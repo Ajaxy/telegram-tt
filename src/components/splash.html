@@ -1,0 +1,48 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #181a1f;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+        }
+
+        .loading-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.5rem;
+        }
+
+        .dots {
+            position: absolute;
+            left: 100%;
+            margin-left: 0;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <span>ulu is loading</span><span class="dots"></span>
+    </div>
+
+    <script>
+        const dots = document.querySelector('.dots');
+        let dotCount = 0;
+
+        setInterval(() => {
+            dotCount = (dotCount + 1) % 4;
+            dots.textContent = '.'.repeat(dotCount);
+        }, 500);
+    </script>
+</body>
+</html>
