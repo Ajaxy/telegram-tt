@@ -20,6 +20,7 @@ export type TreeItemChat<T extends any> = TreeItem<T> & {
   isPinned?: boolean;
   isCurrentChat?: boolean;
   isTempChat?: boolean;
+  isFirst?: boolean;
   folderId?: number;
 };
 

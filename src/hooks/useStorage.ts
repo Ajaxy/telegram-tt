@@ -8,32 +8,40 @@ import { DEFAULT_WORKSPACE, LOCAL_STORAGE_KEYS } from '../config';
 
 export function useStorage() {
   const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>({
-    key: 'ulu_is_autodone_enabled',
+    key: LOCAL_STORAGE_KEYS.IS_AUTO_DONE_ENABLED,
     initValue: false,
     schema: z.boolean(),
   });
   const [
     isAutoArchiverEnabled,
     setIsAutoArchiverEnabled,
-  ] = useLocalStorage<boolean>({ key: 'ulu_is_autoarchiver_enabled', initValue: false, schema: z.boolean() });
+  ] = useLocalStorage<boolean>({
+    key: LOCAL_STORAGE_KEYS.IS_AUTO_ARCHIVER_ENABLED,
+    initValue: false,
+    schema: z.boolean(),
+  });
   const [
     isArchiveWhenDoneEnabled,
     setIsArchiveWhenDoneEnabled,
-  ] = useLocalStorage<boolean>({ key: 'ulu_is_archive_when_done_enabled', initValue: false, schema: z.boolean() });
+  ] = useLocalStorage<boolean>({
+    key: LOCAL_STORAGE_KEYS.IS_ARCHIVE_WHEN_DONE_ENABLED,
+    initValue: false,
+    schema: z.boolean(),
+  });
   const [isFoldersTreeEnabled, setIsFoldersTreeEnabled] = useLocalStorage<boolean>({
-    key: 'ulu_is_folders_tree_enabled',
+    key: LOCAL_STORAGE_KEYS.IS_FOLDERS_TREE_ENABLED,
     initValue: false,
     schema: z.boolean(),
   });
 
   const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>({
-    key: 'ulu_done_chat_ids',
+    key: LOCAL_STORAGE_KEYS.DONE_CHAT_IDS,
     initValue: [],
     schema: z.array(z.string()),
   });
 
   const [savedWorkspaces, setSavedWorkspaces] = useLocalStorage<Workspace[]>({
-    key: 'workspaces',
+    key: LOCAL_STORAGE_KEYS.WORKSPACES,
     initValue: [],
     schema: z.array(WorkspaceSchema),
   });
@@ -45,7 +53,11 @@ export function useStorage() {
   const [
     isInitialMarkAsDone,
     setIsInitialMarkAsDone,
-  ] = useLocalStorage<boolean>({ key: 'ulu_is_initial_mark_as_done', initValue: false, schema: z.boolean() });
+  ] = useLocalStorage<boolean>({
+    key: LOCAL_STORAGE_KEYS.IS_INITIAL_MARK_AS_DONE,
+    initValue: false,
+    schema: z.boolean(),
+  });
 
   return {
     isAutoDoneEnabled,

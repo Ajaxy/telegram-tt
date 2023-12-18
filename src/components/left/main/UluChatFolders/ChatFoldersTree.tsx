@@ -222,6 +222,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
           id: chat.id,
           chat,
           isPinned: chat.isPinned,
+          isFirst: i === 0,
           folderId: chat.folderId,
           isFolder: false,
           canChangeFolder: folders.length > 1,
@@ -255,6 +256,9 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
     tempChatsToDisplay.forEach((id, i) => {
       const chat = chatsById[id];
+      if (!chat) {
+        return;
+      }
       const tempChatAdjustedIndex = lastAdjustedIndex * tempChatsToDisplay.length + i + 1;
 
       items[tempChatAdjustedIndex] = {
@@ -264,6 +268,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         id: chat.id,
         chat,
         isPinned: false,
+        isFirst: i === 0,
         folderId: chat.folderId,
         isFolder: false,
         canChangeFolder: folders.length > 1,

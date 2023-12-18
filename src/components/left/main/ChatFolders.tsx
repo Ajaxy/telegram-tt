@@ -401,7 +401,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         content={content}
         onLeftColumnContentChange={onLeftColumnContentChange}
       />
-      <UluChatFoldersDivider />
+      <UluChatFoldersDivider withBorder={false} />
       {IS_STORIES_ENABLED && shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
       { isFoldersTreeEnabled && (
         <div
