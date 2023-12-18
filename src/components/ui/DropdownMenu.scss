@@ -10,18 +10,23 @@
       display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
+    border-radius: 0.5rem;
     width: 24px;
     height: 24px;
     background: var(--color-interactive-element-hover);
     color: var(--color-text);
-    font-size: 14px; /* Размер шрифта для первой буквы */
+    font-size: 14px;
     font-weight: bold;
     }
 
-    .ProfilePhoto .thumb:not(.shown) {
+    .ProfilePhoto {
+    background-color: var(--color-interactive-element-hover);
+    
+    .thumb:not(.shown) {
       display: none !important; 
     }
+
+  }
 }
 .thumb:not(.shown) {
   display: none !important; 
