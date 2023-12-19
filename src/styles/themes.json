@@ -5,6 +5,7 @@
   "--color-primary-tint": ["#3390ec1a", "#8774e11a"],
   "--color-primary-shade": ["#475aa0", "#E9666F"],
   "--color-background": ["#ECEEF2", "#0E0F0F"],
+  "--color-background-transparent": ["#ECEEF203", "#0E0F0F03"],
   "--color-background-electron": ["#FFFFFF40", "#0E0F0F4D"],
   "--color-background-compact-menu": ["#fefffe7f", "#212121DD"],
   "--color-background-compact-menu-no-blur": ["#FEFFFE", "#212121"],

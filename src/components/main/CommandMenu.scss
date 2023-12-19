@@ -56,6 +56,10 @@
   border: 1px solid var(--color-borders);
   box-shadow: var(--cmdk-shadow);
   transition: transform 100ms ease;
+
+  @media (max-width: 1200px){
+    background: var(--color-cmdk-non-transparent);
+  }
 }
 
 
