@@ -5,7 +5,7 @@
   flex-direction: column;
   // gap: 1.25rem;
   overflow: hidden;
-  /* background-color: transparent !important; */
+  background: var(--color-background-transparent);
 
   > .Transition {
     flex: 1;
