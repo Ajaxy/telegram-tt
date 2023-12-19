@@ -2,6 +2,8 @@
 import React from 'react';
 import { Command } from 'cmdk';
 
+import LinearLogo from './HomePage/LinearLogo.svg';
+
 interface CommandMenuListItemProps {
   onSelect: () => void;
   value?: string;
@@ -19,10 +21,17 @@ const CommandMenuListItem: React.FC<CommandMenuListItemProps> = React.memo(({
   icon,
   label,
 }) => {
+  let iconElement;
+  if (icon === 'linear') {
+    iconElement = <img src={LinearLogo} alt="linear" />;
+  } else {
+    iconElement = <i className={`icon icon-${icon}`} />;
+  }
+
   if (!content && label && icon) {
     content = (
       <>
-        <i className={`icon icon-${icon}`} />
+        {iconElement}
         <span>{label}</span>
       </>
     );

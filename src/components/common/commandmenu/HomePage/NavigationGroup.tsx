@@ -12,7 +12,7 @@ import { IS_APP } from '../../../../util/windowEnvironment';
 
 import useCommands from '../../../../hooks/useCommands';
 
-import CommandMenuListItem from '../../../left/search/CommanMenuListItem';
+import CommandMenuListItem from '../CommanMenuListItem';
 
 import '../../../main/CommandMenu.scss';
 

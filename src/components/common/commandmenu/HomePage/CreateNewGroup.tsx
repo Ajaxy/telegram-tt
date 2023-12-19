@@ -13,7 +13,7 @@ import { IS_ARC_BROWSER } from '../../../../util/windowEnvironment';
 
 import useCommands from '../../../../hooks/useCommands';
 
-import CommandMenuListItem from '../../../left/search/CommanMenuListItem';
+import CommandMenuListItem from '../CommanMenuListItem';
 
 import '../../../main/CommandMenu.scss';
 
@@ -75,6 +75,27 @@ const CreateNewGroup: FC<CreateNewGroupProps> = ({
     });
   };
 
+  const handleNewLinearTask = useCallback(() => {
+    close();
+    openUrl({
+      url: 'https://linear.app/new',
+      shouldSkipModal: true,
+    });
+  }, [close]);
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyT') {
+        handleNewLinearTask();
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener('keydown', listener);
+    return () => document.removeEventListener('keydown', listener);
+  }, [handleNewLinearTask]);
+
   const menuItems = [
     {
       onSelect: handleSelectNewGroup,
@@ -86,6 +107,12 @@ const CreateNewGroup: FC<CreateNewGroupProps> = ({
       onSelect: handleNewMeetLink,
       icon: 'video-outlined',
       label: 'Create new Google Meet',
+    },
+    {
+      onSelect: handleNewLinearTask,
+      icon: 'linear',
+      label: 'Create new Linear task',
+      shortcut: [cmdKey, '⇧', 'L'],
     },
     {
       onSelect: handleSelectNewChannel,

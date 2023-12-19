@@ -10,7 +10,7 @@ import { getActions } from '../../../../global';
 
 import { FAQ_URL, SHORTCUTS_URL } from '../../../../config';
 
-import CommandMenuListItem from '../../../left/search/CommanMenuListItem';
+import CommandMenuListItem from '../CommanMenuListItem';
 
 import '../../../main/CommandMenu.scss';
 
