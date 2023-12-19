@@ -113,6 +113,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     setGlobalSearchDate,
+    openUrl,
     setSettingOption,
     setGlobalSearchChatId,
     lockScreen,
@@ -152,8 +153,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   });
 
   useHotkeys(canSetPasscode ? {
-    'Meta+Shift+L': handleLockScreenHotkey,
-    ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
+    'Meta+L': handleLockScreenHotkey,
+    ...(IS_APP && { 'Meta+L': handleLockScreenHotkey }),
   } : undefined);
 
   const handleSearchFocus = useLastCallback(() => {
@@ -162,6 +163,22 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     }
   });
 
+  const openNewMeetLink = useLastCallback(() => {
+    openUrl({
+      url: 'https://meet.new',
+      shouldSkipModal: true,
+    });
+  });
+
+  const openLinkNewLinearTask = useLastCallback(() => {
+    openUrl({
+      url: 'https://linear.app/new',
+      shouldSkipModal: true,
+    });
+  });
+
+  useCommand('NEW_LINEAR_TASK', openLinkNewLinearTask);
+  useCommand('NEW_MEET', openNewMeetLink);
   useCommand('OPEN_SEARCH', handleSearchFocus);
   useCommand('LOCK_SCREEN', handleLockScreenHotkey);
 

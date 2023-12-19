@@ -3,7 +3,9 @@ import { useEffect } from '../lib/teact/teact';
 type TCommand = (
   | 'NEW_CHANNEL'
   | 'NEW_GROUP'
+  | 'NEW_MEET'
   | 'NEW_FOLDER'
+  | 'NEW_LINEAR_TASK'
   | 'OPEN_SEARCH'
   | 'OPEN_CHAT_SEARCH'
   | 'OPEN_SETTINGS'
