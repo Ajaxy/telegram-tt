@@ -99,7 +99,19 @@ export function createWindow(url?: string) {
   });
 
   window.on('close', (event) => {
-    if (IS_MAC_OS || (IS_WINDOWS && tray.isEnabled)) {
+    const focusedWindow = getCurrentWindow();
+
+    if (focusedWindow && focusedWindow.isFullScreen()) {
+      event.preventDefault();
+      focusedWindow.once('leave-full-screen', () => {
+        if (forceQuit.isEnabled) {
+          app.exit(0);
+        } else {
+          focusedWindow.close();
+        }
+      });
+      focusedWindow.setFullScreen(false);
+    } else if (IS_MAC_OS || (IS_WINDOWS && tray.isEnabled)) {
       if (forceQuit.isEnabled) {
         app.exit(0);
         forceQuit.disable();
