@@ -216,6 +216,38 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [firstUnreadId]);
 
   useEffect(() => {
+    const minDeltaX = 75;
+
+    const handleSwipeLeftToRight = () => {
+      // TODO
+    };
+
+    const handleSwipeRightToLeft = () => {
+      openChat({ id: undefined });
+    };
+
+    const handleScroll = (e: WheelEvent) => {
+      if (containerRef.current && containerRef.current.contains(e.target as Node)) {
+        if (Math.abs(e.deltaY) > 50) {
+          return;
+        }
+
+        if (e.deltaX > minDeltaX) {
+          handleSwipeLeftToRight();
+        } else if (e.deltaX < -minDeltaX) {
+          handleSwipeRightToLeft();
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+    };
+  }, [containerRef]);
+
+  useEffect(() => {
     if (!isCurrentUserPremium && isChannelChat && isSynced && isReady) {
       loadSponsoredMessages({ chatId });
     }
