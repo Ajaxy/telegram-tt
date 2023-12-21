@@ -776,6 +776,40 @@ const Message: FC<OwnProps & StateProps> = ({
     }
   }, [hasUnreadReaction, messageId, animateUnreadReaction]);
 
+    useEffect(() => {
+    const minDeltaX = 75;
+
+    const handleSwipeLeftToRight = () => {
+      if (handleDoubleClick) {
+        handleDoubleClick();
+      }
+    };
+
+    const handleSwipeRightToLeft = () => {
+      // TODO
+    };
+
+    const handleScroll = (e: WheelEvent) => {
+      if (ref.current && ref.current.contains(e.target as Node)) {
+        if (Math.abs(e.deltaY) > 50) {
+          return;
+        }
+
+        if (e.deltaX > minDeltaX) {
+          handleSwipeLeftToRight();
+        } else if (e.deltaX < -minDeltaX) {
+          handleSwipeRightToLeft();
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+    };
+  }, [handleDoubleClick, ref]);
+
   const albumLayout = useMemo(() => {
     return isAlbum
       ? calculateAlbumLayout(isOwn, Boolean(asForwarded), Boolean(noAvatars), album!, isMobile)
