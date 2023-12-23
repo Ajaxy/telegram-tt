@@ -43,7 +43,7 @@ export type Fingerprint = {
 };
 
 export type SsrcGroup = {
-  semantics: string;
+  semantics?: string;
   sources: number[];
 };
 

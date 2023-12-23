@@ -47,7 +47,7 @@ export interface P2PPayloadType {
 }
 
 type P2pSsrcGroup = {
-  semantics: string;
+  semantics?: string;
   ssrcs: number[];
 };
 

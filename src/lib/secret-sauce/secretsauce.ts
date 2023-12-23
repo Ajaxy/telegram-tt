@@ -472,7 +472,6 @@ export async function handleUpdateGroupCallParticipants(updatedParticipants: Gro
         endpoint: `audio${participant.source}`,
         isVideo: false,
         sourceGroups: [{
-          semantics: 'FID',
           sources: [participant.source],
         }],
         mid: state!.lastMid.toString()
@@ -757,7 +756,6 @@ function initializeConnection(
       userId: '',
       sourceGroups: [
         {
-          semantics: 'FID',
           sources: [sdp.ssrc || 0],
         },
       ],
