@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .PollModal {
   .modal-dialog {
     max-width: 26.25rem;
@@ -26,19 +28,13 @@
     border-top: 1px solid var(--color-chat-hover);
     max-height: 20rem;
     overflow: auto;
+    overflow-y: scroll;
 
-    &.overflown {
-      padding: 0 0.4375rem 0.5rem 0.75rem;
-    }
+    @include mixins.adapt-padding-to-scrollbar(0.75rem);
 
     @media (max-width: 600px) {
       overflow: hidden;
       max-height: none;
-
-      &,
-      &.overflown {
-        padding: 0 0.75rem;
-      }
     }
   }
 

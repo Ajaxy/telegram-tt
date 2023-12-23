@@ -6,7 +6,7 @@ import React, {
 
 import type { ApiNewPoll } from '../../../api/types';
 
-import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
+import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 
@@ -90,8 +90,9 @@ const PollModal: FC<OwnProps> = ({
         return;
       }
 
-      list.classList.toggle('overflown', list.scrollHeight > MAX_LIST_HEIGHT);
-      list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+      requestMeasure(() => {
+        list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+      });
     });
   });
 
@@ -101,12 +102,26 @@ const PollModal: FC<OwnProps> = ({
       return;
     }
 
-    const questionTrimmed = question.trim().substring(0, MAX_QUESTION_LENGTH);
-    const optionsTrimmed = options.map((o) => o.trim().substring(0, MAX_OPTION_LENGTH)).filter((o) => o.length);
+    const isNoCorrectOptionError = isQuizMode && (correctOption === undefined || !options[correctOption].trim());
 
-    if (!questionTrimmed || optionsTrimmed.length < 2) {
+    const answers = options
+      .map((text, index) => {
+        text = text.trim();
+
+        if (!text) return undefined;
+
+        return {
+          text,
+          option: String(index),
+          ...(index === correctOption && { correct: true }),
+        };
+      }).filter(Boolean);
+
+    const questionTrimmed = question.trim().substring(0, MAX_QUESTION_LENGTH);
+    if (!questionTrimmed || answers.length < 2) {
       setQuestion(questionTrimmed);
-      if (optionsTrimmed.length) {
+      if (answers.length) {
+        const optionsTrimmed = options.map((o) => o.trim().substring(0, MAX_OPTION_LENGTH)).filter(Boolean);
         if (optionsTrimmed.length < 2) {
           addNewOption(optionsTrimmed);
         } else {
@@ -119,17 +134,10 @@ const PollModal: FC<OwnProps> = ({
       return;
     }
 
-    if (isQuizMode && (correctOption === undefined || !optionsTrimmed[correctOption])) {
+    if (isNoCorrectOptionError) {
       setHasErrors(true);
       return;
     }
-
-    const answers = optionsTrimmed
-      .map((text, index) => ({
-        text: text.trim(),
-        option: String(index),
-        ...(index === correctOption && { correct: true }),
-      }));
 
     const payload: ApiNewPoll = {
       summary: {
@@ -280,7 +288,7 @@ const PollModal: FC<OwnProps> = ({
 
   function renderRadioOptions() {
     return renderOptions()
-      .map((label, index) => ({ value: String(index), label, hidden: index === options.length - 1 }));
+      .map((label, index) => ({ value: String(index), label, hidden: !options[index].trim() }));
   }
 
   function renderQuizNoOptionError() {
