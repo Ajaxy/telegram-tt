@@ -148,7 +148,9 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
     }
 
     entry.sourceGroups.forEach((sourceGroup) => {
-      add(`a=ssrc-group:${sourceGroup.semantics} ${sourceGroup.sources.map(fromTelegramSource).join(' ')}`);
+      if (sourceGroup.semantics) {
+        add(`a=ssrc-group:${sourceGroup.semantics} ${sourceGroup.sources.map(fromTelegramSource).join(' ')}`);
+      }
       sourceGroup.sources.forEach((ssrcTelegram) => {
         const ssrc = fromTelegramSource(ssrcTelegram);
         add(`a=ssrc:${ssrc} cname:${entry.endpoint}`);

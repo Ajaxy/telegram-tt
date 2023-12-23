@@ -90,6 +90,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...global,
         phoneCall: call,
       };
+      setGlobal(global);
+      global = getGlobal();
 
       if (phoneCall && phoneCall.id && call.id !== phoneCall.id) {
         if (call.state !== 'discarded') {

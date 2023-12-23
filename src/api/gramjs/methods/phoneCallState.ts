@@ -167,8 +167,12 @@ export function encodePhoneCallData(params: ParamsOf<'encode'>): ReturnTypeOf<'e
   return currentPhoneCallState!.encode(...params);
 }
 
-export function decodePhoneCallData(params: ParamsOf<'decode'>): ReturnTypeOf<'decode'> {
-  return currentPhoneCallState!.decode(...params);
+export async function decodePhoneCallData(params: ParamsOf<'decode'>) {
+  if (!currentPhoneCallState) {
+    return undefined;
+  }
+  const result = await currentPhoneCallState.decode(...params);
+  return result;
 }
 
 export function confirmPhoneCall(params: ParamsOf<'confirmCall'>): ReturnTypeOf<'confirmCall'> {
