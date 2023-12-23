@@ -9,7 +9,7 @@ import {
   p2pPayloadTypeToConference, removeRelatedAddress,
 } from './utils';
 import buildSdp, { Conference } from './buildSdp';
-import { getUserStreams, StreamType } from './secretsauce';
+import { StreamType } from './secretsauce';
 
 type P2pState = {
   connection: RTCPeerConnection;
@@ -18,7 +18,7 @@ type P2pState = {
   onUpdate: (...args: any[]) => void;
   conference?: Partial<Conference>;
   isOutgoing: boolean;
-  candidates: string[];
+  pendingCandidates: string[];
   streams: {
     video?: MediaStream;
     audio?: MediaStream;
@@ -59,7 +59,6 @@ function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum = 'us
 
   return navigator.mediaDevices.getUserMedia({
     audio: streamType === 'audio' ? {
-      // @ts-ignore
       ...(IS_ECHO_CANCELLATION_SUPPORTED && { echoCancellation: true }),
       ...(IS_NOISE_SUPPRESSION_SUPPORTED && { noiseSuppression: true }),
     } : false,
@@ -164,8 +163,8 @@ export async function toggleStreamP2p(streamType: StreamType, value: boolean | u
     }
     updateStreams();
     sendMediaState();
-  } catch (e) {
-
+  } catch (err) {
+    console.error(err)
   }
 }
 
@@ -183,35 +182,24 @@ export async function joinPhoneCall(
         urls: [
           connection.isTurn && `turn:${connection.ip}:${connection.port}`,
           connection.isStun && `stun:${connection.ip}:${connection.port}`,
-        ].filter(Boolean) as string[],
+        ].filter(Boolean),
         username: connection.username,
         credentialType: 'password',
         credential: connection.password,
       }
     )),
-    iceCandidatePoolSize: 2,
+    iceTransportPolicy: isP2p ? 'all' : 'relay',
+    bundlePolicy: 'max-bundle'
   });
-  const slnc = silence(new AudioContext());
-  const video = black({ width: 640, height: 480 });
-  const screenshare = black({ width: 640, height: 480 });
-  conn.addTrack(slnc.getTracks()[0], slnc);
-  conn.addTrack(video.getTracks()[0], video);
-  conn.addTrack(screenshare.getTracks()[0], screenshare);
 
   conn.onicecandidate = (e) => {
-    if (!e.candidate) return;
-
-    const { candidate } = e.candidate;
-    if(!isP2p && !isRelayAddress(candidate)) {
+    if (!e.candidate) {
       return;
-    }
-
-    const candidateWithoutRelatedAddress = !isP2p ? removeRelatedAddress(candidate) : candidate;
-
+    };
     emitSignalingData({
       '@type': 'Candidates',
       candidates: [{
-        sdpString: candidateWithoutRelatedAddress,
+        sdpString: e.candidate.candidate,
       }],
     });
   };
@@ -240,6 +228,29 @@ export async function joinPhoneCall(
     updateStreams();
   };
 
+  conn.oniceconnectionstatechange = async (e) => {
+    switch(conn.iceConnectionState) {
+      case 'disconnected':
+      case 'failed':
+        if (isOutgoing) {
+          await createOffer(conn, {
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: true,
+            iceRestart: true,
+          });
+        }
+      default:
+        break;
+    }
+  }
+
+  const slnc = silence(new AudioContext());
+  const video = black({ width: 640, height: 480 });
+  const screenshare = black({ width: 640, height: 480 });
+  conn.addTrack(slnc.getTracks()[0], slnc);
+  conn.addTrack(video.getTracks()[0], video);
+  conn.addTrack(screenshare.getTracks()[0], screenshare);
+
   const dc = conn.createDataChannel('data', {
     id: 0,
     negotiated: true,
@@ -256,7 +267,7 @@ export async function joinPhoneCall(
     connection: conn,
     emitSignalingData,
     isOutgoing,
-    candidates: [],
+    pendingCandidates: [],
     onUpdate,
     streams: {
       ownVideo: video,
@@ -281,19 +292,15 @@ export async function joinPhoneCall(
       toggleStreamP2p('video', true);
     }
     toggleStreamP2p('audio', true);
-  } catch (e) {
-
+  } catch (err) {
+    console.error(err)
   }
 
   if (isOutgoing) {
-    const offer = await conn.createOffer({
+    await createOffer(conn, {
       offerToReceiveAudio: true,
       offerToReceiveVideo: true,
-    });
-
-    await conn.setLocalDescription(offer);
-
-    sendInitialSetup(parseSdp(offer, true) as P2pParsedSdp);
+    })
   }
 }
 
@@ -375,8 +382,6 @@ function sendInitialSetup(sdp: P2pParsedSdp) {
 export async function processSignalingMessage(message: P2pMessage) {
   if (!state || !state.connection) return;
 
-  console.log(message);
-
   switch (message['@type']) {
     case 'MediaState': {
       state.mediaState = message;
@@ -385,21 +390,13 @@ export async function processSignalingMessage(message: P2pMessage) {
       break;
     }
     case 'Candidates': {
-      const { candidates, gotInitialSetup } = state;
-
-      if (!candidates) return;
-
+      const { pendingCandidates, gotInitialSetup } = state;
       message.candidates.forEach((candidate) => {
-        state!.candidates.push(candidate.sdpString);
+        pendingCandidates.push(candidate.sdpString);
       });
-
       if (gotInitialSetup) {
-        await Promise.all(state.candidates.map((c) => state!.connection.addIceCandidate({
-          candidate: c,
-          sdpMLineIndex: 0,
-        })));
+        await commitPendingIceCandidates();
       }
-
       break;
     }
     case 'InitialSetup': {
@@ -426,7 +423,6 @@ export async function processSignalingMessage(message: P2pMessage) {
             endpoint: '0',
             mid: '0',
             sourceGroups: [{
-              semantics: 'FID',
               sources: [message.audio.ssrc],
             }],
           },
@@ -471,19 +467,41 @@ export async function processSignalingMessage(message: P2pMessage) {
       if (!isOutgoing) {
         const answer = await connection.createAnswer();
         if (!answer) return;
-
         await connection.setLocalDescription(answer);
-
         sendInitialSetup(parseSdp(answer, true) as P2pParsedSdp);
       }
-
       state.gotInitialSetup = true;
-      await Promise.all(state.candidates.map((c) => connection.addIceCandidate({
-        candidate: c,
-        sdpMLineIndex: 0,
-      })));
-
+      await commitPendingIceCandidates();
       break;
     }
   }
+}
+
+async function commitPendingIceCandidates() {
+  if (!state) {
+    return;
+  }
+  const { pendingCandidates, connection } = state;
+  if (!pendingCandidates.length) {
+    return;
+  }
+  await Promise.all(pendingCandidates.map((c) => tryAddCandidate(connection, c)));
+  state.pendingCandidates = [];
+}
+
+async function tryAddCandidate(connection: RTCPeerConnection, candidate: string) {
+  try {
+    await connection.addIceCandidate({
+      candidate,
+      sdpMLineIndex: 0,
+    })
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function createOffer(pc: RTCPeerConnection, params: RTCOfferOptions) {
+  const offer = await pc.createOffer(params);
+  sendInitialSetup(parseSdp(offer, true) as P2pParsedSdp);
+  await pc.setLocalDescription(offer);
 }
