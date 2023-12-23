@@ -5,7 +5,7 @@ import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
 import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
 import { timestampPlusDay } from '../../../util/dateFormat';
-import { DeepLinkType, isDeepLink, tryParseDeepLink } from '../../../util/deepLinkParser';
+import { isDeepLink, tryParseDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
@@ -172,9 +172,9 @@ async function searchMessagesGlobal<T extends GlobalState>(
     });
     if (isDeepLink(query)) {
       const link = tryParseDeepLink(query);
-      if (link?.type === DeepLinkType.PublicMessageLink) {
+      if (link?.type === 'publicMessageLink') {
         messageLink = await getMessageByPublicLink(global, link);
-      } else if (link?.type === DeepLinkType.PrivateMessageLink) {
+      } else if (link?.type === 'privateMessageLink') {
         messageLink = await getMessageByPrivateLink(global, link);
       }
     }
