@@ -5,16 +5,8 @@ export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'jo
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
 'invoice' | 'addlist' | 'boost' | 'giftcode';
 
-export enum DeepLinkType {
-  PublicMessageLink = 'PublicMessageLink',
-  PrivateMessageLink = 'PrivateMessageLink',
-  ShareLink = 'ShareLink',
-  ChatFolderLink = 'ChatFolderLink',
-  Unknown = 'Unknown',
-}
-
 interface PublicMessageLink {
-  type: DeepLinkType.PublicMessageLink;
+  type: 'publicMessageLink';
   username: string;
   messageId: number;
   isSingle?: boolean;
@@ -24,7 +16,7 @@ interface PublicMessageLink {
 }
 
 interface PrivateMessageLink {
-  type: DeepLinkType.PrivateMessageLink;
+  type: 'privateMessageLink';
   channelId: string;
   messageId: number;
   isSingle?: boolean;
@@ -34,20 +26,42 @@ interface PrivateMessageLink {
 }
 
 interface ShareLink {
-  type: DeepLinkType.ShareLink;
+  type: 'shareLink';
   url: string;
   text?: string;
 }
 
 interface ChatFolderLink {
-  type: DeepLinkType.ChatFolderLink;
+  type: 'chatFolderLink';
   slug: string;
 }
 
-type DeepLink = PublicMessageLink | PrivateMessageLink | ShareLink | ChatFolderLink;
+interface LoginCodeLink {
+  type: 'loginCodeLink';
+  code: string;
+}
+
+interface TelegramPassportLink {
+  type: 'telegramPassportLink';
+  botId: number;
+  scope: string;
+  publicKey: string;
+  nonce: string;
+  callbackUrl?: string;
+  payload?: string;
+}
+
+type DeepLink =
+  TelegramPassportLink |
+  LoginCodeLink |
+  PublicMessageLink |
+  PrivateMessageLink |
+  ShareLink |
+  ChatFolderLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
+type DeepLinkType = DeepLink['type'] | 'unknown';
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
 
@@ -84,7 +98,7 @@ function handleTgLink(url: URL) {
 
   const deepLinkType = getTgDeepLinkType(queryParams, pathParams, method);
   switch (deepLinkType) {
-    case DeepLinkType.PublicMessageLink: {
+    case 'publicMessageLink': {
       const {
         domain, post, single, thread, comment, t,
       } = queryParams;
@@ -97,7 +111,7 @@ function handleTgLink(url: URL) {
         mediaTimestamp: t,
       });
     }
-    case DeepLinkType.PrivateMessageLink: {
+    case 'privateMessageLink': {
       const {
         channel, post, single, thread, comment, t,
       } = queryParams;
@@ -110,10 +124,21 @@ function handleTgLink(url: URL) {
         mediaTimestamp: t,
       });
     }
-    case DeepLinkType.ShareLink:
+    case 'shareLink':
       return buildShareLink({ text: queryParams.text, url: queryParams.url });
-    case DeepLinkType.ChatFolderLink:
+    case 'chatFolderLink':
       return buildChatFolderLink({ slug: queryParams.slug });
+    case 'loginCodeLink':
+      return buildLoginCodeLink({ code: queryParams.code });
+    case 'telegramPassportLink':
+      return buildTelegramPassportLink({
+        botId: queryParams.bot_id,
+        scope: queryParams.scope,
+        publicKey: queryParams.public_key,
+        nonce: queryParams.nonce,
+        callbackUrl: queryParams.callback_url,
+        payload: queryParams.payload,
+      });
     default:
       break;
   }
@@ -129,7 +154,7 @@ function handleHttpLink(url: URL) {
 
   const deepLinkType = getHttpDeepLinkType(queryParams, pathParams);
   switch (deepLinkType) {
-    case DeepLinkType.PublicMessageLink: {
+    case 'publicMessageLink': {
       const {
         single, comment, t,
       } = queryParams;
@@ -155,7 +180,7 @@ function handleHttpLink(url: URL) {
         mediaTimestamp: t,
       });
     }
-    case DeepLinkType.PrivateMessageLink: {
+    case 'privateMessageLink': {
       const {
         single, comment, t,
       } = queryParams;
@@ -181,11 +206,13 @@ function handleHttpLink(url: URL) {
         mediaTimestamp: t,
       });
     }
-    case DeepLinkType.ShareLink: {
+    case 'shareLink': {
       return buildShareLink({ text: queryParams.text, url: queryParams.url });
     }
-    case DeepLinkType.ChatFolderLink:
+    case 'chatFolderLink':
       return buildChatFolderLink({ slug: pathParams[1] });
+    case 'loginCodeLink':
+      return buildLoginCodeLink({ code: pathParams[1] });
     default:
       break;
   }
@@ -195,63 +222,76 @@ function handleHttpLink(url: URL) {
 function getHttpDeepLinkType(
   queryParams: Record<string, string>,
   pathParams: string[],
-) {
+): DeepLinkType {
   const len = pathParams.length;
   const method = pathParams[0];
   if (len === 1) {
     if (method === 'share') {
-      return DeepLinkType.ShareLink;
+      return 'shareLink';
     }
   } else if (len === 2) {
     if (method === 'addlist') {
-      return DeepLinkType.ChatFolderLink;
+      return 'chatFolderLink';
+    }
+    if (method === 'login') {
+      return 'loginCodeLink';
     }
     if (isUsernameValid(pathParams[0]) && isNumber(pathParams[1])) {
-      return DeepLinkType.PublicMessageLink;
+      return 'publicMessageLink';
     }
   } else if (len === 3) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
-      return DeepLinkType.PrivateMessageLink;
+      return 'privateMessageLink';
     }
     if (isUsernameValid(pathParams[0]) && pathParams.slice(1).every(isNumber)) {
-      return DeepLinkType.PublicMessageLink;
+      return 'publicMessageLink';
     }
   } else if (len === 4) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
-      return DeepLinkType.PrivateMessageLink;
+      return 'privateMessageLink';
     }
   }
-  return DeepLinkType.Unknown;
+  return 'unknown';
 }
 
 function getTgDeepLinkType(
   queryParams: Record<string, string>,
   pathParams: string[],
   method: DeepLinkMethod,
-) {
+): DeepLinkType {
   switch (method) {
     case 'resolve': {
-      const { domain, post } = queryParams;
+      const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        domain, post, bot_id, scope, public_key, nonce,
+      } = queryParams;
+      if (domain === 'telegrampassport' && bot_id && scope && public_key && nonce) {
+        return 'telegramPassportLink';
+      }
       if (domain && post) {
-        return DeepLinkType.PublicMessageLink;
+        return 'publicMessageLink';
       }
       break;
     }
     case 'privatepost': {
       const { channel, post } = queryParams;
       if (channel && post) {
-        return DeepLinkType.PrivateMessageLink;
+        return 'privateMessageLink';
       }
       break;
     }
     case 'msg_url':
-      return DeepLinkType.ShareLink;
+      return 'shareLink';
     case 'addlist':
-      return DeepLinkType.ChatFolderLink;
+      return 'chatFolderLink';
+    case 'login':
+      return 'loginCodeLink';
+    case 'passport':
+      return 'telegramPassportLink';
     default:
       break;
   }
-  return DeepLinkType.Unknown;
+  return 'unknown';
 }
 
 function buildShareLink(params: BuilderParams<ShareLink>): BuilderReturnType<ShareLink> {
@@ -260,7 +300,7 @@ function buildShareLink(params: BuilderParams<ShareLink>): BuilderReturnType<Sha
     return undefined;
   }
   return {
-    type: DeepLinkType.ShareLink,
+    type: 'shareLink',
     url,
     text,
   };
@@ -283,7 +323,7 @@ function buildPublicMessageLink(params: BuilderParams<PublicMessageLink>): Build
     return undefined;
   }
   return {
-    type: DeepLinkType.PublicMessageLink,
+    type: 'publicMessageLink',
     username,
     messageId: Number(messageId),
     isSingle: isSingle === '',
@@ -310,7 +350,7 @@ function buildPrivateMessageLink(params: BuilderParams<PrivateMessageLink>): Bui
     return undefined;
   }
   return {
-    type: DeepLinkType.PrivateMessageLink,
+    type: 'privateMessageLink',
     channelId,
     messageId: Number(messageId),
     isSingle: isSingle === '',
@@ -328,8 +368,46 @@ function buildChatFolderLink(params: BuilderParams<ChatFolderLink>): BuilderRetu
     return undefined;
   }
   return {
-    type: DeepLinkType.ChatFolderLink,
+    type: 'chatFolderLink',
     slug,
+  };
+}
+
+function buildLoginCodeLink(params: BuilderParams<LoginCodeLink>): BuilderReturnType<LoginCodeLink> {
+  const {
+    code,
+  } = params;
+  if (!code) {
+    return undefined;
+  }
+  return {
+    type: 'loginCodeLink',
+    code,
+  };
+}
+
+function buildTelegramPassportLink(
+  params: BuilderParams<TelegramPassportLink>,
+): BuilderReturnType<TelegramPassportLink> {
+  const {
+    botId,
+    scope,
+    publicKey,
+    nonce,
+    callbackUrl,
+    payload,
+  } = params;
+  if (!botId || !isNumber(botId) || !scope || !publicKey || !nonce) {
+    return undefined;
+  }
+  return {
+    type: 'telegramPassportLink',
+    botId: Number(botId),
+    scope,
+    publicKey,
+    nonce,
+    callbackUrl,
+    payload,
   };
 }
 
