@@ -206,7 +206,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 
   // Clear old color storage to optimize cache size
-  if (untypedCached.appConfig.peerColors) {
+  if (untypedCached?.appConfig?.peerColors) {
     untypedCached.appConfig.peerColors = undefined;
     untypedCached.appConfig.darkPeerColors = undefined;
   }
