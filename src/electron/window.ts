@@ -98,7 +98,7 @@ export function createWindow(url?: string) {
     window.webContents.send(ElectronEvent.FULLSCREEN_CHANGE, false);
   });
 
-    window.on('close', (event) => {
+  window.on('close', (event) => {
     const focusedWindow = getCurrentWindow();
     if (forceQuit.isEnabled) {
       app.exit(0);
@@ -112,7 +112,7 @@ export function createWindow(url?: string) {
       });
       focusedWindow.setFullScreen(false);
     } else if (IS_MAC_OS || (IS_WINDOWS && tray.isEnabled)) {
-      // Обычная логика закрытия
+      // Standard logic for closing
       if (hasExtraWindows()) {
         windows.delete(window);
         windowState.unmanage();
