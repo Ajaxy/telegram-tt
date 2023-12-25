@@ -176,7 +176,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
-    loadMessageViews, loadPeerStoriesByIds,
+    loadMessageViews, loadPeerStoriesByIds, openChat,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -218,10 +218,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     const minDeltaX = 75;
 
-    const handleSwipeLeftToRight = () => {
-      // TODO
-    };
-
     const handleSwipeRightToLeft = () => {
       openChat({ id: undefined });
     };
@@ -232,9 +228,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           return;
         }
 
-        if (e.deltaX > minDeltaX) {
-          handleSwipeLeftToRight();
-        } else if (e.deltaX < -minDeltaX) {
+        if (e.deltaX < -minDeltaX) {
           handleSwipeRightToLeft();
         }
       }
