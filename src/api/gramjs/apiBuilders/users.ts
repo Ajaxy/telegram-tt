@@ -47,7 +47,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   }
 
   const {
-    id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
+    id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId, botCanEdit,
   } = mtpUser;
   const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
     ? Boolean(mtpUser.photo.hasVideo)
@@ -72,6 +72,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     type: userType,
     firstName,
     lastName,
+    botCanEdit,
     ...(userType === 'userTypeBot' && { canBeInvitedToGroup: !mtpUser.botNochats }),
     ...(usernames && { usernames }),
     phoneNumber: mtpUser.phone || '',

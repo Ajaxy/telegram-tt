@@ -172,7 +172,7 @@ export interface ServiceNotification {
 export type ApiLimitType = (
   'uploadMaxFileparts' | 'stickersFaved' | 'savedGifs' | 'dialogFiltersChats' | 'dialogFilters' | 'dialogFolderPinned' |
   'captionLength' | 'channels' | 'channelsPublic' | 'aboutLength' | 'chatlistInvites' | 'chatlistJoined'
-);
+  );
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
   'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs'
@@ -951,7 +951,7 @@ export type GlobalState = {
 
 export type CallSound = (
   'join' | 'allowTalk' | 'leave' | 'connecting' | 'incoming' | 'end' | 'connect' | 'busy' | 'ringing'
-);
+  );
 
 export interface RequiredActionPayloads {
   apiUpdate: ApiUpdate;
@@ -2246,6 +2246,11 @@ export interface ActionPayloads {
     lastName?: string;
     bio?: string;
     username?: string;
+  } & WithTabId;
+  updateBotProfile: {
+    photo?: File;
+    firstName?: string;
+    bio?: string;
   } & WithTabId;
   checkUsername: {
     username: string;

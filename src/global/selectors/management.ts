@@ -8,7 +8,7 @@ import {
 import { selectChat, selectIsChatWithSelf } from './chats';
 import { selectCurrentMessageList } from './messages';
 import { selectTabState } from './tabs';
-import { selectUser } from './users';
+import { selectBot, selectUser } from './users';
 
 export function selectManagement<T extends GlobalState>(
   global: T, chatId: string,
@@ -39,8 +39,14 @@ export function selectCurrentManagementType<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
+
   if (!chatId || !threadId) {
     return undefined;
+  }
+
+  const chatBot = selectBot(global, chatId);
+  if (chatBot) {
+    return 'bot';
   }
 
   if (isUserId(chatId)) {

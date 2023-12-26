@@ -75,6 +75,7 @@ type StateProps = {
   currentInviteInfo?: ApiExportedInvite;
   shouldSkipHistoryAnimations?: boolean;
   isBot?: boolean;
+  botCanEdit?: boolean;
   isInsideTopic?: boolean;
   canEditTopic?: boolean;
 };
@@ -157,6 +158,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   canEditTopic,
   onClose,
   onScreenSelect,
+  botCanEdit,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -494,6 +496,17 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   <i className="icon icon-edit" />
                 </Button>
               )}
+              {botCanEdit && (
+                <Button
+                  round
+                  color="translucent"
+                  size="smaller"
+                  ariaLabel={lang('Edit')}
+                  onClick={handleToggleManagement}
+                >
+                  <i className="icon icon-edit" />
+                </Button>
+              )}
               {canEditTopic && (
                 <Button
                   round
@@ -580,6 +593,7 @@ export default withGlobal<OwnProps>(
     const topic = isInsideTopic ? chat.topics?.[threadId!] : undefined;
     const canEditTopic = isInsideTopic && topic && getCanManageTopic(chat, topic);
     const isBot = user && isUserBot(user);
+    const botCanEdit = isBot && user?.botCanEdit;
 
     const canAddContact = user && getCanAddContact(user);
     const canManage = Boolean(!isManagement && isProfile && chatId && selectCanManage(global, chatId));
@@ -607,6 +621,7 @@ export default withGlobal<OwnProps>(
       isEditingInvite,
       currentInviteInfo,
       shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
+      botCanEdit,
     };
   },
 )(RightHeader);
