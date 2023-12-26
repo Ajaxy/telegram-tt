@@ -188,7 +188,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
           <TextArea
             value={bio}
             onChange={handleBioChange}
-            label={lang('UserBio')}
+            label={lang('DescriptionPlaceholder')}
             disabled={isLoading}
             maxLength={maxBioLength}
             maxLengthIndicator={maxBioLength ? (maxBioLength - bio.length).toString() : undefined}
