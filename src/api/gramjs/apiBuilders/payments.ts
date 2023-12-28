@@ -248,7 +248,7 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       type: 'active',
       startDate,
       isParticipating: participating,
-      adminDisallowedChatId: adminDisallowedChatId?.toString(),
+      adminDisallowedChatId: adminDisallowedChatId && buildApiPeerId(adminDisallowedChatId, 'channel'),
       disallowedCountry,
       joinedTooEarlyDate,
       isPreparingResults: preparingResults,

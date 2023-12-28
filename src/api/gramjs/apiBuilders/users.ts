@@ -1,7 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiEmojiStatus,
   ApiPremiumGiftOption,
   ApiUser,
   ApiUserFullInfo,
@@ -11,7 +10,7 @@ import type {
 
 import { buildApiBotInfo } from './bots';
 import { buildApiPhoto, buildApiUsernames } from './common';
-import { buildApiPeerColor, buildApiPeerId } from './peers';
+import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
 export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
   const {
@@ -57,7 +56,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     : undefined;
   const userType = buildApiUserType(mtpUser);
   const usernames = buildApiUsernames(mtpUser);
-  const emojiStatus = mtpUser.emojiStatus ? buildApiUserEmojiStatus(mtpUser.emojiStatus) : undefined;
+  const emojiStatus = mtpUser.emojiStatus ? buildApiEmojiStatus(mtpUser.emojiStatus) : undefined;
 
   return {
     id: buildApiPeerId(id, 'user'),
@@ -114,18 +113,6 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   } else {
     return { type: 'userStatusLastMonth' };
   }
-}
-
-export function buildApiUserEmojiStatus(mtpEmojiStatus: GramJs.TypeEmojiStatus): ApiEmojiStatus | undefined {
-  if (mtpEmojiStatus instanceof GramJs.EmojiStatus) {
-    return { documentId: mtpEmojiStatus.documentId.toString() };
-  }
-
-  if (mtpEmojiStatus instanceof GramJs.EmojiStatusUntil) {
-    return { documentId: mtpEmojiStatus.documentId.toString(), until: mtpEmojiStatus.until };
-  }
-
-  return undefined;
 }
 
 export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {

@@ -56,10 +56,10 @@ import type {
   ApiSticker,
   ApiStickerSet,
   ApiStickerSetInfo,
-  ApiStoryView,
   ApiThemeParameters,
   ApiThreadInfo,
   ApiTranscription,
+  ApiTypeStoryView,
   ApiTypingStatus,
   ApiUpdate,
   ApiUpdateAuthorizationStateType,
@@ -378,7 +378,7 @@ export type TabState = {
     isStealthModalOpen?: boolean;
     viewModal?: {
       storyId: number;
-      viewsById?: Record<string, ApiStoryView>;
+      views?: ApiTypeStoryView[];
       nextOffset?: string;
       isLoading?: boolean;
     };
@@ -657,6 +657,10 @@ export type TabState = {
 
   giftCodeModal?: {
     slug: string;
+    message?: {
+      chatId: string;
+      messageId: number;
+    };
     info: ApiCheckedGiftCode;
   };
 
@@ -1878,6 +1882,10 @@ export interface ActionPayloads {
 
   checkGiftCode: {
     slug: string;
+    message?: {
+      chatId: string;
+      messageId: number;
+    };
   } & WithTabId;
   applyGiftCode: {
     slug: string;

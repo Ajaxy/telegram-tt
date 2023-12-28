@@ -1,9 +1,11 @@
 import React, { memo } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
+import type { ApiPeer } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { TME_LINK_PREFIX } from '../../../config';
+import { selectChatMessage, selectSender } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../util/dateFormat';
 import renderText from '../../common/helpers/renderText';
@@ -21,8 +23,12 @@ import styles from './GiftCodeModal.module.scss';
 import PremiumLogo from '../../../assets/premium/PremiumLogo.svg';
 
 export type OwnProps = {
-  currentUserId?: string;
   modal: TabState['giftCodeModal'];
+};
+
+export type StateProps = {
+  currentUserId?: string;
+  messageSender?: ApiPeer;
 };
 
 const GIFTCODE_PATH = 'giftcode';
@@ -30,7 +36,8 @@ const GIFTCODE_PATH = 'giftcode';
 const GiftCodeModal = ({
   currentUserId,
   modal,
-}: OwnProps) => {
+  messageSender,
+}: OwnProps & StateProps) => {
   const {
     closeGiftCodeModal, openChat, applyGiftCode, focusMessage,
   } = getActions();
@@ -65,6 +72,8 @@ const GiftCodeModal = ({
     if (!modal) return undefined;
     const { slug, info } = modal;
 
+    const fromId = info.fromId || messageSender?.id;
+
     return (
       <>
         <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
@@ -74,13 +83,13 @@ const GiftCodeModal = ({
           <tr>
             <td className={styles.title}>{lang('BoostingFrom')}</td>
             <td>
-              {info.fromId ? (
+              {fromId ? (
                 <PickerSelectedItem
-                  peerId={info.fromId}
+                  peerId={fromId}
                   className={styles.chatItem}
                   forceShowSelf
                   fluid
-                  clickArg={info.fromId}
+                  clickArg={fromId}
                   onClick={handleOpenChat}
                 />
               ) : lang('BoostingNoRecipient')}
@@ -157,4 +166,15 @@ const GiftCodeModal = ({
   );
 };
 
-export default memo(GiftCodeModal);
+export default memo(withGlobal<OwnProps>(
+  (global, { modal }): StateProps => {
+    const { message } = modal || {};
+    const chatMessage = message && selectChatMessage(global, message.chatId, message.messageId);
+    const sender = chatMessage && selectSender(global, chatMessage);
+
+    return {
+      currentUserId: global.currentUserId,
+      messageSender: sender,
+    };
+  },
+)(GiftCodeModal));

@@ -203,7 +203,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const handleGiftCodeClick = () => {
     const slug = message.content.action?.slug;
     if (!slug) return;
-    checkGiftCode({ slug });
+    checkGiftCode({ slug, message: { chatId: message.chatId, messageId: message.id } });
   };
 
   // TODO Refactoring for action rendering
