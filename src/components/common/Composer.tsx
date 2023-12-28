@@ -941,6 +941,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (currentAttachments.length) {
       sendAttachments({
         attachments: currentAttachments,
+        scheduledAt,
+        isSilent,
       });
       return;
     }
@@ -1350,9 +1352,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         if (!currentMessageList) {
           return;
         }
-
         requestCalendar((scheduledAt) => {
-          handleMessageSchedule({}, scheduledAt, currentMessageList!);
+          handleMessageSchedule({}, scheduledAt, currentMessageList);
         });
         break;
       default:
@@ -1460,10 +1461,16 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendSilent({ sendCompressed, sendGrouped });
   });
 
-  const onSend = mainButtonState === MainButtonState.Edit
-    ? handleEditComplete
-    : mainButtonState === MainButtonState.Schedule ? handleSendScheduled
-      : handleSend;
+  const onSend = useMemo(() => {
+    switch (mainButtonState) {
+      case MainButtonState.Edit:
+        return handleEditComplete;
+      case MainButtonState.Schedule:
+        return handleSendScheduled;
+      default:
+        return handleSend;
+    }
+  }, [mainButtonState, handleEditComplete]);
 
   const withBotCommands = isChatWithBot && botMenuButton?.type === 'commands' && !editingMessage
     && botCommands !== false && !activeVoiceRecording;
