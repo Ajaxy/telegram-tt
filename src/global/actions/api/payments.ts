@@ -407,7 +407,7 @@ addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promi
       isOpen: true,
       forUserId,
       monthlyCurrency: month.currency,
-      monthlyAmount: month.amount,
+      monthlyAmount: String(month.amount),
     },
   }, tabId);
   setGlobal(global);

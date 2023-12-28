@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiPremiumPromo, ApiSticker, ApiStickerSet, ApiUser,
+  ApiPremiumPromo, ApiPremiumSubscriptionOption, ApiSticker, ApiStickerSet, ApiUser,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
@@ -36,6 +36,7 @@ import PremiumFeatureModal, {
   PREMIUM_FEATURE_SECTIONS,
   PREMIUM_FEATURE_TITLES,
 } from './PremiumFeatureModal';
+import PremiumSubscriptionOption from './PremiumSubscriptionOption';
 
 import styles from './PremiumMainModal.module.scss';
 
@@ -133,6 +134,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const [isHeaderHidden, setHeaderHidden] = useState(true);
   const [currentSection, setCurrentSection] = useState<string | undefined>(initialSection);
+  const [selectedSubscriptionOption, setSubscriptionOption] = useState<ApiPremiumSubscriptionOption>();
 
   const handleOpen = useCallback((section: string | undefined) => {
     return () => {
@@ -146,7 +148,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     setHeaderHidden(scrollTop <= 150);
   }
 
-  function handleClickWithStartParam(startParam?: string) {
+  const handleClickWithStartParam = useLastCallback((startParam?: string) => {
     const dialog = dialogRef.current;
     if (!dialog) return;
 
@@ -160,11 +162,20 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
       });
       closePremiumModal();
     }
-  }
-
-  const handleClick = useLastCallback(() => {
-    handleClickWithStartParam();
   });
+
+  const handleClick = useCallback(() => {
+    if (selectedSubscriptionOption) {
+      handleClickWithStartParam(String(selectedSubscriptionOption.months));
+    } else {
+      handleClickWithStartParam();
+    }
+  }, [selectedSubscriptionOption, handleClickWithStartParam]);
+
+  const handleChangeSubscriptionOption = useCallback((months: number) => {
+    const foundOption = promo?.options.find((option) => option.months === months);
+    setSubscriptionOption(foundOption);
+  }, [promo]);
 
   const showConfetti = useCallback(() => {
     const dialog = dialogRef.current;
@@ -206,6 +217,11 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     });
   }, [loadStickers, fromUserStatusEmoji, fromUserStatusSet]);
 
+  useEffect(() => {
+    const [defaultOption] = promo?.options ?? [];
+    setSubscriptionOption(defaultOption);
+  }, [promo]);
+
   const handleOpenStatusSet = useLastCallback(() => {
     if (!fromUserStatusSet) return;
 
@@ -231,10 +247,15 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     return [renderText(first), link, renderText(second)];
   }, [fromUser, fromUserStatusSet, lang]);
 
-  if (!promo || (fromUserStatusEmoji && !fromUserStatusSet)) return undefined;
+  const fullMonthlyAmount = useMemo(() => {
+    const monthOption = promo?.options.find((option) => option.months === 1);
+    if (!monthOption) {
+      return undefined;
+    }
+    return Number(monthOption.amount);
+  }, [promo]);
 
-  // TODO Support all subscription options
-  const month = promo.options.find((option) => option.months === 1)!;
+  if (!promo || (fromUserStatusEmoji && !fromUserStatusSet)) return undefined;
 
   function getHeaderText() {
     if (isGift) {
@@ -279,6 +300,24 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderSubscriptionOptions() {
+    return (
+      <div className={styles.subscriptionOptions}>
+        {promo?.options
+          .map((option) => (
+            <PremiumSubscriptionOption
+              className={styles.subscriptionOption}
+              key={option.amount}
+              option={option}
+              onChange={handleChangeSubscriptionOption}
+              fullMonthlyAmount={fullMonthlyAmount}
+              checked={selectedSubscriptionOption?.months === option.months}
+            />
+          ))}
+      </div>
+    );
+  }
+
   return (
     <Modal
       className={styles.root}
@@ -319,12 +358,12 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             <div className={styles.description}>
               {renderText(getHeaderDescription(), ['simple_markdown', 'emoji'])}
             </div>
+            {!isPremium && renderSubscriptionOptions()}
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
               <h2 className={styles.premiumHeaderText}>
                 {lang('TelegramPremium')}
               </h2>
             </div>
-
             <div className={buildClassName(styles.list, isPremium && styles.noButton)}>
               {filteredSections.map((section, index) => {
                 return (
@@ -355,10 +394,15 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               </div>
               {renderFooterText()}
             </div>
-            {!isPremium && (
+            {!isPremium && selectedSubscriptionOption && (
               <div className={styles.footer}>
                 <Button className={styles.button} isShiny withPremiumGradient onClick={handleClick}>
-                  {lang('SubscribeToPremium', formatCurrency(Number(month.amount), month.currency, lang.code))}
+                  {lang('SubscribeToPremium',
+                    formatCurrency(
+                      selectedSubscriptionOption.amount,
+                      selectedSubscriptionOption.currency,
+                      lang.code,
+                    ))}
                 </Button>
               </div>
             )}

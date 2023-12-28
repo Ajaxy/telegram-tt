@@ -2,24 +2,27 @@ import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
-import type { ApiPremiumGiftOption } from '../../../api/types';
-
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
 
 import useLang from '../../../hooks/useLang';
 
-import styles from './GiftOption.module.scss';
+import styles from './PremiumSubscriptionOption.module.scss';
 
 type OwnProps = {
-  option: ApiPremiumGiftOption;
+  option: {
+    months: number;
+    currency: string;
+    amount: number;
+  };
   checked?: boolean;
   fullMonthlyAmount?: number;
+  className?: string;
   onChange: (month: number) => void;
 };
 
-const GiftOption: FC<OwnProps> = ({
-  option, checked, fullMonthlyAmount, onChange,
+const PremiumSubscriptionOption: FC<OwnProps> = ({
+  option, checked, fullMonthlyAmount, onChange, className,
 }) => {
   const lang = useLang();
 
@@ -39,7 +42,14 @@ const GiftOption: FC<OwnProps> = ({
   }, [months, onChange]);
 
   return (
-    <label className={buildClassName(styles.wrapper, checked && styles.active)} dir={lang.isRtl ? 'rtl' : undefined}>
+    <label
+      className={buildClassName(
+        styles.wrapper,
+        checked && styles.active,
+        className,
+      )}
+      dir={lang.isRtl ? 'rtl' : undefined}
+    >
       <input
         className={styles.input}
         type="radio"
@@ -62,4 +72,4 @@ const GiftOption: FC<OwnProps> = ({
   );
 };
 
-export default memo(GiftOption);
+export default memo(PremiumSubscriptionOption);
