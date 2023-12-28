@@ -169,13 +169,23 @@ export interface ServiceNotification {
   isDeleted?: boolean;
 }
 
-export type ApiLimitType = (
-  'uploadMaxFileparts' | 'stickersFaved' | 'savedGifs' | 'dialogFiltersChats' | 'dialogFilters' | 'dialogFolderPinned' |
-  'captionLength' | 'channels' | 'channelsPublic' | 'aboutLength' | 'chatlistInvites' | 'chatlistJoined'
-);
+export type ApiLimitType =
+  | 'uploadMaxFileparts'
+  | 'stickersFaved'
+  | 'savedGifs'
+  | 'dialogFiltersChats'
+  | 'dialogFilters'
+  | 'dialogFolderPinned'
+  | 'captionLength'
+  | 'channels'
+  | 'channelsPublic'
+  | 'aboutLength'
+  | 'chatlistInvites'
+  | 'chatlistJoined'
+  | 'recommendedChannels';
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
-  'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs'
+  'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels'
 )>;
 
 export type TranslatedMessage = {
@@ -771,6 +781,7 @@ export type GlobalState = {
     forDiscussionIds?: string[];
     // Obtained from GetFullChat / GetFullChannel
     fullInfoById: Record<string, ApiChatFullInfo>;
+    similarChannelsById: Record<string, string[]>;
   };
 
   messages: {
@@ -1757,6 +1768,9 @@ export interface ActionPayloads {
     chatId: string;
   };
   fetchChat: {
+    chatId: string;
+  };
+  fetchChannelRecommendations: {
     chatId: string;
   };
   updateChatMutedState: {

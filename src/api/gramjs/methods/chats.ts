@@ -1895,6 +1895,22 @@ export function setViewForumAsMessages({ chat, isEnabled }: { chat: ApiChat; isE
   });
 }
 
+export async function fetchChannelRecommendations({ chat }: { chat: ApiChat }) {
+  const { id, accessHash } = chat;
+  const channel = buildInputEntity(id, accessHash);
+
+  const result = await invokeRequest(new GramJs.channels.GetChannelRecommendations({
+    channel: channel as GramJs.InputChannel,
+  }));
+  if (!result) {
+    return undefined;
+  }
+
+  updateLocalDb(result);
+
+  return result?.chats.map((_chat) => buildApiChatFromPreview(_chat)).filter(Boolean);
+}
+
 function handleUserPrivacyRestrictedUpdates(updates: GramJs.TypeUpdates) {
   if (!(updates instanceof GramJs.Updates) && !(updates instanceof GramJs.UpdatesCombined)) {
     return undefined;

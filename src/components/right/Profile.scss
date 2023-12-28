@@ -121,6 +121,7 @@
       }
     }
 
+    &.similarChannels-list,
     &.commonChats-list,
     &.members-list {
       padding: 0.5rem;
@@ -133,5 +134,30 @@
         }
       }
     }
+
+    &.similarChannels-list {
+      .ListItem.blured {
+        filter: opacity(0.8);
+      }
+
+      .show-more-channels {
+        width: calc(100% - 1rem);
+        margin: 0 auto;
+        margin-top: -1.8125rem;
+        z-index: 1;
+        border-radius: var(--border-radius-default-small);
+        box-shadow: 0px 0px 1rem 1rem white;
+
+        .icon {
+          margin-left: 0.625rem;
+        }
+      }
+
+      .more-similar {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.8125rem;
+      }
+    } 
   }
 }

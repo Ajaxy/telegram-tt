@@ -98,6 +98,7 @@ const LIMITS_ORDER: ApiLimitTypeWithoutUpload[] = [
   'captionLength',
   'dialogFilters',
   'dialogFiltersChats',
+  'recommendedChannels',
 ];
 
 const LIMITS_TITLES: Record<ApiLimitTypeWithoutUpload, string> = {
@@ -110,6 +111,7 @@ const LIMITS_TITLES: Record<ApiLimitTypeWithoutUpload, string> = {
   captionLength: 'CaptionsLimitTitle',
   dialogFilters: 'FoldersLimitTitle',
   dialogFiltersChats: 'ChatPerFolderLimitTitle',
+  recommendedChannels: 'SimilarChannelsLimitTitle',
 };
 
 const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeWithoutUpload, string> = {
@@ -122,6 +124,7 @@ const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeWithoutUpload, string> = {
   captionLength: 'CaptionsLimitSubtitle',
   dialogFilters: 'FoldersLimitSubtitle',
   dialogFiltersChats: 'ChatPerFolderLimitSubtitle',
+  recommendedChannels: 'SimilarChannelsLimitSubtitle',
 };
 
 const BORDER_THRESHOLD = 20;
