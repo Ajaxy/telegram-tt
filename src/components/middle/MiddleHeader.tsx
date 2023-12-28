@@ -405,6 +405,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withUpdatingStatus
               withStory
               storyViewerOrigin={StoryViewerOrigin.MiddleHeaderAvatar}
+              emojiStatusSize={EMOJI_STATUS_SIZE}
               noRtl
             />
           )}

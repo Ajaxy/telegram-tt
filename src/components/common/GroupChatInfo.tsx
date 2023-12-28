@@ -6,6 +6,7 @@ import type {
   ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
+import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin, type StoryViewerOrigin } from '../../types';
 
 import {
@@ -30,6 +31,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
+import Icon from './Icon';
 import TopicIcon from './TopicIcon';
 import TypingStatus from './TypingStatus';
 
@@ -39,6 +41,7 @@ type OwnProps = {
   chatId: string;
   threadId?: number;
   className?: string;
+  statusIcon?: IconName;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   status?: string;
@@ -48,6 +51,8 @@ type OwnProps = {
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   withChatType?: boolean;
+  noEmojiStatus?: boolean;
+  emojiStatusSize?: number;
   noRtl?: boolean;
   noAvatar?: boolean;
   noStatusOrTyping?: boolean;
@@ -69,6 +74,7 @@ type StateProps =
 const GroupChatInfo: FC<OwnProps & StateProps> = ({
   typingStatus,
   className,
+  statusIcon,
   avatarSize = 'medium',
   noAvatar,
   status,
@@ -88,6 +94,8 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   noStatusOrTyping,
   withStory,
   storyViewerOrigin,
+  noEmojiStatus,
+  emojiStatusSize,
   onClick,
 }) => {
   const {
@@ -133,7 +141,10 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       return withDots ? (
         <DotAnimation className="status" content={status} />
       ) : (
-        <span className="status" dir="auto">{status}</span>
+        <span className="status" dir="auto">
+          {statusIcon && <Icon className="status-icon" name={statusIcon} />}
+          {renderText(status)}
+        </span>
       );
     }
 
@@ -206,7 +217,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       <div className="info">
         {topic
           ? <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
-          : <FullNameTitle peer={chat} />}
+          : <FullNameTitle peer={chat} emojiStatusSize={emojiStatusSize} withEmojiStatus={!noEmojiStatus} />}
         {!noStatusOrTyping && renderStatusOrTyping()}
       </div>
     </div>

@@ -34,7 +34,8 @@ export function buildContentClassName(
   } = {},
 ) {
   const {
-    text, photo, video, audio, voice, document, poll, webPage, contact, location, invoice, storyData, giveaway,
+    text, photo, video, audio, voice, document, poll, webPage, contact, location, invoice, storyData,
+    giveaway, giveawayResults,
   } = getMessageContent(message);
 
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
@@ -87,7 +88,7 @@ export function buildContentClassName(
     classNames.push('contact');
   } else if (poll) {
     classNames.push('poll');
-  } else if (giveaway) {
+  } else if (giveaway || giveawayResults) {
     classNames.push('giveaway');
   } else if (webPage) {
     classNames.push('web-page');

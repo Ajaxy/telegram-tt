@@ -96,6 +96,7 @@
 
 .footer {
   border-top: 0.0625rem solid var(--color-borders);
+  padding-block: 0.25rem;
 }
 
 .closeButton {
@@ -116,6 +117,10 @@
 
 .menuBubble {
   max-width: min(25rem, 80vw);
+}
+
+.with-colored-status :global(.status-icon) {
+  color: var(--color-text-green);
 }
 
 @keyframes fadeIn {

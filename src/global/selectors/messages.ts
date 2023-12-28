@@ -546,7 +546,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
       || getServerTime() - message.date < MESSAGE_EDIT_ALLOWED_TIME
     ) && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
-      || (content.video?.isRound) || content.location || content.invoice || content.giveaway
+      || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
     )
     && !isForwarded
     && !message.viaBotId

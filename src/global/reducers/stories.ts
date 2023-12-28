@@ -5,9 +5,9 @@ import type {
   ApiStory,
   ApiStoryDeleted,
   ApiStorySkipped,
-  ApiStoryView,
   ApiStoryViews,
   ApiTypeStory,
+  ApiTypeStoryView,
 } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
@@ -204,16 +204,16 @@ export function updatePeersWithStories<T extends GlobalState>(
 export function updateStoryViews<T extends GlobalState>(
   global: T,
   storyId: number,
-  viewsById: Record<string, ApiStoryView>,
+  views: ApiTypeStoryView[],
   nextOffset?: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const tabState = selectTabState(global, tabId);
   const { viewModal } = tabState.storyViewer;
-  const newViewsById = viewModal?.storyId === storyId ? {
-    ...viewModal.viewsById,
-    ...viewsById,
-  } : viewsById;
+  const newViews = viewModal?.storyId === storyId && viewModal.views ? [
+    ...viewModal.views,
+    ...views,
+  ] : views;
 
   global = updateStoryViewsLoading(global, false, tabId);
 
@@ -223,7 +223,7 @@ export function updateStoryViews<T extends GlobalState>(
       viewModal: {
         ...viewModal,
         storyId,
-        viewsById: newViewsById,
+        views: newViews,
         nextOffset,
         isLoading: false,
       },

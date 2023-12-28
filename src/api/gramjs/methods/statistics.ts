@@ -87,22 +87,23 @@ export async function fetchMessagePublicForwards({
   chat,
   messageId,
   dcId,
-  offsetRate = 0,
+  offset,
 }: {
   chat: ApiChat;
   messageId: number;
   dcId?: number;
-  offsetRate?: number;
+  offset?: string;
 }): Promise<{
     forwards?: ApiMessagePublicForward[];
     count?: number;
-    nextRate?: number;
+    nextOffset?: string;
+    chats: ApiChat[];
+    users: ApiUser[];
   } | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetMessagePublicForwards({
     channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
     msgId: messageId,
-    offsetPeer: new GramJs.InputPeerEmpty(),
-    offsetRate,
+    offset,
     limit: STATISTICS_PUBLIC_FORWARDS_LIMIT,
   }), {
     dcId,
@@ -112,16 +113,15 @@ export async function fetchMessagePublicForwards({
     return undefined;
   }
 
-  if ('chats' in result) {
-    addEntitiesToLocalDb(result.chats);
-  }
+  addEntitiesToLocalDb(result.chats);
+  addEntitiesToLocalDb(result.users);
 
   return {
     forwards: buildMessagePublicForwards(result),
-    ...('nextRate' in result ? {
-      count: result.count,
-      nextRate: result.nextRate,
-    } : undefined),
+    count: result.count,
+    nextOffset: result.nextOffset,
+    chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
+    users: result.users.map(buildApiUser).filter(Boolean),
   };
 }
 
@@ -177,23 +177,23 @@ export async function fetchStoryPublicForwards({
   chat,
   storyId,
   dcId,
-  offsetId = '0',
+  offset,
 }: {
   chat: ApiChat;
   storyId: number;
   dcId?: number;
-  offsetId?: string;
+  offset?: string;
 }): Promise<{
     publicForwards: (ApiMessagePublicForward | ApiStoryPublicForward)[] | undefined;
     users: ApiUser[];
     chats: ApiChat[];
     count?: number;
-    nextOffsetId?: string;
+    nextOffset?: string;
   } | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetStoryPublicForwards({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: storyId,
-    offset: offsetId,
+    offset,
     limit: STATISTICS_PUBLIC_FORWARDS_LIMIT,
   }), {
     dcId,
@@ -211,6 +211,6 @@ export async function fetchStoryPublicForwards({
     users: result.users.map(buildApiUser).filter(Boolean),
     chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
     count: result.count,
-    nextOffsetId: result.nextOffset,
+    nextOffset: result.nextOffset,
   };
 }

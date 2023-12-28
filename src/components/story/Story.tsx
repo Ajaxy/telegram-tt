@@ -5,6 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
+  ApiMediaAreaChannelPost,
   ApiPeer, ApiStealthMode, ApiStory, ApiTypeStory,
 } from '../../api/types';
 import type { IDimensions } from '../../global/types';
@@ -843,7 +844,11 @@ export default memo(withGlobal<OwnProps>((global, {
     viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
     || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal,
   );
-  const forwardSenderId = story && 'forwardInfo' in story ? story.forwardInfo?.fromPeerId : undefined;
+
+  const forwardInfo = (story && 'forwardInfo' in story) ? story.forwardInfo : undefined;
+  const mediaAreas = (story && 'mediaAreas' in story) ? story.mediaAreas : undefined;
+  const forwardSenderId = forwardInfo?.fromPeerId
+    || mediaAreas?.find((area): area is ApiMediaAreaChannelPost => area.type === 'channelPost')?.channelId;
   const forwardSender = forwardSenderId ? selectPeer(global, forwardSenderId) : undefined;
 
   return {

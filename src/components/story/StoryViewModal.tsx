@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiStory, ApiStoryView } from '../../api/types';
+import type { ApiStory, ApiTypeStoryView } from '../../api/types';
 
 import {
   STORY_MIN_REACTIONS_SORT,
@@ -41,7 +41,7 @@ import styles from './StoryViewModal.module.scss';
 interface StateProps {
   story?: ApiStory;
   isLoading?: boolean;
-  viewsById?: Record<string, ApiStoryView>;
+  views?: ApiTypeStoryView[];
   nextOffset?: string;
   viewersExpirePeriod: number;
   isCurrentUserPremium?: boolean;
@@ -52,7 +52,7 @@ const REFETCH_DEBOUNCE = 250;
 function StoryViewModal({
   story,
   viewersExpirePeriod,
-  viewsById,
+  views,
   nextOffset,
   isLoading,
   isCurrentUserPremium,
@@ -92,19 +92,13 @@ function StoryViewModal({
     refetchViews();
   }, [areJustContacts, areReactionsFirst, query, refetchViews]);
 
-  const sortedViewIds = useMemo(() => {
-    if (!viewsById) {
-      return undefined;
-    }
+  const sortedViews = useMemo(() => {
+    return views?.sort(prepareComparator(areReactionsFirst));
+  }, [areReactionsFirst, views]);
 
-    return Object.values(viewsById)
-      .sort(prepareComparator(areReactionsFirst))
-      .map((view) => view.userId);
-  }, [areReactionsFirst, viewsById]);
+  const placeholderCount = !sortedViews?.length ? Math.min(viewsCount, 8) : 1;
 
-  const placeholderCount = !sortedViewIds?.length ? Math.min(viewsCount, 8) : 1;
-
-  const notAllAvailable = Boolean(sortedViewIds?.length) && sortedViewIds!.length < viewsCount && isExpired;
+  const notAllAvailable = Boolean(sortedViews?.length) && sortedViews!.length < viewsCount && isExpired;
 
   const handleLoadMore = useLastCallback(() => {
     if (!story?.id || nextOffset === undefined) return;
@@ -207,7 +201,7 @@ function StoryViewModal({
         className={buildClassName(styles.content, !isAtBeginning && styles.topScrolled, 'custom-scroll')}
         onScroll={handleScroll}
       >
-        {isExpired && !isLoading && !query && Boolean(!sortedViewIds?.length) && (
+        {isExpired && !isLoading && !query && Boolean(!sortedViews?.length) && (
           <div className={buildClassName(styles.info, styles.centeredInfo)}>
             {renderText(
               lang(isCurrentUserPremium ? 'ServerErrorViewers' : 'ExpiredViewsStub'),
@@ -215,18 +209,22 @@ function StoryViewModal({
             )}
           </div>
         )}
-        {!isLoading && Boolean(query.length) && !sortedViewIds?.length && (
+        {!isLoading && Boolean(query.length) && !sortedViews?.length && (
           <div className={styles.info}>
             {lang('Story.ViewList.EmptyTextSearch')}
           </div>
         )}
         <InfiniteScroll
-          items={sortedViewIds}
+          items={sortedViews}
           onLoadMore={handleLoadMore}
         >
-          {sortedViewIds?.map((id) => (
-            <StoryView key={id} storyView={viewsById![id]} />
-          ))}
+          {sortedViews?.map((view) => {
+            const additionalKeyId = view.type === 'forward' ? view.messageId
+              : view.type === 'repost' ? view.storyId : 'user';
+            return (
+              <StoryView key={`${view.peerId}-${view.date}-${additionalKeyId}`} storyView={view} />
+            );
+          })}
           {isLoading && Array.from({ length: placeholderCount }).map((_, i) => (
             <ListItem
               // eslint-disable-next-line react/no-array-index-key
@@ -258,12 +256,14 @@ function StoryViewModal({
 }
 
 function prepareComparator(areReactionsFirst?: boolean) {
-  return (a: ApiStoryView, b: ApiStoryView) => {
+  return (a: ApiTypeStoryView, b: ApiTypeStoryView) => {
     if (areReactionsFirst) {
-      if (a.reaction && !b.reaction) {
+      const reactionA = a.type === 'user' && a.reaction;
+      const reactionB = b.type === 'user' && b.reaction;
+      if (reactionA && !reactionB) {
         return -1;
       }
-      if (!a.reaction && b.reaction) {
+      if (!reactionA && reactionB) {
         return 1;
       }
     }
@@ -276,13 +276,13 @@ export default memo(withGlobal((global) => {
   const { appConfig } = global;
   const { storyViewer: { viewModal } } = selectTabState(global);
   const {
-    storyId, viewsById, nextOffset, isLoading,
+    storyId, views, nextOffset, isLoading,
   } = viewModal || {};
   const story = storyId ? selectPeerStory(global, global.currentUserId!, storyId) : undefined;
 
   return {
     storyId,
-    viewsById,
+    views,
     viewersExpirePeriod: appConfig!.storyExpirePeriod + appConfig!.storyViewersExpirePeriod,
     story: story && 'content' in story ? story : undefined,
     nextOffset,

@@ -55,12 +55,12 @@ export function getMessageTranscription(message: ApiMessage) {
 export function hasMessageText(message: ApiMessage | ApiStory) {
   const {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
-    game, action, storyData, giveaway,
+    game, action, storyData, giveaway, giveawayResults,
   } = message.content;
 
   return Boolean(text) || !(
     sticker || photo || video || audio || voice || document || contact || poll || webPage || invoice || location
-    || game || action?.phoneCall || storyData || giveaway
+    || game || action?.phoneCall || storyData || giveaway || giveawayResults
   );
 }
 
