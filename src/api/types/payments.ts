@@ -75,7 +75,7 @@ export interface ApiPremiumSubscriptionOption {
   canPurchaseUpgrade?: boolean;
   months: number;
   currency: string;
-  amount: string;
+  amount: number;
   botUrl: string;
 }
 

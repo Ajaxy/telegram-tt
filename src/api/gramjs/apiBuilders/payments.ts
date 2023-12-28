@@ -194,7 +194,7 @@ function buildApiPremiumSubscriptionOption(option: GramJs.PremiumSubscriptionOpt
     isCurrent: current,
     canPurchaseUpgrade,
     currency,
-    amount: amount.toString(),
+    amount: amount.toJSNumber(),
     botUrl,
     months,
   };
