@@ -24,6 +24,7 @@ export {
   editTopic, toggleForum, fetchTopicById, createTopic, toggleParticipantsHidden, checkChatlistInvite,
   joinChatlistInvite, createChalistInvite, editChatlistInvite, deleteChatlistInvite, fetchChatlistInvites,
   fetchLeaveChatlistSuggestions, leaveChatlist, togglePeerTranslations, setViewForumAsMessages,
+  fetchChannelRecommendations,
 } from './chats';
 
 export {

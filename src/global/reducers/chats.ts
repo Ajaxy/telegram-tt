@@ -401,3 +401,20 @@ export function deleteTopic<T extends GlobalState>(
 
   return global;
 }
+
+export function addSimilarChannels<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  similarChannels: string[],
+) {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      similarChannelsById: {
+        ...global.chats.similarChannelsById,
+        [chatId]: similarChannels,
+      },
+    },
+  };
+}

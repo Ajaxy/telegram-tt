@@ -355,9 +355,17 @@ export enum NewChatMembersProgress {
   Loading,
 }
 
-export type ProfileTabType = (
-  'members' | 'commonChats' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'stories' | 'storiesArchive'
-);
+export type ProfileTabType =
+  | 'members'
+  | 'commonChats'
+  | 'media'
+  | 'documents'
+  | 'links'
+  | 'audio'
+  | 'voice'
+  | 'stories'
+  | 'storiesArchive'
+  | 'similarChannels';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
 'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio';

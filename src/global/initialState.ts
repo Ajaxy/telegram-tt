@@ -105,6 +105,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     totalCount: {},
     byId: {},
     fullInfoById: {},
+    similarChannelsById: {},
   },
 
   messages: {
