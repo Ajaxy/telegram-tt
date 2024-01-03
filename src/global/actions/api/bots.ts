@@ -5,6 +5,7 @@ import {
   type ApiChat, type ApiChatType, type ApiContact, type ApiInputMessageReplyInfo, type ApiPeer, type ApiUrlAuthResult,
   MAIN_THREAD_ID,
 } from '../../../api/types';
+import { ManagementProgress } from '../../../types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -19,7 +20,9 @@ import { callApi } from '../../../api/gramjs';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
-import { addChats, addUsers, removeBlockedUser } from '../../reducers';
+import {
+  addChats, addUsers, removeBlockedUser, updateManagementProgress, updateUser, updateUserFullInfo,
+} from '../../reducers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -1128,3 +1131,48 @@ async function answerCallbackButton<T extends GlobalState>(
     }
   }
 }
+
+addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> => {
+  const {
+    bot, name, description: about,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  let { langCode } = payload;
+  if (!langCode) langCode = global.settings.byKey.language;
+
+  const { currentUserId } = global;
+  if (!currentUserId) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
+  setGlobal(global);
+
+  if (name || about) {
+    const result = await callApi('setBotInfo', {
+      bot, langCode, name, about,
+    });
+
+    if (result) {
+      global = getGlobal();
+
+      if (bot) {
+        global = updateUser(
+          global,
+          bot.id,
+          {
+            firstName: name,
+          },
+        );
+        global = updateUserFullInfo(global, bot.id, { bio: about });
+        setGlobal(global);
+      }
+    }
+  }
+
+  global = getGlobal();
+  global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
+  setGlobal(global);
+});

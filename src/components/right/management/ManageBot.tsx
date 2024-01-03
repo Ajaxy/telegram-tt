@@ -41,6 +41,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  userId?: string;
   user?: ApiUser;
   chatBot?: ApiBotInfo;
   currentBio?: string;
@@ -64,7 +65,8 @@ const ManageBot: FC<OwnProps & StateProps> = ({
   currentAvatarHash,
 }) => {
   const {
-    updateBotProfile,
+    setBotInfo,
+    uploadProfilePhoto,
     uploadContactProfilePhoto,
   } = getActions();
 
@@ -143,15 +145,21 @@ const ManageBot: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    updateBotProfile({
-      photo,
+    setBotInfo({
       ...(isProfileFieldsTouched && {
-        firstName: trimmedFirstName,
-        bio: trimmedBio,
-        isMuted: !isNotificationsEnabled,
+        bot: user,
+        name: trimmedFirstName,
+        description: trimmedBio,
       }),
     });
-  }, [firstName, bio, photo, isProfileFieldsTouched, isNotificationsEnabled]);
+
+    if (photo) {
+      uploadProfilePhoto({
+        file: photo,
+        bot: user,
+      });
+    }
+  }, [firstName, bio, photo, isProfileFieldsTouched, user]);
 
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -243,6 +251,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     return {
+      userId,
       user,
       progress,
       isMuted,

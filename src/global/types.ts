@@ -1004,6 +1004,7 @@ export interface ActionPayloads {
     isFallback?: boolean;
     videoTs?: number;
     isVideo?: boolean;
+    bot?: ApiUser;
   };
   goToAuthQrCode: undefined;
 
@@ -2247,10 +2248,12 @@ export interface ActionPayloads {
     bio?: string;
     username?: string;
   } & WithTabId;
-  updateBotProfile: {
-    photo?: File;
-    firstName?: string;
-    bio?: string;
+  setBotInfo: {
+    bot?: ApiUser | undefined;
+    langCode?: string;
+    name?: string | undefined;
+    about?: string | undefined;
+    description?: string | undefined;
   } & WithTabId;
   checkUsername: {
     username: string;

@@ -1534,6 +1534,7 @@ chatlists.chatlistInvite#1dcd839d flags:# title:string emoticon:flags.0?string p
 chatlists.chatlistUpdates#93bd878d missing_peers:Vector<Peer> chats:Vector<Chat> users:Vector<User> = chatlists.ChatlistUpdates;
 
 bots.botInfo#e8a775b0 name:string about:string description:string = bots.BotInfo;
+bots.setBotInfo#10cf3123 flags:# bot:flags.2?InputUser lang_code:string name:flags.3?string about:flags.0?string description:flags.1?string = bots.SetBotInfo;
 
 messagePeerVote#b6cc2d5c peer:Peer option:bytes date:int = MessagePeerVote;
 messagePeerVoteInputOption#74cda504 peer:Peer date:int = MessagePeerVote;

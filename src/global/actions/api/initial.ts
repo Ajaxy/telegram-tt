@@ -100,10 +100,10 @@ addActionHandler('setAuthPassword', (global, actions, payload): ActionReturnType
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise<void> => {
   const {
-    file, isFallback, isVideo, videoTs,
+    file, isFallback, isVideo, videoTs, bot,
   } = payload!;
 
-  const result = await callApi('uploadProfilePhoto', file, isFallback, isVideo, videoTs);
+  const result = await callApi('uploadProfilePhoto', file, isFallback, isVideo, videoTs, bot);
   if (!result) return;
 
   global = getGlobal();

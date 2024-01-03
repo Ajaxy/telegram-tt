@@ -195,7 +195,8 @@ export function log(suffix: keyof typeof LOG_SUFFIX, ...data: any) {
   /* eslint-enable max-len */
 }
 
-export function isResponseUpdate<T extends GramJs.AnyRequest>(result: T['__response']): result is GramJs.TypeUpdate {
+export function isResponseUpdate<T extends { __response: GramJs.TypeUpdate }>(result: T['__response']):
+  result is GramJs.TypeUpdate {
   return result instanceof GramJs.UpdatesTooLong || result instanceof GramJs.UpdateShortMessage
     || result instanceof GramJs.UpdateShortChatMessage || result instanceof GramJs.UpdateShort
     || result instanceof GramJs.UpdatesCombined || result instanceof GramJs.Updates
