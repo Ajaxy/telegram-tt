@@ -1139,7 +1139,9 @@ addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> =
   } = payload;
 
   let { langCode } = payload;
-  if (!langCode) langCode = global.settings.byKey.language;
+  if (!langCode) {
+    langCode = global.settings.byKey.language;
+  }
 
   const { currentUserId } = global;
   if (!currentUserId) {
@@ -1150,26 +1152,15 @@ addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> =
   global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
   setGlobal(global);
 
-  if (name || about) {
-    const result = await callApi('setBotInfo', {
-      bot, langCode, name, about,
-    });
+  const result = await callApi('setBotInfo', {
+    bot, langCode, name, about,
+  });
 
-    if (result) {
-      global = getGlobal();
-
-      if (bot) {
-        global = updateUser(
-          global,
-          bot.id,
-          {
-            firstName: name,
-          },
-        );
-        global = updateUserFullInfo(global, bot.id, { bio: about });
-        setGlobal(global);
-      }
-    }
+  if (result) {
+    global = getGlobal();
+    global = updateUser(global, bot.id, { firstName: name });
+    global = updateUserFullInfo(global, bot.id, { bio: about });
+    setGlobal(global);
   }
 
   global = getGlobal();

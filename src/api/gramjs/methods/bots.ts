@@ -578,7 +578,7 @@ export function setBotInfo({
   about?: string;
   description?: string;
 }) {
-  invokeRequest(new GramJs.bots.SetBotInfo({
+  return invokeRequest(new GramJs.bots.SetBotInfo({
     bot: bot ? buildInputPeer(bot.id, bot.accessHash) : undefined,
     langCode,
     name: name || '',
