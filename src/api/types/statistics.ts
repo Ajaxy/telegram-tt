@@ -46,8 +46,7 @@ export interface ApiPostStatistics {
   publicForwards?: number;
   publicForwardsData?: (ApiMessagePublicForward | ApiStoryPublicForward)[];
 
-  nextRate?: number;
-  nextOffsetId?: string;
+  nextOffset?: string;
 }
 
 export interface ApiBoostStatistics {

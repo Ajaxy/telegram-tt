@@ -7,12 +7,17 @@
 
 .title {
   display: block;
+  margin-top: 0.5rem;
 }
 
-.gift {
+.sticker {
   position: relative;
   margin-top: -2.5rem;
   margin-bottom: 1rem;
+}
+
+.resultSticker {
+  margin-top: 0;
 }
 
 .count {
@@ -43,15 +48,16 @@
   margin-bottom: 0;
 }
 
-.channels {
+.peers {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: 0.5rem;
   margin-block: 0.25rem;
 }
 
-.channel {
+.peer {
   background-color: var(--accent-background-color);
   color: var(--accent-color);
   margin: unset;
@@ -63,4 +69,30 @@
 
 .button {
   margin-bottom: 1rem;
+}
+
+.result {
+  font-weight: 500;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-dividers);
+}
+
+.separator:not(:empty)::before {
+  margin-right: 0.25em;
+}
+
+.separator:not(:empty)::after {
+  margin-left: 0.25em;
 }

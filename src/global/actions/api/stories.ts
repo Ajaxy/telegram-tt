@@ -1,3 +1,4 @@
+import type { ApiStoryView } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { DEBUG, PREVIEW_AVATAR_COUNT } from '../../../config';
@@ -353,14 +354,15 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
     return;
   }
 
-  const viewsById = buildCollectionByKey(result.views, 'userId');
-
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  if (!isPreload) global = updateStoryViews(global, storyId, viewsById, result.nextOffset, tabId);
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  if (!isPreload) global = updateStoryViews(global, storyId, result.views, result.nextOffset, tabId);
 
   if (isPreload && result.views?.length) {
-    const recentViewerIds = result.views.map((view) => view.userId);
+    const recentViewerIds = result.views
+      .filter((view): view is ApiStoryView => 'date' in view)
+      .map((view) => view.peerId);
     global = updatePeerStoryViews(global, peerId, storyId, {
       recentViewerIds,
       viewsCount: result.viewsCount,

@@ -407,7 +407,7 @@ addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promi
       isOpen: true,
       forUserId,
       monthlyCurrency: month.currency,
-      monthlyAmount: month.amount,
+      monthlyAmount: String(month.amount),
     },
   }, tabId);
   setGlobal(global);
@@ -646,7 +646,7 @@ addActionHandler('applyBoost', async (global, actions, payload): Promise<void> =
 });
 
 addActionHandler('checkGiftCode', async (global, actions, payload): Promise<void> => {
-  const { slug, tabId = getCurrentTabId() } = payload;
+  const { slug, message, tabId = getCurrentTabId() } = payload;
 
   const result = await callApi('checkGiftCode', {
     slug,
@@ -667,6 +667,7 @@ addActionHandler('checkGiftCode', async (global, actions, payload): Promise<void
     giftCodeModal: {
       slug,
       info: result.code,
+      message,
     },
   }, tabId);
   setGlobal(global);

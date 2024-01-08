@@ -8,6 +8,7 @@ import type { IconName } from '../../types/icons';
 import { getChatTitle, getUserFirstOrLastName } from '../../global/helpers';
 import { selectChat, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
@@ -26,6 +27,7 @@ type OwnProps = {
   clickArg?: any;
   className?: string;
   fluid?: boolean;
+  withPeerColors?: boolean;
   onClick: (arg: any) => void;
 };
 
@@ -46,6 +48,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   className,
   fluid,
   isSavedMessages,
+  withPeerColors,
   onClick,
 }) => {
   const lang = useLang();
@@ -84,6 +87,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     isMinimized && 'minimized',
     canClose && 'closeable',
     fluid && 'fluid',
+    withPeerColors && getPeerColorClass(chat || user),
   );
 
   return (

@@ -4,25 +4,30 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiGiveawayInfo, ApiMessage, ApiPeer, ApiSticker,
+  ApiChat, ApiGiveaway, ApiGiveawayInfo, ApiGiveawayResults, ApiMessage, ApiPeer, ApiSticker,
 } from '../../../api/types';
 
-import { getChatTitle, getUserFullName, isApiPeerChat } from '../../../global/helpers';
+import {
+  getChatTitle, getUserFullName, isApiPeerChat, isOwnMessage,
+} from '../../../global/helpers';
 import {
   selectCanPlayAnimatedEmojis,
   selectChat,
   selectForwardedSender,
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { formatDateAtTime, formatDateTimeToString } from '../../../util/dateFormat';
 import { isoToEmoji } from '../../../util/emoji';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import AnimatedIcon from '../../common/AnimatedIcon';
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
 import Button from '../../ui/Button';
@@ -43,6 +48,7 @@ type StateProps = {
 
 const NBSP = '\u00A0';
 const GIFT_STICKER_SIZE = 175;
+const RESULT_STICKER_SIZE = 150;
 
 const Giveaway = ({
   chat,
@@ -57,20 +63,27 @@ const Giveaway = ({
   const [giveawayInfo, setGiveawayInfo] = useState<ApiGiveawayInfo | undefined>();
 
   const lang = useLang();
+  const { giveaway, giveawayResults } = message.content;
+  const isResults = Boolean(giveawayResults);
   const {
-    months, quantity, channelIds, untilDate, countries,
-  } = message.content.giveaway!;
+    months, untilDate, prizeDescription,
+  } = (giveaway || giveawayResults)!;
+
+  const isOwn = isOwnMessage(message);
+
+  const quantity = isResults ? giveawayResults.winnersCount : giveaway!.quantity;
 
   const hasEnded = getServerTime() > untilDate;
 
   const countryList = useMemo(() => {
+    if (isResults) return undefined;
     const translatedNames = new Intl.DisplayNames([lang.code!, 'en'].filter(Boolean), { type: 'region' });
-    return countries?.map((countryCode) => (
+    return giveaway?.countries?.map((countryCode) => (
       `${isoToEmoji(countryCode)}${NBSP}${translatedNames.of(countryCode)}`
     )).join(', ');
-  }, [countries, lang.code]);
+  }, [giveaway, isResults, lang.code]);
 
-  const handleChannelClick = useLastCallback((channelId: string) => {
+  const handlePeerClick = useLastCallback((channelId: string) => {
     openChat({ id: channelId });
   });
 
@@ -95,36 +108,149 @@ const Giveaway = ({
     return lang(giveawayInfo.type === 'results' ? 'BoostingGiveawayEnd' : 'BoostingGiveAwayAbout');
   }, [giveawayInfo, lang]);
 
+  function renderGiveawayDescription(media: ApiGiveaway) {
+    const channelIds = media.channelIds;
+    return (
+      <>
+        <div className={styles.section}>
+          <strong className={styles.title}>
+            {renderText(lang('BoostingGiveawayPrizes'), ['simple_markdown'])}
+          </strong>
+          {prizeDescription && (
+            <>
+              <p className={styles.description}>
+                {renderText(
+                  lang('BoostingGiveawayMsgPrizes', [quantity, prizeDescription], undefined, quantity),
+                  ['simple_markdown'],
+                )}
+              </p>
+              <div className={styles.separator}>{lang('BoostingGiveawayMsgWithDivider')}</div>
+            </>
+          )}
+          <p className={styles.description}>
+            {renderText(lang('Chat.Giveaway.Info.Subscriptions', quantity), ['simple_markdown'])}
+            <br />
+            {renderText(lang(
+              'ActionGiftPremiumSubtitle',
+              lang('Chat.Giveaway.Info.Months', months),
+            ), ['simple_markdown'])}
+          </p>
+        </div>
+        <div className={styles.section}>
+          <strong className={styles.title}>
+            {renderText(lang('BoostingGiveawayMsgParticipants'), ['simple_markdown'])}
+          </strong>
+          <p className={styles.description}>
+            {renderText(lang('BoostingGiveawayMsgAllSubsPlural', channelIds.length), ['simple_markdown'])}
+          </p>
+          <div className={styles.peers}>
+            {channelIds.map((peerId) => (
+              <PickerSelectedItem
+                peerId={peerId}
+                forceShowSelf
+                fluid
+                withPeerColors={!isOwn}
+                className={styles.peer}
+                clickArg={peerId}
+                onClick={handlePeerClick}
+              />
+            ))}
+          </div>
+          {countryList && (
+            <span>{renderText(lang('Chat.Giveaway.Message.CountriesFrom', countryList))}</span>
+          )}
+        </div>
+        <div className={styles.section}>
+          <strong className={styles.title}>
+            {renderText(lang('BoostingWinnersDate'), ['simple_markdown'])}
+          </strong>
+          <p className={styles.description}>
+            {formatDateTimeToString(untilDate * 1000, lang.code, true)}
+          </p>
+        </div>
+      </>
+    );
+  }
+
+  function renderGiveawayResultsDescription(media: ApiGiveawayResults) {
+    const winnerIds = media.winnerIds;
+    return (
+      <>
+        <div className={styles.section}>
+          <strong className={styles.title}>
+            {renderText(lang('BoostingGiveawayResultsMsgWinnersSelected'), ['simple_markdown'])}
+          </strong>
+          <p className={styles.description}>
+            {renderText(lang('BoostingGiveawayResultsMsgWinnersTitle', winnerIds.length), ['simple_markdown'])}
+          </p>
+          <strong className={styles.title}>
+            {lang('lng_prizes_results_winners')}
+          </strong>
+          <div className={styles.peers}>
+            {winnerIds.map((peerId) => (
+              <PickerSelectedItem
+                peerId={peerId}
+                forceShowSelf
+                fluid
+                withPeerColors={!isOwn}
+                className={styles.peer}
+                clickArg={peerId}
+                onClick={handlePeerClick}
+              />
+            ))}
+          </div>
+        </div>
+        <div className={styles.section}>
+          <p className={styles.description}>
+            {lang('BoostingGiveawayResultsMsgAllWinnersReceivedLinks')}
+          </p>
+        </div>
+      </>
+    );
+  }
+
   function renderGiveawayInfo() {
     if (!sender || !giveawayInfo) return undefined;
-    const isResults = giveawayInfo.type === 'results';
+    const isResultsInfo = giveawayInfo.type === 'results';
 
     const chatTitle = isApiPeerChat(sender) ? getChatTitle(lang, sender) : getUserFullName(sender);
     const duration = lang('Chat.Giveaway.Info.Months', months);
     const endDate = formatDateAtTime(lang, untilDate * 1000);
-    const otherChannelsCount = channelIds.length ? channelIds.length - 1 : 0;
+    const otherChannelsCount = giveaway?.channelIds ? giveaway.channelIds.length - 1 : 0;
     const otherChannelsString = lang('Chat.Giveaway.Info.OtherChannels', otherChannelsCount);
     const isSeveral = otherChannelsCount > 0;
 
-    const firstKey = isResults ? 'BoostingGiveawayHowItWorksTextEnd' : 'BoostingGiveawayHowItWorksText';
+    const firstKey = isResultsInfo ? 'BoostingGiveawayHowItWorksTextEnd' : 'BoostingGiveawayHowItWorksText';
     const firstParagraph = lang(firstKey, [chatTitle, quantity, duration], undefined, quantity);
 
+    const additionalPrizes = prizeDescription
+      ? lang('BoostingGiveawayHowItWorksIncludeText', [chatTitle, quantity, prizeDescription], undefined, quantity)
+      : undefined;
+
     let secondKey = '';
-    if (isResults) {
+    if (isResultsInfo) {
       secondKey = isSeveral ? 'BoostingGiveawayHowItWorksSubTextSeveralEnd' : 'BoostingGiveawayHowItWorksSubTextEnd';
     } else {
       secondKey = isSeveral ? 'BoostingGiveawayHowItWorksSubTextSeveral' : 'BoostingGiveawayHowItWorksSubText';
     }
     let secondParagraph = lang(secondKey, [endDate, quantity, chatTitle, otherChannelsCount], undefined, quantity);
-    if (isResults && giveawayInfo.activatedCount) {
+    if (isResultsInfo && giveawayInfo.activatedCount) {
       secondParagraph += ` ${lang('BoostingGiveawayUsedLinksPlural', giveawayInfo.activatedCount)}`;
     }
 
+    let result = '';
+
+    if (isResultsInfo) {
+      if (giveawayInfo.isRefunded) {
+        result = lang('BoostingGiveawayCanceledByPayment');
+      } else {
+        result = lang(giveawayInfo.isWinner ? 'BoostingGiveawayYouWon' : 'BoostingGiveawayYouNotWon');
+      }
+    }
+
     let lastParagraph = '';
-    if (isResults && giveawayInfo.isRefunded) {
-      lastParagraph = lang('BoostingGiveawayCanceledByPayment');
-    } else if (isResults) {
-      lastParagraph = lang(giveawayInfo.isWinner ? 'BoostingGiveawayYouWon' : 'BoostingGiveawayYouNotWon');
+    if (isResultsInfo) {
+      // Nothing
     } else if (giveawayInfo.disallowedCountry) {
       lastParagraph = lang('BoostingGiveawayNotEligibleCountry');
     } else if (giveawayInfo.adminDisallowedChatId) {
@@ -148,78 +274,55 @@ const Giveaway = ({
 
     return (
       <>
+        {result && (
+          <p className={styles.result}>
+            {renderText(result, ['simple_markdown'])}
+          </p>
+        )}
         <p>
           {renderText(firstParagraph, ['simple_markdown'])}
         </p>
+        {additionalPrizes && (
+          <p>
+            {renderText(additionalPrizes, ['simple_markdown'])}
+          </p>
+        )}
         <p>
           {renderText(secondParagraph, ['simple_markdown'])}
         </p>
-        <p>
-          {renderText(lastParagraph, ['simple_markdown'])}
-        </p>
+        {lastParagraph && (
+          <p>
+            {renderText(lastParagraph, ['simple_markdown'])}
+          </p>
+        )}
       </>
     );
   }
 
   return (
     <div className={styles.root}>
-      <div className={styles.gift}>
-        <AnimatedIconFromSticker
-          key={message.id}
-          sticker={giftSticker}
-          play={canPlayAnimatedEmojis && hasEnded}
-          noLoop
-          nonInteractive
-          size={GIFT_STICKER_SIZE}
-        />
+      <div className={buildClassName(styles.sticker, isResults && styles.resultSticker)}>
+        {isResults ? (
+          <AnimatedIcon
+            size={RESULT_STICKER_SIZE}
+            tgsUrl={LOCAL_TGS_URLS.PartyPopper}
+            nonInteractive
+            noLoop
+          />
+        ) : (
+          <AnimatedIconFromSticker
+            sticker={giftSticker}
+            play={canPlayAnimatedEmojis && hasEnded}
+            noLoop
+            nonInteractive
+            size={GIFT_STICKER_SIZE}
+          />
+        )}
         <span className={styles.count}>
           {`x${quantity}`}
         </span>
       </div>
-      <div className={styles.section}>
-        <strong className={styles.title}>
-          {renderText(lang('BoostingGiveawayPrizes'), ['simple_markdown'])}
-        </strong>
-        <p className={styles.description}>
-          {renderText(lang('Chat.Giveaway.Info.Subscriptions', quantity), ['simple_markdown'])}
-          <br />
-          {renderText(lang(
-            'ActionGiftPremiumSubtitle',
-            lang('Chat.Giveaway.Info.Months', months),
-          ), ['simple_markdown'])}
-        </p>
-      </div>
-      <div className={styles.section}>
-        <strong className={styles.title}>
-          {renderText(lang('BoostingGiveawayMsgParticipants'), ['simple_markdown'])}
-        </strong>
-        <p className={styles.description}>
-          {renderText(lang('BoostingGiveawayMsgAllSubsPlural', channelIds.length), ['simple_markdown'])}
-        </p>
-        <div className={styles.channels}>
-          {channelIds.map((channelId) => (
-            <PickerSelectedItem
-              peerId={channelId}
-              forceShowSelf
-              fluid
-              className={styles.channel}
-              clickArg={channelId}
-              onClick={handleChannelClick}
-            />
-          ))}
-        </div>
-        {Boolean(countries?.length) && (
-          <span>{renderText(lang('Chat.Giveaway.Message.CountriesFrom', countryList))}</span>
-        )}
-      </div>
-      <div className={styles.section}>
-        <strong className={styles.title}>
-          {renderText(lang('BoostingWinnersDate'), ['simple_markdown'])}
-        </strong>
-        <p className={styles.description}>
-          {formatDateTimeToString(untilDate * 1000, lang.code, true)}
-        </p>
-      </div>
+      {isResults ? renderGiveawayResultsDescription(giveawayResults) : renderGiveawayDescription(giveaway!)}
       <Button
         className={styles.button}
         color="adaptive"
@@ -243,15 +346,17 @@ const Giveaway = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { message }): StateProps => {
-    const duration = message.content.giveaway!.months;
+    const { giveaway } = message.content;
     const chat = selectChat(global, message.chatId)!;
-    const sender = selectChat(global, message.content.giveaway?.channelIds[0]!)
+    const sender = selectChat(global, giveaway?.channelIds[0]!)
       || selectForwardedSender(global, message) || chat;
+
+    const sticker = giveaway && selectGiftStickerForDuration(global, giveaway.months);
 
     return {
       chat,
       sender,
-      giftSticker: selectGiftStickerForDuration(global, duration),
+      giftSticker: sticker,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };
   },

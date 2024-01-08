@@ -194,7 +194,7 @@ function buildApiPremiumSubscriptionOption(option: GramJs.PremiumSubscriptionOpt
     isCurrent: current,
     canPurchaseUpgrade,
     currency,
-    amount: amount.toString(),
+    amount: amount.toJSNumber(),
     botUrl,
     months,
   };
@@ -248,7 +248,7 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       type: 'active',
       startDate,
       isParticipating: participating,
-      adminDisallowedChatId: adminDisallowedChatId?.toString(),
+      adminDisallowedChatId: adminDisallowedChatId && buildApiPeerId(adminDisallowedChatId, 'channel'),
       disallowedCountry,
       joinedTooEarlyDate,
       isPreparingResults: preparingResults,

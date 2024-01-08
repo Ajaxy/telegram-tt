@@ -260,6 +260,21 @@ export type ApiGiveaway = {
   isOnlyForNewSubscribers?: true;
   countries?: string[];
   channelIds: string[];
+  prizeDescription?: string;
+};
+
+export type ApiGiveawayResults = {
+  months: number;
+  untilDate: number;
+  isRefunded?: true;
+  isOnlyForNewSubscribers?: true;
+  channelId: string;
+  prizeDescription?: string;
+  winnersCount?: number;
+  winnerIds: string[];
+  additionalPeersCount?: number;
+  launchMessageId: number;
+  unclaimedCount: number;
 };
 
 export type ApiNewPoll = {
@@ -370,6 +385,7 @@ export interface ApiStoryForwardInfo {
   fromPeerId?: string;
   fromName?: string;
   storyId?: number;
+  isModified?: boolean;
 }
 
 export type ApiMessageEntityDefault = {
@@ -458,6 +474,7 @@ export type MediaContent = {
   game?: ApiGame;
   storyData?: ApiMessageStoryData;
   giveaway?: ApiGiveaway;
+  giveawayResults?: ApiGiveawayResults;
 };
 
 export interface ApiMessage {

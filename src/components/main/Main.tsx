@@ -179,7 +179,6 @@ const Main: FC<OwnProps & StateProps> = ({
   isMediaViewerOpen,
   isStoryViewerOpen,
   isForwardModalOpen,
-  currentUserId,
   hasNotifications,
   hasDialogs,
   audioMessage,
@@ -568,7 +567,7 @@ const Main: FC<OwnProps & StateProps> = ({
         isByPhoneNumber={newContactByPhoneNumber}
       />
       <BoostModal info={boostModal} />
-      <GiftCodeModal modal={giftCodeModal} currentUserId={currentUserId} />
+      <GiftCodeModal modal={giftCodeModal} />
       <ChatlistModal info={chatlistModal} />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <WebAppModal webApp={webApp} />

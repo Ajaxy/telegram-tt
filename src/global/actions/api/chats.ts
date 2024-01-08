@@ -51,6 +51,7 @@ import {
   addChatMembers,
   addChats,
   addMessages,
+  addSimilarChannels,
   addUsers,
   addUserStatuses,
   addUsersToRestrictedInviteList,
@@ -2515,6 +2516,29 @@ addActionHandler('setViewForumAsMessages', (global, actions, payload): ActionRet
   setGlobal(global);
 
   void callApi('setViewForumAsMessages', { chat, isEnabled });
+});
+
+addActionHandler('fetchChannelRecommendations', async (global, actions, payload): Promise<void> => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+
+  if (!chat) {
+    return;
+  }
+
+  const similarChannels = await callApi('fetchChannelRecommendations', {
+    chat,
+  });
+
+  if (!similarChannels) {
+    return;
+  }
+
+  global = getGlobal();
+  global = addChats(global, buildCollectionByKey(similarChannels, 'id'));
+  global = addSimilarChannels(global, chatId, similarChannels.map((channel) => channel.id));
+
+  setGlobal(global);
 });
 
 async function loadChats(
