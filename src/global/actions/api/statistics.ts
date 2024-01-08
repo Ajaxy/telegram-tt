@@ -91,14 +91,14 @@ addActionHandler('loadMessagePublicForwards', async (global, actions, payload): 
   const dcId = fullInfo.statisticsDcId;
   const stats = selectTabState(global, tabId).statistics.currentMessage || {};
 
-  if (stats?.publicForwards && !stats.nextRate) return;
+  if (stats?.publicForwards && !stats.nextOffset) return;
 
   const publicForwards = await callApi('fetchMessagePublicForwards', {
-    chat, messageId, dcId, offsetRate: stats?.nextRate,
+    chat, messageId, dcId, offset: stats.nextOffset,
   });
   const {
     forwards,
-    nextRate,
+    nextOffset,
     count,
   } = publicForwards || {};
 
@@ -113,7 +113,7 @@ addActionHandler('loadMessagePublicForwards', async (global, actions, payload): 
     publicForwardsData: (stats.publicForwardsData || []).concat(
       shouldOmitFirstElement ? forwards.slice(1) : (forwards || []),
     ),
-    nextRate,
+    nextOffset,
   }, tabId);
   setGlobal(global);
 });
@@ -185,16 +185,16 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
   const dcId = fullInfo.statisticsDcId;
   const stats = selectTabState(global, tabId).statistics.currentStory || {};
 
-  if (stats?.publicForwards && !stats.nextOffsetId) return;
+  if (stats?.publicForwards && !stats.nextOffset) return;
 
   const {
     publicForwards,
     users,
     chats,
     count,
-    nextOffsetId,
+    nextOffset,
   } = await callApi('fetchStoryPublicForwards', {
-    chat, storyId, dcId, offsetId: stats.nextOffsetId,
+    chat, storyId, dcId, offset: stats.nextOffset,
   }) || {};
 
   global = getGlobal();
@@ -211,7 +211,7 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
     publicForwardsData: (stats.publicForwardsData || []).concat(
       publicForwards || [],
     ),
-    nextOffsetId,
+    nextOffset,
   }, tabId);
   setGlobal(global);
 });

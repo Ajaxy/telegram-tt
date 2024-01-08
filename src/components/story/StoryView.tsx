@@ -1,10 +1,13 @@
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiAvailableReaction, ApiStoryView, ApiUser } from '../../api/types';
+import type {
+  ApiAvailableReaction, ApiPeer, ApiTypeStoryView, ApiUser,
+} from '../../api/types';
+import type { IconName } from '../../types/icons';
 
-import { getUserFullName } from '../../global/helpers';
-import { selectUser } from '../../global/selectors';
+import { getUserFullName, isUserId } from '../../global/helpers';
+import { selectPeer } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatDateAtTime } from '../../util/dateFormat';
 import { REM } from '../common/helpers/mediaDimensions';
@@ -12,6 +15,7 @@ import { REM } from '../common/helpers/mediaDimensions';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
+import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
@@ -19,38 +23,64 @@ import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 import styles from './StoryViewModal.module.scss';
 
 type OwnProps = {
-  storyView: ApiStoryView;
+  storyView: ApiTypeStoryView;
 };
 
 type StateProps = {
-  user?: ApiUser;
+  peer?: ApiPeer;
   availableReactions?: ApiAvailableReaction[];
 };
 
 const CLOSE_ANIMATION_DURATION = 100;
 const DEFAULT_REACTION_SIZE = 1.5 * REM;
+const BULLET = '\u2022';
 
 const StoryView = ({
   storyView,
-  user,
+  peer,
   availableReactions,
 }: OwnProps & StateProps) => {
   const {
-    openChat, closeStoryViewer, unblockUser, blockUser, deleteContact, updateStoryView,
+    openChat,
+    closeStoryViewer,
+    unblockUser,
+    blockUser,
+    deleteContact,
+    updateStoryView,
+    focusMessage,
+    openStoryViewer,
+    closeStoryViewModal,
   } = getActions();
 
   const lang = useLang();
 
   const handleClick = useLastCallback(() => {
+    const { type } = storyView;
+
+    if (type === 'repost') {
+      closeStoryViewModal();
+      openStoryViewer({
+        peerId: storyView.peerId,
+        storyId: storyView.storyId,
+      });
+      return;
+    }
+
     closeStoryViewer();
 
     setTimeout(() => {
-      openChat({ id: storyView.userId });
+      if (type === 'user') {
+        openChat({ id: storyView.peerId });
+      } else if (type === 'forward') {
+        focusMessage({ chatId: storyView.peerId, messageId: storyView.messageId });
+      }
     }, CLOSE_ANIMATION_DURATION);
   });
 
   const contextActions = useMemo(() => {
-    const { userId, areStoriesBlocked, isUserBlocked } = storyView;
+    if (!isUserId(storyView.peerId)) return undefined;
+    const { peerId, areStoriesBlocked, isUserBlocked } = storyView;
+    const user = peer as ApiUser;
     const { isContact } = user || {};
     const fullName = getUserFullName(user);
 
@@ -60,8 +90,8 @@ const StoryView = ({
       if (!areStoriesBlocked) {
         actions.push({
           handler: () => {
-            blockUser({ userId, isOnlyStories: true });
-            updateStoryView({ userId, areStoriesBlocked: true });
+            blockUser({ userId: peerId, isOnlyStories: true });
+            updateStoryView({ userId: peerId, areStoriesBlocked: true });
           },
           title: lang('StoryHideFrom', fullName),
           icon: 'hand-stop',
@@ -69,8 +99,8 @@ const StoryView = ({
       } else {
         actions.push({
           handler: () => {
-            unblockUser({ userId, isOnlyStories: true });
-            updateStoryView({ userId, areStoriesBlocked: false });
+            unblockUser({ userId: peerId, isOnlyStories: true });
+            updateStoryView({ userId: peerId, areStoriesBlocked: false });
           },
           title: lang('StoryShowBackTo', fullName),
           icon: 'play-story',
@@ -81,7 +111,7 @@ const StoryView = ({
     if (isContact) {
       actions.push({
         handler: () => {
-          deleteContact({ userId });
+          deleteContact({ userId: peerId });
         },
         title: lang('DeleteContact'),
         icon: 'delete-user',
@@ -91,11 +121,11 @@ const StoryView = ({
       actions.push({
         handler: () => {
           if (isUserBlocked) {
-            unblockUser({ userId });
-            updateStoryView({ userId, isUserBlocked: false });
+            unblockUser({ userId: peerId });
+            updateStoryView({ userId: peerId, isUserBlocked: false });
           } else {
-            blockUser({ userId });
-            updateStoryView({ userId, isUserBlocked: true });
+            blockUser({ userId: peerId });
+            updateStoryView({ userId: peerId, isUserBlocked: true });
           }
         },
         title: lang(isUserBlocked ? 'Unblock' : 'BlockUser'),
@@ -105,11 +135,25 @@ const StoryView = ({
     }
 
     return actions;
-  }, [lang, storyView, user]);
+  }, [lang, storyView, peer]);
+
+  const statusIcon: IconName = storyView.type === 'user' ? 'message-read'
+    : storyView.type === 'forward' ? 'forward' : 'loop';
+  const shouldColorStatus = storyView.type === 'forward' || storyView.type === 'repost';
+
+  const status = useMemo(() => {
+    const isModified = storyView.type === 'repost' && storyView.story.forwardInfo?.isModified;
+    const parts = [formatDateAtTime(lang, storyView.date * 1000)];
+    if (isModified) {
+      parts.push(lang('lng_edited'));
+    }
+
+    return parts.join(` ${BULLET} `);
+  }, [lang, storyView]);
 
   return (
     <ListItem
-      key={storyView.userId}
+      key={storyView.peerId}
       className={buildClassName(
         'chat-item-clickable small-icon',
         styles.opacityFadeIn,
@@ -117,7 +161,7 @@ const StoryView = ({
       )}
       // eslint-disable-next-line react/jsx-no-bind
       onClick={() => handleClick()}
-      rightElement={storyView.reaction ? (
+      rightElement={storyView.type === 'user' && storyView.reaction ? (
         <ReactionStaticEmoji
           reaction={storyView.reaction}
           className={styles.viewReaction}
@@ -130,23 +174,34 @@ const StoryView = ({
       withPortalForMenu
       menuBubbleClassName={styles.menuBubble}
     >
-      <PrivateChatInfo
-        userId={storyView.userId}
-        noStatusOrTyping
-        status={formatDateAtTime(lang, storyView.date * 1000)}
-        statusIcon="message-read"
-        withStory
-        forceShowSelf
-      />
+      {isUserId(storyView.peerId) ? (
+        <PrivateChatInfo
+          className={buildClassName(shouldColorStatus && styles.withColoredStatus)}
+          userId={storyView.peerId}
+          noStatusOrTyping
+          status={status}
+          statusIcon={statusIcon}
+          withStory
+          forceShowSelf
+        />
+      ) : (
+        <GroupChatInfo
+          className={buildClassName(shouldColorStatus && styles.withColoredStatus)}
+          chatId={storyView.peerId}
+          status={status}
+          statusIcon={statusIcon}
+          withStory
+        />
+      )}
     </ListItem>
   );
 };
 
 export default memo(withGlobal<OwnProps>((global, { storyView }) => {
-  const user = selectUser(global, storyView.userId);
+  const peer = selectPeer(global, storyView.peerId);
 
   return {
-    user,
+    peer,
     availableReactions: global.availableReactions,
   };
 })(StoryView));

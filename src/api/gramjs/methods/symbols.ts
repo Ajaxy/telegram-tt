@@ -7,10 +7,10 @@ import type {
 
 import { DEFAULT_GIF_SEARCH_BOT_USERNAME, RECENT_STATUS_LIMIT, RECENT_STICKERS_LIMIT } from '../../../config';
 import { buildVideoFromDocument } from '../apiBuilders/messageContent';
+import { buildApiEmojiStatus } from '../apiBuilders/peers';
 import {
   buildStickerSet, buildStickerSetCovered, processStickerPackResult, processStickerResult,
 } from '../apiBuilders/symbols';
-import { buildApiUserEmojiStatus } from '../apiBuilders/users';
 import { buildInputDocument, buildInputStickerSet, buildInputStickerSetShortName } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { invokeRequest } from './client';
@@ -445,7 +445,7 @@ export async function fetchRecentEmojiStatuses(hash = '0') {
 
   const documentIds = result.statuses
     .slice(0, RECENT_STATUS_LIMIT)
-    .map(buildApiUserEmojiStatus)
+    .map(buildApiEmojiStatus)
     .filter(Boolean)
     .map(({ documentId }) => documentId);
   const emojiStatuses = await fetchCustomEmoji({ documentId: documentIds });

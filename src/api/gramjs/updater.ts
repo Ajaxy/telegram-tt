@@ -46,7 +46,7 @@ import {
   buildApiNotifyExceptionTopic,
   buildPrivacyKey,
 } from './apiBuilders/misc';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
+import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 import {
   buildApiReaction,
   buildMessageReactions,
@@ -55,7 +55,6 @@ import { buildApiStealthMode, buildApiStory } from './apiBuilders/stories';
 import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols';
 import {
   buildApiUser,
-  buildApiUserEmojiStatus,
   buildApiUserStatus,
 } from './apiBuilders/users';
 import {
@@ -795,7 +794,7 @@ export function updater(update: Update) {
       id: buildApiPeerId(update.userId, 'user'),
     });
   } else if (update instanceof GramJs.UpdateUserEmojiStatus) {
-    const emojiStatus = buildApiUserEmojiStatus(update.emojiStatus);
+    const emojiStatus = buildApiEmojiStatus(update.emojiStatus);
     onUpdate({
       '@type': 'updateUserEmojiStatus',
       userId: buildApiPeerId(update.userId, 'user'),

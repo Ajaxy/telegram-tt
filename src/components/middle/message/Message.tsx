@@ -639,6 +639,7 @@ const Message: FC<OwnProps & StateProps> = ({
     voice, document, sticker, contact,
     poll, webPage, invoice, location,
     action, game, storyData, giveaway,
+    giveawayResults,
   } = getMessageContent(message);
 
   const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
@@ -1146,7 +1147,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
         )}
-        {giveaway && (
+        {(giveaway || giveawayResults) && (
           <Giveaway message={message} />
         )}
         {game && (

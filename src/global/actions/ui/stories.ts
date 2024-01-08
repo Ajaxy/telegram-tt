@@ -1,4 +1,3 @@
-import type { ApiStoryView } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -374,7 +373,7 @@ addActionHandler('clearStoryViews', (global, actions, payload): ActionReturnType
       ...tabState.storyViewer,
       viewModal: {
         ...tabState.storyViewer.viewModal,
-        viewsById: {},
+        views: undefined,
         isLoading,
         nextOffset: '',
       },
@@ -389,24 +388,26 @@ addActionHandler('updateStoryView', (global, actions, payload): ActionReturnType
 
   const tabState = selectTabState(global, tabId);
   const { viewModal } = tabState.storyViewer;
+  if (!viewModal?.storyId) return undefined;
 
-  if (!viewModal?.viewsById?.[userId]) return global;
+  const updatedViews = viewModal?.views?.map((view) => {
+    if (view.peerId === userId) {
+      return {
+        ...view,
+        isUserBlocked: isUserBlocked || undefined,
+        areStoriesBlocked: areStoriesBlocked || undefined,
+      };
+    }
 
-  const updatedViewsById: Record<string, ApiStoryView> = {
-    ...viewModal.viewsById,
-    [userId]: {
-      ...viewModal.viewsById[userId],
-      isUserBlocked: isUserBlocked || undefined,
-      areStoriesBlocked: areStoriesBlocked || undefined,
-    },
-  };
+    return view;
+  });
 
   return updateTabState(global, {
     storyViewer: {
       ...tabState.storyViewer,
       viewModal: {
         ...viewModal,
-        viewsById: updatedViewsById,
+        views: updatedViews,
       },
     },
   }, tabId);

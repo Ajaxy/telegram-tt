@@ -19,13 +19,17 @@ import type {
   ApiTopic,
 } from '../../types';
 
-import { pick, pickTruthy } from '../../../util/iteratees';
+import { omitUndefined, pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { buildApiUsernames } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
+  buildApiEmojiStatus,
   buildApiPeerColor,
-  buildApiPeerId, getApiChatIdFromMtpPeer, isPeerChat, isPeerUser,
+  buildApiPeerId,
+  getApiChatIdFromMtpPeer,
+  isPeerChat,
+  isPeerUser,
 } from './peers';
 import { buildApiReaction } from './reactions';
 
@@ -40,10 +44,10 @@ function buildApiChatFieldsFromPeerEntity(
   isSupport = false,
 ): PeerEntityApiChatFields {
   const isMin = Boolean('min' in peerEntity && peerEntity.min);
-  const accessHash = ('accessHash' in peerEntity) && String(peerEntity.accessHash);
+  const accessHash = ('accessHash' in peerEntity) ? String(peerEntity.accessHash) : undefined;
   const hasVideoAvatar = 'photo' in peerEntity && peerEntity.photo && 'hasVideo' in peerEntity.photo
     && peerEntity.photo.hasVideo;
-  const avatarHash = ('photo' in peerEntity) && peerEntity.photo && buildAvatarHash(peerEntity.photo);
+  const avatarHash = ('photo' in peerEntity) && peerEntity.photo ? buildAvatarHash(peerEntity.photo) : undefined;
   const isSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
   const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
   const isScam = Boolean('scam' in peerEntity && peerEntity.scam);
@@ -56,15 +60,17 @@ function buildApiChatFieldsFromPeerEntity(
   const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
   const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
   const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
+  const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
+    ? buildApiEmojiStatus(peerEntity.emojiStatus) : undefined;
 
-  return {
+  return omitUndefined({
     isMin,
     hasPrivateLink,
     isSignaturesShown,
     usernames,
-    ...(accessHash && { accessHash }),
+    accessHash,
     hasVideoAvatar,
-    ...(avatarHash && { avatarHash }),
+    avatarHash,
     ...('verified' in peerEntity && { isVerified: peerEntity.verified }),
     ...('callActive' in peerEntity && { isCallActive: peerEntity.callActive }),
     ...('callNotEmpty' in peerEntity && { isCallNotEmpty: peerEntity.callNotEmpty }),
@@ -73,7 +79,7 @@ function buildApiChatFieldsFromPeerEntity(
       membersCount: peerEntity.participantsCount,
     }),
     ...('noforwards' in peerEntity && { isProtected: Boolean(peerEntity.noforwards) }),
-    ...(isSupport && { isSupport: true }),
+    isSupport: isSupport || undefined,
     ...buildApiChatPermissions(peerEntity),
     ...('creator' in peerEntity && { isCreator: peerEntity.creator }),
     ...buildApiChatRestrictions(peerEntity),
@@ -86,7 +92,8 @@ function buildApiChatFieldsFromPeerEntity(
     areStoriesHidden,
     maxStoryId,
     hasStories: Boolean(maxStoryId) && !storiesUnavailable,
-  };
+    emojiStatus,
+  });
 }
 
 export function buildApiChatFromDialog(

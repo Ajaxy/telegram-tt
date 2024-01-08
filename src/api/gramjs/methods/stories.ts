@@ -285,11 +285,14 @@ export async function fetchStoryViewList({
   }
 
   addEntitiesToLocalDb(result.users);
+  addEntitiesToLocalDb(result.chats);
   const users = result.users.map(buildApiUser).filter(Boolean);
-  const views = result.views.map(buildApiStoryView);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const views = result.views.map(buildApiStoryView).filter(Boolean);
 
   return {
     users,
+    chats,
     views,
     nextOffset: result.nextOffset,
     reactionsCount: result.reactionsCount,

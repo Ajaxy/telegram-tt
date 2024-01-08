@@ -214,6 +214,7 @@
     "channels.toggleUsername",
     "channels.viewSponsoredMessage",
     "channels.getSponsoredMessages",
+    "channels.getChannelRecommendations",
     "bots.canSendMessage",
     "bots.allowSendMessage",
     "bots.invokeWebViewCustomMethod",

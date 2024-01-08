@@ -53,7 +53,6 @@ const FullNameTitle: FC<OwnProps> = ({
   const { showNotification } = getActions();
   const isUser = isUserId(peer.id);
   const title = isUser ? getUserFullName(peer as ApiUser) : getChatTitle(lang, peer as ApiChat);
-  const emojiStatus = isUser && (peer as ApiUser).emojiStatus;
   const isPremium = isUser && (peer as ApiUser).isPremium;
 
   const handleTitleClick = useLastCallback((e) => {
@@ -86,16 +85,16 @@ const FullNameTitle: FC<OwnProps> = ({
       </h3>
       {!noVerified && peer.isVerified && <VerifiedIcon />}
       {!noFake && peer.fakeType && <FakeIcon fakeType={peer.fakeType} />}
-      {withEmojiStatus && emojiStatus && (
+      {withEmojiStatus && peer.emojiStatus && (
         <CustomEmoji
-          documentId={emojiStatus.documentId}
+          documentId={peer.emojiStatus.documentId}
           size={emojiStatusSize}
           loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
           observeIntersectionForLoading={observeIntersection}
           onClick={onEmojiStatusClick}
         />
       )}
-      {withEmojiStatus && !emojiStatus && isPremium && <PremiumIcon />}
+      {withEmojiStatus && !peer.emojiStatus && isPremium && <PremiumIcon />}
     </div>
   );
 };

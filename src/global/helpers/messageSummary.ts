@@ -121,6 +121,7 @@ export function getMessageSummaryDescription(
     game,
     storyData,
     giveaway,
+    giveawayResults,
   } = message.content;
 
   let hasUsedTruncatedText = false;
@@ -193,6 +194,10 @@ export function getMessageSummaryDescription(
 
   if (giveaway) {
     summary = lang('BoostingGiveawayChannelStarted');
+  }
+
+  if (giveawayResults) {
+    summary = lang('Message.GiveawayEndedWinners', giveawayResults.winnersCount);
   }
 
   if (storyData) {

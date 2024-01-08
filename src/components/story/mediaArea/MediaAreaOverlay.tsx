@@ -25,7 +25,7 @@ const STORY_ASPECT_RATIO = 9 / 16;
 const MediaAreaOverlay = ({
   story, isActive, className,
 }: OwnProps) => {
-  const { openMapModal } = getActions();
+  const { openMapModal, focusMessage, closeStoryViewer } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -58,8 +58,20 @@ const MediaAreaOverlay = ({
   }, [isActive, windowSize]);
 
   const handleMediaAreaClick = (mediaArea: ApiMediaArea) => {
-    if (mediaArea.type === 'geoPoint' || mediaArea.type === 'venue') {
-      openMapModal({ geoPoint: mediaArea.geo });
+    switch (mediaArea.type) {
+      case 'geoPoint':
+      case 'venue': {
+        openMapModal({ geoPoint: mediaArea.geo });
+        break;
+      }
+      case 'channelPost': {
+        focusMessage({
+          chatId: mediaArea.channelId,
+          messageId: mediaArea.messageId,
+        });
+        closeStoryViewer();
+        break;
+      }
     }
   };
 
@@ -74,13 +86,16 @@ const MediaAreaOverlay = ({
         switch (mediaArea.type) {
           case 'geoPoint':
           case 'venue':
+          case 'channelPost': {
+            const isShiny = isActive && (mediaArea.type === 'geoPoint' || mediaArea.type === 'venue');
             return (
               <div
-                className={buildClassName(styles.mediaArea, isActive && styles.shiny)}
+                className={buildClassName(styles.mediaArea, isShiny && styles.shiny)}
                 style={prepareStyle(mediaArea)}
                 onClick={() => handleMediaAreaClick(mediaArea)}
               />
             );
+          }
           case 'suggestedReaction':
             return (
               <MediaAreaSuggestedReaction

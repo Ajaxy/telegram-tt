@@ -29,6 +29,7 @@ export default function useProfileViewportIds(
   topicId?: number,
   storyIds?: number[],
   archiveStoryIds?: number[],
+  similarChannels?: string[],
 ) {
   const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
 
@@ -141,6 +142,9 @@ export default function useProfileViewportIds(
       viewportIds = archiveStoryViewportIds;
       getMore = getMoreStoriesArchive;
       noProfileInfo = noProfileInfoForStoriesArchive;
+      break;
+    case 'similarChannels':
+      viewportIds = similarChannels;
       break;
   }
 

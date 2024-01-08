@@ -22,7 +22,7 @@ import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
 import Link from '../../ui/Link';
 import Modal from '../../ui/Modal';
-import GiftOption from './GiftOption';
+import PremiumSubscriptionOption from './PremiumSubscriptionOption';
 
 import styles from './GiftPremiumModal.module.scss';
 
@@ -141,7 +141,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
 
         <div className={styles.options}>
           {renderedGifts?.map((gift) => (
-            <GiftOption
+            <PremiumSubscriptionOption
               key={gift.amount}
               option={gift}
               fullMonthlyAmount={fullMonthlyAmount}

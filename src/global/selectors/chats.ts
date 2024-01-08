@@ -316,3 +316,10 @@ export function selectRequestedChatTranslationLanguage<T extends GlobalState>(
 
   return requestedTranslations.byChatId[chatId]?.toLanguage;
 }
+
+export function selectSimilarChannelIds<T extends GlobalState>(
+  global: T,
+  chatId: string,
+): string[] | undefined {
+  return global.chats.similarChannelsById[chatId];
+}

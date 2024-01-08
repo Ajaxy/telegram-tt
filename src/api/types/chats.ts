@@ -3,7 +3,9 @@ import type {
   ApiChatReactions, ApiMessage, ApiPhoto, ApiStickerSet,
 } from './messages';
 import type { ApiChatInviteImporter } from './misc';
-import type { ApiFakeType, ApiUser, ApiUsername } from './users';
+import type {
+  ApiEmojiStatus, ApiFakeType, ApiUser, ApiUsername,
+} from './users';
 
 type ApiChatType = (
   'chatTypePrivate' | 'chatTypeSecret' |
@@ -43,6 +45,7 @@ export interface ApiChat {
   isProtected?: boolean;
   fakeType?: ApiFakeType;
   color?: ApiPeerColor;
+  emojiStatus?: ApiEmojiStatus;
   isForum?: boolean;
   isForumAsMessages?: true;
   topics?: Record<number, ApiTopic>;

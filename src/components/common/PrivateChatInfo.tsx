@@ -21,6 +21,7 @@ import RippleEffect from '../ui/RippleEffect';
 import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
+import Icon from './Icon';
 import TypingStatus from './TypingStatus';
 
 type OwnProps = {
@@ -122,7 +123,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         <DotAnimation className="status" content={status} />
       ) : (
         <span className="status" dir="auto">
-          {statusIcon && <i className={`icon icon-${statusIcon} status-icon`} />}
+          {statusIcon && <Icon className="status-icon" name={statusIcon} />}
           {renderText(status)}
         </span>
       );
