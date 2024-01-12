@@ -140,7 +140,7 @@ const WebPage: FC<OwnProps> = ({
     <div
       className={className}
       data-initial={(siteName || displayUrl)[0]}
-      dir="auto"
+      dir={lang.isRtl ? 'rtl' : 'auto'}
     >
       <div className={buildClassName('WebPage--content', isStory && 'is-story')}>
         {isStory && (
