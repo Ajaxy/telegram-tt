@@ -38,9 +38,9 @@ const InviteViaLinkModal: FC<OwnProps> = ({
   }, [userIds]);
 
   const handleClose = useLastCallback(() => closeInviteViaLinkModal());
-  const handleClickSkip = useLastCallback(() => closeInviteViaLinkModal());
+  const handleSkip = useLastCallback(() => closeInviteViaLinkModal());
 
-  const handleClickSendInviteLink = useCallback(() => {
+  const handleSendInviteLink = useCallback(() => {
     sendInviteMessages({ chatId: chatId!, userIds: selectedMemberIds! });
     closeInviteViaLinkModal();
   }, [selectedMemberIds, chatId]);
@@ -61,23 +61,25 @@ const InviteViaLinkModal: FC<OwnProps> = ({
         {renderText(lang('SendInviteLink.TextAvailableSingleUser', userNames), ['simple_markdown'])}
       </p>
       <Picker
+        className={styles.userPicker}
         itemIds={userIds!}
-        selectedIds={selectedMemberIds ?? []}
+        selectedIds={selectedMemberIds}
         onSelectedIdsChange={setSelectedMemberIds}
+        isRoundCheckbox
       />
       <div className="dialog-buttons">
         <Button
           className="confirm-dialog-button"
           isText
-          onClick={handleClickSendInviteLink}
-          disabled={!selectedMemberIds?.length}
+          onClick={handleSendInviteLink}
+          disabled={!selectedMemberIds.length}
         >
           {lang('SendInviteLink.ActionInvite')}
         </Button>
         <Button
           className="confirm-dialog-button"
           isText
-          onClick={handleClickSkip}
+          onClick={handleSkip}
         >
           {lang('SendInviteLink.ActionSkip')}
         </Button>

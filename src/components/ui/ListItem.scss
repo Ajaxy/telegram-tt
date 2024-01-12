@@ -455,6 +455,16 @@
     }
   }
 
+  &.chat-item {
+    .ListItem-button {
+      padding: 0.5rem;
+    }
+
+    .Checkbox {
+      padding-left: 3rem;
+    }
+  }
+
   .multiline-item {
     flex-grow: 1;
     white-space: initial;

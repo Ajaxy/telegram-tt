@@ -24,6 +24,7 @@ import PrivateChatInfo from './PrivateChatInfo';
 import './Picker.scss';
 
 type OwnProps = {
+  className?: string;
   itemIds: string[];
   selectedIds: string[];
   filterValue?: string;
@@ -49,6 +50,7 @@ const MAX_FULL_ITEMS = 10;
 const ALWAYS_FULL_ITEMS_COUNT = 5;
 
 const Picker: FC<OwnProps> = ({
+  className,
   itemIds,
   selectedIds,
   filterValue,
@@ -127,7 +129,7 @@ const Picker: FC<OwnProps> = ({
   const lang = useLang();
 
   return (
-    <div className="Picker">
+    <div className={buildClassName('Picker', className)}>
       {isSearchable && (
         <div className="picker-header custom-scroll" dir={lang.isRtl ? 'rtl' : undefined}>
           {lockedSelectedIds.map((id, i) => (
@@ -162,7 +164,7 @@ const Picker: FC<OwnProps> = ({
 
       {viewportIds?.length ? (
         <InfiniteScroll
-          className="picker-list custom-scroll"
+          className={buildClassName('picker-list', 'custom-scroll', isRoundCheckbox && 'withRoundedCheckbox')}
           items={viewportIds}
           onLoadMore={getMore}
           noScrollRestore={noScrollRestore}
