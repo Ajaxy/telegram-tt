@@ -359,7 +359,8 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     const viewportIds = selectViewportIds(global, messageList.chatId, messageList.threadId, tabId);
     return viewportIds?.map((id) => {
       const message = messages[id];
-      const content = message?.content;
+      if (!message) return undefined;
+      const content = message.content;
       const replyPeer = message.replyInfo?.type === 'message' && message.replyInfo.replyToPeerId;
       return content.storyData?.peerId || content.webPage?.story?.peerId || replyPeer;
     });
