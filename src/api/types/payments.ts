@@ -20,6 +20,7 @@ export interface ApiPaymentSavedInfo {
 }
 
 export interface ApiPaymentForm {
+  url: string;
   canSaveCredentials?: boolean;
   isPasswordMissing?: boolean;
   formId: string;

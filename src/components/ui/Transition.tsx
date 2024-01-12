@@ -34,6 +34,7 @@ export type TransitionProps = {
   shouldRestoreHeight?: boolean;
   shouldCleanup?: boolean;
   cleanupExceptionKey?: number;
+  cleanupKey?: number;
   // Used by async components which are usually remounted during first animation
   shouldWrap?: boolean;
   wrapExceptionKey?: number;
@@ -73,6 +74,7 @@ function Transition({
   shouldRestoreHeight,
   shouldCleanup,
   cleanupExceptionKey,
+  cleanupKey,
   shouldWrap,
   wrapExceptionKey,
   id,
@@ -120,13 +122,16 @@ function Transition({
   useLayoutEffect(() => {
     function cleanup() {
       if (!shouldCleanup) {
+        if (cleanupKey !== undefined) {
+          delete rendersRef.current[cleanupKey];
+        }
         return;
       }
-
-      const preservedRender = cleanupExceptionKey !== undefined ? rendersRef.current[cleanupExceptionKey] : undefined;
-
-      rendersRef.current = preservedRender ? { [cleanupExceptionKey!]: preservedRender } : {};
-
+      if (cleanupExceptionKey !== undefined) {
+        rendersRef.current = { [cleanupExceptionKey]: rendersRef.current[cleanupExceptionKey] };
+      } else {
+        rendersRef.current = {};
+      }
       forceUpdate();
     }
 
@@ -312,6 +317,7 @@ function Transition({
     shouldDisableAnimation,
     forceUpdate,
     withSwipeControl,
+    cleanupKey,
   ]);
 
   useEffect(() => {

@@ -47,6 +47,7 @@ export type OwnProps = {
   dispatch?: FormEditDispatch;
   onAcceptTos?: (isAccepted: boolean) => void;
   savedCredentials?: ApiPaymentCredentials[];
+  isPaymentFormUrl?: boolean;
 };
 
 const Checkout: FC<OwnProps> = ({
@@ -64,6 +65,7 @@ const Checkout: FC<OwnProps> = ({
   needAddress,
   hasShippingOptions,
   savedCredentials,
+  isPaymentFormUrl,
 }) => {
   const { setPaymentStep } = getActions();
 
@@ -185,7 +187,7 @@ const Checkout: FC<OwnProps> = ({
         )}
       </div>
       <div className={styles.invoiceInfo}>
-        {renderCheckoutItem({
+        {!isPaymentFormUrl && renderCheckoutItem({
           title: paymentMethod || savedCredentials?.[0].title,
           label: lang('PaymentCheckoutMethod'),
           icon: 'card',

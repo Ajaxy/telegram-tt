@@ -185,10 +185,8 @@ addActionHandler('sendPaymentForm', async (global, actions, payload): Promise<vo
   const formId = selectPaymentFormId(global, tabId);
   const requestInfoId = selectPaymentRequestId(global, tabId);
   const { nativeProvider, temporaryPassword } = selectTabState(global, tabId).payment;
-  const publishableKey = nativeProvider === 'stripe'
-    ? selectProviderPublishableKey(global, tabId) : selectProviderPublicToken(global, tabId);
 
-  if (!inputInvoice || !publishableKey || !formId || !nativeProvider) {
+  if (!inputInvoice || !formId) {
     return;
   }
 
@@ -340,6 +338,14 @@ async function sendSmartGlocalCredentials<T extends GlobalState>(
   global = setPaymentStep(global, PaymentStep.Checkout, tabId);
   setGlobal(global);
 }
+
+addActionHandler('setSmartGlocalCardInfo', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), type, token } = payload;
+  return setSmartGlocalCardInfo(global, {
+    type,
+    token,
+  }, tabId);
+});
 
 addActionHandler('setPaymentStep', (global, actions, payload): ActionReturnType => {
   const { step, tabId = getCurrentTabId() } = payload;
