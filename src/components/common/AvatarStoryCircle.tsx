@@ -150,7 +150,7 @@ export function drawGradientCircle({
     segmentsCount = SEGMENTS_MAX;
   }
 
-  const strokeModifier = Math.max(Math.max(size - SIZES.large * dpr, 0) / REM / 1.5, 1);
+  const strokeModifier = Math.max(Math.max(size - SIZES.large * dpr, 0) / dpr / REM / 1.5, 1) * dpr;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) {
