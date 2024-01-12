@@ -134,6 +134,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
 
       <FloatingActionButton
         isShown
+        className="block-user-button"
         onClick={openBlockUserModal}
         ariaLabel={lang('BlockContact')}
       >

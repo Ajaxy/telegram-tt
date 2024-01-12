@@ -389,3 +389,7 @@
 .settings-item-chatlist .ListItem {
   margin: inherit;
 }
+
+.block-user-button {
+  z-index: var(--z-chat-float-button);
+}

@@ -4,7 +4,6 @@
 
   --z-forum-indicator: 2;
   --z-badge: 4;
-  --z-ripple: 6;
   --z-status: 8; // Avatar stories require a higher z-index than the ripple to work
 
   body.is-ios &,
@@ -200,7 +199,7 @@
   }
 
   .ripple-container {
-    z-index: var(--z-ripple);
+    z-index: var(--z-chat-ripple);
   }
 
   .status {
