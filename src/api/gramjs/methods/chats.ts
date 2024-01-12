@@ -141,7 +141,6 @@ export async function fetchChats({
 
   const chats: ApiChat[] = [];
   const draftsById: Record<string, ApiDraft> = {};
-  const replyingToById: Record<string, number> = {};
 
   const dialogs = (resultPinned ? resultPinned.dialogs : []).concat(result.dialogs);
 
@@ -209,7 +208,6 @@ export async function fetchChats({
     users,
     userStatusesById,
     draftsById,
-    replyingToById,
     orderedPinnedIds: withPinned ? orderedPinnedIds : undefined,
     totalChatCount,
   };
