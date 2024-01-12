@@ -7,8 +7,8 @@ import type { PinnedIntersectionChangedCallback } from './usePinnedMessage';
 import { IS_ANDROID } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useBackgroundMode, { isBackgroundModeActive } from '../../../hooks/useBackgroundMode';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useBackgroundMode, { isBackgroundModeActive } from '../../../hooks/window/useBackgroundMode';
 
 const INTERSECTION_THROTTLE_FOR_READING = 150;
 const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;

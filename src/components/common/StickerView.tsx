@@ -20,6 +20,7 @@ import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useThumbnail from '../../hooks/useThumbnail';
 import useUniqueId from '../../hooks/useUniqueId';
+import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import AnimatedSticker from './AnimatedSticker';
@@ -87,6 +88,8 @@ const StickerView: FC<OwnProps> = ({
   const isStatic = !isLottie && !isVideo;
   const previewMediaHash = getStickerPreviewHash(sticker.id);
 
+  const dpr = useDevicePixelRatio();
+
   const filterStyle = useColorFilter(customColor);
 
   const isIntersectingForLoading = useIsIntersecting(containerRef, observeIntersectionForLoading);
@@ -133,6 +136,7 @@ const StickerView: FC<OwnProps> = ({
     id,
     size,
     (withSharedAnimation ? customColor : undefined),
+    dpr,
   ].filter(Boolean).join('_');
 
   return (

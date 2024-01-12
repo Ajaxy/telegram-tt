@@ -24,10 +24,10 @@ import { compact } from '../../../util/iteratees';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
-import { useFullscreenStatus } from '../../../hooks/useFullscreen';
 import { useIntersectionObserver, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
 
 import Button from '../../ui/Button';

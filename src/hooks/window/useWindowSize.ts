@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from '../lib/teact/teact';
+import { useEffect, useMemo, useState } from '../../lib/teact/teact';
 
-import { throttle } from '../util/schedulers';
-import windowSize from '../util/windowSize';
-import useDebouncedCallback from './useDebouncedCallback';
+import { throttle } from '../../util/schedulers';
+import windowSize from '../../util/windowSize';
+import useDebouncedCallback from '../useDebouncedCallback';
 
 const THROTTLE = 250;
 

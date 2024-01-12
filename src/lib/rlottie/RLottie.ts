@@ -4,8 +4,7 @@ import Deferred from '../../util/Deferred';
 import generateUniqueId from '../../util/generateUniqueId';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
 import {
-  DPR, IS_ANDROID, IS_IOS,
-  IS_SAFARI,
+  IS_ANDROID, IS_IOS, IS_SAFARI,
 } from '../../util/windowEnvironment';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
@@ -338,7 +337,7 @@ class RLottie {
     } = this.params;
 
     // Reduced quality only looks acceptable on high DPR screens
-    return Math.max(DPR * quality, 1);
+    return Math.max(window.devicePixelRatio * quality, 1);
   }
 
   private destroy() {

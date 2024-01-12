@@ -9,7 +9,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { areLinesWrapping } from '../helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
-import useWindowSize from '../../../hooks/useWindowSize';
+import useWindowSize from '../../../hooks/window/useWindowSize';
 
 import styles from './CodeOverlay.module.scss';
 

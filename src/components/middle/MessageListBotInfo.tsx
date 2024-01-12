@@ -13,11 +13,11 @@ import {
 import { selectBot, selectUserFullInfo } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
-import { DPR } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
+import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Skeleton from '../ui/placeholder/Skeleton';
@@ -40,14 +40,15 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
   isInMessageList,
 }) => {
   const lang = useLang();
+  const dpr = useDevicePixelRatio();
 
   const botInfoPhotoUrl = useMedia(botInfo?.photo ? getBotCoverMediaHash(botInfo.photo) : undefined);
   const botInfoGifUrl = useMedia(botInfo?.gif ? getDocumentMediaHash(botInfo.gif) : undefined);
   const botInfoDimensions = botInfo?.photo ? getPhotoFullDimensions(botInfo.photo) : botInfo?.gif
     ? getVideoDimensions(botInfo.gif) : undefined;
   const botInfoRealDimensions = botInfoDimensions && {
-    width: botInfoDimensions.width / DPR,
-    height: botInfoDimensions.height / DPR,
+    width: botInfoDimensions.width / dpr,
+    height: botInfoDimensions.height / dpr,
   };
   const isBotInfoEmpty = botInfo && !botInfo.description && !botInfo.gif && !botInfo.photo;
 

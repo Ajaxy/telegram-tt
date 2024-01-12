@@ -4,18 +4,18 @@ import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { animate, timingFunctions } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
-import { DPR } from '../../util/windowEnvironment';
 
 import { useStateRef } from '../../hooks/useStateRef';
+import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
 import './ProgressSpinner.scss';
 
 const SIZES = {
   s: 42, m: 48, l: 54, xl: 52,
 };
-const STROKE_WIDTH = 2 * DPR;
-const STROKE_WIDTH_XL = 3 * DPR;
-const PADDING = 2 * DPR;
+const STROKE_WIDTH = 2;
+const STROKE_WIDTH_XL = 3;
+const PADDING = 2;
 const MIN_PROGRESS = 0.05;
 const MAX_PROGRESS = 1;
 const GROW_DURATION = 600; // 0.6 s
@@ -41,6 +41,8 @@ const ProgressSpinner: FC<{
   const width = SIZES[size];
   const progressRef = useStateRef(progress);
 
+  const dpr = useDevicePixelRatio();
+
   useEffect(() => {
     let isFirst = true;
     let growFrom = MIN_PROGRESS;
@@ -65,10 +67,11 @@ const ProgressSpinner: FC<{
 
       drawSpinnerArc(
         canvasRef.current,
-        width * DPR,
-        size === 'xl' ? STROKE_WIDTH_XL : STROKE_WIDTH,
+        width * dpr,
+        (size === 'xl' ? STROKE_WIDTH_XL : STROKE_WIDTH) * dpr,
         'white',
         currentProgress,
+        dpr,
         isFirst,
       );
 
@@ -76,7 +79,7 @@ const ProgressSpinner: FC<{
 
       return currentProgress < 1;
     }, requestMutation);
-  }, [progressRef, size, width]);
+  }, [progressRef, size, width, dpr]);
 
   const className = buildClassName(
     `ProgressSpinner size-${size}`,
@@ -101,10 +104,11 @@ function drawSpinnerArc(
   strokeWidth: number,
   color: string,
   progress: number,
+  dpr: number,
   shouldInit = false,
 ) {
   const centerCoordinate = size / 2;
-  const radius = (size - strokeWidth) / 2 - PADDING;
+  const radius = (size - strokeWidth) / 2 - PADDING * dpr;
   const rotationOffset = (Date.now() % ROTATE_DURATION) / ROTATE_DURATION;
   const startAngle = (2 * Math.PI) * rotationOffset;
   const endAngle = startAngle + (2 * Math.PI) * progress;

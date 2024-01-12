@@ -20,11 +20,12 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useColorFilter from '../../../../hooks/stickers/useColorFilter';
 import useDynamicColorListener from '../../../../hooks/stickers/useDynamicColorListener';
-import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useResizeObserver from '../../../../hooks/useResizeObserver';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
+import useBackgroundMode from '../../../../hooks/window/useBackgroundMode';
+import useDevicePixelRatio from '../../../../hooks/window/useDevicePixelRatio';
 
 const SIZE = 1.25 * REM;
 const THROTTLE_MS = 300;
@@ -49,6 +50,7 @@ export default function useInputCustomEmojis(
 ) {
   const customColor = useDynamicColorListener(inputRef, !isReady);
   const colorFilter = useColorFilter(customColor, true);
+  const dpr = useDevicePixelRatio();
   const playersById = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
   const clearPlayers = useLastCallback((ids: string[]) => {
@@ -99,7 +101,7 @@ export default function useInputCustomEmojis(
       }
       const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(global, customEmoji.stickerSetInfo);
       const renderId = [
-        prefixId, documentId, customColor,
+        prefixId, documentId, customColor, dpr,
       ].filter(Boolean).join('_');
 
       createPlayer({
@@ -159,6 +161,12 @@ export default function useInputCustomEmojis(
     false,
   );
   useResizeObserver(sharedCanvasRef, throttledSynchronizeElements);
+  useEffectWithPrevDeps(([prevDpr]) => {
+    if (dpr !== prevDpr) {
+      clearPlayers(Array.from(playersById.current.keys()));
+      synchronizeElements();
+    }
+  }, [dpr, synchronizeElements]);
 
   const freezeAnimation = useLastCallback(() => {
     playersById.current.forEach((player) => {

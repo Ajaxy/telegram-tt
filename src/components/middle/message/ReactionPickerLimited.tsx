@@ -10,7 +10,7 @@ import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useWindowSize from '../../../hooks/useWindowSize';
+import useWindowSize from '../../../hooks/window/useWindowSize';
 
 import ReactionEmoji from '../../common/ReactionEmoji';
 

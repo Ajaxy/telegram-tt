@@ -20,9 +20,5 @@ export function setSystemThemeChangeCallback(callback: (newTheme: ThemeKey) => v
   themeChangeCallback = callback;
 }
 
-const mql = window.matchMedia('(prefers-color-scheme: dark)');
-if (typeof mql.addEventListener === 'function') {
-  mql.addEventListener('change', handleSystemThemeChange);
-} else if (typeof mql.addListener === 'function') {
-  mql.addListener(handleSystemThemeChange);
-}
+window.matchMedia('(prefers-color-scheme: dark)')
+  .addEventListener('change', handleSystemThemeChange);

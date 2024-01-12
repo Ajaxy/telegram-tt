@@ -62,7 +62,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
 import useShowTransition from '../../hooks/useShowTransition';
-import useWindowSize from '../../hooks/useWindowSize';
+import useWindowSize from '../../hooks/window/useWindowSize';
 
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import GroupChatInfo from '../common/GroupChatInfo';

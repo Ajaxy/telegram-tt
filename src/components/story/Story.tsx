@@ -34,7 +34,6 @@ import { PRIMARY_VIDEO_MIME, SECONDARY_VIDEO_MIME } from './helpers/videoFormats
 
 import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
 import useAppLayout, { getIsMobile } from '../../hooks/useAppLayout';
-import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
@@ -45,6 +44,7 @@ import useLongPress from '../../hooks/useLongPress';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useShowTransition from '../../hooks/useShowTransition';
 import { useStreaming } from '../../hooks/useStreaming';
+import useBackgroundMode from '../../hooks/window/useBackgroundMode';
 import useStoryPreloader from './hooks/useStoryPreloader';
 import useStoryProps from './hooks/useStoryProps';
 

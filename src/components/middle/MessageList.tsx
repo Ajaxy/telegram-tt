@@ -58,7 +58,6 @@ import { debounce, onTickEnd } from '../../util/schedulers';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
-import { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
@@ -67,6 +66,7 @@ import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
+import { isBackgroundModeActive } from '../../hooks/window/useBackgroundMode';
 import useContainerHeight from './hooks/useContainerHeight';
 import useStickyDates from './hooks/useStickyDates';
 

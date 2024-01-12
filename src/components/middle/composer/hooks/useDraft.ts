@@ -15,12 +15,12 @@ import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText'
 import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
-import useBackgroundMode from '../../../../hooks/useBackgroundMode';
-import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../../../hooks/useLayoutEffectWithPrevDeps';
 import useRunDebounced from '../../../../hooks/useRunDebounced';
 import { useStateRef } from '../../../../hooks/useStateRef';
+import useBackgroundMode from '../../../../hooks/window/useBackgroundMode';
+import useBeforeUnload from '../../../../hooks/window/useBeforeUnload';
 
 let isFrozen = false;
 

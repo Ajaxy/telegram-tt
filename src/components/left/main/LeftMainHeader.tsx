@@ -29,10 +29,10 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import useElectronDrag from '../../../hooks/useElectronDrag';
 import useFlag from '../../../hooks/useFlag';
-import { useFullscreenStatus } from '../../../hooks/useFullscreen';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
 import PickerSelectedItem from '../../common/PickerSelectedItem';

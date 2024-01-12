@@ -15,7 +15,6 @@ import { hexToRgb } from '../../util/switchTheme';
 import { IS_ELECTRON } from '../../util/windowEnvironment';
 
 import useColorFilter from '../../hooks/stickers/useColorFilter';
-import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -25,6 +24,7 @@ import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useThrottledCallback from '../../hooks/useThrottledCallback';
 import useUniqueId from '../../hooks/useUniqueId';
+import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/window/useBackgroundMode';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;

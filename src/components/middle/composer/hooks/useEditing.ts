@@ -14,11 +14,11 @@ import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText'
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
 import { useDebouncedResolver } from '../../../../hooks/useAsyncResolvers';
-import useBackgroundMode from '../../../../hooks/useBackgroundMode';
-import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useBackgroundMode from '../../../../hooks/window/useBackgroundMode';
+import useBeforeUnload from '../../../../hooks/window/useBeforeUnload';
 
 const URL_ENTITIES = new Set<string>([ApiMessageEntityTypes.TextUrl, ApiMessageEntityTypes.Url]);
 const DEBOUNCE_MS = 300;
