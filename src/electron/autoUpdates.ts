@@ -83,7 +83,7 @@ function shouldPerformAutoUpdate(): Promise<boolean> {
       let contents = '';
 
       response.on('end', () => {
-        resolve(getIsAppUpdateNeeded(contents, app.getVersion()));
+        resolve(getIsAppUpdateNeeded(contents, app.getVersion(), true));
       });
 
       response.on('data', (data: Buffer) => {
