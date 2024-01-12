@@ -1,7 +1,15 @@
 const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
 
-export default function getIsAppUpdateNeeded(remoteVersion: string, appVersion: string) {
+export default function getIsAppUpdateNeeded(remoteVersion: string, appVersion: string, isStrict?: boolean) {
   const sanitizedRemoteVersion = remoteVersion.trim();
 
-  return APP_VERSION_REGEX.test(sanitizedRemoteVersion) && sanitizedRemoteVersion !== appVersion;
+  if (!APP_VERSION_REGEX.test(sanitizedRemoteVersion)) {
+    return false;
+  }
+
+  if (isStrict) {
+    return sanitizedRemoteVersion.localeCompare(appVersion, undefined, { numeric: true, sensitivity: 'base' }) === 1;
+  }
+
+  return sanitizedRemoteVersion !== appVersion;
 }
