@@ -1204,7 +1204,7 @@ const Message: FC<OwnProps & StateProps> = ({
             theme={theme}
             story={webPageStory}
             isConnected={isConnected}
-            noUserColors={isOwn}
+            backgroundEmojiId={sender?.color?.backgroundEmojiId}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
           />
