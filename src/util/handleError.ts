@@ -1,38 +1,54 @@
-import { DEBUG_ALERT_MSG } from '../config';
-import { getAllMultitabTokens } from './establishMultitabRole';
-import { throttle } from './schedulers';
-import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
+import { DEBUG, DEBUG_ALERT_MSG } from '../config';
+import { isMasterTab } from './establishMultitabRole';
 
-// eslint-disable-next-line prefer-destructuring
-const APP_ENV = process.env.APP_ENV;
+let showError = true;
+let error: Error | undefined;
 
 window.addEventListener('error', handleErrorEvent);
 window.addEventListener('unhandledrejection', handleErrorEvent);
+
+if (DEBUG) {
+  window.addEventListener('focus', () => {
+    if (!isMasterTab()) {
+      return;
+    }
+    showError = true;
+    if (error) {
+      // eslint-disable-next-line no-alert
+      window.alert(getErrorMessage(error));
+      error = undefined;
+    }
+  });
+  window.addEventListener('blur', () => {
+    if (!isMasterTab()) {
+      return;
+    }
+    showError = false;
+  });
+}
+
+export function handleError(err: Error) {
+  // eslint-disable-next-line no-console
+  console.error(err);
+  if (DEBUG) {
+    if (showError) {
+      // eslint-disable-next-line no-alert
+      window.alert(getErrorMessage(err));
+    } else {
+      error = err;
+    }
+  }
+}
 
 function handleErrorEvent(e: ErrorEvent | PromiseRejectionEvent) {
   // https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded
   if (e instanceof ErrorEvent && e.message === 'ResizeObserver loop limit exceeded') {
     return;
   }
-
   e.preventDefault();
-
   handleError(e instanceof ErrorEvent ? (e.error || e.message) : e.reason);
 }
 
-const throttledAlert = throttle((message: string) => {
-  if (IS_MULTITAB_SUPPORTED && getAllMultitabTokens().length > 1) {
-    return;
-  }
-  // eslint-disable-next-line no-alert
-  window.alert(message);
-}, 1000);
-
-export function handleError(err: Error) {
-  // eslint-disable-next-line no-console
-  console.error(err);
-
-  if (APP_ENV === 'development' || APP_ENV === 'staging') {
-    throttledAlert(`${DEBUG_ALERT_MSG}\n\n${(err?.message) || err}\n${err?.stack}`);
-  }
+function getErrorMessage(err: Error) {
+  return `${DEBUG_ALERT_MSG}\n\n${(err?.message) || err}\n${err?.stack}`;
 }

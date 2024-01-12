@@ -182,3 +182,7 @@ export function reestablishMasterToSelf() {
 
 export const subscribeToTokenDied = addCallbackTokenDied;
 export const subscribeToMasterChange = addCallback;
+
+export function isMasterTab() {
+  return masterToken === token;
+}
