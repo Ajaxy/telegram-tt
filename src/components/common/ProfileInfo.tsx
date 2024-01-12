@@ -3,7 +3,7 @@ import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiPhoto, ApiTopic, ApiUser, ApiUserStatus,
+  ApiChat, ApiPhoto, ApiSticker, ApiTopic, ApiUser, ApiUserStatus,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
@@ -62,6 +62,7 @@ type StateProps =
     userProfilePhoto?: ApiPhoto;
     userFallbackPhoto?: ApiPhoto;
     chatProfilePhoto?: ApiPhoto;
+    emojiStatusSticker?: ApiSticker;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -84,11 +85,13 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   userProfilePhoto,
   userFallbackPhoto,
   chatProfilePhoto,
+  emojiStatusSticker,
 }) => {
   const {
     loadFullUser,
     openMediaViewer,
     openPremiumModal,
+    openStickerSet,
   } = getActions();
 
   const lang = useLang();
@@ -146,7 +149,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   });
 
   const handleStatusClick = useLastCallback(() => {
-    if (!userId) return;
+    if (!userId) {
+      openStickerSet({
+        stickerSetInfo: emojiStatusSticker!.stickerSetInfo,
+      });
+      return;
+    }
 
     openPremiumModal({ fromUserId: userId });
   });
@@ -367,6 +375,9 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = isPrivate ? selectUserFullInfo(global, userId) : undefined;
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, userId) : undefined;
 
+    const emojiStatus = (user || chat)?.emojiStatus;
+    const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;
+
     return {
       connectionState,
       user,
@@ -379,6 +390,7 @@ export default memo(withGlobal<OwnProps>(
       isSavedMessages,
       mediaId,
       avatarOwnerId,
+      emojiStatusSticker,
       ...(topic && {
         topic,
         messagesCount: selectThreadMessagesCount(global, userId, currentTopicId!),
