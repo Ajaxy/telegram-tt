@@ -59,10 +59,16 @@
     }
   }
 
+  &--background-icons {
+    color: var(--accent-color);
+  }
+
   &-text {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     align-items: flex-start;
+    position: relative;
   }
 
   .media-inner {
