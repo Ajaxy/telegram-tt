@@ -90,6 +90,7 @@ export function buildApiPaymentForm(form: GramJs.payments.PaymentForm): ApiPayme
     savedInfo,
     invoice,
     savedCredentials,
+    url,
   } = form;
 
   const {
@@ -118,6 +119,7 @@ export function buildApiPaymentForm(form: GramJs.payments.PaymentForm): ApiPayme
   const nativeData = nativeParams ? JSON.parse(nativeParams.data) : {};
 
   return {
+    url,
     canSaveCredentials,
     isPasswordMissing,
     formId: String(formId),

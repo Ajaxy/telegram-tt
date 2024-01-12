@@ -472,6 +472,7 @@ export type TabState = {
       value: string;
       validUntil: number;
     };
+    url?: string;
   };
 
   chatCreation?: {
@@ -1503,6 +1504,10 @@ export interface ActionPayloads {
   } & WithTabId;
   sendCredentialsInfo: {
     credentials: ApiCredentials;
+  } & WithTabId;
+  setSmartGlocalCardInfo: {
+    type: string;
+    token: string;
   } & WithTabId;
   clearPaymentError: WithTabId | undefined;
   clearReceipt: WithTabId | undefined;
