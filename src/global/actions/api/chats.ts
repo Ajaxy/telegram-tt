@@ -28,6 +28,7 @@ import {
   TOPICS_SLICE_SECOND_LOAD,
 } from '../../../config';
 import { formatShareText, parseChooseParameter, processDeepLink } from '../../../util/deeplink';
+import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
 import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
@@ -1167,6 +1168,13 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     tabId = getCurrentTabId(),
   } = payload;
 
+  if (isDeepLink(url)) {
+    const isProcessed = processDeepLink(url);
+    if (isProcessed || url.match(RE_TG_LINK)) {
+      return;
+    }
+  }
+
   const {
     openChatByPhoneNumber,
     openChatByInvite,
@@ -1183,11 +1191,6 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     processBoostParameters,
     checkGiftCode,
   } = actions;
-
-  if (url.match(RE_TG_LINK)) {
-    processDeepLink(url);
-    return;
-  }
 
   const uri = new URL(url.toLowerCase().startsWith('http') ? url : `https://${url}`);
   if (TME_WEB_DOMAINS.has(uri.hostname) && uri.pathname === '/') {
