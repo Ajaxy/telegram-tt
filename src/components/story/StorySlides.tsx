@@ -9,7 +9,11 @@ import type { RealTouchEvent } from '../../util/captureEvents';
 import { ANIMATION_END_DELAY, EDITABLE_STORY_INPUT_ID } from '../../config';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getStoryKey } from '../../global/helpers';
-import { selectIsStoryViewerOpen, selectPeer, selectTabState } from '../../global/selectors';
+import {
+  selectIsStoryViewerOpen,
+  selectPeer,
+  selectTabState,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import {
@@ -312,7 +316,7 @@ function StorySlides({
           offsetY = clamp(dragOffsetY, -limit, limit);
           if (offsetY > 0) {
             requestMutation(() => {
-              current.style.setProperty('--slide-translate-y', `${-offsetY}px`);
+              current.style.setProperty('--slide-translate-y', `${offsetY * (isMobile ? 1 : -1)}px`);
             });
           }
           if (event.type === 'wheel' && Math.abs(offsetY) > SWIPE_Y_THRESHOLD * 2) {
@@ -323,9 +327,10 @@ function StorySlides({
       },
       onRelease,
     });
-  }, [isOpen, renderingPeerId, onClose, windowWidth, windowHeight]);
+  }, [isOpen, onClose, windowWidth, windowHeight, isMobile, renderingPeerId]);
 
   useLayoutEffect(() => {
+    if (isMobile) return;
     const transformX = calculateTransformX();
 
     Object.entries(rendersRef.current).forEach(([peerId, { current }]) => {
@@ -341,7 +346,6 @@ function StorySlides({
       }
 
       const getScale = () => {
-        if (isMobile) return '1';
         if (currentPeerId === peerId) {
           return String(slideSizes.toActiveScale);
         }
@@ -353,11 +357,11 @@ function StorySlides({
 
       let offsetY = 0;
       if (peerId === renderingPeerId) {
-        if (!isMobile) offsetY = -ACTIVE_SLIDE_VERTICAL_CORRECTION_REM * slideSizes.fromActiveScale;
+        offsetY = -ACTIVE_SLIDE_VERTICAL_CORRECTION_REM * slideSizes.fromActiveScale;
         current.classList.add(styles.slideAnimationFromActive);
       }
       if (peerId === currentPeerId) {
-        if (!isMobile) offsetY = ACTIVE_SLIDE_VERTICAL_CORRECTION_REM;
+        offsetY = ACTIVE_SLIDE_VERTICAL_CORRECTION_REM;
         current.classList.add(styles.slideAnimationToActive);
       }
 
@@ -366,7 +370,33 @@ function StorySlides({
       current.style.setProperty('--slide-translate-y', `${offsetY}rem`);
       current.style.setProperty('--slide-translate-scale', getScale());
     });
-  }, [currentPeerId, getIsAnimating, renderingPeerId, isMobile, slideSizes]);
+  }, [currentPeerId, getIsAnimating, renderingPeerId, slideSizes, isMobile]);
+
+  if (isMobile) {
+    return (
+      <div className={styles.wrapper} ref={containerRef}>
+        <div
+          className={styles.mobileSlide}
+          ref={(ref) => setRef(ref, renderingPeerId!)}
+        >
+          <Story
+            peerId={renderingPeerId!}
+            storyId={renderingStoryId!}
+            onDelete={onDelete}
+            dimensions={slideSizes.activeSlide}
+            isPrivateStories={renderingIsPrivate}
+            isArchivedStories={renderingIsArchive}
+            isReportModalOpen={isReportModalOpen}
+            isDeleteModalOpen={isDeleteModalOpen}
+            isSingleStory={isSingleStory}
+            getIsAnimating={getIsAnimating}
+            onClose={onClose}
+            onReport={onReport}
+          />
+        </div>
+      </div>
+    );
+  }
 
   function renderStoryPreview(peerId: string, index: number, position: number) {
     const style = buildStyle(
@@ -395,7 +425,7 @@ function StorySlides({
   }
 
   function renderStory(peerId: string) {
-    const style = buildStyle(
+    const style = isMobile ? undefined : buildStyle(
       `width: ${slideSizes.activeSlide.width}px`,
       `--slide-media-height: ${slideSizes.activeSlide.height}px`,
     );

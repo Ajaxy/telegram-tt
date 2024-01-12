@@ -96,7 +96,7 @@ export function animateClosing(
   const { mediaEl: toImage } = getNodes(origin, userId);
 
   const fromImage = document.getElementById('StoryViewer')!.querySelector<HTMLImageElement>(
-    `.${styles.activeSlide} .${styles.media}`,
+    `.${styles.mobileSlide} .${styles.media}, .${styles.activeSlide} .${styles.media}`,
   );
   if (!fromImage || !toImage) {
     return;

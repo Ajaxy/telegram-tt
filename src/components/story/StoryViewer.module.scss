@@ -113,11 +113,19 @@
 }
 
 .slideAnimationFromActive {
+  .storyHeader,
   .composer,
   .caption,
-  .storyIndicators {
+  .captionGradient,
+  .captionBackdrop{
     transition: opacity 250ms ease-in-out;
     opacity: 0;
+  }
+  .media:not(.mediaPreview) {
+    opacity: 0 !important;
+  }
+  .mediaPreview {
+    opacity: 1;
   }
 }
 
@@ -147,28 +155,17 @@
       --slide-x: calc(#{$offset} * var(--story-viewer-scale));
     }
   }
+}
 
-  @media (max-width: 600px) {
-    display: none;
-    border-radius: 0;
-  }
+.mobileSlide {
+  width: 100%;
+  height: 100%;
+  transform: translateY(var(--slide-translate-y, 0px));
 }
 
 .slidePreview {
   overflow: hidden;
   transition: opacity 200ms ease-in-out;
-
-  &::before {
-    pointer-events: none;
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1;
-  }
 
   &.slideAnimationToActive::before {
     transition: opacity 350ms ease-in-out !important;
@@ -185,19 +182,6 @@
   height: calc(var(--slide-media-height) + 3.5rem);
   z-index: 1;
 
-  @media (max-width: 600px) {
-    display: block;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    height: 100%;
-    transform: translate3d(0, calc(var(--slide-translate-y, 0px) * -1), 0);
-
-    &::before {
-      display: none;
-    }
-  }
-
   &::before {
     pointer-events: none;
     content: "";
@@ -209,13 +193,6 @@
     background: rgba(0, 0, 0, 0.5);
     opacity: 0;
     z-index: 3;
-  }
-
-  @media (min-width: 600.001px) {
-    &.slideAnimationFromActive::before {
-      transition: opacity 350ms ease-in-out !important;
-      opacity: 1;
-    }
   }
 }
 
@@ -276,6 +253,17 @@
 }
 
 .content {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.contentInner {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -371,8 +359,17 @@
   align-items: center;
 }
 
+.senderInfoTransition {
+  position: absolute;
+}
+
 .senderInfo {
-  display: inline-flex;
+  display: flex;
+  align-items: center;
+}
+
+.senderMeta {
+  display: flex;
   flex-direction: column;
   margin-left: 0.75rem;
   line-height: 1.25rem;
@@ -605,7 +602,7 @@
   left: 0;
   margin-bottom: 0;
   z-index: 3;
-  transition: transform var(--layer-transition);
+  transition: transform var(--layer-transition), opacity 0.15s ease;
 
   &:global(.Composer) {
     --base-height: 3rem;

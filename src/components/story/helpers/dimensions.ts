@@ -2,6 +2,8 @@ import type { IDimensions } from '../../../global/types';
 
 import { roundToNearestEven } from '../../../util/math';
 
+export const BASE_STORY_WIDTH = 720;
+export const BASE_STORY_HEIGHT = 1280;
 const BASE_SCREEN_WIDTH = 1200;
 const BASE_SCREEN_HEIGHT = 800;
 const BASE_ACTIVE_SLIDE_WIDTH = 405;

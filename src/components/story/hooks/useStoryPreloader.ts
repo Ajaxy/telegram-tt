@@ -5,6 +5,7 @@ import { ApiMediaFormat } from '../../../api/types';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import { selectPeerStories } from '../../../global/selectors';
+import { preloadImage } from '../../../util/files';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { getProgressiveUrl } from '../../../util/mediaLoader';
 import { makeProgressiveLoader } from '../../../util/progressieveLoader';
@@ -44,6 +45,9 @@ function useStoryPreloader(peerId?: string | string[], aroundStoryId?: number) {
             if (format === ApiMediaFormat.Progressive) {
               preloadProgressive(result);
             }
+            if (format === ApiMediaFormat.BlobUrl) {
+              preloadImage(result);
+            }
           });
       });
     };
@@ -60,8 +64,9 @@ function useStoryPreloader(peerId?: string | string[], aroundStoryId?: number) {
 
 function findIdsAroundCurrentId<T>(ids: T[], currentId: T, aroundAmount: number): T[] {
   const currentIndex = ids.indexOf(currentId);
-
-  return ids.slice(currentIndex - aroundAmount, currentIndex + aroundAmount);
+  const start = Math.max(currentIndex - aroundAmount, 0);
+  const end = Math.min(currentIndex + aroundAmount, ids.length);
+  return ids.slice(start, end);
 }
 
 function getPreloadMediaHashes(peerId: string, storyId: number) {
@@ -83,11 +88,13 @@ function getPreloadMediaHashes(peerId: string, storyId: number) {
       return;
     }
 
+    const isVideo = Boolean(story.content.video);
+
     // Media
     mediaHashes.push({
       hash: getStoryMediaHash(story, 'full'),
-      format: story.content.video ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
-      isStream: checkIfStreamingSupported(PRIMARY_VIDEO_MIME),
+      format: isVideo ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl,
+      isStream: isVideo && checkIfStreamingSupported(PRIMARY_VIDEO_MIME),
     });
     // Thumbnail
     mediaHashes.push({ hash: getStoryMediaHash(story), format: ApiMediaFormat.BlobUrl });
