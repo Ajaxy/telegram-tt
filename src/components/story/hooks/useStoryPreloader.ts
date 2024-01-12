@@ -130,6 +130,7 @@ function preloadProgressive(url: string) {
   }, PROGRESSIVE_PRELOAD_DURATION);
 }
 
+// eslint-disable-next-line no-async-without-await/no-async-without-await
 async function preloadStream(hash: string) {
   const loader = makeProgressiveLoader(getProgressiveUrl(hash));
   let cachedSize = 0;

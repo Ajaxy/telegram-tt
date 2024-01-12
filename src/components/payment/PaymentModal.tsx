@@ -301,7 +301,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
             totalPrice={totalPrice}
             invoice={invoice}
             checkoutInfo={checkoutInfo}
-            isPaymentFormUrl
+            isPaymentFormUrl={isPaymentFormUrl}
             currency={currency!}
             hasShippingOptions={hasShippingOptions}
             tipAmount={paymentState.tipAmount}
@@ -596,7 +596,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         <Transition
           name="slide"
           activeKey={step}
-          cleanupKey={PaymentStep.ConfirmPayment}
+          shouldCleanup
+          cleanupOnlyKey={PaymentStep.ConfirmPayment}
         >
           <div className="content custom-scroll">
             {renderModalContent(step)}
