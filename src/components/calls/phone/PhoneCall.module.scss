@@ -172,14 +172,14 @@
   bottom: 1rem;
   right: 1rem;
   border-radius: 0.5rem;
-  transform: translateY(calc(100% + 1rem));
+  transform: translateY(calc(100% + 1rem)) rotateY(180deg);
   transition: 0.25s ease-in-out transform;
 
   &.visible {
-    transform: translateY(-5.5rem);
+    transform: translateY(-5.5rem) rotateY(180deg);
   }
 
   &.fullscreen {
-    transform: translateY(0);
+    transform: translateY(0) rotateY(180deg);
   }
 }

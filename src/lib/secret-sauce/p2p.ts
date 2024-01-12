@@ -288,9 +288,6 @@ export async function joinPhoneCall(
   };
 
   try {
-    if (shouldStartVideo) {
-      toggleStreamP2p('video', true);
-    }
     toggleStreamP2p('audio', true);
   } catch (err) {
     console.error(err)
