@@ -9,20 +9,22 @@ interface PublicMessageLink {
   type: 'publicMessageLink';
   username: string;
   messageId: number;
-  isSingle?: boolean;
+  isSingle: boolean;
   threadId?: number;
   commentId?: number;
   mediaTimestamp?: string;
+  isBoost: boolean;
 }
 
-interface PrivateMessageLink {
+export interface PrivateMessageLink {
   type: 'privateMessageLink';
   channelId: string;
   messageId: number;
-  isSingle?: boolean;
+  isSingle: boolean;
   threadId?: number;
   commentId?: number;
   mediaTimestamp?: string;
+  isBoost: boolean;
 }
 
 interface ShareLink {
@@ -63,6 +65,16 @@ type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
 type DeepLinkType = DeepLink['type'] | 'unknown';
 
+type PrivateMessageLinkBuilderParams = Omit<BuilderParams<PrivateMessageLink>, 'isSingle' | 'isBoost'> & {
+  single: string;
+  boost: string;
+};
+
+type PublicMessageLinkBuilderParams = Omit<BuilderParams<PublicMessageLink>, 'isSingle' | 'isBoost'> & {
+  single: string;
+  boost: string;
+};
+
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
 
 export function isDeepLink(link: string): boolean {
@@ -100,28 +112,30 @@ function handleTgLink(url: URL) {
   switch (deepLinkType) {
     case 'publicMessageLink': {
       const {
-        domain, post, single, thread, comment, t,
+        domain, post, single, thread, comment, t, boost,
       } = queryParams;
       return buildPublicMessageLink({
         username: domain,
         messageId: post,
-        isSingle: single,
+        single,
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
+        boost,
       });
     }
     case 'privateMessageLink': {
       const {
-        channel, post, single, thread, comment, t,
+        channel, post, single, thread, comment, t, boost,
       } = queryParams;
       return buildPrivateMessageLink({
         channelId: channel,
         messageId: post,
-        isSingle: single,
+        single,
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
+        boost,
       });
     }
     case 'shareLink':
@@ -156,7 +170,7 @@ function handleHttpLink(url: URL) {
   switch (deepLinkType) {
     case 'publicMessageLink': {
       const {
-        single, comment, t,
+        single, comment, t, boost,
       } = queryParams;
       const {
         username,
@@ -174,15 +188,16 @@ function handleHttpLink(url: URL) {
       return buildPublicMessageLink({
         username,
         messageId,
-        isSingle: single,
+        single,
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
+        boost,
       });
     }
     case 'privateMessageLink': {
       const {
-        single, comment, t,
+        single, comment, t, boost,
       } = queryParams;
       const {
         channelId,
@@ -200,10 +215,11 @@ function handleHttpLink(url: URL) {
       return buildPrivateMessageLink({
         channelId,
         messageId,
-        isSingle: single,
+        single,
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
+        boost,
       });
     }
     case 'shareLink': {
@@ -306,9 +322,9 @@ function buildShareLink(params: BuilderParams<ShareLink>): BuilderReturnType<Sha
   };
 }
 
-function buildPublicMessageLink(params: BuilderParams<PublicMessageLink>): BuilderReturnType<PublicMessageLink> {
+function buildPublicMessageLink(params: PublicMessageLinkBuilderParams): BuilderReturnType<PublicMessageLink> {
   const {
-    messageId, threadId, commentId, username, isSingle, mediaTimestamp,
+    messageId, threadId, commentId, username, single, mediaTimestamp, boost,
   } = params;
   if (!username || !isUsernameValid(username)) {
     return undefined;
@@ -326,16 +342,17 @@ function buildPublicMessageLink(params: BuilderParams<PublicMessageLink>): Build
     type: 'publicMessageLink',
     username,
     messageId: Number(messageId),
-    isSingle: isSingle === '',
+    isSingle: single === '',
     threadId: threadId ? Number(threadId) : undefined,
     commentId: commentId ? Number(commentId) : undefined,
     mediaTimestamp,
+    isBoost: boost === '',
   };
 }
 
-function buildPrivateMessageLink(params: BuilderParams<PrivateMessageLink>): BuilderReturnType<PrivateMessageLink> {
+function buildPrivateMessageLink(params: PrivateMessageLinkBuilderParams): BuilderReturnType<PrivateMessageLink> {
   const {
-    messageId, threadId, commentId, channelId, isSingle, mediaTimestamp,
+    messageId, threadId, commentId, channelId, single, mediaTimestamp, boost,
   } = params;
   if (!channelId || !isNumber(channelId)) {
     return undefined;
@@ -353,10 +370,11 @@ function buildPrivateMessageLink(params: BuilderParams<PrivateMessageLink>): Bui
     type: 'privateMessageLink',
     channelId,
     messageId: Number(messageId),
-    isSingle: isSingle === '',
+    isSingle: single === '',
     threadId: threadId ? Number(threadId) : undefined,
     commentId: commentId ? Number(commentId) : undefined,
     mediaTimestamp,
+    isBoost: boost === '',
   };
 }
 
