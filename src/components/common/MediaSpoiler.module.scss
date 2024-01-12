@@ -91,18 +91,21 @@
 }
 
 :global(body:not(.no-page-transitions)) .dots {
-  animation: 20s linear infinite dots;
+  animation: 20s linear infinite;
+  animation-name: dots-animation;
 
   &::before {
-    animation: 20s linear -7s infinite dots;
+    animation: 21s linear -7s infinite;
+    animation-name: dots-animation;
   }
 
   &::after {
-    animation: 20s linear -14s infinite dots;
+    animation: 22s linear -14s infinite;
+    animation-name: dots-animation;
   }
 }
 
-@keyframes dots {
+@keyframes dots-animation {
   0% {
     background-position: 0 0;
   }
