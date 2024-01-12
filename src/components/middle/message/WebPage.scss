@@ -10,6 +10,10 @@
   position: relative;
   overflow: hidden;
 
+  &--background-icons {
+    margin: -0.375rem;
+  }
+
   &.in-preview {
     border-radius: 0.25rem;
     background-color: var(--color-primary-tint);
@@ -57,10 +61,6 @@
       background-color: transparent !important;
       opacity: 0.85;
     }
-  }
-
-  &--background-icons {
-    color: var(--accent-color);
   }
 
   &-text {
@@ -133,19 +133,6 @@
     &:dir(rtl) {
       .WebPage-text {
         padding-inline-end: 1rem;
-      }
-    }
-  }
-
-  &:not(.with-square-photo):not(.with-quick-button) {
-    .site-name,
-    .site-title,
-    .site-description {
-      &:last-child::after {
-        content: "";
-        width: var(--meta-safe-area-size);
-        height: 0.75rem;
-        float: right;
       }
     }
   }
