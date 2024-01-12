@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiPeer, ApiTypingStatus,
+  ApiChat, ApiMessage, ApiPeer, ApiSticker, ApiTypingStatus,
 } from '../../api/types';
 import type { GlobalState, MessageListType } from '../../global/types';
 import type { Signal } from '../../util/signals';
@@ -113,6 +113,7 @@ type StateProps = {
   isSyncing?: boolean;
   isSynced?: boolean;
   isFetchingDifference?: boolean;
+  emojiStatusSticker?: ApiSticker;
 };
 
 const MiddleHeader: FC<OwnProps & StateProps> = ({
@@ -143,6 +144,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   isFetchingDifference,
   getCurrentPinnedIndexes,
   getLoadingPinnedId,
+  emojiStatusSticker,
   onFocusPinnedMessage,
 }) => {
   const {
@@ -156,6 +158,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     exitMessageSelectMode,
     openPremiumModal,
     openThread,
+    openStickerSet,
   } = getActions();
 
   const lang = useLang();
@@ -226,8 +229,14 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     }, BACK_BUTTON_INACTIVE_TIME);
   });
 
-  const handleStatusClick = useLastCallback(() => {
+  const handleUserStatusClick = useLastCallback(() => {
     openPremiumModal({ fromUserId: chatId });
+  });
+
+  const handleChannelStatusClick = useLastCallback(() => {
+    openStickerSet({
+      stickerSetInfo: emojiStatusSticker!.stickerSetInfo,
+    });
   });
 
   const handleBackClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -390,7 +399,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               storyViewerOrigin={StoryViewerOrigin.MiddleHeaderAvatar}
               emojiStatusSize={EMOJI_STATUS_SIZE}
               noRtl
-              onEmojiStatusClick={handleStatusClick}
+              onEmojiStatusClick={handleUserStatusClick}
             />
           ) : (
             <GroupChatInfo
@@ -406,6 +415,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withStory
               storyViewerOrigin={StoryViewerOrigin.MiddleHeaderAvatar}
               emojiStatusSize={EMOJI_STATUS_SIZE}
+              onEmojiStatusClick={handleChannelStatusClick}
               noRtl
             />
           )}
@@ -539,6 +549,9 @@ export default memo(withGlobal<OwnProps>(
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const typingStatus = selectThreadParam(global, chatId, threadId, 'typingStatus');
 
+    const emojiStatus = chat?.emojiStatus;
+    const emojiStatusSticker = emojiStatus && global.customEmojis.byId[emojiStatus.documentId];
+
     const state: StateProps = {
       typingStatus,
       isLeftColumnShown,
@@ -554,6 +567,7 @@ export default memo(withGlobal<OwnProps>(
       isSyncing: global.isSyncing,
       isSynced: global.isSynced,
       isFetchingDifference: global.isFetchingDifference,
+      emojiStatusSticker,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
     };
 

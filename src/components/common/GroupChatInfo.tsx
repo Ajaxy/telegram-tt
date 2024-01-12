@@ -59,6 +59,7 @@ type OwnProps = {
   withStory?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
   onClick?: VoidFunction;
+  onEmojiStatusClick?: NoneToVoidFunction;
 };
 
 type StateProps =
@@ -97,6 +98,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   noEmojiStatus,
   emojiStatusSize,
   onClick,
+  onEmojiStatusClick,
 }) => {
   const {
     loadFullChat,
@@ -217,7 +219,14 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       <div className="info">
         {topic
           ? <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
-          : <FullNameTitle peer={chat} emojiStatusSize={emojiStatusSize} withEmojiStatus={!noEmojiStatus} />}
+          : (
+            <FullNameTitle
+              peer={chat}
+              emojiStatusSize={emojiStatusSize}
+              withEmojiStatus={!noEmojiStatus}
+              onEmojiStatusClick={onEmojiStatusClick}
+            />
+          )}
         {!noStatusOrTyping && renderStatusOrTyping()}
       </div>
     </div>
