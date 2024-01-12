@@ -18,14 +18,18 @@ import {
   selectChat, selectIsCurrentUserPremium,
   selectPeer,
   selectPeerStories, selectPeerStory,
+  selectPerformanceSettingsValue,
   selectTabState, selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { formatMediaDuration, formatRelativeTime } from '../../util/dateFormat';
 import download from '../../util/download';
+import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
+import { IS_SAFARI } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
+import { BASE_STORY_HEIGHT, BASE_STORY_WIDTH } from './helpers/dimensions';
 import { PRIMARY_VIDEO_MIME, SECONDARY_VIDEO_MIME } from './helpers/videoFormats';
 
 import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
@@ -33,7 +37,6 @@ import useAppLayout, { getIsMobile } from '../../hooks/useAppLayout';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
@@ -53,6 +56,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Skeleton from '../ui/placeholder/Skeleton';
+import Transition from '../ui/Transition';
 import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';
 import StoryCaption from './StoryCaption';
 import StoryFooter from './StoryFooter';
@@ -90,9 +94,10 @@ interface StateProps {
   areChatSettingsLoaded?: boolean;
   isCurrentUserPremium?: boolean;
   stealthMode: ApiStealthMode;
+  withHeaderAnimation?: boolean;
 }
 
-const VIDEO_MIN_READY_STATE = 4;
+const VIDEO_MIN_READY_STATE = IS_SAFARI ? 4 : 3;
 const SPACEBAR_CODE = 32;
 
 const STEALTH_MODE_NOTIFICATION_DURATION = 4000;
@@ -120,6 +125,7 @@ function Story({
   onDelete,
   onClose,
   onReport,
+  withHeaderAnimation,
 }: OwnProps & StateProps) {
   const {
     viewStory,
@@ -142,7 +148,6 @@ function Story({
 
   const lang = useLang();
   const { isMobile } = useAppLayout();
-  const [, setCurrentTime] = useCurrentTimeSignal();
   const [isComposerHasFocus, markComposerHasFocus, unmarkComposerHasFocus] = useFlag(false);
   const [isStoryPlaybackRequested, playStory, pauseStory] = useFlag(false);
   const [isStoryPlaying, markStoryPlaying, unmarkStoryPlaying] = useFlag(false);
@@ -171,7 +176,6 @@ function Story({
   } = useStoryProps(story, isCurrentUserPremium, isDropdownMenuOpen);
 
   const isLoadedStory = story && 'content' in story;
-
   const isChangelog = peerId === storyChangelogUserId;
   const isChannel = !isUserId(peerId);
   const isOut = isLoadedStory && story.isOut;
@@ -216,9 +220,11 @@ function Story({
     : undefined;
 
   const shouldShowFooter = isLoadedStory && (isOut || isChannel);
+  const headerAnimation = isMobile && withHeaderAnimation ? 'slideFade' : 'none';
 
   const {
-    shouldRender: shouldRenderSkeleton, transitionClassNames: skeletonTransitionClassNames,
+    shouldRender: shouldRenderSkeleton,
+    transitionClassNames: skeletonTransitionClassNames,
   } = useShowTransition(!hasFullData);
 
   const {
@@ -239,8 +245,12 @@ function Story({
   } = useShowTransition(hasText && isCaptionExpanded);
 
   const { transitionClassNames: appearanceAnimationClassNames } = useShowTransition(true);
+  const {
+    shouldRender: shouldRenderCaption,
+    transitionClassNames: captionAppearanceAnimationClassNames,
+  } = useShowTransition(hasText || hasForwardInfo);
 
-  useStreaming(videoRef, fullMediaData, PRIMARY_VIDEO_MIME);
+  const isStreamingSupported = useStreaming(videoRef, fullMediaData, PRIMARY_VIDEO_MIME);
 
   useStoryPreloader(peerId, storyId);
 
@@ -308,11 +318,18 @@ function Story({
     onTouchEnd: handleLongPressTouchEnd,
   } = useLongPress(handleLongPressStart, handleLongPressEnd);
 
-  const isUnsupported = useUnsupportedMedia(videoRef, undefined, !isVideo || !fullMediaData);
+  const isUnsupported = useUnsupportedMedia(
+    videoRef,
+    undefined,
+    !isVideo || !fullMediaData || isStreamingSupported,
+  );
 
   const hasAllData = fullMediaData && (!altMediaHash || altMediaData);
   // Play story after media has been downloaded
-  useEffect(() => { if (hasAllData && !isUnsupported) handlePlayStory(); }, [hasAllData, isUnsupported]);
+  useEffect(() => {
+    if (hasAllData && !isUnsupported) handlePlayStory();
+  }, [hasAllData, isUnsupported]);
+
   useBackgroundMode(unmarkAppFocused, markAppFocused);
 
   useEffect(() => {
@@ -371,7 +388,9 @@ function Story({
     if (
       !isPausedBySpacebar || isCaptionExpanded || isComposerHasFocus
       || shouldForcePause || !isAppFocused || isPausedByLongPress
-    ) return;
+    ) {
+      return;
+    }
 
     if (
       prevIsCaptionExpanded !== isCaptionExpanded
@@ -395,21 +414,21 @@ function Story({
   });
 
   const handleOpenPrevStory = useLastCallback(() => {
-    setCurrentTime(0);
     openPreviousStory();
   });
 
   const handleOpenNextStory = useLastCallback(() => {
-    setCurrentTime(0);
     openNextStory();
   });
 
   const handleVideoStoryTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
     if (video.readyState >= VIDEO_MIN_READY_STATE) {
-      setCurrentTime(video.currentTime);
+      markStoryPlaying();
+    } else {
+      unmarkStoryPlaying();
     }
-    if (duration && video.currentTime >= duration) {
+    if (duration && round(video.currentTime, 2) >= round(duration, 2)) {
       handleOpenNextStory();
     }
   });
@@ -434,7 +453,6 @@ function Story({
   });
 
   const handleDeleteStoryClick = useLastCallback(() => {
-    setCurrentTime(0);
     onDelete(story!);
   });
 
@@ -597,15 +615,15 @@ function Story({
     );
   }
 
-  function renderSender() {
+  function renderSenderInfo() {
     return (
-      <div className={styles.sender}>
+      <div className={styles.senderInfo}>
         <Avatar
           peer={peer}
           size="tiny"
           onClick={handleOpenChat}
         />
-        <div className={styles.senderInfo}>
+        <div className={styles.senderMeta}>
           <span onClick={handleOpenChat} className={styles.senderName}>
             {renderText(getSenderTitle(lang, peer) || '')}
           </span>
@@ -631,6 +649,16 @@ function Story({
             )}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  function renderSender() {
+    return (
+      <div className={styles.sender}>
+        <Transition activeKey={Number(peerId)} name={headerAnimation} className={styles.senderInfoTransition}>
+          {renderSenderInfo()}
+        </Transition>
 
         <div className={styles.actions}>
           {renderStoryPrivacyButton()}
@@ -713,10 +741,11 @@ function Story({
         <canvas ref={thumbRef} className={styles.thumbnail} />
         {previewBlobUrl && (
           <img
+            key={`preview-${storyId}`}
             src={previewBlobUrl}
             draggable={false}
             alt=""
-            className={buildClassName(styles.media, previewTransitionClassNames)}
+            className={buildClassName(styles.media, styles.mediaPreview, previewTransitionClassNames)}
           />
         )}
         {shouldRenderSkeleton && (
@@ -733,14 +762,16 @@ function Story({
         {isVideo && fullMediaData && (
           <OptimizedVideo
             ref={videoRef}
+            key={`video-${storyId}`}
             className={buildClassName(styles.media, mediaTransitionClassNames)}
             canPlay={isStoryPlaybackRequested}
             muted={isMuted}
+            width={BASE_STORY_WIDTH}
+            height={BASE_STORY_HEIGHT}
             draggable={false}
             playsInline
             disablePictureInPicture
             isPriority
-            onPlaying={markStoryPlaying}
             onPause={unmarkStoryPlaying}
             onWaiting={unmarkStoryPlaying}
             disableRemotePlayback
@@ -784,15 +815,15 @@ function Story({
           aria-label={lang('Close')}
         />
       )}
-      {hasText && <div className={styles.captionGradient} />}
-      {(hasText || hasForwardInfo) && (
+      {hasText && <div className={buildClassName(styles.captionGradient, captionAppearanceAnimationClassNames)} />}
+      {shouldRenderCaption && (
         <StoryCaption
           key={`caption-${storyId}-${peerId}`}
           story={story as ApiStory}
           isExpanded={isCaptionExpanded}
           onExpand={expandCaption}
           onFold={foldCaption}
-          className={appearanceAnimationClassNames}
+          className={captionAppearanceAnimationClassNames}
         />
       )}
       {shouldRenderComposer && (
@@ -850,6 +881,7 @@ export default memo(withGlobal<OwnProps>((global, {
   const forwardSenderId = forwardInfo?.fromPeerId
     || mediaAreas?.find((area): area is ApiMediaAreaChannelPost => area.type === 'channelPost')?.channelId;
   const forwardSender = forwardSenderId ? selectPeer(global, forwardSenderId) : undefined;
+  const withHeaderAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
   return {
     peer: (user || chat)!,
@@ -864,5 +896,6 @@ export default memo(withGlobal<OwnProps>((global, {
     isChatExist: Boolean(chat),
     areChatSettingsLoaded: Boolean(chat?.settings),
     stealthMode: global.stories.stealthMode,
+    withHeaderAnimation,
   };
 })(Story));
