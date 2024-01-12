@@ -594,8 +594,12 @@ export default memo(withGlobal<OwnProps>(
     if (pinnedMessageIds?.length) {
       const firstPinnedMessage = messagesById[pinnedMessageIds[0]];
       const {
-        canUnpin,
-      } = (firstPinnedMessage && selectAllowedMessageActions(global, firstPinnedMessage, threadId)) || {};
+        canUnpin = false,
+      } = (
+        firstPinnedMessage
+        && pinnedMessageIds.length === 1
+        && selectAllowedMessageActions(global, firstPinnedMessage, threadId)
+      ) || {};
 
       return {
         ...state,
