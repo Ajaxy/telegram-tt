@@ -35,6 +35,10 @@
     overflow-x: hidden;
     padding: 0.5rem;
 
+    &.withRoundedCheckbox {
+      padding: 0;
+    }
+
     @media (max-width: 600px) {
       padding-left: 0 !important;
       padding-right: 0 !important;
