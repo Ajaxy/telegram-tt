@@ -2,10 +2,10 @@ import { useEffect, useRef } from '../../../../lib/teact/teact';
 
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 
-import useBackgroundMode, { isBackgroundModeActive } from '../../../../hooks/useBackgroundMode';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../../../hooks/useHeavyAnimationCheck';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../../../hooks/usePriorityPlaybackCheck';
+import useBackgroundMode, { isBackgroundModeActive } from '../../../../hooks/window/useBackgroundMode';
 
 export default function useVideoAutoPause(
   playerRef: { current: HTMLVideoElement | null }, canPlay: boolean, isPriority?: boolean,

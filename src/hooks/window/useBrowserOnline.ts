@@ -1,4 +1,4 @@
-import { useEffect, useState } from '../lib/teact/teact';
+import { useEffect, useState } from '../../lib/teact/teact';
 
 export default function useBrowserOnline() {
   const [isOnline, setIsOnline] = useState(window.navigator.onLine);

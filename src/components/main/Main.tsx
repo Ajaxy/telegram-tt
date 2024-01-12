@@ -50,10 +50,7 @@ import updateIcon from '../../util/updateIcon';
 import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
 
 import useAppLayout from '../../hooks/useAppLayout';
-import useBackgroundMode from '../../hooks/useBackgroundMode';
-import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useForceUpdate from '../../hooks/useForceUpdate';
-import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -61,6 +58,9 @@ import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useTimeout from '../../hooks/useTimeout';
+import useBackgroundMode from '../../hooks/window/useBackgroundMode';
+import useBeforeUnload from '../../hooks/window/useBeforeUnload';
+import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
 
 import ActiveCallHeader from '../calls/ActiveCallHeader.async';
 import GroupCall from '../calls/group/GroupCall.async';

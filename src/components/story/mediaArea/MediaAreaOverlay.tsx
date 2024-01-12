@@ -8,7 +8,7 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 
-import useWindowSize from '../../../hooks/useWindowSize';
+import useWindowSize from '../../../hooks/window/useWindowSize';
 
 import MediaAreaSuggestedReaction from './MediaAreaSuggestedReaction';
 

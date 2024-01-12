@@ -36,7 +36,7 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
 import useSignal from '../../hooks/useSignal';
-import useWindowSize from '../../hooks/useWindowSize';
+import useWindowSize from '../../hooks/window/useWindowSize';
 import useSlideSizes from './hooks/useSlideSizes';
 
 import Story from './Story';

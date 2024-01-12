@@ -6,7 +6,7 @@ import type { WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useWindowSize from '../../../../hooks/useWindowSize';
+import useWindowSize from '../../../../hooks/window/useWindowSize';
 
 const SCROLLBAR_STYLE = `* {
   scrollbar-width: thin;

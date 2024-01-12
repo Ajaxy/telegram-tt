@@ -20,14 +20,14 @@ import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useDerivedState from '../../hooks/useDerivedState';
-import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useSignal from '../../hooks/useSignal';
 import { useSignalRef } from '../../hooks/useSignalRef';
 import useTimeout from '../../hooks/useTimeout';
-import useWindowSize from '../../hooks/useWindowSize';
+import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
+import useWindowSize from '../../hooks/window/useWindowSize';
 import useControlsSignal from './hooks/useControlsSignal';
 import useZoomChange from './hooks/useZoomChangeSignal';
 

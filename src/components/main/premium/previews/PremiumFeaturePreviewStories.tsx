@@ -5,11 +5,11 @@ import type { ApiUser } from '../../../../api/types';
 
 import { selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { DPR } from '../../../../util/windowEnvironment';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useLang from '../../../../hooks/useLang';
 import useScrolledState from '../../../../hooks/useScrolledState';
+import useDevicePixelRatio from '../../../../hooks/window/useDevicePixelRatio';
 
 import Avatar from '../../../common/Avatar';
 import { drawGradientCircle } from '../../../common/AvatarStoryCircle';
@@ -53,7 +53,7 @@ const STORY_FEATURE_ICONS = {
 
 const STORY_FEATURE_ORDER = Object.keys(STORY_FEATURE_TITLES) as (keyof typeof STORY_FEATURE_TITLES)[];
 
-const CIRCLE_SIZE = 5.25 * DPR * REM;
+const CIRCLE_SIZE = 5.25 * REM;
 const CIRCLE_SEGMENTS = 8;
 const CIRCLE_READ_SEGMENTS = 0;
 
@@ -65,6 +65,8 @@ const PremiumFeaturePreviewVideo = ({
 
   const lang = useLang();
 
+  const dpr = useDevicePixelRatio();
+
   useLayoutEffect(() => {
     if (!circleRef.current) {
       return;
@@ -72,17 +74,18 @@ const PremiumFeaturePreviewVideo = ({
 
     drawGradientCircle({
       canvas: circleRef.current,
-      size: CIRCLE_SIZE,
+      size: CIRCLE_SIZE * dpr,
       segmentsCount: CIRCLE_SEGMENTS,
       color: 'purple',
       readSegmentsCount: CIRCLE_READ_SEGMENTS,
       readSegmentColor: 'transparent',
+      dpr,
     });
-  }, []);
+  }, [dpr]);
 
   const { handleScroll, isAtBeginning } = useScrolledState();
 
-  const maxSize = CIRCLE_SIZE / DPR;
+  const maxSize = CIRCLE_SIZE;
 
   return (
     <div className={styles.root}>

@@ -80,8 +80,6 @@ export const IS_WEBM_SUPPORTED = Boolean(TEST_VIDEO.canPlayType('video/webm; cod
 
 export const ARE_WEBCODECS_SUPPORTED = 'VideoDecoder' in window;
 
-export const DPR = window.devicePixelRatio || 1;
-
 export const MASK_IMAGE_DISABLED = true;
 export const IS_OPFS_SUPPORTED = Boolean(navigator.storage?.getDirectory);
 if (IS_OPFS_SUPPORTED) {

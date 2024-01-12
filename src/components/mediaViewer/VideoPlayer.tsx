@@ -15,11 +15,11 @@ import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
 import useAppLayout from '../../hooks/useAppLayout';
 import useBuffering from '../../hooks/useBuffering';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
-import useFullscreen from '../../hooks/useFullscreen';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
+import useFullscreen from '../../hooks/window/useFullscreen';
 import useControlsSignal from './hooks/useControlsSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 

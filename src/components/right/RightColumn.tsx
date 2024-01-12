@@ -18,7 +18,7 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import useWindowSize from '../../hooks/useWindowSize';
+import useWindowSize from '../../hooks/window/useWindowSize';
 
 import Transition from '../ui/Transition';
 import AddChatMembers from './AddChatMembers';

@@ -72,7 +72,7 @@ import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import usePrevious from '../../hooks/usePrevious';
 import { useResize } from '../../hooks/useResize';
 import useSyncEffect from '../../hooks/useSyncEffect';
-import useWindowSize from '../../hooks/useWindowSize';
+import useWindowSize from '../../hooks/window/useWindowSize';
 import usePinnedMessage from './hooks/usePinnedMessage';
 
 import Composer from '../common/Composer';

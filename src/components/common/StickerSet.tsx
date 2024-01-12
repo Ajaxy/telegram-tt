@@ -28,7 +28,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useResizeObserver from '../../hooks/useResizeObserver';
-import useWindowSize from '../../hooks/useWindowSize';
+import useWindowSize from '../../hooks/window/useWindowSize';
 
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';

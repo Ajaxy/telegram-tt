@@ -12,7 +12,7 @@ import { pick } from '../../util/iteratees';
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useSyncEffect from '../../hooks/useSyncEffect';
-import useWindowSize from '../../hooks/useWindowSize';
+import useWindowSize from '../../hooks/window/useWindowSize';
 
 import styles from './ConfettiContainer.module.scss';
 
