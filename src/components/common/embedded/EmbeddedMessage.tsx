@@ -20,6 +20,7 @@ import {
   isMessageTranslatable,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';
 import { getPeerColorClass } from '../helpers/peerColor';
 import renderText from '../helpers/renderText';
@@ -54,6 +55,7 @@ type OwnProps = {
   isInComposer?: boolean;
   chatTranslations?: ChatTranslatedMessages;
   requestedChatTranslationLanguage?: string;
+  isOpen?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick: NoneToVoidFunction;
@@ -255,5 +257,7 @@ function renderPictogram(
     </div>
   );
 }
+
+export const ClosableEmbeddedMessage = freezeWhenClosed(EmbeddedMessage);
 
 export default EmbeddedMessage;

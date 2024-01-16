@@ -27,13 +27,14 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { getPeerColorClass } from '../../common/helpers/peerColor';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
-import EmbeddedMessage from '../../common/embedded/EmbeddedMessage';
+import { ClosableEmbeddedMessage } from '../../common/embedded/EmbeddedMessage';
 import Icon from '../../common/Icon';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
@@ -165,9 +166,10 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   }, [handleContextMenuClose, shouldRender]);
 
   const className = buildClassName('ComposerEmbeddedMessage', transitionClassNames);
+  const renderingSender = useCurrentOrPrev(sender, true);
   const innerClassName = buildClassName(
     'ComposerEmbeddedMessage_inner',
-    getPeerColorClass(sender),
+    getPeerColorClass(renderingSender),
   );
 
   const isShowingReply = replyInfo && !shouldForceShowEditing;
@@ -203,6 +205,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     };
   }, [isCurrentUserPremium, isForwarding, message, noAuthors]);
 
+  const renderingLeftIcon = useCurrentOrPrev(leftIcon, true);
+
   if (!shouldRender) {
     return undefined;
   }
@@ -211,12 +215,13 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     <div className={className} ref={ref} onContextMenu={handleContextMenu} onClick={handleContextMenu}>
       <div className={innerClassName}>
         <div className="embedded-left-icon">
-          {leftIcon && <Icon name={leftIcon} />}
+          {renderingLeftIcon && <Icon name={renderingLeftIcon} />}
           {Boolean(replyInfo?.quoteText) && (
             <Icon name="quote" className="quote-reply" />
           )}
         </div>
-        <EmbeddedMessage
+        <ClosableEmbeddedMessage
+          isOpen={isShown}
           className="inside-input"
           replyInfo={replyInfo}
           isInComposer
