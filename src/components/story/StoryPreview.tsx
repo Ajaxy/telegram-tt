@@ -8,12 +8,10 @@ import type { StoryViewerOrigin } from '../../types';
 
 import { getSenderTitle, getStoryMediaHash } from '../../global/helpers';
 import { selectTabState } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
-import useShowTransition from '../../hooks/useShowTransition';
 
 import Avatar from '../common/Avatar';
 import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';
@@ -35,7 +33,6 @@ function StoryPreview({
 }: OwnProps & StateProps) {
   const { openStoryViewer, loadPeerSkippedStories } = getActions();
   const lang = useLang();
-  const { transitionClassNames: appearanceAnimationClassNames } = useShowTransition(true);
 
   const story = useMemo<ApiTypeStory | undefined>(() => {
     if (!peerStories) {
@@ -79,7 +76,7 @@ function StoryPreview({
       )}
       {isLoaded && <MediaAreaOverlay story={story} />}
 
-      <div className={buildClassName(styles.content, appearanceAnimationClassNames)}>
+      <div className={styles.content}>
         <div className={styles.contentInner}>
           <Avatar
             peer={peer}

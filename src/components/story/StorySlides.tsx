@@ -341,6 +341,7 @@ function StorySlides({
         current.style.setProperty('--slide-translate-x', '0px');
         current.style.setProperty('--slide-translate-y', '0px');
         current.style.setProperty('--slide-translate-scale', '1');
+        current.style.setProperty('--slide-content-scale', String(slideSizes.toActiveScale));
 
         return;
       }

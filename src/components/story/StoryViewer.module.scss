@@ -127,6 +127,11 @@
   .mediaPreview {
     opacity: 1;
   }
+
+  .content {
+    opacity: 1 !important;
+    visibility: visible;
+  }
 }
 
 .slide {
@@ -194,6 +199,11 @@
     opacity: 0;
     z-index: 3;
   }
+
+  .content {
+    transform: scale(var(--slide-content-scale, 1));
+    opacity: 0;
+  }
 }
 
 .slideInner {
@@ -260,6 +270,7 @@
   right: 0;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
+  transition: opacity 250ms ease-in-out;
   z-index: 1;
 }
 
@@ -274,7 +285,6 @@
   flex-direction: column;
   align-items: center;
   max-width: 90%;
-  transition: opacity 300ms;
 }
 
 .name {
