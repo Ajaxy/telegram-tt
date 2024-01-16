@@ -801,6 +801,18 @@ function Story({
         {isLoadedStory && fullMediaData && (
           <MediaAreaOverlay story={story} isActive />
         )}
+        {!isMobile && (
+          <div className={styles.content}>
+            <div className={styles.contentInner}>
+              <Avatar
+                peer={peer}
+                withStory
+                storyViewerMode="disabled"
+              />
+              <div className={styles.name}>{renderText(getSenderTitle(lang, peer) || '')}</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {shouldShowFooter && (
@@ -850,7 +862,12 @@ function Story({
 }
 
 export default memo(withGlobal<OwnProps>((global, {
-  peerId, storyId, isPrivateStories, isArchivedStories, isReportModalOpen, isDeleteModalOpen,
+  peerId,
+  storyId,
+  isPrivateStories,
+  isArchivedStories,
+  isReportModalOpen,
+  isDeleteModalOpen,
 }): StateProps => {
   const { appConfig } = global;
   const user = selectUser(global, peerId);
