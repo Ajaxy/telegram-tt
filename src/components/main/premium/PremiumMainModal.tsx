@@ -255,6 +255,19 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     return Number(monthOption.amount);
   }, [promo]);
 
+  const subscribeButtonText = useMemo(() => {
+    if (!selectedSubscriptionOption) {
+      return undefined;
+    }
+    const { amount, months, currency } = selectedSubscriptionOption;
+    const perMonthPrice = Math.floor(amount / months);
+    return formatCurrency(
+      perMonthPrice,
+      currency,
+      lang.code,
+    );
+  }, [selectedSubscriptionOption, lang.code]);
+
   if (!promo || (fromUserStatusEmoji && !fromUserStatusSet)) return undefined;
 
   function getHeaderText() {
@@ -397,12 +410,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             {!isPremium && selectedSubscriptionOption && (
               <div className={styles.footer}>
                 <Button className={styles.button} isShiny withPremiumGradient onClick={handleClick}>
-                  {lang('SubscribeToPremium',
-                    formatCurrency(
-                      selectedSubscriptionOption.amount,
-                      selectedSubscriptionOption.currency,
-                      lang.code,
-                    ))}
+                  {lang('SubscribeToPremium', subscribeButtonText)}
                 </Button>
               </div>
             )}
