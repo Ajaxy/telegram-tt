@@ -158,45 +158,20 @@ function StorySlides({
     return renderingPeerIds.indexOf(currentPeerId);
   }, [currentPeerId, renderingPeerIds]);
 
+  // Handling the flipping of stories from a current user
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setRenderingPeerId(currentPeerId);
-    }, animationDuration);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [animationDuration, currentPeerId]);
-
-  useEffect(() => {
-    let timeOutId: number | undefined;
-
-    if (renderingPeerId !== currentPeerId) {
-      timeOutId = window.setTimeout(() => {
-        setRenderingStoryId(currentStoryId);
-      }, animationDuration);
-    } else if (currentStoryId !== renderingStoryId) {
+    if (renderingPeerId === currentPeerId && currentStoryId !== renderingStoryId) {
       setRenderingStoryId(currentStoryId);
     }
-
-    return () => {
-      window.clearTimeout(timeOutId);
-    };
-  }, [renderingPeerId, currentStoryId, currentPeerId, renderingStoryId, animationDuration]);
+  }, [currentPeerId, currentStoryId, renderingPeerId, renderingStoryId]);
 
   useEffect(() => {
-    let timeOutId: number | undefined;
-
     if (prevPeerId && prevPeerId !== currentPeerId) {
       setIsAnimating(true);
-      timeOutId = window.setTimeout(() => {
-        setIsAnimating(false);
-      }, animationDuration);
     }
 
     return () => {
       setIsAnimating(false);
-      window.clearTimeout(timeOutId);
     };
   }, [prevPeerId, currentPeerId, setIsAnimating, animationDuration]);
 
@@ -373,6 +348,21 @@ function StorySlides({
     });
   }, [currentPeerId, getIsAnimating, renderingPeerId, slideSizes, isMobile]);
 
+  const handleTransitionEnd = useLastCallback((event: React.TransitionEvent<HTMLDivElement>) => {
+    // It is `target` that is needed here, not `currentTarget`
+    const target = event.target as HTMLDivElement | null;
+
+    if (!target || !target.classList.contains(styles.activeSlide)) return;
+
+    if (renderingPeerId !== currentPeerId) {
+      setRenderingPeerId(currentPeerId);
+      setRenderingStoryId(currentStoryId);
+    } else if (currentStoryId !== renderingStoryId) {
+      setRenderingStoryId(currentStoryId);
+    }
+    setIsAnimating(false);
+  });
+
   if (isMobile) {
     return (
       <div className={styles.wrapper} ref={containerRef}>
@@ -461,6 +451,7 @@ function StorySlides({
       className={styles.wrapper}
       ref={containerRef}
       style={`--story-viewer-scale: ${slideSizes.scale}`}
+      onTransitionEnd={handleTransitionEnd}
     >
       <div className={styles.fullSize} onClick={onClose} />
       {renderingPeerIds.length > 1 && (
@@ -480,15 +471,14 @@ function StorySlides({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const {
     storyViewer: {
-      peerId: currentPeerId, storyId: currentStoryId, isSinglePeer, isSingleStory, isPrivate, isArchive,
+      peerId: currentPeerId, storyId: currentStoryId, isSinglePeer, isSingleStory, isPrivate, isArchive, storyList,
     },
   } = selectTabState(global);
-  const { byPeerId, orderedPeerIds: { archived, active } } = global.stories;
-  const peer = currentPeerId ? selectPeer(global, currentPeerId) : undefined;
+  const { byPeerId, orderedPeerIds: { active } } = global.stories;
 
   return {
     byPeerId,
-    peerIds: peer?.areStoriesHidden ? archived : active,
+    peerIds: storyList?.peerIds ?? active,
     currentPeerId,
     currentStoryId,
     isSinglePeer,

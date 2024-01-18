@@ -89,6 +89,7 @@
 }
 
 .slideAnimation {
+  /* Slide switching is made using the `onTransitionEnd` event, so don't remove the animation */
   transition: transform 350ms ease-in-out !important;
 }
 
@@ -131,6 +132,14 @@
   .content {
     opacity: 1 !important;
     visibility: visible;
+  }
+
+  .contentInner {
+    width: 100%;
+  }
+
+  .name {
+    width: calc(100% * var(--slide-translate-scale));
   }
 }
 
