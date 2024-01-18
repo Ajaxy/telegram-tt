@@ -6,7 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { ApiPeerStories, ApiTypeStory } from '../../api/types';
 import type { RealTouchEvent } from '../../util/captureEvents';
 
-import { ANIMATION_END_DELAY, EDITABLE_STORY_INPUT_ID } from '../../config';
+import { EDITABLE_STORY_INPUT_ID } from '../../config';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getStoryKey } from '../../global/helpers';
 import {
@@ -25,9 +25,7 @@ import {
 import focusEditableElement from '../../util/focusEditableElement';
 import { clamp } from '../../util/math';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
-import {
-  IS_FIREFOX, IS_IOS, IS_SAFARI,
-} from '../../util/windowEnvironment';
+import { IS_IOS } from '../../util/windowEnvironment';
 import { calculateOffsetX } from './helpers/dimensions';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -64,7 +62,6 @@ interface StateProps {
   isArchive?: boolean;
 }
 
-const ANIMATION_DURATION_MS = 350 + (IS_SAFARI || IS_FIREFOX ? ANIMATION_END_DELAY : 20);
 const ACTIVE_SLIDE_VERTICAL_CORRECTION_REM = 1.75;
 const SWIPE_Y_THRESHOLD = 50;
 const SCROLL_RELEASE_DELAY = 1500;
@@ -105,7 +102,6 @@ function StorySlides({
   const swipeDirectionRef = useRef<SwipeDirection | undefined>(undefined);
   const isReleasedRef = useRef(false);
   const { isMobile } = useAppLayout();
-  const animationDuration = isMobile ? 0 : ANIMATION_DURATION_MS;
 
   const rendersRef = useRef<Record<string, { current: HTMLDivElement | null }>>({});
   const [getIsAnimating, setIsAnimating] = useSignal(false);
@@ -158,6 +154,13 @@ function StorySlides({
     return renderingPeerIds.indexOf(currentPeerId);
   }, [currentPeerId, renderingPeerIds]);
 
+  useEffect(() => {
+    if (!isMobile) return;
+
+    // If animation disabled, set rendering peer id to current peer
+    setRenderingPeerId(currentPeerId);
+  }, [currentPeerId, isMobile]);
+
   // Handling the flipping of stories from a current user
   useEffect(() => {
     if (renderingPeerId === currentPeerId && currentStoryId !== renderingStoryId) {
@@ -166,6 +169,7 @@ function StorySlides({
   }, [currentPeerId, currentStoryId, renderingPeerId, renderingStoryId]);
 
   useEffect(() => {
+    if (isMobile) return undefined;
     if (prevPeerId && prevPeerId !== currentPeerId) {
       setIsAnimating(true);
     }
@@ -173,7 +177,7 @@ function StorySlides({
     return () => {
       setIsAnimating(false);
     };
-  }, [prevPeerId, currentPeerId, setIsAnimating, animationDuration]);
+  }, [prevPeerId, currentPeerId, setIsAnimating, isMobile]);
 
   useEffect(() => {
     return () => {

@@ -8,6 +8,7 @@ import type { ApiStory } from '../../api/types';
 import { requestForcedReflow, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
 
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -40,8 +41,9 @@ function StoryCaption({
   const textRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const showMoreButtonRef = useRef<HTMLDivElement>(null);
+  const renderingStory = useCurrentOrPrev(story, true);
 
-  const caption = story.content.text;
+  const caption = renderingStory?.content.text;
 
   const [hasOverflow, setHasOverflow] = useState(false);
   const prevIsExpanded = usePrevDuringAnimation(isExpanded || undefined, EXPAND_ANIMATION_DURATION_MS);
@@ -131,19 +133,21 @@ function StoryCaption({
           ref={ref}
           className={buildClassName(styles.captionInner, 'allow-selection', 'custom-scroll')}
         >
-          {story.forwardInfo && (
+          {renderingStory?.forwardInfo && (
             <EmbeddedStoryForward
-              forwardInfo={story.forwardInfo}
+              forwardInfo={renderingStory.forwardInfo}
               className={styles.forwardInfo}
             />
           )}
-          <div ref={textRef} className={styles.captionText}>
-            <MessageText
-              messageOrStory={story}
-              withTranslucentThumbs
-              forcePlayback
-            />
-          </div>
+          {renderingStory && (
+            <div ref={textRef} className={styles.captionText}>
+              <MessageText
+                messageOrStory={renderingStory}
+                withTranslucentThumbs
+                forcePlayback
+              />
+            </div>
+          )}
         </div>
       </div>
       {shouldRenderShowMore && (
