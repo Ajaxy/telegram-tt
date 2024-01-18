@@ -102,7 +102,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     || (sender && forwardedMessagesCount),
   );
   const canAnimate = useAsyncRendering(
-    [isShown],
+    [isForwarding],
     isForwarding ? FORWARD_RENDERING_DELAY : undefined,
   );
 
