@@ -71,6 +71,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     type: userType,
     firstName,
     lastName,
+    canEditBot: Boolean(mtpUser.botCanEdit),
     ...(userType === 'userTypeBot' && { canBeInvitedToGroup: !mtpUser.botNochats }),
     ...(usernames && { usernames }),
     phoneNumber: mtpUser.phone || '',

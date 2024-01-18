@@ -31,6 +31,7 @@ import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
+import Icon from '../common/Icon';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import SearchInput from '../ui/SearchInput';
@@ -75,6 +76,7 @@ type StateProps = {
   currentInviteInfo?: ApiExportedInvite;
   shouldSkipHistoryAnimations?: boolean;
   isBot?: boolean;
+  canEditBot?: boolean;
   isInsideTopic?: boolean;
   canEditTopic?: boolean;
 };
@@ -157,6 +159,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   canEditTopic,
   onClose,
   onScreenSelect,
+  canEditBot,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -494,6 +497,17 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   <i className="icon icon-edit" />
                 </Button>
               )}
+              {canEditBot && (
+                <Button
+                  round
+                  color="translucent"
+                  size="smaller"
+                  ariaLabel={lang('Edit')}
+                  onClick={handleToggleManagement}
+                >
+                  <Icon name="edit" />
+                </Button>
+              )}
               {canEditTopic && (
                 <Button
                   round
@@ -580,6 +594,7 @@ export default withGlobal<OwnProps>(
     const topic = isInsideTopic ? chat.topics?.[threadId!] : undefined;
     const canEditTopic = isInsideTopic && topic && getCanManageTopic(chat, topic);
     const isBot = user && isUserBot(user);
+    const canEditBot = isBot && user?.canEditBot;
 
     const canAddContact = user && getCanAddContact(user);
     const canManage = Boolean(!isManagement && isProfile && chatId && selectCanManage(global, chatId));
@@ -607,6 +622,7 @@ export default withGlobal<OwnProps>(
       isEditingInvite,
       currentInviteInfo,
       shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
+      canEditBot,
     };
   },
 )(RightHeader);

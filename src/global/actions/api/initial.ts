@@ -1,4 +1,5 @@
 import type { ActionReturnType } from '../../types';
+import { ManagementProgress } from '../../../types';
 
 import {
   CUSTOM_BG_CACHE_NAME,
@@ -34,7 +35,9 @@ import { serializeGlobal } from '../../cache';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
-import { addUsers, clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
+import {
+  addUsers, clearGlobalForLockScreen, updateManagementProgress, updatePasscodeSettings,
+} from '../../reducers';
 
 addActionHandler('initApi', async (global, actions): Promise<void> => {
   if (!IS_TEST) {
@@ -100,14 +103,19 @@ addActionHandler('setAuthPassword', (global, actions, payload): ActionReturnType
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise<void> => {
   const {
-    file, isFallback, isVideo, videoTs,
+    file, isFallback, isVideo, videoTs, bot,
+    tabId = getCurrentTabId(),
   } = payload!;
 
-  const result = await callApi('uploadProfilePhoto', file, isFallback, isVideo, videoTs);
+  global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
+  setGlobal(global);
+
+  const result = await callApi('uploadProfilePhoto', file, isFallback, isVideo, videoTs, bot);
   if (!result) return;
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
   setGlobal(global);
 
   actions.loadFullUser({ userId: global.currentUserId! });

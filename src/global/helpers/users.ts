@@ -15,6 +15,7 @@ export function getUserFirstOrLastName(user?: ApiUser) {
 
   switch (user.type) {
     case 'userTypeBot':
+      return user.firstName;
     case 'userTypeRegular': {
       return user.firstName || user.lastName;
     }

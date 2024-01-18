@@ -7,6 +7,7 @@ import { ManagementScreens } from '../../../types';
 
 import { selectCurrentManagementType } from '../../../global/selectors';
 
+import ManageBot from './ManageBot';
 import ManageChannel from './ManageChannel';
 import ManageChatAdministrators from './ManageChatAdministrators';
 import ManageChatPrivacyType from './ManageChatPrivacyType';
@@ -54,6 +55,15 @@ const Management: FC<OwnProps & StateProps> = ({
   switch (currentScreen) {
     case ManagementScreens.Initial: {
       switch (managementType) {
+        case 'bot':
+          return (
+            <ManageBot
+              key={chatId}
+              userId={chatId}
+              onClose={onClose}
+              isActive={isActive}
+            />
+          );
         case 'user':
           return (
             <ManageUser

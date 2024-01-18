@@ -1020,6 +1020,8 @@ export interface ActionPayloads {
     isFallback?: boolean;
     videoTs?: number;
     isVideo?: boolean;
+    bot?: ApiUser;
+    tabId?: number;
   };
   goToAuthQrCode: undefined;
 
@@ -2273,6 +2275,22 @@ export interface ActionPayloads {
     lastName?: string;
     bio?: string;
     username?: string;
+  } & WithTabId;
+  updateBotProfile: {
+    photo?: File;
+    firstName?: string;
+    bio?: string;
+  } & WithTabId;
+  setBotInfo: {
+    bot?: ApiUser | undefined;
+    langCode?: string;
+    name?: string | undefined;
+    about?: string | undefined;
+    description?: string | undefined;
+    isMuted?: boolean;
+  } & WithTabId;
+  startBotFatherConversation: {
+    param: string;
   } & WithTabId;
   checkUsername: {
     username: string;

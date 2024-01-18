@@ -1464,6 +1464,7 @@ channels.toggleParticipantsHidden#6a6e7854 channel:InputChannel enabled:Bool = U
 channels.clickSponsoredMessage#18afbc93 channel:InputChannel random_id:bytes = Bool;
 channels.toggleViewForumAsMessages#9738bb15 channel:InputChannel enabled:Bool = Updates;
 channels.getChannelRecommendations#83b70d97 channel:InputChannel = messages.Chats;
+bots.setBotInfo#10cf3123 flags:# bot:flags.2?InputUser lang_code:string name:flags.3?string about:flags.0?string description:flags.1?string = Bool;
 bots.canSendMessage#1359f4e6 bot:InputUser = Bool;
 bots.allowSendMessage#f132e3ef bot:InputUser = Updates;
 bots.invokeWebViewCustomMethod#87fc5e7 bot:InputUser custom_method:string params:DataJSON = DataJSON;

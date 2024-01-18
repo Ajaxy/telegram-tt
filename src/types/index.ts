@@ -414,7 +414,7 @@ export enum ManagementScreens {
   JoinRequests,
 }
 
-export type ManagementType = 'user' | 'group' | 'channel';
+export type ManagementType = 'user' | 'group' | 'channel' | 'bot';
 
 export type NotifyException = {
   isMuted: boolean;

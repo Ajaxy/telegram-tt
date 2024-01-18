@@ -109,9 +109,12 @@ export async function updateProfilePhoto(photo?: ApiPhoto, isFallback?: boolean)
   return undefined;
 }
 
-export async function uploadProfilePhoto(file: File, isFallback?: boolean, isVideo = false, videoTs = 0) {
+export async function uploadProfilePhoto(
+  file: File, isFallback?: boolean, isVideo = false, videoTs = 0, bot?: ApiUser,
+) {
   const inputFile = await uploadFile(file);
   const result = await invokeRequest(new GramJs.photos.UploadProfilePhoto({
+    ...(bot ? { bot: buildInputPeer(bot.id, bot.accessHash) } : undefined),
     ...(isVideo ? { video: inputFile, videoStartTs: videoTs } : { file: inputFile }),
     ...(isFallback ? { fallback: true } : undefined),
   }));

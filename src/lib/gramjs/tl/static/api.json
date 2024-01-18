@@ -218,6 +218,7 @@
     "bots.canSendMessage",
     "bots.allowSendMessage",
     "bots.invokeWebViewCustomMethod",
+    "bots.setBotInfo",
     "payments.getPaymentForm",
     "payments.getPaymentReceipt",
     "payments.validateRequestedInfo",
