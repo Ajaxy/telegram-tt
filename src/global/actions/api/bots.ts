@@ -5,8 +5,9 @@ import {
   type ApiChat, type ApiChatType, type ApiContact, type ApiInputMessageReplyInfo, type ApiPeer, type ApiUrlAuthResult,
   MAIN_THREAD_ID,
 } from '../../../api/types';
+import { ManagementProgress } from '../../../types';
 
-import { GENERAL_REFETCH_INTERVAL } from '../../../config';
+import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
@@ -19,17 +20,21 @@ import { callApi } from '../../../api/gramjs';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
-import { addChats, addUsers, removeBlockedUser } from '../../reducers';
+import {
+  addChats, addUsers, removeBlockedUser, updateManagementProgress, updateUser, updateUserFullInfo,
+} from '../../reducers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectBot, selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectDraft,
   selectIsTrustedBot, selectMessageReplyInfo, selectSendAs, selectTabState, selectUser, selectUserFullInfo,
 } from '../../selectors';
+import { fetchChatByUsername } from './chats';
 
 const GAMEE_URL = 'https://prizes.gamee.com/';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
+let botFatherId: string | null;
 
 addActionHandler('clickBotInlineButton', (global, actions, payload): ActionReturnType => {
   const { messageId, button, tabId = getCurrentTabId() } = payload;
@@ -1128,3 +1133,66 @@ async function answerCallbackButton<T extends GlobalState>(
     }
   }
 }
+
+addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> => {
+  const {
+    bot, name, description: about,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  let { langCode } = payload;
+  if (!langCode) langCode = global.settings.byKey.language;
+
+  const { currentUserId } = global;
+  if (!currentUserId || !bot) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
+  setGlobal(global);
+
+  if (name || about) {
+    const result = await callApi('setBotInfo', {
+      bot, langCode, name, about,
+    });
+
+    if (result) {
+      global = getGlobal();
+      global = updateUser(
+        global,
+        bot.id,
+        {
+          firstName: name,
+        },
+      );
+      global = updateUserFullInfo(global, bot.id, { bio: about });
+      setGlobal(global);
+    }
+  }
+
+  global = getGlobal();
+  global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('startBotFatherConversation', async (global, actions, payload): Promise<void> => {
+  const {
+    param,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  if (!botFatherId) {
+    const chat = await fetchChatByUsername(global, BOT_FATHER_USERNAME);
+    if (!chat) {
+      return;
+    }
+    botFatherId = chat.id;
+  }
+
+  if (param) {
+    actions.startBot({ botId: botFatherId, param });
+  }
+
+  actions.openChat({ id: botFatherId, tabId });
+});

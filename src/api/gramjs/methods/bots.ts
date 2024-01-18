@@ -564,3 +564,27 @@ function addPhotoToLocalDb(photo: GramJs.Photo) {
 function addWebDocumentToLocalDb(webDocument: GramJs.TypeWebDocument) {
   localDb.webDocuments[webDocument.url] = webDocument;
 }
+
+export function setBotInfo({
+  bot,
+  langCode,
+  name,
+  about,
+  description,
+}: {
+  bot: ApiUser;
+  langCode: string;
+  name?: string;
+  about?: string;
+  description?: string;
+}) {
+  return invokeRequest(new GramJs.bots.SetBotInfo({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    langCode,
+    name: name || '',
+    about: about || '',
+    description: description || '',
+  }), {
+    shouldReturnTrue: true,
+  });
+}

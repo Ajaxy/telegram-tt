@@ -37,6 +37,7 @@ export interface ApiUser {
   hasUnreadStories?: boolean;
   maxStoryId?: number;
   color?: ApiPeerColor;
+  canEditBot?: boolean;
 }
 
 export interface ApiUserFullInfo {
