@@ -9,7 +9,7 @@ import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiMessage, ApiRestrictionReason, ApiTopic,
+  ApiMessage, ApiRestrictionReason, ApiSponsoredMessage, ApiTopic,
 } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { Signal } from '../../util/signals';
@@ -47,6 +47,7 @@ import {
   selectLastScrollOffset,
   selectPerformanceSettingsValue,
   selectScrollOffset,
+  selectSponsoredMessage,
   selectTabState,
   selectThreadInfo,
 } from '../../global/selectors';
@@ -119,6 +120,7 @@ type StateProps = {
   isServiceNotificationsChat?: boolean;
   isEmptyThread?: boolean;
   isForum?: boolean;
+  sponsoredMessage?: ApiSponsoredMessage;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
@@ -173,6 +175,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isServiceNotificationsChat,
   onPinnedIntersectionChange,
   getForceNextPinnedInHeader,
+  sponsoredMessage,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -569,12 +572,17 @@ const MessageList: FC<OwnProps & StateProps> = ({
     'MessageList custom-scroll',
     noAvatars && 'no-avatars',
     !canPost && 'no-composer',
+    type === 'scheduled' && 'type-scheduled',
     type === 'pinned' && 'type-pinned',
+    type === 'thread' && 'type-thread',
     withBottomShift && 'with-bottom-shift',
     withDefaultBg && 'with-default-bg',
     isSelectModeActive && 'select-mode-active',
     isScrolled && 'scrolled',
     !isReady && 'is-animating',
+    sponsoredMessage && 'with-sponsored-message',
+    isChannelChat && 'is-channel',
+    isGroupChat && 'is-group-chat',
   );
 
   const hasMessages = (messageIds && messageGroups) || lastMessage;
@@ -674,6 +682,7 @@ export default memo(withGlobal<OwnProps>(
     const isEmptyThread = !selectThreadInfo(global, chatId, threadId)?.messagesCount;
 
     return {
+      sponsoredMessage: selectSponsoredMessage(global, chatId),
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isChatLoaded: true,
       isRestricted,

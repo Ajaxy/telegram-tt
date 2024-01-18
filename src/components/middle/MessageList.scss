@@ -76,19 +76,32 @@
     }
   }
 
+  @mixin last-element-margin {
+    margin-bottom: 5.625rem;
+
+    @media (max-width: 600px) {
+      margin-bottom: 4.25rem;
+    }
+  }
+
   &.select-mode-active,
   &.type-pinned {
     margin-bottom: 0;
 
-    .last-in-list {
-      margin-bottom: 5.625rem;
+    &:not(.with-sponsored-message, .is-channel, .is-group-chat),
+    &.select-mode-active:not(.with-sponsored-message) {
+        .last-in-list {
+          @include last-element-margin;
+          
+          &.ActionMessage {
+            padding-bottom: 0.125rem;
+          }
+        }
+    }
 
-      @media (max-width: 600px) {
-        margin-bottom: 4.25rem;
-      }
-
-      &.ActionMessage {
-        padding-bottom: 0.125rem;
+    &.select-mode-active {
+      .SponsoredMessage {
+        @include last-element-margin;
       }
     }
   }
@@ -97,12 +110,14 @@
     &.with-bottom-shift {
       margin-bottom: 0;
 
-      .last-in-list {
-        margin-bottom: 4.25rem;
-
-        @supports (margin-bottom: calc(4.25rem + env(safe-area-inset-bottom))) {
-          body:not(.keyboard-visible) & {
-            margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+      &:not(.is-channel) {
+        .last-in-list {
+          margin-bottom: 4.25rem;
+  
+          @supports (margin-bottom: calc(4.25rem + env(safe-area-inset-bottom))) {
+            body:not(.keyboard-visible) & {
+              margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+            }
           }
         }
       }

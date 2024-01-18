@@ -85,6 +85,7 @@ import {
   selectSenderFromHeader,
   selectShouldDetectChatLanguage,
   selectShouldLoopStickers,
+  selectSponsoredMessage,
   selectTabState,
   selectTheme,
   selectThreadInfo,
@@ -273,6 +274,7 @@ type StateProps = {
   isConnected: boolean;
   isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
+  hasSponsoredMessage?: boolean;
 };
 
 type MetaPosition =
@@ -387,6 +389,7 @@ const Message: FC<OwnProps & StateProps> = ({
   getIsMessageListReady,
   shouldWarnAboutSvg,
   onPinnedIntersectionChange,
+  hasSponsoredMessage,
 }) => {
   const {
     toggleMessageSelection,
@@ -732,9 +735,29 @@ const Message: FC<OwnProps & StateProps> = ({
     replyStory,
   );
 
-  useFocusMessage(
-    ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded, Boolean(focusedQuote),
-  );
+  const WITH_BOTTOM_ELEMENT_GAP = 5.625 * REM;
+  const SPONSORED_MESSAGE_GAP = 11 * REM;
+  const SELECT_MODE_WITH_SPONSORED_GAP = WITH_BOTTOM_ELEMENT_GAP + SPONSORED_MESSAGE_GAP;
+
+  const getFocusMargin = () => {
+    if (messageListType === 'pinned' || (isInSelectMode && !hasSponsoredMessage)) return WITH_BOTTOM_ELEMENT_GAP;
+    if (!isInSelectMode && hasSponsoredMessage) return SPONSORED_MESSAGE_GAP;
+    if (isInSelectMode && hasSponsoredMessage) return SELECT_MODE_WITH_SPONSORED_GAP;
+
+    return undefined;
+  };
+
+  useFocusMessage({
+    elementRef: ref,
+    chatId,
+    isFocused,
+    focusDirection,
+    noFocusHighlight,
+    isResizingContainer,
+    isJustAdded,
+    isQuote: Boolean(focusedQuote),
+    focusMargin: getFocusMargin(),
+  });
 
   const signature = (isChannel && message.postAuthorTitle)
     || (!asForwarded && forwardInfo?.postAuthorTitle)
@@ -1553,6 +1576,7 @@ export default memo(withGlobal<OwnProps>(
     const hasActiveReactions = Boolean(reactionMessage && activeReactions[getMessageKey(reactionMessage)]?.length);
 
     return {
+      hasSponsoredMessage: Boolean(selectSponsoredMessage(global, chatId)),
       theme: selectTheme(global),
       forceSenderName,
       sender,
