@@ -15,11 +15,13 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
 import { getSenderTitle, isUserId } from '../../global/helpers';
 import {
-  selectChat, selectIsCurrentUserPremium,
+  selectChat,
+  selectIsCurrentUserPremium,
   selectPeer,
-  selectPeerStories, selectPeerStory,
+  selectPeerStory,
   selectPerformanceSettingsValue,
-  selectTabState, selectUser,
+  selectTabState,
+  selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
@@ -864,8 +866,6 @@ function Story({
 export default memo(withGlobal<OwnProps>((global, {
   peerId,
   storyId,
-  isPrivateStories,
-  isArchivedStories,
   isReportModalOpen,
   isDeleteModalOpen,
 }): StateProps => {
@@ -879,6 +879,7 @@ export default memo(withGlobal<OwnProps>((global, {
       viewModal,
       isPrivacyModalOpen,
       isStealthModalOpen,
+      storyList,
     },
     forwardMessages: { storyId: forwardedStoryId },
     premiumModal,
@@ -886,7 +887,6 @@ export default memo(withGlobal<OwnProps>((global, {
     mapModal,
   } = tabState;
   const { isOpen: isPremiumModalOpen } = premiumModal || {};
-  const { orderedIds, pinnedIds, archiveIds } = selectPeerStories(global, peerId) || {};
   const story = selectPeerStory(global, peerId, storyId);
   const shouldForcePause = Boolean(
     viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
@@ -904,7 +904,7 @@ export default memo(withGlobal<OwnProps>((global, {
     peer: (user || chat)!,
     forwardSender,
     story,
-    orderedIds: isArchivedStories ? archiveIds : (isPrivateStories ? pinnedIds : orderedIds),
+    orderedIds: storyList?.storyIdsByPeerId[peerId],
     isMuted,
     isCurrentUserPremium: selectIsCurrentUserPremium(global),
     shouldForcePause,

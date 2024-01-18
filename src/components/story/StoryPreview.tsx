@@ -26,10 +26,11 @@ interface OwnProps {
 interface StateProps {
   lastViewedId?: number;
   origin?: StoryViewerOrigin;
+  storyIdsForViewer?: number[];
 }
 
 function StoryPreview({
-  peer, peerStories, lastViewedId, origin,
+  peer, peerStories, lastViewedId, storyIdsForViewer, origin,
 }: OwnProps & StateProps) {
   const { openStoryViewer, loadPeerSkippedStories } = getActions();
   const lang = useLang();
@@ -43,11 +44,13 @@ function StoryPreview({
       orderedIds, lastReadId, byId,
     } = peerStories;
     const hasUnreadStories = orderedIds[orderedIds.length - 1] !== lastReadId;
-    const previewIndexId = lastViewedId ?? (hasUnreadStories ? (lastReadId ?? -1) : -1);
-    const resultId = byId[previewIndexId]?.id || orderedIds[0];
+    const previewIndexId = lastViewedId && storyIdsForViewer?.includes(lastViewedId)
+      ? lastViewedId ?? (hasUnreadStories ? (lastReadId ?? -1) : -1)
+      : -1;
+    const resultId = byId[previewIndexId]?.id || storyIdsForViewer?.[0] || orderedIds[0];
 
     return byId[resultId];
-  }, [lastViewedId, peerStories]);
+  }, [lastViewedId, peerStories, storyIdsForViewer]);
 
   const isLoaded = story && 'content' in story;
 
@@ -95,11 +98,13 @@ export default memo(withGlobal<OwnProps>((global, { peer }): StateProps => {
     storyViewer: {
       lastViewedByPeerIds,
       origin,
+      storyList,
     },
   } = selectTabState(global);
 
   return {
     lastViewedId: peer?.id ? lastViewedByPeerIds?.[peer.id] : undefined,
     origin,
+    storyIdsForViewer: peer?.id ? storyList?.storyIdsByPeerId[peer.id] : undefined,
   };
 })(StoryPreview));

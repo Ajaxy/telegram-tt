@@ -383,6 +383,11 @@ export type TabState = {
       isLoading?: boolean;
     };
     origin?: StoryViewerOrigin;
+    // Copy of story list for current view session
+    storyList?: {
+      peerIds: string[];
+      storyIdsByPeerId: Record<string, number[]>;
+    };
   };
 
   mediaViewer: {
