@@ -47,6 +47,7 @@ interface CaptureOptions {
   onClick?: (e: MouseEvent | TouchEvent) => void;
   onDoubleClick?: (e: MouseEvent | RealTouchEvent | WheelEvent, params: { centerX: number; centerY: number }) => void;
   excludedClosestSelector?: string;
+  includedClosestSelector?: string;
   selectorToPreventScroll?: string;
   withNativeDrag?: boolean;
   maxZoom?: number;
@@ -74,6 +75,7 @@ type TSwipeAxis =
 export const IOS_SCREEN_EDGE_THRESHOLD = 20;
 export const SWIPE_DIRECTION_THRESHOLD = 10;
 export const SWIPE_DIRECTION_TOLERANCE = 1.5;
+
 const MOVE_THRESHOLD = 15;
 const SWIPE_THRESHOLD_DEFAULT = 20;
 const RELEASE_WHEEL_ZOOM_DELAY = 150;
@@ -95,7 +97,7 @@ let lastClickTime = 0;
 const lethargy = new Lethargy({
   stability: 5,
   sensitivity: 25,
-  tolerance: IS_WINDOWS ? 1 : 0.6, // Windows scrollDelta does not die down to 0
+  tolerance: IS_WINDOWS ? 1 : 0.6, // Windows `scrollDelta` does not die down to 0
   delay: 150,
 });
 
@@ -127,6 +129,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     const target = e.target as HTMLElement;
     const {
       excludedClosestSelector,
+      includedClosestSelector,
       withNativeDrag,
       withCursor,
       onDrag,
@@ -141,7 +144,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     }
 
     if (
-      excludedClosestSelector && (target.matches(excludedClosestSelector) || target.closest(excludedClosestSelector))
+      (excludedClosestSelector && (target.matches(excludedClosestSelector) || target.closest(excludedClosestSelector)))
+      || (
+        includedClosestSelector && !(target.matches(includedClosestSelector) || target.closest(includedClosestSelector))
+      )
     ) {
       return;
     }
