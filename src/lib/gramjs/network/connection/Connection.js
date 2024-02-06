@@ -189,6 +189,7 @@ class HttpConnection extends Connection {
         super(ip, port, dcId, loggers, testServers, isPremium);
         this.shouldLongPoll = true;
         this.socket = new HttpStream(this.disconnectCallback.bind(this));
+        this.href = HttpStream.getURL(this._ip, this._port, this._testServers, this._isPremium);
     }
 
     send(data) {

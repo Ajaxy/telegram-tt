@@ -40,7 +40,6 @@ const { SecurityError } = require('../errors/Common');
 const { InvalidBufferError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
-const { sendToOrigin } = require('../../../api/gramjs/worker/worker');
 
 const LONGPOLL_MAX_WAIT = 3000;
 const LONGPOLL_MAX_DELAY = 500;
@@ -353,7 +352,11 @@ class MTProtoSender {
         const data = await this._send_queue.getBeacon(state);
         const encryptedData = await this._state.encryptMessageData(data);
 
-        sendToOrigin({ type: 'sendBeacon', data: encryptedData, url: this._fallbackConnection.socket.website });
+        postMessage({
+            type: 'sendBeacon',
+            data: encryptedData,
+            url: this._fallbackConnection.href,
+        });
     }
 
     /**
