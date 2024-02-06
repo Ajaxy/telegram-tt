@@ -14,7 +14,7 @@ export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
-export const IS_ELECTRON_BUILD = process.env.IS_ELECTRON_BUILD;
+export const IS_PACKAGED_ELECTRON = process.env.IS_PACKAGED_ELECTRON;
 
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;

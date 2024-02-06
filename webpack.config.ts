@@ -22,7 +22,7 @@ const {
   HEAD,
   APP_ENV = 'production',
   APP_MOCKED_CLIENT = '',
-  IS_ELECTRON_BUILD,
+  IS_PACKAGED_ELECTRON,
 } = process.env;
 
 dotenv.config();
@@ -44,8 +44,8 @@ const CSP = `
   script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/
-  ${IS_ELECTRON_BUILD ? `${BASE_URL}/` : ''};
-  media-src 'self' blob: data: ${IS_ELECTRON_BUILD ? [`${BASE_URL}/`, ELECTRON_HOST_URL].join(' ') : ''};
+  ${IS_PACKAGED_ELECTRON ? `${BASE_URL}/` : ''};
+  media-src 'self' blob: data: ${IS_PACKAGED_ELECTRON ? [`${BASE_URL}/`, ELECTRON_HOST_URL].join(' ') : ''};
   object-src 'none';
   frame-src http: https:;
   base-uri 'none';
@@ -204,7 +204,7 @@ export default function createConfig(
         TELEGRAM_API_HASH: undefined,
         // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
-        IS_ELECTRON_BUILD: false,
+        IS_PACKAGED_ELECTRON: false,
         ELECTRON_HOST_URL,
         BASE_URL,
       }),
@@ -232,7 +232,7 @@ export default function createConfig(
       }),
     ],
 
-    devtool: APP_ENV === 'production' && IS_ELECTRON_BUILD ? undefined : 'source-map',
+    devtool: APP_ENV === 'production' && IS_PACKAGED_ELECTRON ? undefined : 'source-map',
 
     optimization: {
       splitChunks: {
