@@ -135,16 +135,16 @@ export async function fetchChats({
   }
 
   if (resultPinned) {
+    dispatchThreadInfoUpdates(resultPinned.messages);
     updateLocalDb(resultPinned);
   }
+  dispatchThreadInfoUpdates(result.messages);
   updateLocalDb(result);
 
   const messages = (resultPinned ? resultPinned.messages : [])
     .concat(result.messages)
     .map(buildApiMessage)
     .filter(Boolean);
-
-  dispatchThreadInfoUpdates(result.messages);
 
   const peersByKey = preparePeers(result);
   if (resultPinned) {
