@@ -1012,6 +1012,12 @@ export function deleteMessages<T extends GlobalState>(
       global = updateThreadInfo(global, chatId, threadId, {
         lastMessageId: newLastMessage.id,
       });
+
+      if (chat.isForum) {
+        global = updateTopic(global, chatId, Number(threadId), {
+          lastMessageId: newLastMessage.id,
+        });
+      }
     });
 
     setGlobal(global);
