@@ -1,3 +1,5 @@
+import type { ThreadId } from '../types';
+
 import { RE_TG_LINK, RE_TME_LINK } from '../config';
 import { isUsernameValid } from './username';
 
@@ -10,7 +12,7 @@ interface PublicMessageLink {
   username: string;
   messageId: number;
   isSingle: boolean;
-  threadId?: number;
+  threadId?: ThreadId;
   commentId?: number;
   mediaTimestamp?: string;
   isBoost: boolean;
@@ -21,7 +23,7 @@ export interface PrivateMessageLink {
   channelId: string;
   messageId: number;
   isSingle: boolean;
-  threadId?: number;
+  threadId?: ThreadId;
   commentId?: number;
   mediaTimestamp?: string;
   isBoost: boolean;

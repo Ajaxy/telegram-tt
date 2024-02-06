@@ -5,6 +5,7 @@ import React, {
 import { getActions } from '../../global';
 
 import type { TabState } from '../../global/types';
+import type { ThreadId } from '../../types';
 
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
@@ -33,7 +34,7 @@ const DraftRecipientPicker: FC<OwnProps> = ({
     }
   }, [isOpen, markIsShown]);
 
-  const handleSelectRecipient = useCallback((recipientId: string, threadId?: number) => {
+  const handleSelectRecipient = useCallback((recipientId: string, threadId?: ThreadId) => {
     openChatWithDraft({
       chatId: recipientId,
       threadId,

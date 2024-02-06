@@ -3,11 +3,11 @@ import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus,
+  ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 import type { IconName } from '../../types/icons';
-import { MediaViewerOrigin, type StoryViewerOrigin } from '../../types';
+import { MediaViewerOrigin, type StoryViewerOrigin, type ThreadId } from '../../types';
 
 import {
   getChatTypeString,
@@ -20,6 +20,7 @@ import {
   selectChatOnlineCount,
   selectThreadInfo,
   selectThreadMessagesCount,
+  selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { REM } from './helpers/mediaDimensions';
@@ -39,7 +40,7 @@ const TOPIC_ICON_SIZE = 2.5 * REM;
 
 type OwnProps = {
   chatId: string;
-  threadId?: number;
+  threadId?: ThreadId;
   className?: string;
   statusIcon?: IconName;
   typingStatus?: ApiTypingStatus;
@@ -58,6 +59,7 @@ type OwnProps = {
   noStatusOrTyping?: boolean;
   withStory?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
+  isSavedDialog?: boolean;
   onClick?: VoidFunction;
   onEmojiStatusClick?: NoneToVoidFunction;
 };
@@ -70,6 +72,7 @@ type StateProps =
     onlineCount?: number;
     areMessagesLoaded: boolean;
     messagesCount?: number;
+    self?: ApiUser;
   };
 
 const GroupChatInfo: FC<OwnProps & StateProps> = ({
@@ -97,6 +100,8 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   storyViewerOrigin,
   noEmojiStatus,
   emojiStatusSize,
+  isSavedDialog,
+  self,
   onClick,
   onEmojiStatusClick,
 }) => {
@@ -199,15 +204,28 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       onClick={onClick}
     >
       {!noAvatar && !isTopic && (
-        <Avatar
-          key={chat.id}
-          size={avatarSize}
-          peer={chat}
-          withStory={withStory}
-          storyViewerOrigin={storyViewerOrigin}
-          storyViewerMode="single-peer"
-          onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
-        />
+        <>
+          {isSavedDialog && self && (
+            <Avatar
+              key="saved-messages"
+              size={avatarSize}
+              peer={self}
+              isSavedMessages
+              className="saved-dialog-avatar"
+            />
+          )}
+          <Avatar
+            key={chat.id}
+            className={buildClassName(isSavedDialog && 'overlay-avatar')}
+            size={avatarSize}
+            peer={chat}
+            withStory={withStory}
+            storyViewerOrigin={storyViewerOrigin}
+            storyViewerMode="single-peer"
+            isSavedDialog={isSavedDialog}
+            onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
+          />
+        </>
       )}
       {isTopic && (
         <TopicIcon
@@ -224,6 +242,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
               peer={chat}
               emojiStatusSize={emojiStatusSize}
               withEmojiStatus={!noEmojiStatus}
+              isSavedDialog={isSavedDialog}
               onEmojiStatusClick={onEmojiStatusClick}
             />
           )}
@@ -258,6 +277,7 @@ export default memo(withGlobal<OwnProps>(
     const areMessagesLoaded = Boolean(selectChatMessages(global, chatId));
     const topic = threadId ? chat?.topics?.[threadId] : undefined;
     const messagesCount = topic && selectThreadMessagesCount(global, chatId, threadId!);
+    const self = selectUser(global, global.currentUserId!);
 
     return {
       chat,
@@ -266,6 +286,7 @@ export default memo(withGlobal<OwnProps>(
       topic,
       areMessagesLoaded,
       messagesCount,
+      self,
     };
   },
 )(GroupChatInfo));

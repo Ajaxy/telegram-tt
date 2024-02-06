@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiBotCommand, ApiChat } from '../../api/types';
-import type { IAnchorPosition } from '../../types';
+import type { IAnchorPosition, ThreadId } from '../../types';
 import type { IconName } from '../../types/icons';
 import { MAIN_THREAD_ID } from '../../api/types';
 
@@ -71,7 +71,7 @@ const BOT_BUTTONS: Record<string, { icon: IconName; label: string }> = {
 
 export type OwnProps = {
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   isOpen: boolean;
   withExtraActions: boolean;
   anchor: IAnchorPosition;
@@ -276,7 +276,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleEditTopicClick = useLastCallback(() => {
-    openEditTopicPanel({ chatId, topicId: threadId });
+    openEditTopicPanel({ chatId, topicId: Number(threadId) });
     setShouldCloseFast(!isRightColumnShown);
     closeMenu();
   });

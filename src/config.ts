@@ -40,7 +40,6 @@ export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
 export const GLOBAL_STATE_CACHE_USER_LIST_LIMIT = 500;
 export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 200;
-export const GLOBAL_STATE_CACHE_CHATS_WITH_MESSAGES_LIMIT = 30;
 export const GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT = 150;
 
 export const MEDIA_CACHE_DISABLED = false;
@@ -290,11 +289,13 @@ export const HEART_REACTION: ApiReactionEmoji = {
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
+export const ANONYMOUS_USER_ID = '2666000';
 export const RESTRICTED_EMOJI_SET_ID = '7173162320003080';
 export const CHANNEL_ID_LENGTH = 14; // 14 symbols, including -100 prefix
 export const DEFAULT_GIF_SEARCH_BOT_USERNAME = 'gif';
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
+export const SAVED_FOLDER_ID = -1;
 export const DELETED_COMMENTS_CHANNEL_ID = '-100777';
 export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
@@ -339,4 +340,5 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   chatlistInvites: [3, 100],
   chatlistJoined: [2, 20],
   recommendedChannels: [10, 100],
+  savedDialogsPinned: [5, 100],
 };

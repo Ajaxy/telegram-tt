@@ -107,6 +107,7 @@ import type {
   ShippingOption,
   StoryViewerOrigin,
   ThemeKey,
+  ThreadId,
 } from '../types';
 
 export type MessageListType =
@@ -114,9 +115,11 @@ export type MessageListType =
   | 'pinned'
   | 'scheduled';
 
+export type ChatListType = 'active' | 'archived' | 'saved';
+
 export interface MessageList {
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   type: MessageListType;
 }
 
@@ -182,7 +185,8 @@ export type ApiLimitType =
   | 'aboutLength'
   | 'chatlistInvites'
   | 'chatlistJoined'
-  | 'recommendedChannels';
+  | 'recommendedChannels'
+  | 'savedDialogsPinned';
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
   'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels'
@@ -255,12 +259,12 @@ export type TabState = {
   };
 
   activeChatFolder: number;
-  tabThreads: Record<string, Record<number, TabThread>>;
+  tabThreads: Record<string, Record<ThreadId, TabThread>>;
   forumPanelChatId?: string;
 
   focusedMessage?: {
     chatId?: string;
-    threadId?: number;
+    threadId?: ThreadId;
     messageId?: number;
     direction?: FocusDirection;
     noHighlight?: boolean;
@@ -392,7 +396,7 @@ export type TabState = {
 
   mediaViewer: {
     chatId?: string;
-    threadId?: number;
+    threadId?: ThreadId;
     mediaId?: number;
     avatarOwnerId?: string;
     profilePhotoIndex?: number;
@@ -406,7 +410,7 @@ export type TabState = {
   audioPlayer: {
     chatId?: string;
     messageId?: number;
-    threadId?: number;
+    threadId?: ThreadId;
     origin?: AudioOrigin;
     volume: number;
     playbackRate: number;
@@ -427,7 +431,7 @@ export type TabState = {
     messageIds?: number[];
     storyId?: number;
     toChatId?: string;
-    toThreadId?: number;
+    toThreadId?: ThreadId;
     withMyScore?: boolean;
     noAuthors?: boolean;
     noCaptions?: boolean;
@@ -779,18 +783,26 @@ export type GlobalState = {
     listIds: {
       active?: string[];
       archived?: string[];
+      saved?: string[];
     };
     orderedPinnedIds: {
       active?: string[];
       archived?: string[];
+      saved?: string[];
     };
     totalCount: {
       all?: number;
       archived?: number;
+      saved?: number;
     };
     isFullyLoaded: {
       active?: boolean;
       archived?: boolean;
+      saved?: boolean;
+    };
+    lastMessageIds: {
+      all?: Record<string, number>;
+      saved?: Record<string, number>;
     };
     forDiscussionIds?: string[];
     // Obtained from GetFullChat / GetFullChannel
@@ -801,7 +813,7 @@ export type GlobalState = {
   messages: {
     byChatId: Record<string, {
       byId: Record<number, ApiMessage>;
-      threadsById: Record<number, Thread>;
+      threadsById: Record<ThreadId, Thread>;
     }>;
     sponsoredByChatId: Record<string, ApiSponsoredMessage>;
   };
@@ -1207,7 +1219,7 @@ export interface ActionPayloads {
   };
   preloadTopChatMessages: undefined;
   loadAllChats: {
-    listType: 'active' | 'archived';
+    listType: ChatListType;
     onReplace?: VoidFunction;
     shouldReplace?: boolean;
   };
@@ -1256,6 +1268,9 @@ export interface ActionPayloads {
   openChatByInvite: {
     hash: string;
   } & WithTabId;
+  toggleSavedDialogPinned: {
+    id: string;
+  } & WithTabId;
 
   // global search
   setGlobalSearchQuery: {
@@ -1297,7 +1312,7 @@ export interface ActionPayloads {
     direction?: LoadMoreDirection;
     isBudgetPreload?: boolean;
     chatId?: string;
-    threadId?: number;
+    threadId?: ThreadId;
     shouldForceRender?: boolean;
     onLoaded?: NoneToVoidFunction;
     onError?: NoneToVoidFunction;
@@ -1413,7 +1428,7 @@ export interface ActionPayloads {
   sendMessageAction: {
     action: ApiSendMessageAction;
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
   };
   loadSeenBy: {
     chatId: string;
@@ -1424,7 +1439,7 @@ export interface ActionPayloads {
   } & WithTabId;
   openChatByUsername: {
     username: string;
-    threadId?: number;
+    threadId?: ThreadId;
     messageId?: number;
     commentId?: number;
     startParam?: string;
@@ -1439,12 +1454,12 @@ export interface ActionPayloads {
   } & WithTabId;
   setScrollOffset: {
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
     scrollOffset: number;
   } & WithTabId;
   unpinAllMessages: {
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
   };
   setEditingId: {
     messageId?: number;
@@ -1452,22 +1467,22 @@ export interface ActionPayloads {
   editLastMessage: WithTabId | undefined;
   saveDraft: {
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
     text: ApiDraft['text'];
   };
   clearDraft: {
     chatId: string;
-    threadId?: number;
+    threadId?: ThreadId;
     isLocalOnly?: boolean;
     shouldKeepReply?: boolean;
   };
   loadPinnedMessages: {
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
   };
   toggleMessageWebPage: {
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
     noWebPage?: boolean;
   };
   replyToNextMessage: {
@@ -1694,6 +1709,7 @@ export interface ActionPayloads {
   resetManagementError: { chatId: string } & WithTabId;
 
   requestChatUpdate: { chatId: string };
+  requestSavedDialogUpdate: { chatId: string };
   loadChatJoinRequests: {
     chatId: string;
     offsetDate?: number;
@@ -1706,7 +1722,7 @@ export interface ActionPayloads {
   } & WithTabId;
   focusMessage: {
     chatId: string;
-    threadId?: number;
+    threadId?: ThreadId;
     messageListType?: MessageListType;
     messageId: number;
     noHighlight?: boolean;
@@ -1732,7 +1748,7 @@ export interface ActionPayloads {
   } & WithTabId;
   openChatInNewTab: {
     chatId: string;
-    threadId?: number;
+    threadId?: ThreadId;
   };
   onTabFocusChange: {
     isBlurred: boolean;
@@ -1822,6 +1838,12 @@ export interface ActionPayloads {
     channelId: string;
   } & WithTabId;
 
+  openSavedDialog: {
+    chatId: string;
+    shouldReplaceHistory?: boolean;
+    shouldReplaceLast?: boolean;
+    noForumTopicPanel?: boolean;
+  } & WithTabId;
   openChat: {
     id: string | undefined;
     type?: MessageListType;
@@ -1843,12 +1865,12 @@ export interface ActionPayloads {
   } | {
     isComments?: false;
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
   }) & WithTabId;
   // Used by both openThread & openChat
   processOpenChatOrThread: {
     chatId: string | undefined;
-    threadId: number;
+    threadId: ThreadId;
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
     shouldReplaceLast?: boolean;
@@ -1870,7 +1892,7 @@ export interface ActionPayloads {
   } & WithTabId;
   openChatWithDraft: {
     chatId?: string;
-    threadId?: number;
+    threadId?: ThreadId;
     text: string;
     files?: File[];
     filter?: ApiChatType[];
@@ -1950,7 +1972,7 @@ export interface ActionPayloads {
   setEditingDraft: {
     text?: ApiFormattedText;
     chatId: string;
-    threadId: number;
+    threadId: ThreadId;
     type: MessageListType;
   };
   fetchUnreadMentions: {
@@ -2214,7 +2236,7 @@ export interface ActionPayloads {
   // Media Viewer & Audio Player
   openMediaViewer: {
     chatId?: string;
-    threadId?: number;
+    threadId?: ThreadId;
     mediaId?: number;
     avatarOwnerId?: string;
     profilePhotoIndex?: number;
@@ -2238,7 +2260,7 @@ export interface ActionPayloads {
   } & WithTabId;
   openAudioPlayer: {
     chatId: string;
-    threadId?: number;
+    threadId?: ThreadId;
     messageId: number;
     origin?: AudioOrigin;
     volume?: number;
@@ -2510,7 +2532,7 @@ export interface ActionPayloads {
     queryId: string;
     isSilent?: boolean;
     replyInfo?: ApiInputMessageReplyInfo;
-    threadId?: number;
+    threadId?: ThreadId;
   } & WithTabId;
   requestSimpleWebView: {
     url?: string;
@@ -2573,7 +2595,7 @@ export interface ActionPayloads {
 
   callAttachBot: ({
     chatId: string;
-    threadId?: number;
+    threadId?: ThreadId;
     url?: string;
   } | {
     isFromSideMenu: true;

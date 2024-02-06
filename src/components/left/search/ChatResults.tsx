@@ -11,7 +11,6 @@ import { ALL_FOLDER_ID } from '../../../config';
 import {
   filterChatsByName,
   filterUsersByName,
-  sortChatIds,
 } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 import { getOrderedIds } from '../../../util/folderManager';
@@ -19,6 +18,7 @@ import { unique } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
@@ -147,8 +147,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     ].filter((accountPeerId) => !localPeerIds.includes(accountPeerId)));
 
     return [
-      ...sortChatIds(localPeerIds, chatsById, undefined, currentUserId ? [currentUserId] : undefined),
-      ...sortChatIds(accountPeerIds, chatsById),
+      ...sortChatIds(localPeerIds, undefined, currentUserId ? [currentUserId] : undefined),
+      ...sortChatIds(accountPeerIds),
     ];
   }, [searchQuery, currentUserId, contactIds, lang, accountChatIds, accountUserIds, chatsById]);
 
@@ -161,10 +161,9 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
     return sortChatIds(
       unique([...globalChatIds, ...globalUserIds]),
-      chatsById,
       true,
     );
-  }, [chatsById, globalChatIds, globalUserIds, searchQuery]);
+  }, [globalChatIds, globalUserIds, searchQuery]);
 
   const foundMessages = useMemo(() => {
     if ((!searchQuery && !searchDate) || !foundIds || foundIds.length === 0) {

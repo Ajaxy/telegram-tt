@@ -1,7 +1,7 @@
 import type {
   ApiChat, ApiChatFullInfo, ApiChatMember, ApiPhoto, ApiTopic,
 } from '../../api/types';
-import type { GlobalState } from '../types';
+import type { ChatListType, GlobalState } from '../types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
@@ -11,9 +11,11 @@ import {
 import { selectChat, selectChatFullInfo } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
 
+const DEFAULT_CHAT_LISTS: ChatListType[] = ['active', 'archived'];
+
 export function replaceChatListIds<T extends GlobalState>(
   global: T,
-  type: 'active' | 'archived',
+  type: ChatListType,
   newIds: string[] | undefined,
 ): T {
   return {
@@ -28,8 +30,46 @@ export function replaceChatListIds<T extends GlobalState>(
   };
 }
 
+export function updateChatLastMessageId<T extends GlobalState>(
+  global: T, chatId: string, lastMessageId: number, listType?: ChatListType,
+): T {
+  const key = listType === 'saved' ? 'saved' : 'all';
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      lastMessageIds: {
+        ...global.chats.lastMessageIds,
+        [key]: {
+          ...global.chats.lastMessageIds[key],
+          [chatId]: lastMessageId,
+        },
+      },
+    },
+  };
+}
+
+export function updateChatsLastMessageId<T extends GlobalState>(
+  global: T, messageIds: Record<string, number>, listType?: ChatListType,
+): T {
+  const key = listType === 'saved' ? 'saved' : 'all';
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      lastMessageIds: {
+        ...global.chats.lastMessageIds,
+        [key]: {
+          ...global.chats.lastMessageIds[key],
+          ...messageIds,
+        },
+      },
+    },
+  };
+}
+
 export function updateChatListIds<T extends GlobalState>(
-  global: T, type: 'active' | 'archived', idsUpdate: string[],
+  global: T, type: ChatListType, idsUpdate: string[],
 ): T {
   const { [type]: listIds } = global.chats.listIds;
   const newIds = listIds?.length
@@ -243,13 +283,13 @@ export function updateChatListType<T extends GlobalState>(
 
 export function updateChatListSecondaryInfo<T extends GlobalState>(
   global: T,
-  type: 'active' | 'archived',
+  type: ChatListType,
   info: {
     orderedPinnedIds?: string[];
     totalChatCount: number;
   },
 ): T {
-  const totalCountKey = type === 'active' ? 'all' : 'archived';
+  const totalCountKey = type === 'active' ? 'all' : type;
 
   return {
     ...global,
@@ -281,10 +321,12 @@ export function leaveChat<T extends GlobalState>(global: T, leftChatId: string):
   return global;
 }
 
-export function removeChatFromChatLists<T extends GlobalState>(global: T, chatId: string): T {
-  const lists = global.chats.listIds;
-  Object.entries(lists).forEach(([listType, listIds]) => {
-    global = replaceChatListIds(global, listType as keyof typeof lists, listIds.filter((id) => id !== chatId));
+export function removeChatFromChatLists<T extends GlobalState>(
+  global: T, chatId: string, type: 'all' | 'saved' = 'all',
+): T {
+  const chatLists = type === 'all' ? DEFAULT_CHAT_LISTS : [type];
+  chatLists.forEach((listType) => {
+    global = replaceChatListIds(global, listType, global.chats.listIds[listType]?.filter((id) => id !== chatId));
   });
 
   return global;
@@ -393,8 +435,7 @@ export function deleteTopic<T extends GlobalState>(
   global: T, chatId: string, topicId: number,
 ) {
   const chat = selectChat(global, chatId);
-  const topics = chat?.topics || [];
-
+  const topics = chat?.topics || {};
   global = updateChat(global, chatId, {
     topics: omit(topics, [topicId]),
   });

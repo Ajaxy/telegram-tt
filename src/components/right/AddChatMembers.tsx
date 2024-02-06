@@ -5,15 +5,16 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiChatMember,
+  ApiChatMember,
 } from '../../api/types';
 import { NewChatMembersProgress } from '../../types';
 
 import {
-  filterUsersByName, isChatChannel, isUserBot, sortChatIds,
+  filterUsersByName, isChatChannel, isUserBot,
 } from '../../global/helpers';
 import { selectChat, selectChatFullInfo, selectTabState } from '../../global/selectors';
 import { unique } from '../../util/iteratees';
+import sortChatIds from '../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
@@ -36,7 +37,6 @@ type StateProps = {
   isChannel?: boolean;
   members?: ApiChatMember[];
   currentUserId?: string;
-  chatsById: Record<string, ApiChat>;
   localContactIds?: string[];
   searchQuery?: string;
   isLoading: boolean;
@@ -50,7 +50,6 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
   members,
   onNextStep,
   currentUserId,
-  chatsById,
   localContactIds,
   isLoading,
   searchQuery,
@@ -104,11 +103,8 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
           && (!user || !isUserBot(user) || (!isChannel && user.canBeInvitedToGroup))
         );
       }),
-      chatsById,
     );
-  }, [
-    localContactIds, chatsById, searchQuery, localUserIds, globalUserIds, currentUserId, memberIds, isChannel,
-  ]);
+  }, [localContactIds, searchQuery, localUserIds, globalUserIds, currentUserId, memberIds, isChannel]);
 
   const handleNextStep = useCallback(() => {
     if (selectedMemberIds.length) {
@@ -154,7 +150,6 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const { userIds: localContactIds } = global.contactList || {};
-    const { byId: chatsById } = global.chats;
     const { newChatMembersProgress } = selectTabState(global);
     const { currentUserId } = global;
     const isChannel = chat && isChatChannel(chat);
@@ -170,7 +165,6 @@ export default memo(withGlobal<OwnProps>(
       isChannel,
       members: selectChatFullInfo(global, chatId)?.members,
       currentUserId,
-      chatsById,
       localContactIds,
       searchQuery,
       isSearching: fetchingStatus,

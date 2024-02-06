@@ -3,6 +3,7 @@ import { getActions } from '../../../../global';
 
 import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
 import type { ApiDraft, MessageListType } from '../../../../global/types';
+import type { ThreadId } from '../../../../types';
 import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
@@ -30,7 +31,7 @@ const useEditing = (
   resetComposer: (shouldPreserveInput?: boolean) => void,
   openDeleteModal: () => void,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   type: MessageListType,
   draft?: ApiDraft,
   editingDraft?: ApiFormattedText,

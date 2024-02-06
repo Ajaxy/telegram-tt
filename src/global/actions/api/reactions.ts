@@ -25,6 +25,7 @@ import {
   selectChatMessage,
   selectCurrentChat,
   selectDefaultReaction,
+  selectIsChatWithSelf,
   selectMaxUserReactions,
   selectMessageIdsByGroupId,
   selectPerformanceSettingsValue,
@@ -98,7 +99,7 @@ addActionHandler('sendEmojiInteraction', (global, actions, payload): ActionRetur
 
   const chat = selectChat(global, chatId);
 
-  if (!chat || !emoji || chatId === global.currentUserId) {
+  if (!chat || !emoji || selectIsChatWithSelf(global, chatId)) {
     return;
   }
 
@@ -314,7 +315,7 @@ addActionHandler('sendWatchingEmojiInteraction', (global, actions, payload): Act
 
   const tabState = selectTabState(global, tabId);
   if (!chat || !tabState.activeEmojiInteractions?.some((interaction) => interaction.id === id)
-    || chatId === global.currentUserId) {
+    || selectIsChatWithSelf(global, chatId)) {
     return undefined;
   }
 

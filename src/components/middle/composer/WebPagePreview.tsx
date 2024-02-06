@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
 } from '../../../api/types';
-import type { ISettings } from '../../../types';
+import type { ISettings, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
@@ -29,7 +29,7 @@ import './WebPagePreview.scss';
 
 type OwnProps = {
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   getHtml: Signal<string>;
   isDisabled?: boolean;
 };

@@ -1,4 +1,5 @@
 import type { MessageListType } from '../global/types';
+import type { ThreadId } from '../types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import { IS_MOCKED_CLIENT } from '../config';
@@ -20,14 +21,14 @@ export function resetInitialLocationHash() {
   parsedInitialLocationHash = undefined;
 }
 
-export const createLocationHash = (chatId: string, type: MessageListType, threadId: number): string => {
+export const createLocationHash = (chatId: string, type: MessageListType, threadId: ThreadId): string => {
   const displayType = type === 'thread' ? undefined : type;
   const parts = threadId === MAIN_THREAD_ID ? [chatId, displayType] : [chatId, threadId, displayType];
 
   return parts.filter(Boolean).join('_');
 };
 
-export function parseLocationHash() {
+export function parseLocationHash(currentUserId?: string) {
   parseInitialLocationHash();
 
   if (!messageHash) return undefined;
@@ -50,14 +51,16 @@ export function parseLocationHash() {
 
   const isType = ['thread', 'pinned', 'scheduled'].includes(type!);
 
+  const castedThreadId = (chatId === currentUserId ? threadId : Number(threadId)) || MAIN_THREAD_ID;
+
   return {
     chatId,
     type: type && isType ? (type as MessageListType) : 'thread',
-    threadId: Number(threadId) || MAIN_THREAD_ID,
+    threadId: castedThreadId,
   };
 }
 
-export const createMessageHashUrl = (chatId: string, type: MessageListType, threadId: number): string => {
+export const createMessageHashUrl = (chatId: string, type: MessageListType, threadId: ThreadId): string => {
   const url = new URL(window.location.href);
   url.hash = createLocationHash(chatId, type, threadId);
   return url.href;

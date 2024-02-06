@@ -4,6 +4,8 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
+import type { ThreadId } from '../../types';
+
 import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
 import { selectChat, selectTabState, selectUser } from '../../global/selectors';
 
@@ -47,7 +49,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
     }
   }, [isOpen, markIsShown]);
 
-  const handleSelectRecipient = useCallback((recipientId: string, threadId?: number) => {
+  const handleSelectRecipient = useCallback((recipientId: string, threadId?: ThreadId) => {
     const isSelf = recipientId === currentUserId;
     if (isStory) {
       forwardStory({ toChatId: recipientId });
@@ -82,7 +84,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
       forwardToSavedMessages();
       showNotification({ message });
     } else {
-      setForwardChatOrTopic({ chatId: recipientId, topicId: threadId });
+      setForwardChatOrTopic({ chatId: recipientId, topicId: Number(threadId) });
     }
   }, [currentUserId, isManyMessages, isStory, lang]);
 

@@ -58,6 +58,7 @@ export default function useChatListEntry({
   orderDiff,
   withInterfaceAnimations,
   isTopic,
+  isSavedDialog,
 }: {
   chat?: ApiChat;
   lastMessage?: ApiMessage;
@@ -71,6 +72,7 @@ export default function useChatListEntry({
   actionTargetChatId?: string;
   observeIntersection?: ObserveFn;
   isTopic?: boolean;
+  isSavedDialog?: boolean;
 
   animationType: ChatAnimationTypes;
   orderDiff: number;
@@ -102,14 +104,15 @@ export default function useChatListEntry({
   }, [actionTargetUserIds]);
 
   const renderLastMessageOrTyping = useCallback(() => {
-    if (typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
+    if (!isSavedDialog && typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
 
     const isDraftReplyToTopic = draft && draft.replyInfo?.replyToMsgId === lastMessageTopic?.id;
     const isEmptyLocalReply = draft?.replyInfo && !draft.text && draft.isLocal;
 
-    const canDisplayDraft = !chat?.isForum && draft && !isEmptyLocalReply && (!isTopic || !isDraftReplyToTopic);
+    const canDisplayDraft = !chat?.isForum && !isSavedDialog && draft && !isEmptyLocalReply
+      && (!isTopic || !isDraftReplyToTopic);
 
     if (canDisplayDraft) {
       return (
@@ -169,7 +172,7 @@ export default function useChatListEntry({
             <span className="colon">:</span>
           </>
         )}
-        {lastMessage.forwardInfo && (<i className="icon icon-share-filled chat-prefix-icon" />)}
+        {!isSavedDialog && lastMessage.forwardInfo && (<i className="icon icon-share-filled chat-prefix-icon" />)}
         {lastMessage.replyInfo?.type === 'story' && (<i className="icon icon-story-reply chat-prefix-icon" />)}
         {renderSummary(lang, lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
@@ -177,7 +180,7 @@ export default function useChatListEntry({
   }, [
     actionTargetChatId, actionTargetMessage, actionTargetUsers, chat, chatId, draft, isAction,
     isRoundVideo, isTopic, lang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
-    observeIntersection, typingStatus,
+    observeIntersection, typingStatus, isSavedDialog,
   ]);
 
   function renderSubtitle() {

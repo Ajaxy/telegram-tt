@@ -254,8 +254,7 @@
 
 .Composer,
 .MessageSelectToolbar,
-.unpin-all-button,
-.join-subscribe-button,
+.composer-button,
 .messaging-disabled {
   width: 100%;
   display: flex;
@@ -264,8 +263,7 @@
 }
 
 .MessageSelectToolbar-inner,
-.unpin-all-button,
-.join-subscribe-button,
+.composer-button,
 .messaging-disabled {
   .mask-image-disabled & {
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
@@ -310,11 +308,11 @@
     }
   }
 
-  .join-subscribe-button,
-  .unpin-all-button {
+  .composer-button {
     height: 3.5rem;
     transform: scaleX(1);
     transition: transform var(--select-transition), background-color 0.15s, color 0.15s;
+    color: var(--color-primary);
 
     .select-mode-active + .middle-column-footer & {
       box-shadow: none;

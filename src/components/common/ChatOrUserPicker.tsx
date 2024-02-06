@@ -5,6 +5,7 @@ import React, {
 import { getActions } from '../../global';
 
 import type { ApiChat, ApiTopic } from '../../api/types';
+import type { ThreadId } from '../../types';
 
 import { CHAT_HEIGHT_PX } from '../../config';
 import { getCanPostInChat, isUserId } from '../../global/helpers';
@@ -41,7 +42,7 @@ export type OwnProps = {
   className?: string;
   loadMore?: NoneToVoidFunction;
   onSearchChange: (search: string) => void;
-  onSelectChatOrUser: (chatOrUserId: string, threadId?: number) => void;
+  onSelectChatOrUser: (chatOrUserId: string, threadId?: ThreadId) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };

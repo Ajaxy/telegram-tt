@@ -288,7 +288,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      currentTopicId: chatId === currentChatId ? currentThreadId : undefined,
+      currentTopicId: chatId === currentChatId ? Number(currentThreadId) : undefined,
       withInterfaceAnimations: selectCanAnimateInterface(global),
     };
   },

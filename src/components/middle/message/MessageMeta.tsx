@@ -29,6 +29,7 @@ type OwnProps = {
   repliesThreadInfo?: ApiThreadInfo;
   isTranslated?: boolean;
   isPinned?: boolean;
+  isInSavedDialog?: boolean;
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   onTranslationClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   renderQuickReactionButton?: () => TeactNode | undefined;
@@ -45,6 +46,7 @@ const MessageMeta: FC<OwnProps> = ({
   noReplies,
   isTranslated,
   isPinned,
+  isInSavedDialog,
   onClick,
   onTranslationClick,
   onOpenThread,
@@ -72,7 +74,12 @@ const MessageMeta: FC<OwnProps> = ({
     const editDateTime = message.isEdited
       && formatDateTimeToString(message.editDate! * 1000, lang.code, undefined, lang.timeFormat);
     const forwardedDateTime = message.forwardInfo
-      && formatDateTimeToString(message.forwardInfo.date * 1000, lang.code, undefined, lang.timeFormat);
+      && formatDateTimeToString(
+        (message.forwardInfo.savedDate || message.forwardInfo.date) * 1000,
+        lang.code,
+        undefined,
+        lang.timeFormat,
+      );
 
     let text = createDateTime;
     if (editDateTime) {
@@ -137,7 +144,9 @@ const MessageMeta: FC<OwnProps> = ({
           </>
         )}
         {message.isEdited && `${lang('EditedMessage')} `}
-        {formatTime(lang, message.date * 1000)}
+        {isInSavedDialog
+          ? formatDateTimeToString((message.forwardInfo?.date || message.date) * 1000, lang.code, true)
+          : formatTime(lang, message.date * 1000)}
       </span>
       {outgoingStatus && (
         <MessageOutgoingStatus status={outgoingStatus} />

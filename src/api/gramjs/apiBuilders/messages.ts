@@ -266,13 +266,15 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
 
   return {
     date: fwdFrom.date,
+    savedDate: fwdFrom.savedDate,
     isImported: fwdFrom.imported,
     isChannelPost: Boolean(fwdFrom.channelPost),
     channelPostId: fwdFrom.channelPost,
     isLinkedChannelPost: Boolean(fwdFrom.channelPost && savedFromPeerId && !isChatWithSelf),
+    savedFromPeerId,
+    fromId,
     fromChatId: savedFromPeerId || fromId,
     fromMessageId: fwdFrom.savedFromMsgId || fwdFrom.channelPost,
-    senderUserId: fromId,
     hiddenUserName: fwdFrom.fromName,
     postAuthorTitle: fwdFrom.postAuthor,
   };
@@ -747,6 +749,7 @@ function buildNewPoll(poll: ApiNewPoll, localId: number) {
 
 export function buildLocalMessage(
   chat: ApiChat,
+  lastMessageId?: number,
   text?: string,
   entities?: ApiMessageEntity[],
   replyInfo?: ApiInputReplyInfo,
@@ -760,7 +763,7 @@ export function buildLocalMessage(
   sendAs?: ApiPeer,
   story?: ApiStory | ApiStorySkipped,
 ): ApiMessage {
-  const localId = getNextLocalMessageId(chat.lastMessage?.id);
+  const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
 
@@ -811,6 +814,7 @@ export function buildLocalForwardedMessage({
   noAuthors,
   noCaptions,
   isCurrentUserPremium,
+  lastMessageId,
 }: {
   toChat: ApiChat;
   toThreadId?: number;
@@ -819,8 +823,9 @@ export function buildLocalForwardedMessage({
   noAuthors?: boolean;
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
+  lastMessageId?: number;
 }): ApiMessage {
-  const localId = getNextLocalMessageId(toChat?.lastMessage?.id);
+  const localId = getNextLocalMessageId(lastMessageId);
   const {
     content,
     chatId: fromChatId,
@@ -874,11 +879,13 @@ export function buildLocalForwardedMessage({
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
     ...(message.chatId !== currentUserId && !isAudio && !noAuthors && {
       forwardInfo: {
-        date: message.date,
+        date: message.forwardInfo?.date || message.date,
+        savedDate: message.date,
         isChannelPost: false,
         fromChatId,
         fromMessageId,
-        senderUserId: senderId,
+        fromId: senderId,
+        savedFromPeerId: message.chatId,
       },
     }),
     ...(message.chatId === currentUserId && !noAuthors && { forwardInfo: message.forwardInfo }),

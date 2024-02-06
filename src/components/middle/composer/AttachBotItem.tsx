@@ -5,7 +5,7 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { ApiAttachBot } from '../../../api/types';
-import type { IAnchorPosition, ISettings } from '../../../types';
+import type { IAnchorPosition, ISettings, ThreadId } from '../../../types';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -20,7 +20,7 @@ type OwnProps = {
   theme: ISettings['theme'];
   isInSideMenu?: true;
   chatId?: string;
-  threadId?: number;
+  threadId?: ThreadId;
   canShowNew?: boolean;
   onMenuOpened: VoidFunction;
   onMenuClosed: VoidFunction;

@@ -597,6 +597,26 @@ export function updater(update: Update) {
       ids,
       folderId: update.folderId || undefined,
     });
+  } else if (
+    update instanceof GramJs.UpdateSavedDialogPinned
+    && update.peer instanceof GramJs.DialogPeer
+  ) {
+    onUpdate({
+      '@type': 'updateSavedDialogPinned',
+      id: getApiChatIdFromMtpPeer(update.peer.peer),
+      isPinned: update.pinned || false,
+    });
+  } else if (update instanceof GramJs.UpdatePinnedSavedDialogs) {
+    const ids = update.order
+      ? update.order
+        .filter((dp): dp is GramJs.DialogPeer => dp instanceof GramJs.DialogPeer)
+        .map((dp) => getApiChatIdFromMtpPeer(dp.peer))
+      : [];
+
+    onUpdate({
+      '@type': 'updatePinnedSavedDialogIds',
+      ids,
+    });
   } else if (update instanceof GramJs.UpdateFolderPeers) {
     update.folderPeers.forEach((folderPeer) => {
       const { folderId, peer } = folderPeer;

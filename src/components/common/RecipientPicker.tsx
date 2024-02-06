@@ -3,6 +3,7 @@ import React, { memo, useMemo, useState } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatType } from '../../api/types';
+import type { ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { API_CHAT_TYPES } from '../../config';
@@ -11,10 +12,10 @@ import {
   filterUsersByName,
   getCanPostInChat,
   isDeletedUser,
-  sortChatIds,
 } from '../../global/helpers';
 import { filterChatIdsByType } from '../../global/selectors';
 import { unique } from '../../util/iteratees';
+import sortChatIds from './helpers/sortChatIds';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
@@ -27,7 +28,7 @@ export type OwnProps = {
   className?: string;
   filter?: ApiChatType[];
   loadMore?: NoneToVoidFunction;
-  onSelectRecipient: (peerId: string, threadId?: number) => void;
+  onSelectRecipient: (peerId: string, threadId?: ThreadId) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };
@@ -85,7 +86,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
     const sorted = sortChatIds(unique([
       ...filterChatsByName(lang, chatIds, chatsById, search, currentUserId),
       ...(contactIds && filter.includes('users') ? filterUsersByName(contactIds, usersById, search) : []),
-    ]), chatsById, undefined, priorityIds);
+    ]), undefined, priorityIds);
 
     return filterChatIdsByType(global, sorted, filter);
   }, [pinnedIds, currentUserId, activeListIds, search, archivedListIds, lang, chatsById, contactIds, filter, isOpen]);

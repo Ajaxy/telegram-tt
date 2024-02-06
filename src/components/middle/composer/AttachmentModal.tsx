@@ -8,6 +8,7 @@ import type {
   ApiAttachment, ApiChatMember, ApiSticker,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
+import type { ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import {
@@ -59,7 +60,7 @@ import styles from './AttachmentModal.module.scss';
 
 export type OwnProps = {
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   attachments: ApiAttachment[];
   getHtml: Signal<string>;
   canShowCustomSendMenu?: boolean;

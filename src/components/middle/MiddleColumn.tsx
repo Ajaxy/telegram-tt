@@ -9,11 +9,12 @@ import type {
   ActiveEmojiInteraction,
   MessageListType,
 } from '../../global/types';
-import type { ThemeKey } from '../../types';
+import type { ThemeKey, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ANIMATION_END_DELAY,
+  ANONYMOUS_USER_ID,
   EDITABLE_INPUT_CSS_SELECTOR,
   EDITABLE_INPUT_ID,
   GENERAL_TOPIC_ID,
@@ -29,6 +30,7 @@ import {
   getCanPostInChat,
   getForumComposerPlaceholder,
   getHasAdminRight,
+  getIsSavedDialog,
   getMessageSendingRestrictionReason,
   isChatChannel,
   isChatGroup,
@@ -101,7 +103,7 @@ interface OwnProps {
 
 type StateProps = {
   chatId?: string;
-  threadId?: number;
+  threadId?: ThreadId;
   isComments?: boolean;
   messageListType?: MessageListType;
   chat?: ApiChat;
@@ -145,6 +147,8 @@ type StateProps = {
   topMessageId?: number;
   canUnpin?: boolean;
   canUnblock?: boolean;
+  isSavedDialog?: boolean;
+  canShowOpenChatButton?: boolean;
 };
 
 function isImage(item: DataTransferItem) {
@@ -201,6 +205,8 @@ function MiddleColumn({
   topMessageId,
   canUnpin,
   canUnblock,
+  isSavedDialog,
+  canShowOpenChatButton,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -378,6 +384,10 @@ function MiddleColumn({
     setIsUnpinModalOpen(false);
   });
 
+  const handleOpenChatFromSaved = useLastCallback(() => {
+    openChat({ id: String(threadId) });
+  });
+
   const handleUnpinAllMessages = useLastCallback(() => {
     unpinAllMessages({ chatId: chatId!, threadId: threadId! });
     closeUnpinModal();
@@ -465,12 +475,12 @@ function MiddleColumn({
   });
 
   const isMessagingDisabled = Boolean(
-    !isPinnedMessageList && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
+    !isPinnedMessageList && !isSavedDialog && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
     && !renderingCanSubscribe && composerRestrictionMessage,
   );
   const withMessageListBottomShift = Boolean(
     renderingCanRestartBot || renderingCanSubscribe || renderingShouldSendJoinRequest || renderingCanStartBot
-    || isPinnedMessageList || renderingCanUnblock,
+    || isPinnedMessageList || canShowOpenChatButton || renderingCanUnblock,
   );
   const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || isPinnedMessageList);
 
@@ -563,11 +573,24 @@ function MiddleColumn({
                       size="tiny"
                       fluid
                       color="secondary"
-                      className="unpin-all-button"
+                      className="composer-button unpin-all-button"
                       onClick={handleOpenUnpinModal}
                     >
                       <i className="icon icon-unpin" />
                       <span>{lang('Chat.Pinned.UnpinAll', pinnedMessagesCount, 'i')}</span>
+                    </Button>
+                  </div>
+                )}
+                {canShowOpenChatButton && (
+                  <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                    <Button
+                      size="tiny"
+                      fluid
+                      color="secondary"
+                      className="composer-button open-chat-button"
+                      onClick={handleOpenChatFromSaved}
+                    >
+                      <span>{lang('SavedOpenChat')}</span>
                     </Button>
                   </div>
                 )}
@@ -588,7 +611,7 @@ function MiddleColumn({
                       size="tiny"
                       fluid
                       ripple
-                      className="join-subscribe-button"
+                      className="composer-button join-subscribe-button"
                       onClick={handleSubscribeClick}
                     >
                       {lang(renderingIsChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
@@ -601,7 +624,7 @@ function MiddleColumn({
                       size="tiny"
                       fluid
                       ripple
-                      className="join-subscribe-button"
+                      className="composer-button join-subscribe-button"
                       onClick={handleSubscribeClick}
                     >
                       {lang('ChannelJoinRequest')}
@@ -614,7 +637,7 @@ function MiddleColumn({
                       size="tiny"
                       fluid
                       ripple
-                      className="join-subscribe-button"
+                      className="composer-button join-subscribe-button"
                       onClick={handleStartBot}
                     >
                       {lang('BotStart')}
@@ -627,7 +650,7 @@ function MiddleColumn({
                       size="tiny"
                       fluid
                       ripple
-                      className="join-subscribe-button"
+                      className="composer-button join-subscribe-button"
                       onClick={handleRestartBot}
                     >
                       {lang('BotRestart')}
@@ -640,7 +663,7 @@ function MiddleColumn({
                       size="tiny"
                       fluid
                       ripple
-                      className="join-subscribe-button"
+                      className="composer-button join-subscribe-button"
                       onClick={handleUnblock}
                     >
                       {lang('Unblock')}
@@ -763,8 +786,11 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
 
-    const isCommentThread = threadId !== MAIN_THREAD_ID && !chat?.isForum;
-    const topMessageId = isCommentThread ? threadId : undefined;
+    const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+    const canShowOpenChatButton = isSavedDialog && threadId !== ANONYMOUS_USER_ID;
+
+    const isCommentThread = threadId !== MAIN_THREAD_ID && !isSavedDialog && !chat?.isForum;
+    const topMessageId = isCommentThread ? Number(threadId) : undefined;
 
     const canUnpin = chat && (
       isPrivate || (
@@ -787,7 +813,8 @@ export default memo(withGlobal<OwnProps>(
         && (!chat || canPost)
         && !isBotNotStarted
         && !(shouldJoinToSend && chat?.isNotJoined)
-        && !shouldBlockSendInForum,
+        && !shouldBlockSendInForum
+        && !isSavedDialog,
       isPinnedMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
@@ -807,6 +834,8 @@ export default memo(withGlobal<OwnProps>(
       topMessageId,
       canUnpin,
       canUnblock,
+      isSavedDialog,
+      canShowOpenChatButton,
     };
   },
 )(MiddleColumn));

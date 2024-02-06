@@ -5,13 +5,14 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { MessageListType } from '../../global/types';
-import type { IAnchorPosition } from '../../types';
+import type { IAnchorPosition, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { ManagementScreens } from '../../types';
 
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getHasAdminRight,
+  isAnonymousForwardsChat,
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
 import {
@@ -44,7 +45,7 @@ import HeaderMenuContainer from './HeaderMenuContainer.async';
 
 interface OwnProps {
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   messageListType: MessageListType;
   canExpandActions: boolean;
   isForForum?: boolean;
@@ -485,7 +486,8 @@ export default memo(withGlobal<OwnProps>(
       (isMainThread || chat.isForum) && (isChannel || isChatSuperGroup(chat)) && chat.isNotJoined,
     );
     const canSearch = isMainThread || isDiscussionThread;
-    const canCall = ARE_CALLS_SUPPORTED && isUserId(chat.id) && !isChatWithSelf && !bot;
+    const canCall = ARE_CALLS_SUPPORTED && isUserId(chat.id) && !isChatWithSelf && !bot && !chat.isSupport
+      && !isAnonymousForwardsChat(chat.id);
     const canMute = isMainThread && !isChatWithSelf && !canSubscribe;
     const canLeave = isMainThread && !canSubscribe;
     const canEnterVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && chat.isCallActive;

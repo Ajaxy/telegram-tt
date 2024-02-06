@@ -1,6 +1,6 @@
 import { useEffect } from '../../../lib/teact/teact';
 
-import { ProfileState } from '../../../types';
+import { ProfileState, type ProfileTabType } from '../../../types';
 
 import animateScroll from '../../../util/animateScroll';
 import { throttle } from '../../../util/schedulers';
@@ -17,7 +17,7 @@ let isScrollingProgrammatically = false;
 
 export default function useProfileState(
   containerRef: { current: HTMLDivElement | null },
-  tabType: string,
+  tabType: ProfileTabType,
   profileState: ProfileState,
   onProfileStateChange: (state: ProfileState) => void,
 ) {
@@ -27,11 +27,7 @@ export default function useProfileState(
       const container = containerRef.current!;
       const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
       if (container.scrollTop < tabsEl.offsetTop) {
-        onProfileStateChange(
-          tabType === 'members'
-            ? ProfileState.MemberList
-            : (tabType === 'stories' ? ProfileState.StoryList : ProfileState.SharedMedia),
-        );
+        onProfileStateChange(getStateFromTabType(tabType));
         isScrollingProgrammatically = true;
         animateScroll(container, tabsEl, 'start', undefined, undefined, undefined, TRANSITION_DURATION);
         setTimeout(() => {
@@ -69,9 +65,7 @@ export default function useProfileState(
     setTimeout(() => {
       isScrollingProgrammatically = false;
     }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
-
-    onProfileStateChange(profileState);
-  }, [profileState, containerRef, onProfileStateChange]);
+  }, [profileState, containerRef]);
 
   const determineProfileState = useLastCallback(() => {
     const container = containerRef.current;
@@ -86,9 +80,7 @@ export default function useProfileState(
 
     let state: ProfileState = ProfileState.Profile;
     if (container.scrollTop >= tabListEl.offsetTop) {
-      state = tabType === 'members'
-        ? ProfileState.MemberList
-        : (tabType === 'stories' ? ProfileState.StoryList : ProfileState.SharedMedia);
+      state = getStateFromTabType(tabType);
     }
 
     onProfileStateChange(state);
@@ -113,4 +105,17 @@ export default function useProfileState(
   });
 
   return { handleScroll };
+}
+
+function getStateFromTabType(tabType: ProfileTabType) {
+  switch (tabType) {
+    case 'members':
+      return ProfileState.MemberList;
+    case 'stories':
+      return ProfileState.StoryList;
+    case 'dialogs':
+      return ProfileState.SavedDialogs;
+    default:
+      return ProfileState.SharedMedia;
+  }
 }

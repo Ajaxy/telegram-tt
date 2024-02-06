@@ -15,16 +15,19 @@ import type { MessageListType } from '../../global/types';
 import type { Signal } from '../../util/signals';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { LoadMoreDirection } from '../../types';
+import { LoadMoreDirection, type ThreadId } from '../../types';
 
 import {
   ANIMATION_END_DELAY,
+  ANONYMOUS_USER_ID,
   MESSAGE_LIST_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { forceMeasure, requestForcedReflow, requestMeasure } from '../../lib/fasterdom/fasterdom';
 import {
+  getIsSavedDialog,
   getMessageHtmlId,
+  isAnonymousForwardsChat,
   isChatChannel,
   isChatGroup,
   isChatWithRepliesBot,
@@ -35,6 +38,7 @@ import {
   selectBot,
   selectChat,
   selectChatFullInfo,
+  selectChatLastMessage,
   selectChatMessages,
   selectChatScheduledMessages,
   selectCurrentMessageIds,
@@ -80,7 +84,7 @@ import './MessageList.scss';
 
 type OwnProps = {
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   type: MessageListType;
   isComments?: boolean;
   canPost: boolean;
@@ -101,6 +105,7 @@ type StateProps = {
   isGroupChat?: boolean;
   isChatWithSelf?: boolean;
   isRepliesChat?: boolean;
+  isAnonymousForwards?: boolean;
   isCreator?: boolean;
   isBot?: boolean;
   isSynced?: boolean;
@@ -119,6 +124,7 @@ type StateProps = {
   isServiceNotificationsChat?: boolean;
   isEmptyThread?: boolean;
   isForum?: boolean;
+  currentUserId: string;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
@@ -152,6 +158,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isReady,
   isChatWithSelf,
   isRepliesChat,
+  isAnonymousForwards,
   isCreator,
   isBot,
   messageIds,
@@ -171,8 +178,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
   topic,
   noMessageSendingAnimation,
   isServiceNotificationsChat,
-  onPinnedIntersectionChange,
+  currentUserId,
   getForceNextPinnedInHeader,
+  onPinnedIntersectionChange,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -198,6 +206,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const memoFocusingIdRef = useRef<number>();
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
+
+  const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
+  const hasOpenChatButton = isSavedDialog && threadId !== ANONYMOUS_USER_ID;
 
   const areMessagesLoaded = Boolean(messageIds);
 
@@ -250,7 +261,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       ? groupMessages(
         orderBy(listedMessages, orderRule),
         memoUnreadDividerBeforeIdRef.current,
-        !isForum ? threadId : undefined,
+        !isForum ? Number(threadId) : undefined,
         isChatWithSelf,
       )
       : undefined;
@@ -547,9 +558,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [isSelectModeActive]);
 
   const isPrivate = Boolean(chatId && isUserId(chatId));
-  const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf || isRepliesChat);
+  const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf || isRepliesChat || isAnonymousForwards);
   const noAvatars = Boolean(!withUsers || isChannelChat);
-  const shouldRenderGreeting = isUserId(chatId) && !isChatWithSelf && !isBot
+  const shouldRenderGreeting = isUserId(chatId) && !isChatWithSelf && !isBot && !isAnonymousForwards
     && (
       (
         !messageGroups && !lastMessage && messageIds
@@ -575,6 +586,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     isSelectModeActive && 'select-mode-active',
     isScrolled && 'scrolled',
     !isReady && 'is-animating',
+    hasOpenChatButton && 'saved-dialog',
   );
 
   const hasMessages = (messageIds && messageGroups) || lastMessage;
@@ -610,6 +622,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           chatId={chatId}
           isComments={isComments}
           isChannelChat={isChannelChat}
+          isSavedDialog={isSavedDialog}
           messageIds={messageIds || [lastMessage!.id]}
           messageGroups={messageGroups || groupMessages([lastMessage!])}
           getContainerHeight={getContainerHeight}
@@ -642,9 +655,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, type }): StateProps => {
+    const currentUserId = global.currentUserId!;
     const chat = selectChat(global, chatId);
     if (!chat) {
-      return {};
+      return { currentUserId };
     }
 
     const messageIds = selectCurrentMessageIds(global, chatId, threadId, type);
@@ -652,14 +666,17 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatScheduledMessages(global, chatId)
       : selectChatMessages(global, chatId);
 
+    const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
+
     if (
-      threadId !== MAIN_THREAD_ID && !chat?.isForum
-      && !(messagesById && threadId && messagesById[threadId])
+      threadId !== MAIN_THREAD_ID && !isSavedDialog && !chat?.isForum
+      && !(messagesById && threadId && messagesById[Number(threadId)])
     ) {
-      return {};
+      return { currentUserId };
     }
 
-    const { isRestricted, restrictionReason, lastMessage } = chat;
+    const { isRestricted, restrictionReason } = chat;
+    const lastMessage = selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
     const focusingId = selectFocusedMessageId(global, chatId);
 
     const withLastMessageWhenPreloading = (
@@ -683,6 +700,7 @@ export default memo(withGlobal<OwnProps>(
       isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isRepliesChat: isChatWithRepliesBot(chatId),
+      isAnonymousForwards: isAnonymousForwardsChat(chatId),
       isBot: Boolean(chatBot),
       isSynced: global.isSynced,
       messageIds,
@@ -697,6 +715,7 @@ export default memo(withGlobal<OwnProps>(
       isServiceNotificationsChat: chatId === SERVICE_NOTIFICATIONS_USER_ID,
       isForum: chat.isForum,
       isEmptyThread,
+      currentUserId,
       ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },

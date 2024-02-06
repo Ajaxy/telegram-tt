@@ -17,6 +17,7 @@ import {
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
   FRESH_AUTH_PERIOD,
+  SAVED_FOLDER_ID,
 } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderKey, getPinnedChatsCount } from '../../../util/folderManager';
@@ -41,16 +42,17 @@ import EmptyFolder from './EmptyFolder';
 import UnconfirmedSession from './UnconfirmedSession';
 
 type OwnProps = {
-  folderType: 'all' | 'archived' | 'folder';
+  className?: string;
+  folderType: 'all' | 'archived' | 'saved' | 'folder';
   folderId?: number;
   isActive: boolean;
   canDisplayArchive?: boolean;
-  archiveSettings: GlobalState['archiveSettings'];
+  archiveSettings?: GlobalState['archiveSettings'];
   isForumPanelOpen?: boolean;
   sessions?: Record<string, ApiSession>;
-  foldersDispatch: FolderEditDispatch;
-  onSettingsScreenSelect: (screen: SettingsScreens) => void;
-  onLeftColumnContentChange: (content: LeftColumnContent) => void;
+  foldersDispatch?: FolderEditDispatch;
+  onSettingsScreenSelect?: (screen: SettingsScreens) => void;
+  onLeftColumnContentChange?: (content: LeftColumnContent) => void;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -58,6 +60,7 @@ const DRAG_ENTER_DEBOUNCE = 500;
 const RESERVED_HOTKEYS = new Set(['9', '0']);
 
 const ChatList: FC<OwnProps> = ({
+  className,
   folderType,
   folderId,
   isActive,
@@ -82,18 +85,19 @@ const ChatList: FC<OwnProps> = ({
 
   const isArchived = folderType === 'archived';
   const isAllFolder = folderType === 'all';
+  const isSaved = folderType === 'saved';
   const resolvedFolderId = (
-    isAllFolder ? ALL_FOLDER_ID : isArchived ? ARCHIVED_FOLDER_ID : folderId!
+    isAllFolder ? ALL_FOLDER_ID : isArchived ? ARCHIVED_FOLDER_ID : isSaved ? SAVED_FOLDER_ID : folderId!
   );
 
-  const shouldDisplayArchive = isAllFolder && canDisplayArchive;
+  const shouldDisplayArchive = isAllFolder && canDisplayArchive && archiveSettings;
 
   const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
   usePeerStoriesPolling(orderedIds);
 
   const chatsHeight = (orderedIds?.length || 0) * CHAT_HEIGHT_PX;
   const archiveHeight = shouldDisplayArchive
-    ? archiveSettings.isMinimized ? ARCHIVE_MINIMIZED_HEIGHT : CHAT_HEIGHT_PX : 0;
+    ? archiveSettings?.isMinimized ? ARCHIVE_MINIMIZED_HEIGHT : CHAT_HEIGHT_PX : 0;
 
   const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds);
 
@@ -125,7 +129,7 @@ const ChatList: FC<OwnProps> = ({
 
   // Support <Cmd>+<Digit> to navigate between chats
   useEffect(() => {
-    if (!isActive || !orderedIds || !IS_APP) {
+    if (!isActive || isSaved || !orderedIds || !IS_APP) {
       return undefined;
     }
 
@@ -134,13 +138,13 @@ const ChatList: FC<OwnProps> = ({
         const [, digit] = e.code.match(/Digit(\d)/) || [];
         if (!digit || RESERVED_HOTKEYS.has(digit)) return;
 
-        const isArchiveInList = shouldDisplayArchive && !archiveSettings.isMinimized;
+        const isArchiveInList = shouldDisplayArchive && archiveSettings && !archiveSettings.isMinimized;
 
         const shift = isArchiveInList ? -1 : 0;
         const position = Number(digit) + shift - 1;
 
         if (isArchiveInList && position === -1) {
-          onLeftColumnContentChange(LeftColumnContent.Archived);
+          onLeftColumnContentChange?.(LeftColumnContent.Archived);
           return;
         }
 
@@ -155,7 +159,10 @@ const ChatList: FC<OwnProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [archiveSettings, isActive, onLeftColumnContentChange, openChat, openNextChat, orderedIds, shouldDisplayArchive]);
+  }, [
+    archiveSettings, isSaved, isActive, onLeftColumnContentChange, openChat, openNextChat, orderedIds,
+    shouldDisplayArchive,
+  ]);
 
   const { observe } = useIntersectionObserver({
     rootRef: containerRef,
@@ -163,7 +170,7 @@ const ChatList: FC<OwnProps> = ({
   });
 
   const handleArchivedClick = useLastCallback(() => {
-    onLeftColumnContentChange(LeftColumnContent.Archived);
+    onLeftColumnContentChange!(LeftColumnContent.Archived);
     closeForumPanel();
   });
 
@@ -199,7 +206,7 @@ const ChatList: FC<OwnProps> = ({
     toggleStoryRibbon({ isShown: false, isArchived });
   });
 
-  const renderedOverflowTrigger = useTopOverscroll(containerRef, handleShowStoryRibbon, handleHideStoryRibbon);
+  const renderedOverflowTrigger = useTopOverscroll(containerRef, handleShowStoryRibbon, handleHideStoryRibbon, isSaved);
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
@@ -213,10 +220,11 @@ const ChatList: FC<OwnProps> = ({
       return (
         <Chat
           key={id}
-          teactOrderKey={isPinned ? i : getOrderKey(id)}
+          teactOrderKey={isPinned ? i : getOrderKey(id, isSaved)}
           chatId={id}
           isPinned={isPinned}
           folderId={folderId}
+          isSavedDialog={isSaved}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
           offsetTop={offsetTop}
@@ -229,7 +237,7 @@ const ChatList: FC<OwnProps> = ({
 
   return (
     <InfiniteScroll
-      className={buildClassName('chat-list custom-scroll', isForumPanelOpen && 'forum-panel-open')}
+      className={buildClassName('chat-list custom-scroll', isForumPanelOpen && 'forum-panel-open', className)}
       ref={containerRef}
       items={viewportIds}
       itemSelector=".ListItem:not(.chat-item-archive)"
@@ -257,13 +265,13 @@ const ChatList: FC<OwnProps> = ({
       )}
       {viewportIds?.length ? (
         renderChats()
-      ) : viewportIds && !viewportIds.length ? (
+      ) : viewportIds && !viewportIds.length && !isSaved ? (
         (
           <EmptyFolder
             folderId={folderId}
             folderType={folderType}
-            foldersDispatch={foldersDispatch}
-            onSettingsScreenSelect={onSettingsScreenSelect}
+            foldersDispatch={foldersDispatch!}
+            onSettingsScreenSelect={onSettingsScreenSelect!}
           />
         )
       ) : (

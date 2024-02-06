@@ -5,7 +5,7 @@ import { withGlobal } from '../../global';
 import type {
   ApiDimensions, ApiMessage, ApiPeer,
 } from '../../api/types';
-import { MediaViewerOrigin } from '../../types';
+import { MediaViewerOrigin, type ThreadId } from '../../types';
 
 import {
   selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectTabState, selectUser,
@@ -31,7 +31,7 @@ import './MediaViewerContent.scss';
 type OwnProps = {
   mediaId?: number;
   chatId?: string;
-  threadId?: number;
+  threadId?: ThreadId;
   avatarOwnerId?: string;
   origin?: MediaViewerOrigin;
   isActive?: boolean;
@@ -45,7 +45,7 @@ type StateProps = {
   chatId?: string;
   mediaId?: number;
   senderId?: string;
-  threadId?: number;
+  threadId?: ThreadId;
   avatarOwner?: ApiPeer;
   message?: ApiMessage;
   origin?: MediaViewerOrigin;

@@ -3,7 +3,7 @@ import React, {
   memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import type { MediaViewerOrigin } from '../../types';
+import type { MediaViewerOrigin, ThreadId } from '../../types';
 import type { RealTouchEvent } from '../../util/captureEvents';
 
 import { animateNumber, timingFunctions } from '../../util/animation';
@@ -46,7 +46,7 @@ type OwnProps = {
   isOpen?: boolean;
   selectMedia: (id?: number) => void;
   chatId?: string;
-  threadId?: number;
+  threadId?: ThreadId;
   avatarOwnerId?: string;
   origin?: MediaViewerOrigin;
   withAnimation?: boolean;

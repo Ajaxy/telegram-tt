@@ -1,11 +1,11 @@
 import type {
   ApiChat, ApiChatFullInfo, ApiChatType, ApiPeer,
 } from '../../api/types';
-import type { GlobalState, TabArgs } from '../types';
+import type { ChatListType, GlobalState, TabArgs } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
+  ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
@@ -119,7 +119,8 @@ export function selectIsChatBotNotStarted<T extends GlobalState>(global: T, chat
     return false;
   }
 
-  if (chat.lastMessage && isHistoryClearMessage(chat.lastMessage)) {
+  const lastMessage = selectChatLastMessage(global, chatId);
+  if (lastMessage && isHistoryClearMessage(lastMessage)) {
     return true;
   }
 
@@ -137,7 +138,7 @@ export function selectAreActiveChatsLoaded<T extends GlobalState>(global: T): bo
 }
 
 export function selectIsChatListed<T extends GlobalState>(
-  global: T, chatId: string, type?: 'active' | 'archived',
+  global: T, chatId: string, type?: ChatListType,
 ): boolean {
   const { listIds } = global.chats;
   if (type) {
@@ -178,7 +179,7 @@ export function selectTotalChatCount<T extends GlobalState>(global: T, listType:
 export function selectIsChatPinned<T extends GlobalState>(
   global: T, chatId: string, folderId = ALL_FOLDER_ID,
 ): boolean {
-  const { active, archived } = global.chats.orderedPinnedIds;
+  const { active, archived, saved } = global.chats.orderedPinnedIds;
 
   if (folderId === ALL_FOLDER_ID) {
     return Boolean(active?.includes(chatId));
@@ -186,6 +187,10 @@ export function selectIsChatPinned<T extends GlobalState>(
 
   if (folderId === ARCHIVED_FOLDER_ID) {
     return Boolean(archived?.includes(chatId));
+  }
+
+  if (folderId === SAVED_FOLDER_ID) {
+    return Boolean(saved?.includes(chatId));
   }
 
   const { byId: chatFoldersById } = global.chatFolders;
@@ -322,4 +327,20 @@ export function selectSimilarChannelIds<T extends GlobalState>(
   chatId: string,
 ): string[] | undefined {
   return global.chats.similarChannelsById[chatId];
+}
+
+export function selectChatLastMessageId<T extends GlobalState>(
+  global: T, chatId: string, listType: 'all' | 'saved' = 'all',
+) {
+  return global.chats.lastMessageIds[listType]?.[chatId];
+}
+
+export function selectChatLastMessage<T extends GlobalState>(
+  global: T, chatId: string, listType: 'all' | 'saved' = 'all',
+) {
+  const id = selectChatLastMessageId(global, chatId, listType);
+  if (!id) return undefined;
+
+  const realChatId = listType === 'saved' ? global.currentUserId! : chatId;
+  return global.messages.byChatId[realChatId]?.byId[id];
 }

@@ -6,12 +6,15 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiMessage, ApiPeer } from '../../api/types';
+import type { ThreadId } from '../../types';
 
+import { REPLIES_USER_ID } from '../../config';
 import {
-  selectChat,
   selectChatMessages,
   selectCurrentTextSearch,
-  selectUser,
+  selectForwardedSender,
+  selectIsChatWithSelf,
+  selectSender,
 } from '../../global/selectors';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
@@ -32,7 +35,7 @@ import './RightSearch.scss';
 
 export type OwnProps = {
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   onClose: NoneToVoidFunction;
   isActive: boolean;
 };
@@ -42,6 +45,7 @@ type StateProps = {
   query?: string;
   totalCount?: number;
   foundIds?: number[];
+  isSavedMessages?: boolean;
 };
 
 const RightSearch: FC<OwnProps & StateProps> = ({
@@ -52,6 +56,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
   query,
   totalCount,
   foundIds,
+  isSavedMessages,
   onClose,
 }) => {
   const {
@@ -97,15 +102,11 @@ const RightSearch: FC<OwnProps & StateProps> = ({
 
       const global = getGlobal();
 
-      let senderPeer = message.senderId
-        ? selectUser(global, message.senderId) || selectChat(global, message.senderId)
-        : undefined;
+      const originalSender = (isSavedMessages || chatId === REPLIES_USER_ID)
+        ? selectForwardedSender(global, message) : undefined;
+      const messageSender = selectSender(global, message);
 
-      if (!senderPeer && message.forwardInfo) {
-        const { isChannelPost, fromChatId } = message.forwardInfo;
-        const originalSender = isChannelPost && fromChatId ? selectChat(global, fromChatId) : undefined;
-        if (originalSender) senderPeer = originalSender;
-      }
+      const senderPeer = originalSender || messageSender;
 
       if (!senderPeer) {
         return undefined;
@@ -113,11 +114,11 @@ const RightSearch: FC<OwnProps & StateProps> = ({
 
       return {
         message,
-        senderPeer: senderPeer!,
+        senderPeer,
         onClick: () => focusMessage({ chatId, threadId, messageId: id }),
       };
     }).filter(Boolean);
-  }, [query, viewportIds, messagesById, focusMessage, chatId, threadId]);
+  }, [query, viewportIds, messagesById, isSavedMessages, chatId, threadId]);
 
   const handleKeyDown = useKeyboardListNavigation(containerRef, true, (index) => {
     const foundResult = viewportResults?.[index === -1 ? 0 : index];
@@ -197,11 +198,14 @@ export default memo(withGlobal<OwnProps>(
     const { query, results } = selectCurrentTextSearch(global) || {};
     const { totalCount, foundIds } = results || {};
 
+    const isSavedMessages = selectIsChatWithSelf(global, chatId);
+
     return {
       messagesById,
       query,
       totalCount,
       foundIds,
+      isSavedMessages,
     };
   },
 )(RightSearch));

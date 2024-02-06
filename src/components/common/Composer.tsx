@@ -30,7 +30,9 @@ import type {
   ApiDraft, GlobalState, MessageList,
   MessageListType, TabState,
 } from '../../global/types';
-import type { IAnchorPosition, InlineBotSettings, ISettings } from '../../types';
+import type {
+  IAnchorPosition, InlineBotSettings, ISettings, ThreadId,
+} from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -164,7 +166,7 @@ type ComposerType = 'messageList' | 'story';
 type OwnProps = {
   type: ComposerType;
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   storyId?: number;
   messageListType: MessageListType;
   dropAreaState?: string;

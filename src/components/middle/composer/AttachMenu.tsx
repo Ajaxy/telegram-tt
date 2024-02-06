@@ -6,7 +6,7 @@ import React, {
 
 import type { ApiAttachMenuPeerType } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ISettings } from '../../../types';
+import type { ISettings, ThreadId } from '../../../types';
 
 import {
   CONTENT_TYPES_WITH_PREVIEW, DEBUG_LOG_FILENAME, SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -32,7 +32,7 @@ import './AttachMenu.scss';
 
 export type OwnProps = {
   chatId: string;
-  threadId?: number;
+  threadId?: ThreadId;
   isButtonVisible: boolean;
   canAttachMedia: boolean;
   canAttachPolls: boolean;

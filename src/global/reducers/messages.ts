@@ -1,7 +1,7 @@
 import type {
   ApiMessage, ApiSponsoredMessage, ApiThreadInfo,
 } from '../../api/types';
-import type { FocusDirection } from '../../types';
+import type { FocusDirection, ThreadId } from '../../types';
 import type {
   GlobalState, MessageList, MessageListType, TabArgs, TabThread,
   Thread,
@@ -45,7 +45,7 @@ type MessageStoreSections = {
 export function updateCurrentMessageList<T extends GlobalState>(
   global: T,
   chatId: string | undefined,
-  threadId: number = MAIN_THREAD_ID,
+  threadId: ThreadId = MAIN_THREAD_ID,
   type: MessageListType = 'thread',
   shouldReplaceHistory?: boolean,
   shouldReplaceLast?: boolean,
@@ -80,7 +80,7 @@ function replaceChatMessages<T extends GlobalState>(global: T, chatId: string, n
 }
 
 export function updateTabThread<T extends GlobalState>(
-  global: T, chatId: string, threadId: number, threadUpdate: Partial<TabThread>,
+  global: T, chatId: string, threadId: ThreadId, threadUpdate: Partial<TabThread>,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const tabState = selectTabState(global, tabId);
@@ -101,7 +101,7 @@ export function updateTabThread<T extends GlobalState>(
 }
 
 export function updateThread<T extends GlobalState>(
-  global: T, chatId: string, threadId: number, threadUpdate: Partial<Thread> | undefined,
+  global: T, chatId: string, threadId: ThreadId, threadUpdate: Partial<Thread> | undefined,
 ): T {
   if (!threadUpdate) {
     return updateMessageStore(global, chatId, {
@@ -143,7 +143,7 @@ function updateMessageStore<T extends GlobalState>(
 }
 
 export function replaceTabThreadParam<T extends GlobalState, K extends keyof TabThread>(
-  global: T, chatId: string, threadId: number, paramName: K, newValue: TabThread[K] | undefined,
+  global: T, chatId: string, threadId: ThreadId, paramName: K, newValue: TabThread[K] | undefined,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   if (paramName === 'viewportIds') {
@@ -155,7 +155,7 @@ export function replaceTabThreadParam<T extends GlobalState, K extends keyof Tab
 }
 
 export function replaceThreadParam<T extends GlobalState, K extends keyof Thread>(
-  global: T, chatId: string, threadId: number, paramName: K, newValue: Thread[K] | undefined,
+  global: T, chatId: string, threadId: ThreadId, paramName: K, newValue: Thread[K] | undefined,
 ) {
   return updateThread(global, chatId, threadId, { [paramName]: newValue });
 }
@@ -254,7 +254,7 @@ export function deleteChatMessages<T extends GlobalState>(
   }
 
   orderHistoryIds(messageIds);
-  const updatedThreads = new Map<number, number[]>();
+  const updatedThreads = new Map<ThreadId, number[]>();
   updatedThreads.set(MAIN_THREAD_ID, messageIds);
 
   messageIds.forEach((messageId) => {
@@ -382,7 +382,7 @@ export function deleteChatScheduledMessages<T extends GlobalState>(
 export function updateListedIds<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   idsUpdate: number[],
 ): T {
   const listedIds = selectListedIds(global, chatId, threadId);
@@ -403,7 +403,7 @@ export function updateListedIds<T extends GlobalState>(
 export function removeOutlyingList<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   list: number[],
 ): T {
   const outlyingLists = selectOutlyingLists(global, chatId, threadId);
@@ -419,7 +419,7 @@ export function removeOutlyingList<T extends GlobalState>(
 export function updateOutlyingLists<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   idsUpdate: number[],
 ): T {
   if (!idsUpdate.length) return global;
@@ -434,7 +434,7 @@ export function updateOutlyingLists<T extends GlobalState>(
 export function addViewportId<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   newId: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -458,7 +458,7 @@ export function addViewportId<T extends GlobalState>(
 export function safeReplaceViewportIds<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   newViewportIds: number[],
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
@@ -478,7 +478,7 @@ export function safeReplaceViewportIds<T extends GlobalState>(
 export function safeReplacePinnedIds<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   newPinnedIds: number[],
 ): T {
   const currentIds = selectPinnedIds(global, chatId, threadId) || [];
@@ -494,7 +494,7 @@ export function safeReplacePinnedIds<T extends GlobalState>(
 }
 
 export function updateThreadInfo<T extends GlobalState>(
-  global: T, chatId: string, threadId: number, update: Partial<ApiThreadInfo> | undefined,
+  global: T, chatId: string, threadId: ThreadId, update: Partial<ApiThreadInfo> | undefined,
   doNotUpdateLinked?: boolean,
 ): T {
   const newThreadInfo = {
@@ -572,7 +572,7 @@ export function updateFocusedMessage<T extends GlobalState>({
   global: T;
   chatId?: string;
   messageId?: number;
-  threadId?: number;
+  threadId?: ThreadId;
   noHighlight?: boolean;
   isResizingContainer?: boolean;
   quote?: string;
@@ -637,7 +637,7 @@ export function enterMessageSelectMode<T extends GlobalState>(
 export function toggleMessageSelection<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   messageListType: MessageListType,
   messageId: number,
   groupedId?: string,
@@ -715,7 +715,7 @@ export function updateThreadUnreadFromForwardedMessage<T extends GlobalState>(
 }
 
 export function updateTopicLastMessageId<T extends GlobalState>(
-  global: T, chatId: string, threadId: number, lastMessageId: number,
+  global: T, chatId: string, threadId: ThreadId, lastMessageId: number,
 ) {
   const chat = selectChat(global, chatId);
   if (!chat?.topics?.[threadId]) return global;

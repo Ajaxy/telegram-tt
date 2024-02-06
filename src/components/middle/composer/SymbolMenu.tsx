@@ -6,6 +6,7 @@ import { withGlobal } from '../../../global';
 
 import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { GlobalActions } from '../../../global';
+import type { ThreadId } from '../../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectIsContextMenuTranslucent, selectTabState } from '../../../global/selectors';
@@ -35,7 +36,7 @@ const STICKERS_TAB_INDEX = 2;
 
 export type OwnProps = {
   chatId: string;
-  threadId?: number;
+  threadId?: ThreadId;
   isOpen: boolean;
   canSendStickers?: boolean;
   canSendGifs?: boolean;
