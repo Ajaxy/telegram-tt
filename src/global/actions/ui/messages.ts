@@ -21,7 +21,7 @@ import { getServerTime } from '../../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import versionNotification from '../../../versionNotification.txt';
 import {
-  getIsSavedDialog, getMessageSummaryText, getSenderTitle, isChatChannel,
+  getIsSavedDialog, getMessageSummaryText, getSenderTitle, isChatChannel, isJoinedChannelMessage,
 } from '../../helpers';
 import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -330,6 +330,13 @@ addActionHandler('focusLastMessage', (global, actions, payload): ActionReturnTyp
       lastMessageId = pinnedMessageIds[pinnedMessageIds.length - 1];
     } else {
       lastMessageId = selectChatLastMessageId(global, chatId);
+
+      const chatMessages = selectChatMessages(global, chatId);
+      // Workaround for scroll to local message 'you joined this channel'
+      const lastChatMessage = Object.values(chatMessages).reverse()[0];
+      if (lastMessageId && isJoinedChannelMessage(lastChatMessage) && lastChatMessage.id > lastMessageId) {
+        lastMessageId = lastChatMessage.id;
+      }
     }
   } else if (isSavedDialog) {
     lastMessageId = selectChatLastMessageId(global, String(threadId), 'saved');

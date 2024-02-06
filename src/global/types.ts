@@ -234,6 +234,7 @@ export type TabState = {
   };
 
   nextProfileTab?: ProfileTabType;
+  forceScrollProfileTab?: boolean;
   nextSettingsScreen?: SettingsScreens;
   nextFoldersAction?: ReducerAction<FoldersActions>;
   shareFolderScreen?: {
@@ -807,7 +808,14 @@ export type GlobalState = {
     forDiscussionIds?: string[];
     // Obtained from GetFullChat / GetFullChannel
     fullInfoById: Record<string, ApiChatFullInfo>;
-    similarChannelsById: Record<string, string[]>;
+    similarChannelsById: Record<
+    string,
+    {
+      shouldShowInChat: boolean;
+      similarChannelIds: string[];
+      count: number;
+    }
+    >;
   };
 
   messages: {
@@ -1223,7 +1231,10 @@ export interface ActionPayloads {
     onReplace?: VoidFunction;
     shouldReplace?: boolean;
   };
-  openChatWithInfo: ActionPayloads['openChat'] & { profileTab?: ProfileTabType } & WithTabId;
+  openChatWithInfo: ActionPayloads['openChat'] & {
+    profileTab?: ProfileTabType;
+    forceScrollProfileTab?: boolean;
+  } & WithTabId;
   openThreadWithInfo: ActionPayloads['openThread'] & WithTabId;
   openLinkedChat: { id: string } & WithTabId;
   loadMoreMembers: WithTabId | undefined;
@@ -1807,6 +1818,9 @@ export interface ActionPayloads {
     chatId: string;
   };
   fetchChannelRecommendations: {
+    chatId: string;
+  };
+  toggleChannelRecommendations: {
     chatId: string;
   };
   updateChatMutedState: {

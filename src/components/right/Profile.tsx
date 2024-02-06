@@ -125,6 +125,7 @@ type StateProps = {
   limitSimilarChannels: number;
   isTopicInfo?: boolean;
   isSavedDialog?: boolean;
+  forceScrollProfileTab?: boolean;
 };
 
 type TabProps = {
@@ -180,6 +181,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   limitSimilarChannels,
   isTopicInfo,
   isSavedDialog,
+  forceScrollProfileTab,
 }) => {
   const {
     setLocalMediaSearchType,
@@ -254,10 +256,10 @@ const Profile: FC<OwnProps & StateProps> = ({
   }, [nextProfileTab, tabs]);
 
   useEffect(() => {
-    if (isChannel) {
+    if (isChannel && !similarChannels) {
       fetchChannelRecommendations({ chatId });
     }
-  }, [chatId, isChannel]);
+  }, [chatId, isChannel, similarChannels]);
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
@@ -296,7 +298,13 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   usePeerStoriesPolling(resultType === 'members' ? viewportIds as string[] : undefined);
 
-  const { handleScroll } = useProfileState(containerRef, resultType, profileState, onProfileStateChange);
+  const { handleScroll } = useProfileState(
+    containerRef,
+    resultType,
+    profileState,
+    onProfileStateChange,
+    forceScrollProfileTab,
+  );
 
   const { applyTransitionFix, releaseTransitionFix } = useTransitionFixes(containerRef);
 
@@ -693,7 +701,7 @@ export default memo(withGlobal<OwnProps>(
       && (getHasAdminRight(chat, 'inviteUsers') || !isUserRightBanned(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
     const activeDownloads = selectActiveDownloads(global, chatId);
-    const similarChannels = selectSimilarChannelIds(global, chatId);
+    const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
     let hasCommonChatsTab;
@@ -739,8 +747,9 @@ export default memo(withGlobal<OwnProps>(
       storyByIds,
       isChatProtected: chat?.isProtected,
       nextProfileTab: selectTabState(global).nextProfileTab,
+      forceScrollProfileTab: selectTabState(global).forceScrollProfileTab,
       shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
-      similarChannels,
+      similarChannels: similarChannelIds,
       isCurrentUserPremium,
       isTopicInfo,
       isSavedDialog,

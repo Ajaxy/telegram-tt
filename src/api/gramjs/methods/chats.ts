@@ -2037,7 +2037,13 @@ export async function fetchChannelRecommendations({ chat }: { chat: ApiChat }) {
 
   updateLocalDb(result);
 
-  return result?.chats.map((_chat) => buildApiChatFromPreview(_chat)).filter(Boolean);
+  return {
+    similarChannels: result?.chats
+      .map((_chat) => buildApiChatFromPreview(_chat))
+      .filter(Boolean),
+    count:
+      result instanceof GramJs.messages.ChatsSlice ? result.count : undefined,
+  };
 }
 
 function handleUserPrivacyRestrictedUpdates(updates: GramJs.TypeUpdates) {

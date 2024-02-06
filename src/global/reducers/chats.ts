@@ -446,7 +446,9 @@ export function deleteTopic<T extends GlobalState>(
 export function addSimilarChannels<T extends GlobalState>(
   global: T,
   chatId: string,
-  similarChannels: string[],
+  similarChannelIds: string[],
+  count?: number,
+  shouldShowInChat = true,
 ) {
   return {
     ...global,
@@ -454,7 +456,33 @@ export function addSimilarChannels<T extends GlobalState>(
       ...global.chats,
       similarChannelsById: {
         ...global.chats.similarChannelsById,
-        [chatId]: similarChannels,
+        [chatId]: {
+          similarChannelIds,
+          count: count || similarChannelIds.length,
+          shouldShowInChat,
+        },
+      },
+    },
+  };
+}
+
+export function toggleSimilarChannels<T extends GlobalState>(
+  global: T,
+  chatId: string,
+) {
+  const similarChannels = global.chats.similarChannelsById[chatId];
+  const shouldShowInChat = !global.chats.similarChannelsById[chatId].shouldShowInChat;
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      similarChannelsById: {
+        ...global.chats.similarChannelsById,
+        [chatId]: {
+          ...similarChannels,
+          shouldShowInChat,
+        },
       },
     },
   };

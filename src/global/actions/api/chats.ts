@@ -44,6 +44,7 @@ import {
   isChatBasicGroup,
   isChatChannel,
   isChatSuperGroup,
+  isLocalMessageId,
   isUserBot,
   toChannelId,
 } from '../../helpers';
@@ -58,6 +59,7 @@ import {
   addUsers,
   addUserStatuses,
   addUsersToRestrictedInviteList,
+  deleteChatMessages,
   deleteTopic,
   leaveChat,
   removeChatFromChatLists,
@@ -67,6 +69,7 @@ import {
   replaceThreadParam,
   replaceUsers,
   replaceUserStatuses,
+  toggleSimilarChannels,
   updateChat,
   updateChatFullInfo,
   updateChatLastMessageId,
@@ -93,6 +96,7 @@ import {
   selectChatLastMessage,
   selectChatLastMessageId,
   selectChatListType,
+  selectChatMessages,
   selectCurrentChat,
   selectCurrentMessageList,
   selectDraft,
@@ -798,7 +802,7 @@ addActionHandler('deleteChat', (global, actions, payload): ActionReturnType => {
   void callApi('deleteChat', { chatId: chat.id });
 });
 
-addActionHandler('leaveChannel', (global, actions, payload): ActionReturnType => {
+addActionHandler('leaveChannel', async (global, actions, payload): Promise<void> => {
   const { chatId, tabId = getCurrentTabId() } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -814,7 +818,12 @@ addActionHandler('leaveChannel', (global, actions, payload): ActionReturnType =>
 
   const { id: channelId, accessHash } = chat;
   if (channelId && accessHash) {
-    void callApi('leaveChannel', { channelId, accessHash });
+    await callApi('leaveChannel', { channelId, accessHash });
+    global = getGlobal();
+    const chatMessages = selectChatMessages(global, chatId);
+    const localMessageIds = Object.keys(chatMessages).map(Number).filter(isLocalMessageId);
+    global = deleteChatMessages(global, chatId, localMessageIds);
+    setGlobal(global);
   }
 });
 
@@ -2615,9 +2624,9 @@ addActionHandler('fetchChannelRecommendations', async (global, actions, payload)
     return;
   }
 
-  const similarChannels = await callApi('fetchChannelRecommendations', {
+  const { similarChannels, count } = await callApi('fetchChannelRecommendations', {
     chat,
-  });
+  }) || {};
 
   if (!similarChannels) {
     return;
@@ -2625,8 +2634,19 @@ addActionHandler('fetchChannelRecommendations', async (global, actions, payload)
 
   global = getGlobal();
   global = addChats(global, buildCollectionByKey(similarChannels, 'id'));
-  global = addSimilarChannels(global, chatId, similarChannels.map((channel) => channel.id));
+  global = addSimilarChannels(global, chatId, similarChannels.map((channel) => channel.id), count);
+  setGlobal(global);
+});
 
+addActionHandler('toggleChannelRecommendations', (global, actions, payload): ActionReturnType => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+
+  if (!chat) {
+    return;
+  }
+
+  global = toggleSimilarChannels(global, chatId);
   setGlobal(global);
 });
 
