@@ -36,6 +36,7 @@ import {
   selectViewportIds,
 } from '../selectors';
 import { updateTabState } from './tabs';
+import { clearMessageTranslation } from './translations';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
@@ -261,10 +262,12 @@ export function deleteChatMessages<T extends GlobalState>(
     const message = byId[messageId];
     if (!message) return;
     const threadId = selectThreadIdFromMessage(global, message);
-    if (!threadId || threadId === MAIN_THREAD_ID) return;
+    if (!threadId) return;
     const threadMessages = updatedThreads.get(threadId) || [];
     threadMessages.push(messageId);
     updatedThreads.set(threadId, threadMessages);
+
+    global = clearMessageTranslation(global, chatId, messageId);
   });
 
   const deletedForwardedPosts = Object.values(pickTruthy(byId, messageIds)).filter(
@@ -297,15 +300,11 @@ export function deleteChatMessages<T extends GlobalState>(
     }
 
     Object.values(global.byTabId).forEach(({ id: tabId }) => {
-      let viewportIds = selectViewportIds(global, chatId, threadId, tabId);
+      const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
+      if (!viewportIds) return;
 
-      messageIds.forEach((messageId) => {
-        if (viewportIds?.includes(messageId)) {
-          viewportIds = viewportIds.filter((id) => id !== messageId);
-        }
-      });
-
-      global = replaceTabThreadParam(global, chatId, threadId, 'viewportIds', viewportIds, tabId);
+      const newViewportIds = excludeSortedArray(viewportIds, messageIds);
+      global = replaceTabThreadParam(global, chatId, threadId, 'viewportIds', newViewportIds, tabId);
     });
 
     global = replaceThreadParam(global, chatId, threadId, 'listedIds', listedIds);

@@ -710,6 +710,22 @@ addActionHandler('deleteHistory', async (global, actions, payload): Promise<void
   });
 });
 
+addActionHandler('deleteSavedHistory', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload!;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  await callApi('deleteSavedHistory', { chat });
+
+  global = getGlobal();
+  const activeChat = selectCurrentMessageList(global, tabId);
+  if (activeChat && activeChat.threadId === chatId) {
+    actions.openChat({ id: undefined, tabId });
+  }
+});
+
 addActionHandler('reportMessages', async (global, actions, payload): Promise<void> => {
   const {
     messageIds, reason, description, tabId = getCurrentTabId(),

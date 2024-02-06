@@ -35,6 +35,7 @@ export {
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
   saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, transcribeAudio,
   closePoll, fetchExtendedMedia, translateText, fetchMessageViews, fetchDiscussionMessage, clickSponsoredMessage,
+  deleteSavedHistory,
 } from './messages';
 
 export {

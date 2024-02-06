@@ -1385,6 +1385,9 @@ export interface ActionPayloads {
     chatId: string;
     shouldDeleteForAll?: boolean;
   } & WithTabId;
+  deleteSavedHistory: {
+    chatId: string;
+  } & WithTabId;
   loadSponsoredMessages: {
     chatId: string;
   };

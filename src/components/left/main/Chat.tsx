@@ -354,6 +354,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           onClose={closeDeleteModal}
           onCloseAnimationEnd={unmarkRenderDeleteModal}
           chat={chat}
+          isSavedDialog={isSavedDialog}
         />
       )}
       {shouldRenderMuteModal && (

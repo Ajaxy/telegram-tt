@@ -45,6 +45,24 @@ const useChatContextActions = ({
   const { isSelf } = user || {};
   const isServiceNotifications = user?.id === SERVICE_NOTIFICATIONS_USER_ID;
 
+  const deleteTitle = useMemo(() => {
+    if (!chat) return undefined;
+
+    if (isUserId(chat.id) || isSavedDialog) {
+      return lang('DeleteChatUser');
+    }
+
+    if (getCanDeleteChat(chat)) {
+      return lang('DeleteChat');
+    }
+
+    if (isChatChannel(chat)) {
+      return lang('LeaveChannel');
+    }
+
+    return lang('Group.LeaveGroup');
+  }, [chat, isSavedDialog, lang]);
+
   return useMemo(() => {
     if (!chat) {
       return undefined;
@@ -91,8 +109,15 @@ const useChatContextActions = ({
         handler: togglePinned,
       };
 
+    const actionDelete = {
+      title: deleteTitle,
+      icon: 'delete',
+      destructive: true,
+      handler: handleDelete,
+    };
+
     if (isSavedDialog) {
-      return compact([actionOpenInNewTab, actionPin]) as MenuItemContextAction[];
+      return compact([actionOpenInNewTab, actionPin, actionDelete]) as MenuItemContextAction[];
     }
 
     const actionAddToFolder = canChangeFolder ? {
@@ -133,17 +158,6 @@ const useChatContextActions = ({
       ? { title: lang('ReportPeer.Report'), icon: 'flag', handler: handleReport }
       : undefined;
 
-    const actionDelete = {
-      title: isUserId(chat.id)
-        ? lang('Delete')
-        : lang(getCanDeleteChat(chat)
-          ? 'DeleteChat'
-          : (isChatChannel(chat) ? 'LeaveChannel' : 'Group.LeaveGroup')),
-      icon: 'delete',
-      destructive: true,
-      handler: handleDelete,
-    };
-
     const isInFolder = folderId !== undefined;
 
     return compact([
@@ -159,7 +173,7 @@ const useChatContextActions = ({
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, currentUserId,
-    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, isSavedDialog,
+    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, isSavedDialog, deleteTitle,
   ]);
 };
 

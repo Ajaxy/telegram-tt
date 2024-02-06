@@ -1,21 +1,21 @@
-import { Api as GramJs, connection } from '../../lib/gramjs';
+import { Api as GramJs, connection } from '../../../lib/gramjs';
 
-import type { GroupCallConnectionData } from '../../lib/secret-sauce';
+import type { GroupCallConnectionData } from '../../../lib/secret-sauce';
 import type {
   ApiMessage, ApiMessageExtendedMediaPreview, ApiStory, ApiStorySkipped,
   ApiUpdate, ApiUpdateConnectionStateType, MediaContent, OnApiUpdate,
-} from '../types';
+} from '../../types';
 
-import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
-import { compact, omit, pick } from '../../util/iteratees';
-import { getServerTimeOffset, setServerTimeOffset } from '../../util/serverTime';
-import { buildApiBotMenuButton } from './apiBuilders/bots';
+import { DEBUG, GENERAL_TOPIC_ID } from '../../../config';
+import { compact, omit, pick } from '../../../util/iteratees';
+import { getServerTimeOffset, setServerTimeOffset } from '../../../util/serverTime';
+import { buildApiBotMenuButton } from '../apiBuilders/bots';
 import {
   buildApiGroupCall,
   buildApiGroupCallParticipant,
   buildPhoneCall,
   getGroupCallId,
-} from './apiBuilders/calls';
+} from '../apiBuilders/calls';
 import {
   buildApiChatFolder,
   buildApiChatFromPreview,
@@ -24,15 +24,15 @@ import {
   buildChatMember,
   buildChatMembers,
   buildChatTypingStatus,
-} from './apiBuilders/chats';
-import { buildApiPhoto, buildApiUsernames, buildPrivacyRules } from './apiBuilders/common';
-import { omitVirtualClassFields } from './apiBuilders/helpers';
+} from '../apiBuilders/chats';
+import { buildApiPhoto, buildApiUsernames, buildPrivacyRules } from '../apiBuilders/common';
+import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import {
   buildApiMessageExtendedMediaPreview,
   buildMessageMediaContent,
   buildPoll,
   buildPollResults,
-} from './apiBuilders/messageContent';
+} from '../apiBuilders/messageContent';
 import {
   buildApiMessage,
   buildApiMessageFromNotification,
@@ -40,28 +40,28 @@ import {
   buildApiMessageFromShortChat,
   buildApiThreadInfoFromMessage,
   buildMessageDraft,
-} from './apiBuilders/messages';
+} from '../apiBuilders/messages';
 import {
   buildApiNotifyException,
   buildApiNotifyExceptionTopic,
   buildPrivacyKey,
-} from './apiBuilders/misc';
-import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
+} from '../apiBuilders/misc';
+import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
   buildApiReaction,
   buildMessageReactions,
-} from './apiBuilders/reactions';
-import { buildApiStealthMode, buildApiStory } from './apiBuilders/stories';
-import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols';
+} from '../apiBuilders/reactions';
+import { buildApiStealthMode, buildApiStory } from '../apiBuilders/stories';
+import { buildApiEmojiInteraction, buildStickerSet } from '../apiBuilders/symbols';
 import {
   buildApiUser,
   buildApiUserStatus,
-} from './apiBuilders/users';
+} from '../apiBuilders/users';
 import {
   buildChatPhotoForLocalDb,
   buildMessageFromUpdate,
   isMessageWithMedia,
-} from './gramjsBuilders';
+} from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
   addMessageToLocalDb,
@@ -72,13 +72,15 @@ import {
   resolveMessageApiChatId,
   serializeBytes,
   swapLocalInvoiceMedia,
-} from './helpers';
-import localDb from './localDb';
-import { scheduleMutedChatUpdate, scheduleMutedTopicUpdate } from './scheduleUnmute';
+} from '../helpers';
+import localDb from '../localDb';
+import { scheduleMutedChatUpdate, scheduleMutedTopicUpdate } from '../scheduleUnmute';
+
+import { LocalUpdateChannelPts, LocalUpdatePts, type UpdatePts } from './UpdatePts';
 
 export type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
-) | typeof connection.UpdateConnectionState;
+) | typeof connection.UpdateConnectionState | UpdatePts;
 
 const DELETE_MISSING_CHANNEL_MESSAGE_DELAY = 1000;
 
@@ -1156,6 +1158,8 @@ export function updater(update: Update) {
       chatId: buildApiPeerId(update.channelId, 'channel'),
       isEnabled: update.enabled ? true : undefined,
     });
+  } else if (update instanceof LocalUpdatePts || update instanceof LocalUpdateChannelPts) {
+    // Do nothing, handled on the manager side
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

@@ -464,6 +464,18 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
     }
 
+    case 'deleteSavedHistory': {
+      const { chatId } = update;
+      const currentUserId = global.currentUserId!;
+      global = removeChatFromChatLists(global, chatId, 'saved');
+      setGlobal(global);
+
+      global = getGlobal();
+      deleteThread(global, currentUserId, chatId, actions);
+
+      break;
+    }
+
     case 'updateCommonBoxMessages': {
       const { ids, messageUpdate } = update;
 
@@ -925,6 +937,29 @@ function findLastMessage<T extends GlobalState>(global: T, chatId: string, threa
   return undefined;
 }
 
+export function deleteThread<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+  actions: RequiredGlobalActions,
+) {
+  const byId = selectChatMessages(global, chatId);
+  if (!byId) {
+    return;
+  }
+
+  const messageIds = Object.values(byId).filter((message) => {
+    const messageThreadId = selectThreadIdFromMessage(global, message);
+    return messageThreadId === threadId;
+  }).map((message) => message.id);
+
+  if (!messageIds.length) {
+    return;
+  }
+
+  deleteMessages(global, chatId, messageIds, actions);
+}
+
 export function deleteMessages<T extends GlobalState>(
   global: T, chatId: string | undefined, ids: number[], actions: RequiredGlobalActions,
 ) {
@@ -941,8 +976,6 @@ export function deleteMessages<T extends GlobalState>(
       global = updateChatMessage(global, chatId, id, {
         isDeleting: true,
       });
-
-      global = clearMessageTranslation(global, chatId, id);
 
       if (chat.topics?.[id]) {
         global = deleteTopic(global, chatId, id);
