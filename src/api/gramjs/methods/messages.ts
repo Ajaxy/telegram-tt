@@ -80,8 +80,8 @@ import {
   addMessageToLocalDb,
   deserializeBytes,
 } from '../helpers';
-import { updateChannelState } from '../updateManager';
-import { dispatchThreadInfoUpdates } from '../updater';
+import { processAffectedHistory, updateChannelState } from '../updates/updateManager';
+import { dispatchThreadInfoUpdates } from '../updates/updater';
 import { requestChatUpdate } from './chats';
 import { handleGramJsUpdate, invokeRequest, uploadFile } from './client';
 
@@ -715,10 +715,18 @@ export async function pinMessage({
 }
 
 export async function unpinAllMessages({ chat, threadId }: { chat: ApiChat; threadId?: ThreadId }) {
-  await invokeRequest(new GramJs.messages.UnpinAllMessages({
+  const result = await invokeRequest(new GramJs.messages.UnpinAllMessages({
     peer: buildInputPeer(chat.id, chat.accessHash),
     ...(threadId && { topMsgId: Number(threadId) }),
   }));
+
+  if (!result) return;
+
+  processAffectedHistory(chat, result);
+
+  if (result.offset) {
+    await unpinAllMessages({ chat, threadId });
+  }
 }
 
 export async function deleteMessages({
@@ -743,6 +751,8 @@ export async function deleteMessages({
   if (!result) {
     return;
   }
+
+  processAffectedHistory(chat, result);
 
   onUpdate({
     '@type': 'deleteMessages',
@@ -784,13 +794,43 @@ export async function deleteHistory({
     return;
   }
 
-  if ('offset' in result && result.offset) {
-    await deleteHistory({ chat, shouldDeleteForAll });
-    return;
+  if ('offset' in result) {
+    processAffectedHistory(chat, result);
+
+    if (result.offset) {
+      await deleteHistory({ chat, shouldDeleteForAll });
+      return;
+    }
   }
 
   onUpdate({
     '@type': 'deleteHistory',
+    chatId: chat.id,
+  });
+}
+
+export async function deleteSavedHistory({
+  chat,
+}: {
+  chat: ApiChat;
+}) {
+  const result = await invokeRequest(new GramJs.messages.DeleteSavedHistory({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) {
+    return;
+  }
+
+  processAffectedHistory(chat, result);
+
+  if (result.offset) {
+    await deleteSavedHistory({ chat });
+    return;
+  }
+
+  onUpdate({
+    '@type': 'deleteSavedHistory',
     chatId: chat.id,
   });
 }
@@ -862,10 +902,14 @@ export async function markMessageListRead({
       readMaxId: fixedMaxId,
     }));
   } else {
-    await invokeRequest(new GramJs.messages.ReadHistory({
+    const result = await invokeRequest(new GramJs.messages.ReadHistory({
       peer: buildInputPeer(chat.id, chat.accessHash),
       maxId: fixedMaxId,
     }));
+
+    if (result) {
+      processAffectedHistory(chat, result);
+    }
   }
 
   if (threadId === MAIN_THREAD_ID) {
@@ -880,7 +924,7 @@ export async function markMessagesRead({
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
-  await invokeRequest(
+  const result = await invokeRequest(
     isChannel
       ? new GramJs.channels.ReadMessageContents({
         channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
@@ -890,6 +934,14 @@ export async function markMessagesRead({
         id: messageIds,
       }),
   );
+
+  if (!result) {
+    return;
+  }
+
+  if (result !== true) {
+    processAffectedHistory(chat, result);
+  }
 
   onUpdate({
     ...(isChannel ? {
@@ -1575,28 +1627,40 @@ export function clickSponsoredMessage({ chat, random }: { chat: ApiChat; random:
   }));
 }
 
-export function readAllMentions({
+export async function readAllMentions({
   chat,
 }: {
   chat: ApiChat;
 }) {
-  return invokeRequest(new GramJs.messages.ReadMentions({
+  const result = await invokeRequest(new GramJs.messages.ReadMentions({
     peer: buildInputPeer(chat.id, chat.accessHash),
-  }), {
-    shouldReturnTrue: true,
-  });
+  }));
+
+  if (!result) return;
+
+  processAffectedHistory(chat, result);
+
+  if (result.offset) {
+    await readAllMentions({ chat });
+  }
 }
 
-export function readAllReactions({
+export async function readAllReactions({
   chat,
 }: {
   chat: ApiChat;
 }) {
-  return invokeRequest(new GramJs.messages.ReadReactions({
+  const result = await invokeRequest(new GramJs.messages.ReadReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),
-  }), {
-    shouldReturnTrue: true,
-  });
+  }));
+
+  if (!result) return;
+
+  processAffectedHistory(chat, result);
+
+  if (result.offset) {
+    await readAllReactions({ chat });
+  }
 }
 
 export async function fetchUnreadMentions({

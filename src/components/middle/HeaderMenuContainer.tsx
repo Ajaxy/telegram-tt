@@ -15,6 +15,7 @@ import {
   getCanDeleteChat,
   getCanManageTopic,
   getHasAdminRight,
+  getIsSavedDialog,
   isChatChannel,
   isChatGroup,
   isUserId,
@@ -119,6 +120,7 @@ type StateProps = {
   isBlocked?: boolean;
   isBot?: boolean;
   isChatWithSelf?: boolean;
+  savedDialog?: ApiChat;
 };
 
 const CLOSE_MENU_ANIMATION_DURATION = 200;
@@ -163,6 +165,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isBlocked,
   isBot,
   isChatWithSelf,
+  savedDialog,
   onJoinRequestsClick,
   onSubscribeChannel,
   onSearchClick,
@@ -403,6 +406,24 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     });
   }, [botCommands, closeMenu, lang, sendBotCommand]);
 
+  const deleteTitle = useMemo(() => {
+    if (!chat) return undefined;
+
+    if (isPrivate || savedDialog) {
+      return lang('DeleteChatUser');
+    }
+
+    if (canDeleteChat) {
+      return lang('GroupInfo.DeleteAndExit');
+    }
+
+    if (isChannel) {
+      return lang('LeaveChannel');
+    }
+
+    return lang('Group.LeaveGroup');
+  }, [canDeleteChat, chat, isChannel, isPrivate, savedDialog, lang]);
+
   return (
     <Portal>
       <div className="HeaderMenuContainer">
@@ -627,9 +648,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
                 icon="delete"
                 onClick={handleDelete}
               >
-                {lang(isPrivate
-                  ? 'DeleteChatUser'
-                  : (canDeleteChat ? 'GroupInfo.DeleteAndExit' : (isChannel ? 'LeaveChannel' : 'Group.LeaveGroup')))}
+                {deleteTitle}
               </MenuItem>
             </>
           )}
@@ -638,7 +657,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
           <DeleteChatModal
             isOpen={isDeleteModalOpen}
             onClose={closeDeleteModal}
-            chat={chat}
+            chat={savedDialog || chat}
+            isSavedDialog={Boolean(savedDialog)}
           />
         )}
         {canMute && shouldRenderMuteModal && chat?.id && (
@@ -694,6 +714,9 @@ export default memo(withGlobal<OwnProps>(
     // Context menu item should only be displayed if user hid translation panel
     const canTranslate = selectCanTranslateChat(global, chatId) && fullInfo?.isTranslationDisabled;
 
+    const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+    const savedDialog = isSavedDialog ? selectChat(global, String(threadId)) : undefined;
+
     return {
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
@@ -717,6 +740,7 @@ export default memo(withGlobal<OwnProps>(
       isBlocked: userFullInfo?.isBlocked,
       isBot: Boolean(chatBot),
       isChatWithSelf,
+      savedDialog,
     };
   },
 )(HeaderMenuContainer));

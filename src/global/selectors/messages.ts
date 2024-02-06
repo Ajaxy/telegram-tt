@@ -508,7 +508,12 @@ export function selectCanDeleteTopic<T extends GlobalState>(global: T, chatId: s
 export function selectSavedDialogIdFromMessage<T extends GlobalState>(
   global: T, message: ApiMessage,
 ): string | undefined {
-  const { chatId, senderId, forwardInfo } = message;
+  const {
+    chatId, senderId, forwardInfo, savedPeerId,
+  } = message;
+
+  if (savedPeerId) return savedPeerId;
+
   if (chatId !== global.currentUserId) {
     return undefined;
   }

@@ -1,16 +1,19 @@
-import { Api as GramJs } from '../../lib/gramjs';
-import { UpdateConnectionState, UpdateServerTimeOffset } from '../../lib/gramjs/network';
+import { Api as GramJs } from '../../../lib/gramjs';
+import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gramjs/network';
 
-import type { invokeRequest } from './methods/client';
+import type { ApiChat } from '../../types';
+import type { invokeRequest } from '../methods/client';
 import type { Update } from './updater';
 
-import { DEBUG } from '../../config';
-import SortedQueue from '../../util/SortedQueue';
-import { buildApiPeerId } from './apiBuilders/peers';
-import { buildInputEntity } from './gramjsBuilders';
-import { addEntitiesToLocalDb } from './helpers';
-import localDb from './localDb';
+import { DEBUG } from '../../../config';
+import SortedQueue from '../../../util/SortedQueue';
+import { buildApiPeerId } from '../apiBuilders/peers';
+import { buildInputEntity, buildMtpPeerId } from '../gramjsBuilders';
+import { addEntitiesToLocalDb } from '../helpers';
+import localDb from '../localDb';
 import { dispatchUserAndChatUpdates, sendUpdate, updater } from './updater';
+
+import { buildLocalUpdatePts, type UpdatePts } from './UpdatePts';
 
 export type State = {
   seq: number;
@@ -19,7 +22,7 @@ export type State = {
   qts: number;
 };
 type SeqUpdate = (GramJs.Updates | GramJs.UpdatesCombined) & { _isFromDifference?: true };
-type PtsUpdate = GramJs.TypeUpdate & { pts: number } & { _isFromDifference?: true };
+type PtsUpdate = ((GramJs.TypeUpdate & { pts: number }) | UpdatePts) & { _isFromDifference?: true };
 
 const COMMON_BOX_QUEUE_ID = '0';
 const CHANNEL_DIFFERENCE_LIMIT = 1000;
@@ -201,10 +204,12 @@ function popPtsQueue(channelId: string) {
   const pts = update.pts;
   const ptsCount = getPtsCount(update);
 
+  // Sometimes server sends updates for channels that are opened in other clients. We ignore them
   if (localPts === undefined) {
     if (DEBUG) {
+      // Uncomment to debug missing updates
       // eslint-disable-next-line no-console
-      console.error('[UpdateManager] Got pts update without local state', channelId);
+      // console.error('[UpdateManager] Got pts update without local state', channelId);
     }
     return;
   }
@@ -387,6 +392,16 @@ export function reset() {
   });
 
   isInited = false;
+}
+
+export function processAffectedHistory(
+  chat: ApiChat, affected: GramJs.messages.AffectedMessages | GramJs.messages.AffectedHistory,
+) {
+  const isChannel = chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup';
+  const channeId = isChannel ? buildMtpPeerId(chat.id, 'channel') : undefined;
+  const update = buildLocalUpdatePts(affected.pts, affected.ptsCount, channeId);
+
+  processUpdate(update);
 }
 
 async function loadRemoteState() {

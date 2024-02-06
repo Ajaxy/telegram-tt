@@ -158,7 +158,8 @@ export type UniversalMessage = (
   & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
-    'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned'
+    'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned' |
+    'savedPeerId'
   )>
 );
 
@@ -197,6 +198,8 @@ export function buildApiMessageWithChatId(
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
   const hasComments = mtpMessage.replies?.comments;
 
+  const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
+
   return omitUndefined({
     id: mtpMessage.id,
     chatId,
@@ -233,6 +236,7 @@ export function buildApiMessageWithChatId(
     isProtected,
     isForwardingAllowed,
     hasComments,
+    savedPeerId,
   } satisfies ApiMessage);
 }
 

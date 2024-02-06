@@ -36,7 +36,7 @@ import {
   reset as resetUpdatesManager,
   scheduleGetChannelDifference,
   updateChannelState,
-} from '../updateManager';
+} from '../updates/updateManager';
 import {
   onAuthError, onAuthReady, onCurrentUserUpdate, onRequestCode, onRequestPassword, onRequestPhoneNumber,
   onRequestQrCode, onRequestRegistration, onWebAuthTokenFailed,

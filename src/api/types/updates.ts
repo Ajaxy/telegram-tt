@@ -315,6 +315,11 @@ export type ApiUpdateDeleteHistory = {
   chatId: string;
 };
 
+export type ApiUpdateDeleteSavedHistory = {
+  '@type': 'deleteSavedHistory';
+  chatId: string;
+};
+
 export type ApiUpdateDeleteProfilePhotos = {
   '@type': 'deleteProfilePhotos';
   ids: string[];
@@ -730,7 +735,8 @@ export type ApiUpdate = (
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
-  ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage
+  ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
+  ApiUpdateDeleteSavedHistory
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

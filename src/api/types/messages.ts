@@ -536,6 +536,7 @@ export interface ApiMessage {
   };
   reactions?: ApiReactions;
   hasComments?: boolean;
+  savedPeerId?: string;
 }
 
 export interface ApiReactions {

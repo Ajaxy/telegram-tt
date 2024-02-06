@@ -284,6 +284,7 @@
     "messages.getUnreadMentions",
     "messages.getSavedDialogs",
     "messages.getSavedHistory",
+    "messages.deleteSavedHistory",
     "messages.getPinnedSavedDialogs",
     "messages.toggleSavedDialogPin",
     "help.getPremiumPromo",

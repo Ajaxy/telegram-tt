@@ -583,7 +583,6 @@ addActionHandler('loadTopChats', (): ActionReturnType => {
   runThrottledForLoadTopChats(() => {
     loadChats('active');
     loadChats('archived');
-    loadChats('saved');
   });
 });
 
@@ -2244,9 +2243,7 @@ addActionHandler('deleteTopic', async (global, actions, payload): Promise<void> 
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  const result = await callApi('deleteTopic', { chat, topicId });
-
-  if (!result) return;
+  await callApi('deleteTopic', { chat, topicId });
 
   global = getGlobal();
   global = deleteTopic(global, chatId, topicId);

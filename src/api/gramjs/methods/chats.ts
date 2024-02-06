@@ -72,8 +72,10 @@ import {
 } from '../helpers';
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
-import { applyState, processUpdate, updateChannelState } from '../updateManager';
-import { dispatchThreadInfoUpdates } from '../updater';
+import {
+  applyState, processAffectedHistory, processUpdate, updateChannelState,
+} from '../updates/updateManager';
+import { dispatchThreadInfoUpdates } from '../updates/updater';
 import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
@@ -1787,7 +1789,7 @@ export async function fetchTopicById({
   };
 }
 
-export function deleteTopic({
+export async function deleteTopic({
   chat, topicId,
 }: {
   chat: ApiChat;
@@ -1795,12 +1797,18 @@ export function deleteTopic({
 }) {
   const { id, accessHash } = chat;
 
-  return invokeRequest(new GramJs.channels.DeleteTopicHistory({
+  const result = await invokeRequest(new GramJs.channels.DeleteTopicHistory({
     channel: buildInputPeer(id, accessHash),
     topMsgId: topicId,
-  }), {
-    shouldReturnTrue: true,
-  });
+  }));
+
+  if (!result) return;
+
+  processAffectedHistory(chat, result);
+
+  if (result.offset) {
+    await deleteTopic({ chat, topicId });
+  }
 }
 
 export function togglePinnedTopic({

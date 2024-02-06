@@ -28,6 +28,7 @@ import './DeleteChatModal.scss';
 export type OwnProps = {
   isOpen: boolean;
   chat: ApiChat;
+  isSavedDialog?: boolean;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
 };
@@ -47,6 +48,7 @@ type StateProps = {
 const DeleteChatModal: FC<OwnProps & StateProps> = ({
   isOpen,
   chat,
+  isSavedDialog,
   isChannel,
   isPrivateChat,
   isChatWithSelf,
@@ -62,6 +64,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   const {
     leaveChannel,
     deleteHistory,
+    deleteSavedHistory,
     deleteChannel,
     deleteChatUser,
     blockUser,
@@ -74,7 +77,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
 
     onClose();
-  }, [deleteHistory, chat.id, onClose]);
+  }, [chat.id, onClose]);
 
   const handleDeleteAndStop = useCallback(() => {
     deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
@@ -84,7 +87,9 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   }, [chat.id, onClose]);
 
   const handleDeleteChat = useCallback(() => {
-    if (isPrivateChat) {
+    if (isSavedDialog) {
+      deleteSavedHistory({ chatId: chat.id });
+    } else if (isPrivateChat) {
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if (isBasicGroup) {
       deleteChatUser({ chatId: chat.id, userId: currentUserId! });
@@ -103,11 +108,8 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     currentUserId,
     chat.isCreator,
     chat.id,
+    isSavedDialog,
     onClose,
-    deleteHistory,
-    deleteChatUser,
-    leaveChannel,
-    deleteChannel,
   ]);
 
   const handleLeaveChat = useCallback(() => {
@@ -133,6 +135,10 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   }
 
   function renderTitle() {
+    if (isSavedDialog) {
+      return isChatWithSelf ? 'ClearHistoryMyNotesTitle' : 'ClearHistoryTitleSingle2';
+    }
+
     if (isChannel && !chat.isCreator) {
       return 'LeaveChannel';
     }
@@ -149,6 +155,16 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   }
 
   function renderContent() {
+    if (isSavedDialog) {
+      return (
+        <p>
+          {renderText(
+            isChatWithSelf ? lang('ClearHistoryMyNotesMessage') : lang('ClearHistoryMessageSingle', chatTitle),
+            ['simple_markdown', 'emoji'],
+          )}
+        </p>
+      );
+    }
     if (isChannel && chat.isCreator) {
       return (
         <p>
@@ -165,6 +181,10 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
   }
 
   function renderActionText() {
+    if (isSavedDialog) {
+      return 'Delete';
+    }
+
     if (isChannel && !chat.isCreator) {
       return 'LeaveChannel';
     }
@@ -189,7 +209,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     >
       {renderContent()}
       <div className="dialog-buttons-column">
-        {isBot && (
+        {isBot && !isSavedDialog && (
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteAndStop}>
             {lang('DeleteAndStop')}
           </Button>
@@ -199,7 +219,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
             {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
           </Button>
         )}
-        {!isPrivateChat && chat.isCreator && (
+        {!isPrivateChat && chat.isCreator && !isSavedDialog && (
           <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
             {lang('DeleteForAll')}
           </Button>
@@ -208,7 +228,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
           color="danger"
           className="confirm-dialog-button"
           isText
-          onClick={isPrivateChat ? handleDeleteChat : handleLeaveChat}
+          onClick={(isPrivateChat || isSavedDialog) ? handleDeleteChat : handleLeaveChat}
         >
           {lang(renderActionText())}
         </Button>
@@ -219,12 +239,12 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chat }): StateProps => {
+  (global, { chat, isSavedDialog }): StateProps => {
     const isPrivateChat = isUserId(chat.id);
     const isChatWithSelf = selectIsChatWithSelf(global, chat.id);
     const user = isPrivateChat && selectUser(global, getPrivateChatUserId(chat)!);
     const isBot = user && isUserBot(user) && !chat.isSupport;
-    const canDeleteForAll = (isPrivateChat && !isChatWithSelf && !isBot);
+    const canDeleteForAll = (isPrivateChat && !isChatWithSelf && !isBot && !isSavedDialog);
     const contactName = isPrivateChat
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
