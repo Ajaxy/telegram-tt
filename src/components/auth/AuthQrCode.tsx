@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../global';
 import type { GlobalState } from '../../global/types';
 import type { LangCode } from '../../types';
 
-import { DEFAULT_LANG_CODE } from '../../config';
+import { DEFAULT_LANG_CODE, STRICTERDOM_ENABLED } from '../../config';
 import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import buildClassName from '../../util/buildClassName';
 import { setLanguage } from '../../util/langProvider';
@@ -106,7 +106,9 @@ const AuthCode: FC<StateProps> = ({
     const container = qrCodeRef.current!;
     const data = `${DATA_PREFIX}${authQrCode.token}`;
 
-    disableStrict();
+    if (STRICTERDOM_ENABLED) {
+      disableStrict();
+    }
 
     qrCode.update({
       data,
@@ -117,9 +119,11 @@ const AuthCode: FC<StateProps> = ({
       markQrMounted();
     }
 
-    setTimeout(() => {
-      enableStrict();
-    }, QR_CODE_MUTATION_DURATION);
+    if (STRICTERDOM_ENABLED) {
+      setTimeout(() => {
+        enableStrict();
+      }, QR_CODE_MUTATION_DURATION);
+    }
 
     return undefined;
   }, [isConnected, authQrCode, isQrMounted, markQrMounted, unmarkQrMounted, qrCode]);
