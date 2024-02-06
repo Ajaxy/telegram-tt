@@ -41,7 +41,7 @@ class HttpStream {
         return data;
     }
 
-    getURL(ip: string, port: number, testServers: boolean, isPremium: boolean) {
+    static getURL(ip: string, port: number, testServers: boolean, isPremium: boolean) {
         if (port === 443) {
             return `https://${ip}:${port}/apiw1${testServers ? '_test' : ''}${isPremium ? '_premium' : ''}`;
         } else {
@@ -55,7 +55,7 @@ class HttpStream {
             this.resolveRead = resolve;
             this.rejectRead = reject;
         });
-        this.url = this.getURL(ip, port, testServers, isPremium);
+        this.url = HttpStream.getURL(ip, port, testServers, isPremium);
 
         await fetch(this.url, {
             method: 'POST',

@@ -176,7 +176,7 @@ function onUpdate(update: ApiUpdate) {
   sendUpdatesOnTickEnd();
 }
 
-export function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {
+function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {
   if (arrayBuffer) {
     postMessage(data, [arrayBuffer]);
   } else {
