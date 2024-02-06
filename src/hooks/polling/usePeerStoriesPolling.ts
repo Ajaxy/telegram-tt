@@ -53,7 +53,7 @@ export default function usePeerStoriesPolling(ids?: string[]) {
         return !user.isContact && !user.isSelf && !isUserBot(user) && !peer.isSupport && isStatusAvailable;
       } else {
         const chat = peer as ApiChat;
-        return isChatChannel(chat);
+        return isChatChannel(chat) && !chat.isRestricted;
       }
     }).map((user) => user.id);
   }, [peers]);
