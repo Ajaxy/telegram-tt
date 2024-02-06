@@ -172,6 +172,7 @@ export const FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE = 300; // px
 export const API_UPDATE_THROTTLE = Math.round((FAST_SMOOTH_MIN_DURATION + FAST_SMOOTH_MAX_DURATION) / 2);
 export const API_THROTTLE_RESET_UPDATES = new Set([
   'newMessage', 'newScheduledMessage', 'deleteMessages', 'deleteScheduledMessages', 'deleteHistory',
+  'updateThreadInfos',
 ]);
 
 export const LOCK_SCREEN_ANIMATION_DURATION_MS = 200;

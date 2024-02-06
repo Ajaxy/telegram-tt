@@ -91,7 +91,6 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
       initFolderManager();
       loadAllChats({ listType: 'archived', shouldReplace: true });
       loadAllChats({ listType: 'saved', shouldReplace: true });
-      void callApi('fetchCurrentUser');
       preloadTopChatMessages();
       loadAllStories();
       loadAllHiddenStories();
@@ -167,6 +166,9 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
             .filter(Boolean)
           : [];
 
+        const resultMessageIds = result.messages.map(({ id }) => id);
+        const messagesThreadInfos = pick(global.messages.byChatId[currentChatId].threadsById, resultMessageIds);
+
         const isDiscussionStartLoaded = !result.messages.length
           || result.messages.some(({ id }) => id === resultDiscussion?.firstMessageId);
         const threadStartMessages = (isDiscussionStartLoaded && resultDiscussion?.topMessages) || [];
@@ -194,12 +196,13 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
 
         global = addChatMessagesById(global, currentChatId, byId);
         global = updateListedIds(global, currentChatId, activeThreadId, listedIds);
-        if (resultDiscussion) {
-          // eslint-disable-next-line @typescript-eslint/no-loop-func
-          resultDiscussion.threadInfoUpdates.forEach((update) => {
-            global = updateThreadInfo(global, currentChatId, activeThreadId, update);
-          });
-        }
+
+        // eslint-disable-next-line @typescript-eslint/no-loop-func
+        Object.entries(messagesThreadInfos).forEach(([id, thread]) => {
+          if (!thread?.threadInfo) return;
+          global = updateThreadInfo(global, currentChatId, id, thread.threadInfo);
+        });
+
         if (threadInfo && !threadInfo.isCommentsInfo && activeThreadId !== MAIN_THREAD_ID) {
           global = updateThreadInfo(global, currentChatId, activeThreadId, {
             ...pick(threadInfo, ['fromChannelId', 'fromMessageId']),

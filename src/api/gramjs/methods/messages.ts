@@ -51,7 +51,6 @@ import {
   buildApiMessage,
   buildApiSponsoredMessage,
   buildApiThreadInfo,
-  buildApiThreadInfoFromMessage,
   buildLocalForwardedMessage,
   buildLocalMessage,
 } from '../apiBuilders/messages';
@@ -1035,7 +1034,6 @@ export async function fetchDiscussionMessage({
   if (!threadId) return undefined;
 
   dispatchThreadInfoUpdates(result.messages);
-  const threadInfoUpdates = result.messages.map(buildApiThreadInfoFromMessage).filter(Boolean);
 
   const {
     unreadCount, maxId, readInboxMaxId, readOutboxMaxId,
@@ -1053,7 +1051,6 @@ export async function fetchDiscussionMessage({
     lastMessageId: maxId,
     chatId: topMessages[0]?.chatId,
     firstMessageId: replies.messages[0]?.id,
-    threadInfoUpdates,
   };
 }
 
