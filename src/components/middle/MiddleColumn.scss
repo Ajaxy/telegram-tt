@@ -192,12 +192,10 @@
       top: 0;
 
       @media (max-width: 600px) {
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-          padding-bottom: env(safe-area-inset-bottom);
+        padding-bottom: env(safe-area-inset-bottom);
 
-          body.keyboard-visible & {
-            top: env(safe-area-inset-bottom);
-          }
+        body.keyboard-visible & {
+          top: env(safe-area-inset-bottom);
         }
       }
     }
@@ -325,12 +323,8 @@
   }
 
   @media (max-width: 600px) {
-    padding-bottom: 0.75rem;
     margin-left: -0.5rem;
-
-    @supports (padding-bottom: calc(0.75rem + env(safe-area-inset-bottom))) {
-      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-    }
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   }
 
   .mask-image-disabled &::before {

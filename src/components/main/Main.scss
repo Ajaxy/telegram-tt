@@ -118,12 +118,6 @@
     left: env(safe-area-inset-left) !important;
     width: calc(100vw - env(safe-area-inset-left)) !important;
 
-    // Target: Old Firefox (Waterfox Classic)
-    @supports not (left: env(safe-area-inset-left)) {
-      left: 0 !important;
-      width: 100vw !important;
-    }
-
     // Fix: when opening the SymbolMenu, the chat list flashes in the background
     body.is-symbol-menu-open &::before {
       content: '';

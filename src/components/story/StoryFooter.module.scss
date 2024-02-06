@@ -12,9 +12,7 @@
     padding: 0 0.5rem 0.5rem;
   }
 
-  @supports (margin-bottom: env(safe-area-inset-bottom)) {
-    margin-bottom: env(safe-area-inset-bottom);
-  }
+  margin-bottom: env(safe-area-inset-bottom);
 }
 
 .viewInfo {

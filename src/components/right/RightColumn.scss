@@ -12,11 +12,6 @@
 
   transition: transform var(--layer-transition);
 
-  // Target: Old Firefox (Waterfox Classic)
-  @supports not (padding-right: env(safe-area-inset-right)) {
-    padding-right: 0;
-  }
-
   body.no-page-transitions &,
   body.no-right-column-animations & {
     transition: none !important;

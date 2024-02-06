@@ -33,20 +33,6 @@
       transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
     }
 
-    // Target: Old Firefox (Waterfox Classic)
-    @supports not (padding-right: env(safe-area-inset-right)) {
-      padding-right: 0;
-      padding-left: 0;
-      transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
-    }
-
-    @media (max-width: 600px) {
-      @supports not (padding-right: env(safe-area-inset-right)) {
-        padding-bottom: env(safe-area-inset-bottom);
-        transform: translate3d(0, calc(var(--symbol-menu-height) + env(safe-area-inset-bottom)), 0);
-      }
-    }
-
     body.no-page-transitions & {
       transition: none;
     }
@@ -61,9 +47,7 @@
     max-height: calc(100vh - var(--symbol-menu-footer-height));
 
     @media (max-width: 600px) {
-      @supports (max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom))) {
-        max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom));
-      }
+      max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom));
     }
   }
 
@@ -181,12 +165,6 @@
     position: absolute;
     right: max(0.25rem, env(safe-area-inset-right));
     top: max(0.25rem, env(safe-area-inset-top));
-
-    // Target: Old Firefox (Waterfox Classic)
-    @supports not (right: max(0.25rem, env(safe-area-inset-right))) {
-      right: 0.25rem;
-      top: 0.25rem;
-    }
   }
 
   @media (orientation: landscape) {

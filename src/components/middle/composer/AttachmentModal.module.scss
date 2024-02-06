@@ -27,9 +27,7 @@
       overflow-x: auto;
 
       @media (max-width: 600px) {
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-          padding-bottom: env(safe-area-inset-bottom);
-        }
+        padding-bottom: env(safe-area-inset-bottom);
       }
     }
 
@@ -81,9 +79,7 @@
     transform: translate3d(0, calc((var(--symbol-menu-height)) * -1), 0);
 
     @media (max-width: 600px) {
-      @supports (bottom: env(safe-area-inset-bottom)) {
-        transform: translate3d(0, calc((var(--symbol-menu-height) - env(safe-area-inset-bottom)) * -1), 0);
-      }
+      transform: translate3d(0, calc((var(--symbol-menu-height) - env(safe-area-inset-bottom)) * -1), 0);
     }
   }
 

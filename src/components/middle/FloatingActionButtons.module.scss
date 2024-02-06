@@ -42,18 +42,6 @@
     }
   }
 
-  // Target: Old Firefox (Waterfox Classic)
-  @supports not (right: max(1rem, env(safe-area-inset-right))) {
-    right: 1rem;
-    @media (max-width: 600px) {
-      right: 0.5rem;
-
-      :global(body:not(.keyboard-visible)) & {
-        bottom: 4.5rem;
-      }
-    }
-  }
-
   &.revealed {
     transform: translateY(0);
     opacity: 1;

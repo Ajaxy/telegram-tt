@@ -9,9 +9,7 @@
   margin: 0;
 
   @media (max-width: 600px) {
-    @supports (bottom: calc(0.5rem + env(safe-area-inset-bottom))) {
-      bottom: calc(0.5rem + env(safe-area-inset-bottom));
-    }
+    bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
 
   .mask-image-disabled &::before {

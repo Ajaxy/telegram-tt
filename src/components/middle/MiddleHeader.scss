@@ -45,17 +45,6 @@
     padding-right: max(0.5rem, env(safe-area-inset-right));
   }
 
-  // Target: Old Firefox (Waterfox Classic)
-  @supports not (padding-left: max(1.5rem, env(safe-area-inset-left))) {
-    padding-left: 1.5rem;
-    padding-right: 0.8125rem;
-
-    @media (max-width: 600px) {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
-    }
-  }
-
   .Transition {
     width: 100%;
     // https://dfmcphee.com/flex-items-and-min-width-0/

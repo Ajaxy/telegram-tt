@@ -89,15 +89,6 @@
       }
     }
 
-    // Target: Old Firefox (Waterfox Classic)
-    @supports not (padding: 0.5rem max(1.25rem, env(safe-area-inset-left))) {
-      padding: 0.5rem 1.25rem;
-
-      @media (max-width: 600px) {
-        padding: 0.5rem;
-      }
-    }
-
     body.is-electron.is-macos & {
       -webkit-app-region: drag;
     }
@@ -161,16 +152,6 @@
         right: env(safe-area-inset-right);
         transform: scaleX(-1);
       }
-
-      // Target: Old Firefox (Waterfox Classic)
-      @supports not (left: env(safe-area-inset-left)) {
-        left: 0;
-
-        &[dir="rtl"] {
-          left: auto;
-          right: 0;
-        }
-      }
     }
 
     &.next {
@@ -182,16 +163,6 @@
         right: auto;
         left: env(safe-area-inset-left);
         transform: scaleX(-1);
-      }
-
-      // Target: Old Firefox (Waterfox Classic)
-      @supports not (right: env(safe-area-inset-right)) {
-        right: 0;
-
-        &[dir="rtl"] {
-          right: auto;
-          left: 0;
-        }
       }
     }
 

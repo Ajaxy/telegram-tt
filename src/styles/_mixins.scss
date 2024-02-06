@@ -109,12 +109,6 @@
   padding-right: max(0.5rem, env(safe-area-inset-right));
   background: var(--color-background);
 
-  // Target: Old Firefox (Waterfox Classic)
-  @supports not (padding-left: max(0.75rem, env(safe-area-inset-left))) {
-    padding-left: 0.75rem;
-    padding-right: 0.5rem;
-  }
-
   &::before {
     content: "";
     display: block;

@@ -8,11 +8,7 @@
   flex-direction: column;
   overflow: hidden;
   color: var(--color-text);
-  height: 38rem;
-
-  @supports (height: min(38rem, 90vh)) {
-    height: min(38rem, 90vh);
-  }
+  height: min(38rem, 90vh);
 }
 
 .header {
