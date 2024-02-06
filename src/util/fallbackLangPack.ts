@@ -509,4 +509,5 @@ export default {
   'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Telegram Web. Try opening it with our **mobile app** instead.',
   SlowModeWait: 'Slow Mode — %d',
   OpenMapWith: 'Open map with...',
+  FullDateTimeFormat: '%@, %@',
 } as ApiLangPack;

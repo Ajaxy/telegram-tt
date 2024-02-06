@@ -249,4 +249,8 @@
   &.forum {
     --radius: var(--border-radius-forum-avatar);
   }
+
+  &.hidden-user {
+    --color-user: var(--color-deleted-account);
+  }
 }

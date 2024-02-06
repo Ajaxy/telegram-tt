@@ -53,23 +53,27 @@ export function formatTime(lang: LangFn, datetime: number | Date) {
   return `${String(hours).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}${marker}`;
 }
 
-export function formatPastTimeShort(lang: LangFn, datetime: number | Date) {
+export function formatPastTimeShort(lang: LangFn, datetime: number | Date, alwaysShowTime = false) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
+
+  const time = formatTime(lang, date);
 
   const today = getDayStart(new Date());
   if (date >= today) {
-    return formatTime(lang, date);
+    return time;
   }
 
   const weekAgo = new Date(today);
   weekAgo.setDate(today.getDate() - 7);
   if (date >= weekAgo) {
-    return lang(`Weekday.Short${WEEKDAYS_FULL[date.getDay()]}`);
+    const weekday = lang(`Weekday.Short${WEEKDAYS_FULL[date.getDay()]}`);
+    return alwaysShowTime ? lang('FullDateTimeFormat', [weekday, time]) : weekday;
   }
 
   const noYear = date.getFullYear() === today.getFullYear();
 
-  return formatDateToString(date, lang.code, noYear);
+  const formattedDate = formatDateToString(date, lang.code, noYear);
+  return alwaysShowTime ? lang('FullDateTimeFormat', [formattedDate, time]) : formattedDate;
 }
 
 export function formatFullDate(lang: LangFn, datetime: number | Date) {

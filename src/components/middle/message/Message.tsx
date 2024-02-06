@@ -34,7 +34,6 @@ import { AudioOrigin } from '../../../types';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
 import {
   areReactionsEmpty,
-  getIsSavedDialog,
   getMessageContent,
   getMessageCustomShape,
   getMessageHtmlId,
@@ -129,7 +128,6 @@ import useResizeObserver from '../../../hooks/useResizeObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useThrottledCallback from '../../../hooks/useThrottledCallback';
-import useAuthorWidth from '../hooks/useAuthorWidth';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
 import useFocusMessage from './hooks/useFocusMessage';
 import useInnerHandlers from './hooks/useInnerHandlers';
@@ -279,7 +277,6 @@ type StateProps = {
   isConnected: boolean;
   isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
-  isInSavedDialog?: boolean;
 };
 
 type MetaPosition =
@@ -394,7 +391,6 @@ const Message: FC<OwnProps & StateProps> = ({
   isConnected,
   getIsMessageListReady,
   shouldWarnAboutSvg,
-  isInSavedDialog,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -749,9 +745,8 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const signature = (isChannel && message.postAuthorTitle)
-    || (!asForwarded && forwardInfo?.postAuthorTitle)
+    || ((asForwarded || isChatWithSelf) && forwardInfo?.postAuthorTitle)
     || undefined;
-  useAuthorWidth(ref, signature);
 
   const shouldFocusOnResize = isLastInList;
 
@@ -924,7 +919,7 @@ const Message: FC<OwnProps & StateProps> = ({
       <MessageMeta
         message={message}
         isPinned={isPinned}
-        isInSavedDialog={isInSavedDialog}
+        withFullDate={isChatWithSelf && !isOwn}
         noReplies={noReplies}
         repliesThreadInfo={repliesThreadInfo}
         outgoingStatus={outgoingStatus}
@@ -1567,8 +1562,6 @@ export default memo(withGlobal<OwnProps>(
 
     const hasActiveReactions = Boolean(reactionMessage && activeReactions[getMessageKey(reactionMessage)]?.length);
 
-    const isInSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
-
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1637,7 +1630,6 @@ export default memo(withGlobal<OwnProps>(
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       webPageStory,
       isConnected,
-      isInSavedDialog,
       isLoadingComments: repliesThreadInfo?.isCommentsInfo
         && loadingThread?.loadingChatId === repliesThreadInfo?.originChannelId
         && loadingThread?.loadingMessageId === repliesThreadInfo?.originMessageId,

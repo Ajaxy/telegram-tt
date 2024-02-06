@@ -211,6 +211,7 @@ const Avatar: FC<OwnProps> = ({
     `Avatar size-${size}`,
     className,
     getPeerColorClass(peer),
+    !peer && text && 'hidden-user',
     isSavedMessages && 'saved-messages',
     isAnonymousForwards && 'anonymous-forwards',
     isDeleted && 'deleted-account',
