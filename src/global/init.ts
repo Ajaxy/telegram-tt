@@ -117,7 +117,7 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
     };
   });
 
-  const parsedMessageList = parseLocationHash();
+  const parsedMessageList = parseLocationHash(global.currentUserId);
 
   if (global.authState !== 'authorizationStateReady'
     && !global.passcode.hasPasscode && !global.passcode.isScreenLocked) {

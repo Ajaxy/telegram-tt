@@ -6,7 +6,7 @@ import type {
   VideoRotation,
   VideoState,
 } from '../../lib/secret-sauce';
-import type { ApiPrivacyKey, PrivacyVisibility } from '../../types';
+import type { ApiPrivacyKey, PrivacyVisibility, ThreadId } from '../../types';
 import type { ApiBotMenuButton } from './bots';
 import type {
   ApiGroupCall, ApiPhoneCall,
@@ -102,6 +102,12 @@ export type ApiUpdateChat = {
   noTopChatsRequest?: boolean;
 };
 
+export type ApiUpdateChatLastMessage = {
+  '@type': 'updateChatLastMessage';
+  id: string;
+  lastMessage: ApiMessage;
+};
+
 export type ApiUpdateChatJoin = {
   '@type': 'updateChatJoin';
   id: string;
@@ -126,7 +132,7 @@ export type ApiUpdateChatInbox = {
 export type ApiUpdateChatTypingStatus = {
   '@type': 'updateChatTypingStatus';
   id: string;
-  threadId?: number;
+  threadId?: ThreadId;
   typingStatus: ApiTypingStatus | undefined;
 };
 
@@ -166,6 +172,17 @@ export type ApiUpdateChatListType = {
 
 export type ApiUpdateChatPinned = {
   '@type': 'updateChatPinned';
+  id: string;
+  isPinned: boolean;
+};
+
+export type ApiUpdatePinnedSavedDialogIds = {
+  '@type': 'updatePinnedSavedDialogIds';
+  ids: string[];
+};
+
+export type ApiUpdateSavedDialogPinned = {
+  '@type': 'updateSavedDialogPinned';
   id: string;
   isPinned: boolean;
 };
@@ -312,7 +329,7 @@ export type ApiUpdateResetMessages = {
 export type ApiUpdateDraftMessage = {
   '@type': 'draftMessage';
   chatId: string;
-  threadId?: number;
+  threadId?: ThreadId;
   draft?: ApiDraft;
 };
 
@@ -713,7 +730,7 @@ export type ApiUpdate = (
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
-  ApiUpdateViewForumAsMessages
+  ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

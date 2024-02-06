@@ -7,7 +7,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiInputMessageReplyInfo } from '../../../api/types';
-import type { IAnchorPosition, ISettings } from '../../../types';
+import type { IAnchorPosition, ISettings, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
@@ -48,7 +48,7 @@ type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
   id: string;
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   isAttachmentModalInput?: boolean;
   isStoryInput?: boolean;
   customEmojiPrefix: string;

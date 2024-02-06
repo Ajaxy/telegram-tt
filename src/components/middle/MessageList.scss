@@ -77,7 +77,8 @@
   }
 
   &.select-mode-active,
-  &.type-pinned {
+  &.type-pinned,
+  &.saved-dialog {
     margin-bottom: 0;
 
     .last-in-list {

@@ -29,7 +29,8 @@ type Limit =
   | 'about_length_limit'
   | 'chatlist_invites_limit'
   | 'chatlist_joined_limit'
-  | 'recommended_channels_limit';
+  | 'recommended_channels_limit'
+  | 'saved_dialogs_pinned_limit';
 type LimitKey = `${Limit}_${LimitType}`;
 type LimitsConfig = Record<LimitKey, number>;
 
@@ -124,6 +125,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       chatlistInvites: getLimit(appConfig, 'chatlist_invites_limit', 'chatlistInvites'),
       chatlistJoined: getLimit(appConfig, 'chatlist_joined_limit', 'chatlistJoined'),
       recommendedChannels: getLimit(appConfig, 'recommended_channels_limit', 'recommendedChannels'),
+      savedDialogsPinned: getLimit(appConfig, 'saved_dialogs_pinned_limit', 'savedDialogsPinned'),
     },
     hash,
     areStoriesHidden: appConfig.stories_all_hidden,

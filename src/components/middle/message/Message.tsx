@@ -23,7 +23,9 @@ import type {
   MessageListType,
 } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { FocusDirection, IAlbum, ISettings } from '../../../types';
+import type {
+  FocusDirection, IAlbum, ISettings, ThreadId,
+} from '../../../types';
 import type { Signal } from '../../../util/signals';
 import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -32,6 +34,7 @@ import { AudioOrigin } from '../../../types';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
 import {
   areReactionsEmpty,
+  getIsSavedDialog,
   getMessageContent,
   getMessageCustomShape,
   getMessageHtmlId,
@@ -41,6 +44,7 @@ import {
   getSenderTitle,
   hasMessageText,
   hasMessageTtl,
+  isAnonymousForwardsChat,
   isAnonymousOwnMessage,
   isChatChannel,
   isChatGroup,
@@ -191,7 +195,7 @@ type OwnProps =
     noAvatars?: boolean;
     withAvatar?: boolean;
     withSenderName?: boolean;
-    threadId: number;
+    threadId: ThreadId;
     messageListType: MessageListType;
     noComments: boolean;
     noReplies: boolean;
@@ -232,6 +236,7 @@ type StateProps = {
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
   isRepliesChat?: boolean;
+  isAnonymousForwards?: boolean;
   isChannel?: boolean;
   isGroup?: boolean;
   canReply?: boolean;
@@ -243,7 +248,7 @@ type StateProps = {
   isSelected?: boolean;
   isGroupSelected?: boolean;
   isDownloading?: boolean;
-  threadId?: number;
+  threadId?: ThreadId;
   isPinnedList?: boolean;
   isPinned?: boolean;
   canAutoLoadMedia?: boolean;
@@ -274,6 +279,7 @@ type StateProps = {
   isConnected: boolean;
   isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
+  isInSavedDialog?: boolean;
 };
 
 type MetaPosition =
@@ -347,6 +353,7 @@ const Message: FC<OwnProps & StateProps> = ({
   isForwarding,
   isChatWithSelf,
   isRepliesChat,
+  isAnonymousForwards,
   isChannel,
   isGroup,
   canReply,
@@ -387,6 +394,7 @@ const Message: FC<OwnProps & StateProps> = ({
   isConnected,
   getIsMessageListReady,
   shouldWarnAboutSvg,
+  isInSavedDialog,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -483,6 +491,7 @@ const Message: FC<OwnProps & StateProps> = ({
     forwardInfo
     && (!isChatWithSelf || isScheduled)
     && !isRepliesChat
+    && !isAnonymousForwards
     && !forwardInfo.isLinkedChannelPost
     && !isCustomShape
   ) || Boolean(message.content.storyData && !message.content.storyData.isMention);
@@ -500,7 +509,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const canForward = isChannel && !isScheduled && message.isForwardingAllowed && !isChatProtected;
   const canFocus = Boolean(isPinnedList
     || (forwardInfo
-      && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat)
+      && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat || isAnonymousForwards)
       && forwardInfo.fromMessageId
     ));
 
@@ -520,7 +529,8 @@ const Message: FC<OwnProps & StateProps> = ({
   const messageSender = canShowSender ? sender : undefined;
   const withVoiceTranscription = Boolean(!isTranscriptionHidden && (isTranscriptionError || transcribedText));
 
-  const shouldPreferOriginSender = forwardInfo && (isChatWithSelf || isRepliesChat || !messageSender);
+  const shouldPreferOriginSender = forwardInfo
+    && (isChatWithSelf || isRepliesChat || isAnonymousForwards || !messageSender);
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
   const messageColorPeer = originSender || sender;
   const senderPeer = (forwardInfo || message.content.storyData) ? originSender : messageSender;
@@ -914,6 +924,7 @@ const Message: FC<OwnProps & StateProps> = ({
       <MessageMeta
         message={message}
         isPinned={isPinned}
+        isInSavedDialog={isInSavedDialog}
         noReplies={noReplies}
         repliesThreadInfo={repliesThreadInfo}
         outgoingStatus={outgoingStatus}
@@ -1461,6 +1472,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isRepliesChat = isChatWithRepliesBot(chatId);
+    const isAnonymousForwards = isAnonymousForwardsChat(chatId);
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
@@ -1487,11 +1499,12 @@ export default memo(withGlobal<OwnProps>(
     const shouldHideReply = replyToMsgId && replyToMsgId === threadId;
     const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
     const forwardHeader = forwardInfo || replyFrom;
-    const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage) : forwardHeader && !isRepliesChat
-      ? selectSenderFromHeader(global, forwardHeader) : undefined;
+    const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage)
+      : forwardHeader && !isRepliesChat && !isAnonymousForwards
+        ? selectSenderFromHeader(global, forwardHeader) : undefined;
     const replyMessageForwardSender = replyMessage && selectForwardedSender(global, replyMessage);
     const replyMessageChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
-    const isReplyPrivate = !isRepliesChat && replyMessageChat && !isChatPublic(replyMessageChat)
+    const isReplyPrivate = !isRepliesChat && !isAnonymousForwards && replyMessageChat && !isChatPublic(replyMessageChat)
       && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = storyReplyId && storyReplyUserId
@@ -1554,6 +1567,8 @@ export default memo(withGlobal<OwnProps>(
 
     const hasActiveReactions = Boolean(reactionMessage && activeReactions[getMessageKey(reactionMessage)]?.length);
 
+    const isInSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1578,6 +1593,7 @@ export default memo(withGlobal<OwnProps>(
       reactionMessage,
       isChatWithSelf,
       isRepliesChat,
+      isAnonymousForwards,
       isChannel,
       isGroup,
       canReply,
@@ -1621,6 +1637,7 @@ export default memo(withGlobal<OwnProps>(
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       webPageStory,
       isConnected,
+      isInSavedDialog,
       isLoadingComments: repliesThreadInfo?.isCommentsInfo
         && loadingThread?.loadingChatId === repliesThreadInfo?.originChannelId
         && loadingThread?.loadingMessageId === repliesThreadInfo?.originMessageId,

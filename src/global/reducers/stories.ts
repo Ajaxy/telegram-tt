@@ -16,6 +16,7 @@ import { compareFields, unique } from '../../util/iteratees';
 import { getServerTime } from '../../util/serverTime';
 import { isUserId, updateReactionCount } from '../helpers';
 import {
+  selectIsChatWithSelf,
   selectPeer, selectPeerStories, selectPeerStory, selectTabState, selectUser,
 } from '../selectors';
 import { updatePeer } from './general';
@@ -78,7 +79,7 @@ export function addStoriesForPeer<T extends GlobalState>(
     return acc;
   }, updatedOrderedIds)).filter((storyId) => !deletedIds.includes(storyId));
 
-  if (addToArchive && peerId === global.currentUserId) {
+  if (addToArchive && selectIsChatWithSelf(global, peerId)) {
     updatedArchiveIds = unique(updatedArchiveIds.concat(Object.keys(newStories).map(Number)))
       .sort((a, b) => b - a)
       .filter((storyId) => !deletedIds.includes(storyId));
@@ -101,7 +102,7 @@ export function addStoriesForPeer<T extends GlobalState>(
     },
   };
 
-  if (peerId === global.currentUserId
+  if (selectIsChatWithSelf(global, peerId)
     || selectUser(global, peerId)?.isContact
     || peerId === global.appConfig?.storyChangelogUserId) {
     global = updatePeerLastUpdatedAt(global, peerId);

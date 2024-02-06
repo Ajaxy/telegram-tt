@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useEffect } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -29,6 +29,8 @@ import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectCanAnimateInterface,
   selectChat,
+  selectChatLastMessage,
+  selectChatLastMessageId,
   selectChatMessage,
   selectCurrentMessageList,
   selectDraft,
@@ -37,6 +39,7 @@ import {
   selectNotifyExceptions,
   selectNotifySettings,
   selectOutgoingStatus,
+  selectPeer,
   selectTabState,
   selectThreadParam,
   selectTopicFromMessage,
@@ -49,6 +52,7 @@ import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useChatContextActions from '../../../hooks/useChatContextActions';
+import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -76,6 +80,7 @@ type OwnProps = {
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
   offsetTop: number;
+  isSavedDialog?: boolean;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
 };
@@ -99,6 +104,9 @@ type StateProps = {
   lastMessageTopic?: ApiTopic;
   typingStatus?: ApiTypingStatus;
   withInterfaceAnimations?: boolean;
+  lastMessageId?: number;
+  lastMessage?: ApiMessage;
+  currentUserId: string;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -127,10 +135,16 @@ const Chat: FC<OwnProps & StateProps> = ({
   canChangeFolder,
   lastMessageTopic,
   typingStatus,
+  lastMessageId,
+  lastMessage,
+  isSavedDialog,
+  currentUserId,
   onDragEnter,
 }) => {
   const {
     openChat,
+    openSavedDialog,
+    toggleChatInfo,
     focusLastMessage,
     loadTopics,
     openForumPanel,
@@ -147,7 +161,9 @@ const Chat: FC<OwnProps & StateProps> = ({
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
   const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
 
-  const { lastMessage, isForum, isForumAsMessages } = chat || {};
+  const { isForum, isForumAsMessages } = chat || {};
+
+  useEnsureMessage(isSavedDialog ? currentUserId : chatId, lastMessageId, lastMessage);
 
   const { renderSubtitle, ref } = useChatListEntry({
     chat,
@@ -164,12 +180,22 @@ const Chat: FC<OwnProps & StateProps> = ({
     animationType,
     withInterfaceAnimations,
     orderDiff,
+    isSavedDialog,
   });
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
 
   const handleClick = useLastCallback(() => {
     const noForumTopicPanel = isMobile && isForumAsMessages;
+
+    if (isSavedDialog) {
+      openSavedDialog({ chatId, noForumTopicPanel: true }, { forceOnHeavyAnimation: true });
+
+      if (isMobile) {
+        toggleChatInfo({ force: false });
+      }
+      return;
+    }
 
     if (isForum) {
       if (isForumPanelOpen) {
@@ -228,6 +254,8 @@ const Chat: FC<OwnProps & StateProps> = ({
     isPinned,
     isMuted,
     canChangeFolder,
+    isSavedDialog,
+    currentUserId,
   });
 
   const isIntersecting = useIsIntersecting(ref, chat ? observeIntersection : undefined);
@@ -241,6 +269,16 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
   const { hasShownClass: isAvatarOnlineShown } = useShowTransition(isOnline);
+
+  const href = useMemo(() => {
+    if (!IS_OPEN_IN_NEW_TAB_SUPPORTED) return undefined;
+
+    if (isSavedDialog) {
+      return `#${createLocationHash(currentUserId, 'thread', chatId)}`;
+    }
+
+    return `#${createLocationHash(chatId, 'thread', MAIN_THREAD_ID)}`;
+  }, [chatId, currentUserId, isSavedDialog]);
 
   if (!chat) {
     return undefined;
@@ -260,7 +298,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     <ListItem
       ref={ref}
       className={className}
-      href={IS_OPEN_IN_NEW_TAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', MAIN_THREAD_ID)}` : undefined}
+      href={href}
       style={`top: ${offsetTop}px`}
       ripple={!isForum && !isMobile}
       contextActions={contextActions}
@@ -272,6 +310,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         <Avatar
           peer={peer}
           isSavedMessages={user?.isSelf}
+          isSavedDialog={isSavedDialog}
           withStory={!user?.isSelf}
           withStoryGap={isAvatarOnlineShown}
           storyViewerOrigin={StoryViewerOrigin.ChatList}
@@ -291,21 +330,22 @@ const Chat: FC<OwnProps & StateProps> = ({
             peer={peer}
             withEmojiStatus
             isSavedMessages={chatId === user?.id && user?.isSelf}
+            isSavedDialog={isSavedDialog}
             observeIntersection={observeIntersection}
           />
-          {isMuted && <i className="icon icon-muted" />}
+          {isMuted && !isSavedDialog && <i className="icon icon-muted" />}
           <div className="separator" />
-          {chat.lastMessage && (
+          {lastMessage && (
             <LastMessageMeta
-              message={chat.lastMessage}
-              outgoingStatus={lastMessageOutgoingStatus}
+              message={lastMessage}
+              outgoingStatus={!isSavedDialog ? lastMessageOutgoingStatus : undefined}
               draftDate={draft?.date}
             />
           )}
         </div>
         <div className="subtitle">
           {renderSubtitle()}
-          <ChatBadge chat={chat} isPinned={isPinned} isMuted={isMuted} />
+          <ChatBadge chat={chat} isPinned={isPinned} isMuted={isMuted} isSavedDialog={isSavedDialog} />
         </div>
       </div>
       {shouldRenderDeleteModal && (
@@ -346,29 +386,34 @@ const Chat: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId, isSavedDialog }): StateProps => {
     const chat = selectChat(global, chatId);
     if (!chat) {
-      return {};
+      return {
+        currentUserId: global.currentUserId!,
+      };
     }
 
-    const { lastMessage } = chat;
-    const { senderId, isOutgoing } = lastMessage || {};
+    const lastMessageId = selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
+    const lastMessage = selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
+    const { senderId, isOutgoing, forwardInfo } = lastMessage || {};
+    const actualSenderId = isSavedDialog ? forwardInfo?.fromId : senderId;
     const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
-    const lastMessageSender = senderId
-      ? (selectUser(global, senderId) || selectChat(global, senderId)) : undefined;
+    const lastMessageSender = actualSenderId ? selectPeer(global, actualSenderId) : undefined;
     const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chat.id, replyToMessageId)
       : undefined;
     const { targetUserIds: actionTargetUserIds, targetChatId: actionTargetChatId } = lastMessageAction || {};
     const privateChatUserId = getPrivateChatUserId(chat);
+
     const {
       chatId: currentChatId,
       threadId: currentThreadId,
       type: messageListType,
     } = selectCurrentMessageList(global) || {};
-    const isSelected = chatId === currentChatId && currentThreadId === MAIN_THREAD_ID;
+    const isSelected = chatId === currentChatId && (isSavedDialog
+      ? chatId === currentThreadId : currentThreadId === MAIN_THREAD_ID);
     const isSelectedForum = (chat.isForum && chatId === currentChatId)
       || chatId === selectTabState(global).forumPanelChatId;
 
@@ -399,6 +444,9 @@ export default memo(withGlobal<OwnProps>(
       lastMessageTopic,
       typingStatus,
       withInterfaceAnimations: selectCanAnimateInterface(global),
+      lastMessage,
+      lastMessageId,
+      currentUserId: global.currentUserId!,
     };
   },
 )(Chat));

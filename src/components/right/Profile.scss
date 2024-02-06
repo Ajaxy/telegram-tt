@@ -63,6 +63,10 @@
     flex: 1;
   }
 
+  .saved-dialogs {
+    height: 100% !important;
+  }
+
   .content {
     &.empty-list {
       height: 100%;
@@ -158,6 +162,6 @@
         margin-top: 1rem;
         font-size: 0.8125rem;
       }
-    } 
+    }
   }
 }

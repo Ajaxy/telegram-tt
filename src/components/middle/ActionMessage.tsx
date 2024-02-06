@@ -9,7 +9,7 @@ import type {
 } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { FocusDirection } from '../../types';
+import type { FocusDirection, ThreadId } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
 import {
@@ -45,7 +45,7 @@ import ContextMenuContainer from './message/ContextMenuContainer.async';
 
 type OwnProps = {
   message: ApiMessage;
-  threadId?: number;
+  threadId?: ThreadId;
   messageListType?: MessageListType;
   observeIntersectionForReading?: ObserveFn;
   observeIntersectionForLoading?: ObserveFn;

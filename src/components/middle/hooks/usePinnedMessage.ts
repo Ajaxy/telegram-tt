@@ -1,6 +1,8 @@
 import { useEffect, useRef } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
+import type { ThreadId } from '../../../types';
+
 import {
   selectFocusedMessageId,
   selectListedIds,
@@ -24,7 +26,7 @@ type PinnedIntersectionChangedParams = {
 export type PinnedIntersectionChangedCallback = (params: PinnedIntersectionChangedParams) => void;
 
 export default function usePinnedMessage(
-  chatId?: string, threadId?: number, pinnedIds?: number[], topMessageId?: number,
+  chatId?: string, threadId?: ThreadId, pinnedIds?: number[], topMessageId?: number,
 ) {
   const [getCurrentPinnedIndexes, setCurrentPinnedIndexes] = useSignal<Record<string, number>>({});
   const [getForceNextPinnedInHeader, setForceNextPinnedInHeader] = useSignal<boolean | undefined>();

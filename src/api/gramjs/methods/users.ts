@@ -267,6 +267,8 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
     };
   }
 
+  if (chat?.isRestricted) return undefined;
+
   const result = await searchMessagesLocal({
     chat: chat!,
     type: 'profilePhoto',

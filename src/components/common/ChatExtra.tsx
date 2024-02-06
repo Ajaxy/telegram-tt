@@ -43,6 +43,7 @@ import Switcher from '../ui/Switcher';
 
 type OwnProps = {
   chatOrUserId: string;
+  isSavedDialog?: boolean;
   forceShowSelf?: boolean;
 };
 
@@ -57,11 +58,13 @@ type StateProps =
     description?: string;
     chatInviteLink?: string;
     topicLink?: string;
+    hasSavedMessages?: boolean;
   };
 
 const runDebounced = debounce((cb) => cb(), 500, false);
 
 const ChatExtra: FC<OwnProps & StateProps> = ({
+  chatOrUserId,
   user,
   chat,
   forceShowSelf,
@@ -72,6 +75,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   description,
   chatInviteLink,
   topicLink,
+  hasSavedMessages,
 }) => {
   const {
     loadFullUser,
@@ -79,6 +83,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     updateChatMutedState,
     updateTopicMutedState,
     loadPeerStories,
+    openSavedDialog,
   } = getActions();
 
   const {
@@ -149,6 +154,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
       return newAreNotificationsEnabled;
     });
+  });
+
+  const handleOpenSavedDialog = useLastCallback(() => {
+    openSavedDialog({ chatId: chatOrUserId });
   });
 
   if (!chat || chat.isRestricted || (isSelf && !forceShowSelf)) {
@@ -264,12 +273,17 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           />
         </ListItem>
       )}
+      {hasSavedMessages && (
+        <ListItem icon="saved-messages" ripple onClick={handleOpenSavedDialog}>
+          <span>{lang('SavedMessagesTab')}</span>
+        </ListItem>
+      )}
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatOrUserId }): StateProps => {
+  (global, { chatOrUserId, isSavedDialog }): StateProps => {
     const { countryList: { phoneCodes: phoneCodeList } } = global;
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
@@ -277,7 +291,7 @@ export default memo(withGlobal<OwnProps>(
     const isForum = chat?.isForum;
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
     const { threadId } = selectCurrentMessageList(global) || {};
-    const topicId = isForum ? threadId : undefined;
+    const topicId = isForum ? Number(threadId) : undefined;
     const chatInviteLink = chat ? selectChatFullInfo(global, chat.id)?.inviteLink : undefined;
     let description = user ? selectUserFullInfo(global, user.id)?.bio : undefined;
     if (!description && chat) {
@@ -291,6 +305,8 @@ export default memo(withGlobal<OwnProps>(
 
     const topicLink = topicId ? selectTopicLink(global, chatOrUserId, topicId) : undefined;
 
+    const hasSavedMessages = !isSavedDialog && global.chats.listIds.saved?.includes(chatOrUserId);
+
     return {
       phoneCodeList,
       chat,
@@ -301,6 +317,7 @@ export default memo(withGlobal<OwnProps>(
       chatInviteLink,
       description,
       topicLink,
+      hasSavedMessages,
     };
   },
 )(ChatExtra));

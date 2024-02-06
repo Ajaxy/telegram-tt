@@ -219,6 +219,21 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       };
     }
 
+    case 'updatePinnedSavedDialogIds': {
+      const { ids } = update;
+
+      return {
+        ...global,
+        chats: {
+          ...global.chats,
+          orderedPinnedIds: {
+            ...global.chats.orderedPinnedIds,
+            saved: ids.length ? ids : undefined,
+          },
+        },
+      };
+    }
+
     case 'updateChatPinned': {
       const { id, isPinned } = update;
       const listType = selectChatListType(global, id);
@@ -251,6 +266,30 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           orderedPinnedIds: {
             ...global.chats.orderedPinnedIds,
             [listType]: newOrderedPinnedIds.length ? newOrderedPinnedIds : undefined,
+          },
+        },
+      };
+    }
+
+    case 'updateSavedDialogPinned': {
+      const { id, isPinned } = update;
+
+      const { saved: orderedPinnedIds } = global.chats.orderedPinnedIds;
+
+      let newOrderedPinnedIds = orderedPinnedIds || [];
+      if (!isPinned) {
+        newOrderedPinnedIds = newOrderedPinnedIds.filter((pinnedId) => pinnedId !== id);
+      } else if (!newOrderedPinnedIds.includes(id)) {
+        newOrderedPinnedIds = [id, ...newOrderedPinnedIds];
+      }
+
+      return {
+        ...global,
+        chats: {
+          ...global.chats,
+          orderedPinnedIds: {
+            ...global.chats.orderedPinnedIds,
+            saved: newOrderedPinnedIds.length ? newOrderedPinnedIds : undefined,
           },
         },
       };

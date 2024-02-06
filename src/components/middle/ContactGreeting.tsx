@@ -6,7 +6,7 @@ import type { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 import type { MessageList } from '../../global/types';
 
 import { getPeerIdDividend } from '../../global/helpers';
-import { selectChat, selectCurrentMessageList } from '../../global/selectors';
+import { selectChat, selectChatLastMessage, selectCurrentMessageList } from '../../global/selectors';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -101,10 +101,12 @@ export default memo(withGlobal<OwnProps>(
       return {};
     }
 
+    const lastMessage = selectChatLastMessage(global, chat.id);
+
     return {
       sticker,
-      lastUnreadMessageId: chat.lastMessage && chat.lastMessage.id !== chat.lastReadInboxMessageId
-        ? chat.lastMessage.id
+      lastUnreadMessageId: lastMessage && lastMessage.id !== chat.lastReadInboxMessageId
+        ? lastMessage.id
         : undefined,
       connectionState: global.connectionState,
       currentMessageList: selectCurrentMessageList(global),

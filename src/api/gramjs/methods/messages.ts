@@ -1,5 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
+import type { ThreadId } from '../../../types';
 import type {
   ApiAttachment,
   ApiChat,
@@ -106,21 +107,25 @@ export async function fetchMessages({
   chat,
   threadId,
   offsetId,
+  isSavedDialog,
   ...pagination
 }: {
   chat: ApiChat;
-  threadId?: number;
+  threadId?: ThreadId;
   offsetId?: number;
+  isSavedDialog?: boolean;
   addOffset?: number;
   limit: number;
 }) {
-  const RequestClass = threadId === MAIN_THREAD_ID ? GramJs.messages.GetHistory : GramJs.messages.GetReplies;
+  const RequestClass = threadId === MAIN_THREAD_ID
+    ? GramJs.messages.GetHistory : isSavedDialog
+      ? GramJs.messages.GetSavedHistory : GramJs.messages.GetReplies;
   let result;
 
   try {
     result = await invokeRequest(new RequestClass({
       peer: buildInputPeer(chat.id, chat.accessHash),
-      ...(threadId !== MAIN_THREAD_ID && {
+      ...(threadId !== MAIN_THREAD_ID && !isSavedDialog && {
         msgId: Number(threadId),
       }),
       ...(offsetId && {
@@ -241,6 +246,7 @@ let mediaQueue = Promise.resolve();
 export function sendMessage(
   {
     chat,
+    lastMessageId,
     text,
     entities,
     replyInfo,
@@ -281,6 +287,7 @@ export function sendMessage(
 ) {
   const localMessage = buildLocalMessage(
     chat,
+    lastMessageId,
     text,
     entities,
     replyInfo,
@@ -707,10 +714,10 @@ export async function pinMessage({
   }));
 }
 
-export async function unpinAllMessages({ chat, threadId }: { chat: ApiChat; threadId?: number }) {
+export async function unpinAllMessages({ chat, threadId }: { chat: ApiChat; threadId?: ThreadId }) {
   await invokeRequest(new GramJs.messages.UnpinAllMessages({
     peer: buildInputPeer(chat.id, chat.accessHash),
-    ...(threadId && { topMsgId: threadId }),
+    ...(threadId && { topMsgId: Number(threadId) }),
   }));
 }
 
@@ -806,7 +813,7 @@ export async function reportMessages({
 export async function sendMessageAction({
   peer, threadId, action,
 }: {
-  peer: ApiPeer; threadId?: number; action: ApiSendMessageAction;
+  peer: ApiPeer; threadId?: ThreadId; action: ApiSendMessageAction;
 }) {
   const gramAction = buildSendMessageAction(action);
   if (!gramAction) {
@@ -820,7 +827,7 @@ export async function sendMessageAction({
   try {
     const result = await invokeRequest(new GramJs.messages.SetTyping({
       peer: buildInputPeer(peer.id, peer.accessHash),
-      topMsgId: threadId,
+      topMsgId: Number(threadId),
       action: gramAction,
     }), {
       shouldThrow: true,
@@ -837,7 +844,7 @@ export async function sendMessageAction({
 export async function markMessageListRead({
   chat, threadId, maxId = 0,
 }: {
-  chat: ApiChat; threadId: number; maxId?: number;
+  chat: ApiChat; threadId: ThreadId; maxId?: number;
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
@@ -851,7 +858,7 @@ export async function markMessageListRead({
   } else if (isChannel) {
     await invokeRequest(new GramJs.messages.ReadDiscussion({
       peer: buildInputPeer(chat.id, chat.accessHash),
-      msgId: threadId,
+      msgId: Number(threadId),
       readMaxId: fixedMaxId,
     }));
   } else {
@@ -999,12 +1006,13 @@ export async function fetchDiscussionMessage({
 }
 
 export async function searchMessagesLocal({
-  chat, type, query, threadId, minDate, maxDate, ...pagination
+  chat, isSavedDialog, type, query, threadId, minDate, maxDate, ...pagination
 }: {
   chat: ApiChat;
+  isSavedDialog?: boolean;
   type?: ApiMessageSearchType | ApiGlobalMessageSearchType;
   query?: string;
-  threadId?: number;
+  threadId?: ThreadId;
   offsetId?: number;
   addOffset?: number;
   limit: number;
@@ -1037,9 +1045,12 @@ export async function searchMessagesLocal({
     }
   }
 
+  const peer = buildInputPeer(chat.id, chat.accessHash);
+
   const result = await invokeRequest(new GramJs.messages.Search({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    topMsgId: threadId === MAIN_THREAD_ID ? undefined : threadId,
+    peer: isSavedDialog ? new GramJs.InputPeerSelf() : peer,
+    savedPeerId: isSavedDialog ? peer : undefined,
+    topMsgId: threadId !== MAIN_THREAD_ID && !isSavedDialog ? Number(threadId) : undefined,
     filter,
     q: query || '',
     minDate,
@@ -1288,10 +1299,11 @@ export async function forwardMessages({
   noCaptions,
   isCurrentUserPremium,
   wasDrafted,
+  lastMessageId,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
-  toThreadId?: number;
+  toThreadId?: ThreadId;
   messages: ApiMessage[];
   isSilent?: boolean;
   scheduledAt?: number;
@@ -1301,6 +1313,7 @@ export async function forwardMessages({
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
   wasDrafted?: boolean;
+  lastMessageId?: number;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
@@ -1309,12 +1322,13 @@ export async function forwardMessages({
   messages.forEach((message, index) => {
     const localMessage = buildLocalForwardedMessage({
       toChat,
-      toThreadId,
+      toThreadId: Number(toThreadId),
       message,
       scheduledAt,
       noAuthors,
       noCaptions,
       isCurrentUserPremium,
+      lastMessageId,
     });
     localMessages[randomIds[index].toString()] = localMessage;
 
@@ -1337,7 +1351,7 @@ export async function forwardMessages({
       silent: isSilent || undefined,
       dropAuthor: noAuthors || undefined,
       dropMediaCaptions: noCaptions || undefined,
-      ...(toThreadId && { topMsgId: toThreadId }),
+      ...(toThreadId && { topMsgId: Number(toThreadId) }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
     }), {
@@ -1434,14 +1448,14 @@ function updateLocalDb(result: (
   });
 }
 
-export async function fetchPinnedMessages({ chat, threadId }: { chat: ApiChat; threadId: number }) {
+export async function fetchPinnedMessages({ chat, threadId }: { chat: ApiChat; threadId: ThreadId }) {
   const result = await invokeRequest(new GramJs.messages.Search(
     {
       peer: buildInputPeer(chat.id, chat.accessHash),
       filter: new GramJs.InputMessagesFilterPinned(),
       q: '',
       limit: PINNED_MESSAGES_LIMIT,
-      topMsgId: threadId,
+      topMsgId: Number(threadId),
     },
   ), {
     abortControllerChatId: chat.id,

@@ -9,7 +9,7 @@ import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
-  getUserStatus, isChatChannel, isUserId, isUserOnline,
+  getUserStatus, isAnonymousForwardsChat, isChatChannel, isUserId, isUserOnline,
 } from '../../global/helpers';
 import {
   selectChat,
@@ -53,7 +53,6 @@ type StateProps =
     user?: ApiUser;
     userStatus?: ApiUserStatus;
     chat?: ApiChat;
-    isSavedMessages?: boolean;
     mediaId?: number;
     avatarOwnerId?: string;
     topic?: ApiTopic;
@@ -75,7 +74,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   user,
   userStatus,
   chat,
-  isSavedMessages,
   connectionState,
   mediaId,
   avatarOwnerId,
@@ -107,8 +105,8 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const slideAnimation = hasSlideAnimation ? (lang.isRtl ? 'slideRtl' : 'slide') : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const isFirst = isSavedMessages || photos.length <= 1 || currentPhotoIndex === 0;
-  const isLast = isSavedMessages || photos.length <= 1 || currentPhotoIndex === photos.length - 1;
+  const isFirst = photos.length <= 1 || currentPhotoIndex === 0;
+  const isLast = photos.length <= 1 || currentPhotoIndex === photos.length - 1;
 
   // Set the current avatar photo to the last selected photo in Media Viewer after it is closed
   useEffect(() => {
@@ -227,7 +225,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderPhotoTabs() {
-    if (isSavedMessages || !photos || photos.length <= 1) {
+    if (!photos || photos.length <= 1) {
       return undefined;
     }
 
@@ -241,7 +239,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderPhoto(isActive?: boolean) {
-    const photo = !isSavedMessages && photos.length > 0
+    const photo = photos.length > 0
       ? photos[currentPhotoIndex]
       : undefined;
     const profilePhoto = photo || userPersonalPhoto || userProfilePhoto || chatProfilePhoto || userFallbackPhoto;
@@ -252,7 +250,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
         user={user}
         chat={chat}
         photo={profilePhoto}
-        isSavedMessages={isSavedMessages}
         canPlayVideo={Boolean(isActive && canPlayVideo)}
         onClick={handleProfilePhotoClick}
       />
@@ -260,6 +257,11 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderStatus() {
+    const peerId = (chatId || userId)!;
+
+    const isAnonymousForwards = isAnonymousForwardsChat(peerId);
+    if (isAnonymousForwards) return undefined;
+
     if (user) {
       return (
         <div className={buildClassName(styles.status, 'status', isUserOnline(user, userStatus) && 'online')}>
@@ -348,26 +350,24 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             peer={(user || chat)!}
             withEmojiStatus
             emojiStatusSize={EMOJI_STATUS_SIZE}
-            isSavedMessages={isSavedMessages}
             onEmojiStatusClick={handleStatusClick}
             noLoopLimit
             canCopyTitle
           />
         )}
-        {!isSavedMessages && renderStatus()}
+        {renderStatus()}
       </div>
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId, forceShowSelf }): StateProps => {
+  (global, { userId }): StateProps => {
     const { connectionState } = global;
     const user = selectUser(global, userId);
     const isPrivate = isUserId(userId);
     const userStatus = selectUserStatus(global, userId);
     const chat = selectChat(global, userId);
-    const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const { mediaId, avatarOwnerId } = selectTabState(global).mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
@@ -387,7 +387,6 @@ export default memo(withGlobal<OwnProps>(
       userProfilePhoto: userFullInfo?.profilePhoto,
       userFallbackPhoto: userFullInfo?.fallbackPhoto,
       chatProfilePhoto: chatFullInfo?.profilePhoto,
-      isSavedMessages,
       mediaId,
       avatarOwnerId,
       emojiStatusSticker,

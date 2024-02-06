@@ -243,6 +243,17 @@
       }
     }
 
+    .saved-dialog-avatar {
+      position: absolute;
+    }
+
+    .overlay-avatar {
+      margin-left: 2.125rem;
+      .inner {
+        outline: 2px solid var(--color-background);
+      }
+    }
+
     .status,
     .typing-status {
       display: inline;

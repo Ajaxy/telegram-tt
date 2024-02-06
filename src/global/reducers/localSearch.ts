@@ -1,5 +1,5 @@
 import type { ApiMessageSearchType } from '../../api/types';
-import type { SharedMediaType } from '../../types';
+import type { SharedMediaType, ThreadId } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
@@ -46,7 +46,7 @@ function replaceLocalTextSearch<T extends GlobalState>(
 export function updateLocalTextSearch<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   isActive: boolean,
   query?: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
@@ -63,7 +63,7 @@ export function updateLocalTextSearch<T extends GlobalState>(
 export function replaceLocalTextSearchResults<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   foundIds?: number[],
   totalCount?: number,
   nextOffsetId?: number,
@@ -84,7 +84,7 @@ export function replaceLocalTextSearchResults<T extends GlobalState>(
 export function updateLocalTextSearchResults<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   newFoundIds: number[],
   totalCount?: number,
   nextOffsetId?: number,
@@ -102,7 +102,7 @@ export function updateLocalTextSearchResults<T extends GlobalState>(
 function replaceLocalMediaSearch<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   searchParams: MediaSearchParams,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
@@ -121,7 +121,7 @@ function replaceLocalMediaSearch<T extends GlobalState>(
 export function updateLocalMediaSearchType<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   currentType: SharedMediaType | undefined,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
@@ -136,7 +136,7 @@ export function updateLocalMediaSearchType<T extends GlobalState>(
 export function replaceLocalMediaSearchResults<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   type: ApiMessageSearchType,
   foundIds?: number[],
   totalCount?: number,
@@ -161,7 +161,7 @@ export function replaceLocalMediaSearchResults<T extends GlobalState>(
 export function updateLocalMediaSearchResults<T extends GlobalState>(
   global: T,
   chatId: string,
-  threadId: number,
+  threadId: ThreadId,
   type: SharedMediaType,
   newFoundIds: number[],
   totalCount?: number,

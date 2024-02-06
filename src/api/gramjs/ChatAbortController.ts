@@ -1,7 +1,9 @@
-export class ChatAbortController extends AbortController {
-  private threads = new Map<number, AbortController>();
+import type { ThreadId } from '../../types';
 
-  public getThreadSignal(threadId: number): AbortSignal {
+export class ChatAbortController extends AbortController {
+  private threads = new Map<ThreadId, AbortController>();
+
+  public getThreadSignal(threadId: ThreadId): AbortSignal {
     let controller = this.threads.get(threadId);
     if (!controller) {
       controller = new AbortController();
@@ -10,7 +12,7 @@ export class ChatAbortController extends AbortController {
     return controller.signal;
   }
 
-  public abortThread(threadId: number, reason?: string): void {
+  public abortThread(threadId: ThreadId, reason?: string): void {
     this.threads.get(threadId)?.abort(reason);
     this.threads.delete(threadId);
   }

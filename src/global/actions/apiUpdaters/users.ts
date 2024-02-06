@@ -6,7 +6,12 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   deleteContact, replaceUserStatuses, updatePeerStoriesHidden, updateUser, updateUserFullInfo,
 } from '../../reducers';
-import { selectIsCurrentUserPremium, selectUser, selectUserFullInfo } from '../../selectors';
+import {
+  selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
+  selectUser,
+  selectUserFullInfo,
+} from '../../selectors';
 
 const STATUS_UPDATE_THROTTLE = 3000;
 
@@ -40,7 +45,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateUser': {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
-        if (update.id === global.currentUserId && update.user.isPremium !== selectIsCurrentUserPremium(global)) {
+        if (selectIsChatWithSelf(global, update.id) && update.user.isPremium !== selectIsCurrentUserPremium(global)) {
           if (update.user.isPremium && global.byTabId[tabId].premiumModal) {
             actions.openPremiumModal({ isSuccess: true, tabId });
           }

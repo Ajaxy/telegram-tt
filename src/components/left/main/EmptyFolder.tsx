@@ -18,7 +18,7 @@ import styles from './EmptyFolder.module.scss';
 
 type OwnProps = {
   folderId?: number;
-  folderType: 'all' | 'archived' | 'folder';
+  folderType: 'all' | 'archived' | 'saved' | 'folder';
   foldersDispatch: FolderEditDispatch;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
 };

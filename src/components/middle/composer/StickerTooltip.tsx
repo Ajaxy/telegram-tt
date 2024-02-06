@@ -3,6 +3,7 @@ import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
 import type { ApiSticker } from '../../../api/types';
+import type { ThreadId } from '../../../types';
 
 import { STICKER_SIZE_PICKER } from '../../../config';
 import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
@@ -21,7 +22,7 @@ import './StickerTooltip.scss';
 
 export type OwnProps = {
   chatId: string;
-  threadId?: number;
+  threadId?: ThreadId;
   isOpen: boolean;
   onStickerSelect: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onClose: NoneToVoidFunction;

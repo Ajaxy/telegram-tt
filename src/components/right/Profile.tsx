@@ -14,7 +14,7 @@ import type {
   ApiUserStatus,
 } from '../../api/types';
 import type {
-  ISettings, ProfileState, ProfileTabType, SharedMediaType,
+  ISettings, ProfileState, ProfileTabType, SharedMediaType, ThreadId,
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
@@ -26,7 +26,7 @@ import {
   SLIDE_TRANSITION_DURATION,
 } from '../../config';
 import {
-  getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
+  getHasAdminRight, getIsSavedDialog, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
 } from '../../global/helpers';
 import {
   selectActiveDownloads,
@@ -70,6 +70,7 @@ import NothingFound from '../common/NothingFound';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import ProfileInfo from '../common/ProfileInfo';
 import WebLink from '../common/WebLink';
+import ChatList from '../left/main/ChatList';
 import MediaStory from '../story/MediaStory';
 import Button from '../ui/Button';
 import FloatingActionButton from '../ui/FloatingActionButton';
@@ -84,7 +85,7 @@ import './Profile.scss';
 
 type OwnProps = {
   chatId: string;
-  topicId?: number;
+  threadId?: ThreadId;
   profileState: ProfileState;
   isMobile?: boolean;
   onProfileStateChange: (state: ProfileState) => void;
@@ -122,9 +123,16 @@ type StateProps = {
   similarChannels?: string[];
   isCurrentUserPremium?: boolean;
   limitSimilarChannels: number;
+  isTopicInfo?: boolean;
+  isSavedDialog?: boolean;
 };
 
-const TABS = [
+type TabProps = {
+  type: ProfileTabType;
+  title: string;
+};
+
+const TABS: TabProps[] = [
   { type: 'media', title: 'SharedMediaTab2' },
   { type: 'documents', title: 'SharedFilesTab2' },
   { type: 'links', title: 'SharedLinksTab2' },
@@ -136,7 +144,7 @@ const INTERSECTION_THROTTLE = 500;
 
 const Profile: FC<OwnProps & StateProps> = ({
   chatId,
-  topicId,
+  threadId,
   profileState,
   onProfileStateChange,
   theme,
@@ -170,6 +178,8 @@ const Profile: FC<OwnProps & StateProps> = ({
   similarChannels,
   isCurrentUserPremium,
   limitSimilarChannels,
+  isTopicInfo,
+  isSavedDialog,
 }) => {
   const {
     setLocalMediaSearchType,
@@ -195,29 +205,33 @@ const Profile: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
+  const profileId = isSavedDialog ? String(threadId) : (resolvedUserId || chatId);
+  const isSavedMessages = profileId === currentUserId && !isSavedDialog;
+
   const tabs = useMemo(() => ([
-    ...(hasStoriesTab ? [{ type: 'stories', title: 'ProfileStories' }] : []),
-    ...(hasStoriesTab && currentUserId === chatId ? [{ type: 'storiesArchive', title: 'ProfileStoriesArchive' }] : []),
+    ...(isSavedMessages && !isSavedDialog ? [{ type: 'dialogs' as const, title: 'SavedDialogsTab' }] : []),
+    ...(hasStoriesTab ? [{ type: 'stories' as const, title: 'ProfileStories' }] : []),
+    ...(hasStoriesTab && isSavedMessages ? [{ type: 'storiesArchive' as const, title: 'ProfileStoriesArchive' }] : []),
     ...(hasMembersTab ? [{
-      type: 'members', title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
+      type: 'members' as const, title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
     }] : []),
     ...TABS,
     // TODO The filter for voice messages currently does not work
     // in forum topics. Return it when it's fixed on the server side.
-    ...(!topicId ? [{ type: 'voice', title: 'SharedVoiceTab2' }] : []),
-    ...(hasCommonChatsTab ? [{ type: 'commonChats', title: 'SharedGroupsTab2' }] : []),
+    ...(!isTopicInfo ? [{ type: 'voice' as const, title: 'SharedVoiceTab2' }] : []),
+    ...(hasCommonChatsTab ? [{ type: 'commonChats' as const, title: 'SharedGroupsTab2' }] : []),
     ...(isChannel && similarChannels?.length
-      ? [{ type: 'similarChannels', title: 'SimilarChannelsTab' }]
+      ? [{ type: 'similarChannels' as const, title: 'SimilarChannelsTab' }]
       : []),
   ]), [
-    chatId,
-    currentUserId,
     hasCommonChatsTab,
     hasMembersTab,
     hasStoriesTab,
     isChannel,
-    topicId,
+    isTopicInfo,
     similarChannels,
+    isSavedMessages,
+    isSavedDialog,
   ]);
 
   const initialTab = useMemo(() => {
@@ -269,12 +283,13 @@ const Profile: FC<OwnProps & StateProps> = ({
     chatsById,
     messagesById,
     foundIds,
-    topicId,
+    threadId,
     storyIds,
     archiveStoryIds,
     similarChannels,
   );
-  const isFirstTab = (hasStoriesTab && resultType === 'stories')
+  const isFirstTab = (isSavedMessages && resultType === 'dialogs')
+    || (hasStoriesTab && resultType === 'stories')
     || resultType === 'members'
     || (!hasMembersTab && resultType === 'media');
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
@@ -304,9 +319,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   // Update search type when switching tabs or forum topics
   useEffect(() => {
     setLocalMediaSearchType({ mediaType: tabType as SharedMediaType });
-  }, [setLocalMediaSearchType, tabType, topicId]);
-
-  const profileId = resolvedUserId || chatId;
+  }, [setLocalMediaSearchType, tabType, threadId]);
 
   useEffect(() => {
     loadProfilePhotos({ profileId });
@@ -376,7 +389,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   } else if (!viewportIds) {
     renderingDelay = SLIDE_TRANSITION_DURATION;
   }
-  const canRenderContent = useAsyncRendering([chatId, topicId, resultType, renderingActiveTab], renderingDelay);
+  const canRenderContent = useAsyncRendering([chatId, threadId, resultType, renderingActiveTab], renderingDelay);
 
   function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
@@ -389,6 +402,12 @@ const Profile: FC<OwnProps & StateProps> = ({
   }
 
   function renderContent() {
+    if (resultType === 'dialogs') {
+      return (
+        <ChatList className="saved-dialogs" folderType="saved" isActive />
+      );
+    }
+
     if (!viewportIds || !canRenderContent || !messagesById) {
       const noSpinner = isFirstTab && !canRenderContent;
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
@@ -594,7 +613,9 @@ const Profile: FC<OwnProps & StateProps> = ({
       onLoadMore={getMore}
       onScroll={handleScroll}
     >
-      {!noProfileInfo && renderProfileInfo(chatId, resolvedUserId, isRightColumnShown && canRenderContent)}
+      {!noProfileInfo && !isSavedMessages && (
+        renderProfileInfo(profileId, isRightColumnShown && canRenderContent, isSavedDialog)
+      )}
       {!isRestricted && (
         <div
           className="shared-media"
@@ -635,29 +656,35 @@ const Profile: FC<OwnProps & StateProps> = ({
   );
 };
 
-function renderProfileInfo(chatId: string, resolvedUserId: string | undefined, isReady: boolean) {
+function renderProfileInfo(profileId: string, isReady: boolean, isSavedDialog?: boolean) {
   return (
     <div className="profile-info">
-      <ProfileInfo userId={resolvedUserId || chatId} canPlayVideo={isReady} />
-      <ChatExtra chatOrUserId={resolvedUserId || chatId} />
+      <ProfileInfo userId={profileId} canPlayVideo={isReady} />
+      <ChatExtra chatOrUserId={profileId} isSavedDialog={isSavedDialog} />
     </div>
   );
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, topicId, isMobile }): StateProps => {
+  (global, {
+    chatId, threadId, isMobile,
+  }): StateProps => {
     const chat = selectChat(global, chatId);
     const chatFullInfo = selectChatFullInfo(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
     const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
 
+    const isTopicInfo = Boolean(chat?.isForum && threadId && threadId !== MAIN_THREAD_ID);
+
     const { byId: usersById, statusesById: userStatusesById } = global.users;
     const { byId: chatsById } = global.chats;
 
+    const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
-    const hasMembersTab = !topicId && (isGroup || (isChannel && isChatAdmin(chat!)));
+    const hasMembersTab = !isTopicInfo && !isSavedDialog && (isGroup || (isChannel && isChatAdmin(chat!)));
     const members = chatFullInfo?.members;
     const adminMembersById = chatFullInfo?.adminMembersById;
     const areMembersHidden = hasMembersTab && chat
@@ -675,12 +702,13 @@ export default memo(withGlobal<OwnProps>(
     if (isUserId(chatId)) {
       resolvedUserId = chatId;
       user = selectUser(global, resolvedUserId);
-      hasCommonChatsTab = user && !user.isSelf && !isUserBot(user);
+      hasCommonChatsTab = user && !user.isSelf && !isUserBot(user) && !isSavedDialog;
     }
 
     const peer = user || chat;
     const peerFullInfo = selectPeerFullInfo(global, chatId);
-    const hasStoriesTab = peer && (user?.isSelf || (!peer.areStoriesHidden && peerFullInfo?.hasPinnedStories));
+    const hasStoriesTab = peer && (user?.isSelf || (!peer.areStoriesHidden && peerFullInfo?.hasPinnedStories))
+      && !isSavedDialog;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
     const storyIds = peerStories?.pinnedIds;
     const storyByIds = peerStories?.byId;
@@ -714,6 +742,8 @@ export default memo(withGlobal<OwnProps>(
       shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       similarChannels,
       isCurrentUserPremium,
+      isTopicInfo,
+      isSavedDialog,
       limitSimilarChannels: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),

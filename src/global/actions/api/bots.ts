@@ -26,8 +26,19 @@ import {
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectBot, selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectDraft,
-  selectIsTrustedBot, selectMessageReplyInfo, selectSendAs, selectTabState, selectUser, selectUserFullInfo,
+  selectBot,
+  selectChat,
+  selectChatLastMessageId,
+  selectChatMessage,
+  selectCurrentChat,
+  selectCurrentMessageList,
+  selectDraft,
+  selectIsTrustedBot,
+  selectMessageReplyInfo,
+  selectSendAs,
+  selectTabState,
+  selectUser,
+  selectUserFullInfo,
 } from '../../selectors';
 import { fetchChatByUsername } from './chats';
 
@@ -193,8 +204,10 @@ addActionHandler('sendBotCommand', (global, actions, payload): ActionReturnType 
   actions.resetDraftReplyInfo({ tabId });
   actions.clearWebPagePreview({ tabId });
 
+  const lastMessageId = selectChatLastMessageId(global, chat.id);
+
   void sendBotCommand(
-    chat, command, selectDraft(global, chat.id, threadId)?.replyInfo, selectSendAs(global, chat.id),
+    chat, command, selectDraft(global, chat.id, threadId)?.replyInfo, selectSendAs(global, chat.id), lastMessageId,
   );
 });
 
@@ -207,6 +220,8 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
     return;
   }
 
+  const lastMessageId = selectChatLastMessageId(global, chat.id);
+
   const result = await callApi('unblockUser', { user: bot });
   if (!result) {
     return;
@@ -215,7 +230,7 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
   global = getGlobal();
   global = removeBlockedUser(global, bot.id);
   setGlobal(global);
-  void sendBotCommand(chat, '/start', undefined, selectSendAs(global, chatId));
+  void sendBotCommand(chat, '/start', undefined, selectSendAs(global, chatId), lastMessageId);
 });
 
 addActionHandler('loadTopInlineBots', async (global): Promise<void> => {
@@ -442,6 +457,7 @@ addActionHandler('sharePhoneWithBot', async (global, actions, payload): Promise<
   const currentUser = selectUser(global, global.currentUserId!)!;
 
   if (!chat) return;
+  const lastMessageId = selectChatLastMessageId(global, chat.id);
 
   await callApi('sendMessage', {
     chat,
@@ -451,6 +467,7 @@ addActionHandler('sharePhoneWithBot', async (global, actions, payload): Promise<
       phoneNumber: currentUser.phoneNumber || '',
       userId: currentUser.id,
     },
+    lastMessageId,
   });
 });
 
@@ -1069,13 +1086,14 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
 }
 
 async function sendBotCommand(
-  chat: ApiChat, command: string, replyInfo?: ApiInputMessageReplyInfo, sendAs?: ApiPeer,
+  chat: ApiChat, command: string, replyInfo?: ApiInputMessageReplyInfo, sendAs?: ApiPeer, lastMessageId?: number,
 ) {
   await callApi('sendMessage', {
     chat,
     replyInfo,
     text: command,
     sendAs,
+    lastMessageId,
   });
 }
 

@@ -126,6 +126,20 @@ export function buildApiChatFromDialog(
   };
 }
 
+export function buildApiChatFromSavedDialog(
+  dialog: GramJs.SavedDialog,
+  peerEntity: GramJs.TypeUser | GramJs.TypeChat,
+): ApiChat {
+  const { peer } = dialog;
+
+  return {
+    id: getApiChatIdFromMtpPeer(peer),
+    type: getApiChatTypeFromPeerEntity(peerEntity),
+    title: getApiChatTitleFromMtpPeer(peer, peerEntity),
+    ...buildApiChatFieldsFromPeerEntity(peerEntity),
+  };
+}
+
 function buildApiChatPermissions(peerEntity: GramJs.TypeUser | GramJs.TypeChat): {
   adminRights?: ApiChatAdminRights;
   currentUserBannedRights?: ApiChatBannedRights;

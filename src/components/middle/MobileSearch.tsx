@@ -6,6 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
+import type { ThreadId } from '../../types';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
@@ -32,7 +33,7 @@ export type OwnProps = {
 type StateProps = {
   isActive?: boolean;
   chat?: ApiChat;
-  threadId?: number;
+  threadId?: ThreadId;
   query?: string;
   totalCount?: number;
   foundIds?: number[];

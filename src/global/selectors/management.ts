@@ -3,6 +3,7 @@ import type { GlobalState, TabArgs } from '../types';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   getCanAddContact,
+  isAnonymousForwardsChat,
   isChatAdmin, isChatGroup, isUserBot, isUserId,
 } from '../helpers';
 import { selectChat, selectIsChatWithSelf } from './chats';
@@ -81,6 +82,7 @@ export function selectCanManage<T extends GlobalState>(
     !canAddContact
     && chat
     && !selectIsChatWithSelf(global, chat.id)
+    && !isAnonymousForwardsChat(chat.id)
     // chat.isCreator is for Basic Groups
     && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined))
     && !isBot,

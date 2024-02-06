@@ -4,9 +4,9 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiExportedInvite } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { ManagementScreens, ProfileState } from '../../types';
+import { ManagementScreens, ProfileState, type ThreadId } from '../../types';
 
-import { ANIMATION_END_DELAY } from '../../config';
+import { ANIMATION_END_DELAY, SAVED_FOLDER_ID } from '../../config';
 import {
   getCanAddContact, getCanManageTopic, isChatChannel, isUserBot, isUserId,
 } from '../../global/helpers';
@@ -17,6 +17,7 @@ import {
   selectCurrentGifSearch,
   selectCurrentStickerSearch,
   selectCurrentTextSearch,
+  selectIsChatWithSelf,
   selectTabState,
   selectUser,
 } from '../../global/selectors';
@@ -28,6 +29,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useElectronDrag from '../../hooks/useElectronDrag';
 import useFlag from '../../hooks/useFlag';
+import { useFolderManagerForChatsCount } from '../../hooks/useFolderManager';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -41,7 +43,7 @@ import './RightHeader.scss';
 
 type OwnProps = {
   chatId?: string;
-  threadId?: number;
+  threadId?: ThreadId;
   isColumnOpen?: boolean;
   isProfile?: boolean;
   isSearch?: boolean;
@@ -58,7 +60,7 @@ type OwnProps = {
   isAddingChatMembers?: boolean;
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
-  onClose: () => void;
+  onClose: (shouldScrollUp?: boolean) => void;
   onScreenSelect: (screen: ManagementScreens) => void;
 };
 
@@ -79,6 +81,7 @@ type StateProps = {
   canEditBot?: boolean;
   isInsideTopic?: boolean;
   canEditTopic?: boolean;
+  isSavedMessages?: boolean;
 };
 
 const COLUMN_ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -121,6 +124,7 @@ enum HeaderContent {
   ManageJoinRequests,
   CreateTopic,
   EditTopic,
+  SavedDialogs,
 }
 
 const RightHeader: FC<OwnProps & StateProps> = ({
@@ -157,6 +161,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isBot,
   isInsideTopic,
   canEditTopic,
+  isSavedMessages,
   onClose,
   onScreenSelect,
   canEditBot,
@@ -177,6 +182,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const { isMobile } = useAppLayout();
+
+  const foldersChatCount = useFolderManagerForChatsCount();
 
   const handleEditInviteClick = useLastCallback(() => {
     setEditingExportedInvite({ chatId: chatId!, invite: currentInviteInfo! });
@@ -211,7 +218,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
   const toggleEditTopic = useLastCallback(() => {
     if (!chatId || !threadId) return;
-    openEditTopicPanel({ chatId, topicId: threadId });
+    openEditTopicPanel({ chatId, topicId: Number(threadId) });
   });
 
   const handleToggleManagement = useLastCallback(() => {
@@ -220,6 +227,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
   const handleToggleStatistics = useLastCallback(() => {
     toggleStatistics();
+  });
+
+  const handleClose = useLastCallback(() => {
+    onClose(!isSavedMessages);
   });
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isColumnOpen);
@@ -240,6 +251,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       HeaderContent.MemberList
     ) : profileState === ProfileState.StoryList ? (
       HeaderContent.StoryList
+    ) : profileState === ProfileState.SavedDialogs ? (
+      HeaderContent.SavedDialogs
     ) : -1 // Never reached
   ) : isSearch ? (
     HeaderContent.Search
@@ -310,6 +323,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
 
   function getHeaderTitle() {
+    if (isSavedMessages) {
+      return lang('SavedMessages');
+    }
+
     if (isInsideTopic) {
       return lang('AccDescrTopic');
     }
@@ -332,7 +349,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 
     switch (renderingContentKey) {
       case HeaderContent.PollResults:
-        return <h3>{lang('PollResults')}</h3>;
+        return <h3 className="title">{lang('PollResults')}</h3>;
       case HeaderContent.Search:
         return (
           <>
@@ -354,39 +371,39 @@ const RightHeader: FC<OwnProps & StateProps> = ({
           </>
         );
       case HeaderContent.AddingMembers:
-        return <h3>{lang(isChannel ? 'ChannelAddSubscribers' : 'GroupAddMembers')}</h3>;
+        return <h3 className="title">{lang(isChannel ? 'ChannelAddSubscribers' : 'GroupAddMembers')}</h3>;
       case HeaderContent.ManageInitial:
-        return <h3>{lang('Edit')}</h3>;
+        return <h3 className="title">{lang('Edit')}</h3>;
       case HeaderContent.ManageChatPrivacyType:
-        return <h3>{lang(isChannel ? 'ChannelTypeHeader' : 'GroupTypeHeader')}</h3>;
+        return <h3 className="title">{lang(isChannel ? 'ChannelTypeHeader' : 'GroupTypeHeader')}</h3>;
       case HeaderContent.ManageDiscussion:
-        return <h3>{lang('Discussion')}</h3>;
+        return <h3 className="title">{lang('Discussion')}</h3>;
       case HeaderContent.ManageChatAdministrators:
-        return <h3>{lang('ChannelAdministrators')}</h3>;
+        return <h3 className="title">{lang('ChannelAdministrators')}</h3>;
       case HeaderContent.ManageGroupRecentActions:
-        return <h3>{lang('Group.Info.AdminLog')}</h3>;
+        return <h3 className="title">{lang('Group.Info.AdminLog')}</h3>;
       case HeaderContent.ManageGroupAdminRights:
-        return <h3>{lang('EditAdminRights')}</h3>;
+        return <h3 className="title">{lang('EditAdminRights')}</h3>;
       case HeaderContent.ManageGroupNewAdminRights:
-        return <h3>{lang('SetAsAdmin')}</h3>;
+        return <h3 className="title">{lang('SetAsAdmin')}</h3>;
       case HeaderContent.ManageGroupPermissions:
-        return <h3>{lang('ChannelPermissions')}</h3>;
+        return <h3 className="title">{lang('ChannelPermissions')}</h3>;
       case HeaderContent.ManageGroupRemovedUsers:
-        return <h3>{lang('BlockedUsers')}</h3>;
+        return <h3 className="title">{lang('BlockedUsers')}</h3>;
       case HeaderContent.ManageChannelRemovedUsers:
-        return <h3>{lang('ChannelBlockedUsers')}</h3>;
+        return <h3 className="title">{lang('ChannelBlockedUsers')}</h3>;
       case HeaderContent.ManageGroupUserPermissionsCreate:
-        return <h3>{lang('ChannelAddException')}</h3>;
+        return <h3 className="title">{lang('ChannelAddException')}</h3>;
       case HeaderContent.ManageGroupUserPermissions:
-        return <h3>{lang('UserRestrictions')}</h3>;
+        return <h3 className="title">{lang('UserRestrictions')}</h3>;
       case HeaderContent.ManageInvites:
-        return <h3>{lang('lng_group_invite_title')}</h3>;
+        return <h3 className="title">{lang('lng_group_invite_title')}</h3>;
       case HeaderContent.ManageEditInvite:
-        return <h3>{isEditingInvite ? lang('EditLink') : lang('NewLink')}</h3>;
+        return <h3 className="title">{isEditingInvite ? lang('EditLink') : lang('NewLink')}</h3>;
       case HeaderContent.ManageInviteInfo:
         return (
           <>
-            <h3>{lang('InviteLink')}</h3>
+            <h3 className="title">{lang('InviteLink')}</h3>
             <section className="tools">
               {currentInviteInfo && !currentInviteInfo.isRevoked && (
                 <Button
@@ -425,9 +442,9 @@ const RightHeader: FC<OwnProps & StateProps> = ({
           </>
         );
       case HeaderContent.ManageJoinRequests:
-        return <h3>{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</h3>;
+        return <h3 className="title">{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</h3>;
       case HeaderContent.ManageGroupAddAdmins:
-        return <h3>{lang('Channel.Management.AddModerator')}</h3>;
+        return <h3 className="title">{lang('Channel.Management.AddModerator')}</h3>;
       case HeaderContent.StickerSearch:
         return (
           <SearchInput
@@ -447,32 +464,40 @@ const RightHeader: FC<OwnProps & StateProps> = ({
           />
         );
       case HeaderContent.Statistics:
-        return <h3>{lang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
+        return <h3 className="title">{lang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
       case HeaderContent.MessageStatistics:
-        return <h3>{lang('Stats.MessageTitle')}</h3>;
+        return <h3 className="title">{lang('Stats.MessageTitle')}</h3>;
       case HeaderContent.StoryStatistics:
-        return <h3>{lang('Stats.StoryTitle')}</h3>;
+        return <h3 className="title">{lang('Stats.StoryTitle')}</h3>;
       case HeaderContent.BoostStatistics:
-        return <h3>{lang('Boosts')}</h3>;
+        return <h3 className="title">{lang('Boosts')}</h3>;
       case HeaderContent.SharedMedia:
-        return <h3>{lang('SharedMedia')}</h3>;
+        return <h3 className="title">{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:
-        return <h3>{lang('ChannelSubscribers')}</h3>;
+        return <h3 className="title">{lang('ChannelSubscribers')}</h3>;
       case HeaderContent.MemberList:
       case HeaderContent.ManageGroupMembers:
-        return <h3>{lang('GroupMembers')}</h3>;
+        return <h3 className="title">{lang('GroupMembers')}</h3>;
       case HeaderContent.StoryList:
-        return <h3>{lang(isSelf ? 'Settings.MyStories' : 'PeerInfo.PaneStories')}</h3>;
+        return <h3 className="title">{lang(isSelf ? 'Settings.MyStories' : 'PeerInfo.PaneStories')}</h3>;
+      case HeaderContent.SavedDialogs:
+        return (
+          <div className="header">
+            <h3 className="title">{lang('SavedMessagesTab')}</h3>
+            <div className="subtitle">{lang('Chats', foldersChatCount[SAVED_FOLDER_ID])}</div>
+          </div>
+        );
       case HeaderContent.ManageReactions:
-        return <h3>{lang('Reactions')}</h3>;
+        return <h3 className="title">{lang('Reactions')}</h3>;
       case HeaderContent.CreateTopic:
-        return <h3>{lang('NewTopic')}</h3>;
+        return <h3 className="title">{lang('NewTopic')}</h3>;
       case HeaderContent.EditTopic:
-        return <h3>{lang('EditTopic')}</h3>;
+        return <h3 className="title">{lang('EditTopic')}</h3>;
       default:
         return (
           <>
-            <h3>{getHeaderTitle()}
+            <h3 className="title">
+              {getHeaderTitle()}
             </h3>
             <section className="tools">
               {canAddContact && (
@@ -536,15 +561,16 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     }
   }
 
-  const isBackButton = (
-    isMobile
-    || contentKey === HeaderContent.SharedMedia
-    || contentKey === HeaderContent.MemberList
-    || contentKey === HeaderContent.StoryList
-    || contentKey === HeaderContent.AddingMembers
-    || contentKey === HeaderContent.MessageStatistics
-    || contentKey === HeaderContent.StoryStatistics
-    || isManagement
+  const isBackButton = isMobile || (
+    !isSavedMessages && (
+      contentKey === HeaderContent.SharedMedia
+      || contentKey === HeaderContent.MemberList
+      || contentKey === HeaderContent.StoryList
+      || contentKey === HeaderContent.AddingMembers
+      || contentKey === HeaderContent.MessageStatistics
+      || contentKey === HeaderContent.StoryStatistics
+      || isManagement
+    )
   );
 
   const buttonClassName = buildClassName(
@@ -564,7 +590,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         round
         color="translucent"
         size="smaller"
-        onClick={onClose}
+        onClick={handleClose}
         ariaLabel={isBackButton ? lang('Common.Back') : lang('Common.Close')}
       >
         <div className={buttonClassName} />
@@ -594,6 +620,7 @@ export default withGlobal<OwnProps>(
     const topic = isInsideTopic ? chat.topics?.[threadId!] : undefined;
     const canEditTopic = isInsideTopic && topic && getCanManageTopic(chat, topic);
     const isBot = user && isUserBot(user);
+    const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;
     const canEditBot = isBot && user?.canEditBot;
 
     const canAddContact = user && getCanAddContact(user);
@@ -621,6 +648,7 @@ export default withGlobal<OwnProps>(
       gifSearchQuery,
       isEditingInvite,
       currentInviteInfo,
+      isSavedMessages,
       shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
       canEditBot,
     };

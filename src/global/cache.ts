@@ -12,11 +12,11 @@ import {
   DEBUG,
   DEFAULT_LIMITS,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
-  GLOBAL_STATE_CACHE_CHATS_WITH_MESSAGES_LIMIT,
   GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
   GLOBAL_STATE_CACHE_DISABLED,
   GLOBAL_STATE_CACHE_KEY,
   GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
+  SAVED_FOLDER_ID,
 } from '../config';
 import { getOrderedIds } from '../util/folderManager';
 import {
@@ -31,6 +31,7 @@ import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MID, INITIAL_PERFORMANC
 import { clearGlobalForLockScreen } from './reducers';
 import {
   selectChat,
+  selectChatLastMessageId,
   selectChatMessages,
   selectCurrentMessageList,
   selectViewportIds,
@@ -209,6 +210,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.chats.similarChannelsById = initialState.chats.similarChannelsById;
   }
 
+  if (!cached.chats.lastMessageIds) {
+    cached.chats.lastMessageIds = initialState.chats.lastMessageIds;
+  }
+
   // Clear old color storage to optimize cache size
   if (untypedCached?.appConfig?.peerColors) {
     untypedCached.appConfig.peerColors = undefined;
@@ -370,6 +375,7 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
     ...messagesChatIds,
+    ...getOrderedIds(SAVED_FOLDER_ID) || [],
     ...getOrderedIds(ALL_FOLDER_ID) || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID) || [],
     ...global.recentlyFoundChatIds || [],
@@ -382,6 +388,10 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     isFullyLoaded: {},
     byId: pick(global.chats.byId, idsToSave),
     fullInfoById: pick(global.chats.fullInfoById, idsToSave),
+    lastMessageIds: {
+      all: pick(global.chats.lastMessageIds.all || {}, idsToSave),
+      saved: global.chats.lastMessageIds.saved,
+    },
   };
 }
 
@@ -400,7 +410,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     ...currentChatIds,
     ...currentUserId ? [currentUserId] : [],
     ...forumPanelChatIds,
-    ...getOrderedIds(ALL_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_CHATS_WITH_MESSAGES_LIMIT) || [],
+    ...getOrderedIds(ALL_FOLDER_ID) || [],
   ]);
 
   chatIdsToSave.forEach((chatId) => {
@@ -410,6 +420,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     }
 
     const chat = selectChat(global, chatId);
+    const chatLastMessageId = selectChatLastMessageId(global, chatId);
 
     const threadIds = unique(compact(Object.values(global.byTabId).map(({ id: tabId }) => {
       const { chatId: tabChatId, threadId } = selectCurrentMessageList(global, tabId) || {};
@@ -423,15 +434,18 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
         .map(({ threadInfo }) => (threadInfo?.isCommentsInfo ? threadInfo?.originMessageId : undefined)),
     )));
 
-    const threadIdsToSave = threadIds.length ? [MAIN_THREAD_ID, ...threadIds] : [MAIN_THREAD_ID];
-    const threadsToSave = pickTruthy(current.threadsById, threadIdsToSave);
+    const threadsToSave = pickTruthy(current.threadsById, [MAIN_THREAD_ID, ...threadIds]);
     if (!Object.keys(threadsToSave).length) {
       return;
     }
 
     const viewportIdsToSave = unique(Object.values(threadsToSave).flatMap((thread) => thread.lastViewportIds || []));
-    const lastMessageIdsToSave = chat?.topics
-      ? Object.values(chat.topics).map(({ lastMessageId }) => lastMessageId) : [];
+    const topicLastMessageIds = chat?.topics ? Object.values(chat.topics).map(({ lastMessageId }) => lastMessageId)
+      : [];
+    const savedLastMessageIds = chatId === currentUserId && global.chats.lastMessageIds.saved
+      ? Object.values(global.chats.lastMessageIds.saved) : [];
+    const lastMessageIdsToSave = [chatLastMessageId].concat(topicLastMessageIds).concat(savedLastMessageIds)
+      .filter(Boolean);
     const byId = pick(current.byId, viewportIdsToSave.concat(lastMessageIdsToSave));
     const threadsById = Object.keys(threadsToSave).reduce((acc, key) => {
       const thread = threadsToSave[Number(key)];

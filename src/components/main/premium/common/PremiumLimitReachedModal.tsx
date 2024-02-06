@@ -31,6 +31,7 @@ const LIMIT_DESCRIPTION: Record<ApiLimitTypeWithModal, string> = {
   channels: 'LimitReachedCommunities',
   chatlistInvites: 'LimitReachedFolderLinks',
   chatlistJoined: 'LimitReachedSharedFolders',
+  savedDialogsPinned: 'LimitReachedPinSavedDialogs',
 };
 
 const LIMIT_DESCRIPTION_BLOCKED: Record<ApiLimitTypeWithModal, string> = {
@@ -42,6 +43,7 @@ const LIMIT_DESCRIPTION_BLOCKED: Record<ApiLimitTypeWithModal, string> = {
   channels: 'LimitReachedCommunitiesLocked',
   chatlistInvites: 'LimitReachedFolderLinksLocked',
   chatlistJoined: 'LimitReachedSharedFoldersLocked',
+  savedDialogsPinned: 'LimitReachedPinSavedDialogsLocked',
 };
 
 const LIMIT_DESCRIPTION_PREMIUM: Record<ApiLimitTypeWithModal, string> = {
@@ -53,6 +55,7 @@ const LIMIT_DESCRIPTION_PREMIUM: Record<ApiLimitTypeWithModal, string> = {
   channels: 'LimitReachedCommunitiesPremium',
   chatlistInvites: 'LimitReachedFolderLinksPremium',
   chatlistJoined: 'LimitReachedSharedFoldersPremium',
+  savedDialogsPinned: 'LimitReachedPinSavedDialogsPremium',
 };
 
 const LIMIT_ICON: Record<ApiLimitTypeWithModal, IconName> = {
@@ -64,6 +67,7 @@ const LIMIT_ICON: Record<ApiLimitTypeWithModal, IconName> = {
   channels: 'chats-badge',
   chatlistInvites: 'link-badge',
   chatlistJoined: 'folder-badge',
+  savedDialogsPinned: 'pin-badge',
 };
 
 const LIMIT_VALUE_FORMATTER: Partial<Record<ApiLimitTypeWithModal, (...args: any[]) => string>> = {

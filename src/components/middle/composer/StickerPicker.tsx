@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiSticker, ApiStickerSet } from '../../../api/types';
-import type { StickerSetOrReactionsSetOrRecent } from '../../../types';
+import type { StickerSetOrReactionsSetOrRecent, ThreadId } from '../../../types';
 
 import {
   CHAT_STICKER_SET_ID,
@@ -48,7 +48,7 @@ import styles from './StickerPicker.module.scss';
 
 type OwnProps = {
   chatId: string;
-  threadId?: number;
+  threadId?: ThreadId;
   className: string;
   isHidden?: boolean;
   isTranslucent?: boolean;

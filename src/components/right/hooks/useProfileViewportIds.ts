@@ -3,10 +3,11 @@ import { useMemo, useRef } from '../../../lib/teact/teact';
 import type {
   ApiChat, ApiChatMember, ApiMessage, ApiUser, ApiUserStatus,
 } from '../../../api/types';
-import type { ProfileTabType, SharedMediaType } from '../../../types';
+import type { ProfileTabType, SharedMediaType, ThreadId } from '../../../types';
 
 import { MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
-import { getMessageContentIds, sortChatIds, sortUserIds } from '../../../global/helpers';
+import { getMessageContentIds, sortUserIds } from '../../../global/helpers';
+import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useSyncEffect from '../../../hooks/useSyncEffect';
@@ -26,7 +27,7 @@ export default function useProfileViewportIds(
   chatsById?: Record<string, ApiChat>,
   chatMessages?: Record<number, ApiMessage>,
   foundIds?: number[],
-  topicId?: number,
+  threadId?: ThreadId,
   storyIds?: number[],
   archiveStoryIds?: number[],
   similarChannels?: string[],
@@ -50,7 +51,7 @@ export default function useProfileViewportIds(
       return undefined;
     }
 
-    return sortChatIds(commonChatIds, chatsById, true);
+    return sortChatIds(commonChatIds, true);
   }, [chatsById, commonChatIds]);
 
   const [memberViewportIds, getMoreMembers, noProfileInfoForMembers] = useInfiniteScrollForLoadableItems(
@@ -58,23 +59,23 @@ export default function useProfileViewportIds(
   );
 
   const [mediaViewportIds, getMoreMedia, noProfileInfoForMedia] = useInfiniteScrollForSharedMedia(
-    'media', resultType, searchMessages, chatMessages, foundIds, topicId,
+    'media', resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
   const [documentViewportIds, getMoreDocuments, noProfileInfoForDocuments] = useInfiniteScrollForSharedMedia(
-    'documents', resultType, searchMessages, chatMessages, foundIds, topicId,
+    'documents', resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
   const [linkViewportIds, getMoreLinks, noProfileInfoForLinks] = useInfiniteScrollForSharedMedia(
-    'links', resultType, searchMessages, chatMessages, foundIds, topicId,
+    'links', resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
   const [audioViewportIds, getMoreAudio, noProfileInfoForAudio] = useInfiniteScrollForSharedMedia(
-    'audio', resultType, searchMessages, chatMessages, foundIds, topicId,
+    'audio', resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
   const [voiceViewportIds, getMoreVoices, noProfileInfoForVoices] = useInfiniteScrollForSharedMedia(
-    'voice', resultType, searchMessages, chatMessages, foundIds, topicId,
+    'voice', resultType, searchMessages, chatMessages, foundIds, threadId,
   );
 
   const [commonChatViewportIds, getMoreCommonChats, noProfileInfoForCommonChats] = useInfiniteScrollForLoadableItems(
@@ -146,6 +147,9 @@ export default function useProfileViewportIds(
     case 'similarChannels':
       viewportIds = similarChannels;
       break;
+    case 'dialogs':
+      noProfileInfo = true;
+      break;
   }
 
   return [resultType, viewportIds, getMore, noProfileInfo] as const;
@@ -173,13 +177,13 @@ function useInfiniteScrollForSharedMedia(
   handleLoadMore?: AnyToVoidFunction,
   chatMessages?: Record<number, ApiMessage>,
   foundIds?: number[],
-  topicId?: number,
+  threadId?: ThreadId,
 ) {
   const messageIdsRef = useRef<number[]>();
 
   useSyncEffect(() => {
     messageIdsRef.current = undefined;
-  }, [topicId]);
+  }, [threadId]);
 
   useSyncEffect(() => {
     if (currentResultType === forSharedMediaType && chatMessages && foundIds) {

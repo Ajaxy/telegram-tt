@@ -86,7 +86,9 @@ const PREMIUM_BOTTOM_VIDEOS: string[] = [
   'translations',
 ];
 
-type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType, 'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined'>;
+type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType,
+'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned'
+>;
 
 const LIMITS_ORDER: ApiLimitTypeWithoutUpload[] = [
   'channels',

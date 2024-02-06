@@ -8,22 +8,19 @@ import type {
   ApiUser,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
-import type { NotifyException, NotifySettings } from '../../types';
+import type { NotifyException, NotifySettings, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
+  ANONYMOUS_USER_ID,
   ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
-import { orderBy } from '../../util/iteratees';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getGlobal } from '..';
 import { getMainUsername, getUserFirstOrLastName } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
-
-const VERIFIED_PRIORITY_BASE = 3e9;
-const PINNED_PRIORITY_BASE = 3e8;
 
 export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
@@ -63,6 +60,10 @@ export function isCommonBoxChat(chat: ApiChat) {
 
 export function isChatWithRepliesBot(chatId: string) {
   return chatId === REPLIES_USER_ID;
+}
+
+export function isAnonymousForwardsChat(chatId: string) {
+  return chatId === ANONYMOUS_USER_ID;
 }
 
 export function getChatTypeString(chat: ApiChat) {
@@ -116,10 +117,6 @@ export function getChatAvatarHash(
   }
 }
 
-export function isChatSummaryOnly(chat: ApiChat) {
-  return !chat.lastMessage;
-}
-
 export function isChatAdmin(chat: ApiChat) {
   return Boolean(chat.adminRights);
 }
@@ -140,7 +137,7 @@ export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights)
   );
 }
 
-export function getCanPostInChat(chat: ApiChat, threadId: number, isMessageThread?: boolean) {
+export function getCanPostInChat(chat: ApiChat, threadId: ThreadId, isMessageThread?: boolean) {
   if (threadId !== MAIN_THREAD_ID) {
     if (chat.isForum) {
       if (chat.isNotJoined) {
@@ -155,7 +152,7 @@ export function getCanPostInChat(chat: ApiChat, threadId: number, isMessageThrea
   }
 
   if (chat.isRestricted || chat.isForbidden || chat.migratedTo
-    || (!isMessageThread && chat.isNotJoined) || isChatWithRepliesBot(chat.id)) {
+    || (!isMessageThread && chat.isNotJoined) || isChatWithRepliesBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
     return false;
   }
 
@@ -257,7 +254,7 @@ export function getMessageSendingRestrictionReason(
 }
 
 export function getForumComposerPlaceholder(
-  lang: LangFn, chat?: ApiChat, threadId = MAIN_THREAD_ID, isReplying?: boolean,
+  lang: LangFn, chat?: ApiChat, threadId: ThreadId = MAIN_THREAD_ID, isReplying?: boolean,
 ) {
   if (!chat?.isForum) {
     return undefined;
@@ -377,36 +374,6 @@ export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiP
   return getUserFirstOrLastName(sender);
 }
 
-export function sortChatIds(
-  chatIds: string[],
-  chatsById: Record<string, ApiChat>,
-  shouldPrioritizeVerified = false,
-  priorityIds?: string[],
-) {
-  return orderBy(chatIds, (id) => {
-    const chat = chatsById[id];
-    if (!chat) {
-      return 0;
-    }
-
-    let priority = 0;
-
-    if (chat.lastMessage) {
-      priority += chat.lastMessage.date;
-    }
-
-    if (shouldPrioritizeVerified && chat.isVerified) {
-      priority += VERIFIED_PRIORITY_BASE; // ~100 years in seconds
-    }
-
-    if (priorityIds && priorityIds.includes(id)) {
-      priority = Date.now() + PINNED_PRIORITY_BASE + (priorityIds.length - priorityIds.indexOf(id));
-    }
-
-    return priority;
-  }, 'desc');
-}
-
 export function filterChatsByName(
   lang: LangFn,
   chatIds: string[],
@@ -479,4 +446,8 @@ export function getPeerColorCount(peer: ApiPeer) {
   const key = getPeerColorKey(peer);
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   return getGlobal().peerColors?.general[key].colors?.length || 1;
+}
+
+export function getIsSavedDialog(chatId: string, threadId: ThreadId | undefined, currentUserId: string | undefined) {
+  return chatId === currentUserId && threadId !== MAIN_THREAD_ID;
 }

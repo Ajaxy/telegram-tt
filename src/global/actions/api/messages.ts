@@ -19,7 +19,7 @@ import type {
   ActionReturnType, ApiDraft, GlobalState, TabArgs,
 } from '../../types';
 import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../../api/types';
-import { LoadMoreDirection } from '../../../types';
+import { LoadMoreDirection, type ThreadId } from '../../../types';
 
 import {
   GIF_MIME_TYPE,
@@ -44,6 +44,7 @@ import {
 import { IS_IOS } from '../../../util/windowEnvironment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import {
+  getIsSavedDialog,
   getMessageOriginalId,
   getUserFullName,
   isChatChannel,
@@ -83,6 +84,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatFullInfo,
+  selectChatLastMessageId,
   selectChatMessage,
   selectCurrentChat,
   selectCurrentMessageList,
@@ -96,6 +98,7 @@ import {
   selectFocusedMessageId,
   selectForwardsCanBeSentToChat,
   selectForwardsContainVoiceMessages,
+  selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectLanguageCode,
   selectListedIds,
@@ -227,7 +230,7 @@ async function loadWithBudget<T extends GlobalState>(
   global: T,
   actions: RequiredGlobalActions,
   areAllLocal: boolean, isOutlying: boolean, isBudgetPreload: boolean,
-  chat: ApiChat, threadId: number, direction: LoadMoreDirection, offsetId?: number,
+  chat: ApiChat, threadId: ThreadId, direction: LoadMoreDirection, offsetId?: number,
   onLoaded?: NoneToVoidFunction,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -308,6 +311,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   const messageReplyInfo = selectMessageReplyInfo(global, chatId!, threadId!, draftReplyInfo);
 
   const replyInfo = storyReplyInfo || messageReplyInfo;
+  const lastMessageId = selectChatLastMessageId(global, chatId!);
 
   const params = {
     ...payload,
@@ -315,6 +319,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
     replyInfo,
     noWebPage: selectNoWebPage(global, chatId!, threadId!),
     sendAs: selectSendAs(global, chatId!),
+    lastMessageId,
   };
 
   if (!isStoryReply) {
@@ -545,7 +550,7 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
 async function saveDraft<T extends GlobalState>({
   global, chatId, threadId, draft, isLocalOnly, noLocalTimeUpdate,
 } : {
-  global: T; chatId: string; threadId: number; draft?: ApiDraft; isLocalOnly?: boolean; noLocalTimeUpdate?: boolean;
+  global: T; chatId: string; threadId: ThreadId; draft?: ApiDraft; isLocalOnly?: boolean; noLocalTimeUpdate?: boolean;
 }) {
   const chat = selectChat(global, chatId);
   const user = selectUser(global, chatId);
@@ -732,7 +737,7 @@ addActionHandler('reportMessages', async (global, actions, payload): Promise<voi
 addActionHandler('sendMessageAction', async (global, actions, payload): Promise<void> => {
   const { action, chatId, threadId } = payload!;
   if (global.connectionState !== 'connectionStateReady') return;
-  if (chatId === global.currentUserId) return; // Message actions are disabled in Saved Messages
+  if (selectIsChatWithSelf(global, chatId)) return;
 
   const chat = selectChat(global, chatId)!;
   if (!chat) return;
@@ -754,7 +759,7 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
 
   const { chatId, threadId } = currentMessageList;
   const chat = selectChat(global, chatId);
-  if (!chat) {
+  if (!chat || getIsSavedDialog(chatId, threadId, global.currentUserId)) {
     return undefined;
   }
 
@@ -803,7 +808,7 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
         unreadCount: Math.max(0, chat.unreadCount - 1),
       });
     }
-    return updateTopic(global, chatId, threadId, {
+    return updateTopic(global, chatId, Number(threadId), {
       unreadCount: newTopicUnreadCount,
     });
   }
@@ -951,6 +956,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
 
   const sendAs = selectSendAs(global, toChatId!);
   const draft = selectDraft(global, toChatId!, toThreadId || MAIN_THREAD_ID);
+  const lastMessageId = selectChatLastMessageId(global, toChat.id);
 
   const [realMessages, serviceMessages] = partition(messages, (m) => !isServiceNotificationMessage(m));
   if (realMessages.length) {
@@ -969,6 +975,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
         noCaptions,
         isCurrentUserPremium,
         wasDrafted: Boolean(draft),
+        lastMessageId,
       });
     })();
   }
@@ -990,6 +997,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
         isSilent,
         scheduledAt,
         sendAs,
+        lastMessageId,
       });
     });
 
@@ -1021,7 +1029,7 @@ addActionHandler('loadScheduledHistory', async (global, actions, payload): Promi
   global = replaceScheduledMessages(global, chat.id, byId);
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'scheduledIds', ids);
   if (chat?.isForum) {
-    const scheduledPerThread: Record<number, number[]> = {};
+    const scheduledPerThread: Record<ThreadId, number[]> = {};
     messages.forEach((message) => {
       const threadId = selectThreadIdFromMessage(global, message);
       const scheduledInThread = scheduledPerThread[threadId] || [];
@@ -1121,7 +1129,7 @@ addActionHandler('loadCustomEmojis', async (global, actions, payload): Promise<v
 async function loadViewportMessages<T extends GlobalState>(
   global: T,
   chat: ApiChat,
-  threadId: number,
+  threadId: ThreadId,
   offsetId: number | undefined,
   direction: LoadMoreDirection,
   isOutlying = false,
@@ -1154,12 +1162,18 @@ async function loadViewportMessages<T extends GlobalState>(
   }
 
   global = getGlobal();
+
+  const currentUserId = global.currentUserId!;
+  const isSavedDialog = getIsSavedDialog(chatId, threadId, currentUserId);
+  const realChatId = isSavedDialog ? String(threadId) : chatId;
+
   const result = await callApi('fetchMessages', {
-    chat: selectChat(global, chatId)!,
+    chat: selectChat(global, realChatId)!,
     offsetId,
     addOffset,
     limit: sliceSize,
     threadId,
+    isSavedDialog,
   });
 
   if (!result) {
@@ -1179,10 +1193,10 @@ async function loadViewportMessages<T extends GlobalState>(
   const byId = buildCollectionByKey(allMessages, 'id');
   const ids = Object.keys(byId).map(Number);
 
-  if (threadId !== MAIN_THREAD_ID) {
+  if (threadId !== MAIN_THREAD_ID && !getIsSavedDialog(chatId, threadId, global.currentUserId)) {
     const threadFirstMessageId = selectFirstMessageId(global, chatId, threadId);
     if ((!ids[0] || threadFirstMessageId === ids[0]) && threadFirstMessageId !== threadId) {
-      ids.unshift(threadId);
+      ids.unshift(Number(threadId));
     }
   }
 
@@ -1314,6 +1328,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   sendAs?: ApiPeer;
   groupedId?: string;
   wasDrafted?: boolean;
+  lastMessageId?: number;
 }) {
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
@@ -1351,7 +1366,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
 addActionHandler('loadPinnedMessages', async (global, actions, payload): Promise<void> => {
   const { chatId, threadId } = payload;
   const chat = selectChat(global, chatId);
-  if (!chat) {
+  if (!chat || getIsSavedDialog(chatId, threadId, global.currentUserId)) {
     return;
   }
 
@@ -1651,12 +1666,15 @@ addActionHandler('forwardStory', (global, actions, payload): ActionReturnType =>
     return;
   }
 
+  const lastMessageId = selectChatLastMessageId(global, toChatId);
+
   const { text, entities } = (story as ApiStory).content.text || {};
   void sendMessage(global, {
     chat: toChat,
     text,
     entities,
     story,
+    lastMessageId,
   });
 
   global = getGlobal();

@@ -227,6 +227,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isSynced,
   inviteViaLinkModal,
   oneTimeMediaModal,
+  currentUserId,
 }) => {
   const {
     initMain,
@@ -420,7 +421,7 @@ const Main: FC<OwnProps & StateProps> = ({
   }, []);
 
   useEffect(() => {
-    const parsedLocationHash = parseLocationHash();
+    const parsedLocationHash = parseLocationHash(currentUserId);
     if (!parsedLocationHash) return;
 
     openThread({
@@ -428,7 +429,7 @@ const Main: FC<OwnProps & StateProps> = ({
       threadId: parsedLocationHash.threadId,
       type: parsedLocationHash.type,
     });
-  }, []);
+  }, [currentUserId]);
 
   // Restore Transition slide class after async rendering
   useLayoutEffect(() => {

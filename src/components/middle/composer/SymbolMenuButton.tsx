@@ -3,7 +3,7 @@ import React, { memo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiSticker, ApiVideo } from '../../../api/types';
-import type { IAnchorPosition } from '../../../types';
+import type { IAnchorPosition, ThreadId } from '../../../types';
 
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_MODAL_CSS_SELECTOR } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
@@ -21,7 +21,7 @@ const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
 
 type OwnProps = {
   chatId: string;
-  threadId?: number;
+  threadId?: ThreadId;
   isMobile?: boolean;
   isReady?: boolean;
   isSymbolMenuOpen?: boolean;

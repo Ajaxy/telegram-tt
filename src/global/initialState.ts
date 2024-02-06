@@ -103,6 +103,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     isFullyLoaded: {},
     orderedPinnedIds: {},
     totalCount: {},
+    lastMessageIds: {},
     byId: {},
     fullInfoById: {},
     similarChannelsById: {},

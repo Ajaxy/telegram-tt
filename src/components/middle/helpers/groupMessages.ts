@@ -85,7 +85,7 @@ export function groupMessages(
             || (lastSenderGroupItem
               && 'mainMessage' in lastSenderGroupItem && lastSenderGroupItem.mainMessage?.id === topMessageId))
           && nextMessage.id !== topMessageId)
-        || (isChatWithSelf && message.forwardInfo?.senderUserId !== nextMessage.forwardInfo?.senderUserId)
+        || (isChatWithSelf && message.forwardInfo?.fromId !== nextMessage.forwardInfo?.fromId)
       ) {
         currentSenderGroup = [];
         currentDateGroup.senderGroups.push(currentSenderGroup);

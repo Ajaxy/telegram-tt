@@ -4,6 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { MessageListType } from '../../global/types';
+import type { ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import type { MessageDateGroup } from './helpers/groupMessages';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
@@ -33,7 +34,7 @@ import MessageListBotInfo from './MessageListBotInfo';
 interface OwnProps {
   isCurrentUserPremium?: boolean;
   chatId: string;
-  threadId: number;
+  threadId: ThreadId;
   messageIds: number[];
   messageGroups: MessageDateGroup[];
   getContainerHeight: Signal<number | undefined>;
@@ -54,6 +55,7 @@ interface OwnProps {
   isSchedule: boolean;
   shouldRenderBotInfo?: boolean;
   noAppearanceAnimation: boolean;
+  isSavedDialog?: boolean;
   onFabToggle: AnyToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
   onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
@@ -85,6 +87,7 @@ const MessageListContent: FC<OwnProps> = ({
   isSchedule,
   shouldRenderBotInfo,
   noAppearanceAnimation,
+  isSavedDialog,
   onFabToggle,
   onNotchToggle,
   onPinnedIntersectionChange,
@@ -92,6 +95,7 @@ const MessageListContent: FC<OwnProps> = ({
   const { openHistoryCalendar } = getActions();
 
   const getIsReady = useDerivedSignal(isReady);
+  const areDatesClickable = !isSavedDialog && !isSchedule;
 
   const {
     observeIntersectionForReading,
@@ -162,7 +166,7 @@ const MessageListContent: FC<OwnProps> = ({
             message={message}
             threadId={threadId}
             messageListType={type}
-            isInsideTopic={Boolean(threadId && threadId !== MAIN_THREAD_ID)}
+            isInsideTopic={Boolean(threadId && threadId !== MAIN_THREAD_ID && !isSavedDialog)}
             observeIntersectionForReading={observeIntersectionForReading}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -261,10 +265,10 @@ const MessageListContent: FC<OwnProps> = ({
         teactFastList
       >
         <div
-          className={buildClassName('sticky-date', !isSchedule && 'interactive')}
+          className={buildClassName('sticky-date', areDatesClickable && 'interactive')}
           key="date-header"
           onMouseDown={preventMessageInputBlur}
-          onClick={!isSchedule ? () => openHistoryCalendar({ selectedAt: dateGroup.datetime }) : undefined}
+          onClick={areDatesClickable ? () => openHistoryCalendar({ selectedAt: dateGroup.datetime }) : undefined}
         >
           <span dir="auto">
             {isSchedule && dateGroup.originalDate === SCHEDULED_WHEN_ONLINE && (

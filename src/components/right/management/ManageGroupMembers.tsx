@@ -9,10 +9,11 @@ import { ManagementScreens } from '../../../types';
 
 import {
   filterUsersByName, getHasAdminRight, isChatBasicGroup,
-  isChatChannel, isUserBot, sortChatIds, sortUserIds,
+  isChatChannel, isUserBot, sortUserIds,
 } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
+import sortChatIds from '../../common/helpers/sortChatIds';
 
 import usePeerStoriesPolling from '../../../hooks/polling/usePeerStoriesPolling';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -111,7 +112,6 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    const chatsById = getGlobal().chats.byId;
     const shouldUseSearchResults = Boolean(searchQuery);
     const listedIds = !shouldUseSearchResults
       ? memberIds
@@ -131,7 +131,6 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
         return (isChannel || user.canBeInvitedToGroup || !isUserBot(user))
           && (!noAdmins || !adminIds.includes(contactId));
       }),
-      chatsById,
       true,
     );
   }, [memberIds, localContactIds, searchQuery, localUserIds, globalUserIds, isChannel, noAdmins, adminIds]);

@@ -1,3 +1,4 @@
+import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat } from './chats';
@@ -370,12 +371,14 @@ export type ApiInputReplyInfo = ApiInputMessageReplyInfo | ApiInputStoryReplyInf
 
 export interface ApiMessageForwardInfo {
   date: number;
+  savedDate?: number;
   isImported?: boolean;
   isChannelPost: boolean;
   channelPostId?: number;
   isLinkedChannelPost?: boolean;
   fromChatId?: string;
-  senderUserId?: string;
+  fromId?: string;
+  savedFromPeerId?: string;
   fromMessageId?: number;
   hiddenUserName?: string;
   postAuthorTitle?: string;
@@ -595,14 +598,14 @@ interface ApiBaseThreadInfo {
 
 export interface ApiCommentsInfo extends ApiBaseThreadInfo {
   isCommentsInfo: true;
-  threadId?: number;
+  threadId?: ThreadId;
   originChannelId: string;
   originMessageId: number;
 }
 
 export interface ApiMessageThreadInfo extends ApiBaseThreadInfo {
   isCommentsInfo: false;
-  threadId: number;
+  threadId: ThreadId;
   // For linked messages in discussion
   fromChannelId?: string;
   fromMessageId?: number;

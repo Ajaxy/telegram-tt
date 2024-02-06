@@ -2,11 +2,10 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChat } from '../../../api/types';
-
-import { filterUsersByName, isUserBot, sortChatIds } from '../../../global/helpers';
+import { filterUsersByName, isUserBot } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
+import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -25,7 +24,6 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  chatsById: Record<string, ApiChat>;
   localContactIds?: string[];
   searchQuery?: string;
   isSearching?: boolean;
@@ -40,7 +38,6 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
   onSelectedMemberIdsChange,
   onNextStep,
   onReset,
-  chatsById,
   localContactIds,
   searchQuery,
   isSearching,
@@ -80,11 +77,10 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
 
         return !user.isSelf && (user.canBeInvitedToGroup || !isUserBot(user));
       }),
-      chatsById,
       false,
       selectedMemberIds,
     );
-  }, [localContactIds, chatsById, searchQuery, localUserIds, globalUserIds, selectedMemberIds]);
+  }, [localContactIds, searchQuery, localUserIds, globalUserIds, selectedMemberIds]);
 
   const handleNextStep = useCallback(() => {
     setGlobalSearchQuery({ query: '' });
@@ -133,7 +129,6 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { userIds: localContactIds } = global.contactList || {};
-    const { byId: chatsById } = global.chats;
 
     const {
       query: searchQuery,
@@ -145,7 +140,6 @@ export default memo(withGlobal<OwnProps>(
     const { userIds: localUserIds } = localResults || {};
 
     return {
-      chatsById,
       localContactIds,
       searchQuery,
       isSearching: fetchingStatus?.chats,

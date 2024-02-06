@@ -1,5 +1,7 @@
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  memo, useEffect, useMemo, useRef,
+} from '../../lib/teact/teact';
 
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 
@@ -8,6 +10,7 @@ import {
   getChatTitle,
   getUserFullName,
   getVideoAvatarMediaHash,
+  isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
   isUserId,
@@ -27,6 +30,7 @@ import useMediaTransition from '../../hooks/useMediaTransition';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Spinner from '../ui/Spinner';
+import Icon from './Icon';
 
 import './ProfilePhoto.scss';
 
@@ -34,6 +38,7 @@ type OwnProps = {
   chat?: ApiChat;
   user?: ApiUser;
   isSavedMessages?: boolean;
+  isSavedDialog?: boolean;
   photo?: ApiPhoto;
   canPlayVideo: boolean;
   onClick: NoneToVoidFunction;
@@ -44,6 +49,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   user,
   photo,
   isSavedMessages,
+  isSavedDialog,
   canPlayVideo,
   onClick,
 }) => {
@@ -55,8 +61,9 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
+  const isAnonymousForwards = chat && isAnonymousForwardsChat(chat.id);
   const peer = user || chat;
-  const canHaveMedia = peer && !isSavedMessages && !isDeleted && !isRepliesChat;
+  const canHaveMedia = peer && !isSavedMessages && !isDeleted && !isRepliesChat && !isAnonymousForwards;
   const { isVideo } = photo || {};
 
   const avatarHash = canHaveMedia && getChatAvatarHash(peer, 'normal');
@@ -84,14 +91,30 @@ const ProfilePhoto: FC<OwnProps> = ({
     }
   }, [canPlayVideo]);
 
+  const specialIcon = useMemo(() => {
+    if (isSavedMessages) {
+      return isSavedDialog ? 'my-notes' : 'avatar-saved-messages';
+    }
+
+    if (isDeleted) {
+      return 'avatar-deleted-account';
+    }
+
+    if (isRepliesChat) {
+      return 'reply-filled';
+    }
+
+    if (isAnonymousForwards) {
+      return 'author-hidden';
+    }
+
+    return undefined;
+  }, [isAnonymousForwards, isDeleted, isSavedDialog, isRepliesChat, isSavedMessages]);
+
   let content: TeactNode | undefined;
 
-  if (isSavedMessages) {
-    content = <i className="icon icon-avatar-saved-messages" />;
-  } else if (isDeleted) {
-    content = <i className="icon icon-avatar-deleted-account" />;
-  } else if (isRepliesChat) {
-    content = <i className="icon icon-reply-filled" />;
+  if (specialIcon) {
+    content = <Icon name={specialIcon} role="img" />;
   } else if (hasMedia) {
     content = (
       <>
@@ -141,6 +164,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     'ProfilePhoto',
     getPeerColorClass(peer),
     isSavedMessages && 'saved-messages',
+    isAnonymousForwards && 'anonymous-forwards',
     isDeleted && 'deleted-account',
     isRepliesChat && 'replies-bot-account',
     (!isSavedMessages && !hasMedia) && 'no-photo',

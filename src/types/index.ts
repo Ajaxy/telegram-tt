@@ -29,6 +29,8 @@ export interface IAlbum {
   mainMessage: ApiMessage;
 }
 
+export type ThreadId = string | number;
+
 export type ThemeKey = 'light' | 'dark';
 export type AnimationLevel = 0 | 1 | 2;
 export type PerformanceTypeKey = (
@@ -366,7 +368,8 @@ export type ProfileTabType =
   | 'voice'
   | 'stories'
   | 'storiesArchive'
-  | 'similarChannels';
+  | 'similarChannels'
+  | 'dialogs';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
 'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio';
@@ -377,6 +380,7 @@ export enum ProfileState {
   SharedMedia,
   MemberList,
   StoryList,
+  SavedDialogs,
 }
 
 export enum PaymentStep {

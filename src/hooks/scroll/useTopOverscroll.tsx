@@ -14,6 +14,7 @@ export default function useTopOverscroll(
   containerRef: React.RefObject<HTMLDivElement>,
   onOverscroll?: AnyToVoidFunction,
   onReset?: AnyToVoidFunction,
+  isDisabled?: boolean,
 ) {
   // eslint-disable-next-line no-null/no-null
   const overscrollTriggerRef = useRef<HTMLDivElement>(null);
@@ -125,7 +126,7 @@ export default function useTopOverscroll(
     };
   }, [containerRef, handleWheel]);
 
-  return !IS_IOS ? (
+  return !IS_IOS && !isDisabled ? (
     <div ref={overscrollTriggerRef} className="overscroll-trigger" key="overscroll-trigger" />
   ) : undefined;
 }
