@@ -241,15 +241,16 @@ $icons-map: (
   "video-outlined": "\f1d2",
   "video-stop": "\f1d3",
   "video": "\f1d4",
-  "voice-chat": "\f1d5",
-  "volume-1": "\f1d6",
-  "volume-2": "\f1d7",
-  "volume-3": "\f1d8",
-  "web": "\f1d9",
-  "webapp": "\f1da",
-  "word-wrap": "\f1db",
-  "zoom-in": "\f1dc",
-  "zoom-out": "\f1dd",
+  "view-once": "\f1d5",
+  "voice-chat": "\f1d6",
+  "volume-1": "\f1d7",
+  "volume-2": "\f1d8",
+  "volume-3": "\f1d9",
+  "web": "\f1da",
+  "webapp": "\f1db",
+  "word-wrap": "\f1dc",
+  "zoom-in": "\f1dd",
+  "zoom-out": "\f1de",
 );
 
 .icon-active-sessions::before {
@@ -887,6 +888,9 @@ $icons-map: (
 }
 .icon-video::before {
   content: map.get($icons-map, "video");
+}
+.icon-view-once::before {
+  content: map.get($icons-map, "view-once");
 }
 .icon-voice-chat::before {
   content: map.get($icons-map, "voice-chat");

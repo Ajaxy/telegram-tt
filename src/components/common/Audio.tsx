@@ -16,6 +16,7 @@ import {
   getMediaTransferState,
   getMessageMediaFormat,
   getMessageMediaHash,
+  hasMessageTtl,
   isMessageLocal,
   isOwnMessage,
 } from '../../global/helpers';
@@ -24,6 +25,7 @@ import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dateFormat';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
+import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 import { getFileSizeString } from './helpers/documentInfo';
 import renderText from './helpers/renderText';
 import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
@@ -40,6 +42,8 @@ import useShowTransition from '../../hooks/useShowTransition';
 import Button from '../ui/Button';
 import Link from '../ui/Link';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import AnimatedIcon from './AnimatedIcon';
+import Icon from './Icon';
 
 import './Audio.scss';
 
@@ -61,8 +65,10 @@ type OwnProps = {
   canTranscribe?: boolean;
   isTranscriptionHidden?: boolean;
   isTranscriptionError?: boolean;
+  autoPlay?: boolean;
   onHideTranscription?: (isHidden: boolean) => void;
   onPlay: (messageId: number, chatId: string) => void;
+  onPause?: NoneToVoidFunction;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
   onDateClick?: (messageId: number, chatId: string) => void;
@@ -92,15 +98,23 @@ const Audio: FC<OwnProps> = ({
   isTranscriptionError,
   canDownload,
   canTranscribe,
+  autoPlay,
   onHideTranscription,
   onPlay,
+  onPause,
   onReadMedia,
   onCancelUpload,
   onDateClick,
 }) => {
-  const { cancelMessageMediaDownload, downloadMessageMedia, transcribeAudio } = getActions();
+  const {
+    cancelMessageMediaDownload, downloadMessageMedia, transcribeAudio, openOneTimeMediaModal,
+  } = getActions();
 
-  const { content: { audio, voice, video }, isMediaUnread } = message;
+  const {
+    content: {
+      audio, voice, video,
+    }, isMediaUnread,
+  } = message;
   const isVoice = Boolean(voice || video);
   const isSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
@@ -109,10 +123,13 @@ const Audio: FC<OwnProps> = ({
   const { isRtl } = lang;
 
   const { isMobile } = useAppLayout();
-  const [isActivated, setIsActivated] = useState(false);
+  const [isActivated, setIsActivated] = useState(Boolean(autoPlay));
   const shouldLoad = isActivated || PRELOAD;
   const coverHash = getMessageMediaHash(message, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
+  const hasTtl = hasMessageTtl(message);
+  const isOneTimeModalOrigin = origin === AudioOrigin.OneTimeModal;
+  const trackType = isVoice ? (hasTtl ? 'oneTimeVoice' : 'voice') : 'audio';
 
   const mediaData = useMedia(
     getMessageMediaHash(message, 'inline'),
@@ -139,12 +156,13 @@ const Audio: FC<OwnProps> = ({
     isBuffered, bufferedRanges, bufferingHandlers, checkBuffering,
   } = useBuffering();
 
+  const noReset = isOneTimeModalOrigin;
   const {
     isPlaying, playProgress, playPause, setCurrentTime, duration,
   } = useAudioPlayer(
     makeTrackId(message),
     getMediaDuration(message)!,
-    isVoice ? 'voice' : 'audio',
+    trackType,
     mediaData,
     bufferingHandlers,
     undefined,
@@ -152,12 +170,24 @@ const Audio: FC<OwnProps> = ({
     isActivated,
     handleForcePlay,
     handleTrackChange,
-    isMessageLocal(message),
+    isMessageLocal(message) || hasTtl,
+    undefined,
+    onPause,
+    noReset,
   );
 
+  const reversePlayProgress = 1 - playProgress;
   const isOwn = isOwnMessage(message);
+  const isReverse = hasTtl && isOneTimeModalOrigin;
+
   const waveformCanvasRef = useWaveformCanvas(
-    theme, voice, (isMediaUnread && !isOwn) ? 1 : playProgress, isOwn, !noAvatars, isMobile,
+    theme,
+    voice,
+    (isMediaUnread && !isOwn && !isReverse) ? 1 : playProgress,
+    isOwn,
+    !noAvatars,
+    isMobile,
+    isReverse,
   );
 
   const withSeekline = isPlaying || (playProgress > 0 && playProgress < 1);
@@ -186,6 +216,13 @@ const Audio: FC<OwnProps> = ({
   const handleButtonClick = useLastCallback(() => {
     if (isUploading) {
       onCancelUpload?.();
+      return;
+    }
+
+    if (hasTtl) {
+      // Set new date to prevent saving state of the track
+      openOneTimeMediaModal({ message: { ...message, date: Date.now() } });
+      onReadMedia?.();
       return;
     }
 
@@ -241,14 +278,14 @@ const Audio: FC<OwnProps> = ({
   });
 
   useEffect(() => {
-    if (!seekerRef.current || !withSeekline) return undefined;
+    if (!seekerRef.current || !withSeekline || isOneTimeModalOrigin) return undefined;
     return captureEvents(seekerRef.current, {
       onCapture: handleStartSeek,
       onRelease: handleStopSeek,
       onClick: handleStopSeek,
       onDrag: handleSeek,
     });
-  }, [withSeekline, handleStartSeek, handleSeek, handleStopSeek]);
+  }, [withSeekline, handleStartSeek, handleSeek, handleStopSeek, isOneTimeModalOrigin]);
 
   function renderFirstLine() {
     if (isVoice) {
@@ -285,6 +322,7 @@ const Audio: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'Audio',
     className,
+    isOneTimeModalOrigin && 'non-interactive',
     origin === AudioOrigin.Inline && 'inline',
     isOwn && origin === AudioOrigin.Inline && 'own',
     (origin === AudioOrigin.Search || origin === AudioOrigin.SharedMedia) && 'bigger',
@@ -331,6 +369,40 @@ const Audio: FC<OwnProps> = ({
     );
   }
 
+  function renderTooglePlayWrapper() {
+    return (
+      <div className="toogle-play-wrapper">
+        <Button
+          round
+          ripple={!isMobile}
+          size="smaller"
+          color={coverBlobUrl ? 'translucent-white' : 'primary'}
+          className={buttonClassNames.join(' ')}
+          ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
+          onClick={handleButtonClick}
+          isRtl={lang.isRtl}
+          backgroundImage={coverBlobUrl}
+          nonInteractive={isOneTimeModalOrigin}
+        >
+          {!isOneTimeModalOrigin && <Icon name="play" />}
+          {!isOneTimeModalOrigin && <Icon name="pause" />}
+          {isOneTimeModalOrigin && (
+            <AnimatedIcon
+              className="flame"
+              tgsUrl={LOCAL_TGS_URLS.Flame}
+              nonInteractive
+              noLoop={false}
+              size={40}
+            />
+          )}
+        </Button>
+        {hasTtl && !isOneTimeModalOrigin && (
+          <Icon name="view-once" />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={fullClassName} dir={lang.isRtl ? 'rtl' : 'ltr'}>
       {isSelectable && (
@@ -338,28 +410,27 @@ const Audio: FC<OwnProps> = ({
           {isSelected && <i className="icon icon-select" />}
         </div>
       )}
-      <Button
-        round
-        ripple={!isMobile}
-        size="smaller"
-        color={coverBlobUrl ? 'translucent-white' : 'primary'}
-        className={buttonClassNames.join(' ')}
-        ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
-        onClick={handleButtonClick}
-        isRtl={lang.isRtl}
-        backgroundImage={coverBlobUrl}
-      >
-        <i className="icon icon-play" />
-        <i className="icon icon-pause" />
-      </Button>
+      {renderTooglePlayWrapper()}
       {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames, shouldRenderCross && 'interactive')}>
           <ProgressSpinner
             progress={transferProgress}
             transparent
+            withColor
             size="m"
             onClick={shouldRenderCross ? handleButtonClick : undefined}
             noCross={!shouldRenderCross}
+          />
+        </div>
+      )}
+      {isOneTimeModalOrigin && !shouldRenderSpinner && (
+        <div className={buildClassName('media-loading')}>
+          <ProgressSpinner
+            progress={playProgress}
+            transparent
+            size="m"
+            noCross
+            rotationOffset={3 / 4}
           />
         </div>
       )}
@@ -389,12 +460,12 @@ const Audio: FC<OwnProps> = ({
         onDateClick ? handleDateClick : undefined,
       )}
       {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}
-      {origin === AudioOrigin.Inline && voice && (
+      {(origin === AudioOrigin.Inline || isOneTimeModalOrigin) && voice && (
         renderVoice(
           voice,
           seekerRef,
           waveformCanvasRef,
-          playProgress,
+          hasTtl ? reversePlayProgress : playProgress,
           isMediaUnread,
           isTranscribing,
           isTranscriptionHidden,
@@ -402,6 +473,7 @@ const Audio: FC<OwnProps> = ({
           isTranscriptionError,
           canTranscribe ? handleTranscribe : undefined,
           onHideTranscription,
+          origin,
         )
       )}
     </div>
@@ -489,6 +561,7 @@ function renderVoice(
   isTranscriptionError?: boolean,
   onClickTranscribe?: VoidFunction,
   onHideTranscription?: (isHidden: boolean) => void,
+  origin?: AudioOrigin,
 ) {
   return (
     <div className="content">
@@ -537,8 +610,12 @@ function renderVoice(
           </Button>
         )}
       </div>
-      <p className={buildClassName('voice-duration', isMediaUnread && 'unread')} dir="auto">
-        {playProgress === 0 ? formatMediaDuration(voice.duration) : formatMediaDuration(voice.duration * playProgress)}
+      <p
+        className={buildClassName('voice-duration', origin !== AudioOrigin.OneTimeModal && isMediaUnread && 'unread')}
+        dir="auto"
+      >
+        {playProgress === 0 || playProgress === 1
+          ? formatMediaDuration(voice.duration) : formatMediaDuration(voice.duration * playProgress)}
       </p>
     </div>
   );
@@ -551,6 +628,7 @@ function useWaveformCanvas(
   isOwn = false,
   withAvatar = false,
   isMobile = false,
+  isReverse = false,
 ) {
   // eslint-disable-next-line no-null/no-null
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -588,12 +666,15 @@ function useWaveformCanvas(
     const progressFillColor = theme === 'dark' ? '#8774E1' : '#3390EC';
     const progressFillOwnColor = theme === 'dark' ? '#FFFFFF' : '#4FAE4E';
 
-    renderWaveform(canvas, spikes, playProgress, {
+    const fillStyle = isOwn ? fillOwnColor : fillColor;
+    const progressFillStyle = isOwn ? progressFillOwnColor : progressFillColor;
+
+    renderWaveform(canvas, spikes, isReverse ? 1 - playProgress : playProgress, {
       peak,
-      fillStyle: isOwn ? fillOwnColor : fillColor,
-      progressFillStyle: isOwn ? progressFillOwnColor : progressFillColor,
+      fillStyle,
+      progressFillStyle,
     });
-  }, [isOwn, peak, playProgress, spikes, theme]);
+  }, [isOwn, peak, playProgress, spikes, theme, isReverse]);
 
   return canvasRef;
 }

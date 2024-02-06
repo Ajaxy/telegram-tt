@@ -17,6 +17,7 @@ import {
   areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
 } from '../../util/iteratees';
 import {
+  hasMessageTtl,
   isLocalMessageId, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
 import {
@@ -198,6 +199,15 @@ export function updateChatMessage<T extends GlobalState>(
 ): T {
   const byId = selectChatMessages(global, chatId) || {};
   const message = byId[messageId];
+  if (message && messageUpdate.isMediaUnread === false && hasMessageTtl(message)) {
+    if (message.content.voice) {
+      messageUpdate.content = {
+        ...messageUpdate.content,
+        voice: undefined,
+        isExpiredVoice: true,
+      };
+    }
+  }
   const updatedMessage = {
     ...message,
     ...messageUpdate,

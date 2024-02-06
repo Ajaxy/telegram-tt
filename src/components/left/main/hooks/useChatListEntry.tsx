@@ -13,6 +13,7 @@ import type { LangFn } from '../../../../hooks/useLang';
 import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import {
+  getExpiredMessageDescription,
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
@@ -22,6 +23,7 @@ import {
   getMessageVideo,
   isActionMessage,
   isChatChannel,
+  isExpiredMessage,
 } from '../../../../global/helpers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 import buildClassName from '../../../../util/buildClassName';
@@ -125,6 +127,14 @@ export default function useChatListEntry({
 
     if (!lastMessage) {
       return undefined;
+    }
+
+    if (isExpiredMessage(lastMessage)) {
+      return (
+        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
+          {getExpiredMessageDescription(lang, lastMessage)}
+        </p>
+      );
     }
 
     if (isAction) {

@@ -72,7 +72,18 @@ export function buildMessageTextContent(
 }
 
 export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaContent | undefined {
-  if ('ttlSeconds' in media && media.ttlSeconds) {
+  const ttlSeconds = 'ttlSeconds' in media ? media.ttlSeconds : undefined;
+
+  const isExpiredVoice = isExpiredVoiceMessage(media);
+  if (isExpiredVoice) {
+    return { isExpiredVoice };
+  }
+
+  const voice = buildVoice(media);
+  if (voice) return { voice, ttlSeconds };
+
+  // Other disappearing media types are not supported
+  if (ttlSeconds !== undefined) {
     return undefined;
   }
 
@@ -92,9 +103,6 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaC
 
   const audio = buildAudio(media);
   if (audio) return { audio };
-
-  const voice = buildVoice(media);
-  if (voice) return { voice };
 
   const document = buildDocumentFromMedia(media);
   if (document) return { document };
@@ -253,6 +261,13 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
     ...pick(media.document, ['mimeType']),
     ...pick(audioAttribute, ['duration', 'performer', 'title']),
   };
+}
+
+function isExpiredVoiceMessage(media: GramJs.TypeMessageMedia): MediaContent['isExpiredVoice'] {
+  if (!(media instanceof GramJs.MessageMediaDocument)) {
+    return false;
+  }
+  return !media.document && media.voice;
 }
 
 function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {

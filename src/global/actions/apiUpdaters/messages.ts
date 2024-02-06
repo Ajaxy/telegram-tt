@@ -445,6 +445,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const chatId = selectCommonBoxChatId(global, id);
         if (chatId) {
           global = updateChatMessage(global, chatId, id, messageUpdate);
+          const message = selectChatMessage(global, chatId, id);
+          if (message) {
+            global = updateChatLastMessage(global, chatId, message);
+          }
         }
       });
 

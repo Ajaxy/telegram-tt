@@ -14,6 +14,7 @@ import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../co
 import {
   areReactionsEmpty,
   getMessageVideo,
+  hasMessageTtl,
   isActionMessage,
   isChatChannel,
   isChatGroup,
@@ -649,6 +650,7 @@ export default memo(withGlobal<OwnProps>(
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
     const isLocal = isMessageLocal(message);
+    const hasTtl = hasMessageTtl(message);
     const canShowSeenBy = Boolean(!isLocal
       && chat
       && seenByMaxChatMembers
@@ -695,7 +697,7 @@ export default memo(withGlobal<OwnProps>(
       canForward: !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,
       canUnfaveSticker: !isScheduled && canUnfaveSticker,
-      canCopy: canCopyNumber || (!isProtected && canCopy),
+      canCopy: (canCopyNumber || (!isProtected && canCopy)),
       canCopyLink: !isScheduled && canCopyLink,
       canSelect,
       canDownload: !isProtected && canDownload,
@@ -710,7 +712,8 @@ export default memo(withGlobal<OwnProps>(
       isCurrentUserPremium,
       hasFullInfo: Boolean(chatFullInfo),
       canShowReactionsCount,
-      canShowReactionList: !isLocal && !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
+      canShowReactionList: !isLocal && !isAction
+        && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID && !hasTtl,
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
       customEmojiSetsInfo,
       customEmojiSets,

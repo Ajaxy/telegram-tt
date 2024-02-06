@@ -1,17 +1,25 @@
 .ProgressSpinner {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   z-index: 1;
   width: 3.375rem;
   height: 3.375rem;
-  background: rgba(0, 0, 0, 0.25)
-    url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMTkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEwLjcxNyA5Ljc1TDE4LjMgMi4xNjdhLjY4NC42ODQgMCAxMC0uOTY3LS45NjdMOS43NSA4Ljc4MyAyLjE2NyAxLjJhLjY4NC42ODQgMCAxMC0uOTY3Ljk2N0w4Ljc4MyA5Ljc1IDEuMiAxNy4zMzNhLjY4NC42ODQgMCAxMC45NjcuOTY3bDcuNTgzLTcuNTgzIDcuNTgzIDcuNTgzYS42ODEuNjgxIDAgMDAuOTY3IDAgLjY4NC42ODQgMCAwMDAtLjk2N0wxMC43MTcgOS43NXoiIGZpbGw9IiNGRkYiIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlPSIjRkZGIiBzdHJva2Utd2lkdGg9Ii43NSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==)
-    no-repeat 49% 49%;
+  background-color: rgba(0, 0, 0, 0.25);
   border-radius: 50%;
   cursor: var(--custom-cursor, pointer);
 
   &.no-cross {
     background: transparent !important;
     pointer-events: none;
+  }
+
+  .icon-close {
+    position: absolute;
+    font-size: 1.625rem;
+    color: var(--color-white);
   }
 
   &.square {
@@ -34,10 +42,6 @@
   &.size-m {
     width: auto;
     height: auto;
-    /* stylelint-disable-next-line scss/operator-no-unspaced */
-    background: transparent
-      url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUiIGhlaWdodD0iMTUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTguMjE4IDcuNWw1LjYzMy01LjYzM2EuNTA4LjUwOCAwIDEwLS43MTgtLjcxOEw3LjUgNi43ODIgMS44NjcgMS4xNDlhLjUwOC41MDggMCAxMC0uNzE4LjcxOEw2Ljc4MiA3LjVsLTUuNjMzIDUuNjMzYS41MDguNTA4IDAgMTAuNzE4LjcxOEw3LjUgOC4yMThsNS42MzMgNS42MzNhLjUwNi41MDYgMCAwMC43MTggMCAuNTA4LjUwOCAwIDAwMC0uNzE4TDguMjE4IDcuNXoiIGZpbGw9IiNGRkYiIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlPSIjRkZGIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+)
-      no-repeat 49% 49%;
 
     &.square {
       background-image: none;
@@ -62,5 +66,6 @@
   &_canvas {
     display: block;
     background-color: transparent !important;
+    color: var(--color-white);
   }
 }
