@@ -25,13 +25,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Use Node.js 20.x
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20.x
 
       - name: Cache node modules
         id: npm-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: ${{ runner.os }}-build-${{ hashFiles('**/package-lock.json') }}
@@ -59,7 +59,7 @@ jobs:
 
       - name: Get branch name for current workflow run
         id: branch-name
-        uses: tj-actions/branch-names@v7
+        uses: tj-actions/branch-names@v8
 
       - name: Build, package and publish
         env:
@@ -80,22 +80,22 @@ jobs:
             npm run electron:release:production
           fi
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-x64.dmg
           path: dist-electron/${{ env.APP_NAME }}-x64.dmg
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-arm64.dmg
           path: dist-electron/${{ env.APP_NAME }}-arm64.dmg
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-x86_64.AppImage
           path: dist-electron/${{ env.APP_NAME }}-x86_64.AppImage
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-x64.exe
           path: dist-electron/${{ env.APP_NAME }}-x64.exe
@@ -144,7 +144,7 @@ jobs:
 
       - name: Download Windows package
         id: download-artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.FILE_NAME }}
 
@@ -155,7 +155,7 @@ jobs:
         shell: cmd
         run: smctl.exe sign --keypair-alias=%KEYPAIR_ALIAS% --input "%FILE_PATH%\%FILE_NAME%"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.FILE_NAME }}
           path: ${{ env.FILE_NAME }}
