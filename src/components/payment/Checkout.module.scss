@@ -106,7 +106,8 @@
   border-radius: 1rem;
   width: 1.5rem;
   height: 1.5rem;
-  margin-right: 2rem;
+  margin-inline-start: 0.125rem;
+  margin-inline-end: 1.25rem;
 }
 
 .provider.stripe {
@@ -136,9 +137,9 @@
 }
 
 .tos-checkbox {
-  margin-left: 0.5rem;
-  padding-left: 4rem;
-
+  margin-left: 0.625rem;
+  padding-left: 3.1875rem;
+  
   :global(.Checkbox-main) {
     &::before,
     &::after {
