@@ -2563,6 +2563,7 @@ export interface ActionPayloads {
     theme?: ApiThemeParameters;
     startApp?: string;
     isWriteAllowed?: boolean;
+    isFromConfirm?: boolean;
   } & WithTabId;
   setWebAppPaymentSlug: {
     slug?: string;

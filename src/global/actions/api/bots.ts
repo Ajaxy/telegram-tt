@@ -586,12 +586,45 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
 
 addActionHandler('requestAppWebView', async (global, actions, payload): Promise<void> => {
   const {
-    botId, appName, startApp, theme, isWriteAllowed,
+    botId, appName, startApp, theme, isWriteAllowed, isFromConfirm,
     tabId = getCurrentTabId(),
   } = payload;
 
   const bot = selectUser(global, botId);
   if (!bot) return;
+
+  // Native clients require to install attach bots before using their named mini apps
+  const isAttachBotInstalled = Boolean(global.attachMenu.bots[bot.id]);
+  if (bot.isAttachBot && !isFromConfirm && !isAttachBotInstalled) {
+    const result = await callApi('loadAttachBot', {
+      bot,
+    });
+    if (result) {
+      const attachBot = result.bot;
+      global = getGlobal();
+      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+      setGlobal(global);
+
+      const shouldAskForTos = attachBot.isDisclaimerNeeded || attachBot.isForAttachMenu || attachBot.isForSideMenu;
+
+      if (shouldAskForTos) {
+        global = updateTabState(global, {
+          requestedAttachBotInstall: {
+            bot: attachBot,
+            onConfirm: {
+              action: 'requestAppWebView',
+              payload: {
+                ...payload,
+                isFromConfirm: true,
+              },
+            },
+          },
+        }, tabId);
+        setGlobal(global);
+        return;
+      }
+    }
+  }
 
   const botApp = await callApi('fetchBotApp', {
     bot,

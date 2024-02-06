@@ -65,9 +65,7 @@ const AttachBotInstallModal: FC<OwnProps> = ({
         label={tosLabel}
         onCheck={setIsTosAccepted}
       />
-      {bot?.isInactive && bot.isForSideMenu && (
-        renderText(lang('WebBot.Account.Desclaimer.Desc', bot?.shortName), ['simple_markdown'])
-      )}
+      {renderText(lang('WebBot.Account.Desclaimer.Desc', bot?.shortName), ['simple_markdown'])}
     </ConfirmDialog>
   );
 };
