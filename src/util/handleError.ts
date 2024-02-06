@@ -1,5 +1,6 @@
 import { DEBUG, DEBUG_ALERT_MSG } from '../config';
 import { isMasterTab } from './establishMultitabRole';
+import { throttle } from './schedulers';
 
 let showError = true;
 let error: Error | undefined;
@@ -27,16 +28,20 @@ if (DEBUG) {
   });
 }
 
+const throttleError = throttle((err) => {
+  if (showError) {
+    // eslint-disable-next-line no-alert
+    window.alert(getErrorMessage(err));
+  } else {
+    error = err;
+  }
+}, 1500);
+
 export function handleError(err: Error) {
   // eslint-disable-next-line no-console
   console.error(err);
   if (DEBUG) {
-    if (showError) {
-      // eslint-disable-next-line no-alert
-      window.alert(getErrorMessage(err));
-    } else {
-      error = err;
-    }
+    throttleError(err);
   }
 }
 

@@ -5,8 +5,11 @@ import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { animate, timingFunctions } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
 
+import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 import { useStateRef } from '../../hooks/useStateRef';
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
+
+import Icon from '../common/Icon';
 
 import './ProgressSpinner.scss';
 
@@ -27,6 +30,8 @@ const ProgressSpinner: FC<{
   square?: boolean;
   transparent?: boolean;
   noCross?: boolean;
+  rotationOffset?: number;
+  withColor?: boolean;
   onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 }> = ({
   progress = 0,
@@ -34,6 +39,8 @@ const ProgressSpinner: FC<{
   square,
   transparent,
   noCross,
+  rotationOffset,
+  withColor,
   onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -42,6 +49,8 @@ const ProgressSpinner: FC<{
   const progressRef = useStateRef(progress);
 
   const dpr = useDevicePixelRatio();
+
+  const color = useDynamicColorListener(canvasRef, !withColor);
 
   useEffect(() => {
     let isFirst = true;
@@ -69,17 +78,18 @@ const ProgressSpinner: FC<{
         canvasRef.current,
         width * dpr,
         (size === 'xl' ? STROKE_WIDTH_XL : STROKE_WIDTH) * dpr,
-        'white',
+        color ?? 'white',
         currentProgress,
         dpr,
         isFirst,
+        rotationOffset,
       );
 
       isFirst = false;
 
       return currentProgress < 1;
     }, requestMutation);
-  }, [progressRef, size, width, dpr]);
+  }, [progressRef, size, width, dpr, rotationOffset, color]);
 
   const className = buildClassName(
     `ProgressSpinner size-${size}`,
@@ -93,6 +103,7 @@ const ProgressSpinner: FC<{
       className={className}
       onClick={onClick}
     >
+      {!noCross && <Icon name="close" />}
       <canvas ref={canvasRef} className="ProgressSpinner_canvas" style={`width: ${width}; height: ${width}px;`} />
     </div>
   );
@@ -106,11 +117,12 @@ function drawSpinnerArc(
   progress: number,
   dpr: number,
   shouldInit = false,
+  rotationOffset?: number,
 ) {
   const centerCoordinate = size / 2;
   const radius = (size - strokeWidth) / 2 - PADDING * dpr;
-  const rotationOffset = (Date.now() % ROTATE_DURATION) / ROTATE_DURATION;
-  const startAngle = (2 * Math.PI) * rotationOffset;
+  const offset = rotationOffset ?? (Date.now() % ROTATE_DURATION) / ROTATE_DURATION;
+  const startAngle = (2 * Math.PI) * offset;
   const endAngle = startAngle + (2 * Math.PI) * progress;
   const ctx = canvas.getContext('2d')!;
 

@@ -80,6 +80,7 @@ import BoostModal from '../modals/boost/BoostModal.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 import GiftCodeModal from '../modals/giftcode/GiftCodeModal.async';
 import MapModal from '../modals/map/MapModal.async';
+import OneTimeMediaModal from '../modals/oneTimeMedia/OneTimeMediaModal.async';
 import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
 import WebAppModal from '../modals/webApp/WebAppModal.async';
 import PaymentModal from '../payment/PaymentModal.async';
@@ -163,6 +164,7 @@ type StateProps = {
   withInterfaceAnimations?: boolean;
   isSynced?: boolean;
   inviteViaLinkModal?: TabState['inviteViaLinkModal'];
+  oneTimeMediaModal?: TabState['oneTimeMediaModal'];
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -224,6 +226,7 @@ const Main: FC<OwnProps & StateProps> = ({
   noRightColumnAnimation,
   isSynced,
   inviteViaLinkModal,
+  oneTimeMediaModal,
 }) => {
   const {
     initMain,
@@ -568,6 +571,7 @@ const Main: FC<OwnProps & StateProps> = ({
       />
       <BoostModal info={boostModal} />
       <GiftCodeModal modal={giftCodeModal} />
+      <OneTimeMediaModal info={oneTimeMediaModal} />
       <ChatlistModal info={chatlistModal} />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <WebAppModal webApp={webApp} />
@@ -635,6 +639,7 @@ export default memo(withGlobal<OwnProps>(
       boostModal,
       giftCodeModal,
       inviteViaLinkModal,
+      oneTimeMediaModal,
     } = selectTabState(global);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
@@ -703,6 +708,7 @@ export default memo(withGlobal<OwnProps>(
       noRightColumnAnimation,
       isSynced: global.isSynced,
       inviteViaLinkModal,
+      oneTimeMediaModal,
     };
   },
 )(Main));

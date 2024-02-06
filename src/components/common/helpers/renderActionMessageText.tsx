@@ -9,8 +9,10 @@ import type { TextPart } from '../../../types';
 
 import {
   getChatTitle,
+  getExpiredMessageDescription,
   getMessageSummaryText,
   getUserFullName,
+  isExpiredMessage,
 } from '../../../global/helpers';
 import { formatCurrency } from '../../../util/formatCurrency';
 import trimText from '../../../util/trimText';
@@ -45,6 +47,10 @@ export function renderActionMessageText(
   observeIntersectionForLoading?: ObserveFn,
   observeIntersectionForPlaying?: ObserveFn,
 ) {
+  if (isExpiredMessage(message)) {
+    return getExpiredMessageDescription(lang, message);
+  }
+
   if (!message.content.action) {
     return [];
   }

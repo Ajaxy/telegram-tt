@@ -37,6 +37,7 @@ import {
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
   getSendingState,
+  hasMessageTtl,
   isActionMessage,
   isChatBasicGroup,
   isChatChannel,
@@ -534,6 +535,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const isOwn = isOwnMessage(message);
   const isForwarded = isForwardedMessage(message);
   const isAction = isActionMessage(message);
+  const hasTtl = hasMessageTtl(message);
   const { content } = message;
   const messageTopic = selectTopicFromMessage(global, message);
 
@@ -607,7 +609,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const isStoryForwardForbidden = story && ('isDeleted' in story || ('noForwards' in story && story.noForwards));
   const canForward = (
     !isLocal && !isAction && !isChatProtected && !isStoryForwardForbidden
-    && (message.isForwardingAllowed || isServiceNotification)
+    && (message.isForwardingAllowed || isServiceNotification) && !hasTtl
   );
 
   const hasSticker = Boolean(message.content.sticker);
@@ -619,7 +621,8 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const canSelect = !isLocal && !isAction;
 
   const canDownload = Boolean(content.webPage?.document || content.webPage?.video || content.webPage?.photo
-    || content.audio || content.voice || content.photo || content.video || content.document || content.sticker);
+    || content.audio || content.voice || content.photo || content.video || content.document || content.sticker)
+    && !hasTtl;
 
   const canSaveGif = message.content.video?.isGif;
 
@@ -1113,7 +1116,9 @@ export function selectLastServiceNotification<T extends GlobalState>(global: T) 
 }
 
 export function selectIsMessageProtected<T extends GlobalState>(global: T, message?: ApiMessage) {
-  return Boolean(message && (message.isProtected || selectIsChatProtected(global, message.chatId)));
+  return Boolean(message && (
+    message.isProtected || selectIsChatProtected(global, message.chatId) || hasMessageTtl(message)
+  ));
 }
 
 export function selectIsChatProtected<T extends GlobalState>(global: T, chatId: string) {
@@ -1147,7 +1152,8 @@ export function selectCanForwardMessages<T extends GlobalState>(global: T, chatI
 
   return messageIds
     .map((id) => messages[id])
-    .every((message) => message.isForwardingAllowed || isServiceNotificationMessage(message));
+    .every((message) => !hasMessageTtl(message)
+    && (message.isForwardingAllowed || isServiceNotificationMessage(message)));
 }
 
 export function selectSponsoredMessage<T extends GlobalState>(global: T, chatId: string) {

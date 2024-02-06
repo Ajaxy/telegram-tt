@@ -12,7 +12,9 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FocusDirection } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
-import { getChatTitle, getMessageHtmlId, isChatChannel } from '../../global/helpers';
+import {
+  getChatTitle, getMessageHtmlId, isChatChannel,
+} from '../../global/helpers';
 import { getMessageReplyInfo } from '../../global/helpers/replies';
 import {
   selectCanPlayAnimatedEmojis,

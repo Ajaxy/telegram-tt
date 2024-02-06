@@ -475,6 +475,8 @@ export type MediaContent = {
   storyData?: ApiMessageStoryData;
   giveaway?: ApiGiveaway;
   giveawayResults?: ApiGiveawayResults;
+  ttlSeconds?: number;
+  isExpiredVoice?: boolean;
 };
 
 export interface ApiMessage {

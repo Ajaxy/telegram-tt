@@ -211,6 +211,7 @@ export type FontIconName =
   | 'video-outlined'
   | 'video-stop'
   | 'video'
+  | 'view-once'
   | 'voice-chat'
   | 'volume-1'
   | 'volume-2'

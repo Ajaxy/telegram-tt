@@ -813,6 +813,24 @@ addActionHandler('copyMessagesByIds', (global, actions, payload): ActionReturnTy
   copyTextForMessages(global, chat.id, messageIds);
 });
 
+addActionHandler('openOneTimeMediaModal', (global, actions, payload): ActionReturnType => {
+  const { message, tabId = getCurrentTabId() } = payload;
+  global = updateTabState(global, {
+    oneTimeMediaModal: {
+      message,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeOneTimeMediaModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  global = updateTabState(global, {
+    oneTimeMediaModal: undefined,
+  }, tabId);
+  setGlobal(global);
+});
+
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
   const lang = langProvider.translate;

@@ -40,6 +40,7 @@ import {
   getMessageSingleRegularEmoji,
   getSenderTitle,
   hasMessageText,
+  hasMessageTtl,
   isAnonymousOwnMessage,
   isChatChannel,
   isChatGroup,
@@ -524,6 +525,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const messageColorPeer = originSender || sender;
   const senderPeer = (forwardInfo || message.content.storyData) ? originSender : messageSender;
   const hasText = hasMessageText(message);
+  const hasTtl = hasMessageTtl(message);
 
   const {
     handleMouseDown,
@@ -671,7 +673,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && !isInDocumentGroupNotLast && messageListType === 'thread'
     && !noComments;
   const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
-    && !isInDocumentGroupNotLast && !isStoryMention;
+    && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl;
 
   const contentClassName = buildContentClassName(message, {
     hasSubheader,
@@ -1107,7 +1109,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isSelected={isSelected}
             noAvatars={noAvatars}
             onPlay={handleAudioPlay}
-            onReadMedia={voice && (!isOwn || isChatWithSelf) ? handleReadMedia : undefined}
+            onReadMedia={voice && (!isOwn || isChatWithSelf || (isOwn && !hasTtl)) ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
             isTranscribing={isTranscribing}
@@ -1116,7 +1118,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isTranscriptionError={isTranscriptionError}
             canDownload={!isProtected}
             onHideTranscription={setTranscriptionHidden}
-            canTranscribe={isPremium}
+            canTranscribe={isPremium && !hasTtl}
           />
         )}
         {document && (

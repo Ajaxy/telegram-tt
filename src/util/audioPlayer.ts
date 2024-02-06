@@ -17,7 +17,7 @@ export type TrackId = `${MessageKey}-${number}`;
 export interface Track {
   audio: HTMLAudioElement;
   proxy: HTMLAudioElement;
-  type: 'voice' | 'audio';
+  type: 'voice' | 'audio' | 'oneTimeVoice';
   handlers: Handler[];
   onForcePlay?: NoneToVoidFunction;
   onTrackChange?: NoneToVoidFunction;

@@ -310,6 +310,7 @@ export enum AudioOrigin {
   Inline,
   SharedMedia,
   Search,
+  OneTimeModal,
 }
 
 export enum ChatCreationProgress {

@@ -55,12 +55,12 @@ export function getMessageTranscription(message: ApiMessage) {
 export function hasMessageText(message: ApiMessage | ApiStory) {
   const {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
-    game, action, storyData, giveaway, giveawayResults,
+    game, action, storyData, giveaway, giveawayResults, isExpiredVoice,
   } = message.content;
 
   return Boolean(text) || !(
     sticker || photo || video || audio || voice || document || contact || poll || webPage || invoice || location
-    || game || action?.phoneCall || storyData || giveaway || giveawayResults
+    || game || action?.phoneCall || storyData || giveaway || giveawayResults || isExpiredVoice
   );
 }
 
@@ -173,7 +173,7 @@ export function isForwardedMessage(message: ApiMessage) {
 }
 
 export function isActionMessage(message: ApiMessage) {
-  return Boolean(message.content.action);
+  return Boolean(message.content.action) || isExpiredMessage(message);
 }
 
 export function isServiceNotificationMessage(message: ApiMessage) {
@@ -337,4 +337,20 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
   }
 
   return { text, entities };
+}
+
+export function getExpiredMessageDescription(langFn: LangFn, message: ApiMessage): string | undefined {
+  const { isExpiredVoice } = message.content;
+  if (isExpiredVoice) {
+    return langFn('Message.VoiceMessageExpired');
+  }
+  return undefined;
+}
+
+export function isExpiredMessage(message: ApiMessage) {
+  return Boolean(message.content?.isExpiredVoice);
+}
+
+export function hasMessageTtl(message: ApiMessage) {
+  return message.content?.ttlSeconds !== undefined;
 }

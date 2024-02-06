@@ -674,6 +674,10 @@ export type TabState = {
     restrictedUserIds: string[];
     chatId: string;
   };
+
+  oneTimeMediaModal?: {
+    message: ApiMessage;
+  };
 };
 
 export type GlobalState = {
@@ -2678,6 +2682,9 @@ export interface ActionPayloads {
 
   updatePageTitle: WithTabId | undefined;
   closeInviteViaLinkModal: WithTabId | undefined;
+
+  openOneTimeMediaModal: TabState['oneTimeMediaModal'] & WithTabId;
+  closeOneTimeMediaModal: WithTabId | undefined;
 
   // Calls
   joinGroupCall: {
