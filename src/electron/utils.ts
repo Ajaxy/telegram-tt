@@ -14,6 +14,7 @@ export const IS_WINDOWS = process.platform === 'win32';
 export const IS_LINUX = process.platform === 'linux';
 export const IS_PREVIEW = process.env.IS_PREVIEW === 'true';
 export const IS_FIRST_RUN = !fs.existsSync(`${app.getPath('userData')}/config.json`);
+export const IS_PRODUCTION = process.env.APP_ENV === 'production';
 
 export const windows = new Set<BrowserWindow>();
 export const store: Store = new Store();
