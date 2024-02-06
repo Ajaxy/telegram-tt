@@ -237,10 +237,7 @@
     width: calc(100% - 1rem) !important;
     height: auto !important;
     margin: 0.5rem;
-    bottom: 3.5rem;
-    @supports (bottom: calc(3.5rem + env(safe-area-inset-bottom))) {
-      bottom: calc(3.5rem + env(safe-area-inset-bottom));
-    }
+    bottom: calc(3.5rem + env(safe-area-inset-bottom));
   }
 
   :global(body.ghost-animating) & {
@@ -522,20 +519,16 @@
 
 .caption {
   position: absolute;
-  bottom: 5rem;
   left: 0;
   width: 100%;
   top: 4rem;
+  bottom: calc(4.25rem + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   border-radius: 0 0 var(--border-radius-default-small) var(--border-radius-default-small);
   overflow: hidden;
   pointer-events: none;
-
-  @supports (bottom: env(safe-area-inset-bottom)) {
-    bottom: calc(4.25rem + env(safe-area-inset-bottom));
-  }
 }
 
 .captionInner {
@@ -628,10 +621,7 @@
 
     @media (max-width: 600px) {
       padding: 0 0.5rem 0.5rem;
-
-      @supports (margin-bottom: env(safe-area-inset-bottom)) {
-        margin-bottom: env(safe-area-inset-bottom);
-      }
+      margin-bottom: env(safe-area-inset-bottom);
     }
   }
 
@@ -694,11 +684,7 @@
 
 .modal :global(.modal-content) {
   padding: 0.5rem !important;
-  max-height: 35rem;
-
-  @supports (max-height: min(80vh, 35rem)) {
-    max-height: min(80vh, 35rem);
-  }
+  max-height: min(35rem, 80vh);
 }
 
 .thumbnail {

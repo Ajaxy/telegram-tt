@@ -3,10 +3,7 @@
   flex-direction: column;
   padding-bottom: 0 !important;
 
-  height: 35rem;
-  @supports (height: min(80vh, 35rem)) {
-    height: min(80vh, 35rem);
-  }
+  height: min(35rem, 80vh);
 }
 
 .views-list-loading {

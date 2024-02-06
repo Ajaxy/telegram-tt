@@ -10,10 +10,7 @@
 
     @media (max-width: 600px) {
       padding-right: 1rem;
-
-      @supports (bottom: env(safe-area-inset-bottom)) {
-        bottom: env(safe-area-inset-bottom);
-      }
+      bottom: env(safe-area-inset-bottom);
     }
 
     &::before {
