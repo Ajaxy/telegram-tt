@@ -291,7 +291,14 @@ export interface ApiAction {
   text: string;
   targetUserIds?: string[];
   targetChatId?: string;
-  type: 'historyClear' | 'contactSignUp' | 'chatCreate' | 'topicCreate' | 'suggestProfilePhoto' | 'other';
+  type:
+  | 'historyClear'
+  | 'contactSignUp'
+  | 'chatCreate'
+  | 'topicCreate'
+  | 'suggestProfilePhoto'
+  | 'joinedChannel'
+  | 'other';
   photo?: ApiPhoto;
   amount?: number;
   currency?: string;

@@ -354,3 +354,7 @@ export function isExpiredMessage(message: ApiMessage) {
 export function hasMessageTtl(message: ApiMessage) {
   return message.content?.ttlSeconds !== undefined;
 }
+
+export function isJoinedChannelMessage(message: ApiMessage) {
+  return message.content.action && message.content.action.type === 'joinedChannel';
+}

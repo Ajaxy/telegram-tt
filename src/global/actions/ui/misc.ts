@@ -151,7 +151,7 @@ addActionHandler('resetNextProfileTab', (global, actions, payload): ActionReturn
     return undefined;
   }
 
-  return updateTabState(global, { nextProfileTab: undefined }, tabId);
+  return updateTabState(global, { nextProfileTab: undefined, forceScrollProfileTab: false }, tabId);
 });
 
 addActionHandler('toggleStatistics', (global, actions, payload): ActionReturnType => {
