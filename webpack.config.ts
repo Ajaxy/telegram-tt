@@ -224,8 +224,8 @@ export default function createConfig(
         statsOptions: {
           context: __dirname,
         },
-        saveReportTo: path.resolve('./public/statoscope-report.html'),
-        saveStatsTo: path.resolve('./public/build-stats.json'),
+        // saveReportTo: path.resolve('./public/statoscope-report.html'),
+        // saveStatsTo: path.resolve('./public/build-stats.json'),
         normalizeStats: true,
         open: 'file',
         extensions: [new WebpackContextExtension()], // eslint-disable-line @typescript-eslint/no-use-before-define
