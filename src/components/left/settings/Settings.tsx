@@ -14,6 +14,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';
 import SettingsPasscode from './passcode/SettingsPasscode';
+import PrivacyMessages from './PrivacyMessages';
 import SettingsActiveSessions from './SettingsActiveSessions';
 import SettingsActiveWebsites from './SettingsActiveWebsites';
 import SettingsCustomEmoji from './SettingsCustomEmoji';
@@ -367,6 +368,14 @@ const Settings: FC<OwnProps> = ({
           <SettingsPrivacyVisibilityExceptionList
             screen={currentScreen}
             onScreenSelect={onScreenSelect}
+            isActive={isScreenActive}
+            onReset={handleReset}
+          />
+        );
+
+      case SettingsScreens.PrivacyMessages:
+        return (
+          <PrivacyMessages
             isActive={isScreenActive}
             onReset={handleReset}
           />

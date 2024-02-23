@@ -20,6 +20,10 @@ export function selectTranslationLanguage<T extends GlobalState>(global: T) {
   return global.settings.byKey.translationLanguage || selectLanguageCode(global);
 }
 
+export function selectNewNoncontactPeersRequirePremium<T extends GlobalState>(global: T) {
+  return global.settings.byKey.shouldNewNonContactPeersRequirePremium;
+}
+
 export function selectShouldHideReadMarks<T extends GlobalState>(global: T) {
   return global.settings.byKey.shouldHideReadMarks;
 }

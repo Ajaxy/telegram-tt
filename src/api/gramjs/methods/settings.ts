@@ -615,17 +615,24 @@ export async function fetchGlobalPrivacySettings() {
   return {
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
     shouldHideReadMarks: Boolean(result.hideReadMarks),
+    shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
   };
 }
 
-export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonContact, shouldHideReadMarks }: {
-  shouldArchiveAndMuteNewNonContact: boolean;
-  shouldHideReadMarks: boolean;
+export async function updateGlobalPrivacySettings({
+  shouldArchiveAndMuteNewNonContact,
+  shouldHideReadMarks,
+  shouldNewNonContactPeersRequirePremium,
+}: {
+  shouldArchiveAndMuteNewNonContact?: boolean;
+  shouldHideReadMarks?: boolean;
+  shouldNewNonContactPeersRequirePremium?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.account.SetGlobalPrivacySettings({
     settings: new GramJs.GlobalPrivacySettings({
       ...(shouldArchiveAndMuteNewNonContact && { archiveAndMuteNewNoncontactPeers: true }),
       ...(shouldHideReadMarks && { hideReadMarks: true }),
+      ...(shouldNewNonContactPeersRequirePremium && { newNoncontactPeersRequirePremium: true }),
     }),
   }));
 
@@ -636,6 +643,7 @@ export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonCo
   return {
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
     shouldHideReadMarks: Boolean(result.hideReadMarks),
+    shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
   };
 }
 

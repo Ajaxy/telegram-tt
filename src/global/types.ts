@@ -2873,7 +2873,11 @@ export interface ActionPayloads {
   } & WithTabId;
   closeShareChatFolderModal: undefined | WithTabId;
   loadGlobalPrivacySettings: undefined;
-  updateGlobalPrivacySettings: { shouldArchiveAndMuteNewNonContact?: boolean; shouldHideReadMarks?: boolean };
+  updateGlobalPrivacySettings: {
+    shouldArchiveAndMuteNewNonContact?: boolean;
+    shouldHideReadMarks?: boolean;
+    shouldNewNonContactPeersRequirePremium?: boolean;
+  };
 
   // Premium
   openPremiumModal: ({

@@ -4,7 +4,6 @@ import { getActions, withGlobal } from '../../../global';
 import type { PrivacyVisibility } from '../../../types';
 
 import { selectIsCurrentUserPremium, selectShouldHideReadMarks } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
@@ -13,8 +12,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import PremiumIcon from '../../common/PremiumIcon';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
-
-import styles from './SettingsPrivacyLastSeen.module.scss';
 
 type OwnProps = {
   visibility?: PrivacyVisibility;
@@ -59,10 +56,7 @@ const SettingsPrivacyLastSeen = ({
           {isCurrentUserPremium ? lang('PrivacyLastSeenPremiumForPremium') : lang('PrivacyLastSeenPremium')}
         </ListItem>
         <p
-          className={buildClassName(
-            'settings-item-description-larger',
-            styles.premiumInfo,
-          )}
+          className="settings-item-description-larger premium-info"
           dir={lang.isRtl ? 'rtl' : undefined}
         >
           {isCurrentUserPremium

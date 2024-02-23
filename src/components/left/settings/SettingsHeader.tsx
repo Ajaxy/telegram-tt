@@ -119,6 +119,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('PrivacyForwards')}</h3>;
       case SettingsScreens.PrivacyVoiceMessages:
         return <h3>{lang('PrivacyVoiceMessages')}</h3>;
+      case SettingsScreens.PrivacyMessages:
+        return <h3>{lang('PrivacyMessages')}</h3>;
       case SettingsScreens.PrivacyGroupChats:
         return <h3>{lang('AutodownloadGroupChats')}</h3>;
       case SettingsScreens.PrivacyPhoneCall:
