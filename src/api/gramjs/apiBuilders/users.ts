@@ -108,11 +108,11 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   } else if (mtpStatus instanceof GramJs.UserStatusOffline) {
     return { type: 'userStatusOffline', wasOnline: mtpStatus.wasOnline };
   } else if (mtpStatus instanceof GramJs.UserStatusRecently) {
-    return { type: 'userStatusRecently' };
+    return { type: 'userStatusRecently', isReadDateRestrictedByMe: mtpStatus.byMe };
   } else if (mtpStatus instanceof GramJs.UserStatusLastWeek) {
-    return { type: 'userStatusLastWeek' };
+    return { type: 'userStatusLastWeek', isReadDateRestrictedByMe: mtpStatus.byMe };
   } else {
-    return { type: 'userStatusLastMonth' };
+    return { type: 'userStatusLastMonth', isReadDateRestrictedByMe: mtpStatus.byMe };
   }
 }
 

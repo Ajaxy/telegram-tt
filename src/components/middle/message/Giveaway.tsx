@@ -32,6 +32,7 @@ import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import Separator from '../../ui/Separator';
 
 import styles from './Giveaway.module.scss';
 
@@ -124,7 +125,7 @@ const Giveaway = ({
                   ['simple_markdown'],
                 )}
               </p>
-              <div className={styles.separator}>{lang('BoostingGiveawayMsgWithDivider')}</div>
+              <Separator>{lang('BoostingGiveawayMsgWithDivider')}</Separator>
             </>
           )}
           <p className={styles.description}>

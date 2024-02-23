@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon {
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  margin-bottom: 0.25rem;
+}
+
+.header {
+  margin: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.desc {
+  font-size: 0.9375rem;
+  text-align: center;
+
+  @media (min-width: 600px) {
+    margin-left: 0.75rem;
+    margin-right: 0.75rem;
+  }
+}
+
+.separator {
+  margin-top: 1.25rem;
+  margin-bottom: 0.25rem;
+  width: 80%;
+}
+
+.button {
+  text-transform: none;
+  border-radius: var(--border-radius-default-tiny);
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}

@@ -283,6 +283,11 @@ export type TabState = {
     messageId: number;
   };
 
+  readDateModal?: {
+    chatId: string;
+    messageId: number;
+  };
+
   reactorModal?: {
     chatId: string;
     messageId: number;
@@ -1607,6 +1612,11 @@ export interface ActionPayloads {
     messageId: number;
   } & WithTabId;
   closeSeenByModal: WithTabId | undefined;
+  openGetReadDateModal: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closeGetReadDateModal: WithTabId | undefined;
   closeReactorListModal: WithTabId | undefined;
   openReactorListModal: {
     chatId: string;
@@ -2008,6 +2018,10 @@ export interface ActionPayloads {
     chatId: string;
     ids: number[];
     shouldIncrement?: boolean;
+  };
+  loadOutboxReadDate: {
+    chatId: string;
+    messageId: number;
   };
   animateUnreadReaction: {
     messageIds: number[];
@@ -2833,7 +2847,7 @@ export interface ActionPayloads {
   } & WithTabId;
   closeShareChatFolderModal: undefined | WithTabId;
   loadGlobalPrivacySettings: undefined;
-  updateGlobalPrivacySettings: { shouldArchiveAndMuteNewNonContact: boolean };
+  updateGlobalPrivacySettings: { shouldArchiveAndMuteNewNonContact?: boolean; shouldHideReadMarks?: boolean };
 
   // Premium
   openPremiumModal: ({

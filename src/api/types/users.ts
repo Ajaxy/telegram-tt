@@ -66,6 +66,8 @@ export interface ApiUserStatus {
   );
   wasOnline?: number;
   expires?: number;
+  isReadDateRestrictedByMe?: boolean;
+  isReadDateRestricted?: boolean;
 }
 
 export interface ApiUsername {

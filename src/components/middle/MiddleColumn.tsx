@@ -78,6 +78,7 @@ import useWindowSize from '../../hooks/window/useWindowSize';
 import usePinnedMessage from './hooks/usePinnedMessage';
 
 import Composer from '../common/Composer';
+import ReadTimeModal from '../common/ReadTimeModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
 import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
@@ -128,6 +129,7 @@ type StateProps = {
   hasCurrentTextSearch?: boolean;
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
+  isReadDateModalOpen: boolean;
   isReactorListModalOpen: boolean;
   isGiftPremiumModalOpen?: boolean;
   isChatLanguageModalOpen?: boolean;
@@ -186,6 +188,7 @@ function MiddleColumn({
   hasCurrentTextSearch,
   isSelectModeActive,
   isSeenByModalOpen,
+  isReadDateModalOpen,
   isReactorListModalOpen,
   isGiftPremiumModalOpen,
   isChatLanguageModalOpen,
@@ -676,6 +679,7 @@ function MiddleColumn({
                   canPost={renderingCanPost}
                 />
                 <SeenByModal isOpen={isSeenByModalOpen} />
+                <ReadTimeModal isOpen={isReadDateModalOpen} />
                 <ReactorListModal isOpen={isReactorListModalOpen} />
                 {IS_TRANSLATION_SUPPORTED && <ChatLanguageModal isOpen={isChatLanguageModalOpen} />}
               </div>
@@ -723,7 +727,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
       seenByModal, giftPremiumModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
-      chatLanguageModal,
+      chatLanguageModal, readDateModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { leftColumnWidth } = global;
@@ -739,6 +743,7 @@ export default memo(withGlobal<OwnProps>(
       hasCurrentTextSearch: Boolean(selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
       isSeenByModalOpen: Boolean(seenByModal),
+      isReadDateModalOpen: Boolean(readDateModal),
       isReactorListModalOpen: Boolean(reactorModal),
       isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
       isChatLanguageModalOpen: Boolean(chatLanguageModal),

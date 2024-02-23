@@ -33,6 +33,7 @@ import {
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
+  selectIsMessageUnread,
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
   selectMessageCustomEmojiSets,
@@ -41,6 +42,7 @@ import {
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
+  selectUserStatus,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -107,6 +109,8 @@ type StateProps = {
   canSaveGif?: boolean;
   canRevote?: boolean;
   canClosePoll?: boolean;
+  canLoadReadDate?: boolean;
+  shouldRenderShowWhen?: boolean;
   activeDownloads?: TabState['activeDownloads']['byChatId'][number];
   canShowSeenBy?: boolean;
   enabledReactions?: ApiChatReactions;
@@ -159,6 +163,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canRevote,
   canClosePoll,
   canPlayAnimatedEmojis,
+  canLoadReadDate,
+  shouldRenderShowWhen,
   activeDownloads,
   noReplies,
   canShowSeenBy,
@@ -200,6 +206,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     showOriginalMessage,
     openChatLanguageModal,
     openMessageReactionPicker,
+    loadOutboxReadDate,
   } = getActions();
 
   const lang = useLang();
@@ -220,6 +227,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       loadSeenBy({ chatId: message.chatId, messageId: message.id });
     }
   }, [loadSeenBy, isOpen, message.chatId, message.id, canShowSeenBy]);
+
+  useEffect(() => {
+    if (canLoadReadDate && isOpen) {
+      loadOutboxReadDate({ chatId: message.chatId, messageId: message.id });
+    }
+  }, [canLoadReadDate, isOpen, message.chatId, message.id, message.readDate]);
 
   useEffect(() => {
     if (canShowReactionsCount && isOpen) {
@@ -554,6 +567,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canShowOriginal={canShowOriginal}
         canSelectLanguage={canSelectLanguage}
         canPlayAnimatedEmojis={canPlayAnimatedEmojis}
+        shouldRenderShowWhen={shouldRenderShowWhen}
+        canLoadReadDate={canLoadReadDate}
         hasCustomEmoji={hasCustomEmoji}
         customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
@@ -623,7 +638,9 @@ export default memo(withGlobal<OwnProps>(
     const { threadId } = selectCurrentMessageList(global) || {};
     const activeDownloads = selectActiveDownloads(global, message.chatId);
     const chat = selectChat(global, message.chatId);
-    const { seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions } = global.appConfig || {};
+    const {
+      seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions, readDateExpiresAt,
+    } = global.appConfig || {};
     const {
       noOptions,
       canReply,
@@ -645,7 +662,20 @@ export default memo(withGlobal<OwnProps>(
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
 
     const isPrivate = chat && isUserId(chat.id);
+    const userStatus = isPrivate ? selectUserStatus(global, chat.id) : undefined;
     const isOwn = isOwnMessage(message);
+    const isMessageUnread = selectIsMessageUnread(global, message);
+    const canLoadReadDate = Boolean(
+      isPrivate
+        && isOwn
+        && !isMessageUnread
+        && readDateExpiresAt
+        && message.date > Date.now() / 1000 - readDateExpiresAt
+        && !userStatus?.isReadDateRestricted,
+    );
+    const shouldRenderShowWhen = Boolean(
+      canLoadReadDate && isPrivate && selectUserStatus(global, chat.id)?.isReadDateRestrictedByMe,
+    );
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
@@ -653,6 +683,7 @@ export default memo(withGlobal<OwnProps>(
     const hasTtl = hasMessageTtl(message);
     const canShowSeenBy = Boolean(!isLocal
       && chat
+      && !isMessageUnread
       && seenByMaxChatMembers
       && seenByExpiresAt
       && isChatGroup(chat)
@@ -706,6 +737,8 @@ export default memo(withGlobal<OwnProps>(
       canClosePoll: !isScheduled && canClosePoll,
       activeDownloads,
       canShowSeenBy,
+      canLoadReadDate,
+      shouldRenderShowWhen,
       enabledReactions: chat?.isForbidden ? undefined : chatFullInfo?.enabledReactions,
       maxUniqueReactions,
       isPrivate,

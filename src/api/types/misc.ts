@@ -178,6 +178,7 @@ export interface ApiAppConfig {
   emojiSounds: Record<string, string>;
   seenByMaxChatMembers: number;
   seenByExpiresAt: number;
+  readDateExpiresAt: number;
   autologinDomains: string[];
   urlAuthDomains: string[];
   premiumInvoiceSlug: string;

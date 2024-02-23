@@ -15,6 +15,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
+import SettingsPrivacyLastSeen from './SettingsPrivacyLastSeen';
 import SettingsPrivacyPublicProfilePhoto from './SettingsPrivacyPublicProfilePhoto';
 
 type OwnProps = {
@@ -73,6 +74,9 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
           hasCurrentUserFullInfo={hasCurrentUserFullInfo}
           currentUserFallbackPhoto={currentUserFallbackPhoto}
         />
+      )}
+      {screen === SettingsScreens.PrivacyLastSeen && (
+        <SettingsPrivacyLastSeen visibility={primaryPrivacy?.visibility} />
       )}
       {secondaryScreen && (
         <PrivacySubsection

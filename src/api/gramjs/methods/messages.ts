@@ -1868,3 +1868,17 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
 
   handleGramJsUpdate(update);
 }
+
+export async function fetchOutboxReadDate({ chat, messageId }: { chat: ApiChat; messageId: number }) {
+  const { id, accessHash } = chat;
+  const peer = buildInputPeer(id, accessHash);
+
+  const result = await invokeRequest(new GramJs.messages.GetOutboxReadDate({
+    peer: peer as GramJs.TypeInputPeer,
+    msgId: messageId,
+  }), { shouldThrow: true });
+
+  if (!result) return undefined;
+
+  return { date: result.date };
+}
