@@ -35,6 +35,7 @@ type OwnProps = {
   withEffectOnly?: boolean;
   shouldPause?: boolean;
   shouldLoop?: boolean;
+  loopLimit?: number;
   observeIntersection?: ObserveFn;
 };
 
@@ -64,6 +65,7 @@ const ReactionAnimatedEmoji = ({
   withEffectOnly,
   shouldPause,
   shouldLoop,
+  loopLimit,
   observeIntersection,
 }: OwnProps & StateProps) => {
   const { stopActiveReaction } = getActions();
@@ -164,6 +166,7 @@ const ReactionAnimatedEmoji = ({
           className={styles.customEmoji}
           size={size}
           noPlay={shouldPause}
+          loopLimit={loopLimit}
           forceAlways
           observeIntersectionForPlaying={observeIntersection}
         />
