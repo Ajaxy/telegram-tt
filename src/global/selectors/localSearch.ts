@@ -16,7 +16,7 @@ export function selectCurrentTextSearch<T extends GlobalState>(
 
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
   const currentSearch = selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey];
-  if (!currentSearch || !currentSearch.isActive) {
+  if (!currentSearch || currentSearch.query === undefined) {
     return undefined;
   }
 

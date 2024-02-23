@@ -36,7 +36,7 @@ import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/placeholder/Skeleton';
-import ReactionSelector from './ReactionSelector';
+import ReactionSelector from './reactions/ReactionSelector';
 import ReadTimeMenuItem from './ReadTimeMenuItem';
 
 import './MessageContextMenu.scss';
@@ -45,6 +45,7 @@ type OwnProps = {
   isReactionPickerOpen?: boolean;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
+  defaultTagReactions?: ApiReaction[];
   isOpen: boolean;
   anchor: IAnchorPosition;
   targetHref?: string;
@@ -87,6 +88,7 @@ type OwnProps = {
   customEmojiSets?: ApiStickerSet[];
   canPlayAnimatedEmojis?: boolean;
   noTransition?: boolean;
+  isInSavedMessages?: boolean;
   shouldRenderShowWhen?: boolean;
   canLoadReadDate?: boolean;
   onReply?: NoneToVoidFunction;
@@ -124,14 +126,15 @@ type OwnProps = {
 };
 
 const SCROLLBAR_WIDTH = 10;
-const REACTION_BUBBLE_EXTRA_WIDTH = 32;
 const REACTION_SELECTOR_WIDTH_REM = 19.25;
+const REACTION_SELECTOR_HEIGHT_REM = 3;
 const ANIMATION_DURATION = 200;
 
 const MessageContextMenu: FC<OwnProps> = ({
   isReactionPickerOpen,
   availableReactions,
   topReactions,
+  defaultTagReactions,
   isOpen,
   message,
   isPrivate,
@@ -174,6 +177,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   customEmojiSets,
   canPlayAnimatedEmojis,
   noTransition,
+  isInSavedMessages,
   shouldRenderShowWhen,
   canLoadReadDate,
   onReply,
@@ -288,8 +292,8 @@ const MessageContextMenu: FC<OwnProps> = ({
     return {
       extraPaddingX: SCROLLBAR_WIDTH,
       extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
-      marginSides: withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
       extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
+      topShiftY: withReactions && !isMobile ? -REACTION_SELECTOR_HEIGHT_REM * REM : 0,
       shouldAvoidNegativePosition: !isDesktop,
       menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
     };
@@ -343,6 +347,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           enabledReactions={enabledReactions}
           topReactions={topReactions}
           allAvailableReactions={availableReactions}
+          defaultTagReactions={defaultTagReactions}
           currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
           maxUniqueReactions={maxUniqueReactions}
           onToggleReaction={onToggleReaction!}
@@ -350,8 +355,10 @@ const MessageContextMenu: FC<OwnProps> = ({
           isReady={isReady}
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
+          isInSavedMessages={isInSavedMessages}
           canPlayAnimatedEmojis={canPlayAnimatedEmojis}
           onShowMore={handleOpenMessageReactionPicker}
+          onClose={onClose}
           className={buildClassName(areItemsHidden && 'ReactionSelector-hidden')}
         />
       )}
@@ -362,6 +369,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           areItemsHidden && 'MessageContextMenu_items-hidden',
         )}
         style={menuStyle}
+        dir={lang.isRtl ? 'rtl' : undefined}
         ref={scrollableRef}
       >
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}

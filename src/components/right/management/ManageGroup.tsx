@@ -509,7 +509,7 @@ export default memo(withGlobal<OwnProps>(
       canInvite: chat.isCreator || getHasAdminRight(chat, 'inviteUsers'),
       exportedInvites: invites,
       isChannelsPremiumLimitReached: limitReachedModal?.limit === 'channels',
-      availableReactions: global.availableReactions,
+      availableReactions: global.reactions.availableReactions,
       canEditForum,
     };
   },

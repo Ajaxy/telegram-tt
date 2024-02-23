@@ -46,8 +46,10 @@ import type {
   ApiPostStatistics,
   ApiPremiumPromo,
   ApiReaction,
+  ApiReactionKey,
   ApiReceipt,
   ApiReportReason,
+  ApiSavedReactionTag,
   ApiSendMessageAction,
   ApiSession,
   ApiSessionData,
@@ -345,8 +347,8 @@ export type TabState = {
 
   localTextSearch: {
     byChatThreadKey: Record<string, {
-      isActive: boolean;
       query?: string;
+      savedTag?: ApiReaction;
       results?: {
         totalCount?: number;
         nextOffsetId?: number;
@@ -872,8 +874,18 @@ export type GlobalState = {
 
   recentEmojis: string[];
   recentCustomEmojis: string[];
-  topReactions: ApiReaction[];
-  recentReactions: ApiReaction[];
+
+  reactions: {
+    topReactions: ApiReaction[];
+    recentReactions: ApiReaction[];
+    defaultTags: ApiReaction[];
+    availableReactions?: ApiAvailableReaction[];
+    hash: {
+      topReactions?: string;
+      recentReactions?: string;
+      defaultTags?: string;
+    };
+  };
 
   stickers: {
     setsById: Record<string, ApiStickerSet>;
@@ -945,8 +957,6 @@ export type GlobalState = {
     };
   };
 
-  availableReactions?: ApiAvailableReaction[];
-
   topPeers: {
     userIds?: string[];
     lastRequestedAt?: number;
@@ -996,6 +1006,11 @@ export type GlobalState = {
 
   translations: {
     byChatId: Record<string, ChatTranslatedMessages>;
+  };
+
+  savedReactionTags?: {
+    byKey: Record<ApiReactionKey, ApiSavedReactionTag>;
+    hash: string;
   };
 };
 
@@ -1196,6 +1211,9 @@ export interface ActionPayloads {
   closeLocalTextSearch: WithTabId | undefined;
   setLocalTextSearchQuery: {
     query?: string;
+  } & WithTabId;
+  setLocalTextSearchTag: {
+    tag: ApiReaction | undefined;
   } & WithTabId;
   setLocalMediaSearchType: {
     mediaType: SharedMediaType;
@@ -2080,7 +2098,13 @@ export interface ActionPayloads {
   loadTopReactions: undefined;
   loadRecentReactions: undefined;
   loadAvailableReactions: undefined;
+  loadDefaultTagReactions: undefined;
   clearRecentReactions: undefined;
+  loadSavedReactionTags: undefined;
+  editSavedReactionTag: {
+    reaction: ApiReaction;
+    title?: string;
+  };
 
   loadMessageReactions: {
     chatId: string;

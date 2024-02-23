@@ -15,6 +15,7 @@ import type {
   ApiOnProgress,
   ApiPeer,
   ApiPoll,
+  ApiReaction,
   ApiReportReason,
   ApiSendMessageAction,
   ApiSticker,
@@ -63,6 +64,7 @@ import {
   buildInputPeer,
   buildInputPoll,
   buildInputPollFromExisting,
+  buildInputReaction,
   buildInputReplyTo,
   buildInputReportReason,
   buildInputStory,
@@ -1091,10 +1093,11 @@ export async function fetchDiscussionMessage({
 }
 
 export async function searchMessagesLocal({
-  chat, isSavedDialog, type, query, threadId, minDate, maxDate, ...pagination
+  chat, isSavedDialog, savedTag, type, query, threadId, minDate, maxDate, ...pagination
 }: {
   chat: ApiChat;
   isSavedDialog?: boolean;
+  savedTag?: ApiReaction;
   type?: ApiMessageSearchType | ApiGlobalMessageSearchType;
   query?: string;
   threadId?: ThreadId;
@@ -1135,6 +1138,7 @@ export async function searchMessagesLocal({
   const result = await invokeRequest(new GramJs.messages.Search({
     peer: isSavedDialog ? new GramJs.InputPeerSelf() : peer,
     savedPeerId: isSavedDialog ? peer : undefined,
+    savedReaction: savedTag && [buildInputReaction(savedTag)],
     topMsgId: threadId !== MAIN_THREAD_ID && !isSavedDialog ? Number(threadId) : undefined,
     filter,
     q: query || '',

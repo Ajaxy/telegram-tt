@@ -1,4 +1,4 @@
-import type { ApiMessageSearchType } from '../../api/types';
+import type { ApiMessageSearchType, ApiReaction } from '../../api/types';
 import type { SharedMediaType, ThreadId } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 
@@ -9,8 +9,8 @@ import { selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
 
 interface TextSearchParams {
-  isActive: boolean;
   query?: string;
+  savedTag?: ApiReaction;
   results?: {
     totalCount?: number;
     nextOffsetId?: number;
@@ -47,7 +47,6 @@ export function updateLocalTextSearch<T extends GlobalState>(
   global: T,
   chatId: string,
   threadId: ThreadId,
-  isActive: boolean,
   query?: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
@@ -55,8 +54,26 @@ export function updateLocalTextSearch<T extends GlobalState>(
 
   return replaceLocalTextSearch(global, chatThreadKey, {
     ...selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey],
-    isActive,
     query,
+  }, tabId);
+}
+
+export function updateLocalTextSearchTag<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+  tag?: ApiReaction,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  const currentSearch = selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey];
+  const query = currentSearch?.query || '';
+
+  return replaceLocalTextSearch(global, chatThreadKey, {
+    ...currentSearch,
+    query,
+    savedTag: tag,
   }, tabId);
 }
 

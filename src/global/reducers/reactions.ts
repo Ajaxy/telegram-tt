@@ -8,7 +8,7 @@ import {
   SIDE_COLUMN_MAX_WIDTH,
 } from '../../components/middle/helpers/calculateMiddleFooterTransforms';
 import { updateReactionCount } from '../helpers';
-import { selectSendAs, selectTabState } from '../selectors';
+import { selectIsChatWithSelf, selectSendAs, selectTabState } from '../selectors';
 import { updateChat } from './chats';
 import { updateChatMessage } from './messages';
 
@@ -42,7 +42,8 @@ export function subtractXForEmojiInteraction(global: GlobalState, x: number) {
 export function addMessageReaction<T extends GlobalState>(
   global: T, message: ApiMessage, userReactions: ApiReaction[],
 ): T {
-  const currentReactions = message.reactions || { results: [] };
+  const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
+  const currentReactions = message.reactions || { results: [], areTags: isInSavedMessages };
   const currentSendAs = selectSendAs(global, message.chatId);
 
   // Update UI without waiting for server response

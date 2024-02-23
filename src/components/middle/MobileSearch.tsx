@@ -1,28 +1,36 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect,
+  useMemo,
   useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat } from '../../api/types';
+import type {
+  ApiChat, ApiReaction, ApiReactionKey, ApiSavedReactionTag,
+} from '../../api/types';
 import type { ThreadId } from '../../types';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { getIsSavedDialog, getReactionKey, isSameReaction } from '../../global/helpers';
 import {
-  selectCurrentChat,
+  selectChat,
   selectCurrentMessageList,
   selectCurrentTextSearch,
+  selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
   selectTabState,
 } from '../../global/selectors';
 import { getDayStartAt } from '../../util/dateFormat';
 import { debounce } from '../../util/schedulers';
 import { IS_IOS } from '../../util/windowEnvironment';
 
+import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from '../ui/Button';
 import SearchInput from '../ui/SearchInput';
+import SavedTagButton from './message/reactions/SavedTagButton';
 
 import './MobileSearch.scss';
 
@@ -35,9 +43,12 @@ type StateProps = {
   chat?: ApiChat;
   threadId?: ThreadId;
   query?: string;
+  savedTags?: Record<ApiReactionKey, ApiSavedReactionTag>;
+  searchTag?: ApiReaction;
   totalCount?: number;
   foundIds?: number[];
   isHistoryCalendarOpen?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
@@ -47,21 +58,32 @@ const MobileSearchFooter: FC<StateProps> = ({
   chat,
   threadId,
   query,
+  savedTags,
+  searchTag,
   totalCount,
   foundIds,
   isHistoryCalendarOpen,
+  isCurrentUserPremium,
 }) => {
   const {
     setLocalTextSearchQuery,
+    setLocalTextSearchTag,
     searchTextMessagesLocal,
     focusMessage,
     closeLocalTextSearch,
     openHistoryCalendar,
+    openPremiumModal,
+    loadSavedReactionTags,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const tagsRef = useRef<HTMLDivElement>(null);
+
   const [focusedIndex, setFocusedIndex] = useState(0);
+
+  const hasQueryData = Boolean(query || searchTag);
 
   // Fix for iOS keyboard
   useEffect(() => {
@@ -127,12 +149,39 @@ const MobileSearchFooter: FC<StateProps> = ({
     searchInput.blur();
   }, [isHistoryCalendarOpen]);
 
+  const tags = useMemo(() => {
+    if (!savedTags) return undefined;
+    return Object.values(savedTags);
+  }, [savedTags]);
+
+  const hasTags = Boolean(tags?.length);
+  const areTagsDisabled = hasTags && !isCurrentUserPremium;
+
+  useHorizontalScroll(tagsRef, !hasTags);
+
+  useEffect(() => {
+    if (isActive) loadSavedReactionTags();
+  }, [hasTags, isActive]);
+
   const handleMessageSearchQueryChange = useLastCallback((newQuery: string) => {
     setLocalTextSearchQuery({ query: newQuery });
 
-    if (newQuery.length) {
+    if (hasQueryData) {
       runDebouncedForSearch(searchTextMessagesLocal);
     }
+  });
+
+  const handleTagClick = useLastCallback((tag: ApiReaction) => {
+    if (areTagsDisabled) {
+      openPremiumModal({
+        initialSection: 'saved_tags',
+      });
+      return;
+    }
+
+    setLocalTextSearchTag({ tag });
+
+    runDebouncedForSearch(searchTextMessagesLocal);
   });
 
   const handleUp = useLastCallback(() => {
@@ -172,9 +221,28 @@ const MobileSearchFooter: FC<StateProps> = ({
           onChange={handleMessageSearchQueryChange}
         />
       </div>
+      {hasTags && (
+        <div
+          ref={tagsRef}
+          className="tags-subheader custom-scroll-x no-scrollbar"
+        >
+          {tags.map((tag) => (
+            <SavedTagButton
+              containerId="mobile-search"
+              key={getReactionKey(tag.reaction)}
+              reaction={tag.reaction}
+              tag={tag}
+              withCount
+              isDisabled={areTagsDisabled}
+              isChosen={isSameReaction(tag.reaction, searchTag)}
+              onClick={handleTagClick}
+            />
+          ))}
+        </div>
+      )}
       <div className="footer">
         <div className="counter">
-          {query ? (
+          {hasQueryData ? (
             foundIds?.length ? (
               `${focusedIndex + 1} of ${totalCount}`
             ) : foundIds && !foundIds.length ? (
@@ -220,14 +288,24 @@ const MobileSearchFooter: FC<StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const chat = selectCurrentChat(global);
+    const currentMessageList = selectCurrentMessageList(global);
+    if (!currentMessageList) {
+      return {};
+    }
+    const { chatId, threadId } = currentMessageList;
+
+    const chat = selectChat(global, chatId);
     if (!chat) {
       return {};
     }
 
-    const { query, results } = selectCurrentTextSearch(global) || {};
-    const { threadId } = selectCurrentMessageList(global) || {};
+    const { query, savedTag, results } = selectCurrentTextSearch(global) || {};
     const { totalCount, foundIds } = results || {};
+
+    const isSavedMessages = selectIsChatWithSelf(global, chatId);
+    const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+
+    const savedTags = isSavedMessages && !isSavedDialog ? global.savedReactionTags?.byKey : undefined;
 
     return {
       chat,
@@ -236,6 +314,9 @@ export default memo(withGlobal<OwnProps>(
       threadId,
       foundIds,
       isHistoryCalendarOpen: Boolean(selectTabState(global).historyCalendarSelectedAt),
+      savedTags,
+      searchTag: savedTag,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(MobileSearchFooter));

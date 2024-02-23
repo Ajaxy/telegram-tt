@@ -72,7 +72,7 @@ import UnreadCount from '../common/UnreadCounter';
 import LeftColumn from '../left/LeftColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
-import ReactionPicker from '../middle/message/ReactionPicker.async';
+import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
 import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallModal.async';
@@ -265,11 +265,13 @@ const Main: FC<OwnProps & StateProps> = ({
     updatePageTitle,
     loadTopReactions,
     loadRecentReactions,
+    loadDefaultTagReactions,
     loadFeaturedEmojiStickers,
     setIsElectronUpdateAvailable,
     loadPremiumSetStickers,
     loadAuthorizations,
     loadPeerColors,
+    loadSavedReactionTags,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -343,8 +345,10 @@ const Main: FC<OwnProps & StateProps> = ({
       checkAppVersion();
       loadTopReactions();
       loadRecentReactions();
+      loadDefaultTagReactions();
       loadFeaturedEmojiStickers();
       loadAuthorizations();
+      loadSavedReactionTags();
     }
   }, [isMasterTab, isSynced]);
 

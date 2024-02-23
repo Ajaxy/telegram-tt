@@ -6,7 +6,7 @@ import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
-import { getIsSavedDialog } from '../../helpers';
+import { getIsSavedDialog, isSameReaction } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
@@ -36,14 +36,14 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
 
   const chat = realChatId ? selectChat(global, realChatId) : undefined;
   let currentSearch = selectCurrentTextSearch(global, tabId);
-  if (!chat || !currentSearch || !threadId) {
+  if (!chat || !threadId || !currentSearch) {
     return;
   }
 
-  const { query, results } = currentSearch;
+  const { query, results, savedTag } = currentSearch;
   const offsetId = results?.nextOffsetId;
 
-  if (!query) {
+  if (!query && !savedTag) {
     return;
   }
 
@@ -55,6 +55,7 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
     limit: MESSAGE_SEARCH_SLICE,
     offsetId,
     isSavedDialog,
+    savedTag,
   });
 
   if (!result) {
@@ -71,7 +72,7 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
   global = getGlobal();
 
   currentSearch = selectCurrentTextSearch(global, tabId);
-  if (!currentSearch || query !== currentSearch.query) {
+  if (!currentSearch || query !== currentSearch.query || !isSameReaction(savedTag, currentSearch.savedTag)) {
     return;
   }
 

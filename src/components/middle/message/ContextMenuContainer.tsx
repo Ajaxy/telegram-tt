@@ -31,6 +31,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
+  selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
   selectIsMessageUnread,
@@ -78,6 +79,7 @@ export type OwnProps = {
 type StateProps = {
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
+  defaultTagReactions?: ApiReaction[];
   customEmojiSetsInfo?: ApiStickerSetInfo[];
   customEmojiSets?: ApiStickerSet[];
   noOptions?: boolean;
@@ -119,6 +121,7 @@ type StateProps = {
   canPlayAnimatedEmojis?: boolean;
   isReactionPickerOpen?: boolean;
   messageLink?: string;
+  isInSavedMessages?: boolean;
 };
 
 const selection = window.getSelection();
@@ -126,6 +129,7 @@ const selection = window.getSelection();
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   availableReactions,
   topReactions,
+  defaultTagReactions,
   isOpen,
   messageListType,
   message,
@@ -175,6 +179,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canSelectLanguage,
   isReactionPickerOpen,
   messageLink,
+  isInSavedMessages,
   onClose,
   onCloseAnimationEnd,
 }) => {
@@ -206,6 +211,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     showOriginalMessage,
     openChatLanguageModal,
     openMessageReactionPicker,
+    openPremiumModal,
     loadOutboxReadDate,
   } = getActions();
 
@@ -480,9 +486,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleToggleReaction = useLastCallback((reaction: ApiReaction) => {
-    toggleReaction({
-      chatId: message.chatId, messageId: message.id, reaction, shouldAddToRecent: true,
-    });
+    if (isInSavedMessages && !isCurrentUserPremium) {
+      openPremiumModal({
+        initialSection: 'saved_tags',
+      });
+    } else {
+      toggleReaction({
+        chatId: message.chatId, messageId: message.id, reaction, shouldAddToRecent: true,
+      });
+    }
     closeMenu();
   });
 
@@ -531,6 +543,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         isReactionPickerOpen={isReactionPickerOpen}
         availableReactions={availableReactions}
         topReactions={topReactions}
+        defaultTagReactions={defaultTagReactions}
         message={message}
         isPrivate={isPrivate}
         isCurrentUserPremium={isCurrentUserPremium}
@@ -573,6 +586,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
         seenByRecentPeers={seenByRecentPeers}
+        isInSavedMessages={isInSavedMessages}
         noReplies={noReplies}
         onOpenThread={handleOpenThread}
         onReply={handleReply}
@@ -636,6 +650,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message, messageListType, detectedLanguage }): StateProps => {
     const { threadId } = selectCurrentMessageList(global) || {};
+
+    const { defaultTags, topReactions, availableReactions } = global.reactions;
+
     const activeDownloads = selectActiveDownloads(global, message.chatId);
     const chat = selectChat(global, message.chatId);
     const {
@@ -713,9 +730,12 @@ export default memo(withGlobal<OwnProps>(
     const isChatTranslated = selectRequestedChatTranslationLanguage(global, message.chatId);
     const messageLink = selectMessageLink(global, message.chatId, threadId, message.id);
 
+    const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
+
     return {
-      availableReactions: global.availableReactions,
-      topReactions: global.topReactions,
+      availableReactions,
+      topReactions,
+      defaultTagReactions: defaultTags,
       noOptions,
       canSendNow: isScheduled,
       canReschedule: isScheduled,
@@ -758,6 +778,7 @@ export default memo(withGlobal<OwnProps>(
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       messageLink,
+      isInSavedMessages,
     };
   },
 )(ContextMenuContainer));

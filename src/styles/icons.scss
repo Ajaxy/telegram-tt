@@ -227,33 +227,38 @@ $icons-map: (
   "story-priority": "\f1c4",
   "story-reply": "\f1c5",
   "strikethrough": "\f1c6",
-  "timer": "\f1c7",
-  "transcribe": "\f1c8",
-  "truck": "\f1c9",
-  "unarchive": "\f1ca",
-  "underlined": "\f1cb",
-  "unlock-badge": "\f1cc",
-  "unlock": "\f1cd",
-  "unmute": "\f1ce",
-  "unpin": "\f1cf",
-  "unread": "\f1d0",
-  "up": "\f1d1",
-  "user-filled": "\f1d2",
-  "user-online": "\f1d3",
-  "user": "\f1d4",
-  "video-outlined": "\f1d5",
-  "video-stop": "\f1d6",
-  "video": "\f1d7",
-  "view-once": "\f1d8",
-  "voice-chat": "\f1d9",
-  "volume-1": "\f1da",
-  "volume-2": "\f1db",
-  "volume-3": "\f1dc",
-  "web": "\f1dd",
-  "webapp": "\f1de",
-  "word-wrap": "\f1df",
-  "zoom-in": "\f1e0",
-  "zoom-out": "\f1e1",
+  "tag-add": "\f1c7",
+  "tag-crossed": "\f1c8",
+  "tag-filter": "\f1c9",
+  "tag-name": "\f1ca",
+  "tag": "\f1cb",
+  "timer": "\f1cc",
+  "transcribe": "\f1cd",
+  "truck": "\f1ce",
+  "unarchive": "\f1cf",
+  "underlined": "\f1d0",
+  "unlock-badge": "\f1d1",
+  "unlock": "\f1d2",
+  "unmute": "\f1d3",
+  "unpin": "\f1d4",
+  "unread": "\f1d5",
+  "up": "\f1d6",
+  "user-filled": "\f1d7",
+  "user-online": "\f1d8",
+  "user": "\f1d9",
+  "video-outlined": "\f1da",
+  "video-stop": "\f1db",
+  "video": "\f1dc",
+  "view-once": "\f1dd",
+  "voice-chat": "\f1de",
+  "volume-1": "\f1df",
+  "volume-2": "\f1e0",
+  "volume-3": "\f1e1",
+  "web": "\f1e2",
+  "webapp": "\f1e3",
+  "word-wrap": "\f1e4",
+  "zoom-in": "\f1e5",
+  "zoom-out": "\f1e6",
 );
 
 .icon-active-sessions::before {
@@ -849,6 +854,21 @@ $icons-map: (
 }
 .icon-strikethrough::before {
   content: map.get($icons-map, "strikethrough");
+}
+.icon-tag-add::before {
+  content: map.get($icons-map, "tag-add");
+}
+.icon-tag-crossed::before {
+  content: map.get($icons-map, "tag-crossed");
+}
+.icon-tag-filter::before {
+  content: map.get($icons-map, "tag-filter");
+}
+.icon-tag-name::before {
+  content: map.get($icons-map, "tag-name");
+}
+.icon-tag::before {
+  content: map.get($icons-map, "tag");
 }
 .icon-timer::before {
   content: map.get($icons-map, "timer");

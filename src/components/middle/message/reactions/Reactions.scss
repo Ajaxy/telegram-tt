@@ -1,0 +1,31 @@
+.Reactions {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  overflow: visible;
+  max-width: calc(var(--max-width) + 2.25rem);
+
+  &.is-outside {
+    margin-top: 0.125rem;
+  }
+
+  .own &.is-outside {
+    flex-direction: row-reverse;
+  }
+
+  .theme-light &.is-outside .message-reaction {
+    --reaction-background: var(--pattern-color);
+    --reaction-background-hover: var(--pattern-color);
+    --reaction-background-hover-filter: brightness(115%);
+    --reaction-text-color: white;
+
+    &.chosen {
+      --reaction-background: rgb(255, 255, 255, 0.6);
+      --reaction-background-hover: rgb(255, 255, 255, 0.75);
+      --reaction-text-color: rgb(62 62 62);
+    }
+  }
+}

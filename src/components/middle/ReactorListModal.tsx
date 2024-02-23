@@ -8,7 +8,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
 
-import { getReactionUniqueKey, isSameReaction } from '../../global/helpers';
+import { getReactionKey, isSameReaction } from '../../global/helpers';
 import {
   selectChatMessage,
   selectTabState,
@@ -162,7 +162,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
               .find((reactionsCount) => isSameReaction(reactionsCount.reaction, reaction))?.count;
             return (
               <Button
-                key={getReactionUniqueKey(reaction)}
+                key={getReactionKey(reaction)}
                 className={buildClassName(isSameReaction(chosenTab, reaction) && 'chosen')}
                 size="tiny"
                 ripple
@@ -201,7 +201,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
 
                   items.push(
                     <ListItem
-                      key={`${peerId}-${getReactionUniqueKey(r.reaction)}`}
+                      key={`${peerId}-${getReactionKey(r.reaction)}`}
                       className="chat-item-clickable reactors-list-item"
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => handleClick(peerId)}
@@ -271,7 +271,7 @@ export default memo(withGlobal<OwnProps>(
       reactions: message?.reactions,
       reactors: message?.reactors,
       seenByDates: message?.seenByDates,
-      availableReactions: global.availableReactions,
+      availableReactions: global.reactions.availableReactions,
     };
   },
 )(ReactorListModal));

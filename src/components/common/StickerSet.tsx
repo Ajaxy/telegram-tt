@@ -17,7 +17,7 @@ import {
   RECENT_SYMBOL_SET_ID,
   STICKER_SIZE_PICKER,
 } from '../../config';
-import { getReactionUniqueKey } from '../../global/helpers';
+import { getReactionKey } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
@@ -319,7 +319,7 @@ const StickerSet: FC<OwnProps> = ({
           </Button>
         )}
         {shouldRender && stickerSet.reactions?.map((reaction) => {
-          const reactionId = getReactionUniqueKey(reaction);
+          const reactionId = getReactionKey(reaction);
           const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
 
           return (

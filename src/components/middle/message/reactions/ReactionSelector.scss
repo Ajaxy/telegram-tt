@@ -1,16 +1,12 @@
 .ReactionSelector {
-  position: absolute;
-  height: 2.5rem;
+  position: relative;
   min-width: 3rem;
-  max-width: calc(100% + 4rem);
-  z-index: 100;
-  border-radius: 3rem;
-  right: -2rem;
-  top: 0.5rem;
+  max-width: fit-content;
+  right: 0;
+  top: -0.5rem;
 
   &--isRtl {
-    right: auto;
-    left: -3rem;
+    left: 0;
   }
 
   @media (max-width: 600px) {
@@ -24,16 +20,11 @@
   &__bubble-small,
   &__items-wrapper {
     background: var(--color-background);
-    filter: drop-shadow(0 0.25rem 0.125rem var(--color-default-shadow));
+    box-shadow: 0 0.25rem 0.125rem var(--color-default-shadow);
 
     body:not(.no-menu-blur) & {
       background: var(--color-background-compact-menu);
       backdrop-filter: blur(25px);
-    }
-
-    body.is-safari & {
-      filter: none;
-      box-shadow: 0 0.25rem 0.125rem var(--color-default-shadow);
     }
   }
 
@@ -84,7 +75,7 @@
   &__items-wrapper {
     width: 100%;
     height: 100%;
-    border-radius: 3rem;
+    border-radius: 1.25rem;
 
     @media (max-width: 600px) {
       width: fit-content;
@@ -92,13 +83,25 @@
   }
 
   &__items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__hint {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  &__reactions {
     padding: 0 0.5rem;
-    width: 100%;
-    height: 100%;
+    height: 2.5rem;
     display: flex;
     cursor: var(--custom-cursor, pointer);
     align-items: center;
-    border-radius: 3rem;
   }
 
   &__show-more {

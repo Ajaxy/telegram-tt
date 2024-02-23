@@ -947,6 +947,8 @@ export function updater(update: Update) {
     onUpdate({ '@type': 'updateRecentStickers' });
   } else if (update instanceof GramJs.UpdateRecentReactions) {
     onUpdate({ '@type': 'updateRecentReactions' });
+  } else if (update instanceof GramJs.UpdateSavedReactionTags) {
+    onUpdate({ '@type': 'updateSavedReactionTags' });
   } else if (update instanceof GramJs.UpdateMoveStickerSetToTop) {
     if (!update.masks) {
       onUpdate({

@@ -51,6 +51,7 @@ import PremiumReactions from '../../../assets/premium/PremiumReactions.svg';
 import PremiumSpeed from '../../../assets/premium/PremiumSpeed.svg';
 import PremiumStatus from '../../../assets/premium/PremiumStatus.svg';
 import PremiumStickers from '../../../assets/premium/PremiumStickers.svg';
+import PremiumTags from '../../../assets/premium/PremiumTags.svg';
 import PremiumTranslate from '../../../assets/premium/PremiumTranslate.svg';
 import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
 import PremiumVoice from '../../../assets/premium/PremiumVoice.svg';
@@ -73,6 +74,7 @@ const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
   animated_userpics: PremiumVideo,
   emoji_status: PremiumStatus,
   translations: PremiumTranslate,
+  saved_tags: PremiumTags,
 };
 
 export type OwnProps = {

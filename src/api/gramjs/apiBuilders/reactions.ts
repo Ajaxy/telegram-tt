@@ -7,6 +7,7 @@ import type {
   ApiReactionCount,
   ApiReactionEmoji,
   ApiReactions,
+  ApiSavedReactionTag,
 } from '../../types';
 
 import { buildApiDocument } from './messageContent';
@@ -14,10 +15,11 @@ import { getApiChatIdFromMtpPeer } from './peers';
 
 export function buildMessageReactions(reactions: GramJs.MessageReactions): ApiReactions {
   const {
-    recentReactions, results, canSeeList,
+    recentReactions, results, canSeeList, reactionsAsTags,
   } = reactions;
 
   return {
+    areTags: reactionsAsTags,
     canSeeList,
     results: results.map(buildReactionCount).filter(Boolean).sort(reactionCountComparator),
     recentReactions: recentReactions?.map(buildMessagePeerReaction).filter(Boolean),
@@ -80,6 +82,18 @@ export function buildApiReaction(reaction: GramJs.TypeReaction): ApiReaction | u
   }
 
   return undefined;
+}
+
+export function buildApiSavedReactionTag(tag: GramJs.SavedReactionTag): ApiSavedReactionTag | undefined {
+  const { reaction, title, count } = tag;
+  const apiReaction = buildApiReaction(reaction);
+  if (!apiReaction) return undefined;
+
+  return {
+    reaction: apiReaction,
+    title,
+    count,
+  };
 }
 
 export function buildApiAvailableReaction(availableReaction: GramJs.AvailableReaction): ApiAvailableReaction {

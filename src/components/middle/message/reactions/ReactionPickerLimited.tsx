@@ -1,18 +1,18 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../global';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../../lib/teact/teact';
+import { withGlobal } from '../../../../global';
 
-import type { ApiAvailableReaction, ApiChatReactions, ApiReaction } from '../../../api/types';
+import type { ApiAvailableReaction, ApiChatReactions, ApiReaction } from '../../../../api/types';
 
-import { getReactionUniqueKey, sortReactions } from '../../../global/helpers';
-import { selectChatFullInfo } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import { REM } from '../../common/helpers/mediaDimensions';
+import { getReactionKey, sortReactions } from '../../../../global/helpers';
+import { selectChatFullInfo } from '../../../../global/selectors';
+import buildClassName from '../../../../util/buildClassName';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
-import useAppLayout from '../../../hooks/useAppLayout';
-import useWindowSize from '../../../hooks/window/useWindowSize';
+import useAppLayout from '../../../../hooks/useAppLayout';
+import useWindowSize from '../../../../hooks/window/useWindowSize';
 
-import ReactionEmoji from '../../common/ReactionEmoji';
+import ReactionEmoji from '../../../common/ReactionEmoji';
 
 import styles from './ReactionPickerLimited.module.scss';
 
@@ -87,7 +87,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
           <canvas ref={sharedCanvasRef} className="shared-canvas" />
           <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
           {allAvailableReactions.map((reaction) => {
-            const reactionId = getReactionUniqueKey(reaction);
+            const reactionId = getReactionKey(reaction);
             const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
 
             return (
@@ -111,7 +111,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const { availableReactions, topReactions } = global;
+    const { availableReactions, topReactions } = global.reactions;
     const { enabledReactions } = selectChatFullInfo(global, chatId) || {};
 
     return {

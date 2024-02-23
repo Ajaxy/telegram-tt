@@ -184,7 +184,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       enabledReactions: selectChatFullInfo(global, chatId)?.enabledReactions,
-      availableReactions: global.availableReactions,
+      availableReactions: global.reactions.availableReactions,
       chat,
     };
   },
