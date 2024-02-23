@@ -159,7 +159,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateChatLastMessage': {
       const { id, lastMessage } = update;
 
-      global = updateChatLastMessage(global, id, lastMessage);
+      global = updateChatLastMessage(global, id, lastMessage, true);
       global = addMessages(global, [lastMessage]);
       setGlobal(global);
       break;
