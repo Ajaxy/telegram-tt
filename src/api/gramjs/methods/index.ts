@@ -91,10 +91,7 @@ export {
   requestCall, getDhConfig, confirmCall, sendSignalingData, acceptCall, discardCall, setCallRating, receivedCall,
 } from './calls';
 
-export {
-  getAvailableReactions, sendReaction, sendEmojiInteraction, fetchMessageReactionsList, clearRecentReactions,
-  setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction, fetchRecentReactions, fetchTopReactions,
-} from './reactions';
+export * from './reactions';
 
 export {
   fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics,

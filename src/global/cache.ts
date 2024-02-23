@@ -1,7 +1,7 @@
 /* eslint-disable eslint-multitab-tt/no-immediate-global */
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
-import type { ApiMessage } from '../api/types';
+import type { ApiAvailableReaction, ApiMessage } from '../api/types';
 import type { ActionReturnType, GlobalState, MessageList } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
@@ -181,15 +181,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.appConfig.limits = DEFAULT_LIMITS;
   }
 
-  if (typeof cached.config?.defaultReaction === 'string') {
-    cached.config.defaultReaction = { emoticon: cached.config.defaultReaction };
-  }
-
-  if (typeof cached.availableReactions?.[0].reaction === 'string') {
-    cached.availableReactions = cached.availableReactions
-      .map((r) => ({ ...r, reaction: { emoticon: r.reaction as unknown as string } }));
-  }
-
   if (!cached.archiveSettings) {
     cached.archiveSettings = initialState.archiveSettings;
   }
@@ -223,6 +214,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
   if (!cached.fileUploads.byMessageKey) {
     cached.fileUploads.byMessageKey = {};
+  }
+
+  if (!cached.reactions) {
+    cached.reactions = initialState.reactions;
   }
 }
 
@@ -269,8 +264,6 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'topInlineBots',
       'recentEmojis',
       'recentCustomEmojis',
-      'topReactions',
-      'recentReactions',
       'push',
       'serviceNotifications',
       'attachmentSettings',
@@ -282,6 +275,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'trustedBotIds',
       'recentlyFoundChatIds',
       'peerColors',
+      'savedReactionTags',
     ]),
     lastIsChatInfoShown: !getIsMobile() ? global.lastIsChatInfoShown : undefined,
     customEmojis: reduceCustomEmojis(global),
@@ -291,7 +285,15 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
     settings: reduceSettings(global),
     chatFolders: reduceChatFolders(global),
     groupCalls: reduceGroupCalls(global),
-    availableReactions: reduceAvailableReactions(global),
+    reactions: {
+      ...pick(global.reactions, [
+        'defaultTags',
+        'recentReactions',
+        'topReactions',
+        'hash',
+      ]),
+      availableReactions: reduceAvailableReactions(global.reactions.availableReactions),
+    },
     passcode: pick(global.passcode, [
       'isScreenLocked',
       'hasPasscode',
@@ -536,7 +538,7 @@ function reduceGroupCalls<T extends GlobalState>(global: T): GlobalState['groupC
   };
 }
 
-function reduceAvailableReactions(global: GlobalState): GlobalState['availableReactions'] {
-  return global.availableReactions
+function reduceAvailableReactions(availableReactions?: ApiAvailableReaction[]): ApiAvailableReaction[] | undefined {
+  return availableReactions
     ?.map((r) => pick(r, ['reaction', 'staticIcon', 'title', 'isInactive']));
 }

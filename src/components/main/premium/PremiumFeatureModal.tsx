@@ -39,6 +39,7 @@ export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
   emoji_status: 'PremiumPreviewEmojiStatus',
   translations: 'PremiumPreviewTranslations',
   stories: 'PremiumPreviewStories',
+  saved_tags: 'PremiumPreviewTags2',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
@@ -56,6 +57,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
   emoji_status: 'PremiumPreviewEmojiStatusDescription',
   translations: 'PremiumPreviewTranslationsDescription',
   stories: 'PremiumPreviewStoriesDescription',
+  saved_tags: 'PremiumPreviewTagsDescription2',
 };
 
 export const PREMIUM_FEATURE_SECTIONS = [
@@ -73,6 +75,7 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'animated_userpics',
   'emoji_status',
   'translations',
+  'saved_tags',
 ];
 
 const PREMIUM_BOTTOM_VIDEOS: string[] = [
@@ -84,6 +87,7 @@ const PREMIUM_BOTTOM_VIDEOS: string[] = [
   'animated_userpics',
   'emoji_status',
   'translations',
+  'saved_tags',
 ];
 
 type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType,

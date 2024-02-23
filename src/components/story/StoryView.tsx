@@ -202,6 +202,6 @@ export default memo(withGlobal<OwnProps>((global, { storyView }) => {
 
   return {
     peer,
-    availableReactions: global.availableReactions,
+    availableReactions: global.reactions.availableReactions,
   };
 })(StoryView));

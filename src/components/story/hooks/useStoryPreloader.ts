@@ -42,6 +42,8 @@ function useStoryPreloader(peerId?: string | string[], aroundStoryId?: number) {
           format,
         )
           .then((result) => {
+            if (!result) return;
+
             if (format === ApiMediaFormat.Progressive) {
               preloadProgressive(result);
             }

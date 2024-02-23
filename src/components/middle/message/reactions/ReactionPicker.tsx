@@ -1,31 +1,31 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../../lib/teact/teact';
+import { getActions, getGlobal, withGlobal } from '../../../../global';
 
 import type {
   ApiMessage, ApiMessageEntity,
   ApiReaction, ApiReactionCustomEmoji, ApiSticker, ApiStory, ApiStorySkipped,
-} from '../../../api/types';
-import type { IAnchorPosition } from '../../../types';
+} from '../../../../api/types';
+import type { IAnchorPosition } from '../../../../types';
 
-import { getStoryKey, isUserId } from '../../../global/helpers';
+import { getReactionKey, getStoryKey, isUserId } from '../../../../global/helpers';
 import {
   selectChat, selectChatFullInfo, selectChatMessage, selectIsContextMenuTranslucent, selectIsCurrentUserPremium,
   selectPeerStory, selectTabState,
-} from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
-import { REM } from '../../common/helpers/mediaDimensions';
-import { buildCustomEmojiHtml } from '../composer/helpers/customEmoji';
+} from '../../../../global/selectors';
+import buildClassName from '../../../../util/buildClassName';
+import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
+import { REM } from '../../../common/helpers/mediaDimensions';
+import { buildCustomEmojiHtml } from '../../composer/helpers/customEmoji';
 
-import { getIsMobile } from '../../../hooks/useAppLayout';
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
-import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
+import { getIsMobile } from '../../../../hooks/useAppLayout';
+import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
+import useLang from '../../../../hooks/useLang';
+import useLastCallback from '../../../../hooks/useLastCallback';
+import useMenuPosition from '../../../../hooks/useMenuPosition';
 
-import CustomEmojiPicker from '../../common/CustomEmojiPicker';
-import Menu from '../../ui/Menu';
+import CustomEmojiPicker from '../../../common/CustomEmojiPicker';
+import Menu from '../../../ui/Menu';
 import ReactionPickerLimited from './ReactionPickerLimited';
 
 import styles from './ReactionPicker.module.scss';
@@ -174,7 +174,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   const selectedReactionIds = useMemo(() => {
     return (message?.reactions?.results || []).reduce<string[]>((acc, { chosenOrder, reaction }) => {
       if (chosenOrder !== undefined) {
-        acc.push('emoticon' in reaction ? reaction.emoticon : reaction.documentId);
+        acc.push(getReactionKey(reaction));
       }
 
       return acc;
@@ -202,6 +202,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
       onClose={closeReactionPicker}
     >
       <CustomEmojiPicker
+        chatId={renderedChatId}
         idPrefix="message-emoji-set-"
         isHidden={!isOpen || !(withCustomReactions || renderedStoryId)}
         loadAndPlay={Boolean(isOpen && withCustomReactions)}

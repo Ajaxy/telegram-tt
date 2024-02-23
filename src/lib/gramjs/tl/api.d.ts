@@ -11848,11 +11848,15 @@ namespace Api {
       settings: Api.TypeCodeSettings;
     };
     export class SignUp extends Request<Partial<{
+      // flags: undefined;
+      noJoinedNotifications?: true;
       phoneNumber: string;
       phoneCodeHash: string;
       firstName: string;
       lastName: string;
     }>, auth.TypeAuthorization> {
+      // flags: undefined;
+      noJoinedNotifications?: true;
       phoneNumber: string;
       phoneCodeHash: string;
       firstName: string;
@@ -14706,8 +14710,12 @@ namespace Api {
       order: Api.TypeInputDialogPeer[];
     };
     export class GetSavedReactionTags extends Request<Partial<{
+      // flags: undefined;
+      peer?: Api.TypeInputPeer;
       hash: long;
     }>, messages.TypeSavedReactionTags> {
+      // flags: undefined;
+      peer?: Api.TypeInputPeer;
       hash: long;
     };
     export class UpdateSavedReactionTag extends Request<Partial<{

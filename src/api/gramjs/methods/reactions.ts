@@ -11,7 +11,12 @@ import {
 } from '../../../config';
 import { split } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { buildApiAvailableReaction, buildApiReaction, buildMessagePeerReaction } from '../apiBuilders/reactions';
+import {
+  buildApiAvailableReaction,
+  buildApiReaction,
+  buildApiSavedReactionTag,
+  buildMessagePeerReaction,
+} from '../apiBuilders/reactions';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildInputPeer, buildInputReaction } from '../gramjsBuilders';
 import { addEntitiesToLocalDb } from '../helpers';
@@ -62,7 +67,7 @@ export function sendEmojiInteraction({
   });
 }
 
-export async function getAvailableReactions() {
+export async function fetchAvailableReactions() {
   const result = await invokeRequest(new GramJs.messages.GetAvailableReactions({}));
 
   if (!result || result instanceof GramJs.messages.AvailableReactionsNotModified) {
@@ -201,4 +206,47 @@ export async function fetchRecentReactions({ hash = '0' }: { hash?: string }) {
 
 export function clearRecentReactions() {
   return invokeRequest(new GramJs.messages.ClearRecentReactions());
+}
+
+export async function fetchDefaultTagReactions({ hash = '0' }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.messages.GetDefaultTagReactions({
+    hash: BigInt(hash),
+  }));
+
+  if (!result || result instanceof GramJs.messages.ReactionsNotModified) {
+    return undefined;
+  }
+
+  return {
+    hash: String(result.hash),
+    reactions: result.reactions.map(buildApiReaction).filter(Boolean),
+  };
+}
+
+export async function fetchSavedReactionTags({ hash = '0' }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.messages.GetSavedReactionTags({ hash: BigInt(hash) }));
+
+  if (!result || result instanceof GramJs.messages.SavedReactionTagsNotModified) {
+    return undefined;
+  }
+
+  return {
+    hash: String(result.hash),
+    tags: result.tags.map(buildApiSavedReactionTag).filter(Boolean),
+  };
+}
+
+export function updateSavedReactionTag({
+  reaction,
+  title,
+}: {
+  reaction: ApiReaction;
+  title?: string;
+}) {
+  return invokeRequest(new GramJs.messages.UpdateSavedReactionTag({
+    reaction: buildInputReaction(reaction),
+    title,
+  }), {
+    shouldReturnTrue: true,
+  });
 }

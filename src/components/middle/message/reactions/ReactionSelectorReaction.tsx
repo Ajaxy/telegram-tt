@@ -1,17 +1,18 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
-import type { ApiAvailableReaction, ApiReaction } from '../../../api/types';
+import type { ApiAvailableReaction, ApiReaction } from '../../../../api/types';
 
-import { createClassNameBuilder } from '../../../util/buildClassName';
-import { REM } from '../../common/helpers/mediaDimensions';
+import buildClassName from '../../../../util/buildClassName';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
-import useFlag from '../../../hooks/useFlag';
-import useMedia from '../../../hooks/useMedia';
+import useFlag from '../../../../hooks/useFlag';
+import useMedia from '../../../../hooks/useMedia';
 
-import AnimatedSticker from '../../common/AnimatedSticker';
+import AnimatedSticker from '../../../common/AnimatedSticker';
+import Icon from '../../../common/Icon';
 
-import './ReactionSelectorReaction.scss';
+import styles from './ReactionSelectorReaction.module.scss';
 
 const REACTION_SIZE = 2 * REM;
 
@@ -20,16 +21,16 @@ type OwnProps = {
   isReady?: boolean;
   chosen?: boolean;
   noAppearAnimation?: boolean;
+  isLocked?: boolean;
   onToggleReaction: (reaction: ApiReaction) => void;
 };
-
-const cn = createClassNameBuilder('ReactionSelectorReaction');
 
 const ReactionSelectorReaction: FC<OwnProps> = ({
   reaction,
   isReady,
   noAppearAnimation,
   chosen,
+  isLocked,
   onToggleReaction,
 }) => {
   const mediaAppearData = useMedia(`sticker${reaction.appearAnimation?.id}`, !isReady || noAppearAnimation);
@@ -46,13 +47,13 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
 
   return (
     <div
-      className={cn('&', chosen && 'chosen')}
+      className={buildClassName(styles.root, chosen && styles.chosen)}
       onClick={handleClick}
       onMouseEnter={isReady && !isFirstPlay ? activate : undefined}
     >
       {noAppearAnimation && (
         <img
-          className={cn('static-icon')}
+          className={styles.staticIcon}
           src={staticIconData}
           alt={reaction.reaction.emoticon}
           draggable={false}
@@ -80,6 +81,9 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
           onEnded={deactivate}
           forceAlways
         />
+      )}
+      {isLocked && (
+        <Icon className={styles.lock} name="lock-badge" />
       )}
     </div>
   );

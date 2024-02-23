@@ -240,10 +240,11 @@
     --color-interactive-element-hover: rgba(255, 255, 255, 0.1);
     --color-text: #fff;
 
+    position: absolute;
     left: 50%;
     right: auto;
-    top: -3.875rem;
-    transform: translateX(-50%);
+    top: -0.75rem;
+    transform: translate(-50%, -100%);
     z-index: 1;
 
     @media (max-width: 600px) {
@@ -257,6 +258,10 @@
 
     .ReactionSelector__show-more {
       transform: scaleY(-1);
+      color: #fff;
+    }
+
+    .ReactionSelector__hint {
       color: #fff;
     }
   }

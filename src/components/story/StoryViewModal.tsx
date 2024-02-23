@@ -287,7 +287,7 @@ export default memo(withGlobal((global) => {
     story: story && 'content' in story ? story : undefined,
     nextOffset,
     isLoading,
-    availableReactions: global.availableReactions,
+    availableReactions: global.reactions.availableReactions,
     isCurrentUserPremium: selectIsCurrentUserPremium(global),
   };
 })(StoryViewModal));

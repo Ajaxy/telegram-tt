@@ -543,6 +543,7 @@ export interface ApiMessage {
 
 export interface ApiReactions {
   canSeeList?: boolean;
+  areTags?: boolean;
   results: ApiReactionCount[];
   recentReactions?: ApiPeerReaction[];
 }
@@ -597,6 +598,14 @@ export type ApiReactionCustomEmoji = {
 };
 
 export type ApiReaction = ApiReactionEmoji | ApiReactionCustomEmoji;
+
+export type ApiReactionKey = `${string}-${string}`;
+
+export type ApiSavedReactionTag = {
+  reaction: ApiReaction;
+  title?: string;
+  count: number;
+};
 
 interface ApiBaseThreadInfo {
   chatId: string;

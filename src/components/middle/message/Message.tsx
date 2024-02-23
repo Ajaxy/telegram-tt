@@ -12,6 +12,8 @@ import type {
   ApiMessageOutgoingStatus,
   ApiPeer,
   ApiReaction,
+  ApiReactionKey,
+  ApiSavedReactionTag,
   ApiThreadInfo,
   ApiTopic,
   ApiTypeStory,
@@ -165,7 +167,7 @@ import MessageMeta from './MessageMeta';
 import MessagePhoneCall from './MessagePhoneCall';
 import Photo from './Photo';
 import Poll from './Poll';
-import Reactions from './Reactions';
+import Reactions from './reactions/Reactions';
 import RoundVideo from './RoundVideo';
 import Sticker from './Sticker';
 import Story from './Story';
@@ -277,6 +279,7 @@ type StateProps = {
   isConnected: boolean;
   isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
+  tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
 };
 
 type MetaPosition =
@@ -391,6 +394,7 @@ const Message: FC<OwnProps & StateProps> = ({
   isConnected,
   getIsMessageListReady,
   shouldWarnAboutSvg,
+  tags,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -946,6 +950,8 @@ const Message: FC<OwnProps & StateProps> = ({
         metaChildren={meta}
         observeIntersection={observeIntersectionForPlaying}
         noRecentReactors={isChannel}
+        tags={tags}
+        isCurrentUserPremium={isPremium}
       />
     );
   }
@@ -1428,9 +1434,11 @@ const Message: FC<OwnProps & StateProps> = ({
           <Reactions
             message={reactionMessage!}
             isOutside
+            isCurrentUserPremium={isPremium}
             maxWidth={reactionsMaxWidth}
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
+            tags={tags}
           />
         )}
       </div>
@@ -1611,7 +1619,7 @@ export default memo(withGlobal<OwnProps>(
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
       shouldLoopStickers: selectShouldLoopStickers(global),
       repliesThreadInfo,
-      availableReactions: global.availableReactions,
+      availableReactions: global.reactions.availableReactions,
       defaultReaction: isMessageLocal(message) || messageListType === 'scheduled'
         ? undefined : selectDefaultReaction(global, chatId),
       hasActiveReactions,
@@ -1644,6 +1652,7 @@ export default memo(withGlobal<OwnProps>(
         isResizingContainer,
         focusedQuote,
       }),
+      tags: global.savedReactionTags?.byKey,
     };
   },
 )(Message));

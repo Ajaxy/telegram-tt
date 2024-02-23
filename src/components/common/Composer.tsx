@@ -153,7 +153,7 @@ import SendAsMenu from '../middle/composer/SendAsMenu.async';
 import StickerTooltip from '../middle/composer/StickerTooltip.async';
 import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
 import WebPagePreview from '../middle/composer/WebPagePreview';
-import ReactionSelector from '../middle/message/ReactionSelector';
+import ReactionSelector from '../middle/message/reactions/ReactionSelector';
 import Button from '../ui/Button';
 import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
@@ -1521,6 +1521,8 @@ const Composer: FC<OwnProps & StateProps> = ({
           isReady={isReady}
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
+          isInSavedMessages={isChatWithSelf}
+          isInStoryViewer={isInStoryViewer}
           canPlayAnimatedEmojis={canPlayAnimatedEmojis}
           onShowMore={handleReactionPickerOpen}
           className={reactionSelectorTransitonClassNames}
@@ -2001,8 +2003,8 @@ export default memo(withGlobal<OwnProps>(
     const isInScheduledList = messageListType === 'scheduled';
 
     return {
-      availableReactions: type === 'story' ? global.availableReactions : undefined,
-      topReactions: type === 'story' ? global.topReactions : undefined,
+      availableReactions: type === 'story' ? global.reactions.availableReactions : undefined,
+      topReactions: type === 'story' ? global.reactions.topReactions : undefined,
       isOnActiveTab: !tabState.isBlurred,
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
       draft,

@@ -30,7 +30,6 @@ import {
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import buildClassName from '../../util/buildClassName';
 import { pickTruthy, unique } from '../../util/iteratees';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { REM } from './helpers/mediaDimensions';
 
@@ -76,6 +75,7 @@ type StateProps = {
   recentStatusEmojis?: ApiSticker[];
   topReactions?: ApiReaction[];
   recentReactions?: ApiReaction[];
+  defaultTagReactions?: ApiReaction[];
   stickerSetsById: Record<string, ApiStickerSet>;
   availableReactions?: ApiAvailableReaction[];
   addedCustomEmojiIds?: string[];
@@ -126,6 +126,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   withDefaultTopicIcons,
   defaultTopicIconsId,
   defaultStatusIconsId,
+  defaultTagReactions,
   onCustomEmojiSelect,
   onReactionSelect,
   onContextMenuOpen,
@@ -168,13 +169,22 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   const areAddedLoaded = Boolean(addedCustomEmojiIds);
 
   const allSets = useMemo(() => {
-    if (!addedCustomEmojiIds) {
-      return MEMO_EMPTY_ARRAY;
-    }
-
     const defaultSets: StickerSetOrReactionsSetOrRecent[] = [];
 
-    if (isReactionPicker) {
+    if (isReactionPicker && isSavedMessages) {
+      if (defaultTagReactions?.length) {
+        defaultSets.push({
+          id: TOP_SYMBOL_SET_ID,
+          accessHash: '',
+          title: lang('PremiumPreviewTags'),
+          reactions: defaultTagReactions,
+          count: defaultTagReactions.length,
+          isEmoji: true,
+        });
+      }
+    }
+
+    if (isReactionPicker && !isSavedMessages) {
       const topReactionsSlice = topReactions?.slice(0, TOP_REACTIONS_COUNT) || [];
       if (topReactionsSlice?.length) {
         defaultSets.push({
@@ -240,7 +250,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       });
     }
 
-    const setIdsToDisplay = unique(addedCustomEmojiIds.concat(customEmojiFeaturedIds || []));
+    const setIdsToDisplay = unique((addedCustomEmojiIds || []).concat(customEmojiFeaturedIds || []));
 
     const setsToDisplay = Object.values(pickTruthy(stickerSetsById, setIdsToDisplay));
 
@@ -251,7 +261,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   }, [
     addedCustomEmojiIds, isReactionPicker, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
     customEmojiFeaturedIds, stickerSetsById, topReactions, availableReactions, lang, recentReactions,
-    defaultStatusIconsId, defaultTopicIconsId,
+    defaultStatusIconsId, defaultTopicIconsId, isSavedMessages, defaultTagReactions,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -447,8 +457,12 @@ export default memo(withGlobal<OwnProps>(
         },
       },
       recentCustomEmojis: recentCustomEmojiIds,
-      recentReactions,
-      topReactions,
+      reactions: {
+        availableReactions,
+        recentReactions,
+        topReactions,
+        defaultTags,
+      },
     } = global;
 
     const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
@@ -467,7 +481,8 @@ export default memo(withGlobal<OwnProps>(
       defaultStatusIconsId: global.defaultStatusIconsId,
       topReactions: isReactionPicker ? topReactions : undefined,
       recentReactions: isReactionPicker ? recentReactions : undefined,
-      availableReactions: isReactionPicker ? global.availableReactions : undefined,
+      availableReactions: isReactionPicker ? availableReactions : undefined,
+      defaultTagReactions: isReactionPicker ? defaultTags : undefined,
     };
   },
 )(CustomEmojiPicker));

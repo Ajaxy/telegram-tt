@@ -5,10 +5,10 @@ import type { IAnchorPosition } from '../types';
 interface Layout {
   extraPaddingX?: number;
   extraTopPadding?: number;
-  marginSides?: number;
   extraMarginTop?: number;
   menuElMinWidth?: number;
   deltaX?: number;
+  topShiftY?: number;
   shouldAvoidNegativePosition?: boolean;
   withPortal?: boolean;
   isDense?: boolean; //  Allows you to place the menu as close to the edges of the area as possible
@@ -51,8 +51,8 @@ export default function useMenuPosition(
     const {
       extraPaddingX = 0,
       extraTopPadding = 0,
-      marginSides = 0,
       extraMarginTop = 0,
+      topShiftY = 0,
       menuElMinWidth = 0,
       deltaX = 0,
       shouldAvoidNegativePosition = false,
@@ -83,22 +83,13 @@ export default function useMenuPosition(
     }
     setPositionX(horizontalPosition);
 
-    if (marginSides
-      && horizontalPosition === 'right' && (x + extraPaddingX + marginSides >= rootRect.width + rootRect.left)) {
-      x -= marginSides;
-    }
-
-    if (marginSides && horizontalPosition === 'left') {
-      if (x + extraPaddingX + marginSides + menuRect.width >= rootRect.width + rootRect.left) {
-        x -= marginSides;
-      } else if (x - marginSides <= 0) {
-        x += marginSides;
-      }
-    }
     x += deltaX;
 
-    if (isDense || (y + menuRect.height < rootRect.height + rootRect.top)) {
+    const yWithTopShift = y + topShiftY;
+
+    if (isDense || (yWithTopShift + menuRect.height < rootRect.height + rootRect.top)) {
       verticalPosition = 'top';
+      y = yWithTopShift;
     } else {
       verticalPosition = 'bottom';
 
@@ -106,6 +97,7 @@ export default function useMenuPosition(
         y = rootRect.top + rootRect.height;
       }
     }
+
     setPositionY(verticalPosition);
 
     const triggerRect = triggerEl.getBoundingClientRect();

@@ -209,14 +209,14 @@ const ReactionAnimatedEmoji = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { containerId }) => {
-    const { availableReactions, genericEmojiEffects } = global;
+    const { genericEmojiEffects, reactions } = global;
     const { activeReactions } = selectTabState(global);
 
     const withEffects = selectPerformanceSettingsValue(global, 'reactionEffects');
 
     return {
       activeReactions: activeReactions?.[containerId],
-      availableReactions,
+      availableReactions: reactions.availableReactions,
       genericEffects: genericEmojiEffects,
       withEffects,
     };
