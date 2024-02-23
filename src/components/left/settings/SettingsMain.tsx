@@ -78,7 +78,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         {currentUserId && (
           <ChatExtra
             chatOrUserId={currentUserId}
-            forceShowSelf
+            isInSettings
           />
         )}
         <ListItem
