@@ -44,7 +44,8 @@ import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
 
 const UPDATE_THROTTLE = 5000;
 
-const updateCacheThrottled = throttle(() => onIdle(updateCache), UPDATE_THROTTLE, false);
+const updateCacheThrottled = throttle(() => onIdle(() => updateCache()), UPDATE_THROTTLE, false);
+const updateCacheForced = () => updateCache(true);
 
 let isCaching = false;
 let unsubscribeFromBeforeUnload: NoneToVoidFunction | undefined;
@@ -70,6 +71,7 @@ export function initCache() {
     }
 
     setupCaching();
+    updateCacheForced();
   });
 
   addActionHandler('reset', resetCache);
@@ -95,15 +97,15 @@ export function loadCache(initialState: GlobalState): GlobalState | undefined {
 
 export function setupCaching() {
   isCaching = true;
-  unsubscribeFromBeforeUnload = onBeforeUnload(updateCache, true);
-  window.addEventListener('blur', updateCache);
+  unsubscribeFromBeforeUnload = onBeforeUnload(updateCacheForced, true);
+  window.addEventListener('blur', updateCacheForced);
   addCallback(updateCacheThrottled);
 }
 
 export function clearCaching() {
   isCaching = false;
   removeCallback(updateCacheThrottled);
-  window.removeEventListener('blur', updateCache);
+  window.removeEventListener('blur', updateCacheForced);
   if (unsubscribeFromBeforeUnload) {
     unsubscribeFromBeforeUnload();
   }
@@ -221,9 +223,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 }
 
-function updateCache() {
+function updateCache(force?: boolean) {
   const global = getGlobal();
-  if (!isCaching || global.isLoggingOut || isHeavyAnimating()) {
+  if (!isCaching || global.isLoggingOut || (!force && isHeavyAnimating())) {
     return;
   }
 
