@@ -24,35 +24,36 @@ import type {
   MediaContent,
   OnApiUpdate,
 } from '../../types';
-import {
-  MAIN_THREAD_ID,
-  MESSAGE_DELETED,
-} from '../../types';
+import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../types';
 
 import {
   ALL_FOLDER_ID,
   API_GENERAL_ID_LIMIT,
-  DEBUG, GIF_MIME_TYPE, MAX_INT_32, MENTION_UNREAD_SLICE,
-  PINNED_MESSAGES_LIMIT, REACTION_UNREAD_SLICE,
+  DEBUG,
+  GIF_MIME_TYPE,
+  MAX_INT_32,
+  MENTION_UNREAD_SLICE,
+  PINNED_MESSAGES_LIMIT,
+  REACTION_UNREAD_SLICE,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { fetchFile } from '../../../util/files';
 import { compact, split } from '../../../util/iteratees';
+import { getMessageKey } from '../../../util/messageKey';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
 import { buildApiFormattedText } from '../apiBuilders/common';
-import {
-  buildMessageMediaContent, buildMessageTextContent, buildWebPage,
-} from '../apiBuilders/messageContent';
+import { buildMessageMediaContent, buildMessageTextContent, buildWebPage } from '../apiBuilders/messageContent';
 import {
   buildApiMessage,
   buildApiSponsoredMessage,
   buildApiThreadInfo,
   buildLocalForwardedMessage,
   buildLocalMessage,
+  buildUploadingMedia,
 } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiUser } from '../apiBuilders/users';
@@ -560,31 +561,34 @@ export async function editMessage({
   message,
   text,
   entities,
+  attachment,
   noWebPage,
 }: {
   chat: ApiChat;
   message: ApiMessage;
   text: string;
   entities?: ApiMessageEntity[];
+  attachment?: ApiAttachment;
   noWebPage?: boolean;
-}) {
+}, onProgress?: ApiOnProgress) {
   const isScheduled = message.date * 1000 > Date.now() + getServerTimeOffset() * 1000;
-  let messageUpdate: Partial<ApiMessage> = {
-    content: {
-      ...message.content,
-      ...(text && {
-        text: {
-          text,
-          entities,
-        },
-      }),
-    },
+
+  const media = attachment && buildUploadingMedia(attachment);
+
+  const newContent = {
+    ...(media || message.content),
+    ...(text && {
+      text: {
+        text,
+        entities,
+      },
+    }),
   };
 
-  const emojiOnlyCount = getEmojiOnlyCountForMessage(messageUpdate.content!, messageUpdate.groupedId);
-  messageUpdate = {
-    ...messageUpdate,
-    emojiOnlyCount,
+  const messageUpdate: Partial<ApiMessage> = {
+    ...message,
+    content: newContent,
+    emojiOnlyCount: getEmojiOnlyCountForMessage(newContent, message.groupedId),
   };
 
   onUpdate({
@@ -594,16 +598,47 @@ export async function editMessage({
     message: messageUpdate,
   });
 
-  const mtpEntities = entities && entities.map(buildMtpMessageEntity);
+  try {
+    let mediaUpdate: GramJs.TypeInputMedia | undefined;
+    if (attachment) {
+      mediaUpdate = await uploadMedia(message, attachment, onProgress!);
+    }
 
-  await invokeRequest(new GramJs.messages.EditMessage({
-    message: text || '',
-    entities: mtpEntities,
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    id: message.id,
-    ...(isScheduled && { scheduleDate: message.date }),
-    ...(noWebPage && { noWebpage: noWebPage }),
-  }));
+    const mtpEntities = entities && entities.map(buildMtpMessageEntity);
+
+    await invokeRequest(new GramJs.messages.EditMessage({
+      message: text || '',
+      entities: mtpEntities,
+      media: mediaUpdate,
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      id: message.id,
+      ...(isScheduled && { scheduleDate: message.date }),
+      ...(noWebPage && { noWebpage: noWebPage }),
+    }), { shouldThrow: true });
+  } catch (err) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn(err);
+    }
+
+    const { message: messageErr } = err as Error;
+
+    onUpdate({
+      '@type': 'error',
+      error: {
+        message: messageErr,
+        hasErrorKey: true,
+      },
+    });
+
+    // Rollback changes
+    onUpdate({
+      '@type': isScheduled ? 'updateScheduledMessage' : 'updateMessage',
+      id: message.id,
+      chatId: chat.id,
+      message,
+    });
+  }
 }
 
 export async function rescheduleMessage({
@@ -622,7 +657,7 @@ export async function rescheduleMessage({
   }));
 }
 
-async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
+async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
     filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler, ttlSeconds,
   } = attachment;
@@ -631,7 +666,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     if (onProgress.isCanceled) {
       patchedOnProgress.isCanceled = true;
     } else {
-      onProgress(progress, localMessage.id);
+      onProgress(progress, getMessageKey(message));
     }
   };
 

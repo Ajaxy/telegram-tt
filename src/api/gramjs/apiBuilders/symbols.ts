@@ -4,12 +4,10 @@ import type {
   ApiEmojiInteraction, ApiSticker, ApiStickerSet, ApiStickerSetInfo, GramJsEmojiInteraction,
 } from '../../types';
 
+import { LOTTIE_STICKER_MIME_TYPE, VIDEO_STICKER_MIME_TYPE } from '../../../config';
 import { compact } from '../../../util/iteratees';
 import localDb from '../localDb';
 import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
-
-const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
-const VIDEO_STICKER_MIME_TYPE = 'video/webm';
 
 export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPremium?: boolean): ApiSticker | undefined {
   if (document instanceof GramJs.DocumentEmpty) {

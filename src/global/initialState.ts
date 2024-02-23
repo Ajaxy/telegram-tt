@@ -144,7 +144,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   },
 
   fileUploads: {
-    byMessageLocalId: {},
+    byMessageKey: {},
   },
 
   recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy', 'duck', 'cherries'],

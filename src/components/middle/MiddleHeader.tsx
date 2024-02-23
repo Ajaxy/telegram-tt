@@ -25,7 +25,6 @@ import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getChatTitle,
   getIsSavedDialog,
-  getMessageKey,
   getSenderTitle,
   isChatChannel,
   isChatSuperGroup,
@@ -51,6 +50,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import cycleRestrict from '../../util/cycleRestrict';
+import { getMessageKey } from '../../util/messageKey';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useConnectionStatus from '../../hooks/useConnectionStatus';

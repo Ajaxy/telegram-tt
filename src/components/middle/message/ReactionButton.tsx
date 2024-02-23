@@ -7,8 +7,9 @@ import type {
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import { getMessageKey, isReactionChosen, isSameReaction } from '../../../global/helpers';
+import { isReactionChosen, isSameReaction } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import { getMessageKey } from '../../../util/messageKey';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { REM } from '../../common/helpers/mediaDimensions';
 

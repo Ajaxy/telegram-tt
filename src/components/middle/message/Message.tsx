@@ -37,7 +37,6 @@ import {
   getMessageContent,
   getMessageCustomShape,
   getMessageHtmlId,
-  getMessageKey,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
   getSenderTitle,
@@ -99,6 +98,7 @@ import {
 import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
 import { isElementInViewport } from '../../../util/isElementInViewport';
+import { getMessageKey } from '../../../util/messageKey';
 import stopEvent from '../../../util/stopEvent';
 import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import {

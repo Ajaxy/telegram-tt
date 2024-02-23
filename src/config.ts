@@ -219,6 +219,9 @@ export const SLIDE_TRANSITION_DURATION = 450;
 export const VIDEO_WEBM_TYPE = 'video/webm';
 export const GIF_MIME_TYPE = 'image/gif';
 
+export const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
+export const VIDEO_STICKER_MIME_TYPE = 'video/webm';
+
 export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
   'image/png', 'image/jpeg', GIF_MIME_TYPE,
 ]);
