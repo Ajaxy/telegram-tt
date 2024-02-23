@@ -72,7 +72,8 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
   global = getGlobal();
 
   currentSearch = selectCurrentTextSearch(global, tabId);
-  if (!currentSearch || query !== currentSearch.query || !isSameReaction(savedTag, currentSearch.savedTag)) {
+  const hasTagChanged = !isSameReaction(savedTag, currentSearch?.savedTag);
+  if (!currentSearch || query !== currentSearch.query || hasTagChanged) {
     return;
   }
 
