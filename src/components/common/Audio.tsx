@@ -123,7 +123,7 @@ const Audio: FC<OwnProps> = ({
   const { isRtl } = lang;
 
   const { isMobile } = useAppLayout();
-  const [isActivated, setIsActivated] = useState(Boolean(autoPlay));
+  const [isActivated, setIsActivated] = useState(false);
   const shouldLoad = isActivated || PRELOAD;
   const coverHash = getMessageMediaHash(message, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
@@ -167,13 +167,14 @@ const Audio: FC<OwnProps> = ({
     bufferingHandlers,
     undefined,
     checkBuffering,
-    isActivated,
+    Boolean(isActivated || autoPlay),
     handleForcePlay,
     handleTrackChange,
     isMessageLocal(message) || hasTtl,
     undefined,
     onPause,
     noReset,
+    hasTtl && !isInOneTimeModal,
   );
 
   const reversePlayProgress = 1 - playProgress;
@@ -220,8 +221,7 @@ const Audio: FC<OwnProps> = ({
     }
 
     if (hasTtl) {
-      // Set new date to prevent saving state of the track
-      openOneTimeMediaModal({ message: { ...message, date: Date.now() } });
+      openOneTimeMediaModal({ message });
       onReadMedia?.();
       return;
     }
@@ -329,7 +329,7 @@ const Audio: FC<OwnProps> = ({
     isSelected && 'audio-is-selected',
   );
 
-  const buttonClassNames = ['toggle-play'];
+  const buttonClassNames = ['toogle-play-wrapper'];
   if (shouldRenderCross) {
     buttonClassNames.push('loading');
   } else {
@@ -371,13 +371,13 @@ const Audio: FC<OwnProps> = ({
 
   function renderTooglePlayWrapper() {
     return (
-      <div className="toogle-play-wrapper">
+      <div className={buildClassName(...buttonClassNames)}>
         <Button
           round
           ripple={!isMobile}
           size="smaller"
+          className="toggle-play"
           color={coverBlobUrl ? 'translucent-white' : 'primary'}
-          className={buttonClassNames.join(' ')}
           ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
           onClick={handleButtonClick}
           isRtl={lang.isRtl}

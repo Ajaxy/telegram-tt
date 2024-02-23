@@ -34,6 +34,7 @@ const useAudioPlayer = (
   noProgressUpdates = false,
   onPause?: NoneToVoidFunction,
   noReset = false,
+  noHandleEvents = false,
 ) => {
   // eslint-disable-next-line no-null/no-null
   const controllerRef = useRef<ReturnType<typeof register>>(null);
@@ -50,6 +51,9 @@ const useAudioPlayer = (
 
   useSyncEffect(() => {
     controllerRef.current = register(trackId, trackType, (eventName, e) => {
+      if (noHandleEvents) {
+        return;
+      }
       switch (eventName) {
         case 'onPlay': {
           const {
@@ -67,7 +71,6 @@ const useAudioPlayer = (
           if (trackType === 'voice' || duration > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION) {
             setPlaybackRate(audioPlayer.playbackRate);
           }
-
           setPositionState({
             duration: proxy.duration || 0,
             playbackRate: proxy.playbackRate,
@@ -103,7 +106,6 @@ const useAudioPlayer = (
           break;
         }
       }
-
       handlers?.[eventName]?.(e);
     }, onForcePlay, handleTrackChange);
 
@@ -116,7 +118,7 @@ const useAudioPlayer = (
       isPlayingSync = true;
     }
 
-    if (onInit) {
+    if (onInit && !noHandleEvents) {
       onInit(proxy);
     }
   }, [trackId]);
@@ -159,7 +161,7 @@ const useAudioPlayer = (
 
   // Autoplay once `src` is present
   useEffectWithPrevDeps(([prevShouldPlay, prevSrc]) => {
-    if (prevShouldPlay === shouldPlay && src === prevSrc && trackType !== 'oneTimeVoice') {
+    if (prevShouldPlay === shouldPlay && src === prevSrc) {
       return;
     }
 

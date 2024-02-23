@@ -40,6 +40,7 @@ import {
   EDITABLE_INPUT_MODAL_ID,
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
+  ONE_TIME_MEDIA_TTL_SECONDS,
   REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
@@ -157,6 +158,7 @@ import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
 import Avatar from './Avatar';
 import DeleteMessageModal from './DeleteMessageModal.async';
+import Icon from './Icon';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
 
 import './Composer.scss';
@@ -203,7 +205,7 @@ type StateProps =
     botKeyboardMessageId?: number;
     botKeyboardPlaceholder?: string;
     withScheduledButton?: boolean;
-    shouldSchedule?: boolean;
+    isInScheduledList?: boolean;
     canScheduleUntilOnline?: boolean;
     stickersForEmoji?: ApiSticker[];
     customEmojiForEmoji?: ApiSticker[];
@@ -245,6 +247,7 @@ type StateProps =
     shouldCollectDebugLogs?: boolean;
     sentStoryReaction?: ApiReaction;
     stealthMode?: ApiStealthMode;
+    canSendOneTimeMedia?: boolean;
   };
 
 enum MainButtonState {
@@ -253,6 +256,7 @@ enum MainButtonState {
   Edit = 'edit',
   Schedule = 'schedule',
   Forward = 'forward',
+  SendOneTime = 'sendOneTime',
 }
 
 type ScheduledMessageArgs = TabState['contentToBeScheduled'] | {
@@ -273,7 +277,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   type,
   isOnActiveTab,
   dropAreaState,
-  shouldSchedule,
+  isInScheduledList,
   canScheduleUntilOnline,
   isReady,
   isMobile,
@@ -346,6 +350,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   shouldCollectDebugLogs,
   sentStoryReaction,
   stealthMode,
+  canSendOneTimeMedia,
   onForward,
 }) => {
   const {
@@ -544,6 +549,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     currentRecordTime,
     recordButtonRef: mainButtonRef,
     startRecordTimeRef,
+    isViewOnceEnabled,
+    setIsViewOnceEnabled,
+    toogleViewOnceEnabled,
   } = useVoiceRecording();
 
   const shouldSendRecordingStatus = isForCurrentMessageList && !isInStoryViewer;
@@ -753,16 +761,16 @@ const Composer: FC<OwnProps & StateProps> = ({
       return MainButtonState.Record;
     }
 
-    if (shouldSchedule) {
+    if (isInScheduledList) {
       return MainButtonState.Schedule;
     }
 
     return MainButtonState.Send;
   }, [
     activeVoiceRecording, editingMessage, getHtml, hasAttachments, isForwarding, isInputHasFocus, onForward,
-    shouldForceShowEditing, shouldSchedule,
+    shouldForceShowEditing, isInScheduledList,
   ]);
-  const canShowCustomSendMenu = !shouldSchedule;
+  const canShowCustomSendMenu = !isInScheduledList;
 
   const {
     isContextMenuOpen: isCustomSendMenuOpen,
@@ -928,12 +936,13 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     if (activeVoiceRecording) {
       const record = await stopRecordingVoice();
+      const ttlSeconds = isViewOnceEnabled ? ONE_TIME_MEDIA_TTL_SECONDS : undefined;
       if (record) {
         const { blob, duration, waveform } = record;
         currentAttachments = [await buildAttachment(
           VOICE_RECORDING_FILENAME,
           blob,
-          { voice: { duration, waveform } },
+          { voice: { duration, waveform }, ttlSeconds },
         )];
       }
     }
@@ -1082,7 +1091,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (shouldSchedule || isScheduleRequested) {
+    if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
@@ -1115,7 +1124,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       isPreloadedGlobally: true,
     };
 
-    if (shouldSchedule || isScheduleRequested) {
+    if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
@@ -1144,7 +1153,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (shouldSchedule || isScheduleRequested) {
+    if (isInScheduledList || isScheduleRequested) {
       requestCalendar((scheduledAt) => {
         handleMessageSchedule({
           id: inlineResult.id,
@@ -1184,7 +1193,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (shouldSchedule) {
+    if (isInScheduledList) {
       requestCalendar((scheduledAt) => {
         handleMessageSchedule({ poll }, scheduledAt, currentMessageList);
       });
@@ -1196,7 +1205,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const sendSilent = useLastCallback((additionalArgs?: ScheduledMessageArgs) => {
-    if (shouldSchedule) {
+    if (isInScheduledList) {
       requestCalendar((scheduledAt) => {
         handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt, currentMessageList!);
       });
@@ -1340,6 +1349,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             showAllowedMessageTypesNotification({ chatId });
           }
         } else {
+          setIsViewOnceEnabled(false);
           void startRecordingVoice();
         }
         break;
@@ -1513,7 +1523,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldForceAsFile={shouldForceAsFile}
         isForCurrentMessageList={isForCurrentMessageList}
         isForMessage={isInMessageList}
-        shouldSchedule={shouldSchedule}
+        shouldSchedule={isInScheduledList}
         forceDarkTheme={isInStoryViewer}
         onCaptionUpdate={onCaptionUpdate}
         onSendSilent={handleSendSilentAttachments}
@@ -1762,7 +1772,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             canSendAudios={canSendAudios}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
-            isScheduled={shouldSchedule}
+            isScheduled={isInScheduledList}
             attachBots={isInMessageList ? attachBots : undefined}
             peerType={attachMenuPeerType}
             shouldCollectDebugLogs={shouldCollectDebugLogs}
@@ -1813,6 +1823,18 @@ const Composer: FC<OwnProps & StateProps> = ({
           />
         </div>
       </div>
+      {canSendOneTimeMedia && activeVoiceRecording && (
+        <Button
+          className={buildClassName('view-once', isViewOnceEnabled && 'active')}
+          round
+          color="secondary"
+          ariaLabel={lang('Chat.PlayOnceVoiceMessageTooltip')}
+          onClick={toogleViewOnceEnabled}
+        >
+          <Icon name="view-once" />
+          <Icon name="one-filled" />
+        </Button>
+      )}
       {activeVoiceRecording && (
         <Button
           round
@@ -1883,10 +1905,10 @@ const Composer: FC<OwnProps & StateProps> = ({
       {canShowCustomSendMenu && (
         <CustomSendMenu
           isOpen={isCustomSendMenuOpen}
-          canSchedule={isInMessageList}
-          canScheduleUntilOnline={canScheduleUntilOnline}
+          canSchedule={isInMessageList && !isViewOnceEnabled}
+          canScheduleUntilOnline={canScheduleUntilOnline && !isViewOnceEnabled}
           onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
-          onSendSchedule={!shouldSchedule ? handleSendScheduled : undefined}
+          onSendSchedule={!isInScheduledList ? handleSendScheduled : undefined}
           onSendWhenOnline={handleSendWhenOnline}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
@@ -1958,6 +1980,7 @@ export default memo(withGlobal<OwnProps>(
     const replyToTopic = chat?.isForum && chat.isForumAsMessages && threadId === MAIN_THREAD_ID && replyToMessage
       ? selectTopicFromMessage(global, replyToMessage)
       : undefined;
+    const isInScheduledList = messageListType === 'scheduled';
 
     return {
       availableReactions: type === 'story' ? global.availableReactions : undefined,
@@ -1977,7 +2000,7 @@ export default memo(withGlobal<OwnProps>(
         messageListType === 'thread'
         && Boolean(scheduledIds?.length)
       ),
-      shouldSchedule: messageListType === 'scheduled',
+      isInScheduledList,
       botKeyboardMessageId,
       botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,
       isForwarding: chatId === tabState.forwardMessages.toChatId,
@@ -2019,6 +2042,7 @@ export default memo(withGlobal<OwnProps>(
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
+      canSendOneTimeMedia: isChatWithUser && !isChatWithBot && !isInScheduledList,
       shouldCollectDebugLogs: global.settings.byKey.shouldCollectDebugLogs,
       sentStoryReaction,
       stealthMode: global.stories.stealthMode,

@@ -17,6 +17,7 @@ const useVoiceRecording = () => {
   const [activeVoiceRecording, setActiveVoiceRecording] = useState<ActiveVoiceRecording>();
   const startRecordTimeRef = useRef<number>();
   const [currentRecordTime, setCurrentRecordTime] = useState<number | undefined>();
+  const [isViewOnceEnabled, setIsViewOnceEnabled] = useState(false);
 
   useEffect(() => {
     // Preloading worker fixes silent first record on iOS
@@ -96,6 +97,10 @@ const useVoiceRecording = () => {
     return activeVoiceRecording ? captureEscKeyListener(stopRecordingVoice) : undefined;
   }, [activeVoiceRecording, stopRecordingVoice]);
 
+  const toogleViewOnceEnabled = useLastCallback(() => {
+    setIsViewOnceEnabled(!isViewOnceEnabled);
+  });
+
   return {
     startRecordingVoice,
     pauseRecordingVoice,
@@ -104,6 +109,9 @@ const useVoiceRecording = () => {
     currentRecordTime,
     recordButtonRef,
     startRecordTimeRef,
+    isViewOnceEnabled,
+    setIsViewOnceEnabled,
+    toogleViewOnceEnabled,
   };
 };
 

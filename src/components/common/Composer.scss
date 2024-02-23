@@ -63,7 +63,9 @@
     .icon-schedule,
     .icon-forward,
     .icon-microphone-alt,
-    .icon-check {
+    .icon-check,
+    .icon-view-once,
+    .icon-one-filled {
       position: absolute;
     }
 
@@ -123,7 +125,7 @@
       }
     }
 
-    &.send {
+    &.send, &.sendOneTime {
       .icon-send {
         animation: grow-icon 0.4s ease-out;
       }
@@ -189,6 +191,23 @@
       .icon-microphone-alt,
       .icon-schedule {
         animation: hide-icon 0.4s forwards ease-out;
+      }
+    }
+
+    &.view-once {
+      .icon-one-filled {
+        animation: hide-icon 0.4s forwards ease-out;
+      }
+      .icon-view-once {
+        animation: grow-icon 0.4s ease-out;
+      }
+      &.active {
+        .icon-view-once {
+          animation: hide-icon 0.4s forwards ease-out;
+        }
+        .icon-one-filled {
+          animation: grow-icon 0.4s ease-out;
+        }
       }
     }
 
