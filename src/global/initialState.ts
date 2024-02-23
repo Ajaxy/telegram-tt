@@ -242,6 +242,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       wasTimeFormatSetManually: false,
       isConnectionStatusMinimized: true,
       shouldArchiveAndMuteNewNonContact: false,
+      shouldNewNonContactPeersRequirePremium: false,
       shouldHideReadMarks: false,
       canTranslate: false,
       canTranslateChats: true,

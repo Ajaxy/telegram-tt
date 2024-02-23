@@ -20,6 +20,7 @@ type OwnProps = {
   disabled?: boolean;
   hidden?: boolean;
   isLoading?: boolean;
+  className?: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 };
 
@@ -33,18 +34,20 @@ const Radio: FC<OwnProps> = ({
   disabled,
   hidden,
   isLoading,
+  className,
   onChange,
 }) => {
   const lang = useLang();
-  const className = buildClassName(
+  const fullClassName = buildClassName(
     'Radio',
+    className,
     disabled && 'disabled',
     hidden && 'hidden-widget',
     isLoading && 'loading',
   );
 
   return (
-    <label className={className} dir={lang.isRtl ? 'rtl' : undefined}>
+    <label className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       <input
         type="radio"
         name={name}

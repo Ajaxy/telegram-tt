@@ -9,6 +9,7 @@ export type IRadioOption = {
   subLabel?: string;
   value: string;
   hidden?: boolean;
+  className?: string;
 };
 
 type OwnProps = {
@@ -47,6 +48,7 @@ const RadioGroup: FC<OwnProps> = ({
           hidden={option.hidden}
           disabled={disabled}
           isLoading={loadingOption ? loadingOption === option.value : undefined}
+          className={option.className}
           onChange={handleChange}
         />
       ))}

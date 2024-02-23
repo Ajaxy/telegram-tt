@@ -10,6 +10,7 @@ import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../globa
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 
+import PremiumIcon from '../../common/PremiumIcon';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -30,6 +31,7 @@ type StateProps = {
   canChangeSensitive?: boolean;
   canDisplayAutoarchiveSetting: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
+  shouldNewNonContactPeersRequirePremium?: boolean;
   canDisplayChatInTitle?: boolean;
   privacyPhoneNumber?: ApiPrivacySettings;
   privacyLastSeen?: ApiPrivacySettings;
@@ -52,6 +54,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   canChangeSensitive,
   canDisplayAutoarchiveSetting,
   shouldArchiveAndMuteNewNonContact,
+  shouldNewNonContactPeersRequirePremium,
   canDisplayChatInTitle,
   canSetPasscode,
   privacyPhoneNumber,
@@ -73,7 +76,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadGlobalPrivacySettings,
     updateGlobalPrivacySettings,
     loadWebAuthorizations,
-    showNotification,
     setSettingOption,
   } = getActions();
 
@@ -102,16 +104,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       shouldArchiveAndMuteNewNonContact: isEnabled,
     });
   }, [updateGlobalPrivacySettings]);
-
-  const handleVoiceMessagesClick = useCallback(() => {
-    if (isCurrentUserPremium) {
-      onScreenSelect(SettingsScreens.PrivacyVoiceMessages);
-    } else {
-      showNotification({
-        message: lang('PrivacyVoiceMessagesPremiumOnly'),
-      });
-    }
-  }, [isCurrentUserPremium, lang, onScreenSelect, showNotification]);
 
   const handleChatInTitleChange = useCallback((isChecked: boolean) => {
     setSettingOption({
@@ -298,16 +290,32 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           narrow
-          disabled={!isCurrentUserPremium}
           allowDisabledClick
-          rightElement={!isCurrentUserPremium && <i className="icon icon-lock-badge settings-icon-locked" />}
+          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
           className="no-icon"
-          onClick={handleVoiceMessagesClick}
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.PrivacyVoiceMessages)}
         >
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyVoiceMessagesTitle')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacyVoiceMessages)}
+            </span>
+          </div>
+        </ListItem>
+        <ListItem
+          narrow
+          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
+          className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.PrivacyMessages)}
+        >
+          <div className="multiline-menu-item">
+            <span className="title">{lang('PrivacyMessagesTitle')}</span>
+            <span className="subtitle" dir="auto">
+              {shouldNewNonContactPeersRequirePremium
+                ? lang('PrivacyMessagesContactsAndPremium')
+                : lang('P2PEverybody')}
             </span>
           </div>
         </ListItem>
@@ -362,7 +370,7 @@ export default memo(withGlobal<OwnProps>(
       settings: {
         byKey: {
           hasPassword, isSensitiveEnabled, canChangeSensitive, shouldArchiveAndMuteNewNonContact,
-          canDisplayChatInTitle,
+          canDisplayChatInTitle, shouldNewNonContactPeersRequirePremium,
         },
         privacy,
       },
@@ -383,6 +391,7 @@ export default memo(withGlobal<OwnProps>(
       canDisplayAutoarchiveSetting: Boolean(appConfig?.canDisplayAutoarchiveSetting),
       shouldArchiveAndMuteNewNonContact,
       canChangeSensitive,
+      shouldNewNonContactPeersRequirePremium,
       privacyPhoneNumber: privacy.phoneNumber,
       privacyLastSeen: privacy.lastSeen,
       privacyProfilePhoto: privacy.profilePhoto,

@@ -674,6 +674,8 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
   const shouldArchiveAndMuteNewNonContact = payload.shouldArchiveAndMuteNewNonContact
     ?? Boolean(global.settings.byKey.shouldArchiveAndMuteNewNonContact);
   const shouldHideReadMarks = payload.shouldHideReadMarks ?? Boolean(global.settings.byKey.shouldHideReadMarks);
+  const shouldNewNonContactPeersRequirePremium = payload.shouldNewNonContactPeersRequirePremium
+    ?? Boolean(global.settings.byKey.shouldNewNonContactPeersRequirePremium);
 
   global = replaceSettings(global, { shouldArchiveAndMuteNewNonContact, shouldHideReadMarks });
   setGlobal(global);
@@ -681,6 +683,7 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
   const result = await callApi('updateGlobalPrivacySettings', {
     shouldArchiveAndMuteNewNonContact,
     shouldHideReadMarks,
+    shouldNewNonContactPeersRequirePremium,
   });
 
   global = getGlobal();
@@ -689,6 +692,9 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
       ? !shouldArchiveAndMuteNewNonContact
       : result.shouldArchiveAndMuteNewNonContact,
     shouldHideReadMarks: !result ? !shouldHideReadMarks : result.shouldHideReadMarks,
+    shouldNewNonContactPeersRequirePremium: !result
+      ? !shouldNewNonContactPeersRequirePremium
+      : result.shouldNewNonContactPeersRequirePremium,
   });
   setGlobal(global);
 });
