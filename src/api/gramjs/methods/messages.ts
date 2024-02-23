@@ -624,7 +624,7 @@ export async function rescheduleMessage({
 
 async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
-    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler,
+    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler, ttlSeconds,
   } = attachment;
 
   const patchedOnProgress: ApiOnProgress = (progress) => {
@@ -698,6 +698,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     thumb,
     forceFile: shouldSendAsFile,
     spoiler: shouldSendAsSpoiler,
+    ttlSeconds,
   });
 }
 

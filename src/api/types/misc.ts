@@ -52,6 +52,7 @@ export interface ApiAttachment {
   shouldSendAsSpoiler?: true;
 
   uniqueId?: string;
+  ttlSeconds?: number;
 }
 
 export interface ApiWallpaper {

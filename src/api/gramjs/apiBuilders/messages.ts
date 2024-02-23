@@ -929,6 +929,7 @@ function buildUploadingMedia(
     audio,
     shouldSendAsFile,
     shouldSendAsSpoiler,
+    ttlSeconds,
   } = attachment;
 
   if (!shouldSendAsFile) {
@@ -973,6 +974,7 @@ function buildUploadingMedia(
           duration,
           waveform: inputWaveform,
         },
+        ttlSeconds,
       };
     }
     if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {

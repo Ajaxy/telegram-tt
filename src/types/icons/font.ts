@@ -127,6 +127,7 @@ export type FontIconName =
   | 'next'
   | 'noise-suppression'
   | 'non-contacts'
+  | 'one-filled'
   | 'open-in-new-tab'
   | 'password-off'
   | 'pause'

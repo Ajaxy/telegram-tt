@@ -343,3 +343,5 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   recommendedChannels: [10, 100],
   savedDialogsPinned: [5, 100],
 };
+
+export const ONE_TIME_MEDIA_TTL_SECONDS = 2147483647;
