@@ -59,6 +59,7 @@ import {
   selectIsServiceChatReady,
   selectIsViewportNewest,
   selectListedIds,
+  selectPerformanceSettingsValue,
   selectPinnedIds,
   selectSavedDialogIdFromMessage,
   selectScheduledIds,
@@ -222,7 +223,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const newMessage = selectChatMessage(global, chatId, id)!;
 
       if (message.reactions && chat) {
-        global = updateReactions(global, chatId, id, message.reactions, chat, newMessage.isOutgoing, currentMessage);
+        global = updateReactions(
+          global, actions, chatId, id, message.reactions, chat, newMessage.isOutgoing, currentMessage,
+        );
       }
 
       if (message.content?.text?.text !== currentMessage?.content?.text?.text) {
@@ -620,7 +623,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (!chat || !message) return;
 
-      global = updateReactions(global, chatId, id, reactions, chat, message.isOutgoing, message);
+      global = updateReactions(global, actions, chatId, id, reactions, chat, message.isOutgoing, message);
       setGlobal(global);
       break;
     }
@@ -706,6 +709,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
 function updateReactions<T extends GlobalState>(
   global: T,
+  actions: RequiredGlobalActions,
   chatId: string,
   id: number,
   reactions: ApiReactions,
@@ -724,6 +728,14 @@ function updateReactions<T extends GlobalState>(
 
   if (!isOutgoing) {
     return global;
+  }
+
+  const { reaction, isOwn, isUnread } = reactions.recentReactions?.[0] ?? {};
+  const reactionEffectsEnabled = selectPerformanceSettingsValue(global, 'reactionEffects');
+  if (reactionEffectsEnabled && message && reaction && isUnread && !isOwn) {
+    const messageKey = getMessageKey(message);
+    // Start reaction only in master tab
+    actions.startActiveReaction({ containerId: messageKey, reaction, tabId: getCurrentTabId() });
   }
 
   const alreadyHasUnreadReaction = chat.unreadReactions?.includes(id);
