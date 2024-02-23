@@ -3,7 +3,7 @@ import { getActions } from '../global';
 import type { ApiChatType } from '../api/types';
 import type { DeepLinkMethod, PrivateMessageLink } from './deepLinkParser';
 
-import { API_CHAT_TYPES } from '../config';
+import { API_CHAT_TYPES, RE_TG_LINK } from '../config';
 import { toChannelId } from '../global/helpers';
 import { tryParseDeepLink } from './deepLinkParser';
 import { IS_SAFARI } from './windowEnvironment';
@@ -17,9 +17,19 @@ export const processDeepLink = (url: string): boolean => {
       case 'privateMessageLink':
         handlePrivateMessageLink(parsedLink, actions);
         return true;
+      case 'publicUsernameOrBotLink':
+        actions.openChatByUsername({
+          username: parsedLink.username,
+          startParam: parsedLink.parameter,
+        });
+        return true;
       default:
         break;
     }
+  }
+
+  if (!url.match(RE_TG_LINK)) {
+    return false;
   }
 
   const {

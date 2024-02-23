@@ -1,7 +1,7 @@
 import type { ThreadId } from '../types';
 
 import { RE_TG_LINK, RE_TME_LINK } from '../config';
-import { isUsernameValid } from './username';
+import { ensureProtocol } from './ensureProtocol';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
@@ -55,26 +55,33 @@ interface TelegramPassportLink {
   payload?: string;
 }
 
+interface PublicUsernameOrBotLink {
+  type: 'publicUsernameOrBotLink';
+  username: string;
+  parameter?: string;
+}
+
 type DeepLink =
   TelegramPassportLink |
   LoginCodeLink |
   PublicMessageLink |
   PrivateMessageLink |
   ShareLink |
-  ChatFolderLink;
+  ChatFolderLink |
+  PublicUsernameOrBotLink;
 
-type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string>;
+type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
 type DeepLinkType = DeepLink['type'] | 'unknown';
 
 type PrivateMessageLinkBuilderParams = Omit<BuilderParams<PrivateMessageLink>, 'isSingle' | 'isBoost'> & {
-  single: string;
-  boost: string;
+  single: string | undefined;
+  boost: string | undefined;
 };
 
 type PublicMessageLinkBuilderParams = Omit<BuilderParams<PublicMessageLink>, 'isSingle' | 'isBoost'> & {
-  single: string;
-  boost: string;
+  single: string | undefined;
+  boost: string | undefined;
 };
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
@@ -84,6 +91,9 @@ export function isDeepLink(link: string): boolean {
 }
 
 export function tryParseDeepLink(link: string): DeepLink | undefined {
+  if (!isDeepLink(link)) {
+    return undefined;
+  }
   try {
     return parseDeepLink(link);
   } catch (err) {
@@ -92,19 +102,23 @@ export function tryParseDeepLink(link: string): DeepLink | undefined {
 }
 
 function parseDeepLink(url: string) {
-  if (url.startsWith('https:')) {
-    const urlParsed = new URL(url);
-    return handleHttpLink(urlParsed);
+  const correctUrl = ensureProtocol(url);
+  if (!correctUrl) {
+    return undefined;
   }
-  if (url.startsWith('tg:')) {
+  if (correctUrl.startsWith('https:')) {
+    const urlParsed = new URL(correctUrl);
+    return parseHttpLink(urlParsed);
+  }
+  if (correctUrl.startsWith('tg:')) {
     // Chrome parse url with tg: protocol incorrectly
-    const urlParsed = new URL(url.replace(/^tg:/, 'http:'));
-    return handleTgLink(urlParsed);
+    const urlParsed = new URL(correctUrl.replace(/^tg:/, 'http:'));
+    return parseTgLink(urlParsed);
   }
   return undefined;
 }
 
-function handleTgLink(url: URL) {
+function parseTgLink(url: URL) {
   const { hostname } = url;
   const queryParams = getQueryParams(url);
   const pathParams = getPathParams(url);
@@ -155,13 +169,18 @@ function handleTgLink(url: URL) {
         callbackUrl: queryParams.callback_url,
         payload: queryParams.payload,
       });
+    case 'publicUsernameOrBotLink':
+      return buildPublicUsernameOrBotLink({
+        username: queryParams.domain,
+        parameter: queryParams.start,
+      });
     default:
       break;
   }
   return undefined;
 }
 
-function handleHttpLink(url: URL) {
+function parseHttpLink(url: URL) {
   if (!ELIGIBLE_HOSTNAMES.has(url.hostname)) {
     return undefined;
   }
@@ -231,6 +250,11 @@ function handleHttpLink(url: URL) {
       return buildChatFolderLink({ slug: pathParams[1] });
     case 'loginCodeLink':
       return buildLoginCodeLink({ code: pathParams[1] });
+    case 'publicUsernameOrBotLink':
+      return buildPublicUsernameOrBotLink({
+        username: pathParams[0],
+        parameter: queryParams.start,
+      });
     default:
       break;
   }
@@ -246,6 +270,9 @@ function getHttpDeepLinkType(
   if (len === 1) {
     if (method === 'share') {
       return 'shareLink';
+    }
+    if (isUsernameValid(method)) {
+      return 'publicUsernameOrBotLink';
     }
   } else if (len === 2) {
     if (method === 'addlist') {
@@ -288,6 +315,9 @@ function getTgDeepLinkType(
       }
       if (domain && post) {
         return 'publicMessageLink';
+      }
+      if (isUsernameValid(domain)) {
+        return 'publicUsernameOrBotLink';
       }
       break;
     }
@@ -431,6 +461,26 @@ function buildTelegramPassportLink(
   };
 }
 
+function buildPublicUsernameOrBotLink(
+  params: BuilderParams<PublicUsernameOrBotLink>,
+): BuilderReturnType<PublicUsernameOrBotLink> {
+  const {
+    username,
+    parameter,
+  } = params;
+  if (!username) {
+    return undefined;
+  }
+  if (!isUsernameValid(username)) {
+    return undefined;
+  }
+  return {
+    type: 'publicUsernameOrBotLink',
+    username,
+    parameter,
+  };
+}
+
 function isNumber(s: string) {
   return /^-?\d+$/.test(s);
 }
@@ -441,4 +491,8 @@ function getPathParams(url: URL) {
 
 function getQueryParams(url: URL) {
   return Object.fromEntries(url.searchParams);
+}
+
+function isUsernameValid(username: string) {
+  return /^\D([a-zA-Z0-9_]){1,64}$/.test(username);
 }
