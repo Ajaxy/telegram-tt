@@ -136,6 +136,7 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
     form: buildApiPaymentForm(result),
     invoice: buildApiInvoiceFromForm(result),
     users: result.users.map(buildApiUser).filter(Boolean),
+    botId: result.botId.toString(),
   };
 }
 
