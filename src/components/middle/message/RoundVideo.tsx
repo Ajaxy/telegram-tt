@@ -11,7 +11,9 @@ import type { ApiMessage } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { getMessageMediaFormat, getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../global/helpers';
+import {
+  getMessageMediaFormat, getMessageMediaHash, getMessageMediaThumbDataUri, hasMessageTtl,
+} from '../../../global/helpers';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dateFormat';
@@ -29,6 +31,9 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useSignal from '../../../hooks/useSignal';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
+import Icon from '../../common/Icon';
+import MediaSpoiler from '../../common/MediaSpoiler';
+import Button from '../../ui/Button';
 import OptimizedVideo from '../../ui/OptimizedVideo';
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -36,9 +41,13 @@ import './RoundVideo.scss';
 
 type OwnProps = {
   message: ApiMessage;
-  observeIntersection: ObserveFn;
+  className?: string;
   canAutoLoad?: boolean;
   isDownloading?: boolean;
+  origin?: 'oneTimeModal';
+  observeIntersection?: ObserveFn;
+  onStop?: NoneToVoidFunction;
+  onReadMedia?: NoneToVoidFunction;
 };
 
 const PROGRESS_CENTER = ROUND_VIDEO_DIMENSIONS_PX / 2;
@@ -50,9 +59,13 @@ let stopPrevious: NoneToVoidFunction;
 
 const RoundVideo: FC<OwnProps> = ({
   message,
-  observeIntersection,
+  className,
   canAutoLoad,
   isDownloading,
+  origin,
+  observeIntersection,
+  onStop,
+  onReadMedia,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -62,6 +75,8 @@ const RoundVideo: FC<OwnProps> = ({
   const circleRef = useRef<SVGCircleElement>(null);
 
   const video = message.content.video!;
+
+  const { cancelMessageMediaDownload, openOneTimeMediaModal } = getActions();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
@@ -80,11 +95,14 @@ const RoundVideo: FC<OwnProps> = ({
   );
 
   const [isPlayerReady, markPlayerReady] = useFlag();
+  const hasTtl = hasMessageTtl(message);
+  const isInOneTimeModal = origin === 'oneTimeModal';
+  const shouldRenderSpoiler = hasTtl && !isInOneTimeModal;
   const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
-  const noThumb = !hasThumb || isPlayerReady;
+  const noThumb = !hasThumb || isPlayerReady || shouldRenderSpoiler;
   const thumbRef = useBlurredMediaThumbRef(message, noThumb);
   const thumbClassNames = useMediaTransition(!noThumb);
-
+  const thumbDataUri = getMessageMediaThumbDataUri(message);
   const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
 
@@ -133,18 +151,7 @@ const RoundVideo: FC<OwnProps> = ({
     stopPrevious = stopPlaying;
   });
 
-  const handleClick = useLastCallback(() => {
-    if (!mediaData) {
-      setIsLoadAllowed((isAllowed) => !isAllowed);
-
-      return;
-    }
-
-    if (isDownloading) {
-      getActions().cancelMessageMediaDownload({ message });
-      return;
-    }
-
+  const tooglePlaying = useLastCallback(() => {
     const playerEl = playerRef.current!;
     if (isActivated) {
       if (playerEl.paused) {
@@ -160,25 +167,77 @@ const RoundVideo: FC<OwnProps> = ({
       playerEl.currentTime = 0;
       safePlay(playerEl);
       stopCurrentAudio();
-
       setIsActivated(true);
     }
   });
 
+  useEffect(() => {
+    if (!isInOneTimeModal) {
+      return;
+    }
+    tooglePlaying();
+  }, [isInOneTimeModal]);
+
+  const handleClick = useLastCallback(() => {
+    if (!mediaData) {
+      setIsLoadAllowed((isAllowed) => !isAllowed);
+
+      return;
+    }
+
+    if (isDownloading) {
+      cancelMessageMediaDownload({ message });
+      return;
+    }
+
+    if (hasTtl && !isInOneTimeModal) {
+      openOneTimeMediaModal({ message });
+      onReadMedia?.();
+      return;
+    }
+
+    tooglePlaying();
+  });
+
   const handleTimeUpdate = useLastCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
-
     setProgress(playerEl.currentTime / playerEl.duration);
   });
+
+  function renderPlayWrapper() {
+    return (
+      <div className="play-wrapper">
+        <Button
+          color="dark"
+          round
+          size="smaller"
+          className="play"
+          nonInteractive
+        >
+          <Icon name="play" />
+        </Button>
+        <Icon name="view-once" />
+      </div>
+    );
+  }
 
   return (
     <div
       ref={ref}
-      className="RoundVideo media-inner"
+      className={buildClassName('RoundVideo', 'media-inner', isInOneTimeModal && 'non-interactive', className)}
       onClick={handleClick}
     >
       {mediaData && (
         <div className="video-wrapper">
+          {shouldRenderSpoiler && (
+            <MediaSpoiler
+              isVisible
+              thumbDataUri={thumbDataUri}
+              width={ROUND_VIDEO_DIMENSIONS_PX}
+              height={ROUND_VIDEO_DIMENSIONS_PX}
+              className="media-spoiler"
+            />
+          )}
           <OptimizedVideo
             canPlay={shouldPlay}
             ref={playerRef}
@@ -186,22 +245,24 @@ const RoundVideo: FC<OwnProps> = ({
             className="full-media"
             width={ROUND_VIDEO_DIMENSIONS_PX}
             height={ROUND_VIDEO_DIMENSIONS_PX}
-            autoPlay
+            autoPlay={!shouldRenderSpoiler}
             disablePictureInPicture
             muted={!isActivated}
             loop={!isActivated}
             playsInline
-            onEnded={isActivated ? stopPlaying : undefined}
+            onEnded={isActivated ? onStop ?? stopPlaying : undefined}
             onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
             onReady={markPlayerReady}
           />
         </div>
       )}
-      <canvas
-        ref={thumbRef}
-        className={buildClassName('thumbnail', thumbClassNames)}
-        style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
-      />
+      {!shouldRenderSpoiler && (
+        <canvas
+          ref={thumbRef}
+          className={buildClassName('thumbnail', thumbClassNames)}
+          style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
+        />
+      )}
       <div className="progress">
         {isActivated && (
           <svg width={ROUND_VIDEO_DIMENSIONS_PX} height={ROUND_VIDEO_DIMENSIONS_PX}>
@@ -223,13 +284,16 @@ const RoundVideo: FC<OwnProps> = ({
           <ProgressSpinner progress={isDownloading ? downloadProgress : loadProgress} />
         </div>
       )}
+      {shouldRenderSpoiler && !shouldSpinnerRender && renderPlayWrapper()}
       {!mediaData && !isLoadAllowed && (
         <i className="icon icon-download" />
       )}
-      <div className="message-media-duration">
-        {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
-        {(!isActivated || playerRef.current!.paused) && <i className="icon icon-muted" />}
-      </div>
+      {!isInOneTimeModal && (
+        <div className="message-media-duration">
+          {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
+          {(!isActivated || playerRef.current!.paused) && <Icon name="muted" />}
+        </div>
+      )}
     </div>
   );
 };

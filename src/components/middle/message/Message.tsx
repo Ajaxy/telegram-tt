@@ -964,6 +964,7 @@ const Message: FC<OwnProps & StateProps> = ({
       metaPosition === 'in-text' && 'with-meta',
       outgoingStatus && 'with-outgoing-icon',
     );
+    const shouldReadMedia = !hasTtl || !isOwn || isChatWithSelf;
 
     return (
       <div className={className} onDoubleClick={handleContentDoubleClick} dir="auto">
@@ -1086,6 +1087,7 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             isDownloading={isDownloading}
+            onReadMedia={shouldReadMedia ? handleReadMedia : undefined}
           />
         )}
         {!isAlbum && video && !video.isRound && (
@@ -1115,7 +1117,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isSelected={isSelected}
             noAvatars={noAvatars}
             onPlay={handleAudioPlay}
-            onReadMedia={voice && (!isOwn || isChatWithSelf || (isOwn && !hasTtl)) ? handleReadMedia : undefined}
+            onReadMedia={voice && shouldReadMedia ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
             isTranscribing={isTranscribing}

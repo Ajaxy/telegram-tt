@@ -78,9 +78,18 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaC
   if (isExpiredVoice) {
     return { isExpiredVoice };
   }
+  const isExpiredRoundVideo = isExpiredRoundVideoMessage(media);
+  if (isExpiredRoundVideo) {
+    return { isExpiredRoundVideo };
+  }
 
   const voice = buildVoice(media);
   if (voice) return { voice, ttlSeconds };
+
+  if ('round' in media && media.round) {
+    const video = buildVideo(media);
+    if (video) return { video, ttlSeconds };
+  }
 
   // Other disappearing media types are not supported
   if (ttlSeconds !== undefined) {
@@ -268,6 +277,13 @@ function isExpiredVoiceMessage(media: GramJs.TypeMessageMedia): MediaContent['is
     return false;
   }
   return !media.document && media.voice;
+}
+
+function isExpiredRoundVideoMessage(media: GramJs.TypeMessageMedia): MediaContent['isExpiredRoundVideo'] {
+  if (!(media instanceof GramJs.MessageMediaDocument)) {
+    return false;
+  }
+  return !media.document && media.round;
 }
 
 function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {

@@ -10,7 +10,7 @@
   flex-direction: column;
   backdrop-filter: blur(2rem);
   animation: fade-in-opacity 0.3s ease;
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: var(--z-modal-confirm);
   align-items: center;
   transition: opacity 0.3s ease;
@@ -20,10 +20,14 @@
   }
 }
 
-.main {
-  background-color: var(--color-background);
+.voice {
   padding: 0.6875rem;
   border-radius: 1rem;
+  background-color: var(--color-background);
+}
+
+.video {
+  background: transparent;
 }
 
 .footer {

@@ -128,7 +128,7 @@ const Audio: FC<OwnProps> = ({
   const coverHash = getMessageMediaHash(message, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
   const hasTtl = hasMessageTtl(message);
-  const isOneTimeModalOrigin = origin === AudioOrigin.OneTimeModal;
+  const isInOneTimeModal = origin === AudioOrigin.OneTimeModal;
   const trackType = isVoice ? (hasTtl ? 'oneTimeVoice' : 'voice') : 'audio';
 
   const mediaData = useMedia(
@@ -156,7 +156,7 @@ const Audio: FC<OwnProps> = ({
     isBuffered, bufferedRanges, bufferingHandlers, checkBuffering,
   } = useBuffering();
 
-  const noReset = isOneTimeModalOrigin;
+  const noReset = isInOneTimeModal;
   const {
     isPlaying, playProgress, playPause, setCurrentTime, duration,
   } = useAudioPlayer(
@@ -179,7 +179,7 @@ const Audio: FC<OwnProps> = ({
 
   const reversePlayProgress = 1 - playProgress;
   const isOwn = isOwnMessage(message);
-  const isReverse = hasTtl && isOneTimeModalOrigin;
+  const isReverse = hasTtl && isInOneTimeModal;
 
   const waveformCanvasRef = useWaveformCanvas(
     theme,
@@ -279,14 +279,14 @@ const Audio: FC<OwnProps> = ({
   });
 
   useEffect(() => {
-    if (!seekerRef.current || !withSeekline || isOneTimeModalOrigin) return undefined;
+    if (!seekerRef.current || !withSeekline || isInOneTimeModal) return undefined;
     return captureEvents(seekerRef.current, {
       onCapture: handleStartSeek,
       onRelease: handleStopSeek,
       onClick: handleStopSeek,
       onDrag: handleSeek,
     });
-  }, [withSeekline, handleStartSeek, handleSeek, handleStopSeek, isOneTimeModalOrigin]);
+  }, [withSeekline, handleStartSeek, handleSeek, handleStopSeek, isInOneTimeModal]);
 
   function renderFirstLine() {
     if (isVoice) {
@@ -323,7 +323,7 @@ const Audio: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'Audio',
     className,
-    isOneTimeModalOrigin && 'non-interactive',
+    isInOneTimeModal && 'non-interactive',
     origin === AudioOrigin.Inline && 'inline',
     isOwn && origin === AudioOrigin.Inline && 'own',
     (origin === AudioOrigin.Search || origin === AudioOrigin.SharedMedia) && 'bigger',
@@ -383,11 +383,11 @@ const Audio: FC<OwnProps> = ({
           onClick={handleButtonClick}
           isRtl={lang.isRtl}
           backgroundImage={coverBlobUrl}
-          nonInteractive={isOneTimeModalOrigin}
+          nonInteractive={isInOneTimeModal}
         >
-          {!isOneTimeModalOrigin && <Icon name="play" />}
-          {!isOneTimeModalOrigin && <Icon name="pause" />}
-          {isOneTimeModalOrigin && (
+          {!isInOneTimeModal && <Icon name="play" />}
+          {!isInOneTimeModal && <Icon name="pause" />}
+          {isInOneTimeModal && (
             <AnimatedIcon
               className="flame"
               tgsUrl={LOCAL_TGS_URLS.Flame}
@@ -397,7 +397,7 @@ const Audio: FC<OwnProps> = ({
             />
           )}
         </Button>
-        {hasTtl && !isOneTimeModalOrigin && (
+        {hasTtl && !isInOneTimeModal && (
           <Icon name="view-once" />
         )}
       </div>
@@ -424,7 +424,7 @@ const Audio: FC<OwnProps> = ({
           />
         </div>
       )}
-      {isOneTimeModalOrigin && !shouldRenderSpinner && (
+      {isInOneTimeModal && !shouldRenderSpinner && (
         <div className={buildClassName('media-loading')}>
           <ProgressSpinner
             progress={playProgress}
@@ -461,7 +461,7 @@ const Audio: FC<OwnProps> = ({
         onDateClick ? handleDateClick : undefined,
       )}
       {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}
-      {(origin === AudioOrigin.Inline || isOneTimeModalOrigin) && voice && (
+      {(origin === AudioOrigin.Inline || isInOneTimeModal) && voice && (
         renderVoice(
           voice,
           seekerRef,

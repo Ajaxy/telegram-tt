@@ -206,6 +206,12 @@ export function updateChatMessage<T extends GlobalState>(
         voice: undefined,
         isExpiredVoice: true,
       };
+    } else if (message.content.video?.isRound) {
+      messageUpdate.content = {
+        ...messageUpdate.content,
+        video: undefined,
+        isExpiredRoundVideo: true,
+      };
     }
   }
   const updatedMessage = {

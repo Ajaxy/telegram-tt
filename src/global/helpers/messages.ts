@@ -324,15 +324,18 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
 }
 
 export function getExpiredMessageDescription(langFn: LangFn, message: ApiMessage): string | undefined {
-  const { isExpiredVoice } = message.content;
+  const { isExpiredVoice, isExpiredRoundVideo } = message.content;
   if (isExpiredVoice) {
     return langFn('Message.VoiceMessageExpired');
+  } else if (isExpiredRoundVideo) {
+    return langFn('Message.VideoMessageExpired');
   }
   return undefined;
 }
 
 export function isExpiredMessage(message: ApiMessage) {
-  return Boolean(message.content?.isExpiredVoice);
+  const { isExpiredVoice, isExpiredRoundVideo } = message.content ?? {};
+  return Boolean(isExpiredVoice || isExpiredRoundVideo);
 }
 
 export function hasMessageTtl(message: ApiMessage) {
