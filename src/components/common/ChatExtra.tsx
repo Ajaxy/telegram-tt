@@ -44,7 +44,7 @@ import Switcher from '../ui/Switcher';
 type OwnProps = {
   chatOrUserId: string;
   isSavedDialog?: boolean;
-  forceShowSelf?: boolean;
+  isInSettings?: boolean;
 };
 
 type StateProps =
@@ -67,7 +67,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   chatOrUserId,
   user,
   chat,
-  forceShowSelf,
+  isInSettings,
   canInviteUsers,
   isMuted,
   phoneCodeList,
@@ -160,7 +160,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     openSavedDialog({ chatId: chatOrUserId });
   });
 
-  if (!chat || chat.isRestricted || (isSelf && !forceShowSelf)) {
+  if (!chat || chat.isRestricted || (isSelf && !isInSettings)) {
     return undefined;
   }
 
@@ -262,7 +262,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
         </ListItem>
       )}
-      {!forceShowSelf && (
+      {!isInSettings && (
         <ListItem icon="unmute" ripple onClick={handleNotificationChange}>
           <span>{lang('Notifications')}</span>
           <Switcher
@@ -273,7 +273,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           />
         </ListItem>
       )}
-      {hasSavedMessages && (
+      {hasSavedMessages && !isInSettings && (
         <ListItem icon="saved-messages" ripple onClick={handleOpenSavedDialog}>
           <span>{lang('SavedMessagesTab')}</span>
         </ListItem>
