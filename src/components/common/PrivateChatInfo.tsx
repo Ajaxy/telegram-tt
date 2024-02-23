@@ -150,7 +150,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     const translatedStatus = getUserStatus(lang, user, userStatus);
     const mainUserNameClassName = buildClassName('handle', translatedStatus && 'withStatus');
     return (
-      <span className={buildClassName('status', isUserOnline(user, userStatus) && 'online')}>
+      <span className={buildClassName('status', isUserOnline(user, userStatus, true) && 'online')}>
         {mainUsername && <span className={mainUserNameClassName}>{mainUsername}</span>}
         {translatedStatus && <span className="user-status" dir="auto">{translatedStatus}</span>}
       </span>

@@ -163,7 +163,7 @@ export function getUserStatus(
   }
 }
 
-export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus) {
+export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus, withSelfOnline = false) {
   const { id, type } = user;
 
   if (!userStatus) {
@@ -174,7 +174,7 @@ export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus) {
     return false;
   }
 
-  if (user.isSelf) {
+  if (user.isSelf && !withSelfOnline) {
     return false;
   }
 
