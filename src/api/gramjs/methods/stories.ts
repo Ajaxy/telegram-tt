@@ -367,7 +367,7 @@ export function fetchStoriesMaxIds({
 }) {
   return invokeRequest(new GramJs.stories.GetPeerMaxIDs({
     id: peers.map((peer) => buildInputPeer(peer.id, peer.accessHash)),
-  }));
+  }), { shouldIgnoreErrors: true });
 }
 
 async function fetchCommonStoriesRequest({ method, peerId }: {
