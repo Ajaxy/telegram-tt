@@ -92,7 +92,7 @@ const UsernameInput: FC<OwnProps> = ({
 
     setUsername(newUsername);
 
-    const isValid = isUsernameValid(newUsername);
+    const isValid = newUsername === '' ? true : isUsernameValid(newUsername);
     if (!isValid) return;
 
     onChange?.(newUsername);
