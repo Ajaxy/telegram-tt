@@ -865,7 +865,7 @@ export type GlobalState = {
   phoneCall?: ApiPhoneCall;
 
   fileUploads: {
-    byMessageLocalId: Record<string, {
+    byMessageKey: Record<string, {
       progress: number;
     }>;
   };
@@ -1352,7 +1352,7 @@ export interface ActionPayloads {
     chatId: string;
     userIds: string[];
   } & WithTabId;
-  cancelSendingMessage: {
+  cancelUploadMedia: {
     chatId: string;
     messageId: number;
   };
@@ -1382,8 +1382,9 @@ export interface ActionPayloads {
     };
   };
   editMessage: {
-    messageList: MessageList;
+    messageList?: MessageList;
     text: string;
+    attachments?: ApiAttachment[];
     entities?: ApiMessageEntity[];
   } & WithTabId;
   deleteHistory: {

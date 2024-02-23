@@ -205,6 +205,7 @@ const Audio: FC<OwnProps> = ({
     message,
     uploadProgress || downloadProgress,
     isLoadingForPlaying || isDownloading,
+    uploadProgress !== undefined,
   );
 
   const {

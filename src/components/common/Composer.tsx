@@ -49,6 +49,7 @@ import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterd
 import {
   getAllowedAttachmentOptions,
   getStoryKey,
+  hasReplaceableMedia,
   isChatAdmin,
   isChatChannel,
   isChatSuperGroup,
@@ -373,6 +374,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     openStoryReactionPicker,
     closeReactionPicker,
     sendStoryReaction,
+    editMessage,
   } = getActions();
 
   const lang = useLang();
@@ -400,6 +402,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   const sendMessageAction = useSendMessageAction(chatId, threadId);
   const [isInputHasFocus, markInputHasFocus, unmarkInputHasFocus] = useFlag();
   const [isAttachMenuOpen, onAttachMenuOpen, onAttachMenuClose] = useFlag();
+
+  const canMediaBeReplaced = editingMessage && hasReplaceableMedia(editingMessage);
 
   const isSentStoryReactionHeart = sentStoryReaction && 'emoticon' in sentStoryReaction
     ? sentStoryReaction.emoticon === HEART_REACTION.emoticon : false;
@@ -532,6 +536,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     canSendPhotos,
     canSendDocuments,
     insertNextText,
+    editedMessage: editingMessage,
   });
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
@@ -891,16 +896,25 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (!validateTextLength(text, true)) return;
     if (!checkSlowMode()) return;
 
-    sendMessage({
-      messageList: currentMessageList,
-      text,
-      entities,
-      scheduledAt,
-      isSilent,
-      shouldUpdateStickerSetOrder,
-      attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
-      shouldGroupMessages: sendGrouped,
-    });
+    if (editingMessage) {
+      editMessage({
+        messageList: currentMessageList,
+        text,
+        entities,
+        attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
+      });
+    } else {
+      sendMessage({
+        messageList: currentMessageList,
+        text,
+        entities,
+        scheduledAt,
+        isSilent,
+        shouldUpdateStickerSetOrder,
+        attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
+        shouldGroupMessages: sendGrouped,
+      });
+    }
 
     lastMessageSendTimeSeconds.current = getServerTime();
 
@@ -1495,6 +1509,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           withQuick={dropAreaState === DropAreaState.QuickFile || prevDropAreaState === DropAreaState.QuickFile}
           onHide={onDropHide!}
           onFileSelect={handleFileSelect}
+          editingMessage={editingMessage}
         />
       )}
       {shouldRenderReactionSelector && (
@@ -1535,6 +1550,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         onCustomEmojiSelect={handleCustomEmojiSelectAttachmentModal}
         onRemoveSymbol={removeSymbolAttachmentModal}
         onEmojiSelect={insertTextAndUpdateCursorAttachmentModal}
+        editingMessage={editingMessage}
       />
       <PollModal
         isOpen={pollModal.isOpen}
@@ -1763,7 +1779,9 @@ const Composer: FC<OwnProps & StateProps> = ({
           <AttachMenu
             chatId={chatId}
             threadId={threadId}
-            isButtonVisible={!activeVoiceRecording && !editingMessage}
+            editingMessage={editingMessage}
+            hasReplaceableMedia={canMediaBeReplaced}
+            isButtonVisible={!activeVoiceRecording}
             canAttachMedia={canAttachMedia}
             canAttachPolls={canAttachPolls}
             canSendPhotos={canSendPhotos}

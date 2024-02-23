@@ -1,4 +1,5 @@
 import type {
+  ApiAttachment,
   ApiAudio,
   ApiDimensions,
   ApiDocument,
@@ -13,6 +14,7 @@ import type {
 } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
+import { getMessageKey } from '../../util/messageKey';
 import {
   IS_OPFS_SUPPORTED,
   IS_OPUS_SUPPORTED,
@@ -21,7 +23,7 @@ import {
   MAX_BUFFER_SIZE,
 } from '../../util/windowEnvironment';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
-import { getMessageKey, isMessageLocal, matchLinkInMessageText } from './messages';
+import { getAttachmentType, matchLinkInMessageText } from './messages';
 
 type MediaContainer = {
   content: MediaContent;
@@ -50,6 +52,17 @@ export function hasMessageMedia(message: MediaContainer) {
     || getMessageAction(message)
     || getMessageAudio(message)
     || getMessageVoice(message)
+  ));
+}
+
+export function hasReplaceableMedia(message: MediaContainer) {
+  const video = getMessageVideo(message);
+  return Boolean((
+    getMessagePhoto(message)
+    || (video && !video?.isRound)
+    || getMessageDocument(message)
+    || getMessageSticker(message)
+    || getMessageAudio(message)
   ));
 }
 
@@ -99,6 +112,11 @@ export function isMessageDocumentPhoto(message: MediaContainer) {
 export function isMessageDocumentVideo(message: MediaContainer) {
   const document = getMessageDocument(message);
   return document ? document.mediaType === 'video' : undefined;
+}
+
+export function isMessageDocumentSticker(message: MediaContainer) {
+  const document = getMessageDocument(message);
+  return document ? document.mimeType === 'image/webp' : undefined;
 }
 
 export function getMessageContact(message: MediaContainer) {
@@ -423,8 +441,9 @@ export function getVideoDimensions(video: ApiVideo): ApiDimensions | undefined {
   return undefined;
 }
 
-export function getMediaTransferState(message: ApiMessage, progress?: number, isLoadNeeded = false) {
-  const isUploading = isMessageLocal(message);
+export function getMediaTransferState(
+  message: ApiMessage, progress?: number, isLoadNeeded = false, isUploading = false,
+) {
   const isTransferring = isUploading || isLoadNeeded;
   const transferProgress = Number(progress);
 
@@ -498,4 +517,19 @@ export function getMediaDuration(message: ApiMessage) {
   }
 
   return media.duration;
+}
+
+export function canReplaceMessageMedia(message: ApiMessage, attachment: ApiAttachment) {
+  const isPhotoOrVideo = Boolean(getMessagePhoto(message)
+    || getMessageWebPagePhoto(message) || Boolean(getMessageVideo(message)
+      || getMessageWebPageVideo(message)));
+  const isFile = Boolean(getMessageAudio(message)
+    || getMessageVoice(message) || getMessageDocument(message));
+
+  const fileType = getAttachmentType(attachment);
+
+  return (
+    (isPhotoOrVideo && (fileType === 'image' || fileType === 'video'))
+    || (isFile && (fileType === 'audio' || fileType === 'file'))
+  );
 }

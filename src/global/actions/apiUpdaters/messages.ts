@@ -12,10 +12,11 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit, pickTruthy, unique } from '../../../util/iteratees';
+import { getMessageKey } from '../../../util/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
 import {
-  checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage,
+  checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage, isLocalMessageId,
   isMessageLocal, isUserId,
 } from '../../helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';
@@ -278,7 +279,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = {
         ...global,
         fileUploads: {
-          byMessageLocalId: omit(global.fileUploads.byMessageLocalId, [localId.toString()]),
+          byMessageKey: omit(global.fileUploads.byMessageKey, [getMessageKey(message)]),
         },
       };
 
@@ -763,19 +764,20 @@ function updateWithLocalMedia(
     : selectChatMessage(global, chatId, id);
 
   // Preserve locally uploaded media.
-  if (currentMessage && messageUpdate.content) {
+  if (currentMessage && messageUpdate.content && !isLocalMessageId(id)) {
     const {
       photo, video, sticker, document,
     } = getMessageContent(currentMessage);
+
     if (photo && messageUpdate.content.photo) {
-      messageUpdate.content.photo.blobUrl = photo.blobUrl;
-      messageUpdate.content.photo.thumbnail = photo.thumbnail;
+      messageUpdate.content.photo.blobUrl ??= photo.blobUrl;
+      messageUpdate.content.photo.thumbnail ??= photo.thumbnail;
     } else if (video && messageUpdate.content.video) {
-      messageUpdate.content.video.blobUrl = video.blobUrl;
+      messageUpdate.content.video.blobUrl ??= video.blobUrl;
     } else if (sticker && messageUpdate.content.sticker) {
-      messageUpdate.content.sticker.isPreloadedGlobally = sticker.isPreloadedGlobally;
+      messageUpdate.content.sticker.isPreloadedGlobally ??= sticker.isPreloadedGlobally;
     } else if (document && messageUpdate.content.document) {
-      messageUpdate.content.document.previewBlobUrl = document.previewBlobUrl;
+      messageUpdate.content.document.previewBlobUrl ??= document.previewBlobUrl;
     }
   }
 

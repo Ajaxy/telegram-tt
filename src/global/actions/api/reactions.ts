@@ -5,11 +5,11 @@ import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import * as mediaLoader from '../../../util/mediaLoader';
+import { getMessageKey } from '../../../util/messageKey';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { callApi } from '../../../api/gramjs';
 import {
   getDocumentMediaHash,
-  getMessageKey,
   getUserReactions,
   isMessageLocal,
   isSameReaction,

@@ -1,16 +1,13 @@
-import type {
-  ApiMessage, ApiSponsoredMessage, ApiThreadInfo,
-} from '../../api/types';
+import type { ApiMessage, ApiSponsoredMessage, ApiThreadInfo } from '../../api/types';
 import type { FocusDirection, ThreadId } from '../../types';
+import type { MessageKey } from '../../util/messageKey';
 import type {
-  GlobalState, MessageList, MessageListType, TabArgs, TabThread,
-  Thread,
+  GlobalState, MessageList, MessageListType, TabArgs, TabThread, Thread,
 } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  IS_MOCKED_CLIENT,
-  IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
+  IS_MOCKED_CLIENT, IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
@@ -32,7 +29,9 @@ import {
   selectOutlyingLists,
   selectPinnedIds,
   selectScheduledIds,
-  selectTabState, selectThreadIdFromMessage, selectThreadInfo,
+  selectTabState,
+  selectThreadIdFromMessage,
+  selectThreadInfo,
   selectViewportIds,
 } from '../selectors';
 import { updateTabState } from './tabs';
@@ -787,4 +786,22 @@ export function cancelMessageMediaDownload<T extends GlobalState>(
   }, tabId);
 
   return global;
+}
+
+export function updateUploadByMessageKey<T extends GlobalState>(
+  global: T,
+  messageKey: MessageKey,
+  progress: number | undefined,
+) {
+  return {
+    ...global,
+    fileUploads: {
+      byMessageKey: progress !== undefined
+        ? {
+          ...global.fileUploads.byMessageKey,
+          [messageKey]: { progress },
+        }
+        : omit(global.fileUploads.byMessageKey, [messageKey]),
+    },
+  };
 }

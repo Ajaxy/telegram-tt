@@ -22,6 +22,7 @@ import {
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { getMessageKey } from '../../util/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 import {
@@ -32,9 +33,7 @@ import {
   getIsSavedDialog,
   getMainUsername,
   getMessageAudio,
-  getMessageDocument,
-  getMessageOriginalId,
-  getMessagePhoto,
+  getMessageDocument, getMessagePhoto,
   getMessageVideo,
   getMessageVoice,
   getMessageWebPagePhoto,
@@ -48,7 +47,10 @@ import {
   isChatSuperGroup,
   isCommonBoxChat,
   isForwardedMessage,
-  isLocalMessageId, isMessageFailed, isMessageLocal,
+  isLocalMessageId,
+  isMessageDocumentSticker,
+  isMessageFailed,
+  isMessageLocal,
   isMessageTranslatable,
   isOwnMessage,
   isServiceNotificationMessage,
@@ -588,6 +590,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const hasTtl = hasMessageTtl(message);
   const { content } = message;
   const messageTopic = selectTopicFromMessage(global, message);
+  const isDocumentSticker = isMessageDocumentSticker(message);
 
   const canEditMessagesIndefinitely = isChatWithSelf
     || (isSuperGroup && getHasAdminRight(chat, 'pinMessages'))
@@ -597,8 +600,9 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
       canEditMessagesIndefinitely
       || getServerTime() - message.date < MESSAGE_EDIT_ALLOWED_TIME
     ) && !(
-      content.sticker || content.contact || content.poll || content.action || content.audio
+      content.sticker || content.contact || content.poll || content.action
       || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
+      || isDocumentSticker
     )
     && !isForwarded
     && !message.viaBotId
@@ -801,7 +805,7 @@ export function selectActiveDownloads<T extends GlobalState>(
 }
 
 export function selectUploadProgress<T extends GlobalState>(global: T, message: ApiMessage) {
-  return global.fileUploads.byMessageLocalId[getMessageOriginalId(message)]?.progress;
+  return global.fileUploads.byMessageKey[getMessageKey(message)]?.progress;
 }
 
 export function selectRealLastReadId<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {

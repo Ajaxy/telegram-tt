@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useRef, useState } from '../../../lib/teact/teact';
+import React, { useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
@@ -80,7 +80,15 @@ const Video: FC<OwnProps> = ({
   const video = (getMessageVideo(message) || getMessageWebPageVideo(message))!;
   const localBlobUrl = video.blobUrl;
 
-  const [isSpoilerShown, , hideSpoiler] = useFlag(video.isSpoiler);
+  const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(video.isSpoiler);
+
+  useEffect(() => {
+    if (video.isSpoiler) {
+      showSpoiler();
+    } else {
+      hideSpoiler();
+    }
+  }, [video.isSpoiler]);
 
   const isIntersectingForLoading = useIsIntersecting(ref, observeIntersectionForLoading);
   const isIntersectingForPlaying = (
@@ -133,6 +141,7 @@ const Video: FC<OwnProps> = ({
     message,
     uploadProgress || (isDownloading ? downloadProgress : loadProgress),
     (shouldLoad && !isPlayerReady && !isFullMediaPreloaded) || isDownloading,
+    uploadProgress !== undefined,
   );
 
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;

@@ -917,7 +917,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
   };
 }
 
-function buildUploadingMedia(
+export function buildUploadingMedia(
   attachment: ApiAttachment,
 ): MediaContent {
   const {

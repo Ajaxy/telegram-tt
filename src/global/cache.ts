@@ -1,6 +1,7 @@
 /* eslint-disable eslint-multitab-tt/no-immediate-global */
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
+import type { ApiMessage } from '../api/types';
 import type { ActionReturnType, GlobalState, MessageList } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
@@ -218,6 +219,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (untypedCached?.appConfig?.peerColors) {
     untypedCached.appConfig.peerColors = undefined;
     untypedCached.appConfig.darkPeerColors = undefined;
+  }
+
+  if (!cached.fileUploads.byMessageKey) {
+    cached.fileUploads.byMessageKey = {};
   }
 }
 
@@ -458,8 +463,16 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
       return acc;
     }, {} as GlobalState['messages']['byChatId'][string]['threadsById']);
 
+    const cleanedById = Object.values(byId).reduce((acc, message) => {
+      if (!message) return acc;
+
+      const cleanedMessage = omitLocalMedia(message);
+      acc[message.id] = cleanedMessage;
+      return acc;
+    }, {} as Record<number, ApiMessage>);
+
     byChatId[chatId] = {
-      byId,
+      byId: cleanedById,
       threadsById,
     };
   });
@@ -468,6 +481,33 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     byChatId,
     sponsoredByChatId: {},
   };
+}
+
+function omitLocalMedia(message: ApiMessage): ApiMessage {
+  const {
+    photo, video, document, sticker,
+  } = message.content;
+
+  if (photo) {
+    photo.blobUrl = undefined;
+  }
+
+  if (video) {
+    video.blobUrl = undefined;
+    video.previewBlobUrl = undefined;
+  }
+
+  if (document) {
+    document.previewBlobUrl = undefined;
+  }
+
+  if (sticker) {
+    sticker.isPreloadedGlobally = undefined;
+  }
+
+  message.previousLocalId = undefined;
+
+  return message;
 }
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {

@@ -34,7 +34,7 @@ export default function useInnerHandlers(
 ) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
-    markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu,
+    markMessagesRead, cancelUploadMedia, sendPollVote, openForwardMenu,
     openChatLanguageModal, openThread, openStoryViewer,
   } = getActions();
 
@@ -121,7 +121,7 @@ export default function useInnerHandlers(
   });
 
   const handleCancelUpload = useLastCallback(() => {
-    cancelSendingMessage({ chatId, messageId });
+    cancelUploadMedia({ chatId, messageId });
   });
 
   const handleVoteSend = useLastCallback((options: string[]) => {

@@ -7,10 +7,7 @@ import { getActions } from '../../global';
 import type { ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import {
-  SUPPORTED_IMAGE_CONTENT_TYPES,
-  SUPPORTED_VIDEO_CONTENT_TYPES,
-} from '../../config';
+import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../config';
 import {
   getMediaTransferState,
   getMessageMediaFormat,
@@ -109,7 +106,12 @@ const Document: FC<OwnProps> = ({
 
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && !isLoaded);
+  } = getMediaTransferState(
+    message,
+    uploadProgress || downloadProgress,
+    shouldDownload && !isLoaded,
+    uploadProgress !== undefined,
+  );
 
   const hasPreview = getDocumentHasPreview(document);
   const thumbDataUri = hasPreview ? getMessageMediaThumbDataUri(message) : undefined;
