@@ -48,7 +48,11 @@ const useChatContextActions = ({
   const deleteTitle = useMemo(() => {
     if (!chat) return undefined;
 
-    if (isUserId(chat.id) || isSavedDialog) {
+    if (isSavedDialog) {
+      return lang('Delete');
+    }
+
+    if (isUserId(chat.id)) {
       return lang('DeleteChatUser');
     }
 

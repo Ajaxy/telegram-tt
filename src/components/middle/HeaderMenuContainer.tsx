@@ -409,7 +409,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   const deleteTitle = useMemo(() => {
     if (!chat) return undefined;
 
-    if (isPrivate || savedDialog) {
+    if (savedDialog) {
+      return lang('Delete');
+    }
+
+    if (isPrivate) {
       return lang('DeleteChatUser');
     }
 
