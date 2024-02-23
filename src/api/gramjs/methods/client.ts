@@ -87,7 +87,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       deviceModel: navigator.userAgent || userAgent || DEFAULT_USER_AGENT,
       systemVersion: platform || DEFAULT_PLATFORM,
       appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
-      useWSS: true,
+      useWSS: false,
       additionalDcsDisabled: IS_TEST,
       shouldDebugExportedSenders,
       shouldForceHttpTransport,

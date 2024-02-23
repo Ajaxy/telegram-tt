@@ -304,7 +304,7 @@ export async function requestCall({
 }) {
   const result = await invokeRequest(new GramJs.phone.RequestCall({
     randomId: generateRandomInt(),
-    userId: buildInputPeer(user.id, user.accessHash),
+    userId: new GramJs.InputUser({ userId: BigInt(user.id), accessHash: BigInt(user.accessHash!) }),
     gAHash: Buffer.from(gAHash),
     ...(isVideo && { video: true }),
     protocol: buildCallProtocol(),

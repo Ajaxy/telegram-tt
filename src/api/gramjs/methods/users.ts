@@ -157,7 +157,7 @@ export async function fetchContactList() {
 
 export async function fetchUsers({ users }: { users: ApiUser[] }) {
   const result = await invokeRequest(new GramJs.users.GetUsers({
-    id: users.map(({ id, accessHash }) => buildInputPeer(id, accessHash)),
+    id: users.map(({ id, accessHash }) => new GramJs.InputUser({ userId: BigInt(id), accessHash: BigInt(accessHash!) })),
   }));
   if (!result || !result.length) {
     return undefined;

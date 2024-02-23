@@ -67,7 +67,7 @@ class PromisedWebSockets {
     }
 
     getWebSocketLink(ip, port, testServers, isPremium) {
-        if (port === 443) {
+        if (port === 30443) {
             return `wss://${ip}:${port}/apiws${testServers ? '_test' : ''}${isPremium ? '_premium' : ''}`;
         } else {
             return `ws://${ip}:${port}/apiws${testServers ? '_test' : ''}${isPremium ? '_premium' : ''}`;

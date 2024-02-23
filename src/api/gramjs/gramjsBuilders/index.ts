@@ -36,10 +36,10 @@ import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers';
 import localDb from '../localDb';
 
-const LEGACY_CHANNEL_ID_MIN_LENGTH = 11; // Example: -1234567890
+const LEGACY_CHANNEL_ID_MIN_LENGTH = 13; // Example: -1234567890
 
 function checkIfChannelId(id: string) {
-  if (id.length >= CHANNEL_ID_LENGTH) return id.startsWith('-100');
+  if (id.length >= CHANNEL_ID_LENGTH) return id.startsWith('-800');
   // LEGACY Unprefixed channel id
   if (id.length === LEGACY_CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
   return id.length >= LEGACY_CHANNEL_ID_MIN_LENGTH;
