@@ -607,7 +607,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       ) : isBot && !hasMessages ? (
         <MessageListBotInfo chatId={chatId} />
       ) : shouldRenderGreeting ? (
-        <ContactGreeting userId={chatId} />
+        <ContactGreeting key={chatId} userId={chatId} />
       ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
         <NoMessages
           chatId={chatId}

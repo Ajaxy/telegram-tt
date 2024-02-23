@@ -26,6 +26,7 @@ import styles from './ReactionButton.module.scss';
 
 const REACTION_SIZE = 1.25 * REM;
 const TITLE_MAX_LENGTH = 15;
+const LOOP_LIMIT = 1;
 
 const SavedTagButton: FC<{
   reaction: ApiReaction;
@@ -134,6 +135,7 @@ const SavedTagButton: FC<{
         className={styles.animatedEmoji}
         containerId={containerId}
         reaction={reaction}
+        loopLimit={LOOP_LIMIT}
         size={REACTION_SIZE}
         observeIntersection={observeIntersection}
       />
@@ -151,16 +153,18 @@ const SavedTagButton: FC<{
       >
         <path className={styles.tailFill} d="m 0,30 c 3.1855,0 6.1803,-1.5176 8.0641,-4.0864 l 5.835,-7.9568 c 1.2906,-1.7599 1.2906,-4.1537 0,-5.9136 L 8.0641,4.08636 C 6.1803,1.51761 3.1855,0 0,0" />
       </svg>
-      <PromptDialog
-        isOpen={isRenamePromptOpen}
-        maxLength={TITLE_MAX_LENGTH}
-        title={lang(tag?.title ? 'SavedTagRenameTag' : 'SavedTagLabelTag')}
-        subtitle={lang('SavedTagLabelTagText')}
-        placeholder={lang('SavedTagLabelPlaceholder')}
-        initialValue={tag?.title}
-        onClose={closeRenamePrompt}
-        onSubmit={handleRenameTag}
-      />
+      {withContextMenu && (
+        <PromptDialog
+          isOpen={isRenamePromptOpen}
+          maxLength={TITLE_MAX_LENGTH}
+          title={lang(tag?.title ? 'SavedTagRenameTag' : 'SavedTagLabelTag')}
+          subtitle={lang('SavedTagLabelTagText')}
+          placeholder={lang('SavedTagLabelPlaceholder')}
+          initialValue={tag?.title}
+          onClose={closeRenamePrompt}
+          onSubmit={handleRenameTag}
+        />
+      )}
       {withContextMenu && contextMenuPosition && (
         <Menu
           ref={menuRef}
