@@ -781,6 +781,22 @@ addActionHandler('closeSeenByModal', (global, actions, payload): ActionReturnTyp
   }, tabId);
 });
 
+addActionHandler('openGetReadDateModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    readDateModal: { chatId, messageId },
+  }, tabId);
+});
+
+addActionHandler('closeGetReadDateModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    readDateModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('openChatLanguageModal', (global, actions, payload): ActionReturnType => {
   const { chatId, messageId, tabId = getCurrentTabId() } = payload;
 

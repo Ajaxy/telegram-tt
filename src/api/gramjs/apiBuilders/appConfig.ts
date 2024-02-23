@@ -45,6 +45,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   reactions_uniq_max: number;
   chat_read_mark_size_threshold: number;
   chat_read_mark_expire_period: number;
+  pm_read_date_expire_period: number;
   reactions_user_max_default: number;
   reactions_user_max_premium: number;
   autologin_domains: string[];
@@ -98,6 +99,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     emojiSounds: buildEmojiSounds(appConfig),
     seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
     seenByExpiresAt: appConfig.chat_read_mark_expire_period,
+    readDateExpiresAt: appConfig.pm_read_date_expire_period,
     autologinDomains: appConfig.autologin_domains || [],
     urlAuthDomains: appConfig.url_auth_domains || [],
     maxUniqueReactions: appConfig.reactions_uniq_max,

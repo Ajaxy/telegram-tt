@@ -1,0 +1,44 @@
+:global(.MenuItem).item {
+  margin-bottom: 0;
+  font-size: 0.8125rem;
+  cursor: var(--custom-cursor, default);
+  pointer-events: none;
+  --color-skeleton-background: #2121211a;
+  &:hover,
+  &:focus,
+  &:active {
+    background: none;
+  }
+
+  :global(.icon) {
+    margin-left: 0;
+    margin-right: 0.25rem;
+  }
+
+  &[dir="rtl"] {
+    :global(.icon) {
+      margin-left: 0.25rem;
+      margin-right: 0;
+    }
+  }
+}
+
+.get {
+  cursor: var(--custom-cursor, pointer);
+  margin-left: 0.375rem;
+  border-radius: 0.5rem;
+  padding: 0.125rem 0.375rem;
+  background: var(--color-background-menu-separator);
+  pointer-events: all;
+}
+
+.skeleton {
+  height: 0.5rem;
+  width: calc(100% - 2rem);
+  margin: 0.5rem 0;
+  border-radius: 0.25rem;
+}
+
+.transition {
+  height: 1.5rem;
+}

@@ -666,24 +666,29 @@ addActionHandler('loadGlobalPrivacySettings', async (global): Promise<void> => {
   }
 
   global = getGlobal();
-  global = replaceSettings(global, {
-    shouldArchiveAndMuteNewNonContact: globalSettings.shouldArchiveAndMuteNewNonContact,
-  });
+  global = replaceSettings(global, { ...globalSettings });
   setGlobal(global);
 });
 
 addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload): Promise<void> => {
-  const { shouldArchiveAndMuteNewNonContact } = payload;
-  global = replaceSettings(global, { shouldArchiveAndMuteNewNonContact });
+  const shouldArchiveAndMuteNewNonContact = payload.shouldArchiveAndMuteNewNonContact
+    ?? Boolean(global.settings.byKey.shouldArchiveAndMuteNewNonContact);
+  const shouldHideReadMarks = payload.shouldHideReadMarks ?? Boolean(global.settings.byKey.shouldHideReadMarks);
+
+  global = replaceSettings(global, { shouldArchiveAndMuteNewNonContact, shouldHideReadMarks });
   setGlobal(global);
 
-  const result = await callApi('updateGlobalPrivacySettings', { shouldArchiveAndMuteNewNonContact });
+  const result = await callApi('updateGlobalPrivacySettings', {
+    shouldArchiveAndMuteNewNonContact,
+    shouldHideReadMarks,
+  });
 
   global = getGlobal();
   global = replaceSettings(global, {
     shouldArchiveAndMuteNewNonContact: !result
       ? !shouldArchiveAndMuteNewNonContact
       : result.shouldArchiveAndMuteNewNonContact,
+    shouldHideReadMarks: !result ? !shouldHideReadMarks : result.shouldHideReadMarks,
   });
   setGlobal(global);
 });
