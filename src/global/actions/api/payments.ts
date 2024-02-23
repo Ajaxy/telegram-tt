@@ -33,6 +33,7 @@ import {
   selectSmartGlocalCredentials,
   selectStripeCredentials,
   selectTabState,
+  selectUser,
 } from '../../selectors';
 
 addActionHandler('validateRequestedInfo', (global, actions, payload): ActionReturnType => {
@@ -102,12 +103,17 @@ async function getPaymentForm<T extends GlobalState>(
     return undefined;
   }
 
-  const { form, invoice, users } = result;
+  const {
+    form, invoice, users, botId,
+  } = result;
 
   global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = setPaymentForm(global, form, tabId);
   global = setPaymentStep(global, PaymentStep.Checkout, tabId);
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = updatePayment(global, {
+    botName: selectUser(global, botId)?.firstName,
+  }, tabId);
   setGlobal(global);
 
   return invoice;

@@ -490,6 +490,7 @@ export type TabState = {
       validUntil: number;
     };
     url?: string;
+    botName?: string;
   };
 
   chatCreation?: {
