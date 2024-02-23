@@ -32,6 +32,10 @@ export function getReactionKey(reaction: ApiReaction): ApiReactionKey {
 }
 
 export function isSameReaction(first?: ApiReaction, second?: ApiReaction) {
+  if (first === second) {
+    return true;
+  }
+
   if (!first || !second) {
     return false;
   }
