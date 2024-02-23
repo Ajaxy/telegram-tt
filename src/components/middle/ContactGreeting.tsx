@@ -91,6 +91,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
               containerRef={containerRef}
               sticker={sticker}
               size={160}
+              shouldLoop
             />
           )}
         </div>
