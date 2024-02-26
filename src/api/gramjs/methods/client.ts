@@ -72,18 +72,20 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
     shouldDebugExportedSenders,
   } = initialArgs;
-  console.log('sessionData:', sessionData);
+
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
-  console.log('session:', session);
   // eslint-disable-next-line no-restricted-globals
   (self as any).isWebmSupported = isWebmSupported;
   // eslint-disable-next-line no-restricted-globals
   (self as any).maxBufferSize = maxBufferSize;
 
+  // @ts-ignore;
+  const { initConnectionParams, apiId, apiHash } = sessionData || {};
+
   client = new TelegramClient(
     session,
-    process.env.TELEGRAM_API_ID,
-    process.env.TELEGRAM_API_HASH,
+    apiId || process.env.TELEGRAM_API_ID,
+    apiHash || process.env.TELEGRAM_API_HASH,
     {
       deviceModel: navigator.userAgent || userAgent || DEFAULT_USER_AGENT,
       systemVersion: platform || DEFAULT_PLATFORM,
@@ -95,27 +97,14 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       shouldAllowHttpTransport,
       testServers: isTest,
       dcId,
+      ...initConnectionParams,
     } as any,
   );
 
-  client.apiId = process.env.TELEGRAM_API_ID;
-  client.apiHash = process.env.TELEGRAM_API_HASH;
+  client.initConnectionParams = initConnectionParams;
 
-  try {
-    let entourage = localStorage.getItem('user_entourage');
-    // @ts-ignore;
-    entourage = JSON.parse(entourage);
-    // @ts-ignore;
-    if (entourage?.apiId && entourage?.apiHash) {
-      client.initConnectionParams = entourage || {};
-      // @ts-ignore;
-      client.apiId = entourage.apiId;
-      // @ts-ignore;
-      client.apiHash = entourage.apiHash;
-    }
-  } catch (error) {
-    console.log('initConnectionParams error:', error);
-  }
+  client.apiId = apiId || process.env.TELEGRAM_API_ID;
+  client.apiHash = apiHash || process.env.TELEGRAM_API_HASH;
 
   client.addEventHandler(handleGramJsUpdate, gramJsUpdateEventBuilder);
 

@@ -100,6 +100,24 @@ export function loadStoredSession(): ApiSessionData | undefined {
     keys,
     hashes,
   };
+
+  try {
+    let entourage = localStorage.getItem('user_entourage');
+    // @ts-ignore;
+    entourage = JSON.parse(entourage);
+    // @ts-ignore;
+    if (entourage?.apiId && entourage?.apiHash) {
+      // @ts-ignore;
+      result.initConnectionParams = entourage || {};
+      // @ts-ignore;
+      result.apiId = entourage.apiId;
+      // @ts-ignore;
+      result.apiHash = entourage.apiHash;
+    }
+  } catch (error) {
+    console.log('initConnectionParams error:', error);
+  }
+
   if (DEBUG) {
     console.log('loadStoredSession result:', result);
   }
@@ -118,7 +136,7 @@ export async function importLegacySession() {
   } catch (err) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.warn('Failed to load legacy session', err);
+      console.error('Failed to load legacy session', err);
     }
   }
 }
