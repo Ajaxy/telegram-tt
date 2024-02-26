@@ -50,10 +50,15 @@ const channel = IS_MULTITAB_SUPPORTED
 
 export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
   if (!channel) return;
+  const token = getCurrentTabId();
+  if (DEBUG) {
+    console.log('initApi onmessage initApiOnMasterTab token:', token);
+    console.log('initApi onmessage initApiOnMasterTab initialArgs:', initialArgs);
+  }
 
   channel.postMessage({
     type: 'initApi',
-    token: getCurrentTabId(),
+    token,
     initialArgs,
   });
 }
@@ -86,12 +91,17 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
     }
   }
 
+  if (DEBUG) {
+    console.log('initApi connector makeRequest:', makeRequest);
+    console.log('initApi connector savedLocalDb:', savedLocalDb);
+    console.log('initApi connector initialArgs:', initialArgs);
+  }
+
   return makeRequest({
     type: 'initApi',
     args: [initialArgs, savedLocalDb],
   }).then(() => {
     isInited = true;
-
     apiRequestsQueue.forEach((request) => {
       callApi(request.fnName, ...request.args)
         .then(request.deferred.resolve)

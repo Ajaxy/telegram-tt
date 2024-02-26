@@ -46,8 +46,7 @@ addActionHandler('initApi', async (global, actions): Promise<void> => {
   }
 
   const initialLocationHash = parseInitialLocationHash();
-
-  void initApi(actions.apiUpdate, {
+  const initApiArgs = {
     userAgent: navigator.userAgent,
     platform: PLATFORM_ENV,
     sessionData: loadStoredSession(),
@@ -60,7 +59,11 @@ addActionHandler('initApi', async (global, actions): Promise<void> => {
     shouldAllowHttpTransport: global.settings.byKey.shouldAllowHttpTransport,
     shouldForceHttpTransport: global.settings.byKey.shouldForceHttpTransport,
     shouldDebugExportedSenders: global.settings.byKey.shouldDebugExportedSenders,
-  });
+  };
+
+  console.log('initApiArgs onmessage addActionHandler initApiArgs:', initApiArgs);
+
+  void initApi(actions.apiUpdate, initApiArgs);
 
   void setShouldEnableDebugLog(Boolean(global.settings.byKey.shouldCollectDebugLogs));
 });

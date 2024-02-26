@@ -84,6 +84,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
   if (DEBUG) {
     console.log('sessionData:', sessionData);
+    console.log('initialArgs:', initialArgs);
   }
 
   client = new TelegramClient(

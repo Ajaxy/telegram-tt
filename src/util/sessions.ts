@@ -1,3 +1,4 @@
+/* eslint-disable no-null/no-null */
 import * as idb from 'idb-keyval';
 
 import type { ApiSessionData } from '../api/types';
@@ -49,6 +50,8 @@ export function storeSession(sessionData: ApiSessionData, currentUserId?: string
 }
 
 export function clearStoredSession() {
+  // eslint-disable-next-line no-debugger
+  debugger;
   [
     SESSION_USER_KEY,
     'dc',
@@ -61,6 +64,11 @@ export function clearStoredSession() {
 }
 
 export function loadStoredSession(): ApiSessionData | undefined {
+  if (DEBUG) {
+    console.log('!hasStoredSession():', !hasStoredSession());
+    console.log('userAuth:', localStorage.getItem(SESSION_USER_KEY));
+  }
+
   if (!hasStoredSession()) {
     return undefined;
   }
@@ -76,13 +84,13 @@ export function loadStoredSession(): ApiSessionData | undefined {
   DC_IDS.forEach((dcId) => {
     try {
       const key = localStorage.getItem(`dc${dcId}_auth_key`);
-      if (key) {
-        keys[dcId] = JSON.parse(key);
+      if (key !== null) {
+        keys[dcId] = key;
       }
 
       const hash = localStorage.getItem(`dc${dcId}_hash`);
-      if (hash) {
-        hashes[dcId] = JSON.parse(hash);
+      if (hash !== null) {
+        hashes[dcId] = hash;
       }
     } catch (err) {
       if (DEBUG) {
@@ -92,6 +100,10 @@ export function loadStoredSession(): ApiSessionData | undefined {
       // Do nothing.
     }
   });
+
+  if (DEBUG) {
+    console.log('keys:', keys);
+  }
 
   if (!Object.keys(keys).length) return undefined;
 
