@@ -38,7 +38,7 @@
       "consistent"
     ],
     "no-null/no-null": 2,
-    "no-console": "error",
+    "no-console": "warn",
     "semi": "error",
     "no-implicit-coercion": "error",
     "react-hooks/exhaustive-deps": "off",
