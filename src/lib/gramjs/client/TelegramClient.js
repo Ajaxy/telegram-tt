@@ -145,6 +145,7 @@ class TelegramClient {
         // TODO add proxy support
 
         this._floodWaitedRequests = {};
+        this.initConnectionParams = {};
 
         this._initWith = (x) => {
             return new requests.InvokeWithLayer({
@@ -159,8 +160,9 @@ class TelegramClient {
                     langCode: args.langCode,
                     langPack: '', // this should be left empty.
                     systemLangCode: args.systemLangCode,
-                    query: x,
+                    ...this.initConnectionParams,
                     proxy: undefined, // no proxies yet.
+                    query: x,
                 }),
             });
         };

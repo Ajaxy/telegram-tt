@@ -98,6 +98,25 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     } as any,
   );
 
+  client.apiId = process.env.TELEGRAM_API_ID;
+  client.apiHash = process.env.TELEGRAM_API_HASH;
+
+  try {
+    let entourage = localStorage.getItem('user_entourage');
+    // @ts-ignore;
+    entourage = JSON.parse(entourage);
+    // @ts-ignore;
+    if (entourage?.apiId && entourage?.apiHash) {
+      client.initConnectionParams = entourage || {};
+      // @ts-ignore;
+      client.apiId = entourage.apiId;
+      // @ts-ignore;
+      client.apiHash = entourage.apiHash;
+    }
+  } catch (error) {
+    console.log('initConnectionParams error:', error);
+  }
+
   client.addEventHandler(handleGramJsUpdate, gramJsUpdateEventBuilder);
 
   try {

@@ -95,11 +95,16 @@ export function loadStoredSession(): ApiSessionData | undefined {
 
   if (!Object.keys(keys).length) return undefined;
 
-  return {
+  const result = {
     mainDcId,
     keys,
     hashes,
   };
+  if (DEBUG) {
+    console.log('loadStoredSession result:', result);
+  }
+
+  return result;
 }
 
 export async function importLegacySession() {

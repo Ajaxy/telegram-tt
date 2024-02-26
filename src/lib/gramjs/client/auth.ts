@@ -1,8 +1,10 @@
-import Api from '../tl/api';
 import type TelegramClient from './TelegramClient';
-import utils from '../Utils';
+
+import Api from '../tl/api';
+
 import { sleep } from '../Helpers';
 import { computeCheck as computePasswordSrpCheck } from '../Password';
+import utils from '../Utils';
 
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);
@@ -231,8 +233,8 @@ async function signInUserWithQrCode(
             }
 
             const result = await client.invoke(new Api.auth.ExportLoginToken({
-                apiId: Number(process.env.TELEGRAM_API_ID),
-                apiHash: process.env.TELEGRAM_API_HASH,
+                apiId: Number(client.apiId),
+                apiHash: client.apiHash,
                 exceptIds: [],
             }));
             if (!(result instanceof Api.auth.LoginToken)) {
@@ -272,8 +274,8 @@ async function signInUserWithQrCode(
 
     try {
         const result2 = await client.invoke(new Api.auth.ExportLoginToken({
-            apiId: Number(process.env.TELEGRAM_API_ID),
-            apiHash: process.env.TELEGRAM_API_HASH,
+            apiId: Number(client.apiId),
+            apiHash: client.apiHash,
             exceptIds: [],
         }));
 
