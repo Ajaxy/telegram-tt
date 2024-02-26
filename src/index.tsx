@@ -107,3 +107,9 @@ onBeforeUnload(() => {
   actions.leaveGroupCall?.({ isPageUnload: true });
   actions.hangUp?.({ isPageUnload: true });
 });
+
+// @ts-ignore
+window.unmount = () => {
+  // @ts-ignore
+  TeactDOM.unmountComponentAtNode(document.getElementById('root'));
+};

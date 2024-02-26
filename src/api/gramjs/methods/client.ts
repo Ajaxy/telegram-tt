@@ -72,8 +72,9 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
     shouldDebugExportedSenders,
   } = initialArgs;
+  console.log('sessionData:', sessionData);
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
-
+  console.log('session:', session);
   // eslint-disable-next-line no-restricted-globals
   (self as any).isWebmSupported = isWebmSupported;
   // eslint-disable-next-line no-restricted-globals
