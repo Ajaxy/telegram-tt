@@ -105,6 +105,10 @@ export function loadStoredSession(): ApiSessionData | undefined {
     let entourage = localStorage.getItem('user_entourage');
     // @ts-ignore;
     entourage = JSON.parse(entourage);
+
+    if (DEBUG) {
+      console.log('entourage:', entourage);
+    }
     // @ts-ignore;
     if (entourage?.apiId && entourage?.apiHash) {
       // @ts-ignore;

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import LAYOUT_CAUSES from './layoutCauses';
 
 type Entities = keyof typeof LAYOUT_CAUSES;
@@ -151,6 +152,14 @@ function setupMutationObserver() {
       mutations.forEach(({ target, type, attributeName }) => {
         if (!document.contains(target)) {
           return;
+        }
+
+        // @ts-ignore
+        if (window.__MICRO_APP_ENVIRONMENT__) {
+          // @ts-ignore
+          if (!(document.microAppElement && document?.microAppElement?.contains?.(target))) {
+            return;
+          }
         }
 
         if (forcedMutationAllowedFor.has(target)) {

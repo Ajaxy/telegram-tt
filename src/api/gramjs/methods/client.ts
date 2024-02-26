@@ -101,6 +101,10 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     } as any,
   );
 
+  if (DEBUG) {
+    console.log('initConnectionParams:', initConnectionParams);
+  }
+
   client.initConnectionParams = initConnectionParams;
 
   client.apiId = apiId || process.env.TELEGRAM_API_ID;
