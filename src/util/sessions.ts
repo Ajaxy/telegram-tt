@@ -134,8 +134,10 @@ export async function importLegacySession() {
   if (!sessionId) return;
 
   const sessionJson = await idb.get(`GramJs:${sessionId}`);
+  console.log('sessionJson sessionData:', sessionJson);
   try {
     const sessionData = JSON.parse(sessionJson) as ApiSessionData;
+    console.log('importLegacySession sessionData:', sessionData);
     storeSession(sessionData);
   } catch (err) {
     if (DEBUG) {

@@ -157,7 +157,7 @@ function setupMutationObserver() {
         // @ts-ignore
         if (window.__MICRO_APP_ENVIRONMENT__) {
           // @ts-ignore
-          if (!(document.microAppElement && document?.microAppElement?.contains?.(target))) {
+          if (!document?.microAppElement?.contains?.(target)) {
             return;
           }
         }

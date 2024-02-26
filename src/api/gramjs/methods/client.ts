@@ -82,6 +82,10 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   // @ts-ignore;
   const { initConnectionParams, apiId, apiHash } = sessionData || {};
 
+  if (DEBUG) {
+    console.log('sessionData:', sessionData);
+  }
+
   client = new TelegramClient(
     session,
     apiId || process.env.TELEGRAM_API_ID,
