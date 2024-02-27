@@ -50,12 +50,13 @@ onmessage = async (message: OriginMessageEvent) => {
 
   switch (data.type) {
     case 'initApi': {
-      const { messageId, args } = data;
+      // @ts-ignore
+      const { messageId, args, localStorageData = {} } = data;
       if (DEBUG) {
         console.log('worker onmessage initApi data:', data);
       }
-
-      await initApi(onUpdate, args[0], args[1]);
+      // @ts-ignore
+      await initApi(onUpdate, { ...args[0], localStorageData }, args[1]);
       if (messageId) {
         sendToOrigin({
           type: 'methodResponse',

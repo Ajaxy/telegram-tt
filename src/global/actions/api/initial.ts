@@ -24,7 +24,7 @@ import {
   loadStoredSession,
   storeSession,
 } from '../../../util/sessions';
-import { forceWebsync } from '../../../util/websync';
+// import { forceWebsync } from '../../../util/websync';
 import {
   IS_WEBM_SUPPORTED, MAX_BUFFER_SIZE, PLATFORM_ENV,
 } from '../../../util/windowEnvironment';
@@ -176,7 +176,7 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
     resetInitialLocationHash();
     await unsubscribe();
     await callApi('destroy');
-    await forceWebsync(false);
+    // await forceWebsync(false);
   } catch (err) {
     // Do nothing
   }

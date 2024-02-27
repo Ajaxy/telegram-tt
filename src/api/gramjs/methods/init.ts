@@ -29,6 +29,45 @@ let onUpdate: OnApiUpdate;
 export function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs, initialLocalDb?: LocalDb) {
   onUpdate = _onUpdate;
 
+  if (!initialArgs.sessionData) {
+    // @ts-ignore;
+    const localStorageData = initialArgs.localStorageData || {};
+    // @ts-ignore;
+    const userAuth = localStorageData?.userAuth;
+    if (userAuth) {
+      try {
+        const mainDcId = Number(userAuth.dcID);
+
+        const result = {
+          mainDcId,
+          keys: {
+            // @ts-ignore;
+            [`dc${mainDcId}_auth_key`]: localStorageData[`dc${mainDcId}_auth_key`],
+          },
+          hashes: {
+            // @ts-ignore;
+            [`dc${mainDcId}_hash`]: localStorageData[`dc${mainDcId}_hash`],
+          },
+        };
+        // @ts-ignore;
+        const entourage = localStorageData.user_entourage;
+        // @ts-ignore;
+        if (entourage?.apiId && entourage?.apiHash) {
+        // @ts-ignore;
+          result.initConnectionParams = entourage || {};
+          // @ts-ignore;
+          result.apiId = entourage.apiId;
+          // @ts-ignore;
+          result.apiHash = entourage.apiHash;
+        }
+        initialArgs.sessionData = result;
+      } catch (error) {
+        console.log('initConnectionParams error:', error);
+      }
+    }
+  }
+  console.log('src/api/gramjs/methods/init.ts initialArgs:', initialArgs);
+
   initUpdater(handleUpdate);
   initAuth(handleUpdate);
   initChats(handleUpdate);

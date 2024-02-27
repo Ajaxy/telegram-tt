@@ -16,7 +16,7 @@ import { unique } from '../../../util/iteratees';
 import { setLanguage } from '../../../util/langProvider';
 import { clearWebTokenAuth } from '../../../util/routing';
 import { setServerTimeOffset } from '../../../util/serverTime';
-import { forceWebsync } from '../../../util/websync';
+// import { forceWebsync } from '../../../util/websync';
 import { isChatChannel, isChatSuperGroup } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
@@ -117,7 +117,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
 
   switch (authState) {
     case 'authorizationStateLoggingOut':
-      void forceWebsync(false);
+      // void forceWebsync(false);
 
       global = {
         ...global,
@@ -160,7 +160,7 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
         break;
       }
 
-      void forceWebsync(true);
+      // void forceWebsync(false);
 
       global = {
         ...global,

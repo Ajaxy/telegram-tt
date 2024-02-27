@@ -288,7 +288,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 
   try {
     if (DEBUG) {
-      log('INVOKE', request.className);
+      log('INVOKE', request.className, request);
     }
 
     const result = await client.invoke(request, dcId, abortSignal, shouldRetryOnTimeout);

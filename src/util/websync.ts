@@ -1,10 +1,10 @@
-import { getGlobal } from '../global';
+// import { getGlobal } from '../global';
 
 import {
   APP_CODE_NAME,
   DEBUG, IS_MOCKED_CLIENT,
 } from '../config';
-import { hasStoredSession } from './sessions';
+// import { hasStoredSession } from './sessions';
 import { IS_ELECTRON } from './windowEnvironment';
 
 const WEBSYNC_URLS = [
@@ -78,23 +78,23 @@ export function stopWebsync() {
 }
 
 export function startWebsync() {
-  if (DEBUG || IS_ELECTRON) {
-    return;
-  }
+  // if (DEBUG || IS_ELECTRON) {
+  //   return;
+  // }
 
-  if (lastTimeout !== undefined) return;
-  const currentTs = getTs();
+  // if (lastTimeout !== undefined) return;
+  // const currentTs = getTs();
 
-  const { ts } = JSON.parse(localStorage.getItem(WEBSYNC_KEY) || '{}');
+  // const { ts } = JSON.parse(localStorage.getItem(WEBSYNC_KEY) || '{}');
 
-  const timeout = WEBSYNC_TIMEOUT - (currentTs - ts);
+  // const timeout = WEBSYNC_TIMEOUT - (currentTs - ts);
 
-  lastTimeout = setTimeout(() => {
-    const { authState } = getGlobal();
+  // lastTimeout = setTimeout(() => {
+  //   // const { authState } = getGlobal();
 
-    const authed = authState === 'authorizationStateReady' || hasStoredSession(true);
-    forceWebsync(authed);
-  }, Math.max(0, timeout * 1000));
+  //   // const authed = authState === 'authorizationStateReady' || hasStoredSession(true);
+  //   // forceWebsync(authed);
+  // }, Math.max(0, timeout * 1000));
 }
 
 export function clearWebsync() {
