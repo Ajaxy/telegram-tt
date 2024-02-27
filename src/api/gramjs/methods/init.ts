@@ -41,14 +41,29 @@ export function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs, ini
         const result = {
           mainDcId,
           keys: {
-            // @ts-ignore;
-            [`dc${mainDcId}_auth_key`]: localStorageData[`dc${mainDcId}_auth_key`],
           },
           hashes: {
-            // @ts-ignore;
-            [`dc${mainDcId}_hash`]: localStorageData[`dc${mainDcId}_hash`],
           },
+          isLocalStorage: true,
         };
+        [1, 2, 3, 4, 5].forEach((dcId) => {
+          try {
+            const key = localStorageData[`dc${dcId}_auth_key`];
+            if (key) {
+              // @ts-ignore
+              result.keys[dcId] = key;
+            }
+
+            const hash = localStorageData[`dc${dcId}_hash`];
+            if (hash) {
+              // @ts-ignore
+              result.hashes[dcId] = hash;
+            }
+          } catch (err) {
+            console.log('err:', err);
+          }
+        });
+
         // @ts-ignore;
         const entourage = localStorageData.user_entourage;
         // @ts-ignore;
@@ -66,7 +81,7 @@ export function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs, ini
       }
     }
   }
-  console.log('src/api/gramjs/methods/init.ts initialArgs:', initialArgs);
+  // console.log('src/api/gramjs/methods/init.ts initialArgs:', initialArgs);
 
   initUpdater(handleUpdate);
   initAuth(handleUpdate);

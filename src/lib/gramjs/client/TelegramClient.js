@@ -148,8 +148,6 @@ class TelegramClient {
         this.initConnectionParams = {};
 
         this._initWith = (x) => {
-            console.log('_initWith:', x);
-
             return new requests.InvokeWithLayer({
                 layer: LAYER,
                 query: new requests.InitConnection({

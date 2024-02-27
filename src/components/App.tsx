@@ -1,3 +1,6 @@
+/* eslint-disable react-hooks-static-deps/exhaustive-deps */
+/* eslint-disable max-len */
+// @ts-nocheck
 import type { FC } from '../lib/teact/teact';
 import React, { useEffect, useLayoutEffect } from '../lib/teact/teact';
 import { getActions, withGlobal } from '../global';
@@ -59,6 +62,18 @@ const App: FC<StateProps> = ({
   hasWebAuthTokenFailed,
   theme,
 }) => {
+  // @ts-ignore
+  let body = window.document.querySelector('.telegram-a') as Element;
+  let document = window.document;
+  // @ts-ignore
+  // eslint-disable-next-line no-underscore-dangle
+  if (window.__MICRO_APP_ENVIRONMENT__) {
+    // @ts-ignore
+    body = (document?.microAppElement?.querySelector?.('.telegram-a') || document.querySelector('.telegram-a')) as Element;
+    // @ts-ignore
+    document = window?.rawDocument || window.document;
+  }
+
   const { disconnect } = getActions();
 
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
@@ -73,7 +88,6 @@ const App: FC<StateProps> = ({
 
   // Prevent drop on elements that do not accept it
   useEffect(() => {
-    const body = document.body;
     const handleDrag = (e: DragEvent) => {
       e.preventDefault();
       if (!e.dataTransfer) return;
@@ -86,6 +100,7 @@ const App: FC<StateProps> = ({
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
     };
+
     body.addEventListener('drop', handleDrop);
     body.addEventListener('dragover', handleDrag);
     body.addEventListener('dragenter', handleDrag);
@@ -197,11 +212,11 @@ const App: FC<StateProps> = ({
   }
 
   useLayoutEffect(() => {
-    document.body.classList.add(styles.bg);
+    body.classList.add(styles.bg);
   }, []);
 
   useLayoutEffect(() => {
-    document.body.style.setProperty(
+    body.style.setProperty(
       '--theme-background-color',
       theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
     );

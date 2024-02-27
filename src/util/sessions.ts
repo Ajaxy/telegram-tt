@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-null/no-null */
 import * as idb from 'idb-keyval';
 
@@ -7,6 +8,13 @@ import {
   DEBUG, GLOBAL_STATE_CACHE_KEY, LEGACY_SESSION_KEY, SESSION_USER_KEY,
 } from '../config';
 import * as cacheApi from './cacheApi';
+
+let localStorage = window.localStorage;
+// @ts-ignore
+if (window.__MICRO_APP_ENVIRONMENT__) {
+  // @ts-ignore
+  localStorage = window.rawWindow.localStorage;
+}
 
 const DC_IDS = [1, 2, 3, 4, 5];
 
@@ -51,16 +59,16 @@ export function storeSession(sessionData: ApiSessionData, currentUserId?: string
 
 export function clearStoredSession() {
   // eslint-disable-next-line no-debugger
-  debugger;
-  [
-    SESSION_USER_KEY,
-    'dc',
-    ...DC_IDS.map((dcId) => `dc${dcId}_auth_key`),
-    ...DC_IDS.map((dcId) => `dc${dcId}_hash`),
-    ...DC_IDS.map((dcId) => `dc${dcId}_server_salt`),
-  ].forEach((key) => {
-    localStorage.removeItem(key);
-  });
+  // debugger;
+  // [
+  //   SESSION_USER_KEY,
+  //   'dc',
+  //   ...DC_IDS.map((dcId) => `dc${dcId}_auth_key`),
+  //   ...DC_IDS.map((dcId) => `dc${dcId}_hash`),
+  //   ...DC_IDS.map((dcId) => `dc${dcId}_server_salt`),
+  // ].forEach((key) => {
+  //   localStorage.removeItem(key);
+  // });
 }
 
 export function loadStoredSession(): ApiSessionData | undefined {
@@ -85,12 +93,12 @@ export function loadStoredSession(): ApiSessionData | undefined {
     try {
       const key = localStorage.getItem(`dc${dcId}_auth_key`);
       if (key !== null) {
-        keys[dcId] = key;
+        keys[dcId] = JSON.parse(key);
       }
 
       const hash = localStorage.getItem(`dc${dcId}_hash`);
       if (hash !== null) {
-        hashes[dcId] = hash;
+        hashes[dcId] = JSON.parse(hash);
       }
     } catch (err) {
       if (DEBUG) {
@@ -111,6 +119,7 @@ export function loadStoredSession(): ApiSessionData | undefined {
     mainDcId,
     keys,
     hashes,
+    isLocalStorage: false,
   };
 
   try {
