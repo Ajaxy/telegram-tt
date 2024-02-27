@@ -160,6 +160,7 @@ function setupMutationObserver() {
           if (!document?.microAppElement?.contains?.(target)) {
             return;
           }
+          return;
         }
 
         if (forcedMutationAllowedFor.has(target)) {
@@ -175,7 +176,7 @@ function setupMutationObserver() {
         }
 
         // eslint-disable-next-line no-console
-        onError(new Error(`Unexpected mutation detected: \`${type === 'attributes' ? attributeName : type}\``));
+        console.log(`Unexpected mutation detected: \`${type === 'attributes' ? attributeName : type}\``);
       });
     }
 

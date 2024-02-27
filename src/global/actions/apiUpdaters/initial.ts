@@ -223,10 +223,12 @@ function onUpdateConnectionState<T extends GlobalState>(
 
   if (global.isSynced) {
     const channelStackIds = Object.values(global.byTabId)
-      .flatMap((tab) => tab.messageLists)
-      .map((messageList) => messageList.chatId)
+    // @ts-ignore
+      .flatMap((tab = {}) => tab?.messageLists)
+    // @ts-ignore
+      .map((messageList = {}) => messageList?.chatId)
       .filter((chatId) => {
-        const chat = global.chats.byId[chatId];
+        const chat = global?.chats?.byId?.[chatId];
         return chat && (isChatChannel(chat) || isChatSuperGroup(chat));
       });
     if (connectionState === 'connectionStateReady' && channelStackIds.length) {
