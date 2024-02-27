@@ -13,6 +13,9 @@
   :global(html.theme-light) & {
     background-image: url('../assets/chat-bg-br.png');
   }
+}
+
+.appBg {
 
   &::before {
     content: "";

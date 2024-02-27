@@ -213,6 +213,7 @@ const App: FC<StateProps> = ({
 
   useLayoutEffect(() => {
     body.classList.add(styles.bg);
+    document.body.classList.add(styles.appBg);
   }, []);
 
   useLayoutEffect(() => {

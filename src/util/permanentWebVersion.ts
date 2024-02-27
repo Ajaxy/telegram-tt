@@ -1,6 +1,6 @@
 import { getActions } from '../global';
 
-import { PRODUCTION_HOSTNAME, WEB_VERSION_BASE } from '../config';
+import { WEB_VERSION_BASE } from '../config';
 import { clearWebsync } from './websync';
 
 const SEARCH_ENGINE_REGEX = /(^|\.)(google|bing|duckduckgo|ya|yandex)\./i;
@@ -31,7 +31,7 @@ export function switchPermanentWebVersion(version: AvailableVersions) {
 }
 
 export function checkAndAssignPermanentWebVersion() {
-  if (window.location.hostname !== PRODUCTION_HOSTNAME) return;
+  // if (window.location.hostname !== PRODUCTION_HOSTNAME) return;
 
   const referrer = document.referrer.toLowerCase();
   if (!referrer) return;
