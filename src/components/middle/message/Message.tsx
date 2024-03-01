@@ -1226,6 +1226,8 @@ const Message: FC<OwnProps & StateProps> = ({
             story={webPageStory}
             isConnected={isConnected}
             backgroundEmojiId={sender?.color?.backgroundEmojiId}
+            shouldWarnAboutSvg={shouldWarnAboutSvg}
+            autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
           />

@@ -104,6 +104,10 @@ export function getMessageDocument(message: MediaContainer) {
   return message.content.document;
 }
 
+export function getMessageWebPageDocument(message: MediaContainer) {
+  return getMessageWebPage(message)?.document;
+}
+
 export function isMessageDocumentPhoto(message: MediaContainer) {
   const document = getMessageDocument(message);
   return document ? document.mediaType === 'photo' : undefined;
@@ -213,8 +217,9 @@ export function getMessageMediaHash(
   const messagePhoto = getMessagePhoto(message) || getMessageWebPagePhoto(message) || getMessageDocumentPhoto(message);
   const actionPhoto = getMessageActionPhoto(message);
   const messageVideo = video || getMessageWebPageVideo(message) || getMessageDocumentVideo(message);
+  const messageDocument = document || getMessageWebPageDocument(message);
 
-  const content = actionPhoto || messagePhoto || messageVideo || sticker || audio || voice || document;
+  const content = actionPhoto || messagePhoto || messageVideo || sticker || audio || voice || messageDocument;
   if (!content) {
     return undefined;
   }
@@ -249,17 +254,17 @@ export function getMessageMediaHash(
         return `${base}?size=${actionPhoto ? 'b' : 'x'}`;
       case 'full':
       case 'download':
-        return document ? base : `${base}?size=${actionPhoto ? 'c' : 'z'}`;
+        return messageDocument ? base : `${base}?size=${actionPhoto ? 'c' : 'z'}`;
     }
   }
 
-  if (document) {
+  if (messageDocument) {
     switch (target) {
       case 'micro':
       case 'pictogram':
       case 'inline':
       case 'preview':
-        if (!getDocumentHasPreview(document) || hasMessageLocalBlobUrl(message)) {
+        if (!getDocumentHasPreview(messageDocument) || hasMessageLocalBlobUrl(message)) {
           return undefined;
         }
 
@@ -353,8 +358,9 @@ export function getMessageMediaFormat(
   const {
     video, audio, voice, document,
   } = message.content;
+  const messageDocument = document || getMessageWebPageDocument(message);
   const isVideo = Boolean(video || getMessageWebPageVideo(message) || isMessageDocumentVideo(message));
-  const size = (video || audio || document)?.size!;
+  const size = (video || audio || messageDocument)?.size!;
   if (target === 'download') {
     if (IS_PROGRESSIVE_SUPPORTED && size > MAX_BUFFER_SIZE && !IS_OPFS_SUPPORTED) {
       return ApiMediaFormat.DownloadUrl;

@@ -13,6 +13,7 @@ import {
   getMessageMediaFormat,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
+  getMessageWebPageDocument,
   isMessageDocumentVideo,
 } from '../../global/helpers';
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
@@ -79,7 +80,8 @@ const Document: FC<OwnProps> = ({
   const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
   const [shouldNotWarnAboutSvg, setShouldNotWarnAboutSvg] = useState(false);
 
-  const document = message.content.document!;
+  const document = message.content.document! || getMessageWebPageDocument(message);
+
   const { fileName, size, timestamp } = document;
   const extension = getDocumentExtension(document) || '';
 

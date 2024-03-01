@@ -365,7 +365,6 @@ export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServic
       && (
         media.webpage.photo instanceof GramJs.Photo || (
           media.webpage.document instanceof GramJs.Document
-          && media.webpage.document.mimeType.startsWith('video')
         )
       )
     ) || (

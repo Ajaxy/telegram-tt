@@ -18,6 +18,7 @@ import useEnsureStory from '../../../hooks/useEnsureStory';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Document from '../../common/Document';
 import EmojiIconBackground from '../../common/embedded/EmojiIconBackground';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
@@ -44,6 +45,8 @@ type OwnProps = {
   backgroundEmojiId?: string;
   theme: ISettings['theme'];
   story?: ApiTypeStory;
+  shouldWarnAboutSvg?: boolean;
+  autoLoadFileMaxSizeMb?: number;
   onMediaClick?: () => void;
   onCancelMediaTransfer?: () => void;
 };
@@ -62,6 +65,8 @@ const WebPage: FC<OwnProps> = ({
   story,
   theme,
   backgroundEmojiId,
+  shouldWarnAboutSvg,
+  autoLoadFileMaxSizeMb,
   onMediaClick,
   onCancelMediaTransfer,
 }) => {
@@ -99,6 +104,7 @@ const WebPage: FC<OwnProps> = ({
     photo,
     video,
     type,
+    document,
   } = webPage;
   const isStory = type === WEBPAGE_STORY_TYPE;
   const isExpiredStory = story && 'isDeleted' in story;
@@ -119,6 +125,7 @@ const WebPage: FC<OwnProps> = ({
     !photo && !video && !inPreview && 'without-media',
     video && 'with-video',
     !isArticle && 'no-article',
+    document && 'with-document',
     quickButtonLangKey && 'with-quick-button',
   );
 
@@ -191,6 +198,17 @@ const WebPage: FC<OwnProps> = ({
             isProtected={isProtected}
             onClick={isMediaInteractive ? handleMediaClick : undefined}
             onCancelUpload={onCancelMediaTransfer}
+          />
+        )}
+        {!inPreview && document && (
+          <Document
+            message={message}
+            observeIntersection={observeIntersection}
+            autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
+            onMediaClick={handleMediaClick}
+            onCancelUpload={onCancelMediaTransfer}
+            isDownloading={isDownloading}
+            shouldWarnAboutSvg={shouldWarnAboutSvg}
           />
         )}
       </div>

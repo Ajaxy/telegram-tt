@@ -59,7 +59,7 @@
       right: 0;
       border-bottom-left-radius: 0.25rem;
       background: rgba(black, 0.25);
-      border-color: transparent var(--background-color) transparent var(--background-color);
+      border-color: transparent var(--file-icon-border-color, var(--background-color)) transparent var(--file-icon-border-color, var(--background-color));
       border-width: 0 1.125rem 1.125rem 0;
       border-style: solid;
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */

@@ -96,6 +96,10 @@ export function buildContentClassName(
     if (webPage.photo || webPage.video) {
       classNames.push('media');
     }
+
+    if (webPage.document) {
+      classNames.push('document');
+    }
   }
 
   if (invoice && !invoice.extendedMedia) {
