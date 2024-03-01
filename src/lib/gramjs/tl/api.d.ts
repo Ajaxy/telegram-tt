@@ -12603,7 +12603,7 @@ namespace Api {
     };
     export class GetIsPremiumRequiredToContact extends Request<Partial<{
       id: Api.TypeInputUser[];
-    }>, Bool> {
+    }>, Bool[]> {
       id: Api.TypeInputUser[];
     };
   }
