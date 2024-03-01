@@ -1,12 +1,11 @@
 import 'webpack-dev-server';
 
-import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 import dotenv from 'dotenv';
 import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import path from 'path';
-import type { Compiler, Configuration } from 'webpack';
+import type { Configuration } from 'webpack';
 import {
   ContextReplacementPlugin,
   DefinePlugin,
@@ -219,16 +218,6 @@ export default function createConfig(
       new ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
       }),
-      new StatoscopeWebpackPlugin({
-        statsOptions: {
-          context: __dirname,
-        },
-        saveReportTo: path.resolve('./public/statoscope-report.html'),
-        saveStatsTo: path.resolve('./public/build-stats.json'),
-        normalizeStats: true,
-        open: 'file',
-        extensions: [new WebpackContextExtension()], // eslint-disable-line @typescript-eslint/no-use-before-define
-      }),
     ],
 
     devtool: APP_ENV === 'production' && IS_PACKAGED_ELECTRON ? undefined : 'source-map',
@@ -254,23 +243,4 @@ function getGitMetadata() {
   const branch = HEAD || gitRevisionPlugin.branch();
   const commit = gitRevisionPlugin.commithash()?.substring(0, 7);
   return { branch, commit };
-}
-
-class WebpackContextExtension {
-  context: string;
-
-  constructor() {
-    this.context = '';
-  }
-
-  handleCompiler(compiler: Compiler) {
-    this.context = compiler.context;
-  }
-
-  getExtension() {
-    return {
-      descriptor: { name: 'custom-webpack-extension-context', version: '1.0.0' },
-      payload: { context: this.context },
-    };
-  }
 }
