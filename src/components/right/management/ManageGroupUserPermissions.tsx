@@ -378,4 +378,7 @@ export default memo(withGlobal<OwnProps>(
       members: fullInfo?.members,
     };
   },
+  (global, { chatId }) => {
+    return Boolean(selectChat(global, chatId));
+  },
 )(ManageGroupUserPermissions));

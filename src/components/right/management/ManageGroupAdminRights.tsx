@@ -443,4 +443,7 @@ export default memo(withGlobal<OwnProps>(
       adminMembersById: fullInfo?.adminMembersById,
     };
   },
+  (global, { chatId }) => {
+    return Boolean(selectChat(global, chatId));
+  },
 )(ManageGroupAdminRights));

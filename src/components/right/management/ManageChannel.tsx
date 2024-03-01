@@ -379,4 +379,7 @@ export default memo(withGlobal<OwnProps>(
       availableReactions: global.reactions.availableReactions,
     };
   },
+  (global, { chatId }) => {
+    return Boolean(selectChat(global, chatId));
+  },
 )(ManageChannel));

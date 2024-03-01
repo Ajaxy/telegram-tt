@@ -16,7 +16,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { unsubscribe } from '../../../util/notifications';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
-import { parseInitialLocationHash, resetInitialLocationHash } from '../../../util/routing';
+import { parseInitialLocationHash, resetInitialLocationHash, resetLocationHash } from '../../../util/routing';
 import {
   clearLegacySessions,
   clearStoredSession,
@@ -171,6 +171,7 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
 
   try {
     resetInitialLocationHash();
+    resetLocationHash();
     await unsubscribe();
     await callApi('destroy');
     await forceWebsync(false);

@@ -188,4 +188,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
     };
   },
+  (global, { chatId }) => {
+    return Boolean(selectChat(global, chatId));
+  },
 )(ManageReactions));

@@ -21,6 +21,10 @@ export function resetInitialLocationHash() {
   parsedInitialLocationHash = undefined;
 }
 
+export function resetLocationHash() {
+  window.location.hash = '';
+}
+
 export const createLocationHash = (chatId: string, type: MessageListType, threadId: ThreadId): string => {
   const displayType = type === 'thread' ? undefined : type;
   const parts = threadId === MAIN_THREAD_ID ? [chatId, displayType] : [chatId, threadId, displayType];
