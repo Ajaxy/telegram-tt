@@ -55,6 +55,7 @@ import {
   selectTabState,
   selectTheme,
   selectThreadInfo,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -92,6 +93,7 @@ import MessageList from './MessageList';
 import MessageSelectToolbar from './MessageSelectToolbar.async';
 import MiddleHeader from './MiddleHeader';
 import MobileSearch from './MobileSearch.async';
+import PremiumRequiredPlaceholder from './PremiumRequiredPlaceholder';
 import ReactorListModal from './ReactorListModal.async';
 
 import './MiddleColumn.scss';
@@ -151,6 +153,7 @@ type StateProps = {
   canUnblock?: boolean;
   isSavedDialog?: boolean;
   canShowOpenChatButton?: boolean;
+  isContactRequirePremium?: boolean;
 };
 
 function isImage(item: DataTransferItem) {
@@ -210,6 +213,7 @@ function MiddleColumn({
   canUnblock,
   isSavedDialog,
   canShowOpenChatButton,
+  isContactRequirePremium,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -267,7 +271,7 @@ function MiddleColumn({
   const renderingCanUnblock = usePrevDuringAnimation(canUnblock, closeAnimationDuration);
   const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration)
     && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && !renderingCanUnblock
-    && chatId !== TMP_CHAT_ID;
+    && chatId !== TMP_CHAT_ID && !isContactRequirePremium;
   const renderingHasTools = usePrevDuringAnimation(hasTools, closeAnimationDuration);
   const renderingIsFabShown = usePrevDuringAnimation(isFabShown, closeAnimationDuration) && chatId !== TMP_CHAT_ID;
   const renderingIsChannel = usePrevDuringAnimation(isChannel, closeAnimationDuration);
@@ -449,7 +453,9 @@ function MiddleColumn({
   );
   const forumComposerPlaceholder = getForumComposerPlaceholder(lang, chat, threadId, Boolean(draftReplyInfo));
 
-  const composerRestrictionMessage = messageSendingRestrictionReason || forumComposerPlaceholder;
+  const composerRestrictionMessage = messageSendingRestrictionReason
+    ?? forumComposerPlaceholder
+    ?? (isContactRequirePremium ? <PremiumRequiredPlaceholder userId={chatId!} /> : undefined);
 
   // CSS Variables calculation doesn't work properly with transforms, so we calculate transform values in JS
   const {
@@ -549,6 +555,7 @@ function MiddleColumn({
                 onFabToggle={setIsFabShown}
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
+                isContactRequirePremium={isContactRequirePremium}
                 withBottomShift={withMessageListBottomShift}
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
                 onPinnedIntersectionChange={renderingOnPinnedIntersectionChange!}
@@ -805,6 +812,8 @@ export default memo(withGlobal<OwnProps>(
       )
     );
 
+    const isContactRequirePremium = selectUserFullInfo(global, chatId)?.isContactRequirePremium;
+
     return {
       ...state,
       chatId,
@@ -815,7 +824,8 @@ export default memo(withGlobal<OwnProps>(
       isPrivate,
       areChatSettingsLoaded: Boolean(chat?.settings),
       isComments: isMessageThread,
-      canPost: !isPinnedMessageList
+      canPost:
+        !isPinnedMessageList
         && (!chat || canPost)
         && !isBotNotStarted
         && !(shouldJoinToSend && chat?.isNotJoined)
@@ -842,6 +852,7 @@ export default memo(withGlobal<OwnProps>(
       canUnblock,
       isSavedDialog,
       canShowOpenChatButton,
+      isContactRequirePremium,
     };
   },
 )(MiddleColumn));

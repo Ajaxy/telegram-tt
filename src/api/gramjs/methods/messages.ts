@@ -394,6 +394,10 @@ export function sendMessage(
       });
       if (update) handleLocalMessageUpdate(localMessage, update);
     } catch (error: any) {
+      if (error.message === 'PRIVACY_PREMIUM_REQUIRED') {
+        onUpdate({ '@type': 'updateRequestUserUpdate', id: chat.id });
+      }
+
       onUpdate({
         '@type': 'updateMessageSendFailed',
         chatId: chat.id,

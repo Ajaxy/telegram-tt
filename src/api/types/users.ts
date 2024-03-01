@@ -53,6 +53,7 @@ export interface ApiUserFullInfo {
   premiumGifts?: ApiPremiumGiftOption[];
   isTranslationDisabled?: true;
   hasPinnedStories?: boolean;
+  isContactRequirePremium?: boolean;
 }
 
 export type ApiFakeType = 'fake' | 'scam';

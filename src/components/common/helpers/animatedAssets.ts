@@ -23,6 +23,7 @@ import FoldersAll from '../../../assets/tgs/settings/FoldersAll.tgs';
 import FoldersNew from '../../../assets/tgs/settings/FoldersNew.tgs';
 import FoldersShare from '../../../assets/tgs/settings/FoldersShare.tgs';
 import Lock from '../../../assets/tgs/settings/Lock.tgs';
+import Unlock from '../../../assets/tgs/Unlock.tgs';
 
 export const LOCAL_TGS_URLS = {
   MonkeyIdle,
@@ -50,4 +51,5 @@ export const LOCAL_TGS_URLS = {
   PartyPopper,
   Flame,
   ReadTime,
+  Unlock,
 };

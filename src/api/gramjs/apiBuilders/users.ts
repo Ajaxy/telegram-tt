@@ -18,6 +18,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
       profilePhoto, voiceMessagesForbidden, premiumGifts,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
+      contactRequirePremium,
     },
     users,
   } = mtpUserFull;
@@ -37,6 +38,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     personalPhoto: personalPhoto instanceof GramJs.Photo ? buildApiPhoto(personalPhoto) : undefined,
     ...(premiumGifts && { premiumGifts: premiumGifts.map((gift) => buildApiPremiumGiftOption(gift)) }),
     ...(botInfo && { botInfo: buildApiBotInfo(botInfo, userId) }),
+    isContactRequirePremium: contactRequirePremium,
   };
 }
 

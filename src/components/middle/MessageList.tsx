@@ -79,6 +79,7 @@ import ContactGreeting from './ContactGreeting';
 import MessageListBotInfo from './MessageListBotInfo';
 import MessageListContent from './MessageListContent';
 import NoMessages from './NoMessages';
+import PremiumRequiredMessage from './PremiumRequiredMessage';
 
 import './MessageList.scss';
 
@@ -96,6 +97,7 @@ type OwnProps = {
   withDefaultBg: boolean;
   onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
   getForceNextPinnedInHeader: Signal<boolean | undefined>;
+  isContactRequirePremium?: boolean;
 };
 
 type StateProps = {
@@ -181,6 +183,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   currentUserId,
   getForceNextPinnedInHeader,
   onPinnedIntersectionChange,
+  isContactRequirePremium,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -607,6 +610,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
+      ) : isContactRequirePremium ? (
+        <PremiumRequiredMessage userId={chatId} />
       ) : isBot && !hasMessages ? (
         <MessageListBotInfo chatId={chatId} />
       ) : shouldRenderGreeting ? (
