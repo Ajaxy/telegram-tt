@@ -115,6 +115,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   }, [peerId, chat, user]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);
+  const shouldRenderAllLinks = (chat && isChatChannel(chat)) || user?.isPremium;
 
   const activeUsernames = useMemo(() => {
     const result = usernames?.filter((u) => u.isActive);
@@ -243,7 +244,13 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           isStatic
         >
           <span className="title word-break allow-selection" dir="auto">
-            {renderText(description, ['br', 'links', 'emoji'])}
+            {
+              renderText(description, [
+                'br',
+                shouldRenderAllLinks ? 'links' : 'tg_links',
+                'emoji',
+              ])
+            }
           </span>
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>

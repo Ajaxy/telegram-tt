@@ -8,6 +8,7 @@ import {
 } from '../../../config';
 import EMOJI_REGEX from '../../../lib/twemojiRegex';
 import buildClassName from '../../../util/buildClassName';
+import { isDeepLink } from '../../../util/deepLinkParser';
 import {
   fixNonStandardEmoji,
   handleEmojiLoad,
@@ -22,7 +23,7 @@ import SafeLink from '../SafeLink';
 
 export type TextFilter = (
   'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
-  'simple_markdown' | 'simple_markdown_html' | 'quote'
+  'simple_markdown' | 'simple_markdown_html' | 'quote' | 'tg_links'
   );
 
 const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
@@ -67,6 +68,9 @@ export default function renderText(
 
       case 'links':
         return addLinks(text);
+
+      case 'tg_links':
+        return addLinks(text, true);
 
       case 'simple_markdown':
         return replaceSimpleMarkdown(text, 'jsx');
@@ -214,7 +218,7 @@ function addHighlight(textParts: TextPart[], highlight: string | undefined, isQu
 
 const RE_LINK = new RegExp(`${RE_LINK_TEMPLATE}|${RE_MENTION_TEMPLATE}`, 'ig');
 
-function addLinks(textParts: TextPart[]): TextPart[] {
+function addLinks(textParts: TextPart[], allowOnlyTgLinks?: boolean): TextPart[] {
   return textParts.reduce<TextPart[]>((result, part) => {
     if (typeof part !== 'string') {
       result.push(part);
@@ -245,9 +249,13 @@ function addLinks(textParts: TextPart[]): TextPart[] {
           nextLink = nextLink.slice(0, nextLink.length - 1);
         }
 
-        content.push(
-          <SafeLink text={nextLink} url={nextLink} />,
-        );
+        if (!allowOnlyTgLinks || isDeepLink(nextLink)) {
+          content.push(
+            <SafeLink text={nextLink} url={nextLink} />,
+          );
+        } else {
+          content.push(nextLink);
+        }
       }
       lastIndex = index + nextLink.length;
       nextLink = links.shift();
