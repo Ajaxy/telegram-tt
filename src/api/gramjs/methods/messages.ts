@@ -1011,7 +1011,7 @@ export async function fetchMessageViews({
     }))
   )));
 
-  if (!results || results.find((result) => !result)) return undefined;
+  if (!results || results.some((result) => !result)) return undefined;
 
   const viewsList = results.flatMap((result) => result!.views);
   const users = results.flatMap((result) => result!.users);

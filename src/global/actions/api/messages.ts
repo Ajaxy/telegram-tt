@@ -1849,7 +1849,9 @@ addActionHandler('loadMessageViews', async (global, actions, payload): Promise<v
       forwardsCount: update.forwards,
     });
 
-    global = updateThreadInfo(global, chatId, update.id, update.threadInfo);
+    if (update.threadInfo) {
+      global = updateThreadInfo(global, chatId, update.id, update.threadInfo);
+    }
   });
 
   setGlobal(global);

@@ -12,7 +12,7 @@ export function buildContentClassName(
     asForwarded,
     hasThread,
     forceSenderName,
-    hasComments,
+    hasCommentCounter,
     hasActionButton,
     hasReactions,
     isGeoLiveActive,
@@ -25,7 +25,7 @@ export function buildContentClassName(
     asForwarded?: boolean;
     hasThread?: boolean;
     forceSenderName?: boolean;
-    hasComments?: boolean;
+    hasCommentCounter?: boolean;
     hasActionButton?: boolean;
     hasReactions?: boolean;
     isGeoLiveActive?: boolean;
@@ -69,8 +69,8 @@ export function buildContentClassName(
       classNames.push('round');
     }
 
-    if (hasComments) {
-      classNames.push('has-comments');
+    if (hasCommentCounter) {
+      classNames.push('has-comment-counter');
     }
   }
   if (isMedia) {
@@ -133,7 +133,7 @@ export function buildContentClassName(
   if (!isCustomShape) {
     classNames.push('has-shadow');
 
-    if (isMedia && hasComments) {
+    if (isMedia && hasThread) {
       classNames.push('has-background');
     }
 
