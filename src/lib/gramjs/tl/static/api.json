@@ -331,6 +331,7 @@
     "stories.getPeerMaxIDs",
     "stories.togglePeerStoriesHidden",
     "stories.getPeerStories",
+    "stories.getStoriesViews",
     "premium.getBoostsStatus",
     "premium.getBoostersList",
     "premium.applyBoost",

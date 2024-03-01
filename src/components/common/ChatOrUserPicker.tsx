@@ -2,9 +2,9 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, getGlobal } from '../../global';
 
-import type { ApiChat, ApiTopic } from '../../api/types';
+import type { ApiTopic } from '../../api/types';
 import type { ThreadId } from '../../types';
 
 import { CHAT_HEIGHT_PX } from '../../config';
@@ -35,7 +35,6 @@ import './ChatOrUserPicker.scss';
 export type OwnProps = {
   currentUserId?: string;
   chatOrUserIds: string[];
-  chatsById?: Record<string, ApiChat>;
   isOpen: boolean;
   searchPlaceholder: string;
   search: string;
@@ -55,7 +54,6 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   isOpen,
   currentUserId,
   chatOrUserIds,
-  chatsById,
   search,
   searchPlaceholder,
   className,
@@ -89,7 +87,11 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   useInputFocusOnOpen(topicSearchRef, isOpen && activeKey === TOPIC_LIST_SLIDE);
 
   const [topicIds, topics] = useMemo(() => {
-    const topicsResult = forumId ? chatsById?.[forumId].topics : undefined;
+    const global = getGlobal();
+    const chatsById = global.chats.byId;
+    const chatFullInfoById = global.chats.fullInfoById;
+
+    const topicsResult = forumId ? chatsById[forumId].topics : undefined;
     if (!topicsResult) {
       return [undefined, undefined];
     }
@@ -99,7 +101,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     const result = topicsResult
       ? Object.values(topicsResult).reduce((acc, topic) => {
         if (
-          getCanPostInChat(chatsById![forumId!], topic.id)
+          getCanPostInChat(chatsById[forumId!], topic.id, undefined, chatFullInfoById[forumId!])
           && (!searchTitle || topic.title.toLowerCase().includes(searchTitle))
         ) {
           acc[topic.id] = topic;
@@ -110,7 +112,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       : topicsResult;
 
     return [Object.keys(result).map(Number), result];
-  }, [chatsById, forumId, topicSearch]);
+  }, [forumId, topicSearch]);
 
   const handleHeaderBackClick = useLastCallback(() => {
     setForumId(undefined);
@@ -127,8 +129,10 @@ const ChatOrUserPicker: FC<OwnProps> = ({
 
   const handleKeyDown = useKeyboardListNavigation(containerRef, isOpen, (index) => {
     if (viewportIds && viewportIds.length > 0) {
+      const chatsById = getGlobal().chats.byId;
+
       const chatId = viewportIds[index === -1 ? 0 : index];
-      const chat = chatsById?.[chatId];
+      const chat = chatsById[chatId];
       if (chat?.isForum) {
         if (!chat.topics) loadTopics({ chatId });
         setForumId(chatId);
@@ -145,6 +149,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   }, '.ListItem-button', true);
 
   const handleClick = useLastCallback((e: React.MouseEvent, chatId: string) => {
+    const chatsById = getGlobal().chats.byId;
     const chat = chatsById?.[chatId];
     if (chat?.isForum) {
       if (!chat.topics) loadTopics({ chatId });

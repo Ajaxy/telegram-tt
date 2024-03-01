@@ -81,6 +81,7 @@ import {
   selectIsMessageSelected,
   selectMessageIdsByGroupId,
   selectOutgoingStatus,
+  selectPeer,
   selectPeerStory,
   selectPerformanceSettingsValue,
   selectReplySender,
@@ -222,7 +223,7 @@ type StateProps = {
   replyMessageChat?: ApiChat;
   isReplyPrivate?: boolean;
   replyStory?: ApiTypeStory;
-  storySender?: ApiUser;
+  storySender?: ApiPeer;
   outgoingStatus?: ApiMessageOutgoingStatus;
   uploadProgress?: number;
   isInDocumentGroup: boolean;
@@ -279,7 +280,9 @@ type StateProps = {
   isConnected: boolean;
   isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
+  senderBoosts?: number;
   tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
+  canTranscribeVoice?: boolean;
 };
 
 type MetaPosition =
@@ -394,7 +397,9 @@ const Message: FC<OwnProps & StateProps> = ({
   isConnected,
   getIsMessageListReady,
   shouldWarnAboutSvg,
+  senderBoosts,
   tags,
+  canTranscribeVoice,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -655,7 +660,7 @@ const Message: FC<OwnProps & StateProps> = ({
   } = getMessageContent(message);
 
   const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
-  const { userId: storyReplyUserId, storyId: storyReplyId } = storyReplyInfo || {};
+  const { peerId: storyReplyPeerId, storyId: storyReplyId } = storyReplyInfo || {};
 
   const detectedLanguage = useTextLanguage(
     text?.text,
@@ -739,7 +744,7 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   useEnsureStory(
-    storyReplyUserId || chatId,
+    storyReplyPeerId || chatId,
     storyReplyId,
     replyStory,
   );
@@ -1132,7 +1137,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isTranscriptionError={isTranscriptionError}
             canDownload={!isProtected}
             onHideTranscription={setTranscriptionHidden}
-            canTranscribe={isPremium && !hasTtl}
+            canTranscribe={canTranscribeVoice && !hasTtl}
           />
         )}
         {document && (
@@ -1312,6 +1317,7 @@ const Message: FC<OwnProps & StateProps> = ({
             </span>
           </>
         )}
+        <div className="title-spacer" />
         {forwardInfo?.isLinkedChannelPost ? (
           <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
         ) : message.forwardInfo?.postAuthorTitle && isGroup && asForwarded ? (
@@ -1325,6 +1331,12 @@ const Message: FC<OwnProps & StateProps> = ({
             )}
           </span>
         ) : undefined}
+        {Boolean(senderBoosts) && (
+          <span className="sender-boosts" aria-hidden>
+            <Icon name={senderBoosts > 1 ? 'boosts' : 'boost'} />
+            {senderBoosts > 1 ? senderBoosts : undefined}
+          </span>
+        )}
       </div>
     );
   }
@@ -1499,7 +1511,7 @@ export default memo(withGlobal<OwnProps>(
     const isThreadTop = message.id === threadId;
 
     const { replyToMsgId, replyToPeerId, replyFrom } = getMessageReplyInfo(message) || {};
-    const { userId: storyReplyUserId, storyId: storyReplyId } = getStoryReplyInfo(message) || {};
+    const { peerId: storyReplyPeerId, storyId: storyReplyId } = getStoryReplyInfo(message) || {};
 
     const shouldHideReply = replyToMsgId && replyToMsgId === threadId;
     const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
@@ -1512,10 +1524,10 @@ export default memo(withGlobal<OwnProps>(
     const isReplyPrivate = !isRepliesChat && !isAnonymousForwards && replyMessageChat && !isChatPublic(replyMessageChat)
       && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
-    const replyStory = storyReplyId && storyReplyUserId
-      ? selectPeerStory(global, storyReplyUserId, storyReplyId)
+    const replyStory = storyReplyId && storyReplyPeerId
+      ? selectPeerStory(global, storyReplyPeerId, storyReplyId)
       : undefined;
-    const storySender = storyReplyUserId ? selectUser(global, storyReplyUserId) : undefined;
+    const storySender = storyReplyPeerId ? selectPeer(global, storyReplyPeerId) : undefined;
 
     const uploadProgress = selectUploadProgress(global, message);
     const isFocused = messageListType === 'thread' && (
@@ -1572,6 +1584,14 @@ export default memo(withGlobal<OwnProps>(
 
     const hasActiveReactions = Boolean(reactionMessage && activeReactions[getMessageKey(reactionMessage)]?.length);
 
+    const isPremium = selectIsCurrentUserPremium(global);
+    const senderBoosts = sender && selectIsChatWithSelf(global, sender.id)
+      ? (chatFullInfo?.boostsApplied ?? message.senderBoosts) : message.senderBoosts;
+
+    const chatLevel = chat?.boostLevel || 0;
+    const transcribeMinLevel = global.appConfig?.groupTranscribeLevelMin;
+    const canTranscribeVoice = isPremium || Boolean(transcribeMinLevel && chatLevel >= transcribeMinLevel);
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1627,7 +1647,7 @@ export default memo(withGlobal<OwnProps>(
       hasUnreadReaction,
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
-      isPremium: selectIsCurrentUserPremium(global),
+      isPremium,
       senderAdminMember,
       messageTopic,
       hasTopicChip,
@@ -1652,7 +1672,9 @@ export default memo(withGlobal<OwnProps>(
         isResizingContainer,
         focusedQuote,
       }),
+      senderBoosts,
       tags: global.savedReactionTags?.byKey,
+      canTranscribeVoice,
     };
   },
 )(Message));

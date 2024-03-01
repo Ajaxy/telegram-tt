@@ -222,6 +222,14 @@
     }
   }
 
+  &-chat {
+    background-color: var(--color-text-secondary);
+    color: var(--color-background);
+    border-radius: 0.5rem;
+    padding-inline: 0.25rem;
+    margin-inline-start: 0.5rem;
+  }
+
   &-locked-icon {
     margin-right: 0.25rem;
   }

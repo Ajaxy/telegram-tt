@@ -325,18 +325,31 @@
       margin-left: 0.25rem;
     }
 
+    .title-spacer {
+      flex-grow: 1;
+    }
+
     .admin-title {
-      flex: 1;
       margin-left: 1rem;
       text-align: right;
       font-weight: 400;
       font-size: 0.75rem;
       margin-top: -0.125rem;
       color: rgba(var(--color-text-meta-rgb), 0.75);
+      user-select: none;
 
       .Message.own & {
         color: var(--accent-color);
       }
+    }
+
+    .sender-boosts {
+      display: flex;
+      align-items: center;
+      font-size: 0.75rem;
+      margin-top: -0.125rem;
+      margin-inline-start: 0.125rem;
+      user-select: none;
     }
   }
 

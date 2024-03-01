@@ -197,6 +197,7 @@ export interface ApiAppConfig {
   storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
+  groupTranscribeLevelMin?: number;
 }
 
 export interface ApiConfig {

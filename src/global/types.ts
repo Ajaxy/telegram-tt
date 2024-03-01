@@ -910,10 +910,6 @@ export type GlobalState = {
       hash?: string;
       stickers: ApiSticker[];
     };
-    premiumSet: {
-      hash?: string;
-      stickers: ApiSticker[];
-    };
     featured: {
       hash?: string;
       setIds?: string[];
@@ -2212,11 +2208,11 @@ export interface ActionPayloads {
     isMuted: boolean;
   } & WithTabId;
   closeStoryViewer: WithTabId | undefined;
-  loadStoryViews: ({
+  loadStoryViews: {
     peerId: string;
     storyId: number;
-    isPreload: true;
-  } | {
+  };
+  loadStoryViewList: ({
     peerId: string;
     storyId: number;
     offset?: string;
@@ -2900,9 +2896,6 @@ export interface ActionPayloads {
   loadPremiumGifts: undefined;
   loadDefaultTopicIcons: undefined;
   loadPremiumStickers: undefined;
-  loadPremiumSetStickers: {
-    hash?: string;
-  } | undefined;
 
   openGiftPremiumModal: ({
     forUserId?: string;

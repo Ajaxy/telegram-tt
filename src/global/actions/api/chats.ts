@@ -1463,7 +1463,7 @@ addActionHandler('processBoostParameters', async (global, actions, payload): Pro
     }
   }
 
-  if (!isChatChannel(chat)) {
+  if (!isChatChannel(chat) && !isChatSuperGroup(chat)) {
     actions.openChat({ id: chat.id, tabId });
     return;
   }
@@ -2781,13 +2781,12 @@ export async function loadFullChat<T extends GlobalState>(
   }
 
   const {
-    users, userStatusesById, fullInfo, groupCall, membersCount, isForumAsMessages,
+    chats, users, userStatusesById, fullInfo, groupCall, membersCount, isForumAsMessages,
   } = result;
 
   global = getGlobal();
-  if (users) {
-    global = addUsers(global, buildCollectionByKey(users, 'id'));
-  }
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = updateChats(global, buildCollectionByKey(chats, 'id'));
 
   if (userStatusesById) {
     global = addUserStatuses(global, userStatusesById);
@@ -2820,6 +2819,18 @@ export async function loadFullChat<T extends GlobalState>(
       stickerSetInfo: {
         id: stickerSet.id,
         accessHash: stickerSet.accessHash,
+      },
+      tabId,
+    });
+  }
+
+  const emojiSet = fullInfo.emojiSet;
+  const localEmojiSet = emojiSet && selectStickerSet(global, emojiSet);
+  if (emojiSet && !localEmojiSet) {
+    actions.loadStickers({
+      stickerSetInfo: {
+        id: emojiSet.id,
+        accessHash: emojiSet.accessHash,
       },
       tabId,
     });

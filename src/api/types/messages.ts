@@ -298,6 +298,7 @@ export interface ApiAction {
   | 'topicCreate'
   | 'suggestProfilePhoto'
   | 'joinedChannel'
+  | 'chatBoost'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;
@@ -356,7 +357,7 @@ export interface ApiMessageReplyInfo {
 
 export interface ApiStoryReplyInfo {
   type: 'story';
-  userId: string;
+  peerId: string;
   storyId: number;
 }
 
@@ -370,7 +371,7 @@ export interface ApiInputMessageReplyInfo {
 
 export interface ApiInputStoryReplyInfo {
   type: 'story';
-  userId: string;
+  peerId: string;
   storyId: number;
 }
 
@@ -539,6 +540,7 @@ export interface ApiMessage {
   hasComments?: boolean;
   readDate?: number;
   savedPeerId?: string;
+  senderBoosts?: number;
 }
 
 export interface ApiReactions {

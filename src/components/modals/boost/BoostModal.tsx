@@ -1,11 +1,12 @@
-import React, { memo, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiMyBoost } from '../../../api/types';
+import type { ApiChat, ApiChatFullInfo, ApiMyBoost } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
-import { getChatTitle } from '../../../global/helpers';
-import { selectChat, selectIsCurrentUserPremium } from '../../../global/selectors';
+import { getChatTitle, isChatAdmin, isChatChannel } from '../../../global/helpers';
+import { selectChat, selectChatFullInfo, selectIsCurrentUserPremium } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { formatDateInFuture } from '../../../util/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
@@ -50,14 +51,16 @@ export type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  boostedChat?: ApiChat;
+  chatFullInfo?: ApiChatFullInfo;
+  prevBoostedChat?: ApiChat;
   isCurrentUserPremium?: boolean;
 };
 
 const BoostModal = ({
   info,
   chat,
-  boostedChat,
+  chatFullInfo,
+  prevBoostedChat,
   isCurrentUserPremium,
 }: OwnProps & StateProps) => {
   const {
@@ -65,15 +68,24 @@ const BoostModal = ({
     closeBoostModal,
     requestConfetti,
     openPremiumModal,
+    loadFullChat,
   } = getActions();
 
   const [isReplaceModalOpen, openReplaceModal, closeReplaceModal] = useFlag();
   const [isWaitDialogOpen, openWaitDialog, closeWaitDialog] = useFlag();
   const [isPremiumDialogOpen, openPremiumDialog, closePremiumDialog] = useFlag();
 
+  const isChannel = chat && isChatChannel(chat);
+
   const isOpen = Boolean(info);
 
   const lang = useLang();
+
+  useEffect(() => {
+    if (chat && !chatFullInfo) {
+      loadFullChat({ chatId: chat.id });
+    }
+  }, [chat, chatFullInfo]);
 
   const chatTitle = useMemo(() => {
     if (!chat) {
@@ -84,12 +96,12 @@ const BoostModal = ({
   }, [chat, lang]);
 
   const boostedChatTitle = useMemo(() => {
-    if (!boostedChat) {
+    if (!prevBoostedChat) {
       return undefined;
     }
 
-    return getChatTitle(lang, boostedChat);
-  }, [boostedChat, lang]);
+    return getChatTitle(lang, prevBoostedChat);
+  }, [prevBoostedChat, lang]);
 
   const {
     isStatusLoaded,
@@ -111,7 +123,7 @@ const BoostModal = ({
     }
 
     const {
-      level, currentLevelBoosts, hasMyBoost,
+      hasMyBoost,
     } = info.boostStatus;
 
     const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts, chat.id);
@@ -123,36 +135,28 @@ const BoostModal = ({
       hasNextLevel,
       levelProgress,
       remainingBoosts,
+      isMaxLevel,
     } = getBoostProgressInfo(info.boostStatus, true);
 
     const hasBoost = hasMyBoost;
-    const isJustUpgraded = boosts === currentLevelBoosts && hasBoost;
 
     const left = lang('BoostsLevel', currentLevel);
     const right = hasNextLevel ? lang('BoostsLevel', currentLevel + 1) : undefined;
 
     const moreBoosts = lang('ChannelBoost.MoreBoosts', remainingBoosts);
-    const currentStoriesPerDay = lang('ChannelBoost.StoriesPerDay', level);
-    const nextLevelStoriesPerDay = lang('ChannelBoost.StoriesPerDay', level + 1);
 
-    const modalTitle = hasBoost ? lang('YouBoostedChannel2', chatTitle)
-      : level === 0 ? lang('lng_boost_channel_title_first') : lang('lng_boost_channel_title_more');
+    const modalTitle = isChannel ? lang('BoostChannel') : lang('BoostGroup');
+
+    const boostsLeftToUnrestrict = (chatFullInfo?.boostsToUnrestrict || 0) - (chatFullInfo?.boostsApplied || 0);
 
     let description: string | undefined;
-    if (level === 0) {
-      if (!hasBoost) {
-        description = lang('ChannelBoost.EnableStoriesForChannelText', [chatTitle, moreBoosts]);
-      } else {
-        description = lang('ChannelBoost.EnableStoriesMoreRequired', moreBoosts);
-      }
-    } else if (isJustUpgraded) {
-      if (level === 1) {
-        description = lang('ChannelBoost.EnabledStoriesForChannelText');
-      } else {
-        description = lang('ChannelBoost.BoostedChannelReachedLevel', [level, currentStoriesPerDay]);
-      }
+    if (isMaxLevel) {
+      description = lang('BoostsMaxLevelReached');
+    } else if (boostsLeftToUnrestrict > 0 && !isChatAdmin(chat)) {
+      const boostTimes = lang('GroupBoost.BoostToUnrestrict.Times', boostsLeftToUnrestrict);
+      description = lang('GroupBoost.BoostToUnrestrict', [boostTimes, chatTitle]);
     } else {
-      description = lang('ChannelBoost.HelpUpgradeChannelText', [chatTitle, moreBoosts, nextLevelStoriesPerDay]);
+      description = lang('ChannelBoost.MoreBoostsNeeded.Text', [chatTitle, moreBoosts]);
     }
 
     return {
@@ -166,9 +170,9 @@ const BoostModal = ({
       descriptionText: description,
       boost: firstBoost,
       isBoosted: hasBoost,
-      canBoostMore: areBoostsInDifferentChannels,
+      canBoostMore: areBoostsInDifferentChannels && !isMaxLevel,
     };
-  }, [chat, chatTitle, info, lang]);
+  }, [chat, chatTitle, info, lang, chatFullInfo, isChannel]);
 
   const isBoostDisabled = !info?.myBoosts?.length && isCurrentUserPremium;
   const isReplacingBoost = boost?.chatId && boost.chatId !== info?.chatId;
@@ -189,6 +193,7 @@ const BoostModal = ({
     if (!boost) {
       if (!isCurrentUserPremium) {
         openPremiumDialog();
+        return;
       }
 
       closeBoostModal();
@@ -231,6 +236,11 @@ const BoostModal = ({
           floatingBadgeText={value}
           floatingBadgeIcon="boost"
         />
+        {isBoosted && (
+          <div className={buildClassName(styles.description, styles.bold)}>
+            {lang('ChannelBoost.YouBoostedChannelText', chatTitle)}
+          </div>
+        )}
         <div className={styles.description}>
           {renderText(descriptionText, ['simple_markdown', 'emoji'])}
         </div>
@@ -239,7 +249,7 @@ const BoostModal = ({
             {canBoostMore ? (
               <>
                 <Icon name="boost" />
-                {lang(isBoosted && canBoostMore ? 'BoostingBoostAgain' : 'ChannelBoost.BoostChannel')}
+                {lang(isChannel ? 'ChannelBoost.BoostChannel' : 'GroupBoost.BoostGroup')}
               </>
             ) : lang('OK')}
           </Button>
@@ -269,7 +279,7 @@ const BoostModal = ({
         >
           <div className={styles.avatarContainer}>
             <div className={styles.boostedWrapper}>
-              <Avatar peer={boostedChat} size="large" />
+              <Avatar peer={prevBoostedChat} size="large" />
               <Icon name="boostcircle" className={styles.boostedMark} />
             </div>
             <Icon name="next" className={styles.arrow} />
@@ -334,12 +344,14 @@ function areAllBoostsInChannel(myBoosts: ApiMyBoost[], chatId: string) {
 export default memo(withGlobal<OwnProps>(
   (global, { info }): StateProps => {
     const chat = info && selectChat(global, info?.chatId);
+    const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
     const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts, info.chatId);
     const boostedChat = firstBoost?.chatId ? selectChat(global, firstBoost?.chatId) : undefined;
 
     return {
       chat,
-      boostedChat,
+      chatFullInfo,
+      prevBoostedChat: boostedChat,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },

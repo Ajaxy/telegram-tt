@@ -172,9 +172,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     premium: {
       stickers: [],
     },
-    premiumSet: {
-      stickers: [],
-    },
     featured: {
       setIds: [],
     },

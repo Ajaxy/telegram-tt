@@ -21,6 +21,7 @@ import {
   buildApiStealthMode,
   buildApiStory,
   buildApiStoryView,
+  buildApiStoryViews,
 } from '../apiBuilders/stories';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -297,6 +298,33 @@ export async function fetchStoryViewList({
     nextOffset: result.nextOffset,
     reactionsCount: result.reactionsCount,
     viewsCount: result.count,
+  };
+}
+
+export async function fetchStoriesViews({
+  peer,
+  storyIds,
+}: {
+  peer: ApiPeer;
+  storyIds: number[];
+}) {
+  const result = await invokeRequest(new GramJs.stories.GetStoriesViews({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    id: storyIds,
+  }));
+
+  if (!result?.views[0]) {
+    return undefined;
+  }
+
+  addEntitiesToLocalDb(result.users);
+
+  const views = buildApiStoryViews(result.views[0]);
+  const users = result.users.map(buildApiUser).filter(Boolean);
+
+  return {
+    views,
+    users,
   };
 }
 

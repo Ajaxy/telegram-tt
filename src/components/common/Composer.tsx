@@ -14,7 +14,6 @@ import type {
   ApiBotMenuButton,
   ApiChat,
   ApiChatFullInfo,
-  ApiChatMember,
   ApiFormattedText,
   ApiMessage,
   ApiMessageEntity,
@@ -191,6 +190,7 @@ type StateProps =
     isOnActiveTab: boolean;
     editingMessage?: ApiMessage;
     chat?: ApiChat;
+    chatFullInfo?: ApiChatFullInfo;
     draft?: ApiDraft;
     replyToTopic?: ApiTopic;
     currentMessageList?: MessageList;
@@ -210,7 +210,6 @@ type StateProps =
     canScheduleUntilOnline?: boolean;
     stickersForEmoji?: ApiSticker[];
     customEmojiForEmoji?: ApiSticker[];
-    groupChatMembers?: ApiChatMember[];
     currentUserId?: string;
     currentUser?: ApiUser;
     recentEmojis: string[];
@@ -224,7 +223,6 @@ type StateProps =
     inlineBots?: Record<string, false | InlineBotSettings>;
     botCommands?: ApiBotCommand[] | false;
     botMenuButton?: ApiBotMenuButton;
-    chatBotCommands?: ApiBotCommand[];
     sendAsUser?: ApiUser;
     sendAsChat?: ApiChat;
     sendAsId?: string;
@@ -293,6 +291,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   messageListType,
   draft,
   chat,
+  chatFullInfo,
   replyToTopic,
   isForCurrentMessageList,
   isCurrentUserPremium,
@@ -312,7 +311,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   withScheduledButton,
   stickersForEmoji,
   customEmojiForEmoji,
-  groupChatMembers,
   topInlineBotIds,
   currentUserId,
   currentUser,
@@ -326,7 +324,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   inlineBots,
   isInlineBotLoading,
   botCommands,
-  chatBotCommands,
   sendAsUser,
   sendAsChat,
   sendAsId,
@@ -405,6 +402,9 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const canMediaBeReplaced = editingMessage && hasReplaceableMedia(editingMessage);
 
+  const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
+  const chatEmojiSetId = emojiSet?.id;
+
   const isSentStoryReactionHeart = sentStoryReaction && 'emoticon' in sentStoryReaction
     ? sentStoryReaction.emoticon === HEART_REACTION.emoticon : false;
 
@@ -457,8 +457,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
     canSendVoices, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
   } = useMemo(
-    () => getAllowedAttachmentOptions(chat, isChatWithBot, isInStoryViewer),
-    [chat, isChatWithBot, isInStoryViewer],
+    () => getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isInStoryViewer),
+    [chat, chatFullInfo, isChatWithBot, isInStoryViewer],
   );
 
   const isComposerBlocked = !canSendPlainText && !editingMessage;
@@ -1088,7 +1088,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
 
   const handleCustomEmojiSelect = useLastCallback((emoji: ApiSticker, inInputId?: string) => {
-    if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf) {
+    const emojiSetId = 'id' in emoji.stickerSetInfo && emoji.stickerSetInfo.id;
+    if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf && emojiSetId !== chatEmojiSetId) {
       showCustomEmojiPremiumNotification();
       return;
     }
@@ -2027,7 +2028,7 @@ export default memo(withGlobal<OwnProps>(
       pollModal: tabState.pollModal,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
-      groupChatMembers: chatFullInfo?.members,
+      chatFullInfo,
       topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId,
       currentUser,
@@ -2040,7 +2041,6 @@ export default memo(withGlobal<OwnProps>(
       emojiKeywords: emojiKeywords?.keywords,
       inlineBots: tabState.inlineBots.byUsername,
       isInlineBotLoading: tabState.inlineBots.isLoading,
-      chatBotCommands: chatFullInfo?.botCommands,
       botCommands: chatBotFullInfo ? (chatBotFullInfo.botInfo?.commands || false) : undefined,
       botMenuButton: chatBotFullInfo?.botInfo?.menuButton,
       sendAsUser,

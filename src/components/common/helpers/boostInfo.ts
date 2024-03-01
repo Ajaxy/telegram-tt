@@ -14,11 +14,14 @@ export function getBoostProgressInfo(boostInfo: ApiBoostsStatus, freezeOnLevelUp
     : (boosts - currentLevelBoosts) / (nextLevelBoosts - currentLevelBoosts);
   const remainingBoosts = nextLevelBoosts ? nextLevelBoosts - boosts : 0;
 
+  const isMaxLevel = nextLevelBoosts === undefined;
+
   return {
     currentLevel,
     hasNextLevel,
     boosts,
     levelProgress,
     remainingBoosts,
+    isMaxLevel,
   };
 }

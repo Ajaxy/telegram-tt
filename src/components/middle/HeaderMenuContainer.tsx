@@ -84,6 +84,7 @@ export type OwnProps = {
   canMute?: boolean;
   canViewStatistics?: boolean;
   canViewBoosts?: boolean;
+  canShowBoostModal?: boolean;
   withForumActions?: boolean;
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
@@ -166,6 +167,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isBot,
   isChatWithSelf,
   savedDialog,
+  canShowBoostModal,
   onJoinRequestsClick,
   onSubscribeChannel,
   onSearchClick,
@@ -195,6 +197,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     blockUser,
     unblockUser,
     setViewForumAsMessages,
+    openBoostModal,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -346,8 +349,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleBoostClick = useLastCallback(() => {
-    openBoostStatistics({ chatId });
-    setShouldCloseFast(!isRightColumnShown);
+    if (canViewBoosts) {
+      openBoostStatistics({ chatId });
+      setShouldCloseFast(!isRightColumnShown);
+    } else {
+      openBoostModal({ chatId });
+    }
     closeMenu();
   });
 
@@ -522,6 +529,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang(isChannel ? 'ProfileJoinChannel' : 'ProfileJoinGroup')}
             </MenuItem>
           )}
+          {canShowBoostModal && !canViewBoosts && (
+            <MenuItem
+              icon="boost-outline"
+              onClick={handleBoostClick}
+            >
+              {lang(isChannel ? 'BoostingBoostChannelMenu' : 'BoostingBoostGroupMenu')}
+            </MenuItem>
+          )}
           {canAddContact && (
             <MenuItem
               icon="add-user"
@@ -589,7 +604,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
           )}
           {canViewBoosts && (
             <MenuItem
-              icon="boost"
+              icon="boost-outline"
               onClick={handleBoostClick}
             >
               {lang('Boosts')}

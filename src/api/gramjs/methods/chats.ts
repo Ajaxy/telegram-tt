@@ -80,7 +80,8 @@ import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
   fullInfo: ApiChatFullInfo;
-  users?: ApiUser[];
+  users: ApiUser[];
+  chats: ApiChat[];
   userStatusesById: { [userId: string]: ApiUserStatus };
   groupCall?: Partial<ApiGroupCall>;
   membersCount?: number;
@@ -519,6 +520,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported ? exportedInvite.link : undefined;
   const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
+  const chats = result.chats.map((chat) => buildApiChatFromPreview(chat)).filter(Boolean);
 
   return {
     fullInfo: {
@@ -536,6 +538,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       isTranslationDisabled: translationsDisabled,
     },
     users,
+    chats,
     userStatusesById,
     groupCall: call ? {
       chatId,
@@ -590,6 +593,9 @@ async function getFullChannelInfo(
     translationsDisabled,
     storiesPinnedAvailable,
     viewForumAsMessages,
+    emojiset,
+    boostsApplied,
+    boostsUnrestrict,
   } = result.fullChat;
 
   if (chatPhoto instanceof GramJs.Photo) {
@@ -608,6 +614,7 @@ async function getFullChannelInfo(
     canViewParticipants && await fetchMembers(id, accessHash, 'admin')
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
+  const chats = result.chats.map((chat) => buildApiChatFromPreview(chat)).filter(Boolean);
 
   if (result?.chats?.length > 1) {
     updateLocalDb(result);
@@ -662,11 +669,15 @@ async function getFullChannelInfo(
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
       statisticsDcId: statsDc,
       stickerSet: stickerset ? buildStickerSet(stickerset) : undefined,
+      emojiSet: emojiset ? buildStickerSet(emojiset) : undefined,
       areParticipantsHidden: participantsHidden,
       isTranslationDisabled: translationsDisabled,
       hasPinnedStories: Boolean(storiesPinnedAvailable),
+      boostsApplied,
+      boostsToUnrestrict: boostsUnrestrict,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
+    chats,
     userStatusesById: statusesById,
     groupCall: call ? {
       chatId: id,

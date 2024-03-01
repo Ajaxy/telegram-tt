@@ -646,7 +646,7 @@ export function buildInputBotApp(app: ApiBotApp) {
 export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
   if (replyInfo.type === 'story') {
     return new GramJs.InputReplyToStory({
-      userId: buildInputPeerFromLocalDb(replyInfo.userId)!,
+      peer: buildInputPeerFromLocalDb(replyInfo.peerId)!,
       storyId: replyInfo.storyId,
     });
   }

@@ -2,13 +2,14 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiVideo } from '../../api/types';
+import type { ApiChat, ApiChatFullInfo, ApiVideo } from '../../api/types';
 import type { MessageList } from '../../global/types';
 
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 import {
   selectCanScheduleUntilOnline,
   selectChat,
+  selectChatFullInfo,
   selectCurrentGifSearch,
   selectCurrentMessageList,
   selectIsChatWithBot,
@@ -37,6 +38,7 @@ type StateProps = {
   query?: string;
   results?: ApiVideo[];
   chat?: ApiChat;
+  chatFullInfo?: ApiChatFullInfo;
   isChatWithBot?: boolean;
   canScheduleUntilOnline?: boolean;
   isSavedMessages?: boolean;
@@ -52,6 +54,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
   query,
   results,
   chat,
+  chatFullInfo,
   isChatWithBot,
   canScheduleUntilOnline,
   isSavedMessages,
@@ -74,7 +77,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: containerRef, debounceMs: INTERSECTION_DEBOUNCE });
 
-  const canSendGifs = canPostInChat && getAllowedAttachmentOptions(chat, isChatWithBot).canSendGifs;
+  const canSendGifs = canPostInChat && getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot).canSendGifs;
 
   const handleGifClick = useCallback((gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => {
     if (canSendGifs) {
@@ -166,11 +169,13 @@ export default memo(withGlobal(
     const { query, results } = currentSearch || {};
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
     const chat = chatId ? selectChat(global, chatId) : undefined;
+    const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
     const isChatWithBot = chat ? selectIsChatWithBot(global, chat) : undefined;
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
     const threadInfo = chatId && threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
-    const canPostInChat = Boolean(chat) && Boolean(threadId) && getCanPostInChat(chat, threadId, isMessageThread);
+    const canPostInChat = Boolean(chat) && Boolean(threadId)
+      && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
 
     return {
       query,

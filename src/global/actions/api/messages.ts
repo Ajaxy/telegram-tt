@@ -312,7 +312,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
 
   const storyReplyInfo = isStoryReply ? {
     type: 'story',
-    userId: storyPeerId!,
+    peerId: storyPeerId!,
     storyId: storyId!,
   } satisfies ApiInputStoryReplyInfo : undefined;
 

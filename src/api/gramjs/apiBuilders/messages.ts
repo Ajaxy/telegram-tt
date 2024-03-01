@@ -159,7 +159,7 @@ export type UniversalMessage = (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
     'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned' |
-    'savedPeerId'
+    'savedPeerId' | 'fromBoostsApplied'
   )>
 );
 
@@ -197,10 +197,11 @@ export function buildApiMessageWithChatId(
   const isForwardingAllowed = !mtpMessage.noforwards;
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
   const hasComments = mtpMessage.replies?.comments;
+  const senderBoosts = mtpMessage.fromBoostsApplied;
 
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
-  return omitUndefined({
+  return omitUndefined<ApiMessage>({
     id: mtpMessage.id,
     chatId,
     isOutgoing,
@@ -237,7 +238,8 @@ export function buildApiMessageWithChatId(
     isForwardingAllowed,
     hasComments,
     savedPeerId,
-  } satisfies ApiMessage);
+    senderBoosts,
+  });
 }
 
 export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | undefined {
@@ -288,7 +290,7 @@ function buildApiReplyInfo(replyHeader: GramJs.TypeMessageReplyHeader): ApiReply
   if (replyHeader instanceof GramJs.MessageReplyStoryHeader) {
     return {
       type: 'story',
-      userId: replyHeader.userId.toString(),
+      peerId: getApiChatIdFromMtpPeer(replyHeader.peer),
       storyId: replyHeader.storyId,
     };
   }
@@ -562,6 +564,20 @@ function buildAction(
       translationValues.push('%amount%');
       amount = action.winnersCount;
       pluralValue = action.winnersCount;
+    }
+  } else if (action instanceof GramJs.MessageActionBoostApply) {
+    type = 'chatBoost';
+    if (action.boosts === 1) {
+      text = senderId === currentUserId ? 'BoostingBoostsGroupByYouServiceMsg' : 'BoostingBoostsGroupByUserServiceMsg';
+      translationValues.push('%action_origin%');
+    } else {
+      text = senderId === currentUserId ? 'BoostingBoostsGroupByYouServiceMsgCount'
+        : 'BoostingBoostsGroupByUserServiceMsgCount';
+      translationValues.push(action.boosts.toString());
+      if (senderId !== currentUserId) {
+        translationValues.unshift('%action_origin%');
+      }
+      pluralValue = action.boosts;
     }
   } else {
     text = 'ChatList.UnsupportedMessage';
@@ -901,7 +917,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
   if (inputInfo.type === 'story') {
     return {
       type: 'story',
-      userId: inputInfo.userId,
+      peerId: inputInfo.peerId,
       storyId: inputInfo.storyId,
     };
   }

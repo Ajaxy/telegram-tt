@@ -591,6 +591,8 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const { content } = message;
   const messageTopic = selectTopicFromMessage(global, message);
   const isDocumentSticker = isMessageDocumentSticker(message);
+  const chatFullInfo = selectChatFullInfo(global, chat.id);
+  const isBoostMessage = message.content.action?.type === 'chatBoost';
 
   const canEditMessagesIndefinitely = isChatWithSelf
     || (isSuperGroup && getHasAdminRight(chat, 'pinMessages'))
@@ -614,7 +616,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const threadInfo = selectThreadInfo(global, message.chatId, threadId);
   const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
   const canReply = !isLocal && !isServiceNotification && !chat.isForbidden
-    && getCanPostInChat(chat, threadId, isMessageThread)
+    && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo)
     && (!messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics'));
 
   const hasPinPermission = isPrivate || (
@@ -633,7 +635,10 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
     canPin = !canUnpin;
   }
 
-  const canDelete = (!isLocal || isFailed) && !isServiceNotification && (
+  const canNotDeleteBoostMessage = isBoostMessage && isOwn
+    && !chat.isCreator && !getHasAdminRight(chat, 'deleteMessages');
+
+  const canDelete = (!isLocal || isFailed) && !isServiceNotification && !canNotDeleteBoostMessage && (
     isPrivate
     || isOwn
     || isBasicGroup
@@ -1363,11 +1368,12 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
     return true;
   }
 
+  const chatFullInfo = selectChatFullInfo(global, toChatId);
   const chatMessages = selectChatMessages(global, fromChatId!);
   const {
     canSendVoices, canSendRoundVideos, canSendStickers, canSendDocuments, canSendAudios, canSendVideos,
     canSendPhotos, canSendGifs, canSendPlainText,
-  } = getAllowedAttachmentOptions(chat);
+  } = getAllowedAttachmentOptions(chat, chatFullInfo);
   return !messageIds!.some((messageId) => {
     const message = chatMessages[messageId];
     const isVoice = message.content.voice;

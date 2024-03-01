@@ -207,6 +207,8 @@ const Avatar: FC<OwnProps> = ({
     content = getFirstLetters(text, 2);
   }
 
+  const isRoundedRect = isForum && !((withStory || withStorySolid) && peer?.hasStories);
+
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
@@ -216,7 +218,7 @@ const Avatar: FC<OwnProps> = ({
     isAnonymousForwards && 'anonymous-forwards',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
-    isForum && 'forum',
+    isRoundedRect && 'forum',
     ((withStory && peer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && peer?.hasStories && 'with-story-solid',
     withStorySolid && (peer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',

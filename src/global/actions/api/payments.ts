@@ -9,7 +9,7 @@ import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
 import { buildQueryString } from '../../../util/requestQuery';
 import { callApi } from '../../../api/gramjs';
-import { getStripeError, isChatChannel } from '../../helpers';
+import { getStripeError, isChatChannel, isChatSuperGroup } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
@@ -19,12 +19,14 @@ import {
   setReceipt,
   setRequestInfoId,
   setSmartGlocalCardInfo, setStripeCardInfo,
+  updateChatFullInfo,
   updatePayment,
   updateShippingOptions,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
+  selectChatFullInfo,
   selectChatMessage,
   selectPaymentFormId,
   selectPaymentInputInvoice, selectPaymentRequestId,
@@ -35,6 +37,8 @@ import {
   selectTabState,
   selectUser,
 } from '../../selectors';
+
+const LOCAL_BOOST_COOLDOWN = 86400; // 24 hours
 
 addActionHandler('validateRequestedInfo', (global, actions, payload): ActionReturnType => {
   const { requestInfo, saveInfo, tabId = getCurrentTabId() } = payload;
@@ -477,7 +481,7 @@ async function validateRequestedInfo<T extends GlobalState>(
 addActionHandler('openBoostModal', async (global, actions, payload): Promise<void> => {
   const { chatId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
-  if (!chat || !isChatChannel(chat)) return;
+  if (!chat || !(isChatChannel(chat) || isChatSuperGroup(chat))) return;
 
   global = updateTabState(global, {
     boostModal: {
@@ -614,19 +618,96 @@ addActionHandler('applyBoost', async (global, actions, payload): Promise<void> =
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
+  const oldChatFullInfo = selectChatFullInfo(global, chatId);
+  const oldBoostsApplied = oldChatFullInfo?.boostsApplied || 0;
+
+  const appliedBoostsCount = slots.length;
+
+  let tabState = selectTabState(global, tabId);
+  const oldStatus = tabState.boostModal?.boostStatus;
+
+  if (oldStatus) {
+    const boostsPerLevel = oldStatus.nextLevelBoosts ? oldStatus.nextLevelBoosts - oldStatus.currentLevelBoosts : 1;
+    const newBoosts = oldStatus.boosts + appliedBoostsCount;
+    const isLevelUp = oldStatus.nextLevelBoosts && newBoosts >= oldStatus.nextLevelBoosts;
+    const newCurrentLevelBoosts = isLevelUp ? oldStatus.nextLevelBoosts! : oldStatus.currentLevelBoosts;
+    const newNextLevelBoosts = isLevelUp ? oldStatus.nextLevelBoosts! + boostsPerLevel : oldStatus.nextLevelBoosts;
+
+    global = updateTabState(global, {
+      boostModal: {
+        ...tabState.boostModal!,
+        boostStatus: {
+          ...oldStatus,
+          level: isLevelUp ? oldStatus.level + 1 : oldStatus.level,
+          currentLevelBoosts: newCurrentLevelBoosts,
+          nextLevelBoosts: newNextLevelBoosts,
+          hasMyBoost: true,
+          boosts: newBoosts,
+        },
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+
+  global = getGlobal();
+  tabState = selectTabState(global, tabId);
+  const oldMyBoosts = tabState.boostModal?.myBoosts;
+
+  if (oldMyBoosts) {
+    const unixNow = Math.floor(Date.now() / 1000);
+    const newMyBoosts = oldMyBoosts.map((boost) => {
+      if (slots.includes(boost.slot)) {
+        return {
+          ...boost,
+          chatId,
+          date: unixNow,
+          cooldownUntil: unixNow + LOCAL_BOOST_COOLDOWN, // Will be refetched below
+        };
+      }
+      return boost;
+    });
+
+    global = updateTabState(global, {
+      boostModal: {
+        ...tabState.boostModal!,
+        myBoosts: newMyBoosts,
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+
   const result = await callApi('applyBoost', {
     slots,
     chat,
   });
 
+  global = getGlobal();
+
   if (!result) {
+    // Rollback local changes
+    const boostModal = selectTabState(global, tabId).boostModal;
+    if (boostModal) {
+      global = updateTabState(global, {
+        boostModal: {
+          ...boostModal,
+          boostStatus: oldStatus,
+          myBoosts: oldMyBoosts,
+        },
+      }, tabId);
+      setGlobal(global);
+    }
     return;
   }
 
-  global = getGlobal();
-  let tabState = selectTabState(global, tabId);
+  tabState = selectTabState(global, tabId);
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  if (oldChatFullInfo) {
+    global = updateChatFullInfo(global, chatId, {
+      boostsApplied: oldBoostsApplied + slots.length,
+    });
+  }
+
   if (tabState.boostModal) {
     global = updateTabState(global, {
       boostModal: {
@@ -635,25 +716,6 @@ addActionHandler('applyBoost', async (global, actions, payload): Promise<void> =
       },
     }, tabId);
   }
-  setGlobal(global);
-
-  const newStatusResult = await callApi('fetchBoostsStatus', {
-    chat,
-  });
-
-  if (!newStatusResult) {
-    return;
-  }
-
-  global = getGlobal();
-  tabState = selectTabState(global, tabId);
-  if (!tabState.boostModal?.boostStatus) return;
-  global = updateTabState(global, {
-    boostModal: {
-      ...tabState.boostModal,
-      boostStatus: newStatusResult,
-    },
-  }, tabId);
   setGlobal(global);
 });
 

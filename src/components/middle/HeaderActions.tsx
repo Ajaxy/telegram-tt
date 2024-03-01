@@ -67,6 +67,7 @@ interface StateProps {
   canMute?: boolean;
   canViewStatistics?: boolean;
   canViewBoosts?: boolean;
+  canShowBoostModal?: boolean;
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
   canCreateVoiceChat?: boolean;
@@ -100,6 +101,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canMute,
   canViewStatistics,
   canViewBoosts,
+  canShowBoostModal,
   canLeave,
   canEnterVoiceChat,
   canCreateVoiceChat,
@@ -433,6 +435,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           canMute={canMute}
           canViewStatistics={canViewStatistics}
           canViewBoosts={canViewBoosts}
+          canShowBoostModal={canShowBoostModal}
           canLeave={canLeave}
           canEnterVoiceChat={canEnterVoiceChat}
           canCreateVoiceChat={canCreateVoiceChat}
@@ -456,6 +459,7 @@ export default memo(withGlobal<OwnProps>(
   }): StateProps => {
     const chat = selectChat(global, chatId);
     const isChannel = Boolean(chat && isChatChannel(chat));
+    const isSuperGroup = Boolean(chat && isChatSuperGroup(chat));
     const language = selectLanguageCode(global);
     const translationLanguage = selectTranslationLanguage(global);
     const isPrivate = isUserId(chatId);
@@ -486,7 +490,7 @@ export default memo(withGlobal<OwnProps>(
     const canStartBot = !canRestartBot && Boolean(selectIsChatBotNotStarted(global, chatId));
     const canUnblock = isUserBlocked && !bot;
     const canSubscribe = Boolean(
-      (isMainThread || chat.isForum) && (isChannel || isChatSuperGroup(chat)) && chat.isNotJoined,
+      (isMainThread || chat.isForum) && (isChannel || isSuperGroup) && chat.isNotJoined,
     );
     const canSearch = isMainThread || isDiscussionThread;
     const canCall = ARE_CALLS_SUPPORTED && isUserId(chat.id) && !isChatWithSelf && !bot && !chat.isSupport
@@ -498,6 +502,7 @@ export default memo(withGlobal<OwnProps>(
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
     const canViewStatistics = isMainThread && chatFullInfo?.canViewStatistics;
     const canViewBoosts = isMainThread && isChannel && (canViewStatistics || getHasAdminRight(chat, 'postStories'));
+    const canShowBoostModal = !canViewBoosts && (isSuperGroup || isChannel);
     const pendingJoinRequests = isMainThread ? chatFullInfo?.requestsPending : undefined;
     const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
@@ -518,6 +523,7 @@ export default memo(withGlobal<OwnProps>(
       canMute,
       canViewStatistics,
       canViewBoosts,
+      canShowBoostModal,
       canLeave,
       canEnterVoiceChat,
       canCreateVoiceChat,

@@ -737,17 +737,17 @@
 
   &.clickable {
     cursor: var(--custom-cursor, pointer);
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
-.forwardHeaderText {
+.headerTitle {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
-  .forwardHeader.clickable:hover & {
-    text-decoration: underline;
-  }
 }
 
 .forwardInfo {
@@ -758,4 +758,15 @@
   max-width: 100%;
   margin-bottom: 0.5rem;
   z-index: 1;
+}
+
+.fromPeer {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: var(--custom-cursor, pointer);
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

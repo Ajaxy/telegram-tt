@@ -66,6 +66,8 @@ export interface GramJsAppConfig extends LimitsConfig {
   story_expire_period: number;
   story_viewers_expire_period: number;
   stories_changelog_user_id?: number;
+  // Boosts
+  group_transcribe_level_min?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -134,5 +136,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     storyExpirePeriod: appConfig.story_expire_period ?? STORY_EXPIRE_PERIOD,
     storyViewersExpirePeriod: appConfig.story_viewers_expire_period ?? STORY_VIEWERS_EXPIRE_PERIOD,
     storyChangelogUserId: appConfig.stories_changelog_user_id?.toString() ?? SERVICE_NOTIFICATIONS_USER_ID,
+    groupTranscribeLevelMin: appConfig.group_transcribe_level_min,
   };
 }

@@ -52,6 +52,7 @@ export interface ApiChat {
   listedTopicIds?: number[];
   topicsCount?: number;
   orderedPinnedTopicIds?: number[];
+  boostLevel?: number;
 
   // Calls
   isCallActive?: boolean;
@@ -128,10 +129,14 @@ export interface ApiChatFullInfo {
   requestsPending?: number;
   statisticsDcId?: number;
   stickerSet?: ApiStickerSet;
+  emojiSet?: ApiStickerSet;
   profilePhoto?: ApiPhoto;
   areParticipantsHidden?: boolean;
   isTranslationDisabled?: true;
   hasPinnedStories?: boolean;
+
+  boostsApplied?: number;
+  boostsToUnrestrict?: number;
 }
 
 export interface ApiChatMember {

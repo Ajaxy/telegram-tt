@@ -52,6 +52,8 @@ type OwnProps = {
   selectedReactionIds?: string[];
   withDefaultTopicIcon?: boolean;
   withDefaultStatusIcon?: boolean;
+  isChatEmojiSet?: boolean;
+  isChatStickerSet?: boolean;
   isTranslucent?: boolean;
   noContextMenus?: boolean;
   forcePlayback?: boolean;
@@ -91,6 +93,8 @@ const StickerSet: FC<OwnProps> = ({
   withDefaultTopicIcon,
   selectedReactionIds,
   withDefaultStatusIcon,
+  isChatEmojiSet,
+  isChatStickerSet,
   isTranslucent,
   noContextMenus,
   forcePlayback,
@@ -224,10 +228,11 @@ const StickerSet: FC<OwnProps> = ({
     }
   }, [shouldRender, loadStickers, stickerSet]);
 
-  const isLocked = !isSavedMessages && !isCurrentUserPremium && isPremiumSet;
+  const isLocked = !isSavedMessages && !isCurrentUserPremium && isPremiumSet && !isChatEmojiSet;
 
   const isInstalled = stickerSet.installedDate && !stickerSet.isArchived;
-  const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID && stickerSet.id !== POPULAR_SYMBOL_SET_ID;
+  const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID && stickerSet.id !== POPULAR_SYMBOL_SET_ID
+    && !isChatEmojiSet && !isChatStickerSet;
   const [isCut, , expand] = useFlag(canCut);
   const itemsBeforeCutout = itemsPerRow * 3 - 1;
   const totalItemsCount = withDefaultTopicIcon ? stickerSet.count + 1 : stickerSet.count;
@@ -240,7 +245,7 @@ const StickerSet: FC<OwnProps> = ({
   const favoriteStickerIdsSet = useMemo(() => (
     favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
   ), [favoriteStickers]);
-  const withAddSetButton = !shouldHideHeader && !isRecent && isEmoji && !isPopular
+  const withAddSetButton = !shouldHideHeader && !isRecent && isEmoji && !isPopular && !isChatEmojiSet
     && (!isInstalled || (!isCurrentUserPremium && !isSavedMessages));
   const addSetButtonText = useMemo(() => {
     if (isLocked) {
@@ -265,6 +270,9 @@ const StickerSet: FC<OwnProps> = ({
           <p className={buildClassName('symbol-set-name', withAddSetButton && 'symbol-set-name-external')}>
             {isLocked && <i className="symbol-set-locked-icon icon icon-lock-badge" />}
             {stickerSet.title}
+            {(isChatEmojiSet || isChatStickerSet) && (
+              <span className="symbol-set-chat">{lang(isChatEmojiSet ? 'GroupEmoji' : 'GroupStickers')}</span>
+            )}
             {withAddSetButton && Boolean(stickerSet.stickers) && (
               <span className="symbol-set-amount">
                 {lang(isEmoji ? 'EmojiCount' : 'Stickers', stickerSet.stickers.length, 'i')}
@@ -360,6 +368,7 @@ const StickerSet: FC<OwnProps> = ({
                 canViewSet
                 noContextMenu={noContextMenus}
                 isCurrentUserPremium={isCurrentUserPremium}
+                shouldIgnorePremium={isChatEmojiSet}
                 sharedCanvasRef={canvasRef}
                 withTranslucentThumb={isTranslucent}
                 onClick={onStickerSelect}

@@ -4,6 +4,7 @@ import type {
   ApiMediaArea,
   ApiMediaAreaCoordinates,
   ApiStealthMode,
+  ApiStory,
   ApiStoryForwardInfo,
   ApiStoryView,
   ApiStoryViews,
@@ -46,7 +47,7 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     edited, pinned, expireDate, id, date, caption,
     entities, media, privacy, views,
     public: isPublic, noforwards, closeFriends, contacts, selectedContacts,
-    mediaAreas, sentReaction, out, fwdFrom,
+    mediaAreas, sentReaction, out, fwdFrom, fromId,
   } = story;
 
   const content: MediaContent = {
@@ -57,38 +58,38 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     content.text = buildMessageTextContent(caption, entities);
   }
 
-  return {
+  return omitUndefined<ApiStory>({
     id,
     peerId,
     date,
     expireDate,
     content,
-    ...(isPublic && { isPublic }),
-    ...(edited && { isEdited: true }),
-    ...(pinned && { isPinned: true }),
-    ...(contacts && { isForContacts: true }),
-    ...(selectedContacts && { isForSelectedContacts: true }),
-    ...(closeFriends && { isForCloseFriends: true }),
-    ...(noforwards && { noForwards: true }),
-    ...(views && { views: buildApiStoryViews(views) }),
-    ...(out && { isOut: true }),
-    ...(privacy && { visibility: buildPrivacyRules(privacy) }),
-    ...(mediaAreas && { mediaAreas: mediaAreas.map(buildApiMediaArea).filter(Boolean) }),
-    ...(sentReaction && { sentReaction: buildApiReaction(sentReaction) }),
-    ...(fwdFrom && { forwardInfo: buildApiStoryForwardInfo(fwdFrom) }),
-  };
+    isPublic,
+    isEdited: edited,
+    isPinned: pinned,
+    isForContacts: contacts,
+    isForSelectedContacts: selectedContacts,
+    isForCloseFriends: closeFriends,
+    noForwards: noforwards,
+    views: views && buildApiStoryViews(views),
+    isOut: out,
+    visibility: privacy && buildPrivacyRules(privacy),
+    mediaAreas: mediaAreas?.map(buildApiMediaArea).filter(Boolean),
+    sentReaction: sentReaction && buildApiReaction(sentReaction),
+    forwardInfo: fwdFrom && buildApiStoryForwardInfo(fwdFrom),
+    fromId: fromId && getApiChatIdFromMtpPeer(fromId),
+  });
 }
 
-function buildApiStoryViews(views: GramJs.TypeStoryViews): ApiStoryViews | undefined {
-  return {
+export function buildApiStoryViews(views: GramJs.TypeStoryViews): ApiStoryViews {
+  return omitUndefined<ApiStoryViews>({
+    hasViewers: views.hasViewers,
     viewsCount: views.viewsCount,
     forwardsCount: views.forwardsCount,
     reactionsCount: views.reactionsCount,
-    ...(views?.reactions && { reactions: views.reactions.map(buildReactionCount).filter(Boolean) }),
-    ...(views?.recentViewers && {
-      recentViewerIds: views.recentViewers.map((viewerId) => buildApiPeerId(viewerId, 'user')),
-    }),
-  };
+    reactions: views.reactions?.map(buildReactionCount).filter(Boolean),
+    recentViewerIds: views.recentViewers?.map((viewerId) => buildApiPeerId(viewerId, 'user')),
+  });
 }
 
 export function buildApiStoryView(view: GramJs.TypeStoryView): ApiTypeStoryView | undefined {

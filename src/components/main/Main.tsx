@@ -268,7 +268,6 @@ const Main: FC<OwnProps & StateProps> = ({
     loadDefaultTagReactions,
     loadFeaturedEmojiStickers,
     setIsElectronUpdateAvailable,
-    loadPremiumSetStickers,
     loadAuthorizations,
     loadPeerColors,
     loadSavedReactionTags,
@@ -357,7 +356,6 @@ const Main: FC<OwnProps & StateProps> = ({
     if (isMasterTab && isCurrentUserPremium) {
       loadDefaultStatusIcons();
       loadRecentEmojiStatuses();
-      loadPremiumSetStickers();
     }
   }, [isCurrentUserPremium, isMasterTab]);
 

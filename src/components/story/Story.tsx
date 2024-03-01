@@ -5,6 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
+  ApiChat,
   ApiMediaAreaChannelPost,
   ApiPeer, ApiStealthMode, ApiStory, ApiTypeStory,
 } from '../../api/types';
@@ -13,7 +14,7 @@ import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
-import { getSenderTitle, isUserId } from '../../global/helpers';
+import { getSenderTitle, isChatChannel, isUserId } from '../../global/helpers';
 import {
   selectChat,
   selectIsCurrentUserPremium,
@@ -86,6 +87,7 @@ interface OwnProps {
 interface StateProps {
   peer: ApiPeer;
   forwardSender?: ApiPeer;
+  fromPeer?: ApiPeer;
   story?: ApiTypeStory;
   isMuted: boolean;
   orderedIds?: number[];
@@ -109,6 +111,7 @@ function Story({
   storyId,
   peer,
   forwardSender,
+  fromPeer,
   isMuted,
   isArchivedStories,
   isPrivateStories,
@@ -124,10 +127,10 @@ function Story({
   getIsAnimating,
   isCurrentUserPremium,
   stealthMode,
+  withHeaderAnimation,
   onDelete,
   onClose,
   onReport,
-  withHeaderAnimation,
 }: OwnProps & StateProps) {
   const {
     viewStory,
@@ -179,7 +182,9 @@ function Story({
 
   const isLoadedStory = story && 'content' in story;
   const isChangelog = peerId === storyChangelogUserId;
-  const isChannel = !isUserId(peerId);
+  const isUserStory = isUserId(peerId);
+  const isChatStory = !isUserStory;
+  const isChannelStory = isChatStory && isChatChannel(peer as ApiChat);
   const isOut = isLoadedStory && story.isOut;
 
   const canPinToProfile = useCurrentOrPrev(
@@ -221,7 +226,8 @@ function Story({
     ? story.content.video.duration
     : undefined;
 
-  const shouldShowFooter = isLoadedStory && (isOut || isChannel);
+  const shouldShowComposer = !(isOut && isUserStory) && !isChangelog && !isChannelStory;
+  const shouldShowFooter = isLoadedStory && !shouldShowComposer && (isOut || isChannelStory);
   const headerAnimation = isMobile && withHeaderAnimation ? 'slideFade' : 'none';
 
   const {
@@ -239,7 +245,7 @@ function Story({
   const {
     shouldRender: shouldRenderComposer,
     transitionClassNames: composerAppearanceAnimationClassNames,
-  } = useShowTransition(!isOut && !isChangelog && !isChannel);
+  } = useShowTransition(shouldShowComposer);
 
   const {
     shouldRender: shouldRenderCaptionBackdrop,
@@ -340,11 +346,11 @@ function Story({
   }, [hasAllData]);
 
   useEffect(() => {
-    if (!isOut || isDeletedStory || areViewsExpired) return;
+    if (!isLoadedStory || isDeletedStory || areViewsExpired) return;
 
-    // Refresh recent viewers list each time
-    loadStoryViews({ peerId, storyId, isPreload: true });
-  }, [isDeletedStory, areViewsExpired, isOut, peerId, storyId]);
+    // Refresh counters each time
+    loadStoryViews({ peerId, storyId });
+  }, [isDeletedStory, areViewsExpired, isLoadedStory, peerId, storyId]);
 
   useEffect(() => {
     if (
@@ -413,6 +419,11 @@ function Story({
   const handleForwardPeerClick = useLastCallback(() => {
     onClose();
     openChat({ id: forwardSender!.id });
+  });
+
+  const handleFromPeerClick = useLastCallback(() => {
+    onClose();
+    openChat({ id: fromPeer!.id });
   });
 
   const handleOpenPrevStory = useLastCallback(() => {
@@ -569,7 +580,7 @@ function Story({
   }
 
   function renderStoryPrivacyButton() {
-    if (isChannel) return undefined;
+    if (!isUserStory) return undefined;
 
     let privacyIcon = 'channel-filled';
     const gradient: Record<string, [string, string]> = {
@@ -638,8 +649,21 @@ function Story({
                 onClick={forwardSender ? handleForwardPeerClick : undefined}
               >
                 <Icon name="loop" />
-                <span className={styles.forwardHeaderText}>
+                <span className={styles.headerTitle}>
                   {renderText(forwardSenderTitle)}
+                </span>
+              </span>
+            )}
+            {fromPeer && (
+              <span
+                className={buildClassName(
+                  styles.storyMeta, styles.fromPeer,
+                )}
+                onClick={handleFromPeerClick}
+              >
+                <Avatar peer={fromPeer} size="micro" />
+                <span className={styles.headerTitle}>
+                  {renderText(getSenderTitle(lang, fromPeer) || '')}
                 </span>
               </span>
             )}
@@ -693,17 +717,25 @@ function Story({
           >
             {canCopyLink && <MenuItem icon="copy" onClick={handleCopyStoryLink}>{lang('CopyLink')}</MenuItem>}
             {canPinToProfile && (
-              <MenuItem icon="save-story" onClick={handlePinClick}>{lang('StorySave')}</MenuItem>
+              <MenuItem icon="save-story" onClick={handlePinClick}>
+                {lang(isUserStory ? 'StorySave' : 'SaveToPosts')}
+              </MenuItem>
             )}
             {canUnpinFromProfile && (
-              <MenuItem icon="delete" onClick={handleUnpinClick}>{lang('ArchiveStory')}</MenuItem>
+              <MenuItem icon="delete" onClick={handleUnpinClick}>
+                {lang(isUserStory ? 'ArchiveStory' : 'RemoveFromPosts')}
+              </MenuItem>
             )}
             {canDownload && (
               <MenuItem icon="download" disabled={!downloadMediaData} onClick={handleDownload}>
                 {lang('lng_media_download')}
               </MenuItem>
             )}
-            <MenuItem icon="eye-closed-outline" onClick={handleOpenStealthModal}>{lang('StealthMode')}</MenuItem>
+            {!isOut && isUserStory && (
+              <MenuItem icon="eye-closed-outline" onClick={handleOpenStealthModal}>
+                {lang('StealthMode')}
+              </MenuItem>
+            )}
             {!isOut && <MenuItem icon="flag" onClick={handleReportStoryClick}>{lang('lng_report_story')}</MenuItem>}
             {isOut && <MenuItem icon="delete" destructive onClick={handleDeleteStoryClick}>{lang('Delete')}</MenuItem>}
           </DropdownMenu>
@@ -818,7 +850,7 @@ function Story({
       </div>
 
       {shouldShowFooter && (
-        <StoryFooter story={story} className={appearanceAnimationClassNames} areViewsExpired={areViewsExpired} />
+        <StoryFooter story={story} className={appearanceAnimationClassNames} />
       )}
       {shouldRenderCaptionBackdrop && (
         <div
@@ -853,7 +885,7 @@ function Story({
           editableInputId={EDITABLE_STORY_INPUT_ID}
           inputId="story-input-text"
           className={buildClassName(styles.composer, composerAppearanceAnimationClassNames)}
-          inputPlaceholder={lang('ReplyPrivately')}
+          inputPlaceholder={lang(isChatStory ? 'ReplyToGroupStory' : 'ReplyPrivately')}
           onForward={canShare ? handleForwardClick : undefined}
           onFocus={markComposerHasFocus}
           onBlur={unmarkComposerHasFocus}
@@ -888,21 +920,25 @@ export default memo(withGlobal<OwnProps>((global, {
   } = tabState;
   const { isOpen: isPremiumModalOpen } = premiumModal || {};
   const story = selectPeerStory(global, peerId, storyId);
+  const isLoadedStory = story && 'content' in story;
   const shouldForcePause = Boolean(
     viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
     || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal,
   );
 
-  const forwardInfo = (story && 'forwardInfo' in story) ? story.forwardInfo : undefined;
-  const mediaAreas = (story && 'mediaAreas' in story) ? story.mediaAreas : undefined;
+  const forwardInfo = isLoadedStory ? story.forwardInfo : undefined;
+  const mediaAreas = isLoadedStory ? story.mediaAreas : undefined;
   const forwardSenderId = forwardInfo?.fromPeerId
     || mediaAreas?.find((area): area is ApiMediaAreaChannelPost => area.type === 'channelPost')?.channelId;
   const forwardSender = forwardSenderId ? selectPeer(global, forwardSenderId) : undefined;
   const withHeaderAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
+  const fromPeer = isLoadedStory && story.fromId ? selectPeer(global, story.fromId) : undefined;
+
   return {
     peer: (user || chat)!,
     forwardSender,
+    fromPeer,
     story,
     orderedIds: storyList?.storyIdsByPeerId[peerId],
     isMuted,

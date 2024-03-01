@@ -1,7 +1,6 @@
-import type { ApiStoryView } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
-import { DEBUG, PREVIEW_AVATAR_COUNT } from '../../../config';
+import { DEBUG } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
@@ -312,31 +311,43 @@ addActionHandler('loadPeerStoriesByIds', async (global, actions, payload): Promi
 });
 
 addActionHandler('loadStoryViews', async (global, actions, payload): Promise<void> => {
+  const { peerId, storyId } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
+    return;
+  }
+
+  const result = await callApi('fetchStoriesViews', { peer, storyIds: [storyId] });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updatePeerStoryViews(global, peerId, storyId, result.views);
+  setGlobal(global);
+});
+
+addActionHandler('loadStoryViewList', async (global, actions, payload): Promise<void> => {
   const {
     peerId,
     storyId,
+    offset,
+    areReactionsFirst,
+    areJustContacts,
+    query,
+    limit,
     tabId = getCurrentTabId(),
   } = payload;
-  const isPreload = 'isPreload' in payload;
-  const {
-    offset, areReactionsFirst, areJustContacts, query, limit,
-  } = isPreload ? {
-    offset: undefined,
-    areReactionsFirst: undefined,
-    areJustContacts: undefined,
-    query: undefined,
-    limit: PREVIEW_AVATAR_COUNT,
-  } : payload;
 
   const peer = selectPeer(global, peerId);
   if (!peer) {
     return;
   }
 
-  if (!isPreload) {
-    global = updateStoryViewsLoading(global, true, tabId);
-    setGlobal(global);
-  }
+  global = updateStoryViewsLoading(global, true, tabId);
+  setGlobal(global);
 
   const result = await callApi('fetchStoryViewList', {
     peer,
@@ -357,18 +368,7 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-  if (!isPreload) global = updateStoryViews(global, storyId, result.views, result.nextOffset, tabId);
-
-  if (isPreload && result.views?.length) {
-    const recentViewerIds = result.views
-      .filter((view): view is ApiStoryView => 'date' in view)
-      .map((view) => view.peerId);
-    global = updatePeerStoryViews(global, peerId, storyId, {
-      recentViewerIds,
-      viewsCount: result.viewsCount,
-      reactionsCount: result.reactionsCount,
-    });
-  }
+  global = updateStoryViews(global, storyId, result.views, result.nextOffset, tabId);
   setGlobal(global);
 });
 
