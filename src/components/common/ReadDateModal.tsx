@@ -10,6 +10,7 @@ import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from '../ui/Button';
 import Modal, { ANIMATION_DURATION } from '../ui/Modal';
@@ -36,33 +37,36 @@ const ReadDateModal = ({ isOpen, user }: OwnProps & StateProps) => {
   } = getActions();
   const userName = getUserFirstOrLastName(user);
 
-  const handleShowReadTime = () => {
+  const handleShowReadTime = useLastCallback(() => {
     updateGlobalPrivacySettings({ shouldHideReadMarks: false });
     closeGetReadDateModal();
 
     setTimeout(() => {
       showNotification({ message: lang('PremiumReadSet') });
     }, CLOSE_ANIMATION_DURATION);
-  };
+  });
 
-  const handleOpenPremium = () => {
+  const handleOpenPremium = useLastCallback(() => {
     closeGetReadDateModal();
 
     setTimeout(() => {
       openPremiumModal();
     }, CLOSE_ANIMATION_DURATION);
-  };
+  });
+
+  const handleClose = useLastCallback(() => {
+    closeGetReadDateModal();
+  });
 
   return (
-    <Modal isSlim isOpen={isOpen} onClose={closeGetReadDateModal}>
+    <Modal isSlim isOpen={isOpen} onClose={handleClose}>
       <div className={styles.container} dir={lang.isRtl ? 'rtl' : undefined}>
         <Button
           className={styles.closeButton}
           color="translucent"
           round
           size="smaller"
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => closeGetReadDateModal()}
+          onClick={handleClose}
           ariaLabel="Close"
         >
           <Icon name="close" />
@@ -78,7 +82,6 @@ const ReadDateModal = ({ isOpen, user }: OwnProps & StateProps) => {
         <p className={styles.desc}>{renderText(lang('PremiumReadText1', userName), ['simple_markdown'])}</p>
         <Button
           size="smaller"
-          // eslint-disable-next-line react/jsx-no-bind
           onClick={handleShowReadTime}
           className={styles.button}
         >
@@ -87,7 +90,6 @@ const ReadDateModal = ({ isOpen, user }: OwnProps & StateProps) => {
         <Separator className={styles.separator}>{lang('PremiumOr')}</Separator>
         <h2 className={styles.header}>{lang('PremiumReadHeader2')}</h2>
         <p className={styles.desc}>{renderText(lang('PremiumReadText2', userName), ['simple_markdown'])}</p>
-        {/* eslint-disable-next-line react/jsx-no-bind */}
         <Button withPremiumGradient size="smaller" onClick={handleOpenPremium} className={styles.button}>
           {lang('PremiumLastSeenButton2')}
         </Button>

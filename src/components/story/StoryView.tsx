@@ -159,8 +159,7 @@ const StoryView = ({
         styles.opacityFadeIn,
         (storyView.isUserBlocked || storyView.areStoriesBlocked) && styles.blocked,
       )}
-      // eslint-disable-next-line react/jsx-no-bind
-      onClick={() => handleClick()}
+      onClick={handleClick}
       rightElement={storyView.type === 'user' && storyView.reaction ? (
         <ReactionStaticEmoji
           reaction={storyView.reaction}

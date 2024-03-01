@@ -19,6 +19,7 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 import useFlag from '../../../hooks/useFlag';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useTimeout from '../../../hooks/useTimeout';
 
@@ -92,7 +93,7 @@ const SimilarChannels = ({
     return undefined;
   }, [similarChannels, shouldShowInChat, shoulRenderSkeleton]);
 
-  const handleToggle = () => {
+  const handleToggle = useLastCallback(() => {
     toggleChannelRecommendations({ chatId });
     if (shouldShowInChat) {
       markNotShowing();
@@ -101,7 +102,7 @@ const SimilarChannels = ({
       markShowing();
       markNotHiding();
     }
-  };
+  });
 
   return (
     <div className={buildClassName(styles.root)}>
@@ -144,7 +145,6 @@ const SimilarChannels = ({
               <Button
                 className={styles.close}
                 color="translucent"
-                // eslint-disable-next-line react/jsx-no-bind
                 onClick={handleToggle}
               >
                 <Icon name="close" />

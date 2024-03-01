@@ -41,8 +41,6 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   isOpen,
   user,
   gifts,
-  monthlyCurrency,
-  monthlyAmount,
 }) => {
   const { openPremiumModal, closeGiftPremiumModal, openUrl } = getActions();
 
@@ -56,14 +54,12 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const cheaperGift = renderedGifts.reduce((acc, gift) => {
-      return gift.amount < firstGift?.amount ? gift : firstGift;
+    const basicGift = renderedGifts.reduce((acc, gift) => {
+      return gift.months < firstGift.months ? gift : firstGift;
     }, firstGift);
 
-    return cheaperGift.currency === monthlyCurrency && monthlyAmount
-      ? monthlyAmount
-      : Math.floor(cheaperGift.amount / cheaperGift.months);
-  }, [firstGift, renderedGifts, monthlyAmount, monthlyCurrency]);
+    return Math.floor(basicGift.amount / basicGift.months);
+  }, [firstGift, renderedGifts]);
 
   useEffect(() => {
     if (isOpen) {
@@ -165,14 +161,12 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
-  const { forUserId, monthlyCurrency, monthlyAmount } = selectTabState(global).giftPremiumModal || {};
+  const { forUserId } = selectTabState(global).giftPremiumModal || {};
   const user = forUserId ? selectUser(global, forUserId) : undefined;
   const gifts = user ? selectUserFullInfo(global, user.id)?.premiumGifts : undefined;
 
   return {
     user,
     gifts,
-    monthlyCurrency,
-    monthlyAmount: monthlyAmount ? Number(monthlyAmount) : undefined,
   };
 })(GiftPremiumModal));

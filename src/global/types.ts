@@ -75,6 +75,7 @@ import type {
   ApiWebSession,
 } from '../api/types';
 import type { ApiCredentials } from '../components/payment/PaymentModal';
+import type { PREMIUM_FEATURE_SECTIONS } from '../config';
 import type { FoldersActions } from '../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../hooks/useReducer';
 import type { P2pMessage } from '../lib/secret-sauce';
@@ -193,6 +194,12 @@ export type ApiLimitType =
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
   'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels'
 )>;
+
+export type ApiLimitTypeForPromo = Exclude<ApiLimitType,
+'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned'
+>;
+
+export type ApiPremiumSection = typeof PREMIUM_FEATURE_SECTIONS[number];
 
 export type TranslatedMessage = {
   isPending?: boolean;
@@ -607,9 +614,8 @@ export type TabState = {
 
   premiumModal?: {
     isOpen?: boolean;
-    isClosing?: boolean;
     promo: ApiPremiumPromo;
-    initialSection?: string;
+    initialSection?: ApiPremiumSection;
     fromUserId?: string;
     toUserId?: string;
     isGift?: boolean;
@@ -620,8 +626,6 @@ export type TabState = {
   giftPremiumModal?: {
     isOpen?: boolean;
     forUserId?: string;
-    monthlyCurrency?: string;
-    monthlyAmount?: string;
   };
 
   limitReachedModal?: {
@@ -2877,16 +2881,14 @@ export interface ActionPayloads {
 
   // Premium
   openPremiumModal: ({
-    initialSection?: string;
+    initialSection?: ApiPremiumSection;
     fromUserId?: string;
     toUserId?: string;
     isSuccess?: boolean;
     isGift?: boolean;
     monthsAmount?: number;
   } & WithTabId) | undefined;
-  closePremiumModal: ({
-    isClosed?: boolean;
-  } & WithTabId) | undefined;
+  closePremiumModal: WithTabId | undefined;
 
   transcribeAudio: {
     chatId: string;

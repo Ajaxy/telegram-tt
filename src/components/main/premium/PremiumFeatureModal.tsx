@@ -1,11 +1,14 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
+import { toggleExtraClass } from '../../../lib/teact/teact-dom';
 
-import type { ApiPremiumPromo } from '../../../api/types';
-import type { ApiLimitType, GlobalState } from '../../../global/types';
+import type { ApiPremiumPromo, ApiPremiumSubscriptionOption } from '../../../api/types';
+import type { ApiLimitTypeForPromo, ApiPremiumSection, GlobalState } from '../../../global/types';
 
+import { PREMIUM_BOTTOM_VIDEOS, PREMIUM_FEATURE_SECTIONS, PREMIUM_LIMITS_ORDER } from '../../../config';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -13,6 +16,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
 
 import SliderDots from '../../common/SliderDots';
@@ -24,7 +28,7 @@ import PremiumFeaturePreviewVideo from './previews/PremiumFeaturePreviewVideo';
 
 import styles from './PremiumFeatureModal.module.scss';
 
-export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
+export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   double_limits: 'PremiumPreviewLimits',
   infinite_reactions: 'PremiumPreviewReactions2',
   premium_stickers: 'PremiumPreviewStickers',
@@ -40,9 +44,11 @@ export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
   translations: 'PremiumPreviewTranslations',
   stories: 'PremiumPreviewStories',
   saved_tags: 'PremiumPreviewTags2',
+  last_seen: 'PremiumPreviewLastSeen',
+  message_privacy: 'PremiumPreviewMessagePrivacy',
 };
 
-export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
+export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   double_limits: 'PremiumPreviewLimitsDescription',
   infinite_reactions: 'PremiumPreviewReactions2Description',
   premium_stickers: 'PremiumPreviewStickersDescription',
@@ -58,56 +64,11 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
   translations: 'PremiumPreviewTranslationsDescription',
   stories: 'PremiumPreviewStoriesDescription',
   saved_tags: 'PremiumPreviewTagsDescription2',
+  last_seen: 'PremiumPreviewLastSeenDescription',
+  message_privacy: 'PremiumPreviewMessagePrivacyDescription',
 };
 
-export const PREMIUM_FEATURE_SECTIONS = [
-  'stories',
-  'double_limits',
-  'more_upload',
-  'faster_download',
-  'voice_to_text',
-  'no_ads',
-  'infinite_reactions',
-  'premium_stickers',
-  'animated_emoji',
-  'advanced_chat_management',
-  'profile_badge',
-  'animated_userpics',
-  'emoji_status',
-  'translations',
-  'saved_tags',
-];
-
-const PREMIUM_BOTTOM_VIDEOS: string[] = [
-  'faster_download',
-  'voice_to_text',
-  'advanced_chat_management',
-  'infinite_reactions',
-  'profile_badge',
-  'animated_userpics',
-  'emoji_status',
-  'translations',
-  'saved_tags',
-];
-
-type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType,
-'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned'
->;
-
-const LIMITS_ORDER: ApiLimitTypeWithoutUpload[] = [
-  'channels',
-  'dialogFolderPinned',
-  'channelsPublic',
-  'savedGifs',
-  'stickersFaved',
-  'aboutLength',
-  'captionLength',
-  'dialogFilters',
-  'dialogFiltersChats',
-  'recommendedChannels',
-];
-
-const LIMITS_TITLES: Record<ApiLimitTypeWithoutUpload, string> = {
+const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
   channels: 'GroupsAndChannelsLimitTitle',
   dialogFolderPinned: 'PinChatsLimitTitle',
   channelsPublic: 'PublicLinksLimitTitle',
@@ -120,7 +81,7 @@ const LIMITS_TITLES: Record<ApiLimitTypeWithoutUpload, string> = {
   recommendedChannels: 'SimilarChannelsLimitTitle',
 };
 
-const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeWithoutUpload, string> = {
+const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeForPromo, string> = {
   channels: 'GroupsAndChannelsLimitSubtitle',
   dialogFolderPinned: 'PinChatsLimitSubtitle',
   channelsPublic: 'PublicLinksLimitSubtitle',
@@ -136,11 +97,12 @@ const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeWithoutUpload, string> = {
 const BORDER_THRESHOLD = 20;
 
 type OwnProps = {
-  initialSection: string;
+  initialSection: ApiPremiumSection;
   promo: ApiPremiumPromo;
   isPremium?: boolean;
   limits?: NonNullable<GlobalState['appConfig']>['limits'];
-  premiumPromoOrder?: string[];
+  premiumPromoOrder?: ApiPremiumSection[];
+  subscriptionOption?: ApiPremiumSubscriptionOption;
   onBack: VoidFunction;
   onClickSubscribe: (startParam?: string) => void;
 };
@@ -151,6 +113,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   isPremium,
   limits,
   premiumPromoOrder,
+  subscriptionOption,
   onBack,
   onClickSubscribe,
 }) => {
@@ -171,27 +134,42 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     return premiumPromoOrder.filter((section) => PREMIUM_FEATURE_SECTIONS.includes(section));
   }, [premiumPromoOrder]);
 
-  function handleClick() {
+  const subscriptionButtonText = useMemo(() => {
+    if (!subscriptionOption) return undefined;
+
+    const { amount, months, currency } = subscriptionOption;
+    const perMonthPrice = Math.floor(amount / months);
+
+    return isPremium ? lang('OK') : lang('SubscribeToPremium', formatCurrency(perMonthPrice, currency, lang.code));
+  }, [isPremium, lang, subscriptionOption]);
+
+  const handleClick = useLastCallback(() => {
     onClickSubscribe(initialSection);
-  }
+  });
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
-    const { clientWidth, scrollLeft: scrollLeftOriginal } = e.currentTarget;
+    const target = e.currentTarget;
+    const { clientWidth, scrollLeft: scrollLeftOriginal } = target;
 
     const scrollLeft = Math.round(scrollLeftOriginal);
 
     const left = scrollLeft % (clientWidth);
     const progress = left / (clientWidth);
-    e.currentTarget.style.setProperty('--scroll-progress', progress.toString());
-    e.currentTarget.style.setProperty('--abs-scroll-progress', Math.abs(progress).toString());
+
     const reverseIndex = Math.ceil((scrollLeft + 1) / clientWidth);
 
     setReverseAnimationSlideIndex(reverseIndex);
 
-    const prevElement = e.currentTarget.querySelector(`#premium_feature_preview_video_${reverseIndex - 1}`);
-    const reverseElement = e.currentTarget.querySelector(`#premium_feature_preview_video_${reverseIndex}`);
-    prevElement?.classList.toggle('reverse', false);
-    reverseElement?.classList.toggle('reverse', true);
+    const prevElement = target.querySelector<HTMLDivElement>(`#premium_feature_preview_video_${reverseIndex - 1}`);
+    const reverseElement = target.querySelector<HTMLDivElement>(`#premium_feature_preview_video_${reverseIndex}`);
+
+    requestMutation(() => {
+      target.style.setProperty('--scroll-progress', progress.toString());
+      target.style.setProperty('--abs-scroll-progress', Math.abs(progress).toString());
+
+      if (prevElement) toggleExtraClass(prevElement, 'reverse', false);
+      if (reverseElement) toggleExtraClass(reverseElement, 'reverse', true);
+    });
 
     if (isScrolling) return;
     const slide = Math.round(scrollLeft / clientWidth);
@@ -215,7 +193,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
       .then(stopScrolling);
   }, [currentSlideIndex, filteredSections, initialSection, prevInitialSection]);
 
-  const handleSelectSlide = useCallback(async (index: number) => {
+  const handleSelectSlide = useLastCallback(async (index: number) => {
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
 
@@ -224,10 +202,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     startScrolling();
     await animateHorizontalScroll(scrollContainer, scrollContainer.clientWidth * index, 800);
     stopScrolling();
-  }, []);
-
-  // TODO Support all subscription options
-  const month = promo.options.find((option) => option.months === 1)!;
+  });
 
   return (
     <div className={styles.root}>
@@ -254,7 +229,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                   {lang(PREMIUM_FEATURE_TITLES.double_limits)}
                 </h2>
                 <div className={buildClassName(styles.limitsContent, 'custom-scroll')} onScroll={handleLimitsScroll}>
-                  {LIMITS_ORDER.map((limit, i) => {
+                  {PREMIUM_LIMITS_ORDER.map((limit, i) => {
                     const defaultLimit = limits?.[limit][0].toString();
                     const premiumLimit = limits?.[limit][1].toString();
                     return (
@@ -263,7 +238,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                         description={lang(LIMITS_DESCRIPTIONS[limit], premiumLimit)}
                         leftValue={defaultLimit}
                         rightValue={premiumLimit}
-                        colorStepProgress={i / (LIMITS_ORDER.length - 1)}
+                        colorStepProgress={i / (PREMIUM_LIMITS_ORDER.length - 1)}
                       />
                     );
                   })}
@@ -333,16 +308,16 @@ const PremiumFeatureModal: FC<OwnProps> = ({
           active={currentSlideIndex}
           onSelectSlide={handleSelectSlide}
         />
-        <Button
-          className={buildClassName(styles.button)}
-          isShiny={!isPremium}
-          withPremiumGradient={!isPremium}
-          onClick={isPremium ? onBack : handleClick}
-        >
-          {isPremium
-            ? lang('OK')
-            : lang('SubscribeToPremium', formatCurrency(Number(month.amount), month.currency, lang.code))}
-        </Button>
+        {subscriptionButtonText && (
+          <Button
+            className={buildClassName(styles.button)}
+            isShiny={!isPremium}
+            withPremiumGradient={!isPremium}
+            onClick={isPremium ? onBack : handleClick}
+          >
+            {subscriptionButtonText}
+          </Button>
+        )}
       </div>
     </div>
   );

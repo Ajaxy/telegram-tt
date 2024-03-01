@@ -363,15 +363,14 @@ addActionHandler('setPaymentStep', (global, actions, payload): ActionReturnType 
 });
 
 addActionHandler('closePremiumModal', (global, actions, payload): ActionReturnType => {
-  const { isClosed, tabId = getCurrentTabId() } = payload || {};
+  const { tabId = getCurrentTabId() } = payload || {};
 
   const tabState = selectTabState(global, tabId);
   if (!tabState.premiumModal) return undefined;
   return updateTabState(global, {
     premiumModal: {
-      ...tabState.premiumModal,
-      ...(isClosed && { isOpen: false }),
-      isClosing: !isClosed,
+      promo: tabState.premiumModal.promo, // Cache promo
+      isOpen: false,
     },
   }, tabId);
 });
@@ -415,15 +414,10 @@ addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promi
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
 
-  // TODO Support all subscription options
-  const month = result.promo.options.find((option) => option.months === 1)!;
-
   global = updateTabState(global, {
     giftPremiumModal: {
       isOpen: true,
       forUserId,
-      monthlyCurrency: month.currency,
-      monthlyAmount: String(month.amount),
     },
   }, tabId);
   setGlobal(global);

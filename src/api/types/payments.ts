@@ -1,3 +1,4 @@
+import type { ApiPremiumSection } from '../../global/types';
 import type { ApiInvoiceContainer } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiDocument, ApiMessageEntity, ApiPaymentCredentials } from './messages';
@@ -64,7 +65,7 @@ export interface ApiReceipt {
 }
 
 export interface ApiPremiumPromo {
-  videoSections: string[];
+  videoSections: ApiPremiumSection[];
   videos: ApiDocument[];
   statusText: string;
   statusEntities: ApiMessageEntity[];

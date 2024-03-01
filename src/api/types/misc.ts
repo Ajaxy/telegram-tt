@@ -1,4 +1,4 @@
-import type { ApiLimitType, CallbackAction } from '../../global/types';
+import type { ApiLimitType, ApiPremiumSection, CallbackAction } from '../../global/types';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
 
@@ -185,7 +185,7 @@ export interface ApiAppConfig {
   premiumInvoiceSlug: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
-  premiumPromoOrder: string[];
+  premiumPromoOrder: ApiPremiumSection[];
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;
   topicsPinnedLimit: number;

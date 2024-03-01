@@ -1,5 +1,5 @@
 import type { ApiReactionEmoji } from './api/types';
-import type { ApiLimitType } from './global/types';
+import type { ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection } from './global/types';
 
 export const APP_CODE_NAME = 'A';
 export const APP_NAME = process.env.APP_NAME || `Telegram Web ${APP_CODE_NAME}`;
@@ -347,3 +347,51 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
 };
 
 export const ONE_TIME_MEDIA_TTL_SECONDS = 2147483647;
+
+// Premium
+export const PREMIUM_FEATURE_SECTIONS = [
+  'stories',
+  'double_limits',
+  'more_upload',
+  'faster_download',
+  'voice_to_text',
+  'no_ads',
+  'infinite_reactions',
+  'premium_stickers',
+  'animated_emoji',
+  'advanced_chat_management',
+  'profile_badge',
+  'animated_userpics',
+  'emoji_status',
+  'translations',
+  'saved_tags',
+  'last_seen',
+  'message_privacy',
+] as const;
+
+export const PREMIUM_BOTTOM_VIDEOS: ApiPremiumSection[] = [
+  'faster_download',
+  'voice_to_text',
+  'advanced_chat_management',
+  'infinite_reactions',
+  'profile_badge',
+  'animated_userpics',
+  'emoji_status',
+  'translations',
+  'saved_tags',
+  'last_seen',
+  'message_privacy',
+];
+
+export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [
+  'channels',
+  'dialogFolderPinned',
+  'channelsPublic',
+  'savedGifs',
+  'stickersFaved',
+  'aboutLength',
+  'captionLength',
+  'dialogFilters',
+  'dialogFiltersChats',
+  'recommendedChannels',
+];

@@ -2,7 +2,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiLimitType } from '../../../global/types';
+import type { ApiLimitType, ApiPremiumSection } from '../../../global/types';
 import type { ApiAppConfig } from '../../types';
 
 import {
@@ -107,7 +107,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     maxUniqueReactions: appConfig.reactions_uniq_max,
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
-    premiumPromoOrder: appConfig.premium_promo_order,
+    premiumPromoOrder: appConfig.premium_promo_order as ApiPremiumSection[],
     isPremiumPurchaseBlocked: appConfig.premium_purchase_blocked,
     defaultEmojiStatusesStickerSetId: appConfig.default_emoji_statuses_stickerset_id,
     topicsPinnedLimit: appConfig.topics_pinned_limit,

@@ -33,6 +33,12 @@ const SettingsPrivacyLastSeen = ({
     (isEnabled) => updateGlobalPrivacySettings({ shouldHideReadMarks: isEnabled }),
   );
 
+  const handleOpenPremiumModal = useLastCallback(() => {
+    openPremiumModal({
+      initialSection: 'last_seen',
+    });
+  });
+
   return (
     <>
       {canShowHideReadTime && (
@@ -50,8 +56,7 @@ const SettingsPrivacyLastSeen = ({
       <div className="settings-item">
         <ListItem
           leftElement={<PremiumIcon className="icon" withGradient big />}
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => openPremiumModal()}
+          onClick={handleOpenPremiumModal}
         >
           {isCurrentUserPremium ? lang('PrivacyLastSeenPremiumForPremium') : lang('PrivacyLastSeenPremium')}
         </ListItem>

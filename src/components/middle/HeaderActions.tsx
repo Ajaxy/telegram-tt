@@ -217,9 +217,9 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     setViewForumAsMessages({ chatId, isEnabled: true });
   });
 
-  function handleRequestCall() {
+  const handleRequestCall = useLastCallback(() => {
     requestMasterAndRequestCall({ userId: chatId });
-  }
+  });
 
   const handleHotkeySearchClick = useLastCallback((e: KeyboardEvent) => {
     if (!canSearch || !IS_APP || e.shiftKey) {
@@ -384,7 +384,6 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               round
               color="translucent"
               size="smaller"
-              // eslint-disable-next-line react/jsx-no-bind
               onClick={handleRequestCall}
               ariaLabel="Call"
             >
