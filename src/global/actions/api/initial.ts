@@ -60,6 +60,7 @@ addActionHandler('initApi', async (global, actions): Promise<void> => {
     shouldAllowHttpTransport: global.settings.byKey.shouldAllowHttpTransport,
     shouldForceHttpTransport: global.settings.byKey.shouldForceHttpTransport,
     shouldDebugExportedSenders: global.settings.byKey.shouldDebugExportedSenders,
+    langCode: global.settings.byKey.language,
   });
 
   void setShouldEnableDebugLog(Boolean(global.settings.byKey.shouldCollectDebugLogs));

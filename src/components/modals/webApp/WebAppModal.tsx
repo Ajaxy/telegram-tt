@@ -532,7 +532,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         >
           <div className={backButtonClassName} />
         </Button>
-        <div className="modal-title">{bot?.firstName}</div>
+        <div className="modal-title">{attachBot?.shortName ?? bot?.firstName}</div>
         <DropdownMenu
           className="web-app-more-menu with-menu-transitions"
           trigger={MoreMenuButton}

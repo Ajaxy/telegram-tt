@@ -15,6 +15,7 @@ export interface ApiInitialArgs {
   shouldAllowHttpTransport?: boolean;
   shouldForceHttpTransport?: boolean;
   shouldDebugExportedSenders?: boolean;
+  langCode: string;
 }
 
 export interface ApiOnProgress {
