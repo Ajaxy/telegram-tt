@@ -268,10 +268,13 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [messageIds, messagesById, type, isServiceNotificationsChat, isForum, threadId, isChatWithSelf]);
 
   useInterval(() => {
-    if (!messageIds || !messagesById || type === 'scheduled') {
-      return;
-    }
-    const ids = messageIds.filter((id) => messagesById[id]?.reactions?.results.length);
+    if (!messageIds || !messagesById || type === 'scheduled') return;
+    if (!isChannelChat && !isGroupChat) return;
+
+    const ids = messageIds.filter((id) => {
+      const message = messagesById[id];
+      return message.reactions?.results.length && !message.content.action;
+    });
 
     if (!ids.length) return;
 
