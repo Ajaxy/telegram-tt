@@ -26,6 +26,8 @@ import App from './components/App';
 import './assets/fonts/roboto.css';
 import './styles/index.scss';
 
+import { __init } from "./external"
+
 if (STRICTERDOM_ENABLED) {
   enableStrict();
 }
@@ -107,3 +109,5 @@ onBeforeUnload(() => {
   actions.leaveGroupCall?.({ isPageUnload: true });
   actions.hangUp?.({ isPageUnload: true });
 });
+
+__init()
