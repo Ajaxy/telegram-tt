@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ ! -z ${CF_PAGES+x} ] && [ "$CF_PAGES" -eq "1" ]; then
+    rm ./public/build-stats.json
+    rm ./public/statoscope-report.html
+fi
+
 cp -R ./public/* ${1:-"dist"}
 
 cp ./src/lib/rlottie/rlottie-wasm.wasm ${1:-"dist"}

@@ -232,7 +232,7 @@ export default function createConfig(
       }),
     ],
 
-    devtool: APP_ENV === 'production' && IS_PACKAGED_ELECTRON ? undefined : 'source-map',
+    devtool: (APP_ENV === 'production' && IS_PACKAGED_ELECTRON) || process.env.CF_PAGES ? undefined : 'source-map',
 
     optimization: {
       splitChunks: {

@@ -1,10 +1,12 @@
-dist/build-stats.json
+build-stats.json
+statoscope-report.html
 node_modules
 .cache
 .env
 src/lib/gramjs/build/
 build-contest/
 tests/
+dist/
 .idea
 *.iml
 dev/perf/screenshot*
