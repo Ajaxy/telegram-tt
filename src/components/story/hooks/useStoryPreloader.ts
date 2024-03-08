@@ -5,6 +5,7 @@ import { ApiMediaFormat } from '../../../api/types';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import { selectPeerStories } from '../../../global/selectors';
+import unloadVideo from '../../../util/browser/unloadVideo';
 import { preloadImage } from '../../../util/files';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { getProgressiveUrl } from '../../../util/mediaLoader';
@@ -125,9 +126,7 @@ function preloadProgressive(url: string) {
   head.appendChild(video);
   video.load();
   setTimeout(() => {
-    video.pause();
-    video.src = '';
-    video.load();
+    unloadVideo(video);
     head.removeChild(video);
   }, PROGRESSIVE_PRELOAD_DURATION);
 }

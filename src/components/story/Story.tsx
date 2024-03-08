@@ -348,9 +348,11 @@ function Story({
   useEffect(() => {
     if (!isLoadedStory || isDeletedStory || areViewsExpired) return;
 
+    if (!isOut && !isChannelStory) return;
+
     // Refresh counters each time
     loadStoryViews({ peerId, storyId });
-  }, [isDeletedStory, areViewsExpired, isLoadedStory, peerId, storyId]);
+  }, [isDeletedStory, areViewsExpired, isLoadedStory, peerId, storyId, isOut, isChannelStory]);
 
   useEffect(() => {
     if (
