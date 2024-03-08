@@ -1237,7 +1237,7 @@ async function loadViewportMessages<T extends GlobalState>(
   }
 
   const {
-    messages, users, chats,
+    messages, users, chats, count,
   } = result;
 
   global = getGlobal();
@@ -1282,6 +1282,12 @@ async function loadViewportMessages<T extends GlobalState>(
       const { newViewportIds } = getViewportSlice(historyIds, offsetId, direction);
       global = safeReplaceViewportIds(global, chatId, threadId, newViewportIds!, tabId);
     }
+  }
+
+  if (count) {
+    global = updateThreadInfo(global, chat.id, threadId, {
+      messagesCount: count,
+    });
   }
 
   setGlobal(global);

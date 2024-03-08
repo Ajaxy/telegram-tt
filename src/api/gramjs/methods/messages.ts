@@ -165,12 +165,14 @@ export async function fetchMessages({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const count = !(result instanceof GramJs.messages.Messages) && result.count;
   dispatchThreadInfoUpdates(result.messages);
 
   return {
     messages,
     users,
     chats,
+    count,
   };
 }
 
