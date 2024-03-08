@@ -101,7 +101,7 @@ export default function createConfig(
       assetModuleFilename: 'telegram-a.[name].[contenthash][ext]',
       path: path.resolve(__dirname, 'dist/'),
       clean: true,
-      publicPath: '/telegram-t/',
+      // publicPath: '/telegram-t/',
     },
 
     module: {
