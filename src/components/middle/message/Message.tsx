@@ -1228,6 +1228,7 @@ const Message: FC<OwnProps & StateProps> = ({
             backgroundEmojiId={sender?.color?.backgroundEmojiId}
             shouldWarnAboutSvg={shouldWarnAboutSvg}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
+            onAudioPlay={handleAudioPlay}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
           />

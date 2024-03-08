@@ -216,6 +216,39 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
   };
 }
 
+export function buildAudioFromDocument(document: GramJs.Document): ApiAudio | undefined {
+  if (document instanceof GramJs.DocumentEmpty) {
+    return undefined;
+  }
+
+  const {
+    id, mimeType, size, attributes,
+  } = document;
+
+  const audioAttributes = attributes
+    .find((a: any): a is GramJs.DocumentAttributeAudio => a instanceof GramJs.DocumentAttributeAudio);
+
+  if (!audioAttributes) {
+    return undefined;
+  }
+
+  const {
+    duration,
+    title,
+    performer,
+  } = audioAttributes;
+
+  return {
+    id: String(id),
+    mimeType,
+    duration,
+    fileName: getFilenameFromDocument(document, 'audio'),
+    title,
+    performer,
+    size: size.toJSNumber(),
+  };
+}
+
 function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   if (
     !(media instanceof GramJs.MessageMediaDocument)
@@ -653,8 +686,12 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
   } = media.webpage;
 
   let video;
+  let audio;
   if (document instanceof GramJs.Document && document.mimeType.startsWith('video/')) {
     video = buildVideoFromDocument(document);
+  }
+  if (document instanceof GramJs.Document && document.mimeType.startsWith('audio/')) {
+    audio = buildAudioFromDocument(document);
   }
   let story: ApiWebPageStoryData | undefined;
   const attributeStory = attributes
@@ -683,8 +720,9 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
       'duration',
     ]),
     photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
-    document: !video && document ? buildApiDocument(document) : undefined,
+    document: !video && !audio && document ? buildApiDocument(document) : undefined,
     video,
+    audio,
     story,
   };
 }

@@ -16,6 +16,7 @@ import {
   getMediaTransferState,
   getMessageMediaFormat,
   getMessageMediaHash,
+  getMessageWebPageAudio,
   hasMessageTtl,
   isMessageLocal,
   isOwnMessage,
@@ -67,7 +68,7 @@ type OwnProps = {
   isTranscriptionError?: boolean;
   autoPlay?: boolean;
   onHideTranscription?: (isHidden: boolean) => void;
-  onPlay: (messageId: number, chatId: string) => void;
+  onPlay?: (messageId: number, chatId: string) => void;
   onPause?: NoneToVoidFunction;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
@@ -112,9 +113,10 @@ const Audio: FC<OwnProps> = ({
 
   const {
     content: {
-      audio, voice, video,
+      audio: contentAudio, voice, video,
     }, isMediaUnread,
   } = message;
+  const audio = contentAudio || getMessageWebPageAudio(message);
   const isVoice = Boolean(voice || video);
   const isSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
@@ -145,7 +147,7 @@ const Audio: FC<OwnProps> = ({
 
   const handleForcePlay = useLastCallback(() => {
     setIsActivated(true);
-    onPlay(message.id, message.chatId);
+    onPlay?.(message.id, message.chatId);
   });
 
   const handleTrackChange = useLastCallback(() => {
@@ -228,7 +230,7 @@ const Audio: FC<OwnProps> = ({
     }
 
     if (!isPlaying) {
-      onPlay(message.id, message.chatId);
+      onPlay?.(message.id, message.chatId);
     }
 
     getActions().setAudioPlayerOrigin({ origin });

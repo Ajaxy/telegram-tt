@@ -642,7 +642,7 @@
     }
 
     &.has-replies:not(.custom-shape),
-    &.text {
+    &.text:not(.web-page) {
       .media-inner,
       .Album {
         --border-bottom-left-radius: 0;

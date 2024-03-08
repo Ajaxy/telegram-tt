@@ -4,7 +4,7 @@ import { getActions } from '../../../global';
 
 import type { ApiMessage, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { ISettings } from '../../../types';
+import { AudioOrigin, type ISettings } from '../../../types';
 
 import { getMessageWebPage } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -18,6 +18,7 @@ import useEnsureStory from '../../../hooks/useEnsureStory';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Audio from '../../common/Audio';
 import Document from '../../common/Document';
 import EmojiIconBackground from '../../common/embedded/EmojiIconBackground';
 import SafeLink from '../../common/SafeLink';
@@ -47,8 +48,9 @@ type OwnProps = {
   story?: ApiTypeStory;
   shouldWarnAboutSvg?: boolean;
   autoLoadFileMaxSizeMb?: number;
-  onMediaClick?: () => void;
-  onCancelMediaTransfer?: () => void;
+  onAudioPlay?: NoneToVoidFunction;
+  onMediaClick?: NoneToVoidFunction;
+  onCancelMediaTransfer?: NoneToVoidFunction;
 };
 
 const WebPage: FC<OwnProps> = ({
@@ -68,6 +70,7 @@ const WebPage: FC<OwnProps> = ({
   shouldWarnAboutSvg,
   autoLoadFileMaxSizeMb,
   onMediaClick,
+  onAudioPlay,
   onCancelMediaTransfer,
 }) => {
   const { openTelegramLink } = getActions();
@@ -103,6 +106,7 @@ const WebPage: FC<OwnProps> = ({
     description,
     photo,
     video,
+    audio,
     type,
     document,
   } = webPage;
@@ -200,6 +204,17 @@ const WebPage: FC<OwnProps> = ({
             onCancelUpload={onCancelMediaTransfer}
           />
         )}
+        {!inPreview && audio && (
+          <Audio
+            theme={theme}
+            message={message}
+            origin={AudioOrigin.Inline}
+            noAvatars={noAvatars}
+            isDownloading={isDownloading}
+            onPlay={onAudioPlay}
+            onCancelUpload={onCancelMediaTransfer}
+          />
+        )}
         {!inPreview && document && (
           <Document
             message={message}
@@ -210,6 +225,18 @@ const WebPage: FC<OwnProps> = ({
             isDownloading={isDownloading}
             shouldWarnAboutSvg={shouldWarnAboutSvg}
           />
+        )}
+        {inPreview && displayUrl && !isArticle && (
+          <div className="WebPage-text">
+            {backgroundEmojiId && (
+              <EmojiIconBackground
+                emojiDocumentId={backgroundEmojiId}
+                className="WebPage--background-icons"
+              />
+            )}
+            <p className="site-name">{displayUrl}</p>
+            <p className="site-description">{lang('Chat.Empty.LinkPreview')}</p>
+          </div>
         )}
       </div>
       {quickButtonLangKey && renderQuickButton(quickButtonLangKey)}

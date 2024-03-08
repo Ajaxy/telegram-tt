@@ -155,6 +155,10 @@ export function getMessageWebPageVideo(message: MediaContainer) {
   return getMessageWebPage(message)?.video;
 }
 
+export function getMessageWebPageAudio(message: MediaContainer) {
+  return getMessageWebPage(message)?.audio;
+}
+
 export function getMessageDocumentVideo(message: MediaContainer) {
   return isMessageDocumentVideo(message) ? getMessageDocument(message) : undefined;
 }
@@ -218,8 +222,9 @@ export function getMessageMediaHash(
   const actionPhoto = getMessageActionPhoto(message);
   const messageVideo = video || getMessageWebPageVideo(message) || getMessageDocumentVideo(message);
   const messageDocument = document || getMessageWebPageDocument(message);
+  const messageAudio = audio || getMessageWebPageAudio(message);
 
-  const content = actionPhoto || messagePhoto || messageVideo || sticker || audio || voice || messageDocument;
+  const content = actionPhoto || messagePhoto || messageVideo || sticker || messageAudio || voice || messageDocument;
   if (!content) {
     return undefined;
   }
@@ -288,13 +293,13 @@ export function getMessageMediaHash(
     }
   }
 
-  if (audio) {
+  if (messageAudio) {
     switch (target) {
       case 'micro':
       case 'pictogram':
-        return getAudioHasCover(audio) ? `${base}?size=m` : undefined;
+        return getAudioHasCover(messageAudio) ? `${base}?size=m` : undefined;
       case 'inline':
-        return getVideoOrAudioBaseHash(audio, base);
+        return getVideoOrAudioBaseHash(messageAudio, base);
       case 'download':
         return `${base}?download`;
     }
@@ -517,7 +522,7 @@ export function getMessageContentIds(
 
 export function getMediaDuration(message: ApiMessage) {
   const { audio, voice, video } = getMessageContent(message);
-  const media = audio || voice || video || getMessageWebPageVideo(message);
+  const media = audio || voice || video || getMessageWebPageVideo(message) || getMessageWebPageAudio(message);
   if (!media) {
     return undefined;
   }
