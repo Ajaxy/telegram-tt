@@ -18,7 +18,7 @@ import Separator from '../ui/Separator';
 import AnimatedIconWithPreview from './AnimatedIconWithPreview';
 import Icon from './Icon';
 
-import styles from './ReadDateModal.module.scss';
+import styles from './PrivacySettingsNoticeModal.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -26,28 +26,47 @@ export type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
+  isReadDate?: boolean;
 };
 
 const CLOSE_ANIMATION_DURATION = ANIMATION_DURATION + ANIMATION_END_DELAY;
 
-const ReadDateModal = ({ isOpen, user }: OwnProps & StateProps) => {
+const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & StateProps) => {
   const lang = useLang();
   const {
-    updateGlobalPrivacySettings, openPremiumModal, closeGetReadDateModal, showNotification,
+    updateGlobalPrivacySettings,
+    openPremiumModal,
+    closePrivacySettingsNoticeModal,
+    showNotification,
+    setPrivacyVisibility,
+    loadUser,
   } = getActions();
   const userName = getUserFirstOrLastName(user);
 
   const handleShowReadTime = useLastCallback(() => {
     updateGlobalPrivacySettings({ shouldHideReadMarks: false });
-    closeGetReadDateModal();
+    closePrivacySettingsNoticeModal();
 
     setTimeout(() => {
       showNotification({ message: lang('PremiumReadSet') });
     }, CLOSE_ANIMATION_DURATION);
   });
 
+  const handleShowLastSeen = useLastCallback(() => {
+    setPrivacyVisibility({
+      privacyKey: 'lastSeen',
+      visibility: 'everybody',
+      onSuccess: () => loadUser({ userId: user!.id }),
+    });
+    closePrivacySettingsNoticeModal();
+
+    setTimeout(() => {
+      showNotification({ message: lang('PremiumLastSeenSet') });
+    }, CLOSE_ANIMATION_DURATION);
+  });
+
   const handleOpenPremium = useLastCallback(() => {
-    closeGetReadDateModal();
+    closePrivacySettingsNoticeModal();
 
     setTimeout(() => {
       openPremiumModal();
@@ -55,7 +74,7 @@ const ReadDateModal = ({ isOpen, user }: OwnProps & StateProps) => {
   });
 
   const handleClose = useLastCallback(() => {
-    closeGetReadDateModal();
+    closePrivacySettingsNoticeModal();
   });
 
   return (
@@ -72,25 +91,45 @@ const ReadDateModal = ({ isOpen, user }: OwnProps & StateProps) => {
           <Icon name="close" />
         </Button>
         <AnimatedIconWithPreview
-          tgsUrl={LOCAL_TGS_URLS.ReadTime}
+          tgsUrl={isReadDate ? LOCAL_TGS_URLS.ReadTime : LOCAL_TGS_URLS.LastSeen}
           size={84}
           className={styles.icon}
           nonInteractive
           noLoop
         />
-        <h2 className={styles.header}>{lang('PremiumReadHeader1')}</h2>
-        <p className={styles.desc}>{renderText(lang('PremiumReadText1', userName), ['simple_markdown'])}</p>
+        <h2 className={styles.header}>
+          {lang(isReadDate ? 'PremiumReadHeader1' : 'PremiumLastSeenHeader1')}
+        </h2>
+        <p className={styles.desc}>
+          {renderText(
+            lang(
+              isReadDate ? 'PremiumReadText1' : 'PremiumLastSeenText1Locked',
+              userName,
+            ),
+            ['simple_markdown'],
+          )}
+        </p>
         <Button
           size="smaller"
-          onClick={handleShowReadTime}
+          onClick={isReadDate ? handleShowReadTime : handleShowLastSeen}
           className={styles.button}
         >
-          {lang('PremiumReadButton1')}
+          {lang(isReadDate ? 'PremiumReadButton1' : 'PremiumLastSeenButton1')}
         </Button>
         <Separator className={styles.separator}>{lang('PremiumOr')}</Separator>
         <h2 className={styles.header}>{lang('PremiumReadHeader2')}</h2>
-        <p className={styles.desc}>{renderText(lang('PremiumReadText2', userName), ['simple_markdown'])}</p>
-        <Button withPremiumGradient size="smaller" onClick={handleOpenPremium} className={styles.button}>
+        <p className={styles.desc}>
+          {renderText(
+            lang(isReadDate ? 'PremiumReadText2' : 'PremiumLastSeenText2', userName),
+            ['simple_markdown'],
+          )}
+        </p>
+        <Button
+          withPremiumGradient
+          size="smaller"
+          onClick={handleOpenPremium}
+          className={styles.button}
+        >
           {lang('PremiumLastSeenButton2')}
         </Button>
       </div>
@@ -98,11 +137,11 @@ const ReadDateModal = ({ isOpen, user }: OwnProps & StateProps) => {
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const { chatId } = selectTabState(global).readDateModal || {};
+export default memo(
+  withGlobal<OwnProps>((global): StateProps => {
+    const { chatId, isReadDate } = selectTabState(global).privacySettingsNoticeModal || {};
     const user = chatId ? selectUser(global, chatId) : undefined;
 
-    return { user };
-  },
-)(ReadDateModal));
+    return { user, isReadDate };
+  })(PrivacySettingsNoticeModal),
+);

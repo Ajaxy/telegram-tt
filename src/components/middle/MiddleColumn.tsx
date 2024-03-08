@@ -79,7 +79,7 @@ import useWindowSize from '../../hooks/window/useWindowSize';
 import usePinnedMessage from './hooks/usePinnedMessage';
 
 import Composer from '../common/Composer';
-import ReadTimeModal from '../common/ReadTimeModal.async';
+import PrivacySettingsNoticeModal from '../common/PrivacySettingsNoticeModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
 import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
@@ -131,7 +131,7 @@ type StateProps = {
   hasCurrentTextSearch?: boolean;
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
-  isReadDateModalOpen: boolean;
+  isPrivacySettingsNoticeModalOpen: boolean;
   isReactorListModalOpen: boolean;
   isGiftPremiumModalOpen?: boolean;
   isChatLanguageModalOpen?: boolean;
@@ -191,7 +191,7 @@ function MiddleColumn({
   hasCurrentTextSearch,
   isSelectModeActive,
   isSeenByModalOpen,
-  isReadDateModalOpen,
+  isPrivacySettingsNoticeModalOpen,
   isReactorListModalOpen,
   isGiftPremiumModalOpen,
   isChatLanguageModalOpen,
@@ -686,7 +686,7 @@ function MiddleColumn({
                   canPost={renderingCanPost}
                 />
                 <SeenByModal isOpen={isSeenByModalOpen} />
-                <ReadTimeModal isOpen={isReadDateModalOpen} />
+                <PrivacySettingsNoticeModal isOpen={isPrivacySettingsNoticeModalOpen} />
                 <ReactorListModal isOpen={isReactorListModalOpen} />
                 {IS_TRANSLATION_SUPPORTED && <ChatLanguageModal isOpen={isChatLanguageModalOpen} />}
               </div>
@@ -734,7 +734,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
       seenByModal, giftPremiumModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
-      chatLanguageModal, readDateModal,
+      chatLanguageModal, privacySettingsNoticeModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { leftColumnWidth } = global;
@@ -750,7 +750,7 @@ export default memo(withGlobal<OwnProps>(
       hasCurrentTextSearch: Boolean(selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
       isSeenByModalOpen: Boolean(seenByModal),
-      isReadDateModalOpen: Boolean(readDateModal),
+      isPrivacySettingsNoticeModalOpen: Boolean(privacySettingsNoticeModal),
       isReactorListModalOpen: Boolean(reactorModal),
       isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
       isChatLanguageModalOpen: Boolean(chatLanguageModal),

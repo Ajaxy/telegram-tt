@@ -781,19 +781,19 @@ addActionHandler('closeSeenByModal', (global, actions, payload): ActionReturnTyp
   }, tabId);
 });
 
-addActionHandler('openGetReadDateModal', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+addActionHandler('openPrivacySettingsNoticeModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, isReadDate, tabId = getCurrentTabId() } = payload;
 
   return updateTabState(global, {
-    readDateModal: { chatId, messageId },
+    privacySettingsNoticeModal: { chatId, isReadDate },
   }, tabId);
 });
 
-addActionHandler('closeGetReadDateModal', (global, actions, payload): ActionReturnType => {
+addActionHandler('closePrivacySettingsNoticeModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
   return updateTabState(global, {
-    readDateModal: undefined,
+    privacySettingsNoticeModal: undefined,
   }, tabId);
 });
 

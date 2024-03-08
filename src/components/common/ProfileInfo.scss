@@ -48,4 +48,14 @@
     pointer-events: auto;
     cursor: var(--custom-cursor, pointer);
   }
+
+  .get-status {
+    cursor: var(--custom-cursor, pointer);
+    margin-left: 0.375rem;
+    border-radius: 0.5rem;
+    padding: 0.125rem 0.375rem;
+    background: var(--color-background-menu-separator);
+    pointer-events: all;
+    font-weight: 500;
+  }
 }

@@ -90,6 +90,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     openMediaViewer,
     openPremiumModal,
     openStickerSet,
+    openPrivacySettingsNoticeModal,
   } = getActions();
 
   const lang = useLang();
@@ -171,6 +172,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
     setHasSlideAnimation(true);
     setCurrentPhotoIndex(currentPhotoIndex + 1);
+  });
+
+  const handleOpenGetReadDateModal = useLastCallback(() => {
+    openPrivacySettingsNoticeModal({ chatId: chat!.id, isReadDate: false });
   });
 
   function handleSelectFallbackPhoto() {
@@ -264,8 +269,21 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
     if (user) {
       return (
-        <div className={buildClassName(styles.status, 'status', isUserOnline(user, userStatus) && 'online')}>
-          <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus)}</span>
+        <div
+          className={buildClassName(
+            styles.status,
+            'status',
+            isUserOnline(user, userStatus) && 'online',
+          )}
+        >
+          <span className="user-status" dir="auto">
+            {getUserStatus(lang, user, userStatus)}
+          </span>
+          {userStatus?.isReadDateRestrictedByMe && (
+            <span className="get-status" onClick={handleOpenGetReadDateModal}>
+              {lang('StatusHiddenShow')}
+            </span>
+          )}
         </div>
       );
     }

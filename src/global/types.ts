@@ -292,9 +292,9 @@ export type TabState = {
     messageId: number;
   };
 
-  readDateModal?: {
+  privacySettingsNoticeModal?: {
     chatId: string;
-    messageId: number;
+    isReadDate: boolean;
   };
 
   reactorModal?: {
@@ -1170,6 +1170,7 @@ export interface ActionPayloads {
   setPrivacyVisibility: {
     privacyKey: ApiPrivacyKey;
     visibility: PrivacyVisibility;
+    onSuccess?: VoidFunction;
   };
 
   setPrivacySettings: {
@@ -1632,11 +1633,11 @@ export interface ActionPayloads {
     messageId: number;
   } & WithTabId;
   closeSeenByModal: WithTabId | undefined;
-  openGetReadDateModal: {
+  openPrivacySettingsNoticeModal: {
     chatId: string;
-    messageId: number;
+    isReadDate: boolean;
   } & WithTabId;
-  closeGetReadDateModal: WithTabId | undefined;
+  closePrivacySettingsNoticeModal: WithTabId | undefined;
   closeReactorListModal: WithTabId | undefined;
   openReactorListModal: {
     chatId: string;

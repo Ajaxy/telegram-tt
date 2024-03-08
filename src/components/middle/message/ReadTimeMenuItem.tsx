@@ -25,14 +25,14 @@ type OwnProps = {
 function ReadTimeMenuItem({
   message, shouldRenderShowWhen, canLoadReadDate, closeContextMenu, menuSeparatorSize,
 }: OwnProps) {
-  const { openGetReadDateModal } = getActions();
+  const { openPrivacySettingsNoticeModal } = getActions();
   const lang = useLang();
   const { readDate } = message;
   const shouldRenderSkeleton = canLoadReadDate && !readDate && !shouldRenderShowWhen;
 
   const handleOpenModal = () => {
     closeContextMenu();
-    openGetReadDateModal({ chatId: message.chatId, messageId: message.id });
+    openPrivacySettingsNoticeModal({ chatId: message.chatId, isReadDate: true });
   };
 
   return (

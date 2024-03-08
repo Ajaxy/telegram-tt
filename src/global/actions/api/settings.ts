@@ -470,7 +470,28 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
 });
 
 addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promise<void> => {
-  const { privacyKey, visibility } = payload!;
+  const { privacyKey, visibility, onSuccess } = payload!;
+
+  if (!global.settings.privacy[privacyKey]) {
+    const result = await callApi('fetchPrivacySettings', privacyKey);
+    if (!result) {
+      return;
+    }
+
+    global = getGlobal();
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+    global = {
+      ...global,
+      settings: {
+        ...global.settings,
+        privacy: {
+          ...global.settings.privacy,
+          [privacyKey]: result.rules,
+        },
+      },
+    };
+    setGlobal(global);
+  }
 
   const {
     privacy: { [privacyKey]: settings },
@@ -490,6 +511,8 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
   if (!result) {
     return;
   }
+
+  onSuccess?.();
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));

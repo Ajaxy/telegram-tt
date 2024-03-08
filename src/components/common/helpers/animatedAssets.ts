@@ -11,6 +11,7 @@ import Flame from '../../../assets/tgs/general/Flame.tgs';
 import PartyPopper from '../../../assets/tgs/general/PartyPopper.tgs';
 import Invite from '../../../assets/tgs/invites/Invite.tgs';
 import JoinRequest from '../../../assets/tgs/invites/Requests.tgs';
+import LastSeen from '../../../assets/tgs/LastSeen.tgs';
 import MonkeyClose from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyClose.tgs';
 import MonkeyIdle from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyIdle.tgs';
 import MonkeyPeek from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyPeek.tgs';
@@ -52,4 +53,5 @@ export const LOCAL_TGS_URLS = {
   Flame,
   ReadTime,
   Unlock,
+  LastSeen,
 };
