@@ -267,9 +267,9 @@ const StickerSet: FC<OwnProps> = ({
     >
       {!shouldHideHeader && (
         <div className="symbol-set-header">
-          <p className={buildClassName('symbol-set-name', withAddSetButton && 'symbol-set-name-external')}>
+          <p className={buildClassName('symbol-set-title', withAddSetButton && 'symbol-set-title-external')}>
             {isLocked && <i className="symbol-set-locked-icon icon icon-lock-badge" />}
-            {stickerSet.title}
+            <span className="symbol-set-name">{stickerSet.title}</span>
             {(isChatEmojiSet || isChatStickerSet) && (
               <span className="symbol-set-chat">{lang(isChatEmojiSet ? 'GroupEmoji' : 'GroupStickers')}</span>
             )}

@@ -27,8 +27,8 @@ import renderText from '../../common/helpers/renderText';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import AnimatedIcon from '../../common/AnimatedIcon';
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
+import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -304,7 +304,7 @@ const Giveaway = ({
     <div className={styles.root}>
       <div className={buildClassName(styles.sticker, isResults && styles.resultSticker)}>
         {isResults ? (
-          <AnimatedIcon
+          <AnimatedIconWithPreview
             size={RESULT_STICKER_SIZE}
             tgsUrl={LOCAL_TGS_URLS.PartyPopper}
             nonInteractive
