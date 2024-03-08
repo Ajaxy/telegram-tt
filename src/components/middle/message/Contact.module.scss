@@ -1,0 +1,83 @@
+.root {
+  position: relative;
+  margin: 0.25rem 0.25rem 0.875rem 0.25rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background-color: var(--accent-background-color);
+  color: var(--accent-color);
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    width: 0.1875rem;
+    background: var(--bar-gradient, var(--accent-color));
+  }
+}
+
+.info-container {
+  display: flex;
+  padding: 0.5rem 1.5rem 0.5rem 0.75rem;
+  cursor: var(--custom-cursor, pointer);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  margin-left: 0.5rem;
+}
+
+.name {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  max-width: 12.5rem;
+}
+
+.phone {
+  color: var(--color-text);
+}
+
+.name,
+.phone {
+  line-height: 1rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.divider {
+  height: 0.0625rem;
+  margin: 0 0.5rem;
+  background: var(--accent-color);
+  filter: opacity(0.4)
+}
+
+.buttons {
+  display: flex;
+
+  .button {
+    width: auto;
+    flex: 1;
+    height: 2.25rem;
+    border-radius: 0;
+    font-weight: 500;
+    background-color: transparent;
+    color: var(--accent-color);
+    --ripple-color: var(--accent-background-active-color);
+
+    &:not(.disabled):not(:disabled):hover {
+      color: var(--accent-color);
+      background-color: transparent;
+    }
+  }
+}
+
+.emoji-icon-background {
+  margin-bottom: 2.25rem;
+}
+  
