@@ -15,10 +15,10 @@ import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
@@ -92,9 +92,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
       ));
   }, [exportedInvites]);
   const forceUpdate = useForceUpdate();
-  useInterval(() => {
-    forceUpdate();
-  }, hasDetailedCountdown ? 1000 : undefined);
+  useInterval(forceUpdate, hasDetailedCountdown ? 1000 : undefined);
 
   const chatMainUsername = useMemo(() => chat && getMainUsername(chat), [chat]);
   const primaryInvite = exportedInvites?.find(({ isPermanent }) => isPermanent);

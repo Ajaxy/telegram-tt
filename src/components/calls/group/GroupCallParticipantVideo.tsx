@@ -19,8 +19,8 @@ import { fastRaf } from '../../../util/schedulers';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 import formatGroupCallVolume from './helpers/formatGroupCallVolume';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';

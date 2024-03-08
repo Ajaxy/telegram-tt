@@ -9,7 +9,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { getCanPostInChat } from '../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../global/selectors';
 
-import useInterval from '../../hooks/useInterval';
+import useInterval from '../../hooks/schedulers/useInterval';
 import useLang from '../../hooks/useLang';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
 

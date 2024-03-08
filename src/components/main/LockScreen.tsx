@@ -9,10 +9,10 @@ import type { GlobalState } from '../../global/types';
 import { decryptSession } from '../../util/passcode';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 
+import useTimeout from '../../hooks/schedulers/useTimeout';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useShowTransition from '../../hooks/useShowTransition';
-import useTimeout from '../../hooks/useTimeout';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import PasswordForm from '../common/PasswordForm';

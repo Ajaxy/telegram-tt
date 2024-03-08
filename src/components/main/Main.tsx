@@ -49,15 +49,15 @@ import { parseInitialLocationHash, parseLocationHash } from '../../util/routing'
 import updateIcon from '../../util/updateIcon';
 import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
 
+import useInterval from '../../hooks/schedulers/useInterval';
+import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useInterval from '../../hooks/useInterval';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useSyncEffect from '../../hooks/useSyncEffect';
-import useTimeout from '../../hooks/useTimeout';
 import useBackgroundMode from '../../hooks/window/useBackgroundMode';
 import useBeforeUnload from '../../hooks/window/useBeforeUnload';
 import { useFullscreenStatus } from '../../hooks/window/useFullscreen';

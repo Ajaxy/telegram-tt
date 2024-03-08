@@ -8,10 +8,10 @@ import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
 import { selectUser } from '../../../global/selectors';
 import { getServerTimeOffset } from '../../../util/serverTime';
 
+import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
-import useTimeout from '../../../hooks/useTimeout';
 
 import CustomEmoji from '../../common/CustomEmoji';
 import PremiumIcon from '../../common/PremiumIcon';

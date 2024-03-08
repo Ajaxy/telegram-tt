@@ -62,9 +62,9 @@ import { debounce, onTickEnd } from '../../util/schedulers';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
+import useInterval from '../../hooks/schedulers/useInterval';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useInterval from '../../hooks/useInterval';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
@@ -276,13 +276,13 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     const ids = messageIds.filter((id) => {
       const message = messagesById[id];
-      return message.reactions?.results.length && !message.content.action;
+      return message && message.reactions?.results.length && !message.content.action;
     });
 
     if (!ids.length) return;
 
     loadMessageReactions({ chatId, ids });
-  }, MESSAGE_REACTIONS_POLLING_INTERVAL);
+  }, MESSAGE_REACTIONS_POLLING_INTERVAL, true);
 
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled') {
@@ -317,7 +317,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (!ids.length) return;
 
     loadMessageViews({ chatId, ids });
-  }, MESSAGE_COMMENTS_POLLING_INTERVAL);
+  }, MESSAGE_COMMENTS_POLLING_INTERVAL, true);
 
   const loadMoreAround = useMemo(() => {
     if (type !== 'thread') {

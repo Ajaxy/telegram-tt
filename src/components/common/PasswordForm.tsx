@@ -10,9 +10,9 @@ import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
+import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
-import useTimeout from '../../hooks/useTimeout';
 
 import Button from '../ui/Button';
 

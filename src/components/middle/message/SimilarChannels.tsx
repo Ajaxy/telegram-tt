@@ -16,12 +16,12 @@ import buildClassName from '../../../util/buildClassName';
 import { getAverageColor, rgb2hex } from '../../../util/colors';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
+import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useFlag from '../../../hooks/useFlag';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useTimeout from '../../../hooks/useTimeout';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/Icon';
@@ -79,7 +79,7 @@ const SimilarChannels = ({
       && areSimilarChannelsPresent,
   );
 
-  useTimeout(() => setShoulRenderSkeleton(false), MAX_SKELETON_DELAY, []);
+  useTimeout(() => setShoulRenderSkeleton(false), MAX_SKELETON_DELAY);
 
   useEffect(() => {
     if (shoulRenderSkeleton && similarChannels && shouldShowInChat) {

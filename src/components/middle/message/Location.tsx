@@ -20,13 +20,13 @@ import {
 } from '../../../util/map';
 import { getServerTime } from '../../../util/serverTime';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
+import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import usePrevious from '../../../hooks/usePrevious';
-import useTimeout from '../../../hooks/useTimeout';
 
 import Avatar from '../../common/Avatar';
 import Skeleton from '../../ui/placeholder/Skeleton';

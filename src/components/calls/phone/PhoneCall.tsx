@@ -23,10 +23,10 @@ import {
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
@@ -137,9 +137,7 @@ const PhoneCall: FC<StateProps> = ({
 
   const forceUpdate = useForceUpdate();
 
-  useInterval(() => {
-    forceUpdate();
-  }, isConnected ? 1000 : undefined);
+  useInterval(forceUpdate, isConnected ? 1000 : undefined);
 
   const callStatus = useMemo(() => {
     const state = phoneCall?.state;

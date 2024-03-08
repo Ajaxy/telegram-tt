@@ -22,9 +22,9 @@ import { extractCurrentThemeParams, validateHexColor } from '../../../util/theme
 import { callApi } from '../../../api/gramjs';
 import renderText from '../../common/helpers/renderText';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
-import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';

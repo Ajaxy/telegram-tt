@@ -9,7 +9,7 @@ import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
 
-import useInterval from '../../../hooks/useInterval';
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
