@@ -2,6 +2,7 @@ import type { ThreadId } from '../types';
 
 import { RE_TG_LINK, RE_TME_LINK } from '../config';
 import { ensureProtocol } from './ensureProtocol';
+import { isUsernameValid } from './username';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
@@ -491,8 +492,4 @@ function getPathParams(url: URL) {
 
 function getQueryParams(url: URL) {
   return Object.fromEntries(url.searchParams);
-}
-
-function isUsernameValid(username: string) {
-  return /^\D([a-zA-Z0-9_]){1,64}$/.test(username);
 }
