@@ -86,9 +86,9 @@ import {
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
-import { processMessageInputForCustomEmoji } from '../../util/customEmojiManager';
 import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dateFormat';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
+import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import focusEditableElement from '../../util/focusEditableElement';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import parseHtmlAsFormattedText from '../../util/parseHtmlAsFormattedText';

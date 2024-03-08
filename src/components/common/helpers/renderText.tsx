@@ -10,11 +10,11 @@ import EMOJI_REGEX from '../../../lib/twemojiRegex';
 import buildClassName from '../../../util/buildClassName';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import {
-  fixNonStandardEmoji,
   handleEmojiLoad,
   LOADED_EMOJIS,
   nativeToUnifiedExtendedWithCache,
-} from '../../../util/emoji';
+} from '../../../util/emoji/emoji';
+import fixNonStandardEmoji from '../../../util/emoji/fixNonStandardEmoji';
 import { compact } from '../../../util/iteratees';
 import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
 

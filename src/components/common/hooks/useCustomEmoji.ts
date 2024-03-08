@@ -5,7 +5,7 @@ import type { ApiSticker } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
-import { addCustomEmojiCallback, removeCustomEmojiCallback } from '../../../util/customEmojiManager';
+import { addCustomEmojiCallback, removeCustomEmojiCallback } from '../../../util/emoji/customEmojiManager';
 
 import useEnsureCustomEmoji from '../../../hooks/useEnsureCustomEmoji';
 import useLastCallback from '../../../hooks/useLastCallback';

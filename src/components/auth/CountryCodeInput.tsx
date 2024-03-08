@@ -8,7 +8,7 @@ import type { ApiCountryCode } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
-import { isoToEmoji } from '../../util/emoji';
+import { isoToEmoji } from '../../util/emoji/emoji';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import renderText from '../common/helpers/renderText';
 

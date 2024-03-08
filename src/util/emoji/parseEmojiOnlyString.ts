@@ -1,11 +1,13 @@
-import twemojiRegex from '../lib/twemojiRegex';
+import twemojiRegex from '../../lib/twemojiRegex';
+import fixNonStandardEmoji from './fixNonStandardEmoji';
 
 const DETECT_UP_TO = 100;
 const MAX_LENGTH = DETECT_UP_TO * 8; // Maximum 8 per one emoji.
 const RE_EMOJI_ONLY = new RegExp(`^(?:${twemojiRegex.source})+$`, '');
 
 const parseEmojiOnlyString = (text: string): number | false => {
-  const lines = text.split('\n');
+  const standardizedText = fixNonStandardEmoji(text);
+  const lines = standardizedText.split('\n');
   const textWithoutNewlines = lines.join('');
   if (textWithoutNewlines.length > MAX_LENGTH) {
     return false;

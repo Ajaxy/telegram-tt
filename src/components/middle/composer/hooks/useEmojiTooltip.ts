@@ -2,13 +2,13 @@ import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
-import type { EmojiData, EmojiModule, EmojiRawData } from '../../../../util/emoji';
+import type { EmojiData, EmojiModule, EmojiRawData } from '../../../../util/emoji/emoji';
 import type { Signal } from '../../../../util/signals';
 
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_ID } from '../../../../config';
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
-import { uncompressEmoji } from '../../../../util/emoji';
+import { uncompressEmoji } from '../../../../util/emoji/emoji';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import {
   buildCollectionByKey, mapValues, pickTruthy, unique, uniqueByField,

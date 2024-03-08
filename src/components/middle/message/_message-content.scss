@@ -814,7 +814,7 @@
       --emoji-only-size: #{$size};
 
       .text-content {
-        width: #{calc($size * $i)};
+        width: #{calc(($size + 1px) * $i)};
         font-size: calc($size * 0.9);
       }
     }

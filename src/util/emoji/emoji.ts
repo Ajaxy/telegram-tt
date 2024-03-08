@@ -1,6 +1,8 @@
-import { requestMutation } from '../lib/fasterdom/fasterdom';
-import EMOJI_REGEX, { removeVS16s } from '../lib/twemojiRegex';
-import withCache from './withCache';
+import { addExtraClass } from '../../lib/teact/teact-dom';
+
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { removeVS16s } from '../../lib/twemojiRegex';
+import withCache from '../withCache';
 
 // Due to the fact that emoji from Apple do not contain some characters, it is necessary to remove them from emoji-data
 // https://github.com/iamcal/emoji-data/issues/136
@@ -15,13 +17,6 @@ export type EmojiData = {
   categories: Array<EmojiCategory>;
   emojis: Record<string, Emoji>;
 };
-
-// Non-standard variations of emojis, used on some devices
-const EMOJI_EXCEPTIONS: [string | RegExp, string][] = [
-  [/\u{1f3f3}\u200d\u{1f308}/gu, '\u{1f3f3}\ufe0f\u200d\u{1f308}'], // 🏳‍🌈
-  [/\u{1f3f3}\u200d\u26a7\ufe0f/gu, '\u{1f3f3}\ufe0f\u200d\u26a7\ufe0f'], // 🏳️‍⚧️
-  [/\u{1f937}\u200d\u2642[^\ufe0f]/gu, '\u{1f937}\u200d\u2642\ufe0f'], // 🤷‍♂️
-];
 
 function unifiedToNative(unified: string) {
   const unicodes = unified.split('-');
@@ -38,19 +33,8 @@ export function handleEmojiLoad(event: React.SyntheticEvent<HTMLImageElement>) {
   LOADED_EMOJIS.add(event.currentTarget.dataset.path!);
 
   requestMutation(() => {
-    emoji.classList.add('open');
+    addExtraClass(emoji, 'open');
   });
-}
-
-export function fixNonStandardEmoji(text: string) {
-  // Non-standard sequences typically parsed as separate emojis, so no need to fix text without any
-  if (!text.match(EMOJI_REGEX)) return text;
-  // eslint-disable-next-line no-restricted-syntax
-  for (const [regex, replacement] of EMOJI_EXCEPTIONS) {
-    text = text.replace(regex, replacement);
-  }
-
-  return text;
 }
 
 export function nativeToUnified(emoji: string) {
