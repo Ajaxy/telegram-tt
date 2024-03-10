@@ -68,9 +68,22 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
 
   const handleSelectedIdsChange = useCallback((ids: string[]) => {
     if (mode === 'included') {
+      const includedChatIdsDeconstructed: string[] = [];
+      const pinnedChatIdsDeconstructed: string[] = [];
+      ids.forEach((id) => {
+        if (state.includeFilters?.pinnedChatIds?.includes(id)) {
+          pinnedChatIdsDeconstructed.push(id);
+        } else {
+          includedChatIdsDeconstructed.push(id);
+        }
+      });
       dispatch({
         type: 'setIncludeFilters',
-        payload: { ...state.includeFilters, includedChatIds: ids },
+        payload: {
+          ...state.includeFilters,
+          includedChatIds: includedChatIdsDeconstructed,
+          pinnedChatIds: pinnedChatIdsDeconstructed,
+        },
       });
     } else {
       dispatch({

@@ -29,7 +29,7 @@ export const EXCLUDED_CHAT_TYPES: FolderChatType[] = [
 ];
 
 const INCLUDE_FILTER_FIELDS: Array<keyof FolderIncludeFilters> = [
-  'includedChatIds', 'bots', 'channels', 'groups', 'contacts', 'nonContacts',
+  'includedChatIds', 'pinnedChatIds', 'bots', 'channels', 'groups', 'contacts', 'nonContacts',
 ];
 const EXCLUDE_FILTER_FIELDS: Array<keyof FolderExcludeFilters> = [
   'excludedChatIds', 'excludeArchived', 'excludeMuted', 'excludeRead',
@@ -42,6 +42,7 @@ export function selectChatFilters(state: FoldersState, mode: 'included' | 'exclu
   if (mode === 'included') {
     const {
       includedChatIds,
+      pinnedChatIds,
       ...includeFilters
     } = selectTemp
       ? state.includeFilters || {}
@@ -50,7 +51,7 @@ export function selectChatFilters(state: FoldersState, mode: 'included' | 'exclu
         INCLUDE_FILTER_FIELDS,
       );
 
-    selectedChatIds = includedChatIds || [];
+    selectedChatIds = (includedChatIds || []).concat(pinnedChatIds || []);
     selectedChatTypes = (Object.keys(includeFilters) as Array<keyof typeof includeFilters>)
       .filter((key) => Boolean(includeFilters[key]));
   } else {
@@ -106,7 +107,7 @@ function getSuggestedFolderName(includeFilters?: FolderIncludeFilters) {
 }
 
 type FolderIncludeFilters = Pick<ApiChatFolder, (
-  'includedChatIds' | 'bots' | 'channels' | 'groups' | 'contacts' | 'nonContacts'
+  'includedChatIds' | 'pinnedChatIds' | 'bots' | 'channels' | 'groups' | 'contacts' | 'nonContacts'
 )>;
 type FolderExcludeFilters = Pick<ApiChatFolder, 'excludedChatIds' | 'excludeArchived' | 'excludeMuted' | 'excludeRead'>;
 
