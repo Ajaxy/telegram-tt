@@ -347,7 +347,7 @@ function makeRequestToMaster(message: {
   return promise;
 }
 
-function makeRequest(message: OriginRequest) {
+export function makeRequest(message: OriginRequest) {
   const messageId = generateUniqueId();
   const payload: OriginRequest = {
     messageId,
