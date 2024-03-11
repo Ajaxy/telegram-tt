@@ -5,7 +5,7 @@ import * as CUSTOM from "./custom"
 import { Actions, Custom, Events, Methods } from "./types"
 import { selectChat, selectCurrentMessageList } from "../global/selectors"
 
-const MAIN_FRAME_ORIGIN = "*"
+const MAIN_FRAME_ORIGIN = "https://slise-crm.pages.dev"
 
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN)
 
