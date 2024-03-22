@@ -162,8 +162,10 @@ $color-message-story-mention-to: #74bcff;
   --color-selection-highlight: #{$color-selection};
   --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, 0.7);
 
-  --color-avatar-story-unread-from: #34c76f;
-  --color-avatar-story-unread-to: #3da1fd;
+  --color-avatar-story-unread-from: #34c578;
+  --color-avatar-story-unread-to: #3ca3f3;
+  --color-avatar-story-friend-unread-from: #c9eb38;
+  --color-avatar-story-friend-unread-to: #09c167;
 
   --color-default-shadow: #72727240;
   --color-light-shadow: #7272722b;

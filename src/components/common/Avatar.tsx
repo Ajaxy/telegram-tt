@@ -59,6 +59,7 @@ type OwnProps = {
   forPremiumPromo?: boolean;
   withStoryGap?: boolean;
   withStorySolid?: boolean;
+  forceFriendStorySolid?: boolean;
   forceUnreadStorySolid?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
   storyViewerMode?: 'full' | 'single-peer' | 'disabled';
@@ -81,6 +82,7 @@ const Avatar: FC<OwnProps> = ({
   forPremiumPromo,
   withStoryGap,
   withStorySolid,
+  forceFriendStorySolid,
   forceUnreadStorySolid,
   storyViewerOrigin,
   storyViewerMode = 'single-peer',
@@ -221,6 +223,7 @@ const Avatar: FC<OwnProps> = ({
     isRoundedRect && 'forum',
     ((withStory && peer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && peer?.hasStories && 'with-story-solid',
+    withStorySolid && forceFriendStorySolid && 'close-friend',
     withStorySolid && (peer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
