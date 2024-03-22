@@ -15,6 +15,10 @@
     margin-left: 0.25rem;
     flex: 1;
   }
+
+  body.is-electron.is-macos & {
+    padding-left: 4.5rem;
+  }
 }
 
 #MobileSearch > .tags-subheader {
