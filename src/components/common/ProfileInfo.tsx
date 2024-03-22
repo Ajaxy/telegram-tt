@@ -276,12 +276,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             isUserOnline(user, userStatus) && 'online',
           )}
         >
-          <span className="user-status" dir="auto">
+          <span className={styles.userStatus} dir="auto">
             {getUserStatus(lang, user, userStatus)}
           </span>
           {userStatus?.isReadDateRestrictedByMe && (
-            <span className="get-status" onClick={handleOpenGetReadDateModal}>
-              {lang('StatusHiddenShow')}
+            <span className={styles.getStatus} onClick={handleOpenGetReadDateModal}>
+              <span>{lang('StatusHiddenShow')}</span>
             </span>
           )}
         </div>

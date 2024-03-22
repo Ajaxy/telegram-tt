@@ -69,7 +69,7 @@ const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & Sta
     closePrivacySettingsNoticeModal();
 
     setTimeout(() => {
-      openPremiumModal();
+      openPremiumModal({ initialSection: 'last_seen' });
     }, CLOSE_ANIMATION_DURATION);
   });
 

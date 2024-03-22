@@ -67,7 +67,7 @@ function PrivacyMessages({
           {lang('Privacy.Messages.SectionFooter')}
         </p>
       </div>
-      {!isCurrentUserPremium && <PremiumStatusItem />}
+      {!isCurrentUserPremium && <PremiumStatusItem premiumSection="message_privacy" />}
     </>
   );
 }

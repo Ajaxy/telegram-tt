@@ -1,16 +1,22 @@
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import type { ApiPremiumSection } from '../../../global/types';
+
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import PremiumIcon from '../../common/PremiumIcon';
 import ListItem from '../../ui/ListItem';
 
-function PremiumStatusItem() {
+type OwnProps = {
+  premiumSection?: ApiPremiumSection;
+};
+
+function PremiumStatusItem({ premiumSection }: OwnProps) {
   const { openPremiumModal } = getActions();
   const lang = useLang();
-  const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());
+  const handleOpenPremiumModal = useLastCallback(() => openPremiumModal({ initialSection: premiumSection }));
 
   return (
     <div className="settings-item">

@@ -4,24 +4,21 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChat } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
 
-import { getChatAvatarHash } from '../../../global/helpers';
 import {
   selectChat,
   selectIsCurrentUserPremium,
   selectSimilarChannelIds,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { getAverageColor, rgb2hex } from '../../../util/colors';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
+import useAverageColor from '../../../hooks/useAverageColor';
 import useFlag from '../../../hooks/useFlag';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMedia from '../../../hooks/useMedia';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/Icon';
@@ -173,7 +170,7 @@ const SimilarChannels = ({
 
 function SimilarChannel({ channel }: { channel: ApiChat }) {
   const { openChat } = getActions();
-  const color = useAverageColor(channel);
+  const color = useAverageColor(channel, DEFAULT_BADGE_COLOR);
 
   return (
     <div className={styles.item} onClick={() => openChat({ id: channel.id })}>
@@ -231,24 +228,6 @@ function MoreChannels({
       <span className={styles.channelTitle}>{lang('MoreSimilar')}</span>
     </div>
   );
-}
-
-function useAverageColor(channel: ApiChat) {
-  const [color, setColor] = useState(DEFAULT_BADGE_COLOR);
-  const imgBlobUrl = useMedia(getChatAvatarHash(channel), false, ApiMediaFormat.BlobUrl);
-
-  useEffect(() => {
-    (async () => {
-      if (!imgBlobUrl) {
-        return;
-      }
-
-      const averageColor = await getAverageColor(imgBlobUrl);
-      setColor(`#${rgb2hex(averageColor)}`);
-    })();
-  }, [imgBlobUrl]);
-
-  return color;
 }
 
 export default memo(
