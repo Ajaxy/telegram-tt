@@ -187,7 +187,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
-    loadMessageViews, loadPeerStoriesByIds,
+    loadMessageViews, loadPeerStoriesByIds, openChat,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -228,6 +228,32 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useSyncEffect(() => {
     memoFirstUnreadIdRef.current = firstUnreadId;
   }, [firstUnreadId]);
+
+  useEffect(() => {
+    const minDeltaX = 75;
+
+    const handleSwipeRightToLeft = () => {
+      openChat({ id: undefined });
+    };
+
+    const handleScroll = (e: WheelEvent) => {
+      if (containerRef.current && containerRef.current.contains(e.target as Node)) {
+        if (Math.abs(e.deltaY) > 50) {
+          return;
+        }
+
+        if (e.deltaX < -minDeltaX) {
+          handleSwipeRightToLeft();
+        }
+      }
+    };
+
+    window.addEventListener('wheel', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+    };
+  }, [containerRef]);
 
   useEffect(() => {
     if (!isCurrentUserPremium && isChannelChat && isSynced && isReady) {
