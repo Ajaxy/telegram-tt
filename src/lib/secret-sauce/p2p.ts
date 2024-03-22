@@ -5,8 +5,8 @@ import type { MediaContent, MediaStateMessage, P2pMessage } from './p2pMessage';
 import {
   fromTelegramSource,
   IS_ECHO_CANCELLATION_SUPPORTED,
-  IS_NOISE_SUPPRESSION_SUPPORTED, isRelayAddress,
-  p2pPayloadTypeToConference, removeRelatedAddress,
+  IS_NOISE_SUPPRESSION_SUPPORTED, 
+  p2pPayloadTypeToConference,
 } from './utils';
 import buildSdp, { Conference } from './buildSdp';
 import { StreamType } from './secretsauce';
@@ -37,6 +37,8 @@ type P2pState = {
 };
 
 let state: P2pState | undefined;
+
+const ICE_CANDIDATE_POOL_SIZE = 10;
 
 export function getStreams() {
   return state?.streams;
@@ -189,7 +191,8 @@ export async function joinPhoneCall(
       }
     )),
     iceTransportPolicy: isP2p ? 'all' : 'relay',
-    bundlePolicy: 'max-bundle'
+    bundlePolicy: 'max-bundle',
+    iceCandidatePoolSize: ICE_CANDIDATE_POOL_SIZE,
   });
 
   conn.onicecandidate = (e) => {
@@ -463,9 +466,8 @@ export async function processSignalingMessage(message: P2pMessage) {
 
       if (!isOutgoing) {
         const answer = await connection.createAnswer();
-        if (!answer) return;
         await connection.setLocalDescription(answer);
-        sendInitialSetup(parseSdp(answer, true) as P2pParsedSdp);
+        sendInitialSetup(parseSdp(connection.localDescription!, true) as P2pParsedSdp);
       }
       state.gotInitialSetup = true;
       await commitPendingIceCandidates();
@@ -497,8 +499,8 @@ async function tryAddCandidate(connection: RTCPeerConnection, candidate: string)
   }
 }
 
-async function createOffer(pc: RTCPeerConnection, params: RTCOfferOptions) {
-  const offer = await pc.createOffer(params);
-  sendInitialSetup(parseSdp(offer, true) as P2pParsedSdp);
-  await pc.setLocalDescription(offer);
+async function createOffer(conn: RTCPeerConnection, params: RTCOfferOptions) {
+  const offer = await conn.createOffer(params);
+  await conn.setLocalDescription(offer);
+  sendInitialSetup(parseSdp(conn.localDescription!, true) as P2pParsedSdp);
 }
