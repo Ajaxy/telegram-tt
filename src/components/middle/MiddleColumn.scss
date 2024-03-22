@@ -278,7 +278,7 @@
 
   .unpin-all-button {
     text-transform: capitalize;
-    color: var(--color-black);
+    color: var(--color-primary);
 
     @media (hover: hover) {
       &:hover {
@@ -310,7 +310,6 @@
     height: 3.5rem;
     transform: scaleX(1);
     transition: transform var(--select-transition), background-color 0.15s, color 0.15s;
-    color: var(--color-primary);
 
     .select-mode-active + .middle-column-footer & {
       box-shadow: none;
@@ -320,6 +319,10 @@
     @media (max-width: 600px) {
       height: 2.5rem;
     }
+  }
+
+  .open-chat-button {
+    color: var(--color-primary);
   }
 
   @media (max-width: 600px) {
