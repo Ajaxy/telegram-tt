@@ -4,9 +4,10 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import { isLocalMessageId } from '../../../util/messageKey';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
 import { buildLocalMessage } from '../../../api/gramjs/apiBuilders/messages';
-import { isChatChannel, isLocalMessageId } from '../../helpers';
+import { isChatChannel } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';

@@ -12,11 +12,11 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit, pickTruthy, unique } from '../../../util/iteratees';
-import { getMessageKey } from '../../../util/messageKey';
+import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
 import {
-  checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage, isLocalMessageId,
+  checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage,
   isMessageLocal, isUserId,
 } from '../../helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';

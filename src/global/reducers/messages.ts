@@ -1,6 +1,5 @@
 import type { ApiMessage, ApiSponsoredMessage, ApiThreadInfo } from '../../api/types';
 import type { FocusDirection, ThreadId } from '../../types';
-import type { MessageKey } from '../../util/messageKey';
 import type {
   GlobalState, MessageList, MessageListType, TabArgs, TabThread, Thread,
 } from '../types';
@@ -13,9 +12,9 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
 } from '../../util/iteratees';
+import { isLocalMessageId, type MessageKey } from '../../util/messageKey';
 import {
-  hasMessageTtl,
-  isLocalMessageId, mergeIdRanges, orderHistoryIds, orderPinnedIds,
+  hasMessageTtl, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
 import {
   selectChat,

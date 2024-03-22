@@ -11,7 +11,7 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
-import { getMessageKey } from '../../util/messageKey';
+import { getMessageKey, isLocalMessageId } from '../../util/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { IS_OPUS_SUPPORTED } from '../../util/windowEnvironment';
 import { getGlobal } from '../index';
@@ -186,10 +186,6 @@ export function isMessageLocal(message: ApiMessage) {
 
 export function isMessageFailed(message: ApiMessage) {
   return message.sendingState === 'messageSendingStateFailed';
-}
-
-export function isLocalMessageId(id: number) {
-  return !Number.isInteger(id);
 }
 
 export function isHistoryClearMessage(message: ApiMessage) {

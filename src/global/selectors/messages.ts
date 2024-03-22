@@ -22,7 +22,7 @@ import {
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import { getMessageKey } from '../../util/messageKey';
+import { getMessageKey, isLocalMessageId } from '../../util/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 import {
@@ -47,7 +47,6 @@ import {
   isChatSuperGroup,
   isCommonBoxChat,
   isForwardedMessage,
-  isLocalMessageId,
   isMessageDocumentSticker,
   isMessageFailed,
   isMessageLocal,

@@ -36,6 +36,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
 import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
+import { isLocalMessageId } from '../../../util/messageKey';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
@@ -45,7 +46,6 @@ import {
   isChatBasicGroup,
   isChatChannel,
   isChatSuperGroup,
-  isLocalMessageId,
   isUserBot,
   toChannelId,
 } from '../../helpers';

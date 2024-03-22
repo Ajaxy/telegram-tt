@@ -498,26 +498,30 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
     photo, video, document, sticker,
   } = message.content;
 
-  if (photo) {
-    photo.blobUrl = undefined;
-  }
-
-  if (video) {
-    video.blobUrl = undefined;
-    video.previewBlobUrl = undefined;
-  }
-
-  if (document) {
-    document.previewBlobUrl = undefined;
-  }
-
-  if (sticker) {
-    sticker.isPreloadedGlobally = undefined;
-  }
-
-  message.previousLocalId = undefined;
-
-  return message;
+  return {
+    ...message,
+    content: {
+      ...message.content,
+      photo: photo && {
+        ...photo,
+        blobUrl: undefined,
+      },
+      video: video && {
+        ...video,
+        blobUrl: undefined,
+        previewBlobUrl: undefined,
+      },
+      document: document && {
+        ...document,
+        previewBlobUrl: undefined,
+      },
+      sticker: sticker && {
+        ...sticker,
+        isPreloadedGlobally: undefined,
+      },
+    },
+    previousLocalId: undefined,
+  };
 }
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {

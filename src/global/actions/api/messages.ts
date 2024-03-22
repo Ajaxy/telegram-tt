@@ -45,7 +45,7 @@ import {
   unique,
 } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
-import { getMessageKey } from '../../../util/messageKey';
+import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { IS_IOS } from '../../../util/windowEnvironment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
@@ -54,7 +54,6 @@ import {
   getUserFullName,
   isChatChannel,
   isDeletedUser,
-  isLocalMessageId,
   isMessageLocal,
   isServiceNotificationMessage,
   isUserBot,

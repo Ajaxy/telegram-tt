@@ -14,7 +14,7 @@ import type {
 } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { getMessageKey } from '../../util/messageKey';
+import { getMessageServerKey } from '../../util/messageKey';
 import {
   IS_OPFS_SUPPORTED,
   IS_OPUS_SUPPORTED,
@@ -229,8 +229,13 @@ export function getMessageMediaHash(
     return undefined;
   }
 
+  const messageKey = getMessageServerKey(message);
+  if (!messageKey) {
+    return undefined;
+  }
+
   const mediaId = content.id;
-  const base = `${getMessageKey(message)}${mediaId ? `:${mediaId}` : ''}`;
+  const base = `${messageKey}${mediaId ? `:${mediaId}` : ''}`;
 
   if (messageVideo) {
     switch (target) {
