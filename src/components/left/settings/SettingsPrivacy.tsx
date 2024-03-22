@@ -321,6 +321,21 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
       </div>
 
+      {canChangeSensitive && (
+        <div className="settings-item">
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('lng_settings_sensitive_title')}
+          </h4>
+          <Checkbox
+            label={lang('lng_settings_sensitive_disable_filtering')}
+            subLabel={lang('lng_settings_sensitive_about')}
+            checked={Boolean(isSensitiveEnabled)}
+            disabled={!canChangeSensitive}
+            onCheck={handleUpdateContentSettings}
+          />
+        </div>
+      )}
+
       {canDisplayAutoarchiveSetting && (
         <div className="settings-item">
           <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -345,21 +360,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           onCheck={handleChatInTitleChange}
         />
       </div>
-
-      {canChangeSensitive && (
-        <div className="settings-item">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-            {lang('lng_settings_sensitive_title')}
-          </h4>
-          <Checkbox
-            label={lang('lng_settings_sensitive_disable_filtering')}
-            subLabel={lang('lng_settings_sensitive_about')}
-            checked={Boolean(isSensitiveEnabled)}
-            disabled={!canChangeSensitive}
-            onCheck={handleUpdateContentSettings}
-          />
-        </div>
-      )}
     </div>
   );
 };
