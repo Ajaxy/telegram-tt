@@ -2,6 +2,7 @@
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
 import type { ApiAvailableReaction, ApiMessage } from '../api/types';
+import type { ThreadId } from '../types';
 import type { ActionReturnType, GlobalState, MessageList } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
@@ -12,6 +13,7 @@ import {
   ARCHIVED_FOLDER_ID,
   DEBUG,
   DEFAULT_LIMITS,
+  GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
   GLOBAL_STATE_CACHE_DISABLED,
@@ -342,8 +344,8 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     ...chatStoriesUserIds,
     ...visibleUserIds || [],
     ...global.topPeers.userIds || [],
+    ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT).filter(isUserId) || [],
     ...getOrderedIds(ALL_FOLDER_ID)?.filter(isUserId) || [],
-    ...getOrderedIds(ARCHIVED_FOLDER_ID)?.filter(isUserId) || [],
     ...global.contactList?.userIds || [],
     ...global.recentlyFoundChatIds?.filter(isUserId) || [],
     ...Object.keys(byId),
@@ -384,9 +386,9 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
     ...messagesChatIds,
-    ...getOrderedIds(SAVED_FOLDER_ID) || [],
+    ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT) || [],
     ...getOrderedIds(ALL_FOLDER_ID) || [],
-    ...getOrderedIds(ARCHIVED_FOLDER_ID) || [],
+    ...getOrderedIds(SAVED_FOLDER_ID) || [],
     ...global.recentlyFoundChatIds || [],
     ...Object.keys(byId),
   ]).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT);
@@ -420,7 +422,20 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     ...currentUserId ? [currentUserId] : [],
     ...forumPanelChatIds,
     ...getOrderedIds(ALL_FOLDER_ID) || [],
+    ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT) || [],
   ]);
+
+  const openedChatThreadIds = Object.values(global.byTabId).reduce((acc, { id: tabId }) => {
+    const { chatId: tabChatId, threadId } = selectCurrentMessageList(global, tabId) || {};
+    if (!tabChatId || !threadId || threadId === MAIN_THREAD_ID) {
+      return acc;
+    }
+    const current = acc[tabChatId] || new Set();
+    current.add(threadId);
+    acc[tabChatId] = current;
+
+    return acc;
+  }, {} as Record<string, Set<ThreadId>>);
 
   chatIdsToSave.forEach((chatId) => {
     const current = global.messages.byChatId[chatId];
@@ -431,22 +446,13 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     const chat = selectChat(global, chatId);
     const chatLastMessageId = selectChatLastMessageId(global, chatId);
 
-    const threadIds = unique(compact(Object.values(global.byTabId).map(({ id: tabId }) => {
-      const { chatId: tabChatId, threadId } = selectCurrentMessageList(global, tabId) || {};
-      if (!tabChatId || tabChatId !== chatId || !threadId || threadId === MAIN_THREAD_ID) {
-        return undefined;
-      }
-
-      return threadId;
-    }).concat(
-      Object.values(global.messages.byChatId[chatId].threadsById || {})
-        .map(({ threadInfo }) => (threadInfo?.isCommentsInfo ? threadInfo?.originMessageId : undefined)),
-    )));
+    const openedThreadIds = Array.from(openedChatThreadIds[chatId] || []);
+    const commentThreadIds = Object.values(global.messages.byChatId[chatId].threadsById || {})
+      .map(({ threadInfo }) => (threadInfo?.isCommentsInfo ? threadInfo?.originMessageId : undefined))
+      .filter(Boolean);
+    const threadIds = unique(openedThreadIds.concat(commentThreadIds));
 
     const threadsToSave = pickTruthy(current.threadsById, [MAIN_THREAD_ID, ...threadIds]);
-    if (!Object.keys(threadsToSave).length) {
-      return;
-    }
 
     const viewportIdsToSave = unique(Object.values(threadsToSave).flatMap((thread) => thread.lastViewportIds || []));
     const topicLastMessageIds = chat?.topics ? Object.values(chat.topics).map(({ lastMessageId }) => lastMessageId)

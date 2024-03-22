@@ -20,6 +20,7 @@ import {
   ARCHIVED_FOLDER_ID,
   CHAT_LIST_LOAD_SLICE,
   DEBUG,
+  GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
   RE_TG_LINK,
   SAVED_FOLDER_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -506,7 +507,7 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
   let i = 0;
 
   const getOrderDate = (chat: ApiChat) => {
-    return selectChatLastMessage(global, chat.id)?.date || chat.creationDate;
+    return selectChatLastMessage(global, chat.id, listType === 'saved' ? 'saved' : 'all')?.date || chat.creationDate;
   };
 
   while (shouldReplace || !global.chats.isFullyLoaded[listType]) {
@@ -2704,10 +2705,15 @@ async function loadChats(
       }
 
       const tabStates = Object.values(global.byTabId);
+      const topArchivedChats = getOrderedIds(ARCHIVED_FOLDER_ID)
+        ?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT)
+        .map((chatId) => selectChat(global, chatId))
+        .filter(Boolean);
       const visibleChats = tabStates.flatMap(({ id: tabId }) => {
         const currentChat = selectCurrentChat(global, tabId);
         return currentChat ? [currentChat] : [];
       });
+      const chatsToSave = visibleChats.concat(topArchivedChats || []);
 
       const visibleUsers = tabStates.flatMap(({ id: tabId }) => {
         return selectVisibleUsers(global, tabId) || [];
@@ -2719,7 +2725,7 @@ async function loadChats(
 
       global = replaceUsers(global, buildCollectionByKey(visibleUsers.concat(result.users), 'id'));
       global = replaceUserStatuses(global, result.userStatusesById);
-      global = replaceChats(global, buildCollectionByKey(visibleChats.concat(result.chats), 'id'));
+      global = replaceChats(global, buildCollectionByKey(chatsToSave.concat(result.chats), 'id'));
       global = replaceChatListIds(global, listType, chatIds);
     } else {
       // Archived and Saved
