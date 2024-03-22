@@ -92,7 +92,7 @@ export function startWebsync() {
   lastTimeout = setTimeout(() => {
     const { authState } = getGlobal();
 
-    const authed = authState === 'authorizationStateReady' || hasStoredSession(true);
+    const authed = authState === 'authorizationStateReady' || hasStoredSession();
     forceWebsync(authed);
   }, Math.max(0, timeout * 1000));
 }

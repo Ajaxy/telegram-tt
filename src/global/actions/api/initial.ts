@@ -3,7 +3,6 @@ import { ManagementProgress } from '../../../types';
 
 import {
   CUSTOM_BG_CACHE_NAME,
-  IS_TEST,
   LANG_CACHE_NAME,
   LOCK_SCREEN_ANIMATION_DURATION_MS,
   MEDIA_CACHE_NAME,
@@ -18,9 +17,7 @@ import { unsubscribe } from '../../../util/notifications';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { parseInitialLocationHash, resetInitialLocationHash, resetLocationHash } from '../../../util/routing';
 import {
-  clearLegacySessions,
   clearStoredSession,
-  importLegacySession,
   loadStoredSession,
   storeSession,
 } from '../../../util/sessions';
@@ -39,12 +36,7 @@ import {
   addUsers, clearGlobalForLockScreen, updateManagementProgress, updatePasscodeSettings,
 } from '../../reducers';
 
-addActionHandler('initApi', async (global, actions): Promise<void> => {
-  if (!IS_TEST) {
-    await importLegacySession();
-    void clearLegacySessions();
-  }
-
+addActionHandler('initApi', (global, actions): ActionReturnType => {
   const initialLocationHash = parseInitialLocationHash();
 
   void initApi(actions.apiUpdate, {
@@ -207,8 +199,6 @@ addActionHandler('reset', (global, actions): ActionReturnType => {
   for (let i = 0; i < langCacheVersion; i++) {
     void cacheApi.clear(`${langCachePrefix}${i === 0 ? '' : i}`);
   }
-
-  void clearLegacySessions();
 
   updateAppBadge(0);
 

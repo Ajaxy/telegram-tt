@@ -86,7 +86,7 @@ export function loadCache(initialState: GlobalState): GlobalState | undefined {
 
   const cache = readCache(initialState);
 
-  if (cache.passcode.hasPasscode || hasStoredSession(true)) {
+  if (cache.passcode.hasPasscode || hasStoredSession()) {
     setupCaching();
 
     return cache;

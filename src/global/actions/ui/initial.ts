@@ -64,7 +64,7 @@ addActionHandler('switchMultitabRole', async (global, actions, payload): Promise
       storeSession(session, session.userId);
     }
 
-    if (hasStoredSession(true)) {
+    if (hasStoredSession()) {
       setupCaching();
     }
 
