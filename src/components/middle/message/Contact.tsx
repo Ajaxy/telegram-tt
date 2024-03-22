@@ -20,6 +20,7 @@ import styles from './Contact.module.scss';
 
 type OwnProps = {
   contact: ApiContact;
+  noUserColors?: boolean;
 };
 
 type StateProps = {
@@ -30,17 +31,14 @@ type StateProps = {
 const UNREGISTERED_CONTACT_ID = '0';
 
 const Contact: FC<OwnProps & StateProps> = ({
-  contact, user, phoneCodeList,
+  contact, user, phoneCodeList, noUserColors,
 }) => {
   const lang = useLang();
   const {
     openChat, openAddContactDialog, showNotification, openChatWithInfo,
   } = getActions();
 
-  const {
-    phoneNumber,
-    userId,
-  } = contact;
+  const { phoneNumber, userId } = contact;
   const isRegistered = userId !== UNREGISTERED_CONTACT_ID;
   const canAddContact = isRegistered && user && getCanAddContact(user);
 
@@ -62,25 +60,44 @@ const Contact: FC<OwnProps & StateProps> = ({
   });
 
   return (
-    <PeerColorWrapper peer={user} emojiIconClassName={styles.emojiIconBackground} className={styles.root}>
+    <PeerColorWrapper
+      noUserColors={noUserColors}
+      peer={user}
+      emojiIconClassName={styles.emojiIconBackground}
+      className={styles.root}
+    >
       <div className={styles.infoContainer} onClick={handleClick}>
         <Avatar size="large" peer={user} text={getContactName(contact)} />
         <div className={styles.info}>
           <div className={styles.name}>
             {user ? getUserFullName(user) : getContactName(contact)}
           </div>
-          <div className={styles.phone}>{formatPhoneNumberWithCode(phoneCodeList, phoneNumber)}</div>
+          <div className={styles.phone}>
+            {formatPhoneNumberWithCode(phoneCodeList, phoneNumber)}
+          </div>
         </div>
       </div>
       {isRegistered && (
         <>
           <div className={styles.divider} />
           <div className={styles.buttons}>
-            <Button isText color="translucent" ripple onClick={handleOpenChat} className={styles.button}>
+            <Button
+              isText
+              color="translucent"
+              ripple
+              onClick={handleOpenChat}
+              className={styles.button}
+            >
               {lang('SharedContactMessage')}
             </Button>
             {canAddContact && (
-              <Button isText color="translucent" ripple onClick={handleAddContact} className={styles.button}>
+              <Button
+                isText
+                color="translucent"
+                ripple
+                onClick={handleAddContact}
+                className={styles.button}
+              >
                 {lang('SharedContactAdd')}
               </Button>
             )}
@@ -107,14 +124,14 @@ function getContactName(contact: ApiContact) {
   return '';
 }
 
-export default withGlobal<OwnProps>(
-  (global, { contact }): StateProps => {
-    const { countryList: { phoneCodes: phoneCodeList } } = global;
-    const user = selectUser(global, contact.userId);
+export default withGlobal<OwnProps>((global, { contact }): StateProps => {
+  const {
+    countryList: { phoneCodes: phoneCodeList },
+  } = global;
+  const user = selectUser(global, contact.userId);
 
-    return {
-      user,
-      phoneCodeList,
-    };
-  },
-)(Contact);
+  return {
+    user,
+    phoneCodeList,
+  };
+})(Contact);

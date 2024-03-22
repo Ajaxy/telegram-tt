@@ -33,18 +33,17 @@
 
 .name {
   font-size: 1rem;
-  margin-bottom: 0.25rem;
   font-weight: 500;
   max-width: 12.5rem;
 }
 
 .phone {
   color: var(--color-text);
+  line-height: 1rem;
 }
 
 .name,
 .phone {
-  line-height: 1rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
