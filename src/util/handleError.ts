@@ -1,5 +1,5 @@
 import { DEBUG, DEBUG_ALERT_MSG } from '../config';
-import { isMasterTab } from './establishMultitabRole';
+import { isCurrentTabMaster } from './establishMultitabRole';
 import { throttle } from './schedulers';
 
 let showError = true;
@@ -10,7 +10,7 @@ window.addEventListener('unhandledrejection', handleErrorEvent);
 
 if (DEBUG) {
   window.addEventListener('focus', () => {
-    if (!isMasterTab()) {
+    if (!isCurrentTabMaster()) {
       return;
     }
     showError = true;
@@ -21,7 +21,7 @@ if (DEBUG) {
     }
   });
   window.addEventListener('blur', () => {
-    if (!isMasterTab()) {
+    if (!isCurrentTabMaster()) {
       return;
     }
     showError = false;

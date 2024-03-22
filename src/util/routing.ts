@@ -7,18 +7,13 @@ import { IS_MOCKED_CLIENT } from '../config';
 let parsedInitialLocationHash: Record<string, string> | undefined;
 let messageHash: string | undefined;
 let isAlreadyParsed = false;
-
-let LOCATION_HASH: string | undefined = window.location.hash;
-
-export function getInitialLocationHash() {
-  return LOCATION_HASH;
-}
+let initialLocationHash = window.location.hash;
 
 export function resetInitialLocationHash() {
-  LOCATION_HASH = undefined;
   isAlreadyParsed = false;
   messageHash = undefined;
   parsedInitialLocationHash = undefined;
+  initialLocationHash = '';
 }
 
 export function resetLocationHash() {
@@ -107,4 +102,8 @@ export function clearWebTokenAuth() {
   if (!parsedInitialLocationHash) return;
 
   delete parsedInitialLocationHash.tgWebAuthToken;
+}
+
+function getInitialLocationHash() {
+  return initialLocationHash;
 }

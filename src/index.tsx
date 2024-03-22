@@ -46,7 +46,6 @@ async function init() {
 
   if (IS_MULTITAB_SUPPORTED) {
     subscribeToMultitabBroadcastChannel();
-
     await requestGlobal(APP_VERSION);
     localStorage.setItem(MULTITAB_LOCALSTORAGE_KEY, '1');
     onBeforeUnload(() => {
@@ -64,11 +63,12 @@ async function init() {
   getActions().updateShouldDebugExportedSenders();
 
   if (IS_MULTITAB_SUPPORTED) {
-    establishMultitabRole();
     subscribeToMasterChange((isMasterTab) => {
       getActions()
         .switchMultitabRole({ isMasterTab }, { forceSyncOnIOs: true });
     });
+    const shouldReestablishMasterToSelf = getGlobal().authState !== 'authorizationStateReady';
+    establishMultitabRole(shouldReestablishMasterToSelf);
   }
 
   if (DEBUG) {
