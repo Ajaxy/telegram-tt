@@ -202,6 +202,7 @@
     "channels.leaveChannel",
     "channels.inviteToChannel",
     "channels.deleteChannel",
+    "channels.exportMessageLink",
     "channels.toggleSignatures",
     "channels.editBanned",
     "channels.readMessageContents",

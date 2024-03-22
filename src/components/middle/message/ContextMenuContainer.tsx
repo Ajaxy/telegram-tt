@@ -4,11 +4,18 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type {
-  ApiAvailableReaction, ApiChatReactions, ApiMessage, ApiReaction, ApiStickerSet, ApiStickerSetInfo, ApiThreadInfo,
-} from '../../../api/types';
 import type { MessageListType, TabState } from '../../../global/types';
-import type { IAlbum, IAnchorPosition } from '../../../types';
+import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
+import {
+  type ApiAvailableReaction,
+  type ApiChatReactions,
+  type ApiMessage,
+  type ApiReaction,
+  type ApiStickerSet,
+  type ApiStickerSetInfo,
+  type ApiThreadInfo,
+  MAIN_THREAD_ID,
+} from '../../../api/types';
 
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
@@ -38,7 +45,6 @@ import {
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
   selectMessageCustomEmojiSets,
-  selectMessageLink,
   selectMessageTranslations,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
@@ -77,6 +83,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  threadId?: ThreadId;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
   defaultTagReactions?: ApiReaction[];
@@ -120,13 +127,13 @@ type StateProps = {
   maxUniqueReactions?: number;
   canPlayAnimatedEmojis?: boolean;
   isReactionPickerOpen?: boolean;
-  messageLink?: string;
   isInSavedMessages?: boolean;
 };
 
 const selection = window.getSelection();
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
+  threadId,
   availableReactions,
   topReactions,
   defaultTagReactions,
@@ -178,7 +185,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canShowOriginal,
   canSelectLanguage,
   isReactionPickerOpen,
-  messageLink,
   isInSavedMessages,
   onClose,
   onCloseAnimationEnd,
@@ -213,6 +219,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openMessageReactionPicker,
     openPremiumModal,
     loadOutboxReadDate,
+    copyMessageLink,
   } = getActions();
 
   const lang = useLang();
@@ -459,7 +466,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleCopyLink = useLastCallback(() => {
-    copyTextToClipboard(messageLink!);
+    copyMessageLink({
+      chatId: message.chatId,
+      messageId: message.id,
+      shouldIncludeThread: threadId !== MAIN_THREAD_ID,
+      shouldIncludeGrouped: true, // TODO: Provide correct value when ability to target specific message is added
+    });
     closeMenu();
   });
 
@@ -728,11 +740,11 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const canTranslate = !hasTranslation && selectCanTranslateMessage(global, message, detectedLanguage);
     const isChatTranslated = selectRequestedChatTranslationLanguage(global, message.chatId);
-    const messageLink = selectMessageLink(global, message.chatId, threadId, message.id);
 
     const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
 
     return {
+      threadId,
       availableReactions,
       topReactions,
       defaultTagReactions: defaultTags,
@@ -777,7 +789,6 @@ export default memo(withGlobal<OwnProps>(
       isMessageTranslated: hasTranslation,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
-      messageLink,
       isInSavedMessages,
     };
   },

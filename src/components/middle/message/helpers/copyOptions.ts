@@ -103,11 +103,7 @@ export function getMessageCopyOptions(
     options.push({
       label: 'lng_context_copy_message_link',
       icon: 'link',
-      handler: () => {
-        onCopyLink();
-
-        afterEffect?.();
-      },
+      handler: onCopyLink,
     });
   }
 

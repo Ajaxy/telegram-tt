@@ -1927,3 +1927,21 @@ export async function fetchOutboxReadDate({ chat, messageId }: { chat: ApiChat; 
 
   return { date: result.date };
 }
+
+export async function exportMessageLink({
+  id, chat, shouldIncludeThread, shouldIncludeGrouped,
+}: {
+  id: number;
+  chat: ApiChat;
+  shouldIncludeThread?: boolean;
+  shouldIncludeGrouped?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.channels.ExportMessageLink({
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    id,
+    thread: shouldIncludeThread || undefined,
+    grouped: shouldIncludeGrouped || undefined,
+  }));
+
+  return result?.link;
+}

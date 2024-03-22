@@ -33,6 +33,7 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -53,6 +54,7 @@ import {
   getIsSavedDialog,
   getUserFullName,
   isChatChannel,
+  isChatSuperGroup,
   isDeletedUser,
   isMessageLocal,
   isServiceNotificationMessage,
@@ -1898,6 +1900,49 @@ addActionHandler('loadOutboxReadDate', async (global, actions, payload): Promise
       setGlobal(global);
     }
   }
+});
+
+addActionHandler('copyMessageLink', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, shouldIncludeThread, shouldIncludeGrouped, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    actions.showNotification({
+      message: translate('ErrorOccurred'),
+      tabId,
+    });
+    return;
+  }
+
+  if (!isChatChannel(chat) && !isChatSuperGroup(chat)) {
+    actions.showNotification({
+      message: translate('lng_filters_link_private_error'),
+      tabId,
+    });
+    return;
+  }
+
+  const link = await callApi('exportMessageLink', {
+    chat,
+    id: messageId,
+    shouldIncludeThread,
+    shouldIncludeGrouped,
+  });
+
+  if (!link) {
+    actions.showNotification({
+      message: translate('ErrorOccurred'),
+      tabId,
+    });
+    return;
+  }
+
+  copyTextToClipboard(link);
+  actions.showNotification({
+    message: translate('LinkCopied'),
+    tabId,
+  });
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {

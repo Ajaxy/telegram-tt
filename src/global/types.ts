@@ -2054,6 +2054,12 @@ export interface ActionPayloads {
   markMentionsRead: {
     messageIds: number[];
   } & WithTabId;
+  copyMessageLink: {
+    chatId: string;
+    messageId: number;
+    shouldIncludeThread?: boolean;
+    shouldIncludeGrouped?: boolean;
+  } & WithTabId;
 
   sendPollVote: {
     chatId: string;

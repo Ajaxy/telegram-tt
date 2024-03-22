@@ -1414,29 +1414,21 @@ export function selectCanTranslateMessage<T extends GlobalState>(
     && !chatRequestedLanguage;
 }
 
-export function selectMessageLink<T extends GlobalState>(
-  global: T, chatId: string, threadId?: ThreadId, messageId?: number,
+export function selectTopicLink<T extends GlobalState>(
+  global: T, chatId: string, topicId?: ThreadId,
 ) {
   const chat = selectChat(global, chatId);
-  if (!chat) {
+  if (!chat || !chat?.isForum) {
     return undefined;
   }
 
   const chatUsername = getMainUsername(chat);
 
-  const isChannelId = isChatChannel(chat) || isChatSuperGroup(chat);
-  const normalizedId = isChannelId ? chatId.replace('-100', '') : chatId.replace('-', '');
+  const normalizedId = chatId.replace('-100', '');
 
   const chatPart = chatUsername || `c/${normalizedId}`;
-  const threadPart = threadId && threadId !== MAIN_THREAD_ID ? `/${threadId}` : '';
-  const messagePart = messageId ? `/${messageId}` : '';
-  return `${TME_LINK_PREFIX}${chatPart}${threadPart}${messagePart}`;
-}
-
-export function selectTopicLink<T extends GlobalState>(
-  global: T, chatId: string, topicId?: ThreadId,
-) {
-  return selectMessageLink(global, chatId, topicId);
+  const topicPart = topicId && topicId !== MAIN_THREAD_ID ? `/${topicId}` : '';
+  return `${TME_LINK_PREFIX}${chatPart}${topicPart}`;
 }
 
 export function selectMessageReplyInfo<T extends GlobalState>(
