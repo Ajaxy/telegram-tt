@@ -266,11 +266,12 @@ export function deleteChatMessages<T extends GlobalState>(
     const message = byId[messageId];
     if (!message) return;
     const threadId = selectThreadIdFromMessage(global, message);
-    if (!threadId) return;
+    if (!threadId || threadId === MAIN_THREAD_ID) {
+      return;
+    }
     const threadMessages = updatedThreads.get(threadId) || [];
     threadMessages.push(messageId);
     updatedThreads.set(threadId, threadMessages);
-
     global = clearMessageTranslation(global, chatId, messageId);
   });
 
@@ -308,7 +309,14 @@ export function deleteChatMessages<T extends GlobalState>(
       if (!viewportIds) return;
 
       const newViewportIds = excludeSortedArray(viewportIds, messageIds);
-      global = replaceTabThreadParam(global, chatId, threadId, 'viewportIds', newViewportIds, tabId);
+      global = replaceTabThreadParam(
+        global,
+        chatId,
+        threadId,
+        'viewportIds',
+        newViewportIds.length === 0 ? undefined : newViewportIds,
+        tabId,
+      );
     });
 
     global = replaceThreadParam(global, chatId, threadId, 'listedIds', listedIds);
