@@ -23,3 +23,5 @@
 *.jpg binary
 *.png binary
 *.wav binary
+
+*.json filter=lfs diff=lfs merge=lfs -text
