@@ -1,6 +1,5 @@
 node_modules
 .cache
-.env
 src/lib/gramjs/build/
 build-contest/
 tests/
