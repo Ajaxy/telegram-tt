@@ -22,6 +22,8 @@ const QUICK_REACTION_DOUBLE_TAP_DELAY = 200;
 const QUICK_REACTION_AREA_WIDTH = 3 * REM;
 const QUICK_REACTION_AREA_HEIGHT = Number(REM);
 const GROUP_MESSAGE_HOVER_ATTRIBUTE = 'data-is-document-group-hover';
+const MESSAGE_ITEM_CLASS = 'message-list-item';
+const LONG_CLICK_SELECTION_TIMEOUT = 400;
 
 export default function useOuterHandlers(
   selectMessage: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
@@ -37,17 +39,57 @@ export default function useOuterHandlers(
   quickReactionRef: RefObject<HTMLDivElement>,
   shouldHandleMouseLeave: boolean,
   getIsMessageListReady: Signal<boolean>,
+  isSelected: boolean | undefined,
 ) {
   const { updateDraftReplyInfo, sendDefaultReaction } = getActions();
 
   const [isQuickReactionVisible, markQuickReactionVisible, unmarkQuickReactionVisible] = useFlag();
   const [isSwiped, markSwiped, unmarkSwiped] = useFlag();
   const doubleTapTimeoutRef = useRef<NodeJS.Timeout>();
+  const longClickTimeoutRef = useRef<NodeJS.Timeout>();
+  const isSelectedRecently = useRef<boolean>();
+  const isLockMouseOverSelection = useRef<boolean>();
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     preventMessageInputBlur(e);
     handleBeforeContextMenu(e);
+
+    if (e.target instanceof HTMLElement) {
+      const isOuter = e.target.classList?.contains(MESSAGE_ITEM_CLASS);
+      if (isOuter) {
+        const timeoutId: undefined | ReturnType<typeof setTimeout> = setTimeout(() => {
+          isLockMouseOverSelection.current = true;
+          selectMessage(e);
+          setTimeout(() => {
+            isLockMouseOverSelection.current = false;
+          }, 50);
+          isSelectedRecently.current = true;
+        }, isSelected ? 100 : LONG_CLICK_SELECTION_TIMEOUT);
+        longClickTimeoutRef.current = timeoutId;
+      }
+    }
   }
+
+  const handleMouseUp = () => {
+    if (longClickTimeoutRef.current) {
+      clearTimeout(longClickTimeoutRef.current);
+    }
+    setTimeout(() => {
+      isSelectedRecently.current = false;
+    }, 50);
+  };
+
+  const handleMouseOver = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (e.target instanceof HTMLElement) {
+      const isOuter = e.target.classList.contains(MESSAGE_ITEM_CLASS);
+      if (e.buttons === 1 && isInSelectMode && isOuter && !isLockMouseOverSelection.current) {
+        isSelectedRecently.current = true;
+        selectMessage(e);
+      } else {
+        isSelectedRecently.current = false;
+      }
+    }
+  };
 
   const handleMouseMove = useThrottledCallback((e: React.MouseEvent) => {
     const quickReactionContainer = quickReactionRef.current;
@@ -102,6 +144,12 @@ export default function useOuterHandlers(
   }
 
   function handleClick(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    // prevent select and deselect
+    if (isSelectedRecently.current) {
+      isSelectedRecently.current = false;
+      return;
+    }
+
     if (isInSelectMode) {
       selectMessage(e);
       return;
@@ -184,6 +232,11 @@ export default function useOuterHandlers(
   ]);
 
   function handleMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
+    if (longClickTimeoutRef.current) {
+      clearTimeout(longClickTimeoutRef.current);
+    }
+    isSelectedRecently.current = false;
+
     // Because `mousemove` event is throttled, we need to also throttle `mouseleave` event,
     // so the order of events is preserved
     requestMeasure(unmarkQuickReactionVisible);
@@ -191,14 +244,16 @@ export default function useOuterHandlers(
   }
 
   return {
-    handleMouseDown: !isInSelectMode ? handleMouseDown : undefined,
+    handleMouseDown,
     handleClick,
     handleContextMenu: !isInSelectMode ? handleContextMenu : (isProtected ? stopEvent : undefined),
     handleDoubleClick: !isInSelectMode ? handleContainerDoubleClick : undefined,
     handleContentDoubleClick: !IS_TOUCH_ENV ? stopPropagation : undefined,
     handleMouseMove,
+    handleMouseUp,
     handleSendQuickReaction,
     handleMouseLeave,
+    handleMouseOver,
     isSwiped,
     isQuickReactionVisible,
     handleDocumentGroupMouseEnter,
