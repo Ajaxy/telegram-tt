@@ -544,11 +544,13 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const {
     handleMouseDown,
+    handleMouseUp,
     handleClick,
     handleContextMenu,
     handleDoubleClick,
     handleContentDoubleClick,
     handleMouseMove,
+    handleMouseOver,
     handleSendQuickReaction,
     handleMouseLeave,
     isSwiped,
@@ -568,6 +570,7 @@ const Message: FC<OwnProps & StateProps> = ({
     quickReactionRef,
     isInDocumentGroupNotLast,
     getIsMessageListReady,
+    isSelected,
   );
 
   const {
@@ -1353,7 +1356,9 @@ const Message: FC<OwnProps & StateProps> = ({
       className={containerClassName}
       data-message-id={messageId}
       onCopy={isProtected ? stopEvent : undefined}
+      onMouseOver={handleMouseOver}
       onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       onDoubleClick={handleDoubleClick}
