@@ -7,13 +7,11 @@ import type { ThreadId } from '../../../../types';
 import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
-import { DRAFT_DEBOUNCE, EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
+import { DRAFT_DEBOUNCE } from '../../../../config';
 import {
-  requestMeasure, requestNextMutation,
+  requestMeasure,
 } from '../../../../lib/fasterdom/fasterdom';
-import focusEditableElement from '../../../../util/focusEditableElement';
 import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
-import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -117,15 +115,6 @@ const useDraft = ({
       ?.map((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji && entity.documentId)
       .filter(Boolean) || [];
     if (customEmojiIds.length) loadCustomEmojis({ ids: customEmojiIds });
-
-    if (!IS_TOUCH_ENV) {
-      requestNextMutation(() => {
-        const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
-        if (messageInput) {
-          focusEditableElement(messageInput, true);
-        }
-      });
-    }
   }, [chatId, threadId, draft, getHtml, setHtml, editedMessage, isDisabled]);
 
   // Save draft on chat change
