@@ -3,7 +3,7 @@ import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
@@ -77,7 +77,7 @@ const Picker: FC<OwnProps> = ({
   useEffect(() => {
     if (!isSearchable) return;
     setTimeout(() => {
-      requestMutation(() => {
+      requestMeasure(() => {
         inputRef.current!.focus();
       });
     }, FOCUS_DELAY_MS);
