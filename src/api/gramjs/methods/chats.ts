@@ -1444,10 +1444,11 @@ export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
           shouldIgnoreUpdates: true,
           shouldThrow: true,
         });
-        if (updates) {
-          processUpdate(updates);
-          return handleUserPrivacyRestrictedUpdates(updates);
+        if (!updates) {
+          return undefined;
         }
+        processUpdate(updates);
+        return handleUserPrivacyRestrictedUpdates(updates);
       } catch (err) {
         if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
           return users.map(({ id }) => id);

@@ -7,6 +7,7 @@ import React, {
 import { getActions, getGlobal } from '../../global';
 
 import { getUserFullName } from '../../global/helpers';
+import { selectChat } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
@@ -50,39 +51,68 @@ const InviteViaLinkModal: FC<OwnProps> = ({
     return userIds?.map((userId) => getUserFullName(usersById[userId])).join(', ');
   }, [userIds]);
 
+  const canSendInviteLink = useMemo(() => {
+    if (!chatId) {
+      return false;
+    }
+    const chat = selectChat(getGlobal(), chatId);
+    return Boolean(chat?.isCreator || chat?.adminRights?.inviteUsers);
+  }, [chatId]);
+
+  const contentText = useMemo(() => {
+    const langKey = canSendInviteLink
+      ? 'SendInviteLink.TextAvailableSingleUser'
+      : 'SendInviteLink.TextUnavailableSingleUser';
+    return renderText(lang(langKey, userNames), ['simple_markdown']);
+  }, [userNames, lang, canSendInviteLink]);
+
   return (
     <Modal
       isOpen={Boolean(userIds && chatId)}
-      title={lang('SendInviteLink.InviteTitle')}
+      title={canSendInviteLink ? lang('SendInviteLink.InviteTitle') : lang('SendInviteLink.LinkUnavailableTitle')}
       onClose={handleClose}
       isSlim
     >
       <p className={styles.contentText}>
-        {renderText(lang('SendInviteLink.TextAvailableSingleUser', userNames), ['simple_markdown'])}
+        {contentText}
       </p>
       <Picker
         className={styles.userPicker}
         itemIds={userIds!}
         selectedIds={selectedMemberIds}
         onSelectedIdsChange={setSelectedMemberIds}
+        isViewOnly={!canSendInviteLink}
         isRoundCheckbox
       />
       <div className="dialog-buttons">
-        <Button
-          className="confirm-dialog-button"
-          isText
-          onClick={handleSendInviteLink}
-          disabled={!selectedMemberIds.length}
-        >
-          {lang('SendInviteLink.ActionInvite')}
-        </Button>
-        <Button
-          className="confirm-dialog-button"
-          isText
-          onClick={handleSkip}
-        >
-          {lang('SendInviteLink.ActionSkip')}
-        </Button>
+        {canSendInviteLink && (
+          <Button
+            className="confirm-dialog-button"
+            isText
+            onClick={handleSendInviteLink}
+            disabled={!selectedMemberIds.length}
+          >
+            {lang('SendInviteLink.ActionInvite')}
+          </Button>
+        )}
+        {canSendInviteLink && (
+          <Button
+            className="confirm-dialog-button"
+            isText
+            onClick={handleSkip}
+          >
+            {lang('SendInviteLink.ActionSkip')}
+          </Button>
+        )}
+        {!canSendInviteLink && (
+          <Button
+            className="confirm-dialog-button"
+            isText
+            onClick={handleClose}
+          >
+            {lang('SendInviteLink.ActionClose')}
+          </Button>
+        )}
       </div>
     </Modal>
   );
