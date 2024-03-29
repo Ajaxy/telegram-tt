@@ -63,7 +63,7 @@ import useSchedule from '../../../hooks/useSchedule';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
-import PinMessageModal from '../../common/PinMessageModal';
+import PinMessageModal from '../../common/PinMessageModal.async';
 import ReportModal from '../../common/ReportModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import MessageContextMenu from './MessageContextMenu';

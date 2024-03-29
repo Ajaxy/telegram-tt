@@ -60,12 +60,10 @@ export const IS_VOICE_RECORDING_SUPPORTED = Boolean(
     window.AudioContext || (window as any).webkitAudioContext
   ),
 );
-export const IS_SMOOTH_SCROLL_SUPPORTED = 'scrollBehavior' in document.documentElement.style;
 export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && (IS_MAC_OS || IS_IOS) && isLastEmojiVersionSupported();
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
 // TODO Consider failed service worker
 export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
-export const IS_STREAMING_SUPPORTED = 'MediaSource' in window;
 export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; codecs=opus'));
 export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})

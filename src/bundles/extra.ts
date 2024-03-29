@@ -39,8 +39,6 @@ export { default as LeftSearch } from '../components/left/search/LeftSearch';
 export { default as Settings } from '../components/left/settings/Settings';
 export { default as ContactList } from '../components/left/main/ContactList';
 export { default as NewChat } from '../components/left/newChat/NewChat';
-export { default as NewChatStep1 } from '../components/left/newChat/NewChatStep1';
-export { default as NewChatStep2 } from '../components/left/newChat/NewChatStep2';
 export { default as ArchivedChats } from '../components/left/ArchivedChats';
 export { default as ChatFolderModal } from '../components/left/ChatFolderModal';
 export { default as MuteChatModal } from '../components/left/MuteChatModal';

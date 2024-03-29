@@ -34,7 +34,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
 
 import TextTimer from '../../ui/TextTimer';
-import TextFormatter from './TextFormatter';
+import TextFormatter from './TextFormatter.async';
 
 const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
 // Focus slows down animation, also it breaks transition layout in Chrome
