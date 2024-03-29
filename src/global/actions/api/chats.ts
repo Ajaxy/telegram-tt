@@ -211,7 +211,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
 
   abortChatRequestsForCurrentChat(global, id, MAIN_THREAD_ID, tabId);
 
-  if (!id) {
+  if (!id || id === TMP_CHAT_ID) {
     return;
   }
 
