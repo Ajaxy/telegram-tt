@@ -8,7 +8,7 @@ import type { OriginRequest, ThenArg, WorkerMessageEvent } from './types';
 import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../../config';
 import { logDebugMessage } from '../../../util/debugConsole';
 import Deferred from '../../../util/Deferred';
-import { getCurrentTabId, isCurrentTabMaster } from '../../../util/establishMultitabRole';
+import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
 import { pause } from '../../../util/schedulers';
 import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
@@ -39,6 +39,11 @@ const savedLocalDb: LocalDb = {
   channelPtsById: {},
 };
 
+let isMasterTab = true;
+subscribeToMasterChange((isMasterTabNew) => {
+  isMasterTab = isMasterTabNew;
+});
+
 const channel = IS_MULTITAB_SUPPORTED
   ? new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel
   : undefined;
@@ -62,7 +67,7 @@ let isInited = false;
 export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
   updateCallback = onUpdate;
 
-  if (!isCurrentTabMaster()) {
+  if (!isMasterTab) {
     initApiOnMasterTab(initialArgs);
     return Promise.resolve();
   }
@@ -173,14 +178,14 @@ export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: Method
 }
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
-  if (!isInited && isCurrentTabMaster()) {
+  if (!isInited && isMasterTab) {
     const deferred = new Deferred();
     apiRequestsQueue.push({ fnName, args, deferred });
 
     return deferred.promise as MethodResponse<T>;
   }
 
-  const promise = isCurrentTabMaster() ? makeRequest({
+  const promise = isMasterTab ? makeRequest({
     type: 'callMethod',
     name: fnName,
     args,
@@ -223,7 +228,7 @@ export function cancelApiProgress(progressCallback: ApiOnProgress) {
     return;
   }
 
-  if (isCurrentTabMaster()) {
+  if (isMasterTab) {
     cancelApiProgressMaster(messageId);
   } else {
     if (!channel) return;
