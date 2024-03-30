@@ -1263,20 +1263,12 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     tabId = getCurrentTabId(),
   } = payload;
 
-  if (isDeepLink(url)) {
-    const isProcessed = processDeepLink(url);
-    if (isProcessed || url.match(RE_TG_LINK)) {
-      return;
-    }
-  }
-
   const {
     openChatByPhoneNumber,
     openChatByInvite,
     openStickerSet,
     openChatWithDraft,
     joinVoiceChatByLink,
-    showNotification,
     focusMessage,
     openInvoice,
     processAttachBotParameters,
@@ -1286,6 +1278,13 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     processBoostParameters,
     checkGiftCode,
   } = actions;
+
+  if (isDeepLink(url)) {
+    const isProcessed = processDeepLink(url);
+    if (isProcessed || url.match(RE_TG_LINK)) {
+      return;
+    }
+  }
 
   const uri = new URL(url.toLowerCase().startsWith('http') ? url : `https://${url}`);
   if (TME_WEB_DOMAINS.has(uri.hostname) && uri.pathname === '/') {
@@ -1397,20 +1396,11 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       tabId,
     });
   } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
-    const chatId = toChannelId(chatOrChannelPostId);
-    const chat = selectChat(global, chatId);
-    if (!chat) {
-      showNotification({ message: 'Chat does not exist', tabId });
-      return;
-    }
-
-    if (messageId) {
-      focusMessage({
-        chatId: chat.id,
-        messageId,
-        tabId,
-      });
-    }
+    focusMessage({
+      chatId: toChannelId(chatOrChannelPostId),
+      messageId,
+      tabId,
+    });
   } else if (part1.startsWith('$')) {
     openInvoice({
       slug: part1.substring(1),

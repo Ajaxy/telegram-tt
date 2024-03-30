@@ -16,6 +16,7 @@ import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
+import { translate } from '../../../util/langProvider';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
@@ -401,6 +402,12 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   } = payload;
 
   let { messageId } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    actions.showNotification({ message: translate('Conversation.ErrorInaccessibleMessage'), tabId });
+    return undefined;
+  }
 
   if (groupedId !== undefined) {
     const ids = selectForwardedMessageIdsByGroupId(global, groupedChatId!, groupedId);
