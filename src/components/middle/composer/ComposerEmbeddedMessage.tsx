@@ -86,6 +86,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     setEditingId,
     focusMessage,
     changeForwardRecipient,
+    changeReplyRecipient,
     setForwardNoAuthors,
     setForwardNoCaptions,
     exitForwardMode,
@@ -95,6 +96,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const isReplyToTopicStart = message?.content.action?.type === 'topicCreate';
+  const isShowingReply = replyInfo && !shouldForceShowEditing;
 
   const isForwarding = Boolean(forwardedMessagesCount);
   const isShown = Boolean(
@@ -133,20 +135,26 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     if (isForwarding) return;
     focusMessage({ chatId: message!.chatId, messageId: message!.id, noForumTopicPanel: true });
   });
-
-  const handleClearClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
-    e.stopPropagation();
-    clearEmbedded();
-  });
-
-  const handleChangeRecipientClick = useLastCallback(() => {
-    changeForwardRecipient();
-  });
-
   const {
     isContextMenuOpen, contextMenuPosition, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
+
+  const handleClearClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+    e.stopPropagation();
+    clearEmbedded();
+    handleContextMenuHide();
+  });
+
+  const handleChangeRecipientClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>): void => {
+    handleContextMenuHide();
+    e.stopPropagation();
+    if (isForwarding) {
+      changeForwardRecipient();
+    } else if (isShowingReply) {
+      changeReplyRecipient();
+    }
+  });
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!);
@@ -171,8 +179,6 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     'ComposerEmbeddedMessage_inner',
     getPeerColorClass(renderingSender),
   );
-
-  const isShowingReply = replyInfo && !shouldForceShowEditing;
 
   const leftIcon = useMemo(() => {
     if (isShowingReply) {
@@ -212,9 +218,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className={className} ref={ref} onContextMenu={handleContextMenu} onClick={handleContextMenu}>
+    <div className={className} ref={ref} onContextMenu={handleContextMenu}>
       <div className={innerClassName}>
-        <div className="embedded-left-icon">
+        <div className="embedded-left-icon" onClick={handleContextMenu}>
           {renderingLeftIcon && <Icon name={renderingLeftIcon} />}
           {Boolean(replyInfo?.quoteText) && (
             <Icon name="quote" className="quote-reply" />
@@ -242,7 +248,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
         >
           <i className="icon icon-close" />
         </Button>
-        {isForwarding && !isContextMenuDisabled && (
+        {(isShowingReply || isForwarding) && !isContextMenuDisabled && (
           <Menu
             isOpen={isContextMenuOpen}
             transformOriginX={transformOriginX}

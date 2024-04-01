@@ -90,11 +90,13 @@ import {
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
+  replyContainVoiceMessages,
   selectChat,
   selectChatFullInfo,
   selectChatLastMessageId,
   selectChatMessage,
   selectCurrentChat,
+  selectCurrentDraft,
   selectCurrentMessageList,
   selectCurrentViewedStory,
   selectDraft,
@@ -116,6 +118,7 @@ import {
   selectPeerStory,
   selectPinnedIds,
   selectRealLastReadId,
+  selectReplyCanBeSentToChat,
   selectScheduledMessage,
   selectSendAs,
   selectSponsoredMessage,
@@ -518,6 +521,32 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
   saveDraft({
     global, chatId, threadId, draft: newDraft,
   });
+});
+
+addActionHandler('moveCurrentReplyToNewDraft', (global, actions, payload): ActionReturnType => {
+  const { chatId, threadId } = payload;
+  const tabId = getCurrentTabId();
+
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList) {
+    return;
+  }
+  const { chatId: currentChatId } = currentMessageList;
+
+  const currentReplyInfo = selectCurrentDraft(global)?.replyInfo;
+  if (!currentReplyInfo) return;
+
+  const draft: ApiDraft = {
+    replyInfo: {
+      ...currentReplyInfo,
+      replyToPeerId: currentChatId,
+    },
+  };
+
+  saveDraft({
+    global, chatId, threadId, draft,
+  });
+  actions.resetDraftReplyInfo({ tabId });
 });
 
 addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
@@ -1652,10 +1681,14 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   }
 });
 
-addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Promise<void> => {
-  const { chatId, topicId, tabId = getCurrentTabId() } = payload;
+async function allowSendVoiceMessages<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  tabId: number,
+  isContainVoiceMessages: (global: T, tabId: number) => boolean,
+): Promise<boolean> {
   let user = selectUser(global, chatId);
-  if (user && selectForwardsContainVoiceMessages(global, tabId)) {
+  if (user && isContainVoiceMessages(global, tabId)) {
     let fullInfo = selectUserFullInfo(global, chatId);
     if (!fullInfo) {
       const { accessHash } = user;
@@ -1664,17 +1697,45 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Prom
       user = result?.user;
       fullInfo = result?.fullInfo;
     }
-
     if (fullInfo!.noVoiceMessages) {
-      actions.showDialog({
-        data: {
-          message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
-        },
-        tabId,
-      });
-      return;
+      return false;
     }
   }
+  return true;
+}
+
+addActionHandler('openChatOrTopicWithReplyInDraft', async (global, actions, payload): Promise<void> => {
+  const { chatId, topicId, tabId = getCurrentTabId() } = payload;
+  if (!await allowSendVoiceMessages(global, chatId, tabId, (g) => Boolean(replyContainVoiceMessages(g)))) {
+    return;
+  }
+  global = getGlobal();
+
+  if (!selectReplyCanBeSentToChat(global, chatId)) {
+    actions.showAllowedMessageTypesNotification({ chatId, tabId });
+    return;
+  }
+
+  global = updateTabState(global, {
+    forwardMessages: {
+      ...selectTabState(global, tabId).forwardMessages,
+      isModalShown: false,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  actions.moveCurrentReplyToNewDraft({ chatId, threadId: topicId || MAIN_THREAD_ID });
+  actions.openThread({ chatId, threadId: topicId || MAIN_THREAD_ID, tabId });
+  actions.closeMediaViewer({ tabId });
+  actions.exitMessageSelectMode({ tabId });
+});
+
+addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Promise<void> => {
+  const { chatId, topicId, tabId = getCurrentTabId() } = payload;
+  if (!await allowSendVoiceMessages(global, chatId, tabId, selectForwardsContainVoiceMessages)) {
+    return;
+  }
+  global = getGlobal();
 
   if (!selectForwardsCanBeSentToChat(global, chatId, tabId)) {
     actions.showAllowedMessageTypesNotification({ chatId, tabId });

@@ -1782,6 +1782,10 @@ export interface ActionPayloads {
 
   focusLastMessage: WithTabId | undefined;
   updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
+  moveCurrentReplyToNewDraft: {
+    chatId: string;
+    threadId: ThreadId;
+  };
   resetDraftReplyInfo: WithTabId | undefined;
   closeWebApp: WithTabId | undefined;
 
@@ -2436,6 +2440,10 @@ export interface ActionPayloads {
     chatId: string;
     topicId?: number;
   } & WithTabId;
+  openChatOrTopicWithReplyInDraft: {
+    chatId: string;
+    topicId?: number;
+  } & WithTabId;
   forwardMessages: {
     isSilent?: boolean;
     scheduledAt?: number;
@@ -2448,6 +2456,7 @@ export interface ActionPayloads {
   } & WithTabId;
   exitForwardMode: WithTabId | undefined;
   changeForwardRecipient: WithTabId | undefined;
+  changeReplyRecipient: WithTabId | undefined;
   forwardToSavedMessages: WithTabId | undefined;
   forwardStory: {
     toChatId: string;

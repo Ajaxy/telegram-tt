@@ -9,6 +9,7 @@ import type {
   ApiStickerSetInfo,
 } from '../../api/types';
 import type { ThreadId } from '../../types';
+import type { IAllowedAttachmentOptions } from '../helpers';
 import type {
   ChatTranslatedMessages,
   GlobalState, MessageListType, TabArgs, TabThread, Thread,
@@ -228,6 +229,15 @@ export function selectEditingScheduledDraft<T extends GlobalState>(global: T, ch
 
 export function selectDraft<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
   return selectThreadParam(global, chatId, threadId, 'draft');
+}
+export function selectCurrentDraft<T extends GlobalState>(global: T) {
+  const currentMessageList = selectCurrentMessageList(global, getCurrentTabId());
+  if (!currentMessageList) {
+    return undefined;
+  }
+  const { chatId: currentChatId, threadId: currentThreadId } = currentMessageList;
+
+  return selectDraft(global, currentChatId, currentThreadId);
 }
 
 export function selectNoWebPage<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
@@ -1322,6 +1332,17 @@ export function selectMessageCustomEmojiSets<T extends GlobalState>(
   }, [] as ApiStickerSetInfo[]);
 }
 
+export function replyContainVoiceMessages<T extends GlobalState>(
+  global: T,
+) {
+  const chatId = selectCurrentChat(global, getCurrentTabId())?.id;
+  const replyInfo = selectCurrentDraft(global)?.replyInfo;
+  if (!replyInfo || replyInfo.quoteText || !replyInfo.replyToMsgId) return false;
+  const chatMessages = selectChatMessages(global, chatId!);
+  const message = chatMessages[replyInfo.replyToMsgId];
+  return Boolean(message.content.voice) || message.content.video?.isRound;
+}
+
 export function selectForwardsContainVoiceMessages<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
@@ -1354,6 +1375,22 @@ export function selectRequestedMessageTranslationLanguage<T extends GlobalState>
   return requestedInChat?.toLanguage || requestedInChat?.manualMessages?.[messageId];
 }
 
+export function selectReplyCanBeSentToChat<T extends GlobalState>(
+  global: T,
+  toChatId: string,
+) {
+  const replyInfo = selectCurrentDraft(global)?.replyInfo;
+  const toChat = selectChat(global, toChatId);
+  if (!toChat || !replyInfo || !replyInfo.replyToMsgId) return false;
+  const fromChat = selectCurrentChat(global, getCurrentTabId());
+  const fromChatId = fromChat?.id;
+  const chatMessages = selectChatMessages(global, fromChatId!);
+  const message = chatMessages[replyInfo.replyToMsgId];
+
+  const toChatFullInfo = selectChatFullInfo(global, toChatId);
+  const opt = getAllowedAttachmentOptions(toChat, toChatFullInfo);
+  return !сheckMessageSendingDenied(message, opt);
+}
 export function selectForwardsCanBeSentToChat<T extends GlobalState>(
   global: T,
   toChatId: string,
@@ -1369,33 +1406,30 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
 
   const chatFullInfo = selectChatFullInfo(global, toChatId);
   const chatMessages = selectChatMessages(global, fromChatId!);
-  const {
-    canSendVoices, canSendRoundVideos, canSendStickers, canSendDocuments, canSendAudios, canSendVideos,
-    canSendPhotos, canSendGifs, canSendPlainText,
-  } = getAllowedAttachmentOptions(chat, chatFullInfo);
-  return !messageIds!.some((messageId) => {
-    const message = chatMessages[messageId];
-    const isVoice = message.content.voice;
-    const isRoundVideo = message.content.video?.isRound;
-    const isPhoto = message.content.photo;
-    const isGif = message.content.video?.isGif;
-    const isVideo = message.content.video && !isRoundVideo && !isGif;
-    const isAudio = message.content.audio;
-    const isDocument = message.content.document;
-    const isSticker = message.content.sticker;
-    const isPlainText = message.content.text
-      && !isVoice && !isRoundVideo && !isSticker && !isDocument && !isAudio && !isVideo && !isPhoto && !isGif;
+  const opt = getAllowedAttachmentOptions(chat, chatFullInfo);
+  return !messageIds!.some((messageId) => сheckMessageSendingDenied(chatMessages[messageId], opt));
+}
+function сheckMessageSendingDenied(message: ApiMessage, opt: IAllowedAttachmentOptions) {
+  const isVoice = message.content.voice;
+  const isRoundVideo = message.content.video?.isRound;
+  const isPhoto = message.content.photo;
+  const isGif = message.content.video?.isGif;
+  const isVideo = message.content.video && !isRoundVideo && !isGif;
+  const isAudio = message.content.audio;
+  const isDocument = message.content.document;
+  const isSticker = message.content.sticker;
+  const isPlainText = message.content.text
+    && !isVoice && !isRoundVideo && !isSticker && !isDocument && !isAudio && !isVideo && !isPhoto && !isGif;
 
-    return (isVoice && !canSendVoices)
-      || (isRoundVideo && !canSendRoundVideos)
-      || (isSticker && !canSendStickers)
-      || (isDocument && !canSendDocuments)
-      || (isAudio && !canSendAudios)
-      || (isVideo && !canSendVideos)
-      || (isPhoto && !canSendPhotos)
-      || (isGif && !canSendGifs)
-      || (isPlainText && !canSendPlainText);
-  });
+  return (isVoice && !opt.canSendVoices)
+    || (isRoundVideo && !opt.canSendRoundVideos)
+    || (isSticker && !opt.canSendStickers)
+    || (isDocument && !opt.canSendDocuments)
+    || (isAudio && !opt.canSendAudios)
+    || (isVideo && !opt.canSendVideos)
+    || (isPhoto && !opt.canSendPhotos)
+    || (isGif && !opt.canSendGifs)
+    || (isPlainText && !opt.canSendPlainText);
 }
 
 export function selectCanTranslateMessage<T extends GlobalState>(
