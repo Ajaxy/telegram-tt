@@ -146,15 +146,17 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     handleContextMenuHide();
   });
 
-  const handleChangeRecipientClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>): void => {
-    handleContextMenuHide();
-    e.stopPropagation();
-    if (isForwarding) {
-      changeForwardRecipient();
-    } else if (isShowingReply) {
-      changeReplyRecipient();
-    }
-  });
+  const handleChangeRecipientClick = useLastCallback(
+    (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>): void => {
+      handleContextMenuHide();
+      e.stopPropagation();
+      if (isForwarding) {
+        changeForwardRecipient();
+      } else if (isShowingReply) {
+        changeReplyRecipient();
+      }
+    },
+  );
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!);
@@ -260,54 +262,58 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
             onClose={handleContextMenuClose}
             onCloseAnimationEnd={handleContextMenuHide}
           >
-            <MenuItem
-              icon={!noAuthors ? 'message-succeeded' : undefined}
-              customIcon={noAuthors ? <i className="icon icon-placeholder" /> : undefined}
-              // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => setForwardNoAuthors({
-                noAuthors: false,
-              })}
-            >
-              {lang(forwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
-            </MenuItem>
-            <MenuItem
-              icon={noAuthors ? 'message-succeeded' : undefined}
-              customIcon={!noAuthors ? <i className="icon icon-placeholder" /> : undefined}
-              // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => setForwardNoAuthors({
-                noAuthors: true,
-              })}
-            >
-              {lang(forwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
-            </MenuItem>
-            {forwardsHaveCaptions && (
+            {isForwarding && (
               <>
+                <MenuItem
+                  icon={!noAuthors ? 'message-succeeded' : undefined}
+                  customIcon={noAuthors ? <i className="icon icon-placeholder" /> : undefined}
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={() => setForwardNoAuthors({
+                    noAuthors: false,
+                  })}
+                >
+                  {lang(forwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
+                </MenuItem>
+                <MenuItem
+                  icon={noAuthors ? 'message-succeeded' : undefined}
+                  customIcon={!noAuthors ? <i className="icon icon-placeholder" /> : undefined}
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={() => setForwardNoAuthors({
+                    noAuthors: true,
+                  })}
+                >
+                  {lang(forwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
+                </MenuItem>
+                {forwardsHaveCaptions && (
+                  <>
+                    <MenuSeparator />
+                    <MenuItem
+                      icon={!noCaptions ? 'message-succeeded' : undefined}
+                      customIcon={noCaptions ? <i className="icon icon-placeholder" /> : undefined}
+                      // eslint-disable-next-line react/jsx-no-bind
+                      onClick={() => setForwardNoCaptions({
+                        noCaptions: false,
+                      })}
+                    >
+                      {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.ShowCaption' : 'ShowCaption')}
+                    </MenuItem>
+                    <MenuItem
+                      icon={noCaptions ? 'message-succeeded' : undefined}
+                      customIcon={!noCaptions ? <i className="icon icon-placeholder" /> : undefined}
+                      // eslint-disable-next-line react/jsx-no-bind
+                      onClick={() => setForwardNoCaptions({
+                        noCaptions: true,
+                      })}
+                    >
+                      {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.HideCaption' : 'HideCaption')}
+                    </MenuItem>
+                  </>
+                )}
                 <MenuSeparator />
-                <MenuItem
-                  icon={!noCaptions ? 'message-succeeded' : undefined}
-                  customIcon={noCaptions ? <i className="icon icon-placeholder" /> : undefined}
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onClick={() => setForwardNoCaptions({
-                    noCaptions: false,
-                  })}
-                >
-                  {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.ShowCaption' : 'ShowCaption')}
-                </MenuItem>
-                <MenuItem
-                  icon={noCaptions ? 'message-succeeded' : undefined}
-                  customIcon={!noCaptions ? <i className="icon icon-placeholder" /> : undefined}
-                  // eslint-disable-next-line react/jsx-no-bind
-                  onClick={() => setForwardNoCaptions({
-                    noCaptions: true,
-                  })}
-                >
-                  {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.HideCaption' : 'HideCaption')}
-                </MenuItem>
               </>
             )}
-            <MenuSeparator />
             <MenuItem icon="replace" onClick={handleChangeRecipientClick}>
-              {lang('ChangeRecipient')}
+              {lang(isShowingReply ? 'Conversation.MessageOptionsReplyInAnotherChat' : 'ChangeRecipient')}
             </MenuItem>
           </Menu>
         )}

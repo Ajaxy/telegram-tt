@@ -1335,11 +1335,12 @@ export function selectMessageCustomEmojiSets<T extends GlobalState>(
 export function replyContainVoiceMessages<T extends GlobalState>(
   global: T,
 ) {
-  const chatId = selectCurrentChat(global, getCurrentTabId())?.id;
   const replyInfo = selectCurrentDraft(global)?.replyInfo;
+  const chatId = replyInfo?.replyToPeerId ?? selectCurrentChat(global, getCurrentTabId())?.id;
   if (!replyInfo || replyInfo.quoteText || !replyInfo.replyToMsgId) return false;
   const chatMessages = selectChatMessages(global, chatId!);
   const message = chatMessages[replyInfo.replyToMsgId];
+  if (!message || !message.content) return false;
   return Boolean(message.content.voice) || message.content.video?.isRound;
 }
 
@@ -1382,8 +1383,7 @@ export function selectReplyCanBeSentToChat<T extends GlobalState>(
   const replyInfo = selectCurrentDraft(global)?.replyInfo;
   const toChat = selectChat(global, toChatId);
   if (!toChat || !replyInfo || !replyInfo.replyToMsgId) return false;
-  const fromChat = selectCurrentChat(global, getCurrentTabId());
-  const fromChatId = fromChat?.id;
+  const fromChatId = replyInfo?.replyToPeerId ?? selectCurrentChat(global, getCurrentTabId())?.id;
   const chatMessages = selectChatMessages(global, fromChatId!);
   const message = chatMessages[replyInfo.replyToMsgId];
 

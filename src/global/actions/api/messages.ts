@@ -539,7 +539,7 @@ addActionHandler('moveCurrentReplyToNewDraft', (global, actions, payload): Actio
   const draft: ApiDraft = {
     replyInfo: {
       ...currentReplyInfo,
-      replyToPeerId: currentChatId,
+      replyToPeerId: currentReplyInfo?.replyToPeerId ?? currentChatId,
     },
   };
 
