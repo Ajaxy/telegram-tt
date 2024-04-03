@@ -131,14 +131,16 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
 
-  const handleMessageClick = useLastCallback((): void => {
-    if (isForwarding) return;
-    focusMessage({ chatId: message!.chatId, messageId: message!.id, noForumTopicPanel: true });
-  });
   const {
     isContextMenuOpen, contextMenuPosition, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
+
+  const handleMessageClick = useLastCallback((e: React.MouseEvent): void => {
+    handleContextMenu(e);
+    if (isForwarding) return;
+    focusMessage({ chatId: message!.chatId, messageId: message!.id, noForumTopicPanel: true });
+  });
 
   const handleClearClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     e.stopPropagation();

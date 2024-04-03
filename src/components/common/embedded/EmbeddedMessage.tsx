@@ -58,7 +58,7 @@ type OwnProps = {
   isOpen?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  onClick: NoneToVoidFunction;
+  onClick: NoneToVoidFunction | ((e: React.MouseEvent) => void);
 };
 
 const NBSP = '\u00A0';
