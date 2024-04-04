@@ -315,7 +315,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
               </>
             )}
             <MenuItem icon="replace" onClick={handleChangeRecipientClick}>
-              {lang(isShowingReply ? 'Conversation.MessageOptionsReplyInAnotherChat' : 'ChangeRecipient')}
+              {lang(isShowingReply ? 'Conversation.MessageOptionsReplyInAnotherChat' : 'ForwardAnotherChat')}
             </MenuItem>
           </Menu>
         )}
