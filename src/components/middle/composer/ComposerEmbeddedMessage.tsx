@@ -56,6 +56,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
   isContextMenuDisabled?: boolean;
   isReplyToDiscussion?: boolean;
+  isReplyContainsQuote?: boolean;
 };
 
 type OwnProps = {
@@ -79,10 +80,12 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   isCurrentUserPremium,
   isContextMenuDisabled,
   isReplyToDiscussion,
+  isReplyContainsQuote,
   onClear,
 }) => {
   const {
     resetDraftReplyInfo,
+    updateDraftReplyInfo,
     setEditingId,
     focusMessage,
     changeForwardRecipient,
@@ -136,6 +139,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
+  const focusMessageFromDraft = () => {
+    focusMessage({ chatId: message!.chatId, messageId: message!.id, noForumTopicPanel: true });
+  };
   const handleMessageClick = useLastCallback((e: React.MouseEvent): void => {
     handleContextMenu(e);
     if (isForwarding) return;
@@ -147,18 +153,22 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     clearEmbedded();
     handleContextMenuHide();
   });
-
-  const handleChangeRecipientClick = useLastCallback(
-    (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>): void => {
-      handleContextMenuHide();
+  const baseClickHandler = (
+    action: () => void,
+  ): ((e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>) => void) => {
+    return (e) => {
+      handleContextMenuClose();
       e.stopPropagation();
-      if (isForwarding) {
-        changeForwardRecipient();
-      } else if (isShowingReply) {
-        changeReplyRecipient();
-      }
-    },
-  );
+      action();
+    };
+  };
+  const handleShowMessageClick = useLastCallback(baseClickHandler(focusMessageFromDraft));
+  const handleRemoveQuoteClick = useLastCallback(baseClickHandler(
+    () => updateDraftReplyInfo({ quoteText: undefined }),
+  ));
+  const handleForwardAnotherChatClick = useLastCallback(baseClickHandler(changeForwardRecipient));
+  const handleChangeReplyRecipientClick = useLastCallback(baseClickHandler(changeReplyRecipient));
+  const handleDoNotReplyClick = useLastCallback(baseClickHandler(clearEmbedded));
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!);
@@ -312,11 +322,29 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                   </>
                 )}
                 <MenuSeparator />
+                <MenuItem icon="replace" onClick={handleForwardAnotherChatClick}>
+                  {lang('ForwardAnotherChat')}
+                </MenuItem>
               </>
             )}
-            <MenuItem icon="replace" onClick={handleChangeRecipientClick}>
-              {lang(isShowingReply ? 'Conversation.MessageOptionsReplyInAnotherChat' : 'ForwardAnotherChat')}
-            </MenuItem>
+            {isShowingReply && (
+              <>
+                <MenuItem customIcon={<i className="icon icon-placeholder" />} onClick={handleShowMessageClick}>
+                  {lang('Message.Context.Goto')}
+                </MenuItem>
+                {isReplyContainsQuote && (
+                  <MenuItem customIcon={<i className="icon icon-placeholder" />} onClick={handleRemoveQuoteClick}>
+                    {lang('RemoveQuote')}
+                  </MenuItem>
+                )}
+                <MenuItem icon="replace" onClick={handleChangeReplyRecipientClick}>
+                  {lang('ReplyToAnotherChat')}
+                </MenuItem>
+                <MenuItem icon="remove" onClick={handleDoNotReplyClick}>
+                  {lang('DoNotReply')}
+                </MenuItem>
+              </>
+            )}
           </Menu>
         )}
       </div>
@@ -389,6 +417,7 @@ export default memo(withGlobal<OwnProps>(
       && Boolean(message?.content.storyData);
 
     const isReplyToDiscussion = replyInfo?.replyToMsgId === threadId && !replyInfo.replyToPeerId;
+    const isReplyContainsQuote = Boolean(replyInfo?.quoteText);
 
     return {
       replyInfo,
@@ -403,6 +432,7 @@ export default memo(withGlobal<OwnProps>(
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isContextMenuDisabled,
       isReplyToDiscussion,
+      isReplyContainsQuote,
     };
   },
 )(ComposerEmbeddedMessage));
