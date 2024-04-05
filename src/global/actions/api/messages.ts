@@ -13,6 +13,7 @@ import type {
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
+  ApiUser,
   ApiVideo,
 } from '../../../api/types';
 import type { MessageKey } from '../../../util/messageKey';
@@ -546,7 +547,9 @@ addActionHandler('moveCurrentReplyToNewDraft', (global, actions, payload): Actio
   saveDraft({
     global, chatId, threadId, draft,
   });
-  actions.resetDraftReplyInfo({ tabId });
+  if (chatId !== currentMessageList.chatId) {
+    actions.resetDraftReplyInfo({ tabId });
+  }
 });
 
 addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
@@ -1683,11 +1686,11 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
 
 async function allowSendVoiceMessages<T extends GlobalState>(
   global: T,
+  user: ApiUser | undefined,
   chatId: string,
   tabId: number,
   isContainVoiceMessages: (global: T, tabId: number) => boolean,
 ): Promise<boolean> {
-  let user = selectUser(global, chatId);
   if (user && isContainVoiceMessages(global, tabId)) {
     let fullInfo = selectUserFullInfo(global, chatId);
     if (!fullInfo) {
@@ -1706,7 +1709,14 @@ async function allowSendVoiceMessages<T extends GlobalState>(
 
 addActionHandler('openChatOrTopicWithReplyInDraft', async (global, actions, payload): Promise<void> => {
   const { chatId, topicId, tabId = getCurrentTabId() } = payload;
-  if (!await allowSendVoiceMessages(global, chatId, tabId, (g) => Boolean(replyContainVoiceMessages(g)))) {
+  const user = selectUser(global, chatId);
+  if (!await allowSendVoiceMessages(global, user, chatId, tabId, (g) => Boolean(replyContainVoiceMessages(g)))) {
+    actions.showDialog({
+      data: {
+        message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
+      },
+      tabId,
+    });
     return;
   }
   global = getGlobal();
@@ -1732,7 +1742,14 @@ addActionHandler('openChatOrTopicWithReplyInDraft', async (global, actions, payl
 
 addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Promise<void> => {
   const { chatId, topicId, tabId = getCurrentTabId() } = payload;
-  if (!await allowSendVoiceMessages(global, chatId, tabId, selectForwardsContainVoiceMessages)) {
+  const user = selectUser(global, chatId);
+  if (!await allowSendVoiceMessages(global, user, chatId, tabId, selectForwardsContainVoiceMessages)) {
+    actions.showDialog({
+      data: {
+        message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
+      },
+      tabId,
+    });
     return;
   }
   global = getGlobal();

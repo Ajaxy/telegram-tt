@@ -184,8 +184,11 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   );
 
   useEffect(() => {
-    if (!shouldRender) handleContextMenuClose();
-  }, [handleContextMenuClose, shouldRender]);
+    if (!shouldRender) {
+      handleContextMenuClose();
+      handleContextMenuHide();
+    }
+  }, [handleContextMenuClose, handleContextMenuHide, shouldRender]);
 
   const className = buildClassName('ComposerEmbeddedMessage', transitionClassNames);
   const renderingSender = useCurrentOrPrev(sender, true);
@@ -340,7 +343,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                 <MenuItem icon="replace" onClick={handleChangeReplyRecipientClick}>
                   {lang('ReplyToAnotherChat')}
                 </MenuItem>
-                <MenuItem icon="remove" onClick={handleDoNotReplyClick}>
+                <MenuItem icon="delete" onClick={handleDoNotReplyClick}>
                   {lang('DoNotReply')}
                 </MenuItem>
               </>
