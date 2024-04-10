@@ -91,7 +91,6 @@ import {
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  replyContainVoiceMessages,
   selectChat,
   selectChatFullInfo,
   selectChatLastMessageId,
@@ -120,6 +119,7 @@ import {
   selectPinnedIds,
   selectRealLastReadId,
   selectReplyCanBeSentToChat,
+  selectReplyContainsVoiceMessages,
   selectScheduledMessage,
   selectSendAs,
   selectSponsoredMessage,
@@ -1710,7 +1710,7 @@ async function allowSendVoiceMessages<T extends GlobalState>(
 addActionHandler('openChatOrTopicWithReplyInDraft', async (global, actions, payload): Promise<void> => {
   const { chatId, topicId, tabId = getCurrentTabId() } = payload;
   const user = selectUser(global, chatId);
-  if (!await allowSendVoiceMessages(global, user, chatId, tabId, (g) => Boolean(replyContainVoiceMessages(g)))) {
+  if (!await allowSendVoiceMessages(global, user, chatId, tabId, (g) => Boolean(selectReplyContainsVoiceMessages(g)))) {
     actions.showDialog({
       data: {
         message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),

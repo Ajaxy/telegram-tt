@@ -1332,7 +1332,7 @@ export function selectMessageCustomEmojiSets<T extends GlobalState>(
   }, [] as ApiStickerSetInfo[]);
 }
 
-export function replyContainVoiceMessages<T extends GlobalState>(
+export function selectReplyContainsVoiceMessages<T extends GlobalState>(
   global: T,
 ) {
   const replyInfo = selectCurrentDraft(global)?.replyInfo;
@@ -1388,8 +1388,8 @@ export function selectReplyCanBeSentToChat<T extends GlobalState>(
   const message = chatMessages[replyInfo.replyToMsgId];
 
   const toChatFullInfo = selectChatFullInfo(global, toChatId);
-  const opt = getAllowedAttachmentOptions(toChat, toChatFullInfo);
-  return !сheckMessageSendingDenied(message, opt);
+  const options = getAllowedAttachmentOptions(toChat, toChatFullInfo);
+  return !сheckMessageSendingDenied(message, options);
 }
 export function selectForwardsCanBeSentToChat<T extends GlobalState>(
   global: T,
@@ -1406,10 +1406,10 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
 
   const chatFullInfo = selectChatFullInfo(global, toChatId);
   const chatMessages = selectChatMessages(global, fromChatId!);
-  const opt = getAllowedAttachmentOptions(chat, chatFullInfo);
-  return !messageIds!.some((messageId) => сheckMessageSendingDenied(chatMessages[messageId], opt));
+  const options = getAllowedAttachmentOptions(chat, chatFullInfo);
+  return !messageIds!.some((messageId) => сheckMessageSendingDenied(chatMessages[messageId], options));
 }
-function сheckMessageSendingDenied(message: ApiMessage, opt: IAllowedAttachmentOptions) {
+function сheckMessageSendingDenied(message: ApiMessage, options: IAllowedAttachmentOptions) {
   const isVoice = message.content.voice;
   const isRoundVideo = message.content.video?.isRound;
   const isPhoto = message.content.photo;
@@ -1421,15 +1421,15 @@ function сheckMessageSendingDenied(message: ApiMessage, opt: IAllowedAttachment
   const isPlainText = message.content.text
     && !isVoice && !isRoundVideo && !isSticker && !isDocument && !isAudio && !isVideo && !isPhoto && !isGif;
 
-  return (isVoice && !opt.canSendVoices)
-    || (isRoundVideo && !opt.canSendRoundVideos)
-    || (isSticker && !opt.canSendStickers)
-    || (isDocument && !opt.canSendDocuments)
-    || (isAudio && !opt.canSendAudios)
-    || (isVideo && !opt.canSendVideos)
-    || (isPhoto && !opt.canSendPhotos)
-    || (isGif && !opt.canSendGifs)
-    || (isPlainText && !opt.canSendPlainText);
+  return (isVoice && !options.canSendVoices)
+    || (isRoundVideo && !options.canSendRoundVideos)
+    || (isSticker && !options.canSendStickers)
+    || (isDocument && !options.canSendDocuments)
+    || (isAudio && !options.canSendAudios)
+    || (isVideo && !options.canSendVideos)
+    || (isPhoto && !options.canSendPhotos)
+    || (isGif && !options.canSendGifs)
+    || (isPlainText && !options.canSendPlainText);
 }
 
 export function selectCanTranslateMessage<T extends GlobalState>(
