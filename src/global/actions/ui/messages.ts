@@ -514,20 +514,7 @@ addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType
     },
   }, tabId);
 });
-addActionHandler('changeReplyRecipient', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    forwardMessages: {
-      ...selectTabState(global, tabId).forwardMessages,
-      toChatId: undefined,
-      isModalShown: true,
-      noAuthors: false,
-      noCaptions: false,
-    },
-  }, tabId);
-});
-
-addActionHandler('changeForwardRecipient', (global, actions, payload): ActionReturnType => {
+addActionHandler('changeRecipient', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   return updateTabState(global, {
     forwardMessages: {

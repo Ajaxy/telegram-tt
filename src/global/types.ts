@@ -2451,8 +2451,7 @@ export interface ActionPayloads {
     noCaptions: boolean;
   } & WithTabId;
   exitForwardMode: WithTabId | undefined;
-  changeForwardRecipient: WithTabId | undefined;
-  changeReplyRecipient: WithTabId | undefined;
+  changeRecipient: WithTabId | undefined;
   forwardToSavedMessages: WithTabId | undefined;
   forwardStory: {
     toChatId: string;

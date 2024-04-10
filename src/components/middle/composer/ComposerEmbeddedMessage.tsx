@@ -86,8 +86,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     updateDraftReplyInfo,
     setEditingId,
     focusMessage,
-    changeForwardRecipient,
-    changeReplyRecipient,
+    changeRecipient,
     setForwardNoAuthors,
     setForwardNoCaptions,
     exitForwardMode,
@@ -163,8 +162,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const handleRemoveQuoteClick = useLastCallback(baseClickHandler(
     () => updateDraftReplyInfo({ quoteText: undefined }),
   ));
-  const handleForwardToAnotherChatClick = useLastCallback(baseClickHandler(changeForwardRecipient));
-  const handleChangeReplyRecipientClick = useLastCallback(baseClickHandler(changeReplyRecipient));
+  const handleForwardToAnotherChatClick = useLastCallback(baseClickHandler(changeRecipient));
+  const handleChangeReplyRecipientClick = useLastCallback(baseClickHandler(changeRecipient));
   const handleDoNotReplyClick = useLastCallback(baseClickHandler(clearEmbedded));
 
   const getTriggerElement = useLastCallback(() => ref.current);
