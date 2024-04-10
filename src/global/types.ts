@@ -1782,10 +1782,6 @@ export interface ActionPayloads {
 
   focusLastMessage: WithTabId | undefined;
   updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
-  moveCurrentReplyToNewDraft: {
-    chatId: string;
-    threadId: ThreadId;
-  };
   resetDraftReplyInfo: WithTabId | undefined;
   closeWebApp: WithTabId | undefined;
 

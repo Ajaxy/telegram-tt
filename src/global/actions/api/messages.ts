@@ -524,34 +524,6 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
   });
 });
 
-addActionHandler('moveCurrentReplyToNewDraft', (global, actions, payload): ActionReturnType => {
-  const { chatId, threadId } = payload;
-  const tabId = getCurrentTabId();
-
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
-    return;
-  }
-  const { chatId: currentChatId } = currentMessageList;
-
-  const currentReplyInfo = selectCurrentDraft(global)?.replyInfo;
-  if (!currentReplyInfo) return;
-
-  const draft: ApiDraft = {
-    replyInfo: {
-      ...currentReplyInfo,
-      replyToPeerId: currentReplyInfo?.replyToPeerId ?? currentChatId,
-    },
-  };
-
-  saveDraft({
-    global, chatId, threadId, draft,
-  });
-  if (chatId !== currentMessageList.chatId) {
-    actions.resetDraftReplyInfo({ tabId });
-  }
-});
-
 addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId = MAIN_THREAD_ID, isLocalOnly, shouldKeepReply,
@@ -1706,7 +1678,34 @@ async function allowSendVoiceMessages<T extends GlobalState>(
   }
   return true;
 }
+function moveCurrentReplyToNewDraft<T extends GlobalState>(
+  global: T, actions: RequiredGlobalActions, chatId: string, threadId: ThreadId,
+) {
+  const tabId = getCurrentTabId();
 
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  if (!currentMessageList) {
+    return;
+  }
+  const { chatId: currentChatId } = currentMessageList;
+
+  const currentReplyInfo = selectCurrentDraft(global)?.replyInfo;
+  if (!currentReplyInfo) return;
+
+  const draft: ApiDraft = {
+    replyInfo: {
+      ...currentReplyInfo,
+      replyToPeerId: currentReplyInfo?.replyToPeerId ?? currentChatId,
+    },
+  };
+
+  saveDraft({
+    global, chatId, threadId, draft,
+  });
+  if (chatId !== currentMessageList.chatId) {
+    actions.resetDraftReplyInfo({ tabId });
+  }
+}
 addActionHandler('openChatOrTopicWithReplyInDraft', async (global, actions, payload): Promise<void> => {
   const { chatId, topicId, tabId = getCurrentTabId() } = payload;
   const user = selectUser(global, chatId);
@@ -1734,7 +1733,7 @@ addActionHandler('openChatOrTopicWithReplyInDraft', async (global, actions, payl
   }, tabId);
   setGlobal(global);
 
-  actions.moveCurrentReplyToNewDraft({ chatId, threadId: topicId || MAIN_THREAD_ID });
+  moveCurrentReplyToNewDraft(global, actions, chatId, topicId || MAIN_THREAD_ID);
   actions.openThread({ chatId, threadId: topicId || MAIN_THREAD_ID, tabId });
   actions.closeMediaViewer({ tabId });
   actions.exitMessageSelectMode({ tabId });
