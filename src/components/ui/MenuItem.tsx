@@ -27,6 +27,7 @@ export type MenuItemProps = {
   destructive?: boolean;
   ariaLabel?: string;
   withWrap?: boolean;
+  withAutoStopPropagation? : boolean;
 };
 
 const MenuItem: FC<MenuItemProps> = (props) => {
@@ -43,6 +44,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     destructive,
     ariaLabel,
     withWrap,
+    withAutoStopPropagation,
     onContextMenu,
     clickArg,
   } = props;
@@ -56,7 +58,9 @@ const MenuItem: FC<MenuItemProps> = (props) => {
 
       return;
     }
-
+    if (withAutoStopPropagation) {
+      e.stopPropagation();
+    }
     onClick(e, clickArg);
   });
 
@@ -71,7 +75,9 @@ const MenuItem: FC<MenuItemProps> = (props) => {
 
       return;
     }
-
+    if (withAutoStopPropagation) {
+      e.stopPropagation();
+    }
     onClick(e, clickArg);
   });
 

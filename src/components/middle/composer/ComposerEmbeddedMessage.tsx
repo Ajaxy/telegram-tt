@@ -149,22 +149,17 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     clearEmbedded();
     handleContextMenuHide();
   });
-  const baseClickHandler = (
-    action: () => void,
-  ): ((e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>) => void) => {
-    return (e) => {
-      handleContextMenuClose();
-      e.stopPropagation();
-      action();
-    };
+  const buildAutoCloseMenuItemHandler = (action: () => void): () => void => () => {
+    handleContextMenuClose();
+    action();
   };
-  const handleShowMessageClick = useLastCallback(baseClickHandler(focusMessageFromDraft));
-  const handleRemoveQuoteClick = useLastCallback(baseClickHandler(
+  const handleForwardToAnotherChatClick = useLastCallback(buildAutoCloseMenuItemHandler(changeRecipient));
+  const handleShowMessageClick = useLastCallback(buildAutoCloseMenuItemHandler(focusMessageFromDraft));
+  const handleRemoveQuoteClick = useLastCallback(buildAutoCloseMenuItemHandler(
     () => updateDraftReplyInfo({ quoteText: undefined }),
   ));
-  const handleForwardToAnotherChatClick = useLastCallback(baseClickHandler(changeRecipient));
-  const handleChangeReplyRecipientClick = useLastCallback(baseClickHandler(changeRecipient));
-  const handleDoNotReplyClick = useLastCallback(baseClickHandler(clearEmbedded));
+  const handleChangeReplyRecipientClick = useLastCallback(buildAutoCloseMenuItemHandler(changeRecipient));
+  const handleDoNotReplyClick = useLastCallback(buildAutoCloseMenuItemHandler(clearEmbedded));
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!);
@@ -321,25 +316,33 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                   </>
                 )}
                 <MenuSeparator />
-                <MenuItem icon="replace" onClick={handleForwardToAnotherChatClick}>
+                <MenuItem icon="replace" onClick={handleForwardToAnotherChatClick} withAutoStopPropagation>
                   {lang('ForwardAnotherChat')}
                 </MenuItem>
               </>
             )}
             {isShowingReply && (
               <>
-                <MenuItem customIcon={<i className="icon icon-placeholder" />} onClick={handleShowMessageClick}>
+                <MenuItem
+                  customIcon={<i className="icon icon-placeholder" />}
+                  onClick={handleShowMessageClick}
+                  withAutoStopPropagation
+                >
                   {lang('Message.Context.Goto')}
                 </MenuItem>
                 {isReplyWithQuote && (
-                  <MenuItem customIcon={<i className="icon icon-placeholder" />} onClick={handleRemoveQuoteClick}>
+                  <MenuItem
+                    customIcon={<i className="icon icon-placeholder" />}
+                    onClick={handleRemoveQuoteClick}
+                    withAutoStopPropagation
+                  >
                     {lang('RemoveQuote')}
                   </MenuItem>
                 )}
-                <MenuItem icon="replace" onClick={handleChangeReplyRecipientClick}>
+                <MenuItem icon="replace" onClick={handleChangeReplyRecipientClick} withAutoStopPropagation>
                   {lang('ReplyToAnotherChat')}
                 </MenuItem>
-                <MenuItem icon="delete" onClick={handleDoNotReplyClick}>
+                <MenuItem icon="delete" onClick={handleDoNotReplyClick} withAutoStopPropagation>
                   {lang('DoNotReply')}
                 </MenuItem>
               </>
