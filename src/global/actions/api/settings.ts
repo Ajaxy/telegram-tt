@@ -682,6 +682,22 @@ addActionHandler('loadPeerColors', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadTimezones', async (global): Promise<void> => {
+  const hash = global.timezones?.hash;
+  const result = await callApi('fetchTimezones', hash);
+  if (!result) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    timezones: {
+      byId: buildCollectionByKey(result.timezones, 'id'),
+      hash: result.hash,
+    },
+  };
+  setGlobal(global);
+});
+
 addActionHandler('loadGlobalPrivacySettings', async (global): Promise<void> => {
   const globalSettings = await callApi('fetchGlobalPrivacySettings');
   if (!globalSettings) {

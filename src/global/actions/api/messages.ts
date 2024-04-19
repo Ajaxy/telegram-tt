@@ -69,7 +69,6 @@ import {
   addUsers,
   removeOutlyingList,
   removeRequestedMessageTranslation,
-  replaceScheduledMessages,
   replaceSettings,
   replaceThreadParam,
   replaceUserStatuses,
@@ -78,15 +77,20 @@ import {
   updateChat,
   updateChatFullInfo,
   updateChatMessage,
+  updateChats,
   updateListedIds,
   updateMessageTranslation,
   updateOutlyingLists,
+  updateQuickReplies,
+  updateQuickReplyMessages,
   updateRequestedMessageTranslation,
+  updateScheduledMessages,
   updateSponsoredMessage,
   updateThreadInfo,
   updateThreadUnreadFromForwardedMessage,
   updateTopic,
   updateUploadByMessageKey,
+  updateUsers,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -1083,7 +1087,7 @@ addActionHandler('loadScheduledHistory', async (global, actions, payload): Promi
   const ids = Object.keys(byId).map(Number).sort((a, b) => b - a);
 
   global = getGlobal();
-  global = replaceScheduledMessages(global, chat.id, byId);
+  global = updateScheduledMessages(global, chat.id, byId);
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'scheduledIds', ids);
   if (chat?.isForum) {
     const scheduledPerThread: Record<ThreadId, number[]> = {};
@@ -1900,6 +1904,31 @@ addActionHandler('loadOutboxReadDate', async (global, actions, payload): Promise
       setGlobal(global);
     }
   }
+});
+
+addActionHandler('loadQuickReplies', async (global): Promise<void> => {
+  const result = await callApi('fetchQuickReplies');
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = updateQuickReplyMessages(global, buildCollectionByKey(result.messages, 'id'));
+  global = updateQuickReplies(global, result.quickReplies);
+
+  setGlobal(global);
+});
+
+addActionHandler('sendQuickReply', (global, actions, payload): ActionReturnType => {
+  const { chatId, quickReplyId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return global;
+  callApi('sendQuickReply', {
+    chat,
+    shortcutId: quickReplyId,
+  });
+
+  return global;
 });
 
 addActionHandler('copyMessageLink', async (global, actions, payload): Promise<void> => {

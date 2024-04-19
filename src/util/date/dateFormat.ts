@@ -1,7 +1,7 @@
-import type { LangFn } from '../hooks/useLang';
-import type { TimeFormat } from '../types';
+import type { LangFn } from '../../hooks/useLang';
+import type { TimeFormat } from '../../types';
 
-import withCache from './withCache';
+import withCache from '../withCache';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS_FULL = [
@@ -46,7 +46,7 @@ export function formatTime(lang: LangFn, datetime: number | Date) {
   let hours = date.getHours();
   let marker = '';
   if (timeFormat === '12h') {
-    marker = hours >= 12 ? ' PM' : ' AM';
+    marker = hours >= 12 ? '\xa0PM' : '\xa0AM'; // NBSP
     hours = hours > 12 ? hours % 12 : hours;
   }
 
@@ -222,9 +222,7 @@ export function formatHumanDate(
     weekAgo.setDate(today.getDate() - 7);
     weekAhead.setDate(today.getDate() + 7);
     if (date >= weekAgo && date <= weekAhead) {
-      const weekDay = WEEKDAYS_FULL[date.getDay()];
-      const weekDayString = isShort ? lang(`Weekday.Short${weekDay}`) : lang(`Weekday.${weekDay}`);
-
+      const weekDayString = formatWeekday(lang, date.getDay(), isShort);
       return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(weekDayString);
     }
   }
@@ -233,6 +231,15 @@ export function formatHumanDate(
   const formattedDate = formatDateToString(date, lang.code, noYear, isShort ? 'short' : 'long');
 
   return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(formattedDate);
+}
+
+/**
+ * Returns weekday name
+ * @param day 0 - Sunday, 1 - Monday, ...
+ */
+export function formatWeekday(lang: LangFn, day: number, isShort = false) {
+  const weekDay = WEEKDAYS_FULL[day];
+  return isShort ? lang(`Weekday.Short${weekDay}`) : lang(`Weekday.${weekDay}`);
 }
 
 export function formatMediaDateTime(

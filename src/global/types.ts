@@ -45,6 +45,7 @@ import type {
   ApiPhoto,
   ApiPostStatistics,
   ApiPremiumPromo,
+  ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
   ApiReceipt,
@@ -60,6 +61,7 @@ import type {
   ApiStickerSetInfo,
   ApiThemeParameters,
   ApiThreadInfo,
+  ApiTimezone,
   ApiTranscription,
   ApiTypeStoryView,
   ApiTypingStatus,
@@ -701,6 +703,10 @@ export type GlobalState = {
   config?: ApiConfig;
   appConfig?: ApiAppConfig;
   peerColors?: ApiPeerColors;
+  timezones?: {
+    byId: Record<string, ApiTimezone>;
+    hash: number;
+  };
   hasWebAuthTokenFailed?: boolean;
   hasWebAuthTokenPasswordRequired?: true;
   isCacheApiSupported?: boolean;
@@ -860,6 +866,11 @@ export type GlobalState = {
     byChatId: Record<string, {
       byId: Record<number, ApiMessage>;
     }>;
+  };
+
+  quickReplies: {
+    messagesById: Record<number, ApiMessage>;
+    byId: Record<number, ApiQuickReply>;
   };
 
   chatFolders: {
@@ -2044,6 +2055,11 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
   };
+  loadQuickReplies: undefined;
+  sendQuickReply: {
+    chatId: string;
+    quickReplyId: number;
+  };
   animateUnreadReaction: {
     messageIds: number[];
   } & WithTabId;
@@ -2859,6 +2875,7 @@ export interface ActionPayloads {
     hash: number;
   } | undefined;
   loadPeerColors: undefined;
+  loadTimezones: undefined;
   requestNextSettingsScreen: {
     screen?: SettingsScreens;
     foldersAction?: ReducerAction<FoldersActions>;

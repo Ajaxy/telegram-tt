@@ -7,7 +7,7 @@ import type { LangFn } from '../../hooks/useLang';
 
 import { MAX_INT_32 } from '../../config';
 import buildClassName from '../../util/buildClassName';
-import { formatDateToString, formatTime, getDayStart } from '../../util/dateFormat';
+import { formatDateToString, formatTime, getDayStart } from '../../util/date/dateFormat';
 
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';

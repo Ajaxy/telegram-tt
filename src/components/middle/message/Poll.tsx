@@ -14,7 +14,7 @@ import type {
 } from '../../../api/types';
 import type { LangFn } from '../../../hooks/useLang';
 
-import { formatMediaDuration } from '../../../util/dateFormat';
+import { formatMediaDuration } from '../../../util/date/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';

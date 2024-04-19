@@ -43,6 +43,7 @@ export type FontIconName =
   | 'chat-badge'
   | 'chats-badge'
   | 'check'
+  | 'clock'
   | 'close-circle'
   | 'close-topic'
   | 'close'

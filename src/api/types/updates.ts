@@ -24,6 +24,7 @@ import type {
   ApiMessageExtendedMediaPreview,
   ApiPhoto,
   ApiPoll,
+  ApiQuickReply,
   ApiReaction,
   ApiReactions,
   ApiStickerSet,
@@ -232,6 +233,28 @@ export type ApiUpdateScheduledMessage = {
   chatId: string;
   id: number;
   message: Partial<ApiMessage>;
+};
+
+export type ApiUpdateQuickReplyMessage = {
+  '@type': 'updateQuickReplyMessage';
+  id: number;
+  message: Partial<ApiMessage>;
+};
+
+export type ApiUpdateDeleteQuickReplyMessages = {
+  '@type': 'deleteQuickReplyMessages';
+  quickReplyId: number;
+  messageIds: number[];
+};
+
+export type ApiUpdateQuickReplies = {
+  '@type': 'updateQuickReplies';
+  quickReplies: ApiQuickReply[];
+};
+
+export type ApiDeleteQuickReply = {
+  '@type': 'deleteQuickReply';
+  quickReplyId: number;
 };
 
 export type ApiUpdatePinnedMessageIds = {
@@ -740,7 +763,8 @@ export type ApiUpdate = (
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
   ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
-  ApiUpdateDeleteSavedHistory
+  ApiUpdateDeleteSavedHistory |
+  ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

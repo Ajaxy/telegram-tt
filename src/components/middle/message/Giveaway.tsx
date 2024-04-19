@@ -17,7 +17,7 @@ import {
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime, formatDateTimeToString } from '../../../util/dateFormat';
+import { formatDateAtTime, formatDateTimeToString } from '../../../util/date/dateFormat';
 import { isoToEmoji } from '../../../util/emoji/emoji';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';

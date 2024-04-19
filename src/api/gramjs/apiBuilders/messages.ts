@@ -16,6 +16,7 @@ import type {
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
+  ApiQuickReply,
   ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
@@ -159,7 +160,7 @@ export type UniversalMessage = (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
     'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned' |
-    'savedPeerId' | 'fromBoostsApplied'
+    'savedPeerId' | 'fromBoostsApplied' | 'quickReplyShortcutId'
   )>
 );
 
@@ -1066,6 +1067,15 @@ export function buildApiThreadInfo(
     isCommentsInfo: false,
     chatId,
     threadId: messageId,
+  };
+}
+
+export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply {
+  const { shortcutId, shortcut, topMessage } = reply;
+  return {
+    id: shortcutId,
+    shortcut,
+    topMessageId: topMessage,
   };
 }
 

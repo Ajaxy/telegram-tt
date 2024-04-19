@@ -3,7 +3,7 @@ import { getActions } from '../../../lib/teact/teactn';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { formatDateAtTime } from '../../../util/dateFormat';
+import { formatDateAtTime } from '../../../util/date/dateFormat';
 
 import useLang from '../../../hooks/useLang';
 

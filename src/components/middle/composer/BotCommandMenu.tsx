@@ -11,7 +11,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
 
 import Menu from '../../ui/Menu';
-import BotCommand from './BotCommand';
+import ChatCommand from './ChatCommand';
 
 import './BotCommandMenu.scss';
 
@@ -29,9 +29,9 @@ const BotCommandMenu: FC<OwnProps> = ({
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
 
-  const handleClick = useLastCallback((botCommand: ApiBotCommand) => {
+  const handleClick = useLastCallback((command: string) => {
     sendBotCommand({
-      command: `/${botCommand.command}`,
+      command: `/${command}`,
     });
     onClose();
   });
@@ -50,9 +50,11 @@ const BotCommandMenu: FC<OwnProps> = ({
       noCompact
     >
       {botCommands.map((botCommand) => (
-        <BotCommand
+        <ChatCommand
           key={botCommand.command}
-          botCommand={botCommand}
+          command={botCommand.command}
+          description={botCommand.description}
+          clickArg={botCommand.command}
           onClick={handleClick}
         />
       ))}

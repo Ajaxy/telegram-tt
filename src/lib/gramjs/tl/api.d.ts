@@ -86,7 +86,7 @@ namespace Api {
   export type TypeImportedContact = ImportedContact;
   export type TypeContactStatus = ContactStatus;
   export type TypeMessagesFilter = InputMessagesFilterEmpty | InputMessagesFilterPhotos | InputMessagesFilterVideo | InputMessagesFilterPhotoVideo | InputMessagesFilterDocument | InputMessagesFilterUrl | InputMessagesFilterGif | InputMessagesFilterVoice | InputMessagesFilterMusic | InputMessagesFilterChatPhotos | InputMessagesFilterPhoneCalls | InputMessagesFilterRoundVoice | InputMessagesFilterRoundVideo | InputMessagesFilterMyMentions | InputMessagesFilterGeo | InputMessagesFilterContacts | InputMessagesFilterPinned;
-  export type TypeUpdate = UpdateNewMessage | UpdateMessageID | UpdateDeleteMessages | UpdateUserTyping | UpdateChatUserTyping | UpdateChatParticipants | UpdateUserStatus | UpdateUserName | UpdateNewAuthorization | UpdateNewEncryptedMessage | UpdateEncryptedChatTyping | UpdateEncryption | UpdateEncryptedMessagesRead | UpdateChatParticipantAdd | UpdateChatParticipantDelete | UpdateDcOptions | UpdateNotifySettings | UpdateServiceNotification | UpdatePrivacy | UpdateUserPhone | UpdateReadHistoryInbox | UpdateReadHistoryOutbox | UpdateWebPage | UpdateReadMessagesContents | UpdateChannelTooLong | UpdateChannel | UpdateNewChannelMessage | UpdateReadChannelInbox | UpdateDeleteChannelMessages | UpdateChannelMessageViews | UpdateChatParticipantAdmin | UpdateNewStickerSet | UpdateStickerSetsOrder | UpdateStickerSets | UpdateSavedGifs | UpdateBotInlineQuery | UpdateBotInlineSend | UpdateEditChannelMessage | UpdateBotCallbackQuery | UpdateEditMessage | UpdateInlineBotCallbackQuery | UpdateReadChannelOutbox | UpdateDraftMessage | UpdateReadFeaturedStickers | UpdateRecentStickers | UpdateConfig | UpdatePtsChanged | UpdateChannelWebPage | UpdateDialogPinned | UpdatePinnedDialogs | UpdateBotWebhookJSON | UpdateBotWebhookJSONQuery | UpdateBotShippingQuery | UpdateBotPrecheckoutQuery | UpdatePhoneCall | UpdateLangPackTooLong | UpdateLangPack | UpdateFavedStickers | UpdateChannelReadMessagesContents | UpdateContactsReset | UpdateChannelAvailableMessages | UpdateDialogUnreadMark | UpdateMessagePoll | UpdateChatDefaultBannedRights | UpdateFolderPeers | UpdatePeerSettings | UpdatePeerLocated | UpdateNewScheduledMessage | UpdateDeleteScheduledMessages | UpdateTheme | UpdateGeoLiveViewed | UpdateLoginToken | UpdateMessagePollVote | UpdateDialogFilter | UpdateDialogFilterOrder | UpdateDialogFilters | UpdatePhoneCallSignalingData | UpdateChannelMessageForwards | UpdateReadChannelDiscussionInbox | UpdateReadChannelDiscussionOutbox | UpdatePeerBlocked | UpdateChannelUserTyping | UpdatePinnedMessages | UpdatePinnedChannelMessages | UpdateChat | UpdateGroupCallParticipants | UpdateGroupCall | UpdatePeerHistoryTTL | UpdateChatParticipant | UpdateChannelParticipant | UpdateBotStopped | UpdateGroupCallConnection | UpdateBotCommands | UpdatePendingJoinRequests | UpdateBotChatInviteRequester | UpdateMessageReactions | UpdateAttachMenuBots | UpdateWebViewResultSent | UpdateBotMenuButton | UpdateSavedRingtones | UpdateTranscribedAudio | UpdateReadFeaturedEmojiStickers | UpdateUserEmojiStatus | UpdateRecentEmojiStatuses | UpdateRecentReactions | UpdateMoveStickerSetToTop | UpdateMessageExtendedMedia | UpdateChannelPinnedTopic | UpdateChannelPinnedTopics | UpdateUser | UpdateAutoSaveSettings | UpdateGroupInvitePrivacyForbidden | UpdateStory | UpdateReadStories | UpdateStoryID | UpdateStoriesStealthMode | UpdateSentStoryReaction | UpdateBotChatBoost | UpdateChannelViewForumAsMessages | UpdatePeerWallpaper | UpdateBotMessageReaction | UpdateBotMessageReactions | UpdateSavedDialogPinned | UpdatePinnedSavedDialogs | UpdateSavedReactionTags;
+  export type TypeUpdate = UpdateNewMessage | UpdateMessageID | UpdateDeleteMessages | UpdateUserTyping | UpdateChatUserTyping | UpdateChatParticipants | UpdateUserStatus | UpdateUserName | UpdateNewAuthorization | UpdateNewEncryptedMessage | UpdateEncryptedChatTyping | UpdateEncryption | UpdateEncryptedMessagesRead | UpdateChatParticipantAdd | UpdateChatParticipantDelete | UpdateDcOptions | UpdateNotifySettings | UpdateServiceNotification | UpdatePrivacy | UpdateUserPhone | UpdateReadHistoryInbox | UpdateReadHistoryOutbox | UpdateWebPage | UpdateReadMessagesContents | UpdateChannelTooLong | UpdateChannel | UpdateNewChannelMessage | UpdateReadChannelInbox | UpdateDeleteChannelMessages | UpdateChannelMessageViews | UpdateChatParticipantAdmin | UpdateNewStickerSet | UpdateStickerSetsOrder | UpdateStickerSets | UpdateSavedGifs | UpdateBotInlineQuery | UpdateBotInlineSend | UpdateEditChannelMessage | UpdateBotCallbackQuery | UpdateEditMessage | UpdateInlineBotCallbackQuery | UpdateReadChannelOutbox | UpdateDraftMessage | UpdateReadFeaturedStickers | UpdateRecentStickers | UpdateConfig | UpdatePtsChanged | UpdateChannelWebPage | UpdateDialogPinned | UpdatePinnedDialogs | UpdateBotWebhookJSON | UpdateBotWebhookJSONQuery | UpdateBotShippingQuery | UpdateBotPrecheckoutQuery | UpdatePhoneCall | UpdateLangPackTooLong | UpdateLangPack | UpdateFavedStickers | UpdateChannelReadMessagesContents | UpdateContactsReset | UpdateChannelAvailableMessages | UpdateDialogUnreadMark | UpdateMessagePoll | UpdateChatDefaultBannedRights | UpdateFolderPeers | UpdatePeerSettings | UpdatePeerLocated | UpdateNewScheduledMessage | UpdateDeleteScheduledMessages | UpdateTheme | UpdateGeoLiveViewed | UpdateLoginToken | UpdateMessagePollVote | UpdateDialogFilter | UpdateDialogFilterOrder | UpdateDialogFilters | UpdatePhoneCallSignalingData | UpdateChannelMessageForwards | UpdateReadChannelDiscussionInbox | UpdateReadChannelDiscussionOutbox | UpdatePeerBlocked | UpdateChannelUserTyping | UpdatePinnedMessages | UpdatePinnedChannelMessages | UpdateChat | UpdateGroupCallParticipants | UpdateGroupCall | UpdatePeerHistoryTTL | UpdateChatParticipant | UpdateChannelParticipant | UpdateBotStopped | UpdateGroupCallConnection | UpdateBotCommands | UpdatePendingJoinRequests | UpdateBotChatInviteRequester | UpdateMessageReactions | UpdateAttachMenuBots | UpdateWebViewResultSent | UpdateBotMenuButton | UpdateSavedRingtones | UpdateTranscribedAudio | UpdateReadFeaturedEmojiStickers | UpdateUserEmojiStatus | UpdateRecentEmojiStatuses | UpdateRecentReactions | UpdateMoveStickerSetToTop | UpdateMessageExtendedMedia | UpdateChannelPinnedTopic | UpdateChannelPinnedTopics | UpdateUser | UpdateAutoSaveSettings | UpdateGroupInvitePrivacyForbidden | UpdateStory | UpdateReadStories | UpdateStoryID | UpdateStoriesStealthMode | UpdateSentStoryReaction | UpdateBotChatBoost | UpdateChannelViewForumAsMessages | UpdatePeerWallpaper | UpdateBotMessageReaction | UpdateBotMessageReactions | UpdateSavedDialogPinned | UpdatePinnedSavedDialogs | UpdateSavedReactionTags | UpdateSmsJob | UpdateQuickReplies | UpdateNewQuickReply | UpdateDeleteQuickReply | UpdateQuickReplyMessage | UpdateDeleteQuickReplyMessages;
   export type TypeUpdates = UpdatesTooLong | UpdateShortMessage | UpdateShortChatMessage | UpdateShort | UpdatesCombined | Updates | UpdateShortSentMessage;
   export type TypeDcOption = DcOption;
   export type TypeConfig = Config;
@@ -332,6 +332,21 @@ namespace Api {
   export type TypeSavedDialog = SavedDialog;
   export type TypeSavedReactionTag = SavedReactionTag;
   export type TypeOutboxReadDate = OutboxReadDate;
+  export type TypeSmsJob = SmsJob;
+  export type TypeBusinessWeeklyOpen = BusinessWeeklyOpen;
+  export type TypeBusinessWorkHours = BusinessWorkHours;
+  export type TypeBusinessLocation = BusinessLocation;
+  export type TypeInputBusinessRecipients = InputBusinessRecipients;
+  export type TypeBusinessRecipients = BusinessRecipients;
+  export type TypeBusinessAwayMessageSchedule = BusinessAwayMessageScheduleAlways | BusinessAwayMessageScheduleOutsideWorkHours | BusinessAwayMessageScheduleCustom;
+  export type TypeInputBusinessGreetingMessage = InputBusinessGreetingMessage;
+  export type TypeBusinessGreetingMessage = BusinessGreetingMessage;
+  export type TypeInputBusinessAwayMessage = InputBusinessAwayMessage;
+  export type TypeBusinessAwayMessage = BusinessAwayMessage;
+  export type TypeTimezone = Timezone;
+  export type TypeQuickReply = QuickReply;
+  export type TypeInputQuickReplyShortcut = InputQuickReplyShortcut | InputQuickReplyShortcutId;
+  export type TypeConnectedBot = ConnectedBot;
   export type TypeResPQ = ResPQ;
   export type TypeP_Q_inner_data = PQInnerData | PQInnerDataDc | PQInnerDataTemp | PQInnerDataTempDc;
   export type TypeServer_DH_Params = ServerDHParamsFail | ServerDHParamsOk;
@@ -436,6 +451,8 @@ namespace Api {
     export type TypeWebPage = messages.WebPage;
     export type TypeSavedDialogs = messages.SavedDialogs | messages.SavedDialogsSlice | messages.SavedDialogsNotModified;
     export type TypeSavedReactionTags = messages.SavedReactionTagsNotModified | messages.SavedReactionTags;
+    export type TypeQuickReplies = messages.QuickReplies | messages.QuickRepliesNotModified;
+    export type TypeDialogFilters = messages.DialogFilters;
   }
 
   export namespace updates {
@@ -475,6 +492,7 @@ namespace Api {
     export type TypePeerColorSet = help.PeerColorSet | help.PeerColorProfileSet;
     export type TypePeerColorOption = help.PeerColorOption;
     export type TypePeerColors = help.PeerColorsNotModified | help.PeerColors;
+    export type TypeTimezonesList = help.TimezonesListNotModified | help.TimezonesList;
     export type TypeConfigSimple = help.ConfigSimple;
   }
 
@@ -499,6 +517,7 @@ namespace Api {
     export type TypeEmojiStatuses = account.EmojiStatusesNotModified | account.EmojiStatuses;
     export type TypeEmailVerified = account.EmailVerified | account.EmailVerifiedLogin;
     export type TypeAutoSaveSettings = account.AutoSaveSettings;
+    export type TypeConnectedBots = account.ConnectedBots;
   }
 
   export namespace channels {
@@ -570,6 +589,11 @@ namespace Api {
     export type TypeBoostsList = premium.BoostsList;
     export type TypeMyBoosts = premium.MyBoosts;
     export type TypeBoostsStatus = premium.BoostsStatus;
+  }
+
+  export namespace smsjobs {
+    export type TypeEligibilityToJoin = smsjobs.EligibleToJoin;
+    export type TypeStatus = smsjobs.Status;
   }
 
   export class InputPeerEmpty extends VirtualClass<void> {};
@@ -1555,6 +1579,7 @@ namespace Api {
     reactions?: Api.TypeMessageReactions;
     restrictionReason?: Api.TypeRestrictionReason[];
     ttlPeriod?: int;
+    quickReplyShortcutId?: int;
   }> {
     // flags: undefined;
     out?: true;
@@ -1590,6 +1615,7 @@ namespace Api {
     reactions?: Api.TypeMessageReactions;
     restrictionReason?: Api.TypeRestrictionReason[];
     ttlPeriod?: int;
+    quickReplyShortcutId?: int;
   };
   export class MessageService extends VirtualClass<{
     // flags: undefined;
@@ -2419,6 +2445,7 @@ namespace Api {
     wallpaperOverridden?: true;
     contactRequirePremium?: true;
     readDatesPrivate?: true;
+    // flags2: undefined;
     id: long;
     about?: string;
     settings: Api.TypePeerSettings;
@@ -2438,6 +2465,10 @@ namespace Api {
     premiumGifts?: Api.TypePremiumGiftOption[];
     wallpaper?: Api.TypeWallPaper;
     stories?: Api.TypePeerStories;
+    businessWorkHours?: Api.TypeBusinessWorkHours;
+    businessLocation?: Api.TypeBusinessLocation;
+    businessGreetingMessage?: Api.TypeBusinessGreetingMessage;
+    businessAwayMessage?: Api.TypeBusinessAwayMessage;
   }> {
     // flags: undefined;
     blocked?: true;
@@ -2453,6 +2484,7 @@ namespace Api {
     wallpaperOverridden?: true;
     contactRequirePremium?: true;
     readDatesPrivate?: true;
+    // flags2: undefined;
     id: long;
     about?: string;
     settings: Api.TypePeerSettings;
@@ -2472,6 +2504,10 @@ namespace Api {
     premiumGifts?: Api.TypePremiumGiftOption[];
     wallpaper?: Api.TypeWallPaper;
     stories?: Api.TypePeerStories;
+    businessWorkHours?: Api.TypeBusinessWorkHours;
+    businessLocation?: Api.TypeBusinessLocation;
+    businessGreetingMessage?: Api.TypeBusinessGreetingMessage;
+    businessAwayMessage?: Api.TypeBusinessAwayMessage;
   };
   export class Contact extends VirtualClass<{
     userId: long;
@@ -3588,6 +3624,38 @@ namespace Api {
     order?: Api.TypeDialogPeer[];
   };
   export class UpdateSavedReactionTags extends VirtualClass<void> {};
+  export class UpdateSmsJob extends VirtualClass<{
+    jobId: string;
+  }> {
+    jobId: string;
+  };
+  export class UpdateQuickReplies extends VirtualClass<{
+    quickReplies: Api.TypeQuickReply[];
+  }> {
+    quickReplies: Api.TypeQuickReply[];
+  };
+  export class UpdateNewQuickReply extends VirtualClass<{
+    quickReply: Api.TypeQuickReply;
+  }> {
+    quickReply: Api.TypeQuickReply;
+  };
+  export class UpdateDeleteQuickReply extends VirtualClass<{
+    shortcutId: int;
+  }> {
+    shortcutId: int;
+  };
+  export class UpdateQuickReplyMessage extends VirtualClass<{
+    message: Api.TypeMessage;
+  }> {
+    message: Api.TypeMessage;
+  };
+  export class UpdateDeleteQuickReplyMessages extends VirtualClass<{
+    shortcutId: int;
+    messages: int[];
+  }> {
+    shortcutId: int;
+    messages: int[];
+  };
   export class UpdatesTooLong extends VirtualClass<void> {};
   export class UpdateShortMessage extends VirtualClass<{
     // flags: undefined;
@@ -7699,6 +7767,7 @@ namespace Api {
     id: int;
     title: string;
     emoticon?: string;
+    color?: int;
     pinnedPeers: Api.TypeInputPeer[];
     includePeers: Api.TypeInputPeer[];
     excludePeers: Api.TypeInputPeer[];
@@ -7715,6 +7784,7 @@ namespace Api {
     id: int;
     title: string;
     emoticon?: string;
+    color?: int;
     pinnedPeers: Api.TypeInputPeer[];
     includePeers: Api.TypeInputPeer[];
     excludePeers: Api.TypeInputPeer[];
@@ -7726,6 +7796,7 @@ namespace Api {
     id: int;
     title: string;
     emoticon?: string;
+    color?: int;
     pinnedPeers: Api.TypeInputPeer[];
     includePeers: Api.TypeInputPeer[];
   }> {
@@ -7734,6 +7805,7 @@ namespace Api {
     id: int;
     title: string;
     emoticon?: string;
+    color?: int;
     pinnedPeers: Api.TypeInputPeer[];
     includePeers: Api.TypeInputPeer[];
   };
@@ -9233,6 +9305,170 @@ namespace Api {
   }> {
     date: int;
   };
+  export class SmsJob extends VirtualClass<{
+    jobId: string;
+    phoneNumber: string;
+    text: string;
+  }> {
+    jobId: string;
+    phoneNumber: string;
+    text: string;
+  };
+  export class BusinessWeeklyOpen extends VirtualClass<{
+    startMinute: int;
+    endMinute: int;
+  }> {
+    startMinute: int;
+    endMinute: int;
+  };
+  export class BusinessWorkHours extends VirtualClass<{
+    // flags: undefined;
+    openNow?: true;
+    timezoneId: string;
+    weeklyOpen: Api.TypeBusinessWeeklyOpen[];
+  }> {
+    // flags: undefined;
+    openNow?: true;
+    timezoneId: string;
+    weeklyOpen: Api.TypeBusinessWeeklyOpen[];
+  };
+  export class BusinessLocation extends VirtualClass<{
+    // flags: undefined;
+    geoPoint?: Api.TypeGeoPoint;
+    address: string;
+  }> {
+    // flags: undefined;
+    geoPoint?: Api.TypeGeoPoint;
+    address: string;
+  };
+  export class InputBusinessRecipients extends VirtualClass<{
+    // flags: undefined;
+    existingChats?: true;
+    newChats?: true;
+    contacts?: true;
+    nonContacts?: true;
+    excludeSelected?: true;
+    users?: Api.TypeInputUser[];
+  } | void> {
+    // flags: undefined;
+    existingChats?: true;
+    newChats?: true;
+    contacts?: true;
+    nonContacts?: true;
+    excludeSelected?: true;
+    users?: Api.TypeInputUser[];
+  };
+  export class BusinessRecipients extends VirtualClass<{
+    // flags: undefined;
+    existingChats?: true;
+    newChats?: true;
+    contacts?: true;
+    nonContacts?: true;
+    excludeSelected?: true;
+    users?: long[];
+  } | void> {
+    // flags: undefined;
+    existingChats?: true;
+    newChats?: true;
+    contacts?: true;
+    nonContacts?: true;
+    excludeSelected?: true;
+    users?: long[];
+  };
+  export class BusinessAwayMessageScheduleAlways extends VirtualClass<void> {};
+  export class BusinessAwayMessageScheduleOutsideWorkHours extends VirtualClass<void> {};
+  export class BusinessAwayMessageScheduleCustom extends VirtualClass<{
+    startDate: int;
+    endDate: int;
+  }> {
+    startDate: int;
+    endDate: int;
+  };
+  export class InputBusinessGreetingMessage extends VirtualClass<{
+    shortcutId: int;
+    recipients: Api.TypeInputBusinessRecipients;
+    noActivityDays: int;
+  }> {
+    shortcutId: int;
+    recipients: Api.TypeInputBusinessRecipients;
+    noActivityDays: int;
+  };
+  export class BusinessGreetingMessage extends VirtualClass<{
+    shortcutId: int;
+    recipients: Api.TypeBusinessRecipients;
+    noActivityDays: int;
+  }> {
+    shortcutId: int;
+    recipients: Api.TypeBusinessRecipients;
+    noActivityDays: int;
+  };
+  export class InputBusinessAwayMessage extends VirtualClass<{
+    // flags: undefined;
+    offlineOnly?: true;
+    shortcutId: int;
+    schedule: Api.TypeBusinessAwayMessageSchedule;
+    recipients: Api.TypeInputBusinessRecipients;
+  }> {
+    // flags: undefined;
+    offlineOnly?: true;
+    shortcutId: int;
+    schedule: Api.TypeBusinessAwayMessageSchedule;
+    recipients: Api.TypeInputBusinessRecipients;
+  };
+  export class BusinessAwayMessage extends VirtualClass<{
+    // flags: undefined;
+    offlineOnly?: true;
+    shortcutId: int;
+    schedule: Api.TypeBusinessAwayMessageSchedule;
+    recipients: Api.TypeBusinessRecipients;
+  }> {
+    // flags: undefined;
+    offlineOnly?: true;
+    shortcutId: int;
+    schedule: Api.TypeBusinessAwayMessageSchedule;
+    recipients: Api.TypeBusinessRecipients;
+  };
+  export class Timezone extends VirtualClass<{
+    id: string;
+    name: string;
+    utcOffset: int;
+  }> {
+    id: string;
+    name: string;
+    utcOffset: int;
+  };
+  export class QuickReply extends VirtualClass<{
+    shortcutId: int;
+    shortcut: string;
+    topMessage: int;
+    count: int;
+  }> {
+    shortcutId: int;
+    shortcut: string;
+    topMessage: int;
+    count: int;
+  };
+  export class InputQuickReplyShortcut extends VirtualClass<{
+    shortcut: string;
+  }> {
+    shortcut: string;
+  };
+  export class InputQuickReplyShortcutId extends VirtualClass<{
+    shortcutId: int;
+  }> {
+    shortcutId: int;
+  };
+  export class ConnectedBot extends VirtualClass<{
+    // flags: undefined;
+    canReply?: true;
+    botId: long;
+    recipients: Api.TypeBusinessRecipients;
+  }> {
+    // flags: undefined;
+    canReply?: true;
+    botId: long;
+    recipients: Api.TypeBusinessRecipients;
+  };
   export class ResPQ extends VirtualClass<{
     nonce: int128;
     serverNonce: int128;
@@ -10470,6 +10706,27 @@ namespace Api {
       tags: Api.TypeSavedReactionTag[];
       hash: long;
     };
+    export class QuickReplies extends VirtualClass<{
+      quickReplies: Api.TypeQuickReply[];
+      messages: Api.TypeMessage[];
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    }> {
+      quickReplies: Api.TypeQuickReply[];
+      messages: Api.TypeMessage[];
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    };
+    export class QuickRepliesNotModified extends VirtualClass<void> {};
+    export class DialogFilters extends VirtualClass<{
+      // flags: undefined;
+      tagsEnabled?: true;
+      filters: Api.TypeDialogFilter[];
+    }> {
+      // flags: undefined;
+      tagsEnabled?: true;
+      filters: Api.TypeDialogFilter[];
+    };
   }
 
   export namespace updates {
@@ -10879,6 +11136,14 @@ namespace Api {
       hash: int;
       colors: help.TypePeerColorOption[];
     };
+    export class TimezonesListNotModified extends VirtualClass<void> {};
+    export class TimezonesList extends VirtualClass<{
+      timezones: Api.TypeTimezone[];
+      hash: int;
+    }> {
+      timezones: Api.TypeTimezone[];
+      hash: int;
+    };
     export class ConfigSimple extends VirtualClass<{
       date: int;
       expires: int;
@@ -11095,6 +11360,13 @@ namespace Api {
       broadcastsSettings: Api.TypeAutoSaveSettings;
       exceptions: Api.TypeAutoSaveException[];
       chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    };
+    export class ConnectedBots extends VirtualClass<{
+      connectedBots: Api.TypeConnectedBot[];
+      users: Api.TypeUser[];
+    }> {
+      connectedBots: Api.TypeConnectedBot[];
       users: Api.TypeUser[];
     };
   }
@@ -11722,6 +11994,37 @@ namespace Api {
       boostUrl: string;
       prepaidGiveaways?: Api.TypePrepaidGiveaway[];
       myBoostSlots?: int[];
+    };
+  }
+
+  export namespace smsjobs {
+    export class EligibleToJoin extends VirtualClass<{
+      termsUrl: string;
+      monthlySentSms: int;
+    }> {
+      termsUrl: string;
+      monthlySentSms: int;
+    };
+    export class Status extends VirtualClass<{
+      // flags: undefined;
+      allowInternational?: true;
+      recentSent: int;
+      recentSince: int;
+      recentRemains: int;
+      totalSent: int;
+      totalSince: int;
+      lastGiftSlug?: string;
+      termsUrl: string;
+    }> {
+      // flags: undefined;
+      allowInternational?: true;
+      recentSent: int;
+      recentSince: int;
+      recentRemains: int;
+      totalSent: int;
+      totalSince: int;
+      lastGiftSlug?: string;
+      termsUrl: string;
     };
   }
 
@@ -12605,6 +12908,50 @@ namespace Api {
     }>, Api.TypeEmojiList> {
       hash: long;
     };
+    export class UpdateBusinessWorkHours extends Request<Partial<{
+      // flags: undefined;
+      businessWorkHours?: Api.TypeBusinessWorkHours;
+    } | void>, Bool> {
+      // flags: undefined;
+      businessWorkHours?: Api.TypeBusinessWorkHours;
+    };
+    export class UpdateBusinessLocation extends Request<Partial<{
+      // flags: undefined;
+      geoPoint?: Api.TypeInputGeoPoint;
+      address?: string;
+    } | void>, Bool> {
+      // flags: undefined;
+      geoPoint?: Api.TypeInputGeoPoint;
+      address?: string;
+    };
+    export class UpdateBusinessGreetingMessage extends Request<Partial<{
+      // flags: undefined;
+      message?: Api.TypeInputBusinessGreetingMessage;
+    } | void>, Bool> {
+      // flags: undefined;
+      message?: Api.TypeInputBusinessGreetingMessage;
+    };
+    export class UpdateBusinessAwayMessage extends Request<Partial<{
+      // flags: undefined;
+      message?: Api.TypeInputBusinessAwayMessage;
+    } | void>, Bool> {
+      // flags: undefined;
+      message?: Api.TypeInputBusinessAwayMessage;
+    };
+    export class UpdateConnectedBot extends Request<Partial<{
+      // flags: undefined;
+      canReply?: true;
+      deleted?: true;
+      bot: Api.TypeInputUser;
+      recipients: Api.TypeInputBusinessRecipients;
+    }>, Api.TypeUpdates> {
+      // flags: undefined;
+      canReply?: true;
+      deleted?: true;
+      bot: Api.TypeInputUser;
+      recipients: Api.TypeInputBusinessRecipients;
+    };
+    export class GetConnectedBots extends Request<void, account.TypeConnectedBots> {};
   }
 
   export namespace users {
@@ -12959,6 +13306,7 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     }>, Api.TypeUpdates> {
       // flags: undefined;
       noWebpage?: true;
@@ -12976,6 +13324,7 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     };
     export class SendMedia extends Request<Partial<{
       // flags: undefined;
@@ -12994,6 +13343,7 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     }>, Api.TypeUpdates> {
       // flags: undefined;
       silent?: true;
@@ -13011,6 +13361,7 @@ namespace Api {
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     };
     export class ForwardMessages extends Request<Partial<{
       // flags: undefined;
@@ -13027,6 +13378,7 @@ namespace Api {
       topMsgId?: int;
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     }>, Api.TypeUpdates> {
       // flags: undefined;
       silent?: true;
@@ -13042,6 +13394,7 @@ namespace Api {
       topMsgId?: int;
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     };
     export class ReportSpam extends Request<Partial<{
       peer: Api.TypeInputPeer;
@@ -13424,6 +13777,7 @@ namespace Api {
       id: string;
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     }>, Api.TypeUpdates> {
       // flags: undefined;
       silent?: true;
@@ -13437,6 +13791,7 @@ namespace Api {
       id: string;
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     };
     export class GetMessageEditData extends Request<Partial<{
       peer: Api.TypeInputPeer;
@@ -13456,6 +13811,7 @@ namespace Api {
       replyMarkup?: Api.TypeReplyMarkup;
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
+      quickReplyShortcutId?: int;
     }>, Api.TypeUpdates> {
       // flags: undefined;
       noWebpage?: true;
@@ -13467,6 +13823,7 @@ namespace Api {
       replyMarkup?: Api.TypeReplyMarkup;
       entities?: Api.TypeMessageEntity[];
       scheduleDate?: int;
+      quickReplyShortcutId?: int;
     };
     export class EditInlineBotMessage extends Request<Partial<{
       // flags: undefined;
@@ -13791,6 +14148,7 @@ namespace Api {
       multiMedia: Api.TypeInputSingleMedia[];
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     }>, Api.TypeUpdates> {
       // flags: undefined;
       silent?: true;
@@ -13804,6 +14162,7 @@ namespace Api {
       multiMedia: Api.TypeInputSingleMedia[];
       scheduleDate?: int;
       sendAs?: Api.TypeInputPeer;
+      quickReplyShortcut?: Api.TypeInputQuickReplyShortcut;
     };
     export class UploadEncryptedFile extends Request<Partial<{
       peer: Api.TypeInputEncryptedChat;
@@ -14009,7 +14368,7 @@ namespace Api {
       unarchive?: true;
       stickersets: Api.TypeInputStickerSet[];
     };
-    export class GetDialogFilters extends Request<void, Api.TypeDialogFilter[]> {};
+    export class GetDialogFilters extends Request<void, messages.TypeDialogFilters> {};
     export class GetSuggestedDialogFilters extends Request<void, Api.TypeDialogFilterSuggested[]> {};
     export class UpdateDialogFilter extends Request<Partial<{
       // flags: undefined;
@@ -14763,6 +15122,63 @@ namespace Api {
       peer: Api.TypeInputPeer;
       msgId: int;
     };
+    export class GetQuickReplies extends Request<Partial<{
+      hash: long;
+    }>, messages.TypeQuickReplies> {
+      hash: long;
+    };
+    export class ReorderQuickReplies extends Request<Partial<{
+      order: int[];
+    }>, Bool> {
+      order: int[];
+    };
+    export class CheckQuickReplyShortcut extends Request<Partial<{
+      shortcut: string;
+    }>, Bool> {
+      shortcut: string;
+    };
+    export class EditQuickReplyShortcut extends Request<Partial<{
+      shortcutId: int;
+      shortcut: string;
+    }>, Bool> {
+      shortcutId: int;
+      shortcut: string;
+    };
+    export class DeleteQuickReplyShortcut extends Request<Partial<{
+      shortcutId: int;
+    }>, Bool> {
+      shortcutId: int;
+    };
+    export class GetQuickReplyMessages extends Request<Partial<{
+      // flags: undefined;
+      shortcutId: int;
+      id?: int[];
+      hash: long;
+    }>, messages.TypeMessages> {
+      // flags: undefined;
+      shortcutId: int;
+      id?: int[];
+      hash: long;
+    };
+    export class SendQuickReplyMessages extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+      shortcutId: int;
+    }>, Api.TypeUpdates> {
+      peer: Api.TypeInputPeer;
+      shortcutId: int;
+    };
+    export class DeleteQuickReplyMessages extends Request<Partial<{
+      shortcutId: int;
+      id: int[];
+    }>, Api.TypeUpdates> {
+      shortcutId: int;
+      id: int[];
+    };
+    export class ToggleDialogFilterTags extends Request<Partial<{
+      enabled: Bool;
+    }>, Bool> {
+      enabled: Bool;
+    };
   }
 
   export namespace updates {
@@ -15037,6 +15453,11 @@ namespace Api {
     export class GetPeerProfileColors extends Request<Partial<{
       hash: int;
     }>, help.TypePeerColors> {
+      hash: int;
+    };
+    export class GetTimezonesList extends Request<Partial<{
+      hash: int;
+    }>, help.TypeTimezonesList> {
       hash: int;
     };
   }
@@ -16634,16 +17055,44 @@ namespace Api {
     };
   }
 
+  export namespace smsjobs {
+    export class IsEligibleToJoin extends Request<void, smsjobs.TypeEligibilityToJoin> {};
+    export class Join extends Request<void, Bool> {};
+    export class Leave extends Request<void, Bool> {};
+    export class UpdateSettings extends Request<Partial<{
+      // flags: undefined;
+      allowInternational?: true;
+    } | void>, Bool> {
+      // flags: undefined;
+      allowInternational?: true;
+    };
+    export class GetStatus extends Request<void, smsjobs.TypeStatus> {};
+    export class GetSmsJob extends Request<Partial<{
+      jobId: string;
+    }>, Api.TypeSmsJob> {
+      jobId: string;
+    };
+    export class FinishJob extends Request<Partial<{
+      // flags: undefined;
+      jobId: string;
+      error?: string;
+    }>, Bool> {
+      // flags: undefined;
+      jobId: string;
+      error?: string;
+    };
+  }
+
   export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | ReqPq | ReqPqMulti | ReqPqMultiNew | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
     | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization | auth.RequestFirebaseSms | auth.ResetLoginEmail
-    | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses | account.ReorderUsernames | account.ToggleUsername | account.GetDefaultProfilePhotoEmojis | account.GetDefaultGroupPhotoEmojis | account.GetAutoSaveSettings | account.SaveAutoSaveSettings | account.DeleteAutoSaveExceptions | account.InvalidateSignInCodes | account.UpdateColor | account.GetDefaultBackgroundEmojis | account.GetChannelDefaultEmojiStatuses | account.GetChannelRestrictedStatusEmojis
+    | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses | account.ReorderUsernames | account.ToggleUsername | account.GetDefaultProfilePhotoEmojis | account.GetDefaultGroupPhotoEmojis | account.GetAutoSaveSettings | account.SaveAutoSaveSettings | account.DeleteAutoSaveExceptions | account.InvalidateSignInCodes | account.UpdateColor | account.GetDefaultBackgroundEmojis | account.GetChannelDefaultEmojiStatuses | account.GetChannelRestrictedStatusEmojis | account.UpdateBusinessWorkHours | account.UpdateBusinessLocation | account.UpdateBusinessGreetingMessage | account.UpdateBusinessAwayMessage | account.UpdateConnectedBot | account.GetConnectedBots
     | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors | users.GetIsPremiumRequiredToContact
     | contacts.GetContactIDs | contacts.GetStatuses | contacts.GetContacts | contacts.ImportContacts | contacts.DeleteContacts | contacts.DeleteByPhones | contacts.Block | contacts.Unblock | contacts.GetBlocked | contacts.Search | contacts.ResolveUsername | contacts.GetTopPeers | contacts.ResetTopPeerRating | contacts.ResetSaved | contacts.GetSaved | contacts.ToggleTopPeers | contacts.AddContact | contacts.AcceptContact | contacts.GetLocated | contacts.BlockFromReplies | contacts.ResolvePhone | contacts.ExportContactToken | contacts.ImportContactToken | contacts.EditCloseFriends | contacts.SetBlocked
-    | messages.GetMessages | messages.GetDialogs | messages.GetHistory | messages.Search | messages.ReadHistory | messages.DeleteHistory | messages.DeleteMessages | messages.ReceivedMessages | messages.SetTyping | messages.SendMessage | messages.SendMedia | messages.ForwardMessages | messages.ReportSpam | messages.GetPeerSettings | messages.Report | messages.GetChats | messages.GetFullChat | messages.EditChatTitle | messages.EditChatPhoto | messages.AddChatUser | messages.DeleteChatUser | messages.CreateChat | messages.GetDhConfig | messages.RequestEncryption | messages.AcceptEncryption | messages.DiscardEncryption | messages.SetEncryptedTyping | messages.ReadEncryptedHistory | messages.SendEncrypted | messages.SendEncryptedFile | messages.SendEncryptedService | messages.ReceivedQueue | messages.ReportEncryptedSpam | messages.ReadMessageContents | messages.GetStickers | messages.GetAllStickers | messages.GetWebPagePreview | messages.ExportChatInvite | messages.CheckChatInvite | messages.ImportChatInvite | messages.GetStickerSet | messages.InstallStickerSet | messages.UninstallStickerSet | messages.StartBot | messages.GetMessagesViews | messages.EditChatAdmin | messages.MigrateChat | messages.SearchGlobal | messages.ReorderStickerSets | messages.GetDocumentByHash | messages.GetSavedGifs | messages.SaveGif | messages.GetInlineBotResults | messages.SetInlineBotResults | messages.SendInlineBotResult | messages.GetMessageEditData | messages.EditMessage | messages.EditInlineBotMessage | messages.GetBotCallbackAnswer | messages.SetBotCallbackAnswer | messages.GetPeerDialogs | messages.SaveDraft | messages.GetAllDrafts | messages.GetFeaturedStickers | messages.ReadFeaturedStickers | messages.GetRecentStickers | messages.SaveRecentSticker | messages.ClearRecentStickers | messages.GetArchivedStickers | messages.GetMaskStickers | messages.GetAttachedStickers | messages.SetGameScore | messages.SetInlineGameScore | messages.GetGameHighScores | messages.GetInlineGameHighScores | messages.GetCommonChats | messages.GetWebPage | messages.ToggleDialogPin | messages.ReorderPinnedDialogs | messages.GetPinnedDialogs | messages.SetBotShippingResults | messages.SetBotPrecheckoutResults | messages.UploadMedia | messages.SendScreenshotNotification | messages.GetFavedStickers | messages.FaveSticker | messages.GetUnreadMentions | messages.ReadMentions | messages.GetRecentLocations | messages.SendMultiMedia | messages.UploadEncryptedFile | messages.SearchStickerSets | messages.GetSplitRanges | messages.MarkDialogUnread | messages.GetDialogUnreadMarks | messages.ClearAllDrafts | messages.UpdatePinnedMessage | messages.SendVote | messages.GetPollResults | messages.GetOnlines | messages.EditChatAbout | messages.EditChatDefaultBannedRights | messages.GetEmojiKeywords | messages.GetEmojiKeywordsDifference | messages.GetEmojiKeywordsLanguages | messages.GetEmojiURL | messages.GetSearchCounters | messages.RequestUrlAuth | messages.AcceptUrlAuth | messages.HidePeerSettingsBar | messages.GetScheduledHistory | messages.GetScheduledMessages | messages.SendScheduledMessages | messages.DeleteScheduledMessages | messages.GetPollVotes | messages.ToggleStickerSets | messages.GetDialogFilters | messages.GetSuggestedDialogFilters | messages.UpdateDialogFilter | messages.UpdateDialogFiltersOrder | messages.GetOldFeaturedStickers | messages.GetReplies | messages.GetDiscussionMessage | messages.ReadDiscussion | messages.UnpinAllMessages | messages.DeleteChat | messages.DeletePhoneCallHistory | messages.CheckHistoryImport | messages.InitHistoryImport | messages.UploadImportedMedia | messages.StartHistoryImport | messages.GetExportedChatInvites | messages.GetExportedChatInvite | messages.EditExportedChatInvite | messages.DeleteRevokedExportedChatInvites | messages.DeleteExportedChatInvite | messages.GetAdminsWithInvites | messages.GetChatInviteImporters | messages.SetHistoryTTL | messages.CheckHistoryImportPeer | messages.SetChatTheme | messages.GetMessageReadParticipants | messages.GetSearchResultsCalendar | messages.GetSearchResultsPositions | messages.HideChatJoinRequest | messages.HideAllChatJoinRequests | messages.ToggleNoForwards | messages.SaveDefaultSendAs | messages.SendReaction | messages.GetMessagesReactions | messages.GetMessageReactionsList | messages.SetChatAvailableReactions | messages.GetAvailableReactions | messages.SetDefaultReaction | messages.TranslateText | messages.GetUnreadReactions | messages.ReadReactions | messages.SearchSentMedia | messages.GetAttachMenuBots | messages.GetAttachMenuBot | messages.ToggleBotInAttachMenu | messages.RequestWebView | messages.ProlongWebView | messages.RequestSimpleWebView | messages.SendWebViewResultMessage | messages.SendWebViewData | messages.TranscribeAudio | messages.RateTranscribedAudio | messages.GetCustomEmojiDocuments | messages.GetEmojiStickers | messages.GetFeaturedEmojiStickers | messages.ReportReaction | messages.GetTopReactions | messages.GetRecentReactions | messages.ClearRecentReactions | messages.GetExtendedMedia | messages.SetDefaultHistoryTTL | messages.GetDefaultHistoryTTL | messages.SendBotRequestedPeer | messages.GetEmojiGroups | messages.GetEmojiStatusGroups | messages.GetEmojiProfilePhotoGroups | messages.SearchCustomEmoji | messages.TogglePeerTranslations | messages.GetBotApp | messages.RequestAppWebView | messages.SetChatWallPaper | messages.SearchEmojiStickerSets | messages.GetSavedDialogs | messages.GetSavedHistory | messages.DeleteSavedHistory | messages.GetPinnedSavedDialogs | messages.ToggleSavedDialogPin | messages.ReorderPinnedSavedDialogs | messages.GetSavedReactionTags | messages.UpdateSavedReactionTag | messages.GetDefaultTagReactions | messages.GetOutboxReadDate
+    | messages.GetMessages | messages.GetDialogs | messages.GetHistory | messages.Search | messages.ReadHistory | messages.DeleteHistory | messages.DeleteMessages | messages.ReceivedMessages | messages.SetTyping | messages.SendMessage | messages.SendMedia | messages.ForwardMessages | messages.ReportSpam | messages.GetPeerSettings | messages.Report | messages.GetChats | messages.GetFullChat | messages.EditChatTitle | messages.EditChatPhoto | messages.AddChatUser | messages.DeleteChatUser | messages.CreateChat | messages.GetDhConfig | messages.RequestEncryption | messages.AcceptEncryption | messages.DiscardEncryption | messages.SetEncryptedTyping | messages.ReadEncryptedHistory | messages.SendEncrypted | messages.SendEncryptedFile | messages.SendEncryptedService | messages.ReceivedQueue | messages.ReportEncryptedSpam | messages.ReadMessageContents | messages.GetStickers | messages.GetAllStickers | messages.GetWebPagePreview | messages.ExportChatInvite | messages.CheckChatInvite | messages.ImportChatInvite | messages.GetStickerSet | messages.InstallStickerSet | messages.UninstallStickerSet | messages.StartBot | messages.GetMessagesViews | messages.EditChatAdmin | messages.MigrateChat | messages.SearchGlobal | messages.ReorderStickerSets | messages.GetDocumentByHash | messages.GetSavedGifs | messages.SaveGif | messages.GetInlineBotResults | messages.SetInlineBotResults | messages.SendInlineBotResult | messages.GetMessageEditData | messages.EditMessage | messages.EditInlineBotMessage | messages.GetBotCallbackAnswer | messages.SetBotCallbackAnswer | messages.GetPeerDialogs | messages.SaveDraft | messages.GetAllDrafts | messages.GetFeaturedStickers | messages.ReadFeaturedStickers | messages.GetRecentStickers | messages.SaveRecentSticker | messages.ClearRecentStickers | messages.GetArchivedStickers | messages.GetMaskStickers | messages.GetAttachedStickers | messages.SetGameScore | messages.SetInlineGameScore | messages.GetGameHighScores | messages.GetInlineGameHighScores | messages.GetCommonChats | messages.GetWebPage | messages.ToggleDialogPin | messages.ReorderPinnedDialogs | messages.GetPinnedDialogs | messages.SetBotShippingResults | messages.SetBotPrecheckoutResults | messages.UploadMedia | messages.SendScreenshotNotification | messages.GetFavedStickers | messages.FaveSticker | messages.GetUnreadMentions | messages.ReadMentions | messages.GetRecentLocations | messages.SendMultiMedia | messages.UploadEncryptedFile | messages.SearchStickerSets | messages.GetSplitRanges | messages.MarkDialogUnread | messages.GetDialogUnreadMarks | messages.ClearAllDrafts | messages.UpdatePinnedMessage | messages.SendVote | messages.GetPollResults | messages.GetOnlines | messages.EditChatAbout | messages.EditChatDefaultBannedRights | messages.GetEmojiKeywords | messages.GetEmojiKeywordsDifference | messages.GetEmojiKeywordsLanguages | messages.GetEmojiURL | messages.GetSearchCounters | messages.RequestUrlAuth | messages.AcceptUrlAuth | messages.HidePeerSettingsBar | messages.GetScheduledHistory | messages.GetScheduledMessages | messages.SendScheduledMessages | messages.DeleteScheduledMessages | messages.GetPollVotes | messages.ToggleStickerSets | messages.GetDialogFilters | messages.GetSuggestedDialogFilters | messages.UpdateDialogFilter | messages.UpdateDialogFiltersOrder | messages.GetOldFeaturedStickers | messages.GetReplies | messages.GetDiscussionMessage | messages.ReadDiscussion | messages.UnpinAllMessages | messages.DeleteChat | messages.DeletePhoneCallHistory | messages.CheckHistoryImport | messages.InitHistoryImport | messages.UploadImportedMedia | messages.StartHistoryImport | messages.GetExportedChatInvites | messages.GetExportedChatInvite | messages.EditExportedChatInvite | messages.DeleteRevokedExportedChatInvites | messages.DeleteExportedChatInvite | messages.GetAdminsWithInvites | messages.GetChatInviteImporters | messages.SetHistoryTTL | messages.CheckHistoryImportPeer | messages.SetChatTheme | messages.GetMessageReadParticipants | messages.GetSearchResultsCalendar | messages.GetSearchResultsPositions | messages.HideChatJoinRequest | messages.HideAllChatJoinRequests | messages.ToggleNoForwards | messages.SaveDefaultSendAs | messages.SendReaction | messages.GetMessagesReactions | messages.GetMessageReactionsList | messages.SetChatAvailableReactions | messages.GetAvailableReactions | messages.SetDefaultReaction | messages.TranslateText | messages.GetUnreadReactions | messages.ReadReactions | messages.SearchSentMedia | messages.GetAttachMenuBots | messages.GetAttachMenuBot | messages.ToggleBotInAttachMenu | messages.RequestWebView | messages.ProlongWebView | messages.RequestSimpleWebView | messages.SendWebViewResultMessage | messages.SendWebViewData | messages.TranscribeAudio | messages.RateTranscribedAudio | messages.GetCustomEmojiDocuments | messages.GetEmojiStickers | messages.GetFeaturedEmojiStickers | messages.ReportReaction | messages.GetTopReactions | messages.GetRecentReactions | messages.ClearRecentReactions | messages.GetExtendedMedia | messages.SetDefaultHistoryTTL | messages.GetDefaultHistoryTTL | messages.SendBotRequestedPeer | messages.GetEmojiGroups | messages.GetEmojiStatusGroups | messages.GetEmojiProfilePhotoGroups | messages.SearchCustomEmoji | messages.TogglePeerTranslations | messages.GetBotApp | messages.RequestAppWebView | messages.SetChatWallPaper | messages.SearchEmojiStickerSets | messages.GetSavedDialogs | messages.GetSavedHistory | messages.DeleteSavedHistory | messages.GetPinnedSavedDialogs | messages.ToggleSavedDialogPin | messages.ReorderPinnedSavedDialogs | messages.GetSavedReactionTags | messages.UpdateSavedReactionTag | messages.GetDefaultTagReactions | messages.GetOutboxReadDate | messages.GetQuickReplies | messages.ReorderQuickReplies | messages.CheckQuickReplyShortcut | messages.EditQuickReplyShortcut | messages.DeleteQuickReplyShortcut | messages.GetQuickReplyMessages | messages.SendQuickReplyMessages | messages.DeleteQuickReplyMessages | messages.ToggleDialogFilterTags
     | updates.GetState | updates.GetDifference | updates.GetChannelDifference
     | photos.UpdateProfilePhoto | photos.UploadProfilePhoto | photos.DeletePhotos | photos.GetUserPhotos | photos.UploadContactProfilePhoto
     | upload.SaveFilePart | upload.GetFile | upload.SaveBigFilePart | upload.GetWebFile | upload.GetCdnFile | upload.ReuploadCdnFile | upload.GetCdnFileHashes | upload.GetFileHashes
-    | help.GetConfig | help.GetNearestDc | help.GetAppUpdate | help.GetInviteText | help.GetSupport | help.SetBotUpdatesStatus | help.GetCdnConfig | help.GetRecentMeUrls | help.GetTermsOfServiceUpdate | help.AcceptTermsOfService | help.GetDeepLinkInfo | help.GetAppConfig | help.SaveAppLog | help.GetPassportConfig | help.GetSupportName | help.GetUserInfo | help.EditUserInfo | help.GetPromoData | help.HidePromoData | help.DismissSuggestion | help.GetCountriesList | help.GetPremiumPromo | help.GetPeerColors | help.GetPeerProfileColors
+    | help.GetConfig | help.GetNearestDc | help.GetAppUpdate | help.GetInviteText | help.GetSupport | help.SetBotUpdatesStatus | help.GetCdnConfig | help.GetRecentMeUrls | help.GetTermsOfServiceUpdate | help.AcceptTermsOfService | help.GetDeepLinkInfo | help.GetAppConfig | help.SaveAppLog | help.GetPassportConfig | help.GetSupportName | help.GetUserInfo | help.EditUserInfo | help.GetPromoData | help.HidePromoData | help.DismissSuggestion | help.GetCountriesList | help.GetPremiumPromo | help.GetPeerColors | help.GetPeerProfileColors | help.GetTimezonesList
     | channels.ReadHistory | channels.DeleteMessages | channels.ReportSpam | channels.GetMessages | channels.GetParticipants | channels.GetParticipant | channels.GetChannels | channels.GetFullChannel | channels.CreateChannel | channels.EditAdmin | channels.EditTitle | channels.EditPhoto | channels.CheckUsername | channels.UpdateUsername | channels.JoinChannel | channels.LeaveChannel | channels.InviteToChannel | channels.DeleteChannel | channels.ExportMessageLink | channels.ToggleSignatures | channels.GetAdminedPublicChannels | channels.EditBanned | channels.GetAdminLog | channels.SetStickers | channels.ReadMessageContents | channels.DeleteHistory | channels.TogglePreHistoryHidden | channels.GetLeftChannels | channels.GetGroupsForDiscussion | channels.SetDiscussionGroup | channels.EditCreator | channels.EditLocation | channels.ToggleSlowMode | channels.GetInactiveChannels | channels.ConvertToGigagroup | channels.ViewSponsoredMessage | channels.GetSponsoredMessages | channels.GetSendAs | channels.DeleteParticipantHistory | channels.ToggleJoinToSend | channels.ToggleJoinRequest | channels.ReorderUsernames | channels.ToggleUsername | channels.DeactivateAllUsernames | channels.ToggleForum | channels.CreateForumTopic | channels.GetForumTopics | channels.GetForumTopicsByID | channels.EditForumTopic | channels.UpdatePinnedForumTopic | channels.DeleteTopicHistory | channels.ReorderPinnedForumTopics | channels.ToggleAntiSpam | channels.ReportAntiSpamFalsePositive | channels.ToggleParticipantsHidden | channels.ClickSponsoredMessage | channels.UpdateColor | channels.ToggleViewForumAsMessages | channels.GetChannelRecommendations | channels.UpdateEmojiStatus | channels.SetBoostsToUnblockRestrictions | channels.SetEmojiStickers
     | bots.SendCustomRequest | bots.AnswerWebhookJSONQuery | bots.SetBotCommands | bots.ResetBotCommands | bots.GetBotCommands | bots.SetBotMenuButton | bots.GetBotMenuButton | bots.SetBotBroadcastDefaultAdminRights | bots.SetBotGroupDefaultAdminRights | bots.SetBotInfo | bots.GetBotInfo | bots.ReorderUsernames | bots.ToggleUsername | bots.CanSendMessage | bots.AllowSendMessage | bots.InvokeWebViewCustomMethod
     | payments.GetPaymentForm | payments.GetPaymentReceipt | payments.ValidateRequestedInfo | payments.SendPaymentForm | payments.GetSavedInfo | payments.ClearSavedInfo | payments.GetBankCardData | payments.ExportInvoice | payments.AssignAppStoreTransaction | payments.AssignPlayMarketTransaction | payments.CanPurchasePremium | payments.GetPremiumGiftCodeOptions | payments.CheckGiftCode | payments.ApplyGiftCode | payments.GetGiveawayInfo | payments.LaunchPrepaidGiveaway
@@ -16654,6 +17103,7 @@ namespace Api {
     | stats.GetBroadcastStats | stats.LoadAsyncGraph | stats.GetMegagroupStats | stats.GetMessagePublicForwards | stats.GetMessageStats | stats.GetStoryStats | stats.GetStoryPublicForwards
     | chatlists.ExportChatlistInvite | chatlists.DeleteExportedInvite | chatlists.EditExportedInvite | chatlists.GetExportedInvites | chatlists.CheckChatlistInvite | chatlists.JoinChatlistInvite | chatlists.GetChatlistUpdates | chatlists.JoinChatlistUpdates | chatlists.HideChatlistUpdates | chatlists.GetLeaveChatlistSuggestions | chatlists.LeaveChatlist
     | stories.CanSendStory | stories.SendStory | stories.EditStory | stories.DeleteStories | stories.TogglePinned | stories.GetAllStories | stories.GetPinnedStories | stories.GetStoriesArchive | stories.GetStoriesByID | stories.ToggleAllStoriesHidden | stories.ReadStories | stories.IncrementStoryViews | stories.GetStoryViewsList | stories.GetStoriesViews | stories.ExportStoryLink | stories.Report | stories.ActivateStealthMode | stories.SendReaction | stories.GetPeerStories | stories.GetAllReadPeerStories | stories.GetPeerMaxIDs | stories.GetChatsToSend | stories.TogglePeerStoriesHidden | stories.GetStoryReactionsList
-    | premium.GetBoostsList | premium.GetMyBoosts | premium.ApplyBoost | premium.GetBoostsStatus | premium.GetUserBoosts;
+    | premium.GetBoostsList | premium.GetMyBoosts | premium.ApplyBoost | premium.GetBoostsStatus | premium.GetUserBoosts
+    | smsjobs.IsEligibleToJoin | smsjobs.Join | smsjobs.Leave | smsjobs.UpdateSettings | smsjobs.GetStatus | smsjobs.GetSmsJob | smsjobs.FinishJob;
 
 }

@@ -35,7 +35,7 @@ export {
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
   saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, transcribeAudio,
   closePoll, fetchExtendedMedia, translateText, fetchMessageViews, fetchDiscussionMessage, clickSponsoredMessage,
-  fetchOutboxReadDate, exportMessageLink,
+  fetchOutboxReadDate, exportMessageLink, fetchQuickReplies, sendQuickReply,
   deleteSavedHistory,
 } from './messages';
 
@@ -60,17 +60,7 @@ export {
   hideChatReportPanel,
 } from './management';
 
-export {
-  updateProfile, checkUsername, updateUsername, fetchBlockedUsers, blockUser, unblockUser,
-  updateProfilePhoto, uploadProfilePhoto, deleteProfilePhotos, fetchWallpapers, uploadWallpaper,
-  fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
-  fetchWebAuthorizations, terminateWebAuthorization, terminateAllWebAuthorizations,
-  fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
-  fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
-  updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList, fetchAppConfig,
-  fetchGlobalPrivacySettings, updateGlobalPrivacySettings, toggleUsername, reorderUsernames, fetchConfig,
-  uploadContactProfilePhoto, fetchPeerColors,
-} from './settings';
+export * from './settings';
 
 export {
   getPasswordInfo, checkPassword, clearPassword, updatePassword, updateRecoveryEmail, provideRecoveryEmailCode,

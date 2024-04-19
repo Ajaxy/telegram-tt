@@ -35,6 +35,15 @@
   .FloatingActionButton {
     z-index: 1;
   }
+
+  .business-location {
+    width: 4rem;
+    height: 4rem;
+    object-fit: cover;
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+    margin-inline-start: 0.25rem;
+  }
 }
 
 .shared-media {

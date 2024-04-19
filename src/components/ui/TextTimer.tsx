@@ -1,6 +1,6 @@
 import React, { type FC, memo, useEffect } from '../../lib/teact/teact';
 
-import { formatMediaDuration } from '../../util/dateFormat';
+import { formatMediaDuration } from '../../util/date/dateFormat';
 import { getServerTime } from '../../util/serverTime';
 
 import useInterval from '../../hooks/schedulers/useInterval';

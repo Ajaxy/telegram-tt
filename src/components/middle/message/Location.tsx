@@ -14,7 +14,7 @@ import {
   isGeoLiveExpired,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownShort, formatLastUpdated } from '../../../util/dateFormat';
+import { formatCountdownShort, formatLastUpdated } from '../../../util/date/dateFormat';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl,
 } from '../../../util/map';
@@ -27,6 +27,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import usePrevious from '../../../hooks/usePrevious';
+import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
 import Avatar from '../../common/Avatar';
 import Skeleton from '../../ui/placeholder/Skeleton';
@@ -42,7 +43,6 @@ const DEFAULT_MAP_CONFIG = {
   width: 400,
   height: 300,
   zoom: 16,
-  scale: 2,
 };
 
 type OwnProps = {
@@ -76,11 +76,10 @@ const Location: FC<OwnProps> = ({
   const [point, setPoint] = useState(geo);
 
   const shouldRenderText = type === 'venue' || (type === 'geoLive' && !isExpired);
-  const {
-    width, height, zoom, scale,
-  } = DEFAULT_MAP_CONFIG;
+  const { width, height, zoom } = DEFAULT_MAP_CONFIG;
+  const dpr = useDevicePixelRatio();
 
-  const mediaHash = buildStaticMapHash(point, width, height, zoom, scale);
+  const mediaHash = buildStaticMapHash(point, width, height, zoom, dpr);
   const mediaBlobUrl = useMedia(mediaHash);
   const prevMediaBlobUrl = usePrevious(mediaBlobUrl, true);
   const mapBlobUrl = mediaBlobUrl || prevMediaBlobUrl;

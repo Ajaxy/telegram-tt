@@ -50,6 +50,7 @@ import { buildApiFormattedText } from '../apiBuilders/common';
 import { buildMessageMediaContent, buildMessageTextContent, buildWebPage } from '../apiBuilders/messageContent';
 import {
   buildApiMessage,
+  buildApiQuickReply,
   buildApiSponsoredMessage,
   buildApiThreadInfo,
   buildLocalForwardedMessage,
@@ -1529,7 +1530,7 @@ export async function sendScheduledMessages({ chat, ids }: { chat: ApiChat; ids:
 
 function updateLocalDb(result: (
   GramJs.messages.MessagesSlice | GramJs.messages.Messages | GramJs.messages.ChannelMessages |
-  GramJs.messages.DiscussionMessage | GramJs.messages.SponsoredMessages
+  GramJs.messages.DiscussionMessage | GramJs.messages.SponsoredMessages | GramJs.messages.QuickReplies
 )) {
   addEntitiesToLocalDb(result.users);
   addEntitiesToLocalDb(result.chats);
@@ -1926,6 +1927,54 @@ export async function fetchOutboxReadDate({ chat, messageId }: { chat: ApiChat; 
   if (!result) return undefined;
 
   return { date: result.date };
+}
+
+export async function fetchQuickReplies() {
+  const result = await invokeRequest(new GramJs.messages.GetQuickReplies({}));
+  if (!result || result instanceof GramJs.messages.QuickRepliesNotModified) return undefined;
+
+  updateLocalDb(result);
+
+  const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
+
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const users = result.users.map(buildApiUser).filter(Boolean);
+
+  const quickReplies = result.quickReplies.map(buildApiQuickReply);
+
+  return {
+    messages,
+    chats,
+    users,
+    quickReplies,
+  };
+}
+
+export async function sendQuickReply({
+  chat,
+  shortcutId,
+}: {
+  chat: ApiChat;
+  shortcutId: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.SendQuickReplyMessages({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    shortcutId,
+  }), {
+    shouldIgnoreUpdates: true,
+  });
+
+  if (!result) return;
+
+  // Hack to prevent client from thinking that those messages were local
+  if ('updates' in result) {
+    const filteredUpdates = result.updates
+      .filter((u): u is GramJs.UpdateMessageID => !(u instanceof GramJs.UpdateMessageID));
+    result.updates = filteredUpdates;
+  }
+
+  handleGramJsUpdate(result);
 }
 
 export async function exportMessageLink({

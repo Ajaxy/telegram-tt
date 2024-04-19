@@ -271,6 +271,8 @@ const Main: FC<OwnProps & StateProps> = ({
     loadAuthorizations,
     loadPeerColors,
     loadSavedReactionTags,
+    loadTimezones,
+    loadQuickReplies,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -348,6 +350,8 @@ const Main: FC<OwnProps & StateProps> = ({
       loadFeaturedEmojiStickers();
       loadAuthorizations();
       loadSavedReactionTags();
+      loadTimezones();
+      loadQuickReplies();
     }
   }, [isMasterTab, isSynced]);
 

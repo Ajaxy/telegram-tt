@@ -4,7 +4,7 @@ import type { ApiPrivacyKey } from '../../../types';
 import type {
   ApiConfig, ApiCountry, ApiLangString,
   ApiPeerColors,
-  ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
+  ApiSession, ApiTimezone, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
 } from '../../types';
 
 import { buildCollectionByCallback, omit, pick } from '../../../util/iteratees';
@@ -251,4 +251,13 @@ export function buildApiPeerColors(wrapper: GramJs.help.TypePeerColors): ApiPeer
       darkColors: color.darkColors && buildApiPeerColorSet(color.darkColors),
     }];
   });
+}
+
+export function buildApiTimezone(timezone: GramJs.TypeTimezone): ApiTimezone {
+  const { id, name, utcOffset } = timezone;
+  return {
+    id,
+    name,
+    utcOffset,
+  };
 }

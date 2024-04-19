@@ -26,6 +26,7 @@ import {
   buildApiNotifyException,
   buildApiPeerColors,
   buildApiSession,
+  buildApiTimezone,
   buildApiWallpaper,
   buildApiWebSession, buildLangPack, buildLangPackString,
 } from '../apiBuilders/misc';
@@ -581,6 +582,20 @@ export async function fetchPeerColors(hash?: number) {
   return {
     colors,
     hash: newHash,
+  };
+}
+
+export async function fetchTimezones(hash?: number) {
+  const result = await invokeRequest(new GramJs.help.GetTimezonesList({
+    hash,
+  }));
+  if (!result || result instanceof GramJs.help.TimezonesListNotModified) return undefined;
+
+  const timezones = result.timezones.map(buildApiTimezone);
+
+  return {
+    timezones,
+    hash: result.hash,
   };
 }
 

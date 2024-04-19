@@ -11,7 +11,9 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { omit, pickTruthy, unique } from '../../../util/iteratees';
+import {
+  buildCollectionByKey, omit, pickTruthy, unique,
+} from '../../../util/iteratees';
 import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
@@ -27,6 +29,8 @@ import {
   clearMessageTranslation,
   deleteChatMessages,
   deleteChatScheduledMessages,
+  deleteQuickReply,
+  deleteQuickReplyMessages,
   deleteTopic,
   removeChatFromChatLists,
   replaceThreadParam,
@@ -35,6 +39,8 @@ import {
   updateChatMessage,
   updateListedIds,
   updateMessageTranslations,
+  updateQuickReplies,
+  updateQuickReplyMessage,
   updateScheduledMessage,
   updateThreadInfo,
   updateThreadInfos,
@@ -256,6 +262,39 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
       setGlobal(global);
 
+      break;
+    }
+
+    case 'updateQuickReplyMessage': {
+      const { id, message } = update;
+
+      global = updateQuickReplyMessage(global, id, message);
+      setGlobal(global);
+
+      break;
+    }
+
+    case 'deleteQuickReplyMessages': {
+      const { messageIds } = update;
+
+      global = deleteQuickReplyMessages(global, messageIds);
+      setGlobal(global);
+
+      break;
+    }
+
+    case 'updateQuickReplies': {
+      const { quickReplies } = update;
+      const byId = buildCollectionByKey(quickReplies, 'id');
+
+      global = updateQuickReplies(global, byId);
+      setGlobal(global);
+      break;
+    }
+
+    case 'deleteQuickReply': {
+      global = deleteQuickReply(global, update.quickReplyId);
+      setGlobal(global);
       break;
     }
 
@@ -769,7 +808,11 @@ function updateReactions<T extends GlobalState>(
 }
 
 function updateWithLocalMedia(
-  global: RequiredGlobalState, chatId: string, id: number, messageUpdate: Partial<ApiMessage>, isScheduled = false,
+  global: RequiredGlobalState,
+  chatId: string,
+  id: number,
+  messageUpdate: Partial<ApiMessage>,
+  isScheduled = false,
 ) {
   const currentMessage = isScheduled
     ? selectScheduledMessage(global, chatId, id)

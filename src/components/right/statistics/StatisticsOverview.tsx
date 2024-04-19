@@ -7,7 +7,7 @@ import type {
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatFullDate } from '../../../util/dateFormat';
+import { formatFullDate } from '../../../util/date/dateFormat';
 import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 
 import useLang from '../../../hooks/useLang';

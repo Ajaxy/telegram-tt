@@ -7,7 +7,7 @@ import type {
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/dateFormat';
+import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/date/dateFormat';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 

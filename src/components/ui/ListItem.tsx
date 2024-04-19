@@ -61,6 +61,8 @@ interface OwnProps {
   destructive?: boolean;
   multiline?: boolean;
   isStatic?: boolean;
+  allowSelection?: boolean;
+  withColorTransition?: boolean;
   contextActions?: MenuItemContextAction[];
   withPortalForMenu?: boolean;
   menuBubbleClassName?: string;
@@ -95,6 +97,8 @@ const ListItem: FC<OwnProps> = ({
   destructive,
   multiline,
   isStatic,
+  allowSelection,
+  withColorTransition,
   contextActions,
   withPortalForMenu,
   href,
@@ -202,7 +206,7 @@ const ListItem: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'ListItem',
     className,
-    isStatic && 'allow-selection',
+    allowSelection && 'allow-selection',
     ripple && 'has-ripple',
     narrow && 'narrow',
     disabled && 'disabled',
@@ -213,6 +217,7 @@ const ListItem: FC<OwnProps> = ({
     destructive && 'destructive',
     multiline && 'multiline',
     isStatic && 'is-static',
+    withColorTransition && 'with-color-transition',
   );
 
   const ButtonElementTag = href ? 'a' : 'div';
@@ -236,15 +241,15 @@ const ListItem: FC<OwnProps> = ({
         onMouseDown={handleMouseDown}
         onContextMenu={onContextMenu || ((!inactive && contextActions) ? handleContextMenu : undefined)}
       >
+        {!disabled && !inactive && ripple && (
+          <RippleEffect />
+        )}
         {leftElement}
         {icon && (
           <i className={buildClassName('icon', `icon-${icon}`, iconClassName)} />
         )}
         {multiline && (<div className="multiline-item">{children}</div>)}
         {!multiline && children}
-        {!disabled && !inactive && ripple && (
-          <RippleEffect />
-        )}
         {secondaryIcon && (
           <Button
             className="secondary-icon"

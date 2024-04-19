@@ -92,6 +92,12 @@
     }
   }
 
+  &.with-color-transition {
+    .ListItem-button {
+      transition: background-color 150ms ease-in-out;
+    }
+  }
+
   .title, .subtitle {
     line-height: 1.5rem;
   }

@@ -26,7 +26,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatMediaDuration, formatRelativeTime } from '../../util/dateFormat';
+import { formatMediaDuration, formatRelativeTime } from '../../util/date/dateFormat';
 import download from '../../util/download';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';

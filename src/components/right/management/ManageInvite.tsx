@@ -7,7 +7,7 @@ import type { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { formatFullDate, formatTime } from '../../../util/dateFormat';
+import { formatFullDate, formatTime } from '../../../util/date/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useFlag from '../../../hooks/useFlag';

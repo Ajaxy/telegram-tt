@@ -38,6 +38,7 @@ import {
   buildApiMessageFromNotification,
   buildApiMessageFromShort,
   buildApiMessageFromShortChat,
+  buildApiQuickReply,
   buildApiThreadInfoFromMessage,
   buildMessageDraft,
 } from '../apiBuilders/messages';
@@ -342,6 +343,38 @@ export function updater(update: Update) {
         });
       }
     }
+  } else if (update instanceof GramJs.UpdateQuickReplyMessage) {
+    const message = buildApiMessage(update.message);
+    if (!message) return;
+
+    onUpdate({
+      '@type': 'updateQuickReplyMessage',
+      id: message.id,
+      message,
+    });
+  } else if (update instanceof GramJs.UpdateDeleteQuickReplyMessages) {
+    onUpdate({
+      '@type': 'deleteQuickReplyMessages',
+      quickReplyId: update.shortcutId,
+      messageIds: update.messages,
+    });
+  } else if (update instanceof GramJs.UpdateQuickReplies) {
+    const quickReplies = update.quickReplies.map(buildApiQuickReply);
+    onUpdate({
+      '@type': 'updateQuickReplies',
+      quickReplies,
+    });
+  } else if (update instanceof GramJs.UpdateNewQuickReply) {
+    const quickReply = buildApiQuickReply(update.quickReply);
+    onUpdate({
+      '@type': 'updateQuickReplies',
+      quickReplies: [quickReply],
+    });
+  } else if (update instanceof GramJs.UpdateDeleteQuickReply) {
+    onUpdate({
+      '@type': 'deleteQuickReply',
+      quickReplyId: update.shortcutId,
+    });
   } else if (
     update instanceof GramJs.UpdateEditMessage
     || update instanceof GramJs.UpdateEditChannelMessage

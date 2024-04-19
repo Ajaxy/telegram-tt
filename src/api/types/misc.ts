@@ -222,6 +222,12 @@ export interface ApiPeerColors {
   generalHash?: number;
 }
 
+export interface ApiTimezone {
+  id: string;
+  name: string;
+  utcOffset: number;
+}
+
 export interface GramJsEmojiInteraction {
   v: number;
   a: {

@@ -138,6 +138,11 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byChatId: {},
   },
 
+  quickReplies: {
+    byId: {},
+    messagesById: {},
+  },
+
   chatFolders: {
     byId: {},
     invites: {},

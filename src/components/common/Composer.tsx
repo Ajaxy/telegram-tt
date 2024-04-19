@@ -18,6 +18,7 @@ import type {
   ApiMessage,
   ApiMessageEntity,
   ApiNewPoll,
+  ApiQuickReply,
   ApiReaction,
   ApiStealthMode,
   ApiSticker,
@@ -86,7 +87,7 @@ import {
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dateFormat';
+import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/date/dateFormat';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
 import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import focusEditableElement from '../../util/focusEditableElement';
@@ -122,7 +123,7 @@ import useSignal from '../../hooks/useSignal';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAttachmentModal from '../middle/composer/hooks/useAttachmentModal';
-import useBotCommandTooltip from '../middle/composer/hooks/useBotCommandTooltip';
+import useChatCommandTooltip from '../middle/composer/hooks/useChatCommandTooltip';
 import useClipboardPaste from '../middle/composer/hooks/useClipboardPaste';
 import useCustomEmojiTooltip from '../middle/composer/hooks/useCustomEmojiTooltip';
 import useDraft from '../middle/composer/hooks/useDraft';
@@ -136,9 +137,9 @@ import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
 import AttachmentModal from '../middle/composer/AttachmentModal.async';
 import AttachMenu from '../middle/composer/AttachMenu';
 import BotCommandMenu from '../middle/composer/BotCommandMenu.async';
-import BotCommandTooltip from '../middle/composer/BotCommandTooltip.async';
 import BotKeyboardMenu from '../middle/composer/BotKeyboardMenu';
 import BotMenuButton from '../middle/composer/BotMenuButton';
+import ChatCommandTooltip from '../middle/composer/ChatCommandTooltip.async';
 import ComposerEmbeddedMessage from '../middle/composer/ComposerEmbeddedMessage';
 import CustomEmojiTooltip from '../middle/composer/CustomEmojiTooltip.async';
 import CustomSendMenu from '../middle/composer/CustomSendMenu.async';
@@ -247,6 +248,9 @@ type StateProps =
     sentStoryReaction?: ApiReaction;
     stealthMode?: ApiStealthMode;
     canSendOneTimeMedia?: boolean;
+    quickReplyMessages?: Record<number, ApiMessage>;
+    quickReplies?: Record<number, ApiQuickReply>;
+    canSendQuickReplies?: boolean;
   };
 
 enum MainButtonState {
@@ -349,6 +353,9 @@ const Composer: FC<OwnProps & StateProps> = ({
   sentStoryReaction,
   stealthMode,
   canSendOneTimeMedia,
+  quickReplyMessages,
+  quickReplies,
+  canSendQuickReplies,
   onForward,
 }) => {
   const {
@@ -659,18 +666,22 @@ const Composer: FC<OwnProps & StateProps> = ({
     inlineBots,
   );
 
+  const hasQuickReplies = Boolean(quickReplies && Object.keys(quickReplies).length);
+
   const {
-    isOpen: isBotCommandTooltipOpen,
-    close: closeBotCommandTooltip,
+    isOpen: isChatCommandTooltipOpen,
+    close: closeChatCommandTooltip,
     filteredBotCommands: botTooltipCommands,
-  } = useBotCommandTooltip(
+    filteredQuickReplies: quickReplyCommands,
+  } = useChatCommandTooltip(
     Boolean(isInMessageList
       && isReady
       && isForCurrentMessageList
-      && ((botCommands && botCommands?.length) || chatBotCommands?.length)),
+      && ((botCommands && botCommands?.length) || chatBotCommands?.length || (hasQuickReplies && canSendQuickReplies))),
     getHtml,
     botCommands,
     chatBotCommands,
+    canSendQuickReplies ? quickReplies : undefined,
   );
 
   useDraft({
@@ -1321,7 +1332,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isEmojiTooltipOpen || isSendAsMenuOpen
     || isMentionTooltipOpen || isInlineBotTooltipOpen || isDeleteModalOpen || isBotCommandMenuOpen || isAttachMenuOpen
-    || isStickerTooltipOpen || isBotCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
+    || isStickerTooltipOpen || isChatCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
   || isCustomSendMenuOpen || Boolean(activeVoiceRecording) || attachments.length > 0 || isInputHasFocus;
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
     && !isSymbolMenuOpen;
@@ -1584,13 +1595,17 @@ const Composer: FC<OwnProps & StateProps> = ({
         onInsertUserName={insertMention}
         onClose={closeMentionTooltip}
       />
-      <BotCommandTooltip
-        isOpen={isBotCommandTooltipOpen}
+      <ChatCommandTooltip
+        isOpen={isChatCommandTooltipOpen}
+        chatId={chatId}
         withUsername={Boolean(chatBotCommands)}
         botCommands={botTooltipCommands}
+        quickReplies={quickReplyCommands}
         getHtml={getHtml}
+        self={currentUser!}
+        quickReplyMessages={quickReplyMessages}
         onClick={handleBotCommandSelect}
-        onClose={closeBotCommandTooltip}
+        onClose={closeChatCommandTooltip}
       />
       <div className={buildClassName('composer-wrapper', isInStoryViewer && 'with-story-tweaks')}>
         <svg className="svg-appendix" width="9" height="20">
@@ -2003,6 +2018,8 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const isInScheduledList = messageListType === 'scheduled';
 
+    const canSendQuickReplies = isChatWithUser && !isChatWithBot && !isInScheduledList && !isChatWithSelf;
+
     return {
       availableReactions: type === 'story' ? global.reactions.availableReactions : undefined,
       topReactions: type === 'story' ? global.reactions.topReactions : undefined,
@@ -2067,6 +2084,9 @@ export default memo(withGlobal<OwnProps>(
       sentStoryReaction,
       stealthMode: global.stories.stealthMode,
       replyToTopic,
+      quickReplyMessages: global.quickReplies.messagesById,
+      quickReplies: global.quickReplies.byId,
+      canSendQuickReplies,
     };
   },
 )(Composer));

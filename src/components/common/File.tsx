@@ -6,7 +6,7 @@ import React, {
 import type { IconName } from '../../types/icons';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDateTime, formatPastTimeShort } from '../../util/dateFormat';
+import { formatMediaDateTime, formatPastTimeShort } from '../../util/date/dateFormat';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';

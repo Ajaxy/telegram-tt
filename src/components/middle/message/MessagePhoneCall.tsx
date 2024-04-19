@@ -5,7 +5,7 @@ import { getActions } from '../../../global';
 import type { ApiMessage, PhoneCallAction } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatTimeDuration } from '../../../util/dateFormat';
+import { formatTime, formatTimeDuration } from '../../../util/date/dateFormat';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useLang from '../../../hooks/useLang';

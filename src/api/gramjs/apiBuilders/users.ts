@@ -1,6 +1,8 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiBusinessLocation,
+  ApiBusinessWorkHours,
   ApiPremiumGiftOption,
   ApiUser,
   ApiUserFullInfo,
@@ -8,8 +10,10 @@ import type {
   ApiUserType,
 } from '../../types';
 
+import { omitUndefined } from '../../../util/iteratees';
 import { buildApiBotInfo } from './bots';
 import { buildApiPhoto, buildApiUsernames } from './common';
+import { buildGeoPoint } from './messageContent';
 import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
 export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
@@ -18,14 +22,14 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
       profilePhoto, voiceMessagesForbidden, premiumGifts,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
-      contactRequirePremium,
+      contactRequirePremium, businessWorkHours, businessLocation,
     },
     users,
   } = mtpUserFull;
 
   const userId = buildApiPeerId(users[0].id, 'user');
 
-  return {
+  return omitUndefined<ApiUserFullInfo>({
     bio: about,
     commonChatsCount,
     pinnedMessageId: pinnedMsgId,
@@ -36,10 +40,12 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     profilePhoto: profilePhoto instanceof GramJs.Photo ? buildApiPhoto(profilePhoto) : undefined,
     fallbackPhoto: fallbackPhoto instanceof GramJs.Photo ? buildApiPhoto(fallbackPhoto) : undefined,
     personalPhoto: personalPhoto instanceof GramJs.Photo ? buildApiPhoto(personalPhoto) : undefined,
-    ...(premiumGifts && { premiumGifts: premiumGifts.map((gift) => buildApiPremiumGiftOption(gift)) }),
-    ...(botInfo && { botInfo: buildApiBotInfo(botInfo, userId) }),
+    premiumGifts: premiumGifts?.map((gift) => buildApiPremiumGiftOption(gift)),
+    botInfo: botInfo && buildApiBotInfo(botInfo, userId),
     isContactRequirePremium: contactRequirePremium,
-  };
+    businessLocation: businessLocation && buildApiBusinessLocation(businessLocation),
+    businessWorkHours: businessWorkHours && buildApiBusinessWorkHours(businessWorkHours),
+  });
 }
 
 export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
@@ -151,5 +157,30 @@ export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption):
     currency,
     amount: amount.toJSNumber(),
     botUrl,
+  };
+}
+
+export function buildApiBusinessLocation(location: GramJs.TypeBusinessLocation): ApiBusinessLocation {
+  const {
+    address, geoPoint,
+  } = location;
+
+  return {
+    address,
+    geo: geoPoint && buildGeoPoint(geoPoint),
+  };
+}
+
+export function buildApiBusinessWorkHours(workHours: GramJs.TypeBusinessWorkHours): ApiBusinessWorkHours {
+  const {
+    timezoneId, weeklyOpen,
+  } = workHours;
+
+  return {
+    timezoneId,
+    workHours: weeklyOpen.map(({ startMinute, endMinute }) => ({
+      startMinute,
+      endMinute,
+    })),
   };
 }

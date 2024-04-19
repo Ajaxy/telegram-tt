@@ -6,7 +6,7 @@ import type { TabState } from '../../../global/types';
 
 import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime } from '../../../util/dateFormat';
+import { formatDateAtTime } from '../../../util/date/dateFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
 import useLang from '../../../hooks/useLang';

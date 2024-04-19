@@ -14,7 +14,7 @@ import {
   selectTabState,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/dateFormat';
+import { formatDateAtTime } from '../../util/date/dateFormat';
 import { unique } from '../../util/iteratees';
 import { formatIntegerCompact } from '../../util/textFormat';
 

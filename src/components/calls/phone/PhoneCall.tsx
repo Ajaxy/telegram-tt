@@ -14,7 +14,7 @@ import {
 import { selectTabState } from '../../../global/selectors';
 import { selectPhoneCallUser } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/dateFormat';
+import { formatMediaDuration } from '../../../util/date/dateFormat';
 import {
   IS_ANDROID,
   IS_IOS,

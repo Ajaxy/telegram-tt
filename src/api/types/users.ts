@@ -1,7 +1,7 @@
 import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
 import type { ApiPeerColor } from './chats';
-import type { ApiDocument, ApiPhoto } from './messages';
+import type { ApiDocument, ApiGeoPoint, ApiPhoto } from './messages';
 
 export interface ApiUser {
   id: string;
@@ -54,6 +54,8 @@ export interface ApiUserFullInfo {
   isTranslationDisabled?: true;
   hasPinnedStories?: boolean;
   isContactRequirePremium?: boolean;
+  businessLocation?: ApiBusinessLocation;
+  businessWorkHours?: ApiBusinessWorkHours;
 }
 
 export type ApiFakeType = 'fake' | 'scam';
@@ -112,4 +114,19 @@ export interface ApiPremiumGiftOption {
 export interface ApiEmojiStatus {
   documentId: string;
   until?: number;
+}
+
+export interface ApiBusinessLocation {
+  geo?: ApiGeoPoint;
+  address: string;
+}
+
+export interface ApiBusinessTimetableSegment {
+  startMinute: number;
+  endMinute: number;
+}
+
+export interface ApiBusinessWorkHours {
+  timezoneId: string;
+  workHours: ApiBusinessTimetableSegment[];
 }

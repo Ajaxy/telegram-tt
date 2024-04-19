@@ -788,6 +788,12 @@ export type ApiMessagesBotApp = ApiBotApp & {
   shouldRequestWriteAccess?: boolean;
 };
 
+export type ApiQuickReply = {
+  id: number;
+  shortcut: string;
+  topMessageId: number;
+};
+
 export const MAIN_THREAD_ID = -1;
 
 // `Symbol` can not be transferred from worker

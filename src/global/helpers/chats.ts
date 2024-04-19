@@ -16,7 +16,7 @@ import {
   ANONYMOUS_USER_ID,
   ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
-import { formatDateToString, formatTime } from '../../util/dateFormat';
+import { formatDateToString, formatTime } from '../../util/date/dateFormat';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getGlobal } from '..';
 import { getMainUsername, getUserFirstOrLastName } from './users';

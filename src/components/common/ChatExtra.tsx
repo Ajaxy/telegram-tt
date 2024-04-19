@@ -5,16 +5,16 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiCountryCode, ApiUser, ApiUsername,
+  ApiChat, ApiCountryCode, ApiUser, ApiUserFullInfo, ApiUsername,
 } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { TME_LINK_PREFIX } from '../../config';
 import {
+  buildStaticMapHash,
   getChatLink,
   getHasAdminRight,
   isChatChannel,
-  isUserId,
   isUserRightBanned,
   selectIsChatMuted,
 } from '../../global/helpers';
@@ -37,9 +37,13 @@ import renderText from './helpers/renderText';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useMedia from '../../hooks/useMedia';
+import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
 import ListItem from '../ui/ListItem';
+import Skeleton from '../ui/placeholder/Skeleton';
 import Switcher from '../ui/Switcher';
+import BusinessHours from './BusinessHours';
 
 type OwnProps = {
   chatOrUserId: string;
@@ -47,19 +51,25 @@ type OwnProps = {
   isInSettings?: boolean;
 };
 
-type StateProps =
-  {
-    user?: ApiUser;
-    chat?: ApiChat;
-    canInviteUsers?: boolean;
-    isMuted?: boolean;
-    phoneCodeList: ApiCountryCode[];
-    topicId?: number;
-    description?: string;
-    chatInviteLink?: string;
-    topicLink?: string;
-    hasSavedMessages?: boolean;
-  };
+type StateProps = {
+  user?: ApiUser;
+  chat?: ApiChat;
+  userFullInfo?: ApiUserFullInfo;
+  canInviteUsers?: boolean;
+  isMuted?: boolean;
+  phoneCodeList: ApiCountryCode[];
+  topicId?: number;
+  description?: string;
+  chatInviteLink?: string;
+  topicLink?: string;
+  hasSavedMessages?: boolean;
+};
+
+const DEFAULT_MAP_CONFIG = {
+  width: 64,
+  height: 64,
+  zoom: 15,
+};
 
 const runDebounced = debounce((cb) => cb(), 500, false);
 
@@ -67,6 +77,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   chatOrUserId,
   user,
   chat,
+  userFullInfo,
   isInSettings,
   canInviteUsers,
   isMuted,
@@ -78,12 +89,12 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   hasSavedMessages,
 }) => {
   const {
-    loadFullUser,
     showNotification,
     updateChatMutedState,
     updateTopicMutedState,
     loadPeerStories,
     openSavedDialog,
+    openMapModal,
   } = getActions();
 
   const {
@@ -94,6 +105,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   } = user || {};
   const { id: chatId, usernames: chatUsernames } = chat || {};
   const peerId = userId || chatId;
+  const { businessLocation, businessWorkHours } = userFullInfo || {};
   const lang = useLang();
 
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
@@ -102,17 +114,27 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     setAreNotificationsEnabled(!isMuted);
   }, [isMuted]);
 
-  useEffect(() => {
-    if (!userId) return;
-    loadFullUser({ userId });
-  }, [userId]);
-
   useEffectWithPrevDeps(([prevPeerId]) => {
     if (!peerId || prevPeerId === peerId) return;
     if (user || (chat && isChatChannel(chat))) {
       loadPeerStories({ peerId });
     }
   }, [peerId, chat, user]);
+
+  const { width, height, zoom } = DEFAULT_MAP_CONFIG;
+  const dpr = useDevicePixelRatio();
+  const locationMediaHash = businessLocation?.geo
+    && buildStaticMapHash(businessLocation.geo, width, height, zoom, dpr);
+  const locationBlobUrl = useMedia(locationMediaHash);
+
+  const locationRightComponent = useMemo(() => {
+    if (!businessLocation?.geo) return undefined;
+    if (locationBlobUrl) {
+      return <img src={locationBlobUrl} alt="" className="business-location" />;
+    }
+
+    return <Skeleton className="business-location" />;
+  }, [businessLocation, locationBlobUrl]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);
   const shouldRenderAllLinks = (chat && isChatChannel(chat)) || user?.isPremium;
@@ -136,6 +158,17 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
     return isTopicInfo ? topicLink! : getChatLink(chat) || chatInviteLink;
   }, [chat, isTopicInfo, topicLink, chatInviteLink]);
+
+  const handleClickLocation = useLastCallback(() => {
+    const { address, geo } = businessLocation!;
+    if (!geo) {
+      copyTextToClipboard(address);
+      showNotification({ message: lang('BusinessLocationCopied') });
+      return;
+    }
+
+    openMapModal({ geoPoint: geo, zoom });
+  });
 
   const handleNotificationChange = useLastCallback(() => {
     setAreNotificationsEnabled((current) => {
@@ -242,6 +275,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           multiline
           narrow
           isStatic
+          allowSelection
         >
           <span className="title word-break allow-selection" dir="auto">
             {
@@ -280,6 +314,21 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           />
         </ListItem>
       )}
+      {businessWorkHours && (
+        <BusinessHours businessHours={businessWorkHours} />
+      )}
+      {businessLocation && (
+        <ListItem
+          icon="location"
+          ripple
+          multiline
+          rightElement={locationRightComponent}
+          onClick={handleClickLocation}
+        >
+          <div className="title">{businessLocation.address}</div>
+          <span className="subtitle">{lang('BusinessProfileLocation')}</span>
+        </ListItem>
+      )}
       {hasSavedMessages && !isInSettings && (
         <ListItem icon="saved-messages" ripple onClick={handleOpenSavedDialog}>
           <span>{lang('SavedMessagesTab')}</span>
@@ -294,16 +343,18 @@ export default memo(withGlobal<OwnProps>(
     const { countryList: { phoneCodes: phoneCodeList } } = global;
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
-    const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const user = chatOrUserId ? selectUser(global, chatOrUserId) : undefined;
     const isForum = chat?.isForum;
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
     const { threadId } = selectCurrentMessageList(global) || {};
     const topicId = isForum ? Number(threadId) : undefined;
-    const chatInviteLink = chat ? selectChatFullInfo(global, chat.id)?.inviteLink : undefined;
-    let description = user ? selectUserFullInfo(global, user.id)?.bio : undefined;
-    if (!description && chat) {
-      description = selectChatFullInfo(global, chat.id)?.about;
-    }
+
+    const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
+    const userFullInfo = user && selectUserFullInfo(global, user.id);
+
+    const chatInviteLink = chatFullInfo?.inviteLink;
+
+    const description = userFullInfo?.bio || chatFullInfo?.about;
 
     const canInviteUsers = chat && !user && (
       (!isChatChannel(chat) && !isUserRightBanned(chat, 'inviteUsers'))
@@ -318,6 +369,7 @@ export default memo(withGlobal<OwnProps>(
       phoneCodeList,
       chat,
       user,
+      userFullInfo,
       canInviteUsers,
       isMuted,
       topicId,

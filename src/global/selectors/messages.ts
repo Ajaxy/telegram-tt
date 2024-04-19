@@ -342,6 +342,10 @@ export function selectScheduledMessage<T extends GlobalState>(global: T, chatId:
   return chatMessages ? chatMessages[messageId] : undefined;
 }
 
+export function selectQuickReplyMessage<T extends GlobalState>(global: T, messageId: number) {
+  return global.quickReplies.messagesById[messageId];
+}
+
 export function selectEditingMessage<T extends GlobalState>(
   global: T, chatId: string, threadId: ThreadId, messageListType: MessageListType,
 ) {
