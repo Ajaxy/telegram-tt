@@ -133,6 +133,14 @@ export default function useInputCustomEmojis(
   }, [synchronizeElements]);
 
   useEffect(() => {
+    const activePlayersById = playersById.current;
+    // Always clear players on unmount
+    return () => {
+      clearPlayers(Array.from(activePlayersById.keys()));
+    };
+  }, []);
+
+  useEffect(() => {
     if (!getHtml() || !inputRef.current || !sharedCanvasRef.current || !isActive || !isReady) {
       clearPlayers(Array.from(playersById.current.keys()));
       return;
