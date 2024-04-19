@@ -79,7 +79,7 @@ const UserBirthday = ({
     const isBirthdayToday = date.getDate() === today.getDate() && date.getMonth() === today.getMonth();
     return {
       formattedDate: formatted,
-      isToday: isBirthdayToday || true, // TODO REMOVE AFTER TESTING
+      isToday: isBirthdayToday,
       age: birthday.year && getAge(date),
     };
   }, [birthday, lang]);
