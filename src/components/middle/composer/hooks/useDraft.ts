@@ -1,4 +1,4 @@
-import { useEffect, useRef } from '../../../../lib/teact/teact';
+import { useEffect, useLayoutEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { ApiMessage } from '../../../../api/types';
@@ -73,10 +73,12 @@ const useDraft = ({
     const html = getHtml();
 
     if (html) {
-      saveDraft({
-        chatId: prevState.chatId ?? chatId,
-        threadId: prevState.threadId ?? threadId,
-        text: parseHtmlAsFormattedText(html),
+      requestMeasure(() => {
+        saveDraft({
+          chatId: prevState.chatId ?? chatId,
+          threadId: prevState.threadId ?? threadId,
+          text: parseHtmlAsFormattedText(html),
+        });
       });
     } else {
       clearDraft({
@@ -117,8 +119,8 @@ const useDraft = ({
     if (customEmojiIds.length) loadCustomEmojis({ ids: customEmojiIds });
   }, [chatId, threadId, draft, getHtml, setHtml, editedMessage, isDisabled]);
 
-  // Save draft on chat change
-  useEffect(() => {
+  // Save draft on chat change. Should be layout effect to read correct html on cleanup
+  useLayoutEffect(() => {
     if (isDisabled) {
       return undefined;
     }
