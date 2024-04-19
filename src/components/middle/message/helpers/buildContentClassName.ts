@@ -1,10 +1,12 @@
 import type { ApiMessage } from '../../../../api/types';
+import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
 import { getMessageContent } from '../../../../global/helpers';
 
 export function buildContentClassName(
   message: ApiMessage,
+  album?: IAlbum,
   {
     hasSubheader,
     isCustomShape,
@@ -34,9 +36,10 @@ export function buildContentClassName(
   } = {},
 ) {
   const {
-    text, photo, video, audio, voice, document, poll, webPage, contact, location, invoice, storyData,
+    photo, video, audio, voice, document, poll, webPage, contact, location, invoice, storyData,
     giveaway, giveawayResults,
   } = getMessageContent(message);
+  const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
 
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
   const isMedia = storyData || photo || video || location || invoice?.extendedMedia;

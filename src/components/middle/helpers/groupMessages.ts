@@ -38,11 +38,20 @@ export function groupMessages(
           albumId: message.groupedId!,
           messages: [message],
           mainMessage: message,
+          hasMultipleCaptions: false,
         };
       } else {
         currentAlbum.messages.push(message);
-        if (message.hasComments || (message.content.text && !currentAlbum.mainMessage.hasComments)) {
-          currentAlbum.mainMessage = message;
+        if (message.hasComments) {
+          currentAlbum.commentsMessage = message;
+        }
+        if (message.content.text && !currentAlbum.hasMultipleCaptions) {
+          if (currentAlbum.captionMessage) {
+            currentAlbum.hasMultipleCaptions = true;
+            currentAlbum.captionMessage = undefined;
+          } else {
+            currentAlbum.captionMessage = message;
+          }
         }
       }
     } else {

@@ -27,6 +27,9 @@ export interface IAlbum {
   albumId: string;
   messages: ApiMessage[];
   mainMessage: ApiMessage;
+  captionMessage?: ApiMessage;
+  hasMultipleCaptions: boolean;
+  commentsMessage?: ApiMessage;
 }
 
 export type ThreadId = string | number;

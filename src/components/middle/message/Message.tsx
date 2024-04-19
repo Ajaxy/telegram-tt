@@ -541,7 +541,6 @@ const Message: FC<OwnProps & StateProps> = ({
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
   const messageColorPeer = originSender || sender;
   const senderPeer = (forwardInfo || message.content.storyData) ? originSender : messageSender;
-  const hasText = hasMessageText(message);
   const hasTtl = hasMessageTtl(message);
 
   const {
@@ -623,6 +622,9 @@ const Message: FC<OwnProps & StateProps> = ({
     }
   }, [focusLastMessage, isLastInList, transcribedText, withVoiceTranscription]);
 
+  const textMessage = album?.hasMultipleCaptions ? undefined : (album?.captionMessage || message);
+  const hasText = textMessage && hasMessageText(textMessage);
+
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
@@ -654,12 +656,13 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const {
-    text, photo, video, audio,
+    photo, video, audio,
     voice, document, sticker, contact,
     poll, webPage, invoice, location,
     action, game, storyData, giveaway,
     giveawayResults,
   } = getMessageContent(message);
+  const text = textMessage && getMessageContent(textMessage).text;
 
   const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
   const { peerId: storyReplyPeerId, storyId: storyReplyId } = storyReplyInfo || {};
@@ -692,7 +695,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
     && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl;
 
-  const contentClassName = buildContentClassName(message, {
+  const contentClassName = buildContentClassName(message, album, {
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -889,9 +892,10 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   function renderMessageText(isForAnimation?: boolean) {
+    if (!textMessage) return undefined;
     return (
       <MessageText
-        messageOrStory={message}
+        messageOrStory={textMessage}
         translatedText={requestedTranslationLanguage ? currentTranslatedText : undefined}
         isForAnimation={isForAnimation}
         focusedQuote={focusedQuote}
@@ -1563,7 +1567,7 @@ export default memo(withGlobal<OwnProps>(
     const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
     const isDownloading = selectIsDownloading(global, message);
 
-    const repliesThreadInfo = selectThreadInfo(global, chatId, album?.mainMessage.id || id);
+    const repliesThreadInfo = selectThreadInfo(global, chatId, album?.commentsMessage?.id || id);
 
     const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
     const documentGroupFirstMessageId = isInDocumentGroup
