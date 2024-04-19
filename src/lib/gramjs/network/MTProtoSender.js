@@ -233,13 +233,13 @@ class MTProtoSender {
                 this.logWithIndex.warn('Connecting...');
                 await this._connect(this.getConnection());
                 this.logWithIndex.warn('Connected!');
-                if (this._updateCallback) {
-                    this._updateCallback(new UpdateConnectionState(UpdateConnectionState.connected));
+                if (!this._isExported) {
+                    this._updateCallback?.(new UpdateConnectionState(UpdateConnectionState.connected));
                 }
                 break;
             } catch (err) {
-                if (this._updateCallback && attempt === 0) {
-                    this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
+                if (!this._isExported && attempt === 0) {
+                    this._updateCallback?.(new UpdateConnectionState(UpdateConnectionState.disconnected));
                 }
                 this._log.error(`${this._isFallback ? 'HTTP' : 'WebSocket'} connection failed attempt: ${attempt + 1}`);
                 // eslint-disable-next-line no-console
@@ -382,8 +382,8 @@ class MTProtoSender {
 
             this._state.timeOffset = res.timeOffset;
 
-            if (this._updateCallback) {
-                this._updateCallback(new UpdateServerTimeOffset(this._state.timeOffset));
+            if (!this._isExported) {
+                this._updateCallback?.(new UpdateServerTimeOffset(this._state.timeOffset));
             }
 
             /**
@@ -425,8 +425,8 @@ class MTProtoSender {
     }
 
     async _disconnect(connection) {
-        if (this._updateCallback) {
-            this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
+        if (!this._isExported) {
+            this._updateCallback?.(new UpdateConnectionState(UpdateConnectionState.disconnected));
         }
 
         if (connection === undefined) {
@@ -692,8 +692,8 @@ class MTProtoSender {
 
         this._log.warn(`Broken authorization key for dc ${this._dcId}, resetting...`);
 
-        if (this._isMainSender && this._updateCallback) {
-            this._updateCallback(new UpdateConnectionState(UpdateConnectionState.broken));
+        if (this._isMainSender && !this._isExported) {
+            this._updateCallback?.(new UpdateConnectionState(UpdateConnectionState.broken));
         } else if (!this._isMainSender && this._onConnectionBreak) {
             this._onConnectionBreak(this._dcId);
         }
@@ -858,8 +858,8 @@ class MTProtoSender {
             return;
         }
         this._log.debug(`Handling update ${message.obj.className}`);
-        if (this._updateCallback) {
-            this._updateCallback(message.obj);
+        if (!this._isExported) {
+            this._updateCallback?.(message.obj);
         }
     }
 
@@ -875,8 +875,8 @@ class MTProtoSender {
         const pong = message.obj;
 
         const newTimeOffset = this._state.updateTimeOffset(message.msgId);
-        if (this._updateCallback) {
-            this._updateCallback(new UpdateServerTimeOffset(newTimeOffset));
+        if (!this._isExported) {
+            this._updateCallback?.(new UpdateServerTimeOffset(newTimeOffset));
         }
 
         this._log.debug(`Handling pong for message ${pong.msgId}`);
@@ -924,8 +924,8 @@ class MTProtoSender {
             // Use the current msg_id to determine the right time offset.
             const newTimeOffset = this._state.updateTimeOffset(message.msgId);
 
-            if (this._updateCallback) {
-                this._updateCallback(new UpdateServerTimeOffset(newTimeOffset));
+            if (!this._isExported) {
+                this._updateCallback?.(new UpdateServerTimeOffset(newTimeOffset));
             }
 
             this._log.info(`System clock is wrong, set time offset to ${newTimeOffset}s`);
