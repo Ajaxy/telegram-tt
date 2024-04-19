@@ -77,11 +77,12 @@ import {
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate, scheduleMutedTopicUpdate } from '../scheduleUnmute';
 
+import LocalUpdatePremiumFloodWait from './UpdatePremiumFloodWait';
 import { LocalUpdateChannelPts, LocalUpdatePts, type UpdatePts } from './UpdatePts';
 
 export type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
-) | typeof connection.UpdateConnectionState | UpdatePts;
+) | typeof connection.UpdateConnectionState | UpdatePts | LocalUpdatePremiumFloodWait;
 
 const DELETE_MISSING_CHANNEL_MESSAGE_DELAY = 1000;
 
@@ -1192,6 +1193,11 @@ export function updater(update: Update) {
       '@type': 'updateViewForumAsMessages',
       chatId: buildApiPeerId(update.channelId, 'channel'),
       isEnabled: update.enabled ? true : undefined,
+    });
+  } else if (update instanceof LocalUpdatePremiumFloodWait) {
+    onUpdate({
+      '@type': 'updatePremiumFloodWait',
+      isUpload: update.isUpload,
     });
   } else if (update instanceof LocalUpdatePts || update instanceof LocalUpdateChannelPts) {
     // Do nothing, handled on the manager side

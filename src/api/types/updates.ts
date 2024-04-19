@@ -733,6 +733,11 @@ export type ApiUpdateSavedReactionTags = {
   '@type': 'updateSavedReactionTags';
 };
 
+export type ApiUpdatePremiumFloodWait = {
+  '@type': 'updatePremiumFloodWait';
+  isUpload?: boolean;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -763,7 +768,7 @@ export type ApiUpdate = (
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
   ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
-  ApiUpdateDeleteSavedHistory |
+  ApiUpdateDeleteSavedHistory | ApiUpdatePremiumFloodWait |
   ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages
 );
 

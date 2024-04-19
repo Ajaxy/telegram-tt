@@ -1009,6 +1009,7 @@ export type GlobalState = {
     themes: Partial<Record<ThemeKey, IThemeSettings>>;
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
     notifyExceptions?: Record<number, NotifyException>;
+    lastPremiumBandwithNotificationDate?: number;
   };
 
   push?: {
@@ -1852,6 +1853,9 @@ export interface ActionPayloads {
   setGlobalSearchClosing: ({
     isClosing?: boolean;
   } & WithTabId) | undefined;
+  processPremiumFloodWait: {
+    isUpload?: boolean;
+  };
 
   // Accounts
   reportPeer: {

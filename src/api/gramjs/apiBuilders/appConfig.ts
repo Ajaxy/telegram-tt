@@ -73,6 +73,10 @@ export interface GramJsAppConfig extends LimitsConfig {
   // Boosts
   group_transcribe_level_min?: number;
   new_noncontact_peers_require_premium_without_ownpremium?: boolean;
+  // Upload premium notifications
+  upload_premium_speedup_notify_period?: number;
+  upload_premium_speedup_download?: number;
+  upload_premium_speedup_upload?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -147,5 +151,8 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     storyChangelogUserId: appConfig.stories_changelog_user_id?.toString() ?? SERVICE_NOTIFICATIONS_USER_ID,
     groupTranscribeLevelMin: appConfig.group_transcribe_level_min,
     canLimitNewMessagesWithoutPremium: appConfig.new_noncontact_peers_require_premium_without_ownpremium,
+    bandwidthPremiumNotifyPeriod: appConfig.upload_premium_speedup_notify_period,
+    bandwidthPremiumUploadSpeedup: appConfig.upload_premium_speedup_upload,
+    bandwidthPremiumDownloadSpeedup: appConfig.upload_premium_speedup_download,
   };
 }

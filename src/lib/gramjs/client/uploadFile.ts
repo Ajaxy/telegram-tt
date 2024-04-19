@@ -1,11 +1,12 @@
-// eslint-disable-next-line import/no-named-default
-import { default as Api } from '../tl/api';
-
 import type TelegramClient from './TelegramClient';
+
+import { Foreman } from '../../../util/foreman';
+import errors from '../errors';
+import Api from '../tl/api';
+
+import LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
 import { generateRandomBytes, readBigIntFromBuffer, sleep } from '../Helpers';
 import { getUploadPartSize } from '../Utils';
-import errors from '../errors';
-import { Foreman } from '../../../util/foreman';
 
 interface OnProgress {
     isCanceled?: boolean;
@@ -63,6 +64,9 @@ export async function uploadFile(
     if (onProgress) {
         onProgress(progress);
     }
+
+    // Limit updates to one per file
+    let isPremiumFloodWaitSent = false;
 
     const promises: Promise<any>[] = [];
 
@@ -130,6 +134,10 @@ export async function uploadFile(
                         await sleep(DISCONNECT_SLEEP);
                         continue;
                     } else if (err instanceof errors.FloodWaitError) {
+                        if (err instanceof errors.FloodPremiumWaitError && !isPremiumFloodWaitSent) {
+                            sender?._updateCallback(new LocalUpdatePremiumFloodWait(true));
+                            isPremiumFloodWaitSent = true;
+                        }
                         await sleep(err.seconds * 1000);
                         continue;
                     }

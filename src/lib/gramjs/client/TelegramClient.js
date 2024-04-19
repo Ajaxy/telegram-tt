@@ -634,6 +634,7 @@ class TelegramClient {
             authKeyCallback: this._authKeyCallback.bind(this),
             isMainSender: dcId === this.session.dcId,
             isExported: true,
+            updateCallback: this._handleUpdate.bind(this),
             getShouldDebugExportedSenders: this.getShouldDebugExportedSenders.bind(this),
             onConnectionBreak: () => this._cleanupExportedSender(dcId, index),
         });

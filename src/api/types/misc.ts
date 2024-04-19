@@ -204,6 +204,9 @@ export interface ApiAppConfig {
   storyChangelogUserId: string;
   groupTranscribeLevelMin?: number;
   canLimitNewMessagesWithoutPremium?: boolean;
+  bandwidthPremiumNotifyPeriod?: number;
+  bandwidthPremiumUploadSpeedup?: number;
+  bandwidthPremiumDownloadSpeedup?: number;
 }
 
 export interface ApiConfig {

@@ -119,6 +119,7 @@ module.exports = {
     FileMigrateError,
     FloodTestPhoneWaitError,
     FloodWaitError,
+    FloodPremiumWaitError,
     PhoneMigrateError,
     SlowModeWaitError,
     UserMigrateError,
