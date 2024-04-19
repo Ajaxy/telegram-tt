@@ -1,0 +1,10 @@
+.wrapper {
+  position: relative;
+  display: block;
+  border: none;
+  margin-bottom: 0;
+
+  cursor: var(--custom-cursor, pointer);
+
+  line-height: 1.5rem;
+}

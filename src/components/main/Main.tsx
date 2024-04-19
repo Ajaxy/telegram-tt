@@ -101,6 +101,7 @@ import InviteViaLinkModal from './InviteViaLinkModal.async';
 import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
+import GiveawayModal from './premium/GiveawayModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
 
@@ -156,6 +157,8 @@ type StateProps = {
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
   isReactionPickerOpen: boolean;
+  isAppendModalOpen?: boolean;
+  isGiveawayModalOpen?: boolean;
   isCurrentUserPremium?: boolean;
   chatlistModal?: TabState['chatlistModal'];
   boostModal?: TabState['boostModal'];
@@ -214,6 +217,7 @@ const Main: FC<OwnProps & StateProps> = ({
   currentUserName,
   urlAuth,
   isPremiumModalOpen,
+  isGiveawayModalOpen,
   isPaymentModalOpen,
   isReceiptModalOpen,
   isReactionPickerOpen,
@@ -595,7 +599,8 @@ const Main: FC<OwnProps & StateProps> = ({
       <AttachBotInstallModal bot={attachBotToInstall} />
       <AttachBotRecipientPicker requestedAttachBotInChat={requestedAttachBotInChat} />
       <MessageListHistoryHandler />
-      <PremiumMainModal isOpen={isPremiumModalOpen} />
+      {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
+      {isGiveawayModalOpen && <GiveawayModal isOpen={isGiveawayModalOpen} />}
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
@@ -638,6 +643,7 @@ export default memo(withGlobal<OwnProps>(
       newContact,
       ratingPhoneCall,
       premiumModal,
+      giveawayModal,
       isMasterTab,
       payment,
       limitReachedModal,
@@ -703,6 +709,7 @@ export default memo(withGlobal<OwnProps>(
       urlAuth,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,
+      isGiveawayModalOpen: giveawayModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),

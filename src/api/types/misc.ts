@@ -185,6 +185,10 @@ export interface ApiAppConfig {
   premiumInvoiceSlug: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
+  isGiveawayGiftsPurchaseAvailable: boolean;
+  giveawayAddPeersMax: number;
+  giveawayBoostsPerPremium: number;
+  giveawayCountriesMax: number;
   premiumPromoOrder: ApiPremiumSection[];
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;

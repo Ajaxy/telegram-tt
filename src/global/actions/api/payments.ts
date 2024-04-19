@@ -7,9 +7,11 @@ import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
+import { getStripeError } from '../../../util/payments/stripe';
 import { buildQueryString } from '../../../util/requestQuery';
 import { callApi } from '../../../api/gramjs';
-import { getStripeError, isChatChannel, isChatSuperGroup } from '../../helpers';
+import { isChatChannel, isChatSuperGroup } from '../../helpers';
+import { getRequestInputInvoice } from '../../helpers/payments';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
@@ -48,37 +50,23 @@ addActionHandler('validateRequestedInfo', (global, actions, payload): ActionRetu
     return;
   }
 
-  if ('slug' in inputInvoice) {
-    void validateRequestedInfo(global, inputInvoice, requestInfo, saveInfo, tabId);
-  } else {
-    const chat = selectChat(global, inputInvoice.chatId);
-    if (!chat) {
-      return;
-    }
-
-    void validateRequestedInfo(global, {
-      chat,
-      messageId: inputInvoice.messageId,
-    }, requestInfo, saveInfo, tabId);
+  const requestInputInvoice = getRequestInputInvoice(global, inputInvoice);
+  if (!requestInputInvoice) {
+    return;
   }
+
+  validateRequestedInfo(global, requestInputInvoice, requestInfo, saveInfo, tabId);
 });
 
 addActionHandler('openInvoice', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload;
-  let invoice: ApiInvoice | undefined;
-  if ('slug' in payload) {
-    invoice = await getPaymentForm(global, { slug: payload.slug }, tabId);
-  } else {
-    const chat = selectChat(global, payload.chatId);
-    if (!chat) {
-      return;
-    }
+  const { tabId = getCurrentTabId(), ...inputInvoice } = payload;
 
-    invoice = await getPaymentForm(global, {
-      chat,
-      messageId: payload.messageId,
-    }, tabId);
+  const requestInputInvoice = getRequestInputInvoice(global, inputInvoice);
+  if (!requestInputInvoice) {
+    return;
   }
+
+  const invoice = await getPaymentForm(global, requestInputInvoice, tabId);
 
   if (!invoice) {
     return;
@@ -200,21 +188,9 @@ addActionHandler('sendPaymentForm', async (global, actions, payload): Promise<vo
     return;
   }
 
-  let requestInputInvoice;
-  if ('slug' in inputInvoice) {
-    requestInputInvoice = {
-      slug: inputInvoice.slug,
-    };
-  } else {
-    const chat = selectChat(global, inputInvoice.chatId);
-    if (!chat) {
-      return;
-    }
-
-    requestInputInvoice = {
-      chat,
-      messageId: inputInvoice.messageId,
-    };
+  const requestInputInvoice = getRequestInputInvoice(global, inputInvoice);
+  if (!requestInputInvoice) {
+    return;
   }
 
   global = updatePayment(global, { status: 'pending' }, tabId);
@@ -406,6 +382,46 @@ addActionHandler('openPremiumModal', async (global, actions, payload): Promise<v
   actions.closeReactionPicker({ tabId });
 });
 
+addActionHandler('openGiveawayModal', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, prepaidGiveaway,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('getPremiumGiftCodeOptions', {
+    chat,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+
+  const isOpen = Boolean(chatId);
+
+  global = updateTabState(global, {
+    giveawayModal: {
+      chatId,
+      gifts: result,
+      isOpen,
+      prepaidGiveaway,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeGiveawayModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giveawayModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promise<void> => {
   const { forUserId, tabId = getCurrentTabId() } = payload || {};
   const result = await callApi('fetchPremiumPromo');
@@ -484,7 +500,7 @@ addActionHandler('openBoostModal', async (global, actions, payload): Promise<voi
   }, tabId);
   setGlobal(global);
 
-  const result = await callApi('fetchBoostsStatus', {
+  const result = await callApi('fetchBoostStatus', {
     chat,
   });
 
@@ -535,8 +551,8 @@ addActionHandler('openBoostStatistics', async (global, actions, payload): Promis
   setGlobal(global);
 
   const [boostsListResult, boostStatusResult] = await Promise.all([
-    callApi('fetchBoostsList', { chat }),
-    callApi('fetchBoostsStatus', { chat }),
+    callApi('fetchBoostList', { chat }),
+    callApi('fetchBoostStatus', { chat }),
   ]);
 
   global = getGlobal();
@@ -578,7 +594,7 @@ addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<v
   }, tabId);
   setGlobal(global);
 
-  const result = await callApi('fetchBoostsList', {
+  const result = await callApi('fetchBoostList', {
     chat,
     offset: tabState.boostStatistics.nextOffset,
   });
@@ -753,4 +769,37 @@ addActionHandler('applyGiftCode', async (global, actions, payload): Promise<void
   }
   actions.requestConfetti({ tabId });
   actions.closeGiftCodeModal({ tabId });
+});
+
+addActionHandler('launchPrepaidGiveaway', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, giveawayId, paymentPurpose, tabId = getCurrentTabId(),
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const additionalChannels = paymentPurpose?.additionalChannelIds?.map((id) => selectChat(global, id)).filter(Boolean);
+
+  const result = await callApi('launchPrepaidGiveaway', {
+    chat,
+    giveawayId,
+    paymentPurpose: {
+      type: 'giveaway',
+      chat,
+      areWinnersVisible: paymentPurpose?.areWinnersVisible,
+      additionalChannels,
+      countries: paymentPurpose?.countries,
+      prizeDescription: paymentPurpose.prizeDescription,
+      untilDate: paymentPurpose.untilDate,
+      currency: paymentPurpose.currency,
+      amount: paymentPurpose.amount,
+    },
+  });
+
+  if (!result) {
+    return;
+  }
+
+  actions.openBoostStatistics({ chatId, tabId });
 });

@@ -191,6 +191,7 @@ const useWebAppFrame = (
           slug: eventData.slug,
         });
         openInvoice({
+          type: 'slug',
           slug: eventData.slug,
         });
       }

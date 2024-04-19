@@ -166,6 +166,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
     if (premiumSlug) {
       openInvoice({
+        type: 'slug',
         slug: premiumSlug,
       });
     } else if (premiumBotUsername) {

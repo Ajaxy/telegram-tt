@@ -1,7 +1,7 @@
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { buildChatThreadKey } from '../helpers';
+import { buildChatThreadKey } from '../helpers/localSearch';
 import { selectCurrentMessageList } from './messages';
 import { selectTabState } from './tabs';
 

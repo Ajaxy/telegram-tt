@@ -101,5 +101,6 @@ export * from './stories';
 
 export {
   validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
-  applyBoost, fetchBoostsList, fetchBoostsStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
+  applyBoost, fetchBoostList, fetchBoostStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
+  getPremiumGiftCodeOptions, launchPrepaidGiveaway,
 } from './payments';

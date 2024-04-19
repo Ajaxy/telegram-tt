@@ -1,8 +1,10 @@
 import type { ApiPremiumSection } from '../../global/types';
 import type { ApiInvoiceContainer } from '../../types';
 import type { ApiWebDocument } from './bots';
+import type { ApiChat } from './chats';
 import type { ApiDocument, ApiMessageEntity, ApiPaymentCredentials } from './messages';
-import type { StatisticsOverviewPercentage } from './statistics';
+import type { PrepaidGiveaway, StatisticsOverviewPercentage } from './statistics';
+import type { ApiUser } from './users';
 
 export interface ApiShippingAddress {
   streetLine1: string;
@@ -81,6 +83,36 @@ export interface ApiPremiumSubscriptionOption {
   botUrl: string;
 }
 
+export type ApiInputStorePaymentGiveaway = {
+  type: 'giveaway';
+  isOnlyForNewSubscribers?: boolean;
+  areWinnersVisible?: boolean;
+  chat: ApiChat;
+  additionalChannels?: ApiChat[];
+  countries?: string[];
+  prizeDescription?: string;
+  untilDate: number;
+  currency: string;
+  amount: number;
+};
+
+export type ApiInputStorePaymentGiftcode = {
+  type: 'giftcode';
+  users: ApiUser[];
+  boostChannel?: ApiChat;
+  currency: string;
+  amount: number;
+};
+
+export type ApiInputStorePaymentPurpose = ApiInputStorePaymentGiveaway | ApiInputStorePaymentGiftcode;
+
+export interface ApiPremiumGiftCodeOption {
+  users: number;
+  months: number;
+  currency: string;
+  amount: number;
+}
+
 export type ApiBoostsStatus = {
   level: number;
   currentLevelBoosts: number;
@@ -89,6 +121,7 @@ export type ApiBoostsStatus = {
   hasMyBoost?: boolean;
   boostUrl: string;
   premiumSubscribers?: StatisticsOverviewPercentage;
+  prepaidGiveaways?: PrepaidGiveaway[];
 };
 
 export type ApiMyBoost = {
@@ -131,3 +164,10 @@ export type ApiCheckedGiftCode = {
   months: number;
   usedAt?: number;
 };
+
+export interface ApiPrepaidGiveaway {
+  id: string;
+  months: number;
+  quantity: number;
+  date: number;
+}

@@ -12,12 +12,13 @@ import type {
   ApiFormattedText,
   ApiGroupCall,
   ApiInputReplyInfo,
+  ApiInputStorePaymentPurpose,
   ApiMessageEntity,
   ApiNewPoll,
   ApiPhoneCall,
   ApiPhoto,
   ApiPoll,
-  ApiReaction,
+  ApiPremiumGiftCodeOption, ApiReaction,
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiSendMessageAction,
@@ -566,16 +567,69 @@ export function buildInputPhoneCall({ id, accessHash }: ApiPhoneCall) {
   });
 }
 
+export function buildInputStorePaymentPurpose(purpose: ApiInputStorePaymentPurpose):
+GramJs.TypeInputStorePaymentPurpose {
+  if (purpose.type === 'giftcode') {
+    return new GramJs.InputStorePaymentPremiumGiftCode({
+      users: purpose.users.map((user) => buildInputEntity(user.id, user.accessHash) as GramJs.InputUser),
+      boostPeer: purpose.boostChannel
+        ? buildInputPeer(purpose.boostChannel.id, purpose.boostChannel.accessHash)
+        : undefined,
+      currency: purpose.currency,
+      amount: BigInt(purpose.amount),
+    });
+  }
+
+  const randomId = generateRandomBigInt();
+
+  return new GramJs.InputStorePaymentPremiumGiveaway({
+    boostPeer: buildInputPeer(purpose.chat.id, purpose.chat.accessHash),
+    additionalPeers: purpose.additionalChannels?.map((chat) => buildInputPeer(chat.id, chat.accessHash)),
+    countriesIso2: purpose.countries,
+    prizeDescription: purpose.prizeDescription,
+    onlyNewSubscribers: purpose.isOnlyForNewSubscribers || undefined,
+    winnersAreVisible: purpose.areWinnersVisible || undefined,
+    untilDate: purpose.untilDate,
+    currency: purpose.currency,
+    amount: BigInt(purpose.amount),
+    randomId,
+  });
+}
+
+function buildPremiumGiftCodeOption(optionData: ApiPremiumGiftCodeOption) {
+  return new GramJs.PremiumGiftCodeOption({
+    users: optionData.users,
+    months: optionData.months,
+    currency: optionData.currency,
+    amount: BigInt(optionData.amount),
+  });
+}
+
 export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
-  if ('slug' in invoice) {
-    return new GramJs.InputInvoiceSlug({
-      slug: invoice.slug,
-    });
-  } else {
-    return new GramJs.InputInvoiceMessage({
-      peer: buildInputPeer(invoice.chat.id, invoice.chat.accessHash),
-      msgId: invoice.messageId,
-    });
+  switch (invoice.type) {
+    case 'message': {
+      return new GramJs.InputInvoiceMessage({
+        peer: buildInputPeer(invoice.chat.id, invoice.chat.accessHash),
+        msgId: invoice.messageId,
+      });
+    }
+
+    case 'slug': {
+      return new GramJs.InputInvoiceSlug({
+        slug: invoice.slug,
+      });
+    }
+
+    case 'giveaway':
+    default: {
+      const purpose = buildInputStorePaymentPurpose(invoice.purpose);
+      const option = buildPremiumGiftCodeOption(invoice.option);
+
+      return new GramJs.InputInvoicePremiumGiftCode({
+        purpose,
+        option,
+      });
+    }
   }
 }
 

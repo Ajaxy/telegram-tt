@@ -52,6 +52,8 @@ export interface GramJsAppConfig extends LimitsConfig {
   autologin_token: string;
   url_auth_domains: string[];
   premium_purchase_blocked: boolean;
+  giveaway_gifts_purchase_available: boolean;
+  giveaway_add_peers_max: number;
   premium_bot_username: string;
   premium_invoice_slug: string;
   premium_promo_order: string[];
@@ -59,6 +61,8 @@ export interface GramJsAppConfig extends LimitsConfig {
   hidden_members_group_size_min: number;
   autoarchive_setting_available: boolean;
   authorization_autoconfirm_period: number;
+  giveaway_boosts_per_premium: number;
+  giveaway_countries_max: number;
   // Forums
   topics_pinned_limit: number;
   // Stories
@@ -109,11 +113,15 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
     premiumPromoOrder: appConfig.premium_promo_order as ApiPremiumSection[],
     isPremiumPurchaseBlocked: appConfig.premium_purchase_blocked,
+    isGiveawayGiftsPurchaseAvailable: appConfig.giveaway_gifts_purchase_available,
     defaultEmojiStatusesStickerSetId: appConfig.default_emoji_statuses_stickerset_id,
     topicsPinnedLimit: appConfig.topics_pinned_limit,
     maxUserReactionsDefault: appConfig.reactions_user_max_default,
     maxUserReactionsPremium: appConfig.reactions_user_max_premium,
     hiddenMembersMinCount: appConfig.hidden_members_group_size_min,
+    giveawayAddPeersMax: appConfig.giveaway_add_peers_max,
+    giveawayBoostsPerPremium: appConfig.giveaway_boosts_per_premium,
+    giveawayCountriesMax: appConfig.giveaway_countries_max,
     canDisplayAutoarchiveSetting: appConfig.autoarchive_setting_available,
     limits: {
       uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),

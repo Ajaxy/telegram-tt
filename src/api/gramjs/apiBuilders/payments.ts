@@ -6,7 +6,7 @@ import type {
   ApiCheckedGiftCode,
   ApiGiveawayInfo,
   ApiInvoice, ApiLabeledPrice, ApiMyBoost, ApiPaymentCredentials,
-  ApiPaymentForm, ApiPaymentSavedInfo, ApiPremiumPromo, ApiPremiumSubscriptionOption,
+  ApiPaymentForm, ApiPaymentSavedInfo, ApiPremiumGiftCodeOption, ApiPremiumPromo, ApiPremiumSubscriptionOption,
   ApiReceipt,
 } from '../../types';
 
@@ -14,7 +14,7 @@ import { buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
-import { buildStatisticsPercentage } from './statistics';
+import { buildPrepaidGiveaway, buildStatisticsPercentage } from './statistics';
 
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {
   if (!shippingOptions) {
@@ -209,7 +209,7 @@ export function buildApiPaymentCredentials(credentials: GramJs.PaymentSavedCrede
 
 export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): ApiBoostsStatus {
   const {
-    level, boostUrl, boosts, myBoost, currentLevelBoosts, nextLevelBoosts, premiumAudience,
+    level, boostUrl, boosts, myBoost, currentLevelBoosts, nextLevelBoosts, premiumAudience, prepaidGiveaways,
   } = boostStatus;
   return {
     level,
@@ -219,6 +219,7 @@ export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): 
     boostUrl,
     nextLevelBoosts,
     ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
+    ...(prepaidGiveaways && { prepaidGiveaways: prepaidGiveaways.map(buildPrepaidGiveaway) }),
   };
 }
 
@@ -293,5 +294,18 @@ export function buildApiCheckedGiftCode(giftcode: GramJs.payments.TypeCheckedGif
     usedAt: usedDate,
     isFromGiveaway: viaGiveaway,
     giveawayMessageId: giveawayMsgId,
+  };
+}
+
+export function buildApiPremiumGiftCodeOption(option: GramJs.PremiumGiftCodeOption): ApiPremiumGiftCodeOption {
+  const {
+    amount, currency, months, users,
+  } = option;
+
+  return {
+    amount: amount.toJSNumber(),
+    currency,
+    months,
+    users,
   };
 }

@@ -12,6 +12,16 @@
   line-height: 1.5rem;
 }
 
+.giveawayWrapper {
+  position: relative;
+  display: block;
+  padding-inline: 3.6875rem 1rem;
+
+  cursor: var(--custom-cursor, pointer);
+
+  line-height: 1.5rem;
+}
+
 .active {
   box-shadow: 0 0 0 0.125rem var(--color-primary);
 }
@@ -107,4 +117,11 @@
   unicode-bidi: plaintext;
   margin-inline-end: 0.5rem;
   align-self: baseline;
+}
+
+.giveawayDiscount {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  padding: 0.1875rem;
 }

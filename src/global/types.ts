@@ -44,7 +44,9 @@ import type {
   ApiPhoneCall,
   ApiPhoto,
   ApiPostStatistics,
+  ApiPremiumGiftCodeOption,
   ApiPremiumPromo,
+  ApiPrepaidGiveaway,
   ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
@@ -623,6 +625,15 @@ export type TabState = {
     isGift?: boolean;
     monthsAmount?: number;
     isSuccess?: boolean;
+  };
+
+  giveawayModal?: {
+    chatId: string;
+    isOpen?: boolean;
+    gifts?: ApiPremiumGiftCodeOption[];
+    selectedMemberIds?: string[];
+    selectedChannelIds?: string[];
+    prepaidGiveaway?: ApiPrepaidGiveaway;
   };
 
   giftPremiumModal?: {
@@ -1989,6 +2000,20 @@ export interface ActionPayloads {
   } & WithTabId;
   closeGiftCodeModal: WithTabId | undefined;
 
+  launchPrepaidGiveaway: {
+    chatId: string;
+    giveawayId: string;
+    paymentPurpose: {
+      additionalChannelIds?: string[];
+      areWinnersVisible?: boolean;
+      countries?: string[];
+      prizeDescription?: string;
+      untilDate: number;
+      currency: string;
+      amount: number;
+    };
+  } & WithTabId;
+
   checkChatlistInvite: {
     slug: string;
   } & WithTabId;
@@ -2913,6 +2938,13 @@ export interface ActionPayloads {
     monthsAmount?: number;
   } & WithTabId) | undefined;
   closePremiumModal: WithTabId | undefined;
+
+  openGiveawayModal: ({
+    chatId: string;
+    gifts?: number[] | undefined;
+    prepaidGiveaway?: ApiPrepaidGiveaway | undefined;
+  } & WithTabId);
+  closeGiveawayModal: WithTabId | undefined;
 
   transcribeAudio: {
     chatId: string;

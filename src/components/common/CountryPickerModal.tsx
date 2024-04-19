@@ -1,0 +1,118 @@
+import type { FC } from '../../lib/teact/teact';
+import React, {
+  memo, useMemo, useState,
+} from '../../lib/teact/teact';
+import { getActions } from '../../global';
+
+import type { ApiCountry } from '../../api/types';
+
+import buildClassName from '../../util/buildClassName';
+
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePrevious from '../../hooks/usePrevious';
+
+import Button from '../ui/Button';
+import Modal from '../ui/Modal';
+import Icon from './Icon';
+import Picker from './Picker';
+
+import styles from './CountryPickerModal.module.scss';
+
+export type OwnProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (value: string[]) => void;
+  countryList: ApiCountry[];
+  selectionLimit?: number | undefined;
+};
+
+const CountryPickerModal: FC<OwnProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  countryList,
+  selectionLimit,
+}) => {
+  const { showNotification } = getActions();
+
+  const lang = useLang();
+
+  const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
+  const prevSelectedCountryIds = usePrevious(selectedCountryIds);
+  const noPickerScrollRestore = prevSelectedCountryIds === selectedCountryIds;
+
+  const displayedIds = useMemo(() => {
+    if (!countryList) {
+      return [];
+    }
+
+    return countryList
+      .filter((country) => !country.isHidden)
+      .map((country) => country.iso2);
+  }, [countryList]);
+
+  const handleSelectedIdsChange = useLastCallback((newSelectedIds: string[]) => {
+    if (selectionLimit && newSelectedIds.length > selectionLimit) {
+      showNotification({
+        message: lang('BoostingSelectUpToWarningCountries', selectionLimit),
+      });
+      return;
+    }
+    setSelectedCountryIds(newSelectedIds);
+  });
+
+  const handleSubmit = useLastCallback(() => {
+    onSubmit(selectedCountryIds);
+    onClose();
+  });
+
+  return (
+    <Modal
+      className={styles.root}
+      isOpen={isOpen}
+      onClose={onClose}
+      onEnter={handleSubmit}
+    >
+      <div className={styles.container}>
+        <div className={styles.pickerSelector}>
+          <Button
+            round
+            size="smaller"
+            color="translucent"
+            onClick={onClose}
+          >
+            <Icon name="close" />
+          </Button>
+
+          <h4 className={styles.pickerTitle}>
+            {lang('BoostingSelectCountry')}
+          </h4>
+        </div>
+      </div>
+
+      <div className={buildClassName(styles.main, 'custom-scroll')}>
+        <Picker
+          className={styles.picker}
+          itemIds={displayedIds}
+          selectedIds={selectedCountryIds}
+          onSelectedIdsChange={handleSelectedIdsChange}
+          noScrollRestore={noPickerScrollRestore}
+          isCountryList
+          countryList={countryList}
+        />
+      </div>
+
+      <div className={styles.footer}>
+        <Button
+          size="smaller"
+          onClick={handleSubmit}
+        >
+          {lang('SelectCountries.OK')}
+        </Button>
+      </div>
+    </Modal>
+  );
+};
+
+export default memo(CountryPickerModal);

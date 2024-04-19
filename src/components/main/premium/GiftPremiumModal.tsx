@@ -15,7 +15,6 @@ import {
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
@@ -45,31 +44,28 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   const { openPremiumModal, closeGiftPremiumModal, openUrl } = getActions();
 
   const lang = useLang();
-  const renderedUser = useCurrentOrPrev(user, true);
-  const renderedGifts = useCurrentOrPrev(gifts, true);
   const [selectedOption, setSelectedOption] = useState<number | undefined>();
-  const firstGift = renderedGifts?.[0];
   const fullMonthlyAmount = useMemo(() => {
-    if (!renderedGifts || renderedGifts.length === 0 || !firstGift) {
+    if (!gifts?.length) {
       return undefined;
     }
 
-    const basicGift = renderedGifts.reduce((acc, gift) => {
-      return gift.months < firstGift.months ? gift : firstGift;
-    }, firstGift);
+    const basicGift = gifts.reduce((acc, gift) => {
+      return gift.months < acc.months ? gift : acc;
+    });
 
     return Math.floor(basicGift.amount / basicGift.months);
-  }, [firstGift, renderedGifts]);
+  }, [gifts]);
 
   useEffect(() => {
-    if (isOpen) {
-      setSelectedOption(firstGift?.months);
+    if (isOpen && gifts?.length) {
+      setSelectedOption(gifts[0].months);
     }
-  }, [firstGift?.months, isOpen]);
+  }, [gifts, isOpen]);
 
   const selectedGift = useMemo(() => {
-    return renderedGifts?.find((gift) => gift.months === selectedOption);
-  }, [renderedGifts, selectedOption]);
+    return gifts?.find((gift) => gift.months === selectedOption);
+  }, [gifts, selectedOption]);
 
   const handleSubmit = useCallback(() => {
     if (!selectedGift) {
@@ -121,7 +117,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
           <i className="icon icon-close" />
         </Button>
         <Avatar
-          peer={renderedUser}
+          peer={user}
           size="jumbo"
           className={styles.avatar}
         />
@@ -130,13 +126,13 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
         </h2>
         <p className={styles.description}>
           {renderText(
-            lang('GiftTelegramPremiumDescription', getUserFirstOrLastName(renderedUser)),
+            lang('GiftTelegramPremiumDescription', getUserFirstOrLastName(user)),
             ['emoji', 'simple_markdown'],
           )}
         </p>
 
         <div className={styles.options}>
-          {renderedGifts?.map((gift) => (
+          {gifts?.map((gift) => (
             <PremiumSubscriptionOption
               key={gift.amount}
               option={gift}

@@ -312,6 +312,10 @@ export const GENERAL_TOPIC_ID = 1;
 export const STORY_EXPIRE_PERIOD = 86400; // 1 day
 export const STORY_VIEWERS_EXPIRE_PERIOD = 86400; // 1 day
 export const FRESH_AUTH_PERIOD = 86400; // 1 day
+export const GIVEAWAY_BOOST_PER_PREMIUM = 4;
+export const GIVEAWAY_MAX_ADDITIONAL_CHANNELS = 10;
+export const GIVEAWAY_MAX_ADDITIONAL_USERS = 10;
+export const GIVEAWAY_MAX_ADDITIONAL_COUNTRIES = 10;
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';

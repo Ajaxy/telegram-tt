@@ -104,6 +104,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
         return;
       }
       actions.openInvoice({
+        type: 'message',
         chatId: chat.id,
         messageId,
         tabId,

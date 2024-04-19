@@ -52,6 +52,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
 
   const handleClick = useLastCallback(() => {
     openInvoice({
+      type: 'message',
       chatId,
       messageId: id,
       isExtendedMedia: true,

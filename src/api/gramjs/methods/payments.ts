@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiPeer, ApiRequestInputInvoice,
+  ApiChat, ApiInputStorePaymentPurpose, ApiPeer, ApiRequestInputInvoice,
   OnApiUpdate,
 } from '../../types';
 
@@ -15,12 +15,15 @@ import {
   buildApiInvoiceFromForm,
   buildApiMyBoost,
   buildApiPaymentForm,
+  buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
   buildApiReceipt,
   buildShippingOptions,
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildInputInvoice, buildInputPeer, buildShippingInfo } from '../gramjsBuilders';
+import {
+  buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildShippingInfo,
+} from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
   deserializeBytes,
@@ -241,7 +244,7 @@ export async function applyBoost({
   };
 }
 
-export async function fetchBoostsStatus({
+export async function fetchBoostStatus({
   chat,
 }: {
   chat: ApiChat;
@@ -257,7 +260,7 @@ export async function fetchBoostsStatus({
   return buildApiBoostsStatus(result);
 }
 
-export async function fetchBoostsList({
+export async function fetchBoostList({
   chat,
   offset = '',
   limit,
@@ -344,6 +347,40 @@ export function applyGiftCode({
 }) {
   return invokeRequest(new GramJs.payments.ApplyGiftCode({
     slug,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export async function getPremiumGiftCodeOptions({
+  chat,
+}: {
+  chat?: ApiChat;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetPremiumGiftCodeOptions({
+    boostPeer: chat && buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return result.map(buildApiPremiumGiftCodeOption);
+}
+
+export function launchPrepaidGiveaway({
+  chat,
+  giveawayId,
+  paymentPurpose,
+}: {
+  chat: ApiChat;
+  giveawayId: string;
+  paymentPurpose: ApiInputStorePaymentPurpose;
+}) {
+  return invokeRequest(new GramJs.payments.LaunchPrepaidGiveaway({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    giveawayId: BigInt(giveawayId),
+    purpose: buildInputStorePaymentPurpose(paymentPurpose),
   }), {
     shouldReturnTrue: true,
   });

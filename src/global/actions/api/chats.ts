@@ -1403,11 +1403,13 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     });
   } else if (part1.startsWith('$')) {
     openInvoice({
+      type: 'slug',
       slug: part1.substring(1),
       tabId,
     });
   } else if (part1 === 'invoice') {
     openInvoice({
+      type: 'slug',
       slug: part2,
       tabId,
     });

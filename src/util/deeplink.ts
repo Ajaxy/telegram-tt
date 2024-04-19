@@ -150,7 +150,7 @@ export const processDeepLink = (url: string): boolean => {
 
     case 'invoice': {
       const { slug } = params;
-      openInvoice({ slug });
+      openInvoice({ type: 'slug', slug });
       break;
     }
 

@@ -2,6 +2,7 @@ import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat } from './chats';
+import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption } from './payments';
 import type { ApiMessageStoryData, ApiWebPageStoryData } from './stories';
 
 export interface ApiDimensions {
@@ -170,21 +171,65 @@ export interface ApiPoll {
   };
 }
 
-// First type used for state, second - for API requests
-export type ApiInputInvoice = {
+/* Used for Invoice UI */
+export type ApiInputInvoiceMessage = {
+  type: 'message';
   chatId: string;
   messageId: number;
   isExtendedMedia?: boolean;
-} | {
+};
+
+export type ApiInputInvoiceSlug = {
+  type: 'slug';
   slug: string;
 };
 
-export type ApiRequestInputInvoice = {
+export type ApiInputInvoiceGiveaway = {
+  type: 'giveaway';
+  chatId: string;
+  additionalChannelIds?: string[];
+  isOnlyForNewSubscribers?: boolean;
+  areWinnersVisible?: boolean;
+  prizeDescription?: string;
+  countries?: string[];
+  untilDate: number;
+  currency: string;
+  amount: number;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiInputInvoiceGiftCode = {
+  type: 'giftcode';
+  userIds: string[];
+  boostChannelId?: string;
+  currency: string;
+  amount: number;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
+| ApiInputInvoiceGiftCode;
+
+/* Used for Invoice request */
+export type ApiRequestInputInvoiceMessage = {
+  type: 'message';
   chat: ApiChat;
   messageId: number;
-} | {
+};
+
+export type ApiRequestInputInvoiceSlug = {
+  type: 'slug';
   slug: string;
 };
+
+export type ApiRequestInputInvoiceGiveaway = {
+  type: 'giveaway';
+  purpose: ApiInputStorePaymentPurpose;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
+| ApiRequestInputInvoiceGiveaway;
 
 export interface ApiInvoice {
   text: string;

@@ -38,3 +38,52 @@
 .loadMoreSpinner {
   margin-inline-end: 1rem;
 }
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.info {
+  flex-grow: 1;
+}
+
+.month {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.quantity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.floatingBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-links);
+  position: relative;
+  z-index: 1;
+}
+
+.floatingBadgeButtonColor {
+  padding: 0.25rem 0.75rem 0.375rem 0.5625rem;
+  border-radius: 1rem;
+  background-color: var(--color-primary-opacity);
+  margin-left: 0.5rem;
+}
+
+.floatingBadgeIcon {
+  font-size: 1.125rem;
+  margin-right: 0.1875rem;
+}
+
+.floatingBadgeValue {
+  font-size: 0.875rem;
+  font-weight: 500;
+}

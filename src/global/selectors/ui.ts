@@ -4,7 +4,7 @@ import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { getMessageVideo, getMessageWebPageVideo } from '../helpers';
+import { getMessageVideo, getMessageWebPageVideo } from '../helpers/messageMedia';
 import { selectCurrentTextSearch } from './localSearch';
 import { selectCurrentManagement } from './management';
 import { selectIsStatisticsShown } from './statistics';

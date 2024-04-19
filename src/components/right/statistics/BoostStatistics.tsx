@@ -1,10 +1,11 @@
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiBoostStatistics } from '../../../api/types';
+import type { ApiBoostStatistics, ApiPrepaidGiveaway } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
-import { selectTabState } from '../../../global/selectors';
+import { GIVEAWAY_BOOST_PER_PREMIUM } from '../../../config';
+import { selectIsGiveawayGiftsPurchaseAvailable, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateAtTime } from '../../../util/date/dateFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
@@ -23,14 +24,32 @@ import StatisticsOverview from './StatisticsOverview';
 
 import styles from './BoostStatistics.module.scss';
 
+import GiftBlueRound from '../../../assets/premium/GiftBlueRound.svg';
+import GiftGreenRound from '../../../assets/premium/GiftGreenRound.svg';
+import GiftRedRound from '../../../assets/premium/GiftRedRound.svg';
+
 type StateProps = {
   boostStatistics: TabState['boostStatistics'];
+  isGiveawayAvailable?: boolean;
+  chatId: string;
+  giveawayBoostsPerPremium?: number;
+};
+
+const GIVEAWAY_IMG_LIST: { [key: number]: string } = {
+  3: GiftGreenRound,
+  6: GiftBlueRound,
+  12: GiftRedRound,
 };
 
 const BoostStatistics = ({
   boostStatistics,
+  isGiveawayAvailable,
+  chatId,
+  giveawayBoostsPerPremium,
 }: StateProps) => {
-  const { openChat, loadMoreBoosters, closeBoostStatistics } = getActions();
+  const {
+    openChat, loadMoreBoosters, closeBoostStatistics, openGiveawayModal,
+  } = getActions();
   const lang = useLang();
 
   const isLoaded = boostStatistics?.boostStatus;
@@ -50,6 +69,7 @@ const BoostStatistics = ({
         boosts: 0,
         levelProgress: 0,
         remainingBoosts: 0,
+        prepaidGiveaways: [],
       };
     }
     return getBoostProgressInfo(status);
@@ -63,6 +83,7 @@ const BoostStatistics = ({
       boosts,
       premiumSubscribers: status.premiumSubscribers!,
       remainingBoosts,
+      prepaidGiveaways: status.prepaidGiveaways!,
     } satisfies ApiBoostStatistics;
   }, [status, boosts, currentLevel, remainingBoosts]);
 
@@ -78,8 +99,16 @@ const BoostStatistics = ({
     closeBoostStatistics();
   });
 
+  const handleGiveawayClick = useLastCallback(() => {
+    openGiveawayModal({ chatId });
+  });
+
   const handleLoadMore = useLastCallback(() => {
     loadMoreBoosters();
+  });
+
+  const launchPrepaidGiveawayHandler = useLastCallback((prepaidGiveaway: ApiPrepaidGiveaway) => {
+    openGiveawayModal({ chatId, prepaidGiveaway });
   });
 
   return (
@@ -97,6 +126,42 @@ const BoostStatistics = ({
             />
             <StatisticsOverview className={styles.stats} statistics={statsOverview} type="boost" />
           </div>
+          {statsOverview.prepaidGiveaways && (
+            <div className={styles.section}>
+              <h4 className={styles.sectionHeader} dir={lang.isRtl ? 'rtl' : undefined}>
+                {lang('BoostingPreparedGiveaways')}
+              </h4>
+              {statsOverview?.prepaidGiveaways?.map((prepaidGiveaway) => (
+                <ListItem
+                  key={prepaidGiveaway.id}
+                  className="chat-item-clickable"
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={() => launchPrepaidGiveawayHandler(prepaidGiveaway)}
+                >
+                  <div className={buildClassName(styles.status, 'status-clickable')}>
+                    <div>
+                      <img src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months]} alt="Giveaway" />
+                    </div>
+                    <div className={styles.info}>
+                      <h3>
+                        {lang('BoostingTelegramPremiumCountPlural', prepaidGiveaway.quantity)}
+                      </h3>
+                      <p className={styles.month}>{lang('PrepaidGiveawayMonths', prepaidGiveaway.months)}</p>
+                    </div>
+                    <div className={styles.quantity}>
+                      <div className={buildClassName(styles.floatingBadge, styles.floatingBadgeButtonColor)}>
+                        <Icon name="boost" className={styles.floatingBadgeIcon} />
+                        <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>
+                          {prepaidGiveaway.quantity * (giveawayBoostsPerPremium ?? GIVEAWAY_BOOST_PER_PREMIUM)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ListItem>
+              ))}
+              <p className="text-muted hint" key="links-hint">{lang('BoostingSelectPaidGiveaway')}</p>
+            </div>
+          )}
           <div className={styles.section}>
             <h4 className={styles.sectionHeader} dir={lang.isRtl ? 'rtl' : undefined}>
               {lang('Boosters')}
@@ -136,6 +201,14 @@ const BoostStatistics = ({
             )}
           </div>
           <LinkField className={styles.section} link={status!.boostUrl} withShare title={lang('LinkForBoosting')} />
+          {isGiveawayAvailable && (
+            <div className={styles.section}>
+              <ListItem icon="gift" ripple onClick={handleGiveawayClick}>
+                {lang('BoostingGetBoostsViaGifts')}
+              </ListItem>
+              <p className="text-muted hint" key="links-hint">{lang('BoostingGetMoreBoosts')}</p>
+            </div>
+          )}
         </>
       )}
     </div>
@@ -146,9 +219,15 @@ export default memo(withGlobal(
   (global): StateProps => {
     const tabState = selectTabState(global);
     const boostStatistics = tabState.boostStatistics;
+    const isGiveawayAvailable = selectIsGiveawayGiftsPurchaseAvailable(global);
+    const chatId = boostStatistics && boostStatistics.chatId;
+    const giveawayBoostsPerPremium = global.appConfig?.giveawayBoostsPerPremium;
 
     return {
       boostStatistics,
+      isGiveawayAvailable,
+      chatId: chatId!,
+      giveawayBoostsPerPremium,
     };
   },
 )(BoostStatistics));

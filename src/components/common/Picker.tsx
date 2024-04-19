@@ -3,9 +3,12 @@ import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
+import type { ApiCountry } from '../../api/types';
+
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import { buildCollectionByKey } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
@@ -42,6 +45,8 @@ type OwnProps = {
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (id: string) => void;
   onLoadMore?: () => void;
+  isCountryList?: boolean;
+  countryList?: ApiCountry[];
 };
 
 // Focus slows down animation, also it breaks transition layout in Chrome
@@ -69,6 +74,8 @@ const Picker: FC<OwnProps> = ({
   onFilterChange,
   onDisabledClick,
   onLoadMore,
+  isCountryList,
+  countryList,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -92,17 +99,18 @@ const Picker: FC<OwnProps> = ({
   const lockedIdsSet = useMemo(() => new Set(lockedIds), [lockedIds]);
 
   const sortedItemIds = useMemo(() => {
-    return itemIds.sort((a, b) => {
-      const aIsLocked = lockedIdsSet.has(a);
-      const bIsLocked = lockedIdsSet.has(b);
-      if (aIsLocked && !bIsLocked) {
-        return -1;
+    const lockedBucket: string[] = [];
+    const unlockedBucket: string[] = [];
+
+    itemIds.forEach((id) => {
+      if (lockedIdsSet.has(id)) {
+        lockedBucket.push(id);
+      } else {
+        unlockedBucket.push(id);
       }
-      if (!aIsLocked && bIsLocked) {
-        return 1;
-      }
-      return 0;
     });
+
+    return lockedBucket.concat(unlockedBucket);
   }, [itemIds, lockedIdsSet]);
 
   const handleItemClick = useLastCallback((id: string) => {
@@ -129,6 +137,22 @@ const Picker: FC<OwnProps> = ({
   const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, sortedItemIds, Boolean(filterValue));
 
   const lang = useLang();
+
+  const countriesByIso = useMemo(() => {
+    if (!countryList) return undefined;
+    return buildCollectionByKey(countryList, 'iso2');
+  }, [countryList]);
+
+  const renderChatInfo = (id: string) => {
+    if (isCountryList && countriesByIso) {
+      const country = countriesByIso[id];
+      return <div>{country.defaultName}</div>;
+    } else if (isUserId(id)) {
+      return <PrivateChatInfo forceShowSelf={forceShowSelf} userId={id} />;
+    } else {
+      return <GroupChatInfo chatId={id} />;
+    }
+  };
 
   return (
     <div className={buildClassName('Picker', className)}>
@@ -194,11 +218,7 @@ const Picker: FC<OwnProps> = ({
                 ripple
               >
                 {!isRoundCheckbox ? renderCheckbox() : undefined}
-                {isUserId(id) ? (
-                  <PrivateChatInfo forceShowSelf={forceShowSelf} userId={id} />
-                ) : (
-                  <GroupChatInfo chatId={id} />
-                )}
+                {renderChatInfo(id)}
                 {isRoundCheckbox ? renderCheckbox() : undefined}
               </ListItem>
             );

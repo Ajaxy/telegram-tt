@@ -343,5 +343,7 @@
     "premium.getBoostsList",
     "payments.checkGiftCode",
     "payments.applyGiftCode",
-    "payments.getGiveawayInfo"
+    "payments.getGiveawayInfo",
+    "payments.getPremiumGiftCodeOptions",
+    "payments.launchPrepaidGiveaway"
 ]
