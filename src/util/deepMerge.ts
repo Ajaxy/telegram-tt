@@ -21,6 +21,12 @@ export function deepMerge<T extends any>(value1: T, value2: Record<keyof T, any>
 
   const object1 = value1 as AnyLiteral;
   const object2 = value2 as AnyLiteral;
+
+  // eslint-disable-next-line no-underscore-dangle
+  if (object2.__deleteAllChildren) {
+    return {} as T;
+  }
+
   const allKeys = unique(Object.keys(object1).concat(Object.keys(object2)));
 
   return allKeys.reduce((acc: AnyLiteral, key) => {

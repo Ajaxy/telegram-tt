@@ -1,8 +1,10 @@
 import { unique } from './iteratees';
 
 const EQUAL = Symbol('EQUAL');
+const DELETE = { __delete: true };
+const DELETE_ALL_CHILDREN = { __deleteAllChildren: true };
 
-export function deepDiff<T extends any>(value1: T, value2: T): Partial<T> | typeof EQUAL {
+export function deepDiff<T extends any>(value1: T, value2: T): Partial<T> | typeof EQUAL | typeof DELETE_ALL_CHILDREN {
   const type1 = typeof value1;
   const type2 = typeof value2;
 
@@ -26,7 +28,14 @@ export function deepDiff<T extends any>(value1: T, value2: T): Partial<T> | type
 
   const object1 = value1 as AnyLiteral;
   const object2 = value2 as AnyLiteral;
-  const allKeys = unique(Object.keys(object1).concat(Object.keys(object2)));
+  const keys1 = Object.keys(object1);
+  const keys2 = Object.keys(object2);
+
+  if (!keys2.length) {
+    return !keys1.length ? EQUAL : DELETE_ALL_CHILDREN;
+  }
+
+  const allKeys = unique(keys1.concat(keys2));
 
   const diff = allKeys.reduce((acc: any, key) => {
     if (object1[key] === object2[key]) {
@@ -36,7 +45,7 @@ export function deepDiff<T extends any>(value1: T, value2: T): Partial<T> | type
     const o1has = object1.hasOwnProperty(key);
     const o2has = object2.hasOwnProperty(key);
     if (!o2has) {
-      acc[key] = { __delete: true };
+      acc[key] = DELETE;
       return acc;
     }
     if (!o1has && o2has) {
