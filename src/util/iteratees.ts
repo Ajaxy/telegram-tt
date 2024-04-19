@@ -188,6 +188,10 @@ export function cloneDeep<T>(value: T): T {
   }, {} as T);
 }
 
+export function isLiteralObject(value: any): value is AnyLiteral {
+  return isObject(value) && !Array.isArray(value);
+}
+
 function isObject(value: any): value is object {
   // eslint-disable-next-line no-null/no-null
   return typeof value === 'object' && value !== null;

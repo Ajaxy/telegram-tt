@@ -1,41 +1,32 @@
-import { unique } from './iteratees';
+import { isLiteralObject, unique } from './iteratees';
 
-export function deepMerge<T extends any>(value1: T, value2: Record<keyof T, any>): T {
-  const type1 = typeof value1;
-  const type2 = typeof value2;
-  if (type1 !== 'object') {
-    return value2 as T;
-  }
-
-  if (Array.isArray(value2)) {
-    return value2 as T;
-  }
-
-  if (type1 !== type2) {
-    return value2 as T;
-  }
-
+export function deepMerge<T extends any>(value1: T, value2: T): T {
   if (value1 === value2) {
-    return value2 as T;
+    return value2;
   }
 
-  const object1 = value1 as AnyLiteral;
-  const object2 = value2 as AnyLiteral;
+  if (!isLiteralObject(value2)) {
+    return value2;
+  }
+
+  if (!isLiteralObject(value1)) {
+    return reduceDiff(value2) as T;
+  }
 
   // eslint-disable-next-line no-underscore-dangle
-  if (object2.__deleteAllChildren) {
+  if (value2.__deleteAllChildren) {
     return {} as T;
   }
 
-  const allKeys = unique(Object.keys(object1).concat(Object.keys(object2)));
+  const allKeys = unique(Object.keys(value1).concat(Object.keys(value2)));
 
   return allKeys.reduce((acc: AnyLiteral, key) => {
-    const oldValue = object1[key];
+    const oldValue = value1[key];
 
-    if (!(key in object2)) {
+    if (!value2.hasOwnProperty(key)) {
       acc[key] = oldValue;
     } else {
-      const newValue = object2[key];
+      const newValue = value2[key];
       // eslint-disable-next-line no-underscore-dangle
       if (!newValue?.__delete) {
         acc[key] = deepMerge(oldValue, newValue);
@@ -44,4 +35,21 @@ export function deepMerge<T extends any>(value1: T, value2: Record<keyof T, any>
 
     return acc;
   }, {}) as T;
+}
+
+function reduceDiff(diff: AnyLiteral) {
+  // eslint-disable-next-line no-underscore-dangle
+  if (diff.__deleteAllChildren) {
+    return {};
+  }
+
+  return Object.entries(diff).reduce((acc: AnyLiteral, [key, value]) => {
+    // eslint-disable-next-line no-underscore-dangle
+    if (!value?.__delete) {
+      // eslint-disable-next-line no-null/no-null
+      acc[key] = isLiteralObject(value) ? reduceDiff(value) : value;
+    }
+
+    return acc;
+  }, {});
 }
