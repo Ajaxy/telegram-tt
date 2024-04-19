@@ -21,6 +21,7 @@ import {
   closeNewContactDialog,
   replaceUserStatuses,
   updateChat,
+  updateChats,
   updateManagementProgress,
   updateUser,
   updateUserFullInfo,
@@ -60,6 +61,9 @@ addActionHandler('loadFullUser', async (global, actions, payload): Promise<void>
 
   global = updateUser(global, userId, result.user);
   global = updateUserFullInfo(global, userId, result.fullInfo);
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+
   setGlobal(global);
   if (withPhotos || (user.photos?.length && hasChangedPhoto)) {
     actions.loadProfilePhotos({ profileId: userId });

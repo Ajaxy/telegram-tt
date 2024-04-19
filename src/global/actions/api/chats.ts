@@ -696,7 +696,7 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   try {
     const result = await callApi('createChannel', { title, about, users });
     createdChannel = result?.channel;
-    restrictedUserIds = result?.restrictedUserIds;
+    restrictedUserIds = result?.missingUsers?.map(({ id }) => id);
   } catch (error) {
     global = getGlobal();
 
@@ -864,7 +864,7 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
 
   let createdChatId: string | undefined;
   try {
-    const { chat: createdChat, restrictedUserIds } = await callApi('createGroupChat', {
+    const { chat: createdChat, missingUsers } = await callApi('createGroupChat', {
       title,
       users,
     }) ?? {};
@@ -890,6 +890,8 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
       shouldReplaceHistory: true,
       tabId,
     });
+
+    const restrictedUserIds = missingUsers?.map(({ id }) => id);
     if (restrictedUserIds) {
       global = getGlobal();
       global = addUsersToRestrictedInviteList(global, restrictedUserIds, chatId, tabId);
@@ -1918,7 +1920,8 @@ addActionHandler('addChatMembers', async (global, actions, payload): Promise<voi
   }
 
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Loading, tabId });
-  const restrictedUserIds = await callApi('addChatMembers', chat, users);
+  const missingUsers = await callApi('addChatMembers', chat, users);
+  const restrictedUserIds = missingUsers?.map((user) => user.id);
   if (restrictedUserIds) {
     global = getGlobal();
     global = addUsersToRestrictedInviteList(global, restrictedUserIds, chat.id, tabId);

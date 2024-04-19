@@ -1958,9 +1958,20 @@ export async function sendQuickReply({
   chat: ApiChat;
   shortcutId: number;
 }) {
+  // Remove this request when the client fully supports quick replies and caches them
+  const messages = await invokeRequest(new GramJs.messages.GetQuickReplyMessages({
+    shortcutId,
+  }));
+  if (!messages || messages instanceof GramJs.messages.MessagesNotModified) return;
+
+  const ids = messages.messages.map((m) => m.id);
+  const randomIds = ids.map(generateRandomBigInt);
+
   const result = await invokeRequest(new GramJs.messages.SendQuickReplyMessages({
     peer: buildInputPeer(chat.id, chat.accessHash),
     shortcutId,
+    id: ids,
+    randomId: randomIds,
   }), {
     shouldIgnoreUpdates: true,
   });

@@ -14,6 +14,7 @@ import type {
   ApiChatReactions,
   ApiChatSettings,
   ApiExportedInvite,
+  ApiMissingInvitedUser,
   ApiRestrictionReason,
   ApiSendAsPeerId,
   ApiTopic,
@@ -632,5 +633,15 @@ export function buildApiChatlistExportedInvite(
     title,
     url,
     peerIds: peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+  };
+}
+
+export function buildApiMissingInvitedUser(
+  user: GramJs.TypeMissingInvitee,
+): ApiMissingInvitedUser {
+  return {
+    id: user.userId.toString(),
+    isRequiringPremiumToMessage: user.premiumRequiredForPm,
+    isRequiringPremiumToInvite: user.premiumWouldAllowInvite,
   };
 }

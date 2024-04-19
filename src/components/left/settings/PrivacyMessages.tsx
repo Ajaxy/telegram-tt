@@ -18,29 +18,36 @@ type OwnProps = {
 
 type StateProps = {
   shouldNewNonContactPeersRequirePremium?: boolean;
+  canLimitNewMessagesWithoutPremium?: boolean;
   isCurrentUserPremium?: boolean;
 };
 
 function PrivacyMessages({
-  isActive, onReset, shouldNewNonContactPeersRequirePremium, isCurrentUserPremium,
+  isActive,
+  canLimitNewMessagesWithoutPremium,
+  shouldNewNonContactPeersRequirePremium,
+  isCurrentUserPremium,
+  onReset,
 }: OwnProps & StateProps) {
   const { updateGlobalPrivacySettings } = getActions();
   const lang = useLang();
+
+  const canChange = isCurrentUserPremium || canLimitNewMessagesWithoutPremium;
 
   const options = useMemo(() => {
     return [
       { value: 'everybody', label: lang('P2PEverybody') },
       {
         value: 'contacts_and_premium',
-        label: isCurrentUserPremium ? (
+        label: canChange ? (
           lang('PrivacyMessagesContactsAndPremium')
         ) : (
           <PrivacyLockedOption label={lang('PrivacyMessagesContactsAndPremium')} />
         ),
-        hidden: !isCurrentUserPremium,
+        hidden: !canChange,
       },
     ];
-  }, [lang, isCurrentUserPremium]);
+  }, [lang, canChange]);
 
   const handleChange = useLastCallback((privacy: string) => {
     updateGlobalPrivacySettings({ shouldNewNonContactPeersRequirePremium: privacy === 'contacts_and_premium' });
@@ -67,7 +74,7 @@ function PrivacyMessages({
           {lang('Privacy.Messages.SectionFooter')}
         </p>
       </div>
-      {!isCurrentUserPremium && <PremiumStatusItem premiumSection="message_privacy" />}
+      {!canChange && <PremiumStatusItem premiumSection="message_privacy" />}
     </>
   );
 }
@@ -76,5 +83,6 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
     shouldNewNonContactPeersRequirePremium: selectNewNoncontactPeersRequirePremium(global),
     isCurrentUserPremium: selectIsCurrentUserPremium(global),
+    canLimitNewMessagesWithoutPremium: global.appConfig?.canLimitNewMessagesWithoutPremium,
   };
 })(PrivacyMessages));

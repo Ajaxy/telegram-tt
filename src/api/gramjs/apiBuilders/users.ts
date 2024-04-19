@@ -1,8 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiBusinessLocation,
-  ApiBusinessWorkHours,
   ApiPremiumGiftOption,
   ApiUser,
   ApiUserFullInfo,
@@ -12,8 +10,8 @@ import type {
 
 import { omitUndefined } from '../../../util/iteratees';
 import { buildApiBotInfo } from './bots';
+import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
 import { buildApiPhoto, buildApiUsernames } from './common';
-import { buildGeoPoint } from './messageContent';
 import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
 export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
@@ -22,7 +20,8 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
       profilePhoto, voiceMessagesForbidden, premiumGifts,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
-      contactRequirePremium, businessWorkHours, businessLocation,
+      contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
+      personalChannelId, personalChannelMessage,
     },
     users,
   } = mtpUserFull;
@@ -45,6 +44,9 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     isContactRequirePremium: contactRequirePremium,
     businessLocation: businessLocation && buildApiBusinessLocation(businessLocation),
     businessWorkHours: businessWorkHours && buildApiBusinessWorkHours(businessWorkHours),
+    businessIntro: businessIntro && buildApiBusinessIntro(businessIntro),
+    personalChannelId: personalChannelId && buildApiPeerId(personalChannelId, 'channel'),
+    personalChannelMessageId: personalChannelMessage,
   });
 }
 
@@ -157,30 +159,5 @@ export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption):
     currency,
     amount: amount.toJSNumber(),
     botUrl,
-  };
-}
-
-export function buildApiBusinessLocation(location: GramJs.TypeBusinessLocation): ApiBusinessLocation {
-  const {
-    address, geoPoint,
-  } = location;
-
-  return {
-    address,
-    geo: geoPoint && buildGeoPoint(geoPoint),
-  };
-}
-
-export function buildApiBusinessWorkHours(workHours: GramJs.TypeBusinessWorkHours): ApiBusinessWorkHours {
-  const {
-    timezoneId, weeklyOpen,
-  } = workHours;
-
-  return {
-    timezoneId,
-    workHours: weeklyOpen.map(({ startMinute, endMinute }) => ({
-      startMinute,
-      endMinute,
-    })),
   };
 }

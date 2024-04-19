@@ -201,6 +201,15 @@ const useWebAppFrame = (
         window.open(linkUrl, '_blank', 'noreferrer');
       }
 
+      if (eventType === 'web_app_biometry_get_info') {
+        sendEvent({
+          eventType: 'biometry_info_received',
+          eventData: {
+            available: false,
+          },
+        });
+      }
+
       onEvent(data);
     } catch (err) {
       // Ignore other messages

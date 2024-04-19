@@ -30,7 +30,7 @@ import {
   serializeBytes,
 } from '../helpers';
 import localDb from '../localDb';
-import { invokeRequest } from './client';
+import { handleGramJsUpdate, invokeRequest } from './client';
 import { getTemporaryPaymentPassword } from './twoFaSettings';
 
 let onUpdate: OnApiUpdate;
@@ -108,6 +108,8 @@ export async function sendPaymentForm({
     ...(tipAmount && { tipAmount: BigInt(tipAmount) }),
   }));
 
+  if (!result) return false;
+
   if (result instanceof GramJs.payments.PaymentVerificationNeeded) {
     onUpdate({
       '@type': 'updatePaymentVerificationNeeded',
@@ -115,6 +117,8 @@ export async function sendPaymentForm({
     });
 
     return undefined;
+  } else {
+    handleGramJsUpdate(result.updates);
   }
 
   return Boolean(result);

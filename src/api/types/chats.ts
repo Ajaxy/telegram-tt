@@ -278,3 +278,9 @@ export interface ApiPeerColor {
   color?: number;
   backgroundEmojiId?: string;
 }
+
+export interface ApiMissingInvitedUser {
+  id: string;
+  isRequiringPremiumToInvite?: boolean;
+  isRequiringPremiumToMessage?: boolean;
+}

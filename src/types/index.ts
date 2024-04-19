@@ -123,6 +123,7 @@ export interface ApiPrivacySettings {
   allowChatIds: string[];
   blockUserIds: string[];
   blockChatIds: string[];
+  shouldAllowPremium?: true;
 }
 
 export interface ApiInputPrivacyRules {
@@ -132,6 +133,7 @@ export interface ApiInputPrivacyRules {
   allowedChats?: ApiChat[];
   blockedUsers?: ApiUser[];
   blockedChats?: ApiChat[];
+  shouldAllowPremium?: true;
 }
 
 export type IAnchorPosition = {
@@ -250,8 +252,8 @@ export enum SettingsScreens {
 }
 
 export type StickerSetOrReactionsSetOrRecent = Pick<ApiStickerSet, (
-  'id' | 'accessHash' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isLottie' | 'isVideos' | 'isEmoji' |
-  'installedDate' | 'isArchived'
+  'id' | 'accessHash' | 'title' | 'count' | 'stickers' | 'isEmoji' | 'installedDate' | 'isArchived' |
+  'hasThumbnail' | 'hasStaticThumb' | 'hasAnimatedThumb' | 'hasVideoThumb' | 'thumbCustomEmojiId'
 )> & { reactions?: ApiReaction[] };
 
 export enum LeftColumnContent {

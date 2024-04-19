@@ -22,13 +22,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
   const customEmojiAttribute = document.attributes
     .find((attr): attr is GramJs.DocumentAttributeCustomEmoji => attr instanceof GramJs.DocumentAttributeCustomEmoji);
 
-  const fileAttribute = (mimeType === LOTTIE_STICKER_MIME_TYPE || mimeType === VIDEO_STICKER_MIME_TYPE)
-    && document.attributes
-      .find((attr: any): attr is GramJs.DocumentAttributeFilename => (
-        attr instanceof GramJs.DocumentAttributeFilename
-      ));
-
-  if (!(stickerAttribute || customEmojiAttribute) && !fileAttribute) {
+  if (!(stickerAttribute || customEmojiAttribute)) {
     return undefined;
   }
 
@@ -104,9 +98,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
 export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
   const {
     archived,
-    animated,
     installedDate,
-    videos,
     id,
     accessHash,
     title,
@@ -117,17 +109,25 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     thumbDocumentId,
   } = set;
 
+  const hasStaticThumb = thumbs?.some((thumb) => thumb.type === 's');
+  const hasAnimatedThumb = thumbs?.some((thumb) => thumb.type === 'a');
+  const hasVideoThumb = thumbs?.some((thumb) => thumb.type === 'v');
+  const thumbCustomEmojiId = thumbDocumentId && String(thumbDocumentId);
+
+  const hasThumbnail = hasStaticThumb || hasAnimatedThumb || hasVideoThumb || Boolean(thumbCustomEmojiId);
+
   return {
     isArchived: archived,
-    isLottie: animated,
-    isVideos: videos,
     isEmoji: emojis,
     installedDate,
     id: String(id),
     accessHash: String(accessHash),
     title,
-    hasThumbnail: Boolean(thumbs?.length || thumbDocumentId),
-    thumbCustomEmojiId: thumbDocumentId?.toString(),
+    hasStaticThumb,
+    hasAnimatedThumb,
+    hasVideoThumb,
+    hasThumbnail,
+    thumbCustomEmojiId,
     count,
     shortName,
   };

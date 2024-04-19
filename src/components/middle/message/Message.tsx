@@ -283,6 +283,7 @@ type StateProps = {
   senderBoosts?: number;
   tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
   canTranscribeVoice?: boolean;
+  viaBusinessBot?: ApiUser;
 };
 
 type MetaPosition =
@@ -400,6 +401,7 @@ const Message: FC<OwnProps & StateProps> = ({
   senderBoosts,
   tags,
   canTranscribeVoice,
+  viaBusinessBot,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -753,7 +755,9 @@ const Message: FC<OwnProps & StateProps> = ({
     ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded, Boolean(focusedQuote),
   );
 
-  const signature = (isChannel && message.postAuthorTitle)
+  const viaBusinessBotTitle = viaBusinessBot ? getSenderTitle(lang, viaBusinessBot) : undefined;
+
+  const signature = viaBusinessBotTitle || (isChannel && message.postAuthorTitle)
     || ((asForwarded || isChatWithSelf) && forwardInfo?.postAuthorTitle)
     || undefined;
 
@@ -1486,7 +1490,7 @@ export default memo(withGlobal<OwnProps>(
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
     const {
-      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned,
+      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, viaBusinessBotId,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -1595,6 +1599,8 @@ export default memo(withGlobal<OwnProps>(
     const transcribeMinLevel = global.appConfig?.groupTranscribeLevelMin;
     const canTranscribeVoice = isPremium || Boolean(transcribeMinLevel && chatLevel >= transcribeMinLevel);
 
+    const viaBusinessBot = viaBusinessBotId ? selectUser(global, viaBusinessBotId) : undefined;
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1678,6 +1684,7 @@ export default memo(withGlobal<OwnProps>(
       senderBoosts,
       tags: global.savedReactionTags?.byKey,
       canTranscribeVoice,
+      viaBusinessBot,
     };
   },
 )(Message));

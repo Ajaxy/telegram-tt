@@ -79,8 +79,11 @@ type OwnProps = {
   orderDiff: number;
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
-  offsetTop: number;
+  offsetTop?: number;
   isSavedDialog?: boolean;
+  isPreview?: boolean;
+  previewMessageId?: number;
+  className?: string;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
 };
@@ -139,6 +142,9 @@ const Chat: FC<OwnProps & StateProps> = ({
   lastMessage,
   isSavedDialog,
   currentUserId,
+  isPreview,
+  previewMessageId,
+  className,
   onDragEnter,
 }) => {
   const {
@@ -146,9 +152,11 @@ const Chat: FC<OwnProps & StateProps> = ({
     openSavedDialog,
     toggleChatInfo,
     focusLastMessage,
+    focusMessage,
     loadTopics,
     openForumPanel,
     closeForumPanel,
+    setShouldCloseRightColumn,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -181,12 +189,25 @@ const Chat: FC<OwnProps & StateProps> = ({
     withInterfaceAnimations,
     orderDiff,
     isSavedDialog,
+    isPreview,
   });
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
 
   const handleClick = useLastCallback(() => {
     const noForumTopicPanel = isMobile && isForumAsMessages;
+
+    if (isMobile) {
+      setShouldCloseRightColumn({ value: true });
+    }
+
+    if (isPreview) {
+      focusMessage({
+        chatId,
+        messageId: previewMessageId!,
+      });
+      return;
+    }
 
     if (isSavedDialog) {
       openSavedDialog({ chatId, noForumTopicPanel: true }, { forceOnHeavyAnimation: true });
@@ -256,6 +277,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     canChangeFolder,
     isSavedDialog,
     currentUserId,
+    isPreview,
   });
 
   const isIntersecting = useIsIntersecting(ref, chat ? observeIntersection : undefined);
@@ -286,18 +308,20 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const peer = user || chat;
 
-  const className = buildClassName(
+  const chatClassName = buildClassName(
     'Chat chat-item-clickable',
     isUserId(chatId) ? 'private' : 'group',
     isForum && 'forum',
     isSelected && 'selected',
     isSelectedForum && 'selected-forum',
+    isPreview && 'standalone',
+    className,
   );
 
   return (
     <ListItem
       ref={ref}
-      className={className}
+      className={chatClassName}
       href={href}
       style={`top: ${offsetTop}px`}
       ripple={!isForum && !isMobile}
@@ -345,7 +369,14 @@ const Chat: FC<OwnProps & StateProps> = ({
         </div>
         <div className="subtitle">
           {renderSubtitle()}
-          <ChatBadge chat={chat} isPinned={isPinned} isMuted={isMuted} isSavedDialog={isSavedDialog} />
+          {!isPreview && (
+            <ChatBadge
+              chat={chat}
+              isPinned={isPinned}
+              isMuted={isMuted}
+              isSavedDialog={isSavedDialog}
+            />
+          )}
         </div>
       </div>
       {shouldRenderDeleteModal && (
@@ -387,7 +418,9 @@ const Chat: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, isSavedDialog }): StateProps => {
+  (global, {
+    chatId, isSavedDialog, isPreview, previewMessageId,
+  }): StateProps => {
     const chat = selectChat(global, chatId);
     if (!chat) {
       return {
@@ -395,8 +428,10 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const lastMessageId = selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
-    const lastMessage = selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
+    const lastMessageId = previewMessageId || selectChatLastMessageId(global, chatId, isSavedDialog ? 'saved' : 'all');
+    const lastMessage = previewMessageId
+      ? selectChatMessage(global, chatId, previewMessageId)
+      : selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
     const { senderId, isOutgoing, forwardInfo } = lastMessage || {};
     const actualSenderId = isSavedDialog ? forwardInfo?.fromId : senderId;
     const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
@@ -413,7 +448,7 @@ export default memo(withGlobal<OwnProps>(
       threadId: currentThreadId,
       type: messageListType,
     } = selectCurrentMessageList(global) || {};
-    const isSelected = chatId === currentChatId && (isSavedDialog
+    const isSelected = !isPreview && chatId === currentChatId && (isSavedDialog
       ? chatId === currentThreadId : currentThreadId === MAIN_THREAD_ID);
     const isSelectedForum = (chat.isForum && chatId === currentChatId)
       || chatId === selectTabState(global).forumPanelChatId;

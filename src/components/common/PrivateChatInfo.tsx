@@ -56,6 +56,7 @@ type StateProps =
     self?: ApiUser;
     isSavedMessages?: boolean;
     areMessagesLoaded: boolean;
+    isSynced?: boolean;
   };
 
 const PrivateChatInfo: FC<OwnProps & StateProps> = ({
@@ -83,6 +84,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   ripple,
   className,
   storyViewerOrigin,
+  isSynced,
   onEmojiStatusClick,
 }) => {
   const {
@@ -97,10 +99,10 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (userId) {
-      if (withFullInfo) loadFullUser({ userId });
+      if (withFullInfo && isSynced) loadFullUser({ userId });
       if (withMediaViewer) loadProfilePhotos({ profileId: userId });
     }
-  }, [userId, withFullInfo, withMediaViewer]);
+  }, [userId, withFullInfo, withMediaViewer, isSynced]);
 
   const handleAvatarViewerOpen = useLastCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
@@ -224,6 +226,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
+    const { isSynced } = global;
     const user = selectUser(global, userId);
     const userStatus = selectUserStatus(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
@@ -236,6 +239,7 @@ export default memo(withGlobal<OwnProps>(
       isSavedMessages,
       areMessagesLoaded,
       self,
+      isSynced,
     };
   },
 )(PrivateChatInfo));

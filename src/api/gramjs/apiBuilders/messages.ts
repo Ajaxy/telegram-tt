@@ -160,7 +160,7 @@ export type UniversalMessage = (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
     'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned' |
-    'savedPeerId' | 'fromBoostsApplied' | 'quickReplyShortcutId'
+    'savedPeerId' | 'fromBoostsApplied' | 'quickReplyShortcutId' | 'viaBusinessBotId'
   )>
 );
 
@@ -240,6 +240,7 @@ export function buildApiMessageWithChatId(
     hasComments,
     savedPeerId,
     senderBoosts,
+    viaBusinessBotId: mtpMessage.viaBusinessBotId?.toString(),
   });
 }
 

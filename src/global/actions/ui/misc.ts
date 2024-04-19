@@ -743,6 +743,13 @@ addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionRe
   }, tabId);
 });
 
+addActionHandler('setShouldCloseRightColumn', (global, actions, payload): ActionReturnType => {
+  const { value, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    shouldCloseRightColumn: value,
+  }, tabId);
+});
+
 let prevIsScreenLocked: boolean | undefined;
 let prevBlurredTabsCount: number = 0;
 let onlineTimeout: number | undefined;

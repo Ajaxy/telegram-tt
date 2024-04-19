@@ -11,6 +11,7 @@ import type {
   ApiChatReactions,
   ApiGroupCall,
   ApiMessage,
+  ApiMissingInvitedUser,
   ApiPeer,
   ApiPhoto,
   ApiTopic,
@@ -42,6 +43,7 @@ import {
   buildApiChatlistInvite,
   buildApiChatReactions,
   buildApiChatSettings,
+  buildApiMissingInvitedUser,
   buildApiTopic,
   buildChatMembers,
   getPeerKey,
@@ -73,10 +75,10 @@ import {
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 import {
-  applyState, processAffectedHistory, processUpdate, updateChannelState,
+  applyState, processAffectedHistory, updateChannelState,
 } from '../updates/updateManager';
 import { dispatchThreadInfoUpdates } from '../updates/updater';
-import { invokeRequest, uploadFile } from './client';
+import { handleGramJsUpdate, invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
   fullInfo: ApiChatFullInfo;
@@ -782,36 +784,20 @@ export async function createChannel({
 
   const channel = buildApiChatFromPreview(newChannel)!;
 
-  let restrictedUserIds: string[] | undefined;
+  let missingUsers: ApiMissingInvitedUser[] | undefined;
 
   if (users?.length) {
-    try {
-      const updates = await invokeRequest(new GramJs.channels.InviteToChannel({
-        channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
-        users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
-      }), {
-        shouldIgnoreUpdates: true,
-        shouldThrow: true,
-      });
-      if (updates) {
-        processUpdate(updates);
-        restrictedUserIds = handleUserPrivacyRestrictedUpdates(updates);
-      }
-    } catch (err) {
-      if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
-        restrictedUserIds = users.map(({ id }) => id);
-      } else {
-        onUpdate({
-          '@type': 'error',
-          error: {
-            message: (err as Error).message,
-          },
-        });
-      }
-    }
+    const invitedUsers = await invokeRequest(new GramJs.channels.InviteToChannel({
+      channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
+      users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
+    }));
+    if (!invitedUsers) return undefined;
+
+    handleGramJsUpdate(invitedUsers.updates);
+    missingUsers = invitedUsers.missingInvitees.map(buildApiMissingInvitedUser);
   }
 
-  return { channel, restrictedUserIds };
+  return { channel, missingUsers };
 }
 
 export function joinChannel({
@@ -882,37 +868,25 @@ export async function createGroupChat({
 }: {
   title: string; users: ApiUser[];
 }) {
-  const result = await invokeRequest(new GramJs.messages.CreateChat({
+  const invitedUsers = await invokeRequest(new GramJs.messages.CreateChat({
     title,
     users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
-  }), {
-    shouldIgnoreUpdates: true,
-    shouldThrow: true,
-  });
+  }));
+  if (!invitedUsers) return undefined;
 
-  // `createChat` can return a lot of different update types according to docs,
-  // but currently chat creation returns only `Updates` type.
-  // Errors are added to catch unexpected cases in future testing
-  if (!(result instanceof GramJs.Updates)) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.error('Unexpected chat creation update', result);
-    }
-    return undefined;
-  }
-  processUpdate(result);
-  const restrictedUserIds = handleUserPrivacyRestrictedUpdates(result);
+  handleGramJsUpdate(invitedUsers.updates);
+  const missingUsers = invitedUsers.missingInvitees.map(buildApiMissingInvitedUser);
 
-  const newChat = result.chats[0];
+  const newChat = (invitedUsers.updates as GramJs.Updates).chats[0];
   if (!newChat || !(newChat instanceof GramJs.Chat)) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.error('Created chat not found', result);
+      console.error('Created chat not found', invitedUsers.updates);
     }
     return undefined;
   }
 
-  return { chat: buildApiChatFromPreview(newChat), restrictedUserIds };
+  return { chat: buildApiChatFromPreview(newChat), missingUsers };
 }
 
 export async function editChatPhoto({
@@ -1437,48 +1411,24 @@ export async function openChatByInvite(hash: string) {
 export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
   try {
     if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
-      try {
-        const updates = await invokeRequest(new GramJs.channels.InviteToChannel({
-          channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-          users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
-        }), {
-          shouldIgnoreUpdates: true,
-          shouldThrow: true,
-        });
-        if (!updates) {
-          return undefined;
-        }
-        processUpdate(updates);
-        return handleUserPrivacyRestrictedUpdates(updates);
-      } catch (err) {
-        if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
-          return users.map(({ id }) => id);
-        }
-        throw err;
-      }
+      const invitedUsers = await invokeRequest(new GramJs.channels.InviteToChannel({
+        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
+      }));
+      if (!invitedUsers) return undefined;
+      handleGramJsUpdate(invitedUsers.updates);
+      return invitedUsers.missingInvitees.map(buildApiMissingInvitedUser);
     }
 
     const addChatUsersResult = await Promise.all(
       users.map(async (user) => {
-        try {
-          const updates = await invokeRequest(new GramJs.messages.AddChatUser({
-            chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
-            userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
-          }), {
-            shouldIgnoreUpdates: true,
-            shouldThrow: true,
-          });
-          if (updates) {
-            processUpdate(updates);
-            return handleUserPrivacyRestrictedUpdates(updates);
-          }
-          return undefined;
-        } catch (err) {
-          if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
-            return [user.id];
-          }
-          throw err;
-        }
+        const invitedUsers = await invokeRequest(new GramJs.messages.AddChatUser({
+          chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
+          userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+        }));
+        if (!invitedUsers) return undefined;
+        handleGramJsUpdate(invitedUsers.updates);
+        return invitedUsers.missingInvitees.map(buildApiMissingInvitedUser);
       }),
     );
     if (addChatUsersResult) {
@@ -2065,25 +2015,4 @@ export async function fetchChannelRecommendations({ chat }: { chat: ApiChat }) {
     count:
       result instanceof GramJs.messages.ChatsSlice ? result.count : undefined,
   };
-}
-
-function handleUserPrivacyRestrictedUpdates(updates: GramJs.TypeUpdates) {
-  if (!(updates instanceof GramJs.Updates) && !(updates instanceof GramJs.UpdatesCombined)) {
-    return undefined;
-  }
-
-  const eligibleUpdates = updates
-    .updates
-    .filter(
-      (u): u is GramJs.UpdateGroupInvitePrivacyForbidden => {
-        return u instanceof GramJs.UpdateGroupInvitePrivacyForbidden;
-      },
-    );
-
-  if (eligibleUpdates.length === 0) {
-    return undefined;
-  }
-
-  return eligibleUpdates
-    .map((u) => buildApiPeerId(u.userId, 'user'));
 }

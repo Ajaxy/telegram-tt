@@ -277,19 +277,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           narrow
-          className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.PrivacyGroupChats)}
-        >
-          <div className="multiline-menu-item">
-            <span className="title">{lang('WhoCanAddMe')}</span>
-            <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyGroupChats)}
-            </span>
-          </div>
-        </ListItem>
-        <ListItem
-          narrow
           allowDisabledClick
           rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
           className="no-icon"
@@ -316,6 +303,19 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
               {shouldNewNonContactPeersRequirePremium
                 ? lang('PrivacyMessagesContactsAndPremium')
                 : lang('P2PEverybody')}
+            </span>
+          </div>
+        </ListItem>
+        <ListItem
+          narrow
+          className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.PrivacyGroupChats)}
+        >
+          <div className="multiline-menu-item">
+            <span className="title">{lang('WhoCanAddMe')}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(privacyGroupChats)}
             </span>
           </div>
         </ListItem>

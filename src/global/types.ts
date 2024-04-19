@@ -246,6 +246,7 @@ export type TabState = {
     resultIds?: string[];
   };
 
+  shouldCloseRightColumn?: boolean;
   nextProfileTab?: ProfileTabType;
   forceScrollProfileTab?: boolean;
   nextSettingsScreen?: SettingsScreens;
@@ -1775,6 +1776,9 @@ export interface ActionPayloads {
   updatePrivateLink: WithTabId | undefined;
   resetManagementError: { chatId: string } & WithTabId;
 
+  setShouldCloseRightColumn: {
+    value?: boolean;
+  } & WithTabId;
   requestChatUpdate: { chatId: string };
   requestSavedDialogUpdate: { chatId: string };
   loadChatJoinRequests: {

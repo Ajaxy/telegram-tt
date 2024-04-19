@@ -22,6 +22,7 @@ const useChatContextActions = ({
   canChangeFolder,
   isSavedDialog,
   currentUserId,
+  isPreview,
   handleDelete,
   handleMute,
   handleChatFolderChange,
@@ -35,6 +36,7 @@ const useChatContextActions = ({
   canChangeFolder?: boolean;
   isSavedDialog?: boolean;
   currentUserId?: string;
+  isPreview?: boolean;
   handleDelete?: NoneToVoidFunction;
   handleMute?: NoneToVoidFunction;
   handleChatFolderChange: NoneToVoidFunction;
@@ -68,7 +70,7 @@ const useChatContextActions = ({
   }, [chat, isSavedDialog, lang]);
 
   return useMemo(() => {
-    if (!chat) {
+    if (!chat || isPreview) {
       return undefined;
     }
 
@@ -178,6 +180,7 @@ const useChatContextActions = ({
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, currentUserId,
     handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, isSavedDialog, deleteTitle,
+    isPreview,
   ]);
 };
 

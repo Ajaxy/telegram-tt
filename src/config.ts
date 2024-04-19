@@ -49,7 +49,7 @@ export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v33';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v34';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -217,7 +217,7 @@ export const VIDEO_WEBM_TYPE = 'video/webm';
 export const GIF_MIME_TYPE = 'image/gif';
 
 export const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
-export const VIDEO_STICKER_MIME_TYPE = 'video/webm';
+export const VIDEO_STICKER_MIME_TYPE = VIDEO_WEBM_TYPE;
 
 export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
   'image/png', 'image/jpeg', GIF_MIME_TYPE,

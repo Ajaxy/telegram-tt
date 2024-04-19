@@ -47,6 +47,14 @@ class FloodWaitError extends FloodError {
         this.seconds = seconds;
     }
 }
+class FloodPremiumWaitError extends FloodWaitError {
+    constructor(args) {
+        const seconds = Number(args.capture || 0);
+        super(`A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`);
+        this.message = `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`;
+        this.seconds = seconds;
+    }
+}
 class MsgWaitError extends FloodError {
     constructor(args) {
         super(`Message failed to be sent.${RPCError._fmtRequest(args.request)}`);
@@ -97,6 +105,7 @@ const rpcErrorRe = [
     [/FILE_MIGRATE_(\d+)/, FileMigrateError],
     [/FLOOD_TEST_PHONE_WAIT_(\d+)/, FloodTestPhoneWaitError],
     [/FLOOD_WAIT_(\d+)/, FloodWaitError],
+    [/FLOOD_PREMIUM_WAIT_(\d+)/, FloodPremiumWaitError],
     [/MSG_WAIT_(.*)/, MsgWaitError],
     [/PHONE_MIGRATE_(\d+)/, PhoneMigrateError],
     [/SLOWMODE_WAIT_(\d+)/, SlowModeWaitError],

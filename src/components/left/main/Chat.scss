@@ -19,6 +19,14 @@
 
   -webkit-touch-callout: none;
 
+  &.standalone {
+    position: static;
+
+    .LastMessageMeta {
+      margin-inline-end: 0;
+    }
+  }
+
   &.animate-opacity {
     will-change: opacity;
     transition: opacity 0.2s ease-out;
@@ -54,7 +62,7 @@
     }
   }
 
-  &:last-of-type {
+  &:not(.standalone):last-of-type {
     border-bottom: 0.5rem solid transparent; // `margin` does not help, and `padding` affects forum indicator height
   }
 
@@ -223,7 +231,7 @@
     }
 
     .ChatBadge-transition {
-      position: relative;      
+      position: relative;
       transition: opacity var(--layer-transition), transform var(--layer-transition);
 
       body.no-page-transitions & {

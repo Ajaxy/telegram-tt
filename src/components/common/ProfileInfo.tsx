@@ -63,7 +63,7 @@ type StateProps =
     chatProfilePhoto?: ApiPhoto;
     emojiStatusSticker?: ApiSticker;
   }
-  & Pick<GlobalState, 'connectionState'>;
+  & Pick<GlobalState, 'isSynced'>;
 
 const EMOJI_STATUS_SIZE = 24;
 const EMOJI_TOPIC_SIZE = 120;
@@ -74,7 +74,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   user,
   userStatus,
   chat,
-  connectionState,
+  isSynced,
   mediaId,
   avatarOwnerId,
   topic,
@@ -132,10 +132,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }, [currentPhotoIndex, photos.length]);
 
   useEffect(() => {
-    if (connectionState === 'connectionStateReady' && userId && !forceShowSelf) {
+    if (isSynced && userId && !forceShowSelf) {
       loadFullUser({ userId });
     }
-  }, [userId, loadFullUser, connectionState, forceShowSelf]);
+  }, [userId, loadFullUser, isSynced, forceShowSelf]);
 
   usePhotosPreload(photos, currentPhotoIndex);
 
@@ -381,7 +381,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
-    const { connectionState } = global;
+    const { isSynced } = global;
     const user = selectUser(global, userId);
     const isPrivate = isUserId(userId);
     const userStatus = selectUserStatus(global, userId);
@@ -397,7 +397,7 @@ export default memo(withGlobal<OwnProps>(
     const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;
 
     return {
-      connectionState,
+      isSynced,
       user,
       userStatus,
       chat,

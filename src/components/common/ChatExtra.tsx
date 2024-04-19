@@ -32,6 +32,7 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 import { debounce } from '../../util/schedulers';
 import stopEvent from '../../util/stopEvent';
+import { ChatAnimationTypes } from '../left/main/hooks';
 import renderText from './helpers/renderText';
 
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
@@ -40,10 +41,13 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
+import Chat from '../left/main/Chat';
 import ListItem from '../ui/ListItem';
 import Skeleton from '../ui/placeholder/Skeleton';
 import Switcher from '../ui/Switcher';
 import BusinessHours from './BusinessHours';
+
+import styles from './ChatExtra.module.scss';
 
 type OwnProps = {
   chatOrUserId: string;
@@ -63,6 +67,7 @@ type StateProps = {
   chatInviteLink?: string;
   topicLink?: string;
   hasSavedMessages?: boolean;
+  personalChannel?: ApiChat;
 };
 
 const DEFAULT_MAP_CONFIG = {
@@ -87,6 +92,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   chatInviteLink,
   topicLink,
   hasSavedMessages,
+  personalChannel,
 }) => {
   const {
     showNotification,
@@ -105,7 +111,11 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   } = user || {};
   const { id: chatId, usernames: chatUsernames } = chat || {};
   const peerId = userId || chatId;
-  const { businessLocation, businessWorkHours } = userFullInfo || {};
+  const {
+    businessLocation,
+    businessWorkHours,
+    personalChannelMessageId,
+  } = userFullInfo || {};
   const lang = useLang();
 
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
@@ -261,6 +271,22 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="ChatExtra">
+      {personalChannel && (
+        <div className={styles.personalChannel}>
+          <h3 className={styles.personalChannelTitle}>{lang('ProfileChannel')}</h3>
+          <span className={styles.personalChannelSubscribers}>
+            {lang('Subscribers', personalChannel.membersCount, 'i')}
+          </span>
+          <Chat
+            chatId={personalChannel.id}
+            orderDiff={0}
+            animationType={ChatAnimationTypes.None}
+            isPreview
+            previewMessageId={personalChannelMessageId}
+            className={styles.personalChannelItem}
+          />
+        </div>
+      )}
       {formattedNumber && Boolean(formattedNumber.length) && (
         // eslint-disable-next-line react/jsx-no-bind
         <ListItem icon="phone" multiline narrow ripple onClick={() => copy(formattedNumber, lang('Phone'))}>
@@ -365,6 +391,10 @@ export default memo(withGlobal<OwnProps>(
 
     const hasSavedMessages = !isSavedDialog && global.chats.listIds.saved?.includes(chatOrUserId);
 
+    const personalChannel = userFullInfo?.personalChannelId
+      ? selectChat(global, userFullInfo.personalChannelId)
+      : undefined;
+
     return {
       phoneCodeList,
       chat,
@@ -377,6 +407,7 @@ export default memo(withGlobal<OwnProps>(
       description,
       topicLink,
       hasSavedMessages,
+      personalChannel,
     };
   },
 )(ChatExtra));

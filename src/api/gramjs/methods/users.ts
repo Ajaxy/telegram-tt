@@ -50,6 +50,7 @@ export async function fetchFullUser({
 
   updateLocalDb(result);
   addEntitiesToLocalDb(result.users);
+  addEntitiesToLocalDb(result.chats);
 
   if (result.fullUser.profilePhoto instanceof GramJs.Photo) {
     localDb.photos[result.fullUser.profilePhoto.id.toString()] = result.fullUser.profilePhoto;
@@ -71,8 +72,15 @@ export async function fetchFullUser({
     localDb.documents[botInfo.descriptionDocument.id.toString()] = botInfo.descriptionDocument;
   }
 
+  if (result.fullUser.businessIntro?.sticker instanceof GramJs.Document) {
+    localDb.documents[result.fullUser.businessIntro.sticker.id.toString()] = result.fullUser.businessIntro.sticker;
+  }
+
   const fullInfo = buildApiUserFullInfo(result);
-  const user = buildApiUser(result.users[0])!;
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+
+  const user = users.find(({ id: userId }) => userId === id)!;
 
   onUpdate({
     '@type': 'updateUser',
@@ -84,7 +92,12 @@ export async function fetchFullUser({
     fullInfo,
   });
 
-  return { user, fullInfo };
+  return {
+    user,
+    fullInfo,
+    users,
+    chats,
+  };
 }
 
 export async function fetchCommonChats(id: string, accessHash?: string, maxId?: string) {

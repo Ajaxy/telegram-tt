@@ -170,6 +170,7 @@
     "messages.togglePeerTranslations",
     "messages.getOutboxReadDate",
     "messages.getQuickReplies",
+    "messages.getQuickReplyMessages",
     "messages.sendQuickReplyMessages",
     "updates.getState",
     "updates.getDifference",

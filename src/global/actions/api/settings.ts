@@ -542,6 +542,7 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
   const rules = buildApiInputPrivacyRules(global, {
     visibility: settings.visibility,
     isUnspecified: settings.isUnspecified,
+    shouldAllowPremium: settings.shouldAllowPremium,
     allowedIds: isAllowList ? updatedIds : [...settings.allowUserIds, ...settings.allowChatIds],
     blockedIds: !isAllowList ? updatedIds : [...settings.blockUserIds, ...settings.blockChatIds],
   });

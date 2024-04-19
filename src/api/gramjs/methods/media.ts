@@ -171,7 +171,7 @@ async function download(
         mimeType = 'image/jpeg';
       }
     } else if (entityType === 'sticker' && sizeType) {
-      mimeType = 'image/webp';
+      mimeType = (entity as GramJs.Document).mimeType;
     } else if (entityType === 'webDocument') {
       mimeType = (entity as GramJs.TypeWebDocument).mimeType;
       fullSize = (entity as GramJs.TypeWebDocument).size;
@@ -221,12 +221,6 @@ function getMessageMediaMimeType(message: GramJs.Message, sizeType?: string) {
   if (message.media instanceof GramJs.MessageMediaDocument) {
     const document = message.media.document;
     if (document instanceof GramJs.Document) {
-      if (sizeType) {
-        return document.attributes.some((a) => a instanceof GramJs.DocumentAttributeSticker)
-          ? 'image/webp'
-          : 'image/jpeg';
-      }
-
       return document.mimeType;
     }
   }
