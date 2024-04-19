@@ -1,6 +1,6 @@
 import type {
   ApiChat, ApiChatFolder, ApiChatlistExportedInvite,
-  ApiChatMember, ApiError, ApiUser,
+  ApiChatMember, ApiError, ApiMissingInvitedUser, ApiUser,
 } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
@@ -59,7 +59,6 @@ import {
   addSimilarChannels,
   addUsers,
   addUserStatuses,
-  addUsersToRestrictedInviteList,
   deleteChatMessages,
   deleteTopic,
   leaveChat,
@@ -80,6 +79,7 @@ import {
   updateChatsLastMessageId,
   updateListedTopicIds,
   updateManagementProgress,
+  updateMissingInvitedUsers,
   updatePeerFullInfo,
   updateThread,
   updateThreadInfo,
@@ -692,11 +692,11 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   setGlobal(global);
 
   let createdChannel: ApiChat | undefined;
-  let restrictedUserIds: string[] | undefined;
+  let missingInvitedUsers: ApiMissingInvitedUser[] | undefined;
   try {
     const result = await callApi('createChannel', { title, about, users });
     createdChannel = result?.channel;
-    restrictedUserIds = result?.missingUsers?.map(({ id }) => id);
+    missingInvitedUsers = result?.missingUsers;
   } catch (error) {
     global = getGlobal();
 
@@ -732,9 +732,9 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   setGlobal(global);
   actions.openChat({ id: channelId, shouldReplaceHistory: true, tabId });
 
-  if (restrictedUserIds) {
+  if (missingInvitedUsers) {
     global = getGlobal();
-    global = addUsersToRestrictedInviteList(global, restrictedUserIds, channelId, tabId);
+    global = updateMissingInvitedUsers(global, channelId, missingInvitedUsers, tabId);
     setGlobal(global);
   }
 
@@ -862,7 +862,6 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
   }, tabId);
   setGlobal(global);
 
-  let createdChatId: string | undefined;
   try {
     const { chat: createdChat, missingUsers } = await callApi('createGroupChat', {
       title,
@@ -874,7 +873,6 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
     }
 
     const { id: chatId } = createdChat;
-    createdChatId = chatId;
 
     global = getGlobal();
     global = updateChat(global, chatId, createdChat);
@@ -891,10 +889,9 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
       tabId,
     });
 
-    const restrictedUserIds = missingUsers?.map(({ id }) => id);
-    if (restrictedUserIds) {
+    if (missingUsers) {
       global = getGlobal();
-      global = addUsersToRestrictedInviteList(global, restrictedUserIds, chatId, tabId);
+      global = updateMissingInvitedUsers(global, chatId, missingUsers, tabId);
       setGlobal(global);
     }
 
@@ -914,10 +911,6 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
           error: 'CreateGroupError',
         },
       }, tabId);
-      setGlobal(global);
-    } else if ((err as ApiError).message === 'USER_PRIVACY_RESTRICTED') {
-      global = getGlobal();
-      global = addUsersToRestrictedInviteList(global, users.map(({ id }) => id), createdChatId!, tabId);
       setGlobal(global);
     }
   }
@@ -1926,7 +1919,7 @@ addActionHandler('loadMoreMembers', async (global, actions, payload): Promise<vo
 addActionHandler('addChatMembers', async (global, actions, payload): Promise<void> => {
   const { chatId, memberIds, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
-  const users = (memberIds as string[]).map((userId) => selectUser(global, userId)).filter(Boolean);
+  const users = memberIds.map((userId) => selectUser(global, userId)).filter(Boolean);
 
   if (!chat || !users.length) {
     return;
@@ -1934,10 +1927,9 @@ addActionHandler('addChatMembers', async (global, actions, payload): Promise<voi
 
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Loading, tabId });
   const missingUsers = await callApi('addChatMembers', chat, users);
-  const restrictedUserIds = missingUsers?.map((user) => user.id);
-  if (restrictedUserIds) {
+  if (missingUsers) {
     global = getGlobal();
-    global = addUsersToRestrictedInviteList(global, restrictedUserIds, chat.id, tabId);
+    global = updateMissingInvitedUsers(global, chatId, missingUsers, tabId);
     setGlobal(global);
   }
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Closed, tabId });

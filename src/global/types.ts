@@ -33,6 +33,7 @@ import type {
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageEntity,
+  ApiMissingInvitedUser,
   ApiMyBoost,
   ApiNewPoll,
   ApiNotification,
@@ -702,7 +703,7 @@ export type TabState = {
   };
 
   inviteViaLinkModal?: {
-    restrictedUserIds: string[];
+    missingUsers: ApiMissingInvitedUser[];
     chatId: string;
   };
 

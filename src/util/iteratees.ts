@@ -163,7 +163,7 @@ export function split<T extends any>(array: T[], chunkSize: number) {
 }
 
 export function partition<T extends unknown>(
-  array: T[], filter: (value: T, index: number, array: T[]) => boolean,
+  array: T[], filter: (value: T, index: number, array: T[]) => boolean | undefined,
 ): [T[], T[]] {
   const pass: T[] = [];
   const fail: T[] = [];

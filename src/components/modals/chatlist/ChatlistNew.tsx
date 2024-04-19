@@ -71,7 +71,7 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
         </div>
         <Picker
           itemIds={invite.peerIds}
-          lockedIds={joinedIds}
+          lockedSelectedIds={joinedIds}
           onSelectedIdsChange={setSelectedPeerIds}
           selectedIds={selectedPeerIds}
         />

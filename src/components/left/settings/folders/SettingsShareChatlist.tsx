@@ -170,7 +170,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
       <div className="settings-item settings-item-chatlist">
         <Picker
           itemIds={itemIds}
-          lockedIds={lockedIds}
+          lockedSelectedIds={lockedIds}
           onSelectedIdsChange={handleSelectedIdsChange}
           selectedIds={selectedIds}
           onDisabledClick={handleClickDisabled}

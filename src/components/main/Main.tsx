@@ -79,6 +79,7 @@ import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallMo
 import BoostModal from '../modals/boost/BoostModal.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 import GiftCodeModal from '../modals/giftcode/GiftCodeModal.async';
+import InviteViaLinkModal from '../modals/inviteViaLink/InviteViaLinkModal.async';
 import MapModal from '../modals/map/MapModal.async';
 import OneTimeMediaModal from '../modals/oneTimeMedia/OneTimeMediaModal.async';
 import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
@@ -97,7 +98,6 @@ import DraftRecipientPicker from './DraftRecipientPicker.async';
 import ForwardRecipientPicker from './ForwardRecipientPicker.async';
 import GameModal from './GameModal';
 import HistoryCalendar from './HistoryCalendar.async';
-import InviteViaLinkModal from './InviteViaLinkModal.async';
 import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
@@ -606,7 +606,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
-      <InviteViaLinkModal userIds={inviteViaLinkModal?.restrictedUserIds} chatId={inviteViaLinkModal?.chatId} />
+      <InviteViaLinkModal missingUsers={inviteViaLinkModal?.missingUsers} chatId={inviteViaLinkModal?.chatId} />
     </div>
   );
 };
