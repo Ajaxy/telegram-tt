@@ -16,6 +16,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMenuPosition from '../../hooks/useMenuPosition';
 
+import Icon from '../common/Icon';
 import Button from './Button';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
@@ -47,6 +48,7 @@ interface OwnProps {
   iconClassName?: string;
   leftElement?: TeactNode;
   secondaryIcon?: IconName;
+  secondaryIconClassName?: string;
   rightElement?: TeactNode;
   buttonClassName?: string;
   className?: string;
@@ -84,6 +86,7 @@ const ListItem: FC<OwnProps> = ({
   buttonClassName,
   menuBubbleClassName,
   secondaryIcon,
+  secondaryIconClassName,
   rightElement,
   className,
   style,
@@ -246,20 +249,20 @@ const ListItem: FC<OwnProps> = ({
         )}
         {leftElement}
         {icon && (
-          <i className={buildClassName('icon', `icon-${icon}`, iconClassName)} />
+          <Icon name={icon} className={buildClassName('ListItem-main-icon', iconClassName)} />
         )}
         {multiline && (<div className="multiline-item">{children}</div>)}
         {!multiline && children}
         {secondaryIcon && (
           <Button
-            className="secondary-icon"
+            className={buildClassName('secondary-icon', secondaryIconClassName)}
             round
             color="translucent"
             size="smaller"
             onClick={handleSecondaryIconClick}
             onMouseDown={handleSecondaryIconMouseDown}
           >
-            <i className={`icon icon-${secondaryIcon}`} />
+            <Icon name={secondaryIcon} />
           </Button>
         )}
         {rightElement}

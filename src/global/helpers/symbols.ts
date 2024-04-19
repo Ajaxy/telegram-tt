@@ -5,6 +5,10 @@ export function getStickerPreviewHash(stickerId: string) {
   return `sticker${stickerId}?size=m`;
 }
 
+export function getStickerMediaHash(stickerId: string) {
+  return `document${stickerId}`;
+}
+
 export function containsCustomEmoji(formattedText: ApiFormattedText) {
   return formattedText.entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
 }

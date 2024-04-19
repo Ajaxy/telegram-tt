@@ -482,6 +482,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'bio':
       return new GramJs.InputPrivacyKeyAbout();
+
+    case 'birthday':
+      return new GramJs.InputPrivacyKeyBirthday();
   }
 
   return undefined;

@@ -1,6 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiBirthday,
   ApiPremiumGiftOption,
   ApiUser,
   ApiUserFullInfo,
@@ -8,10 +9,10 @@ import type {
   ApiUserType,
 } from '../../types';
 
-import { omitUndefined } from '../../../util/iteratees';
 import { buildApiBotInfo } from './bots';
 import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
 import { buildApiPhoto, buildApiUsernames } from './common';
+import { omitVirtualClassFields } from './helpers';
 import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
 export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
@@ -21,14 +22,14 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       profilePhoto, voiceMessagesForbidden, premiumGifts,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
-      personalChannelId, personalChannelMessage,
+      birthday, personalChannelId, personalChannelMessage,
     },
     users,
   } = mtpUserFull;
 
   const userId = buildApiPeerId(users[0].id, 'user');
 
-  return omitUndefined<ApiUserFullInfo>({
+  return {
     bio: about,
     commonChatsCount,
     pinnedMessageId: pinnedMsgId,
@@ -42,12 +43,13 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     premiumGifts: premiumGifts?.map((gift) => buildApiPremiumGiftOption(gift)),
     botInfo: botInfo && buildApiBotInfo(botInfo, userId),
     isContactRequirePremium: contactRequirePremium,
+    birthday: birthday && buildApiBirthday(birthday),
     businessLocation: businessLocation && buildApiBusinessLocation(businessLocation),
     businessWorkHours: businessWorkHours && buildApiBusinessWorkHours(businessWorkHours),
     businessIntro: businessIntro && buildApiBusinessIntro(businessIntro),
     personalChannelId: personalChannelId && buildApiPeerId(personalChannelId, 'channel'),
     personalChannelMessageId: personalChannelMessage,
-  });
+  };
 }
 
 export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
@@ -160,4 +162,8 @@ export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption):
     amount: amount.toJSNumber(),
     botUrl,
   };
+}
+
+export function buildApiBirthday(birthday: GramJs.TypeBirthday): ApiBirthday {
+  return omitVirtualClassFields(birthday);
 }

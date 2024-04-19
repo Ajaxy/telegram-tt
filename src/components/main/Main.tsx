@@ -236,6 +236,7 @@ const Main: FC<OwnProps & StateProps> = ({
   const {
     initMain,
     loadAnimatedEmojis,
+    loadBirthdayNumbersStickers,
     loadNotificationSettings,
     loadNotificationExceptions,
     updateIsOnline,
@@ -338,6 +339,7 @@ const Main: FC<OwnProps & StateProps> = ({
       initMain();
       loadAvailableReactions();
       loadAnimatedEmojis();
+      loadBirthdayNumbersStickers();
       loadGenericEmojiEffects();
       loadNotificationSettings();
       loadNotificationExceptions();

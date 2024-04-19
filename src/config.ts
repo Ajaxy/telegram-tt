@@ -213,6 +213,8 @@ export const BASE_EMOJI_KEYWORD_LANG = 'en';
 export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
+export const BIRTHDAY_NUMBERS_SET = 'FestiveFontEmoji';
+
 export const VIDEO_WEBM_TYPE = 'video/webm';
 export const GIF_MIME_TYPE = 'image/gif';
 

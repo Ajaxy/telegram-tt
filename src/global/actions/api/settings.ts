@@ -421,6 +421,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     callApi('fetchPrivacySettings', 'phoneP2P'),
     callApi('fetchPrivacySettings', 'voiceMessages'),
     callApi('fetchPrivacySettings', 'bio'),
+    callApi('fetchPrivacySettings', 'birthday'),
   ]);
 
   if (result.some((e) => e === undefined)) {
@@ -438,6 +439,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     phoneP2PSettings,
     voiceMessagesSettings,
     bioSettings,
+    birthdaySettings,
   ] = result as {
     users: ApiUser[];
     rules: ApiPrivacySettings;
@@ -463,6 +465,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
         phoneP2P: phoneP2PSettings.rules,
         voiceMessages: voiceMessagesSettings.rules,
         bio: bioSettings.rules,
+        birthday: birthdaySettings.rules,
       },
     },
   };

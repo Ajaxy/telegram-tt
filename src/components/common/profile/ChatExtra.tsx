@@ -1,15 +1,15 @@
-import type { FC } from '../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
-} from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+} from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat, ApiCountryCode, ApiUser, ApiUserFullInfo, ApiUsername,
-} from '../../api/types';
-import { MAIN_THREAD_ID } from '../../api/types';
+} from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { TME_LINK_PREFIX } from '../../config';
+import { TME_LINK_PREFIX } from '../../../config';
 import {
   buildStaticMapHash,
   getChatLink,
@@ -17,7 +17,7 @@ import {
   isChatChannel,
   isUserRightBanned,
   selectIsChatMuted,
-} from '../../global/helpers';
+} from '../../../global/helpers';
 import {
   selectChat,
   selectChatFullInfo,
@@ -27,25 +27,26 @@ import {
   selectTopicLink,
   selectUser,
   selectUserFullInfo,
-} from '../../global/selectors';
-import { copyTextToClipboard } from '../../util/clipboard';
-import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
-import { debounce } from '../../util/schedulers';
-import stopEvent from '../../util/stopEvent';
-import { ChatAnimationTypes } from '../left/main/hooks';
-import renderText from './helpers/renderText';
+} from '../../../global/selectors';
+import { copyTextToClipboard } from '../../../util/clipboard';
+import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
+import { debounce } from '../../../util/schedulers';
+import stopEvent from '../../../util/stopEvent';
+import { ChatAnimationTypes } from '../../left/main/hooks';
+import renderText from '../helpers/renderText';
 
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import useLang from '../../hooks/useLang';
-import useLastCallback from '../../hooks/useLastCallback';
-import useMedia from '../../hooks/useMedia';
-import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
+import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
-import Chat from '../left/main/Chat';
-import ListItem from '../ui/ListItem';
-import Skeleton from '../ui/placeholder/Skeleton';
-import Switcher from '../ui/Switcher';
+import Chat from '../../left/main/Chat';
+import ListItem from '../../ui/ListItem';
+import Skeleton from '../../ui/placeholder/Skeleton';
+import Switcher from '../../ui/Switcher';
 import BusinessHours from './BusinessHours';
+import UserBirthday from './UserBirthday';
 
 import styles from './ChatExtra.module.scss';
 
@@ -115,6 +116,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     businessLocation,
     businessWorkHours,
     personalChannelMessageId,
+    birthday,
   } = userFullInfo || {};
   const lang = useLang();
 
@@ -140,10 +142,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   const locationRightComponent = useMemo(() => {
     if (!businessLocation?.geo) return undefined;
     if (locationBlobUrl) {
-      return <img src={locationBlobUrl} alt="" className="business-location" />;
+      return <img src={locationBlobUrl} alt="" className={styles.businessLocation} />;
     }
 
-    return <Skeleton className="business-location" />;
+    return <Skeleton className={styles.businessLocation} />;
   }, [businessLocation, locationBlobUrl]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);
@@ -329,6 +331,9 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
         </ListItem>
       )}
+      {birthday && (
+        <UserBirthday key={peerId} birthday={birthday} user={user!} isInSettings={isInSettings} />
+      )}
       {!isInSettings && (
         <ListItem icon="unmute" ripple onClick={handleNotificationChange}>
           <span>{lang('Notifications')}</span>
@@ -348,6 +353,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           icon="location"
           ripple
           multiline
+          narrow
           rightElement={locationRightComponent}
           onClick={handleClickLocation}
         >

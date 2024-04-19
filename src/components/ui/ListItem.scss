@@ -80,7 +80,7 @@
       border-radius: 0 ;
     }
 
-    > .icon {
+    > .ListItem-main-icon {
       font-size: 1.5rem;
       margin-inline-start: 0.125rem;
       margin-inline-end: 1.25rem;
@@ -125,7 +125,7 @@
   }
 
   &.multiline {
-    .ListItem-button > .icon {
+    .ListItem-button > .ListItem-main-icon {
       position: relative;
     }
   }
@@ -194,7 +194,7 @@
     .ListItem-button {
       color: var(--color-error);
 
-      .icon {
+      .ListItem-main-icon {
         color: inherit;
       }
     }

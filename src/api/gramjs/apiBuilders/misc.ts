@@ -83,6 +83,10 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
       return 'voiceMessages';
     case 'PrivacyKeyChatInvite':
       return 'chatInvite';
+    case 'PrivacyKeyAbout':
+      return 'bio';
+    case 'PrivacyKeyBirthday':
+      return 'birthday';
   }
 
   return undefined;

@@ -12,8 +12,8 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import ChatExtra from '../../common/ChatExtra';
 import PremiumIcon from '../../common/PremiumIcon';
+import ChatExtra from '../../common/profile/ChatExtra';
 import ProfileInfo from '../../common/ProfileInfo';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';

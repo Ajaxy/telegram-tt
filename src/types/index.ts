@@ -185,6 +185,7 @@ export enum SettingsScreens {
   PrivacyLastSeen,
   PrivacyProfilePhoto,
   PrivacyBio,
+  PrivacyBirthday,
   PrivacyPhoneCall,
   PrivacyPhoneP2P,
   PrivacyForwarding,
@@ -199,6 +200,8 @@ export enum SettingsScreens {
   PrivacyProfilePhotoDeniedContacts,
   PrivacyBioAllowedContacts,
   PrivacyBioDeniedContacts,
+  PrivacyBirthdayAllowedContacts,
+  PrivacyBirthdayDeniedContacts,
   PrivacyPhoneCallAllowedContacts,
   PrivacyPhoneCallDeniedContacts,
   PrivacyPhoneP2PAllowedContacts,
@@ -380,7 +383,7 @@ export type ProfileTabType =
   | 'dialogs';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
-'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio';
+'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
 
 export enum ProfileState {

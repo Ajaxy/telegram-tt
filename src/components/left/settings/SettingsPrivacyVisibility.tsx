@@ -179,6 +179,8 @@ function PrivacySubsection({
         return lang('PrivacyProfilePhotoTitle');
       case SettingsScreens.PrivacyBio:
         return lang('PrivacyBioTitle');
+      case SettingsScreens.PrivacyBirthday:
+        return lang('PrivacyBirthdayTitle');
       case SettingsScreens.PrivacyForwarding:
         return lang('PrivacyForwardsTitle');
       case SettingsScreens.PrivacyVoiceMessages:
@@ -233,6 +235,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyProfilePhotoAllowedContacts;
       case SettingsScreens.PrivacyBio:
         return SettingsScreens.PrivacyBioAllowedContacts;
+      case SettingsScreens.PrivacyBirthday:
+        return SettingsScreens.PrivacyBirthdayAllowedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingAllowedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -256,6 +260,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyProfilePhotoDeniedContacts;
       case SettingsScreens.PrivacyBio:
         return SettingsScreens.PrivacyBioDeniedContacts;
+      case SettingsScreens.PrivacyBirthday:
+        return SettingsScreens.PrivacyBirthdayDeniedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingDeniedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -353,6 +359,10 @@ export default memo(withGlobal<OwnProps>(
 
       case SettingsScreens.PrivacyBio:
         primaryPrivacy = privacy.bio;
+        break;
+
+      case SettingsScreens.PrivacyBirthday:
+        primaryPrivacy = privacy.birthday;
         break;
 
       case SettingsScreens.PrivacyPhoneP2P:

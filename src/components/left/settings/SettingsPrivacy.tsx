@@ -2,6 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { GlobalState } from '../../../global/types';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
@@ -33,14 +34,7 @@ type StateProps = {
   shouldArchiveAndMuteNewNonContact?: boolean;
   shouldNewNonContactPeersRequirePremium?: boolean;
   canDisplayChatInTitle?: boolean;
-  privacyPhoneNumber?: ApiPrivacySettings;
-  privacyLastSeen?: ApiPrivacySettings;
-  privacyProfilePhoto?: ApiPrivacySettings;
-  privacyForwarding?: ApiPrivacySettings;
-  privacyVoiceMessages?: ApiPrivacySettings;
-  privacyGroupChats?: ApiPrivacySettings;
-  privacyPhoneCall?: ApiPrivacySettings;
-  privacyBio?: ApiPrivacySettings;
+  privacy: GlobalState['settings']['privacy'];
 };
 
 const SettingsPrivacy: FC<OwnProps & StateProps> = ({
@@ -57,14 +51,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   shouldNewNonContactPeersRequirePremium,
   canDisplayChatInTitle,
   canSetPasscode,
-  privacyPhoneNumber,
-  privacyLastSeen,
-  privacyProfilePhoto,
-  privacyForwarding,
-  privacyVoiceMessages,
-  privacyGroupChats,
-  privacyPhoneCall,
-  privacyBio,
+  privacy,
   onScreenSelect,
   onReset,
 }) => {
@@ -206,7 +193,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyPhoneTitle')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyPhoneNumber)}
+              {getVisibilityValue(privacy.phoneNumber)}
             </span>
           </div>
         </ListItem>
@@ -219,7 +206,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('LastSeenTitle')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyLastSeen)}
+              {getVisibilityValue(privacy.lastSeen)}
             </span>
           </div>
         </ListItem>
@@ -232,7 +219,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyProfilePhotoTitle')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyProfilePhoto)}
+              {getVisibilityValue(privacy.profilePhoto)}
             </span>
           </div>
         </ListItem>
@@ -245,7 +232,20 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyBio')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyBio)}
+              {getVisibilityValue(privacy.bio)}
+            </span>
+          </div>
+        </ListItem>
+        <ListItem
+          narrow
+          className="no-icon"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.PrivacyBirthday)}
+        >
+          <div className="multiline-menu-item">
+            <span className="title">{lang('PrivacyBirthday')}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(privacy.birthday)}
             </span>
           </div>
         </ListItem>
@@ -258,7 +258,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyForwardsTitle')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyForwarding)}
+              {getVisibilityValue(privacy.forwards)}
             </span>
           </div>
         </ListItem>
@@ -271,7 +271,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('WhoCanCallMe')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyPhoneCall)}
+              {getVisibilityValue(privacy.phoneCall)}
             </span>
           </div>
         </ListItem>
@@ -286,7 +286,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('PrivacyVoiceMessagesTitle')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyVoiceMessages)}
+              {getVisibilityValue(privacy.voiceMessages)}
             </span>
           </div>
         </ListItem>
@@ -315,7 +315,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-menu-item">
             <span className="title">{lang('WhoCanAddMe')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyGroupChats)}
+              {getVisibilityValue(privacy.chatInvite)}
             </span>
           </div>
         </ListItem>
@@ -392,14 +392,7 @@ export default memo(withGlobal<OwnProps>(
       shouldArchiveAndMuteNewNonContact,
       canChangeSensitive,
       shouldNewNonContactPeersRequirePremium,
-      privacyPhoneNumber: privacy.phoneNumber,
-      privacyLastSeen: privacy.lastSeen,
-      privacyProfilePhoto: privacy.profilePhoto,
-      privacyForwarding: privacy.forwards,
-      privacyVoiceMessages: privacy.voiceMessages,
-      privacyGroupChats: privacy.chatInvite,
-      privacyPhoneCall: privacy.phoneCall,
-      privacyBio: privacy.bio,
+      privacy,
       canDisplayChatInTitle,
       canSetPasscode: selectCanSetPasscode(global),
     };

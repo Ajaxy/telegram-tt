@@ -148,6 +148,8 @@ export type IDimensions = {
 
 export type ApiPaymentStatus = 'paid' | 'failed' | 'pending' | 'cancelled';
 
+export type ConfettiStyle = 'poppers' | 'top-down';
+
 export interface TabThread {
   scrollOffset?: number;
   replyStack?: number[];
@@ -602,6 +604,7 @@ export type TabState = {
     left?: number;
     width?: number;
     height?: number;
+    style?: ConfettiStyle;
   };
 
   urlAuth?: {
@@ -970,6 +973,7 @@ export type GlobalState = {
   animatedEmojis?: ApiStickerSet;
   animatedEmojiEffects?: ApiStickerSet;
   genericEmojiEffects?: ApiStickerSet;
+  birthdayNumbers?: ApiStickerSet;
   defaultTopicIconsId?: string;
   defaultStatusIconsId?: string;
   premiumGifts?: ApiStickerSet;
@@ -2518,6 +2522,7 @@ export interface ActionPayloads {
   loadAnimatedEmojis: undefined;
   loadGreetingStickers: undefined;
   loadGenericEmojiEffects: undefined;
+  loadBirthdayNumbersStickers: undefined;
 
   addRecentSticker: {
     sticker: ApiSticker;
@@ -2783,6 +2788,7 @@ export interface ActionPayloads {
     left: number;
     width: number;
     height: number;
+    style?: ConfettiStyle;
   } & WithTabId) | WithTabId;
 
   updateAttachmentSettings: {

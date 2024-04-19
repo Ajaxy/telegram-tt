@@ -1,28 +1,28 @@
 import React, {
   memo, useEffect, useMemo, useRef,
-} from '../../lib/teact/teact';
+} from '../../../lib/teact/teact';
 
-import type { ApiBusinessWorkHours } from '../../api/types';
+import type { ApiBusinessWorkHours } from '../../../api/types';
 
-import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
-import buildClassName from '../../util/buildClassName';
-import { formatTime, formatWeekday } from '../../util/date/dateFormat';
+import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
+import buildClassName from '../../../util/buildClassName';
+import { formatTime, formatWeekday } from '../../../util/date/dateFormat';
 import {
   getUtcOffset, getWeekStart, shiftTimeRanges, splitDays,
-} from '../../util/date/workHours';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+} from '../../../util/date/workHours';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
-import useInterval from '../../hooks/schedulers/useInterval';
-import useDerivedState from '../../hooks/useDerivedState';
-import useFlag from '../../hooks/useFlag';
-import useForceUpdate from '../../hooks/useForceUpdate';
-import useLang from '../../hooks/useLang';
-import useLastCallback from '../../hooks/useLastCallback';
-import useSelectorSignal from '../../hooks/useSelectorSignal';
+import useInterval from '../../../hooks/schedulers/useInterval';
+import useDerivedState from '../../../hooks/useDerivedState';
+import useFlag from '../../../hooks/useFlag';
+import useForceUpdate from '../../../hooks/useForceUpdate';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useSelectorSignal from '../../../hooks/useSelectorSignal';
 
-import ListItem from '../ui/ListItem';
-import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../ui/Transition';
-import Icon from './Icon';
+import ListItem from '../../ui/ListItem';
+import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../ui/Transition';
+import Icon from '../Icon';
 
 import styles from './BusinessHours.module.scss';
 
@@ -142,6 +142,7 @@ const BusinessHours = ({
       className={styles.root}
       isStatic={isExpanded}
       ripple
+      narrow
       withColorTransition
       onClick={handleClick}
     >

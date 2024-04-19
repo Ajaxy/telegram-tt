@@ -55,6 +55,7 @@ export interface ApiUserFullInfo {
   isTranslationDisabled?: true;
   hasPinnedStories?: boolean;
   isContactRequirePremium?: boolean;
+  birthday?: ApiBirthday;
   personalChannelId?: string;
   personalChannelMessageId?: number;
   businessLocation?: ApiBusinessLocation;
@@ -118,4 +119,10 @@ export interface ApiPremiumGiftOption {
 export interface ApiEmojiStatus {
   documentId: string;
   until?: number;
+}
+
+export interface ApiBirthday {
+  day: number;
+  month: number;
+  year?: number;
 }
