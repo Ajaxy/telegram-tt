@@ -29,6 +29,7 @@ import {
   canSendReaction,
   getAllowedAttachmentOptions,
   getCanPostInChat,
+  getCleanPeerId,
   getHasAdminRight,
   getIsSavedDialog,
   getMainUsername,
@@ -1428,7 +1429,7 @@ export function selectTopicLink<T extends GlobalState>(
 
   const chatUsername = getMainUsername(chat);
 
-  const normalizedId = chatId.replace('-100', '');
+  const normalizedId = getCleanPeerId(chatId);
 
   const chatPart = chatUsername || `c/${normalizedId}`;
   const topicPart = topicId && topicId !== MAIN_THREAD_ID ? `/${topicId}` : '';

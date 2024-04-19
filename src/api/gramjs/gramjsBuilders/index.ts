@@ -37,13 +37,8 @@ import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers';
 import localDb from '../localDb';
 
-const LEGACY_CHANNEL_ID_MIN_LENGTH = 11; // Example: -1234567890
-
 function checkIfChannelId(id: string) {
-  if (id.length >= CHANNEL_ID_LENGTH) return id.startsWith('-100');
-  // LEGACY Unprefixed channel id
-  if (id.length === LEGACY_CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
-  return id.length >= LEGACY_CHANNEL_ID_MIN_LENGTH;
+  return id.length === CHANNEL_ID_LENGTH && id.startsWith('-1');
 }
 
 export function getEntityTypeById(chatOrUserId: string) {
@@ -545,12 +540,7 @@ export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
   }
 
   if (type === 'channel') {
-    if (id.length === CHANNEL_ID_LENGTH) {
-      return BigInt(id.slice(4));
-    }
-
-    // LEGACY Unprefixed channel id
-    return BigInt(id.slice(1));
+    return BigInt(id.slice(2)); // Slice "-1", zeroes are trimmed when converting to BigInt
   }
 
   return BigInt(id.slice(1));

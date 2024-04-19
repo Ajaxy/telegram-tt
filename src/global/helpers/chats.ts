@@ -28,11 +28,11 @@ export function isUserId(entityId: string) {
 }
 
 export function isChannelId(entityId: string) {
-  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-100');
+  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-1');
 }
 
 export function toChannelId(mtpId: string) {
-  return `-100${mtpId}`;
+  return `-1${mtpId.padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
 }
 
 export function isApiPeerChat(peer: ApiPeer): peer is ApiChat {
@@ -435,7 +435,10 @@ export function getOrderedTopics(
 }
 
 export function getCleanPeerId(peerId: string) {
-  return isChannelId(peerId) ? peerId.replace('-100', '') : peerId.replace('-', '');
+  return isChannelId(peerId)
+    // Remove -1 and leading zeros
+    ? peerId.replace(/^-10+/, '')
+    : peerId.replace('-', '');
 }
 
 export function getPeerIdDividend(peerId: string) {
