@@ -590,7 +590,10 @@ export function updateScheduledMessages<T extends GlobalState>(
         ...global.scheduledMessages.byChatId,
         [chatId]: {
           ...current,
-          ...newById,
+          byId: {
+            ...current.byId,
+            ...newById,
+          },
         },
       },
     },
