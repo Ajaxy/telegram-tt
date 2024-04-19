@@ -892,10 +892,6 @@
   }
 }
 
-.long-word-break-all {
-  word-break: break-all;
-}
-
 .text-entity-link {
   color: var(--color-links) !important;
   text-decoration: none !important;
@@ -908,6 +904,10 @@
   &:visited {
     text-decoration: underline !important;
   }
+}
+
+.long-word-break-all {
+  word-break: break-all;
 }
 
 .text-entity-code {
