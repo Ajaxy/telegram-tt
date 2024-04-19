@@ -151,7 +151,7 @@ const RoundVideo: FC<OwnProps> = ({
     stopPrevious = stopPlaying;
   });
 
-  const tooglePlaying = useLastCallback(() => {
+  const togglePlaying = useLastCallback(() => {
     const playerEl = playerRef.current!;
     if (isActivated) {
       if (playerEl.paused) {
@@ -175,7 +175,7 @@ const RoundVideo: FC<OwnProps> = ({
     if (!isInOneTimeModal) {
       return;
     }
-    tooglePlaying();
+    togglePlaying();
   }, [isInOneTimeModal]);
 
   const handleClick = useLastCallback(() => {
@@ -196,7 +196,7 @@ const RoundVideo: FC<OwnProps> = ({
       return;
     }
 
-    tooglePlaying();
+    togglePlaying();
   });
 
   const handleTimeUpdate = useLastCallback((e: React.UIEvent<HTMLVideoElement>) => {
@@ -250,6 +250,7 @@ const RoundVideo: FC<OwnProps> = ({
             muted={!isActivated}
             loop={!isActivated}
             playsInline
+            isPriority
             onEnded={isActivated ? onStop ?? stopPlaying : undefined}
             onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
             onReady={markPlayerReady}
