@@ -396,7 +396,6 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
             isGiveaway
             key={gift.months}
             option={gift}
-            userCount={gift.users}
             fullMonthlyAmount={fullMonthlyAmount!}
             checked={gift.months === selectedMonthOption}
             onChange={setSelectedMonthOption}
@@ -707,6 +706,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
         selectionLimit={countrySelectionLimit}
       />
       <AppendEntityPickerModal
+        key={entityType}
         isOpen={isEntityPickerModalOpen}
         onClose={closeEntityPickerModal}
         entityType={entityType}

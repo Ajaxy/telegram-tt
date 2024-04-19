@@ -656,7 +656,7 @@ export default memo(withGlobal<OwnProps>(
       providerName = url.startsWith(DONATE_PROVIDER_URL) ? DONATE_PROVIDER : undefined;
     }
 
-    const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
+    const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId!) : undefined;
     const isProviderError = Boolean(invoice && (!providerName || !SUPPORTED_PROVIDERS.has(providerName)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
     const {

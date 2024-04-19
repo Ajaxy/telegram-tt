@@ -1,23 +1,28 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useRef,
+  useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiPremiumGiftOption, ApiUser } from '../../../api/types';
+import type {
+  ApiPremiumGiftCodeOption,
+} from '../../../api/types';
 
-import { getUserFirstOrLastName } from '../../../global/helpers';
+import { BOOST_PER_SENT_GIFT } from '../../../config';
+import { getUserFullName } from '../../../global/helpers';
 import {
   selectTabState,
-  selectUser,
-  selectUserFullInfo,
 } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import Avatar from '../../common/Avatar';
+import AvatarList from '../../common/AvatarList';
+import Icon from '../../common/Icon';
 import Button from '../../ui/Button';
 import Link from '../../ui/Link';
 import Modal from '../../ui/Modal';
@@ -30,55 +35,124 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  user?: ApiUser;
-  gifts?: ApiPremiumGiftOption[];
-  monthlyCurrency?: string;
-  monthlyAmount?: number;
+  isCompleted?: boolean;
+  gifts?: ApiPremiumGiftCodeOption[] | undefined;
+  forUserIds?: string[];
+  boostPerSentGift?: number;
 };
 
 const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   isOpen,
-  user,
+  isCompleted,
   gifts,
+  boostPerSentGift = BOOST_PER_SENT_GIFT,
+  forUserIds,
 }) => {
-  const { openPremiumModal, closeGiftPremiumModal, openUrl } = getActions();
+  // eslint-disable-next-line no-null/no-null
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  const {
+    openPremiumModal, closeGiftPremiumModal, openInvoice, requestConfetti,
+  } = getActions();
 
   const lang = useLang();
-  const [selectedOption, setSelectedOption] = useState<number | undefined>();
-  const fullMonthlyAmount = useMemo(() => {
-    if (!gifts?.length) {
+  const [selectedMonthOption, setSelectedMonthOption] = useState<number | undefined>();
+
+  const selectedUserQuantity = forUserIds && forUserIds.length * boostPerSentGift;
+
+  useEffect(() => {
+    if (forUserIds?.length) {
+      setSelectedMonthOption(gifts?.[0].months);
+    }
+  }, [gifts, forUserIds]);
+
+  const giftingUserList = useMemo(() => {
+    const usersById = getGlobal().users.byId;
+    return forUserIds?.map((userId) => usersById[userId]).filter(Boolean);
+  }, [forUserIds]);
+
+  const selectedGift = useMemo(() => {
+    return gifts?.find((gift) => gift.months === selectedMonthOption && gift.users === forUserIds?.length);
+  }, [gifts, selectedMonthOption, forUserIds?.length]);
+
+  const filteredGifts = useMemo(() => {
+    return gifts?.filter((gift) => gift.users
+      === forUserIds?.length);
+  }, [gifts, forUserIds?.length]);
+
+  const fullMonthlyGiftAmount = useMemo(() => {
+    if (!filteredGifts?.length) {
       return undefined;
     }
 
-    const basicGift = gifts.reduce((acc, gift) => {
-      return gift.months < acc.months ? gift : acc;
+    const basicGift = filteredGifts.reduce((acc, gift) => {
+      return gift.amount < acc.amount ? gift : acc;
     });
 
     return Math.floor(basicGift.amount / basicGift.months);
-  }, [gifts]);
+  }, [filteredGifts]);
 
-  useEffect(() => {
-    if (isOpen && gifts?.length) {
-      setSelectedOption(gifts[0].months);
-    }
-  }, [gifts, isOpen]);
-
-  const selectedGift = useMemo(() => {
-    return gifts?.find((gift) => gift.months === selectedOption);
-  }, [gifts, selectedOption]);
-
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useLastCallback(() => {
     if (!selectedGift) {
       return;
     }
 
-    closeGiftPremiumModal();
-    openUrl({ url: selectedGift.botUrl });
-  }, [closeGiftPremiumModal, openUrl, selectedGift]);
+    openInvoice({
+      type: 'giftcode',
+      userIds: forUserIds!,
+      currency: selectedGift!.currency,
+      amount: selectedGift!.amount,
+      option: selectedGift!,
+    });
+  });
 
-  const handlePremiumClick = useCallback(() => {
+  const handlePremiumClick = useLastCallback(() => {
     openPremiumModal();
-  }, [openPremiumModal]);
+  });
+
+  const showConfetti = useLastCallback(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (isOpen) {
+      const {
+        top, left, width, height,
+      } = dialog.querySelector('.modal-content')!.getBoundingClientRect();
+      requestConfetti({
+        top,
+        left,
+        width,
+        height,
+      });
+    }
+  });
+
+  useEffect(() => {
+    if (isCompleted) {
+      showConfetti();
+    }
+  }, [isCompleted, showConfetti]);
+
+  const userNameList = useMemo(() => {
+    const usersById = getGlobal().users.byId;
+    return forUserIds?.map((userId) => getUserFullName(usersById[userId])).join(', ');
+  }, [forUserIds]);
+
+  function renderGiftTitle() {
+    if (isCompleted) {
+      return renderText(lang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle',
+        [userNameList, selectedGift?.months]), ['simple_markdown']);
+    }
+
+    return lang('GiftTelegramPremiumTitle');
+  }
+
+  function renderGiftText() {
+    if (isCompleted) {
+      return renderText(lang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', userNameList),
+        ['simple_markdown']);
+    }
+    return renderText(lang('GiftPremiumUsersGiveAccessManyZero', userNameList), ['simple_markdown']);
+  }
 
   function renderPremiumFeaturesLink() {
     const info = lang('GiftPremiumListFeaturesAndTerms');
@@ -90,7 +164,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
     }
 
     return (
-      <p className={styles.premiumFeatures}>
+      <p className={buildClassName(styles.premiumFeatures, styles.center)}>
         {parts[1]}
         <Link isPrimary onClick={handlePremiumClick}>{parts[2]}</Link>
         {parts[3]}
@@ -98,8 +172,43 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderBoostsPluralText() {
+    const giftParts = renderText(lang('GiftPremiumWillReceiveBoostsPlural', selectedUserQuantity), ['simple_markdown']);
+    return giftParts.map((part) => {
+      if (typeof part === 'string') {
+        return part.split(/(⚡)/g).map((subpart) => {
+          if (subpart === '⚡') {
+            return <Icon name="boost" className={styles.boostIcon} />;
+          }
+          return subpart;
+        });
+      }
+      return part;
+    });
+  }
+
+  function renderSubscriptionGiftOptions() {
+    return (
+      <div className={styles.subscriptionOptions}>
+        {filteredGifts?.map((gift) => {
+          return (
+            <PremiumSubscriptionOption
+              className={styles.subscriptionOption}
+              key={gift.months}
+              option={gift}
+              fullMonthlyAmount={fullMonthlyGiftAmount}
+              checked={gift.months === selectedMonthOption}
+              onChange={setSelectedMonthOption}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <Modal
+      dialogRef={dialogRef}
       onClose={closeGiftPremiumModal}
       isOpen={isOpen}
       className={styles.modalDialog}
@@ -116,53 +225,53 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
         >
           <i className="icon icon-close" />
         </Button>
-        <Avatar
-          peer={user}
-          size="jumbo"
-          className={styles.avatar}
-        />
-        <h2 className={styles.headerText}>
-          {lang('GiftTelegramPremiumTitle')}
-        </h2>
-        <p className={styles.description}>
-          {renderText(
-            lang('GiftTelegramPremiumDescription', getUserFirstOrLastName(user)),
-            ['emoji', 'simple_markdown'],
-          )}
-        </p>
-
-        <div className={styles.options}>
-          {gifts?.map((gift) => (
-            <PremiumSubscriptionOption
-              key={gift.amount}
-              option={gift}
-              fullMonthlyAmount={fullMonthlyAmount}
-              checked={gift.months === selectedOption}
-              onChange={setSelectedOption}
-            />
-          ))}
+        <div className={styles.avatars}>
+          <AvatarList
+            size="large"
+            peers={giftingUserList}
+          />
         </div>
+        <h2 className={buildClassName(styles.headerText, styles.center)}>
+          {renderGiftTitle()}
+        </h2>
+        <p className={buildClassName(styles.description, styles.center)}>
+          {renderGiftText()}
+        </p>
+        {!isCompleted && (
+          <>
+            <p className={styles.description}>
+              {renderText(renderBoostsPluralText(), ['simple_markdown', 'emoji'])}
+            </p>
 
+            <div className={styles.options}>
+              {renderSubscriptionGiftOptions()}
+            </div>
+          </>
+        )}
         {renderPremiumFeaturesLink()}
       </div>
 
-      <Button className={styles.button} isShiny disabled={!selectedOption} onClick={handleSubmit}>
-        {lang(
-          'GiftSubscriptionFor',
-          selectedGift && formatCurrency(Number(selectedGift.amount), selectedGift.currency, lang.code),
-        )}
-      </Button>
+      {!isCompleted && (
+        <Button withPremiumGradient className={styles.button} isShiny disabled={!selectedGift} onClick={handleSubmit}>
+          {lang(
+            'GiftSubscriptionFor', selectedGift
+            && formatCurrency(selectedGift!.amount, selectedGift.currency, lang.code),
+          )}
+        </Button>
+      )}
     </Modal>
   );
 };
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
-  const { forUserId } = selectTabState(global).giftPremiumModal || {};
-  const user = forUserId ? selectUser(global, forUserId) : undefined;
-  const gifts = user ? selectUserFullInfo(global, user.id)?.premiumGifts : undefined;
+  const {
+    gifts, forUserIds, isCompleted,
+  } = selectTabState(global).giftPremiumModal || {};
 
   return {
-    user,
+    isCompleted,
     gifts,
+    boostPerSentGift: global.appConfig?.boostsPerSentGift,
+    forUserIds,
   };
 })(GiftPremiumModal));

@@ -14,7 +14,6 @@ import styles from './PremiumSubscriptionOption.module.scss';
 type OwnProps = {
   option: ApiPremiumGiftOption | ApiPremiumGiftCodeOption;
   isGiveaway?: boolean;
-  userCount?: number;
   checked?: boolean;
   fullMonthlyAmount?: number;
   className?: string;
@@ -23,14 +22,16 @@ type OwnProps = {
 
 const PremiumSubscriptionOption: FC<OwnProps> = ({
   option, checked, fullMonthlyAmount,
-  onChange, className, isGiveaway, userCount,
+  onChange, className, isGiveaway,
 }) => {
   const lang = useLang();
 
   const {
     months, amount, currency,
   } = option;
+  const users = 'users' in option ? option.users : undefined;
   const perMonth = Math.floor(amount / months);
+  const isUserCountPlural = users ? users > 1 : undefined;
 
   const discount = useMemo(() => {
     return fullMonthlyAmount && fullMonthlyAmount > perMonth
@@ -63,9 +64,9 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
       />
       <div className={styles.content}>
         <div className={styles.month}>
-          {Boolean(discount) && isGiveaway && (
+          {Boolean(discount) && (
             <span
-              className={buildClassName(styles.giveawayDiscount, isGiveaway && styles.discount)}
+              className={buildClassName(styles.giveawayDiscount, styles.discount)}
               title={lang('GiftDiscount')}
             > &minus;{discount}%
             </span>
@@ -73,11 +74,11 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
           {lang('Months', months)}
         </div>
         <div className={styles.perMonth}>
-          {isGiveaway ? `${formatCurrency(amount, currency, lang.code)} x ${userCount!}`
+          {(isGiveaway || isUserCountPlural) ? `${formatCurrency(amount, currency, lang.code)} x ${users!}`
             : lang('PricePerMonth', formatCurrency(perMonth, currency, lang.code))}
         </div>
         <div className={styles.amount}>
-          {formatCurrency(isGiveaway ? amount * userCount! : amount, currency, lang.code)}
+          {formatCurrency(amount, currency, lang.code)}
         </div>
       </div>
     </label>

@@ -102,6 +102,7 @@ import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
 import GiveawayModal from './premium/GiveawayModal.async';
+import PremiumGiftingModal from './premium/PremiumGiftingModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
 
@@ -159,6 +160,7 @@ type StateProps = {
   isReactionPickerOpen: boolean;
   isAppendModalOpen?: boolean;
   isGiveawayModalOpen?: boolean;
+  isPremiumGiftingModalOpen?: boolean;
   isCurrentUserPremium?: boolean;
   chatlistModal?: TabState['chatlistModal'];
   boostModal?: TabState['boostModal'];
@@ -218,6 +220,7 @@ const Main: FC<OwnProps & StateProps> = ({
   urlAuth,
   isPremiumModalOpen,
   isGiveawayModalOpen,
+  isPremiumGiftingModalOpen,
   isPaymentModalOpen,
   isReceiptModalOpen,
   isReactionPickerOpen,
@@ -603,6 +606,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <MessageListHistoryHandler />
       {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
       {isGiveawayModalOpen && <GiveawayModal isOpen={isGiveawayModalOpen} />}
+      {isPremiumGiftingModalOpen && <PremiumGiftingModal isOpen={isPremiumGiftingModalOpen} />}
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
@@ -646,6 +650,7 @@ export default memo(withGlobal<OwnProps>(
       ratingPhoneCall,
       premiumModal,
       giveawayModal,
+      giftingModal,
       isMasterTab,
       payment,
       limitReachedModal,
@@ -712,6 +717,7 @@ export default memo(withGlobal<OwnProps>(
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,
       isGiveawayModalOpen: giveawayModal?.isOpen,
+      isPremiumGiftingModalOpen: giftingModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),

@@ -641,9 +641,15 @@ export type TabState = {
     prepaidGiveaway?: ApiPrepaidGiveaway;
   };
 
-  giftPremiumModal?: {
+  giftingModal?: {
     isOpen?: boolean;
-    forUserId?: string;
+  };
+
+  giftPremiumModal?: {
+    isCompleted?: boolean;
+    isOpen?: boolean;
+    forUserIds?: string[];
+    gifts?: ApiPremiumGiftCodeOption[];
   };
 
   limitReachedModal?: {
@@ -2966,6 +2972,9 @@ export interface ActionPayloads {
   } & WithTabId);
   closeGiveawayModal: WithTabId | undefined;
 
+  openPremiumGiftingModal: WithTabId | undefined;
+  closePremiumGiftingModal: WithTabId | undefined;
+
   transcribeAudio: {
     chatId: string;
     messageId: number;
@@ -2976,7 +2985,9 @@ export interface ActionPayloads {
   loadPremiumStickers: undefined;
 
   openGiftPremiumModal: ({
-    forUserId?: string;
+    chatId?: string;
+    forMultipleUsers?: boolean;
+    forUserIds?: string[];
   } & WithTabId) | undefined;
 
   closeGiftPremiumModal: WithTabId | undefined;

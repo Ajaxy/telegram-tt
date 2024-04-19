@@ -189,6 +189,7 @@ export interface ApiAppConfig {
   giveawayAddPeersMax: number;
   giveawayBoostsPerPremium: number;
   giveawayCountriesMax: number;
+  boostsPerSentGift: number;
   premiumPromoOrder: ApiPremiumSection[];
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;

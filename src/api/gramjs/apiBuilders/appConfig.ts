@@ -63,6 +63,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   authorization_autoconfirm_period: number;
   giveaway_boosts_per_premium: number;
   giveaway_countries_max: number;
+  boosts_per_sent_gift: number;
   // Forums
   topics_pinned_limit: number;
   // Stories
@@ -127,6 +128,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     giveawayAddPeersMax: appConfig.giveaway_add_peers_max,
     giveawayBoostsPerPremium: appConfig.giveaway_boosts_per_premium,
     giveawayCountriesMax: appConfig.giveaway_countries_max,
+    boostsPerSentGift: appConfig.boosts_per_sent_gift,
     canDisplayAutoarchiveSetting: appConfig.autoarchive_setting_available,
     limits: {
       uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),

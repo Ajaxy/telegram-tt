@@ -145,7 +145,7 @@ const UserBirthday = ({
   const canGiftPremium = isToday && !user.isPremium && !user.isSelf && !isPremiumPurchaseBlocked;
 
   const handleOpenGiftModal = useLastCallback(() => {
-    openGiftPremiumModal({ forUserId: user.id });
+    openGiftPremiumModal({ forUserIds: [user.id] });
   });
 
   const handleClick = useLastCallback(() => {

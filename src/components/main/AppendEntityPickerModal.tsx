@@ -1,6 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useMemo, useState,
+  memo,
+  useMemo,
+  useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -66,8 +68,7 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
 
-  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
-  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [pendingChannelId, setPendingChannelId] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -127,8 +128,8 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
       return isChannel || isSuperGroup;
     }),
     false,
-    selectedChannelIds);
-  }, [channelsIds, lang, searchQuery, selectedChannelIds, isSuperGroup, isChannel]);
+    selectedIds);
+  }, [channelsIds, lang, searchQuery, selectedIds, isSuperGroup, isChannel]);
 
   const handleCloseButtonClick = useLastCallback(() => {
     onSubmit([]);
@@ -136,36 +137,36 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleSendIdList = useLastCallback(() => {
-    onSubmit(entityType === 'members' ? selectedMemberIds : selectedChannelIds);
+    onSubmit(selectedIds);
     onClose();
   });
 
   const confirmPrivateLinkChannelSelection = useLastCallback(() => {
     if (pendingChannelId) {
-      setSelectedChannelIds((prevIds) => unique([...prevIds, pendingChannelId]));
+      setSelectedIds((prevIds) => unique([...prevIds, pendingChannelId]));
     }
     closeConfirmModal();
   });
 
-  const handleSelectedMembersChange = useLastCallback((newSelectedIds: string[]) => {
+  const handleSelectedMemberIdsChange = useLastCallback((newSelectedIds: string[]) => {
     if (newSelectedIds.length > selectionLimit) {
       showNotification({
         message: lang('BoostingSelectUpToWarningUsers', selectionLimit),
       });
       return;
     }
-    setSelectedMemberIds(newSelectedIds);
+    setSelectedIds(newSelectedIds);
   });
 
   const handleSelectedChannelIdsChange = useLastCallback((newSelectedIds: string[]) => {
     const chatsById = getGlobal().chats.byId;
-    const newlyAddedIds = newSelectedIds.filter((id) => !selectedChannelIds.includes(id));
+    const newlyAddedIds = newSelectedIds.filter((id) => !selectedIds.includes(id));
     const privateLinkChannelId = newlyAddedIds.find((id) => {
       const chat = chatsById[id];
       return chat && !isChatPublic(chat);
     });
 
-    if (selectedChannelIds?.length >= selectionLimit) {
+    if (selectedIds?.length >= selectionLimit) {
       showNotification({
         message: lang('BoostingSelectUpToWarningChannelsPlural', selectionLimit),
       });
@@ -176,7 +177,7 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
       setPendingChannelId(privateLinkChannelId);
       openConfirmModal();
     } else {
-      setSelectedChannelIds(newSelectedIds);
+      setSelectedIds(newSelectedIds);
     }
   });
 
@@ -218,12 +219,12 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
           <Picker
             className={styles.picker}
             itemIds={entityType === 'members' ? displayedMembersIds : displayedChannelIds}
-            selectedIds={entityType === 'members' ? selectedMemberIds : selectedChannelIds}
+            selectedIds={selectedIds}
             filterValue={searchQuery}
             filterPlaceholder={lang('Search')}
-            searchInputId="new-members-picker-search"
+            searchInputId={`${entityType}-picker-search`}
             onSelectedIdsChange={entityType === 'channels'
-              ? handleSelectedChannelIdsChange : handleSelectedMembersChange}
+              ? handleSelectedChannelIdsChange : handleSelectedMemberIdsChange}
             onFilterChange={setSearchQuery}
             isSearchable
           />
@@ -261,7 +262,7 @@ export default memo(withGlobal<OwnProps>((global, { chatId, entityType }): State
       members = chatFullInfo.members;
       adminMembersById = chatFullInfo.adminMembersById;
     }
-  } else if (entityType === 'channels') {
+  } if (entityType === 'channels') {
     const chat = chatId ? selectChat(global, chatId) : undefined;
     if (chat) {
       isChannel = isChatChannel(chat);

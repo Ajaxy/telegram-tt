@@ -422,18 +422,46 @@ addActionHandler('closeGiveawayModal', (global, actions, payload): ActionReturnT
   }, tabId);
 });
 
+addActionHandler('openPremiumGiftingModal', (global, actions, payload): ActionReturnType => {
+  const {
+    tabId = getCurrentTabId(),
+  } = payload || {};
+
+  global = getGlobal();
+
+  global = updateTabState(global, {
+    giftingModal: {
+      isOpen: true,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closePremiumGiftingModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giftingModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promise<void> => {
-  const { forUserId, tabId = getCurrentTabId() } = payload || {};
+  const {
+    forUserIds, tabId = getCurrentTabId(),
+  } = payload || {};
   const result = await callApi('fetchPremiumPromo');
   if (!result) return;
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
 
+  const gifts = await callApi('getPremiumGiftCodeOptions', {});
+
   global = updateTabState(global, {
     giftPremiumModal: {
       isOpen: true,
-      forUserId,
+      forUserIds,
+      gifts,
     },
   }, tabId);
   setGlobal(global);

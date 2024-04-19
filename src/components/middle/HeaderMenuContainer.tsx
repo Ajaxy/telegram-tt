@@ -313,7 +313,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleGiftPremiumClick = useLastCallback(() => {
-    openGiftPremiumModal({ forUserId: chatId });
+    openGiftPremiumModal({ forUserIds: [chatId] });
     closeMenu();
   });
 

@@ -5,7 +5,10 @@ import { getActions, withGlobal } from '../../../global';
 import { SettingsScreens } from '../../../types';
 
 import { FAQ_URL, PRIVACY_URL } from '../../../config';
-import { selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
+import {
+  selectIsGiveawayGiftsPurchaseAvailable,
+  selectIsPremiumPurchaseBlocked,
+} from '../../../global/selectors';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -28,6 +31,7 @@ type StateProps = {
   sessionCount: number;
   currentUserId?: string;
   canBuyPremium?: boolean;
+  isGiveawayAvailable?: boolean;
 };
 
 const SettingsMain: FC<OwnProps & StateProps> = ({
@@ -37,12 +41,14 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   currentUserId,
   sessionCount,
   canBuyPremium,
+  isGiveawayAvailable,
 }) => {
   const {
     loadProfilePhotos,
     openPremiumModal,
     openSupportChat,
     openUrl,
+    openPremiumGiftingModal,
   } = getActions();
 
   const [isSupportDialogOpen, openSupportDialog, closeSupportDialog] = useFlag(false);
@@ -158,6 +164,16 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             {lang('TelegramPremium')}
           </ListItem>
         )}
+        {isGiveawayAvailable && (
+          <ListItem
+            icon="gift"
+            className="settings-main-menu-premium"
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => openPremiumGiftingModal()}
+          >
+            {lang('GiftPremiumGifting')}
+          </ListItem>
+        )}
       </div>
       <div className="settings-main-menu">
         <ListItem
@@ -196,11 +212,13 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { currentUserId } = global;
+    const isGiveawayAvailable = selectIsGiveawayGiftsPurchaseAvailable(global);
 
     return {
       sessionCount: global.activeSessions.orderedHashes.length,
       currentUserId,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
+      isGiveawayAvailable,
     };
   },
 )(SettingsMain));
