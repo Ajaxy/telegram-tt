@@ -186,9 +186,11 @@ export function buildApiEmojiInteraction(json: GramJsEmojiInteraction): ApiEmoji
 
 export function processStickerPackResult(packs: GramJs.StickerPack[]) {
   return packs.reduce((acc, { emoticon, documents }) => {
-    acc[emoticon] = documents.map((documentId) => buildStickerFromDocument(
-      localDb.documents[String(documentId)],
-    )).filter(Boolean);
+    acc[emoticon] = documents.map((documentId) => {
+      const document = localDb.documents[String(documentId)];
+      if (!document) return undefined;
+      return buildStickerFromDocument(document);
+    }).filter(Boolean);
     return acc;
   }, {} as Record<string, ApiSticker[]>);
 }

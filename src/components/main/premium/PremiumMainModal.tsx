@@ -382,7 +382,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             <div className={styles.description}>
               {renderText(getHeaderDescription(), ['simple_markdown', 'emoji'])}
             </div>
-            {!isPremium && renderSubscriptionOptions()}
+            {!isPremium && !isGift && renderSubscriptionOptions()}
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
               <h2 className={styles.premiumHeaderText}>
                 {lang('TelegramPremium')}

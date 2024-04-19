@@ -616,7 +616,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
-      ) : isContactRequirePremium ? (
+      ) : isContactRequirePremium && !hasMessages ? (
         <PremiumRequiredMessage userId={chatId} />
       ) : isBot && !hasMessages ? (
         <MessageListBotInfo chatId={chatId} />

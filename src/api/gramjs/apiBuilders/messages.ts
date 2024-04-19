@@ -548,13 +548,28 @@ function buildAction(
     text = 'BoostingGiveawayJustStarted';
     translationValues.push('%action_origin%');
   } else if (action instanceof GramJs.MessageActionGiftCode) {
-    text = 'BoostingReceivedGiftNoName';
+    text = isOutgoing ? 'ActionGiftOutbound' : 'BoostingReceivedGiftNoName';
     slug = action.slug;
     months = action.months;
+    amount = action.amount?.toJSNumber();
     isGiveaway = Boolean(action.viaGiveaway);
     isUnclaimed = Boolean(action.unclaimed);
+    if (isOutgoing) {
+      translationValues.push('%gift_payment_amount%');
+    }
+    currency = action.currency;
+    if (action.cryptoCurrency) {
+      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
+      giftCryptoInfo = {
+        currency: action.cryptoCurrency,
+        amount: cryptoAmountWithDecimals.toFixed(2),
+      };
+    }
     if (action.boostPeer) {
       targetChatId = getApiChatIdFromMtpPeer(action.boostPeer);
+    }
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
     }
   } else if (action instanceof GramJs.MessageActionGiveawayResults) {
     if (!action.winnersCount) {
