@@ -538,6 +538,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       requestsPending,
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
       isTranslationDisabled: translationsDisabled,
+      isPreHistoryHidden: true,
     },
     users,
     chats,
