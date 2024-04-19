@@ -15,8 +15,9 @@ import {
   GIVEAWAY_MAX_ADDITIONAL_COUNTRIES,
   GIVEAWAY_MAX_ADDITIONAL_USERS,
 } from '../../../config';
-import { getUserFullName } from '../../../global/helpers';
+import { getUserFullName, isChatChannel } from '../../../global/helpers';
 import {
+  selectChat,
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -69,6 +70,7 @@ type StateProps = {
   countryList: ApiCountry[];
   prepaidGiveaway?: ApiPrepaidGiveaway;
   countrySelectionLimit: number | undefined;
+  isChannel?: boolean;
 };
 
 type GiveawayAction = 'createRandomlyUsers' | 'createSpecificUsers';
@@ -99,6 +101,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   chatId,
   gifts,
   isOpen,
+  isChannel,
   selectedMemberList,
   selectedChannelList,
   giveawayBoostPerPremiumLimit = GIVEAWAY_BOOST_PER_PREMIUM,
@@ -160,19 +163,19 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   const SUBSCRIBER_OPTIONS = useMemo(() => [
     {
       value: 'all',
-      label: lang('BoostingAllSubscribers'),
+      label: lang(isChannel ? 'BoostingAllSubscribers' : 'BoostingAllMembers'),
       subLabel: selectedCountriesIds && selectedCountriesIds.length > 0
         ? lang('Giveaway.ReceiverType.Countries', selectedCountriesIds.length)
         : lang('BoostingFromAllCountries'),
     },
     {
       value: 'new',
-      label: lang('BoostingNewSubscribers'),
+      label: lang(isChannel ? 'BoostingNewSubscribers' : 'BoostingNewMembers'),
       subLabel: selectedCountriesIds && selectedCountriesIds.length > 0
         ? lang('Giveaway.ReceiverType.Countries', selectedCountriesIds.length)
         : lang('BoostingFromAllCountries'),
     },
-  ], [lang, selectedCountriesIds]);
+  ], [isChannel, lang, selectedCountriesIds]);
 
   const monthQuantity = lang('Months', selectedMonthOption);
 
@@ -448,7 +451,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
           {renderText(lang('BoostingBoostsViaGifts'))}
         </h2>
         <div className={styles.description}>
-          {renderText(lang('BoostingGetMoreBoost'))}
+          {renderText(lang(isChannel ? 'BoostingGetMoreBoost' : 'BoostingGetMoreBoostsGroup'))}
         </div>
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.premiumHeaderText}>
@@ -522,7 +525,8 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
               >
                 <GroupChatInfo
                   chatId={chatId!}
-                  status={lang('BoostingChannelWillReceiveBoost', boostQuantity, 'i')}
+                  status={lang(isChannel ? 'BoostingChannelWillReceiveBoost'
+                    : 'BoostingGroupWillReceiveBoost', boostQuantity, 'i')}
                 />
               </ListItem>
 
@@ -551,7 +555,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
                   className={styles.addButton}
                   iconClassName={styles.addChannel}
                 >
-                  {lang('BoostingAddChannel')}
+                  {lang('BoostingAddChannelOrGroup')}
                 </ListItem>
               )}
             </div>
@@ -565,7 +569,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
             </div>
 
             <div className={styles.subscription}>
-              {renderText(lang('BoostGift.LimitSubscribersInfo'))}
+              {renderText(lang(isChannel ? 'BoostGift.LimitSubscribersInfo' : 'lng_giveaway_users_about_group'))}
             </div>
 
             <div className={styles.section}>
@@ -726,9 +730,12 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   const {
     giveawayModal,
   } = selectTabState(global);
+  const chatId = giveawayModal?.chatId;
+  const chat = chatId ? selectChat(global, chatId) : undefined;
+  const isChannel = chat && isChatChannel(chat);
 
   return {
-    chatId: giveawayModal?.chatId,
+    chatId,
     gifts: giveawayModal?.gifts,
     selectedMemberList: giveawayModal?.selectedMemberIds,
     selectedChannelList: giveawayModal?.selectedChannelIds,
@@ -737,5 +744,6 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     countrySelectionLimit: global.appConfig?.giveawayCountriesMax,
     countryList: global.countryList.general,
     prepaidGiveaway: giveawayModal?.prepaidGiveaway,
+    isChannel,
   };
 })(GiveawayModal));

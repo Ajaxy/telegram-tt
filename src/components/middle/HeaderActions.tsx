@@ -500,7 +500,8 @@ export default memo(withGlobal<OwnProps>(
     const canCreateVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && !chat.isCallActive
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
     const canViewStatistics = isMainThread && chatFullInfo?.canViewStatistics;
-    const canViewBoosts = isMainThread && isChannel && (canViewStatistics || getHasAdminRight(chat, 'postStories'));
+    const canViewBoosts = isMainThread
+      && (isSuperGroup || isChannel) && (canViewStatistics || getHasAdminRight(chat, 'postStories'));
     const canShowBoostModal = !canViewBoosts && (isSuperGroup || isChannel);
     const pendingJoinRequests = isMainThread ? chatFullInfo?.requestsPending : undefined;
     const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);

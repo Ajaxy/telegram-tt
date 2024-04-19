@@ -5,7 +5,8 @@ import type { ApiBoostStatistics, ApiPrepaidGiveaway } from '../../../api/types'
 import type { TabState } from '../../../global/types';
 
 import { GIVEAWAY_BOOST_PER_PREMIUM } from '../../../config';
-import { selectIsGiveawayGiftsPurchaseAvailable, selectTabState } from '../../../global/selectors';
+import { isChatChannel } from '../../../global/helpers';
+import { selectChat, selectIsGiveawayGiftsPurchaseAvailable, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateAtTime } from '../../../util/date/dateFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
@@ -33,6 +34,7 @@ type StateProps = {
   isGiveawayAvailable?: boolean;
   chatId: string;
   giveawayBoostsPerPremium?: number;
+  isChannel?: boolean;
 };
 
 const GIVEAWAY_IMG_LIST: { [key: number]: string } = {
@@ -46,6 +48,7 @@ const BoostStatistics = ({
   isGiveawayAvailable,
   chatId,
   giveawayBoostsPerPremium,
+  isChannel,
 }: StateProps) => {
   const {
     openChat, loadMoreBoosters, closeBoostStatistics, openGiveawayModal,
@@ -162,51 +165,56 @@ const BoostStatistics = ({
               <p className="text-muted hint" key="links-hint">{lang('BoostingSelectPaidGiveaway')}</p>
             </div>
           )}
-          <div className={styles.section}>
-            <h4 className={styles.sectionHeader} dir={lang.isRtl ? 'rtl' : undefined}>
-              {lang('Boosters')}
-            </h4>
-            {!boostStatistics.boosterIds?.length && (
-              <div className={styles.noResults}>{lang('NoBoostersHint')}</div>
-            )}
-            {boostStatistics.boosterIds?.map((userId) => (
-              <ListItem
-                key={userId}
-                className="chat-item-clickable"
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => handleBoosterClick(userId)}
-              >
-                <PrivateChatInfo
-                  className={styles.user}
-                  forceShowSelf
-                  userId={userId}
-                  status={lang('BoostExpireOn', formatDateAtTime(lang, boostStatistics.boosters![userId] * 1000))}
-                />
-              </ListItem>
-            ))}
-            {Boolean(boostersToLoadCount) && (
-              <ListItem
-                key="load-more"
-                className={styles.showMore}
-                disabled={boostStatistics?.isLoadingBoosters}
-                onClick={handleLoadMore}
-              >
-                {boostStatistics?.isLoadingBoosters ? (
-                  <Spinner className={styles.loadMoreSpinner} />
-                ) : (
-                  <Icon name="down" className={styles.down} />
-                )}
-                {lang('ShowVotes', boostersToLoadCount)}
-              </ListItem>
-            )}
-          </div>
+          {isChannel && (
+            <div className={styles.section}>
+              <h4 className={styles.sectionHeader} dir={lang.isRtl ? 'rtl' : undefined}>
+                {lang('Boosters')}
+              </h4>
+              {!boostStatistics.boosterIds?.length && (
+                <div className={styles.noResults}>{lang('NoBoostersHint')}</div>
+              )}
+              {boostStatistics.boosterIds?.map((userId) => (
+                <ListItem
+                  key={userId}
+                  className="chat-item-clickable"
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={() => handleBoosterClick(userId)}
+                >
+                  <PrivateChatInfo
+                    className={styles.user}
+                    forceShowSelf
+                    userId={userId}
+                    status={lang('BoostExpireOn', formatDateAtTime(lang, boostStatistics.boosters![userId] * 1000))}
+                  />
+                </ListItem>
+              ))}
+              {Boolean(boostersToLoadCount) && (
+                <ListItem
+                  key="load-more"
+                  className={styles.showMore}
+                  disabled={boostStatistics?.isLoadingBoosters}
+                  onClick={handleLoadMore}
+                >
+                  {boostStatistics?.isLoadingBoosters ? (
+                    <Spinner className={styles.loadMoreSpinner} />
+                  ) : (
+                    <Icon name="down" className={styles.down} />
+                  )}
+                  {lang('ShowVotes', boostersToLoadCount)}
+                </ListItem>
+              )}
+            </div>
+          )}
           <LinkField className={styles.section} link={status!.boostUrl} withShare title={lang('LinkForBoosting')} />
           {isGiveawayAvailable && (
             <div className={styles.section}>
               <ListItem icon="gift" ripple onClick={handleGiveawayClick}>
                 {lang('BoostingGetBoostsViaGifts')}
               </ListItem>
-              <p className="text-muted hint" key="links-hint">{lang('BoostingGetMoreBoosts')}</p>
+              <p className="text-muted hint" key="links-hint">{lang(
+                isChannel ? 'BoostingGetMoreBoosts' : 'BoostingGetMoreBoostsGroup',
+              )}
+              </p>
             </div>
           )}
         </>
@@ -221,6 +229,8 @@ export default memo(withGlobal(
     const boostStatistics = tabState.boostStatistics;
     const isGiveawayAvailable = selectIsGiveawayGiftsPurchaseAvailable(global);
     const chatId = boostStatistics && boostStatistics.chatId;
+    const chat = chatId ? selectChat(global, chatId) : undefined;
+    const isChannel = chat && isChatChannel(chat);
     const giveawayBoostsPerPremium = global.appConfig?.giveawayBoostsPerPremium;
 
     return {
@@ -228,6 +238,7 @@ export default memo(withGlobal(
       isGiveawayAvailable,
       chatId: chatId!,
       giveawayBoostsPerPremium,
+      isChannel,
     };
   },
 )(BoostStatistics));

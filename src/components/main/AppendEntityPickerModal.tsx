@@ -1,8 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo,
-  useMemo,
-  useState,
+  memo, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -10,7 +8,7 @@ import type { ApiChat, ApiChatMember, ApiUserStatus } from '../../api/types';
 
 import {
   filterChatsByName,
-  filterUsersByName, isChatChannel, isChatPublic, isUserBot, sortUserIds,
+  filterUsersByName, isChatChannel, isChatPublic, isChatSuperGroup, isUserBot, sortUserIds,
 } from '../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -45,6 +43,7 @@ interface StateProps {
   userStatusesById: Record<string, ApiUserStatus>;
   channelList?: (ApiChat | undefined)[] | undefined;
   isChannel?: boolean;
+  isSuperGroup?: boolean;
   currentUserId?: string | undefined;
 }
 
@@ -57,6 +56,7 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
   userStatusesById,
   entityType,
   isChannel,
+  isSuperGroup,
   onSubmit,
   currentUserId,
   selectionLimit,
@@ -76,7 +76,8 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
     const activeChatIds = getGlobal().chats.listIds.active;
 
     return activeChatIds!.map((id) => chatsById[id])
-      .filter((chat) => chat && isChatChannel(chat) && chat.id !== chatId)
+      .filter((chat) => chat && (isChatChannel(chat)
+        || isChatSuperGroup(chat)) && chat.id !== chatId)
       .map((chat) => chat!.id);
   }, [chatId]);
 
@@ -123,11 +124,11 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
         return true;
       }
 
-      return isChannel;
+      return isChannel || isSuperGroup;
     }),
     false,
     selectedChannelIds);
-  }, [channelsIds, lang, searchQuery, selectedChannelIds, isChannel]);
+  }, [channelsIds, lang, searchQuery, selectedChannelIds, isSuperGroup, isChannel]);
 
   const handleCloseButtonClick = useLastCallback(() => {
     onSubmit([]);
@@ -248,6 +249,7 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>((global, { chatId, entityType }): StateProps => {
   const { statusesById: userStatusesById } = global.users;
   let isChannel;
+  let isSuperGroup;
   let members: ApiChatMember[] | undefined;
   let adminMembersById: Record<string, ApiChatMember> | undefined;
   let currentUserId: string | undefined;
@@ -263,6 +265,7 @@ export default memo(withGlobal<OwnProps>((global, { chatId, entityType }): State
     const chat = chatId ? selectChat(global, chatId) : undefined;
     if (chat) {
       isChannel = isChatChannel(chat);
+      isSuperGroup = isChatSuperGroup(chat);
     }
   }
 
@@ -272,6 +275,7 @@ export default memo(withGlobal<OwnProps>((global, { chatId, entityType }): State
     adminMembersById,
     userStatusesById,
     isChannel,
+    isSuperGroup,
     currentUserId,
   };
 })(AppendEntityPickerModal));
