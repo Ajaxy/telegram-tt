@@ -17,7 +17,7 @@ import {
 } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChatMessagesById, addChats, addUsers, updateChatMessage,
+  addChatMessagesById, addChats, addUsers, updateChat, updateChatMessage,
 } from '../../reducers';
 import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
@@ -437,9 +437,17 @@ addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnTy
   const { tabId = getCurrentTabId() } = payload || {};
   const chat = selectCurrentChat(global, tabId);
 
-  if (!chat?.unreadReactions) return;
+  if (!chat?.unreadReactions) {
+    if (chat?.unreadReactionsCount) {
+      return updateChat(global, chat.id, {
+        unreadReactionsCount: 0,
+      });
+    }
+    return undefined;
+  }
 
   actions.focusMessage({ chatId: chat.id, messageId: chat.unreadReactions[0], tabId });
+  return undefined;
 });
 
 addActionHandler('readAllReactions', (global, actions, payload): ActionReturnType => {

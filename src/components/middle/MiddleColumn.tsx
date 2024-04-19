@@ -238,7 +238,7 @@ function MiddleColumn({
 
   const lang = useLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
-  const [isFabShown, setIsFabShown] = useState<boolean | undefined>();
+  const [isScrollDownShown, setIsScrollDownShown] = useState(false);
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
@@ -273,7 +273,9 @@ function MiddleColumn({
     && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && !renderingCanUnblock
     && chatId !== TMP_CHAT_ID && !isContactRequirePremium;
   const renderingHasTools = usePrevDuringAnimation(hasTools, closeAnimationDuration);
-  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, closeAnimationDuration) && chatId !== TMP_CHAT_ID;
+  const renderingIsScrollDownShown = usePrevDuringAnimation(
+    isScrollDownShown, closeAnimationDuration,
+  ) && chatId !== TMP_CHAT_ID;
   const renderingIsChannel = usePrevDuringAnimation(isChannel, closeAnimationDuration);
   const renderingShouldJoinToSend = usePrevDuringAnimation(shouldJoinToSend, closeAnimationDuration);
   const renderingShouldSendJoinRequest = usePrevDuringAnimation(shouldSendJoinRequest, closeAnimationDuration);
@@ -489,9 +491,9 @@ function MiddleColumn({
   );
   const withMessageListBottomShift = Boolean(
     renderingCanRestartBot || renderingCanSubscribe || renderingShouldSendJoinRequest || renderingCanStartBot
-    || isPinnedMessageList || canShowOpenChatButton || renderingCanUnblock,
+    || (isPinnedMessageList && canUnpin) || canShowOpenChatButton || renderingCanUnblock,
   );
-  const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || isPinnedMessageList);
+  const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive);
 
   return (
     <div
@@ -552,7 +554,7 @@ function MiddleColumn({
                 isComments={isComments}
                 canPost={renderingCanPost!}
                 hasTools={renderingHasTools}
-                onFabToggle={setIsFabShown}
+                onScrollDownToggle={setIsScrollDownShown}
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
                 isContactRequirePremium={isContactRequirePremium}
@@ -693,7 +695,7 @@ function MiddleColumn({
             </Transition>
 
             <FloatingActionButtons
-              isShown={renderingIsFabShown!}
+              withScrollDown={renderingIsScrollDownShown}
               canPost={renderingCanPost}
               withExtraShift={withExtraShift}
             />

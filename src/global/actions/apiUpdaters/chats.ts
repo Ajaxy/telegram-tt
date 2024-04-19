@@ -7,7 +7,7 @@ import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { isLocalMessageId } from '../../../util/messageKey';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
 import { buildLocalMessage } from '../../../api/gramjs/apiBuilders/messages';
-import { isChatChannel } from '../../helpers';
+import { checkIfHasUnreadReactions, isChatChannel } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
@@ -206,24 +206,22 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateCommonBoxMessages':
     case 'updateChannelMessages': {
       const { ids, messageUpdate } = update;
-      if (messageUpdate.hasUnreadMention !== false) {
-        return undefined;
-      }
 
       ids.forEach((id) => {
         const chatId = ('channelId' in update ? update.channelId : selectCommonBoxChatId(global, id))!;
         const chat = selectChat(global, chatId);
 
-        if (chat?.unreadReactionsCount) {
+        if (messageUpdate.reactions && chat?.unreadReactionsCount
+            && !checkIfHasUnreadReactions(global, messageUpdate.reactions)) {
           global = updateUnreadReactions(global, chatId, {
-            unreadReactionsCount: (chat.unreadReactionsCount - 1) || undefined,
+            unreadReactionsCount: Math.max(chat.unreadReactionsCount - 1, 0) || undefined,
             unreadReactions: chat.unreadReactions?.filter((i) => i !== id),
           });
         }
 
-        if (chat?.unreadMentionsCount) {
+        if (!messageUpdate.hasUnreadMention && chat?.unreadMentionsCount) {
           global = updateChat(global, chatId, {
-            unreadMentionsCount: (chat.unreadMentionsCount - 1) || undefined,
+            unreadMentionsCount: Math.max(chat.unreadMentionsCount - 1, 0) || undefined,
             unreadMentions: chat.unreadMentions?.filter((i) => i !== id),
           });
         }

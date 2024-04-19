@@ -56,7 +56,7 @@ interface OwnProps {
   shouldRenderBotInfo?: boolean;
   noAppearanceAnimation: boolean;
   isSavedDialog?: boolean;
-  onFabToggle: AnyToVoidFunction;
+  onScrollDownToggle: BooleanToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
   onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
 }
@@ -88,7 +88,7 @@ const MessageListContent: FC<OwnProps> = ({
   shouldRenderBotInfo,
   noAppearanceAnimation,
   isSavedDialog,
-  onFabToggle,
+  onScrollDownToggle,
   onNotchToggle,
   onPinnedIntersectionChange,
 }) => {
@@ -115,7 +115,7 @@ const MessageListContent: FC<OwnProps> = ({
     getContainerHeight,
     isViewportNewest,
     isUnread,
-    onFabToggle,
+    onScrollDownToggle,
     onNotchToggle,
     isReady,
   );

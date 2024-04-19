@@ -410,6 +410,7 @@ const Message: FC<OwnProps & StateProps> = ({
     disableContextMenuHint,
     animateUnreadReaction,
     focusLastMessage,
+    markMentionsRead,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -795,10 +796,16 @@ const Message: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     const bottomMarker = bottomMarkerRef.current;
-    if (hasUnreadReaction && bottomMarker && isElementInViewport(bottomMarker)) {
+    if (!bottomMarker || !isElementInViewport(bottomMarker)) return;
+
+    if (hasUnreadReaction) {
       animateUnreadReaction({ messageIds: [messageId] });
     }
-  }, [hasUnreadReaction, messageId, animateUnreadReaction]);
+
+    if (message.hasUnreadMention) {
+      markMentionsRead({ messageIds: [messageId] });
+    }
+  }, [hasUnreadReaction, messageId, animateUnreadReaction, message.hasUnreadMention]);
 
   const albumLayout = useMemo(() => {
     return isAlbum

@@ -90,8 +90,8 @@ type OwnProps = {
   isComments?: boolean;
   canPost: boolean;
   isReady: boolean;
-  onFabToggle: (shouldShow: boolean) => void;
-  onNotchToggle: (shouldShow: boolean) => void;
+  onScrollDownToggle: BooleanToVoidFunction;
+  onNotchToggle: BooleanToVoidFunction;
   hasTools?: boolean;
   withBottomShift?: boolean;
   withDefaultBg: boolean;
@@ -148,7 +148,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   threadId,
   type,
   hasTools,
-  onFabToggle,
+  onScrollDownToggle,
   onNotchToggle,
   isCurrentUserPremium,
   isChatLoaded,
@@ -597,6 +597,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const hasMessages = (messageIds && messageGroups) || lastMessage;
 
+  useEffect(() => {
+    if (hasMessages) return;
+
+    onScrollDownToggle(false);
+  }, [hasMessages, onScrollDownToggle]);
+
   return (
     <div
       ref={containerRef}
@@ -650,7 +656,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isSchedule={messageGroups ? type === 'scheduled' : false}
           shouldRenderBotInfo={isBot}
           noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
-          onFabToggle={onFabToggle}
+          onScrollDownToggle={onScrollDownToggle}
           onNotchToggle={onNotchToggle}
           onPinnedIntersectionChange={onPinnedIntersectionChange}
         />

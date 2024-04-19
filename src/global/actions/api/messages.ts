@@ -1550,6 +1550,10 @@ addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionRetu
 
 addActionHandler('fetchUnreadMentions', async (global, actions, payload): Promise<void> => {
   const { chatId, offsetId } = payload;
+  await fetchUnreadMentions(global, chatId, offsetId);
+});
+
+async function fetchUnreadMentions<T extends GlobalState>(global: T, chatId: string, offsetId?: number) {
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
@@ -1571,7 +1575,7 @@ addActionHandler('fetchUnreadMentions', async (global, actions, payload): Promis
   });
 
   setGlobal(global);
-});
+}
 
 addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnType => {
   const { messageIds, tabId = getCurrentTabId() } = payload;
@@ -1579,8 +1583,15 @@ addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnTyp
   const chat = selectCurrentChat(global, tabId);
   if (!chat) return;
 
-  const unreadMentions = (chat.unreadMentions || []).filter((id) => !messageIds.includes(id));
+  const currentUnreadMentions = chat.unreadMentions || [];
+
+  const unreadMentions = currentUnreadMentions.filter((id) => !messageIds.includes(id));
+  const removedCount = currentUnreadMentions.length - unreadMentions.length;
+
   global = updateChat(global, chat.id, {
+    ...(chat.unreadMentionsCount && {
+      unreadMentionsCount: Math.max(chat.unreadMentionsCount - removedCount, 0) || undefined,
+    }),
     unreadMentions,
   });
 
@@ -1589,12 +1600,20 @@ addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnTyp
   actions.markMessagesRead({ messageIds, tabId });
 });
 
-addActionHandler('focusNextMention', (global, actions, payload): ActionReturnType => {
+addActionHandler('focusNextMention', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload || {};
 
-  const chat = selectCurrentChat(global, tabId);
+  let chat = selectCurrentChat(global, tabId);
 
-  if (!chat?.unreadMentions) return;
+  if (!chat) return;
+
+  if (!chat.unreadMentions) {
+    await fetchUnreadMentions(global, chat.id);
+    global = getGlobal();
+    const previousChatId = chat.id;
+    chat = selectCurrentChat(global, tabId);
+    if (!chat?.unreadMentions || previousChatId !== chat.id) return;
+  }
 
   actions.focusMessage({ chatId: chat.id, messageId: chat.unreadMentions[0], tabId });
 });
