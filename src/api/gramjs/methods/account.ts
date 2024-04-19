@@ -5,6 +5,9 @@ import type {
   ApiPeer, ApiPhoto, ApiReportReason,
 } from '../../types';
 
+import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { buildApiChatLink } from '../apiBuilders/misc';
+import { buildApiUser } from '../apiBuilders/users';
 import { buildInputPeer, buildInputPhoto, buildInputReportReason } from '../gramjsBuilders';
 import { invokeRequest } from './client';
 
@@ -70,4 +73,24 @@ export async function changeSessionTtl({
   }));
 
   return result;
+}
+
+export async function resolveBusinessChatLink({ slug } : { slug: string }) {
+  const result = await invokeRequest(new GramJs.account.ResolveBusinessChatLink({
+    slug,
+  }), {
+    shouldIgnoreErrors: true,
+  });
+  if (!result) return undefined;
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+
+  const chatLink = buildApiChatLink(result);
+
+  return {
+    users,
+    chats,
+    chatLink,
+  };
 }

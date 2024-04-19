@@ -1344,6 +1344,7 @@ account.updateEmojiStatus#fbd3de6b emoji_status:EmojiStatus = Bool;
 account.getRecentEmojiStatuses#f578105 hash:long = account.EmojiStatuses;
 account.reorderUsernames#ef500eab order:Vector<string> = Bool;
 account.toggleUsername#58d6b376 username:string active:Bool = Bool;
+account.resolveBusinessChatLink#5492e5ee slug:string = account.ResolvedBusinessChatLinks;
 users.getUsers#d91a548 id:Vector<InputUser> = Vector<User>;
 users.getFullUser#b60f5918 id:InputUser = users.UserFull;
 contacts.getContacts#5dd69e12 hash:long = contacts.Contacts;

@@ -6,7 +6,7 @@ import { isUsernameValid } from './username';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-'invoice' | 'addlist' | 'boost' | 'giftcode';
+'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -59,7 +59,13 @@ interface TelegramPassportLink {
 interface PublicUsernameOrBotLink {
   type: 'publicUsernameOrBotLink';
   username: string;
-  parameter?: string;
+  start?: string;
+  text?: string;
+}
+
+interface BusinessChatLink {
+  type: 'businessChatLink';
+  slug: string;
 }
 
 type DeepLink =
@@ -69,7 +75,8 @@ type DeepLink =
   PrivateMessageLink |
   ShareLink |
   ChatFolderLink |
-  PublicUsernameOrBotLink;
+  PublicUsernameOrBotLink |
+  BusinessChatLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
@@ -173,8 +180,11 @@ function parseTgLink(url: URL) {
     case 'publicUsernameOrBotLink':
       return buildPublicUsernameOrBotLink({
         username: queryParams.domain,
-        parameter: queryParams.start,
+        start: queryParams.start,
+        text: queryParams.text,
       });
+    case 'businessChatLink':
+      return buildBusinessChatLink({ slug: queryParams.slug });
     default:
       break;
   }
@@ -254,8 +264,11 @@ function parseHttpLink(url: URL) {
     case 'publicUsernameOrBotLink':
       return buildPublicUsernameOrBotLink({
         username: pathParams[0],
-        parameter: queryParams.start,
+        start: queryParams.start,
+        text: queryParams.text,
       });
+    case 'businessChatLink':
+      return buildBusinessChatLink({ slug: pathParams[1] });
     default:
       break;
   }
@@ -284,6 +297,9 @@ function getHttpDeepLinkType(
     }
     if (isUsernameValid(pathParams[0]) && isNumber(pathParams[1])) {
       return 'publicMessageLink';
+    }
+    if (method === 'm') {
+      return 'businessChatLink';
     }
   } else if (len === 3) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
@@ -337,6 +353,8 @@ function getTgDeepLinkType(
       return 'loginCodeLink';
     case 'passport':
       return 'telegramPassportLink';
+    case 'message':
+      return 'businessChatLink';
     default:
       break;
   }
@@ -467,7 +485,8 @@ function buildPublicUsernameOrBotLink(
 ): BuilderReturnType<PublicUsernameOrBotLink> {
   const {
     username,
-    parameter,
+    start,
+    text,
   } = params;
   if (!username) {
     return undefined;
@@ -478,7 +497,23 @@ function buildPublicUsernameOrBotLink(
   return {
     type: 'publicUsernameOrBotLink',
     username,
-    parameter,
+    start,
+    text,
+  };
+}
+
+function buildBusinessChatLink(params: BuilderParams<BusinessChatLink>): BuilderReturnType<BusinessChatLink> {
+  const {
+    slug,
+  } = params;
+
+  if (!slug) {
+    return undefined;
+  }
+
+  return {
+    type: 'businessChatLink',
+    slug,
   };
 }
 

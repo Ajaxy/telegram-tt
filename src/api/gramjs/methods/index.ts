@@ -3,9 +3,7 @@ export {
   setForceHttpTransport, setShouldDebugExportedSenders, setAllowHttpTransport, requestChannelDifference,
 } from './client';
 
-export {
-  reportPeer, reportProfilePhoto, changeSessionSettings, changeSessionTtl,
-} from './account';
+export * from './account';
 
 export {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth, restartAuthWithQr,

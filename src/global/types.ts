@@ -559,7 +559,7 @@ export type TabState = {
 
   requestedDraft?: {
     chatId?: string;
-    text: string;
+    text: ApiFormattedText;
     files?: File[];
     filter?: ApiChatType[];
   };
@@ -1323,6 +1323,7 @@ export interface ActionPayloads {
     phoneNumber: string;
     startAttach?: string | boolean;
     attach?: string;
+    text?: string;
   } & WithTabId;
   openChatByInvite: {
     hash: string;
@@ -1500,6 +1501,9 @@ export interface ActionPayloads {
   openTelegramLink: {
     url: string;
   } & WithTabId;
+  resolveBusinessChatLink: {
+    slug: string;
+  } & WithTabId;
   openChatByUsername: {
     username: string;
     threadId?: ThreadId;
@@ -1509,6 +1513,7 @@ export interface ActionPayloads {
     startAttach?: string;
     attach?: string;
     startApp?: string;
+    text?: string;
     originalParts?: string[];
   } & WithTabId;
   processBoostParameters: {
@@ -1967,7 +1972,7 @@ export interface ActionPayloads {
   openChatWithDraft: {
     chatId?: string;
     threadId?: ThreadId;
-    text: string;
+    text: ApiFormattedText;
     files?: File[];
     filter?: ApiChatType[];
   } & WithTabId;

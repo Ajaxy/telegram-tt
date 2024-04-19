@@ -1,7 +1,7 @@
 import type { ThreadId } from '../../types';
 import type { ApiBotCommand } from './bots';
 import type {
-  ApiChatReactions, ApiPhoto, ApiStickerSet,
+  ApiChatReactions, ApiFormattedText, ApiPhoto, ApiStickerSet,
 } from './messages';
 import type { ApiChatInviteImporter } from './misc';
 import type {
@@ -283,4 +283,9 @@ export interface ApiMissingInvitedUser {
   id: string;
   isRequiringPremiumToInvite?: boolean;
   isRequiringPremiumToMessage?: boolean;
+}
+
+export interface ApiChatLink {
+  chatId: string;
+  text: ApiFormattedText;
 }

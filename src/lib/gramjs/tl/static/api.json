@@ -58,6 +58,7 @@
     "account.getRecentEmojiStatuses",
     "account.reorderUsernames",
     "account.toggleUsername",
+    "account.resolveBusinessChatLink",
     "users.getUsers",
     "users.getFullUser",
     "contacts.getContacts",

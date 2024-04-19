@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiPrivacyKey } from '../../../types';
 import type {
+  ApiChatLink,
   ApiConfig, ApiCountry, ApiLangString,
   ApiPeerColors,
   ApiSession, ApiTimezone, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
@@ -11,7 +12,7 @@ import { buildCollectionByCallback, omit, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { addUserToLocalDb } from '../helpers';
 import { omitVirtualClassFields } from './helpers';
-import { buildApiDocument } from './messageContent';
+import { buildApiDocument, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildApiReaction } from './reactions';
 import { buildApiUser } from './users';
@@ -259,5 +260,13 @@ export function buildApiTimezone(timezone: GramJs.TypeTimezone): ApiTimezone {
     id,
     name,
     utcOffset,
+  };
+}
+
+export function buildApiChatLink(data: GramJs.account.ResolvedBusinessChatLinks): ApiChatLink {
+  const chatId = getApiChatIdFromMtpPeer(data.peer);
+  return {
+    chatId,
+    text: buildMessageTextContent(data.message, data.entities),
   };
 }

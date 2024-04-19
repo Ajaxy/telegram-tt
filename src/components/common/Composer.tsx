@@ -76,8 +76,8 @@ import {
   selectIsRightColumnShown,
   selectNewestMessageWithBotKeyboardButtons,
   selectPeerStory,
+  selectRequestedDraft,
   selectRequestedDraftFiles,
-  selectRequestedDraftText,
   selectScheduledIds,
   selectTabState,
   selectTheme,
@@ -99,7 +99,6 @@ import { IS_IOS, IS_VOICE_RECORDING_SUPPORTED } from '../../util/windowEnvironme
 import windowSize from '../../util/windowSize';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
 import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
-import { escapeHtml } from '../middle/composer/helpers/cleanHtml';
 import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
 import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
 import { getPeerColorClass } from './helpers/peerColor';
@@ -228,7 +227,7 @@ type StateProps =
     sendAsChat?: ApiChat;
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
-    requestedDraftText?: string;
+    requestedDraft?: ApiFormattedText;
     requestedDraftFiles?: File[];
     attachBots: GlobalState['attachMenu']['bots'];
     attachMenuPeerType?: ApiAttachMenuPeerType;
@@ -332,7 +331,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   sendAsChat,
   sendAsId,
   editingDraft,
-  requestedDraftText,
+  requestedDraft,
   requestedDraftFiles,
   botMenuButton,
   attachBots,
@@ -691,7 +690,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     getHtml,
     setHtml,
     editedMessage: editingMessage,
-    isDisabled: isInStoryViewer,
+    isDisabled: isInStoryViewer || Boolean(requestedDraft),
   });
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
@@ -1080,8 +1079,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [contentToBeScheduled, currentMessageList, handleMessageSchedule, requestCalendar]);
 
   useEffect(() => {
-    if (requestedDraftText) {
-      setHtml(escapeHtml(requestedDraftText));
+    if (requestedDraft) {
+      insertFormattedTextAndUpdateCursor(requestedDraft);
       resetOpenChatWithDraft();
 
       requestNextMutation(() => {
@@ -1089,7 +1088,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         focusEditableElement(messageInput, true);
       });
     }
-  }, [editableInputId, requestedDraftText, resetOpenChatWithDraft, setHtml]);
+  }, [editableInputId, requestedDraft, resetOpenChatWithDraft, setHtml]);
 
   useEffect(() => {
     if (requestedDraftFiles?.length) {
@@ -1987,7 +1986,7 @@ export default memo(withGlobal<OwnProps>(
     );
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
-    const requestedDraftText = selectRequestedDraftText(global, chatId);
+    const requestedDraft = selectRequestedDraft(global, chatId);
     const requestedDraftFiles = selectRequestedDraftFiles(global, chatId);
 
     const tabState = selectTabState(global);
@@ -2064,7 +2063,7 @@ export default memo(withGlobal<OwnProps>(
       sendAsChat,
       sendAsId,
       editingDraft,
-      requestedDraftText,
+      requestedDraft,
       requestedDraftFiles,
       attachBots: global.attachMenu.bots,
       attachMenuPeerType: selectChatType(global, chatId),

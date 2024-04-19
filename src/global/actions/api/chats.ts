@@ -1235,7 +1235,7 @@ addActionHandler('openChatByInvite', async (global, actions, payload): Promise<v
 
 addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Promise<void> => {
   const {
-    phoneNumber, startAttach, attach, tabId = getCurrentTabId(),
+    phoneNumber, startAttach, attach, text, tabId = getCurrentTabId(),
   } = payload!;
 
   // Open temporary empty chat to make the click response feel faster
@@ -1251,7 +1251,11 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Prom
     return;
   }
 
-  actions.openChat({ id: chat.id, tabId });
+  if (text) {
+    actions.openChatWithDraft({ chatId: chat.id, text: { text }, tabId });
+  } else {
+    actions.openChat({ id: chat.id, tabId });
+  }
 
   if (attach) {
     global = getGlobal();
@@ -1317,6 +1321,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       phoneNumber: part1.substr(1, part1.length - 1),
       startAttach: params.startattach,
       attach: params.attach,
+      text: params.text,
       tabId,
     });
     return;
@@ -1481,7 +1486,7 @@ addActionHandler('acceptInviteConfirmation', async (global, actions, payload): P
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp,
+    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, text,
     tabId = getCurrentTabId(),
   } = payload!;
 
@@ -1499,7 +1504,15 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     }
     if (!isWebApp) {
       await openChatByUsername(
-        global, actions, username, threadId, messageId, startParam, startAttach, attach, tabId,
+        global, actions, {
+          username,
+          threadId,
+          channelPostId: messageId,
+          startParam,
+          startAttach,
+          attach,
+          text,
+        }, tabId,
       );
       return;
     }
@@ -2643,6 +2656,31 @@ addActionHandler('toggleChannelRecommendations', (global, actions, payload): Act
   setGlobal(global);
 });
 
+addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Promise<void> => {
+  const { slug, tabId = getCurrentTabId() } = payload;
+  const result = await callApi('resolveBusinessChatLink', { slug });
+  if (!result) {
+    actions.showNotification({
+      message: langProvider.translate('BusinessLink.ErrorExpired'),
+      tabId,
+    });
+    return;
+  }
+
+  const { users, chats, chatLink } = result;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addChats(global, buildCollectionByKey(chats, 'id'));
+  setGlobal(global);
+
+  actions.openChatWithDraft({
+    chatId: chatLink.chatId,
+    text: chatLink.text,
+    tabId,
+  });
+});
+
 async function loadChats(
   listType: ChatListType,
   offsetId?: string,
@@ -2944,14 +2982,20 @@ async function getAttachBotOrNotify<T extends GlobalState>(
 async function openChatByUsername<T extends GlobalState>(
   global: T,
   actions: RequiredGlobalActions,
-  username: string,
-  threadId?: ThreadId,
-  channelPostId?: number,
-  startParam?: string,
-  startAttach?: string,
-  attach?: string,
+  params: {
+    username: string;
+    threadId?: ThreadId;
+    channelPostId?: number;
+    startParam?: string;
+    startAttach?: string;
+    attach?: string;
+    text?: string;
+  },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
+  const {
+    username, threadId, channelPostId, startParam, startAttach, attach, text,
+  } = params;
   global = getGlobal();
   const currentChat = selectCurrentChat(global, tabId);
 
@@ -3003,6 +3047,10 @@ async function openChatByUsername<T extends GlobalState>(
   if (attach) {
     global = getGlobal();
     openAttachMenuFromLink(global, actions, chat.id, attach, startAttach, tabId);
+  }
+
+  if (text) {
+    actions.openChatWithDraft({ chatId: chat.id, text: { text }, tabId });
   }
 }
 
