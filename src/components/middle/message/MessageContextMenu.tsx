@@ -36,7 +36,8 @@ import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/placeholder/Skeleton';
-import ReactionSelector from './ReactionSelector';
+import ReactionSelector from './reactions/ReactionSelector';
+import ReadTimeMenuItem from './ReadTimeMenuItem';
 
 import './MessageContextMenu.scss';
 
@@ -44,6 +45,7 @@ type OwnProps = {
   isReactionPickerOpen?: boolean;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
+  defaultTagReactions?: ApiReaction[];
   isOpen: boolean;
   anchor: IAnchorPosition;
   targetHref?: string;
@@ -86,6 +88,9 @@ type OwnProps = {
   customEmojiSets?: ApiStickerSet[];
   canPlayAnimatedEmojis?: boolean;
   noTransition?: boolean;
+  isInSavedMessages?: boolean;
+  shouldRenderShowWhen?: boolean;
+  canLoadReadDate?: boolean;
   onReply?: NoneToVoidFunction;
   onOpenThread?: VoidFunction;
   onEdit?: NoneToVoidFunction;
@@ -121,14 +126,15 @@ type OwnProps = {
 };
 
 const SCROLLBAR_WIDTH = 10;
-const REACTION_BUBBLE_EXTRA_WIDTH = 32;
 const REACTION_SELECTOR_WIDTH_REM = 19.25;
+const REACTION_SELECTOR_HEIGHT_REM = 3;
 const ANIMATION_DURATION = 200;
 
 const MessageContextMenu: FC<OwnProps> = ({
   isReactionPickerOpen,
   availableReactions,
   topReactions,
+  defaultTagReactions,
   isOpen,
   message,
   isPrivate,
@@ -171,6 +177,9 @@ const MessageContextMenu: FC<OwnProps> = ({
   customEmojiSets,
   canPlayAnimatedEmojis,
   noTransition,
+  isInSavedMessages,
+  shouldRenderShowWhen,
+  canLoadReadDate,
   onReply,
   onOpenThread,
   onEdit,
@@ -283,8 +292,8 @@ const MessageContextMenu: FC<OwnProps> = ({
     return {
       extraPaddingX: SCROLLBAR_WIDTH,
       extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
-      marginSides: withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
       extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
+      topShiftY: withReactions && !isMobile ? -REACTION_SELECTOR_HEIGHT_REM * REM : 0,
       shouldAvoidNegativePosition: !isDesktop,
       menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
     };
@@ -338,6 +347,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           enabledReactions={enabledReactions}
           topReactions={topReactions}
           allAvailableReactions={availableReactions}
+          defaultTagReactions={defaultTagReactions}
           currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
           maxUniqueReactions={maxUniqueReactions}
           onToggleReaction={onToggleReaction!}
@@ -345,8 +355,10 @@ const MessageContextMenu: FC<OwnProps> = ({
           isReady={isReady}
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
+          isInSavedMessages={isInSavedMessages}
           canPlayAnimatedEmojis={canPlayAnimatedEmojis}
           onShowMore={handleOpenMessageReactionPicker}
+          onClose={onClose}
           className={buildClassName(areItemsHidden && 'ReactionSelector-hidden')}
         />
       )}
@@ -357,6 +369,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           areItemsHidden && 'MessageContextMenu_items-hidden',
         )}
         style={menuStyle}
+        dir={lang.isRtl ? 'rtl' : undefined}
         ref={scrollableRef}
       >
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}
@@ -401,42 +414,10 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canForward && <MenuItem icon="forward" onClick={onForward}>{lang('Forward')}</MenuItem>}
         {canSelect && <MenuItem icon="select" onClick={onSelect}>{lang('Common.Select')}</MenuItem>}
         {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
-        {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
-          <MenuItem
-            icon={canShowReactionsCount ? 'heart-outline' : 'group'}
-            onClick={canShowReactionsCount ? onShowReactors : onShowSeenBy}
-            disabled={!canShowReactionsCount && !seenByDatesCount}
-          >
-            <span className="MessageContextMenu--seen-by-label-wrapper">
-              <span className="MessageContextMenu--seen-by-label" dir={lang.isRtl ? 'rtl' : undefined}>
-                {canShowReactionsCount && message.reactors?.count ? (
-                  canShowSeenBy && seenByDatesCount
-                    ? lang(
-                      'Chat.OutgoingContextMixedReactionCount',
-                      [message.reactors.count, seenByDatesCount],
-                    )
-                    : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
-                ) : (
-                  seenByDatesCount === 1 && seenByRecentPeers
-                    ? renderText(
-                      isUserId(seenByRecentPeers[0].id)
-                        ? getUserFullName(seenByRecentPeers[0] as ApiUser)!
-                        : (seenByRecentPeers[0] as ApiChat).title,
-                    ) : (
-                      seenByDatesCount
-                        ? lang('Conversation.ContextMenuSeen', seenByDatesCount, 'i')
-                        : lang('Conversation.ContextMenuNoViews')
-                    )
-                )}
-              </span>
-            </span>
-            <AvatarList className="avatars" size="micro" peers={seenByRecentPeers} />
-          </MenuItem>
-        )}
         {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>{lang('Delete')}</MenuItem>}
         {hasCustomEmoji && (
           <>
-            <MenuSeparator />
+            <MenuSeparator size="thick" />
             {!customEmojiSets && (
               <>
                 <Skeleton inline className="menu-loading-row" />
@@ -461,6 +442,50 @@ const MessageContextMenu: FC<OwnProps> = ({
         {isSponsoredMessage && <MenuItem icon="help" onClick={onAboutAds}>{lang('SponsoredMessageInfo')}</MenuItem>}
         {isSponsoredMessage && onSponsoredHide && (
           <MenuItem icon="stop" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
+        )}
+        {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
+          <>
+            <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
+            <MenuItem
+              icon={canShowReactionsCount ? 'heart-outline' : 'group'}
+              onClick={canShowReactionsCount ? onShowReactors : onShowSeenBy}
+              disabled={!canShowReactionsCount && !seenByDatesCount}
+            >
+              <span className="MessageContextMenu--seen-by-label-wrapper">
+                <span className="MessageContextMenu--seen-by-label" dir={lang.isRtl ? 'rtl' : undefined}>
+                  {canShowReactionsCount && message.reactors?.count ? (
+                    canShowSeenBy && seenByDatesCount
+                      ? lang(
+                        'Chat.OutgoingContextMixedReactionCount',
+                        [message.reactors.count, seenByDatesCount],
+                      )
+                      : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
+                  ) : (
+                    seenByDatesCount === 1 && seenByRecentPeers
+                      ? renderText(
+                        isUserId(seenByRecentPeers[0].id)
+                          ? getUserFullName(seenByRecentPeers[0] as ApiUser)!
+                          : (seenByRecentPeers[0] as ApiChat).title,
+                      ) : (
+                        seenByDatesCount
+                          ? lang('Conversation.ContextMenuSeen', seenByDatesCount, 'i')
+                          : lang('Conversation.ContextMenuNoViews')
+                      )
+                  )}
+                </span>
+              </span>
+              <AvatarList className="avatars" size="micro" peers={seenByRecentPeers} />
+            </MenuItem>
+          </>
+        )}
+        {!isSponsoredMessage && (canLoadReadDate || shouldRenderShowWhen) && (
+          <ReadTimeMenuItem
+            canLoadReadDate={canLoadReadDate}
+            shouldRenderShowWhen={shouldRenderShowWhen}
+            message={message}
+            menuSeparatorSize={hasCustomEmoji ? 'thin' : 'thick'}
+            closeContextMenu={onClose}
+          />
         )}
       </div>
     </Menu>

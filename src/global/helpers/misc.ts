@@ -9,11 +9,13 @@ export function buildApiInputPrivacyRules(global: GlobalState, {
   isUnspecified,
   allowedIds,
   blockedIds,
+  shouldAllowPremium,
 }: {
   visibility: PrivacyVisibility;
   isUnspecified?: boolean;
   allowedIds: string[];
   blockedIds: string[];
+  shouldAllowPremium?: true;
 }): ApiInputPrivacyRules {
   const {
     users: { byId: usersById },
@@ -30,6 +32,7 @@ export function buildApiInputPrivacyRules(global: GlobalState, {
     allowedChats: allowedChatIds.map((chatId) => chatsById[chatId]).filter(Boolean),
     blockedUsers: blockedUserIds.map((userId) => usersById[userId]).filter(Boolean),
     blockedChats: blockedChatIds.map((chatId) => chatsById[chatId]).filter(Boolean),
+    shouldAllowPremium,
   };
 
   return rules;

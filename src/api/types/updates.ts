@@ -24,6 +24,7 @@ import type {
   ApiMessageExtendedMediaPreview,
   ApiPhoto,
   ApiPoll,
+  ApiQuickReply,
   ApiReaction,
   ApiReactions,
   ApiStickerSet,
@@ -232,6 +233,28 @@ export type ApiUpdateScheduledMessage = {
   chatId: string;
   id: number;
   message: Partial<ApiMessage>;
+};
+
+export type ApiUpdateQuickReplyMessage = {
+  '@type': 'updateQuickReplyMessage';
+  id: number;
+  message: Partial<ApiMessage>;
+};
+
+export type ApiUpdateDeleteQuickReplyMessages = {
+  '@type': 'deleteQuickReplyMessages';
+  quickReplyId: number;
+  messageIds: number[];
+};
+
+export type ApiUpdateQuickReplies = {
+  '@type': 'updateQuickReplies';
+  quickReplies: ApiQuickReply[];
+};
+
+export type ApiDeleteQuickReply = {
+  '@type': 'deleteQuickReply';
+  quickReplyId: number;
 };
 
 export type ApiUpdatePinnedMessageIds = {
@@ -706,6 +729,15 @@ export type ApiUpdateGroupInvitePrivacyForbidden = {
   userId: string;
 };
 
+export type ApiUpdateSavedReactionTags = {
+  '@type': 'updateSavedReactionTags';
+};
+
+export type ApiUpdatePremiumFloodWait = {
+  '@type': 'updatePremiumFloodWait';
+  isUpload?: boolean;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -724,7 +756,7 @@ export type ApiUpdate = (
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
-  ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions |
+  ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
@@ -736,7 +768,8 @@ export type ApiUpdate = (
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
   ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
-  ApiUpdateDeleteSavedHistory
+  ApiUpdateDeleteSavedHistory | ApiUpdatePremiumFloodWait |
+  ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

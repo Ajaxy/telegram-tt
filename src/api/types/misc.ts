@@ -1,4 +1,4 @@
-import type { ApiLimitType, CallbackAction } from '../../global/types';
+import type { ApiLimitType, ApiPremiumSection, CallbackAction } from '../../global/types';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
 
@@ -15,6 +15,7 @@ export interface ApiInitialArgs {
   shouldAllowHttpTransport?: boolean;
   shouldForceHttpTransport?: boolean;
   shouldDebugExportedSenders?: boolean;
+  langCode: string;
 }
 
 export interface ApiOnProgress {
@@ -52,6 +53,7 @@ export interface ApiAttachment {
   shouldSendAsSpoiler?: true;
 
   uniqueId?: string;
+  ttlSeconds?: number;
 }
 
 export interface ApiWallpaper {
@@ -177,12 +179,18 @@ export interface ApiAppConfig {
   emojiSounds: Record<string, string>;
   seenByMaxChatMembers: number;
   seenByExpiresAt: number;
+  readDateExpiresAt: number;
   autologinDomains: string[];
   urlAuthDomains: string[];
   premiumInvoiceSlug: string;
   premiumBotUsername: string;
   isPremiumPurchaseBlocked: boolean;
-  premiumPromoOrder: string[];
+  isGiveawayGiftsPurchaseAvailable: boolean;
+  giveawayAddPeersMax: number;
+  giveawayBoostsPerPremium: number;
+  giveawayCountriesMax: number;
+  boostsPerSentGift: number;
+  premiumPromoOrder: ApiPremiumSection[];
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;
   topicsPinnedLimit: number;
@@ -195,6 +203,11 @@ export interface ApiAppConfig {
   storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
+  groupTranscribeLevelMin?: number;
+  canLimitNewMessagesWithoutPremium?: boolean;
+  bandwidthPremiumNotifyPeriod?: number;
+  bandwidthPremiumUploadSpeedup?: number;
+  bandwidthPremiumDownloadSpeedup?: number;
 }
 
 export interface ApiConfig {
@@ -216,6 +229,12 @@ export interface ApiPeerColors {
     };
   };
   generalHash?: number;
+}
+
+export interface ApiTimezone {
+  id: string;
+  name: string;
+  utcOffset: number;
 }
 
 export interface GramJsEmojiInteraction {

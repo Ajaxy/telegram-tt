@@ -1,0 +1,38 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1;
+}
+
+.contentText {
+  color: var(--color-text-secondary);
+  text-align: center !important;
+  text-wrap: pretty;
+}
+
+.title {
+  font-size: 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+.separator {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.userPicker {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.sendInvites, .avatarList {
+  margin-top: 1rem;
+}

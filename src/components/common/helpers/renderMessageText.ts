@@ -4,13 +4,13 @@ import type { TextPart } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import {
-  getMessageKey,
   getMessageSummaryDescription,
   getMessageSummaryEmoji,
   getMessageSummaryText,
   getMessageText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../../global/helpers';
+import { getMessageKey } from '../../../util/messageKey';
 import trimText from '../../../util/trimText';
 import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';

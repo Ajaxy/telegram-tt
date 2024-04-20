@@ -10,7 +10,7 @@ import {
   selectPeer,
   selectSender,
 } from '../../global/selectors';
-import { formatMediaDateTime } from '../../util/dateFormat';
+import { formatMediaDateTime } from '../../util/date/dateFormat';
 import renderText from '../common/helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';

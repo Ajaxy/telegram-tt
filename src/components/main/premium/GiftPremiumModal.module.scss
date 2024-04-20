@@ -10,13 +10,16 @@
   left: 0.5rem;
 }
 
-.avatar {
-  margin: 0 auto 1.5rem;
+.avatars {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem;
 }
 
-.headerText {
-  font-size: 1.5rem;
-  font-weight: 500;
+.center {
   text-align: center;
 }
 
@@ -36,9 +39,9 @@
   margin-bottom: 2.5rem;
 }
 
-.button {
-  height: 3rem;
-  background: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
-  font-size: 1rem;
-  font-weight: 600;
+.boostIcon {
+  color: var(--color-primary);
+  vertical-align: middle;
+  line-height: 1.5;
 }
+

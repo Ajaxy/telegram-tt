@@ -62,12 +62,12 @@ import useProfileViewportIds from './hooks/useProfileViewportIds';
 import useTransitionFixes from './hooks/useTransitionFixes';
 
 import Audio from '../common/Audio';
-import ChatExtra from '../common/ChatExtra';
 import Document from '../common/Document';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Media from '../common/Media';
 import NothingFound from '../common/NothingFound';
 import PrivateChatInfo from '../common/PrivateChatInfo';
+import ChatExtra from '../common/profile/ChatExtra';
 import ProfileInfo from '../common/ProfileInfo';
 import WebLink from '../common/WebLink';
 import ChatList from '../left/main/ChatList';

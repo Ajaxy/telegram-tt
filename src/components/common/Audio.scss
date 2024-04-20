@@ -26,6 +26,22 @@
 
   .toogle-play-wrapper {
     margin: 0;
+
+    .icon-view-once {
+      position: absolute;
+      padding: 0.125rem;
+      left: 2rem;
+      bottom: 0;
+      font-size: 1rem;
+      border-radius: 50%;
+      color: var(--color-white);
+      background-color: var(--color-primary);
+      outline: var(--background-color) solid 0.125rem;
+      z-index: var(--z-badge);
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity 0.4s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
     
     .toggle-play {
       margin-inline-end: 0.5rem;
@@ -66,27 +82,16 @@
         transform: scale(1);
         transition: opacity 0.4s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
-  
-      &.play .icon-pause,
-      &.pause .icon-play,
-      &.loading .icon-play,
-      &.loading .icon-pause,
-      &.loading .flame {
-        opacity: 0;
-        transform: scale(0.5);
-      }
     }
 
-    .icon-view-once {
-      position: absolute;
-      left: 2rem;
-      bottom: 0rem;
-      font-size: 1.1875rem;
-      border-radius: 50%;
-      color: var(--color-white);
-      background-color: var(--color-primary);
-      outline: var(--background-color) solid 0.125rem;
-      z-index: var(--z-badge);
+    &.play .icon-pause,
+    &.pause .icon-play,
+    &.loading .icon-play,
+    &.loading .icon-pause,
+    &.loading .flame,
+    &.loading .icon-view-once {
+      opacity: 0;
+      transform: scale(0.5);
     }
   }
 

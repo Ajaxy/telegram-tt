@@ -73,6 +73,10 @@
       color: var(--color-text-secondary);
       unicode-bidi: plaintext;
     }
+
+    .subLabelLink {
+      cursor: pointer;
+    }
   }
 
   input:checked ~ .Radio-main {

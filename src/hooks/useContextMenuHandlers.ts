@@ -49,6 +49,7 @@ const useContextMenuHandlers = (
       return;
     }
     e.preventDefault();
+    e.stopPropagation();
 
     if (contextMenuPosition) {
       return;
@@ -135,6 +136,7 @@ const useContextMenuHandlers = (
       if (isMenuDisabled) {
         return;
       }
+      e.stopPropagation();
       clearLongPressTimer();
 
       timer = window.setTimeout(() => emulateContextMenuEvent(e), LONG_TAP_DURATION_MS);

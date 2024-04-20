@@ -10,13 +10,13 @@ import type {
   EmojiData,
   EmojiModule,
   EmojiRawData,
-} from '../../../util/emoji';
+} from '../../../util/emoji/emoji';
 
 import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import animateScroll from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
-import { uncompressEmoji } from '../../../util/emoji';
+import { uncompressEmoji } from '../../../util/emoji/emoji';
 import { pick } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';

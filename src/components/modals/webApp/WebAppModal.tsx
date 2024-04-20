@@ -22,9 +22,9 @@ import { extractCurrentThemeParams, validateHexColor } from '../../../util/theme
 import { callApi } from '../../../api/gramjs';
 import renderText from '../../common/helpers/renderText';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
-import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
@@ -532,7 +532,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         >
           <div className={backButtonClassName} />
         </Button>
-        <div className="modal-title">{bot?.firstName}</div>
+        <div className="modal-title">{attachBot?.shortName ?? bot?.firstName}</div>
         <DropdownMenu
           className="web-app-more-menu with-menu-transitions"
           trigger={MoreMenuButton}

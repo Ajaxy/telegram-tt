@@ -21,7 +21,7 @@ import Portal from './Portal';
 
 import './Modal.scss';
 
-const ANIMATION_DURATION = 200;
+export const ANIMATION_DURATION = 200;
 
 type OwnProps = {
   title?: string | TextPart[];

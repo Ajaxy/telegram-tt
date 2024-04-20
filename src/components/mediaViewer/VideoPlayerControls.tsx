@@ -8,7 +8,7 @@ import type { ApiDimensions } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/dateFormat';
+import { formatMediaDuration } from '../../util/date/dateFormat';
 import { formatFileSize } from '../../util/textFormat';
 import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 

@@ -3,9 +3,7 @@ export {
   setForceHttpTransport, setShouldDebugExportedSenders, setAllowHttpTransport, requestChannelDifference,
 } from './client';
 
-export {
-  reportPeer, reportProfilePhoto, changeSessionSettings, changeSessionTtl,
-} from './account';
+export * from './account';
 
 export {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth, restartAuthWithQr,
@@ -35,6 +33,7 @@ export {
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
   saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, transcribeAudio,
   closePoll, fetchExtendedMedia, translateText, fetchMessageViews, fetchDiscussionMessage, clickSponsoredMessage,
+  fetchOutboxReadDate, exportMessageLink, fetchQuickReplies, sendQuickReply,
   deleteSavedHistory,
 } from './messages';
 
@@ -59,17 +58,7 @@ export {
   hideChatReportPanel,
 } from './management';
 
-export {
-  updateProfile, checkUsername, updateUsername, fetchBlockedUsers, blockUser, unblockUser,
-  updateProfilePhoto, uploadProfilePhoto, deleteProfilePhotos, fetchWallpapers, uploadWallpaper,
-  fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
-  fetchWebAuthorizations, terminateWebAuthorization, terminateAllWebAuthorizations,
-  fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
-  fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
-  updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList, fetchAppConfig,
-  fetchGlobalPrivacySettings, updateGlobalPrivacySettings, toggleUsername, reorderUsernames, fetchConfig,
-  uploadContactProfilePhoto, fetchPeerColors,
-} from './settings';
+export * from './settings';
 
 export {
   getPasswordInfo, checkPassword, clearPassword, updatePassword, updateRecoveryEmail, provideRecoveryEmailCode,
@@ -90,10 +79,7 @@ export {
   requestCall, getDhConfig, confirmCall, sendSignalingData, acceptCall, discardCall, setCallRating, receivedCall,
 } from './calls';
 
-export {
-  getAvailableReactions, sendReaction, sendEmojiInteraction, fetchMessageReactionsList, clearRecentReactions,
-  setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction, fetchRecentReactions, fetchTopReactions,
-} from './reactions';
+export * from './reactions';
 
 export {
   fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics,
@@ -113,5 +99,6 @@ export * from './stories';
 
 export {
   validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
-  applyBoost, fetchBoostsList, fetchBoostsStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
+  applyBoost, fetchBoostList, fetchBoostStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
+  getPremiumGiftCodeOptions, launchPrepaidGiveaway,
 } from './payments';

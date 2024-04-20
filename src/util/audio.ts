@@ -11,7 +11,8 @@ export async function parseAudioMetadata(url: string): Promise<AudioMetadata> {
   const { common: { title, artist, picture }, format: { duration } } = metadata;
 
   const cover = selectCover(picture);
-  const coverUrl = cover ? `data:${cover.format};base64,${cover.data.toString('base64')}` : undefined;
+  const coverBlob = cover ? new Blob([cover.data], { type: cover.format }) : undefined;
+  const coverUrl = coverBlob ? URL.createObjectURL(coverBlob) : undefined;
 
   return {
     title,

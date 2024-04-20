@@ -2,7 +2,7 @@ import type { ApiPeer, ApiUser, ApiUserStatus } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 
 import { ANONYMOUS_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
-import { formatFullDate, formatTime } from '../../util/dateFormat';
+import { formatFullDate, formatTime } from '../../util/date/dateFormat';
 import { orderBy } from '../../util/iteratees';
 import { formatPhoneNumber } from '../../util/phoneNumber';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
@@ -163,7 +163,7 @@ export function getUserStatus(
   }
 }
 
-export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus) {
+export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus, withSelfOnline = false) {
   const { id, type } = user;
 
   if (!userStatus) {
@@ -174,7 +174,7 @@ export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus) {
     return false;
   }
 
-  if (user.isSelf) {
+  if (user.isSelf && !withSelfOnline) {
     return false;
   }
 

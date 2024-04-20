@@ -1,0 +1,280 @@
+@use '../../../styles/mixins';
+
+.root {
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
+  --premium-feature-background: linear-gradient(65.85deg, #6C93FF -0.24%, #976FFF 53.99%, #DF69D1 110.53%);
+
+  user-select: none;
+}
+
+.root :global(.modal-content) {
+  padding: 0;
+}
+
+.root :global(.modal-dialog) {
+  height: min(calc(55vh + 41px + 193px), 90vh);
+  max-width: 26.25rem;
+  overflow: hidden;
+}
+
+.button {
+  font-weight: 500;
+  font-size: 1rem;
+  height: 3rem;
+}
+
+.main {
+  height: 100%;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  margin: 1rem;
+  width: 6.25rem;
+  height: 6.25rem;
+  min-height: 6.25rem;
+}
+
+.header-text {
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-align: center;
+  margin-inline: 0.5rem;
+}
+
+.description {
+  text-align: center;
+  margin-inline: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.header {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  border-bottom: 0.0625rem solid var(--color-borders);
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  height: 3.5rem;
+  padding: 0.5rem;
+  background: var(--color-background);
+  transition: 0.25s ease-out transform;
+}
+
+.hidden-header {
+  transform: translateY(-100%);
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 3;
+}
+
+.premium-header-text {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0 0 0 3rem;
+  unicode-bidi: plaintext;
+}
+
+.primary-footer-text {
+  color: var(--color-text);
+}
+
+.section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.375rem;
+  border-top: 0.0625rem solid var(--color-borders);
+}
+
+.types {
+  border-top: none;
+}
+
+.footer {
+  position: absolute;
+  width: 100%;
+  background: var(--color-background);
+  border-top: 0.0625rem solid var(--color-borders);
+  left: 0;
+  bottom: 0;
+  padding: 1rem;
+  z-index: 1;
+}
+
+.options {
+  width: 100%;
+}
+
+.giveawayTitle {
+  margin: 0.8125rem 0 0 1rem;
+  font-size: 1rem;
+  color: var(--color-links);
+
+  @include mixins.adapt-margin-to-scrollbar(0.8125rem);
+}
+
+.subscription {
+  margin: 1rem 1.625rem 1.3125rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+
+  @include mixins.adapt-margin-to-scrollbar(1rem);
+}
+
+.subscriptionOption {
+  margin-bottom: 0;
+  padding-inline: 3.5rem 1rem;
+  box-shadow: none;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 0.375rem 0 1.125rem;
+  margin-bottom: 1.3125rem;
+}
+
+.info {
+  flex-grow: 1;
+}
+
+.titleInfo {
+  margin: 0;
+}
+
+.month {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.quantity {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.floatingBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-links);
+  background-color: rgba(78, 142, 229, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.floatingBadgeColor {
+  margin: 0.8125rem 0.8125rem 0 1rem;
+  padding: 0.1875rem 0.75rem 0.25rem 0.5rem;
+  border-radius: 1rem;
+  background-color: rgba(78, 142, 229, 0.1);
+
+  @include mixins.adapt-margin-to-scrollbar(0.8125rem);
+}
+
+.floatingBadgeButtonColor {
+  padding: 0.25rem 0.375rem 0.25rem 0.1875rem;
+  border-radius: 0.375rem;
+  background-color: white;
+  margin-left: 0.5rem;
+}
+
+.floatingBadgeIcon {
+  font-size: 1.125rem;
+  margin-right: 0.1875rem;
+}
+
+.floatingBadgeValue {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.subscriptionFooter {
+  margin-bottom: 6rem;
+}
+
+.premiumFeatures {
+  margin-bottom: 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.dateButton {
+  margin-bottom: 1rem;
+  padding-right: 1.1875rem;
+  display: flex;
+  padding-left: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  color: var(--color-text);;
+  font-size: 1rem;
+  text-transform: initial;
+  margin: 0;
+}
+
+.checkboxSection {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.prizesSection {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+}
+
+.prizesInput {
+  flex-grow: 1;
+  margin-left: 1rem;
+  margin-bottom: 0;
+}
+
+.subLabelClassName {
+  margin-top: 0.1875rem;
+  color: var(--color-links) !important;
+}
+
+.prepaidImg {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.addButton {
+  margin-bottom: 1rem;
+}
+
+.addChannel {
+  margin-inline-start: initial !important;
+}
+
+@media (max-width: 600px) {
+  .root :global(.modal-dialog) {
+    width: 100%;
+    height: 100%;
+    max-width: 100% !important;
+    border-radius: 0;
+  }
+
+  .root .transition {
+    height: 100%;
+  }
+}

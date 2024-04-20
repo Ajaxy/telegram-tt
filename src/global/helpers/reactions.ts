@@ -4,6 +4,7 @@ import type {
   ApiMessage,
   ApiReaction,
   ApiReactionCount,
+  ApiReactionKey,
   ApiReactions,
 } from '../../api/types';
 import type { GlobalState } from '../types';
@@ -22,20 +23,24 @@ export function areReactionsEmpty(reactions: ApiReactions) {
   return !reactions.results.some(({ count }) => count > 0);
 }
 
+export function getReactionKey(reaction: ApiReaction): ApiReactionKey {
+  if ('emoticon' in reaction) {
+    return `emoji-${reaction.emoticon}`;
+  }
+
+  return `document-${reaction.documentId}`;
+}
+
 export function isSameReaction(first?: ApiReaction, second?: ApiReaction) {
+  if (first === second) {
+    return true;
+  }
+
   if (!first || !second) {
     return false;
   }
 
-  if ('emoticon' in first && 'emoticon' in second) {
-    return first.emoticon === second.emoticon;
-  }
-
-  if ('documentId' in first && 'documentId' in second) {
-    return first.documentId === second.documentId;
-  }
-
-  return false;
+  return getReactionKey(first) === getReactionKey(second);
 }
 
 export function canSendReaction(reaction: ApiReaction, chatReactions: ApiChatReactions) {
@@ -69,14 +74,6 @@ export function getUserReactions(message: ApiMessage): ApiReaction[] {
   return message.reactions?.results?.filter((r): r is Required<ApiReactionCount> => isReactionChosen(r))
     .sort((a, b) => a.chosenOrder - b.chosenOrder)
     .map((r) => r.reaction) || [];
-}
-
-export function getReactionUniqueKey(reaction: ApiReaction) {
-  if ('emoticon' in reaction) {
-    return reaction.emoticon;
-  }
-
-  return reaction.documentId;
 }
 
 export function isReactionChosen(reaction: ApiReactionCount) {

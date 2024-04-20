@@ -14,11 +14,11 @@ import type {
   ApiBotMenuButton,
   ApiChat,
   ApiChatFullInfo,
-  ApiChatMember,
   ApiFormattedText,
   ApiMessage,
   ApiMessageEntity,
   ApiNewPoll,
+  ApiQuickReply,
   ApiReaction,
   ApiStealthMode,
   ApiSticker,
@@ -40,6 +40,7 @@ import {
   EDITABLE_INPUT_MODAL_ID,
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
+  ONE_TIME_MEDIA_TTL_SECONDS,
   REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
@@ -48,6 +49,7 @@ import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterd
 import {
   getAllowedAttachmentOptions,
   getStoryKey,
+  hasReplaceableMedia,
   isChatAdmin,
   isChatChannel,
   isChatSuperGroup,
@@ -74,8 +76,8 @@ import {
   selectIsRightColumnShown,
   selectNewestMessageWithBotKeyboardButtons,
   selectPeerStory,
+  selectRequestedDraft,
   selectRequestedDraftFiles,
-  selectRequestedDraftText,
   selectScheduledIds,
   selectTabState,
   selectTheme,
@@ -85,9 +87,9 @@ import {
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
-import { processMessageInputForCustomEmoji } from '../../util/customEmojiManager';
-import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dateFormat';
+import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/date/dateFormat';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
+import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import focusEditableElement from '../../util/focusEditableElement';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import parseHtmlAsFormattedText from '../../util/parseHtmlAsFormattedText';
@@ -97,19 +99,19 @@ import { IS_IOS, IS_VOICE_RECORDING_SUPPORTED } from '../../util/windowEnvironme
 import windowSize from '../../util/windowSize';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
 import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
-import { escapeHtml } from '../middle/composer/helpers/cleanHtml';
 import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
 import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
 import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 import { getTextWithEntitiesAsHtml } from './helpers/renderTextWithEntities';
 
+import useInterval from '../../hooks/schedulers/useInterval';
+import useTimeout from '../../hooks/schedulers/useTimeout';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useDerivedState from '../../hooks/useDerivedState';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useGetSelectionRange from '../../hooks/useGetSelectionRange';
-import useInterval from '../../hooks/useInterval';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
@@ -119,9 +121,8 @@ import useShowTransition from '../../hooks/useShowTransition';
 import useSignal from '../../hooks/useSignal';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
-import useTimeout from '../../hooks/useTimeout';
 import useAttachmentModal from '../middle/composer/hooks/useAttachmentModal';
-import useBotCommandTooltip from '../middle/composer/hooks/useBotCommandTooltip';
+import useChatCommandTooltip from '../middle/composer/hooks/useChatCommandTooltip';
 import useClipboardPaste from '../middle/composer/hooks/useClipboardPaste';
 import useCustomEmojiTooltip from '../middle/composer/hooks/useCustomEmojiTooltip';
 import useDraft from '../middle/composer/hooks/useDraft';
@@ -135,9 +136,9 @@ import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
 import AttachmentModal from '../middle/composer/AttachmentModal.async';
 import AttachMenu from '../middle/composer/AttachMenu';
 import BotCommandMenu from '../middle/composer/BotCommandMenu.async';
-import BotCommandTooltip from '../middle/composer/BotCommandTooltip.async';
 import BotKeyboardMenu from '../middle/composer/BotKeyboardMenu';
 import BotMenuButton from '../middle/composer/BotMenuButton';
+import ChatCommandTooltip from '../middle/composer/ChatCommandTooltip.async';
 import ComposerEmbeddedMessage from '../middle/composer/ComposerEmbeddedMessage';
 import CustomEmojiTooltip from '../middle/composer/CustomEmojiTooltip.async';
 import CustomSendMenu from '../middle/composer/CustomSendMenu.async';
@@ -151,12 +152,13 @@ import SendAsMenu from '../middle/composer/SendAsMenu.async';
 import StickerTooltip from '../middle/composer/StickerTooltip.async';
 import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
 import WebPagePreview from '../middle/composer/WebPagePreview';
-import ReactionSelector from '../middle/message/ReactionSelector';
+import ReactionSelector from '../middle/message/reactions/ReactionSelector';
 import Button from '../ui/Button';
 import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
 import Avatar from './Avatar';
 import DeleteMessageModal from './DeleteMessageModal.async';
+import Icon from './Icon';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
 
 import './Composer.scss';
@@ -188,6 +190,7 @@ type StateProps =
     isOnActiveTab: boolean;
     editingMessage?: ApiMessage;
     chat?: ApiChat;
+    chatFullInfo?: ApiChatFullInfo;
     draft?: ApiDraft;
     replyToTopic?: ApiTopic;
     currentMessageList?: MessageList;
@@ -203,11 +206,10 @@ type StateProps =
     botKeyboardMessageId?: number;
     botKeyboardPlaceholder?: string;
     withScheduledButton?: boolean;
-    shouldSchedule?: boolean;
+    isInScheduledList?: boolean;
     canScheduleUntilOnline?: boolean;
     stickersForEmoji?: ApiSticker[];
     customEmojiForEmoji?: ApiSticker[];
-    groupChatMembers?: ApiChatMember[];
     currentUserId?: string;
     currentUser?: ApiUser;
     recentEmojis: string[];
@@ -221,12 +223,11 @@ type StateProps =
     inlineBots?: Record<string, false | InlineBotSettings>;
     botCommands?: ApiBotCommand[] | false;
     botMenuButton?: ApiBotMenuButton;
-    chatBotCommands?: ApiBotCommand[];
     sendAsUser?: ApiUser;
     sendAsChat?: ApiChat;
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
-    requestedDraftText?: string;
+    requestedDraft?: ApiFormattedText;
     requestedDraftFiles?: File[];
     attachBots: GlobalState['attachMenu']['bots'];
     attachMenuPeerType?: ApiAttachMenuPeerType;
@@ -245,6 +246,10 @@ type StateProps =
     shouldCollectDebugLogs?: boolean;
     sentStoryReaction?: ApiReaction;
     stealthMode?: ApiStealthMode;
+    canSendOneTimeMedia?: boolean;
+    quickReplyMessages?: Record<number, ApiMessage>;
+    quickReplies?: Record<number, ApiQuickReply>;
+    canSendQuickReplies?: boolean;
   };
 
 enum MainButtonState {
@@ -253,6 +258,7 @@ enum MainButtonState {
   Edit = 'edit',
   Schedule = 'schedule',
   Forward = 'forward',
+  SendOneTime = 'sendOneTime',
 }
 
 type ScheduledMessageArgs = TabState['contentToBeScheduled'] | {
@@ -273,7 +279,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   type,
   isOnActiveTab,
   dropAreaState,
-  shouldSchedule,
+  isInScheduledList,
   canScheduleUntilOnline,
   isReady,
   isMobile,
@@ -288,6 +294,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   messageListType,
   draft,
   chat,
+  chatFullInfo,
   replyToTopic,
   isForCurrentMessageList,
   isCurrentUserPremium,
@@ -307,7 +314,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   withScheduledButton,
   stickersForEmoji,
   customEmojiForEmoji,
-  groupChatMembers,
   topInlineBotIds,
   currentUserId,
   currentUser,
@@ -321,12 +327,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   inlineBots,
   isInlineBotLoading,
   botCommands,
-  chatBotCommands,
   sendAsUser,
   sendAsChat,
   sendAsId,
   editingDraft,
-  requestedDraftText,
+  requestedDraft,
   requestedDraftFiles,
   botMenuButton,
   attachBots,
@@ -346,6 +351,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   shouldCollectDebugLogs,
   sentStoryReaction,
   stealthMode,
+  canSendOneTimeMedia,
+  quickReplyMessages,
+  quickReplies,
+  canSendQuickReplies,
   onForward,
 }) => {
   const {
@@ -368,6 +377,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     openStoryReactionPicker,
     closeReactionPicker,
     sendStoryReaction,
+    editMessage,
   } = getActions();
 
   const lang = useLang();
@@ -395,6 +405,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   const sendMessageAction = useSendMessageAction(chatId, threadId);
   const [isInputHasFocus, markInputHasFocus, unmarkInputHasFocus] = useFlag();
   const [isAttachMenuOpen, onAttachMenuOpen, onAttachMenuClose] = useFlag();
+
+  const canMediaBeReplaced = editingMessage && hasReplaceableMedia(editingMessage);
+
+  const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
+  const chatEmojiSetId = emojiSet?.id;
 
   const isSentStoryReactionHeart = sentStoryReaction && 'emoticon' in sentStoryReaction
     ? sentStoryReaction.emoticon === HEART_REACTION.emoticon : false;
@@ -448,8 +463,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
     canSendVoices, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
   } = useMemo(
-    () => getAllowedAttachmentOptions(chat, isChatWithBot, isInStoryViewer),
-    [chat, isChatWithBot, isInStoryViewer],
+    () => getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isInStoryViewer),
+    [chat, chatFullInfo, isChatWithBot, isInStoryViewer],
   );
 
   const isComposerBlocked = !canSendPlainText && !editingMessage;
@@ -527,6 +542,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     canSendPhotos,
     canSendDocuments,
     insertNextText,
+    editedMessage: editingMessage,
   });
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
@@ -544,6 +560,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     currentRecordTime,
     recordButtonRef: mainButtonRef,
     startRecordTimeRef,
+    isViewOnceEnabled,
+    setIsViewOnceEnabled,
+    toogleViewOnceEnabled,
   } = useVoiceRecording();
 
   const shouldSendRecordingStatus = isForCurrentMessageList && !isInStoryViewer;
@@ -646,18 +665,22 @@ const Composer: FC<OwnProps & StateProps> = ({
     inlineBots,
   );
 
+  const hasQuickReplies = Boolean(quickReplies && Object.keys(quickReplies).length);
+
   const {
-    isOpen: isBotCommandTooltipOpen,
-    close: closeBotCommandTooltip,
+    isOpen: isChatCommandTooltipOpen,
+    close: closeChatCommandTooltip,
     filteredBotCommands: botTooltipCommands,
-  } = useBotCommandTooltip(
+    filteredQuickReplies: quickReplyCommands,
+  } = useChatCommandTooltip(
     Boolean(isInMessageList
       && isReady
       && isForCurrentMessageList
-      && ((botCommands && botCommands?.length) || chatBotCommands?.length)),
+      && ((botCommands && botCommands?.length) || chatBotCommands?.length || (hasQuickReplies && canSendQuickReplies))),
     getHtml,
     botCommands,
     chatBotCommands,
+    canSendQuickReplies ? quickReplies : undefined,
   );
 
   useDraft({
@@ -667,7 +690,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     getHtml,
     setHtml,
     editedMessage: editingMessage,
-    isDisabled: isInStoryViewer,
+    isDisabled: isInStoryViewer || Boolean(requestedDraft),
   });
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
@@ -753,16 +776,16 @@ const Composer: FC<OwnProps & StateProps> = ({
       return MainButtonState.Record;
     }
 
-    if (shouldSchedule) {
+    if (isInScheduledList) {
       return MainButtonState.Schedule;
     }
 
     return MainButtonState.Send;
   }, [
     activeVoiceRecording, editingMessage, getHtml, hasAttachments, isForwarding, isInputHasFocus, onForward,
-    shouldForceShowEditing, shouldSchedule,
+    shouldForceShowEditing, isInScheduledList,
   ]);
-  const canShowCustomSendMenu = !shouldSchedule;
+  const canShowCustomSendMenu = !isInScheduledList;
 
   const {
     isContextMenuOpen: isCustomSendMenuOpen,
@@ -883,16 +906,25 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (!validateTextLength(text, true)) return;
     if (!checkSlowMode()) return;
 
-    sendMessage({
-      messageList: currentMessageList,
-      text,
-      entities,
-      scheduledAt,
-      isSilent,
-      shouldUpdateStickerSetOrder,
-      attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
-      shouldGroupMessages: sendGrouped,
-    });
+    if (editingMessage) {
+      editMessage({
+        messageList: currentMessageList,
+        text,
+        entities,
+        attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
+      });
+    } else {
+      sendMessage({
+        messageList: currentMessageList,
+        text,
+        entities,
+        scheduledAt,
+        isSilent,
+        shouldUpdateStickerSetOrder,
+        attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
+        shouldGroupMessages: sendGrouped,
+      });
+    }
 
     lastMessageSendTimeSeconds.current = getServerTime();
 
@@ -928,12 +960,13 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     if (activeVoiceRecording) {
       const record = await stopRecordingVoice();
+      const ttlSeconds = isViewOnceEnabled ? ONE_TIME_MEDIA_TTL_SECONDS : undefined;
       if (record) {
         const { blob, duration, waveform } = record;
         currentAttachments = [await buildAttachment(
           VOICE_RECORDING_FILENAME,
           blob,
-          { voice: { duration, waveform } },
+          { voice: { duration, waveform }, ttlSeconds },
         )];
       }
     }
@@ -1046,8 +1079,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [contentToBeScheduled, currentMessageList, handleMessageSchedule, requestCalendar]);
 
   useEffect(() => {
-    if (requestedDraftText) {
-      setHtml(escapeHtml(requestedDraftText));
+    if (requestedDraft) {
+      insertFormattedTextAndUpdateCursor(requestedDraft);
       resetOpenChatWithDraft();
 
       requestNextMutation(() => {
@@ -1055,7 +1088,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         focusEditableElement(messageInput, true);
       });
     }
-  }, [editableInputId, requestedDraftText, resetOpenChatWithDraft, setHtml]);
+  }, [editableInputId, requestedDraft, resetOpenChatWithDraft, setHtml]);
 
   useEffect(() => {
     if (requestedDraftFiles?.length) {
@@ -1065,7 +1098,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
 
   const handleCustomEmojiSelect = useLastCallback((emoji: ApiSticker, inInputId?: string) => {
-    if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf) {
+    const emojiSetId = 'id' in emoji.stickerSetInfo && emoji.stickerSetInfo.id;
+    if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf && emojiSetId !== chatEmojiSetId) {
       showCustomEmojiPremiumNotification();
       return;
     }
@@ -1082,7 +1116,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (shouldSchedule || isScheduleRequested) {
+    if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
@@ -1115,7 +1149,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       isPreloadedGlobally: true,
     };
 
-    if (shouldSchedule || isScheduleRequested) {
+    if (isInScheduledList || isScheduleRequested) {
       forceShowSymbolMenu();
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
@@ -1144,7 +1178,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (shouldSchedule || isScheduleRequested) {
+    if (isInScheduledList || isScheduleRequested) {
       requestCalendar((scheduledAt) => {
         handleMessageSchedule({
           id: inlineResult.id,
@@ -1184,7 +1218,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (shouldSchedule) {
+    if (isInScheduledList) {
       requestCalendar((scheduledAt) => {
         handleMessageSchedule({ poll }, scheduledAt, currentMessageList);
       });
@@ -1196,7 +1230,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const sendSilent = useLastCallback((additionalArgs?: ScheduledMessageArgs) => {
-    if (shouldSchedule) {
+    if (isInScheduledList) {
       requestCalendar((scheduledAt) => {
         handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt, currentMessageList!);
       });
@@ -1297,7 +1331,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isEmojiTooltipOpen || isSendAsMenuOpen
     || isMentionTooltipOpen || isInlineBotTooltipOpen || isDeleteModalOpen || isBotCommandMenuOpen || isAttachMenuOpen
-    || isStickerTooltipOpen || isBotCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
+    || isStickerTooltipOpen || isChatCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
   || isCustomSendMenuOpen || Boolean(activeVoiceRecording) || attachments.length > 0 || isInputHasFocus;
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
     && !isSymbolMenuOpen;
@@ -1340,6 +1374,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             showAllowedMessageTypesNotification({ chatId });
           }
         } else {
+          setIsViewOnceEnabled(false);
           void startRecordingVoice();
         }
         break;
@@ -1485,6 +1520,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           withQuick={dropAreaState === DropAreaState.QuickFile || prevDropAreaState === DropAreaState.QuickFile}
           onHide={onDropHide!}
           onFileSelect={handleFileSelect}
+          editingMessage={editingMessage}
         />
       )}
       {shouldRenderReactionSelector && (
@@ -1496,6 +1532,8 @@ const Composer: FC<OwnProps & StateProps> = ({
           isReady={isReady}
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
+          isInSavedMessages={isChatWithSelf}
+          isInStoryViewer={isInStoryViewer}
           canPlayAnimatedEmojis={canPlayAnimatedEmojis}
           onShowMore={handleReactionPickerOpen}
           className={reactionSelectorTransitonClassNames}
@@ -1513,7 +1551,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldForceAsFile={shouldForceAsFile}
         isForCurrentMessageList={isForCurrentMessageList}
         isForMessage={isInMessageList}
-        shouldSchedule={shouldSchedule}
+        shouldSchedule={isInScheduledList}
         forceDarkTheme={isInStoryViewer}
         onCaptionUpdate={onCaptionUpdate}
         onSendSilent={handleSendSilentAttachments}
@@ -1525,6 +1563,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         onCustomEmojiSelect={handleCustomEmojiSelectAttachmentModal}
         onRemoveSymbol={removeSymbolAttachmentModal}
         onEmojiSelect={insertTextAndUpdateCursorAttachmentModal}
+        editingMessage={editingMessage}
       />
       <PollModal
         isOpen={pollModal.isOpen}
@@ -1555,13 +1594,17 @@ const Composer: FC<OwnProps & StateProps> = ({
         onInsertUserName={insertMention}
         onClose={closeMentionTooltip}
       />
-      <BotCommandTooltip
-        isOpen={isBotCommandTooltipOpen}
+      <ChatCommandTooltip
+        isOpen={isChatCommandTooltipOpen}
+        chatId={chatId}
         withUsername={Boolean(chatBotCommands)}
         botCommands={botTooltipCommands}
+        quickReplies={quickReplyCommands}
         getHtml={getHtml}
+        self={currentUser!}
+        quickReplyMessages={quickReplyMessages}
         onClick={handleBotCommandSelect}
-        onClose={closeBotCommandTooltip}
+        onClose={closeChatCommandTooltip}
       />
       <div className={buildClassName('composer-wrapper', isInStoryViewer && 'with-story-tweaks')}>
         <svg className="svg-appendix" width="9" height="20">
@@ -1753,7 +1796,9 @@ const Composer: FC<OwnProps & StateProps> = ({
           <AttachMenu
             chatId={chatId}
             threadId={threadId}
-            isButtonVisible={!activeVoiceRecording && !editingMessage}
+            editingMessage={editingMessage}
+            hasReplaceableMedia={canMediaBeReplaced}
+            isButtonVisible={!activeVoiceRecording}
             canAttachMedia={canAttachMedia}
             canAttachPolls={canAttachPolls}
             canSendPhotos={canSendPhotos}
@@ -1762,7 +1807,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             canSendAudios={canSendAudios}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
-            isScheduled={shouldSchedule}
+            isScheduled={isInScheduledList}
             attachBots={isInMessageList ? attachBots : undefined}
             peerType={attachMenuPeerType}
             shouldCollectDebugLogs={shouldCollectDebugLogs}
@@ -1813,6 +1858,18 @@ const Composer: FC<OwnProps & StateProps> = ({
           />
         </div>
       </div>
+      {canSendOneTimeMedia && activeVoiceRecording && (
+        <Button
+          className={buildClassName('view-once', isViewOnceEnabled && 'active')}
+          round
+          color="secondary"
+          ariaLabel={lang('Chat.PlayOnceVoiceMessageTooltip')}
+          onClick={toogleViewOnceEnabled}
+        >
+          <Icon name="view-once" />
+          <Icon name="one-filled" />
+        </Button>
+      )}
       {activeVoiceRecording && (
         <Button
           round
@@ -1883,10 +1940,10 @@ const Composer: FC<OwnProps & StateProps> = ({
       {canShowCustomSendMenu && (
         <CustomSendMenu
           isOpen={isCustomSendMenuOpen}
-          canSchedule={isInMessageList}
-          canScheduleUntilOnline={canScheduleUntilOnline}
+          canSchedule={isInMessageList && !isViewOnceEnabled}
+          canScheduleUntilOnline={canScheduleUntilOnline && !isViewOnceEnabled}
           onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
-          onSendSchedule={!shouldSchedule ? handleSendScheduled : undefined}
+          onSendSchedule={!isInScheduledList ? handleSendScheduled : undefined}
           onSendWhenOnline={handleSendWhenOnline}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
@@ -1929,7 +1986,7 @@ export default memo(withGlobal<OwnProps>(
     );
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
-    const requestedDraftText = selectRequestedDraftText(global, chatId);
+    const requestedDraft = selectRequestedDraft(global, chatId);
     const requestedDraftFiles = selectRequestedDraftFiles(global, chatId);
 
     const tabState = selectTabState(global);
@@ -1958,10 +2015,13 @@ export default memo(withGlobal<OwnProps>(
     const replyToTopic = chat?.isForum && chat.isForumAsMessages && threadId === MAIN_THREAD_ID && replyToMessage
       ? selectTopicFromMessage(global, replyToMessage)
       : undefined;
+    const isInScheduledList = messageListType === 'scheduled';
+
+    const canSendQuickReplies = isChatWithUser && !isChatWithBot && !isInScheduledList && !isChatWithSelf;
 
     return {
-      availableReactions: type === 'story' ? global.availableReactions : undefined,
-      topReactions: type === 'story' ? global.topReactions : undefined,
+      availableReactions: type === 'story' ? global.reactions.availableReactions : undefined,
+      topReactions: type === 'story' ? global.reactions.topReactions : undefined,
       isOnActiveTab: !tabState.isBlurred,
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
       draft,
@@ -1977,14 +2037,14 @@ export default memo(withGlobal<OwnProps>(
         messageListType === 'thread'
         && Boolean(scheduledIds?.length)
       ),
-      shouldSchedule: messageListType === 'scheduled',
+      isInScheduledList,
       botKeyboardMessageId,
       botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,
       isForwarding: chatId === tabState.forwardMessages.toChatId,
       pollModal: tabState.pollModal,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
-      groupChatMembers: chatFullInfo?.members,
+      chatFullInfo,
       topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId,
       currentUser,
@@ -1997,14 +2057,13 @@ export default memo(withGlobal<OwnProps>(
       emojiKeywords: emojiKeywords?.keywords,
       inlineBots: tabState.inlineBots.byUsername,
       isInlineBotLoading: tabState.inlineBots.isLoading,
-      chatBotCommands: chatFullInfo?.botCommands,
       botCommands: chatBotFullInfo ? (chatBotFullInfo.botInfo?.commands || false) : undefined,
       botMenuButton: chatBotFullInfo?.botInfo?.menuButton,
       sendAsUser,
       sendAsChat,
       sendAsId,
       editingDraft,
-      requestedDraftText,
+      requestedDraft,
       requestedDraftFiles,
       attachBots: global.attachMenu.bots,
       attachMenuPeerType: selectChatType(global, chatId),
@@ -2019,10 +2078,14 @@ export default memo(withGlobal<OwnProps>(
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
+      canSendOneTimeMedia: !isChatWithSelf && isChatWithUser && !isChatWithBot && !isInScheduledList,
       shouldCollectDebugLogs: global.settings.byKey.shouldCollectDebugLogs,
       sentStoryReaction,
       stealthMode: global.stories.stealthMode,
       replyToTopic,
+      quickReplyMessages: global.quickReplies.messagesById,
+      quickReplies: global.quickReplies.byId,
+      canSendQuickReplies,
     };
   },
 )(Composer));

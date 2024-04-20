@@ -4,6 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 import type { ApiMessageOutgoingStatus } from '../../api/types';
 
 import Transition from '../ui/Transition';
+import Icon from './Icon';
 
 import './MessageOutgoingStatus.scss';
 
@@ -21,9 +22,9 @@ const MessageOutgoingStatus: FC<OwnProps> = ({ status }) => {
       <Transition name="reveal" activeKey={Keys[status]}>
         {status === 'failed' ? (
           <div className="MessageOutgoingStatus--failed">
-            <i className="icon icon-message-failed" />
+            <Icon name="message-failed" />
           </div>
-        ) : <i className={`icon icon-message-${status}`} />}
+        ) : <Icon name={`message-${status}`} />}
       </Transition>
     </div>
   );

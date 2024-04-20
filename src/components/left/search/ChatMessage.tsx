@@ -19,7 +19,7 @@ import {
 } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/dateFormat';
+import { formatPastTimeShort } from '../../../util/date/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useAppLayout from '../../../hooks/useAppLayout';

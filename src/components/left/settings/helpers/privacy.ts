@@ -19,6 +19,10 @@ export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefine
     case SettingsScreens.PrivacyBioAllowedContacts:
     case SettingsScreens.PrivacyBioDeniedContacts:
       return 'bio';
+    case SettingsScreens.PrivacyBirthday:
+    case SettingsScreens.PrivacyBirthdayAllowedContacts:
+    case SettingsScreens.PrivacyBirthdayDeniedContacts:
+      return 'birthday';
     case SettingsScreens.PrivacyForwarding:
     case SettingsScreens.PrivacyForwardingAllowedContacts:
     case SettingsScreens.PrivacyForwardingDeniedContacts:

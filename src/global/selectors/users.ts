@@ -31,6 +31,10 @@ export function selectIsPremiumPurchaseBlocked<T extends GlobalState>(global: T)
   return global.appConfig?.isPremiumPurchaseBlocked ?? true;
 }
 
+export function selectIsGiveawayGiftsPurchaseAvailable<T extends GlobalState>(global: T) {
+  return global.appConfig?.isGiveawayGiftsPurchaseAvailable ?? true;
+}
+
 // Slow, not to be used in `withGlobal`
 export function selectUserByPhoneNumber<T extends GlobalState>(global: T, phoneNumber: string) {
   const phoneNumberCleaned = phoneNumber.replace(/[^0-9]/g, '');

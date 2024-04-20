@@ -16,6 +16,7 @@ import type {
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
+  ApiQuickReply,
   ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
@@ -159,7 +160,7 @@ export type UniversalMessage = (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
     'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned' |
-    'savedPeerId'
+    'savedPeerId' | 'fromBoostsApplied' | 'quickReplyShortcutId' | 'viaBusinessBotId'
   )>
 );
 
@@ -197,10 +198,11 @@ export function buildApiMessageWithChatId(
   const isForwardingAllowed = !mtpMessage.noforwards;
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
   const hasComments = mtpMessage.replies?.comments;
+  const senderBoosts = mtpMessage.fromBoostsApplied;
 
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
-  return omitUndefined({
+  return omitUndefined<ApiMessage>({
     id: mtpMessage.id,
     chatId,
     isOutgoing,
@@ -237,7 +239,9 @@ export function buildApiMessageWithChatId(
     isForwardingAllowed,
     hasComments,
     savedPeerId,
-  } satisfies ApiMessage);
+    senderBoosts,
+    viaBusinessBotId: mtpMessage.viaBusinessBotId?.toString(),
+  });
 }
 
 export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | undefined {
@@ -288,7 +292,7 @@ function buildApiReplyInfo(replyHeader: GramJs.TypeMessageReplyHeader): ApiReply
   if (replyHeader instanceof GramJs.MessageReplyStoryHeader) {
     return {
       type: 'story',
-      userId: replyHeader.userId.toString(),
+      peerId: getApiChatIdFromMtpPeer(replyHeader.peer),
       storyId: replyHeader.storyId,
     };
   }
@@ -544,13 +548,28 @@ function buildAction(
     text = 'BoostingGiveawayJustStarted';
     translationValues.push('%action_origin%');
   } else if (action instanceof GramJs.MessageActionGiftCode) {
-    text = 'BoostingReceivedGiftNoName';
+    text = isOutgoing ? 'ActionGiftOutbound' : 'BoostingReceivedGiftNoName';
     slug = action.slug;
     months = action.months;
+    amount = action.amount?.toJSNumber();
     isGiveaway = Boolean(action.viaGiveaway);
     isUnclaimed = Boolean(action.unclaimed);
+    if (isOutgoing) {
+      translationValues.push('%gift_payment_amount%');
+    }
+    currency = action.currency;
+    if (action.cryptoCurrency) {
+      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
+      giftCryptoInfo = {
+        currency: action.cryptoCurrency,
+        amount: cryptoAmountWithDecimals.toFixed(2),
+      };
+    }
     if (action.boostPeer) {
       targetChatId = getApiChatIdFromMtpPeer(action.boostPeer);
+    }
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
     }
   } else if (action instanceof GramJs.MessageActionGiveawayResults) {
     if (!action.winnersCount) {
@@ -562,6 +581,20 @@ function buildAction(
       translationValues.push('%amount%');
       amount = action.winnersCount;
       pluralValue = action.winnersCount;
+    }
+  } else if (action instanceof GramJs.MessageActionBoostApply) {
+    type = 'chatBoost';
+    if (action.boosts === 1) {
+      text = senderId === currentUserId ? 'BoostingBoostsGroupByYouServiceMsg' : 'BoostingBoostsGroupByUserServiceMsg';
+      translationValues.push('%action_origin%');
+    } else {
+      text = senderId === currentUserId ? 'BoostingBoostsGroupByYouServiceMsgCount'
+        : 'BoostingBoostsGroupByUserServiceMsgCount';
+      translationValues.push(action.boosts.toString());
+      if (senderId !== currentUserId) {
+        translationValues.unshift('%action_origin%');
+      }
+      pluralValue = action.boosts;
     }
   } else {
     text = 'ChatList.UnsupportedMessage';
@@ -901,7 +934,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
   if (inputInfo.type === 'story') {
     return {
       type: 'story',
-      userId: inputInfo.userId,
+      peerId: inputInfo.peerId,
       storyId: inputInfo.storyId,
     };
   }
@@ -917,7 +950,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
   };
 }
 
-function buildUploadingMedia(
+export function buildUploadingMedia(
   attachment: ApiAttachment,
 ): MediaContent {
   const {
@@ -929,6 +962,7 @@ function buildUploadingMedia(
     audio,
     shouldSendAsFile,
     shouldSendAsSpoiler,
+    ttlSeconds,
   } = attachment;
 
   if (!shouldSendAsFile) {
@@ -973,6 +1007,7 @@ function buildUploadingMedia(
           duration,
           waveform: inputWaveform,
         },
+        ttlSeconds,
       };
     }
     if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {
@@ -1048,6 +1083,15 @@ export function buildApiThreadInfo(
     isCommentsInfo: false,
     chatId,
     threadId: messageId,
+  };
+}
+
+export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply {
+  const { shortcutId, shortcut, topMessage } = reply;
+  return {
+    id: shortcutId,
+    shortcut,
+    topMessageId: topMessage,
   };
 }
 

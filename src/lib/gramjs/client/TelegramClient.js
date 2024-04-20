@@ -157,7 +157,7 @@ class TelegramClient {
                         .toString() || '1.0',
                     appVersion: args.appVersion || '1.0',
                     langCode: args.langCode,
-                    langPack: '', // this should be left empty.
+                    langPack: 'weba',
                     systemLangCode: args.systemLangCode,
                     query: x,
                     proxy: undefined, // no proxies yet.
@@ -294,6 +294,9 @@ class TelegramClient {
 
             try {
                 const ping = () => {
+                    if (this._destroyed) {
+                        return undefined;
+                    }
                     return this._sender.send(new requests.PingDelayDisconnect({
                         pingId: Helpers.getRandomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER),
                         disconnectDelay: PING_DISCONNECT_DELAY,
@@ -330,6 +333,9 @@ class TelegramClient {
 
                 if (this._sender.isReconnecting || this._isSwitchingDc) {
                     continue;
+                }
+                if (this._destroyed) {
+                    break;
                 }
                 this._sender.reconnect();
             }
@@ -628,6 +634,7 @@ class TelegramClient {
             authKeyCallback: this._authKeyCallback.bind(this),
             isMainSender: dcId === this.session.dcId,
             isExported: true,
+            updateCallback: this._handleUpdate.bind(this),
             getShouldDebugExportedSenders: this.getShouldDebugExportedSenders.bind(this),
             onConnectionBreak: () => this._cleanupExportedSender(dcId, index),
         });

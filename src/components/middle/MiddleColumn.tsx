@@ -55,6 +55,7 @@ import {
   selectTabState,
   selectTheme,
   selectThreadInfo,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -78,6 +79,7 @@ import useWindowSize from '../../hooks/window/useWindowSize';
 import usePinnedMessage from './hooks/usePinnedMessage';
 
 import Composer from '../common/Composer';
+import PrivacySettingsNoticeModal from '../common/PrivacySettingsNoticeModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
 import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
@@ -91,6 +93,7 @@ import MessageList from './MessageList';
 import MessageSelectToolbar from './MessageSelectToolbar.async';
 import MiddleHeader from './MiddleHeader';
 import MobileSearch from './MobileSearch.async';
+import PremiumRequiredPlaceholder from './PremiumRequiredPlaceholder';
 import ReactorListModal from './ReactorListModal.async';
 
 import './MiddleColumn.scss';
@@ -128,6 +131,7 @@ type StateProps = {
   hasCurrentTextSearch?: boolean;
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
+  isPrivacySettingsNoticeModalOpen: boolean;
   isReactorListModalOpen: boolean;
   isGiftPremiumModalOpen?: boolean;
   isChatLanguageModalOpen?: boolean;
@@ -149,6 +153,7 @@ type StateProps = {
   canUnblock?: boolean;
   isSavedDialog?: boolean;
   canShowOpenChatButton?: boolean;
+  isContactRequirePremium?: boolean;
 };
 
 function isImage(item: DataTransferItem) {
@@ -186,6 +191,7 @@ function MiddleColumn({
   hasCurrentTextSearch,
   isSelectModeActive,
   isSeenByModalOpen,
+  isPrivacySettingsNoticeModalOpen,
   isReactorListModalOpen,
   isGiftPremiumModalOpen,
   isChatLanguageModalOpen,
@@ -207,6 +213,7 @@ function MiddleColumn({
   canUnblock,
   isSavedDialog,
   canShowOpenChatButton,
+  isContactRequirePremium,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -231,7 +238,7 @@ function MiddleColumn({
 
   const lang = useLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
-  const [isFabShown, setIsFabShown] = useState<boolean | undefined>();
+  const [isScrollDownShown, setIsScrollDownShown] = useState(false);
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
@@ -264,9 +271,11 @@ function MiddleColumn({
   const renderingCanUnblock = usePrevDuringAnimation(canUnblock, closeAnimationDuration);
   const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration)
     && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && !renderingCanUnblock
-    && chatId !== TMP_CHAT_ID;
+    && chatId !== TMP_CHAT_ID && !isContactRequirePremium;
   const renderingHasTools = usePrevDuringAnimation(hasTools, closeAnimationDuration);
-  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, closeAnimationDuration) && chatId !== TMP_CHAT_ID;
+  const renderingIsScrollDownShown = usePrevDuringAnimation(
+    isScrollDownShown, closeAnimationDuration,
+  ) && chatId !== TMP_CHAT_ID;
   const renderingIsChannel = usePrevDuringAnimation(isChannel, closeAnimationDuration);
   const renderingShouldJoinToSend = usePrevDuringAnimation(shouldJoinToSend, closeAnimationDuration);
   const renderingShouldSendJoinRequest = usePrevDuringAnimation(shouldSendJoinRequest, closeAnimationDuration);
@@ -446,7 +455,9 @@ function MiddleColumn({
   );
   const forumComposerPlaceholder = getForumComposerPlaceholder(lang, chat, threadId, Boolean(draftReplyInfo));
 
-  const composerRestrictionMessage = messageSendingRestrictionReason || forumComposerPlaceholder;
+  const composerRestrictionMessage = messageSendingRestrictionReason
+    ?? forumComposerPlaceholder
+    ?? (isContactRequirePremium ? <PremiumRequiredPlaceholder userId={chatId!} /> : undefined);
 
   // CSS Variables calculation doesn't work properly with transforms, so we calculate transform values in JS
   const {
@@ -480,9 +491,9 @@ function MiddleColumn({
   );
   const withMessageListBottomShift = Boolean(
     renderingCanRestartBot || renderingCanSubscribe || renderingShouldSendJoinRequest || renderingCanStartBot
-    || isPinnedMessageList || canShowOpenChatButton || renderingCanUnblock,
+    || (isPinnedMessageList && canUnpin) || canShowOpenChatButton || renderingCanUnblock,
   );
-  const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || isPinnedMessageList);
+  const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive);
 
   return (
     <div
@@ -543,9 +554,10 @@ function MiddleColumn({
                 isComments={isComments}
                 canPost={renderingCanPost!}
                 hasTools={renderingHasTools}
-                onFabToggle={setIsFabShown}
+                onScrollDownToggle={setIsScrollDownShown}
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
+                isContactRequirePremium={isContactRequirePremium}
                 withBottomShift={withMessageListBottomShift}
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
                 onPinnedIntersectionChange={renderingOnPinnedIntersectionChange!}
@@ -676,13 +688,14 @@ function MiddleColumn({
                   canPost={renderingCanPost}
                 />
                 <SeenByModal isOpen={isSeenByModalOpen} />
+                <PrivacySettingsNoticeModal isOpen={isPrivacySettingsNoticeModalOpen} />
                 <ReactorListModal isOpen={isReactorListModalOpen} />
                 {IS_TRANSLATION_SUPPORTED && <ChatLanguageModal isOpen={isChatLanguageModalOpen} />}
               </div>
             </Transition>
 
             <FloatingActionButtons
-              isShown={renderingIsFabShown!}
+              withScrollDown={renderingIsScrollDownShown}
               canPost={renderingCanPost}
               withExtraShift={withExtraShift}
             />
@@ -723,7 +736,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
       seenByModal, giftPremiumModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
-      chatLanguageModal,
+      chatLanguageModal, privacySettingsNoticeModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { leftColumnWidth } = global;
@@ -739,6 +752,7 @@ export default memo(withGlobal<OwnProps>(
       hasCurrentTextSearch: Boolean(selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
       isSeenByModalOpen: Boolean(seenByModal),
+      isPrivacySettingsNoticeModalOpen: Boolean(privacySettingsNoticeModal),
       isReactorListModalOpen: Boolean(reactorModal),
       isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
       isChatLanguageModalOpen: Boolean(chatLanguageModal),
@@ -758,10 +772,11 @@ export default memo(withGlobal<OwnProps>(
     const bot = selectBot(global, chatId);
     const pinnedIds = selectPinnedIds(global, chatId, threadId);
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
+    const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
 
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
-    const canPost = chat && getCanPostInChat(chat, threadId, isMessageThread);
+    const canPost = chat && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
@@ -776,7 +791,7 @@ export default memo(withGlobal<OwnProps>(
     const canStartBot = !canRestartBot && isBotNotStarted;
     const canUnblock = isUserBlocked && !bot;
     const shouldLoadFullChat = Boolean(
-      chat && isChatGroup(chat) && !selectChatFullInfo(global, chat.id),
+      chat && isChatGroup(chat) && !chatFullInfo,
     );
     const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
     const shouldBlockSendInForum = chat?.isForum
@@ -799,6 +814,8 @@ export default memo(withGlobal<OwnProps>(
       )
     );
 
+    const isContactRequirePremium = selectUserFullInfo(global, chatId)?.isContactRequirePremium;
+
     return {
       ...state,
       chatId,
@@ -809,7 +826,8 @@ export default memo(withGlobal<OwnProps>(
       isPrivate,
       areChatSettingsLoaded: Boolean(chat?.settings),
       isComments: isMessageThread,
-      canPost: !isPinnedMessageList
+      canPost:
+        !isPinnedMessageList
         && (!chat || canPost)
         && !isBotNotStarted
         && !(shouldJoinToSend && chat?.isNotJoined)
@@ -836,6 +854,7 @@ export default memo(withGlobal<OwnProps>(
       canUnblock,
       isSavedDialog,
       canShowOpenChatButton,
+      isContactRequirePremium,
     };
   },
 )(MiddleColumn));

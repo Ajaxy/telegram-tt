@@ -1,9 +1,11 @@
-import type { ApiUser, ApiUserFullInfo, ApiUserStatus } from '../../api/types';
+import type {
+  ApiMissingInvitedUser, ApiUser, ApiUserFullInfo, ApiUserStatus,
+} from '../../api/types';
 import type { GlobalState, TabArgs, TabState } from '../types';
 
 import { areDeepEqual } from '../../util/areDeepEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { omit, pick, unique } from '../../util/iteratees';
+import { omit, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectTabState } from '../selectors';
 import { updateChat } from './chats';
@@ -264,17 +266,21 @@ export function closeNewContactDialog<T extends GlobalState>(
   }, tabId);
 }
 
-export function addUsersToRestrictedInviteList<T extends GlobalState>(
+export function updateMissingInvitedUsers<T extends GlobalState>(
   global: T,
-  userIds: string[],
   chatId: string,
+  missingUsers: ApiMissingInvitedUser[],
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const { inviteViaLinkModal } = selectTabState(global, tabId);
+  if (!missingUsers.length) {
+    return updateTabState(global, {
+      inviteViaLinkModal: undefined,
+    }, tabId);
+  }
+
   return updateTabState(global, {
     inviteViaLinkModal: {
-      ...inviteViaLinkModal,
-      restrictedUserIds: unique([...inviteViaLinkModal?.restrictedUserIds ?? [], ...userIds]),
+      missingUsers,
       chatId,
     },
   }, tabId);

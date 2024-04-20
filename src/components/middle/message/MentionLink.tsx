@@ -7,6 +7,8 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { selectUser } from '../../../global/selectors';
 
+import useAppLayout from '../../../hooks/useAppLayout';
+
 type OwnProps = {
   userId?: string;
   username?: string;
@@ -27,9 +29,18 @@ const MentionLink: FC<OwnProps & StateProps> = ({
     openChat,
     openChatByUsername,
     closeStoryViewer,
+    setShouldCloseRightColumn,
   } = getActions();
 
+  const { isMobile } = useAppLayout();
+
   const handleClick = () => {
+    if (isMobile) {
+      setShouldCloseRightColumn({
+        value: true,
+      });
+    }
+
     if (userOrChat) {
       openChat({ id: userOrChat.id });
     } else if (username) {

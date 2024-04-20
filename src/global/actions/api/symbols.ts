@@ -4,6 +4,7 @@ import type {
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
+import { BIRTHDAY_NUMBERS_SET } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
@@ -149,29 +150,6 @@ addActionHandler('loadPremiumStickers', async (global): Promise<void> => {
   setGlobal(global);
 });
 
-addActionHandler('loadPremiumSetStickers', async (global): Promise<void> => {
-  const { hash } = global.stickers.premium || {};
-
-  const result = await callApi('fetchStickersForEmoji', { emoji: '📂⭐️', hash });
-  if (!result) {
-    return;
-  }
-
-  global = getGlobal();
-
-  global = {
-    ...global,
-    stickers: {
-      ...global.stickers,
-      premiumSet: {
-        hash: result.hash,
-        stickers: result.stickers,
-      },
-    },
-  };
-  setGlobal(global);
-});
-
 addActionHandler('loadGreetingStickers', async (global): Promise<void> => {
   const { hash } = global.stickers.greeting || {};
 
@@ -285,6 +263,26 @@ addActionHandler('loadAnimatedEmojis', async (global): Promise<void> => {
   global = {
     ...global,
     animatedEmojiEffects: { ...effects.set, stickers: effects.stickers },
+  };
+
+  setGlobal(global);
+});
+
+addActionHandler('loadBirthdayNumbersStickers', async (global): Promise<void> => {
+  const emojis = await callApi('fetchStickers', {
+    stickerSetInfo: {
+      shortName: BIRTHDAY_NUMBERS_SET,
+    },
+  });
+  if (!emojis) {
+    return;
+  }
+
+  global = getGlobal();
+
+  global = {
+    ...global,
+    birthdayNumbers: { ...emojis.set, stickers: emojis.stickers },
   };
 
   setGlobal(global);

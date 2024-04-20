@@ -78,9 +78,18 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaC
   if (isExpiredVoice) {
     return { isExpiredVoice };
   }
+  const isExpiredRoundVideo = isExpiredRoundVideoMessage(media);
+  if (isExpiredRoundVideo) {
+    return { isExpiredRoundVideo };
+  }
 
   const voice = buildVoice(media);
   if (voice) return { voice, ttlSeconds };
+
+  if ('round' in media && media.round) {
+    const video = buildVideo(media);
+    if (video) return { video, ttlSeconds };
+  }
 
   // Other disappearing media types are not supported
   if (ttlSeconds !== undefined) {
@@ -207,6 +216,39 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
   };
 }
 
+export function buildAudioFromDocument(document: GramJs.Document): ApiAudio | undefined {
+  if (document instanceof GramJs.DocumentEmpty) {
+    return undefined;
+  }
+
+  const {
+    id, mimeType, size, attributes,
+  } = document;
+
+  const audioAttributes = attributes
+    .find((a: any): a is GramJs.DocumentAttributeAudio => a instanceof GramJs.DocumentAttributeAudio);
+
+  if (!audioAttributes) {
+    return undefined;
+  }
+
+  const {
+    duration,
+    title,
+    performer,
+  } = audioAttributes;
+
+  return {
+    id: String(id),
+    mimeType,
+    duration,
+    fileName: getFilenameFromDocument(document, 'audio'),
+    title,
+    performer,
+    size: size.toJSNumber(),
+  };
+}
+
 function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   if (
     !(media instanceof GramJs.MessageMediaDocument)
@@ -268,6 +310,13 @@ function isExpiredVoiceMessage(media: GramJs.TypeMessageMedia): MediaContent['is
     return false;
   }
   return !media.document && media.voice;
+}
+
+function isExpiredRoundVideoMessage(media: GramJs.TypeMessageMedia): MediaContent['isExpiredRoundVideo'] {
+  if (!(media instanceof GramJs.MessageMediaDocument)) {
+    return false;
+  }
+  return !media.document && media.round;
 }
 
 function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
@@ -637,8 +686,12 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
   } = media.webpage;
 
   let video;
+  let audio;
   if (document instanceof GramJs.Document && document.mimeType.startsWith('video/')) {
     video = buildVideoFromDocument(document);
+  }
+  if (document instanceof GramJs.Document && document.mimeType.startsWith('audio/')) {
+    audio = buildAudioFromDocument(document);
   }
   let story: ApiWebPageStoryData | undefined;
   const attributeStory = attributes
@@ -667,8 +720,9 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
       'duration',
     ]),
     photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
-    document: !video && document ? buildApiDocument(document) : undefined,
+    document: !video && !audio && document ? buildApiDocument(document) : undefined,
     video,
+    audio,
     story,
   };
 }

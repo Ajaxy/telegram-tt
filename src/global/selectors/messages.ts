@@ -22,19 +22,19 @@ import {
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { getMessageKey, isLocalMessageId } from '../../util/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 import {
   canSendReaction,
   getAllowedAttachmentOptions,
   getCanPostInChat,
+  getCleanPeerId,
   getHasAdminRight,
   getIsSavedDialog,
   getMainUsername,
   getMessageAudio,
-  getMessageDocument,
-  getMessageOriginalId,
-  getMessagePhoto,
+  getMessageDocument, getMessagePhoto,
   getMessageVideo,
   getMessageVoice,
   getMessageWebPagePhoto,
@@ -48,7 +48,9 @@ import {
   isChatSuperGroup,
   isCommonBoxChat,
   isForwardedMessage,
-  isLocalMessageId, isMessageFailed, isMessageLocal,
+  isMessageDocumentSticker,
+  isMessageFailed,
+  isMessageLocal,
   isMessageTranslatable,
   isOwnMessage,
   isServiceNotificationMessage,
@@ -341,6 +343,10 @@ export function selectScheduledMessage<T extends GlobalState>(global: T, chatId:
   return chatMessages ? chatMessages[messageId] : undefined;
 }
 
+export function selectQuickReplyMessage<T extends GlobalState>(global: T, messageId: number) {
+  return global.quickReplies.messagesById[messageId];
+}
+
 export function selectEditingMessage<T extends GlobalState>(
   global: T, chatId: string, threadId: ThreadId, messageListType: MessageListType,
 ) {
@@ -588,6 +594,9 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const hasTtl = hasMessageTtl(message);
   const { content } = message;
   const messageTopic = selectTopicFromMessage(global, message);
+  const isDocumentSticker = isMessageDocumentSticker(message);
+  const chatFullInfo = selectChatFullInfo(global, chat.id);
+  const isBoostMessage = message.content.action?.type === 'chatBoost';
 
   const canEditMessagesIndefinitely = isChatWithSelf
     || (isSuperGroup && getHasAdminRight(chat, 'pinMessages'))
@@ -597,8 +606,9 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
       canEditMessagesIndefinitely
       || getServerTime() - message.date < MESSAGE_EDIT_ALLOWED_TIME
     ) && !(
-      content.sticker || content.contact || content.poll || content.action || content.audio
+      content.sticker || content.contact || content.poll || content.action
       || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
+      || isDocumentSticker
     )
     && !isForwarded
     && !message.viaBotId
@@ -610,7 +620,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const threadInfo = selectThreadInfo(global, message.chatId, threadId);
   const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
   const canReply = !isLocal && !isServiceNotification && !chat.isForbidden
-    && getCanPostInChat(chat, threadId, isMessageThread)
+    && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo)
     && (!messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics'));
 
   const hasPinPermission = isPrivate || (
@@ -629,7 +639,10 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
     canPin = !canUnpin;
   }
 
-  const canDelete = (!isLocal || isFailed) && !isServiceNotification && (
+  const canNotDeleteBoostMessage = isBoostMessage && isOwn
+    && !chat.isCreator && !getHasAdminRight(chat, 'deleteMessages');
+
+  const canDelete = (!isLocal || isFailed) && !isServiceNotification && !canNotDeleteBoostMessage && (
     isPrivate
     || isOwn
     || isBasicGroup
@@ -801,7 +814,7 @@ export function selectActiveDownloads<T extends GlobalState>(
 }
 
 export function selectUploadProgress<T extends GlobalState>(global: T, message: ApiMessage) {
-  return global.fileUploads.byMessageLocalId[getMessageOriginalId(message)]?.progress;
+  return global.fileUploads.byMessageKey[getMessageKey(message)]?.progress;
 }
 
 export function selectRealLastReadId<T extends GlobalState>(global: T, chatId: string, threadId: ThreadId) {
@@ -1359,11 +1372,12 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
     return true;
   }
 
+  const chatFullInfo = selectChatFullInfo(global, toChatId);
   const chatMessages = selectChatMessages(global, fromChatId!);
   const {
     canSendVoices, canSendRoundVideos, canSendStickers, canSendDocuments, canSendAudios, canSendVideos,
     canSendPhotos, canSendGifs, canSendPlainText,
-  } = getAllowedAttachmentOptions(chat);
+  } = getAllowedAttachmentOptions(chat, chatFullInfo);
   return !messageIds!.some((messageId) => {
     const message = chatMessages[messageId];
     const isVoice = message.content.voice;
@@ -1405,29 +1419,21 @@ export function selectCanTranslateMessage<T extends GlobalState>(
     && !chatRequestedLanguage;
 }
 
-export function selectMessageLink<T extends GlobalState>(
-  global: T, chatId: string, threadId?: ThreadId, messageId?: number,
+export function selectTopicLink<T extends GlobalState>(
+  global: T, chatId: string, topicId?: ThreadId,
 ) {
   const chat = selectChat(global, chatId);
-  if (!chat) {
+  if (!chat || !chat?.isForum) {
     return undefined;
   }
 
   const chatUsername = getMainUsername(chat);
 
-  const isChannelId = isChatChannel(chat) || isChatSuperGroup(chat);
-  const normalizedId = isChannelId ? chatId.replace('-100', '') : chatId.replace('-', '');
+  const normalizedId = getCleanPeerId(chatId);
 
   const chatPart = chatUsername || `c/${normalizedId}`;
-  const threadPart = threadId && threadId !== MAIN_THREAD_ID ? `/${threadId}` : '';
-  const messagePart = messageId ? `/${messageId}` : '';
-  return `${TME_LINK_PREFIX}${chatPart}${threadPart}${messagePart}`;
-}
-
-export function selectTopicLink<T extends GlobalState>(
-  global: T, chatId: string, topicId?: ThreadId,
-) {
-  return selectMessageLink(global, chatId, topicId);
+  const topicPart = topicId && topicId !== MAIN_THREAD_ID ? `/${topicId}` : '';
+  return `${TME_LINK_PREFIX}${chatPart}${topicPart}`;
 }
 
 export function selectMessageReplyInfo<T extends GlobalState>(

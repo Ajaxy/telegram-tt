@@ -4,11 +4,18 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type {
-  ApiAvailableReaction, ApiChatReactions, ApiMessage, ApiReaction, ApiStickerSet, ApiStickerSetInfo, ApiThreadInfo,
-} from '../../../api/types';
 import type { MessageListType, TabState } from '../../../global/types';
-import type { IAlbum, IAnchorPosition } from '../../../types';
+import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
+import {
+  type ApiAvailableReaction,
+  type ApiChatReactions,
+  type ApiMessage,
+  type ApiReaction,
+  type ApiStickerSet,
+  type ApiStickerSetInfo,
+  type ApiThreadInfo,
+  MAIN_THREAD_ID,
+} from '../../../api/types';
 
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
@@ -31,16 +38,18 @@ import {
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
+  selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
+  selectIsMessageUnread,
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
   selectMessageCustomEmojiSets,
-  selectMessageLink,
   selectMessageTranslations,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
+  selectUserStatus,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -54,7 +63,7 @@ import useSchedule from '../../../hooks/useSchedule';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
-import PinMessageModal from '../../common/PinMessageModal';
+import PinMessageModal from '../../common/PinMessageModal.async';
 import ReportModal from '../../common/ReportModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import MessageContextMenu from './MessageContextMenu';
@@ -74,8 +83,10 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  threadId?: ThreadId;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
+  defaultTagReactions?: ApiReaction[];
   customEmojiSetsInfo?: ApiStickerSetInfo[];
   customEmojiSets?: ApiStickerSet[];
   noOptions?: boolean;
@@ -107,6 +118,8 @@ type StateProps = {
   canSaveGif?: boolean;
   canRevote?: boolean;
   canClosePoll?: boolean;
+  canLoadReadDate?: boolean;
+  shouldRenderShowWhen?: boolean;
   activeDownloads?: TabState['activeDownloads']['byChatId'][number];
   canShowSeenBy?: boolean;
   enabledReactions?: ApiChatReactions;
@@ -114,14 +127,16 @@ type StateProps = {
   maxUniqueReactions?: number;
   canPlayAnimatedEmojis?: boolean;
   isReactionPickerOpen?: boolean;
-  messageLink?: string;
+  isInSavedMessages?: boolean;
 };
 
 const selection = window.getSelection();
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
+  threadId,
   availableReactions,
   topReactions,
+  defaultTagReactions,
   isOpen,
   messageListType,
   message,
@@ -159,6 +174,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canRevote,
   canClosePoll,
   canPlayAnimatedEmojis,
+  canLoadReadDate,
+  shouldRenderShowWhen,
   activeDownloads,
   noReplies,
   canShowSeenBy,
@@ -168,7 +185,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canShowOriginal,
   canSelectLanguage,
   isReactionPickerOpen,
-  messageLink,
+  isInSavedMessages,
   onClose,
   onCloseAnimationEnd,
 }) => {
@@ -200,6 +217,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     showOriginalMessage,
     openChatLanguageModal,
     openMessageReactionPicker,
+    openPremiumModal,
+    loadOutboxReadDate,
+    copyMessageLink,
   } = getActions();
 
   const lang = useLang();
@@ -220,6 +240,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       loadSeenBy({ chatId: message.chatId, messageId: message.id });
     }
   }, [loadSeenBy, isOpen, message.chatId, message.id, canShowSeenBy]);
+
+  useEffect(() => {
+    if (canLoadReadDate && isOpen) {
+      loadOutboxReadDate({ chatId: message.chatId, messageId: message.id });
+    }
+  }, [canLoadReadDate, isOpen, message.chatId, message.id, message.readDate]);
 
   useEffect(() => {
     if (canShowReactionsCount && isOpen) {
@@ -440,7 +466,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleCopyLink = useLastCallback(() => {
-    copyTextToClipboard(messageLink!);
+    copyMessageLink({
+      chatId: message.chatId,
+      messageId: message.id,
+      shouldIncludeThread: threadId !== MAIN_THREAD_ID,
+      shouldIncludeGrouped: true, // TODO: Provide correct value when ability to target specific message is added
+    });
     closeMenu();
   });
 
@@ -467,9 +498,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleToggleReaction = useLastCallback((reaction: ApiReaction) => {
-    toggleReaction({
-      chatId: message.chatId, messageId: message.id, reaction, shouldAddToRecent: true,
-    });
+    if (isInSavedMessages && !isCurrentUserPremium) {
+      openPremiumModal({
+        initialSection: 'saved_tags',
+      });
+    } else {
+      toggleReaction({
+        chatId: message.chatId, messageId: message.id, reaction, shouldAddToRecent: true,
+      });
+    }
     closeMenu();
   });
 
@@ -518,6 +555,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         isReactionPickerOpen={isReactionPickerOpen}
         availableReactions={availableReactions}
         topReactions={topReactions}
+        defaultTagReactions={defaultTagReactions}
         message={message}
         isPrivate={isPrivate}
         isCurrentUserPremium={isCurrentUserPremium}
@@ -554,10 +592,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canShowOriginal={canShowOriginal}
         canSelectLanguage={canSelectLanguage}
         canPlayAnimatedEmojis={canPlayAnimatedEmojis}
+        shouldRenderShowWhen={shouldRenderShowWhen}
+        canLoadReadDate={canLoadReadDate}
         hasCustomEmoji={hasCustomEmoji}
         customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
         seenByRecentPeers={seenByRecentPeers}
+        isInSavedMessages={isInSavedMessages}
         noReplies={noReplies}
         onOpenThread={handleOpenThread}
         onReply={handleReply}
@@ -621,9 +662,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message, messageListType, detectedLanguage }): StateProps => {
     const { threadId } = selectCurrentMessageList(global) || {};
+
+    const { defaultTags, topReactions, availableReactions } = global.reactions;
+
     const activeDownloads = selectActiveDownloads(global, message.chatId);
     const chat = selectChat(global, message.chatId);
-    const { seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions } = global.appConfig || {};
+    const {
+      seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions, readDateExpiresAt,
+    } = global.appConfig || {};
     const {
       noOptions,
       canReply,
@@ -645,7 +691,20 @@ export default memo(withGlobal<OwnProps>(
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
 
     const isPrivate = chat && isUserId(chat.id);
+    const userStatus = isPrivate ? selectUserStatus(global, chat.id) : undefined;
     const isOwn = isOwnMessage(message);
+    const isMessageUnread = selectIsMessageUnread(global, message);
+    const canLoadReadDate = Boolean(
+      isPrivate
+        && isOwn
+        && !isMessageUnread
+        && readDateExpiresAt
+        && message.date > Date.now() / 1000 - readDateExpiresAt
+        && !userStatus?.isReadDateRestricted,
+    );
+    const shouldRenderShowWhen = Boolean(
+      canLoadReadDate && isPrivate && selectUserStatus(global, chat.id)?.isReadDateRestrictedByMe,
+    );
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
@@ -653,6 +712,7 @@ export default memo(withGlobal<OwnProps>(
     const hasTtl = hasMessageTtl(message);
     const canShowSeenBy = Boolean(!isLocal
       && chat
+      && !isMessageUnread
       && seenByMaxChatMembers
       && seenByExpiresAt
       && isChatGroup(chat)
@@ -680,11 +740,14 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const canTranslate = !hasTranslation && selectCanTranslateMessage(global, message, detectedLanguage);
     const isChatTranslated = selectRequestedChatTranslationLanguage(global, message.chatId);
-    const messageLink = selectMessageLink(global, message.chatId, threadId, message.id);
+
+    const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
 
     return {
-      availableReactions: global.availableReactions,
-      topReactions: global.topReactions,
+      threadId,
+      availableReactions,
+      topReactions,
+      defaultTagReactions: defaultTags,
       noOptions,
       canSendNow: isScheduled,
       canReschedule: isScheduled,
@@ -706,6 +769,8 @@ export default memo(withGlobal<OwnProps>(
       canClosePoll: !isScheduled && canClosePoll,
       activeDownloads,
       canShowSeenBy,
+      canLoadReadDate,
+      shouldRenderShowWhen,
       enabledReactions: chat?.isForbidden ? undefined : chatFullInfo?.enabledReactions,
       maxUniqueReactions,
       isPrivate,
@@ -724,7 +789,7 @@ export default memo(withGlobal<OwnProps>(
       isMessageTranslated: hasTranslation,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
-      messageLink,
+      isInSavedMessages,
     };
   },
 )(ContextMenuContainer));

@@ -21,13 +21,15 @@
   .bubble {
     overflow: initial;
     padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   &.with-reactions .bubble {
     background: none !important;
     backdrop-filter: none !important;
     box-shadow: none;
-    padding: 3.5rem 0 0 !important;
   }
 
   &.with-reactions &_items {
@@ -36,6 +38,10 @@
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-default);
     padding: 0.25rem 0;
+
+    @media (min-width: 600px) {
+      margin-inline-end: 2.75rem;
+    }
 
     body.no-menu-blur & {
       background: var(--color-background);

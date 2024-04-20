@@ -63,7 +63,9 @@
     .icon-schedule,
     .icon-forward,
     .icon-microphone-alt,
-    .icon-check {
+    .icon-check,
+    .icon-view-once,
+    .icon-one-filled {
       position: absolute;
     }
 
@@ -123,7 +125,7 @@
       }
     }
 
-    &.send {
+    &.send, &.sendOneTime {
       .icon-send {
         animation: grow-icon 0.4s ease-out;
       }
@@ -192,6 +194,23 @@
       }
     }
 
+    &.view-once {
+      .icon-one-filled {
+        animation: hide-icon 0.4s forwards ease-out;
+      }
+      .icon-view-once {
+        animation: grow-icon 0.4s ease-out;
+      }
+      &.active {
+        .icon-view-once {
+          animation: hide-icon 0.4s forwards ease-out;
+        }
+        .icon-one-filled {
+          animation: grow-icon 0.4s ease-out;
+        }
+      }
+    }
+
     &.not-ready > .icon {
       animation-duration: 0ms !important;
     }
@@ -221,10 +240,11 @@
     --color-interactive-element-hover: rgba(255, 255, 255, 0.1);
     --color-text: #fff;
 
+    position: absolute;
     left: 50%;
     right: auto;
-    top: -3.875rem;
-    transform: translateX(-50%);
+    top: -0.75rem;
+    transform: translate(-50%, -100%);
     z-index: 1;
 
     @media (max-width: 600px) {
@@ -238,6 +258,10 @@
 
     .ReactionSelector__show-more {
       transform: scaleY(-1);
+      color: #fff;
+    }
+
+    .ReactionSelector__hint {
       color: #fff;
     }
   }

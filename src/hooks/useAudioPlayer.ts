@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from '../lib/teact/teact';
+import {
+  useEffect, useMemo, useRef, useState,
+} from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
 import type { Track, TrackId } from '../util/audioPlayer';
@@ -20,7 +22,7 @@ type Handler = (e: Event) => void;
 const DEFAULT_SKIP_TIME = 10;
 
 const useAudioPlayer = (
-  trackId: TrackId,
+  trackId: TrackId | undefined,
   originalDuration: number, // Sometimes incorrect for voice messages
   trackType: Track['type'],
   src?: string,
@@ -34,6 +36,7 @@ const useAudioPlayer = (
   noProgressUpdates = false,
   onPause?: NoneToVoidFunction,
   noReset = false,
+  noHandleEvents = false,
 ) => {
   // eslint-disable-next-line no-null/no-null
   const controllerRef = useRef<ReturnType<typeof register>>(null);
@@ -49,7 +52,13 @@ const useAudioPlayer = (
   });
 
   useSyncEffect(() => {
+    if (!trackId) {
+      return;
+    }
     controllerRef.current = register(trackId, trackType, (eventName, e) => {
+      if (noHandleEvents) {
+        return;
+      }
       switch (eventName) {
         case 'onPlay': {
           const {
@@ -67,7 +76,6 @@ const useAudioPlayer = (
           if (trackType === 'voice' || duration > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION) {
             setPlaybackRate(audioPlayer.playbackRate);
           }
-
           setPositionState({
             duration: proxy.duration || 0,
             playbackRate: proxy.playbackRate,
@@ -103,7 +111,6 @@ const useAudioPlayer = (
           break;
         }
       }
-
       handlers?.[eventName]?.(e);
     }, onForcePlay, handleTrackChange);
 
@@ -116,7 +123,7 @@ const useAudioPlayer = (
       isPlayingSync = true;
     }
 
-    if (onInit) {
+    if (onInit && !noHandleEvents) {
       onInit(proxy);
     }
   }, [trackId]);
@@ -139,11 +146,17 @@ const useAudioPlayer = (
     requestPreviousTrack,
     setPlaybackRate,
     toggleMuted,
-  } = controllerRef.current!;
-  const duration = proxy.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
+  } = controllerRef.current ?? {};
+
+  const duration = useMemo(() => {
+    return proxy?.duration && Number.isFinite(proxy.duration) ? proxy.duration : originalDuration;
+  }, [proxy?.duration, originalDuration]);
 
   // RAF progress
   useEffect(() => {
+    if (!proxy) {
+      return;
+    }
     if (noReset && proxy.currentTime === 0) {
       return;
     }
@@ -154,42 +167,42 @@ const useAudioPlayer = (
 
   // Cleanup
   useEffect(() => () => {
-    destroy(noPlaylist);
+    destroy?.(noPlaylist);
   }, [destroy, noPlaylist]);
 
   // Autoplay once `src` is present
   useEffectWithPrevDeps(([prevShouldPlay, prevSrc]) => {
-    if (prevShouldPlay === shouldPlay && src === prevSrc && trackType !== 'oneTimeVoice') {
+    if (prevShouldPlay === shouldPlay && src === prevSrc) {
       return;
     }
 
     // When paused by another player
-    if (proxy.src && proxy.paused) {
+    if (proxy?.src && proxy?.paused) {
       return;
     }
 
     if (shouldPlay && src && !isPlaying) {
-      play(src);
+      play?.(src);
     }
-  }, [shouldPlay, src, isPlaying, play, proxy.src, proxy.paused, trackType]);
+  }, [shouldPlay, src, isPlaying, play, proxy?.src, proxy?.paused, trackType]);
 
   const playIfPresent = useLastCallback(() => {
     if (src) {
-      play(src);
+      play?.(src);
     }
   });
 
   const playPause = useLastCallback(() => {
     if (isPlaying) {
-      pause();
+      pause?.();
     } else {
       playIfPresent();
     }
   });
 
   const setTime = useLastCallback((time: number) => {
-    setCurrentTime(time);
-    if (duration) {
+    setCurrentTime?.(time);
+    if (duration && proxy) {
       setPlayProgress(proxy.currentTime / duration);
     }
   });

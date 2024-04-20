@@ -14,7 +14,7 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
-import Avatar from '../../common/Avatar';
+import AvatarList from '../../common/AvatarList';
 import Button from '../../ui/Button';
 
 import './GroupCallTopPane.scss';
@@ -110,14 +110,9 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
         <span className="title">{lang('VoipGroupVoiceChat')}</span>
         <span className="participants">{lang('Participants', renderingParticipantCount ?? 0, 'i')}</span>
       </div>
-      <div className="avatars">
-        {renderingFetchedParticipants?.map((peer) => (
-          <Avatar
-            key={peer.id}
-            peer={peer}
-          />
-        ))}
-      </div>
+      {Boolean(renderingFetchedParticipants?.length) && (
+        <AvatarList size="small" peers={renderingFetchedParticipants} className="avatars" />
+      )}
       <Button round className="join">
         {lang('VoipChatJoin')}
       </Button>

@@ -5,7 +5,7 @@ import type { ApiMessageStoryData, ApiTypeStory } from '../../../api/types';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/dateFormat';
+import { formatMediaDuration } from '../../../util/date/dateFormat';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';

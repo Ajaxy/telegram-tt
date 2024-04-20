@@ -7,15 +7,13 @@ import { getActions } from '../../global';
 import type { ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import {
-  SUPPORTED_IMAGE_CONTENT_TYPES,
-  SUPPORTED_VIDEO_CONTENT_TYPES,
-} from '../../config';
+import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../config';
 import {
   getMediaTransferState,
   getMessageMediaFormat,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
+  getMessageWebPageDocument,
   isMessageDocumentVideo,
 } from '../../global/helpers';
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
@@ -82,7 +80,8 @@ const Document: FC<OwnProps> = ({
   const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
   const [shouldNotWarnAboutSvg, setShouldNotWarnAboutSvg] = useState(false);
 
-  const document = message.content.document!;
+  const document = message.content.document! || getMessageWebPageDocument(message);
+
   const { fileName, size, timestamp } = document;
   const extension = getDocumentExtension(document) || '';
 
@@ -109,7 +108,12 @@ const Document: FC<OwnProps> = ({
 
   const {
     isUploading, isTransferring, transferProgress,
-  } = getMediaTransferState(message, uploadProgress || downloadProgress, shouldDownload && !isLoaded);
+  } = getMediaTransferState(
+    message,
+    uploadProgress || downloadProgress,
+    shouldDownload && !isLoaded,
+    uploadProgress !== undefined,
+  );
 
   const hasPreview = getDocumentHasPreview(document);
   const thumbDataUri = hasPreview ? getMessageMediaThumbDataUri(message) : undefined;

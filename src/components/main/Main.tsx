@@ -49,15 +49,15 @@ import { parseInitialLocationHash, parseLocationHash } from '../../util/routing'
 import updateIcon from '../../util/updateIcon';
 import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
 
+import useInterval from '../../hooks/schedulers/useInterval';
+import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useInterval from '../../hooks/useInterval';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useSyncEffect from '../../hooks/useSyncEffect';
-import useTimeout from '../../hooks/useTimeout';
 import useBackgroundMode from '../../hooks/window/useBackgroundMode';
 import useBeforeUnload from '../../hooks/window/useBeforeUnload';
 import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
@@ -72,13 +72,14 @@ import UnreadCount from '../common/UnreadCounter';
 import LeftColumn from '../left/LeftColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
-import ReactionPicker from '../middle/message/ReactionPicker.async';
+import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
 import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallModal.async';
 import BoostModal from '../modals/boost/BoostModal.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 import GiftCodeModal from '../modals/giftcode/GiftCodeModal.async';
+import InviteViaLinkModal from '../modals/inviteViaLink/InviteViaLinkModal.async';
 import MapModal from '../modals/map/MapModal.async';
 import OneTimeMediaModal from '../modals/oneTimeMedia/OneTimeMediaModal.async';
 import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
@@ -97,10 +98,11 @@ import DraftRecipientPicker from './DraftRecipientPicker.async';
 import ForwardRecipientPicker from './ForwardRecipientPicker.async';
 import GameModal from './GameModal';
 import HistoryCalendar from './HistoryCalendar.async';
-import InviteViaLinkModal from './InviteViaLinkModal.async';
 import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
+import GiveawayModal from './premium/GiveawayModal.async';
+import PremiumGiftingModal from './premium/PremiumGiftingModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
 
@@ -156,6 +158,9 @@ type StateProps = {
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
   isReactionPickerOpen: boolean;
+  isAppendModalOpen?: boolean;
+  isGiveawayModalOpen?: boolean;
+  isPremiumGiftingModalOpen?: boolean;
   isCurrentUserPremium?: boolean;
   chatlistModal?: TabState['chatlistModal'];
   boostModal?: TabState['boostModal'];
@@ -214,6 +219,8 @@ const Main: FC<OwnProps & StateProps> = ({
   currentUserName,
   urlAuth,
   isPremiumModalOpen,
+  isGiveawayModalOpen,
+  isPremiumGiftingModalOpen,
   isPaymentModalOpen,
   isReceiptModalOpen,
   isReactionPickerOpen,
@@ -232,6 +239,7 @@ const Main: FC<OwnProps & StateProps> = ({
   const {
     initMain,
     loadAnimatedEmojis,
+    loadBirthdayNumbersStickers,
     loadNotificationSettings,
     loadNotificationExceptions,
     updateIsOnline,
@@ -265,11 +273,14 @@ const Main: FC<OwnProps & StateProps> = ({
     updatePageTitle,
     loadTopReactions,
     loadRecentReactions,
+    loadDefaultTagReactions,
     loadFeaturedEmojiStickers,
     setIsElectronUpdateAvailable,
-    loadPremiumSetStickers,
     loadAuthorizations,
     loadPeerColors,
+    loadSavedReactionTags,
+    loadTimezones,
+    loadQuickReplies,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -331,6 +342,7 @@ const Main: FC<OwnProps & StateProps> = ({
       initMain();
       loadAvailableReactions();
       loadAnimatedEmojis();
+      loadBirthdayNumbersStickers();
       loadGenericEmojiEffects();
       loadNotificationSettings();
       loadNotificationExceptions();
@@ -343,8 +355,12 @@ const Main: FC<OwnProps & StateProps> = ({
       checkAppVersion();
       loadTopReactions();
       loadRecentReactions();
+      loadDefaultTagReactions();
       loadFeaturedEmojiStickers();
       loadAuthorizations();
+      loadSavedReactionTags();
+      loadTimezones();
+      loadQuickReplies();
     }
   }, [isMasterTab, isSynced]);
 
@@ -353,7 +369,6 @@ const Main: FC<OwnProps & StateProps> = ({
     if (isMasterTab && isCurrentUserPremium) {
       loadDefaultStatusIcons();
       loadRecentEmojiStatuses();
-      loadPremiumSetStickers();
     }
   }, [isCurrentUserPremium, isMasterTab]);
 
@@ -590,12 +605,14 @@ const Main: FC<OwnProps & StateProps> = ({
       <AttachBotRecipientPicker requestedAttachBotInChat={requestedAttachBotInChat} />
       <MessageListHistoryHandler />
       {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
+      {isGiveawayModalOpen && <GiveawayModal isOpen={isGiveawayModalOpen} />}
+      {isPremiumGiftingModalOpen && <PremiumGiftingModal isOpen={isPremiumGiftingModalOpen} />}
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
-      <InviteViaLinkModal userIds={inviteViaLinkModal?.restrictedUserIds} chatId={inviteViaLinkModal?.chatId} />
+      <InviteViaLinkModal missingUsers={inviteViaLinkModal?.missingUsers} chatId={inviteViaLinkModal?.chatId} />
     </div>
   );
 };
@@ -632,6 +649,8 @@ export default memo(withGlobal<OwnProps>(
       newContact,
       ratingPhoneCall,
       premiumModal,
+      giveawayModal,
+      giftingModal,
       isMasterTab,
       payment,
       limitReachedModal,
@@ -697,6 +716,8 @@ export default memo(withGlobal<OwnProps>(
       urlAuth,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,
+      isGiveawayModalOpen: giveawayModal?.isOpen,
+      isPremiumGiftingModalOpen: giftingModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),

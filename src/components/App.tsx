@@ -136,7 +136,7 @@ const App: FC<StateProps> = ({
         activeKey = AppScreens.main;
         break;
     }
-  } else if (hasStoredSession(true)) {
+  } else if (hasStoredSession()) {
     page = 'main';
     activeKey = AppScreens.main;
   } else if (hasPasscode) {

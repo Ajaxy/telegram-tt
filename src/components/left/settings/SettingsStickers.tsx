@@ -175,7 +175,7 @@ export default memo(withGlobal<OwnProps>(
       customEmojiSetIds: global.customEmojis.added.setIds,
       stickerSetsById: global.stickers.setsById,
       defaultReaction: global.config?.defaultReaction,
-      availableReactions: global.availableReactions,
+      availableReactions: global.reactions.availableReactions,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };
   },

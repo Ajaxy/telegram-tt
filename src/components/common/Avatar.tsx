@@ -59,6 +59,7 @@ type OwnProps = {
   forPremiumPromo?: boolean;
   withStoryGap?: boolean;
   withStorySolid?: boolean;
+  forceFriendStorySolid?: boolean;
   forceUnreadStorySolid?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
   storyViewerMode?: 'full' | 'single-peer' | 'disabled';
@@ -81,6 +82,7 @@ const Avatar: FC<OwnProps> = ({
   forPremiumPromo,
   withStoryGap,
   withStorySolid,
+  forceFriendStorySolid,
   forceUnreadStorySolid,
   storyViewerOrigin,
   storyViewerMode = 'single-peer',
@@ -207,6 +209,8 @@ const Avatar: FC<OwnProps> = ({
     content = getFirstLetters(text, 2);
   }
 
+  const isRoundedRect = isForum && !((withStory || withStorySolid) && peer?.hasStories);
+
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
@@ -216,9 +220,10 @@ const Avatar: FC<OwnProps> = ({
     isAnonymousForwards && 'anonymous-forwards',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
-    isForum && 'forum',
+    isRoundedRect && 'forum',
     ((withStory && peer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && peer?.hasStories && 'with-story-solid',
+    withStorySolid && forceFriendStorySolid && 'close-friend',
     withStorySolid && (peer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',

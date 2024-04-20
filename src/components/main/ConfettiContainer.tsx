@@ -1,8 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, { memo, useRef } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { TabState } from '../../global/types';
+import type { ConfettiStyle, TabState } from '../../global/types';
 
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { selectTabState } from '../../global/selectors';
@@ -11,6 +11,7 @@ import { pick } from '../../util/iteratees';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useLastCallback from '../../hooks/useLastCallback';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
@@ -53,27 +54,20 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
 
   const defaultConfettiAmount = isMobile ? 50 : 100;
   const {
-    lastConfettiTime, top, width, left, height,
+    lastConfettiTime, top, width, left, height, style = 'poppers',
   } = confetti || {};
 
-  const generateConfetti = useCallback((w: number, h: number, amount = defaultConfettiAmount) => {
+  const generateConfetti = useLastCallback((w: number, h: number, amount = defaultConfettiAmount) => {
     for (let i = 0; i < amount; i++) {
-      const leftSide = i % 2;
-      const pos = {
-        x: w * (leftSide ? -0.1 : 1.1),
-        y: h * 0.75,
-      };
-      const randomX = Math.random() * w * 1.5;
-      const randomY = -h / 2 - Math.random() * h;
-      const velocity = {
-        x: leftSide ? randomX : randomX * -1,
-        y: randomY,
-      };
+      const {
+        position, velocity,
+      } = generateRandomPositionData(style, w, h, i);
+
+      const size = DEFAULT_CONFETTI_SIZE + randomNumberAroundZero(DEFAULT_CONFETTI_SIZE / 2);
 
       const randomColor = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
-      const size = DEFAULT_CONFETTI_SIZE;
       confettiRef.current.push({
-        pos,
+        pos: position,
         size,
         color: randomColor,
         velocity,
@@ -84,9 +78,9 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
         frameCount: 0,
       });
     }
-  }, [defaultConfettiAmount]);
+  });
 
-  const updateCanvas = useCallback(() => {
+  const updateCanvas = useLastCallback(() => {
     if (!canvasRef.current || !isRafStartedRef.current) {
       return;
     }
@@ -121,7 +115,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
       };
 
       const newVelocity = {
-        x: velocity.x * 0.98, // Air Resistance
+        x: velocity.x * 0.5 ** (diff / 1), // Air Resistance
         y: velocity.y += diff * 1000, // Gravity
       };
 
@@ -167,7 +161,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
     } else {
       isRafStartedRef.current = false;
     }
-  }, []);
+  });
 
   useSyncEffect(([prevConfettiTime]) => {
     let hideTimeout: ReturnType<typeof setTimeout>;
@@ -189,7 +183,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
     return undefined;
   }
 
-  const style = buildStyle(
+  const containerStyle = buildStyle(
     Boolean(top) && `top: ${top}px`,
     Boolean(left) && `left: ${left}px`,
     Boolean(width) && `width: ${width}px`,
@@ -197,7 +191,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
   );
 
   return (
-    <div id="Confetti" className={styles.root} style={style}>
+    <div id="Confetti" className={styles.root} style={containerStyle}>
       <canvas ref={canvasRef} className={styles.canvas} width={windowSize.width} height={windowSize.height} />
     </div>
   );
@@ -206,3 +200,46 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
 export default memo(withGlobal(
   (global): StateProps => pick(selectTabState(global), ['confetti']),
 )(ConfettiContainer));
+
+function generateRandomPositionData(
+  style: ConfettiStyle, containerWidth: number, containerHeight: number, index: number,
+) {
+  if (style === 'poppers') {
+    const leftSide = index % 2;
+    const position = {
+      x: containerWidth * (leftSide ? -0.1 : 1.1),
+      y: containerHeight * 0.66,
+    };
+    const randomX = Math.random() * containerWidth;
+    const randomY = -containerHeight - randomNumberAroundZero(containerHeight * 0.75);
+    const velocity = {
+      x: leftSide ? randomX : randomX * -1,
+      y: randomY,
+    };
+
+    return {
+      position,
+      velocity,
+    };
+  } else {
+    const position = {
+      x: Math.random() * containerWidth,
+      y: -DEFAULT_CONFETTI_SIZE * 2,
+    };
+    const randomX = randomNumberAroundZero(containerWidth);
+    const randomY = -containerHeight * Math.random() * 1.25;
+    const velocity = {
+      x: randomX,
+      y: randomY,
+    };
+
+    return {
+      position,
+      velocity,
+    };
+  }
+}
+
+function randomNumberAroundZero(max: number = 1) {
+  return Math.random() * max - max / 2;
+}

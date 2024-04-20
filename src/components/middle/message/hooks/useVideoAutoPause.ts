@@ -25,9 +25,9 @@ export default function useVideoAutoPause(
     requestMeasure(unfreezePlaying);
   });
 
-  useBackgroundMode(pause, unfreezePlayingOnRaf, !canPlay);
-  useHeavyAnimationCheck(pause, unfreezePlaying, !canPlay);
-  usePriorityPlaybackCheck(pause, unfreezePlaying, !canPlay);
+  useBackgroundMode(pause, unfreezePlayingOnRaf, !canPlay || isPriority);
+  useHeavyAnimationCheck(pause, unfreezePlaying, !canPlay || isPriority);
+  usePriorityPlaybackCheck(pause, unfreezePlaying, !canPlay || isPriority);
 
   const handlePlaying = useLastCallback(() => {
     if (!canPlayRef.current || (!isPriority && isFrozen())) {

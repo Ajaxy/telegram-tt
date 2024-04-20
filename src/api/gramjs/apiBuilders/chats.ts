@@ -14,6 +14,7 @@ import type {
   ApiChatReactions,
   ApiChatSettings,
   ApiExportedInvite,
+  ApiMissingInvitedUser,
   ApiRestrictionReason,
   ApiSendAsPeerId,
   ApiTopic,
@@ -62,8 +63,9 @@ function buildApiChatFieldsFromPeerEntity(
   const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
   const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
     ? buildApiEmojiStatus(peerEntity.emojiStatus) : undefined;
+  const boostLevel = ('level' in peerEntity) ? peerEntity.level : undefined;
 
-  return omitUndefined({
+  return omitUndefined<PeerEntityApiChatFields>({
     isMin,
     hasPrivateLink,
     isSignaturesShown,
@@ -93,6 +95,7 @@ function buildApiChatFieldsFromPeerEntity(
     maxStoryId,
     hasStories: Boolean(maxStoryId) && !storiesUnavailable,
     emojiStatus,
+    boostLevel,
   });
 }
 
@@ -630,5 +633,15 @@ export function buildApiChatlistExportedInvite(
     title,
     url,
     peerIds: peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+  };
+}
+
+export function buildApiMissingInvitedUser(
+  user: GramJs.TypeMissingInvitee,
+): ApiMissingInvitedUser {
+  return {
+    id: user.userId.toString(),
+    isRequiringPremiumToMessage: user.premiumRequiredForPm,
+    isRequiringPremiumToInvite: user.premiumWouldAllowInvite,
   };
 }

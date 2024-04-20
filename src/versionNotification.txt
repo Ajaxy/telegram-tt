@@ -1,43 +1,62 @@
-**Introducing Telegram Web A v10.0!**
+**Telegram Web A Digest**
 
-Today marks a special occasion. Telegram is celebrating its 10th anniversary! In honor of this milestone, and to highlight our web version's long-awaited parity with the native apps, we've leaped from version 1.x straight to 10.0. Big day!
+Many new features and useful optimizations have been added in recent months. Here is a brief overview of what's been happening in Web A since August.
 
-🌟 **Stories on Telegram**
-Introducing [Telegram Stories](https://t.me/durov/216) - share moments of your life, beyond just text.
+**September – November** 
 
-💻 **Desktop Version**
-An experimental standalone version is now available for enthusiasts and early adopters on all desktop platforms: **[web.telegram.org/a/get](https://web.telegram.org/a/get)**.
+✏️ __General__
+• [Reply Revolution](https://telegram.org/blog/reply-revolution#reply-revolution) – the app learned to quote specific parts of any message, making your responses 100% precise.
+• Also, [Quote Formatting](https://telegram.org/blog/reply-revolution#quote-formatting) have arrived.
 
-🚀 **Massive Connection Improvements**
-Web A is now more optimized – ensuring speedy and seamless conversations. Less loading, more chatting.
+📣 __Channels__
+• Channels added [boosts](https://telegram.org/blog/channel-stories#stories-for-channels) and [giveaways.](https://telegram.org/blog/giveaways#free-telegram-premium) 
+• Users also got an option to reassign their boosts between channels.
 
-🎙️ **Redesigned Group Calls**
-Group calls have been overhauled to bring exceptional clarity, connectivity, and functionality.
+🌄 __Stories__
+• Numerous improvements have been made to the animations flow, ensuring the stories bar expands more smoothly. Additionally, a package of optimizations has been added to enhance the performance of stories on mobile devices.
+• Stories have been introduced for [channels,](https://telegram.org/blog/channel-stories#stories-for-channels) and the story viewer has been updated with new gestures to expand and reply.
 
-🌍 **Real-Time Translation**
-Premium users can tap to translate entire chats, dynamically updating as they scroll.
+⚙️ __Settings__
+• The app has added an option, 'Who can find me by phone number,' along with a setting under 'Privacy and Security' to manage the visibility of your bio.
 
-⏱️ **Custom Mute Durations**
-Notifications from any chat can be temporarily muted for a specific period – like hours, days, or weeks.
+✨ __Extra__
+• Some further improvements have been made to the Mini Apps area.
+• New security notifications have been added to the chat list to alert you when your account is logged into from a new device.
+• New design for code blocks formatting.
 
-🔖 **Read Time in Groups**
-You can see at what time other members read your message in the 'Seen By' section.
+**December – February**
 
-😄 **Emoji v15 Support**
-Web A now supports the latest from Emoji v15, so you can express yourself fully.
+✏️ __General__
+• [Saved Messages 2.0](https://telegram.org/blog/new-saved-messages-and-9-more#saved-messages-2-0) – including tags, My Notes, Replies and forwards from hidden authors.
+• [One-Time Voice Messages](https://telegram.org/blog/new-saved-messages-and-9-more#one-time-voice-and-video-messages) including both listening and recording. Added support for viewing One-Time Video Messages.
+• [Read-Time in Private Chats](https://telegram.org/blog/new-saved-messages-and-9-more#read-time-in-private-chats)
+• You can now replace media when editing messages.
+• The app learned to [preserve the selected mode](https://telegram.org/blog/similar-channels#improvements-for-topics) for topics in groups.
+• Whenever you create a small group, Web A suggests a name for it based on users' name you have added.
 
-🎨 **Dynamic Sticker Packs**
-Dynamic order for your sticker packs can be toggled on or off – whichever you prefer.
+📣 __Channels__ 
+• Added [custom channel reactions.](https://telegram.org/blog/similar-channels#custom-reactions-for-channels)
+• Implemented [channel stories stats.](https://telegram.org/blog/similar-channels#story-stats-for-channels)
+• Channel emoji statuses.
+• [Similar Channels.](https://telegram.org/blog/similar-channels#similar-channels)
 
-🚀 **Performance Upgrades**
-We've implemented multiple memory and performance optimizations for a smoother, faster, more efficient Telegram experience.
+👥 __Groups__
+• [9 new features for groups.](https://telegram.org/blog/february2024)
 
-🔧 **Fixes & Improvements**
-We've patched several problems, including issues with sending messages while uploading files, freezes while scrolling, and messages incorrectly marking as read with Web A in the background. See if you can spot the host of UI refinements we added as well.😉
+🤖 __Bots__
+• Edit your bots info right from their profile.
 
-📱 **More for iPad Users**
-iPad users, we heard you! Web A now has improved iPad support.
+🌄 __Stories__
+• Added support for [forwarded stories](https://telegram.org/blog/posts-in-stories-and-more#view-reposts-and-more) and [channel posts in stories.](https://telegram.org/blog/posts-in-stories-and-more#share-posts-in-stories)
 
-Thank you for being with us. Here's to the next decade together! 🎉🥳
+✨ __Extra__
+• Giveaway Improvements: displaying winners list and additional prizes.
 
-🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webachannel)** and **[Russian](https://t.me/webachannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
+**March**
+
+📣 __Channels__ 
+• Admins will soon be able to launch giveaways in their channels.
+
+✨ __Extra__
+• Added support for Emoji v15.1.
+• Some design enhancements for shared contacts, links preview and more.

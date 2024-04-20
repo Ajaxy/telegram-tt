@@ -16,6 +16,7 @@ import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
+import { translate } from '../../../util/langProvider';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
@@ -402,6 +403,12 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   let { messageId } = payload;
 
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    actions.showNotification({ message: translate('Conversation.ErrorInaccessibleMessage'), tabId });
+    return undefined;
+  }
+
   if (groupedId !== undefined) {
     const ids = selectForwardedMessageIdsByGroupId(global, groupedChatId!, groupedId);
     if (ids?.length) {
@@ -778,6 +785,22 @@ addActionHandler('closeSeenByModal', (global, actions, payload): ActionReturnTyp
 
   return updateTabState(global, {
     seenByModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openPrivacySettingsNoticeModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, isReadDate, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    privacySettingsNoticeModal: { chatId, isReadDate },
+  }, tabId);
+});
+
+addActionHandler('closePrivacySettingsNoticeModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    privacySettingsNoticeModal: undefined,
   }, tabId);
 });
 

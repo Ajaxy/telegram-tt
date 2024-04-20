@@ -27,6 +27,12 @@
 .description {
   padding: 0.5rem;
   line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.bold {
+  font-weight: 500;
 }
 
 .chip {

@@ -24,6 +24,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectCanAnimateInterface,
   selectChat,
+  selectChatFullInfo,
   selectChatMessage,
   selectCurrentChat,
   selectCurrentMessageList,
@@ -34,6 +35,7 @@ import {
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 
 export const APP_VERSION_URL = 'version.txt';
+const FLOOD_PREMIUM_WAIT_NOTIFICATION_DURATION = 6000;
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
 
 addActionHandler('toggleChatInfo', (global, actions, payload): ActionReturnType => {
@@ -319,11 +321,12 @@ addActionHandler('showAllowedMessageTypesNotification', (global, actions, payloa
 
   const chat = selectChat(global, chatId);
   if (!chat) return;
+  const chatFullInfo = selectChatFullInfo(global, chatId);
 
   const {
     canSendPlainText, canSendPhotos, canSendVideos, canSendDocuments, canSendAudios,
     canSendStickers, canSendRoundVideos, canSendVoices,
-  } = getAllowedAttachmentOptions(chat);
+  } = getAllowedAttachmentOptions(chat, chatFullInfo);
   const allowedContent = compact([
     canSendPlainText ? 'Chat.SendAllowedContentTypeText' : undefined,
     canSendPhotos ? 'Chat.SendAllowedContentTypePhoto' : undefined,
@@ -739,6 +742,50 @@ addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionRe
   return updateTabState(global, {
     inviteViaLinkModal: undefined,
   }, tabId);
+});
+
+addActionHandler('setShouldCloseRightColumn', (global, actions, payload): ActionReturnType => {
+  const { value, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    shouldCloseRightColumn: value,
+  }, tabId);
+});
+
+addActionHandler('processPremiumFloodWait', (global, actions, payload): ActionReturnType => {
+  const { isUpload } = payload;
+  const {
+    bandwidthPremiumDownloadSpeedup,
+    bandwidthPremiumUploadSpeedup,
+    bandwidthPremiumNotifyPeriod,
+  } = global.appConfig || {};
+  const { lastPremiumBandwithNotificationDate: lastNotifiedAt } = global.settings;
+
+  if (!bandwidthPremiumDownloadSpeedup || !bandwidthPremiumUploadSpeedup || !bandwidthPremiumNotifyPeriod) {
+    return undefined;
+  }
+  if (lastNotifiedAt && Date.now() < lastNotifiedAt + bandwidthPremiumNotifyPeriod * 1000) return undefined;
+
+  const unblurredTabIds = Object.values(global.byTabId).filter((l) => !l.isBlurred).map((l) => l.id);
+
+  unblurredTabIds.forEach((tabId) => {
+    actions.showNotification({
+      title: langProvider.translate(isUpload ? 'UploadSpeedLimited' : 'DownloadSpeedLimited'),
+      message: langProvider.translate(
+        isUpload ? 'UploadSpeedLimitedMessage' : 'DownloadSpeedLimitedMessage',
+        isUpload ? bandwidthPremiumUploadSpeedup : bandwidthPremiumDownloadSpeedup,
+      ),
+      duration: FLOOD_PREMIUM_WAIT_NOTIFICATION_DURATION,
+      tabId,
+    });
+  });
+
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      lastPremiumBandwithNotificationDate: Date.now(),
+    },
+  };
 });
 
 let prevIsScreenLocked: boolean | undefined;

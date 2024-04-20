@@ -19,13 +19,11 @@ import styles from './StoryFooter.module.scss';
 
 type OwnProps = {
   story: ApiStory;
-  areViewsExpired?: boolean;
   className?: string;
 };
 
 const StoryFooter = ({
   story,
-  areViewsExpired,
   className,
 }: OwnProps) => {
   const { openStoryViewModal, openForwardMenu, sendStoryReaction } = getActions();
@@ -94,7 +92,7 @@ const StoryFooter = ({
         className={buildClassName(styles.viewInfo, !isChannel && styles.interactive)}
         onClick={!isChannel ? handleOpenStoryViewModal : undefined}
       >
-        {!areViewsExpired && Boolean(recentViewers?.length) && (
+        {Boolean(recentViewers?.length) && (
           <AvatarList
             size="small"
             peers={recentViewers}

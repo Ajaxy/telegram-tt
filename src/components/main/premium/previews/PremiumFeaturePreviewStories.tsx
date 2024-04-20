@@ -108,6 +108,7 @@ const PremiumFeaturePreviewVideo = ({
               isFontIcon
               index={index}
               count={STORY_FEATURE_ORDER.length}
+              section={section}
             />
           );
         })}

@@ -135,7 +135,7 @@ export default function createConfig(
                 modules: {
                   exportLocalsConvention: 'camelCase',
                   auto: true,
-                  localIdentName: mode === 'production' ? '[hash:base64]' : '[name]__[local]',
+                  localIdentName: APP_ENV === 'production' ? '[sha1:hash:base64:8]' : '[name]__[local]',
                 },
               },
             },

@@ -8,7 +8,7 @@ import { getActions, withGlobal } from '../../../global';
 import { GlobalSearchContent } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { parseDateString } from '../../../util/dateFormat';
+import { parseDateString } from '../../../util/date/dateFormat';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';

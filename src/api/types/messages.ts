@@ -2,6 +2,7 @@ import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat } from './chats';
+import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption } from './payments';
 import type { ApiMessageStoryData, ApiWebPageStoryData } from './stories';
 
 export interface ApiDimensions {
@@ -51,14 +52,15 @@ export interface ApiSticker {
 
 export interface ApiStickerSet {
   isArchived?: true;
-  isLottie?: true;
-  isVideos?: true;
   isEmoji?: true;
   installedDate?: number;
   id: string;
   accessHash: string;
   title: string;
   hasThumbnail?: boolean;
+  hasStaticThumb?: boolean;
+  hasAnimatedThumb?: boolean;
+  hasVideoThumb?: boolean;
   thumbCustomEmojiId?: string;
   count: number;
   stickers?: ApiSticker[];
@@ -170,21 +172,65 @@ export interface ApiPoll {
   };
 }
 
-// First type used for state, second - for API requests
-export type ApiInputInvoice = {
+/* Used for Invoice UI */
+export type ApiInputInvoiceMessage = {
+  type: 'message';
   chatId: string;
   messageId: number;
   isExtendedMedia?: boolean;
-} | {
+};
+
+export type ApiInputInvoiceSlug = {
+  type: 'slug';
   slug: string;
 };
 
-export type ApiRequestInputInvoice = {
+export type ApiInputInvoiceGiveaway = {
+  type: 'giveaway';
+  chatId: string;
+  additionalChannelIds?: string[];
+  isOnlyForNewSubscribers?: boolean;
+  areWinnersVisible?: boolean;
+  prizeDescription?: string;
+  countries?: string[];
+  untilDate: number;
+  currency: string;
+  amount: number;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiInputInvoiceGiftCode = {
+  type: 'giftcode';
+  userIds: string[];
+  boostChannelId?: string;
+  currency: string;
+  amount: number;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
+| ApiInputInvoiceGiftCode;
+
+/* Used for Invoice request */
+export type ApiRequestInputInvoiceMessage = {
+  type: 'message';
   chat: ApiChat;
   messageId: number;
-} | {
+};
+
+export type ApiRequestInputInvoiceSlug = {
+  type: 'slug';
   slug: string;
 };
+
+export type ApiRequestInputInvoiceGiveaway = {
+  type: 'giveaway';
+  purpose: ApiInputStorePaymentPurpose;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
+| ApiRequestInputInvoiceGiveaway;
 
 export interface ApiInvoice {
   text: string;
@@ -298,6 +344,7 @@ export interface ApiAction {
   | 'topicCreate'
   | 'suggestProfilePhoto'
   | 'joinedChannel'
+  | 'chatBoost'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;
@@ -328,6 +375,7 @@ export interface ApiWebPage {
   title?: string;
   description?: string;
   photo?: ApiPhoto;
+  audio?: ApiAudio;
   duration?: number;
   document?: ApiDocument;
   video?: ApiVideo;
@@ -356,7 +404,7 @@ export interface ApiMessageReplyInfo {
 
 export interface ApiStoryReplyInfo {
   type: 'story';
-  userId: string;
+  peerId: string;
   storyId: number;
 }
 
@@ -370,7 +418,7 @@ export interface ApiInputMessageReplyInfo {
 
 export interface ApiInputStoryReplyInfo {
   type: 'story';
-  userId: string;
+  peerId: string;
   storyId: number;
 }
 
@@ -485,8 +533,9 @@ export type MediaContent = {
   storyData?: ApiMessageStoryData;
   giveaway?: ApiGiveaway;
   giveawayResults?: ApiGiveawayResults;
-  ttlSeconds?: number;
   isExpiredVoice?: boolean;
+  isExpiredRoundVideo?: boolean;
+  ttlSeconds?: number;
 };
 
 export interface ApiMessage {
@@ -516,6 +565,7 @@ export interface ApiMessage {
   isKeyboardSingleUse?: boolean;
   isKeyboardSelective?: boolean;
   viaBotId?: string;
+  viaBusinessBotId?: string;
   postAuthorTitle?: string;
   isScheduled?: boolean;
   shouldHideKeyboardButtons?: boolean;
@@ -536,11 +586,14 @@ export interface ApiMessage {
   };
   reactions?: ApiReactions;
   hasComments?: boolean;
+  readDate?: number;
   savedPeerId?: string;
+  senderBoosts?: number;
 }
 
 export interface ApiReactions {
   canSeeList?: boolean;
+  areTags?: boolean;
   results: ApiReactionCount[];
   recentReactions?: ApiPeerReaction[];
 }
@@ -595,6 +648,14 @@ export type ApiReactionCustomEmoji = {
 };
 
 export type ApiReaction = ApiReactionEmoji | ApiReactionCustomEmoji;
+
+export type ApiReactionKey = `${string}-${string}`;
+
+export type ApiSavedReactionTag = {
+  reaction: ApiReaction;
+  title?: string;
+  count: number;
+};
 
 interface ApiBaseThreadInfo {
   chatId: string;
@@ -772,6 +833,12 @@ export type ApiBotApp = {
 export type ApiMessagesBotApp = ApiBotApp & {
   isInactive?: boolean;
   shouldRequestWriteAccess?: boolean;
+};
+
+export type ApiQuickReply = {
+  id: number;
+  shortcut: string;
+  topMessageId: number;
 };
 
 export const MAIN_THREAD_ID = -1;

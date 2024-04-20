@@ -17,6 +17,9 @@ export { default as AttachBotInstallModal } from '../components/modals/attachBot
 export { default as DeleteFolderDialog } from '../components/main/DeleteFolderDialog';
 export { default as PremiumMainModal } from '../components/main/premium/PremiumMainModal';
 export { default as GiftPremiumModal } from '../components/main/premium/GiftPremiumModal';
+export { default as GiveawayModal } from '../components/main/premium/GiveawayModal';
+export { default as PremiumGiftingModal } from '../components/main/premium/PremiumGiftingModal';
+export { default as AppendEntityPickerModal } from '../components/main/AppendEntityPickerModal';
 export { default as PremiumLimitReachedModal } from '../components/main/premium/common/PremiumLimitReachedModal';
 export { default as StatusPickerMenu } from '../components/left/main/StatusPickerMenu';
 export { default as BoostModal } from '../components/modals/boost/BoostModal';
@@ -30,6 +33,8 @@ export { default as PinMessageModal } from '../components/common/PinMessageModal
 export { default as UnpinAllMessagesModal } from '../components/common/UnpinAllMessagesModal';
 export { default as MessageSelectToolbar } from '../components/middle/MessageSelectToolbar';
 export { default as SeenByModal } from '../components/common/SeenByModal';
+export { default as PrivacySettingsNoticeModal } from '../components/common/PrivacySettingsNoticeModal';
+export { default as CountryPickerModal } from '../components/common/CountryPickerModal';
 export { default as ReactorListModal } from '../components/middle/ReactorListModal';
 export { default as EmojiInteractionAnimation } from '../components/middle/EmojiInteractionAnimation';
 export { default as ChatLanguageModal } from '../components/middle/ChatLanguageModal';
@@ -38,8 +43,6 @@ export { default as LeftSearch } from '../components/left/search/LeftSearch';
 export { default as Settings } from '../components/left/settings/Settings';
 export { default as ContactList } from '../components/left/main/ContactList';
 export { default as NewChat } from '../components/left/newChat/NewChat';
-export { default as NewChatStep1 } from '../components/left/newChat/NewChatStep1';
-export { default as NewChatStep2 } from '../components/left/newChat/NewChatStep2';
 export { default as ArchivedChats } from '../components/left/ArchivedChats';
 export { default as ChatFolderModal } from '../components/left/ChatFolderModal';
 export { default as MuteChatModal } from '../components/left/MuteChatModal';
@@ -51,12 +54,12 @@ export { default as StickerSetModal } from '../components/common/StickerSetModal
 export { default as CustomEmojiSetsModal } from '../components/common/CustomEmojiSetsModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
 export { default as MobileSearch } from '../components/middle/MobileSearch';
-export { default as ReactionPicker } from '../components/middle/message/ReactionPicker';
+export { default as ReactionPicker } from '../components/middle/message/reactions/ReactionPicker';
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as PollModal } from '../components/middle/composer/PollModal';
 export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu';
-export { default as BotCommandTooltip } from '../components/middle/composer/BotCommandTooltip';
+export { default as ChatCommandTooltip } from '../components/middle/composer/ChatCommandTooltip';
 export { default as BotCommandMenu } from '../components/middle/composer/BotCommandMenu';
 export { default as MentionTooltip } from '../components/middle/composer/MentionTooltip';
 export { default as StickerTooltip } from '../components/middle/composer/StickerTooltip';
@@ -82,5 +85,5 @@ export { default as Management } from '../components/right/management/Management
 
 export { default as PaymentModal } from '../components/payment/PaymentModal';
 export { default as ReceiptModal } from '../components/payment/ReceiptModal';
-export { default as InviteViaLinkModal } from '../components/main/InviteViaLinkModal';
+export { default as InviteViaLinkModal } from '../components/modals/inviteViaLink/InviteViaLinkModal';
 export { default as OneTimeMediaModal } from '../components/modals/oneTimeMedia/OneTimeMediaModal';

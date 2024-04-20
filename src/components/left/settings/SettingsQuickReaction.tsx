@@ -65,10 +65,10 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global) => {
-    const { availableReactions, config } = global;
+    const { config, reactions } = global;
 
     return {
-      availableReactions,
+      availableReactions: reactions.availableReactions,
       selectedReaction: config?.defaultReaction,
     };
   },

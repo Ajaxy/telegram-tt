@@ -58,7 +58,7 @@ function StoryViewModal({
   isCurrentUserPremium,
 }: StateProps) {
   const {
-    loadStoryViews, closeStoryViewModal, clearStoryViews,
+    loadStoryViewList, closeStoryViewModal, clearStoryViews,
   } = getActions();
 
   const [areJustContacts, markJustContacts, unmarkJustContacts] = useFlag(false);
@@ -102,7 +102,7 @@ function StoryViewModal({
 
   const handleLoadMore = useLastCallback(() => {
     if (!story?.id || nextOffset === undefined) return;
-    loadStoryViews({
+    loadStoryViewList({
       peerId: story.peerId,
       storyId: story.id,
       offset: nextOffset,
@@ -287,7 +287,7 @@ export default memo(withGlobal((global) => {
     story: story && 'content' in story ? story : undefined,
     nextOffset,
     isLoading,
-    availableReactions: global.availableReactions,
+    availableReactions: global.reactions.availableReactions,
     isCurrentUserPremium: selectIsCurrentUserPremium(global),
   };
 })(StoryViewModal));

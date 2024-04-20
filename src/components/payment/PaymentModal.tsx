@@ -70,6 +70,7 @@ type StateProps = {
   passwordValidUntil?: number;
   isExtendedMedia?: boolean;
   isPaymentFormUrl?: boolean;
+  botName?: string;
 };
 
 type GlobalStateProps = Pick<TabState['payment'], (
@@ -83,7 +84,6 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   isOpen,
   onClose,
   step,
-  chat,
   shippingOptions,
   savedInfo,
   canSaveCredentials,
@@ -113,6 +113,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   passwordValidUntil,
   isExtendedMedia,
   isPaymentFormUrl,
+  botName,
 }) => {
   const {
     loadPasswordInfo,
@@ -292,7 +293,6 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       case PaymentStep.Checkout:
         return (
           <Checkout
-            chat={chat}
             prices={prices}
             dispatch={paymentDispatch}
             shippingPrices={paymentState.shipping && shippingOptions
@@ -309,6 +309,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
             savedCredentials={savedCredentials}
             isTosAccepted={isTosAccepted}
             onAcceptTos={setIsTosAccepted}
+            botName={botName}
           />
         );
       case PaymentStep.SavedPayments:
@@ -647,6 +648,7 @@ export default memo(withGlobal<OwnProps>(
       temporaryPassword,
       isExtendedMedia,
       url,
+      botName,
     } = selectTabState(global).payment;
 
     let providerName = nativeProvider;
@@ -654,7 +656,7 @@ export default memo(withGlobal<OwnProps>(
       providerName = url.startsWith(DONATE_PROVIDER_URL) ? DONATE_PROVIDER : undefined;
     }
 
-    const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
+    const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId!) : undefined;
     const isProviderError = Boolean(invoice && (!providerName || !SUPPORTED_PROVIDERS.has(providerName)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
     const {
@@ -700,6 +702,7 @@ export default memo(withGlobal<OwnProps>(
       savedCredentials,
       passwordValidUntil: temporaryPassword?.validUntil,
       isExtendedMedia,
+      botName,
     };
   },
 )(PaymentModal));
