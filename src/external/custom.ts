@@ -6,6 +6,7 @@ import {
   selectChatFullInfo,
   selectChatLastMessage,
   selectPeer,
+  selectUser,
 } from '../global/selectors';
 
 export function getChatsInTheFolder(folderId: number) {
@@ -19,6 +20,26 @@ export function getChatsInTheFolder(folderId: number) {
     peerInfo: selectPeer(g, id),
     msg: selectChatLastMessage(g, id, 'all'),
   }));
+}
+
+export function getChatsByIds(chatsIds: number[]) {
+  const g = getGlobal();
+
+  const fetchedChats = chatsIds.map((chatId) => {
+    const id = chatId.toString();
+    const chatLastMessage = selectChatLastMessage(g, id);
+    return {
+      chat: selectChat(g, id),
+      id: chatId,
+      fullInfo: selectChatFullInfo(g, id),
+      msg: chatLastMessage,
+      lastMessageUserInfo: chatLastMessage?.senderId
+        ? selectUser(g, chatLastMessage.senderId)
+        : undefined,
+    };
+  });
+
+  return fetchedChats;
 }
 
 export function getAuthInfo():
