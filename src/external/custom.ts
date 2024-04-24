@@ -7,6 +7,7 @@ import {
   selectChatLastMessage,
   selectPeer,
   selectUser,
+  selectUserFullInfo,
 } from '../global/selectors';
 
 export function getChatsInTheFolder(folderId: number) {
@@ -28,18 +29,24 @@ export function getChatsByIds(chatsIds: number[]) {
   const fetchedChats = chatsIds.map((chatId) => {
     const id = chatId.toString();
     const chatLastMessage = selectChatLastMessage(g, id);
+    const shortUserInfo = chatLastMessage?.senderId
+      ? selectUser(g, chatLastMessage.senderId)
+      : undefined;
+    const userFullInfo = chatLastMessage?.senderId
+      ? selectUserFullInfo(g, chatLastMessage.senderId)
+      : undefined;
+
     return {
       chat: selectChat(g, id),
       id: chatId,
-      fullInfo: selectChatFullInfo(g, id),
+      chatFullInfo: selectChatFullInfo(g, id),
       msg: chatLastMessage,
-      lastMessageUserInfo: chatLastMessage?.senderId
-        ? selectUser(g, chatLastMessage.senderId)
-        : undefined,
+      lastMessageUserInfo: shortUserInfo,
+      userFullInfo,
     };
   });
 
-  return fetchedChats;
+  return g.isSynced ? fetchedChats : undefined;
 }
 
 export function getAuthInfo():
