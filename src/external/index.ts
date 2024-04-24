@@ -4,6 +4,8 @@ import { Requester, Responder } from "jsonrpc-iframe";
 import * as CUSTOM from "./custom";
 import { Actions, Custom, Events, Methods } from "./types";
 import { selectChat, selectCurrentMessageList } from "../global/selectors";
+import { addActionHandler } from "../global";
+import { ActionReturnType } from "../global/types";
 
 // const MAIN_FRAME_ORIGIN = "https://slise-crm.pages.dev"
 const MAIN_FRAME_ORIGIN = "https://test.slise-crm-app.pages.dev";
@@ -53,6 +55,18 @@ export function __init() {
     authed: false,
     userId: undefined as string | undefined,
   };
+  addActionHandler("apiUpdate", (global, actions, update): ActionReturnType => {
+    switch (update["@type"]) {
+      case "newMessage": {
+        const { chatId, id, message, shouldForceReply, wasDrafted } = update;
+        events.proxy.newMessage(message);
+        break;
+      }
+      default:
+        break;
+    }
+  });
+
   const check = () => {
     let global = getGlobal();
 
