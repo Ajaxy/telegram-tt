@@ -62,6 +62,13 @@ export function __init() {
         events.proxy.newMessage(message);
         break;
       }
+      case "updateConnectionState":
+      case "updateAuthorizationState": {
+        const auth = CUSTOM.getAuthInfo();
+
+        events.proxy.authStateChanged(auth);
+        break;
+      }
       default:
         break;
     }
