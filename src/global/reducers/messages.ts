@@ -425,9 +425,7 @@ export function deleteChatScheduledMessages<T extends GlobalState>(
       byChatId: {
         ...global.scheduledMessages.byChatId,
         [chatId]: {
-          byId: {
-            ...newById,
-          },
+          byId: newById,
         },
       },
     },

@@ -60,6 +60,9 @@ interface PublicUsernameOrBotLink {
   type: 'publicUsernameOrBotLink';
   username: string;
   start?: string;
+  startApp?: string;
+  startAttach?: string;
+  attach?: string;
   text?: string;
 }
 
@@ -182,6 +185,9 @@ function parseTgLink(url: URL) {
         username: queryParams.domain,
         start: queryParams.start,
         text: queryParams.text,
+        startApp: queryParams.startapp,
+        startAttach: queryParams.startattach,
+        attach: queryParams.attach,
       });
     case 'businessChatLink':
       return buildBusinessChatLink({ slug: queryParams.slug });
@@ -266,6 +272,9 @@ function parseHttpLink(url: URL) {
         username: pathParams[0],
         start: queryParams.start,
         text: queryParams.text,
+        startApp: queryParams.startapp,
+        startAttach: queryParams.startattach,
+        attach: queryParams.attach,
       });
     case 'businessChatLink':
       return buildBusinessChatLink({ slug: pathParams[1] });
@@ -487,6 +496,9 @@ function buildPublicUsernameOrBotLink(
     username,
     start,
     text,
+    startApp,
+    startAttach,
+    attach,
   } = params;
   if (!username) {
     return undefined;
@@ -498,6 +510,9 @@ function buildPublicUsernameOrBotLink(
     type: 'publicUsernameOrBotLink',
     username,
     start,
+    startApp,
+    startAttach,
+    attach,
     text,
   };
 }
