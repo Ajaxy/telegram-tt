@@ -567,6 +567,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf || isRepliesChat || isAnonymousForwards);
   const noAvatars = Boolean(!withUsers || isChannelChat);
   const shouldRenderGreeting = isUserId(chatId) && !isChatWithSelf && !isBot && !isAnonymousForwards
+    && type === 'thread'
     && (
       (
         !messageGroups && !lastMessage && messageIds

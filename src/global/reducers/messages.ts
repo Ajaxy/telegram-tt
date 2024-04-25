@@ -419,7 +419,19 @@ export function deleteChatScheduledMessages<T extends GlobalState>(
     });
   }
 
-  global = updateScheduledMessages(global, chatId, newById);
+  global = {
+    ...global,
+    scheduledMessages: {
+      byChatId: {
+        ...global.scheduledMessages.byChatId,
+        [chatId]: {
+          byId: {
+            ...newById,
+          },
+        },
+      },
+    },
+  };
 
   return global;
 }

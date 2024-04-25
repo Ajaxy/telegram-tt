@@ -700,7 +700,8 @@ export default memo(withGlobal<OwnProps>(
         && !isMessageUnread
         && readDateExpiresAt
         && message.date > Date.now() / 1000 - readDateExpiresAt
-        && !userStatus?.isReadDateRestricted,
+        && !userStatus?.isReadDateRestricted
+        && messageListType !== 'scheduled',
     );
     const shouldRenderShowWhen = Boolean(
       canLoadReadDate && isPrivate && selectUserStatus(global, chat.id)?.isReadDateRestrictedByMe,
