@@ -68,7 +68,11 @@ export function checkIsWebContentsUrlAllowed(url: string): boolean {
 
   const parsedUrl = new URL(url);
 
-  if (parsedUrl.pathname === encodeURI(`${__dirname}/index.html`)) {
+  const localContentsPathname = IS_WINDOWS
+    ? encodeURI(`/${__dirname.replace(/\\/g, '/')}/index.html`)
+    : encodeURI(`${__dirname}/index.html`);
+
+  if (parsedUrl.pathname === localContentsPathname) {
     return true;
   }
 
