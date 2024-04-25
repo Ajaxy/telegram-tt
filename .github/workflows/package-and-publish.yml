@@ -159,6 +159,7 @@ jobs:
         with:
           name: ${{ env.FILE_NAME }}
           path: ${{ env.FILE_NAME }}
+          overwrite: true
 
       - name: Get latest release ID
         id: release-id
