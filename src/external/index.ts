@@ -62,13 +62,13 @@ export function __init() {
         events.proxy.newMessage(message);
         break;
       }
-      case "updateConnectionState":
-      case "updateAuthorizationState": {
-        const auth = CUSTOM.getAuthInfo();
+      // case "updateConnectionState":
+      // case "updateAuthorizationState": {
+      //   const auth = CUSTOM.getAuthInfo();
 
-        events.proxy.authStateChanged(auth);
-        break;
-      }
+      //   events.proxy.authStateChanged(auth);
+      //   break;
+      // }
       case "updateChatInbox": {
         events.proxy.updateChatInbox(update);
       }
@@ -76,6 +76,13 @@ export function __init() {
         break;
     }
   });
+
+  addActionHandler(
+    "signOut",
+    async (global, actions, payload): Promise<void> => {
+      events.proxy.loggedOut();
+    }
+  );
 
   const check = () => {
     let global = getGlobal();
