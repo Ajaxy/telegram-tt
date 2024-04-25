@@ -1,12 +1,12 @@
-import { useCallback, useRef } from '../lib/teact/teact';
-import { getActions } from '../lib/teact/teactn';
+import { useCallback, useRef } from "../lib/teact/teact";
+import { getActions } from "../lib/teact/teactn";
 
-import { IS_TEST } from '../config';
-import { requestMeasure } from '../lib/fasterdom/fasterdom';
-import { IS_IOS } from '../util/windowEnvironment';
-import useEffectOnce from './useEffectOnce';
-import useLastCallback from './useLastCallback';
-import useSyncEffect from './useSyncEffect';
+import { IS_TEST } from "../config";
+import { requestMeasure } from "../lib/fasterdom/fasterdom";
+import { IS_IOS } from "../util/windowEnvironment";
+import useEffectOnce from "./useEffectOnce";
+import useLastCallback from "./useLastCallback";
+import useSyncEffect from "./useSyncEffect";
 
 const PATH_BASE = `${window.location.pathname}${window.location.search}`;
 // Carefully selected by swiping and observing visual changes
@@ -26,12 +26,12 @@ type HistoryRecord = {
 };
 
 type HistoryOperationGo = {
-  type: 'go';
+  type: "go";
   delta: number;
 };
 
 type HistoryOperationState = {
-  type: 'pushState' | 'replaceState';
+  type: "pushState" | "replaceState";
   data: any;
   hash?: string;
 };
@@ -62,7 +62,10 @@ if (IS_TEST) {
 function handleTouchStart(event: TouchEvent) {
   const x = event.touches[0].pageX;
 
-  if (x <= SAFARI_EDGE_BACK_GESTURE_LIMIT || x >= window.innerWidth - SAFARI_EDGE_BACK_GESTURE_LIMIT) {
+  if (
+    x <= SAFARI_EDGE_BACK_GESTURE_LIMIT ||
+    x >= window.innerWidth - SAFARI_EDGE_BACK_GESTURE_LIMIT
+  ) {
     isSafariGestureAnimation = true;
   }
 }
@@ -78,14 +81,18 @@ function handleTouchEnd() {
 }
 
 if (IS_IOS) {
-  window.addEventListener('touchstart', handleTouchStart);
-  window.addEventListener('touchend', handleTouchEnd);
-  window.addEventListener('popstate', handleTouchEnd);
+  window.addEventListener("touchstart", handleTouchStart);
+  window.addEventListener("touchend", handleTouchEnd);
+  window.addEventListener("popstate", handleTouchEnd);
 }
 
 function applyDeferredHistoryOperations() {
-  const goOperations = deferredHistoryOperations.filter((op) => op.type === 'go') as HistoryOperationGo[];
-  const stateOperations = deferredHistoryOperations.filter((op) => op.type !== 'go') as HistoryOperationState[];
+  const goOperations = deferredHistoryOperations.filter(
+    (op) => op.type === "go"
+  ) as HistoryOperationGo[];
+  const stateOperations = deferredHistoryOperations.filter(
+    (op) => op.type !== "go"
+  ) as HistoryOperationState[];
   const goCount = goOperations.reduce((acc, op) => acc + op.delta, 0);
 
   deferredHistoryOperations = [];
@@ -105,7 +112,9 @@ function applyDeferredHistoryOperations() {
 }
 
 function processStateOperations(stateOperations: HistoryOperationState[]) {
-  stateOperations.forEach((op) => window.history[op.type](op.data, '', op.hash));
+  stateOperations.forEach((op) =>
+    window.history[op.type](op.data, "", op.hash)
+  );
 }
 
 function deferHistoryOperation(historyOperation: HistoryOperation) {
@@ -119,12 +128,18 @@ function deferHistoryOperation(historyOperation: HistoryOperation) {
 // Resets history to the `root` state
 function resetHistory() {
   historyCursor = 0;
-  historyState = [{
-    index: 0,
-    onBack: () => window.history.back(),
-  }];
+  historyState = [
+    {
+      index: 0,
+      onBack: () => window.history.back(),
+    },
+  ];
 
-  window.history.replaceState({ index: 0, historyUniqueSessionId }, '', PATH_BASE);
+  window.history.replaceState(
+    { index: 0, historyUniqueSessionId },
+    "",
+    PATH_BASE
+  );
 }
 
 resetHistory();
@@ -138,7 +153,7 @@ function cleanupClosed(alreadyClosedCount = 1) {
   if (countClosed) {
     isAlteringHistory = true;
     deferHistoryOperation({
-      type: 'go',
+      type: "go",
       delta: -countClosed,
     });
   }
@@ -163,7 +178,7 @@ function cleanupTrashedState() {
   resetHistory();
 }
 
-window.addEventListener('popstate', ({ state }: PopStateEvent) => {
+window.addEventListener("popstate", ({ state }: PopStateEvent) => {
   if (isAlteringHistory) {
     isAlteringHistory = false;
     if (deferredPopstateOperations.length) {
@@ -222,7 +237,7 @@ window.addEventListener('popstate', ({ state }: PopStateEvent) => {
     // Forward navigation is not yet supported
     isAlteringHistory = true;
     deferHistoryOperation({
-      type: 'go',
+      type: "go",
       delta: -(index - historyCursor),
     });
   }
@@ -249,42 +264,50 @@ export default function useHistoryBack({
 
   const isFirstRender = useRef(true);
 
-  const pushState = useCallback((forceReplace = false) => {
-    // Check if the old state should be replaced
-    const shouldReplace = forceReplace || historyState[historyCursor].shouldBeReplaced;
-    indexRef.current = shouldReplace ? historyCursor : ++historyCursor;
+  const pushState = useCallback(
+    (forceReplace = false) => {
+      // Check if the old state should be replaced
+      const shouldReplace =
+        forceReplace || historyState[historyCursor].shouldBeReplaced;
+      indexRef.current = shouldReplace ? historyCursor : ++historyCursor;
 
-    historyCursor = indexRef.current;
+      historyCursor = indexRef.current;
 
-    // Mark the previous record as replaced so effectBack doesn't perform back operation on the new record
-    const previousRecord = historyState[indexRef.current];
-    if (previousRecord && !previousRecord.isClosed) {
-      previousRecord.markReplaced?.();
-    }
+      // Mark the previous record as replaced so effectBack doesn't perform back operation on the new record
+      const previousRecord = historyState[indexRef.current];
+      if (previousRecord && !previousRecord.isClosed) {
+        previousRecord.markReplaced?.();
+      }
 
-    historyState[indexRef.current] = {
-      index: indexRef.current,
-      onBack: lastOnBack,
-      shouldBeReplaced,
-      markReplaced: () => {
-        wasReplaced.current = true;
-      },
-    };
-
-    deferHistoryOperation({
-      type: shouldReplace ? 'replaceState' : 'pushState',
-      data: {
+      historyState[indexRef.current] = {
         index: indexRef.current,
-        historyUniqueSessionId,
-      },
-      // Space is a hack to make the browser completely remove the hash
-      hash: hash ? `#${hash}` : (shouldResetUrlHash ? ' ' : undefined),
-    });
-  }, [hash, shouldBeReplaced, shouldResetUrlHash]);
+        onBack: lastOnBack,
+        shouldBeReplaced,
+        markReplaced: () => {
+          wasReplaced.current = true;
+        },
+      };
+
+      deferHistoryOperation({
+        type: shouldReplace ? "replaceState" : "pushState",
+        data: {
+          index: indexRef.current,
+          historyUniqueSessionId,
+        },
+        // Space is a hack to make the browser completely remove the hash
+        hash: hash ? `#${hash}` : shouldResetUrlHash ? " " : undefined,
+      });
+    },
+    [hash, shouldBeReplaced, shouldResetUrlHash]
+  );
 
   const processBack = useCallback(() => {
     // Only process back on open records
-    if (indexRef.current && historyState[indexRef.current] && !wasReplaced.current) {
+    if (
+      indexRef.current &&
+      historyState[indexRef.current] &&
+      !wasReplaced.current
+    ) {
       historyState[indexRef.current].isClosed = true;
       wasReplaced.current = true;
       if (indexRef.current === historyCursor && !shouldBeReplaced) {
@@ -302,14 +325,17 @@ export default function useHistoryBack({
     };
   });
 
-  useSyncEffect(([prevIsActive]) => {
-    if (prevIsActive === isActive) return;
-    if (isFirstRender.current && !isActive) return;
+  useSyncEffect(
+    ([prevIsActive]) => {
+      if (prevIsActive === isActive) return;
+      if (isFirstRender.current && !isActive) return;
 
-    if (isActive) {
-      pushState();
-    } else {
-      processBack();
-    }
-  }, [isActive, processBack, pushState]);
+      // if (isActive) {
+      //   pushState();
+      // } else {
+      //   processBack();
+      // }
+    },
+    [isActive, processBack, pushState]
+  );
 }
