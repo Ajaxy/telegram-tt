@@ -49,6 +49,17 @@ export function getChatsByIds(chatsIds: number[]) {
   return g.isSynced ? fetchedChats : undefined;
 }
 
+export function getUserById(userId: number) {
+  const g = getGlobal();
+
+  const id = userId.toString();
+
+  return {
+    userShortInfo: selectUser(g, id),
+    userFullInfo: selectUserFullInfo(g, id),
+  };
+}
+
 export function getAuthInfo():
 | { authed: false }
 | { authed: true; userId: string } {

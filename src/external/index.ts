@@ -69,6 +69,9 @@ export function __init() {
         events.proxy.authStateChanged(auth);
         break;
       }
+      case "updateChatInbox": {
+        events.proxy.updateChatInbox(update);
+      }
       default:
         break;
     }

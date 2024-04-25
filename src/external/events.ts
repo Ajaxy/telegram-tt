@@ -1,5 +1,5 @@
 import { ApiChat } from "../api/types/chats";
-import { ApiMessage } from "../api/types";
+import { ApiMessage, ApiUpdateChatInbox } from "../api/types";
 
 export function chatOpened(chatId: string, chat: ApiChat) {}
 export function chatClosed() {}
@@ -12,3 +12,4 @@ export function authStateChanged(
 ) {}
 
 export function newMessage(message: Partial<ApiMessage>) {}
+export function updateChatInbox(chatInbox: ApiUpdateChatInbox) {}
