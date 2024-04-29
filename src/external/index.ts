@@ -7,8 +7,12 @@ import { selectChat, selectCurrentMessageList } from "../global/selectors";
 import { addActionHandler } from "../global";
 import { ActionReturnType } from "../global/types";
 
-// const MAIN_FRAME_ORIGIN = "https://slise-crm.pages.dev"
-const MAIN_FRAME_ORIGIN = "https://test.slise-crm-app.pages.dev";
+const MAIN_FRAME_ORIGIN =
+  process.env.MAIN_FRAME_ORIGIN || "https://crm.slise.xyz";
+// const MAIN_FRAME_ORIGIN =
+//   window.location.hostname == "localhost"
+//     ? "http://localhost:5173"
+//     : "https://slise-crm.pages.dev";
 
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
