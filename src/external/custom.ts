@@ -60,6 +60,17 @@ export function getUserById(userId: number) {
   };
 }
 
+export function getChatById(chatId: number) {
+  const g = getGlobal();
+
+  const id = chatId.toString();
+
+  return {
+    chatShortInfo: selectChat(g, id),
+    chatFullInfo: selectChatFullInfo(g, id),
+  };
+}
+
 export function getAuthInfo():
 | { authed: false }
 | { authed: true; userId: string } {
