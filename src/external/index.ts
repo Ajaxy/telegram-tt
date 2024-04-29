@@ -14,6 +14,8 @@ const MAIN_FRAME_ORIGIN =
 //     ? "http://localhost:5173"
 //     : "https://slise-crm.pages.dev";
 
+console.log(MAIN_FRAME_ORIGIN, "MAIN_FRAME_ORIGIN TG");
+
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
 actions.subscribeUniversal(async (name, args) => {
