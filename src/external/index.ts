@@ -91,18 +91,18 @@ export function __init() {
   );
 
   const check = () => {
-    let global = getGlobal();
+    // let global = getGlobal();
 
-    let chatId = selectCurrentMessageList(global)?.chatId;
-    if (chatId != oldChatId) {
-      oldChatId = chatId;
-      if (chatId) {
-        let chat = selectChat(global, chatId);
-        events.proxy.chatOpened(chatId, chat!);
-      } else {
-        events.proxy.chatClosed();
-      }
-    }
+    // let chatId = selectCurrentMessageList(global)?.chatId;
+    // if (chatId != oldChatId) {
+    //   oldChatId = chatId;
+    //   if (chatId) {
+    //     let chat = selectChat(global, chatId);
+    //     events.proxy.chatOpened(chatId, chat!);
+    //   } else {
+    //     events.proxy.chatClosed();
+    //   }
+    // }
 
     let auth = CUSTOM.getAuthInfo();
     if (auth.authed)
