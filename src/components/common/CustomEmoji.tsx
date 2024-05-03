@@ -30,7 +30,6 @@ type OwnProps = {
   style?: string;
   isBig?: boolean;
   noPlay?: boolean;
-  withGridFix?: boolean;
   withSharedAnimation?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
@@ -55,7 +54,6 @@ const CustomEmoji: FC<OwnProps> = ({
   className,
   loopLimit,
   style,
-  withGridFix,
   withSharedAnimation,
   sharedCanvasRef,
   sharedCanvasHqRef,
@@ -117,7 +115,6 @@ const CustomEmoji: FC<OwnProps> = ({
         className,
         'custom-emoji',
         'emoji',
-        withGridFix && styles.withGridFix,
       )}
       onClick={onClick}
       onAnimationEnd={onAnimationEnd}
