@@ -30,6 +30,7 @@ import {
   TOPICS_SLICE,
   TOPICS_SLICE_SECOND_LOAD,
 } from '../../../config';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatShareText, parseChooseParameter, processDeepLink } from '../../../util/deeplink';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -2671,6 +2672,38 @@ addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Pr
     text: chatLink.text,
     tabId,
   });
+});
+
+addActionHandler('requestCollectibleInfo', async (global, actions, payload): Promise<void> => {
+  const {
+    type, collectible, userId, tabId = getCurrentTabId(),
+  } = payload;
+
+  let inputCollectible;
+  if (type === 'phone') {
+    inputCollectible = { phone: collectible };
+  }
+  if (type === 'username') {
+    inputCollectible = { username: collectible };
+  }
+  if (!inputCollectible) return;
+
+  const result = await callApi('fetchCollectionInfo', inputCollectible);
+  if (!result) {
+    copyTextToClipboard(collectible);
+    return;
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    collectibleInfoModal: {
+      ...result,
+      type,
+      collectible,
+      userId,
+    },
+  }, tabId);
+  setGlobal(global);
 });
 
 async function loadChats(

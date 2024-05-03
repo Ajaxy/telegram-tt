@@ -9,7 +9,7 @@ import type {
 } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { TME_LINK_PREFIX } from '../../../config';
+import { FRAGMENT_PHONE_CODE, FRAGMENT_PHONE_LENGTH } from '../../../config';
 import {
   buildStaticMapHash,
   getChatLink,
@@ -33,6 +33,7 @@ import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { debounce } from '../../../util/schedulers';
 import stopEvent from '../../../util/stopEvent';
 import { ChatAnimationTypes } from '../../left/main/hooks';
+import formatUsername from '../helpers/formatUsername';
 import renderText from '../helpers/renderText';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
@@ -102,6 +103,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     loadPeerStories,
     openSavedDialog,
     openMapModal,
+    requestCollectibleInfo,
   } = getActions();
 
   const {
@@ -206,16 +208,32 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     openSavedDialog({ chatId: chatOrUserId });
   });
 
-  if (!chat || chat.isRestricted || (isSelf && !isInSettings)) {
-    return undefined;
-  }
-
   function copy(text: string, entity: string) {
     copyTextToClipboard(text);
     showNotification({ message: `${entity} was copied` });
   }
 
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneCodeList, phoneNumber);
+
+  const handlePhoneClick = useLastCallback(() => {
+    if (phoneNumber?.length === FRAGMENT_PHONE_LENGTH && phoneNumber.startsWith(FRAGMENT_PHONE_CODE)) {
+      requestCollectibleInfo({ collectible: phoneNumber, userId: userId!, type: 'phone' });
+      return;
+    }
+    copy(formattedNumber!, lang('Phone'));
+  });
+
+  const handleUsernameClick = useLastCallback((username: ApiUsername, isChat?: boolean) => {
+    if (!username.isEditable) {
+      requestCollectibleInfo({ collectible: username.username, userId: userId!, type: 'username' });
+      return;
+    }
+    copy(formatUsername(username.username, isChat), lang(isChat ? 'Link' : 'Username'));
+  });
+
+  if (!chat || chat.isRestricted || (isSelf && !isInSettings)) {
+    return undefined;
+  }
 
   function renderUsernames(usernameList: ApiUsername[], isChat?: boolean) {
     const [mainUsername, ...otherUsernames] = usernameList;
@@ -226,21 +244,21 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         .map((s) => {
           return (s === 'USERNAMES' ? (
             <>
-              {otherUsernames.map(({ username: nick }, idx) => {
-                const textToCopy = isChat ? `${TME_LINK_PREFIX}${nick}` : `@${nick}`;
+              {otherUsernames.map((username, idx) => {
                 return (
                   <>
                     {idx > 0 ? ', ' : ''}
                     <a
-                      key={nick}
-                      href={`${TME_LINK_PREFIX}${nick}`}
+                      key={username.username}
+                      href={formatUsername(username.username, true)}
+                      onMouseDown={stopEvent}
                       onClick={(e) => {
                         stopEvent(e);
-                        copy(textToCopy, lang(isChat ? 'Link' : 'Username'));
+                        handleUsernameClick(username, isChat);
                       }}
                       className="text-entity-link username-link"
                     >
-                      {`@${nick}`}
+                      {formatUsername(username.username)}
                     </a>
                   </>
                 );
@@ -250,9 +268,6 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         })
       : undefined;
 
-    const username = isChat ? `t.me/${mainUsername.username}` : mainUsername.username;
-    const textToCopy = isChat ? `${TME_LINK_PREFIX}${mainUsername.username}` : `@${mainUsername.username}`;
-
     return (
       <ListItem
         icon={isChat ? 'link' : 'mention'}
@@ -260,9 +275,11 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         narrow
         ripple
         // eslint-disable-next-line react/jsx-no-bind
-        onClick={() => copy(textToCopy, lang(isChat ? 'Link' : 'Username'))}
+        onClick={() => {
+          handleUsernameClick(mainUsername, isChat);
+        }}
       >
-        <span className="title" dir="auto">{username}</span>
+        <span className="title" dir="auto">{formatUsername(mainUsername.username, isChat)}</span>
         <span className="subtitle">
           {usernameLinks && <span className="other-usernames">{usernameLinks}</span>}
           {lang(isChat ? 'Link' : 'Username')}
@@ -289,9 +306,9 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           />
         </div>
       )}
-      {formattedNumber && Boolean(formattedNumber.length) && (
+      {Boolean(formattedNumber?.length) && (
         // eslint-disable-next-line react/jsx-no-bind
-        <ListItem icon="phone" multiline narrow ripple onClick={() => copy(formattedNumber, lang('Phone'))}>
+        <ListItem icon="phone" multiline narrow ripple onClick={handlePhoneClick}>
           <span className="title" dir="auto">{formattedNumber}</span>
           <span className="subtitle">{lang('Phone')}</span>
         </ListItem>

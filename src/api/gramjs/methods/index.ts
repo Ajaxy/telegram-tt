@@ -102,3 +102,5 @@ export {
   applyBoost, fetchBoostList, fetchBoostStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
   getPremiumGiftCodeOptions, launchPrepaidGiveaway,
 } from './payments';
+
+export * from './fragment';

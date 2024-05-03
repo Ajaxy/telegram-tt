@@ -16,6 +16,7 @@ import type {
   ApiChatReactions,
   ApiChatType,
   ApiCheckedGiftCode,
+  ApiCollectionInfo,
   ApiConfig,
   ApiContact,
   ApiCountry,
@@ -737,6 +738,12 @@ export type TabState = {
 
   oneTimeMediaModal?: {
     message: ApiMessage;
+  };
+
+  collectibleInfoModal?: ApiCollectionInfo & {
+    userId: string;
+    type: 'phone' | 'username';
+    collectible: string;
   };
 };
 
@@ -2866,6 +2873,13 @@ export interface ActionPayloads {
 
   openOneTimeMediaModal: TabState['oneTimeMediaModal'] & WithTabId;
   closeOneTimeMediaModal: WithTabId | undefined;
+
+  requestCollectibleInfo: {
+    userId: string;
+    type : 'phone' | 'username';
+    collectible: string;
+  } & WithTabId;
+  closeCollectibleInfoModal: WithTabId | undefined;
 
   // Calls
   joinGroupCall: {

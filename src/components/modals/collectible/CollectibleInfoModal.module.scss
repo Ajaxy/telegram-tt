@@ -1,0 +1,33 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+}
+
+.icon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+  background-color: var(--color-primary);
+}
+
+.title, .description {
+  text-align: center !important;
+  text-wrap: pretty;
+  padding: 0 1rem;
+}
+
+.title {
+  margin-top: 1rem;
+}

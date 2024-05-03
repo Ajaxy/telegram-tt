@@ -267,3 +267,12 @@ type ApiUrlAuthResultDefault = {
 };
 
 export type ApiUrlAuthResult = ApiUrlAuthResultRequest | ApiUrlAuthResultAccepted | ApiUrlAuthResultDefault;
+
+export interface ApiCollectionInfo {
+  amount: number;
+  currency: string;
+  cryptoAmount: number;
+  cryptoCurrency: string;
+  purchaseDate: number;
+  url: string;
+}

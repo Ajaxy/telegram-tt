@@ -336,7 +336,7 @@ function buildAction(
   let currency: string | undefined;
   let giftCryptoInfo: {
     currency: string;
-    amount: string;
+    amount: number;
   } | undefined;
   let text: string;
   const translationValues: string[] = [];
@@ -499,10 +499,9 @@ function buildAction(
     }
     currency = action.currency;
     if (action.cryptoCurrency) {
-      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
       giftCryptoInfo = {
         currency: action.cryptoCurrency,
-        amount: cryptoAmountWithDecimals.toFixed(2),
+        amount: action.cryptoAmount!.toJSNumber(),
       };
     }
     amount = action.amount.toJSNumber();
@@ -552,10 +551,9 @@ function buildAction(
     }
     currency = action.currency;
     if (action.cryptoCurrency) {
-      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
       giftCryptoInfo = {
         currency: action.cryptoCurrency,
-        amount: cryptoAmountWithDecimals.toFixed(2),
+        amount: action.cryptoAmount!.toJSNumber(),
       };
     }
     if (action.boostPeer) {

@@ -9,6 +9,7 @@ import { pick } from '../../util/iteratees';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
 import BoostModal from './boost/BoostModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
+import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
@@ -25,6 +26,7 @@ type ModalKey = keyof Pick<TabState,
 'oneTimeMediaModal' |
 'inviteViaLinkModal' |
 'requestedAttachBotInstall' |
+'collectibleInfoModal' |
 'reportAdModal' |
 'webApp'
 >;
@@ -51,6 +53,7 @@ const MODALS: ModalRegistry = {
   requestedAttachBotInstall: AttachBotInstallModal,
   reportAdModal: ReportAdModal,
   webApp: WebAppModal,
+  collectibleInfoModal: CollectibleInfoModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

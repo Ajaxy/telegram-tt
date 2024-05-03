@@ -744,6 +744,13 @@ addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionRe
   }, tabId);
 });
 
+addActionHandler('closeCollectibleInfoModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload ?? {};
+  return updateTabState(global, {
+    collectibleInfoModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('setShouldCloseRightColumn', (global, actions, payload): ActionReturnType => {
   const { value, tabId = getCurrentTabId() } = payload;
   return updateTabState(global, {

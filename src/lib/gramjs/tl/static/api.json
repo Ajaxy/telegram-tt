@@ -349,5 +349,6 @@
     "payments.applyGiftCode",
     "payments.getGiveawayInfo",
     "payments.getPremiumGiftCodeOptions",
-    "payments.launchPrepaidGiveaway"
+    "payments.launchPrepaidGiveaway",
+    "fragment.getCollectibleInfo"
 ]

@@ -351,7 +351,7 @@ export interface ApiAction {
   currency?: string;
   giftCryptoInfo?: {
     currency: string;
-    amount: string;
+    amount: number;
   };
   translationValues: string[];
   call?: Partial<ApiGroupCall>;

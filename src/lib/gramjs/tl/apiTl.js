@@ -1637,4 +1637,5 @@ stories.togglePeerStoriesHidden#bd0415c4 peer:InputPeer hidden:Bool = Bool;
 premium.getBoostsList#60f67660 flags:# gifts:flags.0?true peer:InputPeer offset:string limit:int = premium.BoostsList;
 premium.getMyBoosts#be77b4a = premium.MyBoosts;
 premium.applyBoost#6b7da746 flags:# slots:flags.0?Vector<int> peer:InputPeer = premium.MyBoosts;
-premium.getBoostsStatus#42f1f61 peer:InputPeer = premium.BoostsStatus;`;
+premium.getBoostsStatus#42f1f61 peer:InputPeer = premium.BoostsStatus;
+fragment.getCollectibleInfo#be1e85ba collectible:InputCollectible = fragment.CollectibleInfo;`;

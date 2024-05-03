@@ -3,6 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type { ApiPrivacyKey } from '../../../types';
 import type {
   ApiChatLink,
+  ApiCollectionInfo,
   ApiConfig, ApiCountry, ApiLangString,
   ApiPeerColors,
   ApiSession, ApiTimezone, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
@@ -272,5 +273,25 @@ export function buildApiChatLink(data: GramJs.account.ResolvedBusinessChatLinks)
   return {
     chatId,
     text: buildMessageTextContent(data.message, data.entities),
+  };
+}
+
+export function buildApiCollectibleInfo(info: GramJs.fragment.TypeCollectibleInfo): ApiCollectionInfo {
+  const {
+    amount,
+    currency,
+    cryptoAmount,
+    cryptoCurrency,
+    purchaseDate,
+    url,
+  } = info;
+
+  return {
+    amount: amount.toJSNumber(),
+    currency,
+    cryptoAmount: cryptoAmount.toJSNumber(),
+    cryptoCurrency,
+    purchaseDate,
+    url,
   };
 }
