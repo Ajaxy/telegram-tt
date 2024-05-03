@@ -64,6 +64,9 @@ export function __init() {
   let oldSyncState = {
     isSynced: false,
   };
+
+  let actions = getActions();
+
   addActionHandler("apiUpdate", (global, actions, update): ActionReturnType => {
     switch (update["@type"]) {
       case "newMessage": {
@@ -87,6 +90,10 @@ export function __init() {
       oldSyncState.isSynced = false;
     }
   );
+
+  addActionHandler("initShared", (global): ActionReturnType => {
+    actions.setSettingOption({ shouldUseSystemTheme: false, theme: "light" });
+  });
 
   const check = () => {
     let g = getGlobal();
