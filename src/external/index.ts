@@ -61,9 +61,6 @@ export function __init() {
     authed: false,
     userId: undefined as string | undefined,
   };
-  let oldSyncState = {
-    isSynced: false,
-  };
 
   let actions = getActions();
 
@@ -83,11 +80,22 @@ export function __init() {
   });
 
   addActionHandler(
+    "loadAllChats",
+    async (global, actions, payload): Promise<void> => {
+      if (
+        global.connectionState === "connectionStateReady" &&
+        global.isSynced
+      ) {
+        events.proxy.syncStateChanged({ isSynced: true });
+      }
+    }
+  );
+
+  addActionHandler(
     "signOut",
     async (global, actions, payload): Promise<void> => {
       events.proxy.loggedOut();
       events.proxy.syncStateChanged({ isSynced: false });
-      oldSyncState.isSynced = false;
     }
   );
 
@@ -96,7 +104,7 @@ export function __init() {
   });
 
   const check = () => {
-    let g = getGlobal();
+    // let g = getGlobal();
 
     // let chatId = selectCurrentMessageList(global)?.chatId;
     // if (chatId != oldChatId) {
@@ -108,21 +116,6 @@ export function __init() {
     //     events.proxy.chatClosed();
     //   }
     // }
-    if (g.connectionState === "connectionStateReady") {
-      console.log("STATE READY");
-    }
-
-    if (g.isSynced) {
-      console.log("STATE SYNCED");
-    }
-    if (
-      g.connectionState === "connectionStateReady" &&
-      g.isSynced &&
-      !oldSyncState.isSynced
-    ) {
-      events.proxy.syncStateChanged({ isSynced: true });
-      oldSyncState.isSynced = true;
-    }
 
     let auth = CUSTOM.getAuthInfo();
     if (auth.authed)
