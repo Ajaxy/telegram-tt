@@ -7,7 +7,7 @@
   flex: 0 0 var(--custom-emoji-size);
 
   &.with-grid-fix .media, &.with-grid-fix .thumb {
-    width: calc(100% + 1px) !important;
+    width: calc(100%) !important;
     height: calc(100% + 1px) !important;
   }
 
