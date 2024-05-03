@@ -1998,12 +1998,9 @@ export function setViewForumAsMessages({ chat, isEnabled }: { chat: ApiChat; isE
   });
 }
 
-export async function fetchChannelRecommendations({ chat }: { chat: ApiChat }) {
-  const { id, accessHash } = chat;
-  const channel = buildInputEntity(id, accessHash);
-
+export async function fetchChannelRecommendations({ chat }: { chat?: ApiChat }) {
   const result = await invokeRequest(new GramJs.channels.GetChannelRecommendations({
-    channel: channel as GramJs.InputChannel,
+    channel: chat && buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
   }));
   if (!result) {
     return undefined;
@@ -2011,12 +2008,13 @@ export async function fetchChannelRecommendations({ chat }: { chat: ApiChat }) {
 
   updateLocalDb(result);
 
+  const similarChannels = result?.chats
+    .map((c) => buildApiChatFromPreview(c))
+    .filter(Boolean);
+
   return {
-    similarChannels: result?.chats
-      .map((_chat) => buildApiChatFromPreview(_chat))
-      .filter(Boolean),
-    count:
-      result instanceof GramJs.messages.ChatsSlice ? result.count : undefined,
+    similarChannels,
+    count: result instanceof GramJs.messages.ChatsSlice ? result.count : similarChannels.length,
   };
 }
 

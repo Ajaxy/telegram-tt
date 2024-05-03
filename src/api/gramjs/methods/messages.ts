@@ -1232,6 +1232,7 @@ export async function searchMessagesGlobal({
     q: query,
     offsetRate,
     offsetPeer: new GramJs.InputPeerEmpty(),
+    broadcastsOnly: type === 'channels' || undefined,
     limit,
     filter,
     folderId: ALL_FOLDER_ID,

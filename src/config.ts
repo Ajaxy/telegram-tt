@@ -93,6 +93,8 @@ export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
 export const STORY_VIEWS_MIN_CONTACTS_FILTER = 20;
 
+export const GLOBAL_SUGGESTED_CHANNELS_ID = 'global';
+
 // As in Telegram for Android
 // https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7799
 export const TOP_REACTIONS_LIMIT = 100;

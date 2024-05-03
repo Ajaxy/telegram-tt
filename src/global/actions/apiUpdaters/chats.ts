@@ -95,7 +95,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const listType = selectChatListType(global, update.id);
       const chat = selectChat(global, update.id);
       if (chat && isChatChannel(chat)) {
-        actions.fetchChannelRecommendations({ chatId: chat.id });
+        actions.loadChannelRecommendations({ chatId: chat.id });
         const lastMessageId = selectChatLastMessageId(global, chat.id);
         const localMessage = buildLocalMessage(chat, lastMessageId);
         localMessage.content.action = {

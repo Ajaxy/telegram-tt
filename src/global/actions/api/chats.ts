@@ -21,6 +21,7 @@ import {
   CHAT_LIST_LOAD_SLICE,
   DEBUG,
   GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
+  GLOBAL_SUGGESTED_CHANNELS_ID,
   RE_TG_LINK,
   SAVED_FOLDER_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -105,6 +106,7 @@ import {
   selectIsChatPinned,
   selectIsChatWithSelf,
   selectLastServiceNotification,
+  selectSimilarChannelIds,
   selectStickerSet,
   selectSupportChat,
   selectTabState,
@@ -2615,25 +2617,34 @@ addActionHandler('setViewForumAsMessages', (global, actions, payload): ActionRet
   void callApi('setViewForumAsMessages', { chat, isEnabled });
 });
 
-addActionHandler('fetchChannelRecommendations', async (global, actions, payload): Promise<void> => {
+addActionHandler('loadChannelRecommendations', async (global, actions, payload): Promise<void> => {
   const { chatId } = payload;
-  const chat = selectChat(global, chatId);
+  const chat = chatId ? selectChat(global, chatId) : undefined;
 
-  if (!chat) {
+  if (chatId && !chat) {
     return;
   }
 
-  const { similarChannels, count } = await callApi('fetchChannelRecommendations', {
+  if (!chatId) {
+    const similarChannelIds = selectSimilarChannelIds(global, GLOBAL_SUGGESTED_CHANNELS_ID);
+    if (similarChannelIds) return; // Already cached
+  }
+
+  const result = await callApi('fetchChannelRecommendations', {
     chat,
-  }) || {};
+  });
 
-  if (!similarChannels) {
+  if (!result) {
     return;
   }
+
+  const { similarChannels, count } = result;
+
+  const chatsById = buildCollectionByKey(similarChannels, 'id');
 
   global = getGlobal();
-  global = addChats(global, buildCollectionByKey(similarChannels, 'id'));
-  global = addSimilarChannels(global, chatId, similarChannels.map((channel) => channel.id), count);
+  global = addChats(global, chatsById);
+  global = addSimilarChannels(global, chatId || GLOBAL_SUGGESTED_CHANNELS_ID, Object.keys(chatsById), count);
   setGlobal(global);
 });
 

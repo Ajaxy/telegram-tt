@@ -1,6 +1,8 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useMemo, useRef,
+  memo,
+  useMemo,
+  useRef,
   useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
@@ -13,6 +15,7 @@ import { parseDateString } from '../../../util/date/dateFormat';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
@@ -39,6 +42,7 @@ type StateProps = {
 
 const TABS = [
   { type: GlobalSearchContent.ChatList, title: 'SearchAllChatsShort' },
+  { type: GlobalSearchContent.ChannelList, title: 'ChannelsTab' },
   { type: GlobalSearchContent.Media, title: 'SharedMediaTab2' },
   { type: GlobalSearchContent.Links, title: 'SharedLinksTab2' },
   { type: GlobalSearchContent.Files, title: 'SharedFilesTab2' },
@@ -48,10 +52,8 @@ const TABS = [
 
 const CHAT_TABS = [
   { type: GlobalSearchContent.ChatList, title: 'All Messages' },
-  ...TABS.slice(1),
+  ...TABS.slice(2), // Skip ChatList and ChannelList, replaced with All Messages
 ];
-
-const TRANSITION_RENDER_COUNT = Object.keys(GlobalSearchContent).length / 2;
 
 const LeftSearch: FC<OwnProps & StateProps> = ({
   searchQuery,
@@ -70,15 +72,17 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
   const [activeTab, setActiveTab] = useState(currentContent);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
 
-  const handleSwitchTab = useCallback((index: number) => {
-    const tab = TABS[index];
+  const tabs = chatId ? CHAT_TABS : TABS;
+
+  const handleSwitchTab = useLastCallback((index: number) => {
+    const tab = tabs[index];
     setGlobalSearchContent({ content: tab.type });
     setActiveTab(index);
-  }, [setGlobalSearchContent]);
+  });
 
-  const handleSearchDateSelect = useCallback((value: Date) => {
+  const handleSearchDateSelect = useLastCallback((value: Date) => {
     setGlobalSearchDate({ date: value.getTime() / 1000 });
-  }, [setGlobalSearchDate]);
+  });
 
   useHistoryBack({
     isActive,
@@ -91,15 +95,16 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="LeftSearch" ref={containerRef} onKeyDown={handleKeyDown}>
-      <TabList activeTab={activeTab} tabs={chatId ? CHAT_TABS : TABS} onSwitchTab={handleSwitchTab} />
+      <TabList activeTab={activeTab} tabs={tabs} onSwitchTab={handleSwitchTab} />
       <Transition
         name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
-        renderCount={TRANSITION_RENDER_COUNT}
+        renderCount={tabs.length}
         activeKey={currentContent}
       >
         {(() => {
           switch (currentContent) {
             case GlobalSearchContent.ChatList:
+            case GlobalSearchContent.ChannelList:
               if (chatId) {
                 return (
                   <ChatMessageResults
@@ -112,6 +117,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
               }
               return (
                 <ChatResults
+                  isChannelList={currentContent === GlobalSearchContent.ChannelList}
                   searchQuery={searchQuery}
                   searchDate={searchDate}
                   dateSearchQuery={dateSearchQuery}

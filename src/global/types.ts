@@ -1931,8 +1931,8 @@ export interface ActionPayloads {
   fetchChat: {
     chatId: string;
   };
-  fetchChannelRecommendations: {
-    chatId: string;
+  loadChannelRecommendations: {
+    chatId?: string;
   };
   toggleChannelRecommendations: {
     chatId: string;

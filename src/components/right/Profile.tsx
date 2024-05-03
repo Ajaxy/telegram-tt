@@ -197,7 +197,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadPeerPinnedStories,
     loadStoriesArchive,
     openPremiumModal,
-    fetchChannelRecommendations,
+    loadChannelRecommendations,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -257,7 +257,7 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (isChannel && !similarChannels) {
-      fetchChannelRecommendations({ chatId });
+      loadChannelRecommendations({ chatId });
     }
   }, [chatId, isChannel, similarChannels]);
 
