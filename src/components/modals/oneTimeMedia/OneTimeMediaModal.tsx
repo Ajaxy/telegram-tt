@@ -20,23 +20,23 @@ import Button from '../../ui/Button';
 import styles from './OneTimeMediaModal.module.scss';
 
 export type OwnProps = {
-  info: TabState['oneTimeMediaModal'];
+  modal: TabState['oneTimeMediaModal'];
 };
 
 const OneTimeMediaModal = ({
-  info,
+  modal,
 }: OwnProps) => {
   const {
     closeOneTimeMediaModal,
   } = getActions();
 
   const lang = useLang();
-  const message = useCurrentOrPrev(info?.message, true);
+  const message = useCurrentOrPrev(modal?.message, true);
 
   const {
     shouldRender,
     transitionClassNames,
-  } = useShowTransition(Boolean(info));
+  } = useShowTransition(Boolean(modal));
 
   const handlePlayVoice = useLastCallback(() => {
     return undefined;

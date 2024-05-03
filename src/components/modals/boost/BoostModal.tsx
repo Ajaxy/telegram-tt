@@ -46,7 +46,7 @@ type BoostInfo = ({
 } & LoadedParams);
 
 export type OwnProps = {
-  info: TabState['boostModal'];
+  modal: TabState['boostModal'];
 };
 
 type StateProps = {
@@ -57,7 +57,7 @@ type StateProps = {
 };
 
 const BoostModal = ({
-  info,
+  modal,
   chat,
   chatFullInfo,
   prevBoostedChat,
@@ -77,7 +77,7 @@ const BoostModal = ({
 
   const isChannel = chat && isChatChannel(chat);
 
-  const isOpen = Boolean(info);
+  const isOpen = Boolean(modal);
 
   const lang = useLang();
 
@@ -115,7 +115,7 @@ const BoostModal = ({
     descriptionText,
     canBoostMore,
   }: BoostInfo = useMemo(() => {
-    if (!info?.boostStatus || !chat) {
+    if (!modal?.boostStatus || !chat) {
       return {
         isStatusLoaded: false,
         title: lang('Loading'),
@@ -124,10 +124,10 @@ const BoostModal = ({
 
     const {
       hasMyBoost,
-    } = info.boostStatus;
+    } = modal.boostStatus;
 
-    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts, chat.id);
-    const areBoostsInDifferentChannels = info?.myBoosts && !areAllBoostsInChannel(info.myBoosts, chat.id);
+    const firstBoost = modal?.myBoosts && getFirstAvailableBoost(modal.myBoosts, chat.id);
+    const areBoostsInDifferentChannels = modal?.myBoosts && !areAllBoostsInChannel(modal.myBoosts, chat.id);
 
     const {
       boosts,
@@ -136,7 +136,7 @@ const BoostModal = ({
       levelProgress,
       remainingBoosts,
       isMaxLevel,
-    } = getBoostProgressInfo(info.boostStatus, true);
+    } = getBoostProgressInfo(modal.boostStatus, true);
 
     const hasBoost = hasMyBoost;
 
@@ -172,10 +172,10 @@ const BoostModal = ({
       isBoosted: hasBoost,
       canBoostMore: areBoostsInDifferentChannels && !isMaxLevel,
     };
-  }, [chat, chatTitle, info, lang, chatFullInfo, isChannel]);
+  }, [chat, chatTitle, modal, lang, chatFullInfo, isChannel]);
 
-  const isBoostDisabled = !info?.myBoosts?.length && isCurrentUserPremium;
-  const isReplacingBoost = boost?.chatId && boost.chatId !== info?.chatId;
+  const isBoostDisabled = !modal?.myBoosts?.length && isCurrentUserPremium;
+  const isReplacingBoost = boost?.chatId && boost.chatId !== modal?.chatId;
 
   const handleApplyBoost = useLastCallback(() => {
     closeReplaceModal();
@@ -342,10 +342,10 @@ function areAllBoostsInChannel(myBoosts: ApiMyBoost[], chatId: string) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { info }): StateProps => {
-    const chat = info && selectChat(global, info?.chatId);
+  (global, { modal }): StateProps => {
+    const chat = modal && selectChat(global, modal?.chatId);
     const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
-    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts, info.chatId);
+    const firstBoost = modal?.myBoosts && getFirstAvailableBoost(modal.myBoosts, modal.chatId);
     const boostedChat = firstBoost?.chatId ? selectChat(global, firstBoost?.chatId) : undefined;
 
     return {

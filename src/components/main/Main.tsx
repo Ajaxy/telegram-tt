@@ -9,10 +9,8 @@ import { addExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiAttachBot,
   ApiChat,
   ApiChatFolder,
-  ApiGeoPoint,
   ApiMessage,
   ApiUser,
 } from '../../api/types';
@@ -24,7 +22,6 @@ import {
   BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER,
 } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
-import { getUserFullName } from '../../global/helpers';
 import {
   selectCanAnimateInterface,
   selectChatFolder,
@@ -75,15 +72,7 @@ import AudioPlayer from '../middle/AudioPlayer';
 import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
-import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallModal.async';
-import BoostModal from '../modals/boost/BoostModal.async';
-import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
-import GiftCodeModal from '../modals/giftcode/GiftCodeModal.async';
-import InviteViaLinkModal from '../modals/inviteViaLink/InviteViaLinkModal.async';
-import MapModal from '../modals/map/MapModal.async';
-import OneTimeMediaModal from '../modals/oneTimeMedia/OneTimeMediaModal.async';
-import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
-import WebAppModal from '../modals/webApp/WebAppModal.async';
+import ModalContainer from '../modals/ModalContainer';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
 import RightColumn from '../right/RightColumn';
@@ -126,8 +115,6 @@ type StateProps = {
   hasDialogs: boolean;
   audioMessage?: ApiMessage;
   safeLinkModalUrl?: string;
-  mapModalGeoPoint?: ApiGeoPoint;
-  mapModalZoom?: number;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
   openedStickerSetShortName?: string;
@@ -144,15 +131,11 @@ type StateProps = {
   openedGame?: TabState['openedGame'];
   gameTitle?: string;
   isRatePhoneCallModalOpen?: boolean;
-  webApp?: TabState['webApp'];
   isPremiumModalOpen?: boolean;
   botTrustRequest?: TabState['botTrustRequest'];
   botTrustRequestBot?: ApiUser;
-  attachBotToInstall?: ApiAttachBot;
   requestedAttachBotInChat?: TabState['requestedAttachBotInChat'];
   requestedDraft?: TabState['requestedDraft'];
-  currentUserName?: string;
-  urlAuth?: TabState['urlAuth'];
   limitReached?: ApiLimitTypeWithModal;
   deleteFolderDialog?: ApiChatFolder;
   isPaymentModalOpen?: boolean;
@@ -162,14 +145,9 @@ type StateProps = {
   isGiveawayModalOpen?: boolean;
   isPremiumGiftingModalOpen?: boolean;
   isCurrentUserPremium?: boolean;
-  chatlistModal?: TabState['chatlistModal'];
-  boostModal?: TabState['boostModal'];
-  giftCodeModal?: TabState['giftCodeModal'];
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
   isSynced?: boolean;
-  inviteViaLinkModal?: TabState['inviteViaLinkModal'];
-  oneTimeMediaModal?: TabState['oneTimeMediaModal'];
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -191,8 +169,6 @@ const Main: FC<OwnProps & StateProps> = ({
   audioMessage,
   activeGroupCallId,
   safeLinkModalUrl,
-  mapModalGeoPoint,
-  mapModalZoom,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
   limitReached,
@@ -212,12 +188,8 @@ const Main: FC<OwnProps & StateProps> = ({
   isRatePhoneCallModalOpen,
   botTrustRequest,
   botTrustRequestBot,
-  attachBotToInstall,
   requestedAttachBotInChat,
   requestedDraft,
-  webApp,
-  currentUserName,
-  urlAuth,
   isPremiumModalOpen,
   isGiveawayModalOpen,
   isPremiumGiftingModalOpen,
@@ -227,13 +199,8 @@ const Main: FC<OwnProps & StateProps> = ({
   isCurrentUserPremium,
   deleteFolderDialog,
   isMasterTab,
-  chatlistModal,
-  giftCodeModal,
-  boostModal,
   noRightColumnAnimation,
   isSynced,
-  inviteViaLinkModal,
-  oneTimeMediaModal,
   currentUserId,
 }) => {
   const {
@@ -565,9 +532,8 @@ const Main: FC<OwnProps & StateProps> = ({
       <Notifications isOpen={hasNotifications} />
       <Dialogs isOpen={hasDialogs} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
+      <ModalContainer />
       <SafeLinkModal url={safeLinkModalUrl} />
-      <MapModal geoPoint={mapModalGeoPoint} zoom={mapModalZoom} />
-      <UrlAuthModal urlAuth={urlAuth} currentUserName={currentUserName} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
         isOpen={Boolean(openedStickerSetShortName)}
@@ -585,12 +551,7 @@ const Main: FC<OwnProps & StateProps> = ({
         userId={newContactUserId}
         isByPhoneNumber={newContactByPhoneNumber}
       />
-      <BoostModal info={boostModal} />
-      <GiftCodeModal modal={giftCodeModal} />
-      <OneTimeMediaModal info={oneTimeMediaModal} />
-      <ChatlistModal info={chatlistModal} />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
-      <WebAppModal webApp={webApp} />
       <DownloadManager />
       <ConfettiContainer />
       <PhoneCall isActive={isPhoneCallActive} />
@@ -601,7 +562,6 @@ const Main: FC<OwnProps & StateProps> = ({
         type={botTrustRequest?.type}
         shouldRequestWriteAccess={botTrustRequest?.shouldRequestWriteAccess}
       />
-      <AttachBotInstallModal bot={attachBotToInstall} />
       <AttachBotRecipientPicker requestedAttachBotInChat={requestedAttachBotInChat} />
       <MessageListHistoryHandler />
       {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
@@ -612,7 +572,6 @@ const Main: FC<OwnProps & StateProps> = ({
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
-      <InviteViaLinkModal missingUsers={inviteViaLinkModal?.missingUsers} chatId={inviteViaLinkModal?.chatId} />
     </div>
   );
 };
@@ -630,13 +589,9 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       botTrustRequest,
-      requestedAttachBotInstall,
       requestedAttachBotInChat,
       requestedDraft,
-      urlAuth,
-      webApp,
       safeLinkModalUrl,
-      mapModal,
       openedStickerSetShortName,
       openedCustomEmojiSetIds,
       shouldSkipHistoryAnimations,
@@ -655,11 +610,6 @@ export default memo(withGlobal<OwnProps>(
       payment,
       limitReachedModal,
       deleteFolderDialogModal,
-      chatlistModal,
-      boostModal,
-      giftCodeModal,
-      inviteViaLinkModal,
-      oneTimeMediaModal,
     } = selectTabState(global);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
@@ -668,7 +618,6 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;
-    const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
     const { chatId } = selectCurrentMessageList(global) || {};
     const noRightColumnAnimation = !selectPerformanceSettingsValue(global, 'rightColumnAnimations')
         || !selectCanAnimateInterface(global);
@@ -688,8 +637,6 @@ export default memo(withGlobal<OwnProps>(
       hasDialogs: Boolean(dialogs.length),
       audioMessage,
       safeLinkModalUrl,
-      mapModalGeoPoint: mapModal?.point,
-      mapModalZoom: mapModal?.zoom,
       isHistoryCalendarOpen: Boolean(historyCalendarSelectedAt),
       shouldSkipHistoryAnimations,
       openedStickerSetShortName,
@@ -709,11 +656,7 @@ export default memo(withGlobal<OwnProps>(
       isRatePhoneCallModalOpen: Boolean(ratingPhoneCall),
       botTrustRequest,
       botTrustRequestBot: botTrustRequest && selectUser(global, botTrustRequest.botId),
-      attachBotToInstall: requestedAttachBotInstall?.bot,
       requestedAttachBotInChat,
-      webApp,
-      currentUserName: getUserFullName(currentUser),
-      urlAuth,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,
       isGiveawayModalOpen: giveawayModal?.isOpen,
@@ -724,13 +667,8 @@ export default memo(withGlobal<OwnProps>(
       deleteFolderDialog,
       isMasterTab,
       requestedDraft,
-      chatlistModal,
-      boostModal,
-      giftCodeModal,
       noRightColumnAnimation,
       isSynced: global.isSynced,
-      inviteViaLinkModal,
-      oneTimeMediaModal,
     };
   },
 )(Main));
