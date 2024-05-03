@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React, { memo, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage, ApiTypeStory } from '../../../api/types';
@@ -13,6 +13,7 @@ import renderText from '../../common/helpers/renderText';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import { getWebpageButtonText } from './helpers/webpageType';
 
+import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useEnsureStory from '../../../hooks/useEnsureStory';
 import useLang from '../../../hooks/useLang';
@@ -22,6 +23,7 @@ import Audio from '../../common/Audio';
 import Document from '../../common/Document';
 import EmojiIconBackground from '../../common/embedded/EmojiIconBackground';
 import SafeLink from '../../common/SafeLink';
+import StickerView from '../../common/StickerView';
 import Button from '../../ui/Button';
 import BaseStory from './BaseStory';
 import Photo from './Photo';
@@ -31,10 +33,13 @@ import './WebPage.scss';
 
 const MAX_TEXT_LENGTH = 170; // symbols
 const WEBPAGE_STORY_TYPE = 'telegram_story';
+const STICKER_SIZE = 80;
+const EMOJI_SIZE = 40;
 
 type OwnProps = {
   message: ApiMessage;
-  observeIntersection?: ObserveFn;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   noAvatars?: boolean;
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
@@ -55,7 +60,8 @@ type OwnProps = {
 
 const WebPage: FC<OwnProps> = ({
   message,
-  observeIntersection,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   noAvatars,
   canAutoLoad,
   canAutoPlay,
@@ -76,6 +82,10 @@ const WebPage: FC<OwnProps> = ({
   const { openTelegramLink } = getActions();
   const webPage = getMessageWebPage(message);
   const { isMobile } = useAppLayout();
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const stickersRef = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
 
@@ -90,9 +100,12 @@ const WebPage: FC<OwnProps> = ({
     });
   });
 
-  const { story: storyData } = webPage || {};
+  const { story: storyData, stickers } = webPage || {};
 
   useEnsureStory(storyData?.peerId, storyData?.id, story);
+
+  const hasCustomColor = stickers?.isWithTextColor || stickers?.documents?.[0]?.shouldUseTextColor;
+  const customColor = useDynamicColorListener(stickersRef, !hasCustomColor);
 
   if (!webPage) {
     return undefined;
@@ -115,7 +128,7 @@ const WebPage: FC<OwnProps> = ({
   const quickButtonLangKey = !inPreview && !isExpiredStory ? getWebpageButtonText(type) : undefined;
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
   const isArticle = Boolean(truncatedDescription || title || siteName);
-  let isSquarePhoto = false;
+  let isSquarePhoto = Boolean(stickers);
   if (isArticle && webPage?.photo && !webPage.video) {
     const { width, height } = calculateMediaDimensions(message, undefined, undefined, isMobile);
     isSquarePhoto = width === height;
@@ -149,18 +162,25 @@ const WebPage: FC<OwnProps> = ({
 
   return (
     <div
+      ref={ref}
       className={className}
       data-initial={(siteName || displayUrl)[0]}
       dir={lang.isRtl ? 'rtl' : 'auto'}
     >
       <div className={buildClassName('WebPage--content', isStory && 'is-story')}>
+        {backgroundEmojiId && (
+          <EmojiIconBackground
+            emojiDocumentId={backgroundEmojiId}
+            className="WebPage--background-icons"
+          />
+        )}
         {isStory && (
           <BaseStory story={story} isProtected={isProtected} isConnected={isConnected} isPreview />
         )}
         {photo && !video && (
           <Photo
             message={message}
-            observeIntersection={observeIntersection}
+            observeIntersection={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
             size={isSquarePhoto ? 'pictogram' : 'inline'}
@@ -175,12 +195,6 @@ const WebPage: FC<OwnProps> = ({
         )}
         {isArticle && (
           <div className="WebPage-text">
-            {backgroundEmojiId && (
-              <EmojiIconBackground
-                emojiDocumentId={backgroundEmojiId}
-                className="WebPage--background-icons"
-              />
-            )}
             <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
             {!inPreview && title && (
               <p className="site-title">{renderText(title)}</p>
@@ -193,7 +207,7 @@ const WebPage: FC<OwnProps> = ({
         {!inPreview && video && (
           <Video
             message={message}
-            observeIntersectionForLoading={observeIntersection!}
+            observeIntersectionForLoading={observeIntersectionForLoading!}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
             canAutoPlay={canAutoPlay}
@@ -218,7 +232,7 @@ const WebPage: FC<OwnProps> = ({
         {!inPreview && document && (
           <Document
             message={message}
-            observeIntersection={observeIntersection}
+            observeIntersection={observeIntersectionForLoading}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
             onMediaClick={handleMediaClick}
             onCancelUpload={onCancelMediaTransfer}
@@ -226,14 +240,30 @@ const WebPage: FC<OwnProps> = ({
             shouldWarnAboutSvg={shouldWarnAboutSvg}
           />
         )}
+        {!inPreview && stickers && (
+          <div
+            ref={stickersRef}
+            className={buildClassName(
+              'media-inner', 'square-image', stickers.isEmoji && 'WebPage--emoji-grid', 'WebPage--stickers',
+            )}
+          >
+            {stickers.documents.map((sticker) => (
+              <div key={sticker.id} className="WebPage--sticker">
+                <StickerView
+                  containerRef={stickersRef}
+                  sticker={sticker}
+                  shouldLoop
+                  size={stickers.isEmoji ? EMOJI_SIZE : STICKER_SIZE}
+                  customColor={customColor}
+                  observeIntersectionForPlaying={observeIntersectionForPlaying}
+                  observeIntersectionForLoading={observeIntersectionForLoading}
+                />
+              </div>
+            ))}
+          </div>
+        )}
         {inPreview && displayUrl && !isArticle && (
           <div className="WebPage-text">
-            {backgroundEmojiId && (
-              <EmojiIconBackground
-                emojiDocumentId={backgroundEmojiId}
-                className="WebPage--background-icons"
-              />
-            )}
             <p className="site-name">{displayUrl}</p>
             <p className="site-description">{lang('Chat.Empty.LinkPreview')}</p>
           </div>

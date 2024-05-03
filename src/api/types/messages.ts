@@ -3,7 +3,7 @@ import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat, ApiPeerColor } from './chats';
 import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption } from './payments';
-import type { ApiMessageStoryData, ApiWebPageStoryData } from './stories';
+import type { ApiMessageStoryData, ApiWebPageStickerData, ApiWebPageStoryData } from './stories';
 
 export interface ApiDimensions {
   width: number;
@@ -380,6 +380,7 @@ export interface ApiWebPage {
   document?: ApiDocument;
   video?: ApiVideo;
   story?: ApiWebPageStoryData;
+  stickers?: ApiWebPageStickerData;
 }
 
 export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;

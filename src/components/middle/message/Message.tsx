@@ -1230,7 +1230,8 @@ const Message: FC<OwnProps & StateProps> = ({
         {webPage && (
           <WebPage
             message={message}
-            observeIntersection={observeIntersectionForLoading}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}

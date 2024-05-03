@@ -19,6 +19,7 @@ import type {
   ApiVoice,
   ApiWebDocument,
   ApiWebPage,
+  ApiWebPageStickerData,
   ApiWebPageStoryData,
   MediaContent,
 } from '../../types';
@@ -35,7 +36,7 @@ import {
   buildApiThumbnailFromStripped,
 } from './common';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
-import { buildStickerFromDocument } from './symbols';
+import { buildStickerFromDocument, processStickerResult } from './symbols';
 
 export function buildMessageContent(
   mtpMessage: UniversalMessage | GramJs.UpdateServiceNotification,
@@ -694,8 +695,9 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     audio = buildAudioFromDocument(document);
   }
   let story: ApiWebPageStoryData | undefined;
+  let stickers: ApiWebPageStickerData | undefined;
   const attributeStory = attributes
-    ?.find((a: any): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
+    ?.find((a): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
   if (attributeStory) {
     const peerId = getApiChatIdFromMtpPeer(attributeStory.peer);
     story = {
@@ -706,6 +708,16 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     if (attributeStory.story instanceof GramJs.StoryItem) {
       addStoryToLocalDb(attributeStory.story, peerId);
     }
+  }
+  const attributeStickers = attributes?.find((a): a is GramJs.WebPageAttributeStickerSet => (
+    a instanceof GramJs.WebPageAttributeStickerSet
+  ));
+  if (attributeStickers) {
+    stickers = {
+      documents: processStickerResult(attributeStickers.stickers),
+      isEmoji: attributeStickers.emojis,
+      isWithTextColor: attributeStickers.textColor,
+    };
   }
 
   return {
@@ -724,6 +736,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     video,
     audio,
     story,
+    stickers,
   };
 }
 

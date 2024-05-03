@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from '../lib/teact/teact';
 
 import type { Scheduler } from '../util/schedulers';
 
+import { type CallbackManager, createCallbackManager } from '../util/callbacks';
 import {
   debounce, throttle, throttleWith,
 } from '../util/schedulers';
@@ -16,7 +17,9 @@ export type ObserveFn = (target: HTMLElement, targetCallback?: TargetCallback) =
 
 interface IntersectionController {
   observer: IntersectionObserver;
-  callbacks: Map<HTMLElement, TargetCallback>;
+  addCallback: (element: HTMLElement, callback: TargetCallback) => void;
+  removeCallback: (element: HTMLElement, callback: TargetCallback) => void;
+  destroy: NoneToVoidFunction;
 }
 
 interface Response {
@@ -78,14 +81,14 @@ export function useIntersectionObserver({
     return () => {
       if (controllerRef.current) {
         controllerRef.current.observer.disconnect();
-        controllerRef.current.callbacks.clear();
+        controllerRef.current.destroy();
         controllerRef.current = undefined;
       }
     };
   }, [isDisabled]);
 
   function initController() {
-    const callbacks = new Map();
+    const callbacks = new Map<HTMLElement, CallbackManager<TargetCallback>>();
     const entriesAccumulator = new Map<Element, IntersectionObserverEntry>();
 
     let observerCallback: typeof observerCallbackSync;
@@ -108,10 +111,8 @@ export function useIntersectionObserver({
       const entries = Array.from(entriesAccumulator.values());
 
       entries.forEach((entry: IntersectionObserverEntry) => {
-        const callback = callbacks.get(entry.target);
-        if (callback) {
-          callback!(entry, entries);
-        }
+        const callbackManager = callbacks.get(entry.target as HTMLElement);
+        callbackManager?.runCallbacks(entry);
       });
 
       if (rootCallbackRef.current) {
@@ -119,6 +120,25 @@ export function useIntersectionObserver({
       }
 
       entriesAccumulator.clear();
+    }
+
+    function addCallback(element: HTMLElement, callback: TargetCallback) {
+      if (!callbacks.get(element)) {
+        callbacks.set(element, createCallbackManager<TargetCallback>());
+      }
+
+      const callbackManager = callbacks.get(element)!;
+      callbackManager.addCallback(callback);
+    }
+
+    function removeCallback(element: HTMLElement, callback: TargetCallback) {
+      const callbackManager = callbacks.get(element);
+      if (!callbackManager) return;
+      callbackManager.removeCallback(callback);
+
+      if (!callbackManager.hasCallbacks()) {
+        callbacks.delete(element);
+      }
     }
 
     const observer = new IntersectionObserver(
@@ -140,7 +160,17 @@ export function useIntersectionObserver({
       },
     );
 
-    controllerRef.current = { observer, callbacks };
+    function destroy() {
+      callbacks.clear();
+      observer.disconnect();
+    }
+
+    controllerRef.current = {
+      observer,
+      addCallback,
+      removeCallback,
+      destroy,
+    };
   }
 
   const observe = useLastCallback((target, targetCallback) => {
@@ -152,12 +182,12 @@ export function useIntersectionObserver({
     controller.observer.observe(target);
 
     if (targetCallback) {
-      controller.callbacks.set(target, targetCallback);
+      controller.addCallback(target, targetCallback);
     }
 
     return () => {
       if (targetCallback) {
-        controller.callbacks.delete(target);
+        controller.removeCallback(target, targetCallback);
       }
 
       controller.observer.unobserve(target);
