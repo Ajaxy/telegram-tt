@@ -12,6 +12,7 @@ import ChatlistModal from './chatlist/ChatlistModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
+import ReportAdModal from './reportAd/ReportAdModal.async';
 import UrlAuthModal from './urlAuth/UrlAuthModal.async';
 import WebAppModal from './webApp/WebAppModal.async';
 
@@ -24,6 +25,7 @@ type ModalKey = keyof Pick<TabState,
 'oneTimeMediaModal' |
 'inviteViaLinkModal' |
 'requestedAttachBotInstall' |
+'reportAdModal' |
 'webApp'
 >;
 
@@ -47,6 +49,7 @@ const MODALS: ModalRegistry = {
   oneTimeMediaModal: OneTimeMediaModal,
   inviteViaLinkModal: InviteViaLinkModal,
   requestedAttachBotInstall: AttachBotInstallModal,
+  reportAdModal: ReportAdModal,
   webApp: WebAppModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];

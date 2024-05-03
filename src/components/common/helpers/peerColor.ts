@@ -1,4 +1,4 @@
-import type { ApiPeer } from '../../../api/types';
+import type { ApiPeer, ApiPeerColor } from '../../../api/types';
 
 import { getPeerColorCount, getPeerColorKey } from '../../../global/helpers';
 
@@ -8,4 +8,8 @@ export function getPeerColorClass(peer?: ApiPeer, noUserColors?: boolean, should
     return noUserColors ? 'peer-color-count-1' : 'peer-color-0';
   }
   return noUserColors ? `peer-color-count-${getPeerColorCount(peer)}` : `peer-color-${getPeerColorKey(peer)}`;
+}
+
+export function getApiPeerColorClass(color: ApiPeerColor) {
+  return `peer-color-${color.color}`;
 }

@@ -674,47 +674,43 @@
     }
   }
 
-  .message-action-button {
+  .message-action-buttons {
     position: absolute;
     bottom: 0;
-    color: white;
     background-color: var(--pattern-color);
+    border-radius: 1rem;
+
+    display: flex;
+    flex-direction: column;
 
     opacity: 0;
-    transition: opacity 150ms, backdrop-filter 150ms, filter 150ms;
+    transition: opacity 150ms;
 
     @media (pointer: coarse) {
       opacity: 1 !important;
     }
+  }
 
-    &:hover,
-    &:active,
-    &:focus {
-      background-color: var(--pattern-color) !important;
-      backdrop-filter: brightness(115%);
-
-      @supports not (backdrop-filter: brightness(115%)) {
-        filter: brightness(115%);
-      }
-    }
+  .message-action-button {
+    color: white;
   }
 
   &:hover,
   &[data-is-document-group-hover] {
-    .message-action-button {
+    .message-action-buttons {
       opacity: 1;
     }
   }
 
-  .message-action-button-shown {
+  .message-action-buttons-shown {
     opacity: 1;
   }
 
-  &.own .message-action-button {
+  &.own .message-action-buttons {
     left: -3rem;
   }
 
-  &:not(.own) .message-action-button {
+  &:not(.own) .message-action-buttons {
     right: -3rem;
   }
 

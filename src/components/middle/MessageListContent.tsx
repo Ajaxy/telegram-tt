@@ -32,7 +32,7 @@ import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
-  isCurrentUserPremium?: boolean;
+  areAdsEnabled?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageIds: number[];
@@ -64,7 +64,7 @@ interface OwnProps {
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
-  isCurrentUserPremium,
+  areAdsEnabled,
   chatId,
   threadId,
   messageIds,
@@ -290,7 +290,7 @@ const MessageListContent: FC<OwnProps> = ({
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
-      {!isCurrentUserPremium && isViewportNewest && (
+      {areAdsEnabled && isViewportNewest && (
         <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
       )}
       {withHistoryTriggers && (

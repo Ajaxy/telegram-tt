@@ -67,6 +67,7 @@ import {
   addChatMessagesById,
   addChats,
   addUsers,
+  deleteSponsoredMessage,
   removeOutlyingList,
   removeRequestedMessageTranslation,
   replaceSettings,
@@ -90,6 +91,7 @@ import {
   updateThreadUnreadFromForwardedMessage,
   updateTopic,
   updateUploadByMessageKey,
+  updateUserFullInfo,
   updateUsers,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -1546,6 +1548,79 @@ addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionRetu
   }
 
   void callApi('clickSponsoredMessage', { chat, random: message.randomId });
+});
+
+addActionHandler('reportSponsoredMessage', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, randomId, option = '', tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const result = await callApi('reportSponsoredMessage', { chat, randomId, option });
+
+  if (!result) return;
+
+  if (result.type === 'premiumRequired') {
+    actions.openPremiumModal({ initialSection: 'no_ads', tabId });
+    actions.closeReportAdModal({ tabId });
+    return;
+  }
+
+  if (result.type === 'reported' || result.type === 'hidden') {
+    actions.showNotification({
+      message: translate(result.type === 'reported' ? 'AdReported' : 'AdHidden'),
+      tabId,
+    });
+    actions.closeReportAdModal({ tabId });
+
+    global = getGlobal();
+    global = deleteSponsoredMessage(global, chatId);
+    setGlobal(global);
+    return;
+  }
+
+  if (result.type === 'selectOption') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportAdModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options.find((o) => o.option === option);
+    const newSection = {
+      title: result.title,
+      options: result.options,
+      subtitle: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportAdModal: {
+        chatId,
+        randomId,
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+});
+
+addActionHandler('hideSponsoredMessages', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+  if (!isCurrentUserPremium) {
+    actions.openPremiumModal({ initialSection: 'no_ads', tabId });
+    return;
+  }
+
+  const result = await callApi('toggleSponsoredMessages', { enabled: false });
+  if (!result) return;
+  global = getGlobal();
+  global = updateUserFullInfo(global, global.currentUserId!, {
+    areAdsEnabled: false,
+  });
+  setGlobal(global);
+  actions.showNotification({
+    message: translate('AdHidden'),
+    tabId,
+  });
 });
 
 addActionHandler('fetchUnreadMentions', async (global, actions, payload): Promise<void> => {

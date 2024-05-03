@@ -114,7 +114,7 @@ const BusinessHours = ({
 
   useEffect(() => {
     if (!isExpanded) return;
-    const slide = document.querySelector<HTMLElement>(`.${ACTIVE_SLIDE_CLASS_NAME} .${styles.timetable}`);
+    const slide = document.querySelector<HTMLElement>(`.${ACTIVE_SLIDE_CLASS_NAME} > .${styles.timetable}`);
     if (!slide) return;
 
     const height = slide.offsetHeight;
@@ -124,7 +124,7 @@ const BusinessHours = ({
   }, [isExpanded]);
 
   const handleAnimationStart = useLastCallback(() => {
-    const slide = document.querySelector<HTMLElement>(`.${TO_SLIDE_CLASS_NAME} .${styles.timetable}`)!;
+    const slide = document.querySelector<HTMLElement>(`.${TO_SLIDE_CLASS_NAME} > .${styles.timetable}`)!;
 
     requestMeasure(() => {
       const height = slide.offsetHeight;

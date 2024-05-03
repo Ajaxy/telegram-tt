@@ -27,6 +27,7 @@ export { default as GiftCodeModal } from '../components/modals/giftcode/GiftCode
 export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';
 
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
+export { default as ReportAdModal } from '../components/modals/reportAd/ReportAdModal';
 export { default as CalendarModal } from '../components/common/CalendarModal';
 export { default as DeleteMessageModal } from '../components/common/DeleteMessageModal';
 export { default as PinMessageModal } from '../components/common/PinMessageModal';

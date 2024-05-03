@@ -1,7 +1,7 @@
 import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
-import type { ApiChat } from './chats';
+import type { ApiChat, ApiPeerColor } from './chats';
 import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption } from './payments';
 import type { ApiMessageStoryData, ApiWebPageStoryData } from './stories';
 
@@ -382,12 +382,6 @@ export interface ApiWebPage {
   story?: ApiWebPageStoryData;
 }
 
-export interface ApiSponsoredWebPage {
-  url: string;
-  siteName: string;
-  photo?: ApiPhoto;
-}
-
 export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;
 
 export interface ApiMessageReplyInfo {
@@ -685,22 +679,18 @@ export type ApiThreadInfo = ApiCommentsInfo | ApiMessageThreadInfo;
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
 export type ApiSponsoredMessage = {
-  chatId?: string;
   randomId: string;
-  isRecommended?: boolean;
-  isAvatarShown?: boolean;
-  isBot?: boolean;
-  channelPostId?: number;
-  startParam?: string;
-  chatInviteHash?: string;
-  chatInviteTitle?: string;
+  isRecommended?: true;
   text: ApiFormattedText;
-  webPage?: ApiSponsoredWebPage;
   expiresAt: number;
   sponsorInfo?: string;
   additionalInfo?: string;
   buttonText?: string;
-  botApp?: ApiBotApp;
+  canReport?: true;
+  title: string;
+  url: string;
+  photo?: ApiPhoto;
+  peerColor?: ApiPeerColor;
 };
 
 // KeyboardButtons
@@ -839,6 +829,17 @@ export type ApiQuickReply = {
   id: number;
   shortcut: string;
   topMessageId: number;
+};
+
+export type ApiSponsoredMessageReportResult = {
+  type: 'reported' | 'hidden' | 'premiumRequired';
+} | {
+  type: 'selectOption';
+  title: string;
+  options: {
+    text: string;
+    option: string;
+  }[];
 };
 
 export const MAIN_THREAD_ID = -1;

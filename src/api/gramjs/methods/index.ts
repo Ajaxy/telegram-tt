@@ -22,7 +22,7 @@ export {
   editTopic, toggleForum, fetchTopicById, createTopic, toggleParticipantsHidden, checkChatlistInvite,
   joinChatlistInvite, createChalistInvite, editChatlistInvite, deleteChatlistInvite, fetchChatlistInvites,
   fetchLeaveChatlistSuggestions, leaveChatlist, togglePeerTranslations, setViewForumAsMessages,
-  fetchChannelRecommendations, fetchSavedChats, toggleSavedDialogPinned,
+  fetchChannelRecommendations, fetchSavedChats, toggleSavedDialogPinned, reportSponsoredMessage,
 } from './chats';
 
 export {

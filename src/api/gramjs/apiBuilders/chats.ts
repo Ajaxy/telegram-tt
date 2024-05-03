@@ -17,11 +17,13 @@ import type {
   ApiMissingInvitedUser,
   ApiRestrictionReason,
   ApiSendAsPeerId,
+  ApiSponsoredMessageReportResult,
   ApiTopic,
 } from '../../types';
 
 import { omitUndefined, pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
+import { serializeBytes } from '../helpers';
 import { buildApiUsernames } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
@@ -643,5 +645,33 @@ export function buildApiMissingInvitedUser(
     id: user.userId.toString(),
     isRequiringPremiumToMessage: user.premiumRequiredForPm,
     isRequiringPremiumToInvite: user.premiumWouldAllowInvite,
+  };
+}
+
+export function buildApiSponsoredMessageReportResult(
+  result: GramJs.channels.TypeSponsoredMessageReportResult,
+): ApiSponsoredMessageReportResult {
+  if (result instanceof GramJs.channels.SponsoredMessageReportResultReported) {
+    return {
+      type: 'reported',
+    };
+  }
+
+  if (result instanceof GramJs.channels.SponsoredMessageReportResultAdsHidden) {
+    return {
+      type: 'hidden',
+    };
+  }
+
+  const title = result.title;
+  const options = result.options.map((option) => ({
+    text: option.text,
+    option: serializeBytes(option.option),
+  }));
+
+  return {
+    type: 'selectOption',
+    title,
+    options,
   };
 }

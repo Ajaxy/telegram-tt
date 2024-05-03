@@ -118,6 +118,7 @@ type OwnProps = {
   onAboutAds?: NoneToVoidFunction;
   onSponsoredHide?: NoneToVoidFunction;
   onSponsorInfo?: NoneToVoidFunction;
+  onSponsoredReport?: NoneToVoidFunction;
   onTranslate?: NoneToVoidFunction;
   onShowOriginal?: NoneToVoidFunction;
   onSelectLanguage?: NoneToVoidFunction;
@@ -207,6 +208,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onAboutAds,
   onSponsoredHide,
   onSponsorInfo,
+  onSponsoredReport,
   onReactionPickerOpen,
   onTranslate,
   onShowOriginal,
@@ -443,9 +445,21 @@ const MessageContextMenu: FC<OwnProps> = ({
         {isSponsoredMessage && message.sponsorInfo && (
           <MenuItem icon="channel" onClick={onSponsorInfo}>{lang('SponsoredMessageSponsor')}</MenuItem>
         )}
-        {isSponsoredMessage && <MenuItem icon="help" onClick={onAboutAds}>{lang('SponsoredMessageInfo')}</MenuItem>}
+        {isSponsoredMessage && (
+          <MenuItem icon="info" onClick={onAboutAds}>
+            {lang(message.canReport ? 'AboutRevenueSharingAds' : 'SponsoredMessageInfo')}
+          </MenuItem>
+        )}
+        {isSponsoredMessage && message.canReport && (
+          <MenuItem icon="hand-stop" onClick={onSponsoredReport}>
+            {lang('ReportAd')}
+          </MenuItem>
+        )}
         {isSponsoredMessage && onSponsoredHide && (
-          <MenuItem icon="stop" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
+          <>
+            <MenuSeparator />
+            <MenuItem icon="close-circle" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
+          </>
         )}
         {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
           <>

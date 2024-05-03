@@ -53,6 +53,7 @@ export interface ApiUserFullInfo {
   noVoiceMessages?: boolean;
   premiumGifts?: ApiPremiumGiftOption[];
   isTranslationDisabled?: true;
+  areAdsEnabled?: boolean;
   hasPinnedStories?: boolean;
   isContactRequirePremium?: boolean;
   birthday?: ApiBirthday;

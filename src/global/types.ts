@@ -533,6 +533,19 @@ export type TabState = {
   openedStickerSetShortName?: string;
   openedCustomEmojiSetIds?: string[];
 
+  reportAdModal?: {
+    chatId: string;
+    randomId: string;
+    sections: {
+      title: string;
+      subtitle?: string;
+      options: {
+        text: string;
+        option: string;
+      }[];
+    }[];
+  };
+
   activeDownloads: {
     byChatId: {
       [chatId: string]: {
@@ -1465,6 +1478,14 @@ export interface ActionPayloads {
   clickSponsoredMessage: {
     chatId: string;
   };
+  reportSponsoredMessage: {
+    chatId: string;
+    randomId: string;
+    option?: string;
+  } & WithTabId;
+  openPreviousReportAdModal: WithTabId | undefined;
+  closeReportAdModal: WithTabId | undefined;
+  hideSponsoredMessages: WithTabId | undefined;
   loadSendAs: {
     chatId: string;
   };

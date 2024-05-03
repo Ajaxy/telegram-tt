@@ -44,6 +44,7 @@ import {
   buildApiChatReactions,
   buildApiChatSettings,
   buildApiMissingInvitedUser,
+  buildApiSponsoredMessageReportResult,
   buildApiTopic,
   buildChatMembers,
   getPeerKey,
@@ -70,6 +71,7 @@ import {
   addEntitiesToLocalDb,
   addMessageToLocalDb,
   addPhotoToLocalDb,
+  deserializeBytes,
   isChatFolder,
 } from '../helpers';
 import localDb from '../localDb';
@@ -2016,4 +2018,40 @@ export async function fetchChannelRecommendations({ chat }: { chat: ApiChat }) {
     count:
       result instanceof GramJs.messages.ChatsSlice ? result.count : undefined,
   };
+}
+
+export async function reportSponsoredMessage({
+  chat,
+  randomId,
+  option,
+}: {
+  chat: ApiChat;
+  randomId: string;
+  option: string;
+}) {
+  const { id, accessHash } = chat;
+  const channel = buildInputEntity(id, accessHash);
+
+  try {
+    const result = await invokeRequest(new GramJs.channels.ReportSponsoredMessage({
+      channel: channel as GramJs.InputChannel,
+      randomId: deserializeBytes(randomId),
+      option: deserializeBytes(option),
+    }), {
+      shouldThrow: true,
+    });
+
+    if (!result) {
+      return undefined;
+    }
+
+    return buildApiSponsoredMessageReportResult(result);
+  } catch (err) {
+    if (err instanceof Error && err.message === 'PREMIUM_ACCOUNT_REQUIRED') {
+      return {
+        type: 'premiumRequired' as const,
+      };
+    }
+    return undefined;
+  }
 }

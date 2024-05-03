@@ -1389,7 +1389,7 @@ const Message: FC<OwnProps & StateProps> = ({
       />
       {!isInDocumentGroup && (
         <div className="message-select-control">
-          {isSelected && <i className="icon icon-select" />}
+          {isSelected && <Icon name="select" />}
         </div>
       )}
       {isLastInDocumentGroup && (
@@ -1398,7 +1398,7 @@ const Message: FC<OwnProps & StateProps> = ({
           onClick={handleDocumentGroupSelectAll}
         >
           {isGroupSelected && (
-            <i className="icon icon-select" />
+            <Icon name="select" />
           )}
         </div>
       )}
@@ -1419,33 +1419,38 @@ const Message: FC<OwnProps & StateProps> = ({
           )}
           {renderContent()}
           {!isInDocumentGroupNotLast && metaPosition === 'standalone' && !isStoryMention && renderReactionsAndMeta()}
-          {canShowActionButton && canForward ? (
-            <Button
-              className={buildClassName(
-                'message-action-button', isLoadingComments && 'message-action-button-shown',
-              )}
-              color="translucent-white"
-              round
-              size="tiny"
-              ariaLabel={lang('lng_context_forward_msg')}
-              onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
+          {canShowActionButton && (
+            <div className={buildClassName(
+              'message-action-buttons',
+              isLoadingComments && 'message-action-buttons-shown',
+            )}
             >
-              <i className="icon icon-share-filled" />
-            </Button>
-          ) : canShowActionButton && canFocus ? (
-            <Button
-              className={buildClassName(
-                'message-action-button', isLoadingComments && 'message-action-button-shown',
+              {canForward && (
+                <Button
+                  className="message-action-button"
+                  color="translucent-white"
+                  round
+                  size="tiny"
+                  ariaLabel={lang('lng_context_forward_msg')}
+                  onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
+                >
+                  <Icon name="share-filled" />
+                </Button>
               )}
-              color="translucent-white"
-              round
-              size="tiny"
-              ariaLabel="Focus message"
-              onClick={isPinnedList ? handleFocus : handleFocusForwarded}
-            >
-              <i className="icon icon-arrow-right" />
-            </Button>
-          ) : undefined}
+              {canFocus && (
+                <Button
+                  className="message-action-button"
+                  color="translucent-white"
+                  round
+                  size="tiny"
+                  ariaLabel="Focus message"
+                  onClick={isPinnedList ? handleFocus : handleFocusForwarded}
+                >
+                  <Icon name="arrow-right" />
+                </Button>
+              )}
+            </div>
+          )}
           {withCommentButton && (
             <CommentButton
               threadInfo={repliesThreadInfo}

@@ -7,7 +7,7 @@ import useLang from '../../hooks/useLang';
 import styles from './Separator.module.scss';
 
 type OwnProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 };
 

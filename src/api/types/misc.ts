@@ -208,6 +208,7 @@ export interface ApiAppConfig {
   bandwidthPremiumNotifyPeriod?: number;
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;
+  channelRestrictAdsLevelMin?: number;
 }
 
 export interface ApiConfig {

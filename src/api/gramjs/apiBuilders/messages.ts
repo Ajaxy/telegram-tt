@@ -20,7 +20,6 @@ import type {
   ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
-  ApiSponsoredWebPage,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -51,13 +50,12 @@ import {
   resolveMessageApiChatId,
   serializeBytes,
 } from '../helpers';
-import { buildApiBotApp } from './bots';
 import { buildApiCallDiscardReason } from './calls';
 import {
   buildApiPhoto,
 } from './common';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
-import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
+import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
 const LOCAL_MESSAGES_LIMIT = 1e6; // 1M
@@ -79,33 +77,28 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
 
 export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
   const {
-    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended, sponsorInfo,
-    additionalInfo, showPeerPhoto, webpage, buttonText, app,
+    message, entities, randomId, recommended, sponsorInfo, additionalInfo, buttonText, canReport, title, url, color,
   } = mtpMessage;
-  const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
-  const chatInviteTitle = chatInvite
-    ? (chatInvite instanceof GramJs.ChatInvite
-      ? chatInvite.title
-      : !(chatInvite.chat instanceof GramJs.ChatEmpty) ? chatInvite.chat.title : undefined)
-    : undefined;
+
+  let photo: ApiPhoto | undefined;
+  if (mtpMessage.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(mtpMessage.photo);
+    photo = buildApiPhoto(mtpMessage.photo);
+  }
 
   return {
     randomId: serializeBytes(randomId),
-    isBot: fromId ? isPeerUser(fromId) : false,
     text: buildMessageTextContent(message, entities),
     expiresAt: Math.round(Date.now() / 1000) + SPONSORED_MESSAGE_CACHE_MS,
-    isRecommended: Boolean(recommended),
-    ...(webpage && { webPage: buildSponsoredWebPage(webpage) }),
-    ...(showPeerPhoto && { isAvatarShown: true }),
-    ...(chatId && { chatId }),
-    ...(chatInviteHash && { chatInviteHash }),
-    ...(chatInvite && { chatInviteTitle }),
-    ...(startParam && { startParam }),
-    ...(channelPost && { channelPostId: channelPost }),
-    ...(sponsorInfo && { sponsorInfo }),
-    ...(additionalInfo && { additionalInfo }),
-    ...(buttonText && { buttonText }),
-    ...(app && { botApp: buildApiBotApp(app) }),
+    isRecommended: recommended,
+    sponsorInfo,
+    additionalInfo,
+    buttonText,
+    canReport,
+    title,
+    url,
+    peerColor: color && buildApiPeerColor(color),
+    photo,
   };
 }
 
@@ -1092,21 +1085,5 @@ export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply 
     id: shortcutId,
     shortcut,
     topMessageId: topMessage,
-  };
-}
-
-function buildSponsoredWebPage(webPage: GramJs.TypeSponsoredWebPage): ApiSponsoredWebPage {
-  let photo: ApiPhoto | undefined;
-  if (webPage.photo instanceof GramJs.Photo) {
-    addPhotoToLocalDb(webPage.photo);
-    photo = buildApiPhoto(webPage.photo);
-  }
-
-  return {
-    ...pick(webPage, [
-      'url',
-      'siteName',
-    ]),
-    photo,
   };
 }

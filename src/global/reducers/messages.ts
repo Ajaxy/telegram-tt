@@ -671,6 +671,23 @@ export function updateSponsoredMessage<T extends GlobalState>(
   };
 }
 
+export function deleteSponsoredMessage<T extends GlobalState>(
+  global: T, chatId: string,
+): T {
+  const byChatId = global.messages.sponsoredByChatId;
+  if (!byChatId[chatId]) {
+    return global;
+  }
+
+  return {
+    ...global,
+    messages: {
+      ...global.messages,
+      sponsoredByChatId: omit(byChatId, [chatId]),
+    },
+  };
+}
+
 export function updateFocusDirection<T extends GlobalState>(
   global: T, direction?: FocusDirection,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
