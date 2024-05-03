@@ -61,6 +61,9 @@ export function __init() {
     authed: false,
     userId: undefined as string | undefined,
   };
+  let oldSyncState = {
+    isSynced: false,
+  };
   addActionHandler("apiUpdate", (global, actions, update): ActionReturnType => {
     switch (update["@type"]) {
       case "newMessage": {
@@ -68,13 +71,6 @@ export function __init() {
         events.proxy.newMessage(message);
         break;
       }
-      // case "updateConnectionState":
-      // case "updateAuthorizationState": {
-      //   const auth = CUSTOM.getAuthInfo();
-
-      //   events.proxy.authStateChanged(auth);
-      //   break;
-      // }
       case "updateChatInbox": {
         events.proxy.updateChatInbox(update);
       }
@@ -87,11 +83,13 @@ export function __init() {
     "signOut",
     async (global, actions, payload): Promise<void> => {
       events.proxy.loggedOut();
+      events.proxy.syncStateChanged({ isSynced: false });
+      oldSyncState.isSynced = false;
     }
   );
 
   const check = () => {
-    // let global = getGlobal();
+    let g = getGlobal();
 
     // let chatId = selectCurrentMessageList(global)?.chatId;
     // if (chatId != oldChatId) {
@@ -103,6 +101,15 @@ export function __init() {
     //     events.proxy.chatClosed();
     //   }
     // }
+
+    if (
+      g.connectionState === "connectionStateReady" &&
+      g.isSynced &&
+      !oldSyncState.isSynced
+    ) {
+      events.proxy.syncStateChanged({ isSynced: true });
+      oldSyncState.isSynced = true;
+    }
 
     let auth = CUSTOM.getAuthInfo();
     if (auth.authed)
