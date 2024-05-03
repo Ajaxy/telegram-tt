@@ -4,6 +4,7 @@ import { ApiMediaFormat } from '../../../../api/types';
 
 import {
   getMessageContact,
+  getMessageHtmlId,
   getMessageMediaHash,
   getMessagePhoto,
   getMessageText,
@@ -76,6 +77,7 @@ export function getMessageCopyOptions(
       selection?.anchorNode?.parentNode
       && (selection.anchorNode.parentNode as HTMLElement).closest('.Message .content-inner')
       && selection.toString().replace(/(?:\r\n|\r|\n)/g, '') !== ''
+      && checkMessageHasSelection(message)
     ));
 
     options.push({
@@ -121,7 +123,12 @@ export function getMessageCopyOptions(
 
   return options;
 }
-
+function checkMessageHasSelection(message: ApiMessage): boolean {
+  const selection = window.getSelection();
+  const selectionParentNode = (selection?.anchorNode?.parentNode as HTMLElement);
+  const selectedMessageElement = selectionParentNode?.closest<HTMLDivElement>('.Message.message-list-item');
+  return getMessageHtmlId(message.id) === selectedMessageElement?.id;
+}
 function getCopyLabel(hasSelection: boolean): string {
   if (hasSelection) {
     return 'lng_context_copy_selected';
