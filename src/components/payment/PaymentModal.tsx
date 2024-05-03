@@ -529,7 +529,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
 
     switch (step) {
       case PaymentStep.Checkout:
-        return Boolean(invoice?.isRecurring && !isTosAccepted);
+        return !isTosAccepted;
 
       case PaymentStep.PaymentInfo:
         return Boolean(

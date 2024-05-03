@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiPremiumSection } from '../../../global/types';
 import type {
+  ApiBoost,
   ApiBoostsStatus,
   ApiCheckedGiftCode,
   ApiGiveawayInfo,
@@ -220,6 +221,24 @@ export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): 
     nextLevelBoosts,
     ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
     ...(prepaidGiveaways && { prepaidGiveaways: prepaidGiveaways.map(buildPrepaidGiveaway) }),
+  };
+}
+
+export function buildApiBoost(boost: GramJs.Boost): ApiBoost {
+  const {
+    userId,
+    multiplier,
+    expires,
+    giveaway,
+    gift,
+  } = boost;
+
+  return {
+    userId: userId && buildApiPeerId(userId, 'user'),
+    multiplier,
+    expires,
+    isFromGiveaway: giveaway,
+    isGift: gift,
   };
 }
 

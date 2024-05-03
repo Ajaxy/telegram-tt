@@ -6,9 +6,9 @@ import type {
   OnApiUpdate,
 } from '../../types';
 
-import { buildCollectionByCallback } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
+  buildApiBoost,
   buildApiBoostsStatus,
   buildApiCheckedGiftCode,
   buildApiGiveawayInfo,
@@ -266,15 +266,18 @@ export async function fetchBoostStatus({
 
 export async function fetchBoostList({
   chat,
+  isGifts,
   offset = '',
   limit,
 }: {
   chat: ApiChat;
+  isGifts?: boolean;
   offset?: string;
   limit?: number;
 }) {
   const result = await invokeRequest(new GramJs.premium.GetBoostsList({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    gifts: isGifts || undefined,
     offset,
     limit,
   }));
@@ -287,17 +290,12 @@ export async function fetchBoostList({
 
   const users = result.users.map(buildApiUser).filter(Boolean);
 
-  const userBoosts = result.boosts.filter((boost) => boost.userId);
-  const boosterIds = userBoosts.map((boost) => boost.userId!.toString());
-  const boosters = buildCollectionByCallback(userBoosts, (boost) => (
-    [boost.userId!.toString(), boost.expires]
-  ));
+  const boostList = result.boosts.map(buildApiBoost);
 
   return {
     count: result.count,
+    boostList,
     users,
-    boosters,
-    boosterIds,
     nextOffset: result.nextOffset,
   };
 }

@@ -132,6 +132,14 @@ export type ApiMyBoost = {
   cooldownUntil?: number;
 };
 
+export type ApiBoost = {
+  userId?: string;
+  multiplier?: number;
+  expires: number;
+  isFromGiveaway?: boolean;
+  isGift?: boolean;
+};
+
 export type ApiGiveawayInfoActive = {
   type: 'active';
   isParticipating?: true;

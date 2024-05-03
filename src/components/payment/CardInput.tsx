@@ -18,7 +18,7 @@ import mastercardIconPath from '../../assets/mastercard.svg';
 import mirIconPath from '../../assets/mir.svg';
 import visaIconPath from '../../assets/visa.svg';
 
-const CARD_NUMBER_MAX_LENGTH = 23;
+const CARD_NUMBER_MAX_LENGTH = 19;
 
 export type OwnProps = {
   value: string;

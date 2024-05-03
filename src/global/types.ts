@@ -3,6 +3,7 @@ import type {
   ApiAttachBot,
   ApiAttachment,
   ApiAvailableReaction,
+  ApiBoost,
   ApiBoostsStatus,
   ApiChannelStatistics,
   ApiChat,
@@ -694,12 +695,17 @@ export type TabState = {
 
   boostStatistics?: {
     chatId: string;
-    boosters?: Record<string, number>;
-    boosterIds?: string[];
     boostStatus?: ApiBoostsStatus;
     isLoadingBoosters?: boolean;
     nextOffset?: string;
-    count?: number;
+    boosts?: {
+      count: number;
+      list: ApiBoost[];
+    };
+    giftedBoosts?: {
+      count: number;
+      list: ApiBoost[];
+    };
   };
 
   giftCodeModal?: {
@@ -2356,7 +2362,7 @@ export interface ActionPayloads {
     chatId: string;
   } & WithTabId;
   closeBoostStatistics: WithTabId | undefined;
-  loadMoreBoosters: WithTabId | undefined;
+  loadMoreBoosters: { isGifts?: boolean } & WithTabId | undefined;
   applyBoost: {
     slots: number[];
     chatId: string;

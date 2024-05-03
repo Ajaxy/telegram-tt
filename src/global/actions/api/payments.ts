@@ -5,7 +5,7 @@ import { PaymentStep } from '../../../types';
 
 import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey, unique } from '../../../util/iteratees';
+import { buildCollectionByKey } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
 import { getStripeError } from '../../../util/payments/stripe';
 import { buildQueryString } from '../../../util/requestQuery';
@@ -578,13 +578,15 @@ addActionHandler('openBoostStatistics', async (global, actions, payload): Promis
   }, tabId);
   setGlobal(global);
 
-  const [boostsListResult, boostStatusResult] = await Promise.all([
+  const [boostListResult, boostListGiftResult,
+    boostStatusResult] = await Promise.all([
     callApi('fetchBoostList', { chat }),
+    callApi('fetchBoostList', { chat, isGifts: true }),
     callApi('fetchBoostStatus', { chat }),
   ]);
 
   global = getGlobal();
-  if (!boostsListResult || !boostStatusResult) {
+  if (!boostListResult || !boostListGiftResult || !boostStatusResult) {
     global = updateTabState(global, {
       boostStatistics: undefined,
     }, tabId);
@@ -592,22 +594,28 @@ addActionHandler('openBoostStatistics', async (global, actions, payload): Promis
     return;
   }
 
-  global = addUsers(global, buildCollectionByKey(boostsListResult.users, 'id'));
+  const totalBoostUserList = [...boostListResult.users, ...boostListGiftResult.users];
+  global = addUsers(global, buildCollectionByKey(totalBoostUserList, 'id'));
   global = updateTabState(global, {
     boostStatistics: {
       chatId,
       boostStatus: boostStatusResult,
-      boosters: boostsListResult.boosters,
-      boosterIds: boostsListResult.boosterIds,
-      count: boostsListResult.count,
-      nextOffset: boostsListResult.nextOffset,
+      nextOffset: boostListResult.nextOffset,
+      boosts: {
+        count: boostListResult.count,
+        list: boostListResult.boostList,
+      },
+      giftedBoosts: {
+        count: boostListGiftResult?.count,
+        list: boostListGiftResult?.boostList,
+      },
     },
   }, tabId);
   setGlobal(global);
 });
 
 addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { isGifts, tabId = getCurrentTabId() } = payload || {};
   let tabState = selectTabState(global, tabId);
   if (!tabState.boostStatistics) return;
 
@@ -625,6 +633,7 @@ addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<v
   const result = await callApi('fetchBoostList', {
     chat,
     offset: tabState.boostStatistics.nextOffset,
+    isGifts,
   });
   if (!result) return;
 
@@ -634,17 +643,19 @@ addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<v
   tabState = selectTabState(global, tabId);
   if (!tabState.boostStatistics) return;
 
+  const updatedBoostList = (isGifts
+    ? tabState.boostStatistics.giftedBoosts?.list || []
+    : tabState.boostStatistics.boosts?.list || []).concat(result.boostList);
+
   global = updateTabState(global, {
     boostStatistics: {
       ...tabState.boostStatistics,
-      boosters: {
-        ...tabState.boostStatistics.boosters,
-        ...result.boosters,
-      },
-      boosterIds: unique([...tabState.boostStatistics.boosterIds || [], ...result.boosterIds]),
-      count: result.count,
       nextOffset: result.nextOffset,
       isLoadingBoosters: false,
+      [isGifts ? 'giftedBoosts' : 'boosts']: {
+        count: result.count,
+        list: updatedBoostList,
+      },
     },
   }, tabId);
   setGlobal(global);

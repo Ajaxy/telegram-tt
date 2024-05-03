@@ -30,6 +30,8 @@ $color-error: #e53935;
 $color-warning: #fb8c00;
 
 $color-yellow: #fdd764;
+$color-orange: #d08a31;
+$color-light-coral: #d08a3133;
 
 $color-white: #ffffff;
 $color-black: #000000;
@@ -114,6 +116,9 @@ $color-message-story-mention-to: #74bcff;
   --color-warning: #{$color-warning};
 
   --color-yellow: #{$color-yellow};
+
+  --color-orange: #{$color-orange};
+  --color-light-coral: #{$color-light-coral};
 
   --color-links: #{$color-links};
 

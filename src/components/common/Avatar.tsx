@@ -53,6 +53,7 @@ type OwnProps = {
   photo?: ApiPhoto;
   text?: string;
   isSavedMessages?: boolean;
+  isUnknownUser?: boolean;
   isSavedDialog?: boolean;
   withVideo?: boolean;
   withStory?: boolean;
@@ -77,6 +78,7 @@ const Avatar: FC<OwnProps> = ({
   text,
   isSavedMessages,
   isSavedDialog,
+  isUnknownUser,
   withVideo,
   withStory,
   forPremiumPromo,
@@ -120,6 +122,10 @@ const Avatar: FC<OwnProps> = ({
   }
 
   const specialIcon = useMemo(() => {
+    if (isUnknownUser) {
+      return 'user';
+    }
+
     if (isSavedMessages) {
       return isSavedDialog ? 'my-notes' : 'avatar-saved-messages';
     }
@@ -137,7 +143,7 @@ const Avatar: FC<OwnProps> = ({
     }
 
     return undefined;
-  }, [isAnonymousForwards, isDeleted, isSavedDialog, isReplies, isSavedMessages]);
+  }, [isUnknownUser, isSavedMessages, isDeleted, isReplies, isAnonymousForwards, isSavedDialog]);
 
   const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl);
@@ -215,6 +221,7 @@ const Avatar: FC<OwnProps> = ({
     `Avatar size-${size}`,
     className,
     getPeerColorClass(peer),
+    isUnknownUser && 'unknown-user',
     !peer && text && 'hidden-user',
     isSavedMessages && 'saved-messages',
     isAnonymousForwards && 'anonymous-forwards',
