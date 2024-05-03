@@ -397,7 +397,13 @@ const MessageContextMenu: FC<OwnProps> = ({
           <MenuItem icon="web" onClick={onSelectLanguage}>{lang('lng_settings_change_lang')}</MenuItem>
         )}
         {copyOptions.map((option) => (
-          <MenuItem key={option.label} icon={option.icon} onClick={option.handler}>{lang(option.label)}</MenuItem>
+          <MenuItem
+            key={option.label}
+            icon={option.icon}
+            onClick={option.handler}
+            withPreventDefaultOnMouseDown
+          >{lang(option.label)}
+          </MenuItem>
         ))}
         {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
         {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}

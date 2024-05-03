@@ -33,7 +33,7 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { copyTextToClipboard } from '../../../util/clipboard';
+import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -1962,35 +1962,25 @@ addActionHandler('copyMessageLink', async (global, actions, payload): Promise<vo
     });
     return;
   }
-
-  if (!isChatChannel(chat) && !isChatSuperGroup(chat)) {
-    actions.showNotification({
-      message: translate('lng_filters_link_private_error'),
-      tabId,
-    });
-    return;
-  }
-
-  const link = await callApi('exportMessageLink', {
-    chat,
-    id: messageId,
-    shouldIncludeThread,
-    shouldIncludeGrouped,
+  const showErrorOccurredNotification = () => actions.showNotification({
+    message: translate('ErrorOccurred'),
+    tabId,
   });
 
-  if (!link) {
-    actions.showNotification({
-      message: translate('ErrorOccurred'),
-      tabId,
-    });
+  if (!isChatChannel(chat) && !isChatSuperGroup(chat)) {
+    showErrorOccurredNotification();
     return;
   }
-
-  copyTextToClipboard(link);
-  actions.showNotification({
+  const showLinkCopiedNotification = () => actions.showNotification({
     message: translate('LinkCopied'),
     tabId,
   });
+  const callApiExportMessageLinkPromise = callApi('exportMessageLink', {
+    chat, id: messageId, shouldIncludeThread, shouldIncludeGrouped,
+  });
+  await copyTextToClipboardFromPromise(
+    callApiExportMessageLinkPromise, showLinkCopiedNotification, showErrorOccurredNotification,
+  );
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {

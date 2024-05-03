@@ -27,6 +27,7 @@ export type MenuItemProps = {
   destructive?: boolean;
   ariaLabel?: string;
   withWrap?: boolean;
+  withPreventDefaultOnMouseDown?: boolean;
 };
 
 const MenuItem: FC<MenuItemProps> = (props) => {
@@ -45,6 +46,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     withWrap,
     onContextMenu,
     clickArg,
+    withPreventDefaultOnMouseDown,
   } = props;
 
   const lang = useLang();
@@ -73,6 +75,11 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     }
 
     onClick(e, clickArg);
+  });
+  const handleMouseDown = useLastCallback((e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>) => {
+    if (withPreventDefaultOnMouseDown) {
+      e.preventDefault();
+    }
   });
 
   const fullClassName = buildClassName(
@@ -110,6 +117,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
         rel="noopener noreferrer"
         dir={lang.isRtl ? 'rtl' : undefined}
         onClick={onClick}
+        onMouseDown={handleMouseDown}
       >
         {content}
       </a>
@@ -123,6 +131,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
       className={fullClassName}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onMouseDown={handleMouseDown}
       onContextMenu={onContextMenu}
       aria-label={ariaLabel}
       title={ariaLabel}
