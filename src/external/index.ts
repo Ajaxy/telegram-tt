@@ -108,7 +108,13 @@ export function __init() {
     //     events.proxy.chatClosed();
     //   }
     // }
+    if (g.connectionState === "connectionStateReady") {
+      console.log("STATE READY");
+    }
 
+    if (g.isSynced) {
+      console.log("STATE SYNCED");
+    }
     if (
       g.connectionState === "connectionStateReady" &&
       g.isSynced &&
