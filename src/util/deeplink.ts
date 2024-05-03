@@ -32,6 +32,12 @@ export const processDeepLink = (url: string): boolean => {
           slug: parsedLink.slug,
         });
         return true;
+      case 'premiumReferrerLink':
+        actions.openPremiumModal();
+        return true;
+      case 'premiumMultigiftLink':
+        actions.openPremiumGiftingModal();
+        return true;
       default:
         break;
     }
