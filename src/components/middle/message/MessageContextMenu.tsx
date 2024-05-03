@@ -127,7 +127,6 @@ type OwnProps = {
 
 const SCROLLBAR_WIDTH = 10;
 const REACTION_SELECTOR_WIDTH_REM = 19.25;
-const REACTION_SELECTOR_HEIGHT_REM = 3;
 const ANIMATION_DURATION = 200;
 
 const MessageContextMenu: FC<OwnProps> = ({
@@ -293,7 +292,6 @@ const MessageContextMenu: FC<OwnProps> = ({
       extraPaddingX: SCROLLBAR_WIDTH,
       extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
       extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
-      topShiftY: withReactions && !isMobile ? -REACTION_SELECTOR_HEIGHT_REM * REM : 0,
       shouldAvoidNegativePosition: !isDesktop,
       menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
     };
