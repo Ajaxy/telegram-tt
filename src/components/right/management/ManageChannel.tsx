@@ -376,7 +376,10 @@ export default memo(withGlobal<OwnProps>(
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
       canInvite: getHasAdminRight(chat, 'inviteUsers'),
       exportedInvites: invites,
-      availableReactions: global.availableReactions,
+      availableReactions: global.reactions.availableReactions,
     };
+  },
+  (global, { chatId }) => {
+    return Boolean(selectChat(global, chatId));
   },
 )(ManageChannel));

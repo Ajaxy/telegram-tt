@@ -140,6 +140,9 @@ function getCurrentPrivacySettings(global: GlobalState, screen: SettingsScreens)
     case SettingsScreens.PrivacyBioAllowedContacts:
     case SettingsScreens.PrivacyBioDeniedContacts:
       return privacy.bio;
+    case SettingsScreens.PrivacyBirthdayAllowedContacts:
+    case SettingsScreens.PrivacyBirthdayDeniedContacts:
+      return privacy.birthday;
     case SettingsScreens.PrivacyPhoneCallAllowedContacts:
     case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       return privacy.phoneCall;

@@ -35,6 +35,7 @@ type OwnProps = {
   withEffectOnly?: boolean;
   shouldPause?: boolean;
   shouldLoop?: boolean;
+  loopLimit?: number;
   observeIntersection?: ObserveFn;
 };
 
@@ -64,6 +65,7 @@ const ReactionAnimatedEmoji = ({
   withEffectOnly,
   shouldPause,
   shouldLoop,
+  loopLimit,
   observeIntersection,
 }: OwnProps & StateProps) => {
   const { stopActiveReaction } = getActions();
@@ -164,6 +166,7 @@ const ReactionAnimatedEmoji = ({
           className={styles.customEmoji}
           size={size}
           noPlay={shouldPause}
+          loopLimit={loopLimit}
           forceAlways
           observeIntersectionForPlaying={observeIntersection}
         />
@@ -209,14 +212,14 @@ const ReactionAnimatedEmoji = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { containerId }) => {
-    const { availableReactions, genericEmojiEffects } = global;
+    const { genericEmojiEffects, reactions } = global;
     const { activeReactions } = selectTabState(global);
 
     const withEffects = selectPerformanceSettingsValue(global, 'reactionEffects');
 
     return {
       activeReactions: activeReactions?.[containerId],
-      availableReactions,
+      availableReactions: reactions.availableReactions,
       genericEffects: genericEmojiEffects,
       withEffects,
     };

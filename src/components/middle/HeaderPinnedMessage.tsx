@@ -198,7 +198,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
             onMouseEnter={!IS_TOUCH_ENV ? markNoHoverColor : undefined}
             onMouseLeave={!IS_TOUCH_ENV ? unmarkNoHoverColor : undefined}
           >
-            {inlineButton.text}
+            {renderText(inlineButton.text)}
           </Button>
         )}
       </div>

@@ -115,10 +115,14 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('Privacy.ProfilePhoto')}</h3>;
       case SettingsScreens.PrivacyBio:
         return <h3>{lang('PrivacyBio')}</h3>;
+      case SettingsScreens.PrivacyBirthday:
+        return <h3>{lang('PrivacyBirthday')}</h3>;
       case SettingsScreens.PrivacyForwarding:
         return <h3>{lang('PrivacyForwards')}</h3>;
       case SettingsScreens.PrivacyVoiceMessages:
         return <h3>{lang('PrivacyVoiceMessages')}</h3>;
+      case SettingsScreens.PrivacyMessages:
+        return <h3>{lang('PrivacyMessages')}</h3>;
       case SettingsScreens.PrivacyGroupChats:
         return <h3>{lang('AutodownloadGroupChats')}</h3>;
       case SettingsScreens.PrivacyPhoneCall:
@@ -128,6 +132,7 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyLastSeenAllowedContacts:
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyBioAllowedContacts:
+      case SettingsScreens.PrivacyBirthdayAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
       case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
@@ -138,6 +143,7 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyLastSeenDeniedContacts:
       case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       case SettingsScreens.PrivacyBioDeniedContacts:
+      case SettingsScreens.PrivacyBirthdayDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:
       case SettingsScreens.PrivacyVoiceMessagesDeniedContacts:
       case SettingsScreens.PrivacyGroupChatsDeniedContacts:

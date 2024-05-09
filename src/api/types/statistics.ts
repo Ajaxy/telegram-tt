@@ -54,6 +54,7 @@ export interface ApiBoostStatistics {
   boosts: number;
   premiumSubscribers: StatisticsOverviewPercentage;
   remainingBoosts: number;
+  prepaidGiveaways: PrepaidGiveaway[];
 }
 
 export interface ApiMessagePublicForward {
@@ -103,6 +104,13 @@ export interface StatisticsOverviewPercentage {
   part: number;
   total: number;
   percentage: string;
+}
+
+export interface PrepaidGiveaway {
+  id: string;
+  months: number;
+  quantity: number;
+  date: number;
 }
 
 export interface StatisticsOverviewPeriod {

@@ -1,6 +1,7 @@
 import type {
   ApiAttachment,
   ApiChat,
+  ApiError,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
   ApiInputStoryReplyInfo,
@@ -14,6 +15,7 @@ import type {
   ApiStorySkipped,
   ApiVideo,
 } from '../../../api/types';
+import type { MessageKey } from '../../../util/messageKey';
 import type { RequiredGlobalActions } from '../../index';
 import type {
   ActionReturnType, ApiDraft, GlobalState, TabArgs,
@@ -31,25 +33,29 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
+import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
-  areSortedArraysIntersecting, buildCollectionByKey, omit, partition, split, unique,
+  areSortedArraysIntersecting,
+  buildCollectionByKey,
+  omit,
+  partition,
+  split,
+  unique,
 } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
-import {
-  debounce, onTickEnd, rafPromise,
-} from '../../../util/schedulers';
+import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
+import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { IS_IOS } from '../../../util/windowEnvironment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import {
   getIsSavedDialog,
-  getMessageOriginalId,
   getUserFullName,
   isChatChannel,
+  isChatSuperGroup,
   isDeletedUser,
-  isLocalMessageId,
   isMessageLocal,
   isServiceNotificationMessage,
   isUserBot,
@@ -61,24 +67,32 @@ import {
   addChatMessagesById,
   addChats,
   addUsers,
+  deleteSponsoredMessage,
   removeOutlyingList,
   removeRequestedMessageTranslation,
-  replaceScheduledMessages,
   replaceSettings,
   replaceThreadParam,
+  replaceUserStatuses,
   safeReplacePinnedIds,
   safeReplaceViewportIds,
   updateChat,
   updateChatFullInfo,
   updateChatMessage,
+  updateChats,
   updateListedIds,
   updateMessageTranslation,
   updateOutlyingLists,
+  updateQuickReplies,
+  updateQuickReplyMessages,
   updateRequestedMessageTranslation,
+  updateScheduledMessages,
   updateSponsoredMessage,
   updateThreadInfo,
   updateThreadUnreadFromForwardedMessage,
   updateTopic,
+  updateUploadByMessageKey,
+  updateUserFullInfo,
+  updateUsers,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -116,13 +130,14 @@ import {
   selectTranslationLanguage,
   selectUser,
   selectUserFullInfo,
+  selectUserStatus,
   selectViewportIds,
 } from '../../selectors';
 import { deleteMessages } from '../apiUpdaters/messages';
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 
-const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
+const uploadProgressCallbacks = new Map<MessageKey, ApiOnProgress>();
 
 const runDebouncedForMarkRead = debounce((cb) => cb(), 500, false);
 
@@ -304,7 +319,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
 
   const storyReplyInfo = isStoryReply ? {
     type: 'story',
-    userId: storyPeerId!,
+    peerId: storyPeerId!,
     storyId: storyId!,
   } satisfies ApiInputStoryReplyInfo : undefined;
 
@@ -423,12 +438,24 @@ addActionHandler('sendInviteMessages', async (global, actions, payload): Promise
 
 addActionHandler('editMessage', (global, actions, payload): ActionReturnType => {
   const {
-    messageList, text, entities, tabId = getCurrentTabId(),
+    messageList, text, entities, attachments, tabId = getCurrentTabId(),
   } = payload;
 
   if (!messageList) {
     return;
   }
+
+  let currentMessageKey: MessageKey | undefined;
+  const progressCallback = attachments ? (progress: number, messageKey: MessageKey) => {
+    if (!uploadProgressCallbacks.has(messageKey)) {
+      currentMessageKey = messageKey;
+      uploadProgressCallbacks.set(messageKey, progressCallback!);
+    }
+
+    global = getGlobal();
+    global = updateUploadByMessageKey(global, messageKey, progress);
+    setGlobal(global);
+  } : undefined;
 
   const { chatId, threadId, type: messageListType } = messageList;
   const chat = selectChat(global, chatId);
@@ -437,26 +464,46 @@ addActionHandler('editMessage', (global, actions, payload): ActionReturnType => 
     return;
   }
 
-  void callApi('editMessage', {
-    chat, message, text, entities, noWebPage: selectNoWebPage(global, chatId, threadId),
-  });
-
   actions.setEditingId({ messageId: undefined, tabId });
+
+  (async () => {
+    await callApi('editMessage', {
+      chat,
+      message,
+      attachment: attachments ? attachments[0] : undefined,
+      text,
+      entities,
+      noWebPage: selectNoWebPage(global, chatId, threadId),
+    }, progressCallback);
+
+    if (progressCallback && currentMessageKey) {
+      global = getGlobal();
+      global = updateUploadByMessageKey(global, currentMessageKey, undefined);
+      setGlobal(global);
+
+      uploadProgressCallbacks.delete(currentMessageKey);
+    }
+  })();
 });
 
-addActionHandler('cancelSendingMessage', (global, actions, payload): ActionReturnType => {
+addActionHandler('cancelUploadMedia', (global, actions, payload): ActionReturnType => {
   const { chatId, messageId } = payload!;
+
   const message = selectChatMessage(global, chatId, messageId);
-  const progressCallback = message && uploadProgressCallbacks.get(getMessageOriginalId(message));
+  if (!message) return;
+
+  const progressCallback = message && uploadProgressCallbacks.get(getMessageKey(message));
   if (progressCallback) {
     cancelApiProgress(progressCallback);
   }
 
-  actions.apiUpdate({
-    '@type': 'deleteMessages',
-    ids: [messageId],
-    chatId,
-  });
+  if (isMessageLocal(message)) {
+    actions.apiUpdate({
+      '@type': 'deleteMessages',
+      ids: [messageId],
+      chatId,
+    });
+  }
 });
 
 addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
@@ -1042,7 +1089,7 @@ addActionHandler('loadScheduledHistory', async (global, actions, payload): Promi
   const ids = Object.keys(byId).map(Number).sort((a, b) => b - a);
 
   global = getGlobal();
-  global = replaceScheduledMessages(global, chat.id, byId);
+  global = updateScheduledMessages(global, chat.id, byId);
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'scheduledIds', ids);
   if (chat?.isForum) {
     const scheduledPerThread: Record<ThreadId, number[]> = {};
@@ -1197,7 +1244,7 @@ async function loadViewportMessages<T extends GlobalState>(
   }
 
   const {
-    messages, users, chats,
+    messages, users, chats, count,
   } = result;
 
   global = getGlobal();
@@ -1242,6 +1289,12 @@ async function loadViewportMessages<T extends GlobalState>(
       const { newViewportIds } = getViewportSlice(historyIds, offsetId, direction);
       global = safeReplaceViewportIds(global, chatId, threadId, newViewportIds!, tabId);
     }
+  }
+
+  if (count) {
+    global = updateThreadInfo(global, chat.id, threadId, {
+      messagesCount: count,
+    });
   }
 
   setGlobal(global);
@@ -1346,24 +1399,15 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   wasDrafted?: boolean;
   lastMessageId?: number;
 }) {
-  let localId: number | undefined;
-  const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
-    if (!uploadProgressCallbacks.has(messageLocalId)) {
-      localId = messageLocalId;
-      uploadProgressCallbacks.set(messageLocalId, progressCallback!);
+  let currentMessageKey: MessageKey | undefined;
+  const progressCallback = params.attachment ? (progress: number, messageKey: MessageKey) => {
+    if (!uploadProgressCallbacks.has(messageKey)) {
+      currentMessageKey = messageKey;
+      uploadProgressCallbacks.set(messageKey, progressCallback!);
     }
 
     global = getGlobal();
-
-    global = {
-      ...global,
-      fileUploads: {
-        byMessageLocalId: {
-          ...global.fileUploads.byMessageLocalId,
-          [messageLocalId]: { progress },
-        },
-      },
-    };
+    global = updateUploadByMessageKey(global, messageKey, progress);
     setGlobal(global);
   } : undefined;
 
@@ -1374,8 +1418,12 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
 
   await callApi('sendMessage', params, progressCallback);
 
-  if (progressCallback && localId) {
-    uploadProgressCallbacks.delete(localId);
+  if (progressCallback && currentMessageKey) {
+    global = getGlobal();
+    global = updateUploadByMessageKey(global, currentMessageKey, undefined);
+    setGlobal(global);
+
+    uploadProgressCallbacks.delete(currentMessageKey);
   }
 }
 
@@ -1502,8 +1550,85 @@ addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionRetu
   void callApi('clickSponsoredMessage', { chat, random: message.randomId });
 });
 
+addActionHandler('reportSponsoredMessage', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, randomId, option = '', tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const result = await callApi('reportSponsoredMessage', { chat, randomId, option });
+
+  if (!result) return;
+
+  if (result.type === 'premiumRequired') {
+    actions.openPremiumModal({ initialSection: 'no_ads', tabId });
+    actions.closeReportAdModal({ tabId });
+    return;
+  }
+
+  if (result.type === 'reported' || result.type === 'hidden') {
+    actions.showNotification({
+      message: translate(result.type === 'reported' ? 'AdReported' : 'AdHidden'),
+      tabId,
+    });
+    actions.closeReportAdModal({ tabId });
+
+    global = getGlobal();
+    global = deleteSponsoredMessage(global, chatId);
+    setGlobal(global);
+    return;
+  }
+
+  if (result.type === 'selectOption') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportAdModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options.find((o) => o.option === option);
+    const newSection = {
+      title: result.title,
+      options: result.options,
+      subtitle: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportAdModal: {
+        chatId,
+        randomId,
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+});
+
+addActionHandler('hideSponsoredMessages', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+  if (!isCurrentUserPremium) {
+    actions.openPremiumModal({ initialSection: 'no_ads', tabId });
+    return;
+  }
+
+  const result = await callApi('toggleSponsoredMessages', { enabled: false });
+  if (!result) return;
+  global = getGlobal();
+  global = updateUserFullInfo(global, global.currentUserId!, {
+    areAdsEnabled: false,
+  });
+  setGlobal(global);
+  actions.showNotification({
+    message: translate('AdHidden'),
+    tabId,
+  });
+});
+
 addActionHandler('fetchUnreadMentions', async (global, actions, payload): Promise<void> => {
   const { chatId, offsetId } = payload;
+  await fetchUnreadMentions(global, chatId, offsetId);
+});
+
+async function fetchUnreadMentions<T extends GlobalState>(global: T, chatId: string, offsetId?: number) {
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
@@ -1525,7 +1650,7 @@ addActionHandler('fetchUnreadMentions', async (global, actions, payload): Promis
   });
 
   setGlobal(global);
-});
+}
 
 addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnType => {
   const { messageIds, tabId = getCurrentTabId() } = payload;
@@ -1533,8 +1658,15 @@ addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnTyp
   const chat = selectCurrentChat(global, tabId);
   if (!chat) return;
 
-  const unreadMentions = (chat.unreadMentions || []).filter((id) => !messageIds.includes(id));
+  const currentUnreadMentions = chat.unreadMentions || [];
+
+  const unreadMentions = currentUnreadMentions.filter((id) => !messageIds.includes(id));
+  const removedCount = currentUnreadMentions.length - unreadMentions.length;
+
   global = updateChat(global, chat.id, {
+    ...(chat.unreadMentionsCount && {
+      unreadMentionsCount: Math.max(chat.unreadMentionsCount - removedCount, 0) || undefined,
+    }),
     unreadMentions,
   });
 
@@ -1543,12 +1675,20 @@ addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnTyp
   actions.markMessagesRead({ messageIds, tabId });
 });
 
-addActionHandler('focusNextMention', (global, actions, payload): ActionReturnType => {
+addActionHandler('focusNextMention', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload || {};
 
-  const chat = selectCurrentChat(global, tabId);
+  let chat = selectCurrentChat(global, tabId);
 
-  if (!chat?.unreadMentions) return;
+  if (!chat) return;
+
+  if (!chat.unreadMentions) {
+    await fetchUnreadMentions(global, chat.id);
+    global = getGlobal();
+    const previousChatId = chat.id;
+    chat = selectCurrentChat(global, tabId);
+    if (!chat?.unreadMentions || previousChatId !== chat.id) return;
+  }
 
   actions.focusMessage({ chatId: chat.id, messageId: chat.unreadMentions[0], tabId });
 });
@@ -1814,10 +1954,108 @@ addActionHandler('loadMessageViews', async (global, actions, payload): Promise<v
       forwardsCount: update.forwards,
     });
 
-    global = updateThreadInfo(global, chatId, update.id, update.threadInfo);
+    if (update.threadInfo) {
+      global = updateThreadInfo(global, chatId, update.id, update.threadInfo);
+    }
   });
 
   setGlobal(global);
+});
+
+addActionHandler('loadOutboxReadDate', async (global, actions, payload): Promise<void> => {
+  const { chatId, messageId } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  try {
+    const result = await callApi('fetchOutboxReadDate', { chat, messageId });
+    if (result?.date) {
+      global = getGlobal();
+      global = updateChatMessage(global, chatId, messageId, { readDate: result.date });
+      setGlobal(global);
+    }
+  } catch (error) {
+    const { message } = error as ApiError;
+
+    if (message === 'USER_PRIVACY_RESTRICTED' || message === 'YOUR_PRIVACY_RESTRICTED') {
+      global = getGlobal();
+
+      const user = selectUser(global, chatId);
+      if (!user) return;
+      const userStatus = selectUserStatus(global, chatId);
+      if (!userStatus) return;
+
+      const updateStatus = message === 'USER_PRIVACY_RESTRICTED'
+        ? { isReadDateRestricted: true }
+        : { isReadDateRestrictedByMe: true };
+
+      global = replaceUserStatuses(global, {
+        [chatId]: { ...userStatus, ...updateStatus },
+      });
+      // Need to reset `readDate` to `undefined` after click on "Show my Read Time" button
+      global = updateChatMessage(global, chatId, messageId, { readDate: undefined });
+      setGlobal(global);
+    }
+  }
+});
+
+addActionHandler('loadQuickReplies', async (global): Promise<void> => {
+  const result = await callApi('fetchQuickReplies');
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = updateQuickReplyMessages(global, buildCollectionByKey(result.messages, 'id'));
+  global = updateQuickReplies(global, result.quickReplies);
+
+  setGlobal(global);
+});
+
+addActionHandler('sendQuickReply', (global, actions, payload): ActionReturnType => {
+  const { chatId, quickReplyId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return global;
+  callApi('sendQuickReply', {
+    chat,
+    shortcutId: quickReplyId,
+  });
+
+  return global;
+});
+
+addActionHandler('copyMessageLink', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, shouldIncludeThread, shouldIncludeGrouped, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    actions.showNotification({
+      message: translate('ErrorOccurred'),
+      tabId,
+    });
+    return;
+  }
+  const showErrorOccurredNotification = () => actions.showNotification({
+    message: translate('ErrorOccurred'),
+    tabId,
+  });
+
+  if (!isChatChannel(chat) && !isChatSuperGroup(chat)) {
+    showErrorOccurredNotification();
+    return;
+  }
+  const showLinkCopiedNotification = () => actions.showNotification({
+    message: translate('LinkCopied'),
+    tabId,
+  });
+  const callApiExportMessageLinkPromise = callApi('exportMessageLink', {
+    chat, id: messageId, shouldIncludeThread, shouldIncludeGrouped,
+  });
+  await copyTextToClipboardFromPromise(
+    callApiExportMessageLinkPromise, showLinkCopiedNotification, showErrorOccurredNotification,
+  );
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {

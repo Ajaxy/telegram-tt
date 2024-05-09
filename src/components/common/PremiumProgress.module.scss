@@ -3,9 +3,8 @@
   display: flex;
   position: relative;
   height: 2rem;
-  background: #F1F3F5;
+  background: var(--color-background-menu-separator);
   border-radius: 0.625rem;
-  color: black;
 }
 
 .withBadge {

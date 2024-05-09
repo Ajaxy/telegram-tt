@@ -221,7 +221,7 @@ export function selectSendAs<T extends GlobalState>(global: T, chatId: string) {
   return selectUser(global, id) || selectChat(global, id);
 }
 
-export function selectRequestedDraftText<T extends GlobalState>(
+export function selectRequestedDraft<T extends GlobalState>(
   global: T, chatId: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {

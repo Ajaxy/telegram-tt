@@ -1,7 +1,7 @@
 import type { LangFn } from '../hooks/useLang';
 
 import EMOJI_REGEX from '../lib/twemojiRegex';
-import { fixNonStandardEmoji } from './emoji';
+import fixNonStandardEmoji from './emoji/fixNonStandardEmoji';
 import withCache from './withCache';
 
 export function formatInteger(value: number) {

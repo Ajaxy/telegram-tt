@@ -1,12 +1,14 @@
 import type { ChangeEvent, FormEvent, RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 
+import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
 
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   ref?: RefObject<HTMLTextAreaElement>;
@@ -75,22 +77,33 @@ const TextArea: FC<OwnProps> = ({
     className,
   );
 
-  useEffect(() => {
+  const resizeHeight = useLastCallback((element: HTMLTextAreaElement) => {
+    requestMutation(() => {
+      element.style.height = '0';
+      requestForcedReflow(() => {
+        const newHeight = element.scrollHeight;
+        return () => {
+          element.style.height = `${newHeight}px`;
+        };
+      });
+    });
+  });
+
+  useLayoutEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-    textarea.style.height = '0';
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    resizeHeight(textarea);
   }, []);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+    const target = e.currentTarget;
     if (!noReplaceNewlines) {
-      const previousSelectionEnd = e.currentTarget.selectionEnd;
+      const previousSelectionEnd = target.selectionEnd;
       // TDesktop replaces newlines with spaces as well
-      e.currentTarget.value = e.currentTarget.value.replace(/\n/g, ' ');
-      e.currentTarget.selectionEnd = previousSelectionEnd;
+      target.value = target.value.replace(/\n/g, ' ');
+      target.selectionEnd = previousSelectionEnd;
     }
-    e.currentTarget.style.height = '0';
-    e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+    resizeHeight(target);
     onChange?.(e);
   }, [noReplaceNewlines, onChange]);
 

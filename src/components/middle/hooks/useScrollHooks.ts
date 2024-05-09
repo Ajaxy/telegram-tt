@@ -28,8 +28,8 @@ export default function useScrollHooks(
   getContainerHeight: Signal<number | undefined>,
   isViewportNewest: boolean,
   isUnread: boolean,
-  onFabToggle: AnyToVoidFunction,
-  onNotchToggle: AnyToVoidFunction,
+  onScrollDownToggle: BooleanToVoidFunction,
+  onNotchToggle: BooleanToVoidFunction,
   isReady: boolean,
 ) {
   const { loadViewportMessages } = getActions();
@@ -54,13 +54,13 @@ export default function useScrollHooks(
     if (!isReady) return;
 
     if (!messageIds?.length) {
-      onFabToggle(false);
+      onScrollDownToggle(false);
       onNotchToggle(false);
       return;
     }
 
     if (!isViewportNewest) {
-      onFabToggle(true);
+      onScrollDownToggle(true);
       onNotchToggle(true);
       return;
     }
@@ -77,7 +77,7 @@ export default function useScrollHooks(
 
     if (scrollHeight === 0) return;
 
-    onFabToggle(isUnread ? !isAtBottom : !isNearBottom);
+    onScrollDownToggle(isUnread ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
   });
 

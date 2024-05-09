@@ -2,7 +2,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiLimitType } from '../../../global/types';
+import type { ApiLimitType, ApiPremiumSection } from '../../../global/types';
 import type { ApiAppConfig } from '../../types';
 
 import {
@@ -45,12 +45,15 @@ export interface GramJsAppConfig extends LimitsConfig {
   reactions_uniq_max: number;
   chat_read_mark_size_threshold: number;
   chat_read_mark_expire_period: number;
+  pm_read_date_expire_period: number;
   reactions_user_max_default: number;
   reactions_user_max_premium: number;
   autologin_domains: string[];
   autologin_token: string;
   url_auth_domains: string[];
   premium_purchase_blocked: boolean;
+  giveaway_gifts_purchase_available: boolean;
+  giveaway_add_peers_max: number;
   premium_bot_username: string;
   premium_invoice_slug: string;
   premium_promo_order: string[];
@@ -58,6 +61,9 @@ export interface GramJsAppConfig extends LimitsConfig {
   hidden_members_group_size_min: number;
   autoarchive_setting_available: boolean;
   authorization_autoconfirm_period: number;
+  giveaway_boosts_per_premium: number;
+  giveaway_countries_max: number;
+  boosts_per_sent_gift: number;
   // Forums
   topics_pinned_limit: number;
   // Stories
@@ -65,6 +71,14 @@ export interface GramJsAppConfig extends LimitsConfig {
   story_expire_period: number;
   story_viewers_expire_period: number;
   stories_changelog_user_id?: number;
+  // Boosts
+  group_transcribe_level_min?: number;
+  new_noncontact_peers_require_premium_without_ownpremium?: boolean;
+  channel_restrict_sponsored_level_min?: number;
+  // Upload premium notifications
+  upload_premium_speedup_notify_period?: number;
+  upload_premium_speedup_download?: number;
+  upload_premium_speedup_upload?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -98,18 +112,24 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     emojiSounds: buildEmojiSounds(appConfig),
     seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
     seenByExpiresAt: appConfig.chat_read_mark_expire_period,
+    readDateExpiresAt: appConfig.pm_read_date_expire_period,
     autologinDomains: appConfig.autologin_domains || [],
     urlAuthDomains: appConfig.url_auth_domains || [],
     maxUniqueReactions: appConfig.reactions_uniq_max,
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
-    premiumPromoOrder: appConfig.premium_promo_order,
+    premiumPromoOrder: appConfig.premium_promo_order as ApiPremiumSection[],
     isPremiumPurchaseBlocked: appConfig.premium_purchase_blocked,
+    isGiveawayGiftsPurchaseAvailable: appConfig.giveaway_gifts_purchase_available,
     defaultEmojiStatusesStickerSetId: appConfig.default_emoji_statuses_stickerset_id,
     topicsPinnedLimit: appConfig.topics_pinned_limit,
     maxUserReactionsDefault: appConfig.reactions_user_max_default,
     maxUserReactionsPremium: appConfig.reactions_user_max_premium,
     hiddenMembersMinCount: appConfig.hidden_members_group_size_min,
+    giveawayAddPeersMax: appConfig.giveaway_add_peers_max,
+    giveawayBoostsPerPremium: appConfig.giveaway_boosts_per_premium,
+    giveawayCountriesMax: appConfig.giveaway_countries_max,
+    boostsPerSentGift: appConfig.boosts_per_sent_gift,
     canDisplayAutoarchiveSetting: appConfig.autoarchive_setting_available,
     limits: {
       uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),
@@ -132,5 +152,11 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     storyExpirePeriod: appConfig.story_expire_period ?? STORY_EXPIRE_PERIOD,
     storyViewersExpirePeriod: appConfig.story_viewers_expire_period ?? STORY_VIEWERS_EXPIRE_PERIOD,
     storyChangelogUserId: appConfig.stories_changelog_user_id?.toString() ?? SERVICE_NOTIFICATIONS_USER_ID,
+    groupTranscribeLevelMin: appConfig.group_transcribe_level_min,
+    canLimitNewMessagesWithoutPremium: appConfig.new_noncontact_peers_require_premium_without_ownpremium,
+    bandwidthPremiumNotifyPeriod: appConfig.upload_premium_speedup_notify_period,
+    bandwidthPremiumUploadSpeedup: appConfig.upload_premium_speedup_upload,
+    bandwidthPremiumDownloadSpeedup: appConfig.upload_premium_speedup_download,
+    channelRestrictAdsLevelMin: appConfig.channel_restrict_sponsored_level_min,
   };
 }

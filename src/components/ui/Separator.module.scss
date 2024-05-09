@@ -1,0 +1,33 @@
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-secondary);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 0.0625rem solid var(--color-dividers);
+  }
+
+  &:not(:empty)::before {
+    margin-right: 0.5rem;
+  }
+
+  &:not(:empty)::after {
+    margin-left: 0.5rem;
+  }
+
+  &[dir="rtl"] {
+    &:not(:empty)::before {
+      margin-left: 0.5rem;
+      margin-right: 0;
+    }
+
+    &:not(:empty)::after {
+      margin-right: 0.5rem;
+      margin-left: 0;
+    }
+  }
+}

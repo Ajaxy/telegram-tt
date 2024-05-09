@@ -55,6 +55,7 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   nextManagementScreen?: ManagementScreens;
   nextProfileTab?: ProfileTabType;
+  shouldCloseRightColumn?: boolean;
   isSavedMessages?: boolean;
   isSavedDialog?: boolean;
 };
@@ -79,6 +80,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   nextManagementScreen,
   nextProfileTab,
+  shouldCloseRightColumn,
   isSavedMessages,
   isSavedDialog,
 }) => {
@@ -101,6 +103,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     closeCreateTopicPanel,
     closeEditTopicPanel,
     closeBoostStatistics,
+    setShouldCloseRightColumn,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -252,6 +255,13 @@ const RightColumn: FC<OwnProps & StateProps> = ({
 
     resetNextProfileTab();
   }, [nextProfileTab]);
+
+  useEffect(() => {
+    if (shouldCloseRightColumn) {
+      close();
+      setShouldCloseRightColumn({ value: undefined });
+    }
+  }, [shouldCloseRightColumn]);
 
   // Close Right Column when it transforms into overlayed state on screen resize
   useEffect(() => {
@@ -409,7 +419,9 @@ export default memo(withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
-    const { management, shouldSkipHistoryAnimations, nextProfileTab } = selectTabState(global);
+    const {
+      management, shouldSkipHistoryAnimations, nextProfileTab, shouldCloseRightColumn,
+    } = selectTabState(global);
     const nextManagementScreen = chatId ? management.byChatId[chatId]?.nextScreen : undefined;
 
     const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;
@@ -423,6 +435,7 @@ export default memo(withGlobal<OwnProps>(
       shouldSkipHistoryAnimations,
       nextManagementScreen,
       nextProfileTab,
+      shouldCloseRightColumn,
       isSavedMessages,
       isSavedDialog,
     };

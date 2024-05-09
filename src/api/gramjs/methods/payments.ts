@@ -2,32 +2,35 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiPeer, ApiRequestInputInvoice,
+  ApiChat, ApiInputStorePaymentPurpose, ApiPeer, ApiRequestInputInvoice,
   OnApiUpdate,
 } from '../../types';
 
-import { buildCollectionByCallback } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
+  buildApiBoost,
   buildApiBoostsStatus,
   buildApiCheckedGiftCode,
   buildApiGiveawayInfo,
   buildApiInvoiceFromForm,
   buildApiMyBoost,
   buildApiPaymentForm,
+  buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
   buildApiReceipt,
   buildShippingOptions,
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildInputInvoice, buildInputPeer, buildShippingInfo } from '../gramjsBuilders';
+import {
+  buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildShippingInfo,
+} from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
   deserializeBytes,
   serializeBytes,
 } from '../helpers';
 import localDb from '../localDb';
-import { invokeRequest } from './client';
+import { handleGramJsUpdate, invokeRequest } from './client';
 import { getTemporaryPaymentPassword } from './twoFaSettings';
 
 let onUpdate: OnApiUpdate;
@@ -105,6 +108,8 @@ export async function sendPaymentForm({
     ...(tipAmount && { tipAmount: BigInt(tipAmount) }),
   }));
 
+  if (!result) return false;
+
   if (result instanceof GramJs.payments.PaymentVerificationNeeded) {
     onUpdate({
       '@type': 'updatePaymentVerificationNeeded',
@@ -112,6 +117,8 @@ export async function sendPaymentForm({
     });
 
     return undefined;
+  } else {
+    handleGramJsUpdate(result.updates);
   }
 
   return Boolean(result);
@@ -136,6 +143,7 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
     form: buildApiPaymentForm(result),
     invoice: buildApiInvoiceFromForm(result),
     users: result.users.map(buildApiUser).filter(Boolean),
+    botId: result.botId.toString(),
   };
 }
 
@@ -240,7 +248,7 @@ export async function applyBoost({
   };
 }
 
-export async function fetchBoostsStatus({
+export async function fetchBoostStatus({
   chat,
 }: {
   chat: ApiChat;
@@ -256,17 +264,20 @@ export async function fetchBoostsStatus({
   return buildApiBoostsStatus(result);
 }
 
-export async function fetchBoostsList({
+export async function fetchBoostList({
   chat,
+  isGifts,
   offset = '',
   limit,
 }: {
   chat: ApiChat;
+  isGifts?: boolean;
   offset?: string;
   limit?: number;
 }) {
   const result = await invokeRequest(new GramJs.premium.GetBoostsList({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    gifts: isGifts || undefined,
     offset,
     limit,
   }));
@@ -279,17 +290,12 @@ export async function fetchBoostsList({
 
   const users = result.users.map(buildApiUser).filter(Boolean);
 
-  const userBoosts = result.boosts.filter((boost) => boost.userId);
-  const boosterIds = userBoosts.map((boost) => boost.userId!.toString());
-  const boosters = buildCollectionByCallback(userBoosts, (boost) => (
-    [boost.userId!.toString(), boost.expires]
-  ));
+  const boostList = result.boosts.map(buildApiBoost);
 
   return {
     count: result.count,
+    boostList,
     users,
-    boosters,
-    boosterIds,
     nextOffset: result.nextOffset,
   };
 }
@@ -343,6 +349,40 @@ export function applyGiftCode({
 }) {
   return invokeRequest(new GramJs.payments.ApplyGiftCode({
     slug,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export async function getPremiumGiftCodeOptions({
+  chat,
+}: {
+  chat?: ApiChat;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetPremiumGiftCodeOptions({
+    boostPeer: chat && buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return result.map(buildApiPremiumGiftCodeOption);
+}
+
+export function launchPrepaidGiveaway({
+  chat,
+  giveawayId,
+  paymentPurpose,
+}: {
+  chat: ApiChat;
+  giveawayId: string;
+  paymentPurpose: ApiInputStorePaymentPurpose;
+}) {
+  return invokeRequest(new GramJs.payments.LaunchPrepaidGiveaway({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    giveawayId: BigInt(giveawayId),
+    purpose: buildInputStorePaymentPurpose(paymentPurpose),
   }), {
     shouldReturnTrue: true,
   });

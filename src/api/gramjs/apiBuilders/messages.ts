@@ -16,10 +16,10 @@ import type {
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
+  ApiQuickReply,
   ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
-  ApiSponsoredWebPage,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -50,13 +50,12 @@ import {
   resolveMessageApiChatId,
   serializeBytes,
 } from '../helpers';
-import { buildApiBotApp } from './bots';
 import { buildApiCallDiscardReason } from './calls';
 import {
   buildApiPhoto,
 } from './common';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
-import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
+import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
 const LOCAL_MESSAGES_LIMIT = 1e6; // 1M
@@ -78,33 +77,28 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
 
 export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
   const {
-    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended, sponsorInfo,
-    additionalInfo, showPeerPhoto, webpage, buttonText, app,
+    message, entities, randomId, recommended, sponsorInfo, additionalInfo, buttonText, canReport, title, url, color,
   } = mtpMessage;
-  const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
-  const chatInviteTitle = chatInvite
-    ? (chatInvite instanceof GramJs.ChatInvite
-      ? chatInvite.title
-      : !(chatInvite.chat instanceof GramJs.ChatEmpty) ? chatInvite.chat.title : undefined)
-    : undefined;
+
+  let photo: ApiPhoto | undefined;
+  if (mtpMessage.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(mtpMessage.photo);
+    photo = buildApiPhoto(mtpMessage.photo);
+  }
 
   return {
     randomId: serializeBytes(randomId),
-    isBot: fromId ? isPeerUser(fromId) : false,
     text: buildMessageTextContent(message, entities),
     expiresAt: Math.round(Date.now() / 1000) + SPONSORED_MESSAGE_CACHE_MS,
-    isRecommended: Boolean(recommended),
-    ...(webpage && { webPage: buildSponsoredWebPage(webpage) }),
-    ...(showPeerPhoto && { isAvatarShown: true }),
-    ...(chatId && { chatId }),
-    ...(chatInviteHash && { chatInviteHash }),
-    ...(chatInvite && { chatInviteTitle }),
-    ...(startParam && { startParam }),
-    ...(channelPost && { channelPostId: channelPost }),
-    ...(sponsorInfo && { sponsorInfo }),
-    ...(additionalInfo && { additionalInfo }),
-    ...(buttonText && { buttonText }),
-    ...(app && { botApp: buildApiBotApp(app) }),
+    isRecommended: recommended,
+    sponsorInfo,
+    additionalInfo,
+    buttonText,
+    canReport,
+    title,
+    url,
+    peerColor: color && buildApiPeerColor(color),
+    photo,
   };
 }
 
@@ -159,7 +153,7 @@ export type UniversalMessage = (
     'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
     'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
     'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned' |
-    'savedPeerId'
+    'savedPeerId' | 'fromBoostsApplied' | 'quickReplyShortcutId' | 'viaBusinessBotId'
   )>
 );
 
@@ -197,10 +191,11 @@ export function buildApiMessageWithChatId(
   const isForwardingAllowed = !mtpMessage.noforwards;
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
   const hasComments = mtpMessage.replies?.comments;
+  const senderBoosts = mtpMessage.fromBoostsApplied;
 
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
-  return omitUndefined({
+  return omitUndefined<ApiMessage>({
     id: mtpMessage.id,
     chatId,
     isOutgoing,
@@ -237,7 +232,9 @@ export function buildApiMessageWithChatId(
     isForwardingAllowed,
     hasComments,
     savedPeerId,
-  } satisfies ApiMessage);
+    senderBoosts,
+    viaBusinessBotId: mtpMessage.viaBusinessBotId?.toString(),
+  });
 }
 
 export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | undefined {
@@ -288,7 +285,7 @@ function buildApiReplyInfo(replyHeader: GramJs.TypeMessageReplyHeader): ApiReply
   if (replyHeader instanceof GramJs.MessageReplyStoryHeader) {
     return {
       type: 'story',
-      userId: replyHeader.userId.toString(),
+      peerId: getApiChatIdFromMtpPeer(replyHeader.peer),
       storyId: replyHeader.storyId,
     };
   }
@@ -339,7 +336,7 @@ function buildAction(
   let currency: string | undefined;
   let giftCryptoInfo: {
     currency: string;
-    amount: string;
+    amount: number;
   } | undefined;
   let text: string;
   const translationValues: string[] = [];
@@ -502,10 +499,9 @@ function buildAction(
     }
     currency = action.currency;
     if (action.cryptoCurrency) {
-      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
       giftCryptoInfo = {
         currency: action.cryptoCurrency,
-        amount: cryptoAmountWithDecimals.toFixed(2),
+        amount: action.cryptoAmount!.toJSNumber(),
       };
     }
     amount = action.amount.toJSNumber();
@@ -544,13 +540,27 @@ function buildAction(
     text = 'BoostingGiveawayJustStarted';
     translationValues.push('%action_origin%');
   } else if (action instanceof GramJs.MessageActionGiftCode) {
-    text = 'BoostingReceivedGiftNoName';
+    text = isOutgoing ? 'ActionGiftOutbound' : 'BoostingReceivedGiftNoName';
     slug = action.slug;
     months = action.months;
+    amount = action.amount?.toJSNumber();
     isGiveaway = Boolean(action.viaGiveaway);
     isUnclaimed = Boolean(action.unclaimed);
+    if (isOutgoing) {
+      translationValues.push('%gift_payment_amount%');
+    }
+    currency = action.currency;
+    if (action.cryptoCurrency) {
+      giftCryptoInfo = {
+        currency: action.cryptoCurrency,
+        amount: action.cryptoAmount!.toJSNumber(),
+      };
+    }
     if (action.boostPeer) {
       targetChatId = getApiChatIdFromMtpPeer(action.boostPeer);
+    }
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
     }
   } else if (action instanceof GramJs.MessageActionGiveawayResults) {
     if (!action.winnersCount) {
@@ -562,6 +572,20 @@ function buildAction(
       translationValues.push('%amount%');
       amount = action.winnersCount;
       pluralValue = action.winnersCount;
+    }
+  } else if (action instanceof GramJs.MessageActionBoostApply) {
+    type = 'chatBoost';
+    if (action.boosts === 1) {
+      text = senderId === currentUserId ? 'BoostingBoostsGroupByYouServiceMsg' : 'BoostingBoostsGroupByUserServiceMsg';
+      translationValues.push('%action_origin%');
+    } else {
+      text = senderId === currentUserId ? 'BoostingBoostsGroupByYouServiceMsgCount'
+        : 'BoostingBoostsGroupByUserServiceMsgCount';
+      translationValues.push(action.boosts.toString());
+      if (senderId !== currentUserId) {
+        translationValues.unshift('%action_origin%');
+      }
+      pluralValue = action.boosts;
     }
   } else {
     text = 'ChatList.UnsupportedMessage';
@@ -901,7 +925,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
   if (inputInfo.type === 'story') {
     return {
       type: 'story',
-      userId: inputInfo.userId,
+      peerId: inputInfo.peerId,
       storyId: inputInfo.storyId,
     };
   }
@@ -917,7 +941,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
   };
 }
 
-function buildUploadingMedia(
+export function buildUploadingMedia(
   attachment: ApiAttachment,
 ): MediaContent {
   const {
@@ -929,6 +953,7 @@ function buildUploadingMedia(
     audio,
     shouldSendAsFile,
     shouldSendAsSpoiler,
+    ttlSeconds,
   } = attachment;
 
   if (!shouldSendAsFile) {
@@ -973,6 +998,7 @@ function buildUploadingMedia(
           duration,
           waveform: inputWaveform,
         },
+        ttlSeconds,
       };
     }
     if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {
@@ -1051,18 +1077,11 @@ export function buildApiThreadInfo(
   };
 }
 
-function buildSponsoredWebPage(webPage: GramJs.TypeSponsoredWebPage): ApiSponsoredWebPage {
-  let photo: ApiPhoto | undefined;
-  if (webPage.photo instanceof GramJs.Photo) {
-    addPhotoToLocalDb(webPage.photo);
-    photo = buildApiPhoto(webPage.photo);
-  }
-
+export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply {
+  const { shortcutId, shortcut, topMessage } = reply;
   return {
-    ...pick(webPage, [
-      'url',
-      'siteName',
-    ]),
-    photo,
+    id: shortcutId,
+    shortcut,
+    topMessageId: topMessage,
   };
 }

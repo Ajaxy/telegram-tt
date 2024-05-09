@@ -180,12 +180,12 @@ const StickerView: FC<OwnProps> = ({
         />
       ) : isVideo ? (
         <OptimizedVideo
-          canPlay={shouldPlay && shouldLoop}
+          canPlay={shouldPlay}
           className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames, 'sticker-media')}
           src={fullMediaData}
           playsInline
           muted
-          loop={!loopLimit}
+          loop={shouldLoop && !loopLimit}
           isPriority={forceAlways}
           disablePictureInPicture
           onReady={markPlayerReady}

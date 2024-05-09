@@ -191,6 +191,7 @@ const useWebAppFrame = (
           slug: eventData.slug,
         });
         openInvoice({
+          type: 'slug',
           slug: eventData.slug,
         });
       }
@@ -198,6 +199,15 @@ const useWebAppFrame = (
       if (eventType === 'web_app_open_link') {
         const linkUrl = eventData.url;
         window.open(linkUrl, '_blank', 'noreferrer');
+      }
+
+      if (eventType === 'web_app_biometry_get_info') {
+        sendEvent({
+          eventType: 'biometry_info_received',
+          eventData: {
+            available: false,
+          },
+        });
       }
 
       onEvent(data);

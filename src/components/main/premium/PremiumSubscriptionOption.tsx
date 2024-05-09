@@ -2,6 +2,8 @@ import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
+import type { ApiPremiumGiftCodeOption, ApiPremiumGiftOption } from '../../../api/types';
+
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
 
@@ -10,11 +12,8 @@ import useLang from '../../../hooks/useLang';
 import styles from './PremiumSubscriptionOption.module.scss';
 
 type OwnProps = {
-  option: {
-    months: number;
-    currency: string;
-    amount: number;
-  };
+  option: ApiPremiumGiftOption | ApiPremiumGiftCodeOption;
+  isGiveaway?: boolean;
   checked?: boolean;
   fullMonthlyAmount?: number;
   className?: string;
@@ -22,12 +21,17 @@ type OwnProps = {
 };
 
 const PremiumSubscriptionOption: FC<OwnProps> = ({
-  option, checked, fullMonthlyAmount, onChange, className,
+  option, checked, fullMonthlyAmount,
+  onChange, className, isGiveaway,
 }) => {
   const lang = useLang();
 
-  const { months, amount, currency } = option;
+  const {
+    months, amount, currency,
+  } = option;
+  const users = 'users' in option ? option.users : undefined;
   const perMonth = Math.floor(amount / months);
+  const isUserCountPlural = users ? users > 1 : undefined;
 
   const discount = useMemo(() => {
     return fullMonthlyAmount && fullMonthlyAmount > perMonth
@@ -44,8 +48,8 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
   return (
     <label
       className={buildClassName(
-        styles.wrapper,
-        checked && styles.active,
+        isGiveaway ? styles.giveawayWrapper : styles.wrapper,
+        (checked && !isGiveaway) && styles.active,
         className,
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
@@ -53,20 +57,29 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
       <input
         className={styles.input}
         type="radio"
-        name="gift_option"
+        name="subscription_option"
         value={months}
         checked={checked}
         onChange={handleChange}
       />
       <div className={styles.content}>
-        <div className={styles.month}>{lang('Months', months)}</div>
-        <div className={styles.perMonth}>
-          {lang('PricePerMonth', formatCurrency(perMonth, currency, lang.code))}
+        <div className={styles.month}>
           {Boolean(discount) && (
-            <span className={styles.discount} title={lang('GiftDiscount')}> &minus;{discount}% </span>
+            <span
+              className={buildClassName(styles.giveawayDiscount, styles.discount)}
+              title={lang('GiftDiscount')}
+            > &minus;{discount}%
+            </span>
           )}
+          {lang('Months', months)}
         </div>
-        <div className={styles.amount}>{formatCurrency(amount, currency, lang.code)}</div>
+        <div className={styles.perMonth}>
+          {(isGiveaway || isUserCountPlural) ? `${formatCurrency(amount, currency, lang.code)} x ${users!}`
+            : lang('PricePerMonth', formatCurrency(perMonth, currency, lang.code))}
+        </div>
+        <div className={styles.amount}>
+          {formatCurrency(amount, currency, lang.code)}
+        </div>
       </div>
     </label>
   );

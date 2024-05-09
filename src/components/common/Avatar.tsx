@@ -53,12 +53,14 @@ type OwnProps = {
   photo?: ApiPhoto;
   text?: string;
   isSavedMessages?: boolean;
+  isUnknownUser?: boolean;
   isSavedDialog?: boolean;
   withVideo?: boolean;
   withStory?: boolean;
   forPremiumPromo?: boolean;
   withStoryGap?: boolean;
   withStorySolid?: boolean;
+  forceFriendStorySolid?: boolean;
   forceUnreadStorySolid?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
   storyViewerMode?: 'full' | 'single-peer' | 'disabled';
@@ -76,11 +78,13 @@ const Avatar: FC<OwnProps> = ({
   text,
   isSavedMessages,
   isSavedDialog,
+  isUnknownUser,
   withVideo,
   withStory,
   forPremiumPromo,
   withStoryGap,
   withStorySolid,
+  forceFriendStorySolid,
   forceUnreadStorySolid,
   storyViewerOrigin,
   storyViewerMode = 'single-peer',
@@ -118,6 +122,10 @@ const Avatar: FC<OwnProps> = ({
   }
 
   const specialIcon = useMemo(() => {
+    if (isUnknownUser) {
+      return 'user';
+    }
+
     if (isSavedMessages) {
       return isSavedDialog ? 'my-notes' : 'avatar-saved-messages';
     }
@@ -135,7 +143,7 @@ const Avatar: FC<OwnProps> = ({
     }
 
     return undefined;
-  }, [isAnonymousForwards, isDeleted, isSavedDialog, isReplies, isSavedMessages]);
+  }, [isUnknownUser, isSavedMessages, isDeleted, isReplies, isAnonymousForwards, isSavedDialog]);
 
   const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl);
@@ -207,18 +215,22 @@ const Avatar: FC<OwnProps> = ({
     content = getFirstLetters(text, 2);
   }
 
+  const isRoundedRect = isForum && !((withStory || withStorySolid) && peer?.hasStories);
+
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
     getPeerColorClass(peer),
+    isUnknownUser && 'unknown-user',
     !peer && text && 'hidden-user',
     isSavedMessages && 'saved-messages',
     isAnonymousForwards && 'anonymous-forwards',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
-    isForum && 'forum',
+    isRoundedRect && 'forum',
     ((withStory && peer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && peer?.hasStories && 'with-story-solid',
+    withStorySolid && forceFriendStorySolid && 'close-friend',
     withStorySolid && (peer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',

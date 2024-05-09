@@ -22,7 +22,7 @@ import {
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { getDayStartAt } from '../../util/dateFormat';
+import { getDayStartAt } from '../../util/date/dateFormat';
 import { debounce } from '../../util/schedulers';
 
 import useAppLayout from '../../hooks/useAppLayout';

@@ -106,22 +106,22 @@ ${indent}};`.trim()
 
     function renderValueType(type, isVector, isTlType) {
         if (RAW_TYPES.has(type)) {
-            return type
+            return isVector ? `${type}[]` : type;
         }
 
         let resType
 
         if (typeof type === 'string' && isTlType) {
-            resType = renderTypeName(type)
+            resType = renderTypeName(type);
         } else {
-            resType = type
+            resType = type;
         }
 
         if (isVector) {
-            resType = `${resType}[]`
+            resType = `${resType}[]`;
         }
 
-        return resType
+        return resType;
     }
 
     function renderTypeName(typeName) {

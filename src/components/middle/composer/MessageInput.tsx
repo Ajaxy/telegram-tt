@@ -16,8 +16,8 @@ import { selectCanPlayAnimatedEmojis, selectDraft, selectIsInSelectMode } from '
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
+import parseEmojiOnlyString from '../../../util/emoji/parseEmojiOnlyString';
 import focusEditableElement from '../../../util/focusEditableElement';
-import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
 import { debounce } from '../../../util/schedulers';
 import {
   IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
@@ -34,7 +34,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
 
 import TextTimer from '../../ui/TextTimer';
-import TextFormatter from './TextFormatter';
+import TextFormatter from './TextFormatter.async';
 
 const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
 // Focus slows down animation, also it breaks transition layout in Chrome

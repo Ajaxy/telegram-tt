@@ -260,42 +260,36 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
-          {isChannel && (
-            <div className="ListItem">
-              <Checkbox
-                name="postStories"
-                checked={Boolean(permissions.postStories)}
-                label={lang('EditAdminPostStories')}
-                blocking
-                disabled={getControlIsDisabled('postStories')}
-                onChange={handlePermissionChange}
-              />
-            </div>
-          )}
-          {isChannel && (
-            <div className="ListItem">
-              <Checkbox
-                name="editStories"
-                checked={Boolean(permissions.editStories)}
-                label={lang('EditAdminEditStories')}
-                blocking
-                disabled={getControlIsDisabled('editStories')}
-                onChange={handlePermissionChange}
-              />
-            </div>
-          )}
-          {isChannel && (
-            <div className="ListItem">
-              <Checkbox
-                name="deleteStories"
-                checked={Boolean(permissions.deleteStories)}
-                label={lang('EditAdminDeleteStories')}
-                blocking
-                disabled={getControlIsDisabled('deleteStories')}
-                onChange={handlePermissionChange}
-              />
-            </div>
-          )}
+          <div className="ListItem">
+            <Checkbox
+              name="postStories"
+              checked={Boolean(permissions.postStories)}
+              label={lang('EditAdminPostStories')}
+              blocking
+              disabled={getControlIsDisabled('postStories')}
+              onChange={handlePermissionChange}
+            />
+          </div>
+          <div className="ListItem">
+            <Checkbox
+              name="editStories"
+              checked={Boolean(permissions.editStories)}
+              label={lang('EditAdminEditStories')}
+              blocking
+              disabled={getControlIsDisabled('editStories')}
+              onChange={handlePermissionChange}
+            />
+          </div>
+          <div className="ListItem">
+            <Checkbox
+              name="deleteStories"
+              checked={Boolean(permissions.deleteStories)}
+              label={lang('EditAdminDeleteStories')}
+              blocking
+              disabled={getControlIsDisabled('deleteStories')}
+              onChange={handlePermissionChange}
+            />
+          </div>
           {!isChannel && (
             <div className="ListItem">
               <Checkbox
@@ -448,5 +442,8 @@ export default memo(withGlobal<OwnProps>(
       hasFullInfo: Boolean(fullInfo),
       adminMembersById: fullInfo?.adminMembersById,
     };
+  },
+  (global, { chatId }) => {
+    return Boolean(selectChat(global, chatId));
   },
 )(ManageGroupAdminRights));

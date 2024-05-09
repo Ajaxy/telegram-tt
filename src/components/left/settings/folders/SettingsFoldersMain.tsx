@@ -248,6 +248,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     inactive
                     multiline
                     isStatic
+                    allowSelection
                   >
                     <span className="title">
                       {folder.title}

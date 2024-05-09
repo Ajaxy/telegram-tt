@@ -11,7 +11,10 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { omit, pickTruthy, unique } from '../../../util/iteratees';
+import {
+  buildCollectionByKey, omit, pickTruthy, unique,
+} from '../../../util/iteratees';
+import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
 import {
@@ -26,6 +29,8 @@ import {
   clearMessageTranslation,
   deleteChatMessages,
   deleteChatScheduledMessages,
+  deleteQuickReply,
+  deleteQuickReplyMessages,
   deleteTopic,
   removeChatFromChatLists,
   replaceThreadParam,
@@ -34,6 +39,8 @@ import {
   updateChatMessage,
   updateListedIds,
   updateMessageTranslations,
+  updateQuickReplies,
+  updateQuickReplyMessage,
   updateScheduledMessage,
   updateThreadInfo,
   updateThreadInfos,
@@ -58,6 +65,7 @@ import {
   selectIsServiceChatReady,
   selectIsViewportNewest,
   selectListedIds,
+  selectPerformanceSettingsValue,
   selectPinnedIds,
   selectSavedDialogIdFromMessage,
   selectScheduledIds,
@@ -158,7 +166,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateChatLastMessage': {
       const { id, lastMessage } = update;
 
-      global = updateChatLastMessage(global, id, lastMessage);
+      global = updateChatLastMessage(global, id, lastMessage, true);
       global = addMessages(global, [lastMessage]);
       setGlobal(global);
       break;
@@ -221,7 +229,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const newMessage = selectChatMessage(global, chatId, id)!;
 
       if (message.reactions && chat) {
-        global = updateReactions(global, chatId, id, message.reactions, chat, newMessage.isOutgoing, currentMessage);
+        global = updateReactions(
+          global, actions, chatId, id, message.reactions, chat, newMessage.isOutgoing, currentMessage,
+        );
       }
 
       if (message.content?.text?.text !== currentMessage?.content?.text?.text) {
@@ -255,6 +265,39 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
     }
 
+    case 'updateQuickReplyMessage': {
+      const { id, message } = update;
+
+      global = updateQuickReplyMessage(global, id, message);
+      setGlobal(global);
+
+      break;
+    }
+
+    case 'deleteQuickReplyMessages': {
+      const { messageIds } = update;
+
+      global = deleteQuickReplyMessages(global, messageIds);
+      setGlobal(global);
+
+      break;
+    }
+
+    case 'updateQuickReplies': {
+      const { quickReplies } = update;
+      const byId = buildCollectionByKey(quickReplies, 'id');
+
+      global = updateQuickReplies(global, byId);
+      setGlobal(global);
+      break;
+    }
+
+    case 'deleteQuickReply': {
+      global = deleteQuickReply(global, update.quickReplyId);
+      setGlobal(global);
+      break;
+    }
+
     case 'updateMessageSendSucceeded': {
       const { chatId, localId, message } = update;
 
@@ -278,7 +321,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = {
         ...global,
         fileUploads: {
-          byMessageLocalId: omit(global.fileUploads.byMessageLocalId, [localId.toString()]),
+          byMessageKey: omit(global.fileUploads.byMessageKey, [getMessageKey(message)]),
         },
       };
 
@@ -619,7 +662,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (!chat || !message) return;
 
-      global = updateReactions(global, chatId, id, reactions, chat, message.isOutgoing, message);
+      global = updateReactions(global, actions, chatId, id, reactions, chat, message.isOutgoing, message);
       setGlobal(global);
       break;
     }
@@ -705,6 +748,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
 function updateReactions<T extends GlobalState>(
   global: T,
+  actions: RequiredGlobalActions,
   chatId: string,
   id: number,
   reactions: ApiReactions,
@@ -723,6 +767,14 @@ function updateReactions<T extends GlobalState>(
 
   if (!isOutgoing) {
     return global;
+  }
+
+  const { reaction, isOwn, isUnread } = reactions.recentReactions?.[0] ?? {};
+  const reactionEffectsEnabled = selectPerformanceSettingsValue(global, 'reactionEffects');
+  if (reactionEffectsEnabled && message && reaction && isUnread && !isOwn) {
+    const messageKey = getMessageKey(message);
+    // Start reaction only in master tab
+    actions.startActiveReaction({ containerId: messageKey, reaction, tabId: getCurrentTabId() });
   }
 
   const alreadyHasUnreadReaction = chat.unreadReactions?.includes(id);
@@ -756,26 +808,31 @@ function updateReactions<T extends GlobalState>(
 }
 
 function updateWithLocalMedia(
-  global: RequiredGlobalState, chatId: string, id: number, messageUpdate: Partial<ApiMessage>, isScheduled = false,
+  global: RequiredGlobalState,
+  chatId: string,
+  id: number,
+  messageUpdate: Partial<ApiMessage>,
+  isScheduled = false,
 ) {
   const currentMessage = isScheduled
     ? selectScheduledMessage(global, chatId, id)
     : selectChatMessage(global, chatId, id);
 
   // Preserve locally uploaded media.
-  if (currentMessage && messageUpdate.content) {
+  if (currentMessage && messageUpdate.content && !isLocalMessageId(id)) {
     const {
       photo, video, sticker, document,
     } = getMessageContent(currentMessage);
+
     if (photo && messageUpdate.content.photo) {
-      messageUpdate.content.photo.blobUrl = photo.blobUrl;
-      messageUpdate.content.photo.thumbnail = photo.thumbnail;
+      messageUpdate.content.photo.blobUrl ??= photo.blobUrl;
+      messageUpdate.content.photo.thumbnail ??= photo.thumbnail;
     } else if (video && messageUpdate.content.video) {
-      messageUpdate.content.video.blobUrl = video.blobUrl;
+      messageUpdate.content.video.blobUrl ??= video.blobUrl;
     } else if (sticker && messageUpdate.content.sticker) {
-      messageUpdate.content.sticker.isPreloadedGlobally = sticker.isPreloadedGlobally;
+      messageUpdate.content.sticker.isPreloadedGlobally ??= sticker.isPreloadedGlobally;
     } else if (document && messageUpdate.content.document) {
-      messageUpdate.content.document.previewBlobUrl = document.previewBlobUrl;
+      messageUpdate.content.document.previewBlobUrl ??= document.previewBlobUrl;
     }
   }
 

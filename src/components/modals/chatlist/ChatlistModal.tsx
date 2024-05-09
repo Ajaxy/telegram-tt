@@ -19,7 +19,7 @@ import ChatlistNew from './ChatlistNew';
 import styles from './ChatlistModal.module.scss';
 
 export type OwnProps = {
-  info?: TabState['chatlistModal'];
+  modal?: TabState['chatlistModal'];
 };
 
 type StateProps = {
@@ -27,15 +27,15 @@ type StateProps = {
 };
 
 const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
-  info,
+  modal,
   folder,
 }) => {
   const { closeChatlistModal } = getActions();
 
   const lang = useLang();
 
-  const isOpen = Boolean(info);
-  const renderingInfo = usePrevious(info) || info;
+  const isOpen = Boolean(modal);
+  const renderingInfo = usePrevious(modal) || modal;
   const renderingFolder = usePrevious(folder) || folder;
 
   const title = useMemo(() => {
@@ -111,8 +111,8 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { info }): StateProps => {
-    const { invite, removal } = info || {};
+  (global, { modal }): StateProps => {
+    const { invite, removal } = modal || {};
     const folderId = removal?.folderId || (invite && 'folderId' in invite ? invite.folderId : undefined);
     const folder = folderId ? selectChatFolder(global, folderId) : undefined;
 

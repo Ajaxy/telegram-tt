@@ -12,6 +12,8 @@ import type {
   ApiMessageOutgoingStatus,
   ApiPeer,
   ApiReaction,
+  ApiReactionKey,
+  ApiSavedReactionTag,
   ApiThreadInfo,
   ApiTopic,
   ApiTypeStory,
@@ -37,7 +39,6 @@ import {
   getMessageContent,
   getMessageCustomShape,
   getMessageHtmlId,
-  getMessageKey,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
   getSenderTitle,
@@ -80,6 +81,7 @@ import {
   selectIsMessageSelected,
   selectMessageIdsByGroupId,
   selectOutgoingStatus,
+  selectPeer,
   selectPeerStory,
   selectPerformanceSettingsValue,
   selectReplySender,
@@ -99,6 +101,7 @@ import {
 import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
 import { isElementInViewport } from '../../../util/isElementInViewport';
+import { getMessageKey } from '../../../util/messageKey';
 import stopEvent from '../../../util/stopEvent';
 import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import {
@@ -165,7 +168,7 @@ import MessageMeta from './MessageMeta';
 import MessagePhoneCall from './MessagePhoneCall';
 import Photo from './Photo';
 import Poll from './Poll';
-import Reactions from './Reactions';
+import Reactions from './reactions/Reactions';
 import RoundVideo from './RoundVideo';
 import Sticker from './Sticker';
 import Story from './Story';
@@ -220,7 +223,7 @@ type StateProps = {
   replyMessageChat?: ApiChat;
   isReplyPrivate?: boolean;
   replyStory?: ApiTypeStory;
-  storySender?: ApiUser;
+  storySender?: ApiPeer;
   outgoingStatus?: ApiMessageOutgoingStatus;
   uploadProgress?: number;
   isInDocumentGroup: boolean;
@@ -277,6 +280,10 @@ type StateProps = {
   isConnected: boolean;
   isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
+  senderBoosts?: number;
+  tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
+  canTranscribeVoice?: boolean;
+  viaBusinessBot?: ApiUser;
 };
 
 type MetaPosition =
@@ -391,6 +398,10 @@ const Message: FC<OwnProps & StateProps> = ({
   isConnected,
   getIsMessageListReady,
   shouldWarnAboutSvg,
+  senderBoosts,
+  tags,
+  canTranscribeVoice,
+  viaBusinessBot,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -399,6 +410,7 @@ const Message: FC<OwnProps & StateProps> = ({
     disableContextMenuHint,
     animateUnreadReaction,
     focusLastMessage,
+    markMentionsRead,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -530,7 +542,6 @@ const Message: FC<OwnProps & StateProps> = ({
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
   const messageColorPeer = originSender || sender;
   const senderPeer = (forwardInfo || message.content.storyData) ? originSender : messageSender;
-  const hasText = hasMessageText(message);
   const hasTtl = hasMessageTtl(message);
 
   const {
@@ -612,6 +623,9 @@ const Message: FC<OwnProps & StateProps> = ({
     }
   }, [focusLastMessage, isLastInList, transcribedText, withVoiceTranscription]);
 
+  const textMessage = album?.hasMultipleCaptions ? undefined : (album?.captionMessage || message);
+  const hasText = textMessage && hasMessageText(textMessage);
+
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
@@ -643,15 +657,16 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const {
-    text, photo, video, audio,
+    photo, video, audio,
     voice, document, sticker, contact,
     poll, webPage, invoice, location,
     action, game, storyData, giveaway,
     giveawayResults,
   } = getMessageContent(message);
+  const text = textMessage && getMessageContent(textMessage).text;
 
   const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
-  const { userId: storyReplyUserId, storyId: storyReplyId } = storyReplyInfo || {};
+  const { peerId: storyReplyPeerId, storyId: storyReplyId } = storyReplyInfo || {};
 
   const detectedLanguage = useTextLanguage(
     text?.text,
@@ -681,14 +696,14 @@ const Message: FC<OwnProps & StateProps> = ({
   const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
     && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl;
 
-  const contentClassName = buildContentClassName(message, {
+  const contentClassName = buildContentClassName(message, album, {
     hasSubheader,
     isCustomShape,
     isLastInGroup,
     asForwarded,
     hasThread: hasThread && !noComments,
     forceSenderName,
-    hasComments: repliesThreadInfo && repliesThreadInfo.messagesCount > 0,
+    hasCommentCounter: hasThread && repliesThreadInfo.messagesCount > 0,
     hasActionButton: canForward || canFocus,
     hasReactions,
     isGeoLiveActive: location?.type === 'geoLive' && !isGeoLiveExpired(message),
@@ -735,7 +750,7 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   useEnsureStory(
-    storyReplyUserId || chatId,
+    storyReplyPeerId || chatId,
     storyReplyId,
     replyStory,
   );
@@ -744,7 +759,9 @@ const Message: FC<OwnProps & StateProps> = ({
     ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded, Boolean(focusedQuote),
   );
 
-  const signature = (isChannel && message.postAuthorTitle)
+  const viaBusinessBotTitle = viaBusinessBot ? getSenderTitle(lang, viaBusinessBot) : undefined;
+
+  const signature = viaBusinessBotTitle || (isChannel && message.postAuthorTitle)
     || ((asForwarded || isChatWithSelf) && forwardInfo?.postAuthorTitle)
     || undefined;
 
@@ -779,10 +796,16 @@ const Message: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     const bottomMarker = bottomMarkerRef.current;
-    if (hasUnreadReaction && bottomMarker && isElementInViewport(bottomMarker)) {
+    if (!bottomMarker || !isElementInViewport(bottomMarker)) return;
+
+    if (hasUnreadReaction) {
       animateUnreadReaction({ messageIds: [messageId] });
     }
-  }, [hasUnreadReaction, messageId, animateUnreadReaction]);
+
+    if (message.hasUnreadMention) {
+      markMentionsRead({ messageIds: [messageId] });
+    }
+  }, [hasUnreadReaction, messageId, animateUnreadReaction, message.hasUnreadMention]);
 
   const albumLayout = useMemo(() => {
     return isAlbum
@@ -876,9 +899,10 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   function renderMessageText(isForAnimation?: boolean) {
+    if (!textMessage) return undefined;
     return (
       <MessageText
-        messageOrStory={message}
+        messageOrStory={textMessage}
         translatedText={requestedTranslationLanguage ? currentTranslatedText : undefined}
         isForAnimation={isForAnimation}
         focusedQuote={focusedQuote}
@@ -946,6 +970,8 @@ const Message: FC<OwnProps & StateProps> = ({
         metaChildren={meta}
         observeIntersection={observeIntersectionForPlaying}
         noRecentReactors={isChannel}
+        tags={tags}
+        isCurrentUserPremium={isPremium}
       />
     );
   }
@@ -964,6 +990,7 @@ const Message: FC<OwnProps & StateProps> = ({
       metaPosition === 'in-text' && 'with-meta',
       outgoingStatus && 'with-outgoing-icon',
     );
+    const shouldReadMedia = !hasTtl || !isOwn || isChatWithSelf;
 
     return (
       <div className={className} onDoubleClick={handleContentDoubleClick} dir="auto">
@@ -1086,6 +1113,7 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             isDownloading={isDownloading}
+            onReadMedia={shouldReadMedia ? handleReadMedia : undefined}
           />
         )}
         {!isAlbum && video && !video.isRound && (
@@ -1115,7 +1143,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isSelected={isSelected}
             noAvatars={noAvatars}
             onPlay={handleAudioPlay}
-            onReadMedia={voice && (!isOwn || isChatWithSelf || (isOwn && !hasTtl)) ? handleReadMedia : undefined}
+            onReadMedia={voice && shouldReadMedia ? handleReadMedia : undefined}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
             isTranscribing={isTranscribing}
@@ -1124,7 +1152,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isTranscriptionError={isTranscriptionError}
             canDownload={!isProtected}
             onHideTranscription={setTranscriptionHidden}
-            canTranscribe={isPremium && !hasTtl}
+            canTranscribe={canTranscribeVoice && !hasTtl}
           />
         )}
         {document && (
@@ -1150,7 +1178,7 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {isStoryMention && <StoryMention message={message} />}
         {contact && (
-          <Contact contact={contact} />
+          <Contact contact={contact} noUserColors={isOwn} />
         )}
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
@@ -1202,7 +1230,8 @@ const Message: FC<OwnProps & StateProps> = ({
         {webPage && (
           <WebPage
             message={message}
-            observeIntersection={observeIntersectionForLoading}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
@@ -1213,6 +1242,9 @@ const Message: FC<OwnProps & StateProps> = ({
             story={webPageStory}
             isConnected={isConnected}
             backgroundEmojiId={sender?.color?.backgroundEmojiId}
+            shouldWarnAboutSvg={shouldWarnAboutSvg}
+            autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
+            onAudioPlay={handleAudioPlay}
             onMediaClick={handleMediaClick}
             onCancelMediaTransfer={handleCancelUpload}
           />
@@ -1304,6 +1336,7 @@ const Message: FC<OwnProps & StateProps> = ({
             </span>
           </>
         )}
+        <div className="title-spacer" />
         {forwardInfo?.isLinkedChannelPost ? (
           <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
         ) : message.forwardInfo?.postAuthorTitle && isGroup && asForwarded ? (
@@ -1317,6 +1350,12 @@ const Message: FC<OwnProps & StateProps> = ({
             )}
           </span>
         ) : undefined}
+        {Boolean(senderBoosts) && (
+          <span className="sender-boosts" aria-hidden>
+            <Icon name={senderBoosts > 1 ? 'boosts' : 'boost'} />
+            {senderBoosts > 1 ? senderBoosts : undefined}
+          </span>
+        )}
       </div>
     );
   }
@@ -1351,7 +1390,7 @@ const Message: FC<OwnProps & StateProps> = ({
       />
       {!isInDocumentGroup && (
         <div className="message-select-control">
-          {isSelected && <i className="icon icon-select" />}
+          {isSelected && <Icon name="select" />}
         </div>
       )}
       {isLastInDocumentGroup && (
@@ -1360,7 +1399,7 @@ const Message: FC<OwnProps & StateProps> = ({
           onClick={handleDocumentGroupSelectAll}
         >
           {isGroupSelected && (
-            <i className="icon icon-select" />
+            <Icon name="select" />
           )}
         </div>
       )}
@@ -1381,33 +1420,38 @@ const Message: FC<OwnProps & StateProps> = ({
           )}
           {renderContent()}
           {!isInDocumentGroupNotLast && metaPosition === 'standalone' && !isStoryMention && renderReactionsAndMeta()}
-          {canShowActionButton && canForward ? (
-            <Button
-              className={buildClassName(
-                'message-action-button', isLoadingComments && 'message-action-button-shown',
-              )}
-              color="translucent-white"
-              round
-              size="tiny"
-              ariaLabel={lang('lng_context_forward_msg')}
-              onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
+          {canShowActionButton && (
+            <div className={buildClassName(
+              'message-action-buttons',
+              isLoadingComments && 'message-action-buttons-shown',
+            )}
             >
-              <i className="icon icon-share-filled" />
-            </Button>
-          ) : canShowActionButton && canFocus ? (
-            <Button
-              className={buildClassName(
-                'message-action-button', isLoadingComments && 'message-action-button-shown',
+              {canForward && (
+                <Button
+                  className="message-action-button"
+                  color="translucent-white"
+                  round
+                  size="tiny"
+                  ariaLabel={lang('lng_context_forward_msg')}
+                  onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
+                >
+                  <Icon name="share-filled" />
+                </Button>
               )}
-              color="translucent-white"
-              round
-              size="tiny"
-              ariaLabel="Focus message"
-              onClick={isPinnedList ? handleFocus : handleFocusForwarded}
-            >
-              <i className="icon icon-arrow-right" />
-            </Button>
-          ) : undefined}
+              {canFocus && (
+                <Button
+                  className="message-action-button"
+                  color="translucent-white"
+                  round
+                  size="tiny"
+                  ariaLabel="Focus message"
+                  onClick={isPinnedList ? handleFocus : handleFocusForwarded}
+                >
+                  <Icon name="arrow-right" />
+                </Button>
+              )}
+            </div>
+          )}
           {withCommentButton && (
             <CommentButton
               threadInfo={repliesThreadInfo}
@@ -1426,9 +1470,11 @@ const Message: FC<OwnProps & StateProps> = ({
           <Reactions
             message={reactionMessage!}
             isOutside
+            isCurrentUserPremium={isPremium}
             maxWidth={reactionsMaxWidth}
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
+            tags={tags}
           />
         )}
       </div>
@@ -1461,7 +1507,7 @@ export default memo(withGlobal<OwnProps>(
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
     const {
-      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned,
+      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, viaBusinessBotId,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -1489,7 +1535,7 @@ export default memo(withGlobal<OwnProps>(
     const isThreadTop = message.id === threadId;
 
     const { replyToMsgId, replyToPeerId, replyFrom } = getMessageReplyInfo(message) || {};
-    const { userId: storyReplyUserId, storyId: storyReplyId } = getStoryReplyInfo(message) || {};
+    const { peerId: storyReplyPeerId, storyId: storyReplyId } = getStoryReplyInfo(message) || {};
 
     const shouldHideReply = replyToMsgId && replyToMsgId === threadId;
     const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
@@ -1502,10 +1548,10 @@ export default memo(withGlobal<OwnProps>(
     const isReplyPrivate = !isRepliesChat && !isAnonymousForwards && replyMessageChat && !isChatPublic(replyMessageChat)
       && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
-    const replyStory = storyReplyId && storyReplyUserId
-      ? selectPeerStory(global, storyReplyUserId, storyReplyId)
+    const replyStory = storyReplyId && storyReplyPeerId
+      ? selectPeerStory(global, storyReplyPeerId, storyReplyId)
       : undefined;
-    const storySender = storyReplyUserId ? selectUser(global, storyReplyUserId) : undefined;
+    const storySender = storyReplyPeerId ? selectPeer(global, storyReplyPeerId) : undefined;
 
     const uploadProgress = selectUploadProgress(global, message);
     const isFocused = messageListType === 'thread' && (
@@ -1534,7 +1580,7 @@ export default memo(withGlobal<OwnProps>(
     const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
     const isDownloading = selectIsDownloading(global, message);
 
-    const repliesThreadInfo = selectThreadInfo(global, chatId, album?.mainMessage.id || id);
+    const repliesThreadInfo = selectThreadInfo(global, chatId, album?.commentsMessage?.id || id);
 
     const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
     const documentGroupFirstMessageId = isInDocumentGroup
@@ -1561,6 +1607,16 @@ export default memo(withGlobal<OwnProps>(
     const isConnected = global.connectionState === 'connectionStateReady';
 
     const hasActiveReactions = Boolean(reactionMessage && activeReactions[getMessageKey(reactionMessage)]?.length);
+
+    const isPremium = selectIsCurrentUserPremium(global);
+    const senderBoosts = sender && selectIsChatWithSelf(global, sender.id)
+      ? (chatFullInfo?.boostsApplied ?? message.senderBoosts) : message.senderBoosts;
+
+    const chatLevel = chat?.boostLevel || 0;
+    const transcribeMinLevel = global.appConfig?.groupTranscribeLevelMin;
+    const canTranscribeVoice = isPremium || Boolean(transcribeMinLevel && chatLevel >= transcribeMinLevel);
+
+    const viaBusinessBot = viaBusinessBotId ? selectUser(global, viaBusinessBotId) : undefined;
 
     return {
       theme: selectTheme(global),
@@ -1609,7 +1665,7 @@ export default memo(withGlobal<OwnProps>(
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
       shouldLoopStickers: selectShouldLoopStickers(global),
       repliesThreadInfo,
-      availableReactions: global.availableReactions,
+      availableReactions: global.reactions.availableReactions,
       defaultReaction: isMessageLocal(message) || messageListType === 'scheduled'
         ? undefined : selectDefaultReaction(global, chatId),
       hasActiveReactions,
@@ -1617,7 +1673,7 @@ export default memo(withGlobal<OwnProps>(
       hasUnreadReaction,
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
-      isPremium: selectIsCurrentUserPremium(global),
+      isPremium,
       senderAdminMember,
       messageTopic,
       hasTopicChip,
@@ -1642,6 +1698,10 @@ export default memo(withGlobal<OwnProps>(
         isResizingContainer,
         focusedQuote,
       }),
+      senderBoosts,
+      tags: global.savedReactionTags?.byKey,
+      canTranscribeVoice,
+      viaBusinessBot,
     };
   },
 )(Message));

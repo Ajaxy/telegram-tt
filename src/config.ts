@@ -1,5 +1,5 @@
 import type { ApiReactionEmoji } from './api/types';
-import type { ApiLimitType } from './global/types';
+import type { ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection } from './global/types';
 
 export const APP_CODE_NAME = 'A';
 export const APP_NAME = process.env.APP_NAME || `Telegram Web ${APP_CODE_NAME}`;
@@ -33,13 +33,13 @@ export const INACTIVE_MARKER = '[Inactive]';
 export const DEBUG_PAYMENT_SMART_GLOCAL = false;
 
 export const SESSION_USER_KEY = 'user_auth';
-export const LEGACY_SESSION_KEY = 'GramJs:sessionId';
 export const PASSCODE_CACHE_NAME = 'tt-passcode';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
 export const GLOBAL_STATE_CACHE_USER_LIST_LIMIT = 500;
 export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 200;
+export const GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT = 10;
 export const GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT = 150;
 
 export const MEDIA_CACHE_DISABLED = false;
@@ -47,11 +47,9 @@ export const MEDIA_CACHE_NAME = 'tt-media';
 export const MEDIA_CACHE_NAME_AVATARS = 'tt-media-avatars';
 export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
-export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
-export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v31';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v35';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -94,6 +92,8 @@ export const STATISTICS_PUBLIC_FORWARDS_LIMIT = 50;
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
 export const STORY_VIEWS_MIN_CONTACTS_FILTER = 20;
+
+export const GLOBAL_SUGGESTED_CHANNELS_ID = 'global';
 
 // As in Telegram for Android
 // https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7799
@@ -206,7 +206,6 @@ export const POPULAR_SYMBOL_SET_ID = 'popular';
 export const RECENT_SYMBOL_SET_ID = 'recent';
 export const FAVORITE_SYMBOL_SET_ID = 'favorite';
 export const CHAT_STICKER_SET_ID = 'chatStickers';
-export const PREMIUM_STICKER_SET_ID = 'premium';
 export const DEFAULT_TOPIC_ICON_STICKER_ID = 'topic-default-icon';
 export const DEFAULT_STATUS_ICON_ID = 'status-default-icon';
 export const EMOJI_IMG_REGEX = /<img[^>]+alt="([^"]+)"(?![^>]*data-document-id)[^>]*>/gm;
@@ -216,8 +215,13 @@ export const BASE_EMOJI_KEYWORD_LANG = 'en';
 export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
+export const BIRTHDAY_NUMBERS_SET = 'FestiveFontEmoji';
+
 export const VIDEO_WEBM_TYPE = 'video/webm';
 export const GIF_MIME_TYPE = 'image/gif';
+
+export const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
+export const VIDEO_STICKER_MIME_TYPE = VIDEO_WEBM_TYPE;
 
 export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
   'image/png', 'image/jpeg', GIF_MIME_TYPE,
@@ -292,12 +296,12 @@ export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
 export const ANONYMOUS_USER_ID = '2666000';
 export const RESTRICTED_EMOJI_SET_ID = '7173162320003080';
-export const CHANNEL_ID_LENGTH = 14; // 14 symbols, including -100 prefix
+export const CHANNEL_ID_LENGTH = 14; // 14 symbols, based on TDLib's `ZERO_CHANNEL_ID = -1000000000000`
 export const DEFAULT_GIF_SEARCH_BOT_USERNAME = 'gif';
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
 export const SAVED_FOLDER_ID = -1;
-export const DELETED_COMMENTS_CHANNEL_ID = '-100777';
+export const DELETED_COMMENTS_CHANNEL_ID = '-1000000000777';
 export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;
@@ -312,6 +316,13 @@ export const GENERAL_TOPIC_ID = 1;
 export const STORY_EXPIRE_PERIOD = 86400; // 1 day
 export const STORY_VIEWERS_EXPIRE_PERIOD = 86400; // 1 day
 export const FRESH_AUTH_PERIOD = 86400; // 1 day
+export const GIVEAWAY_BOOST_PER_PREMIUM = 4;
+export const GIVEAWAY_MAX_ADDITIONAL_CHANNELS = 10;
+export const GIVEAWAY_MAX_ADDITIONAL_USERS = 10;
+export const GIVEAWAY_MAX_ADDITIONAL_COUNTRIES = 10;
+export const BOOST_PER_SENT_GIFT = 3;
+export const FRAGMENT_PHONE_CODE = '888';
+export const FRAGMENT_PHONE_LENGTH = 11;
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
@@ -325,7 +336,6 @@ export const MAX_UPLOAD_FILEPART_SIZE = 524288;
 // Group calls
 export const GROUP_CALL_VOLUME_MULTIPLIER = 100;
 export const GROUP_CALL_DEFAULT_VOLUME = 100 * GROUP_CALL_VOLUME_MULTIPLIER;
-export const GROUP_CALL_THUMB_VIDEO_DISABLED = true;
 
 export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   uploadMaxFileparts: [4000, 8000],
@@ -343,3 +353,53 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   recommendedChannels: [10, 100],
   savedDialogsPinned: [5, 100],
 };
+
+export const ONE_TIME_MEDIA_TTL_SECONDS = 2147483647;
+
+// Premium
+export const PREMIUM_FEATURE_SECTIONS = [
+  'stories',
+  'double_limits',
+  'more_upload',
+  'faster_download',
+  'voice_to_text',
+  'no_ads',
+  'infinite_reactions',
+  'premium_stickers',
+  'animated_emoji',
+  'advanced_chat_management',
+  'profile_badge',
+  'animated_userpics',
+  'emoji_status',
+  'translations',
+  'saved_tags',
+  'last_seen',
+  'message_privacy',
+] as const;
+
+export const PREMIUM_BOTTOM_VIDEOS: ApiPremiumSection[] = [
+  'faster_download',
+  'voice_to_text',
+  'advanced_chat_management',
+  'infinite_reactions',
+  'profile_badge',
+  'animated_userpics',
+  'emoji_status',
+  'translations',
+  'saved_tags',
+  'last_seen',
+  'message_privacy',
+];
+
+export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [
+  'channels',
+  'dialogFolderPinned',
+  'channelsPublic',
+  'savedGifs',
+  'stickersFaved',
+  'aboutLength',
+  'captionLength',
+  'dialogFilters',
+  'dialogFiltersChats',
+  'recommendedChannels',
+];

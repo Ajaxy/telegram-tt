@@ -24,9 +24,9 @@ type OwnProps = {
 };
 
 type StateProps = {
-  chat: ApiChat;
+  chat?: ApiChat;
   currentUserId?: string;
-  isChannel: boolean;
+  isChannel?: boolean;
   adminMembersById?: Record<string, ApiChatMember>;
 };
 
@@ -47,7 +47,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  const canAddNewAdmins = Boolean(chat.isCreator || chat.adminRights?.addAdmins);
+  const canAddNewAdmins = Boolean(chat?.isCreator || chat?.adminRights?.addAdmins);
 
   const adminMembers = useMemo(() => {
     if (!adminMembersById) {
@@ -141,12 +141,12 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const chat = selectChat(global, chatId)!;
+    const chat = selectChat(global, chatId);
 
     return {
       chat,
       currentUserId: global.currentUserId,
-      isChannel: isChatChannel(chat),
+      isChannel: chat && isChatChannel(chat),
       adminMembersById: selectChatFullInfo(global, chatId)?.adminMembersById,
     };
   },

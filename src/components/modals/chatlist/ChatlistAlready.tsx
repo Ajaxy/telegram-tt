@@ -86,7 +86,7 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
         </div>
         <Picker
           itemIds={invite.alreadyPeerIds}
-          lockedIds={invite.alreadyPeerIds}
+          lockedSelectedIds={invite.alreadyPeerIds}
           selectedIds={invite.alreadyPeerIds}
         />
       </div>

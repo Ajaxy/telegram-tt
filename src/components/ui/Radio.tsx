@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, MouseEventHandler } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
@@ -18,33 +18,42 @@ type OwnProps = {
   value: string;
   checked: boolean;
   disabled?: boolean;
+  isLink?: boolean;
   hidden?: boolean;
   isLoading?: boolean;
+  className?: string;
+  subLabelClassName?: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onSubLabelClick?: MouseEventHandler<HTMLSpanElement> | undefined;
 };
 
 const Radio: FC<OwnProps> = ({
   id,
   label,
   subLabel,
+  subLabelClassName,
   value,
   name,
   checked,
   disabled,
   hidden,
   isLoading,
+  className,
   onChange,
+  isLink,
+  onSubLabelClick,
 }) => {
   const lang = useLang();
-  const className = buildClassName(
+  const fullClassName = buildClassName(
     'Radio',
+    className,
     disabled && 'disabled',
     hidden && 'hidden-widget',
     isLoading && 'loading',
   );
 
   return (
-    <label className={className} dir={lang.isRtl ? 'rtl' : undefined}>
+    <label className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       <input
         type="radio"
         name={name}
@@ -56,7 +65,16 @@ const Radio: FC<OwnProps> = ({
       />
       <div className="Radio-main">
         <span className="label" dir={lang.isRtl ? 'auto' : undefined}>{label}</span>
-        {subLabel && <span className="subLabel" dir={lang.isRtl ? 'auto' : undefined}>{subLabel}</span>}
+        {subLabel
+          && (
+            <span
+              className={buildClassName(subLabelClassName, 'subLabel', isLink ? 'subLabelLink' : undefined)}
+              dir={lang.isRtl ? 'auto' : undefined}
+              onClick={isLink ? onSubLabelClick : undefined}
+            >
+              {subLabel}
+            </span>
+          )}
       </div>
       {isLoading && <Spinner />}
     </label>

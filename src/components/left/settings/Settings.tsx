@@ -14,6 +14,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';
 import SettingsPasscode from './passcode/SettingsPasscode';
+import PrivacyMessages from './PrivacyMessages';
 import SettingsActiveSessions from './SettingsActiveSessions';
 import SettingsActiveWebsites from './SettingsActiveWebsites';
 import SettingsCustomEmoji from './SettingsCustomEmoji';
@@ -102,6 +103,11 @@ const PRIVACY_PROFILE_PHOTO_SCREENS = [
 const PRIVACY_BIO_SCREENS = [
   SettingsScreens.PrivacyBioAllowedContacts,
   SettingsScreens.PrivacyBioDeniedContacts,
+];
+
+const PRIVACY_BIRTHDAY_SCREENS = [
+  SettingsScreens.PrivacyBirthdayAllowedContacts,
+  SettingsScreens.PrivacyBirthdayDeniedContacts,
 ];
 
 const PRIVACY_PHONE_CALL_SCREENS = [
@@ -197,6 +203,7 @@ const Settings: FC<OwnProps> = ({
       [SettingsScreens.PrivacyLastSeen]: PRIVACY_LAST_SEEN_PHONE_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyProfilePhoto]: PRIVACY_PROFILE_PHOTO_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyBio]: PRIVACY_BIO_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyBirthday]: PRIVACY_BIRTHDAY_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyPhoneCall]: PRIVACY_PHONE_CALL_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyPhoneP2P]: PRIVACY_PHONE_P2P_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(activeScreen),
@@ -322,6 +329,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyLastSeen:
       case SettingsScreens.PrivacyProfilePhoto:
       case SettingsScreens.PrivacyBio:
+      case SettingsScreens.PrivacyBirthday:
       case SettingsScreens.PrivacyPhoneCall:
       case SettingsScreens.PrivacyForwarding:
       case SettingsScreens.PrivacyVoiceMessages:
@@ -339,6 +347,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyLastSeenAllowedContacts:
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyBioAllowedContacts:
+      case SettingsScreens.PrivacyBirthdayAllowedContacts:
       case SettingsScreens.PrivacyPhoneCallAllowedContacts:
       case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
@@ -358,6 +367,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyLastSeenDeniedContacts:
       case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       case SettingsScreens.PrivacyBioDeniedContacts:
+      case SettingsScreens.PrivacyBirthdayDeniedContacts:
       case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:
@@ -367,6 +377,14 @@ const Settings: FC<OwnProps> = ({
           <SettingsPrivacyVisibilityExceptionList
             screen={currentScreen}
             onScreenSelect={onScreenSelect}
+            isActive={isScreenActive}
+            onReset={handleReset}
+          />
+        );
+
+      case SettingsScreens.PrivacyMessages:
+        return (
+          <PrivacyMessages
             isActive={isScreenActive}
             onReset={handleReset}
           />

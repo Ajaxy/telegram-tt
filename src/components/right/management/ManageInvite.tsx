@@ -7,7 +7,7 @@ import type { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { formatFullDate, formatTime } from '../../../util/dateFormat';
+import { formatFullDate, formatTime } from '../../../util/date/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useFlag from '../../../hooks/useFlag';
@@ -267,7 +267,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const { editingInvite } = selectTabState(global).management.byChatId[chatId];
+    const { editingInvite } = selectTabState(global).management.byChatId[chatId] || {};
 
     return {
       editingInvite,

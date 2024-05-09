@@ -24,6 +24,9 @@ export function formatCurrency(
 }
 
 function getCurrencyExp(currency: string) {
+  if (currency === 'TON') {
+    return 9;
+  }
   if (currency === 'CLF') {
     return 4;
   }

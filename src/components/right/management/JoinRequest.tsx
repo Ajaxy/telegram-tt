@@ -7,7 +7,7 @@ import type { ApiUser } from '../../../api/types';
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
 import { createClassNameBuilder } from '../../../util/buildClassName';
-import { formatHumanDate, formatTime, isToday } from '../../../util/dateFormat';
+import { formatHumanDate, formatTime, isToday } from '../../../util/date/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useLang from '../../../hooks/useLang';

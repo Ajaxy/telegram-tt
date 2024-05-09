@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useRef, useState } from '../../../lib/teact/teact';
+import React, { useEffect, useRef, useState } from '../../../lib/teact/teact';
 
 import type { ApiMessage } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -102,7 +102,15 @@ const Photo: FC<OwnProps> = ({
   const thumbClassNames = useMediaTransition(!noThumb);
   const thumbDataUri = getMessageMediaThumbDataUri(message);
 
-  const [isSpoilerShown, , hideSpoiler] = useFlag(photo.isSpoiler);
+  const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(photo.isSpoiler);
+
+  useEffect(() => {
+    if (photo.isSpoiler) {
+      showSpoiler();
+    } else {
+      hideSpoiler();
+    }
+  }, [photo.isSpoiler]);
 
   const {
     loadProgress: downloadProgress,
@@ -116,6 +124,7 @@ const Photo: FC<OwnProps> = ({
     message,
     uploadProgress || (isDownloading ? downloadProgress : loadProgress),
     shouldLoad && !fullMediaData,
+    uploadProgress !== undefined,
   );
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
 

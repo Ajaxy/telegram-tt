@@ -3,10 +3,12 @@ import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import type { ApiCountry } from '../../api/types';
+
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { buildCollectionByKey } from '../../util/iteratees';
 
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
@@ -27,6 +29,9 @@ type OwnProps = {
   className?: string;
   itemIds: string[];
   selectedIds: string[];
+  lockedSelectedIds?: string[];
+  lockedUnselectedIds?: string[];
+  lockedUnselectedSubtitle?: string;
   filterValue?: string;
   filterPlaceholder?: string;
   notFoundText?: string;
@@ -35,12 +40,14 @@ type OwnProps = {
   noScrollRestore?: boolean;
   isSearchable?: boolean;
   isRoundCheckbox?: boolean;
-  lockedIds?: string[];
   forceShowSelf?: boolean;
+  isViewOnly?: boolean;
   onSelectedIdsChange?: (ids: string[]) => void;
   onFilterChange?: (value: string) => void;
-  onDisabledClick?: (id: string) => void;
+  onDisabledClick?: (id: string, isSelected: boolean) => void;
   onLoadMore?: () => void;
+  isCountryList?: boolean;
+  countryList?: ApiCountry[];
 };
 
 // Focus slows down animation, also it breaks transition layout in Chrome
@@ -61,12 +68,17 @@ const Picker: FC<OwnProps> = ({
   noScrollRestore,
   isSearchable,
   isRoundCheckbox,
-  lockedIds,
+  lockedSelectedIds,
+  lockedUnselectedIds,
+  lockedUnselectedSubtitle,
   forceShowSelf,
+  isViewOnly,
   onSelectedIdsChange,
   onFilterChange,
   onDisabledClick,
   onLoadMore,
+  isCountryList,
+  countryList,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -75,37 +87,45 @@ const Picker: FC<OwnProps> = ({
   useEffect(() => {
     if (!isSearchable) return;
     setTimeout(() => {
-      requestMutation(() => {
+      requestMeasure(() => {
         inputRef.current!.focus();
       });
     }, FOCUS_DELAY_MS);
   }, [isSearchable]);
 
-  const [lockedSelectedIds, unlockedSelectedIds] = useMemo(() => {
-    if (!lockedIds?.length) return [MEMO_EMPTY_ARRAY, selectedIds];
-    const unlockedIds = selectedIds.filter((id) => !lockedIds.includes(id));
-    return [lockedIds, unlockedIds];
-  }, [selectedIds, lockedIds]);
+  const lockedSelectedIdsSet = useMemo(() => new Set(lockedSelectedIds), [lockedSelectedIds]);
+  const lockedUnselectedIdsSet = useMemo(() => new Set(lockedUnselectedIds), [lockedUnselectedIds]);
 
-  const lockedIdsSet = useMemo(() => new Set(lockedIds), [lockedIds]);
+  const unlockedSelectedIds = useMemo(() => {
+    return selectedIds.filter((id) => !lockedSelectedIdsSet.has(id));
+  }, [lockedSelectedIdsSet, selectedIds]);
 
   const sortedItemIds = useMemo(() => {
-    return itemIds.sort((a, b) => {
-      const aIsLocked = lockedIdsSet.has(a);
-      const bIsLocked = lockedIdsSet.has(b);
-      if (aIsLocked && !bIsLocked) {
-        return -1;
+    const lockedSelectedBucket: string[] = [];
+    const unlockedBucket: string[] = [];
+    const lockedUnselectableBucket: string[] = [];
+
+    itemIds.forEach((id) => {
+      if (lockedSelectedIdsSet.has(id)) {
+        lockedSelectedBucket.push(id);
+      } else if (lockedUnselectedIdsSet.has(id)) {
+        lockedUnselectableBucket.push(id);
+      } else {
+        unlockedBucket.push(id);
       }
-      if (!aIsLocked && bIsLocked) {
-        return 1;
-      }
-      return 0;
     });
-  }, [itemIds, lockedIdsSet]);
+
+    return lockedSelectedBucket.concat(unlockedBucket).concat(lockedUnselectableBucket);
+  }, [itemIds, lockedSelectedIdsSet, lockedUnselectedIdsSet]);
 
   const handleItemClick = useLastCallback((id: string) => {
-    if (lockedIdsSet.has(id)) {
-      onDisabledClick?.(id);
+    if (lockedSelectedIdsSet.has(id)) {
+      onDisabledClick?.(id, true);
+      return;
+    }
+
+    if (lockedUnselectedIdsSet.has(id)) {
+      onDisabledClick?.(id, false);
       return;
     }
 
@@ -128,11 +148,34 @@ const Picker: FC<OwnProps> = ({
 
   const lang = useLang();
 
+  const countriesByIso = useMemo(() => {
+    if (!countryList) return undefined;
+    return buildCollectionByKey(countryList, 'iso2');
+  }, [countryList]);
+
+  const renderChatInfo = (id: string) => {
+    const isUnselectable = lockedUnselectedIdsSet.has(id);
+    if (isCountryList && countriesByIso) {
+      const country = countriesByIso[id];
+      return <div>{country.defaultName}</div>;
+    } else if (isUserId(id)) {
+      return (
+        <PrivateChatInfo
+          forceShowSelf={forceShowSelf}
+          userId={id}
+          status={isUnselectable ? lockedUnselectedSubtitle : undefined}
+        />
+      );
+    } else {
+      return <GroupChatInfo chatId={id} status={isUnselectable ? lockedUnselectedSubtitle : undefined} />;
+    }
+  };
+
   return (
     <div className={buildClassName('Picker', className)}>
       {isSearchable && (
         <div className="picker-header custom-scroll" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lockedSelectedIds.map((id, i) => (
+          {lockedSelectedIds?.map((id, i) => (
             <PickerSelectedItem
               peerId={id}
               isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
@@ -145,7 +188,7 @@ const Picker: FC<OwnProps> = ({
             <PickerSelectedItem
               peerId={id}
               isMinimized={
-                shouldMinimize && i + lockedSelectedIds.length < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT
+                shouldMinimize && i + (lockedSelectedIds?.length || 0) < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT
               }
               canClose
               onClick={handleItemClick}
@@ -170,11 +213,13 @@ const Picker: FC<OwnProps> = ({
           noScrollRestore={noScrollRestore}
         >
           {viewportIds.map((id) => {
+            const shouldRenderLockIcon = lockedUnselectedIdsSet.has(id);
+            const isLocked = lockedSelectedIdsSet.has(id) || shouldRenderLockIcon;
             const renderCheckbox = () => {
-              return (
+              return (isViewOnly || shouldRenderLockIcon) ? undefined : (
                 <Checkbox
                   label=""
-                  disabled={lockedIdsSet.has(id)}
+                  disabled={isLocked}
                   checked={selectedIds.includes(id)}
                   round={isRoundCheckbox}
                 />
@@ -184,18 +229,16 @@ const Picker: FC<OwnProps> = ({
               <ListItem
                 key={id}
                 className={buildClassName('chat-item-clickable picker-list-item', isRoundCheckbox && 'chat-item')}
-                disabled={lockedIdsSet.has(id)}
+                disabled={isLocked}
+                inactive={isViewOnly}
                 allowDisabledClick={Boolean(onDisabledClick)}
+                secondaryIcon={shouldRenderLockIcon ? 'lock-badge' : undefined}
                 // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => handleItemClick(id)}
                 ripple
               >
                 {!isRoundCheckbox ? renderCheckbox() : undefined}
-                {isUserId(id) ? (
-                  <PrivateChatInfo forceShowSelf={forceShowSelf} userId={id} />
-                ) : (
-                  <GroupChatInfo chatId={id} />
-                )}
+                {renderChatInfo(id)}
                 {isRoundCheckbox ? renderCheckbox() : undefined}
               </ListItem>
             );

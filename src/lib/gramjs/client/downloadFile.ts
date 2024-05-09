@@ -7,6 +7,7 @@ import { Foreman } from '../../../util/foreman';
 import errors from '../errors';
 import Api from '../tl/api';
 
+import LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
 import { sleep } from '../Helpers';
 import { getDownloadPartSize } from '../Utils';
 
@@ -185,6 +186,9 @@ async function downloadFile2(
         progressCallback(progress);
     }
 
+    // Limit updates to one per file
+    let isPremiumFloodWaitSent = false;
+
     // Allocate memory
     await fileView.init();
 
@@ -292,6 +296,10 @@ async function downloadFile2(
                         await sleep(DISCONNECT_SLEEP);
                         continue;
                     } else if (err instanceof errors.FloodWaitError) {
+                        if (err instanceof errors.FloodPremiumWaitError && !isPremiumFloodWaitSent) {
+                            sender?._updateCallback(new LocalUpdatePremiumFloodWait(false));
+                            isPremiumFloodWaitSent = true;
+                        }
                         await sleep(err.seconds * 1000);
                         continue;
                     }

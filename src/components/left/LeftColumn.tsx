@@ -189,11 +189,13 @@ function LeftColumn({
         case SettingsScreens.PrivacyLastSeen:
         case SettingsScreens.PrivacyProfilePhoto:
         case SettingsScreens.PrivacyBio:
+        case SettingsScreens.PrivacyBirthday:
         case SettingsScreens.PrivacyPhoneCall:
         case SettingsScreens.PrivacyPhoneP2P:
         case SettingsScreens.PrivacyForwarding:
         case SettingsScreens.PrivacyGroupChats:
         case SettingsScreens.PrivacyVoiceMessages:
+        case SettingsScreens.PrivacyMessages:
         case SettingsScreens.PrivacyBlockedUsers:
         case SettingsScreens.ActiveWebsites:
         case SettingsScreens.TwoFaDisabled:
@@ -241,6 +243,10 @@ function LeftColumn({
         case SettingsScreens.PrivacyBioAllowedContacts:
         case SettingsScreens.PrivacyBioDeniedContacts:
           setSettingsScreen(SettingsScreens.PrivacyBio);
+          return;
+        case SettingsScreens.PrivacyBirthdayAllowedContacts:
+        case SettingsScreens.PrivacyBirthdayDeniedContacts:
+          setSettingsScreen(SettingsScreens.PrivacyBirthday);
           return;
         case SettingsScreens.PrivacyPhoneCallAllowedContacts:
         case SettingsScreens.PrivacyPhoneCallDeniedContacts:

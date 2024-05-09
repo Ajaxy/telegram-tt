@@ -66,7 +66,7 @@ const SliderDots: FC<OwnProps> = ({
                 styles.dot,
                 index === active && styles.active,
                 (isPreLast || isPreFirst) && styles.medium,
-                (isLast || isFirst) && styles.small,
+                (isLast || isFirst || isInvisible) && styles.small,
                 isInvisible && styles.invisible,
               )}
             />

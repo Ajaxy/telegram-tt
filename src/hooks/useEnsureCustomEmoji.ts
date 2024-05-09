@@ -1,6 +1,6 @@
 import { getActions, getGlobal } from '../global';
 
-import { addCustomEmojiInputRenderCallback } from '../util/customEmojiManager';
+import { addCustomEmojiInputRenderCallback } from '../util/emoji/customEmojiManager';
 import { throttle } from '../util/schedulers';
 
 let LOAD_QUEUE = new Set<string>();

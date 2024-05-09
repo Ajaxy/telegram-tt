@@ -1,0 +1,132 @@
+@use '../../styles/mixins';
+
+@mixin thumb-styles() {
+  border: none;
+  width: 1rem;
+  height: 1rem;
+  background: var(--color-links);
+  border-radius: 50%;
+  cursor: var(--custom-cursor, pointer);
+  transform: scale(1);
+  transition: transform 0.30s ease-in-out;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
+
+  &:hover {
+    transform: scale(1.5);
+  }
+}
+
+.dotWrapper {
+  width: 90%;
+  margin-left: 1rem;
+  padding: 1rem 0 0;
+}
+
+.sliderContainer {
+  --fill-percentage: 0%;
+  position: relative;
+  width: 100%;
+}
+
+.marksContainer {
+  width: 100%;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+}
+
+.mark {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 0.1875rem;
+}
+
+.active {
+  color: var(--color-links);
+}
+
+.slider {
+  position: relative;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 0.1875rem;
+  outline: none;
+  transition: opacity 0.2s;
+  z-index: 1;
+
+  background: linear-gradient(to right,
+    var(--color-links) 0%,
+    var(--color-links) var(--fill-percentage),
+    var(--color-text-secondary) var(--fill-percentage),
+    var(--color-text-secondary) 100%);
+}
+
+.slider::before,
+.slider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: transform 0.2s ease;
+  z-index: -1;
+  transform-origin: left;
+}
+
+.slider::before {
+  left: 0;
+  background-color: var(--color-links);
+  transform: scaleX(var(--fill-percentage-before));
+}
+
+.slider::after {
+  right: 0;
+  background: var(--color-text-secondary);
+  transform: scaleX(var(--fill-percentage-after));
+  transform-origin: right;
+}
+
+.slider::-webkit-slider-thumb {
+  @include thumb-styles();
+}
+
+.slider::-moz-range-thumb {
+  @include thumb-styles();
+}
+
+.slider::-ms-thumb {
+  @include thumb-styles();
+}
+
+.tickMarks {
+  position: absolute;
+  top: 2rem;
+  left: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tick {
+  position: relative;
+  width: 0.25rem;
+  height: 0.5rem;
+  background-color: var(--color-text-secondary);
+  border-radius: 0.1875rem;
+}
+
+.filled {
+  background-color: var(--color-links);
+}
+
+.tickUnfilled {
+  background-color: var(--color-text-secondary);
+}

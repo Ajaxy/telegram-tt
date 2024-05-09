@@ -1,15 +1,15 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiPremiumPromo, ApiPremiumSubscriptionOption, ApiSticker, ApiStickerSet, ApiUser,
 } from '../../../api/types';
-import type { GlobalState } from '../../../global/types';
+import type { ApiPremiumSection, GlobalState } from '../../../global/types';
 
-import { TME_LINK_PREFIX } from '../../../config';
+import { PREMIUM_FEATURE_SECTIONS, TME_LINK_PREFIX } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
 import {
   selectIsCurrentUserPremium, selectStickerSet,
@@ -33,7 +33,6 @@ import Transition from '../../ui/Transition';
 import PremiumFeatureItem from './PremiumFeatureItem';
 import PremiumFeatureModal, {
   PREMIUM_FEATURE_DESCRIPTIONS,
-  PREMIUM_FEATURE_SECTIONS,
   PREMIUM_FEATURE_TITLES,
 } from './PremiumFeatureModal';
 import PremiumSubscriptionOption from './PremiumSubscriptionOption';
@@ -45,12 +44,15 @@ import PremiumBadge from '../../../assets/premium/PremiumBadge.svg';
 import PremiumChats from '../../../assets/premium/PremiumChats.svg';
 import PremiumEmoji from '../../../assets/premium/PremiumEmoji.svg';
 import PremiumFile from '../../../assets/premium/PremiumFile.svg';
+import PremiumLastSeen from '../../../assets/premium/PremiumLastSeen.svg';
 import PremiumLimits from '../../../assets/premium/PremiumLimits.svg';
 import PremiumLogo from '../../../assets/premium/PremiumLogo.svg';
+import PremiumMessagePrivacy from '../../../assets/premium/PremiumMessagePrivacy.svg';
 import PremiumReactions from '../../../assets/premium/PremiumReactions.svg';
 import PremiumSpeed from '../../../assets/premium/PremiumSpeed.svg';
 import PremiumStatus from '../../../assets/premium/PremiumStatus.svg';
 import PremiumStickers from '../../../assets/premium/PremiumStickers.svg';
+import PremiumTags from '../../../assets/premium/PremiumTags.svg';
 import PremiumTranslate from '../../../assets/premium/PremiumTranslate.svg';
 import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
 import PremiumVoice from '../../../assets/premium/PremiumVoice.svg';
@@ -58,7 +60,7 @@ import PremiumVoice from '../../../assets/premium/PremiumVoice.svg';
 const LIMIT_ACCOUNTS = 4;
 const STATUS_EMOJI_SIZE = 8 * REM;
 
-const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
+const PREMIUM_FEATURE_COLOR_ICONS: Record<ApiPremiumSection, string> = {
   stories: PremiumStatus,
   double_limits: PremiumLimits,
   infinite_reactions: PremiumReactions,
@@ -73,6 +75,9 @@ const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
   animated_userpics: PremiumVideo,
   emoji_status: PremiumStatus,
   translations: PremiumTranslate,
+  saved_tags: PremiumTags,
+  last_seen: PremiumLastSeen,
+  message_privacy: PremiumMessagePrivacy,
 };
 
 export type OwnProps = {
@@ -82,12 +87,11 @@ export type OwnProps = {
 type StateProps = {
   currentUserId?: string;
   promo?: ApiPremiumPromo;
-  isClosing?: boolean;
   fromUser?: ApiUser;
   fromUserStatusEmoji?: ApiSticker;
   fromUserStatusSet?: ApiStickerSet;
   toUser?: ApiUser;
-  initialSection?: string;
+  initialSection?: ApiPremiumSection;
   isPremium?: boolean;
   isSuccess?: boolean;
   isGift?: boolean;
@@ -99,7 +103,7 @@ type StateProps = {
   limits?: NonNullable<GlobalState['appConfig']>['limits'];
   premiumSlug?: string;
   premiumBotUsername?: string;
-  premiumPromoOrder?: string[];
+  premiumPromoOrder?: ApiPremiumSection[];
 };
 
 const PremiumMainModal: FC<OwnProps & StateProps> = ({
@@ -118,7 +122,6 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   limits,
   premiumSlug,
   premiumBotUsername,
-  isClosing,
   isSuccess,
   isGift,
   toUser,
@@ -133,14 +136,23 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const [isHeaderHidden, setHeaderHidden] = useState(true);
-  const [currentSection, setCurrentSection] = useState<string | undefined>(initialSection);
+  const [currentSection, setCurrentSection] = useState<ApiPremiumSection | undefined>(initialSection);
   const [selectedSubscriptionOption, setSubscriptionOption] = useState<ApiPremiumSubscriptionOption>();
 
-  const handleOpen = useCallback((section: string | undefined) => {
-    return () => {
-      setCurrentSection(section);
-    };
-  }, []);
+  useEffect(() => {
+    if (!isOpen) {
+      setHeaderHidden(true);
+      setCurrentSection(undefined);
+    }
+  }, [isOpen]);
+
+  const handleOpenSection = useLastCallback((section: ApiPremiumSection) => {
+    setCurrentSection(section);
+  });
+
+  const handleResetSection = useLastCallback(() => {
+    setCurrentSection(undefined);
+  });
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
@@ -154,6 +166,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
     if (premiumSlug) {
       openInvoice({
+        type: 'slug',
         slug: premiumSlug,
       });
     } else if (premiumBotUsername) {
@@ -164,20 +177,20 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (selectedSubscriptionOption) {
       handleClickWithStartParam(String(selectedSubscriptionOption.months));
     } else {
       handleClickWithStartParam();
     }
-  }, [selectedSubscriptionOption, handleClickWithStartParam]);
+  });
 
-  const handleChangeSubscriptionOption = useCallback((months: number) => {
+  const handleChangeSubscriptionOption = useLastCallback((months: number) => {
     const foundOption = promo?.options.find((option) => option.months === months);
     setSubscriptionOption(foundOption);
-  }, [promo]);
+  });
 
-  const showConfetti = useCallback(() => {
+  const showConfetti = useLastCallback(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     if (isOpen) {
@@ -191,7 +204,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
         height,
       });
     }
-  }, [isOpen, requestConfetti]);
+  });
 
   useEffect(() => {
     if (isSuccess) {
@@ -334,10 +347,8 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   return (
     <Modal
       className={styles.root}
-      // eslint-disable-next-line react/jsx-no-bind
-      onCloseAnimationEnd={() => closePremiumModal({ isClosed: true })}
       onClose={closePremiumModal}
-      isOpen={isOpen && !isClosing}
+      isOpen={isOpen}
       dialogRef={dialogRef}
     >
       <Transition name="slide" activeKey={currentSection ? 1 : 0} className={styles.transition}>
@@ -371,7 +382,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             <div className={styles.description}>
               {renderText(getHeaderDescription(), ['simple_markdown', 'emoji'])}
             </div>
-            {!isPremium && renderSubscriptionOptions()}
+            {!isPremium && !isGift && renderSubscriptionOptions()}
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
               <h2 className={styles.premiumHeaderText}>
                 {lang('TelegramPremium')}
@@ -390,7 +401,8 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                     icon={PREMIUM_FEATURE_COLOR_ICONS[section]}
                     index={index}
                     count={filteredSections.length}
-                    onClick={handleOpen(section)}
+                    section={section}
+                    onClick={handleOpenSection}
                   />
                 );
               })}
@@ -418,13 +430,13 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
         ) : (
           <PremiumFeatureModal
             initialSection={currentSection}
-            onBack={handleOpen(undefined)}
+            onBack={handleResetSection}
             promo={promo}
-            // eslint-disable-next-line react/jsx-no-bind
             onClickSubscribe={handleClickWithStartParam}
             isPremium={isPremium}
             limits={limits}
             premiumPromoOrder={premiumPromoOrder}
+            subscriptionOption={selectedSubscriptionOption}
           />
         )}
       </Transition>
@@ -446,7 +458,6 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
     currentUserId: global.currentUserId,
     promo: premiumModal?.promo,
-    isClosing: premiumModal?.isClosing,
     isSuccess: premiumModal?.isSuccess,
     isGift: premiumModal?.isGift,
     monthsAmount: premiumModal?.monthsAmount,

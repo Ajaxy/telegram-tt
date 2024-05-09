@@ -2,7 +2,7 @@ import type { ApiMessage } from '../../../api/types';
 import type { IAlbum } from '../../../types';
 
 import { isActionMessage } from '../../../global/helpers';
-import { getDayStartAt } from '../../../util/dateFormat';
+import { getDayStartAt } from '../../../util/date/dateFormat';
 
 type SenderGroup = (ApiMessage | IAlbum)[];
 
@@ -38,11 +38,20 @@ export function groupMessages(
           albumId: message.groupedId!,
           messages: [message],
           mainMessage: message,
+          hasMultipleCaptions: false,
         };
       } else {
         currentAlbum.messages.push(message);
-        if (message.hasComments || (message.content.text && !currentAlbum.mainMessage.hasComments)) {
-          currentAlbum.mainMessage = message;
+        if (message.hasComments) {
+          currentAlbum.commentsMessage = message;
+        }
+        if (message.content.text && !currentAlbum.hasMultipleCaptions) {
+          if (currentAlbum.captionMessage) {
+            currentAlbum.hasMultipleCaptions = true;
+            currentAlbum.captionMessage = undefined;
+          } else {
+            currentAlbum.captionMessage = message;
+          }
         }
       }
     } else {

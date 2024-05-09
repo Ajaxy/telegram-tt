@@ -2,16 +2,18 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiPrivacyKey } from '../../../types';
 import type {
+  ApiChatLink,
+  ApiCollectionInfo,
   ApiConfig, ApiCountry, ApiLangString,
   ApiPeerColors,
-  ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
+  ApiSession, ApiTimezone, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
 } from '../../types';
 
 import { buildCollectionByCallback, omit, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { addUserToLocalDb } from '../helpers';
 import { omitVirtualClassFields } from './helpers';
-import { buildApiDocument } from './messageContent';
+import { buildApiDocument, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildApiReaction } from './reactions';
 import { buildApiUser } from './users';
@@ -82,6 +84,10 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
       return 'voiceMessages';
     case 'PrivacyKeyChatInvite':
       return 'chatInvite';
+    case 'PrivacyKeyAbout':
+      return 'bio';
+    case 'PrivacyKeyBirthday':
+      return 'birthday';
   }
 
   return undefined;
@@ -251,4 +257,41 @@ export function buildApiPeerColors(wrapper: GramJs.help.TypePeerColors): ApiPeer
       darkColors: color.darkColors && buildApiPeerColorSet(color.darkColors),
     }];
   });
+}
+
+export function buildApiTimezone(timezone: GramJs.TypeTimezone): ApiTimezone {
+  const { id, name, utcOffset } = timezone;
+  return {
+    id,
+    name,
+    utcOffset,
+  };
+}
+
+export function buildApiChatLink(data: GramJs.account.ResolvedBusinessChatLinks): ApiChatLink {
+  const chatId = getApiChatIdFromMtpPeer(data.peer);
+  return {
+    chatId,
+    text: buildMessageTextContent(data.message, data.entities),
+  };
+}
+
+export function buildApiCollectibleInfo(info: GramJs.fragment.TypeCollectibleInfo): ApiCollectionInfo {
+  const {
+    amount,
+    currency,
+    cryptoAmount,
+    cryptoCurrency,
+    purchaseDate,
+    url,
+  } = info;
+
+  return {
+    amount: amount.toJSNumber(),
+    currency,
+    cryptoAmount: cryptoAmount.toJSNumber(),
+    cryptoCurrency,
+    purchaseDate,
+    url,
+  };
 }

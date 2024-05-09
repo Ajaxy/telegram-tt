@@ -8,8 +8,8 @@ import { Bundles } from '../../../util/moduleLoader';
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const UrlAuthModalAsync: FC<OwnProps> = (props) => {
-  const { urlAuth } = props;
-  const UrlAuthModal = useModuleLoader(Bundles.Extra, 'UrlAuthModal', !urlAuth);
+  const { modal } = props;
+  const UrlAuthModal = useModuleLoader(Bundles.Extra, 'UrlAuthModal', !modal);
 
   // eslint-disable-next-line react/jsx-props-no-spreading
   return UrlAuthModal ? <UrlAuthModal {...props} /> : undefined;

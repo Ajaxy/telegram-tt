@@ -3,6 +3,8 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiEmojiStatus, ApiPeerColor } from '../../types';
 
+import { CHANNEL_ID_LENGTH } from '../../../config';
+
 export function isPeerUser(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerUser {
   return peer.hasOwnProperty('userId');
 }
@@ -21,7 +23,10 @@ export function buildApiPeerId(id: BigInt.BigInteger, type: 'user' | 'chat' | 'c
   }
 
   if (type === 'channel') {
-    return `-100${id}`;
+    // Simulates TDLib https://github.com/tdlib/td/blob/d7203eb719304866a7eb7033ef03d421459335b8/td/telegram/DialogId.cpp#L54
+    // But using only string operations. Should be fine until channel ids reach 10^12
+    // Example: 12345678 -> -1000012345678
+    return `-1${id.toString().padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
   }
 
   return `-${id}`;

@@ -6,7 +6,7 @@ import type { ApiPhoto } from '../../../api/types';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
-import { selectUserFullInfo } from '../../../global/selectors';
+import { selectIsCurrentUserPremium, selectUserFullInfo } from '../../../global/selectors';
 import { getPrivacyKey } from './helpers/privacy';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -15,6 +15,9 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
+import PremiumStatusItem from './PremiumStatusItem';
+import PrivacyLockedOption from './PrivacyLockedOption';
+import SettingsPrivacyLastSeen from './SettingsPrivacyLastSeen';
 import SettingsPrivacyPublicProfilePhoto from './SettingsPrivacyPublicProfilePhoto';
 
 type OwnProps = {
@@ -30,6 +33,7 @@ type StateProps = {
   currentUserFallbackPhoto?: ApiPhoto;
   primaryPrivacy?: ApiPrivacySettings;
   secondaryPrivacy?: ApiPrivacySettings;
+  isPremiumRequired?: boolean;
 };
 
 const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
@@ -40,6 +44,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   currentUserId,
   hasCurrentUserFullInfo,
   currentUserFallbackPhoto,
+  isPremiumRequired,
   onScreenSelect,
   onReset,
 }) => {
@@ -66,6 +71,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
         screen={screen}
         privacy={primaryPrivacy}
         onScreenSelect={onScreenSelect}
+        isPremiumRequired={isPremiumRequired}
       />
       {screen === SettingsScreens.PrivacyProfilePhoto && primaryPrivacy?.visibility !== 'everybody' && (
         <SettingsPrivacyPublicProfilePhoto
@@ -73,6 +79,9 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
           hasCurrentUserFullInfo={hasCurrentUserFullInfo}
           currentUserFallbackPhoto={currentUserFallbackPhoto}
         />
+      )}
+      {screen === SettingsScreens.PrivacyLastSeen && (
+        <SettingsPrivacyLastSeen visibility={primaryPrivacy?.visibility} />
       )}
       {secondaryScreen && (
         <PrivacySubsection
@@ -89,9 +98,11 @@ function PrivacySubsection({
   screen,
   privacy,
   onScreenSelect,
+  isPremiumRequired,
 }: {
   screen: SettingsScreens;
   privacy?: ApiPrivacySettings;
+  isPremiumRequired?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
 }) {
   const { setPrivacyVisibility } = getActions();
@@ -101,13 +112,30 @@ function PrivacySubsection({
     const hasNobody = screen !== SettingsScreens.PrivacyAddByPhone;
     const options = [
       { value: 'everybody', label: lang('P2PEverybody') },
-      { value: 'contacts', label: lang('P2PContacts') },
+      {
+        value: 'contacts',
+        label: isPremiumRequired ? (
+          <PrivacyLockedOption label={lang('P2PContacts')} />
+        ) : (
+          lang('P2PContacts')
+        ),
+        hidden: isPremiumRequired,
+      },
     ];
+
     if (hasNobody) {
-      options.push({ value: 'nobody', label: lang('P2PNobody') });
+      options.push({
+        value: 'nobody',
+        label: isPremiumRequired ? (
+          <PrivacyLockedOption label={lang('P2PNobody')} />
+        ) : (
+          lang('P2PNobody')
+        ),
+        hidden: isPremiumRequired,
+      });
     }
     return options;
-  }, [lang, screen]);
+  }, [lang, screen, isPremiumRequired]);
 
   const primaryExceptionLists = useMemo(() => {
     if (screen === SettingsScreens.PrivacyAddByPhone) {
@@ -132,6 +160,8 @@ function PrivacySubsection({
       case SettingsScreens.PrivacyAddByPhone: {
         return privacy?.visibility === 'everybody' ? lang('PrivacyPhoneInfo') : lang('PrivacyPhoneInfo3');
       }
+      case SettingsScreens.PrivacyVoiceMessages:
+        return lang('PrivacyVoiceMessagesInfo');
       default:
         return undefined;
     }
@@ -149,6 +179,8 @@ function PrivacySubsection({
         return lang('PrivacyProfilePhotoTitle');
       case SettingsScreens.PrivacyBio:
         return lang('PrivacyBioTitle');
+      case SettingsScreens.PrivacyBirthday:
+        return lang('PrivacyBirthdayTitle');
       case SettingsScreens.PrivacyForwarding:
         return lang('PrivacyForwardsTitle');
       case SettingsScreens.PrivacyVoiceMessages:
@@ -203,6 +235,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyProfilePhotoAllowedContacts;
       case SettingsScreens.PrivacyBio:
         return SettingsScreens.PrivacyBioAllowedContacts;
+      case SettingsScreens.PrivacyBirthday:
+        return SettingsScreens.PrivacyBirthdayAllowedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingAllowedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -226,6 +260,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyProfilePhotoDeniedContacts;
       case SettingsScreens.PrivacyBio:
         return SettingsScreens.PrivacyBioDeniedContacts;
+      case SettingsScreens.PrivacyBirthday:
+        return SettingsScreens.PrivacyBirthdayDeniedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingDeniedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -253,7 +289,7 @@ function PrivacySubsection({
           <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>{descriptionText}</p>
         )}
       </div>
-      {(primaryExceptionLists.shouldShowAllowed || primaryExceptionLists.shouldShowDenied) && (
+      {!isPremiumRequired && (primaryExceptionLists.shouldShowAllowed || primaryExceptionLists.shouldShowDenied) && (
         <div className="settings-item">
           <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('PrivacyExceptions')}
@@ -290,6 +326,7 @@ function PrivacySubsection({
           )}
         </div>
       )}
+      {isPremiumRequired && <PremiumStatusItem />}
     </>
   );
 }
@@ -322,6 +359,10 @@ export default memo(withGlobal<OwnProps>(
 
       case SettingsScreens.PrivacyBio:
         primaryPrivacy = privacy.bio;
+        break;
+
+      case SettingsScreens.PrivacyBirthday:
+        primaryPrivacy = privacy.birthday;
         break;
 
       case SettingsScreens.PrivacyPhoneP2P:
@@ -357,6 +398,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: currentUserId!,
       hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
       currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
+      isPremiumRequired: screen === SettingsScreens.PrivacyVoiceMessages && !selectIsCurrentUserPremium(global),
     };
   },
 )(SettingsPrivacyVisibility));

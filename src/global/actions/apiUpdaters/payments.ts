@@ -1,9 +1,10 @@
 import type { ActionReturnType } from '../../types';
 
+import { areDeepEqual } from '../../../util/areDeepEqual';
 import { formatCurrency } from '../../../util/formatCurrency';
 import * as langProvider from '../../../util/langProvider';
 import { IS_PRODUCTION_HOST } from '../../../util/windowEnvironment';
-import { addActionHandler } from '../../index';
+import { addActionHandler, setGlobal } from '../../index';
 import { closeInvoice } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { selectChatMessage, selectTabState } from '../../selectors';
@@ -27,6 +28,24 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                 title,
               ]),
             });
+          }
+        }
+
+        if (inputInvoice && inputInvoice.type === 'giftcode') {
+          if (!inputInvoice.userIds) {
+            return;
+          }
+          const giftModalState = selectTabState(global, tabId).giftPremiumModal;
+
+          if (giftModalState && giftModalState.isOpen
+            && areDeepEqual(inputInvoice.userIds, giftModalState.forUserIds)) {
+            global = updateTabState(global, {
+              giftPremiumModal: {
+                ...giftModalState,
+                isCompleted: true,
+              },
+            }, tabId);
+            setGlobal(global);
           }
         }
 

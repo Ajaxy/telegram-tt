@@ -1,12 +1,12 @@
 import { getActions, getGlobal } from '../global';
 
 import type { ApiMessage } from '../api/types';
-import type { MessageKey } from '../global/helpers';
+import type { MessageKey } from './messageKey';
 import { AudioOrigin, GlobalSearchContent } from '../types';
 
 import { requestNextMutation } from '../lib/fasterdom/fasterdom';
-import { getMessageKey, parseMessageKey } from '../global/helpers';
 import { selectCurrentMessageList, selectTabState } from '../global/selectors';
+import { getMessageServerKey, parseMessageKey } from './messageKey';
 import { isSafariPatchInProgress, patchSafariProgressiveAudio } from './patchSafariProgressiveAudio';
 import safePlay from './safePlay';
 import { IS_SAFARI } from './windowEnvironment';
@@ -24,6 +24,7 @@ export interface Track {
 }
 
 const tracks = new Map<TrackId, Track>();
+
 let voiceQueue: TrackId[] = [];
 let musicQueue: TrackId[] = [];
 
@@ -331,8 +332,12 @@ function findNextInQueue(currentId: TrackId, origin = AudioOrigin.Inline, isReve
   return chatAudio[index + direction];
 }
 
-export function makeTrackId(message: ApiMessage): TrackId {
-  return `${getMessageKey(message)}-${message.date}`;
+export function makeTrackId(message: ApiMessage): TrackId | undefined {
+  const key = getMessageServerKey(message);
+  if (!key) {
+    return undefined;
+  }
+  return `${key}-${message.date}`;
 }
 
 function splitTrackId(trackId: TrackId) {

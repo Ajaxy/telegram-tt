@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiGeoPoint } from '../../../api/types';
+import type { TabState } from '../../../global/types';
 
 import { prepareMapUrl } from '../../../util/map';
 import { IS_IOS, IS_MAC_OS } from '../../../util/windowEnvironment';
@@ -15,12 +15,13 @@ import Modal from '../../ui/Modal';
 import styles from './MapModal.module.scss';
 
 export type OwnProps = {
-  geoPoint?: ApiGeoPoint;
-  zoom?: number;
+  modal: TabState['mapModal'];
 };
 
-const OpenMapModal = ({ geoPoint, zoom }: OwnProps) => {
+const OpenMapModal = ({ modal }: OwnProps) => {
   const { closeMapModal } = getActions();
+
+  const { point: geoPoint, zoom } = modal || {};
 
   const lang = useLang();
 

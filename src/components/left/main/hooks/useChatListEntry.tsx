@@ -59,6 +59,7 @@ export default function useChatListEntry({
   withInterfaceAnimations,
   isTopic,
   isSavedDialog,
+  isPreview,
 }: {
   chat?: ApiChat;
   lastMessage?: ApiMessage;
@@ -73,6 +74,7 @@ export default function useChatListEntry({
   observeIntersection?: ObserveFn;
   isTopic?: boolean;
   isSavedDialog?: boolean;
+  isPreview?: boolean;
 
   animationType: ChatAnimationTypes;
   orderDiff: number;
@@ -104,14 +106,15 @@ export default function useChatListEntry({
   }, [actionTargetUserIds]);
 
   const renderLastMessageOrTyping = useCallback(() => {
-    if (!isSavedDialog && typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
+    if (!isSavedDialog && !isPreview
+        && typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
 
     const isDraftReplyToTopic = draft && draft.replyInfo?.replyToMsgId === lastMessageTopic?.id;
     const isEmptyLocalReply = draft?.replyInfo && !draft.text && draft.isLocal;
 
-    const canDisplayDraft = !chat?.isForum && !isSavedDialog && draft && !isEmptyLocalReply
+    const canDisplayDraft = !chat?.isForum && !isSavedDialog && !isPreview && draft && !isEmptyLocalReply
       && (!isTopic || !isDraftReplyToTopic);
 
     if (canDisplayDraft) {
@@ -180,7 +183,7 @@ export default function useChatListEntry({
   }, [
     actionTargetChatId, actionTargetMessage, actionTargetUsers, chat, chatId, draft, isAction,
     isRoundVideo, isTopic, lang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
-    observeIntersection, typingStatus, isSavedDialog,
+    observeIntersection, typingStatus, isSavedDialog, isPreview,
   ]);
 
   function renderSubtitle() {

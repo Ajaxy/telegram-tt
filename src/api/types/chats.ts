@@ -1,7 +1,7 @@
 import type { ThreadId } from '../../types';
 import type { ApiBotCommand } from './bots';
 import type {
-  ApiChatReactions, ApiPhoto, ApiStickerSet,
+  ApiChatReactions, ApiFormattedText, ApiPhoto, ApiStickerSet,
 } from './messages';
 import type { ApiChatInviteImporter } from './misc';
 import type {
@@ -52,6 +52,7 @@ export interface ApiChat {
   listedTopicIds?: number[];
   topicsCount?: number;
   orderedPinnedTopicIds?: number[];
+  boostLevel?: number;
 
   // Calls
   isCallActive?: boolean;
@@ -128,10 +129,14 @@ export interface ApiChatFullInfo {
   requestsPending?: number;
   statisticsDcId?: number;
   stickerSet?: ApiStickerSet;
+  emojiSet?: ApiStickerSet;
   profilePhoto?: ApiPhoto;
   areParticipantsHidden?: boolean;
   isTranslationDisabled?: true;
   hasPinnedStories?: boolean;
+
+  boostsApplied?: number;
+  boostsToUnrestrict?: number;
 }
 
 export interface ApiChatMember {
@@ -272,4 +277,15 @@ export interface ApiChatlistExportedInvite {
 export interface ApiPeerColor {
   color?: number;
   backgroundEmojiId?: string;
+}
+
+export interface ApiMissingInvitedUser {
+  id: string;
+  isRequiringPremiumToInvite?: boolean;
+  isRequiringPremiumToMessage?: boolean;
+}
+
+export interface ApiChatLink {
+  chatId: string;
+  text: ApiFormattedText;
 }

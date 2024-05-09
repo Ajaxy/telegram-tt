@@ -1,5 +1,6 @@
 import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
+import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
 import type { ApiPeerColor } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
 
@@ -52,7 +53,15 @@ export interface ApiUserFullInfo {
   noVoiceMessages?: boolean;
   premiumGifts?: ApiPremiumGiftOption[];
   isTranslationDisabled?: true;
+  areAdsEnabled?: boolean;
   hasPinnedStories?: boolean;
+  isContactRequirePremium?: boolean;
+  birthday?: ApiBirthday;
+  personalChannelId?: string;
+  personalChannelMessageId?: number;
+  businessLocation?: ApiBusinessLocation;
+  businessWorkHours?: ApiBusinessWorkHours;
+  businessIntro?: ApiBusinessIntro;
 }
 
 export type ApiFakeType = 'fake' | 'scam';
@@ -66,6 +75,8 @@ export interface ApiUserStatus {
   );
   wasOnline?: number;
   expires?: number;
+  isReadDateRestrictedByMe?: boolean;
+  isReadDateRestricted?: boolean;
 }
 
 export interface ApiUsername {
@@ -109,4 +120,10 @@ export interface ApiPremiumGiftOption {
 export interface ApiEmojiStatus {
   documentId: string;
   until?: number;
+}
+
+export interface ApiBirthday {
+  day: number;
+  month: number;
+  year?: number;
 }

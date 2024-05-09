@@ -129,7 +129,6 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
         )}
 
         <ListItem
-          // eslint-disable-next-line react/jsx-no-bind
           onClick={handleDownloadLog}
           icon="bug"
         >

@@ -53,7 +53,7 @@ const InviteLink: FC<OwnProps> = ({
   });
 
   const handleShare = useLastCallback(() => {
-    openChatWithDraft({ text: link });
+    openChatWithDraft({ text: { text: link } });
   });
 
   const PrimaryLinkMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {

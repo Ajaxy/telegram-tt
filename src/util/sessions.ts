@@ -1,19 +1,12 @@
-import * as idb from 'idb-keyval';
-
 import type { ApiSessionData } from '../api/types';
 
 import {
-  DEBUG, GLOBAL_STATE_CACHE_KEY, LEGACY_SESSION_KEY, SESSION_USER_KEY,
+  DEBUG, GLOBAL_STATE_CACHE_KEY, SESSION_USER_KEY,
 } from '../config';
-import * as cacheApi from './cacheApi';
 
 const DC_IDS = [1, 2, 3, 4, 5];
 
-export function hasStoredSession(withLegacy = false) {
-  if (withLegacy && localStorage.getItem(LEGACY_SESSION_KEY)) {
-    return true;
-  }
-
+export function hasStoredSession() {
   if (checkSessionLocked()) {
     return true;
   }
@@ -100,43 +93,6 @@ export function loadStoredSession(): ApiSessionData | undefined {
     keys,
     hashes,
   };
-}
-
-export async function importLegacySession() {
-  const sessionId = localStorage.getItem(LEGACY_SESSION_KEY);
-  if (!sessionId) return;
-
-  const sessionJson = await idb.get(`GramJs:${sessionId}`);
-  try {
-    const sessionData = JSON.parse(sessionJson) as ApiSessionData;
-    storeSession(sessionData);
-  } catch (err) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to load legacy session', err);
-    }
-  }
-}
-
-// Remove previously created IndexedDB and cache API sessions
-export async function clearLegacySessions() {
-  try {
-    localStorage.removeItem(LEGACY_SESSION_KEY);
-
-    const idbKeys = await idb.keys();
-
-    await Promise.all<Promise<any>>([
-      cacheApi.clear('GramJs'),
-      ...idbKeys
-        .filter((k) => typeof k === 'string' && k.startsWith('GramJs:GramJs-session-'))
-        .map((k) => idb.del(k)),
-    ]);
-  } catch (err) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn('Failed to clear legacy session', err);
-    }
-  }
 }
 
 export function importTestSession() {

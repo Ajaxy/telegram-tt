@@ -14,13 +14,16 @@ import type {
   ApiChatReactions,
   ApiChatSettings,
   ApiExportedInvite,
+  ApiMissingInvitedUser,
   ApiRestrictionReason,
   ApiSendAsPeerId,
+  ApiSponsoredMessageReportResult,
   ApiTopic,
 } from '../../types';
 
 import { omitUndefined, pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
+import { serializeBytes } from '../helpers';
 import { buildApiUsernames } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
@@ -62,8 +65,9 @@ function buildApiChatFieldsFromPeerEntity(
   const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
   const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
     ? buildApiEmojiStatus(peerEntity.emojiStatus) : undefined;
+  const boostLevel = ('level' in peerEntity) ? peerEntity.level : undefined;
 
-  return omitUndefined({
+  return omitUndefined<PeerEntityApiChatFields>({
     isMin,
     hasPrivateLink,
     isSignaturesShown,
@@ -93,6 +97,7 @@ function buildApiChatFieldsFromPeerEntity(
     maxStoryId,
     hasStories: Boolean(maxStoryId) && !storiesUnavailable,
     emojiStatus,
+    boostLevel,
   });
 }
 
@@ -630,5 +635,43 @@ export function buildApiChatlistExportedInvite(
     title,
     url,
     peerIds: peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+  };
+}
+
+export function buildApiMissingInvitedUser(
+  user: GramJs.TypeMissingInvitee,
+): ApiMissingInvitedUser {
+  return {
+    id: user.userId.toString(),
+    isRequiringPremiumToMessage: user.premiumRequiredForPm,
+    isRequiringPremiumToInvite: user.premiumWouldAllowInvite,
+  };
+}
+
+export function buildApiSponsoredMessageReportResult(
+  result: GramJs.channels.TypeSponsoredMessageReportResult,
+): ApiSponsoredMessageReportResult {
+  if (result instanceof GramJs.channels.SponsoredMessageReportResultReported) {
+    return {
+      type: 'reported',
+    };
+  }
+
+  if (result instanceof GramJs.channels.SponsoredMessageReportResultAdsHidden) {
+    return {
+      type: 'hidden',
+    };
+  }
+
+  const title = result.title;
+  const options = result.options.map((option) => ({
+    text: option.text,
+    option: serializeBytes(option.option),
+  }));
+
+  return {
+    type: 'selectOption',
+    title,
+    options,
   };
 }

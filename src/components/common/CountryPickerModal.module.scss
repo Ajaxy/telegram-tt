@@ -1,0 +1,29 @@
+.root :global(.modal-dialog) {
+  max-width: 55vh;
+}
+
+.pickerSelector {
+  display: flex;
+  align-items: center;
+}
+
+.pickerTitle {
+  flex: 1;
+  margin: 0 0 0 1.25rem;
+  font-size: 1.25rem;
+
+  @media (max-width: 600px) {
+    margin-left: 0.75rem;
+  }
+}
+
+.picker {
+  height: 70vh;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+

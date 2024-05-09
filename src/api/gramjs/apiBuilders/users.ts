@@ -1,6 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiBirthday,
   ApiPremiumGiftOption,
   ApiUser,
   ApiUserFullInfo,
@@ -9,7 +10,9 @@ import type {
 } from '../../types';
 
 import { buildApiBotInfo } from './bots';
+import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
 import { buildApiPhoto, buildApiUsernames } from './common';
+import { omitVirtualClassFields } from './helpers';
 import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
 export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
@@ -18,6 +21,8 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
       profilePhoto, voiceMessagesForbidden, premiumGifts,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
+      contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
+      birthday, personalChannelId, personalChannelMessage, sponsoredEnabled,
     },
     users,
   } = mtpUserFull;
@@ -35,8 +40,16 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     profilePhoto: profilePhoto instanceof GramJs.Photo ? buildApiPhoto(profilePhoto) : undefined,
     fallbackPhoto: fallbackPhoto instanceof GramJs.Photo ? buildApiPhoto(fallbackPhoto) : undefined,
     personalPhoto: personalPhoto instanceof GramJs.Photo ? buildApiPhoto(personalPhoto) : undefined,
-    ...(premiumGifts && { premiumGifts: premiumGifts.map((gift) => buildApiPremiumGiftOption(gift)) }),
-    ...(botInfo && { botInfo: buildApiBotInfo(botInfo, userId) }),
+    premiumGifts: premiumGifts?.map((gift) => buildApiPremiumGiftOption(gift)),
+    botInfo: botInfo && buildApiBotInfo(botInfo, userId),
+    isContactRequirePremium: contactRequirePremium,
+    birthday: birthday && buildApiBirthday(birthday),
+    businessLocation: businessLocation && buildApiBusinessLocation(businessLocation),
+    businessWorkHours: businessWorkHours && buildApiBusinessWorkHours(businessWorkHours),
+    businessIntro: businessIntro && buildApiBusinessIntro(businessIntro),
+    personalChannelId: personalChannelId && buildApiPeerId(personalChannelId, 'channel'),
+    personalChannelMessageId: personalChannelMessage,
+    areAdsEnabled: sponsoredEnabled,
   };
 }
 
@@ -108,11 +121,11 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   } else if (mtpStatus instanceof GramJs.UserStatusOffline) {
     return { type: 'userStatusOffline', wasOnline: mtpStatus.wasOnline };
   } else if (mtpStatus instanceof GramJs.UserStatusRecently) {
-    return { type: 'userStatusRecently' };
+    return { type: 'userStatusRecently', isReadDateRestrictedByMe: mtpStatus.byMe };
   } else if (mtpStatus instanceof GramJs.UserStatusLastWeek) {
-    return { type: 'userStatusLastWeek' };
+    return { type: 'userStatusLastWeek', isReadDateRestrictedByMe: mtpStatus.byMe };
   } else {
-    return { type: 'userStatusLastMonth' };
+    return { type: 'userStatusLastMonth', isReadDateRestrictedByMe: mtpStatus.byMe };
   }
 }
 
@@ -150,4 +163,8 @@ export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption):
     amount: amount.toJSNumber(),
     botUrl,
   };
+}
+
+export function buildApiBirthday(birthday: GramJs.TypeBirthday): ApiBirthday {
+  return omitVirtualClassFields(birthday);
 }

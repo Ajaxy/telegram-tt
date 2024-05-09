@@ -176,7 +176,31 @@
 
 .status {
   font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+}
+
+.user-status {
   opacity: 0.5;
+}
+
+.get-status {
+  --blured-background-color: #c4c9cc42;
+  cursor: var(--custom-cursor, pointer);
+  font-size: 0.75rem;
+  margin-inline-start: 0.375rem;
+  border-radius: 1rem;
+  padding: 0.1875rem 0.375rem;
+  pointer-events: all;
+  font-weight: 500;
+  transition: 150ms filter ease-in;
+  background: var(--blured-background-color);
+  backdrop-filter: blur(100px);
+  opacity: 0.8;
+
+  &:hover {
+    filter: brightness(1.10);
+  }
 }
 
 .topicContainer {

@@ -141,7 +141,9 @@ export default function createConfig(
                   exportLocalsConvention: "camelCase",
                   auto: true,
                   localIdentName:
-                    mode === "production" ? "[hash:base64]" : "[name]__[local]",
+                    APP_ENV === "production"
+                      ? "[sha1:hash:base64:8]"
+                      : "[name]__[local]",
                 },
               },
             },

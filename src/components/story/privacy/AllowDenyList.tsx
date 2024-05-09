@@ -42,7 +42,7 @@ function AllowDenyList({
       key={id}
       itemIds={displayedIds}
       selectedIds={selectedIds ?? MEMO_EMPTY_ARRAY}
-      lockedIds={lockedIds}
+      lockedSelectedIds={lockedIds}
       filterValue={searchQuery}
       filterPlaceholder={lang('Search')}
       searchInputId={`${id}-picker-search`}

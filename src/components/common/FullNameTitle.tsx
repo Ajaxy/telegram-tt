@@ -25,7 +25,7 @@ import VerifiedIcon from './VerifiedIcon';
 import styles from './FullNameTitle.module.scss';
 
 type OwnProps = {
-  peer: ApiPeer;
+  peer?: ApiPeer;
   className?: string;
   noVerified?: boolean;
   noFake?: boolean;
@@ -34,9 +34,11 @@ type OwnProps = {
   isSavedMessages?: boolean;
   isSavedDialog?: boolean;
   noLoopLimit?: boolean;
+  isUnknownUser?: boolean;
   canCopyTitle?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
+  iconElement?: React.ReactNode;
 };
 
 const FullNameTitle: FC<OwnProps> = ({
@@ -52,12 +54,25 @@ const FullNameTitle: FC<OwnProps> = ({
   canCopyTitle,
   onEmojiStatusClick,
   observeIntersection,
+  iconElement,
+  isUnknownUser,
 }) => {
   const lang = useLang();
   const { showNotification } = getActions();
-  const isUser = isUserId(peer.id);
-  const title = isUser ? getUserFullName(peer as ApiUser) : getChatTitle(lang, peer as ApiChat);
+  const isUser = peer && isUserId(peer.id);
   const isPremium = isUser && (peer as ApiUser).isPremium;
+
+  const title = useMemo(() => {
+    if (isUnknownUser) {
+      return lang('BoostingToBeDistributed');
+    }
+
+    if (peer && isUserId(peer.id)) {
+      return getUserFullName(peer as ApiUser);
+    }
+
+    return peer && getChatTitle(lang, peer as ApiChat);
+  }, [isUnknownUser, lang, peer]);
 
   const handleTitleClick = useLastCallback((e) => {
     if (!title || !canCopyTitle) {
@@ -74,16 +89,16 @@ const FullNameTitle: FC<OwnProps> = ({
       return lang(isSavedDialog ? 'MyNotes' : 'SavedMessages');
     }
 
-    if (isAnonymousForwardsChat(peer.id)) {
+    if (peer && isAnonymousForwardsChat(peer.id)) {
       return lang('AnonymousForward');
     }
 
-    if (isChatWithRepliesBot(peer.id)) {
+    if (peer && isChatWithRepliesBot(peer.id)) {
       return lang('RepliesTitle');
     }
 
     return undefined;
-  }, [isSavedDialog, isSavedMessages, lang, peer.id]);
+  }, [isSavedDialog, isSavedMessages, lang, peer]);
 
   if (specialTitle) {
     return (
@@ -103,18 +118,23 @@ const FullNameTitle: FC<OwnProps> = ({
       >
         {renderText(title || '')}
       </h3>
-      {!noVerified && peer.isVerified && <VerifiedIcon />}
-      {!noFake && peer.fakeType && <FakeIcon fakeType={peer.fakeType} />}
-      {withEmojiStatus && peer.emojiStatus && (
-        <CustomEmoji
-          documentId={peer.emojiStatus.documentId}
-          size={emojiStatusSize}
-          loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
-          observeIntersectionForLoading={observeIntersection}
-          onClick={onEmojiStatusClick}
-        />
+      {!iconElement && peer && (
+        <>
+          {!noVerified && peer?.isVerified && <VerifiedIcon />}
+          {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
+          {withEmojiStatus && peer.emojiStatus && (
+            <CustomEmoji
+              documentId={peer.emojiStatus.documentId}
+              size={emojiStatusSize}
+              loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
+              observeIntersectionForLoading={observeIntersection}
+              onClick={onEmojiStatusClick}
+            />
+          )}
+          {withEmojiStatus && !peer.emojiStatus && isPremium && <PremiumIcon />}
+        </>
       )}
-      {withEmojiStatus && !peer.emojiStatus && isPremium && <PremiumIcon />}
+      {iconElement}
     </div>
   );
 };

@@ -48,26 +48,10 @@
     }
   }
 
-  .avatars {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-
-    .Avatar {
-      margin: 0 0 0 -0.75rem;
-      font-size: 0.75rem;
-
-      &:first-child {
-        width: 2rem !important;
-        height: 2rem !important;
-      }
-
-      &:not(:first-child) {
-        width: 2.25rem !important;
-        height: 2.25rem !important;
-        border: 0.125rem solid var(--color-background);
-      }
-    }
+  .avatars .Avatar {
+    width: 2.25rem !important;
+    height: 2.25rem !important;
+    margin-inline-end: unset !important;
   }
 
   .join {

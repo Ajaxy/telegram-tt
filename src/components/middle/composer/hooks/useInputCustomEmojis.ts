@@ -13,7 +13,7 @@ import AbsoluteVideo from '../../../../util/AbsoluteVideo';
 import {
   addCustomEmojiInputRenderCallback,
   getCustomEmojiMediaDataForInput,
-} from '../../../../util/customEmojiManager';
+} from '../../../../util/emoji/customEmojiManager';
 import { round } from '../../../../util/math';
 import { hexToRgb } from '../../../../util/switchTheme';
 import { REM } from '../../../common/helpers/mediaDimensions';
@@ -131,6 +131,14 @@ export default function useInputCustomEmojis(
   useEffect(() => {
     return addCustomEmojiInputRenderCallback(synchronizeElements);
   }, [synchronizeElements]);
+
+  useEffect(() => {
+    const activePlayersById = playersById.current;
+    // Always clear players on unmount
+    return () => {
+      clearPlayers(Array.from(activePlayersById.keys()));
+    };
+  }, []);
 
   useEffect(() => {
     if (!getHtml() || !inputRef.current || !sharedCanvasRef.current || !isActive || !isReady) {

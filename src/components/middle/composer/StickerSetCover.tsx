@@ -21,6 +21,7 @@ import useMediaTransition from '../../../hooks/useMediaTransition';
 import useCustomEmoji from '../../common/hooks/useCustomEmoji';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
+import CustomEmoji from '../../common/CustomEmoji';
 import OptimizedVideo from '../../ui/OptimizedVideo';
 
 import styles from './StickerSetCover.module.scss';
@@ -47,7 +48,7 @@ const StickerSetCover: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const {
-    hasThumbnail, thumbCustomEmojiId, isLottie, isVideos: isVideo,
+    hasThumbnail, hasVideoThumb, hasAnimatedThumb, hasStaticThumb, thumbCustomEmojiId,
   } = stickerSet;
 
   const { customEmoji } = useCustomEmoji(thumbCustomEmojiId);
@@ -58,13 +59,15 @@ const StickerSetCover: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(containerRef, observeIntersection);
   const shouldPlay = isIntersecting && !noPlay;
 
-  const shouldFallbackToStatic = stickerSet.stickers && isVideo && !IS_WEBM_SUPPORTED;
+  const hasOnlyStaticThumb = hasStaticThumb && !hasVideoThumb && !hasAnimatedThumb && !thumbCustomEmojiId;
+
+  const shouldFallbackToStatic = hasOnlyStaticThumb || (hasVideoThumb && !IS_WEBM_SUPPORTED && !hasAnimatedThumb);
   const staticHash = shouldFallbackToStatic && getStickerPreviewHash(stickerSet.stickers![0].id);
   const staticMediaData = useMedia(staticHash, !isIntersecting);
 
-  const mediaHash = ((hasThumbnail && !shouldFallbackToStatic) || isLottie) && `stickerSet${stickerSet.id}`;
+  const mediaHash = ((hasThumbnail && !shouldFallbackToStatic) || hasAnimatedThumb) && `stickerSet${stickerSet.id}`;
   const mediaData = useMedia(mediaHash, !isIntersecting);
-  const isReady = mediaData || staticMediaData;
+  const isReady = thumbCustomEmojiId || mediaData || staticMediaData;
   const transitionClassNames = useMediaTransition(isReady);
 
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
@@ -83,7 +86,14 @@ const StickerSetCover: FC<OwnProps> = ({
   return (
     <div ref={containerRef} className={buildClassName(styles.root, 'sticker-set-cover')}>
       {isReady ? (
-        isLottie ? (
+        thumbCustomEmojiId ? (
+          <CustomEmoji
+            documentId={thumbCustomEmojiId}
+            size={size}
+            observeIntersectionForPlaying={observeIntersection}
+            noPlay={noPlay}
+          />
+        ) : hasAnimatedThumb ? (
           <AnimatedSticker
             className={transitionClassNames}
             tgsUrl={mediaData}
@@ -94,7 +104,7 @@ const StickerSetCover: FC<OwnProps> = ({
             sharedCanvasCoords={coords}
             forceAlways={forcePlayback}
           />
-        ) : (isVideo && !shouldFallbackToStatic) ? (
+        ) : (hasVideoThumb && !shouldFallbackToStatic) ? (
           <OptimizedVideo
             className={buildClassName(styles.video, transitionClassNames)}
             src={mediaData}

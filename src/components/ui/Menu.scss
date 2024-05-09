@@ -112,5 +112,6 @@
 
   &.in-portal {
     z-index: var(--z-portal-menu);
+    position: absolute;
   }
 }

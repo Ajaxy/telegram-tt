@@ -4,6 +4,7 @@ import { useEffect } from '../lib/teact/teact';
 import { DEBUG } from '../config';
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { applyStyles } from '../util/animation';
+import unloadVideo from '../util/browser/unloadVideo';
 import { makeProgressiveLoader } from '../util/progressieveLoader';
 import { IS_SAFARI } from '../util/windowEnvironment';
 
@@ -78,9 +79,7 @@ export function useStreaming(videoRef: RefObject<HTMLVideoElement>, url?: string
     return () => {
       requestMutation(() => {
         const src = video.src;
-        video.pause();
-        video.src = '';
-        video.load();
+        unloadVideo(video);
         mediaSource.removeEventListener('sourceopen', onSourceOpen);
         if (mediaSource.readyState === 'open') {
           endOfStream(mediaSource);

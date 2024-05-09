@@ -2,11 +2,13 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
+import type { ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
+import { selectUser } from '../../../global/selectors';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import renderText from '../../common/helpers/renderText';
 
@@ -19,25 +21,28 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import styles from './UrlAuthModal.module.scss';
 
 export type OwnProps = {
-  urlAuth?: TabState['urlAuth'];
-  currentUserName?: string;
+  modal?: TabState['urlAuth'];
 };
 
-const UrlAuthModal: FC<OwnProps> = ({
-  urlAuth, currentUserName,
+type StateProps = {
+  currentUser?: ApiUser;
+};
+
+const UrlAuthModal: FC<OwnProps & StateProps> = ({
+  modal, currentUser,
 }) => {
   const { closeUrlAuthModal, acceptBotUrlAuth, acceptLinkUrlAuth } = getActions();
   const [isLoginChecked, setLoginChecked] = useState(true);
   const [isWriteAccessChecked, setWriteAccessChecked] = useState(true);
-  const currentAuth = useCurrentOrPrev(urlAuth, false);
+  const currentAuth = useCurrentOrPrev(modal, false);
   const { domain, botId, shouldRequestWriteAccess } = currentAuth?.request || {};
   const bot = botId ? getGlobal().users.byId[botId] : undefined;
 
   const lang = useLang();
 
   const handleOpen = useCallback(() => {
-    if (urlAuth?.url && isLoginChecked) {
-      const acceptAction = urlAuth.button ? acceptBotUrlAuth : acceptLinkUrlAuth;
+    if (modal?.url && isLoginChecked) {
+      const acceptAction = modal.button ? acceptBotUrlAuth : acceptLinkUrlAuth;
       acceptAction({
         isWriteAllowed: isWriteAccessChecked,
       });
@@ -46,7 +51,7 @@ const UrlAuthModal: FC<OwnProps> = ({
     }
     closeUrlAuthModal();
   }, [
-    urlAuth, isLoginChecked, closeUrlAuthModal, acceptBotUrlAuth, acceptLinkUrlAuth, isWriteAccessChecked, currentAuth,
+    modal, isLoginChecked, closeUrlAuthModal, acceptBotUrlAuth, acceptLinkUrlAuth, isWriteAccessChecked, currentAuth,
   ]);
 
   const handleDismiss = useCallback(() => {
@@ -68,7 +73,7 @@ const UrlAuthModal: FC<OwnProps> = ({
 
   return (
     <ConfirmDialog
-      isOpen={Boolean(urlAuth?.url)}
+      isOpen={Boolean(modal?.url)}
       onClose={handleDismiss}
       title={lang('OpenUrlTitle')}
       confirmLabel={lang('OpenUrlTitle')}
@@ -81,7 +86,7 @@ const UrlAuthModal: FC<OwnProps> = ({
           label={(
             <>
               {renderText(
-                lang('Conversation.OpenBotLinkLogin', [domain, currentUserName]),
+                lang('Conversation.OpenBotLinkLogin', [domain, getUserFullName(currentUser)]),
                 ['simple_markdown'],
               )}
             </>
@@ -109,5 +114,11 @@ const UrlAuthModal: FC<OwnProps> = ({
     </ConfirmDialog>
   );
 };
-
-export default memo(UrlAuthModal);
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    const currentUser = selectUser(global, global.currentUserId!);
+    return {
+      currentUser,
+    };
+  },
+)(UrlAuthModal));
