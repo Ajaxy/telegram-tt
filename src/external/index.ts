@@ -109,7 +109,7 @@ export function __init() {
 
   const check = () => {
     let g = getGlobal();
-
+    console.log("GLOBAL STATE", g);
     if (
       g.connectionState === "connectionStateReady" &&
       g.chats.isFullyLoaded.active &&
