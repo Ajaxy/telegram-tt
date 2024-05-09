@@ -1,7 +1,7 @@
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { buildChatThreadKey } from '../helpers';
+import { buildChatThreadKey } from '../helpers/localSearch';
 import { selectCurrentMessageList } from './messages';
 import { selectTabState } from './tabs';
 
@@ -16,7 +16,7 @@ export function selectCurrentTextSearch<T extends GlobalState>(
 
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
   const currentSearch = selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey];
-  if (!currentSearch || !currentSearch.isActive) {
+  if (!currentSearch || currentSearch.query === undefined) {
     return undefined;
   }
 

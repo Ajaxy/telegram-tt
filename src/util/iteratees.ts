@@ -163,7 +163,7 @@ export function split<T extends any>(array: T[], chunkSize: number) {
 }
 
 export function partition<T extends unknown>(
-  array: T[], filter: (value: T, index: number, array: T[]) => boolean,
+  array: T[], filter: (value: T, index: number, array: T[]) => boolean | undefined,
 ): [T[], T[]] {
   const pass: T[] = [];
   const fail: T[] = [];
@@ -186,6 +186,10 @@ export function cloneDeep<T>(value: T): T {
     acc[key as keyof T] = cloneDeep(value[key as keyof T]);
     return acc;
   }, {} as T);
+}
+
+export function isLiteralObject(value: any): value is AnyLiteral {
+  return isObject(value) && !Array.isArray(value);
 }
 
 function isObject(value: any): value is object {

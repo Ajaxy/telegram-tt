@@ -1,11 +1,12 @@
 import type { ThreadId } from '../types';
 
 import { RE_TG_LINK, RE_TME_LINK } from '../config';
+import { ensureProtocol } from './ensureProtocol';
 import { isUsernameValid } from './username';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-'invoice' | 'addlist' | 'boost' | 'giftcode';
+'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -55,26 +56,55 @@ interface TelegramPassportLink {
   payload?: string;
 }
 
+interface PublicUsernameOrBotLink {
+  type: 'publicUsernameOrBotLink';
+  username: string;
+  start?: string;
+  startApp?: string;
+  startAttach?: string;
+  attach?: string;
+  text?: string;
+}
+
+interface BusinessChatLink {
+  type: 'businessChatLink';
+  slug: string;
+}
+
+interface PremiumReferrerLink {
+  type: 'premiumReferrerLink';
+  referrer: string;
+}
+
+interface PremiumMultigiftLink {
+  type: 'premiumMultigiftLink';
+  referrer: string;
+}
+
 type DeepLink =
   TelegramPassportLink |
   LoginCodeLink |
   PublicMessageLink |
   PrivateMessageLink |
   ShareLink |
-  ChatFolderLink;
+  ChatFolderLink |
+  PublicUsernameOrBotLink |
+  BusinessChatLink |
+  PremiumReferrerLink |
+  PremiumMultigiftLink;
 
-type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string>;
+type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
 type DeepLinkType = DeepLink['type'] | 'unknown';
 
 type PrivateMessageLinkBuilderParams = Omit<BuilderParams<PrivateMessageLink>, 'isSingle' | 'isBoost'> & {
-  single: string;
-  boost: string;
+  single: string | undefined;
+  boost: string | undefined;
 };
 
 type PublicMessageLinkBuilderParams = Omit<BuilderParams<PublicMessageLink>, 'isSingle' | 'isBoost'> & {
-  single: string;
-  boost: string;
+  single: string | undefined;
+  boost: string | undefined;
 };
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
@@ -84,6 +114,9 @@ export function isDeepLink(link: string): boolean {
 }
 
 export function tryParseDeepLink(link: string): DeepLink | undefined {
+  if (!isDeepLink(link)) {
+    return undefined;
+  }
   try {
     return parseDeepLink(link);
   } catch (err) {
@@ -92,19 +125,23 @@ export function tryParseDeepLink(link: string): DeepLink | undefined {
 }
 
 function parseDeepLink(url: string) {
-  if (url.startsWith('https:')) {
-    const urlParsed = new URL(url);
-    return handleHttpLink(urlParsed);
+  const correctUrl = ensureProtocol(url);
+  if (!correctUrl) {
+    return undefined;
   }
-  if (url.startsWith('tg:')) {
+  if (correctUrl.startsWith('https:')) {
+    const urlParsed = new URL(correctUrl);
+    return parseHttpLink(urlParsed);
+  }
+  if (correctUrl.startsWith('tg:')) {
     // Chrome parse url with tg: protocol incorrectly
-    const urlParsed = new URL(url.replace(/^tg:/, 'http:'));
-    return handleTgLink(urlParsed);
+    const urlParsed = new URL(correctUrl.replace(/^tg:/, 'http:'));
+    return parseTgLink(urlParsed);
   }
   return undefined;
 }
 
-function handleTgLink(url: URL) {
+function parseTgLink(url: URL) {
   const { hostname } = url;
   const queryParams = getQueryParams(url);
   const pathParams = getPathParams(url);
@@ -155,13 +192,28 @@ function handleTgLink(url: URL) {
         callbackUrl: queryParams.callback_url,
         payload: queryParams.payload,
       });
+    case 'publicUsernameOrBotLink':
+      return buildPublicUsernameOrBotLink({
+        username: queryParams.domain,
+        start: queryParams.start,
+        text: queryParams.text,
+        startApp: queryParams.startapp,
+        startAttach: queryParams.startattach,
+        attach: queryParams.attach,
+      });
+    case 'businessChatLink':
+      return buildBusinessChatLink({ slug: queryParams.slug });
+    case 'premiumReferrerLink':
+      return buildPremiumReferrerLink({ referrer: queryParams.ref });
+    case 'premiumMultigiftLink':
+      return buildPremiumMultigiftLink({ referrer: queryParams.ref });
     default:
       break;
   }
   return undefined;
 }
 
-function handleHttpLink(url: URL) {
+function parseHttpLink(url: URL) {
   if (!ELIGIBLE_HOSTNAMES.has(url.hostname)) {
     return undefined;
   }
@@ -231,6 +283,17 @@ function handleHttpLink(url: URL) {
       return buildChatFolderLink({ slug: pathParams[1] });
     case 'loginCodeLink':
       return buildLoginCodeLink({ code: pathParams[1] });
+    case 'publicUsernameOrBotLink':
+      return buildPublicUsernameOrBotLink({
+        username: pathParams[0],
+        start: queryParams.start,
+        text: queryParams.text,
+        startApp: queryParams.startapp,
+        startAttach: queryParams.startattach,
+        attach: queryParams.attach,
+      });
+    case 'businessChatLink':
+      return buildBusinessChatLink({ slug: pathParams[1] });
     default:
       break;
   }
@@ -247,6 +310,9 @@ function getHttpDeepLinkType(
     if (method === 'share') {
       return 'shareLink';
     }
+    if (isUsernameValid(method)) {
+      return 'publicUsernameOrBotLink';
+    }
   } else if (len === 2) {
     if (method === 'addlist') {
       return 'chatFolderLink';
@@ -256,6 +322,9 @@ function getHttpDeepLinkType(
     }
     if (isUsernameValid(pathParams[0]) && isNumber(pathParams[1])) {
       return 'publicMessageLink';
+    }
+    if (method === 'm') {
+      return 'businessChatLink';
     }
   } else if (len === 3) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
@@ -289,6 +358,9 @@ function getTgDeepLinkType(
       if (domain && post) {
         return 'publicMessageLink';
       }
+      if (isUsernameValid(domain)) {
+        return 'publicUsernameOrBotLink';
+      }
       break;
     }
     case 'privatepost': {
@@ -306,6 +378,12 @@ function getTgDeepLinkType(
       return 'loginCodeLink';
     case 'passport':
       return 'telegramPassportLink';
+    case 'message':
+      return 'businessChatLink';
+    case 'premium_offer':
+      return 'premiumReferrerLink';
+    case 'premium_multigift':
+      return 'premiumMultigiftLink';
     default:
       break;
   }
@@ -428,6 +506,80 @@ function buildTelegramPassportLink(
     nonce,
     callbackUrl,
     payload,
+  };
+}
+
+function buildPublicUsernameOrBotLink(
+  params: BuilderParams<PublicUsernameOrBotLink>,
+): BuilderReturnType<PublicUsernameOrBotLink> {
+  const {
+    username,
+    start,
+    text,
+    startApp,
+    startAttach,
+    attach,
+  } = params;
+  if (!username) {
+    return undefined;
+  }
+  if (!isUsernameValid(username)) {
+    return undefined;
+  }
+  return {
+    type: 'publicUsernameOrBotLink',
+    username,
+    start,
+    startApp,
+    startAttach,
+    attach,
+    text,
+  };
+}
+
+function buildBusinessChatLink(params: BuilderParams<BusinessChatLink>): BuilderReturnType<BusinessChatLink> {
+  const {
+    slug,
+  } = params;
+
+  if (!slug) {
+    return undefined;
+  }
+
+  return {
+    type: 'businessChatLink',
+    slug,
+  };
+}
+
+function buildPremiumReferrerLink(params: BuilderParams<PremiumReferrerLink>): BuilderReturnType<PremiumReferrerLink> {
+  const {
+    referrer,
+  } = params;
+
+  if (!referrer) {
+    return undefined;
+  }
+
+  return {
+    type: 'premiumReferrerLink',
+    referrer,
+  };
+}
+
+function buildPremiumMultigiftLink(params: BuilderParams<PremiumMultigiftLink>):
+BuilderReturnType<PremiumMultigiftLink> {
+  const {
+    referrer,
+  } = params;
+
+  if (!referrer) {
+    return undefined;
+  }
+
+  return {
+    type: 'premiumMultigiftLink',
+    referrer,
   };
 }
 

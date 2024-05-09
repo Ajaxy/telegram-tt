@@ -1,0 +1,38 @@
+.businessLocation {
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+  margin-inline-start: 0.25rem;
+}
+
+.personalChannel {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.personalChannelTitle {
+  grid-column: 1;
+  grid-row: 1;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-inline-start: 0.5rem;
+  margin-bottom: 0;
+}
+
+.personalChannelSubscribers {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-inline-end: 0.5rem;
+}
+
+.personalChannelItem {
+  grid-column: 1 / span 2;
+  grid-row: 2;
+}

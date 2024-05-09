@@ -30,7 +30,6 @@ type OwnProps = {
   style?: string;
   isBig?: boolean;
   noPlay?: boolean;
-  withGridFix?: boolean;
   withSharedAnimation?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
@@ -55,7 +54,6 @@ const CustomEmoji: FC<OwnProps> = ({
   className,
   loopLimit,
   style,
-  withGridFix,
   withSharedAnimation,
   sharedCanvasRef,
   sharedCanvasHqRef,
@@ -78,7 +76,7 @@ const CustomEmoji: FC<OwnProps> = ({
   const { customEmoji, canPlay } = useCustomEmoji(documentId);
 
   const loopCountRef = useRef(0);
-  const [shouldLoop, setShouldLoop] = useState(true);
+  const [shouldPlay, setShouldPlay] = useState(true);
 
   const hasCustomColor = customEmoji?.shouldUseTextColor;
   const customColor = useDynamicColorListener(containerRef, !hasCustomColor);
@@ -89,7 +87,7 @@ const CustomEmoji: FC<OwnProps> = ({
     loopCountRef.current += 1;
 
     if (loopCountRef.current >= loopLimit) {
-      setShouldLoop(false);
+      setShouldPlay(false);
       e.currentTarget.currentTime = 0;
     } else {
       // Loop manually
@@ -102,9 +100,8 @@ const CustomEmoji: FC<OwnProps> = ({
 
     loopCountRef.current += 1;
 
-    // Sticker plays 1 more time after disabling loop
-    if (loopCountRef.current >= loopLimit - 1) {
-      setShouldLoop(false);
+    if (loopCountRef.current >= loopLimit) {
+      setShouldPlay(false);
     }
   });
 
@@ -118,7 +115,6 @@ const CustomEmoji: FC<OwnProps> = ({
         className,
         'custom-emoji',
         'emoji',
-        withGridFix && styles.withGridFix,
       )}
       onClick={onClick}
       onAnimationEnd={onAnimationEnd}
@@ -143,10 +139,10 @@ const CustomEmoji: FC<OwnProps> = ({
           sticker={customEmoji}
           isSmall={!isBig}
           size={size}
-          noPlay={noPlay || !canPlay}
+          noPlay={noPlay || !(shouldPlay && canPlay)}
           thumbClassName={styles.thumb}
           fullMediaClassName={styles.media}
-          shouldLoop={shouldLoop}
+          shouldLoop
           loopLimit={loopLimit}
           shouldPreloadPreview={shouldPreloadPreview || noPlay || !canPlay}
           forceOnHeavyAnimation={forceOnHeavyAnimation}

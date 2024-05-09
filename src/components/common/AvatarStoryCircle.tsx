@@ -3,10 +3,11 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
+import type { ApiTypeStory } from '../../api/types';
 import type { ThemeKey } from '../../types';
 import type { AvatarSize } from './Avatar';
 
-import { selectPeerStories, selectTheme, selectUser } from '../../global/selectors';
+import { selectPeerStories, selectTheme } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { REM } from './helpers/mediaDimensions';
 
@@ -21,7 +22,7 @@ interface OwnProps {
 }
 
 interface StateProps {
-  isCloseFriend?: boolean;
+  peerStories?: Record<number, ApiTypeStory>;
   storyIds?: number[];
   lastReadId?: number;
   appTheme: ThemeKey;
@@ -58,7 +59,7 @@ const EXTRA_GAP_END = EXTRA_GAP_ANGLE + EXTRA_GAP_SIZE / 2;
 function AvatarStoryCircle({
   size = 'large',
   className,
-  isCloseFriend,
+  peerStories,
   storyIds,
   lastReadId,
   withExtraGap,
@@ -79,6 +80,21 @@ function AvatarStoryCircle({
       return acc;
     }, { total: 0, read: 0 });
   }, [lastReadId, storyIds]);
+
+  const isCloseFriend = useMemo(() => {
+    if (!peerStories || !storyIds?.length) {
+      return false;
+    }
+
+    return storyIds.some((id) => {
+      const story = peerStories[id];
+      if (!story || !('isForCloseFriends' in story)) {
+        return false;
+      }
+      const isRead = lastReadId && story.id <= lastReadId;
+      return story.isForCloseFriends && !isRead;
+    });
+  }, [lastReadId, peerStories, storyIds]);
 
   useLayoutEffect(() => {
     if (!ref.current) {
@@ -113,12 +129,11 @@ function AvatarStoryCircle({
 }
 
 export default memo(withGlobal<OwnProps>((global, { peerId }): StateProps => {
-  const user = selectUser(global, peerId);
   const peerStories = selectPeerStories(global, peerId);
   const appTheme = selectTheme(global);
 
   return {
-    isCloseFriend: user?.isCloseFriend,
+    peerStories: peerStories?.byId,
     storyIds: peerStories?.orderedIds,
     lastReadId: peerStories?.lastReadId,
     appTheme,

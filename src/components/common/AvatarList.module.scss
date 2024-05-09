@@ -1,5 +1,6 @@
 .root {
   display: flex;
+  position: relative;
   --spacing: calc(var(--size) * 0.4);
   --spacing-gap: calc(var(--size) * 0.04);
   --size: 0px;
@@ -57,4 +58,22 @@
 
 .root[dir="rtl"] .avatar {
   --offset: calc(100% + var(--half-size) - var(--spacing));
+}
+
+.badge {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+
+  background-color: var(--color-primary);
+  color: var(--color-white);
+
+  border: 1px solid var(--color-background);
+  border-radius: 1rem;
+
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+
+  padding: 0rem 0.25rem;
 }

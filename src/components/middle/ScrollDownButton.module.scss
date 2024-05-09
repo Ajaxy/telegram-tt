@@ -64,7 +64,8 @@
   top: -0.3125rem;
   right: -0.3125rem;
 
-  background: var(--color-green);
+  background-color: var(--color-green);
+  border: 1px solid var(--color-background);
   color: white;
 
   pointer-events: none;

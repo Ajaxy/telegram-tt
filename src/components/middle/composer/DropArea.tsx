@@ -1,10 +1,16 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
+import type { ApiMessage } from '../../../api/types';
+
+import { canReplaceMessageMedia, isUploadingFileSticker } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import buildAttachment from './helpers/buildAttachment';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -19,6 +25,7 @@ export type OwnProps = {
   withQuick?: boolean;
   onHide: NoneToVoidFunction;
   onFileSelect: (files: File[], suggestCompression?: boolean) => void;
+  editingMessage?: ApiMessage | undefined;
 };
 
 export enum DropAreaState {
@@ -30,12 +37,15 @@ export enum DropAreaState {
 const DROP_LEAVE_TIMEOUT_MS = 150;
 
 const DropArea: FC<OwnProps> = ({
-  isOpen, withQuick, onHide, onFileSelect,
+  isOpen, withQuick, onHide, onFileSelect, editingMessage,
 }) => {
+  const lang = useLang();
+  const { showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
   const hideTimeoutRef = useRef<number>(null);
   const prevWithQuick = usePrevious(withQuick);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
+  const isInAlbum = editingMessage && editingMessage?.groupedId;
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);
 
@@ -47,6 +57,14 @@ const DropArea: FC<OwnProps> = ({
       files = files.concat(Array.from(dt.files));
     } else if (dt.items && dt.items.length > 0) {
       const folderFiles = await getFilesFromDataTransferItems(dt.items);
+      const newAttachment = folderFiles && await buildAttachment(folderFiles[0].name, folderFiles[0]);
+      const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
+      const isFileSticker = newAttachment && isUploadingFileSticker(newAttachment);
+
+      if (canReplace || isFileSticker) {
+        showNotification({ message: lang(isInAlbum ? 'lng_edit_media_album_error' : 'lng_edit_media_invalid_file') });
+        return;
+      }
       if (folderFiles?.length) {
         files = files.concat(folderFiles);
       }

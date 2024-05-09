@@ -3,20 +3,21 @@ import { ApiMediaFormat } from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import { buildCollectionByCallback, buildCollectionByKey, omit } from '../../../util/iteratees';
 import * as mediaLoader from '../../../util/mediaLoader';
+import { getMessageKey } from '../../../util/messageKey';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { callApi } from '../../../api/gramjs';
 import {
   getDocumentMediaHash,
-  getMessageKey,
+  getReactionKey,
   getUserReactions,
   isMessageLocal,
   isSameReaction,
 } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChatMessagesById, addChats, addUsers, updateChatMessage,
+  addChatMessagesById, addChats, addUsers, updateChat, updateChatMessage,
 } from '../../reducers';
 import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
@@ -37,7 +38,7 @@ const INTERACTION_RANDOM_OFFSET = 40;
 let interactionLocalId = 0;
 
 addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
-  const result = await callApi('getAvailableReactions');
+  const result = await callApi('fetchAvailableReactions');
   if (!result) {
     return;
   }
@@ -61,7 +62,10 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
   global = getGlobal();
   global = {
     ...global,
-    availableReactions: result,
+    reactions: {
+      ...global.reactions,
+      availableReactions: result,
+    },
   };
   setGlobal(global);
 
@@ -144,6 +148,8 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
     return;
   }
 
+  const isInSaved = selectIsChatWithSelf(global, chatId);
+
   const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
   const documentGroupFirstMessageId = isInDocumentGroup
     ? selectMessageIdsByGroupId(global, chatId, message.groupedId!)![0]
@@ -181,6 +187,10 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
       reactions,
       shouldAddToRecent,
     });
+
+    if (isInSaved) {
+      actions.loadSavedReactionTags();
+    }
   } catch (error) {
     global = getGlobal();
     global = addMessageReaction(global, message, userReactions);
@@ -427,9 +437,17 @@ addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnTy
   const { tabId = getCurrentTabId() } = payload || {};
   const chat = selectCurrentChat(global, tabId);
 
-  if (!chat?.unreadReactions) return;
+  if (!chat?.unreadReactions) {
+    if (chat?.unreadReactionsCount) {
+      return updateChat(global, chat.id, {
+        unreadReactionsCount: 0,
+      });
+    }
+    return undefined;
+  }
 
   actions.focusMessage({ chatId: chat.id, messageId: chat.unreadReactions[0], tabId });
+  return undefined;
 });
 
 addActionHandler('readAllReactions', (global, actions, payload): ActionReturnType => {
@@ -446,7 +464,9 @@ addActionHandler('readAllReactions', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('loadTopReactions', async (global): Promise<void> => {
-  const result = await callApi('fetchTopReactions', {});
+  const result = await callApi('fetchTopReactions', {
+    hash: global.reactions.hash.topReactions,
+  });
   if (!result) {
     return;
   }
@@ -454,13 +474,22 @@ addActionHandler('loadTopReactions', async (global): Promise<void> => {
   global = getGlobal();
   global = {
     ...global,
-    topReactions: result.reactions,
+    reactions: {
+      ...global.reactions,
+      topReactions: result.reactions,
+      hash: {
+        ...global.reactions.hash,
+        topReactions: result.hash,
+      },
+    },
   };
   setGlobal(global);
 });
 
 addActionHandler('loadRecentReactions', async (global): Promise<void> => {
-  const result = await callApi('fetchRecentReactions', {});
+  const result = await callApi('fetchRecentReactions', {
+    hash: global.reactions.hash.recentReactions,
+  });
   if (!result) {
     return;
   }
@@ -468,7 +497,14 @@ addActionHandler('loadRecentReactions', async (global): Promise<void> => {
   global = getGlobal();
   global = {
     ...global,
-    recentReactions: result.reactions,
+    reactions: {
+      ...global.reactions,
+      recentReactions: result.reactions,
+      hash: {
+        ...global.reactions.hash,
+        recentReactions: result.hash,
+      },
+    },
   };
   setGlobal(global);
 });
@@ -482,7 +518,89 @@ addActionHandler('clearRecentReactions', async (global): Promise<void> => {
   global = getGlobal();
   global = {
     ...global,
-    recentReactions: [],
+    reactions: {
+      ...global.reactions,
+      recentReactions: [],
+    },
+  };
+  setGlobal(global);
+});
+
+addActionHandler('loadDefaultTagReactions', async (global): Promise<void> => {
+  const result = await callApi('fetchDefaultTagReactions', {
+    hash: global.reactions.hash.defaultTags,
+  });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    reactions: {
+      ...global.reactions,
+      defaultTags: result.reactions,
+      hash: {
+        ...global.reactions.hash,
+        defaultTags: result.hash,
+      },
+    },
+  };
+  setGlobal(global);
+});
+
+addActionHandler('loadSavedReactionTags', async (global): Promise<void> => {
+  const { hash } = global.savedReactionTags || {};
+
+  const result = await callApi('fetchSavedReactionTags', { hash });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+
+  const tagsByKey = buildCollectionByCallback(result.tags, (tag) => ([getReactionKey(tag.reaction), tag]));
+
+  global = {
+    ...global,
+    savedReactionTags: {
+      hash: result.hash,
+      byKey: tagsByKey,
+    },
+  };
+  setGlobal(global);
+});
+
+addActionHandler('editSavedReactionTag', async (global, actions, payload): Promise<void> => {
+  const { reaction, title } = payload;
+
+  const result = await callApi('updateSavedReactionTag', { reaction, title });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  const tagsByKey = global.savedReactionTags?.byKey;
+  if (!tagsByKey) return;
+
+  const key = getReactionKey(reaction);
+  const tag = tagsByKey[key];
+
+  const newTag = {
+    ...tag,
+    title,
+  };
+
+  global = {
+    ...global,
+    savedReactionTags: {
+      ...global.savedReactionTags!,
+      byKey: {
+        ...tagsByKey,
+        [key]: newTag,
+      },
+    },
   };
   setGlobal(global);
 });

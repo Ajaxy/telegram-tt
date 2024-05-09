@@ -27,6 +27,9 @@ export interface IAlbum {
   albumId: string;
   messages: ApiMessage[];
   mainMessage: ApiMessage;
+  captionMessage?: ApiMessage;
+  hasMultipleCaptions: boolean;
+  commentsMessage?: ApiMessage;
 }
 
 export type ThreadId = string | number;
@@ -101,6 +104,8 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   wasTimeFormatSetManually: boolean;
   isConnectionStatusMinimized: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
+  shouldNewNonContactPeersRequirePremium?: boolean;
+  shouldHideReadMarks?: boolean;
   canTranslate: boolean;
   canTranslateChats: boolean;
   translationLanguage?: string;
@@ -121,6 +126,7 @@ export interface ApiPrivacySettings {
   allowChatIds: string[];
   blockUserIds: string[];
   blockChatIds: string[];
+  shouldAllowPremium?: true;
 }
 
 export interface ApiInputPrivacyRules {
@@ -130,6 +136,7 @@ export interface ApiInputPrivacyRules {
   allowedChats?: ApiChat[];
   blockedUsers?: ApiUser[];
   blockedChats?: ApiChat[];
+  shouldAllowPremium?: true;
 }
 
 export type IAnchorPosition = {
@@ -178,10 +185,12 @@ export enum SettingsScreens {
   PrivacyLastSeen,
   PrivacyProfilePhoto,
   PrivacyBio,
+  PrivacyBirthday,
   PrivacyPhoneCall,
   PrivacyPhoneP2P,
   PrivacyForwarding,
   PrivacyVoiceMessages,
+  PrivacyMessages,
   PrivacyGroupChats,
   PrivacyPhoneNumberAllowedContacts,
   PrivacyPhoneNumberDeniedContacts,
@@ -191,6 +200,8 @@ export enum SettingsScreens {
   PrivacyProfilePhotoDeniedContacts,
   PrivacyBioAllowedContacts,
   PrivacyBioDeniedContacts,
+  PrivacyBirthdayAllowedContacts,
+  PrivacyBirthdayDeniedContacts,
   PrivacyPhoneCallAllowedContacts,
   PrivacyPhoneCallDeniedContacts,
   PrivacyPhoneP2PAllowedContacts,
@@ -247,8 +258,8 @@ export enum SettingsScreens {
 }
 
 export type StickerSetOrReactionsSetOrRecent = Pick<ApiStickerSet, (
-  'id' | 'accessHash' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isLottie' | 'isVideos' | 'isEmoji' |
-  'installedDate' | 'isArchived'
+  'id' | 'accessHash' | 'title' | 'count' | 'stickers' | 'isEmoji' | 'installedDate' | 'isArchived' |
+  'hasThumbnail' | 'hasStaticThumb' | 'hasAnimatedThumb' | 'hasVideoThumb' | 'thumbCustomEmojiId'
 )> & { reactions?: ApiReaction[] };
 
 export enum LeftColumnContent {
@@ -265,6 +276,7 @@ export enum LeftColumnContent {
 
 export enum GlobalSearchContent {
   ChatList,
+  ChannelList,
   Media,
   Links,
   Files,
@@ -372,7 +384,7 @@ export type ProfileTabType =
   | 'dialogs';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
-'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio';
+'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
 
 export enum ProfileState {

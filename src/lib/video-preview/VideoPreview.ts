@@ -122,7 +122,10 @@ export function createVideoPreviews(url: string, canvas: HTMLCanvasElement) {
     videoPreview.destroy();
   }
   videoPreview = new VideoPreview(url, canvas);
-  return () => videoPreview?.destroy();
+  return () => {
+    videoPreview?.destroy();
+    videoPreview = undefined;
+  };
 }
 
 export function renderVideoPreview(time: number) {

@@ -129,7 +129,7 @@ const handleMessage = ({ data }: { data: EstablishMessage }) => {
   }
 };
 
-export function establishMultitabRole() {
+export function establishMultitabRole(shouldReestablishMasterToSelf?: boolean) {
   if (!channel) return;
 
   channel.addEventListener('message', handleMessage);
@@ -142,6 +142,8 @@ export function establishMultitabRole() {
     if (masterToken === undefined) {
       masterToken = token;
       runCallbacks(true);
+    } else if (shouldReestablishMasterToSelf) {
+      reestablishMasterToSelf();
     }
   }, ESTABLISH_TIMEOUT);
 
@@ -183,6 +185,6 @@ export function reestablishMasterToSelf() {
 export const subscribeToTokenDied = addCallbackTokenDied;
 export const subscribeToMasterChange = addCallback;
 
-export function isMasterTab() {
+export function isCurrentTabMaster() {
   return masterToken === token;
 }

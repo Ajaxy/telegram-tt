@@ -10,10 +10,8 @@ import type {
 import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 
 import {
-  CHAT_STICKER_SET_ID,
   FAVORITE_SYMBOL_SET_ID,
   POPULAR_SYMBOL_SET_ID,
-  PREMIUM_STICKER_SET_ID,
   RECENT_SYMBOL_SET_ID,
   SLIDE_TRANSITION_DURATION,
   STICKER_PICKER_MAX_SHARED_COVERS,
@@ -23,6 +21,7 @@ import {
 import { isSameReaction } from '../../global/helpers';
 import {
   selectCanPlayAnimatedEmojis,
+  selectChatFullInfo,
   selectIsAlwaysHighPriorityEmoji,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
@@ -30,7 +29,6 @@ import {
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import buildClassName from '../../util/buildClassName';
 import { pickTruthy, unique } from '../../util/iteratees';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { REM } from './helpers/mediaDimensions';
 
@@ -45,6 +43,7 @@ import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
+import Icon from './Icon';
 import StickerButton from './StickerButton';
 import StickerSet from './StickerSet';
 
@@ -74,8 +73,10 @@ type StateProps = {
   customEmojisById?: Record<string, ApiSticker>;
   recentCustomEmojiIds?: string[];
   recentStatusEmojis?: ApiSticker[];
+  chatEmojiSetId?: string;
   topReactions?: ApiReaction[];
   recentReactions?: ApiReaction[];
+  defaultTagReactions?: ApiReaction[];
   stickerSetsById: Record<string, ApiStickerSet>;
   availableReactions?: ApiAvailableReaction[];
   addedCustomEmojiIds?: string[];
@@ -97,8 +98,6 @@ const STICKER_SET_IDS_WITH_COVER = new Set([
   RECENT_SYMBOL_SET_ID,
   FAVORITE_SYMBOL_SET_ID,
   POPULAR_SYMBOL_SET_ID,
-  CHAT_STICKER_SET_ID,
-  PREMIUM_STICKER_SET_ID,
 ]);
 
 const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
@@ -112,6 +111,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   selectedReactionIds,
   recentStatusEmojis,
   stickerSetsById,
+  chatEmojiSetId,
   topReactions,
   recentReactions,
   availableReactions,
@@ -126,6 +126,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   withDefaultTopicIcons,
   defaultTopicIconsId,
   defaultStatusIconsId,
+  defaultTagReactions,
   onCustomEmojiSelect,
   onReactionSelect,
   onContextMenuOpen,
@@ -168,13 +169,22 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   const areAddedLoaded = Boolean(addedCustomEmojiIds);
 
   const allSets = useMemo(() => {
-    if (!addedCustomEmojiIds) {
-      return MEMO_EMPTY_ARRAY;
-    }
-
     const defaultSets: StickerSetOrReactionsSetOrRecent[] = [];
 
-    if (isReactionPicker) {
+    if (isReactionPicker && isSavedMessages) {
+      if (defaultTagReactions?.length) {
+        defaultSets.push({
+          id: TOP_SYMBOL_SET_ID,
+          accessHash: '',
+          title: lang('PremiumPreviewTags'),
+          reactions: defaultTagReactions,
+          count: defaultTagReactions.length,
+          isEmoji: true,
+        });
+      }
+    }
+
+    if (isReactionPicker && !isSavedMessages) {
       const topReactionsSlice = topReactions?.slice(0, TOP_REACTIONS_COUNT) || [];
       if (topReactionsSlice?.length) {
         defaultSets.push({
@@ -240,7 +250,12 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       });
     }
 
-    const setIdsToDisplay = unique(addedCustomEmojiIds.concat(customEmojiFeaturedIds || []));
+    const userSetIds = [...(addedCustomEmojiIds || [])];
+    if (chatEmojiSetId) {
+      userSetIds.unshift(chatEmojiSetId);
+    }
+
+    const setIdsToDisplay = unique(userSetIds.concat(customEmojiFeaturedIds || []));
 
     const setsToDisplay = Object.values(pickTruthy(stickerSetsById, setIdsToDisplay));
 
@@ -251,7 +266,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   }, [
     addedCustomEmojiIds, isReactionPicker, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
     customEmojiFeaturedIds, stickerSetsById, topReactions, availableReactions, lang, recentReactions,
-    defaultStatusIconsId, defaultTopicIconsId,
+    defaultStatusIconsId, defaultTopicIconsId, isSavedMessages, defaultTagReactions, chatEmojiSetId,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -317,7 +332,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           onClick={() => selectStickerSet(isRecent ? 0 : index)}
         >
           {isRecent ? (
-            <i className="icon icon-recent" />
+            <Icon name="recent" />
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}
@@ -397,6 +412,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         {allSets.map((stickerSet, i) => {
           const shouldHideHeader = stickerSet.id === TOP_SYMBOL_SET_ID
             || (stickerSet.id === RECENT_SYMBOL_SET_ID && (withDefaultTopicIcons || isStatusPicker));
+          const isChatEmojiSet = stickerSet.id === chatEmojiSetId;
 
           return (
             <StickerSet
@@ -415,6 +431,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
               shouldHideHeader={shouldHideHeader}
               withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
               withDefaultStatusIcon={isStatusPicker && stickerSet.id === RECENT_SYMBOL_SET_ID}
+              isChatEmojiSet={isChatEmojiSet}
               isCurrentUserPremium={isCurrentUserPremium}
               selectedReactionIds={selectedReactionIds}
               availableReactions={availableReactions}
@@ -447,11 +464,16 @@ export default memo(withGlobal<OwnProps>(
         },
       },
       recentCustomEmojis: recentCustomEmojiIds,
-      recentReactions,
-      topReactions,
+      reactions: {
+        availableReactions,
+        recentReactions,
+        topReactions,
+        defaultTags,
+      },
     } = global;
 
     const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
+    const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
 
     return {
       customEmojisById: !isStatusPicker ? customEmojisById : undefined,
@@ -467,7 +489,9 @@ export default memo(withGlobal<OwnProps>(
       defaultStatusIconsId: global.defaultStatusIconsId,
       topReactions: isReactionPicker ? topReactions : undefined,
       recentReactions: isReactionPicker ? recentReactions : undefined,
-      availableReactions: isReactionPicker ? global.availableReactions : undefined,
+      chatEmojiSetId: chatFullInfo?.emojiSet?.id,
+      availableReactions: isReactionPicker ? availableReactions : undefined,
+      defaultTagReactions: isReactionPicker ? defaultTags : undefined,
     };
   },
 )(CustomEmojiPicker));

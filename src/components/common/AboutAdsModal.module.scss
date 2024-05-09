@@ -1,0 +1,35 @@
+.title, .description {
+  text-align: center !important;
+  text-wrap: pretty;
+  padding-inline: 1.5rem;
+}
+
+.secondary {
+  color: var(--color-text-secondary);
+}
+
+.separator {
+  margin-block: 1rem;
+  width: 100%;
+}
+
+.topIcon {
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--premium-gradient);
+
+  font-size: 4rem;
+  color: white;
+  width: 6rem;
+  height: 6rem;
+  margin-bottom: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

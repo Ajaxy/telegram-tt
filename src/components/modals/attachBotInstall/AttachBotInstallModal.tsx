@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiAttachBot } from '../../../api/types';
+import type { TabState } from '../../../global/types';
 
 import { MINI_APP_TOS_URL } from '../../../config';
 import renderText from '../../common/helpers/renderText';
@@ -15,13 +15,15 @@ import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 
 export type OwnProps = {
-  bot?: ApiAttachBot;
+  modal: TabState['requestedAttachBotInstall'];
 };
 
 const AttachBotInstallModal: FC<OwnProps> = ({
-  bot,
+  modal,
 }) => {
   const { confirmAttachBotInstall, cancelAttachBotInstall } = getActions();
+  const bot = modal?.bot;
+
   const [isTosAccepted, setIsTosAccepted] = useState(false);
 
   const lang = useLang();

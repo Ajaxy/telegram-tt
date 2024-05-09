@@ -2,12 +2,13 @@ import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { buildChatThreadKey } from '../../helpers';
+import { buildChatThreadKey, isSameReaction } from '../../helpers';
 import { addActionHandler } from '../../index';
 import {
   replaceLocalTextSearchResults,
   updateLocalMediaSearchType,
   updateLocalTextSearch,
+  updateLocalTextSearchTag,
 } from '../../reducers';
 import { selectCurrentMessageList, selectTabState } from '../../selectors';
 
@@ -18,7 +19,7 @@ addActionHandler('openLocalTextSearch', (global, actions, payload): ActionReturn
     return undefined;
   }
 
-  return updateLocalTextSearch(global, chatId, threadId, true, undefined, tabId);
+  return updateLocalTextSearch(global, chatId, threadId, '', tabId);
 });
 
 addActionHandler('closeLocalTextSearch', (global, actions, payload): ActionReturnType => {
@@ -41,7 +42,27 @@ addActionHandler('setLocalTextSearchQuery', (global, actions, payload): ActionRe
     global = replaceLocalTextSearchResults(global, chatId, threadId, MEMO_EMPTY_ARRAY, undefined, undefined, tabId);
   }
 
-  global = updateLocalTextSearch(global, chatId, threadId, true, query, tabId);
+  global = updateLocalTextSearch(global, chatId, threadId, query, tabId);
+
+  return global;
+});
+
+addActionHandler('setLocalTextSearchTag', (global, actions, payload): ActionReturnType => {
+  const { tag, tabId = getCurrentTabId() } = payload!;
+
+  const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
+  if (!chatId || !threadId) {
+    return undefined;
+  }
+
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+  const { savedTag } = selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey] || {};
+
+  if (!isSameReaction(tag, savedTag)) {
+    global = replaceLocalTextSearchResults(global, chatId, threadId, MEMO_EMPTY_ARRAY, undefined, undefined, tabId);
+  }
+
+  global = updateLocalTextSearchTag(global, chatId, threadId, tag, tabId);
 
   return global;
 });
@@ -65,7 +86,8 @@ export function closeLocalTextSearch<T extends GlobalState>(
     return global;
   }
 
-  global = updateLocalTextSearch(global, chatId, threadId, false, undefined, tabId);
+  global = updateLocalTextSearchTag(global, chatId, threadId, undefined, tabId);
+  global = updateLocalTextSearch(global, chatId, threadId, undefined, tabId);
   global = replaceLocalTextSearchResults(global, chatId, threadId, undefined, undefined, undefined, tabId);
   return global;
 }

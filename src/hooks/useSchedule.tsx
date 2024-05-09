@@ -1,7 +1,7 @@
 import React, { useState } from '../lib/teact/teact';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
-import { getDayStartAt } from '../util/dateFormat';
+import { getDayStartAt } from '../util/date/dateFormat';
 import { getServerTimeOffset } from '../util/serverTime';
 import useLang from './useLang';
 import useLastCallback from './useLastCallback';

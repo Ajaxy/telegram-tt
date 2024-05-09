@@ -63,7 +63,7 @@ type StateProps =
     chatProfilePhoto?: ApiPhoto;
     emojiStatusSticker?: ApiSticker;
   }
-  & Pick<GlobalState, 'connectionState'>;
+  & Pick<GlobalState, 'isSynced'>;
 
 const EMOJI_STATUS_SIZE = 24;
 const EMOJI_TOPIC_SIZE = 120;
@@ -74,7 +74,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   user,
   userStatus,
   chat,
-  connectionState,
+  isSynced,
   mediaId,
   avatarOwnerId,
   topic,
@@ -90,6 +90,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     openMediaViewer,
     openPremiumModal,
     openStickerSet,
+    openPrivacySettingsNoticeModal,
   } = getActions();
 
   const lang = useLang();
@@ -131,10 +132,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }, [currentPhotoIndex, photos.length]);
 
   useEffect(() => {
-    if (connectionState === 'connectionStateReady' && userId && !forceShowSelf) {
+    if (isSynced && userId && !forceShowSelf) {
       loadFullUser({ userId });
     }
-  }, [userId, loadFullUser, connectionState, forceShowSelf]);
+  }, [userId, loadFullUser, isSynced, forceShowSelf]);
 
   usePhotosPreload(photos, currentPhotoIndex);
 
@@ -171,6 +172,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
     setHasSlideAnimation(true);
     setCurrentPhotoIndex(currentPhotoIndex + 1);
+  });
+
+  const handleOpenGetReadDateModal = useLastCallback(() => {
+    openPrivacySettingsNoticeModal({ chatId: chat!.id, isReadDate: false });
   });
 
   function handleSelectFallbackPhoto() {
@@ -264,8 +269,21 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
     if (user) {
       return (
-        <div className={buildClassName(styles.status, 'status', isUserOnline(user, userStatus) && 'online')}>
-          <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus)}</span>
+        <div
+          className={buildClassName(
+            styles.status,
+            'status',
+            isUserOnline(user, userStatus) && 'online',
+          )}
+        >
+          <span className={styles.userStatus} dir="auto">
+            {getUserStatus(lang, user, userStatus)}
+          </span>
+          {userStatus?.isReadDateRestrictedByMe && (
+            <span className={styles.getStatus} onClick={handleOpenGetReadDateModal}>
+              <span>{lang('StatusHiddenShow')}</span>
+            </span>
+          )}
         </div>
       );
     }
@@ -363,7 +381,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
-    const { connectionState } = global;
+    const { isSynced } = global;
     const user = selectUser(global, userId);
     const isPrivate = isUserId(userId);
     const userStatus = selectUserStatus(global, userId);
@@ -379,7 +397,7 @@ export default memo(withGlobal<OwnProps>(
     const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;
 
     return {
-      connectionState,
+      isSynced,
       user,
       userStatus,
       chat,

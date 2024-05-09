@@ -1,7 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import { formatDateToString } from '../../../util/dateFormat';
+import { formatDateToString } from '../../../util/date/dateFormat';
 
 import './DateSuggest.scss';
 

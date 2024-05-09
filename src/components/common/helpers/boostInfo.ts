@@ -2,7 +2,7 @@ import type { ApiBoostsStatus } from '../../../api/types';
 
 export function getBoostProgressInfo(boostInfo: ApiBoostsStatus, freezeOnLevelUp?: boolean) {
   const {
-    level, boosts, currentLevelBoosts, nextLevelBoosts, hasMyBoost,
+    level, boosts, currentLevelBoosts, nextLevelBoosts, hasMyBoost, prepaidGiveaways,
   } = boostInfo;
 
   const isJustUpgraded = freezeOnLevelUp && boosts === currentLevelBoosts && hasMyBoost;
@@ -14,11 +14,15 @@ export function getBoostProgressInfo(boostInfo: ApiBoostsStatus, freezeOnLevelUp
     : (boosts - currentLevelBoosts) / (nextLevelBoosts - currentLevelBoosts);
   const remainingBoosts = nextLevelBoosts ? nextLevelBoosts - boosts : 0;
 
+  const isMaxLevel = nextLevelBoosts === undefined;
+
   return {
     currentLevel,
     hasNextLevel,
     boosts,
     levelProgress,
     remainingBoosts,
+    isMaxLevel,
+    prepaidGiveaways,
   };
 }

@@ -26,6 +26,7 @@ import {
   buildApiNotifyException,
   buildApiPeerColors,
   buildApiSession,
+  buildApiTimezone,
   buildApiWallpaper,
   buildApiWebSession, buildLangPack, buildLangPackString,
 } from '../apiBuilders/misc';
@@ -584,6 +585,20 @@ export async function fetchPeerColors(hash?: number) {
   };
 }
 
+export async function fetchTimezones(hash?: number) {
+  const result = await invokeRequest(new GramJs.help.GetTimezonesList({
+    hash,
+  }));
+  if (!result || result instanceof GramJs.help.TimezonesListNotModified) return undefined;
+
+  const timezones = result.timezones.map(buildApiTimezone);
+
+  return {
+    timezones,
+    hash: result.hash,
+  };
+}
+
 function updateLocalDb(
   result: (
     GramJs.account.PrivacyRules | GramJs.contacts.Blocked | GramJs.contacts.BlockedSlice |
@@ -614,15 +629,25 @@ export async function fetchGlobalPrivacySettings() {
 
   return {
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
+    shouldHideReadMarks: Boolean(result.hideReadMarks),
+    shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
   };
 }
 
-export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonContact }: {
-  shouldArchiveAndMuteNewNonContact: boolean;
+export async function updateGlobalPrivacySettings({
+  shouldArchiveAndMuteNewNonContact,
+  shouldHideReadMarks,
+  shouldNewNonContactPeersRequirePremium,
+}: {
+  shouldArchiveAndMuteNewNonContact?: boolean;
+  shouldHideReadMarks?: boolean;
+  shouldNewNonContactPeersRequirePremium?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.account.SetGlobalPrivacySettings({
     settings: new GramJs.GlobalPrivacySettings({
       ...(shouldArchiveAndMuteNewNonContact && { archiveAndMuteNewNoncontactPeers: true }),
+      ...(shouldHideReadMarks && { hideReadMarks: true }),
+      ...(shouldNewNonContactPeersRequirePremium && { newNoncontactPeersRequirePremium: true }),
     }),
   }));
 
@@ -632,6 +657,8 @@ export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonCo
 
   return {
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
+    shouldHideReadMarks: Boolean(result.hideReadMarks),
+    shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
   };
 }
 

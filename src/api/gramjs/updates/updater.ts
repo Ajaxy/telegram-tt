@@ -38,6 +38,7 @@ import {
   buildApiMessageFromNotification,
   buildApiMessageFromShort,
   buildApiMessageFromShortChat,
+  buildApiQuickReply,
   buildApiThreadInfoFromMessage,
   buildMessageDraft,
 } from '../apiBuilders/messages';
@@ -76,11 +77,12 @@ import {
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate, scheduleMutedTopicUpdate } from '../scheduleUnmute';
 
+import LocalUpdatePremiumFloodWait from './UpdatePremiumFloodWait';
 import { LocalUpdateChannelPts, LocalUpdatePts, type UpdatePts } from './UpdatePts';
 
 export type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
-) | typeof connection.UpdateConnectionState | UpdatePts;
+) | typeof connection.UpdateConnectionState | UpdatePts | LocalUpdatePremiumFloodWait;
 
 const DELETE_MISSING_CHANNEL_MESSAGE_DELAY = 1000;
 
@@ -342,6 +344,38 @@ export function updater(update: Update) {
         });
       }
     }
+  } else if (update instanceof GramJs.UpdateQuickReplyMessage) {
+    const message = buildApiMessage(update.message);
+    if (!message) return;
+
+    onUpdate({
+      '@type': 'updateQuickReplyMessage',
+      id: message.id,
+      message,
+    });
+  } else if (update instanceof GramJs.UpdateDeleteQuickReplyMessages) {
+    onUpdate({
+      '@type': 'deleteQuickReplyMessages',
+      quickReplyId: update.shortcutId,
+      messageIds: update.messages,
+    });
+  } else if (update instanceof GramJs.UpdateQuickReplies) {
+    const quickReplies = update.quickReplies.map(buildApiQuickReply);
+    onUpdate({
+      '@type': 'updateQuickReplies',
+      quickReplies,
+    });
+  } else if (update instanceof GramJs.UpdateNewQuickReply) {
+    const quickReply = buildApiQuickReply(update.quickReply);
+    onUpdate({
+      '@type': 'updateQuickReplies',
+      quickReplies: [quickReply],
+    });
+  } else if (update instanceof GramJs.UpdateDeleteQuickReply) {
+    onUpdate({
+      '@type': 'deleteQuickReply',
+      quickReplyId: update.shortcutId,
+    });
   } else if (
     update instanceof GramJs.UpdateEditMessage
     || update instanceof GramJs.UpdateEditChannelMessage
@@ -947,6 +981,8 @@ export function updater(update: Update) {
     onUpdate({ '@type': 'updateRecentStickers' });
   } else if (update instanceof GramJs.UpdateRecentReactions) {
     onUpdate({ '@type': 'updateRecentReactions' });
+  } else if (update instanceof GramJs.UpdateSavedReactionTags) {
+    onUpdate({ '@type': 'updateSavedReactionTags' });
   } else if (update instanceof GramJs.UpdateMoveStickerSetToTop) {
     if (!update.masks) {
       onUpdate({
@@ -1157,6 +1193,11 @@ export function updater(update: Update) {
       '@type': 'updateViewForumAsMessages',
       chatId: buildApiPeerId(update.channelId, 'channel'),
       isEnabled: update.enabled ? true : undefined,
+    });
+  } else if (update instanceof LocalUpdatePremiumFloodWait) {
+    onUpdate({
+      '@type': 'updatePremiumFloodWait',
+      isUpload: update.isUpload,
     });
   } else if (update instanceof LocalUpdatePts || update instanceof LocalUpdateChannelPts) {
     // Do nothing, handled on the manager side

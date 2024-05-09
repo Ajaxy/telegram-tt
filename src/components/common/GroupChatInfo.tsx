@@ -29,6 +29,7 @@ import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
+import Transition from '../ui/Transition';
 import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
@@ -172,7 +173,14 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     if (isTopic) {
       return (
         <span className="status" dir="auto">
-          {messagesCount ? lang('messages', messagesCount, 'i') : renderText(chat.title)}
+          <Transition
+            name="fade"
+            shouldRestoreHeight
+            activeKey={messagesCount !== undefined ? 1 : 2}
+            className="message-count-transition"
+          >
+            {messagesCount !== undefined && lang('messages', messagesCount, 'i')}
+          </Transition>
         </span>
       );
     }

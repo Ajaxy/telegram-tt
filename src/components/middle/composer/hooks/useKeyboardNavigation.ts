@@ -60,6 +60,10 @@ export function useKeyboardNavigation({
     return true;
   });
 
+  useEffect(() => {
+    if (!isActive) setSelectedItemIndex(shouldRemoveSelectionOnReset ? -1 : 0);
+  }, [isActive, shouldRemoveSelectionOnReset]);
+
   const isSelectionOutOfRange = !items || selectedItemIndex > items.length - 1;
   useEffect(() => {
     if (!shouldSaveSelectionOnUpdateItems || isSelectionOutOfRange) {

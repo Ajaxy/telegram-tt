@@ -312,4 +312,7 @@ export default memo(withGlobal<OwnProps>(
       privateInviteLink: selectChatFullInfo(global, chatId)?.inviteLink,
     };
   },
+  (global, { chatId }) => {
+    return Boolean(selectChat(global, chatId) && selectManagement(global, chatId));
+  },
 )(ManageChatPrivacyType));

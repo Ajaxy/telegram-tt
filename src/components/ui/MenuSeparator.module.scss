@@ -1,6 +1,13 @@
 .root {
   margin: 0.25rem 0;
-  height: 1px;
-  border-radius: 1px;
-  background-color: var(--color-interactive-inactive);
+  border-radius: 0.0625rem;
+  background-color: var(--color-background-menu-separator);
+}
+
+.thin {
+  height: 0.0625rem;
+}
+
+.thick {
+  height: 0.375rem;
 }

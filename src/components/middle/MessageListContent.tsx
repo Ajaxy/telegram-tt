@@ -15,7 +15,7 @@ import {
   getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { formatHumanDate } from '../../util/dateFormat';
+import { formatHumanDate } from '../../util/date/dateFormat';
 import { compact } from '../../util/iteratees';
 import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
@@ -32,7 +32,7 @@ import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
-  isCurrentUserPremium?: boolean;
+  areAdsEnabled?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageIds: number[];
@@ -56,7 +56,7 @@ interface OwnProps {
   shouldRenderBotInfo?: boolean;
   noAppearanceAnimation: boolean;
   isSavedDialog?: boolean;
-  onFabToggle: AnyToVoidFunction;
+  onScrollDownToggle: BooleanToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
   onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
 }
@@ -64,7 +64,7 @@ interface OwnProps {
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
-  isCurrentUserPremium,
+  areAdsEnabled,
   chatId,
   threadId,
   messageIds,
@@ -88,7 +88,7 @@ const MessageListContent: FC<OwnProps> = ({
   shouldRenderBotInfo,
   noAppearanceAnimation,
   isSavedDialog,
-  onFabToggle,
+  onScrollDownToggle,
   onNotchToggle,
   onPinnedIntersectionChange,
 }) => {
@@ -115,7 +115,7 @@ const MessageListContent: FC<OwnProps> = ({
     getContainerHeight,
     isViewportNewest,
     isUnread,
-    onFabToggle,
+    onScrollDownToggle,
     onNotchToggle,
     isReady,
   );
@@ -290,7 +290,7 @@ const MessageListContent: FC<OwnProps> = ({
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
-      {!isCurrentUserPremium && isViewportNewest && (
+      {areAdsEnabled && isViewportNewest && (
         <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
       )}
       {withHistoryTriggers && (

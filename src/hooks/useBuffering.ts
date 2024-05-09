@@ -56,6 +56,7 @@ const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunct
   });
 
   const bufferingHandlers = {
+    onPLay: handleBuffering,
     onLoadedData: handleBuffering,
     onPlaying: handleBuffering,
     onLoadStart: handleBuffering, // Needed for Safari to start

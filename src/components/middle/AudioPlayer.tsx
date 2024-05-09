@@ -129,6 +129,9 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   });
 
   const handleClose = useLastCallback(() => {
+    if (!stop) {
+      return;
+    }
     if (isPlaying) {
       playPause();
     }
@@ -138,18 +141,26 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   });
 
   const handleVolumeChange = useLastCallback((value: number) => {
+    if (!setVolume) {
+      return;
+    }
     setAudioPlayerVolume({ volume: value / 100 });
-
     setVolume(value / 100);
   });
 
   const handleVolumeClick = useLastCallback(() => {
     if (IS_TOUCH_ENV && !IS_IOS) return;
+    if (!toggleMuted) {
+      return;
+    }
     toggleMuted();
     setAudioPlayerMuted({ isMuted: !isMuted });
   });
 
   const updatePlaybackRate = useLastCallback((newRate: number, isActive = true) => {
+    if (!setPlaybackRate) {
+      return;
+    }
     const rate = PLAYBACK_RATES[newRate];
     const shouldBeActive = newRate !== REGULAR_PLAYBACK_RATE && isActive;
     setAudioPlayerPlaybackRate({ playbackRate: rate, isPlaybackRateActive: shouldBeActive });
@@ -227,7 +238,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         color="translucent"
         size="smaller"
         className="player-button"
-        disabled={isFirst()}
+        disabled={isFirst?.()}
         onClick={requestPreviousTrack}
         ariaLabel="Previous track"
       >
@@ -251,7 +262,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         color="translucent"
         size="smaller"
         className="player-button"
-        disabled={isLast()}
+        disabled={isLast?.()}
         onClick={requestNextTrack}
         ariaLabel="Next track"
       >

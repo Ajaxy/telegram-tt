@@ -8,13 +8,14 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { IAlbum, ISettings } from '../../../types';
 import type { IAlbumLayout } from './helpers/calculateAlbumLayout';
 
-import { getMessageContent, getMessageHtmlId, getMessageOriginalId } from '../../../global/helpers';
+import { getMessageContent, getMessageHtmlId } from '../../../global/helpers';
 import {
   selectActiveDownloads,
   selectCanAutoLoadMedia,
   selectCanAutoPlayMedia,
   selectTheme,
 } from '../../../global/selectors';
+import { getMessageKey } from '../../../util/messageKey';
 import { AlbumRectPart } from './helpers/calculateAlbumLayout';
 import withSelectControl from './hocs/withSelectControl';
 
@@ -40,7 +41,7 @@ type OwnProps = {
 
 type StateProps = {
   theme: ISettings['theme'];
-  uploadsById: GlobalState['fileUploads']['byMessageLocalId'];
+  uploadsByKey: GlobalState['fileUploads']['byMessageKey'];
   activeDownloadIds?: number[];
 };
 
@@ -52,21 +53,21 @@ const Album: FC<OwnProps & StateProps> = ({
   isProtected,
   albumLayout,
   onMediaClick,
-  uploadsById,
+  uploadsByKey,
   activeDownloadIds,
   theme,
 }) => {
-  const { cancelSendingMessage } = getActions();
+  const { cancelUploadMedia } = getActions();
 
   const mediaCount = album.messages.length;
 
   const handleCancelUpload = useLastCallback((message: ApiMessage) => {
-    cancelSendingMessage({ chatId: message.chatId, messageId: message.id });
+    cancelUploadMedia({ chatId: message.chatId, messageId: message.id });
   });
 
   function renderAlbumMessage(message: ApiMessage, index: number) {
     const { photo, video } = getMessageContent(message);
-    const fileUpload = uploadsById[getMessageOriginalId(message)];
+    const fileUpload = uploadsByKey[getMessageKey(message)];
     const uploadProgress = fileUpload?.progress;
     const { dimensions, sides } = albumLayout.layout[index];
 
@@ -139,7 +140,7 @@ export default withGlobal<OwnProps>(
 
     return {
       theme,
-      uploadsById: global.fileUploads.byMessageLocalId,
+      uploadsByKey: global.fileUploads.byMessageKey,
       activeDownloadIds: isScheduled ? activeDownloads?.scheduledIds : activeDownloads?.ids,
     };
   },

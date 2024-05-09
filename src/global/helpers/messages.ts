@@ -1,15 +1,17 @@
 import type {
-  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
+  ApiAttachment, ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import {
-  CONTENT_NOT_SUPPORTED,
+  CONTENT_NOT_SUPPORTED, LOTTIE_STICKER_MIME_TYPE,
   RE_LINK_TEMPLATE,
-  SERVICE_NOTIFICATIONS_USER_ID,
+  SERVICE_NOTIFICATIONS_USER_ID, SUPPORTED_AUDIO_CONTENT_TYPES,
+  SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
+import { getMessageKey, isLocalMessageId } from '../../util/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { IS_OPUS_SUPPORTED } from '../../util/windowEnvironment';
 import { getGlobal } from '../index';
@@ -18,26 +20,8 @@ import { getUserFullName } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
-export type MessageKey = `msg${string}-${number}`;
-
 export function getMessageHtmlId(messageId: number) {
   return `message${messageId.toString().replace('.', '-')}`;
-}
-
-export function getMessageKey(message: ApiMessage): MessageKey {
-  const { chatId, id, previousLocalId } = message;
-
-  return buildMessageKey(chatId, isServiceNotificationMessage(message) ? previousLocalId || id : id);
-}
-
-export function buildMessageKey(chatId: string, msgId: number): MessageKey {
-  return `msg${chatId}-${msgId}`;
-}
-
-export function parseMessageKey(key: MessageKey) {
-  const match = key.match(/^msg(-?\d+)-(\d+)/)!;
-
-  return { chatId: match[1], messageId: Number(match[2]) };
 }
 
 export function getMessageOriginalId(message: ApiMessage) {
@@ -204,10 +188,6 @@ export function isMessageFailed(message: ApiMessage) {
   return message.sendingState === 'messageSendingStateFailed';
 }
 
-export function isLocalMessageId(id: number) {
-  return !Number.isInteger(id);
-}
-
 export function isHistoryClearMessage(message: ApiMessage) {
   return message.content.action && message.content.action.type === 'historyClear';
 }
@@ -340,15 +320,18 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
 }
 
 export function getExpiredMessageDescription(langFn: LangFn, message: ApiMessage): string | undefined {
-  const { isExpiredVoice } = message.content;
+  const { isExpiredVoice, isExpiredRoundVideo } = message.content;
   if (isExpiredVoice) {
     return langFn('Message.VoiceMessageExpired');
+  } else if (isExpiredRoundVideo) {
+    return langFn('Message.VideoMessageExpired');
   }
   return undefined;
 }
 
 export function isExpiredMessage(message: ApiMessage) {
-  return Boolean(message.content?.isExpiredVoice);
+  const { isExpiredVoice, isExpiredRoundVideo } = message.content ?? {};
+  return Boolean(isExpiredVoice || isExpiredRoundVideo);
 }
 
 export function hasMessageTtl(message: ApiMessage) {
@@ -357,4 +340,27 @@ export function hasMessageTtl(message: ApiMessage) {
 
 export function isJoinedChannelMessage(message: ApiMessage) {
   return message.content.action && message.content.action.type === 'joinedChannel';
+}
+
+export function getAttachmentType(attachment: ApiAttachment) {
+  if (attachment.shouldSendAsFile) return 'file';
+
+  if (SUPPORTED_IMAGE_CONTENT_TYPES.has(attachment.mimeType)) {
+    return 'image';
+  }
+
+  if (SUPPORTED_VIDEO_CONTENT_TYPES.has(attachment.mimeType)) {
+    return 'video';
+  }
+
+  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(attachment.mimeType)) {
+    return 'audio';
+  }
+
+  return 'file';
+}
+
+export function isUploadingFileSticker(attachment: ApiAttachment) {
+  return attachment ? (attachment.mimeType === 'image/webp' || attachment.mimeType === LOTTIE_STICKER_MIME_TYPE
+    || attachment.mimeType === VIDEO_STICKER_MIME_TYPE) : undefined;
 }

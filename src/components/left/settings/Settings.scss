@@ -104,7 +104,7 @@
 }
 
 .settings-main-menu-premium .PremiumIcon {
-  margin-right: 2rem;
+  margin-right: 1.25rem;
 }
 
 .settings-main-menu {
@@ -179,6 +179,10 @@
     color: var(--color-text-secondary);
     margin-top: 2rem;
     margin-bottom: 0.75rem;
+
+    &.premium-info {
+      margin-top: 1rem;
+    }
 
     &[dir="rtl"] {
       text-align: right;

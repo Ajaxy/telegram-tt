@@ -96,6 +96,10 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
 
     currentGlobal = newGlobal;
 
+    if (DEBUG) {
+      DEBUG_currentCapturedId = Math.random();
+    }
+
     if (options?.forceSyncOnIOs) {
       forceOnHeavyAnimation = true;
       runCallbacks();
@@ -111,7 +115,6 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
 
 export function getGlobal() {
   if (DEBUG) {
-    DEBUG_currentCapturedId = Math.random();
     currentGlobal = {
       ...currentGlobal,
       DEBUG_capturedId: DEBUG_currentCapturedId,

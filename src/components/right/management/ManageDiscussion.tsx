@@ -286,9 +286,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const { linkedChatId } = selectChatFullInfo(global, chatId) || {};
     const { forDiscussionIds, byId: chatsByIds } = global.chats;
-    const linkedChat = linkedChatId
-      ? selectChat(global, linkedChatId)
-      : undefined;
+    const linkedChat = linkedChatId ? selectChat(global, linkedChatId) : undefined;
 
     return {
       chat,

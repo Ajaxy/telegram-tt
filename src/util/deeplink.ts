@@ -1,9 +1,9 @@
 import { getActions } from '../global';
 
-import type { ApiChatType } from '../api/types';
+import type { ApiChatType, ApiFormattedText } from '../api/types';
 import type { DeepLinkMethod, PrivateMessageLink } from './deepLinkParser';
 
-import { API_CHAT_TYPES } from '../config';
+import { API_CHAT_TYPES, RE_TG_LINK } from '../config';
 import { toChannelId } from '../global/helpers';
 import { tryParseDeepLink } from './deepLinkParser';
 import { IS_SAFARI } from './windowEnvironment';
@@ -17,9 +17,34 @@ export const processDeepLink = (url: string): boolean => {
       case 'privateMessageLink':
         handlePrivateMessageLink(parsedLink, actions);
         return true;
+      case 'publicUsernameOrBotLink':
+        actions.openChatByUsername({
+          username: parsedLink.username,
+          startParam: parsedLink.start,
+          text: parsedLink.text,
+          startApp: parsedLink.startApp,
+          startAttach: parsedLink.startAttach,
+          attach: parsedLink.attach,
+        });
+        return true;
+      case 'businessChatLink':
+        actions.resolveBusinessChatLink({
+          slug: parsedLink.slug,
+        });
+        return true;
+      case 'premiumReferrerLink':
+        actions.openPremiumModal();
+        return true;
+      case 'premiumMultigiftLink':
+        actions.openPremiumGiftingModal();
+        return true;
       default:
         break;
     }
+  }
+
+  if (!url.match(RE_TG_LINK)) {
+    return false;
   }
 
   const {
@@ -51,7 +76,7 @@ export const processDeepLink = (url: string): boolean => {
     case 'resolve': {
       const {
         domain, phone, post, comment, voicechat, livestream, start, startattach, attach, thread, topic,
-        appname, startapp, story,
+        appname, startapp, story, text,
       } = params;
 
       const hasStartAttach = params.hasOwnProperty('startattach');
@@ -66,6 +91,7 @@ export const processDeepLink = (url: string): boolean => {
             username: domain,
             startApp: startapp,
             originalParts: [domain, appname],
+            text,
           });
         } else if ((hasStartAttach && choose) || (!appname && hasStartApp)) {
           processAttachBotParameters({
@@ -81,7 +107,12 @@ export const processDeepLink = (url: string): boolean => {
         } else if (hasBoost) {
           processBoostParameters({ usernameOrId: domain });
         } else if (phone) {
-          openChatByPhoneNumber({ phoneNumber: phone, startAttach: startattach, attach });
+          openChatByPhoneNumber({
+            phoneNumber: phone,
+            startAttach: startattach,
+            attach,
+            text,
+          });
         } else if (story) {
           openStoryViewerByUsername({ username: domain, storyId: Number(story) });
         } else {
@@ -140,7 +171,7 @@ export const processDeepLink = (url: string): boolean => {
 
     case 'invoice': {
       const { slug } = params;
-      openInvoice({ slug });
+      openInvoice({ type: 'slug', slug });
       break;
     }
 
@@ -170,8 +201,10 @@ export function parseChooseParameter(choose?: string) {
   return types.filter((type): type is ApiChatType => API_CHAT_TYPES.includes(type as ApiChatType));
 }
 
-export function formatShareText(url?: string, text?: string, title?: string): string {
-  return [url, title, text].filter(Boolean).join('\n');
+export function formatShareText(url?: string, text?: string, title?: string): ApiFormattedText {
+  return {
+    text: [url, title, text].filter(Boolean).join('\n'),
+  };
 }
 
 function handlePrivateMessageLink(link: PrivateMessageLink, actions: ReturnType<typeof getActions>) {

@@ -358,7 +358,6 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
               className="settings-folders-list-item mb-0"
               icon="link"
               multiline
-              // eslint-disable-next-line react/jsx-no-bind
               onClick={handleEditInviteClick}
               clickArg={invite.url}
             >

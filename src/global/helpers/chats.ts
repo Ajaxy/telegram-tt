@@ -3,6 +3,7 @@ import type {
   ApiChatAdminRights,
   ApiChatBannedRights,
   ApiChatFolder,
+  ApiChatFullInfo,
   ApiPeer,
   ApiTopic,
   ApiUser,
@@ -15,7 +16,7 @@ import {
   ANONYMOUS_USER_ID,
   ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
-import { formatDateToString, formatTime } from '../../util/dateFormat';
+import { formatDateToString, formatTime } from '../../util/date/dateFormat';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getGlobal } from '..';
 import { getMainUsername, getUserFirstOrLastName } from './users';
@@ -27,11 +28,11 @@ export function isUserId(entityId: string) {
 }
 
 export function isChannelId(entityId: string) {
-  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-100');
+  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-1');
 }
 
 export function toChannelId(mtpId: string) {
-  return `-100${mtpId}`;
+  return `-1${mtpId.padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
 }
 
 export function isApiPeerChat(peer: ApiPeer): peer is ApiChat {
@@ -130,14 +131,18 @@ export function getCanManageTopic(chat: ApiChat, topic: ApiTopic) {
   return chat.isCreator || getHasAdminRight(chat, 'manageTopics') || topic.isOwner;
 }
 
-export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights) {
+export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights, chatFullInfo?: ApiChatFullInfo) {
+  const unrestrictedByBoosts = chatFullInfo?.boostsToUnrestrict
+    && (chatFullInfo.boostsApplied || 0) >= chatFullInfo.boostsToUnrestrict;
   return Boolean(
     (chat.currentUserBannedRights?.[key])
-    || (chat.defaultBannedRights?.[key]),
+    || (chat.defaultBannedRights?.[key] && !unrestrictedByBoosts),
   );
 }
 
-export function getCanPostInChat(chat: ApiChat, threadId: ThreadId, isMessageThread?: boolean) {
+export function getCanPostInChat(
+  chat: ApiChat, threadId: ThreadId, isMessageThread?: boolean, chatFullInfo?: ApiChatFullInfo,
+) {
   if (threadId !== MAIN_THREAD_ID) {
     if (chat.isForum) {
       if (chat.isNotJoined) {
@@ -168,7 +173,7 @@ export function getCanPostInChat(chat: ApiChat, threadId: ThreadId, isMessageThr
     return getHasAdminRight(chat, 'postMessages');
   }
 
-  return isChatAdmin(chat) || !isUserRightBanned(chat, 'sendMessages');
+  return isChatAdmin(chat) || !isUserRightBanned(chat, 'sendMessages', chatFullInfo);
 }
 
 export interface IAllowedAttachmentOptions {
@@ -188,6 +193,7 @@ export interface IAllowedAttachmentOptions {
 
 export function getAllowedAttachmentOptions(
   chat?: ApiChat,
+  chatFullInfo?: ApiChatFullInfo,
   isChatWithBot = false,
   isStoryReply = false,
 ): IAllowedAttachmentOptions {
@@ -211,20 +217,20 @@ export function getAllowedAttachmentOptions(
   const isAdmin = isChatAdmin(chat);
 
   return {
-    canAttachMedia: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendMedia'),
+    canAttachMedia: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendMedia', chatFullInfo),
     canAttachPolls: !isStoryReply
-      && (isAdmin || !isUserRightBanned(chat, 'sendPolls'))
+      && (isAdmin || !isUserRightBanned(chat, 'sendPolls', chatFullInfo))
       && (!isUserId(chat.id) || isChatWithBot),
-    canSendStickers: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendStickers'),
-    canSendGifs: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendGifs'),
-    canAttachEmbedLinks: !isStoryReply && (isAdmin || !isUserRightBanned(chat, 'embedLinks')),
-    canSendPhotos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendPhotos'),
-    canSendVideos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendVideos'),
-    canSendRoundVideos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendRoundvideos'),
-    canSendAudios: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendAudios'),
-    canSendVoices: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendVoices'),
-    canSendPlainText: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendPlain'),
-    canSendDocuments: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendDocs'),
+    canSendStickers: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendStickers', chatFullInfo),
+    canSendGifs: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendGifs', chatFullInfo),
+    canAttachEmbedLinks: !isStoryReply && (isAdmin || !isUserRightBanned(chat, 'embedLinks', chatFullInfo)),
+    canSendPhotos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendPhotos', chatFullInfo),
+    canSendVideos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendVideos', chatFullInfo),
+    canSendRoundVideos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendRoundvideos', chatFullInfo),
+    canSendAudios: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendAudios', chatFullInfo),
+    canSendVoices: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendVoices', chatFullInfo),
+    canSendPlainText: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendPlain', chatFullInfo),
+    canSendDocuments: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendDocs', chatFullInfo),
   };
 }
 
@@ -429,7 +435,10 @@ export function getOrderedTopics(
 }
 
 export function getCleanPeerId(peerId: string) {
-  return isChannelId(peerId) ? peerId.replace('-100', '') : peerId.replace('-', '');
+  return isChannelId(peerId)
+    // Remove -1 and leading zeros
+    ? peerId.replace(/^-10+/, '')
+    : peerId.replace('-', '');
 }
 
 export function getPeerIdDividend(peerId: string) {

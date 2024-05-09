@@ -4,6 +4,7 @@
 
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
+  z-index: calc(var(--z-sticky-date) + 1);
 
   &::before {
     display: none;
@@ -36,26 +37,9 @@
     color: var(--color-text);
   }
 
-  &.with-avatar {
-    padding-left: 2.5rem !important;
-
-    & > .Avatar {
-      display: flex !important;
-    }
-
-
-    @media (max-width: 600px) {
-      padding-left: 2.875rem !important;
-
-      .message-content {
-        max-width: min(29rem, calc(100vw - 7.0625rem)) !important;
-      }
-    }
-  }
-
-  .message-action-button {
+  .message-action-buttons {
     bottom: auto !important;
-    top: 0.5rem;
+    top: 0;
   }
 
   .message-content {
@@ -67,7 +51,7 @@
   }
 
   .channel-avatar {
-    --radius: 0.125rem;
+    --radius: 0.25rem;
 
     float: right;
     margin: 0 0 0.5rem 0.5rem;
@@ -86,7 +70,6 @@
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
     background-color: var(--accent-background-color);
     border-radius: 0.375rem;
-    position: relative;
     overflow: hidden;
 
     &::before {
@@ -130,5 +113,20 @@
 
   .svg-appendix {
     transform: translate(0.01875rem, -0.00625rem);
+  }
+
+  .ad-about {
+    font-size: 0.6875rem;
+    margin-inline-start: 0.25rem;
+    border-radius: 1rem;
+    padding-inline: 0.375rem;
+    transition: 150ms filter ease-in;
+    background: var(--accent-background-active-color);
+    cursor: var(--custom-cursor, pointer);
+    filter: opacity(0.8);
+
+    &:hover {
+      filter: opacity(1);
+    }
   }
 }

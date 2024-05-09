@@ -22,9 +22,9 @@ import { extractCurrentThemeParams, validateHexColor } from '../../../util/theme
 import { callApi } from '../../../api/gramjs';
 import renderText from '../../common/helpers/renderText';
 
+import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
-import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
@@ -52,7 +52,7 @@ type WebAppButton = {
 };
 
 export type OwnProps = {
-  webApp?: TabState['webApp'];
+  modal?: TabState['webApp'];
 };
 
 type StateProps = {
@@ -88,7 +88,7 @@ const DEFAULT_BUTTON_TEXT: Record<string, string> = {
 };
 
 const WebAppModal: FC<OwnProps & StateProps> = ({
-  webApp,
+  modal,
   chat,
   bot,
   attachBot,
@@ -141,7 +141,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const {
     url, buttonText, queryId, replyInfo,
-  } = webApp || {};
+  } = modal || {};
   const isOpen = Boolean(url);
   const isSimple = Boolean(buttonText);
 
@@ -173,7 +173,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleRefreshClick = useLastCallback(() => {
-    reloadFrame(webApp!.url);
+    reloadFrame(modal!.url);
   });
 
   const handleClose = useLastCallback(() => {
@@ -215,11 +215,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   useSyncEffect(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
-    if (webApp?.slug && !isPaymentModalOpen && paymentStatus) {
+    if (modal?.slug && !isPaymentModalOpen && paymentStatus) {
       sendEvent({
         eventType: 'invoice_closed',
         eventData: {
-          slug: webApp.slug,
+          slug: modal.slug,
           status: paymentStatus,
         },
       });
@@ -227,7 +227,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         slug: undefined,
       });
     }
-  }, [isPaymentModalOpen, paymentStatus, sendEvent, setWebAppPaymentSlug, webApp]);
+  }, [isPaymentModalOpen, paymentStatus, sendEvent, modal?.slug]);
 
   const handleRemoveAttachBot = useLastCallback(() => {
     toggleAttachBot({
@@ -532,7 +532,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         >
           <div className={backButtonClassName} />
         </Button>
-        <div className="modal-title">{bot?.firstName}</div>
+        <div className="modal-title">{attachBot?.shortName ?? bot?.firstName}</div>
         <DropdownMenu
           className="web-app-more-menu with-menu-transitions"
           trigger={MoreMenuButton}
@@ -693,8 +693,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { webApp }): StateProps => {
-    const { botId } = webApp || {};
+  (global, { modal }): StateProps => {
+    const { botId } = modal || {};
     const attachBot = botId ? global.attachMenu.bots[botId] : undefined;
     const bot = botId ? selectUser(global, botId) : undefined;
     const chat = selectCurrentChat(global);

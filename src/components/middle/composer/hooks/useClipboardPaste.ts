@@ -1,16 +1,20 @@
 import type { StateHookSetter } from '../../../../lib/teact/teact';
 import { useEffect } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
 import type { ApiAttachment, ApiFormattedText, ApiMessage } from '../../../../api/types';
 
 import {
   EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID,
 } from '../../../../config';
+import { canReplaceMessageMedia, isUploadingFileSticker } from '../../../../global/helpers';
 import { containsCustomEmoji, stripCustomEmoji } from '../../../../global/helpers/symbols';
 import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 import buildAttachment from '../helpers/buildAttachment';
 import { preparePastedHtml } from '../helpers/cleanHtml';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
+
+import useLang from '../../../../hooks/useLang';
 
 const MAX_MESSAGE_LENGTH = 4096;
 
@@ -27,6 +31,9 @@ const useClipboardPaste = (
   shouldStripCustomEmoji?: boolean,
   onCustomEmojiStripped?: VoidFunction,
 ) => {
+  const { showNotification } = getActions();
+  const lang = useLang();
+
   useEffect(() => {
     if (!isActive) {
       return undefined;
@@ -60,6 +67,9 @@ const useClipboardPaste = (
       e.preventDefault();
       if (items.length > 0) {
         files = await getFilesFromDataTransferItems(items);
+        if (editedMessage) {
+          files = files?.slice(0, 1);
+        }
       }
 
       if (!files?.length && !pastedText) {
@@ -79,13 +89,29 @@ const useClipboardPaste = (
       }
 
       const hasText = textToPaste && textToPaste.text;
-      const shouldSetAttachments = files?.length && !editedMessage && !isWordDocument;
+      let shouldSetAttachments = files?.length && !isWordDocument;
+
+      const newAttachments = files ? await Promise.all(files.map((file) => buildAttachment(file.name, file))) : [];
+      const canReplace = (editedMessage && newAttachments?.length
+        && canReplaceMessageMedia(editedMessage, newAttachments[0])) || Boolean(hasText);
+      const isUploadingDocumentSticker = isUploadingFileSticker(newAttachments[0]);
+      const isInAlbum = editedMessage && editedMessage?.groupedId;
+
+      if (editedMessage && isUploadingDocumentSticker) {
+        showNotification({ message: lang(isInAlbum ? 'lng_edit_media_album_error' : 'lng_edit_media_invalid_file') });
+        return;
+      }
+
+      if (isInAlbum) {
+        shouldSetAttachments = canReplace;
+        if (!shouldSetAttachments) {
+          showNotification({ message: lang('lng_edit_media_album_error') });
+          return;
+        }
+      }
 
       if (shouldSetAttachments) {
-        const newAttachments = await Promise.all(files!.map((file) => {
-          return buildAttachment(file.name, file);
-        }));
-        setAttachments((attachments) => attachments.concat(newAttachments));
+        setAttachments(editedMessage ? newAttachments : (attachments) => attachments.concat(newAttachments));
       }
 
       if (hasText) {
@@ -103,8 +129,8 @@ const useClipboardPaste = (
       document.removeEventListener('paste', handlePaste, false);
     };
   }, [
-    insertTextAndUpdateCursor, editedMessage, setAttachments, isActive, shouldStripCustomEmoji, onCustomEmojiStripped,
-    setNextText,
+    insertTextAndUpdateCursor, editedMessage, setAttachments, isActive, shouldStripCustomEmoji,
+    onCustomEmojiStripped, setNextText, lang,
   ]);
 };
 

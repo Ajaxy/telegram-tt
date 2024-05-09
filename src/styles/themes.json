@@ -1,7 +1,7 @@
 {
   "--color-primary": ["#3390EC", "#8774E1"],
-  "--color-primary-opacity": ["#50A2E940", "#8378DB80"],
-  "--color-primary-opacity-hover": ["#50A2E926", "#8378DBA0"],
+  "--color-primary-opacity": ["#50A2E91E", "#8378DB1E"],
+  "--color-primary-opacity-hover": ["#50A2E940", "#8378DB40"],
   "--color-primary-tint": ["#3390ec1a", "#8774e11a"],
   "--color-primary-shade": ["#4a95d6", "#7b71c6"],
   "--color-background": ["#FFFFFF", "#212121"],
@@ -9,7 +9,7 @@
   "--color-background-compact-menu-reactions": ["#FFFFFFEB", "#212121DD"],
   "--color-background-compact-menu-hover": ["#00000011", "#00000066"],
   "--color-background-secondary": ["#f4f4f5", "#0F0F0F"],
-  "--color-background-secondary-accent": ["#E4E4E5", "#100f10"],
+  "--color-background-secondary-accent": ["#E4E4E5", "#191919"],
   "--color-background-own": ["#EEFFDE", "#766AC8"],
   "--color-background-own-apple": ["#DCF8C5", "#766AC8"],
   "--color-background-selected": ["#F4F4F5", "#2C2C2C"],
@@ -66,5 +66,6 @@
   "--color-forum-unread-topic-hover": ["#e9e9e9", "#363636"],
   "--color-forum-hover-unread-topic-hover": ["#e2e2e2", "#3f3f3f"],
   "--color-chat-username": ["#3C7EB0", "#E9EEF4"],
-  "--color-borders-read-story": ["#C4C9CC", "#737373"]
+  "--color-borders-read-story": ["#C4C9CC", "#737373"],
+  "--color-background-menu-separator": ["#0000001a", "#ffffff1a"]
 }

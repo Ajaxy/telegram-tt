@@ -38,6 +38,7 @@ type OwnProps<T> = {
   canViewSet?: boolean;
   isSelected?: boolean;
   isCurrentUserPremium?: boolean;
+  shouldIgnorePremium?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
   forcePlayback?: boolean;
@@ -76,6 +77,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   observeIntersectionForShowing,
   isSelected,
   isCurrentUserPremium,
+  shouldIgnorePremium,
   noShowPremium,
   sharedCanvasRef,
   withTranslucentThumb,
@@ -101,7 +103,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const {
     id, isCustomEmoji, hasEffect: isPremium, stickerSetInfo,
   } = sticker;
-  const isLocked = !isCurrentUserPremium && isPremium;
+  const isLocked = !isCurrentUserPremium && isPremium && !shouldIgnorePremium;
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const shouldLoad = isIntersecting;

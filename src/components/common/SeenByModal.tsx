@@ -3,7 +3,7 @@ import { getActions, withGlobal } from '../../global';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/dateFormat';
+import { formatDateAtTime } from '../../util/date/dateFormat';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';

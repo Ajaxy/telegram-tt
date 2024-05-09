@@ -15,7 +15,7 @@
 }
 
 .pinned-message-border-wrapper {
-  background-color: var(--color-primary-opacity);
+  background-color: var(--color-primary-opacity-hover);
   position: relative;
   will-change: transform;
   transition: transform 0.25s ease-in-out;

@@ -31,7 +31,6 @@ import {
   isChatChannel,
   isChatGroup,
   isChatWithRepliesBot,
-  isLocalMessageId,
   isUserId,
 } from '../../global/helpers';
 import {
@@ -53,18 +52,20 @@ import {
   selectScrollOffset,
   selectTabState,
   selectThreadInfo,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
 import { orderBy } from '../../util/iteratees';
+import { isLocalMessageId } from '../../util/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
+import useInterval from '../../hooks/schedulers/useInterval';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useInterval from '../../hooks/useInterval';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
@@ -79,6 +80,7 @@ import ContactGreeting from './ContactGreeting';
 import MessageListBotInfo from './MessageListBotInfo';
 import MessageListContent from './MessageListContent';
 import NoMessages from './NoMessages';
+import PremiumRequiredMessage from './PremiumRequiredMessage';
 
 import './MessageList.scss';
 
@@ -89,17 +91,17 @@ type OwnProps = {
   isComments?: boolean;
   canPost: boolean;
   isReady: boolean;
-  onFabToggle: (shouldShow: boolean) => void;
-  onNotchToggle: (shouldShow: boolean) => void;
+  onScrollDownToggle: BooleanToVoidFunction;
+  onNotchToggle: BooleanToVoidFunction;
   hasTools?: boolean;
   withBottomShift?: boolean;
   withDefaultBg: boolean;
   onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
   getForceNextPinnedInHeader: Signal<boolean | undefined>;
+  isContactRequirePremium?: boolean;
 };
 
 type StateProps = {
-  isCurrentUserPremium?: boolean;
   isChatLoaded?: boolean;
   isChannelChat?: boolean;
   isGroupChat?: boolean;
@@ -125,6 +127,7 @@ type StateProps = {
   isEmptyThread?: boolean;
   isForum?: boolean;
   currentUserId: string;
+  areAdsEnabled?: boolean;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
@@ -146,9 +149,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   threadId,
   type,
   hasTools,
-  onFabToggle,
+  onScrollDownToggle,
   onNotchToggle,
-  isCurrentUserPremium,
   isChatLoaded,
   isForum,
   isChannelChat,
@@ -181,6 +183,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   currentUserId,
   getForceNextPinnedInHeader,
   onPinnedIntersectionChange,
+  isContactRequirePremium,
+  areAdsEnabled,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -227,10 +231,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [firstUnreadId]);
 
   useEffect(() => {
-    if (!isCurrentUserPremium && isChannelChat && isSynced && isReady) {
+    if (areAdsEnabled && isChannelChat && isSynced && isReady) {
       loadSponsoredMessages({ chatId });
     }
-  }, [isCurrentUserPremium, chatId, isSynced, isReady, isChannelChat]);
+  }, [chatId, isSynced, isReady, isChannelChat, areAdsEnabled]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useSyncEffect(() => {
@@ -268,15 +272,18 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [messageIds, messagesById, type, isServiceNotificationsChat, isForum, threadId, isChatWithSelf]);
 
   useInterval(() => {
-    if (!messageIds || !messagesById || type === 'scheduled') {
-      return;
-    }
-    const ids = messageIds.filter((id) => messagesById[id]?.reactions?.results.length);
+    if (!messageIds || !messagesById || type === 'scheduled') return;
+    if (!isChannelChat && !isGroupChat) return;
+
+    const ids = messageIds.filter((id) => {
+      const message = messagesById[id];
+      return message && message.reactions?.results.length && !message.content.action;
+    });
 
     if (!ids.length) return;
 
     loadMessageReactions({ chatId, ids });
-  }, MESSAGE_REACTIONS_POLLING_INTERVAL);
+  }, MESSAGE_REACTIONS_POLLING_INTERVAL, true);
 
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled') {
@@ -311,7 +318,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (!ids.length) return;
 
     loadMessageViews({ chatId, ids });
-  }, MESSAGE_COMMENTS_POLLING_INTERVAL);
+  }, MESSAGE_COMMENTS_POLLING_INTERVAL, true);
 
   const loadMoreAround = useMemo(() => {
     if (type !== 'thread') {
@@ -561,6 +568,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf || isRepliesChat || isAnonymousForwards);
   const noAvatars = Boolean(!withUsers || isChannelChat);
   const shouldRenderGreeting = isUserId(chatId) && !isChatWithSelf && !isBot && !isAnonymousForwards
+    && type === 'thread'
     && (
       (
         !messageGroups && !lastMessage && messageIds
@@ -591,6 +599,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const hasMessages = (messageIds && messageGroups) || lastMessage;
 
+  useEffect(() => {
+    if (hasMessages) return;
+
+    onScrollDownToggle(false);
+  }, [hasMessages, onScrollDownToggle]);
+
   return (
     <div
       ref={containerRef}
@@ -604,10 +618,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
+      ) : isContactRequirePremium && !hasMessages ? (
+        <PremiumRequiredMessage userId={chatId} />
       ) : isBot && !hasMessages ? (
         <MessageListBotInfo chatId={chatId} />
       ) : shouldRenderGreeting ? (
-        <ContactGreeting userId={chatId} />
+        <ContactGreeting key={chatId} userId={chatId} />
       ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
         <NoMessages
           chatId={chatId}
@@ -618,7 +634,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         />
       ) : hasMessages ? (
         <MessageListContent
-          isCurrentUserPremium={isCurrentUserPremium}
+          areAdsEnabled={areAdsEnabled}
           chatId={chatId}
           isComments={isComments}
           isChannelChat={isChannelChat}
@@ -642,7 +658,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isSchedule={messageGroups ? type === 'scheduled' : false}
           shouldRenderBotInfo={isBot}
           noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
-          onFabToggle={onFabToggle}
+          onScrollDownToggle={onScrollDownToggle}
           onNotchToggle={onNotchToggle}
           onPinnedIntersectionChange={onPinnedIntersectionChange}
         />
@@ -690,8 +706,11 @@ export default memo(withGlobal<OwnProps>(
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const isEmptyThread = !selectThreadInfo(global, chatId, threadId)?.messagesCount;
 
+    const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+    const areAdsEnabled = !isCurrentUserPremium || selectUserFullInfo(global, currentUserId)?.areAdsEnabled;
+
     return {
-      isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      areAdsEnabled,
       isChatLoaded: true,
       isRestricted,
       restrictionReason,

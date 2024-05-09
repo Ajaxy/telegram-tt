@@ -1,11 +1,10 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions } from '../../../global';
 
 import type { ApiSponsoredMessage } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useFlag from '../../../hooks/useFlag';
@@ -18,22 +17,19 @@ export type OwnProps = {
   isOpen: boolean;
   message: ApiSponsoredMessage;
   anchor: IAnchorPosition;
-  onAboutAds: () => void;
-  onClose: () => void;
-  onCloseAnimationEnd: () => void;
+  onAboutAds: NoneToVoidFunction;
+  onReportAd: NoneToVoidFunction;
+  onClose: NoneToVoidFunction;
+  onCloseAnimationEnd: NoneToVoidFunction;
 };
 
-type StateProps = {
-  canBuyPremium?: boolean;
-};
-
-const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
+const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
   message,
   anchor,
   onAboutAds,
+  onReportAd,
   onClose,
   onCloseAnimationEnd,
-  canBuyPremium,
 }) => {
   const { openPremiumModal, showDialog } = getActions();
 
@@ -60,6 +56,11 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleReportSponsoredMessage = useLastCallback(() => {
+    closeMenu();
+    onReportAd();
+  });
+
   if (!anchor) {
     return undefined;
   }
@@ -73,17 +74,12 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
         onClose={closeMenu}
         onCloseAnimationEnd={closeMenu}
         onAboutAds={handleAboutAdsOpen}
-        onSponsoredHide={canBuyPremium ? handleSponsoredHide : undefined}
+        onSponsoredHide={handleSponsoredHide}
         onSponsorInfo={handleSponsorInfo}
+        onSponsoredReport={handleReportSponsoredMessage}
       />
     </div>
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    return {
-      canBuyPremium: !selectIsCurrentUserPremium(global) && !selectIsPremiumPurchaseBlocked(global),
-    };
-  },
-)(SponsoredMessageContextMenuContainer));
+export default memo(SponsoredMessageContextMenuContainer);

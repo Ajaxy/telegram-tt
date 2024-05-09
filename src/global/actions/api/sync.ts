@@ -68,6 +68,8 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
     loadAllChats, preloadTopChatMessages, loadAllStories, loadAllHiddenStories,
   } = actions;
 
+  initFolderManager();
+
   loadAllChats({
     listType: 'active',
     shouldReplace: true,
@@ -88,7 +90,6 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
         console.log('>>> FINISH SYNC');
       }
 
-      initFolderManager();
       loadAllChats({ listType: 'archived', shouldReplace: true });
       loadAllChats({ listType: 'saved', shouldReplace: true });
       preloadTopChatMessages();

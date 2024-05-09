@@ -138,7 +138,8 @@ export function renderActionMessageText(
     let priceText = price;
 
     if (giftCryptoInfo) {
-      priceText = `${giftCryptoInfo.amount} ${giftCryptoInfo.currency} (~${price})`;
+      const cryptoPrice = formatCurrency(giftCryptoInfo.amount, giftCryptoInfo.currency, lang.code);
+      priceText = `${cryptoPrice} (${price})`;
     }
 
     processed = processPlaceholder(

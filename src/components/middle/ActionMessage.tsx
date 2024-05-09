@@ -13,7 +13,7 @@ import type { FocusDirection, ThreadId } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
 import {
-  getChatTitle, getMessageHtmlId, isChatChannel, isJoinedChannelMessage,
+  getChatTitle, getMessageHtmlId, isJoinedChannelMessage,
 } from '../../global/helpers';
 import { getMessageReplyInfo } from '../../global/helpers/replies';
 import {
@@ -257,9 +257,9 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         />
         <strong>{lang(isUnclaimed ? 'BoostingUnclaimedPrize' : 'BoostingCongratulations')}</strong>
         <span className="action-message-subtitle">
-          {renderText(lang(isFromGiveaway ? 'BoostingReceivedGiftFrom' : isUnclaimed
+          {targetChat && renderText(lang(isFromGiveaway ? 'BoostingReceivedGiftFrom' : isUnclaimed
             ? 'BoostingReceivedPrizeFrom' : 'BoostingYouHaveUnclaimedPrize',
-          getChatTitle(lang, targetChat!)),
+          getChatTitle(lang, targetChat)),
           ['simple_markdown'])}
         </span>
         <span className="action-message-subtitle">
@@ -322,7 +322,6 @@ export default memo(withGlobal<OwnProps>(
       chatId, senderId, content,
     } = message;
 
-    const userId = senderId;
     const { targetUserIds, targetChatId } = content.action || {};
     const targetMessageId = getMessageReplyInfo(message)?.replyToMsgId;
     const targetMessage = targetMessageId
@@ -335,10 +334,8 @@ export default memo(withGlobal<OwnProps>(
       noHighlight: noFocusHighlight,
     } = (isFocused && selectTabState(global).focusedMessage) || {};
 
-    const chat = selectChat(global, chatId);
-    const isChat = chat && (isChatChannel(chat) || userId === chatId);
-    const senderUser = !isChat && userId ? selectUser(global, userId) : undefined;
-    const senderChat = isChat ? chat : undefined;
+    const senderUser = selectUser(global, senderId || chatId);
+    const senderChat = selectChat(global, chatId);
 
     const targetChat = targetChatId ? selectChat(global, targetChatId) : undefined;
 

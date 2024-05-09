@@ -54,7 +54,7 @@ const SafeLink: FC<OwnProps> = ({
   return (
     <a
       href={ensureProtocol(url)}
-      title={getDomain(url)}
+      title={getUnicodeUrl(url)}
       target="_blank"
       rel="noopener noreferrer"
       className={classNames}
@@ -67,7 +67,7 @@ const SafeLink: FC<OwnProps> = ({
   );
 };
 
-function getDomain(url?: string) {
+function getUnicodeUrl(url?: string) {
   if (!url) {
     return undefined;
   }
@@ -78,20 +78,18 @@ function getDomain(url?: string) {
   }
 
   try {
-    let decodedHref = decodeURI(href.replace(/%%/g, '%25'));
+    const parsedUrl = new URL(href);
+    const unicodeDomain = convertPunycode(parsedUrl.hostname);
 
-    const match = decodedHref.match(/^https?:\/\/([^/:?#]+)(?:[/:?#]|$)/i);
-    if (!match) {
-      return undefined;
+    try {
+      return decodeURI(parsedUrl.toString()).replace(parsedUrl.hostname, unicodeDomain);
+    } catch (err) { // URL contains invalid sequences, keep it as it is
+      return parsedUrl.toString().replace(parsedUrl.hostname, unicodeDomain);
     }
-    const domain = match[1];
-    decodedHref = decodedHref.replace(domain, convertPunycode(domain));
-
-    return decodedHref;
   } catch (error) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.error('SafeLink.getDecodedUrl error ', url, error);
+      console.warn('SafeLink.getDecodedUrl error ', url, error);
     }
   }
 

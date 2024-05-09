@@ -1,6 +1,6 @@
 import type { ApiPrivacySettings } from '../../types';
 import type {
-  ApiGeoPoint, ApiMessage, ApiReaction, ApiReactionCount, ApiStoryForwardInfo, MediaContent,
+  ApiGeoPoint, ApiMessage, ApiReaction, ApiReactionCount, ApiSticker, ApiStoryForwardInfo, MediaContent,
 } from './messages';
 
 export interface ApiStory {
@@ -23,9 +23,11 @@ export interface ApiStory {
   sentReaction?: ApiReaction;
   mediaAreas?: ApiMediaArea[];
   forwardInfo?: ApiStoryForwardInfo;
+  fromId?: string;
 }
 
 export interface ApiStoryViews {
+  hasViewers?: true;
   viewsCount?: number;
   forwardsCount?: number;
   reactionsCount?: number;
@@ -69,6 +71,12 @@ export type ApiMessageStoryData = {
 export type ApiWebPageStoryData = {
   id: number;
   peerId: string;
+};
+
+export type ApiWebPageStickerData = {
+  documents: ApiSticker[];
+  isEmoji?: boolean;
+  isWithTextColor?: boolean;
 };
 
 export type ApiStoryViewPublicForward = {

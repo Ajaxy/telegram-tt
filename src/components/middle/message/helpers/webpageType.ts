@@ -27,7 +27,10 @@ export function getWebpageButtonText(type?: string) {
     case 'telegram_story':
       return 'lng_view_button_story';
     case 'telegram_channel_boost':
+    case 'telegram_group_boost':
       return 'lng_view_button_boost';
+    case 'telegram_stickerset':
+      return 'lng_view_button_stickerset';
     default:
       return undefined;
   }

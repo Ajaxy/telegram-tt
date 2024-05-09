@@ -1,0 +1,54 @@
+.slide { // Do not remove .slide, identifier used in JS
+  overflow-x: hidden;
+}
+
+.modalTitle {
+  display: flex;
+  flex-direction: column;
+}
+
+.optionText {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option {
+  margin-bottom: 0.25rem !important;
+}
+
+.optionButton {
+  padding-block: 0 !important;
+}
+
+.sectionTitle {
+  color: var(--color-primary);
+  padding-inline: 1rem;
+}
+
+.description {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+  padding-inline: 1rem;
+}
+
+.title {
+  margin-bottom: 0;
+}
+
+.titleMultiline > .title {
+  font-size: 1rem;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.transition {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.25s ease-in-out;
+  overflow: hidden;
+}

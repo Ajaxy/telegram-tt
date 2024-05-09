@@ -10,7 +10,7 @@ import {
   getMessageWebPage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { formatPastTimeShort } from '../../util/dateFormat';
+import { formatPastTimeShort } from '../../util/date/dateFormat';
 import trimText from '../../util/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
 import renderText from './helpers/renderText';
