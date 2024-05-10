@@ -14,3 +14,4 @@ export function authStateChanged(
 export function newMessage(message: Partial<ApiMessage>) {}
 export function updateChatInbox(chatInbox: ApiUpdateChatInbox) {}
 export function syncStateChanged(syncState: { isSynced: boolean }) {}
+export function markMessageListRead(chat: ApiChat | undefined) {}
