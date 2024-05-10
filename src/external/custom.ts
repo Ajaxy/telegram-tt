@@ -33,7 +33,8 @@ export function getChatsByIds(chatsIds: number[]) {
 
   const fetchedChats = chatsIds.map((chatId) => {
     const id = chatId.toString();
-    const chatLastMessage = selectChatLastMessage(localStorageData, id);
+    const chatLastMessage = selectChatLastMessage(g, id)
+      || selectChatLastMessage(localStorageData, id);
     const shortUserInfo = chatLastMessage?.senderId
       ? selectUser(localStorageData, chatLastMessage.senderId)
         || selectUser(g, chatLastMessage.senderId)
