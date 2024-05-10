@@ -1,5 +1,6 @@
-import { getGlobal } from "../global";
+import { getGlobal } from '../global';
 
+import { GLOBAL_STATE_CACHE_KEY } from '../config';
 import {
   selectChat,
   selectChatFolder,
@@ -8,7 +9,7 @@ import {
   selectPeer,
   selectUser,
   selectUserFullInfo,
-} from "../global/selectors";
+} from '../global/selectors';
 
 export function getChatsInTheFolder(folderId: number) {
   const g = getGlobal();
@@ -19,30 +20,31 @@ export function getChatsInTheFolder(folderId: number) {
     chat: selectChat(g, id),
     fullInfo: selectChatFullInfo(g, id),
     peerInfo: selectPeer(g, id),
-    msg: selectChatLastMessage(g, id, "all"),
+    msg: selectChatLastMessage(g, id, 'all'),
   }));
 }
 
 export function getChatsByIds(chatsIds: number[]) {
   const g = getGlobal();
 
+  const localStorageData = JSON.parse(
+    localStorage.getItem(GLOBAL_STATE_CACHE_KEY) || '',
+  );
+
   const fetchedChats = chatsIds.map((chatId) => {
     const id = chatId.toString();
-    const chatLastMessage = selectChatLastMessage(g, id);
+    const chatLastMessage = selectChatLastMessage(localStorageData, id);
     const shortUserInfo = chatLastMessage?.senderId
-      ? selectUser(g, chatLastMessage.senderId)
+      ? selectUser(localStorageData, chatLastMessage.senderId)
       : undefined;
     const userFullInfo = chatLastMessage?.senderId
-      ? selectUserFullInfo(g, chatLastMessage.senderId)
+      ? selectUserFullInfo(localStorageData, chatLastMessage.senderId)
       : undefined;
 
     return {
-      chat: selectChat(
-        JSON.parse(localStorage.getItem("tt-global-state") || ""),
-        id
-      ),
+      chat: selectChat(localStorageData, id),
       id: chatId,
-      chatFullInfo: selectChatFullInfo(g, id),
+      chatFullInfo: selectChatFullInfo(localStorageData, id),
       msg: chatLastMessage,
       lastMessageUserInfo: shortUserInfo,
       userFullInfo,
@@ -75,10 +77,10 @@ export function getChatById(chatId: number) {
 }
 
 export function getAuthInfo():
-  | { authed: false }
-  | { authed: true; userId: string } {
+| { authed: false }
+| { authed: true; userId: string } {
   const g = getGlobal();
-  const authed = g.authState === "authorizationStateReady";
+  const authed = g.authState === 'authorizationStateReady';
   const userId = g.currentUserId;
   if (!authed || !userId) return { authed: false };
 
