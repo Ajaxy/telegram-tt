@@ -6,6 +6,7 @@ import { Actions, Custom, Events, Methods } from "./types";
 import { selectChat, selectCurrentMessageList } from "../global/selectors";
 import { addActionHandler } from "../global";
 import { ActionReturnType } from "../global/types";
+import { getCurrentTabId } from "../util/establishMultitabRole";
 
 const MAIN_FRAME_ORIGIN =
   process.env.MAIN_FRAME_ORIGIN || "https://crm.slise.xyz";
@@ -102,6 +103,22 @@ export function __init() {
   addActionHandler("initShared", (global): ActionReturnType => {
     actions.setSettingOption({ shouldUseSystemTheme: false, theme: "light" });
   });
+
+  addActionHandler(
+    "markMessageListRead",
+    (global, actions, payload): ActionReturnType => {
+      const { maxId, tabId = getCurrentTabId() } = payload!;
+
+      const currentMessageList = selectCurrentMessageList(global, tabId);
+      if (!currentMessageList) {
+        return undefined;
+      }
+
+      const { chatId } = currentMessageList;
+      const chat = selectChat(global, chatId);
+      events.proxy.markMessageListRead(chat);
+    }
+  );
 
   const check = () => {
     // let g = getGlobal();
