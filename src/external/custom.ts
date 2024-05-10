@@ -36,13 +36,14 @@ export function getChatsByIds(chatsIds: number[]) {
     const chatLastMessage = selectChatLastMessage(localStorageData, id);
     const shortUserInfo = chatLastMessage?.senderId
       ? selectUser(localStorageData, chatLastMessage.senderId)
+        || selectUser(g, chatLastMessage.senderId)
       : undefined;
     const userFullInfo = chatLastMessage?.senderId
-      ? selectUserFullInfo(localStorageData, chatLastMessage.senderId)
+      ? selectUserFullInfo(g, chatLastMessage.senderId)
       : undefined;
 
     return {
-      chat: selectChat(localStorageData, id),
+      chat: selectChat(localStorageData, id) || selectChat(g, id),
       id: chatId,
       chatFullInfo: selectChatFullInfo(localStorageData, id),
       msg: chatLastMessage,
