@@ -1,4 +1,4 @@
-import { getGlobal } from '../global';
+import { getGlobal } from "../global";
 
 import {
   selectChat,
@@ -8,7 +8,7 @@ import {
   selectPeer,
   selectUser,
   selectUserFullInfo,
-} from '../global/selectors';
+} from "../global/selectors";
 
 export function getChatsInTheFolder(folderId: number) {
   const g = getGlobal();
@@ -19,7 +19,7 @@ export function getChatsInTheFolder(folderId: number) {
     chat: selectChat(g, id),
     fullInfo: selectChatFullInfo(g, id),
     peerInfo: selectPeer(g, id),
-    msg: selectChatLastMessage(g, id, 'all'),
+    msg: selectChatLastMessage(g, id, "all"),
   }));
 }
 
@@ -37,7 +37,10 @@ export function getChatsByIds(chatsIds: number[]) {
       : undefined;
 
     return {
-      chat: selectChat(g, id),
+      chat: selectChat(
+        JSON.parse(localStorage.getItem("tt-global-state") || ""),
+        id
+      ),
       id: chatId,
       chatFullInfo: selectChatFullInfo(g, id),
       msg: chatLastMessage,
@@ -72,10 +75,10 @@ export function getChatById(chatId: number) {
 }
 
 export function getAuthInfo():
-| { authed: false }
-| { authed: true; userId: string } {
+  | { authed: false }
+  | { authed: true; userId: string } {
   const g = getGlobal();
-  const authed = g.authState === 'authorizationStateReady';
+  const authed = g.authState === "authorizationStateReady";
   const userId = g.currentUserId;
   if (!authed || !userId) return { authed: false };
 
