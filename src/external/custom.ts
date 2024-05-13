@@ -24,36 +24,32 @@ export function getChatsInTheFolder(folderId: number) {
   }));
 }
 
-export function getChatsByIds(chatsIds: number[]) {
+export function getChatWithLastMessageById(chatId: number) {
   const g = getGlobal();
-
   const localStorageData = JSON.parse(
     localStorage.getItem(GLOBAL_STATE_CACHE_KEY) || '',
   );
 
-  const fetchedChats = chatsIds.map((chatId) => {
-    const id = chatId.toString();
-    const chatLastMessage = selectChatLastMessage(g, id)
-      || selectChatLastMessage(localStorageData, id);
-    const shortUserInfo = chatLastMessage?.senderId
-      ? selectUser(localStorageData, chatLastMessage.senderId)
-        || selectUser(g, chatLastMessage.senderId)
-      : undefined;
-    const userFullInfo = chatLastMessage?.senderId
-      ? selectUserFullInfo(g, chatLastMessage.senderId)
-      : undefined;
+  const id = chatId.toString();
+  const chatLastMessage = selectChatLastMessage(g, id) || selectChatLastMessage(localStorageData, id);
+  const userShortInfo = chatLastMessage?.senderId
+    ? selectUser(localStorageData, chatLastMessage.senderId)
+      || selectUser(g, chatLastMessage.senderId)
+    : undefined;
+  const userFullInfo = chatLastMessage?.senderId
+    ? selectUserFullInfo(g, chatLastMessage.senderId)
+    : undefined;
 
-    return {
-      chat: selectChat(localStorageData, id) || selectChat(g, id),
-      id: chatId,
-      chatFullInfo: selectChatFullInfo(localStorageData, id),
-      msg: chatLastMessage,
-      lastMessageUserInfo: shortUserInfo,
-      userFullInfo,
-    };
-  });
+  const chatData = {
+    chat: selectChat(localStorageData, id) || selectChat(g, id),
+    id: chatId,
+    chatFullInfo: selectChatFullInfo(localStorageData, id),
+    msg: chatLastMessage,
+    lastMessageUserInfo: userShortInfo,
+    userFullInfo,
+  };
 
-  return g.isSynced ? fetchedChats : undefined;
+  return g.isSynced ? chatData : undefined;
 }
 
 export function getUserById(userId: number) {
