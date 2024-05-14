@@ -3039,11 +3039,11 @@ async function openChatByUsername<T extends GlobalState>(
   if (startAttach !== undefined && !attach) {
     const bot = await getAttachBotOrNotify(global, actions, username, tabId);
 
-    if (!currentChat || !bot) return;
+    if (!bot) return;
 
     actions.callAttachBot({
       bot,
-      chatId: currentChat.id,
+      chatId: currentChat?.id || bot.id,
       startParam: startAttach,
       tabId,
     });

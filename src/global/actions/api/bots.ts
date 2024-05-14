@@ -35,6 +35,7 @@ import {
   selectDraft,
   selectIsTrustedBot,
   selectMessageReplyInfo,
+  selectPeer,
   selectSendAs,
   selectTabState,
   selectUser,
@@ -529,7 +530,7 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
 
   const bot = selectUser(global, botId);
   if (!bot) return;
-  const peer = selectChat(global, peerId);
+  const peer = selectPeer(global, peerId);
   if (!peer) return;
 
   if (!selectIsTrustedBot(global, botId)) {
@@ -548,15 +549,12 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
   }
 
   const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
-    return;
-  }
 
-  const { chatId, threadId } = currentMessageList;
+  const { chatId, threadId = MAIN_THREAD_ID } = currentMessageList || {};
   const draftReplyInfo = chatId ? selectDraft(global, chatId, threadId)?.replyInfo : undefined;
-  const replyInfo = selectMessageReplyInfo(global, chatId, threadId, draftReplyInfo);
+  const replyInfo = chatId ? selectMessageReplyInfo(global, chatId, threadId, draftReplyInfo) : undefined;
 
-  const sendAs = selectSendAs(global, chatId);
+  const sendAs = chatId ? selectSendAs(global, chatId) : undefined;
   const result = await callApi('requestWebView', {
     url,
     bot,
@@ -774,13 +772,12 @@ addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType 
   setGlobal(global);
 });
 
-addActionHandler('loadAttachBots', async (global, actions, payload): Promise<void> => {
-  const { hash } = payload || {};
-  const result = await loadAttachBots(global, hash);
+addActionHandler('loadAttachBots', async (global): Promise<void> => {
+  await loadAttachBots(global);
 
   requestActionTimeout({
     action: 'loadAttachBots',
-    payload: { hash: result?.hash },
+    payload: undefined,
   }, GENERAL_REFETCH_INTERVAL);
 });
 

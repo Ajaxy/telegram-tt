@@ -390,11 +390,12 @@ const Main: FC<OwnProps & StateProps> = ({
 
   // Parse deep link
   useEffect(() => {
+    if (!isSynced) return;
     const parsedInitialLocationHash = parseInitialLocationHash();
     if (parsedInitialLocationHash?.tgaddr) {
       processDeepLink(decodeURIComponent(parsedInitialLocationHash.tgaddr));
     }
-  }, []);
+  }, [isSynced]);
 
   useEffect(() => {
     return window.electron?.on(ElectronEvent.DEEPLINK, (link: string) => {

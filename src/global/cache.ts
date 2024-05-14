@@ -266,6 +266,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'authPhoneNumber',
       'authRememberMe',
       'authNearestCountry',
+      'attachMenu',
       'currentUserId',
       'contactList',
       'topPeers',
@@ -343,11 +344,14 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     .map((message) => message.content.storyData?.peerId || message.content.webPage?.story?.peerId)
     .filter((id): id is string => Boolean(id) && isUserId(id));
 
+  const attachBotIds = Object.keys(global.attachMenu?.bots || {});
+
   const idsToSave = unique([
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
     ...chatStoriesUserIds,
     ...visibleUserIds || [],
+    ...attachBotIds,
     ...global.topPeers.userIds || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT).filter(isUserId) || [],
     ...getOrderedIds(ALL_FOLDER_ID)?.filter(isUserId) || [],

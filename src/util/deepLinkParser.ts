@@ -61,6 +61,7 @@ interface PublicUsernameOrBotLink {
   username: string;
   start?: string;
   startApp?: string;
+  appName?: string;
   startAttach?: string;
   attach?: string;
   text?: string;
@@ -197,6 +198,7 @@ function parseTgLink(url: URL) {
         username: queryParams.domain,
         start: queryParams.start,
         text: queryParams.text,
+        appName: queryParams.appname,
         startApp: queryParams.startapp,
         startAttach: queryParams.startattach,
         attach: queryParams.attach,
@@ -289,6 +291,7 @@ function parseHttpLink(url: URL) {
         start: queryParams.start,
         text: queryParams.text,
         startApp: queryParams.startapp,
+        appName: undefined,
         startAttach: queryParams.startattach,
         attach: queryParams.attach,
       });
@@ -519,6 +522,7 @@ function buildPublicUsernameOrBotLink(
     startApp,
     startAttach,
     attach,
+    appName,
   } = params;
   if (!username) {
     return undefined;
@@ -531,6 +535,7 @@ function buildPublicUsernameOrBotLink(
     username,
     start,
     startApp,
+    appName,
     startAttach,
     attach,
     text,

@@ -25,6 +25,7 @@ export const processDeepLink = (url: string): boolean => {
           startApp: parsedLink.startApp,
           startAttach: parsedLink.startAttach,
           attach: parsedLink.attach,
+          originalParts: [parsedLink.username, parsedLink.appName],
         });
         return true;
       case 'businessChatLink':

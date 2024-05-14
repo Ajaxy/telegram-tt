@@ -71,7 +71,7 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
         >
           {botInfoPhotoUrl && (
             <img
-              className={styles.image}
+              className={styles.media}
               src={botInfoPhotoUrl}
               width={botInfoRealDimensions?.width}
               height={botInfoRealDimensions?.height}
@@ -81,6 +81,7 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
           {botInfoGifUrl && (
             <OptimizedVideo
               canPlay
+              className={styles.media}
               src={botInfoGifUrl}
               loop
               disablePictureInPicture
@@ -91,8 +92,10 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
           )}
           {botInfoDimensions && !botInfoPhotoUrl && !botInfoGifUrl && (
             <Skeleton
+              className={styles.media}
               width={botInfoRealDimensions?.width}
               height={botInfoRealDimensions?.height}
+              forceAspectRatio
             />
           )}
           {botInfo.description && (

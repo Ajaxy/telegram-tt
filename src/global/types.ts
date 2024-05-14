@@ -1561,7 +1561,7 @@ export interface ActionPayloads {
     attach?: string;
     startApp?: string;
     text?: string;
-    originalParts?: string[];
+    originalParts?: (string | undefined)[];
   } & WithTabId;
   processBoostParameters: {
     usernameOrId: string;
@@ -2753,9 +2753,7 @@ export interface ActionPayloads {
     buttonText: string;
   };
 
-  loadAttachBots: {
-    hash?: string;
-  } | undefined;
+  loadAttachBots: undefined;
 
   toggleAttachBot: {
     botId: string;
