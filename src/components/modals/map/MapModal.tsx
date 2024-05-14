@@ -86,7 +86,7 @@ const OpenMapModal = ({ modal }: OwnProps) => {
           Bing Maps
         </Button>
         <Button fluid size="smaller" onClick={handleOsmClick}>
-          Open Street Maps
+          OpenStreetMap
         </Button>
       </div>
       <div className="dialog-buttons mt-2">

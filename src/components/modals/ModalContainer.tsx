@@ -12,6 +12,7 @@ import ChatlistModal from './chatlist/ChatlistModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
+import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import UrlAuthModal from './urlAuth/UrlAuthModal.async';
@@ -23,6 +24,7 @@ type ModalKey = keyof Pick<TabState,
 'boostModal' |
 'chatlistModal' |
 'urlAuth' |
+'mapModal' |
 'oneTimeMediaModal' |
 'inviteViaLinkModal' |
 'requestedAttachBotInstall' |
@@ -54,6 +56,7 @@ const MODALS: ModalRegistry = {
   reportAdModal: ReportAdModal,
   webApp: WebAppModal,
   collectibleInfoModal: CollectibleInfoModal,
+  mapModal: MapModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;
