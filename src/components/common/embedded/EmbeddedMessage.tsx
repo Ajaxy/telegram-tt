@@ -123,6 +123,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         text: replyInfo.quoteText.text,
         entities: replyInfo.quoteText.entities,
         noLineBreaks: isInComposer,
+        emojiSize: EMOJI_SIZE,
       });
     }
 
