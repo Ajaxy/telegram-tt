@@ -18,6 +18,7 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import { formatDateAtTime } from '../../../util/date/dateFormat';
 import { CUSTOM_PEER_TO_BE_DISTRIBUTED } from '../../../util/objects/customPeer';
+import { formatInteger } from '../../../util/textFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
 import useLang from '../../../hooks/useLang';
@@ -111,12 +112,18 @@ const BoostStatistics = ({
   const tabs = useMemo(() => {
     if (shouldDisplayGiftList) {
       return [
-        { type: 'boostList', title: lang('BoostingBoostsCount', boostStatistics?.boosts?.count) },
-        { type: 'giftedBoostList', title: lang('BoostingGiftsCount', boostStatistics?.giftedBoosts?.count) },
+        {
+          type: 'boostList',
+          title: lang('BoostingBoostsCount', boostStatistics?.boosts?.count, 'i'),
+        },
+        {
+          type: 'giftedBoostList',
+          title: lang('BoostingGiftsCount', boostStatistics?.giftedBoosts?.count, 'i'),
+        },
       ];
     }
     return [];
-  }, [shouldDisplayGiftList, boostStatistics?.boosts?.count, boostStatistics?.giftedBoosts?.count, lang]);
+  }, [shouldDisplayGiftList, lang, boostStatistics?.boosts?.count, boostStatistics?.giftedBoosts?.count]);
 
   const initialTab = useMemo(() => {
     return boostStatistics?.boosts && boostStatistics.boosts?.list.length > 0 ? 1 : 0;
@@ -252,7 +259,7 @@ const BoostStatistics = ({
               leftText={lang('BoostsLevel', currentLevel!)}
               rightText={hasNextLevel ? lang('BoostsLevel', currentLevel! + 1) : undefined}
               progress={levelProgress}
-              floatingBadgeText={boosts.toString()}
+              floatingBadgeText={formatInteger(boosts)}
               floatingBadgeIcon="boost"
             />
             <StatisticsOverview className={styles.stats} statistics={statsOverview} type="boost" />
@@ -338,14 +345,14 @@ const BoostStatistics = ({
                 ) : (
                   <Icon name="down" className={styles.down} />
                 )}
-                {lang('ShowVotes', boostersToLoadCount)}
+                {lang('ShowVotes', boostersToLoadCount, 'i')}
               </ListItem>
             )}
           </div>
           <LinkField className={styles.section} link={status!.boostUrl} withShare title={lang('LinkForBoosting')} />
           {isGiveawayAvailable && (
             <div className={styles.section}>
-              <ListItem icon="gift" ripple onClick={handleGiveawayClick}>
+              <ListItem icon="gift" ripple onClick={handleGiveawayClick} className={styles.giveawayButton}>
                 {lang('BoostingGetBoostsViaGifts')}
               </ListItem>
               <p className="text-muted hint" key="links-hint">{lang(

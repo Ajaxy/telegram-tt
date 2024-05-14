@@ -3033,8 +3033,8 @@ export interface ActionPayloads {
     forMultipleUsers?: boolean;
     forUserIds?: string[];
   } & WithTabId) | undefined;
-
   closeGiftPremiumModal: WithTabId | undefined;
+
   setEmojiStatus: {
     emojiStatus: ApiSticker;
     expires?: number;

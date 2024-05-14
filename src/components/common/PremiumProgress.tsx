@@ -35,6 +35,7 @@ const LimitPreview: FC<OwnProps> = ({
 
   const hasFloatingBadge = Boolean(floatingBadgeIcon || floatingBadgeText);
   const isProgressFull = Boolean(progress) && progress > 0.99;
+  const digitsCount = floatingBadgeText?.length;
 
   const tailPosition = progress && (progress < PROGRESS_LOCK ? 0 : progress > 1 - PROGRESS_LOCK ? 1 : 0.5);
 
@@ -48,6 +49,7 @@ const LimitPreview: FC<OwnProps> = ({
       style={buildStyle(
         progress !== undefined && `--progress: ${progress}`,
         tailPosition !== undefined && `--tail-position: ${tailPosition}`,
+        digitsCount !== undefined && `--digits-count: ${digitsCount}`,
       )}
     >
       {hasFloatingBadge && (

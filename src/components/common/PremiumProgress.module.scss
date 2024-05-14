@@ -12,7 +12,9 @@
 }
 
 .badgeContainer {
-  --shift-x: calc(clamp(10%, var(--percent), 90%) - 50%);
+  --min-shift: calc(10% + var(--digits-count, 1) * 0.4ch);
+  --max-shift: calc(85% - var(--digits-count, 1) * 0.4ch);
+  --shift-x: calc(clamp(var(--min-shift), var(--percent), var(--max-shift)) - 50%);
   display: flex;
   justify-content: center;
   position: absolute;
