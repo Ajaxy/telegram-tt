@@ -109,6 +109,7 @@ type StateProps = {
   adminMembersById?: Record<string, ApiChatMember>;
   commonChatIds?: string[];
   storyIds?: number[];
+  pinnedStoryIds?: number[];
   archiveStoryIds?: number[];
   storyByIds?: Record<number, ApiTypeStory>;
   chatsById: Record<string, ApiChat>;
@@ -155,6 +156,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   messagesById,
   foundIds,
   storyIds,
+  pinnedStoryIds,
   archiveStoryIds,
   storyByIds,
   mediaSearchType,
@@ -194,7 +196,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     focusMessage,
     loadProfilePhotos,
     setNewChatMembersDialogState,
-    loadPeerPinnedStories,
+    loadPeerProfileStories,
     loadStoriesArchive,
     openPremiumModal,
     loadChannelRecommendations,
@@ -264,7 +266,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
   const handleLoadPeerStories = useCallback(({ offsetId }: { offsetId: number }) => {
-    loadPeerPinnedStories({ peerId: chatId, offsetId });
+    loadPeerProfileStories({ peerId: chatId, offsetId });
   }, [chatId]);
   const handleLoadStoriesArchive = useCallback(({ offsetId }: { offsetId: number }) => {
     loadStoriesArchive({ peerId: currentUserId!, offsetId });
@@ -287,6 +289,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     foundIds,
     threadId,
     storyIds,
+    pinnedStoryIds,
     archiveStoryIds,
     similarChannels,
   );
@@ -484,11 +487,11 @@ const Profile: FC<OwnProps & StateProps> = ({
             />
           ))
         ) : (resultType === 'stories' || resultType === 'storiesArchive') ? (
-          (viewportIds as number[])!.map((id) => storyByIds?.[id] && (
+          (viewportIds as number[])!.map((id, i) => storyByIds?.[id] && (
             <MediaStory
+              teactOrderKey={i}
               key={`${resultType}_${id}`}
               story={storyByIds[id]}
-              isProtected={isChatProtected}
               isArchive={resultType === 'storiesArchive'}
             />
           ))
@@ -718,7 +721,8 @@ export default memo(withGlobal<OwnProps>(
     const hasStoriesTab = peer && (user?.isSelf || (!peer.areStoriesHidden && peerFullInfo?.hasPinnedStories))
       && !isSavedDialog;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
-    const storyIds = peerStories?.pinnedIds;
+    const storyIds = peerStories?.profileIds;
+    const pinnedStoryIds = peerStories?.pinnedIds;
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
@@ -743,6 +747,7 @@ export default memo(withGlobal<OwnProps>(
       userStatusesById,
       chatsById,
       storyIds,
+      pinnedStoryIds,
       archiveStoryIds,
       storyByIds,
       isChatProtected: chat?.isProtected,

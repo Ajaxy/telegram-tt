@@ -140,7 +140,7 @@ function Story({
     loadPeerSkippedStories,
     openForwardMenu,
     copyStoryLink,
-    toggleStoryPinned,
+    toggleStoryInProfile,
     openChat,
     showNotification,
     openStoryPrivacyEditor,
@@ -188,11 +188,11 @@ function Story({
   const isOut = isLoadedStory && story.isOut;
 
   const canPinToProfile = useCurrentOrPrev(
-    isOut ? !story.isPinned : undefined,
+    isOut ? !story.isInProfile : undefined,
     true,
   );
   const canUnpinFromProfile = useCurrentOrPrev(
-    isOut ? story.isPinned : undefined,
+    isOut ? story.isInProfile : undefined,
     true,
   );
   const areViewsExpired = Boolean(
@@ -460,11 +460,11 @@ function Story({
   });
 
   const handlePinClick = useLastCallback(() => {
-    toggleStoryPinned({ peerId, storyId, isPinned: true });
+    toggleStoryInProfile({ peerId, storyId, isInProfile: true });
   });
 
   const handleUnpinClick = useLastCallback(() => {
-    toggleStoryPinned({ peerId, storyId, isPinned: false });
+    toggleStoryInProfile({ peerId, storyId, isInProfile: false });
   });
 
   const handleDeleteStoryClick = useLastCallback(() => {

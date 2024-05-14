@@ -203,6 +203,7 @@ export interface ApiAppConfig {
   storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
+  maxPinnedStoriesCount?: number;
   groupTranscribeLevelMin?: number;
   canLimitNewMessagesWithoutPremium?: boolean;
   bandwidthPremiumNotifyPeriod?: number;

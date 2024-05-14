@@ -10,7 +10,7 @@ export interface ApiStory {
   date: number;
   expireDate: number;
   content: MediaContent;
-  isPinned?: boolean;
+  isInProfile?: boolean;
   isEdited?: boolean;
   isForCloseFriends?: boolean;
   isForContacts?: boolean;
@@ -56,8 +56,11 @@ export type ApiTypeStory = ApiStory | ApiStorySkipped | ApiStoryDeleted;
 export type ApiPeerStories = {
   byId: Record<number, ApiTypeStory>;
   orderedIds: number[]; // Actual peer stories
-  pinnedIds: number[]; // Profile Shared Media: Pinned Stories tab
+  profileIds: number[]; // Profile Shared Media: Profile Stories tab
+  isFullyLoaded?: boolean;
+  pinnedIds?: number[]; // Profile Shared Media: Pinned profile stories
   archiveIds?: number[]; // Profile Shared Media: Archive Stories tab
+  isArchiveFullyLoaded?: boolean;
   lastUpdatedAt?: number;
   lastReadId?: number;
 };

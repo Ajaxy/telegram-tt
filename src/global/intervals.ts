@@ -48,7 +48,7 @@ function checkStoryExpiration() {
     stories.forEach((story) => {
       if (!('expireDate' in story)) return;
       if (story.expireDate > serverTime) return;
-      if ('isPinned' in story && story.isPinned) return;
+      if ('isInProfile' in story && story.isInProfile) return;
       if ('isPublic' in story && !story.isPublic) return;
 
       global = removePeerStory(global, story.peerId, story.id);

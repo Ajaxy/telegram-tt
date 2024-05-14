@@ -71,6 +71,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   story_expire_period: number;
   story_viewers_expire_period: number;
   stories_changelog_user_id?: number;
+  stories_pinned_to_top_count_max?: number;
   // Boosts
   group_transcribe_level_min?: number;
   new_noncontact_peers_require_premium_without_ownpremium?: boolean;
@@ -152,6 +153,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     storyExpirePeriod: appConfig.story_expire_period ?? STORY_EXPIRE_PERIOD,
     storyViewersExpirePeriod: appConfig.story_viewers_expire_period ?? STORY_VIEWERS_EXPIRE_PERIOD,
     storyChangelogUserId: appConfig.stories_changelog_user_id?.toString() ?? SERVICE_NOTIFICATIONS_USER_ID,
+    maxPinnedStoriesCount: appConfig.stories_pinned_to_top_count_max,
     groupTranscribeLevelMin: appConfig.group_transcribe_level_min,
     canLimitNewMessagesWithoutPremium: appConfig.new_noncontact_peers_require_premium_without_ownpremium,
     bandwidthPremiumNotifyPeriod: appConfig.upload_premium_speedup_notify_period,

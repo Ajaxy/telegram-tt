@@ -66,7 +66,7 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     content,
     isPublic,
     isEdited: edited,
-    isPinned: pinned,
+    isInProfile: pinned,
     isForContacts: contacts,
     isForSelectedContacts: selectedContacts,
     isForCloseFriends: closeFriends,

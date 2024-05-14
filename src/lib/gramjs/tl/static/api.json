@@ -340,6 +340,7 @@
     "stories.togglePeerStoriesHidden",
     "stories.getPeerStories",
     "stories.getStoriesViews",
+    "stories.togglePinnedToTop",
     "premium.getBoostsStatus",
     "premium.getBoostersList",
     "premium.applyBoost",

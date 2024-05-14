@@ -2267,7 +2267,7 @@ export interface ActionPayloads {
   loadPeerStories: {
     peerId: string;
   };
-  loadPeerPinnedStories: {
+  loadPeerProfileStories: {
     peerId: string;
     offsetId?: number;
   } & WithTabId;
@@ -2290,11 +2290,15 @@ export interface ActionPayloads {
     peerId: string;
     storyId: number;
   } & WithTabId;
-  toggleStoryPinned: {
+  toggleStoryInProfile: {
     peerId: string;
     storyId: number;
-    isPinned?: boolean;
-  } & WithTabId;
+    isInProfile?: boolean;
+  };
+  toggleStoryPinnedToTop: {
+    peerId: string;
+    storyId: number;
+  };
   toggleStoryRibbon: {
     isShown: boolean;
     isArchived?: boolean;
