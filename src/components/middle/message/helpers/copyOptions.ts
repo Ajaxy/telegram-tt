@@ -21,6 +21,7 @@ import {
 } from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
 import * as mediaLoader from '../../../../util/mediaLoader';
+import { IS_SAFARI } from '../../../../util/windowEnvironment';
 import { renderMessageText } from '../../../common/helpers/renderMessageText';
 
 type ICopyOptions = {
@@ -45,7 +46,7 @@ export function getMessageCopyOptions(
   const contact = getMessageContact(message);
   const mediaHash = getMessageMediaHash(message, 'inline');
   const canImageBeCopied = canCopy && photo && (mediaHash || hasMessageLocalBlobUrl(message))
-    && CLIPBOARD_ITEM_SUPPORTED;
+    && CLIPBOARD_ITEM_SUPPORTED && !IS_SAFARI;
   const selection = window.getSelection();
 
   if (canImageBeCopied) {
