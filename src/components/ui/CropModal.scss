@@ -54,7 +54,8 @@
     }
 
     .cr-slider {
-      // Note that while we're repeating code here, that's necessary as you can't comma-separate these type of selectors.
+      // Note that while we're repeating code here,
+      // that's necessary as you can't comma-separate these type of selectors.
       // Browsers will drop the entire selector if it doesn't understand a part of it.
 
       &::-webkit-slider-runnable-track {

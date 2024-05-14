@@ -1,11 +1,13 @@
 {
   "extends": [
-    "stylelint-config-recommended-scss"
+    "stylelint-config-recommended-scss",
+    "@stylistic/stylelint-config"
   ],
   "ignoreFiles": [
     "dist/*.css"
   ],
   "plugins": [
+    "@stylistic/stylelint-plugin",
     "stylelint-declaration-block-no-ignored-properties",
     "stylelint-high-performance-animation",
     "stylelint-group-selectors",
@@ -22,7 +24,6 @@
         ]
       }
     ],
-    "number-leading-zero": "always",
     "selector-attribute-quotes": "always",
     "scss/operator-no-unspaced": null,
     "no-descending-specificity": null,
@@ -41,6 +42,11 @@
         "ignorePseudoClasses": ["global"]
       }
     ],
-    "plugin/selector-tag-no-without-class": ["/^(?!body|html)([^_-]*)$/", { "severity": "warning" }]
+    "plugin/selector-tag-no-without-class": ["/^(?!body|html)([^_-]*)$/", { "severity": "warning" }],
+    "@stylistic/number-leading-zero": "always",
+    "@stylistic/string-quotes": null,
+    "@stylistic/color-hex-case": null,
+    "@stylistic/selector-list-comma-newline-after": null,
+    "@stylistic/block-closing-brace-newline-after": null
   }
 }

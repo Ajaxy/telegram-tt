@@ -73,11 +73,11 @@
 
     body.is-ios &,
     body.is-android & {
-      border-radius: 0 ;
+      border-radius: 0;
     }
 
     @media (max-width: 600px) {
-      border-radius: 0 ;
+      border-radius: 0;
     }
 
     > .ListItem-main-icon {

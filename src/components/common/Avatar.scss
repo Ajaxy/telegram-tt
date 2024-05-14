@@ -237,11 +237,21 @@
   }
 
   &.has-unread-story::before {
-    background-image: linear-gradient(215.87deg, var(--color-avatar-story-unread-from) -1.61%, var(--color-avatar-story-unread-to) 97.44%);
+    background-image:
+      linear-gradient(
+        215.87deg,
+        var(--color-avatar-story-unread-from) -1.61%,
+        var(--color-avatar-story-unread-to) 97.44%,
+      );
   }
 
   &.has-unread-story.close-friend::before {
-    background-image: linear-gradient(215.87deg, var(--color-avatar-story-friend-unread-from) -1.61%, var(--color-avatar-story-friend-unread-to) 97.44%);
+    background-image:
+      linear-gradient(
+        215.87deg,
+        var(--color-avatar-story-friend-unread-from) -1.61%,
+        var(--color-avatar-story-friend-unread-to) 97.44%,
+      );
   }
 
   .poster {

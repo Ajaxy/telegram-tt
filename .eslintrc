@@ -9,7 +9,6 @@
     "no-null",
     "simple-import-sort",
     "react-hooks-static-deps",
-    "jsx-expressions",
     "eslint-multitab-tt"
   ],
   "rules": {
@@ -113,12 +112,6 @@
         "allowFunctions": false,
         "allowBind": false,
         "ignoreDOMComponents": true
-      }
-    ],
-    "jsx-expressions/strict-logical-expressions": [
-      "error",
-      {
-        "allowString": true
       }
     ],
     "jsx-a11y/click-events-have-key-events": "off",

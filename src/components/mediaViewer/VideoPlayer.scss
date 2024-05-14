@@ -3,7 +3,7 @@
   display: inline-flex;
   flex-direction: column;
   overflow: hidden;
-  
+
   @media (max-width: 600px) {
     overflow: visible;
   }

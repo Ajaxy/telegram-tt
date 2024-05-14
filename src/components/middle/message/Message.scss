@@ -315,13 +315,20 @@
         /* stylelint-disable-next-line plugin/whole-pixel */
         box-shadow: 0 0 0 0.03125rem rgba(255, 255, 255, 0.3);
         background: rgba(255, 255, 255, 0.3);
-        mask: linear-gradient(to bottom, #fff 0%, #fff 100%) content-box, linear-gradient(to bottom, #fff 0%, #fff 100%);
+        mask:
+          linear-gradient(to bottom, #fff 0%, #fff 100%) content-box,
+          linear-gradient(to bottom, #fff 0%, #fff 100%);
         mask-composite: exclude;
       }
 
       &.is-unread::before {
         padding: 0.125rem;
-        background: linear-gradient(215.87deg, var(--color-message-story-mention-from) -1.61%, var(--color-message-story-mention-to) 97.44%);
+        background:
+          linear-gradient(
+            215.87deg,
+            var(--color-message-story-mention-from) -1.61%,
+            var(--color-message-story-mention-to) 97.44%,
+          );
         box-shadow: none;
       }
     }

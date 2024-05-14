@@ -40,33 +40,35 @@
       z-index: var(--z-badge);
       opacity: 1;
       transform: scale(1);
-      transition: opacity 0.4s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition:
+        opacity 0.4s,
+        transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    
+
     .toggle-play {
       margin-inline-end: 0.5rem;
-  
+
       &.translucent-white {
         color: rgba(255, 255, 255, 0.8);
       }
-  
+
       &.smaller {
         width: 3rem;
         height: 3rem;
         margin-inline-end: 0.75rem;
-  
+
         .icon {
           font-size: 1.625rem;
-  
+
           &.icon-pause {
             font-size: 1.5625rem;
           }
         }
       }
-  
+
       .icon {
         position: absolute;
-  
+
         &.icon-play {
           margin-left: 0.1875rem;
           @media (max-width: 600px) {
@@ -74,13 +76,15 @@
           }
         }
       }
-  
+
       .icon-play,
       .icon-pause,
       .flame {
         opacity: 1;
         transform: scale(1);
-        transition: opacity 0.4s, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transition:
+          opacity 0.4s,
+          transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
     }
 
@@ -106,7 +110,9 @@
       --color-text-green: var(--color-white);
     }
 
-    .Button, .icon-view-once, .media-loading {
+    .Button,
+    .icon-view-once,
+    .media-loading {
       --color-primary: var(--color-text-green);
       --color-primary-shade: var(--color-green);
       --color-primary-shade-darker: var(--color-green-darker);
@@ -249,7 +255,6 @@
     display: flex;
     align-items: flex-end;
   }
-
 
   &.non-interactive {
     pointer-events: none;

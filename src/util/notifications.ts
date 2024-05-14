@@ -431,6 +431,7 @@ export async function notifyAboutCall({
   };
 
   if ('vibrate' in navigator) {
+    // @ts-ignore
     options.vibrate = [200, 100, 200];
   }
 
@@ -507,6 +508,7 @@ export async function notifyAboutMessage({
     };
 
     if ('vibrate' in navigator) {
+      // @ts-ignore
       options.vibrate = [200, 100, 200];
     }
 

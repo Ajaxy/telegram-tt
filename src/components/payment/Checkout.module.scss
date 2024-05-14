@@ -63,7 +63,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.5rem
+  gap: 0.5rem;
 }
 
 .tipsItem {
@@ -139,7 +139,7 @@
 .tos-checkbox {
   margin-left: 0.625rem;
   padding-left: 3.1875rem;
-  
+
   :global(.Checkbox-main) {
     &::before,
     &::after {

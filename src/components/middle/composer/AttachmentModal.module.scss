@@ -54,7 +54,6 @@
     }
   }
 
-
   :global(body.keyboard-visible) & :global(.modal-content) {
     padding-bottom: 0;
   }
@@ -68,7 +67,6 @@
       border-bottom-right-radius: 0;
     }
   }
-
 
   &.mobile:global(:not(.open)) :global(.modal-dialog) {
     transform: translate3d(0, 8rem, 0);

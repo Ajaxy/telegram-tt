@@ -1,3 +1,5 @@
+/* stylelint-disable @stylistic/value-list-comma-newline-after */
+/* stylelint-disable @stylistic/declaration-colon-newline-after */
 @use "reboot";
 @use "variables";
 @use "mixins";
@@ -27,9 +29,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
 
-  --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell,
-    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono", "Consolas", monospace;
+  --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
+    Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono",
+    "Consolas", monospace;
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
@@ -56,18 +59,19 @@ html.theme-dark {
 
 body.is-ios,
 body.is-macos {
-  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue",
+    sans-serif;
 }
 
 html[lang="fa"],
 html[lang="fa"] body {
-  --font-family: "Vazirmatn", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
-    Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family: "Vazirmatn", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 
   &.is-ios,
   &.is-macos {
-    --font-family: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
-      Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    --font-family: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Segoe UI", Oxygen,
+      Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   }
 }
 
