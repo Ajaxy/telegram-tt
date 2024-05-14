@@ -1,0 +1,250 @@
+.zZqgxIbDzTR3rg0rXWQL {
+    width: 100%;
+    height: 100%;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .TrAzcs0J8q3iQDl2IKgK {
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    max-height: none;
+    max-width: none;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .p7S2aqWJFb4_4SxoG53y {
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .JMVbH1VmogtY0FuPkWIS,
+.zZqgxIbDzTR3rg0rXWQL .GWnTtYWvzYBIhnaqJ9w5 {
+    position: absolute;
+    border: 2px solid #fff;
+    margin: auto;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    box-shadow: 0 0 2000px 2000px rgba(0, 0, 0, 0.5);
+    z-index: 0;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .GWnTtYWvzYBIhnaqJ9w5 {
+  z-index: 2;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .psEx5v8_0zyDFOZvoa64,
+.zZqgxIbDzTR3rg0rXWQL .U8EgOC2jIyNNpV9JrTZN {
+  position: absolute;
+  pointer-events: all;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .psEx5v8_0zyDFOZvoa64::after,
+.zZqgxIbDzTR3rg0rXWQL .U8EgOC2jIyNNpV9JrTZN::after {
+    display: block;
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid black;
+    background: #fff;
+    width: 10px;
+    height: 10px;
+    content: '';
+}
+
+.zZqgxIbDzTR3rg0rXWQL .psEx5v8_0zyDFOZvoa64 {
+  bottom: -5px;
+  cursor: row-resize;
+  width: 100%;
+  height: 10px;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .psEx5v8_0zyDFOZvoa64::after {
+    left: 50%;
+    margin-left: -5px;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .U8EgOC2jIyNNpV9JrTZN {
+  right: -5px;
+  cursor: col-resize;
+  width: 10px;
+  height: 100%;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .U8EgOC2jIyNNpV9JrTZN::after {
+    top: 50%;
+    margin-top: -5px;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .MjoJoVAzZrtQwYBr4tO9 {
+    display: none;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .H63irqZVGj3RPhflT15T {
+    border-radius: 50%;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .zad4QsMY02UuZmTdhxri {
+    z-index: 1;
+    position: absolute;
+    cursor: move;
+    touch-action: none;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .lBNb_LHnNdgvgXrytFow {
+    width: 75%;
+    margin: 15px auto;
+    text-align: center;
+}
+
+.XFa47PZEbHmLEp2AFkJ7 {
+    position: relative;
+    overflow: hidden;
+}
+
+.XFa47PZEbHmLEp2AFkJ7 img {
+    position: absolute;
+}
+
+.zZqgxIbDzTR3rg0rXWQL .TrAzcs0J8q3iQDl2IKgK,
+.zZqgxIbDzTR3rg0rXWQL .zad4QsMY02UuZmTdhxri,
+.zZqgxIbDzTR3rg0rXWQL .JMVbH1VmogtY0FuPkWIS {
+    transform: translateZ(0);
+}
+
+/*************************************/
+/***** STYLING RANGE INPUT ***********/
+/*************************************/
+/*http://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html */
+/*************************************/
+
+.cbbF8XoVgGi9rchm4Jys {
+    -webkit-appearance: none;
+/*removes default webkit styles*/
+	/*border: 1px solid white; *//*fix for FF unable to apply focus style bug */
+    width: 300px;
+/*required for proper track sizing in FF*/
+    max-width: 100%;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: transparent;
+}
+
+.cbbF8XoVgGi9rchm4Jys::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 0;
+    border-radius: 3px;
+}
+
+.cbbF8XoVgGi9rchm4Jys::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #ddd;
+    margin-top: -6px;
+}
+
+.cbbF8XoVgGi9rchm4Jys:focus {
+    outline: none;
+}
+/*
+.cr-slider:focus::-webkit-slider-runnable-track {
+background: #ccc;
+}
+*/
+
+.cbbF8XoVgGi9rchm4Jys::-moz-range-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 0;
+    border-radius: 3px;
+}
+
+.cbbF8XoVgGi9rchm4Jys::-moz-range-thumb {
+    border: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #ddd;
+    margin-top: -6px;
+}
+
+/*hide the outline behind the border*/
+.cbbF8XoVgGi9rchm4Jys:-moz-focusring {
+    outline: 1px solid white;
+    outline-offset: -1px;
+}
+
+.cbbF8XoVgGi9rchm4Jys::-ms-track {
+    width: 100%;
+    height: 5px;
+    background: transparent;
+/*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
+	border-color: transparent;/*leave room for the larger thumb to overflow with a transparent border */
+	border-width: 6px 0;
+	color: transparent;/*remove default tick marks*/
+}
+.cbbF8XoVgGi9rchm4Jys::-ms-fill-lower {
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+}
+.cbbF8XoVgGi9rchm4Jys::-ms-fill-upper {
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 10px;
+}
+.cbbF8XoVgGi9rchm4Jys::-ms-thumb {
+	border: none;
+	height: 16px;
+	width: 16px;
+	border-radius: 50%;
+	background: #ddd;
+	margin-top:1px;
+}
+.cbbF8XoVgGi9rchm4Jys:focus::-ms-fill-lower {
+	background: rgba(0, 0, 0, 0.5);
+}
+.cbbF8XoVgGi9rchm4Jys:focus::-ms-fill-upper {
+	background: rgba(0, 0, 0, 0.5);
+}
+/*******************************************/
+
+/***********************************/
+/* Rotation Tools */
+/***********************************/
+.FwMu4nQj92jQmK6tQLtk {
+	position: absolute;
+	bottom: 5px;
+	left: 5px;
+	z-index: 1;
+}
+.FwMu4nQj92jQmK6tQLtk button {
+	border: 0;
+	background: none;
+}
+.FwMu4nQj92jQmK6tQLtk i:before {
+	display: inline-block;
+	font-style: normal;
+	font-weight: 900;
+	font-size: 22px;
+}
+.B3I8rzu8Ci9dZ9bKY0aT i:before {
+	content: '↺';
+}
+.XT4cgHN6dnosCzr3tt6_ i:before {
+	content: '↻';
+}
+
+
+/*# sourceMappingURL=3931.2999f947161e59f4db93.css.map*/
