@@ -13,15 +13,15 @@ import useEffectOnce from './useEffectOnce';
   b) Return a signal instead of forcing a component update right away.
  */
 
-type Selector<T extends any> = (global: GlobalState) => T;
+type Selector<T extends unknown> = (global: GlobalState) => T;
 
-interface State<T extends any> {
+interface State<T extends unknown> {
   clientsCount: number;
   getter: Signal<T>;
   setter: SignalSetter;
 }
 
-const bySelector = new Map<Selector<any>, State<any>>();
+const bySelector = new Map<Selector<unknown>, State<unknown>>();
 
 addCallback((global: GlobalState) => {
   for (const [selector, { setter }] of bySelector) {
@@ -29,7 +29,7 @@ addCallback((global: GlobalState) => {
   }
 });
 
-function useSelectorSignal<T extends any>(selector: Selector<T>): Signal<T> {
+function useSelectorSignal<T extends unknown>(selector: Selector<T>): Signal<T> {
   let state = bySelector.get(selector);
 
   if (!state) {
@@ -50,7 +50,7 @@ function useSelectorSignal<T extends any>(selector: Selector<T>): Signal<T> {
     };
   });
 
-  return state.getter;
+  return state.getter as Signal<T>;
 }
 
 export default useSelectorSignal;
