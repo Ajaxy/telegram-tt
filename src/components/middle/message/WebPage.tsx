@@ -34,7 +34,7 @@ import './WebPage.scss';
 const MAX_TEXT_LENGTH = 170; // symbols
 const WEBPAGE_STORY_TYPE = 'telegram_story';
 const STICKER_SIZE = 80;
-const EMOJI_SIZE = 40;
+const EMOJI_SIZE = 38;
 
 type OwnProps = {
   message: ApiMessage;

@@ -45,6 +45,7 @@ type StateProps = {
   isSignaturesShown: boolean;
   canChangeInfo?: boolean;
   canInvite?: boolean;
+  canPost?: boolean;
   exportedInvites?: ApiExportedInvite[];
   availableReactions?: ApiAvailableReaction[];
 };
@@ -60,6 +61,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   isSignaturesShown,
   canChangeInfo,
   canInvite,
+  canPost,
   exportedInvites,
   isActive,
   availableReactions,
@@ -97,10 +99,11 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
+    if (!canInvite) return;
     loadExportedChatInvites({ chatId });
     loadExportedChatInvites({ chatId, isRevoked: true });
     loadChatJoinRequests({ chatId });
-  }, [chatId]);
+  }, [chatId, canInvite]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -295,13 +298,15 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               {chatReactionsDescription}
             </span>
           </ListItem>
-          <div className="ListItem narrow">
-            <Checkbox
-              checked={isSignaturesShown}
-              label={lang('ChannelSignMessages')}
-              onChange={handleToggleSignatures}
-            />
-          </div>
+          {canPost && (
+            <div className="ListItem narrow">
+              <Checkbox
+                checked={isSignaturesShown}
+                label={lang('ChannelSignMessages')}
+                onChange={handleToggleSignatures}
+              />
+            </div>
+          )}
         </div>
         <div className="section">
           <ListItem
@@ -375,6 +380,7 @@ export default memo(withGlobal<OwnProps>(
       isSignaturesShown,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
       canInvite: getHasAdminRight(chat, 'inviteUsers'),
+      canPost: getHasAdminRight(chat, 'postMessages'),
       exportedInvites: invites,
       availableReactions: global.reactions.availableReactions,
     };

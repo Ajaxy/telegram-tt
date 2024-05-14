@@ -183,16 +183,17 @@
     flex-direction: row-reverse;
     justify-content: flex-start;
     flex-wrap: wrap;
-
-    .confirm-dialog-button + .confirm-dialog-button {
-      margin-right: 1rem;
-    }
+    gap: 0.5rem 1rem;
   }
 
   .dialog-buttons-column {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+  }
+
+  .dialog-buttons-centered {
+    justify-content: center;
   }
 
   .dialog-checkbox {

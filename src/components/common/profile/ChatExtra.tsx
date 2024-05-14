@@ -217,7 +217,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
   const handlePhoneClick = useLastCallback(() => {
     if (phoneNumber?.length === FRAGMENT_PHONE_LENGTH && phoneNumber.startsWith(FRAGMENT_PHONE_CODE)) {
-      requestCollectibleInfo({ collectible: phoneNumber, userId: userId!, type: 'phone' });
+      requestCollectibleInfo({ collectible: phoneNumber, peerId: peerId!, type: 'phone' });
       return;
     }
     copy(formattedNumber!, lang('Phone'));
@@ -225,7 +225,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
   const handleUsernameClick = useLastCallback((username: ApiUsername, isChat?: boolean) => {
     if (!username.isEditable) {
-      requestCollectibleInfo({ collectible: username.username, userId: userId!, type: 'username' });
+      requestCollectibleInfo({ collectible: username.username, peerId: peerId!, type: 'username' });
       return;
     }
     copy(formatUsername(username.username, isChat), lang(isChat ? 'Link' : 'Username'));

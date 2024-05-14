@@ -406,7 +406,7 @@ export function filterChatsByName(
       return searchWords(translatedTitle) || searchWords(chat.title);
     }
 
-    return searchWords(translatedTitle);
+    return searchWords(translatedTitle) || Boolean(chat.usernames?.find(({ username }) => searchWords(username)));
   });
 }
 

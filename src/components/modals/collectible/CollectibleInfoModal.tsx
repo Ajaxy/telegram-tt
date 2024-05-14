@@ -56,7 +56,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleOpenChat = useLastCallback(() => {
-    openChat({ id: modal!.userId });
+    openChat({ id: modal!.peerId });
     handleClose();
   });
 
@@ -126,14 +126,14 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
       <PickerSelectedItem
         fluid
         className={styles.chip}
-        peerId={modal?.userId}
+        peerId={modal?.peerId}
         forceShowSelf
         onClick={handleOpenChat}
       />
       <p className={styles.description}>
         {description && renderText(description, ['simple_markdown'])}
       </p>
-      <div className="dialog-buttons">
+      <div className="dialog-buttons dialog-buttons-centered">
         <Button className="confirm-dialog-button" onClick={handleOpenUrl}>
           {lang('FragmentUsernameOpen')}
         </Button>

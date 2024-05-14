@@ -196,14 +196,20 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
 
+    // No need for expensive global updates, so we avoid them
+    const chatsById = getGlobal().chats.byId;
+
     return foundIds
       .map((id) => {
         const [chatId, messageId] = id.split('_');
+        const chat = chatsById[chatId];
+        if (!chat) return undefined;
+        if (isChannelList && !isChatChannel(chat)) return undefined;
 
         return globalMessagesByChatId?.[chatId]?.byId[Number(messageId)];
       })
       .filter(Boolean);
-  }, [foundIds, globalMessagesByChatId, searchQuery, searchDate]);
+  }, [searchQuery, searchDate, foundIds, isChannelList, globalMessagesByChatId]);
 
   const handleClickShowMoreLocal = useCallback(() => {
     setShouldShowMoreLocal(!shouldShowMoreLocal);

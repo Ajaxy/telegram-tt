@@ -2687,7 +2687,7 @@ addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Pr
 
 addActionHandler('requestCollectibleInfo', async (global, actions, payload): Promise<void> => {
   const {
-    type, collectible, userId, tabId = getCurrentTabId(),
+    type, collectible, peerId, tabId = getCurrentTabId(),
   } = payload;
 
   let inputCollectible;
@@ -2711,7 +2711,7 @@ addActionHandler('requestCollectibleInfo', async (global, actions, payload): Pro
       ...result,
       type,
       collectible,
-      userId,
+      peerId,
     },
   }, tabId);
   setGlobal(global);

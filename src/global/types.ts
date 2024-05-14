@@ -741,7 +741,7 @@ export type TabState = {
   };
 
   collectibleInfoModal?: ApiCollectionInfo & {
-    userId: string;
+    peerId: string;
     type: 'phone' | 'username';
     collectible: string;
   };
@@ -2878,7 +2878,7 @@ export interface ActionPayloads {
   closeOneTimeMediaModal: WithTabId | undefined;
 
   requestCollectibleInfo: {
-    userId: string;
+    peerId: string;
     type : 'phone' | 'username';
     collectible: string;
   } & WithTabId;
