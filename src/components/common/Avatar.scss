@@ -1,4 +1,5 @@
 .Avatar {
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
   --color-user: var(--color-primary);
   --radius: 50%;
 
@@ -258,7 +259,7 @@
     --color-user: var(--color-deleted-account);
   }
 
-  &.unknown-user {
-    background: var(--premium-gradient);
+  &.premium-gradient-bg > .inner {
+    background-image: var(--premium-gradient);
   }
 }

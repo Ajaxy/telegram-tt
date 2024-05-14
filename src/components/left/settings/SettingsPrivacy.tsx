@@ -103,7 +103,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   }, [updateContentSettings]);
 
   function getVisibilityValue(setting?: ApiPrivacySettings) {
-    const { visibility } = setting || {};
+    const { visibility, shouldAllowPremium } = setting || {};
     const blockCount = setting ? setting.blockChatIds.length + setting.blockUserIds.length : 0;
     const allowCount = setting ? setting.allowChatIds.length + setting.allowUserIds.length : 0;
     const total = [];
@@ -111,6 +111,10 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     if (allowCount) total.push(`+${allowCount}`);
 
     const exceptionString = total.length ? `(${total.join(',')})` : '';
+
+    if (shouldAllowPremium) {
+      return lang(exceptionString ? 'ContactsAndPremium' : 'PrivacyPremium');
+    }
 
     switch (visibility) {
       case 'everybody':

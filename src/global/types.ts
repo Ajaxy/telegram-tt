@@ -1238,6 +1238,7 @@ export interface ActionPayloads {
     privacyKey: ApiPrivacyKey;
     isAllowList: boolean;
     updatedIds: string[];
+    isPremiumAllowed?: true;
   };
   loadNotificationExceptions: undefined;
   setThemeSettings: { theme: ThemeKey } & Partial<IThemeSettings>;

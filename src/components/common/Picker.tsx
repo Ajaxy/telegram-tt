@@ -1,9 +1,10 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
 import type { ApiCountry } from '../../api/types';
+import type { CustomPeer, CustomPeerType } from '../../types';
 
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { isUserId } from '../../global/helpers';
@@ -27,7 +28,9 @@ import './Picker.scss';
 
 type OwnProps = {
   className?: string;
+  categories?: CustomPeer[];
   itemIds: string[];
+  selectedCategories?: CustomPeerType[];
   selectedIds: string[];
   lockedSelectedIds?: string[];
   lockedUnselectedIds?: string[];
@@ -42,6 +45,7 @@ type OwnProps = {
   isRoundCheckbox?: boolean;
   forceShowSelf?: boolean;
   isViewOnly?: boolean;
+  onSelectedCategoriesChange?: (categories: CustomPeerType[]) => void;
   onSelectedIdsChange?: (ids: string[]) => void;
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (id: string, isSelected: boolean) => void;
@@ -58,7 +62,9 @@ const ALWAYS_FULL_ITEMS_COUNT = 5;
 
 const Picker: FC<OwnProps> = ({
   className,
+  categories,
   itemIds,
+  selectedCategories,
   selectedIds,
   filterValue,
   filterPlaceholder,
@@ -73,6 +79,7 @@ const Picker: FC<OwnProps> = ({
   lockedUnselectedSubtitle,
   forceShowSelf,
   isViewOnly,
+  onSelectedCategoriesChange,
   onSelectedIdsChange,
   onFilterChange,
   onDisabledClick,
@@ -100,7 +107,16 @@ const Picker: FC<OwnProps> = ({
     return selectedIds.filter((id) => !lockedSelectedIdsSet.has(id));
   }, [lockedSelectedIdsSet, selectedIds]);
 
+  const categoriesByType = useMemo(() => {
+    if (!categories) return {};
+    return buildCollectionByKey(categories, 'type');
+  }, [categories]);
+
   const sortedItemIds = useMemo(() => {
+    if (filterValue) {
+      return itemIds;
+    }
+
     const lockedSelectedBucket: string[] = [];
     const unlockedBucket: string[] = [];
     const lockedUnselectableBucket: string[] = [];
@@ -115,8 +131,8 @@ const Picker: FC<OwnProps> = ({
       }
     });
 
-    return lockedSelectedBucket.concat(unlockedBucket).concat(lockedUnselectableBucket);
-  }, [itemIds, lockedSelectedIdsSet, lockedUnselectedIdsSet]);
+    return lockedSelectedBucket.concat(unlockedBucket, lockedUnselectableBucket);
+  }, [filterValue, itemIds, lockedSelectedIdsSet, lockedUnselectedIdsSet]);
 
   const handleItemClick = useLastCallback((id: string) => {
     if (lockedSelectedIdsSet.has(id)) {
@@ -129,13 +145,24 @@ const Picker: FC<OwnProps> = ({
       return;
     }
 
-    const newSelectedIds = selectedIds.slice();
-    if (newSelectedIds.includes(id)) {
-      newSelectedIds.splice(newSelectedIds.indexOf(id), 1);
+    if (categoriesByType[id]) {
+      const categoryType = categoriesByType[id].type;
+      const newSelectedCategories = selectedCategories?.slice() || [];
+      if (newSelectedCategories.includes(categoryType)) {
+        newSelectedCategories.splice(newSelectedCategories.indexOf(categoryType), 1);
+      } else {
+        newSelectedCategories.push(categoryType);
+      }
+      onSelectedCategoriesChange?.(newSelectedCategories);
     } else {
-      newSelectedIds.push(id);
+      const newSelectedIds = selectedIds.slice();
+      if (newSelectedIds.includes(id)) {
+        newSelectedIds.splice(newSelectedIds.indexOf(id), 1);
+      } else {
+        newSelectedIds.push(id);
+      }
+      onSelectedIdsChange?.(newSelectedIds);
     }
-    onSelectedIdsChange?.(newSelectedIds);
     onFilterChange?.('');
   });
 
@@ -153,7 +180,15 @@ const Picker: FC<OwnProps> = ({
     return buildCollectionByKey(countryList, 'iso2');
   }, [countryList]);
 
-  const renderChatInfo = (id: string) => {
+  const renderCategory = useLastCallback((category: CustomPeer) => {
+    return (
+      <PrivateChatInfo
+        customPeer={category}
+      />
+    );
+  });
+
+  const renderChatInfo = useLastCallback((id: string) => {
     const isUnselectable = lockedUnselectedIdsSet.has(id);
     if (isCountryList && countriesByIso) {
       const country = countriesByIso[id];
@@ -169,12 +204,69 @@ const Picker: FC<OwnProps> = ({
     } else {
       return <GroupChatInfo chatId={id} status={isUnselectable ? lockedUnselectedSubtitle : undefined} />;
     }
-  };
+  });
+
+  const renderItem = useCallback((id: string, isCategory?: boolean) => {
+    const category = isCategory ? categoriesByType[id] : undefined;
+    const shouldRenderLockIcon = lockedUnselectedIdsSet.has(id);
+    const isLocked = lockedSelectedIdsSet.has(id) || shouldRenderLockIcon;
+    const isChecked = category ? selectedCategories?.includes(category.type) : selectedIds.includes(id);
+    const renderCheckbox = () => {
+      return (isViewOnly || shouldRenderLockIcon) ? undefined : (
+        <Checkbox
+          label=""
+          disabled={isLocked}
+          checked={isChecked}
+          round={isRoundCheckbox}
+        />
+      );
+    };
+    return (
+      <ListItem
+        key={id}
+        className={buildClassName('chat-item-clickable picker-list-item', isRoundCheckbox && 'chat-item')}
+        disabled={isLocked}
+        inactive={isViewOnly}
+        allowDisabledClick={Boolean(onDisabledClick)}
+        secondaryIcon={shouldRenderLockIcon ? 'lock-badge' : undefined}
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={() => handleItemClick(id)}
+        ripple
+      >
+        {!isRoundCheckbox ? renderCheckbox() : undefined}
+        {category ? renderCategory(category) : renderChatInfo(id)}
+        {isRoundCheckbox ? renderCheckbox() : undefined}
+      </ListItem>
+    );
+  }, [
+    categoriesByType, isRoundCheckbox, isViewOnly, lockedSelectedIdsSet, lockedUnselectedIdsSet,
+    onDisabledClick, renderChatInfo, selectedCategories, selectedIds,
+  ]);
+
+  const beforeChildren = useMemo(() => {
+    return (
+      <div key="categories">
+        {Boolean(categories?.length) && (
+          <div className="picker-category-title">{lang('PrivacyUserTypes')}</div>
+        )}
+        {categories?.map((category) => renderItem(category.type, true))}
+        <div className="picker-category-title">{lang('FilterChats')}</div>
+      </div>
+    );
+  }, [categories, lang, renderItem]);
 
   return (
     <div className={buildClassName('Picker', className)}>
       {isSearchable && (
         <div className="picker-header custom-scroll" dir={lang.isRtl ? 'rtl' : undefined}>
+          {selectedCategories?.map((category) => (
+            <PickerSelectedItem
+              customPeer={categoriesByType[category]}
+              onClick={handleItemClick}
+              clickArg={category}
+              canClose
+            />
+          ))}
           {lockedSelectedIds?.map((id, i) => (
             <PickerSelectedItem
               peerId={id}
@@ -209,40 +301,11 @@ const Picker: FC<OwnProps> = ({
         <InfiniteScroll
           className={buildClassName('picker-list', 'custom-scroll', isRoundCheckbox && 'withRoundedCheckbox')}
           items={viewportIds}
+          beforeChildren={beforeChildren}
           onLoadMore={getMore}
           noScrollRestore={noScrollRestore}
         >
-          {viewportIds.map((id) => {
-            const shouldRenderLockIcon = lockedUnselectedIdsSet.has(id);
-            const isLocked = lockedSelectedIdsSet.has(id) || shouldRenderLockIcon;
-            const renderCheckbox = () => {
-              return (isViewOnly || shouldRenderLockIcon) ? undefined : (
-                <Checkbox
-                  label=""
-                  disabled={isLocked}
-                  checked={selectedIds.includes(id)}
-                  round={isRoundCheckbox}
-                />
-              );
-            };
-            return (
-              <ListItem
-                key={id}
-                className={buildClassName('chat-item-clickable picker-list-item', isRoundCheckbox && 'chat-item')}
-                disabled={isLocked}
-                inactive={isViewOnly}
-                allowDisabledClick={Boolean(onDisabledClick)}
-                secondaryIcon={shouldRenderLockIcon ? 'lock-badge' : undefined}
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => handleItemClick(id)}
-                ripple
-              >
-                {!isRoundCheckbox ? renderCheckbox() : undefined}
-                {renderChatInfo(id)}
-                {isRoundCheckbox ? renderCheckbox() : undefined}
-              </ListItem>
-            );
-          })}
+          {viewportIds.map((id) => renderItem(id))}
         </InfiniteScroll>
       ) : !isLoading && viewportIds && !viewportIds.length ? (
         <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>

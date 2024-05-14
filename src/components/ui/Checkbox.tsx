@@ -19,7 +19,7 @@ type OwnProps = {
   value?: string;
   label: TeactNode;
   subLabel?: string;
-  checked: boolean;
+  checked?: boolean;
   rightIcon?: IconName;
   disabled?: boolean;
   tabIndex?: number;

@@ -17,6 +17,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateAtTime } from '../../../util/date/dateFormat';
+import { CUSTOM_PEER_TO_BE_DISTRIBUTED } from '../../../util/objects/customPeer';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
 import useLang from '../../../hooks/useLang';
@@ -197,12 +198,12 @@ const BoostStatistics = ({
         <PrivateChatInfo
           className={styles.user}
           userId={boost.userId}
+          customPeer={!boost.userId ? CUSTOM_PEER_TO_BE_DISTRIBUTED : undefined}
           status={lang('BoostExpireOn', formatDateAtTime(lang, boost.expires * 1000))}
           noEmojiStatus
           forceShowSelf
           noFake
           noVerified
-          isUnknownUser={!boost.userId}
           iconElement={boost.multiplier ? renderBoostIcon(boost.multiplier) : undefined}
           rightElement={renderBoostTypeIcon(boost)}
         />

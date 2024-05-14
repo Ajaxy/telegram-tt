@@ -3,6 +3,7 @@ import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { ApiChat, ApiUser } from '../../api/types';
+import type { CustomPeer } from '../../types';
 import type { IconName } from '../../types/icons';
 
 import { getChatTitle, getUserFirstOrLastName } from '../../global/helpers';
@@ -14,11 +15,13 @@ import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';
+import Icon from './Icon';
 
 import './PickerSelectedItem.scss';
 
 type OwnProps = {
   peerId?: string;
+  customPeer?: CustomPeer;
   icon?: IconName;
   title?: string;
   isMinimized?: boolean;
@@ -45,6 +48,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   clickArg,
   chat,
   user,
+  customPeer,
   className,
   fluid,
   isSavedMessages,
@@ -59,23 +63,24 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   if (icon && title) {
     iconElement = (
       <div className="item-icon">
-        <i className={buildClassName('icon', `icon-${icon}`)} />
+        <Icon name={icon} />
       </div>
     );
 
     titleText = title;
-  } else if (user || chat) {
+  } else if (customPeer || user || chat) {
     iconElement = (
       <Avatar
-        peer={user || chat}
+        peer={customPeer || user || chat}
         size="small"
         isSavedMessages={isSavedMessages}
       />
     );
 
-    const name = !chat || (user && !isSavedMessages)
-      ? getUserFirstOrLastName(user)
-      : getChatTitle(lang, chat, isSavedMessages);
+    const name = (customPeer && lang(customPeer.titleKey))
+      || (!chat || (user && !isSavedMessages)
+        ? getUserFirstOrLastName(user)
+        : getChatTitle(lang, chat, isSavedMessages));
 
     titleText = name ? renderText(name) : undefined;
   }
@@ -83,11 +88,11 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   const fullClassName = buildClassName(
     'PickerSelectedItem',
     className,
-    chat?.isForum && 'forum-avatar',
+    (chat?.isForum || customPeer?.isAvatarSquare) && 'square-avatar',
     isMinimized && 'minimized',
     canClose && 'closeable',
     fluid && 'fluid',
-    withPeerColors && getPeerColorClass(chat || user),
+    withPeerColors && getPeerColorClass(customPeer || chat || user),
   );
 
   return (
@@ -105,7 +110,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
       )}
       {canClose && (
         <div className="item-remove">
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </div>
       )}
     </div>

@@ -2,8 +2,11 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiChat, ApiPeer, ApiUser } from '../../api/types';
+import type {
+  ApiChat, ApiPeer, ApiUser,
+} from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { CustomPeer } from '../../types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../config';
 import {
@@ -25,7 +28,7 @@ import VerifiedIcon from './VerifiedIcon';
 import styles from './FullNameTitle.module.scss';
 
 type OwnProps = {
-  peer?: ApiPeer;
+  peer: ApiPeer | CustomPeer;
   className?: string;
   noVerified?: boolean;
   noFake?: boolean;
@@ -34,7 +37,6 @@ type OwnProps = {
   isSavedMessages?: boolean;
   isSavedDialog?: boolean;
   noLoopLimit?: boolean;
-  isUnknownUser?: boolean;
   canCopyTitle?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
@@ -55,24 +57,14 @@ const FullNameTitle: FC<OwnProps> = ({
   onEmojiStatusClick,
   observeIntersection,
   iconElement,
-  isUnknownUser,
 }) => {
   const lang = useLang();
   const { showNotification } = getActions();
-  const isUser = peer && isUserId(peer.id);
+  const realPeer = 'id' in peer ? peer : undefined;
+  const customPeer = 'isCustomPeer' in peer ? peer : undefined;
+  const isUser = realPeer && isUserId(realPeer.id);
+  const title = realPeer && (isUser ? getUserFullName(realPeer as ApiUser) : getChatTitle(lang, realPeer as ApiChat));
   const isPremium = isUser && (peer as ApiUser).isPremium;
-
-  const title = useMemo(() => {
-    if (isUnknownUser) {
-      return lang('BoostingToBeDistributed');
-    }
-
-    if (peer && isUserId(peer.id)) {
-      return getUserFullName(peer as ApiUser);
-    }
-
-    return peer && getChatTitle(lang, peer as ApiChat);
-  }, [isUnknownUser, lang, peer]);
 
   const handleTitleClick = useLastCallback((e) => {
     if (!title || !canCopyTitle) {
@@ -85,20 +77,24 @@ const FullNameTitle: FC<OwnProps> = ({
   });
 
   const specialTitle = useMemo(() => {
+    if (customPeer) {
+      return lang(customPeer.titleKey);
+    }
+
     if (isSavedMessages) {
       return lang(isSavedDialog ? 'MyNotes' : 'SavedMessages');
     }
 
-    if (peer && isAnonymousForwardsChat(peer.id)) {
+    if (isAnonymousForwardsChat(realPeer!.id)) {
       return lang('AnonymousForward');
     }
 
-    if (peer && isChatWithRepliesBot(peer.id)) {
+    if (isChatWithRepliesBot(realPeer!.id)) {
       return lang('RepliesTitle');
     }
 
     return undefined;
-  }, [isSavedDialog, isSavedMessages, lang, peer]);
+  }, [customPeer, isSavedDialog, isSavedMessages, lang, realPeer]);
 
   if (specialTitle) {
     return (
@@ -120,18 +116,18 @@ const FullNameTitle: FC<OwnProps> = ({
       </h3>
       {!iconElement && peer && (
         <>
-          {!noVerified && peer?.isVerified && <VerifiedIcon />}
-          {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
-          {withEmojiStatus && peer.emojiStatus && (
+          {!noVerified && realPeer?.isVerified && <VerifiedIcon />}
+          {!noFake && realPeer?.fakeType && <FakeIcon fakeType={realPeer.fakeType} />}
+          {withEmojiStatus && realPeer?.emojiStatus && (
             <CustomEmoji
-              documentId={peer.emojiStatus.documentId}
+              documentId={realPeer.emojiStatus.documentId}
               size={emojiStatusSize}
               loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
               observeIntersectionForLoading={observeIntersection}
               onClick={onEmojiStatusClick}
             />
           )}
-          {withEmojiStatus && !peer.emojiStatus && isPremium && <PremiumIcon />}
+          {withEmojiStatus && !realPeer?.emojiStatus && isPremium && <PremiumIcon />}
         </>
       )}
       {iconElement}

@@ -196,12 +196,14 @@ function PrivacySubsection({
     }
   }, [lang, screen]);
 
-  const prepareSubtitle = useLastCallback((userIds?: string[], chatIds?: string[]) => {
+  const prepareSubtitle = useLastCallback((userIds?: string[], chatIds?: string[], shouldAllowPremium?: boolean) => {
     const userIdsCount = userIds?.length || 0;
     const chatIdsCount = chatIds?.length || 0;
 
     if (!userIdsCount && !chatIdsCount) {
-      return lang('EditAdminAddUsers');
+      return shouldAllowPremium ? lang('PrivacyPremium') : lang('EditAdminAddUsers');
+    } else if (shouldAllowPremium) {
+      return lang('ContactsAndPremium');
     }
 
     const userCountString = userIdsCount > 0 ? lang('Users', userIdsCount) : undefined;
@@ -211,7 +213,7 @@ function PrivacySubsection({
   });
 
   const allowedString = useMemo(() => {
-    return prepareSubtitle(privacy?.allowUserIds, privacy?.allowChatIds);
+    return prepareSubtitle(privacy?.allowUserIds, privacy?.allowChatIds, privacy?.shouldAllowPremium);
   }, [privacy]);
 
   const blockString = useMemo(() => {
