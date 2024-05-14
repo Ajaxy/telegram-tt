@@ -701,7 +701,8 @@ export default memo(withGlobal<OwnProps>(
     const areMembersHidden = hasMembersTab && chat
       && (chat.isForbidden || (chatFullInfo && !chatFullInfo.canViewMembers));
     const canAddMembers = hasMembersTab && chat
-      && (getHasAdminRight(chat, 'inviteUsers') || !isUserRightBanned(chat, 'inviteUsers') || chat.isCreator);
+      && (getHasAdminRight(chat, 'inviteUsers') || (!isChannel && !isUserRightBanned(chat, 'inviteUsers'))
+        || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
     const activeDownloads = selectActiveDownloads(global, chatId);
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
