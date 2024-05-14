@@ -4,7 +4,7 @@ import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { canReplaceMessageMedia, isUploadingFileSticker } from '../../../global/helpers';
+import { canReplaceMessageMedia } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildAttachment from './helpers/buildAttachment';
@@ -59,9 +59,8 @@ const DropArea: FC<OwnProps> = ({
       const folderFiles = await getFilesFromDataTransferItems(dt.items);
       const newAttachment = folderFiles && await buildAttachment(folderFiles[0].name, folderFiles[0]);
       const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
-      const isFileSticker = newAttachment && isUploadingFileSticker(newAttachment);
 
-      if (canReplace || isFileSticker) {
+      if (canReplace) {
         showNotification({ message: lang(isInAlbum ? 'lng_edit_media_album_error' : 'lng_edit_media_invalid_file') });
         return;
       }
