@@ -1,5 +1,5 @@
 import { ApiChat } from "../api/types/chats";
-import { ApiMessage, ApiUpdateChatInbox } from "../api/types";
+import { ApiMessage, ApiUpdateChat, ApiUpdateChatInbox } from "../api/types";
 
 export function chatOpened(chatId: string, chat: ApiChat) {}
 export function chatClosed() {}
@@ -19,3 +19,4 @@ export function updateChatUnreadStatus(data: {
   chatId: string;
   count: number;
 }) {}
+export function updateChat(data: ApiUpdateChat | ApiUpdateChatInbox) {}
