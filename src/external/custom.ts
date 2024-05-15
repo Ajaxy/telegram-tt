@@ -33,15 +33,15 @@ export function getChatWithLastMessageById(chatId: number) {
   const id = chatId.toString();
   const chatLastMessage = selectChatLastMessage(g, id) || selectChatLastMessage(localStorageData, id);
   const userShortInfo = chatLastMessage?.senderId
-    ? selectUser(localStorageData, chatLastMessage.senderId)
-      || selectUser(g, chatLastMessage.senderId)
+    ? selectUser(g, chatLastMessage.senderId) ||
+      selectUser(localStorageData, chatLastMessage.senderId)
     : undefined;
   const userFullInfo = chatLastMessage?.senderId
     ? selectUserFullInfo(g, chatLastMessage.senderId)
     : undefined;
 
   const chatData = {
-    chat: selectChat(localStorageData, id) || selectChat(g, id),
+    chat: selectChat(g, id) || selectChat(localStorageData, id),
     id: chatId,
     chatFullInfo: selectChatFullInfo(localStorageData, id),
     msg: chatLastMessage,
