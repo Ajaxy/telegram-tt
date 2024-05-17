@@ -885,14 +885,19 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
 });
 
 addActionHandler('markMessagesRead', (global, actions, payload): ActionReturnType => {
-  const { messageIds, tabId = getCurrentTabId() } = payload!;
+  const { messageIds, tabId = getCurrentTabId(), shouldFetchUnreadReactions } = payload!;
 
   const chat = selectCurrentChat(global, tabId);
   if (!chat) {
     return;
   }
 
-  void callApi('markMessagesRead', { chat, messageIds });
+  void callApi('markMessagesRead', { chat, messageIds })
+    .then(() => {
+      if (shouldFetchUnreadReactions) {
+        actions.fetchUnreadReactions({ chatId: chat.id });
+      }
+    });
 });
 
 addActionHandler('loadWebPagePreview', async (global, actions, payload): Promise<void> => {

@@ -1454,6 +1454,7 @@ export interface ActionPayloads {
   } & WithTabId;
   markMessagesRead: {
     messageIds: number[];
+    shouldFetchUnreadReactions?: boolean;
   } & WithTabId;
   loadMessage: {
     chatId: string;
