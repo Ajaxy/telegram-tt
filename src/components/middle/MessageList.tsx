@@ -381,7 +381,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     const container = containerRef.current!;
 
-    if (!messageIds || (
+    if (!messageIds || messageIds.length === 1 || (
       messageIds.length < MESSAGE_LIST_SLICE / 2
       && (container.firstElementChild as HTMLDivElement).clientHeight <= container.offsetHeight
     )) {
