@@ -18,7 +18,7 @@ const useMedia = (
   const isSynced = useSelector(selectIsSynced);
 
   useEffect(() => {
-    if (isSynced && !noLoad && mediaHash && !mediaData) {
+    if (!noLoad && mediaHash && !mediaData) {
       const startedAt = Date.now();
 
       mediaLoader.fetch(mediaHash, mediaFormat).then(() => {

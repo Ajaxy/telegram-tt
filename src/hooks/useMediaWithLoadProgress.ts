@@ -40,7 +40,7 @@ export default function useMediaWithLoadProgress(
   }, [delay]);
 
   useEffect(() => {
-    if (isSynced && !noLoad && mediaHash) {
+    if (!noLoad && mediaHash) {
       if (!mediaData) {
         setLoadProgress(0);
 
