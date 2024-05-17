@@ -857,7 +857,7 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
     return global;
   }
 
-  const readCount = countSortedIds(viewportIds!, minId, maxId);
+  const readCount = countSortedIds(viewportIds, minId, maxId);
   if (!readCount) {
     return global;
   }
@@ -2136,6 +2136,9 @@ addActionHandler('copyMessageLink', async (global, actions, payload): Promise<vo
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {
+  // If ids are outside viewport, we cannot get correct count
+  if (ids.length === 0 || from < ids[0] || to > ids[ids.length - 1]) return undefined;
+
   let count = 0;
 
   for (let i = 0, l = ids.length; i < l; i++) {
