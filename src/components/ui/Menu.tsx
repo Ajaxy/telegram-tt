@@ -189,4 +189,6 @@ const Menu: FC<OwnProps> = ({
   return menu;
 };
 
+export const UnfreezableMenu = memo(Menu);
+
 export default memo(freezeWhenClosed(Menu));

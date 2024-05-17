@@ -21,7 +21,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import Button from '../../ui/Button';
-import Menu from '../../ui/Menu';
+import { UnfreezableMenu } from '../../ui/Menu';
 import Portal from '../../ui/Portal';
 import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
@@ -323,7 +323,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <Menu
+    <UnfreezableMenu
       isOpen={isOpen}
       positionX={isAttachmentModal ? positionX : 'left'}
       positionY={isAttachmentModal ? positionY : 'bottom'}
@@ -340,7 +340,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       style={style}
     >
       {content}
-    </Menu>
+    </UnfreezableMenu>
   );
 };
 
