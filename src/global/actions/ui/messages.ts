@@ -515,7 +515,7 @@ addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType
   }, tabId);
 });
 
-addActionHandler('changeForwardRecipient', (global, actions, payload): ActionReturnType => {
+addActionHandler('changeRecipient', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   return updateTabState(global, {
     forwardMessages: {

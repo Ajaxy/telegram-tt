@@ -3,13 +3,15 @@ import React, { useMemo, useRef } from '../../../lib/teact/teact';
 
 import type {
   ApiChat,
-  ApiMessage, ApiPeer, ApiReplyInfo,
+  ApiMessage, ApiPeer, ApiReplyInfo, MediaContainer,
 } from '../../../api/types';
 import type { ChatTranslatedMessages } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { IconName } from '../../../types/icons';
 
+import { CONTENT_NOT_SUPPORTED } from '../../../config';
 import {
+  getMediaContentTypeDescription,
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageRoundVideo,
@@ -18,6 +20,7 @@ import {
   isChatChannel,
   isChatGroup,
   isMessageTranslatable,
+  isUserId,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
@@ -58,7 +61,7 @@ type OwnProps = {
   isOpen?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
-  onClick: NoneToVoidFunction;
+  onClick: ((e: React.MouseEvent) => void);
 };
 
 const NBSP = '\u00A0';
@@ -128,7 +131,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
     }
 
     if (!message) {
-      return customText || NBSP;
+      return customText || renderMediaContentType(wrappedMedia) || NBSP;
     }
 
     if (isActionMessage(message)) {
@@ -155,6 +158,23 @@ const EmbeddedMessage: FC<OwnProps> = ({
     );
   }
 
+  function renderMediaContentType(media?: MediaContainer) {
+    if (!media || media.content.text) return NBSP;
+    const description = getMediaContentTypeDescription(lang, media.content);
+    if (!description || description === CONTENT_NOT_SUPPORTED) return NBSP;
+    return (
+      <span>
+        {renderText(description)}
+      </span>
+    );
+  }
+
+  function checkShouldRenderSenderTitle() {
+    if (!senderChat) return true;
+    if (isUserId(senderChat?.id)) return true;
+    if (senderChat.id === sender?.id) return false;
+    return true;
+  }
   function renderSender() {
     if (title) {
       return renderText(title);
@@ -175,18 +195,21 @@ const EmbeddedMessage: FC<OwnProps> = ({
       }
     }
 
-    const isChatSender = senderChat && senderChat.id === sender?.id;
     const isReplyToQuote = isInComposer && Boolean(replyInfo && 'quoteText' in replyInfo && replyInfo?.quoteText);
 
     return (
       <>
-        {!isChatSender && (
+        {checkShouldRenderSenderTitle() && (
           <span className="embedded-sender">
             {renderText(isReplyToQuote ? lang('ReplyToQuote', senderTitle) : senderTitle)}
           </span>
         )}
         {icon && <Icon name={icon} className="embedded-chat-icon" />}
-        {icon && senderChatTitle && renderText(senderChatTitle)}
+        {icon && senderChatTitle && (
+          <span className="embedded-sender-chat">
+            {renderText(senderChatTitle)}
+          </span>
+        )}
       </>
     );
   }

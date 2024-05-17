@@ -13,6 +13,7 @@ import type {
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
+  ApiUser,
   ApiVideo,
 } from '../../../api/types';
 import type { MessageKey } from '../../../util/messageKey';
@@ -122,6 +123,7 @@ import {
   selectPeerStory,
   selectPinnedIds,
   selectRealLastReadId,
+  selectReplyCanBeSentToChat,
   selectScheduledMessage,
   selectSendAs,
   selectSponsoredMessage,
@@ -1750,29 +1752,104 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   }
 });
 
+async function checkIfVoiceMessagesAllowed<T extends GlobalState>(
+  global: T,
+  user: ApiUser,
+  chatId: string,
+): Promise<boolean> {
+  let fullInfo = selectUserFullInfo(global, chatId);
+  if (!fullInfo) {
+    const { accessHash } = user;
+    const result = await callApi('fetchFullUser', { id: chatId, accessHash });
+    fullInfo = result?.fullInfo;
+  }
+  return Boolean(!fullInfo?.noVoiceMessages);
+}
+
+function moveReplyToNewDraft<T extends GlobalState>(
+  global: T,
+  threadId: ThreadId,
+  replyInfo: ApiInputMessageReplyInfo,
+  toChatId: string,
+) {
+  const currentDraft = selectDraft(global, toChatId, threadId);
+
+  if (!replyInfo.replyToMsgId) return;
+
+  const newDraft: ApiDraft = {
+    ...currentDraft,
+    replyInfo,
+  };
+
+  saveDraft({
+    global, chatId: toChatId, threadId, draft: newDraft, isLocalOnly: true, noLocalTimeUpdate: true,
+  });
+}
+addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): ActionReturnType => {
+  const { chatId: toChatId, topicId, tabId = getCurrentTabId() } = payload;
+
+  global = getGlobal();
+
+  if (!selectReplyCanBeSentToChat(global, toChatId, tabId)) {
+    actions.showNotification({ message: translate('Chat.SendNotAllowedText'), tabId });
+    return;
+  }
+
+  global = updateTabState(global, {
+    forwardMessages: {
+      ...selectTabState(global, tabId).forwardMessages,
+      isModalShown: false,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const currentChat = selectCurrentChat(global, tabId);
+  if (!currentChat) return;
+
+  const threadId = topicId || MAIN_THREAD_ID;
+  const currentChatId = currentChat.id;
+
+  const currentReplyInfo = selectDraft(global, currentChatId, threadId)?.replyInfo;
+  if (!currentReplyInfo) return;
+  if (!currentReplyInfo.replyToPeerId && toChatId === currentChat.id) return;
+
+  const getPeerId = () => {
+    if (!currentReplyInfo?.replyToPeerId) return currentChatId;
+    return currentReplyInfo.replyToPeerId === toChatId ? undefined : currentReplyInfo.replyToPeerId;
+  };
+  const currentThreadId = selectCurrentMessageList(global, tabId)?.threadId;
+  if (!currentThreadId) {
+    return;
+  }
+  const replyToPeerId = getPeerId();
+  const newReply: ApiInputMessageReplyInfo = {
+    ...currentReplyInfo,
+    replyToPeerId,
+    type: 'message',
+    isShowingDelayNeeded: true,
+  };
+
+  moveReplyToNewDraft(global, threadId, newReply, toChatId);
+  actions.openThread({ chatId: toChatId, threadId, tabId });
+  actions.closeMediaViewer({ tabId });
+  actions.exitMessageSelectMode({ tabId });
+  actions.clearDraft({ chatId: currentChatId, threadId: currentThreadId });
+});
+
 addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Promise<void> => {
   const { chatId, topicId, tabId = getCurrentTabId() } = payload;
-  let user = selectUser(global, chatId);
-  if (user && selectForwardsContainVoiceMessages(global, tabId)) {
-    let fullInfo = selectUserFullInfo(global, chatId);
-    if (!fullInfo) {
-      const { accessHash } = user;
-      const result = await callApi('fetchFullUser', { id: chatId, accessHash });
-      global = getGlobal();
-      user = result?.user;
-      fullInfo = result?.fullInfo;
-    }
-
-    if (fullInfo!.noVoiceMessages) {
-      actions.showDialog({
-        data: {
-          message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
-        },
-        tabId,
-      });
-      return;
-    }
+  const user = selectUser(global, chatId);
+  const isSelectForwardsContainVoiceMessages = selectForwardsContainVoiceMessages(global, tabId);
+  if (isSelectForwardsContainVoiceMessages && user && !await checkIfVoiceMessagesAllowed(global, user, chatId)) {
+    actions.showDialog({
+      data: {
+        message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
+      },
+      tabId,
+    });
+    return;
   }
+  global = getGlobal();
 
   if (!selectForwardsCanBeSentToChat(global, chatId, tabId)) {
     actions.showAllowedMessageTypesNotification({ chatId, tabId });

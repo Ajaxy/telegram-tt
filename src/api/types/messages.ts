@@ -409,6 +409,7 @@ export interface ApiInputMessageReplyInfo {
   replyToTopId?: number;
   replyToPeerId?: string;
   quoteText?: ApiFormattedText;
+  isShowingDelayNeeded?: boolean;
 }
 
 export interface ApiInputStoryReplyInfo {
@@ -531,6 +532,9 @@ export type MediaContent = {
   isExpiredVoice?: boolean;
   isExpiredRoundVideo?: boolean;
   ttlSeconds?: number;
+};
+export type MediaContainer = {
+  content: MediaContent;
 };
 
 export interface ApiMessage {

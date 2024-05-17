@@ -2540,6 +2540,10 @@ export interface ActionPayloads {
     chatId: string;
     topicId?: number;
   } & WithTabId;
+  openChatOrTopicWithReplyInDraft: {
+    chatId: string;
+    topicId?: number;
+  } & WithTabId;
   forwardMessages: {
     isSilent?: boolean;
     scheduledAt?: number;
@@ -2551,7 +2555,7 @@ export interface ActionPayloads {
     noCaptions: boolean;
   } & WithTabId;
   exitForwardMode: WithTabId | undefined;
-  changeForwardRecipient: WithTabId | undefined;
+  changeRecipient: WithTabId | undefined;
   forwardToSavedMessages: WithTabId | undefined;
   forwardStory: {
     toChatId: string;

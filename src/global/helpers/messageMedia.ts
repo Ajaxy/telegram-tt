@@ -10,7 +10,7 @@ import type {
   ApiPhoto,
   ApiVideo,
   ApiWebDocument,
-  MediaContent,
+  MediaContainer,
 } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
@@ -24,10 +24,6 @@ import {
 } from '../../util/windowEnvironment';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
 import { getAttachmentType, matchLinkInMessageText } from './messages';
-
-type MediaContainer = {
-  content: MediaContent;
-};
 
 type Target =
   'micro'

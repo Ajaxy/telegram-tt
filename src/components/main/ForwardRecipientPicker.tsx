@@ -5,9 +5,16 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ThreadId } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
-import { selectChat, selectTabState, selectUser } from '../../global/selectors';
+import {
+  selectChat,
+  selectCurrentChat,
+  selectDraft,
+  selectTabState,
+  selectUser,
+} from '../../global/selectors';
 
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
@@ -23,6 +30,7 @@ interface StateProps {
   currentUserId?: string;
   isManyMessages?: boolean;
   isStory?: boolean;
+  isReplying?: boolean;
 }
 
 const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
@@ -30,8 +38,10 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   currentUserId,
   isManyMessages,
   isStory,
+  isReplying,
 }) => {
   const {
+    openChatOrTopicWithReplyInDraft,
     setForwardChatOrTopic,
     exitForwardMode,
     forwardToSavedMessages,
@@ -84,9 +94,15 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
       forwardToSavedMessages();
       showNotification({ message });
     } else {
-      setForwardChatOrTopic({ chatId: recipientId, topicId: Number(threadId) });
+      const chatId = recipientId;
+      const topicId = threadId ? Number(threadId) : undefined;
+      if (isReplying) {
+        openChatOrTopicWithReplyInDraft({ chatId, topicId });
+      } else {
+        setForwardChatOrTopic({ chatId, topicId });
+      }
     }
-  }, [currentUserId, isManyMessages, isStory, lang]);
+  }, [currentUserId, isManyMessages, isStory, lang, isReplying]);
 
   const handleClose = useCallback(() => {
     exitForwardMode();
@@ -110,9 +126,12 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const { messageIds, storyId } = selectTabState(global).forwardMessages;
+  const currentChatId = selectCurrentChat(global)?.id;
+  const isReplying = currentChatId && selectDraft(global, currentChatId, MAIN_THREAD_ID)?.replyInfo;
   return {
     currentUserId: global.currentUserId,
     isManyMessages: (messageIds?.length || 0) > 1,
     isStory: Boolean(storyId),
+    isReplying: Boolean(isReplying),
   };
 })(ForwardRecipientPicker));

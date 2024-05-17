@@ -1,6 +1,7 @@
 import type {
   ApiAttachment, ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
 } from '../../api/types';
+import type { MediaContent } from '../../api/types/messages';
 import type { LangFn } from '../../hooks/useLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
@@ -320,7 +321,10 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
 }
 
 export function getExpiredMessageDescription(langFn: LangFn, message: ApiMessage): string | undefined {
-  const { isExpiredVoice, isExpiredRoundVideo } = message.content;
+  return getExpiredMessageContentDescription(langFn, message.content);
+}
+export function getExpiredMessageContentDescription(langFn: LangFn, mediaContent: MediaContent): string | undefined {
+  const { isExpiredVoice, isExpiredRoundVideo } = mediaContent;
   if (isExpiredVoice) {
     return langFn('Message.VoiceMessageExpired');
   } else if (isExpiredRoundVideo) {
@@ -330,7 +334,11 @@ export function getExpiredMessageDescription(langFn: LangFn, message: ApiMessage
 }
 
 export function isExpiredMessage(message: ApiMessage) {
-  const { isExpiredVoice, isExpiredRoundVideo } = message.content ?? {};
+  return isExpiredMessageContent(message.content);
+}
+
+export function isExpiredMessageContent(content: MediaContent) {
+  const { isExpiredVoice, isExpiredRoundVideo } = content ?? {};
   return Boolean(isExpiredVoice || isExpiredRoundVideo);
 }
 
