@@ -363,7 +363,7 @@
       animation: push-out 0.25s ease-in-out;
 
       .custom-scroll {
-        scrollbar-color: transparent !important;
+        scrollbar-color: transparent transparent !important;
 
         &::-webkit-scrollbar-thumb {
           background-color: transparent !important;
