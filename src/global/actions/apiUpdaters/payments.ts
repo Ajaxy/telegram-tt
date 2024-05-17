@@ -45,6 +45,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                 isCompleted: true,
               },
             }, tabId);
+            global = closeInvoice(global, tabId);
             setGlobal(global);
           }
         }
