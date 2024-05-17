@@ -505,6 +505,7 @@ export default {
   'ChannelVisibility.Forwarding.Disabled': 'Restrict Forwarding',
   'Settings.TipsUsername': 'TelegramTips',
   FoldersAllChatsDesc: 'All unarchived chats',
+  'Conversation.ErrorInaccessibleMessage': 'Unfortunately, you can\'t access this message. You aren\'t a member of the chat where it was posted.',
   'Video.Unsupported.Desktop': 'Unfortunately, this video can\'t be played on Telegram Web. Try opening it with our **desktop app** instead.',
   'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Telegram Web. Try opening it with our **mobile app** instead.',
   SlowModeWait: 'Slow Mode — %d',
