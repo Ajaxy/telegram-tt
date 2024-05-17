@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiBoostStatistics, ApiPrepaidGiveaway } from '../../../api/types';
+import type { ApiBoost, ApiBoostStatistics, ApiPrepaidGiveaway } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import {
@@ -163,7 +163,7 @@ const BoostStatistics = ({
     </div>
   ));
 
-  const renderBoostTypeIcon = useLastCallback((boost) => {
+  const renderBoostTypeIcon = useLastCallback((boost: ApiBoost) => {
     if (!boost.isFromGiveaway && !boost.isGift) {
       return undefined;
     }
@@ -171,12 +171,12 @@ const BoostStatistics = ({
     return (
       <div className={styles.quantity}>
         <div className={buildClassName(styles.floatingBadge,
-          !boost.giveaway && styles.floatingBadgeWarning,
+          !boost.isFromGiveaway && styles.floatingBadgeWarning,
           styles.floatingBadgeButtonColor,
           styles.floatingBadgeButton)}
         >
           <Icon name="gift" className={styles.floatingBadgeIcon} />
-          <div className={styles.floatingBadgeValue}>{lang(boost.giveaway
+          <div className={styles.floatingBadgeValue}>{lang(boost.isFromGiveaway
             ? 'lng_prizes_results_link' : 'BoostingGift')}
           </div>
         </div>
