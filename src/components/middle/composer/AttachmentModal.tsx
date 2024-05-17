@@ -155,7 +155,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const isEditing = editingMessage && Boolean(editingMessage);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
-  const isEditingMessageFile = attachments?.length && getAttachmentType(attachments[0]);
+  const isEditingMessageFile = isEditing && attachments?.length && getAttachmentType(attachments[0]);
   const notEditingFile = isEditingMessageFile !== 'file';
 
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
