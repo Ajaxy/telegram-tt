@@ -244,6 +244,10 @@ class TelegramClient {
         }
         this._connectedDeferred.resolve();
         this._isSwitchingDc = false;
+
+        // Prepare file connection on current DC to speed up initial media loading
+        const mediaSender = await this._borrowExportedSender(this.session.dcId, false, undefined, 0, this.isPremium);
+        if (mediaSender) this.releaseExportedSender(mediaSender);
     }
 
     async _initSession() {
