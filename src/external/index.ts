@@ -78,6 +78,9 @@ export function __init() {
       case "updateChat": {
         events.proxy.updateChat(update);
       }
+      case "updateChatMembers": {
+        events.proxy.updateChatMembers(update);
+      }
       default:
         break;
     }
