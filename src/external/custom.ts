@@ -1,6 +1,6 @@
-import { getGlobal } from '../global';
+import { getGlobal } from "../global";
 
-import { GLOBAL_STATE_CACHE_KEY } from '../config';
+import { GLOBAL_STATE_CACHE_KEY } from "../config";
 import {
   selectChat,
   selectChatFolder,
@@ -9,7 +9,7 @@ import {
   selectPeer,
   selectUser,
   selectUserFullInfo,
-} from '../global/selectors';
+} from "../global/selectors";
 
 export function getChatsInTheFolder(folderId: number) {
   const g = getGlobal();
@@ -20,18 +20,19 @@ export function getChatsInTheFolder(folderId: number) {
     chat: selectChat(g, id),
     fullInfo: selectChatFullInfo(g, id),
     peerInfo: selectPeer(g, id),
-    msg: selectChatLastMessage(g, id, 'all'),
+    msg: selectChatLastMessage(g, id, "all"),
   }));
 }
 
 export function getChatWithLastMessageById(chatId: number) {
   const g = getGlobal();
   const localStorageData = JSON.parse(
-    localStorage.getItem(GLOBAL_STATE_CACHE_KEY) || '',
+    localStorage.getItem(GLOBAL_STATE_CACHE_KEY) || ""
   );
 
   const id = chatId.toString();
-  const chatLastMessage = selectChatLastMessage(g, id) || selectChatLastMessage(localStorageData, id);
+  const chatLastMessage =
+    selectChatLastMessage(g, id) || selectChatLastMessage(localStorageData, id);
   const userShortInfo = chatLastMessage?.senderId
     ? selectUser(g, chatLastMessage.senderId) ||
       selectUser(localStorageData, chatLastMessage.senderId)
@@ -49,7 +50,8 @@ export function getChatWithLastMessageById(chatId: number) {
     userFullInfo,
   };
 
-  return g.isSynced ? chatData : undefined;
+  // return g.isSynced ? chatData : undefined;
+  return chatData;
 }
 
 export function getUserById(userId: number) {
@@ -75,10 +77,10 @@ export function getChatById(chatId: number) {
 }
 
 export function getAuthInfo():
-| { authed: false }
-| { authed: true; userId: string } {
+  | { authed: false }
+  | { authed: true; userId: string } {
   const g = getGlobal();
-  const authed = g.authState === 'authorizationStateReady';
+  const authed = g.authState === "authorizationStateReady";
   const userId = g.currentUserId;
   if (!authed || !userId) return { authed: false };
 
