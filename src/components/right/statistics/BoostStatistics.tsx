@@ -177,7 +177,7 @@ const BoostStatistics = ({
         >
           <Icon name="gift" className={styles.floatingBadgeIcon} />
           <div className={styles.floatingBadgeValue}>{lang(boost.isFromGiveaway
-            ? 'lng_prizes_results_link' : 'BoostingGift')}
+            ? 'BoostingGiveaway' : 'BoostingGift')}
           </div>
         </div>
       </div>
@@ -218,11 +218,13 @@ const BoostStatistics = ({
     );
   });
 
-  const handleGiveawayClick = useLastCallback(() => {
+  const handleGiveawayClick = useLastCallback((e) => {
+    e.preventDefault();
     openGiveawayModal({ chatId });
   });
 
-  const handleLoadMore = useLastCallback(() => {
+  const handleLoadMore = useLastCallback((e) => {
+    e.preventDefault();
     loadMoreBoosters({ isGifts: tabType === 'giftedBoostList' });
   });
 
@@ -243,7 +245,7 @@ const BoostStatistics = ({
     }
 
     return (
-      <div className={styles.content}>
+      <div className={styles.section}>
         {listToRender?.map((boost) => renderBoostList(boost))}
       </div>
     );
@@ -278,7 +280,11 @@ const BoostStatistics = ({
                 >
                   <div className={buildClassName(styles.status, 'status-clickable')}>
                     <div>
-                      <img src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months]} alt="Giveaway" />
+                      <img
+                        src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months]}
+                        className={styles.giveawayIcon}
+                        alt={lang('Giveaway')}
+                      />
                     </div>
                     <div className={styles.info}>
                       <h3>
@@ -303,13 +309,12 @@ const BoostStatistics = ({
               <p className="text-muted hint" key="links-hint">{lang('BoostingSelectPaidGiveaway')}</p>
             </div>
           )}
-          <div className={styles.section}>
+          <div>
             {shouldDisplayGiftList ? (
               <div
-                className={styles.boostSection}
+                className={buildClassName(styles.boostSection, styles.content)}
               >
                 <Transition
-                  key={activeKey}
                   ref={transitionRef}
                   name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
                   activeKey={activeKey}
@@ -322,7 +327,7 @@ const BoostStatistics = ({
                 <TabList big activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
               </div>
             ) : (
-              <>
+              <div className={styles.section}>
                 <h4 className={styles.sectionHeader} dir={lang.isRtl ? 'rtl' : undefined}>
                   {lang('BoostingBoostsCount', boostStatistics?.boosts?.count)}
                 </h4>
@@ -331,28 +336,35 @@ const BoostStatistics = ({
                   </div>
                 )}
                 {boostStatistics?.boosts?.list?.map((boost) => renderBoostList(boost))}
-              </>
+              </div>
             )}
-            {Boolean(boostersToLoadCount) && (
-              <ListItem
-                key="load-more"
-                className={styles.showMore}
-                disabled={boostStatistics?.isLoadingBoosters}
-                onClick={handleLoadMore}
-              >
-                {boostStatistics?.isLoadingBoosters ? (
-                  <Spinner className={styles.loadMoreSpinner} />
-                ) : (
-                  <Icon name="down" className={styles.down} />
-                )}
-                {lang('ShowVotes', boostersToLoadCount, 'i')}
-              </ListItem>
-            )}
+            <div className={styles.section}>
+              {Boolean(boostersToLoadCount) && (
+                <ListItem
+                  key="load-more"
+                  className={styles.showMore}
+                  disabled={boostStatistics?.isLoadingBoosters}
+                  onClick={handleLoadMore}
+                >
+                  {boostStatistics?.isLoadingBoosters ? (
+                    <Spinner className={styles.loadMoreSpinner} />
+                  ) : (
+                    <Icon name="down" className={styles.down} />
+                  )}
+                  {lang('ShowVotes', boostersToLoadCount, 'i')}
+                </ListItem>
+              )}
+            </div>
           </div>
           <LinkField className={styles.section} link={status!.boostUrl} withShare title={lang('LinkForBoosting')} />
           {isGiveawayAvailable && (
             <div className={styles.section}>
-              <ListItem icon="gift" ripple onClick={handleGiveawayClick} className={styles.giveawayButton}>
+              <ListItem
+                key="load-more"
+                icon="gift"
+                onClick={handleGiveawayClick}
+                className={styles.giveawayButton}
+              >
                 {lang('BoostingGetBoostsViaGifts')}
               </ListItem>
               <p className="text-muted hint" key="links-hint">{lang(

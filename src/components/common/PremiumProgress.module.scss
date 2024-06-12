@@ -12,17 +12,13 @@
 }
 
 .badgeContainer {
-  --min-shift: calc(10% + var(--digits-count, 1) * 0.4ch);
-  --max-shift: calc(85% - var(--digits-count, 1) * 0.4ch);
-  --shift-x: calc(clamp(var(--min-shift), var(--percent), var(--max-shift)) - 50%);
   display: flex;
   justify-content: center;
   position: absolute;
   top: -1.5rem;
   left: 0;
   right: 0;
-  transform: translate(var(--shift-x), -20px);
-
+  transform: translate(calc(var(--shift-x) * 100% - 50%), -20px);
   transition: transform 0.2s ease-in-out;
   animation: slide-in 0.5s ease-in-out;
 }
@@ -33,7 +29,7 @@
   }
 
   to {
-    transform: translate(var(--shift-x), -20px);
+    transform: translate(calc(var(--shift-x) * 100% - 50%), -20px);
   }
 }
 
@@ -75,7 +71,7 @@
 .floating-badge-triangle {
   display: inline-block;
   position: absolute;
-  bottom: -5px;
+  bottom: -4px;
   left: calc(var(--tail-position, 0.5) * 100%);
   transform: translateX(-50%);
 }

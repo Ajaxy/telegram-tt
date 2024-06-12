@@ -44,7 +44,7 @@
 .status {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   justify-content: space-between;
   width: 100%;
 }
@@ -110,4 +110,9 @@
 
 .giveawayButton {
   margin-bottom: 0.5rem;
+}
+
+.giveawayIcon {
+  width: 2.75rem;
+  height: 2.75rem;
 }
