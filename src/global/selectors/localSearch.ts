@@ -1,3 +1,4 @@
+import type { ThreadId } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
@@ -23,7 +24,7 @@ export function selectCurrentTextSearch<T extends GlobalState>(
   return currentSearch;
 }
 
-export function selectCurrentMediaSearch<T extends GlobalState>(
+export function selectCurrentSharedMediaSearch<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -34,5 +35,32 @@ export function selectCurrentMediaSearch<T extends GlobalState>(
 
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
 
-  return selectTabState(global, tabId).localMediaSearch.byChatThreadKey[chatThreadKey];
+  return selectTabState(global, tabId).sharedMediaSearch.byChatThreadKey[chatThreadKey];
+}
+
+export function selectCurrentChatMediaSearch<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
+  if (!chatId || !threadId) {
+    return undefined;
+  }
+
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  return selectTabState(global, tabId).chatMediaSearch.byChatThreadKey[chatThreadKey];
+}
+
+export function selectChatMediaSearch<T extends GlobalState>(
+  global: T, chatId?: string, threadId?: ThreadId,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  if (!chatId || !threadId) {
+    return undefined;
+  }
+
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  return selectTabState(global, tabId).chatMediaSearch.byChatThreadKey[chatThreadKey];
 }

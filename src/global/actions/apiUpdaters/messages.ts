@@ -36,6 +36,7 @@ import {
   replaceThreadParam,
   updateChat,
   updateChatLastMessageId,
+  updateChatMediaLoadingState,
   updateChatMessage,
   updateListedIds,
   updateMessageTranslations,
@@ -108,6 +109,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         if (isLocal && wasDrafted) {
           global = updateChatLastMessage(global, chatId, newMessage);
         }
+
+        const threadId = selectThreadIdFromMessage(global, newMessage);
+        global = updateChatMediaLoadingState(global, newMessage, chatId, threadId, tabId);
 
         if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage, tabId)) {
           if (isLocal && message.isOutgoing && !(message.content?.action) && !storyReplyInfo?.storyId

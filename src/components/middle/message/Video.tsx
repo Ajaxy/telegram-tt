@@ -51,7 +51,7 @@ export type OwnProps = {
   asForwarded?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
-  onClick?: (id: number) => void;
+  onClick?: (id: number, isGif?: boolean) => void;
   onCancelUpload?: (message: ApiMessage) => void;
 };
 
@@ -191,7 +191,7 @@ const Video: FC<OwnProps> = ({
       return;
     }
 
-    onClick?.(message.id);
+    onClick?.(message.id, video?.isGif);
   });
 
   const className = buildClassName(

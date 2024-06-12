@@ -39,6 +39,9 @@ const { easeOutCubic, easeOutQuart } = timingFunctions;
 
 type OwnProps = {
   mediaId?: number;
+  loadMoreMediaIfNeeded: (activeMediaId?: number) => void;
+  isLoadingMoreMedia?: boolean;
+  isSynced?: boolean;
   getMediaId: (fromId?: number, direction?: number) => number | undefined;
   isVideo?: boolean;
   isGif?: boolean;
@@ -84,6 +87,7 @@ enum SwipeDirection {
 
 const MediaViewerSlides: FC<OwnProps> = ({
   mediaId,
+  loadMoreMediaIfNeeded,
   getMediaId,
   selectMedia,
   isVideo,
@@ -91,6 +95,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
   isOpen,
   withAnimation,
   isHidden,
+  isLoadingMoreMedia,
+  isSynced,
   ...rest
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -155,6 +161,11 @@ const MediaViewerSlides: FC<OwnProps> = ({
       setActiveMediaId(mediaId);
     }
   }, [mediaId, setActiveMediaId, transformRef]);
+
+  useEffect(() => {
+    if (!isSynced || isLoadingMoreMedia) return;
+    loadMoreMediaIfNeeded(activeMediaId);
+  }, [activeMediaId, loadMoreMediaIfNeeded, isSynced, isLoadingMoreMedia]);
 
   useLayoutEffect(() => {
     const { x, y, scale } = getTransform();
@@ -643,6 +654,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   [
     onClose,
     setTransform,
+    loadMoreMediaIfNeeded,
     getMediaId,
     windowWidth,
     windowHeight,

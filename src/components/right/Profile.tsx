@@ -33,7 +33,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectChatMessages,
-  selectCurrentMediaSearch,
+  selectCurrentSharedMediaSearch,
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
   selectPeerFullInfo,
@@ -186,11 +186,11 @@ const Profile: FC<OwnProps & StateProps> = ({
   forceScrollProfileTab,
 }) => {
   const {
-    setLocalMediaSearchType,
+    setSharedMediaSearchType,
     loadMoreMembers,
     loadCommonChats,
     openChat,
-    searchMediaMessagesLocal,
+    searchSharedMediaMessages,
     openMediaViewer,
     openAudioPlayer,
     focusMessage,
@@ -275,7 +275,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
     loadMoreMembers,
     loadCommonChats,
-    searchMediaMessagesLocal,
+    searchSharedMediaMessages,
     handleLoadPeerStories,
     handleLoadStoriesArchive,
     tabType,
@@ -329,8 +329,8 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   // Update search type when switching tabs or forum topics
   useEffect(() => {
-    setLocalMediaSearchType({ mediaType: tabType as SharedMediaType });
-  }, [setLocalMediaSearchType, tabType, threadId]);
+    setSharedMediaSearchType({ mediaType: tabType as SharedMediaType });
+  }, [setSharedMediaSearchType, tabType, threadId]);
 
   useEffect(() => {
     loadProfilePhotos({ profileId });
@@ -683,7 +683,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const chatFullInfo = selectChatFullInfo(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
-    const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
+    const { currentType: mediaSearchType, resultsByType } = selectCurrentSharedMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
 
     const isTopicInfo = Boolean(chat?.isForum && threadId && threadId !== MAIN_THREAD_ID);

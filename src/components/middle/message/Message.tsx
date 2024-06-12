@@ -581,6 +581,8 @@ const Message: FC<OwnProps & StateProps> = ({
     handleMediaClick,
     handleAudioPlay,
     handleAlbumMediaClick,
+    handlePhotoMediaClick,
+    handleVideoMediaClick,
     handleMetaClick,
     handleTranslationClick,
     handleOpenThread,
@@ -1105,7 +1107,7 @@ const Message: FC<OwnProps & StateProps> = ({
             asForwarded={asForwarded}
             theme={theme}
             forcedWidth={contentWidth}
-            onClick={handleMediaClick}
+            onClick={handlePhotoMediaClick}
             onCancelUpload={handleCancelUpload}
           />
         )}
@@ -1131,7 +1133,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isDownloading={isDownloading}
             isProtected={isProtected}
             asForwarded={asForwarded}
-            onClick={handleMediaClick}
+            onClick={handleVideoMediaClick}
             onCancelUpload={handleCancelUpload}
           />
         )}

@@ -388,6 +388,22 @@ export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profile
 'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
 
+export interface LoadingState {
+  areAllItemsLoadedForwards: boolean;
+  areAllItemsLoadedBackwards: boolean;
+}
+
+export interface ChatMediaSearchSegment {
+  foundIds: number[];
+  loadingState: LoadingState;
+}
+
+export interface ChatMediaSearchParams {
+  currentSegment: ChatMediaSearchSegment;
+  segments: ChatMediaSearchSegment[];
+  isLoading: boolean;
+}
+
 export enum ProfileState {
   Profile,
   SharedMedia,

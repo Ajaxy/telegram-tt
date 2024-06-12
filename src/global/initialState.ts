@@ -313,7 +313,11 @@ export const INITIAL_TAB_STATE: TabState = {
     byChatThreadKey: {},
   },
 
-  localMediaSearch: {
+  sharedMediaSearch: {
+    byChatThreadKey: {},
+  },
+
+  chatMediaSearch: {
     byChatThreadKey: {},
   },
 

@@ -92,6 +92,7 @@ import type {
   ApiPrivacySettings,
   AudioOrigin,
   ChatCreationProgress,
+  ChatMediaSearchParams,
   EmojiKeywords,
   FocusDirection,
   GlobalSearchContent,
@@ -375,7 +376,7 @@ export type TabState = {
     }>;
   };
 
-  localMediaSearch: {
+  sharedMediaSearch: {
     byChatThreadKey: Record<string, {
       currentType?: SharedMediaType;
       resultsByType?: Partial<Record<SharedMediaType, {
@@ -384,6 +385,10 @@ export type TabState = {
         foundIds: number[];
       }>>;
     }>;
+  };
+
+  chatMediaSearch: {
+    byChatThreadKey: Record<string, ChatMediaSearchParams>;
   };
 
   management: {
@@ -431,6 +436,7 @@ export type TabState = {
     playbackRate: number;
     isMuted: boolean;
     isHidden?: boolean;
+    withDynamicLoading?: boolean;
   };
 
   audioPlayer: {
@@ -1280,11 +1286,18 @@ export interface ActionPayloads {
   setLocalTextSearchTag: {
     tag: ApiReaction | undefined;
   } & WithTabId;
-  setLocalMediaSearchType: {
+  setSharedMediaSearchType: {
     mediaType: SharedMediaType;
   } & WithTabId;
   searchTextMessagesLocal: WithTabId | undefined;
-  searchMediaMessagesLocal: WithTabId | undefined;
+  searchSharedMediaMessages: WithTabId | undefined;
+  searchChatMediaMessages: {
+    currentMediaMessageId: number;
+    direction?: LoadMoreDirection;
+    chatId?: string;
+    threadId? : ThreadId;
+    limit?: number;
+  } & WithTabId;
   searchMessagesByDate: {
     timestamp: number;
   } & WithTabId;
@@ -2414,6 +2427,7 @@ export interface ActionPayloads {
     volume?: number;
     playbackRate?: number;
     isMuted?: boolean;
+    withDynamicLoading?: boolean;
   } & WithTabId;
   closeMediaViewer: WithTabId | undefined;
   setMediaViewerVolume: {

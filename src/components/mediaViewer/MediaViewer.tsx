@@ -16,7 +16,9 @@ import {
   selectChatMessage,
   selectChatMessages,
   selectChatScheduledMessages,
-  selectCurrentMediaSearch, selectIsChatWithSelf,
+  selectCurrentChatMediaSearch,
+  selectCurrentSharedMediaSearch,
+  selectIsChatWithSelf,
   selectListedIds,
   selectOutlyingListByMessageId,
   selectPerformanceSettingsValue,
@@ -71,6 +73,9 @@ type StateProps = {
   isHidden?: boolean;
   withAnimation?: boolean;
   shouldSkipHistoryAnimations?: boolean;
+  withDynamicLoading?: boolean;
+  isLoadingMoreMedia?: boolean;
+  isSynced?: boolean;
 };
 
 const ANIMATION_DURATION = 250;
@@ -91,6 +96,9 @@ const MediaViewer: FC<StateProps> = ({
   withAnimation,
   isHidden,
   shouldSkipHistoryAnimations,
+  withDynamicLoading,
+  isLoadingMoreMedia,
+  isSynced,
 }) => {
   const {
     openMediaViewer,
@@ -98,6 +106,7 @@ const MediaViewer: FC<StateProps> = ({
     openForwardMenu,
     focusMessage,
     toggleChatInfo,
+    searchChatMediaMessages,
   } = getActions();
 
   const isOpen = Boolean(avatarOwner || mediaId);
@@ -133,17 +142,14 @@ const MediaViewer: FC<StateProps> = ({
   const isVisible = !isHidden && isOpen;
 
   /* Navigation */
-  const singleMediaId = webPagePhoto || webPageVideo || actionPhoto ? mediaId : undefined;
+  const singleMediaId = webPagePhoto || webPageVideo || actionPhoto || isGif ? mediaId : undefined;
 
   const mediaIds = useMemo(() => {
-    if (singleMediaId) {
-      return [singleMediaId];
-    } else if (avatarOwner) {
-      return avatarOwner.photos?.map((p, i) => i) || [];
-    } else {
-      return getChatMediaMessageIds(chatMessages || {}, collectionIds || [], isFromSharedMedia);
-    }
-  }, [singleMediaId, avatarOwner, chatMessages, collectionIds, isFromSharedMedia]);
+    if (singleMediaId) return [singleMediaId];
+    if (avatarOwner) return avatarOwner.photos?.map((p, i) => i) || [];
+    if (withDynamicLoading) return collectionIds || [];
+    return getChatMediaMessageIds(chatMessages || {}, collectionIds || [], isFromSharedMedia);
+  }, [singleMediaId, avatarOwner, chatMessages, collectionIds, isFromSharedMedia, withDynamicLoading]);
 
   const selectedMediaIndex = mediaId ? mediaIds.indexOf(mediaId) : -1;
 
@@ -252,6 +258,7 @@ const MediaViewer: FC<StateProps> = ({
       mediaId: id,
       avatarOwnerId: avatarOwner?.id,
       origin: origin!,
+      withDynamicLoading,
     }, {
       forceOnHeavyAnimation: true,
     });
@@ -269,6 +276,11 @@ const MediaViewer: FC<StateProps> = ({
 
   const mediaIdsRef = useStateRef(mediaIds);
 
+  const loadMoreMediaIfNeeded = useLastCallback((activeMediaId?: number) => {
+    if (!activeMediaId || !withDynamicLoading || isLoadingMoreMedia) return;
+    searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: activeMediaId });
+  });
+
   const getMediaId = useLastCallback((fromId?: number, direction?: number): number | undefined => {
     if (fromId === undefined) return undefined;
     const mIds = mediaIdsRef.current;
@@ -276,6 +288,8 @@ const MediaViewer: FC<StateProps> = ({
     if ((direction === -1 && index > 0) || (direction === 1 && index < mIds.length - 1)) {
       return mIds[index + direction];
     }
+    // Fallback
+    if (isVisible) loadMoreMediaIfNeeded(fromId);
     return undefined;
   });
 
@@ -359,6 +373,9 @@ const MediaViewer: FC<StateProps> = ({
       </div>
       <MediaViewerSlides
         mediaId={mediaId}
+        loadMoreMediaIfNeeded={loadMoreMediaIfNeeded}
+        isLoadingMoreMedia={isLoadingMoreMedia}
+        isSynced={isSynced}
         getMediaId={getMediaId}
         chatId={chatId}
         isPhoto={isPhoto}
@@ -389,10 +406,11 @@ export default memo(withGlobal(
       avatarOwnerId,
       origin,
       isHidden,
+      withDynamicLoading,
     } = mediaViewer;
     const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
-    const { currentUserId } = global;
+    const { currentUserId, isSynced } = global;
     let isChatWithSelf = !!chatId && selectIsChatWithSelf(global, chatId);
 
     if (origin === MediaViewerOrigin.SearchResult) {
@@ -466,16 +484,24 @@ export default memo(withGlobal(
     } else {
       chatMessages = selectChatMessages(global, chatId);
     }
+
+    let isLoadingMoreMedia = false;
+    const isOriginInline = origin === MediaViewerOrigin.Inline;
+    const isOriginAlbum = origin === MediaViewerOrigin.Album;
     let collectionIds: number[] | undefined;
 
-    if (origin === MediaViewerOrigin.Inline
-      || origin === MediaViewerOrigin.Album) {
-      collectionIds = selectOutlyingListByMessageId(global, chatId, threadId, message.id)
-        || selectListedIds(global, chatId, threadId);
+    if (withDynamicLoading && (isOriginInline || isOriginAlbum)) {
+      const currentSearch = selectCurrentChatMediaSearch(global);
+      isLoadingMoreMedia = Boolean(currentSearch?.isLoading);
+      const { foundIds } = (currentSearch?.currentSegment) || {};
+      collectionIds = foundIds;
     } else if (origin === MediaViewerOrigin.SharedMedia) {
-      const currentSearch = selectCurrentMediaSearch(global);
+      const currentSearch = selectCurrentSharedMediaSearch(global);
       const { foundIds } = (currentSearch && currentSearch.resultsByType && currentSearch.resultsByType.media) || {};
       collectionIds = foundIds;
+    } else if (isOriginInline || isOriginAlbum) {
+      const outlyingList = selectOutlyingListByMessageId(global, chatId, threadId, message.id);
+      collectionIds = outlyingList || selectListedIds(global, chatId, threadId);
     }
 
     return {
@@ -491,6 +517,9 @@ export default memo(withGlobal(
       withAnimation,
       isHidden,
       shouldSkipHistoryAnimations,
+      withDynamicLoading,
+      isLoadingMoreMedia,
+      isSynced,
     };
   },
 )(MediaViewer));

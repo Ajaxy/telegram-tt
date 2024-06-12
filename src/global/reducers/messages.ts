@@ -16,7 +16,8 @@ import {
 } from '../../util/iteratees';
 import { isLocalMessageId, type MessageKey } from '../../util/messageKey';
 import {
-  hasMessageTtl, mergeIdRanges, orderHistoryIds, orderPinnedIds,
+  hasMessageTtl, isMediaLoadableInViewer,
+  mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
 import {
   selectChat,
@@ -37,6 +38,7 @@ import {
   selectThreadInfo,
   selectViewportIds,
 } from '../selectors';
+import { removeIdFromSearchResults } from './localSearch';
 import { updateTabState } from './tabs';
 import { clearMessageTranslation } from './translations';
 
@@ -296,9 +298,13 @@ export function deleteChatMessages<T extends GlobalState>(
   const updatedThreads = new Map<ThreadId, number[]>();
   updatedThreads.set(MAIN_THREAD_ID, messageIds);
 
+  const mediaIdsToRemove: number[] = [];
   messageIds.forEach((messageId) => {
     const message = byId[messageId];
     if (!message) return;
+    if (isMediaLoadableInViewer(message)) {
+      mediaIdsToRemove.push(messageId);
+    }
     const threadId = selectThreadIdFromMessage(global, message);
     if (!threadId || threadId === MAIN_THREAD_ID) {
       return;
@@ -339,6 +345,10 @@ export function deleteChatMessages<T extends GlobalState>(
     }
 
     Object.values(global.byTabId).forEach(({ id: tabId }) => {
+      mediaIdsToRemove.forEach((mediaId) => {
+        global = removeIdFromSearchResults(global, chatId, threadId, mediaId, tabId);
+      });
+
       const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
       if (!viewportIds) return;
 

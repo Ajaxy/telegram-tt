@@ -545,3 +545,10 @@ export function canReplaceMessageMedia(message: ApiMessage, attachment: ApiAttac
     || (isFile && (fileType === 'audio' || fileType === 'file'))
   );
 }
+
+export function isMediaLoadableInViewer(newMessage: ApiMessage) {
+  if (!newMessage.content) return false;
+  if (newMessage.content.photo) return true;
+  if (newMessage.content.video && !newMessage.content.video.isRound && !newMessage.content.video.isGif) return true;
+  return false;
+}

@@ -35,7 +35,7 @@ export default function useInnerHandlers(
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelUploadMedia, sendPollVote, openForwardMenu,
-    openChatLanguageModal, openThread, openStoryViewer,
+    openChatLanguageModal, openThread, openStoryViewer, searchChatMediaMessages,
   } = getActions();
 
   const {
@@ -102,17 +102,39 @@ export default function useInnerHandlers(
       origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
     });
   });
+  const openMediaViewerWithPhotoOrVideo = useLastCallback((withDynamicLoading: boolean): void => {
+    if (withDynamicLoading) {
+      searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
+    }
+    openMediaViewer({
+      chatId,
+      threadId,
+      mediaId: messageId,
+      origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
+      withDynamicLoading,
+    });
+  });
+  const handlePhotoMediaClick = useLastCallback((): void => {
+    const withDynamicLoading = !isScheduled;
+    openMediaViewerWithPhotoOrVideo(withDynamicLoading);
+  });
+  const handleVideoMediaClick = useLastCallback((id: number, isGif?: boolean): void => {
+    const withDynamicLoading = !isGif && !isScheduled;
+    openMediaViewerWithPhotoOrVideo(withDynamicLoading);
+  });
 
   const handleAudioPlay = useLastCallback((): void => {
     openAudioPlayer({ chatId, messageId });
   });
 
   const handleAlbumMediaClick = useLastCallback((albumMessageId: number): void => {
+    searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
     openMediaViewer({
       chatId,
       threadId,
       mediaId: albumMessageId,
       origin: isScheduled ? MediaViewerOrigin.ScheduledAlbum : MediaViewerOrigin.Album,
+      withDynamicLoading: true,
     });
   });
 
@@ -213,6 +235,8 @@ export default function useInnerHandlers(
     handleMediaClick,
     handleAudioPlay,
     handleAlbumMediaClick,
+    handlePhotoMediaClick,
+    handleVideoMediaClick,
     handleMetaClick: selectWithGroupedId,
     handleTranslationClick,
     handleOpenThread,
