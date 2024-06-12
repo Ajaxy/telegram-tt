@@ -503,6 +503,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && !forwardInfo.isLinkedChannelPost
     && !isCustomShape
   ) || Boolean(message.content.storyData && !message.content.storyData.isMention);
+  const canShowSenderBoosts = Boolean(senderBoosts) && !asForwarded && isFirstInGroup;
   const isStoryMention = message.content.storyData?.isMention;
   const isAlbum = Boolean(album) && album!.messages.length > 1
     && !album?.messages.some((msg) => Object.keys(msg.content).length === 0);
@@ -1359,7 +1360,7 @@ const Message: FC<OwnProps & StateProps> = ({
             )}
           </span>
         ) : undefined}
-        {Boolean(senderBoosts) && (
+        {canShowSenderBoosts && (
           <span className="sender-boosts" aria-hidden>
             <Icon name={senderBoosts > 1 ? 'boosts' : 'boost'} />
             {senderBoosts > 1 ? senderBoosts : undefined}
