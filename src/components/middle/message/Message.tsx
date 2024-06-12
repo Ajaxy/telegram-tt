@@ -1295,6 +1295,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const senderEmojiStatus = senderPeer && 'emojiStatus' in senderPeer && senderPeer.emojiStatus;
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
 
+    const shouldRenderForwardAvatar = asForwarded && senderPeer;
     return (
       <div className="message-title" dir="ltr">
         {(senderTitle || asForwarded) ? (
@@ -1311,6 +1312,13 @@ const Message: FC<OwnProps & StateProps> = ({
               <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
             )}
             {storyData && <Icon name="play-story" />}
+            {shouldRenderForwardAvatar && (
+              <Avatar
+                className="forward-avatar"
+                peer={senderPeer}
+                size="micro"
+              />
+            )}
             {senderTitle ? renderText(senderTitle) : (asForwarded ? NBSP : undefined)}
             {!asForwarded && senderEmojiStatus && (
               <CustomEmoji
