@@ -52,7 +52,6 @@ const MenuItem: FC<MenuItemProps> = (props) => {
   const lang = useLang();
   const { isTouchScreen } = useAppLayout();
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
     if (disabled || !onClick) {
       e.preventDefault();
       return;
@@ -65,7 +64,6 @@ const MenuItem: FC<MenuItemProps> = (props) => {
       return;
     }
 
-    e.stopPropagation();
     if (disabled || !onClick) {
       e.preventDefault();
 

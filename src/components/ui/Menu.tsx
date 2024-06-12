@@ -14,6 +14,7 @@ import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
 
@@ -141,6 +142,11 @@ const Menu: FC<OwnProps> = ({
   const transformOriginYStyle = transformOriginY !== undefined ? `${transformOriginY}px` : undefined;
   const transformOriginXStyle = transformOriginX !== undefined ? `${transformOriginX}px` : undefined;
 
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (autoClose) { onClose(); }
+  });
+
   const menu = (
     <div
       id={id}
@@ -174,7 +180,7 @@ const Menu: FC<OwnProps> = ({
           `transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY}`,
           bubbleStyle,
         )}
-        onClick={autoClose ? onClose : undefined}
+        onClick={handleClick}
       >
         {children}
         {footer && <div className="footer">{footer}</div>}
