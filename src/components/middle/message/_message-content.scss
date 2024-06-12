@@ -596,7 +596,7 @@
   // Moved below `.has-subheader` to overwrite its styles
   &.text .media-inner,
   &.text .Album {
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.375rem !important;
 
     body.is-ios .Message.own & {
       margin-bottom: 0.375rem;
