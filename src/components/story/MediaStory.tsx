@@ -124,6 +124,7 @@ function MediaStory({
 
   const handleTogglePinned = useLastCallback(() => {
     toggleStoryPinnedToTop({ peerId, storyId: story.id });
+    handleContextMenuClose();
   });
 
   return (
