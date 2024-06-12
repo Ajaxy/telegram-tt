@@ -1363,15 +1363,13 @@ export function selectRequestedMessageTranslationLanguage<T extends GlobalState>
 export function selectReplyCanBeSentToChat<T extends GlobalState>(
   global: T,
   toChatId: string,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
+  fromChatId: string,
+  replyInfo: ApiInputMessageReplyInfo,
 ) {
-  const currentChat = selectCurrentChat(global, tabId);
-  if (!currentChat) return false;
-  const replyInfo = selectDraft(global, currentChat.id, MAIN_THREAD_ID)?.replyInfo;
-  if (!replyInfo || !replyInfo.replyToMsgId) return false;
-  const fromChatId = replyInfo?.replyToPeerId ?? currentChat.id;
-  if (toChatId === fromChatId) return true;
-  const chatMessages = selectChatMessages(global, fromChatId!);
+  if (!replyInfo.replyToMsgId) return false;
+  const fromRealChatId = replyInfo?.replyToPeerId ?? fromChatId;
+  if (toChatId === fromRealChatId) return true;
+  const chatMessages = selectChatMessages(global, fromRealChatId!);
   const message = chatMessages[replyInfo.replyToMsgId];
 
   return !isExpiredMessage(message);

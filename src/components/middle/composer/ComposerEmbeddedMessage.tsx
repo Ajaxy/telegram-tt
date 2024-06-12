@@ -116,8 +116,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const isShown = (() => {
     if (isInChangingRecipientMode) return false;
-    if (sender && isForwarding) return true;
     if (message && (replyInfo || editingId)) return true;
+    if (sender && isForwarding) return true;
     return false;
   })();
 
@@ -139,12 +139,12 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   });
 
   const clearEmbedded = useLastCallback(() => {
-    if (replyInfo && !shouldForceShowEditing) {
-      resetDraftReplyInfo();
-    } else if (editingId) {
+    if (editingId) {
       setEditingId({ messageId: undefined });
     } else if (forwardedMessagesCount) {
       exitForwardMode();
+    } else if (replyInfo && !shouldForceShowEditing) {
+      resetDraftReplyInfo();
     }
     onClear?.();
   });
@@ -210,14 +210,14 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   );
 
   const leftIcon = useMemo(() => {
-    if (isShowingReply) {
-      return 'reply';
-    }
     if (editingId) {
       return 'edit';
     }
     if (isForwarding) {
       return 'forward';
+    }
+    if (isShowingReply) {
+      return 'reply';
     }
 
     return undefined;
@@ -398,25 +398,18 @@ export default memo(withGlobal<OwnProps>(
     const senderChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
 
     let message: ApiMessage | undefined;
-    if (replyInfo && !shouldForceShowEditing) {
-      message = selectChatMessage(global, replyInfo.replyToPeerId || chatId, replyInfo.replyToMsgId);
-    } else if (editingId) {
+    if (editingId) {
       message = selectEditingMessage(global, chatId, threadId, messageListType);
     } else if (isForwarding && forwardMessageIds!.length === 1) {
       message = forwardedMessages?.[0];
+    } else if (replyInfo && !shouldForceShowEditing) {
+      message = selectChatMessage(global, replyInfo.replyToPeerId || chatId, replyInfo.replyToMsgId);
     }
 
     let sender: ApiPeer | undefined;
-    if (replyInfo && message && !shouldForceShowEditing) {
-      const { forwardInfo } = message;
-      const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-      if (forwardInfo && (forwardInfo.isChannelPost || isChatWithSelf)) {
-        sender = selectForwardedSender(global, message);
-      }
 
-      if (!sender && (!forwardInfo?.hiddenUserName || Boolean(replyInfo.quoteText))) {
-        sender = selectSender(global, message);
-      }
+    if (editingId && message) {
+      sender = selectSender(global, message);
     } else if (isForwarding) {
       if (message) {
         sender = selectForwardedSender(global, message);
@@ -427,8 +420,16 @@ export default memo(withGlobal<OwnProps>(
       if (!sender) {
         sender = selectPeer(global, fromChatId!);
       }
-    } else if (editingId && message) {
-      sender = selectSender(global, message);
+    } else if (replyInfo && message && !shouldForceShowEditing) {
+      const { forwardInfo } = message;
+      const isChatWithSelf = selectIsChatWithSelf(global, chatId);
+      if (forwardInfo && (forwardInfo.isChannelPost || isChatWithSelf)) {
+        sender = selectForwardedSender(global, message);
+      }
+
+      if (!sender && (!forwardInfo?.hiddenUserName || Boolean(replyInfo.quoteText))) {
+        sender = selectSender(global, message);
+      }
     }
 
     const forwardsHaveCaptions = forwardedMessages?.some((forward) => (

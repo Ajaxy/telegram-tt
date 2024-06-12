@@ -1012,7 +1012,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     lastMessageSendTimeSeconds.current = getServerTime();
 
-    clearDraft({ chatId, isLocalOnly: true });
+    clearDraft({ chatId, isLocalOnly: true, shouldKeepReply: isForwarding });
 
     if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);

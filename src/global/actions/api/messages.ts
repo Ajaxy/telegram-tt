@@ -317,7 +317,9 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
 
   const chat = selectChat(global, chatId!)!;
   const draft = selectDraft(global, chatId!, threadId!);
-  const draftReplyInfo = !isStoryReply ? draft?.replyInfo : undefined;
+  const isForwarding = selectTabState(global, tabId).forwardMessages?.messageIds?.length;
+
+  const draftReplyInfo = !isForwarding && !isStoryReply ? draft?.replyInfo : undefined;
 
   const storyReplyInfo = isStoryReply ? {
     type: 'story',
@@ -1795,11 +1797,6 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
 
   global = getGlobal();
 
-  if (!selectReplyCanBeSentToChat(global, toChatId, tabId)) {
-    actions.showNotification({ message: translate('Chat.SendNotAllowedText'), tabId });
-    return;
-  }
-
   global = updateTabState(global, {
     forwardMessages: {
       ...selectTabState(global, tabId).forwardMessages,
@@ -1809,23 +1806,27 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
   setGlobal(global);
 
   const currentChat = selectCurrentChat(global, tabId);
-  if (!currentChat) return;
+  const currentThreadId = selectCurrentMessageList(global, tabId)?.threadId;
+
+  if (!currentChat || !currentThreadId) return;
 
   const threadId = topicId || MAIN_THREAD_ID;
   const currentChatId = currentChat.id;
 
-  const currentReplyInfo = selectDraft(global, currentChatId, threadId)?.replyInfo;
+  const currentReplyInfo = selectDraft(global, currentChatId, currentThreadId)?.replyInfo;
   if (!currentReplyInfo) return;
+
+  if (!selectReplyCanBeSentToChat(global, toChatId, currentChatId, currentReplyInfo)) {
+    actions.showNotification({ message: translate('Chat.SendNotAllowedText'), tabId });
+    return;
+  }
+
   if (!currentReplyInfo.replyToPeerId && toChatId === currentChat.id) return;
 
   const getPeerId = () => {
     if (!currentReplyInfo?.replyToPeerId) return currentChatId;
     return currentReplyInfo.replyToPeerId === toChatId ? undefined : currentReplyInfo.replyToPeerId;
   };
-  const currentThreadId = selectCurrentMessageList(global, tabId)?.threadId;
-  if (!currentThreadId) {
-    return;
-  }
   const replyToPeerId = getPeerId();
   const newReply: ApiInputMessageReplyInfo = {
     ...currentReplyInfo,
@@ -1869,7 +1870,6 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Prom
     },
   }, tabId);
   setGlobal(global);
-
   actions.openThread({ chatId, threadId: topicId || MAIN_THREAD_ID, tabId });
   actions.closeMediaViewer({ tabId });
   actions.exitMessageSelectMode({ tabId });
