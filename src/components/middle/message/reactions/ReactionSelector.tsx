@@ -157,7 +157,7 @@ const ReactionSelector: FC<OwnProps> = ({
   if (!reactionsToRender.length) return undefined;
 
   return (
-    <div className={buildClassName(cn('&', lang.isRtl && 'isRtl'), className)} ref={ref}>
+    <div className={buildClassName(cn('&'), className)} ref={ref}>
       <div className={cn('bubble-small', lang.isRtl && 'isRtl')} />
       <div className={cn('items-wrapper')}>
         <div className={cn('bubble-big', lang.isRtl && 'isRtl')} />
