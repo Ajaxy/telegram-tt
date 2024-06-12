@@ -361,6 +361,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     updateDraftReplyInfo({
       replyToMsgId: message.id,
       quoteText: canQuoteSelection && selectionRange ? getSelectionAsFormattedText(selectionRange) : undefined,
+      replyToPeerId: undefined,
     });
     closeMenu();
   });

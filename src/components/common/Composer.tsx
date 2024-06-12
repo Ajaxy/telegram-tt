@@ -1649,6 +1649,9 @@ const Composer: FC<OwnProps & StateProps> = ({
             <ComposerEmbeddedMessage
               onClear={handleEmbeddedClear}
               shouldForceShowEditing={Boolean(shouldForceShowEditing && editingMessage)}
+              chatId={chatId}
+              threadId={threadId}
+              messageListType={messageListType}
             />
             <WebPagePreview
               chatId={chatId}

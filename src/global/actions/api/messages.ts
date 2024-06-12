@@ -1831,7 +1831,6 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
     ...currentReplyInfo,
     replyToPeerId,
     type: 'message',
-    isShowingDelayNeeded: true,
   };
 
   moveReplyToNewDraft(global, threadId, newReply, toChatId);

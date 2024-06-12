@@ -229,6 +229,7 @@ export type TabState = {
   isBlurred?: boolean;
   isMasterTab: boolean;
   isInactive?: boolean;
+  shouldPreventComposerAnimation?: boolean;
   inviteHash?: string;
   canInstall?: boolean;
   isChatInfoShown: boolean;
@@ -2527,6 +2528,10 @@ export interface ActionPayloads {
     photo: ApiPhoto;
     isFallback?: boolean;
   };
+  // Composer
+  setShouldPreventComposerAnimation: {
+    shouldPreventComposerAnimation: boolean;
+  } & WithTabId;
 
   // Forwards
   openForwardMenu: {

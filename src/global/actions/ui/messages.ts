@@ -162,7 +162,9 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
       ? Number(chatMessageKeys[newIndex])
       : undefined;
   }
-  actions.updateDraftReplyInfo({ replyToMsgId: messageId, tabId });
+  actions.updateDraftReplyInfo({
+    replyToMsgId: messageId, replyToPeerId: undefined, quoteText: undefined, tabId,
+  });
   actions.focusMessage({
     chatId,
     threadId,
@@ -494,6 +496,13 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     shouldForceRender: true,
   });
   return undefined;
+});
+
+addActionHandler('setShouldPreventComposerAnimation', (global, actions, payload): ActionReturnType => {
+  const { shouldPreventComposerAnimation, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    shouldPreventComposerAnimation,
+  }, tabId);
 });
 
 addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType => {

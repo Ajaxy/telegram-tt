@@ -409,7 +409,6 @@ export interface ApiInputMessageReplyInfo {
   replyToTopId?: number;
   replyToPeerId?: string;
   quoteText?: ApiFormattedText;
-  isShowingDelayNeeded?: boolean;
 }
 
 export interface ApiInputStoryReplyInfo {
