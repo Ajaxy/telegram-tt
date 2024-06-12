@@ -44,7 +44,7 @@
     "react-hooks-static-deps/exhaustive-deps": [
       "error",
       {
-        "additionalHooks": "(useSyncEffect|useAsync|useDebouncedCallback|useThrottledCallback|useEffectWithPrevDeps|useLayoutEffectWithPrevDeps|useDerivedState|useDerivedSignal|useThrottledResolver|useDebouncedResolver)$",
+        "additionalHooks": "(useSyncEffect|useAsync|useDebouncedCallback|useThrottledCallback|useEffectWithPrevDeps|useLayoutEffectWithPrevDeps|useDerivedState|useDerivedSignal|useThrottledResolver|useDebouncedResolver|useThrottleForHeavyAnimation)$",
         "staticHooks": {
           "getActions": true,
           "useFlag": [false, true, true],

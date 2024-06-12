@@ -9,9 +9,7 @@ import { preloadImage } from '../../../util/files';
 import { REM } from '../helpers/mediaDimensions';
 
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
-import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useFlag from '../../../hooks/useFlag';
-import useHeavyAnimationCheck, { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
+import { useThrottleForHeavyAnimation } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
@@ -79,21 +77,20 @@ const EmojiIconBackground = ({
 
   const lang = useLang();
 
-  // Delay mounting until heavy animation ends
-  const [canUpdate, markCanUpdate, unmarkCanUpdate] = useFlag(!isHeavyAnimating());
-  useHeavyAnimationCheck(unmarkCanUpdate, markCanUpdate);
-
   const { customEmoji } = useCustomEmoji(emojiDocumentId);
   const previewMediaHash = customEmoji ? getStickerPreviewHash(customEmoji.id) : undefined;
   const previewUrl = useMedia(previewMediaHash);
 
   const customColor = useDynamicColorListener(containerRef);
 
-  useEffect(() => {
-    if (!previewUrl || !canUpdate) return;
-
+  const preloadAfterHeavyAnimation = useThrottleForHeavyAnimation(() => {
+    if (!previewUrl) return;
     preloadImage(previewUrl).then(setEmojiImage);
-  }, [previewUrl, canUpdate]);
+  }, [previewUrl]);
+
+  useEffect(() => {
+    preloadAfterHeavyAnimation();
+  }, [preloadAfterHeavyAnimation]);
 
   const updateCanvas = useLastCallback(() => {
     const canvas = canvasRef.current;
@@ -129,46 +126,43 @@ const EmojiIconBackground = ({
     context.restore();
   });
 
-  useEffectWithPrevDeps(([prevEmojiImage, prevLangRtl, prevCustomColor]) => {
-    // No need to trigger update if only `canUpdate` changed
-    if (emojiImage === prevEmojiImage && lang.isRtl === prevLangRtl && customColor === prevCustomColor) return;
-    updateCanvas();
-  }, [emojiImage, lang.isRtl, customColor, canUpdate]);
+  const updateCanvasAfterHeavyAnimation = useThrottleForHeavyAnimation(updateCanvas, [updateCanvas]);
 
-  const updateCanvasSize = useLastCallback((parentWidth: number, parentHeight: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas || isHeavyAnimating()) return;
+  useEffect(() => {
+    updateCanvasAfterHeavyAnimation();
+  }, [emojiImage, lang.isRtl, customColor, updateCanvasAfterHeavyAnimation]);
 
-    canvas.width = parentWidth * dpr;
-    canvas.height = parentHeight * dpr;
+  const updateCanvasSize = useThrottleForHeavyAnimation((parentWidth: number, parentHeight: number) => {
+    requestMutation(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    canvas.style.width = `${parentWidth}px`;
-    canvas.style.height = `${parentHeight}px`;
+      canvas.width = parentWidth * dpr;
+      canvas.height = parentHeight * dpr;
 
-    updateCanvas();
-  });
+      canvas.style.width = `${parentWidth}px`;
+      canvas.style.height = `${parentHeight}px`;
 
-  const handleResize = useLastCallback((entry: ResizeObserverEntry) => {
+      updateCanvas();
+    });
+  }, [dpr]);
+
+  const handleResize = useThrottleForHeavyAnimation((entry: ResizeObserverEntry) => {
     const { width, height } = entry.contentRect;
 
-    requestMutation(() => {
-      updateCanvasSize(width, height);
-    });
-  });
+    updateCanvasSize(width, height);
+  }, [updateCanvasSize]);
 
-  useResizeObserver(containerRef, handleResize, !canUpdate);
+  useResizeObserver(containerRef, handleResize);
 
-  useEffectWithPrevDeps(([prevDpr]) => {
-    if (dpr === prevDpr) return;
+  useEffect(() => {
     const container = containerRef.current;
-    if (!container || !canUpdate) return;
+    if (!container) return;
 
     const { width, height } = container.getBoundingClientRect();
 
-    requestMutation(() => {
-      updateCanvasSize(width, height);
-    });
-  }, [dpr, canUpdate]);
+    updateCanvasSize(width, height);
+  }, [updateCanvasSize]);
 
   return (
     <div className={buildClassName(styles.root, className)} ref={containerRef}>
