@@ -468,12 +468,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                 <>
                   {
                     !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
-                    // eslint-disable-next-line react/jsx-no-bind
+                      // eslint-disable-next-line react/jsx-no-bind
                       <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
                         {lang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
                       </MenuItem>
                     ) : (
-                    // eslint-disable-next-line react/jsx-no-bind
+                      // eslint-disable-next-line react/jsx-no-bind
                       <MenuItem icon="photo" onClick={() => setShouldSendCompressed(true)}>
                         {isMultiple ? 'Send All as Media' : 'Send as Media'}
                       </MenuItem>
@@ -502,7 +502,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                     Ungroup All Media
                   </MenuItem>
                 ) : (
-                // eslint-disable-next-line react/jsx-no-bind
+                  // eslint-disable-next-line react/jsx-no-bind
                   <MenuItem icon="grouped" onClick={() => setShouldSendGrouped(true)}>
                     Group All Media
                   </MenuItem>
