@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import React, { memo } from '../../../../lib/teact/teact';
 
 import type {
@@ -22,25 +21,29 @@ import styles from './ReactionButton.module.scss';
 
 const REACTION_SIZE = 1.25 * REM;
 
-const ReactionButton: FC<{
+type OwnProps = {
   reaction: ApiReactionCount;
   containerId: string;
   isOwnMessage?: boolean;
   recentReactors?: ApiPeer[];
   className?: string;
   chosenClassName?: string;
+  shouldDelayInit?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (reaction: ApiReaction) => void;
-}> = ({
+};
+
+const ReactionButton = ({
   reaction,
   containerId,
   isOwnMessage,
   recentReactors,
   className,
   chosenClassName,
+  shouldDelayInit,
   observeIntersection,
   onClick,
-}) => {
+}: OwnProps) => {
   const handleClick = useLastCallback(() => {
     onClick?.(reaction.reaction);
   });
@@ -63,6 +66,7 @@ const ReactionButton: FC<{
         reaction={reaction.reaction}
         size={REACTION_SIZE}
         observeIntersection={observeIntersection}
+        shouldDelayInit={shouldDelayInit}
       />
       {recentReactors?.length ? (
         <AvatarList size="mini" peers={recentReactors} />

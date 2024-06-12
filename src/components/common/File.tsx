@@ -120,7 +120,7 @@ const File: FC<OwnProps> = ({
             {withThumb && (
               <canvas
                 ref={thumbRef}
-                className={buildClassName('thumbnail', thumbClassNames)}
+                className={buildClassName('thumbnail', 'canvas-blur-setup', thumbClassNames)}
               />
             )}
           </div>

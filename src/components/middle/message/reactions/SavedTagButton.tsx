@@ -1,4 +1,3 @@
-import type { FC } from '../../../../lib/teact/teact';
 import React, { memo, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
@@ -28,7 +27,7 @@ const REACTION_SIZE = 1.25 * REM;
 const TITLE_MAX_LENGTH = 15;
 const LOOP_LIMIT = 1;
 
-const SavedTagButton: FC<{
+type OwnProps = {
   reaction: ApiReaction;
   tag?: ApiSavedReactionTag;
   containerId: string;
@@ -39,10 +38,13 @@ const SavedTagButton: FC<{
   chosenClassName?: string;
   isDisabled?: boolean;
   withContextMenu?: boolean;
+  shouldDelayInit?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (reaction: ApiReaction) => void;
   onRemove?: (reaction: ApiReaction) => void;
-}> = ({
+};
+
+const SavedTagButton = ({
   reaction,
   tag,
   containerId,
@@ -53,10 +55,11 @@ const SavedTagButton: FC<{
   withCount,
   isDisabled,
   withContextMenu,
+  shouldDelayInit,
   observeIntersection,
   onClick,
   onRemove,
-}) => {
+}: OwnProps) => {
   const { editSavedReactionTag } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLButtonElement>(null);
@@ -138,6 +141,7 @@ const SavedTagButton: FC<{
         loopLimit={LOOP_LIMIT}
         size={REACTION_SIZE}
         observeIntersection={observeIntersection}
+        shouldDelayInit={shouldDelayInit}
       />
       {hasText && (
         <span className={styles.tagText}>

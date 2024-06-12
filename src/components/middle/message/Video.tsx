@@ -211,7 +211,9 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
+      {withBlurredBackground && (
+        <canvas ref={blurredBackgroundRef} className="thumbnail canvas-blur-setup blurred-bg" />
+      )}
       {isInline && (
         <OptimizedVideo
           ref={videoRef}
@@ -237,7 +239,7 @@ const Video: FC<OwnProps> = ({
       {hasThumb && !isPreviewPreloaded && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
+          className={buildClassName('thumbnail', !noThumb && 'canvas-blur-setup', thumbClassNames)}
         />
       )}
       {isProtected && <span className="protector" />}

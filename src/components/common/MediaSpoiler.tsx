@@ -57,7 +57,12 @@ const MediaSpoiler: FC<OwnProps> = ({
       ref={ref}
       onClick={withAnimation ? handleClick : undefined}
     >
-      <canvas ref={canvasRef} className={styles.canvas} width={width} height={height} />
+      <canvas
+        ref={canvasRef}
+        className={buildClassName(styles.canvas, 'canvas-blur-setup')}
+        width={width}
+        height={height}
+      />
       <div className={styles.dots} />
     </div>
   );

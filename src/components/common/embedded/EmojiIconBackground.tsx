@@ -9,6 +9,9 @@ import { preloadImage } from '../../../util/files';
 import { REM } from '../helpers/mediaDimensions';
 
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useFlag from '../../../hooks/useFlag';
+import useHeavyAnimationCheck, { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
@@ -76,6 +79,10 @@ const EmojiIconBackground = ({
 
   const lang = useLang();
 
+  // Delay mounting until heavy animation ends
+  const [canUpdate, markCanUpdate, unmarkCanUpdate] = useFlag(!isHeavyAnimating());
+  useHeavyAnimationCheck(unmarkCanUpdate, markCanUpdate);
+
   const { customEmoji } = useCustomEmoji(emojiDocumentId);
   const previewMediaHash = customEmoji ? getStickerPreviewHash(customEmoji.id) : undefined;
   const previewUrl = useMedia(previewMediaHash);
@@ -83,10 +90,10 @@ const EmojiIconBackground = ({
   const customColor = useDynamicColorListener(containerRef);
 
   useEffect(() => {
-    if (!previewUrl) return;
+    if (!previewUrl || !canUpdate) return;
 
     preloadImage(previewUrl).then(setEmojiImage);
-  }, [previewUrl]);
+  }, [previewUrl, canUpdate]);
 
   const updateCanvas = useLastCallback(() => {
     const canvas = canvasRef.current;
@@ -122,13 +129,15 @@ const EmojiIconBackground = ({
     context.restore();
   });
 
-  useEffect(() => {
+  useEffectWithPrevDeps(([prevEmojiImage, prevLangRtl, prevCustomColor]) => {
+    // No need to trigger update if only `canUpdate` changed
+    if (emojiImage === prevEmojiImage && lang.isRtl === prevLangRtl && customColor === prevCustomColor) return;
     updateCanvas();
-  }, [emojiImage, lang.isRtl, customColor]);
+  }, [emojiImage, lang.isRtl, customColor, canUpdate]);
 
   const updateCanvasSize = useLastCallback((parentWidth: number, parentHeight: number) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || isHeavyAnimating()) return;
 
     canvas.width = parentWidth * dpr;
     canvas.height = parentHeight * dpr;
@@ -147,18 +156,19 @@ const EmojiIconBackground = ({
     });
   });
 
-  useResizeObserver(containerRef, handleResize);
+  useResizeObserver(containerRef, handleResize, !canUpdate);
 
-  useEffect(() => {
+  useEffectWithPrevDeps(([prevDpr]) => {
+    if (dpr === prevDpr) return;
     const container = containerRef.current;
-    if (!container) return;
+    if (!container || !canUpdate) return;
 
     const { width, height } = container.getBoundingClientRect();
 
     requestMutation(() => {
       updateCanvasSize(width, height);
     });
-  }, [dpr]);
+  }, [dpr, canUpdate]);
 
   return (
     <div className={buildClassName(styles.root, className)} ref={containerRef}>

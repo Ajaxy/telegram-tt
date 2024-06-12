@@ -10,12 +10,14 @@ import type {
   ApiSavedReactionTag,
 } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
+import type { Signal } from '../../../../util/signals';
 
 import { getReactionKey, isReactionChosen } from '../../../../global/helpers';
 import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { getMessageKey } from '../../../../util/messageKey';
 
+import useDerivedState from '../../../../hooks/useDerivedState';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
@@ -33,6 +35,7 @@ type OwnProps = {
   isCurrentUserPremium?: boolean;
   observeIntersection?: ObserveFn;
   noRecentReactors?: boolean;
+  getIsMessageListReady: Signal<boolean>;
 };
 
 const MAX_RECENT_AVATARS = 3;
@@ -46,6 +49,7 @@ const Reactions: FC<OwnProps> = ({
   noRecentReactors,
   isCurrentUserPremium,
   tags,
+  getIsMessageListReady,
 }) => {
   const {
     toggleReaction,
@@ -60,6 +64,8 @@ const Reactions: FC<OwnProps> = ({
   const totalCount = useMemo(() => (
     results.reduce((acc, reaction) => acc + reaction.count, 0)
   ), [results]);
+
+  const isMessageListReady = useDerivedState(getIsMessageListReady);
 
   const recentReactorsByReactionKey = useMemo(() => {
     const global = getGlobal();
@@ -149,6 +155,7 @@ const Reactions: FC<OwnProps> = ({
             onClick={handleClick}
             onRemove={handleRemoveReaction}
             observeIntersection={observeIntersection}
+            shouldDelayInit={!isMessageListReady}
           />
         ) : (
           <ReactionButton
@@ -161,6 +168,7 @@ const Reactions: FC<OwnProps> = ({
             reaction={reaction}
             onClick={handleClick}
             observeIntersection={observeIntersection}
+            shouldDelayInit={!isMessageListReady}
           />
         )
       ))}

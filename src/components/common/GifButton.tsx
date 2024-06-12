@@ -154,7 +154,7 @@ const GifButton: FC<OwnProps> = ({
       {withThumb && (
         <canvas
           ref={thumbRef}
-          className="thumbnail"
+          className="thumbnail canvas-blur-setup"
           // We need to always render to avoid blur re-calculation
           style={isVideoReady ? 'display: none;' : undefined}
         />

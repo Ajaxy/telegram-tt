@@ -972,6 +972,7 @@ const Message: FC<OwnProps & StateProps> = ({
         noRecentReactors={isChannel}
         tags={tags}
         isCurrentUserPremium={isPremium}
+        getIsMessageListReady={getIsMessageListReady}
       />
     );
   }
@@ -1475,6 +1476,7 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
             tags={tags}
+            getIsMessageListReady={getIsMessageListReady}
           />
         )}
       </div>

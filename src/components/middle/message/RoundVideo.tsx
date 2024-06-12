@@ -260,7 +260,7 @@ const RoundVideo: FC<OwnProps> = ({
       {!shouldRenderSpoiler && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
+          className={buildClassName('thumbnail', 'canvas-blur-setup', thumbClassNames)}
           style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
         />
       )}

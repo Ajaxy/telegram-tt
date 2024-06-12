@@ -36,6 +36,7 @@ type OwnProps = {
   shouldPause?: boolean;
   shouldLoop?: boolean;
   loopLimit?: number;
+  shouldDelayInit?: boolean;
   observeIntersection?: ObserveFn;
 };
 
@@ -66,6 +67,7 @@ const ReactionAnimatedEmoji = ({
   shouldPause,
   shouldLoop,
   loopLimit,
+  shouldDelayInit,
   observeIntersection,
 }: OwnProps & StateProps) => {
   const { stopActiveReaction } = getActions();
@@ -167,7 +169,7 @@ const ReactionAnimatedEmoji = ({
           size={size}
           noPlay={shouldPause}
           loopLimit={loopLimit}
-          forceAlways
+          forceAlways={!shouldDelayInit}
           observeIntersectionForPlaying={observeIntersection}
         />
       )}
@@ -179,7 +181,7 @@ const ReactionAnimatedEmoji = ({
           tgsUrl={mediaDataCenterIcon}
           play={isIntersecting && !shouldPause}
           noLoop={!shouldLoop}
-          forceAlways
+          forceAlways={!shouldDelayInit}
           onLoad={markAnimationLoaded}
           onEnded={unmarkAnimationLoaded}
         />
@@ -193,7 +195,7 @@ const ReactionAnimatedEmoji = ({
             tgsUrl={mediaDataEffect}
             play={isIntersecting}
             noLoop
-            forceAlways
+            forceAlways={!shouldDelayInit}
             onEnded={handleEnded}
           />
           {isCustom && !assignedEffectId && isIntersecting && (
