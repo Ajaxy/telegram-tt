@@ -433,6 +433,7 @@
   &.document {
     .File {
       margin-top: calc(0.5rem - 0.3125rem);
+      margin-bottom: calc(0.5rem - 0.3125rem);
 
       .message-content.no-text & {
         margin-bottom: calc(0.5rem - 0.375rem);

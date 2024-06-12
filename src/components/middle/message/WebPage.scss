@@ -189,6 +189,10 @@
     }
   }
 
+  .File .file-preview {
+    margin-inline-end: 0.75rem !important;
+  }
+
   @media (min-width: 1921px) {
     @supports (aspect-ratio: 1) {
       &:not(.in-preview) {
