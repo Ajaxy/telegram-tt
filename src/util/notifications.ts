@@ -13,7 +13,6 @@ import {
   getMessageAction,
   getMessageRecentReaction,
   getMessageSenderName,
-  getMessageSummaryText,
   getPrivateChatUserId,
   getUserFullName,
   isActionMessage,
@@ -21,6 +20,7 @@ import {
   selectIsChatMuted,
   selectShouldShowMessagePreview,
 } from '../global/helpers';
+import { getMessageSummaryText } from '../global/helpers/messageSummary';
 import { getMessageReplyInfo } from '../global/helpers/replies';
 import { addNotifyExceptions, replaceSettings } from '../global/reducers';
 import {

@@ -10,10 +10,10 @@ import type { TextPart } from '../../../types';
 import {
   getChatTitle,
   getExpiredMessageDescription,
-  getMessageSummaryText,
   getUserFullName,
   isExpiredMessage,
 } from '../../../global/helpers';
+import { getMessageSummaryText } from '../../../global/helpers/messageSummary';
 import { formatCurrency } from '../../../util/formatCurrency';
 import trimText from '../../../util/trimText';
 import renderText from './renderText';

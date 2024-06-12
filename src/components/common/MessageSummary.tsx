@@ -7,11 +7,14 @@ import { ApiMessageEntityTypes } from '../../api/types';
 
 import {
   extractMessageText,
+  getMessagePoll,
+} from '../../global/helpers';
+import {
   getMessageSummaryDescription,
   getMessageSummaryEmoji,
   getMessageSummaryText,
   TRUNCATED_SUMMARY_LENGTH,
-} from '../../global/helpers';
+} from '../../global/helpers/messageSummary';
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 
@@ -47,8 +50,9 @@ function MessageSummary({
   const { text, entities } = extractMessageText(message, inChatList) || {};
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
   const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
+  const hasPoll = Boolean(getMessagePoll(message));
 
-  if (!text || (!hasSpoilers && !hasCustomEmoji)) {
+  if ((!text || (!hasSpoilers && !hasCustomEmoji)) && !hasPoll) {
     const summaryText = translatedText?.text || getMessageSummaryText(lang, message, noEmoji);
     const trimmedText = trimText(summaryText, truncateLength);
 

@@ -8,11 +8,11 @@ import {
   getMessageMediaHash,
   getMessagePhoto,
   getMessageText,
-  getMessageTextWithSpoilers,
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
   hasMessageLocalBlobUrl,
 } from '../../../../global/helpers';
+import { getMessageTextWithSpoilers } from '../../../../global/helpers/messageSummary';
 import {
   CLIPBOARD_ITEM_SUPPORTED,
   copyHtmlToClipboard,

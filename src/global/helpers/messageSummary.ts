@@ -6,6 +6,7 @@ import { ApiMessageEntityTypes } from '../../api/types';
 
 import { CONTENT_NOT_SUPPORTED } from '../../config';
 import trimText from '../../util/trimText';
+import { renderTextWithEntities } from '../../components/common/helpers/renderTextWithEntities';
 import { getGlobal } from '../index';
 import {
   getExpiredMessageContentDescription, getMessageText, getMessageTranscription, isExpiredMessageContent,
@@ -179,7 +180,10 @@ function getSummaryDescription(
   }
 
   if (poll) {
-    summary = poll.summary.question;
+    summary = renderTextWithEntities({
+      text: poll.summary.question.text,
+      entities: poll.summary.question.entities,
+    });
   }
 
   if (invoice) {

@@ -7,7 +7,7 @@ import type { ApiChat, ApiMessage } from '../../api/types';
 import { getMessagePoll } from '../../global/helpers';
 import { selectChat, selectChatMessage, selectTabState } from '../../global/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
-import renderText from '../common/helpers/renderText';
+import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
@@ -53,7 +53,12 @@ const PollResults: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="PollResults" dir={lang.isRtl ? 'rtl' : undefined}>
-      <h3 className="poll-question" dir="auto">{renderText(summary.question, ['emoji', 'br'])}</h3>
+      <h3 className="poll-question" dir="auto">
+        {renderTextWithEntities({
+          text: summary.question.text,
+          entities: summary.question.entities,
+        })}
+      </h3>
       <div className="poll-results-list custom-scroll">
         {summary.answers.map((answer) => (
           <PollAnswerResults

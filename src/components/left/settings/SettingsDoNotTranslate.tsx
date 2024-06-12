@@ -125,7 +125,7 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
     }
 
     return displayedOptions.filter((option) => (
-      option.label.toLowerCase().includes(search.toLowerCase())
+      option.label.toString().toLowerCase().includes(search.toLowerCase())
       || option.subLabel?.toLowerCase().includes(search.toLowerCase())
       || option.value.toLowerCase().includes(search.toLowerCase())
     ));

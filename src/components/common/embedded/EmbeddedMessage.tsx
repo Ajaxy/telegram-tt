@@ -11,7 +11,6 @@ import type { IconName } from '../../../types/icons';
 
 import { CONTENT_NOT_SUPPORTED } from '../../../config';
 import {
-  getMediaContentTypeDescription,
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageRoundVideo,
@@ -22,6 +21,7 @@ import {
   isMessageTranslatable,
   isUserId,
 } from '../../../global/helpers';
+import { getMediaContentTypeDescription } from '../../../global/helpers/messageSummary';
 import buildClassName from '../../../util/buildClassName';
 import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';

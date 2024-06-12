@@ -12,11 +12,11 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type {
   ApiMessage, ApiPeer, ApiPoll, ApiPollAnswer,
 } from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { LangFn } from '../../../hooks/useLang';
 
 import { formatMediaDuration } from '../../../util/date/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
-import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useLang from '../../../hooks/useLang';
@@ -34,6 +34,8 @@ import './Poll.scss';
 type OwnProps = {
   message: ApiMessage;
   poll: ApiPoll;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   onSendVote: (options: string[]) => void;
 };
 
@@ -52,6 +54,8 @@ const Poll: FC<OwnProps & StateProps> = ({
   message,
   poll,
   recentVoterIds,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   onSendVote,
 }) => {
   const { loadMessage, openPollResults, requestConfetti } = getActions();
@@ -81,10 +85,18 @@ const Poll: FC<OwnProps & StateProps> = ({
     return voteResults?.filter((r) => r.isCorrect).map((r) => r.option) || [];
   }, [voteResults]);
   const answers = useMemo(() => summary.answers.map((a) => ({
-    label: a.text,
+    label: renderTextWithEntities({
+      text: a.text.text,
+      entities: a.text.entities,
+      observeIntersectionForLoading,
+      observeIntersectionForPlaying,
+    }),
     value: a.option,
     hidden: Boolean(summary.quiz && summary.closePeriod && closePeriod <= 0),
-  })), [closePeriod, summary]);
+  })), [
+    closePeriod, observeIntersectionForLoading, observeIntersectionForPlaying,
+    summary.answers, summary.closePeriod, summary.quiz,
+  ]);
 
   useEffect(() => {
     const chosen = poll.results.results?.find((result) => result.isChosen);
@@ -238,7 +250,14 @@ const Poll: FC<OwnProps & StateProps> = ({
   return (
     <div className="Poll" dir={lang.isRtl ? 'auto' : 'ltr'}>
       {renderSolution()}
-      <div className="poll-question">{renderText(summary.question, ['emoji', 'br'])}</div>
+      <div className="poll-question">
+        {renderTextWithEntities({
+          text: summary.question.text,
+          entities: summary.question.entities,
+          observeIntersectionForLoading,
+          observeIntersectionForPlaying,
+        })}
+      </div>
       <div className="poll-type">
         {lang(getPollTypeString(summary))}
         {renderRecentVoters()}

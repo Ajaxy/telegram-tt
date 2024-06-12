@@ -14,6 +14,7 @@ import type {
 
 import { isUserId } from '../../global/helpers';
 import { selectTabState } from '../../global/selectors';
+import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
@@ -133,7 +134,12 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
         {voters && renderViewMoreButton()}
       </div>
       <div className="answer-head" dir={lang.isRtl ? 'rtl' : undefined}>
-        <span className="answer-title" dir="auto">{text}</span>
+        <span className="answer-title" dir="auto">
+          {renderTextWithEntities({
+            text: text.text,
+            entities: text.entities,
+          })}
+        </span>
         <span className="answer-percent" dir={lang.isRtl ? 'auto' : undefined}>
           {getPercentage(answerVote.votersCount, totalVoters)}%
         </span>

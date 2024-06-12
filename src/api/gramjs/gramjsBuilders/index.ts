@@ -169,9 +169,12 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
   const poll = new GramJs.Poll({
     id: randomId,
     publicVoters: summary.isPublic,
-    question: summary.question,
+    question: buildInputTextWithEntities(summary.question),
     answers: summary.answers.map(({ text, option }) => {
-      return new GramJs.PollAnswer({ text, option: deserializeBytes(option) });
+      return new GramJs.PollAnswer({
+        text: buildInputTextWithEntities(text),
+        option: deserializeBytes(option),
+      });
     }),
     quiz: summary.quiz,
     multipleChoice: summary.multipleChoice,
@@ -200,9 +203,12 @@ export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
     poll: new GramJs.Poll({
       id: BigInt(poll.id),
       publicVoters: poll.summary.isPublic,
-      question: poll.summary.question,
+      question: buildInputTextWithEntities(poll.summary.question),
       answers: poll.summary.answers.map(({ text, option }) => {
-        return new GramJs.PollAnswer({ text, option: deserializeBytes(option) });
+        return new GramJs.PollAnswer({
+          text: buildInputTextWithEntities(text),
+          option: deserializeBytes(option),
+        });
       }),
       quiz: poll.summary.quiz,
       multipleChoice: poll.summary.multipleChoice,

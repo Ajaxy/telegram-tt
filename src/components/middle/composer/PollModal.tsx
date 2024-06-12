@@ -111,7 +111,9 @@ const PollModal: FC<OwnProps> = ({
         if (!text) return undefined;
 
         return {
-          text,
+          text: {
+            text,
+          },
           option: String(index),
           ...(index === correctOption && { correct: true }),
         };
@@ -141,7 +143,9 @@ const PollModal: FC<OwnProps> = ({
 
     const payload: ApiNewPoll = {
       summary: {
-        question: questionTrimmed,
+        question: {
+          text: questionTrimmed,
+        },
         answers,
         ...(!isAnonymous && { isPublic: true }),
         ...(isMultipleAnswers && { multipleChoice: true }),

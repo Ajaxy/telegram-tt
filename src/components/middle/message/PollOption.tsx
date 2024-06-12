@@ -7,7 +7,7 @@ import React, {
 import type { ApiPollAnswer, ApiPollResult } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import renderText from '../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import './PollOption.scss';
 
@@ -65,7 +65,10 @@ const PollOption: FC<OwnProps> = ({
       </div>
       <div className="poll-option-right">
         <div className="poll-option-text" dir="auto">
-          {renderText(answer.text)}
+          {renderTextWithEntities({
+            text: answer.text.text,
+            entities: answer.text.entities,
+          })}
         </div>
         <div className={buildClassName('poll-option-answer', showIcon && !correctAnswer && 'wrong')}>
           {shouldAnimate && (

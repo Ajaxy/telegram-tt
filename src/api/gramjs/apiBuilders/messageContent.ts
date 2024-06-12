@@ -29,6 +29,7 @@ import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEB
 import { pick } from '../../../util/iteratees';
 import { addStoryToLocalDb, serializeBytes } from '../helpers';
 import {
+  buildApiFormattedText,
   buildApiMessageEntity,
   buildApiPhoto,
   buildApiPhotoSize,
@@ -609,7 +610,7 @@ export function buildMessageStoryData(media: GramJs.TypeMessageMedia): ApiMessag
 export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {
   const { id, answers: rawAnswers } = poll;
   const answers = rawAnswers.map((answer) => ({
-    text: answer.text,
+    text: buildApiFormattedText(answer.text),
     option: serializeBytes(answer.option),
   }));
 
@@ -617,11 +618,11 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
     id: String(id),
     summary: {
       isPublic: poll.publicVoters,
+      question: buildApiFormattedText(poll.question),
       ...pick(poll, [
         'closed',
         'multipleChoice',
         'quiz',
-        'question',
         'closePeriod',
         'closeDate',
       ]),
