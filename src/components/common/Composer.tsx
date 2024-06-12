@@ -1165,6 +1165,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         isSilent,
         shouldUpdateStickerSetOrder: shouldUpdateStickerSetOrder && canUpdateStickerSetsOrder,
       });
+      clearDraft({ chatId, isLocalOnly: true });
       requestMeasure(() => {
         resetComposer(shouldPreserveInput);
       });
