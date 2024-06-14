@@ -7,6 +7,7 @@ import type { ApiStory } from '../../api/types';
 
 import { requestForcedReflow, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
+import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
@@ -94,8 +95,8 @@ function StoryCaption({
       const textContainer = textRef.current;
 
       const textOffsetTop = textContainer.offsetTop;
-      const lineHeight = parseInt(getComputedStyle(textContainer).lineHeight, 10);
-      const isOverflowing = textContainer.clientHeight > lineHeight * LINES_TO_SHOW;
+      const { lineHeight, totalLines } = calcTextLineHeightAndCount(textContainer);
+      const isOverflowing = totalLines > LINES_TO_SHOW;
       const overflowShift = textOffsetTop + lineHeight * LINES_TO_SHOW;
 
       return () => {

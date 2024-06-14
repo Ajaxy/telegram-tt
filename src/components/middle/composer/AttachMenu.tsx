@@ -30,7 +30,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';

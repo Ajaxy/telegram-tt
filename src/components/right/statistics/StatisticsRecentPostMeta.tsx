@@ -6,7 +6,7 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 
 import useLang from '../../../hooks/useLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 
 import styles from './StatisticsRecentPost.module.scss';
 

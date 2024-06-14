@@ -22,7 +22,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 
 import CustomEmoji from './CustomEmoji';
 import FakeIcon from './FakeIcon';
-import PremiumIcon from './PremiumIcon';
+import StarIcon from './icons/StarIcon';
 import VerifiedIcon from './VerifiedIcon';
 
 import styles from './FullNameTitle.module.scss';
@@ -127,7 +127,7 @@ const FullNameTitle: FC<OwnProps> = ({
               onClick={onEmojiStatusClick}
             />
           )}
-          {withEmojiStatus && !realPeer?.emojiStatus && isPremium && <PremiumIcon />}
+          {withEmojiStatus && !realPeer?.emojiStatus && isPremium && <StarIcon />}
         </>
       )}
       {iconElement}

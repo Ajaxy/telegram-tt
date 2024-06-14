@@ -31,7 +31,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useSignal from '../../../hooks/useSignal';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 import Button from '../../ui/Button';
 import OptimizedVideo from '../../ui/OptimizedVideo';

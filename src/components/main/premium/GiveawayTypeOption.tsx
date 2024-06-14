@@ -7,7 +7,7 @@ import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 
 import styles from './GiveawayTypeOption.module.scss';
 

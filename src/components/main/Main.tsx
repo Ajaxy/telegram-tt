@@ -248,6 +248,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadSavedReactionTags,
     loadTimezones,
     loadQuickReplies,
+    loadStarStatus,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -328,6 +329,7 @@ const Main: FC<OwnProps & StateProps> = ({
       loadSavedReactionTags();
       loadTimezones();
       loadQuickReplies();
+      loadStarStatus();
     }
   }, [isMasterTab, isSynced]);
 

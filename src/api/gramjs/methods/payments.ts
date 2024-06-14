@@ -6,6 +6,7 @@ import type {
   OnApiUpdate,
 } from '../../types';
 
+import { DEBUG } from '../../../config';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
   buildApiBoost,
@@ -18,6 +19,8 @@ import {
   buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
   buildApiReceipt,
+  buildApiStarsTransaction,
+  buildApiStarTopupOption,
   buildShippingOptions,
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
@@ -26,6 +29,7 @@ import {
 } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
+  addWebDocumentToLocalDb,
   deserializeBytes,
   serializeBytes,
 } from '../helpers';
@@ -124,6 +128,34 @@ export async function sendPaymentForm({
   return Boolean(result);
 }
 
+export async function sendStarPaymentForm({
+  formId,
+  inputInvoice,
+}: {
+  formId: string;
+  inputInvoice: ApiRequestInputInvoice;
+}) {
+  const result = await invokeRequest(new GramJs.payments.SendStarsForm({
+    formId: BigInt(formId),
+    invoice: buildInputInvoice(inputInvoice),
+  }));
+
+  if (!result) return false;
+
+  if (result instanceof GramJs.payments.PaymentVerificationNeeded) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('Unexpected PaymentVerificationNeeded in sendStarsForm');
+    }
+
+    return undefined;
+  } else {
+    handleGramJsUpdate(result.updates);
+  }
+
+  return Boolean(result);
+}
+
 export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
   const result = await invokeRequest(new GramJs.payments.GetPaymentForm({
     invoice: buildInputInvoice(inputInvoice),
@@ -134,7 +166,7 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
   }
 
   if (result.photo) {
-    localDb.webDocuments[result.photo.url] = result.photo;
+    addWebDocumentToLocalDb(result.photo);
   }
 
   addEntitiesToLocalDb(result.users);
@@ -143,7 +175,6 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
     form: buildApiPaymentForm(result),
     invoice: buildApiInvoiceFromForm(result),
     users: result.users.map(buildApiUser).filter(Boolean),
-    botId: result.botId.toString(),
   };
 }
 
@@ -386,4 +417,67 @@ export function launchPrepaidGiveaway({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchStarsStatus() {
+  const result = await invokeRequest(new GramJs.payments.GetStarsStatus({
+    peer: new GramJs.InputPeerSelf(),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+
+  return {
+    users,
+    chats,
+    nextOffset: result.nextOffset,
+    history: result.history.map(buildApiStarsTransaction),
+    balance: result.balance.toJSNumber(),
+  };
+}
+
+export async function fetchStarsTransactions({
+  offset,
+  isInbound,
+  isOutbound,
+}: {
+  offset?: string;
+  isInbound?: true;
+  isOutbound?: true;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetStarsTransactions({
+    peer: new GramJs.InputPeerSelf(),
+    offset,
+    inbound: isInbound,
+    outbound: isOutbound,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+
+  return {
+    users,
+    chats,
+    nextOffset: result.nextOffset,
+    history: result.history.map(buildApiStarsTransaction),
+    balance: result.balance.toJSNumber(),
+  };
+}
+
+export async function fetchStarsTopupOptions() {
+  const result = await invokeRequest(new GramJs.payments.GetStarsTopupOptions());
+
+  if (!result) {
+    return undefined;
+  }
+
+  return result.map(buildApiStarTopupOption);
 }

@@ -20,7 +20,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 
-import Icon from '../Icon';
+import Icon from '../icons/Icon';
 
 import './EmbeddedMessage.scss';
 

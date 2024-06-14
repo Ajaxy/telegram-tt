@@ -15,7 +15,7 @@ import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import './PickerSelectedItem.scss';
 

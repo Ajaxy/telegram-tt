@@ -15,7 +15,7 @@ import renderText from '../../../common/helpers/renderText';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
 
-import Icon from '../../../common/Icon';
+import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
 import PremiumLimitsCompare from './PremiumLimitsCompare';

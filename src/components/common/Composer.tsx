@@ -158,7 +158,7 @@ import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
 import Avatar from './Avatar';
 import DeleteMessageModal from './DeleteMessageModal.async';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
 
 import './Composer.scss';

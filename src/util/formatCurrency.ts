@@ -1,5 +1,7 @@
 import type { LangCode } from '../types';
 
+const STARS_CODE = 'XTR';
+
 export function formatCurrency(
   totalPrice: number,
   currency: string,
@@ -7,6 +9,10 @@ export function formatCurrency(
   shouldOmitFractions = false,
 ) {
   const price = totalPrice / 10 ** getCurrencyExp(currency);
+
+  if (currency === STARS_CODE) {
+    return `⭐️${price}`;
+  }
 
   if (shouldOmitFractions && price % 1 === 0) {
     return new Intl.NumberFormat(locale, {
@@ -35,7 +41,7 @@ function getCurrencyExp(currency: string) {
   }
   if ([
     'BIF', 'BYR', 'CLP', 'CVE', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'UYI',
-    'VND', 'VUV', 'XAF', 'XOF', 'XPF',
+    'VND', 'VUV', 'XAF', 'XOF', 'XPF', STARS_CODE,
   ].includes(currency)) {
     return 0;
   }

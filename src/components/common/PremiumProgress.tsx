@@ -11,7 +11,7 @@ import buildStyle from '../../util/buildStyle';
 import useLang from '../../hooks/useLang';
 import useResizeObserver from '../../hooks/useResizeObserver';
 
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import styles from './PremiumProgress.module.scss';
 

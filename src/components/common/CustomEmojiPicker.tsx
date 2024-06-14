@@ -43,7 +43,7 @@ import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import StickerButton from './StickerButton';
 import StickerSet from './StickerSet';
 

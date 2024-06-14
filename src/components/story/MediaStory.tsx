@@ -18,7 +18,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMenuPosition from '../../hooks/useMenuPosition';
 
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';

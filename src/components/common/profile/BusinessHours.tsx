@@ -22,7 +22,7 @@ import useSelectorSignal from '../../../hooks/useSelectorSignal';
 
 import ListItem from '../../ui/ListItem';
 import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../ui/Transition';
-import Icon from '../Icon';
+import Icon from '../icons/Icon';
 
 import styles from './BusinessHours.module.scss';
 

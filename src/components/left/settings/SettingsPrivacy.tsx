@@ -11,7 +11,7 @@ import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../globa
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 
-import PremiumIcon from '../../common/PremiumIcon';
+import StarIcon from '../../common/icons/StarIcon';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -282,7 +282,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           allowDisabledClick
-          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
+          rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyVoiceMessages)}
@@ -296,7 +296,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           narrow
-          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
+          rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyMessages)}

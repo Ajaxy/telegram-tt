@@ -36,6 +36,10 @@
     height: 100%;
   }
 
+  &.force-fit &__media {
+    object-fit: cover;
+  }
+
   .emoji {
     width: 1rem;
     height: 1rem;

@@ -322,7 +322,7 @@
       color: var(--accent-color);
     }
 
-    .PremiumIcon {
+    .StarIcon {
       --color-fill: var(--accent-color);
       vertical-align: middle;
       opacity: 0.5;
@@ -961,12 +961,6 @@
   --color-scrollbar: var(--color-scrollbar-code);
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
-}
-
-// Remove extra bottom padding from `blockquote`
-.text-entity-blockquote-wrapper {
-  display: inline-block;
-  width: 100%;
 }
 
 blockquote, .blockquote {

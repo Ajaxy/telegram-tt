@@ -478,7 +478,6 @@ export type InlineBotSettings = {
 export type CustomPeerType = 'premium' | 'toBeDistributed';
 
 export interface CustomPeer {
-  type: CustomPeerType;
   isCustomPeer: true;
   titleKey: string;
   subtitleKey?: string;
@@ -486,4 +485,8 @@ export interface CustomPeer {
   isAvatarSquare?: boolean;
   peerColorId?: number;
   withPremiumGradient?: boolean;
+}
+
+export interface UniqueCustomPeer extends CustomPeer {
+  type: CustomPeerType;
 }

@@ -14,6 +14,7 @@ import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/cu
 import renderText from './renderText';
 
 import MentionLink from '../../middle/message/MentionLink';
+import Blockquote from '../Blockquote';
 import CodeBlock from '../code/CodeBlock';
 import CustomEmoji from '../CustomEmoji';
 import SafeLink from '../SafeLink';
@@ -46,6 +47,7 @@ export function renderTextWithEntities({
   cacheBuster,
   forcePlayback,
   focusedQuote,
+  isInSelectMode,
 }: {
   text: string;
   entities?: ApiMessageEntity[];
@@ -64,6 +66,7 @@ export function renderTextWithEntities({
   cacheBuster?: string;
   forcePlayback?: boolean;
   focusedQuote?: string;
+  isInSelectMode?: boolean;
 }) {
   if (!entities?.length) {
     return renderMessagePart({
@@ -170,6 +173,7 @@ export function renderTextWithEntities({
         sharedCanvasHqRef,
         cacheBuster,
         forcePlayback,
+        isInSelectMode,
       });
 
     if (Array.isArray(newEntity)) {
@@ -384,6 +388,7 @@ function processEntity({
   sharedCanvasHqRef,
   cacheBuster,
   forcePlayback,
+  isInSelectMode,
 } : {
   entity: ApiMessageEntity;
   entityContent: TextPart;
@@ -402,6 +407,7 @@ function processEntity({
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
+  isInSelectMode?: boolean;
 }) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
@@ -451,11 +457,9 @@ function processEntity({
       return <strong data-entity-type={entity.type}>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
       return (
-        <span className="text-entity-blockquote-wrapper">
-          <blockquote data-entity-type={entity.type}>
-            {renderNestedMessagePart()}
-          </blockquote>
-        </span>
+        <Blockquote canBeCollapsible={entity.canCollapse} isToggleDisabled={isInSelectMode}>
+          {renderNestedMessagePart()}
+        </Blockquote>
       );
     case ApiMessageEntityTypes.BotCommand:
       return (

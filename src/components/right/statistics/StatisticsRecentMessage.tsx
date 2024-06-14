@@ -18,7 +18,7 @@ import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import StatisticsRecentPostMeta from './StatisticsRecentPostMeta';
 
 import styles from './StatisticsRecentPost.module.scss';

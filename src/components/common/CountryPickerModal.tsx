@@ -14,7 +14,7 @@ import usePrevious from '../../hooks/usePrevious';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import Picker from './Picker';
 
 import styles from './CountryPickerModal.module.scss';

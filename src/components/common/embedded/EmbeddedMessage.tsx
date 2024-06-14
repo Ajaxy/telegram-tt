@@ -37,7 +37,7 @@ import useThumbnail from '../../../hooks/useThumbnail';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
 import ActionMessage from '../../middle/ActionMessage';
-import Icon from '../Icon';
+import Icon from '../icons/Icon';
 import MediaSpoiler from '../MediaSpoiler';
 import MessageSummary from '../MessageSummary';
 import EmojiIconBackground from './EmojiIconBackground';

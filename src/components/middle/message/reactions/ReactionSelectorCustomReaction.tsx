@@ -7,7 +7,7 @@ import buildClassName from '../../../../util/buildClassName';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
 import CustomEmoji from '../../../common/CustomEmoji';
-import Icon from '../../../common/Icon';
+import Icon from '../../../common/icons/Icon';
 
 import styles from './ReactionSelectorReaction.module.scss';
 

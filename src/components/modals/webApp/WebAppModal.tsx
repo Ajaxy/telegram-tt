@@ -32,7 +32,7 @@ import useSyncEffect from '../../../hooks/useSyncEffect';
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import DropdownMenu from '../../ui/DropdownMenu';
@@ -700,13 +700,14 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
     const { isPaymentModalOpen, status } = selectTabState(global).payment;
+    const { isStarPaymentModalOpen } = selectTabState(global);
 
     return {
       attachBot,
       bot,
       chat,
       theme,
-      isPaymentModalOpen,
+      isPaymentModalOpen: isPaymentModalOpen || isStarPaymentModalOpen,
       paymentStatus: status,
     };
   },

@@ -1,8 +1,12 @@
 import type {
-  ApiInvoice, ApiMessage, ApiPaymentForm, ApiReceipt,
+  ApiInvoice, ApiPaymentForm, ApiReceipt,
+  ApiReceiptStars,
+  ApiStarsTransaction,
 } from '../../api/types';
 import type { PaymentStep, ShippingOption } from '../../types';
-import type { GlobalState, TabArgs, TabState } from '../types';
+import type {
+  GlobalState, StarsTransactionType, TabArgs, TabState,
+} from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectTabState } from '../selectors';
@@ -108,25 +112,14 @@ export function setConfirmPaymentUrl<T extends GlobalState>(
 export function setReceipt<T extends GlobalState>(
   global: T,
   receipt?: ApiReceipt,
-  message?: ApiMessage,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  if (!receipt || !message) {
+  if (!receipt) {
     return updatePayment(global, { receipt: undefined }, tabId);
   }
 
-  const { invoice: messageInvoice } = message.content;
-  const {
-    photo, text, title,
-  } = (messageInvoice || {});
-
   return updatePayment(global, {
-    receipt: {
-      ...receipt,
-      photo,
-      text,
-      title,
-    },
+    receipt,
   }, tabId);
 }
 
@@ -136,6 +129,7 @@ export function clearPayment<T extends GlobalState>(
 ): T {
   return updateTabState(global, {
     payment: {},
+    isStarPaymentModalOpen: undefined,
   }, tabId);
 }
 
@@ -143,5 +137,68 @@ export function closeInvoice<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  return updatePayment(global, { isPaymentModalOpen: undefined, isExtendedMedia: undefined }, tabId);
+  global = updatePayment(global, {
+    isPaymentModalOpen: undefined,
+    isExtendedMedia: undefined,
+  }, tabId);
+  global = updateTabState(global, { isStarPaymentModalOpen: undefined }, tabId);
+  return global;
+}
+
+export function updateStarsBalance<T extends GlobalState>(
+  global: T, balance: number,
+): T {
+  return {
+    ...global,
+    stars: {
+      ...global.stars,
+      balance,
+    },
+  };
+}
+
+export function appendStarsTransactions<T extends GlobalState>(
+  global: T,
+  type: StarsTransactionType,
+  transactions: ApiStarsTransaction[],
+  nextOffset?: string,
+): T {
+  const history = global.stars?.history;
+  if (!history) {
+    return global;
+  }
+
+  const newTypeObject = {
+    transactions: (history[type]?.transactions || []).concat(transactions),
+    nextOffset,
+  };
+
+  return {
+    ...global,
+    stars: {
+      ...global.stars,
+      history: {
+        ...history,
+        [type]: newTypeObject,
+      },
+    },
+  };
+}
+
+export function updateReceiptFromStarsTransaction<T extends GlobalState>(
+  global: T, transaction: ApiStarsTransaction, ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const receipt: ApiReceiptStars = {
+    type: 'stars',
+    totalAmount: transaction.stars,
+    currency: 'XTR',
+    peer: transaction.peer,
+    date: transaction.date,
+    text: transaction.description,
+    title: transaction.title,
+    transactionId: transaction.id,
+    photo: transaction.photo,
+  };
+
+  return updatePayment(global, { receipt }, tabId);
 }

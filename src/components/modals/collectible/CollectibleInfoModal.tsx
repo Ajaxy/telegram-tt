@@ -20,7 +20,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';

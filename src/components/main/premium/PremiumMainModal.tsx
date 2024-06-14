@@ -202,6 +202,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
         left,
         width,
         height,
+        withStars: true,
       });
     }
   });

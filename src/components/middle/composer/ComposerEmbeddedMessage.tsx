@@ -38,7 +38,7 @@ import useMenuPosition from '../../../hooks/useMenuPosition';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import { ClosableEmbeddedMessage } from '../../common/embedded/EmbeddedMessage';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';

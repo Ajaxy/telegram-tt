@@ -14,7 +14,7 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 
 import CustomEmoji from '../../common/CustomEmoji';
-import PremiumIcon from '../../common/PremiumIcon';
+import StarIcon from '../../common/icons/StarIcon';
 import CustomEmojiEffect from '../../common/reactions/CustomEmojiEffect';
 import Button from '../../ui/Button';
 import StatusPickerMenu from './StatusPickerMenu.async';
@@ -82,7 +82,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
             size={EMOJI_STATUS_SIZE}
             loopLimit={EMOJI_STATUS_LOOP_LIMIT}
           />
-        ) : <PremiumIcon />}
+        ) : <StarIcon />}
       </Button>
       <StatusPickerMenu
         statusButtonRef={buttonRef}

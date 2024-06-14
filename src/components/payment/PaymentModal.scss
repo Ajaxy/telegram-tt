@@ -12,6 +12,10 @@ $modalHeaderAndFooterHeight: 8.375rem;
     pointer-events: none;
   }
 
+  &.PaymentModal-receipt .modal-backdrop {
+    pointer-events: all;
+  }
+
   .header {
     position: relative;
     border-top-left-radius: var(--border-radius-default-small);

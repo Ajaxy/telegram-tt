@@ -22,8 +22,10 @@ export interface ApiPaymentSavedInfo {
   shippingAddress?: ApiShippingAddress;
 }
 
-export interface ApiPaymentForm {
+export interface ApiPaymentFormRegular {
+  type: 'regular';
   url: string;
+  botId: string;
   canSaveCredentials?: boolean;
   isPasswordMissing?: boolean;
   formId: string;
@@ -35,12 +37,21 @@ export interface ApiPaymentForm {
   nativeParams: ApiPaymentFormNativeParams;
 }
 
+export interface ApiPaymentFormStars {
+  type: 'stars';
+  formId: string;
+  botId: string;
+}
+
+export type ApiPaymentForm = ApiPaymentFormRegular | ApiPaymentFormStars;
+
 export interface ApiPaymentFormNativeParams {
   needCardholderName?: boolean;
   needCountry?: boolean;
   needZip?: boolean;
   publishableKey?: string;
   publicToken?: string;
+  tokenizeUrl?: string;
 }
 
 export interface ApiLabeledPrice {
@@ -48,7 +59,21 @@ export interface ApiLabeledPrice {
   amount: number;
 }
 
-export interface ApiReceipt {
+export interface ApiReceiptStars {
+  type: 'stars';
+  botId?: string;
+  peer?: ApiStarsTransactionPeer;
+  date: number;
+  title?: string;
+  text?: string;
+  photo?: ApiWebDocument;
+  currency: string;
+  totalAmount: number;
+  transactionId: string;
+}
+
+export interface ApiReceiptRegular {
+  type: 'regular';
   photo?: ApiWebDocument;
   text?: string;
   title?: string;
@@ -65,6 +90,8 @@ export interface ApiReceipt {
   shippingPrices?: ApiLabeledPrice[];
   shippingMethod?: string;
 }
+
+export type ApiReceipt = ApiReceiptRegular | ApiReceiptStars;
 
 export interface ApiPremiumPromo {
   videoSections: ApiPremiumSection[];
@@ -178,4 +205,55 @@ export interface ApiPrepaidGiveaway {
   months: number;
   quantity: number;
   date: number;
+}
+
+export interface ApiStarsTransactionPeerUnsupported {
+  type: 'unsupported';
+}
+
+export interface ApiStarsTransactionPeerAppStore {
+  type: 'appStore';
+}
+
+export interface ApiStarsTransactionPeerPlayMarket {
+  type: 'playMarket';
+}
+
+export interface ApiStarsTransactionPeerPremiumBot {
+  type: 'premiumBot';
+}
+
+export interface ApiStarsTransactionPeerFragment {
+  type: 'fragment';
+}
+
+export interface ApiStarsTransactionPeerPeer {
+  type: 'peer';
+  id: string;
+}
+
+export type ApiStarsTransactionPeer =
+| ApiStarsTransactionPeerUnsupported
+| ApiStarsTransactionPeerAppStore
+| ApiStarsTransactionPeerPlayMarket
+| ApiStarsTransactionPeerPremiumBot
+| ApiStarsTransactionPeerFragment
+| ApiStarsTransactionPeerPeer;
+
+export interface ApiStarsTransaction {
+  id: string;
+  peer: ApiStarsTransactionPeer;
+  stars: number;
+  isRefund?: true;
+  date: number;
+  title?: string;
+  description?: string;
+  photo?: ApiWebDocument;
+}
+
+export interface ApiStarTopupOption {
+  isExtended?: true;
+  stars: number;
+  currency: string;
+  amount: number;
 }

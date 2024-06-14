@@ -24,7 +24,7 @@ import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import PremiumProgress from '../../common/PremiumProgress';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -320,7 +320,6 @@ const BoostStatistics = ({
                   activeKey={activeKey}
                   renderCount={tabs.length}
                   shouldRestoreHeight
-                  className="shared-media-transition"
                 >
                   {renderContent()}
                 </Transition>

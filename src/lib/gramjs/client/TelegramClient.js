@@ -31,7 +31,7 @@ const RequestState = require('../network/RequestState');
 const Deferred = require('../../../util/Deferred').default;
 
 const DEFAULT_DC_ID = 2;
-const WEBDOCUMENT_DC_ID = 4;
+const DEFAULT_WEBDOCUMENT_DC_ID = 4;
 const EXPORTED_SENDER_RECONNECT_TIMEOUT = 1000; // 1 sec
 const EXPORTED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
 const WEBDOCUMENT_REQUEST_PART_SIZE = 131072; // 128kb
@@ -906,7 +906,10 @@ class TelegramClient {
                     offset,
                     limit: WEBDOCUMENT_REQUEST_PART_SIZE,
                 });
-                const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
+
+                const sender = await this._borrowExportedSender(
+                    this._config?.webfileDcId || DEFAULT_WEBDOCUMENT_DC_ID,
+                );
                 const res = await sender.send(downloaded);
                 this.releaseExportedSender(sender);
                 offset += 131072;
@@ -953,7 +956,7 @@ class TelegramClient {
                         offset,
                         limit: WEBDOCUMENT_REQUEST_PART_SIZE,
                     });
-                    const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
+                    const sender = await this._borrowExportedSender(DEFAULT_WEBDOCUMENT_DC_ID);
                     const res = await sender.send(downloaded);
                     this.releaseExportedSender(sender);
                     offset += 131072;
@@ -1099,10 +1102,18 @@ class TelegramClient {
         return undefined;
     }
 
+    async loadConfig() {
+        if (!this._config) {
+            this._config = await this.invoke(new requests.help.GetConfig());
+        }
+    }
+
     async start(authParams) {
         if (!this.isConnected()) {
             await this.connect();
         }
+
+        this.loadConfig();
 
         if (await checkAuthorization(this, authParams.shouldThrowIfUnauthorized)) {
             return;

@@ -19,7 +19,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import AboutAdsModal from '../../common/AboutAdsModal.async';
 import Avatar from '../../common/Avatar';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
 import Button from '../../ui/Button';
 import MessageAppendix from './MessageAppendix';

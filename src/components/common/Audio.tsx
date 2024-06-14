@@ -44,7 +44,7 @@ import Button from '../ui/Button';
 import Link from '../ui/Link';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import AnimatedIcon from './AnimatedIcon';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import './Audio.scss';
 

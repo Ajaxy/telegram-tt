@@ -21,7 +21,7 @@ import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Picker from '../common/Picker';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';

@@ -11,7 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';

@@ -1,12 +1,16 @@
-import type { ApiInputInvoice, ApiRequestInputInvoice } from '../../api/types';
+import type {
+  ApiInputInvoice, ApiRequestInputInvoice, ApiStarsTransactionPeer, ApiStarsTransactionPeerPeer,
+} from '../../api/types';
+import type { CustomPeer } from '../../types';
 import type { GlobalState } from '../types';
 
+import { formatInteger } from '../../util/textFormat';
 import { selectChat, selectUser } from '../selectors';
 
 export function getRequestInputInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice,
 ): ApiRequestInputInvoice | undefined {
-  if (inputInvoice.type === 'slug') return inputInvoice;
+  if (inputInvoice.type === 'slug' || inputInvoice.type === 'stars') return inputInvoice;
 
   if (inputInvoice.type === 'message') {
     const chat = selectChat(global, inputInvoice.chatId);
@@ -70,4 +74,65 @@ export function getRequestInputInvoice<T extends GlobalState>(
   }
 
   return undefined;
+}
+
+export function buildStarsTransactionCustomPeer(
+  peer: Exclude<ApiStarsTransactionPeer, ApiStarsTransactionPeerPeer>,
+): CustomPeer {
+  if (peer.type === 'appStore') {
+    return {
+      avatarIcon: 'star',
+      isCustomPeer: true,
+      titleKey: 'Stars.Intro.Transaction.AppleTopUp.Title',
+      subtitleKey: 'Stars.Intro.Transaction.AppleTopUp.Subtitle',
+      peerColorId: 5,
+    };
+  }
+
+  if (peer.type === 'playMarket') {
+    return {
+      avatarIcon: 'star',
+      isCustomPeer: true,
+      titleKey: 'Stars.Intro.Transaction.GoogleTopUp.Title',
+      subtitleKey: 'Stars.Intro.Transaction.GoogleTopUp.Subtitle',
+      peerColorId: 3,
+    };
+  }
+
+  if (peer.type === 'fragment') {
+    return {
+      avatarIcon: 'star',
+      isCustomPeer: true,
+      titleKey: 'Stars.Intro.Transaction.FragmentTopUp.Title',
+      subtitleKey: 'Stars.Intro.Transaction.FragmentTopUp.Subtitle',
+      peerColorId: -1, // Defaults to black
+    };
+  }
+
+  if (peer.type === 'premiumBot') {
+    return {
+      avatarIcon: 'star',
+      isCustomPeer: true,
+      titleKey: 'Stars.Intro.Transaction.PremiumBotTopUp.Title',
+      subtitleKey: 'Stars.Intro.Transaction.PremiumBotTopUp.Subtitle',
+      peerColorId: 1,
+      withPremiumGradient: true,
+    };
+  }
+
+  return {
+    avatarIcon: 'star',
+    isCustomPeer: true,
+    titleKey: 'Stars.Intro.Transaction.Unsupported.Title',
+    subtitleKey: 'Stars.Intro.Transaction.Unsupported.Title',
+    peerColorId: 0,
+  };
+}
+
+export function formatStarsTransactionAmount(amount: number) {
+  if (amount < 0) {
+    return `- ${formatInteger(Math.abs(amount))}`;
+  }
+
+  return `+ ${formatInteger(amount)}`;
 }

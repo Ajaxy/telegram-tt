@@ -257,9 +257,12 @@ function renderCheckoutItem({
   onClick?: NoneToVoidFunction;
   customIcon?: string;
 }) {
+  const isMultiline = Boolean(title && label !== title);
+
   return (
     <ListItem
-      multiline={Boolean(title && label !== title)}
+      multiline={isMultiline}
+      narrow={isMultiline}
       icon={icon}
       inactive={!onClick}
       onClick={onClick}

@@ -211,4 +211,10 @@
   .dialog-button-spacer {
     flex-grow: 1;
   }
+
+  .modal-absolute-close-button {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+  }
 }

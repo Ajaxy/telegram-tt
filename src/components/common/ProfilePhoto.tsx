@@ -30,7 +30,7 @@ import useMediaTransition from '../../hooks/useMediaTransition';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Spinner from '../ui/Spinner';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import './ProfilePhoto.scss';
 

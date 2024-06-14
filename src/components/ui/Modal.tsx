@@ -16,6 +16,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useShowTransition from '../../hooks/useShowTransition';
 
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Portal from './Portal';
 
@@ -31,6 +32,7 @@ type OwnProps = {
   header?: TeactNode;
   isSlim?: boolean;
   hasCloseButton?: boolean;
+  hasAbsoluteCloseButton?: boolean;
   noBackdrop?: boolean;
   noBackdropClose?: boolean;
   children: React.ReactNode;
@@ -54,6 +56,7 @@ const Modal: FC<OwnProps & StateProps> = ({
   isSlim,
   header,
   hasCloseButton,
+  hasAbsoluteCloseButton,
   noBackdrop,
   noBackdropClose,
   children,
@@ -71,6 +74,7 @@ const Modal: FC<OwnProps & StateProps> = ({
   );
   // eslint-disable-next-line no-null/no-null
   const modalRef = useRef<HTMLDivElement>(null);
+  const withCloseButton = hasCloseButton || hasAbsoluteCloseButton;
 
   useEffect(() => {
     if (!isOpen) {
@@ -125,21 +129,20 @@ const Modal: FC<OwnProps & StateProps> = ({
       return header;
     }
 
-    if (!title) {
-      return undefined;
-    }
+    if (!title && !withCloseButton) return undefined;
 
     return (
       <div className="modal-header">
-        {hasCloseButton && (
+        {withCloseButton && (
           <Button
+            className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
             round
             color="translucent"
             size="smaller"
             ariaLabel={lang('Close')}
             onClick={onClose}
           >
-            <i className="icon icon-close" />
+            <Icon name="close" />
           </Button>
         )}
         <div className="modal-title">{title}</div>

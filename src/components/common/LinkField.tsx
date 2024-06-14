@@ -12,7 +12,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import styles from './LinkField.module.scss';
 

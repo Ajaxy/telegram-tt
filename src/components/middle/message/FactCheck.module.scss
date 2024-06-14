@@ -1,0 +1,52 @@
+@use '../../../styles/mixins';
+
+.root {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  padding-block: 0.25rem;
+  padding-inline-end: 0.25rem;
+}
+
+.title {
+  font-weight: 500;
+}
+
+.content {
+  color: var(--color-text);
+}
+
+.separator {
+  --color-dividers: var(--accent-color);
+
+  margin-block: 0.25rem;
+  opacity: 0.25;
+}
+
+.footnote {
+  font-size: 0.75rem;
+}
+
+.collapsed {
+  @include mixins.gradient-border-bottom(1rem);
+}
+
+.cutoutWrapper {
+  max-height: inherit;
+}
+
+.collapseIcon {
+  position: absolute;
+  display: grid;
+  place-items: center;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+
+  bottom: 0;
+  right: 0;
+}
+
+.clickable {
+  cursor: var(--custom-cursor, pointer);
+}

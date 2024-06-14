@@ -5,6 +5,7 @@ import type { ApiMessage } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
 import buildStyle from '../../../util/buildStyle';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -67,8 +68,10 @@ const Invoice: FC<OwnProps> = ({
     if (photoUrl) {
       const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
       getCustomAppendixBg(photoUrl, false, isSelected, theme).then((appendixBg) => {
-        contentEl.style.setProperty('--appendix-bg', appendixBg);
-        contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        requestMutation(() => {
+          contentEl.style.setProperty('--appendix-bg', appendixBg);
+          contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        });
       });
     }
   }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme]);
@@ -117,7 +120,7 @@ const Invoice: FC<OwnProps> = ({
         )}
         <p className="description-text">
           {formatCurrency(amount, currency, lang.code)}
-          {isTest && <span>{lang('PaymentTestInvoice')}</span>}
+          {isTest && <span className="test-invoice">{lang('PaymentTestInvoice')}</span>}
         </p>
       </div>
     </div>

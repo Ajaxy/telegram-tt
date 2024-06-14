@@ -132,6 +132,7 @@ type StateProps = {
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
 const MESSAGE_COMMENTS_POLLING_INTERVAL = 20 * 1000;
+const MESSAGE_FACT_CHECK_UPDATE_INTERVAL = 5 * 1000;
 const MESSAGE_STORY_POLLING_INTERVAL = 5 * 60 * 1000;
 const BOTTOM_THRESHOLD = 50;
 const UNREAD_DIVIDER_TOP = 10;
@@ -188,7 +189,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
-    loadMessageViews, loadPeerStoriesByIds,
+    loadMessageViews, loadPeerStoriesByIds, loadFactChecks,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -319,6 +320,17 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     loadMessageViews({ chatId, ids });
   }, MESSAGE_COMMENTS_POLLING_INTERVAL, true);
+
+  useInterval(() => {
+    if (!messageIds || !messagesById || threadId !== MAIN_THREAD_ID || type === 'scheduled') {
+      return;
+    }
+    const ids = messageIds.filter((id) => messagesById[id].factCheck?.shouldFetch);
+
+    if (!ids.length) return;
+
+    loadFactChecks({ chatId, ids });
+  }, MESSAGE_FACT_CHECK_UPDATE_INTERVAL);
 
   const loadMoreAround = useMemo(() => {
     if (type !== 'thread') {

@@ -16,7 +16,7 @@ import Button from '../ui/Button';
 import Modal, { ANIMATION_DURATION } from '../ui/Modal';
 import Separator from '../ui/Separator';
 import AnimatedIconWithPreview from './AnimatedIconWithPreview';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import styles from './PrivacySettingsNoticeModal.module.scss';
 

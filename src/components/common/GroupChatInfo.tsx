@@ -33,7 +33,7 @@ import Transition from '../ui/Transition';
 import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import TopicIcon from './TopicIcon';
 import TypingStatus from './TypingStatus';
 

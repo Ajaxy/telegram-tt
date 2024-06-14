@@ -22,6 +22,7 @@ import type {
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiSendMessageAction,
+  ApiStarTopupOption,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -604,6 +605,15 @@ function buildPremiumGiftCodeOption(optionData: ApiPremiumGiftCodeOption) {
   });
 }
 
+function buildInputStarsTopupOption(option: ApiStarTopupOption) {
+  return new GramJs.StarsTopupOption({
+    stars: BigInt(option.stars),
+    amount: BigInt(option.amount),
+    currency: option.currency,
+    extended: option.isExtended,
+  });
+}
+
 export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
   switch (invoice.type) {
     case 'message': {
@@ -616,6 +626,12 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
     case 'slug': {
       return new GramJs.InputInvoiceSlug({
         slug: invoice.slug,
+      });
+    }
+
+    case 'stars': {
+      return new GramJs.InputInvoiceStars({
+        option: buildInputStarsTopupOption(invoice.option),
       });
     }
 

@@ -22,7 +22,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import AvatarList from '../../common/AvatarList';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Link from '../../ui/Link';
 import Modal from '../../ui/Modal';
@@ -122,6 +122,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
         left,
         width,
         height,
+        withStars: true,
       });
     }
   });

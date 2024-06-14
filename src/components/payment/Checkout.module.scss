@@ -10,6 +10,7 @@
 }
 .checkout-picture {
   height: 6rem;
+  border-radius: 0.5rem;
 
   @supports (aspect-ratio: 1) {
     margin: 0.25rem 0.75rem 0 0;

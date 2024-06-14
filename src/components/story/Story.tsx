@@ -53,7 +53,7 @@ import useStoryProps from './hooks/useStoryProps';
 
 import Avatar from '../common/Avatar';
 import Composer from '../common/Composer';
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';

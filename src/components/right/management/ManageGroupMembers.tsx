@@ -22,7 +22,7 @@ import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation'
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import NothingFound from '../../common/NothingFound';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';

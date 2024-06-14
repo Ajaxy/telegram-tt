@@ -2,7 +2,7 @@ import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat, ApiPeerColor } from './chats';
-import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption } from './payments';
+import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption, ApiStarTopupOption } from './payments';
 import type { ApiMessageStoryData, ApiWebPageStickerData, ApiWebPageStoryData } from './stories';
 
 export interface ApiDimensions {
@@ -208,8 +208,13 @@ export type ApiInputInvoiceGiftCode = {
   option: ApiPremiumGiftCodeOption;
 };
 
+export type ApiInputInvoiceStars = {
+  type: 'stars';
+  option: ApiStarTopupOption;
+};
+
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode;
+| ApiInputInvoiceGiftCode | ApiInputInvoiceStars;
 
 /* Used for Invoice request */
 export type ApiRequestInputInvoiceMessage = {
@@ -229,8 +234,13 @@ export type ApiRequestInputInvoiceGiveaway = {
   option: ApiPremiumGiftCodeOption;
 };
 
+export type ApiRequestInputInvoiceStars = {
+  type: 'stars';
+  option: ApiStarTopupOption;
+};
+
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
-| ApiRequestInputInvoiceGiveaway;
+| ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars;
 
 export interface ApiInvoice {
   text: string;
@@ -345,6 +355,7 @@ export interface ApiAction {
   | 'suggestProfilePhoto'
   | 'joinedChannel'
   | 'chatBoost'
+  | 'receipt'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;
@@ -445,7 +456,7 @@ export type ApiMessageEntityDefault = {
   type: Exclude<
   `${ApiMessageEntityTypes}`,
   `${ApiMessageEntityTypes.Pre}` | `${ApiMessageEntityTypes.TextUrl}` | `${ApiMessageEntityTypes.MentionName}` |
-  `${ApiMessageEntityTypes.CustomEmoji}`
+  `${ApiMessageEntityTypes.CustomEmoji}` | `${ApiMessageEntityTypes.Blockquote}`
   >;
   offset: number;
   length: number;
@@ -472,6 +483,13 @@ export type ApiMessageEntityMentionName = {
   userId: string;
 };
 
+export type ApiMessageEntityBlockquote = {
+  type: ApiMessageEntityTypes.Blockquote;
+  offset: number;
+  length: number;
+  canCollapse?: boolean;
+};
+
 export type ApiMessageEntityCustomEmoji = {
   type: ApiMessageEntityTypes.CustomEmoji;
   offset: number;
@@ -480,7 +498,7 @@ export type ApiMessageEntityCustomEmoji = {
 };
 
 export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
-ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji;
+ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -587,6 +605,7 @@ export interface ApiMessage {
   readDate?: number;
   savedPeerId?: string;
   senderBoosts?: number;
+  factCheck?: ApiFactCheck;
 }
 
 export interface ApiReactions {
@@ -833,6 +852,13 @@ export type ApiQuickReply = {
   id: number;
   shortcut: string;
   topMessageId: number;
+};
+
+export type ApiFactCheck = {
+  shouldFetch?: true;
+  hash: string;
+  countryCode?: string;
+  text?: ApiFormattedText;
 };
 
 export type ApiSponsoredMessageReportResult = {

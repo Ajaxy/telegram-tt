@@ -2043,6 +2043,29 @@ addActionHandler('loadMessageViews', async (global, actions, payload): Promise<v
   setGlobal(global);
 });
 
+addActionHandler('loadFactChecks', async (global, actions, payload): Promise<void> => {
+  const { chatId, ids } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('fetchFactChecks', {
+    chat,
+    ids,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+  result.forEach((factCheck, i) => {
+    global = updateChatMessage(global, chatId, ids[i], {
+      factCheck,
+    });
+  });
+
+  setGlobal(global);
+});
+
 addActionHandler('loadOutboxReadDate', async (global, actions, payload): Promise<void> => {
   const { chatId, messageId } = payload;
 

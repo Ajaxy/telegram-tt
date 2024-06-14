@@ -13,12 +13,20 @@
   margin-inline-end: calc($margin - var(--scrollbar-width));
 }
 
+@mixin filter-outline($width: 0.125rem, $color) {
+  filter:
+    drop-shadow($width $width 0 $color)
+    drop-shadow((-$width) $width 0 $color)
+    drop-shadow($width (-$width) 0 $color)
+    drop-shadow((-$width) (-$width) 0 $color);
+}
+
 @mixin gradient-border-top($width, $cutout: 0px) {
   mask-image: linear-gradient(transparent $cutout, black $width);
 }
 
-@mixin gradient-border-bottom($width, $cutout: 0px) {
-  mask-image: linear-gradient(to top, transparent $cutout, black $width);
+@mixin gradient-border-bottom($height, $cutout: 0px) {
+  mask-image: linear-gradient(to top, transparent $cutout, black $height);
 }
 
 @mixin gradient-border-top-bottom($top, $bottom) {

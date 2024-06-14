@@ -239,6 +239,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     actions.requestChatUpdate({ chatId: id });
   }
   actions.closeStoryViewer({ tabId });
+  actions.closeStarsBalanceModal({ tabId });
 });
 
 addActionHandler('openSavedDialog', (global, actions, payload): ActionReturnType => {

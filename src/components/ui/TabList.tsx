@@ -5,6 +5,7 @@ import type { MenuItemContextAction } from './ListItem';
 
 import { ALL_FOLDER_ID } from '../../config';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
+import buildClassName from '../../util/buildClassName';
 import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
@@ -29,6 +30,7 @@ type OwnProps = {
   areFolders?: boolean;
   activeTab: number;
   big?: boolean;
+  className?: string;
   onSwitchTab: (index: number) => void;
   contextRootElementSelector?: string;
 };
@@ -39,7 +41,7 @@ const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
 const TabList: FC<OwnProps> = ({
   tabs, areFolders, activeTab, big, onSwitchTab,
-  contextRootElementSelector,
+  contextRootElementSelector, className,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,7 +77,7 @@ const TabList: FC<OwnProps> = ({
 
   return (
     <div
-      className={`TabList no-scrollbar ${big ? 'big' : ''}`}
+      className={buildClassName('TabList', 'no-scrollbar', big && 'big', className)}
       ref={containerRef}
       dir={lang.isRtl ? 'rtl' : undefined}
     >

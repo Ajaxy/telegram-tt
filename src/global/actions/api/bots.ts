@@ -95,7 +95,7 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       }
       const { receiptMessageId } = button;
       actions.getReceipt({
-        receiptMessageId, chatId: chat.id, messageId, tabId,
+        chatId: chat.id, messageId: receiptMessageId, tabId,
       });
       break;
     }

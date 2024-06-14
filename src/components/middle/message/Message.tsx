@@ -145,9 +145,9 @@ import DotAnimation from '../../common/DotAnimation';
 import EmbeddedMessage from '../../common/embedded/EmbeddedMessage';
 import EmbeddedStory from '../../common/embedded/EmbeddedStory';
 import FakeIcon from '../../common/FakeIcon';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
+import StarIcon from '../../common/icons/StarIcon';
 import MessageText from '../../common/MessageText';
-import PremiumIcon from '../../common/PremiumIcon';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import TopicChip from '../../common/TopicChip';
 import Button from '../../ui/Button';
@@ -157,6 +157,7 @@ import AnimatedEmoji from './AnimatedEmoji';
 import CommentButton from './CommentButton';
 import Contact from './Contact';
 import ContextMenuContainer from './ContextMenuContainer.async';
+import FactCheck from './FactCheck';
 import Game from './Game';
 import Giveaway from './Giveaway';
 import InlineButtons from './InlineButtons';
@@ -470,7 +471,7 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const {
-    id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError,
+    id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
   } = message;
 
   useEffect(() => {
@@ -523,6 +524,8 @@ const Message: FC<OwnProps & StateProps> = ({
     ));
 
   const noUserColors = isOwn && !isCustomShape;
+
+  const hasFactCheck = Boolean(factCheck?.text);
 
   const hasSubheader = hasTopicChip || hasMessageReply || hasStoryReply;
 
@@ -627,12 +630,13 @@ const Message: FC<OwnProps & StateProps> = ({
   }, [focusLastMessage, isLastInList, transcribedText, withVoiceTranscription]);
 
   const textMessage = album?.hasMultipleCaptions ? undefined : (album?.captionMessage || message);
-  const hasText = textMessage && hasMessageText(textMessage);
+  const hasTextContent = textMessage && hasMessageText(textMessage);
+  const hasText = hasTextContent || hasFactCheck;
 
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
-    isProtected && !hasText ? 'is-protected' : 'allow-selection',
+    isProtected && !hasTextContent ? 'is-protected' : 'allow-selection',
     isLastInGroup && 'last-in-group',
     isFirstInDocumentGroup && 'first-in-document-group',
     isLastInDocumentGroup && 'last-in-document-group',
@@ -915,6 +919,7 @@ const Message: FC<OwnProps & StateProps> = ({
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         withTranslucentThumbs={isCustomShape}
+        isInSelectMode={isInSelectMode}
       />
     );
   }
@@ -1227,6 +1232,9 @@ const Message: FC<OwnProps & StateProps> = ({
                 </div>
               </div>
             )}
+            {hasFactCheck && (
+              <FactCheck factCheck={factCheck} isToggleDisabled={isInSelectMode} />
+            )}
             {metaPosition === 'in-text' && renderReactionsAndMeta()}
           </div>
         )}
@@ -1331,7 +1339,7 @@ const Message: FC<OwnProps & StateProps> = ({
                 observeIntersectionForPlaying={observeIntersectionForPlaying}
               />
             )}
-            {!asForwarded && !senderEmojiStatus && senderIsPremium && <PremiumIcon />}
+            {!asForwarded && !senderEmojiStatus && senderIsPremium && <StarIcon />}
             {senderPeer?.fakeType && <FakeIcon fakeType={senderPeer.fakeType} />}
           </span>
         ) : !botSender ? (

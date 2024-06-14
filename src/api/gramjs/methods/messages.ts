@@ -49,6 +49,7 @@ import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/ch
 import { buildApiFormattedText } from '../apiBuilders/common';
 import { buildMessageMediaContent, buildMessageTextContent, buildWebPage } from '../apiBuilders/messageContent';
 import {
+  buildApiFactCheck,
   buildApiMessage,
   buildApiQuickReply,
   buildApiSponsoredMessage,
@@ -1045,6 +1046,25 @@ export async function fetchMessageViews({
     users: users.map(buildApiUser).filter(Boolean),
     chats: chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
   };
+}
+
+export async function fetchFactChecks({
+  chat, ids,
+}: {
+  chat: ApiChat;
+  ids: number[];
+}) {
+  const chunks = split(ids, API_GENERAL_ID_LIMIT);
+  const results = await Promise.all(chunks.map((chunkIds) => (
+    invokeRequest(new GramJs.messages.GetFactCheck({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      msgId: chunkIds,
+    }))
+  )));
+
+  if (!results || results.some((result) => !result)) return undefined;
+
+  return results.flatMap((result) => result!).map(buildApiFactCheck);
 }
 
 export async function fetchDiscussionMessage({

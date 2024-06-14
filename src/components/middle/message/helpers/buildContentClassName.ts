@@ -40,10 +40,11 @@ export function buildContentClassName(
     giveaway, giveawayResults,
   } = getMessageContent(message);
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
+  const hasFactCheck = Boolean(message.factCheck?.text);
 
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
   const isMedia = storyData || photo || video || location || invoice?.extendedMedia;
-  const hasText = text || location?.type === 'venue' || isGeoLiveActive;
+  const hasText = text || location?.type === 'venue' || isGeoLiveActive || hasFactCheck;
   const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
 
@@ -144,7 +145,7 @@ export function buildContentClassName(
       classNames.push('has-background');
     }
 
-    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName) {
+    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName || hasFactCheck) {
       classNames.push('has-solid-background');
     }
 

@@ -17,7 +17,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import PremiumProgress from '../../common/PremiumProgress';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';

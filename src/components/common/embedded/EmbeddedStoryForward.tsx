@@ -23,7 +23,7 @@ import { useFastClick } from '../../../hooks/useFastClick';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../Icon';
+import Icon from '../icons/Icon';
 import EmojiIconBackground from './EmojiIconBackground';
 
 import './EmbeddedMessage.scss';

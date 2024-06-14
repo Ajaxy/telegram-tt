@@ -12,7 +12,7 @@ import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
 import Modal from '../ui/Modal';
 import Separator from '../ui/Separator';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import SafeLink from './SafeLink';
 
 import styles from './AboutAdsModal.module.scss';

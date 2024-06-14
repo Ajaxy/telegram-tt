@@ -9,8 +9,12 @@ import type {
   ApiInvoice, ApiLabeledPrice, ApiMyBoost, ApiPaymentCredentials,
   ApiPaymentForm, ApiPaymentSavedInfo, ApiPremiumGiftCodeOption, ApiPremiumPromo, ApiPremiumSubscriptionOption,
   ApiReceipt,
+  ApiStarsTransaction,
+  ApiStarsTransactionPeer,
+  ApiStarTopupOption,
 } from '../../types';
 
+import { addWebDocumentToLocalDb } from '../helpers';
 import { buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument } from './messageContent';
@@ -37,7 +41,35 @@ export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | 
   });
 }
 
-export function buildApiReceipt(receipt: GramJs.payments.PaymentReceipt): ApiReceipt {
+export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): ApiReceipt {
+  const { photo } = receipt;
+
+  if (photo) {
+    addWebDocumentToLocalDb(photo);
+  }
+
+  if (receipt instanceof GramJs.payments.PaymentReceiptStars) {
+    const {
+      botId, currency, date, description: text, title, totalAmount, transactionId,
+    } = receipt;
+
+    if (photo) {
+      addWebDocumentToLocalDb(photo);
+    }
+
+    return {
+      type: 'stars',
+      currency,
+      botId: buildApiPeerId(botId, 'user'),
+      date,
+      text,
+      title,
+      totalAmount: -totalAmount.toJSNumber(),
+      transactionId,
+      photo: photo && buildApiWebDocument(photo),
+    };
+  }
+
   const {
     invoice,
     info,
@@ -46,6 +78,8 @@ export function buildApiReceipt(receipt: GramJs.payments.PaymentReceipt): ApiRec
     totalAmount,
     credentialsTitle,
     tipAmount,
+    title,
+    description: text,
   } = receipt;
 
   const { shippingAddress, phone, name } = (info || {});
@@ -70,6 +104,7 @@ export function buildApiReceipt(receipt: GramJs.payments.PaymentReceipt): ApiRec
   }
 
   return {
+    type: 'regular',
     currency,
     prices: mappedPrices,
     info: { shippingAddress, phone, name },
@@ -78,10 +113,23 @@ export function buildApiReceipt(receipt: GramJs.payments.PaymentReceipt): ApiRec
     shippingPrices,
     shippingMethod,
     tipAmount: tipAmount ? tipAmount.toJSNumber() : 0,
+    title,
+    text,
+    photo: photo && buildApiWebDocument(photo),
   };
 }
 
-export function buildApiPaymentForm(form: GramJs.payments.PaymentForm): ApiPaymentForm {
+export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiPaymentForm {
+  if (form instanceof GramJs.payments.PaymentFormStars) {
+    const { botId, formId } = form;
+
+    return {
+      type: 'stars',
+      botId: buildApiPeerId(botId, 'user'),
+      formId: String(formId),
+    };
+  }
+
   const {
     formId,
     canSaveCredentials,
@@ -93,6 +141,7 @@ export function buildApiPaymentForm(form: GramJs.payments.PaymentForm): ApiPayme
     invoice,
     savedCredentials,
     url,
+    botId,
   } = form;
 
   const {
@@ -121,7 +170,9 @@ export function buildApiPaymentForm(form: GramJs.payments.PaymentForm): ApiPayme
   const nativeData = nativeParams ? JSON.parse(nativeParams.data) : {};
 
   return {
+    type: 'regular',
     url,
+    botId: buildApiPeerId(botId, 'user'),
     canSaveCredentials,
     isPasswordMissing,
     formId: String(formId),
@@ -146,12 +197,13 @@ export function buildApiPaymentForm(form: GramJs.payments.PaymentForm): ApiPayme
       needZip: Boolean(nativeData?.need_zip),
       publishableKey: nativeData?.publishable_key,
       publicToken: nativeData?.public_token,
+      tokenizeUrl: nativeData?.tokenize_url,
     },
-    ...(savedCredentials && { savedCredentials: buildApiPaymentCredentials(savedCredentials) }),
+    savedCredentials: savedCredentials && buildApiPaymentCredentials(savedCredentials),
   };
 }
 
-export function buildApiInvoiceFromForm(form: GramJs.payments.PaymentForm): ApiInvoice {
+export function buildApiInvoiceFromForm(form: GramJs.payments.TypePaymentForm): ApiInvoice {
   const {
     invoice, description: text, title, photo,
   } = form;
@@ -326,5 +378,63 @@ export function buildApiPremiumGiftCodeOption(option: GramJs.PremiumGiftCodeOpti
     currency,
     months,
     users,
+  };
+}
+
+export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPeer): ApiStarsTransactionPeer {
+  if (peer instanceof GramJs.StarsTransactionPeerAppStore) {
+    return { type: 'appStore' };
+  }
+
+  if (peer instanceof GramJs.StarsTransactionPeerPlayMarket) {
+    return { type: 'playMarket' };
+  }
+
+  if (peer instanceof GramJs.StarsTransactionPeerPremiumBot) {
+    return { type: 'premiumBot' };
+  }
+
+  if (peer instanceof GramJs.StarsTransactionPeerFragment) {
+    return { type: 'fragment' };
+  }
+
+  if (peer instanceof GramJs.StarsTransactionPeer) {
+    return { type: 'peer', id: getApiChatIdFromMtpPeer(peer.peer) };
+  }
+
+  return { type: 'unsupported' };
+}
+
+export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
+  const {
+    date, id, peer, stars, description, photo, title, refund,
+  } = transaction;
+
+  if (photo) {
+    addWebDocumentToLocalDb(photo);
+  }
+
+  return {
+    id,
+    date,
+    peer: buildApiStarsTransactionPeer(peer),
+    stars: stars.toJSNumber(),
+    title,
+    description,
+    photo: photo && buildApiWebDocument(photo),
+    isRefund: refund,
+  };
+}
+
+export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): ApiStarTopupOption {
+  const {
+    amount, currency, stars, extended,
+  } = option;
+
+  return {
+    amount: amount.toJSNumber(),
+    currency,
+    stars: stars.toJSNumber(),
+    isExtended: extended,
   };
 }

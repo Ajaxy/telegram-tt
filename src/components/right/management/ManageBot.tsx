@@ -26,7 +26,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';

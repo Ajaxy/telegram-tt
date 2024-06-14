@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import type { ApiCountry } from '../../api/types';
-import type { CustomPeer, CustomPeerType } from '../../types';
+import type { CustomPeer, CustomPeerType, UniqueCustomPeer } from '../../types';
 
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { isUserId } from '../../global/helpers';
@@ -28,7 +28,7 @@ import './Picker.scss';
 
 type OwnProps = {
   className?: string;
-  categories?: CustomPeer[];
+  categories?: UniqueCustomPeer[];
   itemIds: string[];
   selectedCategories?: CustomPeerType[];
   selectedIds: string[];

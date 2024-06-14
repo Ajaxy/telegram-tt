@@ -60,6 +60,8 @@ import type {
   ApiSession,
   ApiSessionData,
   ApiSponsoredMessage,
+  ApiStarsTransaction,
+  ApiStarTopupOption,
   ApiStealthMode,
   ApiSticker,
   ApiStickerSet,
@@ -151,6 +153,12 @@ export type IDimensions = {
 
 export type ApiPaymentStatus = 'paid' | 'failed' | 'pending' | 'cancelled';
 
+export type StarsTransactionType = 'all' | 'inbound' | 'outbound';
+export type StarsTransactionHistory = Record<StarsTransactionType, {
+  transactions: ApiStarsTransaction[];
+  nextOffset?: string;
+} | undefined>;
+
 export type ConfettiStyle = 'poppers' | 'top-down';
 
 export interface TabThread {
@@ -224,6 +232,16 @@ export type ChatRequestedTranslations = {
   toLanguage?: string;
   manualMessages?: Record<number, string>;
 };
+
+type ConfettiParams = OptionalCombine<{
+  style?: ConfettiStyle;
+  withStars?: boolean;
+}, {
+  top?: number;
+  left?: number;
+  width?: number;
+  height?: number;
+}>;
 
 export type TabState = {
   id: number;
@@ -477,6 +495,7 @@ export type TabState = {
   };
 
   payment: {
+    type?: 'regular' | 'stars';
     inputInvoice?: ApiInputInvoice;
     step?: PaymentStep;
     status?: ApiPaymentStatus;
@@ -514,7 +533,7 @@ export type TabState = {
       validUntil: number;
     };
     url?: string;
-    botName?: string;
+    botId?: string;
   };
 
   chatCreation?: {
@@ -627,6 +646,7 @@ export type TabState = {
     width?: number;
     height?: number;
     style?: ConfettiStyle;
+    withStars?: boolean;
   };
 
   urlAuth?: {
@@ -752,6 +772,11 @@ export type TabState = {
     type: 'phone' | 'username';
     collectible: string;
   };
+
+  starsBalanceModal?: {
+    originPayment?: TabState['payment'];
+  };
+  isStarPaymentModalOpen?: true;
 };
 
 export type GlobalState = {
@@ -1080,6 +1105,12 @@ export type GlobalState = {
   savedReactionTags?: {
     byKey: Record<ApiReactionKey, ApiSavedReactionTag>;
     hash: string;
+  };
+
+  stars?: {
+    topupOptions: ApiStarTopupOption[];
+    balance: number;
+    history: StarsTransactionHistory;
   };
 };
 
@@ -1653,10 +1684,13 @@ export interface ActionPayloads {
     savedCredentialId?: string;
     tipAmount?: number;
   } & WithTabId;
+  sendStarPaymentForm: WithTabId | undefined;
   getReceipt: {
-    receiptMessageId: number;
     chatId: string;
     messageId: number;
+  } & WithTabId;
+  getStarsReceipt: {
+    transaction: ApiStarsTransaction;
   } & WithTabId;
   sendCredentialsInfo: {
     credentials: ApiCredentials;
@@ -2088,6 +2122,15 @@ export interface ActionPayloads {
     };
   } & WithTabId;
 
+  loadStarStatus: undefined;
+  loadStarsTransactions: {
+    type: StarsTransactionType;
+  };
+  openStarsBalanceModal: {
+    originPayment?: TabState['payment'];
+  } & WithTabId;
+  closeStarsBalanceModal: WithTabId | undefined;
+
   checkChatlistInvite: {
     slug: string;
   } & WithTabId;
@@ -2149,6 +2192,10 @@ export interface ActionPayloads {
     chatId: string;
     ids: number[];
     shouldIncrement?: boolean;
+  };
+  loadFactChecks: {
+    chatId: string;
+    ids: number[];
   };
   loadOutboxReadDate: {
     chatId: string;
@@ -2850,13 +2897,7 @@ export interface ActionPayloads {
     isQuiz?: boolean;
   } & WithTabId) | undefined;
   closePollModal: WithTabId | undefined;
-  requestConfetti: ({
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-    style?: ConfettiStyle;
-  } & WithTabId) | WithTabId;
+  requestConfetti: (ConfettiParams & WithTabId) | WithTabId;
 
   updateAttachmentSettings: {
     shouldCompress?: boolean;

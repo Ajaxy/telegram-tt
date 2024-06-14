@@ -11,7 +11,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
 import AvatarList from '../common/AvatarList';
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import ReactionAnimatedEmoji from '../common/reactions/ReactionAnimatedEmoji';
 import Button from '../ui/Button';
 

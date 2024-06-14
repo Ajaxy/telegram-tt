@@ -244,12 +244,7 @@ export function updater(update: Update) {
     if (update.message instanceof GramJs.MessageService) {
       const { action } = update.message;
 
-      if (action instanceof GramJs.MessageActionPaymentSent) {
-        onUpdate({
-          '@type': 'updatePaymentStateCompleted',
-          slug: action.invoiceSlug,
-        });
-      } else if (action instanceof GramJs.MessageActionChatEditTitle) {
+      if (action instanceof GramJs.MessageActionChatEditTitle) {
         onUpdate({
           '@type': 'updateChat',
           id: message.chatId,
@@ -1193,6 +1188,11 @@ export function updater(update: Update) {
       '@type': 'updateViewForumAsMessages',
       chatId: buildApiPeerId(update.channelId, 'channel'),
       isEnabled: update.enabled ? true : undefined,
+    });
+  } else if (update instanceof GramJs.UpdateStarsBalance) {
+    onUpdate({
+      '@type': 'updateStarsBalance',
+      balance: update.balance.toJSNumber(),
     });
   } else if (update instanceof LocalUpdatePremiumFloodWait) {
     onUpdate({

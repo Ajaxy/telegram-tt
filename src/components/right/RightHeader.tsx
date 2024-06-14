@@ -33,7 +33,7 @@ import { useFolderManagerForChatsCount } from '../../hooks/useFolderManager';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import SearchInput from '../ui/SearchInput';

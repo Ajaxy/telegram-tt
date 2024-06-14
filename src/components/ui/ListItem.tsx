@@ -16,7 +16,7 @@ import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMenuPosition from '../../hooks/useMenuPosition';
 
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Menu from './Menu';
 import MenuItem from './MenuItem';

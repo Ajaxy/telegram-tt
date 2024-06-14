@@ -5,6 +5,7 @@ import { getActions } from '../../global';
 
 import type {
   ApiChat, ApiPeer, ApiPhoto, ApiUser,
+  ApiWebDocument,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { CustomPeer, StoryViewerOrigin } from '../../types';
@@ -16,6 +17,7 @@ import {
   getChatTitle,
   getPeerStoryHtmlId,
   getUserFullName,
+  getWebDocumentHash,
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
@@ -34,7 +36,7 @@ import useMediaTransition from '../../hooks/useMediaTransition';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import AvatarStoryCircle from './AvatarStoryCircle';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import './Avatar.scss';
 
@@ -51,6 +53,7 @@ type OwnProps = {
   size?: AvatarSize;
   peer?: ApiPeer | CustomPeer;
   photo?: ApiPhoto;
+  webPhoto?: ApiWebDocument;
   text?: string;
   isSavedMessages?: boolean;
   isSavedDialog?: boolean;
@@ -74,6 +77,7 @@ const Avatar: FC<OwnProps> = ({
   size = 'large',
   peer,
   photo,
+  webPhoto,
   text,
   isSavedMessages,
   isSavedDialog,
@@ -118,6 +122,8 @@ const Avatar: FC<OwnProps> = ({
       if (photo.isVideo && withVideo) {
         videoHash = `videoAvatar${photo.id}?size=u`;
       }
+    } else if (webPhoto) {
+      imageHash = getWebDocumentHash(webPhoto);
     }
   }
 
@@ -230,6 +236,7 @@ const Avatar: FC<OwnProps> = ({
     isReplies && 'replies-bot-account',
     isPremiumGradient && 'premium-gradient-bg',
     isRoundedRect && 'forum',
+    (photo || webPhoto) && 'force-fit',
     ((withStory && realPeer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && realPeer?.hasStories && 'with-story-solid',
     withStorySolid && forceFriendStorySolid && 'close-friend',
