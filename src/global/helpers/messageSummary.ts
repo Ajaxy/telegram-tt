@@ -183,6 +183,7 @@ function getSummaryDescription(
     summary = renderTextWithEntities({
       text: poll.summary.question.text,
       entities: poll.summary.question.entities,
+      noLineBreaks: true,
     });
   }
 
