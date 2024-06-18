@@ -269,6 +269,7 @@ export function sendMessage(
     sendAs,
     shouldUpdateStickerSetOrder,
     wasDrafted,
+    isInvertedMedia,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -288,6 +289,7 @@ export function sendMessage(
     sendAs?: ApiPeer;
     shouldUpdateStickerSetOrder?: boolean;
     wasDrafted?: boolean;
+    isInvertedMedia?: true;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -306,6 +308,7 @@ export function sendMessage(
     scheduledAt,
     sendAs,
     story,
+    isInvertedMedia,
   );
 
   onUpdate({
@@ -392,6 +395,7 @@ export function sendMessage(
         ...(noWebPage && { noWebpage: noWebPage }),
         ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
         ...(shouldUpdateStickerSetOrder && { updateStickersetsOrder: shouldUpdateStickerSetOrder }),
+        ...(isInvertedMedia && { invertMedia: isInvertedMedia }),
       }), {
         shouldThrow: true,
         shouldIgnoreUpdates: true,
@@ -585,6 +589,8 @@ export async function editMessage({
 
   const media = attachment && buildUploadingMedia(attachment);
 
+  const isInvertedMedia = text && !attachment?.shouldSendAsFile ? message.isInvertedMedia : undefined;
+
   const newContent = {
     ...(media || message.content),
     ...(text && {
@@ -599,6 +605,7 @@ export async function editMessage({
     ...message,
     content: newContent,
     emojiOnlyCount: getEmojiOnlyCountForMessage(newContent, message.groupedId),
+    isInvertedMedia,
   };
 
   onUpdate({
@@ -624,6 +631,7 @@ export async function editMessage({
       id: message.id,
       ...(isScheduled && { scheduleDate: message.date }),
       ...(noWebPage && { noWebpage: noWebPage }),
+      ...(isInvertedMedia && { invertMedia: isInvertedMedia }),
     }), { shouldThrow: true });
   } catch (err) {
     if (DEBUG) {

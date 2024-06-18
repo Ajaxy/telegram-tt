@@ -14151,7 +14151,7 @@ namespace Api {
       clearDraft?: true;
       noforwards?: true;
       updateStickersetsOrder?: true;
-      invertMedia?: true;
+      isInvertedMedia?: true;
       peer: Api.TypeInputPeer;
       replyTo?: Api.TypeInputReplyTo;
       media: Api.TypeInputMedia;

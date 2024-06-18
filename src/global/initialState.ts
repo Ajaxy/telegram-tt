@@ -132,6 +132,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   attachmentSettings: {
     shouldCompress: true,
     shouldSendGrouped: true,
+    isInvertedMedia: undefined,
   },
 
   scheduledMessages: {

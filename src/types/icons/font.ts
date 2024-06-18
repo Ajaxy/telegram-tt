@@ -123,6 +123,8 @@ export type FontIconName =
   | 'monospace'
   | 'more-circle'
   | 'more'
+  | 'move-caption-down'
+  | 'move-caption-up'
   | 'mute'
   | 'muted'
   | 'my-notes'

@@ -801,6 +801,7 @@ export function buildLocalMessage(
   scheduledAt?: number,
   sendAs?: ApiPeer,
   story?: ApiStory | ApiStorySkipped,
+  isInvertedMedia?: true,
 ): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
@@ -835,6 +836,7 @@ export function buildLocalMessage(
     }),
     ...(scheduledAt && { isScheduled: true }),
     isForwardingAllowed: true,
+    isInvertedMedia,
   } satisfies ApiMessage;
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
@@ -872,6 +874,7 @@ export function buildLocalForwardedMessage({
     senderId,
     groupedId,
     isInAlbum,
+    isInvertedMedia,
   } = message;
 
   const isAudio = content.audio;
@@ -912,6 +915,7 @@ export function buildLocalForwardedMessage({
     isInAlbum,
     isForwardingAllowed: true,
     replyInfo,
+    isInvertedMedia,
     ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
 
     ...(emojiOnlyCount && { emojiOnlyCount }),

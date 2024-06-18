@@ -1407,6 +1407,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   groupedId?: string;
   wasDrafted?: boolean;
   lastMessageId?: number;
+  isInvertedMedia?: true;
 }) {
   let currentMessageKey: MessageKey | undefined;
   const progressCallback = params.attachment ? (progress: number, messageKey: MessageKey) => {

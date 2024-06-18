@@ -887,12 +887,14 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendGrouped = attachmentSettings.shouldSendGrouped,
     isSilent,
     scheduledAt,
+    isInvertedMedia,
   }: {
     attachments: ApiAttachment[];
     sendCompressed?: boolean;
     sendGrouped?: boolean;
     isSilent?: boolean;
     scheduledAt?: number;
+    isInvertedMedia?: true;
   }) => {
     if (!currentMessageList && !storyId) {
       return;
@@ -904,6 +906,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
     if (!validateTextLength(text, true)) return;
     if (!checkSlowMode()) return;
+
+    isInvertedMedia = text && sendCompressed && sendGrouped ? isInvertedMedia : undefined;
 
     if (editingMessage) {
       editMessage({
@@ -922,6 +926,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldUpdateStickerSetOrder,
         attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
         shouldGroupMessages: sendGrouped,
+        isInvertedMedia,
       });
     }
 
@@ -935,11 +940,25 @@ const Composer: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleSendAttachmentsFromModal = useLastCallback((
+    sendCompressed: boolean,
+    sendGrouped: boolean,
+    isInvertedMedia?: true,
+  ) => {
+    sendAttachments({
+      attachments,
+      sendCompressed,
+      sendGrouped,
+      isInvertedMedia,
+    });
+  });
+
   const handleSendAttachments = useLastCallback((
     sendCompressed: boolean,
     sendGrouped: boolean,
     isSilent?: boolean,
     scheduledAt?: number,
+    isInvertedMedia?: true,
   ) => {
     sendAttachments({
       attachments,
@@ -947,6 +966,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       sendGrouped,
       isSilent,
       scheduledAt,
+      isInvertedMedia,
     });
   });
 
@@ -1059,8 +1079,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (!args || Object.keys(restArgs).length === 0) {
       void handleSend(Boolean(isSilent), scheduledAt);
     } else if (args.sendCompressed !== undefined || args.sendGrouped !== undefined) {
-      const { sendCompressed = false, sendGrouped = false } = args;
-      void handleSendAttachments(sendCompressed, sendGrouped, isSilent, scheduledAt);
+      const { sendCompressed = false, sendGrouped = false, isInvertedMedia } = args;
+      void handleSendAttachments(sendCompressed, sendGrouped, isSilent, scheduledAt, isInvertedMedia);
     } else {
       sendMessage({
         ...args,
@@ -1237,8 +1257,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt, currentMessageList!);
       });
     } else if (additionalArgs && ('sendCompressed' in additionalArgs || 'sendGrouped' in additionalArgs)) {
-      const { sendCompressed = false, sendGrouped = false } = additionalArgs;
-      void handleSendAttachments(sendCompressed, sendGrouped, true);
+      const { sendCompressed = false, sendGrouped = false, isInvertedMedia } = additionalArgs;
+      void handleSendAttachments(sendCompressed, sendGrouped, true, undefined, isInvertedMedia);
     } else {
       void handleSend(true);
     }
@@ -1490,15 +1510,19 @@ const Composer: FC<OwnProps & StateProps> = ({
     handleMessageSchedule({}, SCHEDULED_WHEN_ONLINE, currentMessageList!);
   });
 
-  const handleSendScheduledAttachments = useLastCallback((sendCompressed: boolean, sendGrouped: boolean) => {
-    requestCalendar((scheduledAt) => {
-      handleMessageSchedule({ sendCompressed, sendGrouped }, scheduledAt, currentMessageList!);
-    });
-  });
+  const handleSendScheduledAttachments = useLastCallback(
+    (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => {
+      requestCalendar((scheduledAt) => {
+        handleMessageSchedule({ sendCompressed, sendGrouped, isInvertedMedia }, scheduledAt, currentMessageList!);
+      });
+    },
+  );
 
-  const handleSendSilentAttachments = useLastCallback((sendCompressed: boolean, sendGrouped: boolean) => {
-    sendSilent({ sendCompressed, sendGrouped });
-  });
+  const handleSendSilentAttachments = useLastCallback(
+    (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => {
+      sendSilent({ sendCompressed, sendGrouped, isInvertedMedia });
+    },
+  );
 
   const onSend = useMemo(() => {
     switch (mainButtonState) {
@@ -1557,7 +1581,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         forceDarkTheme={isInStoryViewer}
         onCaptionUpdate={onCaptionUpdate}
         onSendSilent={handleSendSilentAttachments}
-        onSend={handleSendAttachments}
+        onSend={handleSendAttachmentsFromModal}
         onSendScheduled={handleSendScheduledAttachments}
         onFileAppend={handleAppendFiles}
         onClear={handleClearAttachments}

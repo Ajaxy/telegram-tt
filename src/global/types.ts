@@ -296,6 +296,7 @@ export type TabState = {
     isSilent?: boolean;
     sendGrouped?: boolean;
     sendCompressed?: boolean;
+    isInvertedMedia?: true;
   };
 
   activeChatFolder: number;
@@ -823,6 +824,7 @@ export type GlobalState = {
   attachmentSettings: {
     shouldCompress: boolean;
     shouldSendGrouped: boolean;
+    isInvertedMedia?: true;
   };
 
   attachMenu: {
@@ -1475,6 +1477,7 @@ export interface ActionPayloads {
     shouldGroupMessages?: boolean;
     messageList?: MessageList;
     isReaction?: true; // Reaction to the story are sent in the form of a message
+    isInvertedMedia?: true;
   } & WithTabId;
   sendInviteMessages: {
     chatId: string;
@@ -2905,6 +2908,7 @@ export interface ActionPayloads {
   updateAttachmentSettings: {
     shouldCompress?: boolean;
     shouldSendGrouped?: boolean;
+    isInvertedMedia?: true;
   };
 
   updateArchiveSettings: {

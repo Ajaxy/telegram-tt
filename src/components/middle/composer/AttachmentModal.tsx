@@ -74,12 +74,12 @@ export type OwnProps = {
   isForCurrentMessageList?: boolean;
   forceDarkTheme?: boolean;
   onCaptionUpdate: (html: string) => void;
-  onSend: (sendCompressed: boolean, sendGrouped: boolean) => void;
+  onSend: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
   onFileAppend: (files: File[], isSpoiler?: boolean) => void;
   onAttachmentsUpdate: (attachments: ApiAttachment[]) => void;
   onClear: NoneToVoidFunction;
-  onSendSilent: (sendCompressed: boolean, sendGrouped: boolean) => void;
-  onSendScheduled: (sendCompressed: boolean, sendGrouped: boolean) => void;
+  onSendSilent: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
+  onSendScheduled: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
   onCustomEmojiSelect: (emoji: ApiSticker) => void;
   onRemoveSymbol: VoidFunction;
   onEmojiSelect: (emoji: string) => void;
@@ -167,6 +167,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     (shouldSendCompressed || shouldForceCompression || isInAlbum) && !shouldForceAsFile,
   );
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
+  const [isInvertedMedia, setIsInvertedMedia] = useState(attachmentSettings.isInvertedMedia);
 
   const {
     handleScroll: handleAttachmentsScroll,
@@ -253,6 +254,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (isOpen) {
       setShouldSendCompressed(shouldSuggestCompression ?? attachmentSettings.shouldCompress);
       setShouldSendGrouped(attachmentSettings.shouldSendGrouped);
+      setIsInvertedMedia(attachmentSettings.isInvertedMedia);
     }
   }, [attachmentSettings, isOpen, shouldSuggestCompression]);
 
@@ -273,10 +275,11 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (isOpen) {
       const send = ((shouldSchedule || shouldSendScheduled) && isForMessage && !editingMessage) ? onSendScheduled
         : isSilent ? onSendSilent : onSend;
-      send(isSendingCompressed, shouldSendGrouped);
+      send(isSendingCompressed, shouldSendGrouped, isInvertedMedia);
       updateAttachmentSettings({
         shouldCompress: shouldSuggestCompression === undefined ? isSendingCompressed : undefined,
         shouldSendGrouped,
+        isInvertedMedia,
       });
     }
   });
@@ -432,6 +435,14 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const isMultiple = renderingAttachments.length > 1;
 
+  const canInvertMedia = (() => {
+    if (isEditing) return false;
+    if (!hasMedia) return false;
+    if (!shouldForceAsFile && !shouldForceCompression && !isSendingCompressed) return false;
+    if (isMultiple && shouldSendGrouped) return false;
+    return true;
+  })();
+
   let title = '';
   if (areAllPhotos) {
     title = lang(isEditing ? 'EditMessageReplacePhoto' : 'PreviewSender.SendPhoto', renderingAttachments.length, 'i');
@@ -466,6 +477,19 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               )}
               {hasMedia && (
                 <>
+                  {
+                    canInvertMedia && (!isInvertedMedia ? (
+                      // eslint-disable-next-line react/jsx-no-bind
+                      <MenuItem icon="move-caption-up" onClick={() => setIsInvertedMedia(true)}>
+                        {lang('PreviewSender.MoveTextUp')}
+                      </MenuItem>
+                    ) : (
+                      // eslint-disable-next-line react/jsx-no-bind
+                      <MenuItem icon="move-caption-down" onClick={() => setIsInvertedMedia(undefined)}>
+                        {lang(('PreviewSender.MoveTextDown'))}
+                      </MenuItem>
+                    ))
+                  }
                   {
                     !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
                       // eslint-disable-next-line react/jsx-no-bind
