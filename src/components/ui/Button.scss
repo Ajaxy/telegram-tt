@@ -43,6 +43,7 @@
   overflow: hidden;
   transition: background-color 0.15s, color 0.15s;
   text-decoration: none !important;
+  text-transform: uppercase;
 
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
 
@@ -51,6 +52,10 @@
   &.clicked,
   body.no-page-transitions & {
     transition: none !important;
+  }
+
+  &.no-upper-case {
+    text-transform: none;
   }
 
   &.disabled {

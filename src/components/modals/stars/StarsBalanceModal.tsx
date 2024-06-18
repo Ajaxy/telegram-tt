@@ -165,7 +165,7 @@ const StarsBalanceModal = ({
               <StarTopupOption option={option} starsCount={starsCount} onClick={handleClick} />
             ))}
             {!areOptionsExtended && (
-              <Button className={styles.moreOptions} isText onClick={markOptionsExtended}>
+              <Button className={styles.moreOptions} noForcedUpperCase isText onClick={markOptionsExtended}>
                 {lang('Stars.Purchase.ShowMore')}
                 <Icon className={styles.iconDown} name="down" />
               </Button>
