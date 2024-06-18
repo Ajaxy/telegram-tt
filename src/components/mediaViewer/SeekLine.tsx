@@ -1,7 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect,
-  useMemo, useRef, useState,
+  useMemo, useRef, useSignal, useState,
 } from '../../lib/teact/teact';
 
 import type { ApiDimensions } from '../../api/types';
@@ -18,7 +18,6 @@ import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { useThrottledSignal } from '../../hooks/useAsyncResolvers';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useLastCallback from '../../hooks/useLastCallback';
-import useSignal from '../../hooks/useSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
 import ShowTransition from '../ui/ShowTransition';

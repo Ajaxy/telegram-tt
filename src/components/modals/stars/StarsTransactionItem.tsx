@@ -15,9 +15,9 @@ import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import { CUSTOM_PEER_PREMIUM } from '../../../util/objects/customPeer';
 
+import useSelector from '../../../hooks/data/useSelector';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useSelector from '../../../hooks/useSelector';
 
 import Avatar from '../../common/Avatar';
 import StarIcon from '../../common/icons/StarIcon';

@@ -4,8 +4,8 @@ import { ApiMediaFormat } from '../api/types';
 
 import { selectIsSynced } from '../global/selectors';
 import * as mediaLoader from '../util/mediaLoader';
+import useSelector from './data/useSelector';
 import useForceUpdate from './useForceUpdate';
-import useSelector from './useSelector';
 
 const useMedia = (
   mediaHash: string | false | undefined,

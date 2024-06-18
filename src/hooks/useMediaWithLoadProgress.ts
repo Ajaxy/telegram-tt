@@ -8,8 +8,8 @@ import { selectIsSynced } from '../global/selectors';
 import * as mediaLoader from '../util/mediaLoader';
 import { throttle } from '../util/schedulers';
 import { IS_PROGRESSIVE_SUPPORTED } from '../util/windowEnvironment';
+import useSelector from './data/useSelector';
 import useForceUpdate from './useForceUpdate';
-import useSelector from './useSelector';
 import useUniqueId from './useUniqueId';
 
 const STREAMING_PROGRESS = 0.75;

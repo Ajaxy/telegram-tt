@@ -4,9 +4,9 @@ import React, { memo, useMemo } from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
+import useSelectorSignal from '../../hooks/data/useSelectorSignal';
 import useDerivedState from '../../hooks/useDerivedState';
 import useOldLang from '../../hooks/useOldLang';
-import useSelectorSignal from '../../hooks/useSelectorSignal';
 
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';

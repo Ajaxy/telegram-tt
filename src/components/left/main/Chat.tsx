@@ -50,13 +50,13 @@ import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 
+import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useSelectorSignal from '../../../hooks/useSelectorSignal';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useChatListEntry from './hooks/useChatListEntry';
 

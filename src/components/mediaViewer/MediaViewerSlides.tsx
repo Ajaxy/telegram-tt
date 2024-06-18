@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useLayoutEffect, useRef, useState,
+  memo, useEffect, useLayoutEffect, useRef, useSignal, useState,
 } from '../../lib/teact/teact';
 
 import type { MediaViewerOrigin, ThreadId } from '../../types';
@@ -24,7 +24,6 @@ import useDerivedState from '../../hooks/useDerivedState';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import useSignal from '../../hooks/useSignal';
 import { useSignalRef } from '../../hooks/useSignalRef';
 import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
 import useWindowSize from '../../hooks/window/useWindowSize';

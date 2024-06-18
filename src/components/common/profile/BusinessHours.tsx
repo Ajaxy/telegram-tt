@@ -12,13 +12,13 @@ import {
 } from '../../../util/dates/workHours';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useSelectorSignal from '../../../hooks/useSelectorSignal';
 
 import ListItem from '../../ui/ListItem';
 import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../ui/Transition';

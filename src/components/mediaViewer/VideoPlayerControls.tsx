@@ -2,6 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect,
   useMemo,
+  useSignal,
 } from '../../lib/teact/teact';
 
 import type { ApiDimensions } from '../../api/types';
@@ -18,7 +19,6 @@ import useDerivedState from '../../hooks/useDerivedState';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import useSignal from '../../hooks/useSignal';
 import useControlsSignal from './hooks/useControlsSignal';
 
 import Button from '../ui/Button';

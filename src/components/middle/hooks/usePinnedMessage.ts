@@ -1,4 +1,4 @@
-import { useEffect, useRef } from '../../../lib/teact/teact';
+import { useEffect, useRef, useSignal } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import type { ThreadId } from '../../../types';
@@ -13,7 +13,6 @@ import { unique } from '../../../util/iteratees';
 import { clamp } from '../../../util/math';
 
 import useLastCallback from '../../../hooks/useLastCallback';
-import useSignal from '../../../hooks/useSignal';
 
 type PinnedIntersectionChangedParams = {
   viewportPinnedIdsToAdd?: number[];

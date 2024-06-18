@@ -1,6 +1,6 @@
-import type { GlobalState } from '../global/types';
+import type { GlobalState } from '../../global/types';
 
-import useDerivedState from './useDerivedState';
+import useDerivedState from '../useDerivedState';
 import useSelectorSignal from './useSelectorSignal';
 
 type Selector<T extends unknown> = (global: GlobalState) => T;
