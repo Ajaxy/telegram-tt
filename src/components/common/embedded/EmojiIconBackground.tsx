@@ -10,9 +10,9 @@ import { REM } from '../helpers/mediaDimensions';
 
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
 import { useThrottleForHeavyAnimation } from '../../../hooks/useHeavyAnimationCheck';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 import useCustomEmoji from '../hooks/useCustomEmoji';
@@ -75,7 +75,7 @@ const EmojiIconBackground = ({
 
   const dpr = useDevicePixelRatio();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { customEmoji } = useCustomEmoji(emojiDocumentId);
   const previewMediaHash = customEmoji ? getStickerPreviewHash(customEmoji.id) : undefined;

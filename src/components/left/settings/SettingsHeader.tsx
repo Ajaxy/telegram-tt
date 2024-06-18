@@ -7,8 +7,8 @@ import { getActions } from '../../../global';
 import { SettingsScreens } from '../../../types';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
 import useMultiClick from '../../../hooks/useMultiClick';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -75,7 +75,7 @@ const SettingsHeader: FC<OwnProps> = ({
     );
   }, [isMobile]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   function renderHeaderContent() {
     switch (currentScreen) {

@@ -17,8 +17,8 @@ import { formatInteger } from '../../../util/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarEditable from '../../ui/AvatarEditable';
 import Checkbox from '../../ui/Checkbox';
@@ -91,7 +91,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   const [error, setError] = useState<string | undefined>();
   const imageHash = chat && getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

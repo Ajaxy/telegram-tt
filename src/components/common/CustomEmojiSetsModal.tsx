@@ -10,7 +10,7 @@ import { selectCanPlayAnimatedEmojis } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import Modal from '../ui/Modal';
@@ -34,7 +34,7 @@ const CustomEmojiSetsModal: FC<OwnProps & StateProps> = ({
   onClose,
 }) => {
   const { openStickerSet } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const customEmojiModalRef = useRef<HTMLDivElement>(null);

@@ -7,11 +7,11 @@ import type { TabState } from '../../../global/types';
 import { TME_LINK_PREFIX } from '../../../config';
 import { selectChatMessage, selectSender } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import LinkField from '../../common/LinkField';
 import TableInfoModal, { type TableData } from '../common/TableInfoModal';
@@ -39,7 +39,7 @@ const GiftCodeModal = ({
   const {
     closeGiftCodeModal, applyGiftCode, focusMessage,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const isOpen = Boolean(modal);
 
   const canUse = (!modal?.info.toId || modal?.info.toId === currentUserId) && !modal?.info.usedAt;

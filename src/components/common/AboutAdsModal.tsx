@@ -5,7 +5,7 @@ import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
 import useDerivedState from '../../hooks/useDerivedState';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useSelectorSignal from '../../hooks/useSelectorSignal';
 
 import Button from '../ui/Button';
@@ -28,7 +28,7 @@ const AboutAdsModal: FC<OwnProps> = ({
   isRevenueSharing,
   onClose,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const minLevelSignal = useSelectorSignal((global) => global.appConfig?.channelRestrictAdsLevelMin);
   const minLevelToRestrictAds = useDerivedState(minLevelSignal);

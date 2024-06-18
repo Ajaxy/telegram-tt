@@ -10,8 +10,8 @@ import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import StarIcon from '../../common/icons/StarIcon';
@@ -42,7 +42,7 @@ const StarPaymentModal = ({
 
   const photo = payment?.invoice?.photo;
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     if (!isOpen) {

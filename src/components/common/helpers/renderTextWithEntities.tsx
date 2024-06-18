@@ -9,7 +9,7 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { translate } from '../../../util/langProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
 import renderText from './renderText';
 
@@ -663,6 +663,6 @@ function handleHashtagClick(e: React.MouseEvent<HTMLAnchorElement>) {
 function handleCodeClick(e: React.MouseEvent<HTMLElement>) {
   copyTextToClipboard(e.currentTarget.innerText);
   getActions().showNotification({
-    message: translate('TextCopied'),
+    message: oldTranslate('TextCopied'),
   });
 }

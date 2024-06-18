@@ -6,12 +6,12 @@ import type { ApiMessage } from '../../../api/types';
 
 import { getMessageInvoice } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import MediaSpoiler from '../../common/MediaSpoiler';
 
@@ -29,7 +29,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
   isConnected,
 }) => {
   const { openInvoice, loadExtendedMedia } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const invoice = getMessageInvoice(message);
 
   const { chatId, id } = message;

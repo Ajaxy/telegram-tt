@@ -18,8 +18,8 @@ import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
 import Icon from '../../common/icons/Icon';
@@ -55,7 +55,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
     openPremiumModal, closeGiftPremiumModal, openInvoice, requestConfetti,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [selectedMonthOption, setSelectedMonthOption] = useState<number | undefined>();
 
   const selectedUserQuantity = forUserIds && forUserIds.length * boostPerSentGift;

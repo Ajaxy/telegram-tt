@@ -16,8 +16,8 @@ import { selectChatMessages, selectUser, selectUserStatus } from '../../global/s
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import RippleEffect from '../ui/RippleEffect';
 import Avatar from './Avatar';
@@ -105,7 +105,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     loadProfilePhotos,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { id: userId } = user || {};
 

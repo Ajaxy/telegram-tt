@@ -22,7 +22,7 @@ import {
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { getDayStartAt } from '../../util/date/dateFormat';
+import { getDayStartAt } from '../../util/dates/dateFormat';
 import { debounce } from '../../util/schedulers';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -30,8 +30,8 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useElectronDrag from '../../hooks/useElectronDrag';
 import useFlag from '../../hooks/useFlag';
 import { useFolderManagerForChatsCount } from '../../hooks/useFolderManager';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
@@ -241,7 +241,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     }, COLUMN_ANIMATION_DURATION);
   }, [isColumnOpen]);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const contentKey = isProfile ? (
     profileState === ProfileState.Profile ? (
       HeaderContent.Profile

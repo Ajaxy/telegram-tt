@@ -124,8 +124,8 @@ import useEnsureStory from '../../../hooks/useEnsureStory';
 import useFlag from '../../../hooks/useFlag';
 import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -423,7 +423,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const messageHeightRef = useRef(0);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
   const [hasActiveStickerEffect, startStickerEffect, stopStickerEffect] = useFlag();

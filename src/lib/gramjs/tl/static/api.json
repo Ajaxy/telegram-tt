@@ -236,6 +236,8 @@
     "langpack.getLangPack",
     "langpack.getStrings",
     "langpack.getLanguages",
+    "langpack.getLanguage",
+    "langpack.getDifference",
     "folders.editPeerFolders",
     "phone.createGroupCall",
     "phone.joinGroupCall",

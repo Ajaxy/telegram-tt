@@ -30,8 +30,8 @@ import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useChatListEntry from './hooks/useChatListEntry';
 import useTopicContextActions from './hooks/useTopicContextActions';
 
@@ -99,7 +99,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     setViewForumAsMessages,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();

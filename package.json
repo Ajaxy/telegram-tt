@@ -24,6 +24,8 @@
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
     "gramjs:lint": "eslint src/lib/gramjs --ext .ts,.tsx,.js",
     "gramjs:lint:fix": "npm run gramjs:lint -- --fix",
+    "lang:ts": "tsx ./dev/generateLangTypes.js",
+    "lang:initial": "tsx ./dev/generateInitialLangFallback.js",
     "icons:build": "fantasticon",
     "test": "cross-env APP_ENV=test jest --verbose --silent --forceExit",
     "test:playwright": "playwright test",
@@ -124,6 +126,7 @@
     "stylelint-high-performance-animation": "^1.10.0",
     "stylelint-selector-tag-no-without-class": "^3.0.1",
     "telegraph-node": "^1.0.4",
+    "tsx": "^4.11.0",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",
     "webpack-dev-server": "^5.0.4"

@@ -3,7 +3,7 @@ import type { ActionReturnType } from '../../types';
 import { DEBUG } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { translate } from '../../../util/langProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
@@ -452,7 +452,7 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
 
   actions.showNotification({
     message: result
-      ? translate('ReportPeer.AlertSuccess')
+      ? oldTranslate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
     tabId,
   });

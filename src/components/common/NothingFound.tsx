@@ -4,7 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import './NothingFound.scss';
@@ -17,7 +17,7 @@ interface OwnProps {
 const DEFAULT_TEXT = 'Nothing found.';
 
 const NothingFound: FC<OwnProps> = ({ text = DEFAULT_TEXT, description }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { transitionClassNames } = useShowTransition(true);
 
   return (

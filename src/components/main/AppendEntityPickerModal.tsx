@@ -18,8 +18,8 @@ import { unique } from '../../util/iteratees';
 import sortChatIds from '../common/helpers/sortChatIds';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Picker from '../common/Picker';
@@ -65,7 +65,7 @@ const AppendEntityPickerModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { showNotification } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

@@ -22,8 +22,8 @@ import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CustomEmoji from '../../common/CustomEmoji';
@@ -134,7 +134,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     closePremiumModal, openInvoice, requestConfetti, openTelegramLink, loadStickers, openStickerSet,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isHeaderHidden, setHeaderHidden] = useState(true);
   const [currentSection, setCurrentSection] = useState<ApiPremiumSection | undefined>(initialSection);
   const [selectedSubscriptionOption, setSubscriptionOption] = useState<ApiPremiumSubscriptionOption>();

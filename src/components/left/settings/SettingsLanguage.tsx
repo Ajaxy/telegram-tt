@@ -9,13 +9,13 @@ import type { ISettings, LangCode } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
-import { setLanguage } from '../../../util/langProvider';
+import { oldSetLanguage } from '../../../util/oldLangProvider';
 import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
@@ -55,7 +55,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
 
   const canTranslateChatsEnabled = isCurrentUserPremium && canTranslateChats;
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     if (!languages?.length) {
@@ -67,7 +67,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
     setSelectedLanguage(langCode);
     markIsLoading();
 
-    void setLanguage(langCode as LangCode, () => {
+    void oldSetLanguage(langCode as LangCode, () => {
       unmarkIsLoading();
 
       setSettingOption({ language: langCode as LangCode });

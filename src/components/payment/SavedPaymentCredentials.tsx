@@ -6,7 +6,7 @@ import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymen
 
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import RadioGroup from '../ui/RadioGroup';
@@ -24,7 +24,7 @@ const SavedPaymentCredentials: FC<OwnProps> = ({
   dispatch,
   onNewCardClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const options = useMemo(() => {
     return savedCredentials?.length

@@ -10,7 +10,7 @@ import buildClassName from '../../util/buildClassName';
 import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransition from '../../hooks/useShowTransition';
 
@@ -33,7 +33,7 @@ const LINES_TO_SHOW = 3;
 function StoryCaption({
   story, isExpanded, className, onExpand, onFold,
 }: OwnProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null

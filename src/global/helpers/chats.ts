@@ -8,7 +8,7 @@ import type {
   ApiTopic,
   ApiUser,
 } from '../../api/types';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 import type { NotifyException, NotifySettings, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
@@ -16,7 +16,7 @@ import {
   ANONYMOUS_USER_ID,
   ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
-import { formatDateToString, formatTime } from '../../util/date/dateFormat';
+import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getGlobal } from '..';
 import { getMainUsername, getUserFirstOrLastName } from './users';

@@ -1,5 +1,5 @@
 import type { ApiMessage } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 

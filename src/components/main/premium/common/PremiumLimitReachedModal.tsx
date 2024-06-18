@@ -3,7 +3,7 @@ import React, { memo, useCallback, useEffect } from '../../../../lib/teact/teact
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiLimitTypeWithModal } from '../../../../global/types';
-import type { LangFn } from '../../../../hooks/useLang';
+import type { LangFn } from '../../../../hooks/useOldLang';
 import type { IconName } from '../../../../types/icons';
 
 import { MAX_UPLOAD_FILEPART_SIZE } from '../../../../config';
@@ -13,7 +13,7 @@ import { formatFileSize } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 
 import useFlag from '../../../../hooks/useFlag';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
@@ -132,7 +132,7 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
   canBuyPremium,
 }) => {
   const { closeLimitReachedModal, openPremiumModal } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isClosing, startClosing, stopClosing] = useFlag();
 

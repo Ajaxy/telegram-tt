@@ -12,8 +12,8 @@ import buildClassName from '../../../util/buildClassName';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useRunThrottled from '../../../hooks/useRunThrottled';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
@@ -73,7 +73,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
     requestToSpeak,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isDeleteUserModalOpen, openDeleteUserModal, closeDeleteUserModal] = useFlag();
 
   const id = participant?.id;

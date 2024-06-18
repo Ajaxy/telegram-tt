@@ -20,8 +20,8 @@ import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
 import { useFastClick } from '../../../hooks/useFastClick';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../icons/Icon';
 import EmojiIconBackground from './EmojiIconBackground';
@@ -48,7 +48,7 @@ const EmbeddedStoryForward: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     if (!story && forwardInfo.fromPeerId && forwardInfo.storyId) {

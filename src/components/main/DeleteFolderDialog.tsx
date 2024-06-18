@@ -4,7 +4,7 @@ import { getActions } from '../../global';
 
 import type { ApiChatFolder } from '../../api/types';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -17,7 +17,7 @@ const DeleteFolderDialog: FC<OwnProps> = ({
   folder,
 }) => {
   const { closeDeleteChatFolderModal, deleteChatFolder, openDeleteChatFolderModal } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isOpen = Boolean(folder);
 

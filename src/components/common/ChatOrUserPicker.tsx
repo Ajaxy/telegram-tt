@@ -16,8 +16,8 @@ import renderText from './helpers/renderText';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -65,7 +65,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
 }) => {
   const { loadTopics } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null

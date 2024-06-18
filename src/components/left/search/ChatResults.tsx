@@ -24,7 +24,7 @@ import sortChatIds from '../../common/helpers/sortChatIds';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useEffectOnce from '../../../hooks/useEffectOnce';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import NothingFound from '../../common/NothingFound';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
@@ -87,7 +87,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const chatSelectionRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { isMobile } = useAppLayout();
   const [shouldShowMoreLocal, setShouldShowMoreLocal] = useState<boolean>(false);

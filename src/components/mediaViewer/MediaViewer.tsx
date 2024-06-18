@@ -39,8 +39,8 @@ import useElectronDrag from '../../hooks/useElectronDrag';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import { exitPictureInPictureIfNeeded, usePictureInPictureSignal } from '../../hooks/usePictureInPicture';
 import usePrevious from '../../hooks/usePrevious';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
@@ -304,7 +304,7 @@ const MediaViewer: FC<StateProps> = ({
     selectMedia(mediaIds[index]);
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   function renderSenderInfo() {
     return avatarOwner ? (

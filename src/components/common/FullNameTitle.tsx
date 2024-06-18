@@ -17,8 +17,8 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import stopEvent from '../../util/stopEvent';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmoji from './CustomEmoji';
 import FakeIcon from './FakeIcon';
@@ -58,7 +58,7 @@ const FullNameTitle: FC<OwnProps> = ({
   observeIntersection,
   iconElement,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { showNotification } = getActions();
   const realPeer = 'id' in peer ? peer : undefined;
   const customPeer = 'isCustomPeer' in peer ? peer : undefined;

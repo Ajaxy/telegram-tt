@@ -35,7 +35,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useFocusMessage from './message/hooks/useFocusMessage';
 
@@ -106,7 +106,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     openPremiumModal, requestConfetti, checkGiftCode, getReceipt,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);

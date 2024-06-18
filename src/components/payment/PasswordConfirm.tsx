@@ -7,7 +7,7 @@ import type { FormState } from '../../hooks/reducers/usePaymentReducer';
 
 import { selectTabState } from '../../global/selectors';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import PasswordForm from '../common/PasswordForm';
 import PasswordMonkey from '../common/PasswordMonkey';
@@ -35,7 +35,7 @@ const PasswordConfirm: FC<OwnProps & StateProps> = ({
 }) => {
   const { clearPaymentError } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [shouldShowPassword, setShouldShowPassword] = useState(false);
   const cardName = useMemo(() => {
     return savedCredentials?.length && state.savedCredentialId

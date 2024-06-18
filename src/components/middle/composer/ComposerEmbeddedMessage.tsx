@@ -32,9 +32,9 @@ import { getPeerColorClass } from '../../common/helpers/peerColor';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
+import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import { ClosableEmbeddedMessage } from '../../common/embedded/EmbeddedMessage';
@@ -106,7 +106,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isReplyToTopicStart = message?.content.action?.type === 'topicCreate';
   const isShowingReply = replyInfo && !shouldForceShowEditing;

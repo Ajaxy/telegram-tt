@@ -12,9 +12,9 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 
-import useLang from '../../../hooks/useLang';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import Skeleton from '../../ui/placeholder/Skeleton';
@@ -41,7 +41,7 @@ const Invoice: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const invoice = getMessageInvoice(message);
 
   const {

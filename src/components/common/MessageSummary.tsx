@@ -2,7 +2,7 @@ import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiFormattedText, ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import {

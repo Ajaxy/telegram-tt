@@ -1,7 +1,7 @@
-import * as langProvider from '../util/langProvider';
+import * as langProvider from '../util/oldLangProvider';
 import useAsync from './useAsync';
 
-const useLangString = (
+const useOldLangString = (
   langCode: string | undefined,
   key: string,
   shouldIgnoreSameValue = false,
@@ -18,4 +18,4 @@ const useLangString = (
   return result || defaultValue;
 };
 
-export default useLangString;
+export default useOldLangString;

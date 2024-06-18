@@ -9,7 +9,7 @@ import type { ApiChatlistInviteNew } from '../../../api/types';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Picker from '../../common/Picker';
 import Badge from '../../ui/Badge';
@@ -24,7 +24,7 @@ type OwnProps = {
 const ChatlistNew: FC<OwnProps> = ({ invite }) => {
   const { closeChatlistModal, joinChatlistInvite } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(invite.peerIds);
 
   const joinedIds = useMemo(() => {

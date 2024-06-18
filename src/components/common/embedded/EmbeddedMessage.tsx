@@ -31,8 +31,8 @@ import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
 import { useFastClick } from '../../../hooks/useFastClick';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import useThumbnail from '../../../hooks/useThumbnail';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
@@ -109,7 +109,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
     chatTranslations, message?.chatId, shouldTranslate ? message?.id : undefined, requestedChatTranslationLanguage,
   );
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const senderTitle = sender ? getSenderTitle(lang, sender)
     : (replyForwardInfo?.hiddenUserName || message?.forwardInfo?.hiddenUserName);

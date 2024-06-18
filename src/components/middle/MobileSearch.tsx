@@ -21,7 +21,7 @@ import {
   selectIsCurrentUserPremium,
   selectTabState,
 } from '../../global/selectors';
-import { getDayStartAt } from '../../util/date/dateFormat';
+import { getDayStartAt } from '../../util/dates/dateFormat';
 import { debounce } from '../../util/schedulers';
 import { IS_IOS } from '../../util/windowEnvironment';
 

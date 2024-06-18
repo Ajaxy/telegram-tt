@@ -25,8 +25,8 @@ import renderText from '../../common/helpers/renderText';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import usePopupLimit from './hooks/usePopupLimit';
@@ -138,7 +138,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const frameRef = useRef<HTMLIFrameElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     url, buttonText, queryId, replyInfo,
   } = modal || {};

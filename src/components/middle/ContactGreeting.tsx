@@ -18,8 +18,8 @@ import {
   selectUserFullInfo,
 } from '../../global/selectors';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import StickerView from '../common/StickerView';
 
@@ -52,7 +52,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
     markMessageListRead,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

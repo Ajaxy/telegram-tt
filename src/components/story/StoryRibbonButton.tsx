@@ -9,9 +9,9 @@ import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMenuPosition from '../../hooks/useMenuPosition';
+import useOldLang from '../../hooks/useOldLang';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
 import Avatar from '../common/Avatar';
@@ -33,7 +33,7 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
     toggleStoriesHidden,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 

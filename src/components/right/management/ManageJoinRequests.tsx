@@ -11,7 +11,7 @@ import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Button from '../../ui/Button';
@@ -41,7 +41,7 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
   const [isAcceptAllDialogOpen, openAcceptAllDialog, closeAcceptAllDialog] = useFlag();
   const [isRejectAllDialogOpen, openRejectAllDialog, closeRejectAllDialog] = useFlag();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

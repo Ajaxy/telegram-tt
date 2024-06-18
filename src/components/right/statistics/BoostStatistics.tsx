@@ -16,13 +16,13 @@ import {
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime } from '../../../util/date/dateFormat';
+import { formatDateAtTime } from '../../../util/dates/dateFormat';
 import { CUSTOM_PEER_TO_BE_DISTRIBUTED } from '../../../util/objects/customPeer';
 import { formatInteger } from '../../../util/textFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
@@ -65,7 +65,7 @@ const BoostStatistics = ({
   const {
     openChat, loadMoreBoosters, closeBoostStatistics, openGiveawayModal, showNotification,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
 

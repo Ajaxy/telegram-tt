@@ -4,7 +4,7 @@ import type { StatisticsMessageInteractionCounter, StatisticsStoryInteractionCou
 
 import { formatIntegerCompact } from '../../../util/textFormat';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 
@@ -15,7 +15,7 @@ interface OwnProps {
 }
 
 function StatisticsRecentPostMeta({ postStatistic }: OwnProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   return (
     <div className={styles.meta}>
       {postStatistic.reactionsCount > 0 && (

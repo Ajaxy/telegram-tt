@@ -9,7 +9,7 @@ import { SettingsScreens } from '../../../types';
 import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';
 import Checkbox from '../../ui/Checkbox';
@@ -79,7 +79,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     }
   }, [isActive, loadGlobalPrivacySettings]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

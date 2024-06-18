@@ -13,8 +13,8 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
@@ -56,7 +56,7 @@ const StarsBalanceModal = ({
 
   const { balance, history, topupOptions } = starsBalanceState || {};
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isHeaderHidden, setHeaderHidden] = useState(true);
   const [areOptionsExtended, markOptionsExtended, unmarkOptionsExtended] = useFlag();
@@ -218,7 +218,7 @@ function StarTopupOption({
 }: {
   option: ApiStarTopupOption; starsCount: number; onClick?: (option: ApiStarTopupOption) => void;
 }) {
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <div className={styles.option} key={option.stars} onClick={() => onClick?.(option)}>

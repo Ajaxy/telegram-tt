@@ -18,7 +18,7 @@ import renderText from './helpers/renderText';
 
 import { getIsMobile } from '../../hooks/useAppLayout';
 import { useFastClick } from '../../hooks/useFastClick';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import TopicIcon from './TopicIcon';
 
@@ -45,7 +45,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const mainColumnRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [lastActiveTopic, ...otherTopics] = useMemo(() => {
     if (!chat.topics) {

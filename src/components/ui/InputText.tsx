@@ -6,7 +6,7 @@ import React, { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 type OwnProps = {
   ref?: RefObject<HTMLInputElement>;
@@ -55,7 +55,7 @@ const InputText: FC<OwnProps> = ({
   onBlur,
   onPaste,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const labelText = error || success || label;
   const fullClassName = buildClassName(
     'input-group',

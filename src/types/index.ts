@@ -1,12 +1,18 @@
 import type { TeactNode } from '../lib/teact/teact';
 
 import type {
-  ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
+  ApiBotInlineMediaResult,
+  ApiBotInlineResult,
+  ApiBotInlineSwitchPm,
   ApiBotInlineSwitchWebview,
   ApiChat,
   ApiChatInviteImporter,
   ApiExportedInvite,
-  ApiLanguage, ApiMessage, ApiReaction, ApiStickerSet, ApiUser,
+  ApiLanguage,
+  ApiMessage,
+  ApiReaction,
+  ApiStickerSet,
+  ApiUser,
 } from '../api/types';
 import type { IconName } from './icons';
 

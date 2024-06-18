@@ -17,8 +17,8 @@ import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useAverageColor from '../../../hooks/useAverageColor';
 import useFlag from '../../../hooks/useFlag';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/icons/Icon';
@@ -50,7 +50,7 @@ const SimilarChannels = ({
   count,
   isCurrentUserPremium,
 }: StateProps & OwnProps) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { toggleChannelRecommendations } = getActions();
   const [isShowing, markShowing, markNotShowing] = useFlag(false);
   const [isHiding, markHiding, markNotHiding] = useFlag(false);
@@ -197,7 +197,7 @@ function MoreChannels({
   isCurrentUserPremium: boolean;
 }) {
   const { openPremiumModal, openChatWithInfo } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleClickMore = () => {
     if (isCurrentUserPremium) {

@@ -7,7 +7,7 @@ import React, {
 import type { ApiCountry } from '../../api/types';
 import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
@@ -75,7 +75,7 @@ const PaymentInfo: FC<OwnProps> = ({
     dispatch({ type: 'changeSaveCredentials', payload: e.target.value });
   }, [dispatch]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { formErrors = {} } = state;
 

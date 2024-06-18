@@ -4,8 +4,8 @@ import React, { memo, useState } from '../../../lib/teact/teact';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useLang from '../../../hooks/useLang';
 import useMouseInside from '../../../hooks/useMouseInside';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -40,7 +40,7 @@ const CustomSendMenu: FC<OwnProps> = ({
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
   const [displayScheduleUntilOnline, setDisplayScheduleUntilOnline] = useState(false);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     // Avoid context menu item shuffling when opened

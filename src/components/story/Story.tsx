@@ -26,7 +26,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatMediaDuration, formatRelativeTime } from '../../util/date/dateFormat';
+import { formatMediaDuration, formatRelativeTime } from '../../util/dates/dateFormat';
 import download from '../../util/download';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
@@ -41,10 +41,10 @@ import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import { useStreaming } from '../../hooks/useStreaming';
 import useBackgroundMode from '../../hooks/window/useBackgroundMode';
@@ -151,7 +151,7 @@ function Story({
   } = getActions();
   const serverTime = getServerTime();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
   const [isComposerHasFocus, markComposerHasFocus, unmarkComposerHasFocus] = useFlag(false);
   const [isStoryPlaybackRequested, playStory, pauseStory] = useFlag(false);

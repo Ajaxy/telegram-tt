@@ -11,7 +11,7 @@ import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import AvatarList from '../../common/AvatarList';
@@ -44,7 +44,7 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
     subscribeToGroupCallUpdates,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleJoinGroupCall = useCallback(() => {
     requestMasterAndJoinGroupCall({

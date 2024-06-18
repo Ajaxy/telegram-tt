@@ -6,8 +6,8 @@ import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
 
 import useAppLayout from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -33,7 +33,7 @@ const InviteLink: FC<OwnProps> = ({
   withShare,
   onRevoke,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { showNotification, openChatWithDraft } = getActions();
 
   const { isMobile } = useAppLayout();

@@ -18,7 +18,7 @@ import { selectCurrentLimit } from '../../../global/selectors/limits';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 
 import ManageUsernames from '../../common/ManageUsernames';
@@ -160,7 +160,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     updatePrivateLink();
   }, [closeRevokeConfirmDialog, updatePrivateLink]);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const langPrefix1 = isChannel ? 'Channel' : 'Mega';
   const langPrefix2 = isChannel ? 'Channel' : 'Group';
 

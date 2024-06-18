@@ -10,8 +10,8 @@ import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Picker from '../../common/Picker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -31,7 +31,7 @@ function CloseFriends({
 }: OwnProps) {
   const { saveCloseFriends } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSubmitShown, setIsSubmitShown] = useState<boolean>(false);
   const [newSelectedContactIds, setNewSelectedContactIds] = useState<string[]>([]);

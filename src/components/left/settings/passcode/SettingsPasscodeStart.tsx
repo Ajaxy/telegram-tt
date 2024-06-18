@@ -5,7 +5,7 @@ import { STICKER_SIZE_PASSCODE } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
 import Button from '../../../ui/Button';
@@ -21,7 +21,7 @@ type OwnProps = {
 const SettingsPasscodeStart: FC<OwnProps> = ({
   isActive, onReset, onStart,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({ isActive, onBack: onReset });
 

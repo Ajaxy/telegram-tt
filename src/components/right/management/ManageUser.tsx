@@ -21,7 +21,7 @@ import {
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -72,7 +72,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   const [isResetPersonalPhotoDialogOpen, openResetPersonalPhotoDialog, closeResetPersonalPhotoDialog] = useFlag();
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

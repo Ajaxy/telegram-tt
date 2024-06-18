@@ -22,8 +22,8 @@ import useTimeout from '../../hooks/schedulers/useTimeout';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useDerivedState from '../../hooks/useDerivedState';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useSignal from '../../hooks/useSignal';
 import { useSignalRef } from '../../hooks/useSignalRef';
 import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
@@ -126,7 +126,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const [getControlsVisible, setControlsVisible, lockControls] = useControlsSignal();
   const { onClose } = rest;
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive: isOpen,

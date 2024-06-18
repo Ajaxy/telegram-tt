@@ -20,7 +20,7 @@ import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useFlag from '../../hooks/useFlag';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import useSlideSizes from './hooks/useSlideSizes';
@@ -62,7 +62,7 @@ function StoryViewer({
 }: StateProps) {
   const { closeStoryViewer, closeStoryPrivacyEditor } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [storyToDelete, setStoryToDelete] = useState<ApiTypeStory | undefined>(undefined);
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag(false);

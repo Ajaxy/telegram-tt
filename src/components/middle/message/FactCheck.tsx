@@ -6,8 +6,8 @@ import buildClassName from '../../../util/buildClassName';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useCollapsibleLines from '../../../hooks/element/useCollapsibleLines';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
@@ -26,7 +26,7 @@ const COLOR = {
 const MAX_LINES = 4;
 
 const FactCheck = ({ factCheck, isToggleDisabled }: OwnProps) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);

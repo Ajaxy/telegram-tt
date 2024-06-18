@@ -6,7 +6,7 @@ import { getActions } from '../../global';
 
 import type { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 import type { ISettings } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 import { AudioOrigin } from '../../types';
@@ -24,7 +24,7 @@ import {
 import { makeTrackId } from '../../util/audioPlayer';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
-import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/date/dateFormat';
+import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dates/dateFormat';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
 import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 import { getFileSizeString } from './helpers/documentInfo';
@@ -34,10 +34,10 @@ import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
 import useAppLayout from '../../hooks/useAppLayout';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import useBuffering from '../../hooks/useBuffering';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import Button from '../ui/Button';
@@ -121,7 +121,7 @@ const Audio: FC<OwnProps> = ({
   const isSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
   const seekerRef = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
   const { isRtl } = lang;
 
   const { isMobile } = useAppLayout();

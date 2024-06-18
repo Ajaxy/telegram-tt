@@ -15,8 +15,8 @@ import {
 import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
-import { translate } from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
@@ -408,7 +408,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   const chat = selectChat(global, chatId);
   if (!chat) {
-    actions.showNotification({ message: translate('Conversation.ErrorInaccessibleMessage'), tabId });
+    actions.showNotification({ message: oldTranslate('Conversation.ErrorInaccessibleMessage'), tabId });
     return undefined;
   }
 
@@ -902,7 +902,7 @@ addActionHandler('openPreviousReportAdModal', (global, actions, payload): Action
 
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
-  const lang = langProvider.translate;
+  const lang = langProvider.oldTranslate;
 
   const chat = selectChat(global, chatId);
 

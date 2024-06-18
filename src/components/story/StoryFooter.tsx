@@ -7,8 +7,8 @@ import { HEART_REACTION } from '../../config';
 import { getStoryKey, isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import AvatarList from '../common/AvatarList';
 import Icon from '../common/icons/Icon';
@@ -27,7 +27,7 @@ const StoryFooter = ({
   className,
 }: OwnProps) => {
   const { openStoryViewModal, openForwardMenu, sendStoryReaction } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     views, isOut, peerId, id: storyId, sentReaction,

@@ -1,6 +1,6 @@
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { translate } from '../../../util/langProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { addUsers } from '../../reducers';
@@ -30,7 +30,7 @@ addActionHandler('reportPeer', async (global, actions, payload): Promise<void> =
 
   actions.showNotification({
     message: result
-      ? translate('ReportPeer.AlertSuccess')
+      ? oldTranslate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
     tabId,
   });
@@ -62,7 +62,7 @@ addActionHandler('reportProfilePhoto', async (global, actions, payload): Promise
 
   actions.showNotification({
     message: result
-      ? translate('ReportPeer.AlertSuccess')
+      ? oldTranslate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
     tabId,
   });

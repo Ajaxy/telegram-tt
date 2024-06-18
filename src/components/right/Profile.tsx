@@ -54,8 +54,8 @@ import usePeerStoriesPolling from '../../hooks/polling/usePeerStoriesPolling';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useAsyncRendering from './hooks/useAsyncRendering';
 import useProfileState from './hooks/useProfileState';
 import useProfileViewportIds from './hooks/useProfileViewportIds';
@@ -206,7 +206,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
   const profileId = isSavedDialog ? String(threadId) : (resolvedUserId || chatId);

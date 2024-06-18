@@ -10,8 +10,8 @@ import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fast
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
@@ -53,7 +53,7 @@ const PollModal: FC<OwnProps> = ({
   const [correctOption, setCorrectOption] = useState<number | undefined>();
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleSolutionChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setSolution(e.target.value);

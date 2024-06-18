@@ -69,8 +69,8 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCustomBackground from '../../hooks/useCustomBackground';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import usePrevious from '../../hooks/usePrevious';
 import { useResize } from '../../hooks/useResize';
@@ -236,7 +236,7 @@ function MiddleColumn({
   const { width: windowWidth } = useWindowSize();
   const { isTablet, isDesktop } = useAppLayout();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
   const [isScrollDownShown, setIsScrollDownShown] = useState(false);
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();

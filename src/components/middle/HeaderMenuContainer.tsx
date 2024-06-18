@@ -40,8 +40,8 @@ import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransition from '../../hooks/useShowTransition';
 
@@ -389,7 +389,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     return enableScrolling;
   }, []);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const botButtons = useMemo(() => {
     return botCommands?.map(({ command }) => {

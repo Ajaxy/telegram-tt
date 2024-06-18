@@ -35,8 +35,8 @@ import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
 import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
@@ -141,7 +141,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const mainButtonRef = useRef<HTMLButtonElement | null>(null);

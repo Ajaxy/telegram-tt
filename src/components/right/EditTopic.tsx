@@ -13,7 +13,7 @@ import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import TopicIcon from '../common/TopicIcon';
@@ -51,7 +51,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
   const { editTopic, openPremiumModal } = getActions();
   const [title, setTitle] = useState('');
   const [iconEmojiId, setIconEmojiId] = useState<string | undefined>(undefined);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isLoading = Boolean(editTopicPanel?.isLoading);
   const isGeneral = topic?.id === GENERAL_TOPIC_ID;

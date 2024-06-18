@@ -15,9 +15,9 @@ import renderText from '../common/helpers/renderText';
 
 import { useFastClick } from '../../hooks/useFastClick';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
+import useOldLang from '../../hooks/useOldLang';
 import useThumbnail from '../../hooks/useThumbnail';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 
@@ -54,7 +54,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
   isLoading, isFullWidth,
 }) => {
   const { clickBotInlineButton } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const mediaThumbnail = useThumbnail(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));

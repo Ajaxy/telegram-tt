@@ -13,7 +13,7 @@ import stopEvent from '../../../util/stopEvent';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -69,7 +69,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
     permissions, havePermissionChanged, isLoading, handlePermissionChange, setIsLoading,
   } = useManagePermissions(selectedChatMember?.bannedRights || chat?.defaultBannedRights);
   const [isBanConfirmationDialogOpen, openBanConfirmationDialog, closeBanConfirmationDialog] = useFlag();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { isForum } = chat || {};
 

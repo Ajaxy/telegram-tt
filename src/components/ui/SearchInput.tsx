@@ -8,7 +8,7 @@ import buildClassName from '../../util/buildClassName';
 
 import useFlag from '../../hooks/useFlag';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from './Button';
 import Loading from './Loading';
@@ -83,7 +83,7 @@ const SearchInput: FC<OwnProps> = ({
     }
   }, [focused, placeholder]); // Trick for setting focus when selecting a contact to search for
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { currentTarget } = event;

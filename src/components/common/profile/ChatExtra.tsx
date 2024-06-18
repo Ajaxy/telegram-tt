@@ -37,9 +37,9 @@ import formatUsername from '../helpers/formatUsername';
 import renderText from '../helpers/renderText';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
 import Chat from '../../left/main/Chat';
@@ -120,7 +120,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     personalChannelMessageId,
     birthday,
   } = userFullInfo || {};
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
 

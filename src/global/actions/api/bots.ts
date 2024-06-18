@@ -10,7 +10,7 @@ import { ManagementProgress } from '../../../types';
 import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { translate } from '../../../util/langProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import PopupManager from '../../../util/PopupManager';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { debounce } from '../../../util/schedulers';
@@ -634,7 +634,7 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
   global = getGlobal();
 
   if (!botApp) {
-    actions.showNotification({ message: translate('lng_username_app_not_found'), tabId });
+    actions.showNotification({ message: oldTranslate('lng_username_app_not_found'), tabId });
     return;
   }
 

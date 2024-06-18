@@ -1,7 +1,7 @@
 import type { TeactNode } from '../../lib/teact/teact';
 
 import type { ApiMessage, MediaContent } from '../../api/types';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { CONTENT_NOT_SUPPORTED } from '../../config';

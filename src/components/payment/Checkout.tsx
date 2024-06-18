@@ -15,8 +15,8 @@ import buildClassName from '../../util/buildClassName';
 import { formatCurrency } from '../../util/formatCurrency';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
+import useOldLang from '../../hooks/useOldLang';
 
 import SafeLink from '../common/SafeLink';
 import Checkbox from '../ui/Checkbox';
@@ -70,7 +70,7 @@ const Checkout: FC<OwnProps> = ({
 }) => {
   const { setPaymentStep } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const isInteractive = Boolean(dispatch);
 
   const {

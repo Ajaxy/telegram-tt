@@ -4,7 +4,7 @@ import { getActions, withGlobal } from '../../global';
 
 import { selectTabState } from '../../global/selectors';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import CalendarModal from '../common/CalendarModal';
 
@@ -26,7 +26,7 @@ const HistoryCalendar: FC<OwnProps & StateProps> = ({
     closeHistoryCalendar();
   }, [closeHistoryCalendar, searchMessagesByDate]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <CalendarModal

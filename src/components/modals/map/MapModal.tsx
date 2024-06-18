@@ -6,8 +6,8 @@ import type { TabState } from '../../../global/types';
 import { prepareMapUrl } from '../../../util/map';
 import { IS_IOS, IS_MAC_OS } from '../../../util/windowEnvironment';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -23,7 +23,7 @@ const OpenMapModal = ({ modal }: OwnProps) => {
 
   const { point: geoPoint, zoom } = modal || {};
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isOpen = Boolean(geoPoint);
 

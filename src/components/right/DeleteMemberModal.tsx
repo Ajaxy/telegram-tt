@@ -8,7 +8,7 @@ import { getUserFirstOrLastName } from '../../global/helpers';
 import { selectCurrentChat, selectUser } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 
@@ -32,7 +32,7 @@ const DeleteMemberModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { deleteChatMember } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleDeleteChatMember = useCallback(() => {
     deleteChatMember({ chatId: chat!.id, userId: userId! });

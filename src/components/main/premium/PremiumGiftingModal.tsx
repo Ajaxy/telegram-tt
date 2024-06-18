@@ -12,8 +12,8 @@ import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import Picker from '../../common/Picker';
@@ -40,7 +40,7 @@ const PremiumGiftingModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { closePremiumGiftingModal, openGiftPremiumModal, showNotification } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');

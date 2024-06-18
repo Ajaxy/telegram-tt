@@ -12,11 +12,11 @@ import { getSenderTitle } from '../../../global/helpers';
 import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '../../../global/helpers/payments';
 import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import { CUSTOM_PEER_PREMIUM } from '../../../util/objects/customPeer';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useSelector from '../../../hooks/useSelector';
 
 import Avatar from '../../common/Avatar';
@@ -43,7 +43,7 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
     isRefund,
     peer: transactionPeer,
   } = transaction;
-  const lang = useLang();
+  const lang = useOldLang();
 
   const peerId = transactionPeer.type === 'peer' ? transactionPeer.id : undefined;
   const peer = useSelector(selectOptionalPeer(peerId));

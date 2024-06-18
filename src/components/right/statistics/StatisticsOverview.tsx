@@ -7,10 +7,10 @@ import type {
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatFullDate } from '../../../util/date/dateFormat';
+import { formatFullDate } from '../../../util/dates/dateFormat';
 import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import styles from './StatisticsOverview.module.scss';
 
@@ -109,7 +109,7 @@ const StatisticsOverview: FC<OwnProps> = ({
   statistics,
   className,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderOverviewItemValue = ({ change, percentage }: StatisticsOverviewItem) => {
     if (!change) {

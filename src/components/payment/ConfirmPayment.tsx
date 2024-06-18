@@ -4,7 +4,7 @@ import { getActions } from '../../global';
 
 import { TME_LINK_PREFIX } from '../../config';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import './ConfirmPayment.scss';
 
@@ -40,7 +40,7 @@ const ConfirmPayment: FC<OwnProps> = ({
 }) => {
   const { openTelegramLink } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleMessage = useCallback((event: MessageEvent<string>) => {
     try {

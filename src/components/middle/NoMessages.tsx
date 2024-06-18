@@ -3,12 +3,12 @@ import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiTopic } from '../../api/types';
 import type { MessageListType } from '../../global/types';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 
 import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import TopicIcon from '../common/TopicIcon';
 
@@ -30,7 +30,7 @@ const NoMessages: FC<OwnProps> = ({
   isGroupChatJustCreated,
   topic,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   if (type === 'scheduled') {
     return renderScheduled(lang);

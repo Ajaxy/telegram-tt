@@ -11,7 +11,7 @@ import { createVideoPreviews, getPreviewDimensions, renderVideoPreview } from '.
 import { animateNumber } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
-import { formatMediaDuration } from '../../util/date/dateFormat';
+import { formatMediaDuration } from '../../util/dates/dateFormat';
 import { clamp, round } from '../../util/math';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 

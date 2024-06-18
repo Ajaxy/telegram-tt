@@ -13,8 +13,8 @@ import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
@@ -93,7 +93,7 @@ function StorySettings({
 }: OwnProps & StateProps) {
   const { editStoryPrivacy, toggleStoryInProfile } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isOpenModal, openModal, closeModal] = useFlag(false);
   const [privacy, setPrivacy] = useState<ApiPrivacySettings | undefined>(visibility);
   const [isPinned, setIsPinned] = useState(story?.isInProfile);

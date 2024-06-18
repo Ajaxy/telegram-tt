@@ -35,8 +35,8 @@ import {
 import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/windowEnvironment';
 
 import { useHotkeys } from '../../hooks/useHotkeys';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -138,7 +138,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 

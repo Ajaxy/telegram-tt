@@ -6,8 +6,8 @@ import type { PrivacyVisibility } from '../../../types';
 import { selectIsCurrentUserPremium, selectShouldHideReadMarks } from '../../../global/selectors';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';
 import Checkbox from '../../ui/Checkbox';
@@ -26,7 +26,7 @@ const SettingsPrivacyLastSeen = ({
   isCurrentUserPremium, shouldHideReadMarks, visibility,
 }: OwnProps & StateProps) => {
   const { updateGlobalPrivacySettings, openPremiumModal } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const canShowHideReadTime = visibility === 'nobody' || visibility === 'contacts';
 
   const handleChangeShouldHideReadMarks = useLastCallback(

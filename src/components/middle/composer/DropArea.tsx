@@ -10,8 +10,8 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildAttachment from './helpers/buildAttachment';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useShowTransition from '../../../hooks/useShowTransition';
 
@@ -39,7 +39,7 @@ const DROP_LEAVE_TIMEOUT_MS = 150;
 const DropArea: FC<OwnProps> = ({
   isOpen, withQuick, onHide, onFileSelect, editingMessage,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
   const hideTimeoutRef = useRef<number>(null);

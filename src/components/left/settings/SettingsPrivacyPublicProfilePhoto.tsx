@@ -7,7 +7,7 @@ import { getActions } from '../../../global';
 import type { ApiPhoto } from '../../../api/types';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -31,7 +31,7 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
     loadFullUser, uploadProfilePhoto, deleteProfilePhoto, showNotification,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isDeleteFallbackPhotoModalOpen, openDeleteFallbackPhotoModal, closeDeleteFallbackPhotoModal] = useFlag(false);
 

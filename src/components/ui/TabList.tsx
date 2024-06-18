@@ -9,7 +9,7 @@ import buildClassName from '../../util/buildClassName';
 import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import Tab from './Tab';
@@ -73,7 +73,7 @@ const TabList: FC<OwnProps> = ({
     animateHorizontalScroll(container, newLeft, SCROLL_DURATION);
   }, [activeTab]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <div

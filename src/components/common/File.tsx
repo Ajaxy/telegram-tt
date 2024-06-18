@@ -6,7 +6,7 @@ import React, {
 import type { IconName } from '../../types/icons';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDateTime, formatPastTimeShort } from '../../util/date/dateFormat';
+import { formatMediaDateTime, formatPastTimeShort } from '../../util/dates/dateFormat';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
@@ -14,8 +14,8 @@ import renderText from './helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
-import useLang from '../../hooks/useLang';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import Link from '../ui/Link';
@@ -64,7 +64,7 @@ const File: FC<OwnProps> = ({
   onClick,
   onDateClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   let elementRef = useRef<HTMLDivElement>(null);
   if (ref) {

@@ -10,6 +10,7 @@ import { selectIsRightColumnShown, selectTabState } from '../../global/selectors
 import buildClassName from '../../util/buildClassName';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
+import { localizationReadyPromise } from '../../util/localization';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
 import { pause } from '../../util/schedulers';
@@ -80,6 +81,7 @@ const preloadTasks = {
       .then(preloadFonts),
     preloadAvatars(),
     preloadImage(spoilerMaskPath),
+    localizationReadyPromise,
   ]),
   authPhoneNumber: () => Promise.all([
     preloadFonts(),

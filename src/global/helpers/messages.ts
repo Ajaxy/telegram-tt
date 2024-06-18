@@ -2,7 +2,7 @@ import type {
   ApiAttachment, ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
 } from '../../api/types';
 import type { MediaContent } from '../../api/types/messages';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import {

@@ -7,11 +7,11 @@ import type { ApiChatInviteImporter, ApiExportedInvite, ApiUser } from '../../..
 import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/date/dateFormat';
+import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Button from '../../ui/Button';
@@ -50,7 +50,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     openChat,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     usage = 0, usageLimit, link, adminId,
   } = invite || {};

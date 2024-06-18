@@ -20,8 +20,8 @@ import { detectCardTypeText } from '../common/helpers/detectCardType';
 
 import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import Button from '../ui/Button';
@@ -128,7 +128,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     setSmartGlocalCardInfo,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isModalOpen, openModal, closeModal] = useFlag();
   const [paymentState, paymentDispatch] = usePaymentReducer();

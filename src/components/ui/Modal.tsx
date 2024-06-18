@@ -11,9 +11,9 @@ import trapFocus from '../../util/trapFocus';
 
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import Icon from '../common/icons/Icon';
@@ -118,7 +118,7 @@ const Modal: FC<OwnProps & StateProps> = ({
     };
   }, [isOpen]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   if (!shouldRender) {
     return undefined;

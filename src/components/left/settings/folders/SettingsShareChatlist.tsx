@@ -17,8 +17,8 @@ import renderText from '../../../common/helpers/renderText';
 
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import LinkField from '../../../common/LinkField';
@@ -55,7 +55,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   const {
     createChatlistInvite, deleteChatlistInvite, editChatlistInvite, showNotification,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isTouched, setIsTouched] = useState(false);
 

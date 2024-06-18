@@ -11,7 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
@@ -51,7 +51,7 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
     playGroupCallSound,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const muteMouseDownState = useRef('up');
 
   const [isRequestingToSpeak, setIsRequestingToSpeak] = useState(false);

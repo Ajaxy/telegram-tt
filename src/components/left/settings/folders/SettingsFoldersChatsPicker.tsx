@@ -16,7 +16,7 @@ import {
   INCLUDED_CHAT_TYPES,
 } from '../../../../hooks/reducers/useFoldersReducer';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import GroupChatInfo from '../../../common/GroupChatInfo';
 import PickerSelectedItem from '../../../common/PickerSelectedItem';
@@ -123,7 +123,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
     onFilterChange(value);
   }, [onFilterChange]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   function renderSelectedChatType(key: string) {
     const selectedType = chatTypes.find(({ key: typeKey }) => key === typeKey);

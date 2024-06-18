@@ -37,8 +37,8 @@ import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
 import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
 import { isLocalMessageId } from '../../../util/messageKey';
+import * as langProvider from '../../../util/oldLangProvider';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
@@ -383,7 +383,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
     setGlobal(global);
 
     actions.showNotification({
-      message: langProvider.translate(isComments ? 'ChannelPostDeleted' : 'lng_message_not_found'),
+      message: langProvider.oldTranslate(isComments ? 'ChannelPostDeleted' : 'lng_message_not_found'),
       tabId,
     });
 
@@ -444,7 +444,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
       setGlobal(global);
 
       actions.showNotification({
-        message: langProvider.translate('Group.ErrorAccessDenied'),
+        message: langProvider.oldTranslate('Group.ErrorAccessDenied'),
         tabId,
       });
     },
@@ -1242,7 +1242,7 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Prom
   if (!chat) {
     actions.openPreviousChat({ tabId });
     actions.showNotification({
-      message: langProvider.translate('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
+      message: langProvider.oldTranslate('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
       tabId,
     });
     return;
@@ -2175,7 +2175,7 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
     result = await callApi('toggleForum', { chat, isEnabled });
   } catch (error) {
     if ((error as ApiError).message.startsWith('A wait of')) {
-      actions.showNotification({ message: langProvider.translate('FloodWait'), tabId });
+      actions.showNotification({ message: langProvider.oldTranslate('FloodWait'), tabId });
     } else {
       actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
     }
@@ -2295,7 +2295,7 @@ addActionHandler('toggleTopicPinned', (global, actions, payload): ActionReturnTy
 
   if (isPinned && Object.values(chat.topics).filter((topic) => topic.isPinned).length >= topicsPinnedLimit) {
     actions.showNotification({
-      message: langProvider.translate('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
+      message: langProvider.oldTranslate('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
       tabId,
     });
     return;
@@ -2310,7 +2310,7 @@ addActionHandler('checkChatlistInvite', async (global, actions, payload): Promis
   const result = await callApi('checkChatlistInvite', { slug });
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('lng_group_invite_bad_link'),
+      message: langProvider.oldTranslate('lng_group_invite_bad_link'),
       tabId,
     });
     return;
@@ -2344,8 +2344,8 @@ addActionHandler('joinChatlistInvite', async (global, actions, payload): Promise
     if (!result) return;
 
     actions.showNotification({
-      title: langProvider.translate(folder ? 'FolderLinkUpdatedTitle' : 'FolderLinkAddedTitle', folderTitle),
-      message: langProvider.translate('FolderLinkAddedSubtitle', notJoinedCount, 'i'),
+      title: langProvider.oldTranslate(folder ? 'FolderLinkUpdatedTitle' : 'FolderLinkAddedTitle', folderTitle),
+      message: langProvider.oldTranslate('FolderLinkAddedSubtitle', notJoinedCount, 'i'),
       tabId,
     });
   } catch (error) {
@@ -2369,8 +2369,8 @@ addActionHandler('leaveChatlist', async (global, actions, payload): Promise<void
   if (!result) return;
 
   actions.showNotification({
-    title: langProvider.translate('FolderLinkDeletedTitle', folder.title),
-    message: langProvider.translate('FolderLinkDeletedSubtitle', peers.length, 'i'),
+    title: langProvider.oldTranslate('FolderLinkDeletedTitle', folder.title),
+    message: langProvider.oldTranslate('FolderLinkDeletedSubtitle', peers.length, 'i'),
     tabId,
   });
 });
@@ -2666,7 +2666,7 @@ addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Pr
   const result = await callApi('resolveBusinessChatLink', { slug });
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('BusinessLink.ErrorExpired'),
+      message: langProvider.oldTranslate('BusinessLink.ErrorExpired'),
       tabId,
     });
     return;
@@ -3003,7 +3003,7 @@ async function getAttachBotOrNotify<T extends GlobalState>(
   global = getGlobal();
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('WebApp.AddToAttachmentUnavailableError'),
+      message: langProvider.oldTranslate('WebApp.AddToAttachmentUnavailableError'),
       tabId,
     });
 

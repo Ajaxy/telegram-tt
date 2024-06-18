@@ -8,7 +8,7 @@ import type { IconName } from '../../types/icons';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useResizeObserver from '../../hooks/useResizeObserver';
 
 import Icon from './icons/Icon';
@@ -32,7 +32,7 @@ const LimitPreview: FC<OwnProps> = ({
   progress,
   className,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const floatingBadgeRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null

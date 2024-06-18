@@ -1,8 +1,8 @@
 import type { ApiPeer, ApiUser, ApiUserStatus } from '../../api/types';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 
 import { ANONYMOUS_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
-import { formatFullDate, formatTime } from '../../util/date/dateFormat';
+import { formatFullDate, formatTime } from '../../util/dates/dateFormat';
 import { orderBy } from '../../util/iteratees';
 import { formatPhoneNumber } from '../../util/phoneNumber';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';

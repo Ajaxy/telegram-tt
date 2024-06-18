@@ -17,7 +17,7 @@ import { unique } from '../../util/iteratees';
 import sortChatIds from '../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import Picker from '../common/Picker';
@@ -61,7 +61,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
 }) => {
   const { setUserSearchQuery } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const prevSelectedMemberIds = usePrevious(selectedMemberIds);
   const noPickerScrollRestore = prevSelectedMemberIds === selectedMemberIds;

@@ -8,8 +8,8 @@ import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
@@ -37,7 +37,7 @@ const CommentButton: FC<OwnProps> = ({
 
   const shouldRenderLoading = useAsyncRendering([isLoading], SHOW_LOADER_DELAY);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     originMessageId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds, originChannelId,
   } = threadInfo;

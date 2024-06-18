@@ -7,8 +7,8 @@ import { IS_TEST } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
 import useAppLayout from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import './MenuItem.scss';
 
@@ -49,7 +49,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     withPreventDefaultOnMouseDown,
   } = props;
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isTouchScreen } = useAppLayout();
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !onClick) {

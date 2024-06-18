@@ -6,7 +6,7 @@ import { PaymentStep } from '../../../types';
 import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
 import { buildQueryString } from '../../../util/requestQuery';
 import { callApi } from '../../../api/gramjs';
@@ -841,7 +841,7 @@ addActionHandler('checkGiftCode', async (global, actions, payload): Promise<void
 
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('lng_gift_link_expired'),
+      message: langProvider.oldTranslate('lng_gift_link_expired'),
       tabId,
     });
     return;

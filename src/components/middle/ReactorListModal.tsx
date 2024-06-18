@@ -14,14 +14,14 @@ import {
   selectTabState,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/date/dateFormat';
+import { formatDateAtTime } from '../../util/dates/dateFormat';
 import { unique } from '../../util/iteratees';
 import { formatIntegerCompact } from '../../util/textFormat';
 
 import useFlag from '../../hooks/useFlag';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import FullNameTitle from '../common/FullNameTitle';
@@ -66,7 +66,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   const chatsById = getGlobal().chats.byId;
   const usersById = getGlobal().users.byId;
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isClosing, startClosing, stopClosing] = useFlag(false);
   const [chosenTab, setChosenTab] = useState<ApiReaction | undefined>(undefined);
   const canShowFilters = reactors && reactions && reactors.count >= MIN_REACTIONS_COUNT_FOR_FILTERS

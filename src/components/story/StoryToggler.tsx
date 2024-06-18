@@ -12,7 +12,7 @@ import buildClassName from '../../util/buildClassName';
 import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ribbonAnimation';
 
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
@@ -52,7 +52,7 @@ function StoryToggler({
 }: OwnProps & StateProps) {
   const { toggleStoryRibbon } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const peers = useMemo(() => {
     if (orderedPeerIds.length === 1) {

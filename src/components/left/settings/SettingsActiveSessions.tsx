@@ -7,12 +7,12 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSession } from '../../../api/types';
 
-import { formatPastTimeShort } from '../../../util/date/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 import getSessionIcon from './helpers/getSessionIcon';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
@@ -45,7 +45,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     changeSessionTtl,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedSessionHash, setOpenedSessionHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();

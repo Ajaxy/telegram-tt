@@ -10,12 +10,12 @@ import { getActions, withGlobal } from '../../../global';
 import { GlobalSearchContent } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { parseDateString } from '../../../util/date/dateFormat';
+import { parseDateString } from '../../../util/dates/dateFormat';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
@@ -68,7 +68,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
     setGlobalSearchDate,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [activeTab, setActiveTab] = useState(currentContent);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
 

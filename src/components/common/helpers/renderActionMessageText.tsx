@@ -4,7 +4,7 @@ import type {
   ApiChat, ApiGroupCall, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 
 import {

@@ -19,8 +19,8 @@ import usePeerStoriesPolling from '../../../hooks/polling/usePeerStoriesPolling'
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import NothingFound from '../../common/NothingFound';
@@ -85,7 +85,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     openChat, setUserSearchQuery, closeManagement,
     toggleParticipantsHidden, setNewChatMembersDialogState, toggleManagement,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
   // eslint-disable-next-line no-null/no-null

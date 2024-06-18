@@ -6,18 +6,18 @@ import type { ApiBusinessWorkHours } from '../../../api/types';
 
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatWeekday } from '../../../util/date/dateFormat';
+import { formatTime, formatWeekday } from '../../../util/dates/dateFormat';
 import {
   getUtcOffset, getWeekStart, shiftTimeRanges, splitDays,
-} from '../../../util/date/workHours';
+} from '../../../util/dates/workHours';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useSelectorSignal from '../../../hooks/useSelectorSignal';
 
 import ListItem from '../../ui/ListItem';
@@ -39,7 +39,7 @@ const BusinessHours = ({
   const transitionRef = useRef<HTMLDivElement>(null);
   const [isExpanded, expand, collapse] = useFlag(false);
   const [isMyTime, showInMyTime, showInLocalTime] = useFlag(false);
-  const lang = useLang();
+  const lang = useOldLang();
   const forceUpdate = useForceUpdate();
 
   useInterval(forceUpdate, 60 * 1000);

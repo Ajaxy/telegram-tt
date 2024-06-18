@@ -26,7 +26,7 @@ import renderText from './helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import useSchedule from '../../hooks/useSchedule';
 import useScrolledState from '../../hooks/useScrolledState';
@@ -86,7 +86,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { isMobile } = useAppLayout();
 

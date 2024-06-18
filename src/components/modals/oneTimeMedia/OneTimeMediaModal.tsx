@@ -9,8 +9,8 @@ import { selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import Audio from '../../common/Audio';
@@ -30,7 +30,7 @@ const OneTimeMediaModal = ({
     closeOneTimeMediaModal,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const message = useCurrentOrPrev(modal?.message, true);
 
   const {

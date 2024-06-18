@@ -16,8 +16,8 @@ import { getWebpageButtonText } from './helpers/webpageType';
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useEnsureStory from '../../../hooks/useEnsureStory';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Audio from '../../common/Audio';
 import Document from '../../common/Document';
@@ -87,7 +87,7 @@ const WebPage: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const stickersRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleMediaClick = useLastCallback(() => {
     onMediaClick!();

@@ -10,7 +10,7 @@ import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import Button from '../../ui/Button';
@@ -33,7 +33,7 @@ const EmptyForum: FC<OwnProps & StateProps> = ({
 }) => {
   const { openCreateTopicPanel } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   const handleCreateTopic = useCallback(() => {

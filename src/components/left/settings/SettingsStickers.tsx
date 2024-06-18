@@ -20,7 +20,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import StickerSetCard from '../../common/StickerSetCard';
@@ -64,7 +64,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
     setSettingOption,
     openStickerSet,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const stickerSettingsRef = useRef<HTMLDivElement>(null);

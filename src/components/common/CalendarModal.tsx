@@ -3,14 +3,14 @@ import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 
 import { MAX_INT_32 } from '../../config';
 import buildClassName from '../../util/buildClassName';
-import { formatDateToString, formatTime, getDayStart } from '../../util/date/dateFormat';
+import { formatDateToString, formatTime, getDayStart } from '../../util/dates/dateFormat';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import Button from '../ui/Button';
@@ -60,7 +60,7 @@ const CalendarModal: FC<OwnProps> = ({
   onSubmit,
   onSecondButtonClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const now = new Date();
 
   const minDate = useMemo(() => {

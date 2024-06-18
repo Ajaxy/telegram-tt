@@ -4,7 +4,7 @@ import { ManagementProgress } from '../../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, unique } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import { throttle } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
@@ -347,7 +347,7 @@ addActionHandler('importContact', async (global, actions, payload): Promise<void
   const result = await callApi('importContact', { phone, firstName, lastName });
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('Contacts.PhoneNumber.NotRegistred'),
+      message: langProvider.oldTranslate('Contacts.PhoneNumber.NotRegistred'),
       tabId,
     });
 

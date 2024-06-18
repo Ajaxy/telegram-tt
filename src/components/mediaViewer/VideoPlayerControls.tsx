@@ -8,7 +8,7 @@ import type { ApiDimensions } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/date/dateFormat';
+import { formatMediaDuration } from '../../util/dates/dateFormat';
 import { formatFileSize } from '../../util/textFormat';
 import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
@@ -16,8 +16,8 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useDerivedState from '../../hooks/useDerivedState';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useSignal from '../../hooks/useSignal';
 import useControlsSignal from './hooks/useControlsSignal';
 
@@ -136,7 +136,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
     }
   }, [closePlaybackMenu, isVisible]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleSeek = useLastCallback((position: number) => {
     setIsSeeking(false);

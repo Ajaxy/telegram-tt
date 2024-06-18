@@ -16,7 +16,7 @@ import {
   isOwnMessage,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import { MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';

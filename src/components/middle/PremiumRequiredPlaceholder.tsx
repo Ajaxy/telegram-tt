@@ -4,8 +4,8 @@ import { getActions, withGlobal } from '../../global';
 import { getUserFirstOrLastName } from '../../global/helpers';
 import { selectUser } from '../../global/selectors';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Link from '../ui/Link';
 
@@ -18,7 +18,7 @@ type StateProps = {
 };
 
 function PremiumRequiredPlaceholder({ userName }: StateProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   const { openPremiumModal } = getActions();
 
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());

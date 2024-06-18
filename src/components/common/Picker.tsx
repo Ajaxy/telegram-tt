@@ -12,8 +12,8 @@ import buildClassName from '../../util/buildClassName';
 import { buildCollectionByKey } from '../../util/iteratees';
 
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -173,7 +173,7 @@ const Picker: FC<OwnProps> = ({
 
   const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, sortedItemIds, Boolean(filterValue));
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const countriesByIso = useMemo(() => {
     if (!countryList) return undefined;

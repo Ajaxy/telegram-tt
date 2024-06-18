@@ -16,9 +16,9 @@ import renderText from '../helpers/renderText';
 
 import { useFastClick } from '../../../hooks/useFastClick';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../icons/Icon';
 
@@ -45,7 +45,7 @@ const EmbeddedStory: FC<OwnProps> = ({
 }) => {
   const { showNotification } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);

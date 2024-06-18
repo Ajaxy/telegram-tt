@@ -4,12 +4,15 @@ import type { ApiPrivacyKey } from '../../../types';
 import type {
   ApiChatLink,
   ApiCollectionInfo,
-  ApiConfig, ApiCountry, ApiLangString,
+  ApiConfig, ApiCountry, ApiLanguage, ApiOldLangString,
   ApiPeerColors,
   ApiSession, ApiTimezone, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
+  LangPackStringValue,
 } from '../../types';
 
-import { buildCollectionByCallback, omit, pick } from '../../../util/iteratees';
+import {
+  buildCollectionByCallback, omit, omitUndefined, pick,
+} from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { addUserToLocalDb } from '../helpers';
 import { omitVirtualClassFields } from './helpers';
@@ -225,19 +228,68 @@ export function buildApiConfig(config: GramJs.Config): ApiConfig {
   };
 }
 
-export function buildLangPack(mtpLangPack: GramJs.LangPackDifference) {
-  return mtpLangPack.strings.reduce<Record<string, ApiLangString | undefined>>((acc, mtpString) => {
-    acc[mtpString.key] = buildLangPackString(mtpString);
+export function oldBuildLangPack(mtpLangPack: GramJs.LangPackDifference) {
+  return mtpLangPack.strings.reduce<Record<string, ApiOldLangString | undefined>>((acc, mtpString) => {
+    acc[mtpString.key] = oldBuildLangPackString(mtpString);
     return acc;
   }, {});
 }
 
-export function buildLangPackString(mtpString: GramJs.TypeLangPackString) {
+export function oldBuildLangPackString(mtpString: GramJs.TypeLangPackString) {
   return mtpString instanceof GramJs.LangPackString
     ? mtpString.value
     : mtpString instanceof GramJs.LangPackStringPluralized
       ? omit(omitVirtualClassFields(mtpString), ['key'])
       : undefined;
+}
+
+export function buildLangStrings(strings: GramJs.TypeLangPackString[]) {
+  const keysToRemove: string[] = [];
+  const apiStrings = strings.reduce<Record<string, LangPackStringValue>>((acc, mtpString) => {
+    if (mtpString instanceof GramJs.LangPackStringDeleted) {
+      keysToRemove.push(mtpString.key);
+    }
+
+    if (mtpString instanceof GramJs.LangPackString) {
+      acc[mtpString.key] = mtpString.value;
+    }
+
+    if (mtpString instanceof GramJs.LangPackStringPluralized) {
+      acc[mtpString.key] = omitUndefined({
+        zero: mtpString.zeroValue,
+        one: mtpString.oneValue,
+        two: mtpString.twoValue,
+        few: mtpString.fewValue,
+        many: mtpString.manyValue,
+        other: mtpString.otherValue,
+      });
+    }
+
+    return acc;
+  }, {});
+
+  return {
+    keysToRemove,
+    strings: apiStrings,
+  };
+}
+
+export function buildApiLanguage(lang: GramJs.TypeLangPackLanguage): ApiLanguage {
+  const {
+    name, nativeName, langCode, pluralCode, rtl, stringsCount, translatedCount, translationsUrl, beta, official,
+  } = lang;
+  return {
+    name,
+    nativeName,
+    langCode,
+    pluralCode,
+    isRtl: rtl,
+    isBeta: beta,
+    isOfficial: official,
+    stringsCount,
+    translatedCount,
+    translationsUrl,
+  };
 }
 
 function buildApiPeerColorSet(colorSet: GramJs.help.TypePeerColorSet) {

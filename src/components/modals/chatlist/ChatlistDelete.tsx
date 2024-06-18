@@ -8,7 +8,7 @@ import buildClassName from '../../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Picker from '../../common/Picker';
 import Badge from '../../ui/Badge';
@@ -27,7 +27,7 @@ const ChatlistDelete: FC<OwnProps> = ({
 }) => {
   const { closeChatlistModal, leaveChatlist } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(suggestedPeerIds);
 

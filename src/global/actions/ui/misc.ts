@@ -12,7 +12,8 @@ import generateUniqueId from '../../../util/generateUniqueId';
 import getIsAppUpdateNeeded from '../../../util/getIsAppUpdateNeeded';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { compact, unique } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import { refreshFromCache } from '../../../util/localization';
+import * as langProvider from '../../../util/oldLangProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
 import { IS_ELECTRON } from '../../../util/windowEnvironment';
@@ -336,21 +337,21 @@ addActionHandler('showAllowedMessageTypesNotification', (global, actions, payloa
     canSendDocuments ? 'Chat.SendAllowedContentTypeFile' : undefined,
     canSendAudios ? 'Chat.SendAllowedContentTypeMusic' : undefined,
     canSendStickers ? 'Chat.SendAllowedContentTypeSticker' : undefined,
-  ]).map((l) => langProvider.translate(l));
+  ]).map((l) => langProvider.oldTranslate(l));
 
   if (!allowedContent.length) {
     actions.showNotification({
-      message: langProvider.translate('Chat.SendNotAllowedText'),
+      message: langProvider.oldTranslate('Chat.SendNotAllowedText'),
       tabId,
     });
     return;
   }
 
-  const lastDelimiter = langProvider.translate('AutoDownloadSettings.LastDelimeter');
+  const lastDelimiter = langProvider.oldTranslate('AutoDownloadSettings.LastDelimeter');
   const allowedContentString = allowedContent.join(', ').replace(/,([^,]*)$/, `${lastDelimiter}$1`);
 
   actions.showNotification({
-    message: langProvider.translate('Chat.SendAllowedContentText', allowedContentString),
+    message: langProvider.oldTranslate('Chat.SendAllowedContentText', allowedContentString),
     tabId,
   });
 });
@@ -723,7 +724,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const { chatId, threadId } = messageList;
     const currentChat = selectChat(global, chatId);
     if (currentChat) {
-      const title = getChatTitle(langProvider.translate, currentChat, chatId === currentUserId);
+      const title = getChatTitle(langProvider.oldTranslate, currentChat, chatId === currentUserId);
       if (currentChat.isForum && currentChat.topics?.[threadId]) {
         setPageTitle(`${title} › ${currentChat.topics[threadId].title}`);
         return;
@@ -758,6 +759,10 @@ addActionHandler('setShouldCloseRightColumn', (global, actions, payload): Action
   }, tabId);
 });
 
+addActionHandler('refreshLangPackFromCache', (global, actions, payload): ActionReturnType => {
+  refreshFromCache(payload.langCode);
+});
+
 addActionHandler('processPremiumFloodWait', (global, actions, payload): ActionReturnType => {
   const { isUpload } = payload;
   const {
@@ -776,8 +781,8 @@ addActionHandler('processPremiumFloodWait', (global, actions, payload): ActionRe
 
   unblurredTabIds.forEach((tabId) => {
     actions.showNotification({
-      title: langProvider.translate(isUpload ? 'UploadSpeedLimited' : 'DownloadSpeedLimited'),
-      message: langProvider.translate(
+      title: langProvider.oldTranslate(isUpload ? 'UploadSpeedLimited' : 'DownloadSpeedLimited'),
+      message: langProvider.oldTranslate(
         isUpload ? 'UploadSpeedLimitedMessage' : 'DownloadSpeedLimitedMessage',
         isUpload ? bandwidthPremiumUploadSpeedup : bandwidthPremiumDownloadSpeedup,
       ),

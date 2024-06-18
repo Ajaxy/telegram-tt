@@ -59,8 +59,8 @@ import useDerivedState from '../../hooks/useDerivedState';
 import useElectronDrag from '../../hooks/useElectronDrag';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import { useFastClick } from '../../hooks/useFastClick';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import useShowTransition from '../../hooks/useShowTransition';
 import useWindowSize from '../../hooks/window/useWindowSize';
@@ -164,7 +164,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openStickerSet,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const isBackButtonActive = useRef(true);
   const { isTablet } = useAppLayout();
 

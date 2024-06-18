@@ -2893,6 +2893,9 @@ export interface ActionPayloads {
   };
 
   // Misc
+  refreshLangPackFromCache: {
+    langCode: string;
+  };
   openPollModal: ({
     isQuiz?: boolean;
   } & WithTabId) | undefined;

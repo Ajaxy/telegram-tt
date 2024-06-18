@@ -11,9 +11,9 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useContextMenuHandlers from '../../../../hooks/useContextMenuHandlers';
 import useFlag from '../../../../hooks/useFlag';
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useMenuPosition from '../../../../hooks/useMenuPosition';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import ReactionAnimatedEmoji from '../../../common/reactions/ReactionAnimatedEmoji';
 import PromptDialog from '../../../modals/prompt/PromptDialog';
@@ -66,7 +66,7 @@ const SavedTagButton = ({
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isRenamePromptOpen, openRenamePrompt, closeRenamePrompt] = useFlag();
 
   const { title, count } = tag || {};

@@ -13,7 +13,7 @@ import { isSameReaction } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import Checkbox from '../../ui/Checkbox';
@@ -42,7 +42,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
 }) => {
   const { setChatEnabledReactions } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isTouched, setIsTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [localEnabledReactions, setLocalEnabledReactions] = useState<ApiChatReactions | undefined>(enabledReactions);

@@ -4,7 +4,7 @@ import React from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import './DotAnimation.scss';
 
@@ -14,7 +14,7 @@ type OwnProps = {
 };
 
 const DotAnimation: FC<OwnProps> = ({ content, className }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   return (
     <span className={buildClassName('DotAnimation', className)} dir={lang.isRtl ? 'rtl' : 'auto'}>
       {renderText(content)}

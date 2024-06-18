@@ -14,9 +14,9 @@ import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -44,7 +44,7 @@ const Sticker: FC<OwnProps> = ({
 }) => {
   const { showNotification, openStickerSet } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   // eslint-disable-next-line no-null/no-null

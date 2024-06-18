@@ -7,8 +7,8 @@ import { canReplaceMessageMedia, getAttachmentType } from '../../../../global/he
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import buildAttachment from '../helpers/buildAttachment';
 
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 export default function useAttachmentModal({
   attachments,
@@ -35,7 +35,7 @@ export default function useAttachmentModal({
   insertNextText: VoidFunction;
   editedMessage: ApiMessage | undefined;
 }) {
-  const lang = useLang();
+  const lang = useOldLang();
   const { openLimitReachedModal, showAllowedMessageTypesNotification, showNotification } = getActions();
   const [shouldForceAsFile, setShouldForceAsFile] = useState<boolean>(false);
   const [shouldForceCompression, setShouldForceCompression] = useState<boolean>(false);

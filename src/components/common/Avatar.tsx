@@ -29,10 +29,10 @@ import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
 import { useFastClick } from '../../hooks/useFastClick';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useOldLang from '../../hooks/useOldLang';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import AvatarStoryCircle from './AvatarStoryCircle';
@@ -171,7 +171,7 @@ const Avatar: FC<OwnProps> = ({
     }
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   let content: TeactNode | undefined;
   const author = user ? getUserFullName(user) : (chat ? getChatTitle(lang, chat) : text);

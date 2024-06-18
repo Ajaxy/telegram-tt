@@ -16,7 +16,7 @@ import {
 } from '../../../../hooks/reducers/useFoldersReducer';
 import { useFolderManagerForOrderedIds } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import Loading from '../../../ui/Loading';
 import SettingsFoldersChatsPicker from './SettingsFoldersChatsPicker';
@@ -41,7 +41,7 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
   const { chatFilter } = state;
   const { selectedChatIds, selectedChatTypes } = selectChatFilters(state, mode, true);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const folderAllOrderedIds = useFolderManagerForOrderedIds(ALL_FOLDER_ID);
   const folderArchivedOrderedIds = useFolderManagerForOrderedIds(ARCHIVED_FOLDER_ID);

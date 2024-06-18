@@ -11,7 +11,7 @@ import { STICKER_SIZE_INVITES, TME_LINK_PREFIX } from '../../../config';
 import { getMainUsername, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/date/dateFormat';
+import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
@@ -19,7 +19,7 @@ import useInterval from '../../../hooks/schedulers/useInterval';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import LinkField from '../../common/LinkField';
@@ -71,7 +71,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     setOpenedInviteInfo,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isDeleteRevokeAllDialogOpen, openDeleteRevokeAllDialog, closeDeleteRevokeAllDialog] = useFlag();
   const [isRevokeDialogOpen, openRevokeDialog, closeRevokeDialog] = useFlag();

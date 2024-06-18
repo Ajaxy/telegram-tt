@@ -8,15 +8,15 @@ import type { ApiStory, ApiTypeStory } from '../../api/types';
 import { getStoryMediaHash } from '../../global/helpers';
 import { selectChat, selectPinnedStories } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/date/dateFormat';
+import { formatMediaDuration } from '../../util/dates/dateFormat';
 import stopEvent from '../../util/stopEvent';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMenuPosition from '../../hooks/useMenuPosition';
+import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import Menu from '../ui/Menu';
@@ -47,7 +47,7 @@ function MediaStory({
     showNotification,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 

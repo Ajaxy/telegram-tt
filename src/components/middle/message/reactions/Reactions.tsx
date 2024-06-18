@@ -18,8 +18,8 @@ import buildClassName from '../../../../util/buildClassName';
 import { getMessageKey } from '../../../../util/messageKey';
 
 import useDerivedState from '../../../../hooks/useDerivedState';
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import ReactionButton from './ReactionButton';
 import SavedTagButton from './SavedTagButton';
@@ -57,7 +57,7 @@ const Reactions: FC<OwnProps> = ({
     searchTextMessagesLocal,
     openPremiumModal,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { results, areTags, recentReactions } = message.reactions!;
 

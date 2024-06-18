@@ -8,8 +8,8 @@ import type { TabState } from '../../../global/types';
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
@@ -32,7 +32,7 @@ const ReportAdModal = ({
   const {
     reportSponsoredMessage, closeReportAdModal, openPreviousReportAdModal,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const isOpen = Boolean(modal);
 
   // eslint-disable-next-line no-null/no-null

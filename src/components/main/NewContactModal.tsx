@@ -14,7 +14,7 @@ import renderText from '../common/helpers/renderText';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import Button from '../ui/Button';
@@ -48,7 +48,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { updateContact, importContact, closeNewContactDialog } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const renderingUser = useCurrentOrPrev(user);
   const renderingIsByPhoneNumber = useCurrentOrPrev(isByPhoneNumber);
   // eslint-disable-next-line no-null/no-null

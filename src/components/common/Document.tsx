@@ -20,10 +20,10 @@ import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentI
 
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
+import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -76,7 +76,7 @@ const Document: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
   const [shouldNotWarnAboutSvg, setShouldNotWarnAboutSvg] = useState(false);
 

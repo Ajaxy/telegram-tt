@@ -35,8 +35,8 @@ import {
 import { callApi } from '../api/gramjs';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { buildCollectionByKey } from './iteratees';
-import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
+import { oldTranslate } from './oldLangProvider';
 import { debounce } from './schedulers';
 import { IS_ELECTRON, IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
 
@@ -353,7 +353,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
 
     if (isActionMessage(message)) {
       body = renderActionMessageText(
-        translate,
+        oldTranslate,
         message,
         !isChat ? messageSenderUser : undefined,
         isChat ? chat : undefined,
@@ -365,12 +365,12 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
       ) as string;
     } else {
       // TODO[forums] Support ApiChat
-      const senderName = getMessageSenderName(translate, chat.id, isChat ? messageSenderChat : messageSenderUser);
-      let summary = getMessageSummaryText(translate, message, hasReaction, 60);
+      const senderName = getMessageSenderName(oldTranslate, chat.id, isChat ? messageSenderChat : messageSenderUser);
+      let summary = getMessageSummaryText(oldTranslate, message, hasReaction, 60);
 
       if (hasReaction) {
         const emoji = getReactionEmoji(reaction);
-        summary = translate('PushReactText', [emoji, summary]);
+        summary = oldTranslate('PushReactText', [emoji, summary]);
       }
 
       body = senderName ? `${senderName}: ${summary}` : summary;
@@ -379,7 +379,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     body = 'New message';
   }
 
-  let title = isScreenLocked ? APP_NAME : getChatTitle(translate, chat, isSelf);
+  let title = isScreenLocked ? APP_NAME : getChatTitle(oldTranslate, chat, isSelf);
 
   if (message.isSilent) {
     title += ' 🔕';
@@ -435,7 +435,7 @@ export async function notifyAboutCall({
     options.vibrate = [200, 100, 200];
   }
 
-  const notification = new Notification(translate('VoipIncoming'), options);
+  const notification = new Notification(oldTranslate('VoipIncoming'), options);
 
   notification.onclick = () => {
     notification.close();

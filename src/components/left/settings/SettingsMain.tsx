@@ -13,8 +13,8 @@ import { formatInteger } from '../../../util/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import StarIcon from '../../common/icons/StarIcon';
 import ChatExtra from '../../common/profile/ChatExtra';
@@ -59,7 +59,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
   const [isSupportDialogOpen, openSupportDialog, closeSupportDialog] = useFlag(false);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     if (currentUserId) {

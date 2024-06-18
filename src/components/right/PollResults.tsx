@@ -10,7 +10,7 @@ import { buildCollectionByKey } from '../../util/iteratees';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Loading from '../ui/Loading';
 import PollAnswerResults from './PollAnswerResults';
@@ -33,7 +33,7 @@ const PollResults: FC<OwnProps & StateProps> = ({
   message,
   onClose,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

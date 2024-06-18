@@ -46,8 +46,8 @@ import {
   split,
   unique,
 } from '../../../util/iteratees';
-import { translate } from '../../../util/langProvider';
 import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { IS_IOS } from '../../../util/windowEnvironment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
@@ -435,7 +435,7 @@ addActionHandler('sendInviteMessages', async (global, actions, payload): Promise
     });
   }));
   return actions.showNotification({
-    message: translate('Conversation.ShareLinkTooltip.Chat.One', userFullNames.join(', ')),
+    message: oldTranslate('Conversation.ShareLinkTooltip.Chat.One', userFullNames.join(', ')),
     tabId,
   });
 });
@@ -795,7 +795,7 @@ addActionHandler('reportMessages', async (global, actions, payload): Promise<voi
 
   actions.showNotification({
     message: result
-      ? translate('ReportPeer.AlertSuccess')
+      ? oldTranslate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
     tabId,
   });
@@ -1580,7 +1580,7 @@ addActionHandler('reportSponsoredMessage', async (global, actions, payload): Pro
 
   if (result.type === 'reported' || result.type === 'hidden') {
     actions.showNotification({
-      message: translate(result.type === 'reported' ? 'AdReported' : 'AdHidden'),
+      message: oldTranslate(result.type === 'reported' ? 'AdReported' : 'AdHidden'),
       tabId,
     });
     actions.closeReportAdModal({ tabId });
@@ -1627,7 +1627,7 @@ addActionHandler('hideSponsoredMessages', async (global, actions, payload): Prom
   });
   setGlobal(global);
   actions.showNotification({
-    message: translate('AdHidden'),
+    message: oldTranslate('AdHidden'),
     tabId,
   });
 });
@@ -1817,7 +1817,7 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
   if (!currentReplyInfo) return;
 
   if (!selectReplyCanBeSentToChat(global, toChatId, currentChatId, currentReplyInfo)) {
-    actions.showNotification({ message: translate('Chat.SendNotAllowedText'), tabId });
+    actions.showNotification({ message: oldTranslate('Chat.SendNotAllowedText'), tabId });
     return;
   }
 
@@ -1848,7 +1848,7 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Prom
   if (isSelectForwardsContainVoiceMessages && user && !await checkIfVoiceMessagesAllowed(global, user, chatId)) {
     actions.showDialog({
       data: {
-        message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
+        message: oldTranslate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
       },
       tabId,
     });
@@ -2136,13 +2136,13 @@ addActionHandler('copyMessageLink', async (global, actions, payload): Promise<vo
   const chat = selectChat(global, chatId);
   if (!chat) {
     actions.showNotification({
-      message: translate('ErrorOccurred'),
+      message: oldTranslate('ErrorOccurred'),
       tabId,
     });
     return;
   }
   const showErrorOccurredNotification = () => actions.showNotification({
-    message: translate('ErrorOccurred'),
+    message: oldTranslate('ErrorOccurred'),
     tabId,
   });
 
@@ -2151,7 +2151,7 @@ addActionHandler('copyMessageLink', async (global, actions, payload): Promise<vo
     return;
   }
   const showLinkCopiedNotification = () => actions.showNotification({
-    message: translate('LinkCopied'),
+    message: oldTranslate('LinkCopied'),
     tabId,
   });
   const callApiExportMessageLinkPromise = callApi('exportMessageLink', {

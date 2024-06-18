@@ -12,10 +12,10 @@ import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '.
 import { selectTabState, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
-import { formatDateTimeToString } from '../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../util/dates/dateFormat';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import StarIcon from '../common/icons/StarIcon';
@@ -44,7 +44,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
   isOpen, receipt, bot, onClose,
 }) => {
   const { showNotification } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const starModalData = useMemo(() => {
     if (receipt?.type !== 'stars') return undefined;
@@ -150,7 +150,7 @@ function ReceiptModalRegular({
     text,
     title,
   } = receipt;
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isModalOpen, openModal, closeModal] = useFlag();
 

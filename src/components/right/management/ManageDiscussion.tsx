@@ -15,7 +15,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Avatar from '../../common/Avatar';
@@ -64,7 +64,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   const [isConfirmLinkGroupDialogOpen, openConfirmLinkGroupDialog, closeConfirmLinkGroupDialog] = useFlag();
   const [isJoinToSend, setIsJoinToSend] = useState(Boolean(linkedChat?.isJoinToSend));
   const [isJoinRequest, setIsJoinRequest] = useState(Boolean(linkedChat?.isJoinRequest));
-  const lang = useLang();
+  const lang = useOldLang();
   const linkedChatId = linkedChat?.id;
 
   useHistoryBack({

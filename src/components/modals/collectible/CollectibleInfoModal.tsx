@@ -9,15 +9,15 @@ import type { ApiCountryCode } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatDateAtTime } from '../../../util/date/dateFormat';
+import { formatDateAtTime } from '../../../util/dates/dateFormat';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
@@ -47,7 +47,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
     openUrl,
     showNotification,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isUsername = modal?.type === 'username';
 

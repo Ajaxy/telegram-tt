@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import type { ApiLangPack } from '../api/types';
+import type { ApiOldLangPack } from '../api/types';
 
 export default {
   Search: 'Search',
@@ -511,4 +511,4 @@ export default {
   SlowModeWait: 'Slow Mode — %d',
   OpenMapWith: 'Open map with...',
   FullDateTimeFormat: '%@, %@',
-} as ApiLangPack;
+} as ApiOldLangPack;

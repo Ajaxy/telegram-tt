@@ -17,8 +17,8 @@ import { calculateMediaViewerDimensions } from '../common/helpers/mediaDimension
 import { renderMessageText } from '../common/helpers/renderMessageText';
 
 import useAppLayout from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useControlsSignal from './hooks/useControlsSignal';
 import { useMediaProps } from './hooks/useMediaProps';
 
@@ -78,7 +78,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     isMoving,
   } = props;
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     isVideo,

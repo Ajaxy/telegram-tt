@@ -4,7 +4,7 @@ import type {
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
 import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
-import { timestampPlusDay } from '../../../util/date/dateFormat';
+import { timestampPlusDay } from '../../../util/dates/dateFormat';
 import { isDeepLink, tryParseDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';

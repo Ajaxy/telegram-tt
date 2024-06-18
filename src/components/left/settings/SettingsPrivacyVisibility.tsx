@@ -10,8 +10,8 @@ import { selectIsCurrentUserPremium, selectUserFullInfo } from '../../../global/
 import { getPrivacyKey } from './helpers/privacy';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
@@ -106,7 +106,7 @@ function PrivacySubsection({
   onScreenSelect: (screen: SettingsScreens) => void;
 }) {
   const { setPrivacyVisibility } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const visibilityOptions = useMemo(() => {
     const hasNobody = screen !== SettingsScreens.PrivacyAddByPhone;

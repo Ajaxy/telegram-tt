@@ -6,7 +6,7 @@ import type { ApiKeyboardButton, ApiMessage } from '../../../api/types';
 import { RE_TME_LINK } from '../../../config';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 
@@ -18,7 +18,7 @@ type OwnProps = {
 };
 
 const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderIcon = (button: ApiKeyboardButton) => {
     const { type } = button;

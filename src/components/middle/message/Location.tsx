@@ -14,7 +14,7 @@ import {
   isGeoLiveExpired,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownShort, formatLastUpdated } from '../../../util/date/dateFormat';
+import { formatCountdownShort, formatLastUpdated } from '../../../util/dates/dateFormat';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl,
 } from '../../../util/map';
@@ -23,9 +23,9 @@ import { getServerTime } from '../../../util/serverTime';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
@@ -62,7 +62,7 @@ const Location: FC<OwnProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const countdownRef = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
   const forceUpdate = useForceUpdate();
 
   const location = getMessageLocation(message)!;

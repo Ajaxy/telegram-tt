@@ -21,7 +21,7 @@ import {
 } from '../../global/selectors';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -84,7 +84,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     onClose();
   }, [onConfirm, album, message.id, isSchedule, onClose, deleteScheduledMessages, deleteMessages]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <Modal

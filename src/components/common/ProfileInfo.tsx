@@ -27,8 +27,8 @@ import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import usePhotosPreload from './hooks/usePhotosPreload';
@@ -93,7 +93,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     openPrivacySettingsNoticeModal,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { id: userId } = user || {};
   const { id: chatId } = chat || {};

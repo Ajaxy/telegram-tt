@@ -1,4 +1,4 @@
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 import type { TimeFormat } from '../../types';
 
 import withCache from '../withCache';

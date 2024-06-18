@@ -13,14 +13,14 @@ import type {
   ApiMessage, ApiPeer, ApiPoll, ApiPollAnswer,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useOldLang';
 
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
@@ -202,7 +202,7 @@ const Poll: FC<OwnProps & StateProps> = ({
     }
   }, [hasVoted, wasSubmitted, results.results, summary.quiz, poll.results.solution]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   function renderResultOption(answer: ApiPollAnswer) {
     return (

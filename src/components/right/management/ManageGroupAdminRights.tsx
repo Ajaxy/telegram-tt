@@ -14,7 +14,7 @@ import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Checkbox from '../../ui/Checkbox';
@@ -71,7 +71,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isDismissConfirmationDialogOpen, openDismissConfirmationDialog, closeDismissConfirmationDialog] = useFlag();
   const [customTitle, setCustomTitle] = useState('');
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

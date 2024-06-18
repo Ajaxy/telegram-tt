@@ -1,6 +1,6 @@
 import { getGlobal } from '../global';
 
-import type { ApiLangPack, ApiLangString } from '../api/types';
+import type { ApiOldLangPack, ApiOldLangString } from '../api/types';
 import type { LangCode, TimeFormat } from '../types';
 
 import {
@@ -10,6 +10,7 @@ import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { createCallbackManager } from './callbacks';
 import { fallbackLangPackInitial } from './fallbackLangPackInitial';
+import { loadAndChangeLanguage } from './localization';
 import { formatInteger } from './textFormat';
 
 export interface LangFn {
@@ -100,8 +101,8 @@ const PLURAL_RULES = {
 
 const cache = new Map<string, string>();
 
-let langPack: ApiLangPack | undefined;
-let fallbackLangPack: ApiLangPack | undefined;
+let langPack: ApiOldLangPack | undefined;
+let fallbackLangPack: ApiOldLangPack | undefined;
 
 const {
   addCallback,
@@ -139,7 +140,10 @@ function createLangFn() {
 
 let translationFn: LangFn = createLangFn();
 
-export function translate(...args: Parameters<LangFn>) {
+/**
+ * @deprecated Do not translate inside non-reactive contexts. Pass parameters to the component instead
+ */
+export function oldTranslate(...args: Parameters<LangFn>) {
   return translationFn(...args);
 }
 
@@ -148,7 +152,7 @@ export function getTranslationFn(): LangFn {
 }
 
 export async function getTranslationForLangString(langCode: string, key: string) {
-  let translateString: ApiLangString | undefined;
+  let translateString: ApiOldLangString | undefined;
   const cachedValue = await cacheApi.fetch(
     LANG_CACHE_NAME,
     `${DEFAULT_LANG_PACK}_${langCode}_${key}`,
@@ -164,7 +168,11 @@ export async function getTranslationForLangString(langCode: string, key: string)
   return processTranslation(translateString, key);
 }
 
-export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunction, withFallback = false) {
+/**
+ * @deprecated Migrate to `changeLanguage` in `util/localization.ts` instead
+ */
+export async function oldSetLanguage(langCode: LangCode, callback?: NoneToVoidFunction, withFallback = false) {
+  loadAndChangeLanguage(langCode, true);
   if (langPack && langCode === currentLangCode) {
     if (callback) {
       callback();
@@ -194,7 +202,7 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
   const { languages, timeFormat } = getGlobal().settings.byKey;
   const langInfo = languages?.find((lang) => lang.langCode === langCode);
   translationFn = createLangFn();
-  translationFn.isRtl = Boolean(langInfo?.rtl);
+  translationFn.isRtl = Boolean(langInfo?.isRtl);
   translationFn.code = langCode.replace('-raw', '') as LangCode;
   translationFn.langName = langInfo?.nativeName;
   translationFn.timeFormat = timeFormat;
@@ -226,8 +234,8 @@ async function importFallbackLangPack() {
   runCallbacks();
 }
 
-async function fetchRemote(langCode: string): Promise<ApiLangPack | undefined> {
-  const remote = await callApi('fetchLangPack', { sourceLangPacks: LANG_PACKS, langCode });
+async function fetchRemote(langCode: string): Promise<ApiOldLangPack | undefined> {
+  const remote = await callApi('oldFetchLangPack', { sourceLangPacks: LANG_PACKS, langCode });
   if (remote) {
     await cacheApi.save(LANG_CACHE_NAME, langCode, remote.langPack);
     return remote.langPack;
@@ -238,8 +246,8 @@ async function fetchRemote(langCode: string): Promise<ApiLangPack | undefined> {
 
 async function fetchRemoteString(
   remoteLangPack: typeof LANG_PACKS[number], langCode: string, key: string,
-): Promise<ApiLangString | undefined> {
-  const remote = await callApi('fetchLangStrings', {
+): Promise<ApiOldLangString | undefined> {
+  const remote = await callApi('oldFetchLangStrings', {
     langPack: remoteLangPack,
     langCode,
     keys: [key],
@@ -278,7 +286,7 @@ function processTemplate(template: string, value: any) {
 }
 
 function processTranslation(
-  langString: ApiLangString | undefined, key: string, value?: any, format?: 'i', pluralValue?: number,
+  langString: ApiOldLangString | undefined, key: string, value?: any, format?: 'i', pluralValue?: number,
 ) {
   const preferredPluralOption = typeof value === 'number' || pluralValue !== undefined
     ? getPluralOption(pluralValue ?? value)

@@ -12,7 +12,7 @@ import {
   getMessageVideo,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/date/dateFormat';
+import { formatMediaDuration } from '../../util/dates/dateFormat';
 import stopEvent from '../../util/stopEvent';
 
 import useFlag from '../../hooks/useFlag';

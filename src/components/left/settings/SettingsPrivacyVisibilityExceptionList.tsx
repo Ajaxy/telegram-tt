@@ -18,7 +18,7 @@ import { getPrivacyKey } from './helpers/privacy';
 
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Picker from '../../common/Picker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -51,7 +51,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
 }) => {
   const { setPrivacySettings } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const selectedContactIds = useMemo(() => {
     if (!settings) {

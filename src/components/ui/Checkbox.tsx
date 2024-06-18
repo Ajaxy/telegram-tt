@@ -7,7 +7,7 @@ import type { IconName } from '../../types/icons';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Spinner from './Spinner';
 
@@ -51,7 +51,7 @@ const Checkbox: FC<OwnProps> = ({
   onCheck,
   onClickLabel,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const labelRef = useRef<HTMLLabelElement>(null);

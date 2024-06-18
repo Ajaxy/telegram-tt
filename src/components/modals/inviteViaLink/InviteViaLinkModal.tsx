@@ -14,8 +14,8 @@ import { selectChat } from '../../../global/selectors';
 import { partition } from '../../../util/iteratees';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
 import Picker from '../../common/Picker';
@@ -40,7 +40,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
   const { sendInviteMessages, closeInviteViaLinkModal, openPremiumModal } = getActions();
   const { missingUsers } = modal || {};
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   const userIds = useMemo(() => missingUsers?.map((user) => user.id), [missingUsers]);
