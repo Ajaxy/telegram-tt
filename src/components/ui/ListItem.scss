@@ -148,7 +148,7 @@
 
       @media (hover: hover) {
         &:hover,
-        &:focus {
+        &:focus-visible {
           --background-color: var(--color-chat-hover);
         }
       }
