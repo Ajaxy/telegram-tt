@@ -80,7 +80,7 @@
     background: none;
   }
 
-  .media:not(.text) &,
+  .media.no-footer &,
   .Message .custom-shape &,
   .Message .invoice:not(.has-reactions) & {
     --color-accent-own: white;
@@ -98,7 +98,7 @@
     }
   }
 
-  .media:not(.text) &,
+  .media.no-footer &,
   .Message .invoice:not(.has-reactions) & {
     background: rgba(0, 0, 0, 0.2);
   }
@@ -122,12 +122,12 @@
     padding: 0 0.375rem 0 0.3125rem;
   }
 
-  .is-forwarded.media:not(.text):dir(rtl) &,
+  .is-forwarded.media.no-footer:dir(rtl) &,
   .Message .is-forwarded.custom-shape:dir(rtl) & {
     left: 0.8125rem;
   }
 
-  .is-forwarded.media:not(.text) & {
+  .is-forwarded.media.no-footer & {
     bottom: 0.9375rem;
     right: 0.8125rem;
     max-width: calc(100% - 2.25rem);
@@ -152,7 +152,7 @@
     bottom: 3.375rem;
   }
 
-  .message-content.has-replies.text:not(.custom-shape) & {
+  .message-content.has-replies.text:not(.custom-shape):not(.is-inverted-media) & {
     bottom: 3.1875rem;
   }
 

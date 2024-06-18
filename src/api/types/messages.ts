@@ -606,6 +606,7 @@ export interface ApiMessage {
   savedPeerId?: string;
   senderBoosts?: number;
   factCheck?: ApiFactCheck;
+  isInvertedMedia?: true;
 }
 
 export interface ApiReactions {

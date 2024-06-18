@@ -191,6 +191,8 @@ export function buildApiMessageWithChatId(
   const senderBoosts = mtpMessage.fromBoostsApplied;
   const factCheck = mtpMessage.factcheck && buildApiFactCheck(mtpMessage.factcheck);
 
+  const isInvertedMedia = mtpMessage.invertMedia;
+
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
   return omitUndefined<ApiMessage>({
@@ -233,6 +235,7 @@ export function buildApiMessageWithChatId(
     senderBoosts,
     viaBusinessBotId: mtpMessage.viaBusinessBotId?.toString(),
     factCheck,
+    isInvertedMedia,
   });
 }
 

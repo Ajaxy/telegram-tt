@@ -126,7 +126,7 @@
     }
   }
 
-  .message-content:not(.has-reactions) & {
+  .message-content:not(.has-reactions):not(.is-inverted-media) & {
     margin-bottom: calc(var(--message-meta-height)) !important;
   }
 

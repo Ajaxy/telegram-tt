@@ -582,6 +582,20 @@
     margin-top: -0.3125rem;
   }
 
+  &.text.is-inverted-media .media-inner,
+  &.text.is-inverted-media .Album {
+    margin-top: 0.3125rem;
+  }
+
+  &.has-solid-background.is-inverted-media.no-footer .media-inner,
+  &.has-solid-background.is-inverted-media.no-footer .Album {
+    margin-bottom: -0.375rem;
+
+    body.is-ios .Message.own & {
+      margin-bottom: -0.4375rem;
+    }
+  }
+
   &.has-subheader .media-inner,
   &.force-sender-name .Album,
   &.has-subheader .Album,
@@ -599,8 +613,10 @@
   }
 
   // Moved below `.has-subheader` to overwrite its styles
-  &.text .media-inner,
-  &.text .Album {
+  &.is-inverted-media.has-fact-check .media-inner,
+  &.is-inverted-media.has-fact-check .Album,
+  &.text:not(.is-inverted-media) .media-inner,
+  &.text:not(.is-inverted-media) .Album {
     margin-bottom: 0.375rem !important;
 
     body.is-ios .Message.own & {

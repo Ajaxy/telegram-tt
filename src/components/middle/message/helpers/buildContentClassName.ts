@@ -20,6 +20,7 @@ export function buildContentClassName(
     isGeoLiveActive,
     withVoiceTranscription,
     peerColorClass,
+    hasOutsideReactions,
   }: {
     hasSubheader?: boolean;
     isCustomShape?: boolean | number;
@@ -33,6 +34,7 @@ export function buildContentClassName(
     isGeoLiveActive?: boolean;
     withVoiceTranscription?: boolean;
     peerColorClass?: string;
+    hasOutsideReactions?: boolean;
   } = {},
 ) {
   const {
@@ -42,11 +44,24 @@ export function buildContentClassName(
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
   const hasFactCheck = Boolean(message.factCheck?.text);
 
+  const isInvertedMedia = message.isInvertedMedia;
+  const isInvertibleMedia = photo || (video && !video?.isRound) || album || webPage;
+
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
   const isMedia = storyData || photo || video || location || invoice?.extendedMedia;
   const hasText = text || location?.type === 'venue' || isGeoLiveActive || hasFactCheck;
   const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
+
+  const hasFooter = (() => {
+    if (isInvertedMedia && isInvertibleMedia) {
+      if (hasReactions && !hasOutsideReactions) return true;
+      if (hasFactCheck) return true;
+      if (webPage && hasText) return true;
+      return false;
+    }
+    return hasText;
+  })();
 
   if (peerColorClass) {
     classNames.push(peerColorClass);
@@ -130,6 +145,10 @@ export function buildContentClassName(
     classNames.push('has-reactions');
   }
 
+  if (hasOutsideReactions) {
+    classNames.push('has-outside-reactions');
+  }
+
   if (isViaBot) {
     classNames.push('is-via-bot');
   }
@@ -149,9 +168,23 @@ export function buildContentClassName(
       classNames.push('has-solid-background');
     }
 
+    if (hasFactCheck) {
+      classNames.push('has-fact-check');
+    }
+
     if (isLastInGroup && (photo || !isMediaWithNoText || (location && asForwarded))) {
       classNames.push('has-appendix');
     }
+  }
+
+  if (isInvertibleMedia && isInvertedMedia) {
+    classNames.push('is-inverted-media');
+  }
+
+  if (hasFooter) {
+    classNames.push('has-footer');
+  } else {
+    classNames.push('no-footer');
   }
 
   return classNames.join(' ');
