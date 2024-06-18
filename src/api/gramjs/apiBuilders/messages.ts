@@ -698,7 +698,6 @@ function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: bool
         if (media instanceof GramJs.MessageMediaInvoice && media.receiptMsgId) {
           return {
             type: 'receipt',
-            text: 'PaymentReceipt',
             receiptMessageId: media.receiptMsgId,
           };
         }

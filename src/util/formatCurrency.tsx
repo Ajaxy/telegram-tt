@@ -1,4 +1,8 @@
+import React, { type TeactNode } from '../lib/teact/teact';
+
 import type { LangCode } from '../types';
+
+import StarIcon from '../components/common/icons/StarIcon';
 
 const STARS_CODE = 'XTR';
 
@@ -6,15 +10,31 @@ export function formatCurrency(
   totalPrice: number,
   currency: string,
   locale: LangCode = 'en',
-  shouldOmitFractions = false,
-) {
+  options?: {
+    shouldOmitFractions?: boolean;
+    iconClassName?: string;
+  },
+): TeactNode {
   const price = totalPrice / 10 ** getCurrencyExp(currency);
 
   if (currency === STARS_CODE) {
-    return `⭐️${price}`;
+    return [<StarIcon className={options?.iconClassName} type="gold" size="adaptive" />, price];
   }
 
-  if (shouldOmitFractions && price % 1 === 0) {
+  return formatCurrencyAsString(totalPrice, currency, locale, options);
+}
+
+export function formatCurrencyAsString(
+  totalPrice: number,
+  currency: string,
+  locale: LangCode = 'en',
+  options?: {
+    shouldOmitFractions?: boolean;
+  },
+) {
+  const price = totalPrice / 10 ** getCurrencyExp(currency);
+
+  if (options?.shouldOmitFractions && price % 1 === 0) {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency,

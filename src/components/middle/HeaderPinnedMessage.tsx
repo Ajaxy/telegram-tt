@@ -12,6 +12,7 @@ import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getPictogramDimensions, REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
+import renderKeyboardButtonText from './composer/helpers/renderKeyboardButtonText';
 
 import { useFastClick } from '../../hooks/useFastClick';
 import useFlag from '../../hooks/useFlag';
@@ -198,7 +199,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
             onMouseEnter={!IS_TOUCH_ENV ? markNoHoverColor : undefined}
             onMouseLeave={!IS_TOUCH_ENV ? unmarkNoHoverColor : undefined}
           >
-            {renderText(inlineButton.text)}
+            {renderKeyboardButtonText(lang, inlineButton)}
           </Button>
         )}
       </div>

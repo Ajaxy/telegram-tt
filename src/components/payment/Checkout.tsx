@@ -121,7 +121,7 @@ const Checkout: FC<OwnProps> = ({
               className={buildClassName(styles.tipsItem, tip === tipAmount && styles.tipsItem_active)}
               onClick={dispatch ? () => handleTipsClick(tip === tipAmount ? 0 : tip) : undefined}
             >
-              {formatCurrency(tip, currency, lang.code, true)}
+              {formatCurrency(tip, currency, lang.code, { shouldOmitFractions: true })}
             </div>
           ))}
         </div>
@@ -199,7 +199,7 @@ const Checkout: FC<OwnProps> = ({
           label: lang('PaymentCheckoutProvider'),
           customIcon: buildClassName(styles.provider, styles[paymentProvider.toLowerCase()]),
         })}
-        {(needAddress || !isInteractive) && renderCheckoutItem({
+        {(needAddress || (!isInteractive && shippingAddress)) && renderCheckoutItem({
           title: shippingAddress,
           label: lang('PaymentShippingAddress'),
           icon: 'location',
@@ -215,7 +215,7 @@ const Checkout: FC<OwnProps> = ({
           label: lang('PaymentCheckoutPhoneNumber'),
           icon: 'phone',
         })}
-        {(hasShippingOptions || !isInteractive) && renderCheckoutItem({
+        {(hasShippingOptions || (!isInteractive && shippingMethod)) && renderCheckoutItem({
           title: shippingMethod,
           label: lang('PaymentCheckoutShippingMethod'),
           icon: 'truck',

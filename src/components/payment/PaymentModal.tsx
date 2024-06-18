@@ -15,7 +15,7 @@ import { getUserFullName } from '../../global/helpers';
 import { selectChat, selectTabState, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatCurrency } from '../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../util/formatCurrency';
 import { detectCardTypeText } from '../common/helpers/detectCardType';
 
 import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
@@ -517,7 +517,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   }, [step, lang]);
 
   const buttonText = step === PaymentStep.Checkout
-    ? lang('Checkout.PayPrice', formatCurrency(totalPrice, currency!, lang.code))
+    ? lang('Checkout.PayPrice', formatCurrencyAsString(totalPrice, currency!, lang.code))
     : lang('Next');
 
   function getIsSubmitDisabled() {

@@ -1,7 +1,7 @@
 import type { ActionReturnType } from '../../types';
 
 import { areDeepEqual } from '../../../util/areDeepEqual';
-import { formatCurrency } from '../../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import * as langProvider from '../../../util/oldLangProvider';
 import { addActionHandler, setGlobal } from '../../index';
 import { closeInvoice, updateStarsBalance } from '../../reducers';
@@ -22,7 +22,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           actions.showNotification({
             tabId,
             message: langProvider.oldTranslate('PaymentInfoHint', [
-              formatCurrency(amount, currency, langProvider.getTranslationFn().code),
+              formatCurrencyAsString(amount, currency, langProvider.getTranslationFn().code),
               title,
             ]),
           });

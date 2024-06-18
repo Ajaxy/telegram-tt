@@ -1,6 +1,9 @@
 import * as langProvider from '../util/oldLangProvider';
 import useAsync from './useAsync';
 
+/**
+ * @deprecated Migrate to `useLang`, while using needed key inside initial fallback
+ */
 const useOldLangString = (
   langCode: string | undefined,
   key: string,

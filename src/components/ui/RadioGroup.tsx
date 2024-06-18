@@ -8,7 +8,7 @@ import Radio from './Radio';
 
 export type IRadioOption<T = string> = {
   label: TeactNode;
-  subLabel?: string;
+  subLabel?: TeactNode;
   value: T;
   hidden?: boolean;
   className?: string;
@@ -25,7 +25,7 @@ type OwnProps = {
   onClickAction?: (value: string) => void;
   isLink?: boolean;
   subLabelClassName?: string;
-  subLabel?: string | undefined;
+  subLabel?: TeactNode;
 };
 
 const RadioGroup: FC<OwnProps> = ({

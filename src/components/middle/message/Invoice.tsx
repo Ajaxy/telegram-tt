@@ -119,7 +119,7 @@ const Invoice: FC<OwnProps> = ({
           </div>
         )}
         <p className="description-text">
-          {formatCurrency(amount, currency, lang.code)}
+          {formatCurrency(amount, currency, lang.code, { iconClassName: 'invoice-currency-icon' })}
           {isTest && <span className="test-invoice">{lang('PaymentTestInvoice')}</span>}
         </p>
       </div>

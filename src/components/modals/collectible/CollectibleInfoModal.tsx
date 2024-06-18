@@ -10,7 +10,7 @@ import type { TabState } from '../../../global/types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatDateAtTime } from '../../../util/dates/dateFormat';
-import { formatCurrency } from '../../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
@@ -91,8 +91,8 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
     if (!modal) return undefined;
     const key = isUsername ? 'FragmentUsernameMessage' : 'FragmentPhoneMessage';
     const date = formatDateAtTime(lang, modal.purchaseDate * 1000);
-    const currency = formatCurrency(modal.amount, modal.currency, lang.code);
-    const cryptoCurrency = formatCurrency(modal.cryptoAmount, modal.cryptoCurrency, lang.code);
+    const currency = formatCurrencyAsString(modal.amount, modal.currency, lang.code);
+    const cryptoCurrency = formatCurrencyAsString(modal.cryptoAmount, modal.cryptoCurrency, lang.code);
     const paid = `${cryptoCurrency} (${currency})`;
     return lang(key, [date, paid]);
   }, [modal, isUsername, lang]);

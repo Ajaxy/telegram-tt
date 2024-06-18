@@ -14,7 +14,7 @@ type OwnProps = {
   id?: string;
   name: string;
   label: TeactNode;
-  subLabel?: string;
+  subLabel?: TeactNode;
   value: string;
   checked: boolean;
   disabled?: boolean;

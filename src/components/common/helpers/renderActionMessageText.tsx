@@ -14,7 +14,7 @@ import {
   isExpiredMessage,
 } from '../../../global/helpers';
 import { getMessageSummaryText } from '../../../global/helpers/messageSummary';
-import { formatCurrency } from '../../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import trimText from '../../../util/trimText';
 import renderText from './renderText';
 
@@ -85,7 +85,7 @@ export function renderActionMessageText(
     processed = processPlaceholder(
       unprocessed,
       '%payment_amount%',
-      formatCurrency(amount!, currency!, lang.code),
+      formatCurrencyAsString(amount!, currency!, lang.code),
     );
     unprocessed = processed.pop() as string;
     content.push(...processed);
@@ -134,11 +134,11 @@ export function renderActionMessageText(
   }
 
   if (unprocessed.includes('%gift_payment_amount%')) {
-    const price = formatCurrency(amount!, currency!, lang.code);
+    const price = formatCurrencyAsString(amount!, currency!, lang.code);
     let priceText = price;
 
     if (giftCryptoInfo) {
-      const cryptoPrice = formatCurrency(giftCryptoInfo.amount, giftCryptoInfo.currency, lang.code);
+      const cryptoPrice = formatCurrencyAsString(giftCryptoInfo.amount, giftCryptoInfo.currency, lang.code);
       priceText = `${cryptoPrice} (${price})`;
     }
 

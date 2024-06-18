@@ -9,7 +9,7 @@ import styles from './StarIcon.module.scss';
 
 type OwnProps = {
   type?: 'gold' | 'premium' | 'regular';
-  size?: 'small' | 'middle' | 'big';
+  size?: 'small' | 'middle' | 'big' | 'adaptive';
   className?: string;
   onClick?: VoidFunction;
 };

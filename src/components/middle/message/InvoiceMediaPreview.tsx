@@ -7,7 +7,7 @@ import type { ApiMessage } from '../../../api/types';
 import { getMessageInvoice } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dates/dateFormat';
-import { formatCurrency } from '../../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -74,7 +74,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
       {Boolean(duration) && <div className={styles.duration}>{formatMediaDuration(duration)}</div>}
       <div className={styles.buy}>
         <i className={buildClassName('icon', 'icon-lock', styles.lock)} />
-        {lang('Checkout.PayPrice', formatCurrency(amount, currency))}
+        {lang('Checkout.PayPrice', formatCurrencyAsString(amount, currency))}
       </div>
     </div>
   );
