@@ -1041,7 +1041,12 @@ addActionHandler('editChatFolders', (global, actions, payload): ActionReturnType
   const limit = selectCurrentLimit(global, 'dialogFiltersChats');
 
   const isLimitReached = idsToAdd
-    .some((id) => selectChatFolder(global, id)!.includedChatIds.length >= limit);
+    .some((id) => {
+      const { includedChatIds, pinnedChatIds } = selectChatFolder(global, id);
+      const totalChatsInFolder = (includedChatIds?.length || 0) + (pinnedChatIds?.length || 0);
+
+      return totalChatsInFolder >= limit;
+    });
   if (isLimitReached) {
     actions.openLimitReachedModal({ limit: 'dialogFiltersChats', tabId });
     return;
