@@ -122,6 +122,7 @@ export default function createConfig(
                 importLoaders: 1,
                 modules: {
                   namedExport: false,
+                  auto: true,
                 },
               },
             },
