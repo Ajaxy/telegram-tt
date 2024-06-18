@@ -1010,8 +1010,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     lastMessageSendTimeSeconds.current = getServerTime();
-
-    clearDraft({ chatId, isLocalOnly: true, shouldKeepReply: isForwarding });
+    clearDraft({
+      chatId, threadId, isLocalOnly: true, shouldKeepReply: isForwarding,
+    });
 
     if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
@@ -1164,7 +1165,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         isSilent,
         shouldUpdateStickerSetOrder: shouldUpdateStickerSetOrder && canUpdateStickerSetsOrder,
       });
-      clearDraft({ chatId, isLocalOnly: true });
+      clearDraft({ chatId, threadId, isLocalOnly: true });
+
       requestMeasure(() => {
         resetComposer(shouldPreserveInput);
       });
