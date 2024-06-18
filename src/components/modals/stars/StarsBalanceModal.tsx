@@ -77,24 +77,34 @@ const StarsBalanceModal = ({
     }
   }, [isOpen]);
 
-  const renderingOptions = useMemo(() => {
+  const [renderingOptions, canExtend] = useMemo(() => {
     if (!topupOptions) {
-      return undefined;
+      return [undefined, false];
     }
 
+    const maxOption = topupOptions.reduce((max, option) => (
+      max.stars > option.stars ? max : option
+    ));
+    const forceShowAll = starsNeeded && maxOption.stars < starsNeeded;
+
     const result: { option: ApiStarTopupOption; starsCount: number }[] = [];
-    let currentStarsCount = 0;
+    let currentStackedStarsCount = 0;
+    let canExtendOptions = false;
     topupOptions.forEach((option) => {
-      if (!option.isExtended) currentStarsCount++;
-      if (!areOptionsExtended && option.isExtended) return;
-      if (starsNeeded && option.stars < starsNeeded) return;
+      if (!option.isExtended) currentStackedStarsCount++;
+
+      if (starsNeeded && !forceShowAll && option.stars < starsNeeded) return;
+      if (!areOptionsExtended && option.isExtended) {
+        canExtendOptions = true;
+        return;
+      }
       result.push({
         option,
-        starsCount: currentStarsCount,
+        starsCount: currentStackedStarsCount,
       });
     });
 
-    return result;
+    return [result, canExtendOptions];
   }, [areOptionsExtended, topupOptions, starsNeeded]);
 
   const tosText = useMemo(() => {
@@ -164,8 +174,8 @@ const StarsBalanceModal = ({
             {renderingOptions?.map(({ option, starsCount }) => (
               <StarTopupOption option={option} starsCount={starsCount} onClick={handleClick} />
             ))}
-            {!areOptionsExtended && (
-              <Button className={styles.moreOptions} noForcedUpperCase isText onClick={markOptionsExtended}>
+            {!areOptionsExtended && canExtend && (
+              <Button className={styles.moreOptions} isText noForcedUpperCase onClick={markOptionsExtended}>
                 {lang('Stars.Purchase.ShowMore')}
                 <Icon className={styles.iconDown} name="down" />
               </Button>

@@ -325,7 +325,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (!messageIds || !messagesById || threadId !== MAIN_THREAD_ID || type === 'scheduled') {
       return;
     }
-    const ids = messageIds.filter((id) => messagesById[id].factCheck?.shouldFetch);
+    const ids = messageIds.filter((id) => messagesById[id]?.factCheck?.shouldFetch);
 
     if (!ids.length) return;
 
