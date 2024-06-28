@@ -132,6 +132,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   attachmentSettings: {
     shouldCompress: true,
     shouldSendGrouped: true,
+    isInvertedMedia: undefined,
   },
 
   scheduledMessages: {
@@ -313,7 +314,11 @@ export const INITIAL_TAB_STATE: TabState = {
     byChatThreadKey: {},
   },
 
-  localMediaSearch: {
+  sharedMediaSearch: {
+    byChatThreadKey: {},
+  },
+
+  chatMediaSearch: {
     byChatThreadKey: {},
   },
 

@@ -3,7 +3,9 @@ import { ApiMediaFormat } from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByCallback, buildCollectionByKey, omit } from '../../../util/iteratees';
+import {
+  buildCollectionByCallback, buildCollectionByKey, omit, unique,
+} from '../../../util/iteratees';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { getMessageKey } from '../../../util/messageKey';
 import requestActionTimeout from '../../../util/requestActionTimeout';
@@ -377,7 +379,7 @@ addActionHandler('fetchUnreadReactions', async (global, actions, payload): Promi
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = updateUnreadReactions(global, chatId, {
-    unreadReactions: [...(chat.unreadReactions || []), ...ids],
+    unreadReactions: unique([...(chat.unreadReactions || []), ...ids]).sort((a, b) => b - a),
   });
 
   setGlobal(global);
@@ -389,48 +391,40 @@ addActionHandler('animateUnreadReaction', (global, actions, payload): ActionRetu
   const chat = selectCurrentChat(global, tabId);
   if (!chat) return undefined;
 
-  if (chat.unreadReactionsCount) {
-    const unreadReactionsCount = chat.unreadReactionsCount - messageIds.length;
-    const unreadReactions = (chat.unreadReactions || []).filter((id) => !messageIds.includes(id));
-
-    global = updateUnreadReactions(global, chat.id, {
-      unreadReactions,
+  if (!chat.unreadReactionsCount) {
+    return updateUnreadReactions(global, chat.id, {
+      unreadReactions: [],
     });
-
-    setGlobal(global);
-
-    if (!unreadReactions.length && unreadReactionsCount) {
-      actions.fetchUnreadReactions({ chatId: chat.id, offsetId: Math.min(...messageIds) });
-    }
   }
 
-  actions.markMessagesRead({ messageIds, tabId });
+  const unreadReactionsCount = Math.max(chat.unreadReactionsCount - messageIds.length, 0);
+  const unreadReactions = (chat.unreadReactions || []).filter((id) => !messageIds.includes(id));
+
+  global = updateUnreadReactions(global, chat.id, {
+    unreadReactions,
+    unreadReactionsCount,
+  });
+
+  setGlobal(global);
+
+  actions.markMessagesRead({ messageIds, shouldFetchUnreadReactions: true, tabId });
 
   if (!selectPerformanceSettingsValue(global, 'reactionEffects')) return undefined;
 
   global = getGlobal();
 
-  return updateTabState(global, {
-    activeReactions: {
-      ...selectTabState(global, tabId).activeReactions,
-      ...Object.fromEntries(messageIds.map((messageId) => {
-        const message = selectChatMessage(global, chat.id, messageId);
+  messageIds.forEach((id) => {
+    const message = selectChatMessage(global, chat.id, id);
+    if (!message) return;
 
-        if (!message) return undefined;
+    const { reaction, isOwn, isUnread } = message.reactions?.recentReactions?.[0] ?? {};
+    if (reaction && isUnread && !isOwn) {
+      const messageKey = getMessageKey(message);
+      actions.startActiveReaction({ containerId: messageKey, reaction, tabId: getCurrentTabId() });
+    }
+  });
 
-        const unread = message.reactions?.recentReactions?.filter(({ isUnread }) => isUnread);
-
-        if (!unread) return undefined;
-
-        const reactions = unread.map((recent) => recent.reaction);
-
-        return [messageId, reactions.map((r) => ({
-          messageId,
-          reaction: r,
-        }))];
-      }).filter(Boolean)),
-    },
-  }, tabId);
+  return undefined;
 });
 
 addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnType => {
@@ -447,6 +441,7 @@ addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnTy
   }
 
   actions.focusMessage({ chatId: chat.id, messageId: chat.unreadReactions[0], tabId });
+  actions.markMessagesRead({ messageIds: [chat.unreadReactions[0]], tabId });
   return undefined;
 });
 

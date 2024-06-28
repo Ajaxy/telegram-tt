@@ -203,11 +203,13 @@ export interface ApiAppConfig {
   storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
+  maxPinnedStoriesCount?: number;
   groupTranscribeLevelMin?: number;
   canLimitNewMessagesWithoutPremium?: boolean;
   bandwidthPremiumNotifyPeriod?: number;
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;
+  channelRestrictAdsLevelMin?: number;
 }
 
 export interface ApiConfig {
@@ -266,3 +268,12 @@ type ApiUrlAuthResultDefault = {
 };
 
 export type ApiUrlAuthResult = ApiUrlAuthResultRequest | ApiUrlAuthResultAccepted | ApiUrlAuthResultDefault;
+
+export interface ApiCollectionInfo {
+  amount: number;
+  currency: string;
+  cryptoAmount: number;
+  cryptoCurrency: string;
+  purchaseDate: number;
+  url: string;
+}

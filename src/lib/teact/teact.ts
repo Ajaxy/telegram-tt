@@ -6,7 +6,7 @@ import { incrementOverlayCounter } from '../../util/debugOverlay';
 import { orderBy } from '../../util/iteratees';
 import safeExec from '../../util/safeExec';
 import { throttleWith } from '../../util/schedulers';
-import { isSignal } from '../../util/signals';
+import { createSignal, isSignal, type Signal } from '../../util/signals';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
 export type Props = AnyLiteral;
@@ -71,6 +71,7 @@ interface ComponentInstance {
   props: Props;
   renderedValue?: any;
   mountState: MountState;
+  context?: Record<string, Signal<unknown>>;
   hooks?: {
     state?: {
       cursor: number;
@@ -132,11 +133,19 @@ export type TeactNode =
 type Effect = () => (NoneToVoidFunction | void);
 type EffectCleanup = NoneToVoidFunction;
 
+export type Context<T> = {
+  defaultValue?: T;
+  contextId: string;
+  Provider: FC<{ value: T; children: TeactNode }>;
+};
+
 const Fragment = Symbol('Fragment');
 
 const DEBUG_RENDER_THRESHOLD = 7;
 const DEBUG_EFFECT_THRESHOLD = 7;
 const DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer', 'Button', 'ListItem', 'MenuItem']);
+
+let contextCounter = 0;
 
 let lastComponentId = 0;
 let renderingInstance: ComponentInstance;
@@ -176,7 +185,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
   }
 
   const componentInstance: ComponentInstance = {
-    id: ++lastComponentId,
+    id: -1,
     $element: undefined as unknown as VirtualElementComponent,
     Component,
     name: Component.name,
@@ -476,6 +485,7 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
 }
 
 export function mountComponent(componentInstance: ComponentInstance) {
+  componentInstance.id = ++lastComponentId;
   renderComponent(componentInstance);
   componentInstance.mountState = MountState.Mounted;
   return componentInstance.$element;
@@ -900,6 +910,42 @@ export function useRef<T>(initial?: T | null) {
   return byCursor[cursor];
 }
 
+export function createContext<T>(defaultValue?: T): Context<T> {
+  const contextId = String(contextCounter++);
+
+  function TeactContextProvider(props: { value: T; children: TeactNode }) {
+    const [getValue, setValue] = useSignal(props.value ?? defaultValue);
+    // Create a new object to avoid mutations in the parent context
+    renderingInstance.context = { ...renderingInstance.context };
+
+    renderingInstance.context[contextId] = getValue;
+    setValue(props.value);
+    return props.children;
+  }
+
+  TeactContextProvider.DEBUG_contentComponentName = contextId;
+
+  const context = {
+    defaultValue,
+    contextId,
+    Provider: TeactContextProvider,
+  };
+
+  return context;
+}
+
+export function useContextSignal<T>(context: Context<T>) {
+  const [getDefaultValue] = useSignal(context.defaultValue);
+
+  return renderingInstance.context?.[context.contextId] || getDefaultValue;
+}
+
+export function useSignal<T>(initial?: T) {
+  const signalRef = useRef<ReturnType<typeof createSignal<T>>>();
+  signalRef.current ??= createSignal<T>(initial);
+  return signalRef.current;
+}
+
 export function memo<T extends FC_withDebug>(Component: T, debugKey?: string) {
   function TeactMemoWrapper(props: Props) {
     return useMemo(
@@ -927,6 +973,10 @@ export function DEBUG_resolveComponentName(Component: FC_withDebug) {
 
   if (name === 'TeactMemoWrapper') {
     return `memo>${DEBUG_contentComponentName}`;
+  }
+
+  if (name === 'TeactContextProvider') {
+    return `context>id${DEBUG_contentComponentName}`;
   }
 
   return name + (DEBUG_contentComponentName ? `>${DEBUG_contentComponentName}` : '');

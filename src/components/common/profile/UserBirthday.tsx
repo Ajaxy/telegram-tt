@@ -11,7 +11,7 @@ import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { getStickerMediaHash } from '../../../global/helpers';
 import { selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateToString } from '../../../util/date/dateFormat';
+import { formatDateToString } from '../../../util/dates/dateFormat';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/windowEnvironment';
@@ -19,8 +19,8 @@ import renderText from '../helpers/renderText';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ListItem from '../../ui/ListItem';
 import StickerView from '../StickerView';
@@ -59,7 +59,7 @@ const UserBirthday = ({
   const animationPlayedRef = useRef(false);
   const [isPlayingAnimation, playAnimation, stopAnimation] = useFlag();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     formattedDate,

@@ -9,7 +9,7 @@ import { getUserFullName, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -40,7 +40,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
   onClose,
   isActive,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

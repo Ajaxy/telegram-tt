@@ -4,7 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 import type { ApiMessageOutgoingStatus } from '../../api/types';
 
 import Transition from '../ui/Transition';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import './MessageOutgoingStatus.scss';
 

@@ -12,8 +12,8 @@ import {
 } from '../../../../global/helpers';
 import buildClassName, { createClassNameBuilder } from '../../../../util/buildClassName';
 
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import Button from '../../../ui/Button';
 import Link from '../../../ui/Link';
@@ -67,7 +67,7 @@ const ReactionSelector: FC<OwnProps> = ({
   const { openPremiumModal } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const areReactionsLocked = isInSavedMessages && !isCurrentUserPremium && !isInStoryViewer;
 
@@ -157,7 +157,7 @@ const ReactionSelector: FC<OwnProps> = ({
   if (!reactionsToRender.length) return undefined;
 
   return (
-    <div className={buildClassName(cn('&', lang.isRtl && 'isRtl'), className)} ref={ref}>
+    <div className={buildClassName(cn('&'), className)} ref={ref}>
       <div className={cn('bubble-small', lang.isRtl && 'isRtl')} />
       <div className={cn('items-wrapper')}>
         <div className={cn('bubble-big', lang.isRtl && 'isRtl')} />

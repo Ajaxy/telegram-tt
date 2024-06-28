@@ -12,6 +12,7 @@ import { parseLocationHash } from '../util/routing';
 import { clearStoredSession } from '../util/sessions';
 import { updatePeerColors } from '../util/theme';
 import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
+import { initializeChatMediaSearchResults } from './reducers/localSearch';
 import { updateTabState } from './reducers/tabs';
 import { initCache, loadCache } from './cache';
 import {
@@ -79,6 +80,7 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
         global = replaceThreadParam(global, chatId, threadId, 'lastViewportIds', undefined);
         return;
       }
+      global = initializeChatMediaSearchResults(global, chatId, threadId, tabId);
       global = replaceTabThreadParam(
         global,
         chatId,

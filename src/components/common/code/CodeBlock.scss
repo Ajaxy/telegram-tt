@@ -38,28 +38,28 @@
         opacity: 1;
       }
     }
-  
+
     &.no-word-wrap {
       white-space: pre;
       padding-bottom: 0.25rem;
     }
-  
+
     html.theme-light & {
       --color-type: #0053d4;
       --color-keyword: #388e22;
       --color-class: #3e6c20;
       --color-string: #9a1111;
-      --color-template: #9A5334;
-      --color-selector: #9A5334;
+      --color-template: #9a5334;
+      --color-selector: #9a5334;
       --color-function: #a753b7;
       --color-comment: #616161;
       --color-section: #9a1111;
-      --color-variable: #BD63C5;
+      --color-variable: #bd63c5;
       --color-attribute: #276b8f;
       --color-link: #276b8f;
       --color-tag: #000000;
     }
-  
+
     html.theme-dark :not(.own) & {
       --color-type: #56b6c2;
       --color-keyword: #c678dd;
@@ -75,9 +75,9 @@
       --color-link: #d19a66;
       --color-tag: #e06c75;
     }
-  
+
     html.theme-dark .own & {
-      --color-type: #9EFFFF;
+      --color-type: #9effff;
       --color-keyword: #ffe900;
       --color-class: #b2f5ff;
       --color-string: #fedcad;
@@ -91,7 +91,7 @@
       --color-link: #ffe900;
       --color-tag: #b2f5ff;
     }
-  
+
     .hljs {
       display: block;
       overflow-x: auto;
@@ -147,7 +147,8 @@
 
 .hljs-meta,
 .hljs-meta .hljs-keyword,
-.hljs-tag, .hljs-doctag {
+.hljs-tag,
+.hljs-doctag {
   color: var(--color-tag);
 }
 

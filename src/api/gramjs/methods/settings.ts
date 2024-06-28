@@ -19,16 +19,19 @@ import { getServerTime } from '../../../util/serverTime';
 import { buildAppConfig } from '../apiBuilders/appConfig';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
-import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import {
   buildApiConfig,
   buildApiCountryList,
+  buildApiLanguage,
   buildApiNotifyException,
   buildApiPeerColors,
   buildApiSession,
   buildApiTimezone,
   buildApiWallpaper,
-  buildApiWebSession, buildLangPack, buildLangPackString,
+  buildApiWebSession,
+  buildLangStrings,
+  oldBuildLangPack,
+  oldBuildLangPackString,
 } from '../apiBuilders/misc';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiUser } from '../apiBuilders/users';
@@ -429,6 +432,57 @@ export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broa
   }));
 }
 
+export async function fetchLangPack({
+  langPack,
+  langCode,
+}: {
+  langPack: string;
+  langCode: string;
+}) {
+  const result = await invokeRequest(new GramJs.langpack.GetLangPack({
+    langPack,
+    langCode,
+  }));
+  if (!result) {
+    return undefined;
+  }
+
+  const { strings, keysToRemove } = buildLangStrings(result.strings);
+
+  return {
+    version: result.version,
+    strings,
+    keysToRemove,
+  };
+}
+
+export async function fetchLangDifference({
+  langPack,
+  langCode,
+  fromVersion,
+}: {
+  langPack: string;
+  langCode: string;
+  fromVersion: number;
+}) {
+  const result = await invokeRequest(new GramJs.langpack.GetDifference({
+    langPack,
+    langCode,
+    fromVersion,
+  }));
+  if (!result) {
+    return undefined;
+  }
+
+  const { strings, keysToRemove } = buildLangStrings(result.strings);
+
+  return {
+    version: result.version,
+    strings,
+    keysToRemove,
+  };
+}
+
 export async function fetchLanguages(): Promise<ApiLanguage[] | undefined> {
   const result = await invokeRequest(new GramJs.langpack.GetLanguages({
     langPack: DEFAULT_LANG_PACK,
@@ -437,10 +491,28 @@ export async function fetchLanguages(): Promise<ApiLanguage[] | undefined> {
     return undefined;
   }
 
-  return result.map(omitVirtualClassFields);
+  return result.map(buildApiLanguage);
 }
 
-export async function fetchLangPack({ sourceLangPacks, langCode }: {
+export async function fetchLanguage({
+  langPack,
+  langCode,
+}: {
+  langPack: string;
+  langCode: string;
+}): Promise<ApiLanguage | undefined> {
+  const result = await invokeRequest(new GramJs.langpack.GetLanguage({
+    langPack,
+    langCode,
+  }));
+  if (!result) {
+    return undefined;
+  }
+
+  return buildApiLanguage(result);
+}
+
+export async function oldFetchLangPack({ sourceLangPacks, langCode }: {
   sourceLangPacks: typeof LANG_PACKS;
   langCode: string;
 }) {
@@ -451,7 +523,7 @@ export async function fetchLangPack({ sourceLangPacks, langCode }: {
     }));
   }));
 
-  const collections = results.filter(Boolean).map(buildLangPack);
+  const collections = results.filter(Boolean).map(oldBuildLangPack);
   if (!collections.length) {
     return undefined;
   }
@@ -459,7 +531,7 @@ export async function fetchLangPack({ sourceLangPacks, langCode }: {
   return { langPack: Object.assign({}, ...collections.reverse()) as typeof collections[0] };
 }
 
-export async function fetchLangStrings({ langPack, langCode, keys }: {
+export async function oldFetchLangStrings({ langPack, langCode, keys }: {
   langPack: string; langCode: string; keys: string[];
 }) {
   const result = await invokeRequest(new GramJs.langpack.GetStrings({
@@ -472,7 +544,7 @@ export async function fetchLangStrings({ langPack, langCode, keys }: {
     return undefined;
   }
 
-  return result.map(buildLangPackString);
+  return result.map(oldBuildLangPackString);
 }
 
 export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {

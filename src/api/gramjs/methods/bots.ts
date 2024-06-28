@@ -33,7 +33,9 @@ import {
   buildInputThemeParams,
   generateRandomBigInt,
 } from '../gramjsBuilders';
-import { addEntitiesToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
+import {
+  addEntitiesToLocalDb, addUserToLocalDb, addWebDocumentToLocalDb, deserializeBytes,
+} from '../helpers';
 import localDb from '../localDb';
 import { invokeRequest } from './client';
 
@@ -559,10 +561,6 @@ function addDocumentToLocalDb(document: GramJs.Document) {
 
 function addPhotoToLocalDb(photo: GramJs.Photo) {
   localDb.photos[String(photo.id)] = photo;
-}
-
-function addWebDocumentToLocalDb(webDocument: GramJs.TypeWebDocument) {
-  localDb.webDocuments[webDocument.url] = webDocument;
 }
 
 export function setBotInfo({

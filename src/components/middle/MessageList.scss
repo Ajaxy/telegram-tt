@@ -424,7 +424,7 @@
 
   .Transition_slide-from > &,
   .Transition_slide-to > & {
-    scrollbar-color: transparent !important;
+    scrollbar-color: transparent transparent !important;
 
     &::-webkit-scrollbar-thumb {
       background-color: transparent !important;

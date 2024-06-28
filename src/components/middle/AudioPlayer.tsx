@@ -22,9 +22,9 @@ import renderText from '../common/helpers/renderText';
 import useAppLayout from '../../hooks/useAppLayout';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -83,7 +83,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
   const { audio, voice, video } = getMessageContent(message);
   const isVoice = Boolean(voice || video);

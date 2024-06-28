@@ -47,6 +47,7 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
 
       global = updateTabState(global, {
         activeReactions: {},
+        shouldPreventComposerAnimation: true,
       }, tabId);
     }
 

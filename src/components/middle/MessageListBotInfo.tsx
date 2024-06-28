@@ -15,8 +15,8 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
+import useOldLang from '../../hooks/useOldLang';
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -39,7 +39,7 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
   isLoadingBotInfo,
   isInMessageList,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const dpr = useDevicePixelRatio();
 
   const botInfoPhotoUrl = useMedia(botInfo?.photo ? getBotCoverMediaHash(botInfo.photo) : undefined);
@@ -71,7 +71,7 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
         >
           {botInfoPhotoUrl && (
             <img
-              className={styles.image}
+              className={styles.media}
               src={botInfoPhotoUrl}
               width={botInfoRealDimensions?.width}
               height={botInfoRealDimensions?.height}
@@ -81,6 +81,7 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
           {botInfoGifUrl && (
             <OptimizedVideo
               canPlay
+              className={styles.media}
               src={botInfoGifUrl}
               loop
               disablePictureInPicture
@@ -91,8 +92,10 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
           )}
           {botInfoDimensions && !botInfoPhotoUrl && !botInfoGifUrl && (
             <Skeleton
+              className={styles.media}
               width={botInfoRealDimensions?.width}
               height={botInfoRealDimensions?.height}
+              forceAspectRatio
             />
           )}
           {botInfo.description && (

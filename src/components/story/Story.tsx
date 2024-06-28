@@ -26,7 +26,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatMediaDuration, formatRelativeTime } from '../../util/date/dateFormat';
+import { formatMediaDuration, formatRelativeTime } from '../../util/dates/dateFormat';
 import download from '../../util/download';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
@@ -41,10 +41,10 @@ import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import { useStreaming } from '../../hooks/useStreaming';
 import useBackgroundMode from '../../hooks/window/useBackgroundMode';
@@ -53,7 +53,7 @@ import useStoryProps from './hooks/useStoryProps';
 
 import Avatar from '../common/Avatar';
 import Composer from '../common/Composer';
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -140,7 +140,7 @@ function Story({
     loadPeerSkippedStories,
     openForwardMenu,
     copyStoryLink,
-    toggleStoryPinned,
+    toggleStoryInProfile,
     openChat,
     showNotification,
     openStoryPrivacyEditor,
@@ -151,7 +151,7 @@ function Story({
   } = getActions();
   const serverTime = getServerTime();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
   const [isComposerHasFocus, markComposerHasFocus, unmarkComposerHasFocus] = useFlag(false);
   const [isStoryPlaybackRequested, playStory, pauseStory] = useFlag(false);
@@ -188,11 +188,11 @@ function Story({
   const isOut = isLoadedStory && story.isOut;
 
   const canPinToProfile = useCurrentOrPrev(
-    isOut ? !story.isPinned : undefined,
+    isOut ? !story.isInProfile : undefined,
     true,
   );
   const canUnpinFromProfile = useCurrentOrPrev(
-    isOut ? story.isPinned : undefined,
+    isOut ? story.isInProfile : undefined,
     true,
   );
   const areViewsExpired = Boolean(
@@ -460,11 +460,11 @@ function Story({
   });
 
   const handlePinClick = useLastCallback(() => {
-    toggleStoryPinned({ peerId, storyId, isPinned: true });
+    toggleStoryInProfile({ peerId, storyId, isInProfile: true });
   });
 
   const handleUnpinClick = useLastCallback(() => {
-    toggleStoryPinned({ peerId, storyId, isPinned: false });
+    toggleStoryInProfile({ peerId, storyId, isInProfile: false });
   });
 
   const handleDeleteStoryClick = useLastCallback(() => {

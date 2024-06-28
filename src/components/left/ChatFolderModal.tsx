@@ -8,7 +8,7 @@ import type { ApiChatFolder } from '../../api/types';
 
 import { ALL_FOLDER_ID } from '../../config';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import CheckboxGroup from '../ui/CheckboxGroup';
@@ -36,7 +36,7 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { editChatFolders } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const initialSelectedFolderIds = useMemo(() => {
     if (!foldersById) {

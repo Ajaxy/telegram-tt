@@ -6,15 +6,16 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiMissingInvitedUser } from '../../../api/types';
+import type { ApiChat } from '../../../api/types';
+import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
 import { selectChat } from '../../../global/selectors';
 import { partition } from '../../../util/iteratees';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
 import Picker from '../../common/Picker';
@@ -25,8 +26,7 @@ import Separator from '../../ui/Separator';
 import styles from './InviteViaLinkModal.module.scss';
 
 export type OwnProps = {
-  chatId?: string;
-  missingUsers?: ApiMissingInvitedUser[];
+  modal: TabState['inviteViaLinkModal'];
 };
 
 type StateProps = {
@@ -34,12 +34,13 @@ type StateProps = {
 };
 
 const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
-  missingUsers,
+  modal,
   chat,
 }) => {
   const { sendInviteMessages, closeInviteViaLinkModal, openPremiumModal } = getActions();
+  const { missingUsers } = modal || {};
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   const userIds = useMemo(() => missingUsers?.map((user) => user.id), [missingUsers]);
@@ -196,8 +197,8 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
-    const chat = chatId ? selectChat(global, chatId) : undefined;
+  (global, { modal }): StateProps => {
+    const chat = modal?.chatId ? selectChat(global, modal.chatId) : undefined;
 
     return {
       chat,

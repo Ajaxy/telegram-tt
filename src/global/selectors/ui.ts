@@ -134,3 +134,7 @@ export function selectCanAnimateInterface<T extends GlobalState>(global: T) {
 export function selectIsContextMenuTranslucent<T extends GlobalState>(global: T) {
   return selectPerformanceSettingsValue(global, 'contextMenuBlur');
 }
+
+export function selectIsSynced<T extends GlobalState>(global: T) {
+  return global.isSynced;
+}

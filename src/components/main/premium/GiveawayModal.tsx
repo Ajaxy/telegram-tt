@@ -21,17 +21,17 @@ import {
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import CalendarModal from '../../common/CalendarModal';
 import CountryPickerModal from '../../common/CountryPickerModal';
 import GroupChatInfo from '../../common/GroupChatInfo';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import InputText from '../../ui/InputText';
@@ -117,7 +117,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
     launchPrepaidGiveaway,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
   const [isCountryPickerModalOpen, openCountryPickerModal, closeCountryPickerModal] = useFlag();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();

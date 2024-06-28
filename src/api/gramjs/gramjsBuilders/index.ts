@@ -22,6 +22,7 @@ import type {
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiSendMessageAction,
+  ApiStarTopupOption,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -174,9 +175,12 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
   const poll = new GramJs.Poll({
     id: randomId,
     publicVoters: summary.isPublic,
-    question: summary.question,
+    question: buildInputTextWithEntities(summary.question),
     answers: summary.answers.map(({ text, option }) => {
-      return new GramJs.PollAnswer({ text, option: deserializeBytes(option) });
+      return new GramJs.PollAnswer({
+        text: buildInputTextWithEntities(text),
+        option: deserializeBytes(option),
+      });
     }),
     quiz: summary.quiz,
     multipleChoice: summary.multipleChoice,
@@ -205,9 +209,12 @@ export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
     poll: new GramJs.Poll({
       id: BigInt(poll.id),
       publicVoters: poll.summary.isPublic,
-      question: poll.summary.question,
+      question: buildInputTextWithEntities(poll.summary.question),
       answers: poll.summary.answers.map(({ text, option }) => {
-        return new GramJs.PollAnswer({ text, option: deserializeBytes(option) });
+        return new GramJs.PollAnswer({
+          text: buildInputTextWithEntities(text),
+          option: deserializeBytes(option),
+        });
       }),
       quiz: poll.summary.quiz,
       multipleChoice: poll.summary.multipleChoice,
@@ -603,6 +610,15 @@ function buildPremiumGiftCodeOption(optionData: ApiPremiumGiftCodeOption) {
   });
 }
 
+function buildInputStarsTopupOption(option: ApiStarTopupOption) {
+  return new GramJs.StarsTopupOption({
+    stars: BigInt(option.stars),
+    amount: BigInt(option.amount),
+    currency: option.currency,
+    extended: option.isExtended,
+  });
+}
+
 export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
   switch (invoice.type) {
     case 'message': {
@@ -615,6 +631,12 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
     case 'slug': {
       return new GramJs.InputInvoiceSlug({
         slug: invoice.slug,
+      });
+    }
+
+    case 'stars': {
+      return new GramJs.InputInvoiceStars({
+        option: buildInputStarsTopupOption(invoice.option),
       });
     }
 

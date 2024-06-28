@@ -20,6 +20,7 @@ import type {
 } from './chats';
 import type {
   ApiFormattedText,
+  ApiInputInvoice,
   ApiMessage,
   ApiMessageExtendedMediaPreview,
   ApiPhoto,
@@ -518,7 +519,7 @@ export type ApiUpdatePaymentVerificationNeeded = {
 
 export type ApiUpdatePaymentStateCompleted = {
   '@type': 'updatePaymentStateCompleted';
-  slug?: string;
+  inputInvoice: ApiInputInvoice;
 };
 
 export type ApiUpdatePrivacy = {
@@ -738,6 +739,11 @@ export type ApiUpdatePremiumFloodWait = {
   isUpload?: boolean;
 };
 
+export type ApiUpdateStarsBalance = {
+  '@type': 'updateStarsBalance';
+  balance: number;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -768,7 +774,7 @@ export type ApiUpdate = (
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
   ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
-  ApiUpdateDeleteSavedHistory | ApiUpdatePremiumFloodWait |
+  ApiUpdateDeleteSavedHistory | ApiUpdatePremiumFloodWait | ApiUpdateStarsBalance |
   ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages
 );
 

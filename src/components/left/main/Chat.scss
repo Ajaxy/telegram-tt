@@ -89,9 +89,9 @@
         color: var(--color-white);
       }
 
-      .VerifiedIcon, .PremiumIcon {
+      .VerifiedIcon, .StarIcon {
         --color-fill: #fff;
-        --color-checkmark: var(--color-primary)
+        --color-checkmark: var(--color-primary);
       }
 
       .avatar-online {

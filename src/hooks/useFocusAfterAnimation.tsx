@@ -1,10 +1,10 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
 
-import { requestMutation } from '../lib/fasterdom/fasterdom';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import { IS_TOUCH_ENV } from '../util/windowEnvironment';
 
-const DEFAULT_DURATION = 400;
+const DEFAULT_DURATION = 300;
 
 export default function useFocusAfterAnimation(
   ref: RefObject<HTMLInputElement>, animationDuration = DEFAULT_DURATION,
@@ -15,7 +15,7 @@ export default function useFocusAfterAnimation(
     }
 
     setTimeout(() => {
-      requestMutation(() => {
+      requestMeasure(() => {
         ref.current?.focus();
       });
     }, animationDuration);

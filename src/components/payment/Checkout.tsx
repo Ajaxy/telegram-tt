@@ -15,8 +15,8 @@ import buildClassName from '../../util/buildClassName';
 import { formatCurrency } from '../../util/formatCurrency';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
+import useOldLang from '../../hooks/useOldLang';
 
 import SafeLink from '../common/SafeLink';
 import Checkbox from '../ui/Checkbox';
@@ -70,7 +70,7 @@ const Checkout: FC<OwnProps> = ({
 }) => {
   const { setPaymentStep } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const isInteractive = Boolean(dispatch);
 
   const {
@@ -121,7 +121,7 @@ const Checkout: FC<OwnProps> = ({
               className={buildClassName(styles.tipsItem, tip === tipAmount && styles.tipsItem_active)}
               onClick={dispatch ? () => handleTipsClick(tip === tipAmount ? 0 : tip) : undefined}
             >
-              {formatCurrency(tip, currency, lang.code, true)}
+              {formatCurrency(tip, currency, lang.code, { shouldOmitFractions: true })}
             </div>
           ))}
         </div>
@@ -199,7 +199,7 @@ const Checkout: FC<OwnProps> = ({
           label: lang('PaymentCheckoutProvider'),
           customIcon: buildClassName(styles.provider, styles[paymentProvider.toLowerCase()]),
         })}
-        {(needAddress || !isInteractive) && renderCheckoutItem({
+        {(needAddress || (!isInteractive && shippingAddress)) && renderCheckoutItem({
           title: shippingAddress,
           label: lang('PaymentShippingAddress'),
           icon: 'location',
@@ -215,7 +215,7 @@ const Checkout: FC<OwnProps> = ({
           label: lang('PaymentCheckoutPhoneNumber'),
           icon: 'phone',
         })}
-        {(hasShippingOptions || !isInteractive) && renderCheckoutItem({
+        {(hasShippingOptions || (!isInteractive && shippingMethod)) && renderCheckoutItem({
           title: shippingMethod,
           label: lang('PaymentCheckoutShippingMethod'),
           icon: 'truck',
@@ -257,9 +257,12 @@ function renderCheckoutItem({
   onClick?: NoneToVoidFunction;
   customIcon?: string;
 }) {
+  const isMultiline = Boolean(title && label !== title);
+
   return (
     <ListItem
-      multiline={Boolean(title && label !== title)}
+      multiline={isMultiline}
+      narrow={isMultiline}
       icon={icon}
       inactive={!onClick}
       onClick={onClick}

@@ -26,8 +26,8 @@ import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationChe
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useOrderDiff from './hooks/useOrderDiff';
 
@@ -88,7 +88,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   }, [chat, loadTopics]);
 
   const [isScrolled, setIsScrolled] = useState(false);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleClose = useLastCallback(() => {
     closeForumPanel();

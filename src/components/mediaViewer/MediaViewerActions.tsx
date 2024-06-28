@@ -19,9 +19,9 @@ import {
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
+import useOldLang from '../../hooks/useOldLang';
 import useZoomChange from './hooks/useZoomChangeSignal';
 
 import DeleteMessageModal from '../common/DeleteMessageModal';
@@ -127,7 +127,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     selectMedia(0);
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (

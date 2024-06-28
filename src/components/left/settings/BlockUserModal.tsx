@@ -11,7 +11,7 @@ import { filterUsersByName, getUserFullName } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ChatOrUserPicker from '../../common/ChatOrUserPicker';
 
@@ -42,7 +42,7 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
     blockUser,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [search, setSearch] = useState('');
 
   useEffect(() => {

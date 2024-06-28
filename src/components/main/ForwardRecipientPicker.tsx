@@ -7,10 +7,14 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { ThreadId } from '../../types';
 
 import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
-import { selectChat, selectTabState, selectUser } from '../../global/selectors';
+import {
+  selectChat,
+  selectTabState,
+  selectUser,
+} from '../../global/selectors';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import RecipientPicker from '../common/RecipientPicker';
@@ -23,6 +27,7 @@ interface StateProps {
   currentUserId?: string;
   isManyMessages?: boolean;
   isStory?: boolean;
+  isForwarding?: boolean;
 }
 
 const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
@@ -30,8 +35,10 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   currentUserId,
   isManyMessages,
   isStory,
+  isForwarding,
 }) => {
   const {
+    openChatOrTopicWithReplyInDraft,
     setForwardChatOrTopic,
     exitForwardMode,
     forwardToSavedMessages,
@@ -39,7 +46,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
     showNotification,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderingIsStory = usePrevious(isStory, true);
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
@@ -84,9 +91,15 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
       forwardToSavedMessages();
       showNotification({ message });
     } else {
-      setForwardChatOrTopic({ chatId: recipientId, topicId: Number(threadId) });
+      const chatId = recipientId;
+      const topicId = threadId ? Number(threadId) : undefined;
+      if (isForwarding) {
+        setForwardChatOrTopic({ chatId, topicId });
+      } else {
+        openChatOrTopicWithReplyInDraft({ chatId, topicId });
+      }
     }
-  }, [currentUserId, isManyMessages, isStory, lang]);
+  }, [currentUserId, isManyMessages, isStory, lang, isForwarding]);
 
   const handleClose = useCallback(() => {
     exitForwardMode();
@@ -110,9 +123,11 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const { messageIds, storyId } = selectTabState(global).forwardMessages;
+  const isForwarding = (messageIds && messageIds.length > 0);
   return {
     currentUserId: global.currentUserId,
     isManyMessages: (messageIds?.length || 0) > 1,
     isStory: Boolean(storyId),
+    isForwarding,
   };
 })(ForwardRecipientPicker));

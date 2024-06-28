@@ -4,7 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Spinner from './Spinner';
 
@@ -14,7 +14,7 @@ type OwnProps = {
   id?: string;
   name: string;
   label: TeactNode;
-  subLabel?: string;
+  subLabel?: TeactNode;
   value: string;
   checked: boolean;
   disabled?: boolean;
@@ -43,7 +43,7 @@ const Radio: FC<OwnProps> = ({
   isLink,
   onSubLabelClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const fullClassName = buildClassName(
     'Radio',
     className,

@@ -19,6 +19,7 @@ import type {
   ApiVoice,
   ApiWebDocument,
   ApiWebPage,
+  ApiWebPageStickerData,
   ApiWebPageStoryData,
   MediaContent,
 } from '../../types';
@@ -28,6 +29,7 @@ import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEB
 import { pick } from '../../../util/iteratees';
 import { addStoryToLocalDb, serializeBytes } from '../helpers';
 import {
+  buildApiFormattedText,
   buildApiMessageEntity,
   buildApiPhoto,
   buildApiPhotoSize,
@@ -35,7 +37,7 @@ import {
   buildApiThumbnailFromStripped,
 } from './common';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
-import { buildStickerFromDocument } from './symbols';
+import { buildStickerFromDocument, processStickerResult } from './symbols';
 
 export function buildMessageContent(
   mtpMessage: UniversalMessage | GramJs.UpdateServiceNotification,
@@ -608,7 +610,7 @@ export function buildMessageStoryData(media: GramJs.TypeMessageMedia): ApiMessag
 export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {
   const { id, answers: rawAnswers } = poll;
   const answers = rawAnswers.map((answer) => ({
-    text: answer.text,
+    text: buildApiFormattedText(answer.text),
     option: serializeBytes(answer.option),
   }));
 
@@ -616,11 +618,11 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
     id: String(id),
     summary: {
       isPublic: poll.publicVoters,
+      question: buildApiFormattedText(poll.question),
       ...pick(poll, [
         'closed',
         'multipleChoice',
         'quiz',
-        'question',
         'closePeriod',
         'closeDate',
       ]),
@@ -694,8 +696,9 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     audio = buildAudioFromDocument(document);
   }
   let story: ApiWebPageStoryData | undefined;
+  let stickers: ApiWebPageStickerData | undefined;
   const attributeStory = attributes
-    ?.find((a: any): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
+    ?.find((a): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
   if (attributeStory) {
     const peerId = getApiChatIdFromMtpPeer(attributeStory.peer);
     story = {
@@ -706,6 +709,16 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     if (attributeStory.story instanceof GramJs.StoryItem) {
       addStoryToLocalDb(attributeStory.story, peerId);
     }
+  }
+  const attributeStickers = attributes?.find((a): a is GramJs.WebPageAttributeStickerSet => (
+    a instanceof GramJs.WebPageAttributeStickerSet
+  ));
+  if (attributeStickers) {
+    stickers = {
+      documents: processStickerResult(attributeStickers.stickers),
+      isEmoji: attributeStickers.emojis,
+      isWithTextColor: attributeStickers.textColor,
+    };
   }
 
   return {
@@ -724,6 +737,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     video,
     audio,
     story,
+    stickers,
   };
 }
 

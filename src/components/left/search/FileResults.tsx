@@ -11,14 +11,14 @@ import { LoadMoreDirection } from '../../../types';
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { getMessageDocument } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatMonthAndYear, toYearMonth } from '../../../util/date/dateFormat';
+import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 import { getSenderName } from './helpers/getSenderName';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Document from '../../common/Document';
@@ -53,7 +53,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { observe: observeIntersectionForMedia } = useIntersectionObserver({
     rootRef: containerRef,

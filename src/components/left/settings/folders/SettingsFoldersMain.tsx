@@ -18,7 +18,7 @@ import renderText from '../../../common/helpers/renderText';
 
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 import usePrevious from '../../../../hooks/usePrevious';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
@@ -109,7 +109,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     onCreateFolder();
   }, [foldersById, maxFolders, onCreateFolder, openLimitReachedModal]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

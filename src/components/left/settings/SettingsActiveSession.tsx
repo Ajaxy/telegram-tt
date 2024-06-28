@@ -5,11 +5,11 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import getSessionIcon from './helpers/getSessionIcon';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
@@ -32,7 +32,7 @@ const SettingsActiveSession: FC<OwnProps & StateProps> = ({
   isOpen, session, onClose,
 }) => {
   const { changeSessionSettings, terminateAuthorization } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderingSession = useCurrentOrPrev(session, true);
 

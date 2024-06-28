@@ -15,15 +15,16 @@ import {
 import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
-import { translate } from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import versionNotification from '../../../versionNotification.txt';
 import {
-  getIsSavedDialog, getMessageSummaryText, getSenderTitle, isChatChannel, isJoinedChannelMessage,
+  getIsSavedDialog, getSenderTitle, isChatChannel, isJoinedChannelMessage,
 } from '../../helpers';
+import { getMessageSummaryText } from '../../helpers/messageSummary';
 import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
@@ -162,7 +163,9 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
       ? Number(chatMessageKeys[newIndex])
       : undefined;
   }
-  actions.updateDraftReplyInfo({ replyToMsgId: messageId, tabId });
+  actions.updateDraftReplyInfo({
+    replyToMsgId: messageId, replyToPeerId: undefined, quoteText: undefined, tabId,
+  });
   actions.focusMessage({
     chatId,
     threadId,
@@ -405,7 +408,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   const chat = selectChat(global, chatId);
   if (!chat) {
-    actions.showNotification({ message: translate('Conversation.ErrorInaccessibleMessage'), tabId });
+    actions.showNotification({ message: oldTranslate('Conversation.ErrorInaccessibleMessage'), tabId });
     return undefined;
   }
 
@@ -496,6 +499,13 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   return undefined;
 });
 
+addActionHandler('setShouldPreventComposerAnimation', (global, actions, payload): ActionReturnType => {
+  const { shouldPreventComposerAnimation, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    shouldPreventComposerAnimation,
+  }, tabId);
+});
+
 addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType => {
   const {
     fromChatId, messageIds, storyId, groupedId, withMyScore, tabId = getCurrentTabId(),
@@ -515,7 +525,7 @@ addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType
   }, tabId);
 });
 
-addActionHandler('changeForwardRecipient', (global, actions, payload): ActionReturnType => {
+addActionHandler('changeRecipient', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   return updateTabState(global, {
     forwardMessages: {
@@ -863,9 +873,36 @@ addActionHandler('closeOneTimeMediaModal', (global, actions, payload): ActionRet
   setGlobal(global);
 });
 
+addActionHandler('closeReportAdModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    reportAdModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openPreviousReportAdModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const reportAdModal = selectTabState(global, tabId).reportAdModal;
+  if (!reportAdModal) {
+    return undefined;
+  }
+
+  if (reportAdModal.sections.length === 1) {
+    actions.closeReportAdModal({ tabId });
+    return undefined;
+  }
+
+  return updateTabState(global, {
+    reportAdModal: {
+      ...reportAdModal,
+      sections: reportAdModal.sections.slice(0, -1),
+    },
+  }, tabId);
+});
+
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
-  const lang = langProvider.translate;
+  const lang = langProvider.oldTranslate;
 
   const chat = selectChat(global, chatId);
 

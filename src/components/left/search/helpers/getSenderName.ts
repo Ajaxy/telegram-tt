@@ -1,5 +1,5 @@
 import type { ApiChat, ApiMessage, ApiUser } from '../../../../api/types';
-import type { LangFn } from '../../../../hooks/useLang';
+import type { LangFn } from '../../../../hooks/useOldLang';
 
 import {
   getChatTitle,

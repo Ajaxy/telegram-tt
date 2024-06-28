@@ -1,4 +1,4 @@
-import type { LangFn } from '../hooks/useLang';
+import type { LangFn } from '../hooks/useOldLang';
 
 import EMOJI_REGEX from '../lib/twemojiRegex';
 import fixNonStandardEmoji from './emoji/fixNonStandardEmoji';

@@ -7,7 +7,7 @@ import { SettingsScreens } from '../../../../types';
 
 import { decryptSession } from '../../../../util/passcode';
 
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import SettingsPasscodeForm from '../SettingsPasswordForm';
 import SettingsPasscodeCongratulations from './SettingsPasscodeCongratulations';
@@ -44,7 +44,7 @@ const SettingsPasscode: FC<OwnProps & StateProps> = ({
     clearPasscodeError,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleStartWizard = useCallback(() => {
     onSetPasscode('');

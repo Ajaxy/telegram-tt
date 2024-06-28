@@ -3,9 +3,9 @@ import { getActions } from '../../../lib/teact/teactn';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { formatDateAtTime } from '../../../util/date/dateFormat';
+import { formatDateAtTime } from '../../../util/dates/dateFormat';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
@@ -26,7 +26,7 @@ function ReadTimeMenuItem({
   message, shouldRenderShowWhen, canLoadReadDate, closeContextMenu, menuSeparatorSize,
 }: OwnProps) {
   const { openPrivacySettingsNoticeModal } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const { readDate } = message;
   const shouldRenderSkeleton = canLoadReadDate && !readDate && !shouldRenderShowWhen;
 

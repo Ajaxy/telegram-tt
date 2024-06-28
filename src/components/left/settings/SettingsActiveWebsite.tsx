@@ -7,7 +7,7 @@ import type { ApiUser, ApiWebSession } from '../../../api/types';
 import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -34,7 +34,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
   onClose,
 }) => {
   const { terminateWebAuthorization } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderingSession = useCurrentOrPrev(session, true);
   const renderingBot = useCurrentOrPrev(bot, true);

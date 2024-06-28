@@ -1,0 +1,54 @@
+.root {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  cursor: var(--custom-cursor, pointer);
+  transition: background-color 0.25s ease-out;
+
+  &:hover {
+    background-color: var(--color-chat-hover);
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.stars {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.25rem;
+}
+
+.amount {
+  font-weight: 500;
+}
+
+.title, .description, .date {
+  margin-bottom: 0;
+}
+
+.title {
+  font-size: 1rem;
+}
+
+.description {
+  font-size: 0.875rem;
+}
+
+.date {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.positive {
+  color: var(--color-success);
+}
+
+.negative {
+  color: var(--color-error);
+}

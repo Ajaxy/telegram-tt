@@ -14,8 +14,9 @@ import type {
 
 import { isUserId } from '../../global/helpers';
 import { selectTabState } from '../../global/selectors';
+import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -61,7 +62,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const areVotersLoaded = Boolean(voters);
   const { option, text } = answer;
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     // For update when new votes arrive or when the user takes back his vote
@@ -133,7 +134,12 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
         {voters && renderViewMoreButton()}
       </div>
       <div className="answer-head" dir={lang.isRtl ? 'rtl' : undefined}>
-        <span className="answer-title" dir="auto">{text}</span>
+        <span className="answer-title" dir="auto">
+          {renderTextWithEntities({
+            text: text.text,
+            entities: text.entities,
+          })}
+        </span>
         <span className="answer-percent" dir={lang.isRtl ? 'auto' : undefined}>
           {getPercentage(answerVote.votersCount, totalVoters)}%
         </span>

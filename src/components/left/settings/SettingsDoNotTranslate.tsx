@@ -13,7 +13,7 @@ import { partition, unique } from '../../../util/iteratees';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Checkbox from '../../ui/Checkbox';
 import InputText from '../../ui/InputText';
@@ -61,7 +61,7 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
 }) => {
   const { setSettingOption } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [displayedOptions, setDisplayedOptions] = useState<IRadioOption[]>([]);
   const [search, setSearch] = useState('');
 
@@ -125,7 +125,7 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
     }
 
     return displayedOptions.filter((option) => (
-      option.label.toLowerCase().includes(search.toLowerCase())
+      option.label.toString().toLowerCase().includes(search.toLowerCase())
       || option.subLabel?.toLowerCase().includes(search.toLowerCase())
       || option.value.toLowerCase().includes(search.toLowerCase())
     ));

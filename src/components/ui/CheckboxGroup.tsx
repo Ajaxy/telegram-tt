@@ -1,11 +1,11 @@
 import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 
 import Checkbox from './Checkbox';
 
 export type IRadioOption = {
-  label: string;
+  label: TeactNode;
   subLabel?: string;
   disabled?: boolean;
   value: string;

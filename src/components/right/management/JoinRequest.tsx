@@ -7,10 +7,10 @@ import type { ApiUser } from '../../../api/types';
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
 import { createClassNameBuilder } from '../../../util/buildClassName';
-import { formatHumanDate, formatTime, isToday } from '../../../util/date/dateFormat';
+import { formatHumanDate, formatTime, isToday } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
@@ -41,7 +41,7 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
   const { openChat, hideChatJoinRequest } = getActions();
 
   const buildClassName = createClassNameBuilder('JoinRequest');
-  const lang = useLang();
+  const lang = useOldLang();
 
   const fullName = getUserFullName(user);
   const fixedDate = (date - getServerTime()) * 1000 + Date.now();

@@ -13,7 +13,7 @@ import buildClassName from '../../../util/buildClassName';
 import stopEvent from '../../../util/stopEvent';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -97,7 +97,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
   const {
     permissions, havePermissionChanged, isLoading, handlePermissionChange, setIsLoading,
   } = useManagePermissions(chat?.defaultBannedRights);
-  const lang = useLang();
+  const lang = useOldLang();
   const { isForum } = chat || {};
   const isPublic = useMemo(() => chat && isChatPublic(chat), [chat]);
   const shouldDisablePermissionForPublicGroup = hasLinkedChat || isPublic;

@@ -184,7 +184,10 @@ export function addChats<T extends GlobalState>(global: T, newById: Record<strin
     const existingChat = byId[id];
     const newChat = newById[id];
 
-    if (existingChat && !existingChat.isMin && (newChat.isMin || existingChat.accessHash === newChat.accessHash)) {
+    const membersCountChanged = !existingChat?.membersCount && newChat.membersCount;
+
+    if (existingChat && !existingChat.isMin && !membersCountChanged
+        && (newChat.isMin || existingChat.accessHash === newChat.accessHash)) {
       return acc;
     }
 

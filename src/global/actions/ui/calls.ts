@@ -8,7 +8,7 @@ import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import safePlay from '../../../util/safePlay';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';
@@ -223,7 +223,7 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload): Promis
   const chat = await fetchChatByUsername(global, username);
 
   if (!chat) {
-    actions.showNotification({ message: langProvider.translate('NoUsernameFound'), tabId });
+    actions.showNotification({ message: langProvider.oldTranslate('NoUsernameFound'), tabId });
     return;
   }
 
@@ -464,7 +464,7 @@ export function checkNavigatorUserMediaPermissions<T extends GlobalState>(
       .then((stream) => {
         if (stream.getVideoTracks().length === 0) {
           actions.showNotification({
-            message: langProvider.translate('Call.Camera.Error'),
+            message: langProvider.oldTranslate('Call.Camera.Error'),
             tabId,
           });
         } else {
@@ -474,7 +474,7 @@ export function checkNavigatorUserMediaPermissions<T extends GlobalState>(
       })
       .catch(() => {
         actions.showNotification({
-          message: langProvider.translate('Call.Camera.Error'),
+          message: langProvider.oldTranslate('Call.Camera.Error'),
           tabId,
         });
       });
@@ -490,7 +490,7 @@ function checkMicrophonePermission<T extends GlobalState>(
     .then((stream) => {
       if (stream.getAudioTracks().length === 0) {
         actions.showNotification({
-          message: langProvider.translate('RequestAcces.Error.HaveNotAccess.Call'),
+          message: langProvider.oldTranslate('RequestAcces.Error.HaveNotAccess.Call'),
           tabId,
         });
       } else {
@@ -499,7 +499,7 @@ function checkMicrophonePermission<T extends GlobalState>(
     })
     .catch(() => {
       actions.showNotification({
-        message: langProvider.translate('RequestAcces.Error.HaveNotAccess.Call'),
+        message: langProvider.oldTranslate('RequestAcces.Error.HaveNotAccess.Call'),
         tabId,
       });
     });

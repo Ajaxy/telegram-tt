@@ -7,8 +7,8 @@ import type { ApiPhoto, ApiReportReason } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
@@ -77,7 +77,7 @@ const ReportModal: FC<OwnProps> = ({
     setDescription(e.target.value);
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const REPORT_OPTIONS: { value: ApiReportReason; label: string }[] = useMemo(() => [
     { value: 'spam', label: lang('lng_report_reason_spam') },

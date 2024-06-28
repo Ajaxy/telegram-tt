@@ -15,13 +15,13 @@ import {
   getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { formatHumanDate } from '../../util/date/dateFormat';
+import { formatHumanDate } from '../../util/dates/dateFormat';
 import { compact } from '../../util/iteratees';
 import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useDerivedSignal from '../../hooks/useDerivedSignal';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
@@ -32,7 +32,7 @@ import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
-  isCurrentUserPremium?: boolean;
+  areAdsEnabled?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageIds: number[];
@@ -64,7 +64,7 @@ interface OwnProps {
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
-  isCurrentUserPremium,
+  areAdsEnabled,
   chatId,
   threadId,
   messageIds,
@@ -120,7 +120,7 @@ const MessageListContent: FC<OwnProps> = ({
     isReady,
   );
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const unreadDivider = (
     <div className={buildClassName(UNREAD_DIVIDER_CLASS, 'local-action-message')} key="unread-messages">
@@ -290,7 +290,7 @@ const MessageListContent: FC<OwnProps> = ({
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
-      {!isCurrentUserPremium && isViewportNewest && (
+      {areAdsEnabled && isViewportNewest && (
         <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
       )}
       {withHistoryTriggers && (

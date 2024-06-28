@@ -1,5 +1,5 @@
 import React, {
-  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useEffect, useLayoutEffect, useMemo, useRef, useSignal, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -33,7 +33,6 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
-import useSignal from '../../hooks/useSignal';
 import useWindowSize from '../../hooks/window/useWindowSize';
 import useSlideSizes from './hooks/useSlideSizes';
 

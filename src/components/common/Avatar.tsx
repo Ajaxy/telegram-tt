@@ -5,9 +5,10 @@ import { getActions } from '../../global';
 
 import type {
   ApiChat, ApiPeer, ApiPhoto, ApiUser,
+  ApiWebDocument,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { StoryViewerOrigin } from '../../types';
+import type { CustomPeer, StoryViewerOrigin } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { IS_TEST } from '../../config';
@@ -16,6 +17,7 @@ import {
   getChatTitle,
   getPeerStoryHtmlId,
   getUserFullName,
+  getWebDocumentHash,
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
@@ -27,14 +29,14 @@ import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
 import { useFastClick } from '../../hooks/useFastClick';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useOldLang from '../../hooks/useOldLang';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import AvatarStoryCircle from './AvatarStoryCircle';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import './Avatar.scss';
 
@@ -49,8 +51,9 @@ cn.icon = cn('icon');
 type OwnProps = {
   className?: string;
   size?: AvatarSize;
-  peer?: ApiPeer;
+  peer?: ApiPeer | CustomPeer;
   photo?: ApiPhoto;
+  webPhoto?: ApiWebDocument;
   text?: string;
   isSavedMessages?: boolean;
   isSavedDialog?: boolean;
@@ -74,6 +77,7 @@ const Avatar: FC<OwnProps> = ({
   size = 'large',
   peer,
   photo,
+  webPhoto,
   text,
   isSavedMessages,
   isSavedDialog,
@@ -95,12 +99,14 @@ const Avatar: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const videoLoopCountRef = useRef(0);
-  const isPeerChat = peer && 'title' in peer;
+  const isCustomPeer = peer && 'isCustomPeer' in peer;
+  const realPeer = peer && !isCustomPeer ? peer : undefined;
+  const isPeerChat = realPeer && 'title' in realPeer;
   const user = peer && !isPeerChat ? peer as ApiUser : undefined;
   const chat = peer && isPeerChat ? peer as ApiChat : undefined;
   const isDeleted = user && isDeletedUser(user);
-  const isReplies = peer && isChatWithRepliesBot(peer.id);
-  const isAnonymousForwards = peer && isAnonymousForwardsChat(peer.id);
+  const isReplies = realPeer && isChatWithRepliesBot(realPeer.id);
+  const isAnonymousForwards = realPeer && isAnonymousForwardsChat(realPeer.id);
   const isForum = chat?.isForum;
   let imageHash: string | undefined;
   let videoHash: string | undefined;
@@ -110,16 +116,22 @@ const Avatar: FC<OwnProps> = ({
   const shouldFetchBig = size === 'jumbo';
   if (!isSavedMessages && !isDeleted) {
     if ((user && !noPersonalPhoto) || chat) {
-      imageHash = getChatAvatarHash(peer!, shouldFetchBig ? 'big' : undefined);
+      imageHash = getChatAvatarHash(peer as ApiPeer, shouldFetchBig ? 'big' : undefined);
     } else if (photo) {
       imageHash = `photo${photo.id}?size=m`;
       if (photo.isVideo && withVideo) {
         videoHash = `videoAvatar${photo.id}?size=u`;
       }
+    } else if (webPhoto) {
+      imageHash = getWebDocumentHash(webPhoto);
     }
   }
 
   const specialIcon = useMemo(() => {
+    if (isCustomPeer) {
+      return peer.avatarIcon;
+    }
+
     if (isSavedMessages) {
       return isSavedDialog ? 'my-notes' : 'avatar-saved-messages';
     }
@@ -137,7 +149,7 @@ const Avatar: FC<OwnProps> = ({
     }
 
     return undefined;
-  }, [isAnonymousForwards, isDeleted, isSavedDialog, isReplies, isSavedMessages]);
+  }, [isCustomPeer, isSavedMessages, isDeleted, isReplies, isAnonymousForwards, peer, isSavedDialog]);
 
   const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl);
@@ -159,7 +171,7 @@ const Avatar: FC<OwnProps> = ({
     }
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   let content: TeactNode | undefined;
   const author = user ? getUserFullName(user) : (chat ? getChatTitle(lang, chat) : text);
@@ -209,7 +221,9 @@ const Avatar: FC<OwnProps> = ({
     content = getFirstLetters(text, 2);
   }
 
-  const isRoundedRect = isForum && !((withStory || withStorySolid) && peer?.hasStories);
+  const isRoundedRect = (isCustomPeer && peer.isAvatarSquare)
+  || (isForum && !((withStory || withStorySolid) && realPeer?.hasStories));
+  const isPremiumGradient = isCustomPeer && peer.withPremiumGradient;
 
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
@@ -220,11 +234,13 @@ const Avatar: FC<OwnProps> = ({
     isAnonymousForwards && 'anonymous-forwards',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
+    isPremiumGradient && 'premium-gradient-bg',
     isRoundedRect && 'forum',
-    ((withStory && peer?.hasStories) || forPremiumPromo) && 'with-story-circle',
-    withStorySolid && peer?.hasStories && 'with-story-solid',
+    (photo || webPhoto) && 'force-fit',
+    ((withStory && realPeer?.hasStories) || forPremiumPromo) && 'with-story-circle',
+    withStorySolid && realPeer?.hasStories && 'with-story-solid',
     withStorySolid && forceFriendStorySolid && 'close-friend',
-    withStorySolid && (peer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',
+    withStorySolid && (realPeer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
   );
@@ -232,11 +248,11 @@ const Avatar: FC<OwnProps> = ({
   const hasMedia = Boolean(isSavedMessages || imgBlobUrl);
 
   const { handleClick, handleMouseDown } = useFastClick((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (withStory && storyViewerMode !== 'disabled' && peer?.hasStories) {
+    if (withStory && storyViewerMode !== 'disabled' && realPeer?.hasStories) {
       e.stopPropagation();
 
       openStoryViewer({
-        peerId: peer.id,
+        peerId: realPeer.id,
         isSinglePeer: storyViewerMode === 'single-peer',
         origin: storyViewerOrigin,
       });
@@ -252,9 +268,9 @@ const Avatar: FC<OwnProps> = ({
     <div
       ref={ref}
       className={fullClassName}
-      id={peer?.id && withStory ? getPeerStoryHtmlId(peer.id) : undefined}
-      data-peer-id={peer?.id}
-      data-test-sender-id={IS_TEST ? peer?.id : undefined}
+      id={realPeer?.id && withStory ? getPeerStoryHtmlId(realPeer.id) : undefined}
+      data-peer-id={realPeer?.id}
+      data-test-sender-id={IS_TEST ? realPeer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
@@ -262,8 +278,8 @@ const Avatar: FC<OwnProps> = ({
       <div className="inner">
         {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
       </div>
-      {withStory && peer?.hasStories && (
-        <AvatarStoryCircle peerId={peer.id} size={size} withExtraGap={withStoryGap} />
+      {withStory && realPeer?.hasStories && (
+        <AvatarStoryCircle peerId={realPeer.id} size={size} withExtraGap={withStoryGap} />
       )}
     </div>
   );

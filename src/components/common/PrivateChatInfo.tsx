@@ -5,27 +5,30 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiChatMember, ApiTypingStatus, ApiUser, ApiUserStatus,
 } from '../../api/types';
-import type { StoryViewerOrigin } from '../../types';
+import type { CustomPeer, StoryViewerOrigin } from '../../types';
 import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin } from '../../types';
 
-import { getMainUsername, getUserStatus, isUserOnline } from '../../global/helpers';
+import {
+  getMainUsername, getUserStatus, isUserOnline,
+} from '../../global/helpers';
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import RippleEffect from '../ui/RippleEffect';
 import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import TypingStatus from './TypingStatus';
 
 type OwnProps = {
-  userId: string;
+  userId?: string;
+  customPeer?: CustomPeer;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
@@ -40,6 +43,8 @@ type OwnProps = {
   withUpdatingStatus?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
   noEmojiStatus?: boolean;
+  noFake?: boolean;
+  noVerified?: boolean;
   emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
@@ -47,6 +52,8 @@ type OwnProps = {
   isSavedDialog?: boolean;
   className?: string;
   onEmojiStatusClick?: NoneToVoidFunction;
+  iconElement?: React.ReactNode;
+  rightElement?: React.ReactNode;
 };
 
 type StateProps =
@@ -60,6 +67,7 @@ type StateProps =
   };
 
 const PrivateChatInfo: FC<OwnProps & StateProps> = ({
+  customPeer,
   typingStatus,
   avatarSize = 'medium',
   status,
@@ -73,6 +81,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   emojiStatusSize,
   noStatusOrTyping,
   noEmojiStatus,
+  noFake,
+  noVerified,
   noRtl,
   user,
   userStatus,
@@ -86,6 +96,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   storyViewerOrigin,
   isSynced,
   onEmojiStatusClick,
+  iconElement,
+  rightElement,
 }) => {
   const {
     loadFullUser,
@@ -93,7 +105,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     loadProfilePhotos,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { id: userId } = user || {};
 
@@ -119,7 +131,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
   const mainUsername = useMemo(() => user && withUsername && getMainUsername(user), [user, withUsername]);
 
-  if (!user) {
+  if (!user && !customPeer) {
     return undefined;
   }
 
@@ -138,6 +150,14 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     if (withUpdatingStatus && !areMessagesLoaded) {
       return (
         <DotAnimation className="status" content={lang('Updating')} />
+      );
+    }
+
+    if (customPeer?.subtitleKey) {
+      return (
+        <span className="status" dir="auto">
+          <span className="user-status" dir="auto">{lang(customPeer.subtitleKey)}</span>
+        </span>
       );
     }
 
@@ -182,12 +202,15 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
     return (
       <FullNameTitle
-        peer={user!}
+        peer={customPeer || user!}
+        noFake={noFake}
+        noVerified={noVerified}
         withEmojiStatus={!noEmojiStatus}
         emojiStatusSize={emojiStatusSize}
         isSavedMessages={isSavedMessages}
         isSavedDialog={isSavedDialog}
         onEmojiStatusClick={onEmojiStatusClick}
+        iconElement={iconElement}
       />
     );
   }
@@ -204,9 +227,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         />
       )}
       <Avatar
-        key={user.id}
+        key={user?.id}
         size={avatarSize}
-        peer={user}
+        peer={customPeer || user}
         className={buildClassName(isSavedDialog && 'overlay-avatar')}
         isSavedMessages={isSavedMessages}
         isSavedDialog={isSavedDialog}
@@ -220,6 +243,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}
       </div>
       {ripple && <RippleEffect />}
+      {rightElement}
     </div>
   );
 };
@@ -227,11 +251,11 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
     const { isSynced } = global;
-    const user = selectUser(global, userId);
-    const userStatus = selectUserStatus(global, userId);
+    const user = userId ? selectUser(global, userId) : undefined;
+    const userStatus = userId ? selectUserStatus(global, userId) : undefined;
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const self = isSavedMessages ? user : selectUser(global, global.currentUserId!);
-    const areMessagesLoaded = Boolean(selectChatMessages(global, userId));
+    const areMessagesLoaded = Boolean(userId && selectChatMessages(global, userId));
 
     return {
       user,

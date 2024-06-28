@@ -9,7 +9,7 @@ import type { ApiUser } from '../../api/types';
 import { getUserFullName } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -25,7 +25,7 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) =>
 
   const [isWriteAllowed, setIsWriteAllowed] = useState(shouldRequestWriteAccess || false);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleBotTrustAccept = useCallback(() => {
     markBotTrusted({ botId: bot!.id, isWriteAllowed });

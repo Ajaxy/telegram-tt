@@ -7,12 +7,12 @@ import type { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { formatFullDate, formatTime } from '../../../util/date/dateFormat';
+import { formatFullDate, formatTime } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CalendarModal from '../../common/CalendarModal';
@@ -50,7 +50,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
 }) => {
   const { editExportedChatInvite, exportChatInvite } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
   const [isRequestNeeded, setIsRequestNeeded] = useState(false);
   const [title, setTitle] = useState('');

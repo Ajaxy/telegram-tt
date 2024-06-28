@@ -13,14 +13,14 @@ import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';
-import { setLanguage } from '../../util/langProvider';
+import { oldSetLanguage } from '../../util/oldLangProvider';
 import { formatPhoneNumber, getCountryCodesByIso, getCountryFromPhoneNumber } from '../../util/phoneNumber';
 import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
-import useLangString from '../../hooks/useLangString';
+import useOldLang from '../../hooks/useOldLang';
+import useOldLangString from '../../hooks/useOldLangString';
 
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
@@ -66,13 +66,13 @@ const AuthPhoneNumber: FC<StateProps> = ({
     setSettingOption,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestedLanguage = getSuggestedLanguage();
 
   const isConnected = connectionState === 'connectionStateReady';
-  const continueText = useLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
+  const continueText = useOldLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
   const [country, setCountry] = useState<ApiCountryCode | undefined>();
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [isTouched, setIsTouched] = useState(false);
@@ -129,7 +129,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
   const handleLangChange = useCallback(() => {
     markIsLoading();
 
-    void setLanguage(suggestedLanguage, () => {
+    void oldSetLanguage(suggestedLanguage, () => {
       unmarkIsLoading();
 
       setSettingOption({ language: suggestedLanguage });

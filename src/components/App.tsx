@@ -22,7 +22,7 @@ import useAppLayout from '../hooks/useAppLayout';
 import useFlag from '../hooks/useFlag';
 import usePrevious from '../hooks/usePrevious';
 
-// import Test from './test/TestSvg';
+// import Test from './test/TestLocale';
 import Auth from './auth/Auth';
 import UiLoader from './common/UiLoader';
 import AppInactive from './main/AppInactive';

@@ -6,7 +6,7 @@ import type {
   ApiChat, ApiMessage, ApiMessageOutgoingStatus,
   ApiUser,
 } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useOldLang';
 
 import {
   getMessageIsSpoiler,
@@ -19,13 +19,13 @@ import {
 } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/date/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import Avatar from '../../common/Avatar';
@@ -65,7 +65,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
     focusMessage({ chatId, messageId: message.id, shouldReplaceHistory: true });
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const buttonRef = useSelectWithEnter(handleClick);
 

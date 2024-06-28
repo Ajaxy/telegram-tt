@@ -22,8 +22,8 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import StoryRibbon from '../../story/StoryRibbon';
@@ -93,7 +93,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     loadChatFolders();

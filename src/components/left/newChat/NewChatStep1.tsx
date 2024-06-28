@@ -8,7 +8,7 @@ import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Picker from '../../common/Picker';
 import Button from '../../ui/Button';
@@ -48,7 +48,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
     setGlobalSearchQuery,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

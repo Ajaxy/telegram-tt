@@ -9,9 +9,9 @@ import { SettingsScreens } from '../../../types';
 import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
-import PremiumIcon from '../../common/PremiumIcon';
+import StarIcon from '../../common/icons/StarIcon';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -79,7 +79,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     }
   }, [isActive, loadGlobalPrivacySettings]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -103,7 +103,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   }, [updateContentSettings]);
 
   function getVisibilityValue(setting?: ApiPrivacySettings) {
-    const { visibility } = setting || {};
+    const { visibility, shouldAllowPremium } = setting || {};
     const blockCount = setting ? setting.blockChatIds.length + setting.blockUserIds.length : 0;
     const allowCount = setting ? setting.allowChatIds.length + setting.allowUserIds.length : 0;
     const total = [];
@@ -111,6 +111,10 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     if (allowCount) total.push(`+${allowCount}`);
 
     const exceptionString = total.length ? `(${total.join(',')})` : '';
+
+    if (shouldAllowPremium) {
+      return lang(exceptionString ? 'ContactsAndPremium' : 'PrivacyPremium');
+    }
 
     switch (visibility) {
       case 'everybody':
@@ -278,7 +282,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           allowDisabledClick
-          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
+          rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyVoiceMessages)}
@@ -292,7 +296,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           narrow
-          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
+          rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyMessages)}

@@ -138,6 +138,7 @@ function showNotification({
     icon: icon || 'icon-192x192.png',
     badge: 'icon-192x192.png',
     tag,
+    // @ts-ignore
     vibrate: [200, 100, 200],
   };
 

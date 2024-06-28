@@ -94,3 +94,15 @@ export async function resolveBusinessChatLink({ slug } : { slug: string }) {
     chatLink,
   };
 }
+
+export function toggleSponsoredMessages({
+  enabled,
+}: {
+  enabled: boolean;
+}) {
+  return invokeRequest(new GramJs.account.ToggleSponsoredMessages({
+    enabled,
+  }), {
+    shouldReturnTrue: true,
+  });
+}

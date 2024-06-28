@@ -29,6 +29,7 @@ export default function useProfileViewportIds(
   foundIds?: number[],
   threadId?: ThreadId,
   storyIds?: number[],
+  pinnedStoryIds?: number[],
   archiveStoryIds?: number[],
   similarChannels?: string[],
 ) {
@@ -82,8 +83,20 @@ export default function useProfileViewportIds(
     loadCommonChats, chatIds,
   );
 
+  const sortedStoryIds = useMemo(() => {
+    if (!storyIds?.length) return storyIds;
+    const pinnedStoryIdsSet = new Set(pinnedStoryIds);
+    return storyIds.slice().sort((a, b) => {
+      const aIsPinned = pinnedStoryIdsSet.has(a);
+      const bIsPinned = pinnedStoryIdsSet.has(b);
+      if (aIsPinned && !bIsPinned) return -1;
+      if (!aIsPinned && bIsPinned) return 1;
+      return b - a;
+    });
+  }, [storyIds, pinnedStoryIds]);
+
   const [storyViewportIds, getMoreStories, noProfileInfoForStories] = useInfiniteScrollForLoadableItems(
-    loadStories, storyIds,
+    loadStories, sortedStoryIds,
   );
 
   const [

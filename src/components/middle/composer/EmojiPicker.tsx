@@ -25,8 +25,8 @@ import { REM } from '../../common/helpers/mediaDimensions';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
@@ -134,7 +134,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     animateHorizontalScroll(header, newLeft);
   }, [categories, activeCategoryIndex]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const allCategories = useMemo(() => {
     if (!categories) {

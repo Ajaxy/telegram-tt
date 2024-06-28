@@ -27,9 +27,9 @@ import { getMessageCopyOptions } from './helpers/copyOptions';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
 import Menu from '../../ui/Menu';
@@ -118,6 +118,7 @@ type OwnProps = {
   onAboutAds?: NoneToVoidFunction;
   onSponsoredHide?: NoneToVoidFunction;
   onSponsorInfo?: NoneToVoidFunction;
+  onSponsoredReport?: NoneToVoidFunction;
   onTranslate?: NoneToVoidFunction;
   onShowOriginal?: NoneToVoidFunction;
   onSelectLanguage?: NoneToVoidFunction;
@@ -127,7 +128,6 @@ type OwnProps = {
 
 const SCROLLBAR_WIDTH = 10;
 const REACTION_SELECTOR_WIDTH_REM = 19.25;
-const REACTION_SELECTOR_HEIGHT_REM = 3;
 const ANIMATION_DURATION = 200;
 
 const MessageContextMenu: FC<OwnProps> = ({
@@ -208,6 +208,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onAboutAds,
   onSponsoredHide,
   onSponsorInfo,
+  onSponsoredReport,
   onReactionPickerOpen,
   onTranslate,
   onShowOriginal,
@@ -218,7 +219,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const scrollableRef = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
   const noReactions = !isPrivate && !enabledReactions;
   const withReactions = canShowReactionList && !noReactions;
   const isSponsoredMessage = !('id' in message);
@@ -293,7 +294,6 @@ const MessageContextMenu: FC<OwnProps> = ({
       extraPaddingX: SCROLLBAR_WIDTH,
       extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
       extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
-      topShiftY: withReactions && !isMobile ? -REACTION_SELECTOR_HEIGHT_REM * REM : 0,
       shouldAvoidNegativePosition: !isDesktop,
       menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
     };
@@ -399,7 +399,13 @@ const MessageContextMenu: FC<OwnProps> = ({
           <MenuItem icon="web" onClick={onSelectLanguage}>{lang('lng_settings_change_lang')}</MenuItem>
         )}
         {copyOptions.map((option) => (
-          <MenuItem key={option.label} icon={option.icon} onClick={option.handler}>{lang(option.label)}</MenuItem>
+          <MenuItem
+            key={option.label}
+            icon={option.icon}
+            onClick={option.handler}
+            withPreventDefaultOnMouseDown
+          >{lang(option.label)}
+          </MenuItem>
         ))}
         {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
         {canUnpin && <MenuItem icon="unpin" onClick={onUnpin}>{lang('DialogUnpin')}</MenuItem>}
@@ -439,9 +445,21 @@ const MessageContextMenu: FC<OwnProps> = ({
         {isSponsoredMessage && message.sponsorInfo && (
           <MenuItem icon="channel" onClick={onSponsorInfo}>{lang('SponsoredMessageSponsor')}</MenuItem>
         )}
-        {isSponsoredMessage && <MenuItem icon="help" onClick={onAboutAds}>{lang('SponsoredMessageInfo')}</MenuItem>}
+        {isSponsoredMessage && (
+          <MenuItem icon="info" onClick={onAboutAds}>
+            {lang(message.canReport ? 'AboutRevenueSharingAds' : 'SponsoredMessageInfo')}
+          </MenuItem>
+        )}
+        {isSponsoredMessage && message.canReport && (
+          <MenuItem icon="hand-stop" onClick={onSponsoredReport}>
+            {lang('ReportAd')}
+          </MenuItem>
+        )}
         {isSponsoredMessage && onSponsoredHide && (
-          <MenuItem icon="stop" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
+          <>
+            <MenuSeparator />
+            <MenuItem icon="close-circle" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
+          </>
         )}
         {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
           <>

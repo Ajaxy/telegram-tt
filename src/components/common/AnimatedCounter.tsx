@@ -8,7 +8,7 @@ import { selectCanAnimateInterface } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import styles from './AnimatedCounter.module.scss';
 
@@ -21,7 +21,7 @@ const AnimatedCounter: FC<OwnProps> = ({
   text,
   className,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const prevTextRef = useRef<string>();
   const [isAnimating, markAnimating, unmarkAnimating] = useFlag(false);

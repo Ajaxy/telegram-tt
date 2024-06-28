@@ -12,12 +12,13 @@ import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getPictogramDimensions, REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
+import renderKeyboardButtonText from './composer/helpers/renderKeyboardButtonText';
 
 import { useFastClick } from '../../hooks/useFastClick';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
+import useOldLang from '../../hooks/useOldLang';
 import useThumbnail from '../../hooks/useThumbnail';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 
@@ -54,7 +55,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
   isLoading, isFullWidth,
 }) => {
   const { clickBotInlineButton } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const mediaThumbnail = useThumbnail(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
@@ -198,7 +199,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
             onMouseEnter={!IS_TOUCH_ENV ? markNoHoverColor : undefined}
             onMouseLeave={!IS_TOUCH_ENV ? unmarkNoHoverColor : undefined}
           >
-            {renderText(inlineButton.text)}
+            {renderKeyboardButtonText(lang, inlineButton)}
           </Button>
         )}
       </div>

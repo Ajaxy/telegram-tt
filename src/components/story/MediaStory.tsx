@@ -1,21 +1,24 @@
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import type { ApiStory, ApiTypeStory } from '../../api/types';
 
 import { getStoryMediaHash } from '../../global/helpers';
+import { selectChat, selectPinnedStories } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { formatMediaDuration } from '../../util/dates/dateFormat';
 import stopEvent from '../../util/stopEvent';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMenuPosition from '../../hooks/useMenuPosition';
+import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';
@@ -24,19 +27,27 @@ import styles from './MediaStory.module.scss';
 
 interface OwnProps {
   story: ApiTypeStory;
-  isProtected?: boolean;
   isArchive?: boolean;
 }
 
-function MediaStory({ story, isProtected, isArchive }: OwnProps) {
+interface StateProps {
+  isProtected?: boolean;
+  isPinned?: boolean;
+  canPin?: boolean;
+}
+
+function MediaStory({
+  story, isProtected, isArchive, isPinned, canPin,
+}: OwnProps & StateProps) {
   const {
     openStoryViewer,
     loadPeerSkippedStories,
-    toggleStoryPinned,
+    toggleStoryInProfile,
+    toggleStoryPinnedToTop,
     showNotification,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +61,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
   const isOwn = isFullyLoaded && story.isOut;
   const isDeleted = story && 'isDeleted' in story;
   const video = isFullyLoaded ? (story as ApiStory).content.video : undefined;
+  const duration = video && formatMediaDuration(video.duration);
   const imageHash = isFullyLoaded ? getStoryMediaHash(story as ApiStory) : undefined;
   const imgBlobUrl = useMedia(imageHash);
   const thumbUrl = imgBlobUrl || video?.thumbnail?.dataUri;
@@ -90,23 +102,28 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
     handleBeforeContextMenu(e);
   });
 
-  const handlePinClick = useLastCallback((e: React.SyntheticEvent) => {
+  const handleUnarchiveClick = useLastCallback((e: React.SyntheticEvent) => {
     stopEvent(e);
 
-    toggleStoryPinned({ peerId, storyId: story.id, isPinned: true });
+    toggleStoryInProfile({ peerId, storyId: story.id, isInProfile: true });
     showNotification({
       message: lang('Story.ToastSavedToProfileText'),
     });
     handleContextMenuClose();
   });
 
-  const handleUnpinClick = useLastCallback((e: React.SyntheticEvent) => {
+  const handleArchiveClick = useLastCallback((e: React.SyntheticEvent) => {
     stopEvent(e);
 
-    toggleStoryPinned({ peerId, storyId: story.id, isPinned: false });
+    toggleStoryInProfile({ peerId, storyId: story.id, isInProfile: false });
     showNotification({
       message: lang('Story.ToastRemovedFromProfileText'),
     });
+    handleContextMenuClose();
+  });
+
+  const handleTogglePinned = useLastCallback(() => {
+    toggleStoryPinnedToTop({ peerId, storyId: story.id });
     handleContextMenuClose();
   });
 
@@ -120,10 +137,18 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
     >
       {isDeleted && (
         <span>
-          <i className={buildClassName(styles.expiredIcon, 'icon icon-story-expired')} aria-hidden />
+          <Icon className={styles.expiredIcon} name="story-expired" />
           {lang('ExpiredStory')}
         </span>
       )}
+      {isPinned && <Icon className={buildClassName(styles.overlayIcon, styles.pinnedIcon)} name="pin-badge" />}
+      {isFullyLoaded && Boolean(story.views?.viewsCount) && (
+        <span className={buildClassName(styles.overlayIcon, styles.viewsCount)}>
+          <Icon name="eye" />
+          {story.views.viewsCount}
+        </span>
+      )}
+      {duration && <span className={buildClassName(styles.overlayIcon, styles.duration)}>{duration}</span>}
       <div className={styles.wrapper}>
         {thumbUrl && (
           <img src={thumbUrl} alt="" className={styles.media} draggable={false} />
@@ -145,10 +170,24 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
           onCloseAnimationEnd={handleContextMenuHide}
           withPortal
         >
-          {isArchive && <MenuItem icon="pin" onClick={handlePinClick}>{lang('StoryList.SaveToProfile')}</MenuItem>}
+          {isArchive && (
+            <MenuItem icon="archive" onClick={handleUnarchiveClick}>
+              {lang('StoryList.SaveToProfile')}
+            </MenuItem>
+          )}
           {!isArchive && (
-            <MenuItem icon="unpin" onClick={handleUnpinClick}>
+            <MenuItem icon="archive" onClick={handleArchiveClick}>
               {lang('Story.Context.RemoveFromProfile')}
+            </MenuItem>
+          )}
+          {!isArchive && !isPinned && canPin && (
+            <MenuItem icon="pin" onClick={handleTogglePinned}>
+              {lang('StoryList.ItemAction.Pin')}
+            </MenuItem>
+          )}
+          {!isArchive && isPinned && (
+            <MenuItem icon="unpin" onClick={handleTogglePinned}>
+              {lang('StoryList.ItemAction.Unpin')}
             </MenuItem>
           )}
         </Menu>
@@ -157,4 +196,19 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
   );
 }
 
-export default memo(MediaStory);
+export default memo(withGlobal<OwnProps>((global, { story }): StateProps => {
+  const chat = selectChat(global, story.peerId);
+  const isProtected = chat?.isProtected;
+
+  const { maxPinnedStoriesCount } = global.appConfig || {};
+  const isOwn = 'isOut' in story && story.isOut;
+  const pinnedStories = selectPinnedStories(global, story.peerId);
+  const isPinned = pinnedStories?.some((pinnedStory) => pinnedStory.id === story.id);
+  const canPinMore = isOwn && (!maxPinnedStoriesCount || (pinnedStories?.length || 0) < maxPinnedStoriesCount);
+
+  return {
+    isProtected,
+    isPinned,
+    canPin: canPinMore,
+  };
+})(MediaStory));

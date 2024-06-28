@@ -1,0 +1,37 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: min(92vh, 40rem) !important;
+  overflow-x: hidden;
+}
+
+.title {
+  background-color: var(--color-background-secondary);
+}
+
+.value {
+  word-break: break-word;
+}
+
+.table .cell {
+  border: 1px solid var(--color-borders);
+  padding: 0.25rem 0.5rem;
+}
+
+.logo {
+  width: 6.25rem;
+  height: 6.25rem;
+  align-self: center;
+}
+
+.avatar {
+  align-self: center;
+}
+
+.chatItem {
+  margin: 0;
+  width: fit-content;
+  background-color: var(--color-background);
+  color: var(--color-primary);
+}

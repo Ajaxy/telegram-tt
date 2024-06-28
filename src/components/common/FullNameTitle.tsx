@@ -2,8 +2,11 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiChat, ApiPeer, ApiUser } from '../../api/types';
+import type {
+  ApiChat, ApiPeer, ApiUser,
+} from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { CustomPeer } from '../../types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../config';
 import {
@@ -14,18 +17,18 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import stopEvent from '../../util/stopEvent';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmoji from './CustomEmoji';
 import FakeIcon from './FakeIcon';
-import PremiumIcon from './PremiumIcon';
+import StarIcon from './icons/StarIcon';
 import VerifiedIcon from './VerifiedIcon';
 
 import styles from './FullNameTitle.module.scss';
 
 type OwnProps = {
-  peer: ApiPeer;
+  peer: ApiPeer | CustomPeer;
   className?: string;
   noVerified?: boolean;
   noFake?: boolean;
@@ -37,6 +40,7 @@ type OwnProps = {
   canCopyTitle?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
+  iconElement?: React.ReactNode;
 };
 
 const FullNameTitle: FC<OwnProps> = ({
@@ -52,11 +56,14 @@ const FullNameTitle: FC<OwnProps> = ({
   canCopyTitle,
   onEmojiStatusClick,
   observeIntersection,
+  iconElement,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { showNotification } = getActions();
-  const isUser = isUserId(peer.id);
-  const title = isUser ? getUserFullName(peer as ApiUser) : getChatTitle(lang, peer as ApiChat);
+  const realPeer = 'id' in peer ? peer : undefined;
+  const customPeer = 'isCustomPeer' in peer ? peer : undefined;
+  const isUser = realPeer && isUserId(realPeer.id);
+  const title = realPeer && (isUser ? getUserFullName(realPeer as ApiUser) : getChatTitle(lang, realPeer as ApiChat));
   const isPremium = isUser && (peer as ApiUser).isPremium;
 
   const handleTitleClick = useLastCallback((e) => {
@@ -70,20 +77,24 @@ const FullNameTitle: FC<OwnProps> = ({
   });
 
   const specialTitle = useMemo(() => {
+    if (customPeer) {
+      return lang(customPeer.titleKey);
+    }
+
     if (isSavedMessages) {
       return lang(isSavedDialog ? 'MyNotes' : 'SavedMessages');
     }
 
-    if (isAnonymousForwardsChat(peer.id)) {
+    if (isAnonymousForwardsChat(realPeer!.id)) {
       return lang('AnonymousForward');
     }
 
-    if (isChatWithRepliesBot(peer.id)) {
+    if (isChatWithRepliesBot(realPeer!.id)) {
       return lang('RepliesTitle');
     }
 
     return undefined;
-  }, [isSavedDialog, isSavedMessages, lang, peer.id]);
+  }, [customPeer, isSavedDialog, isSavedMessages, lang, realPeer]);
 
   if (specialTitle) {
     return (
@@ -103,18 +114,23 @@ const FullNameTitle: FC<OwnProps> = ({
       >
         {renderText(title || '')}
       </h3>
-      {!noVerified && peer.isVerified && <VerifiedIcon />}
-      {!noFake && peer.fakeType && <FakeIcon fakeType={peer.fakeType} />}
-      {withEmojiStatus && peer.emojiStatus && (
-        <CustomEmoji
-          documentId={peer.emojiStatus.documentId}
-          size={emojiStatusSize}
-          loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
-          observeIntersectionForLoading={observeIntersection}
-          onClick={onEmojiStatusClick}
-        />
+      {!iconElement && peer && (
+        <>
+          {!noVerified && realPeer?.isVerified && <VerifiedIcon />}
+          {!noFake && realPeer?.fakeType && <FakeIcon fakeType={realPeer.fakeType} />}
+          {withEmojiStatus && realPeer?.emojiStatus && (
+            <CustomEmoji
+              documentId={realPeer.emojiStatus.documentId}
+              size={emojiStatusSize}
+              loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
+              observeIntersectionForLoading={observeIntersection}
+              onClick={onEmojiStatusClick}
+            />
+          )}
+          {withEmojiStatus && !realPeer?.emojiStatus && isPremium && <StarIcon />}
+        </>
       )}
-      {withEmojiStatus && !peer.emojiStatus && isPremium && <PremiumIcon />}
+      {iconElement}
     </div>
   );
 };

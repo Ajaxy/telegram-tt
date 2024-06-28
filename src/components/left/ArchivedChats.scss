@@ -23,11 +23,10 @@
     z-index: 2;
 
     &.right-aligned {
-      transform: translateX(calc(clamp(
-      var(--left-column-min-width),
-      var(--left-column-width),
-      var(--left-column-max-width)
-      ) - 4.375rem));
+      transform:
+        translateX(
+          calc(clamp(var(--left-column-min-width), var(--left-column-width), var(--left-column-max-width)) - 4.375rem)
+        );
     }
 
     &.disable-transition {

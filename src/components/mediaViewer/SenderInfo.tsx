@@ -10,12 +10,12 @@ import {
   selectPeer,
   selectSender,
 } from '../../global/selectors';
-import { formatMediaDateTime } from '../../util/date/dateFormat';
+import { formatMediaDateTime } from '../../util/dates/dateFormat';
 import renderText from '../common/helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 
@@ -66,7 +66,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   if (!sender || (!message && !isAvatar)) {
     return undefined;

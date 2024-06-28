@@ -22,7 +22,7 @@ export {
   editTopic, toggleForum, fetchTopicById, createTopic, toggleParticipantsHidden, checkChatlistInvite,
   joinChatlistInvite, createChalistInvite, editChatlistInvite, deleteChatlistInvite, fetchChatlistInvites,
   fetchLeaveChatlistSuggestions, leaveChatlist, togglePeerTranslations, setViewForumAsMessages,
-  fetchChannelRecommendations, fetchSavedChats, toggleSavedDialogPinned,
+  fetchChannelRecommendations, fetchSavedChats, toggleSavedDialogPinned, reportSponsoredMessage,
 } from './chats';
 
 export {
@@ -33,7 +33,7 @@ export {
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
   saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, transcribeAudio,
   closePoll, fetchExtendedMedia, translateText, fetchMessageViews, fetchDiscussionMessage, clickSponsoredMessage,
-  fetchOutboxReadDate, exportMessageLink, fetchQuickReplies, sendQuickReply,
+  fetchOutboxReadDate, exportMessageLink, fetchQuickReplies, sendQuickReply, fetchFactChecks,
   deleteSavedHistory,
 } from './messages';
 
@@ -100,5 +100,8 @@ export * from './stories';
 export {
   validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
   applyBoost, fetchBoostList, fetchBoostStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
-  getPremiumGiftCodeOptions, launchPrepaidGiveaway,
+  getPremiumGiftCodeOptions, launchPrepaidGiveaway, fetchStarsStatus, fetchStarsTopupOptions, fetchStarsTransactions,
+  sendStarPaymentForm,
 } from './payments';
+
+export * from './fragment';

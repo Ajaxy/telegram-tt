@@ -153,7 +153,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
 
     case 'updateAttachMenuBots':
-      actions.loadAttachBots({ hash: global.attachMenu.hash });
+      actions.loadAttachBots();
       break;
 
     case 'updatePremiumFloodWait': {

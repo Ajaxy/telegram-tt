@@ -16,6 +16,7 @@ import { IS_ELECTRON } from '../../util/windowEnvironment';
 
 import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useFlag from '../../hooks/useFlag';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
@@ -96,6 +97,16 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   const rgbColor = useRef<[number, number, number] | undefined>();
 
+  const shouldForceOnHeavyAnimation = forceAlways || forceOnHeavyAnimation;
+  // Delay initialization until heavy animation ends
+  const [
+    canInitialize, markCanInitialize, unmarkCanInitialize,
+  ] = useFlag(!isHeavyAnimating() || shouldForceOnHeavyAnimation);
+  useHeavyAnimationCheck(unmarkCanInitialize, markCanInitialize, shouldForceOnHeavyAnimation);
+  useEffect(() => {
+    if (shouldForceOnHeavyAnimation) markCanInitialize();
+  }, [shouldForceOnHeavyAnimation]);
+
   useSyncEffect(() => {
     if (color && !shouldUseColorFilter) {
       const { r, g, b } = hexToRgb(color);
@@ -118,6 +129,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       || isUnmountedRef.current
       || !tgsUrl
       || (sharedCanvas && (!sharedCanvasCoords || !sharedCanvas.offsetWidth || !sharedCanvas.offsetHeight))
+      || (isHeavyAnimating() && !shouldForceOnHeavyAnimation)
     ) {
       return;
     }
@@ -154,12 +166,13 @@ const AnimatedSticker: FC<OwnProps> = ({
   });
 
   useEffect(() => {
+    if (!canInitialize) return;
     if (getRLottie()) {
       init();
     } else {
       ensureRLottie().then(init);
     }
-  }, [init, tgsUrl, sharedCanvas, sharedCanvasCoords]);
+  }, [init, tgsUrl, sharedCanvas, sharedCanvasCoords, canInitialize]);
 
   const throttledInit = useThrottledCallback(init, [init], THROTTLE_MS);
   useSharedIntersectionObserver(sharedCanvas, throttledInit);
@@ -239,7 +252,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [playAnimation, animation, tgsUrl]);
 
-  useHeavyAnimationCheck(pauseAnimation, playAnimation, !playKey || forceAlways || forceOnHeavyAnimation);
+  useHeavyAnimationCheck(pauseAnimation, playAnimation, !playKey || shouldForceOnHeavyAnimation);
   usePriorityPlaybackCheck(pauseAnimation, playAnimation, !playKey || forceAlways);
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,

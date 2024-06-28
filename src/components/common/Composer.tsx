@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useSignal, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -87,7 +87,7 @@ import {
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/date/dateFormat';
+import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dates/dateFormat';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
 import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import focusEditableElement from '../../util/focusEditableElement';
@@ -112,13 +112,12 @@ import useDerivedState from '../../hooks/useDerivedState';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useGetSelectionRange from '../../hooks/useGetSelectionRange';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import useSchedule from '../../hooks/useSchedule';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
 import useShowTransition from '../../hooks/useShowTransition';
-import useSignal from '../../hooks/useSignal';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAttachmentModal from '../middle/composer/hooks/useAttachmentModal';
@@ -158,7 +157,7 @@ import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
 import Avatar from './Avatar';
 import DeleteMessageModal from './DeleteMessageModal.async';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
 
 import './Composer.scss';
@@ -380,7 +379,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     editMessage,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLDivElement>(null);
@@ -888,12 +887,14 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendGrouped = attachmentSettings.shouldSendGrouped,
     isSilent,
     scheduledAt,
+    isInvertedMedia,
   }: {
     attachments: ApiAttachment[];
     sendCompressed?: boolean;
     sendGrouped?: boolean;
     isSilent?: boolean;
     scheduledAt?: number;
+    isInvertedMedia?: true;
   }) => {
     if (!currentMessageList && !storyId) {
       return;
@@ -905,6 +906,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
     if (!validateTextLength(text, true)) return;
     if (!checkSlowMode()) return;
+
+    isInvertedMedia = text && sendCompressed && sendGrouped ? isInvertedMedia : undefined;
 
     if (editingMessage) {
       editMessage({
@@ -923,6 +926,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldUpdateStickerSetOrder,
         attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
         shouldGroupMessages: sendGrouped,
+        isInvertedMedia,
       });
     }
 
@@ -936,11 +940,25 @@ const Composer: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleSendAttachmentsFromModal = useLastCallback((
+    sendCompressed: boolean,
+    sendGrouped: boolean,
+    isInvertedMedia?: true,
+  ) => {
+    sendAttachments({
+      attachments,
+      sendCompressed,
+      sendGrouped,
+      isInvertedMedia,
+    });
+  });
+
   const handleSendAttachments = useLastCallback((
     sendCompressed: boolean,
     sendGrouped: boolean,
     isSilent?: boolean,
     scheduledAt?: number,
+    isInvertedMedia?: true,
   ) => {
     sendAttachments({
       attachments,
@@ -948,6 +966,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       sendGrouped,
       isSilent,
       scheduledAt,
+      isInvertedMedia,
     });
   });
 
@@ -1011,8 +1030,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     lastMessageSendTimeSeconds.current = getServerTime();
-
-    clearDraft({ chatId, isLocalOnly: true });
+    clearDraft({
+      chatId, threadId, isLocalOnly: true, shouldKeepReply: isForwarding,
+    });
 
     if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
@@ -1059,8 +1079,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (!args || Object.keys(restArgs).length === 0) {
       void handleSend(Boolean(isSilent), scheduledAt);
     } else if (args.sendCompressed !== undefined || args.sendGrouped !== undefined) {
-      const { sendCompressed = false, sendGrouped = false } = args;
-      void handleSendAttachments(sendCompressed, sendGrouped, isSilent, scheduledAt);
+      const { sendCompressed = false, sendGrouped = false, isInvertedMedia } = args;
+      void handleSendAttachments(sendCompressed, sendGrouped, isSilent, scheduledAt, isInvertedMedia);
     } else {
       sendMessage({
         ...args,
@@ -1165,6 +1185,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         isSilent,
         shouldUpdateStickerSetOrder: shouldUpdateStickerSetOrder && canUpdateStickerSetsOrder,
       });
+      clearDraft({ chatId, threadId, isLocalOnly: true });
+
       requestMeasure(() => {
         resetComposer(shouldPreserveInput);
       });
@@ -1235,8 +1257,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt, currentMessageList!);
       });
     } else if (additionalArgs && ('sendCompressed' in additionalArgs || 'sendGrouped' in additionalArgs)) {
-      const { sendCompressed = false, sendGrouped = false } = additionalArgs;
-      void handleSendAttachments(sendCompressed, sendGrouped, true);
+      const { sendCompressed = false, sendGrouped = false, isInvertedMedia } = additionalArgs;
+      void handleSendAttachments(sendCompressed, sendGrouped, true, undefined, isInvertedMedia);
     } else {
       void handleSend(true);
     }
@@ -1488,15 +1510,19 @@ const Composer: FC<OwnProps & StateProps> = ({
     handleMessageSchedule({}, SCHEDULED_WHEN_ONLINE, currentMessageList!);
   });
 
-  const handleSendScheduledAttachments = useLastCallback((sendCompressed: boolean, sendGrouped: boolean) => {
-    requestCalendar((scheduledAt) => {
-      handleMessageSchedule({ sendCompressed, sendGrouped }, scheduledAt, currentMessageList!);
-    });
-  });
+  const handleSendScheduledAttachments = useLastCallback(
+    (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => {
+      requestCalendar((scheduledAt) => {
+        handleMessageSchedule({ sendCompressed, sendGrouped, isInvertedMedia }, scheduledAt, currentMessageList!);
+      });
+    },
+  );
 
-  const handleSendSilentAttachments = useLastCallback((sendCompressed: boolean, sendGrouped: boolean) => {
-    sendSilent({ sendCompressed, sendGrouped });
-  });
+  const handleSendSilentAttachments = useLastCallback(
+    (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => {
+      sendSilent({ sendCompressed, sendGrouped, isInvertedMedia });
+    },
+  );
 
   const onSend = useMemo(() => {
     switch (mainButtonState) {
@@ -1555,7 +1581,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         forceDarkTheme={isInStoryViewer}
         onCaptionUpdate={onCaptionUpdate}
         onSendSilent={handleSendSilentAttachments}
-        onSend={handleSendAttachments}
+        onSend={handleSendAttachmentsFromModal}
         onSendScheduled={handleSendScheduledAttachments}
         onFileAppend={handleAppendFiles}
         onClear={handleClearAttachments}
@@ -1649,6 +1675,9 @@ const Composer: FC<OwnProps & StateProps> = ({
             <ComposerEmbeddedMessage
               onClear={handleEmbeddedClear}
               shouldForceShowEditing={Boolean(shouldForceShowEditing && editingMessage)}
+              chatId={chatId}
+              threadId={threadId}
+              messageListType={messageListType}
             />
             <WebPagePreview
               chatId={chatId}

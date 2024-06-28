@@ -7,11 +7,11 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiWebSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/date/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -42,7 +42,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
     terminateAllWebAuthorizations,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedWebsiteHash, setOpenedWebsiteHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();

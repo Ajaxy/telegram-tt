@@ -98,7 +98,7 @@ export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()'
 export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;
 export const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in window;
 export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA && IS_MOBILE);
-export const IS_TRANSLATION_SUPPORTED = !IS_TEST && Boolean(Intl.DisplayNames);
+export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
 
 export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 

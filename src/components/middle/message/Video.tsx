@@ -16,7 +16,7 @@ import {
   isOwnMessage,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import { MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
@@ -51,7 +51,7 @@ export type OwnProps = {
   asForwarded?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
-  onClick?: (id: number) => void;
+  onClick?: (id: number, isGif?: boolean) => void;
   onCancelUpload?: (message: ApiMessage) => void;
 };
 
@@ -191,7 +191,7 @@ const Video: FC<OwnProps> = ({
       return;
     }
 
-    onClick?.(message.id);
+    onClick?.(message.id, video?.isGif);
   });
 
   const className = buildClassName(
@@ -211,7 +211,9 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
+      {withBlurredBackground && (
+        <canvas ref={blurredBackgroundRef} className="thumbnail canvas-blur-setup blurred-bg" />
+      )}
       {isInline && (
         <OptimizedVideo
           ref={videoRef}
@@ -237,7 +239,7 @@ const Video: FC<OwnProps> = ({
       {hasThumb && !isPreviewPreloaded && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
+          className={buildClassName('thumbnail', !noThumb && 'canvas-blur-setup', thumbClassNames)}
         />
       )}
       {isProtected && <span className="protector" />}

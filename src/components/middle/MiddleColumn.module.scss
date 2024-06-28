@@ -69,6 +69,7 @@
     }
   }
 
+  /* stylelint-disable-next-line @stylistic/max-line-length */
   :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn.withTransition::before {
     transition: transform var(--layer-transition);
   }

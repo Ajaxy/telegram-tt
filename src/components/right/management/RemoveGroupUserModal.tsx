@@ -10,7 +10,7 @@ import type { ApiChat, ApiChatMember } from '../../../api/types';
 import { filterUsersByName } from '../../../global/helpers';
 import { selectChatFullInfo } from '../../../global/selectors';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ChatOrUserPicker from '../../common/ChatOrUserPicker';
 
@@ -37,7 +37,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
     deleteChatMember,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [search, setSearch] = useState('');
 
   const usersId = useMemo(() => {

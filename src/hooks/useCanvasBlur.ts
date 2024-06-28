@@ -52,6 +52,8 @@ export default function useCanvasBlur(
 
         ctx.drawImage(img, -radius * 2, -radius * 2, width + radius * 4, height + radius * 4);
 
+        canvas.classList.remove('canvas-blur-setup');
+
         if (!IS_CANVAS_FILTER_SUPPORTED) {
           fastBlur(ctx, 0, 0, width, height, radius, ITERATIONS);
         }

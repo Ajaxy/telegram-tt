@@ -6,7 +6,7 @@ import React, {
 import { DEBUG } from '../../config';
 import { blobToDataUri, blobToFile } from '../../util/files';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from './Button';
 import Loading from './Loading';
@@ -93,7 +93,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
     initCropper(file);
   }, [file, isCroppieReady]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleCropClick = useCallback(async () => {
     if (!cropper) {

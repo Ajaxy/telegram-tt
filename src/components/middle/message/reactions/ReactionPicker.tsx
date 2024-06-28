@@ -20,9 +20,9 @@ import { buildCustomEmojiHtml } from '../../composer/helpers/customEmoji';
 
 import { getIsMobile } from '../../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useMenuPosition from '../../../../hooks/useMenuPosition';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../../../common/CustomEmojiPicker';
 import Menu from '../../../ui/Menu';
@@ -62,7 +62,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
     toggleReaction, closeReactionPicker, sendMessage, showNotification, sendStoryReaction,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderedMessageId = useCurrentOrPrev(message?.id, true);
   const renderedChatId = useCurrentOrPrev(message?.chatId, true);

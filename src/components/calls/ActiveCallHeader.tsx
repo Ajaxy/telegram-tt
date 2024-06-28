@@ -8,7 +8,7 @@ import { selectTabState } from '../../global/selectors';
 import { selectActiveGroupCall, selectPhoneCallUser } from '../../global/selectors/calls';
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import './ActiveCallHeader.scss';
 
@@ -25,7 +25,7 @@ const ActiveCallHeader: FC<StateProps> = ({
 }) => {
   const { toggleGroupCallPanel } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     document.body.classList.toggle('has-call-header', Boolean(isCallPanelVisible));

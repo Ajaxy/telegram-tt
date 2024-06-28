@@ -6,10 +6,10 @@ import type { PrivacyVisibility } from '../../../types';
 import { selectIsCurrentUserPremium, selectShouldHideReadMarks } from '../../../global/selectors';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
-import PremiumIcon from '../../common/PremiumIcon';
+import StarIcon from '../../common/icons/StarIcon';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -26,7 +26,7 @@ const SettingsPrivacyLastSeen = ({
   isCurrentUserPremium, shouldHideReadMarks, visibility,
 }: OwnProps & StateProps) => {
   const { updateGlobalPrivacySettings, openPremiumModal } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const canShowHideReadTime = visibility === 'nobody' || visibility === 'contacts';
 
   const handleChangeShouldHideReadMarks = useLastCallback(
@@ -55,7 +55,7 @@ const SettingsPrivacyLastSeen = ({
       )}
       <div className="settings-item">
         <ListItem
-          leftElement={<PremiumIcon className="icon" withGradient big />}
+          leftElement={<StarIcon className="icon" type="premium" size="big" />}
           onClick={handleOpenPremiumModal}
         >
           {isCurrentUserPremium ? lang('PrivacyLastSeenPremiumForPremium') : lang('PrivacyLastSeenPremium')}

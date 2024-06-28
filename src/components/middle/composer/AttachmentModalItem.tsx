@@ -5,7 +5,7 @@ import type { ApiAttachment } from '../../../api/types';
 
 import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import { REM } from '../../common/helpers/mediaDimensions';
 

@@ -3,8 +3,8 @@ import React, { memo } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 
@@ -43,7 +43,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
   activeTab, onSwitchTab, onRemoveSymbol, onSearchOpen, isAttachmentModal,
   canSendPlainText, canSearch,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   function renderTabButton(tab: SymbolMenuTabs) {
     return (

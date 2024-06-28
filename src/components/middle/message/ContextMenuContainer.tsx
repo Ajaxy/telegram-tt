@@ -57,8 +57,8 @@ import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedTe
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useSchedule from '../../../hooks/useSchedule';
 import useShowTransition from '../../../hooks/useShowTransition';
 
@@ -222,7 +222,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     copyMessageLink,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -361,6 +361,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     updateDraftReplyInfo({
       replyToMsgId: message.id,
       quoteText: canQuoteSelection && selectionRange ? getSelectionAsFormattedText(selectionRange) : undefined,
+      replyToPeerId: undefined,
     });
     closeMenu();
   });
@@ -700,7 +701,8 @@ export default memo(withGlobal<OwnProps>(
         && !isMessageUnread
         && readDateExpiresAt
         && message.date > Date.now() / 1000 - readDateExpiresAt
-        && !userStatus?.isReadDateRestricted,
+        && !userStatus?.isReadDateRestricted
+        && messageListType !== 'scheduled',
     );
     const shouldRenderShowWhen = Boolean(
       canLoadReadDate && isPrivate && selectUserStatus(global, chat.id)?.isReadDateRestrictedByMe,

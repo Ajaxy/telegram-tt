@@ -17,15 +17,15 @@ import {
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime, formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateAtTime, formatDateTimeToString } from '../../../util/dates/dateFormat';
 import { isoToEmoji } from '../../../util/emoji/emoji';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
@@ -63,7 +63,7 @@ const Giveaway = ({
   const isLoadingInfo = useRef(false);
   const [giveawayInfo, setGiveawayInfo] = useState<ApiGiveawayInfo | undefined>();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { giveaway, giveawayResults } = message.content;
   const isResults = Boolean(giveawayResults);
   const {

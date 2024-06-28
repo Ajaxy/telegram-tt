@@ -260,6 +260,15 @@ export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMess
     };
   }
 
+  if (entity instanceof GramJs.MessageEntityBlockquote) {
+    return {
+      type: ApiMessageEntityTypes.Blockquote,
+      canCollapse: entity.collapsed,
+      offset,
+      length,
+    };
+  }
+
   return {
     type: type as `${ApiMessageEntityDefault['type']}`,
     offset,

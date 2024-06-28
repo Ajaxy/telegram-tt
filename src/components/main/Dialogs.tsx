@@ -13,7 +13,7 @@ import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import Button from '../ui/Button';
@@ -33,7 +33,7 @@ const Dialogs: FC<StateProps> = ({ dialogs, currentMessageList }) => {
   } = getActions();
   const [isModalOpen, openModal, closeModal] = useFlag();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     if (dialogs.length > 0) {

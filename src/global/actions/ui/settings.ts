@@ -6,7 +6,7 @@ import { SettingsScreens } from '../../../types';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { setLanguage, setTimeFormat } from '../../../util/langProvider';
+import { oldSetLanguage, setTimeFormat } from '../../../util/oldLangProvider';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import switchTheme from '../../../util/switchTheme';
 import { updatePeerColors } from '../../../util/theme';
@@ -53,7 +53,7 @@ addCallback((global: GlobalState) => {
   }
 
   if (settings.language !== prevSettings.language) {
-    setLanguage(settings.language);
+    oldSetLanguage(settings.language);
   }
 
   if (settings.timeFormat !== prevSettings.timeFormat) {

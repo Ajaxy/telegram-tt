@@ -1,14 +1,15 @@
 import type { TeactNode } from '../../lib/teact/teact';
 
-import type { ApiMessage } from '../../api/types';
-import type { LangFn } from '../../hooks/useLang';
+import type { ApiMessage, MediaContent } from '../../api/types';
+import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { CONTENT_NOT_SUPPORTED } from '../../config';
 import trimText from '../../util/trimText';
+import { renderTextWithEntities } from '../../components/common/helpers/renderTextWithEntities';
 import { getGlobal } from '../index';
 import {
-  getExpiredMessageDescription, getMessageText, getMessageTranscription, isExpiredMessage,
+  getExpiredMessageContentDescription, getMessageText, getMessageTranscription, isExpiredMessageContent,
 } from './messages';
 import { getUserFirstOrLastName } from './users';
 
@@ -102,9 +103,21 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
   return undefined;
 }
 
+export function getMediaContentTypeDescription(lang: LangFn, content: MediaContent) {
+  return getSummaryDescription(lang, content);
+}
 export function getMessageSummaryDescription(
   lang: LangFn,
   message: ApiMessage,
+  truncatedText?: string | TeactNode,
+  isExtended = false,
+) {
+  return getSummaryDescription(lang, message.content, message, truncatedText, isExtended);
+}
+function getSummaryDescription(
+  lang: LangFn,
+  mediaContent: MediaContent,
+  message?: ApiMessage,
   truncatedText?: string | TeactNode,
   isExtended = false,
 ) {
@@ -124,12 +137,12 @@ export function getMessageSummaryDescription(
     storyData,
     giveaway,
     giveawayResults,
-  } = message.content;
+  } = mediaContent;
 
   let hasUsedTruncatedText = false;
   let summary: string | TeactNode | undefined;
 
-  if (message.groupedId) {
+  if (message?.groupedId) {
     hasUsedTruncatedText = true;
     summary = truncatedText || lang('lng_in_dlg_album');
   }
@@ -149,7 +162,7 @@ export function getMessageSummaryDescription(
   }
 
   if (audio) {
-    summary = getMessageAudioCaption(message) || lang('AttachMusic');
+    summary = getMessageAudioCaption(mediaContent) || lang('AttachMusic');
   }
 
   if (voice) {
@@ -167,7 +180,11 @@ export function getMessageSummaryDescription(
   }
 
   if (poll) {
-    summary = poll.summary.question;
+    summary = renderTextWithEntities({
+      text: poll.summary.question.text,
+      entities: poll.summary.question.entities,
+      noLineBreaks: true,
+    });
   }
 
   if (invoice) {
@@ -203,7 +220,7 @@ export function getMessageSummaryDescription(
   }
 
   if (storyData) {
-    if (storyData.isMention) {
+    if (message && storyData.isMention) {
       // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
       const global = getGlobal();
       const firstName = getUserFirstOrLastName(global.users.byId[message.chatId]);
@@ -211,12 +228,12 @@ export function getMessageSummaryDescription(
         ? lang('Chat.Service.StoryMentioned.You', firstName)
         : lang('Chat.Service.StoryMentioned', firstName);
     } else {
-      summary = lang('ForwardedStory');
+      summary = message ? lang('ForwardedStory') : lang('Chat.ReplyStory');
     }
   }
 
-  if (isExpiredMessage(message)) {
-    const expiredMessageText = getExpiredMessageDescription(lang, message);
+  if (isExpiredMessageContent(mediaContent)) {
+    const expiredMessageText = getExpiredMessageContentDescription(lang, mediaContent);
     if (expiredMessageText) {
       summary = expiredMessageText;
     }
@@ -232,11 +249,11 @@ export function generateBrailleSpoiler(length: number) {
     .join('');
 }
 
-function getMessageAudioCaption(message: ApiMessage) {
+function getMessageAudioCaption(mediaContent: MediaContent) {
   const {
     audio,
     text,
-  } = message.content;
+  } = mediaContent;
 
   return (audio && [audio.title, audio.performer].filter(Boolean)
     .join(' — ')) || (text?.text);

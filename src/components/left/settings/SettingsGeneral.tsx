@@ -9,7 +9,7 @@ import type { IRadioOption } from '../../ui/RadioGroup';
 import { SettingsScreens } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
-import { setTimeFormat } from '../../../util/langProvider';
+import { setTimeFormat } from '../../../util/oldLangProvider';
 import { getSystemTheme } from '../../../util/systemTheme';
 import {
   IS_ANDROID, IS_ELECTRON, IS_IOS, IS_MAC_OS, IS_WINDOWS,
@@ -17,7 +17,7 @@ import {
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
@@ -63,7 +63,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     setSettingOption,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { isMobile } = useAppLayout();
   const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);

@@ -25,6 +25,35 @@
   vertical-align: -0.1875rem;
 }
 
+.overlayIcon {
+  position: absolute;
+  font-size: 0.75rem;
+  line-height: 1;
+  z-index: 1;
+  color: white;
+
+  filter: drop-shadow(0 0 0.25rem black);
+}
+
+.pinnedIcon {
+  top: 0.25rem;
+  right: 0.25rem;
+}
+
+.viewsCount {
+  bottom: 0.25rem;
+  left: 0.25rem;
+
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.duration {
+  bottom: 0.25rem;
+  right: 0.25rem;
+}
+
 .contextMenu {
   position: relative;
   z-index: var(--z-right-column-menu);

@@ -10,7 +10,7 @@ import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { isBetween } from '../../util/math';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -45,7 +45,7 @@ const ManageUsernames: FC<OwnProps> = ({
     sortUsernames,
     sortChatUsernames,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const [usernameForConfirm, setUsernameForConfirm] = useState<ApiUsername | undefined>();
 
   const usernameList = useMemo(() => usernames.map(({ username }) => username), [usernames]);

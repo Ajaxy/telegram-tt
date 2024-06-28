@@ -24,6 +24,11 @@ import { getCurrentTabId, signalPasscodeHash, subscribeToTokenDied } from './est
 import { omit } from './iteratees';
 import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 
+type BroadcastChannelRefreshLangpack = {
+  type: 'langpackRefresh';
+  langCode: string;
+};
+
 type BroadcastChannelRequestGlobal = {
   type: 'requestGlobal';
   token?: number;
@@ -99,7 +104,7 @@ export type TypedBroadcastChannel = {
 
 type BroadcastChannelMessage = (
   BroadcastChannelRequestGlobal | BroadcastChannelGlobalUpdate | BroadcastChannelCallApi |
-  BroadcastChannelMessageResponse |
+  BroadcastChannelMessageResponse | BroadcastChannelRefreshLangpack |
   BroadcastChannelMessageCallback | BroadcastChannelCancelApiProgress | BroadcastChannelLocalDbUpdate |
   BroadcastChannelLocalDbUpdateFull | BroadcastChannelGlobalDiff | BroadcastChannelInitApi
 );
@@ -341,6 +346,11 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
 
       break;
     }
+
+    case 'langpackRefresh': {
+      getActions().refreshLangPackFromCache({ langCode: data.langCode });
+      break;
+    }
   }
 }
 
@@ -369,5 +379,14 @@ export function requestGlobal(appVersion: string): Promise<void> {
 
   return new Promise((resolve) => {
     resolveGlobalPromise = resolve;
+  });
+}
+
+export function notifyLangpackUpdate(langCode: string) {
+  if (!channel) return;
+
+  channel.postMessage({
+    type: 'langpackRefresh',
+    langCode,
   });
 }

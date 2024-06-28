@@ -1,5 +1,5 @@
 import type { GlobalState } from '../global/types';
-import type { LangFn } from './useLang';
+import type { LangFn } from './useOldLang';
 
 import useBrowserOnline from './window/useBrowserOnline';
 

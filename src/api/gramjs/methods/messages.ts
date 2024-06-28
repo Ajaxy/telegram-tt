@@ -49,6 +49,7 @@ import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/ch
 import { buildApiFormattedText } from '../apiBuilders/common';
 import { buildMessageMediaContent, buildMessageTextContent, buildWebPage } from '../apiBuilders/messageContent';
 import {
+  buildApiFactCheck,
   buildApiMessage,
   buildApiQuickReply,
   buildApiSponsoredMessage,
@@ -268,6 +269,7 @@ export function sendMessage(
     sendAs,
     shouldUpdateStickerSetOrder,
     wasDrafted,
+    isInvertedMedia,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -287,6 +289,7 @@ export function sendMessage(
     sendAs?: ApiPeer;
     shouldUpdateStickerSetOrder?: boolean;
     wasDrafted?: boolean;
+    isInvertedMedia?: true;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -305,6 +308,7 @@ export function sendMessage(
     scheduledAt,
     sendAs,
     story,
+    isInvertedMedia,
   );
 
   onUpdate({
@@ -391,6 +395,7 @@ export function sendMessage(
         ...(noWebPage && { noWebpage: noWebPage }),
         ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
         ...(shouldUpdateStickerSetOrder && { updateStickersetsOrder: shouldUpdateStickerSetOrder }),
+        ...(isInvertedMedia && { invertMedia: isInvertedMedia }),
       }), {
         shouldThrow: true,
         shouldIgnoreUpdates: true,
@@ -584,6 +589,8 @@ export async function editMessage({
 
   const media = attachment && buildUploadingMedia(attachment);
 
+  const isInvertedMedia = text && !attachment?.shouldSendAsFile ? message.isInvertedMedia : undefined;
+
   const newContent = {
     ...(media || message.content),
     ...(text && {
@@ -598,6 +605,7 @@ export async function editMessage({
     ...message,
     content: newContent,
     emojiOnlyCount: getEmojiOnlyCountForMessage(newContent, message.groupedId),
+    isInvertedMedia,
   };
 
   onUpdate({
@@ -623,6 +631,7 @@ export async function editMessage({
       id: message.id,
       ...(isScheduled && { scheduleDate: message.date }),
       ...(noWebPage && { noWebpage: noWebPage }),
+      ...(isInvertedMedia && { invertMedia: isInvertedMedia }),
     }), { shouldThrow: true });
   } catch (err) {
     if (DEBUG) {
@@ -958,6 +967,12 @@ export async function markMessageListRead({
 
   if (threadId === MAIN_THREAD_ID) {
     void requestChatUpdate({ chat, noLastMessage: true });
+  } else if (chat.isForum) {
+    onUpdate({
+      '@type': 'updateTopic',
+      chatId: chat.id,
+      topicId: Number(threadId),
+    });
   }
 }
 
@@ -1039,6 +1054,25 @@ export async function fetchMessageViews({
     users: users.map(buildApiUser).filter(Boolean),
     chats: chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
   };
+}
+
+export async function fetchFactChecks({
+  chat, ids,
+}: {
+  chat: ApiChat;
+  ids: number[];
+}) {
+  const chunks = split(ids, API_GENERAL_ID_LIMIT);
+  const results = await Promise.all(chunks.map((chunkIds) => (
+    invokeRequest(new GramJs.messages.GetFactCheck({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      msgId: chunkIds,
+    }))
+  )));
+
+  if (!results || results.some((result) => !result)) return undefined;
+
+  return results.flatMap((result) => result!).map(buildApiFactCheck);
 }
 
 export async function fetchDiscussionMessage({
@@ -1232,6 +1266,7 @@ export async function searchMessagesGlobal({
     q: query,
     offsetRate,
     offsetPeer: new GramJs.InputPeerEmpty(),
+    broadcastsOnly: type === 'channels' || undefined,
     limit,
     filter,
     folderId: ALL_FOLDER_ID,

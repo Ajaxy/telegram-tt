@@ -36,6 +36,7 @@ import {
   replaceThreadParam,
   updateChat,
   updateChatLastMessageId,
+  updateChatMediaLoadingState,
   updateChatMessage,
   updateListedIds,
   updateMessageTranslations,
@@ -108,6 +109,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         if (isLocal && wasDrafted) {
           global = updateChatLastMessage(global, chatId, newMessage);
         }
+
+        const threadId = selectThreadIdFromMessage(global, newMessage);
+        global = updateChatMediaLoadingState(global, newMessage, chatId, threadId, tabId);
 
         if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage, tabId)) {
           if (isLocal && message.isOutgoing && !(message.content?.action) && !storyReplyInfo?.storyId
@@ -777,13 +781,14 @@ function updateReactions<T extends GlobalState>(
     actions.startActiveReaction({ containerId: messageKey, reaction, tabId: getCurrentTabId() });
   }
 
-  const alreadyHasUnreadReaction = chat.unreadReactions?.includes(id);
+  const hasUnreadReactionsForMessageInChat = chat.unreadReactions?.includes(id);
+  const hasUnreadReactionsInNewReactions = checkIfHasUnreadReactions(global, reactions);
 
   // Only notify about added reactions, not removed ones
-  if (checkIfHasUnreadReactions(global, reactions) && !alreadyHasUnreadReaction) {
+  if (hasUnreadReactionsInNewReactions && !hasUnreadReactionsForMessageInChat) {
     global = updateUnreadReactions(global, chatId, {
       unreadReactionsCount: (chat?.unreadReactionsCount || 0) + 1,
-      unreadReactions: [...(chat?.unreadReactions || []), id],
+      unreadReactions: [...(chat?.unreadReactions || []), id].sort((a, b) => b - a),
     });
 
     const newMessage = selectChatMessage(global, chatId, id);
@@ -797,7 +802,9 @@ function updateReactions<T extends GlobalState>(
         isReaction: true,
       });
     });
-  } else if (alreadyHasUnreadReaction) {
+  }
+
+  if (!hasUnreadReactionsInNewReactions && hasUnreadReactionsForMessageInChat) {
     global = updateUnreadReactions(global, chatId, {
       unreadReactionsCount: (chat?.unreadReactionsCount || 1) - 1,
       unreadReactions: chat?.unreadReactions?.filter((i) => i !== id),

@@ -24,6 +24,7 @@ const useShowTransition = (
 
     if (closeTimeoutRef.current) {
       window.clearTimeout(closeTimeoutRef.current);
+
       closeTimeoutRef.current = undefined;
     }
   } else {

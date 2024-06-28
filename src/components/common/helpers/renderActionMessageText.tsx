@@ -4,17 +4,17 @@ import type {
   ApiChat, ApiGroupCall, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../../hooks/useLang';
+import type { LangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 
 import {
   getChatTitle,
   getExpiredMessageDescription,
-  getMessageSummaryText,
   getUserFullName,
   isExpiredMessage,
 } from '../../../global/helpers';
-import { formatCurrency } from '../../../util/formatCurrency';
+import { getMessageSummaryText } from '../../../global/helpers/messageSummary';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import trimText from '../../../util/trimText';
 import renderText from './renderText';
 
@@ -85,7 +85,7 @@ export function renderActionMessageText(
     processed = processPlaceholder(
       unprocessed,
       '%payment_amount%',
-      formatCurrency(amount!, currency!, lang.code),
+      formatCurrencyAsString(amount!, currency!, lang.code),
     );
     unprocessed = processed.pop() as string;
     content.push(...processed);
@@ -134,11 +134,12 @@ export function renderActionMessageText(
   }
 
   if (unprocessed.includes('%gift_payment_amount%')) {
-    const price = formatCurrency(amount!, currency!, lang.code);
+    const price = formatCurrencyAsString(amount!, currency!, lang.code);
     let priceText = price;
 
     if (giftCryptoInfo) {
-      priceText = `${giftCryptoInfo.amount} ${giftCryptoInfo.currency} (~${price})`;
+      const cryptoPrice = formatCurrencyAsString(giftCryptoInfo.amount, giftCryptoInfo.currency, lang.code);
+      priceText = `${cryptoPrice} (${price})`;
     }
 
     processed = processPlaceholder(

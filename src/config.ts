@@ -49,7 +49,7 @@ export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v34';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v37';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -72,6 +72,7 @@ export const TOPIC_HEIGHT_PX = 65;
 export const CHAT_LIST_SLICE = isBigScreen ? 30 : 25;
 export const CHAT_LIST_LOAD_SLICE = 100;
 export const SHARED_MEDIA_SLICE = 42;
+export const CHAT_MEDIA_SLICE = 42;
 export const MESSAGE_SEARCH_SLICE = 42;
 export const GLOBAL_SEARCH_SLICE = 20;
 export const GLOBAL_TOPIC_SEARCH_SLICE = 5;
@@ -92,6 +93,8 @@ export const STATISTICS_PUBLIC_FORWARDS_LIMIT = 50;
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
 export const STORY_VIEWS_MIN_CONTACTS_FILTER = 20;
+
+export const GLOBAL_SUGGESTED_CHANNELS_ID = 'global';
 
 // As in Telegram for Android
 // https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7799
@@ -319,6 +322,8 @@ export const GIVEAWAY_MAX_ADDITIONAL_CHANNELS = 10;
 export const GIVEAWAY_MAX_ADDITIONAL_USERS = 10;
 export const GIVEAWAY_MAX_ADDITIONAL_COUNTRIES = 10;
 export const BOOST_PER_SENT_GIFT = 3;
+export const FRAGMENT_PHONE_CODE = '888';
+export const FRAGMENT_PHONE_LENGTH = 11;
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';

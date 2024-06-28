@@ -14,11 +14,16 @@
     z-index: 2;
 
     &.right-aligned {
-      transform: translateX(calc(clamp(
-        var(--left-column-min-width),
-        var(--left-column-width),
-        var(--left-column-max-width)
-      ) - 4.375rem));
+      transform:
+        translateX(
+          calc(
+            clamp(
+              var(--left-column-min-width),
+              var(--left-column-width),
+              var(--left-column-max-width)
+            ) - 4.375rem
+          )
+        );
     }
 
     &.disable-transition {
@@ -90,7 +95,6 @@
     transform: scale(0.75);
   }
 
-
   .Menu .bubble {
     min-width: 17rem;
     max-height: calc(100 * var(--vh) - 3.75rem);
@@ -117,7 +121,7 @@
     color: var(--color-primary);
   }
 
-  .PremiumIcon {
+  .StarIcon {
     width: 1.5rem;
     height: 1.5rem;
   }

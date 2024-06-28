@@ -18,7 +18,7 @@ import { areDeepEqual } from '../../../util/areDeepEqual';
 import { IS_BACKDROP_BLUR_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';
@@ -88,7 +88,7 @@ function SettingsPerformance({
     onBack: onReset,
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [sectionExpandedStates, setSectionExpandedStates] = useState<Record<number, boolean>>({});
 
   const sectionCheckedStates = useMemo(() => {

@@ -13,7 +13,7 @@ import { SESSION_USER_KEY } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
 import { unique } from '../../../util/iteratees';
-import { setLanguage } from '../../../util/langProvider';
+import { oldSetLanguage } from '../../../util/oldLangProvider';
 import { clearWebTokenAuth } from '../../../util/routing';
 import { setServerTimeOffset } from '../../../util/serverTime';
 import { forceWebsync } from '../../../util/websync';
@@ -97,7 +97,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 });
 
 function onUpdateApiReady<T extends GlobalState>(global: T) {
-  void setLanguage(global.settings.byKey.language);
+  void oldSetLanguage(global.settings.byKey.language);
 }
 
 function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationState) {

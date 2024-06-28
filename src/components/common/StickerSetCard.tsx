@@ -4,10 +4,10 @@ import React, { memo, useCallback } from '../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import { STICKER_SIZE_GENERAL_SETTINGS } from '../../config';
+import { CHAT_HEIGHT_PX, STICKER_SIZE_GENERAL_SETTINGS } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import Button from '../ui/Button';
@@ -31,7 +31,7 @@ const StickerSetCard: FC<OwnProps> = ({
   observeIntersection,
   onClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const firstSticker = stickerSet?.stickers?.[0];
 
@@ -79,7 +79,8 @@ const StickerSetCard: FC<OwnProps> = ({
   return (
     <ListItem
       narrow
-      className={buildClassName('StickerSetCard', className)}
+      className={buildClassName('StickerSetCard', 'chat-item-clickable small-icon', className)}
+      style={`height: ${CHAT_HEIGHT_PX}px;`}
       inactive={!firstSticker}
       onClick={handleCardClick}
     >

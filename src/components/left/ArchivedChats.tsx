@@ -12,8 +12,8 @@ import { ANIMATION_DURATION } from '../story/helpers/ribbonAnimation';
 
 import useForumPanelRender from '../../hooks/useForumPanelRender';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
 
@@ -51,7 +51,7 @@ const ArchivedChats: FC<OwnProps> = ({
   foldersDispatch,
 }) => {
   const { updateArchiveSettings } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

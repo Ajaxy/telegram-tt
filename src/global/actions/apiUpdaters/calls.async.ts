@@ -9,7 +9,7 @@ import {
 } from '../../../lib/secret-sauce';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';
@@ -112,7 +112,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           const user = selectPhoneCallUser(global);
           if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
           actions.showNotification({
-            message: langProvider.translate('VoipPeerIncompatible', user?.firstName),
+            message: langProvider.oldTranslate('VoipPeerIncompatible', user?.firstName),
             tabId: getCurrentTabId(),
           });
           return undefined;

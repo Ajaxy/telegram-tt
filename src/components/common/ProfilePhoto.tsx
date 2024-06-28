@@ -24,13 +24,13 @@ import renderText from './helpers/renderText';
 import useAppLayout from '../../hooks/useAppLayout';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useOldLang from '../../hooks/useOldLang';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Spinner from '../ui/Spinner';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import './ProfilePhoto.scss';
 
@@ -56,7 +56,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   const isDeleted = user && isDeletedUser(user);
@@ -119,7 +119,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     content = (
       <>
         {isBlurredThumb ? (
-          <canvas ref={blurredThumbCanvasRef} className="thumb" />
+          <canvas ref={blurredThumbCanvasRef} className="thumb canvas-blur-setup" />
         ) : (
           <img src={avatarBlobUrl} draggable={false} className="thumb" alt="" />
         )}

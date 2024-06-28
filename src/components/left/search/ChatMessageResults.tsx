@@ -11,7 +11,7 @@ import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import NothingFound from '../../common/NothingFound';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -52,7 +52,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
 }) => {
   const { searchMessagesGlobal, openThread } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {

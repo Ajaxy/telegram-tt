@@ -3,9 +3,9 @@ import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
 
-import { formatPastTimeShort } from '../../util/date/dateFormat';
+import { formatPastTimeShort } from '../../util/dates/dateFormat';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import MessageOutgoingStatus from './MessageOutgoingStatus';
 
@@ -18,7 +18,7 @@ type OwnProps = {
 };
 
 const LastMessageMeta: FC<OwnProps> = ({ message, outgoingStatus, draftDate }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const shouldUseDraft = draftDate && draftDate > message.date;
   return (

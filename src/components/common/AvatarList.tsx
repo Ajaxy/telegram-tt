@@ -6,7 +6,7 @@ import type { AvatarSize } from './Avatar';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from './Avatar';
 
@@ -29,7 +29,7 @@ const AvatarList: FC<OwnProps> = ({
   limit = DEFAULT_LIMIT,
   badgeText,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const renderingBadgeText = useMemo(() => {
     if (badgeText) return badgeText;
     if (!peers?.length || peers.length <= limit) return undefined;

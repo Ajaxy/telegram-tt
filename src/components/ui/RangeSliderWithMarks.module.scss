@@ -8,7 +8,7 @@
   border-radius: 50%;
   cursor: var(--custom-cursor, pointer);
   transform: scale(1);
-  transition: transform 0.30s ease-in-out;
+  transition: transform 0.3s ease-in-out;
   z-index: 2;
   -webkit-appearance: none;
   appearance: none;
@@ -60,11 +60,14 @@
   transition: opacity 0.2s;
   z-index: 1;
 
-  background: linear-gradient(to right,
-    var(--color-links) 0%,
-    var(--color-links) var(--fill-percentage),
-    var(--color-text-secondary) var(--fill-percentage),
-    var(--color-text-secondary) 100%);
+  background:
+    linear-gradient(
+      to right,
+      var(--color-links) 0%,
+      var(--color-links) var(--fill-percentage),
+      var(--color-text-secondary) var(--fill-percentage),
+      var(--color-text-secondary) 100%
+    );
 }
 
 .slider::before,

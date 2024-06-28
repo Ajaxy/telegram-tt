@@ -6,6 +6,7 @@ import type {
   ApiAttachment,
   ApiChat,
   ApiContact,
+  ApiFactCheck,
   ApiGroupCall,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
@@ -20,7 +21,6 @@ import type {
   ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
-  ApiSponsoredWebPage,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -51,13 +51,13 @@ import {
   resolveMessageApiChatId,
   serializeBytes,
 } from '../helpers';
-import { buildApiBotApp } from './bots';
 import { buildApiCallDiscardReason } from './calls';
 import {
+  buildApiFormattedText,
   buildApiPhoto,
 } from './common';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
-import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
+import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
 const LOCAL_MESSAGES_LIMIT = 1e6; // 1M
@@ -79,33 +79,28 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
 
 export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
   const {
-    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended, sponsorInfo,
-    additionalInfo, showPeerPhoto, webpage, buttonText, app,
+    message, entities, randomId, recommended, sponsorInfo, additionalInfo, buttonText, canReport, title, url, color,
   } = mtpMessage;
-  const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
-  const chatInviteTitle = chatInvite
-    ? (chatInvite instanceof GramJs.ChatInvite
-      ? chatInvite.title
-      : !(chatInvite.chat instanceof GramJs.ChatEmpty) ? chatInvite.chat.title : undefined)
-    : undefined;
+
+  let photo: ApiPhoto | undefined;
+  if (mtpMessage.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(mtpMessage.photo);
+    photo = buildApiPhoto(mtpMessage.photo);
+  }
 
   return {
     randomId: serializeBytes(randomId),
-    isBot: fromId ? isPeerUser(fromId) : false,
     text: buildMessageTextContent(message, entities),
     expiresAt: Math.round(Date.now() / 1000) + SPONSORED_MESSAGE_CACHE_MS,
-    isRecommended: Boolean(recommended),
-    ...(webpage && { webPage: buildSponsoredWebPage(webpage) }),
-    ...(showPeerPhoto && { isAvatarShown: true }),
-    ...(chatId && { chatId }),
-    ...(chatInviteHash && { chatInviteHash }),
-    ...(chatInvite && { chatInviteTitle }),
-    ...(startParam && { startParam }),
-    ...(channelPost && { channelPostId: channelPost }),
-    ...(sponsorInfo && { sponsorInfo }),
-    ...(additionalInfo && { additionalInfo }),
-    ...(buttonText && { buttonText }),
-    ...(app && { botApp: buildApiBotApp(app) }),
+    isRecommended: recommended,
+    sponsorInfo,
+    additionalInfo,
+    buttonText,
+    canReport,
+    title,
+    url,
+    peerColor: color && buildApiPeerColor(color),
+    photo,
   };
 }
 
@@ -156,12 +151,7 @@ export function buildApiMessageFromNotification(
 
 export type UniversalMessage = (
   Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date')>
-  & Pick<Partial<GramJs.Message & GramJs.MessageService>, (
-    'out' | 'message' | 'entities' | 'fromId' | 'peerId' | 'fwdFrom' | 'replyTo' | 'replyMarkup' | 'post' |
-    'media' | 'action' | 'views' | 'editDate' | 'editHide' | 'mediaUnread' | 'groupedId' | 'mentioned' | 'viaBotId' |
-    'replies' | 'fromScheduled' | 'postAuthor' | 'noforwards' | 'reactions' | 'forwards' | 'silent' | 'pinned' |
-    'savedPeerId' | 'fromBoostsApplied' | 'quickReplyShortcutId' | 'viaBusinessBotId'
-  )>
+  & Partial<GramJs.Message & GramJs.MessageService>
 );
 
 export function buildApiMessageWithChatId(
@@ -199,6 +189,9 @@ export function buildApiMessageWithChatId(
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
   const hasComments = mtpMessage.replies?.comments;
   const senderBoosts = mtpMessage.fromBoostsApplied;
+  const factCheck = mtpMessage.factcheck && buildApiFactCheck(mtpMessage.factcheck);
+
+  const isInvertedMedia = mtpMessage.invertMedia;
 
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
@@ -241,6 +234,8 @@ export function buildApiMessageWithChatId(
     savedPeerId,
     senderBoosts,
     viaBusinessBotId: mtpMessage.viaBusinessBotId?.toString(),
+    factCheck,
+    isInvertedMedia,
   });
 }
 
@@ -326,6 +321,15 @@ function buildApiReplyInfo(replyHeader: GramJs.TypeMessageReplyHeader): ApiReply
   return undefined;
 }
 
+export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
+  return {
+    shouldFetch: factCheck.needCheck,
+    hash: factCheck.hash.toString(),
+    text: factCheck.text && buildApiFormattedText(factCheck.text),
+    countryCode: factCheck.country,
+  };
+}
+
 function buildAction(
   action: GramJs.TypeMessageAction,
   senderId: string | undefined,
@@ -343,7 +347,7 @@ function buildAction(
   let currency: string | undefined;
   let giftCryptoInfo: {
     currency: string;
-    amount: string;
+    amount: number;
   } | undefined;
   let text: string;
   const translationValues: string[] = [];
@@ -457,6 +461,7 @@ function buildAction(
     amount = Number(action.totalAmount);
     currency = action.currency;
     text = 'PaymentSuccessfullyPaid';
+    type = 'receipt';
     if (targetPeerId) {
       targetUserIds.push(targetPeerId);
     }
@@ -506,10 +511,9 @@ function buildAction(
     }
     currency = action.currency;
     if (action.cryptoCurrency) {
-      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
       giftCryptoInfo = {
         currency: action.cryptoCurrency,
-        amount: cryptoAmountWithDecimals.toFixed(2),
+        amount: action.cryptoAmount!.toJSNumber(),
       };
     }
     amount = action.amount.toJSNumber();
@@ -559,10 +563,9 @@ function buildAction(
     }
     currency = action.currency;
     if (action.cryptoCurrency) {
-      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
       giftCryptoInfo = {
         currency: action.cryptoCurrency,
-        amount: cryptoAmountWithDecimals.toFixed(2),
+        amount: action.cryptoAmount!.toJSNumber(),
       };
     }
     if (action.boostPeer) {
@@ -695,7 +698,6 @@ function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: bool
         if (media instanceof GramJs.MessageMediaInvoice && media.receiptMsgId) {
           return {
             type: 'receipt',
-            text: 'PaymentReceipt',
             receiptMessageId: media.receiptMsgId,
           };
         }
@@ -799,6 +801,7 @@ export function buildLocalMessage(
   scheduledAt?: number,
   sendAs?: ApiPeer,
   story?: ApiStory | ApiStorySkipped,
+  isInvertedMedia?: true,
 ): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
@@ -833,6 +836,7 @@ export function buildLocalMessage(
     }),
     ...(scheduledAt && { isScheduled: true }),
     isForwardingAllowed: true,
+    isInvertedMedia,
   } satisfies ApiMessage;
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
@@ -870,6 +874,7 @@ export function buildLocalForwardedMessage({
     senderId,
     groupedId,
     isInAlbum,
+    isInvertedMedia,
   } = message;
 
   const isAudio = content.audio;
@@ -910,6 +915,7 @@ export function buildLocalForwardedMessage({
     isInAlbum,
     isForwardingAllowed: true,
     replyInfo,
+    isInvertedMedia,
     ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
 
     ...(emojiOnlyCount && { emojiOnlyCount }),
@@ -1092,21 +1098,5 @@ export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply 
     id: shortcutId,
     shortcut,
     topMessageId: topMessage,
-  };
-}
-
-function buildSponsoredWebPage(webPage: GramJs.TypeSponsoredWebPage): ApiSponsoredWebPage {
-  let photo: ApiPhoto | undefined;
-  if (webPage.photo instanceof GramJs.Photo) {
-    addPhotoToLocalDb(webPage.photo);
-    photo = buildApiPhoto(webPage.photo);
-  }
-
-  return {
-    ...pick(webPage, [
-      'url',
-      'siteName',
-    ]),
-    photo,
   };
 }

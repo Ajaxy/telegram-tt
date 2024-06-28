@@ -14,8 +14,8 @@ import {
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import InputText from '../ui/InputText';
 import ListItem from '../ui/ListItem';
@@ -55,7 +55,7 @@ const ChatLanguageModal: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const [search, setSearch] = useState('');
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleSelect = useLastCallback((langCode: string) => {
     if (!chatId) return;

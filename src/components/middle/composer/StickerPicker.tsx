@@ -28,8 +28,8 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
 import { useStickerPickerObservers } from '../../common/hooks/useStickerPickerObservers';
@@ -125,7 +125,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     selectStickerSet,
   } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const areAddedLoaded = Boolean(addedSetIds);
 

@@ -8,13 +8,13 @@ import type { ApiCountry } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import Picker from './Picker';
 
 import styles from './CountryPickerModal.module.scss';
@@ -36,7 +36,7 @@ const CountryPickerModal: FC<OwnProps> = ({
 }) => {
   const { showNotification } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
   const prevSelectedCountryIds = usePrevious(selectedCountryIds);

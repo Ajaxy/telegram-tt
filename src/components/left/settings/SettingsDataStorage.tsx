@@ -8,7 +8,7 @@ import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
 import { pick } from '../../../util/iteratees';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';
@@ -53,7 +53,7 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
 }) => {
   const { setSettingOption } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

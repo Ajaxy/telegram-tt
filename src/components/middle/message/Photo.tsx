@@ -199,7 +199,9 @@ const Photo: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
+      {withBlurredBackground && (
+        <canvas ref={blurredBackgroundRef} className="thumbnail canvas-blur-setup blurred-bg" />
+      )}
       <img
         src={fullMediaData}
         className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
@@ -208,7 +210,10 @@ const Photo: FC<OwnProps> = ({
         draggable={!isProtected}
       />
       {withThumb && (
-        <canvas ref={thumbRef} className={buildClassName('thumbnail', thumbClassNames)} />
+        <canvas
+          ref={thumbRef}
+          className={buildClassName('thumbnail', !noThumb && 'canvas-blur-setup', thumbClassNames)}
+        />
       )}
       {isProtected && <span className="protector" />}
       {shouldRenderSpinner && !shouldRenderDownloadButton && (

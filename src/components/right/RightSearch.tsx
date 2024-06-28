@@ -28,8 +28,8 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import FullNameTitle from '../common/FullNameTitle';
@@ -87,7 +87,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const tagsRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   useHistoryBack({
     isActive,
     onBack: onClose,

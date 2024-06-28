@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
 import { ApiMessageEntityTypes } from '../../../api/types';
@@ -11,7 +11,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import './Spoiler.scss';
 
 type OwnProps = {
-  children?: React.ReactNode;
+  children?: TeactNode;
   containerId?: string;
 };
 
@@ -19,10 +19,10 @@ const revealByContainerId: Map<string, VoidFunction[]> = new Map();
 
 const buildClassName = createClassNameBuilder('Spoiler');
 
-const Spoiler: FC<OwnProps> = ({
+const Spoiler = ({
   children,
   containerId,
-}) => {
+}: OwnProps) => {
   // eslint-disable-next-line no-null/no-null
   const contentRef = useRef<HTMLDivElement>(null);
 

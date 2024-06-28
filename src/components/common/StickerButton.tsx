@@ -15,9 +15,9 @@ import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMe
 import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMenuPosition from '../../hooks/useMenuPosition';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
@@ -96,7 +96,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
   const hasCustomColor = sticker.shouldUseTextColor;
   const customColor = useDynamicColorListener(ref, !hasCustomColor);
 

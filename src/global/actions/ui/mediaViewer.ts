@@ -9,7 +9,7 @@ import { selectTabState } from '../../selectors';
 addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId, mediaId, avatarOwnerId, profilePhotoIndex, origin, volume, playbackRate, isMuted,
-    tabId = getCurrentTabId(),
+    withDynamicLoading, tabId = getCurrentTabId(),
   } = payload;
 
   const tabState = selectTabState(global, tabId);
@@ -32,6 +32,7 @@ addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType
         || DEFAULT_PLAYBACK_RATE
       ),
       isMuted: isMuted || tabState.mediaViewer.isMuted,
+      withDynamicLoading,
     },
     forwardMessages: {},
   }, tabId);

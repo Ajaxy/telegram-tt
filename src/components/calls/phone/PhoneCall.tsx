@@ -14,7 +14,7 @@ import {
 import { selectTabState } from '../../../global/selectors';
 import { selectPhoneCallUser } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import {
   IS_ANDROID,
   IS_IOS,
@@ -27,7 +27,7 @@ import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Avatar from '../../common/Avatar';
@@ -50,7 +50,7 @@ const PhoneCall: FC<StateProps> = ({
   phoneCall,
   isCallPanelVisible,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     hangUp, requestMasterAndAcceptCall, playGroupCallSound, toggleGroupCallPanel, connectToActivePhoneCall,
   } = getActions();

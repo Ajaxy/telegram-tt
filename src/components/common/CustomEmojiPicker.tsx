@@ -34,8 +34,8 @@ import { REM } from './helpers/mediaDimensions';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useScrolledState from '../../hooks/useScrolledState';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
@@ -43,7 +43,7 @@ import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import StickerButton from './StickerButton';
 import StickerSet from './StickerSet';
 
@@ -164,7 +164,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     selectStickerSet,
   } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const areAddedLoaded = Boolean(addedCustomEmojiIds);
 

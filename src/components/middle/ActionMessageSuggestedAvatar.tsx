@@ -11,9 +11,9 @@ import { getMessageMediaHash } from '../../global/helpers';
 import * as mediaLoader from '../../util/mediaLoader';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
+import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -34,7 +34,7 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
 
   const { isOutgoing } = message;
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [cropModalBlob, setCropModalBlob] = useState<Blob | undefined>();
   const [isVideoModalOpen, openVideoModal, closeVideoModal] = useFlag(false);
   const suggestedPhotoUrl = useMedia(getMessageMediaHash(message, 'full'));

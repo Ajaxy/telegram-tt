@@ -9,7 +9,10 @@
   --length: 50;
   --count: 8;
   --center: calc((var(--length) * var(--dot-width)) / 2);
-  transform: translateX(calc(var(--center) - (var(--dot-width) * var(--count) / 2) - (var(--dot-width) * var(--start-from))));
+  transform:
+    translateX(
+      calc(var(--center) - (var(--dot-width) * var(--count) / 2) - (var(--dot-width) * var(--start-from)))
+    );
   transition: 0.25s ease-out transform;
 }
 
@@ -59,4 +62,3 @@
 .active {
   background: #8F77FF;
 }
-

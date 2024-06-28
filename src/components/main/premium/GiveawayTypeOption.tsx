@@ -4,10 +4,10 @@ import React, { memo } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 
 import styles from './GiveawayTypeOption.module.scss';
 
@@ -33,7 +33,7 @@ const GiveawayTypeOption: FC<OwnProps> = ({
   isLink, onChange, onClickAction, className,
   userNames, selectedMemberIds,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   let displayText: string | undefined = lang(text);
   if (isLink && selectedMemberIds?.length) {

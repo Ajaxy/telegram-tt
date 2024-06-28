@@ -24,7 +24,7 @@ import {
   selectChatFilters,
 } from '../../../../hooks/reducers/useFoldersReducer';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import GroupChatInfo from '../../../common/GroupChatInfo';
@@ -147,7 +147,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     loadedActiveChatIds, loadedArchivedChatIds,
   ]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

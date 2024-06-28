@@ -15,8 +15,8 @@ import renderText from '../../common/helpers/renderText';
 import formatGroupCallVolume from './helpers/formatGroupCallVolume';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useLang from '../../../hooks/useLang';
 import useMenuPosition from '../../../hooks/useMenuPosition';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -42,7 +42,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     isSelf, isMutedByMe, isMuted, hasVideoStream, hasPresentationStream,

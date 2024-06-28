@@ -15,8 +15,8 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 
 import SliderDots from '../../common/SliderDots';
@@ -117,7 +117,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   onBack,
   onClickSubscribe,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(PREMIUM_FEATURE_SECTIONS.indexOf(initialSection));

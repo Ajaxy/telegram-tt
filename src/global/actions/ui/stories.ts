@@ -3,7 +3,7 @@ import type { ActionReturnType } from '../../types';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { addChats, addStoriesForPeer, addUsers } from '../../reducers';
@@ -286,7 +286,7 @@ addActionHandler('copyStoryLink', async (global, actions, payload): Promise<void
 
   copyTextToClipboard(link);
   actions.showNotification({
-    message: langProvider.translate('LinkCopied'),
+    message: langProvider.oldTranslate('LinkCopied'),
     tabId,
   });
 });
@@ -314,8 +314,8 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   }
 
   actions.showNotification({
-    message: langProvider.translate(message),
-    actionText: langProvider.translate('Story.ToastViewInChat'),
+    message: langProvider.oldTranslate(message),
+    actionText: langProvider.oldTranslate('Story.ToastViewInChat'),
     action: [{
       action: 'closeStoryViewer',
       payload: undefined,

@@ -11,7 +11,7 @@ import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
@@ -51,7 +51,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
     isLoading,
   } = passcodeSettings;
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [validationError, setValidationError] = useState<string>('');
   const [shouldShowPasscode, setShouldShowPasscode] = useState(false);
   const [isSignOutDialogOpen, openSignOutConfirmation, closeSignOutConfirmation] = useFlag(false);

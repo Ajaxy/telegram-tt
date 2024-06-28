@@ -9,7 +9,7 @@ import { getStickerPreviewHash } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import * as mediaLoader from '../../util/mediaLoader';
-import { IS_ANDROID, IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
+import { IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
 
 import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
@@ -115,8 +115,8 @@ const StickerView: FC<OwnProps> = ({
   const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia);
   // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !previewMediaData));
-  // Delay mounting on Android until heavy animation ends
-  const [isReadyToMount, markReadyToMount, unmarkReadyToMount] = useFlag(!IS_ANDROID || !isHeavyAnimating());
+  // Delay mounting until heavy animation ends
+  const [isReadyToMount, markReadyToMount, unmarkReadyToMount] = useFlag(!isHeavyAnimating());
   useHeavyAnimationCheck(unmarkReadyToMount, markReadyToMount, isReadyToMount);
   const isFullMediaReady = isReadyToMount && fullMediaData && (isStatic || isPlayerReady);
 

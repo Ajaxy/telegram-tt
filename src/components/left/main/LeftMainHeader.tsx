@@ -22,7 +22,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { formatDateToString } from '../../../util/date/dateFormat';
+import { formatDateToString } from '../../../util/dates/dateFormat';
 import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -32,6 +32,7 @@ import useFlag from '../../../hooks/useFlag';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
@@ -113,6 +114,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     requestNextSettingsScreen,
   } = getActions();
 
+  const oldLang = useOldLang();
   const lang = useLang();
   const { isMobile } = useAppLayout();
 
@@ -126,7 +128,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   }, [searchDate]);
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
-    lang,
+    oldLang,
     connectionState,
     isSyncing || isFetchingDifference,
     isMessageListOpen,
@@ -161,7 +163,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         className={isOpen ? 'active' : ''}
         // eslint-disable-next-line react/jsx-no-bind
         onClick={hasMenu ? onTrigger : () => onReset()}
-        ariaLabel={hasMenu ? lang('AccDescrOpenMenu2') : 'Return to chat list'}
+        ariaLabel={hasMenu ? oldLang('AccDescrOpenMenu2') : 'Return to chat list'}
       >
         <div className={buildClassName(
           'animated-menu-icon',
@@ -171,7 +173,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         />
       </Button>
     );
-  }, [hasMenu, isMobile, lang, onReset, shouldSkipTransition]);
+  }, [hasMenu, isMobile, oldLang, onReset, shouldSkipTransition]);
 
   const handleSearchFocus = useLastCallback(() => {
     if (!searchQuery) {
@@ -242,20 +244,20 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   return (
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header" ref={headerRef}>
-        {lang.isRtl && <div className="DropdownMenuFiller" />}
+        {oldLang.isRtl && <div className="DropdownMenuFiller" />}
         <DropdownMenu
           trigger={MainButton}
           footer={`${APP_NAME} ${versionString}`}
           className={buildClassName(
             'main-menu',
-            lang.isRtl && 'rtl',
-            shouldHideSearch && lang.isRtl && 'right-aligned',
-            shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
+            oldLang.isRtl && 'rtl',
+            shouldHideSearch && oldLang.isRtl && 'right-aligned',
+            shouldDisableDropdownMenuTransitionRef.current && oldLang.isRtl && 'disable-transition',
           )}
           forceOpen={isBotMenuOpen}
-          positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
+          positionX={shouldHideSearch && oldLang.isRtl ? 'right' : 'left'}
           transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
-          onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
+          onTransitionEnd={oldLang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
           <LeftSideMenuItems
             onSelectArchived={onSelectArchived}
@@ -295,7 +297,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             ripple={!isMobile}
             size="smaller"
             color="translucent"
-            ariaLabel={`${lang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
+            ariaLabel={`${oldLang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
             onClick={handleLockScreen}
             className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
           >

@@ -27,7 +27,10 @@ publish:
   repo: telegram-tt
   releaseType: draft
 win:
-  target: nsis
+  target:
+    target: nsis
+    arch:
+      - x64
   icon: public/icon-electron-windows.ico
 nsis:
   oneClick: false
@@ -58,4 +61,6 @@ dmg:
 linux:
   category: Community
   target:
-    - AppImage
+    target: AppImage
+    arch:
+      - x64

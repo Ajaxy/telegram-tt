@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../api/types';
-import type { LangFn } from '../../hooks/useLang';
+import type { LangFn } from '../../hooks/useOldLang';
 import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin, type StoryViewerOrigin, type ThreadId } from '../../types';
 
@@ -26,14 +26,14 @@ import buildClassName from '../../util/buildClassName';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Transition from '../ui/Transition';
 import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import TopicIcon from './TopicIcon';
 import TypingStatus from './TypingStatus';
 
@@ -112,7 +112,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     loadProfilePhotos,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isSuperGroup = chat && isChatSuperGroup(chat);
   const isTopic = Boolean(chat?.isForum && threadInfo && topic);

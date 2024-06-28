@@ -22,8 +22,8 @@ import renderText from '../common/helpers/renderText';
 
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useScrolledState from '../../hooks/useScrolledState';
 
 import Button from '../ui/Button';
@@ -65,7 +65,7 @@ function StoryViewModal({
   const [areReactionsFirst, markReactionsFirst, unmarkReactionsFirst] = useFlag(true);
   const [query, setQuery] = useState('');
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isOpen = Boolean(story);
   const isExpired = Boolean(story?.date) && (story!.date + viewersExpirePeriod) < getServerTime();

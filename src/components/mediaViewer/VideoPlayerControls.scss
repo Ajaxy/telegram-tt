@@ -63,7 +63,7 @@
     /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
     transition: width 0.2s ease-in-out;
 
-    &:hover{
+    &:hover {
       overflow: hidden;
       width: var(--volume-slider-width);
       .RangeSlider__input {

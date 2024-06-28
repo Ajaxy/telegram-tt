@@ -7,12 +7,12 @@ import type {
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/date/dateFormat';
+import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/dates/dateFormat';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
 import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
@@ -52,7 +52,7 @@ const MessageMeta: FC<OwnProps> = ({
   onOpenThread,
 }) => {
   const { showNotification } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const [isActivated, markActivated] = useFlag();
 
   function handleImportedClick(e: React.MouseEvent) {

@@ -13,8 +13,8 @@ import buildClassName from '../../../util/buildClassName';
 import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import Button from '../../ui/Button';
@@ -162,7 +162,7 @@ const LeftMain: FC<OwnProps> = ({
     };
   }, [content]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <div

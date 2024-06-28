@@ -10,7 +10,7 @@ import { getCanPostInChat } from '../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../global/selectors';
 
 import useInterval from '../../hooks/schedulers/useInterval';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
 
 import Modal from '../ui/Modal';
@@ -32,7 +32,7 @@ type StateProps = {
 
 const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }) => {
   const { closeGame, openForwardMenu } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const { url, chatId, messageId } = openedGame || {};
   const isOpen = Boolean(url);
 

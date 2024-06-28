@@ -35,7 +35,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useFocusMessage from './message/hooks/useFocusMessage';
 
@@ -102,9 +102,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   observeIntersectionForPlaying,
   onPinnedIntersectionChange,
 }) => {
-  const { openPremiumModal, requestConfetti, checkGiftCode } = getActions();
+  const {
+    openPremiumModal, requestConfetti, checkGiftCode, getReceipt,
+  } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -150,7 +152,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (isVisible && shouldShowConfettiRef.current) {
       shouldShowConfettiRef.current = false;
-      requestConfetti({});
+      requestConfetti({ withStars: true });
     }
   }, [isVisible, requestConfetti]);
 
@@ -208,6 +210,15 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     const slug = message.content.action?.slug;
     if (!slug) return;
     checkGiftCode({ slug, message: { chatId: message.chatId, messageId: message.id } });
+  };
+
+  const handleClick = () => {
+    if (message.content.action?.type === 'receipt') {
+      getReceipt({
+        chatId: message.chatId,
+        messageId: message.id,
+      });
+    }
   };
 
   // TODO Refactoring for action rendering
@@ -294,7 +305,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       onContextMenu={handleContextMenu}
     >
       {!isSuggestedAvatar && !isGiftCode && !isJoinedMessage && (
-        <span className="action-message-content">{renderContent()}</span>
+        <span className="action-message-content" onClick={handleClick}>{renderContent()}</span>
       )}
       {isGift && renderGift()}
       {isGiftCode && renderGiftCode()}

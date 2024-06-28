@@ -5,15 +5,16 @@ import type { ApiMessage } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
 import buildStyle from '../../../util/buildStyle';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 
-import useLang from '../../../hooks/useLang';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import Skeleton from '../../ui/placeholder/Skeleton';
@@ -40,7 +41,7 @@ const Invoice: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const invoice = getMessageInvoice(message);
 
   const {
@@ -67,8 +68,10 @@ const Invoice: FC<OwnProps> = ({
     if (photoUrl) {
       const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
       getCustomAppendixBg(photoUrl, false, isSelected, theme).then((appendixBg) => {
-        contentEl.style.setProperty('--appendix-bg', appendixBg);
-        contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        requestMutation(() => {
+          contentEl.style.setProperty('--appendix-bg', appendixBg);
+          contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        });
       });
     }
   }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme]);
@@ -116,8 +119,8 @@ const Invoice: FC<OwnProps> = ({
           </div>
         )}
         <p className="description-text">
-          {formatCurrency(amount, currency, lang.code)}
-          {isTest && <span>{lang('PaymentTestInvoice')}</span>}
+          {formatCurrency(amount, currency, lang.code, { iconClassName: 'invoice-currency-icon' })}
+          {isTest && <span className="test-invoice">{lang('PaymentTestInvoice')}</span>}
         </p>
       </div>
     </div>

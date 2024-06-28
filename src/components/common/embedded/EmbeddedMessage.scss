@@ -110,12 +110,12 @@
     .message-title {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       flex: 1;
       column-gap: 0.25rem;
     }
 
-    .message-title, .embedded-sender {
+    .message-title, .embedded-sender, .embedded-sender-chat {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;

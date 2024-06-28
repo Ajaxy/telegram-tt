@@ -20,7 +20,7 @@ import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useSchedule from '../../hooks/useSchedule';
 
 import GifButton from '../common/GifButton';
@@ -108,7 +108,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
     searchMoreGifs();
   }, [searchMoreGifs]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

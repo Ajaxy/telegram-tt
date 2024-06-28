@@ -14,8 +14,8 @@ import {
 } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 
 import Button from '../ui/Button';
@@ -68,7 +68,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     onClose();
   });
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // Returning `undefined` from FC instead of `<Modal>` doesn't trigger useHistoryBack
   useEffect(() => {

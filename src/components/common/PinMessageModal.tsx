@@ -13,7 +13,7 @@ import {
 import { selectChat, selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -61,7 +61,7 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
     onClose();
   }, [messageId, onClose, pinMessage]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   function renderMessage() {
     if (isChannel) {

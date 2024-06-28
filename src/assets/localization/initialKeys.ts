@@ -1,0 +1,26 @@
+const INITIAL_KEYS = [
+  'WrongNumber',
+  'SentAppCode',
+  'LoginJustSentSms',
+  'LoginHeaderPassword',
+  'LoginEnterPasswordDescription',
+  'StartText',
+  'LoginPhonePlaceholder',
+  'LoginNext',
+  'LoginQRLogin',
+  'LoginQRTitle',
+  'LoginQRHelp1',
+  'LoginQRHelp2',
+  'LoginQR2Help2',
+  'LoginQRHelp3',
+  'LoginQRCancel',
+  'YourName',
+  'LoginRegisterDesc',
+  'LoginRegisterFirstNamePlaceholder',
+  'LoginRegisterLastNamePlaceholder',
+  'LoginSelectCountryTitle',
+  'CountryNone',
+  'PleaseEnterPassword',
+];
+
+export default INITIAL_KEYS;

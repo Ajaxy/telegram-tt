@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PasswordForm from '../../common/PasswordForm';
 import PasswordMonkey from '../../common/PasswordMonkey';
@@ -54,7 +54,7 @@ const SettingsPasswordForm: FC<OwnProps> = ({
     setValidationError('');
   }, [clearError]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

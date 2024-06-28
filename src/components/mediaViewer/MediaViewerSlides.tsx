@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useLayoutEffect, useRef, useState,
+  memo, useEffect, useLayoutEffect, useRef, useSignal, useState,
 } from '../../lib/teact/teact';
 
 import type { MediaViewerOrigin, ThreadId } from '../../types';
@@ -22,9 +22,8 @@ import useTimeout from '../../hooks/schedulers/useTimeout';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useDerivedState from '../../hooks/useDerivedState';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useSignal from '../../hooks/useSignal';
+import useOldLang from '../../hooks/useOldLang';
 import { useSignalRef } from '../../hooks/useSignalRef';
 import { useFullscreenStatus } from '../../hooks/window/useFullscreen';
 import useWindowSize from '../../hooks/window/useWindowSize';
@@ -39,6 +38,9 @@ const { easeOutCubic, easeOutQuart } = timingFunctions;
 
 type OwnProps = {
   mediaId?: number;
+  loadMoreMediaIfNeeded: (activeMediaId?: number) => void;
+  isLoadingMoreMedia?: boolean;
+  isSynced?: boolean;
   getMediaId: (fromId?: number, direction?: number) => number | undefined;
   isVideo?: boolean;
   isGif?: boolean;
@@ -84,6 +86,7 @@ enum SwipeDirection {
 
 const MediaViewerSlides: FC<OwnProps> = ({
   mediaId,
+  loadMoreMediaIfNeeded,
   getMediaId,
   selectMedia,
   isVideo,
@@ -91,6 +94,8 @@ const MediaViewerSlides: FC<OwnProps> = ({
   isOpen,
   withAnimation,
   isHidden,
+  isLoadingMoreMedia,
+  isSynced,
   ...rest
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -120,7 +125,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const [getControlsVisible, setControlsVisible, lockControls] = useControlsSignal();
   const { onClose } = rest;
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive: isOpen,
@@ -155,6 +160,11 @@ const MediaViewerSlides: FC<OwnProps> = ({
       setActiveMediaId(mediaId);
     }
   }, [mediaId, setActiveMediaId, transformRef]);
+
+  useEffect(() => {
+    if (!isSynced || isLoadingMoreMedia) return;
+    loadMoreMediaIfNeeded(activeMediaId);
+  }, [activeMediaId, loadMoreMediaIfNeeded, isSynced, isLoadingMoreMedia]);
 
   useLayoutEffect(() => {
     const { x, y, scale } = getTransform();
@@ -643,6 +653,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   [
     onClose,
     setTransform,
+    loadMoreMediaIfNeeded,
     getMediaId,
     windowWidth,
     windowHeight,

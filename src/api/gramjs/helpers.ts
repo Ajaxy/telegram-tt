@@ -83,9 +83,8 @@ function addMediaToLocalDb(media: GramJs.TypeMessageMedia) {
     addPhotoToLocalDb(media.game.photo);
   }
 
-  if (media instanceof GramJs.MessageMediaInvoice
-    && media.photo) {
-    localDb.webDocuments[String(media.photo.url)] = media.photo;
+  if (media instanceof GramJs.MessageMediaInvoice && media.photo) {
+    addWebDocumentToLocalDb(media.photo);
   }
 }
 
@@ -152,6 +151,10 @@ export function addEntitiesToLocalDb(entities: (GramJs.TypeUser | GramJs.TypeCha
       addChatToLocalDb(entity);
     }
   });
+}
+
+export function addWebDocumentToLocalDb(webDocument: GramJs.TypeWebDocument) {
+  localDb.webDocuments[webDocument.url] = webDocument;
 }
 
 export function swapLocalInvoiceMedia(

@@ -22,12 +22,22 @@ export const processDeepLink = (url: string): boolean => {
           username: parsedLink.username,
           startParam: parsedLink.start,
           text: parsedLink.text,
+          startApp: parsedLink.startApp,
+          startAttach: parsedLink.startAttach,
+          attach: parsedLink.attach,
+          originalParts: [parsedLink.username, parsedLink.appName],
         });
         return true;
       case 'businessChatLink':
         actions.resolveBusinessChatLink({
           slug: parsedLink.slug,
         });
+        return true;
+      case 'premiumReferrerLink':
+        actions.openPremiumModal();
+        return true;
+      case 'premiumMultigiftLink':
+        actions.openPremiumGiftingModal();
         return true;
       default:
         break;

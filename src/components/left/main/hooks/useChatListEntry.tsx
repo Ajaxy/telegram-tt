@@ -8,7 +8,7 @@ import type {
 } from '../../../../api/types';
 import type { ApiDraft } from '../../../../global/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../../../hooks/useLang';
+import type { LangFn } from '../../../../hooks/useOldLang';
 
 import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
@@ -33,8 +33,8 @@ import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEn
 import { ChatAnimationTypes } from './useChatAnimationType';
 
 import useEnsureMessage from '../../../../hooks/useEnsureMessage';
-import useLang from '../../../../hooks/useLang';
 import useMedia from '../../../../hooks/useMedia';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
 import MessageSummary from '../../../common/MessageSummary';
@@ -80,7 +80,7 @@ export default function useChatListEntry({
   orderDiff: number;
   withInterfaceAnimations?: boolean;
 }) {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 

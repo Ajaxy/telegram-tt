@@ -18,8 +18,8 @@ import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import usePrevious from '../../../hooks/usePrevious';
 
 import ManageUsernames from '../../common/ManageUsernames';
@@ -72,7 +72,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
     updateProfile,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const firstEditableUsername = useMemo(() => usernames?.find(({ isEditable }) => isEditable), [usernames]);
   const currentUsername = firstEditableUsername?.username || '';

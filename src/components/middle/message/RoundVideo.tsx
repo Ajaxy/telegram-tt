@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useLayoutEffect,
   useRef,
+  useSignal,
   useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
@@ -16,7 +17,7 @@ import {
 } from '../../../global/helpers';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import safePlay from '../../../util/safePlay';
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 
@@ -28,10 +29,9 @@ import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePrevious from '../../../hooks/usePrevious';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useSignal from '../../../hooks/useSignal';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 import Button from '../../ui/Button';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -260,7 +260,7 @@ const RoundVideo: FC<OwnProps> = ({
       {!shouldRenderSpoiler && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
+          className={buildClassName('thumbnail', 'canvas-blur-setup', thumbClassNames)}
           style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
         />
       )}

@@ -14,14 +14,14 @@ import buildClassName from '../../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
+import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import Button from '../../ui/Button';
-import Menu from '../../ui/Menu';
+import { UnfreezableMenu } from '../../ui/Menu';
 import Portal from '../../ui/Portal';
 import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
@@ -112,7 +112,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   if (!isActivated && isOpen) {
     isActivated = true;
@@ -323,7 +323,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <Menu
+    <UnfreezableMenu
       isOpen={isOpen}
       positionX={isAttachmentModal ? positionX : 'left'}
       positionY={isAttachmentModal ? positionY : 'bottom'}
@@ -340,7 +340,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       style={style}
     >
       {content}
-    </Menu>
+    </UnfreezableMenu>
   );
 };
 

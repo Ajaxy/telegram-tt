@@ -29,6 +29,7 @@ interface OwnProps {
   inChatList?: boolean;
   forcePlayback?: boolean;
   focusedQuote?: string;
+  isInSelectMode?: boolean;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -49,6 +50,7 @@ function MessageText({
   inChatList,
   forcePlayback,
   focusedQuote,
+  isInSelectMode,
 }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -104,6 +106,7 @@ function MessageText({
           cacheBuster: textCacheBusterRef.current.toString(),
           forcePlayback,
           focusedQuote,
+          isInSelectMode,
         }),
       ].flat().filter(Boolean)}
     </>

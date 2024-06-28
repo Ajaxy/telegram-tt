@@ -3,7 +3,7 @@ import { ManagementProgress } from '../../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { getUserFirstOrLastName } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -463,7 +463,7 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
 
   if (file && !isSuggest) {
     actions.showNotification({
-      message: langProvider.translate('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
+      message: langProvider.oldTranslate('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
       tabId,
     });
   }

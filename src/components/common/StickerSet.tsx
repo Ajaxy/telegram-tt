@@ -24,9 +24,9 @@ import buildClassName from '../../util/buildClassName';
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useOldLang from '../../hooks/useOldLang';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
@@ -127,7 +127,7 @@ const StickerSet: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { width: windowWidth } = useWindowSize();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
   const { isMobile } = useAppLayout();

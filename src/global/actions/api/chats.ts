@@ -21,6 +21,7 @@ import {
   CHAT_LIST_LOAD_SLICE,
   DEBUG,
   GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
+  GLOBAL_SUGGESTED_CHANNELS_ID,
   RE_TG_LINK,
   SAVED_FOLDER_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -30,13 +31,14 @@ import {
   TOPICS_SLICE,
   TOPICS_SLICE_SECOND_LOAD,
 } from '../../../config';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatShareText, parseChooseParameter, processDeepLink } from '../../../util/deeplink';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
 import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
 import { isLocalMessageId } from '../../../util/messageKey';
+import * as langProvider from '../../../util/oldLangProvider';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
@@ -104,6 +106,7 @@ import {
   selectIsChatPinned,
   selectIsChatWithSelf,
   selectLastServiceNotification,
+  selectSimilarChannelIds,
   selectStickerSet,
   selectSupportChat,
   selectTabState,
@@ -236,6 +239,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     actions.requestChatUpdate({ chatId: id });
   }
   actions.closeStoryViewer({ tabId });
+  actions.closeStarsBalanceModal({ tabId });
 });
 
 addActionHandler('openSavedDialog', (global, actions, payload): ActionReturnType => {
@@ -379,7 +383,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
     setGlobal(global);
 
     actions.showNotification({
-      message: langProvider.translate(isComments ? 'ChannelPostDeleted' : 'lng_message_not_found'),
+      message: langProvider.oldTranslate(isComments ? 'ChannelPostDeleted' : 'lng_message_not_found'),
       tabId,
     });
 
@@ -440,7 +444,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
       setGlobal(global);
 
       actions.showNotification({
-        message: langProvider.translate('Group.ErrorAccessDenied'),
+        message: langProvider.oldTranslate('Group.ErrorAccessDenied'),
         tabId,
       });
     },
@@ -1238,7 +1242,7 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Prom
   if (!chat) {
     actions.openPreviousChat({ tabId });
     actions.showNotification({
-      message: langProvider.translate('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
+      message: langProvider.oldTranslate('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
       tabId,
     });
     return;
@@ -2171,7 +2175,7 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
     result = await callApi('toggleForum', { chat, isEnabled });
   } catch (error) {
     if ((error as ApiError).message.startsWith('A wait of')) {
-      actions.showNotification({ message: langProvider.translate('FloodWait'), tabId });
+      actions.showNotification({ message: langProvider.oldTranslate('FloodWait'), tabId });
     } else {
       actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
     }
@@ -2291,7 +2295,7 @@ addActionHandler('toggleTopicPinned', (global, actions, payload): ActionReturnTy
 
   if (isPinned && Object.values(chat.topics).filter((topic) => topic.isPinned).length >= topicsPinnedLimit) {
     actions.showNotification({
-      message: langProvider.translate('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
+      message: langProvider.oldTranslate('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
       tabId,
     });
     return;
@@ -2306,7 +2310,7 @@ addActionHandler('checkChatlistInvite', async (global, actions, payload): Promis
   const result = await callApi('checkChatlistInvite', { slug });
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('lng_group_invite_bad_link'),
+      message: langProvider.oldTranslate('lng_group_invite_bad_link'),
       tabId,
     });
     return;
@@ -2340,8 +2344,8 @@ addActionHandler('joinChatlistInvite', async (global, actions, payload): Promise
     if (!result) return;
 
     actions.showNotification({
-      title: langProvider.translate(folder ? 'FolderLinkUpdatedTitle' : 'FolderLinkAddedTitle', folderTitle),
-      message: langProvider.translate('FolderLinkAddedSubtitle', notJoinedCount, 'i'),
+      title: langProvider.oldTranslate(folder ? 'FolderLinkUpdatedTitle' : 'FolderLinkAddedTitle', folderTitle),
+      message: langProvider.oldTranslate('FolderLinkAddedSubtitle', notJoinedCount, 'i'),
       tabId,
     });
   } catch (error) {
@@ -2365,8 +2369,8 @@ addActionHandler('leaveChatlist', async (global, actions, payload): Promise<void
   if (!result) return;
 
   actions.showNotification({
-    title: langProvider.translate('FolderLinkDeletedTitle', folder.title),
-    message: langProvider.translate('FolderLinkDeletedSubtitle', peers.length, 'i'),
+    title: langProvider.oldTranslate('FolderLinkDeletedTitle', folder.title),
+    message: langProvider.oldTranslate('FolderLinkDeletedSubtitle', peers.length, 'i'),
     tabId,
   });
 });
@@ -2614,25 +2618,34 @@ addActionHandler('setViewForumAsMessages', (global, actions, payload): ActionRet
   void callApi('setViewForumAsMessages', { chat, isEnabled });
 });
 
-addActionHandler('fetchChannelRecommendations', async (global, actions, payload): Promise<void> => {
+addActionHandler('loadChannelRecommendations', async (global, actions, payload): Promise<void> => {
   const { chatId } = payload;
-  const chat = selectChat(global, chatId);
+  const chat = chatId ? selectChat(global, chatId) : undefined;
 
-  if (!chat) {
+  if (chatId && !chat) {
     return;
   }
 
-  const { similarChannels, count } = await callApi('fetchChannelRecommendations', {
+  if (!chatId) {
+    const similarChannelIds = selectSimilarChannelIds(global, GLOBAL_SUGGESTED_CHANNELS_ID);
+    if (similarChannelIds) return; // Already cached
+  }
+
+  const result = await callApi('fetchChannelRecommendations', {
     chat,
-  }) || {};
+  });
 
-  if (!similarChannels) {
+  if (!result) {
     return;
   }
+
+  const { similarChannels, count } = result;
+
+  const chatsById = buildCollectionByKey(similarChannels, 'id');
 
   global = getGlobal();
-  global = addChats(global, buildCollectionByKey(similarChannels, 'id'));
-  global = addSimilarChannels(global, chatId, similarChannels.map((channel) => channel.id), count);
+  global = addChats(global, chatsById);
+  global = addSimilarChannels(global, chatId || GLOBAL_SUGGESTED_CHANNELS_ID, Object.keys(chatsById), count);
   setGlobal(global);
 });
 
@@ -2653,7 +2666,7 @@ addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Pr
   const result = await callApi('resolveBusinessChatLink', { slug });
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('BusinessLink.ErrorExpired'),
+      message: langProvider.oldTranslate('BusinessLink.ErrorExpired'),
       tabId,
     });
     return;
@@ -2671,6 +2684,38 @@ addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Pr
     text: chatLink.text,
     tabId,
   });
+});
+
+addActionHandler('requestCollectibleInfo', async (global, actions, payload): Promise<void> => {
+  const {
+    type, collectible, peerId, tabId = getCurrentTabId(),
+  } = payload;
+
+  let inputCollectible;
+  if (type === 'phone') {
+    inputCollectible = { phone: collectible };
+  }
+  if (type === 'username') {
+    inputCollectible = { username: collectible };
+  }
+  if (!inputCollectible) return;
+
+  const result = await callApi('fetchCollectionInfo', inputCollectible);
+  if (!result) {
+    copyTextToClipboard(collectible);
+    return;
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    collectibleInfoModal: {
+      ...result,
+      type,
+      collectible,
+      peerId,
+    },
+  }, tabId);
+  setGlobal(global);
 });
 
 async function loadChats(
@@ -2958,7 +3003,7 @@ async function getAttachBotOrNotify<T extends GlobalState>(
   global = getGlobal();
   if (!result) {
     actions.showNotification({
-      message: langProvider.translate('WebApp.AddToAttachmentUnavailableError'),
+      message: langProvider.oldTranslate('WebApp.AddToAttachmentUnavailableError'),
       tabId,
     });
 
@@ -2995,11 +3040,11 @@ async function openChatByUsername<T extends GlobalState>(
   if (startAttach !== undefined && !attach) {
     const bot = await getAttachBotOrNotify(global, actions, username, tabId);
 
-    if (!currentChat || !bot) return;
+    if (!bot) return;
 
     actions.callAttachBot({
       bot,
-      chatId: currentChat.id,
+      chatId: currentChat?.id || bot.id,
       startParam: startAttach,
       tabId,
     });

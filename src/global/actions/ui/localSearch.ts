@@ -6,9 +6,9 @@ import { buildChatThreadKey, isSameReaction } from '../../helpers';
 import { addActionHandler } from '../../index';
 import {
   replaceLocalTextSearchResults,
-  updateLocalMediaSearchType,
   updateLocalTextSearch,
   updateLocalTextSearchTag,
+  updateSharedMediaSearchType,
 } from '../../reducers';
 import { selectCurrentMessageList, selectTabState } from '../../selectors';
 
@@ -67,14 +67,14 @@ addActionHandler('setLocalTextSearchTag', (global, actions, payload): ActionRetu
   return global;
 });
 
-addActionHandler('setLocalMediaSearchType', (global, actions, payload): ActionReturnType => {
+addActionHandler('setSharedMediaSearchType', (global, actions, payload): ActionReturnType => {
   const { mediaType, tabId = getCurrentTabId() } = payload;
   const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
   if (!chatId || !threadId) {
     return undefined;
   }
 
-  return updateLocalMediaSearchType(global, chatId, threadId, mediaType, tabId);
+  return updateSharedMediaSearchType(global, chatId, threadId, mediaType, tabId);
 });
 
 export function closeLocalTextSearch<T extends GlobalState>(

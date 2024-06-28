@@ -7,13 +7,13 @@ import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { formatMonthAndYear, toYearMonth } from '../../../util/date/dateFormat';
+import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 import { getSenderName } from './helpers/getSenderName';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Audio from '../../common/Audio';
@@ -45,7 +45,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
     openAudioPlayer,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const currentType = isVoice ? 'voice' : 'audio';
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (direction === LoadMoreDirection.Backwards) {

@@ -6,7 +6,7 @@ import { getActions } from '../../global';
 
 import { MAX_INT_32 } from '../../config';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -39,7 +39,7 @@ const MuteChatModal: FC<OwnProps> = ({
   const [muteUntilOption, setMuteUntilOption] = useState(MuteDuration.Forever);
   const { updateChatMutedState, updateTopicMutedState } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const muteForOptions = useMemo(() => [
     { label: lang('MuteFor.Hours', 1), value: MuteDuration.OneHour },

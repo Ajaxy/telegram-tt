@@ -10,7 +10,7 @@ import type {
   ApiPhoto,
   ApiVideo,
   ApiWebDocument,
-  MediaContent,
+  MediaContainer,
 } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
@@ -24,10 +24,6 @@ import {
 } from '../../util/windowEnvironment';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
 import { getAttachmentType, matchLinkInMessageText } from './messages';
-
-type MediaContainer = {
-  content: MediaContent;
-};
 
 type Target =
   'micro'
@@ -548,4 +544,11 @@ export function canReplaceMessageMedia(message: ApiMessage, attachment: ApiAttac
     (isPhotoOrVideo && (fileType === 'image' || fileType === 'video'))
     || (isFile && (fileType === 'audio' || fileType === 'file'))
   );
+}
+
+export function isMediaLoadableInViewer(newMessage: ApiMessage) {
+  if (!newMessage.content) return false;
+  if (newMessage.content.photo) return true;
+  if (newMessage.content.video && !newMessage.content.video.isRound && !newMessage.content.video.isGif) return true;
+  return false;
 }

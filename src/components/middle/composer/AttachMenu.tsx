@@ -26,11 +26,11 @@ import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
@@ -162,7 +162,7 @@ const AttachMenu: FC<OwnProps> = ({
       : undefined;
   }, [attachBots, chatId, peerType]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   if (!isButtonVisible) {
     return undefined;

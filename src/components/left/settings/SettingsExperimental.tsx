@@ -11,8 +11,8 @@ import { IS_ELECTRON } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Checkbox from '../../ui/Checkbox';
@@ -41,7 +41,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
   shouldDebugExportedSenders,
 }) => {
   const { requestConfetti, setSettingOption } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(false);
   useEffect(() => {
@@ -78,7 +78,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
       <div className="settings-item">
         <ListItem
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => requestConfetti({})}
+          onClick={() => requestConfetti({ withStars: true })}
           icon="animations"
         >
           <div className="title">Launch some confetti!</div>

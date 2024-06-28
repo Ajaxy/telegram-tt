@@ -47,6 +47,7 @@ export type OwnProps = {
   isRectangular?: boolean;
   withPremiumGradient?: boolean;
   noPreventDefault?: boolean;
+  noForcedUpperCase?: boolean;
   shouldStopPropagation?: boolean;
   style?: string;
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -102,6 +103,7 @@ const Button: FC<OwnProps> = ({
   isRectangular,
   noPreventDefault,
   shouldStopPropagation,
+  noForcedUpperCase,
   style,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -134,6 +136,7 @@ const Button: FC<OwnProps> = ({
     isShiny && 'shiny',
     withPremiumGradient && 'premium',
     isRectangular && 'rectangular',
+    noForcedUpperCase && 'no-upper-case',
   );
 
   const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {

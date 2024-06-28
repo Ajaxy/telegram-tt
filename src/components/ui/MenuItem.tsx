@@ -7,8 +7,8 @@ import { IS_TEST } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
 import useAppLayout from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import './MenuItem.scss';
 
@@ -27,6 +27,7 @@ export type MenuItemProps = {
   destructive?: boolean;
   ariaLabel?: string;
   withWrap?: boolean;
+  withPreventDefaultOnMouseDown?: boolean;
 };
 
 const MenuItem: FC<MenuItemProps> = (props) => {
@@ -45,18 +46,16 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     withWrap,
     onContextMenu,
     clickArg,
+    withPreventDefaultOnMouseDown,
   } = props;
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isTouchScreen } = useAppLayout();
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !onClick) {
-      e.stopPropagation();
       e.preventDefault();
-
       return;
     }
-
     onClick(e, clickArg);
   });
 
@@ -66,13 +65,16 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     }
 
     if (disabled || !onClick) {
-      e.stopPropagation();
       e.preventDefault();
 
       return;
     }
-
     onClick(e, clickArg);
+  });
+  const handleMouseDown = useLastCallback((e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>) => {
+    if (withPreventDefaultOnMouseDown) {
+      e.preventDefault();
+    }
   });
 
   const fullClassName = buildClassName(
@@ -110,6 +112,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
         rel="noopener noreferrer"
         dir={lang.isRtl ? 'rtl' : undefined}
         onClick={onClick}
+        onMouseDown={handleMouseDown}
       >
         {content}
       </a>
@@ -123,6 +126,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
       className={fullClassName}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onMouseDown={handleMouseDown}
       onContextMenu={onContextMenu}
       aria-label={ariaLabel}
       title={ariaLabel}

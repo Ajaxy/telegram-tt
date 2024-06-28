@@ -18,7 +18,7 @@ import { unique } from '../../util/iteratees';
 import sortChatIds from './helpers/sortChatIds';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import ChatOrUserPicker from './ChatOrUserPicker';
 
@@ -56,7 +56,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const [search, setSearch] = useState('');
   const ids = useMemo(() => {
     if (!isOpen) return undefined;

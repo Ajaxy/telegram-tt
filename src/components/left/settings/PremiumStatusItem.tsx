@@ -3,10 +3,10 @@ import { getActions } from '../../../global';
 
 import type { ApiPremiumSection } from '../../../global/types';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
-import PremiumIcon from '../../common/PremiumIcon';
+import StarIcon from '../../common/icons/StarIcon';
 import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
@@ -15,13 +15,13 @@ type OwnProps = {
 
 function PremiumStatusItem({ premiumSection }: OwnProps) {
   const { openPremiumModal } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal({ initialSection: premiumSection }));
 
   return (
     <div className="settings-item">
       <ListItem
-        leftElement={<PremiumIcon className="icon" withGradient big />}
+        leftElement={<StarIcon className="icon" type="premium" size="big" />}
         onClick={handleOpenPremiumModal}
       >
         {lang('PrivacyLastSeenPremium')}

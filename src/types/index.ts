@@ -1,13 +1,20 @@
 import type { TeactNode } from '../lib/teact/teact';
 
 import type {
-  ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
+  ApiBotInlineMediaResult,
+  ApiBotInlineResult,
+  ApiBotInlineSwitchPm,
   ApiBotInlineSwitchWebview,
   ApiChat,
   ApiChatInviteImporter,
   ApiExportedInvite,
-  ApiLanguage, ApiMessage, ApiReaction, ApiStickerSet, ApiUser,
+  ApiLanguage,
+  ApiMessage,
+  ApiReaction,
+  ApiStickerSet,
+  ApiUser,
 } from '../api/types';
+import type { IconName } from './icons';
 
 export type TextPart = TeactNode;
 
@@ -276,6 +283,7 @@ export enum LeftColumnContent {
 
 export enum GlobalSearchContent {
   ChatList,
+  ChannelList,
   Media,
   Links,
   Files,
@@ -386,6 +394,22 @@ export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profile
 'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
 
+export interface LoadingState {
+  areAllItemsLoadedForwards: boolean;
+  areAllItemsLoadedBackwards: boolean;
+}
+
+export interface ChatMediaSearchSegment {
+  foundIds: number[];
+  loadingState: LoadingState;
+}
+
+export interface ChatMediaSearchParams {
+  currentSegment: ChatMediaSearchSegment;
+  segments: ChatMediaSearchSegment[];
+  isLoading: boolean;
+}
+
 export enum ProfileState {
   Profile,
   SharedMedia,
@@ -456,3 +480,19 @@ export type InlineBotSettings = {
   switchWebview?: ApiBotInlineSwitchWebview;
   cacheTime: number;
 };
+
+export type CustomPeerType = 'premium' | 'toBeDistributed';
+
+export interface CustomPeer {
+  isCustomPeer: true;
+  titleKey: string;
+  subtitleKey?: string;
+  avatarIcon: IconName;
+  isAvatarSquare?: boolean;
+  peerColorId?: number;
+  withPremiumGradient?: boolean;
+}
+
+export interface UniqueCustomPeer extends CustomPeer {
+  type: CustomPeerType;
+}

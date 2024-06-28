@@ -14,7 +14,7 @@ import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Media from '../../common/Media';
@@ -47,7 +47,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { observe: observeIntersectionForMedia } = useIntersectionObserver({
     rootRef: containerRef,
