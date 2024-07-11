@@ -78,4 +78,28 @@
 
     white-space: nowrap;
   }
+
+  .profile-header {
+    padding: 32px 16px;
+    display: flex;
+    justify-content: space-between;
+    img {
+      height: 30px;
+    }
+
+    .profile-right {
+      display: flex;
+      align-items: center;
+      .story-icon {
+          padding-right: 16px;
+        }
+      .profile-img {
+        cursor: pointer;
+        img {
+          height: 45px;
+          width: 45px;
+        }
+      }
+    }
+  }
 }

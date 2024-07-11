@@ -1,6 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useRef, useState,
+  memo,
+  useEffect,
+  useRef,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -12,12 +15,14 @@ import { PRODUCTION_URL } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useFlag from '../../../hooks/useFlag';
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import Button from '../../ui/Button';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 import Transition from '../../ui/Transition';
 import NewChatButton from '../NewChatButton';
 import LeftSearch from '../search/LeftSearch.async';
@@ -27,6 +32,9 @@ import ForumPanel from './ForumPanel';
 import LeftMainHeader from './LeftMainHeader';
 
 import './LeftMain.scss';
+
+import ProfilePath from '../../../assets/profile.png';
+import RabbleLogoPath from '../../../assets/rabble-logo.png';
 
 type OwnProps = {
   content: LeftColumnContent;
@@ -144,6 +152,11 @@ const LeftMain: FC<OwnProps> = ({
     onContentChange(LeftColumnContent.NewGroupStep1);
   });
 
+  const [isStoryDialogOpen, openStoryDialog, closeStoryDialog] = useFlag(false);
+  const handleOpenSelectStories = useLastCallback(() => {
+    closeStoryDialog();
+  });
+
   useEffect(() => {
     let autoCloseTimeout: number | undefined;
     if (content !== LeftColumnContent.ChatList) {
@@ -170,6 +183,35 @@ const LeftMain: FC<OwnProps> = ({
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
     >
+      <div className="profile-header">
+        <img src={RabbleLogoPath} alt="" />
+        <div className="profile-right">
+          <div
+            className="story-icon"
+            onClick={openStoryDialog}
+          >
+            <Button
+              round
+              size="smaller"
+              color="translucent"
+              ariaLabel="More actions"
+            >
+              <i className="icon icon-play-story" />
+            </Button>
+          </div>
+          <ConfirmDialog
+            isOpen={isStoryDialogOpen}
+            title={lang('StoryComing')}
+            text={lang('StoryComingDesc')}
+            confirmHandler={handleOpenSelectStories}
+            onClose={closeStoryDialog}
+            isOnlyConfirm
+          />
+          <div className="profile-img" onClick={handleSelectSettings}>
+            <img src={ProfilePath} alt="" />
+          </div>
+        </div>
+      </div>
       <LeftMainHeader
         shouldHideSearch={isForumPanelVisible}
         content={content}
