@@ -134,6 +134,7 @@
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
     "async-mutex": "^0.5.0",
+    "axios": "^1.7.2",
     "big-integer": "github:painor/BigInteger.js",
     "croppie": "^2.6.5",
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#de1a69aff2c8eb7548df4e6bcf50c7d2304792fc",

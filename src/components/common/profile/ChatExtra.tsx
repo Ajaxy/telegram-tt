@@ -32,6 +32,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { debounce } from '../../../util/schedulers';
 import stopEvent from '../../../util/stopEvent';
+import { getShortWalletAddress } from '../../../util/userWallet';
 import { ChatAnimationTypes } from '../../left/main/hooks';
 import formatUsername from '../helpers/formatUsername';
 import renderText from '../helpers/renderText';
@@ -70,6 +71,7 @@ type StateProps = {
   topicLink?: string;
   hasSavedMessages?: boolean;
   personalChannel?: ApiChat;
+  walletAddress: string;
 };
 
 const DEFAULT_MAP_CONFIG = {
@@ -95,6 +97,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   topicLink,
   hasSavedMessages,
   personalChannel,
+  walletAddress,
 }) => {
   const {
     showNotification,
@@ -215,12 +218,19 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneCodeList, phoneNumber);
 
+  const shortWalletAddress = walletAddress && getShortWalletAddress(walletAddress);
+
   const handlePhoneClick = useLastCallback(() => {
     if (phoneNumber?.length === FRAGMENT_PHONE_LENGTH && phoneNumber.startsWith(FRAGMENT_PHONE_CODE)) {
       requestCollectibleInfo({ collectible: phoneNumber, peerId: peerId!, type: 'phone' });
       return;
     }
     copy(formattedNumber!, lang('Phone'));
+  });
+
+  const handleWalletClick = useLastCallback(() => {
+    requestCollectibleInfo({ collectible: walletAddress, peerId: peerId!, type: 'walletAddress' });
+    copy(walletAddress!, lang('Wallet'));
   });
 
   const handleUsernameClick = useLastCallback((username: ApiUsername, isChat?: boolean) => {
@@ -314,6 +324,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         </ListItem>
       )}
       {activeUsernames && renderUsernames(activeUsernames)}
+      <ListItem icon="webapp" multiline narrow ripple onClick={handleWalletClick}>
+        <span className="title" dir="auto">{shortWalletAddress}</span>
+        <span className="subtitle">{lang('Wallet')}</span>
+      </ListItem>
       {description && Boolean(description.length) && (
         <ListItem
           icon="info"
@@ -389,7 +403,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatOrUserId, isSavedDialog }): StateProps => {
-    const { countryList: { phoneCodes: phoneCodeList } } = global;
+    const { countryList: { phoneCodes: phoneCodeList }, userWallet: { walletAddress } } = global;
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
     const user = chatOrUserId ? selectUser(global, chatOrUserId) : undefined;
@@ -431,6 +445,7 @@ export default memo(withGlobal<OwnProps>(
       topicLink,
       hasSavedMessages,
       personalChannel,
+      walletAddress,
     };
   },
 )(ChatExtra));

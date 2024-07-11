@@ -513,4 +513,5 @@ export default {
   FullDateTimeFormat: '%@, %@',
   StoryComing: 'Rabble stories🪶',
   StoryComingDesc: 'Hold on, we’re cooking up something good! 🧑‍🍳',
+  Wallet: 'Wallet',
 } as ApiOldLangPack;

@@ -781,6 +781,13 @@ export type TabState = {
 };
 
 export type GlobalState = {
+  numstate: number;
+  userWallet: {
+    id: string;
+    walletAddress: string;
+    accessToken: string;
+    refreshToken: string;
+  };
   config?: ApiConfig;
   appConfig?: ApiAppConfig;
   peerColors?: ApiPeerColors;
@@ -2951,7 +2958,7 @@ export interface ActionPayloads {
 
   requestCollectibleInfo: {
     peerId: string;
-    type : 'phone' | 'username';
+    type : 'phone' | 'username' | 'walletAddress';
     collectible: string;
   } & WithTabId;
   closeCollectibleInfoModal: WithTabId | undefined;
