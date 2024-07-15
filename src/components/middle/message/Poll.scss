@@ -110,26 +110,7 @@
   }
 
   .poll-recent-voters {
-    display: inline-flex;
-    align-items: center;
-    vertical-align: text-bottom;
     margin-left: 0.875rem;
-    margin-right: 0.5rem;
-    margin-top: -2px;
-
-    .Avatar {
-      border: 0.0625rem solid var(--color-background);
-      margin-right: 0;
-      box-sizing: content-box;
-
-      .Message.own & {
-        border: 0.0625rem solid var(--secondary-color);
-      }
-
-      &:not(:first-child) {
-        margin-left: -3px;
-      }
-    }
   }
 
   .poll-countdown {
