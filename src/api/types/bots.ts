@@ -9,6 +9,7 @@ export type ApiInlineResultType = (
 );
 
 export interface ApiWebDocument {
+  mediaType: 'webDocument';
   url: string;
   size: number;
   mimeType: string;

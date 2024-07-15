@@ -37,6 +37,11 @@
     user-select: text;
   }
 
+  .content-unsupported {
+    font-style: italic;
+    color: var(--color-text-meta);
+  }
+
   .text-content,
   .transcription {
     margin: 0;
@@ -678,7 +683,8 @@
   }
 
   .message-media-duration,
-  .message-transfer-progress {
+  .message-transfer-progress,
+  .message-paid-media-status {
     background: rgba(0, 0, 0, 0.25);
     color: #fff;
     font-size: 0.75rem;

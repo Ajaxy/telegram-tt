@@ -2,9 +2,9 @@ import React, { type TeactNode } from '../lib/teact/teact';
 
 import type { LangCode } from '../types';
 
-import StarIcon from '../components/common/icons/StarIcon';
+import { STARS_CURRENCY_CODE } from '../config';
 
-const STARS_CODE = 'XTR';
+import StarIcon from '../components/common/icons/StarIcon';
 
 export function formatCurrency(
   totalPrice: number,
@@ -17,7 +17,7 @@ export function formatCurrency(
 ): TeactNode {
   const price = totalPrice / 10 ** getCurrencyExp(currency);
 
-  if (currency === STARS_CODE) {
+  if (currency === STARS_CURRENCY_CODE) {
     return [<StarIcon className={options?.iconClassName} type="gold" size="adaptive" />, price];
   }
 
@@ -61,7 +61,7 @@ function getCurrencyExp(currency: string) {
   }
   if ([
     'BIF', 'BYR', 'CLP', 'CVE', 'DJF', 'GNF', 'ISK', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'UYI',
-    'VND', 'VUV', 'XAF', 'XOF', 'XPF', STARS_CODE,
+    'VND', 'VUV', 'XAF', 'XOF', 'XPF', STARS_CURRENCY_CODE,
   ].includes(currency)) {
     return 0;
   }

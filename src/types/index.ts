@@ -7,12 +7,15 @@ import type {
   ApiBotInlineSwitchWebview,
   ApiChat,
   ApiChatInviteImporter,
+  ApiDocument,
   ApiExportedInvite,
   ApiLanguage,
   ApiMessage,
+  ApiPhoto,
   ApiReaction,
   ApiStickerSet,
   ApiUser,
+  ApiVideo,
 } from '../api/types';
 import type { IconName } from './icons';
 
@@ -35,6 +38,7 @@ export type ScrollTargetPosition = ScrollLogicalPosition | 'centerOrTop';
 export interface IAlbum {
   albumId: string;
   messages: ApiMessage[];
+  isPaidMedia?: boolean;
   mainMessage: ApiMessage;
   captionMessage?: ApiMessage;
   hasMultipleCaptions: boolean;
@@ -309,6 +313,8 @@ export enum RightColumnContent {
   EditTopic,
 }
 
+export type MediaViewerMedia = ApiPhoto | ApiVideo | ApiDocument;
+
 export enum MediaViewerOrigin {
   Inline,
   ScheduledInline,
@@ -320,6 +326,7 @@ export enum MediaViewerOrigin {
   ScheduledAlbum,
   SearchResult,
   SuggestedAvatar,
+  StarsTransaction,
 }
 
 export enum StoryViewerOrigin {

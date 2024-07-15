@@ -93,6 +93,8 @@ import {
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dates/dateFormat';
+import { processDeepLink } from '../../util/deeplink';
+import { tryParseDeepLink } from '../../util/deepLinkParser';
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
 import { processMessageInputForCustomEmoji } from '../../util/emoji/customEmojiManager';
 import focusEditableElement from '../../util/focusEditableElement';
@@ -1093,9 +1095,15 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    callAttachBot({
-      chatId, url: botMenuButton.url, threadId,
-    });
+    const parsedLink = tryParseDeepLink(botMenuButton.url);
+
+    if (parsedLink?.type === 'publicUsernameOrBotLink' && parsedLink.appName) {
+      processDeepLink(botMenuButton.url);
+    } else {
+      callAttachBot({
+        chatId, url: botMenuButton.url, threadId,
+      });
+    }
   });
 
   const handleActivateBotCommandMenu = useLastCallback(() => {
@@ -2033,7 +2041,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         {isInMessageList && <i className="icon icon-check" />}
       </Button>
       {effectEmoji && (
-        <span className="effect-icon">
+        <span className="effect-icon" onClick={handleRemoveEffect}>
           {renderText(effectEmoji)}
         </span>
       )}

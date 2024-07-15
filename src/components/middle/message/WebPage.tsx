@@ -137,7 +137,14 @@ const WebPage: FC<OwnProps> = ({
   const isArticle = Boolean(truncatedDescription || title || siteName);
   let isSquarePhoto = Boolean(stickers);
   if (isArticle && webPage?.photo && !webPage.video) {
-    const { width, height } = calculateMediaDimensions(message, undefined, undefined, isMobile);
+    const { width, height } = calculateMediaDimensions({
+      media: webPage.photo,
+      isOwn: message.isOutgoing,
+      isInWebPage: true,
+      asForwarded,
+      noAvatars,
+      isMobile,
+    });
     isSquarePhoto = width === height;
   }
   const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
@@ -188,7 +195,9 @@ const WebPage: FC<OwnProps> = ({
         )}
         {photo && !video && (
           <Photo
-            message={message}
+            photo={photo}
+            isOwn={message.isOutgoing}
+            isInWebPage
             observeIntersection={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
@@ -215,7 +224,9 @@ const WebPage: FC<OwnProps> = ({
         )}
         {!inPreview && video && (
           <Video
-            message={message}
+            video={video}
+            isOwn={message.isOutgoing}
+            isInWebPage
             observeIntersectionForLoading={observeIntersectionForLoading!}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
@@ -240,7 +251,7 @@ const WebPage: FC<OwnProps> = ({
         )}
         {!inPreview && document && (
           <Document
-            message={message}
+            document={document}
             observeIntersection={observeIntersectionForLoading}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
             onMediaClick={handleMediaClick}

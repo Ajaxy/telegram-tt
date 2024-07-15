@@ -4,7 +4,7 @@ import type {
 } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, ApiDraft,
+  ActionReturnType,
   ChatListType, GlobalState, TabArgs,
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -2827,18 +2827,9 @@ async function loadChats(
 
     if (!draft && !thread) return;
 
-    const currentDraft = selectDraft(global, chatId, MAIN_THREAD_ID);
-
-    // Temporary workaround until the layer is updated
-    if (!currentDraft?.isLocal) {
-      const effectId = currentDraft?.effectId;
-      const newDraft: ApiDraft = effectId ? {
-        ...draft,
-        effectId,
-      } : draft;
-
+    if (!selectDraft(global, chatId, MAIN_THREAD_ID)?.isLocal) {
       global = replaceThreadParam(
-        global, chatId, MAIN_THREAD_ID, 'draft', newDraft,
+        global, chatId, MAIN_THREAD_ID, 'draft', draft,
       );
     }
   });

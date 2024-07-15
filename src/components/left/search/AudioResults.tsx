@@ -2,10 +2,12 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiMessage } from '../../../api/types';
 import type { StateProps } from './helpers/createMapStateToProps';
 import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
+import { getIsDownloading } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -70,8 +72,8 @@ const AudioResults: FC<OwnProps & StateProps> = ({
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
-  const handleMessageFocus = useCallback((messageId: number, chatId: string) => {
-    focusMessage({ chatId, messageId });
+  const handleMessageFocus = useCallback((message: ApiMessage) => {
+    focusMessage({ chatId: message.chatId, messageId: message.id });
   }, [focusMessage]);
 
   const handlePlayAudio = useCallback((messageId: number, chatId: string) => {
@@ -111,7 +113,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
             onPlay={handlePlayAudio}
             onDateClick={handleMessageFocus}
             canDownload={!chatsById[message.chatId]?.isProtected && !message.isProtected}
-            isDownloading={activeDownloads[message.chatId]?.ids?.includes(message.id)}
+            isDownloading={getIsDownloading(activeDownloads, message.content.audio!)}
           />
         </div>
       );

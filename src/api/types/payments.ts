@@ -2,7 +2,9 @@ import type { ApiPremiumSection } from '../../global/types';
 import type { ApiInvoiceContainer } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiChat } from './chats';
-import type { ApiDocument, ApiMessageEntity, ApiPaymentCredentials } from './messages';
+import type {
+  ApiDocument, ApiMessageEntity, ApiPaymentCredentials, BoughtPaidMedia, MediaContent,
+} from './messages';
 import type { PrepaidGiveaway, StatisticsOverviewPercentage } from './statistics';
 import type { ApiUser } from './users';
 
@@ -67,9 +69,11 @@ export interface ApiReceiptStars {
   title?: string;
   text?: string;
   photo?: ApiWebDocument;
+  media?: BoughtPaidMedia[];
   currency: string;
   totalAmount: number;
   transactionId: string;
+  messageId?: number;
 }
 
 export interface ApiReceiptRegular {
@@ -227,6 +231,10 @@ export interface ApiStarsTransactionPeerFragment {
   type: 'fragment';
 }
 
+export interface ApiStarsTransactionPeerAds {
+  type: 'ads';
+}
+
 export interface ApiStarsTransactionPeerPeer {
   type: 'peer';
   id: string;
@@ -238,17 +246,22 @@ export type ApiStarsTransactionPeer =
 | ApiStarsTransactionPeerPlayMarket
 | ApiStarsTransactionPeerPremiumBot
 | ApiStarsTransactionPeerFragment
+| ApiStarsTransactionPeerAds
 | ApiStarsTransactionPeerPeer;
 
 export interface ApiStarsTransaction {
   id: string;
   peer: ApiStarsTransactionPeer;
+  messageId?: number;
   stars: number;
   isRefund?: true;
+  hasFailed?: true;
+  isPending?: true;
   date: number;
   title?: string;
   description?: string;
   photo?: ApiWebDocument;
+  extendedMedia?: MediaContent[];
 }
 
 export interface ApiStarTopupOption {

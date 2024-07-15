@@ -199,11 +199,11 @@ function getSummaryDescription(
     }
   }
 
-  if (location?.type === 'geo' || location?.type === 'venue') {
+  if (location?.mediaType === 'geo' || location?.mediaType === 'venue') {
     summary = lang('Message.Location');
   }
 
-  if (location?.type === 'geoLive') {
+  if (location?.mediaType === 'geoLive') {
     summary = lang('Message.LiveLocation');
   }
 

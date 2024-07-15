@@ -9,6 +9,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
 import { getStripeError } from '../../../util/payments/stripe';
 import { buildQueryString } from '../../../util/requestQuery';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import { isChatChannel, isChatSuperGroup } from '../../helpers';
 import { getRequestInputInvoice } from '../../helpers/payments';
@@ -95,7 +96,8 @@ async function getPaymentForm<T extends GlobalState>(
   global: T, inputInvoice: ApiRequestInputInvoice,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const result = await callApi('getPaymentForm', inputInvoice);
+  const theme = extractCurrentThemeParams();
+  const result = await callApi('getPaymentForm', inputInvoice, theme);
   if (!result) {
     return undefined;
   }

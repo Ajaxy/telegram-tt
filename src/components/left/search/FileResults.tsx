@@ -9,7 +9,7 @@ import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { getMessageDocument } from '../../../global/helpers';
+import { getIsDownloading, getMessageDocument } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -84,8 +84,8 @@ const FileResults: FC<OwnProps & StateProps> = ({
     }).filter(Boolean) as ApiMessage[];
   }, [globalMessagesByChatId, foundIds]);
 
-  const handleMessageFocus = useCallback((messageId: number, chatId: string) => {
-    focusMessage({ chatId, messageId });
+  const handleMessageFocus = useCallback((message: ApiMessage) => {
+    focusMessage({ chatId: message.chatId, messageId: message.id });
   }, [focusMessage]);
 
   function renderList() {
@@ -111,13 +111,14 @@ const FileResults: FC<OwnProps & StateProps> = ({
             </p>
           )}
           <Document
+            document={getMessageDocument(message)!}
             message={message}
             withDate
             datetime={message.date}
             smaller
             sender={getSenderName(lang, message, chatsById, usersById)}
             className="scroll-item"
-            isDownloading={activeDownloads[message.chatId]?.ids?.includes(message.id)}
+            isDownloading={getIsDownloading(activeDownloads, message.content.document!)}
             shouldWarnAboutSvg={shouldWarnAboutSvg}
             observeIntersection={observeIntersectionForMedia}
             onDateClick={handleMessageFocus}

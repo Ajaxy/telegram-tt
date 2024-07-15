@@ -26,9 +26,11 @@ type OwnProps = {
   headerImageUrl?: string;
   headerAvatarPeer?: ApiPeer | CustomPeer;
   headerAvatarWebPhoto?: ApiWebDocument;
+  noHeaderImage?: boolean;
   header?: TeactNode;
   footer?: TeactNode;
   buttonText?: string;
+  className?: string;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
 };
@@ -40,9 +42,11 @@ const TableInfoModal = ({
   headerImageUrl,
   headerAvatarPeer,
   headerAvatarWebPhoto,
+  noHeaderImage,
   header,
   footer,
   buttonText,
+  className,
   onClose,
   onButtonClick,
 }: OwnProps) => {
@@ -61,13 +65,16 @@ const TableInfoModal = ({
       hasAbsoluteCloseButton={!title}
       isSlim
       title={title}
+      className={className}
       contentClassName={styles.content}
       onClose={onClose}
     >
-      {withAvatar ? (
-        <Avatar peer={headerAvatarPeer} webPhoto={headerAvatarWebPhoto} size="jumbo" className={styles.avatar} />
-      ) : (
-        <img className={styles.logo} src={headerImageUrl} alt="" draggable={false} />
+      {!noHeaderImage && (
+        withAvatar ? (
+          <Avatar peer={headerAvatarPeer} webPhoto={headerAvatarWebPhoto} size="jumbo" className={styles.avatar} />
+        ) : (
+          <img className={styles.logo} src={headerImageUrl} alt="" draggable={false} />
+        )
       )}
       {header}
       <table className={styles.table}>

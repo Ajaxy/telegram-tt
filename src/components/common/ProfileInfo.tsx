@@ -53,7 +53,7 @@ type StateProps =
     user?: ApiUser;
     userStatus?: ApiUserStatus;
     chat?: ApiChat;
-    mediaId?: number;
+    mediaIndex?: number;
     avatarOwnerId?: string;
     topic?: ApiTopic;
     messagesCount?: number;
@@ -75,7 +75,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   userStatus,
   chat,
   isSynced,
-  mediaId,
+  mediaIndex,
   avatarOwnerId,
   topic,
   messagesCount,
@@ -98,9 +98,9 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const { id: userId } = user || {};
   const { id: chatId } = chat || {};
   const photos = user?.photos || chat?.photos || MEMO_EMPTY_ARRAY;
-  const prevMediaId = usePrevious(mediaId);
+  const prevMediaIndex = usePrevious(mediaIndex);
   const prevAvatarOwnerId = usePrevious(avatarOwnerId);
-  const mediaIdRef = useStateRef(mediaId);
+  const mediaIndexRef = useStateRef(mediaIndex);
   const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
   // slideOptimized doesn't work well when animation is dynamically disabled
   const slideAnimation = hasSlideAnimation ? (lang.isRtl ? 'slideRtl' : 'slide') : 'none';
@@ -111,17 +111,17 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   // Set the current avatar photo to the last selected photo in Media Viewer after it is closed
   useEffect(() => {
-    if (prevAvatarOwnerId && prevMediaId !== undefined && mediaId === undefined) {
+    if (prevAvatarOwnerId && prevMediaIndex !== undefined && mediaIndex === undefined) {
       setHasSlideAnimation(false);
-      setCurrentPhotoIndex(prevMediaId);
+      setCurrentPhotoIndex(prevMediaIndex);
     }
-  }, [mediaId, prevMediaId, prevAvatarOwnerId]);
+  }, [mediaIndex, prevMediaIndex, prevAvatarOwnerId]);
 
   // Reset the current avatar photo to the one selected in Media Viewer if photos have changed
   useEffect(() => {
     setHasSlideAnimation(false);
-    setCurrentPhotoIndex(mediaIdRef.current || 0);
-  }, [mediaIdRef, photos]);
+    setCurrentPhotoIndex(mediaIndexRef.current || 0);
+  }, [mediaIndexRef, photos]);
 
   // Deleting the last profile photo may result in an error
   useEffect(() => {
@@ -141,8 +141,9 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   const handleProfilePhotoClick = useLastCallback(() => {
     openMediaViewer({
-      avatarOwnerId: userId || chatId,
-      mediaId: currentPhotoIndex,
+      isAvatarView: true,
+      chatId: userId || chatId,
+      mediaIndex: currentPhotoIndex,
       origin: forceShowSelf ? MediaViewerOrigin.SettingsAvatar : MediaViewerOrigin.ProfileAvatar,
     });
   });
@@ -386,7 +387,7 @@ export default memo(withGlobal<OwnProps>(
     const isPrivate = isUserId(userId);
     const userStatus = selectUserStatus(global, userId);
     const chat = selectChat(global, userId);
-    const { mediaId, avatarOwnerId } = selectTabState(global).mediaViewer;
+    const { mediaIndex, chatId: avatarOwnerId } = selectTabState(global).mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
     const topic = isForum && currentTopicId ? chat?.topics?.[currentTopicId] : undefined;
@@ -405,7 +406,7 @@ export default memo(withGlobal<OwnProps>(
       userProfilePhoto: userFullInfo?.profilePhoto,
       userFallbackPhoto: userFullInfo?.fallbackPhoto,
       chatProfilePhoto: chatFullInfo?.profilePhoto,
-      mediaId,
+      mediaIndex,
       avatarOwnerId,
       emojiStatusSticker,
       ...(topic && {

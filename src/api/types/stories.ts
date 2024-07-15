@@ -66,6 +66,7 @@ export type ApiPeerStories = {
 };
 
 export type ApiMessageStoryData = {
+  mediaType: 'storyData';
   id: number;
   peerId: string;
   isMention?: boolean;
@@ -124,6 +125,7 @@ export type ApiMediaAreaCoordinates = {
   width: number;
   height: number;
   rotation: number;
+  radius?: number;
 };
 
 export type ApiMediaAreaVenue = {
@@ -154,5 +156,11 @@ export type ApiMediaAreaChannelPost = {
   messageId: number;
 };
 
+export type ApiMediaAreaUrl = {
+  type: 'url';
+  coordinates: ApiMediaAreaCoordinates;
+  url: string;
+};
+
 export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction
-| ApiMediaAreaChannelPost;
+| ApiMediaAreaChannelPost | ApiMediaAreaUrl;

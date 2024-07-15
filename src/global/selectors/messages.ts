@@ -18,7 +18,7 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ANONYMOUS_USER_ID,
-  GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID, TME_LINK_PREFIX,
+  GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
@@ -30,12 +30,10 @@ import {
   canSendReaction,
   getAllowedAttachmentOptions,
   getCanPostInChat,
-  getCleanPeerId,
   getHasAdminRight,
   getIsSavedDialog,
-  getMainUsername,
   getMessageAudio,
-  getMessageDocument, getMessagePhoto,
+  getMessageDocument, getMessageLink, getMessagePaidMedia, getMessagePhoto,
   getMessageVideo,
   getMessageVoice,
   getMessageWebPagePhoto,
@@ -797,22 +795,11 @@ export function selectCanDownloadSelectedMessages<T extends GlobalState>(
   return messageActions.some((actions) => actions.canDownload);
 }
 
-export function selectIsDownloading<T extends GlobalState>(
-  global: T, message: ApiMessage,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  const activeInChat = selectTabState(global, tabId).activeDownloads.byChatId[message.chatId];
-  if (!activeInChat) return false;
-
-  return Boolean(message.isScheduled
-    ? activeInChat.scheduledIds?.includes(message.id) : activeInChat.ids?.includes(message.id));
-}
-
 export function selectActiveDownloads<T extends GlobalState>(
-  global: T, chatId: string,
+  global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return selectTabState(global, tabId).activeDownloads.byChatId[chatId];
+  return selectTabState(global, tabId).activeDownloads;
 }
 
 export function selectUploadProgress<T extends GlobalState>(global: T, message: ApiMessage) {
@@ -1187,6 +1174,7 @@ export function selectLastServiceNotification<T extends GlobalState>(global: T) 
 export function selectIsMessageProtected<T extends GlobalState>(global: T, message?: ApiMessage) {
   return Boolean(message && (
     message.isProtected || selectIsChatProtected(global, message.chatId) || hasMessageTtl(message)
+      || getMessagePaidMedia(message)
   ));
 }
 
@@ -1439,13 +1427,7 @@ export function selectTopicLink<T extends GlobalState>(
     return undefined;
   }
 
-  const chatUsername = getMainUsername(chat);
-
-  const normalizedId = getCleanPeerId(chatId);
-
-  const chatPart = chatUsername || `c/${normalizedId}`;
-  const topicPart = topicId && topicId !== MAIN_THREAD_ID ? `/${topicId}` : '';
-  return `${TME_LINK_PREFIX}${chatPart}${topicPart}`;
+  return getMessageLink(chat, topicId);
 }
 
 export function selectMessageReplyInfo<T extends GlobalState>(

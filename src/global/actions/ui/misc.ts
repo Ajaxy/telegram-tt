@@ -531,7 +531,7 @@ addActionHandler('setReactionEffect', (global, actions, payload): ActionReturnTy
   const isCurrentUserPremium = selectIsCurrentUserPremium(global);
   if (effect?.isPremium && !isCurrentUserPremium) {
     actions.openPremiumModal({
-      initialSection: 'animated_emoji',
+      initialSection: 'effects',
       tabId,
     });
     return;

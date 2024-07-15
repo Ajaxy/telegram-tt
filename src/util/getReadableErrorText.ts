@@ -74,6 +74,8 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   BOT_PRECHECKOUT_TIMEOUT: 'The request for payment has expired',
 
   PEERS_LIST_EMPTY: 'No chats are added to the list',
+
+  PAID_MEDIA_FORBIDDEN: 'You can\'t send paid media in this chat',
 };
 
 if (DEBUG) {

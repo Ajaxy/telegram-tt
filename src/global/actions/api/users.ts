@@ -30,7 +30,7 @@ import {
   updateUserSearchFetchingStatus,
 } from '../../reducers';
 import {
-  selectChat, selectCurrentMessageList, selectPeer, selectTabState, selectUser, selectUserFullInfo,
+  selectChat, selectChatFullInfo, selectCurrentMessageList, selectPeer, selectTabState, selectUser, selectUserFullInfo,
 } from '../../selectors';
 
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
@@ -261,8 +261,9 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload): Promise<
     return;
   }
 
-  let fullInfo = selectUserFullInfo(global, profileId);
-  if (user && !fullInfo?.profilePhoto) {
+  let userFullInfo = selectUserFullInfo(global, profileId);
+  let chatFullInfo = selectChatFullInfo(global, profileId);
+  if (user && !userFullInfo?.profilePhoto) {
     const { id, accessHash } = user;
     const result = await callApi('fetchFullUser', { id, accessHash });
     if (!result?.user) {
@@ -270,7 +271,16 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload): Promise<
     }
 
     user = result.user;
-    fullInfo = result.fullInfo;
+    userFullInfo = result.fullInfo;
+  }
+
+  if (chat && !chatFullInfo?.profilePhoto) {
+    const result = await callApi('fetchFullChat', chat);
+    if (!result?.fullInfo) {
+      return;
+    }
+
+    chatFullInfo = result.fullInfo;
   }
 
   const result = await callApi('fetchProfilePhotos', user, chat);
@@ -283,10 +293,12 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload): Promise<
   const userOrChat = user || chat;
   const { photos, users } = result;
 
-  const fallbackPhoto = fullInfo?.fallbackPhoto;
-  const personalPhoto = fullInfo?.personalPhoto;
+  const fallbackPhoto = userFullInfo?.fallbackPhoto;
+  const personalPhoto = userFullInfo?.personalPhoto;
+  const chatCurrentPhoto = chatFullInfo?.profilePhoto;
   if (fallbackPhoto) photos.push(fallbackPhoto);
   if (personalPhoto) photos.unshift(personalPhoto);
+  if (chatCurrentPhoto && photos[0]?.id !== chatCurrentPhoto.id) photos.unshift(chatCurrentPhoto);
 
   photos.sort((a) => (a.id === userOrChat?.avatarHash ? -1 : 1));
 

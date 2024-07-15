@@ -6,7 +6,7 @@ import type { ApiMessage } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { getMessageMediaHash } from '../../../global/helpers';
+import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { IS_WEBM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
@@ -58,7 +58,7 @@ const Sticker: FC<OwnProps> = ({
   const isMirrored = !message.isOutgoing;
 
   const mediaHash = sticker.isPreloadedGlobally ? undefined : (
-    getMessageMediaHash(message, isVideo && !IS_WEBM_SUPPORTED ? 'pictogram' : 'inline')!
+    getStickerMediaHash(sticker, isVideo && !IS_WEBM_SUPPORTED ? 'pictogram' : 'inline')!
   );
 
   const canLoad = useIsIntersecting(ref, observeIntersection);

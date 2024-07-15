@@ -1,24 +1,20 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiMessage } from '../../../api/types';
+import type { ApiMediaExtendedPreview, ApiVideo } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import {
+  getMediaFormat,
+  getMediaThumbUri,
   getMediaTransferState,
-  getMessageMediaFormat,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
-  getMessageVideo,
-  getMessageWebPageVideo,
-  isOwnMessage,
+  getVideoMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import * as mediaLoader from '../../../util/mediaLoader';
-import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
+import { calculateExtendedPreviewDimensions, calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import { MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
 import useUnsupportedMedia from '../../../hooks/media/useUnsupportedMedia';
@@ -37,10 +33,12 @@ import MediaSpoiler from '../../common/MediaSpoiler';
 import OptimizedVideo from '../../ui/OptimizedVideo';
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
-export type OwnProps = {
+export type OwnProps<T> = {
   id?: string;
-  message: ApiMessage;
-  observeIntersectionForLoading: ObserveFn;
+  video: ApiVideo | ApiMediaExtendedPreview;
+  isOwn?: boolean;
+  isInWebPage?: boolean;
+  observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   noAvatars?: boolean;
   canAutoLoad?: boolean;
@@ -51,13 +49,18 @@ export type OwnProps = {
   asForwarded?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
-  onClick?: (id: number, isGif?: boolean) => void;
-  onCancelUpload?: (message: ApiMessage) => void;
+  className?: string;
+  clickArg?: T;
+  onClick?: (arg: T, e: React.MouseEvent<HTMLElement>) => void;
+  onCancelUpload?: (arg: T) => void;
 };
 
-const Video: FC<OwnProps> = ({
+// eslint-disable-next-line @typescript-eslint/comma-dangle
+const Video = <T,>({
   id,
-  message,
+  video,
+  isOwn,
+  isInWebPage,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   noAvatars,
@@ -69,26 +72,30 @@ const Video: FC<OwnProps> = ({
   asForwarded,
   isDownloading,
   isProtected,
+  className,
+  clickArg,
   onClick,
   onCancelUpload,
-}) => {
+}: OwnProps<T>) => {
+  const { cancelMediaDownload } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const video = (getMessageVideo(message) || getMessageWebPageVideo(message))!;
-  const localBlobUrl = video.blobUrl;
+  const isPaidPreview = video.mediaType === 'extendedMediaPreview';
 
-  const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(video.isSpoiler);
+  const localBlobUrl = !isPaidPreview ? video.blobUrl : undefined;
+
+  const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(isPaidPreview || video.isSpoiler);
 
   useEffect(() => {
-    if (video.isSpoiler) {
+    if (isPaidPreview || video.isSpoiler) {
       showSpoiler();
     } else {
       hideSpoiler();
     }
-  }, [video.isSpoiler]);
+  }, [isPaidPreview, video]);
 
   const isIntersectingForLoading = useIsIntersecting(ref, observeIntersectionForLoading);
   const isIntersectingForPlaying = (
@@ -102,43 +109,44 @@ const Video: FC<OwnProps> = ({
 
   const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
-  const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading);
+  const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && !isPaidPreview);
   const [isPlayAllowed, setIsPlayAllowed] = useState(Boolean(canAutoPlay && !isSpoilerShown));
 
-  const fullMediaHash = getMessageMediaHash(message, 'inline');
+  const fullMediaHash = !isPaidPreview ? getVideoMediaHash(video, 'inline') : undefined;
   const [isFullMediaPreloaded] = useState(Boolean(fullMediaHash && mediaLoader.getFromMemory(fullMediaHash)));
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
-    fullMediaHash, !shouldLoad, getMessageMediaFormat(message, 'inline'),
+    fullMediaHash,
+    !shouldLoad,
+    !isPaidPreview ? getMediaFormat(video, 'inline') : undefined,
   );
   const fullMediaData = localBlobUrl || mediaData;
   const [isPlayerReady, markPlayerReady] = useFlag();
 
-  const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const thumbDataUri = getMediaThumbUri(video);
   const hasThumb = Boolean(thumbDataUri);
   const withBlurredBackground = Boolean(forcedWidth);
 
-  const previewMediaHash = getMessageMediaHash(message, 'preview');
+  const previewMediaHash = !isPaidPreview ? getVideoMediaHash(video, 'preview') : undefined;
   const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
   const canLoadPreview = isIntersectingForLoading;
   const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview);
   const previewClassNames = useMediaTransition((hasThumb || previewBlobUrl) && !isPlayerReady);
 
-  const noThumb = !hasThumb || previewBlobUrl || isPlayerReady;
-  const thumbRef = useBlurredMediaThumbRef(message, noThumb);
-  const blurredBackgroundRef = useBlurredMediaThumbRef(message, !withBlurredBackground);
+  const noThumb = Boolean(!hasThumb || previewBlobUrl || isPlayerReady);
+  const thumbRef = useBlurredMediaThumbRef(video, noThumb);
+  const blurredBackgroundRef = useBlurredMediaThumbRef(video, !withBlurredBackground);
   const thumbClassNames = useMediaTransition(!noThumb);
 
   const isInline = fullMediaData && wasIntersectedRef.current;
 
   const isUnsupported = useUnsupportedMedia(videoRef, true, !isInline);
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'download'),
+    !isPaidPreview ? getVideoMediaHash(video, 'download') : undefined,
     !isDownloading,
-    getMessageMediaFormat(message, 'download'),
+    !isPaidPreview ? getMediaFormat(video, 'download') : undefined,
   );
 
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
-    message,
     uploadProgress || (isDownloading ? downloadProgress : loadProgress),
     (shouldLoad && !isPlayerReady && !isFullMediaPreloaded) || isDownloading,
     uploadProgress !== undefined,
@@ -160,20 +168,22 @@ const Video: FC<OwnProps> = ({
 
   const duration = (Number.isFinite(videoRef.current?.duration) ? videoRef.current?.duration : video.duration) || 0;
 
-  const isOwn = isOwnMessage(message);
-  const isWebPageVideo = Boolean(getMessageWebPageVideo(message));
   const {
     width, height,
-  } = dimensions || calculateVideoDimensions(video, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile);
+  } = dimensions || (
+    isPaidPreview
+      ? calculateExtendedPreviewDimensions(video, Boolean(isOwn), asForwarded, isInWebPage, noAvatars, isMobile)
+      : calculateVideoDimensions(video, Boolean(isOwn), asForwarded, isInWebPage, noAvatars, isMobile)
+  );
 
-  const handleClick = useLastCallback(() => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
     if (isUploading) {
-      onCancelUpload?.(message);
+      onCancelUpload?.(clickArg!);
       return;
     }
 
-    if (isDownloading) {
-      getActions().cancelMessageMediaDownload({ message });
+    if (!isPaidPreview && isDownloading) {
+      cancelMediaDownload({ media: video });
       return;
     }
 
@@ -191,13 +201,14 @@ const Video: FC<OwnProps> = ({
       return;
     }
 
-    onClick?.(message.id, video?.isGif);
+    onClick?.(clickArg!, e);
   });
 
-  const className = buildClassName(
+  const componentClassName = buildClassName(
     'media-inner dark',
     !isUploading && 'interactive',
     height < MIN_MEDIA_HEIGHT && 'fix-min-height',
+    className,
   );
 
   const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
@@ -207,7 +218,7 @@ const Video: FC<OwnProps> = ({
     <div
       ref={ref}
       id={id}
-      className={className}
+      className={componentClassName}
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
@@ -266,7 +277,7 @@ const Video: FC<OwnProps> = ({
         </span>
       ) : (
         <div className="message-media-duration">
-          {video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
+          {!isPaidPreview && video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
           {isUnsupported && <i className="icon icon-message-failed playback-failed" />}
         </div>
       )}

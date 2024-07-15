@@ -30,7 +30,6 @@ const requestStatesByCallback = new Map<AnyToVoidFunction, RequestStates>();
 const savedLocalDb: LocalDb = {
   chats: {},
   users: {},
-  messages: {},
   documents: {},
   stickerSets: {},
   photos: {},

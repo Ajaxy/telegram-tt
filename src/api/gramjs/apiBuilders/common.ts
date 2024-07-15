@@ -85,10 +85,12 @@ export function buildApiPhoto(photo: GramJs.Photo, isSpoiler?: boolean): ApiPhot
     .map(buildApiPhotoSize);
 
   return {
+    mediaType: 'photo',
     id: String(photo.id),
     thumbnail: buildApiThumbnailFromStripped(photo.sizes),
     sizes,
     isSpoiler,
+    date: photo.date,
     ...(photo.videoSizes && { videoSizes: compact(photo.videoSizes.map(buildApiVideoSize)), isVideo: true }),
   };
 }
@@ -115,7 +117,7 @@ export function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
   return {
     width: w,
     height: h,
-    type: type as ('m' | 'x' | 'y'),
+    type: type as ('s' | 'm' | 'x' | 'y' | 'w'),
   };
 }
 

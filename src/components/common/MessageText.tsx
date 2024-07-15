@@ -6,7 +6,8 @@ import type { ApiFormattedText, ApiMessage, ApiStory } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMessageEntityTypes } from '../../api/types';
 
-import { extractMessageText, getMessageText, stripCustomEmoji } from '../../global/helpers';
+import { CONTENT_NOT_SUPPORTED } from '../../config';
+import { extractMessageText, stripCustomEmoji } from '../../global/helpers';
 import trimText from '../../util/trimText';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
 
@@ -80,8 +81,7 @@ function MessageText({
   }, [entities]) || 0;
 
   if (!text) {
-    const contentNotSupportedText = getMessageText(messageOrStory);
-    return contentNotSupportedText ? [trimText(contentNotSupportedText, truncateLength)] : undefined as any;
+    return <span className="content-unsupported">{CONTENT_NOT_SUPPORTED}</span>;
   }
 
   return (

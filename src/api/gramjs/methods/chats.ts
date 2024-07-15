@@ -65,7 +65,6 @@ import {
   buildInputReplyTo,
   buildMtpMessageEntity,
   generateRandomBigInt,
-  isMessageWithMedia,
 } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
@@ -74,7 +73,6 @@ import {
   deserializeBytes,
   isChatFolder,
 } from '../helpers';
-import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 import {
   applyState, processAffectedHistory, updateChannelState,
@@ -518,8 +516,8 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     translationsDisabled,
   } = result.fullChat;
 
-  if (chatPhoto instanceof GramJs.Photo) {
-    localDb.photos[chatPhoto.id.toString()] = chatPhoto;
+  if (chatPhoto) {
+    addPhotoToLocalDb(chatPhoto);
   }
 
   const members = buildChatMembers(participants);
@@ -606,8 +604,8 @@ async function getFullChannelInfo(
     boostsUnrestrict,
   } = result.fullChat;
 
-  if (chatPhoto instanceof GramJs.Photo) {
-    localDb.photos[chatPhoto.id.toString()] = chatPhoto;
+  if (chatPhoto) {
+    addPhotoToLocalDb(chatPhoto);
   }
 
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
@@ -1555,9 +1553,7 @@ function updateLocalDb(result: (
 
   if ('messages' in result) {
     result.messages.forEach((message) => {
-      if (message instanceof GramJs.Message && isMessageWithMedia(message)) {
-        addMessageToLocalDb(message);
-      }
+      addMessageToLocalDb(message);
     });
   }
 }

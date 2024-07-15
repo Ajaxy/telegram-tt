@@ -6,7 +6,7 @@ import type { ApiStickerSet } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_PICKER_HEADER } from '../../../config';
-import { getStickerPreviewHash } from '../../../global/helpers';
+import { getStickerMediaHash } from '../../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getFirstLetters } from '../../../util/textFormat';
@@ -62,7 +62,7 @@ const StickerSetCover: FC<OwnProps> = ({
   const hasOnlyStaticThumb = hasStaticThumb && !hasVideoThumb && !hasAnimatedThumb && !thumbCustomEmojiId;
 
   const shouldFallbackToStatic = hasOnlyStaticThumb || (hasVideoThumb && !IS_WEBM_SUPPORTED && !hasAnimatedThumb);
-  const staticHash = shouldFallbackToStatic && getStickerPreviewHash(stickerSet.stickers![0].id);
+  const staticHash = shouldFallbackToStatic && getStickerMediaHash(stickerSet.stickers![0], 'preview');
   const staticMediaData = useMedia(staticHash, !isIntersecting);
 
   const mediaHash = ((hasThumbnail && !shouldFallbackToStatic) || hasAnimatedThumb) && `stickerSet${stickerSet.id}`;
@@ -75,10 +75,7 @@ const StickerSetCover: FC<OwnProps> = ({
   useEffect(() => {
     if (isIntersecting && !stickerSet.stickers?.length) {
       loadStickers({
-        stickerSetInfo: {
-          id: stickerSet.id,
-          accessHash: stickerSet.accessHash,
-        },
+        stickerSetInfo: stickerSet,
       });
     }
   }, [isIntersecting, loadStickers, stickerSet]);

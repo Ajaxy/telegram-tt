@@ -31,11 +31,24 @@
   }
 
   .effect-icon {
-    font-size: 1.25rem;
-    position: absolute;
-    right: 0;
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    place-items: center;
 
+    font-size: 1rem;
+    line-height: 1;
+    position: absolute;
+    right: -0.25rem;
+    bottom: -0.25rem;
+
+    background-color: var(--color-background);
+    border: 1px solid var(--color-borders);
     color: var(--color-text);
+
+    border-radius: 50%;
+    cursor: var(--custom-cursor, pointer);
+
     & > .emoji {
       width: 1rem !important;
       height: 1rem !important;

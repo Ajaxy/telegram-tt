@@ -1,14 +1,16 @@
 import type { FC } from '../../lib/teact/teact';
-import React from '../../lib/teact/teact';
+import React, { useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiMessage, ApiPeer } from '../../api/types';
+import type { ApiChat, ApiPeer } from '../../api/types';
+import type { MediaViewerItem } from './helpers/getViewableMedia';
 
-import { getSenderTitle } from '../../global/helpers';
 import {
-  selectChatMessage,
-  selectPeer,
+  getSenderTitle, isChatChannel, isChatGroup, isUserId,
+} from '../../global/helpers';
+import {
   selectSender,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import { formatMediaDateTime } from '../../util/dates/dateFormat';
 import renderText from '../common/helpers/renderText';
@@ -22,26 +24,21 @@ import Avatar from '../common/Avatar';
 import './SenderInfo.scss';
 
 type OwnProps = {
-  chatId?: string;
-  messageId?: number;
-  isAvatar?: boolean;
-  isFallbackAvatar?: boolean;
+  item?: MediaViewerItem;
 };
 
 type StateProps = {
-  sender?: ApiPeer;
-  message?: ApiMessage;
+  owner?: ApiPeer;
+  isFallbackAvatar?: boolean;
 };
 
+const BULLET = '\u2022';
 const ANIMATION_DURATION = 350;
 
 const SenderInfo: FC<OwnProps & StateProps> = ({
-  chatId,
-  messageId,
-  sender,
+  owner,
+  item,
   isFallbackAvatar,
-  isAvatar,
-  message,
 }) => {
   const {
     closeMediaViewer,
@@ -54,37 +51,64 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   const handleFocusMessage = useLastCallback(() => {
     closeMediaViewer();
 
-    if (!chatId || !messageId) return;
+    if (item?.type !== 'message') return;
+
+    const message = item.message;
 
     if (isMobile) {
       setTimeout(() => {
         toggleChatInfo({ force: false }, { forceSyncOnIOs: true });
-        focusMessage({ chatId, messageId });
+        focusMessage({ chatId: message.chatId, messageId: message.id });
       }, ANIMATION_DURATION);
     } else {
-      focusMessage({ chatId, messageId });
+      focusMessage({ chatId: message.chatId, messageId: message.id });
     }
   });
 
   const lang = useOldLang();
 
-  if (!sender || (!message && !isAvatar)) {
+  const subtitle = useMemo(() => {
+    if (!item || item.type === 'standalone') return undefined;
+
+    const avatarOwner = item.type === 'avatar' ? item.avatarOwner : undefined;
+    const avatar = avatarOwner?.photos?.[item.mediaIndex!];
+    const date = item.type === 'message' ? item.message.date : avatar?.date;
+    if (!date) return undefined;
+
+    const formattedDate = formatMediaDateTime(lang, date * 1000, true);
+
+    const parts: string[] = [];
+    if (avatar) {
+      const chat = !isUserId(avatarOwner!.id) ? avatarOwner as ApiChat : undefined;
+      const isChannel = chat && isChatChannel(chat);
+      const isGroup = chat && isChatGroup(chat);
+      parts.push(lang(
+        isFallbackAvatar ? 'lng_mediaview_profile_public_photo'
+          : isChannel ? 'lng_mediaview_channel_photo'
+            : isGroup ? 'lng_mediaview_group_photo' : 'lng_mediaview_profile_photo',
+      ));
+    }
+
+    parts.push(formattedDate);
+
+    return parts.join(` ${BULLET} `);
+  }, [item, isFallbackAvatar, lang]);
+
+  if (!owner) {
     return undefined;
   }
 
-  const senderTitle = getSenderTitle(lang, sender);
+  const senderTitle = getSenderTitle(lang, owner);
 
   return (
     <div className="SenderInfo" onClick={handleFocusMessage}>
-      <Avatar key={sender.id} size="medium" peer={sender} />
+      <Avatar key={owner.id} size="medium" peer={owner} />
       <div className="meta">
         <div className="title" dir="auto">
           {senderTitle && renderText(senderTitle)}
         </div>
         <div className="date" dir="auto">
-          {isAvatar
-            ? lang(isFallbackAvatar ? 'lng_mediaview_profile_public_photo' : 'lng_mediaview_profile_photo')
-            : formatMediaDateTime(lang, message!.date * 1000, true)}
+          {subtitle}
         </div>
       </div>
     </div>
@@ -92,22 +116,21 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global, { chatId, messageId, isAvatar }): StateProps => {
-    if (isAvatar && chatId) {
-      return {
-        sender: selectPeer(global, chatId),
-      };
-    }
+  (global, { item }): StateProps => {
+    const message = item?.type === 'message' ? item.message : undefined;
+    const messageSender = message && selectSender(global, message);
 
-    if (!messageId || !chatId) {
-      return {};
-    }
+    const owner = item?.type === 'avatar' ? item.avatarOwner : messageSender;
 
-    const message = selectChatMessage(global, chatId, messageId);
+    const fallbackAvatar = item?.type === 'avatar'
+      ? selectUserFullInfo(global, item.avatarOwner.id)?.fallbackPhoto : undefined;
+
+    const isFallbackAvatar = fallbackAvatar && item?.type === 'avatar'
+      && item.avatarOwner.photos?.[item.mediaIndex].id === fallbackAvatar.id;
 
     return {
-      message,
-      sender: message && selectSender(global, message),
+      owner,
+      isFallbackAvatar,
     };
   },
 )(SenderInfo);

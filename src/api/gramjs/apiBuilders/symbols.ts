@@ -81,6 +81,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument,
     .some(({ type }) => type === 'f');
 
   return {
+    mediaType: 'sticker',
     id: String(document.id),
     stickerSetInfo,
     emoji,

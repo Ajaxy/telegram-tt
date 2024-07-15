@@ -58,7 +58,7 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
       mediaLoader.fetch(`sticker${availableReaction.appearAnimation.id}`, ApiMediaFormat.BlobUrl);
     }
     if (availableReaction.selectAnimation) {
-      mediaLoader.fetch(getDocumentMediaHash(availableReaction.selectAnimation), ApiMediaFormat.BlobUrl);
+      mediaLoader.fetch(getDocumentMediaHash(availableReaction.selectAnimation, 'full')!, ApiMediaFormat.BlobUrl);
     }
   });
 

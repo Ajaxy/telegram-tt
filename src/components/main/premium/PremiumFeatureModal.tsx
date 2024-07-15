@@ -46,6 +46,7 @@ export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   saved_tags: 'PremiumPreviewTags2',
   last_seen: 'PremiumPreviewLastSeen',
   message_privacy: 'PremiumPreviewMessagePrivacy',
+  effects: 'PremiumPreviewEffects',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
@@ -66,6 +67,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   saved_tags: 'PremiumPreviewTagsDescription2',
   last_seen: 'PremiumPreviewLastSeenDescription',
   message_privacy: 'PremiumPreviewMessagePrivacyDescription',
+  effects: 'PremiumPreviewEffectsDescription',
 };
 
 const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {

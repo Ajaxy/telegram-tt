@@ -5,7 +5,7 @@ import { getGlobal } from '../../global';
 import type { ApiSticker } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import { getStickerPreviewHash } from '../../global/helpers';
+import { getStickerMediaHash } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import * as mediaLoader from '../../util/mediaLoader';
@@ -86,7 +86,7 @@ const StickerView: FC<OwnProps> = ({
   const isUnsupportedVideo = sticker.isVideo && (!IS_WEBM_SUPPORTED || isVideoBroken);
   const isVideo = sticker.isVideo && !isUnsupportedVideo;
   const isStatic = !isLottie && !isVideo;
-  const previewMediaHash = getStickerPreviewHash(sticker.id);
+  const previewMediaHash = getStickerMediaHash(sticker, 'preview');
 
   const dpr = useDevicePixelRatio();
 

@@ -6,9 +6,9 @@ import type { ApiBotInfo } from '../../api/types';
 
 import {
   getBotCoverMediaHash,
-  getDocumentMediaHash,
   getPhotoFullDimensions,
   getVideoDimensions,
+  getVideoMediaHash,
 } from '../../global/helpers';
 import { selectBot, selectUserFullInfo } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -43,7 +43,7 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
   const dpr = useDevicePixelRatio();
 
   const botInfoPhotoUrl = useMedia(botInfo?.photo ? getBotCoverMediaHash(botInfo.photo) : undefined);
-  const botInfoGifUrl = useMedia(botInfo?.gif ? getDocumentMediaHash(botInfo.gif) : undefined);
+  const botInfoGifUrl = useMedia(botInfo?.gif ? getVideoMediaHash(botInfo.gif, 'full') : undefined);
   const botInfoDimensions = botInfo?.photo ? getPhotoFullDimensions(botInfo.photo) : botInfo?.gif
     ? getVideoDimensions(botInfo.gif) : undefined;
   const botInfoRealDimensions = botInfoDimensions && {

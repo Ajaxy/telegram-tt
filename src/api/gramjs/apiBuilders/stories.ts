@@ -150,7 +150,7 @@ export function buildApiStealthMode(stealthMode: GramJs.TypeStoriesStealthMode):
 
 function buildApiMediaAreaCoordinates(coordinates: GramJs.TypeMediaAreaCoordinates): ApiMediaAreaCoordinates {
   const {
-    x, y, w, h, rotation,
+    x, y, w, h, rotation, radius,
   } = coordinates;
 
   return {
@@ -159,6 +159,7 @@ function buildApiMediaAreaCoordinates(coordinates: GramJs.TypeMediaAreaCoordinat
     width: w,
     height: h,
     rotation,
+    radius,
   };
 }
 
@@ -215,6 +216,16 @@ export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | un
       coordinates: buildApiMediaAreaCoordinates(coordinates),
       channelId: buildApiPeerId(channelId, 'channel'),
       messageId: msgId,
+    };
+  }
+
+  if (area instanceof GramJs.MediaAreaUrl) {
+    const { coordinates, url } = area;
+
+    return {
+      type: 'url',
+      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      url,
     };
   }
 

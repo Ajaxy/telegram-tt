@@ -38,8 +38,10 @@ import { AudioOrigin } from '../../../types';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
 import {
   areReactionsEmpty,
+  getIsDownloading,
   getMessageContent,
   getMessageCustomShape,
+  getMessageDownloadableMedia,
   getMessageHtmlId,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
@@ -61,6 +63,7 @@ import {
 } from '../../../global/helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../../global/helpers/replies';
 import {
+  selectActiveDownloads,
   selectAllowedMessageActions,
   selectAnimatedEmoji,
   selectCanAutoLoadMedia,
@@ -76,7 +79,6 @@ import {
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectIsDocumentGroupSelected,
-  selectIsDownloading,
   selectIsInSelectMode,
   selectIsMessageFocused,
   selectIsMessageProtected,
@@ -117,6 +119,7 @@ import renderText from '../../common/helpers/renderText';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
+import getSingularPaidMedia from './helpers/getSingularPaidMedia';
 import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT } from './helpers/mediaDimensions';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -170,6 +173,7 @@ import MessageAppendix from './MessageAppendix';
 import MessageEffect from './MessageEffect';
 import MessageMeta from './MessageMeta';
 import MessagePhoneCall from './MessagePhoneCall';
+import PaidMediaOverlay from './PaidMediaOverlay';
 import Photo from './Photo';
 import Poll from './Poll';
 import Reactions from './reactions/Reactions';
@@ -495,6 +499,17 @@ const Message: FC<OwnProps & StateProps> = ({
   const isScheduled = messageListType === 'scheduled' || message.isScheduled;
   const hasMessageReply = isReplyToMessage(message) && !shouldHideReply;
 
+  const { paidMedia } = getMessageContent(message);
+  const { photo: paidMediaPhoto, video: paidMediaVideo } = getSingularPaidMedia(paidMedia);
+
+  const {
+    photo = paidMediaPhoto, video = paidMediaVideo, audio,
+    voice, document, sticker, contact,
+    poll, webPage, invoice, location,
+    action, game, storyData, giveaway,
+    giveawayResults,
+  } = getMessageContent(message);
+
   const messageReplyInfo = getMessageReplyInfo(message);
   const storyReplyInfo = getStoryReplyInfo(message);
 
@@ -510,11 +525,15 @@ const Message: FC<OwnProps & StateProps> = ({
     && !isAnonymousForwards
     && !forwardInfo.isLinkedChannelPost
     && !isCustomShape
-  ) || Boolean(message.content.storyData && !message.content.storyData.isMention);
+  ) || Boolean(storyData && !storyData.isMention);
   const canShowSenderBoosts = Boolean(senderBoosts) && !asForwarded && isFirstInGroup;
-  const isStoryMention = message.content.storyData?.isMention;
-  const isAlbum = Boolean(album) && album!.messages.length > 1
-    && !album?.messages.some((msg) => Object.keys(msg.content).length === 0);
+  const isStoryMention = storyData?.isMention;
+  const isRoundVideo = video?.mediaType === 'video' && video.isRound;
+  const isAlbum = Boolean(album)
+    && (
+      (album.isPaidMedia && paidMedia!.extendedMedia.length > 1)
+      || album.messages.length > 1
+    ) && !album.messages.some((msg) => Object.keys(msg.content).length === 0);
   const isInDocumentGroupNotFirst = isInDocumentGroup && !isFirstInDocumentGroup;
   const isInDocumentGroupNotLast = isInDocumentGroup && !isLastInDocumentGroup;
   const isContextMenuShown = contextMenuPosition !== undefined;
@@ -552,7 +571,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && (isChatWithSelf || isRepliesChat || isAnonymousForwards || !messageSender);
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
   const messageColorPeer = originSender || sender;
-  const senderPeer = (forwardInfo || message.content.storyData) ? originSender : messageSender;
+  const senderPeer = (forwardInfo || storyData) ? originSender : messageSender;
   const hasTtl = hasMessageTtl(message);
 
   const {
@@ -676,13 +695,6 @@ const Message: FC<OwnProps & StateProps> = ({
     isStoryMention && 'is-story-mention',
   );
 
-  const {
-    photo, video, audio,
-    voice, document, sticker, contact,
-    poll, webPage, invoice, location,
-    action, game, storyData, giveaway,
-    giveawayResults,
-  } = getMessageContent(message);
   const text = textMessage && getMessageContent(textMessage).text;
   const isInvertedMedia = Boolean(message.isInvertedMedia);
 
@@ -726,7 +738,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl;
 
   const hasOutsideReactions = hasReactions
-    && (isCustomShape || ((photo || video || storyData || (location?.type === 'geo')) && !hasText));
+    && (isCustomShape || ((photo || video || storyData || (location?.mediaType === 'geo')) && !hasText));
 
   const contentClassName = buildContentClassName(message, album, {
     hasSubheader,
@@ -738,7 +750,7 @@ const Message: FC<OwnProps & StateProps> = ({
     hasCommentCounter: hasThread && repliesThreadInfo.messagesCount > 0,
     hasActionButton: canForward || canFocus,
     hasReactions,
-    isGeoLiveActive: location?.type === 'geoLive' && !isGeoLiveExpired(message),
+    isGeoLiveActive: location?.mediaType === 'geoLive' && !isGeoLiveExpired(message),
     withVoiceTranscription,
     peerColorClass: getPeerColorClass(messageColorPeer, noUserColors),
     hasOutsideReactions,
@@ -868,12 +880,24 @@ const Message: FC<OwnProps & StateProps> = ({
     if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
       let width: number | undefined;
       if (photo) {
-        width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
+        width = calculateMediaDimensions({
+          media: photo,
+          isOwn,
+          asForwarded,
+          noAvatars,
+          isMobile,
+        }).width;
       } else if (video) {
-        if (video.isRound) {
+        if (isRoundVideo) {
           width = ROUND_VIDEO_DIMENSIONS_PX;
         } else {
-          width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
+          width = calculateMediaDimensions({
+            media: video,
+            isOwn,
+            asForwarded,
+            noAvatars,
+            isMobile,
+          }).width;
         }
       } else if (invoice?.extendedMedia && (
         invoice.extendedMedia.width && invoice.extendedMedia.height
@@ -921,7 +945,7 @@ const Message: FC<OwnProps & StateProps> = ({
     };
   }, [
     albumLayout, asForwarded, extraPadding, hasSubheader, invoice?.extendedMedia, isAlbum, isMediaWithCommentButton,
-    isMobile, isOwn, message, noAvatars, photo, sticker, text?.text, video,
+    isMobile, isOwn, noAvatars, photo, sticker, text?.text, video, isRoundVideo,
   ]);
 
   const {
@@ -1133,7 +1157,7 @@ const Message: FC<OwnProps & StateProps> = ({
             chatId={chatId}
           />
         )}
-        {!isAlbum && video && video.isRound && (
+        {!isAlbum && isRoundVideo && (
           <RoundVideo
             message={message}
             observeIntersection={observeIntersectionForLoading}
@@ -1166,7 +1190,7 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {document && (
           <Document
-            message={message}
+            document={document}
             observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
@@ -1282,7 +1306,7 @@ const Message: FC<OwnProps & StateProps> = ({
       outgoingStatus && 'with-outgoing-icon',
     );
 
-    const hasMediaAfterText = isAlbum || (!isAlbum && photo) || (!isAlbum && video && !video.isRound);
+    const hasMediaAfterText = isAlbum || (!isAlbum && photo) || (!isAlbum && video && !isRoundVideo);
     const hasContentAfterText = hasMediaAfterText || (!hasAnimatedEmoji && hasFactCheck);
     const isMetaInText = metaPosition === 'in-text';
 
@@ -1346,8 +1370,8 @@ const Message: FC<OwnProps & StateProps> = ({
     );
   }
 
-  function renderInvertibleMediaContent(hasCustomAppendix : boolean) {
-    return (
+  function renderInvertibleMediaContent(hasCustomAppendix: boolean) {
+    const content = (
       <>
         {isAlbum && (
           <Album
@@ -1362,7 +1386,9 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {!isAlbum && photo && (
           <Photo
-            message={message}
+            messageText={text?.text}
+            photo={photo}
+            isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
@@ -1377,9 +1403,10 @@ const Message: FC<OwnProps & StateProps> = ({
             onCancelUpload={handleCancelUpload}
           />
         )}
-        {!isAlbum && video && !video.isRound && (
+        {!isAlbum && video && !isRoundVideo && (
           <Video
-            message={message}
+            video={video}
+            isOwn={isOwn}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             forcedWidth={contentWidth}
@@ -1396,10 +1423,20 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
       </>
     );
+
+    if (paidMedia) {
+      return (
+        <PaidMediaOverlay chatId={chatId} messageId={messageId} paidMedia={paidMedia} isOutgoing={isOwn}>
+          {content}
+        </PaidMediaOverlay>
+      );
+    }
+
+    return content;
   }
 
   function renderSenderName() {
-    const media = photo || video || location;
+    const media = photo || video || location || paidMedia;
     const shouldRender = !(isCustomShape && !viaBotId) && (
       (withSenderName && (!media || hasTopicChip)) || asForwarded || viaBotId || forceSenderName
     ) && !isInDocumentGroupNotFirst && !(hasMessageReply && isCustomShape);
@@ -1714,7 +1751,9 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
-    const isDownloading = selectIsDownloading(global, message);
+    const activeDownloads = selectActiveDownloads(global);
+    const downloadableMedia = getMessageDownloadableMedia(message);
+    const isDownloading = downloadableMedia && getIsDownloading(activeDownloads, downloadableMedia);
 
     const repliesThreadInfo = selectThreadInfo(global, chatId, album?.commentsMessage?.id || id);
 

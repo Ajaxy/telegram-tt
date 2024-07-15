@@ -221,6 +221,7 @@ addActionHandler('uploadWallpaper', async (global, actions, payload): Promise<vo
         {
           slug: UPLOADING_WALLPAPER_SLUG,
           document: {
+            mediaType: 'document',
             fileName: '',
             size: file.size,
             mimeType: file.type,

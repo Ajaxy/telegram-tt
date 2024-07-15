@@ -3,7 +3,7 @@ import type {
 } from '../../api/types';
 import type { FocusDirection, ScrollTargetPosition, ThreadId } from '../../types';
 import type {
-  GlobalState, MessageList, MessageListType, TabArgs, TabThread, Thread,
+  GlobalState, MessageList, MessageListType, TabArgs, TabState, TabThread, Thread,
 } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
@@ -835,24 +835,18 @@ export function updateTopicLastMessageId<T extends GlobalState>(
   };
 }
 
-export function addActiveMessageMediaDownload<T extends GlobalState>(
+export function addActiveMediaDownload<T extends GlobalState>(
   global: T,
-  message: ApiMessage,
+  mediaHash: string,
+  metadata: TabState['activeDownloads'][string],
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const tabState = selectTabState(global, tabId);
-  const byChatId = tabState.activeDownloads.byChatId[message.chatId] || {};
-  const currentIds = (message.isScheduled ? byChatId?.scheduledIds : byChatId?.ids) || [];
 
   global = updateTabState(global, {
     activeDownloads: {
-      byChatId: {
-        ...tabState.activeDownloads.byChatId,
-        [message.chatId]: {
-          ...byChatId,
-          [message.isScheduled ? 'scheduledIds' : 'ids']: unique([...currentIds, message.id]),
-        },
-      },
+      ...tabState.activeDownloads,
+      [mediaHash]: metadata,
     },
   }, tabId);
 
@@ -861,25 +855,15 @@ export function addActiveMessageMediaDownload<T extends GlobalState>(
 
 export function cancelMessageMediaDownload<T extends GlobalState>(
   global: T,
-  message: ApiMessage,
+  mediaHashes: string[],
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const tabState = selectTabState(global, tabId);
-  const byChatId = tabState.activeDownloads.byChatId[message.chatId];
-  if (!byChatId) return global;
 
-  const currentIds = (message.isScheduled ? byChatId.scheduledIds : byChatId.ids) || [];
+  const newActiveDownloads = omit(tabState.activeDownloads, mediaHashes);
 
   global = updateTabState(global, {
-    activeDownloads: {
-      byChatId: {
-        ...tabState.activeDownloads.byChatId,
-        [message.chatId]: {
-          ...byChatId,
-          [message.isScheduled ? 'scheduledIds' : 'ids']: currentIds.filter((id) => id !== message.id),
-        },
-      },
-    },
+    activeDownloads: newActiveDownloads,
   }, tabId);
 
   return global;

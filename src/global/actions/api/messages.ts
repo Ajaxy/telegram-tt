@@ -1728,12 +1728,10 @@ addActionHandler('readAllMentions', (global, actions, payload): ActionReturnType
 addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   const { url, shouldSkipModal, tabId = getCurrentTabId() } = payload;
   const urlWithProtocol = ensureProtocol(url)!;
-  const isStoriesViewerOpen = Boolean(selectTabState(global, tabId).storyViewer.peerId);
 
   if (isDeepLink(urlWithProtocol)) {
-    if (isStoriesViewerOpen) {
-      actions.closeStoryViewer({ tabId });
-    }
+    actions.closeStoryViewer({ tabId });
+    actions.closePaymentModal({ tabId });
 
     actions.openTelegramLink({ url, tabId });
     return;
@@ -1750,9 +1748,7 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
     }
 
     if (appConfig.urlAuthDomains.includes(parsedUrl.hostname)) {
-      if (isStoriesViewerOpen) {
-        actions.closeStoryViewer({ tabId });
-      }
+      actions.closeStoryViewer({ tabId });
 
       actions.requestLinkUrlAuth({ url, tabId });
       return;

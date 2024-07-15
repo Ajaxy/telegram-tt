@@ -13,9 +13,9 @@ import { AudioOrigin } from '../../types';
 
 import {
   getMediaDuration,
+  getMediaFormat,
+  getMediaHash,
   getMediaTransferState,
-  getMessageMediaFormat,
-  getMessageMediaHash,
   getMessageWebPageAudio,
   hasMessageTtl,
   isMessageLocal,
@@ -72,7 +72,7 @@ type OwnProps = {
   onPause?: NoneToVoidFunction;
   onReadMedia?: () => void;
   onCancelUpload?: () => void;
-  onDateClick?: (messageId: number, chatId: string) => void;
+  onDateClick?: (arg: ApiMessage) => void;
 };
 
 export const TINY_SCREEN_WIDTH_MQL = window.matchMedia('(max-width: 375px)');
@@ -108,7 +108,7 @@ const Audio: FC<OwnProps> = ({
   onDateClick,
 }) => {
   const {
-    cancelMessageMediaDownload, downloadMessageMedia, transcribeAudio, openOneTimeMediaModal,
+    cancelMediaDownload, downloadMedia, transcribeAudio, openOneTimeMediaModal,
   } = getActions();
 
   const {
@@ -117,6 +117,7 @@ const Audio: FC<OwnProps> = ({
     }, isMediaUnread,
   } = message;
   const audio = contentAudio || getMessageWebPageAudio(message);
+  const media = (voice || video || audio)!;
   const isVoice = Boolean(voice || video);
   const isSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
@@ -127,22 +128,22 @@ const Audio: FC<OwnProps> = ({
   const { isMobile } = useAppLayout();
   const [isActivated, setIsActivated] = useState(false);
   const shouldLoad = isActivated || PRELOAD;
-  const coverHash = getMessageMediaHash(message, 'pictogram');
+  const coverHash = getMediaHash(media, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
   const hasTtl = hasMessageTtl(message);
   const isInOneTimeModal = origin === AudioOrigin.OneTimeModal;
   const trackType = isVoice ? (hasTtl ? 'oneTimeVoice' : 'voice') : 'audio';
 
   const mediaData = useMedia(
-    getMessageMediaHash(message, 'inline'),
+    getMediaHash(media, 'inline'),
     !shouldLoad,
-    getMessageMediaFormat(message, 'inline'),
+    getMediaFormat(media, 'inline'),
   );
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'download'),
+    getMediaHash(media, 'download'),
     !isDownloading,
-    getMessageMediaFormat(message, 'download'),
+    getMediaFormat(media, 'download'),
   );
 
   const handleForcePlay = useLastCallback(() => {
@@ -204,7 +205,6 @@ const Audio: FC<OwnProps> = ({
   const {
     isUploading, isTransferring, transferProgress,
   } = getMediaTransferState(
-    message,
     uploadProgress || downloadProgress,
     isLoadingForPlaying || isDownloading,
     uploadProgress !== undefined,
@@ -246,9 +246,9 @@ const Audio: FC<OwnProps> = ({
 
   const handleDownloadClick = useLastCallback(() => {
     if (isDownloading) {
-      cancelMessageMediaDownload({ message });
+      cancelMediaDownload({ media });
     } else {
-      downloadMessageMedia({ message });
+      downloadMedia({ media });
     }
   });
 
@@ -273,7 +273,7 @@ const Audio: FC<OwnProps> = ({
   });
 
   const handleDateClick = useLastCallback(() => {
-    onDateClick!(message.id, message.chatId);
+    onDateClick!(message);
   });
 
   const handleTranscribe = useLastCallback(() => {

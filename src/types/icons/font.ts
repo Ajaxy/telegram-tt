@@ -195,6 +195,7 @@ export type FontIconName =
   | 'spoiler'
   | 'sport'
   | 'star'
+  | 'stars-lock'
   | 'stats'
   | 'stealth-future'
   | 'stealth-past'

@@ -8,6 +8,7 @@ import type {
   GlobalState, StarsTransactionType, TabArgs, TabState,
 } from '../types';
 
+import { STARS_CURRENCY_CODE } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
@@ -66,6 +67,7 @@ export function setInvoiceInfo<T extends GlobalState>(
 
   return updatePayment(global, {
     invoice: {
+      mediaType: 'invoice',
       title,
       text,
       photo,
@@ -191,13 +193,15 @@ export function updateReceiptFromStarsTransaction<T extends GlobalState>(
   const receipt: ApiReceiptStars = {
     type: 'stars',
     totalAmount: transaction.stars,
-    currency: 'XTR',
+    currency: STARS_CURRENCY_CODE,
     peer: transaction.peer,
     date: transaction.date,
     text: transaction.description,
     title: transaction.title,
     transactionId: transaction.id,
     photo: transaction.photo,
+    media: transaction.extendedMedia,
+    messageId: transaction.messageId,
   };
 
   return updatePayment(global, { receipt }, tabId);

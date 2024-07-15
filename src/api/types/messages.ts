@@ -11,7 +11,7 @@ export interface ApiDimensions {
 }
 
 export interface ApiPhotoSize extends ApiDimensions {
-  type: 's' | 'm' | 'x' | 'y' | 'z';
+  type: 's' | 'm' | 'x' | 'y' | 'w';
 }
 
 export interface ApiVideoSize extends ApiDimensions {
@@ -25,7 +25,9 @@ export interface ApiThumbnail extends ApiDimensions {
 }
 
 export interface ApiPhoto {
+  mediaType: 'photo';
   id: string;
+  date: number;
   thumbnail?: ApiThumbnail;
   isVideo?: boolean;
   sizes: ApiPhotoSize[];
@@ -35,6 +37,7 @@ export interface ApiPhoto {
 }
 
 export interface ApiSticker {
+  mediaType: 'sticker';
   id: string;
   stickerSetInfo: ApiStickerSetInfo;
   emoji?: string;
@@ -85,6 +88,7 @@ type ApiStickerSetInfoMissing = {
 export type ApiStickerSetInfo = ApiStickerSetInfoShortName | ApiStickerSetInfoId | ApiStickerSetInfoMissing;
 
 export interface ApiVideo {
+  mediaType: 'video';
   id: string;
   mimeType: string;
   duration: number;
@@ -103,6 +107,7 @@ export interface ApiVideo {
 }
 
 export interface ApiAudio {
+  mediaType: 'audio';
   id: string;
   size: number;
   mimeType: string;
@@ -114,12 +119,15 @@ export interface ApiAudio {
 }
 
 export interface ApiVoice {
+  mediaType: 'voice';
   id: string;
   duration: number;
   waveform?: number[];
+  size: number;
 }
 
 export interface ApiDocument {
+  mediaType: 'document';
   id?: string;
   fileName: string;
   size: number;
@@ -127,16 +135,28 @@ export interface ApiDocument {
   mimeType: string;
   thumbnail?: ApiThumbnail;
   previewBlobUrl?: string;
-  mediaType?: 'photo' | 'video';
+  innerMediaType?: 'photo' | 'video';
   mediaSize?: ApiDimensions;
 }
 
 export interface ApiContact {
+  mediaType: 'contact';
   firstName: string;
   lastName: string;
   phoneNumber: string;
   userId: string;
 }
+
+export type ApiPaidMedia = {
+  mediaType: 'paidMedia';
+  starsAmount: number;
+} & ({
+  isBought?: true;
+  extendedMedia: BoughtPaidMedia[];
+} | {
+  isBought?: undefined;
+  extendedMedia: ApiMediaExtendedPreview[];
+});
 
 export interface ApiPollAnswer {
   text: ApiFormattedText;
@@ -151,6 +171,7 @@ export interface ApiPollResult {
 }
 
 export interface ApiPoll {
+  mediaType: 'poll';
   id: string;
   summary: {
     closed?: true;
@@ -243,6 +264,7 @@ export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestI
 | ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars;
 
 export interface ApiInvoice {
+  mediaType: 'invoice';
   text: string;
   title: string;
   photo?: ApiWebDocument;
@@ -252,12 +274,13 @@ export interface ApiInvoice {
   isTest?: boolean;
   isRecurring?: boolean;
   termsUrl?: string;
-  extendedMedia?: ApiMessageExtendedMediaPreview;
+  extendedMedia?: ApiMediaExtendedPreview;
   maxTipAmount?: number;
   suggestedTipAmounts?: number[];
 }
 
-export interface ApiMessageExtendedMediaPreview {
+export interface ApiMediaExtendedPreview {
+  mediaType: 'extendedMediaPreview';
   width?: number;
   height?: number;
   thumbnail?: ApiThumbnail;
@@ -277,12 +300,12 @@ export interface ApiGeoPoint {
 }
 
 interface ApiGeo {
-  type: 'geo';
+  mediaType: 'geo';
   geo: ApiGeoPoint;
 }
 
 interface ApiVenue {
-  type: 'venue';
+  mediaType: 'venue';
   geo: ApiGeoPoint;
   title: string;
   address: string;
@@ -292,7 +315,7 @@ interface ApiVenue {
 }
 
 interface ApiGeoLive {
-  type: 'geoLive';
+  mediaType: 'geoLive';
   geo: ApiGeoPoint;
   heading?: number;
   period: number;
@@ -301,6 +324,7 @@ interface ApiGeoLive {
 export type ApiLocation = ApiGeo | ApiVenue | ApiGeoLive;
 
 export type ApiGame = {
+  mediaType: 'game';
   title: string;
   description: string;
   photo?: ApiPhoto;
@@ -311,6 +335,7 @@ export type ApiGame = {
 };
 
 export type ApiGiveaway = {
+  mediaType: 'giveaway';
   quantity: number;
   months: number;
   untilDate: number;
@@ -321,6 +346,7 @@ export type ApiGiveaway = {
 };
 
 export type ApiGiveawayResults = {
+  mediaType: 'giveawayResults';
   months: number;
   untilDate: number;
   isRefunded?: true;
@@ -344,6 +370,7 @@ export type ApiNewPoll = {
 };
 
 export interface ApiAction {
+  mediaType: 'action';
   text: string;
   targetUserIds?: string[];
   targetChatId?: string;
@@ -378,6 +405,7 @@ export interface ApiAction {
 }
 
 export interface ApiWebPage {
+  mediaType: 'webpage';
   id: number;
   url: string;
   displayUrl: string;
@@ -546,6 +574,7 @@ export type MediaContent = {
   storyData?: ApiMessageStoryData;
   giveaway?: ApiGiveaway;
   giveawayResults?: ApiGiveawayResults;
+  paidMedia?: ApiPaidMedia;
   isExpiredVoice?: boolean;
   isExpiredRoundVideo?: boolean;
   ttlSeconds?: number;
@@ -553,6 +582,8 @@ export type MediaContent = {
 export type MediaContainer = {
   content: MediaContent;
 };
+
+export type BoughtPaidMedia = Pick<MediaContent, 'photo' | 'video'>;
 
 export interface ApiMessage {
   id: number;
@@ -841,6 +872,7 @@ export type ApiThemeParameters = {
   section_header_text_color: string;
   subtitle_text_color: string;
   destructive_text_color: string;
+  section_separator_color: string;
 };
 
 export type ApiBotApp = {

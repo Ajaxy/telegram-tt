@@ -1,20 +1,21 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type {
-  ApiDimensions, ApiMessage, ApiPeer,
+  ApiDimensions, ApiMessage,
 } from '../../api/types';
-import { MediaViewerOrigin, type ThreadId } from '../../types';
+import type { MediaViewerOrigin } from '../../types';
+import type { MediaViewerItem } from './helpers/getViewableMedia';
 
 import {
-  selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectTabState, selectUser,
+  selectIsMessageProtected, selectTabState,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 import { ARE_WEBCODECS_SUPPORTED, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { calculateMediaViewerDimensions } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
+import getViewableMedia from './helpers/getViewableMedia';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -29,25 +30,16 @@ import VideoPlayer from './VideoPlayer';
 import './MediaViewerContent.scss';
 
 type OwnProps = {
-  mediaId?: number;
-  chatId?: string;
-  threadId?: ThreadId;
-  avatarOwnerId?: string;
-  origin?: MediaViewerOrigin;
+  item: MediaViewerItem;
   isActive?: boolean;
   withAnimation?: boolean;
+  isMoving?: boolean;
   onClose: () => void;
   onFooterClick: () => void;
-  isMoving?: boolean;
 };
 
 type StateProps = {
-  chatId?: string;
-  mediaId?: number;
-  senderId?: string;
-  threadId?: ThreadId;
-  avatarOwner?: ApiPeer;
-  message?: ApiMessage;
+  textMessage?: ApiMessage;
   origin?: MediaViewerOrigin;
   isProtected?: boolean;
   volume: number;
@@ -59,56 +51,56 @@ type StateProps = {
 const ANIMATION_DURATION = 350;
 const MOBILE_VERSION_CONTROL_WIDTH = 350;
 
-const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
-  const {
-    mediaId,
-    isActive,
-    avatarOwner,
-    chatId,
-    message,
-    origin,
-    withAnimation,
-    isProtected,
-    volume,
-    playbackRate,
-    isMuted,
-    isHidden,
-    onClose,
-    onFooterClick,
-    isMoving,
-  } = props;
-
+const MediaViewerContent = ({
+  item,
+  isActive,
+  textMessage,
+  origin,
+  withAnimation,
+  isProtected,
+  volume,
+  playbackRate,
+  isMuted,
+  isHidden,
+  isMoving,
+  onClose,
+  onFooterClick,
+}: OwnProps & StateProps) => {
   const lang = useOldLang();
+
+  const isAvatar = item.type === 'avatar';
+  const { media } = getViewableMedia(item) || {};
 
   const {
     isVideo,
     isPhoto,
-    actionPhoto,
     bestImageData,
     bestData,
     dimensions,
     isGif,
     isLocal,
     isVideoAvatar,
-    videoSize,
+    mediaSize,
     loadProgress,
   } = useMediaProps({
-    message, avatarOwner, mediaId, origin, delay: withAnimation ? ANIMATION_DURATION : false,
+    media, isAvatar, origin, delay: withAnimation ? ANIMATION_DURATION : false,
   });
 
   const [, toggleControls] = useControlsSignal();
 
-  const isOpen = Boolean(avatarOwner || mediaId);
+  const isOpen = Boolean(media);
   const { isMobile } = useAppLayout();
 
   const toggleControlsOnMove = useLastCallback(() => {
     toggleControls(true);
   });
 
-  if (avatarOwner || actionPhoto) {
+  if (!media) return undefined;
+
+  if (item.type !== 'message') {
     if (!isVideoAvatar) {
       return (
-        <div key={chatId} className="MediaViewerContent">
+        <div key={media.id} className="MediaViewerContent">
           {renderPhoto(
             bestData,
             calculateMediaViewerDimensions(dimensions!, false),
@@ -119,15 +111,15 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       );
     } else {
       return (
-        <div key={chatId} className="MediaViewerContent">
+        <div key={media.id} className="MediaViewerContent">
           <VideoPlayer
-            key={mediaId}
+            key={media.id}
             url={bestData}
             isGif
             posterData={bestImageData}
             posterSize={calculateMediaViewerDimensions(dimensions!, false, true)}
             loadProgress={loadProgress}
-            fileSize={videoSize!}
+            fileSize={mediaSize!}
             isMediaViewerOpen={isOpen && isActive}
             isProtected={isProtected}
             isPreviewDisabled={!ARE_WEBCODECS_SUPPORTED || isLocal}
@@ -144,13 +136,13 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     }
   }
 
-  if (!message) return undefined;
-  const textParts = message.content.action?.type === 'suggestProfilePhoto'
+  if (!textMessage) return undefined;
+  const textParts = textMessage.content.action?.type === 'suggestProfilePhoto'
     ? lang('Conversation.SuggestedPhotoTitle')
-    : renderMessageText({ message, forcePlayback: true, isForMediaViewer: true });
+    : renderMessageText({ message: textMessage, forcePlayback: true, isForMediaViewer: true });
 
   const hasFooter = Boolean(textParts);
-  const posterSize = message && calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);
+  const posterSize = calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);
   const isForceMobileVersion = isMobile || shouldForceMobileVersion(posterSize);
 
   return (
@@ -171,13 +163,13 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
         isProtected,
       ) : (
         <VideoPlayer
-          key={mediaId}
+          key={media.id}
           url={bestData}
           isGif={isGif}
           posterData={bestImageData}
           posterSize={posterSize}
           loadProgress={loadProgress}
-          fileSize={videoSize!}
+          fileSize={mediaSize!}
           isMediaViewerOpen={isOpen && isActive}
           noPlay={!isActive}
           isPreviewDisabled={!ARE_WEBCODECS_SUPPORTED || isLocal}
@@ -205,84 +197,20 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, ownProps): StateProps => {
-    const {
-      chatId,
-      threadId,
-      mediaId,
-      avatarOwnerId,
-      origin,
-    } = ownProps;
-
+  (global, { item }): StateProps => {
     const {
       volume,
       isMuted,
       playbackRate,
       isHidden,
+      origin,
     } = selectTabState(global).mediaViewer;
-
-    if (origin === MediaViewerOrigin.SearchResult) {
-      if (!(chatId && mediaId)) {
-        return { volume, isMuted, playbackRate };
-      }
-
-      const message = selectChatMessage(global, chatId, mediaId);
-      if (!message) {
-        return { volume, isMuted, playbackRate };
-      }
-
-      return {
-        chatId,
-        mediaId,
-        senderId: message.senderId,
-        origin,
-        message,
-        isProtected: selectIsMessageProtected(global, message),
-        volume,
-        isMuted,
-        isHidden,
-        playbackRate,
-      };
-    }
-
-    if (avatarOwnerId) {
-      const sender = selectUser(global, avatarOwnerId) || selectChat(global, avatarOwnerId);
-
-      return {
-        mediaId,
-        senderId: avatarOwnerId,
-        avatarOwner: sender,
-        origin,
-        volume,
-        isMuted,
-        isHidden,
-        playbackRate,
-      };
-    }
-
-    if (!(chatId && threadId && mediaId)) {
-      return { volume, isMuted, playbackRate };
-    }
-
-    let message: ApiMessage | undefined;
-    if (origin && [MediaViewerOrigin.ScheduledAlbum, MediaViewerOrigin.ScheduledInline].includes(origin)) {
-      message = selectScheduledMessage(global, chatId, mediaId);
-    } else {
-      message = selectChatMessage(global, chatId, mediaId);
-    }
-
-    if (!message) {
-      return { volume, isMuted, playbackRate };
-    }
+    const textMessage = item.type === 'message' ? item.message : undefined;
 
     return {
-      chatId,
-      threadId,
-      mediaId,
-      senderId: message.senderId,
       origin,
-      message,
-      isProtected: selectIsMessageProtected(global, message),
+      textMessage,
+      isProtected: textMessage && selectIsMessageProtected(global, textMessage),
       volume,
       isMuted,
       isHidden,

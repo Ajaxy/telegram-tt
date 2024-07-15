@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getStickerPreviewHash } from '../../../global/helpers';
+import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { preloadImage } from '../../../util/files';
 import { REM } from '../helpers/mediaDimensions';
@@ -78,7 +78,7 @@ const EmojiIconBackground = ({
   const lang = useOldLang();
 
   const { customEmoji } = useCustomEmoji(emojiDocumentId);
-  const previewMediaHash = customEmoji ? getStickerPreviewHash(customEmoji.id) : undefined;
+  const previewMediaHash = customEmoji ? getStickerMediaHash(customEmoji, 'preview') : undefined;
   const previewUrl = useMedia(previewMediaHash);
 
   const customColor = useDynamicColorListener(containerRef);

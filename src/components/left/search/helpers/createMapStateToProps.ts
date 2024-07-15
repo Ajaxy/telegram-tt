@@ -14,7 +14,7 @@ export type StateProps = {
   globalMessagesByChatId?: Record<string, { byId: Record<number, ApiMessage> }>;
   foundIds?: string[];
   searchChatId?: string;
-  activeDownloads: TabState['activeDownloads']['byChatId'];
+  activeDownloads: TabState['activeDownloads'];
   isChatProtected?: boolean;
   shouldWarnAboutSvg?: boolean;
 };
@@ -36,7 +36,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
     const { byChatId: globalMessagesByChatId } = global.messages;
     const foundIds = resultsByType?.[currentType]?.foundIds;
 
-    const activeDownloads = tabState.activeDownloads.byChatId;
+    const activeDownloads = tabState.activeDownloads;
 
     return {
       theme: selectTheme(global),

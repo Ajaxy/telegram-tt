@@ -177,6 +177,7 @@ const StickerSet: FC<OwnProps> = ({
 
   const handleDefaultTopicIconClick = useLastCallback(() => {
     onStickerSelect?.({
+      mediaType: 'sticker',
       id: DEFAULT_TOPIC_ICON_STICKER_ID,
       isLottie: false,
       isVideo: false,
@@ -188,6 +189,7 @@ const StickerSet: FC<OwnProps> = ({
 
   const handleDefaultStatusIconClick = useLastCallback(() => {
     onStickerSelect?.({
+      mediaType: 'sticker',
       id: DEFAULT_STATUS_ICON_ID,
       isLottie: false,
       isVideo: false,

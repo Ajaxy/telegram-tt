@@ -1,5 +1,5 @@
 import type {
-  ApiDimensions, ApiPhoto, ApiSticker, ApiVideo,
+  ApiDimensions, ApiMediaExtendedPreview, ApiPhoto, ApiSticker, ApiVideo,
 } from '../../../api/types';
 
 import { STICKER_SIZE_INLINE_DESKTOP_FACTOR, STICKER_SIZE_INLINE_MOBILE_FACTOR } from '../../../config';
@@ -25,7 +25,7 @@ let cachedMaxWidthOwn: number | undefined;
 let cachedMaxWidth: number | undefined;
 let cachedMaxWidthNoAvatar: number | undefined;
 
-function getMaxMessageWidthRem(fromOwnMessage: boolean, noAvatars?: boolean, isMobile?: boolean) {
+function getMaxMessageWidthRem(fromOwnMessage?: boolean, noAvatars?: boolean, isMobile?: boolean) {
   const regularMaxWidth = fromOwnMessage ? MESSAGE_OWN_MAX_WIDTH_REM : MESSAGE_MAX_WIDTH_REM;
   if (!isMobile) {
     return regularMaxWidth;
@@ -59,7 +59,7 @@ function getMaxMessageWidthRem(fromOwnMessage: boolean, noAvatars?: boolean, isM
 }
 
 export function getAvailableWidth(
-  fromOwnMessage: boolean,
+  fromOwnMessage?: boolean,
   asForwarded?: boolean,
   isWebPageMedia?: boolean,
   noAvatars?: boolean,
@@ -94,7 +94,7 @@ export function calculateDimensionsForMessageMedia({
 }: {
   width: number;
   height: number;
-  fromOwnMessage: boolean;
+  fromOwnMessage?: boolean;
   asForwarded?: boolean;
   isWebPageMedia?: boolean;
   isGif?: boolean;
@@ -125,7 +125,7 @@ export function getMediaViewerAvailableDimensions(withFooter: boolean, isVideo: 
 
 export function calculateInlineImageDimensions(
   photo: ApiPhoto,
-  fromOwnMessage: boolean,
+  fromOwnMessage?: boolean,
   asForwarded?: boolean,
   isWebPageMedia?: boolean,
   noAvatars?: boolean,
@@ -146,7 +146,7 @@ export function calculateInlineImageDimensions(
 
 export function calculateVideoDimensions(
   video: ApiVideo,
-  fromOwnMessage: boolean,
+  fromOwnMessage?: boolean,
   asForwarded?: boolean,
   isWebPageMedia?: boolean,
   noAvatars?: boolean,
@@ -161,6 +161,27 @@ export function calculateVideoDimensions(
     asForwarded,
     isWebPageMedia,
     isGif: video.isGif,
+    noAvatars,
+    isMobile,
+  });
+}
+
+export function calculateExtendedPreviewDimensions(
+  preview: ApiMediaExtendedPreview,
+  fromOwnMessage?: boolean,
+  asForwarded?: boolean,
+  isWebPageMedia?: boolean,
+  noAvatars?: boolean,
+  isMobile?: boolean,
+) {
+  const { width = DEFAULT_MEDIA_DIMENSIONS.width, height = DEFAULT_MEDIA_DIMENSIONS.height } = preview;
+
+  return calculateDimensionsForMessageMedia({
+    width,
+    height,
+    fromOwnMessage,
+    asForwarded,
+    isWebPageMedia,
     noAvatars,
     isMobile,
   });

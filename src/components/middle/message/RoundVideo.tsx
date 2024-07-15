@@ -13,7 +13,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../../api/types';
 
 import {
-  getMessageMediaFormat, getMessageMediaHash, getMessageMediaThumbDataUri, hasMessageTtl,
+  getMediaFormat, getMessageMediaThumbDataUri, getVideoMediaHash, hasMessageTtl,
 } from '../../../global/helpers';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import buildClassName from '../../../util/buildClassName';
@@ -76,20 +76,20 @@ const RoundVideo: FC<OwnProps> = ({
 
   const video = message.content.video!;
 
-  const { cancelMessageMediaDownload, openOneTimeMediaModal } = getActions();
+  const { cancelMediaDownload, openOneTimeMediaModal } = getActions();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersecting);
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'inline'),
+    getVideoMediaHash(video, 'inline'),
     !shouldLoad,
-    getMessageMediaFormat(message, 'inline'),
+    getMediaFormat(video, 'inline'),
   );
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'download'),
+    getVideoMediaHash(video, 'download'),
     !isDownloading,
     ApiMediaFormat.BlobUrl,
   );
@@ -100,7 +100,7 @@ const RoundVideo: FC<OwnProps> = ({
   const shouldRenderSpoiler = hasTtl && !isInOneTimeModal;
   const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
   const noThumb = !hasThumb || isPlayerReady || shouldRenderSpoiler;
-  const thumbRef = useBlurredMediaThumbRef(message, noThumb);
+  const thumbRef = useBlurredMediaThumbRef(video, noThumb);
   const thumbClassNames = useMediaTransition(!noThumb);
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
@@ -186,7 +186,7 @@ const RoundVideo: FC<OwnProps> = ({
     }
 
     if (isDownloading) {
-      cancelMessageMediaDownload({ message });
+      cancelMediaDownload({ media: video });
       return;
     }
 

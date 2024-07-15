@@ -361,9 +361,7 @@ export const INITIAL_TAB_STATE: TabState = {
 
   activeReactions: {},
 
-  activeDownloads: {
-    byChatId: {},
-  },
+  activeDownloads: {},
 
   statistics: {
     byChatId: {},

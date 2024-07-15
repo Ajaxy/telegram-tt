@@ -52,21 +52,21 @@ export async function fetchFullUser({
   addEntitiesToLocalDb(result.users);
   addEntitiesToLocalDb(result.chats);
 
-  if (result.fullUser.profilePhoto instanceof GramJs.Photo) {
-    localDb.photos[result.fullUser.profilePhoto.id.toString()] = result.fullUser.profilePhoto;
+  if (result.fullUser.profilePhoto) {
+    addPhotoToLocalDb(result.fullUser.profilePhoto);
   }
 
-  if (result.fullUser.personalPhoto instanceof GramJs.Photo) {
-    localDb.photos[result.fullUser.personalPhoto.id.toString()] = result.fullUser.personalPhoto;
+  if (result.fullUser.personalPhoto) {
+    addPhotoToLocalDb(result.fullUser.personalPhoto);
   }
 
-  if (result.fullUser.fallbackPhoto instanceof GramJs.Photo) {
-    localDb.photos[result.fullUser.fallbackPhoto.id.toString()] = result.fullUser.fallbackPhoto;
+  if (result.fullUser.fallbackPhoto) {
+    addPhotoToLocalDb(result.fullUser.fallbackPhoto);
   }
 
   const botInfo = result.fullUser.botInfo;
-  if (botInfo?.descriptionPhoto instanceof GramJs.Photo) {
-    localDb.photos[botInfo.descriptionPhoto.id.toString()] = botInfo.descriptionPhoto;
+  if (botInfo?.descriptionPhoto) {
+    addPhotoToLocalDb(botInfo.descriptionPhoto);
   }
   if (botInfo?.descriptionDocument instanceof GramJs.Document) {
     localDb.documents[botInfo.descriptionDocument.id.toString()] = botInfo.descriptionDocument;

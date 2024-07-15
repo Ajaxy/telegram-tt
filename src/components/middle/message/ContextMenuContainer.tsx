@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { MessageListType, TabState } from '../../../global/types';
+import type { ActiveDownloads, MessageListType } from '../../../global/types';
 import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
 import {
   type ApiAvailableReaction,
@@ -20,6 +20,8 @@ import {
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
   areReactionsEmpty,
+  getIsDownloading,
+  getMessageDownloadableMedia,
   getMessageVideo,
   hasMessageTtl,
   isActionMessage,
@@ -120,7 +122,7 @@ type StateProps = {
   canClosePoll?: boolean;
   canLoadReadDate?: boolean;
   shouldRenderShowWhen?: boolean;
-  activeDownloads?: TabState['activeDownloads']['byChatId'][number];
+  activeDownloads: ActiveDownloads;
   canShowSeenBy?: boolean;
   enabledReactions?: ApiChatReactions;
   canScheduleUntilOnline?: boolean;
@@ -200,8 +202,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     toggleMessageSelection,
     sendScheduledMessages,
     rescheduleMessage,
-    downloadMessageMedia,
-    cancelMessageMediaDownload,
+    downloadMedia,
+    cancelMediaDownload,
     loadSeenBy,
     openSeenByModal,
     openReactorListModal,
@@ -291,11 +293,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const isDownloading = useMemo(() => {
     if (album) {
       return album.messages.some((msg) => {
-        return activeDownloads?.[message.isScheduled ? 'scheduledIds' : 'ids']?.includes(msg.id);
+        const downloadableMedia = getMessageDownloadableMedia(msg);
+        if (!downloadableMedia) return false;
+        return getIsDownloading(activeDownloads, downloadableMedia);
       });
     }
 
-    return activeDownloads?.[message.isScheduled ? 'scheduledIds' : 'ids']?.includes(message.id);
+    const downloadableMedia = getMessageDownloadableMedia(message);
+    if (!downloadableMedia) return false;
+    return getIsDownloading(activeDownloads, downloadableMedia);
   }, [activeDownloads, album, message]);
 
   const selectionRange = canReply && selection?.rangeCount ? selection.getRangeAt(0) : undefined;
@@ -483,10 +489,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleDownloadClick = useLastCallback(() => {
     (album?.messages || [message]).forEach((msg) => {
+      const downloadableMedia = getMessageDownloadableMedia(msg);
+      if (!downloadableMedia) return;
+
       if (isDownloading) {
-        cancelMessageMediaDownload({ message: msg });
+        cancelMediaDownload({ media: downloadableMedia });
       } else {
-        downloadMessageMedia({ message: msg });
+        downloadMedia({ media: downloadableMedia });
       }
     });
     closeMenu();
@@ -666,7 +675,7 @@ export default memo(withGlobal<OwnProps>(
 
     const { defaultTags, topReactions, availableReactions } = global.reactions;
 
-    const activeDownloads = selectActiveDownloads(global, message.chatId);
+    const activeDownloads = selectActiveDownloads(global);
     const chat = selectChat(global, message.chatId);
     const {
       seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions, readDateExpiresAt,

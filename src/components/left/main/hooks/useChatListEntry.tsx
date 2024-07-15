@@ -89,10 +89,10 @@ export default function useChatListEntry({
   const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
   useEnsureMessage(chatId, isAction ? replyToMessageId : undefined, actionTargetMessage);
 
-  const mediaThumbnail = lastMessage && !getMessageSticker(lastMessage)
-    ? getMessageMediaThumbDataUri(lastMessage)
-    : undefined;
-  const mediaBlobUrl = useMedia(lastMessage ? getMessageMediaHash(lastMessage, 'micro') : undefined);
+  const mediaHasPreview = lastMessage && !getMessageSticker(lastMessage);
+
+  const mediaThumbnail = mediaHasPreview ? getMessageMediaThumbDataUri(lastMessage) : undefined;
+  const mediaBlobUrl = useMedia(mediaHasPreview ? getMessageMediaHash(lastMessage, 'micro') : undefined);
   const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
 
   const actionTargetUsers = useMemo(() => {

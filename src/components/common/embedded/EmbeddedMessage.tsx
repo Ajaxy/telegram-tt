@@ -89,16 +89,20 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   const isIntersecting = useIsIntersecting(ref, observeIntersectionForLoading);
 
-  const wrappedMedia = useMemo(() => {
-    const replyMedia = replyInfo?.type === 'message' && replyInfo.replyMedia;
-    if (!replyMedia) return undefined;
-    return {
-      content: replyMedia,
-    };
-  }, [replyInfo]);
+  const containedMedia: MediaContainer | undefined = useMemo(() => {
+    const media = (replyInfo?.type === 'message' && replyInfo.replyMedia) || message?.content;
+    if (!media) {
+      return undefined;
+    }
 
-  const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !isIntersecting);
-  const mediaThumbnail = useThumbnail(message || wrappedMedia);
+    return {
+      content: media,
+    };
+  }, [message, replyInfo]);
+
+  const mediaHash = containedMedia && getMessageMediaHash(containedMedia, 'pictogram');
+  const mediaBlobUrl = useMedia(mediaHash, !isIntersecting);
+  const mediaThumbnail = useThumbnail(containedMedia);
   const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
   const isSpoiler = Boolean(message && getMessageIsSpoiler(message));
   const isQuote = Boolean(replyInfo?.type === 'message' && replyInfo.isQuote);
@@ -131,7 +135,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
     }
 
     if (!message) {
-      return customText || renderMediaContentType(wrappedMedia) || NBSP;
+      return customText || renderMediaContentType(containedMedia) || NBSP;
     }
 
     if (isActionMessage(message)) {

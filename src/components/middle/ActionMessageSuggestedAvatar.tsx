@@ -4,11 +4,11 @@ import { getActions } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
 import type { TextPart } from '../../types';
-import { ApiMediaFormat, MAIN_THREAD_ID } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 import { MediaViewerOrigin, SettingsScreens } from '../../types';
 
-import { getMessageMediaHash } from '../../global/helpers';
-import * as mediaLoader from '../../util/mediaLoader';
+import { getPhotoMediaHash, getVideoAvatarMediaHash } from '../../global/helpers';
+import { fetchBlob } from '../../util/files';
 
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -37,7 +37,9 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
   const lang = useOldLang();
   const [cropModalBlob, setCropModalBlob] = useState<Blob | undefined>();
   const [isVideoModalOpen, openVideoModal, closeVideoModal] = useFlag(false);
-  const suggestedPhotoUrl = useMedia(getMessageMediaHash(message, 'full'));
+  const photo = message.content.action!.photo!;
+  const suggestedPhotoUrl = useMedia(getPhotoMediaHash(photo, 'full'));
+  const suggestedVideoUrl = useMedia(getVideoAvatarMediaHash(photo));
   const isVideo = message.content.action!.photo?.isVideo;
 
   const showAvatarNotification = useLastCallback(() => {
@@ -65,13 +67,13 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
   });
 
   const handleSetVideo = useLastCallback(async () => {
+    if (!suggestedVideoUrl) return;
+
     closeVideoModal();
     showAvatarNotification();
 
     // TODO Once we support uploading video avatars, add crop/trim modal here
-    const photo = message.content.action!.photo!;
-    const blobUrl = await mediaLoader.fetch(`videoAvatar${photo.id}?size=u`, ApiMediaFormat.BlobUrl);
-    const blob = await fetch(blobUrl).then((r) => r.blob());
+    const blob = await fetchBlob(suggestedVideoUrl);
     uploadProfilePhoto({
       file: new File([blob], 'avatar.mp4'),
       isVideo: true,
@@ -84,12 +86,12 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
       if (isVideo) {
         openVideoModal();
       } else {
-        setCropModalBlob(await fetch(suggestedPhotoUrl).then((r) => r.blob()));
+        setCropModalBlob(await fetchBlob(suggestedPhotoUrl));
       }
     } else {
       openMediaViewer({
         chatId: message.chatId,
-        mediaId: message.id,
+        messageId: message.id,
         threadId: MAIN_THREAD_ID,
         origin: MediaViewerOrigin.SuggestedAvatar,
       });

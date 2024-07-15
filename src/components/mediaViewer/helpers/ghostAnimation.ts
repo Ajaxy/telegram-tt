@@ -25,8 +25,9 @@ export function animateOpening(
   dimensions: ApiDimensions,
   isVideo: boolean,
   message?: ApiMessage,
+  mediaIndex?: number,
 ) {
-  const { mediaEl: fromImage } = getNodes(origin, message);
+  const { mediaEl: fromImage } = getNodes(origin, message, mediaIndex);
   if (!fromImage) {
     return;
   }
@@ -93,8 +94,10 @@ export function animateOpening(
   });
 }
 
-export function animateClosing(origin: MediaViewerOrigin, bestImageData: string, message?: ApiMessage) {
-  const { container, mediaEl: toImage } = getNodes(origin, message);
+export function animateClosing(
+  origin: MediaViewerOrigin, bestImageData: string, message?: ApiMessage, mediaIndex?: number,
+) {
+  const { container, mediaEl: toImage } = getNodes(origin, message, mediaIndex);
   if (!toImage) {
     return;
   }
@@ -102,7 +105,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
   const fromImage = document.getElementById('MediaViewer')!.querySelector<HTMLImageElement>(
     '.MediaViewerSlide--active img, .MediaViewerSlide--active video',
   );
-  if (!fromImage || !toImage) {
+  if (!fromImage) {
     return;
   }
 
@@ -284,24 +287,25 @@ function getTopOffset(hasFooter: boolean) {
   return topOffsetRem * REM;
 }
 
-function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
+function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: number) {
   let containerSelector;
   let mediaSelector;
 
   switch (origin) {
     case MediaViewerOrigin.Album:
     case MediaViewerOrigin.ScheduledAlbum:
-      containerSelector = `.Transition_slide-active > .MessageList #album-media-${getMessageHtmlId(message!.id)}`;
+      // eslint-disable-next-line max-len
+      containerSelector = `.Transition_slide-active > .MessageList #album-media-${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = '.full-media';
       break;
 
     case MediaViewerOrigin.SharedMedia:
-      containerSelector = `#shared-media${getMessageHtmlId(message!.id)}`;
+      containerSelector = `#shared-media${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = 'img';
       break;
 
     case MediaViewerOrigin.SearchResult:
-      containerSelector = `#search-media${getMessageHtmlId(message!.id)}`;
+      containerSelector = `#search-media${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = 'img';
       break;
 
@@ -321,19 +325,25 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
       break;
 
     case MediaViewerOrigin.SuggestedAvatar:
-      containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id)}`;
+      containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = '.Avatar img';
+      break;
+
+    case MediaViewerOrigin.StarsTransaction:
+      containerSelector = '.transaction-media-preview';
+      mediaSelector = index === 0 ? `.stars-transaction-media-${index} :is(img, video)` : undefined;
       break;
 
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.Inline:
     default:
-      containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id)}`;
+      containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media,${MESSAGE_CONTENT_SELECTOR} .thumbnail:not(.blurred-bg)`;
   }
 
   const container = document.querySelector<HTMLElement>(containerSelector)!;
-  const mediaEls = container && container.querySelectorAll<HTMLImageElement | HTMLVideoElement>(mediaSelector);
+  const mediaEls = mediaSelector
+    ? container?.querySelectorAll<HTMLImageElement | HTMLVideoElement>(mediaSelector) : undefined;
 
   return {
     container,
@@ -347,6 +357,7 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.ScheduledAlbum:
     case MediaViewerOrigin.Inline:
     case MediaViewerOrigin.ScheduledInline:
+    case MediaViewerOrigin.StarsTransaction:
       ghost.classList.add('rounded-corners');
       break;
 

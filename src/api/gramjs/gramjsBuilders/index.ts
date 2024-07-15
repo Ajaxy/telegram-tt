@@ -353,36 +353,6 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
   }
 }
 
-export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServiceNotification) {
-  const { media } = message;
-  if (!media) {
-    return false;
-  }
-
-  return (
-    media instanceof GramJs.MessageMediaPhoto
-    || media instanceof GramJs.MessageMediaDocument
-    || (
-      media instanceof GramJs.MessageMediaWebPage
-      && media.webpage instanceof GramJs.WebPage
-      && (
-        media.webpage.photo instanceof GramJs.Photo || (
-          media.webpage.document instanceof GramJs.Document
-        )
-      )
-    ) || (
-      media instanceof GramJs.MessageMediaGame
-      && (media.game.document instanceof GramJs.Document || media.game.photo instanceof GramJs.Photo)
-    ) || (
-      media instanceof GramJs.MessageMediaInvoice && (media.photo || media.extendedMedia)
-    )
-  );
-}
-
-export function isServiceMessageWithMedia(message: GramJs.MessageService) {
-  return 'photo' in message.action && message.action.photo instanceof GramJs.Photo;
-}
-
 export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
   if (photo instanceof GramJs.PhotoEmpty) {
     return new GramJs.ChatPhotoEmpty();

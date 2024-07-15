@@ -2,6 +2,7 @@ import React, { type TeactNode } from '../../../../lib/teact/teact';
 
 import type { ApiKeyboardButton } from '../../../../api/types';
 
+import { STARS_ICON_PLACEHOLDER } from '../../../../config';
 import { replaceWithTeact } from '../../../../util/replaceWithTeact';
 import renderText from '../../../common/helpers/renderText';
 
@@ -15,7 +16,7 @@ export default function renderKeyboardButtonText(lang: LangFn, button: ApiKeyboa
   }
 
   if (button.type === 'buy') {
-    return replaceWithTeact(button.text, '⭐', <Icon className="star-currency-icon" name="star" />);
+    return replaceWithTeact(button.text, STARS_ICON_PLACEHOLDER, <Icon className="star-currency-icon" name="star" />);
   }
 
   return renderText(button.text);

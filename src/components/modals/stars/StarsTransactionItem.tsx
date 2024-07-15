@@ -21,6 +21,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import StarIcon from '../../common/icons/StarIcon';
+import PaidMediaThumb from './PaidMediaThumb';
 
 import styles from './StarsTransactionItem.module.scss';
 
@@ -40,8 +41,8 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
     date,
     stars,
     photo,
-    isRefund,
     peer: transactionPeer,
+    extendedMedia,
   } = transaction;
   const lang = useOldLang();
 
@@ -49,8 +50,9 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
   const peer = useSelector(selectOptionalPeer(peerId));
 
   const data = useMemo(() => {
-    let title = transaction.title;
+    let title = transaction.title || (transaction.extendedMedia ? lang('StarMediaPurchase') : undefined);
     let description;
+    let status: string | undefined;
     let avatarPeer: ApiPeer | CustomPeer | undefined;
 
     if (transaction.peer.type === 'peer') {
@@ -67,10 +69,23 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
       avatarPeer = undefined;
     }
 
+    if (transaction.isRefund) {
+      status = lang('StarsRefunded');
+    }
+
+    if (transaction.hasFailed) {
+      status = lang('StarsFailed');
+    }
+
+    if (transaction.isPending) {
+      status = lang('StarsPending');
+    }
+
     return {
       title,
       description,
       avatarPeer,
+      status,
     };
   }, [lang, peer, transaction]);
 
@@ -80,20 +95,21 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
 
   return (
     <div className={styles.root} onClick={handleClick}>
-      <Avatar size="medium" webPhoto={photo} peer={data.avatarPeer} />
+      {extendedMedia ? <PaidMediaThumb media={extendedMedia} isTransactionPreview />
+        : <Avatar size="medium" webPhoto={photo} peer={data.avatarPeer} />}
       <div className={styles.info}>
         <h3 className={styles.title}>{data.title}</h3>
         <p className={styles.description}>{data.description}</p>
         <p className={styles.date}>
           {formatDateTimeToString(date * 1000, lang.code, true)}
-          {isRefund && ` — (${lang('StarsRefunded')})`}
+          {data.status && ` — (${data.status})`}
         </p>
       </div>
       <div className={styles.stars}>
         <span className={buildClassName(styles.amount, stars < 0 ? styles.negative : styles.positive)}>
           {formatStarsTransactionAmount(stars)}
         </span>
-        <StarIcon type="gold" size="big" />
+        <StarIcon className={styles.star} type="gold" size="big" />
       </div>
     </div>
   );

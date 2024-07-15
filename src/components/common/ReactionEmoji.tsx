@@ -54,7 +54,7 @@ const ReactionEmoji: FC<OwnProps> = ({
   const animationId = availableReaction?.selectAnimation?.id;
   const coords = useCoordsInSharedCanvas(ref, sharedCanvasRef);
   const mediaData = useMedia(
-    availableReaction?.selectAnimation ? getDocumentMediaHash(availableReaction.selectAnimation) : undefined,
+    availableReaction?.selectAnimation ? getDocumentMediaHash(availableReaction.selectAnimation, 'full') : undefined,
     !animationId,
   );
   const handleClick = useLastCallback(() => {

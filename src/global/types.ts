@@ -34,6 +34,7 @@ import type {
   ApiInviteInfo,
   ApiInvoice,
   ApiKeyboardButton,
+  ApiMediaFormat,
   ApiMessage,
   ApiMessageEntity,
   ApiMissingInvitedUser,
@@ -108,6 +109,7 @@ import type {
   ManagementProgress,
   ManagementScreens,
   ManagementState,
+  MediaViewerMedia,
   MediaViewerOrigin,
   NewChatMembersProgress,
   NotifyException,
@@ -124,6 +126,7 @@ import type {
   ThemeKey,
   ThreadId,
 } from '../types';
+import type { DownloadableMedia } from './helpers';
 
 export type MessageListType =
   'thread'
@@ -147,6 +150,12 @@ export interface ActiveEmojiInteraction {
   animatedEffect?: string;
   isReversed?: boolean;
 }
+
+export type ActiveDownloads = Record<string, {
+  format: ApiMediaFormat;
+  filename: string;
+  size: number;
+}>;
 
 export type IDimensions = {
   width: number;
@@ -451,15 +460,16 @@ export type TabState = {
   mediaViewer: {
     chatId?: string;
     threadId?: ThreadId;
-    mediaId?: number;
-    avatarOwnerId?: string;
-    profilePhotoIndex?: number;
+    messageId?: number;
+    withDynamicLoading?: boolean;
+    mediaIndex?: number;
+    isAvatarView?: boolean;
+    standaloneMedia?: MediaViewerMedia[];
     origin?: MediaViewerOrigin;
     volume: number;
     playbackRate: number;
     isMuted: boolean;
     isHidden?: boolean;
-    withDynamicLoading?: boolean;
   };
 
   audioPlayer: {
@@ -578,14 +588,7 @@ export type TabState = {
     }[];
   };
 
-  activeDownloads: {
-    byChatId: {
-      [chatId: string]: {
-        ids?: number[];
-        scheduledIds?: number[];
-      };
-    };
-  };
+  activeDownloads: ActiveDownloads;
 
   statistics: {
     byChatId: Record<string, ApiChannelStatistics | ApiGroupStatistics>;
@@ -2487,13 +2490,11 @@ export interface ActionPayloads {
   openMediaViewer: {
     chatId?: string;
     threadId?: ThreadId;
-    mediaId?: number;
-    avatarOwnerId?: string;
-    profilePhotoIndex?: number;
+    messageId?: number;
+    standaloneMedia?: MediaViewerMedia[];
+    mediaIndex?: number;
+    isAvatarView?: boolean;
     origin: MediaViewerOrigin;
-    volume?: number;
-    playbackRate?: number;
-    isMuted?: boolean;
     withDynamicLoading?: boolean;
   } & WithTabId;
   closeMediaViewer: WithTabId | undefined;
@@ -2535,14 +2536,14 @@ export interface ActionPayloads {
 
   // Downloads
   downloadSelectedMessages: WithTabId | undefined;
-  downloadMessageMedia: {
-    message: ApiMessage;
+  downloadMedia: {
+    media: DownloadableMedia;
   } & WithTabId;
-  cancelMessageMediaDownload: {
-    message: ApiMessage;
+  cancelMediaDownload: {
+    media: DownloadableMedia;
   } & WithTabId;
-  cancelMessagesMediaDownload: {
-    messages: ApiMessage[];
+  cancelMediaHashDownloads: {
+    mediaHashes: string[];
   } & WithTabId;
 
   // Users

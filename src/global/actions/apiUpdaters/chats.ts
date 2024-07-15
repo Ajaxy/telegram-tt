@@ -34,7 +34,6 @@ import {
   selectChatMessages,
   selectCommonBoxChatId,
   selectCurrentMessageList,
-  selectDraft,
   selectIsChatListed,
   selectTabState,
   selectThreadParam,
@@ -102,6 +101,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const lastMessageId = selectChatLastMessageId(global, chat.id);
         const localMessage = buildLocalMessage(chat, lastMessageId);
         localMessage.content.action = {
+          mediaType: 'action',
           text: 'you joined this channel',
           translationValues: ['ChannelJoined'],
           type: 'joinedChannel',
@@ -431,19 +431,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       return undefined;
     }
 
-    case 'deleteProfilePhotos': {
-      const { chatId, ids } = update;
-      const chat = global.chats.byId[chatId];
-
-      if (chat?.photos) {
-        return updateChat(global, chatId, {
-          photos: chat.photos.filter((photo) => !ids.includes(photo.id)),
-        });
-      }
-
-      return undefined;
-    }
-
     case 'draftMessage': {
       const {
         chatId, threadId, draft,
@@ -453,15 +440,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         return undefined;
       }
 
-      const currentDraft = selectDraft(global, chatId, threadId ?? MAIN_THREAD_ID);
-
-      // Temporary workaround until the layer is updated
-      const newDraft = currentDraft?.effectId ? {
-        ...draft,
-        effectId: currentDraft?.effectId,
-      } : draft;
-
-      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', newDraft);
+      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', draft);
       global = updateChat(global, chatId, { draftDate: draft?.date });
       return global;
     }

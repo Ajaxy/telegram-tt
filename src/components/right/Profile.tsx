@@ -13,6 +13,7 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../api/types';
+import type { TabState } from '../../global/types';
 import type {
   ISettings, ProfileState, ProfileTabType, SharedMediaType, ThreadId,
 } from '../../types';
@@ -26,7 +27,16 @@ import {
   SLIDE_TRANSITION_DURATION,
 } from '../../config';
 import {
-  getHasAdminRight, getIsSavedDialog, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
+  getHasAdminRight,
+  getIsDownloading,
+  getIsSavedDialog,
+  getMessageDocument,
+  isChatAdmin,
+  isChatChannel,
+  isChatGroup,
+  isUserBot,
+  isUserId,
+  isUserRightBanned,
 } from '../../global/helpers';
 import {
   selectActiveDownloads,
@@ -117,7 +127,7 @@ type StateProps = {
   userStatusesById: Record<string, ApiUserStatus>;
   isRightColumnShown: boolean;
   isRestricted?: boolean;
-  activeDownloadIds?: number[];
+  activeDownloads: TabState['activeDownloads'];
   isChatProtected?: boolean;
   nextProfileTab?: ProfileTabType;
   shouldWarnAboutSvg?: boolean;
@@ -174,7 +184,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   chatsById,
   isRightColumnShown,
   isRestricted,
-  activeDownloadIds,
+  activeDownloads,
   isChatProtected,
   nextProfileTab,
   shouldWarnAboutSvg,
@@ -336,11 +346,11 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadProfilePhotos({ profileId });
   }, [profileId]);
 
-  const handleSelectMedia = useLastCallback((mediaId: number) => {
+  const handleSelectMedia = useLastCallback((messageId: number) => {
     openMediaViewer({
       chatId: profileId,
       threadId: MAIN_THREAD_ID,
-      mediaId,
+      messageId,
       origin: MediaViewerOrigin.SharedMedia,
     });
   });
@@ -353,8 +363,8 @@ const Profile: FC<OwnProps & StateProps> = ({
     openChat({ id });
   });
 
-  const handleMessageFocus = useLastCallback((messageId: number) => {
-    focusMessage({ chatId: profileId, messageId });
+  const handleMessageFocus = useLastCallback((message: ApiMessage) => {
+    focusMessage({ chatId: message.chatId, messageId: message.id });
   });
 
   const handleDeleteMembersModalClose = useLastCallback(() => {
@@ -499,13 +509,14 @@ const Profile: FC<OwnProps & StateProps> = ({
           (viewportIds as number[])!.map((id) => messagesById[id] && (
             <Document
               key={id}
-              message={messagesById[id]}
+              document={getMessageDocument(messagesById[id])!}
               withDate
               smaller
               className="scroll-item"
-              isDownloading={activeDownloadIds?.includes(id)}
+              isDownloading={getIsDownloading(activeDownloads, getMessageDocument(messagesById[id])!)}
               observeIntersection={observeIntersectionForMedia}
               onDateClick={handleMessageFocus}
+              message={messagesById[id]}
               shouldWarnAboutSvg={shouldWarnAboutSvg}
             />
           ))
@@ -531,7 +542,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
               canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={activeDownloadIds?.includes(id)}
+              isDownloading={getIsDownloading(activeDownloads, messagesById[id].content.audio!)}
             />
           ))
         ) : resultType === 'voice' ? (
@@ -547,7 +558,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
               canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={activeDownloadIds?.includes(id)}
+              isDownloading={getIsDownloading(activeDownloads, messagesById[id].content.voice!)}
             />
           ))
         ) : resultType === 'members' ? (
@@ -704,7 +715,7 @@ export default memo(withGlobal<OwnProps>(
       && (getHasAdminRight(chat, 'inviteUsers') || (!isChannel && !isUserRightBanned(chat, 'inviteUsers'))
         || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
-    const activeDownloads = selectActiveDownloads(global, chatId);
+    const activeDownloads = selectActiveDownloads(global);
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
@@ -743,7 +754,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: global.currentUserId,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isRestricted: chat?.isRestricted,
-      activeDownloadIds: activeDownloads?.ids,
+      activeDownloads,
       usersById,
       userStatusesById,
       chatsById,

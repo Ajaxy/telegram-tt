@@ -1,14 +1,11 @@
-import type { ApiMessage } from '../../../../api/types';
+import type { ApiMediaExtendedPreview, ApiPhoto, ApiVideo } from '../../../../api/types';
 
 import {
-  getMessagePhoto,
-  getMessageText,
-  getMessageVideo,
-  getMessageWebPagePhoto,
-  getMessageWebPageVideo,
-  isOwnMessage,
-} from '../../../../global/helpers';
-import { calculateInlineImageDimensions, calculateVideoDimensions, REM } from '../../../common/helpers/mediaDimensions';
+  calculateExtendedPreviewDimensions,
+  calculateInlineImageDimensions,
+  calculateVideoDimensions,
+  REM,
+} from '../../../common/helpers/mediaDimensions';
 
 const SMALL_IMAGE_THRESHOLD = 12;
 const MIN_MESSAGE_LENGTH_FOR_BLUR = 40;
@@ -22,20 +19,32 @@ export function getMinMediaWidth(text?: string, hasCommentButton?: boolean) {
     : MIN_MEDIA_WIDTH;
 }
 
-export function calculateMediaDimensions(
-  message: ApiMessage, asForwarded?: boolean, noAvatars?: boolean, isMobile?: boolean,
-) {
-  const isOwn = isOwnMessage(message);
-  const photo = getMessagePhoto(message) || getMessageWebPagePhoto(message);
-  const video = getMessageVideo(message);
+export function calculateMediaDimensions({
+  media,
+  messageText,
+  isOwn,
+  isInWebPage,
+  asForwarded,
+  noAvatars,
+  isMobile,
+} : {
+  media: ApiPhoto | ApiVideo | ApiMediaExtendedPreview;
+  messageText?: string;
+  isOwn?: boolean;
+  isInWebPage?: boolean;
+  asForwarded?: boolean;
+  noAvatars?: boolean;
+  isMobile?: boolean;
+}) {
+  const isPhoto = media.mediaType === 'photo';
+  const isVideo = media.mediaType === 'video';
+  const isWebPagePhoto = isPhoto && isInWebPage;
+  const isWebPageVideo = isVideo && isInWebPage;
+  const { width, height } = isPhoto
+    ? calculateInlineImageDimensions(media, isOwn, asForwarded, isWebPagePhoto, noAvatars, isMobile)
+    : isVideo ? calculateVideoDimensions(media, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile)
+      : calculateExtendedPreviewDimensions(media, isOwn, asForwarded, isInWebPage, noAvatars, isMobile);
 
-  const isWebPagePhoto = Boolean(getMessageWebPagePhoto(message));
-  const isWebPageVideo = Boolean(getMessageWebPageVideo(message));
-  const { width, height } = photo
-    ? calculateInlineImageDimensions(photo, isOwn, asForwarded, isWebPagePhoto, noAvatars, isMobile)
-    : calculateVideoDimensions(video!, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile);
-
-  const messageText = getMessageText(message);
   const minMediaWidth = getMinMediaWidth(messageText);
 
   let stretchFactor = 1;

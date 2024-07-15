@@ -1,29 +1,19 @@
 import { useMemo } from '../../../lib/teact/teact';
 
-import type {
-  ApiMessage, ApiPeer,
-} from '../../../api/types';
+import type { MediaViewerMedia } from '../../../types';
 import { ApiMediaFormat } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import {
-  getChatAvatarHash,
-  getMessageActionPhoto,
-  getMessageDocument,
-  getMessageFileName,
-  getMessageFileSize,
-  getMessageMediaFormat,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
-  getMessagePhoto,
-  getMessageVideo,
-  getMessageWebPagePhoto,
-  getMessageWebPageVideo,
+  getMediaFileSize,
+  getMediaFormat,
+  getMediaHash,
+  getMediaThumbUri,
   getPhotoFullDimensions,
   getVideoAvatarMediaHash,
   getVideoDimensions,
-  isMessageDocumentPhoto,
-  isMessageDocumentVideo,
+  isDocumentPhoto,
+  isDocumentVideo,
 } from '../../../global/helpers';
 import { AVATAR_FULL_DIMENSIONS, VIDEO_AVATAR_FULL_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 
@@ -32,67 +22,46 @@ import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 
 type UseMediaProps = {
-  mediaId?: number;
-  message?: ApiMessage;
-  avatarOwner?: ApiPeer;
+  media?: MediaViewerMedia;
+  isAvatar?: boolean;
   origin?: MediaViewerOrigin;
   delay: number | false;
 };
 
 export const useMediaProps = ({
-  message,
-  mediaId = 0,
-  avatarOwner,
+  media,
+  isAvatar,
   origin,
   delay,
 }: UseMediaProps) => {
-  const photo = message ? getMessagePhoto(message) : undefined;
-  const actionPhoto = message ? getMessageActionPhoto(message) : undefined;
-  const video = message ? getMessageVideo(message) : undefined;
-  const webPagePhoto = message ? getMessageWebPagePhoto(message) : undefined;
-  const webPageVideo = message ? getMessageWebPageVideo(message) : undefined;
-  const isDocumentPhoto = message ? isMessageDocumentPhoto(message) : false;
-  const isDocumentVideo = message ? isMessageDocumentVideo(message) : false;
-  const videoSize = message ? getMessageFileSize(message) : undefined;
-  const avatarMedia = avatarOwner?.photos?.[mediaId];
-  const isVideoAvatar = Boolean(avatarMedia?.isVideo || actionPhoto?.isVideo);
-  const isVideo = Boolean(video || webPageVideo || isDocumentVideo);
-  const isPhoto = Boolean(!isVideo && (photo || webPagePhoto || isDocumentPhoto || actionPhoto));
-  const { isGif } = video || webPageVideo || {};
+  const isVideoAvatar = isAvatar && media?.mediaType === 'photo' && media.isVideo;
+  const isDocument = media?.mediaType === 'document';
+  const isVideo = (media?.mediaType === 'video' && !media.isRound) || (isDocument && isDocumentVideo(media));
+  const isPhoto = media?.mediaType === 'photo' || (isDocument && isDocumentPhoto(media));
+  const isGif = media?.mediaType === 'video' && media.isGif;
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const isFromSearch = origin === MediaViewerOrigin.SearchResult;
 
-  const getMediaHash = useMemo(() => (isFull?: boolean) => {
-    if (avatarOwner) {
-      if (avatarMedia) {
-        if (avatarMedia.isVideo && isFull) {
-          return getVideoAvatarMediaHash(avatarMedia);
-        } else if (mediaId === 0) {
-          // Show preloaded avatar if this is the first media (when user clicks on profile info avatar)
-          return getChatAvatarHash(avatarOwner, isFull ? 'big' : 'normal');
-        } else {
-          return `photo${avatarMedia.id}?size=c`;
-        }
-      } else {
-        return getChatAvatarHash(avatarOwner, isFull ? 'big' : 'normal');
-      }
+  const getMediaOrAvatarHash = useMemo(() => (isFull?: boolean) => {
+    if (!media) return undefined;
+
+    if (isVideoAvatar && isFull) {
+      return getVideoAvatarMediaHash(media);
     }
-    if (actionPhoto && isVideoAvatar && isFull) {
-      return `videoAvatar${actionPhoto.id}?size=u`;
-    }
-    return message && getMessageMediaHash(message, isFull ? 'full' : 'preview');
-  }, [avatarOwner, actionPhoto, isVideoAvatar, message, avatarMedia, mediaId]);
+
+    return getMediaHash(media, isFull ? 'full' : 'preview');
+  }, [isVideoAvatar, media]);
 
   const pictogramBlobUrl = useMedia(
-    message
+    media
     // Only use pictogram if it's already loaded
-    && (isFromSharedMedia || isFromSearch || isDocumentPhoto || isDocumentVideo)
-    && getMessageMediaHash(message, 'pictogram'),
+    && (isFromSharedMedia || isFromSearch || isDocument)
+    && getMediaHash(media, 'pictogram'),
     undefined,
     ApiMediaFormat.BlobUrl,
     delay,
   );
-  const previewMediaHash = getMediaHash();
+  const previewMediaHash = getMediaOrAvatarHash();
   const previewBlobUrl = useMedia(
     previewMediaHash,
     undefined,
@@ -103,15 +72,15 @@ export const useMediaProps = ({
     mediaData: fullMediaBlobUrl,
     loadProgress,
   } = useMediaWithLoadProgress(
-    getMediaHash(true),
+    getMediaOrAvatarHash(true),
     undefined,
-    message && getMessageMediaFormat(message, 'full'),
+    media && getMediaFormat(media, 'full'),
     delay,
   );
 
-  const localBlobUrl = (photo || video) ? (photo || video)!.blobUrl : undefined;
+  const localBlobUrl = media && 'blobUrl' in media ? media.blobUrl : undefined;
   let bestImageData = (!isVideo && (localBlobUrl || fullMediaBlobUrl)) || previewBlobUrl || pictogramBlobUrl;
-  const thumbDataUri = useBlurSync(!bestImageData && message && getMessageMediaThumbDataUri(message));
+  const thumbDataUri = useBlurSync(!bestImageData && media && getMediaThumbUri(media));
   if (!bestImageData && origin !== MediaViewerOrigin.SearchResult) {
     bestImageData = thumbDataUri;
   }
@@ -122,59 +91,43 @@ export const useMediaProps = ({
     (!isVideoAvatar && !isVideo) ? (previewBlobUrl || pictogramBlobUrl || bestImageData) : undefined
   );
 
+  const mediaSize = media && getMediaFileSize(media);
+
   const isLocal = Boolean(localBlobUrl);
-  const fileName = message
-    ? getMessageFileName(message)
-    : avatarOwner
-      ? `avatar${avatarOwner!.id}.${avatarOwner?.hasVideoAvatar ? 'mp4' : 'jpg'}`
-      : undefined;
 
   const dimensions = useMemo(() => {
-    if (message) {
-      if (isDocumentPhoto || isDocumentVideo) {
-        return getMessageDocument(message)!.mediaSize!;
-      } else if (photo || webPagePhoto || actionPhoto) {
-        return getPhotoFullDimensions((photo || webPagePhoto || actionPhoto)!)!;
-      } else if (video || webPageVideo) {
-        return getVideoDimensions((video || webPageVideo)!)!;
-      }
-    } else {
+    if (isAvatar) {
       return isVideoAvatar ? VIDEO_AVATAR_FULL_DIMENSIONS : AVATAR_FULL_DIMENSIONS;
     }
+
+    if (isDocument) {
+      return media.mediaSize!;
+    }
+
+    if (isPhoto) {
+      return getPhotoFullDimensions(media);
+    }
+
+    if (isVideo) {
+      return getVideoDimensions(media);
+    }
     return undefined;
-  }, [
-    isDocumentPhoto,
-    isDocumentVideo,
-    isVideoAvatar,
-    message,
-    photo,
-    video,
-    actionPhoto,
-    webPagePhoto,
-    webPageVideo,
-  ]);
+  }, [isAvatar, isDocument, isPhoto, isVideo, isVideoAvatar, media]);
 
   return {
-    getMediaHash,
-    photo,
-    video,
-    webPagePhoto,
-    actionPhoto,
-    webPageVideo,
+    getMediaHash: getMediaOrAvatarHash,
+    media,
     isVideo,
     isPhoto,
     isGif,
-    isDocumentPhoto,
-    isDocumentVideo,
-    fileName,
+    isDocument,
     bestImageData,
     bestData,
     dimensions,
     isFromSharedMedia,
-    avatarPhoto: avatarMedia,
     isVideoAvatar,
     isLocal,
     loadProgress,
-    videoSize,
+    mediaSize,
   };
 };
