@@ -1,5 +1,6 @@
 import { getGlobal } from '../global';
 
+import type { ScrollTargetPosition } from '../types';
 import { FocusDirection } from '../types';
 
 import {
@@ -49,7 +50,7 @@ export function restartCurrentScrollAnimation() {
 function createMutateFunction(
   container: HTMLElement,
   element: HTMLElement,
-  position: ScrollLogicalPosition | 'centerOrTop',
+  position: ScrollTargetPosition,
   margin = 0,
   maxDistance = FAST_SMOOTH_MAX_DISTANCE,
   forceDirection?: FocusDirection,

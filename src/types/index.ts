@@ -30,6 +30,8 @@ export enum FocusDirection {
   Static,
 }
 
+export type ScrollTargetPosition = ScrollLogicalPosition | 'centerOrTop';
+
 export interface IAlbum {
   albumId: string;
   messages: ApiMessage[];

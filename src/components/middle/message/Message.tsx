@@ -26,7 +26,8 @@ import type {
 } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
-  FocusDirection, IAlbum, ISettings, ThreadId,
+  FocusDirection, IAlbum, ISettings, ScrollTargetPosition,
+  ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
@@ -234,6 +235,7 @@ type StateProps = {
   focusDirection?: FocusDirection;
   focusedQuote?: string;
   noFocusHighlight?: boolean;
+  scrollTargetPosition?: ScrollTargetPosition;
   isResizingContainer?: boolean;
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
@@ -354,6 +356,7 @@ const Message: FC<OwnProps & StateProps> = ({
   focusDirection,
   focusedQuote,
   noFocusHighlight,
+  scrollTargetPosition,
   isResizingContainer,
   isForwarding,
   isChatWithSelf,
@@ -770,7 +773,15 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   useFocusMessage(
-    ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded, Boolean(focusedQuote),
+    ref,
+    chatId,
+    isFocused,
+    focusDirection,
+    noFocusHighlight,
+    isResizingContainer,
+    isJustAdded,
+    Boolean(focusedQuote),
+    scrollTargetPosition,
   );
 
   const viaBusinessBotTitle = viaBusinessBot ? getSenderTitle(lang, viaBusinessBot) : undefined;
@@ -1659,7 +1670,8 @@ export default memo(withGlobal<OwnProps>(
     );
 
     const {
-      direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer, quote: focusedQuote,
+      direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
+      quote: focusedQuote, scrollTargetPosition,
     } = (isFocused && focusedMessage) || {};
 
     const { query: highlight } = selectCurrentTextSearch(global) || {};
@@ -1795,6 +1807,7 @@ export default memo(withGlobal<OwnProps>(
         noFocusHighlight,
         isResizingContainer,
         focusedQuote,
+        scrollTargetPosition,
       }),
       senderBoosts,
       tags: global.savedReactionTags?.byKey,

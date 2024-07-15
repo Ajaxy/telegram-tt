@@ -115,6 +115,7 @@ import type {
   PrivacyVisibility,
   ProfileEditProgress,
   ProfileTabType,
+  ScrollTargetPosition,
   SettingsScreens,
   SharedMediaType,
   ShippingOption,
@@ -311,6 +312,7 @@ export type TabState = {
     noHighlight?: boolean;
     isResizingContainer?: boolean;
     quote?: string;
+    scrollTargetPosition?: ScrollTargetPosition;
   };
 
   selectedMessages?: {
@@ -1908,6 +1910,7 @@ export interface ActionPayloads {
     shouldReplaceHistory?: boolean;
     noForumTopicPanel?: boolean;
     quote?: string;
+    scrollTargetPosition?: ScrollTargetPosition;
   } & WithTabId;
 
   focusLastMessage: WithTabId | undefined;

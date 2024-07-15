@@ -440,7 +440,9 @@ addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnTy
     return undefined;
   }
 
-  actions.focusMessage({ chatId: chat.id, messageId: chat.unreadReactions[0], tabId });
+  actions.focusMessage({
+    chatId: chat.id, messageId: chat.unreadReactions[0], tabId, scrollTargetPosition: 'end',
+  });
   actions.markMessagesRead({ messageIds: [chat.unreadReactions[0]], tabId });
   return undefined;
 });

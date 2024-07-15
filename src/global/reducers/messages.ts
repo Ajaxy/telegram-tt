@@ -1,7 +1,7 @@
 import type {
   ApiMessage, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
 } from '../../api/types';
-import type { FocusDirection, ThreadId } from '../../types';
+import type { FocusDirection, ScrollTargetPosition, ThreadId } from '../../types';
 import type {
   GlobalState, MessageList, MessageListType, TabArgs, TabThread, Thread,
 } from '../types';
@@ -643,6 +643,7 @@ export function updateFocusedMessage<T extends GlobalState>({
   noHighlight = false,
   isResizingContainer = false,
   quote,
+  scrollTargetPosition,
 }: {
   global: T;
   chatId?: string;
@@ -651,6 +652,7 @@ export function updateFocusedMessage<T extends GlobalState>({
   noHighlight?: boolean;
   isResizingContainer?: boolean;
   quote?: string;
+  scrollTargetPosition?: ScrollTargetPosition;
 },
 ...[tabId = getCurrentTabId()]: TabArgs<T>): T {
   return updateTabState(global, {
@@ -662,6 +664,7 @@ export function updateFocusedMessage<T extends GlobalState>({
       noHighlight,
       isResizingContainer,
       quote,
+      scrollTargetPosition,
     },
   }, tabId);
 }
