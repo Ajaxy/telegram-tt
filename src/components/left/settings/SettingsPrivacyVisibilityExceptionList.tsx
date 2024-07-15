@@ -146,6 +146,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         selectedCategories={newSelectedCategoryTypes}
         filterValue={searchQuery}
         filterPlaceholder={isAllowList ? lang('AlwaysAllowPlaceholder') : lang('NeverAllowPlaceholder')}
+        categoryPlaceholderKey="PrivacyUserTypes"
         searchInputId="new-group-picker-search"
         isSearchable
         onSelectedIdsChange={handleSelectedContactIdsChange}

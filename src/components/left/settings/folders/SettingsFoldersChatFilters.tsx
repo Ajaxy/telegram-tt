@@ -1,25 +1,31 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useCallback, useMemo } from '../../../../lib/teact/teact';
-import { getGlobal } from '../../../../global';
+import React, {
+  memo, useEffect, useMemo, useState,
+} from '../../../../lib/teact/teact';
+import { getActions, getGlobal, withGlobal } from '../../../../global';
 
-import type {
-  FolderEditDispatch,
-  FoldersState,
-} from '../../../../hooks/reducers/useFoldersReducer';
+import type { FolderEditDispatch, FoldersState } from '../../../../hooks/reducers/useFoldersReducer';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../../config';
 import { filterChatsByName } from '../../../../global/helpers';
+import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import { unique } from '../../../../util/iteratees';
+import { CUSTOM_PEER_EXCLUDED_CHAT_TYPES, CUSTOM_PEER_INCLUDED_CHAT_TYPES } from '../../../../util/objects/customPeer';
 
-import {
-  selectChatFilters,
-} from '../../../../hooks/reducers/useFoldersReducer';
+import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import { useFolderManagerForOrderedIds } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
+import Icon from '../../../common/icons/Icon';
+import Picker from '../../../common/Picker';
+import FloatingActionButton from '../../../ui/FloatingActionButton';
 import Loading from '../../../ui/Loading';
-import SettingsFoldersChatsPicker from './SettingsFoldersChatsPicker';
+
+type StateProps = {
+  maxChats: number;
+};
 
 type OwnProps = {
   mode: 'included' | 'excluded';
@@ -30,23 +36,35 @@ type OwnProps = {
   onSaveFilter: VoidFunction;
 };
 
-const SettingsFoldersChatFilters: FC<OwnProps> = ({
+const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
   mode,
   state,
   dispatch,
   isActive,
   onReset,
   onSaveFilter,
+  maxChats,
 }) => {
+  const lang = useOldLang();
+
+  const { openLimitReachedModal } = getActions();
+
   const { chatFilter } = state;
   const { selectedChatIds, selectedChatTypes } = selectChatFilters(state, mode, true);
+  const chatTypes = mode === 'included' ? CUSTOM_PEER_INCLUDED_CHAT_TYPES : CUSTOM_PEER_EXCLUDED_CHAT_TYPES;
 
-  const lang = useOldLang();
+  const [isTouched, setIsTouched] = useState(false);
 
   const folderAllOrderedIds = useFolderManagerForOrderedIds(ALL_FOLDER_ID);
   const folderArchivedOrderedIds = useFolderManagerForOrderedIds(ARCHIVED_FOLDER_ID);
 
   const shouldHideChatTypes = state.folder.isChatList;
+
+  useEffect(() => {
+    if (!isActive) {
+      setIsTouched(false);
+    }
+  }, [isActive]);
 
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on chats, so we avoid them
@@ -54,20 +72,26 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
 
     const chatIds = [...folderAllOrderedIds || [], ...folderArchivedOrderedIds || []];
     return unique([
-      ...selectedChatIds,
       ...filterChatsByName(lang, chatIds, chatsById, chatFilter),
     ]);
-  }, [folderAllOrderedIds, folderArchivedOrderedIds, selectedChatIds, lang, chatFilter]);
+  }, [folderAllOrderedIds, folderArchivedOrderedIds, lang, chatFilter]);
 
-  const handleFilterChange = useCallback((newFilter: string) => {
+  const handleFilterChange = useLastCallback((newFilter: string) => {
     dispatch({
       type: 'setChatFilter',
       payload: newFilter,
     });
-  }, [dispatch]);
+    setIsTouched(true);
+  });
 
-  const handleSelectedIdsChange = useCallback((ids: string[]) => {
+  const handleSelectedIdsChange = useLastCallback((ids: string[]) => {
     if (mode === 'included') {
+      if (ids.length >= maxChats) {
+        openLimitReachedModal({
+          limit: 'dialogFiltersChats',
+        });
+        return;
+      }
       dispatch({
         type: 'setIncludeFilters',
         payload: { ...state.includeFilters, includedChatIds: ids },
@@ -78,9 +102,10 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
         payload: { ...state.excludeFilters, excludedChatIds: ids },
       });
     }
-  }, [mode, state, dispatch]);
+    setIsTouched(true);
+  });
 
-  const handleSelectedChatTypesChange = useCallback((keys: string[]) => {
+  const handleSelectedChatTypesChange = useLastCallback((keys: string[]) => {
     const newFilters: Record<string, boolean> = {};
     keys.forEach((key) => {
       newFilters[key] = true;
@@ -103,7 +128,7 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
         },
       });
     }
-  }, [mode, selectedChatIds, dispatch]);
+  });
 
   useHistoryBack({
     isActive,
@@ -115,20 +140,38 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
   }
 
   return (
-    <SettingsFoldersChatsPicker
-      mode={mode}
-      chatIds={displayedIds}
-      selectedIds={selectedChatIds}
-      selectedChatTypes={selectedChatTypes}
-      filterValue={chatFilter}
-      shouldHideChatTypes={shouldHideChatTypes}
-      onSelectedIdsChange={handleSelectedIdsChange}
-      onSelectedChatTypesChange={handleSelectedChatTypesChange}
-      onFilterChange={handleFilterChange}
-      onSaveFilter={onSaveFilter}
-      isActive={isActive}
-    />
+    <div className="Picker settings-folders-chat-list">
+      <Picker
+        categories={shouldHideChatTypes ? undefined : chatTypes}
+        itemIds={displayedIds}
+        selectedIds={selectedChatIds}
+        selectedCategories={selectedChatTypes}
+        filterValue={chatFilter}
+        filterPlaceholder={lang('Search')}
+        categoryPlaceholderKey="FilterChatTypes"
+        searchInputId="new-group-picker-search"
+        isSearchable
+        isRoundCheckbox
+        onSelectedIdsChange={handleSelectedIdsChange}
+        onSelectedCategoriesChange={handleSelectedChatTypesChange}
+        onFilterChange={handleFilterChange}
+      />
+
+      <FloatingActionButton
+        isShown={isTouched}
+        onClick={onSaveFilter}
+        ariaLabel={lang('Save')}
+      >
+        <Icon name="check" />
+      </FloatingActionButton>
+    </div>
   );
 };
 
-export default memo(SettingsFoldersChatFilters);
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    return {
+      maxChats: selectCurrentLimit(global, 'dialogFiltersChats'),
+    };
+  },
+)(SettingsFoldersChatFilters));

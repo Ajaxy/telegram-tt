@@ -483,7 +483,8 @@ export type InlineBotSettings = {
   cacheTime: number;
 };
 
-export type CustomPeerType = 'premium' | 'toBeDistributed';
+export type CustomPeerType = 'premium' | 'toBeDistributed' | 'contacts' | 'nonContacts'
+| 'groups' | 'channels' | 'bots' | 'excludeMuted' | 'excludeArchived' | 'excludeRead';
 
 export interface CustomPeer {
   isCustomPeer: true;
