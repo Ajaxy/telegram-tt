@@ -270,6 +270,10 @@
   }
 }
 
+.effect-emojis.symbol-set-container {
+  --emoji-size: 2.25rem;
+}
+
 .symbol-set-container {
   display: grid !important;
   justify-content: space-between;

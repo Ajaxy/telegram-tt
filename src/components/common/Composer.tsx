@@ -7,6 +7,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type {
   ApiAttachment,
   ApiAttachMenuPeerType,
+  ApiAvailableEffect,
   ApiAvailableReaction,
   ApiBotCommand,
   ApiBotInlineMediaResult,
@@ -45,6 +46,7 @@ import {
   REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
+  SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
@@ -78,6 +80,7 @@ import {
   selectNewestMessageWithBotKeyboardButtons,
   selectNoWebPage,
   selectPeerStory,
+  selectPerformanceSettingsValue,
   selectRequestedDraft,
   selectRequestedDraftFiles,
   selectScheduledIds,
@@ -153,6 +156,7 @@ import SendAsMenu from '../middle/composer/SendAsMenu.async';
 import StickerTooltip from '../middle/composer/StickerTooltip.async';
 import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
 import WebPagePreview from '../middle/composer/WebPagePreview';
+import MessageEffect from '../middle/message/MessageEffect';
 import ReactionSelector from '../middle/message/reactions/ReactionSelector';
 import Button from '../ui/Button';
 import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
@@ -253,6 +257,11 @@ type StateProps =
     canSendQuickReplies?: boolean;
     webPagePreview?: ApiWebPage;
     noWebPage?: boolean;
+    effect?: ApiAvailableEffect;
+    effectReactions?: ApiReaction[];
+    areEffectsSupported?: boolean;
+    canPlayEffect?: boolean;
+    shouldPlayEffect?: boolean;
   };
 
 enum MainButtonState {
@@ -361,6 +370,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   onForward,
   webPagePreview,
   noWebPage,
+  effect,
+  effectReactions,
+  areEffectsSupported,
+  canPlayEffect,
+  shouldPlayEffect,
 }) => {
   const {
     sendMessage,
@@ -384,6 +398,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendStoryReaction,
     editMessage,
     updateAttachmentSettings,
+    saveEffectInDraft,
+    setReactionEffect,
+    hideEffectInComposer,
   } = getActions();
 
   const lang = useOldLang();
@@ -1023,10 +1040,14 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     const messageInput = document.querySelector<HTMLDivElement>(editableInputCssSelector);
 
+    const effectId = effect?.id;
+
     if (text) {
       if (!checkSlowMode()) return;
 
       const isInvertedMedia = hasWebPagePreview ? attachmentSettings.isInvertedMedia : undefined;
+
+      if (areEffectsSupported) saveEffectInDraft({ chatId, threadId, effectId: undefined });
 
       sendMessage({
         messageList: currentMessageList,
@@ -1036,6 +1057,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         isSilent,
         shouldUpdateStickerSetOrder,
         isInvertedMedia,
+        effectId,
       });
     }
 
@@ -1077,7 +1099,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleMessageSchedule = useLastCallback((
-    args: ScheduledMessageArgs, scheduledAt: number, messageList: MessageList,
+    args: ScheduledMessageArgs, scheduledAt: number, messageList: MessageList, effectId?: string,
   ) => {
     if (args && 'queryId' in args) {
       const { id, queryId, isSilent } = args;
@@ -1103,6 +1125,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         ...args,
         messageList,
         scheduledAt,
+        effectId,
       });
     }
   });
@@ -1429,7 +1452,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           return;
         }
         requestCalendar((scheduledAt) => {
-          handleMessageSchedule({}, scheduledAt, currentMessageList);
+          handleMessageSchedule({}, scheduledAt, currentMessageList, effect?.id);
         });
         break;
       default:
@@ -1494,6 +1517,12 @@ const Composer: FC<OwnProps & StateProps> = ({
     closeReactionPicker();
   });
 
+  const handleToggleEffectReaction = useLastCallback((reaction: ApiReaction) => {
+    setReactionEffect({ chatId, threadId, reaction });
+
+    closeReactionPicker();
+  });
+
   const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
     openStoryReactionPicker({
       peerId: chatId,
@@ -1524,7 +1553,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSendWhenOnline = useLastCallback(() => {
-    handleMessageSchedule({}, SCHEDULED_WHEN_ONLINE, currentMessageList!);
+    handleMessageSchedule({}, SCHEDULED_WHEN_ONLINE, currentMessageList!, effect?.id);
   });
 
   const handleSendScheduledAttachments = useLastCallback(
@@ -1541,6 +1570,10 @@ const Composer: FC<OwnProps & StateProps> = ({
     },
   );
 
+  const handleRemoveEffect = useLastCallback(() => { saveEffectInDraft({ chatId, threadId, effectId: undefined }); });
+
+  const handleStopEffect = useLastCallback(() => { hideEffectInComposer({ }); });
+
   const onSend = useMemo(() => {
     switch (mainButtonState) {
       case MainButtonState.Edit:
@@ -1554,6 +1587,8 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const withBotCommands = isChatWithBot && botMenuButton?.type === 'commands' && !editingMessage
     && botCommands !== false && !activeVoiceRecording;
+
+  const effectEmoji = areEffectsSupported && effect?.emoticon;
 
   return (
     <div className={fullClassName}>
@@ -1984,6 +2019,18 @@ const Composer: FC<OwnProps & StateProps> = ({
         {isInMessageList && <i className="icon icon-schedule" />}
         {isInMessageList && <i className="icon icon-check" />}
       </Button>
+      {effectEmoji && (
+        <span className="effect-icon">
+          {renderText(effectEmoji)}
+        </span>
+      )}
+      {effect && canPlayEffect && (
+        <MessageEffect
+          shouldPlay={shouldPlayEffect}
+          effect={effect}
+          onStop={handleStopEffect}
+        />
+      )}
       {canShowCustomSendMenu && (
         <CustomSendMenu
           isOpen={isCustomSendMenuOpen}
@@ -1992,9 +2039,20 @@ const Composer: FC<OwnProps & StateProps> = ({
           onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
           onSendSchedule={!isInScheduledList ? handleSendScheduled : undefined}
           onSendWhenOnline={handleSendWhenOnline}
+          onRemoveEffect={handleRemoveEffect}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
           isSavedMessages={isChatWithSelf}
+          chatId={chatId}
+          withEffects={areEffectsSupported}
+          hasCurrentEffect={Boolean(effect)}
+          effectReactions={effectReactions}
+          allAvailableReactions={availableReactions}
+          onToggleReaction={handleToggleEffectReaction}
+          isCurrentUserPremium={isCurrentUserPremium}
+          isInSavedMessages={isChatWithSelf}
+          isInStoryViewer={isInStoryViewer}
+          canPlayAnimatedEmojis={canPlayAnimatedEmojis}
         />
       )}
       {calendar}
@@ -2068,8 +2126,16 @@ export default memo(withGlobal<OwnProps>(
 
     const noWebPage = selectNoWebPage(global, chatId, threadId);
 
+    const areEffectsSupported = isChatWithUser && !isChatWithBot
+    && !isInScheduledList && !isChatWithSelf && type !== 'story' && chatId !== SERVICE_NOTIFICATIONS_USER_ID;
+    const canPlayEffect = selectPerformanceSettingsValue(global, 'stickerEffects');
+    const shouldPlayEffect = tabState.shouldPlayEffectInComposer;
+    const effectId = areEffectsSupported && draft?.effectId;
+    const effect = effectId ? global.availableEffectById[effectId] : undefined;
+    const effectReactions = global.reactions.effectReactions;
+
     return {
-      availableReactions: type === 'story' ? global.reactions.availableReactions : undefined,
+      availableReactions: global.reactions.availableReactions,
       topReactions: type === 'story' ? global.reactions.topReactions : undefined,
       isOnActiveTab: !tabState.isBlurred,
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
@@ -2137,6 +2203,11 @@ export default memo(withGlobal<OwnProps>(
       canSendQuickReplies,
       noWebPage,
       webPagePreview: selectTabState(global).webPagePreview,
+      effect,
+      effectReactions,
+      areEffectsSupported,
+      canPlayEffect,
+      shouldPlayEffect,
     };
   },
 )(Composer));

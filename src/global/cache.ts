@@ -301,6 +301,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
         'defaultTags',
         'recentReactions',
         'topReactions',
+        'effectReactions',
         'hash',
       ]),
       availableReactions: reduceAvailableReactions(global.reactions.availableReactions),

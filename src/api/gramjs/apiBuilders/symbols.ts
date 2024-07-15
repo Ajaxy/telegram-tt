@@ -9,7 +9,8 @@ import { compact } from '../../../util/iteratees';
 import localDb from '../localDb';
 import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
 
-export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPremium?: boolean): ApiSticker | undefined {
+export function buildStickerFromDocument(document: GramJs.TypeDocument,
+  isNoPremium?: boolean, isPremium?: boolean): ApiSticker | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
   }
@@ -46,7 +47,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
   const stickerOrEmojiAttribute = (stickerAttribute || customEmojiAttribute)!;
   const stickerSetInfo = buildApiStickerSetInfo(stickerOrEmojiAttribute?.stickerset);
   const emoji = stickerOrEmojiAttribute?.alt;
-  const isFree = Boolean(customEmojiAttribute?.free ?? true);
+  const isFree = Boolean(customEmojiAttribute?.free ?? true) && !isPremium;
 
   const cachedThumb = document.thumbs && document.thumbs.find(
     (s): s is GramJs.PhotoCachedSize => s instanceof GramJs.PhotoCachedSize,

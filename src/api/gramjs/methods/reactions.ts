@@ -1,7 +1,9 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiChat, ApiReaction } from '../../types';
+import type {
+  ApiChat, ApiReaction, ApiSticker,
+} from '../../types';
 
 import {
   API_GENERAL_ID_LIMIT,
@@ -18,6 +20,7 @@ import {
   buildApiSavedReactionTag,
   buildMessagePeerReaction,
 } from '../apiBuilders/reactions';
+import { buildStickerFromDocument } from '../apiBuilders/symbols';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildInputPeer, buildInputReaction } from '../gramjsBuilders';
 import { addEntitiesToLocalDb } from '../helpers';
@@ -103,13 +106,32 @@ export async function fetchAvailableEffects() {
     return undefined;
   }
 
+  const documentsMap = new Map(result.documents.map((doc) => [String(doc.id), doc]));
+
   result.documents.forEach((document) => {
     if (document instanceof GramJs.Document) {
       localDb.documents[String(document.id)] = document;
     }
   });
 
-  return result.effects.map(buildApiAvailableEffect);
+  const effects = result.effects.map(buildApiAvailableEffect);
+
+  const stickers : ApiSticker[] = [];
+  const emojis : ApiSticker[] = [];
+
+  for (const effect of effects) {
+    if (effect.effectAnimationId) {
+      const document = documentsMap.get(effect.effectStickerId);
+      const emoji = document && buildStickerFromDocument(document, false, effect.isPremium);
+      if (emoji) emojis.push(emoji);
+    } else {
+      const document = localDb.documents[effect.effectStickerId];
+      const sticker = buildStickerFromDocument(document);
+      if (sticker) { stickers.push(sticker); }
+    }
+  }
+
+  return { effects, emojis, stickers };
 }
 
 export function sendReaction({

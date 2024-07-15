@@ -14,12 +14,14 @@ export default function useOverlayPosition({
   isMirrored,
   isForMessageEffect,
   isDisabled,
+  id,
 } : {
   anchorRef: RefObject<HTMLDivElement>;
   overlayRef: RefObject<HTMLDivElement>;
   isMirrored?: boolean;
   isForMessageEffect?: boolean;
   isDisabled?: boolean;
+  id?: string;
 }) {
   const updatePosition = useLastCallback(() => {
     const element = overlayRef.current;
@@ -49,12 +51,13 @@ export default function useOverlayPosition({
   useEffect(() => {
     if (isDisabled) return;
     updatePosition();
-  }, [isDisabled]);
+  }, [isDisabled, id]);
 
   useEffect(() => {
     if (isDisabled) return undefined;
 
     const messagesContainer = anchorRef.current!.closest<HTMLDivElement>('.MessageList')!;
+    if (!messagesContainer) return undefined;
 
     messagesContainer.addEventListener('scroll', updatePosition, { passive: true });
 
@@ -62,4 +65,6 @@ export default function useOverlayPosition({
       messagesContainer.removeEventListener('scroll', updatePosition);
     };
   }, [isDisabled, anchorRef]);
+
+  return updatePosition;
 }

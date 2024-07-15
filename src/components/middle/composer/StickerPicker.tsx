@@ -10,6 +10,8 @@ import type { StickerSetOrReactionsSetOrRecent, ThreadId } from '../../../types'
 
 import {
   CHAT_STICKER_SET_ID,
+  EFFECT_EMOJIS_SET_ID,
+  EFFECT_STICKERS_SET_ID,
   FAVORITE_SYMBOL_SET_ID,
   RECENT_SYMBOL_SET_ID,
   SLIDE_TRANSITION_DURATION,
@@ -57,12 +59,15 @@ type OwnProps = {
   onStickerSelect: (
     sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, canUpdateStickerSetsOrder?: boolean,
   ) => void;
+  isForEffects?: boolean;
 };
 
 type StateProps = {
   chat?: ApiChat;
   recentStickers: ApiSticker[];
   favoriteStickers: ApiSticker[];
+  effectStickers?: ApiSticker[];
+  effectEmojis?: ApiSticker[];
   stickerSetsById: Record<string, ApiStickerSet>;
   chatStickerSetId?: string;
   addedSetIds?: string[];
@@ -83,6 +88,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   canSendStickers,
   recentStickers,
   favoriteStickers,
+  effectStickers,
+  effectEmojis,
   addedSetIds,
   stickerSetsById,
   chatStickerSetId,
@@ -92,6 +99,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   noContextMenus,
   idPrefix,
   onStickerSelect,
+  isForEffects,
 }) => {
   const {
     loadRecentStickers,
@@ -113,7 +121,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     isAtBeginning: shouldHideTopBorder,
   } = useScrolledState();
 
-  const sendMessageAction = useSendMessageAction(chat!.id, threadId);
+  const sendMessageAction = useSendMessageAction(chat?.id, threadId);
 
   const prefix = `${idPrefix}-sticker-set`;
   const {
@@ -130,6 +138,30 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   const areAddedLoaded = Boolean(addedSetIds);
 
   const allSets = useMemo(() => {
+    if (isForEffects && effectStickers) {
+      const effectSets: StickerSetOrReactionsSetOrRecent[] = [];
+      if (effectEmojis?.length) {
+        effectSets.push({
+          id: EFFECT_EMOJIS_SET_ID,
+          accessHash: '0',
+          title: '',
+          stickers: effectEmojis,
+          count: effectEmojis.length,
+          isEmoji: true,
+        });
+      }
+      if (effectStickers?.length) {
+        effectSets.push({
+          id: EFFECT_STICKERS_SET_ID,
+          accessHash: '0',
+          title: lang('StickerEffects'),
+          stickers: effectStickers,
+          count: effectStickers.length,
+        });
+      }
+      return effectSets;
+    }
+
     if (!addedSetIds) {
       return MEMO_EMPTY_ARRAY;
     }
@@ -167,7 +199,17 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       ...defaultSets,
       ...existingAddedSetIds,
     ];
-  }, [addedSetIds, stickerSetsById, favoriteStickers, recentStickers, chatStickerSetId, lang]);
+  }, [
+    addedSetIds,
+    stickerSetsById,
+    favoriteStickers,
+    recentStickers,
+    chatStickerSetId,
+    lang,
+    effectStickers,
+    isForEffects,
+    effectEmojis,
+  ]);
 
   const noPopulatedSets = useMemo(() => (
     areAddedLoaded
@@ -182,7 +224,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   }, [canSendStickers, loadAndPlay, loadRecentStickers, sendMessageAction]);
 
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
-  const shouldRenderContents = areAddedLoaded && canRenderContents && !noPopulatedSets && canSendStickers;
+  const shouldRenderContents = areAddedLoaded && canRenderContents
+  && !noPopulatedSets && (canSendStickers || isForEffects);
 
   useHorizontalScroll(headerRef, !shouldRenderContents || !headerRef.current);
 
@@ -223,6 +266,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   const handleRemoveRecentSticker = useLastCallback((sticker: ApiSticker) => {
     removeRecentSticker({ sticker });
   });
+
+  if (!chat) return undefined;
 
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
@@ -290,7 +335,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   if (!shouldRenderContents) {
     return (
       <div className={fullClassName}>
-        {!canSendStickers ? (
+        {!canSendStickers && !isForEffects ? (
           <div className={styles.pickerDisabled}>{lang('ErrorSendRestrictedStickersAll')}</div>
         ) : noPopulatedSets ? (
           <div className={styles.pickerDisabled}>{lang('NoStickers')}</div>
@@ -309,17 +354,25 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={fullClassName}>
-      <div ref={headerRef} className={headerClassName}>
-        <div className="shared-canvas-container">
-          <canvas ref={sharedCanvasRef} className="shared-canvas" />
-          {allSets.map(renderCover)}
+      { !isForEffects && (
+        <div ref={headerRef} className={headerClassName}>
+          <div className="shared-canvas-container">
+            <canvas ref={sharedCanvasRef} className="shared-canvas" />
+            {allSets.map(renderCover)}
+          </div>
         </div>
-      </div>
+      ) }
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
         onScroll={handleContentScroll}
-        className={buildClassName(styles.main, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+        className={
+          buildClassName(
+            styles.main,
+            IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll',
+            !isForEffects && styles.hasHeader,
+          )
+        }
       >
         {allSets.map((stickerSet, i) => (
           <StickerSet
@@ -343,6 +396,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             onStickerFave={handleStickerFave}
             onStickerRemoveRecent={handleRemoveRecentSticker}
             forcePlayback
+            shouldHideHeader={stickerSet.id === EFFECT_EMOJIS_SET_ID}
           />
         ))}
       </div>
@@ -357,6 +411,7 @@ export default memo(withGlobal<OwnProps>(
       added,
       recent,
       favorite,
+      effect,
     } = global.stickers;
 
     const isSavedMessages = selectIsChatWithSelf(global, chatId);
@@ -365,6 +420,8 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
+      effectStickers: effect?.stickers,
+      effectEmojis: effect?.emojis,
       recentStickers: recent.stickers,
       favoriteStickers: favorite.stickers,
       stickerSetsById: setsById,

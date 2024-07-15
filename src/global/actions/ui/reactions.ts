@@ -62,6 +62,22 @@ addActionHandler('openStoryReactionPicker', (global, actions, payload): ActionRe
   }, tabId);
 });
 
+addActionHandler('openEffectPicker', (global, actions, payload): ActionReturnType => {
+  const {
+    position,
+    chatId,
+    tabId = getCurrentTabId(),
+  } = payload!;
+
+  return updateTabState(global, {
+    reactionPicker: {
+      position,
+      chatId,
+      isForEffects: true,
+    },
+  }, tabId);
+});
+
 addActionHandler('closeReactionPicker', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
@@ -73,6 +89,7 @@ addActionHandler('closeReactionPicker', (global, actions, payload): ActionReturn
       position: undefined,
       storyId: undefined,
       storyPeerId: undefined,
+      isForEffects: undefined,
     },
   }, tabId);
 });

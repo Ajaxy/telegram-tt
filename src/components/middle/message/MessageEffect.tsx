@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
-import type { ApiAvailableEffect, ApiMessage } from '../../../api/types';
+import type { ApiAvailableEffect } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 
@@ -16,18 +16,20 @@ import Portal from '../../ui/Portal';
 import styles from './MessageEffect.module.scss';
 
 type OwnProps = {
-  message: ApiMessage;
+  messageId?: number;
+  isMirrored?: boolean;
   effect: ApiAvailableEffect;
   shouldPlay?: boolean;
-  observeIntersectionForLoading: ObserveFn;
-  observeIntersectionForPlaying: ObserveFn;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   onStop?: VoidFunction;
 };
 
 const EFFECT_SIZE = 256;
 
 const MessageEffect = ({
-  message,
+  messageId,
+  isMirrored,
   effect,
   shouldPlay,
   observeIntersectionForLoading,
@@ -42,30 +44,36 @@ const MessageEffect = ({
   const canPlay = useIsIntersecting(anchorRef, observeIntersectionForPlaying);
 
   const [isPlaying, startPlaying, stopPlaying] = useFlag();
+  const [isPositionUpdateRequired, requirePositionUpdate, resetPositionUpdate] = useFlag();
 
   const effectHash = getEffectHash(effect);
   const effectBlob = useMedia(effectHash, !canLoad);
-
-  const isMirrored = !message.isOutgoing;
 
   const handleEnded = useLastCallback(() => {
     stopPlaying();
     onStop?.();
   });
 
-  useEffect(() => {
-    if (canPlay && shouldPlay && effectBlob) {
-      startPlaying();
-    }
-  }, [canPlay, effectBlob, shouldPlay]);
-
-  useOverlayPosition({
+  const updatePosition = useOverlayPosition({
     anchorRef,
     overlayRef: ref,
     isMirrored,
     isDisabled: !isPlaying,
     isForMessageEffect: true,
+    id: effect.id,
   });
+
+  useEffect(() => {
+    if (isPositionUpdateRequired) updatePosition();
+    resetPositionUpdate();
+  }, [updatePosition, resetPositionUpdate, isPositionUpdateRequired]);
+
+  useEffect(() => {
+    if (canPlay && shouldPlay && effectBlob) {
+      startPlaying();
+      requirePositionUpdate();
+    }
+  }, [canPlay, effectBlob, shouldPlay, updatePosition]);
 
   const effectClassName = buildClassName(
     styles.root,
@@ -78,7 +86,7 @@ const MessageEffect = ({
         <Portal>
           <AnimatedSticker
             ref={ref}
-            key={`effect-${message.id}`}
+            key={`effect-${messageId ?? effect.id}`}
             className={effectClassName}
             tgsUrl={effectBlob}
             size={EFFECT_SIZE}

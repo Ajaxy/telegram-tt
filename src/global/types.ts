@@ -343,7 +343,10 @@ export type TabState = {
     storyId?: number;
     position?: IAnchorPosition;
     sendAsMessage?: boolean;
+    isForEffects?: boolean;
   };
+
+  shouldPlayEffectInComposer?: true;
 
   inlineBots: {
     isLoading: boolean;
@@ -980,6 +983,7 @@ export type GlobalState = {
     topReactions: ApiReaction[];
     recentReactions: ApiReaction[];
     defaultTags: ApiReaction[];
+    effectReactions: ApiReaction[];
     availableReactions?: ApiAvailableReaction[];
     hash: {
       topReactions?: string;
@@ -1019,6 +1023,10 @@ export type GlobalState = {
       emoji?: string;
       stickers?: ApiSticker[];
       hash?: string;
+    };
+    effect: {
+      stickers: ApiSticker[];
+      emojis: ApiSticker[];
     };
   };
 
@@ -1140,6 +1148,7 @@ export type ApiDraft = {
   text?: ApiFormattedText;
   replyInfo?: ApiInputMessageReplyInfo;
   date?: number;
+  effectId?: string;
   isLocal?: boolean;
 };
 
@@ -1482,6 +1491,7 @@ export interface ActionPayloads {
     messageList?: MessageList;
     isReaction?: true; // Reaction to the story are sent in the form of a message
     isInvertedMedia?: true;
+    effectId?: string;
   } & WithTabId;
   sendInviteMessages: {
     chatId: string;
@@ -2318,6 +2328,10 @@ export interface ActionPayloads {
     reaction?: ApiReaction;
   } & WithTabId;
 
+  openEffectPicker: {
+    chatId: string;
+    position: IAnchorPosition;
+  } & WithTabId;
   openMessageReactionPicker: {
     chatId: string;
     messageId: number;
@@ -2917,6 +2931,21 @@ export interface ActionPayloads {
     shouldSendGrouped?: boolean;
     isInvertedMedia?: true;
   };
+
+  saveEffectInDraft: {
+    chatId: string;
+    threadId: ThreadId;
+    effectId?: string;
+  };
+
+  setReactionEffect: {
+    chatId: string;
+    threadId: ThreadId;
+    reaction?: ApiReaction;
+  } & WithTabId;
+
+  requestEffectInComposer: WithTabId;
+  hideEffectInComposer: WithTabId;
 
   updateArchiveSettings: {
     isMinimized?: boolean;

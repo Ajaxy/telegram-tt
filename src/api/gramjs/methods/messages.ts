@@ -1,3 +1,4 @@
+import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ThreadId } from '../../../types';
@@ -270,6 +271,7 @@ export function sendMessage(
     shouldUpdateStickerSetOrder,
     wasDrafted,
     isInvertedMedia,
+    effectId,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -290,6 +292,7 @@ export function sendMessage(
     shouldUpdateStickerSetOrder?: boolean;
     wasDrafted?: boolean;
     isInvertedMedia?: true;
+    effectId?: string;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -309,6 +312,7 @@ export function sendMessage(
     sendAs,
     story,
     isInvertedMedia,
+    effectId,
   );
 
   onUpdate({
@@ -396,6 +400,7 @@ export function sendMessage(
         ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
         ...(shouldUpdateStickerSetOrder && { updateStickersetsOrder: shouldUpdateStickerSetOrder }),
         ...(isInvertedMedia && { invertMedia: isInvertedMedia }),
+        ...(effectId && { effect: BigInt(effectId) }),
       }), {
         shouldThrow: true,
         shouldIgnoreUpdates: true,

@@ -27,6 +27,12 @@
     }
   }
 
+  &.effect-emoji .sticker-locked {
+    font-size: 0.75rem;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
   &.set-expand {
     padding: 0;
     vertical-align: bottom;
@@ -38,8 +44,7 @@
   .sticker-locked {
     position: absolute;
     bottom: 0;
-    left: 50%;
-    transform: translate(-50%, 50%);
+    right: 0;
     width: 1.25rem;
     height: 1.25rem;
     display: flex;
@@ -47,6 +52,8 @@
     align-items: center;
     border-radius: 50%;
     color: white;
+    z-index: 2;
+    opacity: 0.75;
     background: var(--premium-gradient);
   }
 

@@ -11,6 +11,8 @@ import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 import {
   DEFAULT_STATUS_ICON_ID,
   DEFAULT_TOPIC_ICON_STICKER_ID,
+  EFFECT_EMOJIS_SET_ID,
+  EFFECT_STICKERS_SET_ID,
   EMOJI_SIZE_PICKER,
   FAVORITE_SYMBOL_SET_ID,
   POPULAR_SYMBOL_SET_ID,
@@ -232,8 +234,11 @@ const StickerSet: FC<OwnProps> = ({
   const isLocked = !isSavedMessages && !isCurrentUserPremium && isPremiumSet && !isChatEmojiSet;
 
   const isInstalled = stickerSet.installedDate && !stickerSet.isArchived;
-  const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID && stickerSet.id !== POPULAR_SYMBOL_SET_ID
-    && !isChatEmojiSet && !isChatStickerSet;
+
+  const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID
+    && stickerSet.id !== POPULAR_SYMBOL_SET_ID && stickerSet.id !== EFFECT_EMOJIS_SET_ID
+    && stickerSet.id !== EFFECT_STICKERS_SET_ID && !isChatEmojiSet && !isChatStickerSet;
+
   const [isCut, , expand] = useFlag(canCut);
   const itemsBeforeCutout = itemsPerRow * 3 - 1;
   const totalItemsCount = withDefaultTopicIcon ? stickerSet.count + 1 : stickerSet.count;
@@ -298,7 +303,11 @@ const StickerSet: FC<OwnProps> = ({
         </div>
       )}
       <div
-        className={buildClassName('symbol-set-container shared-canvas-container', transitionClassNames)}
+        className={buildClassName(
+          'symbol-set-container shared-canvas-container',
+          transitionClassNames,
+          stickerSet.id === EFFECT_EMOJIS_SET_ID && 'effect-emojis',
+        )}
         style={`height: ${height}px;`}
       >
         <canvas
@@ -382,6 +391,9 @@ const StickerSet: FC<OwnProps> = ({
                 onContextMenuClose={onContextMenuClose}
                 onContextMenuClick={onContextMenuClick}
                 forcePlayback={forcePlayback}
+                isEffectEmoji={stickerSet.id === EFFECT_EMOJIS_SET_ID}
+                noShowPremium={isCurrentUserPremium
+                  && (stickerSet.id === EFFECT_STICKERS_SET_ID || stickerSet.id === EFFECT_EMOJIS_SET_ID)}
               />
             );
           })}

@@ -803,6 +803,7 @@ export function buildLocalMessage(
   sendAs?: ApiPeer,
   story?: ApiStory | ApiStorySkipped,
   isInvertedMedia?: true,
+  effectId?: string,
 ): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
@@ -838,6 +839,7 @@ export function buildLocalMessage(
     ...(scheduledAt && { isScheduled: true }),
     isForwardingAllowed: true,
     isInvertedMedia,
+    effectId,
   } satisfies ApiMessage;
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);

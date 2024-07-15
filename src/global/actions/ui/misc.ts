@@ -29,6 +29,7 @@ import {
   selectChatMessage,
   selectCurrentChat,
   selectCurrentMessageList,
+  selectIsCurrentUserPremium,
   selectIsTrustedBot,
   selectTabState,
 } from '../../selectors';
@@ -496,6 +497,51 @@ addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionR
       isInvertedMedia,
     },
   };
+});
+
+addActionHandler('requestEffectInComposer', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    shouldPlayEffectInComposer: true,
+  }, tabId);
+});
+
+addActionHandler('hideEffectInComposer', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    shouldPlayEffectInComposer: undefined,
+  }, tabId);
+});
+
+addActionHandler('setReactionEffect', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, threadId, reaction, tabId = getCurrentTabId(),
+  } = payload;
+
+  const emoticon = reaction && 'emoticon' in reaction && reaction.emoticon;
+  if (!emoticon) return;
+
+  const effect = Object.values(global.availableEffectById)
+    .find((currentEffect) => currentEffect.effectAnimationId && currentEffect.emoticon === emoticon);
+
+  const effectId = effect?.id;
+
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+  if (effect?.isPremium && !isCurrentUserPremium) {
+    actions.openPremiumModal({
+      initialSection: 'animated_emoji',
+      tabId,
+    });
+    return;
+  }
+
+  if (!effectId) return;
+
+  actions.requestEffectInComposer({ tabId });
+
+  actions.saveEffectInDraft({ chatId, threadId, effectId });
 });
 
 addActionHandler('openLimitReachedModal', (global, actions, payload): ActionReturnType => {

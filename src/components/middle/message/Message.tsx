@@ -1115,10 +1115,11 @@ const Message: FC<OwnProps & StateProps> = ({
             activeEmojiInteractions={activeEmojiInteractions}
           />
         )}
-        {withAnimatedEffects && effect && (
+        {withAnimatedEffects && effect && !isLocal && (
           <MessageEffect
             shouldPlay={shouldPlayEffect}
-            message={message}
+            messageId={message.id}
+            isMirrored={!message.isOutgoing}
             effect={effect}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}

@@ -54,6 +54,7 @@ type OwnProps<T> = {
   onContextMenuOpen?: NoneToVoidFunction;
   onContextMenuClose?: NoneToVoidFunction;
   onContextMenuClick?: NoneToVoidFunction;
+  isEffectEmoji?: boolean;
 };
 
 const contentForStatusMenuContext = [
@@ -91,6 +92,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   onContextMenuOpen,
   onContextMenuClose,
   onContextMenuClick,
+  isEffectEmoji,
 }: OwnProps<T>) => {
   const { openStickerSet, openPremiumModal, setEmojiStatus } = getActions();
   // eslint-disable-next-line no-null/no-null
@@ -102,8 +104,11 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const customColor = useDynamicColorListener(ref, !hasCustomColor);
 
   const {
-    id, isCustomEmoji, hasEffect: isPremium, stickerSetInfo,
+    id, stickerSetInfo,
   } = sticker;
+
+  const isPremium = (!sticker.isFree && isEffectEmoji) || sticker.hasEffect;
+  const isCustomEmoji = sticker.isCustomEmoji || isEffectEmoji;
   const isLocked = !isCurrentUserPremium && isPremium && !shouldIgnorePremium;
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
@@ -213,6 +218,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     onClick && 'interactive',
     isSelected && 'selected',
     isCustomEmoji && 'custom-emoji',
+    isEffectEmoji && 'effect-emoji',
     className,
   );
 

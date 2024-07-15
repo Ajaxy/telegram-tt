@@ -525,6 +525,7 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
   const newDraft: ApiDraft = {
     text,
     replyInfo: currentDraft?.replyInfo,
+    effectId: currentDraft?.effectId,
   };
 
   saveDraft({
@@ -597,6 +598,23 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
 
   saveDraft({
     global, chatId, threadId, draft: newDraft, isLocalOnly: Boolean(newDraft),
+  });
+});
+
+addActionHandler('saveEffectInDraft', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, threadId, effectId,
+  } = payload;
+
+  const currentDraft = selectDraft(global, chatId, threadId);
+
+  const newDraft = {
+    ...currentDraft,
+    effectId,
+  };
+
+  saveDraft({
+    global, chatId, threadId, draft: newDraft, isLocalOnly: true, noLocalTimeUpdate: true,
   });
 });
 
@@ -1410,6 +1428,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   wasDrafted?: boolean;
   lastMessageId?: number;
   isInvertedMedia?: true;
+  effectId?: string;
 }) {
   let currentMessageKey: MessageKey | undefined;
   const progressCallback = params.attachment ? (progress: number, messageKey: MessageKey) => {

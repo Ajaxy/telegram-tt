@@ -34,6 +34,7 @@ import {
   selectChatMessages,
   selectCommonBoxChatId,
   selectCurrentMessageList,
+  selectDraft,
   selectIsChatListed,
   selectTabState,
   selectThreadParam,
@@ -452,7 +453,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         return undefined;
       }
 
-      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', draft);
+      const currentDraft = selectDraft(global, chatId, threadId ?? MAIN_THREAD_ID);
+
+      // Temporary workaround until the layer is updated
+      const newDraft = currentDraft?.effectId ? {
+        ...draft,
+        effectId: currentDraft?.effectId,
+      } : draft;
+
+      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', newDraft);
       global = updateChat(global, chatId, { draftDate: draft?.date });
       return global;
     }

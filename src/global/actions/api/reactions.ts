@@ -1,3 +1,4 @@
+import type { ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
@@ -83,12 +84,35 @@ addActionHandler('loadAvailableEffects', async (global): Promise<void> => {
     return;
   }
 
-  const effectById = buildCollectionByKey(result, 'id');
+  const { effects, emojis, stickers } = result;
+  const reactions:ApiReactionEmoji[] = [];
+
+  const effectById = buildCollectionByKey(effects, 'id');
+
+  for (const effect of effects) {
+    if (effect.effectAnimationId) {
+      const reaction: ApiReactionEmoji = {
+        emoticon: effect.emoticon,
+      };
+      reactions.push(reaction);
+    }
+  }
 
   global = getGlobal();
   global = {
     ...global,
     availableEffectById: effectById,
+    stickers: {
+      ...global.stickers,
+      effect: {
+        stickers,
+        emojis,
+      },
+    },
+    reactions: {
+      ...global.reactions,
+      effectReactions: reactions,
+    },
   };
   setGlobal(global);
 });

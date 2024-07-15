@@ -30,6 +30,17 @@
     --border-width: 0;
   }
 
+  .effect-icon {
+    font-size: 1.25rem;
+    transform: translate(-50%, 0);
+
+    color: var(--color-text);
+    & > .emoji {
+      width: 1rem !important;
+      height: 1rem !important;
+    }
+  }
+
   @keyframes show-send-as-button {
     from {
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */

@@ -11,7 +11,11 @@
   --symbol-set-gap-size: 0.25rem;
 
   position: relative;
-  height: calc(100% - 3rem);
+  height: 100%;
+
+  &.hasHeader {
+    height: calc(100% - 3rem);
+  }
 
   overflow-y: auto;
   overflow-x: hidden;
