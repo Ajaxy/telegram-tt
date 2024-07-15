@@ -4,7 +4,8 @@
     "@stylistic/stylelint-config"
   ],
   "ignoreFiles": [
-    "dist/*.css"
+    "dist/*.css",
+    "src/styles/icons.scss"
   ],
   "plugins": [
     "@stylistic/stylelint-plugin",
@@ -47,6 +48,12 @@
     "@stylistic/string-quotes": null,
     "@stylistic/color-hex-case": null,
     "@stylistic/selector-list-comma-newline-after": null,
-    "@stylistic/block-closing-brace-newline-after": null
+    "@stylistic/block-closing-brace-newline-after": null,
+    "@stylistic/indentation": [2, { "ignore": ["value"] }],
+    "at-rule-empty-line-before": ["always", { "ignore": ["first-nested", "after-comment", "blockless-after-blockless"] }],
+    "rule-empty-line-before": ["always", {
+      "except": ["after-single-line-comment", "first-nested"],
+      "ignore": ["after-comment", "inside-block"]
+    }]
   }
 }

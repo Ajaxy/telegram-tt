@@ -46,6 +46,7 @@
     padding: 0;
     margin: 0.25rem;
     height: 2rem;
+
     @media (max-width: 320px) {
       margin: 0.125rem;
     }
@@ -97,6 +98,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 0.5rem;
+
     @media (max-width: 320px) {
       margin: 0.25rem;
     }

@@ -825,9 +825,12 @@
   @for $i from 1 through 7 {
     &.emoji-only-#{$i} {
       $size: null;
+
       @if $i == 1 {
         $size: 7rem;
-      } @else {
+      }
+
+      @else {
         $size: min(7.5 - ($i * 0.75), 5.625) + rem;
       }
 

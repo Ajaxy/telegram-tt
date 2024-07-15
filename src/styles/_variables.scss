@@ -12,6 +12,7 @@
   $bm-red: color.red($foreground) * $opacity + color.red($background) * $background-opacity * (1 - $opacity);
   $bm-green: color.green($foreground) * $opacity + color.green($background) * $background-opacity * (1 - $opacity);
   $bm-blue: color.blue($foreground) * $opacity + color.blue($background) * $background-opacity * (1 - $opacity);
+
   @return rgb($bm-red, $bm-green, $bm-blue);
 }
 

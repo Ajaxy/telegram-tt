@@ -42,6 +42,7 @@
   @media (min-width: 1921px) {
     --max-width: calc(30vw - 1rem);
   }
+
   @media (max-width: 600px) {
     margin-bottom: 0.25rem;
   }
@@ -110,6 +111,7 @@
 
   &.last-in-group {
     margin-bottom: 0.625rem;
+
     @media (max-width: 600px) {
       margin-bottom: 0.4375rem;
     }
