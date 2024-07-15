@@ -176,7 +176,7 @@ const Video = <T,>({
       : calculateVideoDimensions(video, Boolean(isOwn), asForwarded, isInWebPage, noAvatars, isMobile)
   );
 
-  const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>, isFromSpinner?: boolean) => {
     if (isUploading) {
       onCancelUpload?.(clickArg!);
       return;
@@ -201,8 +201,20 @@ const Video = <T,>({
       return;
     }
 
+    if (isFromSpinner && shouldLoad && !isPlayerReady && !isFullMediaPreloaded) {
+      setIsLoadAllowed(false);
+      e.stopPropagation();
+      return;
+    }
+
     onClick?.(clickArg!, e);
   });
+
+  const handleClickOnSpinner = useLastCallback(
+    (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      handleClick(e, true);
+    },
+  );
 
   const componentClassName = buildClassName(
     'media-inner dark',
@@ -220,7 +232,7 @@ const Video = <T,>({
       id={id}
       className={componentClassName}
       style={style}
-      onClick={isUploading ? undefined : handleClick}
+      onClick={isUploading ? undefined : (e) => handleClick(e)}
     >
       {withBlurredBackground && (
         <canvas ref={blurredBackgroundRef} className="thumbnail canvas-blur-setup blurred-bg" />
@@ -265,7 +277,10 @@ const Video = <T,>({
       />
       {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames)}>
-          <ProgressSpinner progress={transferProgress} onClick={handleClick} />
+          <ProgressSpinner
+            progress={transferProgress}
+            onClick={handleClickOnSpinner}
+          />
         </div>
       )}
       {!isLoadAllowed && !fullMediaData && (
