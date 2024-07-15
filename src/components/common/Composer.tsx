@@ -257,6 +257,7 @@ type StateProps =
     canSendQuickReplies?: boolean;
     webPagePreview?: ApiWebPage;
     noWebPage?: boolean;
+    isContactRequirePremium?: boolean;
     effect?: ApiAvailableEffect;
     effectReactions?: ApiReaction[];
     areEffectsSupported?: boolean;
@@ -370,6 +371,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   onForward,
   webPagePreview,
   noWebPage,
+  isContactRequirePremium,
   effect,
   effectReactions,
   areEffectsSupported,
@@ -490,8 +492,11 @@ const Composer: FC<OwnProps & StateProps> = ({
     [chat, chatFullInfo, isChatWithBot, isInStoryViewer],
   );
 
+  const isNeedPremium = isContactRequirePremium && isInStoryViewer;
+  const isSendTextBlocked = isNeedPremium || !canSendPlainText;
+
   const hasWebPagePreview = !hasAttachments && canAttachEmbedLinks && !noWebPage && Boolean(webPagePreview);
-  const isComposerBlocked = !canSendPlainText && !editingMessage;
+  const isComposerBlocked = isSendTextBlocked && !editingMessage;
 
   useEffect(() => {
     if (!hasWebPagePreview) {
@@ -1601,7 +1606,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           editingMessage={editingMessage}
         />
       )}
-      {shouldRenderReactionSelector && (
+      {shouldRenderReactionSelector && !isNeedPremium && (
         <ReactionSelector
           topReactions={topReactions}
           allAvailableReactions={availableReactions}
@@ -1684,30 +1689,35 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClick={handleBotCommandSelect}
         onClose={closeChatCommandTooltip}
       />
-      <div className={buildClassName('composer-wrapper', isInStoryViewer && 'with-story-tweaks')}>
-        <svg className="svg-appendix" width="9" height="20">
-          <defs>
-            <filter
-              x="-50%"
-              y="-14.7%"
-              width="200%"
-              height="141.2%"
-              filterUnits="objectBoundingBox"
-              id="composerAppendix"
-            >
-              <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1" />
-              <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
-              <feColorMatrix
-                values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0"
-                in="shadowBlurOuter1"
-              />
-            </filter>
-          </defs>
-          <g fill="none" fill-rule="evenodd">
-            <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#composerAppendix)" />
-            <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" className="corner" />
-          </g>
-        </svg>
+      <div className={
+        buildClassName('composer-wrapper', isInStoryViewer && 'with-story-tweaks', isNeedPremium && 'is-need-premium')
+      }
+      >
+        {!isNeedPremium && (
+          <svg className="svg-appendix" width="9" height="20">
+            <defs>
+              <filter
+                x="-50%"
+                y="-14.7%"
+                width="200%"
+                height="141.2%"
+                filterUnits="objectBoundingBox"
+                id="composerAppendix"
+              >
+                <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1" />
+                <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
+                <feColorMatrix
+                  values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0"
+                  in="shadowBlurOuter1"
+                />
+              </filter>
+            </defs>
+            <g fill="none" fill-rule="evenodd">
+              <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#composerAppendix)" />
+              <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" className="corner" />
+            </g>
+          </svg>
+        )}
         {isInMessageList && (
           <>
             <InlineBotTooltip
@@ -1782,7 +1792,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               )}
             </>
           )}
-          {(!isComposerBlocked || canSendGifs || canSendStickers) && (
+          {((!isComposerBlocked || canSendGifs || canSendStickers) && !isNeedPremium) && (
             <SymbolMenuButton
               chatId={chatId}
               threadId={threadId}
@@ -1825,7 +1835,7 @@ const Composer: FC<OwnProps & StateProps> = ({
                 ? ''
                 : (!isComposerBlocked
                   ? (botKeyboardPlaceholder || inputPlaceholder || lang(placeholderForForumAsMessages || 'Message'))
-                  : lang('Chat.PlaceholderTextNotAllowed'))
+                  : isInStoryViewer ? lang('StoryRepliesLocked') : lang('Chat.PlaceholderTextNotAllowed'))
             }
             timedPlaceholderDate={timedPlaceholderDate}
             timedPlaceholderLangKey={timedPlaceholderLangKey}
@@ -1839,6 +1849,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             onSuppressedFocus={closeSymbolMenu}
             onFocus={markInputHasFocus}
             onBlur={unmarkInputHasFocus}
+            isNeedPremium={isNeedPremium}
           />
           {isInMessageList && (
             <>
@@ -1875,28 +1886,30 @@ const Composer: FC<OwnProps & StateProps> = ({
               {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
             </span>
           )}
-          <AttachMenu
-            chatId={chatId}
-            threadId={threadId}
-            editingMessage={editingMessage}
-            hasReplaceableMedia={canMediaBeReplaced}
-            isButtonVisible={!activeVoiceRecording}
-            canAttachMedia={canAttachMedia}
-            canAttachPolls={canAttachPolls}
-            canSendPhotos={canSendPhotos}
-            canSendVideos={canSendVideos}
-            canSendDocuments={canSendDocuments}
-            canSendAudios={canSendAudios}
-            onFileSelect={handleFileSelect}
-            onPollCreate={openPollModal}
-            isScheduled={isInScheduledList}
-            attachBots={isInMessageList ? attachBots : undefined}
-            peerType={attachMenuPeerType}
-            shouldCollectDebugLogs={shouldCollectDebugLogs}
-            theme={theme}
-            onMenuOpen={onAttachMenuOpen}
-            onMenuClose={onAttachMenuClose}
-          />
+          {!isNeedPremium && (
+            <AttachMenu
+              chatId={chatId}
+              threadId={threadId}
+              editingMessage={editingMessage}
+              hasReplaceableMedia={canMediaBeReplaced}
+              isButtonVisible={!activeVoiceRecording}
+              canAttachMedia={canAttachMedia}
+              canAttachPolls={canAttachPolls}
+              canSendPhotos={canSendPhotos}
+              canSendVideos={canSendVideos}
+              canSendDocuments={canSendDocuments}
+              canSendAudios={canSendAudios}
+              onFileSelect={handleFileSelect}
+              onPollCreate={openPollModal}
+              isScheduled={isInScheduledList}
+              attachBots={isInMessageList ? attachBots : undefined}
+              peerType={attachMenuPeerType}
+              shouldCollectDebugLogs={shouldCollectDebugLogs}
+              theme={theme}
+              onMenuOpen={onAttachMenuOpen}
+              onMenuClose={onAttachMenuClose}
+            />
+          )}
           {isInMessageList && Boolean(botKeyboardMessageId) && (
             <BotKeyboardMenu
               messageId={botKeyboardMessageId}
@@ -2126,6 +2139,7 @@ export default memo(withGlobal<OwnProps>(
 
     const noWebPage = selectNoWebPage(global, chatId, threadId);
 
+    const isContactRequirePremium = selectUserFullInfo(global, chatId)?.isContactRequirePremium;
     const areEffectsSupported = isChatWithUser && !isChatWithBot
     && !isInScheduledList && !isChatWithSelf && type !== 'story' && chatId !== SERVICE_NOTIFICATIONS_USER_ID;
     const canPlayEffect = selectPerformanceSettingsValue(global, 'stickerEffects');
@@ -2203,6 +2217,7 @@ export default memo(withGlobal<OwnProps>(
       canSendQuickReplies,
       noWebPage,
       webPagePreview: selectTabState(global).webPagePreview,
+      isContactRequirePremium,
       effect,
       effectReactions,
       areEffectsSupported,
