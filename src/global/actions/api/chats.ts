@@ -1299,7 +1299,9 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
   const hostname = TME_WEB_DOMAINS.has(uri.hostname) ? 't.me' : uri.hostname;
   const hostParts = hostname.split('.');
   if (hostParts.length > 3) return;
-  const pathname = hostParts.length === 3 ? `${hostParts[0]}/${uri.pathname}` : uri.pathname;
+
+  const adaptedPathname = uri.pathname.replace(/^\/?s\//, '');
+  const pathname = hostParts.length === 3 ? `${hostParts[0]}/${adaptedPathname}` : adaptedPathname;
   const [part1, part2, part3] = pathname.split('/').filter(Boolean).map((part) => decodeURI(part));
   const params = Object.fromEntries(uri.searchParams);
 

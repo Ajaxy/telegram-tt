@@ -593,7 +593,11 @@ function isNumber(s: string) {
 }
 
 function getPathParams(url: URL) {
-  return url.pathname.split('/').filter(Boolean).map(decodeURI);
+  const parts = url.pathname.split('/').filter(Boolean);
+  if (parts[0] === 's') {
+    parts.shift();
+  }
+  return parts.map(decodeURI);
 }
 
 function getQueryParams(url: URL) {
