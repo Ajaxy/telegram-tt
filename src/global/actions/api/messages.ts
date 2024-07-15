@@ -67,10 +67,12 @@ import {
 import {
   addChatMessagesById,
   addChats,
+  addUnreadMentions,
   addUsers,
   deleteSponsoredMessage,
   removeOutlyingList,
   removeRequestedMessageTranslation,
+  removeUnreadMentions,
   replaceSettings,
   replaceThreadParam,
   replaceUserStatuses,
@@ -1655,9 +1657,7 @@ async function fetchUnreadMentions<T extends GlobalState>(global: T, chatId: str
   global = addChatMessagesById(global, chat.id, byId);
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChats(global, buildCollectionByKey(chats, 'id'));
-  global = updateChat(global, chatId, {
-    unreadMentions: [...(chat.unreadMentions || []), ...ids],
-  });
+  global = addUnreadMentions(global, chatId, chat, ids);
 
   setGlobal(global);
 }
@@ -1668,18 +1668,7 @@ addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnTyp
   const chat = selectCurrentChat(global, tabId);
   if (!chat) return;
 
-  const currentUnreadMentions = chat.unreadMentions || [];
-
-  const unreadMentions = currentUnreadMentions.filter((id) => !messageIds.includes(id));
-  const removedCount = currentUnreadMentions.length - unreadMentions.length;
-
-  global = updateChat(global, chat.id, {
-    ...(chat.unreadMentionsCount && {
-      unreadMentionsCount: Math.max(chat.unreadMentionsCount - removedCount, 0) || undefined,
-    }),
-    unreadMentions,
-  });
-
+  global = removeUnreadMentions(global, chat.id, chat, messageIds, true);
   setGlobal(global);
 
   actions.markMessagesRead({ messageIds, tabId });
