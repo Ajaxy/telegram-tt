@@ -47,10 +47,8 @@ export type OwnProps = {
 type StateProps = {
   currentUserId?: string;
   contactIds?: string[];
-  accountChatIds?: string[];
-  accountUserIds?: string[];
-  globalChatIds?: string[];
-  globalUserIds?: string[];
+  accountPeerIds?: string[];
+  globalPeerIds?: string[];
   foundIds?: string[];
   globalMessagesByChatId?: Record<string, { byId: Record<number, ApiMessage> }>;
   fetchingStatus?: { chats?: boolean; messages?: boolean };
@@ -69,10 +67,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   dateSearchQuery,
   currentUserId,
   contactIds,
-  accountChatIds,
-  accountUserIds,
-  globalChatIds,
-  globalUserIds,
+  accountPeerIds,
+  globalPeerIds,
   foundIds,
   globalMessagesByChatId,
   fetchingStatus,
@@ -155,41 +151,35 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
     );
 
-    const localPeerIds = unique([
+    const localPeerIds = [
       ...localContactIds,
       ...localChatIds,
-    ]);
-
-    const accountPeerIds = unique([
-      ...(accountChatIds ?? []),
-      ...(accountUserIds ?? []),
-    ].filter((accountPeerId) => !localPeerIds.includes(accountPeerId)));
-
-    return [
-      ...sortChatIds(localPeerIds, undefined, currentUserId ? [currentUserId] : undefined),
-      ...sortChatIds(accountPeerIds),
     ];
-  }, [searchQuery, lang, currentUserId, contactIds, accountChatIds, accountUserIds, isChannelList]);
+
+    return unique([
+      ...sortChatIds(localPeerIds, undefined, currentUserId ? [currentUserId] : undefined),
+      ...sortChatIds(accountPeerIds || []),
+    ]);
+  }, [searchQuery, lang, currentUserId, contactIds, accountPeerIds, isChannelList]);
 
   useHorizontalScroll(chatSelectionRef, !localResults.length || isChannelList, true);
 
   const globalResults = useMemo(() => {
-    if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalChatIds || !globalUserIds) {
+    if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalPeerIds) {
       return MEMO_EMPTY_ARRAY;
     }
 
     // No need for expensive global updates, so we avoid them
     const chatsById = getGlobal().chats.byId;
 
-    const ids = unique([...globalChatIds, ...globalUserIds]);
-    const filteredIds = ids.filter((id) => {
+    const filteredIds = globalPeerIds.filter((id) => {
       if (!isChannelList) return true;
       const chat = chatsById[id];
       return chat && isChatChannel(chat);
     });
 
     return sortChatIds(filteredIds, true);
-  }, [globalChatIds, globalUserIds, isChannelList, searchQuery]);
+  }, [globalPeerIds, isChannelList, searchQuery]);
 
   const foundMessages = useMemo(() => {
     if ((!searchQuery && !searchDate) || !foundIds || foundIds.length === 0) {
@@ -372,8 +362,8 @@ export default memo(withGlobal<OwnProps>(
     const {
       fetchingStatus, globalResults, localResults, resultsByType,
     } = selectTabState(global).globalSearch;
-    const { chatIds: globalChatIds, userIds: globalUserIds } = globalResults || {};
-    const { chatIds: accountChatIds, userIds: accountUserIds } = localResults || {};
+    const { peerIds: globalPeerIds } = globalResults || {};
+    const { peerIds: accountPeerIds } = localResults || {};
     const { byChatId: globalMessagesByChatId } = messages;
     const foundIds = resultsByType?.[isChannelList ? 'channels' : 'text']?.foundIds;
     const { similarChannelIds } = selectSimilarChannelIds(global, GLOBAL_SUGGESTED_CHANNELS_ID) || {};
@@ -381,10 +371,8 @@ export default memo(withGlobal<OwnProps>(
     return {
       currentUserId,
       contactIds,
-      accountChatIds,
-      accountUserIds,
-      globalChatIds,
-      globalUserIds,
+      accountPeerIds,
+      globalPeerIds,
       foundIds,
       globalMessagesByChatId,
       fetchingStatus,

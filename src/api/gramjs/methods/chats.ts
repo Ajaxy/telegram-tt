@@ -360,16 +360,19 @@ export async function searchChats({ query }: { query: string }) {
   updateLocalDb(result);
 
   const accountPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
-  const allChats = result.chats.concat(result.users)
+  const globalPeerIds = result.results.map(getApiChatIdFromMtpPeer)
+    .filter((id) => !accountPeerIds.includes(id));
+
+  const chats = result.chats.concat(result.users)
     .map((user) => buildApiChatFromPreview(user))
     .filter(Boolean);
-  const allUsers = result.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
+  const users = result.users.map(buildApiUser).filter(Boolean);
 
   return {
-    accountChats: allChats.filter((r) => accountPeerIds.includes(r.id)),
-    accountUsers: allUsers.filter((u) => accountPeerIds.includes(u.id)),
-    globalChats: allChats.filter((r) => !accountPeerIds.includes(r.id)),
-    globalUsers: allUsers.filter((u) => !accountPeerIds.includes(u.id)),
+    accountResultIds: accountPeerIds,
+    globalResultIds: globalPeerIds,
+    chats,
+    users,
   };
 }
 

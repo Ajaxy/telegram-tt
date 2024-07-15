@@ -365,12 +365,10 @@ export type TabState = {
     };
     isClosing?: boolean;
     localResults?: {
-      chatIds?: string[];
-      userIds?: string[];
+      peerIds?: string[];
     };
     globalResults?: {
-      chatIds?: string[];
-      userIds?: string[];
+      peerIds?: string[];
     };
     resultsByType?: Partial<Record<ApiGlobalMessageSearchType, {
       totalCount?: number;

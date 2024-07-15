@@ -318,18 +318,15 @@ addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnT
       return;
     }
 
-    const { accountUsers, globalUsers } = result;
+    const {
+      users, chats, accountResultIds, globalResultIds,
+    } = result;
 
-    let localUserIds;
-    let globalUserIds;
-    if (accountUsers.length) {
-      global = addUsers(global, buildCollectionByKey(accountUsers, 'id'));
-      localUserIds = accountUsers.map(({ id }) => id);
-    }
-    if (globalUsers.length) {
-      global = addUsers(global, buildCollectionByKey(globalUsers, 'id'));
-      globalUserIds = globalUsers.map(({ id }) => id);
-    }
+    global = addUsers(global, buildCollectionByKey(users, 'id'));
+    global = addChats(global, buildCollectionByKey(chats, 'id'));
+
+    const localUserIds = accountResultIds.filter(isUserId);
+    const globalUserIds = globalResultIds.filter(isUserId);
 
     global = updateUserSearchFetchingStatus(global, false, tabId);
     global = updateUserSearch(global, { localUserIds, globalUserIds }, tabId);
