@@ -32,7 +32,8 @@
 
   .effect-icon {
     font-size: 1.25rem;
-    transform: translate(-50%, 0);
+    position: absolute;
+    right: 0;
 
     color: var(--color-text);
     & > .emoji {
