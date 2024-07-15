@@ -25,6 +25,7 @@ import type {
   ApiTopic,
   ApiUser,
   ApiVideo,
+  ApiWebPage,
 } from '../../api/types';
 import type {
   ApiDraft, GlobalState, MessageList,
@@ -75,6 +76,7 @@ import {
   selectIsReactionPickerOpen,
   selectIsRightColumnShown,
   selectNewestMessageWithBotKeyboardButtons,
+  selectNoWebPage,
   selectPeerStory,
   selectRequestedDraft,
   selectRequestedDraftFiles,
@@ -249,6 +251,8 @@ type StateProps =
     quickReplyMessages?: Record<number, ApiMessage>;
     quickReplies?: Record<number, ApiQuickReply>;
     canSendQuickReplies?: boolean;
+    webPagePreview?: ApiWebPage;
+    noWebPage?: boolean;
   };
 
 enum MainButtonState {
@@ -355,6 +359,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   quickReplies,
   canSendQuickReplies,
   onForward,
+  webPagePreview,
+  noWebPage,
 }) => {
   const {
     sendMessage,
@@ -377,6 +383,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     closeReactionPicker,
     sendStoryReaction,
     editMessage,
+    updateAttachmentSettings,
   } = getActions();
 
   const lang = useOldLang();
@@ -466,7 +473,14 @@ const Composer: FC<OwnProps & StateProps> = ({
     [chat, chatFullInfo, isChatWithBot, isInStoryViewer],
   );
 
+  const hasWebPagePreview = !hasAttachments && canAttachEmbedLinks && !noWebPage && Boolean(webPagePreview);
   const isComposerBlocked = !canSendPlainText && !editingMessage;
+
+  useEffect(() => {
+    if (!hasWebPagePreview) {
+      updateAttachmentSettings({ isInvertedMedia: undefined });
+    }
+  }, [hasWebPagePreview]);
 
   const insertHtmlAndUpdateCursor = useLastCallback((newHtml: string, inInputId: string = editableInputId) => {
     if (inInputId === editableInputId && isComposerBlocked) return;
@@ -1012,6 +1026,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (text) {
       if (!checkSlowMode()) return;
 
+      const isInvertedMedia = hasWebPagePreview ? attachmentSettings.isInvertedMedia : undefined;
+
       sendMessage({
         messageList: currentMessageList,
         text,
@@ -1019,6 +1035,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         scheduledAt,
         isSilent,
         shouldUpdateStickerSetOrder,
+        isInvertedMedia,
       });
     }
 
@@ -1684,6 +1701,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               threadId={threadId}
               getHtml={getHtml}
               isDisabled={!canAttachEmbedLinks || hasAttachments}
+              isEditing={Boolean(editingMessage)}
             />
           </>
         )}
@@ -2048,6 +2066,8 @@ export default memo(withGlobal<OwnProps>(
 
     const canSendQuickReplies = isChatWithUser && !isChatWithBot && !isInScheduledList && !isChatWithSelf;
 
+    const noWebPage = selectNoWebPage(global, chatId, threadId);
+
     return {
       availableReactions: type === 'story' ? global.reactions.availableReactions : undefined,
       topReactions: type === 'story' ? global.reactions.topReactions : undefined,
@@ -2115,6 +2135,8 @@ export default memo(withGlobal<OwnProps>(
       quickReplyMessages: global.quickReplies.messagesById,
       quickReplies: global.quickReplies.byId,
       canSendQuickReplies,
+      noWebPage,
+      webPagePreview: selectTabState(global).webPagePreview,
     };
   },
 )(Composer));

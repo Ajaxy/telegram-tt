@@ -49,6 +49,13 @@
     margin: 0;
     padding: 0.125rem 0.25rem 0.125rem 0.625rem;
     transition: background-color 0.2s ease-in;
+
+    &.interactive {
+      cursor: var(--custom-cursor, pointer);
+      &:active {
+        background-color: var(--background-active-color);
+      }
+    }
   }
 
   &::before {

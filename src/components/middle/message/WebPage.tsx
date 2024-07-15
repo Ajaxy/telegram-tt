@@ -56,6 +56,8 @@ type OwnProps = {
   onAudioPlay?: NoneToVoidFunction;
   onMediaClick?: NoneToVoidFunction;
   onCancelMediaTransfer?: NoneToVoidFunction;
+  onContainerClick?: ((e: React.MouseEvent) => void);
+  isEditing?: boolean;
 };
 
 const WebPage: FC<OwnProps> = ({
@@ -76,8 +78,10 @@ const WebPage: FC<OwnProps> = ({
   shouldWarnAboutSvg,
   autoLoadFileMaxSizeMb,
   onMediaClick,
+  onContainerClick,
   onAudioPlay,
   onCancelMediaTransfer,
+  isEditing,
 }) => {
   const { openTelegramLink } = getActions();
   const webPage = getMessageWebPage(message);
@@ -91,6 +95,9 @@ const WebPage: FC<OwnProps> = ({
 
   const handleMediaClick = useLastCallback(() => {
     onMediaClick!();
+  });
+  const handleContainerClick = useLastCallback((e: React.MouseEvent) => {
+    onContainerClick?.(e);
   });
 
   const handleQuickButtonClick = useLastCallback(() => {
@@ -138,6 +145,7 @@ const WebPage: FC<OwnProps> = ({
   const className = buildClassName(
     'WebPage',
     inPreview && 'in-preview',
+    !isEditing && inPreview && 'interactive',
     isSquarePhoto && 'with-square-photo',
     !photo && !video && !inPreview && 'without-media',
     video && 'with-video',
@@ -166,6 +174,7 @@ const WebPage: FC<OwnProps> = ({
       className={className}
       data-initial={(siteName || displayUrl)[0]}
       dir={lang.isRtl ? 'rtl' : 'auto'}
+      onClick={handleContainerClick}
     >
       <div className={buildClassName('WebPage--content', isStory && 'is-story')}>
         {backgroundEmojiId && (
