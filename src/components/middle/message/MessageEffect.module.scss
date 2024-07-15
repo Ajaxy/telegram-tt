@@ -1,0 +1,21 @@
+.anchor {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.mirrorAnchor {
+  right: auto;
+  left: 0;
+}
+
+.root {
+  position: fixed;
+  z-index: var(--z-message-effect);
+
+  pointer-events: none;
+}
+
+.mirror {
+  transform: scaleX(-1);
+}

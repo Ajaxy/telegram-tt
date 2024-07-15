@@ -1,6 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiAvailableEffect,
   ApiAvailableReaction,
   ApiPeerReaction,
   ApiReaction,
@@ -115,5 +116,20 @@ export function buildApiAvailableReaction(availableReaction: GramJs.AvailableRea
     title,
     isInactive: inactive,
     isPremium: premium,
+  };
+}
+
+export function buildApiAvailableEffect(availableEffect: GramJs.AvailableEffect): ApiAvailableEffect {
+  const {
+    id, emoticon, premiumRequired, staticIconId, effectStickerId, effectAnimationId,
+  } = availableEffect;
+
+  return {
+    id: id.toString(),
+    emoticon,
+    isPremium: premiumRequired,
+    staticIconId: staticIconId?.toString(),
+    effectStickerId: effectStickerId.toString(),
+    effectAnimationId: effectAnimationId?.toString(),
   };
 }

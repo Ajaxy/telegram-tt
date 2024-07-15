@@ -5,6 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type {
+  ApiAvailableEffect,
   ApiAvailableReaction,
   ApiChat,
   ApiChatMember,
@@ -166,6 +167,7 @@ import Invoice from './Invoice';
 import InvoiceMediaPreview from './InvoiceMediaPreview';
 import Location from './Location';
 import MessageAppendix from './MessageAppendix';
+import MessageEffect from './MessageEffect';
 import MessageMeta from './MessageMeta';
 import MessagePhoneCall from './MessagePhoneCall';
 import Photo from './Photo';
@@ -278,7 +280,7 @@ type StateProps = {
   shouldDetectChatLanguage?: boolean;
   requestedTranslationLanguage?: string;
   requestedChatTranslationLanguage?: string;
-  withStickerEffects?: boolean;
+  withAnimatedEffects?: boolean;
   webPageStory?: ApiTypeStory;
   isConnected: boolean;
   isLoadingComments?: boolean;
@@ -287,6 +289,7 @@ type StateProps = {
   tags?: Record<ApiReactionKey, ApiSavedReactionTag>;
   canTranscribeVoice?: boolean;
   viaBusinessBot?: ApiUser;
+  effect?: ApiAvailableEffect;
 };
 
 type MetaPosition =
@@ -397,7 +400,7 @@ const Message: FC<OwnProps & StateProps> = ({
   shouldDetectChatLanguage,
   requestedTranslationLanguage,
   requestedChatTranslationLanguage,
-  withStickerEffects,
+  withAnimatedEffects,
   webPageStory,
   isConnected,
   getIsMessageListReady,
@@ -406,6 +409,7 @@ const Message: FC<OwnProps & StateProps> = ({
   tags,
   canTranscribeVoice,
   viaBusinessBot,
+  effect,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -429,7 +433,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
 
   const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
-  const [hasActiveStickerEffect, startStickerEffect, stopStickerEffect] = useFlag();
+  const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
   const { isMobile, isTouchScreen } = useAppLayout();
 
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
@@ -622,6 +626,12 @@ const Message: FC<OwnProps & StateProps> = ({
     isRepliesChat,
   );
 
+  const handleEffectClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    requestEffect();
+  });
+
   useEffect(() => {
     if (!isLastInList) {
       return;
@@ -662,7 +672,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isSwiped && 'is-swiped',
     transitionClassNames,
     isJustAdded && 'is-just-added',
-    (hasActiveReactions || hasActiveStickerEffect) && 'has-active-reaction',
+    (hasActiveReactions || shouldPlayEffect) && 'has-active-effect',
     isStoryMention && 'is-story-mention',
   );
 
@@ -678,6 +688,14 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
   const { peerId: storyReplyPeerId, storyId: storyReplyId } = storyReplyInfo || {};
+
+  useEffect(() => {
+    if ((sticker?.hasEffect || effect) && ((
+      memoFirstUnreadIdRef.current && messageId >= memoFirstUnreadIdRef.current
+    ) || isLocal)) {
+      requestEffect();
+    }
+  }, [effect, isLocal, memoFirstUnreadIdRef, messageId, sticker?.hasEffect]);
 
   const detectedLanguage = useTextLanguage(
     text?.text,
@@ -980,7 +998,9 @@ const Message: FC<OwnProps & StateProps> = ({
         }
         availableReactions={availableReactions}
         isTranslated={Boolean(requestedTranslationLanguage ? currentTranslatedText : undefined)}
+        effectEmoji={effect?.emoticon}
         onClick={handleMetaClick}
+        onEffectClick={handleEffectClick}
         onTranslationClick={handleTranslationClick}
         onOpenThread={handleOpenThread}
       />
@@ -1066,20 +1086,15 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             shouldLoop={shouldLoopStickers}
-            shouldPlayEffect={(
-              sticker.hasEffect && ((
-                memoFirstUnreadIdRef.current && messageId >= memoFirstUnreadIdRef.current
-              ) || isLocal)
-            ) || undefined}
-            withEffect={withStickerEffects}
-            onPlayEffect={startStickerEffect}
-            onStopEffect={stopStickerEffect}
+            shouldPlayEffect={shouldPlayEffect}
+            withEffect={withAnimatedEffects}
+            onStopEffect={hideEffect}
           />
         )}
         {hasAnimatedEmoji && animatedCustomEmoji && (
           <AnimatedCustomEmoji
             customEmojiId={animatedCustomEmoji}
-            withEffects={withStickerEffects && isUserId(chatId)}
+            withEffects={withAnimatedEffects && isUserId(chatId) && !effect}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
             forceLoadPreview={isLocal}
@@ -1091,13 +1106,23 @@ const Message: FC<OwnProps & StateProps> = ({
         {hasAnimatedEmoji && animatedEmoji && (
           <AnimatedEmoji
             emoji={animatedEmoji}
-            withEffects={withStickerEffects && isUserId(chatId)}
+            withEffects={withAnimatedEffects && isUserId(chatId) && !effect}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
             forceLoadPreview={isLocal}
             messageId={messageId}
             chatId={chatId}
             activeEmojiInteractions={activeEmojiInteractions}
+          />
+        )}
+        {withAnimatedEffects && effect && (
+          <MessageEffect
+            shouldPlay={shouldPlayEffect}
+            message={message}
+            effect={effect}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+            onStop={hideEffect}
           />
         )}
         {phoneCall && (
@@ -1616,7 +1641,7 @@ export default memo(withGlobal<OwnProps>(
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
     const {
-      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, viaBusinessBotId,
+      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, viaBusinessBotId, effectId,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -1728,6 +1753,8 @@ export default memo(withGlobal<OwnProps>(
 
     const viaBusinessBot = viaBusinessBotId ? selectUser(global, viaBusinessBotId) : undefined;
 
+    const effect = effectId ? global.availableEffectById[effectId] : undefined;
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1793,7 +1820,7 @@ export default memo(withGlobal<OwnProps>(
       requestedTranslationLanguage,
       requestedChatTranslationLanguage,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
-      withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
+      withAnimatedEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       webPageStory,
       isConnected,
       isLoadingComments: repliesThreadInfo?.isCommentsInfo
@@ -1813,6 +1840,7 @@ export default memo(withGlobal<OwnProps>(
       tags: global.savedReactionTags?.byKey,
       canTranscribeVoice,
       viaBusinessBot,
+      effect,
     };
   },
 )(Message));

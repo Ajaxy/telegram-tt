@@ -77,6 +77,22 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
   }, GENERAL_REFETCH_INTERVAL);
 });
 
+addActionHandler('loadAvailableEffects', async (global): Promise<void> => {
+  const result = await callApi('fetchAvailableEffects');
+  if (!result) {
+    return;
+  }
+
+  const effectById = buildCollectionByKey(result, 'id');
+
+  global = getGlobal();
+  global = {
+    ...global,
+    availableEffectById: effectById,
+  };
+  setGlobal(global);
+});
+
 addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): ActionReturnType => {
   const {
     emoji, x, y, startSize, isReversed, tabId = getCurrentTabId(),

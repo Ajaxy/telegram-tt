@@ -12,6 +12,7 @@ import {
 import { split } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
+  buildApiAvailableEffect,
   buildApiAvailableReaction,
   buildApiReaction,
   buildApiSavedReactionTag,
@@ -93,6 +94,22 @@ export async function fetchAvailableReactions() {
   });
 
   return result.reactions.map(buildApiAvailableReaction);
+}
+
+export async function fetchAvailableEffects() {
+  const result = await invokeRequest(new GramJs.messages.GetAvailableEffects({}));
+
+  if (!result || result instanceof GramJs.messages.AvailableEffectsNotModified) {
+    return undefined;
+  }
+
+  result.documents.forEach((document) => {
+    if (document instanceof GramJs.Document) {
+      localDb.documents[String(document.id)] = document;
+    }
+  });
+
+  return result.effects.map(buildApiAvailableEffect);
 }
 
 export function sendReaction({

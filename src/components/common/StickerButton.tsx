@@ -22,6 +22,7 @@ import useOldLang from '../../hooks/useOldLang';
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
+import Icon from './icons/Icon';
 import StickerView from './StickerView';
 
 import './StickerButton.scss';
@@ -311,12 +312,12 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
         <div
           className="sticker-locked"
         >
-          <i className="icon icon-lock-badge" />
+          <Icon name="lock-badge" />
         </div>
       )}
       {!noShowPremium && isPremium && !isLocked && (
         <div className="sticker-premium">
-          <i className="icon icon-premium" />
+          <Icon name="star" />
         </div>
       )}
       {shouldShowCloseButton && (
@@ -327,7 +328,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           noFastClick
           onClick={handleRemoveClick}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
       )}
       {Boolean(contextMenuItems.length) && (

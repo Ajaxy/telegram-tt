@@ -263,6 +263,7 @@
     "messages.getMessageReactionsList",
     "messages.setChatAvailableReactions",
     "messages.getAvailableReactions",
+    "messages.getAvailableEffects",
     "messages.setDefaultReaction",
     "messages.translateText",
     "help.getAppConfig",

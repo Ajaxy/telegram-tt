@@ -286,6 +286,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'peerColors',
       'savedReactionTags',
       'timezones',
+      'availableEffectById',
     ]),
     lastIsChatInfoShown: !getIsMobile() ? global.lastIsChatInfoShown : undefined,
     customEmojis: reduceCustomEmojis(global),

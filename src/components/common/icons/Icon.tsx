@@ -11,6 +11,7 @@ type OwnProps = {
   style?: string;
   role?: AriaRole;
   ariaLabel?: string;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 const Icon = ({
@@ -19,6 +20,7 @@ const Icon = ({
   style,
   role,
   ariaLabel,
+  onClick,
 }: OwnProps) => {
   return (
     <i
@@ -27,6 +29,7 @@ const Icon = ({
       aria-hidden={!ariaLabel}
       aria-label={ariaLabel}
       role={role}
+      onClick={onClick}
     />
   );
 };

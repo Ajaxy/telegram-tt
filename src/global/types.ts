@@ -2,6 +2,7 @@ import type {
   ApiAppConfig,
   ApiAttachBot,
   ApiAttachment,
+  ApiAvailableEffect,
   ApiAvailableReaction,
   ApiBoost,
   ApiBoostsStatus,
@@ -986,6 +987,7 @@ export type GlobalState = {
       defaultTags?: string;
     };
   };
+  availableEffectById: Record<string, ApiAvailableEffect>;
 
   stickers: {
     setsById: Record<string, ApiStickerSet>;
@@ -2645,6 +2647,8 @@ export interface ActionPayloads {
   loadGreetingStickers: undefined;
   loadGenericEmojiEffects: undefined;
   loadBirthdayNumbersStickers: undefined;
+
+  loadAvailableEffects: undefined;
 
   addRecentSticker: {
     sticker: ApiSticker;

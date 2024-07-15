@@ -32,6 +32,7 @@ import useWindowSize from '../../hooks/window/useWindowSize';
 
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import Icon from './icons/Icon';
 import ReactionEmoji from './ReactionEmoji';
 import StickerButton from './StickerButton';
 
@@ -268,7 +269,7 @@ const StickerSet: FC<OwnProps> = ({
       {!shouldHideHeader && (
         <div className="symbol-set-header">
           <p className={buildClassName('symbol-set-title', withAddSetButton && 'symbol-set-title-external')}>
-            {isLocked && <i className="symbol-set-locked-icon icon icon-lock-badge" />}
+            {isLocked && <Icon name="lock-badge" className="symbol-set-locked-icon" />}
             <span className="symbol-set-name">{stickerSet.title}</span>
             {(isChatEmojiSet || isChatStickerSet) && (
               <span className="symbol-set-chat">{lang(isChatEmojiSet ? 'GroupEmoji' : 'GroupStickers')}</span>
@@ -280,7 +281,7 @@ const StickerSet: FC<OwnProps> = ({
             )}
           </p>
           {isRecent && (
-            <i className="symbol-set-remove icon icon-close" onClick={openConfirmModal} />
+            <Icon className="symbol-set-remove" name="close" onClick={openConfirmModal} />
           )}
           {withAddSetButton && (
             <Button
@@ -323,7 +324,7 @@ const StickerSet: FC<OwnProps> = ({
             onClick={handleDefaultStatusIconClick}
             key="default-status-icon"
           >
-            <i className="icon icon-premium" />
+            <Icon name="star" />
           </Button>
         )}
         {shouldRender && stickerSet.reactions?.map((reaction) => {

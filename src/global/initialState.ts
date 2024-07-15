@@ -162,6 +162,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     recentReactions: [],
     hash: {},
   },
+  availableEffectById: {},
 
   stickers: {
     setsById: {},

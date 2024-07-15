@@ -235,6 +235,7 @@ export function buildApiMessageWithChatId(
     senderBoosts,
     viaBusinessBotId: mtpMessage.viaBusinessBotId?.toString(),
     factCheck,
+    effectId: mtpMessage.effect?.toString(),
     isInvertedMedia,
   });
 }

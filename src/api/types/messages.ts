@@ -606,6 +606,7 @@ export interface ApiMessage {
   savedPeerId?: string;
   senderBoosts?: number;
   factCheck?: ApiFactCheck;
+  effectId?: string;
   isInvertedMedia?: true;
 }
 
@@ -642,6 +643,15 @@ export interface ApiAvailableReaction {
   reaction: ApiReactionEmoji;
   title: string;
   isInactive?: boolean;
+  isPremium?: boolean;
+}
+
+export interface ApiAvailableEffect {
+  id: string;
+  emoticon: string;
+  staticIconId?: string;
+  effectAnimationId?: string;
+  effectStickerId: string;
   isPremium?: boolean;
 }
 
