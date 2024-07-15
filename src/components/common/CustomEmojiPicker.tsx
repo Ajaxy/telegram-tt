@@ -201,6 +201,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         .filter((reaction) => !topReactionsSlice.some((topReaction) => isSameReaction(topReaction, reaction)))
         .slice(0, RECENT_REACTIONS_COUNT);
       const cleanAvailableReactions = (availableReactions || [])
+        .filter(({ isInactive }) => !isInactive)
         .map(({ reaction }) => reaction)
         .filter((reaction) => {
           return !topReactionsSlice.some((topReaction) => isSameReaction(topReaction, reaction))
