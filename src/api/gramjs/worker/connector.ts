@@ -23,6 +23,7 @@ type RequestStates = {
 
 const HEALTH_CHECK_TIMEOUT = 150;
 const HEALTH_CHECK_MIN_DELAY = 5 * 1000; // 5 sec
+const NO_QUEUE_BEFORE_INIT = new Set(['destroy']);
 
 let worker: Worker | undefined;
 const requestStates = new Map<string, RequestStates>();
@@ -138,6 +139,10 @@ export function setShouldEnableDebugLog(value: boolean) {
  */
 export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
   if (!isInited) {
+    if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
+      return Promise.resolve(undefined) as MethodResponse<T>;
+    }
+
     const deferred = new Deferred();
     localApiRequestsQueue.push({ fnName, args, deferred });
 
@@ -178,6 +183,10 @@ export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: Method
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
   if (!isInited && isMasterTab) {
+    if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
+      return Promise.resolve(undefined) as MethodResponse<T>;
+    }
+
     const deferred = new Deferred();
     apiRequestsQueue.push({ fnName, args, deferred });
 

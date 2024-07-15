@@ -33,7 +33,7 @@ export const INACTIVE_MARKER = '[Inactive]';
 export const DEBUG_PAYMENT_SMART_GLOCAL = false;
 
 export const SESSION_USER_KEY = 'user_auth';
-export const PASSCODE_CACHE_NAME = 'tt-passcode';
+export const LEGACY_PASSCODE_CACHE_NAME = 'tt-passcode';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';

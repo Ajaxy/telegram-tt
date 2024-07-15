@@ -3060,7 +3060,6 @@ export interface ActionPayloads {
   setPasscode: { passcode: string } & WithTabId;
   clearPasscode: undefined;
   lockScreen: undefined;
-  decryptSession: { passcode: string };
   unlockScreen: { sessionJson: string; globalJson: string };
   softSignIn: undefined;
   logInvalidUnlockAttempt: undefined;

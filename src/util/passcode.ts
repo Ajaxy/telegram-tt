@@ -1,10 +1,13 @@
-import { PASSCODE_CACHE_NAME } from '../config';
+import { LEGACY_PASSCODE_CACHE_NAME } from '../config';
+import { PASSCODE_IDB_STORE } from './browser/idb';
 import * as cacheApi from './cacheApi';
 
 const IV_LENGTH = 12;
 const SALT = 'harder better faster stronger';
 
 let currentPasscodeHash: ArrayBuffer | undefined;
+
+export class UnrecoverablePasscodeError extends Error {}
 
 export function getPasscodeHash() {
   return currentPasscodeHash;
@@ -84,7 +87,7 @@ export async function decryptSession(passcode: string) {
   if (!sessionEncrypted || !globalEncrypted) {
     // eslint-disable-next-line no-console
     console.error('[api/passcode] Missing required stored fields');
-    throw new Error('[api/passcode] Missing required stored fields');
+    throw new UnrecoverablePasscodeError('[api/passcode] Missing required stored fields');
   }
 
   try {
@@ -109,24 +112,27 @@ export function forgetPasscode() {
 
 export function clearEncryptedSession() {
   forgetPasscode();
-  return cacheApi.clear(PASSCODE_CACHE_NAME);
+  PASSCODE_IDB_STORE.clear();
+  return cacheApi.clear(LEGACY_PASSCODE_CACHE_NAME);
 }
 
 function sha256(plaintext: string) {
   return crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${plaintext}${SALT}`));
 }
 
-async function store(key: string, value: ArrayBuffer) {
-  const isSuccessful = await cacheApi.save(PASSCODE_CACHE_NAME, key, value);
-  if (isSuccessful) {
-    return;
-  }
-
-  throw new Error('Failed to save to cache');
+function store(key: string, value: ArrayBuffer) {
+  const asArray = Array.from(new Uint8Array(value));
+  PASSCODE_IDB_STORE.set(key, asArray);
 }
 
-function load(key: string) {
-  return cacheApi.fetch(PASSCODE_CACHE_NAME, key, cacheApi.Type.ArrayBuffer);
+async function load(key: string) {
+  const cached = await PASSCODE_IDB_STORE.get<number[]>(key);
+  if (cached) {
+    const asArrayBuffer = new Uint8Array(cached).buffer;
+    return asArrayBuffer;
+  }
+  // Fallback for old data
+  return cacheApi.fetch(LEGACY_PASSCODE_CACHE_NAME, key, cacheApi.Type.ArrayBuffer);
 }
 
 async function aesEncrypt(plaintext: string, pwHash: ArrayBuffer) {
