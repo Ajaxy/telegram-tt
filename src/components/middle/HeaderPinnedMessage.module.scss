@@ -136,6 +136,10 @@
     margin-right: 2.625rem;
     max-width: calc(15rem - 2.625rem);
     min-width: calc(15rem - 2.625rem);
+
+    &[dir="rtl"] {
+      transform: translateX(-0.25rem);
+    }
   }
 
   :global(.emoji-small) {

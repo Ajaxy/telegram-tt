@@ -26,6 +26,7 @@ type StateProps = {
   messageListType?: MessageListType;
   unreadCount?: number;
   unreadReactions?: number[];
+  unreadMentions?: number[];
   reactionsCount?: number;
   mentionsCount?: number;
 };
@@ -39,6 +40,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
   chatId,
   unreadCount,
   unreadReactions,
+  unreadMentions,
   reactionsCount,
   mentionsCount,
   withExtraShift,
@@ -65,6 +67,12 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
       fetchUnreadReactions({ chatId });
     }
   }, [chatId, fetchUnreadReactions, hasUnreadReactions]);
+
+  useEffect(() => {
+    if (hasUnreadMentions && chatId && !unreadMentions?.length) {
+      fetchUnreadMentions({ chatId });
+    }
+  }, [chatId, fetchUnreadMentions, hasUnreadMentions, unreadMentions?.length]);
 
   useEffect(() => {
     if (hasUnreadMentions && chatId) {
@@ -153,6 +161,7 @@ export default memo(withGlobal<OwnProps>(
       chatId,
       reactionsCount: shouldShowCount ? chat.unreadReactionsCount : undefined,
       unreadReactions: shouldShowCount ? chat.unreadReactions : undefined,
+      unreadMentions: shouldShowCount ? chat.unreadMentions : undefined,
       mentionsCount: shouldShowCount ? chat.unreadMentionsCount : undefined,
       unreadCount: shouldShowCount ? chat.unreadCount : undefined,
     };

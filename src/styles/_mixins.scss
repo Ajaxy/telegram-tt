@@ -49,7 +49,9 @@
         rgb(var(--_accent-color-rgb), 35%) 5px,
         rgb(var(--_accent-color-rgb), 35%) 10px
       );
-  } @else {
+  }
+
+  @else {
     #{$property}:
       repeating-linear-gradient(
         -45deg,
@@ -89,7 +91,7 @@
       -webkit-appearance: none;
     }
 
-    &::-moz-slider-thumb {
+    &::-moz-range-thumb {
       -moz-appearance: none;
     }
 

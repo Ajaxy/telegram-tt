@@ -33,6 +33,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
 
+import Button from '../../ui/Button';
 import TextTimer from '../../ui/TextTimer';
 import TextFormatter from './TextFormatter.async';
 
@@ -72,6 +73,7 @@ type OwnProps = {
   captionLimit?: number;
   onFocus?: NoneToVoidFunction;
   onBlur?: NoneToVoidFunction;
+  isNeedPremium?: boolean;
 };
 
 type StateProps = {
@@ -137,11 +139,13 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   onScroll,
   onFocus,
   onBlur,
+  isNeedPremium,
 }) => {
   const {
     editLastMessage,
     replyToNextMessage,
     showAllowedMessageTypesNotification,
+    openPremiumModal,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -257,7 +261,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const chatIdRef = useRef(chatId);
   chatIdRef.current = chatId;
   const focusInput = useLastCallback(() => {
-    if (!inputRef.current) {
+    if (!inputRef.current || isNeedPremium) {
       return;
     }
 
@@ -450,9 +454,11 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   }
 
   function handleClick() {
-    if (isAttachmentModalInput || canSendPlainText) return;
+    if (isAttachmentModalInput || canSendPlainText || (isStoryInput && isNeedPremium)) return;
     showAllowedMessageTypesNotification({ chatId });
   }
+
+  const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());
 
   useEffect(() => {
     if (IS_TOUCH_ENV) {
@@ -553,14 +559,16 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     shouldSuppressFocus && 'focus-disabled',
   );
 
+  const inputScrollerContentClass = buildClassName('input-scroller-content', isNeedPremium && 'is-need-premium');
+
   return (
     <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
       <div
-        className={buildClassName('custom-scroll', SCROLLER_CLASS)}
+        className={buildClassName('custom-scroll', SCROLLER_CLASS, isNeedPremium && 'is-need-premium')}
         onScroll={onScroll}
         onClick={!isAttachmentModalInput && !canSendPlainText ? handleClick : undefined}
       >
-        <div className="input-scroller-content">
+        <div className={inputScrollerContentClass}>
           <div
             ref={inputRef}
             id={editableInputId || EDITABLE_INPUT_ID}
@@ -576,14 +584,15 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}
             onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
             aria-label={placeholder}
-            onFocus={onFocus}
-            onBlur={onBlur}
+            onFocus={!isNeedPremium ? onFocus : undefined}
+            onBlur={!isNeedPremium ? onBlur : undefined}
           />
           {!forcedPlaceholder && (
             <span
               className={buildClassName(
                 'placeholder-text',
                 !isAttachmentModalInput && !canSendPlainText && 'with-icon',
+                isNeedPremium && 'is-need-premium',
               )}
               dir="auto"
             >
@@ -592,6 +601,11 @@ const MessageInput: FC<OwnProps & StateProps> = ({
               {shouldDisplayTimer ? (
                 <TextTimer langKey={timedPlaceholderLangKey!} endsAt={timedPlaceholderDate!} onEnd={handleTimerEnd} />
               ) : placeholder}
+              {isStoryInput && isNeedPremium && (
+                <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
+                  {lang('StoryRepliesLockedButton')}
+                </Button>
+              )}
             </span>
           )}
           <canvas ref={sharedCanvasRef} className="shared-canvas" />
@@ -599,8 +613,14 @@ const MessageInput: FC<OwnProps & StateProps> = ({
           <div ref={absoluteContainerRef} className="absolute-video-container" />
         </div>
       </div>
-      <div ref={scrollerCloneRef} className={buildClassName('custom-scroll', SCROLLER_CLASS, 'clone')}>
-        <div className="input-scroller-content">
+      <div
+        ref={scrollerCloneRef}
+        className={buildClassName('custom-scroll',
+          SCROLLER_CLASS,
+          'clone',
+          isNeedPremium && 'is-need-premium')}
+      >
+        <div className={inputScrollerContentClass}>
           <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
         </div>
       </div>

@@ -27,7 +27,7 @@ const AttachBotIcon: FC<OwnProps> = ({
   icon, theme,
 }) => {
   const { isTouchScreen } = useAppLayout();
-  const mediaData = useMedia(getDocumentMediaHash(icon), false, ApiMediaFormat.Text);
+  const mediaData = useMedia(getDocumentMediaHash(icon, 'full'), false, ApiMediaFormat.Text);
 
   const iconSvg = useMemo(() => {
     if (!mediaData) return '';

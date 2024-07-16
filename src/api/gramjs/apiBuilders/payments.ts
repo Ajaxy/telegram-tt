@@ -12,12 +12,13 @@ import type {
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
+  BoughtPaidMedia,
 } from '../../types';
 
 import { addWebDocumentToLocalDb } from '../helpers';
 import { buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
-import { buildApiDocument, buildApiWebDocument } from './messageContent';
+import { buildApiDocument, buildApiWebDocument, buildMessageMediaContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildPrepaidGiveaway, buildStatisticsPercentage } from './statistics';
 
@@ -214,6 +215,7 @@ export function buildApiInvoiceFromForm(form: GramJs.payments.TypePaymentForm): 
   const totalAmount = prices.reduce((ac, cur) => ac + cur.amount.toJSNumber(), 0);
 
   return {
+    mediaType: 'invoice',
     text,
     title,
     photo: buildApiWebDocument(photo),
@@ -398,6 +400,10 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
     return { type: 'fragment' };
   }
 
+  if (peer instanceof GramJs.StarsTransactionPeerAds) {
+    return { type: 'ads' };
+  }
+
   if (peer instanceof GramJs.StarsTransactionPeer) {
     return { type: 'peer', id: getApiChatIdFromMtpPeer(peer.peer) };
   }
@@ -407,12 +413,15 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
-    date, id, peer, stars, description, photo, title, refund,
+    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending,
   } = transaction;
 
   if (photo) {
     addWebDocumentToLocalDb(photo);
   }
+
+  const boughtExtendedMedia = extendedMedia?.map((m) => buildMessageMediaContent(m))
+    .filter(Boolean) as BoughtPaidMedia[];
 
   return {
     id,
@@ -423,6 +432,10 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     description,
     photo: photo && buildApiWebDocument(photo),
     isRefund: refund,
+    hasFailed: failed,
+    isPending: pending,
+    messageId: msgId,
+    extendedMedia: boughtExtendedMedia,
   };
 }
 

@@ -27,22 +27,22 @@ type StateProps = {
   localContactIds?: string[];
   searchQuery?: string;
   isSearching?: boolean;
-  localUserIds?: string[];
-  globalUserIds?: string[];
+  localPeerIds?: string[];
+  globalPeerIds?: string[];
 };
 
 const NewChatStep1: FC<OwnProps & StateProps> = ({
   isChannel,
   isActive,
   selectedMemberIds,
-  onSelectedMemberIdsChange,
-  onNextStep,
-  onReset,
   localContactIds,
   searchQuery,
   isSearching,
-  localUserIds,
-  globalUserIds,
+  localPeerIds,
+  globalPeerIds,
+  onSelectedMemberIdsChange,
+  onNextStep,
+  onReset,
 }) => {
   const {
     setGlobalSearchQuery,
@@ -67,20 +67,17 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
     return sortChatIds(
       unique([
         ...foundContactIds,
-        ...(localUserIds || []),
-        ...(globalUserIds || []),
+        ...(localPeerIds || []),
+        ...(globalPeerIds || []),
       ]).filter((contactId) => {
         const user = usersById[contactId];
-        if (!user) {
-          return true;
-        }
 
-        return !user.isSelf && (user.canBeInvitedToGroup || !isUserBot(user));
+        return user && !user.isSelf && (user.canBeInvitedToGroup || !isUserBot(user));
       }),
       false,
       selectedMemberIds,
     );
-  }, [localContactIds, searchQuery, localUserIds, globalUserIds, selectedMemberIds]);
+  }, [localContactIds, searchQuery, localPeerIds, globalPeerIds, selectedMemberIds]);
 
   const handleNextStep = useCallback(() => {
     setGlobalSearchQuery({ query: '' });
@@ -136,15 +133,15 @@ export default memo(withGlobal<OwnProps>(
       globalResults,
       localResults,
     } = selectTabState(global).globalSearch;
-    const { userIds: globalUserIds } = globalResults || {};
-    const { userIds: localUserIds } = localResults || {};
+    const { peerIds: globalPeerIds } = globalResults || {};
+    const { peerIds: localPeerIds } = localResults || {};
 
     return {
       localContactIds,
       searchQuery,
       isSearching: fetchingStatus?.chats,
-      globalUserIds,
-      localUserIds,
+      globalPeerIds,
+      localPeerIds,
     };
   },
 )(NewChatStep1));

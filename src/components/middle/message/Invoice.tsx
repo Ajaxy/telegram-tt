@@ -55,7 +55,7 @@ const Invoice: FC<OwnProps> = ({
 
   const photoUrl = useMedia(getWebDocumentHash(photo));
   const withBlurredBackground = Boolean(forcedWidth);
-  const blurredBackgroundRef = useBlurredMediaThumbRef(message, !withBlurredBackground, photoUrl);
+  const blurredBackgroundRef = useBlurredMediaThumbRef(photoUrl, !withBlurredBackground);
 
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {

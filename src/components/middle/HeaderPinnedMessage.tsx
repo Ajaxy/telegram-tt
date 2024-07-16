@@ -170,8 +170,11 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
             isSpoiler,
           )}
         </Transition>
-        <div className={buildClassName(styles.messageText, mediaThumbnail && styles.withMedia)}>
-          <div className={styles.title} dir="auto">
+        <div
+          className={buildClassName(styles.messageText, mediaThumbnail && styles.withMedia)}
+          dir={lang.isRtl ? 'rtl' : undefined}
+        >
+          <div className={styles.title} dir={lang.isRtl ? 'rtl' : undefined}>
             {!customTitle && (
               <AnimatedCounter text={`${lang('PinnedMessage')} ${index > 0 ? `#${count - index}` : ''}`} />
             )}

@@ -17,6 +17,7 @@
 
   .section {
     padding: 1rem 1.5rem;
+
     @include mixins.side-panel-section;
 
     &.wide {

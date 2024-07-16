@@ -1,11 +1,15 @@
 import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiUser } from '../../../api/types';
+import type {
+  ApiChat, ApiMediaExtendedPreview, ApiMessage, ApiUser,
+} from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 
-import { getUserFullName } from '../../../global/helpers';
-import { selectTabState, selectUser } from '../../../global/selectors';
+import { getChatTitle, getUserFullName } from '../../../global/helpers';
+import {
+  selectChat, selectChatMessage, selectTabState, selectUser,
+} from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
@@ -18,6 +22,7 @@ import StarIcon from '../../common/icons/StarIcon';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import BalanceBlock from './BalanceBlock';
+import PaidMediaThumb from './PaidMediaThumb';
 
 import styles from './StarsBalanceModal.module.scss';
 
@@ -31,10 +36,17 @@ type StateProps = {
   payment?: TabState['payment'];
   starsBalanceState?: GlobalState['stars'];
   bot?: ApiUser;
+  paidMediaMessage?: ApiMessage;
+  paidMediaChat?: ApiChat;
 };
 
 const StarPaymentModal = ({
-  modal, bot, starsBalanceState, payment,
+  modal,
+  bot,
+  starsBalanceState,
+  payment,
+  paidMediaMessage,
+  paidMediaChat,
 }: OwnProps & StateProps) => {
   const { closePaymentModal, openStarsBalanceModal, sendStarPaymentForm } = getActions();
   const [isLoading, markLoading, unmarkLoading] = useFlag();
@@ -58,8 +70,21 @@ const StarPaymentModal = ({
     const botName = getUserFullName(bot);
     const starsText = lang('Stars.Intro.PurchasedText.Stars', payment.invoice.amount);
 
+    if (paidMediaMessage) {
+      const extendedMedia = paidMediaMessage.content.paidMedia!.extendedMedia as ApiMediaExtendedPreview[];
+      const areAllPhotos = extendedMedia.every((media) => !media.duration);
+      const areAllVideos = extendedMedia.every((media) => !!media.duration);
+
+      const mediaText = areAllPhotos ? lang('Stars.Transfer.Photos', extendedMedia.length)
+        : areAllVideos ? lang('Stars.Transfer.Videos', extendedMedia.length)
+          : lang('Media', extendedMedia.length);
+
+      const channelTitle = getChatTitle(lang, paidMediaChat!);
+      return lang('Stars.Transfer.UnlockInfo', [mediaText, channelTitle, starsText]);
+    }
+
     return lang('Stars.Transfer.Info', [payment.invoice.title, botName, starsText]);
-  }, [bot, payment, lang]);
+  }, [payment?.invoice, bot, lang, paidMediaMessage, paidMediaChat]);
 
   const handlePayment = useLastCallback(() => {
     const price = payment?.invoice?.amount;
@@ -89,8 +114,14 @@ const StarPaymentModal = ({
     >
       <BalanceBlock balance={starsBalanceState?.balance || 0} className={styles.modalBalance} />
       <div className={styles.paymentImages} dir={lang.isRtl ? 'ltr' : 'rtl'}>
-        <Avatar peer={bot} size="giant" />
-        {photo && <Avatar className={styles.paymentPhoto} webPhoto={photo} size="giant" />}
+        {paidMediaMessage ? (
+          <PaidMediaThumb media={paidMediaMessage.content.paidMedia!.extendedMedia} />
+        ) : (
+          <>
+            <Avatar peer={bot} size="giant" />
+            {photo && <Avatar className={styles.paymentPhoto} webPhoto={photo} size="giant" />}
+          </>
+        )}
         <img className={styles.paymentImageBackground} src={StarsBackground} alt="" draggable={false} />
       </div>
       <h2 className={styles.headerText}>
@@ -114,10 +145,19 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const payment = selectTabState(global).payment;
     const bot = payment?.botId ? selectUser(global, payment.botId) : undefined;
+
+    const messageInputInvoice = payment.inputInvoice?.type === 'message' ? payment.inputInvoice : undefined;
+    const message = messageInputInvoice
+      ? selectChatMessage(global, messageInputInvoice.chatId, messageInputInvoice.messageId) : undefined;
+    const chat = messageInputInvoice ? selectChat(global, messageInputInvoice.chatId) : undefined;
+    const isPaidMedia = message?.content.paidMedia;
+
     return {
       bot,
       starsBalanceState: global.stars,
       payment,
+      paidMediaMessage: isPaidMedia ? message : undefined,
+      paidMediaChat: isPaidMedia ? chat : undefined,
     };
   },
 )(StarPaymentModal));

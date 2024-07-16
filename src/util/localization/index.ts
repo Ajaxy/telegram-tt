@@ -22,6 +22,7 @@ import { DEBUG } from '../../config';
 import { callApi } from '../../api/gramjs';
 import renderText, { type TextFilter } from '../../components/common/helpers/renderText';
 import { MAIN_IDB_STORE } from '../browser/idb';
+import { getBasicListFormat } from '../browser/intlListFormat';
 import { createCallbackManager } from '../callbacks';
 import readFallbackStrings from '../data/readFallbackStrings';
 import { initialEstablishmentPromise, isCurrentTabMaster } from '../establishMultitabRole';
@@ -29,7 +30,7 @@ import { omit } from '../iteratees';
 import { notifyLangpackUpdate } from '../multitab';
 import { replaceInStringsWithTeact } from '../replaceWithTeact';
 import { fastRaf } from '../schedulers';
-import { IS_MULTITAB_SUPPORTED } from '../windowEnvironment';
+import { IS_INTL_LIST_FORMAT_SUPPORTED, IS_MULTITAB_SUPPORTED } from '../windowEnvironment';
 
 import Deferred from '../Deferred';
 import LimitedMap from '../primitives/LimitedMap';
@@ -145,13 +146,18 @@ function updateLanguage(newLang: ApiLanguage) {
 function createFormatters() {
   if (!language) return;
   const langCode = language.pluralCode;
+  const listFormatFallback = getBasicListFormat();
+
+  function createListFormat(lang: string, type: 'conjunction' | 'disjunction') {
+    return IS_INTL_LIST_FORMAT_SUPPORTED ? new Intl.ListFormat(lang, { type }) : listFormatFallback;
+  }
 
   try {
     formatters = {
       pluralRules: new Intl.PluralRules(langCode),
       region: new Intl.DisplayNames(langCode, { type: 'region' }),
-      conjunction: new Intl.ListFormat(langCode, { type: 'conjunction' }),
-      disjunction: new Intl.ListFormat(langCode, { type: 'disjunction' }),
+      conjunction: createListFormat(langCode, 'conjunction'),
+      disjunction: createListFormat(langCode, 'disjunction'),
       number: new Intl.NumberFormat(langCode),
     };
   } catch (e) {
@@ -160,8 +166,8 @@ function createFormatters() {
     formatters = {
       pluralRules: new Intl.PluralRules(FORMATTERS_FALLBACK_LANG),
       region: new Intl.DisplayNames(FORMATTERS_FALLBACK_LANG, { type: 'region' }),
-      conjunction: new Intl.ListFormat(FORMATTERS_FALLBACK_LANG, { type: 'conjunction' }),
-      disjunction: new Intl.ListFormat(FORMATTERS_FALLBACK_LANG, { type: 'disjunction' }),
+      conjunction: createListFormat(FORMATTERS_FALLBACK_LANG, 'conjunction'),
+      disjunction: createListFormat(FORMATTERS_FALLBACK_LANG, 'disjunction'),
       number: new Intl.NumberFormat(FORMATTERS_FALLBACK_LANG),
     };
   }

@@ -3,24 +3,29 @@ import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
+  ApiInvoice,
+  ApiPeer,
   ApiReceipt, ApiReceiptRegular, ApiShippingAddress,
   ApiStarsTransactionPeer,
-  ApiUser,
 } from '../../api/types';
+import { MediaViewerOrigin } from '../../types';
 
+import { getMessageLink } from '../../global/helpers';
 import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '../../global/helpers/payments';
-import { selectTabState, selectUser } from '../../global/selectors';
+import { selectPeer, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatDateTimeToString } from '../../util/dates/dateFormat';
 
 import useFlag from '../../hooks/useFlag';
+import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
 import StarIcon from '../common/icons/StarIcon';
 import SafeLink from '../common/SafeLink';
 import TableInfoModal, { type TableData } from '../modals/common/TableInfoModal';
+import PaidMediaThumb from '../modals/stars/PaidMediaThumb';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Checkout from './Checkout';
@@ -32,19 +37,29 @@ import StarsBackground from '../../assets/stars-bg.png';
 
 export type OwnProps = {
   isOpen?: boolean;
-  onClose: () => void;
+  onClose: NoneToVoidFunction;
 };
 
 type StateProps = {
   receipt?: ApiReceipt;
-  bot?: ApiUser;
+  peer?: ApiPeer;
 };
 
 const ReceiptModal: FC<OwnProps & StateProps> = ({
-  isOpen, receipt, bot, onClose,
+  isOpen, receipt, peer, onClose,
 }) => {
-  const { showNotification } = getActions();
+  const { showNotification, openMediaViewer } = getActions();
   const lang = useOldLang();
+
+  const handleOpenMedia = useLastCallback(() => {
+    const media = receipt?.type === 'stars' && receipt.media;
+    if (!media) return;
+
+    openMediaViewer({
+      origin: MediaViewerOrigin.StarsTransaction,
+      standaloneMedia: media.flatMap((item) => Object.values(item)),
+    });
+  });
 
   const starModalData = useMemo(() => {
     if (receipt?.type !== 'stars') return undefined;
@@ -57,11 +72,37 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
 
     const title = receipt.title || (customPeer ? lang(customPeer.titleKey) : undefined);
 
+    const messageLink = peer && receipt.messageId ? getMessageLink(peer, undefined, receipt.messageId) : undefined;
+
+    const media = receipt.media;
+
+    const mediaAmount = media?.length || 0;
+    const areAllPhotos = media?.every((m) => !m.video);
+    const areAllVideos = media?.every((m) => !m.photo);
+
+    const mediaText = areAllPhotos ? lang('Stars.Transfer.Photos', mediaAmount)
+      : areAllVideos ? lang('Stars.Transfer.Videos', mediaAmount)
+        : lang('Media', mediaAmount);
+
+    const description = receipt.text || (media ? mediaText : undefined);
+
     const header = (
       <div className={styles.header}>
-        <img className={styles.starsBackground} src={StarsBackground} alt="" draggable={false} />
+        {media && (
+          <PaidMediaThumb
+            className={buildClassName(styles.mediaPreview, 'transaction-media-preview')}
+            media={media}
+            onClick={handleOpenMedia}
+          />
+        )}
+        <img
+          className={buildClassName(styles.starsBackground, receipt.media && styles.mediaShift)}
+          src={StarsBackground}
+          alt=""
+          draggable={false}
+        />
         {title && <h1 className={styles.title}>{title}</h1>}
-        <p className={styles.description}>{receipt.text}</p>
+        <p className={styles.description}>{description}</p>
         <p className={styles.amount}>
           <span className={buildClassName(styles.amount, receipt.totalAmount < 0 ? styles.negative : styles.positive)}>
             {formatStarsTransactionAmount(receipt.totalAmount)}
@@ -71,12 +112,20 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
       </div>
     );
 
-    const tableData = [
-      [
-        lang(receipt.totalAmount < 0 ? 'Stars.Transaction.To' : 'Stars.Transaction.Via'),
-        botId ? { chatId: botId } : toName || '',
-      ],
-      [lang('Stars.Transaction.Id'), (
+    const tableData: TableData = [];
+
+    tableData.push([
+      lang(receipt.totalAmount < 0 ? 'Stars.Transaction.To' : 'Stars.Transaction.Via'),
+      botId ? { chatId: botId } : toName || '',
+    ]);
+
+    if (messageLink) {
+      tableData.push([lang('Stars.Transaction.Media'), <SafeLink url={messageLink} text={messageLink} />]);
+    }
+
+    tableData.push([
+      lang('Stars.Transaction.Id'),
+      (
         <span
           className={styles.tid}
           onClick={() => {
@@ -89,9 +138,13 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
           {receipt.transactionId}
           <Icon className={styles.copyIcon} name="copy" />
         </span>
-      )],
-      [lang('Stars.Transaction.Date'), formatDateTimeToString(receipt.date * 1000, lang.code, true)],
-    ] satisfies TableData;
+      ),
+    ]);
+
+    tableData.push([
+      lang('Stars.Transaction.Date'),
+      formatDateTimeToString(receipt.date * 1000, lang.code, true),
+    ]);
 
     const footerText = lang('lng_credits_box_out_about');
     const footerTextParts = footerText.split('{link}');
@@ -108,9 +161,9 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
       header,
       tableData,
       footer,
-      avatarPeer: !receipt.photo ? (bot || customPeer) : undefined,
+      avatarPeer: !receipt.photo ? (peer || customPeer) : undefined,
     };
-  }, [lang, receipt, bot]);
+  }, [lang, receipt, peer]);
 
   if (receipt?.type === 'regular') {
     return <ReceiptModalRegular isOpen={isOpen} receipt={receipt} onClose={onClose} />;
@@ -119,9 +172,11 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
   return (
     <TableInfoModal
       isOpen={isOpen}
+      className={styles.modal}
       header={starModalData?.header}
       tableData={starModalData?.tableData}
       footer={starModalData?.footer}
+      noHeaderImage={Boolean(receipt?.media)}
       headerAvatarWebPhoto={receipt?.photo}
       headerAvatarPeer={starModalData?.avatarPeer}
       buttonText={lang('OK')}
@@ -164,8 +219,9 @@ function ReceiptModalRegular({
     return getCheckoutInfo(credentialsTitle, info, shippingMethod);
   }, [info, shippingMethod, credentialsTitle]);
 
-  const invoice = useMemo(() => {
+  const invoice: ApiInvoice = useMemo(() => {
     return {
+      mediaType: 'invoice',
       photo,
       text: text!,
       title: title!,
@@ -215,12 +271,12 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { receipt } = selectTabState(global).payment;
 
-    const botId = receipt?.type === 'stars' && (receipt.botId || (receipt.peer?.type === 'peer' && receipt.peer.id));
-    const bot = botId ? selectUser(global, botId) : undefined;
+    const peerId = receipt?.type === 'stars' && (receipt.botId || (receipt.peer?.type === 'peer' && receipt.peer.id));
+    const peer = peerId ? selectPeer(global, peerId) : undefined;
 
     return {
       receipt,
-      bot,
+      peer,
     };
   },
 )(ReceiptModal));
@@ -259,6 +315,8 @@ function getStarsPeerTitleKey(peer: ApiStarsTransactionPeer) {
       return 'Fragment';
     case 'premiumBot':
       return 'StarsTransactionBot';
+    case 'ads':
+      return 'StarsTransactionAds';
     default:
       return 'Stars.Transaction.Unsupported.Title';
   }

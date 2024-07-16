@@ -14,8 +14,15 @@ export function selectIsMediaViewerOpen<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const { mediaViewer } = selectTabState(global, tabId);
-  return Boolean(mediaViewer.mediaId || mediaViewer.avatarOwnerId);
+  const {
+    mediaViewer: {
+      chatId,
+      messageId,
+      isAvatarView,
+      standaloneMedia,
+    },
+  } = selectTabState(global, tabId);
+  return Boolean(standaloneMedia || (chatId && (isAvatarView || messageId)));
 }
 
 export function selectRightColumnContentKey<T extends GlobalState>(

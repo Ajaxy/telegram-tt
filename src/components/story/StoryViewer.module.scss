@@ -67,6 +67,7 @@
   right: 1rem;
   top: 1rem;
   z-index: 3;
+
   @media (max-width: 600px) {
     display: none;
   }
@@ -161,6 +162,7 @@
   @for $i from -4 through 4 {
     $slideWidth: 10.875rem;
     $basis: 4.25rem;
+
     @if $i < 0 {
       $basis: -12.625rem;
     }
@@ -325,6 +327,7 @@
 }
 
 // Shared styles for the header that are also used in ghost animation
+
 @mixin story-header {
   position: absolute;
   width: 100%;
@@ -436,6 +439,7 @@
 
 .closeButton {
   display: none;
+
   @media (max-width: 600px) {
     display: flex;
   }
@@ -448,6 +452,7 @@
 
   :global(.Button) {
     color: white;
+
     @media (max-width: 600px) {
       display: flex;
       &:active,

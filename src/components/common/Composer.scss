@@ -30,6 +30,31 @@
     --border-width: 0;
   }
 
+  .effect-icon {
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    place-items: center;
+
+    font-size: 1rem;
+    line-height: 1;
+    position: absolute;
+    right: -0.25rem;
+    bottom: -0.25rem;
+
+    background-color: var(--color-background);
+    border: 1px solid var(--color-borders);
+    color: var(--color-text);
+
+    border-radius: 50%;
+    cursor: var(--custom-cursor, pointer);
+
+    & > .emoji {
+      width: 1rem !important;
+      height: 1rem !important;
+    }
+  }
+
   @keyframes show-send-as-button {
     from {
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
@@ -331,6 +356,9 @@
   &.with-story-tweaks {
     border-radius: var(--border-radius-default-small);
     border-bottom-right-radius: 0;
+    &.is-need-premium {
+      border-bottom-right-radius: var(--border-radius-default-small);
+    }
     box-shadow: none;
   }
 
@@ -462,6 +490,7 @@
       border-radius: 50%;
       background: var(--color-green-darker);
       box-shadow: -0.375rem -0.25rem 0 -0.1875rem var(--color-background);
+
       @media (max-width: 600px) {
         top: 0.5rem;
         right: 0.5rem;
@@ -742,8 +771,11 @@
   .input-scroller {
     min-height: var(--base-height, 3.5rem);
     max-height: 10rem;
-
     margin-right: calc((var(--margin-for-scrollbar) + 1rem) * -1);
+
+    &.is-need-premium {
+      margin-right: 0.5rem;
+    }
 
     &:has(.form-control:focus) {
       border-color: var(--color-primary);
@@ -752,17 +784,52 @@
 
   .input-scroller-content {
     margin-right: calc(var(--margin-for-scrollbar) + 0.5rem);
+    &.is-need-premium {
+      margin-right: 0;
+    }
   }
 
   .placeholder-text {
     top: auto;
-    bottom: 1.0625rem;
     left: 0.875rem;
+  }
+
+  .unlock-button {
+    &:hover,
+    &.active {
+      background: var(--color-chat-hover);
+    }
+
+    color: var(--color-text);
+    width: auto;
+    height: auto;
+
+    padding-top: 0.125rem;
+    padding-bottom: 0.125rem;
+    padding-right: 0.4375rem;
+    padding-left: 0.4375rem;
+
+    margin-left: 0.4375rem;
+
+    text-transform: lowercase;
   }
 }
 
+#caption-input-text .placeholder-text {
+  bottom: 1.0625rem;
+}
+
 #story-input-text .placeholder-text {
-  bottom: 0.875rem;
+  top: calc((var(--base-height, 3.5rem) - var(--composer-text-size, 1rem) * 1.3125) / 2);
+
+  @media (max-width: 600px) {
+    top: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2);
+  }
+
+  &.is-need-premium {
+    pointer-events: auto;
+  }
+
   left: 0.875rem;
 }
 

@@ -70,11 +70,13 @@ export type LangFn = {
   pluralCode: string;
 };
 
+type ListFormat = Pick<Intl.ListFormat, 'format'>;
+
 export type LangFormatters = {
   pluralRules: Intl.PluralRules;
   region: Intl.DisplayNames;
-  conjunction: Intl.ListFormat;
-  disjunction: Intl.ListFormat;
+  conjunction: ListFormat;
+  disjunction: ListFormat;
   number: Intl.NumberFormat;
 };
 

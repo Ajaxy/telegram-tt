@@ -109,11 +109,13 @@
 
 .settings-main-menu {
   padding: 0.5rem;
+
   @include mixins.side-panel-section;
 
   > .ChatExtra {
     padding: 0 0.5rem 0.3125rem;
     margin: 0 -0.5rem 0.625rem;
+
     @include mixins.side-panel-section;
 
     .ListItem.narrow {
@@ -125,6 +127,7 @@
 .settings-item-simple,
 .settings-item {
   padding: 1.5rem 1.5rem 1rem;
+
   @include mixins.side-panel-section;
 }
 

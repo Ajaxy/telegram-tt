@@ -10,10 +10,12 @@
     height: calc(100% - 3rem);
     overflow-y: auto;
     padding: 0.5rem 0.75rem;
+
     @include mixins.adapt-padding-to-scrollbar(0.75rem);
 
     @media (max-width: 600px) {
       padding: 0.5rem 0.25rem;
+
       @include mixins.adapt-padding-to-scrollbar(0.25rem);
     }
   }

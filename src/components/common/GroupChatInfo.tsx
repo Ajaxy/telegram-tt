@@ -130,8 +130,9 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       if (chat && hasMedia) {
         e.stopPropagation();
         openMediaViewer({
-          avatarOwnerId: chat.id,
-          mediaId: 0,
+          isAvatarView: true,
+          chatId: chat.id,
+          mediaIndex: 0,
           origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
         });
       }

@@ -12,8 +12,10 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
+  addUnreadMentions,
   deleteChatMessages,
   leaveChat,
+  removeUnreadMentions,
   replaceThreadParam,
   updateChat,
   updateChatFullInfo,
@@ -99,6 +101,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const lastMessageId = selectChatLastMessageId(global, chat.id);
         const localMessage = buildLocalMessage(chat, lastMessageId);
         localMessage.content.action = {
+          mediaType: 'action',
           text: 'you joined this channel',
           translationValues: ['ChannelJoined'],
           type: 'joinedChannel',
@@ -177,13 +180,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       global = updateChat(global, update.chatId, {
         unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-        ...(hasMention && { unreadMentionsCount: (chat.unreadMentionsCount || 0) + 1 }),
       });
 
       if (hasMention) {
-        global = updateChat(global, update.chatId, {
-          unreadMentions: [...(chat.unreadMentions || []), update.message.id!],
-        });
+        global = addUnreadMentions(global, update.chatId, chat, [update.message.id!], true);
       }
 
       const topic = chat.isForum ? selectTopicFromMessage(global, message as ApiMessage) : undefined;
@@ -220,10 +220,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
 
         if (!messageUpdate.hasUnreadMention && chat?.unreadMentionsCount) {
-          global = updateChat(global, chatId, {
-            unreadMentionsCount: Math.max(chat.unreadMentionsCount - 1, 0) || undefined,
-            unreadMentions: chat.unreadMentions?.filter((i) => i !== id),
-          });
+          global = removeUnreadMentions(global, chatId, chat, [id], true);
         }
       });
 
@@ -429,19 +426,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         });
 
         return global;
-      }
-
-      return undefined;
-    }
-
-    case 'deleteProfilePhotos': {
-      const { chatId, ids } = update;
-      const chat = global.chats.byId[chatId];
-
-      if (chat?.photos) {
-        return updateChat(global, chatId, {
-          photos: chat.photos.filter((photo) => !ids.includes(photo.id)),
-        });
       }
 
       return undefined;

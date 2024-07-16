@@ -67,10 +67,12 @@ import {
 import {
   addChatMessagesById,
   addChats,
+  addUnreadMentions,
   addUsers,
   deleteSponsoredMessage,
   removeOutlyingList,
   removeRequestedMessageTranslation,
+  removeUnreadMentions,
   replaceSettings,
   replaceThreadParam,
   replaceUserStatuses,
@@ -523,6 +525,7 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
   const newDraft: ApiDraft = {
     text,
     replyInfo: currentDraft?.replyInfo,
+    effectId: currentDraft?.effectId,
   };
 
   saveDraft({
@@ -595,6 +598,23 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
 
   saveDraft({
     global, chatId, threadId, draft: newDraft, isLocalOnly: Boolean(newDraft),
+  });
+});
+
+addActionHandler('saveEffectInDraft', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, threadId, effectId,
+  } = payload;
+
+  const currentDraft = selectDraft(global, chatId, threadId);
+
+  const newDraft = {
+    ...currentDraft,
+    effectId,
+  };
+
+  saveDraft({
+    global, chatId, threadId, draft: newDraft, isLocalOnly: true, noLocalTimeUpdate: true,
   });
 });
 
@@ -1408,6 +1428,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   wasDrafted?: boolean;
   lastMessageId?: number;
   isInvertedMedia?: true;
+  effectId?: string;
 }) {
   let currentMessageKey: MessageKey | undefined;
   const progressCallback = params.attachment ? (progress: number, messageKey: MessageKey) => {
@@ -1655,9 +1676,7 @@ async function fetchUnreadMentions<T extends GlobalState>(global: T, chatId: str
   global = addChatMessagesById(global, chat.id, byId);
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChats(global, buildCollectionByKey(chats, 'id'));
-  global = updateChat(global, chatId, {
-    unreadMentions: [...(chat.unreadMentions || []), ...ids],
-  });
+  global = addUnreadMentions(global, chatId, chat, ids);
 
   setGlobal(global);
 }
@@ -1668,18 +1687,7 @@ addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnTyp
   const chat = selectCurrentChat(global, tabId);
   if (!chat) return;
 
-  const currentUnreadMentions = chat.unreadMentions || [];
-
-  const unreadMentions = currentUnreadMentions.filter((id) => !messageIds.includes(id));
-  const removedCount = currentUnreadMentions.length - unreadMentions.length;
-
-  global = updateChat(global, chat.id, {
-    ...(chat.unreadMentionsCount && {
-      unreadMentionsCount: Math.max(chat.unreadMentionsCount - removedCount, 0) || undefined,
-    }),
-    unreadMentions,
-  });
-
+  global = removeUnreadMentions(global, chat.id, chat, messageIds, true);
   setGlobal(global);
 
   actions.markMessagesRead({ messageIds, tabId });
@@ -1720,12 +1728,10 @@ addActionHandler('readAllMentions', (global, actions, payload): ActionReturnType
 addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   const { url, shouldSkipModal, tabId = getCurrentTabId() } = payload;
   const urlWithProtocol = ensureProtocol(url)!;
-  const isStoriesViewerOpen = Boolean(selectTabState(global, tabId).storyViewer.peerId);
 
   if (isDeepLink(urlWithProtocol)) {
-    if (isStoriesViewerOpen) {
-      actions.closeStoryViewer({ tabId });
-    }
+    actions.closeStoryViewer({ tabId });
+    actions.closePaymentModal({ tabId });
 
     actions.openTelegramLink({ url, tabId });
     return;
@@ -1742,9 +1748,7 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
     }
 
     if (appConfig.urlAuthDomains.includes(parsedUrl.hostname)) {
-      if (isStoriesViewerOpen) {
-        actions.closeStoryViewer({ tabId });
-      }
+      actions.closeStoryViewer({ tabId });
 
       actions.requestLinkUrlAuth({ url, tabId });
       return;

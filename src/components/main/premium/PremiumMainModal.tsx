@@ -42,6 +42,7 @@ import styles from './PremiumMainModal.module.scss';
 import PremiumAds from '../../../assets/premium/PremiumAds.svg';
 import PremiumBadge from '../../../assets/premium/PremiumBadge.svg';
 import PremiumChats from '../../../assets/premium/PremiumChats.svg';
+import PremiumEffects from '../../../assets/premium/PremiumEffects.svg';
 import PremiumEmoji from '../../../assets/premium/PremiumEmoji.svg';
 import PremiumFile from '../../../assets/premium/PremiumFile.svg';
 import PremiumLastSeen from '../../../assets/premium/PremiumLastSeen.svg';
@@ -78,6 +79,7 @@ const PREMIUM_FEATURE_COLOR_ICONS: Record<ApiPremiumSection, string> = {
   saved_tags: PremiumTags,
   last_seen: PremiumLastSeen,
   message_privacy: PremiumMessagePrivacy,
+  effects: PremiumEffects,
 };
 
 export type OwnProps = {

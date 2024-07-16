@@ -31,7 +31,7 @@ type OwnProps = {
   senderTitle?: string;
   isProtected?: boolean;
   observeIntersection?: ObserveFn;
-  onMessageClick: (messageId: number, chatId: string) => void;
+  onMessageClick: (message: ApiMessage) => void;
 };
 
 type ApiWebPageWithFormatted =
@@ -61,7 +61,7 @@ const WebLink: FC<OwnProps> = ({
   }
 
   const handleMessageClick = useLastCallback(() => {
-    onMessageClick(message.id, message.chatId);
+    onMessageClick(message);
   });
 
   if (!linkData) {

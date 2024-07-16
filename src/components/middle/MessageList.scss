@@ -239,7 +239,7 @@
       body.is-ios &,
       body.is-macos & {
         font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
-        line-height: calc(var(--message-text-size, 1rem) + 0.5rem);
+        line-height: calc(var(--message-text-size, 1rem) + 0.2rem);
       }
 
       .emoji-small {

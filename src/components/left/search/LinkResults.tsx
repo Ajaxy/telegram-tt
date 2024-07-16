@@ -4,6 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiMessage } from '../../../api/types';
 import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection } from '../../../types';
 
@@ -80,8 +81,8 @@ const LinkResults: FC<OwnProps & StateProps> = ({
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
-  const handleMessageFocus = useCallback((messageId: number, chatId: string) => {
-    focusMessage({ chatId, messageId });
+  const handleMessageFocus = useCallback((message: ApiMessage) => {
+    focusMessage({ chatId: message.chatId, messageId: message.id });
   }, [focusMessage]);
 
   function renderList() {

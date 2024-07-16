@@ -10,6 +10,7 @@
 
   @media (max-height: 640px) {
     margin-bottom: 1.75rem;
+
     @at-root .has-footer #{&} {
       margin-bottom: 0;
     }

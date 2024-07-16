@@ -17,7 +17,7 @@ import type {
 } from '../../types';
 
 import { pick } from '../../../util/iteratees';
-import localDb from '../localDb';
+import { addDocumentToLocalDb } from '../helpers';
 import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messageContent';
@@ -100,7 +100,7 @@ function buildApiAttachMenuIcon(icon: GramJs.AttachMenuBotIcon): ApiAttachBotIco
 
   if (!document) return undefined;
 
-  localDb.documents[String(icon.icon.id)] = icon.icon;
+  addDocumentToLocalDb(icon.icon);
 
   return {
     name: icon.name,

@@ -33,7 +33,7 @@ export const INACTIVE_MARKER = '[Inactive]';
 export const DEBUG_PAYMENT_SMART_GLOCAL = false;
 
 export const SESSION_USER_KEY = 'user_auth';
-export const PASSCODE_CACHE_NAME = 'tt-passcode';
+export const LEGACY_PASSCODE_CACHE_NAME = 'tt-passcode';
 
 export const GLOBAL_STATE_CACHE_DISABLED = false;
 export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
@@ -49,7 +49,7 @@ export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v37';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v38';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -147,6 +147,9 @@ export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 export const MESSAGE_CONTENT_CLASS_NAME = 'message-content';
 export const MESSAGE_CONTENT_SELECTOR = '.message-content';
 
+export const STARS_ICON_PLACEHOLDER = '⭐';
+export const STARS_CURRENCY_CODE = 'XTR';
+
 // Screen width where Pinned Message / Audio Player in the Middle Header can be safely displayed
 export const SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN = 1440; // px
 // Screen width where Pinned Message / Audio Player in the Middle Header shouldn't collapse with ChatInfo
@@ -206,6 +209,8 @@ export const TOP_SYMBOL_SET_ID = 'top';
 export const POPULAR_SYMBOL_SET_ID = 'popular';
 export const RECENT_SYMBOL_SET_ID = 'recent';
 export const FAVORITE_SYMBOL_SET_ID = 'favorite';
+export const EFFECT_STICKERS_SET_ID = 'effectStickers';
+export const EFFECT_EMOJIS_SET_ID = 'effectEmojis';
 export const CHAT_STICKER_SET_ID = 'chatStickers';
 export const DEFAULT_TOPIC_ICON_STICKER_ID = 'topic-default-icon';
 export const DEFAULT_STATUS_ICON_ID = 'status-default-icon';
@@ -376,6 +381,7 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'saved_tags',
   'last_seen',
   'message_privacy',
+  'effects',
 ] as const;
 
 export const PREMIUM_BOTTOM_VIDEOS: ApiPremiumSection[] = [
@@ -390,6 +396,7 @@ export const PREMIUM_BOTTOM_VIDEOS: ApiPremiumSection[] = [
   'saved_tags',
   'last_seen',
   'message_privacy',
+  'effects',
 ];
 
 export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [

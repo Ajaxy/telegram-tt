@@ -7,12 +7,15 @@ import type {
   ApiBotInlineSwitchWebview,
   ApiChat,
   ApiChatInviteImporter,
+  ApiDocument,
   ApiExportedInvite,
   ApiLanguage,
   ApiMessage,
+  ApiPhoto,
   ApiReaction,
   ApiStickerSet,
   ApiUser,
+  ApiVideo,
 } from '../api/types';
 import type { IconName } from './icons';
 
@@ -30,9 +33,12 @@ export enum FocusDirection {
   Static,
 }
 
+export type ScrollTargetPosition = ScrollLogicalPosition | 'centerOrTop';
+
 export interface IAlbum {
   albumId: string;
   messages: ApiMessage[];
+  isPaidMedia?: boolean;
   mainMessage: ApiMessage;
   captionMessage?: ApiMessage;
   hasMultipleCaptions: boolean;
@@ -307,6 +313,8 @@ export enum RightColumnContent {
   EditTopic,
 }
 
+export type MediaViewerMedia = ApiPhoto | ApiVideo | ApiDocument;
+
 export enum MediaViewerOrigin {
   Inline,
   ScheduledInline,
@@ -318,6 +326,7 @@ export enum MediaViewerOrigin {
   ScheduledAlbum,
   SearchResult,
   SuggestedAvatar,
+  StarsTransaction,
 }
 
 export enum StoryViewerOrigin {
@@ -481,7 +490,8 @@ export type InlineBotSettings = {
   cacheTime: number;
 };
 
-export type CustomPeerType = 'premium' | 'toBeDistributed';
+export type CustomPeerType = 'premium' | 'toBeDistributed' | 'contacts' | 'nonContacts'
+| 'groups' | 'channels' | 'bots' | 'excludeMuted' | 'excludeArchived' | 'excludeRead';
 
 export interface CustomPeer {
   isCustomPeer: true;

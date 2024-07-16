@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from '../../../../lib/teact/teact';
 import { addExtraClass } from '../../../../lib/teact/teact-dom';
 
-import type { FocusDirection } from '../../../../types';
+import type { FocusDirection, ScrollTargetPosition } from '../../../../types';
 
 import {
   requestForcedReflow, requestMeasure, requestMutation,
@@ -22,6 +22,7 @@ export default function useFocusMessage(
   isResizingContainer?: boolean,
   isJustAdded?: boolean,
   isQuote?: boolean,
+  scrollTargetPosition?: ScrollTargetPosition,
 ) {
   const isRelocatedRef = useRef(!isJustAdded);
 
@@ -33,12 +34,13 @@ export default function useFocusMessage(
       const messagesContainer = elementRef.current.closest<HTMLDivElement>('.MessageList')!;
       // `noFocusHighlight` is always called with “scroll-to-bottom” buttons
       const isToBottom = noFocusHighlight;
+      const scrollPosition = scrollTargetPosition || isToBottom ? 'end' : 'centerOrTop';
 
       const exec = () => {
         const result = animateScroll(
           messagesContainer,
           elementRef.current!,
-          isToBottom ? 'end' : 'centerOrTop',
+          scrollPosition,
           FOCUS_MARGIN,
           focusDirection !== undefined ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined,
           focusDirection,
@@ -69,6 +71,6 @@ export default function useFocusMessage(
       }
     }
   }, [
-    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isQuote,
+    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isQuote, scrollTargetPosition,
   ]);
 }

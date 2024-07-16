@@ -5,6 +5,7 @@
     &:focus {
       @content;
     }
+
     @media (hover: hover) {
       &:hover {
         @content;

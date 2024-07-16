@@ -1,10 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
+import React, {
+  memo, useEffect, useRef,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
 } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type { ISettings, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../api/types';
@@ -15,14 +18,19 @@ import buildClassName from '../../../util/buildClassName';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 
 import { useDebouncedResolver } from '../../../hooks/useAsyncResolvers';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useDerivedSignal from '../../../hooks/useDerivedSignal';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useMenuPosition from '../../../hooks/useMenuPosition';
+import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import Button from '../../ui/Button';
+import Menu from '../../ui/Menu';
+import MenuItem from '../../ui/MenuItem';
 import WebPage from '../message/WebPage';
 
 import './WebPagePreview.scss';
@@ -31,6 +39,7 @@ type OwnProps = {
   chatId: string;
   threadId: ThreadId;
   getHtml: Signal<string>;
+  isEditing: boolean;
   isDisabled?: boolean;
 };
 
@@ -38,6 +47,7 @@ type StateProps = {
   webPagePreview?: ApiWebPage;
   noWebPage?: boolean;
   theme: ISettings['theme'];
+  attachmentSettings: GlobalState['attachmentSettings'];
 };
 
 const DEBOUNCE_MS = 300;
@@ -51,14 +61,24 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   webPagePreview,
   noWebPage,
   theme,
+  attachmentSettings,
+  isEditing,
 }) => {
   const {
     loadWebPagePreview,
     clearWebPagePreview,
     toggleMessageWebPage,
+    updateAttachmentSettings,
   } = getActions();
 
+  const lang = useOldLang();
+
   const formattedTextWithLinkRef = useRef<ApiFormattedText>();
+
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
+
+  const isInvertedMedia = attachmentSettings.isInvertedMedia;
 
   const detectLinkDebounced = useDebouncedResolver(() => {
     const formattedText = parseHtmlAsFormattedText(getHtml());
@@ -101,6 +121,41 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     toggleMessageWebPage({ chatId, threadId, noWebPage: true });
   });
 
+  const {
+    isContextMenuOpen, contextMenuPosition, handleContextMenu,
+    handleContextMenuClose, handleContextMenuHide,
+  } = useContextMenuHandlers(ref, isEditing, true);
+
+  const getTriggerElement = useLastCallback(() => ref.current);
+  const getRootElement = useLastCallback(() => ref.current!);
+  const getMenuElement = useLastCallback(
+    () => ref.current!.querySelector('.web-page-preview-context-menu .bubble'),
+  );
+
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useMenuPosition(
+    contextMenuPosition,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+  );
+
+  const handlePreviewClick = useLastCallback((e: React.MouseEvent): void => {
+    handleContextMenu(e);
+  });
+
+  useEffect(() => {
+    if (!shouldRender || !renderingWebPage) {
+      handleContextMenuClose();
+      handleContextMenuHide();
+    }
+  }, [handleContextMenuClose, handleContextMenuHide, shouldRender, renderingWebPage]);
+
+  function updateIsInvertedMedia(value?: true) {
+    updateAttachmentSettings({ isInvertedMedia: value });
+  }
+
   if (!shouldRender || !renderingWebPage) {
     return undefined;
   }
@@ -113,13 +168,59 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     },
   } as ApiMessage;
 
+  function renderContextMenu() {
+    return (
+      <Menu
+        isOpen={isContextMenuOpen}
+        transformOriginX={transformOriginX}
+        transformOriginY={transformOriginY}
+        positionX={positionX}
+        positionY={positionY}
+        style={menuStyle}
+        className="web-page-preview-context-menu"
+        onClose={handleContextMenuClose}
+        onCloseAnimationEnd={handleContextMenuHide}
+        autoClose
+      >
+        <>
+          {
+            isInvertedMedia ? (
+            // eslint-disable-next-line react/jsx-no-bind
+              <MenuItem icon="move-caption-up" onClick={() => updateIsInvertedMedia(undefined)}>
+                {lang('PreviewSender.MoveTextUp')}
+              </MenuItem>
+            ) : (
+            // eslint-disable-next-line react/jsx-no-bind
+              <MenuItem icon="move-caption-down" onClick={() => updateIsInvertedMedia(true)}>
+                {lang(('PreviewSender.MoveTextDown'))}
+              </MenuItem>
+            )
+          }
+          <MenuItem
+            icon="delete"
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={handleClearWebpagePreview}
+          >
+            {lang('ChatInput.EditLink.RemovePreview')}
+          </MenuItem>
+        </>
+      </Menu>
+    );
+  }
+
   return (
-    <div className={buildClassName('WebPagePreview', transitionClassNames)}>
+    <div className={buildClassName('WebPagePreview', transitionClassNames)} ref={ref}>
       <div className="WebPagePreview_inner">
-        <div className="WebPagePreview-left-icon">
+        <div className="WebPagePreview-left-icon" onClick={handlePreviewClick}>
           <i className="icon icon-link" />
         </div>
-        <WebPage message={messageStub} inPreview theme={theme} />
+        <WebPage
+          message={messageStub}
+          inPreview
+          theme={theme}
+          onContainerClick={handlePreviewClick}
+          isEditing={isEditing}
+        />
         <Button
           className="WebPagePreview-clear"
           round
@@ -130,6 +231,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
         >
           <i className="icon icon-close" />
         </Button>
+        {!isEditing && renderContextMenu()}
       </div>
     </div>
   );
@@ -138,10 +240,14 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): StateProps => {
     const noWebPage = selectNoWebPage(global, chatId, threadId);
+    const {
+      attachmentSettings,
+    } = global;
     return {
       theme: selectTheme(global),
       webPagePreview: selectTabState(global).webPagePreview,
       noWebPage,
+      attachmentSettings,
     };
   },
 )(WebPagePreview));

@@ -1,3 +1,4 @@
+import type { ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
@@ -57,7 +58,7 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
       mediaLoader.fetch(`sticker${availableReaction.appearAnimation.id}`, ApiMediaFormat.BlobUrl);
     }
     if (availableReaction.selectAnimation) {
-      mediaLoader.fetch(getDocumentMediaHash(availableReaction.selectAnimation), ApiMediaFormat.BlobUrl);
+      mediaLoader.fetch(getDocumentMediaHash(availableReaction.selectAnimation, 'full')!, ApiMediaFormat.BlobUrl);
     }
   });
 
@@ -75,6 +76,45 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
     action: 'loadAvailableReactions',
     payload: undefined,
   }, GENERAL_REFETCH_INTERVAL);
+});
+
+addActionHandler('loadAvailableEffects', async (global): Promise<void> => {
+  const result = await callApi('fetchAvailableEffects');
+  if (!result) {
+    return;
+  }
+
+  const { effects, emojis, stickers } = result;
+  const reactions:ApiReactionEmoji[] = [];
+
+  const effectById = buildCollectionByKey(effects, 'id');
+
+  for (const effect of effects) {
+    if (effect.effectAnimationId) {
+      const reaction: ApiReactionEmoji = {
+        emoticon: effect.emoticon,
+      };
+      reactions.push(reaction);
+    }
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    availableEffectById: effectById,
+    stickers: {
+      ...global.stickers,
+      effect: {
+        stickers,
+        emojis,
+      },
+    },
+    reactions: {
+      ...global.reactions,
+      effectReactions: reactions,
+    },
+  };
+  setGlobal(global);
 });
 
 addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): ActionReturnType => {
@@ -440,7 +480,9 @@ addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnTy
     return undefined;
   }
 
-  actions.focusMessage({ chatId: chat.id, messageId: chat.unreadReactions[0], tabId });
+  actions.focusMessage({
+    chatId: chat.id, messageId: chat.unreadReactions[0], tabId, scrollTargetPosition: 'end',
+  });
   actions.markMessagesRead({ messageIds: [chat.unreadReactions[0]], tabId });
   return undefined;
 });

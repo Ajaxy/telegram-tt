@@ -1,3 +1,7 @@
+.modal {
+  z-index: calc(var(--z-media-viewer) - 1);
+}
+
 .positive {
   color: var(--color-success);
 }
@@ -50,7 +54,16 @@
   transform: translateX(-50%);
 }
 
+.mediaShift {
+  top: -1.5rem;
+}
+
 .copyIcon {
   margin-inline-start: 0.25rem;
   color: var(--color-primary);
+}
+
+.mediaPreview {
+  margin-bottom: 2rem;
+  cursor: var(--custom-cursor, pointer);
 }

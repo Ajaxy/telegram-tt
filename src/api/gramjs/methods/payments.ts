@@ -3,6 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiChat, ApiInputStorePaymentPurpose, ApiPeer, ApiRequestInputInvoice,
+  ApiThemeParameters,
   OnApiUpdate,
 } from '../../types';
 
@@ -25,7 +26,7 @@ import {
 } from '../apiBuilders/payments';
 import { buildApiUser } from '../apiBuilders/users';
 import {
-  buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildShippingInfo,
+  buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildInputThemeParams, buildShippingInfo,
 } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
@@ -156,9 +157,10 @@ export async function sendStarPaymentForm({
   return Boolean(result);
 }
 
-export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
+export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice, theme?: ApiThemeParameters) {
   const result = await invokeRequest(new GramJs.payments.GetPaymentForm({
     invoice: buildInputInvoice(inputInvoice),
+    themeParams: theme ? buildInputThemeParams(theme) : undefined,
   }));
 
   if (!result) {

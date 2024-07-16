@@ -3,6 +3,7 @@ import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
 import { getMessageContent } from '../../../../global/helpers';
+import getSingularPaidMedia from './getSingularPaidMedia';
 
 export function buildContentClassName(
   message: ApiMessage,
@@ -37,19 +38,24 @@ export function buildContentClassName(
     hasOutsideReactions?: boolean;
   } = {},
 ) {
+  const { paidMedia } = getMessageContent(message);
+  const { photo: paidMediaPhoto, video: paidMediaVideo } = getSingularPaidMedia(paidMedia);
+
   const {
-    photo, video, audio, voice, document, poll, webPage, contact, location, invoice, storyData,
+    photo = paidMediaPhoto, video = paidMediaVideo,
+    audio, voice, document, poll, webPage, contact, location, invoice, storyData,
     giveaway, giveawayResults,
   } = getMessageContent(message);
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
   const hasFactCheck = Boolean(message.factCheck?.text);
 
+  const isRoundVideo = video?.mediaType === 'video' && video.isRound;
   const isInvertedMedia = message.isInvertedMedia;
-  const isInvertibleMedia = photo || (video && !video?.isRound) || album || webPage;
+  const isInvertibleMedia = photo || (video && !isRoundVideo) || album || webPage;
 
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
-  const isMedia = storyData || photo || video || location || invoice?.extendedMedia;
-  const hasText = text || location?.type === 'venue' || isGeoLiveActive || hasFactCheck;
+  const isMedia = storyData || photo || video || location || invoice?.extendedMedia || paidMedia;
+  const hasText = text || location?.mediaType === 'venue' || isGeoLiveActive || hasFactCheck;
   const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
 
@@ -84,7 +90,7 @@ export function buildContentClassName(
 
   if (isCustomShape) {
     classNames.push('custom-shape');
-    if (video?.isRound) {
+    if (isRoundVideo) {
       classNames.push('round');
     }
 

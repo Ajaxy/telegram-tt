@@ -39,7 +39,7 @@ export function groupMessages(
           messages: [message],
           mainMessage: message,
           hasMultipleCaptions: false,
-        };
+        } satisfies IAlbum;
       } else {
         currentAlbum.messages.push(message);
         if (message.hasComments) {
@@ -54,6 +54,14 @@ export function groupMessages(
           }
         }
       }
+    } else if ((message.content.paidMedia?.extendedMedia.length || 0) > 1) {
+      currentSenderGroup.push({
+        albumId: `paid-${message.id}`,
+        messages: [message],
+        mainMessage: message,
+        hasMultipleCaptions: false,
+        isPaidMedia: true,
+      } satisfies IAlbum);
     } else {
       currentSenderGroup.push(message);
     }
@@ -67,6 +75,7 @@ export function groupMessages(
       currentSenderGroup.push(currentAlbum);
       currentAlbum = undefined;
     }
+
     const lastSenderGroupItem = currentSenderGroup[currentSenderGroup.length - 1];
     if (nextMessage) {
       const nextMessageDayStartsAt = getDayStartAt(nextMessage.date * 1000);

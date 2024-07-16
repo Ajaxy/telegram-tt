@@ -37,6 +37,7 @@ type OwnProps = {
   lockedUnselectedSubtitle?: string;
   filterValue?: string;
   filterPlaceholder?: string;
+  categoryPlaceholderKey?: string;
   notFoundText?: string;
   searchInputId?: string;
   isLoading?: boolean;
@@ -65,6 +66,7 @@ const Picker: FC<OwnProps> = ({
   categories,
   itemIds,
   selectedCategories,
+  categoryPlaceholderKey,
   selectedIds,
   filterValue,
   filterPlaceholder,
@@ -171,7 +173,9 @@ const Picker: FC<OwnProps> = ({
     onFilterChange?.(value);
   });
 
-  const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, sortedItemIds, Boolean(filterValue));
+  const [viewportIds, getMore] = useInfiniteScroll(
+    onLoadMore, sortedItemIds, Boolean(filterValue),
+  );
 
   const lang = useOldLang();
 
@@ -247,13 +251,15 @@ const Picker: FC<OwnProps> = ({
     return (
       <div key="categories">
         {Boolean(categories?.length) && (
-          <div className="picker-category-title">{lang('PrivacyUserTypes')}</div>
+          <>
+            {categoryPlaceholderKey && <div className="picker-category-title">{lang(categoryPlaceholderKey)}</div>}
+            {categories?.map((category) => renderItem(category.type, true))}
+            <div className="picker-category-title">{lang('FilterChats')}</div>
+          </>
         )}
-        {categories?.map((category) => renderItem(category.type, true))}
-        <div className="picker-category-title">{lang('FilterChats')}</div>
       </div>
     );
-  }, [categories, lang, renderItem]);
+  }, [categories, categoryPlaceholderKey, lang, renderItem]);
 
   return (
     <div className={buildClassName('Picker', className)}>

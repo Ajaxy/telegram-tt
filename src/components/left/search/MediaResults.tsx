@@ -80,7 +80,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   const handleSelectMedia = useCallback((id: number, chatId: string) => {
     openMediaViewer({
       chatId,
-      mediaId: id,
+      messageId: id,
       origin: MediaViewerOrigin.SearchResult,
     });
   }, [openMediaViewer]);

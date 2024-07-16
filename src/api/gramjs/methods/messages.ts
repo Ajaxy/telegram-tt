@@ -1,3 +1,4 @@
+import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ThreadId } from '../../../types';
@@ -76,8 +77,6 @@ import {
   buildSendMessageAction,
   generateRandomBigInt,
   getEntityTypeById,
-  isMessageWithMedia,
-  isServiceMessageWithMedia,
 } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
@@ -238,9 +237,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
     return undefined;
   }
 
-  if (mtpMessage instanceof GramJs.Message) {
-    addMessageToLocalDb(mtpMessage);
-  }
+  addMessageToLocalDb(mtpMessage);
 
   const users = result.users.map(buildApiUser).filter(Boolean);
 
@@ -270,6 +267,7 @@ export function sendMessage(
     shouldUpdateStickerSetOrder,
     wasDrafted,
     isInvertedMedia,
+    effectId,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -290,6 +288,7 @@ export function sendMessage(
     shouldUpdateStickerSetOrder?: boolean;
     wasDrafted?: boolean;
     isInvertedMedia?: true;
+    effectId?: string;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -309,6 +308,7 @@ export function sendMessage(
     sendAs,
     story,
     isInvertedMedia,
+    effectId,
   );
 
   onUpdate({
@@ -396,6 +396,7 @@ export function sendMessage(
         ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
         ...(shouldUpdateStickerSetOrder && { updateStickersetsOrder: shouldUpdateStickerSetOrder }),
         ...(isInvertedMedia && { invertMedia: isInvertedMedia }),
+        ...(effectId && { effect: BigInt(effectId) }),
       }), {
         shouldThrow: true,
         shouldIgnoreUpdates: true,
@@ -1571,11 +1572,7 @@ function updateLocalDb(result: (
   addEntitiesToLocalDb(result.chats);
 
   result.messages.forEach((message) => {
-    if ((message instanceof GramJs.Message && isMessageWithMedia(message))
-      || (message instanceof GramJs.MessageService && isServiceMessageWithMedia(message))
-    ) {
-      addMessageToLocalDb(message);
-    }
+    addMessageToLocalDb(message);
   });
 }
 
@@ -1919,9 +1916,7 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
     }
 
     const mtpMessage = buildMessageFromUpdate(messageUpdate.id, localMessage.chatId, messageUpdate);
-    if (isMessageWithMedia(mtpMessage)) {
-      addMessageToLocalDb(mtpMessage);
-    }
+    addMessageToLocalDb(mtpMessage);
   }
 
   // Edge case for "Send When Online"

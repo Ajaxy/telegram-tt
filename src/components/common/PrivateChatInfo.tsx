@@ -121,8 +121,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       if (user && hasMedia) {
         e.stopPropagation();
         openMediaViewer({
-          avatarOwnerId: user.id,
-          mediaId: 0,
+          isAvatarView: true,
+          chatId: user.id,
+          mediaIndex: 0,
           origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
         });
       }

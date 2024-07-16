@@ -25,7 +25,9 @@ const STORY_ASPECT_RATIO = 9 / 16;
 const MediaAreaOverlay = ({
   story, isActive, className,
 }: OwnProps) => {
-  const { openMapModal, focusMessage, closeStoryViewer } = getActions();
+  const {
+    openMapModal, focusMessage, closeStoryViewer, openUrl,
+  } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -72,6 +74,10 @@ const MediaAreaOverlay = ({
         closeStoryViewer();
         break;
       }
+      case 'url': {
+        openUrl({ url: mediaArea.url });
+        break;
+      }
     }
   };
 
@@ -86,8 +92,9 @@ const MediaAreaOverlay = ({
         switch (mediaArea.type) {
           case 'geoPoint':
           case 'venue':
-          case 'channelPost': {
-            const isShiny = isActive && (mediaArea.type === 'geoPoint' || mediaArea.type === 'venue');
+          case 'channelPost':
+          case 'url': {
+            const isShiny = isActive && (mediaArea.type !== 'channelPost');
             return (
               <div
                 className={buildClassName(styles.mediaArea, isShiny && styles.shiny)}
@@ -119,7 +126,7 @@ const MediaAreaOverlay = ({
 
 function prepareStyle(mediaArea: ApiMediaArea) {
   const {
-    x, y, width, height, rotation,
+    x, y, width, height, rotation, radius,
   } = mediaArea.coordinates;
 
   return buildStyle(
@@ -128,6 +135,7 @@ function prepareStyle(mediaArea: ApiMediaArea) {
     `width: ${width}%`,
     `height: ${height}%`,
     `transform: rotate(${rotation}deg) translate(-50%, -50%)`,
+    Boolean(radius) && `border-radius: ${radius}%`,
   );
 }
 

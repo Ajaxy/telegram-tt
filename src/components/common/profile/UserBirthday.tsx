@@ -105,12 +105,12 @@ const UserBirthday = ({
     if (!isToday || !numbersForAge) return;
 
     numbersForAge.forEach((sticker) => {
-      const hash = getStickerMediaHash(sticker.id);
+      const hash = getStickerMediaHash(sticker, 'preview');
       mediaLoader.fetch(hash, ApiMediaFormat.BlobUrl);
     });
 
     if (effectSticker) {
-      const effectHash = getStickerMediaHash(effectSticker.id);
+      const effectHash = getStickerMediaHash(effectSticker, 'preview');
       mediaLoader.fetch(effectHash, ApiMediaFormat.BlobUrl);
     }
   }, [effectSticker, isToday, numbersForAge]);

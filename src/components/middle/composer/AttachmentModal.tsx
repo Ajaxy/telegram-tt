@@ -167,7 +167,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     (shouldSendCompressed || shouldForceCompression || isInAlbum) && !shouldForceAsFile,
   );
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
-  const [isInvertedMedia, setIsInvertedMedia] = useState(attachmentSettings.isInvertedMedia);
+  const isInvertedMedia = attachmentSettings.isInvertedMedia;
 
   const {
     handleScroll: handleAttachmentsScroll,
@@ -184,6 +184,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!isOpen) {
       closeSymbolMenu();
+      updateAttachmentSettings({ isInvertedMedia: undefined });
     }
   }, [closeSymbolMenu, isOpen]);
 
@@ -254,9 +255,18 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (isOpen) {
       setShouldSendCompressed(shouldSuggestCompression ?? attachmentSettings.shouldCompress);
       setShouldSendGrouped(attachmentSettings.shouldSendGrouped);
-      setIsInvertedMedia(attachmentSettings.isInvertedMedia);
     }
   }, [attachmentSettings, isOpen, shouldSuggestCompression]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      updateAttachmentSettings({ isInvertedMedia: undefined });
+    }
+  }, [updateAttachmentSettings, isOpen, shouldSuggestCompression]);
+
+  function setIsInvertedMedia(value?: true) {
+    updateAttachmentSettings({ isInvertedMedia: value });
+  }
 
   useEffect(() => {
     if (isOpen && isMobile) {

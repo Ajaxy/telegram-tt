@@ -249,6 +249,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadTimezones,
     loadQuickReplies,
     loadStarStatus,
+    loadAvailableEffects,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -310,26 +311,27 @@ const Main: FC<OwnProps & StateProps> = ({
       initMain();
       loadAvailableReactions();
       loadAnimatedEmojis();
-      loadBirthdayNumbersStickers();
-      loadGenericEmojiEffects();
       loadNotificationSettings();
       loadNotificationExceptions();
-      loadTopInlineBots();
-      loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
       loadAttachBots();
       loadContactList();
-      loadPremiumGifts();
       loadDefaultTopicIcons();
       checkAppVersion();
       loadTopReactions();
       loadRecentReactions();
       loadDefaultTagReactions();
       loadFeaturedEmojiStickers();
-      loadAuthorizations();
-      loadSavedReactionTags();
+      loadTopInlineBots();
+      loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
       loadTimezones();
       loadQuickReplies();
       loadStarStatus();
+      loadPremiumGifts();
+      loadAvailableEffects();
+      loadBirthdayNumbersStickers();
+      loadGenericEmojiEffects();
+      loadSavedReactionTags();
+      loadAuthorizations();
     }
   }, [isMasterTab, isSynced]);
 

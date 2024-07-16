@@ -22,7 +22,7 @@ import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntit
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Avatar from '../../common/Avatar';
+import AvatarList from '../../common/AvatarList';
 import Button from '../../ui/Button';
 import CheckboxGroup from '../../ui/CheckboxGroup';
 import Notification from '../../ui/Notification';
@@ -222,13 +222,10 @@ const Poll: FC<OwnProps & StateProps> = ({
     return (
       recentVoters.length > 0 && (
         <div className="poll-recent-voters">
-          {recentVoters.map((peer) => (
-            <Avatar
-              key={peer.id}
-              size="micro"
-              peer={peer}
-            />
-          ))}
+          <AvatarList
+            size="micro"
+            peers={recentVoters}
+          />
         </div>
       )
     );

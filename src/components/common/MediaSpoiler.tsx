@@ -1,6 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef } from '../../lib/teact/teact';
 
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
 
 import useCanvasBlur from '../../hooks/useCanvasBlur';
@@ -39,12 +40,15 @@ const MediaSpoiler: FC<OwnProps> = ({
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
+    const el = ref.current;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const shiftX = x - (rect.width / 2);
     const shiftY = y - (rect.height / 2);
-    ref.current.setAttribute('style', `--click-shift-x: ${shiftX}px; --click-shift-y: ${shiftY}px`);
+    requestMutation(() => {
+      el.setAttribute('style', `--click-shift-x: ${shiftX}px; --click-shift-y: ${shiftY}px`);
+    });
   });
 
   if (!shouldRender) {

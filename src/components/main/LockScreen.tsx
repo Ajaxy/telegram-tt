@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
-import { decryptSession } from '../../util/passcode';
+import { decryptSession, UnrecoverablePasscodeError } from '../../util/passcode';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 
 import useTimeout from '../../hooks/schedulers/useTimeout';
@@ -70,7 +70,11 @@ const LockScreen: FC<OwnProps & StateProps> = ({
     }
 
     setValidationError('');
-    decryptSession(passcode).then(unlockScreen, () => {
+    decryptSession(passcode).then(unlockScreen, (err) => {
+      if (err instanceof UnrecoverablePasscodeError) {
+        signOut({ forceInitApi: true });
+      }
+
       logInvalidUnlockAttempt();
       setValidationError(lang('lng_passcode_wrong'));
     });

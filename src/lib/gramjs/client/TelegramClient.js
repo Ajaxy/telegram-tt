@@ -816,10 +816,16 @@ class TelegramClient {
         if (!(photo instanceof constructors.Photo)) {
             return undefined;
         }
+
+        const maxSize = photo.sizes.reduce((max, current) => {
+            if (!current.w) return max;
+            return max.w > current.w ? max : current;
+        });
         const isVideoSize = args.sizeType === 'u' || args.sizeType === 'v';
-        const size = this._pickFileSize(isVideoSize
-            ? [...photo.videoSizes, ...photo.sizes]
-            : photo.sizes, args.sizeType);
+        const size = !args.sizeType
+            ? maxSize
+            : this._pickFileSize(isVideoSize ? [...photo.videoSizes, ...photo.sizes] : photo.sizes, args.sizeType);
+
         if (!size || (size instanceof constructors.PhotoSizeEmpty)) {
             return undefined;
         }

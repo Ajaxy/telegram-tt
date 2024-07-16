@@ -5,7 +5,7 @@ import type {
 } from '../api/types';
 
 import {
-  getAudioHasCover, getChatAvatarHash, getChatTitle, getMessageContent, getMessageMediaHash, getSenderTitle,
+  getAudioHasCover, getChatAvatarHash, getChatTitle, getMediaHash, getMessageContent, getSenderTitle,
 } from '../global/helpers';
 import { resizeImage, scaleImage } from '../util/imageResize';
 import { buildMediaMetadata } from '../util/mediaSession';
@@ -30,7 +30,7 @@ const useMessageMediaMetadata = (
   const artist = audio?.performer || (sender && getSenderTitle(lang, sender));
   const album = (chat && getChatTitle(lang, chat)) || 'Telegram';
 
-  const audioCoverHash = (audio && getAudioHasCover(audio) && getMessageMediaHash(message, 'pictogram'));
+  const audioCoverHash = (audio && getAudioHasCover(audio) && getMediaHash(audio, 'pictogram'));
   const avatarHash = sender && getChatAvatarHash(sender, 'big');
   const hash = (audio && audioCoverHash) || (voice && avatarHash);
   const media = useMedia(hash);

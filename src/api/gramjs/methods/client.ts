@@ -20,15 +20,15 @@ import {
   DEBUG, DEBUG_GRAMJS, IS_TEST, UPLOAD_WORKERS,
 } from '../../../config';
 import { pause } from '../../../util/schedulers';
-import { setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
+import { buildApiMessage, setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
 import { buildApiPeerId } from '../apiBuilders/peers';
+import { buildApiStory } from '../apiBuilders/stories';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import { buildInputPeerFromLocalDb } from '../gramjsBuilders';
 import {
-  addEntitiesToLocalDb,
-  addMessageToLocalDb, addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
+  addEntitiesToLocalDb, addMessageToLocalDb, addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
 } from '../helpers';
-import localDb, { clearLocalDb } from '../localDb';
+import localDb, { clearLocalDb, type RepairInfo } from '../localDb';
 import {
   getDifference,
   init as initUpdatesManager,
@@ -381,9 +381,6 @@ export async function fetchCurrentUser() {
 
   const user = userFull.users[0];
 
-  if (user.photo instanceof GramJs.Photo) {
-    localDb.photos[user.photo.id.toString()] = user.photo;
-  }
   addUserToLocalDb(user);
   const currentUserFullInfo = buildApiUserFullInfo(userFull);
   const currentUser = buildApiUser(user)!;
@@ -441,60 +438,98 @@ export async function repairFileReference({
   if (!parsed) return undefined;
 
   const {
-    entityType, entityId, mediaMatchType,
+    entityId, mediaMatchType,
   } = parsed;
 
-  if (mediaMatchType === 'document' || mediaMatchType === 'photo') {
-    const entity = mediaMatchType === 'document' ? localDb.documents[entityId] : localDb.photos[entityId];
-    if (!entity.storyData) return false;
-    const peer = buildInputPeerFromLocalDb(entity.storyData.peerId);
-    if (!peer) return false;
+  if (mediaMatchType === 'document' || mediaMatchType === 'photo' || mediaMatchType === 'webDocument') {
+    const entity = mediaMatchType === 'document'
+      ? localDb.documents[entityId] : mediaMatchType === 'webDocument'
+        ? localDb.webDocuments[entityId] : localDb.photos[entityId];
+    if (!entity) return false;
+    const repairableEntity = entity as RepairInfo;
+    if (!repairableEntity.localRepairInfo) return false;
+    const { localRepairInfo } = repairableEntity;
 
-    const result = await invokeRequest(new GramJs.stories.GetStoriesByID({
-      peer,
-      id: [entity.storyData.id],
-    }));
-    if (!result) return false;
-
-    addEntitiesToLocalDb(result.users);
-    result.stories.forEach((story) => addStoryToLocalDb(story, entity.storyData!.peerId));
-    return true;
-  }
-
-  if (entityType === 'msg') {
-    const entity = localDb.messages[entityId]!;
-    const messageId = entity.id;
-
-    const peer = 'channelId' in entity.peerId ? new GramJs.InputChannel({
-      channelId: entity.peerId.channelId,
-      accessHash: (localDb.chats[buildApiPeerId(entity.peerId.channelId, 'channel')] as GramJs.Channel).accessHash!,
-    }) : undefined;
-    const result = await invokeRequest(
-      peer
-        ? new GramJs.channels.GetMessages({
-          channel: peer,
-          id: [new GramJs.InputMessageID({ id: messageId })],
-        })
-        : new GramJs.messages.GetMessages({
-          id: [new GramJs.InputMessageID({ id: messageId })],
-        }),
-    );
-
-    if (!result || result instanceof GramJs.messages.MessagesNotModified) return false;
-
-    if (peer && 'pts' in result) {
-      updateChannelState(buildApiPeerId(peer.channelId, 'channel'), result.pts);
+    if (localRepairInfo.type === 'story') {
+      const result = await repairStoryMedia(localRepairInfo.peerId, localRepairInfo.id);
+      return result;
     }
 
-    const message = result.messages[0];
-    if (message instanceof GramJs.MessageEmpty) return false;
-    addEntitiesToLocalDb(result.users);
-    addEntitiesToLocalDb(result.chats);
-    addMessageToLocalDb(message);
-    return true;
+    if (localRepairInfo.type === 'message') {
+      const result = await repairMessageMedia(localRepairInfo.peerId, localRepairInfo.id);
+      return result;
+    }
   }
 
   return false;
+}
+
+async function repairMessageMedia(peerId: string, messageId: number) {
+  const peer = buildInputPeerFromLocalDb(peerId);
+  if (!peer) return false;
+  const result = await invokeRequest(
+    peer
+      ? new GramJs.channels.GetMessages({
+        channel: peer,
+        id: [new GramJs.InputMessageID({ id: messageId })],
+      })
+      : new GramJs.messages.GetMessages({
+        id: [new GramJs.InputMessageID({ id: messageId })],
+      }),
+    {
+      shouldIgnoreErrors: true,
+    },
+  );
+
+  if (!result || result instanceof GramJs.messages.MessagesNotModified) return false;
+
+  if (peer && 'pts' in result) {
+    updateChannelState(peerId, result.pts);
+  }
+
+  const message = result.messages[0];
+  if (message instanceof GramJs.MessageEmpty) return false;
+  addEntitiesToLocalDb(result.users);
+  addEntitiesToLocalDb(result.chats);
+  addMessageToLocalDb(message);
+
+  const apiMessage = buildApiMessage(message);
+  if (apiMessage) {
+    onUpdate({
+      '@type': 'updateMessage',
+      chatId: apiMessage.chatId,
+      id: apiMessage.id,
+      message: apiMessage,
+    });
+  }
+  return true;
+}
+
+async function repairStoryMedia(peerId: string, storyId: number) {
+  const peer = buildInputPeerFromLocalDb(peerId);
+  if (!peer) return false;
+
+  const result = await invokeRequest(new GramJs.stories.GetStoriesByID({
+    peer,
+    id: [storyId],
+  }), {
+    shouldIgnoreErrors: true,
+  });
+  if (!result) return false;
+
+  addEntitiesToLocalDb(result.users);
+  result.stories.forEach((story) => {
+    addStoryToLocalDb(story, peerId);
+
+    const apiStory = buildApiStory(peerId, story);
+    if (!apiStory || 'isDeleted' in apiStory) return;
+    onUpdate({
+      '@type': 'updateStory',
+      peerId,
+      story: apiStory,
+    });
+  });
+  return true;
 }
 
 export function setForceHttpTransport(forceHttpTransport: boolean) {

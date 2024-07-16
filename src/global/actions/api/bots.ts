@@ -466,6 +466,7 @@ addActionHandler('sharePhoneWithBot', async (global, actions, payload): Promise<
   await callApi('sendMessage', {
     chat,
     contact: {
+      mediaType: 'contact',
       firstName: currentUser.firstName || '',
       lastName: currentUser.lastName || '',
       phoneNumber: currentUser.phoneNumber || '',

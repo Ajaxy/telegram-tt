@@ -6,7 +6,7 @@ import type { GlobalState } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
-import { getStickerPreviewHash } from '../../global/helpers';
+import { getStickerHashById } from '../../global/helpers';
 import { selectCanPlayAnimatedEmojis } from '../../global/selectors';
 import { createCallbackManager } from '../callbacks';
 import generateUniqueId from '../generateUniqueId';
@@ -97,7 +97,7 @@ function checkInputCustomEmojiLoad(customEmojis: GlobalState['customEmojis']) {
 }
 
 export function getCustomEmojiMediaDataForInput(emojiId: string, isPreview?: boolean) {
-  const mediaHash = isPreview ? getStickerPreviewHash(emojiId) : `sticker${emojiId}`;
+  const mediaHash = getStickerHashById(emojiId, isPreview);
   const data = mediaLoader.getFromMemory(mediaHash);
   if (data) {
     return data;

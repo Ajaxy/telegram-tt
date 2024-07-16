@@ -44,27 +44,21 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
       }
 
       const {
-        accountChats, accountUsers, globalChats, globalUsers,
+        accountResultIds, globalResultIds, users, chats,
       } = result;
 
-      if (accountChats.length || globalChats.length) {
-        global = addChats(global, buildCollectionByKey([...accountChats, ...globalChats], 'id'));
-      }
+      global = addChats(global, buildCollectionByKey(chats, 'id'));
 
-      if (accountUsers.length || globalUsers.length) {
-        global = addUsers(global, buildCollectionByKey([...accountUsers, ...globalUsers], 'id'));
-      }
+      global = addUsers(global, buildCollectionByKey(users, 'id'));
 
       global = updateGlobalSearchFetchingStatus(global, { chats: false }, tabId);
       global = updateGlobalSearch(global, {
         localResults: {
-          chatIds: accountChats.map(({ id }) => id),
-          userIds: accountChats.map(({ id }) => id),
+          peerIds: accountResultIds,
         },
         globalResults: {
           ...selectTabState(global, tabId).globalSearch.globalResults,
-          chatIds: globalChats.map(({ id }) => id),
-          userIds: globalUsers.map(({ id }) => id),
+          peerIds: globalResultIds,
         },
       }, tabId);
 

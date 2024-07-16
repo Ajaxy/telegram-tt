@@ -323,7 +323,6 @@ const VideoPlayer: FC<OwnProps> = ({
           <ProgressSpinner
             size="xl"
             progress={isBuffered ? 1 : loadProgress}
-            square
             onClick={onClose}
           />
         </div>

@@ -19,4 +19,45 @@
   .bubble {
     width: 16rem;
   }
+
+  &.with-effects .bubble {
+    overflow: initial;
+
+    background: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none;
+  }
+
+  &.with-effects &_items {
+    background: var(--color-background-compact-menu);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+    border-radius: var(--border-radius-default);
+    padding: 0.25rem 0;
+
+    @media (min-width: 600px) {
+      margin-inline-end: 2.75rem;
+    }
+
+    body.no-menu-blur & {
+      background: var(--color-background);
+      backdrop-filter: none;
+    }
+
+    &-hidden {
+      opacity: 0;
+      transition: 300ms opacity;
+    }
+  }
+
+  .ReactionSelector {
+    position: absolute;
+    top: 0;
+    transform: translateY(calc(-100% - 0.5rem));
+  }
+}
+
+.ReactionSelector-hidden {
+  opacity: 0;
+  transition: 300ms opacity;
 }

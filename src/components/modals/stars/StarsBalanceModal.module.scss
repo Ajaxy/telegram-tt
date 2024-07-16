@@ -1,5 +1,9 @@
 @use '../../../styles/mixins';
 
+.root {
+  z-index: calc(var(--z-media-viewer) - 1);
+}
+
 .root :global(.modal-content) {
   padding: 0;
 }

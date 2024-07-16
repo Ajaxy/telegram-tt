@@ -65,7 +65,6 @@ import {
   buildInputReplyTo,
   buildMtpMessageEntity,
   generateRandomBigInt,
-  isMessageWithMedia,
 } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
@@ -74,7 +73,6 @@ import {
   deserializeBytes,
   isChatFolder,
 } from '../helpers';
-import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 import {
   applyState, processAffectedHistory, updateChannelState,
@@ -360,16 +358,19 @@ export async function searchChats({ query }: { query: string }) {
   updateLocalDb(result);
 
   const accountPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
-  const allChats = result.chats.concat(result.users)
+  const globalPeerIds = result.results.map(getApiChatIdFromMtpPeer)
+    .filter((id) => !accountPeerIds.includes(id));
+
+  const chats = result.chats.concat(result.users)
     .map((user) => buildApiChatFromPreview(user))
     .filter(Boolean);
-  const allUsers = result.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
+  const users = result.users.map(buildApiUser).filter(Boolean);
 
   return {
-    accountChats: allChats.filter((r) => accountPeerIds.includes(r.id)),
-    accountUsers: allUsers.filter((u) => accountPeerIds.includes(u.id)),
-    globalChats: allChats.filter((r) => !accountPeerIds.includes(r.id)),
-    globalUsers: allUsers.filter((u) => !accountPeerIds.includes(u.id)),
+    accountResultIds: accountPeerIds,
+    globalResultIds: globalPeerIds,
+    chats,
+    users,
   };
 }
 
@@ -515,8 +516,8 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     translationsDisabled,
   } = result.fullChat;
 
-  if (chatPhoto instanceof GramJs.Photo) {
-    localDb.photos[chatPhoto.id.toString()] = chatPhoto;
+  if (chatPhoto) {
+    addPhotoToLocalDb(chatPhoto);
   }
 
   const members = buildChatMembers(participants);
@@ -603,8 +604,8 @@ async function getFullChannelInfo(
     boostsUnrestrict,
   } = result.fullChat;
 
-  if (chatPhoto instanceof GramJs.Photo) {
-    localDb.photos[chatPhoto.id.toString()] = chatPhoto;
+  if (chatPhoto) {
+    addPhotoToLocalDb(chatPhoto);
   }
 
   const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported
@@ -1552,9 +1553,7 @@ function updateLocalDb(result: (
 
   if ('messages' in result) {
     result.messages.forEach((message) => {
-      if (message instanceof GramJs.Message && isMessageWithMedia(message)) {
-        addMessageToLocalDb(message);
-      }
+      addMessageToLocalDb(message);
     });
   }
 }

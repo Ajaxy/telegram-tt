@@ -17,6 +17,7 @@ import type {
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
+  ApiPoll,
   ApiQuickReply,
   ApiReplyInfo,
   ApiReplyKeyboard,
@@ -235,6 +236,7 @@ export function buildApiMessageWithChatId(
     senderBoosts,
     viaBusinessBotId: mtpMessage.viaBusinessBotId?.toString(),
     factCheck,
+    effectId: mtpMessage.effect?.toString(),
     isInvertedMedia,
   });
 }
@@ -245,7 +247,7 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
   }
 
   const {
-    message, entities, replyTo, date,
+    message, entities, replyTo, date, effect,
   } = draft;
 
   const replyInfo = replyTo instanceof GramJs.InputReplyToMessage ? {
@@ -260,6 +262,7 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
     text: message ? buildMessageTextContent(message, entities) : undefined,
     replyInfo,
     date,
+    effectId: effect?.toString(),
   };
 }
 
@@ -609,6 +612,7 @@ function buildAction(
   }
 
   return {
+    mediaType: 'action',
     text,
     type,
     targetUserIds,
@@ -776,13 +780,12 @@ function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: bool
   };
 }
 
-function buildNewPoll(poll: ApiNewPoll, localId: number) {
+function buildNewPoll(poll: ApiNewPoll, localId: number): ApiPoll {
   return {
-    poll: {
-      id: String(localId),
-      summary: pick(poll.summary, ['question', 'answers']),
-      results: {},
-    },
+    mediaType: 'poll',
+    id: String(localId),
+    summary: pick(poll.summary, ['question', 'answers']),
+    results: {},
   };
 }
 
@@ -802,6 +805,7 @@ export function buildLocalMessage(
   sendAs?: ApiPeer,
   story?: ApiStory | ApiStorySkipped,
   isInvertedMedia?: true,
+  effectId?: string,
 ): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
@@ -822,9 +826,12 @@ export function buildLocalMessage(
       ...media,
       ...(sticker && { sticker }),
       ...(gif && { video: gif }),
-      ...(poll && buildNewPoll(poll, localId)),
-      ...(contact && { contact }),
-      ...(story && { storyData: story }),
+      poll: poll && buildNewPoll(poll, localId),
+      contact,
+      storyData: story && {
+        mediaType: 'storyData',
+        ...story,
+      },
     },
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,
@@ -837,6 +844,7 @@ export function buildLocalMessage(
     ...(scheduledAt && { isScheduled: true }),
     isForwardingAllowed: true,
     isInvertedMedia,
+    effectId,
   } satisfies ApiMessage;
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
@@ -978,10 +986,12 @@ export function buildUploadingMedia(
         const { width, height } = attachment.quick;
         return {
           photo: {
+            mediaType: 'photo',
             id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
             sizes: [],
             thumbnail: { width, height, dataUri: previewBlobUrl || blobUrl },
             blobUrl,
+            date: Math.round(Date.now() / 1000),
             isSpoiler: shouldSendAsSpoiler,
           },
         };
@@ -990,6 +1000,7 @@ export function buildUploadingMedia(
         const { width, height, duration } = attachment.quick;
         return {
           video: {
+            mediaType: 'video',
             id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
             mimeType,
             duration: duration || 0,
@@ -1009,9 +1020,11 @@ export function buildUploadingMedia(
       const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
       return {
         voice: {
+          mediaType: 'voice',
           id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
           duration,
           waveform: inputWaveform,
+          size,
         },
         ttlSeconds,
       };
@@ -1020,6 +1033,7 @@ export function buildUploadingMedia(
       const { duration, performer, title } = audio || {};
       return {
         audio: {
+          mediaType: 'audio',
           id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
           mimeType,
           fileName,
@@ -1033,6 +1047,7 @@ export function buildUploadingMedia(
   }
   return {
     document: {
+      mediaType: 'document',
       mimeType,
       fileName,
       size,
