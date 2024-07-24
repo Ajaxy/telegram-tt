@@ -10,12 +10,6 @@ import { getCurrentTabId } from "../util/establishMultitabRole";
 
 const MAIN_FRAME_ORIGIN =
   process.env.MAIN_FRAME_ORIGIN || "https://crm.slise.xyz";
-// const MAIN_FRAME_ORIGIN =
-//   window.location.hostname == "localhost"
-//     ? "http://localhost:5173"
-//     : "https://slise-crm.pages.dev";
-
-console.log(MAIN_FRAME_ORIGIN, "MAIN_FRAME_ORIGIN TG");
 
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
@@ -48,6 +42,12 @@ custom.subscribeUniversal((name, args) => {
 
   let method = CUSTOM[name] as (...args: any[]) => any;
   return method(...args);
+});
+
+let status = new Responder("status", MAIN_FRAME_ORIGIN);
+
+status.subscribeUniversal((name) => {
+  return true;
 });
 
 export let events = new Requester<Events>(
