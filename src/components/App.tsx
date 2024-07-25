@@ -227,7 +227,7 @@ const App: FC<StateProps> = ({
     document.body.classList.remove(styles.bg);
     return (
       <h1>
-        Can't detect Slise CRM, go to{" "}
+        Can't detect DISE, go to{" "}
         <a href={process.env.MAIN_FRAME_ORIGIN}>
           {process.env.MAIN_FRAME_ORIGIN}
         </a>

@@ -386,7 +386,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     const realChatId = isSavedDialog ? String(threadId) : chatId;
     return (
       <>
-        {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, !isSavedDialog)}
+        {/* {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, !isSavedDialog)} */}
         <div
           className="chat-info-wrapper"
           onClick={handleHeaderClick}
