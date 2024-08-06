@@ -56,6 +56,7 @@ const SettingsPrivacyLastSeen = ({
       <div className="settings-item">
         <ListItem
           leftElement={<StarIcon className="icon" type="premium" size="big" />}
+          className="settings-main-menu-star"
           onClick={handleOpenPremiumModal}
         >
           {isCurrentUserPremium ? lang('PrivacyLastSeenPremiumForPremium') : lang('PrivacyLastSeenPremium')}

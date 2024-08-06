@@ -22,6 +22,7 @@ function PremiumStatusItem({ premiumSection }: OwnProps) {
     <div className="settings-item">
       <ListItem
         leftElement={<StarIcon className="icon" type="premium" size="big" />}
+        className="settings-main-menu-star"
         onClick={handleOpenPremiumModal}
       >
         {lang('PrivacyLastSeenPremium')}
