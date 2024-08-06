@@ -15,11 +15,11 @@ import {
   BASE_EMOJI_KEYWORD_LANG,
   EDITABLE_INPUT_MODAL_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getAttachmentType, isUserId } from '../../../global/helpers';
+import { getAttachmentMediaType, isUserId } from '../../../global/helpers';
 import { selectChatFullInfo, selectIsChatWithSelf } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
@@ -155,7 +155,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const isEditing = editingMessage && Boolean(editingMessage);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
-  const isEditingMessageFile = isEditing && attachments?.length && getAttachmentType(attachments[0]);
+  const isEditingMessageFile = isEditing && attachments?.length && getAttachmentMediaType(attachments[0]);
   const notEditingFile = isEditingMessageFile !== 'file';
 
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
@@ -428,7 +428,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const [areAllPhotos, areAllVideos, areAllAudios] = useMemo(() => {
     if (!isQuickGallery || !renderingAttachments) return [false, false, false];
-    const everyPhoto = renderingAttachments.every((a) => SUPPORTED_IMAGE_CONTENT_TYPES.has(a.mimeType));
+    const everyPhoto = renderingAttachments.every((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType));
     const everyVideo = renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType));
     const everyAudio = renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType));
     return [everyPhoto, everyVideo, everyAudio];

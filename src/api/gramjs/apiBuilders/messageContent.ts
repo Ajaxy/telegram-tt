@@ -27,7 +27,7 @@ import type {
 } from '../../types';
 import type { UniversalMessage } from './messages';
 
-import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEBM_TYPE } from '../../../config';
+import { SUPPORTED_PHOTO_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEBM_TYPE } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import {
   addMediaToLocalDb, addStoryToLocalDb, type MediaRepairContext, serializeBytes,
@@ -402,7 +402,7 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
       height: photoSize.h,
     };
 
-    if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
+    if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType)) {
       innerMediaType = 'photo';
 
       const imageAttribute = attributes

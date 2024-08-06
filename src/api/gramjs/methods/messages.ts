@@ -37,7 +37,7 @@ import {
   MENTION_UNREAD_SLICE,
   PINNED_MESSAGES_LIMIT,
   REACTION_UNREAD_SLICE,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
@@ -706,7 +706,7 @@ async function uploadMedia(message: ApiMessage, attachment: ApiAttachment, onPro
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (!shouldSendAsFile) {
     if (quick) {
-      if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType) && mimeType !== GIF_MIME_TYPE) {
+      if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType) && mimeType !== GIF_MIME_TYPE) {
         return new GramJs.InputMediaUploadedPhoto({
           file: inputFile,
           spoiler: shouldSendAsSpoiler,

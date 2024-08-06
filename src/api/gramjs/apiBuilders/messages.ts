@@ -39,7 +39,7 @@ import {
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
   SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
@@ -987,7 +987,7 @@ export function buildUploadingMedia(
   if (!shouldSendAsFile) {
     if (attachment.quick) {
       // TODO Handle GIF as video, but support playback in <video>
-      if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
+      if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType)) {
         const { width, height } = attachment.quick;
         return {
           photo: {

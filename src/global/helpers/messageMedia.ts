@@ -26,7 +26,7 @@ import {
   MAX_BUFFER_SIZE,
 } from '../../util/windowEnvironment';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
-import { getAttachmentType, matchLinkInMessageText } from './messages';
+import { getAttachmentMediaType, matchLinkInMessageText } from './messages';
 
 export type MediaWithThumbs = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiMediaExtendedPreview;
 export type DownloadableMedia = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiAudio | ApiVoice | ApiWebDocument;
@@ -618,10 +618,10 @@ export function canReplaceMessageMedia(message: ApiMessage, attachment: ApiAttac
   const isFile = Boolean(getMessageAudio(message)
     || getMessageVoice(message) || getMessageDocument(message));
 
-  const fileType = getAttachmentType(attachment);
+  const fileType = getAttachmentMediaType(attachment);
 
   return (
-    (isPhotoOrVideo && (fileType === 'image' || fileType === 'video'))
+    (isPhotoOrVideo && (fileType === 'photo' || fileType === 'video'))
     || (isFile && (fileType === 'audio' || fileType === 'file'))
   );
 }

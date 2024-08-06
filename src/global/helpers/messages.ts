@@ -13,10 +13,15 @@ import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  CONTENT_NOT_SUPPORTED, LOTTIE_STICKER_MIME_TYPE,
+  CONTENT_NOT_SUPPORTED,
+  LOTTIE_STICKER_MIME_TYPE,
   RE_LINK_TEMPLATE,
-  SERVICE_NOTIFICATIONS_USER_ID, SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, TME_LINK_PREFIX, VIDEO_STICKER_MIME_TYPE,
+  SERVICE_NOTIFICATIONS_USER_ID,
+  SUPPORTED_AUDIO_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
+  TME_LINK_PREFIX,
+  VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/messageKey';
@@ -321,19 +326,19 @@ export function isJoinedChannelMessage(message: ApiMessage) {
   return message.content.action && message.content.action.type === 'joinedChannel';
 }
 
-export function getAttachmentType(attachment: ApiAttachment) {
+export function getAttachmentMediaType(attachment: ApiAttachment) {
+  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(attachment.mimeType)) {
+    return 'audio';
+  }
+
   if (attachment.shouldSendAsFile) return 'file';
 
-  if (SUPPORTED_IMAGE_CONTENT_TYPES.has(attachment.mimeType)) {
-    return 'image';
+  if (SUPPORTED_PHOTO_CONTENT_TYPES.has(attachment.mimeType)) {
+    return 'photo';
   }
 
   if (SUPPORTED_VIDEO_CONTENT_TYPES.has(attachment.mimeType)) {
     return 'video';
-  }
-
-  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(attachment.mimeType)) {
-    return 'audio';
   }
 
   return 'file';

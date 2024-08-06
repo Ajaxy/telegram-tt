@@ -31,7 +31,7 @@ import {
   RE_TELEGRAM_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
@@ -2246,10 +2246,10 @@ function getAttachmentType(attachment: ApiAttachment) {
   const {
     shouldSendAsFile, mimeType,
   } = attachment;
+  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) return 'audio';
   if (shouldSendAsFile) return 'file';
   if (mimeType === GIF_MIME_TYPE) return 'gif';
-  if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType) || SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) return 'media';
-  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) return 'audio';
+  if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType) || SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) return 'media';
   if (attachment.voice) return 'voice';
   return 'file';
 }

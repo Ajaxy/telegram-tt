@@ -230,7 +230,7 @@ export const GIF_MIME_TYPE = 'image/gif';
 export const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
 export const VIDEO_STICKER_MIME_TYPE = VIDEO_WEBM_TYPE;
 
-export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
+export const SUPPORTED_PHOTO_CONTENT_TYPES = new Set([
   'image/png', 'image/jpeg', GIF_MIME_TYPE,
 ]);
 
@@ -251,7 +251,7 @@ export const SUPPORTED_AUDIO_CONTENT_TYPES = new Set([
 ]);
 
 export const CONTENT_TYPES_WITH_PREVIEW = new Set([
-  ...SUPPORTED_IMAGE_CONTENT_TYPES,
+  ...SUPPORTED_PHOTO_CONTENT_TYPES,
   ...SUPPORTED_VIDEO_CONTENT_TYPES,
 ]);
 
