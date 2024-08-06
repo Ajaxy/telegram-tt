@@ -243,7 +243,7 @@ const StickerSet: FC<OwnProps> = ({
 
   const [isCut, , expand] = useFlag(canCut);
   const itemsBeforeCutout = itemsPerRow * 3 - 1;
-  const totalItemsCount = withDefaultTopicIcon ? stickerSet.count + 1 : stickerSet.count;
+  const totalItemsCount = (withDefaultTopicIcon || withDefaultStatusIcon) ? stickerSet.count + 1 : stickerSet.count;
 
   const itemHeight = itemSize + verticalMargin;
   const heightWhenCut = Math.ceil(Math.min(itemsBeforeCutout, totalItemsCount) / itemsPerRow)
