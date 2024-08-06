@@ -1245,7 +1245,7 @@ export function selectCanForwardMessages<T extends GlobalState>(global: T, chatI
 
   return messageIds
     .map((id) => messages[id])
-    .every((message) => !hasMessageTtl(message)
+    .every((message) => message && !hasMessageTtl(message)
       && (message.isForwardingAllowed || isServiceNotificationMessage(message)));
 }
 

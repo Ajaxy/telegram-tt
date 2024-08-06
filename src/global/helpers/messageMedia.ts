@@ -319,6 +319,10 @@ export function getVideoMediaHash(video: ApiVideo | ApiDocument, target: Target)
   }
 }
 
+export function getVideoPreviewMediaHash(video: ApiVideo) {
+  return video.hasVideoPreview ? `document${video.id}?size=v` : undefined;
+}
+
 export function getDocumentMediaHash(document: ApiDocument, target: Target) {
   const base = `document${document.id}`;
 

@@ -5,9 +5,8 @@ import React, {
 
 import type { ApiVideo } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import { ApiMediaFormat } from '../../api/types';
 
-import { getVideoMediaHash } from '../../global/helpers';
+import { getVideoMediaHash, getVideoPreviewMediaHash } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
@@ -55,10 +54,15 @@ const GifButton: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const loadAndPlay = isIntersecting && !isDisabled;
-  const previewBlobUrl = useMedia(getVideoMediaHash(gif, 'preview'), !loadAndPlay, ApiMediaFormat.BlobUrl);
+  const previewHash = !gif.hasVideoPreview && gif.thumbnail && getVideoMediaHash(gif, 'pictogram');
+  const previewBlobUrl = useMedia(previewHash, !loadAndPlay);
+
   const [withThumb] = useState(gif.thumbnail?.dataUri && !previewBlobUrl);
   const thumbRef = useCanvasBlur(gif.thumbnail?.dataUri, !withThumb);
-  const videoData = useMedia(getVideoMediaHash(gif, 'full'), !loadAndPlay, ApiMediaFormat.BlobUrl);
+
+  const videoHash = getVideoPreviewMediaHash(gif) || getVideoMediaHash(gif, 'full');
+  const videoData = useMedia(videoHash, !loadAndPlay);
+
   const shouldRenderVideo = Boolean(loadAndPlay && videoData);
   const { isBuffered, bufferingHandlers } = useBuffering(true);
   const shouldRenderSpinner = loadAndPlay && !isBuffered;
@@ -154,8 +158,6 @@ const GifButton: FC<OwnProps> = ({
         <canvas
           ref={thumbRef}
           className="thumbnail canvas-blur-setup"
-          // We need to always render to avoid blur re-calculation
-          style={isVideoReady ? 'display: none;' : undefined}
         />
       )}
       {previewBlobUrl && !isVideoReady && (

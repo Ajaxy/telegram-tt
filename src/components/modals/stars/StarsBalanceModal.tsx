@@ -10,6 +10,7 @@ import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
+import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -233,7 +234,7 @@ function StarTopupOption({
   return (
     <div className={styles.option} key={option.stars} onClick={() => onClick?.(option)}>
       <div className={styles.optionTop}>
-        +{option.stars}
+        +{formatInteger(option.stars)}
         {/* Switch directionality for correct order. Can't use flex because https://issues.chromium.org/issues/40249030 */}
         <div className={styles.stackedStars} dir={lang.isRtl ? 'ltr' : 'rtl'}>
           {Array.from({ length: starsCount }).map(() => (

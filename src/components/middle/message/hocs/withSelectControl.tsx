@@ -17,6 +17,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 type OwnProps<T> =
   (PhotoProps<T> | VideoProps<T>) & {
     clickArg: number;
+    noSelectControls?: boolean;
   };
 
 type StateProps = {
@@ -76,10 +77,10 @@ export default function withSelectControl(WrappedComponent: FC) {
 
   return memo(withGlobal<OwnProps<unknown>>(
     (global, ownProps) => {
-      const { clickArg } = ownProps;
+      const { clickArg, noSelectControls } = ownProps;
       return {
-        isInSelectMode: selectIsInSelectMode(global),
-        isSelected: selectIsMessageSelected(global, clickArg),
+        isInSelectMode: !noSelectControls && selectIsInSelectMode(global),
+        isSelected: !noSelectControls && selectIsMessageSelected(global, clickArg),
       };
     },
   )(ComponentWithSelectControl)) as typeof ComponentWithSelectControl;

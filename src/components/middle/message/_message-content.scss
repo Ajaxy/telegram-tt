@@ -919,7 +919,7 @@
   --border-bottom-left-radius: var(--border-radius-messages-small);
   --border-bottom-right-radius: var(--border-radius-messages-small);
 
-  > .media-inner {
+  .media-inner {
     margin: 0 !important;
     margin-bottom: 0.25rem !important;
   }

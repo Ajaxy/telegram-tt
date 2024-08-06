@@ -180,7 +180,7 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
   }
 
   const {
-    id, mimeType, thumbs, size, attributes,
+    id, mimeType, thumbs, size, videoThumbs, attributes,
   } = document;
 
   // eslint-disable-next-line no-restricted-globals
@@ -189,14 +189,16 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
   }
 
   const videoAttr = attributes
-    .find((a: any): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
+    .find((a): a is GramJs.DocumentAttributeVideo => a instanceof GramJs.DocumentAttributeVideo);
 
   if (!videoAttr) {
     return undefined;
   }
 
   const gifAttr = attributes
-    .find((a: any): a is GramJs.DocumentAttributeAnimated => a instanceof GramJs.DocumentAttributeAnimated);
+    .find((a): a is GramJs.DocumentAttributeAnimated => a instanceof GramJs.DocumentAttributeAnimated);
+
+  const hasVideoPreview = videoThumbs?.some((thumb) => thumb instanceof GramJs.VideoSize && thumb.type === 'v');
 
   const {
     duration,
@@ -221,6 +223,7 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
     thumbnail: buildApiThumbnailFromStripped(thumbs),
     size: size.toJSNumber(),
     isSpoiler,
+    hasVideoPreview,
     ...(nosound && { noSound: true }),
   };
 }

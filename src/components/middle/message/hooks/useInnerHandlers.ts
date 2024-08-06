@@ -104,7 +104,6 @@ export default function useInnerHandlers(
   });
   const openMediaViewerWithPhotoOrVideo = useLastCallback((withDynamicLoading: boolean): void => {
     if (paidMedia && !paidMedia.isBought) return;
-    if (paidMedia) return; // TODO: Implement MV and remove this line
     if (withDynamicLoading) {
       searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
     }
@@ -117,12 +116,12 @@ export default function useInnerHandlers(
     });
   });
   const handlePhotoMediaClick = useLastCallback((): void => {
-    const withDynamicLoading = !isScheduled;
+    const withDynamicLoading = !isScheduled && !paidMedia;
     openMediaViewerWithPhotoOrVideo(withDynamicLoading);
   });
   const handleVideoMediaClick = useLastCallback(() => {
     const isGif = message.content?.video?.isGif;
-    const withDynamicLoading = !isGif && !isScheduled;
+    const withDynamicLoading = !isGif && !isScheduled && !paidMedia;
     openMediaViewerWithPhotoOrVideo(withDynamicLoading);
   });
 

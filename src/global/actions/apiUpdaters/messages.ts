@@ -699,7 +699,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         } else {
           const content = media as MediaContent;
           global = updateChatMessage(global, chatId, id, {
-            content,
+            content: {
+              ...content,
+            },
           });
           setGlobal(global);
         }
