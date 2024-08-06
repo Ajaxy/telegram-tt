@@ -157,7 +157,11 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const handleClick = () => {
     if (isContextMenuOpen) return;
     if (isLocked) {
-      openPremiumModal({ initialSection: 'premium_stickers' });
+      if (isEffectEmoji) {
+        openPremiumModal({ initialSection: 'effects' });
+      } else {
+        openPremiumModal({ initialSection: 'premium_stickers' });
+      }
       return;
     }
     onClick?.(clickArg);
