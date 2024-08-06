@@ -4,18 +4,17 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
+import type {
+  ApiAvailableReaction,
+  ApiChatReactions,
+  ApiMessage,
+  ApiReaction,
+  ApiStickerSet, ApiStickerSetInfo,
+  ApiThreadInfo,
+} from '../../../api/types';
 import type { ActiveDownloads, MessageListType } from '../../../global/types';
 import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
-import {
-  type ApiAvailableReaction,
-  type ApiChatReactions,
-  type ApiMessage,
-  type ApiReaction,
-  type ApiStickerSet,
-  type ApiStickerSetInfo,
-  type ApiThreadInfo,
-  MAIN_THREAD_ID,
-} from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
@@ -45,8 +44,7 @@ import {
   selectIsMessageProtected,
   selectIsMessageUnread,
   selectIsPremiumPurchaseBlocked,
-  selectIsReactionPickerOpen,
-  selectMessageCustomEmojiSets,
+  selectIsReactionPickerOpen, selectMessageCustomEmojiSets,
   selectMessageTranslations,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
@@ -88,8 +86,6 @@ type StateProps = {
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
   defaultTagReactions?: ApiReaction[];
-  customEmojiSetsInfo?: ApiStickerSetInfo[];
-  customEmojiSets?: ApiStickerSet[];
   noOptions?: boolean;
   canSendNow?: boolean;
   canReschedule?: boolean;
@@ -98,6 +94,8 @@ type StateProps = {
   canShowReactionsCount?: boolean;
   canBuyPremium?: boolean;
   canShowReactionList?: boolean;
+  customEmojiSetsInfo?: ApiStickerSetInfo[];
+  customEmojiSets?: ApiStickerSet[];
   canUnpin?: boolean;
   canDelete?: boolean;
   canReport?: boolean;
@@ -694,12 +692,12 @@ export default memo(withGlobal<OwnProps>(
     const isMessageUnread = selectIsMessageUnread(global, message);
     const canLoadReadDate = Boolean(
       isPrivate
-        && isOwn
-        && !isMessageUnread
-        && readDateExpiresAt
-        && message.date > Date.now() / 1000 - readDateExpiresAt
-        && !userStatus?.isReadDateRestricted
-        && messageListType !== 'scheduled',
+      && isOwn
+      && !isMessageUnread
+      && readDateExpiresAt
+      && message.date > Date.now() / 1000 - readDateExpiresAt
+      && !userStatus?.isReadDateRestricted
+      && messageListType !== 'scheduled',
     );
     const shouldRenderShowWhen = Boolean(
       canLoadReadDate && isPrivate && selectUserStatus(global, chat.id)?.isReadDateRestrictedByMe,

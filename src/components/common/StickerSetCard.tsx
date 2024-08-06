@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -7,6 +7,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { CHAT_HEIGHT_PX, STICKER_SIZE_GENERAL_SETTINGS } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
 import StickerSetCover from '../middle/composer/StickerSetCover';
@@ -35,11 +36,11 @@ const StickerSetCard: FC<OwnProps> = ({
 
   const firstSticker = stickerSet?.stickers?.[0];
 
-  const handleCardClick = useCallback(() => {
+  const handleCardClick = useLastCallback(() => {
     if (firstSticker) onClick(firstSticker);
-  }, [firstSticker, onClick]);
+  });
 
-  if (!stickerSet || !stickerSet.stickers) {
+  if (!stickerSet?.stickers) {
     return undefined;
   }
 

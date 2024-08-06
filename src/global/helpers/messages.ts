@@ -1,5 +1,11 @@
 import type {
-  ApiAttachment, ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
+  ApiAttachment,
+  ApiChat,
+  ApiMessage,
+  ApiMessageEntityTextUrl,
+  ApiPeer,
+  ApiStory,
+  ApiUser,
 } from '../../api/types';
 import type { MediaContent } from '../../api/types/messages';
 import type { LangFn } from '../../hooks/useOldLang';

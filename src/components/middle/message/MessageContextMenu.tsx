@@ -214,7 +214,9 @@ const MessageContextMenu: FC<OwnProps> = ({
   onShowOriginal,
   onSelectLanguage,
 }) => {
-  const { showNotification, openStickerSet, openCustomEmojiSets } = getActions();
+  const {
+    showNotification, openStickerSet, openCustomEmojiSets, loadStickers,
+  } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -243,6 +245,19 @@ const MessageContextMenu: FC<OwnProps> = ({
       onClose();
     }
   }, [onClose, isOpen, isReactionPickerOpen, areItemsHidden]);
+
+  useEffect(() => {
+    if (customEmojiSets?.length) {
+      customEmojiSets.map((customEmojiSet) => {
+        return loadStickers({
+          stickerSetInfo: {
+            id: customEmojiSet.id,
+            accessHash: customEmojiSet.accessHash,
+          },
+        });
+      });
+    }
+  }, [customEmojiSets, openCustomEmojiSets]);
 
   const handleOpenCustomEmojiSets = useLastCallback(() => {
     if (!customEmojiSets) return;
