@@ -519,10 +519,10 @@ async function repairStoryMedia(peerId: string, storyId: number) {
 
   addEntitiesToLocalDb(result.users);
   result.stories.forEach((story) => {
-    addStoryToLocalDb(story, peerId);
-
     const apiStory = buildApiStory(peerId, story);
     if (!apiStory || 'isDeleted' in apiStory) return;
+
+    addStoryToLocalDb(story, peerId);
     onUpdate({
       '@type': 'updateStory',
       peerId,

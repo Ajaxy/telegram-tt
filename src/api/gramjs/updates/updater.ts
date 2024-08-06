@@ -1097,7 +1097,8 @@ export function updater(update: Update) {
 
     const { story } = update;
     const peerId = getApiChatIdFromMtpPeer(update.peer);
-    addStoryToLocalDb(story, peerId);
+    const apiStory = buildApiStory(peerId, story) as ApiStory | ApiStorySkipped;
+    addStoryToLocalDb(story, peerId); // Add after building to prevent repair info overwrite
 
     if (story instanceof GramJs.StoryItemDeleted) {
       onUpdate({
@@ -1109,7 +1110,7 @@ export function updater(update: Update) {
       onUpdate({
         '@type': 'updateStory',
         peerId,
-        story: buildApiStory(peerId, story) as ApiStory | ApiStorySkipped,
+        story: apiStory,
       });
     }
   } else if (update instanceof GramJs.UpdateReadStories) {

@@ -70,9 +70,6 @@ export async function fetchAllStories({
 
   addEntitiesToLocalDb(result.users);
   addEntitiesToLocalDb(result.chats);
-  result.peerStories.forEach((peerStories) => (
-    peerStories.stories.forEach((story) => addStoryToLocalDb(story, getApiChatIdFromMtpPeer(peerStories.peer)))
-  ));
 
   const allUserStories = result.peerStories.reduce<Record<string, ApiPeerStories>>((acc, peerStories) => {
     const peerId = getApiChatIdFromMtpPeer(peerStories.peer);
@@ -114,6 +111,11 @@ export async function fetchAllStories({
     return acc;
   }, {});
 
+  // Add after building stories to avoid overwriting repair info
+  result.peerStories.forEach((peerStories) => (
+    peerStories.stories.forEach((story) => addStoryToLocalDb(story, getApiChatIdFromMtpPeer(peerStories.peer)))
+  ));
+
   return {
     users: result.users.map(buildApiUser).filter(Boolean),
     chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
@@ -138,13 +140,15 @@ export async function fetchPeerStories({
   }
 
   addEntitiesToLocalDb(result.users);
-  result.stories.stories.forEach((story) => addStoryToLocalDb(story, peer.id));
 
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const stories = buildCollectionByCallback(result.stories.stories, (story) => (
     [story.id, buildApiStory(peer.id, story)]
   ));
+
+  // Add after building stories to avoid overwriting repair info
+  result.stories.stories.forEach((story) => addStoryToLocalDb(story, peer.id));
 
   return {
     chats,
@@ -199,7 +203,6 @@ export async function fetchPeerStoriesByIds({ peer, ids }: { peer: ApiPeer; ids:
 
   addEntitiesToLocalDb(result.users);
   addEntitiesToLocalDb(result.chats);
-  result.stories.forEach((story) => addStoryToLocalDb(story, peer.id));
 
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
@@ -217,6 +220,9 @@ export async function fetchPeerStoriesByIds({ peer, ids }: { peer: ApiPeer; ids:
 
     return acc;
   }, {});
+
+  // Add after building stories to avoid overwriting repair info
+  result.stories.forEach((story) => addStoryToLocalDb(story, peer.id));
 
   return {
     chats,
@@ -426,13 +432,15 @@ async function fetchCommonStoriesRequest({ method, peerId }: {
 
   addEntitiesToLocalDb(result.users);
   addEntitiesToLocalDb(result.chats);
-  result.stories.forEach((story) => addStoryToLocalDb(story, peerId));
 
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const stories = buildCollectionByCallback(result.stories, (story) => (
     [story.id, buildApiStory(peerId, story)]
   ));
+
+  // Add after building stories to avoid overwriting repair info
+  result.stories.forEach((story) => addStoryToLocalDb(story, peerId));
 
   return {
     users,

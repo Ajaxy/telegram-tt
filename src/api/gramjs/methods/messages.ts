@@ -74,6 +74,7 @@ import {
   buildInputTextWithEntities,
   buildMessageFromUpdate,
   buildMtpMessageEntity,
+  buildPeer,
   buildSendMessageAction,
   generateRandomBigInt,
   getEntityTypeById,
@@ -1911,7 +1912,9 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
     if (messageUpdate.media) {
       newContent = {
         ...newContent,
-        ...buildMessageMediaContent(messageUpdate.media),
+        ...buildMessageMediaContent(messageUpdate.media, {
+          peerId: buildPeer(localMessage.chatId), id: messageUpdate.id,
+        }),
       };
     }
 

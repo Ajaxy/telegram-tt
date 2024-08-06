@@ -20,6 +20,9 @@ const LOG_SUFFIX = {
   'UNEXPECTED RESPONSE': '#D1191C',
 };
 
+export type MessageRepairContext = Pick<GramJs.TypeMessage, 'peerId' | 'id'>;
+export type MediaRepairContext = MessageRepairContext;
+
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
     return undefined;
@@ -53,9 +56,9 @@ export function addMessageToLocalDb(message: GramJs.TypeMessage | GramJs.TypeSpo
   }
 }
 
-export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, message?: GramJs.TypeMessage) {
+export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, context?: MediaRepairContext) {
   if (media instanceof GramJs.MessageMediaDocument && media.document) {
-    const document = addMessageRepairInfo(media.document, message);
+    const document = addMessageRepairInfo(media.document, context);
     addDocumentToLocalDb(document);
   }
 
@@ -63,45 +66,45 @@ export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, message?: Gram
     && media.webpage instanceof GramJs.WebPage
   ) {
     if (media.webpage.document) {
-      const document = addMessageRepairInfo(media.webpage.document, message);
+      const document = addMessageRepairInfo(media.webpage.document, context);
       addDocumentToLocalDb(document);
     }
     if (media.webpage.photo) {
-      const photo = addMessageRepairInfo(media.webpage.photo, message);
+      const photo = addMessageRepairInfo(media.webpage.photo, context);
       addPhotoToLocalDb(photo);
     }
   }
 
   if (media instanceof GramJs.MessageMediaGame) {
     if (media.game.document) {
-      const document = addMessageRepairInfo(media.game.document, message);
+      const document = addMessageRepairInfo(media.game.document, context);
       addDocumentToLocalDb(document);
     }
 
-    const photo = addMessageRepairInfo(media.game.photo, message);
+    const photo = addMessageRepairInfo(media.game.photo, context);
     addPhotoToLocalDb(photo);
   }
 
   if (media instanceof GramJs.MessageMediaPhoto && media.photo) {
-    const photo = addMessageRepairInfo(media.photo, message);
+    const photo = addMessageRepairInfo(media.photo, context);
     addPhotoToLocalDb(photo);
   }
 
   if (media instanceof GramJs.MessageMediaInvoice) {
     if (media.photo) {
-      const photo = addMessageRepairInfo(media.photo, message);
+      const photo = addMessageRepairInfo(media.photo, context);
       addWebDocumentToLocalDb(photo);
     }
 
     if (media.extendedMedia instanceof GramJs.MessageExtendedMedia) {
-      addMediaToLocalDb(media.extendedMedia.media, message);
+      addMediaToLocalDb(media.extendedMedia.media, context);
     }
   }
 
   if (media instanceof GramJs.MessageMediaPaidMedia) {
     media.extendedMedia.forEach((extendedMedia) => {
       if (extendedMedia instanceof GramJs.MessageExtendedMedia) {
-        addMediaToLocalDb(extendedMedia.media, message);
+        addMediaToLocalDb(extendedMedia.media, context);
       }
     });
   }
@@ -156,18 +159,18 @@ export function addStoryRepairInfo<T extends GramJs.TypeDocument | GramJs.TypeWe
 }
 
 export function addMessageRepairInfo<T extends GramJs.TypeDocument | GramJs.TypeWebDocument | GramJs.TypePhoto>(
-  media: T, message?: GramJs.TypeMessage,
+  media: T, context?: MediaRepairContext,
 ) : T & RepairInfo {
-  if (!message?.peerId) return media;
-  if (!(media instanceof GramJs.Document && media instanceof GramJs.Photo && media instanceof GramJs.WebDocument)) {
+  if (!context?.peerId) return media;
+  if (!(media instanceof GramJs.Document || media instanceof GramJs.Photo || media instanceof GramJs.WebDocument)) {
     return media;
   }
 
   const repairableMedia = media as T & RepairInfo;
   repairableMedia.localRepairInfo = {
     type: 'message',
-    peerId: getApiChatIdFromMtpPeer(message.peerId),
-    id: message.id,
+    peerId: getApiChatIdFromMtpPeer(context.peerId),
+    id: context.id,
   };
   return repairableMedia;
 }

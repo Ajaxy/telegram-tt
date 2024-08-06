@@ -49,6 +49,7 @@ import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
 import {
   addPhotoToLocalDb,
+  type MediaRepairContext,
   resolveMessageApiChatId,
   serializeBytes,
 } from '../helpers';
@@ -122,6 +123,7 @@ export function buildApiMessageFromShort(mtpMessage: GramJs.UpdateShortMessage):
   return buildApiMessageWithChatId(chatId, {
     ...mtpMessage,
     fromId: buildPeer(mtpMessage.out ? currentUserId : buildApiPeerId(mtpMessage.userId, 'user')),
+    peerId: buildPeer(mtpMessage.out ? buildApiPeerId(mtpMessage.userId, 'user') : currentUserId),
   });
 }
 
@@ -131,6 +133,7 @@ export function buildApiMessageFromShortChat(mtpMessage: GramJs.UpdateShortChatM
   return buildApiMessageWithChatId(chatId, {
     ...mtpMessage,
     fromId: buildPeer(buildApiPeerId(mtpMessage.fromId, 'user')),
+    peerId: buildPeer(buildApiPeerId(mtpMessage.chatId, 'chat')),
   });
 }
 
@@ -151,7 +154,7 @@ export function buildApiMessageFromNotification(
 }
 
 export type UniversalMessage = (
-  Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date')>
+  Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date' | 'peerId')>
   & Partial<GramJs.Message & GramJs.MessageService>
 );
 
@@ -211,7 +214,7 @@ export function buildApiMessageWithChatId(
     isPinned: mtpMessage.pinned,
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
     emojiOnlyCount,
-    ...(mtpMessage.replyTo && { replyInfo: buildApiReplyInfo(mtpMessage.replyTo) }),
+    ...(mtpMessage.replyTo && { replyInfo: buildApiReplyInfo(mtpMessage.replyTo, mtpMessage) }),
     forwardInfo,
     isEdited,
     editDate: mtpMessage.editDate,
@@ -286,7 +289,9 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
   };
 }
 
-function buildApiReplyInfo(replyHeader: GramJs.TypeMessageReplyHeader): ApiReplyInfo | undefined {
+function buildApiReplyInfo(
+  replyHeader: GramJs.TypeMessageReplyHeader, context?: MediaRepairContext,
+): ApiReplyInfo | undefined {
   if (replyHeader instanceof GramJs.MessageReplyStoryHeader) {
     return {
       type: 'story',
@@ -315,7 +320,7 @@ function buildApiReplyInfo(replyHeader: GramJs.TypeMessageReplyHeader): ApiReply
       isForumTopic: forumTopic,
       replyFrom: replyFrom && buildApiMessageForwardInfo(replyFrom),
       replyToPeerId: replyToPeerId && getApiChatIdFromMtpPeer(replyToPeerId),
-      replyMedia: replyMedia && buildMessageMediaContent(replyMedia),
+      replyMedia: replyMedia && buildMessageMediaContent(replyMedia, context),
       isQuote: quote,
       quoteText: quoteText ? buildMessageTextContent(quoteText, quoteEntities) : undefined,
     };

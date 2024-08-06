@@ -3,7 +3,7 @@ import { constructors } from '../../lib/gramjs/tl';
 
 import type { Api as GramJs } from '../../lib/gramjs';
 
-import { DATA_BROADCAST_CHANNEL_NAME } from '../../config';
+import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../config';
 import { throttle } from '../../util/schedulers';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
 
@@ -140,4 +140,8 @@ export function updateFullLocalDb(initial: LocalDb) {
 
 export function clearLocalDb() {
   Object.assign(localDb, createLocalDbInitial());
+}
+
+if (DEBUG) {
+  (globalThis as any).getLocalDb = () => localDb;
 }

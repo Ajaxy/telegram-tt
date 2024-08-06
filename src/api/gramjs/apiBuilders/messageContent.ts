@@ -22,13 +22,16 @@ import type {
   ApiWebPage,
   ApiWebPageStickerData,
   ApiWebPageStoryData,
+  BoughtPaidMedia,
   MediaContent,
 } from '../../types';
 import type { UniversalMessage } from './messages';
 
 import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEBM_TYPE } from '../../../config';
 import { pick } from '../../../util/iteratees';
-import { addMediaToLocalDb, addStoryToLocalDb, serializeBytes } from '../helpers';
+import {
+  addMediaToLocalDb, addStoryToLocalDb, type MediaRepairContext, serializeBytes,
+} from '../helpers';
 import {
   buildApiFormattedText,
   buildApiMessageEntity,
@@ -46,8 +49,9 @@ export function buildMessageContent(
   let content: MediaContent = {};
 
   if (mtpMessage.media) {
+    const repairContext = 'peerId' in mtpMessage ? mtpMessage : undefined;
     content = {
-      ...buildMessageMediaContent(mtpMessage.media),
+      ...buildMessageMediaContent(mtpMessage.media, repairContext),
     };
   }
 
@@ -74,8 +78,10 @@ export function buildMessageTextContent(
   };
 }
 
-export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaContent | undefined {
-  addMediaToLocalDb(media);
+export function buildMessageMediaContent(
+  media: GramJs.TypeMessageMedia, context?: MediaRepairContext,
+): MediaContent | undefined {
+  addMediaToLocalDb(media, context);
 
   const ttlSeconds = 'ttlSeconds' in media ? media.ttlSeconds : undefined;
 
@@ -102,7 +108,7 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaC
   }
 
   if (media instanceof GramJs.MessageMediaInvoice && media.extendedMedia instanceof GramJs.MessageExtendedMedia) {
-    return buildMessageMediaContent(media.extendedMedia.media);
+    return buildMessageMediaContent(media.extendedMedia.media, context);
   }
 
   const sticker = buildSticker(media);
@@ -785,12 +791,7 @@ function buildPaidMedia(media: GramJs.TypeMessageMedia): ApiPaidMedia | undefine
       mediaType: 'paidMedia',
       starsAmount: starsAmount.toJSNumber(),
       isBought,
-      extendedMedia: extendedMedia
-        .filter((paidMedia): paidMedia is GramJs.MessageExtendedMedia => (
-          paidMedia instanceof GramJs.MessageExtendedMedia
-        ))
-        .map((paidMedia) => buildMessageMediaContent(paidMedia.media))
-        .filter(Boolean),
+      extendedMedia: buildBoughtMediaContent(extendedMedia)!,
     };
   }
 
@@ -857,7 +858,9 @@ export function buildApiWebDocument(document?: GramJs.TypeWebDocument): ApiWebDo
   };
 }
 
-export function buildBoughtMediaContent(media: GramJs.TypeMessageExtendedMedia[]): MediaContent[] | undefined {
+export function buildBoughtMediaContent(
+  media: GramJs.TypeMessageExtendedMedia[],
+): BoughtPaidMedia[] | undefined {
   const boughtMedia = media
     .filter((m): m is GramJs.MessageExtendedMedia => m instanceof GramJs.MessageExtendedMedia)
     .map((m) => buildMessageMediaContent(m.media))
