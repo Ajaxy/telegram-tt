@@ -52,7 +52,9 @@ type ActivationFn<OwnProps = undefined> = (
   global: GlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn,
 ) => boolean;
 
-let currentGlobal = {} as GlobalState;
+let currentGlobal = {
+  isInited: false,
+} as GlobalState;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_currentCapturedId: number | undefined;

@@ -32,7 +32,7 @@ setSystemThemeChangeCallback((theme) => {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
 
-  if (!global.settings.byKey.shouldUseSystemTheme) return;
+  if (!global.isInited || !global.settings.byKey.shouldUseSystemTheme) return;
 
   global = replaceSettings(global, { theme });
   setGlobal(global);

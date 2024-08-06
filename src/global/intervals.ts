@@ -41,6 +41,8 @@ function stopIntervals() {
 function checkStoryExpiration() {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
+  if (!global.isInited) return;
+
   const serverTime = getServerTime();
 
   Object.values(global.stories.byPeerId).forEach((peerStories) => {

@@ -66,6 +66,7 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
 };
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {
+  isInited: true,
   attachMenu: { bots: {} },
   passcode: {},
   twoFaSettings: {},

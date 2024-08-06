@@ -16,7 +16,9 @@ import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 let noLockOnUnload = false;
 onBeforeUnload(() => {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-  if (getGlobal().passcode.hasPasscode && !noLockOnUnload && Object.keys(getGlobal().byTabId).length === 1) {
+  const global = getGlobal();
+  if (!global.isInited) return;
+  if (global.passcode.hasPasscode && !noLockOnUnload && Object.keys(global.byTabId).length === 1) {
     clearStoredSession();
   }
 });

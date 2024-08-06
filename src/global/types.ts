@@ -805,6 +805,7 @@ export type TabState = {
 };
 
 export type GlobalState = {
+  isInited: boolean;
   config?: ApiConfig;
   appConfig?: ApiAppConfig;
   peerColors?: ApiPeerColors;
