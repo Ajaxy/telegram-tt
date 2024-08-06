@@ -5,6 +5,7 @@ import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiPhoto, ApiThumbnail, ApiWebDocument,
 } from '../../../../api/types';
 
+import { getPhotoMediaHash, getWebDocumentHash } from '../../../../global/helpers';
 import buildClassName from '../../../../util/buildClassName';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -36,13 +37,13 @@ const MediaResult: FC<OwnProps> = ({
   if ('thumbnail' in inlineResult) {
     thumbnail = inlineResult.thumbnail;
   }
-  if ('webThumbnail' in inlineResult && isForGallery) {
+  if ('webThumbnail' in inlineResult) {
     webThumbnail = inlineResult.webThumbnail;
   }
 
-  const thumbnailDataUrl = useMedia(webThumbnail ? `webDocument:${webThumbnail.url}` : undefined);
-  const mediaBlobUrl = useMedia(photo && `photo${photo.id}?size=m`);
-  const transitionClassNames = useMediaTransition(mediaBlobUrl);
+  const thumbnailBlobUrl = useMedia(getWebDocumentHash(webThumbnail));
+  const mediaBlobUrl = useMedia(photo && getPhotoMediaHash(photo, 'pictogram'));
+  const transitionClassNames = useMediaTransition(mediaBlobUrl || thumbnailBlobUrl);
 
   const handleClick = useLastCallback(() => {
     onClick(inlineResult);
@@ -51,7 +52,7 @@ const MediaResult: FC<OwnProps> = ({
   if (isForGallery) {
     return (
       <div className="MediaResult chat-item-clickable" onClick={handleClick}>
-        <img src={(photo?.thumbnail?.dataUri) || thumbnailDataUrl} alt="" draggable={false} />
+        <img src={(photo?.thumbnail?.dataUri) || thumbnailBlobUrl} alt="" draggable={false} />
         <img
           src={mediaBlobUrl}
           className={buildClassName('full-media', transitionClassNames)}
@@ -67,7 +68,8 @@ const MediaResult: FC<OwnProps> = ({
   return (
     <BaseResult
       focus={focus}
-      thumbUrl={mediaBlobUrl || (thumbnail?.dataUri || thumbnailDataUrl)}
+      thumbnail={webThumbnail}
+      thumbUrl={mediaBlobUrl || thumbnail?.dataUri}
       transitionClassNames={transitionClassNames}
       title={title}
       description={description}
