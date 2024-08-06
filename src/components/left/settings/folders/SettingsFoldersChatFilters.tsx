@@ -50,7 +50,7 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
   const { openLimitReachedModal } = getActions();
 
   const { chatFilter } = state;
-  const { selectedChatIds, selectedChatTypes } = selectChatFilters(state, mode, true);
+  const { selectedChatIds, selectedChatTypes } = useMemo(() => selectChatFilters(state, mode, true), [mode, state]);
   const chatTypes = mode === 'included' ? CUSTOM_PEER_INCLUDED_CHAT_TYPES : CUSTOM_PEER_EXCLUDED_CHAT_TYPES;
 
   const [isTouched, setIsTouched] = useState(false);

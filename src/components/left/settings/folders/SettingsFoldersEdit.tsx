@@ -113,11 +113,11 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   const {
     selectedChatIds: includedChatIds,
     selectedChatTypes: includedChatTypes,
-  } = selectChatFilters(state, 'included');
+  } = useMemo(() => selectChatFilters(state, 'included'), [state]);
   const {
     selectedChatIds: excludedChatIds,
     selectedChatTypes: excludedChatTypes,
-  } = selectChatFilters(state, 'excluded');
+  } = useMemo(() => selectChatFilters(state, 'excluded'), [state]);
 
   useEffect(() => {
     setIsIncludedChatsListExpanded(false);

@@ -1,7 +1,10 @@
+import { getGlobal } from '../../global';
+
 import type { ApiChatFolder } from '../../api/types';
 import type { IconName } from '../../types/icons';
 import type { Dispatch, StateReducer } from '../useReducer';
 
+import { selectChat } from '../../global/selectors';
 import { omit, pick } from '../../util/iteratees';
 import useReducer from '../useReducer';
 
@@ -69,8 +72,11 @@ export function selectChatFilters(state: FoldersState, mode: 'included' | 'exclu
       .filter((key) => Boolean(excludeFilters[key]));
   }
 
+  const global = getGlobal();
+  const existingSelectedChatIds = selectedChatIds.filter((id) => selectChat(global, id));
+
   return {
-    selectedChatIds,
+    selectedChatIds: existingSelectedChatIds,
     selectedChatTypes,
   };
 }
