@@ -51,17 +51,17 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps = Pick<ISettings, 'language' | 'doNotTranslate'>;
+type StateProps = Pick<ISettings, 'doNotTranslate'>;
 
 const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
   isActive,
-  language,
   doNotTranslate,
   onReset,
 }) => {
   const { setSettingOption } = getActions();
 
   const lang = useOldLang();
+  const language = lang.code || 'en';
   const [displayedOptions, setDisplayedOptions] = useState<IRadioOption[]>([]);
   const [search, setSearch] = useState('');
 
@@ -167,11 +167,10 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
-      language, doNotTranslate,
+      doNotTranslate,
     } = global.settings.byKey;
 
     return {
-      language,
       doNotTranslate,
     };
   },
