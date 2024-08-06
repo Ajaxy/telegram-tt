@@ -37,6 +37,7 @@ import useThumbnail from '../../../hooks/useThumbnail';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
 import ActionMessage from '../../middle/ActionMessage';
+import RippleEffect from '../../ui/RippleEffect';
 import Icon from '../icons/Icon';
 import MediaSpoiler from '../MediaSpoiler';
 import MessageSummary from '../MessageSummary';
@@ -232,6 +233,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
+      <RippleEffect />
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
       {sender?.color?.backgroundEmojiId && (
         <EmojiIconBackground
