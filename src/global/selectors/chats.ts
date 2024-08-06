@@ -87,8 +87,7 @@ export function selectChatOnlineCount<T extends GlobalState>(global: T, chat: Ap
 }
 
 export function selectIsTrustedBot<T extends GlobalState>(global: T, botId: string) {
-  const bot = selectUser(global, botId);
-  return bot && (bot.isVerified || global.trustedBotIds.includes(botId));
+  return global.trustedBotIds.includes(botId);
 }
 
 export function selectChatType<T extends GlobalState>(global: T, chatId: string) : ApiChatType | undefined {

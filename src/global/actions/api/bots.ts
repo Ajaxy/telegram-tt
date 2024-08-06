@@ -639,7 +639,7 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
     return;
   }
 
-  if (botApp.isInactive && !selectIsTrustedBot(global, botId)) {
+  if (botApp.isInactive || !selectIsTrustedBot(global, botId)) {
     global = updateTabState(global, {
       botTrustRequest: {
         botId,
