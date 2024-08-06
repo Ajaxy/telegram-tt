@@ -40,6 +40,10 @@
   .content-unsupported {
     font-style: italic;
     color: var(--color-text-meta);
+
+    .Message.own & {
+      color: var(--color-message-meta-own);
+    }
   }
 
   .text-content,
