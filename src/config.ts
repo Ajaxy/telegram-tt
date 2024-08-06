@@ -42,6 +42,8 @@ export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 200;
 export const GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT = 10;
 export const GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT = 150;
 
+export const IS_SCREEN_LOCKED_CACHE_KEY = 'tt-is-screen-locked';
+
 export const MEDIA_CACHE_DISABLED = false;
 export const MEDIA_CACHE_NAME = 'tt-media';
 export const MEDIA_CACHE_NAME_AVATARS = 'tt-media-avatars';

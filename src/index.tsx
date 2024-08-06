@@ -15,6 +15,7 @@ import { enableStrict, requestMutation } from './lib/fasterdom/fasterdom';
 import { selectTabState } from './global/selectors';
 import { betterView } from './util/betterView';
 import { establishMultitabRole, subscribeToMasterChange } from './util/establishMultitabRole';
+import { initGlobal } from './util/init';
 import { initLocalization } from './util/localization';
 import { requestGlobal, subscribeToMultitabBroadcastChannel } from './util/multitab';
 import { checkAndAssignPermanentWebVersion } from './util/permanentWebVersion';
@@ -57,7 +58,7 @@ async function init() {
     });
   }
 
-  getActions().initShared();
+  await initGlobal();
   getActions().init();
 
   getActions().updateShouldEnableDebugLog();

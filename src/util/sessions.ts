@@ -1,7 +1,8 @@
 import type { ApiSessionData } from '../api/types';
 
 import {
-  DEBUG, GLOBAL_STATE_CACHE_KEY, SESSION_USER_KEY,
+  DEBUG, IS_SCREEN_LOCKED_CACHE_KEY,
+  SESSION_USER_KEY,
 } from '../config';
 
 const DC_IDS = [1, 2, 3, 4, 5];
@@ -109,7 +110,5 @@ export function importTestSession() {
 }
 
 function checkSessionLocked() {
-  const stateFromCache = JSON.parse(localStorage.getItem(GLOBAL_STATE_CACHE_KEY) || '{}');
-
-  return Boolean(stateFromCache?.passcode?.isScreenLocked);
+  return localStorage.getItem(IS_SCREEN_LOCKED_CACHE_KEY) === 'true';
 }

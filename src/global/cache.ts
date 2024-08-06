@@ -19,8 +19,10 @@ import {
   GLOBAL_STATE_CACHE_DISABLED,
   GLOBAL_STATE_CACHE_KEY,
   GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
+  IS_SCREEN_LOCKED_CACHE_KEY,
   SAVED_FOLDER_ID,
 } from '../config';
+import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { getOrderedIds } from '../util/folderManager';
 import {
   compact, pick, pickTruthy, unique,
@@ -50,7 +52,24 @@ const updateCacheThrottled = throttle(() => onIdle(() => updateCache()), UPDATE_
 const updateCacheForced = () => updateCache(true);
 
 let isCaching = false;
+let isRemovingCache = false;
 let unsubscribeFromBeforeUnload: NoneToVoidFunction | undefined;
+
+export function cacheGlobal(global: GlobalState) {
+  return MAIN_IDB_STORE.set(GLOBAL_STATE_CACHE_KEY, global);
+}
+
+export function loadCachedGlobal() {
+  return MAIN_IDB_STORE.get<GlobalState>(GLOBAL_STATE_CACHE_KEY);
+}
+
+export function removeGlobalFromCache() {
+  return MAIN_IDB_STORE.del(GLOBAL_STATE_CACHE_KEY);
+}
+
+function cacheIsScreenLocked(global: GlobalState) {
+  if (global?.passcode?.isScreenLocked) localStorage.setItem(IS_SCREEN_LOCKED_CACHE_KEY, 'true');
+}
 
 export function initCache() {
   if (GLOBAL_STATE_CACHE_DISABLED) {
@@ -58,13 +77,16 @@ export function initCache() {
   }
 
   const resetCache = () => {
-    localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
+    isRemovingCache = true;
+    removeGlobalFromCache().finally(() => {
+      localStorage.removeItem(IS_SCREEN_LOCKED_CACHE_KEY);
+      isRemovingCache = false;
+      if (!isCaching) {
+        return;
+      }
 
-    if (!isCaching) {
-      return;
-    }
-
-    clearCaching();
+      clearCaching();
+    });
   };
 
   addActionHandler('saveSession', (): ActionReturnType => {
@@ -79,12 +101,12 @@ export function initCache() {
   addActionHandler('reset', resetCache);
 }
 
-export function loadCache(initialState: GlobalState): GlobalState | undefined {
+export async function loadCache(initialState: GlobalState): Promise<GlobalState | undefined> {
   if (GLOBAL_STATE_CACHE_DISABLED) {
     return undefined;
   }
 
-  const cache = readCache(initialState);
+  const cache = await readCache(initialState);
 
   if (cache.passcode.hasPasscode || hasStoredSession()) {
     setupCaching();
@@ -113,14 +135,17 @@ export function clearCaching() {
   }
 }
 
-function readCache(initialState: GlobalState): GlobalState {
+async function readCache(initialState: GlobalState): Promise<GlobalState> {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.time('global-state-cache-read');
   }
 
   const json = localStorage.getItem(GLOBAL_STATE_CACHE_KEY);
-  const cached = json ? JSON.parse(json) as GlobalState : undefined;
+  const cachedFromLocalStorage = json ? JSON.parse(json) as GlobalState : undefined;
+  if (cachedFromLocalStorage) localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
+
+  const cached = cachedFromLocalStorage || await loadCachedGlobal();
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
@@ -231,7 +256,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
 function updateCache(force?: boolean) {
   const global = getGlobal();
-  if (!isCaching || global.isLoggingOut || (!force && isHeavyAnimating())) {
+  if (isRemovingCache || !isCaching || global.isLoggingOut || (!force && isHeavyAnimating())) {
     return;
   }
 
@@ -248,16 +273,16 @@ export function forceUpdateCache(noEncrypt = false) {
       void encryptSession(undefined, serializedGlobal);
     }
 
-    const serializedGlobalClean = JSON.stringify(clearGlobalForLockScreen(global, false));
-    localStorage.setItem(GLOBAL_STATE_CACHE_KEY, serializedGlobalClean);
-
+    cacheIsScreenLocked(global);
+    cacheGlobal(clearGlobalForLockScreen(global, false));
     return;
   }
 
-  localStorage.setItem(GLOBAL_STATE_CACHE_KEY, serializedGlobal);
+  cacheIsScreenLocked(global);
+  cacheGlobal(reduceGlobal(global));
 }
 
-export function serializeGlobal<T extends GlobalState>(global: T) {
+function reduceGlobal<T extends GlobalState>(global: T) {
   const reducedGlobal: GlobalState = {
     ...INITIAL_GLOBAL_STATE,
     ...pick(global, [
@@ -314,7 +339,11 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
     ]),
   };
 
-  return JSON.stringify(reducedGlobal);
+  return reducedGlobal;
+}
+
+export function serializeGlobal<T extends GlobalState>(global: T) {
+  return JSON.stringify(reduceGlobal(global));
 }
 
 function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['customEmojis'] {
