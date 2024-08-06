@@ -15,8 +15,7 @@ import {
   getPrivateChatUserId,
   getUserFirstOrLastName,
   getUserFullName,
-  isChatBasicGroup,
-  isChatChannel,
+  isChatBasicGroup, isChatChannel,
   isChatSuperGroup,
   isUserId,
 } from '../../global/helpers';
@@ -60,8 +59,8 @@ export type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  isChannel?: boolean;
   isGroup?: boolean;
+  isChannel?: boolean;
   isSuperGroup?: boolean;
   selectedMessageIds?: number[];
   canDeleteForAll?: boolean;
@@ -117,9 +116,12 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
   const [isAdditionalOptionsVisible, setIsAdditionalOptionsVisible] = useState(false);
 
   const senderList = useMemo(() => {
+    if (isChannel) {
+      return undefined;
+    }
     return selectSendersFromSelectedMessages(getGlobal(), chat);
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [chat, isOpen]);
+  }, [chat, isChannel, isOpen]);
 
   const isSenderOwner = useMemo(() => {
     if (!senderList) {
@@ -245,7 +247,8 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
   const handleDeleteMessageForSelf = useLastCallback(() => {
     if (isSchedule) {
       deleteScheduledMessages({ messageIds: selectedMessageIds! });
-    } else if (!isSenderOwner && (isChannel || isSuperGroup)) {
+    } else if (!isSenderOwner
+      && (chosenSpanOption || chosenDeleteOption || chosenBanOption) && (isGroup || isSuperGroup)) {
       if (chosenSpanOption) {
         const userIdList = chosenSpanOption.filter((option) => !Number.isNaN(Number(option)));
         const filteredMessageIdList = filterMessageIdByUserId(userIdList, selectedMessageIds!);
@@ -392,7 +395,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
       <div className={styles.main}>
         {renderHeader()}
         {!showAdditionalOptions && <p>{lang('AreYouSureDeleteFewMessages')}</p>}
-        {(showAdditionalOptions && !canDeleteForAll && !isSchedule && (isChannel || isGroup || isSuperGroup)) && (
+        {(showAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup)) && (
           <>
             <p className={styles.actionTitle}>{oldLang('DeleteAdditionalActions')}</p>
             {renderAdditionalActionOptions()}
@@ -458,8 +461,8 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      isChannel,
       isGroup,
+      isChannel,
       isSuperGroup,
       selectedMessageIds,
       currentUserId: global.currentUserId,

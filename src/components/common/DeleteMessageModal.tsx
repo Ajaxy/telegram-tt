@@ -17,7 +17,7 @@ import {
   getHasAdminRight,
   getPrivateChatUserId,
   getUserFirstOrLastName, getUserFullName,
-  isChatBasicGroup, isChatChannel,
+  isChatBasicGroup,
   isChatSuperGroup, isOwnMessage,
   isUserId,
 } from '../../global/helpers';
@@ -52,7 +52,6 @@ export type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  isChannel?: boolean;
   isGroup?: boolean;
   isSuperGroup?: boolean;
   sender: ApiPeer | undefined;
@@ -75,7 +74,6 @@ type StateProps = {
 const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   isOpen,
   chat,
-  isChannel,
   isGroup,
   isSuperGroup,
   sender,
@@ -226,7 +224,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       : [message!.id];
     if (isSchedule) {
       deleteScheduledMessages({ messageIds });
-    } else if (!isOwn && (isChannel || isGroup || isSuperGroup)) {
+    } else if (!isOwn && (chosenSpanOption || chosenDeleteOption || chosenBanOption) && (isGroup || isSuperGroup)) {
       if (chosenSpanOption) {
         const filteredMessageIdList = filterMessageIdByUserId(chosenSpanOption, messageIdList!);
         if (filteredMessageIdList && filteredMessageIdList.length) {
@@ -367,7 +365,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     >
       <div className={buildClassName(styles.mainContainer, 'custom-scroll')}>
         {renderHeader()}
-        {(shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule && (isChannel || isGroup || isSuperGroup)) && (
+        {(shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup)) && (
           <>
             <p className={styles.actionTitle}>{lang('DeleteAdditionalActions')}</p>
             {renderAdditionalActionOptions()}
@@ -438,7 +436,6 @@ export default memo(withGlobal<OwnProps>(
       && selectAllowedMessageActions(global, deleteMessageModal.message, threadId)) || {};
     const adminMembersById = chatFullInfo && chatFullInfo?.adminMembersById;
     const messageIdList = chat && selectCurrentMessageIds(global, chat.id, threadId!, type!);
-    const isChannel = Boolean(chat) && isChatChannel(chat);
     const isGroup = Boolean(chat) && isChatBasicGroup(chat);
     const isSuperGroup = Boolean(chat) && isChatSuperGroup(chat);
     const sender = deleteMessageModal && chat && deleteMessageModal.message
@@ -457,7 +454,6 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      isChannel,
       isGroup,
       isSuperGroup,
       currentUserId: global.currentUserId,
