@@ -10,7 +10,7 @@ import type {
 import type { MessageListType } from '../../../global/types';
 import type { ThreadId } from '../../../types/index';
 
-import { stripCustomEmoji } from '../../../global/helpers';
+import { isChatChannel, stripCustomEmoji } from '../../../global/helpers';
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -32,6 +32,7 @@ import { getPeerColorClass } from '../../common/helpers/peerColor';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
@@ -62,6 +63,8 @@ type StateProps = {
   isInChangingRecipientMode?: boolean;
   shouldPreventComposerAnimation?: boolean;
   senderChat?: ApiChat;
+  isSenderChannel?: boolean;
+  currentUserId?: string;
 };
 
 type OwnProps = {
@@ -92,6 +95,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   isInChangingRecipientMode,
   shouldPreventComposerAnimation,
   senderChat,
+  chatId,
+  currentUserId,
+  isSenderChannel,
 }) => {
   const {
     resetDraftReplyInfo,
@@ -99,6 +105,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     setEditingId,
     focusMessage,
     changeRecipient,
+    openChatOrTopicWithReplyInDraft,
     setForwardNoAuthors,
     setForwardNoCaptions,
     exitForwardMode,
@@ -106,7 +113,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const isReplyToTopicStart = message?.content.action?.type === 'topicCreate';
   const isShowingReply = replyInfo && !shouldForceShowEditing;
@@ -180,6 +188,11 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     () => updateDraftReplyInfo({ quoteText: undefined }),
   ));
   const handleChangeReplyRecipientClick = useLastCallback(buildAutoCloseMenuItemHandler(changeRecipient));
+  const handleReplyInSenderChat = useLastCallback(() => {
+    handleContextMenuClose();
+    if (!sender) return;
+    openChatOrTopicWithReplyInDraft({ chatId: sender.id });
+  });
   const handleDoNotReplyClick = useLastCallback(buildAutoCloseMenuItemHandler(clearEmbedded));
 
   const getTriggerElement = useLastCallback(() => ref.current);
@@ -224,7 +237,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   }, [editingId, isForwarding, isShowingReply]);
 
   const customText = forwardedMessagesCount && forwardedMessagesCount > 1
-    ? lang('ForwardedMessageCount', forwardedMessagesCount)
+    ? oldLang('ForwardedMessageCount', forwardedMessagesCount)
     : undefined;
 
   const strippedMessage = useMemo(() => {
@@ -246,6 +259,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
+  const canReplyInSenderChat = sender && !isSenderChannel && chatId !== sender.id && sender.id !== currentUserId;
+
   return (
     <div className={className} ref={ref} onContextMenu={handleContextMenu}>
       <div className={innerClassName}>
@@ -263,8 +278,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
           customText={customText}
-          title={(editingId && !isShowingReply) ? lang('EditMessage')
-            : noAuthors ? lang('HiddenSendersNameDescription') : undefined}
+          title={(editingId && !isShowingReply) ? oldLang('EditMessage')
+            : noAuthors ? oldLang('HiddenSendersNameDescription') : undefined}
           onClick={handleMessageClick}
           senderChat={senderChat}
         />
@@ -273,7 +288,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           round
           faded
           color="translucent"
-          ariaLabel={lang('Cancel')}
+          ariaLabel={oldLang('Cancel')}
           onClick={handleClearClick}
         >
           <i className="icon icon-close" />
@@ -300,7 +315,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     noAuthors: false,
                   })}
                 >
-                  {lang(forwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
+                  {oldLang(forwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
                 </MenuItem>
                 <MenuItem
                   icon={noAuthors ? 'message-succeeded' : undefined}
@@ -310,7 +325,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     noAuthors: true,
                   })}
                 >
-                  {lang(forwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
+                  {oldLang(forwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
                 </MenuItem>
                 {forwardsHaveCaptions && (
                   <>
@@ -323,7 +338,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                         noCaptions: false,
                       })}
                     >
-                      {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.ShowCaption' : 'ShowCaption')}
+                      {oldLang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.ShowCaption' : 'ShowCaption')}
                     </MenuItem>
                     <MenuItem
                       icon={noCaptions ? 'message-succeeded' : undefined}
@@ -333,13 +348,13 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                         noCaptions: true,
                       })}
                     >
-                      {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.HideCaption' : 'HideCaption')}
+                      {oldLang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.HideCaption' : 'HideCaption')}
                     </MenuItem>
                   </>
                 )}
                 <MenuSeparator />
                 <MenuItem icon="replace" onClick={handleForwardToAnotherChatClick}>
-                  {lang('ForwardAnotherChat')}
+                  {oldLang('ForwardAnotherChat')}
                 </MenuItem>
               </>
             )}
@@ -349,21 +364,26 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                   icon="show-message"
                   onClick={handleShowMessageClick}
                 >
-                  {lang('Message.Context.Goto')}
+                  {oldLang('Message.Context.Goto')}
                 </MenuItem>
                 {isReplyWithQuote && (
                   <MenuItem
                     icon="remove-quote"
                     onClick={handleRemoveQuoteClick}
                   >
-                    {lang('RemoveQuote')}
+                    {oldLang('RemoveQuote')}
+                  </MenuItem>
+                )}
+                {canReplyInSenderChat && (
+                  <MenuItem icon="user" onClick={handleReplyInSenderChat}>
+                    {lang('ReplyInPrivateMessage')}
                   </MenuItem>
                 )}
                 <MenuItem icon="replace" onClick={handleChangeReplyRecipientClick}>
-                  {lang('ReplyToAnotherChat')}
+                  {oldLang('ReplyToAnotherChat')}
                 </MenuItem>
                 <MenuItem icon="delete" onClick={handleDoNotReplyClick}>
-                  {lang('DoNotReply')}
+                  {oldLang('DoNotReply')}
                 </MenuItem>
               </>
             )}
@@ -432,6 +452,9 @@ export default memo(withGlobal<OwnProps>(
       }
     }
 
+    const chat = sender && selectChat(global, sender.id);
+    const isSenderChannel = chat && isChatChannel(chat);
+
     const forwardsHaveCaptions = forwardedMessages?.some((forward) => (
       forward?.content.text && Object.keys(forward.content).length > 1
     ));
@@ -457,6 +480,8 @@ export default memo(withGlobal<OwnProps>(
       isInChangingRecipientMode: isModalShown,
       shouldPreventComposerAnimation,
       senderChat,
+      currentUserId: global.currentUserId,
+      isSenderChannel,
     };
   },
 )(ComposerEmbeddedMessage));

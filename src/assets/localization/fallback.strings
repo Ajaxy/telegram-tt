@@ -1269,4 +1269,5 @@
 "MenuBetaChangelog" = "Beta Changelog";
 "MenuSwitchToK" = "Switch to K Version";
 "MenuInstallApp" = "Install App";
-"RemoveEffect" = "Remove effect"
+"RemoveEffect" = "Remove effect";
+"ReplyInPrivateMessage" = "Reply In Private Message";
