@@ -21,6 +21,8 @@ import useBlurSync from '../../../hooks/useBlurSync';
 import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 
+const FALLBACK_DIMENSIONS = AVATAR_FULL_DIMENSIONS;
+
 type UseMediaProps = {
   media?: MediaViewerMedia;
   isAvatar?: boolean;
@@ -111,7 +113,8 @@ export const useMediaProps = ({
     if (isVideo) {
       return getVideoDimensions(media);
     }
-    return undefined;
+
+    return FALLBACK_DIMENSIONS;
   }, [isAvatar, isDocument, isPhoto, isVideo, isVideoAvatar, media]);
 
   return {

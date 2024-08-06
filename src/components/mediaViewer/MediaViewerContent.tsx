@@ -97,7 +97,7 @@ const MediaViewerContent = ({
 
   if (!media) return undefined;
 
-  if (item.type !== 'message') {
+  if (item.type === 'avatar') {
     if (!isVideoAvatar) {
       return (
         <div key={media.id} className="MediaViewerContent">
@@ -136,10 +136,9 @@ const MediaViewerContent = ({
     }
   }
 
-  if (!textMessage) return undefined;
-  const textParts = textMessage.content.action?.type === 'suggestProfilePhoto'
+  const textParts = textMessage && (textMessage.content.action?.type === 'suggestProfilePhoto'
     ? lang('Conversation.SuggestedPhotoTitle')
-    : renderMessageText({ message: textMessage, forcePlayback: true, isForMediaViewer: true });
+    : renderMessageText({ message: textMessage, forcePlayback: true, isForMediaViewer: true }));
 
   const hasFooter = Boolean(textParts);
   const posterSize = calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);

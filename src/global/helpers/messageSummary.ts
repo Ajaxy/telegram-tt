@@ -1,6 +1,6 @@
 import type { TeactNode } from '../../lib/teact/teact';
 
-import type { ApiMessage, MediaContent } from '../../api/types';
+import type { ApiMediaExtendedPreview, ApiMessage, MediaContent } from '../../api/types';
 import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
@@ -70,9 +70,10 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
     document,
     sticker,
     poll,
+    paidMedia,
   } = message.content;
 
-  if (message.groupedId || photo) {
+  if (message.groupedId || photo || paidMedia) {
     return '🖼';
   }
 
@@ -137,24 +138,34 @@ function getSummaryDescription(
     storyData,
     giveaway,
     giveawayResults,
+    paidMedia,
   } = mediaContent;
 
   let hasUsedTruncatedText = false;
   let summary: string | TeactNode | undefined;
 
-  if (message?.groupedId) {
+  const boughtExtendedMedia = paidMedia?.isBought && paidMedia.extendedMedia;
+  const previewExtendedMedia = paidMedia && !paidMedia.isBought
+    ? paidMedia.extendedMedia as ApiMediaExtendedPreview[] : undefined;
+
+  const isPaidMediaAlbum = paidMedia && paidMedia.extendedMedia.length > 1;
+  const isPaidMediaSingleVideo = !isPaidMediaAlbum
+    && (boughtExtendedMedia?.[0].video || previewExtendedMedia?.[0].duration);
+  const isPaidMediaSinglePhoto = !isPaidMediaAlbum && !isPaidMediaSingleVideo;
+
+  if (message?.groupedId || isPaidMediaAlbum) {
     hasUsedTruncatedText = true;
     summary = truncatedText || lang('lng_in_dlg_album');
   }
 
-  if (photo) {
+  if (photo || isPaidMediaSinglePhoto) {
     hasUsedTruncatedText = true;
     summary = truncatedText || lang('AttachPhoto');
   }
 
-  if (video) {
+  if (video || isPaidMediaSingleVideo) {
     hasUsedTruncatedText = true;
-    summary = truncatedText || lang(video.isGif ? 'AttachGif' : 'AttachVideo');
+    summary = truncatedText || lang(video?.isGif ? 'AttachGif' : 'AttachVideo');
   }
 
   if (sticker) {

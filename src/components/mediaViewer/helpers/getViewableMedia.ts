@@ -91,7 +91,6 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
   if (document && (isDocumentPhoto(document) || isDocumentVideo(document))) {
     return {
       media: document,
-      isSingle: true,
     };
   }
 

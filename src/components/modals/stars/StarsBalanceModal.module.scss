@@ -178,6 +178,7 @@
 
 .stackedStar {
   @include mixins.filter-outline(0.0625rem, var(--_background-color));
+  transition: filter 0.25s ease-out;
 }
 
 .optionBottom {
