@@ -1,10 +1,18 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useMemo, useRef } from '../../../../lib/teact/teact';
+import React, {
+  memo,
+  useMemo, useRef,
+} from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
-import type { ApiAvailableReaction, ApiChatReactions, ApiReaction } from '../../../../api/types';
+import type {
+  ApiAvailableReaction, ApiChatReactions, ApiMessage,
+  ApiReaction,
+} from '../../../../api/types';
 
-import { getReactionKey, sortReactions } from '../../../../global/helpers';
+import {
+  getReactionKey, sortReactions,
+} from '../../../../global/helpers';
 import { selectChatFullInfo } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { REM } from '../../../common/helpers/mediaDimensions';
@@ -21,6 +29,7 @@ type OwnProps = {
   loadAndPlay: boolean;
   onReactionSelect?: (reaction: ApiReaction) => void;
   selectedReactionIds?: string[];
+  message?: ApiMessage;
 };
 
 type StateProps = {
@@ -29,6 +38,7 @@ type StateProps = {
   topReactions: ApiReaction[];
   canAnimate?: boolean;
   isSavedMessages?: boolean;
+  reactionsLimit?: number;
   isCurrentUserPremium?: boolean;
 };
 
@@ -47,6 +57,8 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
   topReactions,
   selectedReactionIds,
   onReactionSelect,
+  message,
+  reactionsLimit,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -55,7 +67,15 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
   const { width: windowWidth } = useWindowSize();
   const { isTouchScreen } = useAppLayout();
 
+  const currentReactions = message?.reactions?.results;
+
+  const shouldUseCurrentReactions = reactionsLimit && currentReactions
+   && currentReactions.length >= reactionsLimit;
+
   const allAvailableReactions = useMemo(() => {
+    if (shouldUseCurrentReactions) {
+      return currentReactions.map(({ reaction }) => reaction);
+    }
     if (!enabledReactions) {
       return [];
     }
@@ -65,7 +85,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
     }
 
     return sortReactions(enabledReactions.allowed, topReactions);
-  }, [availableReactions, enabledReactions, topReactions]);
+  }, [availableReactions, enabledReactions, topReactions, shouldUseCurrentReactions, currentReactions]);
 
   const pickerHeight = useMemo(() => {
     const pickerWidth = Math.min(MODAL_MAX_WIDTH_REM * REM, windowWidth);
@@ -112,12 +132,15 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const { availableReactions, topReactions } = global.reactions;
+
+    const { maxUniqueReactions } = global.appConfig || {};
     const { enabledReactions } = selectChatFullInfo(global, chatId) || {};
 
     return {
       enabledReactions,
       availableReactions,
       topReactions,
+      reactionsLimit: maxUniqueReactions,
     };
   },
 )(ReactionPickerLimited));
