@@ -7,7 +7,7 @@ import type { StateProps } from './helpers/createMapStateToProps';
 import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { getIsDownloading } from '../../../global/helpers';
+import { getIsDownloading, getMessageDownloadableMedia } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -85,6 +85,8 @@ const AudioResults: FC<OwnProps & StateProps> = ({
       const isFirst = index === 0;
       const shouldDrawDateDivider = isFirst
         || toYearMonth(message.date) !== toYearMonth(foundMessages[index - 1].date);
+
+      const media = getMessageDownloadableMedia(message)!;
       return (
         <div
           className="ListItem small-icon"
@@ -113,7 +115,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
             onPlay={handlePlayAudio}
             onDateClick={handleMessageFocus}
             canDownload={!chatsById[message.chatId]?.isProtected && !message.isProtected}
-            isDownloading={getIsDownloading(activeDownloads, message.content.audio!)}
+            isDownloading={getIsDownloading(activeDownloads, media)}
           />
         </div>
       );
