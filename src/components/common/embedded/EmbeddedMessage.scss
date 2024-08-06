@@ -4,7 +4,7 @@
 
 .EmbeddedMessage {
   --hover-opacity: 0;
-  --hover-background-color: black;
+  --hover-background-color: white;
 
   display: flex;
   align-items: center;
@@ -23,11 +23,11 @@
 
   html.theme-dark & {
     --ripple-color: rgba(255, 255, 255, 0.08);
-    --hover-background-color: white;
+    --hover-background-color: black;
   }
 
   &:hover {
-    --hover-opacity: 0.04;
+    --hover-opacity: 0.15;
 
     html.theme-dark & {
       --hover-opacity: 0.08;
@@ -35,7 +35,7 @@
   }
 
   &::after {
-    transition: opacity 0.2s ease-in;
+    transition: opacity 0.15s;
     content: '';
     position: absolute;
     top: 0;
