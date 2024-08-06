@@ -29,14 +29,15 @@ const useEditing = (
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
   resetComposer: (shouldPreserveInput?: boolean) => void,
-  openDeleteModal: () => void,
   chatId: string,
   threadId: ThreadId,
   type: MessageListType,
   draft?: ApiDraft,
   editingDraft?: ApiFormattedText,
 ): [VoidFunction, VoidFunction, boolean] => {
-  const { editMessage, setEditingDraft, toggleMessageWebPage } = getActions();
+  const {
+    editMessage, setEditingDraft, toggleMessageWebPage, openDeleteMessageModal,
+  } = getActions();
   const [shouldForceShowEditing, setShouldForceShowEditing] = useState(false);
 
   const replyingToId = draft?.replyInfo?.replyToMsgId;
@@ -152,7 +153,7 @@ const useEditing = (
     }
 
     if (!text && !hasMessageMedia(editedMessage)) {
-      openDeleteModal();
+      openDeleteMessageModal({ isSchedule: type === 'scheduled', message: editedMessage });
       return;
     }
 

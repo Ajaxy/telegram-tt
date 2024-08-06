@@ -423,6 +423,42 @@ export function selectSender<T extends GlobalState>(global: T, message: ApiMessa
   return selectPeer(global, senderId);
 }
 
+export function selectSendersFromSelectedMessages<T extends GlobalState>(
+  global: T,
+  chat: ApiChat | undefined,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { messageIds: selectedMessageIds } = selectTabState(global, tabId).selectedMessages || {};
+  if (!chat?.id || !selectedMessageIds) {
+    return undefined;
+  }
+
+  return selectedMessageIds.map((id) => {
+    const message = selectChatMessage(global, chat.id, id);
+    if (!message?.senderId) {
+      return undefined;
+    }
+    return selectSender(global, message);
+  });
+}
+
+export function selectSenderFromMessage<T extends GlobalState>(
+  global: T,
+  chat: ApiChat | undefined,
+  selectedMessageId: number | undefined,
+): ApiPeer | undefined {
+  if (!chat?.id || !selectedMessageId) {
+    return undefined;
+  }
+
+  const message = selectChatMessage(global, chat.id, selectedMessageId);
+  if (!message?.senderId) {
+    return undefined;
+  }
+
+  return selectPeer(global, message.senderId);
+}
+
 export function selectReplySender<T extends GlobalState>(
   global: T, message: ApiMessage,
 ) {

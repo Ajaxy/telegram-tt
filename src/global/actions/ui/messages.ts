@@ -958,3 +958,29 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
 
   copyHtmlToClipboard(resultHtml.join('\n'), resultText.join('\n'));
 }
+
+addActionHandler('openDeleteMessageModal', (global, actions, payload): ActionReturnType => {
+  const {
+    message, isSchedule, album,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  global = getGlobal();
+
+  global = updateTabState(global, {
+    deleteMessageModal: {
+      isSchedule,
+      album,
+      message,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeDeleteMessageModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    deleteMessageModal: undefined,
+  }, tabId);
+});

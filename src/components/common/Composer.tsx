@@ -164,7 +164,6 @@ import Button from '../ui/Button';
 import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
 import Spinner from '../ui/Spinner';
 import Avatar from './Avatar';
-import DeleteMessageModal from './DeleteMessageModal.async';
 import Icon from './icons/Icon';
 import ReactionAnimatedEmoji from './reactions/ReactionAnimatedEmoji';
 
@@ -586,7 +585,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [isBotCommandMenuOpen, openBotCommandMenu, closeBotCommandMenu] = useFlag();
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
   const [isSendAsMenuOpen, openSendAsMenu, closeSendAsMenu] = useFlag();
-  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isHoverDisabled, disableHover, enableHover] = useFlag();
 
   const {
@@ -756,7 +754,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     setHtml,
     editingMessage,
     resetComposer,
-    openDeleteModal,
     chatId,
     threadId,
     messageListType,
@@ -1405,7 +1402,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [isInStoryViewer, slowMode?.nextSendDate, stealthMode?.activeUntil]);
 
   const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isEmojiTooltipOpen || isSendAsMenuOpen
-    || isMentionTooltipOpen || isInlineBotTooltipOpen || isDeleteModalOpen || isBotCommandMenuOpen || isAttachMenuOpen
+    || isMentionTooltipOpen || isInlineBotTooltipOpen || isBotCommandMenuOpen || isAttachMenuOpen
     || isStickerTooltipOpen || isChatCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
   || isCustomSendMenuOpen || Boolean(activeVoiceRecording) || attachments.length > 0 || isInputHasFocus;
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
@@ -1472,9 +1469,6 @@ const Composer: FC<OwnProps & StateProps> = ({
         break;
     }
   });
-
-  const prevEditedMessage = usePrevious(editingMessage, true);
-  const renderedEditedMessage = editingMessage || prevEditedMessage;
 
   const scheduledDefaultDate = new Date();
   scheduledDefaultDate.setSeconds(0);
@@ -1663,14 +1657,6 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClear={closePollModal}
         onSend={handlePollSend}
       />
-      {renderedEditedMessage && (
-        <DeleteMessageModal
-          isOpen={isDeleteModalOpen}
-          isSchedule={messageListType === 'scheduled'}
-          onClose={closeDeleteModal}
-          message={renderedEditedMessage}
-        />
-      )}
       <SendAsMenu
         isOpen={isSendAsMenuOpen}
         onClose={closeSendAsMenu}

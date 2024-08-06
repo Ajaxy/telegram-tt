@@ -31,7 +31,6 @@ import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useOldLang from '../../hooks/useOldLang';
 import useZoomChange from './hooks/useZoomChangeSignal';
 
-import DeleteMessageModal from '../common/DeleteMessageModal';
 import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -90,6 +89,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     updateProfilePhoto,
     updateChatPhoto,
     openMediaViewer,
+    openDeleteMessageModal,
   } = getActions();
 
   const isMessage = item?.type === 'message';
@@ -163,31 +163,16 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     );
   }, []);
 
-  function renderDeleteModals() {
-    if (item?.type === 'message') {
-      return (
-        <DeleteMessageModal
-          isOpen={isDeleteModalOpen}
-          isSchedule={messageListType === 'scheduled'}
-          onClose={closeDeleteModal}
-          onConfirm={onBeforeDelete}
-          message={item.message}
-        />
-      );
-    }
-    if (item?.type === 'avatar') {
-      return (
-        <DeleteProfilePhotoModal
-          isOpen={isDeleteModalOpen}
-          onClose={closeDeleteModal}
-          onConfirm={onBeforeDelete}
-          profileId={item.avatarOwner.id}
-          photo={item.avatarOwner.photos![item.mediaIndex!]}
-        />
-      );
-    }
-
-    return undefined;
+  function renderDeleteModal() {
+    return (item?.type === 'avatar') ? (
+      <DeleteProfilePhotoModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={onBeforeDelete}
+        profileId={item.avatarOwner.id}
+        photo={item.avatarOwner.photos![item.mediaIndex!]}
+      />
+    ) : undefined;
   }
 
   function renderDownloadButton() {
@@ -222,6 +207,17 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       </Button>
     );
   }
+
+  const openDeleteModalHandler = useLastCallback(() => {
+    if (item?.type === 'message') {
+      openDeleteMessageModal({
+        isSchedule: messageListType === 'scheduled',
+        message: item.message, onConfirm: onBeforeDelete,
+      });
+    } else {
+      openDeleteModal();
+    }
+  });
 
   if (isMobile) {
     const menuItems: MenuItemProps[] = [];
@@ -268,7 +264,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     if (canDelete) {
       menuItems.push({
         icon: 'delete',
-        onClick: openDeleteModal,
+        onClick: openDeleteModalHandler,
         children: lang('Delete'),
         destructive: true,
       });
@@ -300,7 +296,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ))}
         </DropdownMenu>
         {isDownloading && <ProgressSpinner progress={downloadProgress} size="s" noCross />}
-        {canDelete && renderDeleteModals()}
+        {canDelete && renderDeleteModal()}
       </div>
     );
   }
@@ -365,7 +361,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           size="smaller"
           color="translucent-white"
           ariaLabel={lang('Delete')}
-          onClick={openDeleteModal}
+          onClick={openDeleteModalHandler}
         >
           <i className="icon icon-delete" />
         </Button>
@@ -379,7 +375,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       >
         <i className="icon icon-close" />
       </Button>
-      {canDelete && renderDeleteModals()}
+      {canDelete && renderDeleteModal()}
     </div>
   );
 };

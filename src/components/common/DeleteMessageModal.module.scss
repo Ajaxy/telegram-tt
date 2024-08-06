@@ -1,0 +1,67 @@
+.mainContainer {
+  max-height: 90vh;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.title {
+  margin: 0;
+}
+
+.actionTitle {
+  margin-top: 1.5rem;
+  margin-left: 0.5rem;
+  color: var(--color-links);
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.restrictionTitle {
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.listItemButton {
+  margin-top: 0.1875rem;
+  margin-left: 0.4375rem;
+}
+
+.button {
+  color: var(--color-links) !important;
+  padding: 0 !important;
+  &:hover {
+    background: none !important;
+  }
+}
+
+.dropdownList {
+  padding-left: 3.1875rem;
+}
+
+.dialogButtons {
+  padding-bottom: 1rem;
+}
+
+.restrictionContainer,
+.dropdownList {
+  overflow: hidden;
+  max-height: 0;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: max-height 0.3s ease-out;
+}
+
+.restrictionContainerOpen,
+.dropdownListOpen {
+  max-height: 100vh;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: max-height 0.3s ease-in;
+}
+
+:global(.Checkbox) {
+  padding-left: 3.875rem;
+}

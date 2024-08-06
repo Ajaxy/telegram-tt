@@ -9,15 +9,15 @@ import { ManagementScreens } from '../../../types';
 
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import stopEvent from '../../../util/stopEvent';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
-import Checkbox from '../../ui/Checkbox';
+import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
@@ -69,9 +69,8 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
     permissions, havePermissionChanged, isLoading, handlePermissionChange, setIsLoading,
   } = useManagePermissions(selectedChatMember?.bannedRights || chat?.defaultBannedRights);
   const [isBanConfirmationDialogOpen, openBanConfirmationDialog, closeBanConfirmationDialog] = useFlag();
-  const lang = useOldLang();
-
-  const { isForum } = chat || {};
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -124,10 +123,6 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   }, [chat, isFormFullyDisabled]);
 
   const [isMediaDropdownOpen, setIsMediaDropdownOpen] = useState(false);
-  const handleOpenMediaDropdown = useCallback((e: React.MouseEvent) => {
-    stopEvent(e);
-    setIsMediaDropdownOpen(!isMediaDropdownOpen);
-  }, [isMediaDropdownOpen]);
 
   if (!selectedChatMember) {
     return undefined;
@@ -145,185 +140,21 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
             <PrivateChatInfo userId={selectedChatMember.userId} forceShowSelf />
           </ListItem>
 
-          <h3 className="section-heading mt-4" dir="auto">{lang('UserRestrictionsCanDo')}</h3>
-
-          <div className="ListItem">
-            <Checkbox
-              name="sendPlain"
-              checked={!permissions.sendPlain}
-              label={lang('UserRestrictionsSend')}
-              blocking
-              disabled={getControlIsDisabled('sendPlain')}
-              onChange={handlePermissionChange}
-            />
-          </div>
-
-          <div className="ListItem">
-            <Checkbox
-              name="sendMedia"
-              checked={!permissions.sendMedia}
-              label={lang('UserRestrictionsSendMedia')}
-              blocking
-              rightIcon={isMediaDropdownOpen ? 'up' : 'down'}
-              disabled={getControlIsDisabled('sendMedia')}
-              onChange={handlePermissionChange}
-              onClickLabel={handleOpenMediaDropdown}
-            />
-          </div>
-
-          <div className="DropdownListTrap">
-            <div
-              className={buildClassName(
-                'DropdownList',
-                isMediaDropdownOpen && 'DropdownList--open',
-              )}
-            >
-              <div className="ListItem">
-                <Checkbox
-                  name="sendPhotos"
-                  checked={!permissions.sendPhotos}
-                  label={lang('UserRestrictionsSendPhotos')}
-                  blocking
-                  disabled={getControlIsDisabled('sendPhotos')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="sendVideos"
-                  checked={!permissions.sendVideos}
-                  label={lang('UserRestrictionsSendVideos')}
-                  blocking
-                  disabled={getControlIsDisabled('sendVideos')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="sendStickers"
-                  checked={!permissions.sendStickers && !permissions.sendGifs}
-                  label={lang('UserRestrictionsSendStickers')}
-                  blocking
-                  disabled={getControlIsDisabled('sendStickers')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="sendAudios"
-                  checked={!permissions.sendAudios}
-                  label={lang('UserRestrictionsSendMusic')}
-                  blocking
-                  disabled={getControlIsDisabled('sendAudios')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="sendDocs"
-                  checked={!permissions.sendDocs}
-                  label={lang('UserRestrictionsSendFiles')}
-                  blocking
-                  disabled={getControlIsDisabled('sendDocs')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="sendVoices"
-                  checked={!permissions.sendVoices}
-                  label={lang('UserRestrictionsSendVoices')}
-                  blocking
-                  disabled={getControlIsDisabled('sendVoices')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="sendRoundvideos"
-                  checked={!permissions.sendRoundvideos}
-                  label={lang('UserRestrictionsSendRound')}
-                  blocking
-                  disabled={getControlIsDisabled('sendRoundvideos')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="embedLinks"
-                  checked={!permissions.embedLinks}
-                  label={lang('UserRestrictionsEmbedLinks')}
-                  blocking
-                  disabled={getControlIsDisabled('embedLinks')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-
-              <div className="ListItem">
-                <Checkbox
-                  name="sendPolls"
-                  checked={!permissions.sendPolls}
-                  label={lang('UserRestrictionsSendPolls')}
-                  blocking
-                  disabled={getControlIsDisabled('sendPolls')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={buildClassName('part', isMediaDropdownOpen && 'shifted')}>
-
-            <div className="ListItem">
-              <Checkbox
-                name="inviteUsers"
-                checked={!permissions.inviteUsers}
-                label={lang('UserRestrictionsInviteUsers')}
-                blocking
-                disabled={getControlIsDisabled('inviteUsers')}
-                onChange={handlePermissionChange}
-              />
-            </div>
-            <div className="ListItem">
-              <Checkbox
-                name="pinMessages"
-                checked={!permissions.pinMessages}
-                label={lang('UserRestrictionsPinMessages')}
-                blocking
-                disabled={getControlIsDisabled('pinMessages')}
-                onChange={handlePermissionChange}
-              />
-            </div>
-            <div className="ListItem">
-              <Checkbox
-                name="changeInfo"
-                checked={!permissions.changeInfo}
-                label={lang('UserRestrictionsChangeInfo')}
-                blocking
-                disabled={getControlIsDisabled('changeInfo')}
-                onChange={handlePermissionChange}
-              />
-            </div>
-            {isForum && (
-              <div className="ListItem">
-                <Checkbox
-                  name="manageTopics"
-                  checked={!permissions.manageTopics}
-                  label={lang('CreateTopicsPermission')}
-                  blocking
-                  disabled={getControlIsDisabled('manageTopics')}
-                  onChange={handlePermissionChange}
-                />
-              </div>
+          <h3 className="section-heading mt-4" dir="auto">{oldLang('UserRestrictionsCanDo')}</h3>
+          <PermissionCheckboxList
+            chatId={chat?.id}
+            isMediaDropdownOpen={isMediaDropdownOpen}
+            setIsMediaDropdownOpen={setIsMediaDropdownOpen}
+            handlePermissionChange={handlePermissionChange}
+            permissions={permissions}
+            className={buildClassName(
+              'DropdownList',
+              isMediaDropdownOpen && 'DropdownList--open',
             )}
-          </div>
+            dropdownClassName="DropdownListTrap"
+            shiftedClassName={buildClassName('part', isMediaDropdownOpen && 'shifted')}
+            getControlIsDisabled={getControlIsDisabled}
+          />
         </div>
 
         {!isFormFullyDisabled && (
@@ -334,7 +165,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
             )}
           >
             <ListItem icon="delete-user" ripple destructive onClick={openBanConfirmationDialog}>
-              {lang('UserRestrictionsBlock')}
+              {oldLang('UserRestrictionsBlock')}
             </ListItem>
           </div>
         )}
@@ -343,7 +174,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
       <FloatingActionButton
         isShown={havePermissionChanged}
         onClick={handleSavePermissions}
-        ariaLabel={lang('Save')}
+        ariaLabel={oldLang('Save')}
         disabled={isLoading}
       >
         {isLoading ? (
@@ -356,7 +187,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
       <ConfirmDialog
         isOpen={isBanConfirmationDialogOpen}
         onClose={closeBanConfirmationDialog}
-        text="Are you sure you want to ban and remove this user from the group?"
+        text={lang('GroupManagementBanUserConfirm')}
         confirmLabel="Remove"
         confirmHandler={handleBanFromGroup}
         confirmIsDestructive

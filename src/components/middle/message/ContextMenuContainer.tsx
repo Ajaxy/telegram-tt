@@ -64,7 +64,6 @@ import useOldLang from '../../../hooks/useOldLang';
 import useSchedule from '../../../hooks/useSchedule';
 import useShowTransition from '../../../hooks/useShowTransition';
 
-import DeleteMessageModal from '../../common/DeleteMessageModal';
 import PinMessageModal from '../../common/PinMessageModal.async';
 import ReportModal from '../../common/ReportModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -222,12 +221,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openPremiumModal,
     loadOutboxReadDate,
     copyMessageLink,
+    openDeleteMessageModal,
   } = getActions();
 
   const lang = useOldLang();
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
@@ -333,24 +332,20 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     isMessageTranslated, message.content.text,
   ]);
 
-  const handleDelete = useLastCallback(() => {
-    setIsMenuOpen(false);
-    setIsDeleteModalOpen(true);
-  });
-
-  const handleReport = useLastCallback(() => {
-    setIsMenuOpen(false);
-    setIsReportModalOpen(true);
-  });
-
   const closeMenu = useLastCallback(() => {
     setIsMenuOpen(false);
     onClose();
   });
 
-  const closeDeleteModal = useLastCallback(() => {
-    setIsDeleteModalOpen(false);
-    onClose();
+  const handleDelete = useLastCallback(() => {
+    setIsMenuOpen(false);
+    closeMenu();
+    openDeleteMessageModal({ isSchedule: messageListType === 'scheduled', album, message });
+  });
+
+  const handleReport = useLastCallback(() => {
+    setIsMenuOpen(false);
+    setIsReportModalOpen(true);
   });
 
   const closeReportModal = useLastCallback(() => {
@@ -638,13 +633,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onTranslate={handleTranslate}
         onShowOriginal={handleShowOriginal}
         onSelectLanguage={handleSelectLanguage}
-      />
-      <DeleteMessageModal
-        isOpen={isDeleteModalOpen}
-        isSchedule={messageListType === 'scheduled'}
-        onClose={closeDeleteModal}
-        album={album}
-        message={message}
       />
       <ReportModal
         isOpen={isReportModalOpen}

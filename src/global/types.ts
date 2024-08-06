@@ -100,6 +100,7 @@ import type {
   EmojiKeywords,
   FocusDirection,
   GlobalSearchContent,
+  IAlbum,
   IAnchorPosition,
   InlineBotSettings,
   ISettings,
@@ -689,6 +690,13 @@ export type TabState = {
     selectedMemberIds?: string[];
     selectedChannelIds?: string[];
     prepaidGiveaway?: ApiPrepaidGiveaway;
+  };
+
+  deleteMessageModal?: {
+    message?: ApiMessage;
+    isSchedule?: boolean;
+    album?: IAlbum;
+    onConfirm?: NoneToVoidFunction;
   };
 
   giftingModal?: {
@@ -3124,6 +3132,14 @@ export interface ActionPayloads {
 
   openPremiumGiftingModal: WithTabId | undefined;
   closePremiumGiftingModal: WithTabId | undefined;
+
+  openDeleteMessageModal: ({
+    message?: ApiMessage;
+    isSchedule?: boolean;
+    album?: IAlbum;
+    onConfirm?: NoneToVoidFunction;
+  } & WithTabId);
+  closeDeleteMessageModal: WithTabId | undefined;
 
   transcribeAudio: {
     chatId: string;

@@ -23,7 +23,7 @@
           var(--color-primary)
           url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzLjkuOEw1LjggOC45IDIuMSA1LjJjLS40LS40LTEuMS0uNC0xLjYgMC0uNC40LS40IDEuMSAwIDEuNkw1IDExLjJjLjQuNCAxLjEuNCAxLjYgMGw4LjktOC45Yy40LS40LjQtMS4xIDAtMS42LS41LS40LTEuMi0uNC0xLjYuMXoiIGZpbGw9IiNGRkYiLz48L3N2Zz4=)
           no-repeat 50% 50%;
-        background-size: 12px;
+        background-size: 0.75rem;
         border-radius: 50%;
       }
     }
@@ -75,14 +75,14 @@
       content: "";
       display: block;
       position: absolute;
-      left: 1.1875rem;
+      left: 0.6875rem;
       top: 0.1875rem;
       width: 1.125rem;
       height: 1.125rem;
     }
 
     &::before {
-      border: 2px solid var(--color-borders-input);
+      border: 0.125rem solid var(--color-borders-input);
       border-radius: 0.25rem;
       background-color: var(--color-background);
       transition: border-color 0.1s ease, background-color 0.1s ease;
@@ -117,6 +117,24 @@
       font-size: 0.875rem;
       line-height: 1rem;
       color: var(--color-text-secondary);
+    }
+  }
+
+  .Nested-avatar-list {
+    &::before,
+    &::after {
+      pointer-events: none;
+      content: "";
+      display: block;
+      position: absolute;
+      left: 4.3125rem;
+      top: 0.625rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+
+    .label {
+      column-gap: 0.6875rem;
     }
   }
 
@@ -155,4 +173,64 @@
       }
     }
   }
+
+  &.nested {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.3125rem;
+    margin-bottom: 0.5625rem;
+    padding-left: 4.1875rem;
+    .Checkbox-main {
+      &::before,
+      &::after {
+        top: 0.875rem;
+        left: 0.75rem;
+      }
+    }
+  }
+
+  &.permission-group {
+    padding-left: 4rem;
+    .Checkbox-main {
+      &::before,
+      &::after {
+        left: 0.75rem;
+      }
+    }
+  }
+
+  &.avatar {
+    padding-left: 6.625rem;
+    margin-bottom: 1.125rem;
+  }
+
+  .button {
+    color: var(--color-text);
+    display: flex;
+    gap: 0.1875rem;
+  }
+
+  .group-icon {
+    font-size: 0.75rem;
+  }
+
+  &.nested-checkbox-group &.Checkbox-main::before,
+  &.nested-checkbox-group &.Checkbox-main::after {
+    top: 1.875rem;
+    left: 2.875rem;
+  }
+}
+
+.nested-checkbox-group {
+  overflow: hidden;
+  max-height: 0;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: max-height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.nested-checkbox-group-open {
+  max-height: 100vh;
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: max-height 0.6s ease-in-out;
 }
