@@ -31,6 +31,7 @@ interface OwnProps {
   forcePlayback?: boolean;
   focusedQuote?: string;
   isInSelectMode?: boolean;
+  canBeEmpty?: boolean;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -52,6 +53,7 @@ function MessageText({
   forcePlayback,
   focusedQuote,
   isInSelectMode,
+  canBeEmpty,
 }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -80,7 +82,7 @@ function MessageText({
     return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS;
   }, [entities]) || 0;
 
-  if (!text) {
+  if (!text && !canBeEmpty) {
     return <span className="content-unsupported">{CONTENT_NOT_SUPPORTED}</span>;
   }
 

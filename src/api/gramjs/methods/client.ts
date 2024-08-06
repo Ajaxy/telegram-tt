@@ -24,7 +24,7 @@ import { buildApiMessage, setMessageBuilderCurrentUserId } from '../apiBuilders/
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiStory } from '../apiBuilders/stories';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
-import { buildInputPeerFromLocalDb } from '../gramjsBuilders';
+import { buildInputPeerFromLocalDb, getEntityTypeById } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb, addMessageToLocalDb, addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
 } from '../helpers';
@@ -465,10 +465,11 @@ export async function repairFileReference({
 }
 
 async function repairMessageMedia(peerId: string, messageId: number) {
+  const type = getEntityTypeById(peerId);
   const peer = buildInputPeerFromLocalDb(peerId);
   if (!peer) return false;
   const result = await invokeRequest(
-    peer
+    type === 'channel'
       ? new GramJs.channels.GetMessages({
         channel: peer,
         id: [new GramJs.InputMessageID({ id: messageId })],

@@ -107,7 +107,7 @@ const StickerView: FC<OwnProps> = ({
   const thumbData = customColor ? thumbDataUri : (previewMediaData || thumbDataUri);
 
   const shouldForcePreview = isUnsupportedVideo || (isStatic && isSmall);
-  fullMediaHash ||= shouldForcePreview ? previewMediaHash : `sticker${id}`;
+  fullMediaHash = shouldForcePreview ? previewMediaHash : (fullMediaHash || `sticker${id}`);
 
   // If preloaded preview is forced, it will render as thumb, so no need to load it again
   const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && previewMediaData);

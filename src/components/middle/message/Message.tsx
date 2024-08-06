@@ -980,6 +980,7 @@ const Message: FC<OwnProps & StateProps> = ({
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         withTranslucentThumbs={isCustomShape}
         isInSelectMode={isInSelectMode}
+        canBeEmpty={hasFactCheck}
       />
     );
   }
