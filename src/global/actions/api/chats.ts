@@ -1953,13 +1953,16 @@ addActionHandler('toggleIsProtected', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('setChatEnabledReactions', async (global, actions, payload): Promise<void> => {
-  const { chatId, enabledReactions, tabId = getCurrentTabId() } = payload;
+  const {
+    chatId, enabledReactions, reactionsLimit, tabId = getCurrentTabId(),
+  } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
   await callApi('setChatEnabledReactions', {
     chat,
     enabledReactions,
+    reactionsLimit,
   });
 
   global = getGlobal();

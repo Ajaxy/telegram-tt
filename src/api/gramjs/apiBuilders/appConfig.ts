@@ -7,6 +7,7 @@ import type { ApiAppConfig } from '../../types';
 
 import {
   DEFAULT_LIMITS,
+  MAX_UNIQUE_REACTIONS,
   SERVICE_NOTIFICATIONS_USER_ID,
   STORY_EXPIRE_PERIOD,
   STORY_VIEWERS_EXPIRE_PERIOD,
@@ -116,7 +117,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     readDateExpiresAt: appConfig.pm_read_date_expire_period,
     autologinDomains: appConfig.autologin_domains || [],
     urlAuthDomains: appConfig.url_auth_domains || [],
-    maxUniqueReactions: appConfig.reactions_uniq_max,
+    maxUniqueReactions: appConfig.reactions_uniq_max ?? MAX_UNIQUE_REACTIONS,
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
     premiumPromoOrder: appConfig.premium_promo_order as ApiPremiumSection[],

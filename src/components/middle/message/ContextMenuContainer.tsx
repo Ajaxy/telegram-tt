@@ -124,7 +124,7 @@ type StateProps = {
   canShowSeenBy?: boolean;
   enabledReactions?: ApiChatReactions;
   canScheduleUntilOnline?: boolean;
-  maxUniqueReactions?: number;
+  reactionsLimit?: number;
   canPlayAnimatedEmojis?: boolean;
   isReactionPickerOpen?: boolean;
   isInSavedMessages?: boolean;
@@ -161,7 +161,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canShowReactionList,
   canEdit,
   enabledReactions,
-  maxUniqueReactions,
+  reactionsLimit,
   isPrivate,
   isCurrentUserPremium,
   canForward,
@@ -576,7 +576,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canBuyPremium={canBuyPremium}
         isOpen={isMenuOpen}
         enabledReactions={enabledReactions}
-        maxUniqueReactions={maxUniqueReactions}
+        reactionsLimit={reactionsLimit}
         anchor={anchor}
         targetHref={targetHref}
         canShowReactionsCount={canShowReactionsCount}
@@ -674,9 +674,15 @@ export default memo(withGlobal<OwnProps>(
 
     const activeDownloads = selectActiveDownloads(global);
     const chat = selectChat(global, message.chatId);
+    const isPrivate = chat && isUserId(chat.id);
+    const chatFullInfo = !isPrivate ? selectChatFullInfo(global, message.chatId) : undefined;
+
     const {
       seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions, readDateExpiresAt,
     } = global.appConfig || {};
+
+    const reactionsLimit = chatFullInfo?.reactionsLimit || maxUniqueReactions;
+
     const {
       noOptions,
       canReply,
@@ -697,7 +703,6 @@ export default memo(withGlobal<OwnProps>(
       canClosePoll,
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
 
-    const isPrivate = chat && isUserId(chat.id);
     const userStatus = isPrivate ? selectUserStatus(global, chat.id) : undefined;
     const isOwn = isOwnMessage(message);
     const isMessageUnread = selectIsMessageUnread(global, message);
@@ -731,7 +736,6 @@ export default memo(withGlobal<OwnProps>(
       && chat.membersCount <= seenByMaxChatMembers
       && message.date > Date.now() / 1000 - seenByExpiresAt);
     const isAction = isActionMessage(message);
-    const chatFullInfo = !isPrivate ? selectChatFullInfo(global, message.chatId) : undefined;
     const canShowReactionsCount = !isLocal && !isChannel && !isScheduled && !isAction && !isPrivate && message.reactions
       && !areReactionsEmpty(message.reactions) && message.reactions.canSeeList;
     const isProtected = selectIsMessageProtected(global, message);
@@ -781,7 +785,7 @@ export default memo(withGlobal<OwnProps>(
       canLoadReadDate,
       shouldRenderShowWhen,
       enabledReactions: chat?.isForbidden ? undefined : chatFullInfo?.enabledReactions,
-      maxUniqueReactions,
+      reactionsLimit,
       isPrivate,
       isCurrentUserPremium,
       hasFullInfo: Boolean(chatFullInfo),

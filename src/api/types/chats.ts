@@ -123,6 +123,7 @@ export interface ApiChatFullInfo {
   linkedChatId?: string;
   botCommands?: ApiBotCommand[];
   enabledReactions?: ApiChatReactions;
+  reactionsLimit?: number;
   sendAsId?: string;
   canViewStatistics?: boolean;
   recentRequesterIds?: string[];

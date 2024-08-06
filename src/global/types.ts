@@ -2335,6 +2335,7 @@ export interface ActionPayloads {
   setChatEnabledReactions: {
     chatId: string;
     enabledReactions?: ApiChatReactions;
+    reactionsLimit?: number;
   } & WithTabId;
 
   startActiveReaction: {

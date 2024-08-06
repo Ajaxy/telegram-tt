@@ -339,6 +339,7 @@ export const PEER_COLOR_BG_OPACITY = '1a';
 export const PEER_COLOR_BG_ACTIVE_OPACITY = '2b';
 export const PEER_COLOR_GRADIENT_STEP = 5; // px
 export const MAX_UPLOAD_FILEPART_SIZE = 524288;
+export const MAX_UNIQUE_REACTIONS = 11;
 
 // Group calls
 export const GROUP_CALL_VOLUME_MULTIPLIER = 100;

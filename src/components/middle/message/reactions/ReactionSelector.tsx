@@ -30,7 +30,7 @@ type OwnProps = {
   effectReactions?: ApiReaction[];
   allAvailableReactions?: ApiAvailableReaction[];
   currentReactions?: ApiReactionCount[];
-  maxUniqueReactions?: number;
+  reactionsLimit?: number;
   isReady?: boolean;
   canBuyPremium?: boolean;
   isCurrentUserPremium?: boolean;
@@ -54,7 +54,7 @@ const ReactionSelector: FC<OwnProps> = ({
   defaultTagReactions,
   enabledReactions,
   currentReactions,
-  maxUniqueReactions,
+  reactionsLimit,
   isPrivate,
   isReady,
   canPlayAnimatedEmojis,
@@ -75,8 +75,8 @@ const ReactionSelector: FC<OwnProps> = ({
 
   const areReactionsLocked = isInSavedMessages && !isCurrentUserPremium && !isInStoryViewer;
 
-  const shouldUseCurrentReactions = Boolean(maxUniqueReactions
-    && currentReactions && currentReactions.length >= maxUniqueReactions);
+  const shouldUseCurrentReactions = Boolean(reactionsLimit
+    && currentReactions && currentReactions.length >= reactionsLimit);
 
   const availableReactions = useMemo(() => {
     const reactions = (() => {
@@ -86,6 +86,7 @@ const ReactionSelector: FC<OwnProps> = ({
       if (enabledReactions?.type === 'some') return enabledReactions.allowed;
       return allAvailableReactions?.map((reaction) => reaction.reaction);
     })();
+
     const filteredReactions = reactions?.map((reaction) => {
       const isCustomReaction = 'documentId' in reaction;
       const availableReaction = allAvailableReactions?.find((r) => isSameReaction(r.reaction, reaction));
@@ -106,6 +107,7 @@ const ReactionSelector: FC<OwnProps> = ({
   }, [
     allAvailableReactions, currentReactions, defaultTagReactions, enabledReactions, isInSavedMessages, isPrivate,
     topReactions, isForEffects, effectReactions, shouldUseCurrentReactions,
+
   ]);
 
   const reactionsToRender = useMemo(() => {

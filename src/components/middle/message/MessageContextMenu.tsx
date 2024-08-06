@@ -52,7 +52,7 @@ type OwnProps = {
   message: ApiMessage | ApiSponsoredMessage;
   canSendNow?: boolean;
   enabledReactions?: ApiChatReactions;
-  maxUniqueReactions?: number;
+  reactionsLimit?: number;
   canReschedule?: boolean;
   canReply?: boolean;
   canQuote?: boolean;
@@ -140,7 +140,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   isPrivate,
   isCurrentUserPremium,
   enabledReactions,
-  maxUniqueReactions,
+  reactionsLimit,
   anchor,
   targetHref,
   canSendNow,
@@ -364,7 +364,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           allAvailableReactions={availableReactions}
           defaultTagReactions={defaultTagReactions}
           currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
-          maxUniqueReactions={maxUniqueReactions}
+          reactionsLimit={reactionsLimit}
           onToggleReaction={onToggleReaction!}
           isPrivate={isPrivate}
           isReady={isReady}

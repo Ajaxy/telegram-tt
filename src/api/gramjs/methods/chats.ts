@@ -514,6 +514,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     requestsPending,
     chatPhoto,
     translationsDisabled,
+    reactionsLimit,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -538,6 +539,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       inviteLink,
       groupCallId: call?.id.toString(),
       enabledReactions: buildApiChatReactions(availableReactions),
+      reactionsLimit,
       requestsPending,
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
       isTranslationDisabled: translationsDisabled,
@@ -588,6 +590,7 @@ async function getFullChannelInfo(
     call,
     botInfo,
     availableReactions,
+    reactionsLimit,
     defaultSendAs,
     requestsPending,
     recentRequesters,
@@ -670,6 +673,7 @@ async function getFullChannelInfo(
       linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'channel') : undefined,
       botCommands,
       enabledReactions: buildApiChatReactions(availableReactions),
+      reactionsLimit,
       sendAsId: defaultSendAs ? getApiChatIdFromMtpPeer(defaultSendAs) : undefined,
       requestsPending,
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
@@ -1568,13 +1572,14 @@ export async function importChatInvite({ hash }: { hash: string }) {
 }
 
 export function setChatEnabledReactions({
-  chat, enabledReactions,
+  chat, enabledReactions, reactionsLimit,
 }: {
-  chat: ApiChat; enabledReactions?: ApiChatReactions;
+  chat: ApiChat; enabledReactions?: ApiChatReactions; reactionsLimit?: number;
 }) {
   return invokeRequest(new GramJs.messages.SetChatAvailableReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),
     availableReactions: buildInputChatReactions(enabledReactions),
+    reactionsLimit,
   }), {
     shouldReturnTrue: true,
   });
