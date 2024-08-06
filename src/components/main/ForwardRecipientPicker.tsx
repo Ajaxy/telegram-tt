@@ -113,7 +113,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
     <RecipientPicker
       isOpen={isOpen}
       className={renderingIsStory ? 'component-theme-dark' : undefined}
-      searchPlaceholder={lang('ForwardTo')}
+      searchPlaceholder={lang(isForwarding ? 'ForwardTo' : 'ReplyToDialog')}
       onSelectRecipient={handleSelectRecipient}
       onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}

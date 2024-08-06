@@ -61,6 +61,7 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
       contentToBeScheduled: undefined,
       ...(chatId !== selectTabState(global, tabId).forwardMessages.toChatId && {
         forwardMessages: {},
+        isShareMessageModalShown: false,
       }),
     }, tabId);
   }

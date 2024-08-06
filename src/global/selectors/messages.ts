@@ -655,9 +655,13 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
 
   const threadInfo = selectThreadInfo(global, message.chatId, threadId);
   const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
-  const canReply = !isLocal && !isServiceNotification && !chat.isForbidden
-    && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo)
-    && (!messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics'));
+  const canPostInChat = getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
+  const canReply = (() => {
+    if (isLocal || isServiceNotification) return false;
+    if (isChatChannel(chat)) return true;
+    if (!canPostInChat || chat.isForbidden) return false;
+    return !messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics');
+  })();
 
   const hasPinPermission = isPrivate || (
     chat.isCreator
@@ -945,8 +949,8 @@ export function selectIsForwardModalOpen<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const { forwardMessages } = selectTabState(global, tabId);
-  return Boolean(forwardMessages.isModalShown);
+  const { isShareMessageModalShown } = selectTabState(global, tabId);
+  return Boolean(isShareMessageModalShown);
 }
 
 export function selectCommonBoxChatId<T extends GlobalState>(global: T, messageId: number) {

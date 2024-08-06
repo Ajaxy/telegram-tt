@@ -1121,6 +1121,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
   global = getGlobal();
   global = updateTabState(global, {
     forwardMessages: {},
+    isShareMessageModalShown: false,
   }, tabId);
   setGlobal(global);
 });
@@ -1827,11 +1828,12 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
 
   global = getGlobal();
 
+  const tabState = selectTabState(global, tabId);
+  const replyingInfo = tabState.replyingMessage;
+
   global = updateTabState(global, {
-    forwardMessages: {
-      ...selectTabState(global, tabId).forwardMessages,
-      isModalShown: false,
-    },
+    isShareMessageModalShown: false,
+    replyingMessage: {},
   }, tabId);
   setGlobal(global);
 
@@ -1843,7 +1845,16 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
   const threadId = topicId || MAIN_THREAD_ID;
   const currentChatId = currentChat.id;
 
-  const currentReplyInfo = selectDraft(global, currentChatId, currentThreadId)?.replyInfo;
+  const newReplyInfo = {
+    type: 'message',
+    replyToMsgId: replyingInfo.messageId,
+    replyToTopId: replyingInfo.toThreadId,
+    replyToPeerId: currentChatId,
+    quoteText: replyingInfo.quoteText,
+  } as ApiInputMessageReplyInfo;
+
+  const currentReplyInfo = replyingInfo.messageId
+    ? newReplyInfo : selectDraft(global, currentChatId, currentThreadId)?.replyInfo;
   if (!currentReplyInfo) return;
 
   if (!selectReplyCanBeSentToChat(global, toChatId, currentChatId, currentReplyInfo)) {
@@ -1896,8 +1907,8 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Prom
       ...selectTabState(global, tabId).forwardMessages,
       toChatId: chatId,
       toThreadId: topicId,
-      isModalShown: false,
     },
+    isShareMessageModalShown: false,
   }, tabId);
   setGlobal(global);
   actions.openThread({ chatId, threadId: topicId || MAIN_THREAD_ID, tabId });
@@ -1947,6 +1958,7 @@ addActionHandler('forwardStory', (global, actions, payload): ActionReturnType =>
   global = getGlobal();
   global = updateTabState(global, {
     forwardMessages: {},
+    isShareMessageModalShown: false,
   }, tabId);
   setGlobal(global);
 });

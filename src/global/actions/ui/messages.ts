@@ -515,6 +515,20 @@ addActionHandler('setShouldPreventComposerAnimation', (global, actions, payload)
   }, tabId);
 });
 
+addActionHandler('openReplyMenu', (global, actions, payload): ActionReturnType => {
+  const {
+    fromChatId, messageId, quoteText, tabId = getCurrentTabId(),
+  } = payload;
+  return updateTabState(global, {
+    replyingMessage: {
+      fromChatId,
+      messageId,
+      quoteText,
+    },
+    isShareMessageModalShown: true,
+  }, tabId);
+});
+
 addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType => {
   const {
     fromChatId, messageIds, storyId, groupedId, withMyScore, tabId = getCurrentTabId(),
@@ -528,9 +542,9 @@ addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType
       fromChatId,
       messageIds: groupedMessageIds || messageIds,
       storyId,
-      isModalShown: true,
       withMyScore,
     },
+    isShareMessageModalShown: true,
   }, tabId);
 });
 
@@ -540,10 +554,10 @@ addActionHandler('changeRecipient', (global, actions, payload): ActionReturnType
     forwardMessages: {
       ...selectTabState(global, tabId).forwardMessages,
       toChatId: undefined,
-      isModalShown: true,
       noAuthors: false,
       noCaptions: false,
     },
+    isShareMessageModalShown: true,
   }, tabId);
 });
 
@@ -575,7 +589,9 @@ addActionHandler('exitForwardMode', (global, actions, payload): ActionReturnType
   const { tabId = getCurrentTabId() } = payload || {};
 
   global = updateTabState(global, {
+    isShareMessageModalShown: false,
     forwardMessages: {},
+    replyingMessage: {},
   }, tabId);
   setGlobal(global);
 });

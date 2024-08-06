@@ -19,6 +19,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
   areReactionsEmpty,
+  getHasAdminRight,
   getIsDownloading,
   getMessageDownloadableMedia,
   getMessageVideo,
@@ -127,6 +128,8 @@ type StateProps = {
   canPlayAnimatedEmojis?: boolean;
   isReactionPickerOpen?: boolean;
   isInSavedMessages?: boolean;
+  isChannel?: boolean;
+  canPostMessagesInChannel?: boolean;
 };
 
 const selection = window.getSelection();
@@ -187,6 +190,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   isInSavedMessages,
   onClose,
   onCloseAnimationEnd,
+  isChannel,
+  canPostMessagesInChannel,
 }) => {
   const {
     openThread,
@@ -194,6 +199,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     setEditingId,
     pinMessage,
     openForwardMenu,
+    openReplyMenu,
     faveSticker,
     unfaveSticker,
     toggleMessageSelection,
@@ -357,11 +363,16 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleReply = useLastCallback(() => {
-    updateDraftReplyInfo({
-      replyToMsgId: message.id,
-      quoteText: canQuoteSelection && selectionRange ? getSelectionAsFormattedText(selectionRange) : undefined,
-      replyToPeerId: undefined,
-    });
+    const quoteText = canQuoteSelection && selectionRange ? getSelectionAsFormattedText(selectionRange) : undefined;
+    if (isChannel && !canPostMessagesInChannel) {
+      openReplyMenu({ fromChatId: message.chatId, messageId: message.id, quoteText });
+    } else {
+      updateDraftReplyInfo({
+        replyToMsgId: message.id,
+        quoteText,
+        replyToPeerId: undefined,
+      });
+    }
     closeMenu();
   });
 
@@ -705,6 +716,7 @@ export default memo(withGlobal<OwnProps>(
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
+    const canPostMessagesInChannel = isChannel && getHasAdminRight(chat, 'postMessages');
     const isLocal = isMessageLocal(message);
     const hasTtl = hasMessageTtl(message);
     const canShowSeenBy = Boolean(!isLocal
@@ -787,6 +799,8 @@ export default memo(withGlobal<OwnProps>(
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       isInSavedMessages,
+      isChannel,
+      canPostMessagesInChannel,
     };
   },
 )(ContextMenuContainer));

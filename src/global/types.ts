@@ -491,8 +491,17 @@ export type TabState = {
     loadingMessageId: number;
   };
 
+  isShareMessageModalShown?: boolean;
+
+  replyingMessage: {
+    fromChatId?: string;
+    messageId?: number;
+    quoteText?: ApiFormattedText;
+    toChatId?: string;
+    toThreadId?: ThreadId;
+  };
+
   forwardMessages: {
-    isModalShown?: boolean;
     fromChatId?: string;
     messageIds?: number[];
     storyId?: number;
@@ -2623,6 +2632,13 @@ export interface ActionPayloads {
   // Composer
   setShouldPreventComposerAnimation: {
     shouldPreventComposerAnimation: boolean;
+  } & WithTabId;
+
+  // Replies
+  openReplyMenu: {
+    fromChatId: string;
+    messageId?: number;
+    quoteText?: ApiFormattedText;
   } & WithTabId;
 
   // Forwards

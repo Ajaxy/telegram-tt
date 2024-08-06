@@ -28,6 +28,7 @@ addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType
       withDynamicLoading,
     },
     forwardMessages: {},
+    isShareMessageModalShown: false,
   }, tabId);
 });
 

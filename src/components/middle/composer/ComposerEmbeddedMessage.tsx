@@ -400,8 +400,9 @@ export default memo(withGlobal<OwnProps>(
   }): StateProps => {
     const {
       forwardMessages: {
-        fromChatId, toChatId, messageIds: forwardMessageIds, noAuthors, noCaptions, isModalShown,
+        fromChatId, toChatId, messageIds: forwardMessageIds, noAuthors, noCaptions,
       },
+      isShareMessageModalShown: isModalShown,
       shouldPreventComposerAnimation,
     } = selectTabState(global);
 

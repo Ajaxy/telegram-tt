@@ -349,7 +349,11 @@ export const INITIAL_TAB_STATE: TabState = {
     isMuted: false,
   },
 
+  isShareMessageModalShown: false,
+
   forwardMessages: {},
+
+  replyingMessage: {},
 
   pollResults: {},
 
