@@ -174,11 +174,13 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
           </div>
         )}
       </div>
-      <DeleteSelectedMessageModal
-        isOpen={isDeleteModalOpen}
-        isSchedule={isSchedule}
-        onClose={closeDeleteModal}
-      />
+      {canDeleteMessages && (
+        <DeleteSelectedMessageModal
+          isOpen={isDeleteModalOpen}
+          isSchedule={isSchedule}
+          onClose={closeDeleteModal}
+        />
+      )}
       <ReportModal
         isOpen={isReportModalOpen}
         onClose={closeReportModal}
