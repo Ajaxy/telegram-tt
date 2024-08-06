@@ -233,6 +233,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
+      <div className="hover-effect" />
       <RippleEffect />
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
       {sender?.color?.backgroundEmojiId && (

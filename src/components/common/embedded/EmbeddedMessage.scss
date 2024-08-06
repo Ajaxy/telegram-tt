@@ -34,7 +34,7 @@
     }
   }
 
-  &::after {
+  .hover-effect {
     transition: opacity 0.15s;
     content: '';
     position: absolute;
@@ -47,6 +47,7 @@
     opacity: var(--hover-opacity);
 
     pointer-events: none;
+    z-index: 2;
   }
 
   body.no-page-transitions & {
@@ -67,10 +68,6 @@
     background-color: var(--pattern-color);
     box-shadow: 0 1px 2px var(--color-default-shadow);
 
-    &::before {
-      background: var(--accent-color);
-    }
-
     &:dir(rtl) {
       padding: 0.5rem;
     }
@@ -85,6 +82,10 @@
     inset-inline-start: 0;
     width: 3px;
     background: var(--bar-gradient, var(--accent-color));
+
+    .custom-shape & {
+      background: var(--accent-color);
+    }
   }
 
   &.is-quote {
