@@ -323,7 +323,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             onClick={handleClickSubscribers}
           >
             <span className="title" dir="auto">{lang('ChannelSubscribers')}</span>
-            <span className="subtitle" dir="auto">{lang('Subscribers', chat.membersCount ?? 0, 'i')}</span>
+            <span className="subtitle" dir="auto">{formatInteger(chat.membersCount!)}</span>
           </ListItem>
           <ListItem
             icon="delete-user"
