@@ -154,7 +154,7 @@ kbd,
 samp {
   /* stylelint-disable-next-line @stylistic/max-line-length */
   font: 0.9375rem/1.25 "Courier", "Courier New", "Nimbus Mono L", "Courier 10 Pitch", "FreeMono", sans-serif-monospace, monospace;
-  font-size-adjust: 0.43;
+  font-size-adjust: 0.5;
 }
 
 pre {
