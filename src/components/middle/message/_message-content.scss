@@ -1001,6 +1001,7 @@ blockquote, .blockquote {
   overflow: hidden;
   background-color: var(--accent-background-color);
   white-space: pre-wrap;
+  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
 
   &::before {
     content: "";
