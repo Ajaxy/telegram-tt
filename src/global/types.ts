@@ -2608,8 +2608,10 @@ export interface ActionPayloads {
     isMuted?: boolean;
     shouldSharePhoneNumber?: boolean;
   } & WithTabId;
-  loadProfilePhotos: {
-    profileId: string;
+  loadMoreProfilePhotos: {
+    peerId: string;
+    isPreload?: boolean;
+    shouldInvalidateCache?: boolean;
   };
   deleteProfilePhoto: {
     photo: ApiPhoto;

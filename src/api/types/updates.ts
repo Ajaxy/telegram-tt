@@ -100,7 +100,6 @@ export type ApiUpdateChat = {
   '@type': 'updateChat';
   id: string;
   chat: Partial<ApiChat>;
-  newProfilePhoto?: ApiPhoto;
   noTopChatsRequest?: boolean;
 };
 
@@ -742,6 +741,18 @@ export type ApiUpdateStarsBalance = {
   balance: number;
 };
 
+export type ApiUpdateDeleteProfilePhoto = {
+  '@type': 'updateDeleteProfilePhoto';
+  peerId: string;
+  photoId?: string;
+};
+
+export type ApiUpdateNewProfilePhoto = {
+  '@type': 'updateNewProfilePhoto';
+  peerId: string;
+  photo: ApiPhoto;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -773,7 +784,8 @@ export type ApiUpdate = (
   ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
   ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
   ApiUpdateDeleteSavedHistory | ApiUpdatePremiumFloodWait | ApiUpdateStarsBalance |
-  ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages
+  ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages |
+  ApiUpdateDeleteProfilePhoto | ApiUpdateNewProfilePhoto
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

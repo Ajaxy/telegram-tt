@@ -6,7 +6,7 @@ import type {
   ApiUser, OnApiUpdate,
 } from '../../types';
 
-import { COMMON_CHATS_LIMIT, PROFILE_PHOTOS_LIMIT } from '../../../config';
+import { COMMON_CHATS_LIMIT } from '../../../config';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { buildApiPeerId } from '../apiBuilders/peers';
@@ -85,10 +85,7 @@ export async function fetchFullUser({
   onUpdate({
     '@type': 'updateUser',
     id,
-    user: {
-      ...user,
-      avatarHash: user?.avatarHash || undefined,
-    },
+    user,
     fullInfo,
   });
 
@@ -255,14 +252,24 @@ export async function deleteContact({
   });
 }
 
-export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
+export async function fetchProfilePhotos({
+  peer,
+  offset = 0,
+  limit = 0,
+}: {
+  peer: ApiPeer;
+  offset?: number;
+  limit?: number;
+}) {
+  const chat = 'title' in peer ? peer as ApiChat : undefined;
+  const user = !chat ? peer as ApiUser : undefined;
   if (user) {
     const { id, accessHash } = user;
 
     const result = await invokeRequest(new GramJs.photos.GetUserPhotos({
       userId: buildInputEntity(id, accessHash) as GramJs.InputUser,
-      limit: PROFILE_PHOTOS_LIMIT,
-      offset: 0,
+      limit,
+      offset,
       maxId: BigInt('0'),
     }));
 
@@ -272,11 +279,17 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
 
     updateLocalDb(result);
 
+    const count = result instanceof GramJs.photos.PhotosSlice ? result.count : result.photos.length;
+    const proposedNextOffsetId = offset + result.photos.length;
+    const nextOffsetId = proposedNextOffsetId < count ? proposedNextOffsetId : undefined;
+
     return {
+      count,
       photos: result.photos
         .filter((photo): photo is GramJs.Photo => photo instanceof GramJs.Photo)
         .map((photo) => buildApiPhoto(photo)),
       users: result.users.map(buildApiUser).filter(Boolean),
+      nextOffsetId,
     };
   }
 
@@ -285,18 +298,22 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
   const result = await searchMessagesLocal({
     chat: chat!,
     type: 'profilePhoto',
-    limit: PROFILE_PHOTOS_LIMIT,
+    limit,
   });
 
   if (!result) {
     return undefined;
   }
 
-  const { messages, users } = result;
+  const {
+    messages, users, totalCount, nextOffsetId,
+  } = result;
 
   return {
+    count: totalCount,
     photos: messages.map((message) => message.content.action!.photo).filter(Boolean),
     users,
+    nextOffsetId,
   };
 }
 

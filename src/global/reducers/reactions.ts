@@ -77,5 +77,5 @@ export function addMessageReaction<T extends GlobalState>(
 export function updateUnreadReactions<T extends GlobalState>(
   global: T, chatId: string, update: Pick<ApiChat, 'unreadReactionsCount' | 'unreadReactions'>,
 ): T {
-  return updateChat(global, chatId, update, undefined, true);
+  return updateChat(global, chatId, update, true);
 }

@@ -63,6 +63,7 @@ import {
   addUsers,
   addUserStatuses,
   deleteChatMessages,
+  deletePeerPhoto,
   deleteTopic,
   leaveChat,
   removeChatFromChatLists,
@@ -574,7 +575,7 @@ addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType =>
   const loadChat = async () => {
     await loadFullChat(global, actions, chat, tabId);
     if (withPhotos) {
-      actions.loadProfilePhotos({ profileId: chatId });
+      actions.loadMoreProfilePhotos({ peerId: chatId, shouldInvalidateCache: true });
     }
   };
 
@@ -1727,17 +1728,12 @@ addActionHandler('updateChatPhoto', async (global, actions, payload): Promise<vo
   const { photo, chatId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
-  global = updateChat(global, chatId, { avatarHash: undefined });
-  global = updateChatFullInfo(global, chatId, { profilePhoto: undefined });
-  setGlobal(global);
-  // This method creates a new entry in photos array
+
   await callApi('editChatPhoto', {
     chatId,
     accessHash: chat.accessHash,
     photo,
   });
-  // Explicitly delete the old photo reference
-  await callApi('deleteProfilePhotos', [photo]);
   actions.loadFullChat({ chatId, tabId, withPhotos: true });
 });
 
@@ -1745,35 +1741,22 @@ addActionHandler('deleteChatPhoto', async (global, actions, payload): Promise<vo
   const { photo, chatId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
-  const photosToDelete = [photo];
-  if (chat.avatarHash === photo.id) {
-    // Select next photo to set as avatar
-    const nextPhoto = chat.photos?.[1];
-    if (nextPhoto) {
-      photosToDelete.push(nextPhoto);
-    }
-    global = updateChat(global, chatId, { avatarHash: undefined });
-    global = updateChatFullInfo(global, chatId, { profilePhoto: undefined });
-    setGlobal(global);
-    // Set next photo as avatar
-    await callApi('editChatPhoto', {
+
+  let isDeleted;
+  if (photo.id === chat.avatarPhotoId) {
+    isDeleted = await callApi('editChatPhoto', {
       chatId,
       accessHash: chat.accessHash,
-      photo: nextPhoto,
     });
+  } else {
+    isDeleted = await callApi('deleteProfilePhotos', [photo]);
   }
+  if (!isDeleted) return;
 
-  const { photos = [] } = chat;
-
-  const newPhotos = photos.filter((p) => photosToDelete.some((toDelete) => toDelete.id !== p.id));
   global = getGlobal();
-  global = updateChat(global, chatId, { photos: newPhotos });
-
+  global = deletePeerPhoto(global, chatId, photo.id);
   setGlobal(global);
 
-  // Delete references to the old photos
-  const result = await callApi('deleteProfilePhotos', photosToDelete);
-  if (!result) return;
   actions.loadFullChat({ chatId, tabId, withPhotos: true });
 });
 

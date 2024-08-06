@@ -109,7 +109,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   const {
     loadFullChat,
     openMediaViewer,
-    loadProfilePhotos,
+    loadMoreProfilePhotos,
   } = getActions();
 
   const lang = useOldLang();
@@ -121,9 +121,9 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (chatId && !isMin) {
       if (withFullInfo) loadFullChat({ chatId });
-      if (withMediaViewer) loadProfilePhotos({ profileId: chatId });
+      if (withMediaViewer) loadMoreProfilePhotos({ peerId: chatId, isPreload: true });
     }
-  }, [chatId, isMin, withFullInfo, loadFullChat, loadProfilePhotos, isSuperGroup, withMediaViewer]);
+  }, [chatId, isMin, withFullInfo, isSuperGroup, withMediaViewer]);
 
   const handleAvatarViewerOpen = useLastCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {

@@ -14,6 +14,7 @@ import {
 import {
   addUnreadMentions,
   deleteChatMessages,
+  deletePeerPhoto,
   leaveChat,
   removeUnreadMentions,
   replaceThreadParam,
@@ -35,6 +36,7 @@ import {
   selectCommonBoxChatId,
   selectCurrentMessageList,
   selectIsChatListed,
+  selectPeer,
   selectTabState,
   selectThreadParam,
   selectTopicFromMessage,
@@ -57,7 +59,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const localChat = selectChat(global, update.id);
 
-      global = updateChat(global, update.id, update.chat, update.newProfilePhoto);
+      global = updateChat(global, update.id, update.chat);
 
       if (localChat?.areStoriesHidden !== update.chat.areStoriesHidden) {
         global = updatePeerStoriesHidden(global, update.id, update.chat.areStoriesHidden || false);
@@ -534,6 +536,43 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         isForumAsMessages: isEnabled,
       });
       setGlobal(global);
+      break;
+    }
+
+    case 'updateNewProfilePhoto': {
+      const { peerId, photo } = update;
+
+      global = updateChat(global, peerId, {
+        avatarPhotoId: photo.id,
+      });
+      setGlobal(global);
+
+      actions.loadMoreProfilePhotos({ peerId, shouldInvalidateCache: true });
+
+      break;
+    }
+
+    case 'updateDeleteProfilePhoto': {
+      const { peerId, photoId } = update;
+
+      const peer = selectPeer(global, peerId);
+      if (!peer) {
+        return undefined;
+      }
+
+      if (!photoId || peer.avatarPhotoId === photoId) {
+        global = updateChat(global, peerId, {
+          avatarPhotoId: undefined,
+          profilePhotos: undefined,
+        });
+      } else {
+        global = deletePeerPhoto(global, peerId, photoId);
+      }
+      setGlobal(global);
+
+      actions.loadMoreProfilePhotos({ peerId, shouldInvalidateCache: true });
+
+      break;
     }
   }
 

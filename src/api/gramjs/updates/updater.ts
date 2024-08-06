@@ -20,12 +20,13 @@ import {
   buildApiChatFolder,
   buildApiChatFromPreview,
   buildApiChatSettings,
-  buildAvatarHash,
   buildChatMember,
   buildChatMembers,
   buildChatTypingStatus,
 } from '../apiBuilders/chats';
-import { buildApiPhoto, buildApiUsernames, buildPrivacyRules } from '../apiBuilders/common';
+import {
+  buildApiPhoto, buildApiUsernames, buildPrivacyRules,
+} from '../apiBuilders/common';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import {
   buildApiMessageExtendedMediaPreview,
@@ -244,8 +245,10 @@ export function updater(update: Update) {
           },
         });
       } else if (action instanceof GramJs.MessageActionChatEditPhoto) {
+        const apiPhoto = action.photo instanceof GramJs.Photo && buildApiPhoto(action.photo);
+        if (!apiPhoto) return;
+
         const photo = buildChatPhotoForLocalDb(action.photo);
-        const avatarHash = buildAvatarHash(photo);
 
         const localDbChatId = resolveMessageApiChatId(update.message)!;
         if (localDb.chats[localDbChatId]) {
@@ -253,16 +256,11 @@ export function updater(update: Update) {
         }
         addPhotoToLocalDb(action.photo);
 
-        if (avatarHash) {
-          onUpdate({
-            '@type': 'updateChat',
-            id: message.chatId,
-            chat: {
-              avatarHash,
-            },
-            ...(action.photo instanceof GramJs.Photo && { newProfilePhoto: buildApiPhoto(action.photo) }),
-          });
-        }
+        onUpdate({
+          '@type': 'updateNewProfilePhoto',
+          peerId: message.chatId,
+          photo: apiPhoto,
+        });
       } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
         const localDbChatId = resolveMessageApiChatId(update.message)!;
         if (localDb.chats[localDbChatId]) {
@@ -270,9 +268,8 @@ export function updater(update: Update) {
         }
 
         onUpdate({
-          '@type': 'updateChat',
-          id: message.chatId,
-          chat: { avatarHash: undefined },
+          '@type': 'updateDeleteProfilePhoto',
+          peerId: message.chatId,
         });
       } else if (action instanceof GramJs.MessageActionChatDeleteUser) {
         // eslint-disable-next-line no-underscore-dangle

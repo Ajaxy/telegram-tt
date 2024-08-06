@@ -7,7 +7,7 @@ import type { TextPart } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { MediaViewerOrigin, SettingsScreens } from '../../types';
 
-import { getPhotoMediaHash, getVideoAvatarMediaHash } from '../../global/helpers';
+import { getPhotoMediaHash, getVideoProfilePhotoMediaHash } from '../../global/helpers';
 import { fetchBlob } from '../../util/files';
 
 import useFlag from '../../hooks/useFlag';
@@ -39,7 +39,7 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
   const [isVideoModalOpen, openVideoModal, closeVideoModal] = useFlag(false);
   const photo = message.content.action!.photo!;
   const suggestedPhotoUrl = useMedia(getPhotoMediaHash(photo, 'full'));
-  const suggestedVideoUrl = useMedia(getVideoAvatarMediaHash(photo));
+  const suggestedVideoUrl = useMedia(getVideoProfilePhotoMediaHash(photo));
   const isVideo = message.content.action!.photo?.isVideo;
 
   const showAvatarNotification = useLastCallback(() => {

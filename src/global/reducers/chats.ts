@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiChatFullInfo, ApiChatMember, ApiPhoto, ApiTopic,
+  ApiChat, ApiChatFullInfo, ApiChatMember, ApiTopic,
 } from '../../api/types';
 import type { ChatListType, GlobalState } from '../types';
 
@@ -138,12 +138,11 @@ export function removeUnreadMentions<T extends GlobalState>(
 }
 
 export function updateChat<T extends GlobalState>(
-  global: T, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
-  noOmitUnreadReactionCount = false,
+  global: T, chatId: string, chatUpdate: Partial<ApiChat>, noOmitUnreadReactionCount = false,
 ): T {
   const { byId } = global.chats;
 
-  const updatedChat = getUpdatedChat(global, chatId, chatUpdate, photo, noOmitUnreadReactionCount);
+  const updatedChat = getUpdatedChat(global, chatId, chatUpdate, noOmitUnreadReactionCount);
   if (!updatedChat) {
     return global;
   }
@@ -257,7 +256,7 @@ export function addChats<T extends GlobalState>(global: T, newById: Record<strin
 
 // @optimization Don't spread/unspread global for each element, do it in a batch
 function getUpdatedChat<T extends GlobalState>(
-  global: T, chatId: string, chatUpdate: Partial<ApiChat>, photo?: ApiPhoto,
+  global: T, chatId: string, chatUpdate: Partial<ApiChat>,
   noOmitUnreadReactionCount = false,
 ) {
   const { byId } = global.chats;
@@ -279,7 +278,6 @@ function getUpdatedChat<T extends GlobalState>(
   const updatedChat: ApiChat = {
     ...chat,
     ...omit(chatUpdate, omitProps),
-    ...(photo && { photos: [photo, ...(chat.photos || [])] }),
   } as ApiChat;
 
   if (!updatedChat.id || !updatedChat.type) {

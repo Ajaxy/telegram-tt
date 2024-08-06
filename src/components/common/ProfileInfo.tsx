@@ -3,22 +3,19 @@ import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiPhoto, ApiSticker, ApiTopic, ApiUser, ApiUserStatus,
+  ApiChat, ApiSticker, ApiTopic, ApiUser, ApiUserStatus,
 } from '../../api/types';
-import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
-  getUserStatus, isAnonymousForwardsChat, isChatChannel, isUserId, isUserOnline,
+  getUserStatus, isAnonymousForwardsChat, isChatChannel, isUserOnline,
 } from '../../global/helpers';
 import {
   selectChat,
-  selectChatFullInfo,
   selectCurrentMessageList,
   selectTabState,
   selectThreadMessagesCount,
   selectUser,
-  selectUserFullInfo,
   selectUserStatus,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -30,7 +27,6 @@ import renderText from './helpers/renderText';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
-import { useStateRef } from '../../hooks/useStateRef';
 import usePhotosPreload from './hooks/usePhotosPreload';
 
 import Transition from '../ui/Transition';
@@ -43,7 +39,7 @@ import './ProfileInfo.scss';
 import styles from './ProfileInfo.module.scss';
 
 type OwnProps = {
-  userId: string;
+  peerId: string;
   forceShowSelf?: boolean;
   canPlayVideo: boolean;
 };
@@ -57,16 +53,13 @@ type StateProps =
     avatarOwnerId?: string;
     topic?: ApiTopic;
     messagesCount?: number;
-    userPersonalPhoto?: ApiPhoto;
-    userProfilePhoto?: ApiPhoto;
-    userFallbackPhoto?: ApiPhoto;
-    chatProfilePhoto?: ApiPhoto;
     emojiStatusSticker?: ApiSticker;
-  }
-  & Pick<GlobalState, 'isSynced'>;
+  };
 
 const EMOJI_STATUS_SIZE = 24;
 const EMOJI_TOPIC_SIZE = 120;
+const LOAD_MORE_THRESHOLD = 3;
+const MAX_PHOTO_DASH_COUNT = 30;
 
 const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
@@ -74,33 +67,28 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   user,
   userStatus,
   chat,
-  isSynced,
   mediaIndex,
   avatarOwnerId,
   topic,
   messagesCount,
-  userPersonalPhoto,
-  userProfilePhoto,
-  userFallbackPhoto,
-  chatProfilePhoto,
   emojiStatusSticker,
+  peerId,
 }) => {
   const {
-    loadFullUser,
     openMediaViewer,
     openPremiumModal,
     openStickerSet,
     openPrivacySettingsNoticeModal,
+    loadMoreProfilePhotos,
   } = getActions();
 
   const lang = useOldLang();
 
-  const { id: userId } = user || {};
-  const { id: chatId } = chat || {};
-  const photos = user?.photos || chat?.photos || MEMO_EMPTY_ARRAY;
+  const userProfilePhotos = user?.profilePhotos;
+  const chatProfilePhotos = chat?.profilePhotos;
+  const photos = userProfilePhotos?.photos || chatProfilePhotos?.photos || MEMO_EMPTY_ARRAY;
   const prevMediaIndex = usePrevious(mediaIndex);
   const prevAvatarOwnerId = usePrevious(avatarOwnerId);
-  const mediaIndexRef = useStateRef(mediaIndex);
   const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
   // slideOptimized doesn't work well when animation is dynamically disabled
   const slideAnimation = hasSlideAnimation ? (lang.isRtl ? 'slideRtl' : 'slide') : 'none';
@@ -108,6 +96,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const isFirst = photos.length <= 1 || currentPhotoIndex === 0;
   const isLast = photos.length <= 1 || currentPhotoIndex === photos.length - 1;
+
+  useEffect(() => {
+    if (photos.length - currentPhotoIndex <= LOAD_MORE_THRESHOLD) {
+      loadMoreProfilePhotos({ peerId });
+    }
+  }, [currentPhotoIndex, peerId, photos.length]);
 
   // Set the current avatar photo to the last selected photo in Media Viewer after it is closed
   useEffect(() => {
@@ -117,12 +111,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
   }, [mediaIndex, prevMediaIndex, prevAvatarOwnerId]);
 
-  // Reset the current avatar photo to the one selected in Media Viewer if photos have changed
-  useEffect(() => {
-    setHasSlideAnimation(false);
-    setCurrentPhotoIndex(mediaIndexRef.current || 0);
-  }, [mediaIndexRef, photos]);
-
   // Deleting the last profile photo may result in an error
   useEffect(() => {
     if (currentPhotoIndex > photos.length) {
@@ -131,32 +119,26 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
   }, [currentPhotoIndex, photos.length]);
 
-  useEffect(() => {
-    if (isSynced && userId && !forceShowSelf) {
-      loadFullUser({ userId });
-    }
-  }, [userId, loadFullUser, isSynced, forceShowSelf]);
-
   usePhotosPreload(photos, currentPhotoIndex);
 
   const handleProfilePhotoClick = useLastCallback(() => {
     openMediaViewer({
       isAvatarView: true,
-      chatId: userId || chatId,
+      chatId: peerId,
       mediaIndex: currentPhotoIndex,
       origin: forceShowSelf ? MediaViewerOrigin.SettingsAvatar : MediaViewerOrigin.ProfileAvatar,
     });
   });
 
   const handleStatusClick = useLastCallback(() => {
-    if (!userId) {
+    if (!peerId) {
       openStickerSet({
         stickerSetInfo: emojiStatusSticker!.stickerSetInfo,
       });
       return;
     }
 
-    openPremiumModal({ fromUserId: userId });
+    openPremiumModal({ fromUserId: peerId });
   });
 
   const selectPreviousMedia = useLastCallback(() => {
@@ -231,14 +213,18 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderPhotoTabs() {
-    if (!photos || photos.length <= 1) {
+    const totalPhotosLength = Math.max(photos.length, userProfilePhotos?.count || 0, chatProfilePhotos?.count || 0);
+    if (!photos || totalPhotosLength <= 1) {
       return undefined;
     }
 
+    const enumerator = Array.from({ length: Math.min(totalPhotosLength, MAX_PHOTO_DASH_COUNT) });
+    const activeDashIndex = currentPhotoIndex >= MAX_PHOTO_DASH_COUNT ? MAX_PHOTO_DASH_COUNT - 1 : currentPhotoIndex;
+
     return (
       <div className={styles.photoDashes}>
-        {photos.map((_, i) => (
-          <span className={buildClassName(styles.photoDash, i === currentPhotoIndex && styles.photoDash_current)} />
+        {enumerator.map((_, i) => (
+          <span className={buildClassName(styles.photoDash, i === activeDashIndex && styles.photoDash_current)} />
         ))}
       </div>
     );
@@ -248,14 +234,13 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     const photo = photos.length > 0
       ? photos[currentPhotoIndex]
       : undefined;
-    const profilePhoto = photo || userPersonalPhoto || userProfilePhoto || chatProfilePhoto || userFallbackPhoto;
 
     return (
       <ProfilePhoto
         key={currentPhotoIndex}
         user={user}
         chat={chat}
-        photo={profilePhoto}
+        photo={photo}
         canPlayVideo={Boolean(isActive && canPlayVideo)}
         onClick={handleProfilePhotoClick}
       />
@@ -263,8 +248,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderStatus() {
-    const peerId = (chatId || userId)!;
-
     const isAnonymousForwards = isAnonymousForwardsChat(peerId);
     if (isAnonymousForwards) return undefined;
 
@@ -310,18 +293,18 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     >
       <div className={styles.photoWrapper}>
         {renderPhotoTabs()}
-        {!forceShowSelf && userPersonalPhoto && (
+        {!forceShowSelf && userProfilePhotos?.personalPhoto && (
           <div className={buildClassName(
             styles.fallbackPhoto,
             isFirst && styles.fallbackPhotoVisible,
           )}
           >
             <div className={styles.fallbackPhotoContents}>
-              {lang(userPersonalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
+              {lang(userProfilePhotos.personalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
             </div>
           </div>
         )}
-        {forceShowSelf && userFallbackPhoto && (
+        {forceShowSelf && userProfilePhotos?.fallbackPhoto && (
           <div className={buildClassName(
             styles.fallbackPhoto,
             (isFirst || isLast) && styles.fallbackPhotoVisible,
@@ -330,12 +313,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             <div className={styles.fallbackPhotoContents} onClick={handleSelectFallbackPhoto}>
               {!isLast && (
                 <Avatar
-                  photo={userFallbackPhoto}
+                  photo={userProfilePhotos.fallbackPhoto}
                   className={styles.fallbackPhotoAvatar}
                   size="mini"
                 />
               )}
-              {lang(userFallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
+              {lang(userProfilePhotos.fallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
             </div>
           </div>
         )}
@@ -381,37 +364,28 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
-    const { isSynced } = global;
-    const user = selectUser(global, userId);
-    const isPrivate = isUserId(userId);
-    const userStatus = selectUserStatus(global, userId);
-    const chat = selectChat(global, userId);
+  (global, { peerId }): StateProps => {
+    const user = selectUser(global, peerId);
+    const userStatus = selectUserStatus(global, peerId);
+    const chat = selectChat(global, peerId);
     const { mediaIndex, chatId: avatarOwnerId } = selectTabState(global).mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
     const topic = isForum && currentTopicId ? chat?.topics?.[currentTopicId] : undefined;
-    const userFullInfo = isPrivate ? selectUserFullInfo(global, userId) : undefined;
-    const chatFullInfo = !isPrivate ? selectChatFullInfo(global, userId) : undefined;
 
     const emojiStatus = (user || chat)?.emojiStatus;
     const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;
 
     return {
-      isSynced,
       user,
       userStatus,
       chat,
-      userPersonalPhoto: userFullInfo?.personalPhoto,
-      userProfilePhoto: userFullInfo?.profilePhoto,
-      userFallbackPhoto: userFullInfo?.fallbackPhoto,
-      chatProfilePhoto: chatFullInfo?.profilePhoto,
       mediaIndex,
       avatarOwnerId,
       emojiStatusSticker,
       ...(topic && {
         topic,
-        messagesCount: selectThreadMessagesCount(global, userId, currentTopicId!),
+        messagesCount: selectThreadMessagesCount(global, peerId, currentTopicId!),
       }),
     };
   },

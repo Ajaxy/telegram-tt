@@ -24,7 +24,7 @@ import type {
 import { omitUndefined, pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { serializeBytes } from '../helpers';
-import { buildApiUsernames } from './common';
+import { buildApiUsernames, buildAvatarPhotoId } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
   buildApiEmojiStatus,
@@ -50,7 +50,7 @@ function buildApiChatFieldsFromPeerEntity(
   const accessHash = ('accessHash' in peerEntity) ? String(peerEntity.accessHash) : undefined;
   const hasVideoAvatar = 'photo' in peerEntity && peerEntity.photo && 'hasVideo' in peerEntity.photo
     && peerEntity.photo.hasVideo;
-  const avatarHash = ('photo' in peerEntity) && peerEntity.photo ? buildAvatarHash(peerEntity.photo) : undefined;
+  const avatarPhotoId = ('photo' in peerEntity) && peerEntity.photo ? buildAvatarPhotoId(peerEntity.photo) : undefined;
   const isSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
   const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
   const isScam = Boolean('scam' in peerEntity && peerEntity.scam);
@@ -74,7 +74,7 @@ function buildApiChatFieldsFromPeerEntity(
     usernames,
     accessHash,
     hasVideoAvatar,
-    avatarHash,
+    avatarPhotoId,
     ...('verified' in peerEntity && { isVerified: peerEntity.verified }),
     ...('callActive' in peerEntity && { isCallActive: peerEntity.callActive }),
     ...('callNotEmpty' in peerEntity && { isCallNotEmpty: peerEntity.callNotEmpty }),
@@ -306,14 +306,6 @@ function getUserName(user: GramJs.User) {
   return user.firstName
     ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
     : (user.lastName || '');
-}
-
-export function buildAvatarHash(photo: GramJs.TypeUserProfilePhoto | GramJs.TypeChatPhoto) {
-  if ('photoId' in photo) {
-    return String(photo.photoId);
-  }
-
-  return undefined;
 }
 
 export function buildChatMember(

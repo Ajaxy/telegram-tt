@@ -129,7 +129,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   const handleUpdate = useLastCallback(() => {
     if (item?.type !== 'avatar') return;
     const { avatarOwner, mediaIndex } = item;
-    const avatarPhoto = avatarOwner.photos?.[mediaIndex]!;
+    const avatarPhoto = avatarOwner.profilePhotos?.photos[mediaIndex]!;
     if (isUserId(avatarOwner.id)) {
       updateProfilePhoto({ photo: avatarPhoto });
     } else {
@@ -170,7 +170,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         onClose={closeDeleteModal}
         onConfirm={onBeforeDelete}
         profileId={item.avatarOwner.id}
-        photo={item.avatarOwner.photos![item.mediaIndex!]}
+        photo={item.avatarOwner.profilePhotos!.photos[item.mediaIndex!]}
       />
     ) : undefined;
   }
@@ -212,7 +212,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     if (item?.type === 'message') {
       openDeleteMessageModal({
         isSchedule: messageListType === 'scheduled',
-        message: item.message, onConfirm: onBeforeDelete,
+        message: item.message,
+        onConfirm: onBeforeDelete,
       });
     } else {
       openDeleteModal();
@@ -389,7 +390,7 @@ export default memo(withGlobal<OwnProps>(
 
     const message = item?.type === 'message' ? item.message : undefined;
     const avatarOwner = item?.type === 'avatar' ? item.avatarOwner : undefined;
-    const avatarPhoto = avatarOwner?.photos?.[item!.mediaIndex!];
+    const avatarPhoto = avatarOwner?.profilePhotos?.photos[item!.mediaIndex!];
 
     const currentMessageList = selectCurrentMessageList(global);
     const { threadId } = selectCurrentMessageList(global) || {};
@@ -398,10 +399,10 @@ export default memo(withGlobal<OwnProps>(
     const isChatProtected = message && selectIsChatProtected(global, message?.chatId);
     const { canDelete: canDeleteMessage } = (threadId
       && message && selectAllowedMessageActions(global, message, threadId)) || {};
-    const isCurrentAvatar = avatarPhoto && (avatarPhoto.id === avatarOwner?.avatarHash);
-    const canDeleteAvatar = canUpdateMedia && !!avatarPhoto;
+    const isCurrentAvatar = avatarPhoto && (avatarPhoto.id === avatarOwner?.avatarPhotoId);
+    const canDeleteAvatar = canUpdateMedia && Boolean(avatarPhoto);
     const canDelete = canDeleteMessage || canDeleteAvatar;
-    const canUpdate = canUpdateMedia && !!avatarPhoto && !isCurrentAvatar;
+    const canUpdate = canUpdateMedia && Boolean(avatarPhoto) && !isCurrentAvatar;
     const messageListType = currentMessageList?.type;
 
     return {

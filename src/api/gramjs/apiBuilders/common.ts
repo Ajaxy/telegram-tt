@@ -277,3 +277,11 @@ export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMess
     length,
   };
 }
+
+export function buildAvatarPhotoId(photo: GramJs.TypeUserProfilePhoto | GramJs.TypeChatPhoto) {
+  if ('photoId' in photo) {
+    return photo.photoId.toString();
+  }
+
+  return undefined;
+}

@@ -68,7 +68,7 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
   }
 
   if (params.type === 'avatar') {
-    const avatar = params.avatarOwner.photos?.[params.mediaIndex];
+    const avatar = params.avatarOwner.profilePhotos?.photos[params.mediaIndex];
     if (avatar) {
       return {
         media: avatar,

@@ -277,3 +277,12 @@ export interface ApiCollectionInfo {
   purchaseDate: number;
   url: string;
 }
+
+export interface ApiPeerPhotos {
+  fallbackPhoto?: ApiPhoto;
+  personalPhoto?: ApiPhoto;
+  photos: ApiPhoto[];
+  count: number;
+  nextOffset?: number;
+  isLoading?: boolean;
+}

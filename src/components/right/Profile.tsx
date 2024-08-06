@@ -204,7 +204,6 @@ const Profile: FC<OwnProps & StateProps> = ({
     openMediaViewer,
     openAudioPlayer,
     focusMessage,
-    loadProfilePhotos,
     setNewChatMembersDialogState,
     loadPeerProfileStories,
     loadStoriesArchive,
@@ -341,10 +340,6 @@ const Profile: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     setSharedMediaSearchType({ mediaType: tabType as SharedMediaType });
   }, [setSharedMediaSearchType, tabType, threadId]);
-
-  useEffect(() => {
-    loadProfilePhotos({ profileId });
-  }, [profileId]);
 
   const handleSelectMedia = useLastCallback((messageId: number) => {
     openMediaViewer({
@@ -681,7 +676,7 @@ const Profile: FC<OwnProps & StateProps> = ({
 function renderProfileInfo(profileId: string, isReady: boolean, isSavedDialog?: boolean) {
   return (
     <div className="profile-info">
-      <ProfileInfo userId={profileId} canPlayVideo={isReady} />
+      <ProfileInfo peerId={profileId} canPlayVideo={isReady} />
       <ChatExtra chatOrUserId={profileId} isSavedDialog={isSavedDialog} />
     </div>
   );

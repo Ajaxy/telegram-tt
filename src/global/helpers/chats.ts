@@ -104,22 +104,22 @@ export function getChatLink(chat: ApiChat) {
 export function getChatAvatarHash(
   owner: ApiPeer,
   size: 'normal' | 'big' = 'normal',
-  avatarHash = owner.avatarHash,
+  avatarPhotoId = owner.avatarPhotoId,
 ) {
-  if (!avatarHash) {
+  if (!avatarPhotoId) {
     return undefined;
   }
 
   switch (size) {
     case 'big':
-      return `profile${owner.id}?${avatarHash}`;
+      return `profile${owner.id}?${avatarPhotoId}`;
     default:
-      return `avatar${owner.id}?${avatarHash}`;
+      return `avatar${owner.id}?${avatarPhotoId}`;
   }
 }
 
 export function isChatAdmin(chat: ApiChat) {
-  return Boolean(chat.adminRights);
+  return Boolean(chat.adminRights || chat.isCreator);
 }
 
 export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {

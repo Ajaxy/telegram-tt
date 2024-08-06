@@ -30,6 +30,7 @@ import {
   clearMessageTranslation,
   deleteChatMessages,
   deleteChatScheduledMessages,
+  deletePeerPhoto,
   deleteQuickReply,
   deleteQuickReplyMessages,
   deleteTopic,
@@ -1069,6 +1070,10 @@ export function deleteMessages<T extends GlobalState>(
         return;
       }
 
+      if (message.content.action?.photo) {
+        global = deletePeerPhoto(global, chatId, message.content.action.photo.id, true);
+      }
+
       global = updateThreadUnread(global, actions, message, true);
 
       const threadId = selectThreadIdFromMessage(global, message);
@@ -1142,6 +1147,10 @@ export function deleteMessages<T extends GlobalState>(
             global = updateChatLastMessageId(global, commonBoxChatId, newLastSavedDialogMessage.id, 'saved');
           }
         }
+      }
+
+      if (message?.content.action?.photo) {
+        global = deletePeerPhoto(global, commonBoxChatId, message.content.action.photo.id, true);
       }
 
       setTimeout(() => {

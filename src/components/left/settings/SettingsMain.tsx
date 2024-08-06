@@ -49,7 +49,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   onReset,
 }) => {
   const {
-    loadProfilePhotos,
+    loadMoreProfilePhotos,
     openPremiumModal,
     openSupportChat,
     openUrl,
@@ -63,9 +63,9 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (currentUserId) {
-      loadProfilePhotos({ profileId: currentUserId });
+      loadMoreProfilePhotos({ peerId: currentUserId, isPreload: true });
     }
-  }, [currentUserId, loadProfilePhotos]);
+  }, [currentUserId]);
 
   useHistoryBack({
     isActive,
@@ -82,7 +82,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
       <div className="settings-main-menu">
         {currentUserId && (
           <ProfileInfo
-            userId={currentUserId}
+            peerId={currentUserId}
             canPlayVideo={Boolean(isActive)}
             forceShowSelf
           />

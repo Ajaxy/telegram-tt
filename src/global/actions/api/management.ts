@@ -455,7 +455,7 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
     return;
   }
 
-  actions.loadProfilePhotos({ profileId: userId });
+  actions.loadMoreProfilePhotos({ peerId: userId, shouldInvalidateCache: true });
 
   global = getGlobal();
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);

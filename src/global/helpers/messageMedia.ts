@@ -284,14 +284,18 @@ export function getPhotoMediaHash(photo: ApiPhoto | ApiDocument, target: Target,
     case 'preview':
       return `${base}?size=${isAction ? 'b' : 'x'}`;
     case 'download':
-      return !isVideo ? base : getVideoAvatarMediaHash(photo);
+      return !isVideo ? base : getVideoProfilePhotoMediaHash(photo);
     case 'full':
     default:
       return base;
   }
 }
 
-export function getVideoAvatarMediaHash(photo: ApiPhoto) {
+export function getProfilePhotoMediaHash(photo: ApiPhoto) {
+  return `photo${photo.id}?size=c`;
+}
+
+export function getVideoProfilePhotoMediaHash(photo: ApiPhoto) {
   if (!photo.isVideo) return undefined;
   return `photo${photo.id}?size=u`;
 }

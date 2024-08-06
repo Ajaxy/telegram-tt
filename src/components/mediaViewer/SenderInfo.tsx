@@ -10,7 +10,6 @@ import {
 } from '../../global/helpers';
 import {
   selectSender,
-  selectUserFullInfo,
 } from '../../global/selectors';
 import { formatMediaDateTime } from '../../util/dates/dateFormat';
 import renderText from '../common/helpers/renderText';
@@ -29,7 +28,6 @@ type OwnProps = {
 
 type StateProps = {
   owner?: ApiPeer;
-  isFallbackAvatar?: boolean;
 };
 
 const BULLET = '\u2022';
@@ -38,7 +36,6 @@ const ANIMATION_DURATION = 350;
 const SenderInfo: FC<OwnProps & StateProps> = ({
   owner,
   item,
-  isFallbackAvatar,
 }) => {
   const {
     closeMediaViewer,
@@ -71,11 +68,15 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     if (!item || item.type === 'standalone') return undefined;
 
     const avatarOwner = item.type === 'avatar' ? item.avatarOwner : undefined;
-    const avatar = avatarOwner?.photos?.[item.mediaIndex!];
+    const avatar = avatarOwner?.profilePhotos?.photos[item.mediaIndex!];
+    const isFallbackAvatar = avatar?.id === avatarOwner?.profilePhotos?.fallbackPhoto?.id;
     const date = item.type === 'message' ? item.message.date : avatar?.date;
     if (!date) return undefined;
 
     const formattedDate = formatMediaDateTime(lang, date * 1000, true);
+    const count = avatarOwner?.profilePhotos?.count
+      && (avatarOwner.profilePhotos.count + (avatarOwner?.profilePhotos?.fallbackPhoto ? 1 : 0));
+    const countText = count && lang('Of', [item.mediaIndex! + 1, count]);
 
     const parts: string[] = [];
     if (avatar) {
@@ -89,10 +90,12 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
       ));
     }
 
+    if (countText) parts.push(countText);
+
     parts.push(formattedDate);
 
     return parts.join(` ${BULLET} `);
-  }, [item, isFallbackAvatar, lang]);
+  }, [item, lang]);
 
   if (!owner) {
     return undefined;
@@ -122,15 +125,8 @@ export default withGlobal<OwnProps>(
 
     const owner = item?.type === 'avatar' ? item.avatarOwner : messageSender;
 
-    const fallbackAvatar = item?.type === 'avatar'
-      ? selectUserFullInfo(global, item.avatarOwner.id)?.fallbackPhoto : undefined;
-
-    const isFallbackAvatar = fallbackAvatar && item?.type === 'avatar'
-      && item.avatarOwner.photos?.[item.mediaIndex].id === fallbackAvatar.id;
-
     return {
       owner,
-      isFallbackAvatar,
     };
   },
 )(SenderInfo);

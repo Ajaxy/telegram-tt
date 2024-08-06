@@ -11,7 +11,7 @@ import type {
 
 import { buildApiBotInfo } from './bots';
 import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
-import { buildApiPhoto, buildApiUsernames } from './common';
+import { buildApiPhoto, buildApiUsernames, buildAvatarPhotoId } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
@@ -61,12 +61,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   const {
     id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
   } = mtpUser;
-  const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
-    ? Boolean(mtpUser.photo.hasVideo)
-    : undefined;
-  const avatarHash = mtpUser.photo instanceof GramJs.UserProfilePhoto
-    ? String(mtpUser.photo.photoId)
-    : undefined;
+  const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto ? Boolean(mtpUser.photo.hasVideo) : undefined;
+  const avatarPhotoId = mtpUser.photo && buildAvatarPhotoId(mtpUser.photo);
   const userType = buildApiUserType(mtpUser);
   const usernames = buildApiUsernames(mtpUser);
   const emojiStatus = mtpUser.emojiStatus ? buildApiEmojiStatus(mtpUser.emojiStatus) : undefined;
@@ -90,7 +86,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     phoneNumber: mtpUser.phone || '',
     noStatus: !mtpUser.status,
     ...(mtpUser.accessHash && { accessHash: String(mtpUser.accessHash) }),
-    ...(avatarHash && { avatarHash }),
+    avatarPhotoId,
     emojiStatus,
     hasVideoAvatar,
     areStoriesHidden: Boolean(mtpUser.storiesHidden),

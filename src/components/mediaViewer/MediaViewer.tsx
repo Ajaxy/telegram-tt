@@ -80,6 +80,7 @@ type StateProps = {
 };
 
 const ANIMATION_DURATION = 250;
+const AVATAR_LOAD_TRIGGER = 4;
 
 const MediaViewer = ({
   chatId,
@@ -109,6 +110,7 @@ const MediaViewer = ({
     focusMessage,
     toggleChatInfo,
     searchChatMediaMessages,
+    loadMoreProfilePhotos,
   } = getActions();
 
   const isOpen = Boolean(avatarOwner || message || standaloneMedia);
@@ -255,9 +257,17 @@ const MediaViewer = ({
   }, [isGif, isVideo]);
 
   const loadMoreItemsIfNeeded = useLastCallback((item?: MediaViewerItem) => {
-    if (!item || !withDynamicLoading || isLoadingMoreMedia) return;
-    if (item.type !== 'message') return;
-    searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: item.message.id });
+    if (!item || isLoadingMoreMedia) return;
+
+    if (item.type === 'avatar') {
+      const isNearEnd = item.mediaIndex >= item.avatarOwner.profilePhotos!.photos.length - AVATAR_LOAD_TRIGGER;
+      if (!isNearEnd) return;
+      loadMoreProfilePhotos({ peerId: item.avatarOwner.id });
+    }
+
+    if (item.type === 'message' && withDynamicLoading) {
+      searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: item.message.id });
+    }
   });
 
   const getNextItem = useLastCallback((from: MediaViewerItem, direction: number): MediaViewerItem | undefined => {
@@ -276,7 +286,7 @@ const MediaViewer = ({
     if (from.type === 'avatar') {
       const { avatarOwner: fromAvatarOwner, mediaIndex: fromMediaIndex } = from;
       const nextIndex = fromMediaIndex + direction;
-      if (nextIndex >= 0 && fromAvatarOwner.photos && nextIndex < fromAvatarOwner.photos.length) {
+      if (nextIndex >= 0 && fromAvatarOwner.profilePhotos && nextIndex < fromAvatarOwner.profilePhotos.photos.length) {
         return { type: 'avatar', avatarOwner: fromAvatarOwner, mediaIndex: nextIndex };
       }
 
@@ -332,7 +342,8 @@ const MediaViewer = ({
   });
 
   const handleBeforeDelete = useLastCallback(() => {
-    const mediaCount = avatarOwner?.photos?.length || standaloneMedia?.length || messageMediaIds?.length || 0;
+    const mediaCount = avatarOwner?.profilePhotos?.photos.length
+      || standaloneMedia?.length || messageMediaIds?.length || 0;
     if (mediaCount <= 1 || !currentItem) {
       handleClose();
       return;
@@ -344,7 +355,7 @@ const MediaViewer = ({
       return;
     }
 
-    if (currentItem.type === 'avatar' || currentItem.type === 'standalone') {
+    if ((currentItem.type === 'avatar' && isUserId(currentItem.avatarOwner.id)) || currentItem.type === 'standalone') {
       // Keep current item, it'll update when indexes shift
       return;
     }
@@ -451,9 +462,12 @@ export default memo(withGlobal(
         canUpdateMedia = isUserId(peer.id) ? peer.id === currentUserId : isChatAdmin(peer as ApiChat);
       }
 
+      const profilePhotos = peer?.profilePhotos;
+
       return {
-        avatar: peer?.photos?.[mediaIndex!],
+        avatar: profilePhotos?.photos[mediaIndex!],
         avatarOwner: peer,
+        isLoadingMoreMedia: profilePhotos?.isLoading,
         isChatWithSelf,
         canUpdateMedia,
         withAnimation,
@@ -462,6 +476,7 @@ export default memo(withGlobal(
         isHidden,
         standaloneMedia,
         mediaIndex,
+        isSynced,
       };
     }
 

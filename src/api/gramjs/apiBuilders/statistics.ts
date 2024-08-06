@@ -14,8 +14,7 @@ import type {
   StatisticsStoryInteractionCounter,
 } from '../../types';
 
-import { buildAvatarHash } from './chats';
-import { buildApiUsernames } from './common';
+import { buildApiUsernames, buildAvatarPhotoId } from './common';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 
 export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiChannelStatistics {
@@ -233,6 +232,8 @@ function getOverviewPeriod(data: GramJs.StatsDateRangeDays): StatisticsOverviewP
 function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs.TypeChat[]): ApiMessagePublicForward {
   const peerId = getApiChatIdFromMtpPeer(message.peerId!);
   const channel = chats.find((c) => buildApiPeerId(c.id, 'channel') === peerId);
+  const channelProfilePhoto = channel && 'photo' in channel && channel.photo instanceof GramJs.Photo
+    ? channel.photo : undefined;
 
   return {
     messageId: message.id,
@@ -243,9 +244,8 @@ function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs
       type: 'chatTypeChannel',
       title: (channel as GramJs.Channel).title,
       usernames: buildApiUsernames(channel as GramJs.Channel),
-      avatarHash: channel && 'photo' in channel
-        ? buildAvatarHash((channel as GramJs.Channel).photo)
-        : undefined,
+      avatarPhotoId: channelProfilePhoto && buildAvatarPhotoId(channelProfilePhoto),
+      hasVideoAvatar: Boolean(channelProfilePhoto?.videoSizes),
     },
   };
 }

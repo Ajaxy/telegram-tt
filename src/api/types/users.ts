@@ -3,6 +3,7 @@ import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
 import type { ApiPeerColor } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
+import type { ApiPeerPhotos } from './misc';
 
 export interface ApiUser {
   id: string;
@@ -21,8 +22,8 @@ export interface ApiUser {
   phoneNumber: string;
   accessHash?: string;
   hasVideoAvatar?: boolean;
-  avatarHash?: string;
-  photos?: ApiPhoto[];
+  avatarPhotoId?: string;
+  profilePhotos?: ApiPeerPhotos;
   botPlaceholder?: string;
   canBeInvitedToGroup?: boolean;
   commonChats?: {
