@@ -363,30 +363,55 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
     } = params;
     const byType = splitAttachmentsByType(attachments!);
 
+    let hasSentCaption = false;
     byType.forEach((group, groupIndex) => {
       const groupedAttachments = split(group as ApiAttachment[], MAX_MEDIA_FILES_FOR_ALBUM);
       for (let i = 0; i < groupedAttachments.length; i++) {
-        const [firstAttachment, ...restAttachments] = groupedAttachments[i];
         const groupedId = `${Date.now()}${groupIndex}${i}`;
 
         const isFirst = i === 0 && groupIndex === 0;
+        const isLast = i === groupedAttachments.length - 1 && groupIndex === byType.length - 1;
 
-        sendMessage(global, {
-          ...commonParams,
-          text: isFirst ? text : undefined,
-          entities: isFirst ? entities : undefined,
-          attachment: firstAttachment,
-          groupedId: restAttachments.length > 0 ? groupedId : undefined,
-          wasDrafted: Boolean(draft),
-        });
-
-        restAttachments.forEach((attachment: ApiAttachment) => {
+        if (group[0].quick && !group[0].shouldSendAsFile) {
+          const [firstAttachment, ...restAttachments] = groupedAttachments[i];
           sendMessage(global, {
             ...commonParams,
-            attachment,
-            groupedId,
+            text: isFirst && !hasSentCaption ? text : undefined,
+            entities: isFirst && !hasSentCaption ? entities : undefined,
+            attachment: firstAttachment,
+            groupedId: restAttachments.length > 0 ? groupedId : undefined,
+            wasDrafted: Boolean(draft),
           });
-        });
+          hasSentCaption = true;
+
+          restAttachments.forEach((attachment: ApiAttachment) => {
+            sendMessage(global, {
+              ...commonParams,
+              attachment,
+              groupedId,
+            });
+          });
+        } else {
+          const firstAttachments = groupedAttachments[i].slice(0, -1);
+          const lastAttachment = groupedAttachments[i][groupedAttachments[i].length - 1];
+          firstAttachments.forEach((attachment: ApiAttachment) => {
+            sendMessage(global, {
+              ...commonParams,
+              attachment,
+              groupedId,
+            });
+          });
+
+          sendMessage(global, {
+            ...commonParams,
+            text: isLast && !hasSentCaption ? text : undefined,
+            entities: isLast && !hasSentCaption ? entities : undefined,
+            attachment: lastAttachment,
+            groupedId: firstAttachments.length > 0 ? groupedId : undefined,
+            wasDrafted: Boolean(draft),
+          });
+          hasSentCaption = true;
+        }
       }
     });
   } else {
