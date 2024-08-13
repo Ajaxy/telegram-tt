@@ -11,7 +11,11 @@ import { getCurrentTabId } from "../util/establishMultitabRole";
 const MAIN_FRAME_ORIGIN =
   process.env.MAIN_FRAME_ORIGIN || "https://crm.dise.app";
 
-console.log({ NODE_ENV: process.env.NODE_ENV, APP_ENV: process.env.APP_ENV });
+console.log({
+  NODE_ENV: process.env.NODE_ENV,
+  APP_ENV: process.env.APP_ENV,
+  DISE_ENV: process.env.DISE_ENV,
+});
 
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
