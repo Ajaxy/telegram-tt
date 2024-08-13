@@ -21,6 +21,8 @@ const ORIGINS =
       ]
     : MAIN_FRAME_ORIGIN;
 
+console.log(ORIGINS, process.env.DISE_ENV, MAIN_FRAME_ORIGIN, "ORIGINS");
+
 let actions = new Responder<Actions>("actions", ORIGINS);
 
 actions.subscribeUniversal(async (name, args) => {
