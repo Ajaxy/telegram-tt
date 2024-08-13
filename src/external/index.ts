@@ -8,16 +8,20 @@ import { addActionHandler } from "../global";
 import { ActionReturnType } from "../global/types";
 import { getCurrentTabId } from "../util/establishMultitabRole";
 
-const MAIN_FRAME_ORIGIN =
-  process.env.MAIN_FRAME_ORIGIN || "https://crm.dise.app";
+const DEFAULT_ORIGIN = "https://crm.dise.app";
 
-console.log({
-  NODE_ENV: process.env.NODE_ENV,
-  APP_ENV: process.env.APP_ENV,
-  DISE_ENV: process.env.DISE_ENV,
-});
+const MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
 
-let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
+const ORIGINS =
+  process.env.DISE_ENV === "testing"
+    ? [
+        MAIN_FRAME_ORIGIN,
+        DEFAULT_ORIGIN,
+        /https:\/\/([a-z-]+)\.slise-crm-app\.pages\.dev/i,
+      ]
+    : MAIN_FRAME_ORIGIN;
+
+let actions = new Responder<Actions>("actions", ORIGINS);
 
 actions.subscribeUniversal(async (name, args) => {
   console.log("Received action", name, args);
@@ -29,7 +33,7 @@ actions.subscribeUniversal(async (name, args) => {
   return result;
 });
 
-let clientApi = new Responder<Methods>("methods", MAIN_FRAME_ORIGIN);
+let clientApi = new Responder<Methods>("methods", ORIGINS);
 
 clientApi.subscribeUniversal((name, args) => {
   console.log("Received client-api", name);
@@ -41,7 +45,7 @@ clientApi.subscribeUniversal((name, args) => {
   });
 });
 
-let custom = new Responder<Custom>("custom", MAIN_FRAME_ORIGIN);
+let custom = new Responder<Custom>("custom", ORIGINS);
 
 custom.subscribeUniversal((name, args) => {
   console.log("Received custom", name, args);
@@ -50,7 +54,7 @@ custom.subscribeUniversal((name, args) => {
   return method(...args);
 });
 
-let status = new Responder("status", MAIN_FRAME_ORIGIN);
+let status = new Responder("status", ORIGINS);
 
 status.subscribeUniversal((name) => {
   return true;
@@ -63,7 +67,7 @@ export let events = new Requester<Events>(
 );
 
 export function __init() {
-  let oldChatId: string | undefined;
+  // let oldChatId: string | undefined;
   let oldAuth = {
     authed: false,
     userId: undefined as string | undefined,
