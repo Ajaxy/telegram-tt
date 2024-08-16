@@ -113,6 +113,13 @@ const TextFormatter: FC<OwnProps> = ({
     }
 
     setSelectedTextFormats(selectedFormats);
+      const linkElement = selectedRange.commonAncestorContainer.parentElement as HTMLAnchorElement;
+      if (linkElement && linkElement.tagName === 'A') {
+          setLinkUrl(linkElement.href);
+          setIsEditingLink(true);
+
+      }
+    
   }, [isOpen, selectedRange, openLinkControl]);
 
   const restoreSelection = useLastCallback(() => {
@@ -329,7 +336,7 @@ const TextFormatter: FC<OwnProps> = ({
       (element as HTMLAnchorElement).href = formattedLinkUrl;
 
       onClose();
-
+      
       return;
     }
 
