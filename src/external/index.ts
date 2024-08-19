@@ -12,18 +12,7 @@ const DEFAULT_ORIGIN = "https://crm.dise.app";
 
 const MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
 
-const ORIGINS =
-  process.env.DISE_ENV === "testing"
-    ? [
-        MAIN_FRAME_ORIGIN,
-        DEFAULT_ORIGIN,
-        /https:\/\/([a-z-]+)\.slise-crm-app\.pages\.dev/i,
-      ]
-    : MAIN_FRAME_ORIGIN;
-
-console.log(ORIGINS, process.env.DISE_ENV, MAIN_FRAME_ORIGIN, "ORIGINS");
-
-let actions = new Responder<Actions>("actions", ORIGINS);
+let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
 actions.subscribeUniversal(async (name, args) => {
   console.log("Received action", name, args);
@@ -35,7 +24,7 @@ actions.subscribeUniversal(async (name, args) => {
   return result;
 });
 
-let clientApi = new Responder<Methods>("methods", ORIGINS);
+let clientApi = new Responder<Methods>("methods", MAIN_FRAME_ORIGIN);
 
 clientApi.subscribeUniversal((name, args) => {
   console.log("Received client-api", name);
@@ -47,16 +36,16 @@ clientApi.subscribeUniversal((name, args) => {
   });
 });
 
-let custom = new Responder<Custom>("custom", ORIGINS);
+let custom = new Responder<Custom>("custom", MAIN_FRAME_ORIGIN);
 
 custom.subscribeUniversal((name, args) => {
-  console.log("Received custom", name, args);
+  // console.log("Received custom", name, args);
 
   let method = CUSTOM[name] as (...args: any[]) => any;
   return method(...args);
 });
 
-let status = new Responder("status", ORIGINS);
+let status = new Responder("status", MAIN_FRAME_ORIGIN);
 
 status.subscribeUniversal((name) => {
   return true;
