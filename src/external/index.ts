@@ -90,10 +90,7 @@ export function __init() {
   addActionHandler(
     "loadAllChats",
     async (global, actions, payload): Promise<void> => {
-      if (
-        global.connectionState === "connectionStateReady" &&
-        global.isSynced
-      ) {
+      if (global.connectionState === "connectionStateReady") {
         events.proxy.syncStateChanged({ isSynced: true });
       }
     }
