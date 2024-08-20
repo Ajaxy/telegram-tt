@@ -97,6 +97,15 @@ export function __init() {
   );
 
   addActionHandler(
+    "loadChatFolders",
+    async (global, actions, payload): Promise<void> => {
+      if (global.connectionState === "connectionStateReady") {
+        events.proxy.syncStateChanged({ isSynced: true });
+      }
+    }
+  );
+
+  addActionHandler(
     "signOut",
     async (global, actions, payload): Promise<void> => {
       events.proxy.loggedOut();
