@@ -8,8 +8,9 @@ import { addActionHandler } from "../global";
 import { ActionReturnType } from "../global/types";
 import { getCurrentTabId } from "../util/establishMultitabRole";
 
-const MAIN_FRAME_ORIGIN =
-  process.env.MAIN_FRAME_ORIGIN || "https://crm.slise.xyz";
+const DEFAULT_ORIGIN = "https://crm.dise.app";
+
+const MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
 
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
@@ -38,7 +39,7 @@ clientApi.subscribeUniversal((name, args) => {
 let custom = new Responder<Custom>("custom", MAIN_FRAME_ORIGIN);
 
 custom.subscribeUniversal((name, args) => {
-  console.log("Received custom", name, args);
+  // console.log("Received custom", name, args);
 
   let method = CUSTOM[name] as (...args: any[]) => any;
   return method(...args);
@@ -57,7 +58,7 @@ export let events = new Requester<Events>(
 );
 
 export function __init() {
-  let oldChatId: string | undefined;
+  // let oldChatId: string | undefined;
   let oldAuth = {
     authed: false,
     userId: undefined as string | undefined,
@@ -89,10 +90,16 @@ export function __init() {
   addActionHandler(
     "loadAllChats",
     async (global, actions, payload): Promise<void> => {
-      if (
-        global.connectionState === "connectionStateReady" &&
-        global.isSynced
-      ) {
+      if (global.connectionState === "connectionStateReady") {
+        events.proxy.syncStateChanged({ isSynced: true });
+      }
+    }
+  );
+
+  addActionHandler(
+    "loadChatFolders",
+    async (global, actions, payload): Promise<void> => {
+      if (global.connectionState === "connectionStateReady") {
         events.proxy.syncStateChanged({ isSynced: true });
       }
     }
