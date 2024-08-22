@@ -1,4 +1,7 @@
-import { makeRequest } from "../api/gramjs/worker/connector";
+import {
+  makeRequest,
+  makeRequestToMaster,
+} from "../api/gramjs/worker/connector";
 import { getActions, getGlobal } from "../global";
 import { Requester, Responder } from "jsonrpc-iframe";
 import * as CUSTOM from "./custom";
@@ -7,6 +10,7 @@ import { selectChat, selectCurrentMessageList } from "../global/selectors";
 import { addActionHandler } from "../global";
 import { ActionReturnType } from "../global/types";
 import { getCurrentTabId } from "../util/establishMultitabRole";
+import { selectTabState } from "../global/selectors";
 
 const DEFAULT_ORIGIN = "https://crm.dise.app";
 
@@ -27,13 +31,26 @@ actions.subscribeUniversal(async (name, args) => {
 let clientApi = new Responder<Methods>("methods", MAIN_FRAME_ORIGIN);
 
 clientApi.subscribeUniversal((name, args) => {
-  console.log("Received client-api", name);
+  const global = getGlobal();
 
-  return makeRequest({
-    type: "callMethod",
-    name: name,
-    args: args,
-  });
+  const promise = selectTabState(global).isMasterTab
+    ? makeRequest({
+        type: "callMethod",
+        name: name,
+        args,
+      })
+    : makeRequestToMaster({
+        name: name,
+        args,
+      });
+
+  return promise;
+
+  // return makeRequest({
+  //   type: "callMethod",
+  //   name: name,
+  //   args: args,
+  // });
 });
 
 let custom = new Responder<Custom>("custom", MAIN_FRAME_ORIGIN);
