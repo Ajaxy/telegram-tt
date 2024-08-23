@@ -332,7 +332,7 @@ export function selectSimilarChannelIds<T extends GlobalState>(
 export function selectChatLastMessageId<T extends GlobalState>(
   global: T, chatId: string, listType: 'all' | 'saved' = 'all',
 ) {
-  return global.chats.lastMessageIds[listType]?.[chatId];
+  return global.chats.lastMessageIds?.[listType]?.[chatId];
 }
 
 export function selectChatLastMessage<T extends GlobalState>(
