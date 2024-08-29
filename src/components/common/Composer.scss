@@ -1,3 +1,5 @@
+@use '../../styles/mixins';
+
 .Composer {
   --base-height: 3.5rem;
 
@@ -841,7 +843,7 @@
   width: 100%;
   background: var(--color-background);
   border-radius: var(--border-radius-messages);
-  padding: 0.5rem 0;
+  padding: 0.5rem;
   max-height: 15rem;
 
   overflow-x: hidden;
@@ -853,6 +855,10 @@
   transform: translateY(1.5rem);
   transform-origin: bottom;
   transition: opacity var(--layer-transition), transform var(--layer-transition);
+
+  scrollbar-gutter: stable;
+
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
 
   &:not(.shown) {
     display: none;
