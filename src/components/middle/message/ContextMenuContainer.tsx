@@ -19,7 +19,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
   areReactionsEmpty,
-  getHasAdminRight,
+  getCanPostInChat,
   getIsDownloading,
   getMessageDownloadableMedia,
   getMessageVideo,
@@ -30,6 +30,7 @@ import {
   isMessageLocal,
   isOwnMessage,
   isUserId,
+  isUserRightBanned,
 } from '../../../global/helpers';
 import {
   selectActiveDownloads,
@@ -50,6 +51,7 @@ import {
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
+  selectThreadInfo,
   selectUserStatus,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -129,7 +131,7 @@ type StateProps = {
   isReactionPickerOpen?: boolean;
   isInSavedMessages?: boolean;
   isChannel?: boolean;
-  canPostMessagesInChannel?: boolean;
+  canReplyInChat?: boolean;
 };
 
 const selection = window.getSelection();
@@ -190,8 +192,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   isInSavedMessages,
   onClose,
   onCloseAnimationEnd,
-  isChannel,
-  canPostMessagesInChannel,
+  canReplyInChat,
 }) => {
   const {
     openThread,
@@ -364,7 +365,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleReply = useLastCallback(() => {
     const quoteText = canQuoteSelection && selectionRange ? getSelectionAsFormattedText(selectionRange) : undefined;
-    if (isChannel && !canPostMessagesInChannel) {
+    if (!canReplyInChat) {
       openReplyMenu({ fromChatId: message.chatId, messageId: message.id, quoteText });
     } else {
       updateDraftReplyInfo({
@@ -685,7 +686,7 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       noOptions,
-      canReply,
+      canReplyGlobally,
       canPin,
       canUnpin,
       canDelete,
@@ -721,7 +722,15 @@ export default memo(withGlobal<OwnProps>(
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
-    const canPostMessagesInChannel = isChannel && getHasAdminRight(chat, 'postMessages');
+
+    const threadInfo = threadId && selectThreadInfo(global, message.chatId, threadId);
+    const isMessageThread = Boolean(threadInfo && !threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+
+    const canSendText = chat && !isUserRightBanned(chat, 'sendPlain', chatFullInfo);
+
+    const canReplyInChat = chat && threadId ? getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo)
+     && canSendText : false;
+
     const isLocal = isMessageLocal(message);
     const hasTtl = hasMessageTtl(message);
     const canShowSeenBy = Boolean(!isLocal
@@ -764,7 +773,7 @@ export default memo(withGlobal<OwnProps>(
       noOptions,
       canSendNow: isScheduled,
       canReschedule: isScheduled,
-      canReply: !isPinned && !isScheduled && canReply,
+      canReply: !isPinned && !isScheduled && canReplyGlobally,
       canPin: !isScheduled && canPin,
       canUnpin: !isScheduled && canUnpin,
       canDelete,
@@ -804,7 +813,7 @@ export default memo(withGlobal<OwnProps>(
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       isInSavedMessages,
       isChannel,
-      canPostMessagesInChannel,
+      canReplyInChat,
     };
   },
 )(ContextMenuContainer));

@@ -658,10 +658,12 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const canPostInChat = getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
   const canReply = (() => {
     if (isLocal || isServiceNotification) return false;
-    if (isChatChannel(chat)) return true;
     if (!canPostInChat || chat.isForbidden) return false;
     return !messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics');
   })();
+
+  const canReplyGlobally = canReply || (!isSavedDialog && !isLocal && !isServiceNotification
+    && (isSuperGroup || isBasicGroup || isChatChannel(chat)));
 
   const hasPinPermission = isPrivate || (
     chat.isCreator
@@ -737,6 +739,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
 
   const noOptions = [
     canReply,
+    canReplyGlobally,
     canEdit,
     canPin,
     canUnpin,
@@ -758,6 +761,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   return {
     noOptions,
     canReply,
+    canReplyGlobally,
     canEdit,
     canPin,
     canUnpin,
