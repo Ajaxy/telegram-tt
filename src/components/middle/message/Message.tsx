@@ -918,7 +918,7 @@ const Message: FC<OwnProps & StateProps> = ({
           contentWidth = width;
         }
         calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMediaWithCommentButton), width);
-        if (invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
+        if (!asForwarded && invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
           noMediaCorners = true;
         }
       }
@@ -926,7 +926,7 @@ const Message: FC<OwnProps & StateProps> = ({
       calculatedWidth = Math.max(
         getMinMediaWidth(text?.text, isMediaWithCommentButton), albumLayout.containerStyle.width,
       );
-      if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
+      if (!asForwarded && calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }

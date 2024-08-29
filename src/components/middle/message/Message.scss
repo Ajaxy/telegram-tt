@@ -646,7 +646,7 @@
 
   .message-content {
     &.has-replies:not(.custom-shape),
-    &.has-footer:not(.web-page) {
+    &.has-footer:not(.web-page):not(.is-forwarded) {
       .media-inner,
       .Album {
         --border-bottom-left-radius: 0;
@@ -654,7 +654,7 @@
       }
     }
 
-    &.text.is-inverted-media {
+    &.text.is-inverted-media:not(.is-forwarded) {
       .Album,
       .media-inner {
         --border-top-left-radius: 0;
