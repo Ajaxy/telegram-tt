@@ -1365,7 +1365,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
 
   const isWebApp = await checkWebAppExists(global, part1, part2);
 
-  const shouldTryOpenChat = (part1 && !part2) || isWebApp;
+  const shouldTryOpenChat = (part1 && !part2) || Number.isInteger(Number(part2)) || isWebApp;
 
   if (params.hasOwnProperty('voicechat') || params.hasOwnProperty('livestream')) {
     joinVoiceChatByLink({
