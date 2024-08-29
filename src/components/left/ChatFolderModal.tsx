@@ -7,12 +7,15 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChatFolder } from '../../api/types';
 
 import { ALL_FOLDER_ID } from '../../config';
+import buildClassName from '../../util/buildClassName';
 
 import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import CheckboxGroup from '../ui/CheckboxGroup';
 import Modal from '../ui/Modal';
+
+import styles from './ChatFolderModal.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -80,19 +83,24 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
       onEnter={handleSubmit}
-      className="delete"
+      className={buildClassName(styles.root, 'delete')}
+      contentClassName={styles.modalContent}
       title={lang('FilterAddTo')}
     >
-      <CheckboxGroup
-        options={folders}
-        selected={selectedFolderIds}
-        onChange={setSelectedFolderIds}
-      />
-      <div className="dialog-buttons">
-        <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
-          {lang('FilterAddTo')}
-        </Button>
-        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      <div className={buildClassName(styles.main, 'custom-scroll')}>
+        <CheckboxGroup
+          options={folders}
+          selected={selectedFolderIds}
+          onChange={setSelectedFolderIds}
+        />
+      </div>
+      <div className={styles.footer}>
+        <div className="dialog-buttons">
+          <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
+            {lang('FilterAddTo')}
+          </Button>
+          <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        </div>
       </div>
     </Modal>
   );
