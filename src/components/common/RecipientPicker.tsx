@@ -83,10 +83,13 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
       return chat && getCanPostInChat(chat, MAIN_THREAD_ID, undefined, chatFullInfoById[id]);
     });
 
-    const sorted = sortChatIds(unique([
-      ...filterChatsByName(lang, chatIds, chatsById, search, currentUserId),
-      ...(contactIds && filter.includes('users') ? filterUsersByName(contactIds, usersById, search) : []),
-    ]), undefined, priorityIds);
+    const sorted = [
+      ...(currentUserId ? [currentUserId] : []),
+      ...sortChatIds(unique([
+        ...filterChatsByName(lang, chatIds, chatsById, search, currentUserId),
+        ...(contactIds && filter.includes('users') ? filterUsersByName(contactIds, usersById, search) : []),
+      ]), undefined, priorityIds),
+    ];
 
     return filterChatIdsByType(global, sorted, filter);
   }, [pinnedIds, currentUserId, activeListIds, search, archivedListIds, lang, contactIds, filter, isOpen]);

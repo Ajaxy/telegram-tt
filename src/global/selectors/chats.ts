@@ -97,18 +97,18 @@ export function selectIsTrustedBot<T extends GlobalState>(global: T, botId: stri
 }
 
 export function selectChatType<T extends GlobalState>(global: T, chatId: string) : ApiChatType | undefined {
-  const chat = selectChat(global, chatId);
-  if (!chat) return undefined;
-
   const bot = selectBot(global, chatId);
   if (bot) {
     return 'bots';
   }
 
-  const user = selectChatUser(global, chat);
+  const user = selectUser(global, chatId);
   if (user) {
     return 'users';
   }
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
 
   if (isChatChannel(chat)) {
     return 'channels';
