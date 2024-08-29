@@ -129,6 +129,7 @@
 
 .settings-item-simple,
 .settings-item {
+  text-align: initial;
   padding: 1.5rem 0.5rem 1rem;
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
@@ -148,10 +149,6 @@
     margin-bottom: 1.25rem;
     padding-inline-start: 1rem;
     position: relative;
-
-    &[dir="rtl"] {
-      text-align: right;
-    }
   }
 
   &-slider {
@@ -162,7 +159,7 @@
     font-size: 0.875rem;
     color: var(--color-text-secondary);
     margin-top: -0.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     padding-inline-start: 1rem;
 
     .settings-content.two-fa &,
@@ -396,7 +393,7 @@
 
 .SettingsDefaultReaction {
   .current-default-reaction {
-    margin-inline-end: 1.1875rem;
+    margin-inline-end: 1.75rem;
   }
 }
 

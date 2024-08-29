@@ -178,6 +178,7 @@
 
     .ListItem-button {
       padding: 0.5rem 1rem;
+      min-height: 3rem;
     }
 
     .ListItem-main-icon {
@@ -438,6 +439,10 @@
     .subtitle {
       display: block;
       text-align: initial;
+
+      &[dir="rtl"] {
+        text-align: right;
+      }
     }
 
     .title {

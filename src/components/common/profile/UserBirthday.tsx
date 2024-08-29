@@ -175,7 +175,9 @@ const UserBirthday = ({
         isStatic={isStatic}
         onSecondaryIconClick={handleOpenPremiumGiftModal}
       >
-        <div className="title">{renderText(lang(valueKey, [formattedDate, age], undefined, age))}</div>
+        <div className="title" dir={lang.isRtl ? 'rtl' : undefined}>
+          {renderText(lang(valueKey, [formattedDate, age], undefined, age))}
+        </div>
         <span className="subtitle">{lang(isToday ? 'ProfileBirthdayToday' : 'ProfileBirthday')}</span>
       </ListItem>
       {isPlayingAnimation && IS_OFFSET_PATH_SUPPORTED && numbersForAge?.map((sticker, index) => (

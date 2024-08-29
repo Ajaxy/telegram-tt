@@ -313,7 +313,9 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           handleUsernameClick(mainUsername, isChat);
         }}
       >
-        <span className="title" dir="auto">{formatUsername(mainUsername.username, isChat)}</span>
+        <span className="title" dir={lang.isRtl ? 'rtl' : undefined}>
+          {formatUsername(mainUsername.username, isChat)}
+        </span>
         <span className="subtitle">
           {usernameLinks && <span className="other-usernames">{usernameLinks}</span>}
           {oldLang(isChat ? 'Link' : 'Username')}
@@ -343,7 +345,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
       {Boolean(formattedNumber?.length) && (
         // eslint-disable-next-line react/jsx-no-bind
         <ListItem icon="phone" multiline narrow ripple onClick={handlePhoneClick}>
-          <span className="title" dir="auto">{formattedNumber}</span>
+          <span className="title" dir={lang.isRtl ? 'rtl' : undefined}>{formattedNumber}</span>
           <span className="subtitle">{oldLang('Phone')}</span>
         </ListItem>
       )}
@@ -356,7 +358,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           isStatic
           allowSelection
         >
-          <span className="title word-break allow-selection" dir="auto">
+          <span className="title word-break allow-selection" dir={lang.isRtl ? 'rtl' : undefined}>
             {
               renderText(description, [
                 'br',

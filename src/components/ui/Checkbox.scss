@@ -3,7 +3,7 @@
   position: relative;
   padding-inline-start: 3.5rem;
   text-align: left;
-  margin-bottom: 1.5rem;
+  margin-block: 0.75rem;
   line-height: 1.5rem;
   cursor: var(--custom-cursor, pointer);
 
@@ -69,10 +69,10 @@
       content: "";
       display: block;
       position: absolute;
-      left: 1rem;
-      top: 0.1875rem;
-      width: 1.125rem;
-      height: 1.125rem;
+      left: 1.125rem;
+      top: 0.125rem;
+      width: 1.25rem;
+      height: 1.25rem;
     }
 
     &::before {

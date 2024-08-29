@@ -32,6 +32,10 @@
       border-top: none;
     }
 
+    &.section-with-fab {
+      padding-bottom: 3.5rem;
+    }
+
     > .ChatInfo {
       margin: 0 0 2rem !important;
 
@@ -126,10 +130,12 @@
 
   .RangeSlider {
     margin-top: 2rem;
+    margin-inline-start: 1rem;
   }
 
   .radio-group {
-    margin-top: 2rem;
+    margin-block: 2rem;
+    margin-inline-start: 1rem;
 
     .Radio {
       padding-left: 3.5rem;

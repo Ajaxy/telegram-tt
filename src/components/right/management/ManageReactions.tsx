@@ -226,7 +226,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
           </p>
         </div>
         {localEnabledReactions?.type === 'some' && (
-          <div className="section">
+          <div className="section section-with-fab">
             <h3 className="section-heading">
               {lang('OnlyAllowThisReactions')}
             </h3>
