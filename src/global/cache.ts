@@ -382,10 +382,10 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     ...visibleUserIds || [],
     ...attachBotIds,
     ...global.topPeers.userIds || [],
+    ...global.recentlyFoundChatIds?.filter(isUserId) || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT).filter(isUserId) || [],
     ...getOrderedIds(ALL_FOLDER_ID)?.filter(isUserId) || [],
     ...global.contactList?.userIds || [],
-    ...global.recentlyFoundChatIds?.filter(isUserId) || [],
     ...Object.keys(byId),
   ]).slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
 

@@ -85,6 +85,10 @@
     }
   }
 
+  .RecentContacts .search-section {
+    padding-left: 0.25rem;
+  }
+
   .WebLink {
     display: flex;
   }
@@ -123,6 +127,10 @@
   }
 
   .ListItem.search-result {
+    .ListItem-button {
+      padding: 0.375rem;
+    }
+
     .ChatInfo {
       // Fix for overflow hidden and stories indicator
       padding: 0.0625rem;
@@ -185,7 +193,7 @@
   }
 
   .search-section {
-    padding: 0 0.125rem 0 1rem;
+    padding: 0 0.125rem 0 0.75rem;
 
     .section-heading {
       color: var(--color-text-secondary);
