@@ -8,7 +8,7 @@
 }
 
 .root :global(.modal-dialog) {
-  height: 70%;
+  max-height: 70%;
   max-width: 26.25rem;
   overflow: hidden;
 }
