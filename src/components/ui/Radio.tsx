@@ -12,18 +12,20 @@ import './Radio.scss';
 
 type OwnProps = {
   id?: string;
-  name: string;
-  label: TeactNode;
+  name?: string;
+  label?: TeactNode;
   subLabel?: TeactNode;
-  value: string;
-  checked: boolean;
+  value?: string;
+  checked?: boolean;
   disabled?: boolean;
   isLink?: boolean;
   hidden?: boolean;
   isLoading?: boolean;
+  withIcon?: boolean;
   className?: string;
+  onlyInput?: boolean;
   subLabelClassName?: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onSubLabelClick?: MouseEventHandler<HTMLSpanElement> | undefined;
 };
 
@@ -39,8 +41,10 @@ const Radio: FC<OwnProps> = ({
   hidden,
   isLoading,
   className,
-  onChange,
+  onlyInput,
+  withIcon,
   isLink,
+  onChange,
   onSubLabelClick,
 }) => {
   const lang = useOldLang();
@@ -49,7 +53,9 @@ const Radio: FC<OwnProps> = ({
     className,
     disabled && 'disabled',
     hidden && 'hidden-widget',
+    withIcon && 'with-icon',
     isLoading && 'loading',
+    onlyInput && 'onlyInput',
   );
 
   return (

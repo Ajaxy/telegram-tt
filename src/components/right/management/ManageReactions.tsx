@@ -241,6 +241,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
                       {title}
                     </div>
                   )}
+                  withIcon
                   onChange={handleReactionChange}
                 />
               </div>

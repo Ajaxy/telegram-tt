@@ -12,6 +12,10 @@
 }
 
 .settings-folders-list-item {
+  .ListItem-main-icon {
+    margin-inline-end: 1.875rem !important;
+  }
+
   .ChatInfo {
     display: flex;
     align-items: center;
@@ -99,7 +103,9 @@
   padding-top: 0.75rem;
 }
 
-.down {
-  font-size: 1.5rem;
-  margin-right: 0.5rem;
+.Picker {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }

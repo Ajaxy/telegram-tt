@@ -5,12 +5,12 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../api/types';
-import type { LangFn } from '../../hooks/useOldLang';
 import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin, type StoryViewerOrigin, type ThreadId } from '../../types';
 
 import {
   getChatTypeString,
+  getGroupStatus,
   getMainUsername,
   isChatSuperGroup,
 } from '../../global/helpers';
@@ -260,23 +260,6 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     </div>
   );
 };
-
-function getGroupStatus(lang: LangFn, chat: ApiChat) {
-  const chatTypeString = lang(getChatTypeString(chat));
-  const { membersCount } = chat;
-
-  if (chat.isRestricted) {
-    return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
-  }
-
-  if (!membersCount) {
-    return chatTypeString;
-  }
-
-  return chatTypeString === 'Channel'
-    ? lang('Subscribers', membersCount, 'i')
-    : lang('Members', membersCount, 'i');
-}
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): StateProps => {

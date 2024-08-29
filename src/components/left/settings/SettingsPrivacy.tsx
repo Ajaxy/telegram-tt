@@ -103,9 +103,11 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   }, [updateContentSettings]);
 
   function getVisibilityValue(setting?: ApiPrivacySettings) {
-    const { visibility, shouldAllowPremium } = setting || {};
-    const blockCount = setting ? setting.blockChatIds.length + setting.blockUserIds.length : 0;
-    const allowCount = setting ? setting.allowChatIds.length + setting.allowUserIds.length : 0;
+    if (!setting) return lang('Loading');
+
+    const { visibility, shouldAllowPremium } = setting;
+    const blockCount = setting.blockChatIds.length + setting.blockUserIds.length;
+    const allowCount = setting.allowChatIds.length + setting.allowUserIds.length;
     const total = [];
     if (blockCount) total.push(`-${blockCount}`);
     if (allowCount) total.push(`+${allowCount}`);
@@ -135,6 +137,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       <div className="settings-item pt-3">
         <ListItem
           icon="delete-user"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyBlockedUsers)}
         >
@@ -176,6 +179,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         {webAuthCount > 0 && (
           <ListItem
             icon="web"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => onScreenSelect(SettingsScreens.ActiveWebsites)}
           >
@@ -186,7 +190,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PrivacyTitle')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PrivacyTitle')}</h4>
 
         <ListItem
           narrow

@@ -16,7 +16,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
@@ -106,7 +106,7 @@ const PremiumGiftingModal: FC<OwnProps & StateProps> = ({
       <div className={styles.main}>
         {renderSearchField()}
         <div className={buildClassName(styles.main, 'custom-scroll')}>
-          <Picker
+          <PeerPicker
             className={styles.picker}
             itemIds={displayedUserIds}
             selectedIds={selectedUserIds}
@@ -116,6 +116,10 @@ const PremiumGiftingModal: FC<OwnProps & StateProps> = ({
             onSelectedIdsChange={handleSelectedUserIdsChange}
             onFilterChange={setSearchQuery}
             isSearchable
+            withDefaultPadding
+            withStatus
+            allowMultiple
+            itemInputType="checkbox"
           />
         </div>
         <div className={styles.buttons}>

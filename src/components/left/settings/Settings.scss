@@ -118,12 +118,21 @@
       margin-bottom: 0.25rem;
     }
   }
+
+  .ListItem.narrow {
+    margin-bottom: 0;
+
+    .ListItem-button {
+      padding: 1rem;
+    }
+  }
 }
 
 .settings-item-simple,
 .settings-item {
-  padding: 1.5rem 1.5rem 1rem;
+  padding: 1.5rem 0.5rem 1rem;
 
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
   @include mixins.side-panel-section;
 }
 
@@ -137,7 +146,8 @@
   &-header {
     font-size: 1rem;
     color: var(--color-text-secondary);
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
+    padding-inline-start: 1rem;
     position: relative;
 
     &[dir="rtl"] {
@@ -154,6 +164,7 @@
     color: var(--color-text-secondary);
     margin-top: -0.5rem;
     margin-bottom: 1.5rem;
+    padding-inline-start: 1rem;
 
     .settings-content.two-fa &,
     .settings-content.password-form &,
@@ -189,9 +200,7 @@
   }
 
   .ListItem {
-    margin: 0 -1rem 1rem;
-
-    &:last-child {
+    &.narrow {
       margin-bottom: 0;
     }
 
@@ -302,11 +311,7 @@
 
   .RangeSlider {
     margin-bottom: 1.0625rem;
-  }
-
-  .Checkbox,
-  .radio-group {
-    margin: 0 -1rem 0.5rem;
+    padding-inline: 1rem;
   }
 
   .radio-group {
@@ -324,12 +329,24 @@
     margin-top: 2rem;
   }
 
+  > .Checkbox, > .Radio {
+    padding-inline-start: 4.25rem;
+  }
+
   &__current-value {
     margin-inline-start: auto;
     padding-inline-start: 0.5rem;
     font-size: 0.9375rem;
     color: var(--color-text-secondary);
   }
+}
+
+.settings-picker {
+  padding-block: 0;
+}
+
+.settings-picker-title {
+  margin-inline-start: var(--picker-title-shift);
 }
 
 .settings-fab-wrapper {
@@ -368,8 +385,6 @@
 }
 
 .settings-dropdown-section {
-  margin: 0 -0.75rem 1rem -1rem;
-
   .DropdownList {
     position: relative;
 
@@ -381,7 +396,7 @@
 
 .SettingsDefaultReaction {
   .current-default-reaction {
-    margin-inline-end: 2rem;
+    margin-inline-end: 1.1875rem;
   }
 }
 
@@ -391,6 +406,10 @@
 
 .settings-item-chatlist .ListItem {
   margin: inherit;
+}
+
+.settings-item-picker {
+  padding: 1.5rem 0.5rem 0.5rem;
 }
 
 .block-user-button {

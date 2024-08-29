@@ -24,6 +24,7 @@ type OwnProps = {
   onChange: (value: string, event: ChangeEvent<HTMLInputElement>) => void;
   onClickAction?: (value: string) => void;
   isLink?: boolean;
+  withIcon?: boolean;
   subLabelClassName?: string;
   subLabel?: TeactNode;
 };
@@ -39,6 +40,7 @@ const RadioGroup: FC<OwnProps> = ({
   onClickAction,
   subLabelClassName,
   isLink,
+  withIcon,
   subLabel,
 }) => {
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +64,7 @@ const RadioGroup: FC<OwnProps> = ({
           checked={option.value === selected}
           hidden={option.hidden}
           disabled={disabled}
+          withIcon={withIcon}
           isLoading={loadingOption ? loadingOption === option.value : undefined}
           className={option.className}
           onChange={handleChange}

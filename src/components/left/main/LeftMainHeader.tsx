@@ -36,7 +36,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import StoryToggler from '../../story/StoryToggler';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';

@@ -1123,12 +1123,12 @@ export function deleteMessages<T extends GlobalState>(
 
   // Common box update
 
-  const chatsIdsToUpdate: string[] = [];
+  const chatIdsToUpdate: string[] = [];
 
   ids.forEach((id) => {
     const commonBoxChatId = selectCommonBoxChatId(global, id);
     if (commonBoxChatId) {
-      chatsIdsToUpdate.push(commonBoxChatId);
+      chatIdsToUpdate.push(commonBoxChatId);
 
       global = updateChatMessage(global, commonBoxChatId, id, {
         isDeleting: true,
@@ -1165,7 +1165,7 @@ export function deleteMessages<T extends GlobalState>(
 
   setGlobal(global);
 
-  unique(chatsIdsToUpdate).forEach((id) => {
+  unique(chatIdsToUpdate).forEach((id) => {
     actions.requestChatUpdate({ chatId: id });
   });
 }

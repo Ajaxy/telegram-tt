@@ -10,7 +10,7 @@ import sortChatIds from '../../common/helpers/sortChatIds';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
@@ -99,7 +99,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
         <h3>{lang('GroupAddMembers')}</h3>
       </div>
       <div className="NewChat-inner step-1">
-        <Picker
+        <PeerPicker
           itemIds={displayedIds}
           selectedIds={selectedMemberIds}
           filterValue={searchQuery}
@@ -107,6 +107,10 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           searchInputId="new-group-picker-search"
           isLoading={isSearching}
           isSearchable
+          allowMultiple
+          withStatus
+          itemInputType="checkbox"
+          withDefaultPadding
           onSelectedIdsChange={onSelectedMemberIdsChange}
           onFilterChange={handleFilterChange}
         />

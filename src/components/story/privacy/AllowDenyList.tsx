@@ -8,7 +8,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 
 interface OwnProps {
   id: string;
@@ -38,7 +38,7 @@ function AllowDenyList({
   }, [contactListIds, currentUserId, searchQuery, selectedIds, usersById]);
 
   return (
-    <Picker
+    <PeerPicker
       key={id}
       itemIds={displayedIds}
       selectedIds={selectedIds ?? MEMO_EMPTY_ARRAY}
@@ -47,9 +47,13 @@ function AllowDenyList({
       filterPlaceholder={lang('Search')}
       searchInputId={`${id}-picker-search`}
       isSearchable
+      withDefaultPadding
       forceShowSelf
       onSelectedIdsChange={onSelect}
       onFilterChange={setSearchQuery}
+      allowMultiple
+      withStatus
+      itemInputType="checkbox"
     />
   );
 }

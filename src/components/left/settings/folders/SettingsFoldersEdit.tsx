@@ -28,7 +28,6 @@ import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import GroupChatInfo from '../../../common/GroupChatInfo';
-import Icon from '../../../common/icons/Icon';
 import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import InputText from '../../../ui/InputText';
@@ -267,10 +266,12 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         {(!isExpanded && leftChatsCount > 0) && (
           <ListItem
             key="load-more"
+            className="settings-folders-list-item"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={clickHandler}
+            icon="down"
           >
-            <Icon name="down" className="down" />
             {lang('FilterShowMoreChats', leftChatsCount, 'i')}
           </ListItem>
         )}
@@ -315,8 +316,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterInclude')}</h4>
 
             <ListItem
-              className="settings-folders-list-item color-primary mb-0"
+              className="settings-folders-list-item color-primary"
               icon="add"
+              narrow
               onClick={onAddIncludedChats}
             >
               {lang('FilterAddChats')}
@@ -331,8 +333,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterExclude')}</h4>
 
             <ListItem
-              className="settings-folders-list-item color-primary mb-0"
+              className="settings-folders-list-item color-primary"
               icon="add"
+              narrow
               onClick={onAddExcludedChats}
             >
               {lang('FilterAddChats')}
@@ -348,8 +351,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           </h4>
 
           <ListItem
-            className="settings-folders-list-item color-primary mb-0"
+            className="settings-folders-list-item color-primary"
             icon="add"
+            narrow
             onClick={handleCreateInviteClick}
           >
             {lang('ChatListFilter.CreateLinkNew')}
@@ -357,8 +361,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
           {invites?.map((invite) => (
             <ListItem
-              className="settings-folders-list-item mb-0"
+              className="settings-folders-list-item"
               icon="link"
+              narrow
               multiline
               onClick={handleEditInviteClick}
               clickArg={invite.url}

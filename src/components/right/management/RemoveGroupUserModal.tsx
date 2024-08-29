@@ -12,7 +12,7 @@ import { selectChatFullInfo } from '../../../global/selectors';
 
 import useOldLang from '../../../hooks/useOldLang';
 
-import ChatOrUserPicker from '../../common/ChatOrUserPicker';
+import ChatOrUserPicker from '../../common/pickers/ChatOrUserPicker';
 
 export type OwnProps = {
   chat: ApiChat;

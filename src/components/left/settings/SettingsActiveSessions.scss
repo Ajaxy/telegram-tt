@@ -14,7 +14,11 @@ $icons: "android", "apple", "brave", "chrome", "edge", "firefox", "linux", "oper
     background-repeat: no-repeat;
     background-size: 2rem;
     flex: 0 0 2rem;
-    margin-inline-end: 1.5rem !important;
+    margin-inline-end: 1.25rem !important;
+  }
+
+  .icon-stop {
+    margin-inline: 0.25rem 1.5rem !important;
   }
 
   @each $icon in $icons {

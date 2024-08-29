@@ -1,7 +1,7 @@
 .Checkbox {
   display: block;
   position: relative;
-  padding-left: 4.5rem;
+  padding-inline-start: 3.5rem;
   text-align: left;
   margin-bottom: 1.5rem;
   line-height: 1.5rem;
@@ -12,19 +12,13 @@
     opacity: 0.5;
   }
 
-  &.round {
+  &.withIcon {
+    padding-inline-start: 1rem;
     .Checkbox-main {
-      &::before {
-        border-radius: 50%;
-      }
-
+      &::before,
       &::after {
-        background:
-          var(--color-primary)
-          url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEzLjkuOEw1LjggOC45IDIuMSA1LjJjLS40LS40LTEuMS0uNC0xLjYgMC0uNC40LS40IDEuMSAwIDEuNkw1IDExLjJjLjQuNCAxLjEuNCAxLjYgMGw4LjktOC45Yy40LS40LjQtMS4xIDAtMS42LS41LS40LTEuMi0uNC0xLjYuMXoiIGZpbGw9IiNGRkYiLz48L3N2Zz4=)
-          no-repeat 50% 50%;
-        background-size: 0.75rem;
-        border-radius: 50%;
+        left: auto;
+        right: 1.1875rem;
       }
     }
   }
@@ -75,7 +69,7 @@
       content: "";
       display: block;
       position: absolute;
-      left: 0.6875rem;
+      left: 1rem;
       top: 0.1875rem;
       width: 1.125rem;
       height: 1.125rem;
@@ -120,6 +114,16 @@
     }
   }
 
+  &.withSubLabel {
+    .Checkbox-main {
+      &::before,
+      &::after {
+        top: 0.875rem;
+        left: 1rem;
+      }
+    }
+  }
+
   .Nested-avatar-list {
     &::before,
     &::after {
@@ -150,9 +154,6 @@
   }
 
   &[dir="rtl"] {
-    padding-left: 0;
-    padding-right: 4.5rem;
-
     &.loading {
       .Spinner {
         left: auto;
@@ -169,7 +170,7 @@
       &::before,
       &::after {
         left: auto;
-        right: 1.1875rem;
+        right: 1rem;
       }
     }
   }
@@ -180,28 +181,28 @@
     align-items: center;
     gap: 0.3125rem;
     margin-bottom: 0.5625rem;
-    padding-left: 4.1875rem;
+    padding-inline-start: 4.1875rem;
     .Checkbox-main {
       &::before,
       &::after {
         top: 0.875rem;
-        left: 0.75rem;
+        left: 1.375rem;
       }
     }
   }
 
   &.permission-group {
-    padding-left: 4rem;
+    padding-inline-start: 3.625rem;
     .Checkbox-main {
       &::before,
       &::after {
-        left: 0.75rem;
+        left: 1rem;
       }
     }
   }
 
   &.avatar {
-    padding-left: 6.625rem;
+    padding-inline-start: 6.625rem;
     margin-bottom: 1.125rem;
   }
 
@@ -219,6 +220,18 @@
   &.nested-checkbox-group &.Checkbox-main::after {
     top: 1.875rem;
     left: 2.875rem;
+  }
+
+  &.onlyInput {
+    padding-inline-start: 1.125rem;
+
+    .Checkbox-main {
+      &::before,
+      &::after {
+        left: 0;
+        right: 0;
+      }
+    }
   }
 }
 

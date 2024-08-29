@@ -16,7 +16,7 @@
   }
 
   .section {
-    padding: 1rem 1.5rem;
+    padding: 1rem 0.5rem;
 
     @include mixins.side-panel-section;
 
@@ -45,8 +45,6 @@
     }
 
     .ListItem {
-      margin: 0 -0.75rem;
-
       .Reaction {
         display: flex;
         align-items: center;
@@ -54,11 +52,7 @@
 
       .ReactionStaticEmoji {
         width: 1.5rem;
-        margin-right: 1rem;
-      }
-
-      &:last-child {
-        margin-bottom: 0;
+        margin-right: 1.6875rem;
       }
 
       .multiline-item .subtitle {
@@ -73,11 +67,6 @@
         body.is-android &::after {
           bottom: -1rem;
         }
-      }
-
-      &:not(.picker-list-item) .Checkbox {
-        margin-top: 2rem;
-        margin-bottom: 2rem;
       }
 
       &.narrow {
@@ -196,10 +185,6 @@
       padding: 0;
       box-shadow: none;
     }
-  }
-
-  .Checkbox {
-    padding-left: 3.875rem;
   }
 
   .Spinner {

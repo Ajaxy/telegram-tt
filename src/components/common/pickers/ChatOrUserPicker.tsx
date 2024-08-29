@@ -1,34 +1,34 @@
-import type { FC } from '../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useMemo, useRef, useState,
-} from '../../lib/teact/teact';
-import { getActions, getGlobal } from '../../global';
+} from '../../../lib/teact/teact';
+import { getActions, getGlobal } from '../../../global';
 
-import type { ApiTopic } from '../../api/types';
-import type { ThreadId } from '../../types';
+import type { ApiTopic } from '../../../api/types';
+import type { ThreadId } from '../../../types';
 
-import { CHAT_HEIGHT_PX } from '../../config';
-import { getCanPostInChat, isUserId } from '../../global/helpers';
-import buildClassName from '../../util/buildClassName';
-import { REM } from './helpers/mediaDimensions';
-import renderText from './helpers/renderText';
+import { CHAT_HEIGHT_PX } from '../../../config';
+import { getCanPostInChat, isUserId } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
+import { REM } from '../helpers/mediaDimensions';
+import renderText from '../helpers/renderText';
 
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
-import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
+import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import useInputFocusOnOpen from '../../../hooks/useInputFocusOnOpen';
+import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Button from '../ui/Button';
-import InfiniteScroll from '../ui/InfiniteScroll';
-import InputText from '../ui/InputText';
-import ListItem from '../ui/ListItem';
-import Loading from '../ui/Loading';
-import Modal from '../ui/Modal';
-import Transition from '../ui/Transition';
-import GroupChatInfo from './GroupChatInfo';
-import PrivateChatInfo from './PrivateChatInfo';
-import TopicIcon from './TopicIcon';
+import Button from '../../ui/Button';
+import InfiniteScroll from '../../ui/InfiniteScroll';
+import InputText from '../../ui/InputText';
+import ListItem from '../../ui/ListItem';
+import Loading from '../../ui/Loading';
+import Modal from '../../ui/Modal';
+import Transition from '../../ui/Transition';
+import GroupChatInfo from '../GroupChatInfo';
+import PrivateChatInfo from '../PrivateChatInfo';
+import TopicIcon from '../TopicIcon';
 
 import './ChatOrUserPicker.scss';
 

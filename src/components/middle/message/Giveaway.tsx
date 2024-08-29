@@ -8,8 +8,9 @@ import type {
 } from '../../../api/types';
 
 import {
-  getChatTitle, getUserFullName, isApiPeerChat, isOwnMessage,
+  getChatTitle, getUserFullName, isOwnMessage,
 } from '../../../global/helpers';
+import { isApiPeerChat } from '../../../global/helpers/peers';
 import {
   selectCanPlayAnimatedEmojis,
   selectChat,
@@ -29,7 +30,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Separator from '../../ui/Separator';

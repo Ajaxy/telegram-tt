@@ -25,18 +25,19 @@ type OwnProps = {
   id?: string;
   name?: string;
   value?: string;
-  label: TeactNode;
+  label?: TeactNode;
   labelText?: TeactNode;
   subLabel?: string;
   checked?: boolean;
   rightIcon?: IconName;
   disabled?: boolean;
   tabIndex?: number;
-  round?: boolean;
+  withIcon?: boolean;
   blocking?: boolean;
   permissionGroup?: boolean;
   isLoading?: boolean;
   withCheckedCallback?: boolean;
+  onlyInput?: boolean;
   className?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>, nestedOptionList?: IRadioOption) => void;
   onCheck?: (isChecked: boolean) => void;
@@ -58,12 +59,13 @@ const Checkbox: FC<OwnProps> = ({
   checked,
   tabIndex,
   disabled,
-  round,
+  withIcon,
   blocking,
   permissionGroup,
   isLoading,
   className,
   rightIcon,
+  onlyInput,
   onChange,
   onCheck,
   onClickLabel,
@@ -109,12 +111,14 @@ const Checkbox: FC<OwnProps> = ({
   const labelClassName = buildClassName(
     'Checkbox',
     disabled && 'disabled',
-    round && 'round',
+    withIcon && 'withIcon',
     isLoading && 'loading',
     blocking && 'blocking',
     nestedCheckbox && 'nested',
+    subLabel && 'withSubLabel',
     permissionGroup && 'permission-group',
     Boolean(leftElement) && 'avatar',
+    onlyInput && 'onlyInput',
     className,
   );
 

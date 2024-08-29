@@ -38,9 +38,10 @@ type OwnProps = {
   isSavedDialog?: boolean;
   noLoopLimit?: boolean;
   canCopyTitle?: boolean;
+  iconElement?: React.ReactNode;
+  allowMultiLine?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
-  iconElement?: React.ReactNode;
 };
 
 const FullNameTitle: FC<OwnProps> = ({
@@ -54,9 +55,10 @@ const FullNameTitle: FC<OwnProps> = ({
   isSavedDialog,
   noLoopLimit,
   canCopyTitle,
+  iconElement,
+  allowMultiLine,
   onEmojiStatusClick,
   observeIntersection,
-  iconElement,
 }) => {
   const lang = useOldLang();
   const { showNotification } = getActions();
@@ -99,7 +101,9 @@ const FullNameTitle: FC<OwnProps> = ({
   if (specialTitle) {
     return (
       <div className={buildClassName('title', styles.root, className)}>
-        <h3>{specialTitle}</h3>
+        <h3 className={buildClassName('fullName', styles.fullName, !allowMultiLine && styles.ellipsis)}>
+          {specialTitle}
+        </h3>
       </div>
     );
   }
@@ -109,7 +113,12 @@ const FullNameTitle: FC<OwnProps> = ({
       <h3
         dir="auto"
         role="button"
-        className={buildClassName('fullName', styles.fullName, canCopyTitle && styles.canCopy)}
+        className={buildClassName(
+          'fullName',
+          styles.fullName,
+          !allowMultiLine && styles.ellipsis,
+          canCopyTitle && styles.canCopy,
+        )}
         onClick={handleTitleClick}
       >
         {renderText(title || '')}

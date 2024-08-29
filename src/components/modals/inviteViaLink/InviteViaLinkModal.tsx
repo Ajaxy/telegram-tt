@@ -12,13 +12,14 @@ import type { TabState } from '../../../global/types';
 import { getUserFullName } from '../../../global/helpers';
 import { selectChat } from '../../../global/selectors';
 import { partition } from '../../../util/iteratees';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import renderText from '../../common/helpers/renderText';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import Separator from '../../ui/Separator';
@@ -43,7 +44,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
-  const userIds = useMemo(() => missingUsers?.map((user) => user.id), [missingUsers]);
+  const userIds = useMemo(() => missingUsers?.map((user) => user.id) || MEMO_EMPTY_ARRAY, [missingUsers]);
   const [unselectableIds, selectableIds] = useMemo(() => {
     if (!missingUsers?.length) return [[], []];
     const [requirePremiumIds, regularIds] = partition(missingUsers, (user) => user.isRequiringPremiumToMessage);
@@ -114,8 +115,6 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
     return lang(langKey, params, undefined, topListPeers.length);
   }, [invitableWithPremiumIds, isEveryPremiumBlocksPm, lang, topListPeers]);
 
-  if (!userIds) return undefined;
-
   const hasPremiumSection = Boolean(topListPeers?.length);
   const hasSelectableSection = Boolean(selectableIds?.length);
 
@@ -170,15 +169,17 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
           <p className={styles.contentText}>
             {inviteSectionText}
           </p>
-          <Picker
+          <PeerPicker
             className={styles.userPicker}
-            itemIds={userIds!}
+            itemIds={userIds}
             selectedIds={selectedMemberIds}
             lockedUnselectedIds={unselectableIds}
             lockedUnselectedSubtitle={lang('InvitePremiumBlockedUser')}
             onSelectedIdsChange={setSelectedMemberIds}
             isViewOnly={!canSendInviteLink}
-            isRoundCheckbox
+            allowMultiple
+            withStatus
+            itemInputType="checkbox"
           />
           {canSendInviteLink && (
             <Button

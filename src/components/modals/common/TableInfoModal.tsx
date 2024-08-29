@@ -9,7 +9,7 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 

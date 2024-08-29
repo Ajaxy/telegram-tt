@@ -24,10 +24,11 @@ import './Modal.scss';
 
 export const ANIMATION_DURATION = 200;
 
-type OwnProps = {
+export type OwnProps = {
   title?: string | TextPart[];
   className?: string;
   contentClassName?: string;
+  headerClassName?: string;
   isOpen?: boolean;
   header?: TeactNode;
   isSlim?: boolean;
@@ -37,10 +38,10 @@ type OwnProps = {
   noBackdropClose?: boolean;
   children: React.ReactNode;
   style?: string;
+  dialogRef?: React.RefObject<HTMLDivElement>;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
-  dialogRef?: React.RefObject<HTMLDivElement>;
 };
 
 type StateProps = {
@@ -52,6 +53,7 @@ const Modal: FC<OwnProps & StateProps> = ({
   title,
   className,
   contentClassName,
+  headerClassName,
   isOpen,
   isSlim,
   header,
@@ -61,10 +63,10 @@ const Modal: FC<OwnProps & StateProps> = ({
   noBackdropClose,
   children,
   style,
+  shouldSkipHistoryAnimations,
   onClose,
   onCloseAnimationEnd,
   onEnter,
-  shouldSkipHistoryAnimations,
 }) => {
   const {
     shouldRender,
@@ -132,7 +134,7 @@ const Modal: FC<OwnProps & StateProps> = ({
     if (!title && !withCloseButton) return undefined;
 
     return (
-      <div className="modal-header">
+      <div className={buildClassName('modal-header', headerClassName)}>
         {withCloseButton && (
           <Button
             className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}

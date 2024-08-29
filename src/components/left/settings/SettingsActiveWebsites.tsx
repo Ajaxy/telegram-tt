@@ -81,7 +81,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
   function renderSessions(sessionHashes: string[]) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('WebSessionsTitle')}
         </h4>
 

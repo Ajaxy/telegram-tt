@@ -298,7 +298,6 @@ const Poll: FC<OwnProps & StateProps> = ({
                 onChange={handleCheckboxChange}
                 disabled={message.isScheduled || isSubmitting}
                 loadingOptions={isSubmitting ? chosenOptions : undefined}
-                round
               />
             )
             : (

@@ -145,7 +145,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   function renderCurrentSession(session: ApiSession) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('AuthSessions.CurrentSession')}
         </h4>
 
@@ -177,7 +177,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   function renderOtherSessions(sessionHashes: string[]) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('OtherSessions')}
         </h4>
 
@@ -189,7 +189,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   function renderAutoTerminate() {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('TerminateOldSessionHeader')}
         </h4>
 

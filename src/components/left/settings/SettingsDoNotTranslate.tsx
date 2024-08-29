@@ -1,22 +1,21 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ISettings } from '../../../types';
-import type { IRadioOption } from '../../ui/CheckboxGroup';
 
 import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { partition, unique } from '../../../util/iteratees';
+import { partition } from '../../../util/iteratees';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Checkbox from '../../ui/Checkbox';
-import InputText from '../../ui/InputText';
+import ItemPicker, { type ItemPickerOption } from '../../common/pickers/ItemPicker';
 
 import styles from './SettingsDoNotTranslate.module.scss';
 
@@ -62,11 +61,11 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
 
   const lang = useOldLang();
   const language = lang.code || 'en';
-  const [displayedOptions, setDisplayedOptions] = useState<IRadioOption[]>([]);
-  const [search, setSearch] = useState('');
+  const [displayedOptions, setDisplayedOptions] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const options: IRadioOption[] = useMemo(() => {
-    return SUPPORTED_LANGUAGES.map((langCode: string) => {
+  const displayedOptionList: ItemPickerOption[] = useMemo(() => {
+    const options = SUPPORTED_LANGUAGES.map((langCode: string) => {
       const translatedNames = new Intl.DisplayNames([language], { type: 'language' });
       const translatedName = translatedNames.of(langCode)!;
 
@@ -78,58 +77,33 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
         translatedName,
         originalName,
       };
-    }).map(({ langCode, translatedName, originalName }) => ({
+    }).filter(Boolean).map(({ langCode, translatedName, originalName }) => ({
       label: translatedName,
       subLabel: originalName,
       value: langCode,
     }));
-  }, [language]);
 
-  useEffect(() => {
-    if (!isActive) setSearch('');
-  }, [isActive]);
-
-  useEffectWithPrevDeps(([prevIsActive]) => {
-    if (prevIsActive === isActive) return;
-    if (isActive && displayedOptions.length) return;
-
-    const current = options.find((option) => option.value === language);
-    const otherLanguages = options.filter((option) => option.value !== language);
-
-    const [selected, unselected] = partition(otherLanguages, (option) => doNotTranslate.includes(option.value));
-
-    setDisplayedOptions([current!, ...selected, ...unselected]);
-  }, [isActive, doNotTranslate, displayedOptions.length, language, options]);
-
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = event.currentTarget;
-    let newDoNotTranslate: string[];
-    if (checked) {
-      newDoNotTranslate = unique([...doNotTranslate, value]);
-    } else {
-      newDoNotTranslate = doNotTranslate.filter((v) => v !== value);
+    if (!searchQuery.trim()) {
+      const currentLanguageOption = options.find((option) => option.value === language);
+      const otherOptionList = options.filter((option) => option.value !== language);
+      return currentLanguageOption ? [currentLanguageOption, ...otherOptionList] : options;
     }
 
+    return options?.filter((option) => option.label.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [language, searchQuery]);
+
+  useEffectWithPrevDeps(([prevIsActive, prevLanguage]) => {
+    if (prevIsActive === isActive && prevLanguage?.find((option) => option === language)) return;
+    const [selected] = partition(displayedOptionList, (option) => doNotTranslate.includes(option.value));
+    setDisplayedOptions([...selected.map((option) => option.value)]);
+  }, [isActive, doNotTranslate, displayedOptions.length, language, displayedOptionList]);
+
+  const handleChange = useLastCallback((newSelectedIds: string[]) => {
+    setDisplayedOptions(newSelectedIds);
     setSettingOption({
-      doNotTranslate: newDoNotTranslate,
+      doNotTranslate: newSelectedIds,
     });
-  }, [doNotTranslate, setSettingOption]);
-
-  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-  }, []);
-
-  const filteredDisplayedOptions = useMemo(() => {
-    if (!search.trim()) {
-      return displayedOptions;
-    }
-
-    return displayedOptions.filter((option) => (
-      option.label.toString().toLowerCase().includes(search.toLowerCase())
-      || option.subLabel?.toLowerCase().includes(search.toLowerCase())
-      || option.value.toLowerCase().includes(search.toLowerCase())
-    ));
-  }, [displayedOptions, search]);
+  });
 
   useHistoryBack({
     isActive,
@@ -137,28 +111,21 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
   });
 
   return (
-    <div className={buildClassName(styles.root, 'settings-content custom-scroll')}>
-      <div className={buildClassName(styles.item, 'settings-item')}>
-        <InputText
-          key="search"
-          value={search}
-          onChange={handleSearch}
-          placeholder={lang('Search')}
-          teactExperimentControlled
+    <div className={buildClassName(styles.root, 'settings-content infinite-scroll')}>
+      <div className={buildClassName(styles.item)}>
+        <ItemPicker
+          className={styles.picker}
+          items={displayedOptionList}
+          selectedValues={displayedOptions}
+          onSelectedValuesChange={handleChange}
+          filterValue={searchQuery}
+          onFilterChange={setSearchQuery}
+          isSearchable
+          allowMultiple
+          withDefaultPadding
+          itemInputType="checkbox"
+          searchInputId="lang-picker-search"
         />
-        <div className={buildClassName(styles.languages, 'radio-group custom-scroll')}>
-          {filteredDisplayedOptions.map((option) => (
-            <Checkbox
-              className={styles.checkbox}
-              label={option.label}
-              subLabel={option.subLabel}
-              checked={doNotTranslate.includes(option.value)}
-              value={option.value}
-              key={option.value}
-              onChange={handleChange}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );

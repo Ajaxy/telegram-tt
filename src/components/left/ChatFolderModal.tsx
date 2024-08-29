@@ -87,7 +87,6 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
         options={folders}
         selected={selectedFolderIds}
         onChange={setSelectedFolderIds}
-        round
       />
       <div className="dialog-buttons">
         <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>

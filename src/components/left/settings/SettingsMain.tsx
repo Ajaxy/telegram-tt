@@ -95,6 +95,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         )}
         <ListItem
           icon="settings"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.General)}
         >
@@ -102,6 +103,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="animations"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Performance)}
         >
@@ -109,6 +111,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="unmute"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Notifications)}
         >
@@ -116,6 +119,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="data"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.DataStorage)}
         >
@@ -123,6 +127,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="lock"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Privacy)}
         >
@@ -130,6 +135,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="folder"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Folders)}
         >
@@ -137,6 +143,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="active-sessions"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.ActiveSessions)}
         >
@@ -145,6 +152,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="language"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Language)}
         >
@@ -153,6 +161,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="stickers"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Stickers)}
         >
@@ -164,6 +173,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           <ListItem
             leftElement={<StarIcon className="icon ListItem-main-icon" type="premium" size="big" />}
             className="settings-main-menu-star"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumModal()}
           >
@@ -174,6 +184,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           <ListItem
             leftElement={<StarIcon className="icon ListItem-main-icon" type="gold" size="big" />}
             className="settings-main-menu-star"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openStarsBalanceModal({})}
           >
@@ -187,6 +198,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           <ListItem
             icon="gift"
             className="settings-main-menu-star"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumGiftingModal()}
           >
@@ -197,12 +209,14 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
       <div className="settings-main-menu">
         <ListItem
           icon="ask-support"
+          narrow
           onClick={openSupportDialog}
         >
           {lang('AskAQuestion')}
         </ListItem>
         <ListItem
           icon="help"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => openUrl({ url: FAQ_URL })}
         >
@@ -210,6 +224,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           icon="privacy-policy"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => openUrl({ url: PRIVACY_URL })}
         >

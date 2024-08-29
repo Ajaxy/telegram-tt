@@ -11,7 +11,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Badge from '../../ui/Badge';
 import Button from '../../ui/Button';
 
@@ -69,11 +69,14 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
             {selectedPeerIds.length === invite.peerIds.length ? lang('DeselectAll') : lang('SelectAll')}
           </div>
         </div>
-        <Picker
+        <PeerPicker
           itemIds={invite.peerIds}
           lockedSelectedIds={joinedIds}
           onSelectedIdsChange={setSelectedPeerIds}
           selectedIds={selectedPeerIds}
+          allowMultiple
+          withStatus
+          itemInputType="checkbox"
         />
       </div>
       <Button

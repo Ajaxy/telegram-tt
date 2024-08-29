@@ -293,7 +293,7 @@ function PrivacySubsection({
       </div>
       {!isPremiumRequired && (primaryExceptionLists.shouldShowAllowed || primaryExceptionLists.shouldShowDenied) && (
         <div className="settings-item">
-          <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
             {lang('PrivacyExceptions')}
           </h4>
           {primaryExceptionLists.shouldShowAllowed && (

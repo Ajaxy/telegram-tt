@@ -19,7 +19,6 @@ export { default as PremiumMainModal } from '../components/main/premium/PremiumM
 export { default as GiftPremiumModal } from '../components/main/premium/GiftPremiumModal';
 export { default as GiveawayModal } from '../components/main/premium/GiveawayModal';
 export { default as PremiumGiftingModal } from '../components/main/premium/PremiumGiftingModal';
-export { default as AppendEntityPickerModal } from '../components/main/AppendEntityPickerModal';
 export { default as PremiumLimitReachedModal } from '../components/main/premium/common/PremiumLimitReachedModal';
 export { default as StatusPickerMenu } from '../components/left/main/StatusPickerMenu';
 export { default as BoostModal } from '../components/modals/boost/BoostModal';

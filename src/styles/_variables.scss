@@ -45,6 +45,7 @@ $color-text-meta-apple: #8c8c91;
 $color-borders: #dadce0;
 $color-dividers: #c8c6cc;
 $color-dividers-android: #E7E7E7;
+$color-item-hover: #f4f4f5;
 $color-item-active: #ededed;
 $color-chat-hover: #f4f4f5;
 $color-chat-active: #3390ec;
@@ -164,6 +165,7 @@ $color-message-story-mention-to: #74bcff;
   --color-chat-username: #3C7EB0;
   --color-chat-hover: #{$color-chat-hover};
   --color-chat-active: #{$color-chat-active};
+  --color-item-hover: #{$color-item-hover};
   --color-item-active: #{$color-item-active};
 
   --color-selection-highlight: #{$color-selection};
@@ -298,6 +300,8 @@ $color-message-story-mention-to: #74bcff;
   --safe-area-right: env(safe-area-inset-right);
   --safe-area-bottom: env(safe-area-inset-bottom);
   --safe-area-left: env(safe-area-inset-left);
+
+  --picker-title-shift: 1rem;
 
   body.is-ios {
     --layer-transition: 650ms cubic-bezier(0.22, 1, 0.36, 1);

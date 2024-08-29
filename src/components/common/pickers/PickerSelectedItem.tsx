@@ -1,21 +1,21 @@
-import type { TeactNode } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../global';
+import type { TeactNode } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
+import { withGlobal } from '../../../global';
 
-import type { ApiChat, ApiUser } from '../../api/types';
-import type { CustomPeer } from '../../types';
-import type { IconName } from '../../types/icons';
+import type { ApiChat, ApiUser } from '../../../api/types';
+import type { CustomPeer } from '../../../types';
+import type { IconName } from '../../../types/icons';
 
-import { getChatTitle, getUserFirstOrLastName } from '../../global/helpers';
-import { selectChat, selectUser } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
-import { getPeerColorClass } from './helpers/peerColor';
-import renderText from './helpers/renderText';
+import { getChatTitle, getUserFirstOrLastName } from '../../../global/helpers';
+import { selectChat, selectUser } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
+import { getPeerColorClass } from '../helpers/peerColor';
+import renderText from '../helpers/renderText';
 
-import useOldLang from '../../hooks/useOldLang';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Avatar from './Avatar';
-import Icon from './icons/Icon';
+import Avatar from '../Avatar';
+import Icon from '../icons/Icon';
 
 import './PickerSelectedItem.scss';
 

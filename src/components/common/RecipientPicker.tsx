@@ -20,7 +20,7 @@ import sortChatIds from './helpers/sortChatIds';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useOldLang from '../../hooks/useOldLang';
 
-import ChatOrUserPicker from './ChatOrUserPicker';
+import ChatOrUserPicker from './pickers/ChatOrUserPicker';
 
 export type OwnProps = {
   isOpen: boolean;

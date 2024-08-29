@@ -41,8 +41,9 @@ import Modal from '../../ui/Modal';
 import RadioGroup from '../../ui/RadioGroup';
 import RangeSliderWithMarks from '../../ui/RangeSliderWithMarks';
 import Switcher from '../../ui/Switcher';
-import AppendEntityPickerModal from '../AppendEntityPickerModal';
+import GiveawayChannelPickerModal from './GiveawayChannelPickerModal';
 import GiveawayTypeOption from './GiveawayTypeOption';
+import GiveawayUserPickerModal from './GiveawayUserPickerModal';
 import PremiumSubscriptionOption from './PremiumSubscriptionOption';
 
 import styles from './GiveawayModal.module.scss';
@@ -121,8 +122,8 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   const [isCalendarOpened, openCalendar, closeCalendar] = useFlag();
   const [isCountryPickerModalOpen, openCountryPickerModal, closeCountryPickerModal] = useFlag();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
-  const [isEntityPickerModalOpen, openEntityPickerModal, closeEntityPickerModal] = useFlag();
-  const [entityType, setEntityType] = useState<'members' | 'channels' | undefined>(undefined);
+  const [isUserPickerModalOpen, openUserPickerModal, closeUserPickerModal] = useFlag();
+  const [isChannelPickerModalOpen, openChannelPickerModal, closeChannelPickerModal] = useFlag();
 
   const TYPE_OPTIONS: TypeOption[] = [{
     name: 'BoostingCreateGiveaway',
@@ -139,43 +140,44 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
     actions: 'createSpecificUsers',
     isLink: true,
     onClickAction: () => {
-      openEntityPickerModal();
-      setEntityType('members');
+      openUserPickerModal();
     },
   }];
 
   const [customExpireDate, setCustomExpireDate] = useState<number>(Date.now() + DEFAULT_CUSTOM_EXPIRE_DATE);
   const [isHeaderHidden, setHeaderHidden] = useState(true);
-  const [selectedUserCount, setSelectedUserCount] = useState<number>(DEFAULT_BOOST_COUNT);
+  const [selectedRandomUserCount, setSelectedRandomUserCount] = useState<number>(DEFAULT_BOOST_COUNT);
   const [selectedGiveawayOption, setGiveawayOption] = useState<ApiGiveawayType>(TYPE_OPTIONS[0].value);
   const [selectedSubscriberOption, setSelectedSubscriberOption] = useState<SubscribersType>('all');
   const [selectedMonthOption, setSelectedMonthOption] = useState<number | undefined>();
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>([]);
-  const [selectedCountriesIds, setSelectedCountriesIds] = useState<string[] | undefined>([]);
+  const [selectedCountryIds, setSelectedCountryIds] = useState<string[] | undefined>([]);
   const [shouldShowWinners, setShouldShowWinners] = useState<boolean>(false);
   const [shouldShowPrizes, setShouldShowPrizes] = useState<boolean>(false);
   const [prizeDescription, setPrizeDescription] = useState<string | undefined>(undefined);
   const [dataPrepaidGiveaway, setDataPrepaidGiveaway] = useState<ApiPrepaidGiveaway | undefined>(undefined);
-  const boostQuantity = selectedUserCount * giveawayBoostPerPremiumLimit;
+
   const isRandomUsers = selectedGiveawayOption === 'random_users';
+  const selectedUserCount = isRandomUsers ? selectedRandomUserCount : selectedUserIds.length;
+  const boostQuantity = selectedUserCount * giveawayBoostPerPremiumLimit;
 
   const SUBSCRIBER_OPTIONS = useMemo(() => [
     {
       value: 'all',
       label: lang(isChannel ? 'BoostingAllSubscribers' : 'BoostingAllMembers'),
-      subLabel: selectedCountriesIds && selectedCountriesIds.length > 0
-        ? lang('Giveaway.ReceiverType.Countries', selectedCountriesIds.length)
+      subLabel: selectedCountryIds && selectedCountryIds.length > 0
+        ? lang('Giveaway.ReceiverType.Countries', selectedCountryIds.length)
         : lang('BoostingFromAllCountries'),
     },
     {
       value: 'new',
       label: lang(isChannel ? 'BoostingNewSubscribers' : 'BoostingNewMembers'),
-      subLabel: selectedCountriesIds && selectedCountriesIds.length > 0
-        ? lang('Giveaway.ReceiverType.Countries', selectedCountriesIds.length)
+      subLabel: selectedCountryIds && selectedCountryIds.length > 0
+        ? lang('Giveaway.ReceiverType.Countries', selectedCountryIds.length)
         : lang('BoostingFromAllCountries'),
     },
-  ], [isChannel, lang, selectedCountriesIds]);
+  ], [isChannel, lang, selectedCountryIds]);
 
   const monthQuantity = lang('Months', selectedMonthOption);
 
@@ -184,9 +186,8 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   }, [gifts, selectedMonthOption, selectedUserCount]);
 
   const filteredGifts = useMemo(() => {
-    return gifts?.filter((gift) => gift.users
-      === (selectedUserIds?.length ? selectedUserIds?.length : selectedUserCount));
-  }, [gifts, selectedUserIds, selectedUserCount]);
+    return gifts?.filter((gift) => gift.users === selectedUserCount);
+  }, [gifts, selectedUserCount]);
 
   const fullMonthlyAmount = useMemo(() => {
     if (!filteredGifts?.length) {
@@ -213,7 +214,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (prepaidGiveaway) {
-      setSelectedUserCount(prepaidGiveaway.quantity);
+      setSelectedRandomUserCount(prepaidGiveaway.quantity);
       setDataPrepaidGiveaway(prepaidGiveaway);
     }
   }, [prepaidGiveaway]);
@@ -235,25 +236,25 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleClick = useLastCallback(() => {
-    if (selectedUserIds?.length) {
+    if (isRandomUsers) {
       openInvoice({
-        type: 'giftcode',
-        boostChannelId: chatId!,
-        userIds: selectedUserIds,
+        type: 'giveaway',
+        chatId: chatId!,
+        additionalChannelIds: selectedChannelIds,
+        isOnlyForNewSubscribers: selectedSubscriberOption === 'new',
+        countries: selectedCountryIds,
+        areWinnersVisible: shouldShowWinners,
+        prizeDescription,
+        untilDate: customExpireDate / 1000,
         currency: selectedGift!.currency,
         amount: selectedGift!.amount,
         option: selectedGift!,
       });
     } else {
       openInvoice({
-        type: 'giveaway',
-        chatId: chatId!,
-        additionalChannelIds: selectedChannelIds,
-        isOnlyForNewSubscribers: selectedSubscriberOption === 'new',
-        countries: selectedCountriesIds,
-        areWinnersVisible: shouldShowWinners,
-        prizeDescription,
-        untilDate: customExpireDate / 1000,
+        type: 'giftcode',
+        boostChannelId: chatId!,
+        userIds: selectedUserIds,
         currency: selectedGift!.currency,
         amount: selectedGift!.amount,
         option: selectedGift!,
@@ -269,7 +270,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
       giveawayId: dataPrepaidGiveaway!.id,
       paymentPurpose: {
         additionalChannelIds: selectedChannelIds,
-        countries: selectedCountriesIds,
+        countries: selectedCountryIds,
         prizeDescription,
         areWinnersVisible: shouldShowWinners,
         untilDate: customExpireDate / 1000,
@@ -282,8 +283,8 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
     closeGiveawayModal();
   });
 
-  const handleUserCountChange = useLastCallback((newValue) => {
-    setSelectedUserCount(newValue);
+  const handleRandomUserCountChange = useLastCallback((newValue) => {
+    setSelectedRandomUserCount(newValue);
   });
 
   const handlePrizeDescriptionChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -294,11 +295,6 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
     const usersById = getGlobal().users.byId;
     return selectedUserIds?.map((userId) => getUserFullName(usersById[userId])).join(', ');
   }, [selectedUserIds]);
-
-  const handleAdd = useLastCallback(() => {
-    openEntityPickerModal();
-    setEntityType('channels');
-  });
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
@@ -321,13 +317,18 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleSetCountriesListChange = useLastCallback((value: string[]) => {
-    setSelectedCountriesIds(value);
+    setSelectedCountryIds(value);
   });
 
-  const handleSetIdsListChange = useLastCallback((value: string[]) => {
-    return entityType === 'members'
-      ? (value?.length ? setSelectedUserIds(value) : setGiveawayOption('random_users'))
-      : setSelectedChannelIds(value);
+  const handleSelectedUserIdsChange = useLastCallback((newSelectedIds: string[]) => {
+    setSelectedUserIds(newSelectedIds);
+    if (!newSelectedIds.length) {
+      setGiveawayOption('random_users');
+    }
+  });
+
+  const handleSelectedChannelIdsChange = useLastCallback((newSelectedIds: string[]) => {
+    setSelectedChannelIds(newSelectedIds);
   });
 
   const handleClose = useLastCallback(() => {
@@ -503,7 +504,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
                   <RangeSliderWithMarks
                     rangeCount={selectedUserCount}
                     marks={userCountOptions}
-                    onChange={handleUserCountChange}
+                    onChange={handleRandomUserCountChange}
                   />
                 </div>
 
@@ -537,7 +538,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
                     className="chat-item-clickable contact-list-item"
                     /* eslint-disable-next-line react/jsx-no-bind */
                     onClick={() => deleteParticipantsHandler(channelId)}
-                    rightElement={(<Icon name="close" />)}
+                    rightElement={(<Icon name="close" className={styles.removeChannel} />)}
                   >
                     <GroupChatInfo
                       chatId={channelId.toString()}
@@ -550,7 +551,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
                 <ListItem
                   icon="add"
                   ripple
-                  onClick={handleAdd}
+                  onClick={openChannelPickerModal}
                   className={styles.addButton}
                   iconClassName={styles.addChannel}
                 >
@@ -705,14 +706,21 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
         onSubmit={handleSetCountriesListChange}
         selectionLimit={countrySelectionLimit}
       />
-      <AppendEntityPickerModal
-        key={entityType}
-        isOpen={isEntityPickerModalOpen}
-        onClose={closeEntityPickerModal}
-        entityType={entityType}
-        chatId={chatId}
-        onSubmit={handleSetIdsListChange}
-        selectionLimit={entityType === 'members' ? userSelectionLimit : GIVEAWAY_MAX_ADDITIONAL_CHANNELS}
+      <GiveawayUserPickerModal
+        isOpen={isUserPickerModalOpen}
+        onClose={closeUserPickerModal}
+        onSelectedIdsConfirmed={handleSelectedUserIdsChange}
+        initialSelectedIds={selectedUserIds}
+        selectionLimit={userSelectionLimit}
+        giveawayChatId={chatId}
+      />
+      <GiveawayChannelPickerModal
+        isOpen={isChannelPickerModalOpen}
+        onClose={closeChannelPickerModal}
+        initialSelectedIds={selectedChannelIds}
+        onSelectedIdsConfirmed={handleSelectedChannelIdsChange}
+        selectionLimit={GIVEAWAY_MAX_ADDITIONAL_CHANNELS}
+        giveawayChatId={chatId}
       />
       <ConfirmDialog
         title={lang('BoostingStartGiveawayConfirmTitle')}

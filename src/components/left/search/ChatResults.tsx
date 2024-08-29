@@ -28,7 +28,7 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useOldLang from '../../../hooks/useOldLang';
 
 import NothingFound from '../../common/NothingFound';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Link from '../../ui/Link';
 import ChatMessage from './ChatMessage';

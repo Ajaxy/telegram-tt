@@ -43,10 +43,6 @@ export function toChannelId(mtpId: string) {
   return `-1${mtpId.padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
 }
 
-export function isApiPeerChat(peer: ApiPeer): peer is ApiChat {
-  return 'title' in peer;
-}
-
 export function isChatGroup(chat: ApiChat) {
   return isChatBasicGroup(chat) || isChatSuperGroup(chat);
 }
@@ -465,4 +461,21 @@ export function getPeerColorCount(peer: ApiPeer) {
 
 export function getIsSavedDialog(chatId: string, threadId: ThreadId | undefined, currentUserId: string | undefined) {
   return chatId === currentUserId && threadId !== MAIN_THREAD_ID;
+}
+
+export function getGroupStatus(lang: LangFn, chat: ApiChat) {
+  const chatTypeString = lang(getChatTypeString(chat));
+  const { membersCount } = chat;
+
+  if (chat.isRestricted) {
+    return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
+  }
+
+  if (!membersCount) {
+    return chatTypeString;
+  }
+
+  return chatTypeString === 'Channel'
+    ? lang('Subscribers', membersCount, 'i')
+    : lang('Members', membersCount, 'i');
 }

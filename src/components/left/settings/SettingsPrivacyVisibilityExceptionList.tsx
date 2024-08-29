@@ -20,7 +20,7 @@ import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
 export type OwnProps = {
@@ -139,7 +139,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="NewChat-inner step-1">
-      <Picker
+      <PeerPicker
         categories={withPremiumCategory ? PREMIUM_CATEGORY : undefined}
         itemIds={displayedIds || []}
         selectedIds={newSelectedContactIds}
@@ -152,6 +152,10 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         onSelectedIdsChange={handleSelectedContactIdsChange}
         onSelectedCategoriesChange={handleSelectedCategoriesChange}
         onFilterChange={setSearchQuery}
+        allowMultiple
+        itemInputType="checkbox"
+        withDefaultPadding
+        withStatus
       />
 
       <FloatingActionButton

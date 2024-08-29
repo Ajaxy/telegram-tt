@@ -49,7 +49,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/icons/Icon';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import SearchInput from '../../ui/SearchInput';

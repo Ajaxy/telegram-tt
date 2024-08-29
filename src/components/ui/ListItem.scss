@@ -62,7 +62,7 @@
     outline: none !important;
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 1rem 0.8125rem;
     position: relative;
     overflow: hidden;
     white-space: nowrap;
@@ -82,7 +82,6 @@
 
     > .ListItem-main-icon {
       font-size: 1.5rem;
-      margin-inline-start: 0.125rem;
       margin-inline-end: 1.25rem;
       color: var(--color-text-secondary);
     }
@@ -179,6 +178,10 @@
 
     .ListItem-button {
       padding: 0.5rem 1rem;
+    }
+
+    .ListItem-main-icon {
+      margin-inline-end: 1.75rem;
     }
   }
 
@@ -397,6 +400,10 @@
       height: 1.5rem;
       margin: 0;
       padding-left: 4rem;
+    }
+
+    .withSubLabel {
+      height: 2.5rem;
     }
 
     &[dir="rtl"] {

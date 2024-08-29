@@ -266,6 +266,12 @@
   margin-inline-start: initial !important;
 }
 
+.removeChannel {
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
+  padding: 0.5rem;
+}
+
 @media (max-width: 600px) {
   .root :global(.modal-dialog) {
     width: 100%;

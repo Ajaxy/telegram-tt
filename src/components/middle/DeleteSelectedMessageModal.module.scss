@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin: 0 1rem;
 }
 
 .title {
@@ -15,7 +15,7 @@
 
 .actionTitle {
   margin-top: 1.5rem;
-  margin-left: 0.5rem;
+  margin-left: 1rem;
   color: var(--color-links);
   font-size: 1rem;
   font-weight: 500;
@@ -28,7 +28,7 @@
 
 .listItemButton {
   margin-top: 0.1875rem;
-  margin-left: 0.4375rem;
+  margin-left: 1rem;
 }
 
 .button {

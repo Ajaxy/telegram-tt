@@ -15,7 +15,7 @@ import usePrevious from '../../hooks/usePrevious';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Icon from './icons/Icon';
-import Picker from './Picker';
+import ItemPicker from './pickers/ItemPicker';
 
 import styles from './CountryPickerModal.module.scss';
 
@@ -47,9 +47,13 @@ const CountryPickerModal: FC<OwnProps> = ({
       return [];
     }
 
-    return countryList
-      .filter((country) => !country.isHidden)
-      .map((country) => country.iso2);
+    return countryList.filter((country) => !country.isHidden && country.iso2 !== 'FT')
+      .map(({
+        iso2, defaultName,
+      }) => ({
+        value: iso2,
+        label: defaultName,
+      }));
   }, [countryList]);
 
   const handleSelectedIdsChange = useLastCallback((newSelectedIds: string[]) => {
@@ -92,14 +96,14 @@ const CountryPickerModal: FC<OwnProps> = ({
       </div>
 
       <div className={buildClassName(styles.main, 'custom-scroll')}>
-        <Picker
+        <ItemPicker
           className={styles.picker}
-          itemIds={displayedIds}
-          selectedIds={selectedCountryIds}
-          onSelectedIdsChange={handleSelectedIdsChange}
+          items={displayedIds}
+          selectedValues={selectedCountryIds}
+          onSelectedValuesChange={handleSelectedIdsChange}
           noScrollRestore={noPickerScrollRestore}
-          isCountryList
-          countryList={countryList}
+          allowMultiple
+          itemInputType="checkbox"
         />
       </div>
 

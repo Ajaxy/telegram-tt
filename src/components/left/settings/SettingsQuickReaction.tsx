@@ -58,6 +58,7 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
         options={options}
         selected={selectedReaction}
         onChange={handleChange}
+        withIcon
       />
     </div>
   );

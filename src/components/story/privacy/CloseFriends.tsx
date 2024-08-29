@@ -13,7 +13,7 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
 import styles from './CloseFriends.module.scss';
@@ -64,15 +64,19 @@ function CloseFriends({
 
   return (
     <>
-      <Picker
+      <PeerPicker
         itemIds={displayedIds || []}
         selectedIds={newSelectedContactIds}
         filterValue={searchQuery}
         filterPlaceholder={lang('Search')}
         searchInputId="close-friends-picker-search"
         isSearchable
+        withDefaultPadding
         onSelectedIdsChange={handleSelectedContactIdsChange}
         onFilterChange={setSearchQuery}
+        allowMultiple
+        withStatus
+        itemInputType="checkbox"
       />
 
       <div className={buildClassName(styles.buttonHolder, isSubmitShown && styles.active)}>
