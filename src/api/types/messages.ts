@@ -397,6 +397,9 @@ export interface ApiAction {
   | 'joinedChannel'
   | 'chatBoost'
   | 'receipt'
+  | 'giftStars'
+  | 'giftPremium'
+  | 'giftCode'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;

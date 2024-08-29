@@ -1,5 +1,10 @@
 import type {
-  ApiInputInvoice, ApiRequestInputInvoice, ApiStarsTransactionPeer, ApiStarsTransactionPeerPeer,
+  ApiInputInvoice,
+  ApiMessage,
+  ApiRequestInputInvoice,
+  ApiStarsTransaction,
+  ApiStarsTransactionPeer,
+  ApiStarsTransactionPeerPeer,
 } from '../../api/types';
 import type { CustomPeer } from '../../types';
 import type { GlobalState } from '../types';
@@ -141,7 +146,7 @@ export function buildStarsTransactionCustomPeer(
       isCustomPeer: true,
       titleKey: 'Stars.Intro.Transaction.FragmentTopUp.Title',
       subtitleKey: 'Stars.Intro.Transaction.FragmentTopUp.Subtitle',
-      peerColorId: -1, // Defaults to black
+      customPeerAvatarColor: '#000000',
     };
   }
 
@@ -181,4 +186,24 @@ export function formatStarsTransactionAmount(amount: number) {
   }
 
   return `+ ${formatInteger(amount)}`;
+}
+
+export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransaction | undefined {
+  const { action } = message.content;
+
+  if (action?.type !== 'giftStars') return undefined;
+
+  const { transactionId, stars } = action;
+
+  return {
+    id: transactionId!,
+    stars: stars!,
+    peer: {
+      type: 'peer',
+      id: message.isOutgoing ? message.chatId : message.senderId!,
+    },
+    date: message.date,
+    isGift: true,
+    isMyGift: message.isOutgoing || undefined,
+  };
 }

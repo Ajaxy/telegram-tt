@@ -1,14 +1,14 @@
-import React, { memo } from '../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
-import type { ApiMediaExtendedPreview, BoughtPaidMedia } from '../../../api/types';
+import type { ApiMediaExtendedPreview, BoughtPaidMedia } from '../../../../api/types';
 
-import { getMediaHash, getMediaThumbUri } from '../../../global/helpers';
-import buildClassName from '../../../util/buildClassName';
+import { getMediaHash, getMediaThumbUri } from '../../../../global/helpers';
+import buildClassName from '../../../../util/buildClassName';
 
-import useMedia from '../../../hooks/useMedia';
+import useMedia from '../../../../hooks/useMedia';
 
-import Icon from '../../common/icons/Icon';
-import MediaSpoiler from '../../common/MediaSpoiler';
+import Icon from '../../../common/icons/Icon';
+import MediaSpoiler from '../../../common/MediaSpoiler';
 
 import styles from './PaidMediaThumb.module.scss';
 

@@ -12,11 +12,13 @@ import { buildQueryString } from '../../../util/requestQuery';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import { isChatChannel, isChatSuperGroup } from '../../helpers';
-import { getRequestInputInvoice } from '../../helpers/payments';
+import { getRequestInputInvoice, getStarsTransactionFromGift } from '../../helpers/payments';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
   addUsers, appendStarsTransactions, closeInvoice,
+  openStarsTransactionFromReceipt,
+  openStarsTransactionModal,
   setInvoiceInfo, setPaymentForm,
   setPaymentStep,
   setReceipt,
@@ -24,7 +26,6 @@ import {
   setSmartGlocalCardInfo, setStripeCardInfo,
   updateChatFullInfo,
   updatePayment,
-  updateReceiptFromStarsTransaction,
   updateShippingOptions,
   updateStarsBalance,
 } from '../../reducers';
@@ -32,6 +33,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatFullInfo,
+  selectChatMessage,
   selectPaymentFormId,
   selectPaymentInputInvoice, selectPaymentRequestId,
   selectProviderPublicToken,
@@ -132,13 +134,12 @@ addActionHandler('getReceipt', async (global, actions, payload): Promise<void> =
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = setReceipt(global, result.receipt, tabId);
+  if (result.receipt.type === 'stars') {
+    global = openStarsTransactionFromReceipt(global, result.receipt, tabId);
+  } else {
+    global = setReceipt(global, result.receipt, tabId);
+  }
   setGlobal(global);
-});
-
-addActionHandler('getStarsReceipt', (global, actions, payload): ActionReturnType => {
-  const { transaction, tabId = getCurrentTabId() } = payload;
-  return updateReceiptFromStarsTransaction(global, transaction, tabId);
 });
 
 addActionHandler('clearPaymentError', (global, actions, payload): ActionReturnType => {
@@ -534,37 +535,20 @@ addActionHandler('closeStarsGiftingModal', (global, actions, payload): ActionRet
   }, tabId);
 });
 
-addActionHandler('openStarGiftInfoModal', (global, actions, payload): ActionReturnType => {
+addActionHandler('openStarsTransactionFromGift', (global, actions, payload): ActionReturnType => {
   const {
-    toUserId,
-    stars,
-    date,
+    chatId,
+    messageId,
     tabId = getCurrentTabId(),
   } = payload || {};
 
-  if (!stars || !toUserId || !date) {
-    return;
-  }
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) return undefined;
 
-  global = getGlobal();
+  const transaction = getStarsTransactionFromGift(message);
+  if (!transaction) return undefined;
 
-  global = updateTabState(global, {
-    starGiftInfoModal: {
-      toUserId,
-      stars,
-      date,
-      isOpen: true,
-    },
-  }, tabId);
-  setGlobal(global);
-});
-
-addActionHandler('closeStarGiftInfoModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    starGiftInfoModal: undefined,
-  }, tabId);
+  return openStarsTransactionModal(global, transaction, tabId);
 });
 
 addActionHandler('openPremiumGiftModal', async (global, actions, payload): Promise<void> => {

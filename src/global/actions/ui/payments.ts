@@ -2,7 +2,9 @@ import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addActionHandler } from '../../index';
-import { clearPayment, closeInvoice, updatePayment } from '../../reducers';
+import {
+  clearPayment, closeInvoice, openStarsTransactionModal, updatePayment,
+} from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
 
@@ -70,5 +72,18 @@ addActionHandler('closeStarsBalanceModal', (global, actions, payload): ActionRet
 
   return updateTabState(global, {
     starsBalanceModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openStarsTransactionModal', (global, actions, payload): ActionReturnType => {
+  const { transaction, tabId = getCurrentTabId() } = payload;
+  return openStarsTransactionModal(global, transaction, tabId);
+});
+
+addActionHandler('closeStarsTransactionModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    starsTransactionModal: undefined,
   }, tabId);
 });

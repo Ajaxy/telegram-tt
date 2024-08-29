@@ -520,6 +520,7 @@ export interface CustomPeer {
   avatarIcon: IconName;
   isAvatarSquare?: boolean;
   peerColorId?: number;
+  customPeerAvatarColor?: string;
   withPremiumGradient?: boolean;
 }
 

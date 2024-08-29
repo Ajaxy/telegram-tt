@@ -22,7 +22,7 @@ import StarIcon from '../../common/icons/StarIcon';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import BalanceBlock from './BalanceBlock';
-import PaidMediaThumb from './PaidMediaThumb';
+import PaidMediaThumb from './transaction/PaidMediaThumb';
 
 import styles from './StarsBalanceModal.module.scss';
 

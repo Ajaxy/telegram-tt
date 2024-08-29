@@ -1,0 +1,69 @@
+.modal {
+  z-index: calc(var(--z-media-viewer) - 1);
+}
+
+.positive {
+  color: var(--color-success);
+}
+
+.negative {
+  color: var(--color-error);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.amount {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.325;
+}
+
+.title, .description, .amount {
+  margin-bottom: 0;
+}
+
+.tid {
+  font-family: var(--font-family-monospace);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.description {
+  text-align: center;
+}
+
+.footer {
+  text-align: center;
+  margin-block: 0.5rem;
+}
+
+.starsBackground {
+  position: absolute;
+  height: 8rem;
+  top: -8.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mediaShift {
+  top: -1.5rem;
+}
+
+.copyIcon {
+  margin-inline-start: 0.25rem;
+  color: var(--color-primary);
+}
+
+.mediaPreview {
+  margin-bottom: 2rem;
+  cursor: var(--custom-cursor, pointer);
+}

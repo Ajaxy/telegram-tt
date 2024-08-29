@@ -1,26 +1,26 @@
-import React, { memo, useMemo } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import React, { memo, useMemo } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
 import type {
   ApiPeer,
   ApiStarsTransaction,
-} from '../../../api/types';
-import type { GlobalState } from '../../../global/types';
-import type { CustomPeer } from '../../../types';
+} from '../../../../api/types';
+import type { GlobalState } from '../../../../global/types';
+import type { CustomPeer } from '../../../../types';
 
-import { getSenderTitle } from '../../../global/helpers';
-import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '../../../global/helpers/payments';
-import { selectPeer } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dates/dateFormat';
-import { CUSTOM_PEER_PREMIUM } from '../../../util/objects/customPeer';
+import { getSenderTitle } from '../../../../global/helpers';
+import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '../../../../global/helpers/payments';
+import { selectPeer } from '../../../../global/selectors';
+import buildClassName from '../../../../util/buildClassName';
+import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { CUSTOM_PEER_PREMIUM } from '../../../../util/objects/customPeer';
 
-import useSelector from '../../../hooks/data/useSelector';
-import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
+import useSelector from '../../../../hooks/data/useSelector';
+import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
-import Avatar from '../../common/Avatar';
-import StarIcon from '../../common/icons/StarIcon';
+import Avatar from '../../../common/Avatar';
+import StarIcon from '../../../common/icons/StarIcon';
 import PaidMediaThumb from './PaidMediaThumb';
 
 import styles from './StarsTransactionItem.module.scss';
@@ -36,7 +36,7 @@ function selectOptionalPeer(peerId?: string) {
 }
 
 const StarsTransactionItem = ({ transaction }: OwnProps) => {
-  const { getStarsReceipt } = getActions();
+  const { openStarsTransactionModal } = getActions();
   const {
     date,
     stars,
@@ -90,7 +90,7 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
   }, [lang, peer, transaction]);
 
   const handleClick = useLastCallback(() => {
-    getStarsReceipt({ transaction });
+    openStarsTransactionModal({ transaction });
   });
 
   return (

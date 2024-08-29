@@ -3,7 +3,7 @@ import type { ApiInvoiceContainer } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiChat } from './chats';
 import type {
-  ApiDocument, ApiMessageEntity, ApiPaymentCredentials, BoughtPaidMedia, MediaContent,
+  ApiDocument, ApiMessageEntity, ApiPaymentCredentials, BoughtPaidMedia,
 } from './messages';
 import type { PrepaidGiveaway, StatisticsOverviewPercentage } from './statistics';
 import type { ApiUser } from './users';
@@ -63,8 +63,7 @@ export interface ApiLabeledPrice {
 
 export interface ApiReceiptStars {
   type: 'stars';
-  botId?: string;
-  peer?: ApiStarsTransactionPeer;
+  peer: ApiStarsTransactionPeer;
   date: number;
   title?: string;
   text?: string;
@@ -273,18 +272,20 @@ export type ApiStarsTransactionPeer =
 | ApiStarsTransactionPeerPeer;
 
 export interface ApiStarsTransaction {
-  id: string;
+  id?: string;
   peer: ApiStarsTransactionPeer;
   messageId?: number;
   stars: number;
   isRefund?: true;
+  isGift?: true;
+  isMyGift?: true; // Used only for outgoing star gift messages
   hasFailed?: true;
   isPending?: true;
   date: number;
   title?: string;
   description?: string;
   photo?: ApiWebDocument;
-  extendedMedia?: MediaContent[];
+  extendedMedia?: BoughtPaidMedia[];
 }
 
 export interface ApiStarTopupOption {

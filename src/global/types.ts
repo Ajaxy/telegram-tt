@@ -56,7 +56,7 @@ import type {
   ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
-  ApiReceipt,
+  ApiReceiptRegular,
   ApiReportReason,
   ApiSavedReactionTag,
   ApiSendMessageAction,
@@ -547,7 +547,7 @@ export type TabState = {
     };
     passwordMissing?: boolean;
     savedCredentials?: ApiPaymentCredentials[];
-    receipt?: ApiReceipt;
+    receipt?: ApiReceiptRegular;
     error?: {
       field?: string;
       message?: string;
@@ -720,18 +720,15 @@ export type TabState = {
     isOpen?: boolean;
   };
 
-  starGiftInfoModal?: {
-    isOpen?: boolean;
-    toUserId: string;
-    date: number;
-    stars: number;
-  };
-
   starsGiftModal?: {
     isCompleted?: boolean;
     isOpen?: boolean;
     forUserId?: string;
     starsGiftOptions?: ApiStarsGiftOption[];
+  };
+
+  starsTransactionModal?: {
+    transaction: ApiStarsTransaction;
   };
 
   giftModal?: {
@@ -1770,9 +1767,14 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
   } & WithTabId;
-  getStarsReceipt: {
+  openStarsTransactionModal: {
     transaction: ApiStarsTransaction;
   } & WithTabId;
+  openStarsTransactionFromGift: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closeStarsTransactionModal: WithTabId | undefined;
   sendCredentialsInfo: {
     credentials: ApiCredentials;
   } & WithTabId;
@@ -3240,13 +3242,6 @@ export interface ActionPayloads {
     forUserId?: string;
   } & WithTabId) | undefined;
   closeStarsGiftModal: WithTabId | undefined;
-
-  openStarGiftInfoModal: ({
-    toUserId?: string;
-    stars?: number;
-    date?: number;
-  } & WithTabId) | undefined;
-  closeStarGiftInfoModal: WithTabId | undefined;
 
   setEmojiStatus: {
     emojiStatus: ApiSticker;

@@ -459,16 +459,19 @@ export async function fetchStarsStatus() {
 }
 
 export async function fetchStarsTransactions({
+  peer,
   offset,
   isInbound,
   isOutbound,
 }: {
+  peer?: ApiPeer;
   offset?: string;
   isInbound?: true;
   isOutbound?: true;
 }) {
+  const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
   const result = await invokeRequest(new GramJs.payments.GetStarsTransactions({
-    peer: new GramJs.InputPeerSelf(),
+    peer: inputPeer,
     offset,
     inbound: isInbound,
     outbound: isOutbound,
@@ -487,6 +490,34 @@ export async function fetchStarsTransactions({
     nextOffset: result.nextOffset,
     history: result.history.map(buildApiStarsTransaction),
     balance: result.balance.toJSNumber(),
+  };
+}
+
+export async function fetchStarsTransactionById({
+  id, peer,
+}: {
+  id: string;
+  peer?: ApiPeer;
+}) {
+  const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
+  const result = await invokeRequest(new GramJs.payments.GetStarsTransactionsByID({
+    peer: inputPeer,
+    id: [new GramJs.InputStarsTransaction({
+      id,
+    })],
+  }));
+
+  if (!result?.history?.[0]) {
+    return undefined;
+  }
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+
+  return {
+    users,
+    chats,
+    transaction: buildApiStarsTransaction(result.history[0]),
   };
 }
 

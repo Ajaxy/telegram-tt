@@ -102,7 +102,7 @@ export {
   validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
   applyBoost, fetchBoostList, fetchBoostStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
   getPremiumGiftCodeOptions, launchPrepaidGiveaway, fetchStarsStatus, fetchStarsTopupOptions, fetchStarsTransactions,
-  sendStarPaymentForm, getStarsGiftOptions,
+  sendStarPaymentForm, getStarsGiftOptions, fetchStarsTransactionById,
 } from './payments';
 
 export * from './fragment';

@@ -1,5 +1,6 @@
 import type {
-  ApiInvoice, ApiPaymentForm, ApiReceipt,
+  ApiInvoice, ApiPaymentForm,
+  ApiReceiptRegular,
   ApiReceiptStars,
   ApiStarsTransaction,
 } from '../../api/types';
@@ -8,7 +9,6 @@ import type {
   GlobalState, StarsTransactionType, TabArgs, TabState,
 } from '../types';
 
-import { STARS_CURRENCY_CODE } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
@@ -113,7 +113,7 @@ export function setConfirmPaymentUrl<T extends GlobalState>(
 
 export function setReceipt<T extends GlobalState>(
   global: T,
-  receipt?: ApiReceipt,
+  receipt?: ApiReceiptRegular,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   if (!receipt) {
@@ -187,22 +187,30 @@ export function appendStarsTransactions<T extends GlobalState>(
   };
 }
 
-export function updateReceiptFromStarsTransaction<T extends GlobalState>(
+export function openStarsTransactionModal<T extends GlobalState>(
   global: T, transaction: ApiStarsTransaction, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const receipt: ApiReceiptStars = {
-    type: 'stars',
-    totalAmount: transaction.stars,
-    currency: STARS_CURRENCY_CODE,
-    peer: transaction.peer,
-    date: transaction.date,
-    text: transaction.description,
-    title: transaction.title,
-    transactionId: transaction.id,
-    photo: transaction.photo,
-    media: transaction.extendedMedia,
-    messageId: transaction.messageId,
+  return updateTabState(global, {
+    starsTransactionModal: {
+      transaction,
+    },
+  }, tabId);
+}
+
+export function openStarsTransactionFromReceipt<T extends GlobalState>(
+  global: T, receipt: ApiReceiptStars, ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const transaction: ApiStarsTransaction = {
+    id: receipt.transactionId,
+    peer: receipt.peer,
+    stars: receipt.totalAmount,
+    date: receipt.date,
+    title: receipt.title,
+    description: receipt.text,
+    photo: receipt.photo,
+    extendedMedia: receipt.media,
+    messageId: receipt.messageId,
   };
 
-  return updatePayment(global, { receipt }, tabId);
+  return openStarsTransactionModal(global, transaction, tabId);
 }

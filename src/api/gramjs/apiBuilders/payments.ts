@@ -61,7 +61,10 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
     return {
       type: 'stars',
       currency,
-      botId: buildApiPeerId(botId, 'user'),
+      peer: {
+        type: 'peer',
+        id: buildApiPeerId(botId, 'user'),
+      },
       date,
       text,
       title,
@@ -426,7 +429,7 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
-    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending,
+    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift,
   } = transaction;
 
   if (photo) {
@@ -448,6 +451,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     hasFailed: failed,
     isPending: pending,
     messageId: msgId,
+    isGift: gift,
     extendedMedia: boughtExtendedMedia,
   };
 }

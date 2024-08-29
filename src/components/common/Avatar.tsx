@@ -26,6 +26,7 @@ import {
   isUserId,
 } from '../../global/helpers';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 import { getFirstLetters } from '../../util/textFormat';
 import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
@@ -225,6 +226,7 @@ const Avatar: FC<OwnProps> = ({
   const isRoundedRect = (isCustomPeer && peer.isAvatarSquare)
   || (isForum && !((withStory || withStorySolid) && realPeer?.hasStories));
   const isPremiumGradient = isCustomPeer && peer.withPremiumGradient;
+  const customColor = isCustomPeer && peer.customPeerAvatarColor;
 
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
@@ -273,6 +275,7 @@ const Avatar: FC<OwnProps> = ({
       data-peer-id={realPeer?.id}
       data-test-sender-id={IS_TEST ? realPeer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
+      style={buildStyle(customColor && `--color-user: ${customColor}`)}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >

@@ -1,6 +1,5 @@
 import '../../global/actions/all';
 
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect,
   useRef, useState,
@@ -9,7 +8,6 @@ import { addExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiChat,
   ApiChatFolder,
   ApiMessage,
   ApiUser,
@@ -74,7 +72,6 @@ import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
 import ModalContainer from '../modals/ModalContainer';
-import StarGiftInfoModal from '../modals/stars/StarGiftInfoModal';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
 import RightColumn from '../right/RightColumn';
@@ -106,7 +103,6 @@ export interface OwnProps {
 
 type StateProps = {
   isMasterTab?: boolean;
-  chat?: ApiChat;
   currentUserId?: string;
   isLeftColumnOpen: boolean;
   isMiddleColumnOpen: boolean;
@@ -144,12 +140,10 @@ type StateProps = {
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
   isReactionPickerOpen: boolean;
-  isAppendModalOpen?: boolean;
   isGiveawayModalOpen?: boolean;
   isDeleteMessageModalOpen?: boolean;
   isPremiumGiftingPickerModal?: boolean;
   isStarsGiftingPickerModal?: boolean;
-  isStarGiftInfoModal?: boolean;
   isCurrentUserPremium?: boolean;
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
@@ -162,7 +156,7 @@ const CALL_BUNDLE_LOADING_DELAY_MS = 5000; // 5 sec
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
 
-const Main: FC<OwnProps & StateProps> = ({
+const Main = ({
   isMobile,
   isLeftColumnOpen,
   isMiddleColumnOpen,
@@ -201,7 +195,6 @@ const Main: FC<OwnProps & StateProps> = ({
   isDeleteMessageModalOpen,
   isPremiumGiftingPickerModal,
   isStarsGiftingPickerModal,
-  isStarGiftInfoModal,
   isPaymentModalOpen,
   isReceiptModalOpen,
   isReactionPickerOpen,
@@ -211,7 +204,7 @@ const Main: FC<OwnProps & StateProps> = ({
   noRightColumnAnimation,
   isSynced,
   currentUserId,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     initMain,
     loadAnimatedEmojis,
@@ -584,7 +577,6 @@ const Main: FC<OwnProps & StateProps> = ({
       {isGiveawayModalOpen && <GiveawayModal isOpen={isGiveawayModalOpen} />}
       {isPremiumGiftingPickerModal && <PremiumGiftingPickerModal isOpen={isPremiumGiftingPickerModal} />}
       {isStarsGiftingPickerModal && <StarsGiftingPickerModal isOpen={isStarsGiftingPickerModal} />}
-      {isStarGiftInfoModal && <StarGiftInfoModal isOpen={isStarGiftInfoModal} />}
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
@@ -627,7 +619,6 @@ export default memo(withGlobal<OwnProps>(
       deleteMessageModal,
       giftingModal,
       starsGiftingModal,
-      starGiftInfoModal,
       isMasterTab,
       payment,
       limitReachedModal,
@@ -685,7 +676,6 @@ export default memo(withGlobal<OwnProps>(
       isDeleteMessageModalOpen: Boolean(deleteMessageModal),
       isPremiumGiftingPickerModal: giftingModal?.isOpen,
       isStarsGiftingPickerModal: starsGiftingModal?.isOpen,
-      isStarGiftInfoModal: starGiftInfoModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),

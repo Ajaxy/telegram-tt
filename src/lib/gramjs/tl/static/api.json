@@ -361,6 +361,7 @@
     "payments.getStarsTopupOptions",
     "payments.getStarsStatus",
     "payments.getStarsTransactions",
+    "payments.getStarsTransactionsByID",
     "payments.sendStarsForm",
     "payments.getStarsGiftOptions",
     "payments.refundStarsCharge",

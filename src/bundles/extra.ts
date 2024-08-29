@@ -25,10 +25,10 @@ export { default as PremiumLimitReachedModal } from '../components/main/premium/
 export { default as StatusPickerMenu } from '../components/left/main/StatusPickerMenu';
 export { default as BoostModal } from '../components/modals/boost/BoostModal';
 export { default as GiftCodeModal } from '../components/modals/giftcode/GiftCodeModal';
-export { default as StarGiftInfoModal } from '../components/modals/stars/StarGiftInfoModal';
 export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';
 export { default as StarsBalanceModal } from '../components/modals/stars/StarsBalanceModal';
 export { default as StarPaymentModal } from '../components/modals/stars/StarsPaymentModal';
+export { default as StarsTransactionInfoModal } from '../components/modals/stars/transaction/StarsTransactionModal';
 
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
 export { default as AboutMonetizationModal } from '../components/common/AboutMonetizationModal';

@@ -24,8 +24,8 @@ import Modal from '../../ui/Modal';
 import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import BalanceBlock from './BalanceBlock';
-import TransactionItem from './StarsTransactionItem';
 import StarTopupOptionList from './StarTopupOptionList';
+import TransactionItem from './transaction/StarsTransactionItem';
 
 import styles from './StarsBalanceModal.module.scss';
 

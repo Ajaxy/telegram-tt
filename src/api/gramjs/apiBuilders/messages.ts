@@ -370,6 +370,7 @@ function buildAction(
   let isGiveaway: boolean | undefined;
   let isUnclaimed: boolean | undefined;
   let pluralValue: number | undefined;
+  let transactionId: string | undefined;
 
   let targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -509,6 +510,7 @@ function buildAction(
     text = 'Notification.WebAppSentData';
     translationValues.push(action.text);
   } else if (action instanceof GramJs.MessageActionGiftPremium) {
+    type = 'giftPremium';
     text = isOutgoing ? 'ActionGiftOutbound' : 'ActionGiftInbound';
     if (isOutgoing) {
       translationValues.push('%gift_payment_amount%');
@@ -561,6 +563,7 @@ function buildAction(
     text = 'BoostingGiveawayJustStarted';
     translationValues.push('%action_origin%');
   } else if (action instanceof GramJs.MessageActionGiftCode) {
+    type = 'giftCode';
     text = isOutgoing ? 'ActionGiftOutbound' : 'BoostingReceivedGiftNoName';
     slug = action.slug;
     months = action.months;
@@ -621,7 +624,8 @@ function buildAction(
       translationValues.unshift('%action_origin%');
     }
   } else if (action instanceof GramJs.MessageActionGiftStars) {
-    text = isOutgoing ? 'ActionGiftOutbound' : 'BoostingReceivedGiftNoName';
+    type = 'giftStars';
+    text = isOutgoing ? 'ActionGiftOutbound' : targetPeerId ? 'ActionGiftInbound' : 'BoostingReceivedGiftNoName';
     if (isOutgoing) {
       translationValues.push('%gift_payment_amount%');
     } else {
@@ -629,10 +633,20 @@ function buildAction(
     }
     if (targetPeerId) {
       targetUserIds.push(targetPeerId);
+      targetChatId = targetPeerId;
     }
+
+    if (action.cryptoCurrency) {
+      giftCryptoInfo = {
+        currency: action.cryptoCurrency,
+        amount: action.cryptoAmount!.toJSNumber(),
+      };
+    }
+
     currency = action.currency;
     amount = action.amount.toJSNumber();
     stars = action.stars.toJSNumber();
+    transactionId = action.transactionId;
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -664,6 +678,7 @@ function buildAction(
     isTopicAction,
     isUnclaimed,
     pluralValue,
+    transactionId,
   };
 }
 
