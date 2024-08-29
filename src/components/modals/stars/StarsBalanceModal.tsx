@@ -129,7 +129,9 @@ const StarsBalanceModal = ({
   const handleClick = useLastCallback((option: ApiStarTopupOption) => {
     openInvoice({
       type: 'stars',
-      option,
+      stars: option.stars,
+      currency: option.currency,
+      amount: option.amount,
     });
   });
 

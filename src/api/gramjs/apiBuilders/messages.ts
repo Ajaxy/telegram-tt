@@ -607,6 +607,10 @@ function buildAction(
       }
       pluralValue = action.boosts;
     }
+  } else if (action instanceof GramJs.MessageActionPaymentRefunded) {
+    text = 'ActionRefunded';
+    amount = Number(action.totalAmount);
+    currency = action.currency;
   } else {
     text = 'ChatList.UnsupportedMessage';
   }

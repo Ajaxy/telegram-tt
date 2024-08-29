@@ -135,7 +135,15 @@ export type ApiInputStorePaymentGiftcode = {
   amount: number;
 };
 
-export type ApiInputStorePaymentPurpose = ApiInputStorePaymentGiveaway | ApiInputStorePaymentGiftcode;
+export type ApiInputStorePaymentStarsTopup = {
+  type: 'stars';
+  stars: number;
+  currency: string;
+  amount: number;
+};
+
+export type ApiInputStorePaymentPurpose = ApiInputStorePaymentGiveaway | ApiInputStorePaymentGiftcode |
+ApiInputStorePaymentStarsTopup;
 
 export interface ApiPremiumGiftCodeOption {
   users: number;

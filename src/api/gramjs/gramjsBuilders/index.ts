@@ -22,7 +22,6 @@ import type {
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiSendMessageAction,
-  ApiStarTopupOption,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -539,6 +538,14 @@ export function buildInputPhoneCall({ id, accessHash }: ApiPhoneCall) {
 
 export function buildInputStorePaymentPurpose(purpose: ApiInputStorePaymentPurpose):
 GramJs.TypeInputStorePaymentPurpose {
+  if (purpose.type === 'stars') {
+    return new GramJs.InputStorePaymentStarsTopup({
+      stars: BigInt(purpose.stars),
+      currency: purpose.currency,
+      amount: BigInt(purpose.amount),
+    });
+  }
+
   if (purpose.type === 'giftcode') {
     return new GramJs.InputStorePaymentPremiumGiftCode({
       users: purpose.users.map((user) => buildInputEntity(user.id, user.accessHash) as GramJs.InputUser),
@@ -575,15 +582,6 @@ function buildPremiumGiftCodeOption(optionData: ApiPremiumGiftCodeOption) {
   });
 }
 
-function buildInputStarsTopupOption(option: ApiStarTopupOption) {
-  return new GramJs.StarsTopupOption({
-    stars: BigInt(option.stars),
-    amount: BigInt(option.amount),
-    currency: option.currency,
-    extended: option.isExtended,
-  });
-}
-
 export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
   switch (invoice.type) {
     case 'message': {
@@ -600,8 +598,9 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
     }
 
     case 'stars': {
+      const purpose = buildInputStorePaymentPurpose(invoice.purpose);
       return new GramJs.InputInvoiceStars({
-        option: buildInputStarsTopupOption(invoice.option),
+        purpose,
       });
     }
 

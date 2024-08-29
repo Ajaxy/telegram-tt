@@ -359,5 +359,8 @@
     "payments.getStarsStatus",
     "payments.getStarsTransactions",
     "payments.sendStarsForm",
+    "payments.getStarsGiftOptions",
+    "payments.refundStarsCharge",
+    "payments.getStarsGiftOptions",
     "fragment.getCollectibleInfo"
 ]

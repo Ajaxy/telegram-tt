@@ -2,7 +2,10 @@ import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat, ApiPeerColor } from './chats';
-import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption, ApiStarTopupOption } from './payments';
+import type {
+  ApiInputStorePaymentPurpose,
+  ApiPremiumGiftCodeOption,
+} from './payments';
 import type { ApiMessageStoryData, ApiWebPageStickerData, ApiWebPageStoryData } from './stories';
 
 export interface ApiDimensions {
@@ -232,7 +235,9 @@ export type ApiInputInvoiceGiftCode = {
 
 export type ApiInputInvoiceStars = {
   type: 'stars';
-  option: ApiStarTopupOption;
+  stars: number;
+  currency: string;
+  amount: number;
 };
 
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
@@ -258,7 +263,7 @@ export type ApiRequestInputInvoiceGiveaway = {
 
 export type ApiRequestInputInvoiceStars = {
   type: 'stars';
-  option: ApiStarTopupOption;
+  purpose: ApiInputStorePaymentPurpose;
 };
 
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug

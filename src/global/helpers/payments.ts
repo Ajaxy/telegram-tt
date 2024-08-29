@@ -10,7 +10,23 @@ import { selectChat, selectUser } from '../selectors';
 export function getRequestInputInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice,
 ): ApiRequestInputInvoice | undefined {
-  if (inputInvoice.type === 'slug' || inputInvoice.type === 'stars') return inputInvoice;
+  if (inputInvoice.type === 'slug') return inputInvoice;
+
+  if (inputInvoice.type === 'stars') {
+    const {
+      stars, amount, currency,
+    } = inputInvoice;
+
+    return {
+      type: 'stars',
+      purpose: {
+        type: 'stars',
+        stars,
+        amount,
+        currency,
+      },
+    };
+  }
 
   if (inputInvoice.type === 'message') {
     const chat = selectChat(global, inputInvoice.chatId);

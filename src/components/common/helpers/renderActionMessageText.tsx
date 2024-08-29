@@ -79,6 +79,11 @@ export function renderActionMessageText(
       .replace('un2', '%gift_payment_amount%')
       .replace(/\*\*/g, '');
   }
+  if (translationKey === 'ActionRefunded') {
+    unprocessed = unprocessed
+      .replace('un1', '%action_origin%')
+      .replace('%1$s', '%gift_payment_amount%');
+  }
   let processed: TextPart[];
 
   if (unprocessed.includes('%payment_amount%')) {
