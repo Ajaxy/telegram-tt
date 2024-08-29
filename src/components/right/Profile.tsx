@@ -63,6 +63,7 @@ import { getSenderName } from '../left/search/helpers/getSenderName';
 import usePeerStoriesPolling from '../../hooks/polling/usePeerStoriesPolling';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useFlag from '../../hooks/useFlag';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
@@ -256,6 +257,8 @@ const Profile: FC<OwnProps & StateProps> = ({
     return index === -1 ? 0 : index;
   }, [nextProfileTab, tabs]);
 
+  const [allowAutoScrollToTabs, startAutoScrollToTabsIfNeeded, stopAutoScrollToTabs] = useFlag(false);
+
   const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
@@ -265,6 +268,11 @@ const Profile: FC<OwnProps & StateProps> = ({
     if (index === -1) return;
     setActiveTab(index);
   }, [nextProfileTab, tabs]);
+
+  const handleSwitchTab = useCallback((index: number) => {
+    startAutoScrollToTabsIfNeeded();
+    setActiveTab(index);
+  }, []);
 
   useEffect(() => {
     if (isChannel && !similarChannels) {
@@ -310,12 +318,18 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   usePeerStoriesPolling(resultType === 'members' ? viewportIds as string[] : undefined);
 
+  const handleStopAutoScrollToTabs = useLastCallback(() => {
+    stopAutoScrollToTabs();
+  });
+
   const { handleScroll } = useProfileState(
     containerRef,
     resultType,
     profileState,
     onProfileStateChange,
     forceScrollProfileTab,
+    allowAutoScrollToTabs,
+    handleStopAutoScrollToTabs,
   );
 
   const { applyTransitionFix, releaseTransitionFix } = useTransitionFixes(containerRef);
@@ -649,7 +663,7 @@ const Profile: FC<OwnProps & StateProps> = ({
           >
             {renderContent()}
           </Transition>
-          <TabList big activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
+          <TabList big activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={handleSwitchTab} />
         </div>
       )}
 
