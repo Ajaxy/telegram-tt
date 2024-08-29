@@ -91,6 +91,7 @@ async function loadFallbackPack() {
   if (!language) {
     updateLanguage(fallbackData.language);
   } else {
+    translationFn = createTranslationFn();
     scheduleCallbacks();
   }
 }

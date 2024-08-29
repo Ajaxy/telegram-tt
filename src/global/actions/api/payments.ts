@@ -511,7 +511,63 @@ addActionHandler('closePremiumGiftingModal', (global, actions, payload): ActionR
   }, tabId);
 });
 
-addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promise<void> => {
+addActionHandler('openStarsGiftingModal', (global, actions, payload): ActionReturnType => {
+  const {
+    tabId = getCurrentTabId(),
+  } = payload || {};
+
+  global = getGlobal();
+
+  global = updateTabState(global, {
+    starsGiftingModal: {
+      isOpen: true,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeStarsGiftingModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    starsGiftingModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openStarGiftInfoModal', (global, actions, payload): ActionReturnType => {
+  const {
+    toUserId,
+    stars,
+    date,
+    tabId = getCurrentTabId(),
+  } = payload || {};
+
+  if (!stars || !toUserId || !date) {
+    return;
+  }
+
+  global = getGlobal();
+
+  global = updateTabState(global, {
+    starGiftInfoModal: {
+      toUserId,
+      stars,
+      date,
+      isOpen: true,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeStarGiftInfoModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    starGiftInfoModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openPremiumGiftModal', async (global, actions, payload): Promise<void> => {
   const {
     forUserIds, tabId = getCurrentTabId(),
   } = payload || {};
@@ -524,7 +580,7 @@ addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promi
   const gifts = await callApi('getPremiumGiftCodeOptions', {});
 
   global = updateTabState(global, {
-    giftPremiumModal: {
+    giftModal: {
       isOpen: true,
       forUserIds,
       gifts,
@@ -533,10 +589,35 @@ addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promi
   setGlobal(global);
 });
 
-addActionHandler('closeGiftPremiumModal', (global, actions, payload): ActionReturnType => {
+addActionHandler('closePremiumGiftModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   global = updateTabState(global, {
-    giftPremiumModal: { isOpen: false },
+    giftModal: { isOpen: false },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('openStarsGiftModal', async (global, actions, payload): Promise<void> => {
+  const {
+    forUserId, tabId = getCurrentTabId(),
+  } = payload || {};
+
+  const starsGiftOptions = await callApi('getStarsGiftOptions', {});
+
+  global = updateTabState(global, {
+    starsGiftModal: {
+      isOpen: true,
+      forUserId,
+      starsGiftOptions,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeStarsGiftModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  global = updateTabState(global, {
+    starsGiftModal: { isOpen: false },
   }, tabId);
   setGlobal(global);
 });

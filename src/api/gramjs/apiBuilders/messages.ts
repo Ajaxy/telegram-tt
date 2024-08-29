@@ -352,6 +352,7 @@ function buildAction(
   let phoneCall: PhoneCallAction | undefined;
   let call: Partial<ApiGroupCall> | undefined;
   let amount: number | undefined;
+  let stars: number | undefined;
   let currency: string | undefined;
   let giftCryptoInfo: {
     currency: string;
@@ -370,11 +371,11 @@ function buildAction(
   let isUnclaimed: boolean | undefined;
   let pluralValue: number | undefined;
 
-  const targetUserIds = 'users' in action
+  let targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
     : ('userId' in action && [buildApiPeerId(action.userId, 'user')]) || [];
-  let targetChatId: string | undefined;
 
+  let targetChatId;
   if (action instanceof GramJs.MessageActionChatCreate) {
     text = 'Notification.CreatedChatWithTitle';
     translationValues.push('%action_origin%', action.title);
@@ -611,6 +612,27 @@ function buildAction(
     text = 'ActionRefunded';
     amount = Number(action.totalAmount);
     currency = action.currency;
+  } else if (action instanceof GramJs.MessageActionRequestedPeer) {
+    text = 'ActionRequestedPeer';
+    if (action.peers) {
+      targetUserIds = action.peers?.map((peer) => getApiChatIdFromMtpPeer(peer));
+    }
+    if (targetPeerId) {
+      translationValues.unshift('%action_origin%');
+    }
+  } else if (action instanceof GramJs.MessageActionGiftStars) {
+    text = isOutgoing ? 'ActionGiftOutbound' : 'BoostingReceivedGiftNoName';
+    if (isOutgoing) {
+      translationValues.push('%gift_payment_amount%');
+    } else {
+      translationValues.push('%action_origin%', '%gift_payment_amount%');
+    }
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
+    }
+    currency = action.currency;
+    amount = action.amount.toJSNumber();
+    stars = action.stars.toJSNumber();
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -628,6 +650,7 @@ function buildAction(
     targetChatId,
     photo, // TODO Only used internally now, will be used for the UI in future
     amount,
+    stars,
     currency,
     giftCryptoInfo,
     isGiveaway,

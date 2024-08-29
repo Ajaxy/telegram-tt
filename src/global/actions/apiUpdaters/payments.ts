@@ -32,13 +32,31 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           if (!inputInvoice.userIds) {
             return;
           }
-          const giftModalState = selectTabState(global, tabId).giftPremiumModal;
+          const giftModalState = selectTabState(global, tabId).giftModal;
 
           if (giftModalState && giftModalState.isOpen
             && areDeepEqual(inputInvoice.userIds, giftModalState.forUserIds)) {
             global = updateTabState(global, {
-              giftPremiumModal: {
+              giftModal: {
                 ...giftModalState,
+                isCompleted: true,
+              },
+            }, tabId);
+            global = closeInvoice(global, tabId);
+          }
+        }
+
+        if (inputInvoice?.type === 'starsgift') {
+          if (!inputInvoice.userId) {
+            return;
+          }
+          const starsModalState = selectTabState(global, tabId).starsGiftModal;
+
+          if (starsModalState && starsModalState.isOpen
+            && areDeepEqual(inputInvoice.userId, starsModalState.forUserId)) {
+            global = updateTabState(global, {
+              starsGiftModal: {
+                ...starsModalState,
                 isCompleted: true,
               },
             }, tabId);

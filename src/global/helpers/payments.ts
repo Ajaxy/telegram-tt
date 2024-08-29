@@ -12,6 +12,26 @@ export function getRequestInputInvoice<T extends GlobalState>(
 ): ApiRequestInputInvoice | undefined {
   if (inputInvoice.type === 'slug') return inputInvoice;
 
+  if (inputInvoice.type === 'starsgift') {
+    const {
+      userId, stars, amount, currency,
+    } = inputInvoice;
+    const user = selectUser(global, userId!);
+
+    if (!user) return undefined;
+
+    return {
+      type: 'stars',
+      purpose: {
+        type: 'starsgift',
+        user,
+        stars,
+        amount,
+        currency,
+      },
+    };
+  }
+
   if (inputInvoice.type === 'stars') {
     const {
       stars, amount, currency,

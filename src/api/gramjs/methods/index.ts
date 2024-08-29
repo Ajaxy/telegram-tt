@@ -101,7 +101,7 @@ export {
   validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
   applyBoost, fetchBoostList, fetchBoostStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
   getPremiumGiftCodeOptions, launchPrepaidGiveaway, fetchStarsStatus, fetchStarsTopupOptions, fetchStarsTransactions,
-  sendStarPaymentForm,
+  sendStarPaymentForm, getStarsGiftOptions,
 } from './payments';
 
 export * from './fragment';

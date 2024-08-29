@@ -8,19 +8,16 @@ import { GIVEAWAY_MAX_ADDITIONAL_CHANNELS } from '../../../config';
 import {
   filterUsersByName, isUserBot,
 } from '../../../global/helpers';
-import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
-import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
+import PickerModal from '../../common/pickers/PickerModal';
 
-import styles from './PremiumGiftingModal.module.scss';
+import styles from './PremiumGiftingPickerModal.module.scss';
 
 export type OwnProps = {
   isOpen?: boolean;
@@ -32,15 +29,15 @@ interface StateProps {
   userIds?: string[];
 }
 
-const PremiumGiftingModal: FC<OwnProps & StateProps> = ({
+const PremiumGiftingPickerModal: FC<OwnProps & StateProps> = ({
   isOpen,
   currentUserId,
   userSelectionLimit = GIVEAWAY_MAX_ADDITIONAL_CHANNELS,
   userIds,
 }) => {
-  const { closePremiumGiftingModal, openGiftPremiumModal, showNotification } = getActions();
+  const { closePremiumGiftingModal, openPremiumGiftModal, showNotification } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
 
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -61,8 +58,7 @@ const PremiumGiftingModal: FC<OwnProps & StateProps> = ({
 
   const handleSendIdList = useLastCallback(() => {
     if (selectedUserIds?.length) {
-      openGiftPremiumModal({ forUserIds: selectedUserIds });
-
+      openPremiumGiftModal({ forUserIds: selectedUserIds });
       closePremiumGiftingModal();
     }
   });
@@ -70,65 +66,42 @@ const PremiumGiftingModal: FC<OwnProps & StateProps> = ({
   const handleSelectedUserIdsChange = useLastCallback((newSelectedIds: string[]) => {
     if (newSelectedIds.length > userSelectionLimit) {
       showNotification({
-        message: lang('BoostingSelectUpToWarningUsers', userSelectionLimit),
+        message: oldLang('BoostingSelectUpToWarningUsers', userSelectionLimit),
       });
       return;
     }
     setSelectedUserIds(newSelectedIds);
   });
 
-  function renderSearchField() {
-    return (
-      <div className={styles.filter} dir={lang.isRtl ? 'rtl' : undefined}>
-        <Button
-          round
-          size="smaller"
-          color="translucent"
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => closePremiumGiftingModal()}
-          ariaLabel={lang('Close')}
-        >
-          <Icon name="close" />
-        </Button>
-        <h3 className={styles.title}>{lang('GiftTelegramPremiumTitle')}
-        </h3>
-      </div>
-    );
-  }
-
   return (
-    <Modal
+    <PickerModal
       className={styles.root}
       isOpen={isOpen}
       onClose={closePremiumGiftingModal}
+      title={oldLang('GiftTelegramPremiumTitle')}
+      hasCloseButton
+      shouldAdaptToSearch
+      withFixedHeight
+      confirmButtonText={oldLang('Continue')}
+      onConfirm={handleSendIdList}
       onEnter={handleSendIdList}
+      withPremiumGradient
     >
-      <div className={styles.main}>
-        {renderSearchField()}
-        <div className={buildClassName(styles.main, 'custom-scroll')}>
-          <PeerPicker
-            className={styles.picker}
-            itemIds={displayedUserIds}
-            selectedIds={selectedUserIds}
-            filterValue={searchQuery}
-            filterPlaceholder={lang('Search')}
-            searchInputId="users-picker-search"
-            onSelectedIdsChange={handleSelectedUserIdsChange}
-            onFilterChange={setSearchQuery}
-            isSearchable
-            withDefaultPadding
-            withStatus
-            allowMultiple
-            itemInputType="checkbox"
-          />
-        </div>
-        <div className={styles.buttons}>
-          <Button withPremiumGradient size="smaller" onClick={handleSendIdList} disabled={!selectedUserIds?.length}>
-            {lang('Continue')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
+      <PeerPicker
+        className={styles.picker}
+        itemIds={displayedUserIds}
+        selectedIds={selectedUserIds}
+        filterValue={searchQuery}
+        filterPlaceholder={oldLang('Search')}
+        onSelectedIdsChange={handleSelectedUserIdsChange}
+        onFilterChange={setSearchQuery}
+        isSearchable
+        withDefaultPadding
+        withStatus
+        allowMultiple
+        itemInputType="checkbox"
+      />
+    </PickerModal>
   );
 };
 
@@ -140,4 +113,4 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     userIds: global.contactList?.userIds,
     userSelectionLimit: global.appConfig?.giveawayAddPeersMax,
   };
-})(PremiumGiftingModal));
+})(PremiumGiftingPickerModal));

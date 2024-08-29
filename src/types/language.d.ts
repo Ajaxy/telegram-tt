@@ -1514,7 +1514,16 @@ export interface LangPair {
   'ReplyInPrivateMessage': undefined;
   'AriaSearchOlderResult': undefined;
   'AriaSearchNewerResult': undefined;
-
+  'CreditsBoxHistoryEntryGiftOutAbout': {
+    'user': string | number;
+    'link': string | number;
+  };
+  'CreditsBoxOutAbout': {
+    'link': string | number;
+  };
+  'GiftStarsOutgoing': {
+    'user': string | number;
+  };
 }
 
 export type LangKey = keyof LangPair;

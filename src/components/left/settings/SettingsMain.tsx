@@ -59,7 +59,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
   const [isSupportDialogOpen, openSupportDialog, closeSupportDialog] = useFlag(false);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
 
   useEffect(() => {
     if (currentUserId) {
@@ -99,7 +99,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.General)}
         >
-          {lang('Telegram.GeneralSettingsViewController')}
+          {oldLang('Telegram.GeneralSettingsViewController')}
         </ListItem>
         <ListItem
           icon="animations"
@@ -107,7 +107,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Performance)}
         >
-          {lang('Animations and Performance')}
+          {oldLang('Animations and Performance')}
         </ListItem>
         <ListItem
           icon="unmute"
@@ -115,7 +115,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Notifications)}
         >
-          {lang('Notifications')}
+          {oldLang('Notifications')}
         </ListItem>
         <ListItem
           icon="data"
@@ -123,7 +123,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.DataStorage)}
         >
-          {lang('DataSettings')}
+          {oldLang('DataSettings')}
         </ListItem>
         <ListItem
           icon="lock"
@@ -131,7 +131,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Privacy)}
         >
-          {lang('PrivacySettings')}
+          {oldLang('PrivacySettings')}
         </ListItem>
         <ListItem
           icon="folder"
@@ -139,7 +139,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Folders)}
         >
-          {lang('Filters')}
+          {oldLang('Filters')}
         </ListItem>
         <ListItem
           icon="active-sessions"
@@ -147,7 +147,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.ActiveSessions)}
         >
-          {lang('SessionsTitle')}
+          {oldLang('SessionsTitle')}
           {sessionCount > 0 && (<span className="settings-item__current-value">{sessionCount}</span>)}
         </ListItem>
         <ListItem
@@ -156,8 +156,8 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Language)}
         >
-          {lang('Language')}
-          <span className="settings-item__current-value">{lang.langName}</span>
+          {oldLang('Language')}
+          <span className="settings-item__current-value">{oldLang.langName}</span>
         </ListItem>
         <ListItem
           icon="stickers"
@@ -165,7 +165,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Stickers)}
         >
-          {lang('StickersName')}
+          {oldLang('StickersName')}
         </ListItem>
       </div>
       <div className="settings-main-menu">
@@ -176,7 +176,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumModal()}
           >
-            {lang('TelegramPremium')}
+            {oldLang('TelegramPremium')}
           </ListItem>
         )}
         {shouldDisplayStars && (
@@ -186,7 +186,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openStarsBalanceModal({})}
           >
-            {lang('MenuTelegramStars')}
+            {oldLang('MenuTelegramStars')}
             {Boolean(starsBalance) && (
               <span className="settings-item__current-value">{formatInteger(starsBalance)}</span>
             )}
@@ -199,7 +199,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumGiftingModal()}
           >
-            {lang('GiftPremiumGifting')}
+            {oldLang('GiftPremiumGifting')}
           </ListItem>
         )}
       </div>
@@ -209,7 +209,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           narrow
           onClick={openSupportDialog}
         >
-          {lang('AskAQuestion')}
+          {oldLang('AskAQuestion')}
         </ListItem>
         <ListItem
           icon="help"
@@ -217,7 +217,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => openUrl({ url: FAQ_URL })}
         >
-          {lang('TelegramFaq')}
+          {oldLang('TelegramFaq')}
         </ListItem>
         <ListItem
           icon="privacy-policy"
@@ -225,14 +225,14 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => openUrl({ url: PRIVACY_URL })}
         >
-          {lang('PrivacyPolicy')}
+          {oldLang('PrivacyPolicy')}
         </ListItem>
       </div>
       <ConfirmDialog
         isOpen={isSupportDialogOpen}
-        confirmLabel={lang('lng_settings_ask_ok')}
-        title={lang('AskAQuestion')}
-        text={lang('lng_settings_ask_sure')}
+        confirmLabel={oldLang('lng_settings_ask_ok')}
+        title={oldLang('AskAQuestion')}
+        text={oldLang('lng_settings_ask_sure')}
         confirmHandler={handleOpenSupport}
         onClose={closeSupportDialog}
       />

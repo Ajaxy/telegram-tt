@@ -19,7 +19,7 @@ import {
   buildApiPaymentForm,
   buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
-  buildApiReceipt,
+  buildApiReceipt, buildApiStarsGiftOptions,
   buildApiStarsTransaction,
   buildApiStarTopupOption,
   buildShippingOptions,
@@ -401,6 +401,22 @@ export async function getPremiumGiftCodeOptions({
   }
 
   return result.map(buildApiPremiumGiftCodeOption);
+}
+
+export async function getStarsGiftOptions({
+  chat,
+}: {
+  chat?: ApiChat;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetStarsGiftOptions({
+    userId: chat && buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return result.map(buildApiStarsGiftOptions);
 }
 
 export function launchPrepaidGiveaway({

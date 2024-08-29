@@ -1,3 +1,5 @@
+@use '../../../styles/mixins';
+
 .content {
   display: flex;
   flex-direction: column;
@@ -19,10 +21,30 @@
   padding: 0.25rem 0.5rem;
 }
 
+.section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 0.5rem;
+  position: relative;
+
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
+}
+
 .logo {
+  margin: 1rem;
   width: 6.25rem;
   height: 6.25rem;
-  align-self: center;
+  min-height: 6.25rem;
+}
+
+.logoBackground {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 8rem;
 }
 
 .avatar {

@@ -14,6 +14,7 @@ type OwnProps = {
   isConfirmDisabled?: boolean;
   shouldAdaptToSearch?: boolean;
   withFixedHeight?: boolean;
+  withPremiumGradient?: boolean;
   onConfirm?: NoneToVoidFunction;
 } & ModalProps;
 
@@ -23,6 +24,7 @@ const PickerModal = ({
   shouldAdaptToSearch,
   withFixedHeight,
   onConfirm,
+  withPremiumGradient,
   ...modalProps
 }: OwnProps) => {
   const lang = useOldLang();
@@ -43,6 +45,7 @@ const PickerModal = ({
       {modalProps.children}
       <div className={styles.buttonWrapper}>
         <Button
+          withPremiumGradient={withPremiumGradient}
           onClick={onConfirm || modalProps.onClose}
           color="primary"
           size="smaller"

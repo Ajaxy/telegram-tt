@@ -7,13 +7,11 @@ import type { ApiStarTopupOption, ApiUser } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
-import { selectUser } from '../../../global/selectors';
+import { selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatCurrency } from '../../../util/formatCurrency';
-import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
-import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -27,6 +25,7 @@ import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import BalanceBlock from './BalanceBlock';
 import TransactionItem from './StarsTransactionItem';
+import StarTopupOptionList from './StarTopupOptionList';
 
 import styles from './StarsBalanceModal.module.scss';
 
@@ -39,7 +38,6 @@ const TRANSACTION_TABS: TabWithProperties[] = [
   { title: 'StarsTransactionsIncoming' },
   { title: 'StarsTransactionsOutgoing' },
 ];
-const MAX_STARS_COUNT = 6;
 
 export type OwnProps = {
   modal: TabState['starsBalanceModal'];
@@ -48,19 +46,22 @@ export type OwnProps = {
 type StateProps = {
   starsBalanceState?: GlobalState['stars'];
   originPaymentBot?: ApiUser;
+  canBuyPremium?: boolean;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, originPaymentBot,
+  modal, starsBalanceState, originPaymentBot, canBuyPremium,
 }: OwnProps & StateProps) => {
-  const { closeStarsBalanceModal, loadStarsTransactions, openInvoice } = getActions();
+  const {
+    closeStarsBalanceModal, loadStarsTransactions, openInvoice, openStarsGiftingModal,
+  } = getActions();
 
   const { balance, history, topupOptions } = starsBalanceState || {};
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [isHeaderHidden, setHeaderHidden] = useState(true);
-  const [areOptionsExtended, markOptionsExtended, unmarkOptionsExtended] = useFlag();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   const isOpen = Boolean(modal && starsBalanceState);
@@ -73,52 +74,21 @@ const StarsBalanceModal = ({
   useEffect(() => {
     if (!isOpen) {
       setHeaderHidden(true);
-      unmarkOptionsExtended();
       setSelectedTabIndex(0);
     }
   }, [isOpen]);
 
-  const [renderingOptions, canExtend] = useMemo(() => {
-    if (!topupOptions) {
-      return [undefined, false];
-    }
-
-    const maxOption = topupOptions.reduce((max, option) => (
-      max.stars > option.stars ? max : option
-    ));
-    const forceShowAll = starsNeeded && maxOption.stars < starsNeeded;
-
-    const result: { option: ApiStarTopupOption; starsCount: number }[] = [];
-    let currentStackedStarsCount = 0;
-    let canExtendOptions = false;
-    topupOptions.forEach((option) => {
-      if (!option.isExtended) currentStackedStarsCount++;
-
-      if (starsNeeded && !forceShowAll && option.stars < starsNeeded) return;
-      if (!areOptionsExtended && option.isExtended) {
-        canExtendOptions = true;
-        return;
-      }
-      result.push({
-        option,
-        starsCount: Math.min(currentStackedStarsCount, MAX_STARS_COUNT),
-      });
-    });
-
-    return [result, canExtendOptions];
-  }, [areOptionsExtended, topupOptions, starsNeeded]);
-
   const tosText = useMemo(() => {
     if (!isOpen) return undefined;
 
-    const text = lang('lng_credits_summary_options_about');
+    const text = oldLang('lng_credits_summary_options_about');
     const parts = text.split('{link}');
     return [
       parts[0],
-      <SafeLink url={lang('StarsTOSLink')} text={lang('lng_credits_summary_options_about_link')} />,
+      <SafeLink url={oldLang('StarsTOSLink')} text={oldLang('lng_credits_summary_options_about_link')} />,
       parts[1],
     ];
-  }, [isOpen, lang]);
+  }, [isOpen, oldLang]);
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
@@ -135,10 +105,25 @@ const StarsBalanceModal = ({
     });
   });
 
+  function renderStarOptionList() {
+    return (
+      <StarTopupOptionList
+        isActive={isOpen}
+        options={topupOptions}
+        starsNeeded={starsNeeded}
+        onClick={handleClick}
+      />
+    );
+  }
+
   const handleLoadMore = useLastCallback(() => {
     loadStarsTransactions({
       type: TRANSACTION_TYPES[selectedTabIndex],
     });
+  });
+
+  const openPremiumGiftingModalHandler = useLastCallback(() => {
+    openStarsGiftingModal({});
   });
 
   return (
@@ -158,29 +143,31 @@ const StarsBalanceModal = ({
         <BalanceBlock balance={balance || 0} className={styles.modalBalance} />
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>
-            {lang('TelegramStars')}
+            {oldLang('TelegramStars')}
           </h2>
         </div>
         <div className={styles.section}>
           <img className={styles.logo} src={StarLogo} alt="" draggable={false} />
           <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
           <h2 className={styles.headerText}>
-            {starsNeeded ? lang('StarsNeededTitle', starsNeeded) : lang('TelegramStars')}
+            {starsNeeded ? oldLang('StarsNeededTitle', starsNeeded) : oldLang('TelegramStars')}
           </h2>
           <div className={styles.description}>
             {renderText(
-              starsNeeded ? lang('StarsNeededText', originBotName) : lang('TelegramStarsInfo'),
+              starsNeeded ? oldLang('StarsNeededText', originBotName) : oldLang('TelegramStarsInfo'),
               ['simple_markdown', 'emoji'],
             )}
           </div>
           <div className={styles.options}>
-            {renderingOptions?.map(({ option, starsCount }) => (
-              <StarTopupOption option={option} starsCount={starsCount} onClick={handleClick} />
-            ))}
-            {!areOptionsExtended && canExtend && (
-              <Button className={styles.moreOptions} isText noForcedUpperCase onClick={markOptionsExtended}>
-                {lang('Stars.Purchase.ShowMore')}
-                <Icon className={styles.iconDown} name="down" />
+            {renderStarOptionList()}
+            {canBuyPremium && (
+              <Button
+                className={buildClassName(styles.starButton, 'settings-main-menu-star')}
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={openPremiumGiftingModalHandler}
+              >
+                <StarIcon className="icon" type="gold" size="big" />
+                {oldLang('TelegramStarsGift')}
               </Button>
             )}
           </div>
@@ -189,13 +176,7 @@ const StarsBalanceModal = ({
           {tosText}
         </div>
         {shouldShowTransactions && (
-          <>
-            <TabList
-              big
-              activeTab={selectedTabIndex}
-              tabs={TRANSACTION_TABS}
-              onSwitchTab={setSelectedTabIndex}
-            />
+          <div className={styles.container}>
             <div className={styles.section}>
               <Transition
                 name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
@@ -219,37 +200,18 @@ const StarsBalanceModal = ({
                 </InfiniteScroll>
               </Transition>
             </div>
-          </>
+            <TabList
+              big
+              activeTab={selectedTabIndex}
+              tabs={TRANSACTION_TABS}
+              onSwitchTab={setSelectedTabIndex}
+            />
+          </div>
         )}
       </div>
     </Modal>
   );
 };
-
-function StarTopupOption({
-  option, starsCount, onClick,
-}: {
-  option: ApiStarTopupOption; starsCount: number; onClick?: (option: ApiStarTopupOption) => void;
-}) {
-  const lang = useOldLang();
-
-  return (
-    <div className={styles.option} key={option.stars} onClick={() => onClick?.(option)}>
-      <div className={styles.optionTop}>
-        +{formatInteger(option.stars)}
-        {/* Switch directionality for correct order. Can't use flex because https://issues.chromium.org/issues/40249030 */}
-        <div className={styles.stackedStars} dir={lang.isRtl ? 'ltr' : 'rtl'}>
-          {Array.from({ length: starsCount }).map(() => (
-            <StarIcon className={styles.stackedStar} type="gold" size="big" />
-          ))}
-        </div>
-      </div>
-      <div className={styles.optionBottom}>
-        {formatCurrency(option.amount, option.currency, lang.code)}
-      </div>
-    </div>
-  );
-}
 
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
@@ -259,6 +221,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       starsBalanceState: global.stars,
       originPaymentBot: bot,
+      canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
     };
   },
 )(StarsBalanceModal));

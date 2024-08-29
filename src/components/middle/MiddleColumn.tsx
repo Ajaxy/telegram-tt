@@ -82,7 +82,8 @@ import Composer from '../common/Composer';
 import PrivacySettingsNoticeModal from '../common/PrivacySettingsNoticeModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
-import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
+import PremiumGiftModal from '../main/premium/PremiumGiftModal.async';
+import StarsGiftModal from '../main/premium/StarsGiftModal.async';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
 import ChatLanguageModal from './ChatLanguageModal.async';
@@ -133,7 +134,8 @@ type StateProps = {
   isSeenByModalOpen: boolean;
   isPrivacySettingsNoticeModalOpen: boolean;
   isReactorListModalOpen: boolean;
-  isGiftPremiumModalOpen?: boolean;
+  isPremiumGiftModalOpen?: boolean;
+  isStarsGiftModalOpen?: boolean;
   isChatLanguageModalOpen?: boolean;
   withInterfaceAnimations?: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -193,7 +195,8 @@ function MiddleColumn({
   isSeenByModalOpen,
   isPrivacySettingsNoticeModalOpen,
   isReactorListModalOpen,
-  isGiftPremiumModalOpen,
+  isPremiumGiftModalOpen,
+  isStarsGiftModalOpen,
   isChatLanguageModalOpen,
   withInterfaceAnimations,
   shouldSkipHistoryAnimations,
@@ -715,7 +718,8 @@ function MiddleColumn({
           />
         ))}
       </div>
-      <GiftPremiumModal isOpen={isGiftPremiumModalOpen} />
+      <PremiumGiftModal isOpen={isPremiumGiftModalOpen} />
+      <StarsGiftModal isOpen={isStarsGiftModalOpen} />
     </div>
   );
 }
@@ -729,7 +733,7 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
-      seenByModal, giftPremiumModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
+      seenByModal, giftModal, starsGiftModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
       chatLanguageModal, privacySettingsNoticeModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
@@ -748,7 +752,8 @@ export default memo(withGlobal<OwnProps>(
       isSeenByModalOpen: Boolean(seenByModal),
       isPrivacySettingsNoticeModalOpen: Boolean(privacySettingsNoticeModal),
       isReactorListModalOpen: Boolean(reactorModal),
-      isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
+      isPremiumGiftModalOpen: giftModal?.isOpen,
+      isStarsGiftModalOpen: starsGiftModal?.isOpen,
       isChatLanguageModalOpen: Boolean(chatLanguageModal),
       withInterfaceAnimations: selectCanAnimateInterface(global),
       currentTransitionKey: Math.max(0, messageLists.length - 1),

@@ -84,7 +84,40 @@ export function renderActionMessageText(
       .replace('un1', '%action_origin%')
       .replace('%1$s', '%gift_payment_amount%');
   }
+  if (translationKey === 'ActionRequestedPeer') {
+    unprocessed = unprocessed
+      .replace('un1', '%star_target_user%')
+      .replace('un2', '%action_origin%')
+      .replace(/\*\*/g, '');
+  }
   let processed: TextPart[];
+
+  if (unprocessed.includes('%star_target_user%')) {
+    processed = processPlaceholder(
+      unprocessed,
+      '%star_target_user%',
+      targetUsers
+        ? targetUsers.map((user) => renderUserContent(user, noLinks)).filter(Boolean)
+        : 'User',
+    );
+
+    unprocessed = processed.pop() as string;
+    content.push(...processed);
+  }
+
+  processed = processPlaceholder(
+    unprocessed,
+    '%action_origin%',
+    actionOriginChat ? (
+      renderChatContent(lang, actionOriginChat, noLinks) || NBSP
+    ) : actionOriginUser ? (
+      renderUserContent(actionOriginUser, noLinks) || NBSP
+    ) : 'User',
+    '',
+  );
+
+  unprocessed = processed.pop() as string;
+  content.push(...processed);
 
   if (unprocessed.includes('%payment_amount%')) {
     processed = processPlaceholder(
@@ -95,20 +128,6 @@ export function renderActionMessageText(
     unprocessed = processed.pop() as string;
     content.push(...processed);
   }
-
-  processed = processPlaceholder(
-    unprocessed,
-    '%action_origin%',
-    actionOriginUser ? (
-      renderUserContent(actionOriginUser, noLinks) || NBSP
-    ) : actionOriginChat ? (
-      renderChatContent(lang, actionOriginChat, noLinks) || NBSP
-    ) : 'User',
-    '',
-  );
-
-  unprocessed = processed.pop() as string;
-  content.push(...processed);
 
   if (unprocessed.includes('%action_topic%')) {
     const topicEmoji = topic?.iconEmojiId

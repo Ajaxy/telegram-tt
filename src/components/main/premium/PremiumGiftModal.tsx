@@ -28,7 +28,7 @@ import Link from '../../ui/Link';
 import Modal from '../../ui/Modal';
 import PremiumSubscriptionOption from './PremiumSubscriptionOption';
 
-import styles from './GiftPremiumModal.module.scss';
+import styles from './PremiumGiftModal.module.scss';
 
 export type OwnProps = {
   isOpen?: boolean;
@@ -41,7 +41,7 @@ type StateProps = {
   boostPerSentGift?: number;
 };
 
-const GiftPremiumModal: FC<OwnProps & StateProps> = ({
+const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   isOpen,
   isCompleted,
   gifts,
@@ -52,10 +52,11 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const {
-    openPremiumModal, closeGiftPremiumModal, openInvoice, requestConfetti,
+    openPremiumModal, closePremiumGiftModal, openInvoice, requestConfetti,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+
   const [selectedMonthOption, setSelectedMonthOption] = useState<number | undefined>();
 
   const selectedUserQuantity = forUserIds && forUserIds.length * boostPerSentGift;
@@ -140,23 +141,23 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
 
   function renderGiftTitle() {
     if (isCompleted) {
-      return renderText(lang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle',
+      return renderText(oldLang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle',
         [userNameList, selectedGift?.months]), ['simple_markdown']);
     }
 
-    return lang('GiftTelegramPremiumTitle');
+    return oldLang('GiftTelegramPremiumTitle');
   }
 
   function renderGiftText() {
     if (isCompleted) {
-      return renderText(lang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', userNameList),
+      return renderText(oldLang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', userNameList),
         ['simple_markdown']);
     }
-    return renderText(lang('GiftPremiumUsersGiveAccessManyZero', userNameList), ['simple_markdown']);
+    return renderText(oldLang('GiftPremiumUsersGiveAccessManyZero', userNameList), ['simple_markdown']);
   }
 
   function renderPremiumFeaturesLink() {
-    const info = lang('GiftPremiumListFeaturesAndTerms');
+    const info = oldLang('GiftPremiumListFeaturesAndTerms');
     // Translation hack for rendering component inside string
     const parts = info.match(/([^*]*)\*([^*]+)\*(.*)/);
 
@@ -174,7 +175,8 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   }
 
   function renderBoostsPluralText() {
-    const giftParts = renderText(lang('GiftPremiumWillReceiveBoostsPlural', selectedUserQuantity), ['simple_markdown']);
+    const giftParts = renderText(oldLang('GiftPremiumWillReceiveBoostsPlural',
+      selectedUserQuantity), ['simple_markdown']);
     return giftParts.map((part) => {
       if (typeof part === 'string') {
         return part.split(/(⚡)/g).map((subpart) => {
@@ -210,19 +212,20 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   return (
     <Modal
       dialogRef={dialogRef}
-      onClose={closeGiftPremiumModal}
+      onClose={closePremiumGiftModal}
       isOpen={isOpen}
-      className={styles.modalDialog}
+      contentClassName={styles.content}
+      className={buildClassName(styles.modalDialog, styles.root)}
     >
-      <div className="custom-scroll">
+      <div className={buildClassName(styles.main, 'custom-scroll')}>
         <Button
           round
           size="smaller"
           className={styles.closeButton}
           color="translucent"
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => closeGiftPremiumModal()}
-          ariaLabel={lang('Close')}
+          onClick={() => closePremiumGiftModal()}
+          ariaLabel={oldLang('Close')}
         >
           <i className="icon icon-close" />
         </Button>
@@ -244,7 +247,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
               {renderText(renderBoostsPluralText(), ['simple_markdown', 'emoji'])}
             </p>
 
-            <div className={styles.options}>
+            <div className={styles.giftSection}>
               {renderSubscriptionGiftOptions()}
             </div>
           </>
@@ -253,12 +256,14 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
       </div>
 
       {!isCompleted && (
-        <Button withPremiumGradient className={styles.button} isShiny disabled={!selectedGift} onClick={handleSubmit}>
-          {lang(
-            'GiftSubscriptionFor', selectedGift
-            && formatCurrency(selectedGift!.amount, selectedGift.currency, lang.code),
-          )}
-        </Button>
+        <div className={styles.footer}>
+          <Button withPremiumGradient isShiny disabled={!selectedGift} onClick={handleSubmit}>
+            {oldLang(
+              'GiftSubscriptionFor', selectedGift
+              && formatCurrency(selectedGift!.amount, selectedGift.currency, oldLang.code),
+            )}
+          </Button>
+        </div>
       )}
     </Modal>
   );
@@ -267,7 +272,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const {
     gifts, forUserIds, isCompleted,
-  } = selectTabState(global).giftPremiumModal || {};
+  } = selectTabState(global).giftModal || {};
 
   return {
     isCompleted,
@@ -275,4 +280,4 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     boostPerSentGift: global.appConfig?.boostsPerSentGift,
     forUserIds,
   };
-})(GiftPremiumModal));
+})(PremiumGiftModal));

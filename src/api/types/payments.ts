@@ -142,12 +142,27 @@ export type ApiInputStorePaymentStarsTopup = {
   amount: number;
 };
 
+export type ApiInputStorePaymentStarsGift = {
+  type: 'starsgift';
+  user: ApiUser;
+  stars: number;
+  currency: string;
+  amount: number;
+};
+
 export type ApiInputStorePaymentPurpose = ApiInputStorePaymentGiveaway | ApiInputStorePaymentGiftcode |
-ApiInputStorePaymentStarsTopup;
+ApiInputStorePaymentStarsTopup | ApiInputStorePaymentStarsGift;
 
 export interface ApiPremiumGiftCodeOption {
   users: number;
   months: number;
+  currency: string;
+  amount: number;
+}
+
+export interface ApiStarsGiftOption {
+  isExtended?: true;
+  stars: number;
   currency: string;
   amount: number;
 }

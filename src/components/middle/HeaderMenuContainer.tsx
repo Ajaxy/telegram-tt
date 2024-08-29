@@ -187,7 +187,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     requestMasterAndRequestCall,
     toggleStatistics,
     openBoostStatistics,
-    openGiftPremiumModal,
+    openPremiumGiftModal,
     openThreadWithInfo,
     openCreateTopicPanel,
     openEditTopicPanel,
@@ -313,7 +313,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleGiftPremiumClick = useLastCallback(() => {
-    openGiftPremiumModal({ forUserIds: [chatId] });
+    openPremiumGiftModal({ forUserIds: [chatId] });
     closeMenu();
   });
 

@@ -24,6 +24,11 @@
   overflow-y: scroll;
 }
 
+.container {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
 .section {
   display: flex;
   flex-direction: column;
@@ -138,63 +143,16 @@
   width: 100%;
 }
 
-.option {
-  --_background-color: var(--color-background-secondary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.125rem;
-
-  padding: 1rem;
-  border-radius: 0.625rem;
-
-  background-color: var(--_background-color);
-  transition: background-color 0.25s ease-out;
-
-  cursor: var(--custom-cursor, pointer);
-
-  &:hover {
-    --_background-color: var(--color-background-secondary-accent);
-  }
+.optionFullWidth {
+  grid-column: 1 / -1;
 }
 
-.optionTop {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-
-  font-weight: 500;
-  font-size: 1.5rem;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.stackedStars {
-  display: grid;
-  grid-auto-columns: 0.4375rem;
-  grid-auto-flow: column;
-  justify-items: center;
-  margin-left: 0.375rem;
-}
-
-.stackedStar {
-  @include mixins.filter-outline(0.0625rem, var(--_background-color));
-  transition: filter 0.25s ease-out;
-}
-
-.optionBottom {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-}
-
-.moreOptions {
+.starButton {
   grid-column: 1/-1;
-}
-
-.iconDown {
-  margin-inline-start: 0.25rem;
-  font-size: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }
 
 .paymentContent {

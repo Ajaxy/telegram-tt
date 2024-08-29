@@ -546,6 +546,15 @@ GramJs.TypeInputStorePaymentPurpose {
     });
   }
 
+  if (purpose.type === 'starsgift') {
+    return new GramJs.InputStorePaymentStarsGift({
+      userId: buildInputEntity(purpose.user.id, purpose.user.accessHash) as GramJs.InputUser,
+      stars: BigInt(purpose.stars),
+      currency: purpose.currency,
+      amount: BigInt(purpose.amount),
+    });
+  }
+
   if (purpose.type === 'giftcode') {
     return new GramJs.InputStorePaymentPremiumGiftCode({
       users: purpose.users.map((user) => buildInputEntity(user.id, user.accessHash) as GramJs.InputUser),

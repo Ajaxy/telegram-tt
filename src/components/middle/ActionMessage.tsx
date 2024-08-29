@@ -13,7 +13,7 @@ import type { FocusDirection, ThreadId } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
 import {
-  getChatTitle, getMessageHtmlId, isJoinedChannelMessage,
+  getChatTitle, getMessageHtmlId, getSenderTitle, isJoinedChannelMessage,
 } from '../../global/helpers';
 import { getMessageReplyInfo } from '../../global/helpers/replies';
 import {
@@ -35,6 +35,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useFocusMessage from './message/hooks/useFocusMessage';
@@ -103,10 +104,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   onPinnedIntersectionChange,
 }) => {
   const {
-    openPremiumModal, requestConfetti, checkGiftCode, getReceipt,
+    openPremiumModal, requestConfetti, checkGiftCode, getReceipt, openStarGiftInfoModal,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -133,6 +135,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const isGiftCode = Boolean(message.content.action?.text.startsWith('BoostingReceivedGift'));
   const isSuggestedAvatar = message.content.action?.type === 'suggestProfilePhoto' && message.content.action!.photo;
   const isJoinedMessage = isJoinedChannelMessage(message);
+  const hasStars = Boolean(message.content.action?.stars);
 
   useEffect(() => {
     if (noAppearanceAnimation) {
@@ -168,7 +171,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   const renderContent = useCallback(() => {
     return renderActionMessageText(
-      lang,
+      oldLang,
       message,
       senderUser,
       senderChat,
@@ -181,7 +184,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       observeIntersectionForPlaying,
     );
   }, [
-    isEmbedded, lang, message, observeIntersectionForLoading, observeIntersectionForPlaying,
+    isEmbedded, message, observeIntersectionForLoading, observeIntersectionForPlaying, oldLang,
     senderChat, senderUser, targetChatId, targetMessage, targetUsers, topic,
   ]);
 
@@ -195,6 +198,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     preventMessageInputBlur(e);
     handleBeforeContextMenu(e);
+  };
+
+  const handleStarGiftClick = () => {
+    openStarGiftInfoModal({
+      toUserId: targetUserIds?.[0],
+      stars: message.content.action!.stars,
+      date: message.date,
+    });
   };
 
   const handlePremiumGiftClick = () => {
@@ -233,7 +244,12 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   function renderGift() {
     return (
-      <span className="action-message-gift" tabIndex={0} role="button" onClick={handlePremiumGiftClick}>
+      <span
+        className="action-message-gift action-message-stars-gift"
+        tabIndex={0}
+        role="button"
+        onClick={hasStars ? handleStarGiftClick : handlePremiumGiftClick}
+      >
         <AnimatedIconFromSticker
           key={message.id}
           sticker={premiumGiftSticker}
@@ -241,10 +257,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           noLoop
           nonInteractive
         />
-        <strong>{lang('ActionGiftPremiumTitle')}</strong>
-        <span>{lang('ActionGiftPremiumSubtitle', lang('Months', message.content.action?.months, 'i'))}</span>
+        <strong>{hasStars ? oldLang('Stars', message.content.action?.stars)
+          : oldLang('ActionGiftPremiumTitle')}
+        </strong>
+        <span>{hasStars ? oldLang('ActionGiftStarsSubtitleYou')
+          : oldLang('ActionGiftPremiumSubtitle', oldLang('Months', message.content.action?.months, 'i'))}
+        </span>
 
-        <span className="action-message-button">{lang('ActionGiftPremiumView')}</span>
+        <span className="action-message-button">{oldLang('ActionGiftPremiumView')}</span>
       </span>
     );
   }
@@ -257,7 +277,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         className="action-message-gift action-message-gift-code"
         tabIndex={0}
         role="button"
-        onClick={handleGiftCodeClick}
+        onClick={hasStars ? handleStarGiftClick : handleGiftCodeClick}
       >
         <AnimatedIconFromSticker
           key={message.id}
@@ -266,21 +286,36 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           noLoop
           nonInteractive
         />
-        <strong>{lang(isUnclaimed ? 'BoostingUnclaimedPrize' : 'BoostingCongratulations')}</strong>
+        <strong>{hasStars ? oldLang('Stars', message.content.action?.stars)
+          : oldLang(isUnclaimed ? 'BoostingUnclaimedPrize' : 'BoostingCongratulations')}
+        </strong>
         <span className="action-message-subtitle">
-          {targetChat && renderText(lang(isFromGiveaway ? 'BoostingReceivedGiftFrom' : isUnclaimed
+          {hasStars ? lang('GiftStarsOutgoing', {
+            user: (
+              <b>
+                {senderUser && renderText(getSenderTitle(oldLang, senderUser) || '', ['simple_markdown'])}
+              </b>
+            ),
+          }, {
+            withNodes: true,
+          }) : targetChat && renderText(oldLang(isFromGiveaway ? 'BoostingReceivedGiftFrom' : isUnclaimed
             ? 'BoostingReceivedPrizeFrom' : 'BoostingYouHaveUnclaimedPrize',
-          getChatTitle(lang, targetChat)),
+          getChatTitle(oldLang, targetChat)),
           ['simple_markdown'])}
         </span>
-        <span className="action-message-subtitle">
-          {renderText(lang(
-            'BoostingUnclaimedPrizeDuration',
-            lang('Months', message.content.action?.months, 'i'),
-          ), ['simple_markdown'])}
-        </span>
+        {!hasStars && (
+          <span className="action-message-subtitle">
+            {renderText(oldLang(
+              'BoostingUnclaimedPrizeDuration',
+              oldLang('Months', message.content.action?.months, 'i'),
+            ), ['simple_markdown'])}
+          </span>
+        )}
 
-        <span className="action-message-button">{lang('BoostingReceivedGiftOpenBtn')}</span>
+        <span className="action-message-button">{
+          oldLang(hasStars ? 'ActionGiftPremiumView' : 'BoostingReceivedGiftOpenBtn')
+        }
+        </span>
       </span>
     );
   }

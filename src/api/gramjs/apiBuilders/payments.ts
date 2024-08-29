@@ -8,7 +8,7 @@ import type {
   ApiGiveawayInfo,
   ApiInvoice, ApiLabeledPrice, ApiMyBoost, ApiPaymentCredentials,
   ApiPaymentForm, ApiPaymentSavedInfo, ApiPremiumGiftCodeOption, ApiPremiumPromo, ApiPremiumSubscriptionOption,
-  ApiReceipt,
+  ApiReceipt, ApiStarsGiftOption,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
@@ -380,6 +380,19 @@ export function buildApiPremiumGiftCodeOption(option: GramJs.PremiumGiftCodeOpti
     currency,
     months,
     users,
+  };
+}
+
+export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiStarsGiftOption {
+  const {
+    extended, stars, amount, currency,
+  } = option;
+
+  return {
+    isExtended: extended,
+    stars: stars.toJSNumber(),
+    amount: amount.toJSNumber(),
+    currency,
   };
 }
 

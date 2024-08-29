@@ -1273,3 +1273,6 @@
 "ReplyInPrivateMessage" = "Reply In Private Message";
 "AriaSearchOlderResult" = "Focus next result";
 "AriaSearchNewerResult" = "Focus previous result";
+"CreditsBoxHistoryEntryGiftOutAbout" = "With Stars, {user} will be able to unlock content and services on Telegram. {link}"
+"CreditsBoxOutAbout" = "Review the {link} for Stars."
+"GiftStarsOutgoing" = "With Stars, {user} will be able to unlock content and services on Telegram."

@@ -61,7 +61,7 @@ import type {
   ApiSendMessageAction,
   ApiSession,
   ApiSessionData,
-  ApiSponsoredMessage,
+  ApiSponsoredMessage, ApiStarsGiftOption,
   ApiStarsTransaction,
   ApiStarTopupOption,
   ApiStealthMode,
@@ -709,11 +709,30 @@ export type TabState = {
     isOpen?: boolean;
   };
 
-  giftPremiumModal?: {
+  starsGiftingModal?: {
+    isOpen?: boolean;
+  };
+
+  starGiftInfoModal?: {
+    isOpen?: boolean;
+    toUserId: string;
+    date: number;
+    stars: number;
+  };
+
+  starsGiftModal?: {
+    isCompleted?: boolean;
+    isOpen?: boolean;
+    forUserId?: string;
+    starsGiftOptions?: ApiStarsGiftOption[];
+  };
+
+  giftModal?: {
     isCompleted?: boolean;
     isOpen?: boolean;
     forUserIds?: string[];
     gifts?: ApiPremiumGiftCodeOption[];
+    starsGiftOptions?: ApiStarsGiftOption[];
   };
 
   limitReachedModal?: {
@@ -3162,6 +3181,9 @@ export interface ActionPayloads {
   openPremiumGiftingModal: WithTabId | undefined;
   closePremiumGiftingModal: WithTabId | undefined;
 
+  openStarsGiftingModal: WithTabId | undefined;
+  closeStarsGiftingModal: WithTabId | undefined;
+
   openDeleteMessageModal: ({
     message?: ApiMessage;
     isSchedule?: boolean;
@@ -3179,12 +3201,26 @@ export interface ActionPayloads {
   loadDefaultTopicIcons: undefined;
   loadPremiumStickers: undefined;
 
-  openGiftPremiumModal: ({
+  openPremiumGiftModal: ({
     chatId?: string;
     forMultipleUsers?: boolean;
     forUserIds?: string[];
+    isStarsGifting?: boolean;
   } & WithTabId) | undefined;
-  closeGiftPremiumModal: WithTabId | undefined;
+  closePremiumGiftModal: WithTabId | undefined;
+
+  openStarsGiftModal: ({
+    chatId?: string;
+    forUserId?: string;
+  } & WithTabId) | undefined;
+  closeStarsGiftModal: WithTabId | undefined;
+
+  openStarGiftInfoModal: ({
+    toUserId?: string;
+    stars?: number;
+    date?: number;
+  } & WithTabId) | undefined;
+  closeStarGiftInfoModal: WithTabId | undefined;
 
   setEmojiStatus: {
     emojiStatus: ApiSticker;

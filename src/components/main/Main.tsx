@@ -74,6 +74,7 @@ import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
 import ModalContainer from '../modals/ModalContainer';
+import StarGiftInfoModal from '../modals/stars/StarGiftInfoModal';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
 import RightColumn from '../right/RightColumn';
@@ -92,8 +93,9 @@ import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
 import GiveawayModal from './premium/GiveawayModal.async';
-import PremiumGiftingModal from './premium/PremiumGiftingModal.async';
+import PremiumGiftingPickerModal from './premium/PremiumGiftingPickerModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
+import StarsGiftingPickerModal from './premium/StarsGiftingPickerModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
 
 import './Main.scss';
@@ -145,7 +147,9 @@ type StateProps = {
   isAppendModalOpen?: boolean;
   isGiveawayModalOpen?: boolean;
   isDeleteMessageModalOpen?: boolean;
-  isPremiumGiftingModalOpen?: boolean;
+  isPremiumGiftingPickerModal?: boolean;
+  isStarsGiftingPickerModal?: boolean;
+  isStarGiftInfoModal?: boolean;
   isCurrentUserPremium?: boolean;
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
@@ -195,7 +199,9 @@ const Main: FC<OwnProps & StateProps> = ({
   isPremiumModalOpen,
   isGiveawayModalOpen,
   isDeleteMessageModalOpen,
-  isPremiumGiftingModalOpen,
+  isPremiumGiftingPickerModal,
+  isStarsGiftingPickerModal,
+  isStarGiftInfoModal,
   isPaymentModalOpen,
   isReceiptModalOpen,
   isReactionPickerOpen,
@@ -574,7 +580,9 @@ const Main: FC<OwnProps & StateProps> = ({
       <MessageListHistoryHandler />
       {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
       {isGiveawayModalOpen && <GiveawayModal isOpen={isGiveawayModalOpen} />}
-      {isPremiumGiftingModalOpen && <PremiumGiftingModal isOpen={isPremiumGiftingModalOpen} />}
+      {isPremiumGiftingPickerModal && <PremiumGiftingPickerModal isOpen={isPremiumGiftingPickerModal} />}
+      {isStarsGiftingPickerModal && <StarsGiftingPickerModal isOpen={isStarsGiftingPickerModal} />}
+      {isStarGiftInfoModal && <StarGiftInfoModal isOpen={isStarGiftInfoModal} />}
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
@@ -616,6 +624,8 @@ export default memo(withGlobal<OwnProps>(
       giveawayModal,
       deleteMessageModal,
       giftingModal,
+      starsGiftingModal,
+      starGiftInfoModal,
       isMasterTab,
       payment,
       limitReachedModal,
@@ -671,7 +681,9 @@ export default memo(withGlobal<OwnProps>(
       isPremiumModalOpen: premiumModal?.isOpen,
       isGiveawayModalOpen: giveawayModal?.isOpen,
       isDeleteMessageModalOpen: Boolean(deleteMessageModal),
-      isPremiumGiftingModalOpen: giftingModal?.isOpen,
+      isPremiumGiftingPickerModal: giftingModal?.isOpen,
+      isStarsGiftingPickerModal: starsGiftingModal?.isOpen,
+      isStarGiftInfoModal: starGiftInfoModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),
