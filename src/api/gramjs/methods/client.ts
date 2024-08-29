@@ -337,6 +337,14 @@ export async function downloadMedia(
       }
     }
 
+    if (err.message === 'FILE_ID_INVALID' && args.url.includes('avatar')) {
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.warn('Inaccessible avatar image', args.url);
+      }
+      return undefined;
+    }
+
     if (DEBUG) {
       // eslint-disable-next-line no-console
       console.error('Failed to download media', args.url, err);
