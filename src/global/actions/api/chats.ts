@@ -1244,7 +1244,7 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Prom
   }
 });
 
-addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnType => {
+addActionHandler('openTelegramLink', async (global, actions, payload): Promise<void> => {
   const {
     url,
     tabId = getCurrentTabId(),
@@ -1361,6 +1361,10 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
   const messageId = part3 ? Number(part3) : undefined;
   const commentId = params.comment ? Number(params.comment) : undefined;
 
+  const isWebApp = await checkWebAppExists(global, part1, part2);
+
+  const shouldTryOpenChat = (part1 && !part2) || isWebApp;
+
   if (params.hasOwnProperty('voicechat') || params.hasOwnProperty('livestream')) {
     joinVoiceChatByLink({
       username: part1,
@@ -1410,7 +1414,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       startParam: params.startattach || params.startapp,
       tabId,
     });
-  } else {
+  } else if (shouldTryOpenChat) {
     openChatByUsernameAction({
       username: part1,
       messageId: messageId || Number(chatOrChannelPostId),
@@ -1422,6 +1426,10 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       startApp: params.startapp,
       originalParts: [part1, part2, part3],
       tabId,
+    });
+  } else {
+    actions.openUrl({
+      url, shouldSkipModal: true, tabId, ignoreDeepLinks: true,
     });
   }
 });
@@ -2952,6 +2960,20 @@ export async function fetchChatByUsername<T extends GlobalState>(
   setGlobal(global);
 
   return chat;
+}
+
+export async function checkWebAppExists<T extends GlobalState>(
+  global: T, botName: string, appName: string,
+) {
+  if (!botName || !appName) return false;
+  global = getGlobal();
+  const chatByUsername = await fetchChatByUsername(global, botName);
+  const bot = chatByUsername && selectUser(global, chatByUsername.id);
+  const botApp = bot && await callApi('fetchBotApp', {
+    bot,
+    appName,
+  });
+  return Boolean(botApp);
 }
 
 export async function fetchChatByPhoneNumber<T extends GlobalState>(global: T, phoneNumber: string) {

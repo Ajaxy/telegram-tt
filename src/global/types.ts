@@ -3050,6 +3050,7 @@ export interface ActionPayloads {
   openUrl: {
     url: string;
     shouldSkipModal?: boolean;
+    ignoreDeepLinks?: boolean;
   } & WithTabId;
   openMapModal: {
     geoPoint: ApiGeoPoint;

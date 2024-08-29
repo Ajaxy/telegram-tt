@@ -1752,10 +1752,12 @@ addActionHandler('readAllMentions', (global, actions, payload): ActionReturnType
 });
 
 addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
-  const { url, shouldSkipModal, tabId = getCurrentTabId() } = payload;
+  const {
+    url, shouldSkipModal, ignoreDeepLinks, tabId = getCurrentTabId(),
+  } = payload;
   const urlWithProtocol = ensureProtocol(url)!;
 
-  if (isDeepLink(urlWithProtocol)) {
+  if (!ignoreDeepLinks && isDeepLink(urlWithProtocol)) {
     actions.closeStoryViewer({ tabId });
     actions.closePaymentModal({ tabId });
 
