@@ -335,6 +335,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           peer={peer}
           isSavedMessages={user?.isSelf}
           isSavedDialog={isSavedDialog}
+          size={isPreview ? 'medium' : 'large'}
           withStory={!user?.isSelf}
           withStoryGap={isAvatarOnlineShown}
           storyViewerOrigin={StoryViewerOrigin.ChatList}

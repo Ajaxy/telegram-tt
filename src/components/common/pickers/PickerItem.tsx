@@ -22,6 +22,7 @@ type OwnProps = {
   className?: string;
   titleClassName?: string;
   subtitleClassName?: string;
+  style?: string;
   onClick?: NoneToVoidFunction;
   onDisabledClick?: NoneToVoidFunction;
 };
@@ -38,6 +39,7 @@ const PickerItem = ({
   className,
   titleClassName,
   subtitleClassName,
+  style,
   onClick,
   onDisabledClick,
 }: OwnProps) => {
@@ -66,6 +68,7 @@ const PickerItem = ({
         className,
       )}
       onClick={handleClick}
+      style={style}
       dir={lang.isRtl ? 'rtl' : undefined}
       role={isClickable ? 'button' : undefined}
       // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex

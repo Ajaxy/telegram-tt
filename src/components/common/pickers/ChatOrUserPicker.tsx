@@ -1,18 +1,24 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useMemo, useRef, useState,
+  memo, useCallback, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { ApiTopic } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type { ThreadId } from '../../../types';
 
-import { CHAT_HEIGHT_PX } from '../../../config';
-import { getCanPostInChat, isUserId } from '../../../global/helpers';
+import { PEER_PICKER_ITEM_HEIGHT_PX } from '../../../config';
+import {
+  getCanPostInChat, getGroupStatus, getUserStatus, isUserOnline,
+} from '../../../global/helpers';
+import { isApiPeerChat } from '../../../global/helpers/peers';
+import { selectChat, selectPeer, selectUserStatus } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { REM } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';
 
+import useSelector from '../../../hooks/data/useSelector';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useInputFocusOnOpen from '../../../hooks/useInputFocusOnOpen';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
@@ -22,13 +28,13 @@ import useOldLang from '../../../hooks/useOldLang';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import InputText from '../../ui/InputText';
-import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
-import GroupChatInfo from '../GroupChatInfo';
-import PrivateChatInfo from '../PrivateChatInfo';
+import Avatar from '../Avatar';
+import FullNameTitle from '../FullNameTitle';
 import TopicIcon from '../TopicIcon';
+import PickerItem from './PickerItem';
 
 import './ChatOrUserPicker.scss';
 
@@ -49,6 +55,8 @@ export type OwnProps = {
 const CHAT_LIST_SLIDE = 0;
 const TOPIC_LIST_SLIDE = 1;
 const TOPIC_ICON_SIZE = 2.75 * REM;
+const ITEM_CLASS_NAME = 'ChatOrUserPicker-item';
+const TOPIC_ITEM_HEIGHT_PX = 56;
 
 const ChatOrUserPicker: FC<OwnProps> = ({
   isOpen,
@@ -86,22 +94,33 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   useInputFocusOnOpen(searchRef, isOpen && activeKey === CHAT_LIST_SLIDE, resetSearch);
   useInputFocusOnOpen(topicSearchRef, isOpen && activeKey === TOPIC_LIST_SLIDE);
 
+  const selectTopics = useLastCallback((global: GlobalState) => {
+    if (!forumId) {
+      return undefined;
+    }
+
+    return selectChat(global, forumId)?.topics;
+  });
+
+  const forumTopics = useSelector(selectTopics);
+
   const [topicIds, topics] = useMemo(() => {
     const global = getGlobal();
     const chatsById = global.chats.byId;
     const chatFullInfoById = global.chats.fullInfoById;
 
-    const topicsResult = forumId ? chatsById[forumId].topics : undefined;
-    if (!topicsResult) {
+    const chat = chatsById[forumId!];
+
+    if (!chat || !forumTopics) {
       return [undefined, undefined];
     }
 
     const searchTitle = topicSearch.toLowerCase();
 
-    const result = topicsResult
-      ? Object.values(topicsResult).reduce((acc, topic) => {
+    const result = forumTopics
+      ? Object.values(forumTopics).reduce((acc, topic) => {
         if (
-          getCanPostInChat(chatsById[forumId!], topic.id, undefined, chatFullInfoById[forumId!])
+          getCanPostInChat(chat, topic.id, undefined, chatFullInfoById[forumId!])
           && (!searchTitle || topic.title.toLowerCase().includes(searchTitle))
         ) {
           acc[topic.id] = topic;
@@ -109,10 +128,10 @@ const ChatOrUserPicker: FC<OwnProps> = ({
 
         return acc;
       }, {} as Record<number, ApiTopic>)
-      : topicsResult;
+      : forumTopics;
 
     return [Object.keys(result).map(Number), result];
-  }, [forumId, topicSearch]);
+  }, [forumId, topicSearch, forumTopics]);
 
   const handleHeaderBackClick = useLastCallback(() => {
     setForumId(undefined);
@@ -140,15 +159,15 @@ const ChatOrUserPicker: FC<OwnProps> = ({
         onSelectChatOrUser(chatId);
       }
     }
-  }, '.ListItem-button', true);
+  }, `.${ITEM_CLASS_NAME}`, true);
 
   const handleTopicKeyDown = useKeyboardListNavigation(topicContainerRef, isOpen, (index) => {
     if (topicIds?.length) {
       onSelectChatOrUser(forumId!, topicIds[index === -1 ? 0 : index]);
     }
-  }, '.ListItem-button', true);
+  }, `.${ITEM_CLASS_NAME}`, true);
 
-  const handleClick = useLastCallback((e: React.MouseEvent, chatId: string) => {
+  const handleClick = useLastCallback((chatId: string) => {
     const chatsById = getGlobal().chats.byId;
     const chat = chatsById?.[chatId];
     if (chat?.isForum) {
@@ -160,9 +179,52 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     }
   });
 
-  const handleTopicClick = useLastCallback((e: React.MouseEvent, topicId: number) => {
-    onSelectChatOrUser(forumId!, topicId);
-  });
+  const renderChatItem = useCallback((id: string, index: number) => {
+    const global = getGlobal();
+    const peer = selectPeer(global, id);
+    if (!peer) {
+      return undefined;
+    }
+
+    const isSelf = peer && !isApiPeerChat(peer) ? peer.isSelf : undefined;
+
+    function getSubtitle() {
+      if (!peer) return undefined;
+      if (peer.id === currentUserId) return [lang('SavedMessagesInfo')];
+      if (isApiPeerChat(peer)) {
+        return [getGroupStatus(lang, peer)];
+      }
+
+      const userStatus = selectUserStatus(global, peer.id);
+      return [
+        getUserStatus(lang, peer, userStatus),
+        buildClassName(isUserOnline(peer, userStatus, true) && 'online'),
+      ];
+    }
+
+    const [subtitle, subtitleClassName] = getSubtitle() || [];
+
+    return (
+      <PickerItem
+        key={id}
+        className={ITEM_CLASS_NAME}
+        title={<FullNameTitle peer={peer} isSavedMessages={isSelf} />}
+        avatarElement={(
+          <Avatar
+            peer={peer}
+            isSavedMessages={isSelf}
+            size="medium"
+          />
+        )}
+        subtitle={subtitle}
+        subtitleClassName={subtitleClassName}
+        ripple
+        style={`top: ${(viewportOffset + index) * PEER_PICKER_ITEM_HEIGHT_PX}px;`}
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={() => handleClick(id)}
+      />
+    );
+  }, [currentUserId, lang, viewportOffset]);
 
   function renderTopicList() {
     return (
@@ -184,28 +246,28 @@ const ChatOrUserPicker: FC<OwnProps> = ({
           className="picker-list custom-scroll"
           items={topicIds}
           withAbsolutePositioning
-          maxHeight={!topicIds ? 0 : topicIds.length * CHAT_HEIGHT_PX}
+          maxHeight={(topicIds?.length || 0) * TOPIC_ITEM_HEIGHT_PX}
           onKeyDown={handleTopicKeyDown}
         >
-          {topicIds
-            ? topicIds.map((topicId, i) => (
-              <ListItem
-                key={`${forumId}_${topicId}`}
-                className="chat-item-clickable force-rounded-corners small-icon topic-item"
-                style={`top: ${i * CHAT_HEIGHT_PX}px;`}
-                onClick={handleTopicClick}
-                clickArg={topicId}
-              >
+          {!topicIds && <Loading />}
+          {topicIds?.map((topicId, i) => (
+            <PickerItem
+              key={`${forumId}_${topicId}`}
+              className={ITEM_CLASS_NAME}
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={() => onSelectChatOrUser(forumId!, topicId)}
+              style={`top: ${(viewportOffset + i) * TOPIC_ITEM_HEIGHT_PX}px;`}
+              avatarElement={(
                 <TopicIcon
                   size={TOPIC_ICON_SIZE}
                   topic={topics[topicId]}
                   className="topic-icon"
                   letterClassName="topic-icon-letter"
                 />
-                <div dir="auto" className="fullName">{renderText(topics[topicId].title)}</div>
-              </ListItem>
-            ))
-            : <Loading />}
+              )}
+              title={renderText(topics[topicId].title)}
+            />
+          ))}
         </InfiniteScroll>
       </>
     );
@@ -237,29 +299,13 @@ const ChatOrUserPicker: FC<OwnProps> = ({
             ref={containerRef}
             className="picker-list custom-scroll"
             items={viewportIds}
+            itemSelector={`.${ITEM_CLASS_NAME}`}
             onLoadMore={getMore}
             withAbsolutePositioning
-            maxHeight={chatOrUserIds!.length * CHAT_HEIGHT_PX}
+            maxHeight={chatOrUserIds!.length * PEER_PICKER_ITEM_HEIGHT_PX}
             onKeyDown={handleKeyDown}
           >
-            {viewportIds.map((id, i) => (
-              <ListItem
-                key={id}
-                className="chat-item-clickable force-rounded-corners small-icon"
-                style={`height: ${CHAT_HEIGHT_PX}px; top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
-                onClick={handleClick}
-                clickArg={id}
-              >
-                {isUserId(id) ? (
-                  <PrivateChatInfo
-                    status={id === currentUserId ? lang('SavedMessagesInfo') : undefined}
-                    userId={id}
-                  />
-                ) : (
-                  <GroupChatInfo chatId={id} />
-                )}
-              </ListItem>
-            ))}
+            {viewportIds.map(renderChatItem)}
           </InfiniteScroll>
         ) : viewportIds && !viewportIds.length ? (
           <p className="no-results">{lang('lng_blocked_list_not_found')}</p>

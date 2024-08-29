@@ -1,3 +1,5 @@
+@use "../../../styles/mixins";
+
 .ChatOrUserPicker {
   .modal-dialog {
     height: 70%;
@@ -54,7 +56,9 @@
       height: 100%;
       overflow-x: hidden;
       overflow-y: auto;
-      padding: 0 0.5rem;
+      padding-inline: 0.5rem;
+
+      @include mixins.adapt-padding-to-scrollbar(0.5rem);
 
       body.is-ios &,
       body.is-android & {
@@ -81,25 +85,12 @@
     position: relative;
   }
 
-  .ListItem {
+  .ChatOrUserPicker-item {
     position: absolute;
     width: 100%;
 
-    body.is-ios &:not(:last-of-type)::after,
-    body.is-android &:not(:last-of-type)::after {
-      right: -0.5rem;
-    }
-  }
-
-  .ListItem.chat-item-clickable {
-    &:not(.force-rounded-corners) {
-      @media (max-width: 600px) {
-        margin: 0;
-
-        .ListItem-button {
-          border-radius: 0;
-        }
-      }
+    .online {
+      color: var(--color-primary);
     }
   }
 

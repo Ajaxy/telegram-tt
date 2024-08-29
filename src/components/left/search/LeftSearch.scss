@@ -86,7 +86,7 @@
   }
 
   .RecentContacts .search-section {
-    padding-left: 0.25rem;
+    padding-inline: 0.5rem;
   }
 
   .WebLink {
@@ -193,7 +193,9 @@
   }
 
   .search-section {
-    padding: 0 0.125rem 0 0.75rem;
+    padding-inline: 0.5rem;
+
+    @include mixins.adapt-padding-to-scrollbar(0.5rem);
 
     .section-heading {
       color: var(--color-text-secondary);

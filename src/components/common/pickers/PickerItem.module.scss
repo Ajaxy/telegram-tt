@@ -60,7 +60,6 @@
   color: var(--color-text-secondary);
   grid-row: 2;
   grid-column: 3;
-  align-self: start;
 }
 
 .title, .subtitle {
@@ -76,6 +75,7 @@
 .multiline {
   .title {
     grid-row: 1;
+    align-self: end;
   }
 }
 

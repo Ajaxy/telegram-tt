@@ -40,6 +40,10 @@
 .personalChannelItem {
   grid-column: 1 / span 2;
   grid-row: 2;
+
+  :global(.Avatar) {
+    margin-right: 0.9375rem !important;
+  }
 }
 
 .openAppButton {

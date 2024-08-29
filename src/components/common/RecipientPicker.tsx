@@ -104,6 +104,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
       isOpen={isOpen}
       className={className}
       chatOrUserIds={renderingIds}
+      currentUserId={currentUserId}
       searchPlaceholder={searchPlaceholder}
       search={search}
       onSearchChange={setSearch}

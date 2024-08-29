@@ -86,11 +86,11 @@
   .platform {
     position: absolute;
     bottom: -0.625rem;
-    left: 0;
+    left: -0.5rem;
+    right: -0.5rem;
     opacity: 0;
     background-color: var(--color-primary);
     height: 0.1875rem;
-    width: 100%;
     border-radius: 0.1875rem 0.1875rem 0 0;
     pointer-events: none;
     box-sizing: content-box;

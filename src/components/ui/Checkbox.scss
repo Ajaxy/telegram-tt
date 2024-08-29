@@ -224,12 +224,14 @@
 
   &.onlyInput {
     padding-inline-start: 1.125rem;
+    margin-block: 0 1.25rem;
 
     .Checkbox-main {
       &::before,
       &::after {
         left: 0;
         right: 0;
+        top: 0;
       }
     }
   }
