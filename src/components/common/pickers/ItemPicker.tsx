@@ -100,12 +100,16 @@ const ItemPicker = ({
   const lockedUnselectedValues = allowMultiple ? optionalProps.lockedUnselectedValues : undefined;
 
   useEffect(() => {
-    if (!isSearchable) return;
-    setTimeout(() => {
+    if (!isSearchable) return undefined;
+    const timeoutId = window.setTimeout(() => {
       requestMeasure(() => {
-        inputRef.current!.focus();
+        inputRef.current?.focus();
       });
     }, FOCUS_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [isSearchable]);
 
   const selectedValues = useMemo(() => {

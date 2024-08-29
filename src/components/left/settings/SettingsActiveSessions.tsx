@@ -193,7 +193,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
           {lang('TerminateOldSessionHeader')}
         </h4>
 
-        <p>{lang('IfInactiveFor')}</p>
+        <p className="settings-item-description-larger">{lang('IfInactiveFor')}</p>
         <RadioGroup
           name="session_ttl"
           options={AUTO_TERMINATE_OPTIONS}

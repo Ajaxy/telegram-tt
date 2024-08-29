@@ -328,7 +328,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
           <ListItem
             icon="delete-user"
             multiline
-            narrow
             onClick={handleRemovedUsersClick}
           >
             <span className="title">{lang('ChannelBlockedUsers')}</span>

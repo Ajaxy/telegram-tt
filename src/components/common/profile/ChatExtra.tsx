@@ -352,7 +352,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         <UserBirthday key={peerId} birthday={birthday} user={user!} isInSettings={isInSettings} />
       )}
       {!isInSettings && (
-        <ListItem icon="unmute" ripple onClick={handleNotificationChange}>
+        <ListItem icon="unmute" narrow ripple onClick={handleNotificationChange}>
           <span>{lang('Notifications')}</span>
           <Switcher
             id="group-notifications"
@@ -379,7 +379,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         </ListItem>
       )}
       {hasSavedMessages && !isInSettings && (
-        <ListItem icon="saved-messages" ripple onClick={handleOpenSavedDialog}>
+        <ListItem icon="saved-messages" narrow ripple onClick={handleOpenSavedDialog}>
           <span>{lang('SavedMessagesTab')}</span>
         </ListItem>
       )}

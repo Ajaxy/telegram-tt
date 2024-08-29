@@ -66,6 +66,7 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
   return (
     <div className="settings-item">
       <ListItem
+        narrow
         icon="camera-add"
         onClick={handleOpenFileSelector}
       >
@@ -79,6 +80,7 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
       </ListItem>
       {currentUserFallbackPhoto && (
         <ListItem
+          narrow
           leftElement={<Avatar photo={currentUserFallbackPhoto} size="mini" className={styles.fallbackPhoto} />}
           onClick={openDeleteFallbackPhotoModal}
           destructive

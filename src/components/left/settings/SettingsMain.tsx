@@ -172,7 +172,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         {canBuyPremium && (
           <ListItem
             leftElement={<StarIcon className="icon ListItem-main-icon" type="premium" size="big" />}
-            className="settings-main-menu-star"
             narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumModal()}
@@ -183,7 +182,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         {shouldDisplayStars && (
           <ListItem
             leftElement={<StarIcon className="icon ListItem-main-icon" type="gold" size="big" />}
-            className="settings-main-menu-star"
             narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openStarsBalanceModal({})}
@@ -197,7 +195,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         {isGiveawayAvailable && (
           <ListItem
             icon="gift"
-            className="settings-main-menu-star"
             narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumGiftingModal()}

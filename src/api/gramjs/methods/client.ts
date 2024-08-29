@@ -337,6 +337,11 @@ export async function downloadMedia(
       }
     }
 
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to download media', args.url, err);
+    }
+
     throw err;
   }
 }
