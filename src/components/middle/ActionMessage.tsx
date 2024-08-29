@@ -21,12 +21,14 @@ import {
   selectChat,
   selectChatMessage,
   selectGiftStickerForDuration,
+  selectGiftStickerForStars,
   selectIsMessageFocused,
   selectTabState,
   selectTopicFromMessage,
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { formatInteger } from '../../util/textFormat';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import renderText from '../common/helpers/renderText';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
@@ -72,6 +74,7 @@ type StateProps = {
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   premiumGiftSticker?: ApiSticker;
+  starGiftSticker?: ApiSticker;
   canPlayAnimatedEmojis?: boolean;
 };
 
@@ -93,6 +96,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   focusDirection,
   noFocusHighlight,
   premiumGiftSticker,
+  starGiftSticker,
   isInsideTopic,
   topic,
   memoFirstUnreadIdRef,
@@ -315,15 +319,16 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       >
         <AnimatedIconFromSticker
           key={message.id}
-          sticker={premiumGiftSticker}
+          sticker={starGiftSticker}
           play={canPlayAnimatedEmojis}
           noLoop
           nonInteractive
         />
-        <strong>
-          {oldLang('Stars', message.content.action!.stars)}
-        </strong>
-        <span className="action-message-subtitle">
+        <div className="action-message-stars-balance">
+          {formatInteger(message.content.action!.stars!)}
+          <strong>{oldLang('Stars')}</strong>
+        </div>
+        <span className="action-message-stars-subtitle">
           {renderText(
             oldLang(!message.isOutgoing
               ? 'ActionGiftStarsSubtitleYou' : 'ActionGiftStarsSubtitle', getChatTitle(oldLang, targetChat!)),
@@ -406,6 +411,10 @@ export default memo(withGlobal<OwnProps>(
 
     const giftDuration = content.action?.months;
     const premiumGiftSticker = selectGiftStickerForDuration(global, giftDuration);
+
+    const starCount = content.action?.stars;
+    const starGiftSticker = selectGiftStickerForStars(global, starCount);
+
     const topic = selectTopicFromMessage(global, message);
 
     return {
@@ -417,6 +426,7 @@ export default memo(withGlobal<OwnProps>(
       targetMessage,
       isFocused,
       premiumGiftSticker,
+      starGiftSticker,
       topic,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       ...(isFocused && {

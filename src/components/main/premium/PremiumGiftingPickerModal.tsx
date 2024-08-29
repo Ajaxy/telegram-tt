@@ -86,6 +86,7 @@ const PremiumGiftingPickerModal: FC<OwnProps & StateProps> = ({
       onConfirm={handleSendIdList}
       onEnter={handleSendIdList}
       withPremiumGradient
+      isConfirmDisabled={!selectedUserIds?.length}
     >
       <PeerPicker
         className={styles.picker}

@@ -37,6 +37,7 @@ const SIZES: Record<AvatarSize, number> = {
   medium: 2.875 * REM,
   large: 3.5 * REM,
   giant: 5.125 * REM,
+  huge: 6.125 * REM,
   jumbo: 7.625 * REM,
 };
 

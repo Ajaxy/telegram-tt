@@ -7,6 +7,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { LangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
   getChatTitle,
   getExpiredMessageDescription,
@@ -111,7 +112,9 @@ export function renderActionMessageText(
     actionOriginChat ? (
       renderChatContent(lang, actionOriginChat, noLinks) || NBSP
     ) : actionOriginUser ? (
-      renderUserContent(actionOriginUser, noLinks) || NBSP
+      actionOriginUser.id === SERVICE_NOTIFICATIONS_USER_ID
+        ? lang('StarsTransactionUnknown')
+        : renderUserContent(actionOriginUser, noLinks) || NBSP
     ) : 'User',
     '',
   );

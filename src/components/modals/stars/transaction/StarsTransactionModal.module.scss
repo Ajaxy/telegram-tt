@@ -2,6 +2,10 @@
   z-index: calc(var(--z-media-viewer) - 1);
 }
 
+.modal :global(.modal-dialog) {
+  max-width: 26rem !important;
+}
+
 .positive {
   color: var(--color-success);
 }
@@ -19,10 +23,14 @@
   position: relative;
 }
 
+.starsHeader {
+  gap: normal;
+}
+
 .amount {
   display: flex;
   gap: 0.25rem;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.325;
 }
@@ -44,6 +52,7 @@
 .footer {
   text-align: center;
   margin-block: 0.5rem;
+  color: var(--color-text-secondary);
 }
 
 .starsBackground {
@@ -66,4 +75,13 @@
 .mediaPreview {
   margin-bottom: 2rem;
   cursor: var(--custom-cursor, pointer);
+}
+
+.starTitle {
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 1rem;
 }

@@ -159,13 +159,6 @@ export interface ApiPremiumGiftCodeOption {
   amount: number;
 }
 
-export interface ApiStarsGiftOption {
-  isExtended?: true;
-  stars: number;
-  currency: string;
-  amount: number;
-}
-
 export type ApiBoostsStatus = {
   level: number;
   currentLevelBoosts: number;

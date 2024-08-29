@@ -63,7 +63,7 @@ import type {
   ApiSendMessageAction,
   ApiSession,
   ApiSessionData,
-  ApiSponsoredMessage, ApiStarsGiftOption,
+  ApiSponsoredMessage,
   ApiStarsTransaction,
   ApiStarTopupOption,
   ApiStealthMode,
@@ -725,7 +725,7 @@ export type TabState = {
     isCompleted?: boolean;
     isOpen?: boolean;
     forUserId?: string;
-    starsGiftOptions?: ApiStarsGiftOption[];
+    starsGiftOptions?: ApiStarTopupOption[];
   };
 
   starsTransactionModal?: {
@@ -737,7 +737,7 @@ export type TabState = {
     isOpen?: boolean;
     forUserIds?: string[];
     gifts?: ApiPremiumGiftCodeOption[];
-    starsGiftOptions?: ApiStarsGiftOption[];
+    starsGiftOptions?: ApiStarTopupOption[];
   };
 
   limitReachedModal?: {

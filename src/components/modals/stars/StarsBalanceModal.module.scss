@@ -136,23 +136,10 @@
   z-index: 3;
 }
 
-.options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.optionFullWidth {
-  grid-column: 1 / -1;
-}
-
 .starButton {
   grid-column: 1/-1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 1rem;
+  margin-top: 0.5rem;
 }
 
 .paymentContent {

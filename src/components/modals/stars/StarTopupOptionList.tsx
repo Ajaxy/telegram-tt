@@ -73,7 +73,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
   }, [areOptionsExtended, options, starsNeeded]);
 
   return (
-    <>
+    <div className={styles.options}>
       {renderingOptions?.map(({ option, starsCount, isWide }) => {
         const length = renderingOptions?.length;
         const isOdd = length % 2 === 0;
@@ -103,7 +103,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
           <Icon className={styles.iconDown} name="down" />
         </Button>
       )}
-    </>
+    </div>
   );
 };
 

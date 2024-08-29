@@ -30,7 +30,39 @@
   flex-direction: column;
 }
 
+.headerInfo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  margin: 1rem;
+  width: 6.25rem;
+  height: 6.25rem;
+  min-height: 6.25rem;
+}
+
+.logoBackground {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 8rem;
+}
+
+.description {
+  text-align: center;
+  margin-inline: 0.5rem;
+  margin-bottom: 1rem;
+  text-wrap: balance;
+}
+
 .section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 0.5rem;
 }
 
@@ -67,41 +99,24 @@
   z-index: 3;
 }
 
-.avatars {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin: 1rem;
+.avatar {
+  margin: 2rem;
 }
 
 .center {
   text-align: center;
 }
 
-.options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  width: 100%;
-  margin-bottom: 2.5rem;
-}
-
-.boostIcon {
-  color: var(--color-primary);
-  vertical-align: middle;
-  line-height: 1.5;
-}
-
-.moreOptions {
-  grid-column: 1/-1;
-}
-
 .secondaryInfo {
   text-align: center;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  padding: 0.5rem 1rem;
+  padding: 1rem;
   margin-top: auto;
+}
+
+@media (max-width: 450px) {
+  .modalDialog :global(.modal-dialog) {
+    max-width: 100% !important;
+  }
 }

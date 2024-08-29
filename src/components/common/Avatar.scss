@@ -135,6 +135,17 @@
     }
   }
 
+  &.size-huge {
+    width: 6rem;
+    height: 6rem;
+    font-size: 3rem;
+
+    .emoji {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+
   &.size-jumbo {
     width: 7.5rem;
     height: 7.5rem;

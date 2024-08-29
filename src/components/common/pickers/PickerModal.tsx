@@ -28,6 +28,7 @@ const PickerModal = ({
   ...modalProps
 }: OwnProps) => {
   const lang = useOldLang();
+  const hasOnClickHandler = Boolean(onConfirm || modalProps.onClose);
 
   return (
     <Modal
@@ -43,17 +44,19 @@ const PickerModal = ({
       headerClassName={buildClassName(styles.header, modalProps.headerClassName)}
     >
       {modalProps.children}
-      <div className={styles.buttonWrapper}>
-        <Button
-          withPremiumGradient={withPremiumGradient}
-          onClick={onConfirm || modalProps.onClose}
-          color="primary"
-          size="smaller"
-          disabled={isConfirmDisabled}
-        >
-          {confirmButtonText || lang('Confirm')}
-        </Button>
-      </div>
+      {hasOnClickHandler && (
+        <div className={styles.buttonWrapper}>
+          <Button
+            withPremiumGradient={withPremiumGradient}
+            onClick={onConfirm || modalProps.onClose}
+            color="primary"
+            size="smaller"
+            disabled={isConfirmDisabled}
+          >
+            {confirmButtonText || lang('Confirm')}
+          </Button>
+        </div>
+      )}
     </Modal>
   );
 };

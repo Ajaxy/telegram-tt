@@ -1,7 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useMemo,
-  useRef,
   useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
@@ -10,17 +9,14 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
   filterUsersByName, isDeletedUser, isUserBot,
 } from '../../../global/helpers';
-import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
-import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
+import PickerModal from '../../common/pickers/PickerModal';
 
 import styles from './StarsGiftingPickerModal.module.scss';
 
@@ -42,8 +38,6 @@ const StarsGiftingPickerModal: FC<OwnProps & StateProps> = ({
   archivedListIds,
   userIds,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const dialogRef = useRef<HTMLDivElement>(null);
   const { closeStarsGiftingModal, openStarsGiftModal } = getActions();
 
   const oldLang = useOldLang();
@@ -79,48 +73,30 @@ const StarsGiftingPickerModal: FC<OwnProps & StateProps> = ({
     }
   });
 
-  function renderHeaderText() {
-    return (
-      <div className={styles.filter} dir={oldLang.isRtl ? 'rtl' : undefined}>
-        <Button
-          round
-          size="smaller"
-          color="translucent"
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => closeStarsGiftingModal()}
-          ariaLabel={oldLang('Close')}
-        >
-          <Icon name="close" />
-        </Button>
-        <h3 className={buildClassName(styles.title, 'ml-2')}>{oldLang('GiftStarsTitle')}
-        </h3>
-      </div>
-    );
-  }
-
   return (
-    <Modal
+    <PickerModal
       className={styles.root}
       isOpen={isOpen}
       onClose={closeStarsGiftingModal}
-      onEnter={handleSelectedUserIdsChange}
-      dialogRef={dialogRef}
+      title={oldLang('GiftStarsTitle')}
+      hasCloseButton
+      shouldAdaptToSearch
+      withFixedHeight
+      confirmButtonText={oldLang('Continue')}
+      onEnter={closeStarsGiftingModal}
     >
-      <div className={buildClassName(styles.main, 'custom-scroll')}>
-        {renderHeaderText()}
-        <PeerPicker
-          className={styles.picker}
-          itemIds={displayedUserIds}
-          filterValue={searchQuery}
-          filterPlaceholder={oldLang('Search')}
-          onFilterChange={setSearchQuery}
-          isSearchable
-          withDefaultPadding
-          withStatus
-          onSelectedIdChange={handleSelectedUserIdsChange}
-        />
-      </div>
-    </Modal>
+      <PeerPicker
+        className={styles.picker}
+        itemIds={displayedUserIds}
+        filterValue={searchQuery}
+        filterPlaceholder={oldLang('Search')}
+        onFilterChange={setSearchQuery}
+        isSearchable
+        withDefaultPadding
+        withStatus
+        onSelectedIdChange={handleSelectedUserIdsChange}
+      />
+    </PickerModal>
   );
 };
 

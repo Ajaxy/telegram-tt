@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiStarTopupOption, ApiUser } from '../../../api/types';
+import type { ApiUser } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
@@ -24,7 +24,6 @@ import Modal from '../../ui/Modal';
 import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import BalanceBlock from './BalanceBlock';
-import StarTopupOptionList from './StarTopupOptionList';
 import TransactionItem from './transaction/StarsTransactionItem';
 
 import styles from './StarsBalanceModal.module.scss';
@@ -53,10 +52,10 @@ const StarsBalanceModal = ({
   modal, starsBalanceState, originPaymentBot, canBuyPremium,
 }: OwnProps & StateProps) => {
   const {
-    closeStarsBalanceModal, loadStarsTransactions, openInvoice, openStarsGiftingModal,
+    closeStarsBalanceModal, loadStarsTransactions, openStarsGiftingModal, openStarsGiftModal,
   } = getActions();
 
-  const { balance, history, topupOptions } = starsBalanceState || {};
+  const { balance, history } = starsBalanceState || {};
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -96,34 +95,18 @@ const StarsBalanceModal = ({
     setHeaderHidden(scrollTop <= 150);
   }
 
-  const handleClick = useLastCallback((option: ApiStarTopupOption) => {
-    openInvoice({
-      type: 'stars',
-      stars: option.stars,
-      currency: option.currency,
-      amount: option.amount,
-    });
-  });
-
-  function renderStarOptionList() {
-    return (
-      <StarTopupOptionList
-        isActive={isOpen}
-        options={topupOptions}
-        starsNeeded={starsNeeded}
-        onClick={handleClick}
-      />
-    );
-  }
-
   const handleLoadMore = useLastCallback(() => {
     loadStarsTransactions({
       type: TRANSACTION_TYPES[selectedTabIndex],
     });
   });
 
-  const openPremiumGiftingModalHandler = useLastCallback(() => {
+  const openStarsGiftingModalHandler = useLastCallback(() => {
     openStarsGiftingModal({});
+  });
+
+  const openStarsInfoModalHandler = useLastCallback(() => {
+    openStarsGiftModal({});
   });
 
   return (
@@ -158,19 +141,24 @@ const StarsBalanceModal = ({
               ['simple_markdown', 'emoji'],
             )}
           </div>
-          <div className={styles.options}>
-            {renderStarOptionList()}
-            {canBuyPremium && (
-              <Button
-                className={buildClassName(styles.starButton, 'settings-main-menu-star')}
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={openPremiumGiftingModalHandler}
-              >
-                <StarIcon className="icon" type="gold" size="big" />
-                {oldLang('TelegramStarsGift')}
-              </Button>
-            )}
-          </div>
+          {canBuyPremium && (
+            <Button
+              className={styles.starButton}
+              onClick={openStarsInfoModalHandler}
+            >
+              {oldLang('Star.List.BuyMoreStars')}
+            </Button>
+          )}
+          {canBuyPremium && (
+            <Button
+              className={buildClassName(styles.starButton, 'settings-main-menu-star')}
+              color="translucent"
+              onClick={openStarsGiftingModalHandler}
+            >
+              <StarIcon className="icon" type="gold" size="big" />
+              {oldLang('TelegramStarsGift')}
+            </Button>
+          )}
         </div>
         <div className={styles.secondaryInfo}>
           {tosText}

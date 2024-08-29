@@ -6,9 +6,10 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
-  ApiStarsGiftOption, ApiStarTopupOption, ApiUser,
+  ApiStarTopupOption, ApiUser,
 } from '../../../api/types';
 
+import { getSenderTitle } from '../../../global/helpers';
 import {
   selectTabState, selectUser,
 } from '../../../global/selectors';
@@ -27,13 +28,16 @@ import Modal from '../../ui/Modal';
 
 import styles from './StarsGiftModal.module.scss';
 
+import StarLogo from '../../../assets/icons/StarLogo.svg';
+import StarsBackground from '../../../assets/stars-bg.png';
+
 export type OwnProps = {
   isOpen?: boolean;
 };
 
 type StateProps = {
   isCompleted?: boolean;
-  starsGiftOptions?: ApiStarsGiftOption[] | undefined;
+  starsGiftOptions?: ApiStarTopupOption[] | undefined;
   forUserId?: string;
   user?: ApiUser;
 };
@@ -88,13 +92,22 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
 
   const handleClick = useLastCallback((option: ApiStarTopupOption) => {
     setSelectedOption(option);
-    openInvoice({
-      type: 'starsgift',
-      userId: forUserId!,
-      stars: option.stars,
-      currency: option.currency,
-      amount: option.amount,
-    });
+    if (user) {
+      openInvoice({
+        type: 'starsgift',
+        userId: forUserId!,
+        stars: option.stars,
+        currency: option.currency,
+        amount: option.amount,
+      });
+    } else {
+      openInvoice({
+        type: 'stars',
+        stars: option.stars,
+        currency: option.currency,
+        amount: option.amount,
+      });
+    }
   });
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
@@ -105,11 +118,12 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
 
   function renderGiftTitle() {
     if (isCompleted) {
-      return renderText(oldLang('Notification.StarsGift.SentYou',
-        formatCurrencyAsString(selectedOption!.amount, selectedOption!.currency, oldLang.code)), ['simple_markdown']);
+      return user ? renderText(oldLang('Notification.StarsGift.SentYou',
+        formatCurrencyAsString(selectedOption!.amount, selectedOption!.currency, oldLang.code)), ['simple_markdown'])
+        : renderText(oldLang('StarsAcquiredInfo', selectedOption?.stars), ['simple_markdown']);
     }
 
-    return oldLang('GiftStarsTitle');
+    return user ? oldLang('GiftStarsTitle') : oldLang('Star.List.GetStars');
   }
 
   function renderStarOptionList() {
@@ -154,28 +168,40 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
         </Button>
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>
-            {oldLang('GiftStarsTitle')}
+            {user ? oldLang('GiftStarsTitle') : oldLang('Star.List.GetStars')}
           </h2>
         </div>
-        <div className={styles.avatars}>
-          <Avatar
-            size="large"
-            peer={user}
-          />
+        <div className={styles.headerInfo}>
+          {user ? (
+            <>
+              <Avatar
+                size="huge"
+                peer={user}
+                className={styles.avatar}
+              />
+              <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
+            </>
+          ) : (
+            <>
+              <img className={styles.logo} src={StarLogo} alt="" draggable={false} />
+              <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
+            </>
+          )}
         </div>
         <h2 className={buildClassName(styles.headerText, styles.center)}>
           {renderGiftTitle()}
         </h2>
-        {!isCompleted && (
-          <>
-            <div className={buildClassName(styles.section, styles.options)}>
-              {renderStarOptionList()}
-            </div>
-            <div className={styles.secondaryInfo}>
-              {bottomText}
-            </div>
-          </>
-        )}
+        <p className={styles.description}>
+          {user ? renderText(
+            oldLang('ActionGiftStarsSubtitle', getSenderTitle(oldLang, user)), ['simple_markdown'],
+          ) : oldLang('Stars.Purchase.GetStarsInfo')}
+        </p>
+        <div className={styles.section}>
+          {renderStarOptionList()}
+          <div className={styles.secondaryInfo}>
+            {bottomText}
+          </div>
+        </div>
       </div>
     </Modal>
   );

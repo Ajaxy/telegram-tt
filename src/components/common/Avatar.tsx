@@ -45,7 +45,8 @@ import './Avatar.scss';
 
 const LOOP_COUNT = 3;
 
-export type AvatarSize = 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'giant' | 'jumbo';
+export type AvatarSize =
+  'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'giant' | 'huge' | 'jumbo';
 
 const cn = createClassNameBuilder('Avatar');
 cn.media = cn('media');

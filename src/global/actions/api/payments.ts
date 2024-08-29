@@ -583,7 +583,8 @@ addActionHandler('closePremiumGiftModal', (global, actions, payload): ActionRetu
 
 addActionHandler('openStarsGiftModal', async (global, actions, payload): Promise<void> => {
   const {
-    forUserId, tabId = getCurrentTabId(),
+    forUserId,
+    tabId = getCurrentTabId(),
   } = payload || {};
 
   const starsGiftOptions = await callApi('getStarsGiftOptions', {});

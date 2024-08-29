@@ -64,6 +64,23 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           }
         }
 
+        if (inputInvoice?.type === 'stars') {
+          if (!inputInvoice.stars) {
+            return;
+          }
+          const starsModalState = selectTabState(global, tabId).starsGiftModal;
+
+          if (starsModalState && starsModalState.isOpen) {
+            global = updateTabState(global, {
+              starsGiftModal: {
+                ...starsModalState,
+                isCompleted: true,
+              },
+            }, tabId);
+            global = closeInvoice(global, tabId);
+          }
+        }
+
         setGlobal(global);
       });
 
