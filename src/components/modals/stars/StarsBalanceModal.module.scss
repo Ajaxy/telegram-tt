@@ -167,13 +167,15 @@
   font-weight: 500;
   font-size: 1.5rem;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .stackedStars {
   display: grid;
   grid-auto-columns: 0.4375rem;
   grid-auto-flow: column;
-  justify-items: end;
+  justify-items: center;
+  margin-left: 0.375rem;
 }
 
 .stackedStar {

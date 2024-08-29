@@ -34,12 +34,12 @@ import StarLogo from '../../../assets/icons/StarLogo.svg';
 import StarsBackground from '../../../assets/stars-bg.png';
 
 const TRANSACTION_TYPES = ['all', 'inbound', 'outbound'] as const;
-
 const TRANSACTION_TABS: TabWithProperties[] = [
   { title: 'StarsTransactionsAll' },
   { title: 'StarsTransactionsIncoming' },
   { title: 'StarsTransactionsOutgoing' },
 ];
+const MAX_STARS_COUNT = 6;
 
 export type OwnProps = {
   modal: TabState['starsBalanceModal'];
@@ -101,7 +101,7 @@ const StarsBalanceModal = ({
       }
       result.push({
         option,
-        starsCount: currentStackedStarsCount,
+        starsCount: Math.min(currentStackedStarsCount, MAX_STARS_COUNT),
       });
     });
 

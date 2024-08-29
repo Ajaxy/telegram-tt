@@ -162,7 +162,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
       <div className="settings-main-menu">
         {canBuyPremium && (
           <ListItem
-            leftElement={<StarIcon className="icon" type="premium" size="big" />}
+            leftElement={<StarIcon className="icon ListItem-main-icon" type="premium" size="big" />}
             className="settings-main-menu-star"
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumModal()}
@@ -172,7 +172,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
         )}
         {shouldDisplayStars && (
           <ListItem
-            leftElement={<StarIcon className="icon" type="gold" size="big" />}
+            leftElement={<StarIcon className="icon ListItem-main-icon" type="gold" size="big" />}
             className="settings-main-menu-star"
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openStarsBalanceModal({})}
