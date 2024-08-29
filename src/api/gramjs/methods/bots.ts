@@ -3,6 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiBotApp,
+  ApiBotPreviewMedia,
   ApiChat,
   ApiInputMessageReplyInfo,
   ApiPeer,
@@ -23,6 +24,7 @@ import {
 } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
+import { buildMessageMediaContent } from '../apiBuilders/messageContent';
 import { buildApiUrlAuthResult } from '../apiBuilders/misc';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -236,6 +238,35 @@ export async function requestWebView({
   }
 
   return undefined;
+}
+
+export async function requestMainWebView({
+  peer,
+  bot,
+  startParam,
+  theme,
+}: {
+  peer: ApiPeer;
+  bot: ApiUser;
+  startParam?: string;
+  theme?: ApiThemeParameters;
+}) {
+  const result = await invokeRequest(new GramJs.messages.RequestMainWebView({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    startParam,
+    themeParams: theme ? buildInputThemeParams(theme) : undefined,
+    platform: WEB_APP_PLATFORM,
+  }));
+
+  if (!(result instanceof GramJs.WebViewResultUrl)) {
+    return undefined;
+  }
+
+  return {
+    url: result.url,
+    queryId: result.queryId?.toString(),
+  };
 }
 
 export async function requestSimpleWebView({
@@ -549,6 +580,22 @@ export async function invokeWebViewCustomMethod({
       error: error.message,
     };
   }
+}
+
+export async function fetchPreviewMedias({ bot } : { bot: ApiUser }) {
+  const result = await invokeRequest(new GramJs.bots.GetPreviewMedias({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+  }));
+
+  if (!result) return undefined;
+
+  const previews: ApiBotPreviewMedia[] = result.map((preview) => {
+    return {
+      content: buildMessageMediaContent(preview.media)!,
+      date: preview.date,
+    };
+  });
+  return previews;
 }
 
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {

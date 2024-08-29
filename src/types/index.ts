@@ -329,6 +329,7 @@ export enum MediaViewerOrigin {
   SearchResult,
   SuggestedAvatar,
   StarsTransaction,
+  PreviewMedia,
 }
 
 export enum StoryViewerOrigin {
@@ -392,6 +393,7 @@ export type ProfileTabType =
   | 'members'
   | 'commonChats'
   | 'media'
+  | 'previewMedia'
   | 'documents'
   | 'links'
   | 'audio'

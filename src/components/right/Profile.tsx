@@ -6,6 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
+  ApiBotPreviewMedia,
   ApiChat,
   ApiChatMember,
   ApiMessage,
@@ -52,6 +53,7 @@ import {
   selectTabState,
   selectTheme,
   selectUser,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import { selectPremiumLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
@@ -77,6 +79,7 @@ import Document from '../common/Document';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Media from '../common/Media';
 import NothingFound from '../common/NothingFound';
+import PreviewMedia from '../common/PreviewMedia';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import ChatExtra from '../common/profile/ChatExtra';
 import ProfileInfo from '../common/ProfileInfo';
@@ -113,6 +116,7 @@ type StateProps = {
   hasCommonChatsTab?: boolean;
   hasStoriesTab?: boolean;
   hasMembersTab?: boolean;
+  hasPreviewMediaTab?: boolean;
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
@@ -133,6 +137,7 @@ type StateProps = {
   nextProfileTab?: ProfileTabType;
   shouldWarnAboutSvg?: boolean;
   similarChannels?: string[];
+  botPreviewMedia? : ApiBotPreviewMedia[];
   isCurrentUserPremium?: boolean;
   limitSimilarChannels: number;
   isTopicInfo?: boolean;
@@ -174,6 +179,8 @@ const Profile: FC<OwnProps & StateProps> = ({
   hasCommonChatsTab,
   hasStoriesTab,
   hasMembersTab,
+  hasPreviewMediaTab,
+  botPreviewMedia,
   areMembersHidden,
   canAddMembers,
   canDeleteMembers,
@@ -210,6 +217,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadStoriesArchive,
     openPremiumModal,
     loadChannelRecommendations,
+    loadPreviewMedias,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -229,6 +237,9 @@ const Profile: FC<OwnProps & StateProps> = ({
     ...(hasMembersTab ? [{
       type: 'members' as const, title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
     }] : []),
+    ...(hasPreviewMediaTab ? [{
+      type: 'previewMedia' as const, title: 'ProfileBotPreviewTab',
+    }] : []),
     ...TABS,
     // TODO The filter for voice messages currently does not work
     // in forum topics. Return it when it's fixed on the server side.
@@ -240,6 +251,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   ]), [
     hasCommonChatsTab,
     hasMembersTab,
+    hasPreviewMediaTab,
     hasStoriesTab,
     isChannel,
     isTopicInfo,
@@ -273,6 +285,12 @@ const Profile: FC<OwnProps & StateProps> = ({
     startAutoScrollToTabsIfNeeded();
     setActiveTab(index);
   }, []);
+
+  useEffect(() => {
+    if (hasPreviewMediaTab && !botPreviewMedia) {
+      loadPreviewMedias({ botId: chatId });
+    }
+  }, [chatId, botPreviewMedia, hasPreviewMediaTab]);
 
   useEffect(() => {
     if (isChannel && !similarChannels) {
@@ -364,6 +382,15 @@ const Profile: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleSelectPreviewMedia = useLastCallback((index: number) => {
+    openMediaViewer({
+      standaloneMedia: botPreviewMedia?.flatMap((item) => item?.content.photo
+      || item?.content.video).filter(Boolean),
+      origin: MediaViewerOrigin.PreviewMedia,
+      mediaIndex: index,
+    });
+  });
+
   const handlePlayAudio = useLastCallback((messageId: number) => {
     openAudioPlayer({ chatId: profileId, messageId });
   });
@@ -416,7 +443,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   if (isFirstTab) {
     renderingDelay = !isRightColumnShown ? HIDDEN_RENDER_DELAY : 0;
     // @optimization Used to delay first render of secondary tabs while animating
-  } else if (!viewportIds) {
+  } else if (!viewportIds && !botPreviewMedia) {
     renderingDelay = SLIDE_TRANSITION_DURATION;
   }
   const canRenderContent = useAsyncRendering([chatId, threadId, resultType, renderingActiveTab], renderingDelay);
@@ -438,7 +465,7 @@ const Profile: FC<OwnProps & StateProps> = ({
       );
     }
 
-    if (!viewportIds || !canRenderContent || !messagesById) {
+    if ((!viewportIds && !botPreviewMedia) || !canRenderContent || !messagesById) {
       const noSpinner = isFirstTab && !canRenderContent;
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
 
@@ -450,7 +477,7 @@ const Profile: FC<OwnProps & StateProps> = ({
       );
     }
 
-    if (!viewportIds.length) {
+    if (viewportIds && !viewportIds?.length) {
       let text: string;
 
       switch (resultType) {
@@ -594,6 +621,17 @@ const Profile: FC<OwnProps & StateProps> = ({
             >
               <GroupChatInfo chatId={id} />
             </ListItem>
+          ))
+        ) : resultType === 'previewMedia' ? (
+          botPreviewMedia!.map((media, i) => (
+            <PreviewMedia
+              key={media.date}
+              media={media}
+              isProtected={isChatProtected}
+              observeIntersection={observeIntersectionForMedia}
+              onClick={handleSelectPreviewMedia}
+              index={i}
+            />
           ))
         ) : resultType === 'similarChannels' ? (
           <div key={resultType}>
@@ -739,6 +777,11 @@ export default memo(withGlobal<OwnProps>(
 
     const peer = user || chat;
     const peerFullInfo = selectPeerFullInfo(global, chatId);
+
+    const userFullInfo = selectUserFullInfo(global, chatId);
+    const hasPreviewMediaTab = userFullInfo?.botInfo?.hasPreviewMedia;
+    const botPreviewMedia = global.users.previewMediaByBotId[chatId];
+
     const hasStoriesTab = peer && (user?.isSelf || (!peer.areStoriesHidden && peerFullInfo?.hasPinnedStories))
       && !isSavedDialog;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
@@ -757,6 +800,7 @@ export default memo(withGlobal<OwnProps>(
       hasCommonChatsTab,
       hasStoriesTab,
       hasMembersTab,
+      hasPreviewMediaTab,
       areMembersHidden,
       canAddMembers,
       canDeleteMembers,
@@ -776,6 +820,7 @@ export default memo(withGlobal<OwnProps>(
       forceScrollProfileTab: selectTabState(global).forceScrollProfileTab,
       shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       similarChannels: similarChannelIds,
+      botPreviewMedia,
       isCurrentUserPremium,
       isTopicInfo,
       isSavedDialog,

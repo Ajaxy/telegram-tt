@@ -24,6 +24,11 @@
   margin-bottom: 0;
 }
 
+.sectionInfo {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
 .personalChannelSubscribers {
   grid-column: 2;
   grid-row: 1;
@@ -35,4 +40,9 @@
 .personalChannelItem {
   grid-column: 1 / span 2;
   grid-row: 2;
+}
+
+.openAppButton {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }

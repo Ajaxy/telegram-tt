@@ -1512,6 +1512,11 @@ export interface LangPair {
   'MenuInstallApp': undefined;
   'RemoveEffect': undefined;
   'ReplyInPrivateMessage': undefined;
+  'ProfileOpenAppAbout': {
+    'terms': string;
+  };
+  'ProfileOpenAppTerms': undefined;
+  'ProfileBotOpenAppInfoLink': undefined;
   'MonetizationInfoTONTitle': undefined;
   'ChannelEarnLearnCoinAbout': {
     'link': string | number;

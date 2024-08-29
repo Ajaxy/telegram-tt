@@ -612,6 +612,88 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
   setGlobal(global);
 });
 
+addActionHandler('requestMainWebView', async (global, actions, payload): Promise<void> => {
+  const {
+    botId, peerId, theme, startParam, shouldMarkBotTrusted,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
+
+  if (!selectIsTrustedBot(global, botId)) {
+    if (shouldMarkBotTrusted) {
+      actions.markBotTrusted({ botId, isWriteAllowed: true, tabId });
+    } else {
+      global = updateTabState(global, {
+        botTrustRequest: {
+          botId,
+          type: 'webApp',
+          onConfirm: {
+            action: 'requestMainWebView',
+            payload,
+          },
+        },
+      }, tabId);
+      setGlobal(global);
+      return;
+    }
+  }
+
+  const result = await callApi('requestMainWebView', {
+    bot,
+    peer,
+    theme,
+    startParam,
+  });
+  if (!result) {
+    return;
+  }
+
+  const { url: webViewUrl, queryId } = result;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    webApp: {
+      url: webViewUrl,
+      botId,
+      queryId,
+      buttonText: '',
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadPreviewMedias', async (global, actions, payload): Promise<void> => {
+  const {
+    botId,
+  } = payload;
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
+  const medias = await callApi('fetchPreviewMedias', {
+    bot,
+  });
+
+  global = getGlobal();
+  if (medias) {
+    global = {
+      ...global,
+      users: {
+        ...global.users,
+        previewMediaByBotId: {
+          ...global.users.previewMediaByBotId,
+          [botId]: medias,
+        },
+      },
+    };
+
+    setGlobal(global);
+  }
+});
+
 addActionHandler('requestAppWebView', async (global, actions, payload): Promise<void> => {
   const {
     botId, appName, startApp, theme, isWriteAllowed, isFromConfirm,

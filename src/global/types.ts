@@ -6,6 +6,7 @@ import type {
   ApiAvailableReaction,
   ApiBoost,
   ApiBoostsStatus,
+  ApiBotPreviewMedia,
   ApiChannelMonetizationStatistics,
   ApiChannelStatistics,
   ApiChat,
@@ -925,6 +926,7 @@ export type GlobalState = {
     statusesById: Record<string, ApiUserStatus>;
     // Obtained from GetFullUser / UserFullInfo
     fullInfoById: Record<string, ApiUserFullInfo>;
+    previewMediaByBotId: Record<string, ApiBotPreviewMedia[]>;
   };
 
   chats: {
@@ -2873,6 +2875,13 @@ export interface ActionPayloads {
     isFromBotMenu?: boolean;
     startParam?: string;
   } & WithTabId;
+  requestMainWebView: {
+    botId: string;
+    peerId: string;
+    theme?: ApiThemeParameters;
+    startParam?: string;
+    shouldMarkBotTrusted?: boolean;
+  } & WithTabId;
   prolongWebView: {
     botId: string;
     peerId: string;
@@ -2898,6 +2907,9 @@ export interface ActionPayloads {
     isWriteAllowed?: boolean;
     isFromConfirm?: boolean;
   } & WithTabId;
+  loadPreviewMedias: {
+    botId: string;
+  };
   setWebAppPaymentSlug: {
     slug?: string;
   } & WithTabId;

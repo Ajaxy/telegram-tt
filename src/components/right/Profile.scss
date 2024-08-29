@@ -71,7 +71,8 @@
 
     &.storiesArchive-list,
     &.stories-list,
-    &.media-list {
+    &.media-list,
+    &.previewMedia-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 1fr;

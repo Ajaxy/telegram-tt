@@ -511,4 +511,6 @@ export default {
   SlowModeWait: 'Slow Mode — %d',
   OpenMapWith: 'Open map with...',
   FullDateTimeFormat: '%@, %@',
+  ProfileOpenAppTerms: 'Terms of Service for Mini Apps',
+  ProfileBotOpenAppInfoLink: 'https://telegram.org/tos/mini-apps',
 } as ApiOldLangPack;

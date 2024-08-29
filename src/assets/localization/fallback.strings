@@ -1271,6 +1271,9 @@
 "MenuInstallApp" = "Install App";
 "RemoveEffect" = "Remove effect";
 "ReplyInPrivateMessage" = "Reply In Private Message";
+"ProfileOpenAppAbout" = "By launching this mini app, you agree to the {terms}.";
+"ProfileOpenAppTerms" = "Terms of Service for Mini Apps";
+"ProfileBotOpenAppInfoLink" = "https://telegram.org/tos/mini-apps";
 "MonetizationInfoTONTitle" = "What is 💎 TON?";
 "ChannelEarnLearnCoinAbout" = "TON is a blockchain platform and cryptocurrency that Telegram uses for its high speed and low commissions on transactions. {link}";
 "MonetizationBalanceZeroInfo" = "You will be able to collect rewards using Fragment, a third-party platform used by advertisers to pay for ads. {link}";

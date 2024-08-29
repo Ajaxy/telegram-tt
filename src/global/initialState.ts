@@ -97,6 +97,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byId: {},
     statusesById: {},
     fullInfoById: {},
+    previewMediaByBotId: {},
   },
 
   chats: {

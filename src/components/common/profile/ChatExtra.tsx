@@ -32,20 +32,24 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { debounce } from '../../../util/schedulers';
 import stopEvent from '../../../util/stopEvent';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { ChatAnimationTypes } from '../../left/main/hooks';
 import formatUsername from '../helpers/formatUsername';
 import renderText from '../helpers/renderText';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
 import Chat from '../../left/main/Chat';
+import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import Switcher from '../../ui/Switcher';
+import SafeLink from '../SafeLink';
 import BusinessHours from './BusinessHours';
 import UserBirthday from './UserBirthday';
 
@@ -70,6 +74,7 @@ type StateProps = {
   topicLink?: string;
   hasSavedMessages?: boolean;
   personalChannel?: ApiChat;
+  hasMainMiniApp?: boolean;
 };
 
 const DEFAULT_MAP_CONFIG = {
@@ -95,6 +100,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   topicLink,
   hasSavedMessages,
   personalChannel,
+  hasMainMiniApp,
 }) => {
   const {
     showNotification,
@@ -104,6 +110,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     openSavedDialog,
     openMapModal,
     requestCollectibleInfo,
+    requestMainWebView,
   } = getActions();
 
   const {
@@ -120,7 +127,8 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     personalChannelMessageId,
     birthday,
   } = userFullInfo || {};
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
 
@@ -177,7 +185,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     const { address, geo } = businessLocation!;
     if (!geo) {
       copyTextToClipboard(address);
-      showNotification({ message: lang('BusinessLocationCopied') });
+      showNotification({ message: oldLang('BusinessLocationCopied') });
       return;
     }
 
@@ -220,7 +228,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
       requestCollectibleInfo({ collectible: phoneNumber, peerId: peerId!, type: 'phone' });
       return;
     }
-    copy(formattedNumber!, lang('Phone'));
+    copy(formattedNumber!, oldLang('Phone'));
   });
 
   const handleUsernameClick = useLastCallback((username: ApiUsername, isChat?: boolean) => {
@@ -228,8 +236,34 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
       requestCollectibleInfo({ collectible: username.username, peerId: peerId!, type: 'username' });
       return;
     }
-    copy(formatUsername(username.username, isChat), lang(isChat ? 'Link' : 'Username'));
+    copy(formatUsername(username.username, isChat), oldLang(isChat ? 'Link' : 'Username'));
   });
+
+  const handleOpenApp = useLastCallback(() => {
+    if (!chat) {
+      return;
+    }
+    const botId = user?.id;
+    if (!botId) {
+      return;
+    }
+    const theme = extractCurrentThemeParams();
+    requestMainWebView({
+      botId,
+      peerId: botId,
+      theme,
+      shouldMarkBotTrusted: true,
+    });
+  });
+
+  const appTermsInfo = lang('ProfileOpenAppAbout', {
+    terms: (
+      <SafeLink
+        text={lang('ProfileOpenAppTerms')}
+        url={lang('ProfileBotOpenAppInfoLink')}
+      />
+    ),
+  }, { withNodes: true });
 
   if (!chat || chat.isRestricted || (isSelf && !isInSettings)) {
     return undefined;
@@ -239,7 +273,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     const [mainUsername, ...otherUsernames] = usernameList;
 
     const usernameLinks = otherUsernames.length
-      ? (lang('UsernameAlso', '%USERNAMES%') as string)
+      ? (oldLang('UsernameAlso', '%USERNAMES%') as string)
         .split('%')
         .map((s) => {
           return (s === 'USERNAMES' ? (
@@ -282,7 +316,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         <span className="title" dir="auto">{formatUsername(mainUsername.username, isChat)}</span>
         <span className="subtitle">
           {usernameLinks && <span className="other-usernames">{usernameLinks}</span>}
-          {lang(isChat ? 'Link' : 'Username')}
+          {oldLang(isChat ? 'Link' : 'Username')}
         </span>
       </ListItem>
     );
@@ -292,9 +326,9 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     <div className="ChatExtra">
       {personalChannel && (
         <div className={styles.personalChannel}>
-          <h3 className={styles.personalChannelTitle}>{lang('ProfileChannel')}</h3>
+          <h3 className={styles.personalChannelTitle}>{oldLang('ProfileChannel')}</h3>
           <span className={styles.personalChannelSubscribers}>
-            {lang('Subscribers', personalChannel.membersCount, 'i')}
+            {oldLang('Subscribers', personalChannel.membersCount, 'i')}
           </span>
           <Chat
             chatId={personalChannel.id}
@@ -310,7 +344,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         // eslint-disable-next-line react/jsx-no-bind
         <ListItem icon="phone" multiline narrow ripple onClick={handlePhoneClick}>
           <span className="title" dir="auto">{formattedNumber}</span>
-          <span className="subtitle">{lang('Phone')}</span>
+          <span className="subtitle">{oldLang('Phone')}</span>
         </ListItem>
       )}
       {activeUsernames && renderUsernames(activeUsernames)}
@@ -331,7 +365,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
               ])
             }
           </span>
-          <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
+          <span className="subtitle">{oldLang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>
       )}
       {activeChatUsernames && !isTopicInfo && renderUsernames(activeChatUsernames, true)}
@@ -342,18 +376,36 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           narrow
           ripple
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => copy(link, lang('SetUrlPlaceholder'))}
+          onClick={() => copy(link, oldLang('SetUrlPlaceholder'))}
         >
           <div className="title">{link}</div>
-          <span className="subtitle">{lang('SetUrlPlaceholder')}</span>
+          <span className="subtitle">{oldLang('SetUrlPlaceholder')}</span>
         </ListItem>
       )}
       {birthday && (
         <UserBirthday key={peerId} birthday={birthday} user={user!} isInSettings={isInSettings} />
       )}
+      { hasMainMiniApp && (
+        <ListItem
+          multiline
+          isStatic
+          narrow
+        >
+          <Button
+            className={styles.openAppButton}
+            size="smaller"
+            onClick={handleOpenApp}
+          >
+            {oldLang('ProfileBotOpenApp')}
+          </Button>
+          <div className={styles.sectionInfo}>
+            {appTermsInfo}
+          </div>
+        </ListItem>
+      )}
       {!isInSettings && (
         <ListItem icon="unmute" narrow ripple onClick={handleNotificationChange}>
-          <span>{lang('Notifications')}</span>
+          <span>{oldLang('Notifications')}</span>
           <Switcher
             id="group-notifications"
             label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
@@ -375,12 +427,12 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           onClick={handleClickLocation}
         >
           <div className="title">{businessLocation.address}</div>
-          <span className="subtitle">{lang('BusinessProfileLocation')}</span>
+          <span className="subtitle">{oldLang('BusinessProfileLocation')}</span>
         </ListItem>
       )}
       {hasSavedMessages && !isInSettings && (
         <ListItem icon="saved-messages" narrow ripple onClick={handleOpenSavedDialog}>
-          <span>{lang('SavedMessagesTab')}</span>
+          <span>{oldLang('SavedMessagesTab')}</span>
         </ListItem>
       )}
     </div>
@@ -418,6 +470,8 @@ export default memo(withGlobal<OwnProps>(
       ? selectChat(global, userFullInfo.personalChannelId)
       : undefined;
 
+    const hasMainMiniApp = user?.hasMainMiniApp;
+
     return {
       phoneCodeList,
       chat,
@@ -431,6 +485,7 @@ export default memo(withGlobal<OwnProps>(
       topicLink,
       hasSavedMessages,
       personalChannel,
+      hasMainMiniApp,
     };
   },
 )(ChatExtra));

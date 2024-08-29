@@ -253,6 +253,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.quickReplies = initialState.quickReplies;
   }
 
+  if (!cached.users.previewMediaByBotId) {
+    cached.users.previewMediaByBotId = initialState.users.previewMediaByBotId;
+  }
   if (!cached.chats.loadingParameters) {
     cached.chats.loadingParameters = initialState.chats.loadingParameters;
   }
@@ -366,7 +369,11 @@ function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['cust
 }
 
 function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
-  const { users: { byId, statusesById, fullInfoById }, currentUserId } = global;
+  const {
+    users: {
+      byId, statusesById, fullInfoById,
+    }, currentUserId,
+  } = global;
   const currentChatIds = compact(
     Object.values(global.byTabId)
       .map(({ id: tabId }) => selectCurrentMessageList(global, tabId)),
@@ -400,6 +407,7 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     byId: pick(byId, idsToSave),
     statusesById: pick(statusesById, idsToSave),
     fullInfoById: pick(fullInfoById, idsToSave),
+    previewMediaByBotId: {},
   };
 }
 

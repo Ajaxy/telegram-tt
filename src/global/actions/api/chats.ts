@@ -1485,6 +1485,20 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       });
       return;
     }
+    if (startApp !== undefined && !webAppName) {
+      const theme = extractCurrentThemeParams();
+      const chatByUsername = await fetchChatByUsername(global, username);
+      global = getGlobal();
+      const user = chatByUsername && selectUser(global, chatByUsername.id);
+      if (!chatByUsername || !chat || !user?.hasMainMiniApp) return;
+      actions.requestMainWebView({
+        botId: chatByUsername.id,
+        peerId: chat.id,
+        theme,
+        tabId,
+      });
+      return;
+    }
     if (!isWebApp) {
       await openChatByUsername(
         global, actions, {
