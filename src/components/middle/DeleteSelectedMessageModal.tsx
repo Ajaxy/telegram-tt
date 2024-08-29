@@ -155,6 +155,8 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     return !userList.some((user) => user.id === currentUserId);
   }, [userList, currentUserId]);
 
+  const shouldShowOptions = showAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup);
+
   const userNames = useMemo(() => {
     const usersById = getGlobal().users.byId;
     if (!senderList || isSchedule) return {};
@@ -162,7 +164,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     const uniqueUserIds = new Set(senderList.map((user) => user!.id));
     const userIds = Array.from(uniqueUserIds).map((userId) => usersById[userId]);
 
-    return buildCollectionByCallback(userIds, (user) => [user.id, getUserFullName(user)]);
+    return buildCollectionByCallback(userIds, (user) => [user?.id, getUserFullName(user)]);
   }, [isSchedule, senderList]);
 
   const ACTION_SPAM_OPTION: IRadioOption[] = useMemo(() => {
@@ -247,8 +249,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
   const handleDeleteMessageForSelf = useLastCallback(() => {
     if (isSchedule) {
       deleteScheduledMessages({ messageIds: selectedMessageIds! });
-    } else if (!isSenderOwner
-      && (chosenSpanOption || chosenDeleteOption || chosenBanOption) && (isGroup || isSuperGroup)) {
+    } else if (!isSenderOwner && shouldShowOptions) {
       if (chosenSpanOption) {
         const userIdList = chosenSpanOption.filter((option) => !Number.isNaN(Number(option)));
         const filteredMessageIdList = filterMessageIdByUserId(userIdList, selectedMessageIds!);
@@ -319,14 +320,18 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
 
   function renderHeader() {
     return (
-      <div className={styles.container} dir={oldLang.isRtl ? 'rtl' : undefined}>
-        {(showAdditionalOptions && !canDeleteForAll && !isSchedule) && (
+      <div
+        className={shouldShowOptions && styles.container}
+        dir={oldLang.isRtl ? 'rtl' : undefined}
+      >
+        {shouldShowOptions && (
           <AvatarList
             size="small"
             peers={userList}
           />
         )}
-        <h3 className={styles.title}>{oldLang('Chat.DeleteMessagesConfirmation', selectedMessageIds?.length)}
+        <h3 className={buildClassName(shouldShowOptions ? styles.title : styles.singleTitle)}>
+          {oldLang('Chat.DeleteMessagesConfirmation', selectedMessageIds?.length)}
         </h3>
       </div>
     );
@@ -395,7 +400,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
       <div className={styles.main}>
         {renderHeader()}
         {!showAdditionalOptions && <p>{lang('AreYouSureDeleteFewMessages')}</p>}
-        {(showAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup)) && (
+        {shouldShowOptions && (
           <>
             <p className={styles.actionTitle}>{oldLang('DeleteAdditionalActions')}</p>
             {renderAdditionalActionOptions()}

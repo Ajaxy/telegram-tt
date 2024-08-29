@@ -129,6 +129,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     return user && user.id !== currentUserId;
   }, [user, currentUserId]);
 
+  const shouldShowOptions = shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup);
+
   const userName = useMemo(() => {
     const usersById = getGlobal().users.byId;
     if (!sender || isSchedule) return '';
@@ -294,15 +296,14 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
   function renderHeader() {
     return (
-      <div className={styles.container} dir={lang.isRtl ? 'rtl' : undefined}>
-        {(shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule) && (
+      <div className={shouldShowOptions && styles.container} dir={lang.isRtl ? 'rtl' : undefined}>
+        {shouldShowOptions && (
           <Avatar
             size="small"
             peer={user!}
           />
         )}
-        <h3 className={styles.title}>{lang('DeleteSingleMessagesTitle')}
-        </h3>
+        <h3 className={shouldShowOptions ? styles.title : styles.singleTitle}>{lang('DeleteSingleMessagesTitle')}</h3>
       </div>
     );
   }
@@ -365,7 +366,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     >
       <div className={buildClassName(styles.mainContainer, 'custom-scroll')}>
         {renderHeader()}
-        {(shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup)) && (
+        {shouldShowOptions && (
           <>
             <p className={styles.actionTitle}>{lang('DeleteAdditionalActions')}</p>
             {renderAdditionalActionOptions()}
