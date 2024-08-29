@@ -413,12 +413,12 @@ export function selectOutgoingStatus<T extends GlobalState>(
 
 export function selectSender<T extends GlobalState>(global: T, message: ApiMessage): ApiPeer | undefined {
   const { senderId } = message;
+  const chat = selectChat(global, message.chatId);
   if (!senderId) {
-    return undefined;
+    return chat;
   }
 
-  const chat = selectChat(global, message.chatId);
-  if (chat && isChatChannel(chat)) return chat;
+  if (chat && isChatChannel(chat) && !chat.areProfilesShown) return chat;
 
   return selectPeer(global, senderId);
 }

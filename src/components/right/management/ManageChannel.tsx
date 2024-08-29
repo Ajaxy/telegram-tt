@@ -21,7 +21,6 @@ import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarEditable from '../../ui/AvatarEditable';
-import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
@@ -42,10 +41,8 @@ type StateProps = {
   chat: ApiChat;
   chatFullInfo?: ApiChatFullInfo;
   progress?: ManagementProgress;
-  isSignaturesShown: boolean;
   canChangeInfo?: boolean;
   canInvite?: boolean;
-  canPost?: boolean;
   exportedInvites?: ApiExportedInvite[];
   availableReactions?: ApiAvailableReaction[];
 };
@@ -58,10 +55,8 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   chat,
   chatFullInfo,
   progress,
-  isSignaturesShown,
   canChangeInfo,
   canInvite,
-  canPost,
   exportedInvites,
   isActive,
   availableReactions,
@@ -70,7 +65,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     updateChat,
-    toggleSignatures,
     closeManagement,
     leaveChannel,
     deleteChannel,
@@ -172,10 +166,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
       photo,
     });
   }, [about, chatId, photo, title, updateChat]);
-
-  const handleToggleSignatures = useCallback(() => {
-    toggleSignatures({ chatId, isEnabled: !isSignaturesShown });
-  }, [chatId, isSignaturesShown, toggleSignatures]);
 
   const handleClickSubscribers = useCallback(() => {
     onScreenSelect(ManagementScreens.ChannelSubscribers);
@@ -298,15 +288,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               {chatReactionsDescription}
             </span>
           </ListItem>
-          {canPost && (
-            <div className="ListItem narrow">
-              <Checkbox
-                checked={isSignaturesShown}
-                label={lang('ChannelSignMessages')}
-                onChange={handleToggleSignatures}
-              />
-            </div>
-          )}
         </div>
         <div className="section">
           <ListItem
@@ -369,17 +350,14 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId)!;
     const { management } = selectTabState(global);
     const { progress } = management;
-    const isSignaturesShown = Boolean(chat?.isSignaturesShown);
     const { invites } = management.byChatId[chatId] || {};
 
     return {
       chat,
       chatFullInfo: selectChatFullInfo(global, chatId),
       progress,
-      isSignaturesShown,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
       canInvite: getHasAdminRight(chat, 'inviteUsers'),
-      canPost: getHasAdminRight(chat, 'postMessages'),
       exportedInvites: invites,
       availableReactions: global.reactions.availableReactions,
     };

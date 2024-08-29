@@ -210,23 +210,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.appConfig.limits = DEFAULT_LIMITS;
   }
 
-  if (!cached.archiveSettings) {
-    cached.archiveSettings = initialState.archiveSettings;
-  }
-
-  if (!cached.stories) {
-    cached.stories = initialState.stories;
-  }
-
-  if (!cached.stories.stealthMode) {
-    cached.stories.stealthMode = initialState.stories.stealthMode;
-  }
-
-  if (!cached.stories.byPeerId) {
-    cached.stories.byPeerId = initialState.stories.byPeerId;
-    cached.stories.orderedPeerIds = initialState.stories.orderedPeerIds;
-  }
-
   if (!cached.chats.similarChannelsById) {
     cached.chats.similarChannelsById = initialState.chats.similarChannelsById;
   }
@@ -258,6 +241,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
   if (!cached.chats.loadingParameters) {
     cached.chats.loadingParameters = initialState.chats.loadingParameters;
+  }
+  if (!cached.topBotApps) {
+    cached.topBotApps = initialState.topBotApps;
   }
 }
 

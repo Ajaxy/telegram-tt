@@ -110,7 +110,8 @@ function buildApiAttachMenuIcon(icon: GramJs.AttachMenuBotIcon): ApiAttachBotIco
 
 export function buildApiBotInfo(botInfo: GramJs.BotInfo, chatId: string): ApiBotInfo {
   const {
-    description, descriptionPhoto, descriptionDocument, userId, commands, menuButton, hasPreviewMedias,
+    description, descriptionPhoto, descriptionDocument, userId, commands, menuButton, privacyPolicyUrl,
+    hasPreviewMedias,
   } = botInfo;
 
   const botId = userId && buildApiPeerId(userId, 'user');
@@ -125,6 +126,7 @@ export function buildApiBotInfo(botInfo: GramJs.BotInfo, chatId: string): ApiBot
     gif,
     photo,
     menuButton: buildApiBotMenuButton(menuButton),
+    privacyPolicyUrl,
     commands: commandsArray?.length ? commandsArray : undefined,
     hasPreviewMedia: hasPreviewMedias,
   };

@@ -228,7 +228,7 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload): Promis
   }
 
   global = getGlobal();
-  const full = await loadFullChat(global, actions, chat, tabId);
+  const full = await loadFullChat(global, actions, chat);
 
   if (full?.groupCall) {
     actions.requestMasterAndJoinGroupCall({
@@ -308,7 +308,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
 
     if (!chat) return;
 
-    await loadFullChat(global, actions, chat, tabId);
+    await loadFullChat(global, actions, chat);
     global = getGlobal();
     groupCall = selectChatGroupCall(global, chatId);
   } else if (!groupCall && id && accessHash) {

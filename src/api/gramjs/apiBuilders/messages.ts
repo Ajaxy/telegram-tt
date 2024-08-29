@@ -205,7 +205,7 @@ export function buildApiMessageWithChatId(
     isOutgoing,
     content,
     date: mtpMessage.date,
-    senderId: fromId || (mtpMessage.out && mtpMessage.post && currentUserId) || chatId,
+    senderId: fromId,
     viewsCount: mtpMessage.views,
     forwardsCount: mtpMessage.forwards,
     isScheduled,

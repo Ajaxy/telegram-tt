@@ -760,7 +760,7 @@ addActionHandler('toggleUsername', async (global, actions, payload): Promise<voi
 
 addActionHandler('toggleChatUsername', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, username, isActive, tabId = getCurrentTabId(),
+    chatId, username, isActive,
   } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.usernames) {
@@ -786,7 +786,7 @@ addActionHandler('toggleChatUsername', async (global, actions, payload): Promise
   });
 
   if (!result) {
-    actions.loadFullChat({ chatId, tabId });
+    actions.loadFullChat({ chatId });
   }
 });
 

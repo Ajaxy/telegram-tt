@@ -1,26 +1,29 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../../global';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiChatMember } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { getUserFullName, isChatChannel } from '../../../global/helpers';
+import { getHasAdminRight, getUserFullName, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
+import { partition } from '../../../util/iteratees';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: string;
+  isActive: boolean;
   onScreenSelect: (screen: ManagementScreens) => void;
   onChatMemberSelect: (memberId: string, isPromotedByCurrentUser?: boolean) => void;
   onClose: NoneToVoidFunction;
-  isActive: boolean;
 };
 
 type StateProps = {
@@ -31,6 +34,7 @@ type StateProps = {
 };
 
 const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
+  isActive,
   chat,
   isChannel,
   currentUserId,
@@ -38,8 +42,8 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
   onScreenSelect,
   onChatMemberSelect,
   onClose,
-  isActive,
 }) => {
+  const { toggleSignatures } = getActions();
   const lang = useOldLang();
 
   useHistoryBack({
@@ -47,34 +51,48 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  const canAddNewAdmins = Boolean(chat?.isCreator || chat?.adminRights?.addAdmins);
+  const areSignaturesEnabled = Boolean(chat?.areSignaturesShown);
+  const areProfilesEnabled = Boolean(chat?.areProfilesShown);
+
+  const canAddNewAdmins = Boolean(chat?.isCreator || (chat && getHasAdminRight(chat, 'addAdmins')));
+  const canToggleSignatures = isChannel && getHasAdminRight(chat!, 'postMessages');
 
   const adminMembers = useMemo(() => {
     if (!adminMembersById) {
       return [];
     }
 
-    return Object.values(adminMembersById).sort((a, b) => {
-      if (a.isOwner) {
-        return -1;
-      } else if (b.isOwner) {
-        return 1;
-      }
+    const [owner, admins] = partition(Object.values(adminMembersById), (member) => member.isOwner);
 
-      return 0;
-    });
+    return [...owner, ...admins];
   }, [adminMembersById]);
 
-  const handleAdminMemberClick = useCallback((member: ApiChatMember) => {
+  const handleAdminMemberClick = useLastCallback((member: ApiChatMember) => {
     onChatMemberSelect(member.userId, member.promotedByUserId === currentUserId);
     onScreenSelect(ManagementScreens.ChatAdminRights);
-  }, [currentUserId, onChatMemberSelect, onScreenSelect]);
+  });
 
-  const handleAddAdminClick = useCallback(() => {
+  const handleToggleSignatures = useLastCallback(() => {
+    toggleSignatures({
+      chatId: chat!.id,
+      areProfilesEnabled,
+      areSignaturesEnabled: !areSignaturesEnabled,
+    });
+  });
+
+  const handleToggleProfiles = useLastCallback(() => {
+    toggleSignatures({
+      chatId: chat!.id,
+      areProfilesEnabled: !areProfilesEnabled,
+      areSignaturesEnabled,
+    });
+  });
+
+  const handleAddAdminClick = useLastCallback(() => {
     onScreenSelect(ManagementScreens.GroupAddAdmins);
-  }, [onScreenSelect]);
+  });
 
-  const getMemberStatus = useCallback((member: ApiChatMember) => {
+  const getMemberStatus = useLastCallback((member: ApiChatMember) => {
     if (member.isOwner) {
       return lang('ChannelCreator');
     }
@@ -88,7 +106,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
     }
 
     return lang('ChannelAdmin');
-  }, [lang]);
+  });
 
   return (
     <div className="Management">
@@ -106,9 +124,9 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
 
         <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
           <p className="text-muted" dir="auto">
-            {isChannel
-              ? 'You can add administrators to help you manage your channel.'
-              : 'You can add administrators to help you manage your group.'}
+            {lang(isChannel
+              ? 'Channel.Management.AddModeratorHelp'
+              : 'Group.Management.AddModeratorHelp')}
           </p>
 
           {adminMembers.map((member) => (
@@ -134,6 +152,32 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
             <i className="icon icon-add-user-filled" />
           </FloatingActionButton>
         </div>
+
+        {canToggleSignatures && (
+          <div className="section">
+            <div className="ListItem narrow">
+              <Checkbox
+                checked={areSignaturesEnabled}
+                label={lang('ChannelSignMessages')}
+                onChange={handleToggleSignatures}
+              />
+            </div>
+            {areSignaturesEnabled && (
+              <>
+                <div className="ListItem narrow">
+                  <Checkbox
+                    checked={areProfilesEnabled}
+                    label={lang('ChannelSignMessagesWithProfile')}
+                    onChange={handleToggleProfiles}
+                  />
+                </div>
+                <p className="section-info">
+                  {lang('ChannelSignProfilesInfo')}
+                </p>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -142,7 +186,6 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-
     return {
       chat,
       currentUserId: global.currentUserId,

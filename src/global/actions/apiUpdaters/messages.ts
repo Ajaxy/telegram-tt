@@ -463,7 +463,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const tabId = getCurrentTabId();
         global = deleteChatMessages(global, chatId, Object.keys(messagesById).map(Number));
         setGlobal(global);
-        actions.loadFullChat({ chatId, force: true, tabId });
+        actions.loadFullChat({ chatId, force: true });
         actions.loadViewportMessages({ chatId, threadId: MAIN_THREAD_ID, tabId });
       }
 

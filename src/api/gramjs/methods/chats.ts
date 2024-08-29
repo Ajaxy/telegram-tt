@@ -46,6 +46,7 @@ import {
   buildApiMissingInvitedUser,
   buildApiSponsoredMessageReportResult,
   buildApiTopic,
+  buildChatMember,
   buildChatMembers,
   getPeerKey,
 } from '../apiBuilders/chats';
@@ -354,12 +355,12 @@ export async function fetchSavedChats({
 }
 
 export function fetchFullChat(chat: ApiChat) {
-  const { id, accessHash, adminRights } = chat;
+  const { id, accessHash } = chat;
 
   const input = buildInputEntity(id, accessHash);
 
   return input instanceof GramJs.InputChannel
-    ? getFullChannelInfo(id, accessHash!, adminRights)
+    ? getFullChannelInfo(chat)
     : getFullChatInfo(id);
 }
 
@@ -598,10 +599,10 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
 }
 
 async function getFullChannelInfo(
-  id: string,
-  accessHash: string,
-  adminRights?: ApiChatAdminRights,
+  chat: ApiChat,
 ): Promise<FullChatData | undefined> {
+  const { id, adminRights } = chat;
+  const accessHash = chat.accessHash!;
   const result = await invokeRequest(new GramJs.channels.GetFullChannel({
     channel: buildInputEntity(id, accessHash) as GramJs.InputChannel,
   }));
@@ -659,14 +660,23 @@ async function getFullChannelInfo(
     canViewParticipants && await fetchMembers(id, accessHash, 'admin')
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
-  const chats = result.chats.map((chat) => buildApiChatFromPreview(chat)).filter(Boolean);
+  const memberInfoRequest = !chat.isNotJoined && chat.type === 'chatTypeChannel'
+    ? await fetchMember({ chat }) : undefined;
+  const memberInfo = memberInfoRequest?.member;
+  const joinInfo = memberInfo?.joinedDate ? {
+    joinedDate: memberInfo.joinedDate,
+    inviter: memberInfo.inviterId,
+    isViaRequest: memberInfo.isViaRequest,
+  } : undefined;
+
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 
   if (result?.chats?.length > 1) {
     updateLocalDb(result);
 
     const [, mtpLinkedChat] = result.chats;
-    const chat = buildApiChatFromPreview(mtpLinkedChat);
-    if (chat) {
+    const linkedChat = buildApiChatFromPreview(mtpLinkedChat);
+    if (linkedChat) {
       onUpdate({
         '@type': 'updateChat',
         id: chat.id,
@@ -676,7 +686,7 @@ async function getFullChannelInfo(
   }
 
   if (result.fullChat.pts) {
-    updateChannelState(id, result.fullChat.pts);
+    updateChannelState(chat.id, result.fullChat.pts);
   }
 
   const statusesById = {
@@ -703,6 +713,7 @@ async function getFullChannelInfo(
       canViewStatistics: canViewStats,
       canViewMonetization,
       isPreHistoryHidden: hiddenPrehistory,
+      joinInfo,
       members,
       kickedMembers,
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
@@ -1284,14 +1295,19 @@ export async function updateChatAbout(chat: ApiChat, about: string) {
 }
 
 export function toggleSignatures({
-  chat, isEnabled,
-}: { chat: ApiChat; isEnabled: boolean }) {
+  chat, areSignaturesEnabled, areProfilesEnabled,
+}: {
+  chat: ApiChat;
+  areSignaturesEnabled: boolean;
+  areProfilesEnabled: boolean;
+}) {
   const { id, accessHash } = chat;
   const channel = buildInputEntity(id, accessHash);
 
   return invokeRequest(new GramJs.channels.ToggleSignatures({
     channel: channel as GramJs.InputChannel,
-    enabled: isEnabled,
+    signaturesEnabled: areSignaturesEnabled || undefined,
+    profilesEnabled: areProfilesEnabled || undefined,
   }), {
     shouldReturnTrue: true,
   });
@@ -1342,6 +1358,44 @@ export async function fetchMembers(
     members: buildChatMembers(result),
     users,
     userStatusesById,
+  };
+}
+
+export async function fetchMember({
+  chat,
+  peer,
+}: {
+  chat: ApiChat;
+  peer?: ApiPeer;
+}) {
+  const participant = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
+
+  const result = await invokeRequest(new GramJs.channels.GetParticipant({
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    participant,
+  }), {
+    abortControllerChatId: chat.id,
+  });
+
+  if (!result) {
+    return undefined;
+  }
+
+  updateLocalDb(result);
+
+  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const member = buildChatMember(result.participant);
+
+  if (!member) {
+    return undefined;
+  }
+
+  return {
+    member,
+    users,
+    userStatusesById,
+    chats,
   };
 }
 

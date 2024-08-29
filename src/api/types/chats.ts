@@ -30,7 +30,8 @@ export interface ApiChat {
   isVerified?: true;
   isMuted?: boolean;
   muteUntil?: number;
-  isSignaturesShown?: boolean;
+  areSignaturesShown?: boolean;
+  areProfilesShown?: boolean;
   hasPrivateLink?: boolean;
   accessHash?: string;
   isMin?: boolean;
@@ -120,6 +121,11 @@ export interface ApiChatFullInfo {
     chatId: string;
     maxMessageId?: number;
   };
+  joinInfo?: {
+    joinedDate: number;
+    inviter?: string;
+    isViaRequest?: boolean;
+  };
   linkedChatId?: string;
   botCommands?: ApiBotCommand[];
   enabledReactions?: ApiChatReactions;
@@ -152,6 +158,7 @@ export interface ApiChatMember {
   customTitle?: string;
   isAdmin?: true;
   isOwner?: true;
+  isViaRequest?: true;
 }
 
 export interface ApiChatAdminRights {

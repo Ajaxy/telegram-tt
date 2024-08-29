@@ -1423,7 +1423,7 @@ export interface ActionPayloads {
   deleteChatMember: {
     chatId: string;
     userId: string;
-  } & WithTabId;
+  };
   openPreviousChat: WithTabId | undefined;
   editChatFolders: {
     chatId: string;
@@ -2094,7 +2094,8 @@ export interface ActionPayloads {
   };
   toggleSignatures: {
     chatId: string;
-    isEnabled: boolean;
+    areSignaturesEnabled: boolean;
+    areProfilesEnabled: boolean;
   };
   loadGroupsForDiscussion: undefined;
   linkDiscussionGroup: {
@@ -2103,7 +2104,7 @@ export interface ActionPayloads {
   } & WithTabId;
   unlinkDiscussionGroup: {
     channelId: string;
-  } & WithTabId;
+  };
 
   openSavedDialog: {
     chatId: string;
@@ -2148,15 +2149,15 @@ export interface ActionPayloads {
     chatId: string;
     withPhotos?: boolean;
     force?: boolean;
-  } & WithTabId;
+  };
   updateChatPhoto: {
     chatId: string;
     photo: ApiPhoto;
-  } & WithTabId;
+  };
   deleteChatPhoto: {
     chatId: string;
     photo: ApiPhoto;
-  } & WithTabId;
+  };
   openChatWithDraft: {
     chatId?: string;
     threadId?: ThreadId;
@@ -2389,7 +2390,7 @@ export interface ActionPayloads {
     chatId: string;
     enabledReactions?: ApiChatReactions;
     reactionsLimit?: number;
-  } & WithTabId;
+  };
 
   startActiveReaction: {
     containerId: string;
@@ -2740,7 +2741,7 @@ export interface ActionPayloads {
   // Stickers
   loadStickers: {
     stickerSetInfo: ApiStickerSetInfo;
-  } & WithTabId;
+  };
   loadAnimatedEmojis: undefined;
   loadGreetingStickers: undefined;
   loadGenericEmojiEffects: undefined;
@@ -2759,7 +2760,7 @@ export interface ActionPayloads {
   clearRecentStickers: undefined;
 
   loadStickerSets: undefined;
-  loadAddedStickers: WithTabId | undefined;
+  loadAddedStickers: undefined;
   loadRecentStickers: undefined;
   loadFavoriteStickers: undefined;
   loadFeaturedStickers: undefined;
@@ -3005,7 +3006,7 @@ export interface ActionPayloads {
     chatId: string;
     username: string;
     isActive: boolean;
-  } & WithTabId;
+  };
   sortChatUsernames: {
     chatId: string;
     usernames: string[];

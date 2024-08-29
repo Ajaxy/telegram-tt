@@ -93,6 +93,7 @@ export function groupMessages(
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
         || message.isOutgoing !== nextMessage.isOutgoing
+        || message.postAuthorTitle !== nextMessage.postAuthorTitle
         || (isActionMessage(message) && !message.content.action?.phoneCall)
         || (isActionMessage(nextMessage) && !nextMessage.content.action?.phoneCall)
         || message.inlineButtons

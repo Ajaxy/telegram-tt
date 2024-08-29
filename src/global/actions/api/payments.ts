@@ -1018,7 +1018,9 @@ addActionHandler('loadStarStatus', async (global): Promise<void> => {
       },
     },
   };
-  global = appendStarsTransactions(global, 'all', status.history, status.nextOffset);
+  if (status.history) {
+    global = appendStarsTransactions(global, 'all', status.history, status.nextOffset);
+  }
   setGlobal(global);
 });
 
@@ -1044,6 +1046,8 @@ addActionHandler('loadStarsTransactions', async (global, actions, payload): Prom
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
 
   global = updateStarsBalance(global, result.balance);
-  global = appendStarsTransactions(global, type, result.history, result.nextOffset);
+  if (result.history) {
+    global = appendStarsTransactions(global, type, result.history, result.nextOffset);
+  }
   setGlobal(global);
 });

@@ -51,7 +51,7 @@ function buildApiChatFieldsFromPeerEntity(
   const hasVideoAvatar = 'photo' in peerEntity && peerEntity.photo && 'hasVideo' in peerEntity.photo
     && peerEntity.photo.hasVideo;
   const avatarPhotoId = ('photo' in peerEntity) && peerEntity.photo ? buildAvatarPhotoId(peerEntity.photo) : undefined;
-  const isSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
+  const areSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
   const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
   const isScam = Boolean('scam' in peerEntity && peerEntity.scam);
   const isFake = Boolean('fake' in peerEntity && peerEntity.fake);
@@ -66,11 +66,13 @@ function buildApiChatFieldsFromPeerEntity(
   const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
     ? buildApiEmojiStatus(peerEntity.emojiStatus) : undefined;
   const boostLevel = ('level' in peerEntity) ? peerEntity.level : undefined;
+  const areProfilesShown = Boolean('signatureProfiles' in peerEntity && peerEntity.signatureProfiles);
 
   return omitUndefined<PeerEntityApiChatFields>({
     isMin,
     hasPrivateLink,
-    isSignaturesShown,
+    areSignaturesShown,
+    areProfilesShown,
     usernames,
     accessHash,
     hasVideoAvatar,
@@ -328,6 +330,7 @@ export function buildChatMember(
     bannedRights: 'bannedRights' in member ? omitVirtualClassFields(member.bannedRights) : undefined,
     adminRights: 'adminRights' in member ? omitVirtualClassFields(member.adminRights) : undefined,
     customTitle: 'rank' in member ? member.rank : undefined,
+    isViaRequest: 'viaRequest' in member ? member.viaRequest : undefined,
     ...((member instanceof GramJs.ChannelParticipantAdmin || member instanceof GramJs.ChatParticipantAdmin) && {
       isAdmin: true,
     }),

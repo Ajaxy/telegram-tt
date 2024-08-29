@@ -52,7 +52,18 @@ export function updateGlobalSearchResults<T extends GlobalState>(
       (newId) => foundIdsForType.includes(getSearchResultKey(newFoundMessagesById[newId])),
     )
   ) {
-    return updateGlobalSearchFetchingStatus(global, { messages: false }, tabId);
+    global = updateGlobalSearchFetchingStatus(global, { messages: false }, tabId);
+    return updateGlobalSearch(global, {
+      resultsByType: {
+        ...(selectTabState(global, tabId).globalSearch || {}).resultsByType,
+        [type]: {
+          totalCount,
+          nextOffsetId,
+          nextOffsetRate,
+          nextOffsetPeerId,
+        },
+      },
+    }, tabId);
   }
 
   const prevFoundIds = foundIdsForType || [];

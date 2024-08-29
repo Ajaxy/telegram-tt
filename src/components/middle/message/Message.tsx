@@ -816,7 +816,8 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const viaBusinessBotTitle = viaBusinessBot ? getSenderTitle(lang, viaBusinessBot) : undefined;
 
-  const signature = viaBusinessBotTitle || (isChannel && message.postAuthorTitle)
+  const canShowPostAuthor = !message.senderId;
+  const signature = viaBusinessBotTitle || (canShowPostAuthor && message.postAuthorTitle)
     || ((asForwarded || isChatWithSelf) && forwardInfo?.postAuthorTitle)
     || undefined;
 

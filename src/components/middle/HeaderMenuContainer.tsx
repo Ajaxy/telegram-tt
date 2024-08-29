@@ -60,10 +60,6 @@ const BOT_BUTTONS: Record<string, { icon: IconName; label: string }> = {
     icon: 'bots',
     label: 'BotSettings',
   },
-  privacy: {
-    icon: 'info',
-    label: 'Privacy',
-  },
   help: {
     icon: 'help',
     label: 'BotHelp',
@@ -103,6 +99,7 @@ export type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   botCommands?: ApiBotCommand[];
+  botPrivacyPolicyUrl?: string;
   isPrivate?: boolean;
   isMuted?: boolean;
   isTopic?: boolean;
@@ -135,6 +132,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   anchor,
   isChannel,
   botCommands,
+  botPrivacyPolicyUrl,
   withForumActions,
   isTopic,
   isForum,
@@ -195,6 +193,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openCreateTopicPanel,
     openEditTopicPanel,
     openChat,
+    openUrl,
     toggleManagement,
     togglePeerTranslations,
     blockUser,
@@ -401,9 +400,10 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
 
   const botButtons = useMemo(() => {
-    return botCommands?.map(({ command }) => {
+    const commandButtons = botCommands?.map(({ command }) => {
       const cmd = BOT_BUTTONS[command];
       if (!cmd) return undefined;
+
       const handleClick = () => {
         sendBotCommand({ command: `/${command}` });
         closeMenu();
@@ -420,7 +420,28 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
         </MenuItem>
       );
     });
-  }, [botCommands, closeMenu, lang, sendBotCommand]);
+
+    const hasPrivacyCommand = botCommands?.some(({ command }) => command === 'privacy');
+
+    const privacyButton = isBot && (
+      <MenuItem
+        icon="privacy-policy"
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={() => {
+          if (hasPrivacyCommand && !botPrivacyPolicyUrl) {
+            sendBotCommand({ command: '/privacy' });
+          } else {
+            openUrl({ url: botPrivacyPolicyUrl || lang('BotDefaultPrivacyPolicy') });
+          }
+          closeMenu();
+        }}
+      >
+        {lang('BotPrivacyPolicy')}
+      </MenuItem>
+    );
+
+    return [...commandButtons || [], privacyButton].filter(Boolean);
+  }, [botCommands, lang, botPrivacyPolicyUrl, isBot]);
 
   const deleteTitle = useMemo(() => {
     if (!chat) return undefined;
@@ -766,6 +787,7 @@ export default memo(withGlobal<OwnProps>(
       canGiftPremium,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       botCommands: chatBot ? userFullInfo?.botInfo?.commands : undefined,
+      botPrivacyPolicyUrl: chatBot ? userFullInfo?.botInfo?.privacyPolicyUrl : undefined,
       isChatInfoShown: selectTabState(global).isChatInfoShown
         && currentChatId === chatId && currentThreadId === threadId,
       canCreateTopic,

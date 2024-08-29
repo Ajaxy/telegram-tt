@@ -143,6 +143,7 @@ type StateProps = {
   isTopicInfo?: boolean;
   isSavedDialog?: boolean;
   forceScrollProfileTab?: boolean;
+  isSynced?: boolean;
 };
 
 type TabProps = {
@@ -202,6 +203,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   isTopicInfo,
   isSavedDialog,
   forceScrollProfileTab,
+  isSynced,
 }) => {
   const {
     setSharedMediaSearchType,
@@ -293,10 +295,10 @@ const Profile: FC<OwnProps & StateProps> = ({
   }, [chatId, botPreviewMedia, hasPreviewMediaTab]);
 
   useEffect(() => {
-    if (isChannel && !similarChannels) {
+    if (isChannel && !similarChannels && isSynced) {
       loadChannelRecommendations({ chatId });
     }
-  }, [chatId, isChannel, similarChannels]);
+  }, [chatId, isChannel, similarChannels, isSynced]);
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
@@ -824,6 +826,7 @@ export default memo(withGlobal<OwnProps>(
       isCurrentUserPremium,
       isTopicInfo,
       isSavedDialog,
+      isSynced: global.isSynced,
       limitSimilarChannels: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),

@@ -11,7 +11,7 @@ export {
 
 export {
   fetchChats, fetchFullChat, searchChats, requestChatUpdate, fetchChatSettings,
-  saveDraft, fetchChat, updateChatMutedState, updateTopicMutedState,
+  saveDraft, fetchChat, updateChatMutedState, updateTopicMutedState, fetchMember,
   createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
   toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
   fetchChatFolders, editChatFolder, deleteChatFolder, sortChatFolders, fetchRecommendedChatFolders,

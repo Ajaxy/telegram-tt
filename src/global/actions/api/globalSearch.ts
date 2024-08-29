@@ -1,5 +1,6 @@
 import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic, ApiUser,
+  ApiUserStatus,
 } from '../../../api/types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
@@ -16,6 +17,7 @@ import {
   addChats,
   addMessages,
   addUsers,
+  addUserStatuses,
   updateGlobalSearch,
   updateGlobalSearchFetchingStatus,
   updateGlobalSearchResults,
@@ -98,6 +100,11 @@ addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionRetur
   const offsetRate = (resultsByType?.[type])?.nextOffsetRate;
   const offsetPeerId = (resultsByType?.[type])?.nextOffsetPeerId;
 
+  // Stop loading if we have all the messages
+  if (resultsByType?.[type]?.totalCount && resultsByType[type]!.totalCount! >= resultsByType[type]!.foundIds.length) {
+    return;
+  }
+
   const chat = chatId ? selectChat(global, chatId) : undefined;
   const offsetPeer = offsetPeerId ? selectChat(global, offsetPeerId) : undefined;
 
@@ -161,6 +168,7 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   let result: {
     messages: ApiMessage[];
     users: ApiUser[];
+    userStatusesById?: Record<number, ApiUserStatus>;
     chats: ApiChat[];
     topics?: ApiTopic[];
     totalTopicsCount?: number;
@@ -241,7 +249,7 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   }
 
   const {
-    messages, users, chats, totalCount, nextOffsetRate, nextOffsetId, nextOffsetPeerId,
+    messages, users, chats, userStatusesById, totalCount, nextOffsetRate, nextOffsetId, nextOffsetPeerId,
   } = result;
 
   if (chats.length) {
@@ -250,6 +258,10 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
 
   if (users.length) {
     global = addUsers(global, buildCollectionByKey(users, 'id'));
+  }
+
+  if (userStatusesById) {
+    global = addUserStatuses(global, userStatusesById);
   }
 
   if (messages.length) {

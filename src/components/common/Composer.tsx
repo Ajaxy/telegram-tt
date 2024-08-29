@@ -470,10 +470,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [isReady, chatId, threadId, isInStoryViewer]);
 
   useEffect(() => {
-    if (chatId && chat && !sendAsPeerIds && isReady && isChatSuperGroup(chat)) {
+    const isChannelWithProfiles = isChannel && chat?.areProfilesShown;
+    if (chatId && chat && !sendAsPeerIds && isReady && (isChatSuperGroup(chat) || isChannelWithProfiles)) {
       loadSendAs({ chatId });
     }
-  }, [chat, chatId, isReady, loadSendAs, sendAsPeerIds]);
+  }, [chat, chatId, isChannel, isReady, loadSendAs, sendAsPeerIds]);
 
   const shouldAnimateSendAsButtonRef = useRef(false);
   useSyncEffect(([prevChatId, prevSendAsPeerIds]) => {

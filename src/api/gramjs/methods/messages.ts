@@ -23,6 +23,7 @@ import type {
   ApiStory,
   ApiStorySkipped,
   ApiUser,
+  ApiUserStatus,
   ApiVideo,
   MediaContent,
   OnApiUpdate,
@@ -61,7 +62,7 @@ import {
   buildUploadingMedia,
 } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
-import { buildApiUser } from '../apiBuilders/users';
+import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import {
   buildInputEntity,
   buildInputMediaDocument,
@@ -106,6 +107,7 @@ type TranslateTextParams = ({
 type SearchResults = {
   messages: ApiMessage[];
   users: ApiUser[];
+  userStatusesById: Record<number, ApiUserStatus>;
   chats: ApiChat[];
   totalCount: number;
   nextOffsetRate?: number;
@@ -1216,7 +1218,7 @@ export async function searchMessagesInChat({
   updateLocalDb(result);
 
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const users = result.users.map(buildApiUser).filter(Boolean);
+  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   dispatchThreadInfoUpdates(result.messages);
 
@@ -1233,6 +1235,7 @@ export async function searchMessagesInChat({
   return {
     chats,
     users,
+    userStatusesById,
     messages,
     totalCount,
     nextOffsetId,
@@ -1304,7 +1307,7 @@ export async function searchMessagesGlobal({
   updateLocalDb(result);
 
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const users = result.users.map(buildApiUser).filter(Boolean);
+  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   dispatchThreadInfoUpdates(result.messages);
 
@@ -1323,6 +1326,7 @@ export async function searchMessagesGlobal({
   return {
     messages,
     users,
+    userStatusesById,
     chats,
     totalCount,
     nextOffsetRate,
@@ -1356,7 +1360,7 @@ export async function searchHashtagPosts({
   updateLocalDb(result);
 
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const users = result.users.map(buildApiUser).filter(Boolean);
+  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   dispatchThreadInfoUpdates(result.messages);
 
@@ -1375,6 +1379,7 @@ export async function searchHashtagPosts({
   return {
     messages,
     users,
+    userStatusesById,
     chats,
     totalCount,
     nextOffsetRate,

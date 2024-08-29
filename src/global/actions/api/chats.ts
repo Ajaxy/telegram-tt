@@ -547,7 +547,7 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
 
 addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, force, tabId = getCurrentTabId(), withPhotos,
+    chatId, force, withPhotos,
   } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -555,7 +555,7 @@ addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType =>
   }
 
   const loadChat = async () => {
-    await loadFullChat(global, actions, chat, tabId);
+    await loadFullChat(global, actions, chat);
     if (withPhotos) {
       actions.loadMoreProfilePhotos({ peerId: chatId, shouldInvalidateCache: true });
     }
@@ -813,6 +813,8 @@ addActionHandler('leaveChannel', async (global, actions, payload): Promise<void>
     global = deleteChatMessages(global, chatId, localMessageIds);
     setGlobal(global);
   }
+
+  actions.loadFullChat({ chatId, force: true });
 });
 
 addActionHandler('deleteChannel', (global, actions, payload): ActionReturnType => {
@@ -1724,12 +1726,12 @@ addActionHandler('updateChat', async (global, actions, payload): Promise<void> =
   setGlobal(global);
 
   if (photo) {
-    actions.loadFullChat({ chatId, tabId, withPhotos: true });
+    actions.loadFullChat({ chatId, withPhotos: true });
   }
 });
 
 addActionHandler('updateChatPhoto', async (global, actions, payload): Promise<void> => {
-  const { photo, chatId, tabId = getCurrentTabId() } = payload;
+  const { photo, chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
@@ -1738,11 +1740,11 @@ addActionHandler('updateChatPhoto', async (global, actions, payload): Promise<vo
     accessHash: chat.accessHash,
     photo,
   });
-  actions.loadFullChat({ chatId, tabId, withPhotos: true });
+  actions.loadFullChat({ chatId, withPhotos: true });
 });
 
 addActionHandler('deleteChatPhoto', async (global, actions, payload): Promise<void> => {
-  const { photo, chatId, tabId = getCurrentTabId() } = payload;
+  const { photo, chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
@@ -1761,18 +1763,18 @@ addActionHandler('deleteChatPhoto', async (global, actions, payload): Promise<vo
   global = deletePeerPhoto(global, chatId, photo.id);
   setGlobal(global);
 
-  actions.loadFullChat({ chatId, tabId, withPhotos: true });
+  actions.loadFullChat({ chatId, withPhotos: true });
 });
 
 addActionHandler('toggleSignatures', (global, actions, payload): ActionReturnType => {
-  const { chatId, isEnabled } = payload;
+  const { chatId, areProfilesEnabled, areSignaturesEnabled } = payload;
   const chat = selectChat(global, chatId);
 
   if (!chat) {
     return;
   }
 
-  void callApi('toggleSignatures', { chat, isEnabled });
+  void callApi('toggleSignatures', { chat, areProfilesEnabled, areSignaturesEnabled });
 });
 
 addActionHandler('loadGroupsForDiscussion', async (global): Promise<void> => {
@@ -1835,7 +1837,7 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload): Promis
 });
 
 addActionHandler('unlinkDiscussionGroup', async (global, actions, payload): Promise<void> => {
-  const { channelId, tabId = getCurrentTabId() } = payload;
+  const { channelId } = payload;
 
   const channel = selectChat(global, channelId);
   if (!channel) {
@@ -1851,7 +1853,7 @@ addActionHandler('unlinkDiscussionGroup', async (global, actions, payload): Prom
   await callApi('setDiscussionGroup', { channel });
   if (chat) {
     global = getGlobal();
-    loadFullChat(global, actions, chat, tabId);
+    loadFullChat(global, actions, chat);
   }
 });
 
@@ -1928,11 +1930,11 @@ addActionHandler('addChatMembers', async (global, actions, payload): Promise<voi
   }
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Closed, tabId });
   global = getGlobal();
-  loadFullChat(global, actions, chat, tabId);
+  loadFullChat(global, actions, chat);
 });
 
 addActionHandler('deleteChatMember', async (global, actions, payload): Promise<void> => {
-  const { chatId, userId, tabId = getCurrentTabId() } = payload;
+  const { chatId, userId } = payload;
   const chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
 
@@ -1942,7 +1944,7 @@ addActionHandler('deleteChatMember', async (global, actions, payload): Promise<v
 
   await callApi('deleteChatMember', chat, user);
   global = getGlobal();
-  loadFullChat(global, actions, chat, tabId);
+  loadFullChat(global, actions, chat);
 });
 
 addActionHandler('toggleIsProtected', (global, actions, payload): ActionReturnType => {
@@ -1958,7 +1960,7 @@ addActionHandler('toggleIsProtected', (global, actions, payload): ActionReturnTy
 
 addActionHandler('setChatEnabledReactions', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, enabledReactions, reactionsLimit, tabId = getCurrentTabId(),
+    chatId, enabledReactions, reactionsLimit,
   } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
@@ -1970,7 +1972,7 @@ addActionHandler('setChatEnabledReactions', async (global, actions, payload): Pr
   });
 
   global = getGlobal();
-  void loadFullChat(global, actions, chat, tabId);
+  void loadFullChat(global, actions, chat);
 });
 
 addActionHandler('fetchChat', (global, actions, payload): ActionReturnType => {
@@ -2851,7 +2853,6 @@ async function loadChats(
 
 export async function loadFullChat<T extends GlobalState>(
   global: T, actions: RequiredGlobalActions, chat: ApiChat,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const result = await callApi('fetchFullChat', chat);
   if (!result) {
@@ -2898,7 +2899,6 @@ export async function loadFullChat<T extends GlobalState>(
         id: stickerSet.id,
         accessHash: stickerSet.accessHash,
       },
-      tabId,
     });
   }
 
@@ -2910,7 +2910,6 @@ export async function loadFullChat<T extends GlobalState>(
         id: emojiSet.id,
         accessHash: emojiSet.accessHash,
       },
-      tabId,
     });
   }
 
@@ -3143,7 +3142,7 @@ export async function ensureIsSuperGroup<T extends GlobalState>(
     return undefined;
   }
 
-  actions.loadFullChat({ chatId: newChat.id, tabId });
+  actions.loadFullChat({ chatId: newChat.id });
   actions.openChat({ id: newChat.id, tabId });
 
   return newChat;

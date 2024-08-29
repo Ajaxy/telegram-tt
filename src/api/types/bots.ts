@@ -74,6 +74,7 @@ export interface ApiBotInfo {
   photo?: ApiPhoto;
   gif?: ApiVideo;
   menuButton: ApiBotMenuButton;
+  privacyPolicyUrl?: string;
   hasPreviewMedia?: true;
 }
 

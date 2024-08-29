@@ -197,6 +197,7 @@
     "channels.getMessages",
     "channels.getParticipants",
     "channels.getParticipant",
+    "channels.getParticipant",
     "channels.getChannels",
     "channels.getFullChannel",
     "channels.createChannel",

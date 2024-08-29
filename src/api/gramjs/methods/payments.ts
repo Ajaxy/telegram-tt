@@ -453,7 +453,7 @@ export async function fetchStarsStatus() {
     users,
     chats,
     nextOffset: result.nextOffset,
-    history: result.history.map(buildApiStarsTransaction),
+    history: result.history?.map(buildApiStarsTransaction),
     balance: result.balance.toJSNumber(),
   };
 }
@@ -488,7 +488,7 @@ export async function fetchStarsTransactions({
     users,
     chats,
     nextOffset: result.nextOffset,
-    history: result.history.map(buildApiStarsTransaction),
+    history: result.history?.map(buildApiStarsTransaction),
     balance: result.balance.toJSNumber(),
   };
 }

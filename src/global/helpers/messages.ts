@@ -181,7 +181,7 @@ export function isServiceNotificationMessage(message: ApiMessage) {
 }
 
 export function isAnonymousOwnMessage(message: ApiMessage) {
-  return Boolean(message.senderId) && !isUserId(message.senderId!) && isOwnMessage(message);
+  return Boolean(message.senderId) && !isUserId(message.senderId) && isOwnMessage(message);
 }
 
 export function getSenderTitle(lang: LangFn, sender: ApiPeer) {

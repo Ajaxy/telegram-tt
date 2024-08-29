@@ -21,6 +21,7 @@ import {
   addChats,
   addMessages,
   addUsers,
+  addUserStatuses,
   initializeChatMediaSearchResults,
   mergeWithChatMediaSearchSegment,
   setChatMediaSearchLoading,
@@ -125,7 +126,7 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
   }
 
   const {
-    chats, users, messages, totalCount, nextOffsetId, nextOffsetRate, nextOffsetPeerId,
+    chats, users, userStatusesById, messages, totalCount, nextOffsetId, nextOffsetRate, nextOffsetPeerId,
   } = result;
 
   const newFoundIds = messages.map(getSearchResultKey);
@@ -143,6 +144,7 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
 
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addUserStatuses(global, userStatusesById);
   global = addMessages(global, messages);
   global = updateMiddleSearch(global, resultChatId, threadId, {
     fetchingQuery: undefined,

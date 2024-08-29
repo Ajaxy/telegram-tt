@@ -532,7 +532,6 @@ export function toggleSimilarChannels<T extends GlobalState>(
   chatId: string,
 ) {
   const similarChannels = global.chats.similarChannelsById[chatId];
-  const shouldShowInChat = !global.chats.similarChannelsById[chatId].shouldShowInChat;
 
   return {
     ...global,
@@ -542,7 +541,7 @@ export function toggleSimilarChannels<T extends GlobalState>(
         ...global.chats.similarChannelsById,
         [chatId]: {
           ...similarChannels,
-          shouldShowInChat,
+          shouldShowInChat: !similarChannels.shouldShowInChat,
         },
       },
     },
