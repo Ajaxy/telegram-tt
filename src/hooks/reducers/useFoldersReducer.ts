@@ -17,20 +17,6 @@ export type FolderChatType = {
   )>;
 };
 
-export const INCLUDED_CHAT_TYPES: FolderChatType[] = [
-  { icon: 'user', title: 'FilterContacts', key: 'contacts' },
-  { icon: 'non-contacts', title: 'FilterNonContacts', key: 'nonContacts' },
-  { icon: 'group', title: 'FilterGroups', key: 'groups' },
-  { icon: 'channel', title: 'FilterChannels', key: 'channels' },
-  { icon: 'bots', title: 'FilterBots', key: 'bots' },
-];
-
-export const EXCLUDED_CHAT_TYPES: FolderChatType[] = [
-  { icon: 'mute', title: 'FilterMuted', key: 'excludeMuted' },
-  { icon: 'archive', title: 'FilterArchived', key: 'excludeArchived' },
-  { icon: 'readchats', title: 'FilterRead', key: 'excludeRead' },
-];
-
 const INCLUDE_FILTER_FIELDS: Array<keyof FolderIncludeFilters> = [
   'includedChatIds', 'bots', 'channels', 'groups', 'contacts', 'nonContacts',
 ];

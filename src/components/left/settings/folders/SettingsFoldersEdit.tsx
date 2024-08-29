@@ -16,13 +16,10 @@ import { selectCanShareFolder } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
+import { CUSTOM_PEER_EXCLUDED_CHAT_TYPES, CUSTOM_PEER_INCLUDED_CHAT_TYPES } from '../../../../util/objects/customPeer';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
-import {
-  EXCLUDED_CHAT_TYPES,
-  INCLUDED_CHAT_TYPES,
-  selectChatFilters,
-} from '../../../../hooks/reducers/useFoldersReducer';
+import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useOldLang from '../../../../hooks/useOldLang';
 
@@ -216,8 +213,8 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
   function renderChatType(key: string, mode: 'included' | 'excluded') {
     const chatType = mode === 'included'
-      ? INCLUDED_CHAT_TYPES.find(({ key: typeKey }) => typeKey === key)
-      : EXCLUDED_CHAT_TYPES.find(({ key: typeKey }) => typeKey === key);
+      ? CUSTOM_PEER_INCLUDED_CHAT_TYPES.find(({ type: typeKey }) => typeKey === key)
+      : CUSTOM_PEER_EXCLUDED_CHAT_TYPES.find(({ type: typeKey }) => typeKey === key);
 
     if (!chatType) {
       return undefined;
@@ -225,13 +222,15 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
     return (
       <ListItem
-        key={chatType.key}
+        key={chatType.type}
         className="settings-folders-list-item mb-1"
-        icon={chatType.icon}
         narrow
         inactive
       >
-        {lang(chatType.title)}
+        <PrivateChatInfo
+          avatarSize="small"
+          customPeer={chatType}
+        />
       </ListItem>
     );
   }
