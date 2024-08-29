@@ -16,7 +16,7 @@ export function getRequestInputInvoice<T extends GlobalState>(
     const {
       userId, stars, amount, currency,
     } = inputInvoice;
-    const user = selectUser(global, userId!);
+    const user = selectUser(global, userId);
 
     if (!user) return undefined;
 

@@ -5,7 +5,7 @@ import { withGlobal } from '../../../global';
 import type { ApiChat, ApiUser } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
-import { getPrivateChatUserId, isUserId, selectIsChatMuted } from '../../../global/helpers';
+import { isUserId, selectIsChatMuted } from '../../../global/helpers';
 import {
   selectChat, selectIsChatPinned, selectNotifyExceptions,
   selectNotifySettings, selectUser,
@@ -76,10 +76,6 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
 
   const buttonRef = useSelectWithEnter(handleClick);
 
-  if (!chat) {
-    return undefined;
-  }
-
   return (
     <ListItem
       className="chat-item-clickable search-result"
@@ -92,14 +88,14 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
           userId={chatId}
           withUsername={withUsername}
           withStory
-          avatarSize="large"
+          avatarSize="medium"
           storyViewerOrigin={StoryViewerOrigin.SearchResult}
         />
       ) : (
         <GroupChatInfo
           chatId={chatId}
           withUsername={withUsername}
-          avatarSize="large"
+          avatarSize="medium"
           withStory
           storyViewerOrigin={StoryViewerOrigin.SearchResult}
         />
@@ -127,8 +123,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    const privateChatUserId = chat && getPrivateChatUserId(chat);
-    const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+    const user = selectUser(global, chatId);
     const isPinned = selectIsChatPinned(global, chatId);
     const isMuted = chat
       ? selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global))

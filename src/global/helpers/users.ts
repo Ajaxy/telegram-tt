@@ -77,6 +77,9 @@ export function getUserStatus(
   }
 
   if (user.type && user.type === 'userTypeBot') {
+    if (user.botActiveUsers) {
+      return lang('BotUsers', user.botActiveUsers, 'i');
+    }
     return lang('Bot');
   }
 

@@ -40,6 +40,7 @@ export interface ApiUser {
   maxStoryId?: number;
   color?: ApiPeerColor;
   canEditBot?: boolean;
+  botActiveUsers?: number;
 }
 
 export interface ApiUserFullInfo {

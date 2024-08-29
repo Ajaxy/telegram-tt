@@ -46,18 +46,6 @@
     background: var(--color-background);
     top: -1px;
     z-index: 1;
-
-    .Tab {
-      padding: 1rem 0.75rem;
-
-      &_inner {
-        white-space: nowrap;
-      }
-
-      .platform {
-        bottom: -1rem;
-      }
-    }
   }
 
   .Transition {

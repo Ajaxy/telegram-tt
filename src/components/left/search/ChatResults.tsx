@@ -238,7 +238,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
   return (
     <InfiniteScroll
-      className="LeftSearch custom-scroll"
+      className="LeftSearch--content custom-scroll"
       items={foundMessages}
       onLoadMore={handleLoadMore}
       // To prevent scroll jumps caused by delayed local results rendering

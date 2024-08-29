@@ -105,10 +105,11 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
             {lang('Recent')}
 
             <Button
+              className="clear-recent-chats"
               round
               size="smaller"
               color="translucent"
-              ariaLabel="Clear recent chats"
+              ariaLabel={lang('Clear')}
               onClick={handleClearRecentlyFoundChats}
               isRtl={lang.isRtl}
             >

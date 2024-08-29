@@ -8,7 +8,6 @@ import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { getIsDownloading, getMessageDownloadableMedia } from '../../../global/helpers';
-import buildClassName from '../../../util/buildClassName';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -58,7 +57,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
         });
       });
     }
-  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
   }, [currentType, searchMessagesGlobal, searchQuery]);
 
   const foundMessages = useMemo(() => {
@@ -89,36 +88,35 @@ const AudioResults: FC<OwnProps & StateProps> = ({
 
       const media = getMessageDownloadableMedia(message)!;
       return (
-        <div
-          className="ListItem small-icon"
-          key={message.id}
-        >
+        <>
           {shouldDrawDateDivider && (
             <p
-              className={buildClassName(
-                'section-heading',
-                isFirst && 'section-heading-first',
-                !isFirst && 'section-heading-with-border',
-              )}
+              className="section-heading"
+              key={message.date}
               dir={lang.isRtl ? 'rtl' : undefined}
             >
               {formatMonthAndYear(lang, new Date(message.date * 1000))}
             </p>
           )}
-          <Audio
+          <div
+            className="ListItem small-icon"
             key={message.id}
-            theme={theme}
-            message={message}
-            origin={AudioOrigin.Search}
-            senderTitle={getSenderName(lang, message, chatsById, usersById)}
-            date={message.date}
-            className="scroll-item"
-            onPlay={handlePlayAudio}
-            onDateClick={handleMessageFocus}
-            canDownload={!chatsById[message.chatId]?.isProtected && !message.isProtected}
-            isDownloading={getIsDownloading(activeDownloads, media)}
-          />
-        </div>
+          >
+            <Audio
+              key={message.id}
+              theme={theme}
+              message={message}
+              origin={AudioOrigin.Search}
+              senderTitle={getSenderName(lang, message, chatsById, usersById)}
+              date={message.date}
+              className="scroll-item"
+              onPlay={handlePlayAudio}
+              onDateClick={handleMessageFocus}
+              canDownload={!chatsById[message.chatId]?.isProtected && !message.isProtected}
+              isDownloading={getIsDownloading(activeDownloads, media)}
+            />
+          </div>
+        </>
       );
     });
   }
@@ -126,7 +124,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([searchQuery], SLIDE_TRANSITION_DURATION) && !isLoading;
 
   return (
-    <div className="LeftSearch">
+    <div className="LeftSearch--content">
       <InfiniteScroll
         className="search-content documents-list custom-scroll"
         items={foundMessages}

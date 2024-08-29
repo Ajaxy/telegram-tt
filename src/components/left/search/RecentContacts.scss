@@ -77,16 +77,10 @@
   .recent-chats-header {
     display: flex;
     align-items: center;
+  }
 
-    .Button {
-      margin-left: auto;
-    }
-
-    &[dir="rtl"] {
-      .Button {
-        margin-left: 0;
-        margin-right: auto;
-      }
-    }
+  .clear-recent-chats {
+    position: absolute;
+    inset-inline-end: 0.5rem;
   }
 }

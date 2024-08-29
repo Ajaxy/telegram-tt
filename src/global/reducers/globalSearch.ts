@@ -79,7 +79,7 @@ export function updateGlobalSearchResults<T extends GlobalState>(
 }
 
 export function updateGlobalSearchFetchingStatus<T extends GlobalState>(
-  global: T, newState: { chats?: boolean; messages?: boolean },
+  global: T, newState: { chats?: boolean; messages?: boolean; botApps?: boolean },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   return updateGlobalSearch(global, {

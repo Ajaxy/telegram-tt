@@ -82,6 +82,24 @@ export async function fetchTopInlineBots() {
   };
 }
 
+export async function fetchTopBotApps() {
+  const topPeers = await invokeRequest(new GramJs.contacts.GetTopPeers({
+    botsApp: true,
+  }));
+
+  if (!(topPeers instanceof GramJs.contacts.TopPeers)) {
+    return undefined;
+  }
+
+  const users = topPeers.users.map(buildApiUser).filter(Boolean);
+  const ids = users.map(({ id }) => id);
+
+  return {
+    ids,
+    users,
+  };
+}
+
 export async function fetchInlineBot({ username }: { username: string }) {
   const resolvedPeer = await invokeRequest(new GramJs.contacts.ResolveUsername({ username }));
 
@@ -581,4 +599,31 @@ export function setBotInfo({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchPopularAppBots({
+  offset = '', limit,
+}: {
+  offset?: string;
+  limit?: number;
+}) {
+  const result = await invokeRequest(new GramJs.bots.GetPopularAppBots({
+    offset,
+    limit,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  addEntitiesToLocalDb(result.users);
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.users.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+
+  return {
+    users,
+    chats,
+    nextOffset: result.nextOffset,
+  };
 }

@@ -7,7 +7,7 @@
   width: auto;
   margin: 0;
   border: none;
-  padding: 0.625rem 0.25rem;
+  padding: 0.625rem 1.125rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   border-top-left-radius: var(--border-radius-messages-small);
@@ -44,7 +44,7 @@
     }
   }
 
-  > span {
+  .Tab_inner {
     position: relative;
     display: flex;
     align-items: center;
@@ -85,7 +85,7 @@
 
   .platform {
     position: absolute;
-    bottom: calc(-0.625rem - 1px);
+    bottom: -0.625rem;
     left: 0;
     opacity: 0;
     background-color: var(--color-primary);

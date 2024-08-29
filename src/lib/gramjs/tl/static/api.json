@@ -228,6 +228,7 @@
     "bots.canSendMessage",
     "bots.allowSendMessage",
     "bots.invokeWebViewCustomMethod",
+    "bots.getPopularAppBots",
     "bots.setBotInfo",
     "payments.getPaymentForm",
     "payments.getPaymentReceipt",

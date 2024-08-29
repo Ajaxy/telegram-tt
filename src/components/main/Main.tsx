@@ -259,6 +259,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadQuickReplies,
     loadStarStatus,
     loadAvailableEffects,
+    loadTopBotApps,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -341,6 +342,7 @@ const Main: FC<OwnProps & StateProps> = ({
       loadGenericEmojiEffects();
       loadSavedReactionTags();
       loadAuthorizations();
+      loadTopBotApps();
     }
   }, [isMasterTab, isSynced]);
 

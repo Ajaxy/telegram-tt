@@ -66,7 +66,7 @@ export {
 
 export {
   answerCallbackButton, setBotInfo, fetchTopInlineBots, fetchInlineBot, fetchInlineBotResults,
-  sendInlineBotResult, startBot,
+  sendInlineBotResult, startBot, fetchPopularAppBots, fetchTopBotApps,
   requestWebView, requestSimpleWebView, sendWebViewData, prolongWebView, loadAttachBots, toggleAttachBot, fetchBotApp,
   requestBotUrlAuth, requestLinkUrlAuth, acceptBotUrlAuth, acceptLinkUrlAuth, loadAttachBot, requestAppWebView,
   allowBotSendMessages, fetchBotCanSendMessage, invokeWebViewCustomMethod,

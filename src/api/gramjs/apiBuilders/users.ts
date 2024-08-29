@@ -60,6 +60,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
 
   const {
     id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
+    bot, botActiveUsers, botInlinePlaceholder, botAttachMenu, botCanEdit,
   } = mtpUser;
   const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto ? Boolean(mtpUser.photo.hasVideo) : undefined;
   const avatarPhotoId = mtpUser.photo && buildAvatarPhotoId(mtpUser.photo);
@@ -80,7 +81,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     type: userType,
     firstName,
     lastName,
-    canEditBot: Boolean(mtpUser.botCanEdit),
+    canEditBot: botCanEdit,
     ...(userType === 'userTypeBot' && { canBeInvitedToGroup: !mtpUser.botNochats }),
     ...(usernames && { usernames }),
     phoneNumber: mtpUser.phone || '',
@@ -92,8 +93,9 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     areStoriesHidden: Boolean(mtpUser.storiesHidden),
     maxStoryId: storiesMaxId,
     hasStories: Boolean(storiesMaxId) && !storiesUnavailable,
-    ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
-    ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachBot: mtpUser.botAttachMenu }),
+    ...(bot && botInlinePlaceholder && { botPlaceholder: botInlinePlaceholder }),
+    ...(bot && botAttachMenu && { isAttachBot: botAttachMenu }),
+    botActiveUsers,
     color: mtpUser.color && buildApiPeerColor(mtpUser.color),
   };
 }

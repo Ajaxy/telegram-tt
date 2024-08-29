@@ -213,6 +213,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   topPeers: {},
 
   topInlineBots: {},
+  topBotApps: {},
 
   activeSessions: {
     byHash: {},

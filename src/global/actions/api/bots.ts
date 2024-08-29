@@ -261,6 +261,32 @@ addActionHandler('loadTopInlineBots', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadTopBotApps', async (global): Promise<void> => {
+  const { lastRequestedAt } = global.topBotApps;
+  if (lastRequestedAt && getServerTime() - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
+    return;
+  }
+
+  const result = await callApi('fetchTopBotApps');
+  if (!result) {
+    return;
+  }
+
+  const { ids, users } = result;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = {
+    ...global,
+    topBotApps: {
+      ...global.topBotApps,
+      userIds: ids,
+      lastRequestedAt: getServerTime(),
+    },
+  };
+  setGlobal(global);
+});
+
 addActionHandler('queryInlineBot', async (global, actions, payload): Promise<void> => {
   const {
     chatId, username, query, offset,

@@ -300,6 +300,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
       'contactList',
       'topPeers',
       'topInlineBots',
+      'topBotApps',
       'recentEmojis',
       'recentCustomEmojis',
       'push',

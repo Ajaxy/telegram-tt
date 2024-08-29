@@ -223,7 +223,7 @@
     }
 
     .ListItem-button {
-      padding: 0.5625rem;
+      padding: 0.375rem;
     }
 
     &.contact-list-item {
@@ -237,7 +237,7 @@
     }
 
     .Avatar {
-      margin-right: 0.5rem;
+      margin-right: 0.75rem;
     }
 
     .info {
@@ -270,6 +270,7 @@
     .typing-status {
       font-size: 1rem;
       margin: 0;
+      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       text-align: initial;

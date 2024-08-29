@@ -10,7 +10,6 @@ import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { getIsDownloading, getMessageDocument } from '../../../global/helpers';
-import buildClassName from '../../../util/buildClassName';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
 import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -69,7 +68,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
         });
       });
     }
-  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
   }, [searchQuery]);
 
   const foundMessages = useMemo(() => {
@@ -95,36 +94,35 @@ const FileResults: FC<OwnProps & StateProps> = ({
       const shouldDrawDateDivider = isFirst
         || toYearMonth(message.date) !== toYearMonth(foundMessages[index - 1].date);
       return (
-        <div
-          className="ListItem small-icon"
-          key={message.id}
-        >
+        <>
           {shouldDrawDateDivider && (
             <p
-              className={buildClassName(
-                'section-heading',
-                isFirst && 'section-heading-first',
-                !isFirst && 'section-heading-with-border',
-              )}
+              className="section-heading"
               dir={lang.isRtl ? 'rtl' : undefined}
+              key={message.date}
             >
               {formatMonthAndYear(lang, new Date(message.date * 1000))}
             </p>
           )}
-          <Document
-            document={getMessageDocument(message)!}
-            message={message}
-            withDate
-            datetime={message.date}
-            smaller
-            sender={getSenderName(lang, message, chatsById, usersById)}
-            className="scroll-item"
-            isDownloading={getIsDownloading(activeDownloads, message.content.document!)}
-            shouldWarnAboutSvg={shouldWarnAboutSvg}
-            observeIntersection={observeIntersectionForMedia}
-            onDateClick={handleMessageFocus}
-          />
-        </div>
+          <div
+            className="ListItem small-icon"
+            key={message.id}
+          >
+            <Document
+              document={getMessageDocument(message)!}
+              message={message}
+              withDate
+              datetime={message.date}
+              smaller
+              sender={getSenderName(lang, message, chatsById, usersById)}
+              className="scroll-item"
+              isDownloading={getIsDownloading(activeDownloads, message.content.document!)}
+              shouldWarnAboutSvg={shouldWarnAboutSvg}
+              observeIntersection={observeIntersectionForMedia}
+              onDateClick={handleMessageFocus}
+            />
+          </div>
+        </>
       );
     });
   }
@@ -132,7 +130,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([searchQuery], SLIDE_TRANSITION_DURATION) && !isLoading;
 
   return (
-    <div ref={containerRef} className="LeftSearch">
+    <div ref={containerRef} className="LeftSearch--content">
       <InfiniteScroll
         className="search-content documents-list custom-scroll"
         items={foundMessages}

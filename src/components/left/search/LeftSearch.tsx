@@ -20,6 +20,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import AudioResults from './AudioResults';
+import BotAppResults from './BotAppResults';
 import ChatMessageResults from './ChatMessageResults';
 import ChatResults from './ChatResults';
 import FileResults from './FileResults';
@@ -43,6 +44,7 @@ type StateProps = {
 const TABS = [
   { type: GlobalSearchContent.ChatList, title: 'SearchAllChatsShort' },
   { type: GlobalSearchContent.ChannelList, title: 'ChannelsTab' },
+  { type: GlobalSearchContent.BotApps, title: 'AppsTab' },
   { type: GlobalSearchContent.Media, title: 'SharedMediaTab2' },
   { type: GlobalSearchContent.Links, title: 'SharedLinksTab2' },
   { type: GlobalSearchContent.Files, title: 'SharedFilesTab2' },
@@ -52,7 +54,7 @@ const TABS = [
 
 const CHAT_TABS = [
   { type: GlobalSearchContent.ChatList, title: 'All Messages' },
-  ...TABS.slice(2), // Skip ChatList and ChannelList, replaced with All Messages
+  ...TABS.slice(3), // Skip ChatList, ChannelList and BotApps, replaced with All Messages
 ];
 
 const LeftSearch: FC<OwnProps & StateProps> = ({
@@ -143,6 +145,13 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
                 <AudioResults
                   key="voice"
                   isVoice
+                  searchQuery={searchQuery}
+                />
+              );
+            case GlobalSearchContent.BotApps:
+              return (
+                <BotAppResults
+                  key="botApps"
                   searchQuery={searchQuery}
                 />
               );

@@ -112,6 +112,38 @@ addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionRetur
   });
 });
 
+addActionHandler('searchPopularBotApps', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const popularBotApps = selectTabState(global, tabId).globalSearch.popularBotApps;
+  const offset = popularBotApps?.nextOffset;
+  if (popularBotApps?.peerIds && !offset) return; // Already fetched all
+
+  global = updateGlobalSearchFetchingStatus(global, { botApps: true }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchPopularAppBots', { offset });
+
+  global = getGlobal();
+  if (!result) {
+    global = updateGlobalSearchFetchingStatus(global, { botApps: false }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  const peerIds = result.users.map(({ id }) => id);
+  global = updateGlobalSearch(global, {
+    popularBotApps: {
+      peerIds: [...(popularBotApps?.peerIds || []), ...peerIds],
+      nextOffset: result.nextOffset,
+    },
+  }, tabId);
+  global = updateGlobalSearchFetchingStatus(global, { botApps: false }, tabId);
+
+  setGlobal(global);
+});
+
 async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   query?: string;
   type: ApiGlobalMessageSearchType;

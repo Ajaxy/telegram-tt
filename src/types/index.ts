@@ -291,6 +291,7 @@ export enum LeftColumnContent {
 export enum GlobalSearchContent {
   ChatList,
   ChannelList,
+  BotApps,
   Media,
   Links,
   Files,

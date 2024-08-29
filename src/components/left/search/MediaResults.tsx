@@ -123,7 +123,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   );
 
   return (
-    <div ref={containerRef} className="LeftSearch">
+    <div ref={containerRef} className="LeftSearch--content LeftSearch--media">
       <InfiniteScroll
         className={classNames}
         items={foundMessages}

@@ -376,6 +376,7 @@ export type TabState = {
     fetchingStatus?: {
       chats?: boolean;
       messages?: boolean;
+      botApps?: boolean;
     };
     isClosing?: boolean;
     localResults?: {
@@ -383,6 +384,10 @@ export type TabState = {
     };
     globalResults?: {
       peerIds?: string[];
+    };
+    popularBotApps?: {
+      peerIds: string[];
+      nextOffset?: string;
     };
     resultsByType?: Partial<Record<ApiGlobalMessageSearchType, {
       totalCount?: number;
@@ -1120,6 +1125,11 @@ export type GlobalState = {
     lastRequestedAt?: number;
   };
 
+  topBotApps: {
+    userIds?: string[];
+    lastRequestedAt?: number;
+  };
+
   activeSessions: {
     byHash: Record<string, ApiSession>;
     orderedHashes: string[];
@@ -1491,6 +1501,7 @@ export interface ActionPayloads {
   searchMessagesGlobal: {
     type: ApiGlobalMessageSearchType;
   } & WithTabId;
+  searchPopularBotApps: WithTabId | undefined;
   addRecentlyFoundChatId: {
     id: string;
   };
@@ -2800,6 +2811,7 @@ export interface ActionPayloads {
     chatId?: string;
   } & WithTabId;
   loadTopInlineBots: undefined;
+  loadTopBotApps: undefined;
   queryInlineBot: {
     chatId: string;
     username: string;

@@ -115,7 +115,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
     && !foundTopicIds?.length;
 
   return (
-    <div className="LeftSearch">
+    <div className="LeftSearch--content">
       <InfiniteScroll
         className="search-content custom-scroll chat-list"
         items={foundMessages}
