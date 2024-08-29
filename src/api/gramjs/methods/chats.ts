@@ -679,8 +679,8 @@ async function getFullChannelInfo(
     if (linkedChat) {
       onUpdate({
         '@type': 'updateChat',
-        id: chat.id,
-        chat,
+        id: linkedChat.id,
+        chat: linkedChat,
       });
     }
   }
