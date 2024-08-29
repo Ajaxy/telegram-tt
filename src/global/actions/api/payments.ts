@@ -761,6 +761,20 @@ addActionHandler('openBoostStatistics', async (global, actions, payload): Promis
   setGlobal(global);
 });
 
+addActionHandler('openMonetizationStatistics', (global, actions, payload): ActionReturnType => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  global = updateTabState(global, {
+    monetizationStatistics: {
+      chatId,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
 addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<void> => {
   const { isGifts, tabId = getCurrentTabId() } = payload || {};
   let tabState = selectTabState(global, tabId);

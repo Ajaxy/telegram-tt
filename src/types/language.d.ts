@@ -1512,6 +1512,16 @@ export interface LangPair {
   'MenuInstallApp': undefined;
   'RemoveEffect': undefined;
   'ReplyInPrivateMessage': undefined;
+  'MonetizationInfoTONTitle': undefined;
+  'ChannelEarnLearnCoinAbout': {
+    'link': string | number;
+  };
+  'MonetizationBalanceZeroInfo': {
+    'link': string | number;
+  };
+  'ChannelEarnAbout': {
+    'link': string | number;
+  };
   'AriaSearchOlderResult': undefined;
   'AriaSearchNewerResult': undefined;
   'CreditsBoxHistoryEntryGiftOutAbout': {

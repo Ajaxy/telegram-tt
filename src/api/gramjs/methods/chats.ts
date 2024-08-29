@@ -640,6 +640,7 @@ async function getFullChannelInfo(
     emojiset,
     boostsApplied,
     boostsUnrestrict,
+    canViewRevenue: canViewMonetization,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -700,6 +701,7 @@ async function getFullChannelInfo(
       } : undefined,
       canViewMembers: canViewParticipants,
       canViewStatistics: canViewStats,
+      canViewMonetization,
       isPreHistoryHidden: hiddenPrehistory,
       members,
       kickedMembers,

@@ -35,6 +35,7 @@ import Profile from './Profile';
 import RightHeader from './RightHeader';
 import BoostStatistics from './statistics/BoostStatistics';
 import MessageStatistics from './statistics/MessageStatistics.async';
+import MonetizationStatistics from './statistics/MonetizationStatistics';
 import Statistics from './statistics/Statistics.async';
 import StoryStatistics from './statistics/StoryStatistics.async';
 import StickerSearch from './StickerSearch.async';
@@ -102,6 +103,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     closeEditTopicPanel,
     closeBoostStatistics,
     setShouldCloseRightColumn,
+    closeMonetizationStatistics,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -120,6 +122,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const isMessageStatistics = contentKey === RightColumnContent.MessageStatistics;
   const isStoryStatistics = contentKey === RightColumnContent.StoryStatistics;
   const isBoostStatistics = contentKey === RightColumnContent.BoostStatistics;
+  const isMonetizationStatistics = contentKey === RightColumnContent.MonetizationStatistics;
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
@@ -196,6 +199,9 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         break;
       case RightColumnContent.BoostStatistics:
         closeBoostStatistics();
+        break;
+      case RightColumnContent.MonetizationStatistics:
+        closeMonetizationStatistics();
         break;
       case RightColumnContent.StickerSearch:
         blurSearchInput();
@@ -329,6 +335,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         return <Statistics chatId={chatId!} />;
       case RightColumnContent.BoostStatistics:
         return <BoostStatistics />;
+      case RightColumnContent.MonetizationStatistics:
+        return <MonetizationStatistics />;
       case RightColumnContent.MessageStatistics:
         return <MessageStatistics chatId={chatId!} isActive={isOpen && isActive} />;
       case RightColumnContent.StoryStatistics:
@@ -365,6 +373,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           isManagement={isManagement}
           isStatistics={isStatistics}
           isBoostStatistics={isBoostStatistics}
+          isMonetizationStatistics={isMonetizationStatistics}
           isMessageStatistics={isMessageStatistics}
           isStoryStatistics={isStoryStatistics}
           isStickerSearch={isStickerSearch}

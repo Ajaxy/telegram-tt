@@ -1,7 +1,7 @@
 .root {
   padding: 1rem 0.75rem;
   margin-bottom: 1rem;
-  border-bottom: 1px solid var(--color-borders);
+  border-bottom: 0.0625rem solid var(--color-borders);
 }
 
 .header {
@@ -13,10 +13,10 @@
 }
 
 .title {
-  margin-right: 2em;
-  font-size: 16px;
+  margin-right: 2rem;
+  font-size: 1rem;
   color: var(--text-color);
-  line-height: 30px;
+  line-height: 1.875rem;
   text-transform: lowercase;
 
   &:first-letter {
@@ -60,4 +60,17 @@
   &.negative {
     color: var(--color-error);
   }
+}
+
+.decimalPart {
+  font-size: 0.875rem;
+}
+
+.decimalUsdPart {
+  font-size: 0.6875rem;
+}
+
+.toncoin {
+  margin-inline: -0.125rem 0.3125rem;
+  color: var(--color-primary);
 }

@@ -6,6 +6,7 @@ import type {
   ApiAvailableReaction,
   ApiBoost,
   ApiBoostsStatus,
+  ApiChannelMonetizationStatistics,
   ApiChannelStatistics,
   ApiChat,
   ApiChatAdminRights,
@@ -603,6 +604,7 @@ export type TabState = {
     currentMessageId?: number;
     currentStory?: ApiPostStatistics;
     currentStoryId?: number;
+    monetization?: ApiChannelMonetizationStatistics;
   };
 
   newContact?: {
@@ -788,6 +790,10 @@ export type TabState = {
       count: number;
       list: ApiBoost[];
     };
+  };
+
+  monetizationStatistics?: {
+    chatId: string;
   };
 
   giftCodeModal?: {
@@ -1800,6 +1806,9 @@ export interface ActionPayloads {
     name: string;
     isPercentage?: boolean;
   } & WithTabId;
+  loadChannelMonetizationStatistics: {
+    chatId: string;
+  } & WithTabId;
 
   // ui
   dismissDialog: WithTabId | undefined;
@@ -2532,6 +2541,11 @@ export interface ActionPayloads {
     slots: number[];
     chatId: string;
   } & WithTabId;
+
+  openMonetizationStatistics: {
+    chatId: string;
+  } & WithTabId;
+  closeMonetizationStatistics: WithTabId | undefined;
 
   // Media Viewer & Audio Player
   openMediaViewer: {

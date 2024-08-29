@@ -47,6 +47,7 @@ type OwnProps = {
   isStatistics?: boolean;
   isBoostStatistics?: boolean;
   isMessageStatistics?: boolean;
+  isMonetizationStatistics?: boolean;
   isStoryStatistics?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
@@ -91,6 +92,7 @@ enum HeaderContent {
   MessageStatistics,
   StoryStatistics,
   BoostStatistics,
+  MonetizationStatistics,
   Management,
   ManageInitial,
   ManageChannelSubscribers,
@@ -130,6 +132,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isStatistics,
   isMessageStatistics,
   isStoryStatistics,
+  isMonetizationStatistics,
   isBoostStatistics,
   isStickerSearch,
   isGifSearch,
@@ -297,6 +300,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     HeaderContent.CreateTopic
   ) : isEditingTopic ? (
     HeaderContent.EditTopic
+  ) : isMonetizationStatistics ? (
+    HeaderContent.MonetizationStatistics
   ) : undefined; // When column is closed
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
@@ -430,6 +435,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3 className="title">{lang('Stats.StoryTitle')}</h3>;
       case HeaderContent.BoostStatistics:
         return <h3 className="title">{lang('Boosts')}</h3>;
+      case HeaderContent.MonetizationStatistics:
+        return <h3 className="title">{lang('lng_channel_earn_title')}</h3>;
       case HeaderContent.SharedMedia:
         return <h3 className="title">{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:

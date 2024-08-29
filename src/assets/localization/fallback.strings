@@ -1271,6 +1271,10 @@
 "MenuInstallApp" = "Install App";
 "RemoveEffect" = "Remove effect";
 "ReplyInPrivateMessage" = "Reply In Private Message";
+"MonetizationInfoTONTitle" = "What is 💎 TON?";
+"ChannelEarnLearnCoinAbout" = "TON is a blockchain platform and cryptocurrency that Telegram uses for its high speed and low commissions on transactions. {link}";
+"MonetizationBalanceZeroInfo" = "You will be able to collect rewards using Fragment, a third-party platform used by advertisers to pay for ads. {link}";
+"ChannelEarnAbout" = "Telegram shares 50% of the revenue from ads displayed in your channel as rewards. {link}";
 "AriaSearchOlderResult" = "Focus next result";
 "AriaSearchNewerResult" = "Focus previous result";
 "CreditsBoxHistoryEntryGiftOutAbout" = "With Stars, {user} will be able to unlock content and services on Telegram. {link}"

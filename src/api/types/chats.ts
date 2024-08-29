@@ -126,6 +126,7 @@ export interface ApiChatFullInfo {
   reactionsLimit?: number;
   sendAsId?: string;
   canViewStatistics?: boolean;
+  canViewMonetization?: boolean;
   recentRequesterIds?: string[];
   requestsPending?: number;
   statisticsDcId?: number;

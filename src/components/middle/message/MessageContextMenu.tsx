@@ -115,7 +115,7 @@ type OwnProps = {
   onClosePoll?: NoneToVoidFunction;
   onShowSeenBy?: NoneToVoidFunction;
   onShowReactors?: NoneToVoidFunction;
-  onAboutAds?: NoneToVoidFunction;
+  onAboutAdsClick?: NoneToVoidFunction;
   onSponsoredHide?: NoneToVoidFunction;
   onSponsorInfo?: NoneToVoidFunction;
   onSponsoredReport?: NoneToVoidFunction;
@@ -205,7 +205,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onShowReactors,
   onToggleReaction,
   onCopyMessages,
-  onAboutAds,
+  onAboutAdsClick,
   onSponsoredHide,
   onSponsorInfo,
   onSponsoredReport,
@@ -461,7 +461,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           <MenuItem icon="channel" onClick={onSponsorInfo}>{lang('SponsoredMessageSponsor')}</MenuItem>
         )}
         {isSponsoredMessage && (
-          <MenuItem icon="info" onClick={onAboutAds}>
+          <MenuItem icon="info" onClick={onAboutAdsClick}>
             {lang(message.canReport ? 'AboutRevenueSharingAds' : 'SponsoredMessageInfo')}
           </MenuItem>
         )}

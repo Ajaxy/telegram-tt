@@ -8,6 +8,7 @@ import type {
 import { STATISTICS_PUBLIC_FORWARDS_LIMIT } from '../../../config';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
+  buildChannelMonetizationStatistics,
   buildChannelStatistics,
   buildGraph,
   buildGroupStatistics,
@@ -37,6 +38,22 @@ export async function fetchChannelStatistics({
     stats: buildChannelStatistics(result),
     users: [],
   };
+}
+
+export async function fetchChannelMonetizationStatistics({
+  chat, dcId,
+}: { chat: ApiChat; dcId?: number }) {
+  const result = await invokeRequest(new GramJs.stats.GetBroadcastRevenueStats({
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+  }), {
+    dcId,
+  });
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildChannelMonetizationStatistics(result);
 }
 
 export async function fetchGroupStatistics({

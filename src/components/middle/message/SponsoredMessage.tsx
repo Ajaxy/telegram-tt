@@ -188,7 +188,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           isOpen={isContextMenuOpen}
           anchor={contextMenuPosition}
           message={message!}
-          onAboutAds={openAboutAdsModal}
+          onAboutAdsClick={openAboutAdsModal}
           onReportAd={handleReportSponsoredMessage}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
@@ -196,7 +196,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
       )}
       <AboutAdsModal
         isOpen={isAboutAdsModalOpen}
-        isRevenueSharing={message.canReport}
+        isMonetizationSharing={message.canReport}
         onClose={closeAboutAdsModal}
       />
     </div>

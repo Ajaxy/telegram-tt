@@ -47,6 +47,8 @@ export function selectRightColumnContentKey<T extends GlobalState>(
     RightColumnContent.Statistics
   ) : tabState.boostStatistics ? (
     RightColumnContent.BoostStatistics
+  ) : tabState.monetizationStatistics ? (
+    RightColumnContent.MonetizationStatistics
   ) : tabState.stickerSearch.query !== undefined ? (
     RightColumnContent.StickerSearch
   ) : tabState.gifSearch.query !== undefined ? (

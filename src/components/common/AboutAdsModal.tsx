@@ -1,6 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 
+import type { TableAboutData } from '../modals/common/TableAboutModal';
+
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
@@ -8,27 +10,25 @@ import useSelectorSignal from '../../hooks/data/useSelectorSignal';
 import useDerivedState from '../../hooks/useDerivedState';
 import useOldLang from '../../hooks/useOldLang';
 
+import TableAboutModal from '../modals/common/TableAboutModal';
 import Button from '../ui/Button';
-import ListItem from '../ui/ListItem';
 import Modal from '../ui/Modal';
-import Separator from '../ui/Separator';
-import Icon from './icons/Icon';
 import SafeLink from './SafeLink';
 
 import styles from './AboutAdsModal.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
-  isRevenueSharing?: boolean;
+  isMonetizationSharing?: boolean;
   onClose: NoneToVoidFunction;
 };
 
 const AboutAdsModal: FC<OwnProps> = ({
   isOpen,
-  isRevenueSharing,
+  isMonetizationSharing,
   onClose,
 }) => {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
 
   const minLevelSignal = useSelectorSignal((global) => global.appConfig?.channelRestrictAdsLevelMin);
   const minLevelToRestrictAds = useDerivedState(minLevelSignal);
@@ -36,84 +36,89 @@ const AboutAdsModal: FC<OwnProps> = ({
   const regularAdContent = useMemo(() => {
     return (
       <>
-        <h3>{lang('SponsoredMessageInfoScreen.Title')}</h3>
-        <p>{renderText(lang('SponsoredMessageInfoDescription1'), ['br'])}</p>
-        <p>{renderText(lang('SponsoredMessageInfoDescription2'), ['br'])}</p>
-        <p>{renderText(lang('SponsoredMessageInfoDescription3'), ['br'])}</p>
+        <h3>{oldLang('SponsoredMessageInfoScreen.Title')}</h3>
+        <p>{renderText(oldLang('SponsoredMessageInfoDescription1'), ['br'])}</p>
+        <p>{renderText(oldLang('SponsoredMessageInfoDescription2'), ['br'])}</p>
+        <p>{renderText(oldLang('SponsoredMessageInfoDescription3'), ['br'])}</p>
         <p>
           <SafeLink
-            url={lang('SponsoredMessageAlertLearnMoreUrl')}
-            text={lang('SponsoredMessageAlertLearnMoreUrl')}
+            url={oldLang('SponsoredMessageAlertLearnMoreUrl')}
+            text={oldLang('SponsoredMessageAlertLearnMoreUrl')}
           />
         </p>
-        <p>{renderText(lang('SponsoredMessageInfoDescription4'), ['br'])}</p>
+        <p>{renderText(oldLang('SponsoredMessageInfoDescription4'), ['br'])}</p>
       </>
     );
-  }, [lang]);
+  }, [oldLang]);
 
-  const revenueSharingAdContent = useMemo(() => {
-    return (
+  const modalData = useMemo(() => {
+    if (!isOpen) return undefined;
+
+    const header = (
       <>
-        <div className={styles.topIcon}><Icon name="channel" /></div>
-        <h3 className={styles.title}>{lang('AboutRevenueSharingAds')}</h3>
+        <h3 className={styles.title}>{oldLang('AboutRevenueSharingAds')}</h3>
         <p className={buildClassName(styles.description, styles.secondary)}>
-          {lang('RevenueSharingAdsAlertSubtitle')}
+          {oldLang('RevenueSharingAdsAlertSubtitle')}
         </p>
-        <ListItem
-          isStatic
-          multiline
-          icon="lock"
-        >
-          <span className="title">{lang('RevenueSharingAdsInfo1Title')}</span>
-          <span className="subtitle">
-            {renderText(lang('RevenueSharingAdsInfo1Subtitle'), ['simple_markdown'])}
-          </span>
-        </ListItem>
-        <ListItem
-          isStatic
-          multiline
-          icon="revenue-split"
-        >
-          <span className="title">{lang('RevenueSharingAdsInfo2Title')}</span>
-          <span className="subtitle">
-            {renderText(lang('RevenueSharingAdsInfo2Subtitle'), ['simple_markdown'])}
-          </span>
-        </ListItem>
-        <ListItem
-          isStatic
-          multiline
-          icon="nochannel"
-        >
-          <span className="title">{lang('RevenueSharingAdsInfo3Title')}</span>
-          <span className="subtitle">
-            {renderText(lang('RevenueSharingAdsInfo3Subtitle', minLevelToRestrictAds), ['simple_markdown'])}
-          </span>
-        </ListItem>
-        <Separator className={styles.separator} />
-        <h3 className={styles.title}>{renderText(lang('RevenueSharingAdsInfo4Title'), ['simple_markdown'])}</h3>
+      </>
+    );
+
+    const listItemData = [
+      ['lock', oldLang('RevenueSharingAdsInfo1Title'),
+        renderText(oldLang('RevenueSharingAdsInfo1Subtitle'), ['simple_markdown'])],
+      ['revenue-split', oldLang('RevenueSharingAdsInfo2Title'),
+        renderText(oldLang('RevenueSharingAdsInfo2Subtitle'), ['simple_markdown'])],
+      ['nochannel', oldLang('RevenueSharingAdsInfo3Title'),
+        renderText(oldLang('RevenueSharingAdsInfo3Subtitle', minLevelToRestrictAds), ['simple_markdown'])],
+    ] satisfies TableAboutData;
+
+    const footer = (
+      <>
+        <h3 className={styles.title}>{renderText(oldLang('RevenueSharingAdsInfo4Title'), ['simple_markdown'])}</h3>
         <p className={styles.description}>
-          {renderText(lang('RevenueSharingAdsInfo4Subtitle2', ''), ['simple_markdown'])}
+          {renderText(oldLang('RevenueSharingAdsInfo4Subtitle2', ''), ['simple_markdown'])}
           <SafeLink
-            url={lang('PromoteUrl')}
-            text={lang('LearnMoreArrow')}
+            url={oldLang('PromoteUrl')}
+            text={oldLang('LearnMoreArrow')}
           />
         </p>
       </>
     );
-  }, [lang, minLevelToRestrictAds]);
+
+    return {
+      header,
+      listItemData,
+      footer,
+    };
+  }, [isOpen, oldLang, minLevelToRestrictAds]);
+
+  if (isMonetizationSharing && modalData) {
+    return (
+      <TableAboutModal
+        isOpen={isOpen}
+        listItemData={modalData.listItemData}
+        headerIconName="channel"
+        header={modalData.header}
+        footer={modalData.footer}
+        buttonText={oldLang('RevenueSharingAdsUnderstood')}
+        onClose={onClose}
+      />
+    );
+  }
 
   return (
     <Modal
       isOpen={isOpen}
+      className={styles.root}
       contentClassName={styles.content}
       onClose={onClose}
     >
-      {isRevenueSharing ? revenueSharingAdContent : regularAdContent}
+      {regularAdContent}
       <Button
         size="smaller"
         onClick={onClose}
       >
-        {lang('RevenueSharingAdsUnderstood')}
+        {oldLang('RevenueSharingAdsUnderstood')}
       </Button>
     </Modal>
   );

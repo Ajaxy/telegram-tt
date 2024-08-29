@@ -6,6 +6,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
   addUsers,
+  updateChannelMonetizationStatistics,
   updateMessageStatistics,
   updateStatistics,
   updateStatisticsGraph,
@@ -40,6 +41,28 @@ addActionHandler('loadStatistics', async (global, actions, payload): Promise<voi
 
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = updateStatistics(global, chatId, stats, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadChannelMonetizationStatistics', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const fullInfo = selectChatFullInfo(global, chatId);
+  if (!chat || !fullInfo) {
+    return;
+  }
+
+  const dcId = fullInfo.statisticsDcId;
+  const stats = await callApi('fetchChannelMonetizationStatistics', { chat, dcId });
+
+  if (!stats) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateChannelMonetizationStatistics(global, stats, tabId);
   setGlobal(global);
 });
 

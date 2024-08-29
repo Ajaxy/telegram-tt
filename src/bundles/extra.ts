@@ -31,6 +31,7 @@ export { default as StarsBalanceModal } from '../components/modals/stars/StarsBa
 export { default as StarPaymentModal } from '../components/modals/stars/StarsPaymentModal';
 
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
+export { default as AboutMonetizationModal } from '../components/common/AboutMonetizationModal';
 export { default as ReportAdModal } from '../components/modals/reportAd/ReportAdModal';
 export { default as CalendarModal } from '../components/common/CalendarModal';
 export { default as DeleteMessageModal } from '../components/common/DeleteMessageModal';

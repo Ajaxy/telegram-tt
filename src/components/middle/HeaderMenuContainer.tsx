@@ -84,6 +84,7 @@ export type OwnProps = {
   canMute?: boolean;
   canViewStatistics?: boolean;
   canViewBoosts?: boolean;
+  canViewMonetization?: boolean;
   canShowBoostModal?: boolean;
   withForumActions?: boolean;
   canLeave?: boolean;
@@ -145,6 +146,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canCall,
   canMute,
   canViewStatistics,
+  canViewMonetization,
   canViewBoosts,
   pendingJoinRequests,
   canLeave,
@@ -186,6 +188,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openAddContactDialog,
     requestMasterAndRequestCall,
     toggleStatistics,
+    openMonetizationStatistics,
     openBoostStatistics,
     openPremiumGiftModal,
     openThreadWithInfo,
@@ -344,6 +347,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleStatisticsClick = useLastCallback(() => {
     toggleStatistics();
+    setShouldCloseFast(!isRightColumnShown);
+    closeMenu();
+  });
+
+  const handleMonetizationClick = useLastCallback(() => {
+    openMonetizationStatistics({ chatId });
     setShouldCloseFast(!isRightColumnShown);
     closeMenu();
   });
@@ -616,6 +625,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               onClick={handleStatisticsClick}
             >
               {lang('Statistics')}
+            </MenuItem>
+          )}
+          {isChannel && canViewMonetization && (
+            <MenuItem
+              icon="cash-circle"
+              onClick={handleMonetizationClick}
+            >
+              {lang('lng_channel_earn_title')}
             </MenuItem>
           )}
           {canTranslate && (

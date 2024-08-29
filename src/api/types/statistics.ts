@@ -23,6 +23,13 @@ export interface ApiChannelStatistics {
   recentPosts: Array<StatisticsMessageInteractionCounter | StatisticsStoryInteractionCounter>;
 }
 
+export interface ApiChannelMonetizationStatistics {
+  topHoursGraph?: StatisticsGraph | string;
+  revenueGraph?: StatisticsGraph | string;
+  balances?: ChannelMonetizationBalances;
+  usdRate?: number;
+}
+
 export interface ApiGroupStatistics {
   growthGraph?: StatisticsGraph | string;
   membersGraph?: StatisticsGraph | string;
@@ -79,6 +86,8 @@ export interface StatisticsGraph {
   labels: Array<string | number>;
   isStacked: boolean;
   isPercentage?: boolean;
+  isCurrency?: boolean;
+  currencyRate?: number;
   hideCaption: boolean;
   hasSecondYAxis: boolean;
   minimapRange: {
@@ -130,4 +139,10 @@ export interface StatisticsStoryInteractionCounter {
   viewsCount: number;
   forwardsCount: number;
   reactionsCount: number;
+}
+
+export interface ChannelMonetizationBalances {
+  currentBalance: number;
+  availableBalance: number;
+  overallRevenue: number;
 }

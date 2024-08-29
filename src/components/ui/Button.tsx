@@ -179,6 +179,8 @@ const Button: FC<OwnProps> = ({
         aria-controls={ariaControls}
         style={style}
         onTransitionEnd={onTransitionEnd}
+        target="_blank"
+        rel="noreferrer"
       >
         {children}
         {!isNotInteractive && ripple && (

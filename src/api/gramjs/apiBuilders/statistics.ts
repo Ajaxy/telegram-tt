@@ -1,11 +1,13 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiChannelMonetizationStatistics,
   ApiChannelStatistics,
   ApiGroupStatistics,
   ApiMessagePublicForward,
   ApiPostStatistics,
   ApiStoryPublicForward,
+  ChannelMonetizationBalances,
   PrepaidGiveaway, StatisticsGraph,
   StatisticsMessageInteractionCounter,
   StatisticsOverviewItem,
@@ -16,6 +18,8 @@ import type {
 
 import { buildApiUsernames, buildAvatarPhotoId } from './common';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+
+const DECIMALS = 10 ** 9;
 
 export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiChannelStatistics {
   return {
@@ -46,6 +50,20 @@ export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiC
 
     // Recent posts
     recentPosts: stats.recentPostsInteractions.map(buildApiPostInteractionCounter).filter(Boolean),
+  };
+}
+
+export function buildChannelMonetizationStatistics(
+  stats: GramJs.stats.BroadcastRevenueStats,
+): ApiChannelMonetizationStatistics {
+  return {
+    // Graphs
+    topHoursGraph: buildGraph(stats.topHoursGraph),
+    revenueGraph: buildGraph(stats.revenueGraph, undefined, true, stats.usdRate),
+
+    // Statistics overview
+    balances: buildChannelMonetizationBalances(stats.balances),
+    usdRate: stats.usdRate,
   };
 }
 
@@ -136,7 +154,7 @@ export function buildStoryPublicForwards(
 }
 
 export function buildGraph(
-  result: GramJs.TypeStatsGraph, isPercentage?: boolean,
+  result: GramJs.TypeStatsGraph, isPercentage?: boolean, isCurrency?: boolean, currencyRate?: number,
 ): StatisticsGraph | undefined {
   if ((result as GramJs.StatsGraphError).error) {
     return undefined;
@@ -156,6 +174,8 @@ export function buildGraph(
     hasSecondYAxis,
     isStacked: data.stacked && !hasSecondYAxis,
     isPercentage,
+    isCurrency,
+    currencyRate,
     datasets: y.map((item: any) => {
       const key = item[0];
 
@@ -247,5 +267,17 @@ function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs
       avatarPhotoId: channelProfilePhoto && buildAvatarPhotoId(channelProfilePhoto),
       hasVideoAvatar: Boolean(channelProfilePhoto?.videoSizes),
     },
+  };
+}
+
+function buildChannelMonetizationBalances({
+  currentBalance,
+  availableBalance,
+  overallRevenue,
+}: GramJs.BroadcastRevenueBalances): ChannelMonetizationBalances {
+  return {
+    currentBalance: Number(currentBalance) / DECIMALS,
+    availableBalance: Number(availableBalance) / DECIMALS,
+    overallRevenue: Number(overallRevenue) / DECIMALS,
   };
 }

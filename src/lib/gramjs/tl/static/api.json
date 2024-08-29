@@ -271,6 +271,7 @@
     "help.getPeerColors",
     "help.getTimezonesList",
     "stats.getBroadcastStats",
+    "stats.getBroadcastRevenueStats",
     "stats.getMegagroupStats",
     "stats.getMessagePublicForwards",
     "stats.getMessageStats",
