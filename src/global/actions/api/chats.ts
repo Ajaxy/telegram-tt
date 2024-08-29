@@ -38,7 +38,7 @@ import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
 import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
-import { isLocalMessageId } from '../../../util/messageKey';
+import { isLocalMessageId } from '../../../util/keys/messageKey';
 import * as langProvider from '../../../util/oldLangProvider';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -69,6 +69,7 @@ import {
   removeChatFromChatLists,
   replaceChatFullInfo,
   replaceChatListIds,
+  replaceChatListLoadingParameters,
   replaceChats,
   replaceThreadParam,
   replaceUsers,
@@ -98,8 +99,8 @@ import {
   selectChatByUsername,
   selectChatFolder,
   selectChatFullInfo,
-  selectChatLastMessage,
   selectChatLastMessageId,
+  selectChatListLoadingParameters,
   selectChatListType,
   selectChatMessages,
   selectCurrentChat,
@@ -108,6 +109,7 @@ import {
   selectIsChatPinned,
   selectIsChatWithSelf,
   selectLastServiceNotification,
+  selectPeer,
   selectSimilarChannelIds,
   selectStickerSet,
   selectSupportChat,
@@ -512,10 +514,6 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
   let { shouldReplace } = payload;
   let i = 0;
 
-  const getOrderDate = (chat: ApiChat) => {
-    return selectChatLastMessage(global, chat.id, listType === 'saved' ? 'saved' : 'all')?.date || chat.creationDate;
-  };
-
   while (shouldReplace || !global.chats.isFullyLoaded[listType]) {
     if (i++ >= INFINITE_LOOP_MARKER) {
       if (DEBUG) {
@@ -532,24 +530,8 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
       return;
     }
 
-    const listIds = !shouldReplace && global.chats.listIds[listType];
-    const oldestChat = listIds
-      ? listIds
-        /* eslint-disable @typescript-eslint/no-loop-func */
-        .map((id) => global.chats.byId[id])
-        .filter((chat) => (
-          Boolean(chat && getOrderDate(chat))
-          && chat.id !== SERVICE_NOTIFICATIONS_USER_ID
-          && !selectIsChatPinned(global, chat.id)
-        ))
-        /* eslint-enable @typescript-eslint/no-loop-func */
-        .sort((chat1, chat2) => getOrderDate(chat1)! - getOrderDate(chat2)!)[0]
-      : undefined;
-
     await loadChats(
       listType,
-      oldestChat?.id,
-      oldestChat ? getOrderDate(oldestChat) : undefined,
       shouldReplace,
       true,
     );
@@ -2709,21 +2691,30 @@ addActionHandler('requestCollectibleInfo', async (global, actions, payload): Pro
 
 async function loadChats(
   listType: ChatListType,
-  offsetId?: string,
-  offsetDate?: number,
   shouldReplace = false,
   isFullDraftSync?: boolean,
 ) {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
   let lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
+
+  const params = selectChatListLoadingParameters(global, listType);
+  const offsetPeer = !shouldReplace && params.nextOffsetPeerId
+    ? selectPeer(global, params.nextOffsetPeerId) : undefined;
+  const offsetDate = !shouldReplace ? params.nextOffsetDate : undefined;
+  const offsetId = !shouldReplace ? params.nextOffsetId : undefined;
+
   const result = listType === 'saved' ? await callApi('fetchSavedChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
+    offsetId,
+    offsetPeer,
     withPinned: shouldReplace,
   }) : await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
+    offsetId,
+    offsetPeer,
     archived: listType === 'archived',
     withPinned: shouldReplace,
     lastLocalServiceMessageId,
@@ -2734,10 +2725,6 @@ async function loadChats(
   }
 
   const { chatIds } = result;
-
-  if (chatIds.length > 0 && chatIds[0] === offsetId) {
-    chatIds.shift();
-  }
 
   global = getGlobal();
   lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
@@ -2805,6 +2792,10 @@ async function loadChats(
   global = updateChatListSecondaryInfo(global, listType, result);
   global = addMessages(global, result.messages);
   global = updateChatsLastMessageId(global, result.lastMessageByChatId, listType);
+
+  global = replaceChatListLoadingParameters(
+    global, listType, result.nextOffsetId, result.nextOffsetPeerId, result.nextOffsetDate,
+  );
 
   const idsToUpdateDraft = isFullDraftSync ? result.chatIds : Object.keys(result.draftsById);
   idsToUpdateDraft.forEach((chatId) => {

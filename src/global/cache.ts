@@ -252,6 +252,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.quickReplies) {
     cached.quickReplies = initialState.quickReplies;
   }
+
+  if (!cached.chats.loadingParameters) {
+    cached.chats.loadingParameters = initialState.chats.loadingParameters;
+  }
 }
 
 function updateCache(force?: boolean) {

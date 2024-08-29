@@ -4,8 +4,8 @@
   background: var(--color-chat-hover);
   height: 2rem;
   min-width: 2rem;
-  margin-left: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
   padding-right: 1rem;
   border-radius: 1rem;
   cursor: var(--custom-cursor, pointer);
@@ -53,15 +53,6 @@
 
   &.fluid {
     max-width: unset;
-  }
-
-  .SearchInput & {
-    flex: 1 0 auto;
-    position: relative;
-    top: 0.25rem;
-    left: -0.125rem;
-
-    color: var(--color-text-secondary);
   }
 
   .Avatar,

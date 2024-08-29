@@ -108,6 +108,11 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byId: {},
     fullInfoById: {},
     similarChannelsById: {},
+    loadingParameters: {
+      active: {},
+      archived: {},
+      saved: {},
+    },
   },
 
   messages: {
@@ -317,7 +322,7 @@ export const INITIAL_TAB_STATE: TabState = {
 
   userSearch: {},
 
-  localTextSearch: {
+  middleSearch: {
     byChatThreadKey: {},
   },
 

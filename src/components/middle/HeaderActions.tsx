@@ -123,7 +123,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   const {
     joinChannel,
     sendBotCommand,
-    openLocalTextSearch,
+    openMiddleSearch,
     restartBot,
     requestMasterAndRequestCall,
     requestNextManagementScreen,
@@ -196,12 +196,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    openLocalTextSearch();
+    openMiddleSearch();
 
     if (isMobile) {
       // iOS requires synchronous focus on user event.
-      const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
-      searchInput.focus();
+      setFocusInSearchInput();
     } else if (noAnimation) {
       // The second RAF is necessary because Teact must update the state and render the async component
       requestMeasure(() => {
@@ -543,6 +542,6 @@ export default memo(withGlobal<OwnProps>(
 )(HeaderActions));
 
 function setFocusInSearchInput() {
-  const searchInput = document.querySelector<HTMLInputElement>('.RightHeader .SearchInput input');
+  const searchInput = document.querySelector<HTMLInputElement>('#MiddleSearch input');
   searchInput?.focus();
 }

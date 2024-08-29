@@ -378,60 +378,6 @@
     }
   }
 
-  &.search-result-message {
-    .title {
-      flex-grow: 1;
-      padding-right: 0.125rem;
-    }
-
-    .search-result-message-top {
-      display: flex;
-    }
-
-    h3 {
-      max-width: 80%;
-    }
-
-    h3,
-    .subtitle {
-      font-size: 1rem;
-      line-height: 1.5rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      text-align: left;
-      display: block;
-    }
-
-    .subtitle {
-      color: var(--color-text-secondary);
-
-      .matching-text-highlight {
-        color: var(--color-text);
-        background: #cae3f7;
-        border-radius: 0.25rem;
-        padding: 0 0.125rem;
-        display: inline-block;
-
-        .theme-dark & {
-          --color-text: #000;
-        }
-      }
-    }
-
-    &[dir="rtl"] {
-      .LastMessageMeta {
-        margin-left: 0;
-        margin-right: auto;
-      }
-
-      .subtitle {
-        margin-right: 0;
-        display: block;
-      }
-    }
-  }
-
   &.picker-list-item {
     margin: 0;
 

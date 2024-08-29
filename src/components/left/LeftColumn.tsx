@@ -562,7 +562,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       globalSearch: {
         query,
-        date,
+        minDate,
       },
       shouldSkipHistoryAnimations,
       activeChatFolder,
@@ -589,7 +589,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       searchQuery: query,
-      searchDate: date,
+      searchDate: minDate,
       isFirstChatFolderActive: activeChatFolder === 0,
       shouldSkipHistoryAnimations,
       currentUserId,

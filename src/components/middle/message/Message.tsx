@@ -72,7 +72,7 @@ import {
   selectChatFullInfo,
   selectChatMessage,
   selectChatTranslations,
-  selectCurrentTextSearch,
+  selectCurrentMiddleSearch,
   selectDefaultReaction,
   selectForwardedSender,
   selectIsChatProtected,
@@ -105,7 +105,7 @@ import {
 import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
 import { isElementInViewport } from '../../../util/isElementInViewport';
-import { getMessageKey } from '../../../util/messageKey';
+import { getMessageKey } from '../../../util/keys/messageKey';
 import stopEvent from '../../../util/stopEvent';
 import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import {
@@ -1038,6 +1038,7 @@ const Message: FC<OwnProps & StateProps> = ({
     return (
       <Reactions
         message={reactionMessage!}
+        threadId={threadId}
         metaChildren={meta}
         observeIntersection={observeIntersectionForPlaying}
         noRecentReactors={isChannel}
@@ -1641,6 +1642,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {reactionsPosition === 'outside' && !isStoryMention && (
           <Reactions
             message={reactionMessage!}
+            threadId={threadId}
             isOutside
             isCurrentUserPremium={isPremium}
             maxWidth={reactionsMaxWidth}
@@ -1738,7 +1740,9 @@ export default memo(withGlobal<OwnProps>(
       quote: focusedQuote, scrollTargetPosition,
     } = (isFocused && focusedMessage) || {};
 
-    const { query: highlight } = selectCurrentTextSearch(global) || {};
+    const middleSearch = selectCurrentMiddleSearch(global);
+    const highlight = middleSearch?.results?.query
+      && `${middleSearch.isHashtag ? '#' : ''}${middleSearch.results.query}`;
 
     const singleEmoji = getMessageSingleRegularEmoji(message);
     const animatedEmoji = singleEmoji && selectAnimatedEmoji(global, singleEmoji) ? singleEmoji : undefined;

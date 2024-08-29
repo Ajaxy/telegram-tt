@@ -15,7 +15,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   buildCollectionByKey, omit, pickTruthy, unique,
 } from '../../../util/iteratees';
-import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
+import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
 import {

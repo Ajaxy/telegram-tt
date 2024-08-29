@@ -9,6 +9,7 @@ import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
+import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
@@ -71,9 +72,9 @@ const MediaResults: FC<OwnProps & StateProps> = ({
     }
 
     return foundIds.map((id) => {
-      const [chatId, messageId] = id.split('_');
+      const [chatId, messageId] = parseSearchResultKey(id);
 
-      return globalMessagesByChatId[chatId]?.byId[Number(messageId)];
+      return globalMessagesByChatId[chatId]?.byId[messageId];
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 

@@ -45,7 +45,7 @@ import {
   selectChatFullInfo,
   selectChatMessage,
   selectCurrentMessageList,
-  selectCurrentTextSearch,
+  selectCurrentMiddleSearch,
   selectDraft,
   selectIsChatBotNotStarted,
   selectIsInSelectMode,
@@ -92,9 +92,9 @@ import FloatingActionButtons from './FloatingActionButtons';
 import MessageList from './MessageList';
 import MessageSelectToolbar from './MessageSelectToolbar.async';
 import MiddleHeader from './MiddleHeader';
-import MobileSearch from './MobileSearch.async';
 import PremiumRequiredPlaceholder from './PremiumRequiredPlaceholder';
 import ReactorListModal from './ReactorListModal.async';
+import MiddleSearch from './search/MiddleSearch.async';
 
 import './MiddleColumn.scss';
 import styles from './MiddleColumn.module.scss';
@@ -128,7 +128,7 @@ type StateProps = {
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
   leftColumnWidth?: number;
-  hasCurrentTextSearch?: boolean;
+  hasActiveMiddleSearch?: boolean;
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
   isPrivacySettingsNoticeModalOpen: boolean;
@@ -188,7 +188,7 @@ function MiddleColumn({
   isRightColumnShown,
   isBackgroundBlurred,
   leftColumnWidth,
-  hasCurrentTextSearch,
+  hasActiveMiddleSearch,
   isSelectModeActive,
   isSeenByModalOpen,
   isPrivacySettingsNoticeModalOpen,
@@ -221,7 +221,6 @@ function MiddleColumn({
     unpinAllMessages,
     loadUser,
     loadChatSettings,
-    closeLocalTextSearch,
     exitMessageSelectMode,
     joinChannel,
     sendBotCommand,
@@ -238,7 +237,8 @@ function MiddleColumn({
 
   const lang = useOldLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
-  const [isScrollDownShown, setIsScrollDownShown] = useState(false);
+  const [isScrollDownNeeded, setIsScrollDownShown] = useState(false);
+  const isScrollDownShown = isScrollDownNeeded && (!isMobile || !hasActiveMiddleSearch);
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
@@ -250,7 +250,6 @@ function MiddleColumn({
     getForceNextPinnedInHeader,
   } = usePinnedMessage(chatId, threadId, pinnedIds, topMessageId);
 
-  const isMobileSearchActive = isMobile && hasCurrentTextSearch;
   const closeAnimationDuration = isMobile ? LAYER_ANIMATION_DURATION_MS : undefined;
   const hasTools = hasPinned && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
@@ -480,11 +479,6 @@ function MiddleColumn({
     onBack: exitMessageSelectMode,
   });
 
-  useHistoryBack({
-    isActive: isMobileSearchActive,
-    onBack: closeLocalTextSearch,
-  });
-
   const isMessagingDisabled = Boolean(
     !isPinnedMessageList && !isSavedDialog && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
     && !renderingCanSubscribe && composerRestrictionMessage,
@@ -700,7 +694,7 @@ function MiddleColumn({
               withExtraShift={withExtraShift}
             />
           </div>
-          {isMobile && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}
+          <MiddleSearch isActive={Boolean(hasActiveMiddleSearch)} />
         </>
       )}
       {chatId && (
@@ -749,7 +743,7 @@ export default memo(withGlobal<OwnProps>(
       isLeftColumnShown,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isBackgroundBlurred,
-      hasCurrentTextSearch: Boolean(selectCurrentTextSearch(global)),
+      hasActiveMiddleSearch: Boolean(selectCurrentMiddleSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
       isSeenByModalOpen: Boolean(seenByModal),
       isPrivacySettingsNoticeModalOpen: Boolean(privacySettingsNoticeModal),

@@ -6,11 +6,15 @@
   border: 2px solid var(--color-chat-hover);
   border-radius: 1.375rem;
   transition: border-color 0.15s ease;
+  display: flex;
+  align-items: center;
+
+  padding-inline-end: 0.1875rem;
 
   &.with-picker-item {
     display: flex;
 
-    .icon-search {
+    .icon-container-left {
       display: none;
     }
 
@@ -44,34 +48,46 @@
     background-color: transparent !important;
     box-shadow: none !important;
     padding:
-      calc(0.4375rem - var(--border-width)) calc(2.625rem - var(--border-width))
-      calc(0.5rem - var(--border-width)) calc(2.75rem - var(--border-width));
+      calc(0.4375rem - var(--border-width)) calc(0.625rem - var(--border-width))
+      calc(0.5rem - var(--border-width)) calc(0.75rem - var(--border-width));
 
     &::placeholder {
       color: var(--color-placeholders);
     }
   }
 
-  .icon-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
+  .icon-container-left {
+    width: 1.5rem;
+    flex-shrink: 0;
+    margin-inline-start: 0.75rem;
   }
 
-  .search-icon {
-    position: absolute;
-    top: 50%;
-    left: 0.75rem;
-    transform: translateY(-50%);
-    font-size: 1.375rem;
+  .icon-container-right {
+    width: 2.5rem;
+    flex-shrink: 0;
+    margin-inline-start: 0.5rem;
+  }
+
+  .icon-container-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-icon, .back-icon {
+    font-size: 1.5rem;
     line-height: 1;
+  }
+
+  .back-icon {
+    color: var(--color-text-secondary);
   }
 
   .Loading {
     position: absolute;
-    top: 0;
-    left: 0.1875rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     height: 2.5rem;
     width: 2.5rem;
 
@@ -81,9 +97,6 @@
   }
 
   .Button {
-    position: absolute;
-    top: 0.125rem;
-    right: 0.125rem;
     font-size: 1rem;
   }
 
@@ -91,28 +104,13 @@
     input {
       height: 2.5rem;
       border-radius: 1.25rem;
-      padding-left: calc(2.75rem - var(--border-width));
+      padding-left: calc(0.75rem - var(--border-width));
     }
   }
 
   &[dir="rtl"] {
     input {
       direction: rtl;
-    }
-
-    .search-icon {
-      left: auto;
-      right: 0.75rem;
-    }
-
-    .Loading {
-      right: 0.1875rem;
-      left: auto;
-    }
-
-    .Button {
-      left: 0.125rem;
-      right: auto;
     }
   }
 }

@@ -112,6 +112,7 @@ import type {
   ManagementState,
   MediaViewerMedia,
   MediaViewerOrigin,
+  MiddleSearchParams,
   NewChatMembersProgress,
   NotifyException,
   PaymentStep,
@@ -127,6 +128,7 @@ import type {
   ThemeKey,
   ThreadId,
 } from '../types';
+import type { SearchResultKey } from '../util/keys/searchResultKey';
 import type { DownloadableMedia } from './helpers';
 
 export type MessageListType =
@@ -365,7 +367,8 @@ export type TabState = {
 
   globalSearch: {
     query?: string;
-    date?: number;
+    minDate?: number;
+    maxDate?: number;
     currentContent?: GlobalSearchContent;
     chatId?: string;
     foundTopicIds?: number[];
@@ -382,8 +385,10 @@ export type TabState = {
     };
     resultsByType?: Partial<Record<ApiGlobalMessageSearchType, {
       totalCount?: number;
-      nextOffsetId: number;
-      foundIds: string[];
+      nextOffsetId?: number;
+      nextOffsetPeerId?: string;
+      nextOffsetRate?: number;
+      foundIds: SearchResultKey[];
     }>>;
   };
 
@@ -397,16 +402,8 @@ export type TabState = {
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   activeReactions: Record<string, ApiReaction[]>;
 
-  localTextSearch: {
-    byChatThreadKey: Record<string, {
-      query?: string;
-      savedTag?: ApiReaction;
-      results?: {
-        totalCount?: number;
-        nextOffsetId?: number;
-        foundIds?: number[];
-      };
-    }>;
+  middleSearch: {
+    byChatThreadKey: Record<string, MiddleSearchParams | undefined>;
   };
 
   sharedMediaSearch: {
@@ -930,6 +927,11 @@ export type GlobalState = {
       all?: Record<string, number>;
       saved?: Record<string, number>;
     };
+    loadingParameters: Record<ChatListType, {
+      nextOffsetId?: number;
+      nextOffsetPeerId?: string;
+      nextOffsetDate?: number;
+    }>;
     forDiscussionIds?: string[];
     // Obtained from GetFullChat / GetFullChannel
     fullInfoById: Record<string, ApiChatFullInfo>;
@@ -1342,19 +1344,26 @@ export interface ActionPayloads {
     userIds: string[];
   };
 
-  // message search
-  openLocalTextSearch: WithTabId | undefined;
-  closeLocalTextSearch: WithTabId | undefined;
-  setLocalTextSearchQuery: {
+  // Message search
+  openMiddleSearch: WithTabId | undefined;
+  closeMiddleSearch: WithTabId | undefined;
+  updateMiddleSearch: {
+    chatId: string;
+    threadId?: ThreadId;
+    update: Partial<Omit<MiddleSearchParams, 'results'>>;
+  } & WithTabId;
+  resetMiddleSearch: WithTabId | undefined;
+  performMiddleSearch: {
+    chatId: string;
+    threadId?: ThreadId;
     query?: string;
   } & WithTabId;
-  setLocalTextSearchTag: {
-    tag: ApiReaction | undefined;
+  searchHashtag: {
+    hashtag: string;
   } & WithTabId;
   setSharedMediaSearchType: {
     mediaType: SharedMediaType;
   } & WithTabId;
-  searchTextMessagesLocal: WithTabId | undefined;
   searchSharedMediaMessages: WithTabId | undefined;
   searchChatMediaMessages: {
     currentMediaMessageId: number;

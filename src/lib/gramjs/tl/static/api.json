@@ -224,6 +224,7 @@
     "channels.getSponsoredMessages",
     "channels.getChannelRecommendations",
     "channels.reportSponsoredMessage",
+    "channels.searchPosts",
     "bots.canSendMessage",
     "bots.allowSendMessage",
     "bots.invokeWebViewCustomMethod",

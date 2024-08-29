@@ -12,6 +12,7 @@ import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { getIsDownloading, getMessageDocument } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
+import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
@@ -77,8 +78,8 @@ const FileResults: FC<OwnProps & StateProps> = ({
     }
 
     return foundIds.map((id) => {
-      const [chatId, messageId] = id.split('_');
-      const message = globalMessagesByChatId[chatId]?.byId[Number(messageId)];
+      const [chatId, messageId] = parseSearchResultKey(id);
+      const message = globalMessagesByChatId[chatId]?.byId[messageId];
 
       return message && getMessageDocument(message) ? message : undefined;
     }).filter(Boolean) as ApiMessage[];

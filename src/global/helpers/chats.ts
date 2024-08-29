@@ -27,6 +27,14 @@ export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
 }
 
+export function isPeerChat(entity: ApiPeer): entity is ApiChat {
+  return 'title' in entity;
+}
+
+export function isPeerUser(entity: ApiPeer): entity is ApiUser {
+  return !isPeerChat(entity);
+}
+
 export function isChannelId(entityId: string) {
   return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-1');
 }
@@ -365,13 +373,11 @@ export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiP
     return undefined;
   }
 
-  if (!isUserId(sender.id)) {
+  if (isPeerChat(sender)) {
     if (chatId === sender.id) return undefined;
 
-    return (sender as ApiChat).title;
+    return sender.title;
   }
-
-  sender = sender as ApiUser;
 
   if (sender.isSelf) {
     return lang('FromYou');

@@ -72,7 +72,8 @@ addActionHandler('setGlobalSearchDate', (global, actions, payload): ActionReturn
   const maxDate = date ? timestampPlusDay(date) : date;
 
   global = updateGlobalSearch(global, {
-    date,
+    minDate: date,
+    maxDate,
     query: '',
     resultsByType: {
       ...selectTabState(global, tabId).globalSearch.resultsByType,
@@ -85,29 +86,46 @@ addActionHandler('setGlobalSearchDate', (global, actions, payload): ActionReturn
   }, tabId);
   setGlobal(global);
 
-  const { chatId } = selectTabState(global, tabId).globalSearch;
-  const chat = chatId ? selectChat(global, chatId) : undefined;
-  searchMessagesGlobal(global, '', 'text', undefined, chat, maxDate, date, tabId);
+  actions.searchMessagesGlobal({ type: 'text', tabId });
 });
 
 addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionReturnType => {
   const { type, tabId = getCurrentTabId() } = payload;
   const {
-    query, resultsByType, chatId, date,
+    query, resultsByType, chatId,
   } = selectTabState(global, tabId).globalSearch;
-  const maxDate = date ? timestampPlusDay(date) : date;
-  const nextOffsetId = (resultsByType?.[type as ApiGlobalMessageSearchType])?.nextOffsetId;
+  const offsetId = (resultsByType?.[type])?.nextOffsetId;
+  const offsetRate = (resultsByType?.[type])?.nextOffsetRate;
+  const offsetPeerId = (resultsByType?.[type])?.nextOffsetPeerId;
 
   const chat = chatId ? selectChat(global, chatId) : undefined;
+  const offsetPeer = offsetPeerId ? selectChat(global, offsetPeerId) : undefined;
 
-  searchMessagesGlobal(global, query, type, nextOffsetId, chat, maxDate, date, tabId);
+  searchMessagesGlobal(global, {
+    query,
+    type,
+    offsetRate,
+    offsetId,
+    offsetPeer,
+    chat,
+    tabId,
+  });
 });
 
-async function searchMessagesGlobal<T extends GlobalState>(
-  global: T,
-  query = '', type: ApiGlobalMessageSearchType, offsetRate?: number, chat?: ApiChat, maxDate?: number, minDate?: number,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
+async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
+  query?: string;
+  type: ApiGlobalMessageSearchType;
+  offsetRate?: number;
+  offsetId?: number;
+  offsetPeer?: ApiChat;
+  chat?: ApiChat;
+  maxDate?: number;
+  minDate?: number;
+  tabId: TabArgs<T>[0];
+}) {
+  const {
+    query = '', type, offsetRate, offsetId, offsetPeer, chat, maxDate, minDate, tabId = getCurrentTabId(),
+  } = params;
   let result: {
     messages: ApiMessage[];
     users: ApiUser[];
@@ -115,18 +133,20 @@ async function searchMessagesGlobal<T extends GlobalState>(
     topics?: ApiTopic[];
     totalTopicsCount?: number;
     totalCount: number;
-    nextRate: number | undefined;
+    nextOffsetRate?: number;
+    nextOffsetId?: number;
+    nextOffsetPeerId?: string;
   } | undefined;
 
   let messageLink: ApiMessage | undefined;
 
   if (chat) {
-    const localResultRequest = callApi('searchMessagesLocal', {
+    const inChatResultRequest = callApi('searchMessagesInChat', {
       chat,
       query,
       type,
       limit: GLOBAL_SEARCH_SLICE,
-      offsetId: offsetRate,
+      offsetId,
       minDate,
       maxDate,
     });
@@ -136,12 +156,12 @@ async function searchMessagesGlobal<T extends GlobalState>(
       limit: GLOBAL_TOPIC_SEARCH_SLICE,
     }) : undefined;
 
-    const [localResult, topics] = await Promise.all([localResultRequest, topicsRequest]);
+    const [inChatResult, topics] = await Promise.all([inChatResultRequest, topicsRequest]);
 
-    if (localResult) {
+    if (inChatResult) {
       const {
         messages, users, totalCount, nextOffsetId,
-      } = localResult;
+      } = inChatResult;
 
       const { topics: localTopics, count } = topics || {};
 
@@ -152,13 +172,15 @@ async function searchMessagesGlobal<T extends GlobalState>(
         users,
         chats: [],
         totalCount,
-        nextRate: nextOffsetId,
+        nextOffsetId,
       };
     }
   } else {
     result = await callApi('searchMessagesGlobal', {
       query,
       offsetRate,
+      offsetId,
+      offsetPeer,
       limit: GLOBAL_SEARCH_SLICE,
       type,
       maxDate,
@@ -187,7 +209,7 @@ async function searchMessagesGlobal<T extends GlobalState>(
   }
 
   const {
-    messages, users, chats, totalCount, nextRate,
+    messages, users, chats, totalCount, nextOffsetRate, nextOffsetId, nextOffsetPeerId,
   } = result;
 
   if (chats.length) {
@@ -207,7 +229,9 @@ async function searchMessagesGlobal<T extends GlobalState>(
     messages,
     totalCount,
     type,
-    nextRate,
+    nextOffsetRate,
+    nextOffsetId,
+    nextOffsetPeerId,
     tabId,
   );
 

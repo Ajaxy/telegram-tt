@@ -27,7 +27,7 @@ export {
 
 export {
   fetchMessages, fetchMessage, sendMessage, pinMessage, unpinAllMessages, deleteMessages, deleteHistory,
-  markMessageListRead, markMessagesRead, searchMessagesLocal, searchMessagesGlobal,
+  markMessageListRead, markMessagesRead, searchMessagesInChat, searchMessagesGlobal, searchHashtagPosts,
   fetchWebPagePreview, editMessage, forwardMessages, loadPollOptionResults, sendPollVote, findFirstMessageIdAfterDate,
   fetchPinnedMessages, fetchScheduledHistory, sendScheduledMessages, rescheduleMessage, deleteScheduledMessages,
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,

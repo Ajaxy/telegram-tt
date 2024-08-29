@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
@@ -19,19 +19,21 @@ import Icon from './icons/Icon';
 
 import './PickerSelectedItem.scss';
 
-type OwnProps = {
+type OwnProps<T = undefined> = {
+  // eslint-disable-next-line react/no-unused-prop-types
   peerId?: string;
+  // eslint-disable-next-line react/no-unused-prop-types
+  forceShowSelf?: boolean;
   customPeer?: CustomPeer;
   icon?: IconName;
   title?: string;
   isMinimized?: boolean;
   canClose?: boolean;
-  forceShowSelf?: boolean;
-  clickArg?: any;
   className?: string;
   fluid?: boolean;
   withPeerColors?: boolean;
-  onClick: (arg: any) => void;
+  clickArg: T;
+  onClick: (arg: T) => void;
 };
 
 type StateProps = {
@@ -40,7 +42,8 @@ type StateProps = {
   isSavedMessages?: boolean;
 };
 
-const PickerSelectedItem: FC<OwnProps & StateProps> = ({
+// eslint-disable-next-line @typescript-eslint/comma-dangle
+const PickerSelectedItem = <T,>({
   icon,
   title,
   isMinimized,
@@ -54,7 +57,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   withPeerColors,
   onClick,
-}) => {
+}: OwnProps<T> & StateProps) => {
   const lang = useOldLang();
 
   let iconElement: TeactNode | undefined;
@@ -82,7 +85,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
         ? getUserFirstOrLastName(user)
         : getChatTitle(lang, chat, isSavedMessages));
 
-    titleText = name ? renderText(name) : undefined;
+    titleText = title || (name ? renderText(name) : undefined);
   }
 
   const fullClassName = buildClassName(
@@ -133,4 +136,4 @@ export default memo(withGlobal<OwnProps>(
       isSavedMessages,
     };
   },
-)(PickerSelectedItem));
+)(PickerSelectedItem)) as typeof PickerSelectedItem;

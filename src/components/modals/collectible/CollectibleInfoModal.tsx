@@ -128,6 +128,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
         className={styles.chip}
         peerId={modal?.peerId}
         forceShowSelf
+        clickArg={modal?.peerId}
         onClick={handleOpenChat}
       />
       <p className={styles.description}>

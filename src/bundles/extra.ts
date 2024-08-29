@@ -57,7 +57,7 @@ export { default as SponsoredMessageContextMenuContainer }
 export { default as StickerSetModal } from '../components/common/StickerSetModal';
 export { default as CustomEmojiSetsModal } from '../components/common/CustomEmojiSetsModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
-export { default as MobileSearch } from '../components/middle/MobileSearch';
+export { default as MiddleSearch } from '../components/middle/search/MiddleSearch';
 export { default as ReactionPicker } from '../components/middle/message/reactions/ReactionPicker';
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
@@ -75,7 +75,6 @@ export { default as EmojiTooltip } from '../components/middle/composer/EmojiTool
 export { default as InlineBotTooltip } from '../components/middle/composer/InlineBotTooltip';
 export { default as SendAsMenu } from '../components/middle/composer/SendAsMenu';
 
-export { default as RightSearch } from '../components/right/RightSearch';
 export { default as StickerSearch } from '../components/right/StickerSearch';
 export { default as GifSearch } from '../components/right/GifSearch';
 export { default as Statistics } from '../components/right/statistics/Statistics';

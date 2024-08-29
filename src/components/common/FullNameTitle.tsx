@@ -3,14 +3,14 @@ import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type {
-  ApiChat, ApiPeer, ApiUser,
+  ApiPeer,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { CustomPeer } from '../../types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../config';
 import {
-  getChatTitle, getUserFullName, isAnonymousForwardsChat, isChatWithRepliesBot, isUserId,
+  getChatTitle, getUserFullName, isAnonymousForwardsChat, isChatWithRepliesBot, isPeerUser,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
@@ -62,9 +62,9 @@ const FullNameTitle: FC<OwnProps> = ({
   const { showNotification } = getActions();
   const realPeer = 'id' in peer ? peer : undefined;
   const customPeer = 'isCustomPeer' in peer ? peer : undefined;
-  const isUser = realPeer && isUserId(realPeer.id);
-  const title = realPeer && (isUser ? getUserFullName(realPeer as ApiUser) : getChatTitle(lang, realPeer as ApiChat));
-  const isPremium = isUser && (peer as ApiUser).isPremium;
+  const isUser = realPeer && isPeerUser(realPeer);
+  const title = realPeer && (isUser ? getUserFullName(realPeer) : getChatTitle(lang, realPeer));
+  const isPremium = isUser && realPeer.isPremium;
 
   const handleTitleClick = useLastCallback((e) => {
     if (!title || !canCopyTitle) {

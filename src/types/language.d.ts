@@ -1185,7 +1185,6 @@ export interface LangPair {
   'AttachSticker': undefined;
   'AttachMusic': undefined;
   'AttachContact': undefined;
-  'PaymentInvoice': undefined;
   'MessageLocation': undefined;
   'MessageLiveLocation': undefined;
   'ServiceNotifications': undefined;
@@ -1511,8 +1510,11 @@ export interface LangPair {
   'MenuBetaChangelog': undefined;
   'MenuSwitchToK': undefined;
   'MenuInstallApp': undefined;
-  'RemoveEffect' : undefined;
+  'RemoveEffect': undefined;
   'ReplyInPrivateMessage': undefined;
+  'AriaSearchOlderResult': undefined;
+  'AriaSearchNewerResult': undefined;
+
 }
 
 export type LangKey = keyof LangPair;

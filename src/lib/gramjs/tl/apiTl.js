@@ -1612,6 +1612,7 @@ channels.clickSponsoredMessage#18afbc93 channel:InputChannel random_id:bytes = B
 channels.toggleViewForumAsMessages#9738bb15 channel:InputChannel enabled:Bool = Updates;
 channels.getChannelRecommendations#25a71742 flags:# channel:flags.0?InputChannel = messages.Chats;
 channels.reportSponsoredMessage#af8ff6b9 channel:InputChannel random_id:bytes option:bytes = channels.SponsoredMessageReportResult;
+channels.searchPosts#d19f987b hashtag:string offset_rate:int offset_peer:InputPeer offset_id:int limit:int = messages.Messages;
 bots.setBotInfo#10cf3123 flags:# bot:flags.2?InputUser lang_code:string name:flags.3?string about:flags.0?string description:flags.1?string = Bool;
 bots.canSendMessage#1359f4e6 bot:InputUser = Bool;
 bots.allowSendMessage#f132e3ef bot:InputUser = Updates;

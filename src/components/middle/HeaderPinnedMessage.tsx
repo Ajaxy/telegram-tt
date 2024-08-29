@@ -184,7 +184,6 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           <Transition activeKey={message.id} name="slideVerticalFade" className={styles.messageTextTransition}>
             <p dir="auto" className={styles.summary}>
               <MessageSummary
-                lang={lang}
                 message={message}
                 noEmoji={Boolean(mediaThumbnail)}
                 emojiSize={EMOJI_SIZE}

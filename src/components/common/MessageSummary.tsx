@@ -2,7 +2,6 @@ import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiFormattedText, ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import {
@@ -18,42 +17,43 @@ import {
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 
+import useOldLang from '../../hooks/useOldLang';
+
 import MessageText from './MessageText';
 
 interface OwnProps {
-  lang: LangFn;
   message: ApiMessage;
   translatedText?: ApiFormattedText;
   noEmoji?: boolean;
   highlight?: string;
   truncateLength?: number;
-  observeIntersectionForLoading?: ObserveFn;
-  observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
   inChatList?: boolean;
   emojiSize?: number;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
 }
 
 function MessageSummary({
-  lang,
   message,
   translatedText,
   noEmoji = false,
   highlight,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
-  observeIntersectionForLoading,
-  observeIntersectionForPlaying,
   withTranslucentThumbs = false,
   inChatList = false,
   emojiSize,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
 }: OwnProps) {
+  const lang = useOldLang();
   const { text, entities } = extractMessageText(message, inChatList) || {};
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
   const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
   const hasPoll = Boolean(getMessagePoll(message));
 
   if ((!text || (!hasSpoilers && !hasCustomEmoji)) && !hasPoll) {
-    const summaryText = translatedText?.text || getMessageSummaryText(lang, message, noEmoji);
+    const summaryText = translatedText?.text || getMessageSummaryText(lang, message, noEmoji, truncateLength);
     const trimmedText = trimText(summaryText, truncateLength);
 
     return (

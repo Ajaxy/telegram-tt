@@ -3,7 +3,7 @@ export * from './users';
 export * from './chats';
 export * from './messages';
 export * from './globalSearch';
-export * from './localSearch';
+export * from './middleSearch';
 export * from './management';
 export * from './symbols';
 export * from './payments';

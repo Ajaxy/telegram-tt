@@ -6,13 +6,13 @@ import { createMessageHashUrl } from '../../../util/routing';
 import { IS_ELECTRON } from '../../../util/windowEnvironment';
 import { addActionHandler, setGlobal } from '../../index';
 import {
+  closeMiddleSearch,
   exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList, updateRequestedChatTranslation,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat, selectCurrentMessageList, selectTabState,
 } from '../../selectors';
-import { closeLocalTextSearch } from './localSearch';
 
 addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
   const {
@@ -50,10 +50,11 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
         activeReactions: {},
         shouldPreventComposerAnimation: true,
       }, tabId);
+
+      global = closeMiddleSearch(global, chatId, threadId, tabId);
     }
 
     global = exitMessageSelectMode(global, tabId);
-    global = closeLocalTextSearch(global, tabId);
 
     global = updateTabState(global, {
       isStatisticsShown: false,

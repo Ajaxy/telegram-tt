@@ -1,8 +1,8 @@
-import type { ApiChat } from '../../../api/types';
 import type {
   ChatMediaSearchParams, ChatMediaSearchSegment, LoadingState, SharedMediaType, ThreadId,
 } from '../../../types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
+import { type ApiChat, MAIN_THREAD_ID } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import {
@@ -10,6 +10,7 @@ import {
 } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, isInsideSortedArrayRange } from '../../../util/iteratees';
+import { getSearchResultKey } from '../../../util/keys/searchResultKey';
 import { callApi } from '../../../api/gramjs';
 import { getChatMediaMessageIds, getIsSavedDialog, isSameReaction } from '../../helpers';
 import {
@@ -18,27 +19,30 @@ import {
 import {
   addChatMessagesById,
   addChats,
+  addMessages,
   addUsers,
   initializeChatMediaSearchResults,
   mergeWithChatMediaSearchSegment,
   setChatMediaSearchLoading,
   updateChatMediaSearchResults,
-  updateLocalTextSearchResults,
+  updateMiddleSearch,
+  updateMiddleSearchResults,
   updateSharedMediaSearchResults,
 } from '../../reducers';
 import {
   selectChat,
   selectCurrentChatMediaSearch,
   selectCurrentMessageList,
+  selectCurrentMiddleSearch,
   selectCurrentSharedMediaSearch,
-  selectCurrentTextSearch,
 } from '../../selectors';
 
 const MEDIA_PRELOAD_OFFSET = 9;
 
-addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
+addActionHandler('performMiddleSearch', async (global, actions, payload): Promise<void> => {
+  const {
+    query, chatId, threadId = MAIN_THREAD_ID, tabId = getCurrentTabId(),
+  } = payload || {};
 
   if (!chatId) return;
 
@@ -47,45 +51,91 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
   const realChatId = isSavedDialog ? String(threadId) : chatId;
 
   const chat = realChatId ? selectChat(global, realChatId) : undefined;
-  let currentSearch = selectCurrentTextSearch(global, tabId);
-  if (!chat || !threadId || !currentSearch) {
+  let currentSearch = selectCurrentMiddleSearch(global, tabId);
+  if (!chat) {
     return;
   }
 
-  const { query, results, savedTag } = currentSearch;
+  if (!currentSearch) {
+    global = updateMiddleSearch(global, realChatId, threadId, {}, tabId);
+    setGlobal(global);
+    global = getGlobal();
+  }
+  currentSearch = selectCurrentMiddleSearch(global, tabId)!;
+
+  const {
+    results, savedTag, type, isHashtag,
+  } = currentSearch;
   const offsetId = results?.nextOffsetId;
+  const offsetRate = results?.nextOffsetRate;
+  const offsetPeerId = results?.nextOffsetPeerId;
+  const offsetPeer = offsetPeerId ? selectChat(global, offsetPeerId) : undefined;
 
-  if (!query && !savedTag) {
+  const shouldHaveQuery = isHashtag || !savedTag;
+  if (shouldHaveQuery && !query) {
+    global = updateMiddleSearch(global, realChatId, threadId, {
+      fetchingQuery: undefined,
+    }, tabId);
+    setGlobal(global);
     return;
   }
 
-  const result = await callApi('searchMessagesLocal', {
-    chat,
-    type: 'text',
-    query,
-    threadId,
-    limit: MESSAGE_SEARCH_SLICE,
-    offsetId,
-    isSavedDialog,
-    savedTag,
-  });
+  global = updateMiddleSearch(global, realChatId, threadId, {
+    fetchingQuery: query,
+  }, tabId);
+  setGlobal(global);
+
+  let result;
+  if (type === 'chat') {
+    result = await callApi('searchMessagesInChat', {
+      chat,
+      type: 'text',
+      query: isHashtag ? `#${query}` : query,
+      threadId,
+      limit: MESSAGE_SEARCH_SLICE,
+      offsetId,
+      isSavedDialog,
+      savedTag,
+    });
+  }
+
+  if (type === 'myChats') {
+    result = await callApi('searchMessagesGlobal', {
+      type: 'text',
+      query: isHashtag ? `#${query}` : query!,
+      limit: MESSAGE_SEARCH_SLICE,
+      offsetId,
+      offsetRate,
+      offsetPeer,
+    });
+  }
+
+  if (type === 'channels') {
+    result = await callApi('searchHashtagPosts', {
+      hashtag: query!,
+      limit: MESSAGE_SEARCH_SLICE,
+      offsetId,
+      offsetPeer,
+      offsetRate,
+    });
+  }
 
   if (!result) {
     return;
   }
 
   const {
-    chats, users, messages, totalCount, nextOffsetId,
+    chats, users, messages, totalCount, nextOffsetId, nextOffsetRate, nextOffsetPeerId,
   } = result;
 
-  const byId = buildCollectionByKey(messages, 'id');
-  const newFoundIds = Object.keys(byId).map(Number);
+  const newFoundIds = messages.map(getSearchResultKey);
 
   global = getGlobal();
 
-  currentSearch = selectCurrentTextSearch(global, tabId);
-  const hasTagChanged = !isSameReaction(savedTag, currentSearch?.savedTag);
-  if (!currentSearch || query !== currentSearch.query || hasTagChanged) {
+  currentSearch = selectCurrentMiddleSearch(global, tabId);
+  const hasTagChanged = currentSearch?.savedTag && !isSameReaction(savedTag, currentSearch.savedTag);
+  const hasSearchChanged = currentSearch?.fetchingQuery && currentSearch.fetchingQuery !== query;
+  if (!currentSearch || hasSearchChanged || hasTagChanged) {
     return;
   }
 
@@ -93,9 +143,40 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
 
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = addUsers(global, buildCollectionByKey(users, 'id'));
-  global = addChatMessagesById(global, resultChatId, byId);
-  global = updateLocalTextSearchResults(global, resultChatId, threadId, newFoundIds, totalCount, nextOffsetId, tabId);
+  global = addMessages(global, messages);
+  global = updateMiddleSearch(global, resultChatId, threadId, {
+    fetchingQuery: undefined,
+  }, tabId);
+  global = updateMiddleSearchResults(global, resultChatId, threadId, {
+    foundIds: newFoundIds,
+    totalCount,
+    nextOffsetId,
+    nextOffsetRate,
+    nextOffsetPeerId,
+    query: query || '',
+  }, tabId);
   setGlobal(global);
+});
+
+addActionHandler('searchHashtag', (global, actions, payload): ActionReturnType => {
+  const { hashtag, tabId = getCurrentTabId() } = payload;
+
+  const messageList = selectCurrentMessageList(global, tabId);
+  if (!messageList) {
+    return;
+  }
+
+  const cleanQuery = hashtag.replace(/^#/, '');
+
+  actions.updateMiddleSearch({
+    chatId: messageList.chatId,
+    threadId: messageList.threadId,
+    update: {
+      isHashtag: true,
+      requestedQuery: cleanQuery,
+    },
+    tabId,
+  });
 });
 
 addActionHandler('searchSharedMediaMessages', (global, actions, payload): ActionReturnType => {
@@ -203,7 +284,7 @@ async function searchSharedMedia<T extends GlobalState>(
 ) {
   const resultChatId = isSavedDialog ? global.currentUserId! : chat.id;
 
-  const result = await callApi('searchMessagesLocal', {
+  const result = await callApi('searchMessagesInChat', {
     chat,
     type,
     limit: SHARED_MEDIA_SLICE * 2,
@@ -367,7 +448,7 @@ async function searchChatMedia<T extends GlobalState>(
   global = setChatMediaSearchLoading(global, resultChatId, threadId, true, tabId);
   setGlobal(global);
 
-  const result = await callApi('searchMessagesLocal', {
+  const result = await callApi('searchMessagesInChat', {
     chat,
     type: 'media',
     limit,

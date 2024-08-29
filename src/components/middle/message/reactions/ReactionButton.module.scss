@@ -9,9 +9,6 @@
     --reaction-background: var(--color-reaction-chosen);
     --reaction-background-hover: var(--hover-color-reaction-chosen);
     --reaction-text-color: var(--text-color-reaction-chosen);
-
-    position: relative;
-    z-index: 1;
   }
 
   display: flex;
@@ -27,7 +24,9 @@
   text-transform: none;
   color: var(--reaction-text-color);
   overflow: visible;
+  position: relative;
   line-height: 1.75rem;
+  z-index: 1;
 
   gap: 0.125rem;
 

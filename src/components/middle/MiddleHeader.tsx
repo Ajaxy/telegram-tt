@@ -35,6 +35,7 @@ import {
   selectChat,
   selectChatMessage,
   selectChatMessages,
+  selectCurrentMiddleSearch,
   selectForwardedSender,
   selectIsChatBotNotStarted,
   selectIsChatWithBot,
@@ -50,7 +51,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import cycleRestrict from '../../util/cycleRestrict';
-import { getMessageKey } from '../../util/messageKey';
+import { getMessageKey } from '../../util/keys/messageKey';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
@@ -58,8 +59,8 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useDerivedState from '../../hooks/useDerivedState';
 import useElectronDrag from '../../hooks/useElectronDrag';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
-import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
+import useLongPress from '../../hooks/useLongPress';
 import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -81,6 +82,7 @@ import './MiddleHeader.scss';
 const ANIMATION_DURATION = 350;
 const BACK_BUTTON_INACTIVE_TIME = 450;
 const EMOJI_STATUS_SIZE = 22;
+const SEARCH_LONGTAP_THRESHOLD = 500;
 
 type OwnProps = {
   chatId: string;
@@ -116,6 +118,7 @@ type StateProps = {
   isSynced?: boolean;
   isFetchingDifference?: boolean;
   emojiStatusSticker?: ApiSticker;
+  isMiddleSearchOpen?: boolean;
 };
 
 const MiddleHeader: FC<OwnProps & StateProps> = ({
@@ -148,6 +151,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   getLoadingPinnedId,
   emojiStatusSticker,
   isSavedDialog,
+  isMiddleSearchOpen,
   onFocusPinnedMessage,
 }) => {
   const {
@@ -162,6 +166,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openPremiumModal,
     openThread,
     openStickerSet,
+    updateMiddleSearch,
   } = getActions();
 
   const lang = useOldLang();
@@ -197,13 +202,26 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const componentRef = useRef<HTMLDivElement>(null);
   const shouldAnimateTools = useRef<boolean>(true);
 
-  const {
-    handleClick: handleHeaderClick,
-    handleMouseDown: handleHeaderMouseDown,
-  } = useFastClick((e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
-    if (e.type === 'mousedown' && (e.target as Element).closest('.title > .custom-emoji')) return;
+  const handleOpenSearch = useLastCallback(() => {
+    updateMiddleSearch({ chatId, threadId, update: {} });
+  });
+
+  const handleOpenChat = useLastCallback((event: React.MouseEvent | React.TouchEvent) => {
+    if ((event.target as Element).closest('.title > .custom-emoji')) return;
 
     openThreadWithInfo({ chatId, threadId });
+  });
+
+  const {
+    onMouseDown: handleLongPressMouseDown,
+    onMouseUp: handleLongPressMouseUp,
+    onMouseLeave: handleLongPressMouseLeave,
+    onTouchStart: handleLongPressTouchStart,
+    onTouchEnd: handleLongPressTouchEnd,
+  } = useLongPress({
+    onStart: handleOpenSearch,
+    onClick: handleOpenChat,
+    threshold: SEARCH_LONGTAP_THRESHOLD,
   });
 
   const handleUnpinMessage = useLastCallback((messageId: number) => {
@@ -305,7 +323,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const {
     shouldRender: shouldRenderPinnedMessage,
     transitionClassNames: pinnedMessageClassNames,
-  } = useShowTransition(Boolean(pinnedMessage), undefined, true);
+  } = useShowTransition(Boolean(pinnedMessage) && !isMiddleSearchOpen, undefined, true);
 
   const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage, true);
   const renderingPinnedMessagesCount = useCurrentOrPrev(pinnedMessagesCount, true);
@@ -389,8 +407,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, !isSavedDialog)}
         <div
           className="chat-info-wrapper"
-          onClick={handleHeaderClick}
-          onMouseDown={handleHeaderMouseDown}
+          onMouseDown={handleLongPressMouseDown}
+          onMouseUp={handleLongPressMouseUp}
+          onMouseLeave={handleLongPressMouseLeave}
+          onTouchStart={handleLongPressTouchStart}
+          onTouchEnd={handleLongPressTouchEnd}
         >
           {isUserId(realChatId) ? (
             <PrivateChatInfo
@@ -562,6 +583,7 @@ export default memo(withGlobal<OwnProps>(
     const emojiStatusSticker = emojiStatus && global.customEmojis.byId[emojiStatus.documentId];
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+    const isMiddleSearchOpen = Boolean(selectCurrentMiddleSearch(global));
 
     const state: StateProps = {
       typingStatus,
@@ -581,6 +603,7 @@ export default memo(withGlobal<OwnProps>(
       emojiStatusSticker,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
       isSavedDialog,
+      isMiddleSearchOpen,
     };
 
     const messagesById = selectChatMessages(global, chatId);

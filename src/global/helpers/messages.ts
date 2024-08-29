@@ -1,11 +1,9 @@
 import type {
   ApiAttachment,
-  ApiChat,
   ApiMessage,
   ApiMessageEntityTextUrl,
   ApiPeer,
   ApiStory,
-  ApiUser,
 } from '../../api/types';
 import type { MediaContent } from '../../api/types/messages';
 import type { LangFn } from '../../hooks/useOldLang';
@@ -24,10 +22,15 @@ import {
   VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
-import { isLocalMessageId } from '../../util/messageKey';
+import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '../index';
-import { getChatTitle, getCleanPeerId, isUserId } from './chats';
+import {
+  getChatTitle,
+  getCleanPeerId,
+  isPeerUser,
+  isUserId,
+} from './chats';
 import { getMainUsername, getUserFullName } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
@@ -182,7 +185,7 @@ export function isAnonymousOwnMessage(message: ApiMessage) {
 }
 
 export function getSenderTitle(lang: LangFn, sender: ApiPeer) {
-  return isUserId(sender.id) ? getUserFullName(sender as ApiUser) : getChatTitle(lang, sender as ApiChat);
+  return isPeerUser(sender) ? getUserFullName(sender) : getChatTitle(lang, sender);
 }
 
 export function getSendingState(message: ApiMessage) {

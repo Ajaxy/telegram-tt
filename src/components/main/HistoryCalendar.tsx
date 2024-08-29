@@ -22,7 +22,7 @@ const HistoryCalendar: FC<OwnProps & StateProps> = ({
   const { searchMessagesByDate, closeHistoryCalendar } = getActions();
 
   const handleJumpToDate = useCallback((date: Date) => {
-    searchMessagesByDate({ timestamp: date.valueOf() / 1000 });
+    searchMessagesByDate({ timestamp: date.getTime() / 1000 });
     closeHistoryCalendar();
   }, [closeHistoryCalendar, searchMessagesByDate]);
 

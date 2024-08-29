@@ -14,7 +14,7 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
 } from '../../util/iteratees';
-import { isLocalMessageId, type MessageKey } from '../../util/messageKey';
+import { isLocalMessageId, type MessageKey } from '../../util/keys/messageKey';
 import {
   hasMessageTtl, isMediaLoadableInViewer,
   mergeIdRanges, orderHistoryIds, orderPinnedIds,
@@ -38,7 +38,7 @@ import {
   selectThreadInfo,
   selectViewportIds,
 } from '../selectors';
-import { removeIdFromSearchResults } from './localSearch';
+import { removeIdFromSearchResults } from './middleSearch';
 import { updateTabState } from './tabs';
 import { clearMessageTranslation } from './translations';
 

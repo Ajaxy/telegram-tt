@@ -152,7 +152,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
     return (
       <MessageSummary
-        lang={lang}
         message={message}
         noEmoji={Boolean(mediaThumbnail)}
         translatedText={translatedText}

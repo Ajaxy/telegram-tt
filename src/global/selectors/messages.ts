@@ -22,8 +22,8 @@ import {
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
+import { getMessageKey, isLocalMessageId } from '../../util/keys/messageKey';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import { getMessageKey, isLocalMessageId } from '../../util/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 import {

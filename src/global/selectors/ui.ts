@@ -5,7 +5,6 @@ import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { getMessageVideo, getMessageWebPageVideo } from '../helpers/messageMedia';
-import { selectCurrentTextSearch } from './localSearch';
 import { selectCurrentManagement } from './management';
 import { selectIsStatisticsShown } from './statistics';
 import { selectTabState } from './tabs';
@@ -38,8 +37,6 @@ export function selectRightColumnContentKey<T extends GlobalState>(
     RightColumnContent.CreateTopic
   ) : tabState.pollResults.messageId ? (
     RightColumnContent.PollResults
-  ) : !isMobile && selectCurrentTextSearch(global, tabId) ? (
-    RightColumnContent.Search
   ) : selectCurrentManagement(global, tabId) ? (
     RightColumnContent.Management
   ) : tabState.isStatisticsShown && tabState.statistics.currentMessageId ? (

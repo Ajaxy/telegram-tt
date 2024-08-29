@@ -17,6 +17,7 @@ import type {
   ApiUser,
   ApiVideo,
 } from '../api/types';
+import type { SearchResultKey } from '../util/keys/searchResultKey';
 import type { IconName } from './icons';
 
 export type TextPart = TeactNode;
@@ -299,7 +300,6 @@ export enum GlobalSearchContent {
 
 export enum RightColumnContent {
   ChatInfo,
-  Search,
   Management,
   Statistics,
   BoostStatistics,
@@ -399,6 +399,24 @@ export type ProfileTabType =
   | 'similarChannels'
   | 'dialogs';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
+export type MiddleSearchType = 'chat' | 'myChats' | 'channels';
+export type MiddleSearchParams = {
+  requestedQuery?: string;
+  savedTag?: ApiReaction;
+  isHashtag?: boolean;
+  fetchingQuery?: string;
+  type: MiddleSearchType;
+  results?: MiddleSearchResults;
+};
+export type MiddleSearchResults = {
+  query: string;
+  totalCount?: number;
+  nextOffsetId?: number;
+  nextOffsetPeerId?: string;
+  nextOffsetRate?: number;
+  foundIds?: SearchResultKey[];
+};
+
 export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
 'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';

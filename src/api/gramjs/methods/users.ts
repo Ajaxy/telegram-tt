@@ -22,7 +22,7 @@ import {
 import { addEntitiesToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
 import localDb from '../localDb';
 import { invokeRequest } from './client';
-import { searchMessagesLocal } from './messages';
+import { searchMessagesInChat } from './messages';
 
 let onUpdate: OnApiUpdate;
 
@@ -139,7 +139,7 @@ export async function fetchTopUsers() {
     return undefined;
   }
 
-  const users = topPeers.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
+  const users = topPeers.users.map(buildApiUser).filter((user): user is ApiUser => Boolean(user) && !user.isSelf);
   const ids = users.map(({ id }) => id);
 
   return {
@@ -295,7 +295,7 @@ export async function fetchProfilePhotos({
 
   if (chat?.isRestricted) return undefined;
 
-  const result = await searchMessagesLocal({
+  const result = await searchMessagesInChat({
     chat: chat!,
     type: 'profilePhoto',
     limit,

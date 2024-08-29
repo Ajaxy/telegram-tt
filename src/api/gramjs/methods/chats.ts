@@ -100,6 +100,9 @@ type ChatListData = {
   totalChatCount: number;
   messages: ApiMessage[];
   lastMessageByChatId: Record<string, number>;
+  nextOffsetId?: number;
+  nextOffsetPeerId?: string;
+  nextOffsetDate?: number;
 };
 
 let onUpdate: OnApiUpdate;
@@ -111,18 +114,24 @@ export function init(_onUpdate: OnApiUpdate) {
 export async function fetchChats({
   limit,
   offsetDate,
+  offsetPeer,
+  offsetId,
   archived,
   withPinned,
   lastLocalServiceMessageId,
 }: {
   limit: number;
   offsetDate?: number;
+  offsetPeer?: ApiPeer;
+  offsetId?: number;
   archived?: boolean;
   withPinned?: boolean;
   lastLocalServiceMessageId?: number;
 }): Promise<ChatListData | undefined> {
+  const peer = (offsetPeer && buildInputPeer(offsetPeer.id, offsetPeer.accessHash)) || new GramJs.InputPeerEmpty();
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
-    offsetPeer: new GramJs.InputPeerEmpty(),
+    offsetPeer: peer,
+    offsetId,
     limit,
     offsetDate,
     ...(withPinned && { excludePinned: true }),
@@ -217,6 +226,13 @@ export async function fetchChats({
     totalChatCount = chatIds.length;
   }
 
+  const lastDialog = chats[chats.length - 1];
+  const lastMessageId = lastMessageByChatId[lastDialog?.id];
+  const nextOffsetId = lastMessageId;
+  const nextOffsetPeerId = lastDialog?.id;
+  const nextOffsetDate = messages.reverse()
+    .find((message) => message.chatId === lastDialog?.id && message.id === lastMessageId)?.date;
+
   return {
     chatIds,
     chats,
@@ -227,20 +243,29 @@ export async function fetchChats({
     totalChatCount,
     lastMessageByChatId,
     messages,
+    nextOffsetId,
+    nextOffsetPeerId,
+    nextOffsetDate,
   };
 }
 
 export async function fetchSavedChats({
   limit,
   offsetDate,
+  offsetPeer,
+  offsetId,
   withPinned,
 }: {
   limit: number;
   offsetDate?: number;
+  offsetPeer?: ApiPeer;
+  offsetId?: number;
   withPinned?: boolean;
 }): Promise<ChatListData | undefined> {
+  const peer = (offsetPeer && buildInputPeer(offsetPeer.id, offsetPeer.accessHash)) || new GramJs.InputPeerEmpty();
   const result = await invokeRequest(new GramJs.messages.GetSavedDialogs({
-    offsetPeer: new GramJs.InputPeerEmpty(),
+    offsetPeer: peer,
+    offsetId,
     limit,
     offsetDate,
     ...(withPinned && { excludePinned: true }),
@@ -305,6 +330,13 @@ export async function fetchSavedChats({
     totalChatCount = chatIds.length;
   }
 
+  const lastDialog = chats[chats.length - 1];
+  const lastMessageId = lastMessageByChatId[lastDialog?.id];
+  const nextOffsetId = lastMessageId;
+  const nextOffsetPeerId = lastDialog?.id;
+  const nextOffsetDate = messages.reverse()
+    .find((message) => message.chatId === lastDialog?.id && message.id === lastMessageId)?.date;
+
   return {
     chatIds,
     chats,
@@ -315,6 +347,9 @@ export async function fetchSavedChats({
     lastMessageByChatId,
     messages,
     draftsById: {},
+    nextOffsetId,
+    nextOffsetPeerId,
+    nextOffsetDate,
   };
 }
 

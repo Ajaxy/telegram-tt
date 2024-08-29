@@ -2,11 +2,11 @@ import type { ThreadId } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { buildChatThreadKey } from '../helpers/localSearch';
+import { buildChatThreadKey } from '../helpers/middleSearch';
 import { selectCurrentMessageList } from './messages';
 import { selectTabState } from './tabs';
 
-export function selectCurrentTextSearch<T extends GlobalState>(
+export function selectCurrentMiddleSearch<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -16,12 +16,8 @@ export function selectCurrentTextSearch<T extends GlobalState>(
   }
 
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
-  const currentSearch = selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey];
-  if (!currentSearch || currentSearch.query === undefined) {
-    return undefined;
-  }
 
-  return currentSearch;
+  return selectTabState(global, tabId).middleSearch.byChatThreadKey[chatThreadKey];
 }
 
 export function selectCurrentSharedMediaSearch<T extends GlobalState>(

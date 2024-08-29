@@ -57,7 +57,7 @@ import {
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
 import { orderBy } from '../../util/iteratees';
-import { isLocalMessageId } from '../../util/messageKey';
+import { isLocalMessageId } from '../../util/keys/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
 import { groupMessages } from './helpers/groupMessages';

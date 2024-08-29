@@ -141,4 +141,10 @@
       pointer-events: none;
     }
   }
+
+  .left-search-picker-item {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    padding-right: 0;
+  }
 }

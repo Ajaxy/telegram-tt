@@ -71,15 +71,6 @@
     }
   }
 
-  &.round {
-    width: 3.5rem;
-    border-radius: 50%;
-
-    .icon {
-      font-size: 1.5rem;
-    }
-  }
-
   &.primary {
     background-color: var(--color-primary);
     color: var(--color-white);
@@ -354,6 +345,15 @@
       border-radius: 1rem;
       padding: 0.3125rem 1rem;
       font-size: 1rem;
+    }
+  }
+
+  &.round {
+    width: 3.5rem;
+    border-radius: 50%;
+
+    .icon {
+      font-size: 1.5rem;
     }
   }
 

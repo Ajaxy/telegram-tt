@@ -12,7 +12,7 @@ import {
   getMessageSummaryText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../../global/helpers/messageSummary';
-import { getMessageKey } from '../../../util/messageKey';
+import { getMessageKey } from '../../../util/keys/messageKey';
 import trimText from '../../../util/trimText';
 import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';

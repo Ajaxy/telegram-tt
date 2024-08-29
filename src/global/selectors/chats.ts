@@ -41,6 +41,12 @@ export function selectPeerFullInfo<T extends GlobalState>(global: T, peerId: str
   return selectChatFullInfo(global, peerId);
 }
 
+export function selectChatListLoadingParameters<T extends GlobalState>(
+  global: T, listType: ChatListType,
+) {
+  return global.chats.loadingParameters[listType];
+}
+
 export function selectChatUser<T extends GlobalState>(global: T, chat: ApiChat) {
   const userId = getPrivateChatUserId(chat);
   if (!userId) {

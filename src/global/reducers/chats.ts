@@ -30,6 +30,25 @@ export function replaceChatListIds<T extends GlobalState>(
   };
 }
 
+export function replaceChatListLoadingParameters<T extends GlobalState>(
+  global: T, type: ChatListType, nextOffsetId?: number, nextOffsetPeerId?: string, nextOffsetDate?: number,
+): T {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      loadingParameters: {
+        ...global.chats.loadingParameters,
+        [type]: {
+          nextOffsetId,
+          nextOffsetPeerId,
+          nextOffsetDate,
+        },
+      },
+    },
+  };
+}
+
 export function updateChatLastMessageId<T extends GlobalState>(
   global: T, chatId: string, lastMessageId: number, listType?: ChatListType,
 ): T {

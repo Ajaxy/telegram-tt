@@ -4,10 +4,9 @@ import type { GlobalState, TabArgs, TabState } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { areSortedArraysEqual } from '../../util/iteratees';
+import { getSearchResultKey } from '../../util/keys/searchResultKey';
 import { selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
-
-const getComplexKey = (message: ApiMessage) => `${message.chatId}_${message.id}`;
 
 export function updateGlobalSearch<T extends GlobalState>(
   global: T,
@@ -35,12 +34,14 @@ export function updateGlobalSearchResults<T extends GlobalState>(
   newFoundMessages: ApiMessage[],
   totalCount: number,
   type: ApiGlobalMessageSearchType,
-  nextRate?: number,
+  nextOffsetRate?: number,
+  nextOffsetId?: number,
+  nextOffsetPeerId?: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const { resultsByType } = selectTabState(global, tabId).globalSearch || {};
   const newFoundMessagesById = newFoundMessages.reduce((result, message) => {
-    result[getComplexKey(message)] = message;
+    result[getSearchResultKey(message)] = message;
 
     return result;
   }, {} as Record<string, ApiMessage>);
@@ -48,7 +49,7 @@ export function updateGlobalSearchResults<T extends GlobalState>(
 
   if (foundIdsForType !== undefined
     && Object.keys(newFoundMessagesById).every(
-      (newId) => foundIdsForType.includes(getComplexKey(newFoundMessagesById[newId])),
+      (newId) => foundIdsForType.includes(getSearchResultKey(newFoundMessagesById[newId])),
     )
   ) {
     return updateGlobalSearchFetchingStatus(global, { messages: false }, tabId);
@@ -56,7 +57,7 @@ export function updateGlobalSearchResults<T extends GlobalState>(
 
   const prevFoundIds = foundIdsForType || [];
   const newFoundIds = newFoundMessages
-    .map((message) => getComplexKey(message))
+    .map((message) => getSearchResultKey(message))
     .filter((id) => !prevFoundIds.includes(id));
   const foundIds = Array.prototype.concat(prevFoundIds, newFoundIds);
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
@@ -68,7 +69,9 @@ export function updateGlobalSearchResults<T extends GlobalState>(
       ...(selectTabState(global, tabId).globalSearch || {}).resultsByType,
       [type]: {
         totalCount,
-        nextOffsetId: nextRate,
+        nextOffsetId,
+        nextOffsetRate,
+        nextOffsetPeerId,
         foundIds: foundOrPrevFoundIds,
       },
     },

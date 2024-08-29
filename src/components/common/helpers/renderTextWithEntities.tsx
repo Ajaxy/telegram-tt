@@ -656,8 +656,7 @@ function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {
 }
 
 function handleHashtagClick(e: React.MouseEvent<HTMLAnchorElement>) {
-  getActions().setLocalTextSearchQuery({ query: e.currentTarget.innerText });
-  getActions().searchTextMessagesLocal();
+  getActions().searchHashtag({ hashtag: e.currentTarget.innerText });
 }
 
 function handleCodeClick(e: React.MouseEvent<HTMLElement>) {

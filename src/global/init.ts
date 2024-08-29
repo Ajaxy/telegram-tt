@@ -6,12 +6,12 @@ import { isCacheApiSupported } from '../util/cacheApi';
 import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMultitabRole';
 import { initGlobal } from '../util/init';
 import { cloneDeep } from '../util/iteratees';
-import { isLocalMessageId } from '../util/messageKey';
+import { isLocalMessageId } from '../util/keys/messageKey';
 import { Bundles, loadBundle } from '../util/moduleLoader';
 import { parseLocationHash } from '../util/routing';
 import { updatePeerColors } from '../util/theme';
 import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
-import { initializeChatMediaSearchResults } from './reducers/localSearch';
+import { initializeChatMediaSearchResults } from './reducers/middleSearch';
 import { updateTabState } from './reducers/tabs';
 import { initCache } from './cache';
 import {

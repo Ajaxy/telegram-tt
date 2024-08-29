@@ -10,6 +10,7 @@ import type {
 import { type MediaViewerMedia, MediaViewerOrigin, type ThreadId } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getChatMediaMessageIds, getMessagePaidMedia, isChatAdmin, isUserId,
 } from '../../global/helpers';
@@ -180,7 +181,9 @@ const MediaViewer = ({
 
   useEffect(() => {
     if (isMobile) {
-      document.body.classList.toggle('is-media-viewer-open', isOpen);
+      requestMutation(() => {
+        document.body.classList.toggle('is-media-viewer-open', isOpen);
+      });
     }
   }, [isMobile, isOpen]);
 

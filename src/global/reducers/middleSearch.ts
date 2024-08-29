@@ -1,26 +1,23 @@
-import type { ApiMessage, ApiMessageSearchType, ApiReaction } from '../../api/types';
+import type { ApiMessage, ApiMessageSearchType } from '../../api/types';
 import type {
-  ChatMediaSearchParams, ChatMediaSearchSegment, LoadingState,
-  SharedMediaType, ThreadId,
+  ChatMediaSearchParams,
+  ChatMediaSearchSegment,
+  LoadingState,
+  MiddleSearchParams,
+  MiddleSearchResults,
+  SharedMediaType,
+  ThreadId,
 } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { areSortedArraysEqual, areSortedArraysIntersecting, unique } from '../../util/iteratees';
+import {
+  areSortedArraysEqual, areSortedArraysIntersecting, omit, unique,
+} from '../../util/iteratees';
 import { buildChatThreadKey, isMediaLoadableInViewer } from '../helpers';
 import { selectTabState } from '../selectors';
-import { selectChatMediaSearch } from '../selectors/localSearch';
+import { selectChatMediaSearch } from '../selectors/middleSearch';
 import { updateTabState } from './tabs';
-
-interface TextSearchParams {
-  query?: string;
-  savedTag?: ApiReaction;
-  results?: {
-    totalCount?: number;
-    nextOffsetId?: number;
-    foundIds?: number[];
-  };
-}
 
 interface SharedMediaSearchParams {
   currentType?: SharedMediaType;
@@ -31,93 +28,128 @@ interface SharedMediaSearchParams {
   }>>;
 }
 
-function replaceLocalTextSearch<T extends GlobalState>(
+function replaceMiddleSearch<T extends GlobalState>(
   global: T,
   chatThreadKey: string,
-  searchParams: TextSearchParams,
+  searchParams?: MiddleSearchParams,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
+  const current = selectTabState(global, tabId).middleSearch.byChatThreadKey;
+  if (!searchParams) {
+    return updateTabState(global, {
+      middleSearch: {
+        byChatThreadKey: omit(current, [chatThreadKey]),
+      },
+    }, tabId);
+  }
+
+  const { type = 'chat', ...rest } = searchParams;
   return updateTabState(global, {
-    localTextSearch: {
+    middleSearch: {
       byChatThreadKey: {
-        ...selectTabState(global, tabId).localTextSearch.byChatThreadKey,
-        [chatThreadKey]: searchParams,
+        ...selectTabState(global, tabId).middleSearch.byChatThreadKey,
+        [chatThreadKey]: {
+          type,
+          ...rest,
+        },
       },
     },
   }, tabId);
 }
 
-export function updateLocalTextSearch<T extends GlobalState>(
+export function updateMiddleSearch<T extends GlobalState>(
   global: T,
   chatId: string,
   threadId: ThreadId,
-  query?: string,
+  update: Partial<MiddleSearchParams>,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
+  const currentSearch = selectTabState(global, tabId).middleSearch.byChatThreadKey[chatThreadKey];
 
-  return replaceLocalTextSearch(global, chatThreadKey, {
-    ...selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey],
-    query,
-  }, tabId);
-}
-
-export function updateLocalTextSearchTag<T extends GlobalState>(
-  global: T,
-  chatId: string,
-  threadId: ThreadId,
-  tag?: ApiReaction,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  const chatThreadKey = buildChatThreadKey(chatId, threadId);
-
-  const currentSearch = selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey];
-  const query = currentSearch?.query || '';
-
-  return replaceLocalTextSearch(global, chatThreadKey, {
+  const updated = {
+    type: 'chat',
     ...currentSearch,
-    query,
-    savedTag: tag,
-  }, tabId);
+    ...update,
+  } satisfies MiddleSearchParams;
+
+  if (!updated.isHashtag) {
+    updated.type = 'chat';
+  }
+
+  if (currentSearch && (currentSearch.type !== updated.type || currentSearch.savedTag !== updated.savedTag)) {
+    updated.results = undefined;
+  }
+
+  return replaceMiddleSearch(global, chatThreadKey, updated, tabId);
 }
 
-export function replaceLocalTextSearchResults<T extends GlobalState>(
+export function resetMiddleSearch<T extends GlobalState>(
   global: T,
   chatId: string,
   threadId: ThreadId,
-  foundIds?: number[],
-  totalCount?: number,
-  nextOffsetId?: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const chatThreadKey = buildChatThreadKey(chatId, threadId);
-
-  return replaceLocalTextSearch(global, chatThreadKey, {
-    ...selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey],
-    results: {
-      foundIds,
-      totalCount,
-      nextOffsetId,
-    },
+  return replaceMiddleSearch(global, buildChatThreadKey(chatId, threadId), {
+    type: 'chat',
   }, tabId);
 }
 
-export function updateLocalTextSearchResults<T extends GlobalState>(
+function replaceMiddleSearchResults<T extends GlobalState>(
   global: T,
   chatId: string,
   threadId: ThreadId,
-  newFoundIds: number[],
-  totalCount?: number,
-  nextOffsetId?: number,
+  results: MiddleSearchResults,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  return updateMiddleSearch(global, chatId, threadId, {
+    results,
+    fetchingQuery: undefined,
+  }, tabId);
+}
+
+export function updateMiddleSearchResults<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+  update: MiddleSearchResults,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const chatThreadKey = buildChatThreadKey(chatId, threadId);
-  const { results } = selectTabState(global, tabId).localTextSearch.byChatThreadKey[chatThreadKey] || {};
+  const { results } = selectTabState(global, tabId).middleSearch.byChatThreadKey[chatThreadKey] || {};
+  const prevQuery = (results?.query) || '';
+  if (update.query !== prevQuery) {
+    return replaceMiddleSearchResults(global, chatId, threadId, update, tabId);
+  }
+
   const prevFoundIds = (results?.foundIds) || [];
-  const foundIds = orderFoundIdsByDescending(unique(Array.prototype.concat(prevFoundIds, newFoundIds)));
+  const {
+    query, foundIds: newFoundIds, totalCount, nextOffsetId, nextOffsetPeerId, nextOffsetRate,
+  } = update;
+  const foundIds = unique(Array.prototype.concat(prevFoundIds, newFoundIds));
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
 
-  return replaceLocalTextSearchResults(global, chatId, threadId, foundOrPrevFoundIds, totalCount, nextOffsetId, tabId);
+  return replaceMiddleSearchResults(
+    global, chatId, threadId, {
+      query,
+      foundIds: foundOrPrevFoundIds,
+      totalCount,
+      nextOffsetId,
+      nextOffsetRate,
+      nextOffsetPeerId,
+    }, tabId,
+  );
+}
+
+export function closeMiddleSearch<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: ThreadId,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  return replaceMiddleSearch(global, chatThreadKey, undefined, tabId);
 }
 
 function replaceSharedMediaSearch<T extends GlobalState>(

@@ -324,7 +324,10 @@ function Story({
     onMouseLeave: handleLongPressMouseLeave,
     onTouchStart: handleLongPressTouchStart,
     onTouchEnd: handleLongPressTouchEnd,
-  } = useLongPress(handleLongPressStart, handleLongPressEnd);
+  } = useLongPress({
+    onStart: handleLongPressStart,
+    onEnd: handleLongPressEnd,
+  });
 
   const isUnsupported = useUnsupportedMedia(
     videoRef,

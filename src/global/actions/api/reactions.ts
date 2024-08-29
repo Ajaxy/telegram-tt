@@ -7,8 +7,8 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   buildCollectionByCallback, buildCollectionByKey, omit, unique,
 } from '../../../util/iteratees';
+import { getMessageKey } from '../../../util/keys/messageKey';
 import * as mediaLoader from '../../../util/mediaLoader';
-import { getMessageKey } from '../../../util/messageKey';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { callApi } from '../../../api/gramjs';
 import {

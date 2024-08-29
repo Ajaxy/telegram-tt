@@ -16,7 +16,7 @@ import type {
   ApiUser,
   ApiVideo,
 } from '../../../api/types';
-import type { MessageKey } from '../../../util/messageKey';
+import type { MessageKey } from '../../../util/keys/messageKey';
 import type { RequiredGlobalActions } from '../../index';
 import type {
   ActionReturnType, ApiDraft, GlobalState, TabArgs,
@@ -46,7 +46,7 @@ import {
   split,
   unique,
 } from '../../../util/iteratees';
-import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
+import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { IS_IOS } from '../../../util/windowEnvironment';

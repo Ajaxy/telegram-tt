@@ -22,6 +22,7 @@ import type {
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
+  ApiUser,
   ApiVideo,
   MediaContent,
   OnApiUpdate,
@@ -43,7 +44,7 @@ import {
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { fetchFile } from '../../../util/files';
 import { compact, split } from '../../../util/iteratees';
-import { getMessageKey } from '../../../util/messageKey';
+import { getMessageKey } from '../../../util/keys/messageKey';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
@@ -83,6 +84,7 @@ import {
   addEntitiesToLocalDb,
   addMessageToLocalDb,
   deserializeBytes,
+  resolveMessageApiChatId,
 } from '../helpers';
 import { processAffectedHistory, updateChannelState } from '../updates/updateManager';
 import { dispatchThreadInfoUpdates } from '../updates/updater';
@@ -99,6 +101,16 @@ type TranslateTextParams = ({
   messageIds: number[];
 }) & {
   toLanguageCode: string;
+};
+
+type SearchResults = {
+  messages: ApiMessage[];
+  users: ApiUser[];
+  chats: ApiChat[];
+  totalCount: number;
+  nextOffsetRate?: number;
+  nextOffsetPeerId?: string;
+  nextOffsetId?: number;
 };
 
 let onUpdate: OnApiUpdate;
@@ -1135,8 +1147,8 @@ export async function fetchDiscussionMessage({
   };
 }
 
-export async function searchMessagesLocal({
-  chat, isSavedDialog, savedTag, type, query, threadId, minDate, maxDate, ...pagination
+export async function searchMessagesInChat({
+  chat, isSavedDialog, savedTag, type, query = '', threadId, minDate, maxDate, ...pagination
 }: {
   chat: ApiChat;
   isSavedDialog?: boolean;
@@ -1149,7 +1161,7 @@ export async function searchMessagesLocal({
   limit: number;
   minDate?: number;
   maxDate?: number;
-}) {
+}): Promise<SearchResults | undefined> {
   let filter;
   switch (type) {
     case 'media':
@@ -1184,7 +1196,7 @@ export async function searchMessagesLocal({
     savedReaction: savedTag && [buildInputReaction(savedTag)],
     topMsgId: threadId !== MAIN_THREAD_ID && !isSavedDialog ? Number(threadId) : undefined,
     filter,
-    q: query || '',
+    q: query,
     minDate,
     maxDate,
     ...pagination,
@@ -1228,15 +1240,17 @@ export async function searchMessagesLocal({
 }
 
 export async function searchMessagesGlobal({
-  query, offsetRate = 0, limit, type = 'text', minDate, maxDate,
+  query, offsetRate = 0, offsetPeer, offsetId, limit, type = 'text', minDate, maxDate,
 }: {
   query: string;
   offsetRate?: number;
+  offsetPeer?: ApiPeer;
+  offsetId?: number;
   limit: number;
   type?: ApiGlobalMessageSearchType;
   minDate?: number;
   maxDate?: number;
-}) {
+}): Promise<SearchResults | undefined> {
   let filter;
   switch (type) {
     case 'media':
@@ -1264,10 +1278,13 @@ export async function searchMessagesGlobal({
     }
   }
 
+  const peer = (offsetPeer && buildInputPeer(offsetPeer.id, offsetPeer.accessHash)) || new GramJs.InputPeerEmpty();
+
   const result = await invokeRequest(new GramJs.messages.SearchGlobal({
     q: query,
     offsetRate,
-    offsetPeer: new GramJs.InputPeerEmpty(),
+    offsetPeer: peer,
+    offsetId,
     broadcastsOnly: type === 'channels' || undefined,
     limit,
     filter,
@@ -1284,11 +1301,7 @@ export async function searchMessagesGlobal({
     return undefined;
   }
 
-  updateLocalDb({
-    chats: result.chats,
-    users: result.users,
-    messages: result.messages,
-  } as GramJs.messages.Messages);
+  updateLocalDb(result);
 
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
@@ -1296,21 +1309,77 @@ export async function searchMessagesGlobal({
   dispatchThreadInfoUpdates(result.messages);
 
   let totalCount = messages.length;
-  let nextRate: number | undefined;
   if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
     totalCount = result.count;
-
-    if (messages.length) {
-      nextRate = messages[messages.length - 1].id;
-    }
+  } else {
+    totalCount = result.messages.length;
   }
+
+  const lastMessage = result.messages[result.messages.length - 1];
+  const nextOffsetPeerId = resolveMessageApiChatId(lastMessage);
+  const nextOffsetRate = 'nextRate' in result && result.nextRate ? result.nextRate : undefined;
+  const nextOffsetId = lastMessage?.id;
 
   return {
     messages,
     users,
     chats,
     totalCount,
-    nextRate: 'nextRate' in result && result.nextRate ? result.nextRate : nextRate,
+    nextOffsetRate,
+    nextOffsetPeerId,
+    nextOffsetId,
+  };
+}
+
+export async function searchHashtagPosts({
+  hashtag, offsetRate, offsetPeer, offsetId, limit,
+}: {
+  hashtag: string;
+  offsetRate?: number;
+  offsetPeer?: ApiPeer;
+  offsetId?: number;
+  limit?: number;
+}): Promise<SearchResults | undefined> {
+  const peer = (offsetPeer && buildInputPeer(offsetPeer.id, offsetPeer.accessHash)) || new GramJs.InputPeerEmpty();
+  const result = await invokeRequest(new GramJs.channels.SearchPosts({
+    hashtag,
+    offsetRate,
+    offsetId,
+    offsetPeer: peer,
+    limit,
+  }));
+
+  if (!result || result instanceof GramJs.messages.MessagesNotModified) {
+    return undefined;
+  }
+
+  updateLocalDb(result);
+
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
+
+  let totalCount = messages.length;
+  if (result instanceof GramJs.messages.MessagesSlice || result instanceof GramJs.messages.ChannelMessages) {
+    totalCount = result.count;
+  } else {
+    totalCount = result.messages.length;
+  }
+
+  const lastMessage = result.messages[result.messages.length - 1];
+  const nextOffsetPeerId = resolveMessageApiChatId(lastMessage);
+  const nextOffsetRate = 'nextRate' in result && result.nextRate ? result.nextRate : undefined;
+  const nextOffsetId = lastMessage?.id;
+
+  return {
+    messages,
+    users,
+    chats,
+    totalCount,
+    nextOffsetRate,
+    nextOffsetPeerId,
+    nextOffsetId,
   };
 }
 

@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { selectChat, selectCurrentMessageList } from '../../global/selectors';
+import { selectChat, selectCurrentMessageList, selectCurrentMiddleSearch } from '../../global/selectors';
 import animateScroll from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
 
@@ -153,8 +153,10 @@ export default memo(withGlobal<OwnProps>(
 
     const { chatId, threadId, type: messageListType } = currentMessageList;
     const chat = selectChat(global, chatId);
+    const hasActiveMiddleSearch = Boolean(selectCurrentMiddleSearch(global));
 
-    const shouldShowCount = chat && threadId === MAIN_THREAD_ID && messageListType === 'thread';
+    const shouldShowCount = chat && threadId === MAIN_THREAD_ID && messageListType === 'thread'
+      && !hasActiveMiddleSearch;
 
     return {
       messageListType,

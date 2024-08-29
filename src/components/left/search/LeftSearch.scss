@@ -24,9 +24,9 @@
 
   .section-heading {
     position: relative;
-    padding-top: 1.25rem;
+    padding-top: 0.25rem;
     padding-left: 1.25rem;
-    margin: 0 0 1rem -1.25rem !important;
+    margin: 0 0 0.5rem -1.25rem !important;
 
     font-weight: 500;
     font-size: 0.9375rem;
@@ -177,17 +177,6 @@
     }
   }
 
-  .ListItem.search-result-message {
-    .sender-name {
-      color: var(--color-text);
-
-      &::after {
-        content: ": ";
-        white-space: pre;
-      }
-    }
-  }
-
   @media (max-width: 600px) {
     .ListItem {
       margin: 0 -0.125rem 0 -0.5rem;
@@ -233,7 +222,7 @@
   }
 
   .chat-selection {
-    padding-top: 0.5rem;
+    padding-block: 0.5rem;
     display: flex;
     flex-shrink: 0;
     flex-wrap: nowrap;
@@ -246,18 +235,7 @@
     overflow-y: hidden;
 
     > .PickerSelectedItem {
-      flex: 0 0 auto;
-
-      &:last-child {
-        margin-right: auto;
-      }
-    }
-
-    &[dir="rtl"] {
-      > .PickerSelectedItem:last-child {
-        margin-left: auto;
-        margin-right: 0;
-      }
+      flex-shrink: 0;
     }
   }
 

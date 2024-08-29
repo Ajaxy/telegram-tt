@@ -254,7 +254,6 @@ function renderMessageContent(
 
   const messageSummary = (
     <MessageSummary
-      lang={lang}
       message={message}
       truncateLength={MAX_LENGTH}
       observeIntersectionForLoading={observeIntersectionForLoading}
