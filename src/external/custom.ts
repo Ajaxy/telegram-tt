@@ -13,8 +13,8 @@ import {
 export function getChatsInTheFolder(folderId: number) {
   const g = getGlobal();
 
-  if (!g.chatFolders.byId[folderId]) {
-    return [];
+  if (!g.chatFolders?.byId?.[folderId]) {
+    return undefined;
   }
 
   const folder = selectChatFolder(g, folderId);
@@ -22,7 +22,7 @@ export function getChatsInTheFolder(folderId: number) {
   const ids = folder?.includedChatIds;
 
   if (!ids?.length) {
-    return [];
+    return undefined;
   }
 
   return ids.map((id) => ({
@@ -37,7 +37,7 @@ export function getChatsInTheFolder(folderId: number) {
 export function getChatWithLastMessageById(chatId: number) {
   const g = getGlobal();
 
-  if (!g.chats.byId[chatId]) {
+  if (!g.chats?.byId?.[chatId]) {
     return undefined;
   }
 
@@ -67,7 +67,7 @@ export function getUserById(userId: number) {
 
   const id = userId.toString();
 
-  if (!g.users.byId[userId]) {
+  if (!g.users?.byId?.[userId]) {
     return undefined;
   }
 
@@ -82,7 +82,7 @@ export function getChatById(chatId: number) {
 
   const id = chatId.toString();
 
-  if (!g.chats.byId[chatId]) {
+  if (!g.chats?.byId?.[chatId]) {
     return undefined;
   }
 
