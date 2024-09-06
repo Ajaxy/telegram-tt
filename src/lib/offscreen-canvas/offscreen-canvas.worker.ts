@@ -1,14 +1,23 @@
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
+import fastBlur from '../fastBlur';
+
+const FAST_BLUR_ITERATIONS = 2;
 
 export async function blurThumb(canvas: OffscreenCanvas, dataUri: string, radius: number) {
   const imageBitmap = await dataUriToImageBitmap(dataUri);
   const { width, height } = canvas;
   const ctx = canvas.getContext('2d')!;
+  const isFilterSupported = 'filter' in ctx;
 
-  // Draw image twice to battle white-ish edges
-  ctx.drawImage(imageBitmap, 0, 0, width, height);
-  ctx.filter = `blur(${radius}px)`;
-  ctx.drawImage(imageBitmap, 0, 0, width, height);
+  if (isFilterSupported) {
+    ctx.filter = `blur(${radius}px)`;
+  }
+
+  ctx.drawImage(imageBitmap, -radius * 2, -radius * 2, width + radius * 4, height + radius * 4);
+
+  if (!isFilterSupported) {
+    fastBlur(ctx, 0, 0, width, height, radius, FAST_BLUR_ITERATIONS);
+  }
 }
 
 function dataUriToImageBitmap(dataUri: string) {
