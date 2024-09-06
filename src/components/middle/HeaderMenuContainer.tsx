@@ -24,19 +24,21 @@ import {
 } from '../../global/helpers';
 import {
   selectBot,
-  selectCanManage, selectCanTranslateChat,
+  selectCanManage,
+  selectCanTranslateChat,
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
   selectIsChatWithSelf,
   selectIsPremiumPurchaseBlocked,
-  selectIsRightColumnShown, selectNotifyExceptions,
+  selectIsRightColumnShown,
+  selectNotifyExceptions,
   selectNotifySettings,
   selectTabState,
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
-import { disableScrolling, enableScrolling } from '../../util/scrollLock';
+import { disableScrolling } from '../../util/scrollLock';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
@@ -391,11 +393,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
-  useEffect(() => {
-    disableScrolling();
-
-    return enableScrolling;
-  }, []);
+  useEffect(disableScrolling, []);
 
   const lang = useOldLang();
 

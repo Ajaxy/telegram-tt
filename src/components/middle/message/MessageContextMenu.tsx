@@ -20,7 +20,7 @@ import type { IAnchorPosition } from '../../../types';
 
 import { getUserFullName, isUserId } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
+import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import { getMessageCopyOptions } from './helpers/copyOptions';
@@ -323,9 +323,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   }, [isOpen, markIsReady, unmarkIsReady]);
 
   useEffect(() => {
-    disableScrolling(scrollableRef.current, '.ReactionPicker');
-
-    return enableScrolling;
+    return disableScrolling(scrollableRef.current, '.ReactionPicker');
   }, [isOpen]);
 
   const handleOpenMessageReactionPicker = useLastCallback((position: IAnchorPosition) => {
