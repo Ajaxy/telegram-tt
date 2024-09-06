@@ -259,10 +259,10 @@ function updateCache(force?: boolean) {
 export function forceUpdateCache(noEncrypt = false) {
   const global = getGlobal();
   const { hasPasscode, isScreenLocked } = global.passcode;
-  const serializedGlobal = serializeGlobal(global);
 
   if (hasPasscode) {
     if (!isScreenLocked && !noEncrypt) {
+      const serializedGlobal = serializeGlobal(global);
       void encryptSession(undefined, serializedGlobal);
     }
 
@@ -390,9 +390,9 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
   ]).slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
 
   return {
-    byId: pick(byId, idsToSave),
-    statusesById: pick(statusesById, idsToSave),
-    fullInfoById: pick(fullInfoById, idsToSave),
+    byId: pickTruthy(byId, idsToSave),
+    statusesById: pickTruthy(statusesById, idsToSave),
+    fullInfoById: pickTruthy(fullInfoById, idsToSave),
     previewMediaByBotId: {},
   };
 }
@@ -436,10 +436,10 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...global.chats,
     similarChannelsById: {},
     isFullyLoaded: {},
-    byId: pick(global.chats.byId, idsToSave),
-    fullInfoById: pick(global.chats.fullInfoById, idsToSave),
+    byId: pickTruthy(global.chats.byId, idsToSave),
+    fullInfoById: pickTruthy(global.chats.fullInfoById, idsToSave),
     lastMessageIds: {
-      all: pick(global.chats.lastMessageIds.all || {}, idsToSave),
+      all: pickTruthy(global.chats.lastMessageIds.all || {}, idsToSave),
       saved: global.chats.lastMessageIds.saved,
     },
   };
