@@ -11,7 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
 import useShowTransition from '../../../hooks/useShowTransition';
 
@@ -49,7 +49,7 @@ const StickerTooltip: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
-  const prevStickers = usePrevious(stickers, true);
+  const prevStickers = usePreviousDeprecated(stickers, true);
   const displayedStickers = stickers || prevStickers;
   const sendMessageAction = useSendMessageAction(chatId, threadId);
 

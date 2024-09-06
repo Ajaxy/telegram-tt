@@ -20,7 +20,7 @@ import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
 import ReportModal from '../common/ReportModal';
@@ -105,7 +105,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     exitMessageSelectMode();
   });
 
-  const prevSelectedMessagesCount = usePrevious(selectedMessagesCount || undefined, true);
+  const prevSelectedMessagesCount = usePreviousDeprecated(selectedMessagesCount || undefined, true);
   const renderingSelectedMessagesCount = isActive ? selectedMessagesCount : prevSelectedMessagesCount;
 
   const formattedMessagesCount = lang('VoiceOver.Chat.MessagesSelected', renderingSelectedMessagesCount, 'i');

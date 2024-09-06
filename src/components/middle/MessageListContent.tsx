@@ -27,7 +27,7 @@ import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import useDerivedSignal from '../../hooks/useDerivedSignal';
 import { getIsHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
 
@@ -139,7 +139,7 @@ const MessageListContent: FC<OwnProps> = ({
   }, 0);
   let appearanceIndex = 0;
 
-  const prevMessageIds = usePrevious(messageIds);
+  const prevMessageIds = usePreviousDeprecated(messageIds);
   const isNewMessage = Boolean(
     messageIds && prevMessageIds && messageIds[messageIds.length - 2] === prevMessageIds[prevMessageIds.length - 1],
   );

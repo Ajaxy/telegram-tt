@@ -11,7 +11,7 @@ import {
 } from '../../util/username';
 
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import InputText from '../ui/InputText';
 
@@ -43,7 +43,7 @@ const UsernameInput: FC<OwnProps> = ({
   const langPrefix = asLink ? 'SetUrl' : 'Username';
   const label = asLink ? lang('SetUrlPlaceholder') : lang('Username');
 
-  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
   const renderingIsUsernameAvailable = currentUsername !== username
     ? (isUsernameAvailable ?? previousIsUsernameAvailable) : undefined;
   const isChecking = username && currentUsername !== username && checkedUsername !== username;

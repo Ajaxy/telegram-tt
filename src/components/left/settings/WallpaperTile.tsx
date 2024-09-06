@@ -16,7 +16,7 @@ import { fetchBlob } from '../../../util/files';
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -52,7 +52,7 @@ const WallpaperTile: FC<OwnProps> = ({
   const {
     mediaData: fullMedia, loadProgress,
   } = useMediaWithLoadProgress(localMediaHash, !isLoadAllowed);
-  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
+  const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
   const { shouldRender: shouldRenderSpinner, transitionClassNames: spinnerClassNames } = useShowTransition(
     (isLoadAllowed && !fullMedia) || slug === UPLOADING_WALLPAPER_SLUG,
     undefined,

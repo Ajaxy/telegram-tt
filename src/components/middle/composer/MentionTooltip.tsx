@@ -8,7 +8,7 @@ import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 
 import useLastCallback from '../../../hooks/useLastCallback';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
@@ -74,7 +74,7 @@ const MentionTooltip: FC<OwnProps> = ({
     }
   }, [filteredUsers, onClose]);
 
-  const prevChatMembers = usePrevious(
+  const prevChatMembers = usePreviousDeprecated(
     filteredUsers?.length
       ? filteredUsers
       : undefined,

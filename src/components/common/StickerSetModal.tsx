@@ -27,7 +27,7 @@ import renderText from './helpers/renderText';
 import useAppLayout from '../../hooks/useAppLayout';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useSchedule from '../../hooks/useSchedule';
 import useScrolledState from '../../hooks/useScrolledState';
 
@@ -90,7 +90,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 
   const { isMobile } = useAppLayout();
 
-  const prevStickerSet = usePrevious(stickerSet);
+  const prevStickerSet = usePreviousDeprecated(stickerSet);
   const renderingStickerSet = stickerSet || prevStickerSet;
 
   const isAdded = Boolean(!renderingStickerSet?.isArchived && renderingStickerSet?.installedDate);

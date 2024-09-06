@@ -11,7 +11,7 @@ import { formatDateToString, formatTime, getDayStart } from '../../util/dates/da
 
 import useFlag from '../../hooks/useFlag';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -73,7 +73,7 @@ const CalendarModal: FC<OwnProps> = ({
   }, [isPastMode, maxAt]);
 
   const passedSelectedDate = useMemo(() => (selectedAt ? new Date(selectedAt) : new Date()), [selectedAt]);
-  const prevIsOpen = usePrevious(isOpen);
+  const prevIsOpen = usePreviousDeprecated(isOpen);
   const [isTimeInputFocused, markTimeInputAsFocused] = useFlag(false);
 
   const [selectedDate, setSelectedDate] = useState<Date>(passedSelectedDate);

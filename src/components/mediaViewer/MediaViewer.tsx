@@ -44,7 +44,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import { exitPictureInPictureIfNeeded, usePictureInPictureSignal } from '../../hooks/usePictureInPicture';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
 
@@ -120,7 +120,7 @@ const MediaViewer = ({
   /* Animation */
   const animationKey = useRef<number>();
   const senderId = message?.senderId || avatarOwner?.id;
-  const prevSenderId = usePrevious<string | undefined>(senderId);
+  const prevSenderId = usePreviousDeprecated<string | undefined>(senderId);
   const headerAnimation = withAnimation ? 'slideFade' : 'none';
   const isGhostAnimation = Boolean(withAnimation && !shouldSkipHistoryAnimations);
 
@@ -201,11 +201,11 @@ const MediaViewer = ({
     };
   }, [forceUpdate]);
 
-  const prevMessage = usePrevious<ApiMessage | undefined>(message);
-  const prevIsHidden = usePrevious<boolean | undefined>(isHidden);
-  const prevOrigin = usePrevious(origin);
-  const prevItem = usePrevious(currentItem);
-  const prevBestImageData = usePrevious(bestImageData);
+  const prevMessage = usePreviousDeprecated<ApiMessage | undefined>(message);
+  const prevIsHidden = usePreviousDeprecated<boolean | undefined>(isHidden);
+  const prevOrigin = usePreviousDeprecated(origin);
+  const prevItem = usePreviousDeprecated(currentItem);
+  const prevBestImageData = usePreviousDeprecated(bestImageData);
   const textParts = message ? renderMessageText({ message, forcePlayback: true, isForMediaViewer: true }) : undefined;
   const hasFooter = Boolean(textParts);
   const shouldAnimateOpening = prevIsHidden && prevItem !== currentItem;

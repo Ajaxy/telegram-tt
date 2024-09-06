@@ -24,7 +24,7 @@ import renderText from '../../../common/helpers/renderText';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
-import usePrevious from '../../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Icon from '../../../common/icons/Icon';
@@ -243,7 +243,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     };
   }, [transaction, oldLang, peer, isGift, animatedStickerData, giftOutAboutText, giftEntryAboutText]);
 
-  const prevModalData = usePrevious(starModalData);
+  const prevModalData = usePreviousDeprecated(starModalData);
   const renderingModalData = prevModalData || starModalData;
 
   return (

@@ -27,7 +27,7 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
@@ -561,10 +561,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     );
   }
 
-  const prevMainButtonColor = usePrevious(mainButton?.color, true);
-  const prevMainButtonTextColor = usePrevious(mainButton?.textColor, true);
-  const prevMainButtonIsActive = usePrevious(mainButton && Boolean(mainButton.isActive), true);
-  const prevMainButtonText = usePrevious(mainButton?.text, true);
+  const prevMainButtonColor = usePreviousDeprecated(mainButton?.color, true);
+  const prevMainButtonTextColor = usePreviousDeprecated(mainButton?.textColor, true);
+  const prevMainButtonIsActive = usePreviousDeprecated(mainButton && Boolean(mainButton.isActive), true);
+  const prevMainButtonText = usePreviousDeprecated(mainButton?.text, true);
 
   const mainButtonCurrentColor = mainButton?.color || prevMainButtonColor;
   const mainButtonCurrentTextColor = mainButton?.textColor || prevMainButtonTextColor;

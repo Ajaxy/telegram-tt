@@ -28,7 +28,7 @@ import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useOrderDiff from './hooks/useOrderDiff';
 
 import GroupCallTopPane from '../../calls/group/GroupCallTopPane';
@@ -129,7 +129,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 
   const shouldRenderRef = useRef(false);
   const isVisible = isOpen && !isHidden;
-  const prevIsVisible = usePrevious(isVisible);
+  const prevIsVisible = usePreviousDeprecated(isVisible);
 
   if (prevIsVisible !== isVisible) {
     shouldRenderRef.current = false;

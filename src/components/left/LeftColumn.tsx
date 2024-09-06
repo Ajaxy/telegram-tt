@@ -17,7 +17,7 @@ import {
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
-import usePrevious2 from '../../hooks/usePrevious2';
+import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
@@ -448,7 +448,7 @@ function LeftColumn({
     setSettingsScreen(screen);
   });
 
-  const prevSettingsScreenRef = useStateRef(usePrevious2(contentType === ContentType.Settings ? settingsScreen : -1));
+  const prevSettingsScreenRef = useStateRef(usePrevious(contentType === ContentType.Settings ? settingsScreen : -1));
 
   useEffect(() => {
     if (!IS_TOUCH_ENV) {

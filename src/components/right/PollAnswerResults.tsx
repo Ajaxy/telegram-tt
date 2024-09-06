@@ -17,7 +17,7 @@ import { selectTabState } from '../../global/selectors';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -58,7 +58,7 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
     closePollResults,
   } = getActions();
 
-  const prevVotersCount = usePrevious<number>(answerVote.votersCount);
+  const prevVotersCount = usePreviousDeprecated<number>(answerVote.votersCount);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const areVotersLoaded = Boolean(voters);
   const { option, text } = answer;

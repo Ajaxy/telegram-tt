@@ -3,7 +3,7 @@ import React, { useRef } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../hooks/useShowTransition';
 
 type OwnProps = {
@@ -33,8 +33,8 @@ const ShowTransition: FC<OwnProps> = ({
   style,
   ref,
 }) => {
-  const prevIsOpen = usePrevious(isOpen);
-  const prevChildren = usePrevious(children);
+  const prevIsOpen = usePreviousDeprecated(isOpen);
+  const prevChildren = usePreviousDeprecated(children);
   const fromChildrenRef = useRef<React.ReactNode>();
   const isFirstRender = prevIsOpen === undefined;
   const {

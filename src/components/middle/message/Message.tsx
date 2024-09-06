@@ -130,7 +130,7 @@ import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationChe
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useTextLanguage from '../../../hooks/useTextLanguage';
@@ -720,7 +720,7 @@ const Message: FC<OwnProps & StateProps> = ({
     chatTranslations, chatId, shouldTranslate ? messageId : undefined, requestedTranslationLanguage,
   );
   // Used to display previous result while new one is loading
-  const previousTranslatedText = usePrevious(translatedText, Boolean(shouldTranslate));
+  const previousTranslatedText = usePreviousDeprecated(translatedText, Boolean(shouldTranslate));
 
   const currentTranslatedText = translatedText || previousTranslatedText;
 

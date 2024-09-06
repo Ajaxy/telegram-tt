@@ -62,7 +62,7 @@ import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../hooks/useShowTransition';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
@@ -330,7 +330,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const renderingCanUnpin = useCurrentOrPrev(canUnpin, true);
   const renderingPinnedMessageTitle = useCurrentOrPrev(topMessageTitle);
 
-  const prevTransitionKey = usePrevious(currentTransitionKey);
+  const prevTransitionKey = usePreviousDeprecated(currentTransitionKey);
   const cleanupExceptionKey = (
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
   );

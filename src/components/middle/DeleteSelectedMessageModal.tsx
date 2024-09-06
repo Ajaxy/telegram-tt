@@ -37,7 +37,7 @@ import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useManagePermissions from '../right/hooks/useManagePermissions';
 
 import Avatar from '../common/Avatar';
@@ -100,7 +100,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     updateChatMemberBannedRights,
   } = getActions();
 
-  const prevIsOpen = usePrevious(isOpen);
+  const prevIsOpen = usePreviousDeprecated(isOpen);
 
   const oldLang = useOldLang();
   const lang = useLang();

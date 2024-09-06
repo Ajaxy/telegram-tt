@@ -25,7 +25,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
@@ -152,7 +152,7 @@ const Video = <T,>({
     uploadProgress !== undefined,
   );
 
-  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
+  const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,

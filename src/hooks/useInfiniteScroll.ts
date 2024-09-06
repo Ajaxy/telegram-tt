@@ -5,7 +5,7 @@ import { LoadMoreDirection } from '../types';
 import { areSortedArraysEqual } from '../util/iteratees';
 import useForceUpdate from './useForceUpdate';
 import useLastCallback from './useLastCallback';
-import usePrevious from './usePrevious';
+import usePreviousDeprecated from './usePreviousDeprecated';
 
 type GetMore = (args: { direction: LoadMoreDirection }) => void;
 type LoadMoreBackwards = (args: { offsetId?: string | number }) => void;
@@ -39,8 +39,8 @@ const useInfiniteScroll = <ListId extends string | number>(
     requestParamsRef.current = {};
   }
 
-  const prevListIds = usePrevious(listIds);
-  const prevIsDisabled = usePrevious(isDisabled);
+  const prevListIds = usePreviousDeprecated(listIds);
+  const prevIsDisabled = usePreviousDeprecated(isDisabled);
   if (listIds && !isDisabled && (listIds !== prevListIds || isDisabled !== prevIsDisabled)) {
     const { viewportIds, isOnTop } = currentStateRef.current || {};
     const currentMiddleId = viewportIds && !isOnTop ? viewportIds[Math.round(viewportIds.length / 2)] : undefined;

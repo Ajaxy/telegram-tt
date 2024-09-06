@@ -17,7 +17,7 @@ import renderText from '../../common/helpers/renderText';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import SliderDots from '../../common/SliderDots';
 import Button from '../../ui/Button';
@@ -129,7 +129,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   const [isScrolledToTop, setIsScrolledToTop] = useState(true);
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
 
-  const prevInitialSection = usePrevious(initialSection);
+  const prevInitialSection = usePreviousDeprecated(initialSection);
 
   const filteredSections = useMemo(() => {
     if (!premiumPromoOrder) return PREMIUM_FEATURE_SECTIONS;

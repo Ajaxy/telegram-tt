@@ -11,7 +11,7 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import { isBetween } from '../../util/math';
 
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Draggable from '../ui/Draggable';
@@ -49,7 +49,7 @@ const ManageUsernames: FC<OwnProps> = ({
   const [usernameForConfirm, setUsernameForConfirm] = useState<ApiUsername | undefined>();
 
   const usernameList = useMemo(() => usernames.map(({ username }) => username), [usernames]);
-  const prevUsernameList = usePrevious(usernameList);
+  const prevUsernameList = usePreviousDeprecated(usernameList);
 
   const [state, setState] = useState<SortState>({
     orderedUsernames: usernameList,

@@ -5,7 +5,7 @@ import { getActions } from '../../global';
 import type { ApiChatFolder } from '../../api/types';
 
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 
@@ -21,7 +21,7 @@ const DeleteFolderDialog: FC<OwnProps> = ({
 
   const isOpen = Boolean(folder);
 
-  const renderingFolder = usePrevious(folder) || folder;
+  const renderingFolder = usePreviousDeprecated(folder) || folder;
   const isMyChatlist = renderingFolder?.hasMyInvites;
 
   const handleDeleteFolderMessage = useCallback(() => {

@@ -16,7 +16,7 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
@@ -117,7 +117,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
     });
   });
 
-  const prevInlineBotResults = usePrevious(
+  const prevInlineBotResults = usePreviousDeprecated(
     inlineBotResults?.length
       ? inlineBotResults
       : undefined,

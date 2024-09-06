@@ -12,7 +12,7 @@ import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferIte
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import Portal from '../../ui/Portal';
@@ -43,7 +43,7 @@ const DropArea: FC<OwnProps> = ({
   const { showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
   const hideTimeoutRef = useRef<number>(null);
-  const prevWithQuick = usePrevious(withQuick);
+  const prevWithQuick = usePreviousDeprecated(withQuick);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
 

@@ -20,7 +20,7 @@ import renderText from '../../common/helpers/renderText';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
@@ -91,7 +91,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   const isLoading = progress === ProfileEditProgress.InProgress;
   const isUsernameError = editableUsername === false;
 
-  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
   const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
   const shouldRenderUsernamesManage = usernames && usernames.length > 1;
 

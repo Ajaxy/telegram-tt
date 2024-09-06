@@ -121,7 +121,7 @@ import useFlag from '../../hooks/useFlag';
 import useGetSelectionRange from '../../hooks/useGetSelectionRange';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useSchedule from '../../hooks/useSchedule';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -418,7 +418,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [isMounted, setIsMounted] = useState(false);
   const getSelectionRange = useGetSelectionRange(editableInputCssSelector);
   const lastMessageSendTimeSeconds = useRef<number>();
-  const prevDropAreaState = usePrevious(dropAreaState);
+  const prevDropAreaState = usePreviousDeprecated(dropAreaState);
   const { width: windowWidth } = windowSize.get();
 
   const isInMessageList = type === 'messageList';

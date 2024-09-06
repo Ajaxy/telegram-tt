@@ -72,7 +72,7 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { useResize } from '../../hooks/useResize';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useWindowSize from '../../hooks/window/useWindowSize';
@@ -286,7 +286,7 @@ function MiddleColumn({
     closeAnimationDuration,
   );
 
-  const prevTransitionKey = usePrevious(currentTransitionKey);
+  const prevTransitionKey = usePreviousDeprecated(currentTransitionKey);
 
   const cleanupExceptionKey = (
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined

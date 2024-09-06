@@ -27,7 +27,7 @@ import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
@@ -104,7 +104,7 @@ const RoundVideo: FC<OwnProps> = ({
   const thumbClassNames = useMediaTransition(!noThumb);
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
-  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
+  const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
 
   const {
     shouldRender: shouldSpinnerRender,

@@ -1,13 +1,13 @@
 import { useRef } from '../lib/teact/teact';
 
 import useEffectOnce from './useEffectOnce';
-import usePrevious from './usePrevious';
+import usePreviousDeprecated from './usePreviousDeprecated';
 
 export default function useSyncEffect<const T extends readonly any[]>(
   effect: (args: T | readonly []) => NoneToVoidFunction | void,
   dependencies: T,
 ) {
-  const prevDeps = usePrevious<T>(dependencies);
+  const prevDeps = usePreviousDeprecated<T>(dependencies);
   const cleanupRef = useRef<NoneToVoidFunction>();
 
   if (!prevDeps || dependencies.some((d, i) => d !== prevDeps[i])) {

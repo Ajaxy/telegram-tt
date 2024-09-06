@@ -26,7 +26,7 @@ import renderText from './helpers/renderText';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import usePhotosPreload from './hooks/usePhotosPreload';
 
 import Transition from '../ui/Transition';
@@ -87,8 +87,8 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const userProfilePhotos = user?.profilePhotos;
   const chatProfilePhotos = chat?.profilePhotos;
   const photos = userProfilePhotos?.photos || chatProfilePhotos?.photos || MEMO_EMPTY_ARRAY;
-  const prevMediaIndex = usePrevious(mediaIndex);
-  const prevAvatarOwnerId = usePrevious(avatarOwnerId);
+  const prevMediaIndex = usePreviousDeprecated(mediaIndex);
+  const prevAvatarOwnerId = usePreviousDeprecated(avatarOwnerId);
   const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
   // slideOptimized doesn't work well when animation is dynamically disabled
   const slideAnimation = hasSlideAnimation ? (lang.isRtl ? 'slideRtl' : 'slide') : 'none';

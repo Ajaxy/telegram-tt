@@ -15,7 +15,7 @@ import {
 
 import useFlag from '../../hooks/useFlag';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import RecipientPicker from '../common/RecipientPicker';
 
@@ -48,7 +48,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
 
   const lang = useOldLang();
 
-  const renderingIsStory = usePrevious(isStory, true);
+  const renderingIsStory = usePreviousDeprecated(isStory, true);
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
   useEffect(() => {
     if (isOpen) {

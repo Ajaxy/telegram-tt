@@ -10,7 +10,7 @@ import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -39,7 +39,7 @@ const CountryPickerModal: FC<OwnProps> = ({
   const lang = useOldLang();
 
   const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
-  const prevSelectedCountryIds = usePrevious(selectedCountryIds);
+  const prevSelectedCountryIds = usePreviousDeprecated(selectedCountryIds);
   const noPickerScrollRestore = prevSelectedCountryIds === selectedCountryIds;
 
   const displayedIds = useMemo(() => {

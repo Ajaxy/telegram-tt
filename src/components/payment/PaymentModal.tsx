@@ -22,7 +22,7 @@ import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -135,8 +135,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isTosAccepted, setIsTosAccepted] = useState(false);
   const [twoFaPassword, setTwoFaPassword] = useState('');
-  const prevStep = usePrevious(step, true);
-  const prevRequestId = usePrevious(requestId);
+  const prevStep = usePreviousDeprecated(step, true);
+  const prevRequestId = usePreviousDeprecated(requestId);
   const canRenderFooter = step !== PaymentStep.ConfirmPayment;
 
   const setStep = useCallback((nextStep) => {

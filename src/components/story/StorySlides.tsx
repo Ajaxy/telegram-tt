@@ -32,7 +32,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useWindowSize from '../../hooks/window/useWindowSize';
 import useSlideSizes from './hooks/useSlideSizes';
 
@@ -91,7 +91,7 @@ function StorySlides({
   const containerRef = useRef<HTMLDivElement>(null);
   const [renderingPeerId, setRenderingPeerId] = useState(currentPeerId);
   const [renderingStoryId, setRenderingStoryId] = useState(currentStoryId);
-  const prevPeerId = usePrevious(currentPeerId);
+  const prevPeerId = usePreviousDeprecated(currentPeerId);
   const renderingIsArchive = useCurrentOrPrev(isArchive, true);
   const renderingIsPrivate = useCurrentOrPrev(isPrivate, true);
   const renderingIsSinglePeer = useCurrentOrPrev(isSinglePeer, true);

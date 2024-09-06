@@ -33,7 +33,7 @@ import renderText from './helpers/renderText';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useManagePermissions from '../right/hooks/useManagePermissions';
 
 import PermissionCheckboxList from '../main/PermissionCheckboxList';
@@ -101,7 +101,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     closeDeleteMessageModal,
   } = getActions();
 
-  const prevIsOpen = usePrevious(isOpen);
+  const prevIsOpen = usePreviousDeprecated(isOpen);
 
   const lang = useOldLang();
 

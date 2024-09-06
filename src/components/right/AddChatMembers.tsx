@@ -18,7 +18,7 @@ import sortChatIds from '../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import PeerPicker from '../common/pickers/PeerPicker';
 import FloatingActionButton from '../ui/FloatingActionButton';
@@ -63,7 +63,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
 
   const lang = useOldLang();
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
-  const prevSelectedMemberIds = usePrevious(selectedMemberIds);
+  const prevSelectedMemberIds = usePreviousDeprecated(selectedMemberIds);
   const noPickerScrollRestore = prevSelectedMemberIds === selectedMemberIds;
 
   useHistoryBack({

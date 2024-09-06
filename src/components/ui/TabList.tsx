@@ -10,7 +10,7 @@ import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Tab from './Tab';
 
@@ -45,7 +45,7 @@ const TabList: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const previousActiveTab = usePrevious(activeTab);
+  const previousActiveTab = usePreviousDeprecated(activeTab);
 
   useHorizontalScroll(containerRef, undefined, true);
 

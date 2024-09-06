@@ -37,7 +37,7 @@ import useFlag from '../../../hooks/useFlag';
 import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
@@ -149,7 +149,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const inputRef = useRef<HTMLDivElement>(null);
 
   const hideTimeoutRef = useRef<number>();
-  const prevAttachments = usePrevious(attachments);
+  const prevAttachments = usePreviousDeprecated(attachments);
   const renderingAttachments = attachments.length ? attachments : prevAttachments;
   const { isMobile } = useAppLayout();
 

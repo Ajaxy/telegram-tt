@@ -15,7 +15,7 @@ import { allowSwipeControlForTransition } from '../../util/swipeController';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import './Transition.scss';
 
@@ -98,7 +98,7 @@ function Transition({
   }
 
   const rendersRef = useRef<Record<number, React.ReactNode | ChildrenFn>>({});
-  const prevActiveKey = usePrevious<any>(activeKey);
+  const prevActiveKey = usePreviousDeprecated<any>(activeKey);
   const forceUpdate = useForceUpdate();
   const isAnimatingRef = useRef(false);
   const isSwipeJustCancelledRef = useRef(false);

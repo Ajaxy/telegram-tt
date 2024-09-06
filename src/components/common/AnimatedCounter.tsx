@@ -8,7 +8,7 @@ import { throttleWithTickEnd } from '../../util/schedulers';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import styles from './AnimatedCounter.module.scss';
 
@@ -34,7 +34,7 @@ const AnimatedCounter: FC<OwnProps> = ({
 }) => {
   const { isRtl } = useLang();
 
-  const prevText = usePrevious(text);
+  const prevText = usePreviousDeprecated(text);
   const forceUpdate = useForceUpdate();
 
   const shouldAnimate = scheduleAnimation(
