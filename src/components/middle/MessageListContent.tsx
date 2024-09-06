@@ -12,7 +12,11 @@ import { MAIN_THREAD_ID } from '../../api/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import {
-  getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
+  getMessageHtmlId,
+  getMessageOriginalId,
+  isActionMessage,
+  isOwnMessage,
+  isServiceNotificationMessage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate } from '../../util/dates/dateFormat';
@@ -21,6 +25,7 @@ import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useDerivedSignal from '../../hooks/useDerivedSignal';
+import { getIsHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useOldLang from '../../hooks/useOldLang';
 import usePrevious from '../../hooks/usePrevious';
 import useMessageObservers from './hooks/useMessageObservers';
@@ -94,7 +99,9 @@ const MessageListContent: FC<OwnProps> = ({
 }) => {
   const { openHistoryCalendar } = getActions();
 
-  const getIsReady = useDerivedSignal(isReady);
+  const getIsHeavyAnimating2 = getIsHeavyAnimating;
+  const getIsReady = useDerivedSignal(() => isReady && !getIsHeavyAnimating2(), [isReady, getIsHeavyAnimating2]);
+
   const areDatesClickable = !isSavedDialog && !isSchedule;
 
   const {
