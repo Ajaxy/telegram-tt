@@ -134,7 +134,7 @@ export function renderActionMessageText(
 
   if (unprocessed.includes('%action_topic%')) {
     const topicEmoji = topic?.iconEmojiId
-      ? <CustomEmoji documentId={topic.iconEmojiId} />
+      ? <CustomEmoji documentId={topic.iconEmojiId} isSelectable />
       : '';
     const topicString = topic ? `${topic.title}` : 'a topic';
     processed = processPlaceholder(
@@ -153,7 +153,7 @@ export function renderActionMessageText(
     processed = processPlaceholder(
       unprocessed,
       '%action_topic_icon%',
-      hasIcon ? <CustomEmoji documentId={topicIcon!} />
+      hasIcon ? <CustomEmoji documentId={topicIcon!} isSelectable />
         : topic ? <TopicDefaultIcon topicId={topic!.id} title={topic!.title} /> : '...',
     );
     unprocessed = processed.pop() as string;

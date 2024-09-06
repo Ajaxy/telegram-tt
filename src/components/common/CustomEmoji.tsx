@@ -1,4 +1,4 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef, useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
@@ -18,18 +18,17 @@ import StickerView from './StickerView';
 import styles from './CustomEmoji.module.scss';
 
 import blankImg from '../../assets/blank.png';
-import svgPlaceholder from '../../assets/square.svg';
 
 type OwnProps = {
   ref?: React.RefObject<HTMLDivElement>;
   documentId: string;
-  children?: TeactNode;
-  size?: number;
   className?: string;
-  loopLimit?: number;
   style?: string;
+  size?: number;
   isBig?: boolean;
   noPlay?: boolean;
+  loopLimit?: number;
+  isSelectable?: boolean;
   withSharedAnimation?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
@@ -48,12 +47,13 @@ const STICKER_SIZE = 20;
 const CustomEmoji: FC<OwnProps> = ({
   ref,
   documentId,
+  className,
+  style,
   size = STICKER_SIZE,
   isBig,
   noPlay,
-  className,
   loopLimit,
-  style,
+  isSelectable,
   withSharedAnimation,
   sharedCanvasRef,
   sharedCanvasHqRef,
@@ -123,16 +123,18 @@ const CustomEmoji: FC<OwnProps> = ({
       data-alt={customEmoji?.emoji}
       style={style}
     >
-      <img
-        className={styles.highlightCatch}
-        src={blankImg}
-        alt={customEmoji?.emoji}
-        data-entity-type={ApiMessageEntityTypes.CustomEmoji}
-        data-document-id={documentId}
-        draggable={false}
-      />
+      {isSelectable && (
+        <img
+          className={styles.highlightCatch}
+          src={blankImg}
+          alt={customEmoji?.emoji}
+          data-entity-type={ApiMessageEntityTypes.CustomEmoji}
+          data-document-id={documentId}
+          draggable={false}
+        />
+      )}
       {!customEmoji ? (
-        <img className={styles.thumb} src={svgPlaceholder} alt="Emoji" draggable={false} />
+        <div className={buildClassName(styles.placeholder)} draggable={false} />
       ) : (
         <StickerView
           containerRef={containerRef}

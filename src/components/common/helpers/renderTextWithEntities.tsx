@@ -439,6 +439,7 @@ function processEntity({
           key={cacheBuster ? `${cacheBuster}-${entity.offset}` : undefined}
           documentId={entity.documentId}
           size={emojiSize}
+          isSelectable
           withSharedAnimation
           sharedCanvasRef={sharedCanvasRef}
           sharedCanvasHqRef={sharedCanvasHqRef}
@@ -568,6 +569,7 @@ function processEntity({
           key={cacheBuster ? `${cacheBuster}-${entity.offset}` : undefined}
           documentId={entity.documentId}
           size={emojiSize}
+          isSelectable
           withSharedAnimation
           sharedCanvasRef={sharedCanvasRef}
           sharedCanvasHqRef={sharedCanvasHqRef}
