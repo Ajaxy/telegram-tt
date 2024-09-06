@@ -2578,7 +2578,7 @@ addActionHandler('updateChatDetectedLanguage', (global, actions, payload): Actio
   global = getGlobal();
   global = updateChat(global, chatId, {
     detectedLanguage,
-  });
+  }, undefined, true);
 
   return global;
 });

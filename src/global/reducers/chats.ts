@@ -6,7 +6,7 @@ import type { ChatListType, GlobalState } from '../types';
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
 import {
-  areSortedArraysEqual, buildCollectionByKey, omit, unique,
+  areSortedArraysEqual, buildCollectionByKey, omit, pick, unique,
 } from '../../util/iteratees';
 import { selectChat, selectChatFullInfo } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
@@ -157,9 +157,17 @@ export function removeUnreadMentions<T extends GlobalState>(
 }
 
 export function updateChat<T extends GlobalState>(
-  global: T, chatId: string, chatUpdate: Partial<ApiChat>, noOmitUnreadReactionCount = false,
+  global: T, chatId: string, chatUpdate: Partial<ApiChat>, noOmitUnreadReactionCount = false, withDeepCheck = false,
 ): T {
   const { byId } = global.chats;
+
+  const chat = byId[chatId];
+  if (withDeepCheck && chat) {
+    const updateKeys = Object.keys(chatUpdate) as (keyof ApiChat)[];
+    if (areDeepEqual(pick(chat, updateKeys), chatUpdate)) {
+      return global;
+    }
+  }
 
   const updatedChat = getUpdatedChat(global, chatId, chatUpdate, noOmitUnreadReactionCount);
   if (!updatedChat) {
