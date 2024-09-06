@@ -1,6 +1,11 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -20,15 +25,10 @@ import type {
   ApiTypeStory,
   ApiUser,
 } from '../../../api/types';
-import type {
-  ActiveEmojiInteraction,
-  ChatTranslatedMessages,
-  MessageListType,
-} from '../../../global/types';
+import type { ActiveEmojiInteraction, ChatTranslatedMessages, MessageListType } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
-  FocusDirection, IAlbum, ISettings, ScrollTargetPosition,
-  ThreadId,
+  FocusDirection, IAlbum, ISettings, ScrollTargetPosition, ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
@@ -66,7 +66,8 @@ import {
   selectActiveDownloads,
   selectAnimatedEmoji,
   selectCanAutoLoadMedia,
-  selectCanAutoPlayMedia, selectCanReplyToMessage,
+  selectCanAutoPlayMedia,
+  selectCanReplyToMessage,
   selectChat,
   selectChatFullInfo,
   selectChatMessage,
@@ -443,7 +444,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const {
     isContextMenuOpen,
-    contextMenuPosition,
+    contextMenuAnchor,
     contextMenuTarget,
     handleBeforeContextMenu,
     handleContextMenu: onContextMenu,
@@ -535,7 +536,7 @@ const Message: FC<OwnProps & StateProps> = ({
     ) && !album.messages.some((msg) => Object.keys(msg.content).length === 0);
   const isInDocumentGroupNotFirst = isInDocumentGroup && !isFirstInDocumentGroup;
   const isInDocumentGroupNotLast = isInDocumentGroup && !isLastInDocumentGroup;
-  const isContextMenuShown = contextMenuPosition !== undefined;
+  const isContextMenuShown = contextMenuAnchor !== undefined;
   const canShowActionButton = (
     !(isContextMenuShown || isInSelectMode || isForwarding)
     && !isInDocumentGroupNotLast
@@ -1650,10 +1651,10 @@ const Message: FC<OwnProps & StateProps> = ({
           />
         )}
       </div>
-      {contextMenuPosition && (
+      {contextMenuAnchor && (
         <ContextMenuContainer
           isOpen={isContextMenuOpen}
-          anchor={contextMenuPosition}
+          anchor={contextMenuAnchor}
           targetHref={contextMenuTarget?.matches('a[href]') ? (contextMenuTarget as HTMLAnchorElement).href : undefined}
           message={message}
           album={album}

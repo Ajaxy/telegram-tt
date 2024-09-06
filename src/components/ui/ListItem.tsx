@@ -13,7 +13,6 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMenuPosition from '../../hooks/useMenuPosition';
 import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
@@ -120,7 +119,7 @@ const ListItem: FC<OwnProps> = ({
   const [isTouched, markIsTouched, unmarkIsTouched] = useFlag();
 
   const {
-    isContextMenuOpen, contextMenuPosition,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(containerRef, !contextActions);
@@ -132,16 +131,6 @@ const ListItem: FC<OwnProps> = ({
       .querySelector('.ListItem-context-menu .bubble');
   });
   const getLayout = useLastCallback(() => ({ withPortal: withPortalForMenu }));
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
 
   const handleClickEvent = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     const hasModifierKey = e.ctrlKey || e.metaKey || e.shiftKey;
@@ -215,7 +204,7 @@ const ListItem: FC<OwnProps> = ({
     disabled && 'disabled',
     allowDisabledClick && 'click-allowed',
     inactive && 'inactive',
-    contextMenuPosition && 'has-menu-open',
+    contextMenuAnchor && 'has-menu-open',
     focus && 'focus',
     destructive && 'destructive',
     multiline && 'multiline',
@@ -267,14 +256,14 @@ const ListItem: FC<OwnProps> = ({
         )}
         {rightElement}
       </ButtonElementTag>
-      {contextActions && contextMenuPosition !== undefined && (
+      {contextActions && contextMenuAnchor !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
           className="ListItem-context-menu with-menu-transitions"
           autoClose
           onClose={handleContextMenuClose}

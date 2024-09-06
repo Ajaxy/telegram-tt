@@ -17,7 +17,6 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useMenuPosition from '../../hooks/useMenuPosition';
 import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
@@ -69,7 +68,7 @@ const GifButton: FC<OwnProps> = ({
   const isVideoReady = loadAndPlay && isBuffered;
 
   const {
-    isContextMenuOpen, contextMenuPosition,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
@@ -77,15 +76,6 @@ const GifButton: FC<OwnProps> = ({
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!.closest('.custom-scroll, .no-scrollbar'));
   const getMenuElement = useLastCallback(() => ref.current!.querySelector('.gif-context-menu .bubble'));
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-  );
 
   const handleClick = useLastCallback(() => {
     if (isContextMenuOpen || !onClick) return;
@@ -185,14 +175,13 @@ const GifButton: FC<OwnProps> = ({
       {shouldRenderSpinner && (
         <Spinner color={previewBlobUrl || withThumb ? 'white' : 'black'} />
       )}
-      {onClick && contextMenuPosition !== undefined && (
+      {onClick && contextMenuAnchor !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
           className="gif-context-menu"
           autoClose
           onClose={handleContextMenuClose}

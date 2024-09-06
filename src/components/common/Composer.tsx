@@ -29,8 +29,7 @@ import type {
   ApiWebPage,
 } from '../../api/types';
 import type {
-  ApiDraft, GlobalState, MessageList,
-  MessageListType, TabState,
+  ApiDraft, GlobalState, MessageList, MessageListType, TabState,
 } from '../../global/types';
 import type {
   IAnchorPosition, InlineBotSettings, ISettings, ThreadId,
@@ -830,7 +829,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   } = useContextMenuHandlers(mainButtonRef, !(mainButtonState === MainButtonState.Send && canShowCustomSendMenu));
 
   const {
-    contextMenuPosition: storyReactionPickerPosition,
+    contextMenuAnchor: storyReactionPickerAnchor,
     handleContextMenu: handleStoryPickerContextMenu,
     handleBeforeContextMenu: handleBeforeStoryPickerContextMenu,
     handleContextMenuHide: handleStoryPickerContextMenuHide,
@@ -839,15 +838,15 @@ const Composer: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (isReactionPickerOpen) return;
 
-    if (storyReactionPickerPosition) {
+    if (storyReactionPickerAnchor) {
       openStoryReactionPicker({
         peerId: chatId,
         storyId: storyId!,
-        position: storyReactionPickerPosition,
+        position: storyReactionPickerAnchor,
       });
       handleStoryPickerContextMenuHide();
     }
-  }, [chatId, handleStoryPickerContextMenuHide, isReactionPickerOpen, storyId, storyReactionPickerPosition]);
+  }, [chatId, handleStoryPickerContextMenuHide, isReactionPickerOpen, storyId, storyReactionPickerAnchor]);
 
   useClipboardPaste(
     isForCurrentMessageList || isInStoryViewer,

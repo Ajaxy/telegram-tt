@@ -34,7 +34,6 @@ import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
@@ -160,7 +159,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
 
   const {
-    isContextMenuOpen, contextMenuPosition, handleContextMenu,
+    isContextMenuOpen, contextMenuAnchor, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
@@ -198,15 +197,6 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!);
   const getMenuElement = useLastCallback(() => ref.current!.querySelector('.forward-context-menu .bubble'));
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-  );
 
   useEffect(() => {
     if (!shouldRender) {
@@ -296,11 +286,10 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
         {(isShowingReply || isForwarding) && !isContextMenuDisabled && (
           <Menu
             isOpen={isContextMenuOpen}
-            transformOriginX={transformOriginX}
-            transformOriginY={transformOriginY}
-            positionX={positionX}
-            positionY={positionY}
-            style={menuStyle}
+            anchor={contextMenuAnchor}
+            getTriggerElement={getTriggerElement}
+            getRootElement={getRootElement}
+            getMenuElement={getMenuElement}
             className="forward-context-menu"
             onClose={handleContextMenuClose}
             onCloseAnimationEnd={handleContextMenuHide}

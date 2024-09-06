@@ -28,7 +28,6 @@ import { getMessageCopyOptions } from './helpers/copyOptions';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
@@ -323,15 +322,11 @@ const MessageContextMenu: FC<OwnProps> = ({
     }, ANIMATION_DURATION);
   }, [isOpen, markIsReady, unmarkIsReady]);
 
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style, menuStyle, withScroll,
-  } = useMenuPosition(anchor, getTriggerElement, getRootElement, getMenuElement, getLayout);
-
   useEffect(() => {
-    disableScrolling(withScroll ? scrollableRef.current : undefined, '.ReactionPicker');
+    disableScrolling(scrollableRef.current, '.ReactionPicker');
 
     return enableScrolling;
-  }, [withScroll]);
+  }, [isOpen]);
 
   const handleOpenMessageReactionPicker = useLastCallback((position: IAnchorPosition) => {
     onReactionPickerOpen!(position);
@@ -342,12 +337,11 @@ const MessageContextMenu: FC<OwnProps> = ({
     <Menu
       ref={menuRef}
       isOpen={isOpen}
-      transformOriginX={transformOriginX}
-      transformOriginY={transformOriginY}
-      positionX={positionX}
-      positionY={positionY}
-      style={style}
-      bubbleStyle={menuStyle}
+      anchor={anchor}
+      getTriggerElement={getTriggerElement}
+      getRootElement={getRootElement}
+      getMenuElement={getMenuElement}
+      getLayout={getLayout}
       className={buildClassName(
         'MessageContextMenu', 'fluid', withReactions && 'with-reactions',
       )}
@@ -376,13 +370,12 @@ const MessageContextMenu: FC<OwnProps> = ({
       )}
 
       <div
+        ref={scrollableRef}
         className={buildClassName(
           'MessageContextMenu_items scrollable-content custom-scroll',
           areItemsHidden && 'MessageContextMenu_items-hidden',
         )}
-        style={menuStyle}
         dir={lang.isRtl ? 'rtl' : undefined}
-        ref={scrollableRef}
       >
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}
         {canReschedule && (

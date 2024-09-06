@@ -12,9 +12,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FocusDirection, ThreadId } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
-import {
-  getChatTitle, getMessageHtmlId, isJoinedChannelMessage,
-} from '../../global/helpers';
+import { getChatTitle, getMessageHtmlId, isJoinedChannelMessage } from '../../global/helpers';
 import { getMessageReplyInfo } from '../../global/helpers/replies';
 import {
   selectCanPlayAnimatedEmojis,
@@ -191,11 +189,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   ]);
 
   const {
-    isContextMenuOpen, contextMenuPosition,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
-  const isContextMenuShown = contextMenuPosition !== undefined;
+  const isContextMenuShown = contextMenuAnchor !== undefined;
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     preventMessageInputBlur(e);
@@ -372,10 +370,10 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         <ActionMessageSuggestedAvatar message={message} renderContent={renderContent} />
       )}
       {isJoinedMessage && <SimilarChannels chatId={targetChatId!} />}
-      {contextMenuPosition && (
+      {contextMenuAnchor && (
         <ContextMenuContainer
           isOpen={isContextMenuOpen}
-          anchor={contextMenuPosition}
+          anchor={contextMenuAnchor}
           message={message}
           messageListType="thread"
           onClose={handleContextMenuClose}

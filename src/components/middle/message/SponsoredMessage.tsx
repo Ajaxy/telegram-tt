@@ -65,7 +65,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     threshold: 1,
   });
   const {
-    isContextMenuOpen, contextMenuPosition,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref, undefined, true, IS_ANDROID);
@@ -183,10 +183,10 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           )}
         </div>
       </div>
-      {contextMenuPosition && (
+      {contextMenuAnchor && (
         <SponsoredMessageContextMenuContainer
           isOpen={isContextMenuOpen}
-          anchor={contextMenuPosition}
+          anchor={contextMenuAnchor}
           message={message!}
           onAboutAdsClick={openAboutAdsModal}
           onReportAd={handleReportSponsoredMessage}

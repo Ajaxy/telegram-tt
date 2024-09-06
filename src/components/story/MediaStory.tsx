@@ -15,7 +15,6 @@ import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMe
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useMenuPosition from '../../hooks/useMenuPosition';
 import useOldLang from '../../hooks/useOldLang';
 
 import Icon from '../common/icons/Icon';
@@ -73,19 +72,10 @@ function MediaStory({
   }, [isDeleted, isFullyLoaded, story]);
 
   const {
-    isContextMenuOpen, contextMenuPosition,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(containerRef, !isOwn);
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
 
   const handleClick = useCallback(() => {
     openStoryViewer({
@@ -156,14 +146,14 @@ function MediaStory({
         {isFullyLoaded && <MediaAreaOverlay story={story} />}
         {isProtected && <span className="protector" />}
       </div>
-      {contextMenuPosition !== undefined && (
+      {contextMenuAnchor !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
           className={buildClassName(styles.contextMenu, 'story-context-menu')}
           autoClose
           onClose={handleContextMenuClose}

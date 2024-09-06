@@ -10,7 +10,6 @@ import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMe
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMenuPosition from '../../hooks/useMenuPosition';
 import useOldLang from '../../hooks/useOldLang';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
@@ -43,7 +42,7 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
   useStoryPreloader(peer.id);
 
   const {
-    isContextMenuOpen, contextMenuPosition,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
@@ -52,16 +51,6 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
   const getRootElement = useLastCallback(() => document.body);
   const getMenuElement = useLastCallback(() => ref.current!.querySelector('.story-peer-context-menu .bubble'));
   const getLayout = useLastCallback(() => ({ withPortal: true, isDense: true }));
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
 
   const handleClick = useLastCallback(() => {
     if (isContextMenuOpen) return;
@@ -114,14 +103,14 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
       <div className={buildClassName(styles.name, peer.hasUnreadStories && styles.name_hasUnreadStory)}>
         {isSelf ? lang('MyStory') : getSenderTitle(lang, peer)}
       </div>
-      {contextMenuPosition !== undefined && (
+      {contextMenuAnchor !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
           className={buildClassName('story-peer-context-menu', styles.contextMenu)}
           autoClose
           withPortal

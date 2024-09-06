@@ -1,7 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  memo, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -23,7 +21,6 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useDerivedSignal from '../../../hooks/useDerivedSignal';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useSyncEffect from '../../../hooks/useSyncEffect';
@@ -122,7 +119,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   });
 
   const {
-    isContextMenuOpen, contextMenuPosition, handleContextMenu,
+    isContextMenuOpen, contextMenuAnchor, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref, isEditing, true);
 
@@ -130,15 +127,6 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   const getRootElement = useLastCallback(() => ref.current!);
   const getMenuElement = useLastCallback(
     () => ref.current!.querySelector('.web-page-preview-context-menu .bubble'),
-  );
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
   );
 
   const handlePreviewClick = useLastCallback((e: React.MouseEvent): void => {
@@ -172,11 +160,10 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     return (
       <Menu
         isOpen={isContextMenuOpen}
-        transformOriginX={transformOriginX}
-        transformOriginY={transformOriginY}
-        positionX={positionX}
-        positionY={positionY}
-        style={menuStyle}
+        anchor={contextMenuAnchor}
+        getTriggerElement={getTriggerElement}
+        getRootElement={getRootElement}
+        getMenuElement={getMenuElement}
         className="web-page-preview-context-menu"
         onClose={handleContextMenuClose}
         onCloseAnimationEnd={handleContextMenuHide}
@@ -185,7 +172,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
         <>
           {
             isInvertedMedia ? (
-            // eslint-disable-next-line react/jsx-no-bind
+              // eslint-disable-next-line react/jsx-no-bind
               <MenuItem icon="move-caption-up" onClick={() => updateIsInvertedMedia(undefined)}>
                 {lang('PreviewSender.MoveTextUp')}
               </MenuItem>

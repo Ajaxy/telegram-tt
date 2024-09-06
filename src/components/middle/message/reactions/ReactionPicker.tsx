@@ -5,15 +5,25 @@ import { getActions, getGlobal, withGlobal } from '../../../../global';
 import type { IAnchorPosition } from '../../../../types';
 import {
   type ApiAvailableEffect,
-  type ApiMessage, type ApiMessageEntity,
-  type ApiReaction, type ApiReactionCustomEmoji, type ApiSticker, type ApiStory, type ApiStorySkipped,
+  type ApiMessage,
+  type ApiMessageEntity,
+  type ApiReaction,
+  type ApiReactionCustomEmoji,
+  type ApiSticker,
+  type ApiStory,
+  type ApiStorySkipped,
   MAIN_THREAD_ID,
 } from '../../../../api/types';
 
 import { getReactionKey, getStoryKey, isUserId } from '../../../../global/helpers';
 import {
-  selectChat, selectChatFullInfo, selectChatMessage, selectIsContextMenuTranslucent, selectIsCurrentUserPremium,
-  selectPeerStory, selectTabState,
+  selectChat,
+  selectChatFullInfo,
+  selectChatMessage,
+  selectIsContextMenuTranslucent,
+  selectIsCurrentUserPremium,
+  selectPeerStory,
+  selectTabState,
 } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
@@ -23,7 +33,6 @@ import { buildCustomEmojiHtml } from '../../composer/helpers/customEmoji';
 import { getIsMobile } from '../../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useMenuPosition from '../../../../hooks/useMenuPosition';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../../../common/CustomEmojiPicker';
@@ -104,9 +113,6 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
       ? -(menuRef.current.offsetWidth - REACTION_SELECTOR_WIDTH) / 2 - FULL_PICKER_SHIFT_DELTA.x / 2
       : 0,
   }));
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style,
-  } = useMenuPosition(renderingPosition, getTriggerElement, getRootElement, getMenuElement, getLayout);
 
   const handleToggleCustomReaction = useLastCallback((sticker: ApiSticker) => {
     if (!renderedChatId || !renderedMessageId) {
@@ -213,11 +219,11 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
       )}
       withPortal
       noCompact
-      positionX={positionX}
-      positionY={positionY}
-      transformOriginX={transformOriginX}
-      transformOriginY={transformOriginY}
-      style={style}
+      anchor={renderingPosition}
+      getTriggerElement={getTriggerElement}
+      getRootElement={getRootElement}
+      getMenuElement={getMenuElement}
+      getLayout={getLayout}
       backdropExcludedSelector=".Modal.confirm"
       onClose={closeReactionPicker}
     >

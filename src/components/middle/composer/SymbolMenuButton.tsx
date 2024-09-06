@@ -10,7 +10,6 @@ import buildClassName from '../../../util/buildClassName';
 
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
 
 import Button from '../../ui/Button';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
@@ -89,7 +88,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const [isSymbolMenuLoaded, onSymbolMenuLoadingComplete] = useFlag();
-  const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
+  const [contextMenuAnchor, setContextMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
 
   const symbolMenuButtonClassName = buildClassName(
     'mobile-symbol-menu-button',
@@ -106,7 +105,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
     const triggerEl = triggerRef.current;
     if (!triggerEl) return;
     const { x, y } = triggerEl.getBoundingClientRect();
-    setContextMenuPosition({ x, y });
+    setContextMenuAnchor({ x, y });
   });
 
   const handleSearchOpen = useLastCallback((type: 'stickers' | 'gifs') => {
@@ -140,16 +139,6 @@ const SymbolMenuButton: FC<OwnProps> = ({
   const getRootElement = useLastCallback(() => triggerRef.current?.closest('.custom-scroll, .no-scrollbar'));
   const getMenuElement = useLastCallback(() => document.querySelector('#portals .SymbolMenu .bubble'));
   const getLayout = useLastCallback(() => ({ withPortal: true }));
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
 
   return (
     <>
@@ -199,11 +188,11 @@ const SymbolMenuButton: FC<OwnProps> = ({
         isAttachmentModal={isAttachmentModal}
         canSendPlainText={canSendPlainText}
         className={buildClassName(className, forceDarkTheme && 'component-theme-dark')}
-        positionX={isAttachmentModal ? positionX : undefined}
-        positionY={isAttachmentModal ? positionY : undefined}
-        transformOriginX={isAttachmentModal ? transformOriginX : undefined}
-        transformOriginY={isAttachmentModal ? transformOriginY : undefined}
-        style={isAttachmentModal ? menuStyle : undefined}
+        anchor={isAttachmentModal ? contextMenuAnchor : undefined}
+        getTriggerElement={isAttachmentModal ? getTriggerElement : undefined}
+        getRootElement={isAttachmentModal ? getRootElement : undefined}
+        getMenuElement={isAttachmentModal ? getMenuElement : undefined}
+        getLayout={isAttachmentModal ? getLayout : undefined}
       />
     </>
   );

@@ -1,7 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, useMemo,
-  useRef, useState,
+  useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
 import Button from './Button';
@@ -44,12 +43,11 @@ const DropdownMenu: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleIsOpen = () => {
     setIsOpen(!isOpen);
+
     if (isOpen) {
       onClose?.();
     } else {
@@ -96,7 +94,6 @@ const DropdownMenu: FC<OwnProps> = ({
 
   return (
     <div
-      ref={dropdownRef}
       className={`DropdownMenu ${className || ''}`}
       onKeyDown={handleKeyDown}
       onTransitionEnd={onTransitionEnd}
@@ -105,7 +102,6 @@ const DropdownMenu: FC<OwnProps> = ({
 
       <Menu
         ref={menuRef}
-        containerRef={dropdownRef}
         isOpen={isOpen || Boolean(forceOpen)}
         className={className || ''}
         transformOriginX={transformOriginX}

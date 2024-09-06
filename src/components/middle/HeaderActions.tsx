@@ -142,12 +142,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const lang = useOldLang();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
+  const [menuAnchor, setMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
 
   const handleHeaderMenuOpen = useLastCallback(() => {
     setIsMenuOpen(true);
     const rect = menuButtonRef.current!.getBoundingClientRect();
-    setMenuPosition({ x: rect.right, y: rect.bottom });
+    setMenuAnchor({ x: rect.right, y: rect.bottom });
   });
 
   const handleHeaderMenuClose = useLastCallback(() => {
@@ -155,7 +155,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   });
 
   const handleHeaderMenuHide = useLastCallback(() => {
-    setMenuPosition(undefined);
+    setMenuAnchor(undefined);
   });
 
   const handleSubscribeClick = useLastCallback(() => {
@@ -420,12 +420,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
       >
         <i className="icon icon-more" aria-hidden />
       </Button>
-      {menuPosition && (
+      {menuAnchor && (
         <HeaderMenuContainer
           chatId={chatId}
           threadId={threadId}
           isOpen={isMenuOpen}
-          anchor={menuPosition}
+          anchor={menuAnchor}
           withExtraActions={isMobile || !canExpandActions}
           isChannel={isChannel}
           canStartBot={canStartBot}
