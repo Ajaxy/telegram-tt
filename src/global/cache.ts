@@ -28,7 +28,7 @@ import {
   compact, pick, pickTruthy, unique,
 } from '../util/iteratees';
 import { encryptSession } from '../util/passcode';
-import { onBeforeUnload, onIdle, throttle } from '../util/schedulers';
+import { onBeforeUnload, throttle } from '../util/schedulers';
 import { hasStoredSession } from '../util/sessions';
 import { isUserId } from './helpers';
 import { addActionHandler, getGlobal } from './index';
@@ -44,11 +44,11 @@ import {
 } from './selectors';
 
 import { getIsMobile } from '../hooks/useAppLayout';
-import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
+import { isHeavyAnimating, onFullyIdle } from '../hooks/useHeavyAnimationCheck';
 
 const UPDATE_THROTTLE = 5000;
 
-const updateCacheThrottled = throttle(() => onIdle(() => updateCache()), UPDATE_THROTTLE, false);
+const updateCacheThrottled = throttle(() => onFullyIdle(() => updateCache()), UPDATE_THROTTLE, false);
 const updateCacheForced = () => updateCache(true);
 
 let isCaching = false;

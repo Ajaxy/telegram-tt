@@ -21,7 +21,9 @@ import {
 import arePropsShallowEqual from './arePropsShallowEqual';
 import { createCallbackManager } from './callbacks';
 import { areSortedArraysEqual, unique } from './iteratees';
-import { onIdle, throttle } from './schedulers';
+import { throttle } from './schedulers';
+
+import { onFullyIdle } from '../hooks/useHeavyAnimationCheck';
 
 interface FolderSummary {
   id: number;
@@ -112,7 +114,7 @@ if (DEBUG) {
 }
 
 const updateFolderManagerThrottled = throttle(() => {
-  onIdle(() => {
+  onFullyIdle(() => {
     updateFolderManager(getGlobal());
   });
 }, UPDATE_THROTTLE);

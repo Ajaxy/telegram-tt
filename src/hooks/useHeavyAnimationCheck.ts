@@ -2,7 +2,10 @@ import {
   useCallback, useEffect, useMemo, useRef,
 } from '../lib/teact/teact';
 
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import { createCallbackManager } from '../util/callbacks';
+import { onIdle } from '../util/schedulers';
+import { createSignal } from '../util/signals';
 import useLastCallback from './useLastCallback';
 
 // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
@@ -12,13 +15,16 @@ const startCallbacks = createCallbackManager();
 const endCallbacks = createCallbackManager();
 
 let timeout: number | undefined;
-let isAnimating = false;
 
-const useHeavyAnimationCheck = (
+const [getIsAnimating, setIsAnimating] = createSignal(false);
+
+export const getIsHeavyAnimating = getIsAnimating;
+
+export default function useHeavyAnimationCheck(
   onStart?: AnyToVoidFunction,
   onEnd?: AnyToVoidFunction,
   isDisabled = false,
-) => {
+) {
   const lastOnStart = useLastCallback(onStart);
   const lastOnEnd = useLastCallback(onEnd);
 
@@ -27,7 +33,7 @@ const useHeavyAnimationCheck = (
       return undefined;
     }
 
-    if (isAnimating) {
+    if (getIsAnimating()) {
       lastOnStart();
     }
 
@@ -39,8 +45,9 @@ const useHeavyAnimationCheck = (
       startCallbacks.removeCallback(lastOnStart);
     };
   }, [isDisabled, lastOnEnd, lastOnStart]);
-};
+}
 
+// TODO → `onFullyIdle`?
 export function useThrottleForHeavyAnimation<T extends AnyToVoidFunction>(afterHeavyAnimation: T, deps: unknown[]) {
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   const fnMemo = useCallback(afterHeavyAnimation, deps);
@@ -50,7 +57,7 @@ export function useThrottleForHeavyAnimation<T extends AnyToVoidFunction>(afterH
   return useMemo(() => {
     return (...args: Parameters<T>) => {
       if (!isScheduledRef.current) {
-        if (!isAnimating) {
+        if (!getIsAnimating()) {
           fnMemo(...args);
           return;
         }
@@ -68,12 +75,12 @@ export function useThrottleForHeavyAnimation<T extends AnyToVoidFunction>(afterH
 }
 
 export function isHeavyAnimating() {
-  return isAnimating;
+  return getIsAnimating();
 }
 
 export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
-  if (!isAnimating) {
-    isAnimating = true;
+  if (!getIsAnimating()) {
+    setIsAnimating(true);
     startCallbacks.runCallbacks();
   }
 
@@ -89,7 +96,7 @@ export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
       timeout = undefined;
     }
 
-    isAnimating = false;
+    setIsAnimating(false);
     endCallbacks.runCallbacks();
   }
 
@@ -98,4 +105,14 @@ export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
   return onEnd;
 }
 
-export default useHeavyAnimationCheck;
+export function onFullyIdle(cb: NoneToVoidFunction, idleTimeout?: number) {
+  onIdle(() => {
+    if (getIsAnimating()) {
+      requestMeasure(() => {
+        onFullyIdle(cb, idleTimeout);
+      });
+    } else {
+      cb();
+    }
+  }, idleTimeout);
+}
