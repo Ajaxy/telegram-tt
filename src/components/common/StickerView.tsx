@@ -14,10 +14,10 @@ import { IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
 import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useFlag from '../../hooks/useFlag';
-import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useMountAfterHeavyAnimation from '../../hooks/useMountAfterHeavyAnimation';
 import useThumbnail from '../../hooks/useThumbnail';
 import useUniqueId from '../../hooks/useUniqueId';
 import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
@@ -115,9 +115,7 @@ const StickerView: FC<OwnProps> = ({
   const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia);
   // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !previewMediaData));
-  // Delay mounting until heavy animation ends
-  const [isReadyToMount, markReadyToMount, unmarkReadyToMount] = useFlag(!isHeavyAnimating());
-  useHeavyAnimationCheck(unmarkReadyToMount, markReadyToMount, isReadyToMount);
+  const isReadyToMount = useMountAfterHeavyAnimation();
   const isFullMediaReady = isReadyToMount && fullMediaData && (isStatic || isPlayerReady);
 
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
