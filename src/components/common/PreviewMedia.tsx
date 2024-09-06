@@ -14,7 +14,7 @@ import stopEvent from '../../util/stopEvent';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 
 import './Media.scss';
 
@@ -42,7 +42,7 @@ const PreviewMedia: FC<OwnProps> = ({
   const thumbDataUri = getMessageMediaThumbDataUri(media);
 
   const mediaBlobUrl = useMedia(getMessageMediaHash(media, 'preview'), !isIntersecting);
-  const transitionClassNames = useMediaTransition(mediaBlobUrl);
+  const transitionClassNames = useMediaTransitionDeprecated(mediaBlobUrl);
 
   const video = media.content.video;
 

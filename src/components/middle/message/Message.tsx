@@ -132,7 +132,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useResizeObserver from '../../../hooks/useResizeObserver';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useThrottledCallback from '../../../hooks/useThrottledCallback';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
@@ -473,7 +473,7 @@ const Message: FC<OwnProps & StateProps> = ({
     setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
 
-  const { transitionClassNames } = useShowTransition(
+  const { transitionClassNames } = useShowTransitionDeprecated(
     isShown || isJustAdded,
     undefined,
     noAppearanceAnimation && !isJustAdded,

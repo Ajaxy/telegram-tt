@@ -1,8 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 
-import buildClassName from '../../util/buildClassName';
-
+import useDerivedState from '../../hooks/useDerivedState';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../hooks/useShowTransition';
 
@@ -17,7 +16,7 @@ type OwnProps = {
   shouldAnimateFirstRender?: boolean;
   style?: string;
   children: React.ReactNode;
-  ref?: React.LegacyRef<HTMLDivElement>;
+  ref?: React.RefObject<HTMLDivElement>;
 };
 
 const ShowTransition: FC<OwnProps> = ({
@@ -31,22 +30,21 @@ const ShowTransition: FC<OwnProps> = ({
   noCloseTransition,
   shouldAnimateFirstRender,
   style,
-  ref,
+  ref: externalRef,
 }) => {
   const prevIsOpen = usePreviousDeprecated(isOpen);
   const prevChildren = usePreviousDeprecated(children);
   const fromChildrenRef = useRef<React.ReactNode>();
   const isFirstRender = prevIsOpen === undefined;
-  const {
-    shouldRender,
-    transitionClassNames,
-  } = useShowTransition(
-    isOpen && !isHidden,
-    undefined,
-    isFirstRender && !shouldAnimateFirstRender,
-    isCustom ? false : undefined,
+
+  const { ref, getShouldRender } = useShowTransition({
+    isOpen: isOpen && !isHidden,
+    ref: externalRef,
+    noMountTransition: isFirstRender && !shouldAnimateFirstRender,
+    className: isCustom ? false : undefined,
     noCloseTransition,
-  );
+  });
+  const shouldRender = useDerivedState(getShouldRender);
 
   if (prevIsOpen && !isOpen) {
     fromChildrenRef.current = prevChildren;
@@ -57,7 +55,7 @@ const ShowTransition: FC<OwnProps> = ({
       <div
         id={id}
         ref={ref}
-        className={buildClassName(className, transitionClassNames)}
+        className={className}
         onClick={onClick}
         style={style}
       >

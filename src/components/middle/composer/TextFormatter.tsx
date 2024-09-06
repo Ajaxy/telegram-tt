@@ -17,7 +17,7 @@ import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
 
 import Button from '../../ui/Button';
@@ -64,7 +64,7 @@ const TextFormatter: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const linkUrlInputRef = useRef<HTMLInputElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const [isLinkControlOpen, openLinkControl, closeLinkControl] = useFlag();
   const [linkUrl, setLinkUrl] = useState('');
   const [isEditingLink, setIsEditingLink] = useState(false);

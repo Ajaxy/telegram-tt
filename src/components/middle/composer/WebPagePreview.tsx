@@ -25,7 +25,7 @@ import useDerivedState from '../../../hooks/useDerivedState';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import Button from '../../ui/Button';
@@ -113,7 +113,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   const isShown = useDerivedState(() => {
     return Boolean(webPagePreview && getHtml() && !noWebPage && !isDisabled);
   }, [isDisabled, getHtml, noWebPage, webPagePreview]);
-  const { shouldRender, transitionClassNames } = useShowTransition(isShown);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isShown);
 
   const renderingWebPage = useCurrentOrPrev(webPagePreview, true);
 

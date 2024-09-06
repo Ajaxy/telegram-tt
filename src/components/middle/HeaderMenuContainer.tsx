@@ -43,7 +43,7 @@ import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import DeleteChatModal from '../common/DeleteChatModal';
 import ReportModal from '../common/ReportModal';
@@ -211,7 +211,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const { x, y } = anchor;
 
-  useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
+  useShowTransitionDeprecated(isOpen, onCloseAnimationEnd, undefined, false);
   const isViewGroupInfoShown = usePrevDuringAnimation(
     (!isChatInfoShown && isForum) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
   );

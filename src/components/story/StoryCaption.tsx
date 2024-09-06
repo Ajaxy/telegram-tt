@@ -12,7 +12,7 @@ import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAnd
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import EmbeddedStoryForward from '../common/embedded/EmbeddedStoryForward';
 import MessageText from '../common/MessageText';
@@ -65,7 +65,7 @@ function StoryCaption({
   }, [isExpanded]);
 
   const canExpand = hasOverflow && !isInExpandedState;
-  const { shouldRender: shouldRenderShowMore, transitionClassNames } = useShowTransition(
+  const { shouldRender: shouldRenderShowMore, transitionClassNames } = useShowTransitionDeprecated(
     canExpand, undefined, true, 'slow', true,
   );
 

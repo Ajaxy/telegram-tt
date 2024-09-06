@@ -12,7 +12,7 @@ import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import AvatarList from '../../common/AvatarList';
 import Button from '../../ui/Button';
@@ -89,7 +89,7 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   const {
     shouldRender,
     transitionClassNames,
-  } = useShowTransition(Boolean(groupCall && isActive));
+  } = useShowTransitionDeprecated(Boolean(groupCall && isActive));
 
   const renderingParticipantCount = useCurrentOrPrev(groupCall?.participantsCount, true);
   const renderingFetchedParticipants = useCurrentOrPrev(fetchedParticipants, true);

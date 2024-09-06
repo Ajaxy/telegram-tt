@@ -13,7 +13,7 @@ import buildClassName from '../../util/buildClassName';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 
 import AnimatedIconWithPreview from './AnimatedIconWithPreview';
 import CustomEmoji from './CustomEmoji';
@@ -61,7 +61,7 @@ const ReactionEmoji: FC<OwnProps> = ({
     onClick(reaction);
   });
 
-  const transitionClassNames = useMediaTransition(mediaData);
+  const transitionClassNames = useMediaTransitionDeprecated(mediaData);
   const fullClassName = buildClassName(
     styles.root,
     isSelected && styles.selected,

@@ -22,10 +22,10 @@ import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
-import useMediaTransition from '../../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import MediaSpoiler from '../../common/MediaSpoiler';
@@ -106,7 +106,7 @@ const Photo = <T,>({
   const noThumb = Boolean(fullMediaData);
   const thumbRef = useBlurredMediaThumbRef(photo, noThumb);
   const blurredBackgroundRef = useBlurredMediaThumbRef(photo, !withBlurredBackground);
-  const thumbClassNames = useMediaTransition(!noThumb);
+  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
   const thumbDataUri = getMediaThumbUri(photo);
 
   const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(isPaidPreview || photo.isSpoiler);
@@ -139,11 +139,11 @@ const Photo = <T,>({
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, wasLoadDisabled, 'slow');
+  } = useShowTransitionDeprecated(isTransferring, undefined, wasLoadDisabled, 'slow');
   const {
     shouldRender: shouldRenderDownloadButton,
     transitionClassNames: downloadButtonClassNames,
-  } = useShowTransition(!fullMediaData && !isLoadAllowed);
+  } = useShowTransitionDeprecated(!fullMediaData && !isLoadAllowed);
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
     if (isUploading) {

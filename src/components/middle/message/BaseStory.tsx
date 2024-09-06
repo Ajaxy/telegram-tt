@@ -14,7 +14,7 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import MediaAreaOverlay from '../../story/mediaArea/MediaAreaOverlay';
 
@@ -41,7 +41,7 @@ function BaseStory({
   const imgBlobUrl = useMedia(imageHash);
   const thumbnail = isLoaded ? (video ? video.thumbnail?.dataUri : story.content.photo?.thumbnail?.dataUri) : undefined;
   const mediaUrl = useCurrentOrPrev(imgBlobUrl, true);
-  const { shouldRender, transitionClassNames } = useShowTransition(Boolean(mediaUrl));
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(Boolean(mediaUrl));
   const blurredBackgroundRef = useCanvasBlur(
     thumbnail,
     isExpired && !isPreview,

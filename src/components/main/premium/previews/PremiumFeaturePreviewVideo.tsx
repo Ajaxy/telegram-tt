@@ -7,7 +7,7 @@ import buildClassName from '../../../../util/buildClassName';
 
 import useCanvasBlur from '../../../../hooks/useCanvasBlur';
 import useMedia from '../../../../hooks/useMedia';
-import useMediaTransition from '../../../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../../../hooks/useMediaTransitionDeprecated';
 
 import OptimizedVideo from '../../../ui/OptimizedVideo';
 
@@ -34,7 +34,7 @@ const PremiumFeaturePreviewVideo: FC<OwnProps> = ({
 }) => {
   const mediaData = useMedia(`document${videoId}`);
   const thumbnailRef = useCanvasBlur(videoThumbnail.dataUri);
-  const transitionClassNames = useMediaTransition(mediaData);
+  const transitionClassNames = useMediaTransitionDeprecated(mediaData);
 
   return (
     <div className={styles.root}>

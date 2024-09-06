@@ -38,7 +38,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import Button from '../ui/Button';
 import Link from '../ui/Link';
@@ -213,7 +213,7 @@ const Audio: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring);
+  } = useShowTransitionDeprecated(isTransferring);
 
   const shouldRenderCross = shouldRenderSpinner && (isLoadingForPlaying || isUploading);
 

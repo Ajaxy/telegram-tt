@@ -24,7 +24,7 @@ import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManag
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
@@ -103,7 +103,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     shouldRender: shouldRenderStoryRibbon,
     transitionClassNames: storyRibbonClassNames,
     isClosing: isStoryRibbonClosing,
-  } = useShowTransition(isStoryRibbonShown, undefined, undefined, '');
+  } = useShowTransitionDeprecated(isStoryRibbonShown, undefined, undefined, '');
 
   const allChatsFolder: ApiChatFolder = useMemo(() => {
     return {
@@ -283,7 +283,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   const {
     shouldRender: shouldRenderPlaceholder, transitionClassNames,
-  } = useShowTransition(!orderedFolderIds, undefined, true);
+  } = useShowTransitionDeprecated(!orderedFolderIds, undefined, true);
 
   function renderCurrentTab(isActive: boolean) {
     const activeFolder = Object.values(chatFoldersById)

@@ -87,7 +87,6 @@ type OwnProps = {
   hasCustomEmoji?: boolean;
   customEmojiSets?: ApiStickerSet[];
   canPlayAnimatedEmojis?: boolean;
-  noTransition?: boolean;
   isInSavedMessages?: boolean;
   shouldRenderShowWhen?: boolean;
   canLoadReadDate?: boolean;
@@ -176,7 +175,6 @@ const MessageContextMenu: FC<OwnProps> = ({
   hasCustomEmoji,
   customEmojiSets,
   canPlayAnimatedEmojis,
-  noTransition,
   isInSavedMessages,
   shouldRenderShowWhen,
   canLoadReadDate,
@@ -353,7 +351,6 @@ const MessageContextMenu: FC<OwnProps> = ({
       className={buildClassName(
         'MessageContextMenu', 'fluid', withReactions && 'with-reactions',
       )}
-      shouldSkipTransition={noTransition}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >

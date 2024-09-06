@@ -38,7 +38,7 @@ import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useFocusMessage from './message/hooks/useFocusMessage';
 
 import AnimatedIconFromSticker from '../common/AnimatedIconFromSticker';
@@ -161,7 +161,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     }
   }, [isVisible, requestConfetti]);
 
-  const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
+  const { transitionClassNames } = useShowTransitionDeprecated(isShown, undefined, noAppearanceAnimation, false);
 
   // No need for expensive global updates on users and chats, so we avoid them
   const usersById = getGlobal().users.byId;

@@ -5,7 +5,7 @@ import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import './NothingFound.scss';
 
@@ -18,7 +18,7 @@ const DEFAULT_TEXT = 'Nothing found.';
 
 const NothingFound: FC<OwnProps> = ({ text = DEFAULT_TEXT, description }) => {
   const lang = useOldLang();
-  const { transitionClassNames } = useShowTransition(true);
+  const { transitionClassNames } = useShowTransitionDeprecated(true);
 
   return (
     <div className={buildClassName('NothingFound', transitionClassNames, description && 'with-description')}>

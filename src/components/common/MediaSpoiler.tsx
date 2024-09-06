@@ -6,7 +6,7 @@ import buildClassName from '../../util/buildClassName';
 
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useLastCallback from '../../hooks/useLastCallback';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import styles from './MediaSpoiler.module.scss';
 
@@ -33,7 +33,7 @@ const MediaSpoiler: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const { shouldRender, transitionClassNames } = useShowTransition(
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(
     isVisible, undefined, true, withAnimation ? false : undefined, undefined, ANIMATION_DURATION,
   );
   const canvasRef = useCanvasBlur(thumbDataUri, !shouldRender, undefined, BLUR_RADIUS, width, height);

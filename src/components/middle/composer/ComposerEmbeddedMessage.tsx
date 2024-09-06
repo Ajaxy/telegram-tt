@@ -36,7 +36,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import { ClosableEmbeddedMessage } from '../../common/embedded/EmbeddedMessage';
 import Icon from '../../common/icons/Icon';
@@ -131,7 +131,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const {
     shouldRender, transitionClassNames,
-  } = useShowTransition(
+  } = useShowTransitionDeprecated(
     isShown && !isReplyToTopicStart && !isReplyToDiscussion,
     undefined,
     !shouldAnimate,

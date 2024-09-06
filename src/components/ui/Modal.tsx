@@ -1,5 +1,5 @@
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { useEffect, useRef } from '../../lib/teact/teact';
+import React, { useEffect } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
@@ -9,6 +9,7 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
 import trapFocus from '../../util/trapFocus';
 
+import useDerivedState from '../../hooks/useDerivedState';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -44,11 +45,7 @@ export type OwnProps = {
   onEnter?: () => void;
 };
 
-type StateProps = {
-  shouldSkipHistoryAnimations?: boolean;
-};
-
-const Modal: FC<OwnProps & StateProps> = ({
+const Modal: FC<OwnProps> = ({
   dialogRef,
   title,
   className,
@@ -63,19 +60,19 @@ const Modal: FC<OwnProps & StateProps> = ({
   noBackdropClose,
   children,
   style,
-  shouldSkipHistoryAnimations,
   onClose,
   onCloseAnimationEnd,
   onEnter,
 }) => {
   const {
-    shouldRender,
-    transitionClassNames,
-  } = useShowTransition(
-    isOpen, onCloseAnimationEnd, shouldSkipHistoryAnimations, undefined, shouldSkipHistoryAnimations,
-  );
-  // eslint-disable-next-line no-null/no-null
-  const modalRef = useRef<HTMLDivElement>(null);
+    ref: modalRef,
+    getShouldRender,
+  } = useShowTransition({
+    isOpen,
+    onCloseAnimationEnd,
+  });
+  const shouldRender = useDerivedState(getShouldRender);
+
   const withCloseButton = hasCloseButton || hasAbsoluteCloseButton;
 
   useEffect(() => {
@@ -101,7 +98,7 @@ const Modal: FC<OwnProps & StateProps> = ({
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: onClose, onEnter: handleEnter }) : undefined
   ), [isOpen, onClose, handleEnter]);
-  useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen]);
+  useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen, modalRef]);
 
   useHistoryBack({
     isActive: isOpen,
@@ -155,7 +152,6 @@ const Modal: FC<OwnProps & StateProps> = ({
   const fullClassName = buildClassName(
     'Modal',
     className,
-    transitionClassNames,
     noBackdrop && 'transparent-backdrop',
     isSlim && 'slim',
   );

@@ -63,7 +63,7 @@ import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useSchedule from '../../../hooks/useSchedule';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import PinMessageModal from '../../common/PinMessageModal.async';
 import ReportModal from '../../common/ReportModal';
@@ -230,7 +230,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useOldLang();
-  const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
+  const { transitionClassNames } = useShowTransitionDeprecated(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);

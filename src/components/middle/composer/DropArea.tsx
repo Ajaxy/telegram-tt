@@ -13,7 +13,7 @@ import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferIte
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Portal from '../../ui/Portal';
 import DropTarget from './DropTarget';
@@ -44,7 +44,7 @@ const DropArea: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const hideTimeoutRef = useRef<number>(null);
   const prevWithQuick = usePreviousDeprecated(withQuick);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);

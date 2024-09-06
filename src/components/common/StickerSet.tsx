@@ -27,7 +27,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import useWindowSize from '../../hooks/window/useWindowSize';
@@ -138,7 +138,7 @@ const StickerSet: FC<OwnProps> = ({
   const [itemsPerRow, setItemsPerRow] = useState(getItemsPerRowFallback(windowWidth));
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection ?? observeIntersectionForShowingItems);
-  const transitionClassNames = useMediaTransition(isIntersecting);
+  const transitionClassNames = useMediaTransitionDeprecated(isIntersecting);
 
   // `isNearActive` is set in advance during animation, but it is not reliable for short sets
   const shouldRender = isNearActive || isIntersecting;

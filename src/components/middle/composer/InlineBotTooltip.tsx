@@ -17,7 +17,7 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -71,7 +71,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const renderedIsGallery = useCurrentOrPrev(isGallery, shouldRender);
   const {
     observe: observeIntersection,

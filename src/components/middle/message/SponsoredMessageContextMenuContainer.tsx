@@ -9,7 +9,7 @@ import buildClassName from '../../../util/buildClassName';
 
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import MessageContextMenu from './MessageContextMenu';
 
@@ -34,7 +34,7 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
   const { openPremiumModal, showDialog } = getActions();
 
   const [isMenuOpen, , closeMenu] = useFlag(true);
-  const { transitionClassNames } = useShowTransition(isMenuOpen, onCloseAnimationEnd, undefined, false);
+  const { transitionClassNames } = useShowTransitionDeprecated(isMenuOpen, onCloseAnimationEnd, undefined, false);
 
   const handleAboutAdsOpen = useLastCallback(() => {
     onAboutAdsClick();

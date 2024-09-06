@@ -17,7 +17,7 @@ import useBuffering from '../../hooks/useBuffering';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useFullscreen from '../../hooks/window/useFullscreen';
 import useControlsSignal from './hooks/useControlsSignal';
@@ -126,11 +126,15 @@ const VideoPlayer: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(!isBuffered && !isUnsupported, undefined, undefined, 'slow');
+  } = useShowTransitionDeprecated(
+    !isBuffered && !isUnsupported, undefined, undefined, 'slow',
+  );
   const {
     shouldRender: shouldRenderPlayButton,
     transitionClassNames: playButtonClassNames,
-  } = useShowTransition(IS_IOS && !isPlaying && !shouldRenderSpinner && !isUnsupported, undefined, undefined, 'slow');
+  } = useShowTransitionDeprecated(
+    IS_IOS && !isPlaying && !shouldRenderSpinner && !isUnsupported, undefined, undefined, 'slow',
+  );
 
   useEffect(() => {
     lockControls(shouldRenderSpinner);

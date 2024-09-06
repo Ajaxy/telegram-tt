@@ -14,7 +14,7 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import StickerButton from '../../common/StickerButton';
 import Loading from '../../ui/Loading';
@@ -52,7 +52,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const prevStickers = usePreviousDeprecated(customEmoji, true);
   const displayedStickers = customEmoji || prevStickers;
 

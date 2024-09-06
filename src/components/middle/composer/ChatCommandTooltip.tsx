@@ -14,7 +14,7 @@ import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import ChatCommand from './ChatCommand';
@@ -56,7 +56,7 @@ const ChatCommandTooltip: FC<OwnProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
 
   const handleSendCommand = useLastCallback(({ botId, command }: ApiBotCommand) => {
     // No need for expensive global updates on users and chats, so we avoid them

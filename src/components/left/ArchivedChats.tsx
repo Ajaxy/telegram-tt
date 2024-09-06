@@ -14,7 +14,7 @@ import useForumPanelRender from '../../hooks/useForumPanelRender';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
 
 import StoryRibbon from '../story/StoryRibbon';
@@ -70,7 +70,7 @@ const ArchivedChats: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderTitle,
     transitionClassNames: titleClassNames,
-  } = useShowTransition(!isForumPanelOpen);
+  } = useShowTransitionDeprecated(!isForumPanelOpen);
 
   const {
     shouldRenderForumPanel, handleForumPanelAnimationEnd,
@@ -82,7 +82,9 @@ const ArchivedChats: FC<OwnProps> = ({
     shouldRender: shouldRenderStoryRibbon,
     transitionClassNames: storyRibbonClassNames,
     isClosing: isStoryRibbonClosing,
-  } = useShowTransition(isStoryRibbonShown, undefined, undefined, '', false, ANIMATION_DURATION + ANIMATION_END_DELAY);
+  } = useShowTransitionDeprecated(
+    isStoryRibbonShown, undefined, undefined, '', false, ANIMATION_DURATION + ANIMATION_END_DELAY,
+  );
 
   return (
     <div className="ArchivedChats">

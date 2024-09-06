@@ -9,7 +9,7 @@ import { isSameReaction } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 
 import useMedia from '../../hooks/useMedia';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 
 import CustomEmoji from './CustomEmoji';
 
@@ -41,7 +41,7 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   const staticIconId = availableReaction?.staticIcon?.id;
   const mediaData = useMedia(`document${staticIconId}`, !staticIconId, ApiMediaFormat.BlobUrl);
 
-  const transitionClassNames = useMediaTransition(mediaData);
+  const transitionClassNames = useMediaTransitionDeprecated(mediaData);
 
   const shouldApplySizeFix = 'emoticon' in reaction && reaction.emoticon === '🦄';
   const shouldReplaceWithHeartIcon = withIconHeart && 'emoticon' in reaction && reaction.emoticon === '❤';

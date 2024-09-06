@@ -1,6 +1,4 @@
-import React, {
-  type FC, memo, useEffect, useRef,
-} from '../../lib/teact/teact';
+import React, { type FC, memo, useEffect } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -38,7 +36,6 @@ type OwnProps = {
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   autoClose?: boolean;
-  shouldSkipTransition?: boolean;
   footer?: string;
   noCloseOnBackdrop?: boolean;
   backdropExcludedSelector?: string;
@@ -50,13 +47,13 @@ type OwnProps = {
   onMouseEnterBackdrop?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   withPortal?: boolean;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 const ANIMATION_DURATION = 200;
 
 const Menu: FC<OwnProps> = ({
-  ref,
+  ref: externalRef,
   containerRef,
   shouldCloseFast,
   isOpen,
@@ -80,27 +77,18 @@ const Menu: FC<OwnProps> = ({
   onClose,
   onMouseEnter,
   onMouseLeave,
-  shouldSkipTransition,
   withPortal,
   onMouseEnterBackdrop,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  let menuRef = useRef<HTMLDivElement>(null);
-  if (ref) {
-    menuRef = ref;
-  }
-  const backdropContainerRef = containerRef || menuRef;
   const { isTouchScreen } = useAppLayout();
 
-  const {
-    transitionClassNames,
-  } = useShowTransition(
+  const { ref: menuRef } = useShowTransition({
     isOpen,
+    ref: externalRef,
     onCloseAnimationEnd,
-    shouldSkipTransition,
-    undefined,
-    shouldSkipTransition,
-  );
+  });
+
+  const backdropContainerRef = containerRef || menuRef;
 
   useEffect(
     () => (isOpen ? captureEscKeyListener(onClose) : undefined),
@@ -134,7 +122,6 @@ const Menu: FC<OwnProps> = ({
     positionY,
     positionX,
     footer && 'with-footer',
-    transitionClassNames,
     bubbleClassName,
     shouldCloseFast && 'close-fast',
   );
@@ -144,7 +131,9 @@ const Menu: FC<OwnProps> = ({
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    if (autoClose) { onClose(); }
+    if (autoClose) {
+      onClose();
+    }
   });
 
   const menu = (

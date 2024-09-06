@@ -23,10 +23,10 @@ import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useMediaTransition from '../../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import MediaSpoiler from '../../common/MediaSpoiler';
@@ -130,12 +130,12 @@ const Video = <T,>({
   const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
   const canLoadPreview = isIntersectingForLoading;
   const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview);
-  const previewClassNames = useMediaTransition((hasThumb || previewBlobUrl) && !isPlayerReady);
+  const previewClassNames = useMediaTransitionDeprecated((hasThumb || previewBlobUrl) && !isPlayerReady);
 
   const noThumb = Boolean(!hasThumb || previewBlobUrl || isPlayerReady);
   const thumbRef = useBlurredMediaThumbRef(video, noThumb);
   const blurredBackgroundRef = useBlurredMediaThumbRef(video, !withBlurredBackground);
-  const thumbClassNames = useMediaTransition(!noThumb);
+  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
 
   const isInline = fullMediaData && wasIntersectedRef.current;
 
@@ -156,10 +156,10 @@ const Video = <T,>({
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring && !isUnsupported, undefined, wasLoadDisabled);
+  } = useShowTransitionDeprecated(isTransferring && !isUnsupported, undefined, wasLoadDisabled);
   const {
     transitionClassNames: playButtonClassNames,
-  } = useShowTransition(Boolean((isLoadAllowed || fullMediaData) && !isPlayAllowed && !shouldRenderSpinner));
+  } = useShowTransitionDeprecated(Boolean((isLoadAllowed || fullMediaData) && !isPlayAllowed && !shouldRenderSpinner));
 
   const [playProgress, setPlayProgress] = useState<number>(0);
   const handleTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {

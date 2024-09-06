@@ -25,10 +25,10 @@ import { useThrottledSignal } from '../../../hooks/useAsyncResolvers';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMediaTransition from '../../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import Icon from '../../common/icons/Icon';
@@ -101,7 +101,7 @@ const RoundVideo: FC<OwnProps> = ({
   const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
   const noThumb = !hasThumb || isPlayerReady || shouldRenderSpoiler;
   const thumbRef = useBlurredMediaThumbRef(video, noThumb);
-  const thumbClassNames = useMediaTransition(!noThumb);
+  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
   const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
@@ -109,7 +109,7 @@ const RoundVideo: FC<OwnProps> = ({
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, wasLoadDisabled);
+  } = useShowTransitionDeprecated(isTransferring, undefined, wasLoadDisabled);
 
   const [isActivated, setIsActivated] = useState(false);
 

@@ -17,7 +17,7 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import Button from '../../ui/Button';
@@ -110,7 +110,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, onClose, false, false);
 
   const lang = useOldLang();
 

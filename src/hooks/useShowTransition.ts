@@ -1,75 +1,103 @@
-import { useRef, useState } from '../lib/teact/teact';
+import type { RefObject } from 'react';
+import { useLayoutEffect, useRef, useSignal } from '../lib/teact/teact';
+import { addExtraClass, toggleExtraClass } from '../lib/teact/teact-dom';
 
-import buildClassName from '../util/buildClassName';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
+import useDerivedSignal from './useDerivedSignal';
+import useLastCallback from './useLastCallback';
+import { useStateRef } from './useStateRef';
+import useSyncEffectWithPrevDeps from './useSyncEffectWithPrevDeps';
 
 const CLOSE_DURATION = 350;
 
-const useShowTransition = (
-  isOpen = false,
-  onCloseTransitionEnd?: () => void,
-  noFirstOpenTransition = false,
-  className: string | false = 'fast',
+type State =
+  'closed'
+  | 'scheduled-open'
+  | 'open'
+  | 'closing';
+
+export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>({
+  isOpen,
+  ref,
+  noMountTransition = false,
+  noOpenTransition = false,
   noCloseTransition = false,
   closeDuration = CLOSE_DURATION,
-  noOpenTransition = false,
-) => {
-  const [isClosed, setIsClosed] = useState(!isOpen);
-  const closeTimeoutRef = useRef<number>();
-  // СSS class should be added in a separate tick to turn on CSS transition.
-  const [hasOpenClassName, setHasOpenClassName] = useState(isOpen && noFirstOpenTransition);
+  className = 'fast',
+  prefix = '',
+  onCloseAnimationEnd,
+}: {
+  isOpen: boolean | undefined;
+  ref?: RefObject<RefType>;
+  noMountTransition?: boolean;
+  noOpenTransition?: boolean;
+  noCloseTransition?: boolean;
+  closeDuration?: number;
+  className?: string | false;
+  prefix?: string;
+  onCloseAnimationEnd?: NoneToVoidFunction;
+}) {
+  // eslint-disable-next-line no-null/no-null
+  const localRef = useRef<RefType>(null);
+  ref ||= localRef;
+  const closingTimeoutRef = useRef<number>();
+  const [getState, setState] = useSignal<State | undefined>();
+  const optionsRef = useStateRef({
+    closeDuration, noMountTransition, noOpenTransition, noCloseTransition,
+  });
+  const onCloseEndLast = useLastCallback(onCloseAnimationEnd);
 
-  if (isOpen) {
-    setIsClosed(false);
-    setHasOpenClassName(true);
+  useSyncEffectWithPrevDeps(([prevIsOpen]) => {
+    const options = optionsRef.current;
 
-    if (closeTimeoutRef.current) {
-      window.clearTimeout(closeTimeoutRef.current);
-
-      closeTimeoutRef.current = undefined;
-    }
-  } else {
-    setHasOpenClassName(false);
-
-    if (!isClosed && !closeTimeoutRef.current) {
-      const exec = () => {
-        setIsClosed(true);
-
-        if (onCloseTransitionEnd) {
-          onCloseTransitionEnd();
-        }
-
-        closeTimeoutRef.current = undefined;
-      };
-
-      if (noCloseTransition) {
-        exec();
-      } else {
-        closeTimeoutRef.current = window.setTimeout(exec, closeDuration);
+    if (isOpen) {
+      if (closingTimeoutRef.current) {
+        clearTimeout(closingTimeoutRef.current);
+        closingTimeoutRef.current = undefined;
       }
+
+      if (options.noOpenTransition || (prevIsOpen === undefined && options.noMountTransition)) {
+        setState('open');
+      } else {
+        setState('scheduled-open');
+        requestMeasure(() => {
+          setState('open');
+        });
+      }
+    } else if (prevIsOpen === undefined || options.noCloseTransition) {
+      setState('closed');
+    } else {
+      setState('closing');
+
+      closingTimeoutRef.current = window.setTimeout(() => {
+        setState('closed');
+        onCloseEndLast();
+      }, options.closeDuration);
     }
-  }
+  }, [isOpen]);
 
-  // `noCloseTransition`, when set to true, should remove the open class immediately
-  const shouldHaveOpenClassName = (hasOpenClassName && !(noCloseTransition && !isOpen)) || (noOpenTransition && isOpen);
-  const isClosing = Boolean(closeTimeoutRef.current);
-  const shouldRender = isOpen || isClosing;
-  const transitionClassNames = buildClassName(
-    className && 'opacity-transition',
-    className,
-    shouldHaveOpenClassName && 'open',
-    !shouldHaveOpenClassName && 'not-open',
-    shouldRender && 'shown',
-    !shouldRender && 'not-shown',
-    isClosing && 'closing',
-  );
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
 
-  return {
-    shouldRender,
-    transitionClassNames,
-    hasShownClass: shouldRender,
-    hasOpenClass: shouldHaveOpenClassName,
-    isClosing,
-  };
-};
+    addExtraClass(element, 'opacity-transition');
+    if (className !== false) {
+      addExtraClass(element, className);
+    }
 
-export default useShowTransition;
+    const state = getState();
+    const shouldRender = state !== 'closed';
+    const hasOpenClass = state === 'open';
+    const isClosing = state === 'closing';
+
+    toggleExtraClass(element, `${prefix}shown`, shouldRender);
+    toggleExtraClass(element, `${prefix}not-shown`, !shouldRender);
+    toggleExtraClass(element, `${prefix}open`, hasOpenClass);
+    toggleExtraClass(element, `${prefix}not-open`, !hasOpenClass);
+    toggleExtraClass(element, `${prefix}closing`, isClosing);
+  }, [className, getState, prefix, ref]);
+
+  const getShouldRender = useDerivedSignal(() => getState() !== 'closed', [getState]);
+
+  return { ref, getShouldRender };
+}

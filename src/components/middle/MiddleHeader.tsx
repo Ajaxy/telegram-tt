@@ -63,7 +63,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
@@ -310,20 +310,20 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const {
     shouldRender: shouldShowChatReportPanel,
     transitionClassNames: chatReportPanelClassNames,
-  } = useShowTransition(hasChatSettings);
+  } = useShowTransitionDeprecated(hasChatSettings);
   const renderingChatSettings = useCurrentOrPrev(hasChatSettings ? settings : undefined, true);
 
   const {
     shouldRender: shouldRenderAudioPlayer,
     transitionClassNames: audioPlayerClassNames,
-  } = useShowTransition(Boolean(audioMessage));
+  } = useShowTransitionDeprecated(Boolean(audioMessage));
 
   const renderingAudioMessage = useCurrentOrPrev(audioMessage, true);
 
   const {
     shouldRender: shouldRenderPinnedMessage,
     transitionClassNames: pinnedMessageClassNames,
-  } = useShowTransition(Boolean(pinnedMessage) && !isMiddleSearchOpen, undefined, true);
+  } = useShowTransitionDeprecated(Boolean(pinnedMessage) && !isMiddleSearchOpen, undefined, true);
 
   const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage, true);
   const renderingPinnedMessagesCount = useCurrentOrPrev(pinnedMessagesCount, true);

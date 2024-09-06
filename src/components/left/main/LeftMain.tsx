@@ -15,7 +15,7 @@ import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Button from '../../ui/Button';
 import Transition from '../../ui/Transition';
@@ -86,7 +86,7 @@ const LeftMain: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderUpdateButton,
     transitionClassNames: updateButtonClassNames,
-  } = useShowTransition(isAppUpdateAvailable || isElectronUpdateAvailable);
+  } = useShowTransitionDeprecated(isAppUpdateAvailable || isElectronUpdateAvailable);
 
   const isMouseInside = useRef(false);
 

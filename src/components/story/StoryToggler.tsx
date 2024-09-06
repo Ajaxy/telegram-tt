@@ -10,7 +10,7 @@ import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ri
 
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
 import Avatar from '../common/Avatar';
@@ -89,7 +89,7 @@ function StoryToggler({
 
   const isVisible = canShow && isShown;
   // For some reason, setting 'slow' here also fixes scroll freezes on iOS when collapsing Story Ribbon
-  const { shouldRender, transitionClassNames } = useShowTransition(isVisible, undefined, undefined, 'slow');
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isVisible, undefined, undefined, 'slow');
 
   useEffect(() => {
     if (!withAnimation || isForumPanelOpen) return;

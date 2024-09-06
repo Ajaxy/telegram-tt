@@ -7,18 +7,12 @@ import React, {
 import { addExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type {
-  ApiChatFolder,
-  ApiMessage,
-  ApiUser,
-} from '../../api/types';
+import type { ApiChatFolder, ApiMessage, ApiUser } from '../../api/types';
 import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
 import type { LangCode } from '../../types';
 import { ElectronEvent } from '../../types/electron';
 
-import {
-  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER,
-} from '../../config';
+import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   selectCanAnimateInterface,
@@ -430,9 +424,12 @@ const Main = ({
     }
   }, []);
 
-  const leftColumnTransition = useShowTransition(
-    isLeftColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations, undefined, true,
-  );
+  useShowTransition({
+    ref: containerRef,
+    isOpen: isLeftColumnOpen,
+    noCloseTransition: shouldSkipHistoryAnimations,
+    prefix: 'left-column-',
+  });
   const willAnimateLeftColumnRef = useRef(false);
   const forceUpdate = useForceUpdate();
 
@@ -459,9 +456,12 @@ const Main = ({
     });
   }, [isLeftColumnOpen, withInterfaceAnimations, forceUpdate]);
 
-  const rightColumnTransition = useShowTransition(
-    isRightColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations, undefined, true,
-  );
+  useShowTransition({
+    ref: containerRef,
+    isOpen: isRightColumnOpen,
+    noCloseTransition: shouldSkipHistoryAnimations,
+    prefix: 'right-column-',
+  });
   const willAnimateRightColumnRef = useRef(false);
   const [isNarrowMessageList, setIsNarrowMessageList] = useState(isRightColumnOpen);
 
@@ -491,11 +491,7 @@ const Main = ({
   }, [isMiddleColumnOpen, isRightColumnOpen, noRightColumnAnimation, forceUpdate]);
 
   const className = buildClassName(
-    leftColumnTransition.hasShownClass && 'left-column-shown',
-    leftColumnTransition.hasOpenClass && 'left-column-open',
     willAnimateLeftColumnRef.current && 'left-column-animating',
-    rightColumnTransition.hasShownClass && 'right-column-shown',
-    rightColumnTransition.hasOpenClass && 'right-column-open',
     willAnimateRightColumnRef.current && 'right-column-animating',
     isNarrowMessageList && 'narrow-message-list',
     shouldSkipHistoryAnimations && 'history-animation-disabled',

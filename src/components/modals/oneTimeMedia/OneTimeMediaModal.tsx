@@ -11,7 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Audio from '../../common/Audio';
 import RoundVideo from '../../middle/message/RoundVideo';
@@ -36,7 +36,7 @@ const OneTimeMediaModal = ({
   const {
     shouldRender,
     transitionClassNames,
-  } = useShowTransition(Boolean(modal));
+  } = useShowTransitionDeprecated(Boolean(modal));
 
   const handlePlayVoice = useLastCallback(() => {
     return undefined;

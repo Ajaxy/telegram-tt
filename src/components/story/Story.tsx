@@ -43,9 +43,9 @@ import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import { useStreaming } from '../../hooks/useStreaming';
 import useBackgroundMode from '../../hooks/window/useBackgroundMode';
 import useStoryPreloader from './hooks/useStoryPreloader';
@@ -233,30 +233,30 @@ function Story({
   const {
     shouldRender: shouldRenderSkeleton,
     transitionClassNames: skeletonTransitionClassNames,
-  } = useShowTransition(!hasFullData);
+  } = useShowTransitionDeprecated(!hasFullData);
 
   const {
     transitionClassNames: mediaTransitionClassNames,
-  } = useShowTransition(Boolean(fullMediaData));
+  } = useShowTransitionDeprecated(Boolean(fullMediaData));
 
   const thumbRef = useCanvasBlur(thumbnail, !hasThumb);
-  const previewTransitionClassNames = useMediaTransition(previewBlobUrl);
+  const previewTransitionClassNames = useMediaTransitionDeprecated(previewBlobUrl);
 
   const {
     shouldRender: shouldRenderComposer,
     transitionClassNames: composerAppearanceAnimationClassNames,
-  } = useShowTransition(shouldShowComposer);
+  } = useShowTransitionDeprecated(shouldShowComposer);
 
   const {
     shouldRender: shouldRenderCaptionBackdrop,
     transitionClassNames: captionBackdropTransitionClassNames,
-  } = useShowTransition(hasText && isCaptionExpanded);
+  } = useShowTransitionDeprecated(hasText && isCaptionExpanded);
 
-  const { transitionClassNames: appearanceAnimationClassNames } = useShowTransition(true);
+  const { transitionClassNames: appearanceAnimationClassNames } = useShowTransitionDeprecated(true);
   const {
     shouldRender: shouldRenderCaption,
     transitionClassNames: captionAppearanceAnimationClassNames,
-  } = useShowTransition(hasText || hasForwardInfo);
+  } = useShowTransitionDeprecated(hasText || hasForwardInfo);
 
   const isStreamingSupported = useStreaming(videoRef, fullMediaData, PRIMARY_VIDEO_MIME);
 

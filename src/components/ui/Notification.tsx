@@ -14,7 +14,7 @@ import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import Button from './Button';
 import Portal from './Portal';
@@ -45,7 +45,7 @@ const Notification: FC<OwnProps> = ({
   const [isOpen, setIsOpen] = useState(true);
   // eslint-disable-next-line no-null/no-null
   const timerRef = useRef<number | undefined>(null);
-  const { transitionClassNames } = useShowTransition(isOpen);
+  const { transitionClassNames } = useShowTransitionDeprecated(isOpen);
 
   const closeAndDismiss = useCallback(() => {
     setIsOpen(false);

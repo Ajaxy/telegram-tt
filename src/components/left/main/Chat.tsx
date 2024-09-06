@@ -57,7 +57,7 @@ import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useChatListEntry from './hooks/useChatListEntry';
 
 import Avatar from '../../common/Avatar';
@@ -290,7 +290,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   }, [chat, chatId, isForum, isIntersecting]);
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
-  const { hasShownClass: isAvatarOnlineShown } = useShowTransition(isOnline);
+  const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
 
   const href = useMemo(() => {
     if (!IS_OPEN_IN_NEW_TAB_SUPPORTED) return undefined;

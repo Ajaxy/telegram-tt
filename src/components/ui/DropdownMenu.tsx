@@ -115,7 +115,6 @@ const DropdownMenu: FC<OwnProps> = ({
         footer={footer}
         autoClose
         onClose={handleClose}
-        shouldSkipTransition={forceOpen}
         onCloseAnimationEnd={onHide}
         onMouseEnterBackdrop={onMouseEnterBackdrop}
       >

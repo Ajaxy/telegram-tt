@@ -12,7 +12,7 @@ import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useFlag from '../../hooks/useFlag';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import PasswordForm from '../common/PasswordForm';
@@ -55,7 +55,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
   const [validationError, setValidationError] = useState<string>('');
   const [shouldShowPasscode, setShouldShowPasscode] = useState(false);
   const [isSignOutDialogOpen, openSignOutConfirmation, closeSignOutConfirmation] = useFlag(false);
-  const { shouldRender } = useShowTransition(isLocked);
+  const { shouldRender } = useShowTransitionDeprecated(isLocked);
 
   useTimeout(resetInvalidUnlockAttempts, timeoutUntil ? timeoutUntil - Date.now() : undefined);
 

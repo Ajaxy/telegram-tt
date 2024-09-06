@@ -124,7 +124,7 @@ import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useSchedule from '../../hooks/useSchedule';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAttachmentModal from '../middle/composer/hooks/useAttachmentModal';
@@ -1425,7 +1425,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const {
     shouldRender: shouldRenderReactionSelector,
     transitionClassNames: reactionSelectorTransitonClassNames,
-  } = useShowTransition(isReactionSelectorOpen);
+  } = useShowTransitionDeprecated(isReactionSelectorOpen);
   const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
     && (!canAttachMedia || !canSendVoiceByPrivacy || !canSendVoices);
 

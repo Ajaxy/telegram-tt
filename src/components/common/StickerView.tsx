@@ -123,9 +123,13 @@ const StickerView: FC<OwnProps> = ({
   const thumbData = cachedPreview || previewMediaData || thumbDataUri;
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
 
-  const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
-  const fullMediaClassNames = useMediaTransition(isFullMediaReady);
-  const noTransition = isLottie && withPreview;
+  const noCrossTransition = Boolean(isLottie && withPreview);
+  const thumbRef = useMediaTransition<HTMLImageElement>(thumbData && !isFullMediaReady, {
+    noCloseTransition: noCrossTransition,
+  });
+  const fullMediaRef = useMediaTransition<HTMLElement>(isFullMediaReady, {
+    noOpenTransition: noCrossTransition,
+  });
 
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
@@ -144,13 +148,13 @@ const StickerView: FC<OwnProps> = ({
   return (
     <>
       <img
+        ref={thumbRef}
         src={thumbData}
         className={buildClassName(
           styles.thumb,
-          noTransition && styles.noTransition,
+          noCrossTransition && styles.noTransition,
           isThumbOpaque && styles.thumbOpaque,
           thumbClassName,
-          thumbClassNames,
           'sticker-media',
         )}
         alt=""
@@ -158,14 +162,14 @@ const StickerView: FC<OwnProps> = ({
       />
       {shouldRenderFullMedia && (isLottie ? (
         <AnimatedSticker
+          ref={fullMediaRef as React.RefObject<HTMLDivElement>}
           key={renderId}
           renderId={renderId}
           size={size}
           className={buildClassName(
             styles.media,
-            (noTransition || isThumbOpaque) && styles.noTransition,
+            (noCrossTransition || isThumbOpaque) && styles.noTransition,
             fullMediaClassName,
-            fullMediaClassNames,
           )}
           tgsUrl={fullMediaData}
           play={shouldPlay}
@@ -182,8 +186,9 @@ const StickerView: FC<OwnProps> = ({
         />
       ) : isVideo ? (
         <OptimizedVideo
+          ref={fullMediaRef as React.RefObject<HTMLVideoElement>}
           canPlay={shouldPlay}
-          className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames, 'sticker-media')}
+          className={buildClassName(styles.media, fullMediaClassName, 'sticker-media')}
           src={fullMediaData}
           playsInline
           muted
@@ -197,7 +202,8 @@ const StickerView: FC<OwnProps> = ({
         />
       ) : (
         <img
-          className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames, 'sticker-media')}
+          ref={fullMediaRef as React.RefObject<HTMLImageElement>}
+          className={buildClassName(styles.media, fullMediaClassName, 'sticker-media')}
           src={fullMediaData}
           alt={emoji}
           style={filterStyle}

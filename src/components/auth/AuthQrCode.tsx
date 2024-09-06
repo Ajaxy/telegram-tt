@@ -17,7 +17,7 @@ import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import useAsync from '../../hooks/useAsync';
 import useFlag from '../../hooks/useFlag';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
 import useOldLangString from '../../hooks/useOldLangString';
 
@@ -90,7 +90,7 @@ const AuthCode: FC<StateProps> = ({
     });
   }, []);
 
-  const transitionClassNames = useMediaTransition(isQrMounted);
+  const transitionClassNames = useMediaTransitionDeprecated(isQrMounted);
 
   useLayoutEffect(() => {
     if (!authQrCode || !qrCode) {
