@@ -216,6 +216,7 @@
     display: flex;
     align-items: center;
     z-index: var(--z-status);
+    overflow: visible !important;
   }
 
   .avatar-badge-wrapper {
