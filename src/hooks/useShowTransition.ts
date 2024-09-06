@@ -2,6 +2,8 @@ import type { RefObject } from 'react';
 import { useLayoutEffect, useRef, useSignal } from '../lib/teact/teact';
 import { addExtraClass, toggleExtraClass } from '../lib/teact/teact-dom';
 
+import type { Signal } from '../util/signals';
+
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import useDerivedSignal from './useDerivedSignal';
 import useDerivedState from './useDerivedState';
@@ -11,24 +13,7 @@ import useSyncEffectWithPrevDeps from './useSyncEffectWithPrevDeps';
 
 const CLOSE_DURATION = 350;
 
-type State =
-  'closed'
-  | 'scheduled-open'
-  | 'open'
-  | 'closing';
-
-export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>({
-  isOpen,
-  ref,
-  noMountTransition = false,
-  noOpenTransition = false,
-  noCloseTransition = false,
-  closeDuration = CLOSE_DURATION,
-  className = 'fast',
-  prefix = '',
-  onCloseAnimationEnd,
-  withShouldRender,
-}: {
+type BaseHookParams<RefType extends HTMLElement> = {
   isOpen: boolean | undefined;
   ref?: RefObject<RefType>;
   noMountTransition?: boolean;
@@ -37,9 +22,55 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
   closeDuration?: number;
   className?: string | false;
   prefix?: string;
-  withShouldRender?: boolean;
   onCloseAnimationEnd?: NoneToVoidFunction;
-}) {
+};
+
+export type HookParams<RefType extends HTMLElement> = BaseHookParams<RefType> & {
+  withShouldRender?: never;
+};
+
+type HookParamsWithShouldRender<RefType extends HTMLElement> = BaseHookParams<RefType> & {
+  withShouldRender: true;
+};
+
+type HookResult<RefType extends HTMLElement> = {
+  ref: RefObject<RefType>;
+  getIsClosing: Signal<boolean>;
+};
+
+type HookResultWithShouldRender<RefType extends HTMLElement> = HookResult<RefType> & {
+  shouldRender: boolean;
+};
+
+type State =
+  'closed'
+  | 'scheduled-open'
+  | 'open'
+  | 'closing';
+
+export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>(
+  params: HookParams<RefType>
+): HookResult<RefType>;
+export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>(
+  params: HookParamsWithShouldRender<RefType>
+): HookResultWithShouldRender<RefType>;
+export default function useShowTransition<RefType extends HTMLElement = HTMLDivElement>(
+  params: HookParams<RefType> | HookParamsWithShouldRender<RefType>,
+): HookResult<RefType> | HookResultWithShouldRender<RefType> {
+  const {
+    isOpen,
+    noMountTransition = false,
+    noOpenTransition = false,
+    noCloseTransition = false,
+    closeDuration = CLOSE_DURATION,
+    className = 'fast',
+    prefix = '',
+    onCloseAnimationEnd,
+  } = params;
+  let ref = params.ref;
+
+  const withShouldRender = 'withShouldRender' in params && params.withShouldRender;
+
   // eslint-disable-next-line no-null/no-null
   const localRef = useRef<RefType>(null);
   ref ||= localRef;
@@ -106,5 +137,9 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
   );
   const getIsClosing = useDerivedSignal(() => getState() === 'closing', [getState]);
 
-  return { ref, shouldRender, getIsClosing };
+  if (withShouldRender) {
+    return { ref, shouldRender, getIsClosing };
+  }
+
+  return { ref, getIsClosing };
 }

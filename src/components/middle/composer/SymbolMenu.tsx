@@ -22,7 +22,7 @@ import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDepreca
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import Button from '../../ui/Button';
-import { UnfreezableMenu } from '../../ui/Menu';
+import Menu from '../../ui/Menu';
 import Portal from '../../ui/Portal';
 import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
@@ -316,7 +316,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <UnfreezableMenu
+    <Menu
       isOpen={isOpen}
       onClose={onClose}
       withPortal={isAttachmentModal}
@@ -333,7 +333,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       })}
     >
       {content}
-    </UnfreezableMenu>
+    </Menu>
   );
 };
 

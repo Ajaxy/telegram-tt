@@ -6,7 +6,6 @@ import type { MenuPositionOptions } from '../../hooks/useMenuPosition';
 
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
 import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
@@ -173,6 +172,4 @@ const Menu: FC<OwnProps> = ({
   return menu;
 };
 
-export const UnfreezableMenu = memo(Menu);
-
-export default memo(freezeWhenClosed(Menu));
+export default memo(Menu);

@@ -1,8 +1,8 @@
-import useShowTransition from './useShowTransition';
+import useShowTransition, { type HookParams } from './useShowTransition';
 
 export default function useMediaTransition<RefType extends HTMLElement = HTMLDivElement>(
   mediaData?: unknown,
-  options?: Partial<Parameters<typeof useShowTransition<RefType>>[0]>,
+  options?: Partial<HookParams<RefType>>,
 ) {
   const isMediaReady = Boolean(mediaData);
 
