@@ -32,6 +32,7 @@ import {
   getIsDownloading,
   getIsSavedDialog,
   getMessageDocument,
+  getMessageDownloadableMedia,
   isChatAdmin,
   isChatChannel,
   isChatGroup,
@@ -584,21 +585,26 @@ const Profile: FC<OwnProps & StateProps> = ({
             />
           ))
         ) : resultType === 'voice' ? (
-          (viewportIds as number[])!.map((id) => messagesById[id] && (
-            <Audio
-              key={id}
-              theme={theme}
-              message={messagesById[id]}
-              senderTitle={getSenderName(lang, messagesById[id], chatsById, usersById)}
-              origin={AudioOrigin.SharedMedia}
-              date={messagesById[id].date}
-              className="scroll-item"
-              onPlay={handlePlayAudio}
-              onDateClick={handleMessageFocus}
-              canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={getIsDownloading(activeDownloads, messagesById[id].content.voice!)}
-            />
-          ))
+          (viewportIds as number[])!.map((id) => {
+            const message = messagesById[id];
+            if (!message) return undefined;
+            const media = messagesById[id] && getMessageDownloadableMedia(message)!;
+            return messagesById[id] && (
+              <Audio
+                key={id}
+                theme={theme}
+                message={messagesById[id]}
+                senderTitle={getSenderName(lang, messagesById[id], chatsById, usersById)}
+                origin={AudioOrigin.SharedMedia}
+                date={messagesById[id].date}
+                className="scroll-item"
+                onPlay={handlePlayAudio}
+                onDateClick={handleMessageFocus}
+                canDownload={!isChatProtected && !messagesById[id].isProtected}
+                isDownloading={getIsDownloading(activeDownloads, media)}
+              />
+            );
+          })
         ) : resultType === 'members' ? (
           (viewportIds as string[])!.map((id, i) => (
             <ListItem
