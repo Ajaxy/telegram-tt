@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
+import type { ApiChat, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
 import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
@@ -27,6 +28,8 @@ interface StateProps {
   isShown: boolean;
   isForumPanelOpen?: boolean;
   withAnimation?: boolean;
+  usersById: Record<string, ApiUser>;
+  chatsById: Record<string, ApiChat>;
   peerStories: GlobalState['stories']['byPeerId'];
 }
 
@@ -35,6 +38,8 @@ const PRELOAD_PEERS = 5;
 function StoryToggler({
   currentUserId,
   orderedPeerIds,
+  usersById,
+  chatsById,
   canShow,
   isShown,
   isForumPanelOpen,
@@ -47,10 +52,6 @@ function StoryToggler({
   const lang = useOldLang();
 
   const peers = useMemo(() => {
-    // No need for expensive global updates on users, so we avoid them
-    const usersById = getGlobal().users.byId;
-    const chatsById = getGlobal().chats.byId;
-
     if (orderedPeerIds.length === 1) {
       return [usersById[orderedPeerIds[0]] || chatsById[orderedPeerIds[0]]];
     }
@@ -60,7 +61,7 @@ function StoryToggler({
       .filter((peer) => peer && peer.id !== currentUserId)
       .slice(0, PREVIEW_AVATAR_COUNT)
       .reverse();
-  }, [currentUserId, orderedPeerIds]);
+  }, [currentUserId, orderedPeerIds, usersById, chatsById]);
 
   const closeFriends = useMemo(() => {
     if (!peers?.length) return {};
@@ -145,6 +146,8 @@ export default memo(withGlobal<OwnProps>((global, { isArchived }): StateProps =>
     isShown: isArchived ? !isArchivedRibbonShown : !isRibbonShown,
     isForumPanelOpen,
     withAnimation,
+    usersById: global.users.byId,
+    chatsById: global.chats.byId,
     peerStories: byPeerId,
   };
 })(StoryToggler));
