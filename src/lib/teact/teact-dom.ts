@@ -102,7 +102,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   const isCurrentFragment = !isCurrentComponent && $current?.type === VirtualType.Fragment;
   const isNewFragment = !isNewComponent && $new?.type === VirtualType.Fragment;
 
-  if ($new?.type === VirtualType.Tag && $new.tag === 'svg') {
+  if (!isSvg && $new?.type === VirtualType.Tag && $new.tag === 'svg') {
     isSvg = true;
   }
 
@@ -623,13 +623,13 @@ function renderFragment(
   insertBefore(parentEl, fragment, nextSibling);
 }
 
-function setElementRef($element: VirtualElementTag, DOMElement: DOMElement | undefined) {
+function setElementRef($element: VirtualElementTag, element: DOMElement | undefined) {
   const { ref } = $element.props;
 
   if (typeof ref === 'object') {
-    ref.current = DOMElement;
+    ref.current = element;
   } else if (typeof ref === 'function') {
-    ref(DOMElement);
+    ref(element);
   }
 }
 
