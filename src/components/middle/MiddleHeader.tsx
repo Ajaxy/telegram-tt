@@ -31,7 +31,7 @@ import {
   isUserId,
 } from '../../global/helpers';
 import {
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectChat,
   selectChatMessage,
   selectChatMessages,
@@ -633,7 +633,7 @@ export default memo(withGlobal<OwnProps>(
       } = (
         firstPinnedMessage
         && pinnedMessageIds.length === 1
-        && selectAllowedMessageActions(global, firstPinnedMessage, threadId)
+        && selectAllowedMessageActionsSlow(global, firstPinnedMessage, threadId)
       ) || {};
 
       return {

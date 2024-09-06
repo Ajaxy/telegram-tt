@@ -48,7 +48,7 @@ import {
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectChat,
   selectChatLastMessageId,
   selectChatMessages,
@@ -127,7 +127,7 @@ addActionHandler('editLastMessage', (global, actions, payload): ActionReturnType
   }
 
   const lastOwnEditableMessageId = findLast(viewportIds, (id) => {
-    return Boolean(chatMessages[id] && selectAllowedMessageActions(global, chatMessages[id], threadId).canEdit);
+    return Boolean(chatMessages[id] && selectAllowedMessageActionsSlow(global, chatMessages[id], threadId).canEdit);
   });
 
   if (!lastOwnEditableMessageId) {
@@ -655,7 +655,7 @@ addActionHandler('downloadSelectedMessages', (global, actions, payload): ActionR
   const chatMessages = selectChatMessages(global, chatId);
   if (!chatMessages || !threadId) return;
   const messages = messageIds.map((id) => chatMessages[id])
-    .filter((message) => selectAllowedMessageActions(global, message, threadId).canDownload);
+    .filter((message) => selectAllowedMessageActionsSlow(global, message, threadId).canDownload);
   messages.forEach((message) => {
     const media = getMessageDownloadableMedia(message);
     if (!media) return;
@@ -955,7 +955,7 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
 
   const messages = messageIds
     .map((id) => chatMessages[id])
-    .filter((message) => selectAllowedMessageActions(global, message, threadId).canCopy)
+    .filter((message) => selectAllowedMessageActionsSlow(global, message, threadId).canCopy)
     .sort((message1, message2) => message1.id - message2.id);
 
   const resultHtml: string[] = [];

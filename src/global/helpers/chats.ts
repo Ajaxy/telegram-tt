@@ -127,7 +127,7 @@ export function isChatAdmin(chat: ApiChat) {
 }
 
 export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {
-  return chat.adminRights ? chat.adminRights[key] : false;
+  return chat.adminRights?.[key] || false;
 }
 
 export function getCanManageTopic(chat: ApiChat, topic: ApiTopic) {

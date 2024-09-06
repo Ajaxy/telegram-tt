@@ -11,14 +11,12 @@ import type {
 import type { ThreadId } from '../../types';
 import type { IAllowedAttachmentOptions } from '../helpers';
 import type {
-  ChatTranslatedMessages,
-  GlobalState, MessageListType, TabArgs, TabThread, Thread,
+  ChatTranslatedMessages, GlobalState, MessageListType, TabArgs, TabThread, Thread,
 } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  ANONYMOUS_USER_ID,
-  GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  ANONYMOUS_USER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
@@ -33,7 +31,10 @@ import {
   getHasAdminRight,
   getIsSavedDialog,
   getMessageAudio,
-  getMessageDocument, getMessageLink, getMessagePaidMedia, getMessagePhoto,
+  getMessageDocument,
+  getMessageLink,
+  getMessagePaidMedia,
+  getMessagePhoto,
   getMessageVideo,
   getMessageVoice,
   getMessageWebPagePhoto,
@@ -70,10 +71,7 @@ import { selectPeerStory } from './stories';
 import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
 import {
-  selectBot,
-  selectIsCurrentUserPremium,
-  selectUser,
-  selectUserStatus,
+  selectBot, selectIsCurrentUserPremium, selectUser, selectUserStatus,
 } from './users';
 
 const MESSAGE_EDIT_ALLOWED_TIME = 172800; // 48 hours
@@ -608,7 +606,29 @@ export function selectTopicFromMessage<T extends GlobalState>(global: T, message
   return chat.topics?.[threadId];
 }
 
-export function selectAllowedMessageActions<T extends GlobalState>(global: T, message: ApiMessage, threadId: ThreadId) {
+export function selectCanReplyToMessage<T extends GlobalState>(global: T, message: ApiMessage, threadId: ThreadId) {
+  const chat = selectChat(global, message.chatId);
+  if (!chat || chat.isRestricted || chat.isForbidden) return false;
+
+  const isLocal = isMessageLocal(message);
+  const isServiceNotification = isServiceNotificationMessage(message);
+
+  if (isLocal || isServiceNotification) return false;
+
+  const threadInfo = selectThreadInfo(global, message.chatId, threadId);
+  const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+  const chatFullInfo = selectChatFullInfo(global, chat.id);
+  const canPostInChat = getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
+  if (!canPostInChat) return false;
+
+  const messageTopic = selectTopicFromMessage(global, message);
+  return !messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics');
+}
+
+// This selector is slow and not to be used within lists (e.g. Message component)
+export function selectAllowedMessageActionsSlow<T extends GlobalState>(
+  global: T, message: ApiMessage, threadId: ThreadId,
+) {
   const chat = selectChat(global, message.chatId);
   if (!chat || chat.isRestricted) {
     return {};
@@ -628,9 +648,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const isAction = isActionMessage(message);
   const hasTtl = hasMessageTtl(message);
   const { content } = message;
-  const messageTopic = selectTopicFromMessage(global, message);
   const isDocumentSticker = isMessageDocumentSticker(message);
-  const chatFullInfo = selectChatFullInfo(global, chat.id);
   const isBoostMessage = message.content.action?.type === 'chatBoost';
 
   const canEditMessagesIndefinitely = isChatWithSelf
@@ -652,15 +670,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
 
   const isSavedDialog = getIsSavedDialog(chat.id, threadId, global.currentUserId);
 
-  const threadInfo = selectThreadInfo(global, message.chatId, threadId);
-  const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
-  const canPostInChat = getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
-  const canReply = (() => {
-    if (isLocal || isServiceNotification) return false;
-    if (!canPostInChat || chat.isForbidden) return false;
-    return !messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics');
-  })();
-
+  const canReply = selectCanReplyToMessage(global, message, threadId);
   const canReplyGlobally = canReply || (!isSavedDialog && !isLocal && !isServiceNotification
     && (isSuperGroup || isBasicGroup || isChatChannel(chat)));
 
@@ -793,7 +803,7 @@ export function selectCanDeleteSelectedMessages<T extends GlobalState>(
   }
 
   const messageActions = selectedMessageIds
-    .map((id) => chatMessages[id] && selectAllowedMessageActions(global, chatMessages[id], threadId))
+    .map((id) => chatMessages[id] && selectAllowedMessageActionsSlow(global, chatMessages[id], threadId))
     .filter(Boolean);
 
   return {
@@ -814,7 +824,7 @@ export function selectCanReportSelectedMessages<T extends GlobalState>(
   }
 
   const messageActions = selectedMessageIds
-    .map((id) => chatMessages[id] && selectAllowedMessageActions(global, chatMessages[id], threadId))
+    .map((id) => chatMessages[id] && selectAllowedMessageActionsSlow(global, chatMessages[id], threadId))
     .filter(Boolean);
 
   return messageActions.every((actions) => actions.canReport);
@@ -832,7 +842,7 @@ export function selectCanDownloadSelectedMessages<T extends GlobalState>(
   }
 
   const messageActions = selectedMessageIds
-    .map((id) => chatMessages[id] && selectAllowedMessageActions(global, chatMessages[id], threadId))
+    .map((id) => chatMessages[id] && selectAllowedMessageActionsSlow(global, chatMessages[id], threadId))
     .filter(Boolean);
 
   return messageActions.some((actions) => actions.canDownload);

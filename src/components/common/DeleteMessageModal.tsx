@@ -22,7 +22,7 @@ import {
   isUserId,
 } from '../../global/helpers';
 import {
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectBot,
   selectChat, selectChatFullInfo, selectCurrentMessageIds,
   selectCurrentMessageList, selectSenderFromMessage, selectTabState,
@@ -434,7 +434,7 @@ export default memo(withGlobal<OwnProps>(
     const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
     const { threadId, type } = selectCurrentMessageList(global) || {};
     const { canDeleteForAll } = (deleteMessageModal && deleteMessageModal.message && threadId
-      && selectAllowedMessageActions(global, deleteMessageModal.message, threadId)) || {};
+      && selectAllowedMessageActionsSlow(global, deleteMessageModal.message, threadId)) || {};
     const adminMembersById = chatFullInfo && chatFullInfo?.adminMembersById;
     const messageIdList = chat && selectCurrentMessageIds(global, chat.id, threadId!, type!);
     const isGroup = Boolean(chat) && isChatBasicGroup(chat);

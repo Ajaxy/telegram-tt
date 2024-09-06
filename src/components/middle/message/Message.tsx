@@ -64,10 +64,9 @@ import {
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../../global/helpers/replies';
 import {
   selectActiveDownloads,
-  selectAllowedMessageActions,
   selectAnimatedEmoji,
   selectCanAutoLoadMedia,
-  selectCanAutoPlayMedia,
+  selectCanAutoPlayMedia, selectCanReplyToMessage,
   selectChat,
   selectChatFullInfo,
   selectChatMessage,
@@ -1754,7 +1753,7 @@ export default memo(withGlobal<OwnProps>(
       isSelected = selectIsMessageSelected(global, id);
     }
 
-    const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
+    const canReply = messageListType === 'thread' && selectCanReplyToMessage(global, message, threadId);
     const activeDownloads = selectActiveDownloads(global);
     const downloadableMedia = getMessageDownloadableMedia(message);
     const isDownloading = downloadableMedia && getIsDownloading(activeDownloads, downloadableMedia);

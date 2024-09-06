@@ -34,7 +34,7 @@ import {
 } from '../../../global/helpers';
 import {
   selectActiveDownloads,
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
   selectCanTranslateMessage,
@@ -702,7 +702,7 @@ export default memo(withGlobal<OwnProps>(
       canSaveGif,
       canRevote,
       canClosePoll,
-    } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
+    } = (threadId && selectAllowedMessageActionsSlow(global, message, threadId)) || {};
 
     const userStatus = isPrivate ? selectUserStatus(global, chat.id) : undefined;
     const isOwn = isOwnMessage(message);

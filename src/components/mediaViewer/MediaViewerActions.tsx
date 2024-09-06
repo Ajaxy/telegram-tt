@@ -16,7 +16,7 @@ import {
 } from '../../global/helpers';
 import {
   selectActiveDownloads,
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectCurrentMessageList,
   selectIsChatProtected,
   selectIsMessageProtected,
@@ -398,7 +398,7 @@ export default memo(withGlobal<OwnProps>(
     const activeDownloads = selectActiveDownloads(global);
     const isChatProtected = message && selectIsChatProtected(global, message?.chatId);
     const { canDelete: canDeleteMessage } = (threadId
-      && message && selectAllowedMessageActions(global, message, threadId)) || {};
+      && message && selectAllowedMessageActionsSlow(global, message, threadId)) || {};
     const isCurrentAvatar = avatarPhoto && (avatarPhoto.id === avatarOwner?.avatarPhotoId);
     const canDeleteAvatar = canUpdateMedia && Boolean(avatarPhoto);
     const canDelete = canDeleteMessage || canDeleteAvatar;
