@@ -8,10 +8,7 @@ import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import {
-  getMediaFormat,
-  getMediaThumbUri,
-  getMediaTransferState,
-  getPhotoMediaHash,
+  getMediaFormat, getMediaThumbUri, getMediaTransferState, getPhotoMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
@@ -22,10 +19,10 @@ import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
-import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
+import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import MediaSpoiler from '../../common/MediaSpoiler';
@@ -105,8 +102,8 @@ const Photo = <T,>({
   const [withThumb] = useState(!fullMediaData);
   const noThumb = Boolean(fullMediaData);
   const thumbRef = useBlurredMediaThumbRef(photo, noThumb);
+  useMediaTransition(!noThumb, { ref: thumbRef });
   const blurredBackgroundRef = useBlurredMediaThumbRef(photo, !withBlurredBackground);
-  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
   const thumbDataUri = getMediaThumbUri(photo);
 
   const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(isPaidPreview || photo.isSpoiler);
@@ -137,13 +134,21 @@ const Photo = <T,>({
   const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
 
   const {
+    ref: spinnerRef,
     shouldRender: shouldRenderSpinner,
-    transitionClassNames: spinnerClassNames,
-  } = useShowTransitionDeprecated(isTransferring, undefined, wasLoadDisabled, 'slow');
+  } = useShowTransition({
+    isOpen: isTransferring,
+    noMountTransition: wasLoadDisabled,
+    className: 'slow',
+    withShouldRender: true,
+  });
   const {
+    ref: downloadButtonRef,
     shouldRender: shouldRenderDownloadButton,
-    transitionClassNames: downloadButtonClassNames,
-  } = useShowTransitionDeprecated(!fullMediaData && !isLoadAllowed);
+  } = useShowTransition({
+    isOpen: !fullMediaData && !isLoadAllowed,
+    withShouldRender: true,
+  });
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
     if (isUploading) {
@@ -228,19 +233,15 @@ const Photo = <T,>({
         />
       )}
       {withThumb && (
-        <canvas
-          ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
-        />
+        <canvas ref={thumbRef} className="thumbnail" />
       )}
       {isProtected && <span className="protector" />}
       {shouldRenderSpinner && !shouldRenderDownloadButton && (
-        <div className={`media-loading ${spinnerClassNames}`}>
+        <div ref={spinnerRef} className="media-loading">
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {shouldRenderDownloadButton
-        && <i className={buildClassName('icon', 'icon-download', downloadButtonClassNames)} />}
+      {shouldRenderDownloadButton && <i ref={downloadButtonRef} className="icon icon-download" />}
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation

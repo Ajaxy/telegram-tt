@@ -9,7 +9,6 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
 import trapFocus from '../../util/trapFocus';
 
-import useDerivedState from '../../hooks/useDerivedState';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -66,12 +65,12 @@ const Modal: FC<OwnProps> = ({
 }) => {
   const {
     ref: modalRef,
-    getShouldRender,
+    shouldRender,
   } = useShowTransition({
     isOpen,
     onCloseAnimationEnd,
+    withShouldRender: true,
   });
-  const shouldRender = useDerivedState(getShouldRender);
 
   const withCloseButton = hasCloseButton || hasAbsoluteCloseButton;
 

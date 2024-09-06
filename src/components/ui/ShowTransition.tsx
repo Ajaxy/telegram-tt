@@ -1,7 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 
-import useDerivedState from '../../hooks/useDerivedState';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../hooks/useShowTransition';
 
@@ -37,14 +36,14 @@ const ShowTransition: FC<OwnProps> = ({
   const fromChildrenRef = useRef<React.ReactNode>();
   const isFirstRender = prevIsOpen === undefined;
 
-  const { ref, getShouldRender } = useShowTransition({
+  const { ref, shouldRender } = useShowTransition({
     isOpen: isOpen && !isHidden,
     ref: externalRef,
     noMountTransition: isFirstRender && !shouldAnimateFirstRender,
     className: isCustom ? false : undefined,
     noCloseTransition,
+    withShouldRender: true,
   });
-  const shouldRender = useDerivedState(getShouldRender);
 
   if (prevIsOpen && !isOpen) {
     fromChildrenRef.current = prevChildren;

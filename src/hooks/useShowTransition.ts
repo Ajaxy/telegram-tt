@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef, useSignal } from '../lib/teact/teact';
 import { addExtraClass, toggleExtraClass } from '../lib/teact/teact-dom';
 
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
-import useDerivedSignal from './useDerivedSignal';
+import useDerivedState from './useDerivedState';
 import useLastCallback from './useLastCallback';
 import { useStateRef } from './useStateRef';
 import useSyncEffectWithPrevDeps from './useSyncEffectWithPrevDeps';
@@ -26,6 +26,7 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
   className = 'fast',
   prefix = '',
   onCloseAnimationEnd,
+  withShouldRender,
 }: {
   isOpen: boolean | undefined;
   ref?: RefObject<RefType>;
@@ -35,6 +36,7 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
   closeDuration?: number;
   className?: string | false;
   prefix?: string;
+  withShouldRender?: boolean;
   onCloseAnimationEnd?: NoneToVoidFunction;
 }) {
   // eslint-disable-next-line no-null/no-null
@@ -97,7 +99,10 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     toggleExtraClass(element, `${prefix}closing`, isClosing);
   }, [className, getState, prefix, ref]);
 
-  const getShouldRender = useDerivedSignal(() => getState() !== 'closed', [getState]);
+  const shouldRender = useDerivedState(
+    () => (withShouldRender && getState() !== 'closed'),
+    [withShouldRender, getState],
+  );
 
-  return { ref, getShouldRender };
+  return { ref, shouldRender };
 }
