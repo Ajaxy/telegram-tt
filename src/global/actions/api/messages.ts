@@ -213,29 +213,31 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
     const isOutlying = Boolean(listedIds && !listedIds.includes(offsetId));
     const historyIds = (isOutlying
       ? selectOutlyingListByMessageId(global, chatId, threadId, offsetId) : listedIds)!;
-    const {
-      newViewportIds, areSomeLocal, areAllLocal,
-    } = getViewportSlice(historyIds, offsetId, direction);
+    if (historyIds?.length) {
+      const {
+        newViewportIds, areSomeLocal, areAllLocal,
+      } = getViewportSlice(historyIds, offsetId, direction);
 
-    if (areSomeLocal) {
-      global = safeReplaceViewportIds(global, chatId, threadId, newViewportIds, tabId);
+      if (areSomeLocal) {
+        global = safeReplaceViewportIds(global, chatId, threadId, newViewportIds, tabId);
+      }
+
+      onTickEnd(() => {
+        void loadWithBudget(
+          global,
+          actions,
+          areAllLocal,
+          isOutlying,
+          isBudgetPreload,
+          chat,
+          threadId!,
+          direction,
+          offsetId,
+          onLoaded,
+          tabId,
+        );
+      });
     }
-
-    onTickEnd(() => {
-      void loadWithBudget(
-        global,
-        actions,
-        areAllLocal,
-        isOutlying,
-        isBudgetPreload,
-        chat,
-        threadId!,
-        direction,
-        offsetId,
-        onLoaded,
-        tabId,
-      );
-    });
 
     if (isBudgetPreload) {
       return;

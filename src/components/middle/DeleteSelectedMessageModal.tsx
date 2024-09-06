@@ -20,13 +20,13 @@ import {
   isUserId,
 } from '../../global/helpers';
 import {
+  getSendersFromSelectedMessages,
   selectCanDeleteSelectedMessages,
   selectChatFullInfo,
   selectCurrentChat,
   selectCurrentMessageIds,
   selectCurrentMessageList,
   selectSenderFromMessage,
-  selectSendersFromSelectedMessages,
   selectTabState,
   selectUser,
 } from '../../global/selectors';
@@ -119,7 +119,8 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     if (isChannel) {
       return undefined;
     }
-    return selectSendersFromSelectedMessages(getGlobal(), chat);
+    const senderArray = getSendersFromSelectedMessages(getGlobal(), chat);
+    return senderArray?.filter(Boolean);
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [chat, isChannel, isOpen]);
 

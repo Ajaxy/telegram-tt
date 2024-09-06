@@ -420,7 +420,7 @@ export function selectSender<T extends GlobalState>(global: T, message: ApiMessa
   return selectPeer(global, senderId);
 }
 
-export function selectSendersFromSelectedMessages<T extends GlobalState>(
+export function getSendersFromSelectedMessages<T extends GlobalState>(
   global: T,
   chat: ApiChat | undefined,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
