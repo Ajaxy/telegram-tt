@@ -216,7 +216,7 @@ const Photo = <T,>({
       onClick={isUploading ? undefined : handleClick}
     >
       {withBlurredBackground && (
-        <canvas ref={blurredBackgroundRef} className="thumbnail canvas-blur-setup blurred-bg" />
+        <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
       )}
       <img
         src={fullMediaData}
@@ -228,7 +228,7 @@ const Photo = <T,>({
       {withThumb && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', !noThumb && 'canvas-blur-setup', thumbClassNames)}
+          className={buildClassName('thumbnail', thumbClassNames)}
         />
       )}
       {isProtected && <span className="protector" />}

@@ -84,7 +84,7 @@ function BaseStory({
       onClick={isConnected ? handleClick : undefined}
     >
       {!isExpired && isPreview && (
-        <canvas ref={blurredBackgroundRef} className="thumbnail canvas-blur-setup blurred-bg" />
+        <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
       )}
       {shouldRender && (
         <>

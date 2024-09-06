@@ -235,7 +235,7 @@ const Video = <T,>({
       onClick={isUploading ? undefined : (e) => handleClick(e)}
     >
       {withBlurredBackground && (
-        <canvas ref={blurredBackgroundRef} className="thumbnail canvas-blur-setup blurred-bg" />
+        <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
       )}
       {isInline && (
         <OptimizedVideo
@@ -262,7 +262,7 @@ const Video = <T,>({
       {hasThumb && !isPreviewPreloaded && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', !noThumb && 'canvas-blur-setup', thumbClassNames)}
+          className={buildClassName('thumbnail', thumbClassNames)}
         />
       )}
       {isProtected && <span className="protector" />}

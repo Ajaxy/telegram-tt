@@ -97,6 +97,7 @@ export type RequestTypes<T extends InputRequestTypes> = Values<{
   [Name in keyof (T)]: {
     name: Name & string;
     args: Parameters<T[Name]>;
+    transferables?: Transferable[];
   }
 }>;
 
@@ -106,6 +107,8 @@ class ConnectorClass<T extends InputRequestTypes> {
   private requestStatesByCallback = new Map<AnyToVoidFunction, RequestState>();
 
   private pendingPayloads: OriginPayload[] = [];
+
+  private pendingTransferables: Transferable[] = [];
 
   constructor(
     public target: Worker,
@@ -127,12 +130,13 @@ class ConnectorClass<T extends InputRequestTypes> {
 
   request(messageData: RequestTypes<T>) {
     const { requestStates, requestStatesByCallback } = this;
+    const { transferables, ...restMessageData } = messageData;
 
     const messageId = generateUniqueId();
     const payload: CallMethodPayload = {
       type: 'callMethod',
       messageId,
-      ...messageData,
+      ...restMessageData,
     };
 
     const requestState = { messageId } as RequestState;
@@ -161,7 +165,7 @@ class ConnectorClass<T extends InputRequestTypes> {
         }
       });
 
-    this.postMessageOnTickEnd(payload);
+    this.postMessageOnTickEnd(payload, transferables);
 
     return promise;
   }
@@ -208,20 +212,25 @@ class ConnectorClass<T extends InputRequestTypes> {
     });
   }
 
-  private postMessageOnTickEnd(payload: OriginPayload) {
+  private postMessageOnTickEnd(payload: OriginPayload, transferables?: Transferable[]) {
     this.pendingPayloads.push(payload);
+
+    if (transferables) {
+      this.pendingTransferables.push(...transferables);
+    }
+
     this.postMessagesOnTickEnd();
   }
 
   private postMessagesOnTickEnd = throttleWithTickEnd(() => {
+    const { channel } = this;
     const payloads = this.pendingPayloads;
+    const transferables = this.pendingTransferables;
 
     this.pendingPayloads = [];
+    this.pendingTransferables = [];
 
-    this.target.postMessage({
-      channel: this.channel,
-      payloads,
-    });
+    this.target.postMessage({ channel, payloads }, transferables);
   });
 }
 

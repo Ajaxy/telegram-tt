@@ -201,10 +201,6 @@ body:not(.is-ios) {
   }
 }
 
-.canvas-blur-setup {
-  will-change: width, height;
-}
-
 .emoji-small {
   background: no-repeat;
   background-size: var(--emoji-size);

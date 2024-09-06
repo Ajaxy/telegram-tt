@@ -63,7 +63,7 @@ const MediaSpoiler: FC<OwnProps> = ({
     >
       <canvas
         ref={canvasRef}
-        className={buildClassName(styles.canvas, 'canvas-blur-setup')}
+        className={styles.canvas}
         width={width}
         height={height}
       />
