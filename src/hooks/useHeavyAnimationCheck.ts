@@ -14,7 +14,7 @@ const AUTO_END_TIMEOUT = 1000;
 const startCallbacks = createCallbackManager();
 const endCallbacks = createCallbackManager();
 
-let timeout: number | undefined;
+let counter = 0;
 
 const [getIsAnimating, setIsAnimating] = createSignal(false);
 
@@ -79,28 +79,30 @@ export function isHeavyAnimating() {
 }
 
 export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
-  if (!getIsAnimating()) {
+  counter++;
+
+  if (counter === 1) {
     setIsAnimating(true);
     startCallbacks.runCallbacks();
   }
 
-  if (timeout) {
-    clearTimeout(timeout);
-    timeout = undefined;
-  }
+  const timeout = window.setTimeout(onEnd, duration);
 
-  // Race condition may happen if another `dispatchHeavyAnimationEvent` is called before `onEnd`
+  let hasEnded = false;
+
   function onEnd() {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = undefined;
+    if (hasEnded) return;
+    hasEnded = true;
+
+    clearTimeout(timeout);
+
+    counter--;
+
+    if (counter === 0) {
+      setIsAnimating(false);
+      endCallbacks.runCallbacks();
     }
-
-    setIsAnimating(false);
-    endCallbacks.runCallbacks();
   }
-
-  timeout = window.setTimeout(onEnd, duration);
 
   return onEnd;
 }

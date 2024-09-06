@@ -20,6 +20,7 @@ type Params = Parameters<typeof createMutateFunction>;
 
 let isAnimating = false;
 let currentArgs: Parameters<typeof createMutateFunction> | undefined;
+let onHeavyAnimationStop: NoneToVoidFunction | undefined;
 
 export default function animateScroll(...args: Params | [...Params, boolean]) {
   currentArgs = args.slice(0, 8) as Params;
@@ -117,15 +118,18 @@ function createMutateFunction(
       return;
     }
 
-    isAnimating = true;
-
     const transition = absPath <= FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
     const duration = forceDuration || (
       FAST_SMOOTH_MIN_DURATION
       + (absPath / FAST_SMOOTH_MAX_DISTANCE) * (FAST_SMOOTH_MAX_DURATION - FAST_SMOOTH_MIN_DURATION)
     );
     const startAt = Date.now();
-    const onHeavyAnimationStop = dispatchHeavyAnimationEvent();
+
+    isAnimating = true;
+
+    const prevOnHeavyAnimationStop = onHeavyAnimationStop;
+    onHeavyAnimationStop = dispatchHeavyAnimationEvent();
+    prevOnHeavyAnimationStop?.();
 
     animateSingle(() => {
       const t = Math.min((Date.now() - startAt) / duration, 1);
@@ -138,7 +142,9 @@ function createMutateFunction(
 
       if (!isAnimating) {
         currentArgs = undefined;
-        onHeavyAnimationStop();
+
+        onHeavyAnimationStop!();
+        onHeavyAnimationStop = undefined;
       }
 
       return isAnimating;

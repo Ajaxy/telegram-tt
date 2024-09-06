@@ -245,6 +245,7 @@ function Transition({
 
       requestMutation(() => {
         if (activeKey !== currentKeyRef.current) {
+          dispatchHeavyAnimationStop();
           return;
         }
 
@@ -472,6 +473,7 @@ function performSlideOptimized(
 
     requestMutation(() => {
       if (activeKey !== currentKeyRef.current) {
+        dispatchHeavyAnimationStop();
         return;
       }
 
