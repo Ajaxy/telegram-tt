@@ -456,17 +456,6 @@ export function selectSenderFromMessage<T extends GlobalState>(
   return selectPeer(global, message.senderId);
 }
 
-export function selectReplySender<T extends GlobalState>(
-  global: T, message: ApiMessage,
-) {
-  const { senderId } = message;
-  if (!senderId) {
-    return undefined;
-  }
-
-  return selectPeer(global, senderId);
-}
-
 export function selectSenderFromHeader<T extends GlobalState>(
   global: T,
   header: ApiMessageForwardInfo,

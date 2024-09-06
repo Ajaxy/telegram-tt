@@ -88,7 +88,6 @@ import {
   selectPeer,
   selectPeerStory,
   selectPerformanceSettingsValue,
-  selectReplySender,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectSender,
@@ -1713,7 +1712,7 @@ export default memo(withGlobal<OwnProps>(
     const shouldHideReply = replyToMsgId && replyToMsgId === threadId;
     const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
     const forwardHeader = forwardInfo || replyFrom;
-    const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage)
+    const replyMessageSender = replyMessage ? selectSender(global, replyMessage)
       : forwardHeader && !isRepliesChat && !isAnonymousForwards
         ? selectSenderFromHeader(global, forwardHeader) : undefined;
     const replyMessageForwardSender = replyMessage && selectForwardedSender(global, replyMessage);
