@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React, { memo, useRef } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { ApiSticker } from '../../api/types';
@@ -99,24 +99,30 @@ const StickerView: FC<OwnProps> = ({
     && isIntersectingForLoading
   );
   const shouldPlay = isIntersectingForPlaying && !noPlay;
+  const hasIntersectedForPlayingRef = useRef(isIntersectingForPlaying);
+  if (!hasIntersectedForPlayingRef.current && isIntersectingForPlaying) {
+    hasIntersectedForPlayingRef.current = true;
+  }
+
+  const isReadyToMountFullMedia = useMountAfterHeavyAnimation(hasIntersectedForPlayingRef.current);
+
+  const cachedPreview = mediaLoader.getFromMemory(previewMediaHash);
+  const shouldLoadPreview = !customColor && !cachedPreview && (
+    !isReadyToMountFullMedia || isUnsupportedVideo || (isStatic ? isSmall : noPlay)
+  );
+  const previewMediaData = useMedia(previewMediaHash, !shouldLoadPreview);
 
   const thumbDataUri = useThumbnail(sticker);
-  // Use preview instead of thumb but only if it's already loaded or when playing an animation is disabled
-  const previewMediaDataFromCache: string | undefined = mediaLoader.getFromMemory(previewMediaHash);
-  const previewMediaData = useMedia(previewMediaHash, Boolean(previewMediaDataFromCache || !noPlay));
-  const thumbData = customColor ? thumbDataUri : (previewMediaData || thumbDataUri);
+  const thumbData = cachedPreview || previewMediaData || thumbDataUri;
 
-  const shouldForcePreview = isUnsupportedVideo || (isStatic && isSmall);
-  fullMediaHash = shouldForcePreview ? previewMediaHash : (fullMediaHash || `sticker${id}`);
-
-  // If preloaded preview is forced, it will render as thumb, so no need to load it again
-  const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && previewMediaData);
-
-  const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia);
+  // No need to use full media if preview is enough and available
+  const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData));
+  const fullMediaData = useMedia(fullMediaHash || `sticker${id}`, !shouldLoad || shouldSkipFullMedia);
   // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !previewMediaData));
-  const isReadyToMount = useMountAfterHeavyAnimation();
-  const isFullMediaReady = isReadyToMount && fullMediaData && (isStatic || isPlayerReady);
+
+  const shouldRenderFullMedia = isReadyToMountFullMedia && fullMediaData;
+  const isFullMediaReady = isReadyToMountFullMedia && fullMediaData && (isStatic || isPlayerReady);
 
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
   const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
@@ -152,7 +158,7 @@ const StickerView: FC<OwnProps> = ({
         alt=""
         draggable={false}
       />
-      {isReadyToMount && (isLottie ? (
+      {shouldRenderFullMedia && (isLottie ? (
         <AnimatedSticker
           key={renderId}
           renderId={renderId}

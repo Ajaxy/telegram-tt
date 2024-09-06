@@ -1,19 +1,19 @@
-import { useEffect } from '../lib/teact/teact';
+import { useEffect, useSignal } from '../lib/teact/teact';
 
-import useFlag from './useFlag';
+import useDerivedState from './useDerivedState';
 import { getIsHeavyAnimating } from './useHeavyAnimationCheck';
 
-export default function useMountAfterHeavyAnimation() {
-  const [isReadyToMount, markReadyToMount] = useFlag(false);
+export default function useMountAfterHeavyAnimation(hasIntersected: boolean) {
+  const [getNoHeavyAnimation, setNoHeavyAnimation] = useSignal(false);
 
   const $getIsHeavyAnimating = getIsHeavyAnimating;
 
-  // Animation is often started right after the mount, so we use effect to check for it on the next frame
+  // Animation is usually started right after the mount, so we use effect to check for it on the next frame
   useEffect(() => {
     if (!$getIsHeavyAnimating()) {
-      markReadyToMount();
+      setNoHeavyAnimation(true);
     }
-  }, [$getIsHeavyAnimating]);
+  }, [$getIsHeavyAnimating, setNoHeavyAnimation]);
 
-  return isReadyToMount;
+  return useDerivedState(() => (getNoHeavyAnimation() && hasIntersected), [getNoHeavyAnimation, hasIntersected]);
 }
