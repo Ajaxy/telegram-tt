@@ -98,7 +98,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
             description={lang('ChatList.Search.NoResultsDescription')}
           />
         )}
-        {canRenderContents && !searchQuery && recentBotIds?.length && (
+        {canRenderContents && !searchQuery && Boolean(recentBotIds?.length) && (
           <div className="search-section">
             <h3 className="section-heading">
               {recentBotIds.length > LESS_LIST_ITEMS_AMOUNT && (
