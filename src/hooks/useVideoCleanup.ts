@@ -1,21 +1,20 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
 
-import { requestNextMutation } from '../lib/fasterdom/fasterdom';
 import unloadVideo from '../util/browser/unloadVideo';
+import { onFullyIdle } from './useHeavyAnimationCheck';
 
 // Fix for memory leak when unmounting video element
 export default function useVideoCleanup(videoRef: RefObject<HTMLVideoElement>, dependencies: any[]) {
   useEffect(() => {
     const videoEl = videoRef.current;
+    if (!videoEl) return undefined;
 
     return () => {
-      if (videoEl) {
-        // It may be slow (specifically on iOS), so we postpone it after unmounting
-        requestNextMutation(() => {
-          unloadVideo(videoEl);
-        });
-      }
+      // It may be slow (specifically on iOS), so we postpone it after unmounting
+      onFullyIdle(() => {
+        unloadVideo(videoEl);
+      });
     };
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, dependencies);
