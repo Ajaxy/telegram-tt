@@ -105,14 +105,14 @@ export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
   return onEnd;
 }
 
-export function onFullyIdle(cb: NoneToVoidFunction, idleTimeout?: number) {
+export function onFullyIdle(cb: NoneToVoidFunction) {
   onIdle(() => {
     if (getIsAnimating()) {
       requestMeasure(() => {
-        onFullyIdle(cb, idleTimeout);
+        onFullyIdle(cb);
       });
     } else {
       cb();
     }
-  }, idleTimeout);
+  });
 }
