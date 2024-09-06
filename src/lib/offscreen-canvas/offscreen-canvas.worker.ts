@@ -3,8 +3,10 @@ import fastBlur from '../fastBlur';
 
 const FAST_BLUR_ITERATIONS = 2;
 
-export async function blurThumb(canvas: OffscreenCanvas, dataUri: string, radius: number) {
-  const imageBitmap = await dataUriToImageBitmap(dataUri);
+export async function blurThumb(canvas: OffscreenCanvas, thumbData: string, radius: number) {
+  const imageBitmap = thumbData.startsWith('data:')
+    ? await dataUriToImageBitmap(thumbData)
+    : await blobUrlToImageBitmap(thumbData);
   const { width, height } = canvas;
   const ctx = canvas.getContext('2d')!;
   const isFilterSupported = 'filter' in ctx;
@@ -32,6 +34,12 @@ function dataUriToImageBitmap(dataUri: string) {
 
   const blob = new Blob([buffer], { type: mimeString });
 
+  return createImageBitmap(blob);
+}
+
+async function blobUrlToImageBitmap(blobUrl: string) {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
   return createImageBitmap(blob);
 }
 
