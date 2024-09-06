@@ -72,7 +72,6 @@ import { selectTabState } from './tabs';
 import {
   selectBot,
   selectIsCurrentUserPremium,
-  selectIsUserOrChatContact,
   selectUser,
   selectUserStatus,
 } from './users';
@@ -1197,7 +1196,7 @@ function canAutoLoadMedia<T extends GlobalState>({
   sender?: ApiPeer;
 }) {
   const isMediaFromContact = Boolean(sender && (
-    selectIsChatWithSelf(global, sender.id) || selectIsUserOrChatContact(global, sender)
+    selectIsChatWithSelf(global, sender.id) || selectUser(global, sender.id)?.isContact
   ));
 
   return Boolean(
