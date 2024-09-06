@@ -442,7 +442,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
     }
   }, () => {
     // eslint-disable-next-line no-console
-    console.error(`[Teact] Error while rendering component ${componentInstance.name}`);
+    console.error(`[Teact] Error while rendering component ${componentInstance.name}`, componentInstance);
 
     newRenderedValue = componentInstance.renderedValue;
   });
@@ -681,8 +681,8 @@ function useEffectBase(
       }
     }
   }, () => {
-    // eslint-disable-next-line no-console
-    console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`);
+    // eslint-disable-next-line no-console, max-len
+    console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`, componentInstance);
   }, () => {
     byCursor[cursor].cleanup = undefined;
   });
@@ -713,7 +713,7 @@ function useEffectBase(
     }
   }, () => {
     // eslint-disable-next-line no-console
-    console.error(`[Teact] Error in effect at cursor #${cursor} in ${componentInstance.name}`);
+    console.error(`[Teact] Error in effect at cursor #${cursor} in ${componentInstance.name}`, componentInstance);
   });
 
   function schedule() {
