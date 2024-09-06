@@ -18,6 +18,7 @@ type OwnProps = {
   text: string;
   className?: string;
   children?: TeactNode;
+  withNormalWordBreak?: boolean;
   isRtl?: boolean;
 };
 
@@ -26,6 +27,7 @@ const SafeLink = ({
   text,
   className,
   children,
+  withNormalWordBreak,
   isRtl,
 }: OwnProps) => {
   const { openUrl } = getActions();
@@ -48,7 +50,7 @@ const SafeLink = ({
 
   const classNames = buildClassName(
     className || 'text-entity-link',
-    text.length > 50 && 'long-word-break-all',
+    !withNormalWordBreak && 'word-break-all',
   );
 
   return (

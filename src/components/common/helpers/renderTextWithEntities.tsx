@@ -555,6 +555,7 @@ function processEntity({
         <SafeLink
           url={getLinkUrl(entityText, entity)}
           text={entityText}
+          withNormalWordBreak
         >
           {renderNestedMessagePart()}
         </SafeLink>
