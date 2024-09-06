@@ -38,7 +38,6 @@ type OwnProps = {
   chosenClassName?: string;
   isDisabled?: boolean;
   withContextMenu?: boolean;
-  shouldDelayInit?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (reaction: ApiReaction) => void;
   onRemove?: (reaction: ApiReaction) => void;
@@ -55,7 +54,6 @@ const SavedTagButton = ({
   withCount,
   isDisabled,
   withContextMenu,
-  shouldDelayInit,
   observeIntersection,
   onClick,
   onRemove,
@@ -141,7 +139,6 @@ const SavedTagButton = ({
         loopLimit={LOOP_LIMIT}
         size={REACTION_SIZE}
         observeIntersection={observeIntersection}
-        shouldDelayInit={shouldDelayInit}
       />
       {hasText && (
         <span className={styles.tagText}>

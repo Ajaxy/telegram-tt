@@ -28,7 +28,6 @@ type OwnProps = {
   recentReactors?: ApiPeer[];
   className?: string;
   chosenClassName?: string;
-  shouldDelayInit?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (reaction: ApiReaction) => void;
 };
@@ -40,7 +39,6 @@ const ReactionButton = ({
   recentReactors,
   className,
   chosenClassName,
-  shouldDelayInit,
   observeIntersection,
   onClick,
 }: OwnProps) => {
@@ -66,7 +64,6 @@ const ReactionButton = ({
         reaction={reaction.reaction}
         size={REACTION_SIZE}
         observeIntersection={observeIntersection}
-        shouldDelayInit={shouldDelayInit}
       />
       {recentReactors?.length ? (
         <AvatarList size="mini" peers={recentReactors} />
