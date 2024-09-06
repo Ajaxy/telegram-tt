@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useSignal } from '../lib/teact/teact';
 import { addExtraClass, toggleExtraClass } from '../lib/teact/teact-dom';
 
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
+import useDerivedSignal from './useDerivedSignal';
 import useDerivedState from './useDerivedState';
 import useLastCallback from './useLastCallback';
 import { useStateRef } from './useStateRef';
@@ -82,8 +83,8 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     const element = ref.current;
     if (!element) return;
 
-    addExtraClass(element, 'opacity-transition');
     if (className !== false) {
+      addExtraClass(element, 'opacity-transition');
       addExtraClass(element, className);
     }
 
@@ -103,6 +104,7 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     () => (withShouldRender && getState() !== 'closed'),
     [withShouldRender, getState],
   );
+  const getIsClosing = useDerivedSignal(() => getState() === 'closing', [getState]);
 
-  return { ref, shouldRender };
+  return { ref, shouldRender, getIsClosing };
 }

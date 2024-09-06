@@ -1,10 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useSignal,
-  useState,
+  useEffect, useLayoutEffect, useRef, useSignal, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -13,7 +9,10 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../../api/types';
 
 import {
-  getMediaFormat, getMessageMediaThumbDataUri, getVideoMediaHash, hasMessageTtl,
+  getMediaFormat,
+  getMessageMediaThumbDataUri,
+  getVideoMediaHash,
+  hasMessageTtl,
 } from '../../../global/helpers';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import buildClassName from '../../../util/buildClassName';
@@ -25,10 +24,10 @@ import { useThrottledSignal } from '../../../hooks/useAsyncResolvers';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
+import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import Icon from '../../common/icons/Icon';
@@ -101,15 +100,19 @@ const RoundVideo: FC<OwnProps> = ({
   const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
   const noThumb = !hasThumb || isPlayerReady || shouldRenderSpoiler;
   const thumbRef = useBlurredMediaThumbRef(video, noThumb);
-  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
+  useMediaTransition(!noThumb, { ref: thumbRef });
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
   const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
 
   const {
-    shouldRender: shouldSpinnerRender,
-    transitionClassNames: spinnerClassNames,
-  } = useShowTransitionDeprecated(isTransferring, undefined, wasLoadDisabled);
+    ref: spinnerRef,
+    shouldRender: shouldRenderSpinner,
+  } = useShowTransition({
+    isOpen: isTransferring,
+    noMountTransition: wasLoadDisabled,
+    withShouldRender: true,
+  });
 
   const [isActivated, setIsActivated] = useState(false);
 
@@ -260,7 +263,7 @@ const RoundVideo: FC<OwnProps> = ({
       {!shouldRenderSpoiler && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
+          className="thumbnail"
           style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
         />
       )}
@@ -280,12 +283,12 @@ const RoundVideo: FC<OwnProps> = ({
           </svg>
         )}
       </div>
-      {shouldSpinnerRender && (
-        <div className={`media-loading ${spinnerClassNames}`}>
+      {shouldRenderSpinner && (
+        <div ref={spinnerRef} className="media-loading">
           <ProgressSpinner progress={isDownloading ? downloadProgress : loadProgress} />
         </div>
       )}
-      {shouldRenderSpoiler && !shouldSpinnerRender && renderPlayWrapper()}
+      {shouldRenderSpoiler && !shouldRenderSpinner && renderPlayWrapper()}
       {!mediaData && !isLoadAllowed && (
         <i className="icon icon-download" />
       )}

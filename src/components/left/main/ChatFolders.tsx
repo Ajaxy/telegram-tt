@@ -20,11 +20,12 @@ import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useDerivedState from '../../../hooks/useDerivedState';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
@@ -100,10 +101,15 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   }, []);
 
   const {
+    ref,
     shouldRender: shouldRenderStoryRibbon,
-    transitionClassNames: storyRibbonClassNames,
-    isClosing: isStoryRibbonClosing,
-  } = useShowTransitionDeprecated(isStoryRibbonShown, undefined, undefined, '');
+    getIsClosing: getIsStoryRibbonClosing,
+  } = useShowTransition({
+    isOpen: isStoryRibbonShown,
+    className: false,
+    withShouldRender: true,
+  });
+  const isStoryRibbonClosing = useDerivedState(getIsStoryRibbonClosing);
 
   const allChatsFolder: ApiChatFolder = useMemo(() => {
     return {
@@ -282,8 +288,13 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   }, [currentUserId, folderTabs, openChat, setActiveChatFolder]);
 
   const {
-    shouldRender: shouldRenderPlaceholder, transitionClassNames,
-  } = useShowTransitionDeprecated(!orderedFolderIds, undefined, true);
+    ref: placeholderRef,
+    shouldRender: shouldRenderPlaceholder,
+  } = useShowTransition({
+    isOpen: !orderedFolderIds,
+    noMountTransition: true,
+    withShouldRender: true,
+  });
 
   function renderCurrentTab(isActive: boolean) {
     const activeFolder = Object.values(chatFoldersById)
@@ -310,11 +321,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   return (
     <div
+      ref={ref}
       className={buildClassName(
         'ChatFolders',
         shouldRenderFolders && shouldHideFolderTabs && 'ChatFolders--tabs-hidden',
         shouldRenderStoryRibbon && 'with-story-ribbon',
-        storyRibbonClassNames,
       )}
     >
       {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
@@ -327,7 +338,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
           areFolders
         />
       ) : shouldRenderPlaceholder ? (
-        <div className={buildClassName('tabs-placeholder', transitionClassNames)} />
+        <div ref={placeholderRef} className="tabs-placeholder" />
       ) : undefined}
       <Transition
         ref={transitionRef}

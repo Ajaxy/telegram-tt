@@ -9,7 +9,8 @@ import type {
   ApiChatReactions,
   ApiMessage,
   ApiReaction,
-  ApiStickerSet, ApiStickerSetInfo,
+  ApiStickerSet,
+  ApiStickerSetInfo,
   ApiThreadInfo,
 } from '../../../api/types';
 import type { ActiveDownloads, MessageListType } from '../../../global/types';
@@ -46,7 +47,8 @@ import {
   selectIsMessageProtected,
   selectIsMessageUnread,
   selectIsPremiumPurchaseBlocked,
-  selectIsReactionPickerOpen, selectMessageCustomEmojiSets,
+  selectIsReactionPickerOpen,
+  selectMessageCustomEmojiSets,
   selectMessageTranslations,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
@@ -54,7 +56,6 @@ import {
   selectThreadInfo,
   selectUserStatus,
 } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedText';
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
@@ -63,7 +64,7 @@ import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useSchedule from '../../../hooks/useSchedule';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import PinMessageModal from '../../common/PinMessageModal.async';
 import ReportModal from '../../common/ReportModal';
@@ -230,7 +231,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useOldLang();
-  const { transitionClassNames } = useShowTransitionDeprecated(isOpen, onCloseAnimationEnd, undefined, false);
+  const { ref: containerRef } = useShowTransition({
+    isOpen,
+    onCloseAnimationEnd,
+    className: false,
+  });
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
@@ -565,7 +570,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
   return (
-    <div className={buildClassName('ContextMenuContainer', transitionClassNames)}>
+    <div ref={containerRef} className="ContextMenuContainer">
       <MessageContextMenu
         isReactionPickerOpen={isReactionPickerOpen}
         availableReactions={availableReactions}

@@ -132,7 +132,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useResizeObserver from '../../../hooks/useResizeObserver';
-import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
+import useShowTransition from '../../../hooks/useShowTransition';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useThrottledCallback from '../../../hooks/useThrottledCallback';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
@@ -473,12 +473,12 @@ const Message: FC<OwnProps & StateProps> = ({
     setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
 
-  const { transitionClassNames } = useShowTransitionDeprecated(
-    isShown || isJustAdded,
-    undefined,
-    noAppearanceAnimation && !isJustAdded,
-    false,
-  );
+  useShowTransition({
+    ref,
+    isOpen: isShown || isJustAdded,
+    noMountTransition: noAppearanceAnimation && !isJustAdded,
+    className: false,
+  });
 
   const {
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
@@ -688,7 +688,6 @@ const Message: FC<OwnProps & StateProps> = ({
     isThreadTop && !withAvatar && 'is-thread-top',
     Boolean(message.inlineButtons) && 'has-inline-buttons',
     isSwiped && 'is-swiped',
-    transitionClassNames,
     isJustAdded && 'is-just-added',
     (hasActiveReactions || shouldPlayEffect) && 'has-active-effect',
     isStoryMention && 'is-story-mention',

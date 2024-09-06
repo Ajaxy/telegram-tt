@@ -5,12 +5,11 @@ import type { GlobalState } from '../../global/types';
 
 import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
 import { selectIsForumPanelOpen, selectPerformanceSettingsValue, selectTabState } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
 import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ribbonAnimation';
 
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
+import useShowTransition from '../../hooks/useShowTransition';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
 import Avatar from '../common/Avatar';
@@ -89,7 +88,11 @@ function StoryToggler({
 
   const isVisible = canShow && isShown;
   // For some reason, setting 'slow' here also fixes scroll freezes on iOS when collapsing Story Ribbon
-  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isVisible, undefined, undefined, 'slow');
+  const { ref, shouldRender } = useShowTransition<HTMLButtonElement>({
+    isOpen: isVisible,
+    className: 'slow',
+    withShouldRender: true,
+  });
 
   useEffect(() => {
     if (!withAnimation || isForumPanelOpen) return;
@@ -108,9 +111,10 @@ function StoryToggler({
 
   return (
     <button
+      ref={ref}
       type="button"
       id="StoryToggler"
-      className={buildClassName(styles.root, transitionClassNames)}
+      className={styles.root}
       aria-label={lang('Chat.Context.Peer.OpenStory')}
       onClick={() => toggleStoryRibbon({ isShown: true, isArchived })}
       dir={lang.isRtl ? 'rtl' : undefined}
