@@ -1,4 +1,5 @@
 import generateUniqueId from './generateUniqueId';
+import { throttleWithTickEnd } from './schedulers';
 
 export interface CancellableCallback {
   (
@@ -8,16 +9,13 @@ export interface CancellableCallback {
   isCanceled?: boolean;
 }
 
-type InitData = {
-  channel?: string;
+type InitPayload = {
   type: 'init';
   messageId?: string;
-  name: 'init';
   args: any;
 };
 
-type CallMethodData = {
-  channel?: string;
+type CallMethodPayload = {
   type: 'callMethod';
   messageId?: string;
   name: string;
@@ -25,10 +23,19 @@ type CallMethodData = {
   withCallback?: boolean;
 };
 
-export type OriginMessageData = InitData | CallMethodData | {
-  channel?: string;
+type CancelProgressPayload = {
   type: 'cancelProgress';
   messageId: string;
+};
+
+export type OriginPayload =
+  InitPayload
+  | CallMethodPayload
+  | CancelProgressPayload;
+
+export type OriginMessageData = {
+  channel?: string;
+  payloads: OriginPayload[];
 };
 
 export interface OriginMessageEvent {
@@ -39,32 +46,44 @@ export type ApiUpdate =
   { type: string }
   & any;
 
+export type WorkerPayload =
+  {
+    channel?: string;
+    type: 'update';
+    update: ApiUpdate;
+  }
+  |
+  {
+    channel?: string;
+    type: 'methodResponse';
+    messageId: string;
+    response?: any;
+    error?: { message: string };
+  }
+  |
+  {
+    channel?: string;
+    type: 'methodCallback';
+    messageId: string;
+    callbackArgs: any[];
+  }
+  |
+  {
+    channel?: string;
+    type: 'unhandledError';
+    error?: { message: string };
+  };
+
 export type WorkerMessageData = {
   channel?: string;
-  type: 'update';
-  update: ApiUpdate;
-} | {
-  channel?: string;
-  type: 'methodResponse';
-  messageId: string;
-  response?: any;
-  error?: { message: string };
-} | {
-  channel?: string;
-  type: 'methodCallback';
-  messageId: string;
-  callbackArgs: any[];
-} | {
-  channel?: string;
-  type: 'unhandledError';
-  error?: { message: string };
+  payloads: WorkerPayload[];
 };
 
 export interface WorkerMessageEvent {
   data: WorkerMessageData;
 }
 
-interface RequestStates {
+interface RequestState {
   messageId: string;
   resolve: Function;
   reject: Function;
@@ -82,9 +101,11 @@ export type RequestTypes<T extends InputRequestTypes> = Values<{
 }>;
 
 class ConnectorClass<T extends InputRequestTypes> {
-  private requestStates = new Map<string, RequestStates>();
+  private requestStates = new Map<string, RequestState>();
 
-  private requestStatesByCallback = new Map<AnyToVoidFunction, RequestStates>();
+  private requestStatesByCallback = new Map<AnyToVoidFunction, RequestState>();
+
+  private pendingPayloads: OriginPayload[] = [];
 
   constructor(
     public target: Worker,
@@ -98,7 +119,7 @@ class ConnectorClass<T extends InputRequestTypes> {
   }
 
   init(...args: any[]) {
-    this.postMessage({
+    this.postMessageOnTickEnd({
       type: 'init',
       args,
     });
@@ -108,13 +129,13 @@ class ConnectorClass<T extends InputRequestTypes> {
     const { requestStates, requestStatesByCallback } = this;
 
     const messageId = generateUniqueId();
-    const payload: CallMethodData = {
+    const payload: CallMethodPayload = {
       type: 'callMethod',
       messageId,
       ...messageData,
     };
 
-    const requestState = { messageId } as RequestStates;
+    const requestState = { messageId } as RequestState;
 
     // Re-wrap type because of `postMessage`
     const promise: Promise<any> = new Promise((resolve, reject) => {
@@ -140,7 +161,7 @@ class ConnectorClass<T extends InputRequestTypes> {
         }
       });
 
-    this.postMessage(payload);
+    this.postMessageOnTickEnd(payload);
 
     return promise;
   }
@@ -153,7 +174,7 @@ class ConnectorClass<T extends InputRequestTypes> {
       return;
     }
 
-    this.postMessage({
+    this.postMessageOnTickEnd({
       type: 'cancelProgress',
       messageId,
     });
@@ -165,31 +186,43 @@ class ConnectorClass<T extends InputRequestTypes> {
       return;
     }
 
-    if (data.type === 'update' && this.onUpdate) {
-      this.onUpdate(data.update);
-    }
-    if (data.type === 'methodResponse') {
-      const requestState = requestStates.get(data.messageId);
-      if (requestState) {
-        if (data.error) {
-          requestState.reject(data.error);
-        } else {
-          requestState.resolve(data.response);
-        }
+    data.payloads.forEach((payload) => {
+      if (payload.type === 'update' && this.onUpdate) {
+        this.onUpdate(payload.update);
       }
-    } else if (data.type === 'methodCallback') {
-      const requestState = requestStates.get(data.messageId);
-      requestState?.callback?.(...data.callbackArgs);
-    } else if (data.type === 'unhandledError') {
-      throw new Error(data.error?.message);
-    }
+      if (payload.type === 'methodResponse') {
+        const requestState = requestStates.get(payload.messageId);
+        if (requestState) {
+          if (payload.error) {
+            requestState.reject(payload.error);
+          } else {
+            requestState.resolve(payload.response);
+          }
+        }
+      } else if (payload.type === 'methodCallback') {
+        const requestState = requestStates.get(payload.messageId);
+        requestState?.callback?.(...payload.callbackArgs);
+      } else if (payload.type === 'unhandledError') {
+        throw new Error(payload.error?.message);
+      }
+    });
   }
 
-  private postMessage(data: AnyLiteral) {
-    data.channel = this.channel;
-
-    this.target.postMessage(data);
+  private postMessageOnTickEnd(payload: OriginPayload) {
+    this.pendingPayloads.push(payload);
+    this.postMessagesOnTickEnd();
   }
+
+  private postMessagesOnTickEnd = throttleWithTickEnd(() => {
+    const payloads = this.pendingPayloads;
+
+    this.pendingPayloads = [];
+
+    this.target.postMessage({
+      channel: this.channel,
+      payloads,
+    });
+  });
 }
 
 export function createConnector<T extends InputRequestTypes>(
