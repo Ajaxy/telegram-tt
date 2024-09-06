@@ -10,6 +10,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import {
   IS_MOCKED_CLIENT, IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
 } from '../../config';
+import { areDeepEqual } from '../../util/areDeepEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
@@ -200,10 +201,18 @@ export function addChatMessagesById<T extends GlobalState>(
 }
 
 export function updateChatMessage<T extends GlobalState>(
-  global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>,
+  global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>, withDeepCheck = false,
 ): T {
   const byId = selectChatMessages(global, chatId) || {};
   const message = byId[messageId];
+
+  if (withDeepCheck && message) {
+    const updateKeys = Object.keys(messageUpdate) as (keyof ApiMessage)[];
+    if (areDeepEqual(pick(message, updateKeys), messageUpdate)) {
+      return global;
+    }
+  }
+
   if (message && messageUpdate.isMediaUnread === false && hasMessageTtl(message)) {
     if (message.content.voice) {
       messageUpdate.content = {
