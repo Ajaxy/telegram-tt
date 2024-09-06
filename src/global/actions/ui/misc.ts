@@ -31,6 +31,7 @@ import {
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectIsTrustedBot,
+  selectSender,
   selectTabState,
 } from '../../selectors';
 
@@ -433,7 +434,7 @@ addActionHandler('openGame', (global, actions, payload): ActionReturnType => {
   const message = selectChatMessage(global, chatId, messageId);
   if (!message) return;
 
-  const botId = message.viaBotId || message.senderId;
+  const botId = message.viaBotId || selectSender(global, message)?.id;
   if (!botId) return;
 
   if (!selectIsTrustedBot(global, botId)) {

@@ -432,28 +432,18 @@ export function getSendersFromSelectedMessages<T extends GlobalState>(
 
   return selectedMessageIds.map((id) => {
     const message = selectChatMessage(global, chat.id, id);
-    if (!message?.senderId) {
-      return undefined;
-    }
-    return selectSender(global, message);
+    return message && selectSender(global, message);
   });
 }
 
 export function selectSenderFromMessage<T extends GlobalState>(
   global: T,
-  chat: ApiChat | undefined,
-  selectedMessageId: number | undefined,
+  chatId: string,
+  messageId: number,
 ): ApiPeer | undefined {
-  if (!chat?.id || !selectedMessageId) {
-    return undefined;
-  }
+  const message = selectChatMessage(global, chatId, messageId);
 
-  const message = selectChatMessage(global, chat.id, selectedMessageId);
-  if (!message?.senderId) {
-    return undefined;
-  }
-
-  return selectPeer(global, message.senderId);
+  return message && selectSender(global, message);
 }
 
 export function selectSenderFromHeader<T extends GlobalState>(

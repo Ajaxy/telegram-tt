@@ -25,10 +25,11 @@ import {
   selectAllowedMessageActionsSlow,
   selectBot,
   selectChat, selectChatFullInfo, selectCurrentMessageIds,
-  selectCurrentMessageList, selectSenderFromMessage, selectTabState,
+  selectCurrentMessageList, selectSender, selectSenderFromMessage, selectTabState,
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import renderText from './helpers/renderText';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -182,8 +183,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   });
 
   const filterMessageIdByUserId = useLastCallback((userIds: string[], selectedMessageIdList: number[]) => {
+    if (!chat) return MEMO_EMPTY_ARRAY;
     return selectedMessageIdList.filter((msgId) => {
-      const senderPeer = selectSenderFromMessage(getGlobal(), chat, msgId);
+      const senderPeer = selectSenderFromMessage(getGlobal(), chat.id, msgId);
       return senderPeer && userIds.includes(senderPeer.id);
     });
   });
@@ -220,6 +222,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleDeleteMessageForSelf = useLastCallback(() => {
+    if (!chat) return;
+
     onConfirm?.();
     const messageIds = album?.messages
       ? album.messages.map(({ id }) => id)
@@ -241,7 +245,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
       if (chosenBanOption && !havePermissionChanged && message) {
         const filteredUserIdList = chosenBanOption.filter((userId) => messageIds?.some((msgId) => {
-          const senderPeer = selectSenderFromMessage(getGlobal(), chat, msgId);
+          const senderPeer = selectSenderFromMessage(getGlobal(), chat.id, msgId);
           return senderPeer && senderPeer.id === userId;
         }));
         handleDeleteMember(filteredUserIdList);
@@ -253,7 +257,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
       if (chosenBanOption && havePermissionChanged) {
         const filteredUserIdList = chosenBanOption.filter((userId) => messageIds?.some((msgId) => {
-          const senderPeer = selectSenderFromMessage(getGlobal(), chat, msgId);
+          const senderPeer = selectSenderFromMessage(getGlobal(), chat.id, msgId);
           return senderPeer && senderPeer.id === userId;
         }));
         handleUpdateChatMemberBannedRights(filteredUserIdList);
@@ -439,8 +443,7 @@ export default memo(withGlobal<OwnProps>(
     const messageIdList = chat && selectCurrentMessageIds(global, chat.id, threadId!, type!);
     const isGroup = Boolean(chat) && isChatBasicGroup(chat);
     const isSuperGroup = Boolean(chat) && isChatSuperGroup(chat);
-    const sender = deleteMessageModal && chat && deleteMessageModal.message
-      && selectSenderFromMessage(global, chat, deleteMessageModal.message.id);
+    const sender = deleteMessageModal?.message && selectSender(global, deleteMessageModal.message);
     const contactName = chat && isUserId(chat.id)
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;

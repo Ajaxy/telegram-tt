@@ -595,6 +595,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     <Modal
       className={styles.root}
       isOpen={isOpen}
+      isLowStackPriority
       onClose={handleClose}
       header={renderHeader()}
       style={`background-color: ${backgroundColor}`}

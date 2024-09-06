@@ -2,6 +2,7 @@ import type { FC, TeactNode } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
 import type { ApiKeyboardButton, ApiMessage } from '../../../api/types';
+import type { ActionPayloads } from '../../../global/types';
 
 import { RE_TME_LINK } from '../../../config';
 import renderKeyboardButtonText from '../composer/helpers/renderKeyboardButtonText';
@@ -15,7 +16,7 @@ import './InlineButtons.scss';
 
 type OwnProps = {
   message: ApiMessage;
-  onClick: ({ messageId, button }: { messageId: number; button: ApiKeyboardButton }) => void;
+  onClick: (payload: ActionPayloads['clickBotInlineButton']) => void;
 };
 
 const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
@@ -62,7 +63,7 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
               ripple
               disabled={button.type === 'unsupported'}
               // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => onClick({ messageId: message.id, button })}
+              onClick={() => onClick({ chatId: message.chatId, messageId: message.id, button })}
             >
               <span className="inline-button-text">
                 {buttonTexts[i][j]}

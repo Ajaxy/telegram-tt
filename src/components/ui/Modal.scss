@@ -7,6 +7,10 @@
     z-index: var(--z-modal-confirm);
   }
 
+  &.low-priority {
+    z-index: var(--z-modal-low-priority);
+  }
+
   &.delete,
   &.error,
   &.confirm,

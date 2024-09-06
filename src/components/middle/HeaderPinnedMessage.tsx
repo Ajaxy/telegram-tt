@@ -77,7 +77,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
 
   const handleInlineButtonClick = useLastCallback(() => {
     if (inlineButton) {
-      clickBotInlineButton({ messageId: message.id, button: inlineButton });
+      clickBotInlineButton({ chatId: message.chatId, messageId: message.id, button: inlineButton });
     }
   });
 

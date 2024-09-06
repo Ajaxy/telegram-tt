@@ -37,6 +37,7 @@ import {
   selectMessageReplyInfo,
   selectPeer,
   selectSendAs,
+  selectSender,
   selectTabState,
   selectUser,
   selectUserFullInfo,
@@ -49,7 +50,14 @@ const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
 let botFatherId: string | null;
 
 addActionHandler('clickBotInlineButton', (global, actions, payload): ActionReturnType => {
-  const { messageId, button, tabId = getCurrentTabId() } = payload;
+  const {
+    chatId, messageId, button, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!chat || !message) {
+    return;
+  }
 
   switch (button.type) {
     case 'command':
@@ -61,11 +69,6 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       break;
     }
     case 'callback': {
-      const chat = selectCurrentChat(global, tabId);
-      if (!chat) {
-        return;
-      }
-
       void answerCallbackButton(global, actions, chat, messageId, button.data, undefined, tabId);
       break;
     }
@@ -89,10 +92,6 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       break;
     }
     case 'receipt': {
-      const chat = selectCurrentChat(global, tabId);
-      if (!chat) {
-        return;
-      }
       const { receiptMessageId } = button;
       actions.getReceipt({
         chatId: chat.id, messageId: receiptMessageId, tabId,
@@ -100,10 +99,6 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       break;
     }
     case 'buy': {
-      const chat = selectCurrentChat(global, tabId);
-      if (!chat) {
-        return;
-      }
       actions.openInvoice({
         type: 'message',
         chatId: chat.id,
@@ -113,11 +108,6 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       break;
     }
     case 'game': {
-      const chat = selectCurrentChat(global, tabId);
-      if (!chat) {
-        return;
-      }
-
       void answerCallbackButton(global, actions, chat, messageId, undefined, true, tabId);
       break;
     }
@@ -137,30 +127,22 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
 
     case 'simpleWebView': {
       const { url } = button;
-      const { chatId } = selectCurrentMessageList(global, tabId) || {};
-      if (!chatId) {
+      const sender = selectSender(global, message);
+      if (!sender) {
         return;
       }
-      const message = selectChatMessage(global, chatId, messageId);
-      if (!message?.senderId) return;
+
       const theme = extractCurrentThemeParams();
       actions.requestSimpleWebView({
-        url, botId: message?.senderId, theme, buttonText: button.text, tabId,
+        url, botId: sender.id, theme, buttonText: button.text, tabId,
       });
       break;
     }
 
     case 'webView': {
       const { url } = button;
-      const chat = selectCurrentChat(global, tabId);
-      if (!chat) {
-        return;
-      }
-      const message = selectChatMessage(global, chat.id, messageId);
-      if (!message) {
-        return;
-      }
-      const botId = message.viaBotId || message.senderId;
+      const sender = selectSender(global, message);
+      const botId = message.viaBotId || sender?.id;
       if (!botId) {
         return;
       }
@@ -177,10 +159,6 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
     }
     case 'urlAuth': {
       const { url } = button;
-      const chat = selectCurrentChat(global, tabId);
-      if (!chat) {
-        return;
-      }
       actions.requestBotUrlAuth({
         chatId: chat.id,
         messageId,
@@ -355,7 +333,8 @@ addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType
     if (!message) {
       return undefined;
     }
-    botId = message.viaBotId || message.senderId;
+    const sender = selectSender(global, message);
+    botId = message.viaBotId || sender?.id;
   }
 
   if (!botId) {

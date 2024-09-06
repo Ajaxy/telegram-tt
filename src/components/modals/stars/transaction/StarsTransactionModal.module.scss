@@ -1,5 +1,5 @@
 .modal {
-  z-index: calc(var(--z-media-viewer) - 1);
+  z-index: calc(var(--z-modal-low-priority) + 1);
 }
 
 .modal :global(.modal-dialog) {

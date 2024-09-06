@@ -32,6 +32,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { buildCollectionByCallback } from '../../util/iteratees';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
@@ -219,8 +220,9 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
   });
 
   const filterMessageIdByUserId = useLastCallback((userIds: string[], selectedMessageIdList: number[]) => {
+    if (!chat) return MEMO_EMPTY_ARRAY;
     return selectedMessageIdList.filter((msgId) => {
-      const sender = selectSenderFromMessage(getGlobal(), chat, msgId);
+      const sender = selectSenderFromMessage(getGlobal(), chat.id, msgId);
       return sender && userIds.includes(sender.id);
     });
   });
@@ -248,13 +250,15 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleDeleteMessageForSelf = useLastCallback(() => {
+    if (!chat) return;
+
     if (isSchedule) {
       deleteScheduledMessages({ messageIds: selectedMessageIds! });
     } else if (!isSenderOwner && shouldShowOptions) {
       if (chosenSpanOption) {
         const userIdList = chosenSpanOption.filter((option) => !Number.isNaN(Number(option)));
         const filteredMessageIdList = filterMessageIdByUserId(userIdList, selectedMessageIds!);
-        if (filteredMessageIdList && filteredMessageIdList.length) {
+        if (filteredMessageIdList?.length) {
           reportMessages({ messageIds: filteredMessageIdList, reason: 'spam', description: '' });
         }
       }
@@ -268,7 +272,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
       if (chosenBanOption && !havePermissionChanged) {
         const userIdList = chosenBanOption.filter((option) => !Number.isNaN(Number(option)));
         const filteredUserIdList = userIdList.filter((userId) => selectedMessageIds?.some((msgId) => {
-          const sender = selectSenderFromMessage(getGlobal(), chat, msgId);
+          const sender = selectSenderFromMessage(getGlobal(), chat.id, msgId);
           return sender && sender.id === userId;
         }));
         handleDeleteMember(filteredUserIdList);
@@ -279,7 +283,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
       if (chosenBanOption && havePermissionChanged) {
         const userIdList = chosenBanOption.filter((option) => !Number.isNaN(Number(option)));
         const filteredUserIdList = userIdList.filter((userId) => selectedMessageIds?.some((msgId) => {
-          const sender = selectSenderFromMessage(getGlobal(), chat, msgId);
+          const sender = selectSenderFromMessage(getGlobal(), chat.id, msgId);
           return sender && sender.id === userId;
         }));
         handleUpdateChatMemberBannedRights(filteredUserIdList);

@@ -200,7 +200,7 @@ export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransa
     stars: stars!,
     peer: {
       type: 'peer',
-      id: message.isOutgoing ? message.chatId : message.senderId!,
+      id: message.isOutgoing ? message.chatId : (message.senderId || message.chatId),
     },
     date: message.date,
     isGift: true,

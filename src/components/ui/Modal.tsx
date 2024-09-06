@@ -39,6 +39,7 @@ export type OwnProps = {
   children: React.ReactNode;
   style?: string;
   dialogRef?: React.RefObject<HTMLDivElement>;
+  isLowStackPriority?: boolean;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
@@ -59,6 +60,7 @@ const Modal: FC<OwnProps> = ({
   noBackdropClose,
   children,
   style,
+  isLowStackPriority,
   onClose,
   onCloseAnimationEnd,
   onEnter,
@@ -153,6 +155,7 @@ const Modal: FC<OwnProps> = ({
     className,
     noBackdrop && 'transparent-backdrop',
     isSlim && 'slim',
+    isLowStackPriority && 'low-priority',
   );
 
   return (

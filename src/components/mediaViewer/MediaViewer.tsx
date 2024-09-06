@@ -119,7 +119,7 @@ const MediaViewer = ({
 
   /* Animation */
   const animationKey = useRef<number>();
-  const senderId = message?.senderId || avatarOwner?.id;
+  const senderId = message?.senderId || avatarOwner?.id || message?.chatId;
   const prevSenderId = usePreviousDeprecated<string | undefined>(senderId);
   const headerAnimation = withAnimation ? 'slideFade' : 'none';
   const isGhostAnimation = Boolean(withAnimation && !shouldSkipHistoryAnimations);

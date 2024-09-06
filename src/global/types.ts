@@ -2847,6 +2847,7 @@ export interface ActionPayloads {
   };
 
   clickBotInlineButton: {
+    chatId: string;
     messageId: number;
     button: ApiKeyboardButton;
   } & WithTabId;

@@ -70,7 +70,7 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
                 ripple
                 disabled={button.type === 'unsupported'}
                 // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => clickBotInlineButton({ messageId: message.id, button })}
+                onClick={() => clickBotInlineButton({ chatId: message.chatId, messageId: message.id, button })}
               >
                 {buttonTexts?.[i][j]}
               </Button>
