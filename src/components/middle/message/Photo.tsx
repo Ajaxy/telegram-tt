@@ -218,13 +218,15 @@ const Photo = <T,>({
       {withBlurredBackground && (
         <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
       )}
-      <img
-        src={fullMediaData}
-        className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
-        alt=""
-        style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
-        draggable={!isProtected}
-      />
+      {fullMediaData && (
+        <img
+          src={fullMediaData}
+          className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
+          alt=""
+          style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
+          draggable={!isProtected}
+        />
+      )}
       {withThumb && (
         <canvas
           ref={thumbRef}
