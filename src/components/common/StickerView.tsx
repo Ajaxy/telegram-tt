@@ -83,7 +83,7 @@ const StickerView: FC<OwnProps> = ({
     id, isLottie, stickerSetInfo, emoji,
   } = sticker;
   const [isVideoBroken, markVideoBroken] = useFlag();
-  const isUnsupportedVideo = sticker.isVideo && (!IS_WEBM_SUPPORTED || isVideoBroken);
+  const isUnsupportedVideo = sticker.isVideo && !IS_WEBM_SUPPORTED;
   const isVideo = sticker.isVideo && !isUnsupportedVideo;
   const isStatic = !isLottie && !isVideo;
   const previewMediaHash = getStickerMediaHash(sticker, 'preview');
@@ -109,22 +109,23 @@ const StickerView: FC<OwnProps> = ({
   const shouldForcePreview = isUnsupportedVideo || (isStatic ? isSmall : noPlay);
   const shouldLoadPreview = !customColor && !cachedPreview && (!isReadyToMountFullMedia || shouldForcePreview);
   const previewMediaData = useMedia(previewMediaHash, !shouldLoadPreview);
+  const withPreview = shouldLoadPreview || cachedPreview;
+
   const shouldSkipFullMedia = Boolean(shouldForcePreview || (
     fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData)
   ));
   const fullMediaData = useMedia(fullMediaHash || `sticker${id}`, !shouldLoad || shouldSkipFullMedia);
-  // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
-  const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !previewMediaData));
-
-  const shouldRenderFullMedia = isReadyToMountFullMedia && fullMediaData;
-  const isFullMediaReady = isReadyToMountFullMedia && fullMediaData && (isStatic || isPlayerReady);
+  const shouldRenderFullMedia = isReadyToMountFullMedia && fullMediaData && !isVideoBroken;
+  const [isPlayerReady, markPlayerReady] = useFlag();
+  const isFullMediaReady = shouldRenderFullMedia && (isStatic || isPlayerReady);
 
   const thumbDataUri = useThumbnail(sticker);
   const thumbData = cachedPreview || previewMediaData || thumbDataUri;
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
+
   const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
-  const noTransition = isLottie && previewMediaData;
+  const noTransition = isLottie && withPreview;
 
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
