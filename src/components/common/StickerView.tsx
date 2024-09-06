@@ -104,19 +104,14 @@ const StickerView: FC<OwnProps> = ({
     hasIntersectedForPlayingRef.current = true;
   }
 
-  const isReadyToMountFullMedia = useMountAfterHeavyAnimation(hasIntersectedForPlayingRef.current);
-
   const cachedPreview = mediaLoader.getFromMemory(previewMediaHash);
-  const shouldLoadPreview = !customColor && !cachedPreview && (
-    !isReadyToMountFullMedia || isUnsupportedVideo || (isStatic ? isSmall : noPlay)
-  );
+  const isReadyToMountFullMedia = useMountAfterHeavyAnimation(hasIntersectedForPlayingRef.current);
+  const shouldForcePreview = isUnsupportedVideo || (isStatic ? isSmall : noPlay);
+  const shouldLoadPreview = !customColor && !cachedPreview && (!isReadyToMountFullMedia || shouldForcePreview);
   const previewMediaData = useMedia(previewMediaHash, !shouldLoadPreview);
-
-  const thumbDataUri = useThumbnail(sticker);
-  const thumbData = cachedPreview || previewMediaData || thumbDataUri;
-
-  // No need to use full media if preview is enough and available
-  const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData));
+  const shouldSkipFullMedia = Boolean(shouldForcePreview || (
+    fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData)
+  ));
   const fullMediaData = useMedia(fullMediaHash || `sticker${id}`, !shouldLoad || shouldSkipFullMedia);
   // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !previewMediaData));
@@ -124,6 +119,8 @@ const StickerView: FC<OwnProps> = ({
   const shouldRenderFullMedia = isReadyToMountFullMedia && fullMediaData;
   const isFullMediaReady = isReadyToMountFullMedia && fullMediaData && (isStatic || isPlayerReady);
 
+  const thumbDataUri = useThumbnail(sticker);
+  const thumbData = cachedPreview || previewMediaData || thumbDataUri;
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
   const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
