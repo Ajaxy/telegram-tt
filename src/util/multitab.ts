@@ -24,6 +24,8 @@ import { getCurrentTabId, signalPasscodeHash, subscribeToTokenDied } from './est
 import { omit } from './iteratees';
 import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 
+import { onFullyIdle } from '../hooks/useHeavyAnimationCheck';
+
 type BroadcastChannelRefreshLangpack = {
   type: 'langpackRefresh';
   langCode: string;
@@ -118,6 +120,27 @@ const channel = IS_MULTITAB_SUPPORTED
   ? new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel
   : undefined;
 
+let globalToDiffWith: GlobalState | undefined;
+
+function broadcastDiffOnIdle(_globalToDiffWith: GlobalState) {
+  globalToDiffWith = _globalToDiffWith;
+
+  onFullyIdle(() => {
+    if (!channel || !globalToDiffWith) return;
+
+    const diff = deepDiff(globalToDiffWith, prevGlobal);
+
+    globalToDiffWith = undefined;
+
+    if (typeof diff !== 'symbol') {
+      channel.postMessage({
+        type: 'globalDiffUpdate',
+        diff,
+      });
+    }
+  });
+}
+
 export function unsubcribeFromMultitabBroadcastChannel() {
   if (channel) {
     channel.removeEventListener('message', handleMessage);
@@ -175,14 +198,7 @@ export function subscribeToMultitabBroadcastChannel() {
       return;
     }
 
-    const diff = deepDiff(prevGlobal, global);
-
-    if (typeof diff !== 'symbol') {
-      channel.postMessage({
-        type: 'globalDiffUpdate',
-        diff,
-      });
-    }
+    broadcastDiffOnIdle(prevGlobal);
 
     prevGlobal = global;
   });
