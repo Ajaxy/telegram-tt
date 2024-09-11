@@ -249,6 +249,11 @@
     > .PickerSelectedItem {
       flex-shrink: 0;
     }
+
+    &::after {
+      content: "";
+      flex-grow: 1;
+    }
   }
 
   .NothingFound {

@@ -323,7 +323,7 @@ const BoostStatistics = ({
                 >
                   {renderContent()}
                 </Transition>
-                <TabList big activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
+                <TabList activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
               </div>
             ) : (
               <div className={styles.section}>

@@ -38,6 +38,7 @@ type OwnProps = {
   isLoading?: boolean;
   withCheckedCallback?: boolean;
   onlyInput?: boolean;
+  isRound?: boolean;
   className?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>, nestedOptionList?: IRadioOption) => void;
   onCheck?: (isChecked: boolean) => void;
@@ -66,14 +67,15 @@ const Checkbox: FC<OwnProps> = ({
   className,
   rightIcon,
   onlyInput,
-  onChange,
-  onCheck,
-  onClickLabel,
+  isRound,
   nestedCheckbox,
   nestedCheckboxCount,
   nestedOptionList,
   leftElement,
   values = [],
+  onChange,
+  onCheck,
+  onClickLabel,
 }) => {
   const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
@@ -119,6 +121,7 @@ const Checkbox: FC<OwnProps> = ({
     permissionGroup && 'permission-group',
     Boolean(leftElement) && 'avatar',
     onlyInput && 'onlyInput',
+    isRound && 'round',
     className,
   );
 

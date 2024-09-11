@@ -29,7 +29,6 @@ type OwnProps = {
   tabs: readonly TabWithProperties[];
   areFolders?: boolean;
   activeTab: number;
-  big?: boolean;
   className?: string;
   onSwitchTab: (index: number) => void;
   contextRootElementSelector?: string;
@@ -40,7 +39,7 @@ const TAB_SCROLL_THRESHOLD_PX = 16;
 const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
 const TabList: FC<OwnProps> = ({
-  tabs, areFolders, activeTab, big, onSwitchTab,
+  tabs, areFolders, activeTab, onSwitchTab,
   contextRootElementSelector, className,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -77,7 +76,7 @@ const TabList: FC<OwnProps> = ({
 
   return (
     <div
-      className={buildClassName('TabList', 'no-scrollbar', big && 'big', className)}
+      className={buildClassName('TabList', 'no-scrollbar', className)}
       ref={containerRef}
       dir={lang.isRtl ? 'rtl' : undefined}
     >

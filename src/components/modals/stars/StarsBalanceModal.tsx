@@ -189,7 +189,6 @@ const StarsBalanceModal = ({
               </Transition>
             </div>
             <TabList
-              big
               activeTab={selectedTabIndex}
               tabs={TRANSACTION_TABS}
               onSwitchTab={setSelectedTabIndex}

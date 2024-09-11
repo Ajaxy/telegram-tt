@@ -12,6 +12,14 @@
     opacity: 0.5;
   }
 
+  &.round {
+    .Checkbox-main {
+      &::before, &::after {
+        border-radius: 50%;
+      }
+    }
+  }
+
   &.withIcon {
     padding-inline-start: 1rem;
     .Checkbox-main {

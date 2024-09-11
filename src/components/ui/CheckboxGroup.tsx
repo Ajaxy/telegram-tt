@@ -24,6 +24,7 @@ type OwnProps = {
   disabled?: boolean;
   nestedCheckbox?: boolean;
   loadingOptions?: string[];
+  isRound?: boolean;
   onChange: (value: string[]) => void;
 };
 
@@ -34,6 +35,7 @@ const CheckboxGroup: FC<OwnProps> = ({
   disabled,
   nestedCheckbox,
   loadingOptions,
+  isRound,
   onChange,
 }) => {
   const [values, setValues] = useState<string[]>(selected || []);
@@ -93,6 +95,7 @@ const CheckboxGroup: FC<OwnProps> = ({
             nestedCheckboxCount={getCheckedNestedCount(option.nestedOptions ?? [])}
             nestedOptionList={option}
             values={values}
+            isRound={isRound}
           />
         );
       })}
