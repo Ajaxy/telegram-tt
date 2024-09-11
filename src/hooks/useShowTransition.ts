@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import type { RefObject } from '../lib/teact/teact';
 import { useLayoutEffect, useRef, useSignal } from '../lib/teact/teact';
 import { addExtraClass, toggleExtraClass } from '../lib/teact/teact-dom';
 
@@ -9,13 +9,14 @@ import useDerivedSignal from './useDerivedSignal';
 import useDerivedState from './useDerivedState';
 import useLastCallback from './useLastCallback';
 import { useStateRef } from './useStateRef';
+import useSyncEffect from './useSyncEffect';
 import useSyncEffectWithPrevDeps from './useSyncEffectWithPrevDeps';
 
 const CLOSE_DURATION = 350;
 
 type BaseHookParams<RefType extends HTMLElement> = {
   isOpen: boolean | undefined;
-  ref?: RefObject<RefType>;
+  ref?: RefObject<RefType | null>;
   noMountTransition?: boolean;
   noOpenTransition?: boolean;
   noCloseTransition?: boolean;
@@ -34,7 +35,7 @@ type HookParamsWithShouldRender<RefType extends HTMLElement> = BaseHookParams<Re
 };
 
 type HookResult<RefType extends HTMLElement> = {
-  ref: RefObject<RefType>;
+  ref: RefObject<RefType | null>;
   getIsClosing: Signal<boolean>;
 };
 
@@ -67,13 +68,10 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     prefix = '',
     onCloseAnimationEnd,
   } = params;
-  let ref = params.ref;
-
-  const withShouldRender = 'withShouldRender' in params && params.withShouldRender;
 
   // eslint-disable-next-line no-null/no-null
   const localRef = useRef<RefType>(null);
-  ref ||= localRef;
+  const ref = params.ref || localRef;
   const closingTimeoutRef = useRef<number>();
   const [getState, setState] = useSignal<State | undefined>();
   const optionsRef = useStateRef({
@@ -110,7 +108,7 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     }
   }, [isOpen]);
 
-  useLayoutEffect(() => {
+  const applyClassNames = useLastCallback(() => {
     const element = ref.current;
     if (!element) return;
 
@@ -129,12 +127,25 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     toggleExtraClass(element, `${prefix}open`, hasOpenClass);
     toggleExtraClass(element, `${prefix}not-open`, !hasOpenClass);
     toggleExtraClass(element, `${prefix}closing`, isClosing);
-  }, [className, getState, prefix, ref]);
+  });
 
+  // Workaround for Chrome causing forced reflow in the middle of mutation phase when unmounting a focused element.
+  // Due to such forced reflow setting initial class names in the first layout effect causes transitions to start.
+  useSyncEffect(() => {
+    ref.onChange = () => {
+      ref.onChange = undefined;
+      applyClassNames();
+    };
+  }, [applyClassNames, ref]);
+
+  useLayoutEffect(applyClassNames, [applyClassNames, getState]);
+
+  const withShouldRender = 'withShouldRender' in params && params.withShouldRender;
   const shouldRender = useDerivedState(
     () => (withShouldRender && getState() !== 'closed'),
     [withShouldRender, getState],
   );
+
   const getIsClosing = useDerivedSignal(() => getState() === 'closing', [getState]);
 
   if (withShouldRender) {

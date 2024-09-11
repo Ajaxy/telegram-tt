@@ -628,6 +628,7 @@ function setElementRef($element: VirtualElementTag, element: DOMElement | undefi
 
   if (typeof ref === 'object') {
     ref.current = element;
+    ref.onChange?.();
   } else if (typeof ref === 'function') {
     ref(element);
   }

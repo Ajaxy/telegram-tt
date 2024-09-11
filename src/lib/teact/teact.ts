@@ -57,6 +57,11 @@ export interface VirtualElementFragment {
 
 export type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
 
+export interface RefObject<T = any> {
+  current: T;
+  onChange?: NoneToVoidFunction;
+}
+
 export enum MountState {
   New,
   Mounted,
@@ -99,9 +104,7 @@ interface ComponentInstance {
     };
     refs?: {
       cursor: number;
-      byCursor: {
-        current: any;
-      }[];
+      byCursor: RefObject[];
     };
   };
   prepareForFrame?: () => void;
@@ -547,6 +550,7 @@ function helpGc(componentInstance: ComponentInstance) {
   if (refs) {
     for (const hook of refs.byCursor) {
       hook.current = undefined as any;
+      hook.onChange = undefined as any;
     }
   }
 
@@ -886,9 +890,9 @@ export function useCallback<F extends AnyFunction>(newCallback: F, dependencies:
   return useMemo(() => newCallback, dependencies, debugKey);
 }
 
-export function useRef<T>(initial: T): { current: T };
-export function useRef<T>(): { current: T | undefined }; // TT way (empty is `undefined`)
-export function useRef<T>(initial: null): { current: T | null }; // React way (empty is `null`)
+export function useRef<T>(initial: T): RefObject<T>;
+export function useRef<T>(): RefObject<T | undefined>; // TT way (empty is `undefined`)
+export function useRef<T>(initial: null): RefObject<T | null>; // React way (empty is `null`)
 // eslint-disable-next-line no-null/no-null
 export function useRef<T>(initial?: T | null) {
   if (!renderingInstance.hooks) {
