@@ -340,6 +340,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       getRootElement={getRootElement}
       getMenuElement={getMenuElement}
       getLayout={getLayout}
+      withMaxHeight
       className={buildClassName(
         'MessageContextMenu', 'fluid', withReactions && 'with-reactions',
       )}

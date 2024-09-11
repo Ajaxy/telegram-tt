@@ -23,6 +23,7 @@ interface DynamicPositionOptions {
   getRootElement: () => HTMLElement | null;
   getMenuElement: () => HTMLElement | null;
   getLayout?: () => Layout;
+  withMaxHeight?: boolean;
 }
 
 export type MenuPositionOptions =
@@ -122,6 +123,7 @@ function processDynamically(
     getMenuElement,
     getTriggerElement,
     getLayout,
+    withMaxHeight,
   }: DynamicPositionOptions,
 ) {
   const triggerEl = getTriggerElement()!;
@@ -214,9 +216,13 @@ function processDynamically(
   const transformOriginX = positionX === 'left' ? offsetX : menuRect.width + offsetX;
   const transformOriginY = positionY === 'bottom' ? menuRect.height + offsetY : offsetY;
 
-  const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN - (marginTop || 0);
-  const bubbleStyle = `max-height: ${menuMaxHeight}px;`;
   const style = `left: ${left}px; top: ${top}px`;
+
+  let bubbleStyle;
+  if (withMaxHeight) {
+    const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN - (marginTop || 0);
+    bubbleStyle = `max-height: ${menuMaxHeight}px;`;
+  }
 
   return {
     positionX,
