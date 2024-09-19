@@ -439,6 +439,7 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...global.chats,
     similarChannelsById: {},
     isFullyLoaded: {},
+    loadingParameters: INITIAL_GLOBAL_STATE.chats.loadingParameters,
     byId: pickTruthy(global.chats.byId, idsToSave),
     fullInfoById: pickTruthy(global.chats.fullInfoById, idsToSave),
     lastMessageIds: {
