@@ -179,7 +179,8 @@ const Photo = <T,>({
 
     const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
     if (fullMediaData) {
-      getCustomAppendixBg(fullMediaData, Boolean(isOwn), isSelected, theme).then((appendixBg) => {
+      const messageId = Number(contentEl.closest<HTMLDivElement>('.Message')!.dataset.messageId);
+      getCustomAppendixBg(fullMediaData, Boolean(isOwn), messageId, isSelected, theme).then((appendixBg) => {
         requestMutation(() => {
           contentEl.style.setProperty('--appendix-bg', appendixBg);
           contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');

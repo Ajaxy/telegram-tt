@@ -26,3 +26,7 @@ export default function launchMediaWorkers() {
 
   return instances;
 }
+
+export function requestMediaWorker(payload: Parameters<Connector<MediaWorkerApi>['request']>[0], index: number) {
+  return launchMediaWorkers()[index].connector.request(payload);
+}

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef } from '../lib/teact/teact';
 
 import cycleRestrict from '../util/cycleRestrict';
-import launchMediaWorkers, { MAX_WORKERS } from '../util/launchMediaWorkers';
+import { MAX_WORKERS, requestMediaWorker } from '../util/launchMediaWorkers';
 
 const RADIUS = 7;
 
@@ -25,12 +25,11 @@ export default function useOffscreenCanvasBlur(
 
     offscreenRef.current = canvas.transferControlToOffscreen();
 
-    const { connector } = launchMediaWorkers()[workerIndex];
-    connector.request({
-      name: 'blurThumb',
+    requestMediaWorker({
+      name: 'offscreen-canvas:blurThumb',
       args: [offscreenRef.current, thumbData, radius],
       transferables: [offscreenRef.current],
-    });
+    }, workerIndex);
   }, [thumbData, isDisabled, radius, workerIndex]);
 
   return canvasRef;
