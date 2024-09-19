@@ -35,6 +35,7 @@ import {
   selectNotifyExceptions,
   selectNotifySettings,
   selectTabState,
+  selectTopic,
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
@@ -760,7 +761,7 @@ export default memo(withGlobal<OwnProps>(
       && !selectIsPremiumPurchaseBlocked(global),
     );
 
-    const topic = chat?.topics?.[threadId];
+    const topic = selectTopic(global, chatId, threadId);
     const canCreateTopic = chat.isForum && (
       chat.isCreator || !isUserRightBanned(chat, 'manageTopics') || getHasAdminRight(chat, 'manageTopics')
     );

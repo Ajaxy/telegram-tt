@@ -54,6 +54,7 @@ import {
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
   selectThreadInfo,
+  selectTopic,
   selectUserStatus,
 } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -730,10 +731,11 @@ export default memo(withGlobal<OwnProps>(
 
     const threadInfo = threadId && selectThreadInfo(global, message.chatId, threadId);
     const isMessageThread = Boolean(threadInfo && !threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+    const topic = threadId ? selectTopic(global, message.chatId, threadId) : undefined;
 
     const canSendText = chat && !isUserRightBanned(chat, 'sendPlain', chatFullInfo);
 
-    const canReplyInChat = chat && threadId ? getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo)
+    const canReplyInChat = chat && threadId ? getCanPostInChat(chat, topic, isMessageThread, chatFullInfo)
      && canSendText : false;
 
     const isLocal = isMessageLocal(message);

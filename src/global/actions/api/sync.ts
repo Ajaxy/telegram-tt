@@ -36,6 +36,7 @@ import {
   selectEditingId,
   selectTabState,
   selectThreadInfo,
+  selectTopics,
 } from '../../selectors';
 
 const RELEASE_STATUS_TIMEOUT = 15000; // 15 sec;
@@ -160,10 +161,10 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         const localMessages = currentChatId === SERVICE_NOTIFICATIONS_USER_ID
           ? global.serviceNotifications.filter(({ isDeleted }) => !isDeleted).map(({ message }) => message)
           : [];
-        const topicLastMessages = currentChat.isForum && currentChat.topics
-          ? Object.values(currentChat.topics)
-            .map(({ lastMessageId }) => currentChatMessages[lastMessageId])
-            .filter(Boolean)
+        const topics = selectTopics(global, currentChatId);
+        const topicLastMessages = topics ? Object.values(topics)
+          .map(({ lastMessageId }) => currentChatMessages[lastMessageId])
+          .filter(Boolean)
           : [];
 
         const resultMessageIds = result.messages.map(({ id }) => id);

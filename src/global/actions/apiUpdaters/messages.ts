@@ -78,6 +78,7 @@ import {
   selectThreadByMessage,
   selectThreadIdFromMessage,
   selectThreadInfo,
+  selectTopic,
   selectTopicFromMessage,
   selectViewportIds,
 } from '../../selectors';
@@ -1061,7 +1062,7 @@ export function deleteMessages<T extends GlobalState>(
         isDeleting: true,
       });
 
-      if (chat.topics?.[id]) {
+      if (selectTopic(global, chatId, id)) {
         global = deleteTopic(global, chatId, id);
       }
 
@@ -1091,7 +1092,12 @@ export function deleteMessages<T extends GlobalState>(
       if (!threadInfo?.lastMessageId || !idsSet.has(threadInfo.lastMessageId)) return;
 
       const newLastMessage = findLastMessage(global, chatId, threadId);
-      if (!newLastMessage) return;
+      if (!newLastMessage) {
+        if (chat.isForum && threadId !== MAIN_THREAD_ID) {
+          actions.loadTopicById({ chatId, topicId: Number(threadId) });
+        }
+        return;
+      }
 
       if (threadId === MAIN_THREAD_ID) {
         global = updateChatLastMessage(global, chatId, newLastMessage, true);

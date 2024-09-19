@@ -127,6 +127,7 @@ import {
   selectSponsoredMessage,
   selectTabState,
   selectThreadIdFromMessage,
+  selectTopic,
   selectTranslationLanguage,
   selectUser,
   selectUserFullInfo,
@@ -907,8 +908,8 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
     return global;
   }
 
-  if (chat.isForum && chat.topics?.[threadId]) {
-    const topic = chat.topics[threadId];
+  const topic = selectTopic(global, chatId, threadId);
+  if (chat.isForum && topic) {
     global = updateThreadInfo(global, chatId, threadId, {
       lastReadInboxMessageId: maxId,
     });

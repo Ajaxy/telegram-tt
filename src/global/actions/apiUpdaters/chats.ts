@@ -17,6 +17,7 @@ import {
   leaveChat,
   removeUnreadMentions,
   replacePeerPhotos,
+  replacePinnedTopicIds,
   replaceThreadParam,
   updateChat,
   updateChatFullInfo,
@@ -482,9 +483,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const chat = global.chats.byId[chatId];
       if (!chat) return undefined;
 
-      global = updateChat(global, chatId, {
-        orderedPinnedTopicIds: order,
-      });
+      global = replacePinnedTopicIds(global, chatId, order);
       setGlobal(global);
 
       return undefined;

@@ -4,7 +4,9 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiChatBannedRights, ApiInputMessageReplyInfo } from '../../api/types';
+import type {
+  ApiChat, ApiChatBannedRights, ApiInputMessageReplyInfo, ApiTopic,
+} from '../../api/types';
 import type {
   ActiveEmojiInteraction,
   MessageListType,
@@ -55,6 +57,8 @@ import {
   selectTabState,
   selectTheme,
   selectThreadInfo,
+  selectTopic,
+  selectTopics,
   selectUserFullInfo,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -156,6 +160,7 @@ type StateProps = {
   isSavedDialog?: boolean;
   canShowOpenChatButton?: boolean;
   isContactRequirePremium?: boolean;
+  topics?: Record<number, ApiTopic>;
 };
 
 function isImage(item: DataTransferItem) {
@@ -217,6 +222,7 @@ function MiddleColumn({
   isSavedDialog,
   canShowOpenChatButton,
   isContactRequirePremium,
+  topics,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -455,7 +461,7 @@ function MiddleColumn({
   const messageSendingRestrictionReason = getMessageSendingRestrictionReason(
     lang, currentUserBannedRights, defaultBannedRights,
   );
-  const forumComposerPlaceholder = getForumComposerPlaceholder(lang, chat, threadId, Boolean(draftReplyInfo));
+  const forumComposerPlaceholder = getForumComposerPlaceholder(lang, chat, threadId, topics, Boolean(draftReplyInfo));
 
   const composerRestrictionMessage = messageSendingRestrictionReason
     ?? forumComposerPlaceholder
@@ -775,7 +781,8 @@ export default memo(withGlobal<OwnProps>(
 
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
-    const canPost = chat && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
+    const topic = selectTopic(global, chatId, threadId);
+    const canPost = chat && getCanPostInChat(chat, topic, isMessageThread, chatFullInfo);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
@@ -794,11 +801,12 @@ export default memo(withGlobal<OwnProps>(
     );
     const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
     const shouldBlockSendInForum = chat?.isForum
-      ? threadId === MAIN_THREAD_ID && !draftReplyInfo && (chat.topics?.[GENERAL_TOPIC_ID]?.isClosed)
+      ? threadId === MAIN_THREAD_ID && !draftReplyInfo && (selectTopic(global, chatId, GENERAL_TOPIC_ID)?.isClosed)
       : false;
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
+    const topics = selectTopics(global, chatId);
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
     const canShowOpenChatButton = isSavedDialog && threadId !== ANONYMOUS_USER_ID;
@@ -854,6 +862,7 @@ export default memo(withGlobal<OwnProps>(
       isSavedDialog,
       canShowOpenChatButton,
       isContactRequirePremium,
+      topics,
     };
   },
 )(MiddleColumn));

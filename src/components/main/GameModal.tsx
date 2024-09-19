@@ -4,7 +4,6 @@ import { getActions } from '../../lib/teact/teactn';
 import { withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
-import { MAIN_THREAD_ID } from '../../api/types';
 
 import { getCanPostInChat } from '../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../global/selectors';
@@ -94,7 +93,7 @@ export default memo(withGlobal<OwnProps>(
     const { chatId } = openedGame || {};
     const chat = chatId && selectChat(global, chatId);
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
-    const canPost = Boolean(chat) && getCanPostInChat(chat, MAIN_THREAD_ID, undefined, chatFullInfo);
+    const canPost = Boolean(chat) && getCanPostInChat(chat, undefined, undefined, chatFullInfo);
 
     return {
       canPost,

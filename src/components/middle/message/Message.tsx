@@ -31,7 +31,7 @@ import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessag
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { AudioOrigin } from '../../../types';
 
-import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
+import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
 import {
   areReactionsEmpty,
   getIsDownloading,
@@ -1766,8 +1766,7 @@ export default memo(withGlobal<OwnProps>(
     const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
 
     const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && isFirstInGroup;
-    const messageTopic = hasTopicChip ? (selectTopicFromMessage(global, message) || chat?.topics?.[GENERAL_TOPIC_ID])
-      : undefined;
+    const messageTopic = hasTopicChip ? selectTopicFromMessage(global, message) : undefined;
 
     const chatTranslations = selectChatTranslations(global, chatId);
 

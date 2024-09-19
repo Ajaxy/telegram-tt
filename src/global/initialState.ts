@@ -110,6 +110,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byId: {},
     fullInfoById: {},
     similarChannelsById: {},
+    topicsInfoById: {},
     loadingParameters: {
       active: {},
       archived: {},

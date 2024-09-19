@@ -145,15 +145,14 @@ export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights,
 }
 
 export function getCanPostInChat(
-  chat: ApiChat, threadId: ThreadId, isMessageThread?: boolean, chatFullInfo?: ApiChatFullInfo,
+  chat: ApiChat, topic?: ApiTopic, isMessageThread?: boolean, chatFullInfo?: ApiChatFullInfo,
 ) {
-  if (threadId !== MAIN_THREAD_ID) {
+  if (topic) {
     if (chat.isForum) {
       if (chat.isNotJoined) {
         return false;
       }
 
-      const topic = chat.topics?.[threadId];
       if (topic?.isClosed && !topic.isOwner && !getHasAdminRight(chat, 'manageTopics')) {
         return false;
       }
@@ -264,18 +263,22 @@ export function getMessageSendingRestrictionReason(
 }
 
 export function getForumComposerPlaceholder(
-  lang: LangFn, chat?: ApiChat, threadId: ThreadId = MAIN_THREAD_ID, isReplying?: boolean,
+  lang: LangFn,
+  chat?: ApiChat,
+  threadId: ThreadId = MAIN_THREAD_ID,
+  topics?: Record<number, ApiTopic>,
+  isReplying?: boolean,
 ) {
   if (!chat?.isForum) {
     return undefined;
   }
 
   if (threadId === MAIN_THREAD_ID) {
-    if (isReplying || (chat.topics && !chat.topics[GENERAL_TOPIC_ID]?.isClosed)) return undefined;
+    if (isReplying || (topics && !topics[GENERAL_TOPIC_ID]?.isClosed)) return undefined;
     return lang('lng_forum_replies_only');
   }
 
-  const topic = chat.topics?.[threadId];
+  const topic = topics?.[Number(threadId)];
   if (!topic) {
     return undefined;
   }

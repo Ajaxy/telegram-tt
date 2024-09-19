@@ -24,10 +24,19 @@ type OwnProps = {
   isSavedDialog?: boolean;
   shouldShowOnlyMostImportant?: boolean;
   forceHidden?: boolean | Signal<boolean>;
+  topics?: Record<number, ApiTopic>;
 };
 
 const ChatBadge: FC<OwnProps> = ({
-  topic, chat, isPinned, isMuted, shouldShowOnlyMostImportant, wasTopicOpened, forceHidden, isSavedDialog,
+  topic,
+  topics,
+  chat,
+  isPinned,
+  isMuted,
+  shouldShowOnlyMostImportant,
+  wasTopicOpened,
+  forceHidden,
+  isSavedDialog,
 }) => {
   const {
     unreadMentionsCount = 0, unreadReactionsCount = 0,
@@ -36,8 +45,8 @@ const ChatBadge: FC<OwnProps> = ({
   const isTopicUnopened = !isPinned && topic && !wasTopicOpened;
   const isForum = chat.isForum && !topic;
   const topicsWithUnread = useMemo(() => (
-    isForum && chat?.topics ? Object.values(chat.topics).filter(({ unreadCount }) => unreadCount) : undefined
-  ), [chat, isForum]);
+    isForum && topics ? Object.values(topics).filter(({ unreadCount }) => unreadCount) : undefined
+  ), [topics, isForum]);
 
   const unreadCount = useMemo(() => (
     isForum
@@ -48,11 +57,11 @@ const ChatBadge: FC<OwnProps> = ({
   ), [chat, topic, topicsWithUnread, isForum, isMuted]);
 
   const shouldBeMuted = useMemo(() => {
-    const hasUnmutedUnreadTopics = chat.topics
-      && Object.values(chat.topics).some((acc) => !acc.isMuted && acc.unreadCount);
+    const hasUnmutedUnreadTopics = topics
+      && Object.values(topics).some((acc) => !acc.isMuted && acc.unreadCount);
 
-    return isMuted || (chat.topics && !hasUnmutedUnreadTopics);
-  }, [chat, isMuted]);
+    return isMuted || (topics && !hasUnmutedUnreadTopics);
+  }, [topics, isMuted]);
 
   const hasUnreadMark = topic ? false : chat.hasUnreadMark;
 

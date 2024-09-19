@@ -4,7 +4,6 @@ import { getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatType } from '../../api/types';
 import type { ThreadId } from '../../types';
-import { MAIN_THREAD_ID } from '../../api/types';
 
 import { API_CHAT_TYPES } from '../../config';
 import {
@@ -80,7 +79,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
       const user = usersById[id];
       if (user && isDeletedUser(user)) return false;
 
-      return chat && getCanPostInChat(chat, MAIN_THREAD_ID, undefined, chatFullInfoById[id]);
+      return chat && getCanPostInChat(chat, undefined, undefined, chatFullInfoById[id]);
     });
 
     const sorted = sortChatIds(

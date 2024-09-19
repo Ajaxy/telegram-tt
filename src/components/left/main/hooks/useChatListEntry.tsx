@@ -43,6 +43,7 @@ const ANIMATION_DURATION = 200;
 
 export default function useChatListEntry({
   chat,
+  topics,
   lastMessage,
   chatId,
   typingStatus,
@@ -61,6 +62,7 @@ export default function useChatListEntry({
   isPreview,
 }: {
   chat?: ApiChat;
+  topics?: Record<number, ApiTopic>;
   lastMessage?: ApiMessage;
   chatId: string;
   typingStatus?: ApiTypingStatus;
@@ -192,6 +194,7 @@ export default function useChatListEntry({
           chat={chat}
           renderLastMessage={renderLastMessageOrTyping}
           observeIntersection={observeIntersection}
+          topics={topics}
         />
       );
     }

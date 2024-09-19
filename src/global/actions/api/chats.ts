@@ -112,6 +112,9 @@ import {
   selectTabState,
   selectThread,
   selectThreadInfo,
+  selectTopic,
+  selectTopics,
+  selectTopicsInfo,
   selectUser,
   selectUserByPhoneNumber,
 } from '../../selectors';
@@ -1169,7 +1172,9 @@ addActionHandler('markTopicRead', (global, actions, payload): ActionReturnType =
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  const lastTopicMessageId = chat.topics?.[topicId]?.lastMessageId;
+  const topic = selectTopic(global, chatId, topicId);
+
+  const lastTopicMessageId = topic?.lastMessageId;
   if (!lastTopicMessageId) return;
 
   void callApi('markMessageListRead', {
@@ -2074,13 +2079,15 @@ addActionHandler('loadTopics', async (global, actions, payload): Promise<void> =
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  if (!force && chat.listedTopicIds && chat.listedTopicIds.length === chat.topicsCount) {
+  const topicsInfo = selectTopicsInfo(global, chatId);
+
+  if (!force && topicsInfo?.listedTopicIds && topicsInfo.listedTopicIds.length === topicsInfo.totalCount) {
     return;
   }
 
-  const offsetTopic = !force && chat.listedTopicIds ? chat.listedTopicIds.reduce((acc, el) => {
-    const topic = chat.topics?.[el];
-    const accTopic = chat.topics?.[acc];
+  const offsetTopic = !force ? topicsInfo?.listedTopicIds?.reduce((acc, el) => {
+    const topic = selectTopic(global, chatId, el);
+    const accTopic = selectTopic(global, chatId, acc);
     if (!topic) return acc;
     if (!accTopic || topic.lastMessageId < accTopic.lastMessageId) {
       return el;
@@ -2089,7 +2096,7 @@ addActionHandler('loadTopics', async (global, actions, payload): Promise<void> =
   }) : undefined;
 
   const { id: offsetTopicId, date: offsetDate, lastMessageId: offsetId } = (offsetTopic
-    && chat.topics?.[offsetTopic]) || {};
+    && selectTopic(global, chatId, offsetTopic)) || {};
   const result = await callApi('fetchTopics', {
     chat, offsetTopicId, offsetId, offsetDate, limit: offsetTopicId ? TOPICS_SLICE : TOPICS_SLICE_SECOND_LOAD,
   });
@@ -2231,7 +2238,7 @@ addActionHandler('editTopic', async (global, actions, payload): Promise<void> =>
     chatId, topicId, tabId = getCurrentTabId(), ...rest
   } = payload;
   const chat = selectChat(global, chatId);
-  const topic = chat?.topics?.[topicId];
+  const topic = selectTopic(global, chatId, topicId);
   if (!chat || !topic) return;
 
   if (selectTabState(global, tabId).editTopicPanel) {
@@ -2262,9 +2269,10 @@ addActionHandler('toggleTopicPinned', (global, actions, payload): ActionReturnTy
 
   const { topicsPinnedLimit } = global.appConfig || {};
   const chat = selectChat(global, chatId);
-  if (!chat || !chat.topics || !topicsPinnedLimit) return;
+  const topics = selectTopics(global, chatId);
+  if (!chat || !topics || !topicsPinnedLimit) return;
 
-  if (isPinned && Object.values(chat.topics).filter((topic) => topic.isPinned).length >= topicsPinnedLimit) {
+  if (isPinned && Object.values(topics).filter((topic) => topic.isPinned).length >= topicsPinnedLimit) {
     actions.showNotification({
       message: langProvider.oldTranslate('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
       tabId,

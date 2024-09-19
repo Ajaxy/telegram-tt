@@ -13,7 +13,7 @@ import {
   getCanPostInChat, getGroupStatus, getUserStatus, isUserOnline,
 } from '../../../global/helpers';
 import { isApiPeerChat } from '../../../global/helpers/peers';
-import { selectChat, selectPeer, selectUserStatus } from '../../../global/selectors';
+import { selectPeer, selectTopics, selectUserStatus } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { REM } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';
@@ -94,15 +94,15 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   useInputFocusOnOpen(searchRef, isOpen && activeKey === CHAT_LIST_SLIDE, resetSearch);
   useInputFocusOnOpen(topicSearchRef, isOpen && activeKey === TOPIC_LIST_SLIDE);
 
-  const selectTopics = useLastCallback((global: GlobalState) => {
+  const selectTopicsById = useLastCallback((global: GlobalState) => {
     if (!forumId) {
       return undefined;
     }
 
-    return selectChat(global, forumId)?.topics;
+    return selectTopics(global, forumId);
   });
 
-  const forumTopics = useSelector(selectTopics);
+  const forumTopicsById = useSelector(selectTopicsById);
 
   const [topicIds, topics] = useMemo(() => {
     const global = getGlobal();
@@ -111,16 +111,16 @@ const ChatOrUserPicker: FC<OwnProps> = ({
 
     const chat = chatsById[forumId!];
 
-    if (!chat || !forumTopics) {
+    if (!chat || !forumTopicsById) {
       return [undefined, undefined];
     }
 
     const searchTitle = topicSearch.toLowerCase();
 
-    const result = forumTopics
-      ? Object.values(forumTopics).reduce((acc, topic) => {
+    const result = forumTopicsById
+      ? Object.values(forumTopicsById).reduce((acc, topic) => {
         if (
-          getCanPostInChat(chat, topic.id, undefined, chatFullInfoById[forumId!])
+          getCanPostInChat(chat, topic, undefined, chatFullInfoById[forumId!])
           && (!searchTitle || topic.title.toLowerCase().includes(searchTitle))
         ) {
           acc[topic.id] = topic;
@@ -128,10 +128,10 @@ const ChatOrUserPicker: FC<OwnProps> = ({
 
         return acc;
       }, {} as Record<number, ApiTopic>)
-      : forumTopics;
+      : forumTopicsById;
 
     return [Object.keys(result).map(Number), result];
-  }, [forumId, topicSearch, forumTopics]);
+  }, [forumId, topicSearch, forumTopicsById]);
 
   const handleHeaderBackClick = useLastCallback(() => {
     setForumId(undefined);
@@ -153,7 +153,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       const chatId = viewportIds[index === -1 ? 0 : index];
       const chat = chatsById[chatId];
       if (chat?.isForum) {
-        if (!chat.topics) loadTopics({ chatId });
+        if (!forumTopicsById) loadTopics({ chatId });
         setForumId(chatId);
       } else {
         onSelectChatOrUser(chatId);
@@ -171,7 +171,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     const chatsById = getGlobal().chats.byId;
     const chat = chatsById?.[chatId];
     if (chat?.isForum) {
-      if (!chat.topics) loadTopics({ chatId });
+      if (!forumTopicsById) loadTopics({ chatId });
       setForumId(chatId);
       resetSearch();
     } else {

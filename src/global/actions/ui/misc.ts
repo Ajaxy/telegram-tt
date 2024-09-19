@@ -33,6 +33,7 @@ import {
   selectIsTrustedBot,
   selectSender,
   selectTabState,
+  selectTopic,
 } from '../../selectors';
 
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
@@ -773,8 +774,9 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const currentChat = selectChat(global, chatId);
     if (currentChat) {
       const title = getChatTitle(langProvider.oldTranslate, currentChat, chatId === currentUserId);
-      if (currentChat.isForum && currentChat.topics?.[threadId]) {
-        setPageTitle(`${title} › ${currentChat.topics[threadId].title}`);
+      const topic = selectTopic(global, chatId, threadId);
+      if (currentChat.isForum && topic) {
+        setPageTitle(`${title} › ${topic.title}`);
         return;
       }
 

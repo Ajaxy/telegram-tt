@@ -54,6 +54,7 @@ import {
   selectScrollOffset,
   selectTabState,
   selectThreadInfo,
+  selectTopic,
   selectUserFullInfo,
 } from '../../global/selectors';
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
@@ -772,7 +773,7 @@ export default memo(withGlobal<OwnProps>(
 
     const chatBot = selectBot(global, chatId);
 
-    const topic = chat.topics?.[threadId];
+    const topic = selectTopic(global, chatId, threadId);
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const isEmptyThread = !selectThreadInfo(global, chatId, threadId)?.messagesCount;
 

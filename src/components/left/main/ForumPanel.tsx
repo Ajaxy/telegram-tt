@@ -6,6 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat } from '../../../api/types';
+import type { TopicsInfo } from '../../../global/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
@@ -14,7 +15,12 @@ import {
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { getOrderedTopics } from '../../../global/helpers';
 import {
-  selectCanAnimateInterface, selectChat, selectCurrentMessageList, selectIsForumPanelOpen, selectTabState,
+  selectCanAnimateInterface,
+  selectChat,
+  selectCurrentMessageList,
+  selectIsForumPanelOpen,
+  selectTabState,
+  selectTopicsInfo,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -52,6 +58,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  topicsInfo?: TopicsInfo;
   currentTopicId?: number;
   withInterfaceAnimations?: boolean;
 };
@@ -63,6 +70,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   currentTopicId,
   isOpen,
   isHidden,
+  topicsInfo,
   onTopicSearch,
   onCloseAnimationEnd,
   onOpenAnimationStart,
@@ -80,12 +88,13 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const scrollTopHandlerRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useAppLayout();
+  const chatId = chat?.id;
 
   useEffect(() => {
-    if (chat && !chat.topics) {
-      loadTopics({ chatId: chat.id });
+    if (chatId && !topicsInfo) {
+      loadTopics({ chatId });
     }
-  }, [chat, loadTopics]);
+  }, [topicsInfo, chatId]);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const lang = useOldLang();
@@ -115,17 +124,20 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   });
 
   const orderedIds = useMemo(() => {
-    return chat?.topics
-      ? getOrderedTopics(Object.values(chat.topics), chat.orderedPinnedTopicIds).map(({ id }) => id)
+    return topicsInfo
+      ? getOrderedTopics(
+        Object.values(topicsInfo.topicsById),
+        topicsInfo.orderedPinnedTopicIds,
+      ).map(({ id }) => id)
       : [];
-  }, [chat]);
+  }, [topicsInfo]);
 
   const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds, chat?.id);
 
   const [viewportIds, getMore] = useInfiniteScroll(() => {
     if (!chat) return;
     loadTopics({ chatId: chat.id });
-  }, orderedIds, !chat?.topicsCount || orderedIds.length >= chat.topicsCount, TOPICS_SLICE);
+  }, orderedIds, !topicsInfo?.totalCount || orderedIds.length >= topicsInfo.totalCount, TOPICS_SLICE);
 
   const shouldRenderRef = useRef(false);
   const isVisible = isOpen && !isHidden;
@@ -191,7 +203,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
       <Topic
         key={id}
         chatId={chat!.id}
-        topic={chat!.topics![id]}
+        topic={topicsInfo!.topicsById[id]}
         style={`top: ${(viewportOffset + i) * TOPIC_HEIGHT_PX}px;`}
         isSelected={currentTopicId === id}
         observeIntersection={observe}
@@ -201,7 +213,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
     ));
   }
 
-  const isLoading = chat?.topics === undefined;
+  const isLoading = topicsInfo === undefined;
 
   return (
     <div
@@ -271,7 +283,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         )}
       </InfiniteScroll>
       {!isLoading && viewportIds?.length === 1 && viewportIds[0] === GENERAL_TOPIC_ID && (
-        <EmptyForum chatId={chat.id} />
+        <EmptyForum chatId={chatId!} />
       )}
     </div>
   );
@@ -285,11 +297,13 @@ export default memo(withGlobal<OwnProps>(
       chatId: currentChatId,
       threadId: currentThreadId,
     } = selectCurrentMessageList(global) || {};
+    const topicsInfo = chatId ? selectTopicsInfo(global, chatId) : undefined;
 
     return {
       chat,
       currentTopicId: chatId === currentChatId ? Number(currentThreadId) : undefined,
       withInterfaceAnimations: selectCanAnimateInterface(global),
+      topicsInfo,
     };
   },
   (global) => selectIsForumPanelOpen(global),

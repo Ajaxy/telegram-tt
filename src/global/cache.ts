@@ -36,10 +36,10 @@ import { addActionHandler, getGlobal } from './index';
 import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MID, INITIAL_PERFORMANCE_STATE_MIN } from './initialState';
 import { clearGlobalForLockScreen } from './reducers';
 import {
-  selectChat,
   selectChatLastMessageId,
   selectChatMessages,
   selectCurrentMessageList,
+  selectTopics,
   selectViewportIds,
   selectVisibleUsers,
 } from './selectors';
@@ -248,6 +248,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.users.commonChatsById) {
     cached.users.commonChatsById = initialState.users.commonChatsById;
   }
+  if (!cached.chats.topicsInfoById) {
+    cached.chats.topicsInfoById = initialState.chats.topicsInfoById;
+  }
 }
 
 function updateCache(force?: boolean) {
@@ -446,6 +449,7 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
       all: pickTruthy(global.chats.lastMessageIds.all || {}, idsToSave),
       saved: global.chats.lastMessageIds.saved,
     },
+    topicsInfoById: pickTruthy(global.chats.topicsInfoById, currentChatIds),
   };
 }
 
@@ -486,7 +490,6 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
       return;
     }
 
-    const chat = selectChat(global, chatId);
     const chatLastMessageId = selectChatLastMessageId(global, chatId);
 
     const openedThreadIds = Array.from(openedChatThreadIds[chatId] || []);
@@ -498,8 +501,9 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     const threadsToSave = pickTruthy(current.threadsById, [MAIN_THREAD_ID, ...threadIds]);
 
     const viewportIdsToSave = unique(Object.values(threadsToSave).flatMap((thread) => thread.lastViewportIds || []));
-    const topicLastMessageIds = chat?.topics ? Object.values(chat.topics).map(({ lastMessageId }) => lastMessageId)
-      : [];
+    const topics = selectTopics(global, chatId);
+    const topicLastMessageIds = topics && forumPanelChatIds.includes(chatId)
+      ? Object.values(topics).map(({ lastMessageId }) => lastMessageId) : [];
     const savedLastMessageIds = chatId === currentUserId && global.chats.lastMessageIds.saved
       ? Object.values(global.chats.lastMessageIds.saved) : [];
     const lastMessageIdsToSave = [chatLastMessageId].concat(topicLastMessageIds).concat(savedLastMessageIds)

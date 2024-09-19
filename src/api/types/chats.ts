@@ -1,4 +1,3 @@
-import type { ThreadId } from '../../types';
 import type { ApiBotCommand } from './bots';
 import type {
   ApiChatReactions, ApiFormattedText, ApiPhoto, ApiStickerSet,
@@ -48,10 +47,6 @@ export interface ApiChat {
   emojiStatus?: ApiEmojiStatus;
   isForum?: boolean;
   isForumAsMessages?: true;
-  topics?: Record<ThreadId, ApiTopic>;
-  listedTopicIds?: number[];
-  topicsCount?: number;
-  orderedPinnedTopicIds?: number[];
   boostLevel?: number;
 
   // Calls

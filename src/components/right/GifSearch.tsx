@@ -14,6 +14,7 @@ import {
   selectCurrentMessageList,
   selectIsChatWithBot,
   selectIsChatWithSelf, selectThreadInfo,
+  selectTopic,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
@@ -174,8 +175,9 @@ export default memo(withGlobal(
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
     const threadInfo = chatId && threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+    const topic = chatId && threadId ? selectTopic(global, chatId, threadId) : undefined;
     const canPostInChat = Boolean(chat) && Boolean(threadId)
-      && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
+      && getCanPostInChat(chat, topic, isMessageThread, chatFullInfo);
 
     return {
       query,

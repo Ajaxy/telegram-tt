@@ -70,6 +70,7 @@ import { selectPeer } from './peers';
 import { selectPeerStory } from './stories';
 import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
+import { selectTopic } from './topics';
 import {
   selectBot, selectIsCurrentUserPremium, selectUser, selectUserStatus,
 } from './users';
@@ -483,17 +484,21 @@ export function selectForwardedSender<T extends GlobalState>(
   return undefined;
 }
 
+export function selectTopicFromMessage<T extends GlobalState>(global: T, message: ApiMessage) {
+  const { chatId } = message;
+  const chat = selectChat(global, chatId);
+  if (!chat?.isForum) return undefined;
+
+  const threadId = selectThreadIdFromMessage(global, message);
+  return selectTopic(global, chatId, threadId);
+}
+
 const MAX_MESSAGES_TO_DELETE_OWNER_TOPIC = 10;
 export function selectCanDeleteOwnerTopic<T extends GlobalState>(global: T, chatId: string, topicId: number) {
-  const chat = selectChat(global, chatId);
-  if (!chat) {
-    return false;
-  }
+  const topic = selectTopic(global, chatId, topicId);
+  if (topic && !topic.isOwner) return false;
 
-  if (chat.topics?.[topicId] && !chat.topics?.[topicId].isOwner) return false;
-
-  const thread = global.messages.byChatId[chatId]?.threadsById[topicId];
-
+  const thread = selectThread(global, chatId, topicId);
   if (!thread) return false;
 
   const { listedIds } = thread;
@@ -576,15 +581,6 @@ export function selectThreadIdFromMessage<T extends GlobalState>(global: T, mess
   return replyToTopId || replyToMsgId || GENERAL_TOPIC_ID;
 }
 
-export function selectTopicFromMessage<T extends GlobalState>(global: T, message: ApiMessage) {
-  const { chatId } = message;
-  const chat = selectChat(global, chatId);
-  if (!chat?.isForum) return undefined;
-
-  const threadId = selectThreadIdFromMessage(global, message);
-  return chat.topics?.[threadId];
-}
-
 export function selectCanReplyToMessage<T extends GlobalState>(global: T, message: ApiMessage, threadId: ThreadId) {
   const chat = selectChat(global, message.chatId);
   if (!chat || chat.isRestricted || chat.isForbidden) return false;
@@ -597,7 +593,8 @@ export function selectCanReplyToMessage<T extends GlobalState>(global: T, messag
   const threadInfo = selectThreadInfo(global, message.chatId, threadId);
   const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
   const chatFullInfo = selectChatFullInfo(global, chat.id);
-  const canPostInChat = getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo);
+  const topic = selectTopic(global, chat.id, threadId);
+  const canPostInChat = getCanPostInChat(chat, topic, isMessageThread, chatFullInfo);
   if (!canPostInChat) return false;
 
   const messageTopic = selectTopicFromMessage(global, message);

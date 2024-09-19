@@ -21,7 +21,6 @@ import {
   mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
 import {
-  selectChat,
   selectChatMessage,
   selectChatMessages,
   selectChatScheduledMessages,
@@ -43,10 +42,7 @@ import { removeIdFromSearchResults } from './middleSearch';
 import { updateTabState } from './tabs';
 import { clearMessageTranslation } from './translations';
 
-type MessageStoreSections = {
-  byId: Record<number, ApiMessage>;
-  threadsById: Record<number, Thread>;
-};
+type MessageStoreSections = GlobalState['messages']['byChatId'][string];
 
 export function updateCurrentMessageList<T extends GlobalState>(
   global: T,
@@ -128,7 +124,7 @@ export function updateThread<T extends GlobalState>(
   });
 }
 
-function updateMessageStore<T extends GlobalState>(
+export function updateMessageStore<T extends GlobalState>(
   global: T, chatId: string, update: Partial<MessageStoreSections>,
 ): T {
   const current = global.messages.byChatId[chatId] || { byId: {}, threadsById: {} };
@@ -821,32 +817,6 @@ export function updateThreadUnreadFromForwardedMessage<T extends GlobalState>(
     }
   }
   return global;
-}
-
-export function updateTopicLastMessageId<T extends GlobalState>(
-  global: T, chatId: string, threadId: ThreadId, lastMessageId: number,
-) {
-  const chat = selectChat(global, chatId);
-  if (!chat?.topics?.[threadId]) return global;
-  return {
-    ...global,
-    chats: {
-      ...global.chats,
-      byId: {
-        ...global.chats.byId,
-        [chatId]: {
-          ...chat,
-          topics: {
-            ...chat.topics,
-            [threadId]: {
-              ...chat.topics[threadId],
-              lastMessageId,
-            },
-          },
-        },
-      },
-    },
-  };
 }
 
 export function addActiveMediaDownload<T extends GlobalState>(

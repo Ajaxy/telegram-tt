@@ -18,6 +18,7 @@ import {
   selectCurrentStickerSearch,
   selectIsChatWithSelf,
   selectTabState,
+  selectTopic,
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -582,7 +583,7 @@ export default withGlobal<OwnProps>(
     const user = isProfile && chatId && isUserId(chatId) ? selectUser(global, chatId) : undefined;
     const isChannel = chat && isChatChannel(chat);
     const isInsideTopic = chat?.isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
-    const topic = isInsideTopic ? chat.topics?.[threadId!] : undefined;
+    const topic = isInsideTopic ? selectTopic(global, chatId!, threadId!) : undefined;
     const canEditTopic = isInsideTopic && topic && getCanManageTopic(chat, topic);
     const isBot = user && isUserBot(user);
     const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;

@@ -16,6 +16,7 @@ import {
   selectPeerPhotos,
   selectTabState,
   selectThreadMessagesCount,
+  selectTopic,
   selectUser,
   selectUserStatus,
 } from '../../global/selectors';
@@ -373,7 +374,7 @@ export default memo(withGlobal<OwnProps>(
     const { mediaIndex, chatId: avatarOwnerId } = selectTabState(global).mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
-    const topic = isForum && currentTopicId ? chat?.topics?.[currentTopicId] : undefined;
+    const topic = isForum && currentTopicId ? selectTopic(global, peerId, currentTopicId) : undefined;
 
     const emojiStatus = (user || chat)?.emojiStatus;
     const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;

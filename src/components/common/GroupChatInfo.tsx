@@ -20,6 +20,7 @@ import {
   selectChatOnlineCount,
   selectThreadInfo,
   selectThreadMessagesCount,
+  selectTopic,
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -267,7 +268,7 @@ export default memo(withGlobal<OwnProps>(
     const threadInfo = threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;
     const areMessagesLoaded = Boolean(selectChatMessages(global, chatId));
-    const topic = threadId ? chat?.topics?.[threadId] : undefined;
+    const topic = threadId ? selectTopic(global, chatId, threadId) : undefined;
     const messagesCount = topic && selectThreadMessagesCount(global, chatId, threadId!);
     const self = selectUser(global, global.currentUserId!);
 

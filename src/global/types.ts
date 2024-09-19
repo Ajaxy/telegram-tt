@@ -74,6 +74,7 @@ import type {
   ApiThemeParameters,
   ApiThreadInfo,
   ApiTimezone,
+  ApiTopic,
   ApiTranscription,
   ApiTypeStoryView,
   ApiTypingStatus,
@@ -211,6 +212,13 @@ export interface ServiceNotification {
   version?: string;
   isUnread?: boolean;
   isDeleted?: boolean;
+}
+
+export interface TopicsInfo {
+  totalCount: number;
+  topicsById: Record<ThreadId, ApiTopic>;
+  listedTopicIds?: number[];
+  orderedPinnedTopicIds?: number[];
 }
 
 export type ApiLimitType =
@@ -968,6 +976,7 @@ export type GlobalState = {
       all?: Record<string, number>;
       saved?: Record<string, number>;
     };
+    topicsInfoById: Record<string, TopicsInfo>;
     loadingParameters: Record<ChatListType, {
       nextOffsetId?: number;
       nextOffsetPeerId?: string;
