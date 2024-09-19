@@ -162,6 +162,8 @@ export type ActiveDownloads = Record<string, {
   format: ApiMediaFormat;
   filename: string;
   size: number;
+  originChatId?: string;
+  originMessageId?: number;
 }>;
 
 export type IDimensions = {
@@ -2632,6 +2634,7 @@ export interface ActionPayloads {
   downloadSelectedMessages: WithTabId | undefined;
   downloadMedia: {
     media: DownloadableMedia;
+    originMessage?: ApiMessage;
   } & WithTabId;
   cancelMediaDownload: {
     media: DownloadableMedia;

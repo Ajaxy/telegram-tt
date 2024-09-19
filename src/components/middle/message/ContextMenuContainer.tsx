@@ -505,7 +505,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       if (isDownloading) {
         cancelMediaDownload({ media: downloadableMedia });
       } else {
-        downloadMedia({ media: downloadableMedia });
+        downloadMedia({ media: downloadableMedia, originMessage: msg });
       }
     });
     closeMenu();

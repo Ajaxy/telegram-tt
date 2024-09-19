@@ -354,6 +354,17 @@ export function deleteChatMessages<T extends GlobalState>(
     }
 
     Object.values(global.byTabId).forEach(({ id: tabId }) => {
+      const tabState = selectTabState(global, tabId);
+      const activeDownloadsInChat = Object.entries(tabState.activeDownloads).filter(
+        ([, { originChatId, originMessageId }]) => originChatId === chatId && originMessageId,
+      );
+
+      activeDownloadsInChat.forEach(([mediaHash, context]) => {
+        if (messageIds.includes(context.originMessageId!)) {
+          global = cancelMessageMediaDownload(global, [mediaHash], tabId);
+        }
+      });
+
       mediaIdsToRemove.forEach((mediaId) => {
         global = removeIdFromSearchResults(global, chatId, threadId, mediaId, tabId);
       });

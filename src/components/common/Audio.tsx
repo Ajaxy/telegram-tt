@@ -248,7 +248,7 @@ const Audio: FC<OwnProps> = ({
     if (isDownloading) {
       cancelMediaDownload({ media });
     } else {
-      downloadMedia({ media });
+      downloadMedia({ media, originMessage: message });
     }
   });
 

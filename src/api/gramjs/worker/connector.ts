@@ -5,7 +5,7 @@ import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
 import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
 
-import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../../config';
+import { DATA_BROADCAST_CHANNEL_NAME, DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
 import { logDebugMessage } from '../../../util/debugConsole';
 import Deferred from '../../../util/Deferred';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
@@ -295,7 +295,9 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
       } else if (payload.type === 'methodCallback') {
         handleMethodCallback(payload);
       } else if (payload.type === 'unhandledError') {
-        throw new Error(payload.error?.message);
+        const message = payload.error?.message;
+        if (message && IGNORE_UNHANDLED_ERRORS.has(message)) return;
+        throw new Error(message);
       } else if (payload.type === 'sendBeacon') {
         navigator.sendBeacon(payload.url, payload.data);
       } else if (payload.type === 'debugLog') {

@@ -252,6 +252,7 @@ const WebPage: FC<OwnProps> = ({
         {!inPreview && document && (
           <Document
             document={document}
+            message={message}
             observeIntersection={observeIntersectionForLoading}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
             onMediaClick={handleMediaClick}

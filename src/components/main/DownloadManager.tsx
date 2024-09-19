@@ -1,12 +1,13 @@
 import type { FC } from '../../lib/teact/teact';
 import { memo, useEffect } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { selectTabState } from '../../global/selectors';
 import download from '../../util/download';
+import generateUniqueId from '../../util/generateUniqueId';
 import * as mediaLoader from '../../util/mediaLoader';
 import { IS_OPFS_SUPPORTED, IS_SERVICE_WORKER_SUPPORTED, MAX_BUFFER_SIZE } from '../../util/windowEnvironment';
 
@@ -69,7 +70,14 @@ const DownloadManager: FC<StateProps> = ({
         return;
       }
 
-      mediaLoader.fetch(mediaHash, mediaFormat, true).then((result) => {
+      const handleProgress = () => {
+        const currentDownloads = selectTabState(getGlobal()).activeDownloads;
+        if (!currentDownloads[mediaHash]) {
+          mediaLoader.cancelProgress(handleProgress);
+        }
+      };
+
+      mediaLoader.fetch(mediaHash, mediaFormat, true, handleProgress, generateUniqueId()).then((result) => {
         if (mediaFormat === ApiMediaFormat.DownloadUrl) {
           const url = new URL(result, window.document.baseURI);
           url.searchParams.set('filename', encodeURIComponent(filename));

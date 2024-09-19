@@ -627,7 +627,7 @@ addActionHandler('cancelMediaHashDownloads', (global, actions, payload): ActionR
 });
 
 addActionHandler('downloadMedia', (global, actions, payload): ActionReturnType => {
-  const { media, tabId = getCurrentTabId() } = payload;
+  const { media, originMessage, tabId = getCurrentTabId() } = payload;
 
   const hash = getMediaHash(media, 'download');
   if (!hash) return undefined;
@@ -637,6 +637,8 @@ addActionHandler('downloadMedia', (global, actions, payload): ActionReturnType =
     size,
     format: getMediaFormat(media, 'download'),
     filename: getMediaFilename(media),
+    originChatId: originMessage?.chatId,
+    originMessageId: originMessage?.id,
   } satisfies ActiveDownloads[string];
 
   return addActiveMediaDownload(global, hash, metadata, tabId);
@@ -659,7 +661,7 @@ addActionHandler('downloadSelectedMessages', (global, actions, payload): ActionR
   messages.forEach((message) => {
     const media = getMessageDownloadableMedia(message);
     if (!media) return;
-    actions.downloadMedia({ media, tabId });
+    actions.downloadMedia({ media, originMessage: message, tabId });
   });
 });
 

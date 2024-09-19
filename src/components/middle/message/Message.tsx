@@ -1186,6 +1186,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {document && (
           <Document
             document={document}
+            message={message}
             observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}

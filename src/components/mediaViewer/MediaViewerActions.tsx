@@ -110,7 +110,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     if (isDownloading) {
       cancelMediaDownload({ media });
     } else {
-      downloadMedia({ media });
+      const message = item?.type === 'message' ? item.message : undefined;
+      downloadMedia({ media, originMessage: message });
     }
   });
 
