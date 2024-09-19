@@ -5,7 +5,7 @@ import type {
   ApiMessageEntityCustomEmoji,
   ApiMessageForwardInfo,
   ApiMessageOutgoingStatus,
-  ApiPeer,
+  ApiPeer, ApiSponsoredMessage,
   ApiStickerSetInfo,
 } from '../../api/types';
 import type { ThreadId } from '../../types';
@@ -1101,13 +1101,15 @@ function selectShouldDisplayReplyKeyboard<T extends GlobalState>(global: T, mess
   return true;
 }
 
-export function selectCanAutoLoadMedia<T extends GlobalState>(global: T, message: ApiMessage) {
+export function selectCanAutoLoadMedia<T extends GlobalState>(
+  global: T, message: ApiMessage | ApiSponsoredMessage,
+) {
   const chat = selectChat(global, message.chatId);
   if (!chat) {
     return undefined;
   }
 
-  const sender = selectSender(global, message);
+  const sender = 'id' in message ? selectSender(global, message) : undefined;
 
   const isPhoto = Boolean(getMessagePhoto(message) || getMessageWebPagePhoto(message));
   const isVideo = Boolean(getMessageVideo(message) || getMessageWebPageVideo(message));

@@ -763,9 +763,9 @@ export type ApiThreadInfo = ApiCommentsInfo | ApiMessageThreadInfo;
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
 export type ApiSponsoredMessage = {
+  chatId: string;
   randomId: string;
   isRecommended?: true;
-  text: ApiFormattedText;
   expiresAt: number;
   sponsorInfo?: string;
   additionalInfo?: string;
@@ -774,6 +774,7 @@ export type ApiSponsoredMessage = {
   title: string;
   url: string;
   photo?: ApiPhoto;
+  content: MediaContent;
   peerColor?: ApiPeerColor;
 };
 

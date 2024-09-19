@@ -1,4 +1,4 @@
-import type { ApiMessage, ApiPeer } from '../../../api/types';
+import type { ApiMessage, ApiPeer, ApiSponsoredMessage } from '../../../api/types';
 import type { MediaViewerMedia } from '../../../types';
 
 import { getMessageContent, isDocumentPhoto, isDocumentVideo } from '../../../global/helpers';
@@ -15,6 +15,10 @@ export type MediaViewerItem = {
   type: 'standalone';
   media: MediaViewerMedia[];
   mediaIndex: number;
+} | {
+  type: 'sponsoredMessage';
+  message: ApiSponsoredMessage;
+  mediaIndex?: number;
 };
 
 type ViewableMedia = {
@@ -23,11 +27,12 @@ type ViewableMedia = {
 };
 
 export function getMediaViewerItem({
-  message, avatarOwner, standaloneMedia, mediaIndex,
+  message, avatarOwner, standaloneMedia, mediaIndex, sponsoredMessage,
 }: {
   message?: ApiMessage;
   avatarOwner?: ApiPeer;
   standaloneMedia?: MediaViewerMedia[];
+  sponsoredMessage?: ApiSponsoredMessage;
   mediaIndex?: number;
 }): MediaViewerItem | undefined {
   if (avatarOwner) {
@@ -50,6 +55,14 @@ export function getMediaViewerItem({
     return {
       type: 'message',
       message,
+      mediaIndex,
+    };
+  }
+
+  if (sponsoredMessage) {
+    return {
+      type: 'sponsoredMessage',
+      message: sponsoredMessage,
       mediaIndex,
     };
   }

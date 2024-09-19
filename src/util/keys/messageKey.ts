@@ -1,11 +1,16 @@
-import type { ApiMessage } from '../../api/types';
+import type { ApiMessage, ApiSponsoredMessage } from '../../api/types';
 
 export type MessageKey = `msg${string}-${number}`;
 
-export function getMessageKey(message: ApiMessage): MessageKey {
-  const { chatId, id, previousLocalId } = message;
+export function getMessageKey(message: ApiMessage | ApiSponsoredMessage): MessageKey {
+  const {
+    chatId,
+  } = message;
 
-  return buildMessageKey(chatId, previousLocalId || id);
+  if ('randomId' in message) {
+    return buildMessageKey(chatId, Number(message.randomId));
+  }
+  return buildMessageKey(chatId, message.previousLocalId || message.id);
 }
 
 export function getMessageServerKey(message: ApiMessage): MessageKey | undefined {

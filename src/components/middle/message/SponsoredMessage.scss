@@ -1,3 +1,5 @@
+@use "message-content";
+
 .SponsoredMessage {
   --border-top-left-radius: var(--border-radius-messages) !important;
   --border-bottom-left-radius: 0 !important;
@@ -44,6 +46,10 @@
 
   .message-content {
     padding: 0.5rem;
+    --border-top-left-radius: var(--border-radius-messages-small);
+    --border-top-right-radius: var(--border-radius-messages-small);
+    --border-bottom-right-radius: var(--border-radius-messages-small);
+    --border-bottom-left-radius: var(--border-radius-messages-small);
 
     @media (max-width: 600px) {
       max-width: min(29rem, calc(100vw - 4.5rem)) !important;
@@ -128,5 +134,9 @@
     &:hover {
       filter: opacity(1);
     }
+  }
+
+  .has-media {
+    padding-top: 0.5rem;
   }
 }

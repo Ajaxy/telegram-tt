@@ -298,7 +298,13 @@ const MessageListContent: FC<OwnProps> = ({
       {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
       {areAdsEnabled && isViewportNewest && (
-        <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
+        <SponsoredMessage
+          key={chatId}
+          chatId={chatId}
+          containerRef={containerRef}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
+        />
       )}
       {withHistoryTriggers && (
         <div

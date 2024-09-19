@@ -79,7 +79,9 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
   currentUserId = _currentUserId;
 }
 
-export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
+export function buildApiSponsoredMessage(
+  mtpMessage: GramJs.SponsoredMessage, chatId: string,
+): ApiSponsoredMessage | undefined {
   const {
     message, entities, randomId, recommended, sponsorInfo, additionalInfo, buttonText, canReport, title, url, color,
   } = mtpMessage;
@@ -90,9 +92,14 @@ export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): A
     photo = buildApiPhoto(mtpMessage.photo);
   }
 
+  let media: MediaContent | undefined;
+  if (mtpMessage.media) {
+    media = buildMessageMediaContent(mtpMessage.media);
+  }
+
   return {
+    chatId,
     randomId: serializeBytes(randomId),
-    text: buildMessageTextContent(message, entities),
     expiresAt: Math.round(Date.now() / 1000) + SPONSORED_MESSAGE_CACHE_MS,
     isRecommended: recommended,
     sponsorInfo,
@@ -103,6 +110,10 @@ export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): A
     url,
     peerColor: color && buildApiPeerColor(color),
     photo,
+    content: {
+      ...media,
+      text: buildMessageTextContent(message, entities),
+    },
   };
 }
 

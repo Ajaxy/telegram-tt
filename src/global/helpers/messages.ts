@@ -2,7 +2,7 @@ import type {
   ApiAttachment,
   ApiMessage,
   ApiMessageEntityTextUrl,
-  ApiPeer,
+  ApiPeer, ApiSponsoredMessage,
   ApiStory,
 } from '../../api/types';
 import type { MediaContent } from '../../api/types/messages';
@@ -52,7 +52,7 @@ export function getMessageTranscription(message: ApiMessage) {
   return transcriptionId && global.transcriptions[transcriptionId]?.text;
 }
 
-export function hasMessageText(message: ApiMessage | ApiStory) {
+export function hasMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage) {
   const {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
     game, action, storyData, giveaway, giveawayResults, isExpiredVoice, paidMedia,
@@ -64,7 +64,7 @@ export function hasMessageText(message: ApiMessage | ApiStory) {
   );
 }
 
-export function getMessageText(message: ApiMessage | ApiStory) {
+export function getMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage) {
   return hasMessageText(message) ? message.content.text?.text || CONTENT_NOT_SUPPORTED : undefined;
 }
 

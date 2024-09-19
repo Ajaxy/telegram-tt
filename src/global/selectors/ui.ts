@@ -1,4 +1,4 @@
-import type { ApiMessage } from '../../api/types';
+import type { ApiMessage, ApiSponsoredMessage } from '../../api/types';
 import type { PerformanceTypeKey } from '../../types';
 import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
@@ -19,9 +19,10 @@ export function selectIsMediaViewerOpen<T extends GlobalState>(
       messageId,
       isAvatarView,
       standaloneMedia,
+      isSponsoredMessage,
     },
   } = selectTabState(global, tabId);
-  return Boolean(standaloneMedia || (chatId && (isAvatarView || messageId)));
+  return Boolean(standaloneMedia || (chatId && (isAvatarView || messageId || isSponsoredMessage)));
 }
 
 export function selectRightColumnContentKey<T extends GlobalState>(
@@ -111,7 +112,7 @@ export function selectPerformanceSettingsValue<T extends GlobalState>(
   return global.settings.performance[key];
 }
 
-export function selectCanAutoPlayMedia<T extends GlobalState>(global: T, message: ApiMessage) {
+export function selectCanAutoPlayMedia<T extends GlobalState>(global: T, message: ApiMessage | ApiSponsoredMessage) {
   const video = getMessageVideo(message) || getMessageWebPageVideo(message);
   if (!video) {
     return undefined;

@@ -469,6 +469,7 @@ export type TabState = {
     withDynamicLoading?: boolean;
     mediaIndex?: number;
     isAvatarView?: boolean;
+    isSponsoredMessage?: boolean;
     standaloneMedia?: MediaViewerMedia[];
     origin?: MediaViewerOrigin;
     volume: number;
@@ -2570,6 +2571,7 @@ export interface ActionPayloads {
     standaloneMedia?: MediaViewerMedia[];
     mediaIndex?: number;
     isAvatarView?: boolean;
+    isSponsoredMessage?: boolean;
     origin: MediaViewerOrigin;
     withDynamicLoading?: boolean;
   } & WithTabId;

@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type {
   ApiChat,
-  ApiMessage, ApiPeer, ApiPhoto,
+  ApiMessage, ApiPeer, ApiPhoto, ApiSponsoredMessage,
 } from '../../api/types';
 import { type MediaViewerMedia, MediaViewerOrigin, type ThreadId } from '../../types';
 
@@ -25,7 +25,7 @@ import {
   selectOutlyingListByMessageId,
   selectPeer,
   selectPerformanceSettingsValue,
-  selectScheduledMessage,
+  selectScheduledMessage, selectSponsoredMessage,
   selectTabState,
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
@@ -70,6 +70,7 @@ type StateProps = {
   avatar?: ApiPhoto;
   avatarOwner?: ApiPeer;
   chatMessages?: Record<number, ApiMessage>;
+  sponsoredMessage?: ApiSponsoredMessage;
   standaloneMedia?: MediaViewerMedia[];
   mediaIndex?: number;
   isHidden?: boolean;
@@ -95,6 +96,7 @@ const MediaViewer = ({
   avatar,
   avatarOwner,
   chatMessages,
+  sponsoredMessage,
   standaloneMedia,
   mediaIndex,
   withAnimation,
@@ -112,9 +114,11 @@ const MediaViewer = ({
     toggleChatInfo,
     searchChatMediaMessages,
     loadMoreProfilePhotos,
+    clickSponsoredMessage,
+    openUrl,
   } = getActions();
 
-  const isOpen = Boolean(avatarOwner || message || standaloneMedia);
+  const isOpen = Boolean(avatarOwner || message || standaloneMedia || sponsoredMessage);
   const { isMobile } = useAppLayout();
 
   /* Animation */
@@ -128,7 +132,7 @@ const MediaViewer = ({
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
 
   const currentItem = getMediaViewerItem({
-    message, avatarOwner, standaloneMedia, mediaIndex,
+    message, avatarOwner, standaloneMedia, mediaIndex, sponsoredMessage,
   });
   const { media, isSingle } = getViewableMedia(currentItem) || {};
 
@@ -242,6 +246,14 @@ const MediaViewer = ({
     }
   });
 
+  const onSponsoredButtonClick = useLastCallback(() => {
+    if (!sponsoredMessage || !chatId) return;
+
+    clickSponsoredMessage({ chatId });
+    openUrl({ url: sponsoredMessage!.url });
+    closeMediaViewer();
+  });
+
   const handleForward = useLastCallback(() => {
     openForwardMenu({
       fromChatId: chatId!,
@@ -291,6 +303,16 @@ const MediaViewer = ({
       const nextIndex = fromMediaIndex + direction;
       if (nextIndex >= 0 && fromAvatarOwner.profilePhotos && nextIndex < fromAvatarOwner.profilePhotos.photos.length) {
         return { type: 'avatar', avatarOwner: fromAvatarOwner, mediaIndex: nextIndex };
+      }
+
+      return undefined;
+    }
+
+    if (from.type === 'sponsoredMessage') {
+      const { message: fromSponsoredMessage, mediaIndex: fromSponsoredMessageIndex } = from;
+      const nextIndex = fromSponsoredMessageIndex! + direction;
+      if (nextIndex >= 0 && fromSponsoredMessage) {
+        return { type: 'sponsoredMessage', message: fromSponsoredMessage, mediaIndex: nextIndex };
       }
 
       return undefined;
@@ -434,6 +456,7 @@ const MediaViewer = ({
         selectItem={openMediaViewerItem}
         isHidden={isHidden}
         onFooterClick={handleFooterClick}
+        onSponsoredButtonClick={onSponsoredButtonClick}
       />
     </ShowTransition>
   );
@@ -452,6 +475,7 @@ export default memo(withGlobal(
       standaloneMedia,
       mediaIndex,
       isAvatarView,
+      isSponsoredMessage,
     } = mediaViewer;
     const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
@@ -489,6 +513,13 @@ export default memo(withGlobal(
         message = selectScheduledMessage(global, chatId, messageId);
       } else {
         message = selectChatMessage(global, chatId, messageId);
+      }
+    }
+
+    let sponsoredMessage: ApiSponsoredMessage | undefined;
+    if (isSponsoredMessage && chatId) {
+      if (origin === MediaViewerOrigin.SponsoredMessage) {
+        sponsoredMessage = selectSponsoredMessage(global, chatId);
       }
     }
 
@@ -531,6 +562,7 @@ export default memo(withGlobal(
       origin,
       message,
       chatMessages,
+      sponsoredMessage,
       collectedMessageIds,
       withAnimation,
       isHidden,

@@ -2,7 +2,7 @@ import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type {
-  ApiDimensions, ApiMessage,
+  ApiDimensions, ApiMessage, ApiSponsoredMessage,
 } from '../../api/types';
 import type { MediaViewerOrigin } from '../../types';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
@@ -36,10 +36,11 @@ type OwnProps = {
   isMoving?: boolean;
   onClose: () => void;
   onFooterClick: () => void;
+  onSponsoredButtonClick: () => void;
 };
 
 type StateProps = {
-  textMessage?: ApiMessage;
+  textMessage?: ApiMessage | ApiSponsoredMessage;
   origin?: MediaViewerOrigin;
   isProtected?: boolean;
   volume: number;
@@ -65,6 +66,7 @@ const MediaViewerContent = ({
   isMoving,
   onClose,
   onFooterClick,
+  onSponsoredButtonClick,
 }: OwnProps & StateProps) => {
   const lang = useOldLang();
 
@@ -139,7 +141,7 @@ const MediaViewerContent = ({
   const textParts = textMessage && (textMessage.content.action?.type === 'suggestProfilePhoto'
     ? lang('Conversation.SuggestedPhotoTitle')
     : renderMessageText({ message: textMessage, forcePlayback: true, isForMediaViewer: true }));
-
+  const buttonText = textMessage && 'buttonText' in textMessage ? textMessage.buttonText : undefined;
   const hasFooter = Boolean(textParts);
   const posterSize = calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);
   const isForceMobileVersion = isMobile || shouldForceMobileVersion(posterSize);
@@ -185,10 +187,12 @@ const MediaViewerContent = ({
       {textParts && (
         <MediaViewerFooter
           text={textParts}
+          buttonText={buttonText}
           onClick={onFooterClick}
           isProtected={isProtected}
           isForceMobileVersion={isForceMobileVersion}
           isForVideo={isVideo && !isGif}
+          onButtonClick={onSponsoredButtonClick}
         />
       )}
     </div>
@@ -204,12 +208,14 @@ export default memo(withGlobal<OwnProps>(
       isHidden,
       origin,
     } = selectTabState(global).mediaViewer;
-    const textMessage = item.type === 'message' ? item.message : undefined;
+    const message = item.type === 'message' ? item.message : undefined;
+    const sponsoredMessage = item.type === 'sponsoredMessage' ? item.message : undefined;
+    const textMessage = message || sponsoredMessage;
 
     return {
       origin,
       textMessage,
-      isProtected: textMessage && selectIsMessageProtected(global, textMessage),
+      isProtected: message && selectIsMessageProtected(global, message),
       volume,
       isMuted,
       isHidden,

@@ -339,6 +339,11 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
       mediaSelector = index === 0 ? `.stars-transaction-media-${index} :is(img, video)` : undefined;
       break;
 
+    case MediaViewerOrigin.SponsoredMessage:
+      containerSelector = '.Transition_slide-active > .MessageList .sponsored-media-preview';
+      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media,${MESSAGE_CONTENT_SELECTOR} .thumbnail:not(.blurred-bg)`;
+      break;
+
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.Inline:
     default:

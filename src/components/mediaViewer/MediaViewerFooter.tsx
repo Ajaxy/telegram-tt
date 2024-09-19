@@ -12,20 +12,24 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useDerivedState from '../../hooks/useDerivedState';
 import useControlsSignal from './hooks/useControlsSignal';
 
+import Button from '../ui/Button';
+
 import './MediaViewerFooter.scss';
 
 const RESIZE_THROTTLE_MS = 500;
 
 type OwnProps = {
   text: TextPart | TextPart[];
+  buttonText?: string;
   onClick: () => void;
+  onButtonClick: () => void;
   isForVideo: boolean;
   isForceMobileVersion?: boolean;
   isProtected?: boolean;
 };
 
 const MediaViewerFooter: FC<OwnProps> = ({
-  text = '', isForVideo, onClick, isProtected, isForceMobileVersion,
+  text = '', buttonText, isForVideo, onClick, onButtonClick, isProtected, isForceMobileVersion,
 }) => {
   const [isMultiline, setIsMultiline] = useState(false);
   const { isMobile } = useAppLayout();
@@ -75,6 +79,17 @@ const MediaViewerFooter: FC<OwnProps> = ({
             {text}
           </p>
         </div>
+      )}
+      {Boolean(buttonText) && (
+        <Button
+          className={buildClassName('media-viewer-footer-content', 'media-viewer-button')}
+          size="default"
+          color="translucent"
+          isRectangular
+          onClick={onButtonClick}
+        >
+          {buttonText}
+        </Button>
       )}
     </div>
   );

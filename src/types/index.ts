@@ -330,6 +330,7 @@ export enum MediaViewerOrigin {
   SuggestedAvatar,
   StarsTransaction,
   PreviewMedia,
+  SponsoredMessage,
 }
 
 export enum StoryViewerOrigin {

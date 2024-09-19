@@ -1661,7 +1661,7 @@ export async function fetchSponsoredMessages({ chat }: { chat: ApiChat }) {
     return undefined;
   }
 
-  const messages = result.messages.map(buildApiSponsoredMessage).filter(Boolean);
+  const messages = result.messages.map((message) => buildApiSponsoredMessage(message, chat.id)).filter(Boolean);
 
   return {
     messages,

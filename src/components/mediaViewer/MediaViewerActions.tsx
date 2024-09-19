@@ -180,7 +180,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    return isVideo ? (
+    return item?.type !== 'sponsoredMessage' && (isVideo ? (
       <Button
         round
         size="smaller"
@@ -205,7 +205,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       >
         <i className="icon icon-download" />
       </Button>
-    );
+    ));
   }
 
   const openDeleteModalHandler = useLastCallback(() => {

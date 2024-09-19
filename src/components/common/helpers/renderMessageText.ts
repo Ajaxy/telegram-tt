@@ -1,4 +1,4 @@
-import type { ApiMessage } from '../../../api/types';
+import type { ApiMessage, ApiSponsoredMessage } from '../../../api/types';
 import type { LangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
@@ -28,7 +28,7 @@ export function renderMessageText({
   shouldRenderAsHtml,
   isForMediaViewer,
 } : {
-  message: ApiMessage;
+  message: ApiMessage | ApiSponsoredMessage;
   highlight?: string;
   emojiSize?: number;
   isSimple?: boolean;
