@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import React, { memo, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  memo, useEffect, useMemo, useState,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
@@ -410,7 +412,7 @@ function LeftColumn({
     setContent(LeftColumnContent.Settings);
   });
 
-  useHotkeys({
+  useHotkeys(useMemo(() => ({
     'Mod+Shift+F': handleHotkeySearch,
     // https://support.mozilla.org/en-US/kb/take-screenshots-firefox
     ...(!IS_FIREFOX && {
@@ -421,7 +423,7 @@ function LeftColumn({
       'Mod+9': handleArchivedChats,
     }),
     ...(IS_MAC_OS && IS_APP && { 'Mod+,': handleHotkeySettings }),
-  });
+  }), []));
 
   useEffect(() => {
     clearTwoFaError();

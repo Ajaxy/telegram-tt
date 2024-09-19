@@ -276,9 +276,9 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     showNotification({ message: getTextWithLanguage('AddedToDoNotTranslate', detectedChatLanguage) });
   });
 
-  useHotkeys({
+  useHotkeys(useMemo(() => ({
     'Mod+F': handleHotkeySearchClick,
-  });
+  }), []));
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (

@@ -146,12 +146,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     }
   });
 
-  useHotkeys(canSetPasscode ? {
+  useHotkeys(useMemo(() => (canSetPasscode ? {
     'Ctrl+Shift+L': handleLockScreenHotkey,
     'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
     ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
-  } : undefined);
+  } : undefined), [canSetPasscode]));
 
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
