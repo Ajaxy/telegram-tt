@@ -1,4 +1,5 @@
 import React, {
+  beginHeavyAnimation,
   type FC, memo, useEffect, useRef,
 } from '../../lib/teact/teact';
 
@@ -11,7 +12,6 @@ import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMe
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -100,7 +100,7 @@ const Menu: FC<OwnProps> = ({
 
   useEffectWithPrevDeps(([prevIsOpen]) => {
     if (isOpen || (!isOpen && prevIsOpen === true)) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION);
+      beginHeavyAnimation(ANIMATION_DURATION);
     }
   }, [isOpen]);
 

@@ -1,3 +1,4 @@
+import { onFullyIdle } from '../lib/teact/teact';
 import { addCallback } from '../lib/teact/teactn';
 import { addActionHandler, getGlobal } from '../global';
 
@@ -22,8 +23,6 @@ import arePropsShallowEqual from './arePropsShallowEqual';
 import { createCallbackManager } from './callbacks';
 import { areSortedArraysEqual, unique } from './iteratees';
 import { throttle } from './schedulers';
-
-import { onFullyIdle } from '../hooks/useHeavyAnimationCheck';
 
 interface FolderSummary {
   id: number;

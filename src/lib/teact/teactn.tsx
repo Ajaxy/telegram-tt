@@ -6,10 +6,9 @@ import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
 import { throttleWithTickEnd } from '../../util/schedulers';
 import { requestMeasure } from '../fasterdom/fasterdom';
-import React, { DEBUG_resolveComponentName, useEffect } from './teact';
+import React, { DEBUG_resolveComponentName, getIsHeavyAnimating, useEffect } from './teact';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
-import { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useUniqueId from '../../hooks/useUniqueId';
 
 export default React;
@@ -75,7 +74,7 @@ let forceOnHeavyAnimation = true;
 function runCallbacks() {
   if (forceOnHeavyAnimation) {
     forceOnHeavyAnimation = false;
-  } else if (isHeavyAnimating()) {
+  } else if (getIsHeavyAnimating()) {
     requestMeasure(runCallbacksThrottled);
     return;
   }

@@ -1,6 +1,7 @@
 import '../../global/actions/all';
 
 import React, {
+  beginHeavyAnimation,
   memo, useEffect, useLayoutEffect,
   useRef, useState,
 } from '../../lib/teact/teact';
@@ -42,7 +43,6 @@ import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -447,10 +447,10 @@ const Main = ({
       });
     }
 
-    const dispatchHeavyAnimationEnd = dispatchHeavyAnimationEvent();
+    const endHeavyAnimation = beginHeavyAnimation();
 
     waitForTransitionEnd(document.getElementById('MiddleColumn')!, () => {
-      dispatchHeavyAnimationEnd();
+      endHeavyAnimation();
       willAnimateLeftColumnRef.current = false;
       forceUpdate();
     });
@@ -480,10 +480,10 @@ const Main = ({
 
     willAnimateRightColumnRef.current = true;
 
-    const dispatchHeavyAnimationEnd = dispatchHeavyAnimationEvent();
+    const endHeavyAnimation = beginHeavyAnimation();
 
     waitForTransitionEnd(document.getElementById('RightColumn')!, () => {
-      dispatchHeavyAnimationEnd();
+      endHeavyAnimation();
       willAnimateRightColumnRef.current = false;
       forceUpdate();
       setIsNarrowMessageList(isRightColumnOpen);

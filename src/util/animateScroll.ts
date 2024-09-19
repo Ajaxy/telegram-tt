@@ -1,3 +1,4 @@
+import { beginHeavyAnimation } from '../lib/teact/teact';
 import { getGlobal } from '../global';
 
 import type { ScrollTargetPosition } from '../types';
@@ -14,13 +15,11 @@ import { selectCanAnimateInterface } from '../global/selectors';
 import { animateSingle, cancelSingleAnimation } from './animation';
 import { IS_ANDROID } from './windowEnvironment';
 
-import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
-
 type Params = Parameters<typeof createMutateFunction>;
 
 let isAnimating = false;
 let currentArgs: Parameters<typeof createMutateFunction> | undefined;
-let onHeavyAnimationStop: NoneToVoidFunction | undefined;
+let onHeavyAnimationEnd: NoneToVoidFunction | undefined;
 
 export default function animateScroll(...args: Params | [...Params, boolean]) {
   currentArgs = args.slice(0, 8) as Params;
@@ -127,9 +126,9 @@ function createMutateFunction(
 
     isAnimating = true;
 
-    const prevOnHeavyAnimationStop = onHeavyAnimationStop;
-    onHeavyAnimationStop = dispatchHeavyAnimationEvent();
-    prevOnHeavyAnimationStop?.();
+    const prevOnHeavyAnimationEnd = onHeavyAnimationEnd;
+    onHeavyAnimationEnd = beginHeavyAnimation();
+    prevOnHeavyAnimationEnd?.();
 
     animateSingle(() => {
       const t = Math.min((Date.now() - startAt) / duration, 1);
@@ -143,8 +142,8 @@ function createMutateFunction(
       if (!isAnimating) {
         currentArgs = undefined;
 
-        onHeavyAnimationStop!();
-        onHeavyAnimationStop = undefined;
+        onHeavyAnimationEnd!();
+        onHeavyAnimationEnd = undefined;
       }
 
       return isAnimating;

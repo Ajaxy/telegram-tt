@@ -1,7 +1,6 @@
-import { useEffect, useSignal } from '../lib/teact/teact';
+import { getIsHeavyAnimating, useEffect, useSignal } from '../lib/teact/teact';
 
 import useDerivedState from './useDerivedState';
-import { getIsHeavyAnimating } from './useHeavyAnimationCheck';
 
 export default function useMountAfterHeavyAnimation(hasIntersected: boolean) {
   const [getNoHeavyAnimation, setNoHeavyAnimation] = useSignal(false);

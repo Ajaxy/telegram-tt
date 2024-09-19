@@ -1,4 +1,5 @@
 /* eslint-disable eslint-multitab-tt/no-immediate-global */
+import { getIsHeavyAnimating, onFullyIdle } from '../lib/teact/teact';
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
 import type { ApiAvailableReaction, ApiMessage } from '../api/types';
@@ -44,7 +45,6 @@ import {
 } from './selectors';
 
 import { getIsMobile } from '../hooks/useAppLayout';
-import { isHeavyAnimating, onFullyIdle } from '../hooks/useHeavyAnimationCheck';
 
 const UPDATE_THROTTLE = 5000;
 
@@ -249,7 +249,7 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
 function updateCache(force?: boolean) {
   const global = getGlobal();
-  if (isRemovingCache || !isCaching || global.isLoggingOut || (!force && isHeavyAnimating())) {
+  if (isRemovingCache || !isCaching || global.isLoggingOut || (!force && getIsHeavyAnimating())) {
     return;
   }
 

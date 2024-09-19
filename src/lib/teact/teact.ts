@@ -9,6 +9,8 @@ import { throttleWith } from '../../util/schedulers';
 import { createSignal, isSignal, type Signal } from '../../util/signals';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
+export { getIsHeavyAnimating, beginHeavyAnimation, onFullyIdle } from './heavyAnimation';
+
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
 // eslint-disable-next-line @typescript-eslint/naming-convention

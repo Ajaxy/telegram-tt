@@ -1,11 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+  beginHeavyAnimation,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -126,7 +122,6 @@ import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useEnsureStory from '../../../hooks/useEnsureStory';
 import useFlag from '../../../hooks/useFlag';
-import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
@@ -832,7 +827,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const container = entry.target.closest<HTMLDivElement>('.MessageList');
     if (!container) return;
 
-    dispatchHeavyAnimationEvent(RESIZE_ANIMATION_DURATION);
+    beginHeavyAnimation(RESIZE_ANIMATION_DURATION);
 
     const resizeDiff = newHeight - lastHeight;
     const { offsetHeight, scrollHeight, scrollTop } = container;

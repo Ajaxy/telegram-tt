@@ -1,4 +1,5 @@
 /* eslint-disable eslint-multitab-tt/set-global-only-variable */
+import { onFullyIdle } from '../lib/teact/teact';
 import { addCallback } from '../lib/teact/teactn';
 import { getActions, getGlobal, setGlobal } from '../global';
 
@@ -23,8 +24,6 @@ import { deepMerge } from './deepMerge';
 import { getCurrentTabId, signalPasscodeHash, subscribeToTokenDied } from './establishMultitabRole';
 import { omit } from './iteratees';
 import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
-
-import { onFullyIdle } from '../hooks/useHeavyAnimationCheck';
 
 type BroadcastChannelRefreshLangpack = {
   type: 'langpackRefresh';

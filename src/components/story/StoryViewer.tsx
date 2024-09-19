@@ -1,4 +1,5 @@
 import React, {
+  beginHeavyAnimation,
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
@@ -19,7 +20,6 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useFlag from '../../hooks/useFlag';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
@@ -117,11 +117,11 @@ function StoryViewer({
 
   useEffect(() => {
     if (isGhostAnimation && !isPrevOpen && isOpen && peerId && thumbnail && origin !== undefined) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateOpening(peerId, origin, thumbnail, bestImageData, slideSizes.activeSlide);
     }
     if (isGhostAnimation && isPrevOpen && !isOpen && prevPeerId && prevBestImageData && prevOrigin !== undefined) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(prevPeerId, prevOrigin, prevBestImageData);
     }
   }, [

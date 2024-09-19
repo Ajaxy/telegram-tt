@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, {
+  getIsHeavyAnimating,
   memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
@@ -17,7 +18,7 @@ import { IS_ELECTRON } from '../../util/windowEnvironment';
 import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
-import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
+import useHeavyAnimation from '../../hooks/useHeavyAnimation';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
 import useSharedIntersectionObserver from '../../hooks/useSharedIntersectionObserver';
@@ -101,8 +102,8 @@ const AnimatedSticker: FC<OwnProps> = ({
   // Delay initialization until heavy animation ends
   const [
     canInitialize, markCanInitialize, unmarkCanInitialize,
-  ] = useFlag(!isHeavyAnimating() || shouldForceOnHeavyAnimation);
-  useHeavyAnimationCheck(unmarkCanInitialize, markCanInitialize, shouldForceOnHeavyAnimation);
+  ] = useFlag(!getIsHeavyAnimating() || shouldForceOnHeavyAnimation);
+  useHeavyAnimation(unmarkCanInitialize, markCanInitialize, shouldForceOnHeavyAnimation);
   useEffect(() => {
     if (shouldForceOnHeavyAnimation) markCanInitialize();
   }, [shouldForceOnHeavyAnimation]);
@@ -129,7 +130,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       || isUnmountedRef.current
       || !tgsUrl
       || (sharedCanvas && (!sharedCanvasCoords || !sharedCanvas.offsetWidth || !sharedCanvas.offsetHeight))
-      || (isHeavyAnimating() && !shouldForceOnHeavyAnimation)
+      || (getIsHeavyAnimating() && !shouldForceOnHeavyAnimation)
     ) {
       return;
     }
@@ -252,7 +253,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [playAnimation, animation, tgsUrl]);
 
-  useHeavyAnimationCheck(pauseAnimation, playAnimation, !playKey || shouldForceOnHeavyAnimation);
+  useHeavyAnimation(pauseAnimation, playAnimation, !playKey || shouldForceOnHeavyAnimation);
   usePriorityPlaybackCheck(pauseAnimation, playAnimation, !playKey || forceAlways);
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,
@@ -282,5 +283,5 @@ export default memo(AnimatedSticker);
 
 function isFrozen(forceAlways = false, forceOnHeavyAnimation = false) {
   if (forceAlways) return false;
-  return (!forceOnHeavyAnimation && isHeavyAnimating()) || isPriorityPlaybackActive() || isBackgroundModeActive();
+  return (!forceOnHeavyAnimation && getIsHeavyAnimating()) || isPriorityPlaybackActive() || isBackgroundModeActive();
 }

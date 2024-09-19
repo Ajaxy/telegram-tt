@@ -1,5 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
+  beginHeavyAnimation,
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
@@ -22,7 +23,6 @@ import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -148,8 +148,8 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
       requestNextMutation(() => {
         if (!ref.current) return;
 
-        const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
-        waitForTransitionEnd(ref.current, dispatchHeavyAnimationStop);
+        const endHeavyAnimation = beginHeavyAnimation();
+        waitForTransitionEnd(ref.current, endHeavyAnimation);
 
         onOpenAnimationStart?.();
 

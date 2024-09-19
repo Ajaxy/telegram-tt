@@ -1,26 +1,23 @@
 import {
+  getIsHeavyAnimating,
   useCallback, useEffect, useMemo, useRef,
 } from '../lib/teact/teact';
 
-import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import { createCallbackManager } from '../util/callbacks';
-import { onIdle } from '../util/schedulers';
-import { createSignal } from '../util/signals';
 import useLastCallback from './useLastCallback';
 
-// Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
-const AUTO_END_TIMEOUT = 1000;
+export const startCallbacks = createCallbackManager();
+export const endCallbacks = createCallbackManager();
 
-const startCallbacks = createCallbackManager();
-const endCallbacks = createCallbackManager();
+getIsHeavyAnimating.subscribe(() => {
+  if (getIsHeavyAnimating()) {
+    startCallbacks.runCallbacks();
+  } else {
+    endCallbacks.runCallbacks();
+  }
+});
 
-let counter = 0;
-
-const [getIsAnimating, setIsAnimating] = createSignal(false);
-
-export const getIsHeavyAnimating = getIsAnimating;
-
-export default function useHeavyAnimationCheck(
+export default function useHeavyAnimation(
   onStart?: AnyToVoidFunction,
   onEnd?: AnyToVoidFunction,
   isDisabled = false,
@@ -33,7 +30,7 @@ export default function useHeavyAnimationCheck(
       return undefined;
     }
 
-    if (getIsAnimating()) {
+    if (getIsHeavyAnimating()) {
       lastOnStart();
     }
 
@@ -57,7 +54,7 @@ export function useThrottleForHeavyAnimation<T extends AnyToVoidFunction>(afterH
   return useMemo(() => {
     return (...args: Parameters<T>) => {
       if (!isScheduledRef.current) {
-        if (!getIsAnimating()) {
+        if (!getIsHeavyAnimating()) {
           fnMemo(...args);
           return;
         }
@@ -72,49 +69,4 @@ export function useThrottleForHeavyAnimation<T extends AnyToVoidFunction>(afterH
       }
     };
   }, [fnMemo]);
-}
-
-export function isHeavyAnimating() {
-  return getIsAnimating();
-}
-
-export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
-  counter++;
-
-  if (counter === 1) {
-    setIsAnimating(true);
-    startCallbacks.runCallbacks();
-  }
-
-  const timeout = window.setTimeout(onEnd, duration);
-
-  let hasEnded = false;
-
-  function onEnd() {
-    if (hasEnded) return;
-    hasEnded = true;
-
-    clearTimeout(timeout);
-
-    counter--;
-
-    if (counter === 0) {
-      setIsAnimating(false);
-      endCallbacks.runCallbacks();
-    }
-  }
-
-  return onEnd;
-}
-
-export function onFullyIdle(cb: NoneToVoidFunction) {
-  onIdle(() => {
-    if (getIsAnimating()) {
-      requestMeasure(() => {
-        onFullyIdle(cb);
-      });
-    } else {
-      cb();
-    }
-  });
 }

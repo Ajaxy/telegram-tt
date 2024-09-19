@@ -1,8 +1,7 @@
 import type { RefObject } from 'react';
-import { useEffect } from '../lib/teact/teact';
+import { onFullyIdle, useEffect } from '../lib/teact/teact';
 
 import unloadVideo from '../util/browser/unloadVideo';
-import { onFullyIdle } from './useHeavyAnimationCheck';
 
 // Fix for memory leak when unmounting video element
 export default function useVideoCleanup(videoRef: RefObject<HTMLVideoElement>, dependencies: any[]) {

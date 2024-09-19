@@ -1,4 +1,6 @@
-import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
+import React, {
+  beginHeavyAnimation, memo, useEffect, useMemo,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiUser } from '../../api/types';
@@ -8,7 +10,6 @@ import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
 import { selectIsForumPanelOpen, selectPerformanceSettingsValue, selectTabState } from '../../global/selectors';
 import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ribbonAnimation';
 
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useStoryPreloader from './hooks/useStoryPreloader';
@@ -98,10 +99,10 @@ function StoryToggler({
   useEffect(() => {
     if (!withAnimation || isForumPanelOpen) return;
     if (isVisible) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(isArchived);
     } else {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateOpening(isArchived);
     }
   }, [isArchived, isVisible, withAnimation, isForumPanelOpen]);
