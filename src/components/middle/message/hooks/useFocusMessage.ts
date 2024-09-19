@@ -3,6 +3,7 @@ import { addExtraClass } from '../../../../lib/teact/teact-dom';
 
 import type { FocusDirection, ScrollTargetPosition } from '../../../../types';
 
+import { SCROLL_MAX_DISTANCE } from '../../../../config';
 import {
   requestForcedReflow, requestMeasure, requestMutation,
 } from '../../../../lib/fasterdom/fasterdom';
@@ -10,7 +11,7 @@ import animateScroll from '../../../../util/animateScroll';
 
 // This is used when the viewport was replaced.
 const BOTTOM_FOCUS_OFFSET = 500;
-const RELOCATED_FOCUS_OFFSET = 750;
+const RELOCATED_FOCUS_OFFSET = SCROLL_MAX_DISTANCE;
 const FOCUS_MARGIN = 20;
 
 export default function useFocusMessage(

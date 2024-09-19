@@ -5,10 +5,10 @@ import type { ScrollTargetPosition } from '../types';
 import { FocusDirection } from '../types';
 
 import {
-  FAST_SMOOTH_MAX_DISTANCE,
-  FAST_SMOOTH_MAX_DURATION,
-  FAST_SMOOTH_MIN_DURATION,
-  FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE,
+  SCROLL_MAX_DISTANCE,
+  SCROLL_MAX_DURATION,
+  SCROLL_MIN_DURATION,
+  SCROLL_SHORT_TRANSITION_MAX_DISTANCE,
 } from '../config';
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../global/selectors';
@@ -52,7 +52,7 @@ function createMutateFunction(
   element: HTMLElement,
   position: ScrollTargetPosition,
   margin = 0,
-  maxDistance = FAST_SMOOTH_MAX_DISTANCE,
+  maxDistance = SCROLL_MAX_DISTANCE,
   forceDirection?: FocusDirection,
   forceDuration?: number,
   forceNormalContainerHeight?: boolean,
@@ -117,10 +117,10 @@ function createMutateFunction(
       return;
     }
 
-    const transition = absPath <= FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
+    const transition = absPath <= SCROLL_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
     const duration = forceDuration || (
-      FAST_SMOOTH_MIN_DURATION
-      + (absPath / FAST_SMOOTH_MAX_DISTANCE) * (FAST_SMOOTH_MAX_DURATION - FAST_SMOOTH_MIN_DURATION)
+      SCROLL_MIN_DURATION
+      + (absPath / SCROLL_MAX_DISTANCE) * (SCROLL_MAX_DURATION - SCROLL_MIN_DURATION)
     );
     const startAt = Date.now();
 
@@ -158,7 +158,7 @@ export function isAnimatingScroll() {
 function calculateScrollFrom(
   container: HTMLElement,
   scrollTo: number,
-  maxDistance = FAST_SMOOTH_MAX_DISTANCE,
+  maxDistance = SCROLL_MAX_DISTANCE,
   forceDirection?: FocusDirection,
 ) {
   const { scrollTop } = container;
@@ -185,5 +185,5 @@ function shortTransition(t: number) {
 }
 
 function longTransition(t: number) {
-  return 1 - ((1 - t) ** 6.5);
+  return 1 - ((1 - t) ** 6);
 }
