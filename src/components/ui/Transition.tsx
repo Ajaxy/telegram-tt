@@ -152,7 +152,9 @@ function Transition({
       addExtraClass(el, CLASSES.slide);
 
       if (slideClassName) {
-        addExtraClass(el, slideClassName);
+        slideClassName.split(/\s+/).forEach((token) => {
+          addExtraClass(el, token);
+        });
       }
     });
 
