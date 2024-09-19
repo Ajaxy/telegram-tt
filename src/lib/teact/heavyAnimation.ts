@@ -1,4 +1,4 @@
-import { onIdle } from '../../util/schedulers';
+import { onIdle, throttleWith } from '../../util/schedulers';
 import { createSignal } from '../../util/signals';
 import { requestMeasure } from '../fasterdom/fasterdom';
 
@@ -47,4 +47,8 @@ export function onFullyIdle(cb: NoneToVoidFunction) {
       cb();
     }
   });
+}
+
+export function throttleWithFullyIdle<F extends AnyToVoidFunction>(fn: F) {
+  return throttleWith(onFullyIdle, fn);
 }
