@@ -6,7 +6,7 @@ import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
 import { throttleWithTickEnd } from '../../util/schedulers';
 import { requestMeasure } from '../fasterdom/fasterdom';
-import React, { DEBUG_resolveComponentName, getIsHeavyAnimating, useEffect } from './teact';
+import React, { DEBUG_resolveComponentName, getIsHeavyAnimating, useUnmountCleanup } from './teact';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useUniqueId from '../../hooks/useUniqueId';
@@ -255,11 +255,9 @@ export function withGlobal<OwnProps extends AnyLiteral>(
       const id = useUniqueId();
       const forceUpdate = useForceUpdate();
 
-      useEffect(() => {
-        return () => {
-          containers.delete(id);
-        };
-      }, [id]);
+      useUnmountCleanup(() => {
+        containers.delete(id);
+      });
 
       let container = containers.get(id)!;
       if (!container) {

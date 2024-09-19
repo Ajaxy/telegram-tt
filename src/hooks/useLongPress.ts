@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from '../lib/teact/teact';
+import { useCallback, useRef, useUnmountCleanup } from '../lib/teact/teact';
 
 const DEFAULT_THRESHOLD = 250;
 
@@ -41,11 +41,9 @@ function useLongPress({
     window.clearTimeout(timerId.current);
   }, [onEnd, onClick]);
 
-  useEffect(() => {
-    return () => {
-      window.clearTimeout(timerId.current);
-    };
-  }, []);
+  useUnmountCleanup(() => {
+    window.clearTimeout(timerId.current);
+  });
 
   return {
     onMouseDown: start,

@@ -1,6 +1,5 @@
-import { useRef } from '../lib/teact/teact';
+import { useRef, useUnmountCleanup } from '../lib/teact/teact';
 
-import useEffectOnce from './useEffectOnce';
 import usePreviousDeprecated from './usePreviousDeprecated';
 
 export default function useSyncEffect<const T extends readonly any[]>(
@@ -15,9 +14,7 @@ export default function useSyncEffect<const T extends readonly any[]>(
     cleanupRef.current = effect(prevDeps || []) ?? undefined;
   }
 
-  useEffectOnce(() => {
-    return () => {
-      cleanupRef.current?.();
-    };
+  useUnmountCleanup(() => {
+    cleanupRef.current?.();
   });
 }

@@ -2,7 +2,11 @@ import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, {
   getIsHeavyAnimating,
-  memo, useEffect, useRef, useState,
+  memo,
+  useEffect,
+  useRef,
+  useState,
+  useUnmountCleanup,
 } from '../../lib/teact/teact';
 
 import type RLottieInstance from '../../lib/rlottie/RLottie';
@@ -118,11 +122,9 @@ const AnimatedSticker: FC<OwnProps> = ({
   }, [color, shouldUseColorFilter]);
 
   const isUnmountedRef = useRef(false);
-  useEffect(() => {
-    return () => {
-      isUnmountedRef.current = true;
-    };
-  }, []);
+  useUnmountCleanup(() => {
+    isUnmountedRef.current = true;
+  });
 
   const init = useLastCallback(() => {
     if (
@@ -184,11 +186,9 @@ const AnimatedSticker: FC<OwnProps> = ({
     animation.setColor(rgbColor.current);
   }, [color, animation]);
 
-  useEffect(() => {
-    return () => {
-      animationRef.current?.removeView(viewId);
-    };
-  }, [viewId]);
+  useUnmountCleanup(() => {
+    animationRef.current?.removeView(viewId);
+  });
 
   const playAnimation = useLastCallback((shouldRestart = false) => {
     if (

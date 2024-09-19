@@ -92,7 +92,7 @@ interface ComponentInstance {
       cursor: number;
       byCursor: {
         dependencies?: readonly any[];
-        schedule: NoneToVoidFunction;
+        schedule?: NoneToVoidFunction;
         cleanup?: NoneToVoidFunction;
         releaseSignals?: NoneToVoidFunction;
       }[];
@@ -778,7 +778,7 @@ function useEffectBase(
         console.log(`[Teact] Effect "${debugKey}" caused by signal #${i} new value:`, signal());
       }
 
-      byCursor[cursor].schedule();
+      byCursor[cursor].schedule!();
     }));
 
     if (!cleanups?.length) {
@@ -805,6 +805,26 @@ export function useEffect(effect: Effect, dependencies?: readonly any[], debugKe
 
 export function useLayoutEffect(effect: Effect, dependencies?: readonly any[], debugKey?: string) {
   return useEffectBase(true, effect, dependencies, debugKey);
+}
+
+export function useUnmountCleanup(cleanup: NoneToVoidFunction) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+
+  if (!renderingInstance.hooks.effects) {
+    renderingInstance.hooks.effects = { cursor: 0, byCursor: [] };
+  }
+
+  const { cursor, byCursor } = renderingInstance.hooks.effects;
+
+  if (!byCursor[cursor]) {
+    byCursor[cursor] = {
+      cleanup,
+    };
+  }
+
+  renderingInstance.hooks.effects.cursor++;
 }
 
 export function useMemo<T extends any>(
