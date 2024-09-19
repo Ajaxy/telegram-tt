@@ -2,6 +2,7 @@ import { getIsHeavyAnimating, useEffect } from '../lib/teact/teact';
 
 import type { CallbackManager } from '../util/callbacks';
 
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import { createCallbackManager } from '../util/callbacks';
 import useLastCallback from './useLastCallback';
 
@@ -41,7 +42,9 @@ export default function useSharedIntersectionObserver(
       if (!getIsHeavyAnimating()) {
         flush();
       } else {
-        getIsHeavyAnimating.once(flush);
+        getIsHeavyAnimating.once(() => {
+          requestMeasure(flush);
+        });
       }
     };
 
