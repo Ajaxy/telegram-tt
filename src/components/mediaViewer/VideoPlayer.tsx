@@ -181,7 +181,8 @@ const VideoPlayer: FC<OwnProps> = ({
     }
   });
 
-  useVideoCleanup(videoRef, []);
+  useVideoCleanup(videoRef, bufferingHandlers);
+
   const [, setCurrentTime] = useCurrentTimeSignal();
   const [, setIsVideoWaiting] = useVideoWaitingSignal();
 

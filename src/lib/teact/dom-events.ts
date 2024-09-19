@@ -27,7 +27,7 @@ export function removeEventListener(element: Element, propName: string, handler:
   }
 }
 
-function resolveEventType(propName: string, element: Element) {
+export function resolveEventType(propName: string, element: Element) {
   const eventType = propName
     .replace(/^on/, '')
     .replace(/Capture$/, '').toLowerCase();
