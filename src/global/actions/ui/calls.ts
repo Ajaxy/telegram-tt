@@ -7,7 +7,7 @@ import type {
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import { omit } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
 import safePlay from '../../../util/safePlay';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
@@ -17,7 +17,6 @@ import {
   addActionHandler, getGlobal,
   setGlobal,
 } from '../../index';
-import { addChats, addUsers } from '../../reducers';
 import { updateGroupCall } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -107,31 +106,19 @@ async function fetchGroupCall<T extends GlobalState>(global: T, groupCall: Parti
     undefined,
     existingGroupCall?.isLoaded ? undefined : result.groupCall.participantsCount,
   );
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
 
   setGlobal(global);
 
   return result.groupCall;
 }
 
-async function fetchGroupCallParticipants<T extends GlobalState>(
-  global: T,
+function requestGroupCallParticipants(
   groupCall: Partial<ApiGroupCall>, nextOffset?: string,
 ) {
-  const result = await callApi('fetchGroupCallParticipants', {
+  return callApi('fetchGroupCallParticipants', {
     call: groupCall as ApiGroupCall,
     offset: nextOffset,
   });
-
-  if (!result) return;
-
-  global = getGlobal();
-
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-
-  setGlobal(global);
 }
 
 addActionHandler('toggleGroupCallPanel', (global, actions, payload): ActionReturnType => {
@@ -150,7 +137,7 @@ addActionHandler('subscribeToGroupCallUpdates', async (global, actions, payload)
   if (subscribed) {
     await fetchGroupCall(global, groupCall);
     global = getGlobal();
-    await fetchGroupCallParticipants(global, groupCall);
+    await requestGroupCallParticipants(groupCall);
   }
 
   await callApi('toggleGroupCallStartSubscription', {
@@ -373,7 +360,7 @@ addActionHandler('loadMoreGroupCallParticipants', (global): ActionReturnType => 
     return;
   }
 
-  void fetchGroupCallParticipants(global, groupCall, groupCall.nextOffset);
+  void requestGroupCallParticipants(groupCall, groupCall.nextOffset);
 });
 
 addActionHandler('requestMasterAndRequestCall', (global, actions, payload): ActionReturnType => {

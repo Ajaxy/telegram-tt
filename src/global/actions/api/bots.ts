@@ -9,7 +9,6 @@ import { ManagementProgress } from '../../../types';
 
 import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import PopupManager from '../../../util/PopupManager';
 import requestActionTimeout from '../../../util/requestActionTimeout';
@@ -21,7 +20,7 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
-  addChats, addUsers, removeBlockedUser, updateManagementProgress, updateUser, updateUserFullInfo,
+  removeBlockedUser, updateManagementProgress, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
@@ -224,10 +223,9 @@ addActionHandler('loadTopInlineBots', async (global): Promise<void> => {
     return;
   }
 
-  const { ids, users } = result;
+  const { ids } = result;
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = {
     ...global,
     topInlineBots: {
@@ -250,10 +248,9 @@ addActionHandler('loadTopBotApps', async (global): Promise<void> => {
     return;
   }
 
-  const { ids, users } = result;
+  const { ids } = result;
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = {
     ...global,
     topBotApps: {
@@ -285,8 +282,6 @@ addActionHandler('queryInlineBot', async (global, actions, payload): Promise<voi
       return;
     }
 
-    global = addUsers(global, { [inlineBot.id]: inlineBot });
-    global = addChats(global, { [chat.id]: chat });
     inlineBotData = {
       id: inlineBot.id,
       query: '',
@@ -689,11 +684,9 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
       bot,
     });
     if (result) {
-      const attachBot = result.bot;
       global = getGlobal();
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      setGlobal(global);
 
+      const attachBot = result.bot;
       const shouldAskForTos = attachBot.isDisclaimerNeeded || attachBot.isForAttachMenu || attachBot.isForSideMenu;
 
       if (shouldAskForTos) {
@@ -886,7 +879,6 @@ async function loadAttachBots<T extends GlobalState>(global: T, hash?: string) {
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = {
     ...global,
     attachMenu: {

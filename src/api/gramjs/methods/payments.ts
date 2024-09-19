@@ -4,11 +4,9 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type {
   ApiChat, ApiInputStorePaymentPurpose, ApiPeer, ApiRequestInputInvoice,
   ApiThemeParameters,
-  OnApiUpdate,
 } from '../../types';
 
 import { DEBUG } from '../../../config';
-import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
   buildApiBoost,
   buildApiBoostsStatus,
@@ -24,25 +22,18 @@ import {
   buildApiStarTopupOption,
   buildShippingOptions,
 } from '../apiBuilders/payments';
-import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildInputThemeParams, buildShippingInfo,
 } from '../gramjsBuilders';
 import {
-  addEntitiesToLocalDb,
   addWebDocumentToLocalDb,
   deserializeBytes,
   serializeBytes,
 } from '../helpers';
 import localDb from '../localDb';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { handleGramJsUpdate, invokeRequest } from './client';
 import { getTemporaryPaymentPassword } from './twoFaSettings';
-
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
 
 export async function validateRequestedInfo({
   inputInvoice,
@@ -116,7 +107,7 @@ export async function sendPaymentForm({
   if (!result) return false;
 
   if (result instanceof GramJs.payments.PaymentVerificationNeeded) {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updatePaymentVerificationNeeded',
       url: result.url,
     });
@@ -171,12 +162,9 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice, theme
     addWebDocumentToLocalDb(result.photo);
   }
 
-  addEntitiesToLocalDb(result.users);
-
   return {
     form: buildApiPaymentForm(result),
     invoice: buildApiInvoiceFromForm(result),
-    users: result.users.map(buildApiUser).filter(Boolean),
   };
 }
 
@@ -190,11 +178,8 @@ export async function getReceipt(chat: ApiChat, msgId: number) {
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-
   return {
     receipt: buildApiReceipt(result),
-    users: result.users.map(buildApiUser).filter(Boolean),
   };
 }
 
@@ -202,9 +187,6 @@ export async function fetchPremiumPromo() {
   const result = await invokeRequest(new GramJs.help.GetPremiumPromo());
   if (!result) return undefined;
 
-  addEntitiesToLocalDb(result.users);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
   result.videos.forEach((video) => {
     if (video instanceof GramJs.Document) {
       localDb.documents[video.id.toString()] = video;
@@ -213,7 +195,6 @@ export async function fetchPremiumPromo() {
 
   return {
     promo: buildApiPremiumPromo(result),
-    users,
   };
 }
 
@@ -239,16 +220,9 @@ export async function fetchMyBoosts() {
 
   if (!result) return undefined;
 
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const boosts = result.myBoosts.map(buildApiMyBoost);
 
   return {
-    users,
-    chats,
     boosts,
   };
 }
@@ -267,16 +241,9 @@ export async function applyBoost({
 
   if (!result) return undefined;
 
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const boosts = result.myBoosts.map(buildApiMyBoost);
 
   return {
-    users,
-    chats,
     boosts,
   };
 }
@@ -319,16 +286,11 @@ export async function fetchBoostList({
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
-
   const boostList = result.boosts.map(buildApiBoost);
 
   return {
     count: result.count,
     boostList,
-    users,
     nextOffset: result.nextOffset,
   };
 }
@@ -365,13 +327,8 @@ export async function checkGiftCode({
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-
   return {
     code: buildApiCheckedGiftCode(result),
-    users: result.users.map(buildApiUser).filter(Boolean),
-    chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
   };
 }
 
@@ -446,12 +403,7 @@ export async function fetchStarsStatus() {
     return undefined;
   }
 
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-
   return {
-    users,
-    chats,
     nextOffset: result.nextOffset,
     history: result.history?.map(buildApiStarsTransaction),
     balance: result.balance.toJSNumber(),
@@ -481,12 +433,7 @@ export async function fetchStarsTransactions({
     return undefined;
   }
 
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-
   return {
-    users,
-    chats,
     nextOffset: result.nextOffset,
     history: result.history?.map(buildApiStarsTransaction),
     balance: result.balance.toJSNumber(),
@@ -511,12 +458,7 @@ export async function fetchStarsTransactionById({
     return undefined;
   }
 
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-
   return {
-    users,
-    chats,
     transaction: buildApiStarsTransaction(result.history[0]),
   };
 }

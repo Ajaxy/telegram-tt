@@ -1,4 +1,4 @@
-import type { ApiUser, ApiUsername } from '../../../api/types';
+import type { ApiUsername } from '../../../api/types';
 import type {
   ApiPrivacySettings,
 } from '../../../types';
@@ -19,8 +19,8 @@ import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addBlockedUser, addNotifyExceptions, addUsers, deletePeerPhoto,
-  removeBlockedUser, replaceSettings, updateChat, updateChats,
+  addBlockedUser, addNotifyExceptions, deletePeerPhoto,
+  removeBlockedUser, replaceSettings, updateChat,
   updateNotifySettings, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -47,12 +47,7 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
   setGlobal(global);
 
   if (photo) {
-    const result = await callApi('uploadProfilePhoto', photo);
-    if (result) {
-      global = getGlobal();
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      setGlobal(global);
-    }
+    await callApi('uploadProfilePhoto', photo);
   }
 
   if (firstName || lastName || about) {
@@ -119,10 +114,6 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise
   const result = await callApi('updateProfilePhoto', photo, isFallback);
   if (!result) return;
 
-  const { users } = result;
-  global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
-  setGlobal(global);
   actions.loadFullUser({ userId: currentUserId, withPhotos: true });
 });
 
@@ -260,13 +251,6 @@ addActionHandler('loadBlockedUsers', async (global): Promise<void> => {
   if (!result) return;
 
   global = getGlobal();
-
-  if (result.users?.length) {
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  }
-  if (result.chats?.length) {
-    global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  }
 
   global = {
     ...global,
@@ -425,14 +409,10 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     bioSettings,
     birthdaySettings,
   ] = result as {
-    users: ApiUser[];
     rules: ApiPrivacySettings;
   }[];
 
-  const allUsers = result.flatMap((e) => e!.users);
-
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(allUsers, 'id'));
   global = {
     ...global,
     settings: {
@@ -466,7 +446,6 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
     }
 
     global = getGlobal();
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
     global = {
       ...global,
       settings: {
@@ -502,7 +481,6 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
   onSuccess?.();
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = {
     ...global,
     settings: {
@@ -542,7 +520,6 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = {
     ...global,
     settings: {

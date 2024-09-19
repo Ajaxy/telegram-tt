@@ -1,6 +1,6 @@
 import type {
   ApiChat, ApiChatFolder, ApiChatlistExportedInvite,
-  ApiChatMember, ApiError, ApiMissingInvitedUser, ApiUser,
+  ApiChatMember, ApiError, ApiMissingInvitedUser,
 } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
@@ -21,7 +21,6 @@ import {
   ARCHIVED_FOLDER_ID,
   CHAT_LIST_LOAD_SLICE,
   DEBUG,
-  GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT,
   GLOBAL_SUGGESTED_CHANNELS_ID,
   RE_TG_LINK,
   SAVED_FOLDER_ID,
@@ -57,10 +56,8 @@ import {
 } from '../../index';
 import {
   addChatMembers,
-  addChats,
   addMessages,
   addSimilarChannels,
-  addUsers,
   addUserStatuses,
   deleteChatMessages,
   deletePeerPhoto,
@@ -70,9 +67,7 @@ import {
   replaceChatFullInfo,
   replaceChatListIds,
   replaceChatListLoadingParameters,
-  replaceChats,
   replaceThreadParam,
-  replaceUsers,
   replaceUserStatuses,
   toggleSimilarChannels,
   updateChat,
@@ -91,6 +86,7 @@ import {
   updateTopic,
   updateTopics,
   updateUser,
+  updateUsers,
 } from '../../reducers';
 import { updateGroupCall } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
@@ -118,7 +114,6 @@ import {
   selectThreadInfo,
   selectUser,
   selectUserByPhoneNumber,
-  selectVisibleUsers,
 } from '../../selectors';
 import { selectGroupCall } from '../../selectors/calls';
 import { selectCurrentLimit } from '../../selectors/limits';
@@ -126,13 +121,6 @@ import { selectCurrentLimit } from '../../selectors/limits';
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const INFINITE_LOOP_MARKER = 100;
 
-const SERVICE_NOTIFICATIONS_USER_MOCK: ApiUser = {
-  id: SERVICE_NOTIFICATIONS_USER_ID,
-  accessHash: '0',
-  type: 'userTypeRegular',
-  isMin: true,
-  phoneNumber: '',
-};
 const CHATLIST_LIMIT_ERROR_LIST = new Set([
   'FILTERS_TOO_MUCH',
   'CHATLISTS_TOO_MUCH',
@@ -404,8 +392,6 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addMessages(global, result.messages);
   if (isComments) {
     global = updateThreadInfo(global, loadingChatId, loadingThreadId, {
@@ -509,12 +495,12 @@ addActionHandler('openSupportChat', async (global, actions, payload): Promise<vo
 });
 
 addActionHandler('loadAllChats', async (global, actions, payload): Promise<void> => {
+  const { onFirstBatchDone } = payload;
   const listType = payload.listType;
-  const { onReplace } = payload;
-  let { shouldReplace } = payload;
+  let isCallbackFired = false;
   let i = 0;
 
-  while (shouldReplace || !global.chats.isFullyLoaded[listType]) {
+  while (!global.chats.isFullyLoaded[listType]) {
     if (i++ >= INFINITE_LOOP_MARKER) {
       if (DEBUG) {
         // eslint-disable-next-line no-console
@@ -532,13 +518,12 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
 
     await loadChats(
       listType,
-      shouldReplace,
       true,
     );
 
-    if (shouldReplace) {
-      onReplace?.();
-      shouldReplace = false;
+    if (!isCallbackFired) {
+      onFirstBatchDone?.();
+      isCallbackFired = true;
     }
 
     global = getGlobal();
@@ -608,8 +593,6 @@ addActionHandler('requestSavedDialogUpdate', async (global, actions, payload): P
   global = getGlobal();
 
   global = addMessages(global, result.messages);
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
 
   if (result.messages.length) {
     global = updateChatLastMessageId(global, chatId, result.messages[0].id, 'saved');
@@ -1792,7 +1775,6 @@ addActionHandler('loadGroupsForDiscussion', async (global): Promise<void> => {
   }, {} as Record<string, ApiChat>);
 
   global = getGlobal();
-  global = addChats(global, addedById);
   global = {
     ...global,
     chats: {
@@ -1900,13 +1882,12 @@ addActionHandler('loadMoreMembers', async (global, actions, payload): Promise<vo
     return;
   }
 
-  const { members, users, userStatusesById } = result;
+  const { members, userStatusesById } = result;
   if (!members || !members.length) {
     return;
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addUserStatuses(global, userStatusesById);
   global = addChatMembers(global, chat, members);
   setGlobal(global);
@@ -2000,11 +1981,10 @@ addActionHandler('loadChatSettings', async (global, actions, payload): Promise<v
 
   const result = await callApi('fetchChatSettings', chat);
   if (!result) return;
-  const { settings, users } = result;
+
+  const { settings } = result;
+
   global = getGlobal();
-
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
-
   global = updateChat(global, chat.id, { settings });
   setGlobal(global);
 });
@@ -2117,8 +2097,6 @@ addActionHandler('loadTopics', async (global, actions, payload): Promise<void> =
   if (!result) return;
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addMessages(global, result.messages);
   global = updateTopics(global, chatId, result.count, result.topics);
   global = updateListedTopicIds(global, chatId, result.topics.map((topic) => topic.id));
@@ -2149,8 +2127,6 @@ addActionHandler('loadTopicById', async (global, actions, payload): Promise<void
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addMessages(global, result.messages);
   global = updateTopic(global, chatId, topicId, result.topic);
 
@@ -2313,9 +2289,6 @@ addActionHandler('checkChatlistInvite', async (global, actions, payload): Promis
 
   global = getGlobal();
 
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-
   global = updateTabState(global, {
     chatlistModal: {
       invite: result.invite,
@@ -2379,8 +2352,6 @@ addActionHandler('loadChatlistInvites', async (global, actions, payload): Promis
 
   global = getGlobal();
 
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = {
     ...global,
     chatFolders: {
@@ -2639,7 +2610,6 @@ addActionHandler('loadChannelRecommendations', async (global, actions, payload):
   const chatsById = buildCollectionByKey(similarChannels, 'id');
 
   global = getGlobal();
-  global = addChats(global, chatsById);
   global = addSimilarChannels(global, chatId || GLOBAL_SUGGESTED_CHANNELS_ID, Object.keys(chatsById), count);
   setGlobal(global);
 });
@@ -2667,12 +2637,7 @@ addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Pr
     return;
   }
 
-  const { users, chats, chatLink } = result;
-
-  global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
-  global = addChats(global, buildCollectionByKey(chats, 'id'));
-  setGlobal(global);
+  const { chatLink } = result;
 
   actions.openChatWithDraft({
     chatId: chatLink.chatId,
@@ -2715,7 +2680,6 @@ addActionHandler('requestCollectibleInfo', async (global, actions, payload): Pro
 
 async function loadChats(
   listType: ChatListType,
-  shouldReplace = false,
   isFullDraftSync?: boolean,
 ) {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
@@ -2723,24 +2687,25 @@ async function loadChats(
   let lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
 
   const params = selectChatListLoadingParameters(global, listType);
-  const offsetPeer = !shouldReplace && params.nextOffsetPeerId
-    ? selectPeer(global, params.nextOffsetPeerId) : undefined;
-  const offsetDate = !shouldReplace ? params.nextOffsetDate : undefined;
-  const offsetId = !shouldReplace ? params.nextOffsetId : undefined;
+  const offsetPeer = params.nextOffsetPeerId ? selectPeer(global, params.nextOffsetPeerId) : undefined;
+  const offsetDate = params.nextOffsetDate;
+  const offsetId = params.nextOffsetId;
+
+  const isFirstBatch = !offsetPeer && !offsetDate && !offsetId;
 
   const result = listType === 'saved' ? await callApi('fetchSavedChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     offsetId,
     offsetPeer,
-    withPinned: shouldReplace,
+    withPinned: isFirstBatch,
   }) : await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
     offsetId,
     offsetPeer,
     archived: listType === 'archived',
-    withPinned: shouldReplace,
+    withPinned: isFirstBatch,
     lastLocalServiceMessageId,
   });
 
@@ -2753,64 +2718,16 @@ async function loadChats(
   global = getGlobal();
   lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
 
-  if (shouldReplace) {
-    if (listType === 'active') {
-      // Always include service notifications chat
-      if (!chatIds.includes(SERVICE_NOTIFICATIONS_USER_ID)) {
-        const result2 = await callApi('fetchChat', {
-          type: 'user',
-          user: SERVICE_NOTIFICATIONS_USER_MOCK,
-        });
+  const newChats = buildCollectionByKey(result.chats, 'id');
 
-        global = getGlobal();
-
-        const notificationsChat = result2 && selectChat(global, result2.chatId);
-        if (notificationsChat) {
-          chatIds.unshift(notificationsChat.id);
-          result.chats.unshift(notificationsChat);
-          if (lastLocalServiceMessageId) {
-            result.lastMessageByChatId[notificationsChat.id] = lastLocalServiceMessageId;
-          }
-        }
-      }
-
-      const tabStates = Object.values(global.byTabId);
-      const topArchivedChats = getOrderedIds(ARCHIVED_FOLDER_ID)
-        ?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT)
-        .map((chatId) => selectChat(global, chatId))
-        .filter(Boolean);
-      const visibleChats = tabStates.flatMap(({ id: tabId }) => {
-        const currentChat = selectCurrentChat(global, tabId);
-        return currentChat ? [currentChat] : [];
-      });
-      const chatsToSave = visibleChats.concat(topArchivedChats || []);
-
-      const visibleUsers = tabStates.flatMap(({ id: tabId }) => {
-        return selectVisibleUsers(global, tabId) || [];
-      });
-
-      if (global.currentUserId && global.users.byId[global.currentUserId]) {
-        visibleUsers.push(global.users.byId[global.currentUserId]);
-      }
-
-      global = replaceUsers(global, buildCollectionByKey(visibleUsers.concat(result.users), 'id'));
-      global = replaceUserStatuses(global, result.userStatusesById);
-      global = replaceChats(global, buildCollectionByKey(chatsToSave.concat(result.chats), 'id'));
-      global = replaceChatListIds(global, listType, chatIds);
-    } else {
-      // Archived and Saved
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = addUserStatuses(global, result.userStatusesById);
-      global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-      global = replaceChatListIds(global, listType, chatIds);
-    }
+  global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = updateChats(global, newChats);
+  if (isFirstBatch) {
+    global = replaceChatListIds(global, listType, chatIds);
+    global = replaceUserStatuses(global, result.userStatusesById);
   } else {
-    const newChats = buildCollectionByKey(result.chats, 'id');
-
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-    global = addUserStatuses(global, result.userStatusesById);
-    global = updateChats(global, newChats);
     global = updateChatListIds(global, listType, chatIds);
+    global = addUserStatuses(global, result.userStatusesById);
   }
 
   global = updateChatListSecondaryInfo(global, listType, result);
@@ -2860,11 +2777,10 @@ export async function loadFullChat<T extends GlobalState>(
   }
 
   const {
-    chats, users, userStatusesById, fullInfo, groupCall, membersCount, isForumAsMessages,
+    chats, userStatusesById, fullInfo, groupCall, membersCount, isForumAsMessages,
   } = result;
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = updateChats(global, buildCollectionByKey(chats, 'id'));
 
   if (userStatusesById) {
@@ -3024,8 +2940,6 @@ async function getAttachBotOrNotify<T extends GlobalState>(
 
     return undefined;
   }
-
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   setGlobal(global);
 
   return result.bot;

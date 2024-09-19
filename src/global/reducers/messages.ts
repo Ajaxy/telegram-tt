@@ -576,15 +576,9 @@ export function updateThreadInfo<T extends GlobalState>(
     ...update,
   } as ApiThreadInfo;
 
-  if (!doNotUpdateLinked) {
+  if (!doNotUpdateLinked && !newThreadInfo.isCommentsInfo) {
     const linkedUpdate = pick(newThreadInfo, ['messagesCount', 'lastMessageId', 'lastReadInboxMessageId']);
-    if (newThreadInfo.isCommentsInfo) {
-      if (newThreadInfo.threadId) {
-        global = updateThreadInfo(
-          global, newThreadInfo.chatId, newThreadInfo.threadId, linkedUpdate, true,
-        );
-      }
-    } else if (newThreadInfo.fromChannelId && newThreadInfo.fromMessageId) {
+    if (newThreadInfo.fromChannelId && newThreadInfo.fromMessageId) {
       global = updateThreadInfo(
         global, newThreadInfo.fromChannelId, newThreadInfo.fromMessageId, linkedUpdate, true,
       );

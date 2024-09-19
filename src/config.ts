@@ -178,7 +178,6 @@ export const FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE = 300; // px
 export const API_UPDATE_THROTTLE = Math.round((FAST_SMOOTH_MIN_DURATION + FAST_SMOOTH_MAX_DURATION) / 2);
 export const API_THROTTLE_RESET_UPDATES = new Set([
   'newMessage', 'newScheduledMessage', 'deleteMessages', 'deleteScheduledMessages', 'deleteHistory',
-  'updateThreadInfos',
 ]);
 
 export const LOCK_SCREEN_ANIMATION_DURATION_MS = 200;
@@ -287,6 +286,7 @@ export const TME_LINK_PREFIX = 'https://t.me/';
 export const BOT_FATHER_USERNAME = 'botfather';
 export const USERNAME_PURCHASE_ERROR = 'USERNAME_PURCHASE_AVAILABLE';
 export const PURCHASE_USERNAME = 'auction';
+export const ACCEPTABLE_USERNAME_ERRORS = new Set([USERNAME_PURCHASE_ERROR, 'USERNAME_INVALID']);
 export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'a.t.me', 'k.t.me', 'z.t.me']);
 export const WEB_APP_PLATFORM = 'weba';
 

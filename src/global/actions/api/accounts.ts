@@ -1,9 +1,7 @@
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { addUsers } from '../../reducers';
 import { selectChat } from '../../selectors';
 
 addActionHandler('reportPeer', async (global, actions, payload): Promise<void> => {
@@ -193,10 +191,8 @@ addActionHandler('loadWebAuthorizations', async (global): Promise<void> => {
   if (!result) {
     return;
   }
-  const { users, webAuthorizations } = result;
+  const { webAuthorizations } = result;
   global = getGlobal();
-
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
 
   global = {
     ...global,

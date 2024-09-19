@@ -9,7 +9,6 @@ import type {
   ApiPeer,
   ApiThemeParameters,
   ApiUser,
-  OnApiUpdate,
 } from '../../types';
 
 import { WEB_APP_PLATFORM } from '../../../config';
@@ -37,19 +36,13 @@ import {
 } from '../gramjsBuilders';
 import {
   addDocumentToLocalDb,
-  addEntitiesToLocalDb,
   addPhotoToLocalDb,
   addUserToLocalDb,
   addWebDocumentToLocalDb,
   deserializeBytes,
 } from '../helpers';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
-
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
 
 export async function answerCallbackButton({
   chatId, accessHash, messageId, data, isGame,
@@ -80,7 +73,6 @@ export async function fetchTopInlineBots() {
 
   return {
     ids,
-    users,
   };
 }
 
@@ -98,7 +90,6 @@ export async function fetchTopBotApps() {
 
   return {
     ids,
-    users,
   };
 }
 
@@ -140,15 +131,12 @@ export async function fetchInlineBotResults({
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-
   return {
     isGallery: Boolean(result.gallery),
     help: bot.botPlaceholder,
     nextOffset: getInlineBotResultsNextOffset(bot.usernames![0].username, result.nextOffset),
     switchPm: buildBotSwitchPm(result.switchPm),
     switchWebview: buildBotSwitchWebview(result.switchWebview),
-    users: result.users.map(buildApiUser).filter(Boolean),
     results: processInlineBotResult(String(result.queryId), result.results),
     cacheTime: result.cacheTime,
   };
@@ -394,11 +382,9 @@ export async function loadAttachBots({
   }));
 
   if (result instanceof GramJs.AttachMenuBots) {
-    addEntitiesToLocalDb(result.users);
     return {
       hash: result.hash.toString(),
       bots: buildCollectionByKey(result.bots.map(buildApiAttachBot), 'id'),
-      users: result.users.map(buildApiUser).filter(Boolean),
     };
   }
   return undefined;
@@ -414,10 +400,8 @@ export async function loadAttachBot({
   }));
 
   if (result instanceof GramJs.AttachMenuBotsBot) {
-    addEntitiesToLocalDb(result.users);
     return {
       bot: buildApiAttachBot(result.bot),
-      users: result.users.map(buildApiUser).filter(Boolean),
     };
   }
   return undefined;
@@ -456,7 +440,7 @@ export async function requestBotUrlAuth({
 
   const authResult = buildApiUrlAuthResult(result);
   if (authResult?.type === 'request') {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateUser',
       id: authResult.bot.id,
       user: authResult.bot,
@@ -487,7 +471,7 @@ export async function acceptBotUrlAuth({
 
   const authResult = buildApiUrlAuthResult(result);
   if (authResult?.type === 'request') {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateUser',
       id: authResult.bot.id,
       user: authResult.bot,
@@ -505,7 +489,7 @@ export async function requestLinkUrlAuth({ url }: { url: string }) {
 
   const authResult = buildApiUrlAuthResult(result);
   if (authResult?.type === 'request') {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateUser',
       id: authResult.bot.id,
       user: authResult.bot,
@@ -524,7 +508,7 @@ export async function acceptLinkUrlAuth({ url, isWriteAllowed }: { url: string; 
 
   const authResult = buildApiUrlAuthResult(result);
   if (authResult?.type === 'request') {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateUser',
       id: authResult.bot.id,
       user: authResult.bot,
@@ -663,14 +647,11 @@ export async function fetchPopularAppBots({
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-
   const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.users.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const peerIds = users.map(({ id }) => id);
 
   return {
-    users,
-    chats,
+    peerIds,
     nextOffset: result.nextOffset,
   };
 }

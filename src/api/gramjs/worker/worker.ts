@@ -41,6 +41,7 @@ handleErrors();
 
 let pendingPayloads: WorkerPayload[] = [];
 let pendingTransferables: Transferable[] = [];
+let pendingUpdates: ApiUpdate[] = [];
 
 const callbackState = new Map<string, ApiOnProgress>();
 
@@ -158,31 +159,18 @@ function handleErrors() {
   });
 }
 
-let pendingUpdates: ApiUpdate[] = [];
-
-const sendUpdatesOnTickEnd = throttleWithTickEnd(() => {
-  const currentUpdates = pendingUpdates;
-  pendingUpdates = [];
-
-  sendToOrigin({
-    type: 'updates',
-    updates: currentUpdates,
-  });
-});
-
-function onUpdate(update: ApiUpdate) {
-  if (DEBUG && update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {
-    log('UPDATE', update['@type'], update);
+const sendToOriginOnTickEnd = throttleWithTickEnd(() => {
+  if (pendingUpdates.length) {
+    pendingPayloads.unshift({
+      type: 'updates',
+      updates: pendingUpdates,
+    });
   }
 
-  pendingUpdates.push(update);
-  sendUpdatesOnTickEnd();
-}
-
-const sendToOriginOnTickEnd = throttleWithTickEnd(() => {
   const data = { payloads: pendingPayloads };
   const transferables = pendingTransferables;
 
+  pendingUpdates = [];
   pendingPayloads = [];
   pendingTransferables = [];
 
@@ -200,5 +188,14 @@ function sendToOrigin(payload: WorkerPayload, transferable?: Transferable) {
     pendingTransferables.push(transferable);
   }
 
+  sendToOriginOnTickEnd();
+}
+
+function onUpdate(update: ApiUpdate) {
+  if (DEBUG && update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {
+    log('UPDATE', update['@type'], update);
+  }
+
+  pendingUpdates.push(update);
   sendToOriginOnTickEnd();
 }

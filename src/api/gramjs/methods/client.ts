@@ -12,7 +12,6 @@ import type {
   ApiMediaFormat,
   ApiOnProgress,
   ApiSessionData,
-  OnApiUpdate,
 } from '../../types';
 
 import {
@@ -20,15 +19,20 @@ import {
   DEBUG, DEBUG_GRAMJS, IS_TEST, UPLOAD_WORKERS,
 } from '../../../config';
 import { pause } from '../../../util/schedulers';
-import { buildApiMessage, setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
+import {
+  buildApiMessage,
+  setMessageBuilderCurrentUserId,
+} from '../apiBuilders/messages';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiStory } from '../apiBuilders/stories';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import { buildInputPeerFromLocalDb, getEntityTypeById } from '../gramjsBuilders';
 import {
-  addEntitiesToLocalDb, addMessageToLocalDb, addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
+  addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
 } from '../helpers';
 import localDb, { clearLocalDb, type RepairInfo } from '../localDb';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
+import { processAndUpdateEntities, processMessageAndUpdateThreadInfo } from '../updates/entityProcessor';
 import {
   getDifference,
   init as initUpdatesManager,
@@ -55,17 +59,14 @@ const gramJsUpdateEventBuilder = { build: (update: object) => update };
 const CHAT_ABORT_CONTROLLERS = new Map<string, ChatAbortController>();
 const ABORT_CONTROLLERS = new Map<string, AbortController>();
 
-let onUpdate: OnApiUpdate;
 let client: TelegramClient;
 let currentUserId: string | undefined;
 
-export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
+export async function init(initialArgs: ApiInitialArgs) {
   if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('>>> START INIT API');
   }
-
-  onUpdate = _onUpdate;
 
   const {
     userAgent, platform, sessionData, isTest, isWebmSupported, maxBufferSize, webAuthToken, dcId,
@@ -130,7 +131,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       console.error(err);
 
       if (err.message !== 'Disconnect' && err.message !== 'Cannot send requests while disconnected') {
-        onUpdate({
+        sendApiUpdate({
           '@type': 'updateConnectionState',
           connectionState: 'connectionStateBroken',
         });
@@ -147,7 +148,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
     onAuthReady();
     onSessionUpdate(session.getSessionData());
-    onUpdate({ '@type': 'updateApiReady' });
+    sendApiUpdate({ '@type': 'updateApiReady' });
 
     initUpdatesManager(invokeRequest);
 
@@ -191,7 +192,7 @@ export function getClient() {
 }
 
 function onSessionUpdate(sessionData: ApiSessionData) {
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateSession',
     sessionData,
   });
@@ -275,6 +276,8 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     }
 
     const result = await client.invoke(request, dcId, abortSignal, shouldRetryOnTimeout);
+
+    processAndUpdateEntities(result);
 
     if (DEBUG) {
       log('RESPONSE', request.className, result);
@@ -414,7 +417,7 @@ export function dispatchErrorUpdate<T extends GramJs.AnyRequest>(err: Error, req
 
   const { message } = err;
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'error',
     error: {
       message,
@@ -433,7 +436,7 @@ async function handleTerminatedSession() {
     });
   } catch (err: any) {
     if (err.message === 'AUTH_KEY_UNREGISTERED' || err.message === 'SESSION_REVOKED') {
-      onUpdate({
+      sendApiUpdate({
         '@type': 'updateConnectionState',
         connectionState: 'connectionStateBroken',
       });
@@ -503,13 +506,12 @@ async function repairMessageMedia(peerId: string, messageId: number) {
 
   const message = result.messages[0];
   if (message instanceof GramJs.MessageEmpty) return false;
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-  addMessageToLocalDb(message);
+
+  processMessageAndUpdateThreadInfo(message);
 
   const apiMessage = buildApiMessage(message);
   if (apiMessage) {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateMessage',
       chatId: apiMessage.chatId,
       id: apiMessage.id,
@@ -531,13 +533,12 @@ async function repairStoryMedia(peerId: string, storyId: number) {
   });
   if (!result) return false;
 
-  addEntitiesToLocalDb(result.users);
   result.stories.forEach((story) => {
     const apiStory = buildApiStory(peerId, story);
     if (!apiStory || 'isDeleted' in apiStory) return;
 
     addStoryToLocalDb(story, peerId);
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateStory',
       peerId,
       story: apiStory,

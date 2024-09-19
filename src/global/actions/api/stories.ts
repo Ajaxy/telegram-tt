@@ -2,17 +2,14 @@ import type { ActionReturnType } from '../../types';
 
 import { DEBUG } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChats,
   addStories,
   addStoriesForPeer,
-  addUsers,
   removePeerStory,
   updateLastReadStoryForPeer,
   updateLastViewedStoryForPeer,
@@ -67,8 +64,6 @@ addActionHandler('loadAllStories', async (global): Promise<void> => {
     global.stories.stateHash = result.state;
 
     if ('peerStories' in result) {
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = addChats(global, buildCollectionByKey(result.chats, 'id'));
       global = addStories(global, result.peerStories);
       global = updatePeersWithStories(global, result.peerStories);
       global = updateStealthMode(global, result.stealthMode);
@@ -112,8 +107,6 @@ addActionHandler('loadAllHiddenStories', async (global): Promise<void> => {
     global.stories.archiveStateHash = result.state;
 
     if ('peerStories' in result) {
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = addChats(global, buildCollectionByKey(result.chats, 'id'));
       global = addStories(global, result.peerStories);
       global = updatePeersWithStories(global, result.peerStories);
       global = updateStealthMode(global, result.stealthMode);
@@ -153,8 +146,6 @@ addActionHandler('loadPeerSkippedStories', async (global, actions, payload): Pro
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addStoriesForPeer(global, peerId, result.stories, result.pinnedIds);
   setGlobal(global);
 });
@@ -295,8 +286,6 @@ addActionHandler('loadPeerStories', async (global, actions, payload): Promise<vo
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addStoriesForPeer(global, peerId, result.stories);
   if (result.lastReadStoryId) {
     global = updateLastReadStoryForPeer(global, peerId, result.lastReadStoryId);
@@ -322,8 +311,6 @@ addActionHandler('loadPeerProfileStories', async (global, actions, payload): Pro
     global = updatePeerStoriesFullyLoaded(global, peerId, true);
   }
 
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addStoriesForPeer(global, peerId, result.stories, result.pinnedIds);
   setGlobal(global);
 });
@@ -343,8 +330,6 @@ addActionHandler('loadStoriesArchive', async (global, actions, payload): Promise
   if (Object.values(result.stories).length === 0) {
     global = updatePeerStoriesFullyLoaded(global, peerId, true, true);
   }
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addStoriesForPeer(global, peerId, result.stories, undefined, true);
   setGlobal(global);
 });
@@ -362,8 +347,6 @@ addActionHandler('loadPeerStoriesByIds', async (global, actions, payload): Promi
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addStoriesForPeer(global, peerId, result.stories);
   setGlobal(global);
 });
@@ -382,7 +365,6 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updatePeerStoryViews(global, peerId, storyId, result.views);
   setGlobal(global);
 });
@@ -424,8 +406,6 @@ addActionHandler('loadStoryViewList', async (global, actions, payload): Promise<
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = updateStoryViews(global, storyId, result.views, result.nextOffset, tabId);
   setGlobal(global);
 });

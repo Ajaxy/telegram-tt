@@ -745,7 +745,7 @@ interface ApiBaseThreadInfo {
 
 export interface ApiCommentsInfo extends ApiBaseThreadInfo {
   isCommentsInfo: true;
-  threadId?: ThreadId;
+  threadId?: never;
   originChannelId: string;
   originMessageId: number;
 }

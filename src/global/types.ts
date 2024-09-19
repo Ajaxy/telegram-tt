@@ -1437,8 +1437,7 @@ export interface ActionPayloads {
   preloadTopChatMessages: undefined;
   loadAllChats: {
     listType: ChatListType;
-    onReplace?: VoidFunction;
-    shouldReplace?: boolean;
+    onFirstBatchDone?: VoidFunction;
   };
   openChatWithInfo: ActionPayloads['openChat'] & {
     profileTab?: ProfileTabType;

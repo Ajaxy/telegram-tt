@@ -13,7 +13,6 @@ import { updateAppBadge } from '../../../util/appBadge';
 import { MAIN_IDB_STORE, PASSCODE_IDB_STORE } from '../../../util/browser/idb';
 import * as cacheApi from '../../../util/cacheApi';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { unsubscribe } from '../../../util/notifications';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { parseInitialLocationHash, resetInitialLocationHash, resetLocationHash } from '../../../util/routing';
@@ -35,7 +34,7 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
-  addUsers, clearGlobalForLockScreen, updateManagementProgress, updatePasscodeSettings,
+  clearGlobalForLockScreen, updateManagementProgress, updatePasscodeSettings,
 } from '../../reducers';
 
 addActionHandler('initApi', (global, actions): ActionReturnType => {
@@ -109,7 +108,6 @@ addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise
   if (!result) return;
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
   setGlobal(global);
 

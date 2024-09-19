@@ -1,8 +1,7 @@
 import { Api as GramJs, errors } from '../../../lib/gramjs';
 
-import type { OnApiUpdate } from '../../types';
-
 import { DEBUG } from '../../../config';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { getTmpPassword, invokeRequest, updateTwoFaSettings } from './client';
 
 const ApiErrors: { [k: string]: string } = {
@@ -19,12 +18,6 @@ const emailCodeController: {
   reject?: Function;
 } = {};
 
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
-
 export async function getPasswordInfo() {
   const result = await invokeRequest(new GramJs.account.GetPassword());
   if (!result) {
@@ -37,7 +30,7 @@ export async function getPasswordInfo() {
 }
 
 function onRequestEmailCode(length: number) {
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateTwoFaStateWaitCode',
     length,
   });
@@ -136,7 +129,7 @@ function onError(err: Error) {
     }
   }
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateTwoFaError',
     message,
   });

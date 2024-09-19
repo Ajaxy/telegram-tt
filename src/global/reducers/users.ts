@@ -5,7 +5,7 @@ import type { GlobalState, TabArgs, TabState } from '../types';
 
 import { areDeepEqual } from '../../util/areDeepEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { omit, pick } from '../../util/iteratees';
+import { omit, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectTabState } from '../selectors';
 import { updateChat } from './chats';
@@ -26,19 +26,19 @@ function updateContactList<T extends GlobalState>(global: T, updatedUsers: ApiUs
 
   if (!contactUserIds) return global;
 
-  const newContactUserIds = updatedUsers
-    .filter((user) => user?.isContact && !contactUserIds.includes(user.id))
+  const contactUserIdsFromUpdate = updatedUsers
+    .filter((user) => user?.isContact)
     .map((user) => user.id);
 
-  if (newContactUserIds.length === 0) return global;
+  if (contactUserIdsFromUpdate.length === 0) return global;
 
   return {
     ...global,
     contactList: {
-      userIds: [
-        ...newContactUserIds,
+      userIds: unique([
+        ...contactUserIdsFromUpdate,
         ...contactUserIds,
-      ],
+      ]),
     },
   };
 }
@@ -244,14 +244,9 @@ export function updateUserFullInfo<T extends GlobalState>(
 export function addUserStatuses<T extends GlobalState>(global: T, newById: Record<string, ApiUserStatus>): T {
   const { statusesById } = global.users;
 
-  const newKeys = Object.keys(newById).filter((id) => !statusesById[id]);
-  if (!newKeys.length) {
-    return global;
-  }
-
   global = replaceUserStatuses(global, {
     ...statusesById,
-    ...pick(newById, newKeys),
+    ...newById,
   });
 
   return global;

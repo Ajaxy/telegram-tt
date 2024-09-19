@@ -1,5 +1,7 @@
 import type { DebugLevel } from '../../../util/debugConsole';
-import type { ApiInitialArgs, ApiUpdate } from '../../types';
+import type {
+  ApiInitialArgs, ApiUpdate,
+} from '../../types';
 import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
 

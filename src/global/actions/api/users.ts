@@ -15,8 +15,6 @@ import {
   setGlobal,
 } from '../../index';
 import {
-  addChats,
-  addUsers,
   addUserStatuses,
   closeNewContactDialog,
   replaceUserStatuses,
@@ -113,10 +111,9 @@ addActionHandler('loadTopUsers', async (global): Promise<void> => {
     return;
   }
 
-  const { ids, users } = result;
+  const { ids } = result;
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = {
     ...global,
     topPeers: {
@@ -135,8 +132,6 @@ addActionHandler('loadContactList', async (global): Promise<void> => {
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(contactList.users, 'id'));
-  global = addChats(global, buildCollectionByKey(contactList.chats, 'id'));
   global = addUserStatuses(global, contactList.userStatusesById);
 
   // Sort contact list by Last Name (or First Name), with latin names being placed first
@@ -174,12 +169,9 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
     return;
   }
 
-  const { chats, chatIds, isFullyLoaded } = result;
+  const { chatIds, isFullyLoaded } = result;
 
   global = getGlobal();
-  if (chats.length) {
-    global = addChats(global, buildCollectionByKey(chats, 'id'));
-  }
   global = updateUser(global, user.id, {
     commonChats: {
       maxId: chatIds.length ? chatIds[chatIds.length - 1] : '0',
@@ -315,10 +307,8 @@ addActionHandler('loadMoreProfilePhotos', async (global, actions, payload): Prom
   global = getGlobal();
 
   const {
-    photos, users, count, nextOffsetId,
+    photos, count, nextOffsetId,
   } = result;
-
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
 
   global = updatePeerPhotos(global, peerId, {
     newPhotos: photos,
@@ -349,11 +339,8 @@ addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnT
     }
 
     const {
-      users, chats, accountResultIds, globalResultIds,
+      accountResultIds, globalResultIds,
     } = result;
-
-    global = addUsers(global, buildCollectionByKey(users, 'id'));
-    global = addChats(global, buildCollectionByKey(chats, 'id'));
 
     const localUserIds = accountResultIds.filter(isUserId);
     const globalUserIds = globalResultIds.filter(isUserId);

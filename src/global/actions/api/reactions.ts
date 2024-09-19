@@ -20,7 +20,7 @@ import {
 } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChatMessagesById, addChats, addUsers, updateChat, updateChatMessage,
+  addChatMessagesById, updateChat, updateChatMessage,
 } from '../../reducers';
 import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
@@ -336,10 +336,6 @@ addActionHandler('loadReactors', async (global, actions, payload): Promise<void>
   }
 
   global = getGlobal();
-
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-
   global = updateChatMessage(global, chatId, messageId, {
     reactors: result,
   });
@@ -409,15 +405,13 @@ addActionHandler('fetchUnreadReactions', async (global, actions, payload): Promi
     return;
   }
 
-  const { messages, chats, users } = result;
+  const { messages } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
   const ids = Object.keys(byId).map(Number);
 
   global = getGlobal();
   global = addChatMessagesById(global, chat.id, byId);
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
-  global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = updateUnreadReactions(global, chatId, {
     unreadReactions: unique([...(chat.unreadReactions || []), ...ids]).sort((a, b) => b - a),
   });

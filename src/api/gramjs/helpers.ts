@@ -199,16 +199,6 @@ export function addUserToLocalDb(user: GramJs.User) {
   localDb.users[id] = user;
 }
 
-export function addEntitiesToLocalDb(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
-  entities.forEach((entity) => {
-    if (entity instanceof GramJs.User) {
-      addUserToLocalDb(entity);
-    } else if ((entity instanceof GramJs.Chat || entity instanceof GramJs.Channel)) {
-      addChatToLocalDb(entity);
-    }
-  });
-}
-
 export function addWebDocumentToLocalDb(webDocument: GramJs.TypeWebDocument) {
   localDb.webDocuments[webDocument.url] = webDocument;
 }

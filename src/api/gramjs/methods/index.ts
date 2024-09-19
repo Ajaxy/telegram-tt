@@ -3,106 +3,42 @@ export {
   setForceHttpTransport, setShouldDebugExportedSenders, setAllowHttpTransport, requestChannelDifference,
 } from './client';
 
-export * from './account';
-
 export {
   provideAuthPhoneNumber, provideAuthCode, provideAuthPassword, provideAuthRegistration, restartAuth, restartAuthWithQr,
 } from './auth';
 
 export {
-  fetchChats, fetchFullChat, searchChats, requestChatUpdate, fetchChatSettings,
-  saveDraft, fetchChat, updateChatMutedState, updateTopicMutedState, fetchMember,
-  createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
-  toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
-  fetchChatFolders, editChatFolder, deleteChatFolder, sortChatFolders, fetchRecommendedChatFolders,
-  getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
-  updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
-  migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember, toggleIsProtected,
-  getChatByPhoneNumber, toggleJoinToSend, toggleJoinRequest, fetchTopics, deleteTopic, togglePinnedTopic,
-  editTopic, toggleForum, fetchTopicById, createTopic, toggleParticipantsHidden, checkChatlistInvite,
-  joinChatlistInvite, createChalistInvite, editChatlistInvite, deleteChatlistInvite, fetchChatlistInvites,
-  fetchLeaveChatlistSuggestions, leaveChatlist, togglePeerTranslations, setViewForumAsMessages,
-  fetchChannelRecommendations, fetchSavedChats, toggleSavedDialogPinned, reportSponsoredMessage,
-} from './chats';
-
-export {
-  fetchMessages, fetchMessage, sendMessage, pinMessage, unpinAllMessages, deleteMessages, deleteHistory,
-  markMessageListRead, markMessagesRead, searchMessagesInChat, searchMessagesGlobal, searchHashtagPosts,
-  fetchWebPagePreview, editMessage, forwardMessages, loadPollOptionResults, sendPollVote, findFirstMessageIdAfterDate,
-  fetchPinnedMessages, fetchScheduledHistory, sendScheduledMessages, rescheduleMessage, deleteScheduledMessages,
-  reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
-  saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, transcribeAudio,
-  closePoll, fetchExtendedMedia, translateText, fetchMessageViews, fetchDiscussionMessage, clickSponsoredMessage,
-  fetchOutboxReadDate, exportMessageLink, fetchQuickReplies, sendQuickReply, fetchFactChecks,
-  deleteSavedHistory,
-} from './messages';
-
-export {
-  fetchFullUser, fetchNearestCountry, fetchTopUsers, fetchContactList, fetchUsers,
-  updateContact, importContact, deleteContact, fetchProfilePhotos, fetchCommonChats, reportSpam, updateEmojiStatus,
-  saveCloseFriends,
-} from './users';
-
-export {
-  fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, fetchFeaturedStickers, fetchRecentEmojiStatuses,
-  faveSticker, fetchStickers, fetchSavedGifs, saveGif, searchStickers, installStickerSet, uninstallStickerSet,
-  searchGifs, fetchAnimatedEmojis, fetchStickersForEmoji, fetchEmojiKeywords, fetchAnimatedEmojiEffects,
-  removeRecentSticker, clearRecentStickers, fetchCustomEmoji, fetchPremiumGifts, fetchCustomEmojiSets,
-  fetchFeaturedEmojiStickers, fetchGenericEmojiEffects, fetchDefaultTopicIcons, fetchDefaultStatusEmojis,
-} from './symbols';
-
-export {
-  checkChatUsername, setChatUsername, updatePrivateLink, deactivateAllUsernames,
-  fetchExportedChatInvites, editExportedChatInvite, exportChatInvite, deleteExportedChatInvite,
-  deleteRevokedExportedChatInvites, fetchChatInviteImporters, hideChatJoinRequest, hideAllChatJoinRequests,
-  hideChatReportPanel,
-} from './management';
-
-export * from './settings';
-
-export {
-  getPasswordInfo, checkPassword, clearPassword, updatePassword, updateRecoveryEmail, provideRecoveryEmailCode,
-} from './twoFaSettings';
-
-export {
-  answerCallbackButton, setBotInfo, fetchTopInlineBots, fetchPreviewMedias, fetchInlineBot, fetchInlineBotResults,
-  sendInlineBotResult, startBot, requestMainWebView, fetchPopularAppBots, fetchTopBotApps,
-  requestWebView, requestSimpleWebView, sendWebViewData, prolongWebView, loadAttachBots, toggleAttachBot, fetchBotApp,
-  requestBotUrlAuth, requestLinkUrlAuth, acceptBotUrlAuth, acceptLinkUrlAuth, loadAttachBot, requestAppWebView,
-  allowBotSendMessages, fetchBotCanSendMessage, invokeWebViewCustomMethod,
-} from './bots';
-
-export {
-  getGroupCall, joinGroupCall, discardGroupCall, createGroupCall,
-  editGroupCallTitle, editGroupCallParticipant, exportGroupCallInvite, fetchGroupCallParticipants,
-  joinGroupCallPresentation, leaveGroupCall, leaveGroupCallPresentation, toggleGroupCallStartSubscription,
-  requestCall, getDhConfig, confirmCall, sendSignalingData, acceptCall, discardCall, setCallRating, receivedCall,
-} from './calls';
-
-export * from './reactions';
-
-export {
-  fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics,
-  fetchMessagePublicForwards, fetchStatisticsAsyncGraph, fetchStoryStatistics, fetchStoryPublicForwards,
-  fetchChannelMonetizationStatistics,
-} from './statistics';
-
-export {
-  acceptPhoneCall, confirmPhoneCall, requestPhoneCall, decodePhoneCallData, createPhoneCallState,
-  destroyPhoneCallState, encodePhoneCallData,
-} from './phoneCallState';
-
-export {
   broadcastLocalDbUpdateFull,
 } from '../localDb';
 
+export * from './account';
+
+export * from './chats';
+
+export * from './messages';
+
+export * from './users';
+
+export * from './symbols';
+
+export * from './management';
+
+export * from './settings';
+
+export * from './twoFaSettings';
+
+export * from './bots';
+
+export * from './calls';
+
+export * from './reactions';
+
+export * from './statistics';
+
+export * from './phoneCallState';
+
 export * from './stories';
 
-export {
-  validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
-  applyBoost, fetchBoostList, fetchBoostStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
-  getPremiumGiftCodeOptions, launchPrepaidGiveaway, fetchStarsStatus, fetchStarsTopupOptions, fetchStarsTransactions,
-  sendStarPaymentForm, getStarsGiftOptions, fetchStarsTransactionById,
-} from './payments';
+export * from './payments';
 
 export * from './fragment';

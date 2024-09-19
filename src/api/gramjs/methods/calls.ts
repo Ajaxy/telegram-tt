@@ -3,8 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { JoinGroupCallPayload } from '../../../lib/secret-sauce';
 import type {
-  ApiChat, ApiGroupCall, ApiPhoneCall,
-  ApiUser, OnApiUpdate,
+  ApiChat, ApiGroupCall, ApiPhoneCall, ApiUser,
 } from '../../types';
 
 import { GROUP_CALL_PARTICIPANTS_LIMIT } from '../../../config';
@@ -13,19 +12,11 @@ import {
   buildApiGroupCallParticipant, buildCallProtocol,
   buildPhoneCall,
 } from '../apiBuilders/calls';
-import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputGroupCall, buildInputPeer, buildInputPhoneCall, generateRandomInt,
 } from '../gramjsBuilders';
-import { addEntitiesToLocalDb } from '../helpers';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest, invokeRequestBeacon } from './client';
-
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
 
 export async function getGroupCall({
   call,
@@ -40,16 +31,8 @@ export async function getGroupCall({
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-
   return {
     groupCall: buildApiGroupCall(result.call),
-    users,
-    chats,
   };
 }
 
@@ -130,25 +113,15 @@ export async function fetchGroupCallParticipants({
   }));
 
   if (!result) {
-    return undefined;
+    return;
   }
 
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateGroupCallParticipants',
     groupCallId: call.id,
     participants: result.participants.map(buildApiGroupCallParticipant),
     nextOffset: result.nextOffset,
   });
-
-  return {
-    users, chats,
-  };
 }
 
 export function leaveGroupCall({
@@ -316,16 +289,12 @@ export async function requestCall({
 
   const call = buildPhoneCall(result.phoneCall);
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updatePhoneCall',
     call,
   });
 
-  addEntitiesToLocalDb(result.users);
-
-  return {
-    users: result.users.map(buildApiUser).filter(Boolean),
-  };
+  return true;
 }
 
 export function setCallRating({
@@ -369,16 +338,12 @@ export async function acceptCall({
 
   call = buildPhoneCall(result.phoneCall);
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updatePhoneCall',
     call,
   });
 
-  addEntitiesToLocalDb(result.users);
-
-  return {
-    users: result.users.map(buildApiUser).filter(Boolean),
-  };
+  return true;
 }
 
 export async function confirmCall({
@@ -399,16 +364,12 @@ export async function confirmCall({
 
   call = buildPhoneCall(result.phoneCall);
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updatePhoneCall',
     call,
   });
 
-  addEntitiesToLocalDb(result.users);
-
-  return {
-    users: result.users.map(buildApiUser).filter(Boolean),
-  };
+  return true;
 }
 
 export function sendSignalingData({

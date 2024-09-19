@@ -1,11 +1,8 @@
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChats,
-  addUsers,
   updateChannelMonetizationStatistics,
   updateMessageStatistics,
   updateStatistics,
@@ -36,10 +33,8 @@ addActionHandler('loadStatistics', async (global, actions, payload): Promise<voi
     return;
   }
 
+  const { stats } = result;
   global = getGlobal();
-  const { stats, users } = result;
-
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = updateStatistics(global, chatId, stats, tabId);
   setGlobal(global);
 });
@@ -212,8 +207,6 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
 
   const {
     publicForwards,
-    users,
-    chats,
     count,
     nextOffset,
   } = await callApi('fetchStoryPublicForwards', {
@@ -221,13 +214,6 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
   }) || {};
 
   global = getGlobal();
-
-  if (chats) {
-    global = addChats(global, buildCollectionByKey(chats, 'id'));
-  }
-  if (users) {
-    global = addUsers(global, buildCollectionByKey(users, 'id'));
-  }
   global = updateStoryStatistics(global, {
     ...stats,
     publicForwards: count || publicForwards?.length,

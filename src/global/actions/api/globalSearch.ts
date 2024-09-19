@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic, ApiUser,
+  ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic,
   ApiUserStatus,
 } from '../../../api/types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
@@ -8,15 +8,12 @@ import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config'
 import { timestampPlusDay } from '../../../util/dates/dateFormat';
 import { isDeepLink, tryParseDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
 import { isChatChannel, isChatGroup, toChannelId } from '../../helpers/chats';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChats,
   addMessages,
-  addUsers,
   addUserStatuses,
   updateGlobalSearch,
   updateGlobalSearchFetchingStatus,
@@ -46,12 +43,8 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
       }
 
       const {
-        accountResultIds, globalResultIds, users, chats,
+        accountResultIds, globalResultIds,
       } = result;
-
-      global = addChats(global, buildCollectionByKey(chats, 'id'));
-
-      global = addUsers(global, buildCollectionByKey(users, 'id'));
 
       global = updateGlobalSearchFetchingStatus(global, { chats: false }, tabId);
       global = updateGlobalSearch(global, {
@@ -137,12 +130,9 @@ addActionHandler('searchPopularBotApps', async (global, actions, payload): Promi
     return;
   }
 
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-  const peerIds = result.users.map(({ id }) => id);
   global = updateGlobalSearch(global, {
     popularBotApps: {
-      peerIds: [...(popularBotApps?.peerIds || []), ...peerIds],
+      peerIds: [...(popularBotApps?.peerIds || []), ...result.peerIds],
       nextOffset: result.nextOffset,
     },
   }, tabId);
@@ -167,9 +157,7 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   } = params;
   let result: {
     messages: ApiMessage[];
-    users: ApiUser[];
     userStatusesById?: Record<number, ApiUserStatus>;
-    chats: ApiChat[];
     topics?: ApiTopic[];
     totalTopicsCount?: number;
     totalCount: number;
@@ -200,7 +188,7 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
 
     if (inChatResult) {
       const {
-        messages, users, totalCount, nextOffsetId,
+        messages, totalCount, nextOffsetId,
       } = inChatResult;
 
       const { topics: localTopics, count } = topics || {};
@@ -209,8 +197,6 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
         topics: localTopics,
         totalTopicsCount: count,
         messages,
-        users,
-        chats: [],
         totalCount,
         nextOffsetId,
       };
@@ -249,16 +235,8 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   }
 
   const {
-    messages, users, chats, userStatusesById, totalCount, nextOffsetRate, nextOffsetId, nextOffsetPeerId,
+    messages, userStatusesById, totalCount, nextOffsetRate, nextOffsetId, nextOffsetPeerId,
   } = result;
-
-  if (chats.length) {
-    global = addChats(global, buildCollectionByKey(chats, 'id'));
-  }
-
-  if (users.length) {
-    global = addUsers(global, buildCollectionByKey(users, 'id'));
-  }
 
   if (userStatusesById) {
     global = addUserStatuses(global, userStatusesById);

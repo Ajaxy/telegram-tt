@@ -72,8 +72,7 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
 
   loadAllChats({
     listType: 'active',
-    shouldReplace: true,
-    onReplace: async () => {
+    onFirstBatchDone: async () => {
       await loadAndReplaceMessages(global, actions);
 
       global = getGlobal();
@@ -90,8 +89,8 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
         console.log('>>> FINISH SYNC');
       }
 
-      loadAllChats({ listType: 'archived', shouldReplace: true });
-      loadAllChats({ listType: 'saved', shouldReplace: true });
+      loadAllChats({ listType: 'archived' });
+      loadAllChats({ listType: 'saved' });
       preloadTopChatMessages();
       loadAllStories();
       loadAllHiddenStories();

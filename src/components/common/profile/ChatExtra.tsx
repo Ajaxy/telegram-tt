@@ -450,7 +450,7 @@ export default memo(withGlobal<OwnProps>(
     const isForum = chat?.isForum;
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
     const { threadId } = selectCurrentMessageList(global) || {};
-    const topicId = isForum ? Number(threadId) : undefined;
+    const topicId = isForum && threadId ? Number(threadId) : undefined;
 
     const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
     const userFullInfo = user && selectUserFullInfo(global, user.id);

@@ -18,9 +18,7 @@ import {
 } from '../../index';
 import {
   addChatMessagesById,
-  addChats,
   addMessages,
-  addUsers,
   addUserStatuses,
   initializeChatMediaSearchResults,
   mergeWithChatMediaSearchSegment,
@@ -126,7 +124,7 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
   }
 
   const {
-    chats, users, userStatusesById, messages, totalCount, nextOffsetId, nextOffsetRate, nextOffsetPeerId,
+    userStatusesById, messages, totalCount, nextOffsetId, nextOffsetRate, nextOffsetPeerId,
   } = result;
 
   const newFoundIds = messages.map(getSearchResultKey);
@@ -142,8 +140,6 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
 
   const resultChatId = isSavedDialog ? currentUserId : chat.id;
 
-  global = addChats(global, buildCollectionByKey(chats, 'id'));
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addUserStatuses(global, userStatusesById);
   global = addMessages(global, messages);
   global = updateMiddleSearch(global, resultChatId, threadId, {
@@ -300,7 +296,7 @@ async function searchSharedMedia<T extends GlobalState>(
   }
 
   const {
-    chats, users, messages, totalCount, nextOffsetId,
+    userStatusesById, messages, totalCount, nextOffsetId,
   } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
@@ -313,8 +309,7 @@ async function searchSharedMedia<T extends GlobalState>(
     return;
   }
 
-  global = addChats(global, buildCollectionByKey(chats, 'id'));
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addUserStatuses(global, userStatusesById);
   global = addChatMessagesById(global, resultChatId, byId);
   global = updateSharedMediaSearchResults(
     global, resultChatId, threadId, type, newFoundIds, totalCount, nextOffsetId, tabId,
@@ -469,14 +464,13 @@ async function searchChatMedia<T extends GlobalState>(
   }
 
   const {
-    chats, users, messages,
+    messages, userStatusesById,
   } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
   const newFoundIds = Object.keys(byId).map(Number);
 
-  global = addChats(global, buildCollectionByKey(chats, 'id'));
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  global = addUserStatuses(global, userStatusesById);
   global = addChatMessagesById(global, resultChatId, byId);
 
   const loadingState = calcLoadingState(direction, limit, newFoundIds.length, currentSegment);

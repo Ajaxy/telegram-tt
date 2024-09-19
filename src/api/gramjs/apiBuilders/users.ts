@@ -128,27 +128,16 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   }
 }
 
-export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {
+export function buildApiUserStatuses(mtpUsers: GramJs.TypeUser[]) {
   const userStatusesById: Record<string, ApiUserStatus> = {};
-  const usersById: Record<string, ApiUser> = {};
-
   mtpUsers.forEach((mtpUser) => {
-    const user = buildApiUser(mtpUser);
-    if (!user) {
-      return;
-    }
-
-    const duplicateUser = usersById[user.id];
-    if (!duplicateUser || duplicateUser.isMin) {
-      usersById[user.id] = user;
-    }
-
     if ('status' in mtpUser) {
-      userStatusesById[user.id] = buildApiUserStatus(mtpUser.status);
+      const userId = buildApiPeerId(mtpUser.id, 'user');
+      userStatusesById[userId] = buildApiUserStatus(mtpUser.status);
     }
   });
 
-  return { users: Object.values(usersById), userStatusesById };
+  return userStatusesById;
 }
 
 export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption): ApiPremiumGiftOption {
