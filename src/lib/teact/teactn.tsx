@@ -5,7 +5,6 @@ import arePropsShallowEqual, { logUnequalProps } from '../../util/arePropsShallo
 import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
 import { throttleWithTickEnd } from '../../util/schedulers';
-import { requestMeasure } from '../fasterdom/fasterdom';
 import React, { DEBUG_resolveComponentName, getIsHeavyAnimating, useUnmountCleanup } from './teact';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
@@ -75,7 +74,7 @@ function runCallbacks() {
   if (forceOnHeavyAnimation) {
     forceOnHeavyAnimation = false;
   } else if (getIsHeavyAnimating()) {
-    requestMeasure(runCallbacksThrottled);
+    getIsHeavyAnimating.once(runCallbacksThrottled);
     return;
   }
 
