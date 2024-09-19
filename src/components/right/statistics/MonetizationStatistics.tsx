@@ -5,19 +5,22 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChannelMonetizationStatistics, StatisticsGraph } from '../../../api/types';
 
-import { FRAGMENT_ADS_URL } from '../../../config';
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AboutMonetizationModal from '../../common/AboutMonetizationModal.async';
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
+import VerificationMonetizationModal from '../../common/VerificationMonetizationModal.async';
 import Button from '../../ui/Button';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 import Link from '../../ui/Link';
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';
@@ -47,29 +50,46 @@ type StateProps = {
   chatId: string;
   dcId?: number;
   statistics?: ApiChannelMonetizationStatistics;
-  canCollect?: boolean;
+  isCreator?: boolean;
+  isChannelRevenueWithdrawalEnabled?: boolean;
+  hasPassword?: boolean;
+  passwordHint?: string;
+  error?: string;
+  isLoading?: boolean;
 };
 
 const MonetizationStatistics = ({
   chatId,
   dcId,
   statistics,
-  canCollect,
+  isCreator,
+  isChannelRevenueWithdrawalEnabled,
+  hasPassword,
+  passwordHint,
+  error,
+  isLoading,
 }: StateProps) => {
-  const { loadChannelMonetizationStatistics } = getActions();
+  const { loadChannelMonetizationStatistics, loadPasswordInfo } = getActions();
   const oldLang = useOldLang();
   const lang = useLang();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
   const loadedCharts = useRef<string[]>([]);
   const forceUpdate = useForceUpdate();
   const [isAboutMonetizationModalOpen, openAboutMonetizationModal, closeAboutMonetizationModal] = useFlag(false);
-  const hasAvailableBalance = Boolean(statistics?.balances?.availableBalance !== 0);
+  const [
+    isVerificationMonetizationModalOpen, openVerificationMonetizationModal, closeVerificationMonetizationModal,
+  ] = useFlag(false);
+  const [isConfirmPasswordDialogOpen, openConfirmPasswordDialogOpen, closeConfirmPasswordDialogOpen] = useFlag();
+  const availableBalance = statistics?.balances?.availableBalance;
+  const canWithdraw = isCreator && isChannelRevenueWithdrawalEnabled && Boolean(availableBalance);
 
   useEffect(() => {
     if (chatId) {
       loadChannelMonetizationStatistics({ chatId });
+      loadPasswordInfo();
     }
   }, [chatId, loadChannelMonetizationStatistics]);
 
@@ -86,7 +106,7 @@ const MonetizationStatistics = ({
         return;
       }
 
-      MONETIZATION_GRAPHS.forEach((name, index: number) => {
+      MONETIZATION_GRAPHS.filter(Boolean).forEach((name, index: number) => {
         const graph = statistics[name as keyof typeof statistics];
         const isAsync = typeof graph === 'string';
 
@@ -115,7 +135,6 @@ const MonetizationStatistics = ({
   }, [isReady, statistics, oldLang, chatId, dcId, forceUpdate]);
 
   function renderAvailableReward() {
-    const availableBalance = statistics?.balances?.availableBalance;
     const [integerTonPart, decimalTonPart] = availableBalance ? availableBalance.toFixed(4).split('.') : [0];
     const [integerUsdPart, decimalUsdPart] = availableBalance
     && statistics?.usdRate ? (availableBalance * statistics.usdRate).toFixed(2).split('.') : [0];
@@ -172,6 +191,14 @@ const MonetizationStatistics = ({
     );
   }, [lang, oldLang]);
 
+  const verificationMonetizationHandler = useLastCallback(() => {
+    if (hasPassword) {
+      openVerificationMonetizationModal();
+    } else {
+      openConfirmPasswordDialogOpen();
+    }
+  });
+
   if (!isReady || !statistics) {
     return <Loading />;
   }
@@ -190,29 +217,49 @@ const MonetizationStatistics = ({
       {!loadedCharts.current.length && <Loading />}
 
       <div ref={containerRef} className={styles.section}>
-        {MONETIZATION_GRAPHS.map((graph) => (
+        {MONETIZATION_GRAPHS.filter(Boolean).map((graph) => (
           <div key={graph} className={buildClassName(styles.graph, styles.hidden)} />
         ))}
       </div>
 
-      {hasAvailableBalance && (
-        <div className={styles.section}>
-          {oldLang('lng_channel_earn_balance_title')}
+      <div className={styles.section}>
+        {oldLang('lng_channel_earn_balance_title')}
 
-          {renderAvailableReward()}
+        {renderAvailableReward()}
 
-          <Button size="smaller" type="button" href={FRAGMENT_ADS_URL} disabled={canCollect && hasAvailableBalance}>
-            {oldLang('MonetizationWithdraw')}
-          </Button>
+        <Button
+          size="smaller"
+          type="button"
+          onClick={verificationMonetizationHandler}
+          disabled={!canWithdraw}
+        >
+          {oldLang('MonetizationWithdraw')}
+        </Button>
 
-          <div className={styles.textBottom}>{rewardsText}</div>
-        </div>
-      )}
+        <div className={styles.textBottom}>{rewardsText}</div>
+      </div>
 
       <AboutMonetizationModal
         isOpen={isAboutMonetizationModalOpen}
         onClose={closeAboutMonetizationModal}
       />
+      <VerificationMonetizationModal
+        chatId={chatId}
+        isOpen={isVerificationMonetizationModalOpen}
+        onClose={closeVerificationMonetizationModal}
+        passwordHint={passwordHint}
+        error={error}
+        isLoading={isLoading}
+      />
+      <ConfirmDialog
+        isOnlyConfirm
+        isOpen={isConfirmPasswordDialogOpen}
+        onClose={closeConfirmPasswordDialogOpen}
+        confirmHandler={closeConfirmPasswordDialogOpen}
+        confirmLabel={lang('OK')}
+      >
+        <p>{renderText(oldLang('Monetization.Withdraw.Error.Text'), ['br'])}</p>
+      </ConfirmDialog>
     </div>
   );
 };
@@ -220,18 +267,38 @@ const MonetizationStatistics = ({
 export default memo(withGlobal(
   (global): StateProps => {
     const tabState = selectTabState(global);
+    const {
+      settings: {
+        byKey: {
+          hasPassword,
+        },
+      },
+      twoFaSettings: {
+        hint: passwordHint,
+      },
+    } = global;
+    const isLoading = global.monetizationInfo?.isLoading;
+    const error = global.monetizationInfo?.error;
     const monetizationStatistics = tabState.monetizationStatistics;
     const chatId = monetizationStatistics && monetizationStatistics.chatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
-    const canCollect = chat && chat.isCreator;
     const dcId = selectChatFullInfo(global, chatId!)?.statisticsDcId;
+    const isCreator = Boolean(chat?.isCreator);
+
     const statistics = tabState.statistics.monetization;
+
+    const isChannelRevenueWithdrawalEnabled = global.appConfig?.isChannelRevenueWithdrawalEnabled;
 
     return {
       chatId: chatId!,
       dcId,
       statistics,
-      canCollect,
+      isCreator,
+      isChannelRevenueWithdrawalEnabled,
+      hasPassword,
+      passwordHint,
+      error,
+      isLoading,
     };
   },
 )(MonetizationStatistics));

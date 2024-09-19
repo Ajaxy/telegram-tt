@@ -1,9 +1,11 @@
 import type TelegramClient from './TelegramClient';
+
+import errors from '../errors';
 // eslint-disable-next-line import/no-named-default
 import { default as Api } from '../tl/api';
+
 import { generateRandomBytes } from '../Helpers';
 import { computeCheck, computeDigest } from '../Password';
-import errors from '../errors';
 
 export interface TwoFaParams {
     isCheckPassword?: boolean;
@@ -15,7 +17,13 @@ export interface TwoFaParams {
     onEmailCodeError?: (err: Error) => void;
 }
 
+export interface TwoFaPasswordParams {
+    currentPassword?: string;
+    onPasswordCodeError?: (err: Error) => void;
+}
+
 export type TmpPasswordResult = Api.account.TmpPassword | { error: string } | undefined;
+export type PasswordResult = Api.account.Password | { error: string } | undefined;
 
 /**
  * Changes the 2FA settings of the logged in user.
@@ -145,5 +153,31 @@ export async function getTmpPassword(client: TelegramClient, currentPassword: st
         }
 
         throw err;
+    }
+}
+
+export async function getCurrentPassword(
+    client: TelegramClient,
+    {
+        currentPassword,
+        onPasswordCodeError,
+    }: TwoFaPasswordParams,
+) {
+    const pwd = await client.invoke(new Api.account.GetPassword());
+
+    if (!pwd) {
+        return undefined;
+    }
+
+    try {
+        return currentPassword ? await computeCheck(pwd, currentPassword!) : new Api.InputCheckPasswordEmpty();
+    } catch (err: any) {
+        if (err instanceof errors.PasswordModifiedError) {
+            return onPasswordCodeError!(err);
+        } else if (err.message === 'PASSWORD_HASH_INVALID') {
+            return { error: err.message };
+        } else {
+            throw err;
+        }
     }
 }

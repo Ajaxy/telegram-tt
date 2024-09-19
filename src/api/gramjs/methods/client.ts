@@ -2,7 +2,7 @@ import {
   Api as GramJs,
   sessions,
 } from '../../../lib/gramjs';
-import type { TwoFaParams } from '../../../lib/gramjs/client/2fa';
+import type { TwoFaParams, TwoFaPasswordParams } from '../../../lib/gramjs/client/2fa';
 import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 
@@ -367,6 +367,10 @@ export function updateTwoFaSettings(params: TwoFaParams) {
 
 export function getTmpPassword(currentPassword: string, ttl?: number) {
   return client.getTmpPassword(currentPassword, ttl);
+}
+
+export function getCurrentPassword(params: TwoFaPasswordParams) {
+  return client.getCurrentPassword(params);
 }
 
 export function abortChatRequests(params: { chatId: string; threadId?: ThreadId }) {

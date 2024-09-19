@@ -1,3 +1,5 @@
+import type { ActionReturnType } from '../../types';
+
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
@@ -5,6 +7,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   updateChannelMonetizationStatistics,
   updateMessageStatistics,
+  updateMonetizationInfo,
   updateStatistics,
   updateStatisticsGraph,
   updateStoryStatistics,
@@ -223,4 +226,42 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
     nextOffset,
   }, tabId);
   setGlobal(global);
+});
+
+addActionHandler('loadMonetizationRevenueWithdrawalUrl', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, currentPassword, onSuccess, tabId = getCurrentTabId(),
+  } = payload;
+
+  global = updateMonetizationInfo(global, { isLoading: true, error: undefined });
+  setGlobal(global);
+
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const result = await callApi('loadMonetizationRevenueWithdrawalUrl', { chat, currentPassword });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateMonetizationInfo(global, { isLoading: false });
+  setGlobal(global);
+
+  if (result) {
+    onSuccess();
+    actions.openUrl({
+      url: result.url,
+      shouldSkipModal: true,
+      tabId,
+      ignoreDeepLinks: true,
+    });
+  }
+});
+
+addActionHandler('clearMonetizationInfo', (global): ActionReturnType => {
+  return updateMonetizationInfo(global, { error: undefined });
 });

@@ -872,6 +872,11 @@ export type GlobalState = {
     waitingEmailCodeLength?: number;
   };
 
+  monetizationInfo: {
+    isLoading?: boolean;
+    error?: string;
+  };
+
   attachmentSettings: {
     shouldCompress: boolean;
     shouldSendGrouped: boolean;
@@ -1285,6 +1290,7 @@ export interface ActionPayloads {
   updatePerformanceSettings: Partial<PerformanceType>;
   loadPasswordInfo: undefined;
   clearTwoFaError: undefined;
+  clearMonetizationInfo: undefined;
   updatePassword: {
     currentPassword: string;
     password: string;
@@ -1823,6 +1829,12 @@ export interface ActionPayloads {
   } & WithTabId;
   loadChannelMonetizationStatistics: {
     chatId: string;
+  } & WithTabId;
+
+  loadMonetizationRevenueWithdrawalUrl: {
+    chatId: string;
+    currentPassword: string;
+    onSuccess: VoidFunction;
   } & WithTabId;
 
   // ui

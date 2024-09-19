@@ -26,6 +26,7 @@ const { uploadFile } = require('./uploadFile');
 const {
     updateTwoFaSettings,
     getTmpPassword,
+    getCurrentPassword,
 } = require('./2fa');
 const RequestState = require('../network/RequestState');
 const Deferred = require('../../../util/Deferred').default;
@@ -1116,6 +1117,10 @@ class TelegramClient {
 
     getTmpPassword(currentPassword, ttl) {
         return getTmpPassword(this, currentPassword, ttl);
+    }
+
+    getCurrentPassword(currentPassword) {
+        return getCurrentPassword(this, currentPassword);
     }
 
     // event region

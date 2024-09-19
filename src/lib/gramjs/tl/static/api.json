@@ -282,6 +282,7 @@
     "stats.getStoryStats",
     "stats.getStoryPublicForwards",
     "stats.loadAsyncGraph",
+    "stats.getBroadcastRevenueWithdrawalUrl",
     "messages.getAttachMenuBots",
     "messages.getAttachMenuBot",
     "messages.toggleBotInAttachMenu",

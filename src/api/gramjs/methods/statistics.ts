@@ -17,6 +17,7 @@ import {
 } from '../apiBuilders/statistics';
 import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
 import { invokeRequest } from './client';
+import { getPassword, onPasswordError } from './twoFaSettings';
 
 export async function fetchChannelStatistics({
   chat, dcId,
@@ -210,4 +211,33 @@ export async function fetchStoryPublicForwards({
     count: result.count,
     nextOffset: result.nextOffset,
   };
+}
+
+export async function loadMonetizationRevenueWithdrawalUrl({
+  chat, currentPassword,
+}: { chat: ApiChat; currentPassword: string }) {
+  try {
+    const password = await getPassword(currentPassword);
+
+    if (!password || 'error' in password) {
+      return undefined;
+    }
+
+    const result = await invokeRequest(new GramJs.stats.GetBroadcastRevenueWithdrawalUrl({
+      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+      password,
+    }), {
+      shouldThrow: true,
+    });
+
+    if (!result) {
+      return undefined;
+    }
+
+    return result;
+  } catch (err: any) {
+    onPasswordError(err);
+  }
+
+  return undefined;
 }

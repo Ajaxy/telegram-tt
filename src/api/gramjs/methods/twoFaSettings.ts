@@ -2,7 +2,9 @@ import { Api as GramJs, errors } from '../../../lib/gramjs';
 
 import { DEBUG } from '../../../config';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
-import { getTmpPassword, invokeRequest, updateTwoFaSettings } from './client';
+import {
+  getCurrentPassword, getTmpPassword, invokeRequest, updateTwoFaSettings,
+} from './client';
 
 const ApiErrors: { [k: string]: string } = {
   EMAIL_UNCONFIRMED: 'Email unconfirmed',
@@ -11,6 +13,7 @@ const ApiErrors: { [k: string]: string } = {
   NEW_SETTINGS_INVALID: 'The new password settings are invalid',
   CODE_INVALID: 'Invalid Code',
   PASSWORD_HASH_INVALID: 'Invalid Password',
+  PASSWORD_MISSING: 'You must enable 2FA before executing this operation',
 };
 
 const emailCodeController: {
@@ -43,6 +46,18 @@ function onRequestEmailCode(length: number) {
 
 export function getTemporaryPaymentPassword(password: string, ttl?: number) {
   return getTmpPassword(password, ttl);
+}
+
+export function getPassword(password: string) {
+  try {
+    return getCurrentPassword({
+      currentPassword: password,
+      onPasswordCodeError: onPasswordError,
+    });
+  } catch (err: any) {
+    onPasswordError(err);
+    return undefined;
+  }
 }
 
 export async function checkPassword(currentPassword: string) {
@@ -132,5 +147,30 @@ function onError(err: Error) {
   sendApiUpdate({
     '@type': 'updateTwoFaError',
     message,
+  });
+}
+
+export function onPasswordError(err: Error) {
+  let message: string;
+
+  if (err instanceof errors.PasswordModifiedError) {
+    const hours = Math.ceil(Number(err.seconds) / 60 / 60);
+    message = `Too many attempts. Try again in ${hours > 1 ? `${hours} hours` : 'an hour'}`;
+  } else {
+    message = ApiErrors[err.message];
+  }
+
+  if (!message) {
+    message = 'Unexpected Error';
+
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }
+
+  sendApiUpdate({
+    '@type': 'updatePasswordError',
+    error: message,
   });
 }

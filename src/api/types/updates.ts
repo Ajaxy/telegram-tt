@@ -481,6 +481,11 @@ export type ApiUpdateTwoFaError = {
   message: string;
 };
 
+export type ApiUpdatePasswordError = {
+  '@type': 'updatePasswordError';
+  error: string;
+};
+
 export type ApiUpdateNotifySettings = {
   '@type': 'updateNotifySettings';
   peerType: 'contact' | 'group' | 'broadcast';
@@ -776,7 +781,7 @@ export type ApiUpdate = (
   ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
   ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
-  ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
+  ApiUpdateTwoFaError | ApiUpdatePasswordError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |

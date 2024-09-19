@@ -1624,8 +1624,8 @@ bots.setBotInfo#10cf3123 flags:# bot:flags.2?InputUser lang_code:string name:fla
 bots.canSendMessage#1359f4e6 bot:InputUser = Bool;
 bots.allowSendMessage#f132e3ef bot:InputUser = Updates;
 bots.invokeWebViewCustomMethod#87fc5e7 bot:InputUser custom_method:string params:DataJSON = DataJSON;
-bots.getPreviewMedias#a2a5594d bot:InputUser = Vector<BotPreviewMedia>;
 bots.getPopularAppBots#c2510192 offset:string limit:int = bots.PopularAppBots;
+bots.getPreviewMedias#a2a5594d bot:InputUser = Vector<BotPreviewMedia>;
 payments.getPaymentForm#37148dbb flags:# invoice:InputInvoice theme_params:flags.0?DataJSON = payments.PaymentForm;
 payments.getPaymentReceipt#2478d1cc peer:InputPeer msg_id:int = payments.PaymentReceipt;
 payments.validateRequestedInfo#b6c8f12b flags:# save:flags.0?true invoice:InputInvoice info:PaymentRequestedInfo = payments.ValidatedRequestedInfo;
@@ -1676,6 +1676,7 @@ stats.getMessageStats#b6e0a3f5 flags:# dark:flags.0?true channel:InputChannel ms
 stats.getStoryStats#374fef40 flags:# dark:flags.0?true peer:InputPeer id:int = stats.StoryStats;
 stats.getStoryPublicForwards#a6437ef6 peer:InputPeer id:int offset:string limit:int = stats.PublicForwards;
 stats.getBroadcastRevenueStats#75dfb671 flags:# dark:flags.0?true channel:InputChannel = stats.BroadcastRevenueStats;
+stats.getBroadcastRevenueWithdrawalUrl#2a65ef73 channel:InputChannel password:InputCheckPasswordSRP = stats.BroadcastRevenueWithdrawalUrl;
 chatlists.exportChatlistInvite#8472478e chatlist:InputChatlist title:string peers:Vector<InputPeer> = chatlists.ExportedChatlistInvite;
 chatlists.deleteExportedInvite#719c5c5e chatlist:InputChatlist slug:string = Bool;
 chatlists.editExportedInvite#653db63d flags:# chatlist:InputChatlist slug:string title:flags.1?string peers:flags.2?Vector<InputPeer> = ExportedChatlistInvite;

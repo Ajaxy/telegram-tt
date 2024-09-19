@@ -38,5 +38,6 @@ import './apiUpdaters/symbols';
 import './apiUpdaters/misc';
 import './apiUpdaters/settings';
 import './apiUpdaters/twoFaSettings';
+import './apiUpdaters/password';
 import './apiUpdaters/calls';
 import './apiUpdaters/payments';
