@@ -1,5 +1,5 @@
 import type {
-  ApiMissingInvitedUser, ApiUser, ApiUserFullInfo, ApiUserStatus,
+  ApiMissingInvitedUser, ApiUser, ApiUserCommonChats, ApiUserFullInfo, ApiUserStatus,
 } from '../../api/types';
 import type { GlobalState, TabArgs, TabState } from '../types';
 
@@ -235,6 +235,21 @@ export function updateUserFullInfo<T extends GlobalState>(
           ...userFullInfo,
           ...fullInfo,
         },
+      },
+    },
+  };
+}
+
+export function updateUserCommonChats<T extends GlobalState>(
+  global: T, userId: string, commonChats: ApiUserCommonChats,
+): T {
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      commonChatsById: {
+        ...global.users.commonChatsById,
+        [userId]: commonChats,
       },
     },
   };

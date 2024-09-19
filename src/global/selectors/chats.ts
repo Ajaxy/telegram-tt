@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiChatFullInfo, ApiChatType, ApiPeer,
+  ApiChat, ApiChatFullInfo, ApiChatType,
 } from '../../api/types';
 import type { ChatListType, GlobalState, TabArgs } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -23,10 +23,6 @@ import { selectTabState } from './tabs';
 import {
   selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
 } from './users';
-
-export function selectPeer<T extends GlobalState>(global: T, peerId: string): ApiPeer | undefined {
-  return selectUser(global, peerId) || selectChat(global, peerId);
-}
 
 export function selectChat<T extends GlobalState>(global: T, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];

@@ -16,6 +16,7 @@ import {
   deletePeerPhoto,
   leaveChat,
   removeUnreadMentions,
+  replacePeerPhotos,
   replaceThreadParam,
   updateChat,
   updateChatFullInfo,
@@ -548,8 +549,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (!photoId || peer.avatarPhotoId === photoId) {
         global = updateChat(global, peerId, {
           avatarPhotoId: undefined,
-          profilePhotos: undefined,
         });
+        global = replacePeerPhotos(global, peerId, undefined);
       } else {
         global = deletePeerPhoto(global, peerId, photoId);
       }

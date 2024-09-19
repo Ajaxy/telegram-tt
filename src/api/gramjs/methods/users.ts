@@ -5,7 +5,6 @@ import type {
   ApiChat, ApiPeer, ApiSticker, ApiUser,
 } from '../../types';
 
-import { COMMON_CHATS_LIMIT } from '../../../config';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { buildApiPeerId } from '../apiBuilders/peers';
@@ -87,21 +86,21 @@ export async function fetchFullUser({
   };
 }
 
-export async function fetchCommonChats(id: string, accessHash?: string, maxId?: string) {
-  const commonChats = await invokeRequest(new GramJs.messages.GetCommonChats({
-    userId: buildInputEntity(id, accessHash) as GramJs.InputUser,
+export async function fetchCommonChats(user: ApiUser, maxId?: string) {
+  const result = await invokeRequest(new GramJs.messages.GetCommonChats({
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
     maxId: maxId ? buildMtpPeerId(maxId, getEntityTypeById(maxId)) : undefined,
-    limit: COMMON_CHATS_LIMIT,
   }));
 
-  if (!commonChats) {
+  if (!result) {
     return undefined;
   }
 
-  const chats = commonChats.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const chatIds = chats.map(({ id: chatId }) => chatId);
+  const count = 'count' in result ? result.count : chatIds.length;
 
-  return { chatIds, isFullyLoaded: chatIds.length < COMMON_CHATS_LIMIT };
+  return { chatIds, count };
 }
 
 export async function fetchNearestCountry() {

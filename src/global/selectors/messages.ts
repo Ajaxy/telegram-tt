@@ -64,9 +64,9 @@ import {
   selectChatFullInfo,
   selectChatLastMessageId,
   selectIsChatWithSelf,
-  selectPeer,
   selectRequestedChatTranslationLanguage,
 } from './chats';
+import { selectPeer } from './peers';
 import { selectPeerStory } from './stories';
 import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';

@@ -23,6 +23,7 @@ import {
   updatePeerPhotos,
   updatePeerPhotosIsLoading,
   updateUser,
+  updateUserCommonChats,
   updateUserFullInfo,
   updateUsers,
   updateUserSearch,
@@ -31,10 +32,11 @@ import {
 import {
   selectChat,
   selectChatFullInfo,
-  selectCurrentMessageList,
   selectPeer,
+  selectPeerPhotos,
   selectTabState,
   selectUser,
+  selectUserCommonChats,
   selectUserFullInfo,
 } from '../../selectors';
 
@@ -56,6 +58,7 @@ addActionHandler('loadFullUser', async (global, actions, payload): Promise<void>
   global = getGlobal();
   const fullInfo = selectUserFullInfo(global, userId);
   const { user: newUser, fullInfo: newFullInfo } = result;
+  const profilePhotos = selectPeerPhotos(global, userId);
   const hasChangedAvatar = user.avatarPhotoId !== newUser.avatarPhotoId;
   const hasChangedProfilePhoto = fullInfo?.profilePhoto?.id !== newFullInfo?.profilePhoto?.id;
   const hasChangedFallbackPhoto = fullInfo?.fallbackPhoto?.id !== newFullInfo?.fallbackPhoto?.id;
@@ -71,7 +74,7 @@ addActionHandler('loadFullUser', async (global, actions, payload): Promise<void>
   global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
 
   setGlobal(global);
-  if (withPhotos || (user.profilePhotos?.count && hasChangedPhoto)) {
+  if (withPhotos || (profilePhotos?.count && hasChangedPhoto)) {
     actions.loadMoreProfilePhotos({ peerId: userId, shouldInvalidateCache: true });
   }
 });
@@ -156,28 +159,27 @@ addActionHandler('loadCurrentUser', (): ActionReturnType => {
 });
 
 addActionHandler('loadCommonChats', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const { chatId } = selectCurrentMessageList(global, tabId) || {};
-  const user = chatId ? selectUser(global, chatId) : undefined;
-  if (!user || isUserBot(user) || user.commonChats?.isFullyLoaded) {
+  const { userId } = payload;
+  const user = selectUser(global, userId);
+  const commonChats = selectUserCommonChats(global, userId);
+  if (!user || isUserBot(user) || commonChats?.isFullyLoaded) {
     return;
   }
 
-  const maxId = user.commonChats?.maxId;
-  const result = await callApi('fetchCommonChats', user.id, user.accessHash!, maxId);
+  const result = await callApi('fetchCommonChats', user, commonChats?.maxId);
   if (!result) {
     return;
   }
 
-  const { chatIds, isFullyLoaded } = result;
+  const { chatIds, count } = result;
+
+  const ids = unique((commonChats?.ids || []).concat(chatIds));
 
   global = getGlobal();
-  global = updateUser(global, user.id, {
-    commonChats: {
-      maxId: chatIds.length ? chatIds[chatIds.length - 1] : '0',
-      ids: unique((user.commonChats?.ids || []).concat(chatIds)),
-      isFullyLoaded,
-    },
+  global = updateUserCommonChats(global, user.id, {
+    maxId: chatIds.length ? chatIds[chatIds.length - 1] : undefined,
+    ids,
+    isFullyLoaded: ids.length >= count,
   });
 
   setGlobal(global);
@@ -258,11 +260,12 @@ addActionHandler('loadMoreProfilePhotos', async (global, actions, payload): Prom
   const user = isPrivate ? selectUser(global, peerId) : undefined;
   const chat = !isPrivate ? selectChat(global, peerId) : undefined;
   const peer = user || chat;
+  const profilePhotos = selectPeerPhotos(global, peerId);
   if (!peer?.avatarPhotoId) {
     return;
   }
 
-  if (peer.profilePhotos && !shouldInvalidateCache && (isPreload || !peer.profilePhotos.nextOffset)) return;
+  if (profilePhotos && !shouldInvalidateCache && (isPreload || !profilePhotos.nextOffset)) return;
 
   global = updatePeerPhotosIsLoading(global, peerId, true);
   setGlobal(global);
@@ -292,7 +295,7 @@ addActionHandler('loadMoreProfilePhotos', async (global, actions, payload): Prom
   const peerFullInfo = userFullInfo || chatFullInfo;
   if (!peerFullInfo) return;
 
-  const offset = peer.profilePhotos?.nextOffset;
+  const offset = profilePhotos?.nextOffset;
   const limit = !offset || isPreload || shouldInvalidateCache ? PROFILE_PHOTOS_FIRST_LOAD_LIMIT : undefined;
 
   const result = await callApi('fetchProfilePhotos', {

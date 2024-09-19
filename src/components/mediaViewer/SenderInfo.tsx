@@ -68,14 +68,15 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     if (!item || item.type === 'standalone') return undefined;
 
     const avatarOwner = item.type === 'avatar' ? item.avatarOwner : undefined;
-    const avatar = avatarOwner?.profilePhotos?.photos[item.mediaIndex!];
-    const isFallbackAvatar = avatar?.id === avatarOwner?.profilePhotos?.fallbackPhoto?.id;
+    const profilePhotos = item.type === 'avatar' ? item.profilePhotos : undefined;
+    const avatar = profilePhotos?.photos[item.mediaIndex!];
+    const isFallbackAvatar = avatar?.id === profilePhotos?.fallbackPhoto?.id;
     const date = item.type === 'message' ? item.message.date : avatar?.date;
     if (!date) return undefined;
 
     const formattedDate = formatMediaDateTime(lang, date * 1000, true);
-    const count = avatarOwner?.profilePhotos?.count
-      && (avatarOwner.profilePhotos.count + (avatarOwner?.profilePhotos?.fallbackPhoto ? 1 : 0));
+    const count = profilePhotos?.count
+      && (profilePhotos.count + (profilePhotos?.fallbackPhoto ? 1 : 0));
     const countText = count && lang('Of', [item.mediaIndex! + 1, count]);
 
     const parts: string[] = [];

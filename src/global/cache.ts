@@ -245,6 +245,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.topBotApps) {
     cached.topBotApps = initialState.topBotApps;
   }
+  if (!cached.users.commonChatsById) {
+    cached.users.commonChatsById = initialState.users.commonChatsById;
+  }
 }
 
 function updateCache(force?: boolean) {
@@ -390,10 +393,10 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
   ]).slice(0, GLOBAL_STATE_CACHE_USER_LIST_LIMIT);
 
   return {
+    ...INITIAL_GLOBAL_STATE.users,
     byId: pickTruthy(byId, idsToSave),
     statusesById: pickTruthy(statusesById, idsToSave),
     fullInfoById: pickTruthy(fullInfoById, idsToSave),
-    previewMediaByBotId: {},
   };
 }
 

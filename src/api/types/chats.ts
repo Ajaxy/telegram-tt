@@ -3,7 +3,7 @@ import type { ApiBotCommand } from './bots';
 import type {
   ApiChatReactions, ApiFormattedText, ApiPhoto, ApiStickerSet,
 } from './messages';
-import type { ApiChatInviteImporter, ApiPeerPhotos } from './misc';
+import type { ApiChatInviteImporter } from './misc';
 import type {
   ApiEmojiStatus, ApiFakeType, ApiUser, ApiUsername,
 } from './users';
@@ -41,7 +41,6 @@ export interface ApiChat {
   membersCount?: number;
   creationDate?: number;
   isSupport?: true;
-  profilePhotos?: ApiPeerPhotos;
   draftDate?: number;
   isProtected?: boolean;
   fakeType?: ApiFakeType;

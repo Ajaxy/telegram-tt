@@ -37,7 +37,6 @@ import {
   isChatChannel,
   isChatGroup,
   isUserBot,
-  isUserId,
   isUserRightBanned,
 } from '../../global/helpers';
 import {
@@ -48,12 +47,12 @@ import {
   selectCurrentSharedMediaSearch,
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
-  selectPeerFullInfo,
   selectPeerStories,
   selectSimilarChannelIds,
   selectTabState,
   selectTheme,
   selectUser,
+  selectUserCommonChats,
   selectUserFullInfo,
 } from '../../global/selectors';
 import { selectPremiumLimit } from '../../global/selectors/limits';
@@ -110,7 +109,6 @@ type StateProps = {
   theme: ISettings['theme'];
   isChannel?: boolean;
   currentUserId?: string;
-  resolvedUserId?: string;
   messagesById?: Record<number, ApiMessage>;
   foundIds?: number[];
   mediaSearchType?: SharedMediaType;
@@ -166,10 +164,8 @@ const Profile: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   profileState,
-  onProfileStateChange,
   theme,
   isChannel,
-  resolvedUserId,
   currentUserId,
   messagesById,
   foundIds,
@@ -205,6 +201,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   isSavedDialog,
   forceScrollProfileTab,
   isSynced,
+  onProfileStateChange,
 }) => {
   const {
     setSharedMediaSearchType,
@@ -230,7 +227,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
-  const profileId = isSavedDialog ? String(threadId) : (resolvedUserId || chatId);
+  const profileId = isSavedDialog ? String(threadId) : chatId;
   const isSavedMessages = profileId === currentUserId && !isSavedDialog;
 
   const tabs = useMemo(() => ([
@@ -303,6 +300,9 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
+  const handleLoadCommonChats = useCallback(() => {
+    loadCommonChats({ userId: chatId });
+  }, [chatId]);
   const handleLoadPeerStories = useCallback(({ offsetId }: { offsetId: number }) => {
     loadPeerProfileStories({ peerId: chatId, offsetId });
   }, [chatId]);
@@ -312,7 +312,7 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
     loadMoreMembers,
-    loadCommonChats,
+    handleLoadCommonChats,
     searchSharedMediaMessages,
     handleLoadPeerStories,
     handleLoadStoriesArchive,
@@ -746,9 +746,12 @@ export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, isMobile,
   }): StateProps => {
+    const user = selectUser(global, chatId);
     const chat = selectChat(global, chatId);
     const chatFullInfo = selectChatFullInfo(global, chatId);
+    const userFullInfo = selectUserFullInfo(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
+
     const { currentType: mediaSearchType, resultsByType } = selectCurrentSharedMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
 
@@ -774,19 +777,13 @@ export default memo(withGlobal<OwnProps>(
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
-    let hasCommonChatsTab;
-    let resolvedUserId;
-    let user;
-    if (isUserId(chatId)) {
-      resolvedUserId = chatId;
-      user = selectUser(global, resolvedUserId);
-      hasCommonChatsTab = user && !user.isSelf && !isUserBot(user) && !isSavedDialog;
-    }
-
     const peer = user || chat;
-    const peerFullInfo = selectPeerFullInfo(global, chatId);
+    const peerFullInfo = userFullInfo || chatFullInfo;
 
-    const userFullInfo = selectUserFullInfo(global, chatId);
+    const hasCommonChatsTab = user && !user.isSelf && !isUserBot(user) && !isSavedDialog
+      && Boolean(userFullInfo?.commonChatsCount);
+    const commonChats = selectUserCommonChats(global, chatId);
+
     const hasPreviewMediaTab = userFullInfo?.botInfo?.hasPreviewMedia;
     const botPreviewMedia = global.users.previewMediaByBotId[chatId];
 
@@ -801,7 +798,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       theme: selectTheme(global),
       isChannel,
-      resolvedUserId,
       messagesById,
       foundIds,
       mediaSearchType,
@@ -835,7 +831,7 @@ export default memo(withGlobal<OwnProps>(
       isSynced: global.isSynced,
       limitSimilarChannels: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
-      ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
+      ...(hasCommonChatsTab && user && { commonChatIds: commonChats?.ids }),
     };
   },
 )(Profile));

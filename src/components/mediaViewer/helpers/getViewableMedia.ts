@@ -1,4 +1,6 @@
-import type { ApiMessage, ApiPeer, ApiSponsoredMessage } from '../../../api/types';
+import type {
+  ApiMessage, ApiPeer, ApiPeerPhotos, ApiSponsoredMessage,
+} from '../../../api/types';
 import type { MediaViewerMedia } from '../../../types';
 
 import { getMessageContent, isDocumentPhoto, isDocumentVideo } from '../../../global/helpers';
@@ -10,6 +12,7 @@ export type MediaViewerItem = {
 } | {
   type: 'avatar';
   avatarOwner: ApiPeer;
+  profilePhotos: ApiPeerPhotos;
   mediaIndex: number;
 } | {
   type: 'standalone';
@@ -27,18 +30,20 @@ type ViewableMedia = {
 };
 
 export function getMediaViewerItem({
-  message, avatarOwner, standaloneMedia, mediaIndex, sponsoredMessage,
+  message, avatarOwner, profilePhotos, standaloneMedia, mediaIndex, sponsoredMessage,
 }: {
   message?: ApiMessage;
   avatarOwner?: ApiPeer;
+  profilePhotos?: ApiPeerPhotos;
   standaloneMedia?: MediaViewerMedia[];
   sponsoredMessage?: ApiSponsoredMessage;
   mediaIndex?: number;
 }): MediaViewerItem | undefined {
-  if (avatarOwner) {
+  if (avatarOwner && profilePhotos) {
     return {
       type: 'avatar',
       avatarOwner,
+      profilePhotos,
       mediaIndex: mediaIndex!,
     };
   }
@@ -81,7 +86,7 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
   }
 
   if (params.type === 'avatar') {
-    const avatar = params.avatarOwner.profilePhotos?.photos[params.mediaIndex];
+    const avatar = params.profilePhotos?.photos[params.mediaIndex];
     if (avatar) {
       return {
         media: avatar,

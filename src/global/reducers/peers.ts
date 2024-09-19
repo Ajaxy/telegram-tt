@@ -1,11 +1,16 @@
 import type {
-  ApiChat, ApiChatFullInfo, ApiPhoto, ApiUser, ApiUserFullInfo,
+  ApiChat, ApiChatFullInfo, ApiPeerPhotos, ApiPhoto, ApiUser, ApiUserFullInfo,
 } from '../../api/types';
 import type { GlobalState } from '../types';
 
-import { uniqueByField } from '../../util/iteratees';
+import { omit, uniqueByField } from '../../util/iteratees';
 import { isChatChannel, isUserId } from '../helpers';
-import { selectChatFullInfo, selectPeer, selectUserFullInfo } from '../selectors';
+import {
+  selectChatFullInfo,
+  selectPeer,
+  selectPeerPhotos,
+  selectUserFullInfo,
+} from '../selectors';
 import { updateChat, updateChatFullInfo } from './chats';
 import { updateUser, updateUserFullInfo } from './users';
 
@@ -38,17 +43,36 @@ export function updatePeerPhotosIsLoading<T extends GlobalState>(
   peerId: string,
   isLoading: boolean,
 ) {
-  const peer = selectPeer(global, peerId);
-  if (!peer || !peer.profilePhotos) {
+  const profilePhotos = selectPeerPhotos(global, peerId);
+  if (!profilePhotos) {
     return global;
   }
 
-  return updatePeer(global, peerId, {
-    profilePhotos: {
-      ...peer.profilePhotos,
-      isLoading,
-    },
+  return replacePeerPhotos(global, peerId, {
+    ...profilePhotos,
+    isLoading,
   });
+}
+
+export function replacePeerPhotos<T extends GlobalState>(
+  global: T,
+  peerId: string,
+  value?: ApiPeerPhotos,
+) {
+  if (!value) {
+    return {
+      ...global,
+      profilePhotosById: omit(global.profilePhotosById, [peerId]),
+    };
+  }
+
+  return {
+    ...global,
+    profilePhotosById: {
+      ...global.profilePhotosById,
+      [peerId]: value,
+    },
+  };
 }
 
 export function updatePeerPhotos<T extends GlobalState>(
@@ -62,15 +86,12 @@ export function updatePeerPhotos<T extends GlobalState>(
     shouldInvalidateCache?: boolean;
   },
 ) {
-  const peer = selectPeer(global, peerId);
-  if (!peer) {
-    return global;
-  }
+  const profilePhotos = selectPeerPhotos(global, peerId);
 
   const {
     newPhotos, count, nextOffset, fullInfo, shouldInvalidateCache,
   } = update;
-  const currentPhotos = peer.profilePhotos;
+  const currentPhotos = profilePhotos;
   const profilePhoto = fullInfo.profilePhoto;
   const fallbackPhoto = 'fallbackPhoto' in fullInfo ? fullInfo.fallbackPhoto : undefined;
   const personalPhoto = 'personalPhoto' in fullInfo ? fullInfo.personalPhoto : undefined;
@@ -89,15 +110,13 @@ export function updatePeerPhotos<T extends GlobalState>(
       newPhotos.push(fallbackPhoto);
     }
 
-    return updatePeer(global, peerId, {
-      profilePhotos: {
-        fallbackPhoto,
-        personalPhoto,
-        photos: newPhotos,
-        count,
-        nextOffset,
-        isLoading: false,
-      },
+    return replacePeerPhotos(global, peerId, {
+      fallbackPhoto,
+      personalPhoto,
+      photos: newPhotos,
+      count,
+      nextOffset,
+      isLoading: false,
     });
   }
 
@@ -105,15 +124,13 @@ export function updatePeerPhotos<T extends GlobalState>(
   const currentPhotoArray = hasFallbackPhoto ? currentPhotos.photos.slice(0, -1) : currentPhotos.photos;
 
   const photos = uniqueByField([...currentPhotoArray, ...newPhotos, fallbackPhoto].filter(Boolean), 'id');
-  return updatePeer(global, peerId, {
-    profilePhotos: {
-      fallbackPhoto,
-      personalPhoto,
-      photos,
-      count,
-      nextOffset,
-      isLoading: false,
-    },
+  return replacePeerPhotos(global, peerId, {
+    fallbackPhoto,
+    personalPhoto,
+    photos,
+    count,
+    nextOffset,
+    isLoading: false,
   });
 }
 
@@ -124,7 +141,8 @@ export function deletePeerPhoto<T extends GlobalState>(
   isFromActionMessage?: boolean,
 ) {
   const peer = selectPeer(global, peerId);
-  if (!peer || !peer.profilePhotos) {
+  const profilePhotos = selectPeerPhotos(global, peerId);
+  if (!peer || !profilePhotos) {
     return global;
   }
   const isChannel = 'title' in peer && isChatChannel(peer);
@@ -133,7 +151,7 @@ export function deletePeerPhoto<T extends GlobalState>(
   const chatFullInfo = selectChatFullInfo(global, peerId);
 
   const isAvatar = peer.avatarPhotoId === photoId && (!isChannel || isFromActionMessage);
-  const nextAvatarPhoto = isAvatar ? peer.profilePhotos.photos[1] : undefined;
+  const nextAvatarPhoto = isAvatar ? profilePhotos.photos[1] : undefined;
 
   if (userFullInfo) {
     const newFallbackPhoto = userFullInfo.fallbackPhoto?.id === photoId ? undefined : userFullInfo.fallbackPhoto;
@@ -156,13 +174,17 @@ export function deletePeerPhoto<T extends GlobalState>(
   const avatarPhotoId = isAvatar ? nextAvatarPhoto?.id : peer.avatarPhotoId;
   const shouldKeepInPhotos = isAvatar && 'title' in peer && isChatChannel(peer);
   const photos = shouldKeepInPhotos
-    ? peer.profilePhotos.photos.filter((photo) => photo.id !== photoId) : peer.profilePhotos.photos.slice();
-  return updatePeer(global, peerId, {
+    ? profilePhotos.photos.filter((photo) => photo.id !== photoId) : profilePhotos.photos.slice();
+
+  global = updatePeer(global, peerId, {
     avatarPhotoId,
-    profilePhotos: avatarPhotoId ? {
-      ...peer.profilePhotos,
-      photos,
-      count: peer.profilePhotos.count - 1,
-    } : undefined,
   });
+
+  global = replacePeerPhotos(global, peerId, avatarPhotoId ? {
+    ...profilePhotos,
+    photos,
+    count: profilePhotos.count - 1,
+  } : undefined);
+
+  return global;
 }

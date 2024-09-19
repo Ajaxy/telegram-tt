@@ -47,6 +47,7 @@ import type {
   ApiPaymentFormNativeParams,
   ApiPaymentSavedInfo,
   ApiPeerColors,
+  ApiPeerPhotos,
   ApiPeerStories,
   ApiPhoneCall,
   ApiPhoto,
@@ -80,6 +81,7 @@ import type {
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
   ApiUser,
+  ApiUserCommonChats,
   ApiUserFullInfo,
   ApiUserStatus,
   ApiVideo,
@@ -933,7 +935,9 @@ export type GlobalState = {
     // Obtained from GetFullUser / UserFullInfo
     fullInfoById: Record<string, ApiUserFullInfo>;
     previewMediaByBotId: Record<string, ApiBotPreviewMedia[]>;
+    commonChatsById: Record<string, ApiUserCommonChats>;
   };
+  profilePhotosById: Record<string, ApiPeerPhotos>;
 
   chats: {
     // TODO Replace with `Partial<Record>` to properly handle missing keys
@@ -2672,7 +2676,9 @@ export interface ActionPayloads {
   deleteContact: { userId: string };
   loadUser: { userId: string };
   setUserSearchQuery: { query?: string } & WithTabId;
-  loadCommonChats: WithTabId | undefined;
+  loadCommonChats: {
+    userId: string;
+  };
   reportSpam: { chatId: string };
   loadFullUser: { userId: string; withPhotos?: boolean };
   openAddContactDialog: { userId?: string } & WithTabId;

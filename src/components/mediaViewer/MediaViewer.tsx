@@ -6,7 +6,11 @@ import { getActions, withGlobal } from '../../global';
 
 import type {
   ApiChat,
-  ApiMessage, ApiPeer, ApiPhoto, ApiSponsoredMessage,
+  ApiMessage,
+  ApiPeer,
+  ApiPeerPhotos,
+  ApiPhoto,
+  ApiSponsoredMessage,
 } from '../../api/types';
 import { type MediaViewerMedia, MediaViewerOrigin, type ThreadId } from '../../types';
 
@@ -25,6 +29,7 @@ import {
   selectListedIds,
   selectOutlyingListByMessageId,
   selectPeer,
+  selectPeerPhotos,
   selectPerformanceSettingsValue,
   selectScheduledMessage, selectSponsoredMessage,
   selectTabState,
@@ -69,6 +74,7 @@ type StateProps = {
   origin?: MediaViewerOrigin;
   avatar?: ApiPhoto;
   avatarOwner?: ApiPeer;
+  profilePhotos?: ApiPeerPhotos;
   chatMessages?: Record<number, ApiMessage>;
   sponsoredMessage?: ApiSponsoredMessage;
   standaloneMedia?: MediaViewerMedia[];
@@ -95,6 +101,7 @@ const MediaViewer = ({
   origin,
   avatar,
   avatarOwner,
+  profilePhotos,
   chatMessages,
   sponsoredMessage,
   standaloneMedia,
@@ -132,7 +139,7 @@ const MediaViewer = ({
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
 
   const currentItem = getMediaViewerItem({
-    message, avatarOwner, standaloneMedia, mediaIndex, sponsoredMessage,
+    message, avatarOwner, standaloneMedia, profilePhotos, mediaIndex, sponsoredMessage,
   });
   const { media, isSingle } = getViewableMedia(currentItem) || {};
 
@@ -275,7 +282,7 @@ const MediaViewer = ({
     if (!item || isLoadingMoreMedia) return;
 
     if (item.type === 'avatar') {
-      const isNearEnd = item.mediaIndex >= item.avatarOwner.profilePhotos!.photos.length - AVATAR_LOAD_TRIGGER;
+      const isNearEnd = item.mediaIndex >= item.profilePhotos.photos.length - AVATAR_LOAD_TRIGGER;
       if (!isNearEnd) return;
       loadMoreProfilePhotos({ peerId: item.avatarOwner.id });
     }
@@ -299,10 +306,15 @@ const MediaViewer = ({
     }
 
     if (from.type === 'avatar') {
-      const { avatarOwner: fromAvatarOwner, mediaIndex: fromMediaIndex } = from;
+      const { avatarOwner: fromAvatarOwner, profilePhotos: fromProfilePhotos, mediaIndex: fromMediaIndex } = from;
       const nextIndex = fromMediaIndex + direction;
-      if (nextIndex >= 0 && fromAvatarOwner.profilePhotos && nextIndex < fromAvatarOwner.profilePhotos.photos.length) {
-        return { type: 'avatar', avatarOwner: fromAvatarOwner, mediaIndex: nextIndex };
+      if (nextIndex >= 0 && fromProfilePhotos && nextIndex < fromProfilePhotos.photos.length) {
+        return {
+          type: 'avatar',
+          avatarOwner: fromAvatarOwner,
+          profilePhotos: fromProfilePhotos,
+          mediaIndex: nextIndex,
+        };
       }
 
       return undefined;
@@ -367,7 +379,7 @@ const MediaViewer = ({
   });
 
   const handleBeforeDelete = useLastCallback(() => {
-    const mediaCount = avatarOwner?.profilePhotos?.photos.length
+    const mediaCount = profilePhotos?.photos.length
       || standaloneMedia?.length || messageMediaIds?.length || 0;
     if (mediaCount <= 1 || !currentItem) {
       handleClose();
@@ -489,9 +501,10 @@ export default memo(withGlobal(
         canUpdateMedia = isUserId(peer.id) ? peer.id === currentUserId : isChatAdmin(peer as ApiChat);
       }
 
-      const profilePhotos = peer?.profilePhotos;
+      const profilePhotos = selectPeerPhotos(global, chatId!);
 
       return {
+        profilePhotos,
         avatar: profilePhotos?.photos[mediaIndex!],
         avatarOwner: peer,
         isLoadingMoreMedia: profilePhotos?.isLoading,

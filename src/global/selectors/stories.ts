@@ -2,7 +2,7 @@ import type { ApiPeerStories, ApiTypeStory } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { selectPeer } from './chats';
+import { selectPeer } from './peers';
 import { selectTabState } from './tabs';
 
 export function selectCurrentViewedStory<T extends GlobalState>(

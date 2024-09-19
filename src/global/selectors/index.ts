@@ -11,3 +11,4 @@ export * from './settings';
 export * from './statistics';
 export * from './stories';
 export * from './tabs';
+export * from './peers';
