@@ -670,7 +670,7 @@ addActionHandler('loadPreviewMedias', async (global, actions, payload): Promise<
 
 addActionHandler('requestAppWebView', async (global, actions, payload): Promise<void> => {
   const {
-    botId, appName, startApp, theme, isWriteAllowed, isFromConfirm,
+    botId, appName, startApp, theme, isWriteAllowed, isFromConfirm, shouldSkipBotTrustRequest,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -719,7 +719,10 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
     return;
   }
 
-  if (botApp.isInactive || !selectIsTrustedBot(global, botId)) {
+  const shouldRequestBotTrust = !shouldSkipBotTrustRequest && (botApp.isInactive || !selectIsTrustedBot(global, botId));
+
+  if (shouldRequestBotTrust) {
+    payload.shouldSkipBotTrustRequest = true;
     global = updateTabState(global, {
       botTrustRequest: {
         botId,

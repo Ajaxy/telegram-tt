@@ -2891,6 +2891,7 @@ export async function checkWebAppExists<T extends GlobalState>(
   if (!botName || !appName) return false;
   global = getGlobal();
   const chatByUsername = await fetchChatByUsername(global, botName);
+  global = getGlobal();
   const bot = chatByUsername && selectUser(global, chatByUsername.id);
   const botApp = bot && await callApi('fetchBotApp', {
     bot,

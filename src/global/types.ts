@@ -2961,6 +2961,7 @@ export interface ActionPayloads {
     startApp?: string;
     isWriteAllowed?: boolean;
     isFromConfirm?: boolean;
+    shouldSkipBotTrustRequest?: boolean;
   } & WithTabId;
   loadPreviewMedias: {
     botId: string;
