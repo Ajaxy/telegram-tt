@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useRef } from '../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { ApiSticker } from '../../api/types';
@@ -9,7 +9,7 @@ import { getStickerMediaHash } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import * as mediaLoader from '../../util/mediaLoader';
-import { IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
+import { IS_ANDROID, IS_IOS, IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
 
 import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
@@ -45,6 +45,7 @@ type OwnProps = {
   observeIntersectionForPlaying?: ObserveFn;
   noLoad?: boolean;
   noPlay?: boolean;
+  noVideoOnMobile?: boolean;
   withSharedAnimation?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   withTranslucentThumb?: boolean; // With shared canvas thumbs are opaque by default to provide better transition effect
@@ -73,6 +74,7 @@ const StickerView: FC<OwnProps> = ({
   observeIntersectionForPlaying,
   noLoad,
   noPlay,
+  noVideoOnMobile,
   withSharedAnimation,
   withTranslucentThumb,
   sharedCanvasRef,
@@ -83,8 +85,11 @@ const StickerView: FC<OwnProps> = ({
     id, isLottie, stickerSetInfo, emoji,
   } = sticker;
   const [isVideoBroken, markVideoBroken] = useFlag();
-  const isUnsupportedVideo = sticker.isVideo && !IS_WEBM_SUPPORTED;
-  const isVideo = sticker.isVideo && !isUnsupportedVideo;
+  const isUnsupportedVideo = sticker.isVideo && (
+    !IS_WEBM_SUPPORTED
+    || (noVideoOnMobile && (IS_IOS || IS_ANDROID))
+  );
+  const isVideo = sticker.isVideo;
   const isStatic = !isLottie && !isVideo;
   const previewMediaHash = getStickerMediaHash(sticker, 'preview');
 
@@ -115,7 +120,7 @@ const StickerView: FC<OwnProps> = ({
     fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData)
   ));
   const fullMediaData = useMedia(fullMediaHash || `sticker${id}`, !shouldLoad || shouldSkipFullMedia);
-  const shouldRenderFullMedia = isReadyToMountFullMedia && fullMediaData && !isVideoBroken;
+  const shouldRenderFullMedia = isReadyToMountFullMedia && !shouldSkipFullMedia && fullMediaData && !isVideoBroken;
   const [isPlayerReady, markPlayerReady] = useFlag();
   const isFullMediaReady = shouldRenderFullMedia && (isStatic || isPlayerReady);
 
@@ -137,13 +142,13 @@ const StickerView: FC<OwnProps> = ({
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview);
 
   const randomIdPrefix = useUniqueId();
-  const renderId = [
+  const renderId = useMemo(() => ([
     (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix),
     id,
     size,
     (withSharedAnimation ? customColor : undefined),
     dpr,
-  ].filter(Boolean).join('_');
+  ].filter(Boolean).join('_')), [customColor, dpr, id, randomIdPrefix, size, withSharedAnimation]);
 
   return (
     <>

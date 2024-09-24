@@ -27,6 +27,7 @@ type OwnProps = {
   size?: number;
   isBig?: boolean;
   noPlay?: boolean;
+  noVideoOnMobile?: boolean;
   loopLimit?: number;
   isSelectable?: boolean;
   withSharedAnimation?: boolean;
@@ -52,6 +53,7 @@ const CustomEmoji: FC<OwnProps> = ({
   size = STICKER_SIZE,
   isBig,
   noPlay,
+  noVideoOnMobile,
   loopLimit,
   isSelectable,
   withSharedAnimation,
@@ -142,6 +144,7 @@ const CustomEmoji: FC<OwnProps> = ({
           isSmall={!isBig}
           size={size}
           noPlay={noPlay || !(shouldPlay && canPlay)}
+          noVideoOnMobile={noVideoOnMobile}
           thumbClassName={styles.thumb}
           fullMediaClassName={styles.media}
           shouldLoop

@@ -166,6 +166,7 @@ const ReactionAnimatedEmoji = ({
           className={styles.customEmoji}
           size={size}
           noPlay={shouldPause}
+          noVideoOnMobile
           loopLimit={loopLimit}
           observeIntersectionForPlaying={observeIntersection}
         />

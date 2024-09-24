@@ -299,6 +299,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           shouldPreloadPreview
           noLoad={!shouldLoad}
           noPlay={!shouldPlay}
+          noVideoOnMobile
           withSharedAnimation
           sharedCanvasRef={sharedCanvasRef}
           withTranslucentThumb={withTranslucentThumb}
