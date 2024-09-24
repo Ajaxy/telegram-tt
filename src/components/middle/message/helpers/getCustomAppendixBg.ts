@@ -23,5 +23,5 @@ export default function getCustomAppendixBg(
   return requestMediaWorker({
     name: 'offscreen-canvas:getAppendixColorFromImage',
     args: [src, isOwn],
-  }, id % MAX_WORKERS);
+  }, Math.round(id) % MAX_WORKERS);
 }
