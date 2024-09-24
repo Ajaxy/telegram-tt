@@ -125,7 +125,8 @@
   .voice &,
   .poll &,
   .text &,
-  .giveaway & {
+  .giveaway &,
+  .unsupported & {
     border-top: 1px solid var(--color-borders);
   }
 
@@ -144,7 +145,8 @@
   .message-content.poll &,
   .message-content.giveaway &,
   .message-content.has-solid-background.text &,
-  .message-content.has-solid-background.is-forwarded & {
+  .message-content.has-solid-background.is-forwarded &,
+  .message-content.unsupported & {
     width: calc(100% + 1rem);
   }
 

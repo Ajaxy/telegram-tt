@@ -41,11 +41,12 @@ export function buildContentClassName(
   const { paidMedia } = getMessageContent(message);
   const { photo: paidMediaPhoto, video: paidMediaVideo } = getSingularPaidMedia(paidMedia);
 
+  const content = getMessageContent(message);
   const {
     photo = paidMediaPhoto, video = paidMediaVideo,
     audio, voice, document, poll, webPage, contact, location, invoice, storyData,
     giveaway, giveawayResults,
-  } = getMessageContent(message);
+  } = content;
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
   const hasFactCheck = Boolean(message.factCheck?.text);
 
@@ -82,6 +83,10 @@ export function buildContentClassName(
     classNames.push('text');
   } else {
     classNames.push('no-text');
+  }
+
+  if (!Object.keys(content).length) {
+    classNames.push('unsupported');
   }
 
   if (hasActionButton) {
