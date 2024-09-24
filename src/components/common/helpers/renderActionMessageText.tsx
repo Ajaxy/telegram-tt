@@ -109,12 +109,12 @@ export function renderActionMessageText(
   processed = processPlaceholder(
     unprocessed,
     '%action_origin%',
-    actionOriginChat ? (
-      renderChatContent(lang, actionOriginChat, noLinks) || NBSP
-    ) : actionOriginUser ? (
+    actionOriginUser ? (
       actionOriginUser.id === SERVICE_NOTIFICATIONS_USER_ID
         ? lang('StarsTransactionUnknown')
         : renderUserContent(actionOriginUser, noLinks) || NBSP
+    ) : actionOriginChat ? (
+      renderChatContent(lang, actionOriginChat, noLinks) || NBSP
     ) : 'User',
     '',
   );
