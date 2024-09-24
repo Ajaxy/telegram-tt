@@ -1577,8 +1577,8 @@ const Message: FC<OwnProps & StateProps> = ({
       {withAvatar && renderAvatar()}
       <div
         className={buildClassName('message-content-wrapper',
-          contentClassName.includes('text') && 'giveaway-result-content',
-          contentClassName.includes('giveaway') && 'can-select-text')}
+          contentClassName.includes('text') && 'can-select-text',
+          contentClassName.includes('giveaway') && 'giveaway-result-content')}
       >
         <div
           className={contentClassName}
