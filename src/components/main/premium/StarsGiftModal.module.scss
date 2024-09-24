@@ -4,10 +4,6 @@
   }
 }
 
-.root {
-  z-index: calc(var(--z-modal-low-priority) + 1);
-}
-
 .root :global(.modal-content) {
   padding: 0;
 }
@@ -15,11 +11,6 @@
 .root :global(.modal-dialog) {
   height: min(calc(55vh + 41px + 193px), 90vh);
   max-width: 26.25rem;
-}
-
-.root :global(.modal-dialog),
-.root :global(.modal-content),
-.transition {
   overflow: hidden;
 }
 
@@ -28,6 +19,7 @@
   overflow-y: scroll;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .headerInfo {

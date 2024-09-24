@@ -608,6 +608,15 @@ function buildAction(
       amount = action.winnersCount;
       pluralValue = action.winnersCount;
     }
+  } else if (action instanceof GramJs.MessageActionPrizeStars) {
+    type = 'prizeStars';
+    isUnclaimed = Boolean(action.unclaimed);
+    if (action.boostPeer) {
+      targetChatId = getApiChatIdFromMtpPeer(action.boostPeer);
+    }
+    text = 'Notification.StarsPrize';
+    stars = action.stars.toJSNumber();
+    transactionId = action.transactionId;
   } else if (action instanceof GramJs.MessageActionBoostApply) {
     type = 'chatBoost';
     if (action.boosts === 1) {

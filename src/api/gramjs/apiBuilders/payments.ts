@@ -6,9 +6,20 @@ import type {
   ApiBoostsStatus,
   ApiCheckedGiftCode,
   ApiGiveawayInfo,
-  ApiInvoice, ApiLabeledPrice, ApiMyBoost, ApiPaymentCredentials,
-  ApiPaymentForm, ApiPaymentSavedInfo, ApiPremiumGiftCodeOption, ApiPremiumPromo, ApiPremiumSubscriptionOption,
+  ApiInvoice,
+  ApiLabeledPrice,
+  ApiMyBoost,
+  ApiPaymentCredentials,
+  ApiPaymentForm,
+  ApiPaymentSavedInfo,
+  ApiPremiumGiftCodeOption,
+  ApiPremiumPromo,
+  ApiPremiumSubscriptionOption,
+  ApiPrepaidGiveaway,
+  ApiPrepaidStarsGiveaway,
   ApiReceipt,
+  ApiStarGiveawayOption,
+  ApiStarsGiveawayWinnerOption,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
@@ -20,7 +31,7 @@ import { buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildMessageMediaContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
-import { buildPrepaidGiveaway, buildStatisticsPercentage } from './statistics';
+import { buildStatisticsPercentage } from './statistics';
 
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {
   if (!shippingOptions) {
@@ -265,19 +276,46 @@ export function buildApiPaymentCredentials(credentials: GramJs.PaymentSavedCrede
   return credentials.map(({ id, title }) => ({ id, title }));
 }
 
+export function buildPrepaidGiveaway(
+  interaction: GramJs.TypePrepaidGiveaway,
+): ApiPrepaidGiveaway | ApiPrepaidStarsGiveaway {
+  if (interaction instanceof GramJs.PrepaidGiveaway) {
+    return {
+      type: 'giveaway',
+      id: interaction.id.toString(),
+      date: interaction.date,
+      months: interaction.months,
+      quantity: interaction.quantity,
+    };
+  }
+
+  return {
+    type: 'starsGiveaway',
+    id: interaction.id.toString(),
+    stars: interaction.stars.toJSNumber(),
+    quantity: interaction.quantity,
+    boosts: interaction.boosts,
+    date: interaction.date,
+  };
+}
+
 export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): ApiBoostsStatus {
   const {
-    level, boostUrl, boosts, myBoost, currentLevelBoosts, nextLevelBoosts, premiumAudience, prepaidGiveaways,
+    level, boostUrl, boosts,
+    giftBoosts, myBoost, currentLevelBoosts, nextLevelBoosts,
+    premiumAudience, prepaidGiveaways,
   } = boostStatus;
+
   return {
     level,
     currentLevelBoosts,
     boosts,
     hasMyBoost: Boolean(myBoost),
     boostUrl,
+    giftBoosts,
     nextLevelBoosts,
     ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
-    ...(prepaidGiveaways && { prepaidGiveaways: prepaidGiveaways.map(buildPrepaidGiveaway) }),
+    ...(prepaidGiveaways && { prepaidGiveaways: prepaidGiveaways.map((m) => buildPrepaidGiveaway(m)) }),
   };
 }
 
@@ -288,6 +326,7 @@ export function buildApiBoost(boost: GramJs.Boost): ApiBoost {
     expires,
     giveaway,
     gift,
+    stars,
   } = boost;
 
   return {
@@ -296,6 +335,7 @@ export function buildApiBoost(boost: GramJs.Boost): ApiBoost {
     expires,
     isFromGiveaway: giveaway,
     isGift: gift,
+    stars: stars?.toJSNumber(),
   };
 }
 
@@ -342,6 +382,7 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       refunded,
       startDate,
       winnersCount,
+      starsPrize,
     } = info;
 
     return {
@@ -353,6 +394,7 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       giftCodeSlug,
       isRefunded: refunded,
       isWinner: winner,
+      starsPrize: starsPrize?.toJSNumber(),
     };
   }
 }
@@ -396,6 +438,38 @@ export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiSta
     stars: stars.toJSNumber(),
     amount: amount.toJSNumber(),
     currency,
+  };
+}
+
+export function buildApiStarsGiveawayWinnersOption(
+  option: GramJs.StarsGiveawayWinnersOption,
+): ApiStarsGiveawayWinnerOption {
+  const {
+    default: isDefault, users, perUserStars,
+  } = option;
+
+  return {
+    isDefault,
+    users,
+    perUserStars: perUserStars.toJSNumber(),
+  };
+}
+
+export function buildApiStarsGiveawayOptions(option: GramJs.StarsGiveawayOption): ApiStarGiveawayOption {
+  const {
+    extended, default: isDefault, stars, yearlyBoosts, amount, winners, currency,
+  } = option;
+
+  const winnerList = winners?.map((m) => buildApiStarsGiveawayWinnersOption(m)).filter(Boolean);
+
+  return {
+    isExtended: extended,
+    isDefault,
+    yearlyBoosts,
+    stars: stars.toJSNumber(),
+    amount: amount.toJSNumber(),
+    currency,
+    winners: winnerList,
   };
 }
 

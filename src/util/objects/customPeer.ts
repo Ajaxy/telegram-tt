@@ -18,6 +18,14 @@ export const CUSTOM_PEER_TO_BE_DISTRIBUTED: UniqueCustomPeer = {
   withPremiumGradient: true,
 };
 
+export const CUSTOM_PEER_STAR: UniqueCustomPeer = {
+  isCustomPeer: true,
+  type: 'stars',
+  titleKey: 'Stars',
+  avatarIcon: 'star',
+  peerColorId: 1,
+};
+
 export const CUSTOM_PEER_INCLUDED_CHAT_TYPES: UniqueCustomPeer[] = [
   {
     isCustomPeer: true,

@@ -85,6 +85,36 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'starsgiveaway') {
+    const {
+      chatId, additionalChannelIds, amount, currency, untilDate, areWinnersVisible, countries,
+      isOnlyForNewSubscribers, prizeDescription, stars, users,
+    } = inputInvoice;
+    const chat = selectChat(global, chatId);
+    if (!chat) {
+      return undefined;
+    }
+    const additionalChannels = additionalChannelIds?.map((id) => selectChat(global, id)).filter(Boolean);
+
+    return {
+      type: 'starsgiveaway',
+      purpose: {
+        type: 'starsgiveaway',
+        amount,
+        currency,
+        chat,
+        additionalChannels,
+        untilDate,
+        areWinnersVisible,
+        countries,
+        isOnlyForNewSubscribers,
+        prizeDescription,
+        stars,
+        users,
+      },
+    };
+  }
+
   if (inputInvoice.type === 'giveaway') {
     const {
       chatId, additionalChannelIds, amount, currency, option, untilDate, areWinnersVisible, countries,
@@ -205,5 +235,24 @@ export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransa
     date: message.date,
     isGift: true,
     isMyGift: message.isOutgoing || undefined,
+  };
+}
+
+export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiStarsTransaction | undefined {
+  const { action } = message.content;
+
+  if (action?.type !== 'prizeStars') return undefined;
+
+  const { transactionId, stars, targetChatId } = action;
+
+  return {
+    id: transactionId!,
+    stars: stars!,
+    peer: {
+      type: 'peer',
+      id: targetChatId!,
+    },
+    date: message.date,
+    isPrizeStars: true,
   };
 }

@@ -17,7 +17,9 @@ import {
   buildApiPaymentForm,
   buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
-  buildApiReceipt, buildApiStarsGiftOptions,
+  buildApiReceipt,
+  buildApiStarsGiftOptions,
+  buildApiStarsGiveawayOptions,
   buildApiStarsTransaction,
   buildApiStarTopupOption,
   buildShippingOptions,
@@ -374,6 +376,16 @@ export async function getStarsGiftOptions({
   }
 
   return result.map(buildApiStarsGiftOptions);
+}
+
+export async function fetchStarsGiveawayOptions() {
+  const result = await invokeRequest(new GramJs.payments.GetStarsGiveawayOptions());
+
+  if (!result) {
+    return undefined;
+  }
+
+  return result.map(buildApiStarsGiveawayOptions);
 }
 
 export function launchPrepaidGiveaway({

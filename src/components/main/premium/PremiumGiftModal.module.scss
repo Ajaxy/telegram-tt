@@ -15,7 +15,6 @@
 }
 
 .root :global(.modal-dialog) {
-  height: min(calc(55vh + 41px + 193px), 90vh);
   max-width: 26.25rem;
 }
 
@@ -119,5 +118,5 @@
 }
 
 .footer {
-  margin: 0 1.5rem;
+  margin: 0 1.5rem 1rem;
 }

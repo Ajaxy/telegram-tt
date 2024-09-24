@@ -91,6 +91,11 @@ export function renderActionMessageText(
       .replace('un2', '%action_origin%')
       .replace(/\*\*/g, '');
   }
+  if (translationKey === 'BoostingReceivedPrizeFrom') {
+    unprocessed = unprocessed
+      .replace('**%s**', '%target_chat%')
+      .replace(/\*\*/g, '');
+  }
   let processed: TextPart[];
 
   if (unprocessed.includes('%star_target_user%')) {

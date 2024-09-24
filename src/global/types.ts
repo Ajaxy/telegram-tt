@@ -54,7 +54,6 @@ import type {
   ApiPostStatistics,
   ApiPremiumGiftCodeOption,
   ApiPremiumPromo,
-  ApiPrepaidGiveaway,
   ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
@@ -64,7 +63,7 @@ import type {
   ApiSendMessageAction,
   ApiSession,
   ApiSessionData,
-  ApiSponsoredMessage,
+  ApiSponsoredMessage, ApiStarGiveawayOption,
   ApiStarsTransaction,
   ApiStarTopupOption,
   ApiStealthMode,
@@ -76,6 +75,7 @@ import type {
   ApiTimezone,
   ApiTopic,
   ApiTranscription,
+  ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
   ApiTypingStatus,
   ApiUpdate,
@@ -716,7 +716,8 @@ export type TabState = {
     gifts?: ApiPremiumGiftCodeOption[];
     selectedMemberIds?: string[];
     selectedChannelIds?: string[];
-    prepaidGiveaway?: ApiPrepaidGiveaway;
+    prepaidGiveaway?: ApiTypePrepaidGiveaway;
+    starOptions?: ApiStarGiveawayOption[];
   };
 
   deleteMessageModal?: {
@@ -1798,6 +1799,11 @@ export interface ActionPayloads {
     messageId: number;
   } & WithTabId;
   closeStarsTransactionModal: WithTabId | undefined;
+  openPrizeStarsTransactionFromGiveaway: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closePrizeStarsTransactionFromGiveaway: WithTabId | undefined;
   sendCredentialsInfo: {
     credentials: ApiCredentials;
   } & WithTabId;
@@ -2235,6 +2241,22 @@ export interface ActionPayloads {
       prizeDescription?: string;
       untilDate: number;
       currency: string;
+      amount: number;
+    };
+  } & WithTabId;
+
+  launchPrepaidStarsGiveaway: {
+    chatId: string;
+    giveawayId: string;
+    paymentPurpose: {
+      additionalChannelIds?: string[];
+      areWinnersVisible?: boolean;
+      countries?: string[];
+      prizeDescription?: string;
+      untilDate: number;
+      currency: string;
+      stars: number;
+      users: number;
       amount: number;
     };
   } & WithTabId;
@@ -3248,7 +3270,7 @@ export interface ActionPayloads {
   openGiveawayModal: ({
     chatId: string;
     gifts?: number[] | undefined;
-    prepaidGiveaway?: ApiPrepaidGiveaway | undefined;
+    prepaidGiveaway?: ApiTypePrepaidGiveaway | undefined;
   } & WithTabId);
   closeGiveawayModal: WithTabId | undefined;
 

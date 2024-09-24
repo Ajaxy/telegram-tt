@@ -368,6 +368,7 @@
     "payments.getStarsTransactionsByID",
     "payments.sendStarsForm",
     "payments.getStarsGiftOptions",
+    "payments.getStarsGiveawayOptions",
     "payments.refundStarsCharge",
     "payments.getStarsGiftOptions",
     "fragment.getCollectibleInfo"

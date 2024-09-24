@@ -28,6 +28,10 @@
   }
 }
 
+.active {
+  --_background-color: var(--color-background-secondary-accent);
+}
+
 .wideOption {
   grid-column: 1 / -1;
 }

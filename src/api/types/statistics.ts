@@ -1,4 +1,5 @@
 import type { ApiChat } from './chats';
+import type { ApiTypePrepaidGiveaway } from './payments';
 
 export interface ApiChannelStatistics {
   growthGraph?: StatisticsGraph | string;
@@ -61,7 +62,7 @@ export interface ApiBoostStatistics {
   boosts: number;
   premiumSubscribers: StatisticsOverviewPercentage;
   remainingBoosts: number;
-  prepaidGiveaways: PrepaidGiveaway[];
+  prepaidGiveaways: ApiTypePrepaidGiveaway[];
 }
 
 export interface ApiMessagePublicForward {
@@ -113,13 +114,6 @@ export interface StatisticsOverviewPercentage {
   part: number;
   total: number;
   percentage: string;
-}
-
-export interface PrepaidGiveaway {
-  id: string;
-  months: number;
-  quantity: number;
-  date: number;
 }
 
 export interface StatisticsOverviewPeriod {

@@ -568,6 +568,23 @@ GramJs.TypeInputStorePaymentPurpose {
 
   const randomId = generateRandomBigInt();
 
+  if (purpose.type === 'starsgiveaway') {
+    return new GramJs.InputStorePaymentStarsGiveaway({
+      boostPeer: buildInputPeer(purpose.chat.id, purpose.chat.accessHash),
+      additionalPeers: purpose.additionalChannels?.map((chat) => buildInputPeer(chat.id, chat.accessHash)),
+      stars: BigInt(purpose.stars!),
+      countriesIso2: purpose.countries,
+      prizeDescription: purpose.prizeDescription,
+      onlyNewSubscribers: purpose.isOnlyForNewSubscribers || undefined,
+      winnersAreVisible: purpose.areWinnersVisible || undefined,
+      untilDate: purpose.untilDate,
+      currency: purpose.currency,
+      amount: BigInt(purpose.amount),
+      users: purpose.users,
+      randomId,
+    });
+  }
+
   return new GramJs.InputStorePaymentPremiumGiveaway({
     boostPeer: buildInputPeer(purpose.chat.id, purpose.chat.accessHash),
     additionalPeers: purpose.additionalChannels?.map((chat) => buildInputPeer(chat.id, chat.accessHash)),
@@ -607,6 +624,13 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
     }
 
     case 'stars': {
+      const purpose = buildInputStorePaymentPurpose(invoice.purpose);
+      return new GramJs.InputInvoiceStars({
+        purpose,
+      });
+    }
+
+    case 'starsgiveaway': {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);
       return new GramJs.InputInvoiceStars({
         purpose,

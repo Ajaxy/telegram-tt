@@ -31,6 +31,7 @@ type OwnProps = {
   headerAvatarWebPhoto?: ApiWebDocument;
   noHeaderImage?: boolean;
   isGift?: boolean;
+  isPrizeStars?: boolean;
   header?: TeactNode;
   footer?: TeactNode;
   buttonText?: string;
@@ -49,6 +50,7 @@ const TableInfoModal = ({
   headerAvatarWebPhoto,
   noHeaderImage,
   isGift,
+  isPrizeStars,
   header,
   footer,
   buttonText,
@@ -75,7 +77,7 @@ const TableInfoModal = ({
       contentClassName={styles.content}
       onClose={onClose}
     >
-      {!isGift && !noHeaderImage && (
+      {!isGift && !isPrizeStars && !noHeaderImage && (
         withAvatar ? (
           <Avatar peer={headerAvatarPeer} webPhoto={headerAvatarWebPhoto} size="jumbo" className={styles.avatar} />
         ) : (

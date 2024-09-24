@@ -576,7 +576,7 @@ function buildGiweawayFromMedia(media: GramJs.TypeMessageMedia): ApiGiveaway | u
 
 function buildGiveaway(media: GramJs.MessageMediaGiveaway): ApiGiveaway | undefined {
   const {
-    channels, months, quantity, untilDate, countriesIso2, onlyNewSubscribers, prizeDescription,
+    channels, months, stars, quantity, untilDate, countriesIso2, onlyNewSubscribers, prizeDescription,
   } = media;
 
   const channelIds = channels.map((channel) => buildApiPeerId(channel, 'channel'));
@@ -585,6 +585,7 @@ function buildGiveaway(media: GramJs.MessageMediaGiveaway): ApiGiveaway | undefi
     mediaType: 'giveaway',
     channelIds,
     months,
+    stars: stars?.toJSNumber(),
     quantity,
     untilDate,
     countries: countriesIso2,

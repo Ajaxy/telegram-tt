@@ -569,10 +569,10 @@ const Main = ({
       />
       <AttachBotRecipientPicker requestedAttachBotInChat={requestedAttachBotInChat} />
       <MessageListHistoryHandler />
-      {isPremiumModalOpen && <PremiumMainModal isOpen={isPremiumModalOpen} />}
-      {isGiveawayModalOpen && <GiveawayModal isOpen={isGiveawayModalOpen} />}
-      {isPremiumGiftingPickerModal && <PremiumGiftingPickerModal isOpen={isPremiumGiftingPickerModal} />}
-      {isStarsGiftingPickerModal && <StarsGiftingPickerModal isOpen={isStarsGiftingPickerModal} />}
+      <PremiumMainModal isOpen={isPremiumModalOpen} />
+      <GiveawayModal isOpen={isGiveawayModalOpen} />
+      <PremiumGiftingPickerModal isOpen={isPremiumGiftingPickerModal} />
+      <StarsGiftingPickerModal isOpen={isStarsGiftingPickerModal} />
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />

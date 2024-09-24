@@ -8,7 +8,7 @@ import type {
   ApiPostStatistics,
   ApiStoryPublicForward,
   ChannelMonetizationBalances,
-  PrepaidGiveaway, StatisticsGraph,
+  StatisticsGraph,
   StatisticsMessageInteractionCounter,
   StatisticsOverviewItem,
   StatisticsOverviewPercentage,
@@ -230,15 +230,6 @@ export function buildStatisticsPercentage(data: GramJs.StatsPercentValue): Stati
     part: data.part,
     total: data.total,
     percentage: ((data.part / data.total) * 100).toFixed(2),
-  };
-}
-
-export function buildPrepaidGiveaway(prepaidGiveaway: GramJs.PrepaidGiveaway): PrepaidGiveaway {
-  return {
-    id: prepaidGiveaway.id.toString(),
-    date: prepaidGiveaway.date,
-    months: prepaidGiveaway.months,
-    quantity: prepaidGiveaway.quantity,
   };
 }
 

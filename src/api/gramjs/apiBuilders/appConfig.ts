@@ -82,6 +82,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   upload_premium_speedup_notify_period?: number;
   upload_premium_speedup_download?: number;
   upload_premium_speedup_upload?: number;
+  stars_gifts_enabled?: boolean;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -163,5 +164,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     bandwidthPremiumDownloadSpeedup: appConfig.upload_premium_speedup_download,
     channelRestrictAdsLevelMin: appConfig.channel_restrict_sponsored_level_min,
     isChannelRevenueWithdrawalEnabled: appConfig.channel_revenue_withdrawal_enabled,
+    isStarsGiftsEnabled: appConfig.stars_gifts_enabled,
   };
 }

@@ -80,7 +80,7 @@ const FullNameTitle: FC<OwnProps> = ({
 
   const specialTitle = useMemo(() => {
     if (customPeer) {
-      return lang(customPeer.titleKey);
+      return lang(customPeer.titleKey, customPeer.titleValue, 'i');
     }
 
     if (isSavedMessages) {

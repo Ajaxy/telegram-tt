@@ -248,8 +248,23 @@ export type ApiInputInvoiceStarsGift = {
   amount: number;
 };
 
+export type ApiInputInvoiceStarsGiveaway = {
+  type: 'starsgiveaway';
+  chatId: string;
+  additionalChannelIds?: string[];
+  isOnlyForNewSubscribers?: boolean;
+  areWinnersVisible?: boolean;
+  prizeDescription?: string;
+  countries?: string[];
+  untilDate: number;
+  currency: string;
+  amount: number;
+  stars: number;
+  users: number;
+};
+
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode | ApiInputInvoiceStarsGift | ApiInputInvoiceStars;
+| ApiInputInvoiceGiftCode | ApiInputInvoiceStarsGift | ApiInputInvoiceStars | ApiInputInvoiceStarsGiveaway;
 
 /* Used for Invoice request */
 export type ApiRequestInputInvoiceMessage = {
@@ -274,8 +289,13 @@ export type ApiRequestInputInvoiceStars = {
   purpose: ApiInputStorePaymentPurpose;
 };
 
+export type ApiRequestInputInvoiceStarsGiveaway = {
+  type: 'starsgiveaway';
+  purpose: ApiInputStorePaymentPurpose;
+};
+
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
-| ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars;
+| ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway;
 
 export interface ApiInvoice {
   mediaType: 'invoice';
@@ -351,7 +371,8 @@ export type ApiGame = {
 export type ApiGiveaway = {
   mediaType: 'giveaway';
   quantity: number;
-  months: number;
+  months?: number;
+  stars?: number;
   untilDate: number;
   isOnlyForNewSubscribers?: true;
   countries?: string[];
@@ -361,7 +382,8 @@ export type ApiGiveaway = {
 
 export type ApiGiveawayResults = {
   mediaType: 'giveawayResults';
-  months: number;
+  months?: number;
+  stars?: number;
   untilDate: number;
   isRefunded?: true;
   isOnlyForNewSubscribers?: true;
@@ -400,6 +422,7 @@ export interface ApiAction {
   | 'giftStars'
   | 'giftPremium'
   | 'giftCode'
+  | 'prizeStars'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;

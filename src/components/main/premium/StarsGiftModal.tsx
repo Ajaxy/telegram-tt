@@ -116,6 +116,10 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
     setHeaderHidden(scrollTop <= 150);
   }
 
+  const handleClose = useLastCallback(() => {
+    closeStarsGiftModal();
+  });
+
   function renderGiftTitle() {
     if (isCompleted) {
       return user ? renderText(oldLang('Notification.StarsGift.SentYou',
@@ -149,12 +153,12 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
 
   return (
     <Modal
-      dialogRef={dialogRef}
-      onClose={closeStarsGiftModal}
-      isOpen={isOpen}
       className={buildClassName(styles.modalDialog, styles.root)}
+      dialogRef={dialogRef}
+      onClose={handleClose}
+      isOpen={isOpen}
     >
-      <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
+      <div className={styles.main} onScroll={handleScroll}>
         <Button
           round
           size="smaller"

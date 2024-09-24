@@ -1,13 +1,17 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
+import React, {
+  memo, useEffect, useMemo,
+} from '../../../lib/teact/teact';
 
-import type { ApiStarTopupOption } from '../../../api/types';
+import type { ApiStarGiveawayOption, ApiStarTopupOption } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatInteger } from '../../../util/textFormat';
+import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
@@ -20,18 +24,25 @@ const MAX_STARS_COUNT = 6;
 
 type OwnProps = {
   isActive?: boolean;
-  options?: ApiStarTopupOption[];
+  options?: ApiStarTopupOption[] | ApiStarGiveawayOption[];
+  selectedStarOption?: ApiStarTopupOption | ApiStarGiveawayOption;
+  selectedStarCount?: number;
   starsNeeded?: number;
-  onClick: (option: ApiStarTopupOption) => void;
+  className?: string;
+  onClick: (option: ApiStarTopupOption | ApiStarGiveawayOption) => void;
 };
 
 const StarTopupOptionList: FC<OwnProps> = ({
   isActive,
+  className,
   options,
+  selectedStarOption,
+  selectedStarCount,
   starsNeeded,
   onClick,
 }) => {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [areOptionsExtended, markOptionsExtended, unmarkOptionsExtended] = useFlag();
 
@@ -51,7 +62,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
     ));
     const forceShowAll = starsNeeded && maxOption.stars < starsNeeded;
 
-    const result: { option: ApiStarTopupOption; starsCount: number; isWide: boolean }[] = [];
+    const result: { option: ApiStarTopupOption | ApiStarGiveawayOption; starsCount: number; isWide: boolean }[] = [];
     let currentStackedStarsCount = 0;
     let canExtendOptions = false;
     options.forEach((option, index) => {
@@ -73,13 +84,24 @@ const StarTopupOptionList: FC<OwnProps> = ({
   }, [areOptionsExtended, options, starsNeeded]);
 
   return (
-    <div className={styles.options}>
+    <div className={buildClassName(styles.options, className)}>
       {renderingOptions?.map(({ option, starsCount, isWide }) => {
         const length = renderingOptions?.length;
         const isOdd = length % 2 === 0;
+        const isActiveOption = option === selectedStarOption;
+
+        let perUserStarCount;
+        if (option && 'winners' in option) {
+          const winner = option.winners.find((opt) => opt.users === selectedStarCount)
+            || option.winners.reduce((max, opt) => (opt.users > max.users ? opt : max), option.winners[0]);
+          perUserStarCount = winner?.perUserStars;
+        }
+
         return (
           <div
-            className={buildClassName(styles.option, (!isOdd && isWide) && styles.wideOption)}
+            className={buildClassName(
+              styles.option, (!isOdd && isWide) && styles.wideOption, isActiveOption && styles.active,
+            )}
             key={option.stars}
             onClick={() => onClick?.(option)}
           >
@@ -92,14 +114,21 @@ const StarTopupOptionList: FC<OwnProps> = ({
               </div>
             </div>
             <div className={styles.optionBottom}>
-              {formatCurrency(option.amount, option.currency, lang.code)}
+              {formatCurrency(option.amount, option.currency, oldLang.code)}
             </div>
+            {(isActiveOption || (selectedStarOption && 'winners' in selectedStarOption)) && perUserStarCount && (
+              <div className={styles.optionBottom}>
+                <div className={styles.perUserStars}>
+                  {renderText(oldLang('BoostGift.Stars.PerUser', formatInteger(perUserStarCount)))}
+                </div>
+              </div>
+            )}
           </div>
         );
       })}
       {!areOptionsExtended && canExtend && (
         <Button className={styles.moreOptions} isText noForcedUpperCase onClick={markOptionsExtended}>
-          {lang('Stars.Purchase.ShowMore')}
+          {oldLang('Stars.Purchase.ShowMore')}
           <Icon className={styles.iconDown} name="down" />
         </Button>
       )}

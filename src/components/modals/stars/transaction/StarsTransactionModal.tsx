@@ -56,6 +56,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const { transaction } = modal || {};
   const isGift = transaction?.isGift;
+  const isPrizeStars = transaction?.isPrizeStars;
 
   const handleOpenMedia = useLastCallback(() => {
     const media = transaction?.extendedMedia;
@@ -158,7 +159,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
             onClick={handleOpenMedia}
           />
         )}
-        {isGift ? animatedStickerData : (
+        {(isGift || isPrizeStars) ? animatedStickerData : (
           <img
             className={buildClassName(styles.starsBackground, media && styles.mediaShift)}
             src={StarsBackground}
@@ -167,9 +168,10 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
           />
         )}
         {title && <h1 className={styles.title}>{title}</h1>}
-        {isGift && (
+        {(isGift || isPrizeStars) && (
           <h1 className={buildClassName(styles.title, styles.starTitle)}>
-            {transaction?.isMyGift ? oldLang('StarsGiftSent') : oldLang('StarsGiftReceived')}
+            {isPrizeStars ? oldLang('StarsGiveawayPrizeReceived')
+              : transaction?.isMyGift ? oldLang('StarsGiftSent') : oldLang('StarsGiftReceived')}
           </h1>
         )}
         <p className={styles.description}>{description}</p>
@@ -199,7 +201,14 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       tableData.push([oldLang('Stars.Transaction.Media'), <SafeLink url={messageLink} text={messageLink} />]);
     }
 
-    if (transaction.id) {
+    if (isPrizeStars) {
+      tableData.push(
+        [oldLang('BoostReason'), oldLang('Giveaway')],
+        [oldLang('Gift'), oldLang('Stars', transaction.stars, 'i')],
+      );
+    }
+
+    if (transaction.id && !isPrizeStars) {
       tableData.push([
         oldLang('Stars.Transaction.Id'),
         (
@@ -241,7 +250,9 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       footer,
       avatarPeer: !transaction.photo ? (peer || customPeer) : undefined,
     };
-  }, [transaction, oldLang, peer, isGift, animatedStickerData, giftOutAboutText, giftEntryAboutText]);
+  }, [
+    transaction, oldLang, peer, isGift, isPrizeStars, animatedStickerData, giftOutAboutText, giftEntryAboutText,
+  ]);
 
   const prevModalData = usePreviousDeprecated(starModalData);
   const renderingModalData = prevModalData || starModalData;
@@ -252,6 +263,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       className={styles.modal}
       header={renderingModalData?.header}
       isGift={isGift}
+      isPrizeStars={isPrizeStars}
       tableData={renderingModalData?.tableData}
       footer={renderingModalData?.footer}
       noHeaderImage={Boolean(transaction?.extendedMedia)}

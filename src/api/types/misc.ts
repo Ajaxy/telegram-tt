@@ -211,6 +211,7 @@ export interface ApiAppConfig {
   bandwidthPremiumDownloadSpeedup?: number;
   channelRestrictAdsLevelMin?: number;
   isChannelRevenueWithdrawalEnabled?: boolean;
+  isStarsGiftsEnabled?: boolean;
 }
 
 export interface ApiConfig {

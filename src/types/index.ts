@@ -514,14 +514,16 @@ export type InlineBotSettings = {
 };
 
 export type CustomPeerType = 'premium' | 'toBeDistributed' | 'contacts' | 'nonContacts'
-| 'groups' | 'channels' | 'bots' | 'excludeMuted' | 'excludeArchived' | 'excludeRead';
+| 'groups' | 'channels' | 'bots' | 'excludeMuted' | 'excludeArchived' | 'excludeRead' | 'stars';
 
 export interface CustomPeer {
   isCustomPeer: true;
+  key?: string | number;
   titleKey: string;
   subtitleKey?: string;
   avatarIcon: IconName;
   isAvatarSquare?: boolean;
+  titleValue?: number;
   peerColorId?: number;
   customPeerAvatarColor?: string;
   withPremiumGradient?: boolean;

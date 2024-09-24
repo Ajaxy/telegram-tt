@@ -35,6 +35,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useFocusMessage from './message/hooks/useFocusMessage';
@@ -105,10 +106,16 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   onIntersectPinnedMessage,
 }) => {
   const {
-    openPremiumModal, requestConfetti, checkGiftCode, getReceipt, openStarsTransactionFromGift,
+    openPremiumModal,
+    requestConfetti,
+    checkGiftCode,
+    getReceipt,
+    openStarsTransactionFromGift,
+    openPrizeStarsTransactionFromGiveaway,
   } = getActions();
 
   const oldLang = useOldLang();
+  const lang = useLang();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -134,6 +141,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const isSuggestedAvatar = message.content.action?.type === 'suggestProfilePhoto' && message.content.action!.photo;
   const isJoinedMessage = isJoinedChannelMessage(message);
   const isStarsGift = message.content.action?.type === 'giftStars';
+  const isPrizeStars = message.content.action?.type === 'prizeStars';
 
   useEffect(() => {
     if (noAppearanceAnimation) {
@@ -211,6 +219,13 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       fromUserId: senderUser?.id,
       toUserId: targetUserIds?.[0],
       monthsAmount: message.content.action?.months || 0,
+    });
+  };
+
+  const handlePrizeStarsClick = () => {
+    openPrizeStarsTransactionFromGiveaway({
+      chatId: message.chatId,
+      messageId: message.id,
     });
   };
 
@@ -343,6 +358,50 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderPrizeStars() {
+    const isUnclaimed = message.content.action?.isUnclaimed;
+
+    return (
+      <span
+        className="action-message-gift action-message-gift-code"
+        tabIndex={0}
+        role="button"
+        onClick={handlePrizeStarsClick}
+      >
+        <AnimatedIconFromSticker
+          key={message.id}
+          sticker={starGiftSticker}
+          play={canPlayAnimatedEmojis}
+          noLoop
+          nonInteractive
+        />
+        <strong>
+          {oldLang(isUnclaimed ? 'BoostingUnclaimedPrize' : 'BoostingCongratulations')}
+        </strong>
+        <span className="action-message-subtitle">
+          {targetChat && renderText(oldLang(isUnclaimed
+            ? 'BoostingReceivedPrizeFrom' : 'BoostingYouHaveUnclaimedPrize', getChatTitle(oldLang, targetChat)),
+          ['simple_markdown'])}
+        </span>
+        <span className="action-message-subtitle">
+          {renderText(lang(
+            'PrizeCredits', {
+              count: (
+                <b>{formatInteger(message.content.action?.stars!)}</b>
+              ),
+            }, {
+              withNodes: true,
+            },
+          ), ['simple_markdown'])}
+        </span>
+        <span className="action-message-button">{
+          oldLang('ActionGiftPremiumView')
+        }
+        </span>
+      </span>
+    );
+  }
+
   const className = buildClassName(
     'ActionMessage message-list-item',
     isFocused && !noFocusHighlight && 'focused',
@@ -368,6 +427,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       {isPremiumGift && renderGift()}
       {isGiftCode && renderGiftCode()}
       {isStarsGift && renderStarsGift()}
+      {isPrizeStars && renderPrizeStars()}
       {isSuggestedAvatar && (
         <ActionMessageSuggestedAvatar message={message} renderContent={renderContent} />
       )}
