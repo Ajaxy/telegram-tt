@@ -13,6 +13,7 @@ import {
   SCROLL_MAX_DURATION,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
+import { cancelScrollBlockingAnimation, isAnimatingScroll } from '../../../util/animateScroll';
 import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
@@ -487,6 +488,10 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   if (viewportIds && !shouldSwitchChat) {
     const direction = messageId > viewportIds[0] ? FocusDirection.Down : FocusDirection.Up;
     global = updateFocusDirection(global, direction, tabId);
+  }
+
+  if (isAnimatingScroll()) {
+    cancelScrollBlockingAnimation();
   }
 
   setGlobal(global, { forceOnHeavyAnimation: true });

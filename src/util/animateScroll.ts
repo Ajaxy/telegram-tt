@@ -127,7 +127,7 @@ function createMutateFunction(
     isAnimating = true;
 
     const prevOnHeavyAnimationEnd = onHeavyAnimationEnd;
-    onHeavyAnimationEnd = beginHeavyAnimation();
+    onHeavyAnimationEnd = beginHeavyAnimation(undefined, true);
     prevOnHeavyAnimationEnd?.();
 
     animateSingle(() => {
@@ -142,7 +142,7 @@ function createMutateFunction(
       if (!isAnimating) {
         currentArgs = undefined;
 
-        onHeavyAnimationEnd!();
+        onHeavyAnimationEnd?.();
         onHeavyAnimationEnd = undefined;
       }
 
@@ -153,6 +153,11 @@ function createMutateFunction(
 
 export function isAnimatingScroll() {
   return isAnimating;
+}
+
+export function cancelScrollBlockingAnimation() {
+  onHeavyAnimationEnd!();
+  onHeavyAnimationEnd = undefined;
 }
 
 function calculateScrollFrom(

@@ -8,6 +8,7 @@ import safeExec from '../../util/safeExec';
 import { throttleWith } from '../../util/schedulers';
 import { createSignal, isSignal, type Signal } from '../../util/signals';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
+import { getIsBlockingAnimating } from './heavyAnimation';
 
 export { getIsHeavyAnimating, beginHeavyAnimation, onFullyIdle } from './heavyAnimation';
 
@@ -329,6 +330,11 @@ let areImmediateEffectsCaptured = false;
  */
 
 const runUpdatePassOnRaf = throttleWith(requestMeasure, () => {
+  if (getIsBlockingAnimating()) {
+    getIsBlockingAnimating.once(runUpdatePassOnRaf);
+    return;
+  }
+
   const runImmediateEffects = captureImmediateEffects();
 
   idsToExcludeFromUpdate = new Set();
