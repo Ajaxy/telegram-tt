@@ -1,21 +1,15 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  beginHeavyAnimation,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
+  beginHeavyAnimation, memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiChatFullInfo,
-  ApiMessage, ApiRestrictionReason, ApiTopic,
+  ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiTopic,
 } from '../../api/types';
 import type { MessageListType } from '../../global/types';
-import type { Signal } from '../../util/signals';
-import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { LoadMoreDirection, type ThreadId } from '../../types';
 
@@ -98,8 +92,7 @@ type OwnProps = {
   hasTools?: boolean;
   withBottomShift?: boolean;
   withDefaultBg: boolean;
-  onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
-  getForceNextPinnedInHeader: Signal<boolean | undefined>;
+  onIntersectPinnedMessage: OnIntersectPinnedMessage;
   isContactRequirePremium?: boolean;
 };
 
@@ -185,11 +178,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   noMessageSendingAnimation,
   isServiceNotificationsChat,
   currentUserId,
-  getForceNextPinnedInHeader,
   isContactRequirePremium,
   areAdsEnabled,
   channelJoinInfo,
-  onPinnedIntersectionChange,
+  onIntersectPinnedMessage,
   onScrollDownToggle,
   onNotchToggle,
 }) => {
@@ -418,9 +410,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     runDebouncedForScroll(() => {
       const global = getGlobal();
-      const forceNextPinnedInHeader = getForceNextPinnedInHeader() && !selectTabState(global).focusedMessage?.chatId;
-      if (forceNextPinnedInHeader) {
-        onPinnedIntersectionChange({ hasScrolled: true });
+
+      const isFocusing = Boolean(selectTabState(global).focusedMessage?.chatId);
+      if (!isFocusing) {
+        onIntersectPinnedMessage({ shouldCancelWaiting: true });
       }
 
       if (!container.parentElement) {
@@ -731,7 +724,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
           onScrollDownToggle={onScrollDownToggle}
           onNotchToggle={onNotchToggle}
-          onPinnedIntersectionChange={onPinnedIntersectionChange}
+          onIntersectPinnedMessage={onIntersectPinnedMessage}
         />
       ) : (
         <Loading color="white" backgroundColor="dark" />

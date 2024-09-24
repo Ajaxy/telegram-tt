@@ -1,7 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   beginHeavyAnimation,
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useUnmountCleanup,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -27,7 +33,7 @@ import type {
   FocusDirection, IAlbum, ISettings, ScrollTargetPosition, ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
-import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
+import type { OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { AudioOrigin } from '../../../types';
 
@@ -206,7 +212,7 @@ type OwnProps =
     isJustAdded: boolean;
     memoFirstUnreadIdRef: { current: number | undefined };
     getIsMessageListReady: Signal<boolean>;
-    onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
+    onIntersectPinnedMessage: OnIntersectPinnedMessage;
   }
   & MessagePositionProperties;
 
@@ -408,7 +414,7 @@ const Message: FC<OwnProps & StateProps> = ({
   canTranscribeVoice,
   viaBusinessBot,
   effect,
-  onPinnedIntersectionChange,
+  onIntersectPinnedMessage,
 }) => {
   const {
     toggleMessageSelection,
@@ -479,14 +485,12 @@ const Message: FC<OwnProps & StateProps> = ({
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError, factCheck,
   } = message;
 
-  useEffect(() => {
-    if (!isPinned) return undefined;
-    const id = album ? album.mainMessage.id : messageId;
-
-    return () => {
-      onPinnedIntersectionChange({ viewportPinnedIdsToRemove: [id], isUnmount: true });
-    };
-  }, [album, isPinned, messageId, onPinnedIntersectionChange]);
+  useUnmountCleanup(() => {
+    if (message.isPinned) {
+      const id = album ? album.mainMessage.id : messageId;
+      onIntersectPinnedMessage({ viewportPinnedIdsToRemove: [id] });
+    }
+  });
 
   const isLocal = isMessageLocal(message);
   const isOwn = isOwnMessage(message);
@@ -1050,7 +1054,7 @@ const Message: FC<OwnProps & StateProps> = ({
       noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup
-    && (!hasText || (isInvertedMedia && !hasFactCheck && !hasReactions)) && !asForwarded && !withCommentButton;
+      && (!hasText || (isInvertedMedia && !hasFactCheck && !hasReactions)) && !asForwarded && !withCommentButton;
     const textContentClass = buildClassName(
       'text-content',
       'clearfix',

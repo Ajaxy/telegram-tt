@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useMemo, useRef, useUnmountCleanup,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -10,7 +10,7 @@ import type {
 import type { MessageListType } from '../../global/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FocusDirection, ThreadId } from '../../types';
-import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 
 import { getChatTitle, getMessageHtmlId, isJoinedChannelMessage } from '../../global/helpers';
 import { getMessageReplyInfo } from '../../global/helpers/replies';
@@ -57,7 +57,7 @@ type OwnProps = {
   isLastInList?: boolean;
   isInsideTopic?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
-  onPinnedIntersectionChange?: PinnedIntersectionChangedCallback;
+  onIntersectPinnedMessage?: OnIntersectPinnedMessage;
 };
 
 type StateProps = {
@@ -102,7 +102,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   observeIntersectionForReading,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
-  onPinnedIntersectionChange,
+  onIntersectPinnedMessage,
 }) => {
   const {
     openPremiumModal, requestConfetti, checkGiftCode, getReceipt, openStarsTransactionFromGift,
@@ -121,13 +121,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   );
   useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight, isJustAdded);
 
-  useEffect(() => {
-    if (!message.isPinned) return undefined;
-
-    return () => {
-      onPinnedIntersectionChange?.({ viewportPinnedIdsToRemove: [message.id], isUnmount: true });
-    };
-  }, [onPinnedIntersectionChange, message.isPinned, message.id]);
+  useUnmountCleanup(() => {
+    if (message.isPinned) {
+      onIntersectPinnedMessage?.({ viewportPinnedIdsToRemove: [message.id] });
+    }
+  });
 
   const noAppearanceAnimation = appearanceOrder <= 0;
   const [isShown, markShown] = useFlag(noAppearanceAnimation);
@@ -287,10 +285,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           {oldLang(isUnclaimed ? 'BoostingUnclaimedPrize' : 'BoostingCongratulations')}
         </strong>
         <span className="action-message-subtitle">
-          {targetChat && renderText(oldLang(isFromGiveaway ? 'BoostingReceivedGiftFrom' : isUnclaimed
-            ? 'BoostingReceivedPrizeFrom' : 'BoostingYouHaveUnclaimedPrize',
-          getChatTitle(oldLang, targetChat)),
-          ['simple_markdown'])}
+          {targetChat && renderText(
+            oldLang(
+              isFromGiveaway ? 'BoostingReceivedGiftFrom' : isUnclaimed
+                ? 'BoostingReceivedPrizeFrom' : 'BoostingYouHaveUnclaimedPrize',
+              getChatTitle(oldLang, targetChat),
+            ),
+            ['simple_markdown'],
+          )}
         </span>
         <span className="action-message-subtitle">
           {renderText(oldLang(

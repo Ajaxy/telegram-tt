@@ -91,9 +91,9 @@ type OwnProps = {
   isComments?: boolean;
   isReady?: boolean;
   isMobile?: boolean;
-  getCurrentPinnedIndexes: Signal<Record<string, number>>;
+  getCurrentPinnedIndex: Signal<number>;
   getLoadingPinnedId: Signal<number | undefined>;
-  onFocusPinnedMessage: (messageId: number) => boolean;
+  onFocusPinnedMessage: (messageId: number) => void;
 };
 
 type StateProps = {
@@ -147,7 +147,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   isSyncing,
   isSynced,
   isFetchingDifference,
-  getCurrentPinnedIndexes,
+  getCurrentPinnedIndex,
   getLoadingPinnedId,
   emojiStatusSticker,
   isSavedDialog,
@@ -173,9 +173,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const isBackButtonActive = useRef(true);
   const { isTablet } = useAppLayout();
 
-  const currentPinnedIndexes = useDerivedState(getCurrentPinnedIndexes);
-  const currentPinnedIndex = currentPinnedIndexes[`${chatId}_${threadId}`] || 0;
-  const waitingForPinnedId = useDerivedState(getLoadingPinnedId);
+  const currentPinnedIndex = useDerivedState(getCurrentPinnedIndex);
   const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[currentPinnedIndex] : pinnedMessageIds;
   const pinnedMessage = messagesById && pinnedMessageId ? messagesById[pinnedMessageId] : undefined;
   const pinnedMessagesCount = Array.isArray(pinnedMessageIds)
@@ -233,10 +231,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
       ? pinnedMessageIds[cycleRestrict(pinnedMessageIds.length, pinnedMessageIds.indexOf(pinnedMessageId!) - 2)]
       : pinnedMessageId!;
 
-    if (onFocusPinnedMessage(messageId)) {
+    if (!getLoadingPinnedId()) {
       focusMessage({
         chatId, threadId, messageId, noForumTopicPanel: true,
       });
+      onFocusPinnedMessage(messageId);
     }
   });
 
@@ -509,7 +508,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
           onUnpinMessage={renderingCanUnpin ? handleUnpinMessage : undefined}
           onClick={handlePinnedMessageClick}
           onAllPinnedClick={handleAllPinnedClick}
-          isLoading={waitingForPinnedId !== undefined}
+          getLoadingPinnedId={getLoadingPinnedId}
           isFullWidth={isPinnedMessagesFullWidth}
         />
       )}
