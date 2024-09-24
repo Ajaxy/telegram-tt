@@ -544,6 +544,7 @@ function MiddleColumn({
               activeKey={currentTransitionKey}
               shouldCleanup
               cleanupExceptionKey={cleanupExceptionKey}
+              isBlockingAnimation
               onStop={handleSlideTransitionStop}
             >
               <MessageList

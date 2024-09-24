@@ -44,6 +44,7 @@ export type TransitionProps = {
   className?: string;
   slideClassName?: string;
   withSwipeControl?: boolean;
+  isBlockingAnimation?: boolean;
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
   children: React.ReactNode | ChildrenFn;
@@ -83,6 +84,7 @@ function Transition({
   className,
   slideClassName,
   withSwipeControl,
+  isBlockingAnimation,
   onStart,
   onStop,
   children,
@@ -200,6 +202,7 @@ function Transition({
         childNodes[activeIndex],
         childNodes[prevActiveIndex],
         shouldRestoreHeight,
+        isBlockingAnimation,
         onStart,
         onStop,
       );
@@ -236,7 +239,7 @@ function Transition({
     });
 
     isAnimatingRef.current = true;
-    const endHeavyAnimation = beginHeavyAnimation();
+    const endHeavyAnimation = beginHeavyAnimation(undefined, isBlockingAnimation);
     onStart?.();
 
     toggleExtraClass(container, `Transition-${name}`, !isBackwards);
@@ -321,6 +324,7 @@ function Transition({
     shouldDisableAnimation,
     forceUpdate,
     withSwipeControl,
+    isBlockingAnimation,
     cleanupOnlyKey,
   ]);
 
@@ -394,6 +398,7 @@ function performSlideOptimized(
   toSlide: ChildNode,
   fromSlide?: ChildNode,
   shouldRestoreHeight?: boolean,
+  isBlockingAnimation?: boolean,
   onStart?: NoneToVoidFunction,
   onStop?: NoneToVoidFunction,
 ) {
@@ -427,7 +432,7 @@ function performSlideOptimized(
   }
 
   isAnimatingRef.current = true;
-  const endHeavyAnimation = beginHeavyAnimation();
+  const endHeavyAnimation = beginHeavyAnimation(undefined, isBlockingAnimation);
   onStart?.();
 
   toggleExtraClass(container, `Transition-${name}`, !isBackwards);
