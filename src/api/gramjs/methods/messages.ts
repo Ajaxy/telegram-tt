@@ -5,6 +5,7 @@ import type { ThreadId } from '../../../types';
 import type {
   ApiAttachment,
   ApiChat,
+  ApiClickSponsoredMessage,
   ApiContact,
   ApiFormattedText,
   ApiGlobalMessageSearchType,
@@ -1673,8 +1674,12 @@ export async function viewSponsoredMessage({ chat, random }: { chat: ApiChat; ra
   }));
 }
 
-export function clickSponsoredMessage({ chat, random }: { chat: ApiChat; random: string }) {
+export function clickSponsoredMessage({
+  chat, random, isMedia, isFullscreen,
+}: ApiClickSponsoredMessage) {
   return invokeRequest(new GramJs.channels.ClickSponsoredMessage({
+    media: isMedia || undefined,
+    fullscreen: isFullscreen || undefined,
     channel: buildInputPeer(chat.id, chat.accessHash),
     randomId: deserializeBytes(random),
   }));

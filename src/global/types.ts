@@ -1659,6 +1659,8 @@ export interface ActionPayloads {
   };
   clickSponsoredMessage: {
     chatId: string;
+    isMedia?: boolean;
+    isFullscreen?: boolean;
   };
   reportSponsoredMessage: {
     chatId: string;

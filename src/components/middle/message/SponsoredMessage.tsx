@@ -124,26 +124,28 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     hideSponsoredMessages();
   });
 
+  const {
+    photo, video,
+  } = message ? getMessageContent(message) : { photo: undefined, video: undefined };
+
+  const isGif = video?.isGif;
+  const hasMedia = Boolean(photo || video);
+
   const handleClick = useLastCallback(() => {
     if (!message) return;
 
-    clickSponsoredMessage({ chatId });
+    clickSponsoredMessage({ isMedia: photo || isGif ? true : undefined, chatId });
     openUrl({ url: message!.url, shouldSkipModal: true });
   });
 
   const handleOpenMedia = useLastCallback(() => {
+    clickSponsoredMessage({ isMedia: true, chatId });
     openMediaViewer({
       origin: MediaViewerOrigin.SponsoredMessage,
       chatId,
       isSponsoredMessage: true,
     });
   });
-
-  const {
-    photo, video,
-  } = message ? getMessageContent(message) : { photo: undefined, video: undefined };
-
-  const hasMedia = Boolean(photo || video);
 
   const extraPadding = 0;
 
@@ -233,7 +235,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           isDownloading={isDownloading}
           observeIntersection={observeIntersectionForLoading}
           noAvatars
-          onClick={handleOpenMedia}
+          onClick={handleClick}
           forcedWidth={contentWidth}
         />
       );
@@ -248,7 +250,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           canAutoLoad={canAutoLoadMedia}
           canAutoPlay={canAutoPlayMedia}
           isDownloading={isDownloading}
-          onClick={handleOpenMedia}
+          onClick={isGif ? handleClick : handleOpenMedia}
           forcedWidth={contentWidth}
         />
       );

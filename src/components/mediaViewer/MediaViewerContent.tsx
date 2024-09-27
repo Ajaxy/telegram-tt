@@ -36,7 +36,7 @@ type OwnProps = {
   isMoving?: boolean;
   onClose: () => void;
   onFooterClick: () => void;
-  onSponsoredButtonClick: () => void;
+  handleSponsoredClick: () => void;
 };
 
 type StateProps = {
@@ -66,11 +66,12 @@ const MediaViewerContent = ({
   isMoving,
   onClose,
   onFooterClick,
-  onSponsoredButtonClick,
+  handleSponsoredClick,
 }: OwnProps & StateProps) => {
   const lang = useOldLang();
 
   const isAvatar = item.type === 'avatar';
+  const isSponsoredMessage = item.type === 'sponsoredMessage';
   const { media } = getViewableMedia(item) || {};
 
   const {
@@ -132,6 +133,8 @@ const MediaViewerContent = ({
             volume={0}
             isClickDisabled={isMoving}
             playbackRate={1}
+            isSponsoredMessage={isSponsoredMessage}
+            handleSponsoredClick={handleSponsoredClick}
           />
         </div>
       );
@@ -182,6 +185,8 @@ const MediaViewerContent = ({
           volume={volume}
           isClickDisabled={isMoving}
           playbackRate={playbackRate}
+          isSponsoredMessage={isSponsoredMessage}
+          handleSponsoredClick={handleSponsoredClick}
         />
       ))}
       {textParts && (
@@ -192,7 +197,7 @@ const MediaViewerContent = ({
           isProtected={isProtected}
           isForceMobileVersion={isForceMobileVersion}
           isForVideo={isVideo && !isGif}
-          onButtonClick={onSponsoredButtonClick}
+          handleSponsoredClick={handleSponsoredClick}
         />
       )}
     </div>

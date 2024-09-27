@@ -116,7 +116,7 @@ namespace Api {
   export type TypeStickerSet = StickerSet;
   export type TypeBotCommand = BotCommand;
   export type TypeBotInfo = BotInfo;
-  export type TypeKeyboardButton = KeyboardButton | KeyboardButtonUrl | KeyboardButtonCallback | KeyboardButtonRequestPhone | KeyboardButtonRequestGeoLocation | KeyboardButtonSwitchInline | KeyboardButtonGame | KeyboardButtonBuy | KeyboardButtonUrlAuth | InputKeyboardButtonUrlAuth | KeyboardButtonRequestPoll | InputKeyboardButtonUserProfile | KeyboardButtonUserProfile | KeyboardButtonWebView | KeyboardButtonSimpleWebView | KeyboardButtonRequestPeer | InputKeyboardButtonRequestPeer;
+  export type TypeKeyboardButton = KeyboardButton | KeyboardButtonUrl | KeyboardButtonCallback | KeyboardButtonRequestPhone | KeyboardButtonRequestGeoLocation | KeyboardButtonSwitchInline | KeyboardButtonGame | KeyboardButtonBuy | KeyboardButtonUrlAuth | InputKeyboardButtonUrlAuth | KeyboardButtonRequestPoll | InputKeyboardButtonUserProfile | KeyboardButtonUserProfile | KeyboardButtonWebView | KeyboardButtonSimpleWebView | KeyboardButtonRequestPeer | InputKeyboardButtonRequestPeer | KeyboardButtonCopy;
   export type TypeKeyboardButtonRow = KeyboardButtonRow;
   export type TypeReplyMarkup = ReplyKeyboardHide | ReplyKeyboardForceReply | ReplyKeyboardMarkup | ReplyInlineMarkup;
   export type TypeMessageEntity = MessageEntityUnknown | MessageEntityMention | MessageEntityHashtag | MessageEntityBotCommand | MessageEntityUrl | MessageEntityEmail | MessageEntityBold | MessageEntityItalic | MessageEntityCode | MessageEntityPre | MessageEntityTextUrl | MessageEntityMentionName | InputMessageEntityMentionName | MessageEntityPhone | MessageEntityCashtag | MessageEntityUnderline | MessageEntityStrike | MessageEntityBankCard | MessageEntitySpoiler | MessageEntityCustomEmoji | MessageEntityBlockquote;
@@ -403,7 +403,7 @@ namespace Api {
   export type TypeAccessPointRule = AccessPointRule;
   export type TypeTlsClientHello = TlsClientHello;
   export type TypeTlsBlock = TlsBlockString | TlsBlockRandom | TlsBlockZero | TlsBlockDomain | TlsBlockGrease | TlsBlockScope;
-  
+
 
   export namespace storage {
     export type TypeFileType = storage.FileUnknown | storage.FilePartial | storage.FileJpeg | storage.FileGif | storage.FilePng | storage.FilePdf | storage.FileMp3 | storage.FileMov | storage.FileMp4 | storage.FileWebp;
@@ -4567,6 +4567,7 @@ namespace Api {
     h: int;
     preloadPrefixSize?: int;
     videoStartTs?: double;
+    videoCodec?: string;
   }> {
     // flags: undefined;
     roundMessage?: true;
@@ -4577,6 +4578,7 @@ namespace Api {
     h: int;
     preloadPrefixSize?: int;
     videoStartTs?: double;
+    videoCodec?: string;
   };
   export class DocumentAttributeAudio extends VirtualClass<{
     // flags: undefined;
@@ -5066,6 +5068,13 @@ namespace Api {
     buttonId: int;
     peerType: Api.TypeRequestPeerType;
     maxQuantity: int;
+  };
+  export class KeyboardButtonCopy extends VirtualClass<{
+    text: string;
+    copyText: string;
+  }> {
+    text: string;
+    copyText: string;
   };
   export class KeyboardButtonRow extends VirtualClass<{
     buttons: Api.TypeKeyboardButton[];
@@ -10782,7 +10791,7 @@ namespace Api {
   }> {
     entries: Api.TypeTlsBlock[];
   };
-  
+
 
   export namespace storage {
     export class FileUnknown extends VirtualClass<void> {};
@@ -13393,7 +13402,7 @@ namespace Api {
   }>, Api.TypeDestroySessionRes> {
     sessionId: long;
   };
-  
+
 
   export namespace auth {
     export class SendCode extends Request<Partial<{
@@ -17356,9 +17365,15 @@ namespace Api {
       enabled: Bool;
     };
     export class ClickSponsoredMessage extends Request<Partial<{
+      // flags: undefined;
+      media?: true;
+      fullscreen?: true;
       channel: Api.TypeInputChannel;
       randomId: bytes;
     }>, Bool> {
+      // flags: undefined;
+      media?: true;
+      fullscreen?: true;
       channel: Api.TypeInputChannel;
       randomId: bytes;
     };

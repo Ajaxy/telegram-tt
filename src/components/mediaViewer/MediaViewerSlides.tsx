@@ -56,7 +56,7 @@ type OwnProps = {
   selectItem: (item: MediaViewerItem) => void;
   loadMoreItemsIfNeeded: (item: MediaViewerItem) => void;
   onFooterClick: () => void;
-  onSponsoredButtonClick: () => void;
+  handleSponsoredClick: (isFromMedia?: boolean) => void;
   onClose: () => void;
 };
 
@@ -100,7 +100,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   selectItem,
   onClose,
   onFooterClick,
-  onSponsoredButtonClick,
+  handleSponsoredClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -731,7 +731,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
             item={prevItem}
             onClose={onClose}
             onFooterClick={onFooterClick}
-            onSponsoredButtonClick={onSponsoredButtonClick}
+            handleSponsoredClick={handleSponsoredClick}
           />
         )}
       </div>
@@ -751,7 +751,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           isMoving={isMoving}
           onClose={onClose}
           onFooterClick={onFooterClick}
-          onSponsoredButtonClick={onSponsoredButtonClick}
+          handleSponsoredClick={handleSponsoredClick}
         />
       </div>
       <div className="MediaViewerSlide" ref={rightSlideRef}>
@@ -762,7 +762,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
             item={nextItem}
             onClose={onClose}
             onFooterClick={onFooterClick}
-            onSponsoredButtonClick={onSponsoredButtonClick}
+            handleSponsoredClick={handleSponsoredClick}
           />
         )}
       </div>

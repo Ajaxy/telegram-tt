@@ -957,6 +957,13 @@ export type ApiSponsoredMessageReportResult = {
   }[];
 };
 
+export type ApiClickSponsoredMessage = {
+  chat: ApiChat;
+  random: string;
+  isMedia?: boolean;
+  isFullscreen?: boolean;
+};
+
 export const MAIN_THREAD_ID = -1;
 
 // `Symbol` can not be transferred from worker

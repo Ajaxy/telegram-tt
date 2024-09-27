@@ -253,10 +253,10 @@ const MediaViewer = ({
     }
   });
 
-  const onSponsoredButtonClick = useLastCallback(() => {
+  const handleSponsoredClick = useLastCallback((isFromMedia?: boolean) => {
     if (!sponsoredMessage || !chatId) return;
 
-    clickSponsoredMessage({ chatId });
+    clickSponsoredMessage({ isMedia: isFromMedia, isFullscreen: true, chatId });
     openUrl({ url: sponsoredMessage!.url });
     closeMediaViewer();
   });
@@ -468,7 +468,7 @@ const MediaViewer = ({
         selectItem={openMediaViewerItem}
         isHidden={isHidden}
         onFooterClick={handleFooterClick}
-        onSponsoredButtonClick={onSponsoredButtonClick}
+        handleSponsoredClick={handleSponsoredClick}
       />
     </ShowTransition>
   );

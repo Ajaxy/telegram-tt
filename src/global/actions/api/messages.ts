@@ -1583,14 +1583,16 @@ addActionHandler('viewSponsoredMessage', (global, actions, payload): ActionRetur
 });
 
 addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionReturnType => {
-  const { chatId } = payload;
+  const { chatId, isMedia, isFullscreen } = payload;
   const chat = selectChat(global, chatId);
   const message = selectSponsoredMessage(global, chatId);
   if (!chat || !message) {
     return;
   }
 
-  void callApi('clickSponsoredMessage', { chat, random: message.randomId });
+  void callApi('clickSponsoredMessage', {
+    chat, random: message.randomId, isMedia, isFullscreen,
+  });
 });
 
 addActionHandler('reportSponsoredMessage', async (global, actions, payload): Promise<void> => {
