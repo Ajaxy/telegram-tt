@@ -1539,7 +1539,7 @@ export interface LangPair {
   'GiftStarsOutgoing': {
     'user': string | number;
   };
-  MiniAppsMoreTabs: {
+  'MiniAppsMoreTabs': {
     'botName': string | number;
   };
   'PrizeCredits': {
