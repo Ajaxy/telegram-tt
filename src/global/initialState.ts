@@ -325,6 +325,14 @@ export const INITIAL_TAB_STATE: TabState = {
     byUsername: {},
   },
 
+  webApps: {
+    openedWebApps: {},
+    openedOrderedKeys: [],
+    sessionKeys: [],
+    modalState: 'maximized',
+    isModalOpen: false,
+  },
+
   globalSearch: {},
 
   userSearch: {},

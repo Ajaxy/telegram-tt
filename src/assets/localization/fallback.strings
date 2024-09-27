@@ -1283,4 +1283,6 @@
 "CreditsBoxHistoryEntryGiftOutAbout" = "With Stars, {user} will be able to unlock content and services on Telegram. {link}"
 "CreditsBoxOutAbout" = "Review the {link} for Stars."
 "GiftStarsOutgoing" = "With Stars, {user} will be able to unlock content and services on Telegram."
+"MiniAppsMoreTabs_one" = "{botName} & {count} Other";
+"MiniAppsMoreTabs_other" = "{botName} & {count} Others";
 "PrizeCredits" = "Your prize is {count} Stars."

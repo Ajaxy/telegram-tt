@@ -29,6 +29,14 @@
   mask-image: linear-gradient(to top, transparent $cutout, black $height);
 }
 
+@mixin gradient-border-horizontal($borderStart, $borderEnd) {
+  mask-image: linear-gradient(to right, transparent, black $borderStart, black $borderEnd, transparent);
+}
+
+@mixin gradient-border-left($indent) {
+  mask-image: linear-gradient(to right, transparent, black $indent);
+}
+
 @mixin gradient-border-top-bottom($top, $bottom) {
   mask-image: linear-gradient(transparent 0%, black $top, black calc(100% - $bottom), transparent 100%);
 }

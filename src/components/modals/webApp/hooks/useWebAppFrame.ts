@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
+import type { WebApp } from '../../../../global/types';
 import type { WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
 
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
@@ -35,6 +36,7 @@ const useWebAppFrame = (
   isOpen: boolean,
   isSimpleView: boolean,
   onEvent: (event: WebAppInboundEvent) => void,
+  webApp?: WebApp,
   onLoad?: () => void,
 ) => {
   const {
@@ -128,6 +130,12 @@ const useWebAppFrame = (
     if (ignoreEventsRef.current) {
       return;
     }
+    const contentWindow = ref.current?.contentWindow;
+    const sourceWindow = event.source as Window;
+
+    if (contentWindow !== sourceWindow) {
+      return;
+    }
 
     try {
       const data = JSON.parse(event.data) as WebAppInboundEvent;
@@ -138,7 +146,7 @@ const useWebAppFrame = (
       }
 
       if (eventType === 'web_app_close') {
-        closeWebApp();
+        if (webApp) closeWebApp({ webApp, skipClosingConfirmation: true });
       }
 
       if (eventType === 'web_app_request_viewport') {
@@ -175,9 +183,9 @@ const useWebAppFrame = (
           },
         });
 
-        showNotification({
-          message: 'Clipboard access is not supported in this client yet',
-        });
+        // showNotification({
+        //   message: 'Clipboard access is not supported in this client yet',
+        // });
       }
 
       if (eventType === 'web_app_open_scan_qr_popup') {
@@ -214,7 +222,10 @@ const useWebAppFrame = (
     } catch (err) {
       // Ignore other messages
     }
-  }, [isSimpleView, sendEvent, onEvent, sendCustomStyle, sendTheme, sendViewport, onLoad, windowSize.isResizing]);
+  }, [
+    isSimpleView, sendEvent, onEvent, sendCustomStyle, webApp,
+    sendTheme, sendViewport, onLoad, windowSize.isResizing, ref,
+  ]);
 
   useEffect(() => {
     const { width, height, isResizing } = windowSize;
@@ -227,7 +238,7 @@ const useWebAppFrame = (
   useEffect(() => {
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [handleMessage]);
+  }, [handleMessage, ref]);
 
   useEffect(() => {
     if (isOpen && ref.current?.contentWindow) {

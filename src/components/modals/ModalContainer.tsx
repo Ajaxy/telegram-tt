@@ -35,7 +35,7 @@ type ModalKey = keyof Pick<TabState,
 'reportAdModal' |
 'starsBalanceModal' |
 'isStarPaymentModalOpen' |
-'webApp' |
+'webApps' |
 'starsTransactionModal'
 >;
 
@@ -52,7 +52,6 @@ type Entries<T> = {
 }[keyof T][];
 
 const MODALS: ModalRegistry = {
-  webApp: WebAppModal,
   giftCodeModal: GiftCodeModal,
   boostModal: BoostModal,
   chatlistModal: ChatlistModal,
@@ -61,6 +60,7 @@ const MODALS: ModalRegistry = {
   inviteViaLinkModal: InviteViaLinkModal,
   requestedAttachBotInstall: AttachBotInstallModal,
   reportAdModal: ReportAdModal,
+  webApps: WebAppModal,
   collectibleInfoModal: CollectibleInfoModal,
   mapModal: MapModal,
   isStarPaymentModalOpen: StarsPaymentModal,

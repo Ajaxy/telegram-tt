@@ -12,6 +12,7 @@ export { default as UrlAuthModal } from '../components/modals/urlAuth/UrlAuthMod
 export { default as HistoryCalendar } from '../components/main/HistoryCalendar';
 export { default as NewContactModal } from '../components/main/NewContactModal';
 export { default as WebAppModal } from '../components/modals/webApp/WebAppModal';
+export { default as MinimizedWebAppModal } from '../components/modals/webApp/MinimizedWebAppModal';
 export { default as BotTrustModal } from '../components/main/BotTrustModal';
 export { default as AttachBotInstallModal } from '../components/modals/attachBotInstall/AttachBotInstallModal';
 export { default as DeleteFolderDialog } from '../components/main/DeleteFolderDialog';

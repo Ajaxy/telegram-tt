@@ -133,6 +133,7 @@ import type {
   ThemeKey,
   ThreadId,
 } from '../types';
+import type { WebAppOutboundEvent } from '../types/webapp';
 import type { SearchResultKey } from '../util/keys/searchResultKey';
 import type { DownloadableMedia } from './helpers';
 
@@ -142,6 +143,8 @@ export type MessageListType =
   | 'scheduled';
 
 export type ChatListType = 'active' | 'archived' | 'saved';
+
+export type WebAppModalStateType = 'maximized' | 'minimized';
 
 export interface MessageList {
   chatId: string;
@@ -649,14 +652,13 @@ export type TabState = {
     isQuiz?: boolean;
   };
 
-  webApp?: {
-    url: string;
-    botId: string;
-    buttonText: string;
-    queryId?: string;
-    slug?: string;
-    replyInfo?: ApiInputMessageReplyInfo;
-    canSendMessages?: boolean;
+  webApps: {
+    activeWebApp?: WebApp;
+    openedOrderedKeys: string[];
+    sessionKeys: string[];
+    openedWebApps: Record<string, WebApp>;
+    modalState : WebAppModalStateType;
+    isModalOpen: boolean;
   };
 
   botTrustRequest?: {
@@ -1227,6 +1229,30 @@ export type ApiDraft = {
   date?: number;
   effectId?: string;
   isLocal?: boolean;
+};
+
+export type WebApp = {
+  url: string;
+  requestUrl?: string;
+  botId: string;
+  appName?: string;
+  buttonText: string;
+  peerId?: string;
+  queryId?: string;
+  slug?: string;
+  replyInfo?: ApiInputMessageReplyInfo;
+  canSendMessages?: boolean;
+  isRemoveModalOpen?: boolean;
+  isCloseModalOpen?: boolean;
+  shouldConfirmClosing?: boolean;
+  headerColor?: string;
+  serverHeaderColor?: string;
+  serverHeaderColorKey?: 'bg_color' | 'secondary_bg_color';
+  backgroundColor?: string;
+  isBackButtonVisible?: boolean;
+  isSettingsButtonVisible?: boolean;
+  sendEvent?: (event: WebAppOutboundEvent) => void;
+  reloadFrame?: (url: string) => void;
 };
 
 type WithTabId = { tabId?: number };
@@ -2032,7 +2058,6 @@ export interface ActionPayloads {
   focusLastMessage: WithTabId | undefined;
   updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
   resetDraftReplyInfo: WithTabId | undefined;
-  closeWebApp: WithTabId | undefined;
 
   // Multitab
   destroyConnection: undefined;
@@ -2930,6 +2955,9 @@ export interface ActionPayloads {
     isFromBotMenu?: boolean;
     startParam?: string;
   } & WithTabId;
+  updateWebApp: {
+    webApp: Partial<WebApp>;
+  } & WithTabId;
   requestMainWebView: {
     botId: string;
     peerId: string;
@@ -2962,6 +2990,9 @@ export interface ActionPayloads {
     isWriteAllowed?: boolean;
     isFromConfirm?: boolean;
     shouldSkipBotTrustRequest?: boolean;
+  } & WithTabId;
+  openWebAppTab: {
+    webApp?: WebApp;
   } & WithTabId;
   loadPreviewMedias: {
     botId: string;
@@ -3066,6 +3097,13 @@ export interface ActionPayloads {
     chatId: string;
     usernames: string[];
   };
+  closeActiveWebApp: WithTabId | undefined;
+  closeWebApp: {
+    webApp: WebApp;
+    skipClosingConfirmation?: boolean;
+  } & WithTabId;
+  closeWebAppModal: WithTabId | undefined;
+  changeWebAppModalState: WithTabId | undefined;
 
   // Misc
   refreshLangPackFromCache: {

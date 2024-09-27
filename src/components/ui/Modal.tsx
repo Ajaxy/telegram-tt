@@ -37,6 +37,7 @@ export type OwnProps = {
   noBackdropClose?: boolean;
   children: React.ReactNode;
   style?: string;
+  dialogStyle?: string;
   dialogRef?: React.RefObject<HTMLDivElement>;
   isLowStackPriority?: boolean;
   onClose: () => void;
@@ -59,6 +60,7 @@ const Modal: FC<OwnProps> = ({
   noBackdropClose,
   children,
   style,
+  dialogStyle,
   isLowStackPriority,
   onClose,
   onCloseAnimationEnd,
@@ -167,7 +169,7 @@ const Modal: FC<OwnProps> = ({
       >
         <div className="modal-container">
           <div className="modal-backdrop" onClick={!noBackdropClose ? onClose : undefined} />
-          <div className="modal-dialog" ref={dialogRef}>
+          <div className="modal-dialog" ref={dialogRef} style={dialogStyle}>
             {renderHeader()}
             <div className={buildClassName('modal-content custom-scroll', contentClassName)} style={style}>
               {children}

@@ -1,21 +1,31 @@
+@use '../../../styles/mixins';
+
 .root {
   --color-transition: 0.25s ease-in-out;
+  --more-button-opacity: 0;
+  --modal-shadow: 0 0 1rem rgba(0, 0, 0, 0.15);
+  --active-tab-background: var(--color-background);
+  --state-transition: 0.25s cubic-bezier(0.29, 0.81, 0.27, 0.99);
   :global {
     .modal-header {
       color: var(--color-header-text);
-      border-bottom: 1px solid var(--color-dividers);
       padding: 0.5rem;
-
+      border-bottom: 1px solid var(--color-dividers);
       transition: var(--color-transition) background-color, var(--color-transition) color;
     }
 
     .modal-dialog {
+      pointer-events: auto;
       height: 75%;
       justify-content: center;
       border: none;
       box-shadow: none;
       margin: 0;
       overflow: hidden;
+    }
+
+    .modal-container {
+      pointer-events: none;
     }
 
     .modal-content {
@@ -45,10 +55,241 @@
   }
 }
 
+.multi-tab {
+  :global {
+    .modal-dialog {
+      height: min(42.5rem, 85vh);
+      max-width: 26.25rem;
+      background-color: var(--color-web-app-browser);
+      backdrop-filter: blur(1.5625rem);
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+      transition: height var(--state-transition), width var(--state-transition), transform 0.2s ease, opacity 0.2s ease;
+      box-shadow: var(--modal-shadow);
+    }
+
+    .modal-header {
+      padding: 0;
+      padding-inline: 0.5rem;
+      border-bottom: 0;
+    }
+
+    .modal-content {
+      background-color: var(--color-background);
+      border-top-right-radius: var(--border-radius-default);
+      border-top-left-radius: var(--border-radius-default);
+      box-shadow: var(--modal-shadow);
+      max-height: none;
+    }
+
+    @media (max-width: 600px) {
+      .modal-dialog {
+        background-color: var(--color-web-app-browser);
+      }
+    }
+  }
+
+  .close-icon {
+    opacity: 0.75;
+    position: absolute;
+    transform: rotate(-45deg);
+
+    &,
+    &::before,
+    &::after {
+      background-color: var(--color-text-secondary);
+    }
+  }
+}
+
+.minimized {
+  :global {
+    .modal-dialog {
+      cursor: grab !important;
+      width: 300px;
+      height: 2.5rem;
+      min-width: 0;
+    }
+  }
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-grow: 1;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+
+  scrollbar-width: none;
+  scrollbar-color: rgba(0, 0, 0, 0);
+
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+
+  @include mixins.gradient-border-horizontal(0.5rem, calc(100% - 0.5rem));
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+.tab-button-wrapper {
+  display: flex;
+  margin-left: -0.5rem;
+  margin-right: -0.5rem;
+}
+
+.tab-button {
+  position: relative;
+  z-index: 1;
+
+  transition: var(--color-transition) background-color, var(--color-transition) color;
+  background-color: var(--active-tab-background);
+  color: var(--color-header-text);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+
+  border-top-right-radius: var(--border-radius-default);
+  border-top-left-radius: var(--border-radius-default);
+
+  box-shadow: var(--modal-shadow);
+
+  &:hover,
+  &:focus {
+    --more-button-opacity: 1;
+
+    .tab-right-mask {
+      opacity: 1;
+    }
+
+    .tab-close-button {
+      opacity: 1;
+    }
+  }
+}
+
+.tab-right-mask {
+  @include mixins.gradient-border-left(2rem);
+
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+
+  position: absolute;
+  width: 4rem;
+  height: 100%;
+  right: 0;
+
+  background-color: var(--active-tab-background);
+  border-top-right-radius: var(--border-radius-default);
+}
+
+.tab-button-curve-path {
+  fill: var(--active-tab-background);
+  transition: var(--color-transition) fill;
+}
+
+.tab-button-left-curve,
+.tab-button-right-curve {
+  position: relative;
+  z-index: 2;
+
+  transition: var(--color-transition) background-color, var(--color-transition) color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.tab-button-right-curve {
+  transform: scaleX(-1);
+}
+
+.avatar-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.web-app-tab-more-menu {
+  z-index: 1;
+  position: absolute;
+}
+
 .more-button {
   opacity: 0.75;
   color: var(--color-header-text) !important;
   transition: var(--color-transition) color;
+}
+
+.tab-more-button {
+  z-index: 2;
+  padding: 0 !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  font-size: 0.75rem;
+  opacity: var(--more-button-opacity);
+  color: white !important;
+  transition: opacity 0.25s ease-in-out;
+  background-color: rgba(0, 0, 0, 0.45) !important;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.window-state-button,
+.header-button {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+
+.tab-close-button {
+  transition: opacity 0.25s ease-in-out;
+  opacity: 0;
+  position: absolute;
+  right: 0.5rem;
+  color: var(--color-header-text) !important;
+
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+
+.tab-close-icon {
+  opacity: 0.75;
+  font-size: 1rem !important;
+}
+
+.state-icon,
+.icon {
+  opacity: 0.75;
+}
+
+.state-icon {
+  font-size: 2rem !important;
+}
+
+.tab-avatar {
+  cursor: var(--custom-cursor, pointer);
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
 }
 
 .close-icon {
@@ -93,6 +334,7 @@
 
 .loading-spinner {
   position: absolute;
+  pointer-events: none;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
