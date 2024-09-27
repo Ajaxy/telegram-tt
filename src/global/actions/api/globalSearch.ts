@@ -89,23 +89,23 @@ addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionRetur
   const {
     query, resultsByType, chatId,
   } = selectTabState(global, tabId).globalSearch;
-  const offsetId = (resultsByType?.[type])?.nextOffsetId;
-  const offsetRate = (resultsByType?.[type])?.nextOffsetRate;
-  const offsetPeerId = (resultsByType?.[type])?.nextOffsetPeerId;
+  const {
+    totalCount, foundIds, nextOffsetId, nextOffsetPeerId, nextOffsetRate,
+  } = resultsByType?.[type] || {};
 
-  // Stop loading if we have all the messages
-  if (resultsByType?.[type]?.totalCount && resultsByType[type]!.totalCount! >= resultsByType[type]!.foundIds.length) {
+  // Stop loading if we have all the messages or server returned 0
+  if (totalCount !== undefined && (!totalCount || (foundIds && foundIds.length >= totalCount))) {
     return;
   }
 
   const chat = chatId ? selectChat(global, chatId) : undefined;
-  const offsetPeer = offsetPeerId ? selectChat(global, offsetPeerId) : undefined;
+  const offsetPeer = nextOffsetPeerId ? selectChat(global, nextOffsetPeerId) : undefined;
 
   searchMessagesGlobal(global, {
     query,
     type,
-    offsetRate,
-    offsetId,
+    offsetRate: nextOffsetRate,
+    offsetId: nextOffsetId,
     offsetPeer,
     chat,
     tabId,

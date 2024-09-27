@@ -133,7 +133,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
     <div ref={containerRef} className="LeftSearch--content">
       <InfiniteScroll
         className="search-content documents-list custom-scroll"
-        items={foundMessages}
+        items={canRenderContents ? foundMessages : undefined}
         onLoadMore={handleLoadMore}
         noFastList
       >

@@ -87,7 +87,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
     <div ref={containerRef} className="LeftSearch--content">
       <InfiniteScroll
         className="search-content custom-scroll"
-        items={filteredFoundIds}
+        items={canRenderContents ? filteredFoundIds : undefined}
         onLoadMore={handleLoadMore}
         noFastList
       >

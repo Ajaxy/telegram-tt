@@ -29,7 +29,6 @@ import type {
 import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../types';
 
 import {
-  ALL_FOLDER_ID,
   API_GENERAL_ID_LIMIT,
   DEBUG,
   GIF_MIME_TYPE,
@@ -1253,7 +1252,6 @@ export async function searchMessagesGlobal({
     broadcastsOnly: type === 'channels' || undefined,
     limit,
     filter,
-    folderId: ALL_FOLDER_ID,
     minDate,
     maxDate,
   }));

@@ -126,7 +126,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
     <div ref={containerRef} className="LeftSearch--content LeftSearch--media">
       <InfiniteScroll
         className={classNames}
-        items={foundMessages}
+        items={canRenderContents ? foundMessages : undefined}
         itemSelector={!searchQuery ? '.Media' : '.ListItem'}
         onLoadMore={handleLoadMore}
         noFastList
