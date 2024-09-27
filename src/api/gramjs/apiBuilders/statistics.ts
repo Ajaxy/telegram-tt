@@ -265,10 +265,12 @@ function buildChannelMonetizationBalances({
   currentBalance,
   availableBalance,
   overallRevenue,
+  withdrawalEnabled,
 }: GramJs.BroadcastRevenueBalances): ChannelMonetizationBalances {
   return {
     currentBalance: Number(currentBalance) / DECIMALS,
     availableBalance: Number(availableBalance) / DECIMALS,
     overallRevenue: Number(overallRevenue) / DECIMALS,
+    isWithdrawalEnabled: withdrawalEnabled,
   };
 }

@@ -84,7 +84,9 @@ const MonetizationStatistics = ({
   ] = useFlag(false);
   const [isConfirmPasswordDialogOpen, openConfirmPasswordDialogOpen, closeConfirmPasswordDialogOpen] = useFlag();
   const availableBalance = statistics?.balances?.availableBalance;
-  const canWithdraw = isCreator && isChannelRevenueWithdrawalEnabled && Boolean(availableBalance);
+  const isWithdrawalEnabled = statistics?.balances?.isWithdrawalEnabled;
+  const canWithdraw = isCreator && isChannelRevenueWithdrawalEnabled && Boolean(availableBalance)
+    && isWithdrawalEnabled;
 
   useEffect(() => {
     if (chatId) {
@@ -144,12 +146,14 @@ const MonetizationStatistics = ({
         <div className={styles.toncoin}>
           <Icon className={styles.toncoinIcon} name="toncoin" />
           <b className={styles.rewardValue}>
-            {integerTonPart}<span className={styles.decimalPart}>.{decimalTonPart}</span>
+            {integerTonPart}
+            {decimalTonPart ? <span className={styles.decimalPart}>.{decimalTonPart}</span> : undefined}
           </b>
         </div>
         {' '}
         <span className={styles.integer}>
-          ≈ ${integerUsdPart}<span className={styles.decimalUsdPart}>.{decimalUsdPart}</span>
+          ≈ ${integerUsdPart}
+          {decimalUsdPart ? <span className={styles.decimalUsdPart}>.{decimalUsdPart}</span> : undefined}
         </span>
       </div>
     );
@@ -212,6 +216,9 @@ const MonetizationStatistics = ({
         isToncoin
         type="monetization"
         title={oldLang('MonetizationOverview')}
+        subtitle={
+          <div className={styles.textBottom}>{oldLang('MonetizationProceedsTONInfo')}</div>
+        }
       />
 
       {!loadedCharts.current.length && <Loading />}

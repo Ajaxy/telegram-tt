@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
@@ -109,6 +110,7 @@ export type OwnProps = {
   ApiPostStatistics |
   ApiBoostStatistics |
   ApiChannelMonetizationStatistics;
+  subtitle?: ReactNode;
 };
 
 const StatisticsOverview: FC<OwnProps> = ({
@@ -117,6 +119,7 @@ const StatisticsOverview: FC<OwnProps> = ({
   statistics,
   isToncoin,
   className,
+  subtitle,
 }) => {
   const lang = useOldLang();
 
@@ -234,6 +237,8 @@ const StatisticsOverview: FC<OwnProps> = ({
           </tr>
         ))}
       </table>
+
+      {subtitle}
     </div>
   );
 };

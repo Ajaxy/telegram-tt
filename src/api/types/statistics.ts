@@ -139,4 +139,5 @@ export interface ChannelMonetizationBalances {
   currentBalance: number;
   availableBalance: number;
   overallRevenue: number;
+  isWithdrawalEnabled?: boolean;
 }
