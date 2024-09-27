@@ -113,6 +113,7 @@ type StateProps = {
   lastMessageId?: number;
   lastMessage?: ApiMessage;
   currentUserId: string;
+  isSynced?: boolean;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -150,6 +151,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   isPreview,
   previewMessageId,
   className,
+  isSynced,
   onDragEnter,
 }) => {
   const {
@@ -290,10 +292,10 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   // Load the forum topics to display unread count badge
   useEffect(() => {
-    if (isIntersecting && isForum && listedTopicIds === undefined) {
+    if (isIntersecting && isForum && isSynced && listedTopicIds === undefined) {
       loadTopics({ chatId });
     }
-  }, [chatId, listedTopicIds, isForum, isIntersecting]);
+  }, [chatId, listedTopicIds, isSynced, isForum, isIntersecting]);
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
   const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
@@ -501,6 +503,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: global.currentUserId!,
       listedTopicIds: topicsInfo?.listedTopicIds,
       topics: topicsInfo?.topicsById,
+      isSynced: global.isSynced,
     };
   },
 )(Chat));

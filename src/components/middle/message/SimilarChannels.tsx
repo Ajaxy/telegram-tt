@@ -41,7 +41,6 @@ type StateProps = {
   shouldShowInChat?: boolean;
   count: number;
   isCurrentUserPremium: boolean;
-  isSynced?: boolean;
 };
 
 const SimilarChannels = ({
@@ -50,7 +49,6 @@ const SimilarChannels = ({
   shouldShowInChat,
   count,
   isCurrentUserPremium,
-  isSynced,
 }: StateProps & OwnProps) => {
   const lang = useOldLang();
   const { toggleChannelRecommendations, loadChannelRecommendations } = getActions();
@@ -80,10 +78,10 @@ const SimilarChannels = ({
   );
 
   useEffect(() => {
-    if (isSynced && !similarChannelIds) {
+    if (!similarChannelIds) {
       loadChannelRecommendations({ chatId });
     }
-  }, [chatId, isSynced, similarChannelIds]);
+  }, [chatId, similarChannelIds]);
 
   useTimeout(() => setShoulRenderSkeleton(false), MAX_SKELETON_DELAY);
 
@@ -249,7 +247,6 @@ export default memo(
       shouldShowInChat,
       count,
       isCurrentUserPremium,
-      isSynced: global.isSynced,
     };
   })(SimilarChannels),
 );
