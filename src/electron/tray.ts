@@ -4,7 +4,8 @@ import {
 import path from 'path';
 
 import {
-  focusLastWindow, forceQuit, getAppTitle, store,
+  focusLastWindow, forceQuit, getAppTitle, IS_WINDOWS,
+  store,
 } from './utils';
 
 const TRAY_ICON_SETTINGS_KEY = 'trayIcon';
@@ -46,7 +47,9 @@ const tray: TrayHelper = {
       return;
     }
 
-    const icon = nativeImage.createFromPath(path.resolve(__dirname, '../public/icon-electron-windows.ico'));
+    const icon = IS_WINDOWS
+      ? nativeImage.createFromPath(path.resolve(__dirname, '../public/icon-electron-windows.ico'))
+      : nativeImage.createFromPath(path.resolve(__dirname, '../public/icon-electron-linux.png'));
     const title = getAppTitle();
 
     this.instance = new Tray(icon);
