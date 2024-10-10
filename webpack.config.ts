@@ -222,6 +222,7 @@ export default function createConfig(
         TELEGRAM_API_ID: undefined,
         TELEGRAM_API_HASH: undefined,
         MAIN_FRAME_ORIGIN: undefined,
+        MAIN_FRAME_ORIGIN_REGEXP: undefined,
         DISE_ENV: "",
         // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
