@@ -21,7 +21,7 @@ const MAIN_FRAME_ORIGIN_REGEXP = process.env.MAIN_FRAME_ORIGIN_REGEXP
 const DISE_ENV = process.env.DISE_ENV 
 
 let MAIN_FRAME_ORIGIN_STR_OR_REGEXP: StringFilterSource = MAIN_FRAME_ORIGIN
-if (DISE_ENV === "testing") {
+if (DISE_ENV === "testing" && MAIN_FRAME_ORIGIN_REGEXP) {
   MAIN_FRAME_ORIGIN_STR_OR_REGEXP = new RegExp(`${MAIN_FRAME_ORIGIN_REGEXP}`)
 }
 
