@@ -15,10 +15,11 @@ import { StringFilterSource } from "jsonrpc-iframe/string-filter";
 
 const DEFAULT_ORIGIN = "https://crm.dise.app";
 
-const MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
+const env = process.env
+const MAIN_FRAME_ORIGIN = env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
 
-const MAIN_FRAME_ORIGIN_REGEXP = process.env.MAIN_FRAME_ORIGIN_REGEXP 
-const DISE_ENV = process.env.DISE_ENV 
+const MAIN_FRAME_ORIGIN_REGEXP = env.MAIN_FRAME_ORIGIN_REGEXP 
+const DISE_ENV = env.DISE_ENV 
 
 let MAIN_FRAME_ORIGIN_STR_OR_REGEXP: StringFilterSource = MAIN_FRAME_ORIGIN
 if (DISE_ENV === "testing" && MAIN_FRAME_ORIGIN_REGEXP) {
