@@ -11,12 +11,21 @@ import { addActionHandler } from "../global";
 import { ActionReturnType } from "../global/types";
 import { getCurrentTabId } from "../util/establishMultitabRole";
 import { selectTabState } from "../global/selectors";
+import { StringFilterSource } from "jsonrpc-iframe/string-filter";
 
 const DEFAULT_ORIGIN = "https://crm.dise.app";
 
 const MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
 
-let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
+const MAIN_FRAME_ORIGIN_REGEXP = process.env.MAIN_FRAME_ORIGIN_REGEXP 
+const DISE_ENV = process.env.DISE_ENV 
+
+let MAIN_FRAME_ORIGIN_STR_OR_REGEXP: StringFilterSource = MAIN_FRAME_ORIGIN
+if (DISE_ENV === "testing") {
+  MAIN_FRAME_ORIGIN_STR_OR_REGEXP = new RegExp(`${MAIN_FRAME_ORIGIN_REGEXP}`)
+}
+
+let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN_STR_OR_REGEXP);
 
 actions.subscribeUniversal(async (name, args) => {
   console.log("Received action", name, args);
@@ -28,7 +37,7 @@ actions.subscribeUniversal(async (name, args) => {
   return result;
 });
 
-let clientApi = new Responder<Methods>("methods", MAIN_FRAME_ORIGIN);
+let clientApi = new Responder<Methods>("methods", MAIN_FRAME_ORIGIN_STR_OR_REGEXP);
 
 clientApi.subscribeUniversal((name, args) => {
   const global = getGlobal();
@@ -53,7 +62,7 @@ clientApi.subscribeUniversal((name, args) => {
   // });
 });
 
-let custom = new Responder<Custom>("custom", MAIN_FRAME_ORIGIN);
+let custom = new Responder<Custom>("custom", MAIN_FRAME_ORIGIN_STR_OR_REGEXP);
 
 custom.subscribeUniversal((name, args) => {
   // console.log("Received custom", name, args);
@@ -62,7 +71,7 @@ custom.subscribeUniversal((name, args) => {
   return method(...args);
 });
 
-let status = new Responder("status", MAIN_FRAME_ORIGIN);
+let status = new Responder("status", MAIN_FRAME_ORIGIN_STR_OR_REGEXP);
 
 status.subscribeUniversal((name) => {
   return true;
