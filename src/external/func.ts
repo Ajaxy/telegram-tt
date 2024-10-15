@@ -7,5 +7,5 @@ export const updateOriginWithBranch = (origin: string) => {
 
   const url = new URL(origin);
   url.hostname = `${branch}.${url.hostname}`;
-  return url.toString();
+  return url.toString().replace(/\/$/, '');
 };
