@@ -19,9 +19,9 @@ const DISE_ENV = process.env.DISE_ENV
 
 let MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
 
-if (DISE_ENV === 'testing') {
-  MAIN_FRAME_ORIGIN = updateOriginWithBranch(MAIN_FRAME_ORIGIN);
-}
+// if (DISE_ENV === 'testing') {
+//   MAIN_FRAME_ORIGIN = updateOriginWithBranch(MAIN_FRAME_ORIGIN);
+// }
 
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
