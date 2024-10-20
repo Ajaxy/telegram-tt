@@ -1533,9 +1533,11 @@ export interface LangPair {
     'user': string | number;
     'link': string | number;
   };
-  'CreditsBoxOutAbout': {
+  'StarsTransactionTOS': {
     'link': string | number;
   };
+  'StarsTransactionTOSLinkText': undefined;
+  'StarsTransactionTOSLink': undefined;
   'GiftStarsOutgoing': {
     'user': string | number;
   };
@@ -1549,9 +1551,22 @@ export interface LangPair {
   'StarsReactionLink': undefined;
   'MiniAppsMoreTabs': {
     'botName': string | number;
+    'count': string | number;
   };
   'PrizeCredits': {
     'count': string | number;
+  };
+  'StarsSubscribeText': {
+    'chat': string | number;
+    'amount': string | number;
+  };
+  'StarsSubscribeInfo': {
+    'link': string | number;
+  };
+  'StarsSubscribeInfoLinkText': undefined;
+  'StarsSubscribeInfoLink': undefined;
+  'StarsPerMonth': {
+    'amount': string | number;
   };
 
 }

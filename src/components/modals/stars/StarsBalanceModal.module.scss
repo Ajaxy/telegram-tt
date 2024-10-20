@@ -42,6 +42,14 @@
   @include mixins.side-panel-section;
 }
 
+.sectionTitle {
+  color: var(--color-primary);
+  font-weight: 500;
+  font-size: 1rem;
+  align-self: flex-start;
+  padding: 0.25rem 0.75rem;
+}
+
 .secondaryInfo {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
@@ -76,6 +84,7 @@
   margin-inline: 0.5rem;
   margin-bottom: 1rem;
   text-wrap: balance;
+  line-height: 1.375;
 }
 
 .header {
@@ -123,10 +132,11 @@
 }
 
 .balanceBottom {
+  line-height: 1.5;
   font-weight: 500;
   display: flex;
+  align-items: center;
   gap: 0.25rem;
-  line-height: 1.5;
 }
 
 .modalBalance {
@@ -162,6 +172,17 @@
   z-index: 1;
 }
 
+.avatarStar {
+  font-size: 2rem;
+
+  @include mixins.filter-outline(1px, var(--color-background));
+
+  position: absolute;
+  right: -1rem;
+  bottom: 0;
+  z-index: 1;
+}
+
 .paymentImageBackground {
   height: 7rem;
   position: absolute;
@@ -179,13 +200,27 @@
 .paymentButton {
   display: flex;
   gap: 0.125rem;
+  margin-top: 1rem;
 }
 
 .paymentButtonStar {
   --color-fill: white !important;
 }
 
-.transactions {
+.transactions, .subscriptions {
   display: flex;
   flex-direction: column;
+  width: 100%;
+}
+
+.tabs {
+  // Disable tabs rounded corners
+  --border-radius-messages-small: 0;
+
+  top: 3.5rem;
+}
+
+.disclaimer {
+  margin-top: 0.5rem;
+  color: var(--color-text-secondary);
 }

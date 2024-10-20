@@ -134,16 +134,6 @@ export type ApiFieldError = {
   message: string;
 };
 
-export type ApiInviteInfo = {
-  title: string;
-  about?: string;
-  hash: string;
-  isChannel?: boolean;
-  participantsCount?: number;
-  isRequestNeeded?: true;
-  photo?: ApiPhoto;
-};
-
 export type ApiExportedInvite = {
   isRevoked?: boolean;
   isPermanent?: boolean;
@@ -157,6 +147,31 @@ export type ApiExportedInvite = {
   requested?: number;
   title?: string;
   adminId: string;
+};
+
+export type ApiChatInviteInfo = {
+  title: string;
+  about?: string;
+  photo?: ApiPhoto;
+  isScam?: boolean;
+  isFake?: boolean;
+  isChannel?: boolean;
+  isVerified?: boolean;
+  isSuperGroup?: boolean;
+  isPublic?: boolean;
+  participantsCount?: number;
+  participantIds?: string[];
+  color: number;
+  isBroadcast?: boolean;
+  isRequestNeeded?: boolean;
+  subscriptionFormId?: string;
+  canRefulfillSubscription?: boolean;
+  subscriptionPricing?: ApiStarsSubscriptionPricing;
+};
+
+export type ApiStarsSubscriptionPricing = {
+  period: number;
+  amount: number;
 };
 
 export type ApiChatInviteImporter = {

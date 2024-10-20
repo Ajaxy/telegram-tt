@@ -20,6 +20,7 @@ import type {
   ApiReceipt,
   ApiStarGiveawayOption,
   ApiStarsGiveawayWinnerOption,
+  ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
@@ -27,6 +28,7 @@ import type {
 } from '../../types';
 
 import { addWebDocumentToLocalDb } from '../helpers';
+import { buildApiStarsSubscriptionPricing } from './chats';
 import { buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildMessageMediaContent } from './messageContent';
@@ -504,6 +506,7 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
     date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
+    subscriptionPeriod,
   } = transaction;
 
   if (photo) {
@@ -527,7 +530,25 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     messageId: msgId,
     isGift: gift,
     extendedMedia: boughtExtendedMedia,
+    subscriptionPeriod,
     isReaction: reaction,
+  };
+}
+
+export function buildApiStarsSubscription(subscription: GramJs.StarsSubscription): ApiStarsSubscription {
+  const {
+    id, peer, pricing, untilDate, canRefulfill, canceled, chatInviteHash, missingBalance,
+  } = subscription;
+
+  return {
+    id,
+    peerId: getApiChatIdFromMtpPeer(peer),
+    until: untilDate,
+    pricing: buildApiStarsSubscriptionPricing(pricing),
+    isCancelled: canceled,
+    canRefulfill,
+    hasMissingBalance: missingBalance,
+    chatInviteHash,
   };
 }
 

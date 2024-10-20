@@ -14,6 +14,7 @@ import type {
   ApiChatBannedRights,
   ApiChatFolder,
   ApiChatFullInfo,
+  ApiChatInviteInfo,
   ApiChatlistExportedInvite,
   ApiChatlistInvite,
   ApiChatReactions,
@@ -33,7 +34,6 @@ import type {
   ApiGroupStatistics,
   ApiInputInvoice,
   ApiInputMessageReplyInfo,
-  ApiInviteInfo,
   ApiInvoice,
   ApiKeyboardButton,
   ApiMediaFormat,
@@ -65,6 +65,7 @@ import type {
   ApiSession,
   ApiSessionData,
   ApiSponsoredMessage, ApiStarGiveawayOption,
+  ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStarTopupOption,
   ApiStealthMode,
@@ -183,6 +184,10 @@ export type StarsTransactionHistory = Record<StarsTransactionType, {
   transactions: ApiStarsTransaction[];
   nextOffset?: string;
 } | undefined>;
+export type StarsSubscriptions = {
+  list: ApiStarsSubscription[];
+  nextOffset?: string;
+};
 
 export type ConfettiStyle = 'poppers' | 'top-down';
 
@@ -349,6 +354,11 @@ export type TabState = {
   selectedMessages?: {
     chatId: string;
     messageIds: number[];
+  };
+
+  chatInviteModal?: {
+    hash: string;
+    inviteInfo: ApiChatInviteInfo;
   };
 
   seenByModal?: {
@@ -595,7 +605,7 @@ export type TabState = {
   };
 
   notifications: ApiNotification[];
-  dialogs: (ApiError | ApiInviteInfo | ApiContact)[];
+  dialogs: (ApiError | ApiContact)[];
 
   safeLinkModalUrl?: string;
   mapModal?: {
@@ -747,6 +757,9 @@ export type TabState = {
 
   starsTransactionModal?: {
     transaction: ApiStarsTransaction;
+  };
+  starsSubscriptionModal?: {
+    subscription: ApiStarsSubscription;
   };
 
   giftModal?: {
@@ -1216,6 +1229,7 @@ export type GlobalState = {
     topupOptions: ApiStarTopupOption[];
     balance: number;
     history: StarsTransactionHistory;
+    subscriptions?: StarsSubscriptions;
   };
 };
 
@@ -1337,7 +1351,12 @@ export interface ActionPayloads {
     adminRights: ApiChatAdminRights;
     customTitle?: string;
   } & WithTabId;
-  acceptInviteConfirmation: { hash: string } & WithTabId;
+
+  checkChatInvite: {
+    hash: string;
+  } & WithTabId;
+  acceptChatInvite: { hash: string } & WithTabId;
+  closeChatInviteModal: WithTabId | undefined;
 
   // settings
   setSettingOption: Partial<ISettings> | undefined;
@@ -1545,9 +1564,6 @@ export interface ActionPayloads {
     startAttach?: string | boolean;
     attach?: string;
     text?: string;
-  } & WithTabId;
-  openChatByInvite: {
-    hash: string;
   } & WithTabId;
   toggleSavedDialogPinned: {
     id: string;
@@ -1839,6 +1855,10 @@ export interface ActionPayloads {
     messageId: number;
   } & WithTabId;
   closeStarsTransactionModal: WithTabId | undefined;
+  openStarsSubscriptionModal: {
+    subscription: ApiStarsSubscription;
+  } & WithTabId;
+  closeStarsSubscriptionModal: WithTabId | undefined;
   openPrizeStarsTransactionFromGiveaway: {
     chatId: string;
     messageId: number;
@@ -2303,6 +2323,16 @@ export interface ActionPayloads {
   loadStarStatus: undefined;
   loadStarsTransactions: {
     type: StarsTransactionType;
+  };
+  loadStarsSubscriptions: undefined;
+  changeStarsSubscription: {
+    peerId?: string;
+    id: string;
+    isCancelled: boolean;
+  };
+  fulfillStarsSubscription: {
+    peerId?: string;
+    id: string;
   };
   openStarsBalanceModal: {
     originPayment?: TabState['payment'];

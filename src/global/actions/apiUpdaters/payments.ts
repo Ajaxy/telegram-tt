@@ -1,5 +1,6 @@
 import type { ActionReturnType } from '../../types';
 
+import { STARS_CURRENCY_CODE } from '../../../config';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import * as langProvider from '../../../util/oldLangProvider';
@@ -19,13 +20,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         if (invoice) {
           const { amount, currency, title } = invoice;
 
-          actions.showNotification({
-            tabId,
-            message: langProvider.oldTranslate('PaymentInfoHint', [
-              formatCurrencyAsString(amount, currency, langProvider.getTranslationFn().code),
-              title,
-            ]),
-          });
+          if (currency !== STARS_CURRENCY_CODE) {
+            actions.showNotification({
+              tabId,
+              message: langProvider.oldTranslate('PaymentInfoHint', [
+                formatCurrencyAsString(amount, currency, langProvider.getTranslationFn().code),
+                title,
+              ]),
+            });
+          }
         }
 
         if (inputInvoice?.type === 'giftcode') {
@@ -42,7 +45,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                 isCompleted: true,
               },
             }, tabId);
-            global = closeInvoice(global, tabId);
           }
         }
 
@@ -60,14 +62,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                 isCompleted: true,
               },
             }, tabId);
-            global = closeInvoice(global, tabId);
           }
         }
 
         if (inputInvoice?.type === 'stars') {
-          if (!inputInvoice.stars) {
-            return;
-          }
           const starsModalState = selectTabState(global, tabId).starsGiftModal;
 
           if (starsModalState && starsModalState.isOpen) {
@@ -77,10 +75,27 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                 isCompleted: true,
               },
             }, tabId);
-            global = closeInvoice(global, tabId);
           }
+
+          actions.loadStarStatus(); // Manually reload. Server update takes ~10 seconds
         }
 
+        if (inputInvoice?.type === 'chatInviteSubscription') {
+          const { amount } = invoice!;
+          actions.showNotification({
+            tabId,
+            title: langProvider.oldTranslate('StarsSubscriptionCompleted'),
+            message: langProvider.oldTranslate('StarsSubscriptionCompletedText', [
+              amount,
+              inputInvoice.inviteInfo.title,
+            ], undefined, amount),
+            icon: 'star',
+          });
+        }
+
+        if (invoice?.currency === STARS_CURRENCY_CODE) {
+          global = closeInvoice(global, tabId);
+        }
         setGlobal(global);
       });
 

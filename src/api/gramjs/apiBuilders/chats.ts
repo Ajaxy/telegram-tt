@@ -8,6 +8,7 @@ import type {
   ApiChatBannedRights,
   ApiChatFolder,
   ApiChatInviteImporter,
+  ApiChatInviteInfo,
   ApiChatlistExportedInvite,
   ApiChatlistInvite,
   ApiChatMember,
@@ -18,13 +19,14 @@ import type {
   ApiRestrictionReason,
   ApiSendAsPeerId,
   ApiSponsoredMessageReportResult,
+  ApiStarsSubscriptionPricing,
   ApiTopic,
 } from '../../types';
 
 import { omitUndefined, pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
-import { serializeBytes } from '../helpers';
-import { buildApiUsernames, buildAvatarPhotoId } from './common';
+import { addPhotoToLocalDb, addUserToLocalDb, serializeBytes } from '../helpers';
+import { buildApiPhoto, buildApiUsernames, buildAvatarPhotoId } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
   buildApiEmojiStatus,
@@ -67,6 +69,7 @@ function buildApiChatFieldsFromPeerEntity(
     ? buildApiEmojiStatus(peerEntity.emojiStatus) : undefined;
   const boostLevel = ('level' in peerEntity) ? peerEntity.level : undefined;
   const areProfilesShown = Boolean('signatureProfiles' in peerEntity && peerEntity.signatureProfiles);
+  const subscriptionUntil = 'subscriptionUntilDate' in peerEntity ? peerEntity.subscriptionUntilDate : undefined;
 
   return omitUndefined<PeerEntityApiChatFields>({
     isMin,
@@ -100,6 +103,7 @@ function buildApiChatFieldsFromPeerEntity(
     hasStories: Boolean(maxStoryId) && !storiesUnavailable,
     emojiStatus,
     boostLevel,
+    subscriptionUntil,
   });
 }
 
@@ -668,5 +672,49 @@ export function buildApiSponsoredMessageReportResult(
     type: 'selectOption',
     title,
     options,
+  };
+}
+
+export function buildApiChatInviteInfo(invite: GramJs.ChatInvite): ApiChatInviteInfo {
+  const {
+    color, participants, participantsCount, photo, title, about, scam, fake, verified, megagroup, channel, broadcast,
+    requestNeeded, subscriptionFormId, subscriptionPricing, canRefulfillSubscription,
+  } = invite;
+
+  let apiPhoto;
+  if (photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(photo);
+    apiPhoto = buildApiPhoto(photo);
+  }
+
+  participants?.forEach(addUserToLocalDb);
+
+  return {
+    title,
+    about,
+    isFake: fake,
+    isScam: scam,
+    isVerified: verified,
+    isSuperGroup: megagroup,
+    isPublic: invite.public,
+    participantsCount,
+    color,
+    isChannel: channel,
+    isBroadcast: broadcast,
+    isRequestNeeded: requestNeeded,
+    photo: apiPhoto,
+    subscriptionFormId: subscriptionFormId?.toString(),
+    subscriptionPricing: subscriptionPricing && buildApiStarsSubscriptionPricing(subscriptionPricing),
+    canRefulfillSubscription,
+    participantIds: participants?.map((participant) => buildApiPeerId(participant.id, 'user')).filter(Boolean),
+  };
+}
+
+export function buildApiStarsSubscriptionPricing(
+  pricing: GramJs.StarsSubscriptionPricing,
+): ApiStarsSubscriptionPricing {
+  return {
+    period: pricing.period,
+    amount: pricing.amount.toJSNumber(),
   };
 }

@@ -20,10 +20,12 @@ import {
   buildApiReceipt,
   buildApiStarsGiftOptions,
   buildApiStarsGiveawayOptions,
+  buildApiStarsSubscription,
   buildApiStarsTransaction,
   buildApiStarTopupOption,
   buildShippingOptions,
 } from '../apiBuilders/payments';
+import { buildApiPeerId } from '../apiBuilders/peers';
 import {
   buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildInputThemeParams, buildShippingInfo,
 } from '../gramjsBuilders';
@@ -134,7 +136,7 @@ export async function sendStarPaymentForm({
     invoice: buildInputInvoice(inputInvoice),
   }));
 
-  if (!result) return false;
+  if (!result) return undefined;
 
   if (result instanceof GramJs.payments.PaymentVerificationNeeded) {
     if (DEBUG) {
@@ -143,11 +145,29 @@ export async function sendStarPaymentForm({
     }
 
     return undefined;
-  } else {
-    handleGramJsUpdate(result.updates);
   }
 
-  return Boolean(result);
+  handleGramJsUpdate(result.updates);
+
+  if (inputInvoice.type === 'chatInviteSubscription') {
+    const updates = 'updates' in result.updates ? result.updates.updates : undefined;
+
+    const mtpChannelId = updates?.find((update): update is GramJs.UpdateChannel => (
+      update instanceof GramJs.UpdateChannel
+    ))?.channelId;
+
+    if (!mtpChannelId) {
+      return undefined;
+    }
+
+    return {
+      channelId: buildApiPeerId(mtpChannelId, 'channel'),
+    };
+  }
+
+  return {
+    completed: true,
+  };
 }
 
 export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice, theme?: ApiThemeParameters) {
@@ -416,8 +436,10 @@ export async function fetchStarsStatus() {
   }
 
   return {
-    nextOffset: result.nextOffset,
+    nextHistoryOffset: result.nextOffset,
     history: result.history?.map(buildApiStarsTransaction),
+    nextSubscriptionOffset: result.subscriptionsNextOffset,
+    subscriptions: result.subscriptions?.map(buildApiStarsSubscription),
     balance: result.balance.toJSNumber(),
   };
 }
@@ -473,6 +495,59 @@ export async function fetchStarsTransactionById({
   return {
     transaction: buildApiStarsTransaction(result.history[0]),
   };
+}
+
+export async function fetchStarsSubscriptions({
+  offset, peer,
+}: {
+  offset?: string;
+  peer?: ApiPeer;
+}) {
+  const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
+  const result = await invokeRequest(new GramJs.payments.GetStarsSubscriptions({
+    peer: inputPeer,
+    offset,
+  }));
+
+  if (!result?.subscriptions) {
+    return undefined;
+  }
+
+  return {
+    nextOffset: result.subscriptionsNextOffset,
+    subscriptions: result.subscriptions.map(buildApiStarsSubscription),
+    balance: result.balance.toJSNumber(),
+  };
+}
+
+export async function changeStarsSubscription({
+  peer, subscriptionId, isCancelled,
+}: {
+  peer?: ApiPeer;
+  subscriptionId: string;
+  isCancelled: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.payments.ChangeStarsSubscription({
+    peer: peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf(),
+    subscriptionId,
+    canceled: isCancelled,
+  }));
+
+  return result;
+}
+
+export async function fulfillStarsSubscription({
+  peer, subscriptionId,
+}: {
+  peer?: ApiPeer;
+  subscriptionId: string;
+}) {
+  const result = await invokeRequest(new GramJs.payments.FulfillStarsSubscription({
+    peer: peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf(),
+    subscriptionId,
+  }));
+
+  return result;
 }
 
 export async function fetchStarsTopupOptions() {

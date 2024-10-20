@@ -5,6 +5,7 @@ import type { ApiChat } from './chats';
 import type {
   ApiDocument, ApiMessageEntity, ApiPaymentCredentials, BoughtPaidMedia,
 } from './messages';
+import type { ApiStarsSubscriptionPricing } from './misc';
 import type { StatisticsOverviewPercentage } from './statistics';
 import type { ApiUser } from './users';
 
@@ -311,6 +312,18 @@ export interface ApiStarsTransaction {
   description?: string;
   photo?: ApiWebDocument;
   extendedMedia?: BoughtPaidMedia[];
+  subscriptionPeriod?: number;
+}
+
+export interface ApiStarsSubscription {
+  id: string;
+  peerId: string;
+  until: number;
+  pricing: ApiStarsSubscriptionPricing;
+  isCancelled?: true;
+  canRefulfill?: true;
+  hasMissingBalance?: true;
+  chatInviteHash?: string;
 }
 
 export interface ApiStarTopupOption {

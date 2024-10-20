@@ -2,6 +2,7 @@ import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat, ApiPeerColor } from './chats';
+import type { ApiChatInviteInfo } from './misc';
 import type {
   ApiInputStorePaymentPurpose,
   ApiPremiumGiftCodeOption,
@@ -263,8 +264,15 @@ export type ApiInputInvoiceStarsGiveaway = {
   users: number;
 };
 
+export type ApiInputInvoiceChatInviteSubscription = {
+  type: 'chatInviteSubscription';
+  hash: string;
+  inviteInfo: ApiChatInviteInfo;
+};
+
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode | ApiInputInvoiceStarsGift | ApiInputInvoiceStars | ApiInputInvoiceStarsGiveaway;
+| ApiInputInvoiceGiftCode | ApiInputInvoiceStarsGift | ApiInputInvoiceStars | ApiInputInvoiceStarsGiveaway
+| ApiInputInvoiceChatInviteSubscription;
 
 /* Used for Invoice request */
 export type ApiRequestInputInvoiceMessage = {
@@ -294,8 +302,14 @@ export type ApiRequestInputInvoiceStarsGiveaway = {
   purpose: ApiInputStorePaymentPurpose;
 };
 
+export type ApiRequestInputInvoiceChatInviteSubscription = {
+  type: 'chatInviteSubscription';
+  hash: string;
+};
+
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
-| ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway;
+| ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway
+| ApiRequestInputInvoiceChatInviteSubscription;
 
 export interface ApiInvoice {
   mediaType: 'invoice';

@@ -9,7 +9,7 @@ import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const StarsGiftModalAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
-  const StarsGiftModal = useModuleLoader(Bundles.Extra, 'StarsGiftModal', !isOpen);
+  const StarsGiftModal = useModuleLoader(Bundles.Stars, 'StarsGiftModal', !isOpen);
 
   // eslint-disable-next-line react/jsx-props-no-spreading
   return StarsGiftModal ? <StarsGiftModal {...props} /> : undefined;

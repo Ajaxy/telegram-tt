@@ -59,7 +59,7 @@ export const processDeepLink = (url: string): boolean => {
   const params = Object.fromEntries(searchParams);
 
   const {
-    openChatByInvite,
+    checkChatInvite,
     openChatByUsername,
     openChatByPhoneNumber,
     openStickerSet,
@@ -139,7 +139,7 @@ export const processDeepLink = (url: string): boolean => {
     case 'join': {
       const { invite } = params;
 
-      openChatByInvite({ hash: invite });
+      checkChatInvite({ hash: invite });
       break;
     }
     case 'addemoji':

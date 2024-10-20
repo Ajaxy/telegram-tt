@@ -38,6 +38,7 @@ import {
   buildApiChatFromDialog,
   buildApiChatFromPreview,
   buildApiChatFromSavedDialog,
+  buildApiChatInviteInfo,
   buildApiChatlistExportedInvite,
   buildApiChatlistInvite,
   buildApiChatReactions,
@@ -1404,53 +1405,27 @@ export async function migrateChat(chat: ApiChat) {
   return buildApiChatFromPreview(newChannel);
 }
 
-export async function openChatByInvite(hash: string) {
+export async function checkChatInvite(hash: string) {
   const result = await invokeRequest(new GramJs.messages.CheckChatInvite({ hash }));
 
   if (!result) {
     return undefined;
   }
 
-  let chat: ApiChat | undefined;
-
   if (result instanceof GramJs.ChatInvite) {
-    const {
-      photo, participantsCount, title, channel, requestNeeded, about, megagroup,
-    } = result;
-
-    if (photo instanceof GramJs.Photo) {
-      addPhotoToLocalDb(result.photo);
-    }
-
-    sendApiUpdate({
-      '@type': 'showInvite',
-      data: {
-        title,
-        about,
-        hash,
-        participantsCount,
-        isChannel: channel && !megagroup,
-        isRequestNeeded: requestNeeded,
-        ...(photo instanceof GramJs.Photo && { photo: buildApiPhoto(photo) }),
-      },
-    });
-  } else {
-    chat = buildApiChatFromPreview(result.chat);
-
-    if (chat) {
-      sendApiUpdate({
-        '@type': 'updateChat',
-        id: chat.id,
-        chat,
-      });
-    }
+    return {
+      chat: undefined,
+      invite: buildApiChatInviteInfo(result),
+      users: result.participants?.map(buildApiUser).filter(Boolean),
+    };
   }
 
+  const chat = buildApiChatFromPreview(result.chat);
   if (!chat) {
     return undefined;
   }
 
-  return { chatId: chat.id };
+  return { chat, invite: undefined, users: undefined };
 }
 
 export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {

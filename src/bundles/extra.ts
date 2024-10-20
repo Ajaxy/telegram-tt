@@ -18,19 +18,14 @@ export { default as AttachBotInstallModal } from '../components/modals/attachBot
 export { default as DeleteFolderDialog } from '../components/main/DeleteFolderDialog';
 export { default as PremiumMainModal } from '../components/main/premium/PremiumMainModal';
 export { default as PremiumGiftModal } from '../components/main/premium/PremiumGiftModal';
-export { default as StarsGiftModal } from '../components/main/premium/StarsGiftModal';
 export { default as GiveawayModal } from '../components/main/premium/GiveawayModal';
 export { default as PremiumGiftingPickerModal } from '../components/main/premium/PremiumGiftingPickerModal';
-export { default as StarsGiftingPickerModal } from '../components/main/premium/StarsGiftingPickerModal';
 export { default as PremiumLimitReachedModal } from '../components/main/premium/common/PremiumLimitReachedModal';
 export { default as StatusPickerMenu } from '../components/left/main/StatusPickerMenu';
 export { default as BoostModal } from '../components/modals/boost/BoostModal';
 export { default as GiftCodeModal } from '../components/modals/giftcode/GiftCodeModal';
 export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';
-export { default as StarsBalanceModal } from '../components/modals/stars/StarsBalanceModal';
-export { default as StarPaymentModal } from '../components/modals/stars/StarsPaymentModal';
-export { default as StarsTransactionInfoModal } from '../components/modals/stars/transaction/StarsTransactionModal';
-export { default as PaidReactionModal } from '../components/modals/paidReaction/PaidReactionModal';
+export { default as ChatInviteModal } from '../components/modals/chatInvite/ChatInviteModal';
 
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
 export { default as AboutMonetizationModal } from '../components/common/AboutMonetizationModal';

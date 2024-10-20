@@ -176,7 +176,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updatePaidReactionPrivacy': {
-      return {
+      global = {
         ...global,
         settings: {
           ...global.settings,

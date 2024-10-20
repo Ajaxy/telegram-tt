@@ -125,8 +125,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const chat = selectChat(global, update.id);
       if (chat && isChatChannel(chat)) {
         const chatMessages = selectChatMessages(global, update.id);
-        const localMessageIds = Object.keys(chatMessages).map(Number).filter(isLocalMessageId);
-        global = deleteChatMessages(global, chat.id, localMessageIds);
+        if (chatMessages) {
+          const localMessageIds = Object.keys(chatMessages).map(Number).filter(isLocalMessageId);
+          global = deleteChatMessages(global, chat.id, localMessageIds);
+        }
       }
 
       return global;
@@ -432,16 +434,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', draft);
       global = updateChat(global, chatId, { draftDate: draft?.date });
       return global;
-    }
-
-    case 'showInvite': {
-      const { data } = update;
-
-      Object.values(global.byTabId).forEach(({ id: tabId }) => {
-        actions.showDialog({ data, tabId });
-      });
-
-      return undefined;
     }
 
     case 'updatePendingJoinRequests': {

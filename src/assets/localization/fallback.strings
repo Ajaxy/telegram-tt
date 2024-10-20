@@ -1281,7 +1281,9 @@
 "AriaSearchOlderResult" = "Focus next result";
 "AriaSearchNewerResult" = "Focus previous result";
 "CreditsBoxHistoryEntryGiftOutAbout" = "With Stars, {user} will be able to unlock content and services on Telegram. {link}"
-"CreditsBoxOutAbout" = "Review the {link} for Stars."
+"StarsTransactionTOS" = "Review the {link} for Stars."
+"StarsTransactionTOSLinkText" = "Terms of Service"
+"StarsTransactionTOSLink" = "https://telegram.org/tos/stars"
 "GiftStarsOutgoing" = "With Stars, {user} will be able to unlock content and services on Telegram."
 "SendPaidReaction" = "Send ⭐️{amount}"
 "StarsReactionTerms" = "By sending Stars you agree to the {link}"
@@ -1290,3 +1292,9 @@
 "MiniAppsMoreTabs_one" = "{botName} & {count} Other";
 "MiniAppsMoreTabs_other" = "{botName} & {count} Others";
 "PrizeCredits" = "Your prize is {count} Stars."
+"StarsSubscribeText_one" = "Do you want to subscribe to **{chat}** for **{amount} Star** per month?"
+"StarsSubscribeText_other" = "Do you want to subscribe to **{chat}** for **{amount} Stars** per month?"
+"StarsSubscribeInfo" = "By subscribing you agree to the {link}"
+"StarsSubscribeInfoLinkText" = "Terms of Service"
+"StarsSubscribeInfoLink" = "https://telegram.org/tos/stars"
+"StarsPerMonth" = "⭐️{amount}/month"

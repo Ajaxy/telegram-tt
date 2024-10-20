@@ -4,12 +4,15 @@ import type {
   ApiChatBannedRights,
   ApiChatFolder,
   ApiChatFullInfo,
+  ApiChatInviteInfo,
   ApiPeer,
   ApiTopic,
   ApiUser,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useOldLang';
-import type { NotifyException, NotifySettings, ThreadId } from '../../types';
+import type {
+  CustomPeer, NotifyException, NotifySettings, ThreadId,
+} from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -481,4 +484,17 @@ export function getGroupStatus(lang: LangFn, chat: ApiChat) {
   return chatTypeString === 'Channel'
     ? lang('Subscribers', membersCount, 'i')
     : lang('Members', membersCount, 'i');
+}
+
+export function getCustomPeerFromInvite(invite: ApiChatInviteInfo): CustomPeer {
+  const {
+    title, color, isVerified, isFake, isScam,
+  } = invite;
+  return {
+    isCustomPeer: true,
+    title,
+    peerColorId: color,
+    isVerified,
+    fakeType: isFake ? 'fake' : isScam ? 'scam' : undefined,
+  };
 }

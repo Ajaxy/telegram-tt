@@ -1,12 +1,13 @@
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { getStarsTransactionFromGift } from '../../helpers/payments';
 import { addActionHandler } from '../../index';
 import {
   clearPayment, closeInvoice, openStarsTransactionModal, updatePayment,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectTabState } from '../../selectors';
+import { selectChatMessage, selectTabState } from '../../selectors';
 
 addActionHandler('closePaymentModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
@@ -97,10 +98,44 @@ addActionHandler('openStarsTransactionModal', (global, actions, payload): Action
   return openStarsTransactionModal(global, transaction, tabId);
 });
 
+addActionHandler('openStarsTransactionFromGift', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId,
+    messageId,
+    tabId = getCurrentTabId(),
+  } = payload || {};
+
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) return undefined;
+
+  const transaction = getStarsTransactionFromGift(message);
+  if (!transaction) return undefined;
+
+  return openStarsTransactionModal(global, transaction, tabId);
+});
+
 addActionHandler('closeStarsTransactionModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
   return updateTabState(global, {
     starsTransactionModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openStarsSubscriptionModal', (global, actions, payload): ActionReturnType => {
+  const { subscription, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    starsSubscriptionModal: {
+      subscription,
+    },
+  }, tabId);
+});
+
+addActionHandler('closeStarsSubscriptionModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    starsSubscriptionModal: undefined,
   }, tabId);
 });

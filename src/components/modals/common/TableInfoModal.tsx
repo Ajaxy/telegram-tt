@@ -1,7 +1,7 @@
 import React, { memo, type TeactNode } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiPeer, ApiWebDocument } from '../../../api/types';
+import type { ApiPeer } from '../../../api/types';
 import type { CustomPeer } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
@@ -15,8 +15,6 @@ import Modal from '../../ui/Modal';
 
 import styles from './TableInfoModal.module.scss';
 
-import StarsBackground from '../../../assets/stars-bg.png';
-
 type ChatItem = { chatId: string };
 
 export type TableData = [TeactNode, TeactNode | ChatItem][];
@@ -25,13 +23,7 @@ type OwnProps = {
   isOpen?: boolean;
   title?: string;
   tableData?: TableData;
-  headerImageUrl?: string;
-  logoBackground?: string;
   headerAvatarPeer?: ApiPeer | CustomPeer;
-  headerAvatarWebPhoto?: ApiWebDocument;
-  noHeaderImage?: boolean;
-  isGift?: boolean;
-  isPrizeStars?: boolean;
   header?: TeactNode;
   footer?: TeactNode;
   buttonText?: string;
@@ -44,13 +36,7 @@ const TableInfoModal = ({
   isOpen,
   title,
   tableData,
-  headerImageUrl,
-  logoBackground,
   headerAvatarPeer,
-  headerAvatarWebPhoto,
-  noHeaderImage,
-  isGift,
-  isPrizeStars,
   header,
   footer,
   buttonText,
@@ -64,8 +50,6 @@ const TableInfoModal = ({
     onClose();
   });
 
-  const withAvatar = Boolean(headerAvatarPeer || headerAvatarWebPhoto);
-
   return (
     <Modal
       isOpen={isOpen}
@@ -77,23 +61,15 @@ const TableInfoModal = ({
       contentClassName={styles.content}
       onClose={onClose}
     >
-      {!isGift && !isPrizeStars && !noHeaderImage && (
-        withAvatar ? (
-          <Avatar peer={headerAvatarPeer} webPhoto={headerAvatarWebPhoto} size="jumbo" className={styles.avatar} />
-        ) : (
-          <div className={styles.section}>
-            <img className={styles.logo} src={headerImageUrl} alt="" draggable={false} />
-            {Boolean(logoBackground)
-              && <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />}
-          </div>
-        )
+      {headerAvatarPeer && (
+        <Avatar peer={headerAvatarPeer} size="jumbo" className={styles.avatar} />
       )}
       {header}
-      <table className={styles.table}>
+      <div className={styles.table}>
         {tableData?.map(([label, value]) => (
-          <tr className={styles.row}>
-            <td className={buildClassName(styles.cell, styles.title)}>{label}</td>
-            <td className={buildClassName(styles.cell, styles.value)}>
+          <>
+            <div className={buildClassName(styles.cell, styles.title)}>{label}</div>
+            <div className={buildClassName(styles.cell, styles.value)}>
               {typeof value === 'object' && 'chatId' in value ? (
                 <PickerSelectedItem
                   peerId={value.chatId}
@@ -104,10 +80,10 @@ const TableInfoModal = ({
                   onClick={handleOpenChat}
                 />
               ) : value}
-            </td>
-          </tr>
+            </div>
+          </>
         ))}
-      </table>
+      </div>
       {footer}
       {buttonText && (
         <Button size="smaller" onClick={onButtonClick || onClose}>{buttonText}</Button>

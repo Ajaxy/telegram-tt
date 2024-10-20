@@ -69,6 +69,7 @@ const GiftCodeModal = ({
 
     const header = (
       <>
+        <img src={PremiumLogo} alt="" className={styles.logo} />
         <p className={styles.centered}>{renderText(lang('lng_gift_link_about'), ['simple_markdown'])}</p>
         <LinkField title="BoostingGiftLink" link={`${TME_LINK_PREFIX}/${GIFTCODE_PATH}/${slug}`} />
       </>
@@ -110,7 +111,6 @@ const GiftCodeModal = ({
     <TableInfoModal
       isOpen={isOpen}
       title={lang('lng_gift_link_title')}
-      headerImageUrl={PremiumLogo}
       tableData={modalData.tableData}
       header={modalData.header}
       footer={modalData.footer}

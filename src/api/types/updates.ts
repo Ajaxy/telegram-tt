@@ -33,7 +33,7 @@ import type {
   BoughtPaidMedia,
 } from './messages';
 import type {
-  ApiEmojiInteraction, ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
+  ApiEmojiInteraction, ApiError, ApiNotifyException, ApiSessionData,
 } from './misc';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
@@ -112,11 +112,6 @@ export type ApiUpdateChatLastMessage = {
 export type ApiUpdateChatJoin = {
   '@type': 'updateChatJoin';
   id: string;
-};
-
-export type ApiUpdateShowInvite = {
-  '@type': 'showInvite';
-  data: ApiInviteInfo;
 };
 
 export type ApiUpdateChatLeave = {
@@ -788,7 +783,7 @@ export type ApiUpdate = (
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
   ApiUpdateTwoFaError | ApiUpdatePasswordError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
-  ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
+  ApiUpdateServerTimeOffset | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |

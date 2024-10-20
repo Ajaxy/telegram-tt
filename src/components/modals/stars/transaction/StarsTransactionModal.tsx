@@ -24,9 +24,10 @@ import renderText from '../../../common/helpers/renderText';
 import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
-import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
+import usePrevious from '../../../../hooks/usePrevious';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
+import Avatar from '../../../common/Avatar';
 import Icon from '../../../common/icons/Icon';
 import StarIcon from '../../../common/icons/StarIcon';
 import SafeLink from '../../../common/SafeLink';
@@ -55,8 +56,6 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
   const oldLang = useOldLang();
   const lang = useLang();
   const { transaction } = modal || {};
-  const isGift = transaction?.isGift;
-  const isPrizeStars = transaction?.isPrizeStars;
 
   const handleOpenMedia = useLastCallback(() => {
     const media = transaction?.extendedMedia;
@@ -67,22 +66,6 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       standaloneMedia: media.flatMap((item) => Object.values(item)),
     });
   });
-
-  const animatedStickerData = useMemo(() => {
-    if (!transaction) {
-      return undefined;
-    }
-
-    return (
-      <AnimatedIconFromSticker
-        key={transaction.id}
-        sticker={starGiftSticker}
-        play={canPlayAnimatedEmojis}
-        noLoop
-        nonInteractive
-      />
-    );
-  }, [canPlayAnimatedEmojis, starGiftSticker, transaction]);
 
   const giftEntryAboutText = useMemo(() => {
     const subtitleText = oldLang('lng_credits_box_history_entry_gift_in_about');
@@ -127,24 +110,23 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
+    const { isGift, isPrizeStars, photo } = transaction;
+
     const customPeer = (transaction.peer && transaction.peer.type !== 'peer'
         && buildStarsTransactionCustomPeer(transaction.peer)) || undefined;
 
     const peerId = transaction.peer?.type === 'peer' ? transaction.peer.id : undefined;
     const toName = transaction.peer && oldLang(getStarsPeerTitleKey(transaction.peer));
 
-    let title = transaction.title;
-    if (!title && customPeer) {
-      title = oldLang(customPeer.titleKey);
-    }
+    const title = (() => {
+      if (transaction.extendedMedia) return oldLang('StarMediaPurchase');
+      if (transaction.subscriptionPeriod) return oldLang('StarSubscriptionPurchase');
+      if (transaction.isReaction) return oldLang('StarsReactionsSent');
 
-    if (!title && transaction.extendedMedia) {
-      title = oldLang('StarMediaPurchase');
-    }
+      if (customPeer) return customPeer.title || oldLang(customPeer.titleKey!);
 
-    if (!title && transaction.isReaction) {
-      title = oldLang('StarsReactionsSent');
-    }
+      return transaction.title;
+    })();
 
     const messageLink = peer && transaction.messageId
       ? getMessageLink(peer, undefined, transaction.messageId) : undefined;
@@ -161,6 +143,9 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const description = transaction.description || (media ? mediaText : undefined);
 
+    const shouldDisplayAvatar = !media && !isGift && !isPrizeStars;
+    const avatarPeer = !photo ? (peer || customPeer) : undefined;
+
     const header = (
       <div className={buildClassName(styles.header, styles.starsHeader)}>
         {media && (
@@ -170,14 +155,24 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
             onClick={handleOpenMedia}
           />
         )}
-        {(isGift || isPrizeStars) ? animatedStickerData : (
-          <img
-            className={buildClassName(styles.starsBackground, media && styles.mediaShift)}
-            src={StarsBackground}
-            alt=""
-            draggable={false}
+        {(isGift || isPrizeStars) && starGiftSticker && (
+          <AnimatedIconFromSticker
+            key={transaction.id}
+            sticker={starGiftSticker}
+            play={canPlayAnimatedEmojis}
+            noLoop
+            nonInteractive
           />
         )}
+        {shouldDisplayAvatar && (
+          <Avatar peer={avatarPeer} webPhoto={photo} size="jumbo" />
+        )}
+        <img
+          className={buildClassName(styles.starsBackground)}
+          src={StarsBackground}
+          alt=""
+          draggable={false}
+        />
         {title && <h1 className={styles.title}>{title}</h1>}
         {(isGift || isPrizeStars) && (
           <h1 className={buildClassName(styles.title, styles.starTitle)}>
@@ -223,18 +218,20 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       tableData.push([
         oldLang('Stars.Transaction.Id'),
         (
-          <span
-            className={styles.tid}
-            onClick={() => {
-              copyTextToClipboard(transaction.id!);
-              showNotification({
-                message: oldLang('StarsTransactionIDCopied'),
-              });
-            }}
-          >
-            {transaction.id}
+          <>
+            <div
+              className={styles.tid}
+              onClick={() => {
+                copyTextToClipboard(transaction.id!);
+                showNotification({
+                  message: oldLang('StarsTransactionIDCopied'),
+                });
+              }}
+            >
+              {transaction.id}
+            </div>
             <Icon className={styles.copyIcon} name="copy" />
-          </span>
+          </>
         ),
       ]);
     }
@@ -259,13 +256,12 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       header,
       tableData,
       footer,
-      avatarPeer: !transaction.photo ? (peer || customPeer) : undefined,
     };
   }, [
-    transaction, oldLang, peer, isGift, isPrizeStars, animatedStickerData, giftOutAboutText, giftEntryAboutText,
+    transaction, oldLang, peer, giftOutAboutText, giftEntryAboutText, canPlayAnimatedEmojis, starGiftSticker,
   ]);
 
-  const prevModalData = usePreviousDeprecated(starModalData);
+  const prevModalData = usePrevious(starModalData);
   const renderingModalData = prevModalData || starModalData;
 
   return (
@@ -273,13 +269,8 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       isOpen={Boolean(transaction)}
       className={styles.modal}
       header={renderingModalData?.header}
-      isGift={isGift}
-      isPrizeStars={isPrizeStars}
       tableData={renderingModalData?.tableData}
       footer={renderingModalData?.footer}
-      noHeaderImage={Boolean(transaction?.extendedMedia)}
-      headerAvatarWebPhoto={transaction?.photo}
-      headerAvatarPeer={renderingModalData?.avatarPeer}
       buttonText={oldLang('OK')}
       onClose={closeStarsTransactionModal}
     />

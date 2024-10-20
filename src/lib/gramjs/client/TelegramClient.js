@@ -1000,8 +1000,11 @@ class TelegramClient {
                 if (isExported) this.releaseExportedSender(sender);
                 return result;
             } catch (e) {
-                if (e instanceof errors.ServerError || e.message === 'RPC_CALL_FAIL'
-                    || e.message === 'RPC_MCGET_FAIL') {
+                if (e instanceof errors.ServerError
+                    || e.message === 'RPC_CALL_FAIL'
+                    || e.message === 'RPC_MCGET_FAIL'
+                    || e.message.match(/INTERDC_\d_CALL(_RICH)?_ERROR/)
+                ) {
                     this._log.warn(`Telegram is having internal issues ${e.constructor.name}`);
                     await sleep(2000);
                 } else if (e instanceof errors.FloodWaitError || e instanceof errors.FloodTestPhoneWaitError) {

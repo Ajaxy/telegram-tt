@@ -385,6 +385,7 @@ export function leaveChat<T extends GlobalState>(global: T, leftChatId: string):
   global = removeChatFromChatLists(global, leftChatId);
 
   global = updateChat(global, leftChatId, { isNotJoined: true });
+  global = updateChatFullInfo(global, leftChatId, { joinInfo: undefined });
 
   return global;
 }

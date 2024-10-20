@@ -2,6 +2,7 @@ import type {
   ApiInvoice, ApiPaymentForm,
   ApiReceiptRegular,
   ApiReceiptStars,
+  ApiStarsSubscription,
   ApiStarsTransaction,
 } from '../../api/types';
 import type { PaymentStep, ShippingOption } from '../../types';
@@ -183,6 +184,29 @@ export function appendStarsTransactions<T extends GlobalState>(
         ...history,
         [type]: newTypeObject,
       },
+    },
+  };
+}
+
+export function appendStarsSubscriptions<T extends GlobalState>(
+  global: T,
+  subscriptions: ApiStarsSubscription[],
+  nextOffset?: string,
+): T {
+  if (!global.stars) {
+    return global;
+  }
+
+  const newObject = {
+    list: (global.stars.subscriptions?.list || []).concat(subscriptions),
+    nextOffset,
+  };
+
+  return {
+    ...global,
+    stars: {
+      ...global.stars,
+      subscriptions: newObject,
     },
   };
 }

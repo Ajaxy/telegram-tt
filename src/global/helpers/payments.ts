@@ -53,6 +53,15 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'chatInviteSubscription') {
+    const { hash } = inputInvoice;
+
+    return {
+      type: 'chatInviteSubscription',
+      hash,
+    };
+  }
+
   if (inputInvoice.type === 'message') {
     const chat = selectChat(global, inputInvoice.chatId);
     if (!chat) {

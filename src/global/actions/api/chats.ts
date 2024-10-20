@@ -25,6 +25,7 @@ import {
   RE_TG_LINK,
   SAVED_FOLDER_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
+  STARS_CURRENCY_CODE,
   TME_WEB_DOMAINS,
   TMP_CHAT_ID,
   TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
@@ -56,8 +57,10 @@ import {
 } from '../../index';
 import {
   addChatMembers,
+  addChats,
   addMessages,
   addSimilarChannels,
+  addUsers,
   addUserStatuses,
   deleteChatMessages,
   deletePeerPhoto,
@@ -466,7 +469,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
 });
 
 addActionHandler('openLinkedChat', async (global, actions, payload): Promise<void> => {
-  const { id, tabId = getCurrentTabId() } = payload!;
+  const { id, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, id);
   if (!chat) {
     return;
@@ -534,7 +537,7 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
 addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType => {
   const {
     chatId, force, withPhotos,
-  } = payload!;
+  } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
@@ -716,7 +719,7 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
 });
 
 addActionHandler('joinChannel', async (global, actions, payload): Promise<void> => {
-  const { chatId, tabId = getCurrentTabId() } = payload!;
+  const { chatId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
@@ -758,7 +761,7 @@ addActionHandler('deleteChatUser', (global, actions, payload): ActionReturnType 
 });
 
 addActionHandler('deleteChat', (global, actions, payload): ActionReturnType => {
-  const { chatId, tabId = getCurrentTabId() } = payload!;
+  const { chatId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
@@ -775,7 +778,7 @@ addActionHandler('deleteChat', (global, actions, payload): ActionReturnType => {
 });
 
 addActionHandler('leaveChannel', async (global, actions, payload): Promise<void> => {
-  const { chatId, tabId = getCurrentTabId() } = payload!;
+  const { chatId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
@@ -797,8 +800,6 @@ addActionHandler('leaveChannel', async (global, actions, payload): Promise<void>
     global = deleteChatMessages(global, chatId, localMessageIds);
     setGlobal(global);
   }
-
-  actions.loadFullChat({ chatId, force: true });
 });
 
 addActionHandler('deleteChannel', (global, actions, payload): ActionReturnType => {
@@ -891,7 +892,7 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
 });
 
 addActionHandler('toggleChatPinned', (global, actions, payload): ActionReturnType => {
-  const { id, folderId, tabId = getCurrentTabId() } = payload!;
+  const { id, folderId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, id);
   if (!chat) {
     return;
@@ -938,7 +939,7 @@ addActionHandler('toggleChatPinned', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('toggleChatArchived', (global, actions, payload): ActionReturnType => {
-  const { id } = payload!;
+  const { id } = payload;
   const chat = selectChat(global, id);
   if (chat) {
     void callApi('toggleChatArchived', {
@@ -949,7 +950,7 @@ addActionHandler('toggleChatArchived', (global, actions, payload): ActionReturnT
 });
 
 addActionHandler('toggleSavedDialogPinned', (global, actions, payload): ActionReturnType => {
-  const { id, tabId = getCurrentTabId() } = payload!;
+  const { id, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, id);
   if (!chat) {
     return;
@@ -1046,7 +1047,7 @@ addActionHandler('editChatFolders', (global, actions, payload): ActionReturnType
 });
 
 addActionHandler('editChatFolder', (global, actions, payload): ActionReturnType => {
-  const { id, folderUpdate } = payload!;
+  const { id, folderUpdate } = payload;
   const folder = selectChatFolder(global, id);
 
   if (folder) {
@@ -1063,7 +1064,7 @@ addActionHandler('editChatFolder', (global, actions, payload): ActionReturnType 
 });
 
 addActionHandler('addChatFolder', async (global, actions, payload): Promise<void> => {
-  const { folder, tabId = getCurrentTabId() } = payload!;
+  const { folder, tabId = getCurrentTabId() } = payload;
   const { orderedIds, byId } = global.chatFolders;
 
   const limit = selectCurrentLimit(global, 'dialogFilters');
@@ -1125,7 +1126,7 @@ addActionHandler('addChatFolder', async (global, actions, payload): Promise<void
 });
 
 addActionHandler('sortChatFolders', async (global, actions, payload): Promise<void> => {
-  const { folderIds } = payload!;
+  const { folderIds } = payload;
 
   const result = await callApi('sortChatFolders', folderIds);
   if (result) {
@@ -1191,21 +1192,65 @@ addActionHandler('markTopicRead', (global, actions, payload): ActionReturnType =
   setGlobal(global);
 });
 
-addActionHandler('openChatByInvite', async (global, actions, payload): Promise<void> => {
-  const { hash, tabId = getCurrentTabId() } = payload!;
+addActionHandler('checkChatInvite', async (global, actions, payload): Promise<void> => {
+  const { hash, tabId = getCurrentTabId() } = payload;
 
-  const result = await callApi('openChatByInvite', hash);
+  const result = await callApi('checkChatInvite', hash);
   if (!result) {
     return;
   }
 
-  actions.openChat({ id: result.chatId, tabId });
+  global = getGlobal();
+
+  if (result.users) {
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  }
+
+  if (result.chat) {
+    global = addChats(global, buildCollectionByKey([result.chat], 'id'));
+    setGlobal(global);
+    actions.openChat({ id: result.chat.id, tabId });
+    return;
+  }
+
+  if (result.invite.subscriptionFormId) {
+    global = updateTabState(global, {
+      payment: {
+        formId: result.invite.subscriptionFormId,
+        inputInvoice: {
+          type: 'chatInviteSubscription',
+          hash,
+          inviteInfo: result.invite,
+        },
+        invoice: {
+          amount: result.invite.subscriptionPricing!.amount,
+          currency: STARS_CURRENCY_CODE,
+          isRecurring: true,
+          mediaType: 'invoice',
+          // Placeholder values
+          title: 'Subscription',
+          text: '',
+        },
+      },
+      isStarPaymentModalOpen: true,
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  global = updateTabState(global, {
+    chatInviteModal: {
+      hash,
+      inviteInfo: result.invite,
+    },
+  }, tabId);
+  setGlobal(global);
 });
 
 addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Promise<void> => {
   const {
     phoneNumber, startAttach, attach, text, tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   // Open temporary empty chat to make the click response feel faster
   actions.openChat({ id: TMP_CHAT_ID, tabId });
@@ -1240,7 +1285,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
 
   const {
     openChatByPhoneNumber,
-    openChatByInvite,
+    checkChatInvite,
     openStickerSet,
     openChatWithDraft,
     joinVoiceChatByLink,
@@ -1313,7 +1358,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
   }
 
   if (hash) {
-    openChatByInvite({ hash, tabId });
+    checkChatInvite({ hash, tabId });
     return;
   }
 
@@ -1453,8 +1498,8 @@ addActionHandler('processBoostParameters', async (global, actions, payload): Pro
   });
 });
 
-addActionHandler('acceptInviteConfirmation', async (global, actions, payload): Promise<void> => {
-  const { hash, tabId = getCurrentTabId() } = payload!;
+addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<void> => {
+  const { hash, tabId = getCurrentTabId() } = payload;
   const result = await callApi('importChatInvite', { hash });
   if (!result) {
     return;
@@ -1467,7 +1512,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   const {
     username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, text,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   const chat = selectCurrentChat(global, tabId);
   const webAppName = originalParts?.[1];
@@ -1557,7 +1602,7 @@ addActionHandler('togglePreHistoryHidden', async (global, actions, payload): Pro
   const {
     chatId, isEnabled,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
   if (!chat) {
@@ -1572,7 +1617,7 @@ addActionHandler('togglePreHistoryHidden', async (global, actions, payload): Pro
 });
 
 addActionHandler('updateChatDefaultBannedRights', (global, actions, payload): ActionReturnType => {
-  const { chatId, bannedRights } = payload!;
+  const { chatId, bannedRights } = payload;
   const chat = selectChat(global, chatId);
 
   if (!chat) {
@@ -1586,7 +1631,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
   const {
     chatId, userId, bannedRights,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   const user = selectUser(global, userId);
 
@@ -1634,7 +1679,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
   const {
     chatId, userId, adminRights, customTitle,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   const user = selectUser(global, userId);
   if (!user) {

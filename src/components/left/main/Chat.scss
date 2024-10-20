@@ -1,3 +1,5 @@
+@use "../../../styles/mixins";
+
 .Chat {
   --background-color: var(--color-background);
   --thumbs-background: var(--background-color);
@@ -39,8 +41,8 @@
 
   &:hover,
   &.ListItem.has-menu-open {
-    .avatar-online {
-      border-color: var(--color-chat-hover);
+    .avatar-badge {
+      --_color-outline: var(--color-chat-hover);
     }
 
     .avatar-badge-wrapper {
@@ -70,8 +72,8 @@
     &.selected {
       --background-color: var(--color-chat-hover) !important;
 
-      .avatar-online {
-        border-color: var(--color-chat-hover);
+      .avatar-badge {
+        --_color-outline: var(--color-chat-hover);
       }
 
       .ChatCallStatus {
@@ -94,8 +96,11 @@
         --color-checkmark: var(--color-primary);
       }
 
+      .avatar-badge {
+        --_color-outline: var(--color-chat-active) !important;
+      }
+
       .avatar-online {
-        border-color: var(--color-chat-active) !important;
         background-color: var(--color-white);
       }
 
@@ -241,16 +246,25 @@
     }
   }
 
-  .avatar-online {
+  .avatar-badge {
+    --_color-outline: var(--color-background);
     position: absolute;
     bottom: 0.0625rem;
     right: 0.0625rem;
+    flex-shrink: 0;
+  }
+
+  .avatar-subscription {
+    @include mixins.filter-outline(1px, var(--_color-outline));
+  }
+
+  .avatar-online {
+    border-radius: 50%;
+    border: 2px solid var(--_color-outline);
+    background-color: #0ac630;
+
     width: 0.875rem;
     height: 0.875rem;
-    border-radius: 50%;
-    border: 2px solid var(--color-background);
-    background-color: #0ac630;
-    flex-shrink: 0;
 
     opacity: 0.5;
     transform: scale(0);

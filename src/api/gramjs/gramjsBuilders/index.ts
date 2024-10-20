@@ -647,6 +647,12 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'chatInviteSubscription': {
+      return new GramJs.InputInvoiceChatInviteSubscription({
+        hash: invoice.hash,
+      });
+    }
+
     case 'giveaway':
     default: {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);

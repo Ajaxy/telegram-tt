@@ -1,9 +1,7 @@
+@use "../../../../styles/mixins";
+
 .modal {
   z-index: calc(var(--z-modal-low-priority) + 1);
-}
-
-.modal :global(.modal-dialog) {
-  max-width: 26rem !important;
 }
 
 .positive {
@@ -43,6 +41,11 @@
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
   cursor: pointer;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  @include mixins.gradient-border-right(3rem, 1rem);
 }
 
 .description {
@@ -53,27 +56,31 @@
   text-align: center;
   margin-block: 0.5rem;
   color: var(--color-text-secondary);
+  font-size: 0.875rem;
 }
 
 .starsBackground {
   position: absolute;
   height: 8rem;
-  top: -8.5rem;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
-}
-
-.mediaShift {
-  top: -1.5rem;
+  z-index: -1;
 }
 
 .copyIcon {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+
   margin-inline-start: 0.25rem;
   color: var(--color-primary);
+  pointer-events: none;
 }
 
 .mediaPreview {
-  margin-bottom: 2rem;
+  margin-block: 1.5rem 1rem;
   cursor: var(--custom-cursor, pointer);
 }
 

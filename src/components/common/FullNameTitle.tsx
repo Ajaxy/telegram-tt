@@ -80,7 +80,7 @@ const FullNameTitle: FC<OwnProps> = ({
 
   const specialTitle = useMemo(() => {
     if (customPeer) {
-      return lang(customPeer.titleKey, customPeer.titleValue, 'i');
+      return customPeer.title || lang(customPeer.titleKey!);
     }
 
     if (isSavedMessages) {
@@ -125,8 +125,8 @@ const FullNameTitle: FC<OwnProps> = ({
       </h3>
       {!iconElement && peer && (
         <>
-          {!noVerified && realPeer?.isVerified && <VerifiedIcon />}
-          {!noFake && realPeer?.fakeType && <FakeIcon fakeType={realPeer.fakeType} />}
+          {!noVerified && peer?.isVerified && <VerifiedIcon />}
+          {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
           {withEmojiStatus && realPeer?.emojiStatus && (
             <CustomEmoji
               documentId={realPeer.emojiStatus.documentId}

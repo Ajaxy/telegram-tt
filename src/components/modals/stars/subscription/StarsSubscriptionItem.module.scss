@@ -19,7 +19,14 @@
   flex-grow: 1;
 }
 
-.stars {
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.statusPricing {
   display: flex;
   align-items: center;
   flex-shrink: 0;
@@ -30,7 +37,7 @@
   font-weight: 500;
 }
 
-.title, .description, .date {
+.title, .description {
   margin-bottom: 0;
 }
 
@@ -38,20 +45,12 @@
   font-size: 1rem;
 }
 
-.description {
-  font-size: 0.875rem;
-}
-
-.date {
+.description, .statusPeriod, .statusEnded {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
 }
 
-.positive {
-  color: var(--color-success);
-}
-
-.negative {
+.statusEnded {
   color: var(--color-error);
 }
 

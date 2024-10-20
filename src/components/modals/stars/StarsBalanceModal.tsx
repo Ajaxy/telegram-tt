@@ -26,7 +26,8 @@ import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import BalanceBlock from './BalanceBlock';
 import StarTopupOptionList from './StarTopupOptionList';
-import TransactionItem from './transaction/StarsTransactionItem';
+import StarsSubscriptionItem from './subscription/StarsSubscriptionItem';
+import StarsTransactionItem from './transaction/StarsTransactionItem';
 
 import styles from './StarsBalanceModal.module.scss';
 
@@ -39,6 +40,7 @@ const TRANSACTION_TABS: TabWithProperties[] = [
   { title: 'StarsTransactionsIncoming' },
   { title: 'StarsTransactionsOutgoing' },
 ];
+const TRANSACTION_ITEM_CLASS = 'StarsTransactionItem';
 
 export type OwnProps = {
   modal: TabState['starsBalanceModal'];
@@ -56,7 +58,7 @@ const StarsBalanceModal = ({
     closeStarsBalanceModal, loadStarsTransactions, openStarsGiftingModal, openInvoice,
   } = getActions();
 
-  const { balance, history } = starsBalanceState || {};
+  const { balance, history, subscriptions } = starsBalanceState || {};
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -90,13 +92,14 @@ const StarsBalanceModal = ({
     return undefined;
   }, [oldLang, originPayment, originReaction, starsNeeded]);
 
-  const shouldShowTransactions = Boolean(history?.all?.transactions.length && !originPayment && !originReaction);
+  const shouldShowItems = Boolean(history?.all?.transactions.length && !originPayment && !originReaction);
   const shouldSuggestGifting = !originPayment && !originReaction;
 
   useEffect(() => {
     if (!isOpen) {
       setHeaderHidden(true);
       setSelectedTabIndex(0);
+      hideBuyOptions();
     }
   }, [isOpen]);
 
@@ -127,7 +130,7 @@ const StarsBalanceModal = ({
     setHeaderHidden(scrollTop <= 150);
   }
 
-  const handleLoadMore = useLastCallback(() => {
+  const handleLoadMoreTransactions = useLastCallback(() => {
     loadStarsTransactions({
       type: TRANSACTION_TYPES[selectedTabIndex],
     });
@@ -170,7 +173,7 @@ const StarsBalanceModal = ({
           <img className={styles.logo} src={StarLogo} alt="" draggable={false} />
           <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
           <h2 className={styles.headerText}>
-            {starsNeeded ? oldLang('StarsNeededTitle', starsNeeded) : oldLang('TelegramStars')}
+            {starsNeeded ? oldLang('StarsNeededTitle', ongoingTransactionAmount) : oldLang('TelegramStars')}
           </h2>
           <div className={styles.description}>
             {renderText(
@@ -207,7 +210,20 @@ const StarsBalanceModal = ({
         <div className={styles.secondaryInfo}>
           {tosText}
         </div>
-        {shouldShowTransactions && (
+        {shouldShowItems && Boolean(subscriptions?.list.length) && (
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>{oldLang('StarMySubscriptions')}</h3>
+            <div className={styles.subscriptions}>
+              {subscriptions?.list.map((subscription) => (
+                <StarsSubscriptionItem
+                  key={subscription.id}
+                  subscription={subscription}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {shouldShowItems && (
           <div className={styles.container}>
             <div className={styles.section}>
               <Transition
@@ -218,21 +234,25 @@ const StarsBalanceModal = ({
                 className={styles.transition}
               >
                 <InfiniteScroll
-                  onLoadMore={handleLoadMore}
+                  onLoadMore={handleLoadMoreTransactions}
                   items={history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions}
+                  scrollContainerClosest={`.${styles.main}`}
+                  itemSelector={`.${TRANSACTION_ITEM_CLASS}`}
                   className={styles.transactions}
                   noFastList
                 >
                   {history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions.map((transaction) => (
-                    <TransactionItem
+                    <StarsTransactionItem
                       key={`${transaction.id}-${transaction.isRefund}`}
                       transaction={transaction}
+                      className={TRANSACTION_ITEM_CLASS}
                     />
                   ))}
                 </InfiniteScroll>
               </Transition>
             </div>
             <TabList
+              className={styles.tabs}
               activeTab={selectedTabIndex}
               tabs={TRANSACTION_TABS}
               onSwitchTab={setSelectedTabIndex}

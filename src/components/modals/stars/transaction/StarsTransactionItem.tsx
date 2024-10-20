@@ -27,6 +27,7 @@ import styles from './StarsTransactionItem.module.scss';
 
 type OwnProps = {
   transaction: ApiStarsTransaction;
+  className?: string;
 };
 
 function selectOptionalPeer(peerId?: string) {
@@ -35,7 +36,7 @@ function selectOptionalPeer(peerId?: string) {
   );
 }
 
-const StarsTransactionItem = ({ transaction }: OwnProps) => {
+const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
   const { openStarsTransactionModal } = getActions();
   const {
     date,
@@ -43,6 +44,7 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
     photo,
     peer: transactionPeer,
     extendedMedia,
+    subscriptionPeriod,
   } = transaction;
   const lang = useOldLang();
 
@@ -50,15 +52,13 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
   const peer = useSelector(selectOptionalPeer(peerId));
 
   const data = useMemo(() => {
-    let title = transaction.title;
-    if (transaction.extendedMedia) {
-      title = lang('StarMediaPurchase');
-    }
+    let title = (() => {
+      if (transaction.extendedMedia) return lang('StarMediaPurchase');
+      if (transaction.subscriptionPeriod) return lang('StarSubscriptionPurchase');
+      if (transaction.isReaction) return lang('StarsReactionsSent');
 
-    if (transaction.isReaction) {
-      title = lang('StarsReactionsSent');
-    }
-
+      return transaction.title;
+    })();
     let description;
     let status: string | undefined;
     let avatarPeer: ApiPeer | CustomPeer | undefined;
@@ -68,7 +68,7 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
       avatarPeer = peer || CUSTOM_PEER_PREMIUM;
     } else {
       const customPeer = buildStarsTransactionCustomPeer(transaction.peer);
-      title = lang(customPeer.titleKey);
+      title = customPeer.title || lang(customPeer.titleKey!);
       description = lang(customPeer.subtitleKey!);
       avatarPeer = customPeer;
     }
@@ -102,9 +102,14 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
   });
 
   return (
-    <div className={styles.root} onClick={handleClick}>
-      {extendedMedia ? <PaidMediaThumb media={extendedMedia} isTransactionPreview />
-        : <Avatar size="medium" webPhoto={photo} peer={data.avatarPeer} />}
+    <div className={buildClassName(styles.root, className)} onClick={handleClick}>
+      <div className={styles.preview}>
+        {extendedMedia ? <PaidMediaThumb media={extendedMedia} isTransactionPreview />
+          : <Avatar size="medium" webPhoto={photo} peer={data.avatarPeer} />}
+        {Boolean(subscriptionPeriod) && (
+          <StarIcon className={styles.subscriptionStar} type="gold" size="small" />
+        )}
+      </div>
       <div className={styles.info}>
         <h3 className={styles.title}>{data.title}</h3>
         <p className={styles.description}>{data.description}</p>
@@ -117,7 +122,7 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
         <span className={buildClassName(styles.amount, stars < 0 ? styles.negative : styles.positive)}>
           {formatStarsTransactionAmount(stars)}
         </span>
-        <StarIcon className={styles.star} type="gold" size="big" />
+        <StarIcon className={styles.star} type="gold" size="adaptive" />
       </div>
     </div>
   );

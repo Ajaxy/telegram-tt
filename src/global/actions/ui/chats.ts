@@ -204,3 +204,10 @@ addActionHandler('requestChatTranslation', (global, actions, payload): ActionRet
   const { chatId, toLanguageCode, tabId = getCurrentTabId() } = payload;
   return updateRequestedChatTranslation(global, chatId, toLanguageCode, tabId);
 });
+
+addActionHandler('closeChatInviteModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    chatInviteModal: undefined,
+  }, tabId);
+});

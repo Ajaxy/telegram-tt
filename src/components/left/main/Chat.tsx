@@ -64,6 +64,7 @@ import useChatListEntry from './hooks/useChatListEntry';
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import StarIcon from '../../common/icons/StarIcon';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import ReportModal from '../../common/ReportModal';
 import ListItem from '../../ui/ListItem';
@@ -345,12 +346,17 @@ const Chat: FC<OwnProps & StateProps> = ({
           isSavedDialog={isSavedDialog}
           size={isPreview ? 'medium' : 'large'}
           withStory={!user?.isSelf}
-          withStoryGap={isAvatarOnlineShown}
+          withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil)}
           storyViewerOrigin={StoryViewerOrigin.ChatList}
           storyViewerMode="single-peer"
         />
         <div className="avatar-badge-wrapper">
-          <div className={buildClassName('avatar-online', isAvatarOnlineShown && 'avatar-online-shown')} />
+          <div
+            className={buildClassName('avatar-online', 'avatar-badge', isAvatarOnlineShown && 'avatar-online-shown')}
+          />
+          {!isAvatarOnlineShown && Boolean(chat.subscriptionUntil) && (
+            <StarIcon type="gold" className="avatar-badge avatar-subscription" size="adaptive" />
+          )}
           <ChatBadge
             chat={chat}
             isMuted={isMuted}

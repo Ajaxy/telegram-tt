@@ -14,7 +14,7 @@ import styles from './PeerBadge.module.scss';
 type OwnProps = {
   peer: ApiPeer | CustomPeer;
   text?: string;
-  badgeText: string;
+  badgeText?: string;
   badgeIcon?: IconName;
   className?: string;
   badgeClassName?: string;
@@ -37,10 +37,12 @@ const PeerBadge = ({
     >
       <div className={styles.top}>
         <Avatar size="large" peer={peer} />
-        <div className={buildClassName(styles.badge, badgeClassName)}>
-          {badgeIcon && <Icon name={badgeIcon} />}
-          {badgeText}
-        </div>
+        {badgeText && (
+          <div className={buildClassName(styles.badge, badgeClassName)}>
+            {badgeIcon && <Icon name={badgeIcon} />}
+            {badgeText}
+          </div>
+        )}
       </div>
       {text && <p className={styles.text}>{text}</p>}
     </div>
