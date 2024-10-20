@@ -118,8 +118,8 @@ export function buildMessageMediaContent(
   if (photo) return { photo };
 
   const video = buildVideo(media);
-  const altVideo = buildAltVideo(media);
-  if (video) return { video, altVideo };
+  const altVideos = buildAltVideos(media);
+  if (video) return { video, altVideos };
 
   const audio = buildAudio(media);
   if (audio) return { audio };
@@ -280,16 +280,20 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   return buildVideoFromDocument(media.document, media.spoiler);
 }
 
-function buildAltVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
-  if (
-    !(media instanceof GramJs.MessageMediaDocument)
-    || !(media.altDocument instanceof GramJs.Document)
-    || !media.altDocument.mimeType.startsWith('video')
-  ) {
+function buildAltVideos(media: GramJs.TypeMessageMedia): ApiVideo[] | undefined {
+  if (!(media instanceof GramJs.MessageMediaDocument) || !media.altDocuments) {
     return undefined;
   }
 
-  return buildVideoFromDocument(media.altDocument, media.spoiler);
+  const altVideos = media.altDocuments.filter((d): d is GramJs.Document => (
+    d instanceof GramJs.Document && d.mimeType.startsWith('video')
+  )).map((alt) => buildVideoFromDocument(alt, media.spoiler))
+    .filter(Boolean);
+  if (!altVideos.length) {
+    return undefined;
+  }
+
+  return altVideos;
 }
 
 function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {

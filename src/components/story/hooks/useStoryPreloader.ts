@@ -101,7 +101,7 @@ function getPreloadMediaHashes(peerId: string, storyId: number) {
     });
     // Thumbnail
     mediaHashes.push({ hash: getStoryMediaHash(story), format: ApiMediaFormat.BlobUrl });
-    if (story.content.altVideo) {
+    if (story.content.altVideos) {
       mediaHashes.push({
         hash: getStoryMediaHash(story, 'full', true)!,
         format: ApiMediaFormat.Progressive,

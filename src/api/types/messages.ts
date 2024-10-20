@@ -601,7 +601,7 @@ export type MediaContent = {
   text?: ApiFormattedText;
   photo?: ApiPhoto;
   video?: ApiVideo;
-  altVideo?: ApiVideo;
+  altVideos?: ApiVideo[];
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
