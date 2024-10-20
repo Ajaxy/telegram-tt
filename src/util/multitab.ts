@@ -229,7 +229,7 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
       const global = deepMerge(oldGlobal, diff);
 
       // @ts-ignore
-      global.DEBUG_capturedId = oldGlobal.DEBUG_capturedId;
+      global.DEBUG_randomId = oldGlobal.DEBUG_randomId;
 
       currentGlobal = global;
       setGlobal(global);
@@ -240,7 +240,7 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
       if (isFirstGlobalResolved) return;
       const oldGlobal = getGlobal();
       // @ts-ignore
-      data.global.DEBUG_capturedId = oldGlobal.DEBUG_capturedId;
+      data.global.DEBUG_randomId = oldGlobal.DEBUG_randomId;
       currentGlobal = data.global;
       setGlobal(data.global);
       if (resolveGlobalPromise) {
