@@ -627,9 +627,21 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const isDocumentSticker = isMessageDocumentSticker(message);
   const isBoostMessage = message.content.action?.type === 'chatBoost';
 
-  const canEditMessagesIndefinitely = isChatWithSelf
-    || (isSuperGroup && getHasAdminRight(chat, 'pinMessages'))
-    || (isChannel && getHasAdminRight(chat, 'editMessages'));
+  const hasChatPinPermission = (chat.isCreator
+    || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
+    || getHasAdminRight(chat, 'pinMessages'));
+
+  const hasPinPermission = isPrivate || hasChatPinPermission;
+
+  // https://github.com/telegramdesktop/tdesktop/blob/335095a332607c41a8d20b47e61f5bbd66366d4b/Telegram/SourceFiles/data/data_peer.cpp#L653
+  const canEditMessagesIndefinitely = (() => {
+    if (isPrivate) return isChatWithSelf;
+    if (isBasicGroup) return false;
+    if (isSuperGroup) return hasChatPinPermission;
+    if (isChannel) return chat.isCreator || getHasAdminRight(chat, 'editMessages');
+    return false;
+  })();
+
   const isMessageEditable = (
     (
       canEditMessagesIndefinitely
@@ -649,12 +661,6 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const canReply = selectCanReplyToMessage(global, message, threadId);
   const canReplyGlobally = canReply || (!isSavedDialog && !isLocal && !isServiceNotification
     && (isSuperGroup || isBasicGroup || isChatChannel(chat)));
-
-  const hasPinPermission = isPrivate || (
-    chat.isCreator
-    || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
-    || getHasAdminRight(chat, 'pinMessages')
-  );
 
   let canPin = !isLocal && !isServiceNotification && !isAction && hasPinPermission && !isSavedDialog;
   let canUnpin = false;
