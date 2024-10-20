@@ -30,6 +30,7 @@ type OwnProps = {
   areFolders?: boolean;
   activeTab: number;
   className?: string;
+  tabClassName?: string;
   onSwitchTab: (index: number) => void;
   contextRootElementSelector?: string;
 };
@@ -40,7 +41,7 @@ const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
 const TabList: FC<OwnProps> = ({
   tabs, areFolders, activeTab, onSwitchTab,
-  contextRootElementSelector, className,
+  contextRootElementSelector, className, tabClassName,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,6 +95,7 @@ const TabList: FC<OwnProps> = ({
           clickArg={i}
           contextActions={tab.contextActions}
           contextRootElementSelector={contextRootElementSelector}
+          className={tabClassName}
         />
       ))}
     </div>

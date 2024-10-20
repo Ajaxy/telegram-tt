@@ -130,18 +130,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
     return user ? oldLang('GiftStarsTitle') : oldLang('Star.List.GetStars');
   }
 
-  function renderStarOptionList() {
-    return (
-      <StarTopupOptionList
-        options={starsGiftOptions}
-        onClick={handleClick}
-      />
-    );
-  }
-
   const bottomText = useMemo(() => {
-    if (!isOpen) return undefined;
-
     const text = oldLang('lng_credits_summary_options_about');
     const parts = text.split('{link}');
     return [
@@ -149,7 +138,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
       <SafeLink url={oldLang('StarsTOSLink')} text={oldLang('lng_credits_summary_options_about_link')} />,
       parts[1],
     ];
-  }, [isOpen, oldLang]);
+  }, [oldLang]);
 
   return (
     <Modal
@@ -201,7 +190,12 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
           ) : oldLang('Stars.Purchase.GetStarsInfo')}
         </p>
         <div className={styles.section}>
-          {renderStarOptionList()}
+          {starsGiftOptions && (
+            <StarTopupOptionList
+              options={starsGiftOptions}
+              onClick={handleClick}
+            />
+          )}
           <div className={styles.secondaryInfo}>
             {bottomText}
           </div>
