@@ -33,11 +33,13 @@ import { getHtmlTextLength } from './helpers/getHtmlTextLength';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useDerivedState from '../../../hooks/useDerivedState';
+import useEffectOnce from '../../../hooks/useEffectOnce';
 import useFlag from '../../../hooks/useFlag';
 import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useResizeObserver from '../../../hooks/useResizeObserver';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
@@ -139,6 +141,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   onRemoveSymbol,
   onEmojiSelect,
 }) => {
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const svgRef = useRef<SVGSVGElement>(null);
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
 
   const lang = useOldLang();
@@ -388,6 +394,23 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     }));
   });
 
+  const handleResize = useLastCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) {
+      return;
+    }
+
+    // Get inner width, without padding
+    const { width, height } = svg.getBoundingClientRect();
+    svg.viewBox.baseVal.width = width;
+    svg.viewBox.baseVal.height = height;
+  });
+
+  // Can't listen for SVG resize
+  useResizeObserver(ref, handleResize);
+
+  useEffectOnce(handleResize);
+
   useEffect(() => {
     const mainButton = mainButtonRef.current;
     const input = document.getElementById(ATTACHMENT_MODAL_INPUT_ID);
@@ -575,6 +598,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         data-attach-description={lang('Preview.Dragging.AddItems', 10)}
         data-dropzone
       >
+        <svg className={styles.dropOutlineContainer}>
+          <rect className={styles.dropOutline} x="0" y="0" width="100%" height="100%" rx="8" />
+        </svg>
         <div
           className={buildClassName(
             styles.attachments,

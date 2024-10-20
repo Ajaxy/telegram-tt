@@ -136,56 +136,71 @@
   gap: 0.5rem;
 }
 
-.drop-target {
+.dropTarget {
   display: flex;
   flex-direction: column;
 
   position: relative;
   overflow: hidden;
+}
 
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: var(--border-radius-default);
-    pointer-events: none;
+.dropOutlineContainer {
+  pointer-events: none;
+  overflow: visible !important;
 
-    opacity: 0;
-    transition: 250ms opacity;
-    z-index: 1;
-  }
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: calc(100% - 1rem);
+  height: calc(100% - 1rem);
 
-  &::before {
-    background-image: var(--drag-target-border-hovered);
-    background-color: var(--color-background);
-  }
+  background-color: var(--color-background);
 
-  &::after {
-    content: attr(data-attach-description);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--color-primary);
-  }
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 1;
+}
+
+.dropOutline {
+  fill: none;
+
+  stroke: var(--color-primary);
+  stroke-width: 2;
+  stroke-dasharray: 11, 8;
+  stroke-linecap: round;
+  stroke-dashoffset: 0;
+
+  animation: outline 0.5s linear infinite;
+  animation-play-state: paused;
 }
 
 .hovered {
-  .drop-target::before {
-    opacity: 0.95;
+  .dropOutline {
+    animation-play-state: running;
   }
 
-  .drop-target::after {
+  .dropOutlineContainer {
     opacity: 1;
   }
 
-  .caption-wrapper,
-  .attachments,
-  :global(.input-scroller) {
-    pointer-events: none;
+  .dropTarget {
+    &::after {
+      content: attr(data-attach-description);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--color-primary);
+      z-index: 1;
+    }
+
+    .caption-wrapper,
+    .attachments,
+    :global(.input-scroller),
+    :global(.custom-scroll),
+    :global(.custom-scroll-x) {
+      pointer-events: none !important;
+    }
   }
 }
 
@@ -210,5 +225,14 @@
       bottom: auto;
       height: 3.5rem;
     }
+  }
+}
+
+@keyframes outline {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -19;
   }
 }
