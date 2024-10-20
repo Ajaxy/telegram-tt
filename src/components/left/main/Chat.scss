@@ -255,6 +255,8 @@
   }
 
   .avatar-subscription {
+    font-size: 0.875rem;
+
     @include mixins.filter-outline(1px, var(--_color-outline));
   }
 
