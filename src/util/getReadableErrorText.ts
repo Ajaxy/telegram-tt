@@ -71,7 +71,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   ADMIN_RANK_EMOJI_NOT_ALLOWED: 'An admin rank cannot contain emojis',
   ADMIN_RANK_INVALID: 'The specified admin rank is invalid',
   FRESH_CHANGE_ADMINS_FORBIDDEN: 'You were just elected admin, you can\'t add or modify other admins yet',
-  INPUT_USER_DEACTIVATED: 'The specified user was deleted',
+  INPUT_USER_DEACTIVATED: 'Can\'t do this action to a deleted account',
   BOT_PRECHECKOUT_TIMEOUT: 'The request for payment has expired',
 
   PEERS_LIST_EMPTY: 'No chats are added to the list',
