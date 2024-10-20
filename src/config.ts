@@ -295,6 +295,7 @@ export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', '
 export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users'] as const;
 
 export const HEART_REACTION: ApiReactionEmoji = {
+  type: 'emoji',
   emoticon: '❤',
 };
 

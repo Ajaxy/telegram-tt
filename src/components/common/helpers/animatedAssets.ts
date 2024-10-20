@@ -26,6 +26,8 @@ import FoldersAll from '../../../assets/tgs/settings/FoldersAll.tgs';
 import FoldersNew from '../../../assets/tgs/settings/FoldersNew.tgs';
 import FoldersShare from '../../../assets/tgs/settings/FoldersShare.tgs';
 import Lock from '../../../assets/tgs/settings/Lock.tgs';
+import StarReaction from '../../../assets/tgs/stars/StarReaction.tgs';
+import StarReactionEffect from '../../../assets/tgs/stars/StarReactionEffect.tgs';
 import Unlock from '../../../assets/tgs/Unlock.tgs';
 
 export const LOCAL_TGS_URLS = {
@@ -58,4 +60,6 @@ export const LOCAL_TGS_URLS = {
   LastSeen,
   Mention,
   Fragment,
+  StarReactionEffect,
+  StarReaction,
 };

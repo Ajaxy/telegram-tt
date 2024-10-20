@@ -602,6 +602,7 @@ async function getFullChannelInfo(
     boostsApplied,
     boostsUnrestrict,
     canViewRevenue: canViewMonetization,
+    paidReactionsAvailable,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -691,6 +692,7 @@ async function getFullChannelInfo(
       hasPinnedStories: Boolean(storiesPinnedAvailable),
       boostsApplied,
       boostsToUnrestrict: boostsUnrestrict,
+      isPaidReactionAvailable: paidReactionsAvailable,
     },
     chats,
     userStatusesById: statusesById,

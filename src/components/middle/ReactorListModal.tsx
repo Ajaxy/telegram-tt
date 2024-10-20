@@ -26,7 +26,7 @@ import useOldLang from '../../hooks/useOldLang';
 import Avatar from '../common/Avatar';
 import FullNameTitle from '../common/FullNameTitle';
 import PrivateChatInfo from '../common/PrivateChatInfo';
-import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
+import ReactionStaticEmoji from '../common/reactions/ReactionStaticEmoji';
 import Button from '../ui/Button';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import ListItem from '../ui/ListItem';

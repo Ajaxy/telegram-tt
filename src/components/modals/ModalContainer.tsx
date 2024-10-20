@@ -14,6 +14,7 @@ import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
+import PaidReactionModal from './paidReaction/PaidReactionModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import StarsBalanceModal from './stars/StarsBalanceModal.async';
 import StarsPaymentModal from './stars/StarsPaymentModal.async';
@@ -35,6 +36,8 @@ type ModalKey = keyof Pick<TabState,
 'reportAdModal' |
 'starsBalanceModal' |
 'isStarPaymentModalOpen' |
+'starsTransactionModal' |
+'paidReactionModal' |
 'webApps' |
 'starsTransactionModal'
 >;
@@ -66,6 +69,7 @@ const MODALS: ModalRegistry = {
   isStarPaymentModalOpen: StarsPaymentModal,
   starsBalanceModal: StarsBalanceModal,
   starsTransactionModal: StarsTransactionInfoModal,
+  paidReactionModal: PaidReactionModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

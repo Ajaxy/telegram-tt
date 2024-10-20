@@ -1,4 +1,5 @@
 import type { ApiLimitType, ApiPremiumSection, CallbackAction } from '../../global/types';
+import type { IconName } from '../../types/icons';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
 
@@ -110,10 +111,15 @@ export type ApiNotification = {
   localId: string;
   title?: string;
   message: string;
+  cacheBreaker?: string;
   actionText?: string;
   action?: CallbackAction | CallbackAction[];
   className?: string;
   duration?: number;
+  disableClickDismiss?: boolean;
+  shouldShowTimer?: boolean;
+  icon?: IconName;
+  dismissAction?: CallbackAction;
 };
 
 export type ApiError = {
@@ -210,6 +216,7 @@ export interface ApiAppConfig {
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;
   channelRestrictAdsLevelMin?: number;
+  paidReactionMaxAmount?: number;
   isChannelRevenueWithdrawalEnabled?: boolean;
   isStarsGiftsEnabled?: boolean;
 }

@@ -50,11 +50,13 @@ import {
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getAllowedAttachmentOptions,
+  getReactionKey,
   getStoryKey,
   hasReplaceableMedia,
   isChatAdmin,
   isChatChannel,
   isChatSuperGroup,
+  isSameReaction,
   isUserId,
 } from '../../global/helpers';
 import {
@@ -436,8 +438,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
   const chatEmojiSetId = emojiSet?.id;
 
-  const isSentStoryReactionHeart = sentStoryReaction && 'emoticon' in sentStoryReaction
-    ? sentStoryReaction.emoticon === HEART_REACTION.emoticon : false;
+  const isSentStoryReactionHeart = sentStoryReaction && isSameReaction(sentStoryReaction, HEART_REACTION);
 
   useEffect(processMessageInputForCustomEmoji, [getHtml]);
 
@@ -1503,9 +1504,11 @@ const Composer: FC<OwnProps & StateProps> = ({
     let text: string | undefined;
     let entities: ApiMessageEntity[] | undefined;
 
-    if ('emoticon' in reaction) {
+    if (reaction.type === 'emoji') {
       text = reaction.emoticon;
-    } else {
+    }
+
+    if (reaction.type === 'custom') {
       const sticker = getGlobal().customEmojis.byId[reaction.documentId];
       if (!sticker) {
         return;
@@ -1983,7 +1986,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         >
           {sentStoryReaction && (
             <ReactionAnimatedEmoji
-              key={'documentId' in sentStoryReaction ? sentStoryReaction.documentId : sentStoryReaction.emoticon}
+              key={getReactionKey(sentStoryReaction)}
               containerId={getStoryKey(chatId, storyId!)}
               reaction={sentStoryReaction}
               withEffectOnly={isSentStoryReactionHeart}

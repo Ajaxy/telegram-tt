@@ -1513,7 +1513,7 @@ export interface LangPair {
   'RemoveEffect': undefined;
   'ReplyInPrivateMessage': undefined;
   'ProfileOpenAppAbout': {
-    'terms': string;
+    'terms': string | number;
   };
   'ProfileOpenAppTerms': undefined;
   'ProfileBotOpenAppInfoLink': undefined;
@@ -1539,12 +1539,21 @@ export interface LangPair {
   'GiftStarsOutgoing': {
     'user': string | number;
   };
+  'SendPaidReaction': {
+    'amount': string | number;
+  };
+  'StarsReactionTerms': {
+    'link': string | number;
+  };
+  'StarsReactionLinkText': undefined;
+  'StarsReactionLink': undefined;
   'MiniAppsMoreTabs': {
     'botName': string | number;
   };
   'PrizeCredits': {
     'count': string | number;
   };
+
 }
 
 export type LangKey = keyof LangPair;

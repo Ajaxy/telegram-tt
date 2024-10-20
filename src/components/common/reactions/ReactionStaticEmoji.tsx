@@ -1,21 +1,20 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { memo, useMemo } from '../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { ApiAvailableReaction, ApiReaction } from '../../api/types';
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import { ApiMediaFormat } from '../../api/types';
+import type { ApiAvailableReaction, ApiReaction } from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import { isSameReaction } from '../../global/helpers';
-import buildClassName from '../../util/buildClassName';
+import { isSameReaction } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
 
-import useMedia from '../../hooks/useMedia';
-import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
+import useMedia from '../../../hooks/useMedia';
+import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
 
-import CustomEmoji from './CustomEmoji';
+import CustomEmoji from '../CustomEmoji';
 
 import './ReactionStaticEmoji.scss';
 
-import blankUrl from '../../assets/blank.png';
+import blankUrl from '../../../assets/blank.png';
 
 type OwnProps = {
   reaction: ApiReaction;
@@ -34,19 +33,19 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   withIconHeart,
   observeIntersection,
 }) => {
-  const isCustom = 'documentId' in reaction;
   const availableReaction = useMemo(() => (
     availableReactions?.find((available) => isSameReaction(available.reaction, reaction))
   ), [availableReactions, reaction]);
   const staticIconId = availableReaction?.staticIcon?.id;
-  const mediaData = useMedia(`document${staticIconId}`, !staticIconId, ApiMediaFormat.BlobUrl);
+  const mediaHash = staticIconId ? `document${staticIconId}` : undefined;
+  const mediaData = useMedia(mediaHash);
 
   const transitionClassNames = useMediaTransitionDeprecated(mediaData);
 
-  const shouldApplySizeFix = 'emoticon' in reaction && reaction.emoticon === '🦄';
-  const shouldReplaceWithHeartIcon = withIconHeart && 'emoticon' in reaction && reaction.emoticon === '❤';
+  const shouldApplySizeFix = reaction.type === 'emoji' && reaction.emoticon === '🦄';
+  const shouldReplaceWithHeartIcon = withIconHeart && reaction.type === 'emoji' && reaction.emoticon === '❤';
 
-  if (isCustom) {
+  if (reaction.type === 'custom') {
     return (
       <CustomEmoji
         documentId={reaction.documentId}

@@ -305,10 +305,13 @@ addActionHandler('reorderStickerSets', (global, actions, payload): ActionReturnT
 
 addActionHandler('showNotification', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId(), ...notification } = payload;
-  notification.localId = generateUniqueId();
+  const hasLocalId = notification.localId;
+  notification.localId ||= generateUniqueId();
 
   const newNotifications = [...selectTabState(global, tabId).notifications];
-  const existingNotificationIndex = newNotifications.findIndex((n) => n.message === notification.message);
+  const existingNotificationIndex = newNotifications.findIndex((n) => (
+    hasLocalId ? n.localId === notification.localId : n.message === notification.message
+  ));
   if (existingNotificationIndex !== -1) {
     newNotifications.splice(existingNotificationIndex, 1);
   }
@@ -522,7 +525,7 @@ addActionHandler('setReactionEffect', (global, actions, payload): ActionReturnTy
     chatId, threadId, reaction, tabId = getCurrentTabId(),
   } = payload;
 
-  const emoticon = reaction && 'emoticon' in reaction && reaction.emoticon;
+  const emoticon = reaction?.type === 'emoji' && reaction.emoticon;
   if (!emoticon) return;
 
   const effect = Object.values(global.availableEffectById)

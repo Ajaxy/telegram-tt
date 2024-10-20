@@ -11,7 +11,7 @@ export function formatInteger(value: number) {
 function formatFixedNumber(number: number) {
   const fixed = String(number.toFixed(1));
   if (fixed.substr(-2) === '.0') {
-    return Math.round(number);
+    return Math.floor(number);
   }
 
   return number.toFixed(1).replace('.', ',');

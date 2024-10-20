@@ -24,6 +24,7 @@ const useContextMenuHandlers = (
   shouldDisableOnLink?: boolean,
   shouldDisableOnLongTap?: boolean,
   getIsReady?: Signal<boolean>,
+  shouldDisablePropagation?: boolean,
 ) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuAnchor, setContextMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
@@ -133,7 +134,7 @@ const useContextMenuHandlers = (
       if (isMenuDisabled) {
         return;
       }
-      e.stopPropagation();
+      if (shouldDisablePropagation) e.stopPropagation();
       clearLongPressTimer();
 
       timer = window.setTimeout(() => emulateContextMenuEvent(e), LONG_TAP_DURATION_MS);
@@ -154,6 +155,7 @@ const useContextMenuHandlers = (
     };
   }, [
     contextMenuAnchor, isMenuDisabled, shouldDisableOnLongTap, elementRef, shouldDisableOnLink, getIsReady,
+    shouldDisablePropagation,
   ]);
 
   return {

@@ -1069,6 +1069,10 @@ export async function fetchFactChecks({
   return results.flatMap((result) => result!).map(buildApiFactCheck);
 }
 
+export function fetchPaidReactionPrivacy() {
+  return invokeRequest(new GramJs.messages.GetPaidReactionPrivacy(), { shouldReturnTrue: true });
+}
+
 export async function fetchDiscussionMessage({
   chat, messageId,
 }: {

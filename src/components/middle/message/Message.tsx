@@ -153,7 +153,7 @@ import FakeIcon from '../../common/FakeIcon';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import MessageText from '../../common/MessageText';
-import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import TopicChip from '../../common/TopicChip';
 import Button from '../../ui/Button';
 import Album from './Album';
@@ -294,6 +294,7 @@ type StateProps = {
   canTranscribeVoice?: boolean;
   viaBusinessBot?: ApiUser;
   effect?: ApiAvailableEffect;
+  availableStars?: number;
 };
 
 type MetaPosition =
@@ -414,6 +415,7 @@ const Message: FC<OwnProps & StateProps> = ({
   canTranscribeVoice,
   viaBusinessBot,
   effect,
+  availableStars,
   onIntersectPinnedMessage,
 }) => {
   const {
@@ -1042,6 +1044,7 @@ const Message: FC<OwnProps & StateProps> = ({
         noRecentReactors={isChannel}
         tags={tags}
         isCurrentUserPremium={isPremium}
+        availableStars={availableStars}
       />
     );
   }
@@ -1649,6 +1652,7 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
             tags={tags}
+            availableStars={availableStars}
           />
         )}
       </div>
@@ -1798,6 +1802,8 @@ export default memo(withGlobal<OwnProps>(
 
     const effect = effectId ? global.availableEffectById[effectId] : undefined;
 
+    const { balance: availableStars } = global.stars || {};
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1884,6 +1890,7 @@ export default memo(withGlobal<OwnProps>(
       canTranscribeVoice,
       viaBusinessBot,
       effect,
+      availableStars,
     };
   },
 )(Message));

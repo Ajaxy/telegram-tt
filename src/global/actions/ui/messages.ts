@@ -948,6 +948,20 @@ addActionHandler('openPreviousReportAdModal', (global, actions, payload): Action
   }, tabId);
 });
 
+addActionHandler('openPaidReactionModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    paidReactionModal: { chatId, messageId },
+  }, tabId);
+});
+
+addActionHandler('closePaidReactionModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    paidReactionModal: undefined,
+  }, tabId);
+});
+
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
   const lang = langProvider.oldTranslate;

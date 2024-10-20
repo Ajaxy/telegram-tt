@@ -1009,11 +1009,12 @@ export function updater(update: Update) {
       lastReadId: update.maxId,
     });
   } else if (update instanceof GramJs.UpdateSentStoryReaction) {
+    const reaction = buildApiReaction(update.reaction);
     sendApiUpdate({
       '@type': 'updateSentStoryReaction',
       peerId: getApiChatIdFromMtpPeer(update.peer),
       storyId: update.storyId,
-      reaction: buildApiReaction(update.reaction),
+      reaction,
     });
   } else if (update instanceof GramJs.UpdateStoriesStealthMode) {
     sendApiUpdate({
@@ -1043,6 +1044,11 @@ export function updater(update: Update) {
     sendApiUpdate({
       '@type': 'updateStarsBalance',
       balance: update.balance.toJSNumber(),
+    });
+  } else if (update instanceof GramJs.UpdatePaidReactionPrivacy) {
+    sendApiUpdate({
+      '@type': 'updatePaidReactionPrivacy',
+      isPrivate: update.private,
     });
   } else if (update instanceof LocalUpdatePremiumFloodWait) {
     sendApiUpdate({

@@ -57,6 +57,7 @@ import type {
   ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
+  ApiReactionWithPaid,
   ApiReceiptRegular,
   ApiReportReason,
   ApiSavedReactionTag,
@@ -422,7 +423,7 @@ export type TabState = {
   };
 
   activeEmojiInteractions?: ActiveEmojiInteraction[];
-  activeReactions: Record<string, ApiReaction[]>;
+  activeReactions: Record<string, ApiReactionWithPaid[]>;
 
   middleSearch: {
     byChatThreadKey: Record<string, MiddleSearchParams | undefined>;
@@ -824,6 +825,11 @@ export type TabState = {
     info: ApiCheckedGiftCode;
   };
 
+  paidReactionModal?: {
+    chatId: string;
+    messageId: number;
+  };
+
   inviteViaLinkModal?: {
     missingUsers: ApiMissingInvitedUser[];
     chatId: string;
@@ -841,6 +847,11 @@ export type TabState = {
 
   starsBalanceModal?: {
     originPayment?: TabState['payment'];
+    originReaction?: {
+      chatId: string;
+      messageId: number;
+      amount: number;
+    };
   };
   isStarPaymentModalOpen?: true;
 };
@@ -1172,6 +1183,7 @@ export type GlobalState = {
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
     notifyExceptions?: Record<number, NotifyException>;
     lastPremiumBandwithNotificationDate?: number;
+    paidReactionPrivacy?: boolean;
   };
 
   push?: {
@@ -2294,6 +2306,11 @@ export interface ActionPayloads {
   };
   openStarsBalanceModal: {
     originPayment?: TabState['payment'];
+    originReaction?: {
+      chatId: string;
+      messageId: number;
+      amount: number;
+    };
   } & WithTabId;
   closeStarsBalanceModal: WithTabId | undefined;
 
@@ -2389,6 +2406,8 @@ export interface ActionPayloads {
     shouldIncludeGrouped?: boolean;
   } & WithTabId;
 
+  loadPaidReactionPrivacy: undefined;
+
   sendPollVote: {
     chatId: string;
     messageId: number;
@@ -2454,6 +2473,23 @@ export interface ActionPayloads {
     shouldAddToRecent?: boolean;
   } & WithTabId;
 
+  sendPaidReaction: {
+    chatId: string;
+    messageId: number;
+    forcedAmount?: number;
+    isPrivate?: boolean;
+  } & WithTabId;
+  addLocalPaidReaction: {
+    chatId: string;
+    messageId: number;
+    count: number;
+    isPrivate?: boolean;
+  } & WithTabId;
+  resetLocalPaidReactions: {
+    chatId: string;
+    messageId: number;
+  };
+
   setDefaultReaction: {
     reaction: ApiReaction;
   };
@@ -2470,11 +2506,11 @@ export interface ActionPayloads {
 
   startActiveReaction: {
     containerId: string;
-    reaction: ApiReaction;
+    reaction: ApiReactionWithPaid;
   } & WithTabId;
   stopActiveReaction: {
     containerId: string;
-    reaction?: ApiReaction;
+    reaction?: ApiReactionWithPaid;
   } & WithTabId;
 
   openEffectPicker: {
@@ -3157,15 +3193,7 @@ export interface ActionPayloads {
     url?: string;
   } & WithTabId;
   closeUrlAuthModal: WithTabId | undefined;
-  showNotification: {
-    localId?: string;
-    title?: string;
-    message: string;
-    className?: string;
-    duration?: number;
-    actionText?: string;
-    action?: CallbackAction | CallbackAction[];
-  } & WithTabId;
+  showNotification: Omit<ApiNotification, 'localId'> & { localId?: string } & WithTabId;
   showAllowedMessageTypesNotification: {
     chatId: string;
   } & WithTabId;
@@ -3320,6 +3348,12 @@ export interface ActionPayloads {
 
   openStarsGiftingModal: WithTabId | undefined;
   closeStarsGiftingModal: WithTabId | undefined;
+
+  openPaidReactionModal: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  closePaidReactionModal: WithTabId | undefined;
 
   openDeleteMessageModal: ({
     message?: ApiMessage;

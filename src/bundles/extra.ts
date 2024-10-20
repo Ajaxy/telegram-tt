@@ -30,6 +30,7 @@ export { default as ChatlistModal } from '../components/modals/chatlist/Chatlist
 export { default as StarsBalanceModal } from '../components/modals/stars/StarsBalanceModal';
 export { default as StarPaymentModal } from '../components/modals/stars/StarsPaymentModal';
 export { default as StarsTransactionInfoModal } from '../components/modals/stars/transaction/StarsTransactionModal';
+export { default as PaidReactionModal } from '../components/modals/paidReaction/PaidReactionModal';
 
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
 export { default as AboutMonetizationModal } from '../components/common/AboutMonetizationModal';

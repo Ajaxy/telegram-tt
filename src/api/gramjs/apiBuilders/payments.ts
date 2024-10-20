@@ -503,7 +503,7 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
-    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift,
+    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
   } = transaction;
 
   if (photo) {
@@ -527,6 +527,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     messageId: msgId,
     isGift: gift,
     extendedMedia: boughtExtendedMedia,
+    isReaction: reaction,
   };
 }
 

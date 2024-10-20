@@ -50,7 +50,15 @@ const StarsTransactionItem = ({ transaction }: OwnProps) => {
   const peer = useSelector(selectOptionalPeer(peerId));
 
   const data = useMemo(() => {
-    let title = transaction.title || (transaction.extendedMedia ? lang('StarMediaPurchase') : undefined);
+    let title = transaction.title;
+    if (transaction.extendedMedia) {
+      title = lang('StarMediaPurchase');
+    }
+
+    if (transaction.isReaction) {
+      title = lang('StarsReactionsSent');
+    }
+
     let description;
     let status: string | undefined;
     let avatarPeer: ApiPeer | CustomPeer | undefined;

@@ -1,16 +1,17 @@
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiUser } from '../../../api/types';
+import type { ApiStarTopupOption } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 
-import { getUserFullName } from '../../../global/helpers';
-import { selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
+import { getChatTitle, getUserFullName } from '../../../global/helpers';
+import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
+import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
@@ -24,6 +25,7 @@ import Modal from '../../ui/Modal';
 import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import BalanceBlock from './BalanceBlock';
+import StarTopupOptionList from './StarTopupOptionList';
 import TransactionItem from './transaction/StarsTransactionItem';
 
 import styles from './StarsBalanceModal.module.scss';
@@ -44,15 +46,14 @@ export type OwnProps = {
 
 type StateProps = {
   starsBalanceState?: GlobalState['stars'];
-  originPaymentBot?: ApiUser;
   canBuyPremium?: boolean;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, originPaymentBot, canBuyPremium,
+  modal, starsBalanceState, canBuyPremium,
 }: OwnProps & StateProps) => {
   const {
-    closeStarsBalanceModal, loadStarsTransactions, openStarsGiftingModal, openStarsGiftModal,
+    closeStarsBalanceModal, loadStarsTransactions, openStarsGiftingModal, openInvoice,
   } = getActions();
 
   const { balance, history } = starsBalanceState || {};
@@ -62,13 +63,35 @@ const StarsBalanceModal = ({
 
   const [isHeaderHidden, setHeaderHidden] = useState(true);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
 
   const isOpen = Boolean(modal && starsBalanceState);
 
-  const productStarsPrice = modal?.originPayment?.invoice?.amount;
-  const starsNeeded = productStarsPrice ? productStarsPrice - (balance || 0) : undefined;
-  const originBotName = originPaymentBot && getUserFullName(originPaymentBot);
-  const shouldShowTransactions = Boolean(history?.all?.transactions.length && !modal?.originPayment);
+  const { originPayment, originReaction } = modal || {};
+
+  const ongoingTransactionAmount = originPayment?.invoice?.amount || originReaction?.amount;
+  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance || 0) : undefined;
+  const starsNeededText = useMemo(() => {
+    if (!starsNeeded || starsNeeded < 0) return undefined;
+    const global = getGlobal();
+
+    if (originReaction) {
+      const channel = selectChat(global, originReaction.chatId);
+      if (!channel) return undefined;
+      return oldLang('StarsNeededTextReactions', getChatTitle(oldLang, channel));
+    }
+
+    if (originPayment) {
+      const bot = selectUser(global, originPayment.botId!);
+      if (!bot) return undefined;
+      return oldLang('StarsNeededText', getUserFullName(bot));
+    }
+
+    return undefined;
+  }, [oldLang, originPayment, originReaction, starsNeeded]);
+
+  const shouldShowTransactions = Boolean(history?.all?.transactions.length && !originPayment && !originReaction);
+  const shouldSuggestGifting = !originPayment && !originReaction;
 
   useEffect(() => {
     if (!isOpen) {
@@ -76,6 +99,15 @@ const StarsBalanceModal = ({
       setSelectedTabIndex(0);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (ongoingTransactionAmount) {
+      showBuyOptions();
+      return;
+    }
+
+    hideBuyOptions();
+  }, [ongoingTransactionAmount]);
 
   const tosText = useMemo(() => {
     if (!isOpen) return undefined;
@@ -105,8 +137,13 @@ const StarsBalanceModal = ({
     openStarsGiftingModal({});
   });
 
-  const openStarsInfoModalHandler = useLastCallback(() => {
-    openStarsGiftModal({});
+  const handleBuyStars = useLastCallback((option: ApiStarTopupOption) => {
+    openInvoice({
+      type: 'stars',
+      stars: option.stars,
+      currency: option.currency,
+      amount: option.amount,
+    });
   });
 
   return (
@@ -137,19 +174,19 @@ const StarsBalanceModal = ({
           </h2>
           <div className={styles.description}>
             {renderText(
-              starsNeeded ? oldLang('StarsNeededText', originBotName) : oldLang('TelegramStarsInfo'),
+              starsNeededText || oldLang('TelegramStarsInfo'),
               ['simple_markdown', 'emoji'],
             )}
           </div>
-          {canBuyPremium && (
+          {canBuyPremium && !areBuyOptionsShown && (
             <Button
               className={styles.starButton}
-              onClick={openStarsInfoModalHandler}
+              onClick={showBuyOptions}
             >
               {oldLang('Star.List.BuyMoreStars')}
             </Button>
           )}
-          {canBuyPremium && (
+          {canBuyPremium && !areBuyOptionsShown && shouldSuggestGifting && (
             <Button
               className={buildClassName(styles.starButton, 'settings-main-menu-star')}
               color="translucent"
@@ -158,6 +195,13 @@ const StarsBalanceModal = ({
               <StarIcon className="icon" type="gold" size="big" />
               {oldLang('TelegramStarsGift')}
             </Button>
+          )}
+          {areBuyOptionsShown && starsBalanceState?.topupOptions && (
+            <StarTopupOptionList
+              starsNeeded={starsNeeded}
+              options={starsBalanceState.topupOptions}
+              onClick={handleBuyStars}
+            />
           )}
         </div>
         <div className={styles.secondaryInfo}>
@@ -201,13 +245,9 @@ const StarsBalanceModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
-    const botId = modal?.originPayment?.botId;
-    const bot = botId ? selectUser(global, botId) : undefined;
-
+  (global): StateProps => {
     return {
       starsBalanceState: global.stars,
-      originPaymentBot: bot,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
     };
   },

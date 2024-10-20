@@ -11,6 +11,18 @@
     --reaction-text-color: var(--text-color-reaction-chosen);
   }
 
+  &.paid {
+    --reaction-background: #FFBC2E33 !important;
+    --reaction-background-hover: #FFBC2E55 !important;
+    --reaction-text-color: #E98111 !important;
+  }
+
+  &.paid.chosen {
+    --reaction-background: #FFBC2E !important;
+    --reaction-background-hover: #FFBC2ECC !important;
+    --reaction-text-color: #FFFFFF !important;
+  }
+
   display: flex;
   flex-direction: row;
   height: 1.875rem;
@@ -113,4 +125,18 @@
 
 .disabled {
   opacity: 0.5;
+}
+
+.paidCounter {
+  font-family: var(--font-family-rounded);
+  font-size: 2.5rem;
+  font-variant-numeric: tabular-nums;
+  color: #FFBC2E;
+
+  position: absolute;
+  top: -150%;
+  right: 50%;
+  transform: translateX(50%);
+  -webkit-text-stroke: 1px #E58E0D;
+  z-index: 1;
 }

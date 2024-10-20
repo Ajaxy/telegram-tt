@@ -23,18 +23,23 @@ const Notifications: FC<StateProps> = ({ notifications }) => {
 
   return (
     <div id="Notifications">
-      {notifications.map(({
-        message, className, localId, action, actionText, title, duration,
-      }) => (
+      {notifications.map((notification) => (
         <Notification
-          title={title ? renderText(title, ['simple_markdown', 'emoji', 'br', 'links']) : undefined}
-          action={action}
-          actionText={actionText}
-          className={className}
-          duration={duration}
-          message={renderText(message, ['simple_markdown', 'emoji', 'br', 'links'])}
+          key={notification.localId}
+          title={notification.title
+            ? renderText(notification.title, ['simple_markdown', 'emoji', 'br', 'links']) : undefined}
+          action={notification.action}
+          actionText={notification.actionText}
+          className={notification.className}
+          duration={notification.duration}
+          icon={notification.icon}
+          cacheBreaker={notification.cacheBreaker}
+          message={renderText(notification.message, ['simple_markdown', 'emoji', 'br', 'links'])}
+          shouldDisableClickDismiss={notification.disableClickDismiss}
+          dismissAction={notification.dismissAction}
+          shouldShowTimer={notification.shouldShowTimer}
           // eslint-disable-next-line react/jsx-no-bind
-          onDismiss={() => dismissNotification({ localId })}
+          onDismiss={() => dismissNotification({ localId: notification.localId })}
         />
       ))}
     </div>

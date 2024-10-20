@@ -303,6 +303,7 @@ export interface ApiStarsTransaction {
   isGift?: true;
   isPrizeStars?: true;
   isMyGift?: true; // Used only for outgoing star gift messages
+  isReaction?: true;
   hasFailed?: true;
   isPending?: true;
   date: number;

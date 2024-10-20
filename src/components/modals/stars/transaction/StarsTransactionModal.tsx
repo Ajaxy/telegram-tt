@@ -133,7 +133,18 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     const peerId = transaction.peer?.type === 'peer' ? transaction.peer.id : undefined;
     const toName = transaction.peer && oldLang(getStarsPeerTitleKey(transaction.peer));
 
-    const title = transaction.title || (customPeer ? oldLang(customPeer.titleKey) : undefined);
+    let title = transaction.title;
+    if (!title && customPeer) {
+      title = oldLang(customPeer.titleKey);
+    }
+
+    if (!title && transaction.extendedMedia) {
+      title = oldLang('StarMediaPurchase');
+    }
+
+    if (!title && transaction.isReaction) {
+      title = oldLang('StarsReactionsSent');
+    }
 
     const messageLink = peer && transaction.messageId
       ? getMessageLink(peer, undefined, transaction.messageId) : undefined;
@@ -198,7 +209,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     ]);
 
     if (messageLink) {
-      tableData.push([oldLang('Stars.Transaction.Media'), <SafeLink url={messageLink} text={messageLink} />]);
+      tableData.push([oldLang('Stars.Transaction.Reaction.Post'), <SafeLink url={messageLink} text={messageLink} />]);
     }
 
     if (isPrizeStars) {

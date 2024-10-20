@@ -2094,6 +2094,11 @@ addActionHandler('loadFactChecks', async (global, actions, payload): Promise<voi
   setGlobal(global);
 });
 
+addActionHandler('loadPaidReactionPrivacy', (): ActionReturnType => {
+  callApi('fetchPaidReactionPrivacy');
+  return undefined;
+});
+
 addActionHandler('loadOutboxReadDate', async (global, actions, payload): Promise<void> => {
   const { chatId, messageId } = payload;
 

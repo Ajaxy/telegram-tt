@@ -134,6 +134,7 @@ type StateProps = {
   isInSavedMessages?: boolean;
   isChannel?: boolean;
   canReplyInChat?: boolean;
+  isWithPaidReaction?: boolean;
 };
 
 const selection = window.getSelection();
@@ -192,9 +193,10 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canSelectLanguage,
   isReactionPickerOpen,
   isInSavedMessages,
+  canReplyInChat,
+  isWithPaidReaction,
   onClose,
   onCloseAnimationEnd,
-  canReplyInChat,
 }) => {
   const {
     openThread,
@@ -229,6 +231,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadOutboxReadDate,
     copyMessageLink,
     openDeleteMessageModal,
+    addLocalPaidReaction,
+    openPaidReactionModal,
   } = getActions();
 
   const lang = useOldLang();
@@ -531,6 +535,22 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
+  const handleSendPaidReaction = useLastCallback(() => {
+    addLocalPaidReaction({
+      chatId: message.chatId, messageId: message.id, count: 1,
+    });
+    closeMenu();
+  });
+
+  const handlePaidReactionModalOpen = useLastCallback(() => {
+    openPaidReactionModal({
+      chatId: message.chatId,
+      messageId: message.id,
+    });
+
+    closeMenu();
+  });
+
   const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
     openMessageReactionPicker({ chatId: message.chatId, messageId: message.id, position });
   });
@@ -577,6 +597,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         availableReactions={availableReactions}
         topReactions={topReactions}
         defaultTagReactions={defaultTagReactions}
+        isWithPaidReaction={isWithPaidReaction}
         message={message}
         isPrivate={isPrivate}
         isCurrentUserPremium={isCurrentUserPremium}
@@ -644,6 +665,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onClosePoll={openClosePollDialog}
         onShowSeenBy={handleOpenSeenByModal}
         onToggleReaction={handleToggleReaction}
+        onSendPaidReaction={handleSendPaidReaction}
+        onShowPaidReactionModal={handlePaidReactionModalOpen}
         onShowReactors={handleOpenReactorListModal}
         onReactionPickerOpen={handleReactionPickerOpen}
         onTranslate={handleTranslate}
@@ -821,6 +844,7 @@ export default memo(withGlobal<OwnProps>(
       isInSavedMessages,
       isChannel,
       canReplyInChat,
+      isWithPaidReaction: chatFullInfo?.isPaidReactionAvailable,
     };
   },
 )(ContextMenuContainer));

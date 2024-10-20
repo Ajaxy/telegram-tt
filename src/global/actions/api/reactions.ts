@@ -1,4 +1,4 @@
-import type { ApiReactionEmoji } from '../../../api/types';
+import type { ApiError, ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
@@ -12,6 +12,7 @@ import * as mediaLoader from '../../../util/mediaLoader';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { callApi } from '../../../api/gramjs';
 import {
+  addPaidReaction,
   getDocumentMediaHash,
   getReactionKey,
   getUserReactions,
@@ -92,6 +93,7 @@ addActionHandler('loadAvailableEffects', async (global): Promise<void> => {
   for (const effect of effects) {
     if (effect.effectAnimationId) {
       const reaction: ApiReactionEmoji = {
+        type: 'emoji',
         emoticon: effect.emoticon,
       };
       reactions.push(reaction);
@@ -237,6 +239,71 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
     global = getGlobal();
     global = addMessageReaction(global, message, userReactions);
     setGlobal(global);
+  }
+});
+
+addActionHandler('addLocalPaidReaction', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, messageId, count, isPrivate, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+
+  if (!chat || !message) {
+    return;
+  }
+
+  const currentReactions = message.reactions?.results || [];
+  const newReactions = addPaidReaction(currentReactions, count, isPrivate);
+  global = updateChatMessage(global, message.chatId, message.id, {
+    reactions: {
+      ...currentReactions,
+      results: newReactions,
+    },
+  });
+  setGlobal(global);
+
+  const messageKey = getMessageKey(message);
+  if (selectPerformanceSettingsValue(global, 'reactionEffects')) {
+    actions.startActiveReaction({
+      containerId: messageKey,
+      reaction: {
+        type: 'paid',
+      },
+      tabId,
+    });
+  }
+});
+
+addActionHandler('sendPaidReaction', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, forcedAmount, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+
+  if (!chat || !message) {
+    return;
+  }
+
+  const paidReaction = message.reactions?.results?.find((r) => r.reaction.type === 'paid');
+  const count = forcedAmount || paidReaction?.localAmount || 0;
+  if (!count) {
+    return;
+  }
+  actions.resetLocalPaidReactions({ chatId, messageId });
+
+  try {
+    await callApi('sendPaidReaction', {
+      chat,
+      messageId,
+      count,
+      isPrivate: paidReaction?.localIsPrivate,
+    });
+  } catch (error) {
+    if ((error as ApiError).message === 'BALANCE_TOO_LOW') {
+      actions.openStarsBalanceModal({ originReaction: { chatId, messageId, amount: count }, tabId });
+    }
   }
 });
 

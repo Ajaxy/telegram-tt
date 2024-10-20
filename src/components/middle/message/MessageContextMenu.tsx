@@ -51,6 +51,7 @@ type OwnProps = {
   message: ApiMessage | ApiSponsoredMessage;
   canSendNow?: boolean;
   enabledReactions?: ApiChatReactions;
+  isWithPaidReaction?: boolean;
   reactionsLimit?: number;
   canReschedule?: boolean;
   canReply?: boolean;
@@ -121,6 +122,8 @@ type OwnProps = {
   onShowOriginal?: NoneToVoidFunction;
   onSelectLanguage?: NoneToVoidFunction;
   onToggleReaction?: (reaction: ApiReaction) => void;
+  onSendPaidReaction?: NoneToVoidFunction;
+  onShowPaidReactionModal?: NoneToVoidFunction;
   onReactionPickerOpen?: (position: IAnchorPosition) => void;
 };
 
@@ -138,6 +141,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   isPrivate,
   isCurrentUserPremium,
   enabledReactions,
+  isWithPaidReaction,
   reactionsLimit,
   anchor,
   targetHref,
@@ -201,6 +205,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onShowSeenBy,
   onShowReactors,
   onToggleReaction,
+  onSendPaidReaction,
+  onShowPaidReactionModal,
   onCopyMessages,
   onAboutAdsClick,
   onSponsoredHide,
@@ -356,6 +362,9 @@ const MessageContextMenu: FC<OwnProps> = ({
           currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
           reactionsLimit={reactionsLimit}
           onToggleReaction={onToggleReaction!}
+          onSendPaidReaction={onSendPaidReaction}
+          onShowPaidReactionModal={onShowPaidReactionModal}
+          isWithPaidReaction={isWithPaidReaction}
           isPrivate={isPrivate}
           isReady={isReady}
           canBuyPremium={canBuyPremium}

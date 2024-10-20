@@ -245,6 +245,11 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.topBotApps) {
     cached.topBotApps = initialState.topBotApps;
   }
+
+  if (!cached.reactions.defaultTags?.[0]?.type) {
+    cached.reactions = initialState.reactions;
+  }
+
   if (!cached.users.commonChatsById) {
     cached.users.commonChatsById = initialState.users.commonChatsById;
   }
@@ -523,7 +528,8 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     const cleanedById = Object.values(byId).reduce((acc, message) => {
       if (!message) return acc;
 
-      const cleanedMessage = omitLocalMedia(message);
+      let cleanedMessage = omitLocalMedia(message);
+      cleanedMessage = omitLocalPaidReactions(cleanedMessage);
       acc[message.id] = cleanedMessage;
       return acc;
     }, {} as Record<number, ApiMessage>);
@@ -537,6 +543,25 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
   return {
     byChatId,
     sponsoredByChatId: {},
+  };
+}
+
+function omitLocalPaidReactions(message: ApiMessage): ApiMessage {
+  if (!message.reactions?.results.length) return message;
+  return {
+    ...message,
+    reactions: {
+      ...message.reactions,
+      results: message.reactions.results.map((reaction) => {
+        if (reaction.localAmount) {
+          return {
+            ...reaction,
+            localAmount: undefined,
+          };
+        }
+        return reaction;
+      }),
+    },
   };
 }
 

@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, {
   useCallback,
   useEffect,
@@ -8,37 +8,55 @@ import React, {
 import { getActions } from '../../global';
 
 import type { CallbackAction } from '../../global/types';
-import type { TextPart } from '../../types';
+import type { IconName } from '../../types/icons';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Portal from './Portal';
+import RoundTimer from './RoundTimer';
 
 import './Notification.scss';
 
 type OwnProps = {
-  title?: TextPart[];
+  title?: TeactNode;
   containerId?: string;
-  message: TextPart[];
+  message: TeactNode;
   duration?: number;
-  onDismiss: () => void;
   action?: CallbackAction | CallbackAction[];
   actionText?: string;
   className?: string;
+  icon?: IconName;
+  shouldDisableClickDismiss?: boolean;
+  dismissAction?: CallbackAction;
+  shouldShowTimer?: boolean;
+  cacheBreaker?: string;
+  onDismiss: NoneToVoidFunction;
 };
 
 const DEFAULT_DURATION = 3000;
 const ANIMATION_DURATION = 150;
 
 const Notification: FC<OwnProps> = ({
-  title, className,
-  message, duration = DEFAULT_DURATION, containerId, onDismiss,
-  action, actionText,
+  title,
+  className,
+  message,
+  duration = DEFAULT_DURATION,
+  containerId,
+  icon,
+  action,
+  actionText,
+  shouldDisableClickDismiss,
+  dismissAction,
+  shouldShowTimer,
+  cacheBreaker,
+  onDismiss,
 }) => {
   const actions = getActions();
 
@@ -47,10 +65,15 @@ const Notification: FC<OwnProps> = ({
   const timerRef = useRef<number | undefined>(null);
   const { transitionClassNames } = useShowTransitionDeprecated(isOpen);
 
-  const closeAndDismiss = useCallback(() => {
+  const closeAndDismiss = useLastCallback((force?: boolean) => {
+    if (!force && shouldDisableClickDismiss) return;
     setIsOpen(false);
     setTimeout(onDismiss, ANIMATION_DURATION + ANIMATION_END_DELAY);
-  }, [onDismiss]);
+    if (dismissAction) {
+      // @ts-ignore
+      actions[dismissAction.action](dismissAction.payload);
+    }
+  });
 
   const handleClick = useCallback(() => {
     if (action) {
@@ -68,7 +91,7 @@ const Notification: FC<OwnProps> = ({
   useEffect(() => (isOpen ? captureEscKeyListener(closeAndDismiss) : undefined), [isOpen, closeAndDismiss]);
 
   useEffect(() => {
-    timerRef.current = window.setTimeout(closeAndDismiss, duration);
+    timerRef.current = window.setTimeout(() => closeAndDismiss(true), duration);
 
     return () => {
       if (timerRef.current) {
@@ -76,18 +99,23 @@ const Notification: FC<OwnProps> = ({
         timerRef.current = undefined;
       }
     };
-  }, [duration, closeAndDismiss]);
+  }, [duration, cacheBreaker]); // Reset timer if `cacheBreaker` changes
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnter = useLastCallback(() => {
+    if (shouldDisableClickDismiss) return;
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = undefined;
     }
-  }, []);
+  });
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useLastCallback(() => {
+    if (shouldDisableClickDismiss) return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
     timerRef.current = window.setTimeout(closeAndDismiss, duration);
-  }, [duration, closeAndDismiss]);
+  });
 
   return (
     <Portal className="Notification-container" containerId={containerId}>
@@ -97,6 +125,7 @@ const Notification: FC<OwnProps> = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
+        <Icon name={icon || 'info-filled'} className="notification-icon" />
         <div className="content">
           {title && <div className="notification-title">{title}</div>}
           {message}
@@ -105,10 +134,13 @@ const Notification: FC<OwnProps> = ({
           <Button
             color="translucent-white"
             onClick={handleClick}
-            className="Notification-button"
+            className="notification-button"
           >
             {actionText}
           </Button>
+        )}
+        {shouldShowTimer && (
+          <RoundTimer className="notification-timer" key={cacheBreaker} duration={Math.ceil(duration / 1000)} />
         )}
       </div>
     </Portal>

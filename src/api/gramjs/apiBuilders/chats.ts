@@ -530,7 +530,7 @@ export function buildApiChatReactions(chatReactions?: GramJs.TypeChatReactions):
   if (chatReactions instanceof GramJs.ChatReactionsSome) {
     return {
       type: 'some',
-      allowed: chatReactions.reactions.map(buildApiReaction).filter(Boolean),
+      allowed: chatReactions.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
     };
   }
 

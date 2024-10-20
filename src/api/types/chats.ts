@@ -136,6 +136,7 @@ export interface ApiChatFullInfo {
   areParticipantsHidden?: boolean;
   isTranslationDisabled?: true;
   hasPinnedStories?: boolean;
+  isPaidReactionAvailable?: boolean;
 
   boostsApplied?: number;
   boostsToUnrestrict?: number;

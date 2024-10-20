@@ -1283,6 +1283,10 @@
 "CreditsBoxHistoryEntryGiftOutAbout" = "With Stars, {user} will be able to unlock content and services on Telegram. {link}"
 "CreditsBoxOutAbout" = "Review the {link} for Stars."
 "GiftStarsOutgoing" = "With Stars, {user} will be able to unlock content and services on Telegram."
+"SendPaidReaction" = "Send ⭐️{amount}"
+"StarsReactionTerms" = "By sending Stars you agree to the {link}"
+"StarsReactionLinkText" = "Terms of Service"
+"StarsReactionLink" = "https://telegram.org/tos/stars"
 "MiniAppsMoreTabs_one" = "{botName} & {count} Other";
 "MiniAppsMoreTabs_other" = "{botName} & {count} Others";
 "PrizeCredits" = "Your prize is {count} Stars."

@@ -247,6 +247,7 @@ const Main = ({
     loadStarStatus,
     loadAvailableEffects,
     loadTopBotApps,
+    loadPaidReactionPrivacy,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -330,6 +331,7 @@ const Main = ({
       loadSavedReactionTags();
       loadAuthorizations();
       loadTopBotApps();
+      loadPaidReactionPrivacy();
     }
   }, [isMasterTab, isSynced]);
 

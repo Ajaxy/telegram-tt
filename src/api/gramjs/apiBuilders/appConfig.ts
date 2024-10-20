@@ -65,6 +65,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   giveaway_boosts_per_premium: number;
   giveaway_countries_max: number;
   boosts_per_sent_gift: number;
+  stars_paid_reaction_amount_max: number;
   // Forums
   topics_pinned_limit: number;
   // Stories
@@ -163,6 +164,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     bandwidthPremiumUploadSpeedup: appConfig.upload_premium_speedup_upload,
     bandwidthPremiumDownloadSpeedup: appConfig.upload_premium_speedup_download,
     channelRestrictAdsLevelMin: appConfig.channel_restrict_sponsored_level_min,
+    paidReactionMaxAmount: appConfig.stars_paid_reaction_amount_max,
     isChannelRevenueWithdrawalEnabled: appConfig.channel_revenue_withdrawal_enabled,
     isStarsGiftsEnabled: appConfig.stars_gifts_enabled,
   };

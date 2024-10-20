@@ -172,6 +172,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       actions.processPremiumFloodWait({
         isUpload: update.isUpload,
       });
+      break;
+    }
+
+    case 'updatePaidReactionPrivacy': {
+      return {
+        ...global,
+        settings: {
+          ...global.settings,
+          paidReactionPrivacy: update.isPrivate,
+        },
+      };
+      setGlobal(global);
+      break;
     }
   }
 
