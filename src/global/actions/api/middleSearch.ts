@@ -228,6 +228,7 @@ addActionHandler('searchChatMediaMessages', (global, actions, payload): ActionRe
     if (!currentSearch) {
       return;
     }
+    global = getGlobal();
   }
 
   void searchChatMedia(global,

@@ -472,6 +472,8 @@ addActionHandler('openGiveawayModal', async (global, actions, payload): Promise<
     return;
   }
 
+  global = getGlobal();
+
   const isOpen = Boolean(chatId);
 
   global = updateTabState(global, {
@@ -563,9 +565,9 @@ addActionHandler('openPremiumGiftModal', async (global, actions, payload): Promi
   const result = await callApi('fetchPremiumPromo');
   if (!result) return;
 
-  global = getGlobal();
-
   const gifts = await callApi('getPremiumGiftCodeOptions', {});
+
+  global = getGlobal();
 
   global = updateTabState(global, {
     giftModal: {
@@ -592,6 +594,8 @@ addActionHandler('openStarsGiftModal', async (global, actions, payload): Promise
   } = payload || {};
 
   const starsGiftOptions = await callApi('getStarsGiftOptions', {});
+
+  global = getGlobal();
 
   global = updateTabState(global, {
     starsGiftModal: {
