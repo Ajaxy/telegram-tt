@@ -203,6 +203,7 @@ const Main = ({
     initMain,
     loadAnimatedEmojis,
     loadBirthdayNumbersStickers,
+    loadRestrictedEmojiStickers,
     loadNotificationSettings,
     loadNotificationExceptions,
     updateIsOnline,
@@ -327,6 +328,7 @@ const Main = ({
       loadPremiumGifts();
       loadAvailableEffects();
       loadBirthdayNumbersStickers();
+      loadRestrictedEmojiStickers();
       loadGenericEmojiEffects();
       loadSavedReactionTags();
       loadAuthorizations();

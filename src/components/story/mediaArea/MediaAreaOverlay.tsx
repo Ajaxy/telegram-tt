@@ -11,6 +11,7 @@ import buildStyle from '../../../util/buildStyle';
 import useWindowSize from '../../../hooks/window/useWindowSize';
 
 import MediaAreaSuggestedReaction from './MediaAreaSuggestedReaction';
+import MediaAreaWeather from './MediaAreaWeather';
 
 import styles from './MediaArea.module.scss';
 
@@ -116,6 +117,18 @@ const MediaAreaOverlay = ({
                 style={prepareStyle(mediaArea)}
               />
             );
+          case 'weather': {
+            return (
+              <MediaAreaWeather
+                // eslint-disable-next-line react/no-array-index-key
+                key={`${mediaArea.type}-${i}`}
+                mediaArea={mediaArea}
+                className={styles.mediaArea}
+                style={prepareStyle(mediaArea)}
+                isPreview={isActive}
+              />
+            );
+          }
           default:
             return undefined;
         }

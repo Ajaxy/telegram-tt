@@ -1150,6 +1150,7 @@ export type GlobalState = {
   animatedEmojiEffects?: ApiStickerSet;
   genericEmojiEffects?: ApiStickerSet;
   birthdayNumbers?: ApiStickerSet;
+  restrictedEmoji?: ApiStickerSet;
   defaultTopicIconsId?: string;
   defaultStatusIconsId?: string;
   premiumGifts?: ApiStickerSet;
@@ -2892,6 +2893,7 @@ export interface ActionPayloads {
   loadGreetingStickers: undefined;
   loadGenericEmojiEffects: undefined;
   loadBirthdayNumbersStickers: undefined;
+  loadRestrictedEmojiStickers: undefined;
 
   loadAvailableEffects: undefined;
 

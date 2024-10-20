@@ -233,6 +233,20 @@ export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | un
     };
   }
 
+  if (area instanceof GramJs.MediaAreaWeather) {
+    const {
+      coordinates, emoji, temperatureC, color,
+    } = area;
+
+    return {
+      type: 'weather',
+      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      emoji,
+      temperatureC,
+      color,
+    };
+  }
+
   return undefined;
 }
 

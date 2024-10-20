@@ -168,5 +168,13 @@ export type ApiMediaAreaUrl = {
   url: string;
 };
 
+export type ApiMediaAreaWeather = {
+  type: 'weather';
+  coordinates: ApiMediaAreaCoordinates;
+  emoji: string;
+  temperatureC: number;
+  color: number;
+};
+
 export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction
-| ApiMediaAreaChannelPost | ApiMediaAreaUrl;
+| ApiMediaAreaChannelPost | ApiMediaAreaUrl | ApiMediaAreaWeather;
