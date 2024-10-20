@@ -58,6 +58,7 @@ export function buildContentClassName(
   const isMedia = storyData || photo || video || location || invoice?.extendedMedia || paidMedia;
   const hasText = text || location?.mediaType === 'venue' || isGeoLiveActive || hasFactCheck;
   const isMediaWithNoText = isMedia && !hasText;
+  const hasInlineKeyboard = Boolean(message.inlineButtons);
   const isViaBot = Boolean(message.viaBotId);
 
   const hasFooter = (() => {
@@ -183,7 +184,7 @@ export function buildContentClassName(
       classNames.push('has-fact-check');
     }
 
-    if (isLastInGroup && (photo || !isMediaWithNoText || (location && asForwarded))) {
+    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || (location && asForwarded))) {
       classNames.push('has-appendix');
     }
   }
