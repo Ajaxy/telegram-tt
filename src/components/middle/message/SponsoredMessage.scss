@@ -49,7 +49,6 @@
     --border-top-left-radius: var(--border-radius-messages-small);
     --border-top-right-radius: var(--border-radius-messages-small);
     --border-bottom-right-radius: var(--border-radius-messages-small);
-    --border-bottom-left-radius: var(--border-radius-messages-small);
 
     @media (max-width: 600px) {
       max-width: min(29rem, calc(100vw - 4.5rem)) !important;
@@ -108,7 +107,7 @@
       }
     }
 
-    .icon {
+    .sponsored-action-icon {
       position: absolute;
       font-size: 0.75rem;
       top: 0.25rem;
@@ -138,5 +137,9 @@
 
   .has-media {
     padding-top: 0.5rem;
+  }
+
+  .media-inner {
+    --border-bottom-left-radius: var(--border-radius-messages-small);
   }
 }

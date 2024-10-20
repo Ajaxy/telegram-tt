@@ -90,6 +90,14 @@
         padding-bottom: 0.125rem;
       }
     }
+
+    &:has(.sponsored-media-preview) {
+      margin-bottom: 5.625rem;
+
+      .last-in-list {
+        margin-bottom: 1rem;
+      }
+    }
   }
 
   @media (max-width: 600px) {

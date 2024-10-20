@@ -297,7 +297,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
             ariaLabel={lang('Close')}
             onClick={handleHideSponsoredMessage}
           >
-            <Icon name="close" />
+            <Icon name="close" className="sponsored-action-icon" />
           </Button>
           {message.canReport && (
             <Button
@@ -309,7 +309,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
               onClick={handleContextMenu}
               onContextMenu={handleContextMenu}
             >
-              <Icon name="more" />
+              <Icon name="more" className="sponsored-action-icon" />
             </Button>
           )}
         </div>
