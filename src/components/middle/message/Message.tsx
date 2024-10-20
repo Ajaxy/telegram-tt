@@ -1499,14 +1499,14 @@ const Message: FC<OwnProps & StateProps> = ({
         ) : !botSender ? (
           NBSP
         ) : undefined}
-        {botSender && (
+        {botSender?.usernames?.length && (
           <>
             <span className="via">{lang('ViaBot')}</span>
             <span
               className="interactive"
               onClick={handleViaBotClick}
             >
-              {renderText(`@${botSender.usernames![0].username}`)}
+              {renderText(`@${botSender.usernames[0].username}`)}
             </span>
           </>
         )}
