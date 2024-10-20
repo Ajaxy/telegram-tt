@@ -35,7 +35,7 @@
     text-transform: capitalize;
   }
 
-  .message-peer {
+  .content-inner, .message-peer {
     color: var(--color-text);
   }
 
@@ -46,9 +46,9 @@
 
   .message-content {
     padding: 0.5rem;
-    --border-top-left-radius: var(--border-radius-messages-small);
-    --border-top-right-radius: var(--border-radius-messages-small);
-    --border-bottom-right-radius: var(--border-radius-messages-small);
+    --border-top-left-radius: var(--border-radius-messages);
+    --border-top-right-radius: var(--border-radius-messages);
+    --border-bottom-right-radius: var(--border-radius-messages);
 
     @media (max-width: 600px) {
       max-width: min(29rem, calc(100vw - 4.5rem)) !important;
@@ -74,7 +74,6 @@
     padding-inline-start: 0.625rem;
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
     background-color: var(--accent-background-color);
-    border-radius: 0.375rem;
     overflow: hidden;
 
     &::before {
@@ -128,10 +127,10 @@
     transition: 150ms filter ease-in;
     background: var(--accent-background-active-color);
     cursor: var(--custom-cursor, pointer);
-    filter: opacity(0.8);
+    filter: brightness(1);
 
     &:hover {
-      filter: opacity(1);
+      filter: brightness(1.1);
     }
   }
 

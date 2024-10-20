@@ -262,13 +262,13 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   return (
     <div
       ref={ref}
-      style={style}
       key="sponsored-message"
       className="SponsoredMessage Message open sponsored-media-preview"
     >
       <div
         className="message-content media has-shadow has-solid-background has-appendix"
         dir="auto"
+        style={style}
         onMouseDown={handleMouseDown}
         onContextMenu={handleContextMenu}
       >

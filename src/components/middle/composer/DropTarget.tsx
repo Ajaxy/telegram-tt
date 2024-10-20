@@ -40,7 +40,6 @@ const DropTarget: FC<OwnProps> = ({ isQuick, isGeneric, onFileSelect }) => {
       return;
     }
 
-    // Get inner width, without padding
     const { width, height } = svg.getBoundingClientRect();
     svg.viewBox.baseVal.width = width;
     svg.viewBox.baseVal.height = height;

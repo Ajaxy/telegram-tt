@@ -400,7 +400,6 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    // Get inner width, without padding
     const { width, height } = svg.getBoundingClientRect();
     svg.viewBox.baseVal.width = width;
     svg.viewBox.baseVal.height = height;
