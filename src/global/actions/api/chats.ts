@@ -559,8 +559,8 @@ addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType =>
 
 addActionHandler('loadTopChats', (): ActionReturnType => {
   runThrottledForLoadTopChats(() => {
-    loadChats('active');
-    loadChats('archived');
+    loadChats('active', undefined, true);
+    loadChats('archived', undefined, true);
   });
 });
 
@@ -2732,12 +2732,13 @@ addActionHandler('requestCollectibleInfo', async (global, actions, payload): Pro
 async function loadChats(
   listType: ChatListType,
   isFullDraftSync?: boolean,
+  shouldIgnorePagination?: boolean,
 ) {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
   let lastLocalServiceMessageId = selectLastServiceNotification(global)?.id;
 
-  const params = selectChatListLoadingParameters(global, listType);
+  const params = !shouldIgnorePagination ? selectChatListLoadingParameters(global, listType) : {};
   const offsetPeer = params.nextOffsetPeerId ? selectPeer(global, params.nextOffsetPeerId) : undefined;
   const offsetDate = params.nextOffsetDate;
   const offsetId = params.nextOffsetId;
@@ -2785,9 +2786,11 @@ async function loadChats(
   global = addMessages(global, result.messages);
   global = updateChatsLastMessageId(global, result.lastMessageByChatId, listType);
 
-  global = replaceChatListLoadingParameters(
-    global, listType, result.nextOffsetId, result.nextOffsetPeerId, result.nextOffsetDate,
-  );
+  if (!shouldIgnorePagination) {
+    global = replaceChatListLoadingParameters(
+      global, listType, result.nextOffsetId, result.nextOffsetPeerId, result.nextOffsetDate,
+    );
+  }
 
   const idsToUpdateDraft = isFullDraftSync ? result.chatIds : Object.keys(result.draftsById);
   idsToUpdateDraft.forEach((chatId) => {
