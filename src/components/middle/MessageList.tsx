@@ -334,7 +334,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (!ids.length) return;
 
     loadMessageReactions({ chatId, ids });
-  }, MESSAGE_REACTIONS_POLLING_INTERVAL, true);
+  }, MESSAGE_REACTIONS_POLLING_INTERVAL);
 
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled') {
