@@ -114,13 +114,6 @@
   }
 }
 
-.withBackground {
-  width: 100%;
-  height: 100%;
-  background-color: var(--custom-background-color);
-  filter: drop-shadow(0 0.125rem 0.25rem var(--color-default-shadow));
-}
-
 .reaction {
   position: absolute;
   top: 50%;
@@ -141,26 +134,27 @@
   font-weight: 500;
 }
 
-.weatherInfo {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  transition: transform 200ms ease-out;
+.weather {
+  display: grid;
+  place-items: center;
+}
+
+.weatherInner {
+  width: auto !important;
+  height: auto !important;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3125rem;
+  gap: 0.2em;
   white-space: nowrap;
+  padding: 0 0.2em;
+  background-color: var(--custom-background-color);
+  border-radius: 0.25em;
 }
 
 .temperature {
+  font-family: var(--font-family-condensed);
   font-weight: 700;
   margin: 0;
-}
-
-.border {
-  border-radius: 0.3125rem !important;
 }

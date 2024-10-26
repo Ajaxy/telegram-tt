@@ -1,16 +1,19 @@
 import React, {
-  type FC, memo, useRef, useState,
+  type FC, memo,
+  useLayoutEffect,
+  useRef, useState,
 } from '../../../lib/teact/teact';
+import { setExtraStyles } from '../../../lib/teact/teact-dom';
 import { withGlobal } from '../../../global';
 
 import type { ApiMediaAreaWeather, ApiSticker } from '../../../api/types';
 
+import { requestForcedReflow, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectRestrictedEmoji } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { convertToRGBA, getTextColor } from '../../../util/colors';
 import { formatTemperature } from '../../../util/formatTemperature';
-import { REM } from '../../common/helpers/mediaDimensions';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useResizeObserver from '../../../hooks/useResizeObserver';
@@ -42,48 +45,62 @@ const MediaAreaWeather: FC<OwnProps & StateProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const [customEmojiSize, setCustomEmojiSize] = useState(1.5 * REM);
-  const [customTemperatureSize, setCustomTemperatureSize] = useState(0);
+  const [customEmojiSize, setCustomEmojiSize] = useState(0);
 
   const { temperatureC, color } = mediaArea;
 
   const backgroundColor = convertToRGBA(color);
   const textColor = getTextColor(color);
 
-  const updateCustomSize = useLastCallback(() => {
-    if (!ref.current) return;
-    const height = ref.current.clientHeight;
-    setCustomEmojiSize(Math.round(height * EMOJI_SIZE_MULTIPLIER));
-    setCustomTemperatureSize(height / TEMPERATURE_SIZE);
+  const updateCustomSize = useLastCallback((isImmediate?: boolean) => {
+    if (!ref.current) return undefined;
+    const el = ref.current;
+
+    const height = el.clientHeight;
+    const customEmojiHeight = Math.round(height * EMOJI_SIZE_MULTIPLIER);
+    setCustomEmojiSize(customEmojiHeight);
+    const applyFn = () => {
+      setExtraStyles(el, {
+        '--custom-emoji-size': `${customEmojiHeight}px`,
+        'font-size': `${height / TEMPERATURE_SIZE}rem`,
+      });
+    };
+
+    if (isImmediate) return applyFn;
+
+    requestMutation(applyFn);
+
+    return undefined;
   });
 
-  useResizeObserver(ref, updateCustomSize);
+  useLayoutEffect(() => {
+    requestForcedReflow(() => updateCustomSize(true));
+  }, []);
+
+  useResizeObserver(ref, () => updateCustomSize());
 
   return (
     <div
       ref={ref}
-      className={buildClassName(className, styles.withBackground, isPreview && styles.border)}
+      className={buildClassName(styles.weather, className)}
       style={buildStyle(
         style,
-        `--custom-emoji-size: ${customEmojiSize}px`,
         `--custom-background-color: ${backgroundColor}`,
+        `color: ${textColor}`,
       )}
     >
-      <div className={styles.weatherInfo}>
+      <div className={styles.weatherInner}>
         {restrictedEmoji && (
           <CustomEmoji
             key={restrictedEmoji.id}
             documentId={restrictedEmoji.id}
             size={customEmojiSize}
-            noPlay={!isPreview}
+            noPlay={isPreview}
             withTranslucentThumb
             forceAlways
           />
         )}
-        <p
-          className={styles.temperature}
-          style={buildStyle(`font-size: ${customTemperatureSize}rem`, `color: ${textColor}`)}
-        >
+        <p className={styles.temperature}>
           {formatTemperature(temperatureC)}
         </p>
       </div>
