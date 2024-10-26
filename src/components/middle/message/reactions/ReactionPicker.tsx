@@ -7,7 +7,6 @@ import type {
   ApiMessage,
   ApiMessageEntity,
   ApiReaction,
-  ApiReactionCustomEmoji,
   ApiReactionWithPaid,
   ApiSticker,
   ApiStory,
@@ -119,9 +118,9 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
     if (!renderedChatId || !renderedMessageId) {
       return;
     }
-    const reaction = sticker.isCustomEmoji
-      ? { documentId: sticker.id } as ApiReactionCustomEmoji
-      : { emoticon: sticker.emoji } as ApiReaction;
+    const reaction: ApiReaction = sticker.isCustomEmoji
+      ? { type: 'custom', documentId: sticker.id }
+      : { type: 'emoji', emoticon: sticker.emoji! };
 
     toggleReaction({
       chatId: renderedChatId, messageId: renderedMessageId, reaction, shouldAddToRecent: true,

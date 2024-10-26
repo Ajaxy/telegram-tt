@@ -116,7 +116,7 @@ const Reactions: FC<OwnProps> = ({
         return;
       }
 
-      updateMiddleSearch({ chatId: message.chatId, threadId, update: { savedTag: reaction as ApiReaction } });
+      updateMiddleSearch({ chatId: message.chatId, threadId, update: { savedTag: reaction } });
       performMiddleSearch({ chatId: message.chatId, threadId });
       return;
     }
