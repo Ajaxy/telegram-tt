@@ -9,7 +9,9 @@ import type {
   ApiPremiumGiftCodeOption,
   ApiStarGift,
 } from './payments';
-import type { ApiMessageStoryData, ApiWebPageStickerData, ApiWebPageStoryData } from './stories';
+import type {
+  ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
+} from './stories';
 import type { ApiUser } from './users';
 
 export interface ApiDimensions {
@@ -667,7 +669,7 @@ export type MediaContent = {
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
-  poll?: ApiPoll;
+  pollId?: string;
   action?: ApiAction;
   webPage?: ApiWebPage;
   audio?: ApiAudio;
@@ -685,6 +687,11 @@ export type MediaContent = {
 };
 export type MediaContainer = {
   content: MediaContent;
+};
+
+export type StatefulMediaContent = {
+  poll?: ApiPoll;
+  story?: ApiStory;
 };
 
 export type BoughtPaidMedia = Pick<MediaContent, 'photo' | 'video'>;

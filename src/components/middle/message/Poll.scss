@@ -39,9 +39,14 @@
   .Checkbox,
   .Radio {
     padding-left: 2.25rem;
+    padding-bottom: 1rem;
 
     &:last-child {
-      margin-bottom: 0.75rem;
+      margin-bottom: 0;
+    }
+
+    &:first-child {
+      margin-top: 0;
     }
 
     &.disabled {

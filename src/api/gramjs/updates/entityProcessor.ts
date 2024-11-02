@@ -1,9 +1,12 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiChat, ApiThreadInfo, ApiUser } from '../../types';
+import type {
+  ApiChat, ApiPoll, ApiThreadInfo, ApiUser,
+} from '../../types';
 
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { buildPollFromMedia } from '../apiBuilders/messageContent';
 import { buildApiThreadInfoFromMessage } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import { addChatToLocalDb, addMessageToLocalDb, addUserToLocalDb } from '../helpers';
@@ -19,7 +22,8 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
 
   let userById: Record<string, ApiUser> | undefined;
   let chatById: Record<string, ApiChat> | undefined;
-  let threadInfos: ApiThreadInfo[] | undefined;
+  const threadInfos: ApiThreadInfo[] | undefined = [];
+  const polls: ApiPoll[] | undefined = [];
 
   if ('users' in response && Array.isArray(response.users) && TYPE_USER.has(response.users[0]?.className)) {
     const users = response.users.map((user) => {
@@ -42,19 +46,29 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
   }
 
   if ('messages' in response && Array.isArray(response.messages) && TYPE_MESSAGE.has(response.messages[0]?.className)) {
-    threadInfos = response.messages.map((message) => {
+    response.messages.forEach((message) => {
       addMessageToLocalDb(message);
-      return buildApiThreadInfoFromMessage(message);
-    }).filter(Boolean);
+
+      const threadInfo = buildApiThreadInfoFromMessage(message);
+      if (threadInfo) {
+        threadInfos.push(threadInfo);
+      }
+
+      const poll = buildPollFromMedia(message.media);
+      if (poll) {
+        polls.push(poll);
+      }
+    });
   }
 
-  if (!userById && !chatById && !threadInfos) return;
+  if (!userById && !chatById && !threadInfos?.length) return;
 
   sendImmediateApiUpdate({
     '@type': 'updateEntities',
     users: userById,
     chats: chatById,
-    threadInfos,
+    threadInfos: threadInfos?.length ? threadInfos : undefined,
+    polls: polls?.length ? polls : undefined,
   });
 }
 

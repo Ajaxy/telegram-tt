@@ -50,6 +50,7 @@ import type {
   ApiPeerStories,
   ApiPhoneCall,
   ApiPhoto,
+  ApiPoll,
   ApiPostStatistics,
   ApiPremiumGiftCodeOption,
   ApiPremiumPromo,
@@ -1048,6 +1049,7 @@ export type GlobalState = {
       threadsById: Record<ThreadId, Thread>;
     }>;
     sponsoredByChatId: Record<string, ApiSponsoredMessage>;
+    pollById: Record<string, ApiPoll>;
   };
 
   stories: {

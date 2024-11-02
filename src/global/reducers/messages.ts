@@ -1,5 +1,5 @@
 import type {
-  ApiMessage, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
+  ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
 } from '../../api/types';
 import type { FocusDirection, ScrollTargetPosition, ThreadId } from '../../types';
 import type {
@@ -29,6 +29,7 @@ import {
   selectMessageIdsByGroupId,
   selectOutlyingLists,
   selectPinnedIds,
+  selectPoll,
   selectQuickReplyMessage,
   selectScheduledIds,
   selectScheduledMessage,
@@ -933,4 +934,95 @@ export function deleteQuickReply<T extends GlobalState>(
       byId: omit(global.quickReplies.byId, [quickReplyId]),
     },
   };
+}
+
+export function updatePoll<T extends GlobalState>(
+  global: T,
+  pollId: string,
+  pollUpdate: Partial<ApiPoll>,
+) {
+  const poll = selectPoll(global, pollId);
+
+  const oldResults = poll?.results;
+  let newResults = oldResults || pollUpdate.results;
+  if (poll && pollUpdate.results?.results) {
+    if (!poll.results || !pollUpdate.results.isMin) {
+      newResults = pollUpdate.results;
+    } else if (oldResults.results) {
+      // Update voters counts, but keep local `isChosen` values
+      newResults = {
+        ...pollUpdate.results,
+        results: pollUpdate.results.results.map((result) => ({
+          ...result,
+          isChosen: oldResults.results!.find((r) => r.option === result.option)?.isChosen,
+        })),
+        isMin: undefined,
+      };
+    }
+  }
+
+  const updatedPoll = {
+    ...poll,
+    ...pollUpdate,
+    results: newResults,
+  } satisfies ApiPoll;
+  if (!updatedPoll.id) {
+    return global;
+  }
+
+  return {
+    ...global,
+    messages: {
+      ...global.messages,
+      pollById: {
+        ...global.messages.pollById,
+        [pollId]: updatedPoll,
+      },
+    },
+  };
+}
+
+export function updatePollVote<T extends GlobalState>(
+  global: T,
+  pollId: string,
+  peerId: string,
+  options: string[],
+) {
+  const poll = selectPoll(global, pollId);
+  if (!poll) {
+    return global;
+  }
+
+  const { recentVoterIds, totalVoters, results } = poll.results;
+  const newRecentVoterIds = recentVoterIds ? [...recentVoterIds] : [];
+  const newTotalVoters = totalVoters ? totalVoters + 1 : 1;
+  const newResults = results ? [...results] : [];
+
+  newRecentVoterIds.push(peerId);
+
+  options.forEach((option) => {
+    const targetOptionIndex = newResults.findIndex((result) => result.option === option);
+    const targetOption = newResults[targetOptionIndex];
+    const updatedOption: ApiPollResult = targetOption ? { ...targetOption } : { option, votersCount: 0 };
+
+    updatedOption.votersCount += 1;
+    if (peerId === global.currentUserId) {
+      updatedOption.isChosen = true;
+    }
+
+    if (targetOptionIndex) {
+      newResults[targetOptionIndex] = updatedOption;
+    } else {
+      newResults.push(updatedOption);
+    }
+  });
+
+  return updatePoll(global, pollId, {
+    results: {
+      ...poll.results,
+      recentVoterIds: newRecentVoterIds,
+      totalVoters: newTotalVoters,
+      results: newResults,
+    },
+  });
 }

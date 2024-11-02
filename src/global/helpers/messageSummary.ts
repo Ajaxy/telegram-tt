@@ -1,17 +1,17 @@
 import type { TeactNode } from '../../lib/teact/teact';
 
-import type { ApiMediaExtendedPreview, ApiMessage, MediaContent } from '../../api/types';
+import type {
+  ApiMediaExtendedPreview, ApiMessage, MediaContent, StatefulMediaContent,
+} from '../../api/types';
 import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { CONTENT_NOT_SUPPORTED } from '../../config';
 import trimText from '../../util/trimText';
 import { renderTextWithEntities } from '../../components/common/helpers/renderTextWithEntities';
-import { getGlobal } from '../index';
 import {
   getExpiredMessageContentDescription, getMessageText, getMessageTranscription, isExpiredMessageContent,
 } from './messages';
-import { getUserFirstOrLastName } from './users';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
 export const TRUNCATED_SUMMARY_LENGTH = 80;
@@ -19,22 +19,23 @@ export const TRUNCATED_SUMMARY_LENGTH = 80;
 export function getMessageSummaryText(
   lang: LangFn,
   message: ApiMessage,
+  statefulContent: StatefulMediaContent | undefined,
   noEmoji = false,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
   isExtended = false,
 ) {
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
-  const text = trimText(getMessageTextWithSpoilers(message), truncateLength);
-  const description = getMessageSummaryDescription(lang, message, text, isExtended);
+  const text = trimText(getMessageTextWithSpoilers(message, statefulContent), truncateLength);
+  const description = getMessageSummaryDescription(lang, message, statefulContent, text, isExtended);
 
   return `${emojiWithSpace}${description}`;
 }
 
-export function getMessageTextWithSpoilers(message: ApiMessage) {
+export function getMessageTextWithSpoilers(message: ApiMessage, statefulContent: StatefulMediaContent | undefined) {
   const transcription = getMessageTranscription(message);
 
-  const textWithoutTranscription = getMessageText(message);
+  const textWithoutTranscription = getMessageText(statefulContent?.story || message);
   if (!textWithoutTranscription) {
     return transcription;
   }
@@ -69,7 +70,7 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
     voice,
     document,
     sticker,
-    poll,
+    pollId,
     paidMedia,
   } = message.content;
 
@@ -97,27 +98,31 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
     return '📎';
   }
 
-  if (poll) {
+  if (pollId) {
     return '📊';
   }
 
   return undefined;
 }
 
-export function getMediaContentTypeDescription(lang: LangFn, content: MediaContent) {
-  return getSummaryDescription(lang, content);
+export function getMediaContentTypeDescription(
+  lang: LangFn, content: MediaContent, statefulContent: StatefulMediaContent | undefined,
+) {
+  return getSummaryDescription(lang, content, statefulContent);
 }
 export function getMessageSummaryDescription(
   lang: LangFn,
   message: ApiMessage,
+  statefulContent: StatefulMediaContent | undefined,
   truncatedText?: string | TeactNode,
   isExtended = false,
 ) {
-  return getSummaryDescription(lang, message.content, message, truncatedText, isExtended);
+  return getSummaryDescription(lang, message.content, statefulContent, message, truncatedText, isExtended);
 }
 function getSummaryDescription(
   lang: LangFn,
   mediaContent: MediaContent,
+  statefulContent: StatefulMediaContent | undefined,
   message?: ApiMessage,
   truncatedText?: string | TeactNode,
   isExtended = false,
@@ -131,7 +136,6 @@ function getSummaryDescription(
     document,
     sticker,
     contact,
-    poll,
     invoice,
     location,
     game,
@@ -140,6 +144,7 @@ function getSummaryDescription(
     giveawayResults,
     paidMedia,
   } = mediaContent;
+  const { poll } = statefulContent || {};
 
   let hasUsedTruncatedText = false;
   let summary: string | TeactNode | undefined;
@@ -231,16 +236,7 @@ function getSummaryDescription(
   }
 
   if (storyData) {
-    if (message && storyData.isMention) {
-      // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-      const global = getGlobal();
-      const firstName = getUserFirstOrLastName(global.users.byId[message.chatId]);
-      summary = message.isOutgoing
-        ? lang('Chat.Service.StoryMentioned.You', firstName)
-        : lang('Chat.Service.StoryMentioned', firstName);
-    } else {
-      summary = message ? lang('ForwardedStory') : lang('Chat.ReplyStory');
-    }
+    summary = truncatedText || (message ? lang('ForwardedStory') : lang('Chat.ReplyStory'));
   }
 
   if (isExpiredMessageContent(mediaContent)) {

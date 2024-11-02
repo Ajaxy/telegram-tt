@@ -9,6 +9,8 @@ import type { ApiPollAnswer, ApiPollResult } from '../../../api/types';
 import buildClassName from '../../../util/buildClassName';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
+import Icon from '../../common/icons/Icon';
+
 import './PollOption.scss';
 
 type OwnProps = {
@@ -59,7 +61,7 @@ const PollOption: FC<OwnProps> = ({
             shouldAnimate && 'animate',
           )}
           >
-            <i className={buildClassName('icon', correctAnswer ? 'icon-check' : 'icon-close')} />
+            <Icon name={correctAnswer ? 'check' : 'close'} className="poll-option-icon" />
           </span>
         )}
       </div>

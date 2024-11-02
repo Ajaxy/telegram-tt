@@ -14,6 +14,7 @@ import {
   updateLastReadStoryForPeer,
   updatePeerStory,
   updatePeersWithStories,
+  updatePoll,
   updateStealthMode,
   updateThreadInfos,
 } from '../../reducers';
@@ -22,10 +23,17 @@ import { selectPeerStories, selectPeerStory } from '../../selectors';
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateEntities': {
-      const { users, chats, threadInfos } = update;
+      const {
+        users, chats, threadInfos, polls,
+      } = update;
       if (users) global = addUsers(global, users);
       if (chats) global = addChats(global, chats);
       if (threadInfos) global = updateThreadInfos(global, threadInfos);
+      if (polls) {
+        polls.forEach((poll) => {
+          global = updatePoll(global, poll.id, poll);
+        });
+      }
       setGlobal(global);
       break;
     }

@@ -19,6 +19,7 @@ import type {
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiPeer,
+  ApiPoll,
   ApiReaction,
   ApiReactionKey,
   ApiSavedReactionTag,
@@ -90,6 +91,7 @@ import {
   selectPeer,
   selectPeerStory,
   selectPerformanceSettingsValue,
+  selectPollFromMessage,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectSender,
@@ -295,6 +297,7 @@ type StateProps = {
   viaBusinessBot?: ApiUser;
   effect?: ApiAvailableEffect;
   availableStars?: number;
+  poll?: ApiPoll;
 };
 
 type MetaPosition =
@@ -416,6 +419,7 @@ const Message: FC<OwnProps & StateProps> = ({
   viaBusinessBot,
   effect,
   availableStars,
+  poll,
   onIntersectPinnedMessage,
 }) => {
   const {
@@ -505,7 +509,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const {
     photo = paidMediaPhoto, video = paidMediaVideo, audio,
     voice, document, sticker, contact,
-    poll, webPage, invoice, location,
+    webPage, invoice, location,
     action, game, storyData, giveaway,
     giveawayResults,
   } = getMessageContent(message);
@@ -741,6 +745,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && (isCustomShape || ((photo || video || storyData || (location?.mediaType === 'geo')) && !hasText));
 
   const contentClassName = buildContentClassName(message, album, {
+    poll,
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -1818,6 +1823,7 @@ export default memo(withGlobal<OwnProps>(
     const effect = effectId ? global.availableEffectById[effectId] : undefined;
 
     const { balance: availableStars } = global.stars || {};
+    const poll = selectPollFromMessage(global, message);
 
     return {
       theme: selectTheme(global),
@@ -1906,6 +1912,7 @@ export default memo(withGlobal<OwnProps>(
       viaBusinessBot,
       effect,
       availableStars,
+      poll,
     };
   },
 )(Message));

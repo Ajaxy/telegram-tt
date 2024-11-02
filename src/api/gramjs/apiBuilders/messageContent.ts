@@ -58,7 +58,7 @@ export function buildMessageContent(
   const hasUnsupportedMedia = mtpMessage.media instanceof GramJs.MessageMediaUnsupported;
 
   if (mtpMessage.message && !hasUnsupportedMedia
-    && !content.sticker && !content.poll && !content.contact && !content.video?.isRound) {
+    && !content.sticker && !content.pollId && !content.contact && !content.video?.isRound) {
     content = {
       ...content,
       text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
@@ -130,8 +130,8 @@ export function buildMessageMediaContent(
   const contact = buildContact(media);
   if (contact) return { contact };
 
-  const poll = buildPollFromMedia(media);
-  if (poll) return { poll };
+  const pollId = buildPollIdFromMedia(media);
+  if (pollId) return { pollId };
 
   const webPage = buildWebPage(media);
   if (webPage) return { webPage };
@@ -465,7 +465,15 @@ function buildContact(media: GramJs.TypeMessageMedia): ApiContact | undefined {
   };
 }
 
-function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
+function buildPollIdFromMedia(media: GramJs.TypeMessageMedia): string | undefined {
+  if (!(media instanceof GramJs.MessageMediaPoll)) {
+    return undefined;
+  }
+
+  return media.poll.id.toString();
+}
+
+export function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined {
   if (!(media instanceof GramJs.MessageMediaPoll)) {
     return undefined;
   }

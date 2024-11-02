@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiMediaExtendedPreview, ApiMessage, ApiPollResult, ApiReactions,
+  ApiChat, ApiMediaExtendedPreview, ApiMessage, ApiReactions,
   MediaContent,
 } from '../../../api/types';
 import type { ThreadId } from '../../../types';
@@ -43,6 +43,8 @@ import {
   updateChatMessage,
   updateListedIds,
   updateMessageTranslations,
+  updatePoll,
+  updatePollVote,
   updateQuickReplies,
   updateQuickReplyMessage,
   updateScheduledMessage,
@@ -57,7 +59,6 @@ import {
   selectChat,
   selectChatLastMessageId,
   selectChatMessage,
-  selectChatMessageByPollId,
   selectChatMessages,
   selectChatScheduledMessages,
   selectCommonBoxChatId,
@@ -74,7 +75,6 @@ import {
   selectSavedDialogIdFromMessage,
   selectScheduledIds,
   selectScheduledMessage,
-  selectSendAs,
   selectTabState,
   selectThreadByMessage,
   selectThreadIdFromMessage,
@@ -90,7 +90,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'newMessage': {
       const {
-        chatId, id, message, shouldForceReply, wasDrafted,
+        chatId, id, message, shouldForceReply, wasDrafted, poll,
       } = update;
       global = updateWithLocalMedia(global, chatId, id, message);
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
@@ -154,6 +154,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       });
 
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       // Reload dialogs if chat is not present in the list
@@ -208,7 +212,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'newScheduledMessage': {
-      const { chatId, id, message } = update;
+      const {
+        chatId, id, message, poll,
+      } = update;
 
       global = updateWithLocalMedia(global, chatId, id, message, true);
 
@@ -219,6 +225,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (threadId !== MAIN_THREAD_ID) {
         const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
         global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', unique([...threadScheduledIds, id]));
+      }
+
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
       }
 
       setGlobal(global);
@@ -560,97 +570,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateMessagePoll': {
       const { pollId, pollUpdate } = update;
 
-      const message = selectChatMessageByPollId(global, pollId);
+      global = updatePoll(global, pollId, pollUpdate);
 
-      if (message?.content.poll) {
-        const oldResults = message.content.poll.results;
-        let newResults = oldResults;
-        if (pollUpdate.results?.results) {
-          if (!oldResults.results || !pollUpdate.results.isMin) {
-            newResults = pollUpdate.results;
-          } else if (oldResults.results) {
-            newResults = {
-              ...pollUpdate.results,
-              results: pollUpdate.results.results.map((result) => ({
-                ...result,
-                isChosen: oldResults.results!.find((r) => r.option === result.option)?.isChosen,
-              })),
-              isMin: undefined,
-            };
-          }
-        }
-        const updatedPoll = { ...message.content.poll, ...pollUpdate, results: newResults };
-
-        global = updateChatMessage(
-          global,
-          message.chatId,
-          message.id,
-          {
-            content: {
-              ...message.content,
-              poll: updatedPoll,
-            },
-          },
-        );
-        setGlobal(global);
-      }
+      setGlobal(global);
       break;
     }
 
     case 'updateMessagePollVote': {
       const { pollId, peerId, options } = update;
-      const message = selectChatMessageByPollId(global, pollId);
-      if (!message || !message.content.poll || !message.content.poll.results) {
-        break;
-      }
-
-      const { poll } = message.content;
-
-      const currentSendAs = selectSendAs(global, message.chatId);
-
-      const { recentVoterIds, totalVoters, results } = poll.results;
-      const newRecentVoterIds = recentVoterIds ? [...recentVoterIds] : [];
-      const newTotalVoters = totalVoters ? totalVoters + 1 : 1;
-      const newResults = results ? [...results] : [];
-
-      newRecentVoterIds.push(peerId);
-
-      options.forEach((option) => {
-        const targetOptionIndex = newResults.findIndex((result) => result.option === option);
-        const targetOption = newResults[targetOptionIndex];
-        const updatedOption: ApiPollResult = targetOption ? { ...targetOption } : { option, votersCount: 0 };
-
-        updatedOption.votersCount += 1;
-        if (currentSendAs?.id === peerId || peerId === global.currentUserId) {
-          updatedOption.isChosen = true;
-        }
-
-        if (targetOptionIndex) {
-          newResults[targetOptionIndex] = updatedOption;
-        } else {
-          newResults.push(updatedOption);
-        }
-      });
-
-      global = updateChatMessage(
-        global,
-        message.chatId,
-        message.id,
-        {
-          content: {
-            ...message.content,
-            poll: {
-              ...poll,
-              results: {
-                ...poll.results,
-                recentVoterIds: newRecentVoterIds,
-                totalVoters: newTotalVoters,
-                results: newResults,
-              },
-            },
-          },
-        },
-      );
+      global = updatePollVote(global, pollId, peerId, options);
       setGlobal(global);
 
       break;

@@ -278,7 +278,7 @@ function renderMessageContent(
   const { asPlainText, isEmbedded } = options;
 
   if (asPlainText) {
-    return getMessageSummaryText(lang, message, undefined, MAX_LENGTH);
+    return getMessageSummaryText(lang, message, undefined, undefined, MAX_LENGTH);
   }
 
   const messageSummary = (

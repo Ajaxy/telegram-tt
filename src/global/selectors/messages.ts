@@ -357,23 +357,6 @@ export function selectEditingMessage<T extends GlobalState>(
   }
 }
 
-export function selectChatMessageByPollId<T extends GlobalState>(global: T, pollId: string) {
-  let messageWithPoll: ApiMessage | undefined;
-
-  // eslint-disable-next-line no-restricted-syntax
-  for (const chatMessages of Object.values(global.messages.byChatId)) {
-    const { byId } = chatMessages;
-    messageWithPoll = Object.values(byId).find((message) => {
-      return message.content.poll && message.content.poll.id === pollId;
-    });
-    if (messageWithPoll) {
-      break;
-    }
-  }
-
-  return messageWithPoll;
-}
-
 export function selectFocusedMessageId<T extends GlobalState>(
   global: T, chatId: string, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -482,6 +465,15 @@ export function selectForwardedSender<T extends GlobalState>(
   }
 
   return undefined;
+}
+
+export function selectPoll<T extends GlobalState>(global: T, pollId: string) {
+  return global.messages.pollById[pollId];
+}
+
+export function selectPollFromMessage<T extends GlobalState>(global: T, message: ApiMessage) {
+  if (!message.content.pollId) return undefined;
+  return selectPoll(global, message.content.pollId);
 }
 
 export function selectTopicFromMessage<T extends GlobalState>(global: T, message: ApiMessage) {
@@ -647,7 +639,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
       canEditMessagesIndefinitely
       || getServerTime() - message.date < MESSAGE_EDIT_ALLOWED_TIME
     ) && !(
-      content.sticker || content.contact || content.poll || content.action
+      content.sticker || content.contact || content.pollId || content.action
       || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
       || isDocumentSticker
     )
@@ -724,7 +716,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
 
   const canSaveGif = message.content.video?.isGif;
 
-  const poll = content.poll;
+  const poll = content.pollId ? selectPoll(global, content.pollId) : undefined;
   const canRevote = !poll?.summary.closed && !poll?.summary.quiz && poll?.results.results?.some((r) => r.isChosen);
   const canClosePoll = hasMessageEditRight && poll && !poll.summary.closed && !isForwarded;
 

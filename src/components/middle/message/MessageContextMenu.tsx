@@ -10,15 +10,17 @@ import type {
   ApiChatReactions,
   ApiMessage,
   ApiPeer,
+  ApiPoll,
   ApiReaction,
   ApiSponsoredMessage,
   ApiStickerSet,
   ApiThreadInfo,
+  ApiTypeStory,
   ApiUser,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { getUserFullName, isUserId } from '../../../global/helpers';
+import { getUserFullName, groupStatetefulContent, isUserId } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -49,6 +51,8 @@ type OwnProps = {
   anchor: IAnchorPosition;
   targetHref?: string;
   message: ApiMessage | ApiSponsoredMessage;
+  poll?: ApiPoll;
+  story?: ApiTypeStory;
   canSendNow?: boolean;
   enabledReactions?: ApiChatReactions;
   isWithPaidReaction?: boolean;
@@ -138,6 +142,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   defaultTagReactions,
   isOpen,
   message,
+  poll,
+  story,
   isPrivate,
   isCurrentUserPremium,
   enabledReactions,
@@ -282,6 +288,7 @@ const MessageContextMenu: FC<OwnProps> = ({
     ? []
     : getMessageCopyOptions(
       message,
+      groupStatetefulContent({ poll, story }),
       targetHref,
       canCopy,
       handleAfterCopy,

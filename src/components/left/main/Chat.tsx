@@ -8,6 +8,7 @@ import type {
   ApiMessageOutgoingStatus,
   ApiPeer,
   ApiTopic,
+  ApiTypeStory,
   ApiTypingStatus,
   ApiUser,
   ApiUserStatus,
@@ -21,6 +22,7 @@ import { StoryViewerOrigin } from '../../../types';
 import {
   getMessageAction,
   getPrivateChatUserId,
+  groupStatetefulContent,
   isUserId,
   isUserOnline,
   selectIsChatMuted,
@@ -40,6 +42,7 @@ import {
   selectNotifySettings,
   selectOutgoingStatus,
   selectPeer,
+  selectPeerStory,
   selectTabState,
   selectThreadParam,
   selectTopicFromMessage,
@@ -92,6 +95,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  lastMessageStory?: ApiTypeStory;
   listedTopicIds?: number[];
   topics?: Record<number, ApiTopic>;
   isMuted?: boolean;
@@ -127,6 +131,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   topics,
   observeIntersection,
   chat,
+  lastMessageStory,
   isMuted,
   user,
   userStatus,
@@ -187,6 +192,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     lastMessage,
     typingStatus,
     draft,
+    statefulMediaContent: groupStatetefulContent({ story: lastMessageStory }),
     actionTargetMessage,
     actionTargetUserIds,
     actionTargetChatId,
@@ -483,6 +489,9 @@ export default memo(withGlobal<OwnProps>(
 
     const topicsInfo = selectTopicsInfo(global, chatId);
 
+    const storyData = lastMessage?.content.storyData;
+    const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
+
     return {
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
@@ -510,6 +519,7 @@ export default memo(withGlobal<OwnProps>(
       listedTopicIds: topicsInfo?.listedTopicIds,
       topics: topicsInfo?.topicsById,
       isSynced: global.isSynced,
+      lastMessageStory,
     };
   },
 )(Chat));

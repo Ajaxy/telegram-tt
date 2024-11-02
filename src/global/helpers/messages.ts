@@ -3,13 +3,15 @@ import type {
   ApiMessage,
   ApiMessageEntityTextUrl,
   ApiPeer,
-  ApiSponsoredMessage,
   ApiStory,
-  MediaContainer,
+  ApiTypeStory,
 } from '../../api/types';
-import type { MediaContent } from '../../api/types/messages';
+import type {
+  ApiPoll, MediaContainer, MediaContent, StatefulMediaContent,
+} from '../../api/types/messages';
 import type { LangFn } from '../../hooks/useOldLang';
 import type { ThreadId } from '../../types';
+import type { GlobalState } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -52,26 +54,48 @@ export function getMessageTranscription(message: ApiMessage) {
   return transcriptionId && global.transcriptions[transcriptionId]?.text;
 }
 
-export function hasMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage | MediaContainer) {
+export function hasMessageText(message: MediaContainer) {
   const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
+    text, sticker, photo, video, audio, voice, document, pollId, webPage, contact, invoice, location,
     game, action, storyData, giveaway, giveawayResults, isExpiredVoice, paidMedia,
   } = message.content;
 
   return Boolean(text) || !(
-    sticker || photo || video || audio || voice || document || contact || poll || webPage || invoice || location
+    sticker || photo || video || audio || voice || document || contact || pollId || webPage || invoice || location
     || game || action?.phoneCall || storyData || giveaway || giveawayResults || isExpiredVoice || paidMedia
   );
 }
 
-export function getMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage | MediaContainer) {
+export function getMessageStatefulContent(global: GlobalState, message: ApiMessage): StatefulMediaContent {
+  const poll = message.content.pollId ? global.messages.pollById[message.content.pollId] : undefined;
+
+  const { peerId: storyPeerId, id: storyId } = message.content.storyData || {};
+  const story = storyId && storyPeerId ? global.stories.byPeerId[storyPeerId]?.byId[storyId] : undefined;
+
+  return groupStatetefulContent({ poll, story });
+}
+
+export function groupStatetefulContent({
+  poll,
+  story,
+} : {
+  poll?: ApiPoll;
+  story?: ApiTypeStory;
+}) {
+  return {
+    poll,
+    story: story && 'content' in story ? story : undefined,
+  };
+}
+
+export function getMessageText(message: MediaContainer) {
   return hasMessageText(message) ? message.content.text?.text || CONTENT_NOT_SUPPORTED : undefined;
 }
 
 export function getMessageCustomShape(message: ApiMessage): boolean {
   const {
     text, sticker, photo, video, audio, voice,
-    document, poll, webPage, contact, action,
+    document, pollId, webPage, contact, action,
     game, invoice, location, storyData,
   } = message.content;
 
@@ -79,7 +103,7 @@ export function getMessageCustomShape(message: ApiMessage): boolean {
     return true;
   }
 
-  if (!text || photo || video || audio || voice || document || poll || webPage || contact || action || game || invoice
+  if (!text || photo || video || audio || voice || document || pollId || webPage || contact || action || game || invoice
     || location || storyData) {
     return false;
   }

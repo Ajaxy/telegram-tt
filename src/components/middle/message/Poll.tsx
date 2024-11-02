@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+import { getActions, getGlobal } from '../../../global';
 
 import type {
   ApiMessage, ApiPeer, ApiPoll, ApiPollAnswer,
@@ -15,6 +15,7 @@ import type {
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { LangFn } from '../../../hooks/useOldLang';
 
+import { selectPeer } from '../../../global/selectors';
 import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
@@ -39,10 +40,6 @@ type OwnProps = {
   onSendVote: (options: string[]) => void;
 };
 
-type StateProps = {
-  recentVoterIds?: number[];
-};
-
 const SOLUTION_CONTAINER_ID = '#middle-column-portals';
 const SOLUTION_DURATION = 5000;
 const TIMER_RADIUS = 6;
@@ -50,10 +47,9 @@ const TIMER_CIRCUMFERENCE = TIMER_RADIUS * 2 * Math.PI;
 const TIMER_UPDATE_INTERVAL = 1000;
 const NBSP = '\u00A0';
 
-const Poll: FC<OwnProps & StateProps> = ({
+const Poll: FC<OwnProps> = ({
   message,
   poll,
-  recentVoterIds,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onSendVote,
@@ -80,6 +76,7 @@ const Poll: FC<OwnProps & StateProps> = ({
   const canVote = !summary.closed && !hasVoted;
   const canViewResult = !canVote && summary.isPublic && Number(results.totalVoters) > 0;
   const isMultiple = canVote && summary.multipleChoice;
+  const recentVoterIds = results.recentVoterIds;
   const maxVotersCount = voteResults ? Math.max(...voteResults.map((r) => r.votersCount)) : totalVoters;
   const correctResults = useMemo(() => {
     return voteResults?.filter((r) => r.isCorrect).map((r) => r.option) || [];
@@ -147,15 +144,11 @@ const Poll: FC<OwnProps & StateProps> = ({
 
   const recentVoters = useMemo(() => {
     // No need for expensive global updates on chats or users, so we avoid them
-    const chatsById = getGlobal().chats.byId;
-    const usersById = getGlobal().users.byId;
+    const global = getGlobal();
     return recentVoterIds ? recentVoterIds.reduce((result: ApiPeer[], id) => {
-      const chat = chatsById[id];
-      const user = usersById[id];
-      if (user) {
-        result.push(user);
-      } else if (chat) {
-        result.push(chat);
+      const peer = selectPeer(global, id);
+      if (peer) {
+        result.push(peer);
       }
 
       return result;
@@ -372,17 +365,4 @@ function stopPropagation(e: React.MouseEvent<HTMLDivElement>) {
   e.stopPropagation();
 }
 
-export default memo(withGlobal<OwnProps>(
-  (global, { poll }) => {
-    const { recentVoterIds } = poll.results;
-    const { users: { byId: usersById } } = global;
-    if (!recentVoterIds || recentVoterIds.length === 0) {
-      return {};
-    }
-
-    return {
-      recentVoterIds,
-      usersById,
-    };
-  },
-)(Poll));
+export default memo(Poll);

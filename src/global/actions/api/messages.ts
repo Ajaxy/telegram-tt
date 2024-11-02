@@ -120,6 +120,7 @@ import {
   selectOutlyingListByMessageId,
   selectPeerStory,
   selectPinnedIds,
+  selectPollFromMessage,
   selectRealLastReadId,
   selectReplyCanBeSentToChat,
   selectScheduledMessage,
@@ -977,7 +978,7 @@ addActionHandler('clearWebPagePreview', (global, actions, payload): ActionReturn
 });
 
 addActionHandler('sendPollVote', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId, options } = payload!;
+  const { chatId, messageId, options } = payload;
   const chat = selectChat(global, chatId);
 
   if (chat) {
@@ -986,7 +987,7 @@ addActionHandler('sendPollVote', (global, actions, payload): ActionReturnType =>
 });
 
 addActionHandler('cancelPollVote', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId } = payload!;
+  const { chatId, messageId } = payload;
   const chat = selectChat(global, chatId);
 
   if (chat) {
@@ -997,7 +998,8 @@ addActionHandler('cancelPollVote', (global, actions, payload): ActionReturnType 
 addActionHandler('closePoll', (global, actions, payload): ActionReturnType => {
   const { chatId, messageId } = payload;
   const chat = selectChat(global, chatId);
-  const poll = selectChatMessage(global, chatId, messageId)?.content.poll;
+  const message = selectChatMessage(global, chatId, messageId);
+  const poll = message && selectPollFromMessage(global, message);
   if (chat && poll) {
     void callApi('closePoll', { chat, messageId, poll });
   }
@@ -1006,7 +1008,7 @@ addActionHandler('closePoll', (global, actions, payload): ActionReturnType => {
 addActionHandler('loadPollOptionResults', async (global, actions, payload): Promise<void> => {
   const {
     chat, messageId, option, offset, limit, shouldResetVoters, tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   const result = await callApi('loadPollOptionResults', {
     chat, messageId, option, offset, limit,
@@ -1103,7 +1105,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
   serviceMessages
     .forEach((message) => {
       const { text, entities } = message.content.text || {};
-      const { sticker, poll } = message.content;
+      const { sticker } = message.content;
 
       const replyInfo = selectMessageReplyInfo(global, toChat.id, toThreadId);
 
@@ -1113,7 +1115,6 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
         text,
         entities,
         sticker,
-        poll,
         isSilent,
         scheduledAt,
         sendAs,

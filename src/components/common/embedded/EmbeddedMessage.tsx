@@ -164,7 +164,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   function renderMediaContentType(media?: MediaContainer) {
     if (!media || media.content.text) return NBSP;
-    const description = getMediaContentTypeDescription(lang, media.content);
+    const description = getMediaContentTypeDescription(lang, media.content, {});
     if (!description || description === CONTENT_NOT_SUPPORTED) return NBSP;
     return (
       <span>

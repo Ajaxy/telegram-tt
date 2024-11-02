@@ -935,30 +935,30 @@ export function buildLocalMessage(
   story?: ApiStory | ApiStorySkipped,
   isInvertedMedia?: true,
   effectId?: string,
-): ApiMessage {
+) {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
 
   const resultReplyInfo = replyInfo && buildReplyInfo(replyInfo, chat.isForum);
 
+  const localPoll = poll && buildNewPoll(poll, localId);
+
   const message = {
     id: localId,
     chatId: chat.id,
-    content: {
-      ...(text && {
-        text: {
-          text,
-          entities,
-        },
-      }),
+    content: omitUndefined({
+      text: text ? {
+        text,
+        entities,
+      } : undefined,
       ...media,
-      ...(sticker && { sticker }),
-      ...(gif && { video: gif }),
-      ...(poll && { poll: buildNewPoll(poll, localId) }),
-      ...(contact && { contact }),
-      ...(story && { storyData: { mediaType: 'storyData', ...story } }),
-    },
+      sticker,
+      video: gif || media?.video,
+      contact,
+      storyData: story && { mediaType: 'storyData', ...story },
+      pollId: localPoll?.id,
+    }),
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
@@ -975,9 +975,14 @@ export function buildLocalMessage(
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
 
-  return {
+  const finalMessage = {
     ...message,
     ...(emojiOnlyCount && { emojiOnlyCount }),
+  };
+
+  return {
+    message: finalMessage,
+    poll: localPoll,
   };
 }
 

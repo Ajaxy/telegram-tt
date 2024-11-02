@@ -1,9 +1,12 @@
+import { getGlobal } from '../../../global';
+
 import type { ApiMessage, ApiSponsoredMessage } from '../../../api/types';
 import type { LangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import {
+  getMessageStatefulContent,
   getMessageText,
 } from '../../../global/helpers';
 import {
@@ -70,10 +73,13 @@ export function renderMessageSummary(
 ): TextPart[] {
   const { entities } = message.content.text || {};
 
+  const global = getGlobal();
+  const statefulContent = getMessageStatefulContent(global, message);
+
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
   const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
   if (!hasSpoilers && !hasCustomEmoji) {
-    const text = trimText(getMessageSummaryText(lang, message, noEmoji), truncateLength);
+    const text = trimText(getMessageSummaryText(lang, message, statefulContent, noEmoji), truncateLength);
 
     if (highlight) {
       return renderText(text, ['emoji', 'highlight'], { highlight });
@@ -88,7 +94,7 @@ export function renderMessageSummary(
   const text = renderMessageText({
     message, highlight, isSimple: true, truncateLength,
   });
-  const description = getMessageSummaryDescription(lang, message, text);
+  const description = getMessageSummaryDescription(lang, message, statefulContent, text);
 
   return [
     ...renderText(emojiWithSpace),

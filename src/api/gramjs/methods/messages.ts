@@ -293,7 +293,10 @@ export function sendMessage(
   },
   onProgress?: ApiOnProgress,
 ) {
-  const localMessage = buildLocalMessage(
+  const {
+    message: localMessage,
+    poll: localPoll,
+  } = buildLocalMessage(
     chat,
     lastMessageId,
     text,
@@ -317,6 +320,7 @@ export function sendMessage(
     id: localMessage.id,
     chatId: chat.id,
     message: localMessage,
+    poll: localPoll,
     wasDrafted,
   });
 

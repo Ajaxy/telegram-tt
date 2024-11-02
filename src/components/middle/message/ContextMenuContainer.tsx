@@ -8,10 +8,12 @@ import type {
   ApiAvailableReaction,
   ApiChatReactions,
   ApiMessage,
+  ApiPoll,
   ApiReaction,
   ApiStickerSet,
   ApiStickerSetInfo,
   ApiThreadInfo,
+  ApiTypeStory,
 } from '../../../api/types';
 import type { ActiveDownloads, MessageListType } from '../../../global/types';
 import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
@@ -50,6 +52,8 @@ import {
   selectIsReactionPickerOpen,
   selectMessageCustomEmojiSets,
   selectMessageTranslations,
+  selectPeerStory,
+  selectPollFromMessage,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
@@ -88,6 +92,8 @@ export type OwnProps = {
 
 type StateProps = {
   threadId?: ThreadId;
+  poll?: ApiPoll;
+  story?: ApiTypeStory;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
   defaultTagReactions?: ApiReaction[];
@@ -150,6 +156,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   customEmojiSetsInfo,
   customEmojiSets,
   album,
+  poll,
+  story,
   anchor,
   targetHref,
   noOptions,
@@ -642,6 +650,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         seenByRecentPeers={seenByRecentPeers}
         isInSavedMessages={isInSavedMessages}
         noReplies={noReplies}
+        poll={poll}
+        story={story}
         onOpenThread={handleOpenThread}
         onReply={handleReply}
         onEdit={handleEdit}
@@ -795,6 +805,10 @@ export default memo(withGlobal<OwnProps>(
 
     const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
 
+    const poll = selectPollFromMessage(global, message);
+    const storyData = message.content.storyData;
+    const story = storyData ? selectPeerStory(global, storyData.peerId, storyData.id) : undefined;
+
     return {
       threadId,
       availableReactions,
@@ -845,6 +859,8 @@ export default memo(withGlobal<OwnProps>(
       isChannel,
       canReplyInChat,
       isWithPaidReaction: chatFullInfo?.isPaidReactionAvailable,
+      poll,
+      story,
     };
   },
 )(ContextMenuContainer));

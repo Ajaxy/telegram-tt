@@ -1,4 +1,4 @@
-import type { ApiMessage } from '../../../../api/types';
+import type { ApiMessage, ApiPoll } from '../../../../api/types';
 import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
@@ -9,6 +9,7 @@ export function buildContentClassName(
   message: ApiMessage,
   album?: IAlbum,
   {
+    poll,
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -23,6 +24,7 @@ export function buildContentClassName(
     peerColorClass,
     hasOutsideReactions,
   }: {
+    poll?: ApiPoll;
     hasSubheader?: boolean;
     isCustomShape?: boolean | number;
     isLastInGroup?: boolean;
@@ -44,7 +46,7 @@ export function buildContentClassName(
   const content = getMessageContent(message);
   const {
     photo = paidMediaPhoto, video = paidMediaVideo,
-    audio, voice, document, poll, webPage, contact, location, invoice, storyData,
+    audio, voice, document, webPage, contact, location, invoice, storyData,
     giveaway, giveawayResults,
   } = content;
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;

@@ -204,6 +204,7 @@ export type ApiUpdateNewScheduledMessage = {
   id: number;
   message: ApiMessage;
   wasDrafted?: boolean;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateNewMessage = {
@@ -213,6 +214,7 @@ export type ApiUpdateNewMessage = {
   message: Partial<ApiMessage>;
   shouldForceReply?: boolean;
   wasDrafted?: boolean;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateMessage = {
@@ -764,6 +766,7 @@ export type ApiUpdateEntities = {
   users?: Record<string, ApiUser>;
   chats?: Record<string, ApiChat>;
   threadInfos?: ApiThreadInfo[];
+  polls?: ApiPoll[];
 };
 
 export type ApiUpdatePaidReactionPrivacy = {

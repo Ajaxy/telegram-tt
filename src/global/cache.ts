@@ -257,6 +257,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.chats.topicsInfoById = initialState.chats.topicsInfoById;
   }
 
+  if (!cached.messages.pollById) {
+    cached.messages.pollById = initialState.messages.pollById;
+  }
+
   if (!cached.stickers.starGifts) {
     cached.stickers.starGifts = initialState.stickers.starGifts;
     cached.users.giftsById = initialState.users.giftsById;
@@ -495,6 +499,8 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     return acc;
   }, {} as Record<string, Set<ThreadId>>);
 
+  const pollIdsToSave: string[] = [];
+
   chatIdsToSave.forEach((chatId) => {
     const current = global.messages.byChatId[chatId];
     if (!current) {
@@ -537,6 +543,11 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
       let cleanedMessage = omitLocalMedia(message);
       cleanedMessage = omitLocalPaidReactions(cleanedMessage);
       acc[message.id] = cleanedMessage;
+
+      if (message.content.pollId) {
+        pollIdsToSave.push(message.content.pollId);
+      }
+
       return acc;
     }, {} as Record<number, ApiMessage>);
 
@@ -548,6 +559,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
 
   return {
     byChatId,
+    pollById: pickTruthy(global.messages.pollById, pollIdsToSave),
     sponsoredByChatId: {},
   };
 }

@@ -29,6 +29,7 @@ import {
   getMediaFormat,
   getMediaHash,
   getMessageDownloadableMedia,
+  getMessageStatefulContent,
   getSenderTitle,
   isChatChannel,
   isJoinedChannelMessage,
@@ -985,12 +986,13 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
   messages.forEach((message) => {
     const sender = isChatChannel(chat) ? chat : selectSender(global, message);
     const senderTitle = `> ${sender ? getSenderTitle(lang, sender) : message.forwardInfo?.hiddenUserName || ''}:`;
+    const statefulContent = getMessageStatefulContent(global, message);
 
     resultHtml.push(senderTitle);
     resultHtml.push(`${renderMessageSummaryHtml(lang, message)}\n`);
 
     resultText.push(senderTitle);
-    resultText.push(`${getMessageSummaryText(lang, message, false, 0, true)}\n`);
+    resultText.push(`${getMessageSummaryText(lang, message, statefulContent, false, 0, true)}\n`);
   });
 
   copyHtmlToClipboard(resultHtml.join('\n'), resultText.join('\n'));

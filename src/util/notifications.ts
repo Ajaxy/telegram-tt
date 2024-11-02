@@ -13,6 +13,7 @@ import {
   getMessageAction,
   getMessageRecentReaction,
   getMessageSenderName,
+  getMessageStatefulContent,
   getPrivateChatUserId,
   getUserFullName,
   isActionMessage,
@@ -366,7 +367,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     } else {
       // TODO[forums] Support ApiChat
       const senderName = getMessageSenderName(oldTranslate, chat.id, isChat ? messageSenderChat : messageSenderUser);
-      let summary = getMessageSummaryText(oldTranslate, message, hasReaction, 60);
+      const statefulContent = getMessageStatefulContent(global, message);
+      let summary = getMessageSummaryText(oldTranslate, message, statefulContent, hasReaction, 60);
 
       if (hasReaction) {
         const emoji = getReactionEmoji(reaction);
