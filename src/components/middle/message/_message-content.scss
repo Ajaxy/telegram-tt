@@ -291,6 +291,10 @@
       align-items: center;
     }
 
+    .forward-title {
+      margin-right: 0.1875rem;
+    }
+
     .forward-avatar {
       margin-right: 0.25rem;
     }
@@ -891,28 +895,6 @@
   .message-content:not(.custom-shape) & {
     position: relative;
     margin-top: 0.25rem;
-    padding-left: 0.625rem;
-
-    &::before {
-      content: "";
-      display: block;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0.0625rem;
-      width: 2px;
-      background: var(--accent-color);
-      border-radius: 2px;
-    }
-
-    &:dir(rtl) {
-      padding-inline-start: 0.625rem;
-
-      &::before {
-        left: auto;
-        right: 0.0625rem;
-      }
-    }
   }
 
   --border-top-left-radius: var(--border-radius-messages-small);
