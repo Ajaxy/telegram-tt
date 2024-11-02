@@ -22,7 +22,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       profilePhoto, voiceMessagesForbidden, premiumGifts,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
-      birthday, personalChannelId, personalChannelMessage, sponsoredEnabled,
+      birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount,
     },
     users,
   } = mtpUserFull;
@@ -50,6 +50,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     personalChannelId: personalChannelId && buildApiPeerId(personalChannelId, 'channel'),
     personalChannelMessageId: personalChannelMessage,
     areAdsEnabled: sponsoredEnabled,
+    starGiftCount: stargiftsCount,
   };
 }
 

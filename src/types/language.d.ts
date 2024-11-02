@@ -1541,6 +1541,82 @@ export interface LangPair {
   'GiftStarsOutgoing': {
     'user': string | number;
   };
+  'GiftPremiumHeader': undefined;
+  'GiftPremiumDescription': {
+    'user': string | number;
+    'link': string | number;
+  };
+  'GiftPremiumDescriptionLinkCaption': undefined;
+  'GiftPremiumDescriptionLink': undefined;
+  'StarsGiftHeader': undefined;
+  'StarGiftDescription': {
+    'user': string | number;
+  };
+  'GiftLimited': undefined;
+  'GiftDiscount': {
+    'percent': string | number;
+  };
+  'GiftSoldCount': {
+    'count': string | number;
+  };
+  'GiftLeftCount': {
+    'count': string | number;
+  };
+  'GiftSoldOut': undefined;
+  'GiftSoldOutInfo': undefined;
+  'GiftMessagePlaceholder': undefined;
+  'GiftHideMyName': undefined;
+  'GiftHideNameDescription': {
+    'profile': string | number;
+    'receiver': string | number;
+  };
+  'GiftSend': {
+    'amount': string | number;
+  };
+  'GiftInfoSent': undefined;
+  'GiftInfoReceived': undefined;
+  'GiftInfoTitle': undefined;
+  'GiftInfoDescription': {
+    'amount': string | number;
+  };
+  'GiftInfoDescriptionOut': {
+    'user': string | number;
+    'amount': string | number;
+  };
+  'GiftInfoDescriptionConverted': {
+    'amount': string | number;
+  };
+  'GiftInfoDescriptionOutConverted': {
+    'user': string | number;
+    'amount': string | number;
+  };
+  'GiftInfoFrom': undefined;
+  'GiftInfoDate': undefined;
+  'GiftInfoValue': undefined;
+  'GiftInfoMakeVisible': undefined;
+  'GiftInfoMakeInvisible': undefined;
+  'GiftInfoConvert': {
+    'amount': string | number;
+  };
+  'GiftInfoConvertTitle': undefined;
+  'GiftInfoConvertDescription': {
+    'user': string | number;
+    'amount': string | number;
+  };
+  'GiftInfoSaved': {
+    'link': string | number;
+  };
+  'GiftInfoSavedView': undefined;
+  'GiftInfoHidden': undefined;
+  'StarsAmount': {
+    'amount': string | number;
+  };
+  'StarsAmountText': {
+    'amount': string | number;
+  };
+  'AllGiftsCategory': undefined;
+  'LimitedGiftsCategory': undefined;
+  'PremiumGiftDescription': undefined;
   'SendPaidReaction': {
     'amount': string | number;
   };
@@ -1555,6 +1631,44 @@ export interface LangPair {
   };
   'PrizeCredits': {
     'count': string | number;
+  };
+  'ActionStarGiftTitle': {
+    'user': string | number;
+    'count': string | number;
+  };
+  'ActionStarGiftOutTitle': {
+    'count': string | number;
+  };
+  'ActionStarGiftOutDescription': {
+    'user': string | number;
+    'count': string | number;
+  };
+  'ActionStarGiftDescription': {
+    'count': string | number;
+  };
+  'ActionStarGiftDisplaying': undefined;
+  'GiftTo': undefined;
+  'GiftFrom': undefined;
+  'ReceivedGift': undefined;
+  'SentGift': undefined;
+  'StarGiftInfoDescriptionInbound': {
+    'count': string | number;
+    'link': string | number;
+  };
+  'StarGiftInfoDescriptionOutgoing': {
+    'user': string | number;
+    'count': string | number;
+    'link': string | number;
+  };
+  'StarGiftInfoLinkCaption': undefined;
+  'StarGiftDisplayOnMyPage': undefined;
+  'StarGiftConvertTo': undefined;
+  'StarGiftHideFromMyPage': undefined;
+  'StarGiftSenderPrivacyNote': undefined;
+  'StarGiftAvailability': undefined;
+  'StarGiftAvailabilityValue': {
+    'number': string | number;
+    'total': string | number;
   };
   'StarsSubscribeText': {
     'chat': string | number;

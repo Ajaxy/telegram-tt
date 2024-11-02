@@ -10,6 +10,7 @@ import type {
   ApiDocument,
   ApiExportedInvite,
   ApiFakeType,
+  ApiLabeledPrice,
   ApiLanguage,
   ApiMessage,
   ApiPhoto,
@@ -163,25 +164,7 @@ export interface ShippingOption {
   id: string;
   title: string;
   amount: number;
-  prices: Price[];
-}
-
-export interface Price {
-  label: string;
-  amount: number;
-}
-
-export interface ApiInvoiceContainer {
-  isTest?: boolean;
-  isNameRequested?: boolean;
-  isPhoneRequested?: boolean;
-  isEmailRequested?: boolean;
-  isShippingAddressRequested?: boolean;
-  isFlexible?: boolean;
-  shouldSendPhoneToProvider?: boolean;
-  shouldSendEmailToProvider?: boolean;
-  currency?: string;
-  prices?: Price[];
+  prices: ApiLabeledPrice[];
 }
 
 export enum SettingsScreens {
@@ -403,7 +386,8 @@ export type ProfileTabType =
   | 'stories'
   | 'storiesArchive'
   | 'similarChannels'
-  | 'dialogs';
+  | 'dialogs'
+  | 'gifts';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type MiddleSearchType = 'chat' | 'myChats' | 'channels';
 export type MiddleSearchParams = {

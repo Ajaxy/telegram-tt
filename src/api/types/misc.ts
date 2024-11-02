@@ -235,7 +235,8 @@ export interface ApiAppConfig {
   channelRestrictAdsLevelMin?: number;
   paidReactionMaxAmount?: number;
   isChannelRevenueWithdrawalEnabled?: boolean;
-  isStarsGiftsEnabled?: boolean;
+  isStarsGiftEnabled?: boolean;
+  starGiftMaxMessageLength?: number;
 }
 
 export interface ApiConfig {

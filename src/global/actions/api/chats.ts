@@ -25,7 +25,6 @@ import {
   RE_TG_LINK,
   SAVED_FOLDER_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
-  STARS_CURRENCY_CODE,
   TME_WEB_DOMAINS,
   TMP_CHAT_ID,
   TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
@@ -70,6 +69,7 @@ import {
   replaceChatFullInfo,
   replaceChatListIds,
   replaceChatListLoadingParameters,
+  replaceMessages,
   replaceThreadParam,
   replaceUserStatuses,
   toggleSimilarChannels,
@@ -499,7 +499,7 @@ addActionHandler('openSupportChat', async (global, actions, payload): Promise<vo
 });
 
 addActionHandler('loadAllChats', async (global, actions, payload): Promise<void> => {
-  const { onFirstBatchDone } = payload;
+  const { whenFirstBatchDone } = payload;
   const listType = payload.listType;
   let isCallbackFired = false;
   let i = 0;
@@ -526,7 +526,7 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
     );
 
     if (!isCallbackFired) {
-      onFirstBatchDone?.();
+      await whenFirstBatchDone?.();
       isCallbackFired = true;
     }
 
@@ -1215,24 +1215,14 @@ addActionHandler('checkChatInvite', async (global, actions, payload): Promise<vo
 
   if (result.invite.subscriptionFormId) {
     global = updateTabState(global, {
-      payment: {
-        formId: result.invite.subscriptionFormId,
+      starsPayment: {
         inputInvoice: {
           type: 'chatInviteSubscription',
           hash,
-          inviteInfo: result.invite,
         },
-        invoice: {
-          amount: result.invite.subscriptionPricing!.amount,
-          currency: STARS_CURRENCY_CODE,
-          isRecurring: true,
-          mediaType: 'invoice',
-          // Placeholder values
-          title: 'Subscription',
-          text: '',
-        },
+        subscriptionInfo: result.invite,
+        status: 'pending',
       },
-      isStarPaymentModalOpen: true,
     }, tabId);
     setGlobal(global);
     return;
@@ -2783,7 +2773,7 @@ async function loadChats(
   }
 
   global = updateChatListSecondaryInfo(global, listType, result);
-  global = addMessages(global, result.messages);
+  global = replaceMessages(global, result.messages);
   global = updateChatsLastMessageId(global, result.lastMessageByChatId, listType);
 
   if (!shouldIgnorePagination) {

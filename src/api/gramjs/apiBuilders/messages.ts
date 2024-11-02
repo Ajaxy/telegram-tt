@@ -7,11 +7,13 @@ import type {
   ApiChat,
   ApiContact,
   ApiFactCheck,
+  ApiFormattedText,
   ApiGroupCall,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
   ApiKeyboardButton,
   ApiMessage,
+  ApiMessageActionStarGift,
   ApiMessageEntity,
   ApiMessageForwardInfo,
   ApiNewPoll,
@@ -38,6 +40,7 @@ import {
   DELETED_COMMENTS_CHANNEL_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
+  STARS_CURRENCY_CODE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -59,6 +62,7 @@ import {
   buildApiPhoto,
 } from './common';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
+import { buildApiStarGift } from './payments';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
@@ -349,6 +353,21 @@ export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
   };
 }
 
+function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : ApiMessageActionStarGift {
+  const {
+    nameHidden, saved, converted, gift, message, convertStars,
+  } = action;
+
+  return {
+    isNameHidden: Boolean(nameHidden),
+    isSaved: Boolean(saved),
+    isConverted: Boolean(converted),
+    gift: buildApiStarGift(gift),
+    message: message && buildApiFormattedText(message),
+    starsToConvert: convertStars.toJSNumber(),
+  };
+}
+
 function buildAction(
   action: GramJs.TypeMessageAction,
   senderId: string | undefined,
@@ -364,6 +383,7 @@ function buildAction(
   let call: Partial<ApiGroupCall> | undefined;
   let amount: number | undefined;
   let stars: number | undefined;
+  let starGift: ApiMessageActionStarGift | undefined;
   let currency: string | undefined;
   let giftCryptoInfo: {
     currency: string;
@@ -382,6 +402,7 @@ function buildAction(
   let isUnclaimed: boolean | undefined;
   let pluralValue: number | undefined;
   let transactionId: string | undefined;
+  let message: ApiFormattedText | undefined;
 
   let targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -528,6 +549,9 @@ function buildAction(
     } else {
       translationValues.push('%action_origin%', '%gift_payment_amount%');
     }
+    if (action.message) {
+      message = buildApiFormattedText(action.message);
+    }
     if (targetPeerId) {
       targetUserIds.push(targetPeerId);
     }
@@ -584,6 +608,10 @@ function buildAction(
     if (isOutgoing) {
       translationValues.push('%gift_payment_amount%');
     }
+    if (action.message) {
+      message = buildApiFormattedText(action.message);
+    }
+
     currency = action.currency;
     if (action.cryptoCurrency) {
       giftCryptoInfo = {
@@ -667,6 +695,24 @@ function buildAction(
     amount = action.amount.toJSNumber();
     stars = action.stars.toJSNumber();
     transactionId = action.transactionId;
+  } else if (action instanceof GramJs.MessageActionStarGift) {
+    type = 'starGift';
+    if (isOutgoing) {
+      text = 'ActionGiftOutbound';
+      translationValues.push('%gift_payment_amount%');
+    } else {
+      text = 'ActionGiftInbound';
+      translationValues.push('%action_origin%', '%gift_payment_amount%');
+    }
+
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
+      targetChatId = targetPeerId;
+    }
+
+    amount = action.gift.stars.toJSNumber();
+    currency = STARS_CURRENCY_CODE;
+    starGift = buildApiMessageActionStarGift(action);
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -685,6 +731,7 @@ function buildAction(
     photo, // TODO Only used internally now, will be used for the UI in future
     amount,
     stars,
+    starGift,
     currency,
     giftCryptoInfo,
     isGiveaway,
@@ -699,6 +746,7 @@ function buildAction(
     isUnclaimed,
     pluralValue,
     transactionId,
+    message,
   };
 }
 

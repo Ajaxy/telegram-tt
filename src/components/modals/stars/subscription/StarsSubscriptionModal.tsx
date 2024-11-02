@@ -7,6 +7,7 @@ import type {
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
+import { STARS_ICON_PLACEHOLDER } from '../../../../config';
 import {
   selectPeer,
 } from '../../../../global/selectors';
@@ -130,7 +131,7 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
           }, {
             withNodes: true,
             specialReplacement: {
-              '⭐️': <StarIcon className={styles.amountStar} size="adaptive" type="gold" />,
+              [STARS_ICON_PLACEHOLDER]: <StarIcon className={styles.amountStar} size="adaptive" type="gold" />,
             },
           })}
         </p>

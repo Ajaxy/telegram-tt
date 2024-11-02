@@ -30,7 +30,7 @@
 }
 
 @mixin gradient-border-horizontal($borderStart, $borderEnd) {
-  mask-image: linear-gradient(to right, transparent, black $borderStart, black $borderEnd, transparent);
+  mask-image: linear-gradient(to right, transparent, black $borderStart, black calc(100% - $borderEnd), transparent);
 }
 
 @mixin gradient-border-left($indent, $cutout: 0px) {

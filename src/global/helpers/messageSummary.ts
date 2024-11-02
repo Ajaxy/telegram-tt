@@ -199,7 +199,7 @@ function getSummaryDescription(
   }
 
   if (invoice) {
-    summary = invoice.extendedMedia ? invoice.title : `${lang('PaymentInvoice')}: ${invoice.text}`;
+    summary = invoice.extendedMedia ? invoice.title : `${lang('PaymentInvoice')}: ${invoice.description}`;
   }
 
   if (text) {

@@ -271,6 +271,7 @@
 
   .action-message-gift {
     display: flex !important;
+    width: 13.75rem;
     flex-direction: column;
     align-items: center;
     line-height: 1rem !important;
@@ -281,15 +282,10 @@
   }
 
   .action-message-gift-code {
-    width: 12rem;
     margin-inline: auto;
   }
 
-  .action-message-stars-gift {
-    width: 15rem;
-    margin-inline: auto;
-  }
-
+  .action-message-user-caption,
   .action-message-stars-balance {
     margin-top: 0.5rem;
     display: flex;
@@ -298,15 +294,26 @@
     font-weight: 500;
   }
 
+  .action-message-user-caption {
+    align-items: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .action-message-user-avatar {
+    margin-left: 0.25rem;
+  }
+
   .action-message-subtitle {
     margin-top: 1rem;
     font-weight: normal;
     text-wrap: balance;
   }
 
-  .action-message-stars-subtitle {
+  .action-message-gift-subtitle {
     font-weight: normal;
     text-wrap: balance;
+    font-size: 0.75rem;
   }
 
   .action-message-suggested-avatar {
@@ -328,6 +335,7 @@
   }
 
   .action-message-button {
+    position: relative;
     display: inline-block;
     border-radius: var(--border-radius-default);
     padding: 0.5rem 0.75rem;

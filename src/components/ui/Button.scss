@@ -280,6 +280,20 @@
     }
   }
 
+  &.stars {
+    background-color: #FFB727;
+    color: var(--color-white);
+    --ripple-color: rgba(0, 0, 0, 0.08);
+
+    @include active-styles() {
+      background-color: #FFB727CC;
+    }
+
+    @include no-ripple-styles() {
+      background-color: #FFB727;
+    }
+  }
+
   &.smaller {
     height: 2.75rem;
     padding: 0.3125rem;
@@ -341,7 +355,7 @@
     }
 
     &.pill {
-      height: 2rem;
+      height: 1.875rem;
       border-radius: 1rem;
       padding: 0.3125rem 1rem;
       font-size: 1rem;
@@ -365,6 +379,10 @@
     &.tiny {
       padding-left: 1.375rem;
       padding-right: 1.375rem;
+    }
+
+    &.pill {
+      padding: 0.5rem 0.75rem;
     }
   }
 

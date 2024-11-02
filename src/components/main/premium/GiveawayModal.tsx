@@ -80,7 +80,7 @@ type StateProps = {
   prepaidGiveaway?: ApiTypePrepaidGiveaway;
   countrySelectionLimit: number | undefined;
   isChannel?: boolean;
-  isStarsGiftsEnabled?: boolean;
+  isStarsGiftEnabled?: boolean;
   starsGiftOptions?: ApiStarGiveawayOption[] | undefined;
 };
 
@@ -120,7 +120,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   prepaidGiveaway,
   countrySelectionLimit = GIVEAWAY_MAX_ADDITIONAL_COUNTRIES,
   userSelectionLimit = GIVEAWAY_MAX_ADDITIONAL_USERS,
-  isStarsGiftsEnabled,
+  isStarsGiftEnabled,
   starsGiftOptions,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -149,7 +149,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
     },
   }];
 
-  if (isStarsGiftsEnabled) {
+  if (isStarsGiftEnabled) {
     TYPE_OPTIONS.push({
       name: 'TelegramStars',
       text: 'BoostingWinnersRandomly',
@@ -914,7 +914,7 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     selectedMemberList: giveawayModal?.selectedMemberIds,
     selectedChannelList: giveawayModal?.selectedChannelIds,
     giveawayBoostPerPremiumLimit: global.appConfig?.giveawayBoostsPerPremium,
-    isStarsGiftsEnabled: global.appConfig?.isStarsGiftsEnabled,
+    isStarsGiftEnabled: global.appConfig?.isStarsGiftEnabled,
     userSelectionLimit: global.appConfig?.giveawayAddPeersMax,
     countrySelectionLimit: global.appConfig?.giveawayCountriesMax,
     countryList: global.countryList.general,

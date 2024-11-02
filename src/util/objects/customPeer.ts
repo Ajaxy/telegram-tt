@@ -79,3 +79,11 @@ export const CUSTOM_PEER_EXCLUDED_CHAT_TYPES: UniqueCustomPeer[] = [
     peerColorId: 5,
   },
 ];
+
+export const CUSTOM_PEER_HIDDEN: UniqueCustomPeer<'hidden'> = {
+  isCustomPeer: true,
+  type: 'hidden',
+  titleKey: 'StarsTransactionHidden',
+  avatarIcon: 'author-hidden',
+  peerColorId: 4,
+};

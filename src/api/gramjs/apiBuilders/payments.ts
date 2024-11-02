@@ -1,3 +1,4 @@
+import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiPremiumSection } from '../../../global/types';
@@ -18,18 +19,20 @@ import type {
   ApiPrepaidGiveaway,
   ApiPrepaidStarsGiveaway,
   ApiReceipt,
+  ApiStarGift,
   ApiStarGiveawayOption,
   ApiStarsGiveawayWinnerOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
+  ApiUserStarGift,
   BoughtPaidMedia,
 } from '../../types';
 
 import { addWebDocumentToLocalDb } from '../helpers';
 import { buildApiStarsSubscriptionPricing } from './chats';
-import { buildApiMessageEntity } from './common';
+import { buildApiFormattedText, buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildMessageMediaContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
@@ -64,26 +67,20 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
 
   if (receipt instanceof GramJs.payments.PaymentReceiptStars) {
     const {
-      botId, currency, date, description: text, title, totalAmount, transactionId,
+      botId, currency, date, description, title, totalAmount, transactionId, invoice,
     } = receipt;
-
-    if (photo) {
-      addWebDocumentToLocalDb(photo);
-    }
 
     return {
       type: 'stars',
       currency,
-      peer: {
-        type: 'peer',
-        id: buildApiPeerId(botId, 'user'),
-      },
       date,
-      text,
+      botId: buildApiPeerId(botId, 'user'),
+      description,
       title,
       totalAmount: -totalAmount.toJSNumber(),
       transactionId,
-      photo: photo && buildApiWebDocument(photo),
+      photo: buildApiWebDocument(photo),
+      invoice: buildApiInvoice(invoice),
     };
   }
 
@@ -91,21 +88,18 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
     invoice,
     info,
     shipping,
-    currency,
     totalAmount,
     credentialsTitle,
     tipAmount,
     title,
-    description: text,
+    description,
+    botId,
+    currency,
+    date,
+    providerId,
   } = receipt;
 
   const { shippingAddress, phone, name } = (info || {});
-
-  const { prices } = invoice;
-  const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
-    label,
-    amount: amount.toJSNumber(),
-  }));
 
   let shippingPrices: ApiLabeledPrice[] | undefined;
   let shippingMethod: string | undefined;
@@ -122,32 +116,50 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
 
   return {
     type: 'regular',
-    currency,
-    prices: mappedPrices,
     info: { shippingAddress, phone, name },
     totalAmount: totalAmount.toJSNumber(),
+    currency,
+    date,
     credentialsTitle,
     shippingPrices,
     shippingMethod,
     tipAmount: tipAmount ? tipAmount.toJSNumber() : 0,
     title,
-    text,
+    description,
+    botId: buildApiPeerId(botId, 'user'),
+    providerId: providerId.toString(),
     photo: photo && buildApiWebDocument(photo),
+    invoice: buildApiInvoice(invoice),
   };
 }
 
-export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiPaymentForm | undefined {
+export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiPaymentForm {
   if (form instanceof GramJs.payments.PaymentFormStarGift) {
-    return undefined;
+    const { formId } = form;
+    return {
+      type: 'stargift',
+      formId: String(formId),
+      invoice: buildApiInvoice(form.invoice),
+    };
   }
 
   if (form instanceof GramJs.payments.PaymentFormStars) {
-    const { botId, formId } = form;
+    const {
+      botId, formId, title, description, photo,
+    } = form;
+
+    if (photo) {
+      addWebDocumentToLocalDb(photo);
+    }
 
     return {
       type: 'stars',
       botId: buildApiPeerId(botId, 'user'),
       formId: String(formId),
+      title,
+      description,
+      photo: buildApiWebDocument(photo),
+      invoice: buildApiInvoice(form.invoice),
     };
   }
 
@@ -163,25 +175,14 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
     savedCredentials,
     url,
     botId,
+    description,
+    title,
+    photo,
   } = form;
 
-  const {
-    test: isTest,
-    nameRequested: isNameRequested,
-    phoneRequested: isPhoneRequested,
-    emailRequested: isEmailRequested,
-    shippingAddressRequested: isShippingAddressRequested,
-    flexible: isFlexible,
-    phoneToProvider: shouldSendPhoneToProvider,
-    emailToProvider: shouldSendEmailToProvider,
-    currency,
-    prices,
-  } = invoice;
-
-  const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
-    label,
-    amount: amount.toJSNumber(),
-  }));
+  if (photo) {
+    addWebDocumentToLocalDb(photo);
+  }
   const { shippingAddress } = savedInfo || {};
   const cleanedInfo: ApiPaymentSavedInfo | undefined = savedInfo ? omitVirtualClassFields(savedInfo) : undefined;
   if (cleanedInfo && shippingAddress) {
@@ -192,6 +193,9 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
 
   return {
     type: 'regular',
+    title,
+    description,
+    photo: buildApiWebDocument(photo),
     url,
     botId: buildApiPeerId(botId, 'user'),
     canSaveCredentials,
@@ -200,18 +204,7 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
     providerId: String(providerId),
     nativeProvider,
     savedInfo: cleanedInfo,
-    invoiceContainer: {
-      isTest,
-      isNameRequested,
-      isPhoneRequested,
-      isEmailRequested,
-      isShippingAddressRequested,
-      isFlexible,
-      shouldSendPhoneToProvider,
-      shouldSendEmailToProvider,
-      currency,
-      prices: mappedPrices,
-    },
+    invoice: buildApiInvoice(invoice),
     nativeParams: {
       needCardholderName: Boolean(nativeData?.need_cardholder_name),
       needCountry: Boolean(nativeData?.need_country),
@@ -224,32 +217,47 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
   };
 }
 
-export function buildApiInvoiceFromForm(form: GramJs.payments.TypePaymentForm): ApiInvoice | undefined {
-  if (form instanceof GramJs.payments.PaymentFormStarGift) {
-    return undefined;
-  }
-
+export function buildApiInvoice(invoice: GramJs.Invoice): ApiInvoice {
   const {
-    invoice, description: text, title, photo,
-  } = form;
-  const {
-    test, currency, prices, recurring, termsUrl, maxTipAmount, suggestedTipAmounts,
+    test,
+    currency,
+    prices,
+    recurring,
+    termsUrl,
+    maxTipAmount,
+    suggestedTipAmounts,
+    emailRequested,
+    emailToProvider,
+    nameRequested,
+    phoneRequested,
+    phoneToProvider,
+    shippingAddressRequested,
+    flexible,
   } = invoice;
 
-  const totalAmount = prices.reduce((ac, cur) => ac + cur.amount.toJSNumber(), 0);
+  const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
+    label,
+    amount: amount.toJSNumber(),
+  }));
+
+  const totalAmount = prices.reduce((acc, cur) => acc.add(cur.amount), bigInt(0)).toJSNumber();
 
   return {
-    mediaType: 'invoice',
-    text,
-    title,
-    photo: buildApiWebDocument(photo),
-    amount: totalAmount,
+    totalAmount,
     currency,
     isTest: test,
     isRecurring: recurring,
     termsUrl,
+    prices: mappedPrices,
     maxTipAmount: maxTipAmount?.toJSNumber(),
-    ...(suggestedTipAmounts && { suggestedTipAmounts: suggestedTipAmounts.map((tip) => tip.toJSNumber()) }),
+    suggestedTipAmounts: suggestedTipAmounts?.map((tip) => tip.toJSNumber()),
+    isEmailRequested: emailRequested,
+    isEmailSentToProvider: emailToProvider,
+    isNameRequested: nameRequested,
+    isPhoneRequested: phoneRequested,
+    isPhoneSentToProvider: phoneToProvider,
+    isShippingAddressRequested: shippingAddressRequested,
+    isFlexible: flexible,
   };
 }
 
@@ -514,7 +522,7 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
     date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
-    subscriptionPeriod,
+    subscriptionPeriod, stargift, giveawayPostId,
   } = transaction;
 
   if (photo) {
@@ -540,6 +548,8 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     extendedMedia: boughtExtendedMedia,
     subscriptionPeriod,
     isReaction: reaction,
+    starGift: stargift && buildApiStarGift(stargift),
+    giveawayPostId,
   };
 }
 
@@ -570,5 +580,38 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
     currency,
     stars: stars.toJSNumber(),
     isExtended: extended,
+  };
+}
+
+export function buildApiStarGift(startGift: GramJs.StarGift): ApiStarGift {
+  const {
+    id, limited, sticker, stars, availabilityRemains, availabilityTotal, convertStars,
+  } = startGift;
+
+  return {
+    id: id.toString(),
+    isLimited: limited,
+    stickerId: sticker.id.toString(),
+    stars: stars.toJSNumber(),
+    availabilityRemains,
+    availabilityTotal,
+    starsToConvert: convertStars.toJSNumber(),
+  };
+}
+
+export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUserStarGift {
+  const {
+    gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved,
+  } = userStarGift;
+
+  return {
+    gift: buildApiStarGift(gift),
+    date,
+    starsToConvert: convertStars?.toJSNumber(),
+    fromId: fromId && buildApiPeerId(fromId, 'user'),
+    message: message && buildApiFormattedText(message),
+    messageId: msgId,
+    isNameHidden: nameHidden,
+    isUnsaved: unsaved,
   };
 }

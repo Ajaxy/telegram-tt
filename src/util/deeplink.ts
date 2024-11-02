@@ -37,7 +37,7 @@ export const processDeepLink = (url: string): boolean => {
         actions.openPremiumModal();
         return true;
       case 'premiumMultigiftLink':
-        actions.openPremiumGiftingModal();
+        actions.openGiftRecipientPicker();
         return true;
       default:
         break;

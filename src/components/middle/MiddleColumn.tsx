@@ -86,8 +86,6 @@ import Composer from '../common/Composer';
 import PrivacySettingsNoticeModal from '../common/PrivacySettingsNoticeModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
-import PremiumGiftModal from '../main/premium/PremiumGiftModal.async';
-import StarsGiftModal from '../main/premium/StarsGiftModal.async';
 import Button from '../ui/Button';
 import Transition from '../ui/Transition';
 import ChatLanguageModal from './ChatLanguageModal.async';
@@ -138,8 +136,6 @@ type StateProps = {
   isSeenByModalOpen: boolean;
   isPrivacySettingsNoticeModalOpen: boolean;
   isReactorListModalOpen: boolean;
-  isPremiumGiftModalOpen?: boolean;
-  isStarsGiftModalOpen?: boolean;
   isChatLanguageModalOpen?: boolean;
   withInterfaceAnimations?: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -199,8 +195,6 @@ function MiddleColumn({
   isSeenByModalOpen,
   isPrivacySettingsNoticeModalOpen,
   isReactorListModalOpen,
-  isPremiumGiftModalOpen,
-  isStarsGiftModalOpen,
   isChatLanguageModalOpen,
   withInterfaceAnimations,
   shouldSkipHistoryAnimations,
@@ -721,8 +715,6 @@ function MiddleColumn({
           />
         ))}
       </div>
-      <PremiumGiftModal isOpen={isPremiumGiftModalOpen} />
-      <StarsGiftModal isOpen={isStarsGiftModalOpen} />
     </div>
   );
 }
@@ -736,7 +728,7 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
-      seenByModal, giftModal, starsGiftModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
+      seenByModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
       chatLanguageModal, privacySettingsNoticeModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
@@ -755,8 +747,6 @@ export default memo(withGlobal<OwnProps>(
       isSeenByModalOpen: Boolean(seenByModal),
       isPrivacySettingsNoticeModalOpen: Boolean(privacySettingsNoticeModal),
       isReactorListModalOpen: Boolean(reactorModal),
-      isPremiumGiftModalOpen: giftModal?.isOpen,
-      isStarsGiftModalOpen: starsGiftModal?.isOpen,
       isChatLanguageModalOpen: Boolean(chatLanguageModal),
       withInterfaceAnimations: selectCanAnimateInterface(global),
       currentTransitionKey: Math.max(0, messageLists.length - 1),

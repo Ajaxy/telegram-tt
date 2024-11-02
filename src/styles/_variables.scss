@@ -112,6 +112,10 @@ $color-message-story-mention-to: #74bcff;
   --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
   --color-success: #{$color-green};
 
+  --accent-color: var(--color-primary);
+  --accent-background-color: var(--color-primary-tint);
+  --accent-background-active-color: var(--color-primary-opacity);
+
   --color-error: #{$color-error};
   --color-error-shade: #{color.mix($color-error, $color-black, 92%)};
   --color-error-rgb: #{toRGB($color-error)};

@@ -256,6 +256,11 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.chats.topicsInfoById) {
     cached.chats.topicsInfoById = initialState.chats.topicsInfoById;
   }
+
+  if (!cached.stickers.starGifts) {
+    cached.stickers.starGifts = initialState.stickers.starGifts;
+    cached.users.giftsById = initialState.users.giftsById;
+  }
 }
 
 function updateCache(force?: boolean) {

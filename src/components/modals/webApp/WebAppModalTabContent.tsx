@@ -112,6 +112,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     switchBotInline,
     sharePhoneWithBot,
     updateWebApp,
+    resetPaymentStatus,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [secondaryButton, setSecondaryButton] = useState<WebAppButton | undefined>();
@@ -265,6 +266,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       setWebAppPaymentSlug({
         slug: undefined,
       });
+      resetPaymentStatus();
     }
   }, [isPaymentModalOpen, paymentStatus, sendEvent, webApp?.slug]);
 
@@ -748,16 +750,18 @@ export default memo(withGlobal<OwnProps>(
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
-    const { isPaymentModalOpen, status } = selectTabState(global).payment;
-    const { isStarPaymentModalOpen } = selectTabState(global);
+    const { isPaymentModalOpen, status: regularPaymentStatus } = selectTabState(global).payment;
+    const { status: starsPaymentStatus, inputInvoice: starsInputInvoice } = selectTabState(global).starsPayment;
+
+    const paymentStatus = starsPaymentStatus || regularPaymentStatus;
 
     return {
       attachBot,
       bot,
       chat,
       theme,
-      isPaymentModalOpen: isPaymentModalOpen || isStarPaymentModalOpen,
-      paymentStatus: status,
+      isPaymentModalOpen: isPaymentModalOpen || Boolean(starsInputInvoice),
+      paymentStatus,
       isMaximizedState,
     };
   },

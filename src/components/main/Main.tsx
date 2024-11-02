@@ -83,7 +83,6 @@ import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
 import GiveawayModal from './premium/GiveawayModal.async';
-import PremiumGiftingPickerModal from './premium/PremiumGiftingPickerModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import StarsGiftingPickerModal from './premium/StarsGiftingPickerModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
@@ -137,7 +136,6 @@ type StateProps = {
   isReactionPickerOpen: boolean;
   isGiveawayModalOpen?: boolean;
   isDeleteMessageModalOpen?: boolean;
-  isPremiumGiftingPickerModal?: boolean;
   isStarsGiftingPickerModal?: boolean;
   isCurrentUserPremium?: boolean;
   noRightColumnAnimation?: boolean;
@@ -188,7 +186,6 @@ const Main = ({
   isPremiumModalOpen,
   isGiveawayModalOpen,
   isDeleteMessageModalOpen,
-  isPremiumGiftingPickerModal,
   isStarsGiftingPickerModal,
   isPaymentModalOpen,
   isReceiptModalOpen,
@@ -215,6 +212,7 @@ const Main = ({
     loadAvailableReactions,
     loadStickerSets,
     loadPremiumGifts,
+    loadStarGifts,
     loadDefaultTopicIcons,
     loadAddedStickers,
     loadFavoriteStickers,
@@ -327,6 +325,7 @@ const Main = ({
       loadQuickReplies();
       loadStarStatus();
       loadPremiumGifts();
+      loadStarGifts();
       loadAvailableEffects();
       loadBirthdayNumbersStickers();
       loadRestrictedEmojiStickers();
@@ -579,7 +578,6 @@ const Main = ({
       <MessageListHistoryHandler />
       <PremiumMainModal isOpen={isPremiumModalOpen} />
       <GiveawayModal isOpen={isGiveawayModalOpen} />
-      <PremiumGiftingPickerModal isOpen={isPremiumGiftingPickerModal} />
       <StarsGiftingPickerModal isOpen={isStarsGiftingPickerModal} />
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
@@ -621,8 +619,7 @@ export default memo(withGlobal<OwnProps>(
       premiumModal,
       giveawayModal,
       deleteMessageModal,
-      giftingModal,
-      starsGiftingModal,
+      starsGiftingPickerModal,
       isMasterTab,
       payment,
       limitReachedModal,
@@ -678,8 +675,7 @@ export default memo(withGlobal<OwnProps>(
       isPremiumModalOpen: premiumModal?.isOpen,
       isGiveawayModalOpen: giveawayModal?.isOpen,
       isDeleteMessageModalOpen: Boolean(deleteMessageModal),
-      isPremiumGiftingPickerModal: giftingModal?.isOpen,
-      isStarsGiftingPickerModal: starsGiftingModal?.isOpen,
+      isStarsGiftingPickerModal: starsGiftingPickerModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),

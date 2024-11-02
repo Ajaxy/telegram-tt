@@ -188,6 +188,30 @@ export function addMessages<T extends GlobalState>(
   return global;
 }
 
+export function replaceMessages<T extends GlobalState>(
+  global: T, messages: ApiMessage[],
+): T {
+  const updatedByChatId = messages.reduce((messagesByChatId, message: ApiMessage) => {
+    if (!messagesByChatId[message.chatId]) {
+      messagesByChatId[message.chatId] = {};
+    }
+    messagesByChatId[message.chatId][message.id] = message;
+
+    return messagesByChatId;
+  }, {} as Record<string, Record<number, ApiMessage>>);
+
+  Object.keys(updatedByChatId).forEach((chatId) => {
+    const currentById = selectChatMessages(global, chatId) || {};
+    const newById = {
+      ...currentById,
+      ...updatedByChatId[chatId],
+    };
+    global = replaceChatMessages(global, chatId, newById);
+  });
+
+  return global;
+}
+
 export function addChatMessagesById<T extends GlobalState>(
   global: T, chatId: string, newById: Record<number, ApiMessage>,
 ): T {

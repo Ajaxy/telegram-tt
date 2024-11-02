@@ -184,6 +184,7 @@ const ReactionButton = ({
     >
       {reaction.reaction.type === 'paid' ? (
         <>
+          <Sparkles preset="button" />
           <PaidReactionEmoji
             className={styles.animatedEmoji}
             containerId={containerId}
@@ -192,7 +193,6 @@ const ReactionButton = ({
             localAmount={reaction.localAmount}
             observeIntersection={observeIntersection}
           />
-          <Sparkles preset="reaction" />
           {shouldRenderPaidCounter && (
             <AnimatedCounter
               ref={counterRef}

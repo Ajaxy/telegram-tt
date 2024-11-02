@@ -26,7 +26,7 @@ import { getBasicListFormat } from '../browser/intlListFormat';
 import { createCallbackManager } from '../callbacks';
 import readFallbackStrings from '../data/readFallbackStrings';
 import { initialEstablishmentPromise, isCurrentTabMaster } from '../establishMultitabRole';
-import { omit } from '../iteratees';
+import { omit, unique } from '../iteratees';
 import { notifyLangpackUpdate } from '../multitab';
 import { replaceInStringsWithTeact } from '../replaceWithTeact';
 import { fastRaf } from '../schedulers';
@@ -377,12 +377,14 @@ function processTranslationAdvanced(
   const withRenderText = options?.withMarkdown || options?.renderTextFilters;
 
   if (withRenderText) {
+    const filters = options?.withMarkdown
+      ? unique((options.renderTextFilters || []).concat(['simple_markdown', 'emoji']) as TextFilter[])
+      : options.renderTextFilters;
+
     return tempResult.flatMap((curr: TeactNode) => {
       if (typeof curr !== 'string') {
         return curr;
       }
-
-      const filters = options?.withMarkdown ? ['simple_markdown', 'emoji'] as TextFilter[] : options.renderTextFilters!;
 
       return renderText(curr, filters, {
         markdownPostProcessor: (part: string) => {

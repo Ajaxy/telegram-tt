@@ -1,9 +1,13 @@
 import type { ApiPremiumSection } from '../../global/types';
-import type { ApiInvoiceContainer } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiChat } from './chats';
 import type {
-  ApiDocument, ApiMessageEntity, ApiPaymentCredentials, BoughtPaidMedia,
+  ApiDocument,
+  ApiFormattedText,
+  ApiInvoice,
+  ApiMessageEntity,
+  ApiPaymentCredentials,
+  BoughtPaidMedia,
 } from './messages';
 import type { ApiStarsSubscriptionPricing } from './misc';
 import type { StatisticsOverviewPercentage } from './statistics';
@@ -34,19 +38,32 @@ export interface ApiPaymentFormRegular {
   formId: string;
   providerId: string;
   nativeProvider?: string;
+  nativeParams: ApiPaymentFormNativeParams;
   savedInfo?: ApiPaymentSavedInfo;
   savedCredentials?: ApiPaymentCredentials[];
-  invoiceContainer: ApiInvoiceContainer;
-  nativeParams: ApiPaymentFormNativeParams;
+  invoice: ApiInvoice;
+  title: string;
+  description: string;
+  photo?: ApiWebDocument;
 }
 
 export interface ApiPaymentFormStars {
   type: 'stars';
   formId: string;
   botId: string;
+  title: string;
+  description: string;
+  photo?: ApiWebDocument;
+  invoice: ApiInvoice;
 }
 
-export type ApiPaymentForm = ApiPaymentFormRegular | ApiPaymentFormStars;
+export interface ApiPaymentFormStarGift {
+  type: 'stargift';
+  formId: string;
+  invoice: ApiInvoice;
+}
+
+export type ApiPaymentForm = ApiPaymentFormRegular | ApiPaymentFormStars | ApiPaymentFormStarGift;
 
 export interface ApiPaymentFormNativeParams {
   needCardholderName?: boolean;
@@ -64,25 +81,25 @@ export interface ApiLabeledPrice {
 
 export interface ApiReceiptStars {
   type: 'stars';
-  peer: ApiStarsTransactionPeer;
   date: number;
-  title?: string;
-  text?: string;
+  botId: string;
+  title: string;
+  description: string;
+  invoice: ApiInvoice;
   photo?: ApiWebDocument;
-  media?: BoughtPaidMedia[];
   currency: string;
   totalAmount: number;
   transactionId: string;
-  messageId?: number;
 }
 
 export interface ApiReceiptRegular {
   type: 'regular';
+  botId: string;
+  providerId: string;
+  description: string;
+  title: string;
+  invoice: ApiInvoice;
   photo?: ApiWebDocument;
-  text?: string;
-  title?: string;
-  currency: string;
-  prices: ApiLabeledPrice[];
   info?: {
     shippingAddress?: ApiShippingAddress;
     phone?: string;
@@ -90,6 +107,8 @@ export interface ApiReceiptRegular {
   };
   tipAmount: number;
   totalAmount: number;
+  currency: string;
+  date: number;
   credentialsTitle: string;
   shippingPrices?: ApiLabeledPrice[];
   shippingMethod?: string;
@@ -133,6 +152,7 @@ export type ApiInputStorePaymentGiftcode = {
   boostChannel?: ApiChat;
   currency: string;
   amount: number;
+  message?: ApiFormattedText;
 };
 
 export type ApiInputStorePaymentStarsTopup = {
@@ -167,6 +187,28 @@ export type ApiInputStorePaymentStarsGiveaway = {
 
 export type ApiInputStorePaymentPurpose = ApiInputStorePaymentGiveaway | ApiInputStorePaymentGiftcode |
 ApiInputStorePaymentStarsTopup | ApiInputStorePaymentStarsGift | ApiInputStorePaymentStarsGiveaway;
+
+export type ApiStarGift = {
+  isLimited?: true;
+  id: string;
+  stickerId: string;
+  stars: number;
+  availabilityRemains?: number;
+  availabilityTotal?: number;
+  starsToConvert: number;
+};
+
+export interface ApiUserStarGift {
+  isNameHidden?: boolean;
+  isUnsaved?: boolean;
+  fromId?: string;
+  date: number;
+  gift: ApiStarGift;
+  message?: ApiFormattedText;
+  messageId?: number;
+  starsToConvert?: number;
+  isConverted?: boolean; // Local field, used for Action Message
+}
 
 export interface ApiPremiumGiftCodeOption {
   users: number;
@@ -302,7 +344,8 @@ export interface ApiStarsTransaction {
   stars: number;
   isRefund?: true;
   isGift?: true;
-  isPrizeStars?: true;
+  starGift?: ApiStarGift;
+  giveawayPostId?: number;
   isMyGift?: true; // Used only for outgoing star gift messages
   isReaction?: true;
   hasFailed?: true;

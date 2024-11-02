@@ -7,6 +7,7 @@ import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { CustomPeer } from '../../../types';
 
+import { STARS_ICON_PLACEHOLDER } from '../../../config';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { selectChat, selectChatMessage, selectUser } from '../../../global/selectors';
 import { formatInteger } from '../../../util/textFormat';
@@ -165,7 +166,7 @@ const PaidReactionModal = ({
       hasAbsoluteCloseButton
       contentClassName={styles.content}
     >
-      {starBalance !== undefined && <BalanceBlock balance={starBalance} className={styles.modalBalance} />}
+      <BalanceBlock balance={starBalance} className={styles.modalBalance} />
       <StarSlider
         className={styles.slider}
         defaultValue={DEFAULT_STARS_AMOUNT}
@@ -213,7 +214,7 @@ const PaidReactionModal = ({
         {lang('SendPaidReaction', { amount: starsAmount }, {
           withNodes: true,
           specialReplacement: {
-            '⭐️': <Icon className={styles.buttonStar} name="star" />,
+            [STARS_ICON_PLACEHOLDER]: <Icon className={styles.buttonStar} name="star" />,
           },
         })}
       </Button>

@@ -1,4 +1,4 @@
-import type { ApiDraft } from '../../global/types';
+import type { ApiDraft, TabState } from '../../global/types';
 import type {
   GroupCallConnectionData,
   GroupCallConnectionState,
@@ -20,7 +20,6 @@ import type {
 } from './chats';
 import type {
   ApiFormattedText,
-  ApiInputInvoice,
   ApiMediaExtendedPreview,
   ApiMessage,
   ApiPhoto,
@@ -516,7 +515,14 @@ export type ApiUpdatePaymentVerificationNeeded = {
 
 export type ApiUpdatePaymentStateCompleted = {
   '@type': 'updatePaymentStateCompleted';
-  inputInvoice: ApiInputInvoice;
+  paymentState: TabState['payment'];
+  tabId: number;
+};
+
+export type ApiUpdateStarPaymentStateCompleted = {
+  '@type': 'updateStarPaymentStateCompleted';
+  paymentState: TabState['starsPayment'];
+  tabId: number;
 };
 
 export type ApiUpdatePrivacy = {
@@ -779,7 +785,7 @@ export type ApiUpdate = (
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |
   ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
-  ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
+  ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage | ApiUpdateStarPaymentStateCompleted |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
   ApiUpdateTwoFaError | ApiUpdatePasswordError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |

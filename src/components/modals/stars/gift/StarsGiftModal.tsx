@@ -1,60 +1,59 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { FC } from '../../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
   useState,
-} from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+} from '../../../../lib/teact/teact';
+import { getActions, getGlobal, withGlobal } from '../../../../global';
 
 import type {
   ApiStarTopupOption, ApiUser,
-} from '../../../api/types';
+} from '../../../../api/types';
+import type { TabState } from '../../../../global/types';
 
-import { getSenderTitle } from '../../../global/helpers';
+import { getSenderTitle } from '../../../../global/helpers';
 import {
-  selectTabState, selectUser,
-} from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import { formatCurrencyAsString } from '../../../util/formatCurrency';
-import renderText from '../../common/helpers/renderText';
+  selectUser,
+} from '../../../../global/selectors';
+import buildClassName from '../../../../util/buildClassName';
+import { formatCurrencyAsString } from '../../../../util/formatCurrency';
+import renderText from '../../../common/helpers/renderText';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
+import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
+import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
-import Avatar from '../../common/Avatar';
-import SafeLink from '../../common/SafeLink';
-import StarTopupOptionList from '../../modals/stars/StarTopupOptionList';
-import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
+import Avatar from '../../../common/Avatar';
+import SafeLink from '../../../common/SafeLink';
+import Button from '../../../ui/Button';
+import Modal from '../../../ui/Modal';
+import StarTopupOptionList from '../StarTopupOptionList';
 
 import styles from './StarsGiftModal.module.scss';
 
-import StarLogo from '../../../assets/icons/StarLogo.svg';
-import StarsBackground from '../../../assets/stars-bg.png';
+import StarLogo from '../../../../assets/icons/StarLogo.svg';
+import StarsBackground from '../../../../assets/stars-bg.png';
 
 export type OwnProps = {
-  isOpen?: boolean;
+  modal: TabState['starsGiftModal'];
 };
 
 type StateProps = {
-  isCompleted?: boolean;
-  starsGiftOptions?: ApiStarTopupOption[] | undefined;
-  forUserId?: string;
   user?: ApiUser;
 };
 
 const StarsGiftModal: FC<OwnProps & StateProps> = ({
-  isOpen,
-  isCompleted,
-  starsGiftOptions,
-  forUserId,
+  modal,
   user,
 }) => {
-  // eslint-disable-next-line no-null/no-null
-  const dialogRef = useRef<HTMLDivElement>(null);
-
   const {
     closeStarsGiftModal, openInvoice, requestConfetti,
   } = getActions();
+  // eslint-disable-next-line no-null/no-null
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  const isOpen = Boolean(modal?.isOpen);
+
+  const renderingModal = useCurrentOrPrev(modal);
 
   const oldLang = useOldLang();
 
@@ -85,17 +84,19 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
-    if (isCompleted) {
+    if (renderingModal?.isCompleted) {
       showConfetti();
     }
-  }, [isCompleted, showConfetti]);
+  }, [renderingModal, showConfetti]);
 
   const handleClick = useLastCallback((option: ApiStarTopupOption) => {
+    if (!renderingModal) return;
+
     setSelectedOption(option);
     if (user) {
       openInvoice({
         type: 'starsgift',
-        userId: forUserId!,
+        userId: user.id,
         stars: option.stars,
         currency: option.currency,
         amount: option.amount,
@@ -121,7 +122,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
   });
 
   function renderGiftTitle() {
-    if (isCompleted) {
+    if (renderingModal?.isCompleted) {
       return user ? renderText(oldLang('Notification.StarsGift.SentYou',
         formatCurrencyAsString(selectedOption!.amount, selectedOption!.currency, oldLang.code)), ['simple_markdown'])
         : renderText(oldLang('StarsAcquiredInfo', selectedOption?.stars), ['simple_markdown']);
@@ -144,6 +145,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
     <Modal
       className={buildClassName(styles.modalDialog, styles.root)}
       dialogRef={dialogRef}
+      isSlim
       onClose={handleClose}
       isOpen={isOpen}
     >
@@ -190,12 +192,10 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
           ) : oldLang('Stars.Purchase.GetStarsInfo')}
         </p>
         <div className={styles.section}>
-          {starsGiftOptions && (
-            <StarTopupOptionList
-              options={starsGiftOptions}
-              onClick={handleClick}
-            />
-          )}
+          <StarTopupOptionList
+            options={renderingModal?.starsGiftOptions}
+            onClick={handleClick}
+          />
           <div className={styles.secondaryInfo}>
             {bottomText}
           </div>
@@ -205,17 +205,10 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global): StateProps => {
-  const {
-    starsGiftOptions, forUserId, isCompleted,
-  } = selectTabState(global).starsGiftModal || {};
-
-  const user = forUserId ? selectUser(getGlobal(), forUserId) : undefined;
+export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
+  const user = modal?.forUserId ? selectUser(getGlobal(), modal.forUserId) : undefined;
 
   return {
-    isCompleted,
-    starsGiftOptions,
-    forUserId,
     user,
   };
 })(StarsGiftModal));

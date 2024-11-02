@@ -1,15 +1,8 @@
-@media (min-width: 451px) {
-  .modalDialog :global(.modal-dialog) {
-    max-width: 32rem !important;
-  }
-}
-
 .root :global(.modal-content) {
   padding: 0;
 }
 
 .root :global(.modal-dialog) {
-  max-width: 26.25rem;
   overflow: hidden;
 }
 

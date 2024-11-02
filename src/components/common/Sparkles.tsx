@@ -5,15 +5,15 @@ import buildStyle from '../../util/buildStyle';
 
 import styles from './Sparkles.module.scss';
 
-type ReactionParameters = {
-  preset: 'reaction';
+type ButtonParameters = {
+  preset: 'button';
 };
 
 type ProgressParameters = {
   preset: 'progress';
 };
 
-type PresetParameters = ReactionParameters | ProgressParameters;
+type PresetParameters = ButtonParameters | ProgressParameters;
 
 type OwnProps = {
   className?: string;
@@ -23,7 +23,7 @@ const SYMBOL = '✦';
 const ANIMATION_DURATION = 5;
 
 // Values are in percents
-const REACTION_POSITIONS = [{
+const BUTTON_POSITIONS = [{
   x: 20,
   y: 0,
   size: 100,
@@ -85,10 +85,10 @@ const Sparkles = ({
   className,
   ...presetSettings
 }: OwnProps) => {
-  if (presetSettings.preset === 'reaction') {
+  if (presetSettings.preset === 'button') {
     return (
-      <div className={buildClassName(styles.root, styles.reaction, className)}>
-        {REACTION_POSITIONS.map((position) => {
+      <div className={buildClassName(styles.root, styles.button, className)}>
+        {BUTTON_POSITIONS.map((position) => {
           const shiftX = Math.cos(Math.atan2(-50 + position.y, -50 + position.x)) * 100;
           const shiftY = Math.sin(Math.atan2(-50 + position.y, -50 + position.x)) * 100;
           return (

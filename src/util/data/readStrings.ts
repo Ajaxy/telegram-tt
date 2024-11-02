@@ -1,8 +1,7 @@
-const TRIM_UNQUOTE = /^\s*"\s*|\s*";?\s*$/g;
-const BACKSLASH_UNESCAPE = /(?:\\(.))/g;
+import { DEBUG } from '../../config';
 
 export default function readStrings(data: string): Record<string, string> {
-  const lines = data.split('\n');
+  const lines = data.split(/;?\r?\n/);
   const result: Record<string, string> = {};
   for (const line of lines) {
     if (!line.startsWith('"')) continue;
@@ -44,14 +43,17 @@ function parseLine(line: string) {
 
   if (separatorIndex === undefined || separatorIndex === line.length - 1) return undefined;
 
-  const key = line
-    .slice(0, separatorIndex)
-    .replace(TRIM_UNQUOTE, '')
-    .replace(BACKSLASH_UNESCAPE, '$1');
-  const value = line
-    .slice(separatorIndex + 1)
-    .replace(TRIM_UNQUOTE, '')
-    .replace(BACKSLASH_UNESCAPE, '$1');
+  try {
+    const key = JSON.parse(line.slice(0, separatorIndex));
+    const value = JSON.parse(line.slice(separatorIndex + 1));
 
-  return [key, value];
+    return [key, value];
+  } catch (e) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error('Error parsing line:', line, e);
+    }
+  }
+
+  return undefined;
 }

@@ -17,7 +17,7 @@ import styles from './TableInfoModal.module.scss';
 
 type ChatItem = { chatId: string };
 
-export type TableData = [TeactNode, TeactNode | ChatItem][];
+export type TableData = [TeactNode | undefined, TeactNode | ChatItem][];
 
 type OwnProps = {
   isOpen?: boolean;
@@ -68,8 +68,8 @@ const TableInfoModal = ({
       <div className={styles.table}>
         {tableData?.map(([label, value]) => (
           <>
-            <div className={buildClassName(styles.cell, styles.title)}>{label}</div>
-            <div className={buildClassName(styles.cell, styles.value)}>
+            {label && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}
+            <div className={buildClassName(styles.cell, styles.value, !label && styles.fullWidth)}>
               {typeof value === 'object' && 'chatId' in value ? (
                 <PickerSelectedItem
                   peerId={value.chatId}
@@ -86,7 +86,12 @@ const TableInfoModal = ({
       </div>
       {footer}
       {buttonText && (
-        <Button size="smaller" onClick={onButtonClick || onClose}>{buttonText}</Button>
+        <Button
+          className={!footer ? styles.noFooter : undefined}
+          size="smaller"
+          onClick={onButtonClick || onClose}
+        >{buttonText}
+        </Button>
       )}
     </Modal>
   );

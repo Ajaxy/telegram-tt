@@ -22,6 +22,7 @@ export default async function readFallbackStrings(forLocalScript?: boolean): Pro
 
   Object.entries(rawStrings).forEach(([key, value]) => {
     const [clearKey, pluralSuffix] = key.split('_');
+
     if (!pluralSuffix) {
       strings[clearKey] = value;
       return;

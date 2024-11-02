@@ -3,12 +3,14 @@ import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat, ApiPeerColor } from './chats';
-import type { ApiChatInviteInfo } from './misc';
 import type {
   ApiInputStorePaymentPurpose,
+  ApiLabeledPrice,
   ApiPremiumGiftCodeOption,
+  ApiStarGift,
 } from './payments';
 import type { ApiMessageStoryData, ApiWebPageStickerData, ApiWebPageStoryData } from './stories';
+import type { ApiUser } from './users';
 
 export interface ApiDimensions {
   width: number;
@@ -233,6 +235,7 @@ export type ApiInputInvoiceGiftCode = {
   currency: string;
   amount: number;
   option: ApiPremiumGiftCodeOption;
+  message?: ApiFormattedText;
 };
 
 export type ApiInputInvoiceStars = {
@@ -248,6 +251,14 @@ export type ApiInputInvoiceStarsGift = {
   stars: number;
   currency: string;
   amount: number;
+};
+
+export type ApiInputInvoiceStarGift = {
+  type: 'stargift';
+  shouldHideName?: boolean;
+  userId: string;
+  giftId: string;
+  message?: ApiFormattedText;
 };
 
 export type ApiInputInvoiceStarsGiveaway = {
@@ -268,12 +279,11 @@ export type ApiInputInvoiceStarsGiveaway = {
 export type ApiInputInvoiceChatInviteSubscription = {
   type: 'chatInviteSubscription';
   hash: string;
-  inviteInfo: ApiChatInviteInfo;
 };
 
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode | ApiInputInvoiceStarsGift | ApiInputInvoiceStars | ApiInputInvoiceStarsGiveaway
-| ApiInputInvoiceChatInviteSubscription;
+| ApiInputInvoiceGiftCode | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
+| ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription;
 
 /* Used for Invoice request */
 export type ApiRequestInputInvoiceMessage = {
@@ -303,6 +313,14 @@ export type ApiRequestInputInvoiceStarsGiveaway = {
   purpose: ApiInputStorePaymentPurpose;
 };
 
+export type ApiRequestInputInvoiceStarGift = {
+  type: 'stargift';
+  shouldHideName?: boolean;
+  user: ApiUser;
+  giftId: string;
+  message?: ApiFormattedText;
+};
+
 export type ApiRequestInputInvoiceChatInviteSubscription = {
   type: 'chatInviteSubscription';
   hash: string;
@@ -310,22 +328,36 @@ export type ApiRequestInputInvoiceChatInviteSubscription = {
 
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
 | ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway
-| ApiRequestInputInvoiceChatInviteSubscription;
+| ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift;
 
 export interface ApiInvoice {
-  mediaType: 'invoice';
-  text: string;
-  title: string;
-  photo?: ApiWebDocument;
-  amount: number;
+  prices: ApiLabeledPrice[];
+  totalAmount: number;
   currency: string;
-  receiptMsgId?: number;
   isTest?: boolean;
   isRecurring?: boolean;
   termsUrl?: string;
-  extendedMedia?: ApiMediaExtendedPreview;
   maxTipAmount?: number;
   suggestedTipAmounts?: number[];
+  isNameRequested?: boolean;
+  isPhoneRequested?: boolean;
+  isEmailRequested?: boolean;
+  isShippingAddressRequested?: boolean;
+  isFlexible?: boolean;
+  isPhoneSentToProvider?: boolean;
+  isEmailSentToProvider?: boolean;
+}
+
+export interface ApiMediaInvoice {
+  mediaType: 'invoice';
+  title: string;
+  description: string;
+  photo?: ApiWebDocument;
+  isTest?: boolean;
+  receiptMessageId?: number;
+  currency: string;
+  amount: number;
+  extendedMedia?: ApiMediaExtendedPreview;
 }
 
 export interface ApiMediaExtendedPreview {
@@ -420,6 +452,15 @@ export type ApiNewPoll = {
   };
 };
 
+export interface ApiMessageActionStarGift {
+  isNameHidden: boolean;
+  isSaved: boolean;
+  isConverted?: boolean;
+  gift: ApiStarGift;
+  message?: ApiFormattedText;
+  starsToConvert: number;
+}
+
 export interface ApiAction {
   mediaType: 'action';
   text: string;
@@ -438,6 +479,7 @@ export interface ApiAction {
   | 'giftPremium'
   | 'giftCode'
   | 'prizeStars'
+  | 'starGift'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;
@@ -448,6 +490,7 @@ export interface ApiAction {
     currency: string;
     amount: number;
   };
+  starGift?: ApiMessageActionStarGift;
   translationValues: string[];
   call?: Partial<ApiGroupCall>;
   phoneCall?: PhoneCallAction;
@@ -459,6 +502,7 @@ export interface ApiAction {
   isGiveaway?: boolean;
   isUnclaimed?: boolean;
   pluralValue?: number;
+  message?: ApiFormattedText;
 }
 
 export interface ApiWebPage {
@@ -627,7 +671,7 @@ export type MediaContent = {
   webPage?: ApiWebPage;
   audio?: ApiAudio;
   voice?: ApiVoice;
-  invoice?: ApiInvoice;
+  invoice?: ApiMediaInvoice;
   location?: ApiLocation;
   game?: ApiGame;
   storyData?: ApiMessageStoryData;

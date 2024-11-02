@@ -8,9 +8,9 @@ import type {
   ApiGame,
   ApiGiveaway,
   ApiGiveawayResults,
-  ApiInvoice,
   ApiLocation,
   ApiMediaExtendedPreview,
+  ApiMediaInvoice,
   ApiMessageStoryData,
   ApiPaidMedia,
   ApiPhoto,
@@ -473,12 +473,12 @@ function buildPollFromMedia(media: GramJs.TypeMessageMedia): ApiPoll | undefined
   return buildPoll(media.poll, media.results);
 }
 
-function buildInvoiceFromMedia(media: GramJs.TypeMessageMedia): ApiInvoice | undefined {
+function buildInvoiceFromMedia(media: GramJs.TypeMessageMedia): ApiMediaInvoice | undefined {
   if (!(media instanceof GramJs.MessageMediaInvoice)) {
     return undefined;
   }
 
-  return buildInvoice(media);
+  return buildMediaInvoice(media);
 }
 
 function buildLocationFromMedia(media: GramJs.TypeMessageMedia): ApiLocation | undefined {
@@ -671,9 +671,9 @@ export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): A
   };
 }
 
-export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
+export function buildMediaInvoice(media: GramJs.MessageMediaInvoice): ApiMediaInvoice {
   const {
-    description: text, title, photo, test, totalAmount, currency, receiptMsgId, extendedMedia,
+    description, title, photo, test, totalAmount, currency, receiptMsgId, extendedMedia,
   } = media;
 
   const preview = extendedMedia instanceof GramJs.MessageExtendedMediaPreview
@@ -682,10 +682,10 @@ export function buildInvoice(media: GramJs.MessageMediaInvoice): ApiInvoice {
   return {
     mediaType: 'invoice',
     title,
-    text,
+    description,
     photo: buildApiWebDocument(photo),
-    receiptMsgId,
-    amount: Number(totalAmount),
+    receiptMessageId: receiptMsgId,
+    amount: totalAmount.toJSNumber(),
     currency,
     isTest: test,
     extendedMedia: preview,

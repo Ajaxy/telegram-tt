@@ -99,6 +99,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     fullInfoById: {},
     previewMediaByBotId: {},
     commonChatsById: {},
+    giftsById: {},
   },
 
   chats: {
@@ -174,6 +175,11 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     hash: {},
   },
   availableEffectById: {},
+  starGiftsById: {},
+  starGiftCategoriesByName: {
+    all: [],
+    limited: [],
+  },
 
   stickers: {
     setsById: {},
@@ -196,6 +202,9 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     effect: {
       stickers: [],
       emojis: [],
+    },
+    starGifts: {
+      stickers: {},
     },
     forEmoji: {},
   },
@@ -380,6 +389,7 @@ export const INITIAL_TAB_STATE: TabState = {
   pollResults: {},
 
   payment: {},
+  starsPayment: {},
 
   notifications: [],
 

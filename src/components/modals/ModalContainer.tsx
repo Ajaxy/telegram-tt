@@ -11,12 +11,16 @@ import BoostModal from './boost/BoostModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
+import PremiumGiftModal from './gift/GiftModal.async';
+import GiftInfoModal from './gift/info/GiftInfoModal.async';
+import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import PaidReactionModal from './paidReaction/PaidReactionModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
+import StarsGiftModal from './stars/gift/StarsGiftModal.async';
 import StarsBalanceModal from './stars/StarsBalanceModal.async';
 import StarsPaymentModal from './stars/StarsPaymentModal.async';
 import StarsSubscriptionModal from './stars/subscription/StarsSubscriptionModal.async';
@@ -37,13 +41,17 @@ type ModalKey = keyof Pick<TabState,
 'collectibleInfoModal' |
 'reportAdModal' |
 'starsBalanceModal' |
-'isStarPaymentModalOpen' |
+'starsPayment' |
 'starsTransactionModal' |
 'paidReactionModal' |
 'webApps' |
 'starsTransactionModal' |
 'chatInviteModal' |
-'starsSubscriptionModal'
+'starsSubscriptionModal' |
+'starsGiftModal' |
+'giftModal' |
+'isGiftRecipientPickerOpen' |
+'giftInfoModal'
 >;
 
 type StateProps = {
@@ -70,12 +78,16 @@ const MODALS: ModalRegistry = {
   webApps: WebAppModal,
   collectibleInfoModal: CollectibleInfoModal,
   mapModal: MapModal,
-  isStarPaymentModalOpen: StarsPaymentModal,
+  starsPayment: StarsPaymentModal,
   starsBalanceModal: StarsBalanceModal,
   starsTransactionModal: StarsTransactionInfoModal,
   chatInviteModal: ChatInviteModal,
   paidReactionModal: PaidReactionModal,
   starsSubscriptionModal: StarsSubscriptionModal,
+  starsGiftModal: StarsGiftModal,
+  giftModal: PremiumGiftModal,
+  isGiftRecipientPickerOpen: GiftRecipientPicker,
+  giftInfoModal: GiftInfoModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

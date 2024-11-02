@@ -291,6 +291,10 @@ body:not(.is-ios) {
   vertical-align: text-top;
 }
 
+.star-amount-icon {
+  margin-inline-start: 0.5em; // Prevent sticking to the text without using `white-space: pre`
+}
+
 .shared-canvas-container {
   position: relative;
 }

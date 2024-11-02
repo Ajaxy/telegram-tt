@@ -573,6 +573,7 @@ GramJs.TypeInputStorePaymentPurpose {
         : undefined,
       currency: purpose.currency,
       amount: BigInt(purpose.amount),
+      message: purpose.message && buildInputTextWithEntities(purpose.message),
     });
   }
 
@@ -630,6 +631,18 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
     case 'slug': {
       return new GramJs.InputInvoiceSlug({
         slug: invoice.slug,
+      });
+    }
+
+    case 'stargift': {
+      const {
+        user, shouldHideName, giftId, message,
+      } = invoice;
+      return new GramJs.InputInvoiceStarGift({
+        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+        hideName: shouldHideName || undefined,
+        giftId: BigInt(giftId),
+        message: message && buildInputTextWithEntities(message),
       });
     }
 

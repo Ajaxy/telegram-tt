@@ -36,7 +36,7 @@ const MAX_LENGTH = 32;
 const NBSP = '\u00A0';
 
 export function renderActionMessageText(
-  lang: LangFn,
+  oldLang: LangFn,
   message: ApiMessage,
   actionOriginUser?: ApiUser,
   actionOriginChat?: ApiChat,
@@ -49,23 +49,25 @@ export function renderActionMessageText(
   observeIntersectionForPlaying?: ObserveFn,
 ) {
   if (isExpiredMessage(message)) {
-    return getExpiredMessageDescription(lang, message);
+    return getExpiredMessageDescription(oldLang, message);
   }
 
-  if (!message.content.action) {
+  if (!message.content?.action) {
     return [];
   }
 
   const {
     text, translationValues, amount, currency, call, score, topicEmojiIconId, giftCryptoInfo, pluralValue,
   } = message.content.action;
-  const content: TextPart[] = [];
+
   const noLinks = options.asPlainText || options.isEmbedded;
+
+  const content: TextPart[] = [];
   const translationKey = text === 'Chat.Service.Group.UpdatedPinnedMessage1' && !targetMessage
     ? 'Message.PinnedGenericMessage'
     : text;
 
-  let unprocessed = lang(
+  let unprocessed = oldLang(
     translationKey, translationValues?.length ? translationValues : undefined, undefined, pluralValue,
   );
   if (translationKey.includes('ScoredInGame')) { // Translation hack for games
@@ -116,10 +118,10 @@ export function renderActionMessageText(
     '%action_origin%',
     actionOriginUser ? (
       actionOriginUser.id === SERVICE_NOTIFICATIONS_USER_ID
-        ? lang('StarsTransactionUnknown')
+        ? oldLang('StarsTransactionUnknown')
         : renderUserContent(actionOriginUser, noLinks) || NBSP
     ) : actionOriginChat ? (
-      renderChatContent(lang, actionOriginChat, noLinks) || NBSP
+      renderChatContent(oldLang, actionOriginChat, noLinks) || NBSP
     ) : 'User',
     '',
   );
@@ -131,7 +133,7 @@ export function renderActionMessageText(
     processed = processPlaceholder(
       unprocessed,
       '%payment_amount%',
-      formatCurrencyAsString(amount!, currency!, lang.code),
+      formatCurrencyAsString(amount!, currency!, oldLang.code),
     );
     unprocessed = processed.pop() as string;
     content.push(...processed);
@@ -166,11 +168,11 @@ export function renderActionMessageText(
   }
 
   if (unprocessed.includes('%gift_payment_amount%')) {
-    const price = formatCurrencyAsString(amount!, currency!, lang.code);
+    const price = formatCurrencyAsString(amount!, currency!, oldLang.code);
     let priceText = price;
 
     if (giftCryptoInfo) {
-      const cryptoPrice = formatCurrencyAsString(giftCryptoInfo.amount, giftCryptoInfo.currency, lang.code);
+      const cryptoPrice = formatCurrencyAsString(giftCryptoInfo.amount, giftCryptoInfo.currency, oldLang.code);
       priceText = `${cryptoPrice} (${price})`;
     }
 
@@ -220,7 +222,7 @@ export function renderActionMessageText(
     '%message%',
     targetMessage
       ? renderMessageContent(
-        lang, targetMessage, options, observeIntersectionForLoading, observeIntersectionForPlaying,
+        oldLang, targetMessage, options, observeIntersectionForLoading, observeIntersectionForPlaying,
       )
       : 'a message',
   );

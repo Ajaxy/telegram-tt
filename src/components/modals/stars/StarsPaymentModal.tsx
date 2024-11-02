@@ -2,13 +2,13 @@ import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiChatInviteInfo, ApiMediaExtendedPreview, ApiMessage, ApiUser,
+  ApiChat, ApiMediaExtendedPreview, ApiMessage, ApiUser,
 } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 
 import { getChatTitle, getCustomPeerFromInvite, getUserFullName } from '../../../global/helpers';
 import {
-  selectChat, selectChatMessage, selectTabState, selectUser,
+  selectChat, selectChatMessage, selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
@@ -17,6 +17,7 @@ import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
+import usePrevious from '../../../hooks/usePrevious';
 
 import Avatar from '../../common/Avatar';
 import StarIcon from '../../common/icons/StarIcon';
@@ -31,32 +32,34 @@ import styles from './StarsBalanceModal.module.scss';
 import StarsBackground from '../../../assets/stars-bg.png';
 
 export type OwnProps = {
-  modal: TabState['isStarPaymentModalOpen'];
+  modal: TabState['starsPayment'];
 };
 
 type StateProps = {
-  payment?: TabState['payment'];
   starsBalanceState?: GlobalState['stars'];
   bot?: ApiUser;
   paidMediaMessage?: ApiMessage;
   paidMediaChat?: ApiChat;
-  inviteInfo?: ApiChatInviteInfo;
 };
 
 const StarPaymentModal = ({
   modal,
   bot,
   starsBalanceState,
-  payment,
   paidMediaMessage,
   paidMediaChat,
-  inviteInfo,
 }: OwnProps & StateProps) => {
-  const { closePaymentModal, openStarsBalanceModal, sendStarPaymentForm } = getActions();
+  const { closeStarsPaymentModal, openStarsBalanceModal, sendStarPaymentForm } = getActions();
   const [isLoading, markLoading, unmarkLoading] = useFlag();
-  const isOpen = Boolean(modal && starsBalanceState);
+  const isOpen = Boolean(modal?.inputInvoice && starsBalanceState);
 
-  const photo = payment?.invoice?.photo;
+  const prevModal = usePrevious(modal);
+  const renderingModal = modal || prevModal;
+
+  const { form, subscriptionInfo } = renderingModal || {};
+  const amount = form?.invoice?.totalAmount || subscriptionInfo?.subscriptionPricing?.amount;
+
+  const photo = form?.photo;
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -68,12 +71,12 @@ const StarPaymentModal = ({
   }, [isOpen]);
 
   const descriptionText = useMemo(() => {
-    if (!payment?.invoice) {
+    if (!renderingModal?.inputInvoice) {
       return '';
     }
 
     const botName = getUserFullName(bot);
-    const starsText = oldLang('Stars.Intro.PurchasedText.Stars', payment.invoice.amount);
+    const starsText = oldLang('Stars.Intro.PurchasedText.Stars', amount);
 
     if (paidMediaMessage) {
       const extendedMedia = paidMediaMessage.content.paidMedia!.extendedMedia as ApiMediaExtendedPreview[];
@@ -88,22 +91,22 @@ const StarPaymentModal = ({
       return oldLang('Stars.Transfer.UnlockInfo', [mediaText, channelTitle, starsText]);
     }
 
-    if (inviteInfo) {
+    if (subscriptionInfo) {
       return lang('StarsSubscribeText', {
-        chat: inviteInfo.title,
-        amount: payment.invoice.amount,
+        chat: subscriptionInfo.title,
+        amount: amount!,
       }, {
         withNodes: true,
         withMarkdown: true,
-        pluralValue: payment.invoice.amount,
+        pluralValue: amount,
       });
     }
 
-    return oldLang('Stars.Transfer.Info', [payment.invoice.title, botName, starsText]);
-  }, [payment?.invoice, bot, oldLang, lang, paidMediaMessage, paidMediaChat, inviteInfo]);
+    return oldLang('Stars.Transfer.Info', [form!.title, botName, starsText]);
+  }, [renderingModal, bot, oldLang, amount, paidMediaMessage, subscriptionInfo, form, paidMediaChat, lang]);
 
   const disclaimerText = useMemo(() => {
-    if (inviteInfo) {
+    if (subscriptionInfo) {
       return lang('StarsSubscribeInfo', {
         link: <SafeLink url={lang('StarsSubscribeInfoLink')} text={lang('StarsSubscribeInfoLinkText')} />,
       }, {
@@ -112,31 +115,30 @@ const StarPaymentModal = ({
     }
 
     return undefined;
-  }, [inviteInfo, lang]);
+  }, [subscriptionInfo, lang]);
 
   const inviteCustomPeer = useMemo(() => {
-    if (!inviteInfo) {
+    if (!subscriptionInfo) {
       return undefined;
     }
 
-    return getCustomPeerFromInvite(inviteInfo);
-  }, [inviteInfo]);
+    return getCustomPeerFromInvite(subscriptionInfo);
+  }, [subscriptionInfo]);
 
   const handlePayment = useLastCallback(() => {
-    const price = payment?.invoice?.amount;
     const balance = starsBalanceState?.balance;
-    if (price === undefined || balance === undefined) {
+    if (amount === undefined || balance === undefined) {
       return;
     }
 
-    if (price > balance) {
+    if (amount > balance) {
       openStarsBalanceModal({
-        originPayment: payment,
+        originStarsPayment: modal,
       });
       return;
     }
 
-    sendStarPaymentForm();
+    sendStarPaymentForm({});
     markLoading();
   });
 
@@ -146,9 +148,9 @@ const StarPaymentModal = ({
       isOpen={isOpen}
       hasAbsoluteCloseButton
       isSlim
-      onClose={closePaymentModal}
+      onClose={closeStarsPaymentModal}
     >
-      <BalanceBlock balance={starsBalanceState?.balance || 0} className={styles.modalBalance} />
+      <BalanceBlock balance={starsBalanceState?.balance} className={styles.modalBalance} />
       <div className={styles.paymentImages} dir={oldLang.isRtl ? 'ltr' : 'rtl'}>
         {paidMediaMessage ? (
           <PaidMediaThumb media={paidMediaMessage.content.paidMedia!.extendedMedia} />
@@ -174,7 +176,7 @@ const StarPaymentModal = ({
       <Button className={styles.paymentButton} size="smaller" onClick={handlePayment} isLoading={isLoading}>
         {oldLang('Stars.Transfer.Pay')}
         <div className={styles.paymentAmount}>
-          {payment?.invoice?.amount}
+          {amount}
           <StarIcon className={styles.paymentButtonStar} size="small" />
         </div>
       </Button>
@@ -188,27 +190,20 @@ const StarPaymentModal = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    const payment = selectTabState(global).payment;
-    const bot = payment?.botId ? selectUser(global, payment.botId) : undefined;
+  (global, { modal }): StateProps => {
+    const bot = modal?.form?.botId ? selectUser(global, modal.form.botId) : undefined;
 
-    const messageInputInvoice = payment.inputInvoice?.type === 'message' ? payment.inputInvoice : undefined;
+    const messageInputInvoice = modal?.inputInvoice?.type === 'message' ? modal.inputInvoice : undefined;
     const message = messageInputInvoice
       ? selectChatMessage(global, messageInputInvoice.chatId, messageInputInvoice.messageId) : undefined;
     const chat = messageInputInvoice ? selectChat(global, messageInputInvoice.chatId) : undefined;
     const isPaidMedia = message?.content.paidMedia;
 
-    const inviteInputInvoice = payment.inputInvoice?.type === 'chatInviteSubscription'
-      ? payment.inputInvoice : undefined;
-    const inviteInfo = inviteInputInvoice?.inviteInfo;
-
     return {
       bot,
       starsBalanceState: global.stars,
-      payment,
       paidMediaMessage: isPaidMedia ? message : undefined,
       paidMediaChat: isPaidMedia ? chat : undefined,
-      inviteInfo,
     };
   },
 )(StarPaymentModal));

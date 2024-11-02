@@ -39,8 +39,6 @@
 
   @include mixins.adapt-padding-to-scrollbar(0.5rem);
   @include mixins.side-panel-section;
-
-  border-bottom: 0;
 }
 
 .sectionTitle {
@@ -51,11 +49,12 @@
   padding: 0.25rem 0.75rem;
 }
 
-.secondaryInfo {
+.tos {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   background-color: var(--color-background-secondary);
   padding: 0.5rem 1rem;
+  padding-top: 0;
 }
 
 .logo {

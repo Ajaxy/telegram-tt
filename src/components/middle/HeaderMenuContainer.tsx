@@ -111,7 +111,7 @@ type StateProps = {
   canAddContact?: boolean;
   canReportChat?: boolean;
   canDeleteChat?: boolean;
-  canGiftPremium?: boolean;
+  canGift?: boolean;
   canCreateTopic?: boolean;
   canEditTopic?: boolean;
   hasLinkedChat?: boolean;
@@ -158,7 +158,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isMuted,
   canReportChat,
   canDeleteChat,
-  canGiftPremium,
+  canGift,
   hasLinkedChat,
   canAddContact,
   canCreateTopic,
@@ -191,7 +191,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     toggleStatistics,
     openMonetizationStatistics,
     openBoostStatistics,
-    openPremiumGiftModal,
+    openGiftModal,
     openThreadWithInfo,
     openCreateTopicPanel,
     openEditTopicPanel,
@@ -317,8 +317,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
-  const handleGiftPremiumClick = useLastCallback(() => {
-    openPremiumGiftModal({ forUserIds: [chatId] });
+  const handleGiftClick = useLastCallback(() => {
+    openGiftModal({ forUserId: chatId });
     closeMenu();
   });
 
@@ -672,12 +672,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             </MenuItem>
           )}
           {botButtons}
-          {canGiftPremium && (
+          {canGift && (
             <MenuItem
               icon="gift"
-              onClick={handleGiftPremiumClick}
+              onClick={handleGiftClick}
             >
-              {lang('GiftPremium')}
+              {lang('ProfileSendAGift')}
             </MenuItem>
           )}
           {isBot && (
@@ -756,10 +756,7 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
     const fullInfo = userFullInfo || chatFullInfo;
-    const canGiftPremium = Boolean(
-      userFullInfo?.premiumGifts?.length
-      && !selectIsPremiumPurchaseBlocked(global),
-    );
+    const canGift = !selectIsPremiumPurchaseBlocked(global) && !isChatWithSelf;
 
     const topic = selectTopic(global, chatId, threadId);
     const canCreateTopic = chat.isForum && (
@@ -783,7 +780,7 @@ export default memo(withGlobal<OwnProps>(
       canAddContact,
       canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
-      canGiftPremium,
+      canGift,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       botCommands: chatBot ? userFullInfo?.botInfo?.commands : undefined,
       botPrivacyPolicyUrl: chatBot ? userFullInfo?.botInfo?.privacyPolicyUrl : undefined,

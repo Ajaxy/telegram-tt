@@ -81,7 +81,7 @@ export default function useChatListEntry({
   orderDiff: number;
   withInterfaceAnimations?: boolean;
 }) {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
@@ -120,8 +120,8 @@ export default function useChatListEntry({
 
     if (canDisplayDraft) {
       return (
-        <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          <span className="draft">{lang('Draft')}</span>
+        <p className="last-message" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
+          <span className="draft">{oldLang('Draft')}</span>
           {renderTextWithEntities({
             text: draft.text?.text || '',
             entities: draft.text?.entities,
@@ -138,8 +138,8 @@ export default function useChatListEntry({
 
     if (isExpiredMessage(lastMessage)) {
       return (
-        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          {getExpiredMessageDescription(lang, lastMessage)}
+        <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
+          {getExpiredMessageDescription(oldLang, lastMessage)}
         </p>
       );
     }
@@ -148,9 +148,9 @@ export default function useChatListEntry({
       const isChat = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId);
 
       return (
-        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
+        <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
           {renderActionMessageText(
-            lang,
+            oldLang,
             lastMessage,
             !isChat ? lastMessageSender as ApiUser : undefined,
             isChat ? chat : undefined,
@@ -166,10 +166,10 @@ export default function useChatListEntry({
       );
     }
 
-    const senderName = getMessageSenderName(lang, chatId, lastMessageSender);
+    const senderName = getMessageSenderName(oldLang, chatId, lastMessageSender);
 
     return (
-      <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
+      <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
         {senderName && (
           <>
             <span className="sender-name">{renderText(senderName)}</span>
@@ -183,7 +183,7 @@ export default function useChatListEntry({
     );
   }, [
     actionTargetChatId, actionTargetMessage, actionTargetUsers, chat, chatId, draft, isAction,
-    isRoundVideo, isTopic, lang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
+    isRoundVideo, isTopic, oldLang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
     observeIntersection, typingStatus, isSavedDialog, isPreview,
   ]);
 

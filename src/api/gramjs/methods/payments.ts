@@ -3,7 +3,8 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiChat, ApiInputStorePaymentPurpose, ApiPeer, ApiRequestInputInvoice,
-  ApiThemeParameters,
+  ApiSticker, ApiThemeParameters,
+  ApiUser,
 } from '../../types';
 
 import { DEBUG } from '../../../config';
@@ -12,25 +13,26 @@ import {
   buildApiBoostsStatus,
   buildApiCheckedGiftCode,
   buildApiGiveawayInfo,
-  buildApiInvoiceFromForm,
   buildApiMyBoost,
   buildApiPaymentForm,
   buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
   buildApiReceipt,
+  buildApiStarGift,
   buildApiStarsGiftOptions,
   buildApiStarsGiveawayOptions,
   buildApiStarsSubscription,
   buildApiStarsTransaction,
   buildApiStarTopupOption,
+  buildApiUserStarGift,
   buildShippingOptions,
 } from '../apiBuilders/payments';
 import { buildApiPeerId } from '../apiBuilders/peers';
+import { buildStickerFromDocument } from '../apiBuilders/symbols';
 import {
   buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildInputThemeParams, buildShippingInfo,
 } from '../gramjsBuilders';
 import {
-  addWebDocumentToLocalDb,
   deserializeBytes,
   serializeBytes,
 } from '../helpers';
@@ -171,23 +173,35 @@ export async function sendStarPaymentForm({
 }
 
 export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice, theme?: ApiThemeParameters) {
-  const result = await invokeRequest(new GramJs.payments.GetPaymentForm({
-    invoice: buildInputInvoice(inputInvoice),
-    themeParams: theme ? buildInputThemeParams(theme) : undefined,
-  }));
+  try {
+    const result = await invokeRequest(new GramJs.payments.GetPaymentForm({
+      invoice: buildInputInvoice(inputInvoice),
+      themeParams: theme ? buildInputThemeParams(theme) : undefined,
+    }), {
+      shouldThrow: true,
+    });
 
-  if (!result || result instanceof GramJs.payments.PaymentFormStarGift) {
+    if (!result) {
+      return undefined;
+    }
+
+    return buildApiPaymentForm(result);
+  } catch (err) {
+    if (err instanceof Error) {
+      // Can be removed if separate error handling is added to payment UI
+      sendApiUpdate({
+        '@type': 'error',
+        error: {
+          message: err.message,
+          hasErrorKey: true,
+        },
+      });
+      return {
+        error: err.message,
+      };
+    }
     return undefined;
   }
-
-  if (result.photo) {
-    addWebDocumentToLocalDb(result.photo);
-  }
-
-  return {
-    form: buildApiPaymentForm(result)!,
-    invoice: buildApiInvoiceFromForm(result)!,
-  };
 }
 
 export async function getReceipt(chat: ApiChat, msgId: number) {
@@ -406,6 +420,86 @@ export async function fetchStarsGiveawayOptions() {
   }
 
   return result.map(buildApiStarsGiveawayOptions);
+}
+
+export async function fetchStarGifts() {
+  const result = await invokeRequest(new GramJs.payments.GetStarGifts({}));
+
+  if (!result || result instanceof GramJs.payments.StarGiftsNotModified) {
+    return undefined;
+  }
+
+  const gifts = result.gifts.map(buildApiStarGift);
+  const stickers : Record<string, ApiSticker> = {};
+
+  result.gifts.forEach((gift) => {
+    if (gift.sticker instanceof GramJs.Document) {
+      localDb.documents[String(gift.sticker.id)] = gift.sticker;
+    }
+
+    const sticker = buildStickerFromDocument(gift.sticker);
+    if (sticker) {
+      stickers[sticker.id] = sticker;
+    }
+  });
+
+  return { gifts, stickers };
+}
+
+export async function fetchUserStarGifts({
+  user,
+  offset = '',
+  limit,
+}: {
+  user: ApiUser;
+  offset?: string;
+  limit?: number;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetUserStarGifts({
+    userId: buildInputPeer(user.id, user.accessHash),
+    offset,
+    limit,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  const gifts = result.gifts.map(buildApiUserStarGift);
+
+  return {
+    gifts,
+    nextOffset: result.nextOffset,
+  };
+}
+
+export function saveStarGift({
+  user,
+  messageId,
+  shouldUnsave,
+}: {
+  user: ApiUser;
+  messageId: number;
+  shouldUnsave?: boolean;
+}) {
+  return invokeRequest(new GramJs.payments.SaveStarGift({
+    userId: buildInputPeer(user.id, user.accessHash),
+    msgId: messageId,
+    unsave: shouldUnsave || undefined,
+  }));
+}
+
+export function convertStarGift({
+  user,
+  messageId,
+}: {
+  user: ApiUser;
+  messageId: number;
+}) {
+  return invokeRequest(new GramJs.payments.ConvertStarGift({
+    userId: buildInputPeer(user.id, user.accessHash),
+    msgId: messageId,
+  }));
 }
 
 export function launchPrepaidGiveaway({

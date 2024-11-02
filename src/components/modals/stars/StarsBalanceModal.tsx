@@ -55,7 +55,7 @@ const StarsBalanceModal = ({
   modal, starsBalanceState, canBuyPremium,
 }: OwnProps & StateProps) => {
   const {
-    closeStarsBalanceModal, loadStarsTransactions, openStarsGiftingModal, openInvoice,
+    closeStarsBalanceModal, loadStarsTransactions, openStarsGiftingPickerModal, openInvoice,
   } = getActions();
 
   const { balance, history, subscriptions } = starsBalanceState || {};
@@ -69,9 +69,12 @@ const StarsBalanceModal = ({
 
   const isOpen = Boolean(modal && starsBalanceState);
 
-  const { originPayment, originReaction } = modal || {};
+  const { originStarsPayment, originReaction, originGift } = modal || {};
 
-  const ongoingTransactionAmount = originPayment?.invoice?.amount || originReaction?.amount;
+  const ongoingTransactionAmount = originStarsPayment?.form?.invoice?.totalAmount
+    || originStarsPayment?.subscriptionInfo?.subscriptionPricing?.amount
+    || originReaction?.amount
+    || originGift?.gift.stars;
   const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance || 0) : undefined;
   const starsNeededText = useMemo(() => {
     if (!starsNeeded || starsNeeded < 0) return undefined;
@@ -83,17 +86,23 @@ const StarsBalanceModal = ({
       return oldLang('StarsNeededTextReactions', getChatTitle(oldLang, channel));
     }
 
-    if (originPayment) {
-      const bot = selectUser(global, originPayment.botId!);
+    if (originStarsPayment) {
+      const bot = originStarsPayment.form?.botId ? selectUser(global, originStarsPayment.form.botId) : undefined;
       if (!bot) return undefined;
       return oldLang('StarsNeededText', getUserFullName(bot));
     }
 
-    return undefined;
-  }, [oldLang, originPayment, originReaction, starsNeeded]);
+    if (originGift) {
+      const user = selectUser(global, originGift.userId);
+      if (!user) return undefined;
+      return oldLang('StarsNeededTextGift', getUserFullName(user));
+    }
 
-  const shouldShowItems = Boolean(history?.all?.transactions.length && !originPayment && !originReaction);
-  const shouldSuggestGifting = !originPayment && !originReaction;
+    return undefined;
+  }, [starsNeeded, originReaction, originStarsPayment, originGift, oldLang]);
+
+  const shouldShowItems = Boolean(history?.all?.transactions.length && !originStarsPayment && !originReaction);
+  const shouldSuggestGifting = !originStarsPayment && !originReaction;
 
   useEffect(() => {
     if (!isOpen) {
@@ -136,8 +145,8 @@ const StarsBalanceModal = ({
     });
   });
 
-  const openStarsGiftingModalHandler = useLastCallback(() => {
-    openStarsGiftingModal({});
+  const openStarsGiftingPickerModalHandler = useLastCallback(() => {
+    openStarsGiftingPickerModal({});
   });
 
   const handleBuyStars = useLastCallback((option: ApiStarTopupOption) => {
@@ -163,7 +172,7 @@ const StarsBalanceModal = ({
         >
           <Icon name="close" />
         </Button>
-        <BalanceBlock balance={balance || 0} className={styles.modalBalance} />
+        <BalanceBlock balance={balance} className={styles.modalBalance} />
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>
             {oldLang('TelegramStars')}
@@ -193,7 +202,7 @@ const StarsBalanceModal = ({
             <Button
               className={buildClassName(styles.starButton, 'settings-main-menu-star')}
               color="translucent"
-              onClick={openStarsGiftingModalHandler}
+              onClick={openStarsGiftingPickerModalHandler}
             >
               <StarIcon className="icon" type="gold" size="big" />
               {oldLang('TelegramStarsGift')}
@@ -207,9 +216,11 @@ const StarsBalanceModal = ({
             />
           )}
         </div>
-        <div className={styles.secondaryInfo}>
-          {tosText}
-        </div>
+        {areBuyOptionsShown && (
+          <div className={styles.tos}>
+            {tosText}
+          </div>
+        )}
         {shouldShowItems && Boolean(subscriptions?.list.length) && (
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>{oldLang('StarMySubscriptions')}</h3>

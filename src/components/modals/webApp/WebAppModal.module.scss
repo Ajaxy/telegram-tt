@@ -128,7 +128,7 @@
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 
-  @include mixins.gradient-border-horizontal(0.5rem, calc(100% - 0.5rem));
+  @include mixins.gradient-border-horizontal(0.5rem, 0.5rem);
 
   &::-webkit-scrollbar {
     height: 0;

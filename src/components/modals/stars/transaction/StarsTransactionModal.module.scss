@@ -84,11 +84,13 @@
   cursor: var(--custom-cursor, pointer);
 }
 
-.starTitle {
-  font-size: 1.5rem;
-}
-
 .subtitle {
   text-align: center;
   margin-top: 1rem;
+}
+
+.starGiftSticker {
+  height: 150px;
+  width: 150px;
+  position: relative;
 }

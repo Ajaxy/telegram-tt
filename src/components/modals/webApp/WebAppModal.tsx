@@ -14,7 +14,7 @@ import type { WebAppOutboundEvent } from '../../../types/webapp';
 
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
-  selectCurrentChat, selectTabState, selectTheme, selectUser,
+  selectCurrentChat, selectTheme, selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
@@ -56,8 +56,6 @@ type StateProps = {
   bot?: ApiUser;
   attachBot?: ApiAttachBot;
   theme?: ThemeKey;
-  isPaymentModalOpen?: boolean;
-  paymentStatus?: TabState['payment']['status'];
 };
 
 const PROLONG_INTERVAL = 45000; // 45s
@@ -588,16 +586,12 @@ export default memo(withGlobal<OwnProps>(
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
-    const { isPaymentModalOpen, status } = selectTabState(global).payment;
-    const { isStarPaymentModalOpen } = selectTabState(global);
 
     return {
       attachBot,
       bot,
       chat,
       theme,
-      isPaymentModalOpen: isPaymentModalOpen || isStarPaymentModalOpen,
-      paymentStatus: status,
     };
   },
 )(WebAppModal));

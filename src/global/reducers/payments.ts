@@ -1,5 +1,4 @@
 import type {
-  ApiInvoice, ApiPaymentForm,
   ApiReceiptRegular,
   ApiReceiptStars,
   ApiStarsSubscription,
@@ -11,7 +10,7 @@ import type {
 } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { selectTabState } from '../selectors';
+import { selectStarsPayment, selectTabState } from '../selectors';
 import { updateTabState } from './tabs';
 
 export function updatePayment<T extends GlobalState>(
@@ -21,6 +20,23 @@ export function updatePayment<T extends GlobalState>(
   return updateTabState(global, {
     payment: {
       ...selectTabState(global, tabId).payment,
+      ...update,
+    },
+  }, tabId);
+}
+
+export function updateStarsPayment<T extends GlobalState>(
+  global: T, update: Partial<TabState['starsPayment']>,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const starPayment = selectStarsPayment(global, tabId);
+  if (!starPayment) {
+    return global;
+  }
+
+  return updateTabState(global, {
+    starsPayment: {
+      ...starPayment,
       ...update,
     },
   }, tabId);
@@ -49,40 +65,6 @@ export function setPaymentStep<T extends GlobalState>(
   return updatePayment(global, { step }, tabId);
 }
 
-export function setInvoiceInfo<T extends GlobalState>(
-  global: T, invoice: ApiInvoice,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  const {
-    title,
-    text,
-    amount,
-    currency,
-    isTest,
-    photo,
-    isRecurring,
-    termsUrl,
-    maxTipAmount,
-    suggestedTipAmounts,
-  } = invoice;
-
-  return updatePayment(global, {
-    invoice: {
-      mediaType: 'invoice',
-      title,
-      text,
-      photo,
-      amount,
-      currency,
-      isTest,
-      isRecurring,
-      termsUrl,
-      maxTipAmount,
-      suggestedTipAmounts,
-    },
-  }, tabId);
-}
-
 export function setStripeCardInfo<T extends GlobalState>(
   global: T, cardInfo: { type: string; id: string },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
@@ -96,13 +78,6 @@ export function setSmartGlocalCardInfo<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   return updatePayment(global, { smartGlocalCredentials: { ...cardInfo } }, tabId);
-}
-
-export function setPaymentForm<T extends GlobalState>(
-  global: T, form: ApiPaymentForm,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  return updatePayment(global, { ...form }, tabId);
 }
 
 export function setConfirmPaymentUrl<T extends GlobalState>(
@@ -132,7 +107,15 @@ export function clearPayment<T extends GlobalState>(
 ): T {
   return updateTabState(global, {
     payment: {},
-    isStarPaymentModalOpen: undefined,
+  }, tabId);
+}
+
+export function clearStarPayment<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  return updateTabState(global, {
+    starsPayment: {},
   }, tabId);
 }
 
@@ -144,7 +127,6 @@ export function closeInvoice<T extends GlobalState>(
     isPaymentModalOpen: undefined,
     isExtendedMedia: undefined,
   }, tabId);
-  global = updateTabState(global, { isStarPaymentModalOpen: undefined }, tabId);
   return global;
 }
 
@@ -226,14 +208,15 @@ export function openStarsTransactionFromReceipt<T extends GlobalState>(
 ): T {
   const transaction: ApiStarsTransaction = {
     id: receipt.transactionId,
-    peer: receipt.peer,
+    peer: {
+      type: 'peer',
+      id: receipt.botId,
+    },
     stars: receipt.totalAmount,
     date: receipt.date,
     title: receipt.title,
-    description: receipt.text,
+    description: receipt.description,
     photo: receipt.photo,
-    extendedMedia: receipt.media,
-    messageId: receipt.messageId,
   };
 
   return openStarsTransactionModal(global, transaction, tabId);

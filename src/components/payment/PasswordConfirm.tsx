@@ -68,6 +68,6 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
     error: payment.error?.message,
     passwordHint: global.twoFaSettings.hint,
-    savedCredentials: payment.savedCredentials,
+    savedCredentials: payment.form?.type === 'regular' ? payment.form.savedCredentials : undefined,
   };
 })(PasswordConfirm));

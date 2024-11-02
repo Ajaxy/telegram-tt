@@ -12,6 +12,7 @@ import type {
   ApiMessage,
   ApiTypeStory,
   ApiUser,
+  ApiUserStarGift,
   ApiUserStatus,
 } from '../../api/types';
 import type { TabState } from '../../global/types';
@@ -76,6 +77,7 @@ import useTransitionFixes from './hooks/useTransitionFixes';
 
 import Audio from '../common/Audio';
 import Document from '../common/Document';
+import UserGift from '../common/gift/UserGift';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Media from '../common/Media';
 import NothingFound from '../common/NothingFound';
@@ -116,6 +118,8 @@ type StateProps = {
   hasStoriesTab?: boolean;
   hasMembersTab?: boolean;
   hasPreviewMediaTab?: boolean;
+  hasGiftsTab?: boolean;
+  gifts?: ApiUserStarGift[];
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
@@ -178,6 +182,8 @@ const Profile: FC<OwnProps & StateProps> = ({
   hasStoriesTab,
   hasMembersTab,
   hasPreviewMediaTab,
+  hasGiftsTab,
+  gifts,
   botPreviewMedia,
   areMembersHidden,
   canAddMembers,
@@ -218,6 +224,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     openPremiumModal,
     loadChannelRecommendations,
     loadPreviewMedias,
+    loadUserGifts,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -234,6 +241,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     ...(isSavedMessages && !isSavedDialog ? [{ type: 'dialogs' as const, title: 'SavedDialogsTab' }] : []),
     ...(hasStoriesTab ? [{ type: 'stories' as const, title: 'ProfileStories' }] : []),
     ...(hasStoriesTab && isSavedMessages ? [{ type: 'storiesArchive' as const, title: 'ProfileStoriesArchive' }] : []),
+    ...(hasGiftsTab ? [{ type: 'gifts' as const, title: 'ProfileGifts' }] : []),
     ...(hasMembersTab ? [{
       type: 'members' as const, title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
     }] : []),
@@ -253,6 +261,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     hasMembersTab,
     hasPreviewMediaTab,
     hasStoriesTab,
+    hasGiftsTab,
     isChannel,
     isTopicInfo,
     similarChannels,
@@ -298,6 +307,10 @@ const Profile: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, isChannel, similarChannels, isSynced]);
 
+  const giftIds = useMemo(() => {
+    return gifts?.map(({ date, gift, fromId }) => `${date}-${fromId}-${gift.id}`);
+  }, [gifts]);
+
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
   const handleLoadCommonChats = useCallback(() => {
@@ -309,28 +322,33 @@ const Profile: FC<OwnProps & StateProps> = ({
   const handleLoadStoriesArchive = useCallback(({ offsetId }: { offsetId: number }) => {
     loadStoriesArchive({ peerId: currentUserId!, offsetId });
   }, [currentUserId]);
+  const handleLoadGifts = useCallback(() => {
+    loadUserGifts({ userId: chatId });
+  }, [chatId]);
 
-  const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
+  const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds({
     loadMoreMembers,
-    handleLoadCommonChats,
-    searchSharedMediaMessages,
-    handleLoadPeerStories,
-    handleLoadStoriesArchive,
+    searchMessages: searchSharedMediaMessages,
+    loadStories: handleLoadPeerStories,
+    loadStoriesArchive: handleLoadStoriesArchive,
+    loadMoreGifts: handleLoadGifts,
+    loadCommonChats: handleLoadCommonChats,
     tabType,
     mediaSearchType,
-    members,
+    groupChatMembers: members,
     commonChatIds,
     usersById,
     userStatusesById,
     chatsById,
-    messagesById,
+    chatMessages: messagesById,
     foundIds,
     threadId,
     storyIds,
+    giftIds,
     pinnedStoryIds,
     archiveStoryIds,
     similarChannels,
-  );
+  });
   const isFirstTab = (isSavedMessages && resultType === 'dialogs')
     || (hasStoriesTab && resultType === 'stories')
     || resultType === 'members'
@@ -670,6 +688,10 @@ const Profile: FC<OwnProps & StateProps> = ({
               </>
             )}
           </div>
+        ) : resultType === 'gifts' ? (
+          (gifts?.map((gift) => (
+            <UserGift userId={chatId} key={`${gift.date}-${gift.fromId}-${gift.gift.id}`} gift={gift} />
+          )))
         ) : undefined}
       </div>
     );
@@ -795,6 +817,9 @@ export default memo(withGlobal<OwnProps>(
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
+    const hasGiftsTab = Boolean(userFullInfo?.starGiftCount);
+    const userGifts = global.users.giftsById[chatId];
+
     return {
       theme: selectTheme(global),
       isChannel,
@@ -816,6 +841,8 @@ export default memo(withGlobal<OwnProps>(
       userStatusesById,
       chatsById,
       storyIds,
+      hasGiftsTab,
+      gifts: userGifts?.gifts,
       pinnedStoryIds,
       archiveStoryIds,
       storyByIds,

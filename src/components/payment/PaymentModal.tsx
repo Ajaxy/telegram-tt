@@ -4,10 +4,12 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiCountry, ApiPaymentCredentials } from '../../api/types';
+import type {
+  ApiChat, ApiCountry, ApiInvoice, ApiLabeledPrice, ApiPaymentCredentials, ApiPaymentFormRegular,
+} from '../../api/types';
 import type { TabState } from '../../global/types';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
-import type { Price, ShippingOption } from '../../types';
+import type { ShippingOption } from '../../types';
 import type { PaymentFormSubmitEvent } from './ConfirmPayment';
 import { PaymentStep } from '../../types';
 
@@ -49,15 +51,13 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  step?: PaymentStep;
   chat?: ApiChat;
-  isNameRequested?: boolean;
-  isShippingAddressRequested?: boolean;
-  isPhoneRequested?: boolean;
-  isEmailRequested?: boolean;
-  shouldSendPhoneToProvider?: boolean;
-  shouldSendEmailToProvider?: boolean;
-  currency?: string;
-  prices?: Price[];
+  nativeProvider?: string;
+  invoice?: ApiInvoice;
+  form?: ApiPaymentFormRegular;
+  error?: TabState['payment']['error'];
+  prices?: ApiLabeledPrice[];
   isProviderError?: boolean;
   needCardholderName?: boolean;
   needCountry?: boolean;
@@ -65,6 +65,7 @@ type StateProps = {
   confirmPaymentUrl?: string;
   countryList: ApiCountry[];
   hasShippingOptions?: boolean;
+  shippingOptions?: ShippingOption[];
   requestId?: string;
   smartGlocalToken?: string;
   stripeId?: string;
@@ -75,32 +76,17 @@ type StateProps = {
   botName?: string;
 };
 
-type GlobalStateProps = Pick<TabState['payment'], (
-  'step' | 'shippingOptions' |
-  'savedInfo' | 'canSaveCredentials' | 'nativeProvider' | 'passwordMissing' | 'invoice' | 'error'
-)>;
-
 const NETWORK_REQUEST_TIMEOUT_S = 3;
 
-const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
+const PaymentModal: FC<OwnProps & StateProps> = ({
   isOpen,
   onClose,
   step,
   shippingOptions,
-  savedInfo,
-  canSaveCredentials,
-  isNameRequested,
-  isShippingAddressRequested,
-  isPhoneRequested,
-  isEmailRequested,
-  shouldSendPhoneToProvider,
-  shouldSendEmailToProvider,
-  currency,
-  passwordMissing,
+  form,
   isProviderError,
   invoice,
   nativeProvider,
-  prices,
   needCardholderName,
   needCountry,
   needZip,
@@ -189,10 +175,10 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   }, [error, paymentDispatch]);
 
   useEffect(() => {
-    if (savedInfo) {
+    if (form?.savedInfo) {
       const {
         name: fullName, phone, email, shippingAddress,
-      } = savedInfo;
+      } = form.savedInfo;
       const {
         countryIso2, ...shippingAddressRest
       } = shippingAddress || {};
@@ -213,7 +199,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         },
       });
     }
-  }, [savedInfo, paymentDispatch, countryList]);
+  }, [form, paymentDispatch, countryList]);
 
   useEffect(() => {
     if (savedCredentials?.length) {
@@ -233,8 +219,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       return 0;
     }
 
-    return getTotalPrice(prices, shippingOptions, paymentState.shipping, paymentState.tipAmount);
-  }, [step, prices, shippingOptions, paymentState.shipping, paymentState.tipAmount]);
+    return getTotalPrice(invoice?.prices, shippingOptions, paymentState.shipping, paymentState.tipAmount);
+  }, [step, invoice?.prices, shippingOptions, paymentState.shipping, paymentState.tipAmount]);
 
   const checkoutInfo = useMemo(() => {
     if (step !== PaymentStep.Checkout) {
@@ -295,19 +281,20 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       case PaymentStep.Checkout:
         return (
           <Checkout
-            prices={prices}
+            title={form!.title}
+            description={form!.description}
+            photo={form!.photo}
             dispatch={paymentDispatch}
             shippingPrices={paymentState.shipping && shippingOptions
               ? getShippingPrices(shippingOptions, paymentState.shipping)
               : undefined}
             totalPrice={totalPrice}
-            invoice={invoice}
+            invoice={invoice!}
             checkoutInfo={checkoutInfo}
             isPaymentFormUrl={isPaymentFormUrl}
-            currency={currency!}
             hasShippingOptions={hasShippingOptions}
             tipAmount={paymentState.tipAmount}
-            needAddress={Boolean(isShippingAddressRequested)}
+            needAddress={Boolean(invoice?.isShippingAddressRequested)}
             savedCredentials={savedCredentials}
             isTosAccepted={isTosAccepted}
             onAcceptTos={setIsTosAccepted}
@@ -337,7 +324,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           <PaymentInfo
             state={paymentState}
             dispatch={paymentDispatch}
-            canSaveCredentials={Boolean(!passwordMissing && canSaveCredentials)}
+            canSaveCredentials={Boolean(!form!.isPasswordMissing && form!.canSaveCredentials)}
             needCardholderName={needCardholderName}
             needCountry={needCountry}
             needZip={needZip}
@@ -349,10 +336,10 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           <ShippingInfo
             state={paymentState}
             dispatch={paymentDispatch}
-            needAddress={Boolean(isShippingAddressRequested)}
-            needEmail={Boolean(isEmailRequested || shouldSendEmailToProvider)}
-            needPhone={Boolean(isPhoneRequested || shouldSendPhoneToProvider)}
-            needName={Boolean(isNameRequested)}
+            needAddress={Boolean(invoice?.isShippingAddressRequested)}
+            needEmail={Boolean(invoice?.isEmailRequested || invoice?.isEmailSentToProvider)}
+            needPhone={Boolean(invoice?.isPhoneRequested || invoice?.isPhoneSentToProvider)}
+            needName={Boolean(invoice?.isNameRequested)}
             countryList={countryList!}
           />
         );
@@ -362,7 +349,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
             state={paymentState}
             dispatch={paymentDispatch}
             shippingOptions={shippingOptions || []}
-            currency={currency!}
+            currency={invoice!.currency}
           />
         );
       case PaymentStep.ConfirmPayment:
@@ -429,7 +416,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           return;
         }
 
-        if (savedInfo && !requestId && !paymentState.shipping) {
+        if (form?.savedInfo && !requestId && !paymentState.shipping) {
           setIsLoading(true);
           validateRequest();
           return;
@@ -455,16 +442,16 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         }
 
         const { phone, email, fullName } = paymentState;
-        const shouldFillRequestedData = (isEmailRequested && !email)
-          || (isPhoneRequested && !phone)
-          || (isNameRequested && !fullName);
+        const shouldFillRequestedData = (invoice?.isEmailRequested && !email)
+          || (invoice?.isPhoneRequested && !phone)
+          || (invoice?.isNameRequested && !fullName);
 
-        if ((isShippingAddressRequested && !requestId) || shouldFillRequestedData) {
+        if ((invoice?.isShippingAddressRequested && !requestId) || shouldFillRequestedData) {
           setStep(PaymentStep.ShippingInfo);
           return;
         }
 
-        if (isShippingAddressRequested && !paymentState.shipping && shippingOptions?.length) {
+        if (invoice?.isShippingAddressRequested && !paymentState.shipping && shippingOptions?.length) {
           setStep(PaymentStep.Shipping);
           return;
         }
@@ -517,7 +504,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   }, [step, lang]);
 
   const buttonText = step === PaymentStep.Checkout
-    ? lang('Checkout.PayPrice', formatCurrencyAsString(totalPrice, currency!, lang.code))
+    ? lang('Checkout.PayPrice', formatCurrencyAsString(totalPrice, invoice!.currency, lang.code))
     : lang('Next');
 
   function getIsSubmitDisabled() {
@@ -625,41 +612,27 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps & GlobalStateProps => {
+  (global): StateProps => {
     const {
+      form,
       step,
       shippingOptions,
-      savedInfo,
-      canSaveCredentials,
-      invoice,
-      invoiceContainer,
-      nativeProvider,
-      nativeParams,
-      passwordMissing,
       error,
       confirmPaymentUrl,
       inputInvoice,
       requestId,
       stripeCredentials,
       smartGlocalCredentials,
-      savedCredentials,
       temporaryPassword,
       isExtendedMedia,
       url,
       botId,
-      type,
     } = selectTabState(global).payment;
 
+    const { invoice, nativeParams, nativeProvider } = form || {};
     const countryList = global.countryList.general;
 
-    // Handled in `StarPaymentModal`
-    if (type === 'stars') {
-      return {
-        countryList,
-      };
-    }
-
-    let providerName = nativeProvider;
+    let providerName = form?.nativeProvider;
     if (!providerName && url) {
       providerName = url.startsWith(DONATE_PROVIDER_URL) ? DONATE_PROVIDER : undefined;
     }
@@ -667,16 +640,6 @@ export default memo(withGlobal<OwnProps>(
     const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId!) : undefined;
     const isProviderError = Boolean(invoice && (!providerName || !SUPPORTED_PROVIDERS.has(providerName)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
-    const {
-      isNameRequested,
-      isShippingAddressRequested,
-      isPhoneRequested,
-      isEmailRequested,
-      shouldSendPhoneToProvider,
-      shouldSendEmailToProvider,
-      currency,
-      prices,
-    } = (invoiceContainer || {});
     const bot = botId ? selectUser(global, botId) : undefined;
     const botName = getUserFullName(bot);
 
@@ -684,19 +647,9 @@ export default memo(withGlobal<OwnProps>(
       step,
       chat,
       shippingOptions,
-      savedInfo,
-      canSaveCredentials,
       nativeProvider: providerName,
-      passwordMissing,
-      isNameRequested,
-      isShippingAddressRequested,
-      isPhoneRequested,
-      isEmailRequested,
-      shouldSendPhoneToProvider,
-      shouldSendEmailToProvider,
-      currency,
-      prices,
       isProviderError,
+      form,
       invoice,
       needCardholderName,
       needCountry,
@@ -709,7 +662,6 @@ export default memo(withGlobal<OwnProps>(
       hasShippingOptions: Boolean(shippingOptions?.length),
       smartGlocalToken: smartGlocalCredentials?.token,
       stripeId: stripeCredentials?.id,
-      savedCredentials,
       passwordValidUntil: temporaryPassword?.validUntil,
       isExtendedMedia,
       botName,
@@ -727,7 +679,7 @@ function getShippingPrices(shippingOptions: ShippingOption[], shippingOption: st
 }
 
 function getTotalPrice(
-  prices: Price[] = [],
+  prices: ApiLabeledPrice[] = [],
   shippingOptions: ShippingOption[] | undefined,
   shippingOption: string,
   tipAmount: number,

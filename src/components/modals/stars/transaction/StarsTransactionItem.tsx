@@ -14,6 +14,7 @@ import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { CUSTOM_PEER_PREMIUM } from '../../../../util/objects/customPeer';
+import { getTransactionTitle } from '../helpers/transaction';
 
 import useSelector from '../../../../hooks/data/useSelector';
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -52,13 +53,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
   const peer = useSelector(selectOptionalPeer(peerId));
 
   const data = useMemo(() => {
-    let title = (() => {
-      if (transaction.extendedMedia) return lang('StarMediaPurchase');
-      if (transaction.subscriptionPeriod) return lang('StarSubscriptionPurchase');
-      if (transaction.isReaction) return lang('StarsReactionsSent');
-
-      return transaction.title;
-    })();
+    let title = getTransactionTitle(lang, transaction);
     let description;
     let status: string | undefined;
     let avatarPeer: ApiPeer | CustomPeer | undefined;
