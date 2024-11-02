@@ -238,6 +238,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
       withPortal
       noCompact
       anchor={renderingPosition}
+      positionY={story && 'bottom'}
       getTriggerElement={getTriggerElement}
       getRootElement={getRootElement}
       getMenuElement={getMenuElement}
