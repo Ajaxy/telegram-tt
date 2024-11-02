@@ -205,7 +205,7 @@ const Photo = <T,>({
     'media-inner',
     !isUploading && !nonInteractive && 'interactive',
     isSmall && 'small-image',
-    width === height && 'square-image',
+    (width === height || size === 'pictogram') && 'square-image',
     height < MIN_MEDIA_HEIGHT && 'fix-min-height',
     className,
   );

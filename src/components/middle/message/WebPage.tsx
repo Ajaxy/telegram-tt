@@ -129,6 +129,7 @@ const WebPage: FC<OwnProps> = ({
     audio,
     type,
     document,
+    mediaSize,
   } = webPage;
   const isStory = type === WEBPAGE_STORY_TYPE;
   const isExpiredStory = story && 'isDeleted' in story;
@@ -145,7 +146,7 @@ const WebPage: FC<OwnProps> = ({
       noAvatars,
       isMobile,
     });
-    isSquarePhoto = width === height;
+    isSquarePhoto = (width === height || mediaSize === 'small') && mediaSize !== 'large';
   }
   const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
 

@@ -1,3 +1,4 @@
+import type { WebPageMediaSize } from '../../global/types';
 import type { ThreadId } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
@@ -476,6 +477,8 @@ export interface ApiWebPage {
   video?: ApiVideo;
   story?: ApiWebPageStoryData;
   stickers?: ApiWebPageStickerData;
+  mediaSize?: WebPageMediaSize;
+  hasLargeMedia?: boolean;
 }
 
 export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;

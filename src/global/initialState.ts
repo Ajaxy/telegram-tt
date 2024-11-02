@@ -142,6 +142,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     shouldCompress: true,
     shouldSendGrouped: true,
     isInvertedMedia: undefined,
+    webPageMediaSize: undefined,
   },
 
   scheduledMessages: {

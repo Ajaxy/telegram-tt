@@ -1,6 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
+import type { WebPageMediaSize } from '../../../global/types';
 import type { ThreadId } from '../../../types';
 import type {
   ApiAttachment,
@@ -264,6 +265,8 @@ export function sendMessage(
     wasDrafted,
     isInvertedMedia,
     effectId,
+    webPageMediaSize,
+    webPageUrl,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -285,6 +288,8 @@ export function sendMessage(
     wasDrafted?: boolean;
     isInvertedMedia?: true;
     effectId?: string;
+    webPageMediaSize?: WebPageMediaSize;
+    webPageUrl?: string;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -366,6 +371,12 @@ export function sendMessage(
       media = buildInputPoll(poll, randomId);
     } else if (story) {
       media = buildInputStory(story);
+    } else if (webPageUrl && webPageMediaSize) {
+      media = new GramJs.InputMediaWebPage({
+        url: webPageUrl,
+        forceLargeMedia: webPageMediaSize === 'large' ? true : undefined,
+        forceSmallMedia: webPageMediaSize === 'small' ? true : undefined,
+      });
     } else if (contact) {
       media = new GramJs.InputMediaContact({
         phoneNumber: contact.phoneNumber,

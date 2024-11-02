@@ -491,7 +491,7 @@ addActionHandler('requestConfetti', (global, actions, payload): ActionReturnType
 
 addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionReturnType => {
   const {
-    shouldCompress, shouldSendGrouped, isInvertedMedia,
+    shouldCompress, shouldSendGrouped, isInvertedMedia, webPageMediaSize,
   } = payload;
 
   return {
@@ -500,6 +500,7 @@ addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionR
       shouldCompress: shouldCompress ?? global.attachmentSettings.shouldCompress,
       shouldSendGrouped: shouldSendGrouped ?? global.attachmentSettings.shouldSendGrouped,
       isInvertedMedia,
+      webPageMediaSize,
     },
   };
 });

@@ -280,6 +280,8 @@ type ConfettiParams = OptionalCombine<{
   height?: number;
 }>;
 
+export type WebPageMediaSize = 'large' | 'small';
+
 export type TabState = {
   id: number;
   isBlurred?: boolean;
@@ -920,6 +922,7 @@ export type GlobalState = {
     shouldCompress: boolean;
     shouldSendGrouped: boolean;
     isInvertedMedia?: true;
+    webPageMediaSize?: WebPageMediaSize;
   };
 
   attachMenu: {
@@ -1632,6 +1635,8 @@ export interface ActionPayloads {
     isReaction?: true; // Reaction to the story are sent in the form of a message
     isInvertedMedia?: true;
     effectId?: string;
+    webPageMediaSize?: WebPageMediaSize;
+    webPageUrl?: string;
   } & WithTabId;
   sendInviteMessages: {
     chatId: string;
@@ -3189,6 +3194,7 @@ export interface ActionPayloads {
     shouldCompress?: boolean;
     shouldSendGrouped?: boolean;
     isInvertedMedia?: true;
+    webPageMediaSize?: WebPageMediaSize;
   };
 
   saveEffectInDraft: {

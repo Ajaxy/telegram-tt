@@ -1063,6 +1063,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldUpdateStickerSetOrder,
         isInvertedMedia,
         effectId,
+        webPageMediaSize: attachmentSettings.webPageMediaSize,
+        webPageUrl: hasWebPagePreview ? webPagePreview!.url : undefined,
       });
     }
 

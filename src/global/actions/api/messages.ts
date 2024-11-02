@@ -19,7 +19,7 @@ import type {
 import type { MessageKey } from '../../../util/keys/messageKey';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, ApiDraft, GlobalState, TabArgs,
+  ActionReturnType, ApiDraft, GlobalState, TabArgs, WebPageMediaSize,
 } from '../../types';
 import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../../api/types';
 import { LoadMoreDirection, type ThreadId } from '../../../types';
@@ -1455,6 +1455,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   lastMessageId?: number;
   isInvertedMedia?: true;
   effectId?: string;
+  webPageMediaSize?: WebPageMediaSize;
 }) {
   let currentMessageKey: MessageKey | undefined;
   const progressCallback = params.attachment ? (progress: number, messageKey: MessageKey) => {

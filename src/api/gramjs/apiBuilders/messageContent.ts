@@ -761,6 +761,8 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     };
   }
 
+  const mediaSize = media.forceSmallMedia ? 'small' : media.forceLargeMedia ? 'large' : undefined;
+
   return {
     mediaType: 'webpage',
     id: Number(id),
@@ -772,6 +774,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
       'title',
       'description',
       'duration',
+      'hasLargeMedia',
     ]),
     photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
     document: !video && !audio && document ? buildApiDocument(document) : undefined,
@@ -779,6 +782,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     audio,
     story,
     stickers,
+    mediaSize,
   };
 }
 
