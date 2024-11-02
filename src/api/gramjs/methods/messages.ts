@@ -8,6 +8,7 @@ import type {
   ApiChat,
   ApiClickSponsoredMessage,
   ApiContact,
+  ApiError,
   ApiFormattedText,
   ApiGlobalMessageSearchType,
   ApiInputReplyInfo,
@@ -19,7 +20,6 @@ import type {
   ApiPeer,
   ApiPoll,
   ApiReaction,
-  ApiReportReason,
   ApiSendMessageAction,
   ApiSticker,
   ApiStory,
@@ -36,6 +36,7 @@ import {
   GIF_MIME_TYPE,
   MAX_INT_32,
   MENTION_UNREAD_SLICE,
+  MESSAGE_ID_REQUIRED_ERROR,
   PINNED_MESSAGES_LIMIT,
   REACTION_UNREAD_SLICE,
   SUPPORTED_PHOTO_CONTENT_TYPES,
@@ -47,13 +48,17 @@ import { compact, split } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
-import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
+import {
+  buildApiChatFromPreview,
+  buildApiSendAsPeerId,
+} from '../apiBuilders/chats';
 import { buildApiFormattedText } from '../apiBuilders/common';
 import { buildMessageMediaContent, buildMessageTextContent, buildWebPage } from '../apiBuilders/messageContent';
 import {
   buildApiFactCheck,
   buildApiMessage,
   buildApiQuickReply,
+  buildApiReportResult,
   buildApiSponsoredMessage,
   buildApiThreadInfo,
   buildLocalForwardedMessage,
@@ -901,18 +906,45 @@ export async function deleteSavedHistory({
 }
 
 export async function reportMessages({
-  peer, messageIds, description,
+  peer, messageIds, description, option,
 }: {
-  peer: ApiPeer; messageIds: number[]; reason: ApiReportReason; description?: string;
+  peer: ApiPeer; messageIds: number[]; description: string; option: string;
 }) {
-  const result = await invokeRequest(new GramJs.messages.Report({
-    peer: buildInputPeer(peer.id, peer.accessHash),
-    id: messageIds,
-    option: Buffer.alloc(0),
-    message: description,
-  }));
+  try {
+    const result = await invokeRequest(new GramJs.messages.Report({
+      peer: buildInputPeer(peer.id, peer.accessHash),
+      id: messageIds,
+      option: deserializeBytes(option),
+      message: description,
+    }), { shouldThrow: true });
 
-  return result;
+    if (!result) return undefined;
+
+    return { result: buildApiReportResult(result), error: undefined };
+  } catch (err: any) {
+    const errorMessage = (err as ApiError).message;
+
+    if (errorMessage === MESSAGE_ID_REQUIRED_ERROR) {
+      return {
+        result: undefined,
+        error: errorMessage,
+      };
+    }
+
+    throw err;
+  }
+}
+
+export function reportChannelSpam({
+  peer, chat, messageIds,
+}: {
+  peer: ApiPeer; chat: ApiChat; messageIds: number[];
+}) {
+  return invokeRequest(new GramJs.channels.ReportSpam({
+    participant: buildInputPeer(peer.id, peer.accessHash),
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    id: messageIds,
+  }));
 }
 
 export async function sendMessageAction({

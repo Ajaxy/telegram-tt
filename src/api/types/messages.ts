@@ -871,6 +871,21 @@ export interface ApiMessageThreadInfo extends ApiBaseThreadInfo {
 
 export type ApiThreadInfo = ApiCommentsInfo | ApiMessageThreadInfo;
 
+export type ApiMessageReportResult = {
+  type: 'reported';
+} | {
+  type: 'comment';
+  isOptional?: boolean;
+  option: string;
+} | {
+  type: 'selectOption';
+  title: string;
+  options: {
+    text: string;
+    option: string;
+  }[];
+};
+
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
 export type ApiSponsoredMessage = {

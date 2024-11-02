@@ -49,7 +49,6 @@ import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import DeleteChatModal from '../common/DeleteChatModal';
-import ReportModal from '../common/ReportModal';
 import MuteChatModal from '../left/MuteChatModal.async';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
@@ -109,8 +108,8 @@ type StateProps = {
   isForum?: boolean;
   isForumAsMessages?: true;
   canAddContact?: boolean;
-  canReportChat?: boolean;
   canDeleteChat?: boolean;
+  canReportChat?: boolean;
   canGift?: boolean;
   canCreateTopic?: boolean;
   canEditTopic?: boolean;
@@ -143,6 +142,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isChatInfoShown,
   canStartBot,
   canSubscribe,
+  canReportChat,
   canSearch,
   canCall,
   canMute,
@@ -156,7 +156,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   chat,
   isPrivate,
   isMuted,
-  canReportChat,
   canDeleteChat,
   canGift,
   hasLinkedChat,
@@ -203,13 +202,13 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     unblockUser,
     setViewForumAsMessages,
     openBoostModal,
+    reportMessages,
   } = getActions();
 
   const { isMobile } = useAppLayout();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [shouldCloseFast, setShouldCloseFast] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isMuteModalOpen, setIsMuteModalOpen] = useState(false);
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const { x, y } = anchor;
@@ -219,18 +218,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     (!isChatInfoShown && isForum) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
   );
 
-  const handleReport = useLastCallback(() => {
-    setIsMenuOpen(false);
-    setIsReportModalOpen(true);
-  });
-
-  const closeReportModal = useLastCallback(() => {
-    setIsReportModalOpen(false);
+  const closeMuteModal = useLastCallback(() => {
+    setIsMuteModalOpen(false);
     onClose();
   });
 
-  const closeMuteModal = useLastCallback(() => {
-    setIsMuteModalOpen(false);
+  const handleReport = useLastCallback(() => {
+    setIsMenuOpen(false);
+    reportMessages({ chatId, messageIds: [] });
     onClose();
   });
 
@@ -725,14 +720,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             chatId={chat.id}
           />
         )}
-        {canReportChat && chat?.id && (
-          <ReportModal
-            isOpen={isReportModalOpen}
-            onClose={closeReportModal}
-            subject="peer"
-            peerId={chat.id}
-          />
-        )}
       </div>
     </Portal>
   );
@@ -749,8 +736,8 @@ export default memo(withGlobal<OwnProps>(
     const canAddContact = user && getCanAddContact(user);
     const isMainThread = threadId === MAIN_THREAD_ID;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-    const canReportChat = isMainThread && (isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf));
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
+    const canReportChat = isMainThread && !user && (isChatChannel(chat) || isChatGroup(chat));
 
     const chatBot = !isSystemBot(chatId) ? selectBot(global, chatId) : undefined;
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
@@ -778,8 +765,8 @@ export default memo(withGlobal<OwnProps>(
       isForum: chat?.isForum,
       isForumAsMessages: chat?.isForumAsMessages,
       canAddContact,
-      canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
+      canReportChat,
       canGift,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       botCommands: chatBot ? userFullInfo?.botInfo?.commands : undefined,

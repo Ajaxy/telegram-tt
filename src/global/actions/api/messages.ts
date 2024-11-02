@@ -27,6 +27,7 @@ import { LoadMoreDirection, type ThreadId } from '../../../types';
 import {
   GIF_MIME_TYPE,
   MAX_MEDIA_FILES_FOR_ALBUM,
+  MESSAGE_ID_REQUIRED_ERROR,
   MESSAGE_LIST_SLICE,
   RE_TELEGRAM_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -118,6 +119,7 @@ import {
   selectMessageReplyInfo,
   selectNoWebPage,
   selectOutlyingListByMessageId,
+  selectPeer,
   selectPeerStory,
   selectPinnedIds,
   selectPollFromMessage,
@@ -824,33 +826,81 @@ addActionHandler('deleteSavedHistory', async (global, actions, payload): Promise
 
 addActionHandler('reportMessages', async (global, actions, payload): Promise<void> => {
   const {
-    messageIds, reason, description, tabId = getCurrentTabId(),
+    messageIds, description = '', option = '', chatId, tabId = getCurrentTabId(),
   } = payload!;
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
-    return;
-  }
-
-  // TODO: Remove after implementing the new report system
-  if (messageIds) {
-    // eslint-disable-next-line no-console
-    console.warn('UNSUPPORTED');
-    return;
-  }
-
-  const { chatId } = currentMessageList;
   const chat = selectChat(global, chatId)!;
 
-  const result = await callApi('reportMessages', {
-    peer: chat, messageIds, reason, description,
+  const response = await callApi('reportMessages', {
+    peer: chat, messageIds, description, option,
   });
 
-  actions.showNotification({
-    message: result
-      ? oldTranslate('ReportPeer.AlertSuccess')
-      : 'An error occurred while submitting your report. Please, try again later.',
-    tabId,
-  });
+  if (!response) return;
+
+  const { result, error } = response;
+
+  if (error === MESSAGE_ID_REQUIRED_ERROR) {
+    actions.showNotification({
+      message: oldTranslate('lng_report_please_select_messages'),
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
+    return;
+  }
+
+  if (!result) return;
+
+  if (result.type === 'reported') {
+    actions.showNotification({
+      message: result
+        ? oldTranslate('ReportPeer.AlertSuccess')
+        : 'An error occurred while submitting your report. Please, try again later.',
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
+    return;
+  }
+
+  if (result.type === 'selectOption') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      title: result.title,
+      options: result.options,
+      subtitle: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        chatId,
+        messageIds,
+        description,
+        subject: 'message',
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+
+  if (result.type === 'comment') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      isOptional: result.isOptional,
+      option: result.option,
+      title: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        chatId,
+        messageIds,
+        description,
+        subject: 'message',
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
 });
 
 addActionHandler('sendMessageAction', async (global, actions, payload): Promise<void> => {
@@ -866,6 +916,17 @@ addActionHandler('sendMessageAction', async (global, actions, payload): Promise<
   await callApi('sendMessageAction', {
     peer: chat, threadId, action,
   });
+});
+
+addActionHandler('reportChannelSpam', (global, actions, payload): ActionReturnType => {
+  const { participantId, chatId, messageIds } = payload;
+  const peer = selectPeer(global, participantId);
+  const chat = selectChat(global, chatId);
+  if (!peer || !chat) {
+    return;
+  }
+
+  void callApi('reportChannelSpam', { peer, chat, messageIds });
 });
 
 addActionHandler('markMessageListRead', (global, actions, payload): ActionReturnType => {

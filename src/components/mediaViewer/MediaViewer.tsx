@@ -53,7 +53,7 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
 
-import ReportModal from '../common/ReportModal';
+import ReportAvatarModal from '../common/ReportAvatarModal';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
 import Transition from '../ui/Transition';
@@ -446,10 +446,9 @@ const MediaViewer = ({
           onCloseMediaViewer={handleClose}
           onForward={handleForward}
         />
-        <ReportModal
+        <ReportAvatarModal
           isOpen={isReportAvatarModalOpen}
           onClose={closeReportAvatarModal}
-          subject="media"
           photo={avatar}
           peerId={avatarOwner?.id}
         />

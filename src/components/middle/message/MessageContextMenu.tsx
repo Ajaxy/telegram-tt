@@ -101,8 +101,8 @@ type OwnProps = {
   onUnpin?: NoneToVoidFunction;
   onForward?: NoneToVoidFunction;
   onDelete?: NoneToVoidFunction;
-  onReport?: NoneToVoidFunction;
   onFaveSticker?: NoneToVoidFunction;
+  onReport?: NoneToVoidFunction;
   onUnfaveSticker?: NoneToVoidFunction;
   onSelect?: NoneToVoidFunction;
   onSend?: NoneToVoidFunction;
@@ -161,8 +161,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   canPin,
   canUnpin,
   canDelete,
-  canReport,
   canForward,
+  canReport,
   canFaveSticker,
   canUnfaveSticker,
   canCopy,
@@ -194,8 +194,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onUnpin,
   onForward,
   onDelete,
-  onReport,
   onFaveSticker,
+  onReport,
   onUnfaveSticker,
   onSelect,
   onSend,

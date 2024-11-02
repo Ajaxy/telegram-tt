@@ -69,7 +69,6 @@ import DeleteChatModal from '../../common/DeleteChatModal';
 import FullNameTitle from '../../common/FullNameTitle';
 import StarIcon from '../../common/icons/StarIcon';
 import LastMessageMeta from '../../common/LastMessageMeta';
-import ReportModal from '../../common/ReportModal';
 import ListItem from '../../ui/ListItem';
 import ChatFolderModal from '../ChatFolderModal.async';
 import MuteChatModal from '../MuteChatModal.async';
@@ -170,17 +169,16 @@ const Chat: FC<OwnProps & StateProps> = ({
     openForumPanel,
     closeForumPanel,
     setShouldCloseRightColumn,
+    reportMessages,
   } = getActions();
 
   const { isMobile } = useAppLayout();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
-  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
-  const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
 
   const { isForum, isForumAsMessages } = chat || {};
 
@@ -275,8 +273,8 @@ const Chat: FC<OwnProps & StateProps> = ({
   });
 
   const handleReport = useLastCallback(() => {
-    markRenderReportModal();
-    openReportModal();
+    if (!chat) return;
+    reportMessages({ chatId: chat.id, messageIds: [] });
   });
 
   const contextActions = useChatContextActions({
@@ -430,15 +428,6 @@ const Chat: FC<OwnProps & StateProps> = ({
           onClose={closeChatFolderModal}
           onCloseAnimationEnd={unmarkRenderChatFolderModal}
           chatId={chatId}
-        />
-      )}
-      {shouldRenderReportModal && (
-        <ReportModal
-          isOpen={isReportModalOpen}
-          onClose={closeReportModal}
-          onCloseAnimationEnd={unmarkRenderReportModal}
-          peerId={chatId}
-          subject="peer"
         />
       )}
     </ListItem>

@@ -5,8 +5,6 @@ import { getActions } from '../../global';
 
 import type { ApiPhoto, ApiReportReason } from '../../api/types';
 
-import buildClassName from '../../util/buildClassName';
-
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -17,55 +15,28 @@ import RadioGroup from '../ui/RadioGroup';
 
 export type OwnProps = {
   isOpen: boolean;
-  subject?: 'peer' | 'messages' | 'media' | 'story';
   peerId?: string;
   photo?: ApiPhoto;
-  messageIds?: number[];
-  storyId?: number;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
 };
 
-const ReportModal: FC<OwnProps> = ({
+const ReportAvatarModal: FC<OwnProps> = ({
   isOpen,
-  subject = 'messages',
   peerId,
   photo,
-  messageIds,
-  storyId,
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const {
-    reportMessages,
-    reportPeer,
-    reportProfilePhoto,
-    reportStory,
-    exitMessageSelectMode,
-  } = getActions();
+  const { reportProfilePhoto } = getActions();
 
   const [selectedReason, setSelectedReason] = useState<ApiReportReason>('spam');
   const [description, setDescription] = useState('');
 
   const handleReport = useLastCallback(() => {
-    switch (subject) {
-      case 'messages':
-        reportMessages({ messageIds: messageIds!, reason: selectedReason, description });
-        exitMessageSelectMode();
-        break;
-      case 'peer':
-        reportPeer({ chatId: peerId, reason: selectedReason, description });
-        break;
-      case 'media':
-        reportProfilePhoto({
-          chatId: peerId, photo, reason: selectedReason, description,
-        });
-        break;
-      case 'story':
-        reportStory({
-          peerId: peerId!, storyId: storyId!, reason: selectedReason, description,
-        });
-    }
+    reportProfilePhoto({
+      chatId: peerId, photo, reason: selectedReason, description,
+    });
     onClose();
   });
 
@@ -90,18 +61,11 @@ const ReportModal: FC<OwnProps> = ({
     { value: 'other', label: lang('lng_report_reason_other') },
   ], [lang]);
 
-  if (
-    (subject === 'messages' && !messageIds)
-    || (subject === 'peer' && !peerId)
-    || (subject === 'media' && (!peerId || !photo))
-    || (subject === 'story' && (!storyId || !peerId))
-  ) {
+  if (!peerId || !photo) {
     return undefined;
   }
 
-  const title = subject === 'messages'
-    ? lang('lng_report_message_title')
-    : lang('ReportPeer.Report');
+  const title = lang('ReportPeer.Report');
 
   return (
     <Modal
@@ -109,7 +73,7 @@ const ReportModal: FC<OwnProps> = ({
       onClose={onClose}
       onEnter={isOpen ? handleReport : undefined}
       onCloseAnimationEnd={onCloseAnimationEnd}
-      className={buildClassName('narrow', subject === 'story' && 'component-theme-dark')}
+      className="narrow"
       title={title}
     >
       <RadioGroup
@@ -133,4 +97,4 @@ const ReportModal: FC<OwnProps> = ({
   );
 };
 
-export default memo(ReportModal);
+export default memo(ReportAvatarModal);

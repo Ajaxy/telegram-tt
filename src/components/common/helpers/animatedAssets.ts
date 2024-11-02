@@ -19,6 +19,7 @@ import MonkeyIdle from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyIdle.tgs
 import MonkeyPeek from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyPeek.tgs';
 import MonkeyTracking from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyTracking.tgs';
 import ReadTime from '../../../assets/tgs/ReadTime.tgs';
+import Report from '../../../assets/tgs/Report.tgs';
 import Congratulations from '../../../assets/tgs/settings/Congratulations.tgs';
 import DiscussionGroups from '../../../assets/tgs/settings/DiscussionGroupsDucks.tgs';
 import Experimental from '../../../assets/tgs/settings/Experimental.tgs';
@@ -62,4 +63,5 @@ export const LOCAL_TGS_URLS = {
   Fragment,
   StarReactionEffect,
   StarReaction,
+  Report,
 };

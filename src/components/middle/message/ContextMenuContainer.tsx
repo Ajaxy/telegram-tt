@@ -6,6 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
   ApiAvailableReaction,
+  ApiChat,
   ApiChatReactions,
   ApiMessage,
   ApiPoll,
@@ -72,7 +73,6 @@ import useSchedule from '../../../hooks/useSchedule';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import PinMessageModal from '../../common/PinMessageModal.async';
-import ReportModal from '../../common/ReportModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import MessageContextMenu from './MessageContextMenu';
 
@@ -94,6 +94,7 @@ type StateProps = {
   threadId?: ThreadId;
   poll?: ApiPoll;
   story?: ApiTypeStory;
+  chat?: ApiChat;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
   defaultTagReactions?: ApiReaction[];
@@ -169,8 +170,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   repliesThreadInfo,
   canUnpin,
   canDelete,
-  canReport,
   canShowReactionsCount,
+  chat,
+  canReport,
   canShowReactionList,
   canEdit,
   enabledReactions,
@@ -241,6 +243,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openDeleteMessageModal,
     addLocalPaidReaction,
     openPaidReactionModal,
+    reportMessages,
   } = getActions();
 
   const lang = useOldLang();
@@ -250,7 +253,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     className: false,
   });
   const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
   const [canQuoteSelection, setCanQuoteSelection] = useState(false);
@@ -364,16 +366,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     setIsMenuOpen(false);
     closeMenu();
     openDeleteMessageModal({ isSchedule: messageListType === 'scheduled', album, message });
-  });
-
-  const handleReport = useLastCallback(() => {
-    setIsMenuOpen(false);
-    setIsReportModalOpen(true);
-  });
-
-  const closeReportModal = useLastCallback(() => {
-    setIsReportModalOpen(false);
-    onClose();
   });
 
   const closePinModal = useLastCallback(() => {
@@ -589,6 +581,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 
+  const handleReport = useLastCallback(() => {
+    if (!chat) return;
+    setIsMenuOpen(false);
+    onClose();
+    reportMessages({
+      chatId: chat.id, messageIds: reportMessageIds,
+    });
+  });
+
   if (noOptions) {
     closeMenu();
 
@@ -622,8 +623,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canReply={canReply}
         canQuote={canQuoteSelection}
         canDelete={canDelete}
-        canReport={canReport}
         canPin={canPin}
+        canReport={canReport}
         repliesThreadInfo={repliesThreadInfo}
         canUnpin={canUnpin}
         canEdit={canEdit}
@@ -682,11 +683,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onTranslate={handleTranslate}
         onShowOriginal={handleShowOriginal}
         onSelectLanguage={handleSelectLanguage}
-      />
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onClose={closeReportModal}
-        messageIds={reportMessageIds}
       />
       <PinMessageModal
         isOpen={isPinModalOpen}
@@ -811,17 +807,18 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       threadId,
+      chat,
       availableReactions,
       topReactions,
       defaultTagReactions: defaultTags,
       noOptions,
+      canReport,
       canSendNow: isScheduled,
       canReschedule: isScheduled,
       canReply: !isPinned && !isScheduled && canReplyGlobally,
       canPin: !isScheduled && canPin,
       canUnpin: !isScheduled && canUnpin,
       canDelete,
-      canReport,
       canEdit: !isPinned && canEdit,
       canForward: !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,

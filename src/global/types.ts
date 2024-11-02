@@ -638,6 +638,24 @@ export type TabState = {
     }[];
   };
 
+  reportModal?: {
+    chatId?: string;
+    messageIds: number[];
+    description: string;
+    peerId?: string;
+    subject: 'story' | 'message';
+    sections: {
+      title?: string;
+      subtitle?: string;
+      options?: {
+        text: string;
+        option: string;
+      }[];
+      isOptional?: boolean;
+      option?: string;
+    }[];
+  };
+
   activeDownloads: ActiveDownloads;
 
   statistics: {
@@ -1728,7 +1746,9 @@ export interface ActionPayloads {
     option?: string;
   } & WithTabId;
   openPreviousReportAdModal: WithTabId | undefined;
+  openPreviousReportModal: WithTabId | undefined;
   closeReportAdModal: WithTabId | undefined;
+  closeReportModal: WithTabId | undefined;
   hideSponsoredMessages: WithTabId | undefined;
   loadSendAs: {
     chatId: string;
@@ -1768,14 +1788,20 @@ export interface ActionPayloads {
     isReversed?: boolean;
   } & WithTabId;
   reportMessages: {
+    chatId: string;
     messageIds: number[];
-    reason: ApiReportReason;
-    description: string;
+    description?: string;
+    option?: string;
   } & WithTabId;
   sendMessageAction: {
     action: ApiSendMessageAction;
     chatId: string;
     threadId: ThreadId;
+  };
+  reportChannelSpam: {
+    chatId: string;
+    participantId: string;
+    messageIds: number[];
   };
   loadSeenBy: {
     chatId: string;
@@ -2698,9 +2724,9 @@ export interface ActionPayloads {
   } & WithTabId;
   reportStory: {
     peerId: string;
+    option?: string;
     storyId: number;
-    reason: ApiReportReason;
-    description: string;
+    description?: string;
   } & WithTabId;
   openStoryPrivacyEditor: WithTabId | undefined;
   closeStoryPrivacyEditor: WithTabId | undefined;

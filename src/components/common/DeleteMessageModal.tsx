@@ -96,7 +96,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   const {
     deleteMessages,
     deleteScheduledMessages,
-    reportMessages,
+    reportChannelSpam,
     deleteChatMember,
     updateChatMemberBannedRights,
     closeDeleteMessageModal,
@@ -231,10 +231,10 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     if (isSchedule) {
       deleteScheduledMessages({ messageIds });
     } else if (!isOwn && (chosenSpanOption || chosenDeleteOption || chosenBanOption) && (isGroup || isSuperGroup)) {
-      if (chosenSpanOption) {
+      if (chosenSpanOption && sender) {
         const filteredMessageIdList = filterMessageIdByUserId(chosenSpanOption, messageIdList!);
         if (filteredMessageIdList && filteredMessageIdList.length) {
-          reportMessages({ messageIds: filteredMessageIdList, reason: 'spam', description: '' });
+          reportChannelSpam({ participantId: sender.id, chatId: chat.id, messageIds: filteredMessageIdList });
         }
       }
 

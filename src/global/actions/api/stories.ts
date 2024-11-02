@@ -1,6 +1,6 @@
 import type { ActionReturnType } from '../../types';
 
-import { DEBUG } from '../../../config';
+import { DEBUG, MESSAGE_ID_REQUIRED_ERROR } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import { getServerTime } from '../../../util/serverTime';
@@ -25,9 +25,10 @@ import {
   updateStoryViews,
   updateStoryViewsLoading,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectPeer, selectPeerStories, selectPeerStory,
-  selectPinnedStories,
+  selectPinnedStories, selectTabState,
 } from '../../selectors';
 
 const INFINITE_LOOP_MARKER = 100;
@@ -414,8 +415,8 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
   const {
     peerId,
     storyId,
-    reason,
-    description,
+    description = '',
+    option = '',
     tabId = getCurrentTabId(),
   } = payload;
   const peer = selectPeer(global, peerId);
@@ -423,26 +424,80 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
     return;
   }
 
-  // TODO: Remove after implementing the new report system
-  if (storyId) {
-    // eslint-disable-next-line no-console
-    console.warn('UNSUPPORTED');
+  const response = await callApi('reportStory', {
+    peer,
+    storyId,
+    description,
+    option,
+  });
+
+  if (!response) return;
+
+  const { result, error } = response;
+
+  if (error === MESSAGE_ID_REQUIRED_ERROR) {
+    actions.showNotification({
+      message: oldTranslate('lng_report_please_select_messages'),
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
     return;
   }
 
-  const result = await callApi('reportStory', {
-    peer,
-    storyId,
-    reason,
-    description,
-  });
+  if (!result) return;
 
-  actions.showNotification({
-    message: result
-      ? oldTranslate('ReportPeer.AlertSuccess')
-      : 'An error occurred while submitting your report. Please, try again later.',
-    tabId,
-  });
+  if (result.type === 'reported') {
+    actions.showNotification({
+      message: result
+        ? oldTranslate('ReportPeer.AlertSuccess')
+        : 'An error occurred while submitting your report. Please, try again later.',
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
+    return;
+  }
+
+  if (result.type === 'selectOption') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      title: result.title,
+      options: result.options,
+      subtitle: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        messageIds: [storyId],
+        subject: 'story',
+        peerId,
+        description,
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+
+  if (result.type === 'comment') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      isOptional: result.isOptional,
+      option: result.option,
+      title: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        messageIds: [storyId],
+        description,
+        peerId,
+        subject: 'story',
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
 });
 
 addActionHandler('editStoryPrivacy', (global, actions, payload): ActionReturnType => {

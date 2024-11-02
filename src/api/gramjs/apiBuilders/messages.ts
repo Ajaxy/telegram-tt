@@ -16,6 +16,7 @@ import type {
   ApiMessageActionStarGift,
   ApiMessageEntity,
   ApiMessageForwardInfo,
+  ApiMessageReportResult,
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
@@ -1244,5 +1245,35 @@ export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply 
     id: shortcutId,
     shortcut,
     topMessageId: topMessage,
+  };
+}
+
+export function buildApiReportResult(
+  result: GramJs.TypeReportResult,
+): ApiMessageReportResult {
+  if (result instanceof GramJs.ReportResultReported) {
+    return {
+      type: 'reported',
+    };
+  }
+
+  if (result instanceof GramJs.ReportResultAddComment) {
+    return {
+      type: 'comment',
+      isOptional: result.optional,
+      option: serializeBytes(result.option),
+    };
+  }
+
+  const title = result.title;
+  const options = result.options.map((option) => ({
+    text: option.text,
+    option: serializeBytes(option.option),
+  }));
+
+  return {
+    type: 'selectOption',
+    title,
+    options,
   };
 }

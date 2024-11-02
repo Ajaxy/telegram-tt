@@ -929,6 +929,13 @@ addActionHandler('closeReportAdModal', (global, actions, payload): ActionReturnT
   }, tabId);
 });
 
+addActionHandler('closeReportModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    reportModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('openPreviousReportAdModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const reportAdModal = selectTabState(global, tabId).reportAdModal;
@@ -945,6 +952,26 @@ addActionHandler('openPreviousReportAdModal', (global, actions, payload): Action
     reportAdModal: {
       ...reportAdModal,
       sections: reportAdModal.sections.slice(0, -1),
+    },
+  }, tabId);
+});
+
+addActionHandler('openPreviousReportModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const reportModal = selectTabState(global, tabId).reportModal;
+  if (!reportModal) {
+    return undefined;
+  }
+
+  if (reportModal.sections.length === 1) {
+    actions.closeReportModal({ tabId });
+    return undefined;
+  }
+
+  return updateTabState(global, {
+    reportModal: {
+      ...reportModal,
+      sections: reportModal.sections.slice(0, -1),
     },
   }, tabId);
 });

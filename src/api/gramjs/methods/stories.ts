@@ -2,16 +2,17 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiInputPrivacyRules } from '../../../types';
 import type {
+  ApiError,
   ApiPeer,
   ApiPeerStories,
   ApiReaction,
-  ApiReportReason,
   ApiStealthMode,
   ApiTypeStory,
 } from '../../types';
 
-import { STORY_LIST_LIMIT } from '../../../config';
+import { MESSAGE_ID_REQUIRED_ERROR, STORY_LIST_LIMIT } from '../../../config';
 import { buildCollectionByCallback } from '../../../util/iteratees';
+import { buildApiReportResult } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
   buildApiPeerStories,
@@ -25,7 +26,7 @@ import {
   buildInputPrivacyRules,
   buildInputReaction,
 } from '../gramjsBuilders';
-import { addStoryToLocalDb } from '../helpers';
+import { addStoryToLocalDb, deserializeBytes } from '../helpers';
 import { invokeRequest } from './client';
 
 export async function fetchAllStories({
@@ -328,19 +329,37 @@ export async function fetchStoryLink({ peer, storyId }: { peer: ApiPeer ; storyI
   return result.link;
 }
 
-export function reportStory({
+export async function reportStory({
   peer,
   storyId,
   description,
+  option,
 }: {
-  peer: ApiPeer; storyId: number; reason: ApiReportReason; description?: string;
+  peer: ApiPeer; storyId: number; description: string; option: string;
 }) {
-  return invokeRequest(new GramJs.stories.Report({
-    peer: buildInputPeer(peer.id, peer.accessHash),
-    id: [storyId],
-    option: Buffer.alloc(0),
-    message: description,
-  }));
+  try {
+    const result = await invokeRequest(new GramJs.stories.Report({
+      peer: buildInputPeer(peer.id, peer.accessHash),
+      id: [storyId],
+      option: deserializeBytes(option),
+      message: description,
+    }), { shouldThrow: true });
+
+    if (!result) return undefined;
+
+    return { result: buildApiReportResult(result), error: undefined };
+  } catch (err: any) {
+    const errorMessage = (err as ApiError).message;
+
+    if (errorMessage === MESSAGE_ID_REQUIRED_ERROR) {
+      return {
+        result: undefined,
+        error: errorMessage,
+      };
+    }
+
+    throw err;
+  }
 }
 
 export function editStoryPrivacy({

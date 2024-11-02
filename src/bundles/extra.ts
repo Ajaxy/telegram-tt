@@ -29,6 +29,7 @@ export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
 export { default as AboutMonetizationModal } from '../components/common/AboutMonetizationModal';
 export { default as VerificationMonetizationModal } from '../components/common/VerificationMonetizationModal';
 export { default as ReportAdModal } from '../components/modals/reportAd/ReportAdModal';
+export { default as ReportModal } from '../components/modals/reportModal/ReportModal';
 export { default as CalendarModal } from '../components/common/CalendarModal';
 export { default as DeleteMessageModal } from '../components/common/DeleteMessageModal';
 export { default as PinMessageModal } from '../components/common/PinMessageModal';

@@ -20,6 +20,7 @@ import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import PaidReactionModal from './paidReaction/PaidReactionModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
+import ReportModal from './reportModal/ReportModal.async';
 import StarsGiftModal from './stars/gift/StarsGiftModal.async';
 import StarsBalanceModal from './stars/StarsBalanceModal.async';
 import StarsPaymentModal from './stars/StarsPaymentModal.async';
@@ -40,6 +41,7 @@ type ModalKey = keyof Pick<TabState,
 'requestedAttachBotInstall' |
 'collectibleInfoModal' |
 'reportAdModal' |
+'reportModal' |
 'starsBalanceModal' |
 'starsPayment' |
 'starsTransactionModal' |
@@ -75,6 +77,7 @@ const MODALS: ModalRegistry = {
   inviteViaLinkModal: InviteViaLinkModal,
   requestedAttachBotInstall: AttachBotInstallModal,
   reportAdModal: ReportAdModal,
+  reportModal: ReportModal,
   webApps: WebAppModal,
   collectibleInfoModal: CollectibleInfoModal,
   mapModal: MapModal,
