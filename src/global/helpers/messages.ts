@@ -2,8 +2,10 @@ import type {
   ApiAttachment,
   ApiMessage,
   ApiMessageEntityTextUrl,
-  ApiPeer, ApiSponsoredMessage,
-  ApiStory, MediaContainer,
+  ApiPeer,
+  ApiSponsoredMessage,
+  ApiStory,
+  MediaContainer,
 } from '../../api/types';
 import type { MediaContent } from '../../api/types/messages';
 import type { LangFn } from '../../hooks/useOldLang';
@@ -27,10 +29,7 @@ import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '../index';
 import {
-  getChatTitle,
-  getCleanPeerId,
-  isPeerUser,
-  isUserId,
+  getChatTitle, getCleanPeerId, isPeerUser, isUserId,
 } from './chats';
 import { getMainUsername, getUserFullName } from './users';
 
@@ -280,14 +279,14 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
   const { text } = contentText;
   let { entities } = contentText;
 
-  if (text && inChatList && 'chatId' in message) {
+  if (text && 'chatId' in message) {
     if (message.chatId === SERVICE_NOTIFICATIONS_USER_ID) {
       const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];
       if (authCode) {
         entities = [
           ...entities || [],
           {
-            type: ApiMessageEntityTypes.Spoiler,
+            type: inChatList ? ApiMessageEntityTypes.Spoiler : ApiMessageEntityTypes.Code,
             offset: text.indexOf(authCode),
             length: authCode.length,
           },
@@ -296,7 +295,7 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
       }
     }
 
-    if (message.chatId === VERIFICATION_CODES_USER_ID && entities) {
+    if (inChatList && message.chatId === VERIFICATION_CODES_USER_ID && entities) {
       // Wrap code entities in spoiler
       const hasCodeEntities = entities.some((entity) => entity.type === ApiMessageEntityTypes.Code);
       if (hasCodeEntities) {
