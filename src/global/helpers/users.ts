@@ -69,7 +69,7 @@ export function getUserStatus(
   lang: LangFn, user: ApiUser, userStatus: ApiUserStatus | undefined,
 ) {
   if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
-    return lang('ServiceNotifications').toLowerCase();
+    return lang('ServiceNotifications');
   }
 
   if (user.isSupport) {
