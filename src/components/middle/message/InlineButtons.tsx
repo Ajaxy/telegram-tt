@@ -41,6 +41,8 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
       case 'webView':
       case 'simpleWebView':
         return <Icon className="corner-icon" name="webapp" />;
+      case 'copy':
+        return <Icon className="corner-icon" name="copy" />;
     }
     return undefined;
   };

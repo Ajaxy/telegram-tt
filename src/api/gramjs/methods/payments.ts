@@ -176,7 +176,7 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice, theme
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
   }));
 
-  if (!result) {
+  if (!result || result instanceof GramJs.payments.PaymentFormStarGift) {
     return undefined;
   }
 
@@ -185,8 +185,8 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice, theme
   }
 
   return {
-    form: buildApiPaymentForm(result),
-    invoice: buildApiInvoiceFromForm(result),
+    form: buildApiPaymentForm(result)!,
+    invoice: buildApiInvoiceFromForm(result)!,
   };
 }
 

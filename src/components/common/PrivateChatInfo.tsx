@@ -10,7 +10,7 @@ import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin } from '../../types';
 
 import {
-  getMainUsername, getUserStatus, isUserOnline,
+  getMainUsername, getUserStatus, isSystemBot, isUserOnline,
 } from '../../global/helpers';
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -168,6 +168,10 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
     if (typingStatus) {
       return <TypingStatus typingStatus={typingStatus} />;
+    }
+
+    if (isSystemBot(user.id)) {
+      return undefined;
     }
 
     const translatedStatus = getUserStatus(lang, user, userStatus);

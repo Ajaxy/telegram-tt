@@ -13,9 +13,11 @@ import type {
   CustomPeer, MiddleSearchParams, MiddleSearchType, ThreadId,
 } from '../../../types';
 
-import { ANONYMOUS_USER_ID, REPLIES_USER_ID } from '../../../config';
+import { ANONYMOUS_USER_ID } from '../../../config';
 import { requestMeasure, requestMutation, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
-import { getIsSavedDialog, getReactionKey, isSameReaction } from '../../../global/helpers';
+import {
+  getIsSavedDialog, getReactionKey, isSameReaction, isSystemBot,
+} from '../../../global/helpers';
 import {
   selectChat,
   selectChatMessage,
@@ -404,7 +406,7 @@ const MiddleSearch: FC<StateProps> = ({
         return undefined;
       }
 
-      const originalSender = (isSavedMessages || chatId === REPLIES_USER_ID || chatId === ANONYMOUS_USER_ID)
+      const originalSender = (isSavedMessages || isSystemBot(chatId) || chatId === ANONYMOUS_USER_ID)
         ? selectForwardedSender(global, message) : undefined;
       const messageSender = selectSender(global, message);
       const messageChat = selectChat(global, message.chatId);

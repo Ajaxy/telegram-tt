@@ -69,7 +69,6 @@ import {
   buildInputPollFromExisting,
   buildInputReaction,
   buildInputReplyTo,
-  buildInputReportReason,
   buildInputStory,
   buildInputTextWithEntities,
   buildMessageFromUpdate,
@@ -887,14 +886,14 @@ export async function deleteSavedHistory({
 }
 
 export async function reportMessages({
-  peer, messageIds, reason, description,
+  peer, messageIds, description,
 }: {
   peer: ApiPeer; messageIds: number[]; reason: ApiReportReason; description?: string;
 }) {
   const result = await invokeRequest(new GramJs.messages.Report({
     peer: buildInputPeer(peer.id, peer.accessHash),
     id: messageIds,
-    reason: buildInputReportReason(reason),
+    option: Buffer.alloc(0),
     message: description,
   }));
 

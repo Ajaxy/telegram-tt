@@ -831,6 +831,13 @@ addActionHandler('reportMessages', async (global, actions, payload): Promise<voi
     return;
   }
 
+  // TODO: Remove after implementing the new report system
+  if (messageIds) {
+    // eslint-disable-next-line no-console
+    console.warn('UNSUPPORTED');
+    return;
+  }
+
   const { chatId } = currentMessageList;
   const chat = selectChat(global, chatId)!;
 

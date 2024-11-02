@@ -127,7 +127,6 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   translationLanguage?: string;
   doNotTranslate: string[];
   canDisplayChatInTitle: boolean;
-  shouldShowLoginCodeInChatList?: boolean;
   shouldForceHttpTransport?: boolean;
   shouldAllowHttpTransport?: boolean;
   shouldCollectDebugLogs?: boolean;

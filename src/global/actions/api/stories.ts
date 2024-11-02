@@ -423,6 +423,13 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
     return;
   }
 
+  // TODO: Remove after implementing the new report system
+  if (storyId) {
+    // eslint-disable-next-line no-console
+    console.warn('UNSUPPORTED');
+    return;
+  }
+
   const result = await callApi('reportStory', {
     peer,
     storyId,

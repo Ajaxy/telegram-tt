@@ -376,5 +376,9 @@
     "payments.getStarsGiveawayOptions",
     "payments.refundStarsCharge",
     "payments.getStarsGiftOptions",
+    "payments.getStarGifts",
+    "payments.getUserStarGifts",
+    "payments.saveStarGift",
+    "payments.convertStarGift",
     "fragment.getCollectibleInfo"
 ]

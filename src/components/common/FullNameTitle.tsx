@@ -10,7 +10,12 @@ import type { CustomPeer } from '../../types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../config';
 import {
-  getChatTitle, getUserFullName, isAnonymousForwardsChat, isChatWithRepliesBot, isPeerUser,
+  getChatTitle,
+  getUserFullName,
+  isAnonymousForwardsChat,
+  isChatWithRepliesBot,
+  isChatWithVerificationCodesBot,
+  isPeerUser,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
@@ -95,18 +100,12 @@ const FullNameTitle: FC<OwnProps> = ({
       return lang('RepliesTitle');
     }
 
+    if (isChatWithVerificationCodesBot(realPeer!.id)) {
+      return lang('VerifyCodesNotifications');
+    }
+
     return undefined;
   }, [customPeer, isSavedDialog, isSavedMessages, lang, realPeer]);
-
-  if (specialTitle) {
-    return (
-      <div className={buildClassName('title', styles.root, className)}>
-        <h3 className={buildClassName('fullName', styles.fullName, !allowMultiLine && styles.ellipsis)}>
-          {specialTitle}
-        </h3>
-      </div>
-    );
-  }
 
   return (
     <div className={buildClassName('title', styles.root, className)}>
@@ -121,7 +120,7 @@ const FullNameTitle: FC<OwnProps> = ({
         )}
         onClick={handleTitleClick}
       >
-        {renderText(title || '')}
+        {specialTitle || renderText(title || '')}
       </h3>
       {!iconElement && peer && (
         <>

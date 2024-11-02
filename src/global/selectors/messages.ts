@@ -16,7 +16,7 @@ import type {
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  ANONYMOUS_USER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  ANONYMOUS_USER_ID, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
@@ -1314,7 +1314,7 @@ export function selectShouldSchedule<T extends GlobalState>(
 
 export function selectCanScheduleUntilOnline<T extends GlobalState>(global: T, id: string) {
   const isChatWithSelf = selectIsChatWithSelf(global, id);
-  const chatBot = id === REPLIES_USER_ID && selectBot(global, id);
+  const chatBot = selectBot(global, id);
   return Boolean(
     !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline,
   );

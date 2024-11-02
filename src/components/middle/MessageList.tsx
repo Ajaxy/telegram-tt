@@ -26,7 +26,7 @@ import {
   isAnonymousForwardsChat,
   isChatChannel,
   isChatGroup,
-  isChatWithRepliesBot,
+  isSystemBot,
   isUserId,
 } from '../../global/helpers';
 import {
@@ -101,7 +101,7 @@ type StateProps = {
   isChannelChat?: boolean;
   isGroupChat?: boolean;
   isChatWithSelf?: boolean;
-  isRepliesChat?: boolean;
+  isSystemBotChat?: boolean;
   isAnonymousForwards?: boolean;
   isCreator?: boolean;
   isChannelWithAvatars?: boolean;
@@ -156,7 +156,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isSynced,
   isReady,
   isChatWithSelf,
-  isRepliesChat,
+  isSystemBotChat,
   isAnonymousForwards,
   isCreator,
   isBot,
@@ -629,7 +629,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const isPrivate = isUserId(chatId);
   const withUsers = Boolean((!isPrivate && !isChannelChat)
-    || isChatWithSelf || isRepliesChat || isAnonymousForwards || isChannelWithAvatars);
+    || isChatWithSelf || isSystemBotChat || isAnonymousForwards || isChannelWithAvatars);
   const noAvatars = Boolean(!withUsers || (isChannelChat && !isChannelWithAvatars));
   const shouldRenderGreeting = isUserId(chatId) && !isChatWithSelf && !isBot && !isAnonymousForwards
     && type === 'thread'
@@ -783,7 +783,7 @@ export default memo(withGlobal<OwnProps>(
       isChannelWithAvatars: chat.areProfilesShown,
       isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
-      isRepliesChat: isChatWithRepliesBot(chatId),
+      isSystemBotChat: isSystemBot(chatId),
       isAnonymousForwards: isAnonymousForwardsChat(chatId),
       isBot: Boolean(chatBot),
       isSynced: global.isSynced,

@@ -10,6 +10,7 @@ import {
 import { ManagementProgress } from '../../../types';
 
 import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import PopupManager from '../../../util/PopupManager';
@@ -76,6 +77,11 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
     case 'url': {
       const { url } = button;
       actions.openUrl({ url, tabId });
+      break;
+    }
+    case 'copy': {
+      copyTextToClipboard(button.copyText);
+      actions.showNotification({ message: oldTranslate('ExactTextCopied', button.copyText), tabId });
       break;
     }
     case 'callback': {

@@ -24,7 +24,6 @@ type OwnProps = {
 };
 
 type StateProps = {
-  shouldShowLoginCodeInChatList?: boolean;
   shouldForceHttpTransport?: boolean;
   shouldAllowHttpTransport?: boolean;
   shouldCollectDebugLogs?: boolean;
@@ -34,7 +33,6 @@ type StateProps = {
 const SettingsExperimental: FC<OwnProps & StateProps> = ({
   isActive,
   onReset,
-  shouldShowLoginCodeInChatList,
   shouldForceHttpTransport,
   shouldAllowHttpTransport,
   shouldCollectDebugLogs,
@@ -83,13 +81,6 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
         >
           <div className="title">Launch some confetti!</div>
         </ListItem>
-
-        <Checkbox
-          label="Show login code in chat list"
-          checked={Boolean(shouldShowLoginCodeInChatList)}
-          // eslint-disable-next-line react/jsx-no-bind
-          onCheck={() => setSettingOption({ shouldShowLoginCodeInChatList: !shouldShowLoginCodeInChatList })}
-        />
 
         <Checkbox
           label="Allow HTTP Transport"
@@ -142,7 +133,6 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal(
   (global): StateProps => {
     return {
-      shouldShowLoginCodeInChatList: global.settings.byKey.shouldShowLoginCodeInChatList,
       shouldForceHttpTransport: global.settings.byKey.shouldForceHttpTransport,
       shouldAllowHttpTransport: global.settings.byKey.shouldAllowHttpTransport,
       shouldCollectDebugLogs: global.settings.byKey.shouldCollectDebugLogs,

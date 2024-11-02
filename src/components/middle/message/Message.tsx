@@ -55,12 +55,12 @@ import {
   isChatChannel,
   isChatGroup,
   isChatPublic,
-  isChatWithRepliesBot,
   isGeoLiveExpired,
   isMessageLocal,
   isMessageTranslatable,
   isOwnMessage,
   isReplyToMessage,
+  isSystemBot,
   isUserId,
 } from '../../../global/helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../../global/helpers/replies';
@@ -1690,7 +1690,7 @@ export default memo(withGlobal<OwnProps>(
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-    const isRepliesChat = isChatWithRepliesBot(chatId);
+    const isSystemBotChat = isSystemBot(chatId);
     const isAnonymousForwards = isAnonymousForwardsChat(chatId);
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
@@ -1719,11 +1719,12 @@ export default memo(withGlobal<OwnProps>(
     const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
     const forwardHeader = forwardInfo || replyFrom;
     const replyMessageSender = replyMessage ? selectSender(global, replyMessage)
-      : forwardHeader && !isRepliesChat && !isAnonymousForwards
+      : forwardHeader && !isSystemBotChat && !isAnonymousForwards
         ? selectSenderFromHeader(global, forwardHeader) : undefined;
     const replyMessageForwardSender = replyMessage && selectForwardedSender(global, replyMessage);
     const replyMessageChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
-    const isReplyPrivate = !isRepliesChat && !isAnonymousForwards && replyMessageChat && !isChatPublic(replyMessageChat)
+    const isReplyPrivate = !isSystemBotChat && !isAnonymousForwards && replyMessageChat
+      && !isChatPublic(replyMessageChat)
       && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = storyReplyId && storyReplyPeerId
@@ -1827,7 +1828,7 @@ export default memo(withGlobal<OwnProps>(
       isForwarding,
       reactionMessage,
       isChatWithSelf,
-      isRepliesChat,
+      isRepliesChat: isSystemBotChat,
       isAnonymousForwards,
       isChannel,
       isGroup,

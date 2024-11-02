@@ -42,7 +42,6 @@ import {
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
   ONE_TIME_MEDIA_TTL_SECONDS,
-  REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -57,6 +56,7 @@ import {
   isChatChannel,
   isChatSuperGroup,
   isSameReaction,
+  isSystemBot,
   isUserId,
 } from '../../global/helpers';
 import {
@@ -2075,7 +2075,7 @@ export default memo(withGlobal<OwnProps>(
     chatId, threadId, storyId, messageListType, isMobile, type,
   }): StateProps => {
     const chat = selectChat(global, chatId);
-    const chatBot = chatId !== REPLIES_USER_ID ? selectBot(global, chatId) : undefined;
+    const chatBot = !isSystemBot(chatId) ? selectBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isChatWithUser = isUserId(chatId);

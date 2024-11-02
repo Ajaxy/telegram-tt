@@ -828,6 +828,14 @@ function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: bool
         };
       }
 
+      if (button instanceof GramJs.KeyboardButtonCopy) {
+        return {
+          type: 'copy',
+          text,
+          copyText: button.copyText,
+        };
+      }
+
       return {
         type: 'unsupported',
         text,

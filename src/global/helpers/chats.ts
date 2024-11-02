@@ -18,10 +18,12 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import {
   ANONYMOUS_USER_ID,
   ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
+  VERIFICATION_CODES_USER_ID,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getGlobal } from '..';
+import { isSystemBot } from './bots';
 import { getMainUsername, getUserFirstOrLastName } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
@@ -68,6 +70,10 @@ export function isCommonBoxChat(chat: ApiChat) {
 
 export function isChatWithRepliesBot(chatId: string) {
   return chatId === REPLIES_USER_ID;
+}
+
+export function isChatWithVerificationCodesBot(chatId: string) {
+  return chatId === VERIFICATION_CODES_USER_ID;
 }
 
 export function isAnonymousForwardsChat(chatId: string) {
@@ -163,7 +169,7 @@ export function getCanPostInChat(
   }
 
   if (chat.isRestricted || chat.isForbidden || chat.migratedTo
-    || (!isMessageThread && chat.isNotJoined) || isChatWithRepliesBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
+    || (!isMessageThread && chat.isNotJoined) || isSystemBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
     return false;
   }
 

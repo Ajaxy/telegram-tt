@@ -19,6 +19,7 @@ import {
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   TME_LINK_PREFIX,
+  VERIFICATION_CODES_USER_ID,
   VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
@@ -279,20 +280,41 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
   const { text } = contentText;
   let { entities } = contentText;
 
-  if (text && inChatList && 'chatId' in message && message.chatId === SERVICE_NOTIFICATIONS_USER_ID
-    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-    && !getGlobal().settings.byKey.shouldShowLoginCodeInChatList) {
-    const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];
-    if (authCode) {
-      entities = [
-        ...entities || [],
-        {
-          type: ApiMessageEntityTypes.Spoiler,
-          offset: text.indexOf(authCode),
-          length: authCode.length,
-        },
-      ];
-      entities.sort((a, b) => (a.offset > b.offset ? 1 : -1));
+  if (text && inChatList && 'chatId' in message) {
+    if (message.chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+      const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];
+      if (authCode) {
+        entities = [
+          ...entities || [],
+          {
+            type: ApiMessageEntityTypes.Spoiler,
+            offset: text.indexOf(authCode),
+            length: authCode.length,
+          },
+        ];
+        entities.sort((a, b) => (a.offset > b.offset ? 1 : -1));
+      }
+    }
+
+    if (message.chatId === VERIFICATION_CODES_USER_ID && entities) {
+      // Wrap code entities in spoiler
+      const hasCodeEntities = entities.some((entity) => entity.type === ApiMessageEntityTypes.Code);
+      if (hasCodeEntities) {
+        const oldEntities = entities;
+        entities = [];
+
+        for (let i = 0; i < oldEntities.length; i++) {
+          const entity = oldEntities[i];
+          if (entity.type === ApiMessageEntityTypes.Code) {
+            entities.push({
+              type: ApiMessageEntityTypes.Spoiler,
+              offset: entity.offset,
+              length: entity.length,
+            });
+          }
+          entities.push(entity);
+        }
+      }
     }
   }
 

@@ -136,7 +136,11 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
   };
 }
 
-export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiPaymentForm {
+export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiPaymentForm | undefined {
+  if (form instanceof GramJs.payments.PaymentFormStarGift) {
+    return undefined;
+  }
+
   if (form instanceof GramJs.payments.PaymentFormStars) {
     const { botId, formId } = form;
 
@@ -220,7 +224,11 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
   };
 }
 
-export function buildApiInvoiceFromForm(form: GramJs.payments.TypePaymentForm): ApiInvoice {
+export function buildApiInvoiceFromForm(form: GramJs.payments.TypePaymentForm): ApiInvoice | undefined {
+  if (form instanceof GramJs.payments.PaymentFormStarGift) {
+    return undefined;
+  }
+
   const {
     invoice, description: text, title, photo,
   } = form;

@@ -895,11 +895,11 @@ interface ApiKeyboardButtonUrlAuth {
   buttonId: number;
 }
 
-export type ApiTranscription = {
+interface ApiKeyboardButtonCopy {
+  type: 'copy';
   text: string;
-  isPending?: boolean;
-  transcriptionId: string;
-};
+  copyText: string;
+}
 
 export type ApiKeyboardButton = (
   ApiKeyboardButtonSimple
@@ -912,6 +912,7 @@ export type ApiKeyboardButton = (
   | ApiKeyboardButtonWebView
   | ApiKeyboardButtonSimpleWebView
   | ApiKeyboardButtonUrlAuth
+  | ApiKeyboardButtonCopy
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];
@@ -921,6 +922,12 @@ export type ApiReplyKeyboard = {
   isKeyboardSelective?: boolean;
 } & {
   [K in 'inlineButtons' | 'keyboardButtons']?: ApiKeyboardButtons;
+};
+
+export type ApiTranscription = {
+  text: string;
+  isPending?: boolean;
+  transcriptionId: string;
 };
 
 export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'profilePhoto';

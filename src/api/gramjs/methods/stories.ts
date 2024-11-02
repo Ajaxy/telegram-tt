@@ -24,7 +24,6 @@ import {
   buildInputPeer,
   buildInputPrivacyRules,
   buildInputReaction,
-  buildInputReportReason,
 } from '../gramjsBuilders';
 import { addStoryToLocalDb } from '../helpers';
 import { invokeRequest } from './client';
@@ -332,7 +331,6 @@ export async function fetchStoryLink({ peer, storyId }: { peer: ApiPeer ; storyI
 export function reportStory({
   peer,
   storyId,
-  reason,
   description,
 }: {
   peer: ApiPeer; storyId: number; reason: ApiReportReason; description?: string;
@@ -340,7 +338,7 @@ export function reportStory({
   return invokeRequest(new GramJs.stories.Report({
     peer: buildInputPeer(peer.id, peer.accessHash),
     id: [storyId],
-    reason: buildInputReportReason(reason),
+    option: Buffer.alloc(0),
     message: description,
   }));
 }

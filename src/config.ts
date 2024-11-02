@@ -303,6 +303,7 @@ export const HEART_REACTION: ApiReactionEmoji = {
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
+export const VERIFICATION_CODES_USER_ID = '489000';
 export const ANONYMOUS_USER_ID = '2666000';
 export const RESTRICTED_EMOJI_SET_ID = '7173162320003080';
 export const CHANNEL_ID_LENGTH = 14; // 14 symbols, based on TDLib's `ZERO_CHANNEL_ID = -1000000000000`
