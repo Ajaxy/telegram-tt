@@ -1,18 +1,18 @@
-import React, { memo, useRef } from '../../lib/teact/teact';
-import { withGlobal } from '../../global';
+import React, { memo, useRef } from '../../../lib/teact/teact';
+import { withGlobal } from '../../../global';
 
-import type { ConfettiStyle, TabState } from '../../global/types';
+import type { ConfettiStyle, TabState } from '../../../global/types';
 
-import { requestMeasure } from '../../lib/fasterdom/fasterdom';
-import { selectTabState } from '../../global/selectors';
-import buildStyle from '../../util/buildStyle';
-import { pick } from '../../util/iteratees';
+import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
+import { selectTabState } from '../../../global/selectors';
+import buildStyle from '../../../util/buildStyle';
+import { pick } from '../../../util/iteratees';
 
-import useAppLayout from '../../hooks/useAppLayout';
-import useForceUpdate from '../../hooks/useForceUpdate';
-import useLastCallback from '../../hooks/useLastCallback';
-import useSyncEffect from '../../hooks/useSyncEffect';
-import useWindowSize from '../../hooks/window/useWindowSize';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useForceUpdate from '../../../hooks/useForceUpdate';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useSyncEffect from '../../../hooks/useSyncEffect';
+import useWindowSize from '../../../hooks/window/useWindowSize';
 
 import styles from './ConfettiContainer.module.scss';
 

@@ -125,6 +125,7 @@ const PaidReactionEmoji = ({
           tgsUrl={LOCAL_TGS_URLS.StarReactionEffect}
           play={isIntersecting}
           noLoop
+          forceAlways
           nonInteractive
           quality={QUALITY}
           onEnded={handleEnded}

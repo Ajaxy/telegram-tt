@@ -152,6 +152,7 @@ export function addPaidReaction(
       count: 0,
       chosenOrder: -1,
       localAmount: count,
+      localIsPrivate: isAnonymous,
     },
     ...reactionCount,
   ];

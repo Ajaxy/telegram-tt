@@ -37,7 +37,7 @@ import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
-import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
+import { IS_ANDROID, IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/windowEnvironment';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
@@ -72,7 +72,6 @@ import RightColumn from '../right/RightColumn';
 import StoryViewer from '../story/StoryViewer.async';
 import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import BotTrustModal from './BotTrustModal.async';
-import ConfettiContainer from './ConfettiContainer';
 import DeleteFolderDialog from './DeleteFolderDialog.async';
 import Dialogs from './Dialogs.async';
 import DownloadManager from './DownloadManager';
@@ -88,6 +87,8 @@ import PremiumGiftingPickerModal from './premium/PremiumGiftingPickerModal.async
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import StarsGiftingPickerModal from './premium/StarsGiftingPickerModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
+import ConfettiContainer from './visualEffects/ConfettiContainer';
+import WaveContainer from './visualEffects/WaveContainer';
 
 import './Main.scss';
 
@@ -565,6 +566,7 @@ const Main = ({
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <DownloadManager />
       <ConfettiContainer />
+      {IS_WAVE_TRANSFORM_SUPPORTED && <WaveContainer />}
       <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />

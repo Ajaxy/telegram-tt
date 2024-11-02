@@ -699,6 +699,11 @@ export type TabState = {
     style?: ConfettiStyle;
     withStars?: boolean;
   };
+  wave?: {
+    lastWaveTime: number;
+    startX: number;
+    startY: number;
+  };
 
   urlAuth?: {
     button?: {
@@ -3189,6 +3194,10 @@ export interface ActionPayloads {
   } & WithTabId) | undefined;
   closePollModal: WithTabId | undefined;
   requestConfetti: (ConfettiParams & WithTabId) | WithTabId;
+  requestWave: {
+    startX: number;
+    startY: number;
+  } & WithTabId;
 
   updateAttachmentSettings: {
     shouldCompress?: boolean;

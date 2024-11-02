@@ -7,14 +7,14 @@ import { getActions, withGlobal } from '../../../global';
 import { DEBUG_LOG_FILENAME } from '../../../config';
 import { getDebugLogs } from '../../../util/debugConsole';
 import download from '../../../util/download';
-import { IS_ELECTRON } from '../../../util/windowEnvironment';
+import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import AnimatedIcon from '../../common/AnimatedIcon';
+import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -38,7 +38,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
   shouldCollectDebugLogs,
   shouldDebugExportedSenders,
 }) => {
-  const { requestConfetti, setSettingOption } = getActions();
+  const { requestConfetti, setSettingOption, requestWave } = getActions();
   const lang = useOldLang();
 
   const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(false);
@@ -61,10 +61,14 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
     window.electron?.setIsAutoUpdateEnabled(isChecked);
   }, []);
 
+  const handleRequestWave = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    requestWave({ startX: e.clientX, startY: e.clientY });
+  });
+
   return (
     <div className="settings-content custom-scroll">
       <div className="settings-content-header no-border">
-        <AnimatedIcon
+        <AnimatedIconWithPreview
           tgsUrl={LOCAL_TGS_URLS.Experimental}
           size={200}
           className="experimental-duck"
@@ -80,6 +84,13 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
           icon="animations"
         >
           <div className="title">Launch some confetti!</div>
+        </ListItem>
+        <ListItem
+          onClick={handleRequestWave}
+          icon="story-expired"
+          disabled={!IS_WAVE_TRANSFORM_SUPPORTED}
+        >
+          <div className="title">Start wave</div>
         </ListItem>
 
         <Checkbox

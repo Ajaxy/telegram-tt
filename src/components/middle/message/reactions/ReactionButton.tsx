@@ -64,7 +64,12 @@ const ReactionButton = ({
   onClick,
   onPaidClick,
 }: OwnProps) => {
-  const { openStarsBalanceModal, resetLocalPaidReactions, openPaidReactionModal } = getActions();
+  const {
+    openStarsBalanceModal,
+    resetLocalPaidReactions,
+    openPaidReactionModal,
+    requestWave,
+  } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLButtonElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -83,6 +88,7 @@ const ReactionButton = ({
     if (reaction.reaction.type === 'paid') {
       e.stopPropagation(); // Prevent default message double click behavior
       handlePaidClick();
+
       return;
     }
 
@@ -127,6 +133,13 @@ const ReactionButton = ({
         messageId,
       });
       return;
+    }
+
+    if (reaction.localAmount) {
+      const { left, top } = button.getBoundingClientRect();
+      const startX = left + button.offsetWidth / 2;
+      const startY = top + button.offsetHeight / 2;
+      requestWave({ startX, startY });
     }
 
     const currentScale = Number(getComputedStyle(button).scale) || 1;

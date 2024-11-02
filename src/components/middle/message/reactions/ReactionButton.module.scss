@@ -15,6 +15,7 @@
     --reaction-background: #FFBC2E33 !important;
     --reaction-background-hover: #FFBC2E55 !important;
     --reaction-text-color: #E98111 !important;
+    z-index: 2;
   }
 
   &.paid.chosen {

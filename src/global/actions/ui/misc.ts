@@ -4,6 +4,7 @@ import type { ApiError, ApiNotification } from '../../../api/types';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
+  ANIMATION_WAVE_MIN_INTERVAL,
   DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../../config';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
@@ -16,7 +17,7 @@ import { refreshFromCache } from '../../../util/localization';
 import * as langProvider from '../../../util/oldLangProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
-import { IS_ELECTRON } from '../../../util/windowEnvironment';
+import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
@@ -485,6 +486,26 @@ addActionHandler('requestConfetti', (global, actions, payload): ActionReturnType
     confetti: {
       lastConfettiTime: Date.now(),
       ...rest,
+    },
+  }, tabId);
+});
+
+addActionHandler('requestWave', (global, actions, payload): ActionReturnType => {
+  const {
+    startX, startY, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (!IS_WAVE_TRANSFORM_SUPPORTED || !selectCanAnimateInterface(global)) return undefined;
+
+  const tabState = selectTabState(global, tabId);
+  const currentLastTime = tabState.wave?.lastWaveTime || 0;
+  if (Date.now() - currentLastTime < ANIMATION_WAVE_MIN_INTERVAL) return undefined;
+
+  return updateTabState(global, {
+    wave: {
+      lastWaveTime: Date.now(),
+      startX,
+      startY,
     },
   }, tabId);
 });

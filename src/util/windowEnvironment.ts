@@ -69,8 +69,11 @@ export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
 );
 export const IS_REQUEST_FULLSCREEN_SUPPORTED = 'requestFullscreen' in document.createElement('div');
-export const ARE_CALLS_SUPPORTED = !IS_FIREFOX;
+export const ARE_CALLS_SUPPORTED = !IS_FIREFOX; // https://bugzilla.mozilla.org/show_bug.cgi?id=1923416
 export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slideFade' : IS_IOS ? 'slideLayers' : 'pushSlide';
+export const IS_WAVE_TRANSFORM_SUPPORTED = !IS_MOBILE
+  && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1808785
+  && !IS_SAFARI; // https://bugs.webkit.org/show_bug.cgi?id=245510
 
 const TEST_VIDEO = document.createElement('video');
 
