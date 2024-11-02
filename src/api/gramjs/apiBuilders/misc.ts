@@ -220,6 +220,7 @@ export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlA
 export function buildApiConfig(config: GramJs.Config): ApiConfig {
   const defaultReaction = config.reactionsDefault && buildApiReaction(config.reactionsDefault);
   return {
+    isTestServer: config.testMode,
     expiresAt: config.expires,
     gifSearchUsername: config.gifSearchUsername,
     defaultReaction,

@@ -749,10 +749,12 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   const { tabId = getCurrentTabId() } = payload || {};
   const { canDisplayChatInTitle } = global.settings.byKey;
   const currentUserId = global.currentUserId;
+  const isTestServer = global.config?.isTestServer;
+  const prefix = isTestServer ? '[T] ' : '';
 
   if (document.title.includes(INACTIVE_MARKER)) {
     updateIcon(false);
-    setPageTitleInstant(`${PAGE_TITLE} ${INACTIVE_MARKER}`);
+    setPageTitleInstant(`${prefix}${PAGE_TITLE} ${INACTIVE_MARKER}`);
     return;
   }
 
@@ -762,7 +764,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const newUnread = notificationCount - global.initialUnreadNotifications;
 
     if (newUnread > 0) {
-      setPageTitleInstant(`${newUnread} notification${newUnread > 1 ? 's' : ''}`);
+      setPageTitleInstant(`${prefix}${newUnread} notification${newUnread > 1 ? 's' : ''}`);
       updateIcon(true);
       return;
     }
@@ -779,16 +781,16 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
       const title = getChatTitle(langProvider.oldTranslate, currentChat, chatId === currentUserId);
       const topic = selectTopic(global, chatId, threadId);
       if (currentChat.isForum && topic) {
-        setPageTitle(`${title} › ${topic.title}`);
+        setPageTitle(`${prefix}${title} › ${topic.title}`);
         return;
       }
 
-      setPageTitle(title);
+      setPageTitle(`${prefix}${title}`);
       return;
     }
   }
 
-  setPageTitleInstant(IS_ELECTRON ? '' : PAGE_TITLE);
+  setPageTitleInstant(IS_ELECTRON ? '' : `${prefix}${PAGE_TITLE}`);
 });
 
 addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionReturnType => {

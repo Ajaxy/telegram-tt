@@ -397,6 +397,8 @@ const Main = ({
   // Parse deep link
   useEffect(() => {
     if (!isSynced) return;
+    updatePageTitle();
+
     const parsedInitialLocationHash = parseInitialLocationHash();
     if (parsedInitialLocationHash?.tgaddr) {
       processDeepLink(decodeURIComponent(parsedInitialLocationHash.tgaddr));

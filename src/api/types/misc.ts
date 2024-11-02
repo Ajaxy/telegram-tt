@@ -17,6 +17,7 @@ export interface ApiInitialArgs {
   shouldForceHttpTransport?: boolean;
   shouldDebugExportedSenders?: boolean;
   langCode: string;
+  isTestServerRequested?: boolean;
 }
 
 export interface ApiOnProgress {
@@ -96,6 +97,7 @@ export interface ApiWebSession {
 
 export interface ApiSessionData {
   mainDcId: number;
+  isTest?: true;
   keys: Record<number, string | number[]>;
   hashes: Record<number, string | number[]>;
 }
@@ -242,6 +244,7 @@ export interface ApiConfig {
   gifSearchUsername?: string;
   maxGroupSize: number;
   autologinToken?: string;
+  isTestServer?: boolean;
 }
 
 export type ApiPeerColorSet = string[];

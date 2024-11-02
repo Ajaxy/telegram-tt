@@ -69,10 +69,11 @@ export async function init(initialArgs: ApiInitialArgs) {
   }
 
   const {
-    userAgent, platform, sessionData, isTest, isWebmSupported, maxBufferSize, webAuthToken, dcId,
+    userAgent, platform, sessionData, isWebmSupported, maxBufferSize, webAuthToken, dcId,
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
-    shouldDebugExportedSenders, langCode,
+    shouldDebugExportedSenders, langCode, isTestServerRequested,
   } = initialArgs;
+
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
   // eslint-disable-next-line no-restricted-globals
@@ -93,9 +94,9 @@ export async function init(initialArgs: ApiInitialArgs) {
       shouldDebugExportedSenders,
       shouldForceHttpTransport,
       shouldAllowHttpTransport,
-      testServers: isTest,
       dcId,
       langCode,
+      isTestServerRequested,
     } as any,
   );
 
