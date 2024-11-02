@@ -67,9 +67,6 @@ function GiftItemPremium({
       role="button"
       onClick={handleGiftClick}
     >
-      {Boolean(discount) && (
-        <GiftRibbon color="red" text={lang('GiftDiscount', { percent: discount })} />
-      )}
       <AnimatedIconFromSticker
         sticker={sticker}
         play={canPlayAnimatedEmojis}
@@ -85,6 +82,9 @@ function GiftItemPremium({
       <Button className={styles.buy} nonInteractive size="tiny" pill fluid>
         {formatCurrencyAsString(amount, currency)}
       </Button>
+      {Boolean(discount) && (
+        <GiftRibbon color="red" text={lang('GiftDiscount', { percent: discount })} />
+      )}
     </div>
   );
 }

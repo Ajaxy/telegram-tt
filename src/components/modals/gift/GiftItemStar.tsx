@@ -57,8 +57,6 @@ function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
       role="button"
       onClick={handleGiftClick}
     >
-      {isLimited && !isSoldOut && <GiftRibbon color="blue" text={lang('GiftLimited')} />}
-      {isSoldOut && <GiftRibbon color="red" text={lang('GiftSoldOut')} />}
       <AnimatedIconFromSticker
         sticker={sticker}
         noLoop
@@ -71,6 +69,8 @@ function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
           {stars}
         </div>
       </Button>
+      {isLimited && !isSoldOut && <GiftRibbon color="blue" text={lang('GiftLimited')} />}
+      {isSoldOut && <GiftRibbon color="red" text={lang('GiftSoldOut')} />}
     </div>
   );
 }

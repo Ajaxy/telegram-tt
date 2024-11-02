@@ -743,7 +743,7 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
     const fullInfo = userFullInfo || chatFullInfo;
-    const canGift = !selectIsPremiumPurchaseBlocked(global) && !isChatWithSelf;
+    const canGift = !selectIsPremiumPurchaseBlocked(global) && !isChatWithSelf && isPrivate;
 
     const topic = selectTopic(global, chatId, threadId);
     const canCreateTopic = chat.isForum && (

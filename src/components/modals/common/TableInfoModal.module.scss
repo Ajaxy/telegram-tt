@@ -26,6 +26,8 @@
   background-color: var(--color-borders);
   gap: 1px;
 
+  flex-shrink: 0;
+
   overflow: hidden;
 }
 
