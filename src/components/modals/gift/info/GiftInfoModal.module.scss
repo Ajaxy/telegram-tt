@@ -19,6 +19,10 @@
   margin-bottom: 0;
 }
 
+.soldOut {
+  color: var(--color-error);
+}
+
 .description {
   text-align: center;
 }

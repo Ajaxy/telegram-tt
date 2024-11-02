@@ -585,7 +585,8 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
 
 export function buildApiStarGift(startGift: GramJs.StarGift): ApiStarGift {
   const {
-    id, limited, sticker, stars, availabilityRemains, availabilityTotal, convertStars,
+    id, limited, sticker, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate,
+    soldOut,
   } = startGift;
 
   return {
@@ -596,6 +597,9 @@ export function buildApiStarGift(startGift: GramJs.StarGift): ApiStarGift {
     availabilityRemains,
     availabilityTotal,
     starsToConvert: convertStars.toJSNumber(),
+    firstSaleDate,
+    lastSaleDate,
+    isSoldOut: soldOut,
   };
 }
 

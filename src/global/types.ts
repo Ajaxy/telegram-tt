@@ -882,8 +882,8 @@ export type TabState = {
   };
 
   giftInfoModal?: {
-    userId: string;
-    gift: ApiUserStarGift;
+    userId?: string;
+    gift: ApiUserStarGift | ApiStarGift;
   };
 };
 
@@ -3461,10 +3461,12 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
   } & WithTabId;
-  openGiftInfoModal: {
+  openGiftInfoModal: ({
     userId: string;
     gift: ApiUserStarGift;
-  } & WithTabId;
+  } | {
+    gift: ApiStarGift;
+  }) & WithTabId;
   closeGiftInfoModal: WithTabId | undefined;
   loadUserGifts: {
     userId: string;

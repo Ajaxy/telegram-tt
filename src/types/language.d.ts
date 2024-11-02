@@ -1563,7 +1563,6 @@ export interface LangPair {
     'count': string | number;
   };
   'GiftSoldOut': undefined;
-  'GiftSoldOutInfo': undefined;
   'GiftMessagePlaceholder': undefined;
   'GiftHideMyName': undefined;
   'GiftHideNameDescription': {
@@ -1599,15 +1598,29 @@ export interface LangPair {
     'amount': string | number;
   };
   'GiftInfoConvertTitle': undefined;
-  'GiftInfoConvertDescription': {
+  'GiftInfoConvertDescription1': {
     'user': string | number;
     'amount': string | number;
+  };
+  'GiftInfoConvertDescription2': undefined;
+  'GiftInfoConvertDescriptionPeriod': {
+    'count': string | number;
   };
   'GiftInfoSaved': {
     'link': string | number;
   };
   'GiftInfoSavedView': undefined;
   'GiftInfoHidden': undefined;
+  'GiftInfoAvailability': undefined;
+  'GiftInfoAvailabilityValue': {
+    'count': string | number;
+    'total': string | number;
+  };
+  'GiftInfoFirstSale': undefined;
+  'GiftInfoLastSale': undefined;
+  'GiftInfoSoldOutTitle': undefined;
+  'GiftInfoSoldOutDescription': undefined;
+  'GiftInfoSenderHidden': undefined;
   'StarsAmount': {
     'amount': string | number;
   };

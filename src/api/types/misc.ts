@@ -237,6 +237,7 @@ export interface ApiAppConfig {
   isChannelRevenueWithdrawalEnabled?: boolean;
   isStarsGiftEnabled?: boolean;
   starGiftMaxMessageLength?: number;
+  starGiftMaxConvertPeriod?: number;
 }
 
 export interface ApiConfig {

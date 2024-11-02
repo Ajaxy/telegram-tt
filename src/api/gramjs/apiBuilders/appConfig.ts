@@ -85,6 +85,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   upload_premium_speedup_upload?: number;
   stars_gifts_enabled?: boolean;
   stargifts_message_length_max?: number;
+  stargifts_convert_period_max?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -169,5 +170,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     isChannelRevenueWithdrawalEnabled: appConfig.channel_revenue_withdrawal_enabled,
     isStarsGiftEnabled: appConfig.stars_gifts_enabled,
     starGiftMaxMessageLength: appConfig.stargifts_message_length_max,
+    starGiftMaxConvertPeriod: appConfig.stargifts_convert_period_max,
   };
 }

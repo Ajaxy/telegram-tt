@@ -196,6 +196,9 @@ export type ApiStarGift = {
   availabilityRemains?: number;
   availabilityTotal?: number;
   starsToConvert: number;
+  isSoldOut?: true;
+  firstSaleDate?: number;
+  lastSaleDate?: number;
 };
 
 export interface ApiUserStarGift {

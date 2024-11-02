@@ -264,8 +264,10 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
 
 addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnType => {
   const {
-    userId, gift, tabId = getCurrentTabId(),
+    gift, tabId = getCurrentTabId(),
   } = payload;
+
+  const userId = 'userId' in payload ? payload.userId : undefined;
 
   return updateTabState(global, {
     giftInfoModal: {

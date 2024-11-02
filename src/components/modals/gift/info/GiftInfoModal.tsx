@@ -7,6 +7,7 @@ import type { TabState } from '../../../../global/types';
 import { STARS_ICON_PLACEHOLDER } from '../../../../config';
 import { getUserFullName } from '../../../../global/helpers';
 import { selectStarGiftSticker, selectUser } from '../../../../global/selectors';
+import buildClassName from '../../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
 import { formatInteger } from '../../../../util/textFormat';
@@ -38,12 +39,13 @@ type StateProps = {
   userFrom?: ApiUser;
   targetUser?: ApiUser;
   currentUserId?: string;
+  starGiftMaxConvertPeriod?: number;
 };
 
 const STICKER_SIZE = 120;
 
 const GiftInfoModal = ({
-  modal, sticker, userFrom, targetUser, currentUserId,
+  modal, sticker, userFrom, targetUser, currentUserId, starGiftMaxConvertPeriod,
 }: OwnProps & StateProps) => {
   const {
     closeGiftInfoModal,
@@ -59,9 +61,14 @@ const GiftInfoModal = ({
 
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
-  const { gift: userGift } = renderingModal || {};
+  const { gift: typeGift } = renderingModal || {};
+  const isUserGift = typeGift && 'gift' in typeGift;
+  const userGift = isUserGift ? typeGift : undefined;
   const canUpdate = Boolean(userGift?.fromId && userGift.messageId);
   const isSender = userGift?.fromId === currentUserId;
+  const canConvertDifference = (userGift && starGiftMaxConvertPeriod && (
+    userGift.date + starGiftMaxConvertPeriod - Date.now() / 1000
+  )) || 0;
 
   const handleClose = useLastCallback(() => {
     closeGiftInfoModal();
@@ -86,16 +93,23 @@ const GiftInfoModal = ({
   });
 
   const modalData = useMemo(() => {
-    if (!userGift) {
+    if (!typeGift) {
       return undefined;
     }
 
     const {
-      gift, date, fromId, isNameHidden, message, starsToConvert, isUnsaved, isConverted,
-    } = userGift;
+      fromId, isNameHidden, message, starsToConvert, isUnsaved, isConverted,
+    } = userGift || {};
+    const gift = isUserGift ? typeGift.gift : typeGift;
+
+    const isVisibleForMe = isNameHidden && targetUser;
 
     const description = (() => {
+      if (!userGift) {
+        return lang('GiftInfoSoldOutDescription');
+      }
       if (!canUpdate && !isSender) return undefined;
+      if (!starsToConvert || canConvertDifference < 0) return undefined;
       if (isConverted) {
         return canUpdate
           ? lang('GiftInfoDescriptionConverted', {
@@ -135,16 +149,19 @@ const GiftInfoModal = ({
       <div className={styles.header}>
         <AnimatedIconFromSticker sticker={sticker} noLoop nonInteractive size={STICKER_SIZE} />
         <h1 className={styles.title}>
-          {lang(canUpdate ? 'GiftInfoReceived' : 'GiftInfoTitle')}
+          {!userGift && lang('GiftInfoSoldOutTitle')}
+          {userGift && lang(canUpdate ? 'GiftInfoReceived' : 'GiftInfoTitle')}
         </h1>
-        <p className={styles.amount}>
-          <span className={styles.amount}>
-            {formatInteger(gift.stars)}
-          </span>
-          <StarIcon type="gold" size="middle" />
-        </p>
+        {userGift && (
+          <p className={styles.amount}>
+            <span className={styles.amount}>
+              {formatInteger(gift.stars)}
+            </span>
+            <StarIcon type="gold" size="middle" />
+          </p>
+        )}
         {description && (
-          <p className={styles.description}>
+          <p className={buildClassName(styles.description, !userGift && styles.soldOut)}>
             {description}
           </p>
         )}
@@ -164,10 +181,26 @@ const GiftInfoModal = ({
       ]);
     }
 
-    tableData.push([
-      lang('GiftInfoDate'),
-      formatDateTimeToString(date * 1000, lang.code, true),
-    ]);
+    if (userGift?.date) {
+      tableData.push([
+        lang('GiftInfoDate'),
+        formatDateTimeToString(userGift.date * 1000, lang.code, true),
+      ]);
+    }
+
+    if (gift.firstSaleDate) {
+      tableData.push([
+        lang('GiftInfoFirstSale'),
+        formatDateTimeToString(gift.firstSaleDate * 1000, lang.code, true),
+      ]);
+    }
+
+    if (gift.lastSaleDate) {
+      tableData.push([
+        lang('GiftInfoLastSale'),
+        formatDateTimeToString(gift.lastSaleDate * 1000, lang.code, true),
+      ]);
+    }
 
     tableData.push([
       lang('GiftInfoValue'),
@@ -180,13 +213,23 @@ const GiftInfoModal = ({
             [STARS_ICON_PLACEHOLDER]: <StarIcon type="gold" size="small" />,
           },
         })}
-        {canUpdate && Boolean(starsToConvert) && (
+        {canUpdate && canConvertDifference > 0 && Boolean(starsToConvert) && (
           <BadgeButton onClick={openConvertConfirm}>
             {lang('GiftInfoConvert', { amount: starsToConvert }, { pluralValue: starsToConvert })}
           </BadgeButton>
         )}
       </div>,
     ]);
+
+    if (gift.availabilityTotal) {
+      tableData.push([
+        lang('GiftInfoAvailability'),
+        lang('GiftInfoAvailabilityValue', {
+          count: formatInteger(gift.availabilityRemains!),
+          total: formatInteger(gift.availabilityTotal),
+        }),
+      ]);
+    }
 
     if (message) {
       tableData.push([
@@ -198,14 +241,21 @@ const GiftInfoModal = ({
     const footer = (
       <div className={styles.footer}>
         {canUpdate && (
-          <p className={styles.footerDescription}>
-            {isUnsaved ? lang('GiftInfoHidden')
-              : lang('GiftInfoSaved', {
-                link: <Link isPrimary onClick={handleOpenProfile}>{lang('GiftInfoSavedView')}</Link>,
-              }, {
-                withNodes: true,
-              })}
-          </p>
+          <div className={styles.footerDescription}>
+            <div>
+              {isUnsaved ? lang('GiftInfoHidden')
+                : lang('GiftInfoSaved', {
+                  link: <Link isPrimary onClick={handleOpenProfile}>{lang('GiftInfoSavedView')}</Link>,
+                }, {
+                  withNodes: true,
+                })}
+            </div>
+            {isVisibleForMe && (
+              <div>
+                {lang('GiftInfoSenderHidden')}
+              </div>
+            )}
+          </div>
         )}
         {!canUpdate && (
           <Button size="smaller" onClick={handleClose}>
@@ -225,7 +275,7 @@ const GiftInfoModal = ({
       tableData,
       footer,
     };
-  }, [userGift, sticker, lang, canUpdate, isSender, oldLang, targetUser]);
+  }, [typeGift, userGift, isUserGift, targetUser, sticker, lang, canUpdate, canConvertDifference, isSender, oldLang]);
 
   return (
     <>
@@ -236,31 +286,48 @@ const GiftInfoModal = ({
         footer={modalData?.footer}
         onClose={handleClose}
       />
-      <ConfirmDialog
-        isOpen={isConvertConfirmOpen}
-        onClose={closeConvertConfirm}
-        confirmHandler={handleConvertToStars}
-        title={lang('GiftInfoConvertTitle')}
-      >
-        {userGift && lang('GiftInfoConvertDescription', {
-          amount: lang('StarsAmountText', { amount: formatInteger(userGift.starsToConvert!) }),
-          user: getUserFullName(userFrom)!,
-        }, {
-          withNodes: true,
-          withMarkdown: true,
-          renderTextFilters: ['br'],
-        })}
-      </ConfirmDialog>
+      {userGift && (
+        <ConfirmDialog
+          isOpen={isConvertConfirmOpen}
+          onClose={closeConvertConfirm}
+          confirmHandler={handleConvertToStars}
+          title={lang('GiftInfoConvertTitle')}
+        >
+          <div>
+            {lang('GiftInfoConvertDescription1', {
+              amount: lang('StarsAmountText', { amount: formatInteger(userGift.starsToConvert!) }),
+              user: getUserFullName(userFrom)!,
+            }, {
+              withNodes: true,
+              withMarkdown: true,
+            })}
+          </div>
+          {canConvertDifference > 0 && (
+            <div>
+              {lang('GiftInfoConvertDescriptionPeriod', {
+                count: formatInteger(Math.ceil(canConvertDifference / 60 / 60 / 24)),
+              }, {
+                withNodes: true,
+                withMarkdown: true,
+              })}
+            </div>
+          )}
+          <div>{lang('GiftInfoConvertDescription2')}</div>
+        </ConfirmDialog>
+      )}
     </>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
-    const stickerId = modal?.gift?.gift.stickerId;
+    const typeGift = modal?.gift;
+    const isUserGift = typeGift && 'gift' in typeGift;
+    const gift = isUserGift ? typeGift.gift : typeGift;
+    const stickerId = gift?.stickerId;
     const sticker = stickerId ? selectStarGiftSticker(global, stickerId) : undefined;
 
-    const fromId = modal?.gift?.fromId;
+    const fromId = isUserGift && typeGift.fromId;
     const userFrom = fromId ? selectUser(global, fromId) : undefined;
     const targetUser = modal?.userId ? selectUser(global, modal.userId) : undefined;
 
@@ -269,6 +336,7 @@ export default memo(withGlobal<OwnProps>(
       userFrom,
       targetUser,
       currentUserId: global.currentUserId,
+      starGiftMaxConvertPeriod: global.appConfig?.starGiftMaxConvertPeriod,
     };
   },
 )(GiftInfoModal));

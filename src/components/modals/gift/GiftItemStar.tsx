@@ -30,21 +30,18 @@ export type StateProps = {
 const GIFT_STICKER_SIZE = 90;
 
 function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
-  const { showNotification } = getActions();
+  const { openGiftInfoModal } = getActions();
   const lang = useLang();
 
   const {
     stars,
     isLimited,
-    availabilityRemains,
-    availabilityTotal,
+    isSoldOut,
   } = gift;
-
-  const isSoldOut = availabilityTotal && !availabilityRemains;
 
   const handleGiftClick = useLastCallback(() => {
     if (isSoldOut) {
-      showNotification({ message: lang('GiftSoldOutInfo') });
+      openGiftInfoModal({ gift });
       return;
     }
 
