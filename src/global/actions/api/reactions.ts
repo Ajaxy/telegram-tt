@@ -1,11 +1,11 @@
-import type { ApiError, ApiReactionEmoji } from '../../../api/types';
+import type { ApiError, ApiReaction, ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
-  buildCollectionByCallback, buildCollectionByKey, omit, unique,
+  buildCollectionByCallback, buildCollectionByKey, omit, partition, unique,
 } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import * as mediaLoader from '../../../util/mediaLoader';
@@ -210,7 +210,9 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
     ? userReactions.filter((userReaction) => !isSameReaction(userReaction, reaction)) : [...userReactions, reaction];
 
   const limit = selectMaxUserReactions(global);
-  const reactions = newUserReactions.slice(-limit);
+  const [paidReactions, regularReactions] = partition(newUserReactions, (r) => r.type === 'paid');
+  const trimmedRegularReactions = regularReactions.slice(-limit) as ApiReaction[];
+  const localReactions = [...paidReactions, ...trimmedRegularReactions];
   const messageKey = getMessageKey(message);
 
   if (selectPerformanceSettingsValue(global, 'reactionEffects')) {
@@ -221,14 +223,14 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
     }
   }
 
-  global = addMessageReaction(global, message, reactions);
+  global = addMessageReaction(global, message, localReactions);
   setGlobal(global);
 
   try {
     await callApi('sendReaction', {
       chat,
       messageId,
-      reactions,
+      reactions: trimmedRegularReactions,
       shouldAddToRecent,
     });
 

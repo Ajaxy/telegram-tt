@@ -731,6 +731,7 @@ export interface ApiReactionCount {
   reaction: ApiReactionWithPaid;
   localAmount?: number;
   localIsPrivate?: boolean;
+  localPreviousChosenOrder?: number;
 }
 
 export interface ApiAvailableReaction {

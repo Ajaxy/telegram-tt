@@ -2,7 +2,6 @@ import type {
   ApiAvailableReaction,
   ApiChatReactions,
   ApiMessage,
-  ApiReaction,
   ApiReactionCount,
   ApiReactionKey,
   ApiReactions,
@@ -83,18 +82,17 @@ export function sortReactions<T extends ApiAvailableReaction | ApiReactionWithPa
   });
 }
 
-export function getUserReactions(message: ApiMessage): ApiReaction[] {
+export function getUserReactions(message: ApiMessage): ApiReactionWithPaid[] {
   return message.reactions?.results?.filter((r): r is Required<ApiReactionCount> => isReactionChosen(r))
     .sort((a, b) => a.chosenOrder - b.chosenOrder)
-    .map((r) => r.reaction)
-    .filter((r): r is ApiReaction => r.type !== 'paid') || [];
+    .map((r) => r.reaction) || [];
 }
 
 export function isReactionChosen(reaction: ApiReactionCount) {
   return reaction.chosenOrder !== undefined;
 }
 
-export function updateReactionCount(reactionCount: ApiReactionCount[], newReactions: ApiReaction[]) {
+export function updateReactionCount(reactionCount: ApiReactionCount[], newReactions: ApiReactionWithPaid[]) {
   const results = reactionCount.map((current) => (
     isReactionChosen(current) ? {
       ...current,
@@ -136,6 +134,7 @@ export function addPaidReaction(
           localAmount: (current.localAmount || 0) + count,
           chosenOrder: -1,
           localIsPrivate: isAnonymous !== undefined ? isAnonymous : current.localIsPrivate,
+          localPreviousChosenOrder: current.chosenOrder,
         });
         return;
       }

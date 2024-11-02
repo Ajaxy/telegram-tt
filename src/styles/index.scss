@@ -33,8 +33,8 @@ body {
   Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono",
   "Consolas", monospace;
-  --font-family-rounded: -ui-rounded, "Roboto Round";
-  --font-family-condensed: -ui-rounded, "Roboto Condensed";
+  --font-family-rounded: -ui-rounded, "Numbers Rounded", "Roboto", "Helvetica Neue", sans-serif;
+  --font-family-condensed: "Roboto Condensed", "Roboto", "Helvetica Neue", sans-serif;
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
