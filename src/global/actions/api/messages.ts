@@ -660,7 +660,6 @@ async function saveDraft<T extends GlobalState>({
     isLocal: true,
   } : undefined;
 
-  global = getGlobal();
   global = replaceThreadParam(global, chatId, threadId, 'draft', newDraft);
   if (!noLocalTimeUpdate) {
     global = updateChat(global, chatId, { draftDate: newDraft?.date });
@@ -1833,6 +1832,7 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
     replyingMessage: {},
   }, tabId);
   setGlobal(global);
+  global = getGlobal();
 
   const currentChat = selectCurrentChat(global, tabId);
   const currentThreadId = selectCurrentMessageList(global, tabId)?.threadId;

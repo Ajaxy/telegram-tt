@@ -571,6 +571,7 @@ export interface ApiMessageForwardInfo {
   fromChatId?: string;
   fromId?: string;
   savedFromPeerId?: string;
+  isSavedOutgoing?: boolean;
   fromMessageId?: number;
   hiddenUserName?: string;
   postAuthorTitle?: string;

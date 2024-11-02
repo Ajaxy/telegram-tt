@@ -115,6 +115,7 @@ addActionHandler('resetLocalPaidReactions', (global, actions, payload): ActionRe
       return {
         ...reaction,
         localAmount: undefined,
+        localPreviousChosenOrder: undefined,
         chosenOrder: reaction.localPreviousChosenOrder,
       };
     }

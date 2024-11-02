@@ -1,4 +1,4 @@
-const SITE_FONTS = ['400 1em Roboto', '500 1em Roboto', "500 1em 'Roboto Round'"];
+const SITE_FONTS = ['400 1em Roboto', '500 1em Roboto', "500 1em 'Numbers Rounded'"];
 
 export default function preloadFonts() {
   if ('fonts' in document) {

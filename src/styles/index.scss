@@ -127,7 +127,8 @@ body.cursor-ew-resize {
 }
 
 .svg-definitions {
-  display: none;
+  position: fixed; // Firefox requires definition to be visible
+  top: -99999px;
 }
 
 .allow-selection {

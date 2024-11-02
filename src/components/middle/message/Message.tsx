@@ -545,7 +545,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const canForward = isChannel && !isScheduled && message.isForwardingAllowed && !isChatProtected;
   const canFocus = Boolean(isPinnedList
     || (forwardInfo
-      && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat || isAnonymousForwards)
+      && (forwardInfo.isChannelPost || isChatWithSelf || isRepliesChat || isAnonymousForwards)
       && forwardInfo.fromMessageId
     ));
 
@@ -625,7 +625,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleDocumentGroupSelectAll,
     handleTopicChipClick,
     handleStoryClick,
-  } = useInnerHandlers(
+  } = useInnerHandlers({
     lang,
     selectMessage,
     message,
@@ -639,11 +639,12 @@ const Message: FC<OwnProps & StateProps> = ({
     senderPeer,
     botSender,
     messageTopic,
-    Boolean(requestedChatTranslationLanguage),
-    replyStory && 'content' in replyStory ? replyStory : undefined,
+    isTranslatingChat: Boolean(requestedChatTranslationLanguage),
+    story: replyStory && 'content' in replyStory ? replyStory : undefined,
     isReplyPrivate,
     isRepliesChat,
-  );
+    isSavedMessages: isChatWithSelf,
+  });
 
   const handleEffectClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
