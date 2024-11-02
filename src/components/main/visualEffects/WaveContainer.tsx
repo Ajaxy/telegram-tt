@@ -67,6 +67,7 @@ const WaveContainer = ({ waveInfo }: StateProps) => {
     filter.setAttribute('y', '0');
     filter.setAttribute('width', '1');
     filter.setAttribute('height', '1');
+    filter.setAttribute('color-interpolation-filters', 'sRGB');
     addSvgDefinition(filter, FILTER_ID);
 
     const feImage = document.createElementNS(SVG_NAMESPACE, 'feImage');
