@@ -23,10 +23,10 @@ import { callApi } from '../../../api/gramjs';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
@@ -45,6 +45,7 @@ type WebAppButton = {
   color: string;
   textColor: string;
   isProgressVisible: boolean;
+  position?: 'left' | 'right' | 'top' | 'bottom';
 };
 
 export type OwnProps = {
@@ -113,12 +114,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     updateWebApp,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
+  const [secondaryButton, setSecondaryButton] = useState<WebAppButton | undefined>();
 
   const [isLoaded, markLoaded, markUnloaded] = useFlag(false);
 
   const [popupParameters, setPopupParameters] = useState<PopupOptions | undefined>();
   const [isRequestingPhone, setIsRequestingPhone] = useState(false);
   const [isRequestingWriteAccess, setIsRequestingWriteAccess] = useState(false);
+  const [bottomBarColor, setBottomBarColor] = useState<string | undefined>();
   const {
     unlockPopupsAt, handlePopupOpened, handlePopupClosed,
   } = usePopupLimit(POPUP_SEQUENTIAL_LIMIT, POPUP_RESET_DELAY);
@@ -147,6 +150,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     const themeParams = extractCurrentThemeParams();
+    setBottomBarColor(themeParams.secondary_bg_color);
     updateCurrentWebApp({ headerColor: themeParams.bg_color, backgroundColor: themeParams.bg_color });
   }, []);
 
@@ -169,7 +173,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     if (isActive) registerReloadFrameCallback(reloadFrame);
   }, [reloadFrame, registerReloadFrameCallback, isActive]);
 
-  const shouldShowMainButton = mainButton?.isVisible && mainButton.text.trim().length > 0;
+  const isMainButtonVisible = mainButton?.isVisible && mainButton.text.trim().length > 0;
+  const isSecondaryButtonVisible = secondaryButton?.isVisible && secondaryButton.text.trim().length > 0;
 
   const handleHideCloseModal = useLastCallback(() => {
     updateCurrentWebApp({ isCloseModalOpen: false });
@@ -188,6 +193,12 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const handleMainButtonClick = useLastCallback(() => {
     sendEvent({
       eventType: 'main_button_pressed',
+    });
+  });
+
+  const handleSecondaryButtonClick = useLastCallback(() => {
+    sendEvent({
+      eventType: 'secondary_button_pressed',
     });
   });
 
@@ -240,13 +251,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       sendThemeCallback();
     }, ANIMATION_WAIT);
   }, [theme]);
-
-  // Notify view that height changed
-  useSyncEffect(() => {
-    setTimeout(() => {
-      sendViewport();
-    }, ANIMATION_WAIT);
-  }, [mainButton?.isVisible, sendViewport]);
 
   useSyncEffect(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
@@ -362,6 +366,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       setIsRequestingPhone(false);
       setIsRequestingWriteAccess(false);
       setMainButton(undefined);
+      setSecondaryButton(undefined);
       updateCurrentWebApp({
         isSettingsButtonVisible: false,
         shouldConfirmClosing: false,
@@ -399,6 +404,10 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       calculateHeaderColor(eventData.color_key, eventData.color);
     }
 
+    if (eventType === 'web_app_set_bottom_bar_color') {
+      setBottomBarColor(eventData.color);
+    }
+
     if (eventType === 'web_app_data_send') {
       closeActiveWebApp();
       sendWebViewData({
@@ -409,16 +418,29 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_setup_main_button') {
-      const themeParams = extractCurrentThemeParams();
-      const color = validateHexColor(eventData.color) ? eventData.color : themeParams.button_color;
-      const textColor = validateHexColor(eventData.text_color) ? eventData.text_color : themeParams.text_color;
+      const color = eventData.color;
+      const textColor = eventData.text_color;
       setMainButton({
         isVisible: eventData.is_visible && Boolean(eventData.text?.trim().length),
         isActive: eventData.is_active,
-        text: eventData.text || '',
+        text: eventData.text,
         color,
         textColor,
         isProgressVisible: eventData.is_progress_visible,
+      });
+    }
+
+    if (eventType === 'web_app_setup_secondary_button') {
+      const color = eventData.color;
+      const textColor = eventData.text_color;
+      setSecondaryButton({
+        isVisible: eventData.is_visible && Boolean(eventData.text?.trim().length),
+        isActive: eventData.is_active,
+        text: eventData.text,
+        color,
+        textColor,
+        isProgressVisible: eventData.is_progress_visible,
+        position: eventData.position,
       });
     }
 
@@ -478,39 +500,99 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
   }
 
-  const prevMainButtonColor = usePreviousDeprecated(mainButton?.color, true);
-  const prevMainButtonTextColor = usePreviousDeprecated(mainButton?.textColor, true);
-  const prevMainButtonIsActive = usePreviousDeprecated(mainButton && Boolean(mainButton.isActive), true);
-  const prevMainButtonText = usePreviousDeprecated(mainButton?.text, true);
+  const mainButtonCurrentColor = useCurrentOrPrev(mainButton?.color, true);
+  const mainButtonCurrentTextColor = useCurrentOrPrev(mainButton?.textColor, true);
+  const mainButtonCurrentIsActive = useCurrentOrPrev(mainButton && Boolean(mainButton.isActive), true);
+  const mainButtonCurrentText = useCurrentOrPrev(mainButton?.text, true);
 
-  const mainButtonCurrentColor = mainButton?.color || prevMainButtonColor;
-  const mainButtonCurrentTextColor = mainButton?.textColor || prevMainButtonTextColor;
-  const mainButtonCurrentIsActive = mainButton?.isActive !== undefined ? mainButton.isActive : prevMainButtonIsActive;
-  const mainButtonCurrentText = mainButton?.text || prevMainButtonText;
+  const secondaryButtonCurrentPosition = useCurrentOrPrev(secondaryButton?.position, true);
+  const secondaryButtonCurrentColor = useCurrentOrPrev(secondaryButton?.color, true);
+  const secondaryButtonCurrentTextColor = useCurrentOrPrev(secondaryButton?.textColor, true);
+  const secondaryButtonCurrentIsActive = useCurrentOrPrev(secondaryButton && Boolean(secondaryButton.isActive), true);
+  const secondaryButtonCurrentText = useCurrentOrPrev(secondaryButton?.text, true);
 
   const [shouldDecreaseWebFrameSize, setShouldDecreaseWebFrameSize] = useState(false);
-  const [shouldHideButton, setShouldHideButton] = useState(true);
+  const [shouldHideMainButton, setShouldHideMainButton] = useState(true);
+  const [shouldHideSecondaryButton, setShouldHideSecondaryButton] = useState(true);
+  const [shouldShowMainButton, setShouldShowMainButton] = useState(false);
+  const [shouldShowSecondaryButton, setShouldShowSecondaryButton] = useState(false);
 
-  const buttonChangeTimeout = useRef<ReturnType<typeof setTimeout>>();
+  // Notify view that height changed
+  useSyncEffect(() => {
+    setTimeout(() => {
+      sendViewport();
+    }, ANIMATION_WAIT);
+  }, [shouldShowSecondaryButton, shouldHideSecondaryButton,
+    shouldShowMainButton, shouldShowMainButton,
+    secondaryButton?.position, sendViewport]);
+
+  const isVerticalLayout = secondaryButtonCurrentPosition === 'top' || secondaryButtonCurrentPosition === 'bottom';
+  const isHorizontalLayout = !isVerticalLayout;
+
+  const rowsCount = (isVerticalLayout && shouldShowMainButton && shouldShowSecondaryButton) ? 2
+    : shouldShowMainButton || shouldShowSecondaryButton ? 1 : 0;
+
+  const hideDirection = (isHorizontalLayout
+    && (!shouldHideMainButton && !shouldHideSecondaryButton)) ? 'horizontal' : 'vertical';
+
+  const mainButtonChangeTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const mainButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const secondaryButtonChangeTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const secondaryButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    if (buttonChangeTimeout.current) clearTimeout(buttonChangeTimeout.current);
-    if (!shouldShowMainButton) {
-      setShouldDecreaseWebFrameSize(false);
-      buttonChangeTimeout.current = setTimeout(() => {
-        setShouldHideButton(true);
-      }, MAIN_BUTTON_ANIMATION_TIME);
-    } else {
-      setShouldHideButton(false);
-      buttonChangeTimeout.current = setTimeout(() => {
+    if (mainButtonChangeTimeout.current) clearTimeout(mainButtonChangeTimeout.current);
+    if (mainButtonFastTimeout.current) clearTimeout(mainButtonFastTimeout.current);
+
+    if (isMainButtonVisible) {
+      mainButtonFastTimeout.current = setTimeout(() => {
+        setShouldShowMainButton(true);
+      }, 35);
+      setShouldHideMainButton(false);
+      mainButtonChangeTimeout.current = setTimeout(() => {
         setShouldDecreaseWebFrameSize(true);
       }, MAIN_BUTTON_ANIMATION_TIME);
     }
-  }, [setShouldDecreaseWebFrameSize, shouldShowMainButton]);
+
+    if (!isMainButtonVisible) {
+      setShouldShowMainButton(false);
+      mainButtonChangeTimeout.current = setTimeout(() => {
+        setShouldHideMainButton(true);
+      }, MAIN_BUTTON_ANIMATION_TIME);
+    }
+  }, [isMainButtonVisible]);
+
+  useEffect(() => {
+    if (secondaryButtonChangeTimeout.current) clearTimeout(secondaryButtonChangeTimeout.current);
+    if (secondaryButtonFastTimeout.current) clearTimeout(secondaryButtonFastTimeout.current);
+
+    if (isSecondaryButtonVisible) {
+      secondaryButtonFastTimeout.current = setTimeout(() => {
+        setShouldShowSecondaryButton(true);
+      }, 35);
+      setShouldHideSecondaryButton(false);
+      secondaryButtonChangeTimeout.current = setTimeout(() => {
+        setShouldDecreaseWebFrameSize(true);
+      }, MAIN_BUTTON_ANIMATION_TIME);
+    }
+
+    if (!isSecondaryButtonVisible) {
+      setShouldShowSecondaryButton(false);
+      secondaryButtonChangeTimeout.current = setTimeout(() => {
+        setShouldHideSecondaryButton(true);
+      }, MAIN_BUTTON_ANIMATION_TIME);
+    }
+  }, [isSecondaryButtonVisible]);
+
+  useEffect(() => {
+    if (!shouldShowSecondaryButton && !shouldShowMainButton) {
+      setShouldDecreaseWebFrameSize(false);
+    }
+  }, [setShouldDecreaseWebFrameSize, shouldShowSecondaryButton, shouldShowMainButton]);
 
   const frameWidth = frameSize?.width || 0;
   let frameHeight = frameSize?.height || 0;
-  if (shouldDecreaseWebFrameSize) { frameHeight -= 3.5 * REM; }
+  if (shouldDecreaseWebFrameSize) { frameHeight -= 4 * REM; }
   const frameStyle = buildStyle(
     `left: ${0}px;`,
     `top: ${0}px;`,
@@ -543,19 +625,53 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         ref={frameRef}
       />
       {isMaximizedState && (
-        <Button
+        <div
+          style={`background-color: ${bottomBarColor};`}
           className={buildClassName(
-            styles.mainButton,
-            shouldShowMainButton && styles.visible,
-            shouldHideButton && styles.hidden,
+            styles.buttonsContainer,
+            secondaryButtonCurrentPosition === 'left' && styles.leftToRight,
+            secondaryButtonCurrentPosition === 'right' && styles.rightToLeft,
+            secondaryButtonCurrentPosition === 'top' && styles.topToBottom,
+            secondaryButtonCurrentPosition === 'bottom' && styles.bottomToTop,
+            hideDirection === 'horizontal' && styles.hideHorizontal,
+            rowsCount === 1 && styles.oneRow,
+            rowsCount === 2 && styles.twoRows,
           )}
-          style={`background-color: ${mainButtonCurrentColor}; color: ${mainButtonCurrentTextColor}`}
-          disabled={!mainButtonCurrentIsActive}
-          onClick={handleMainButtonClick}
         >
-          {mainButtonCurrentText}
-          {mainButton?.isProgressVisible && <Spinner className={styles.mainButtonSpinner} color="white" />}
-        </Button>
+          <Button
+            className={buildClassName(
+              styles.secondaryButton,
+              shouldShowSecondaryButton && !shouldHideSecondaryButton && styles.visible,
+              shouldHideSecondaryButton && styles.hidden,
+            )}
+            fluid
+            style={`background-color: ${secondaryButtonCurrentColor}; color: ${secondaryButtonCurrentTextColor}`}
+            disabled={!secondaryButtonCurrentIsActive && !secondaryButton?.isProgressVisible}
+            nonInteractive={secondaryButton?.isProgressVisible}
+            onClick={handleSecondaryButtonClick}
+            size="smaller"
+          >
+            {!secondaryButton?.isProgressVisible && secondaryButtonCurrentText}
+            {secondaryButton?.isProgressVisible
+            && <Spinner className={styles.mainButtonSpinner} color="blue" />}
+          </Button>
+          <Button
+            className={buildClassName(
+              styles.mainButton,
+              shouldShowMainButton && !shouldHideMainButton && styles.visible,
+              shouldHideMainButton && styles.hidden,
+            )}
+            fluid
+            style={`background-color: ${mainButtonCurrentColor}; color: ${mainButtonCurrentTextColor}`}
+            disabled={!mainButtonCurrentIsActive && !mainButton?.isProgressVisible}
+            nonInteractive={mainButton?.isProgressVisible}
+            onClick={handleMainButtonClick}
+            size="smaller"
+          >
+            {!mainButton?.isProgressVisible && mainButtonCurrentText}
+            {mainButton?.isProgressVisible && <Spinner className={styles.mainButtonSpinner} color="white" />}
+          </Button>
+        </div>
       ) }
       <ConfirmDialog
         isOpen={isRequestingPhone}
