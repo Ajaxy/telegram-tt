@@ -1474,12 +1474,12 @@ const Message: FC<OwnProps & StateProps> = ({
             dir="ltr"
           >
             {asForwarded && (
+              <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
+            )}
+            {asForwarded && (
               <span className="forward-title">
                 {lang('ForwardedFrom')}
               </span>
-            )}
-            {asForwarded && (
-              <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
             )}
             {storyData && <Icon name="play-story" />}
             {shouldRenderForwardAvatar && (
