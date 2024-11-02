@@ -1,6 +1,5 @@
 import type { ActionReturnType } from '../../types';
 
-import { areDeepEqual } from '../../../util/areDeepEqual';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import * as langProvider from '../../../util/oldLangProvider';
 import { addActionHandler, setGlobal } from '../../index';
@@ -17,13 +16,24 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const { totalAmount, currency } = invoice;
 
-      actions.showNotification({
-        tabId,
-        message: langProvider.oldTranslate('PaymentInfoHint', [
-          formatCurrencyAsString(totalAmount, currency, langProvider.getTranslationFn().code),
-          form.title,
-        ]),
-      });
+      if (paymentState.inputInvoice?.type === 'stars') {
+        actions.closeStarsBalanceModal({ tabId });
+        actions.showNotification({
+          message: langProvider.oldTranslate('StarsAcquiredInfo', paymentState.inputInvoice.stars),
+          title: langProvider.oldTranslate('StarsAcquired'),
+          icon: 'star',
+          tabId,
+        });
+        actions.requestConfetti({ withStars: true, tabId });
+      } else {
+        actions.showNotification({
+          tabId,
+          message: langProvider.oldTranslate('PaymentInfoHint', [
+            formatCurrencyAsString(totalAmount, currency, langProvider.getTranslationFn().code),
+            form.title,
+          ]),
+        });
+      }
 
       setGlobal(global);
 
@@ -69,8 +79,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
         const starsModalState = selectTabState(global, tabId).starsGiftModal;
 
-        if (starsModalState && starsModalState.isOpen
-          && areDeepEqual(inputInvoice.userId, starsModalState.forUserId)) {
+        if (starsModalState?.isOpen && inputInvoice.userId === starsModalState.forUserId) {
           global = updateTabState(global, {
             starsGiftModal: {
               ...starsModalState,
@@ -78,22 +87,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             },
           }, tabId);
         }
-      }
 
-      if (inputInvoice?.type === 'stars') {
-        const starsModalState = selectTabState(global, tabId).starsGiftModal;
-
-        if (starsModalState && starsModalState.isOpen) {
-          global = updateTabState(global, {
-            starsGiftModal: {
-              ...starsModalState,
-              isCompleted: true,
-            },
-          }, tabId);
-        }
-      }
-
-      if (inputInvoice?.type === 'stars' || inputInvoice?.type === 'stargift') {
         actions.requestConfetti({ withStars: true, tabId });
       }
       break;

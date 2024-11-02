@@ -40,7 +40,6 @@ export type OwnProps = {
     name?: string;
     phone?: string;
     shippingMethod?: string;
-    botName?: string;
   };
   totalPrice?: number;
   needAddress?: boolean;

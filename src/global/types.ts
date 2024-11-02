@@ -875,6 +875,10 @@ export type TabState = {
       messageId: number;
       amount: number;
     };
+    topup?: {
+      balanceNeeded: number;
+      purpose?: string;
+    };
   };
 
   giftInfoModal?: {
@@ -2375,6 +2379,11 @@ export interface ActionPayloads {
       messageId: number;
       amount: number;
     };
+    topup?: {
+      balanceNeeded: number;
+      purpose?: string;
+    };
+    shouldIgnoreBalance?: boolean;
   } & WithTabId;
   closeStarsBalanceModal: WithTabId | undefined;
 

@@ -626,7 +626,6 @@ export default memo(withGlobal<OwnProps>(
       temporaryPassword,
       isExtendedMedia,
       url,
-      botId,
     } = selectTabState(global).payment;
 
     const { invoice, nativeParams, nativeProvider } = form || {};
@@ -640,7 +639,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId!) : undefined;
     const isProviderError = Boolean(invoice && (!providerName || !SUPPORTED_PROVIDERS.has(providerName)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
-    const bot = botId ? selectUser(global, botId) : undefined;
+    const bot = form?.botId ? selectUser(global, form.botId) : undefined;
     const botName = getUserFullName(bot);
 
     return {

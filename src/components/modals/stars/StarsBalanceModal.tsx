@@ -41,6 +41,7 @@ const TRANSACTION_TABS: TabWithProperties[] = [
   { title: 'StarsTransactionsOutgoing' },
 ];
 const TRANSACTION_ITEM_CLASS = 'StarsTransactionItem';
+const SUBSCRIPTION_PURPOSE = 'subs';
 
 export type OwnProps = {
   modal: TabState['starsBalanceModal'];
@@ -69,15 +70,19 @@ const StarsBalanceModal = ({
 
   const isOpen = Boolean(modal && starsBalanceState);
 
-  const { originStarsPayment, originReaction, originGift } = modal || {};
+  const {
+    originStarsPayment, originReaction, originGift, topup,
+  } = modal || {};
+
+  const shouldOpenOnBuy = originStarsPayment || originReaction || originGift || topup;
 
   const ongoingTransactionAmount = originStarsPayment?.form?.invoice?.totalAmount
     || originStarsPayment?.subscriptionInfo?.subscriptionPricing?.amount
     || originReaction?.amount
-    || originGift?.gift.stars;
+    || originGift?.gift.stars
+    || topup?.balanceNeeded;
   const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance || 0) : undefined;
   const starsNeededText = useMemo(() => {
-    if (!starsNeeded || starsNeeded < 0) return undefined;
     const global = getGlobal();
 
     if (originReaction) {
@@ -98,11 +103,15 @@ const StarsBalanceModal = ({
       return oldLang('StarsNeededTextGift', getUserFullName(user));
     }
 
-    return undefined;
-  }, [starsNeeded, originReaction, originStarsPayment, originGift, oldLang]);
+    if (topup?.purpose === SUBSCRIPTION_PURPOSE) {
+      return oldLang('StarsNeededTextLink');
+    }
 
-  const shouldShowItems = Boolean(history?.all?.transactions.length && !originStarsPayment && !originReaction);
-  const shouldSuggestGifting = !originStarsPayment && !originReaction;
+    return undefined;
+  }, [originReaction, originStarsPayment, originGift, topup?.purpose, oldLang]);
+
+  const shouldShowItems = Boolean(history?.all?.transactions.length && !shouldOpenOnBuy);
+  const shouldSuggestGifting = !shouldOpenOnBuy;
 
   useEffect(() => {
     if (!isOpen) {
@@ -113,13 +122,13 @@ const StarsBalanceModal = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if (ongoingTransactionAmount) {
+    if (shouldOpenOnBuy) {
       showBuyOptions();
       return;
     }
 
     hideBuyOptions();
-  }, [ongoingTransactionAmount]);
+  }, [shouldOpenOnBuy]);
 
   const tosText = useMemo(() => {
     if (!isOpen) return undefined;

@@ -71,6 +71,7 @@ export const processDeepLink = (url: string): boolean => {
     openStoryViewerByUsername,
     processBoostParameters,
     checkGiftCode,
+    openStarsBalanceModal,
   } = actions;
 
   switch (method) {
@@ -173,6 +174,15 @@ export const processDeepLink = (url: string): boolean => {
     case 'invoice': {
       const { slug } = params;
       openInvoice({ type: 'slug', slug });
+      break;
+    }
+
+    case 'stars_topup': {
+      const { balance, purpose } = params;
+      const balanceNeeded = Number(balance);
+      if (!balanceNeeded || balanceNeeded < 0) return true;
+
+      openStarsBalanceModal({ topup: { balanceNeeded, purpose } });
       break;
     }
 

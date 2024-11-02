@@ -2,6 +2,7 @@ import type { ApiUserStarGift } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import * as langProvider from '../../../util/oldLangProvider';
 import { getPrizeStarsTransactionFromGiveaway, getStarsTransactionFromGift } from '../../helpers/payments';
 import { addActionHandler } from '../../index';
 import {
@@ -12,7 +13,13 @@ import { selectChatMessage, selectStarsPayment } from '../../selectors';
 
 addActionHandler('processOriginStarsPayment', (global, actions, payload): ActionReturnType => {
   const { originData, status, tabId = getCurrentTabId() } = payload;
-  const { originStarsPayment, originReaction, originGift } = originData || {};
+  const {
+    originStarsPayment, originReaction, originGift, topup,
+  } = originData || {};
+
+  if (!originStarsPayment && !originReaction && !originGift && !topup) {
+    return undefined;
+  }
 
   actions.closeStarsBalanceModal({ tabId });
 
@@ -105,8 +112,26 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
     originStarsPayment,
     originReaction,
     originGift,
+    topup,
+    shouldIgnoreBalance,
     tabId = getCurrentTabId(),
   } = payload || {};
+
+  const starBalance = global.stars?.balance;
+
+  if (!shouldIgnoreBalance && starBalance && topup && topup.balanceNeeded <= starBalance) {
+    actions.showNotification({
+      message: langProvider.oldTranslate('StarsTopupLinkEnough'),
+      actionText: langProvider.oldTranslate('StarsTopupLinkTopupAnyway'),
+      action: {
+        action: 'openStarsBalanceModal',
+        payload: { topup, shouldIgnoreBalance: true, tabId },
+      },
+      icon: 'star',
+      tabId,
+    });
+    return undefined;
+  }
 
   global = clearStarPayment(global, tabId);
 
@@ -118,6 +143,7 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
       originStarsPayment,
       originReaction,
       originGift,
+      topup,
     },
   }, tabId);
 });
