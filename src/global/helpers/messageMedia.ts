@@ -26,7 +26,7 @@ import {
   MAX_BUFFER_SIZE,
 } from '../../util/windowEnvironment';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
-import { getAttachmentMediaType, matchLinkInMessageText } from './messages';
+import { getAttachmentMediaType, getMessageText, matchLinkInMessageText } from './messages';
 
 export type MediaWithThumbs = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiMediaExtendedPreview;
 export type DownloadableMedia = ApiPhoto | ApiVideo | ApiDocument | ApiSticker | ApiAudio | ApiVoice | ApiWebDocument;
@@ -65,6 +65,7 @@ export function hasReplaceableMedia(message: MediaContainer) {
     || getMessageDocument(message)
     || getMessageSticker(message)
     || getMessageAudio(message)
+    || getMessageText(message)
   ));
 }
 

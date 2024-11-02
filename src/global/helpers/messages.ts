@@ -3,7 +3,7 @@ import type {
   ApiMessage,
   ApiMessageEntityTextUrl,
   ApiPeer, ApiSponsoredMessage,
-  ApiStory,
+  ApiStory, MediaContainer,
 } from '../../api/types';
 import type { MediaContent } from '../../api/types/messages';
 import type { LangFn } from '../../hooks/useOldLang';
@@ -53,7 +53,7 @@ export function getMessageTranscription(message: ApiMessage) {
   return transcriptionId && global.transcriptions[transcriptionId]?.text;
 }
 
-export function hasMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage) {
+export function hasMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage | MediaContainer) {
   const {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
     game, action, storyData, giveaway, giveawayResults, isExpiredVoice, paidMedia,
@@ -65,7 +65,7 @@ export function hasMessageText(message: ApiMessage | ApiStory | ApiSponsoredMess
   );
 }
 
-export function getMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage) {
+export function getMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage | MediaContainer) {
   return hasMessageText(message) ? message.content.text?.text || CONTENT_NOT_SUPPORTED : undefined;
 }
 

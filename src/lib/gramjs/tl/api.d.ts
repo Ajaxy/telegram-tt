@@ -2173,6 +2173,7 @@ namespace Api {
     months: int;
     cryptoCurrency?: string;
     cryptoAmount?: long;
+    message?: Api.TypeTextWithEntities;
   }> {
     // flags: undefined;
     currency: string;
@@ -2180,6 +2181,7 @@ namespace Api {
     months: int;
     cryptoCurrency?: string;
     cryptoAmount?: long;
+    message?: Api.TypeTextWithEntities;
   };
   export class MessageActionTopicCreate extends VirtualClass<{
     // flags: undefined;
@@ -2239,6 +2241,7 @@ namespace Api {
     amount?: long;
     cryptoCurrency?: string;
     cryptoAmount?: long;
+    message?: Api.TypeTextWithEntities;
   }> {
     // flags: undefined;
     viaGiveaway?: true;
@@ -2250,6 +2253,7 @@ namespace Api {
     amount?: long;
     cryptoCurrency?: string;
     cryptoAmount?: long;
+    message?: Api.TypeTextWithEntities;
   };
   export class MessageActionGiveawayLaunch extends VirtualClass<{
     // flags: undefined;
@@ -8884,12 +8888,14 @@ namespace Api {
     boostPeer?: Api.TypeInputPeer;
     currency: string;
     amount: long;
+    message?: Api.TypeTextWithEntities;
   }> {
     // flags: undefined;
     users: Api.TypeInputUser[];
     boostPeer?: Api.TypeInputPeer;
     currency: string;
     amount: long;
+    message?: Api.TypeTextWithEntities;
   };
   export class InputStorePaymentPremiumGiveaway extends VirtualClass<{
     // flags: undefined;
@@ -10485,21 +10491,27 @@ namespace Api {
   export class StarGift extends VirtualClass<{
     // flags: undefined;
     limited?: true;
+    soldOut?: true;
     id: long;
     sticker: Api.TypeDocument;
     stars: long;
     availabilityRemains?: int;
     availabilityTotal?: int;
     convertStars: long;
+    firstSaleDate?: int;
+    lastSaleDate?: int;
   }> {
     // flags: undefined;
     limited?: true;
+    soldOut?: true;
     id: long;
     sticker: Api.TypeDocument;
     stars: long;
     availabilityRemains?: int;
     availabilityTotal?: int;
     convertStars: long;
+    firstSaleDate?: int;
+    lastSaleDate?: int;
   };
   export class UserStarGift extends VirtualClass<{
     // flags: undefined;
