@@ -15,20 +15,6 @@
     margin: -0.3125rem -0.5rem 0.3125rem -0.625rem;
   }
 
-  .forwarded-message & {
-    margin-bottom: 0.125rem;
-
-    .message-content.media.text & {
-      margin: 0 0 0.3125rem;
-      --border-bottom-left-radius: inherit;
-      --border-bottom-right-radius: inherit;
-
-      + .message-paid-media-status {
-        margin-right: 0;
-      }
-    }
-  }
-
   &,
   .message-content.media.text & {
     > .album-item-select-wrapper .media-inner {

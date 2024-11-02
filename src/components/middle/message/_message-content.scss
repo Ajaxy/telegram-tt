@@ -285,10 +285,31 @@
     color: var(--accent-color);
     unicode-bidi: plaintext;
     display: flex;
+    user-select: none;
 
+    .forward-title-container,
+    .message-title-name-container,
     .message-title-name {
       display: flex;
       align-items: center;
+    }
+
+    .message-title-name-container {
+      flex-wrap: wrap;
+    }
+
+    .forward-title-container,
+    .message-title-name {
+      white-space: nowrap;
+    }
+
+    .message-title-name {
+      max-width: 100%;
+    }
+
+    .sender-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .forward-title {
@@ -306,17 +327,19 @@
       unicode-bidi: plaintext;
     }
 
-    &.interactive,
-    & > .interactive {
-      cursor: var(--custom-cursor, pointer);
-
-      &:hover {
-        opacity: 0.85;
-      }
-    }
-
     .sender-hidden {
       font-weight: normal;
+    }
+
+    &.interactive,
+    & > .interactive {
+      .sender-title {
+        cursor: var(--custom-cursor, pointer);
+
+        &:hover {
+          opacity: 0.85;
+        }
+      }
     }
 
     & + .File {
@@ -593,6 +616,10 @@
     }
   }
 
+  &.is-forwarded.text .media-inner {
+    margin-top: 0;
+  }
+
   &.text .media-inner {
     margin-top: -0.3125rem;
   }
@@ -723,7 +750,7 @@
 }
 
 .message-content.story {
-  max-width: 13.625rem;
+  max-width: 12rem;
 }
 
 .message-content.custom-shape {
@@ -886,7 +913,6 @@
 
 .forwarded-message {
   .message-content.contact &,
-  .message-content.voice &,
   .message-content.poll &,
   .message-content.giveaway & {
     // MessageOutgoingStatus's icon needs more space
@@ -898,14 +924,44 @@
     margin-top: 0.25rem;
   }
 
-  --border-top-left-radius: var(--border-radius-messages-small);
-  --border-top-right-radius: var(--border-radius-messages-small);
-  --border-bottom-left-radius: var(--border-radius-messages-small);
-  --border-bottom-right-radius: var(--border-radius-messages-small);
+  --border-top-left-radius: 0;
+  --border-top-right-radius: 0;
 
+  .has-footer & {
+    --border-bottom-left-radius: 0;
+    --border-bottom-right-radius: 0;
+  }
+
+  .Album,
   .media-inner:not(.file-preview) {
-    margin: 0 !important;
-    margin-bottom: 0.25rem !important;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+
+    body.is-ios .Message.own & {
+      margin-left: -0.625rem;
+    }
+
+    :not(.has-footer) & {
+      margin-bottom: -0.375rem;
+
+      body.is-ios .Message.own & {
+        margin-bottom: -0.4375rem;
+      }
+    }
+  }
+
+  .Album {
+    margin-bottom: 0.125rem;
+
+    .message-content.media.text & {
+      margin-top: 0.25rem;
+      --border-bottom-left-radius: inherit;
+      --border-bottom-right-radius: inherit;
+
+      + .message-paid-media-status {
+        margin-right: 0;
+      }
+    }
   }
 }
 

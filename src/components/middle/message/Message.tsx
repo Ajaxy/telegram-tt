@@ -927,13 +927,13 @@ const Message: FC<OwnProps & StateProps> = ({
       calculatedWidth = Math.max(
         getMinMediaWidth(text?.text, isMediaWithCommentButton), albumLayout.containerStyle.width,
       );
-      if (!asForwarded && calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
+      if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }
 
     if (calculatedWidth) {
-      style = `width: ${calculatedWidth + extraPadding}px`;
+      style = `width: ${calculatedWidth}px`;
       reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
     } else if (sticker && !hasSubheader) {
       const { width } = getStickerDimensions(sticker, isMobile);
@@ -1058,7 +1058,7 @@ const Message: FC<OwnProps & StateProps> = ({
       noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup
-      && (!hasText || (isInvertedMedia && !hasFactCheck && !hasReactions)) && !asForwarded && !withCommentButton;
+      && (!hasText || (isInvertedMedia && !hasFactCheck && !hasReactions)) && !withCommentButton;
     const textContentClass = buildClassName(
       'text-content',
       'clearfix',
@@ -1467,40 +1467,48 @@ const Message: FC<OwnProps & StateProps> = ({
         {(senderTitle || asForwarded) ? (
           <span
             className={buildClassName(
-              'message-title-name',
+              'message-title-name-container',
               forwardInfo?.hiddenUserName ? 'sender-hidden' : 'interactive',
               senderColor,
             )}
-            onClick={handleSenderClick}
             dir="ltr"
           >
-            {asForwarded && (
-              <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
-            )}
-            {asForwarded && (
-              <span className="forward-title">
-                {lang('ForwardedFrom')}
+            <span className="forward-title-container">
+              {asForwarded && (
+                <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
+              )}
+              {asForwarded && (
+                <span className="forward-title">
+                  {lang('ForwardedFrom')}
+                </span>
+              )}
+            </span>
+            <span className="message-title-name">
+              {storyData && <Icon name="play-story" />}
+              {shouldRenderForwardAvatar && (
+                <Avatar
+                  className="forward-avatar"
+                  peer={senderPeer}
+                  size="micro"
+                />
+              )}
+              <span
+                className="sender-title"
+                onClick={handleSenderClick}
+              >
+                {senderTitle ? renderText(senderTitle) : (asForwarded ? NBSP : undefined)}
               </span>
-            )}
-            {storyData && <Icon name="play-story" />}
-            {shouldRenderForwardAvatar && (
-              <Avatar
-                className="forward-avatar"
-                peer={senderPeer}
-                size="micro"
-              />
-            )}
-            {senderTitle ? renderText(senderTitle) : (asForwarded ? NBSP : undefined)}
-            {!asForwarded && senderEmojiStatus && (
-              <CustomEmoji
-                documentId={senderEmojiStatus.documentId}
-                loopLimit={EMOJI_STATUS_LOOP_LIMIT}
-                observeIntersectionForLoading={observeIntersectionForLoading}
-                observeIntersectionForPlaying={observeIntersectionForPlaying}
-              />
-            )}
-            {!asForwarded && !senderEmojiStatus && senderIsPremium && <StarIcon />}
-            {senderPeer?.fakeType && <FakeIcon fakeType={senderPeer.fakeType} />}
+              {!asForwarded && senderEmojiStatus && (
+                <CustomEmoji
+                  documentId={senderEmojiStatus.documentId}
+                  loopLimit={EMOJI_STATUS_LOOP_LIMIT}
+                  observeIntersectionForLoading={observeIntersectionForLoading}
+                  observeIntersectionForPlaying={observeIntersectionForPlaying}
+                />
+              )}
+              {!asForwarded && !senderEmojiStatus && senderIsPremium && <StarIcon />}
+              {senderPeer?.fakeType && <FakeIcon fakeType={senderPeer.fakeType} />}
+            </span>
           </span>
         ) : !botSender ? (
           NBSP
