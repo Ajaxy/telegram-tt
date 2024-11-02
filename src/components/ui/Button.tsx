@@ -22,7 +22,7 @@ export type OwnProps = {
   size?: 'default' | 'smaller' | 'tiny';
   color?: (
     'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black'
-    | 'translucent-bordered' | 'dark' | 'green' | 'adaptive' | 'sparkles'
+    | 'translucent-bordered' | 'dark' | 'green' | 'adaptive' | 'stars'
   );
   backgroundImage?: string;
   id?: string;
@@ -172,7 +172,7 @@ const Button: FC<OwnProps> = ({
 
   const content = (
     <>
-      {color === 'sparkles' && withSparkleEffect && <Sparkles preset="button" />}
+      {withSparkleEffect && <Sparkles preset="button" />}
       {isLoading ? (
         <div>
           <span dir={isRtl ? 'auto' : undefined}>{lang('Cache.ClearProgress')}</span>

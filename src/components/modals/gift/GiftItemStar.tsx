@@ -68,7 +68,7 @@ function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
         nonInteractive
         size={GIFT_STICKER_SIZE}
       />
-      <Button className={styles.buy} nonInteractive size="tiny" color="sparkles" withSparkleEffect pill fluid>
+      <Button className={styles.buy} nonInteractive size="tiny" color="stars" withSparkleEffect pill fluid>
         <Icon name="star" className={styles.star} />
         <div className={styles.amount}>
           {stars}
