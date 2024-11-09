@@ -222,7 +222,7 @@ const LeftMain: FC<OwnProps> = ({
       {shouldRenderUpdateButton && (
         <Button
           fluid
-          pill
+          badge
           className={buildClassName('btn-update', updateButtonClassNames)}
           onClick={handleUpdateClick}
         >

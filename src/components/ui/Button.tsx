@@ -29,6 +29,7 @@ export type OwnProps = {
   className?: string;
   round?: boolean;
   pill?: boolean;
+  badge?: boolean;
   fluid?: boolean;
   isText?: boolean;
   isLoading?: boolean;
@@ -84,6 +85,7 @@ const Button: FC<OwnProps> = ({
   className,
   round,
   pill,
+  badge,
   fluid,
   isText,
   isLoading,
@@ -130,6 +132,7 @@ const Button: FC<OwnProps> = ({
     round && 'round',
     pill && 'pill',
     fluid && 'fluid',
+    badge && 'badge',
     isNotInteractive && 'disabled',
     nonInteractive && 'non-interactive',
     allowDisabledClick && 'click-allowed',
