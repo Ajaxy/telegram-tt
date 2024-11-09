@@ -817,7 +817,7 @@ export default memo(withGlobal<OwnProps>(
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
-    const hasGiftsTab = Boolean(userFullInfo?.starGiftCount);
+    const hasGiftsTab = Boolean(userFullInfo?.starGiftCount) && !isSavedDialog;
     const userGifts = global.users.giftsById[chatId];
 
     return {

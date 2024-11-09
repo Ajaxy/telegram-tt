@@ -72,6 +72,7 @@ const FullNameTitle: FC<OwnProps> = ({
   const isUser = realPeer && isPeerUser(realPeer);
   const title = realPeer && (isUser ? getUserFullName(realPeer) : getChatTitle(lang, realPeer));
   const isPremium = isUser && realPeer.isPremium;
+  const canShowEmojiStatus = withEmojiStatus && !isSavedMessages && realPeer;
 
   const handleTitleClick = useLastCallback((e) => {
     if (!title || !canCopyTitle) {
@@ -126,7 +127,7 @@ const FullNameTitle: FC<OwnProps> = ({
         <>
           {!noVerified && peer?.isVerified && <VerifiedIcon />}
           {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
-          {withEmojiStatus && realPeer?.emojiStatus && (
+          {canShowEmojiStatus && realPeer.emojiStatus && (
             <CustomEmoji
               documentId={realPeer.emojiStatus.documentId}
               size={emojiStatusSize}
@@ -135,7 +136,7 @@ const FullNameTitle: FC<OwnProps> = ({
               onClick={onEmojiStatusClick}
             />
           )}
-          {withEmojiStatus && !realPeer?.emojiStatus && isPremium && <StarIcon />}
+          {canShowEmojiStatus && !realPeer.emojiStatus && isPremium && <StarIcon />}
         </>
       )}
       {iconElement}
