@@ -7,7 +7,6 @@ import { formatDateAtTime } from '../../../util/dates/dateFormat';
 import useOldLang from '../../../hooks/useOldLang';
 
 import MenuItem from '../../ui/MenuItem';
-import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/placeholder/Skeleton';
 
 import styles from './TimeMenuItem.module.scss';
@@ -24,13 +23,10 @@ function LastEditTimeMenuItem({
   const shouldRenderSkeleton = !editDate;
 
   return (
-    <>
-      <MenuSeparator size="thick" />
-      <MenuItem icon="edit" className={styles.item}>
-        {shouldRenderSkeleton ? <Skeleton className={styles.skeleton} /> : Boolean(editDate)
-          && lang('Chat.PrivateMessageEditTimestamp.Date', formatDateAtTime(lang, editDate * 1000))}
-      </MenuItem>
-    </>
+    <MenuItem icon="edited" className={styles.item}>
+      {shouldRenderSkeleton ? <Skeleton className={styles.skeleton} /> : Boolean(editDate)
+        && lang('Chat.PrivateMessageEditTimestamp.Date', formatDateAtTime(lang, editDate * 1000))}
+    </MenuItem>
   );
 }
 

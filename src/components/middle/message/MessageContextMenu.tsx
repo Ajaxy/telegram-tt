@@ -483,11 +483,6 @@ const MessageContextMenu: FC<OwnProps> = ({
             <MenuItem icon="close-circle" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
           </>
         )}
-        {isEdited && (
-          <LastEditTimeMenuItem
-            message={message}
-          />
-        )}
         {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
           <>
             <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
@@ -523,13 +518,20 @@ const MessageContextMenu: FC<OwnProps> = ({
             </MenuItem>
           </>
         )}
+        {((!isSponsoredMessage && (canLoadReadDate || shouldRenderShowWhen)) || isEdited) && (
+          <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
+        )}
         {!isSponsoredMessage && (canLoadReadDate || shouldRenderShowWhen) && (
           <ReadTimeMenuItem
             canLoadReadDate={canLoadReadDate}
             shouldRenderShowWhen={shouldRenderShowWhen}
             message={message}
-            menuSeparatorSize={hasCustomEmoji ? 'thin' : 'thick'}
             closeContextMenu={onClose}
+          />
+        )}
+        {isEdited && (
+          <LastEditTimeMenuItem
+            message={message}
           />
         )}
       </div>

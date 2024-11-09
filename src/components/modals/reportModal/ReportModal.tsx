@@ -24,6 +24,7 @@ import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../
 import styles from './ReportModal.module.scss';
 
 const MAX_DESCRIPTION = 512;
+const ADDED_PADDING = 20;
 
 export type OwnProps = {
   modal: TabState['reportModal'];
@@ -138,7 +139,7 @@ const ReportModal = ({
     requestMeasure(() => {
       const height = slide.scrollHeight;
       requestMutation(() => {
-        transitionRef.current!.style.height = `${height}px`;
+        transitionRef.current!.style.height = `${height + ADDED_PADDING}px`;
       });
     });
   });
@@ -200,10 +201,11 @@ const ReportModal = ({
             <div className={styles.block}>
               <AnimatedIconWithPreview
                 tgsUrl={LOCAL_TGS_URLS.Report}
-                size={150}
+                size={100}
                 className={styles.reportIcon}
                 nonInteractive
                 forceAlways
+                noLoop={false}
               />
               <TextArea
                 id="option"

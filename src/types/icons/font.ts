@@ -68,6 +68,7 @@ export type FontIconName =
   | 'download'
   | 'eats'
   | 'edit'
+  | 'edited'
   | 'email'
   | 'enter'
   | 'expand-modal'

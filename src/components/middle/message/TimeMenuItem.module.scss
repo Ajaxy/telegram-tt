@@ -1,6 +1,7 @@
 :global(.MenuItem).item {
   margin-bottom: 0;
   font-size: 0.8125rem;
+  font-weight: 400;
   cursor: var(--custom-cursor, default);
   pointer-events: none;
   --color-skeleton-background: #2121211a;
