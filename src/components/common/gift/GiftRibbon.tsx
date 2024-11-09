@@ -1,5 +1,9 @@
 import React, { memo } from '../../../lib/teact/teact';
+import { withGlobal } from '../../../global';
 
+import type { ThemeKey } from '../../../types';
+
+import { selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useUniqueId from '../../../hooks/useUniqueId';
@@ -7,8 +11,8 @@ import useUniqueId from '../../../hooks/useUniqueId';
 import styles from './GiftRibbon.module.scss';
 
 const COLORS = {
-  red: ['#FF5B54', '#ED1C26'],
-  blue: ['#6ED2FF', '#34A4FC'],
+  red: [['#FF5B54', '#ED1C26'], ['#653633', '#532224']],
+  blue: [['#6ED2FF', '#34A4FC'], ['#344F5A', '#152E42']],
 } as const;
 type ColorKey = keyof typeof COLORS;
 
@@ -20,14 +24,23 @@ type OwnProps = {
   className?: string;
 };
 
-const GiftRibbon = ({ text, color, className }: OwnProps) => {
+type StateProps = {
+  theme: ThemeKey;
+};
+
+const GiftRibbon = ({
+  text, color, className, theme,
+}: OwnProps & StateProps) => {
   const randomId = useUniqueId();
   const validSvgRandomId = `svg-${randomId}`; // ID must start with a letter
 
   const colorKey = COLOR_KEYS.has(color as ColorKey) ? color as ColorKey : undefined;
 
-  const startColor = colorKey ? COLORS[colorKey][0] : color;
-  const endColor = colorKey ? COLORS[colorKey][1] : color;
+  const isDarkTheme = theme === 'dark';
+
+  const gradientColor = colorKey ? COLORS[colorKey][isDarkTheme ? 1 : 0] : undefined;
+  const startColor = gradientColor ? gradientColor[0] : color;
+  const endColor = gradientColor ? gradientColor[1] : color;
 
   return (
     <div className={buildClassName(styles.root, className)}>
@@ -45,4 +58,10 @@ const GiftRibbon = ({ text, color, className }: OwnProps) => {
   );
 };
 
-export default memo(GiftRibbon);
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    return {
+      theme: selectTheme(global),
+    };
+  },
+)(GiftRibbon));
