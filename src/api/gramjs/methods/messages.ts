@@ -1168,9 +1168,9 @@ export async function fetchDiscussionMessage({
 }
 
 export async function searchMessagesInChat({
-  chat, isSavedDialog, savedTag, type, query = '', threadId, minDate, maxDate, ...pagination
+  peer, isSavedDialog, savedTag, type, query = '', threadId, minDate, maxDate, ...pagination
 }: {
-  chat: ApiChat;
+  peer: ApiPeer;
   isSavedDialog?: boolean;
   savedTag?: ApiReaction;
   type?: ApiMessageSearchType | ApiGlobalMessageSearchType;
@@ -1208,11 +1208,11 @@ export async function searchMessagesInChat({
     }
   }
 
-  const peer = buildInputPeer(chat.id, chat.accessHash);
+  const inputPeer = buildInputPeer(peer.id, peer.accessHash);
 
   const result = await invokeRequest(new GramJs.messages.Search({
-    peer: isSavedDialog ? new GramJs.InputPeerSelf() : peer,
-    savedPeerId: isSavedDialog ? peer : undefined,
+    peer: isSavedDialog ? new GramJs.InputPeerSelf() : inputPeer,
+    savedPeerId: isSavedDialog ? inputPeer : undefined,
     savedReaction: savedTag && [buildInputReaction(savedTag)],
     topMsgId: threadId !== MAIN_THREAD_ID && !isSavedDialog ? Number(threadId) : undefined,
     filter,
@@ -1221,7 +1221,7 @@ export async function searchMessagesInChat({
     maxDate,
     ...pagination,
   }), {
-    abortControllerChatId: chat.id,
+    abortControllerChatId: peer.id,
     abortControllerThreadId: threadId,
   });
 

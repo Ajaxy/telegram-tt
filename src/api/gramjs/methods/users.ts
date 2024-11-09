@@ -274,7 +274,7 @@ export async function fetchProfilePhotos({
   if (chat?.isRestricted) return undefined;
 
   const result = await searchMessagesInChat({
-    chat: chat!,
+    peer,
     type: 'profilePhoto',
     limit,
   });

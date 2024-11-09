@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic,
+  ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiPeer, ApiTopic,
   ApiUserStatus,
 } from '../../../api/types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
@@ -11,6 +11,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
 import { isChatChannel, isChatGroup, toChannelId } from '../../helpers/chats';
+import { isApiPeerChat } from '../../helpers/peers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addMessages,
@@ -21,7 +22,7 @@ import {
   updateTopics,
 } from '../../reducers';
 import {
-  selectChat, selectChatByUsername, selectChatMessage, selectCurrentGlobalSearchQuery, selectTabState,
+  selectChat, selectChatByUsername, selectChatMessage, selectCurrentGlobalSearchQuery, selectPeer, selectTabState,
 } from '../../selectors';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
@@ -98,8 +99,8 @@ addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionRetur
     return;
   }
 
-  const chat = chatId ? selectChat(global, chatId) : undefined;
-  const offsetPeer = nextOffsetPeerId ? selectChat(global, nextOffsetPeerId) : undefined;
+  const chat = chatId ? selectPeer(global, chatId) : undefined;
+  const offsetPeer = nextOffsetPeerId ? selectPeer(global, nextOffsetPeerId) : undefined;
 
   searchMessagesGlobal(global, {
     query,
@@ -107,7 +108,7 @@ addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionRetur
     offsetRate: nextOffsetRate,
     offsetId: nextOffsetId,
     offsetPeer,
-    chat,
+    peer: chat,
     tabId,
   });
 });
@@ -146,14 +147,14 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   type: ApiGlobalMessageSearchType;
   offsetRate?: number;
   offsetId?: number;
-  offsetPeer?: ApiChat;
-  chat?: ApiChat;
+  offsetPeer?: ApiPeer;
+  peer?: ApiPeer;
   maxDate?: number;
   minDate?: number;
   tabId: TabArgs<T>[0];
 }) {
   const {
-    query = '', type, offsetRate, offsetId, offsetPeer, chat, maxDate, minDate, tabId = getCurrentTabId(),
+    query = '', type, offsetRate, offsetId, offsetPeer, peer, maxDate, minDate, tabId = getCurrentTabId(),
   } = params;
   let result: {
     messages: ApiMessage[];
@@ -168,9 +169,9 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
 
   let messageLink: ApiMessage | undefined;
 
-  if (chat) {
+  if (peer) {
     const inChatResultRequest = callApi('searchMessagesInChat', {
-      chat,
+      peer,
       query,
       type,
       limit: GLOBAL_SEARCH_SLICE,
@@ -178,8 +179,9 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
       minDate,
       maxDate,
     });
-    const topicsRequest = chat.isForum ? callApi('fetchTopics', {
-      chat,
+    const isChat = isApiPeerChat(peer);
+    const topicsRequest = isChat && peer.isForum ? callApi('fetchTopics', {
+      chat: peer,
       query,
       limit: GLOBAL_TOPIC_SEARCH_SLICE,
     }) : undefined;
@@ -258,7 +260,7 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   );
 
   if (result.topics) {
-    global = updateTopics(global, chat!.id, result.totalTopicsCount!, result.topics);
+    global = updateTopics(global, peer!.id, result.totalTopicsCount!, result.topics);
   }
 
   const sortedTopics = result.topics?.map(({ id }) => id).sort((a, b) => b - a);
