@@ -369,7 +369,7 @@ function processTranslation(
   const finalString = variableEntries.reduce((result, [key, value]) => {
     if (value === undefined) return result;
 
-    const valueAsString = Number.isInteger(value) ? formatters!.number.format(value as number) : String(value);
+    const valueAsString = Number.isFinite(value) ? formatters!.number.format(value as number) : String(value);
     return result.replace(`{${key}}`, valueAsString);
   }, string);
 
@@ -412,9 +412,9 @@ function processTranslationAdvanced(
       return renderText(curr, filters, {
         markdownPostProcessor: (part: string) => {
           return variableEntries.reduce((result, [key, value]): TeactNode[] => {
-            if (!value) return result;
+            if (value === undefined) return result;
 
-            const preparedValue = Number.isInteger(value) ? formatters!.number.format(value as number) : value;
+            const preparedValue = Number.isFinite(value) ? formatters!.number.format(value as number) : value;
             return replaceInStringsWithTeact(result, `{${key}}`, preparedValue);
           }, [part] as TeactNode[]);
         },
@@ -423,9 +423,9 @@ function processTranslationAdvanced(
   }
 
   return variableEntries.reduce((result, [key, value]): TeactNode[] => {
-    if (!value) return result;
+    if (value === undefined) return result;
 
-    const preparedValue = Number.isInteger(value) ? formatters!.number.format(value as number) : value;
+    const preparedValue = Number.isFinite(value) ? formatters!.number.format(value as number) : value;
     return replaceInStringsWithTeact(result, `{${key}}`, preparedValue);
   }, tempResult);
 }
