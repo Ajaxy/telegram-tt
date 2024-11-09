@@ -1370,3 +1370,4 @@
 "StarsSubscribeInfoLinkText" = "Terms of Service";
 "StarsSubscribeInfoLink" = "https://telegram.org/tos/stars";
 "StarsPerMonth" = "⭐️{amount}/month";
+"PaymentInfoDone" = "Proceed to checkout";

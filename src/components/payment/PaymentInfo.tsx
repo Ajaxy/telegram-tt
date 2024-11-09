@@ -88,7 +88,7 @@ const PaymentInfo: FC<OwnProps> = ({
           value={state.cardNumber}
           error={formErrors.cardNumber}
         />
-        { needCardholderName && (
+        {needCardholderName && (
           <InputText
             label={lang('Checkout.NewCard.CardholderNamePlaceholder')}
             onChange={handleCardholderChange}
@@ -115,54 +115,56 @@ const PaymentInfo: FC<OwnProps> = ({
             teactExperimentControlled
           />
         </section>
-        { needCountry || needZip ? (
+        {needCountry || needZip ? (
           <h5>{lang('PaymentBillingAddress')}</h5>
-        ) : undefined }
-        { needCountry && (
-          <Select
-            label={lang('PaymentShippingCountry')}
-            onChange={handleCountryChange}
-            value={state.billingCountry}
-            hasArrow={Boolean(true)}
-            id="billing-country"
-            error={formErrors.billingCountry}
+        ) : undefined}
+        <section className="inline-inputs">
+          {needCountry && (
+            <Select
+              label={lang('PaymentShippingCountry')}
+              onChange={handleCountryChange}
+              value={state.billingCountry}
+              hasArrow={Boolean(true)}
+              id="billing-country"
+              error={formErrors.billingCountry}
+              tabIndex={0}
+              ref={selectCountryRef}
+            >
+              {
+                countryList.map(({ defaultName, name }) => (
+                  <option
+                    value={defaultName}
+                    className="county-item"
+                    selected={defaultName === state.billingCountry}
+                  >
+                    {defaultName || name}
+                  </option>
+                ))
+              }
+            </Select>
+          )}
+          {needZip && (
+            <InputText
+              label={lang('PaymentShippingZipPlaceholder')}
+              onChange={handleBillingPostCodeChange}
+              value={state.billingZip}
+              inputMode="text"
+              tabIndex={0}
+              maxLength={12}
+              error={formErrors.billingZip}
+            />
+          )}
+        </section>
+        <div className="checkbox">
+          <Checkbox
+            label={lang('PaymentCardSavePaymentInformation')}
+            checked={canSaveCredentials ? state.saveCredentials : false}
             tabIndex={0}
-            ref={selectCountryRef}
-          >
-            {
-              countryList.map(({ defaultName, name }) => (
-                <option
-                  value={defaultName}
-                  className="county-item"
-                  selected={defaultName === state.billingCountry}
-                >
-                  {defaultName || name}
-                </option>
-              ))
-            }
-          </Select>
-        ) }
-        { needZip && (
-          <InputText
-            label={lang('PaymentShippingZipPlaceholder')}
-            onChange={handleBillingPostCodeChange}
-            value={state.billingZip}
-            inputMode="text"
-            tabIndex={0}
-            maxLength={12}
-            error={formErrors.billingZip}
+            subLabel={lang(canSaveCredentials ? 'Checkout.NewCard.SaveInfoHelp' : 'Checkout.2FA.Text')}
+            onChange={handleChangeSaveCredentials}
+            disabled={!canSaveCredentials}
           />
-        )}
-        <Checkbox
-          label={lang('PaymentCardSavePaymentInformation')}
-          checked={canSaveCredentials ? state.saveCredentials : false}
-          tabIndex={0}
-          onChange={handleChangeSaveCredentials}
-          disabled={!canSaveCredentials}
-        />
-        <p className="description">
-          {lang(canSaveCredentials ? 'Checkout.NewCard.SaveInfoHelp' : 'Checkout.2FA.Text')}
-        </p>
+        </div>
       </form>
     </div>
   );

@@ -22,6 +22,7 @@ import { detectCardTypeText } from '../common/helpers/detectCardType';
 
 import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -114,7 +115,8 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
     setSmartGlocalCardInfo,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [isModalOpen, openModal, closeModal] = useFlag();
   const [paymentState, paymentDispatch] = usePaymentReducer();
@@ -254,7 +256,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
             isText
             onClick={handleClearPaymentError}
           >
-            {lang('OK')}
+            {oldLang('OK')}
           </Button>
         </div>
       </Modal>
@@ -485,27 +487,27 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
   const modalHeader = useMemo(() => {
     switch (step) {
       case PaymentStep.Checkout:
-        return lang('PaymentCheckout');
+        return oldLang('PaymentCheckout');
       case PaymentStep.ShippingInfo:
-        return lang('PaymentShippingInfo');
+        return oldLang('PaymentShippingInfo');
       case PaymentStep.Shipping:
-        return lang('PaymentShippingMethod');
+        return oldLang('PaymentShippingMethod');
       case PaymentStep.SavedPayments:
-        return lang('PaymentCheckoutMethod');
+        return oldLang('PaymentCheckoutMethod');
       case PaymentStep.ConfirmPassword:
-        return lang('Checkout.PasswordEntry.Title');
+        return oldLang('Checkout.PasswordEntry.Title');
       case PaymentStep.PaymentInfo:
-        return lang('PaymentCardInfo');
+        return oldLang('PaymentCardInfo');
       case PaymentStep.ConfirmPayment:
-        return lang('Checkout.WebConfirmation.Title');
+        return oldLang('Checkout.WebConfirmation.Title');
       default:
         return '';
     }
-  }, [step, lang]);
+  }, [step, oldLang]);
 
   const buttonText = step === PaymentStep.Checkout
-    ? lang('Checkout.PayPrice', formatCurrencyAsString(totalPrice, invoice!.currency, lang.code))
-    : lang('Next');
+    ? oldLang('Checkout.PayPrice', formatCurrencyAsString(totalPrice, invoice!.currency, oldLang.code))
+    : lang('PaymentInfoDone');
 
   function getIsSubmitDisabled() {
     if (isLoading) {
@@ -546,7 +548,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
             isText
             onClick={closeModal}
           >
-            {lang('OK')}
+            {oldLang('OK')}
           </Button>
         </div>
       </Modal>
@@ -562,7 +564,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
       onClose={closeModal}
       onCloseAnimationEnd={handleModalClose}
     >
-      <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className="header" dir={oldLang.isRtl ? 'rtl' : undefined}>
         <Button
           className="close-button"
           color="translucent"
@@ -597,6 +599,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
       {canRenderFooter && (
         <div className="footer">
           <Button
+            className="button-text"
             type="submit"
             onClick={handleButtonClick}
             disabled={isSubmitDisabled}

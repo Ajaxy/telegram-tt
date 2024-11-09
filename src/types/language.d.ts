@@ -1530,6 +1530,7 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsPerMonth': {
     'amount': V;
   };
+  'PaymentInfoDone': undefined;
 }
 
 export interface LangPairPlural {

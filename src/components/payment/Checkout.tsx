@@ -268,6 +268,8 @@ function renderCheckoutItem({
 
   return (
     <ListItem
+      className={styles.list}
+      narrow
       multiline={isMultiline}
       icon={icon}
       inactive={!onClick}

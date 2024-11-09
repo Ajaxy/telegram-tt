@@ -18,8 +18,8 @@ $modalHeaderAndFooterHeight: 8.375rem;
 
   .header {
     position: relative;
-    border-top-left-radius: var(--border-radius-default-small);
-    border-top-right-radius: var(--border-radius-default-small);
+    border-top-left-radius: var(--border-radius-modal);
+    border-top-right-radius: var(--border-radius-modal);
     width: 100%;
     padding: 0.5rem 1rem 0.25rem;
     display: flex;
@@ -36,7 +36,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
   }
 
   .Transition {
-    height: min(27rem, 68vh);
+    height: min(25rem, 68vh);
   }
 
   .empty-content {
@@ -56,27 +56,31 @@ $modalHeaderAndFooterHeight: 8.375rem;
     overflow: auto;
     overflow-x: hidden;
     width: 100%;
+    height: 100%;
     position: relative;
   }
 
   .footer {
     position: relative;
     bottom: 0;
-    border-bottom-left-radius: var(--border-radius-default-small);
-    border-bottom-right-radius: var(--border-radius-default-small);
+    border-bottom-left-radius: var(--border-radius-modal);
+    border-bottom-right-radius: var(--border-radius-modal);
     width: 100%;
     padding: 0.75rem 1rem;
     background: var(--color-background);
-    border-top: 0.0625rem var(--color-borders) solid;
 
     button {
       text-transform: none;
       font-weight: 500;
     }
+
+    .button-text {
+      text-transform: uppercase;
+    }
   }
 
   .modal-dialog {
-    width: 25rem;
+    width: 26.25rem;
   }
 
   .modal-content {
