@@ -2,7 +2,7 @@ import { Api as GramJs, connection } from '../../../lib/gramjs';
 
 import type { GroupCallConnectionData } from '../../../lib/secret-sauce';
 import type {
-  ApiMessage, ApiStory, ApiStorySkipped,
+  ApiMessage, ApiPoll, ApiStory, ApiStorySkipped,
   ApiUpdateConnectionStateType,
 } from '../../types';
 
@@ -34,6 +34,7 @@ import {
   buildApiMessageExtendedMediaPreview,
   buildBoughtMediaContent,
   buildPoll,
+  buildPollFromMedia,
   buildPollResults,
 } from '../apiBuilders/messageContent';
 import {
@@ -125,6 +126,7 @@ export function updater(update: Update) {
     || update instanceof GramJs.UpdateShortMessage
   ) {
     let message: ApiMessage | undefined;
+    let poll: ApiPoll | undefined;
     let shouldForceReply: boolean | undefined;
 
     if (update instanceof GramJs.UpdateShortChatMessage) {
@@ -132,8 +134,9 @@ export function updater(update: Update) {
     } else if (update instanceof GramJs.UpdateShortMessage) {
       message = buildApiMessageFromShort(update);
     } else {
+      const mtpMessage = update.message;
       // TODO Remove if proven not reproducing
-      if (update.message instanceof GramJs.MessageEmpty) {
+      if (mtpMessage instanceof GramJs.MessageEmpty) {
         if (DEBUG) {
           // eslint-disable-next-line no-console
           console.error('Unexpected update:', update.className, update);
@@ -142,9 +145,13 @@ export function updater(update: Update) {
         return;
       }
 
-      processMessageAndUpdateThreadInfo(update.message);
+      processMessageAndUpdateThreadInfo(mtpMessage);
 
-      message = buildApiMessage(update.message)!;
+      message = buildApiMessage(mtpMessage)!;
+
+      if (mtpMessage instanceof GramJs.Message) {
+        poll = mtpMessage.media && buildPollFromMedia(mtpMessage.media);
+      }
 
       shouldForceReply = 'replyMarkup' in update.message
         && update.message?.replyMarkup instanceof GramJs.ReplyKeyboardForceReply
@@ -157,6 +164,7 @@ export function updater(update: Update) {
         id: message.id,
         chatId: message.chatId,
         message,
+        poll,
       });
     } else {
       // We don't have preview for action or 'via bot' messages, so `newMessage` update here is required
@@ -167,6 +175,7 @@ export function updater(update: Update) {
         chatId: message.chatId,
         message,
         shouldForceReply,
+        poll,
       });
     }
 
@@ -302,8 +311,9 @@ export function updater(update: Update) {
     update instanceof GramJs.UpdateEditMessage
     || update instanceof GramJs.UpdateEditChannelMessage
   ) {
+    const mtpMessage = update.message;
     // TODO Remove if proven not reproducing
-    if (update.message instanceof GramJs.MessageEmpty) {
+    if (mtpMessage instanceof GramJs.MessageEmpty) {
       if (DEBUG) {
         // eslint-disable-next-line no-console
         console.error('Unexpected update:', update.className, update);
@@ -312,16 +322,20 @@ export function updater(update: Update) {
       return;
     }
 
-    processMessageAndUpdateThreadInfo(update.message);
+    processMessageAndUpdateThreadInfo(mtpMessage);
 
     // Workaround for a weird server behavior when own message is marked as incoming
-    const message = omit(buildApiMessage(update.message)!, ['isOutgoing']);
+    const message = omit(buildApiMessage(mtpMessage)!, ['isOutgoing']);
+
+    const poll = mtpMessage instanceof GramJs.Message && mtpMessage.media
+      ? buildPollFromMedia(mtpMessage.media) : undefined;
 
     sendApiUpdate({
       '@type': 'updateMessage',
       id: message.id,
       chatId: message.chatId,
       message,
+      poll,
     });
   } else if (update instanceof GramJs.UpdateMessageReactions) {
     sendApiUpdate({

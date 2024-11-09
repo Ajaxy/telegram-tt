@@ -26,7 +26,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
   const polls: ApiPoll[] | undefined = [];
 
   if ('users' in response && Array.isArray(response.users) && TYPE_USER.has(response.users[0]?.className)) {
-    const users = response.users.map((user) => {
+    const users = response.users.map((user: GramJs.TypeUser) => {
       if (user instanceof GramJs.User) {
         addUserToLocalDb(user);
       }
@@ -36,7 +36,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
   }
 
   if ('chats' in response && Array.isArray(response.chats) && TYPE_CHAT.has(response.chats[0]?.className)) {
-    const chats = response.chats.map((chat) => {
+    const chats = response.chats.map((chat: GramJs.TypeChat) => {
       if ((chat instanceof GramJs.Chat || chat instanceof GramJs.Channel)) {
         addChatToLocalDb(chat);
       }
@@ -46,7 +46,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
   }
 
   if ('messages' in response && Array.isArray(response.messages) && TYPE_MESSAGE.has(response.messages[0]?.className)) {
-    response.messages.forEach((message) => {
+    response.messages.forEach((message: GramJs.TypeMessage) => {
       addMessageToLocalDb(message);
 
       const threadInfo = buildApiThreadInfoFromMessage(message);
@@ -54,7 +54,7 @@ export function processAndUpdateEntities(response?: GramJs.AnyRequest['__respons
         threadInfos.push(threadInfo);
       }
 
-      const poll = buildPollFromMedia(message.media);
+      const poll = 'media' in message && message.media && buildPollFromMedia(message.media);
       if (poll) {
         polls.push(poll);
       }

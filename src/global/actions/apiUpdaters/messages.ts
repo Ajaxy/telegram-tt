@@ -239,7 +239,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateMessage': {
-      const { chatId, id, message } = update;
+      const {
+        chatId, id, message, poll,
+      } = update;
 
       const currentMessage = selectChatMessage(global, chatId, id);
       const chat = selectChat(global, chatId);
@@ -258,13 +260,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = clearMessageTranslation(global, chatId, id);
       }
 
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       break;
     }
 
     case 'updateScheduledMessage': {
-      const { chatId, id, message } = update;
+      const {
+        chatId, id, message, poll,
+      } = update;
 
       const currentMessage = selectScheduledMessage(global, chatId, id);
       if (!currentMessage) {
@@ -280,15 +288,24 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
         global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', threadScheduledIds.sort((a, b) => b - a));
       }
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       break;
     }
 
     case 'updateQuickReplyMessage': {
-      const { id, message } = update;
+      const { id, message, poll } = update;
 
       global = updateQuickReplyMessage(global, id, message);
+
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       break;
@@ -319,7 +336,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateMessageSendSucceeded': {
-      const { chatId, localId, message } = update;
+      const {
+        chatId, localId, message, poll,
+      } = update;
 
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
 
@@ -337,6 +356,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...message,
         previousLocalId: localId,
       });
+
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
 
       global = {
         ...global,
@@ -389,7 +412,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateScheduledMessageSendSucceeded': {
-      const { chatId, localId, message } = update;
+      const {
+        chatId, localId, message, poll,
+      } = update;
       const scheduledIds = selectScheduledIds(global, chatId, MAIN_THREAD_ID) || [];
       global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', [...scheduledIds, message.id]);
 
@@ -407,6 +432,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...message,
         previousLocalId: localId,
       });
+
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
 
       setGlobal(global);
       break;

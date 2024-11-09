@@ -53,7 +53,9 @@ import {
   buildApiSendAsPeerId,
 } from '../apiBuilders/chats';
 import { buildApiFormattedText } from '../apiBuilders/common';
-import { buildMessageMediaContent, buildMessageTextContent, buildWebPage } from '../apiBuilders/messageContent';
+import {
+  buildMessageMediaContent, buildMessageTextContent, buildPollFromMedia, buildWebPage,
+} from '../apiBuilders/messageContent';
 import {
   buildApiFactCheck,
   buildApiMessage,
@@ -1920,6 +1922,7 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
   }
 
   let newContent: MediaContent | undefined;
+  let poll: ApiPoll | undefined;
   if (messageUpdate instanceof GramJs.UpdateShortSentMessage) {
     if (localMessage.content.text && messageUpdate.entities) {
       newContent = {
@@ -1933,6 +1936,7 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
           peerId: buildPeer(localMessage.chatId), id: messageUpdate.id,
         }),
       };
+      poll = buildPollFromMedia(messageUpdate.media);
     }
 
     const mtpMessage = buildMessageFromUpdate(messageUpdate.id, localMessage.chatId, messageUpdate);
@@ -1960,6 +1964,7 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
       sendingState: undefined,
       ...('date' in messageUpdate && { date: messageUpdate.date }),
     },
+    poll,
   });
 
   handleGramJsUpdate(update);

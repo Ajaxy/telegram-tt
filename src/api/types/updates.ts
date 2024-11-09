@@ -223,6 +223,7 @@ export type ApiUpdateMessage = {
   chatId: string;
   id: number;
   message: Partial<ApiMessage>;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateScheduledMessage = {
@@ -230,12 +231,14 @@ export type ApiUpdateScheduledMessage = {
   chatId: string;
   id: number;
   message: Partial<ApiMessage>;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateQuickReplyMessage = {
   '@type': 'updateQuickReplyMessage';
   id: number;
   message: Partial<ApiMessage>;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateDeleteQuickReplyMessages = {
@@ -271,6 +274,7 @@ export type ApiUpdateScheduledMessageSendSucceeded = {
   chatId: string;
   localId: number;
   message: ApiMessage;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateMessageSendSucceeded = {
@@ -278,6 +282,7 @@ export type ApiUpdateMessageSendSucceeded = {
   chatId: string;
   localId: number;
   message: ApiMessage;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateMessageSendFailed = {
