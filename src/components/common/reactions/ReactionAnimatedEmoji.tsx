@@ -10,7 +10,7 @@ import type {
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import { isSameReaction } from '../../../global/helpers';
+import { getStickerHashById, isSameReaction } from '../../../global/helpers';
 import { selectPerformanceSettingsValue, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { roundToNearestEven } from '../../../util/math';
@@ -112,11 +112,11 @@ const ReactionAnimatedEmoji = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
-  const mediaHashCenterIcon = centerIconId && `sticker${centerIconId}`;
-  const mediaHashEffect = effectId && `sticker${effectId}`;
+  const mediaHashCenterIcon = centerIconId && getStickerHashById(centerIconId);
+  const mediaHashEffect = effectId && getStickerHashById(effectId);
 
-  const mediaDataCenterIcon = useMedia(mediaHashCenterIcon, !centerIconId);
-  const mediaDataEffect = useMedia(mediaHashEffect, !effectId);
+  const mediaDataCenterIcon = useMedia(mediaHashCenterIcon);
+  const mediaDataEffect = useMedia(mediaHashEffect);
 
   const activeReaction = useMemo(() => (
     activeReactions?.find((active) => isSameReaction(active, reaction))
@@ -173,6 +173,7 @@ const ReactionAnimatedEmoji = ({
           noVideoOnMobile
           loopLimit={loopLimit}
           observeIntersectionForPlaying={observeIntersection}
+          forceAlways
         />
       )}
       {shouldRenderCenter && !isCustom && (
@@ -185,6 +186,7 @@ const ReactionAnimatedEmoji = ({
           noLoop={!shouldLoop}
           onLoad={markAnimationLoaded}
           onEnded={unmarkAnimationLoaded}
+          forceAlways
         />
       )}
       {shouldRenderEffect && (
@@ -197,6 +199,7 @@ const ReactionAnimatedEmoji = ({
             play={isIntersecting}
             noLoop
             onEnded={handleEnded}
+            forceAlways
           />
           {isCustom && !assignedEffectId && isIntersecting && (
             <CustomEmojiEffect
