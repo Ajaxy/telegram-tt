@@ -367,7 +367,7 @@ function processTranslation(
 
   const variableEntries = variables ? Object.entries(variables) : [];
   const finalString = variableEntries.reduce((result, [key, value]) => {
-    if (!value) return result;
+    if (value === undefined) return result;
 
     const valueAsString = Number.isInteger(value) ? formatters!.number.format(value as number) : String(value);
     return result.replace(`{${key}}`, valueAsString);
