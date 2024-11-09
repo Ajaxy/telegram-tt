@@ -30,8 +30,8 @@ import {
 } from '../../reducers';
 import {
   activateWebAppIfOpen,
-  addWebAppToOpenList, clearOpenedWebApps, hasOpenedWebApps,
-  removeActiveWebAppFromOpenList, removeWebAppFromOpenList,
+  addWebAppToOpenList, clearOpenedWebApps, hasOpenedMoreThanOneWebApps,
+  hasOpenedWebApps, removeActiveWebAppFromOpenList, removeWebAppFromOpenList,
   replaceInlineBotSettings, replaceInlineBotsIsLoading,
   replaceIsWebAppModalOpen, replaceWebAppModalState, updateWebApp,
 } from '../../reducers/bots';
@@ -704,6 +704,35 @@ addActionHandler('openWebAppTab', (global, actions, payload): ActionReturnType =
   }
 });
 
+addActionHandler('openWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
+  const {
+    tabId = getCurrentTabId(),
+  } = payload || {};
+
+  return updateTabState(global, {
+    isWebAppsCloseConfirmationModalOpen: true,
+  }, tabId);
+});
+
+addActionHandler('closeWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
+  const { shouldSkipInFuture, tabId = getCurrentTabId() } = payload || {};
+
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      byKey: {
+        ...global.settings.byKey,
+        shouldSkipWebAppCloseConfirmation: Boolean(shouldSkipInFuture),
+      },
+    },
+  };
+
+  return updateTabState(global, {
+    isWebAppsCloseConfirmationModalOpen: undefined,
+  }, tabId);
+});
+
 addActionHandler('requestAppWebView', async (global, actions, payload): Promise<void> => {
   const {
     botId, appName, startApp, theme, isWriteAllowed, isFromConfirm, shouldSkipBotTrustRequest,
@@ -869,7 +898,15 @@ addActionHandler('closeWebApp', (global, actions, payload): ActionReturnType => 
 });
 
 addActionHandler('closeWebAppModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { shouldSkipConfirmation, tabId = getCurrentTabId() } = payload || {};
+
+  const shouldShowConfirmation = !shouldSkipConfirmation
+  && !global.settings.byKey.shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
+
+  if (shouldShowConfirmation) {
+    actions.openWebAppsCloseConfirmationModal({ tabId });
+    return global;
+  }
 
   global = clearOpenedWebApps(global, tabId);
   if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);

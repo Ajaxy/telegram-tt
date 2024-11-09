@@ -1141,6 +1141,10 @@ export interface LangPair {
   'StarGiftAvailability': undefined;
   'StarsSubscribeInfoLinkText': undefined;
   'StarsSubscribeInfoLink': undefined;
+  'AreYouSureCloseMiniApps': undefined;
+  'CloseMiniApps': undefined;
+  'DoNotAskAgain': undefined;
+  'PaymentInfoDone': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1530,7 +1534,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsPerMonth': {
     'amount': V;
   };
-  'PaymentInfoDone': undefined;
 }
 
 export interface LangPairPlural {

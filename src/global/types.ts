@@ -772,6 +772,8 @@ export type TabState = {
     onConfirm?: NoneToVoidFunction;
   };
 
+  isWebAppsCloseConfirmationModalOpen?: boolean;
+
   isGiftRecipientPickerOpen?: boolean;
 
   starsGiftingPickerModal?: {
@@ -3243,7 +3245,9 @@ export interface ActionPayloads {
     webApp: WebApp;
     skipClosingConfirmation?: boolean;
   } & WithTabId;
-  closeWebAppModal: WithTabId | undefined;
+  closeWebAppModal: ({
+    shouldSkipConfirmation?: boolean;
+  } & WithTabId) | undefined;
   changeWebAppModalState: WithTabId | undefined;
 
   // Misc
@@ -3453,6 +3457,12 @@ export interface ActionPayloads {
 
   openGiftRecipientPicker: WithTabId | undefined;
   closeGiftRecipientPicker: WithTabId | undefined;
+
+  openWebAppsCloseConfirmationModal: WithTabId | undefined;
+
+  closeWebAppsCloseConfirmationModal: ({
+    shouldSkipInFuture?: boolean;
+  } & WithTabId);
 
   openStarsGiftingPickerModal: WithTabId | undefined;
   closeStarsGiftingPickerModal: WithTabId | undefined;

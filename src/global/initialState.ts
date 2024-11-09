@@ -269,6 +269,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       notificationSoundVolume: 5,
       shouldSuggestStickers: true,
       shouldSuggestCustomEmoji: true,
+      shouldSkipWebAppCloseConfirmation: false,
       shouldUpdateStickerSetOrder: true,
       language: 'en',
       timeFormat: '24h',
@@ -385,6 +386,8 @@ export const INITIAL_TAB_STATE: TabState = {
   },
 
   isShareMessageModalShown: false,
+
+  isWebAppsCloseConfirmationModalOpen: false,
 
   forwardMessages: {},
 

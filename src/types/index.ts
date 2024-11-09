@@ -131,6 +131,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   shouldCollectDebugLogs?: boolean;
   shouldDebugExportedSenders?: boolean;
   shouldWarnAboutSvg?: boolean;
+  shouldSkipWebAppCloseConfirmation: boolean;
 }
 
 export interface ApiPrivacySettings {

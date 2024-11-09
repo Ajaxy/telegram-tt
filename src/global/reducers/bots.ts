@@ -246,6 +246,12 @@ export function hasOpenedWebApps<T extends GlobalState>(
   return Object.keys(selectTabState(global, tabId).webApps.openedWebApps).length > 0;
 }
 
+export function hasOpenedMoreThanOneWebApps<T extends GlobalState>(
+  global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
+): boolean {
+  return Object.keys(selectTabState(global, tabId).webApps.openedWebApps).length > 1;
+}
+
 export function replaceWebAppModalState<T extends GlobalState>(
   global: T, modalState: WebAppModalStateType,
   ...[tabId = getCurrentTabId()]: TabArgs<T>

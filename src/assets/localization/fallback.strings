@@ -1370,4 +1370,7 @@
 "StarsSubscribeInfoLinkText" = "Terms of Service";
 "StarsSubscribeInfoLink" = "https://telegram.org/tos/stars";
 "StarsPerMonth" = "⭐️{amount}/month";
+"AreYouSureCloseMiniApps" = "Are you sure you want to close all Mini Apps?";
+"CloseMiniApps" = "Close Mini Apps";
+"DoNotAskAgain" = "Don't ask again";
 "PaymentInfoDone" = "Proceed to checkout";
