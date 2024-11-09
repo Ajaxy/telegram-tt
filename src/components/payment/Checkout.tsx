@@ -9,7 +9,6 @@ import type {
   ApiWebDocument,
 } from '../../api/types';
 import type { FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
-import type { LangCode } from '../../types';
 import type { IconName } from '../../types/icons';
 import { PaymentStep } from '../../types';
 
@@ -238,7 +237,7 @@ const Checkout: FC<OwnProps> = ({
 export default memo(Checkout);
 
 function renderPaymentItem(
-  langCode: LangCode | undefined, title: string, value: number, currency: string, main = false,
+  langCode: string | undefined, title: string, value: number, currency: string, main = false,
 ) {
   return (
     <div className={buildClassName(styles.priceInfoItem, main && styles.priceInfoItemMain)}>

@@ -1,7 +1,7 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
 import type { ActionReturnType, GlobalState } from '../../types';
-import { SettingsScreens } from '../../../types';
+import { type LangCode, SettingsScreens } from '../../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
@@ -53,7 +53,7 @@ addCallback((global: GlobalState) => {
   }
 
   if (settings.language !== prevSettings.language) {
-    oldSetLanguage(settings.language);
+    oldSetLanguage(settings.language as LangCode);
   }
 
   if (settings.timeFormat !== prevSettings.timeFormat) {

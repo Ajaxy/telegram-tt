@@ -1,4 +1,4 @@
-import type { LangFn } from '../hooks/useOldLang';
+import type { OldLangFn } from '../hooks/useOldLang';
 
 import EMOJI_REGEX from '../lib/twemojiRegex';
 import fixNonStandardEmoji from './emoji/fixNonStandardEmoji';
@@ -48,7 +48,7 @@ export const getFirstLetters = withCache((phrase: string, count = 2) => {
 });
 
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
-export function formatFileSize(lang: LangFn, bytes: number, decimals = 1): string {
+export function formatFileSize(lang: OldLangFn, bytes: number, decimals = 1): string {
   if (bytes === 0) {
     return lang('FileSize.B', 0);
   }

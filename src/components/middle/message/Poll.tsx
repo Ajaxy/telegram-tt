@@ -13,10 +13,11 @@ import type {
   ApiMessage, ApiPeer, ApiPoll, ApiPollAnswer,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import { selectPeer } from '../../../global/selectors';
 import { formatMediaDuration } from '../../../util/dates/dateFormat';
+import { getMessageKey } from '../../../util/keys/messageKey';
 import { getServerTime } from '../../../util/serverTime';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
@@ -26,7 +27,6 @@ import useOldLang from '../../../hooks/useOldLang';
 import AvatarList from '../../common/AvatarList';
 import Button from '../../ui/Button';
 import CheckboxGroup from '../../ui/CheckboxGroup';
-import Notification from '../../ui/Notification';
 import RadioGroup from '../../ui/RadioGroup';
 import PollOption from './PollOption';
 
@@ -54,13 +54,14 @@ const Poll: FC<OwnProps> = ({
   observeIntersectionForPlaying,
   onSendVote,
 }) => {
-  const { loadMessage, openPollResults, requestConfetti } = getActions();
+  const {
+    loadMessage, openPollResults, requestConfetti, showNotification,
+  } = getActions();
 
   const { id: messageId, chatId } = message;
   const { summary, results } = poll;
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [chosenOptions, setChosenOptions] = useState<string[]>([]);
-  const [isSolutionShown, setIsSolutionShown] = useState<boolean>(false);
   const [wasSubmitted, setWasSubmitted] = useState<boolean>(false);
   const [closePeriod, setClosePeriod] = useState<number>(
     !summary.closed && summary.closeDate && summary.closeDate > 0
@@ -176,13 +177,13 @@ const Poll: FC<OwnProps> = ({
     openPollResults({ chatId, messageId });
   });
 
-  const handleSolutionShow = useLastCallback(() => {
-    setIsSolutionShown(true);
-  });
-
-  const handleSolutionHide = useLastCallback(() => {
-    setIsSolutionShown(false);
-    setWasSubmitted(false);
+  const showSolution = useLastCallback(() => {
+    showNotification({
+      localId: getMessageKey(message),
+      message: renderTextWithEntities({ text: poll.results.solution!, entities: poll.results.solutionEntities }),
+      duration: SOLUTION_DURATION,
+      containerSelector: SOLUTION_CONTAINER_ID,
+    });
   });
 
   // Show the solution to quiz if the answer was incorrect
@@ -190,7 +191,7 @@ const Poll: FC<OwnProps> = ({
     if (wasSubmitted && hasVoted && summary.quiz && results.results && poll.results.solution) {
       const correctResult = results.results.find((r) => r.isChosen && r.isCorrect);
       if (!correctResult) {
-        setIsSolutionShown(true);
+        showSolution();
       }
     }
   }, [hasVoted, wasSubmitted, results.results, summary.quiz, poll.results.solution]);
@@ -224,22 +225,8 @@ const Poll: FC<OwnProps> = ({
     );
   }
 
-  function renderSolution() {
-    return (
-      isSolutionShown && poll.results.solution && (
-        <Notification
-          message={renderTextWithEntities({ text: poll.results.solution, entities: poll.results.solutionEntities })}
-          duration={SOLUTION_DURATION}
-          onDismiss={handleSolutionHide}
-          containerId={SOLUTION_CONTAINER_ID}
-        />
-      )
-    );
-  }
-
   return (
     <div className="Poll" dir={lang.isRtl ? 'auto' : 'ltr'}>
-      {renderSolution()}
       <div className="poll-question">
         {renderTextWithEntities({
           text: summary.question.text,
@@ -274,8 +261,7 @@ const Poll: FC<OwnProps> = ({
             size="tiny"
             color="translucent"
             className="poll-quiz-help"
-            disabled={isSolutionShown}
-            onClick={handleSolutionShow}
+            onClick={showSolution}
             ariaLabel="Show Solution"
           >
             <i className="icon icon-lamp" />
@@ -353,7 +339,7 @@ function getPollTypeString(summary: ApiPoll['summary']) {
   return summary.isPublic ? 'PublicPoll' : 'AnonymousPoll';
 }
 
-function getReadableVotersCount(lang: LangFn, isQuiz: true | undefined, count?: number) {
+function getReadableVotersCount(lang: OldLangFn, isQuiz: true | undefined, count?: number) {
   if (!count) {
     return lang(isQuiz ? 'Chat.Quiz.TotalVotesEmpty' : 'Chat.Poll.TotalVotesResultEmpty');
   }

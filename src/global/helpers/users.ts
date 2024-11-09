@@ -1,5 +1,5 @@
 import type { ApiPeer, ApiUser, ApiUserStatus } from '../../api/types';
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 
 import { ANONYMOUS_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { formatFullDate, formatTime } from '../../util/dates/dateFormat';
@@ -66,7 +66,7 @@ export function getUserFullName(user?: ApiUser) {
 }
 
 export function getUserStatus(
-  lang: LangFn, user: ApiUser, userStatus: ApiUserStatus | undefined,
+  lang: OldLangFn, user: ApiUser, userStatus: ApiUserStatus | undefined,
 ) {
   if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return lang('ServiceNotifications');

@@ -52,7 +52,9 @@ function GiftItemPremium({
     : undefined;
 
   function renderMonths() {
-    const caption = months === 12 ? lang('Years', { count: 1 }) : lang('Months', { count: months });
+    const caption = months === 12
+      ? lang('Years', { count: 1 }, { pluralValue: 1 })
+      : lang('Months', { count: months }, { pluralValue: months });
     return (
       <div className={styles.monthsDescription}>
         {caption}

@@ -5,7 +5,6 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
-import type { LangCode } from '../../types';
 
 import { DEFAULT_LANG_CODE, STRICTERDOM_ENABLED } from '../../config';
 import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
@@ -29,7 +28,7 @@ import blankUrl from '../../assets/blank.png';
 
 type StateProps =
   Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>
-  & { language?: LangCode };
+  & { language?: string };
 
 const DATA_PREFIX = 'tg://login?token=';
 const QR_SIZE = 280;

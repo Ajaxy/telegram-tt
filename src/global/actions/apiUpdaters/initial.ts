@@ -6,6 +6,7 @@ import type {
   ApiUpdateServerTimeOffset,
   ApiUpdateSession,
 } from '../../../api/types';
+import type { LangCode } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState } from '../../types';
 
@@ -97,7 +98,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 });
 
 function onUpdateApiReady<T extends GlobalState>(global: T) {
-  void oldSetLanguage(global.settings.byKey.language);
+  void oldSetLanguage(global.settings.byKey.language as LangCode);
 }
 
 function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationState) {

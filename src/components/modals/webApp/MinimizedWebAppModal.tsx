@@ -73,6 +73,9 @@ const MinimizedWebAppModal = ({
         {
           botName: activeTabName,
           count: openedTabsCount - 1,
+        },
+        {
+          pluralValue: openedTabsCount - 1,
         })}`
       : activeTabName;
 

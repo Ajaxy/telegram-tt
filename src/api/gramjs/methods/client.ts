@@ -16,7 +16,7 @@ import type {
 
 import {
   APP_CODE_NAME,
-  DEBUG, DEBUG_GRAMJS, IS_TEST, UPLOAD_WORKERS,
+  DEBUG, DEBUG_GRAMJS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,
 } from '../../../config';
 import { pause } from '../../../util/schedulers';
 import {
@@ -95,7 +95,9 @@ export async function init(initialArgs: ApiInitialArgs) {
       shouldForceHttpTransport,
       shouldAllowHttpTransport,
       dcId,
+      langPack: LANG_PACK,
       langCode,
+      systemLangCode: navigator.language,
       isTestServerRequested,
     } as any,
   );

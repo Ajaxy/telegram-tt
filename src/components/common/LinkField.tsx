@@ -43,7 +43,9 @@ const InviteLink: FC<OwnProps> = ({
   const copyLink = useLastCallback(() => {
     copyTextToClipboard(link);
     showNotification({
-      message: lang('LinkCopied'),
+      message: {
+        key: 'LinkCopied',
+      },
     });
   });
 

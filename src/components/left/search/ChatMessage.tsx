@@ -6,7 +6,7 @@ import type {
   ApiChat, ApiMessage, ApiMessageOutgoingStatus,
   ApiUser,
 } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import {
   getMessageIsSpoiler,
@@ -111,7 +111,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
 };
 
 function renderSummary(
-  lang: LangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string, isRoundVideo?: boolean,
+  lang: OldLangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string, isRoundVideo?: boolean,
 ) {
   if (!blobUrl) {
     return renderMessageSummary(lang, message, undefined, searchQuery);

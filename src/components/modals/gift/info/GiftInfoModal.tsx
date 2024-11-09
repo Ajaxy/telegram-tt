@@ -4,11 +4,11 @@ import { getActions, withGlobal } from '../../../../global';
 import type { ApiSticker, ApiUser } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
-import { STARS_ICON_PLACEHOLDER } from '../../../../config';
 import { getUserFullName } from '../../../../global/helpers';
 import { selectStarGiftSticker, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
+import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
 import { formatInteger } from '../../../../util/textFormat';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
@@ -69,6 +69,7 @@ const GiftInfoModal = ({
   const canConvertDifference = (userGift && starGiftMaxConvertPeriod && (
     userGift.date + starGiftMaxConvertPeriod - Date.now() / 1000
   )) || 0;
+  const conversionLeft = Math.ceil(canConvertDifference / 60 / 60 / 24);
 
   const handleClose = useLastCallback(() => {
     closeGiftInfoModal();
@@ -131,17 +132,19 @@ const GiftInfoModal = ({
 
       return canUpdate
         ? lang('GiftInfoDescription', {
-          amount: formatInteger(starsToConvert!),
+          amount: starsToConvert,
         }, {
           withNodes: true,
           withMarkdown: true,
+          pluralValue: starsToConvert,
         })
         : lang('GiftInfoDescriptionOut', {
-          amount: formatInteger(starsToConvert!),
+          amount: starsToConvert,
           user: getUserFullName(targetUser)!,
         }, {
           withNodes: true,
           withMarkdown: true,
+          pluralValue: starsToConvert,
         });
     })();
 
@@ -205,14 +208,7 @@ const GiftInfoModal = ({
     tableData.push([
       lang('GiftInfoValue'),
       <div className={styles.giftValue}>
-        {lang('StarsAmount', {
-          amount: formatInteger(gift.stars),
-        }, {
-          withNodes: true,
-          specialReplacement: {
-            [STARS_ICON_PLACEHOLDER]: <StarIcon type="gold" size="small" />,
-          },
-        })}
+        {formatStarsAsIcon(lang, gift.stars)}
         {canUpdate && canConvertDifference > 0 && Boolean(starsToConvert) && (
           <BadgeButton onClick={openConvertConfirm}>
             {lang('GiftInfoConvert', { amount: starsToConvert }, { pluralValue: starsToConvert })}
@@ -225,8 +221,10 @@ const GiftInfoModal = ({
       tableData.push([
         lang('GiftInfoAvailability'),
         lang('GiftInfoAvailabilityValue', {
-          count: formatInteger(gift.availabilityRemains!),
-          total: formatInteger(gift.availabilityTotal),
+          count: gift.availabilityRemains || 0,
+          total: gift.availabilityTotal,
+        }, {
+          pluralValue: gift.availabilityRemains || 0,
         }),
       ]);
     }
@@ -295,7 +293,7 @@ const GiftInfoModal = ({
         >
           <div>
             {lang('GiftInfoConvertDescription1', {
-              amount: lang('StarsAmountText', { amount: formatInteger(userGift.starsToConvert!) }),
+              amount: formatStarsAsText(lang, userGift.starsToConvert!),
               user: getUserFullName(userFrom)!,
             }, {
               withNodes: true,
@@ -305,10 +303,11 @@ const GiftInfoModal = ({
           {canConvertDifference > 0 && (
             <div>
               {lang('GiftInfoConvertDescriptionPeriod', {
-                count: formatInteger(Math.ceil(canConvertDifference / 60 / 60 / 24)),
+                count: conversionLeft,
               }, {
                 withNodes: true,
                 withMarkdown: true,
+                pluralValue: conversionLeft,
               })}
             </div>
           )}

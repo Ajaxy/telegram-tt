@@ -7,7 +7,6 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiCountryCode } from '../../api/types';
 import type { GlobalState } from '../../global/types';
-import type { LangCode } from '../../types';
 
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { preloadImage } from '../../util/files';
@@ -36,7 +35,7 @@ type StateProps = Pick<GlobalState, (
   'authIsLoadingQrCode' | 'authError' |
   'authRememberMe' | 'authNearestCountry'
 )> & {
-  language?: LangCode;
+  language?: string;
   phoneCodeList: ApiCountryCode[];
 };
 

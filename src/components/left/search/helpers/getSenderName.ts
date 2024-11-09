@@ -1,5 +1,5 @@
 import type { ApiChat, ApiMessage, ApiUser } from '../../../../api/types';
-import type { LangFn } from '../../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../../hooks/useOldLang';
 
 import {
   getChatTitle,
@@ -9,7 +9,7 @@ import {
 } from '../../../../global/helpers';
 
 export function getSenderName(
-  lang: LangFn, message: ApiMessage, chatsById: Record<string, ApiChat>, usersById: Record<string, ApiUser>,
+  lang: OldLangFn, message: ApiMessage, chatsById: Record<string, ApiChat>, usersById: Record<string, ApiUser>,
 ) {
   const { senderId } = message;
   if (!senderId) {

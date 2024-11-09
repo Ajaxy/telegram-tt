@@ -36,6 +36,7 @@ import type {
   ApiInputInvoiceStarGift,
   ApiInputMessageReplyInfo,
   ApiKeyboardButton,
+  ApiLanguage,
   ApiMediaFormat,
   ApiMessage,
   ApiMessageEntity,
@@ -115,7 +116,6 @@ import type {
   InlineBotSettings,
   ISettings,
   IThemeSettings,
-  LangCode,
   LoadMoreDirection,
   ManagementProgress,
   ManagementScreens,
@@ -1199,7 +1199,7 @@ export type GlobalState = {
   defaultTopicIconsId?: string;
   defaultStatusIconsId?: string;
   premiumGifts?: ApiStickerSet;
-  emojiKeywords: Partial<Record<LangCode, EmojiKeywords>>;
+  emojiKeywords: Record<string, EmojiKeywords | undefined>;
 
   gifs: {
     saved: {
@@ -1243,6 +1243,7 @@ export type GlobalState = {
     notifyExceptions?: Record<number, NotifyException>;
     lastPremiumBandwithNotificationDate?: number;
     paidReactionPrivacy?: boolean;
+    languages?: ApiLanguage[];
   };
 
   push?: {
@@ -1377,7 +1378,7 @@ export interface ActionPayloads {
   faveSticker: { sticker: ApiSticker } & WithTabId;
   unfaveSticker: { sticker: ApiSticker };
   toggleStickerSet: { stickerSetId: string };
-  loadEmojiKeywords: { language: LangCode };
+  loadEmojiKeywords: { language: string };
 
   // groups
   togglePreHistoryHidden: {
@@ -1484,7 +1485,7 @@ export interface ActionPayloads {
   updateContentSettings: boolean;
 
   loadCountryList: {
-    langCode?: LangCode;
+    langCode?: string;
   };
   ensureTimeFormat: WithTabId | undefined;
 

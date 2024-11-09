@@ -4,7 +4,7 @@ import { getActions } from '../../../../global';
 import type {
   ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiUser,
 } from '../../../../api/types';
-import type { LangFn } from '../../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin } from '../../../../types';
@@ -33,7 +33,7 @@ export default function useInnerHandlers({
   isRepliesChat,
   isSavedMessages,
 }: {
-  lang: LangFn;
+  lang: OldLangFn;
   selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void;
   message: ApiMessage;
   chatId: string;

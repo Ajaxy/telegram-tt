@@ -73,6 +73,7 @@ class TelegramClient {
         systemVersion: undefined,
         appVersion: undefined,
         langCode: 'en',
+        langPack: 'weba',
         systemLangCode: 'en',
         baseLogger: 'gramjs',
         useWSS: false,
@@ -158,7 +159,7 @@ class TelegramClient {
                         .toString() || '1.0',
                     appVersion: args.appVersion || '1.0',
                     langCode: args.langCode,
-                    langPack: 'weba',
+                    langPack: args.langPack,
                     systemLangCode: args.systemLangCode,
                     query: x,
                     proxy: undefined, // no proxies yet.

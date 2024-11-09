@@ -62,6 +62,7 @@ type OwnProps = {
   noScrollRestore?: boolean;
   isViewOnly?: boolean;
   withDefaultPadding?: boolean;
+  forceRenderAllItems?: boolean;
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (value: string, isSelected: boolean) => void;
   onLoadMore?: () => void;
@@ -86,6 +87,7 @@ const ItemPicker = ({
   itemInputType,
   itemClassName,
   withDefaultPadding,
+  forceRenderAllItems,
   onFilterChange,
   onDisabledClick,
   onLoadMore,
@@ -163,7 +165,7 @@ const ItemPicker = ({
   });
 
   const [viewportValuesList, getMore] = useInfiniteScroll(
-    onLoadMore, sortedItemValuesList, Boolean(filterValue),
+    onLoadMore, sortedItemValuesList, Boolean(forceRenderAllItems || filterValue),
   );
 
   const handleFilterChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {

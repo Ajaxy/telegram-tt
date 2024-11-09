@@ -1,19 +1,21 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { CallbackAction } from '../../global/types';
-import type { IconName } from '../../types/icons';
+import type { ApiNotification } from '../../api/types';
+import { isLangFnParam } from '../../util/localization/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import renderText from '../common/helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
@@ -25,57 +27,55 @@ import RoundTimer from './RoundTimer';
 import './Notification.scss';
 
 type OwnProps = {
-  title?: TeactNode;
-  containerId?: string;
-  message: TeactNode;
-  duration?: number;
-  action?: CallbackAction | CallbackAction[];
-  actionText?: string;
-  className?: string;
-  icon?: IconName;
-  shouldDisableClickDismiss?: boolean;
-  dismissAction?: CallbackAction;
-  shouldShowTimer?: boolean;
-  cacheBreaker?: string;
-  onDismiss: NoneToVoidFunction;
+  notification: ApiNotification;
 };
 
 const DEFAULT_DURATION = 3000;
 const ANIMATION_DURATION = 150;
 
 const Notification: FC<OwnProps> = ({
-  title,
-  className,
-  message,
-  duration = DEFAULT_DURATION,
-  containerId,
-  icon,
-  action,
-  actionText,
-  shouldDisableClickDismiss,
-  dismissAction,
-  shouldShowTimer,
-  cacheBreaker,
-  onDismiss,
+  notification,
 }) => {
   const actions = getActions();
+
+  const lang = useLang();
+
+  const {
+    localId,
+    message,
+    action,
+    actionText,
+    cacheBreaker,
+    className,
+    disableClickDismiss,
+    dismissAction,
+    duration = DEFAULT_DURATION,
+    icon,
+    shouldShowTimer,
+    title,
+    containerSelector,
+  } = notification;
 
   const [isOpen, setIsOpen] = useState(true);
   // eslint-disable-next-line no-null/no-null
   const timerRef = useRef<number | undefined>(null);
   const { transitionClassNames } = useShowTransitionDeprecated(isOpen);
 
+  const handleDismiss = useLastCallback(() => {
+    actions.dismissNotification({ localId });
+  });
+
   const closeAndDismiss = useLastCallback((force?: boolean) => {
-    if (!force && shouldDisableClickDismiss) return;
+    if (!force && disableClickDismiss) return;
     setIsOpen(false);
-    setTimeout(onDismiss, ANIMATION_DURATION + ANIMATION_END_DELAY);
+    setTimeout(handleDismiss, ANIMATION_DURATION + ANIMATION_END_DELAY);
     if (dismissAction) {
       // @ts-ignore
       actions[dismissAction.action](dismissAction.payload);
     }
   });
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (action) {
       if (Array.isArray(action)) {
         // @ts-ignore
@@ -86,7 +86,7 @@ const Notification: FC<OwnProps> = ({
       }
     }
     closeAndDismiss();
-  }, [action, actions, closeAndDismiss]);
+  });
 
   useEffect(() => (isOpen ? captureEscKeyListener(closeAndDismiss) : undefined), [isOpen, closeAndDismiss]);
 
@@ -102,7 +102,7 @@ const Notification: FC<OwnProps> = ({
   }, [duration, cacheBreaker]); // Reset timer if `cacheBreaker` changes
 
   const handleMouseEnter = useLastCallback(() => {
-    if (shouldDisableClickDismiss) return;
+    if (disableClickDismiss) return;
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = undefined;
@@ -110,15 +110,45 @@ const Notification: FC<OwnProps> = ({
   });
 
   const handleMouseLeave = useLastCallback(() => {
-    if (shouldDisableClickDismiss) return;
+    if (disableClickDismiss) return;
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
     timerRef.current = window.setTimeout(closeAndDismiss, duration);
   });
 
+  const renderedTitle = useMemo(() => {
+    if (!title) return undefined;
+    if (isLangFnParam(title)) {
+      return lang.with(title);
+    }
+
+    return renderText(title, ['simple_markdown', 'emoji', 'br', 'links']);
+  }, [lang, title]);
+
+  const renderedMessage = useMemo(() => {
+    if (isLangFnParam(message)) {
+      return lang.with(message);
+    }
+
+    if (typeof message === 'string') {
+      return renderText(message, ['simple_markdown', 'emoji', 'br', 'links']);
+    }
+
+    return message;
+  }, [lang, message]);
+
+  const renderedActionText = useMemo(() => {
+    if (!actionText) return undefined;
+    if (isLangFnParam(actionText)) {
+      return lang.with(actionText);
+    }
+
+    return actionText;
+  }, [lang, actionText]);
+
   return (
-    <Portal className="Notification-container" containerId={containerId}>
+    <Portal className="Notification-container" containerSelector={containerSelector}>
       <div
         className={buildClassName('Notification', transitionClassNames, className)}
         onClick={handleClick}
@@ -127,16 +157,18 @@ const Notification: FC<OwnProps> = ({
       >
         <Icon name={icon || 'info-filled'} className="notification-icon" />
         <div className="content">
-          {title && <div className="notification-title">{title}</div>}
-          {message}
+          {renderedTitle && (
+            <div className="notification-title">{renderedTitle}</div>
+          )}
+          {renderedMessage}
         </div>
-        {action && actionText && (
+        {action && renderedActionText && (
           <Button
             color="translucent-white"
             onClick={handleClick}
             className="notification-button"
           >
-            {actionText}
+            {renderedActionText}
           </Button>
         )}
         {shouldShowTimer && (

@@ -3,7 +3,7 @@ import type { TeactNode } from '../../lib/teact/teact';
 import type {
   ApiMediaExtendedPreview, ApiMessage, MediaContent, StatefulMediaContent,
 } from '../../api/types';
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { CONTENT_NOT_SUPPORTED } from '../../config';
@@ -17,7 +17,7 @@ const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
 export const TRUNCATED_SUMMARY_LENGTH = 80;
 
 export function getMessageSummaryText(
-  lang: LangFn,
+  lang: OldLangFn,
   message: ApiMessage,
   statefulContent: StatefulMediaContent | undefined,
   noEmoji = false,
@@ -106,12 +106,12 @@ export function getMessageSummaryEmoji(message: ApiMessage) {
 }
 
 export function getMediaContentTypeDescription(
-  lang: LangFn, content: MediaContent, statefulContent: StatefulMediaContent | undefined,
+  lang: OldLangFn, content: MediaContent, statefulContent: StatefulMediaContent | undefined,
 ) {
   return getSummaryDescription(lang, content, statefulContent);
 }
 export function getMessageSummaryDescription(
-  lang: LangFn,
+  lang: OldLangFn,
   message: ApiMessage,
   statefulContent: StatefulMediaContent | undefined,
   truncatedText?: string | TeactNode,
@@ -120,7 +120,7 @@ export function getMessageSummaryDescription(
   return getSummaryDescription(lang, message.content, statefulContent, message, truncatedText, isExtended);
 }
 function getSummaryDescription(
-  lang: LangFn,
+  lang: OldLangFn,
   mediaContent: MediaContent,
   statefulContent: StatefulMediaContent | undefined,
   message?: ApiMessage,

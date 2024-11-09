@@ -7,17 +7,15 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiMessage, ApiUser } from '../../../api/types';
 import type { GiftOption } from './GiftModal';
 
-import { STARS_CURRENCY_CODE, STARS_ICON_PLACEHOLDER } from '../../../config';
+import { STARS_CURRENCY_CODE } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
 import { selectTabState, selectTheme, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
-import { formatInteger } from '../../../util/textFormat';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Icon from '../../common/icons/Icon';
 import PremiumProgress from '../../common/PremiumProgress';
 import ActionMessage from '../../middle/ActionMessage';
 import Button from '../../ui/Button';
@@ -175,16 +173,9 @@ function GiftComposer({
   function renderFooter() {
     const userFullName = getUserFullName(user)!;
 
-    const amount = isStarGift ? (
-      lang('StarsAmount', {
-        amount: formatInteger(gift.stars),
-      }, {
-        withNodes: true,
-        specialReplacement: {
-          [STARS_ICON_PLACEHOLDER]: <Icon className="star-amount-icon" name="star" />,
-        },
-      })
-    ) : formatCurrency(gift.amount, gift.currency);
+    const amount = isStarGift
+      ? formatCurrency(gift.stars, STARS_CURRENCY_CODE, lang.code, { iconClassName: 'star-amount-icon' })
+      : formatCurrency(gift.amount, gift.currency);
 
     return (
       <div className={styles.footer}>
@@ -201,9 +192,9 @@ function GiftComposer({
             isPrimary
             progress={gift.availabilityRemains / gift.availabilityTotal!}
             rightText={lang('GiftSoldCount', {
-              count: formatInteger(gift.availabilityTotal! - gift.availabilityRemains),
+              count: gift.availabilityTotal! - gift.availabilityRemains,
             })}
-            leftText={lang('GiftLeftCount', { count: formatInteger(gift.availabilityRemains) })}
+            leftText={lang('GiftLeftCount', { count: gift.availabilityRemains })}
             className={styles.limited}
           />
         )}

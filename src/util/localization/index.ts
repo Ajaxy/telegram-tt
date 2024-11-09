@@ -4,21 +4,23 @@ import type {
   ApiLanguage,
   CachedLangData,
   LangPack,
+  LangPackStringValue,
 } from '../../api/types';
-import type { LangKey } from '../../types/language';
+import type { LangKey, LangVariable } from '../../types/language';
 import {
   type AdvancedLangFnOptions,
+  type AdvancedLangFnOptionsWithPlural,
   areAdvancedLangFnOptions,
   isDeletedLangString,
   isPluralLangString,
   type LangFn,
   type LangFnOptions,
+  type LangFnOptionsWithPlural,
   type LangFnParameters,
-  type LangFnWithFunction,
   type LangFormatters,
 } from './types';
 
-import { DEBUG } from '../../config';
+import { DEBUG, LANG_PACK } from '../../config';
 import { callApi } from '../../api/gramjs';
 import renderText, { type TextFilter } from '../../components/common/helpers/renderText';
 import { MAIN_IDB_STORE } from '../browser/idb';
@@ -37,7 +39,6 @@ import LimitedMap from '../primitives/LimitedMap';
 
 import initialStrings from '../../assets/localization/initialStrings';
 
-const LANG_PACK = 'weba';
 const LANGPACK_STORE_PREFIX = 'langpack-';
 const FORMATTERS_FALLBACK_LANG = 'en';
 
@@ -115,14 +116,22 @@ async function fetchDifference() {
     langCode: langPack.langCode,
     fromVersion: langPack.version,
   });
-  if (!result || result.version === langPack.version) return;
+  if (!result) return;
+
+  applyLangPackDifference(result.version, result.strings, result.keysToRemove);
+}
+
+export function applyLangPackDifference(
+  version: number, strings: Record<string, LangPackStringValue>, keysToRemove: string[],
+) {
+  if (!langPack || !language || version === langPack.version) return;
 
   const newLangPack = {
     ...langPack,
-    version: result.version,
+    version,
     strings: {
-      ...omit(langPack.strings, result.keysToRemove),
-      ...result.strings,
+      ...omit(langPack.strings, keysToRemove),
+      ...strings,
     },
   };
   updateLangPack(newLangPack);
@@ -242,6 +251,11 @@ export async function loadAndChangeLanguage(langCode: string, shouldCheckCache?:
   return changeLanguage(remoteLanguage);
 }
 
+export function requestLangPackDifference(langCode: string) {
+  if (language?.langCode !== langCode) return;
+  fetchDifference();
+}
+
 export async function changeLanguage(newLanguage: ApiLanguage) {
   if (langPack && language?.langCode === newLanguage.langCode) return;
 
@@ -300,10 +314,10 @@ function createTranslationFn(): LangFn {
   fn.pluralCode = language?.pluralCode || FORMATTERS_FALLBACK_LANG;
   fn.with = (({ key, variables, options }: LangFnParameters) => {
     if (options && areAdvancedLangFnOptions(options)) {
-      return processTranslationAdvanced(key, variables as Record<string, TeactNode>, options);
+      return processTranslationAdvanced(key, variables as Record<string, TeactNode | undefined>, options);
     }
-    return processTranslation(key, variables as Record<string, string | number>, options);
-  }) as LangFnWithFunction;
+    return processTranslation(key, variables as Record<string, LangVariable>, options);
+  });
   fn.region = (code: string) => formatters?.region.of(code);
   fn.conjunction = (list: string[]) => formatters?.conjunction.format(list) || list.join(', ');
   fn.disjunction = (list: string[]) => formatters?.disjunction.format(list) || list.join(', ');
@@ -315,7 +329,7 @@ export function getTranslationFn(): LangFn {
   return translationFn;
 }
 
-function getString(langKey: LangKey, count: number, options?: Pick<LangFnOptions, 'pluralValue'>) {
+function getString(langKey: LangKey, count: number) {
   let langPackStringValue = langPack?.strings[langKey];
 
   if (!langPackStringValue && !fallbackLangPack) {
@@ -327,7 +341,7 @@ function getString(langKey: LangKey, count: number, options?: Pick<LangFnOptions
 
   if (!langPackStringValue || isDeletedLangString(langPackStringValue)) return undefined;
 
-  const pluralSuffix = formatters?.pluralRules.select(options?.pluralValue || count) || 'other';
+  const pluralSuffix = formatters?.pluralRules.select(count) || 'other';
 
   const string = isPluralLangString(langPackStringValue)
     ? (langPackStringValue[pluralSuffix] || langPackStringValue.other)
@@ -337,20 +351,26 @@ function getString(langKey: LangKey, count: number, options?: Pick<LangFnOptions
 }
 
 function processTranslation(
-  langKey: LangKey, variables?: Record<string, string | number>, options?: LangFnOptions,
+  langKey: LangKey,
+  variables?: Record<string, LangVariable>,
+  options?: LangFnOptions | LangFnOptionsWithPlural,
 ): string {
   const cacheKey = `${langKey}-${JSON.stringify(variables)}-${JSON.stringify(options)}`;
   if (TRANSLATION_CACHE.has(cacheKey)) {
     return TRANSLATION_CACHE.get(cacheKey)!;
   }
 
-  const string = getString(langKey, options?.pluralValue || Number(variables?.count) || 0, options);
+  const pluralValue = options && 'pluralValue' in options ? Number(options.pluralValue) : 0;
+  const string = getString(langKey, pluralValue);
 
   if (!string) return langKey;
 
   const variableEntries = variables ? Object.entries(variables) : [];
   const finalString = variableEntries.reduce((result, [key, value]) => {
-    return result.replace(`{${key}}`, String(value));
+    if (!value) return result;
+
+    const valueAsString = Number.isInteger(value) ? formatters!.number.format(value as number) : String(value);
+    return result.replace(`{${key}}`, valueAsString);
   }, string);
 
   TRANSLATION_CACHE.set(cacheKey, finalString);
@@ -359,9 +379,12 @@ function processTranslation(
 }
 
 function processTranslationAdvanced(
-  langKey: LangKey, variables?: Record<string, TeactNode>, options?: AdvancedLangFnOptions,
+  langKey: LangKey,
+  variables?: Record<string, TeactNode | undefined>,
+  options?: AdvancedLangFnOptions | AdvancedLangFnOptionsWithPlural,
 ): TeactNode {
-  const string = getString(langKey, options?.pluralValue || Number(variables?.count) || 0, options);
+  const pluralValue = options && 'pluralValue' in options ? Number(options.pluralValue) : 0;
+  const string = getString(langKey, pluralValue);
   if (!string) return langKey;
 
   const variableEntries = variables ? Object.entries(variables) : [];
@@ -389,7 +412,10 @@ function processTranslationAdvanced(
       return renderText(curr, filters, {
         markdownPostProcessor: (part: string) => {
           return variableEntries.reduce((result, [key, value]): TeactNode[] => {
-            return replaceInStringsWithTeact(result, `{${key}}`, value);
+            if (!value) return result;
+
+            const preparedValue = Number.isInteger(value) ? formatters!.number.format(value as number) : value;
+            return replaceInStringsWithTeact(result, `{${key}}`, preparedValue);
           }, [part] as TeactNode[]);
         },
       });
@@ -397,7 +423,10 @@ function processTranslationAdvanced(
   }
 
   return variableEntries.reduce((result, [key, value]): TeactNode[] => {
-    return replaceInStringsWithTeact(result, `{${key}}`, value);
+    if (!value) return result;
+
+    const preparedValue = Number.isInteger(value) ? formatters!.number.format(value as number) : value;
+    return replaceInStringsWithTeact(result, `{${key}}`, preparedValue);
   }, tempResult);
 }
 

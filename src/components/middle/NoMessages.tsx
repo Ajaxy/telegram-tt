@@ -3,7 +3,7 @@ import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiTopic } from '../../api/types';
 import type { MessageListType } from '../../global/types';
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 
 import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
@@ -53,7 +53,7 @@ const NoMessages: FC<OwnProps> = ({
   );
 };
 
-function renderTopic(lang: LangFn, topic: ApiTopic) {
+function renderTopic(lang: OldLangFn, topic: ApiTopic) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
@@ -69,13 +69,13 @@ function renderTopic(lang: LangFn, topic: ApiTopic) {
   );
 }
 
-function renderScheduled(lang: LangFn) {
+function renderScheduled(lang: OldLangFn) {
   return (
     <div className="empty"><span>{lang('ScheduledMessages.EmptyPlaceholder')}</span></div>
   );
 }
 
-function renderSavedMessages(lang: LangFn) {
+function renderSavedMessages(lang: OldLangFn) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
@@ -92,7 +92,7 @@ function renderSavedMessages(lang: LangFn) {
   );
 }
 
-function renderGroup(lang: LangFn) {
+function renderGroup(lang: OldLangFn) {
   return (
     <div className="NoMessages">
       <div className="wrapper" dir={lang.isRtl ? 'rtl' : undefined}>

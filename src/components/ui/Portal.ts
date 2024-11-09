@@ -3,19 +3,19 @@ import { useLayoutEffect, useRef } from '../../lib/teact/teact';
 import TeactDOM from '../../lib/teact/teact-dom';
 
 type OwnProps = {
-  containerId?: string;
+  containerSelector?: string;
   className?: string;
   children: VirtualElement;
 };
 
-const Portal: FC<OwnProps> = ({ containerId, className, children }) => {
+const Portal: FC<OwnProps> = ({ containerSelector, className, children }) => {
   const elementRef = useRef<HTMLDivElement>();
   if (!elementRef.current) {
     elementRef.current = document.createElement('div');
   }
 
   useLayoutEffect(() => {
-    const container = document.querySelector<HTMLDivElement>(containerId || '#portals');
+    const container = document.querySelector<HTMLDivElement>(containerSelector || '#portals');
     if (!container) {
       return undefined;
     }
@@ -31,7 +31,7 @@ const Portal: FC<OwnProps> = ({ containerId, className, children }) => {
       TeactDOM.render(undefined, element);
       container.removeChild(element);
     };
-  }, [className, containerId]);
+  }, [className, containerSelector]);
 
   return TeactDOM.render(children, elementRef.current);
 };

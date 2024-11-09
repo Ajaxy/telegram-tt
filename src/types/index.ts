@@ -11,7 +11,6 @@ import type {
   ApiExportedInvite,
   ApiFakeType,
   ApiLabeledPrice,
-  ApiLanguage,
   ApiMessage,
   ApiPhoto,
   ApiReaction,
@@ -113,8 +112,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   shouldSuggestCustomEmoji: boolean;
   shouldUpdateStickerSetOrder: boolean;
   hasPassword?: boolean;
-  languages?: ApiLanguage[];
-  language: LangCode;
+  language: string;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
   timeFormat: TimeFormat;
@@ -481,8 +479,8 @@ export type NotifyException = {
 
 export type EmojiKeywords = {
   isLoading?: boolean;
-  version: number;
-  keywords: Record<string, string[]>;
+  version?: number;
+  keywords?: Record<string, string[]>;
 };
 
 export type InlineBotSettings = {

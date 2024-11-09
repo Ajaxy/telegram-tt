@@ -4,7 +4,7 @@ import type {
   ApiChat, ApiGroupCall, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
@@ -36,7 +36,7 @@ const MAX_LENGTH = 32;
 const NBSP = '\u00A0';
 
 export function renderActionMessageText(
-  oldLang: LangFn,
+  oldLang: OldLangFn,
   message: ApiMessage,
   actionOriginUser?: ApiUser,
   actionOriginChat?: ApiChat,
@@ -269,7 +269,7 @@ function renderProductContent(message: ApiMessage) {
 }
 
 function renderMessageContent(
-  lang: LangFn,
+  lang: OldLangFn,
   message: ApiMessage,
   options: RenderOptions = {},
   observeIntersectionForLoading?: ObserveFn,
@@ -318,7 +318,7 @@ function renderUserContent(sender: ApiUser, noLinks?: boolean): string | TextPar
   return <UserLink className="action-link" sender={sender}>{sender && renderText(text!)}</UserLink>;
 }
 
-function renderChatContent(lang: LangFn, chat: ApiChat, noLinks?: boolean): string | TextPart | undefined {
+function renderChatContent(lang: OldLangFn, chat: ApiChat, noLinks?: boolean): string | TextPart | undefined {
   const text = trimText(getChatTitle(lang, chat), MAX_LENGTH);
 
   if (noLinks) {

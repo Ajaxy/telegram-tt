@@ -94,11 +94,11 @@ const StarPaymentModal = ({
     if (subscriptionInfo) {
       return lang('StarsSubscribeText', {
         chat: subscriptionInfo.title,
-        amount: amount!,
+        amount,
       }, {
         withNodes: true,
         withMarkdown: true,
-        pluralValue: amount,
+        pluralValue: amount!,
       });
     }
 

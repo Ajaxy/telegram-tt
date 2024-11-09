@@ -9,7 +9,7 @@ import type {
 import type {
   ApiPoll, MediaContainer, MediaContent, StatefulMediaContent,
 } from '../../api/types/messages';
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 import type { ThreadId } from '../../types';
 import type { GlobalState } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
@@ -208,7 +208,7 @@ export function isAnonymousOwnMessage(message: ApiMessage) {
   return Boolean(message.senderId) && !isUserId(message.senderId) && isOwnMessage(message);
 }
 
-export function getSenderTitle(lang: LangFn, sender: ApiPeer) {
+export function getSenderTitle(lang: OldLangFn, sender: ApiPeer) {
   return isPeerUser(sender) ? getUserFullName(sender) : getChatTitle(lang, sender);
 }
 
@@ -344,10 +344,10 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
   return { text, entities };
 }
 
-export function getExpiredMessageDescription(langFn: LangFn, message: ApiMessage): string | undefined {
+export function getExpiredMessageDescription(langFn: OldLangFn, message: ApiMessage): string | undefined {
   return getExpiredMessageContentDescription(langFn, message.content);
 }
-export function getExpiredMessageContentDescription(langFn: LangFn, mediaContent: MediaContent): string | undefined {
+export function getExpiredMessageContentDescription(langFn: OldLangFn, mediaContent: MediaContent): string | undefined {
   const { isExpiredVoice, isExpiredRoundVideo } = mediaContent;
   if (isExpiredVoice) {
     return langFn('Message.VoiceMessageExpired');

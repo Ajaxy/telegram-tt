@@ -10,7 +10,6 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiMessage, ApiUser } from '../../api/types';
 import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
-import type { LangCode } from '../../types';
 import { ElectronEvent } from '../../types/electron';
 
 import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER } from '../../config';
@@ -43,6 +42,7 @@ import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -115,7 +115,6 @@ type StateProps = {
   openedCustomEmojiSetIds?: string[];
   activeGroupCallId?: string;
   isServiceChatReady?: boolean;
-  language?: LangCode;
   wasTimeFormatSetManually?: boolean;
   isPhoneCallActive?: boolean;
   addedSetIds?: string[];
@@ -170,7 +169,6 @@ const Main = ({
   openedCustomEmojiSetIds,
   isServiceChatReady,
   withInterfaceAnimations,
-  language,
   wasTimeFormatSetManually,
   addedSetIds,
   addedCustomEmojiIds,
@@ -256,6 +254,8 @@ const Main = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
+
+  const lang = useLang();
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
@@ -349,13 +349,15 @@ const Main = ({
   // Language-based API calls
   useEffect(() => {
     if (isMasterTab) {
-      if (language !== BASE_EMOJI_KEYWORD_LANG) {
-        loadEmojiKeywords({ language: language! });
+      if (lang.code !== BASE_EMOJI_KEYWORD_LANG) {
+        loadEmojiKeywords({ language: lang.code });
       }
 
-      loadCountryList({ langCode: language });
+      loadCountryList({ langCode: lang.code });
+
+      loadAttachBots();
     }
-  }, [language, isMasterTab]);
+  }, [lang, isMasterTab]);
 
   // Re-fetch cached saved emoji for `localDb`
   useEffect(() => {
@@ -596,7 +598,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       settings: {
         byKey: {
-          language, wasTimeFormatSetManually,
+          wasTimeFormatSetManually,
         },
       },
       currentUserId,
@@ -660,7 +662,6 @@ export default memo(withGlobal<OwnProps>(
       isServiceChatReady: selectIsServiceChatReady(global),
       activeGroupCallId: isMasterTab ? global.groupCalls.activeGroupCallId : undefined,
       withInterfaceAnimations: selectCanAnimateInterface(global),
-      language,
       wasTimeFormatSetManually,
       isPhoneCallActive: isMasterTab ? Boolean(global.phoneCall) : undefined,
       addedSetIds: global.stickers.added.setIds,

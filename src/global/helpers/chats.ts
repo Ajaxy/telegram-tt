@@ -9,7 +9,7 @@ import type {
   ApiTopic,
   ApiUser,
 } from '../../api/types';
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 import type {
   CustomPeer, NotifyException, NotifySettings, ThreadId,
 } from '../../types';
@@ -101,7 +101,7 @@ export function getPrivateChatUserId(chat: ApiChat) {
   return chat.id;
 }
 
-export function getChatTitle(lang: LangFn, chat: ApiChat, isSelf = false) {
+export function getChatTitle(lang: OldLangFn, chat: ApiChat, isSelf = false) {
   if (isSelf) {
     return lang('SavedMessages');
   }
@@ -247,7 +247,7 @@ export function getAllowedAttachmentOptions(
 }
 
 export function getMessageSendingRestrictionReason(
-  lang: LangFn,
+  lang: OldLangFn,
   currentUserBannedRights?: ApiChatBannedRights,
   defaultBannedRights?: ApiChatBannedRights,
 ) {
@@ -272,7 +272,7 @@ export function getMessageSendingRestrictionReason(
 }
 
 export function getForumComposerPlaceholder(
-  lang: LangFn,
+  lang: OldLangFn,
   chat?: ApiChat,
   threadId: ThreadId = MAIN_THREAD_ID,
   topics?: Record<number, ApiTopic>,
@@ -341,7 +341,7 @@ export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }
 
-export function getFolderDescriptionText(lang: LangFn, folder: ApiChatFolder, chatsCount?: number) {
+export function getFolderDescriptionText(lang: OldLangFn, folder: ApiChatFolder, chatsCount?: number) {
   const {
     excludedChatIds, includedChatIds,
     bots, groups, contacts, nonContacts, channels,
@@ -376,7 +376,7 @@ export function getFolderDescriptionText(lang: LangFn, folder: ApiChatFolder, ch
   }
 }
 
-export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiPeer) {
+export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: ApiPeer) {
   if (!sender || isUserId(chatId)) {
     return undefined;
   }
@@ -395,7 +395,7 @@ export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiP
 }
 
 export function filterChatsByName(
-  lang: LangFn,
+  lang: OldLangFn,
   chatIds: string[],
   chatsById: Record<string, ApiChat>,
   query?: string,
@@ -475,7 +475,7 @@ export function getIsSavedDialog(chatId: string, threadId: ThreadId | undefined,
   return chatId === currentUserId && threadId !== MAIN_THREAD_ID;
 }
 
-export function getGroupStatus(lang: LangFn, chat: ApiChat) {
+export function getGroupStatus(lang: OldLangFn, chat: ApiChat) {
   const chatTypeString = lang(getChatTypeString(chat));
   const { membersCount } = chat;
 

@@ -1,6 +1,7 @@
 import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
+import { applyLangPackDifference, requestLangPackDifference } from '../../../util/localization';
 import { addActionHandler, setGlobal } from '../../index';
 import {
   addBlockedUser,
@@ -193,6 +194,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       };
       setGlobal(global);
       break;
+    }
+
+    case 'updateLangPackTooLong': {
+      requestLangPackDifference(update.langCode);
+      break;
+    }
+
+    case 'updateLangPack': {
+      applyLangPackDifference(update.version, update.strings, update.keysToRemove);
     }
   }
 

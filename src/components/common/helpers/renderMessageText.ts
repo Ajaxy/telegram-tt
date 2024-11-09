@@ -1,7 +1,7 @@
 import { getGlobal } from '../../../global';
 
 import type { ApiMessage, ApiSponsoredMessage } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
@@ -65,7 +65,7 @@ export function renderMessageText({
 
 // TODO Use Message Summary component instead
 export function renderMessageSummary(
-  lang: LangFn,
+  lang: OldLangFn,
   message: ApiMessage,
   noEmoji = false,
   highlight?: string,

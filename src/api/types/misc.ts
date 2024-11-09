@@ -1,5 +1,8 @@
+import type { TeactNode } from '../../lib/teact/teact';
+
 import type { ApiLimitType, ApiPremiumSection, CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
+import type { LangFnParameters } from '../../util/localization';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
 
@@ -111,10 +114,11 @@ export type ApiNotifyException = {
 
 export type ApiNotification = {
   localId: string;
-  title?: string;
-  message: string;
+  containerSelector?: string;
+  title?: string | LangFnParameters;
+  message: TeactNode | LangFnParameters;
   cacheBreaker?: string;
-  actionText?: string;
+  actionText?: string | LangFnParameters;
   action?: CallbackAction | CallbackAction[];
   className?: string;
   duration?: number;

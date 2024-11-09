@@ -1,7 +1,5 @@
 import React, { type TeactNode } from '../lib/teact/teact';
 
-import type { LangCode } from '../types';
-
 import { STARS_CURRENCY_CODE } from '../config';
 
 import StarIcon from '../components/common/icons/StarIcon';
@@ -9,7 +7,7 @@ import StarIcon from '../components/common/icons/StarIcon';
 export function formatCurrency(
   totalPrice: number,
   currency: string,
-  locale: LangCode = 'en',
+  locale: string = 'en',
   options?: {
     shouldOmitFractions?: boolean;
     iconClassName?: string;
@@ -27,7 +25,7 @@ export function formatCurrency(
 export function formatCurrencyAsString(
   totalPrice: number,
   currency: string,
-  locale: LangCode = 'en',
+  locale: string = 'en',
   options?: {
     shouldOmitFractions?: boolean;
   },

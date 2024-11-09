@@ -668,7 +668,6 @@
 "DiscussChannel" = "channel";
 "ForwardedMessage" = "Forwarded message";
 "ContextForwardMsg" = "Forward";
-"ShareLinkCopied" = "Copied to Clipboard";
 "MessageScheduleSend" = "Send Now";
 "MessageScheduleEditTime" = "Reschedule";
 "Reply" = "Reply";

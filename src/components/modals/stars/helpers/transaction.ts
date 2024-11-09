@@ -1,9 +1,9 @@
 import type { ApiStarsTransaction } from '../../../../api/types';
-import type { LangFn } from '../../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../../hooks/useOldLang';
 
 import { buildStarsTransactionCustomPeer } from '../../../../global/helpers/payments';
 
-export function getTransactionTitle(lang: LangFn, transaction: ApiStarsTransaction) {
+export function getTransactionTitle(lang: OldLangFn, transaction: ApiStarsTransaction) {
   if (transaction.extendedMedia) return lang('StarMediaPurchase');
   if (transaction.subscriptionPeriod) return lang('StarSubscriptionPurchase');
   if (transaction.isReaction) return lang('StarsReactionsSent');

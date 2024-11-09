@@ -3,7 +3,7 @@ import React, { memo, useCallback, useEffect } from '../../../../lib/teact/teact
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiLimitTypeWithModal } from '../../../../global/types';
-import type { LangFn } from '../../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IconName } from '../../../../types/icons';
 
 import { MAX_UPLOAD_FILEPART_SIZE } from '../../../../config';
@@ -71,7 +71,7 @@ const LIMIT_ICON: Record<ApiLimitTypeWithModal, IconName> = {
 };
 
 const LIMIT_VALUE_FORMATTER: Partial<Record<ApiLimitTypeWithModal, (...args: any[]) => string>> = {
-  uploadMaxFileparts: (lang: LangFn, value: number) => {
+  uploadMaxFileparts: (lang: OldLangFn, value: number) => {
     // The real size is not exactly 4gb, so we need to round it
     if (value === 8000) return lang('FileSize.GB', '4');
     if (value === 4000) return lang('FileSize.GB', '2');
@@ -88,7 +88,7 @@ function getLimiterDescription({
   premiumValue,
   valueFormatter,
 }: {
-  lang: LangFn;
+  lang: OldLangFn;
   limitType?: ApiLimitTypeWithModal;
   isPremium?: boolean;
   canBuyPremium?: boolean;

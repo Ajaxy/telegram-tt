@@ -47,6 +47,7 @@ import {
 import {
   buildApiNotifyException,
   buildApiNotifyExceptionTopic,
+  buildLangStrings,
   buildPrivacyKey,
 } from '../apiBuilders/misc';
 import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -1050,7 +1051,20 @@ export function updater(update: Update) {
       '@type': 'updatePaidReactionPrivacy',
       isPrivate: update.private,
     });
-  } else if (update instanceof LocalUpdatePremiumFloodWait) {
+  } else if (update instanceof GramJs.UpdateLangPackTooLong) {
+    sendApiUpdate({
+      '@type': 'updateLangPackTooLong',
+      langCode: update.langCode,
+    });
+  } else if (update instanceof GramJs.UpdateLangPack) {
+    const { strings, keysToRemove } = buildLangStrings(update.difference.strings);
+    sendApiUpdate({
+      '@type': 'updateLangPack',
+      version: update.difference.version,
+      strings,
+      keysToRemove,
+    });
+  } else if (update instanceof LocalUpdatePremiumFloodWait) { // Local updates
     sendApiUpdate({
       '@type': 'updatePremiumFloodWait',
       isUpload: update.isUpload,
