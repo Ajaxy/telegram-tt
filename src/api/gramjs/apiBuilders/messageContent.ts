@@ -36,6 +36,7 @@ import {
   buildApiFormattedText,
   buildApiMessageEntity,
   buildApiPhoto,
+  buildApiPhotoPreviewSizes,
   buildApiPhotoSize,
   buildApiThumbnailFromPath,
   buildApiThumbnailFromStripped,
@@ -205,6 +206,7 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
     .find((a): a is GramJs.DocumentAttributeAnimated => a instanceof GramJs.DocumentAttributeAnimated);
 
   const hasVideoPreview = videoThumbs?.some((thumb) => thumb instanceof GramJs.VideoSize && thumb.type === 'v');
+  const previewPhotoSizes = thumbs && buildApiPhotoPreviewSizes(thumbs);
 
   const {
     duration,
@@ -230,6 +232,7 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
     size: size.toJSNumber(),
     isSpoiler,
     hasVideoPreview,
+    previewPhotoSizes,
     ...(nosound && { noSound: true }),
   };
 }
@@ -389,14 +392,15 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
     id, size, mimeType, date, thumbs, attributes,
   } = document;
 
-  const photoSize = thumbs && thumbs.find((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
+  const photoSize = thumbs && thumbs.find((s): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
   let thumbnail = thumbs && buildApiThumbnailFromStripped(thumbs);
   if (!thumbnail && thumbs && photoSize) {
-    const photoPath = thumbs.find((s: any): s is GramJs.PhotoPathSize => s instanceof GramJs.PhotoPathSize);
+    const photoPath = thumbs.find((s): s is GramJs.PhotoPathSize => s instanceof GramJs.PhotoPathSize);
     if (photoPath) {
       thumbnail = buildApiThumbnailFromPath(photoPath, photoSize);
     }
   }
+  const previewPhotoSizes = thumbs && buildApiPhotoPreviewSizes(thumbs);
 
   let innerMediaType: ApiDocument['innerMediaType'] | undefined;
   let mediaSize: ApiDocument['mediaSize'] | undefined;
@@ -410,7 +414,7 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
       innerMediaType = 'photo';
 
       const imageAttribute = attributes
-        .find((a: any): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
+        .find((a): a is GramJs.DocumentAttributeImageSize => a instanceof GramJs.DocumentAttributeImageSize);
 
       if (imageAttribute) {
         const { w: width, h: height } = imageAttribute;
@@ -444,6 +448,7 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
     thumbnail,
     innerMediaType,
     mediaSize,
+    previewPhotoSizes,
   };
 }
 

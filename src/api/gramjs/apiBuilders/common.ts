@@ -95,6 +95,12 @@ export function buildApiPhoto(photo: GramJs.Photo, isSpoiler?: boolean): ApiPhot
   };
 }
 
+export function buildApiPhotoPreviewSizes(sizes: GramJs.TypePhotoSize[]): ApiPhotoSize[] {
+  return sizes.filter((s): s is GramJs.PhotoSize => (
+    s instanceof GramJs.PhotoSize || s instanceof GramJs.PhotoSizeProgressive
+  )).map(buildApiPhotoSize);
+}
+
 export function buildApiVideoSize(videoSize: GramJs.TypeVideoSize): ApiVideoSize | undefined {
   if (!(videoSize instanceof GramJs.VideoSize)) return undefined;
 

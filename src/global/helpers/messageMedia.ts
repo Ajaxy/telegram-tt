@@ -384,6 +384,9 @@ export function getStickerMediaHash(sticker: ApiSticker, target: Target) {
   switch (target) {
     case 'micro':
     case 'pictogram':
+      if (!sticker.previewPhotoSizes?.some((size) => size.type === 's')) {
+        return getStickerMediaHash(sticker, 'preview');
+      }
       return `${base}?size=s`;
     case 'preview':
       return `${base}?size=m`;
