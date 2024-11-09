@@ -148,6 +148,9 @@ export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 export const MESSAGE_CONTENT_CLASS_NAME = 'message-content';
 export const MESSAGE_CONTENT_SELECTOR = '.message-content';
 
+export const SNAP_EFFECT_CONTAINER_ID = 'snap-effect-container';
+export const SNAP_EFFECT_ID = 'snap-effect';
+
 export const STARS_ICON_PLACEHOLDER = '⭐';
 export const STARS_CURRENCY_CODE = 'XTR';
 

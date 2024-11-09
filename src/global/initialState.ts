@@ -29,6 +29,7 @@ export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
   rightColumnAnimations: true,
   stickerEffects: true,
   storyRibbonAnimations: true,
+  snapEffect: true,
 };
 
 export const INITIAL_PERFORMANCE_STATE_MID: PerformanceType = {
@@ -46,6 +47,7 @@ export const INITIAL_PERFORMANCE_STATE_MID: PerformanceType = {
   rightColumnAnimations: false,
   stickerEffects: false,
   storyRibbonAnimations: false,
+  snapEffect: false,
 };
 
 export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
@@ -63,6 +65,7 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
   rightColumnAnimations: false,
   stickerEffects: false,
   storyRibbonAnimations: false,
+  snapEffect: false,
 };
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {

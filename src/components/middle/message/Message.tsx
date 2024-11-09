@@ -157,6 +157,7 @@ import StarIcon from '../../common/icons/StarIcon';
 import MessageText from '../../common/MessageText';
 import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import TopicChip from '../../common/TopicChip';
+import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Button from '../../ui/Button';
 import Album from './Album';
 import AnimatedCustomEmoji from './AnimatedCustomEmoji';
@@ -443,6 +444,8 @@ const Message: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
 
   const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
+  const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
+  const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
   const { isMobile, isTouchScreen } = useAppLayout();
 
@@ -666,6 +669,17 @@ const Message: FC<OwnProps & StateProps> = ({
     }
   }, [focusLastMessage, isLastInList, transcribedText, withVoiceTranscription]);
 
+  useEffect(() => {
+    const element = ref.current;
+    if (message.isDeleting && element) {
+      if (animateSnap(element)) {
+        setIsPlayingSnapAnimation(true);
+      } else {
+        setIsPlayingDeleteAnimation(true);
+      }
+    }
+  }, [message.isDeleting]);
+
   const textMessage = album?.hasMultipleCaptions ? undefined : (album?.captionMessage || message);
   const hasTextContent = textMessage && hasMessageText(textMessage);
   const hasText = hasTextContent || hasFactCheck;
@@ -685,7 +699,8 @@ const Message: FC<OwnProps & StateProps> = ({
     isContextMenuOpen && 'has-menu-open',
     isFocused && !noFocusHighlight && 'focused',
     isForwarding && 'is-forwarding',
-    message.isDeleting && 'is-deleting',
+    isPlayingDeleteAnimation && 'is-deleting',
+    isPlayingSnapAnimation && 'is-dissolving',
     isInDocumentGroup && 'is-in-document-group',
     isAlbum && 'is-album',
     message.hasUnreadMention && 'has-unread-mention',

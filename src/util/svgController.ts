@@ -3,6 +3,8 @@ import generateUniqueId from './generateUniqueId';
 export const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
 const CONTAINER = document.createElementNS(SVG_NAMESPACE, 'svg');
+CONTAINER.setAttribute('width', '0');
+CONTAINER.setAttribute('height', '0');
 CONTAINER.setAttribute('viewBox', '0 0 1 1');
 CONTAINER.classList.add('svg-definitions');
 document.body.appendChild(CONTAINER);

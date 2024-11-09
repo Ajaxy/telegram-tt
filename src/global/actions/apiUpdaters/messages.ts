@@ -56,6 +56,7 @@ import {
 import { updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
 import {
+  selectCanAnimateSnapEffect,
   selectChat,
   selectChatLastMessageId,
   selectChatMessage,
@@ -85,6 +86,7 @@ import {
 } from '../../selectors';
 
 const ANIMATION_DELAY = 350;
+const SNAP_ANIMATION_DELAY = 1000;
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
@@ -1056,11 +1058,13 @@ export function deleteMessages<T extends GlobalState>(
 
     setGlobal(global);
 
+    const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+
     setTimeout(() => {
       global = getGlobal();
       global = deleteChatMessages(global, chatId, ids);
       setGlobal(global);
-    }, ANIMATION_DELAY);
+    }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
 
     return;
   }
@@ -1099,11 +1103,13 @@ export function deleteMessages<T extends GlobalState>(
         global = deletePeerPhoto(global, commonBoxChatId, message.content.action.photo.id, true);
       }
 
+      const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+
       setTimeout(() => {
         global = getGlobal();
         global = deleteChatMessages(global, commonBoxChatId, [id]);
         setGlobal(global);
-      }, ANIMATION_DELAY);
+      }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
     }
   });
 
@@ -1129,6 +1135,8 @@ function deleteScheduledMessages<T extends GlobalState>(
 
   setGlobal(global);
 
+  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+
   setTimeout(() => {
     global = getGlobal();
     global = deleteChatScheduledMessages(global, chatId, ids);
@@ -1137,5 +1145,5 @@ function deleteScheduledMessages<T extends GlobalState>(
       global, chatId, MAIN_THREAD_ID, 'scheduledIds', Object.keys(scheduledMessages || {}).map(Number),
     );
     setGlobal(global);
-  }, ANIMATION_DELAY);
+  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
 }

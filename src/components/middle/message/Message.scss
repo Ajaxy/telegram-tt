@@ -268,6 +268,10 @@
     }
   }
 
+  &.is-dissolving {
+    visibility: hidden;
+  }
+
   &.is-story-mention {
     --background-color: var(--pattern-color);
 

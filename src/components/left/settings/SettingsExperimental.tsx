@@ -1,13 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { DEBUG_LOG_FILENAME } from '../../../config';
 import { getDebugLogs } from '../../../util/debugConsole';
 import download from '../../../util/download';
-import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/windowEnvironment';
+import { IS_ELECTRON, IS_SNAP_EFFECT_SUPPORTED, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -15,6 +15,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
+import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -39,6 +40,11 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
   shouldDebugExportedSenders,
 }) => {
   const { requestConfetti, setSettingOption, requestWave } = getActions();
+
+  // eslint-disable-next-line no-null/no-null
+  const snapButtonRef = useRef<HTMLDivElement>(null);
+  const [isSnapButtonAnimating, setIsSnapButtonAnimating] = useState(false);
+
   const lang = useOldLang();
 
   const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(false);
@@ -63,6 +69,19 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
 
   const handleRequestWave = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     requestWave({ startX: e.clientX, startY: e.clientY });
+  });
+
+  const handleSnap = useLastCallback(() => {
+    const button = snapButtonRef.current;
+    if (!button) return;
+
+    if (animateSnap(button)) {
+      setIsSnapButtonAnimating(true);
+      // Manual reset for debug
+      setTimeout(() => {
+        setIsSnapButtonAnimating(false);
+      }, 1500);
+    }
   });
 
   return (
@@ -91,6 +110,15 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
           disabled={!IS_WAVE_TRANSFORM_SUPPORTED}
         >
           <div className="title">Start wave</div>
+        </ListItem>
+        <ListItem
+          ref={snapButtonRef}
+          onClick={handleSnap}
+          icon="spoiler"
+          disabled={!IS_SNAP_EFFECT_SUPPORTED}
+          style={isSnapButtonAnimating ? 'visibility: hidden' : ''}
+        >
+          <div className="title">Vaporize this button</div>
         </ListItem>
 
         <Checkbox
