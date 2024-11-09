@@ -12,7 +12,7 @@ import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import Transition from '../../ui/Transition';
 
-import styles from './ReadTimeMenuItem.module.scss';
+import styles from './TimeMenuItem.module.scss';
 
 type OwnProps = {
   message: ApiMessage;

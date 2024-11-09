@@ -37,6 +37,7 @@ import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/placeholder/Skeleton';
+import LastEditTimeMenuItem from './LastEditTimeMenuItem';
 import ReactionSelector from './reactions/ReactionSelector';
 import ReadTimeMenuItem from './ReadTimeMenuItem';
 
@@ -234,6 +235,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   const noReactions = !isPrivate && !enabledReactions;
   const withReactions = canShowReactionList && !noReactions;
   const isSponsoredMessage = !('id' in message);
+  const isEdited = ('isEdited' in message) && message.isEdited;
   const messageId = !isSponsoredMessage ? message.id : '';
   const seenByDates = !isSponsoredMessage ? message.seenByDates : undefined;
 
@@ -480,6 +482,11 @@ const MessageContextMenu: FC<OwnProps> = ({
             <MenuSeparator />
             <MenuItem icon="close-circle" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
           </>
+        )}
+        {isEdited && (
+          <LastEditTimeMenuItem
+            message={message}
+          />
         )}
         {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
           <>
