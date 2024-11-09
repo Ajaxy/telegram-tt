@@ -346,6 +346,7 @@ export const INITIAL_TAB_STATE: TabState = {
     sessionKeys: [],
     modalState: 'maximized',
     isModalOpen: false,
+    isMoreAppsTabActive: false,
   },
 
   globalSearch: {},

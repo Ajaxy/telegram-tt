@@ -888,6 +888,43 @@ addActionHandler('closeActiveWebApp', (global, actions, payload): ActionReturnTy
   return global;
 });
 
+addActionHandler('openMoreAppsTab', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+  global = updateTabState(global, {
+    webApps: {
+      ...tabState.webApps,
+      activeWebApp: undefined,
+      isMoreAppsTabActive: true,
+    },
+  }, tabId);
+
+  return global;
+});
+
+addActionHandler('closeMoreAppsTab', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+
+  const openedWebApps = tabState.webApps.openedWebApps;
+
+  const openedWebAppsValues = Object.values(openedWebApps);
+  const openedWebAppsCount = openedWebAppsValues.length;
+
+  global = updateTabState(global, {
+    webApps: {
+      ...tabState.webApps,
+      isMoreAppsTabActive: false,
+      activeWebApp: openedWebAppsCount ? openedWebAppsValues[openedWebAppsCount - 1] : undefined,
+      isModalOpen: openedWebAppsCount > 0,
+    },
+  }, tabId);
+
+  return global;
+});
+
 addActionHandler('closeWebApp', (global, actions, payload): ActionReturnType => {
   const { webApp, skipClosingConfirmation, tabId = getCurrentTabId() } = payload || {};
 

@@ -67,7 +67,7 @@ const MinimizedWebAppModal = ({
   if (!isMinimizedState) return undefined;
 
   function renderTitle() {
-    const activeTabName = activeTabBot?.firstName;
+    const activeTabName = peers.length > 0 && peers[0]?.firstName;
     const title = openedTabsCount && activeTabName && openedTabsCount > 1
       ? `${lang('MiniAppsMoreTabs',
         {

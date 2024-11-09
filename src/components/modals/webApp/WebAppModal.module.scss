@@ -161,7 +161,7 @@
   padding-left: 1rem;
   padding-right: 1rem;
 
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 500;
   text-overflow: ellipsis;
 
@@ -220,11 +220,17 @@
   transform: scaleX(-1);
 }
 
+.more-apps-tab-icon,
 .avatar-container {
   position: relative;
   display: flex;
   align-items: center;
   margin-right: 0.5rem;
+}
+
+.more-apps-tab-icon {
+  font-size: 1.5rem;
+  color: var(--color-text-secondary);
 }
 
 .web-app-tab-more-menu {
@@ -255,6 +261,7 @@
   transform: translate(-50%, -50%);
 }
 
+.more-apps-button,
 .window-state-button,
 .header-button {
   width: 1.75rem !important;

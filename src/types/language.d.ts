@@ -1141,6 +1141,10 @@ export interface LangPair {
   'StarGiftAvailability': undefined;
   'StarsSubscribeInfoLinkText': undefined;
   'StarsSubscribeInfoLink': undefined;
+  'OpenApp': undefined;
+  'PopularApps': undefined;
+  'SearchApps': undefined;
+  'Apps': undefined;
   'AreYouSureCloseMiniApps': undefined;
   'CloseMiniApps': undefined;
   'DoNotAskAgain': undefined;

@@ -90,6 +90,7 @@ export function activateWebAppIfOpen<T extends GlobalState>(
   global = updateTabState(global, {
     webApps: {
       ...currentTabState.webApps,
+      isMoreAppsTabActive: false,
       activeWebApp: newActiveWebApp,
       modalState: 'maximized',
     },
@@ -120,6 +121,7 @@ export function addWebAppToOpenList<T extends GlobalState>(
     webApps: {
       ...currentTabState.webApps,
       ...makeActive && { activeWebApp: webApp },
+      isMoreAppsTabActive: false,
       isModalOpen: openModalIfNotOpen,
       modalState: 'maximized',
       openedWebApps: {
@@ -234,6 +236,7 @@ export function clearOpenedWebApps<T extends GlobalState>(
     webApps: {
       ...currentTabState.webApps,
       activeWebApp: newActiveWebApp,
+      isMoreAppsTabActive: false,
       openedWebApps: webAppsNotAllowedToClose,
       openedOrderedKeys: newOpenedKeys,
     },

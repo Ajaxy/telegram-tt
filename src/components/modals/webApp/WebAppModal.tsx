@@ -26,6 +26,7 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useDraggable from '../../../hooks/useDraggable';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -37,6 +38,7 @@ import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import Modal from '../../ui/Modal';
 import MinimizedWebAppModal from './MinimizedWebAppModal';
+import MoreAppsTabContent from './MoreAppsTabContent';
 import WebAppModalTabContent from './WebAppModalTabContent';
 
 import styles from './WebAppModal.module.scss';
@@ -77,6 +79,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     changeWebAppModalState,
     openWebAppTab,
     updateWebApp,
+    openMoreAppsTab,
+    closeMoreAppsTab,
   } = getActions();
 
   const maximizedStateSize = useMemo(() => {
@@ -94,7 +98,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   }
 
   const {
-    openedWebApps, activeWebApp, openedOrderedKeys, sessionKeys,
+    openedWebApps, activeWebApp, openedOrderedKeys, sessionKeys, isMoreAppsTabActive,
   } = modal || {};
   const {
     isBackButtonVisible, headerColor, backgroundColor, isSettingsButtonVisible,
@@ -168,7 +172,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     }
   }, [currentWidth, currentHeight, isMaximizedState, minimizedStateSize, setFrameSize]);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const {
     queryId,
   } = activeWebApp || {};
@@ -229,6 +234,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     closeWebAppModal();
   });
 
+  const handleCloseMoreAppsTab = useLastCallback(() => {
+    closeMoreAppsTab();
+  });
+
   const handleTabClose = useLastCallback(() => {
     if (openTabsCount > 1) {
       closeActiveWebApp();
@@ -268,6 +277,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     changeWebAppModalState();
   });
 
+  const handleOpenMoreAppsTabClick = useLastCallback(() => {
+    openMoreAppsTab();
+  });
+
   const handleTabClick = useLastCallback((tab: WebAppModalTab) => {
     openWebAppTab({ webApp: tab.webApp });
   });
@@ -304,12 +317,12 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     return (
       <>
         {chat && bot && chat.id !== bot.id && (
-          <MenuItem icon="bots" onClick={openBotChat}>{lang('BotWebViewOpenBot')}</MenuItem>
+          <MenuItem icon="bots" onClick={openBotChat}>{oldLang('BotWebViewOpenBot')}</MenuItem>
         )}
-        <MenuItem icon="reload" onClick={handleRefreshClick}>{lang('WebApp.ReloadPage')}</MenuItem>
+        <MenuItem icon="reload" onClick={handleRefreshClick}>{oldLang('WebApp.ReloadPage')}</MenuItem>
         {isSettingsButtonVisible && (
           <MenuItem icon="settings" onClick={handleSettingsButtonClick}>
-            {lang('Settings')}
+            {oldLang('Settings')}
           </MenuItem>
         )}
         {bot?.isAttachBot && (
@@ -318,7 +331,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             onClick={handleToggleClick}
             destructive={Boolean(attachBot)}
           >
-            {lang(attachBot ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
+            {oldLang(attachBot ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
           </MenuItem>
         )}
       </>
@@ -368,12 +381,13 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   );
 
   const headerTextVar = useMemo(() => {
+    if (isMoreAppsTabActive) return 'color-text';
     if (!headerColor) return undefined;
     const { r, g, b } = hexToRgb(headerColor);
     const luma = getColorLuma([r, g, b]);
     const adaptedLuma = theme === 'dark' ? 255 - luma : luma;
     return adaptedLuma > LUMA_THRESHOLD ? 'color-text' : 'color-background';
-  }, [headerColor, theme]);
+  }, [headerColor, theme, isMoreAppsTabActive]);
 
   function renderTabCurveBorder(className: string) {
     return (
@@ -422,7 +436,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             round
             color="translucent"
             size="tiny"
-            ariaLabel={lang('Close')}
+            ariaLabel={oldLang('Close')}
             onClick={handleTabClose}
           >
             <Icon className={styles.tabCloseIcon} name="close" />
@@ -430,6 +444,53 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         </div>
         {renderTabCurveBorder(styles.tabButtonRightCurve)}
       </div>
+    );
+  }
+
+  function renderMoreAppsTab() {
+    return (
+      <div
+        className={styles.tabButtonWrapper}
+      >
+        {renderTabCurveBorder(styles.tabButtonLeftCurve)}
+        <div
+          className={styles.tabButton}
+        >
+          <div className={styles.moreAppsTabIcon}>
+            <Icon className={styles.icon} name="add" />
+          </div>
+          {lang('OpenApp')}
+          <div className={styles.tabRightMask} />
+          <Button
+            className={styles.tabCloseButton}
+            round
+            color="translucent"
+            size="tiny"
+            ariaLabel={oldLang('Close')}
+            onClick={handleCloseMoreAppsTab}
+          >
+            <Icon className={styles.tabCloseIcon} name="close" />
+          </Button>
+        </div>
+        {renderTabCurveBorder(styles.tabButtonRightCurve)}
+      </div>
+    );
+  }
+
+  function renderMoreAppsButton() {
+    return (
+      <Button
+        className={buildClassName(
+          styles.moreAppsButton,
+          'no-drag',
+        )}
+        round
+        color="translucent"
+        size="tiny"
+        onClick={handleOpenMoreAppsTabClick}
+      >
+        <Icon className={styles.icon} name="add" />
+      </Button>
     );
   }
 
@@ -456,6 +517,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             />
           )
         ))}
+        {isMoreAppsTabActive && renderMoreAppsTab()}
+        {!isMoreAppsTabActive && renderMoreAppsButton()}
       </div>
     );
   }
@@ -488,22 +551,13 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           round
           color="translucent"
           size="tiny"
-          ariaLabel={lang(isBackButtonVisible ? 'Back' : 'Close')}
+          ariaLabel={oldLang(isBackButtonVisible ? 'Back' : 'Close')}
           onClick={handleBackClick}
         >
           <div className={backButtonClassName} />
         </Button>
         {renderTabs()}
         {renderMoreMenu()}
-
-        {/* <Button
-          round
-          color="translucent"
-          size="tiny"
-        >
-          <Icon className={styles.icon} name="add" />
-        </Button>
-        */}
 
         <Button
           className={buildClassName(
@@ -534,13 +588,13 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           round
           color="translucent"
           size="smaller"
-          ariaLabel={lang(isBackButtonVisible ? 'Back' : 'Close')}
+          ariaLabel={oldLang(isBackButtonVisible ? 'Back' : 'Close')}
           onClick={handleBackClick}
         >
           <div className={backButtonClassName} />
         </Button>
         <div className="modal-title">{attachBot?.shortName ?? bot?.firstName}</div>
-        {renderDropdownMoreMenu()}
+        {!isMoreAppsTabActive && renderDropdownMoreMenu()}
       </div>
     );
   }
@@ -574,6 +628,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           isMultiTabSupported={supportMultiTabMode}
         />
       ))}
+      { isMoreAppsTabActive && (<MoreAppsTabContent />)}
     </Modal>
   );
 };

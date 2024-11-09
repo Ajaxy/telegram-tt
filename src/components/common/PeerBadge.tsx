@@ -18,6 +18,8 @@ type OwnProps = {
   badgeIcon?: IconName;
   className?: string;
   badgeClassName?: string;
+  badgeIconClassName?: string;
+  textClassName?: string;
   onClick?: NoneToVoidFunction;
 };
 
@@ -28,6 +30,8 @@ const PeerBadge = ({
   badgeIcon,
   className,
   badgeClassName,
+  badgeIconClassName,
+  textClassName,
   onClick,
 }: OwnProps) => {
   return (
@@ -39,12 +43,12 @@ const PeerBadge = ({
         <Avatar size="large" peer={peer} />
         {badgeText && (
           <div className={buildClassName(styles.badge, badgeClassName)}>
-            {badgeIcon && <Icon name={badgeIcon} />}
+            {badgeIcon && <Icon name={badgeIcon} className={badgeIconClassName} />}
             {badgeText}
           </div>
         )}
       </div>
-      {text && <p className={styles.text}>{text}</p>}
+      {text && <p className={buildClassName(styles.text, textClassName)}>{text}</p>}
     </div>
   );
 };

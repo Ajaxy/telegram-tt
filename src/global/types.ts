@@ -697,6 +697,7 @@ export type TabState = {
     openedWebApps: Record<string, WebApp>;
     modalState : WebAppModalStateType;
     isModalOpen: boolean;
+    isMoreAppsTabActive: boolean;
   };
 
   botTrustRequest?: {
@@ -3241,6 +3242,8 @@ export interface ActionPayloads {
     usernames: string[];
   };
   closeActiveWebApp: WithTabId | undefined;
+  openMoreAppsTab: WithTabId | undefined;
+  closeMoreAppsTab: WithTabId | undefined;
   closeWebApp: {
     webApp: WebApp;
     skipClosingConfirmation?: boolean;
