@@ -10,13 +10,13 @@ import {
   getMessageWebPage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { formatPastTimeShort } from '../../util/date/dateFormat';
+import { formatPastTimeShort } from '../../util/dates/dateFormat';
 import trimText from '../../util/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Link from '../ui/Link';
 import Media from './Media';
@@ -31,7 +31,7 @@ type OwnProps = {
   senderTitle?: string;
   isProtected?: boolean;
   observeIntersection?: ObserveFn;
-  onMessageClick: (messageId: number, chatId: string) => void;
+  onMessageClick: (message: ApiMessage) => void;
 };
 
 type ApiWebPageWithFormatted =
@@ -41,7 +41,7 @@ type ApiWebPageWithFormatted =
 const WebLink: FC<OwnProps> = ({
   message, senderTitle, isProtected, observeIntersection, onMessageClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   let linkData: ApiWebPageWithFormatted | undefined = getMessageWebPage(message);
 
@@ -61,7 +61,7 @@ const WebLink: FC<OwnProps> = ({
   }
 
   const handleMessageClick = useLastCallback(() => {
-    onMessageClick(message.id, message.chatId);
+    onMessageClick(message);
   });
 
   if (!linkData) {

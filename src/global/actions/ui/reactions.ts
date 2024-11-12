@@ -1,9 +1,11 @@
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { getMessageKey } from '../../../util/keys/messageKey';
 import { addActionHandler } from '../../index';
+import { updateChatMessage } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectTabState } from '../../selectors';
+import { selectChatMessage, selectTabState } from '../../selectors';
 
 addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
   const {
@@ -32,7 +34,7 @@ addActionHandler('openMessageReactionPicker', (global, actions, payload): Action
     messageId,
     position,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   return updateTabState(global, {
     reactionPicker: {
@@ -50,7 +52,7 @@ addActionHandler('openStoryReactionPicker', (global, actions, payload): ActionRe
     position,
     sendAsMessage,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   return updateTabState(global, {
     reactionPicker: {
@@ -58,6 +60,22 @@ addActionHandler('openStoryReactionPicker', (global, actions, payload): ActionRe
       storyId,
       sendAsMessage,
       position,
+    },
+  }, tabId);
+});
+
+addActionHandler('openEffectPicker', (global, actions, payload): ActionReturnType => {
+  const {
+    position,
+    chatId,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    reactionPicker: {
+      position,
+      chatId,
+      isForEffects: true,
     },
   }, tabId);
 });
@@ -73,6 +91,49 @@ addActionHandler('closeReactionPicker', (global, actions, payload): ActionReturn
       position: undefined,
       storyId: undefined,
       storyPeerId: undefined,
+      isForEffects: undefined,
     },
   }, tabId);
+});
+
+addActionHandler('resetLocalPaidReactions', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId } = payload;
+  const message = selectChatMessage(global, chatId, messageId);
+  if (!message) {
+    return undefined;
+  }
+
+  const { reactions } = message;
+
+  if (!reactions) {
+    return undefined;
+  }
+
+  const updatedResults = reactions.results.map((reaction) => {
+    if (reaction.localAmount) {
+      if (!reaction.count) return undefined;
+      return {
+        ...reaction,
+        localAmount: undefined,
+        localPreviousChosenOrder: undefined,
+        chosenOrder: reaction.localPreviousChosenOrder,
+      };
+    }
+    return reaction;
+  }).filter(Boolean);
+
+  Object.values(global.byTabId)
+    .forEach(({ id: tabId }) => {
+      actions.dismissNotification({
+        localId: getMessageKey(message),
+        tabId,
+      });
+    });
+
+  return updateChatMessage(global, chatId, messageId, {
+    reactions: {
+      ...reactions,
+      results: updatedResults,
+    },
+  });
 });

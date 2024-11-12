@@ -11,8 +11,8 @@ import { selectChat, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
@@ -47,7 +47,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     hideChatReportPanel,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
   const [shouldReportSpam, setShouldReportSpam] = useState<boolean>(true);
   const [shouldDeleteChat, setShouldDeleteChat] = useState<boolean>(true);

@@ -281,7 +281,7 @@
     }
   }
 
-  .Avatar, .topic-header-icon {
+  .ChatInfo .Avatar, .topic-header-icon {
     // TODO For some reason webpack imports `Audio.scss` second time when loading calls bundle
     width: 2.5rem !important;
     height: 2.5rem !important;

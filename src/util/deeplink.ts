@@ -22,12 +22,22 @@ export const processDeepLink = (url: string): boolean => {
           username: parsedLink.username,
           startParam: parsedLink.start,
           text: parsedLink.text,
+          startApp: parsedLink.startApp,
+          startAttach: parsedLink.startAttach,
+          attach: parsedLink.attach,
+          originalParts: [parsedLink.username, parsedLink.appName],
         });
         return true;
       case 'businessChatLink':
         actions.resolveBusinessChatLink({
           slug: parsedLink.slug,
         });
+        return true;
+      case 'premiumReferrerLink':
+        actions.openPremiumModal();
+        return true;
+      case 'premiumMultigiftLink':
+        actions.openGiftRecipientPicker();
         return true;
       default:
         break;
@@ -49,7 +59,7 @@ export const processDeepLink = (url: string): boolean => {
   const params = Object.fromEntries(searchParams);
 
   const {
-    openChatByInvite,
+    checkChatInvite,
     openChatByUsername,
     openChatByPhoneNumber,
     openStickerSet,
@@ -61,6 +71,7 @@ export const processDeepLink = (url: string): boolean => {
     openStoryViewerByUsername,
     processBoostParameters,
     checkGiftCode,
+    openStarsBalanceModal,
   } = actions;
 
   switch (method) {
@@ -129,7 +140,7 @@ export const processDeepLink = (url: string): boolean => {
     case 'join': {
       const { invite } = params;
 
-      openChatByInvite({ hash: invite });
+      checkChatInvite({ hash: invite });
       break;
     }
     case 'addemoji':
@@ -163,6 +174,15 @@ export const processDeepLink = (url: string): boolean => {
     case 'invoice': {
       const { slug } = params;
       openInvoice({ type: 'slug', slug });
+      break;
+    }
+
+    case 'stars_topup': {
+      const { balance, purpose } = params;
+      const balanceNeeded = Number(balance);
+      if (!balanceNeeded || balanceNeeded < 0) return true;
+
+      openStarsBalanceModal({ topup: { balanceNeeded, purpose } });
       break;
     }
 

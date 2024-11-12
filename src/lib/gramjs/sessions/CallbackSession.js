@@ -29,13 +29,14 @@ class CallbackSession extends MemorySession {
             mainDcId,
             keys,
             hashes,
+            isTest,
         } = this._sessionData;
         const {
             ipAddress,
             port,
         } = utils.getDC(mainDcId);
 
-        this.setDC(mainDcId, ipAddress, port, true);
+        this.setDC(mainDcId, ipAddress, port, isTest, true);
 
         await Promise.all(Object.keys(keys)
             .map(async (dcId) => {
@@ -56,10 +57,11 @@ class CallbackSession extends MemorySession {
             }));
     }
 
-    setDC(dcId, serverAddress, port, skipOnUpdate = false) {
+    setDC(dcId, serverAddress, port, isTestServer, skipOnUpdate = false) {
         this._dcId = dcId;
         this._serverAddress = serverAddress;
         this._port = port;
+        this._isTestServer = isTestServer;
 
         delete this._authKeys[dcId];
 
@@ -83,6 +85,7 @@ class CallbackSession extends MemorySession {
             mainDcId: this._dcId,
             keys: {},
             hashes: {},
+            isTest: this._isTestServer || undefined,
         };
 
         Object

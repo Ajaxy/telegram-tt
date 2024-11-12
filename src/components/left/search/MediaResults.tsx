@@ -9,12 +9,13 @@ import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
+import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Media from '../../common/Media';
@@ -47,7 +48,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { observe: observeIntersectionForMedia } = useIntersectionObserver({
     rootRef: containerRef,
@@ -71,16 +72,16 @@ const MediaResults: FC<OwnProps & StateProps> = ({
     }
 
     return foundIds.map((id) => {
-      const [chatId, messageId] = id.split('_');
+      const [chatId, messageId] = parseSearchResultKey(id);
 
-      return globalMessagesByChatId[chatId]?.byId[Number(messageId)];
+      return globalMessagesByChatId[chatId]?.byId[messageId];
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
   const handleSelectMedia = useCallback((id: number, chatId: string) => {
     openMediaViewer({
       chatId,
-      mediaId: id,
+      messageId: id,
       origin: MediaViewerOrigin.SearchResult,
     });
   }, [openMediaViewer]);
@@ -122,10 +123,10 @@ const MediaResults: FC<OwnProps & StateProps> = ({
   );
 
   return (
-    <div ref={containerRef} className="LeftSearch">
+    <div ref={containerRef} className="LeftSearch--content LeftSearch--media">
       <InfiniteScroll
         className={classNames}
-        items={foundMessages}
+        items={canRenderContents ? foundMessages : undefined}
         itemSelector={!searchQuery ? '.Media' : '.ListItem'}
         onLoadMore={handleLoadMore}
         noFastList

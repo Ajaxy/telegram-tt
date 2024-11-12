@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiChatFullInfo, ApiChatType, ApiPeer,
+  ApiChat, ApiChatFullInfo, ApiChatType,
 } from '../../api/types';
 import type { ChatListType, GlobalState, TabArgs } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -24,10 +24,6 @@ import {
   selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
 } from './users';
 
-export function selectPeer<T extends GlobalState>(global: T, peerId: string): ApiPeer | undefined {
-  return selectUser(global, peerId) || selectChat(global, peerId);
-}
-
 export function selectChat<T extends GlobalState>(global: T, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];
 }
@@ -39,6 +35,12 @@ export function selectChatFullInfo<T extends GlobalState>(global: T, chatId: str
 export function selectPeerFullInfo<T extends GlobalState>(global: T, peerId: string) {
   if (isUserId(peerId)) return selectUserFullInfo(global, peerId);
   return selectChatFullInfo(global, peerId);
+}
+
+export function selectChatListLoadingParameters<T extends GlobalState>(
+  global: T, listType: ChatListType,
+) {
+  return global.chats.loadingParameters[listType];
 }
 
 export function selectChatUser<T extends GlobalState>(global: T, chat: ApiChat) {
@@ -87,23 +89,22 @@ export function selectChatOnlineCount<T extends GlobalState>(global: T, chat: Ap
 }
 
 export function selectIsTrustedBot<T extends GlobalState>(global: T, botId: string) {
-  const bot = selectUser(global, botId);
-  return bot && (bot.isVerified || global.trustedBotIds.includes(botId));
+  return global.trustedBotIds.includes(botId);
 }
 
 export function selectChatType<T extends GlobalState>(global: T, chatId: string) : ApiChatType | undefined {
-  const chat = selectChat(global, chatId);
-  if (!chat) return undefined;
-
   const bot = selectBot(global, chatId);
   if (bot) {
     return 'bots';
   }
 
-  const user = selectChatUser(global, chat);
+  const user = selectUser(global, chatId);
   if (user) {
     return 'users';
   }
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
 
   if (isChatChannel(chat)) {
     return 'channels';

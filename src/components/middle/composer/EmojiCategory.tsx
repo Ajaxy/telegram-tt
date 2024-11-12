@@ -10,8 +10,8 @@ import { REM } from '../../common/helpers/mediaDimensions';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
-import useMediaTransition from '../../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
+import useOldLang from '../../../hooks/useOldLang';
 
 import EmojiButton from './EmojiButton';
 
@@ -38,9 +38,9 @@ const EmojiCategory: FC<OwnProps> = ({
 
   useOnIntersect(ref, observeIntersection);
 
-  const transitionClassNames = useMediaTransition(shouldRender);
+  const transitionClassNames = useMediaTransitionDeprecated(shouldRender);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   const emojisPerRow = isMobile

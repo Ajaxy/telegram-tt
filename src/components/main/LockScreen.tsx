@@ -6,13 +6,13 @@ import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
-import { decryptSession } from '../../util/passcode';
+import { decryptSession, UnrecoverablePasscodeError } from '../../util/passcode';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useOldLang from '../../hooks/useOldLang';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import PasswordForm from '../common/PasswordForm';
@@ -51,11 +51,11 @@ const LockScreen: FC<OwnProps & StateProps> = ({
     isLoading,
   } = passcodeSettings;
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [validationError, setValidationError] = useState<string>('');
   const [shouldShowPasscode, setShouldShowPasscode] = useState(false);
   const [isSignOutDialogOpen, openSignOutConfirmation, closeSignOutConfirmation] = useFlag(false);
-  const { shouldRender } = useShowTransition(isLocked);
+  const { shouldRender } = useShowTransitionDeprecated(isLocked);
 
   useTimeout(resetInvalidUnlockAttempts, timeoutUntil ? timeoutUntil - Date.now() : undefined);
 
@@ -70,7 +70,11 @@ const LockScreen: FC<OwnProps & StateProps> = ({
     }
 
     setValidationError('');
-    decryptSession(passcode).then(unlockScreen, () => {
+    decryptSession(passcode).then(unlockScreen, (err) => {
+      if (err instanceof UnrecoverablePasscodeError) {
+        signOut({ forceInitApi: true });
+      }
+
       logInvalidUnlockAttempt();
       setValidationError(lang('lng_passcode_wrong'));
     });

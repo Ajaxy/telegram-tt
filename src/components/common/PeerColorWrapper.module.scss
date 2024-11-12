@@ -1,0 +1,22 @@
+.root {
+  position: relative;
+  overflow: hidden;
+
+  padding-inline-start: 0.5rem;
+
+  border-radius: 0.25rem;
+
+  background-color: var(--accent-background-color);
+  color: var(--accent-color);
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    width: 0.1875rem;
+    background: var(--bar-gradient, var(--accent-color));
+  }
+}

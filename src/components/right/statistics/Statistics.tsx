@@ -25,7 +25,7 @@ import buildClassName from '../../../util/buildClassName';
 import { callApi } from '../../../api/gramjs';
 
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';
@@ -94,7 +94,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
   messagesById,
   storiesById,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);

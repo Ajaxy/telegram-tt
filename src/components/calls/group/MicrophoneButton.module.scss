@@ -36,16 +36,10 @@
   opacity: 1;
 }
 
-.canUnmute::before {
+.mutedByAdmin::before, .canUnmute::before {
   opacity: 1;
   transform: rotate(0deg);
 }
-
-.mutedByAdmin::after {
-  opacity: 1;
-  transform: rotate(0deg);
-}
-
 
 .icon {
   z-index: 1;

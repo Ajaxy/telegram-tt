@@ -25,15 +25,15 @@
   transform:
     perspective(200px)
     translate3d(
-        calc(var(--scroll-progress-converted) * -30%),
-        calc(var(--y-static) + var(--abs-scroll-progress-converted) * var(--y-dynamic)),
-        0
+      calc(var(--scroll-progress-converted) * -30%),
+      calc(var(--y-static) + var(--abs-scroll-progress-converted) * var(--y-dynamic)),
+      0
     )
     rotateY(calc(var(--scroll-progress-converted) * 40deg));
   opacity: calc(1 - var(--abs-scroll-progress-converted) * 0.4);
 
   @supports not (aspect-ratio: 1) {
-    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.005, 0, -342.2, 0, 1)
+    transform: matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.005, 0, -342.2, 0, 1);
   }
 }
 

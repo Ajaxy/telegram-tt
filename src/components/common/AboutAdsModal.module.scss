@@ -1,0 +1,19 @@
+.root :global(.modal-dialog) {
+  width: 26.25rem;
+}
+
+.title, .description {
+  text-align: center !important;
+  text-wrap: pretty;
+  padding-inline: 1.5rem;
+}
+
+.secondary {
+  color: var(--color-text-secondary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

@@ -11,7 +11,7 @@ import type {
 
 import { buildApiBotInfo } from './bots';
 import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHours } from './business';
-import { buildApiPhoto, buildApiUsernames } from './common';
+import { buildApiPhoto, buildApiUsernames, buildAvatarPhotoId } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
@@ -22,7 +22,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       profilePhoto, voiceMessagesForbidden, premiumGifts,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
-      birthday, personalChannelId, personalChannelMessage,
+      birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount,
     },
     users,
   } = mtpUserFull;
@@ -49,6 +49,8 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     businessIntro: businessIntro && buildApiBusinessIntro(businessIntro),
     personalChannelId: personalChannelId && buildApiPeerId(personalChannelId, 'channel'),
     personalChannelMessageId: personalChannelMessage,
+    areAdsEnabled: sponsoredEnabled,
+    starGiftCount: stargiftsCount,
   };
 }
 
@@ -59,13 +61,10 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
 
   const {
     id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
+    bot, botActiveUsers, botInlinePlaceholder, botAttachMenu, botCanEdit,
   } = mtpUser;
-  const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
-    ? Boolean(mtpUser.photo.hasVideo)
-    : undefined;
-  const avatarHash = mtpUser.photo instanceof GramJs.UserProfilePhoto
-    ? String(mtpUser.photo.photoId)
-    : undefined;
+  const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto ? Boolean(mtpUser.photo.hasVideo) : undefined;
+  const avatarPhotoId = mtpUser.photo && buildAvatarPhotoId(mtpUser.photo);
   const userType = buildApiUserType(mtpUser);
   const usernames = buildApiUsernames(mtpUser);
   const emojiStatus = mtpUser.emojiStatus ? buildApiEmojiStatus(mtpUser.emojiStatus) : undefined;
@@ -83,20 +82,22 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     type: userType,
     firstName,
     lastName,
-    canEditBot: Boolean(mtpUser.botCanEdit),
+    hasMainMiniApp: Boolean(mtpUser.botHasMainApp),
+    canEditBot: botCanEdit,
     ...(userType === 'userTypeBot' && { canBeInvitedToGroup: !mtpUser.botNochats }),
     ...(usernames && { usernames }),
     phoneNumber: mtpUser.phone || '',
     noStatus: !mtpUser.status,
     ...(mtpUser.accessHash && { accessHash: String(mtpUser.accessHash) }),
-    ...(avatarHash && { avatarHash }),
+    avatarPhotoId,
     emojiStatus,
     hasVideoAvatar,
     areStoriesHidden: Boolean(mtpUser.storiesHidden),
     maxStoryId: storiesMaxId,
     hasStories: Boolean(storiesMaxId) && !storiesUnavailable,
-    ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
-    ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachBot: mtpUser.botAttachMenu }),
+    ...(bot && botInlinePlaceholder && { botPlaceholder: botInlinePlaceholder }),
+    ...(bot && botAttachMenu && { isAttachBot: botAttachMenu }),
+    botActiveUsers,
     color: mtpUser.color && buildApiPeerColor(mtpUser.color),
   };
 }
@@ -128,27 +129,16 @@ export function buildApiUserStatus(mtpStatus?: GramJs.TypeUserStatus): ApiUserSt
   }
 }
 
-export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {
+export function buildApiUserStatuses(mtpUsers: GramJs.TypeUser[]) {
   const userStatusesById: Record<string, ApiUserStatus> = {};
-  const usersById: Record<string, ApiUser> = {};
-
   mtpUsers.forEach((mtpUser) => {
-    const user = buildApiUser(mtpUser);
-    if (!user) {
-      return;
-    }
-
-    const duplicateUser = usersById[user.id];
-    if (!duplicateUser || duplicateUser.isMin) {
-      usersById[user.id] = user;
-    }
-
     if ('status' in mtpUser) {
-      userStatusesById[user.id] = buildApiUserStatus(mtpUser.status);
+      const userId = buildApiPeerId(mtpUser.id, 'user');
+      userStatusesById[userId] = buildApiUserStatus(mtpUser.status);
     }
   });
 
-  return { users: Object.values(usersById), userStatusesById };
+  return userStatusesById;
 }
 
 export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption): ApiPremiumGiftOption {

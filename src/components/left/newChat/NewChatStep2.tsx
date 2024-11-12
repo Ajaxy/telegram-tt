@@ -11,7 +11,7 @@ import { getUserFirstOrLastName } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import AvatarEditable from '../../ui/AvatarEditable';
@@ -50,7 +50,7 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
     createChannel,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

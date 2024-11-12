@@ -7,6 +7,7 @@ import { withGlobal } from '../../../global';
 import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { GlobalActions } from '../../../global';
 import type { ThreadId } from '../../../types';
+import type { MenuPositionOptions } from '../../ui/Menu';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectIsContextMenuTranslucent, selectTabState } from '../../../global/selectors';
@@ -14,10 +15,10 @@ import buildClassName from '../../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useOldLang from '../../../hooks/useOldLang';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import Button from '../../ui/Button';
@@ -61,12 +62,8 @@ export type OwnProps = {
   className?: string;
   isAttachmentModal?: boolean;
   canSendPlainText?: boolean;
-  positionX?: 'left' | 'right';
-  positionY?: 'top' | 'bottom';
-  transformOriginX?: number;
-  transformOriginY?: number;
-  style?: string;
-};
+}
+& MenuPositionOptions;
 
 type StateProps = {
   isLeftColumnShown: boolean;
@@ -87,11 +84,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   isAttachmentModal,
   canSendPlainText,
   className,
-  positionX,
-  positionY,
-  transformOriginX,
-  transformOriginY,
-  style,
   isBackgroundTranslucent,
   onLoad,
   onClose,
@@ -103,6 +95,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   onSearchOpen,
   addRecentEmoji,
   addRecentCustomEmoji,
+  ...menuPositionOptions
 }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
@@ -110,9 +103,9 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, onClose, false, false);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   if (!isActivated && isOpen) {
     isActivated = true;
@@ -325,8 +318,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   return (
     <Menu
       isOpen={isOpen}
-      positionX={isAttachmentModal ? positionX : 'left'}
-      positionY={isAttachmentModal ? positionY : 'bottom'}
       onClose={onClose}
       withPortal={isAttachmentModal}
       className={buildClassName('SymbolMenu', className)}
@@ -335,9 +326,11 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
-      transformOriginX={transformOriginX}
-      transformOriginY={transformOriginY}
-      style={style}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...(isAttachmentModal ? menuPositionOptions : {
+        positionX: 'left',
+        positionY: 'bottom',
+      })}
     >
       {content}
     </Menu>

@@ -1,13 +1,15 @@
-import type { ApiMessage } from '../../../../api/types';
+import type { ApiMessage, ApiPoll } from '../../../../api/types';
 import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
 import { getMessageContent } from '../../../../global/helpers';
+import getSingularPaidMedia from './getSingularPaidMedia';
 
 export function buildContentClassName(
   message: ApiMessage,
   album?: IAlbum,
   {
+    poll,
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -20,7 +22,9 @@ export function buildContentClassName(
     isGeoLiveActive,
     withVoiceTranscription,
     peerColorClass,
+    hasOutsideReactions,
   }: {
+    poll?: ApiPoll;
     hasSubheader?: boolean;
     isCustomShape?: boolean | number;
     isLastInGroup?: boolean;
@@ -33,19 +37,41 @@ export function buildContentClassName(
     isGeoLiveActive?: boolean;
     withVoiceTranscription?: boolean;
     peerColorClass?: string;
+    hasOutsideReactions?: boolean;
   } = {},
 ) {
+  const { paidMedia } = getMessageContent(message);
+  const { photo: paidMediaPhoto, video: paidMediaVideo } = getSingularPaidMedia(paidMedia);
+
+  const content = getMessageContent(message);
   const {
-    photo, video, audio, voice, document, poll, webPage, contact, location, invoice, storyData,
+    photo = paidMediaPhoto, video = paidMediaVideo,
+    audio, voice, document, webPage, contact, location, invoice, storyData,
     giveaway, giveawayResults,
-  } = getMessageContent(message);
+  } = content;
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
+  const hasFactCheck = Boolean(message.factCheck?.text);
+
+  const isRoundVideo = video?.mediaType === 'video' && video.isRound;
+  const isInvertedMedia = message.isInvertedMedia;
+  const isInvertibleMedia = photo || (video && !isRoundVideo) || album || webPage;
 
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
-  const isMedia = storyData || photo || video || location || invoice?.extendedMedia;
-  const hasText = text || location?.type === 'venue' || isGeoLiveActive;
+  const isMedia = storyData || photo || video || location || invoice?.extendedMedia || paidMedia;
+  const hasText = text || location?.mediaType === 'venue' || isGeoLiveActive || hasFactCheck;
   const isMediaWithNoText = isMedia && !hasText;
+  const hasInlineKeyboard = Boolean(message.inlineButtons);
   const isViaBot = Boolean(message.viaBotId);
+
+  const hasFooter = (() => {
+    if (isInvertedMedia && isInvertibleMedia) {
+      if (hasReactions && !hasOutsideReactions) return true;
+      if (hasFactCheck) return true;
+      if (webPage && hasText) return true;
+      return false;
+    }
+    return hasText;
+  })();
 
   if (peerColorClass) {
     classNames.push(peerColorClass);
@@ -62,13 +88,17 @@ export function buildContentClassName(
     classNames.push('no-text');
   }
 
+  if (!Object.keys(content).length) {
+    classNames.push('unsupported');
+  }
+
   if (hasActionButton) {
     classNames.push('has-action-button');
   }
 
   if (isCustomShape) {
     classNames.push('custom-shape');
-    if (video?.isRound) {
+    if (isRoundVideo) {
       classNames.push('round');
     }
 
@@ -129,6 +159,10 @@ export function buildContentClassName(
     classNames.push('has-reactions');
   }
 
+  if (hasOutsideReactions) {
+    classNames.push('has-outside-reactions');
+  }
+
   if (isViaBot) {
     classNames.push('is-via-bot');
   }
@@ -144,13 +178,27 @@ export function buildContentClassName(
       classNames.push('has-background');
     }
 
-    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName) {
+    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName || hasFactCheck) {
       classNames.push('has-solid-background');
     }
 
-    if (isLastInGroup && (photo || !isMediaWithNoText || (location && asForwarded))) {
+    if (hasFactCheck) {
+      classNames.push('has-fact-check');
+    }
+
+    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || (location && asForwarded))) {
       classNames.push('has-appendix');
     }
+  }
+
+  if (isInvertibleMedia && isInvertedMedia) {
+    classNames.push('is-inverted-media');
+  }
+
+  if (hasFooter) {
+    classNames.push('has-footer');
+  } else {
+    classNames.push('no-footer');
   }
 
   return classNames.join(' ');

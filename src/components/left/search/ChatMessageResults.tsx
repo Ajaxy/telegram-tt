@@ -6,12 +6,13 @@ import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
+import { parseSearchResultKey, type SearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import NothingFound from '../../common/NothingFound';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -28,7 +29,7 @@ export type OwnProps = {
 
 type StateProps = {
   currentUserId?: string;
-  foundIds?: string[];
+  foundIds?: SearchResultKey[];
   globalMessagesByChatId?: Record<string, { byId: Record<number, ApiMessage> }>;
   chatsById: Record<string, ApiChat>;
   fetchingStatus?: { chats?: boolean; messages?: boolean };
@@ -52,7 +53,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
 }) => {
   const { searchMessagesGlobal, openThread } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
@@ -85,9 +86,9 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
 
     return foundIds
       .map((id) => {
-        const [chatId, messageId] = id.split('_');
+        const [chatId, messageId] = parseSearchResultKey(id);
 
-        return globalMessagesByChatId?.[chatId]?.byId[Number(messageId)];
+        return globalMessagesByChatId?.[chatId]?.byId[messageId];
       })
       .filter(Boolean)
       .sort((a, b) => b.date - a.date);
@@ -114,7 +115,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
     && !foundTopicIds?.length;
 
   return (
-    <div className="LeftSearch">
+    <div className="LeftSearch--content">
       <InfiniteScroll
         className="search-content custom-scroll chat-list"
         items={foundMessages}

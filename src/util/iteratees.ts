@@ -125,6 +125,9 @@ export function areSortedArraysEqual(array1: any[], array2: any[]) {
 export function areSortedArraysIntersecting(array1: any[], array2: any[]) {
   return array1[0] <= array2[array2.length - 1] && array1[array1.length - 1] >= array2[0];
 }
+export function isInsideSortedArrayRange(value:any, array: any[]) {
+  return array[0] <= value && value <= array[array.length - 1];
+}
 
 export function findIntersectionWithSet<T>(array: T[], set: Set<T>): T[] {
   return array.filter((a) => set.has(a));

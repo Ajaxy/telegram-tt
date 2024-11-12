@@ -1,7 +1,7 @@
 export interface ApiLanguage {
-  official?: true;
-  rtl?: true;
-  beta?: true;
+  isOfficial?: true;
+  isRtl?: true;
+  isBeta?: true;
   name: string;
   nativeName: string;
   langCode: string;
@@ -12,7 +12,7 @@ export interface ApiLanguage {
   translationsUrl: string;
 }
 
-export type ApiLangString = string | {
+export type ApiOldLangString = string | {
   zeroValue?: string;
   oneValue?: string;
   twoValue?: string;
@@ -21,4 +21,30 @@ export type ApiLangString = string | {
   otherValue?: string;
 };
 
-export type ApiLangPack = Record<string, ApiLangString | undefined>;
+export type ApiOldLangPack = Record<string, ApiOldLangString | undefined>;
+
+export type LangPack = {
+  langCode: string;
+  version: number;
+  strings: Record<string, LangPackStringValue>;
+};
+
+export type CachedLangData = {
+  langPack: LangPack;
+  language: ApiLanguage;
+};
+
+export type LangPackStringValueRegular = string;
+export type LangPackStringValueDeleted = {
+  isDeleted: true;
+};
+export type LangPackStringValuePlural = {
+  zero?: string;
+  one?: string;
+  two?: string;
+  few?: string;
+  many?: string;
+  other: string;
+};
+
+export type LangPackStringValue = LangPackStringValueRegular | LangPackStringValueDeleted | LangPackStringValuePlural;

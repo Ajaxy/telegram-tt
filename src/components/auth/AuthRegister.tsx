@@ -7,7 +7,7 @@ import type { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import AvatarEditable from '../ui/AvatarEditable';
 import Button from '../ui/Button';
@@ -20,7 +20,7 @@ const AuthRegister: FC<StateProps> = ({
 }) => {
   const { signUp, clearAuthError, uploadProfilePhoto } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isButtonShown, setIsButtonShown] = useState(false);
   const [croppedFile, setCroppedFile] = useState<File | undefined>();
   const [firstName, setFirstName] = useState('');

@@ -6,15 +6,15 @@ import type {
   ApiTypeStory,
   StatisticsStoryInteractionCounter,
 } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import StatisticsRecentPostMeta from './StatisticsRecentPostMeta';
@@ -28,7 +28,7 @@ export type OwnProps = {
 };
 
 function StatisticsRecentStory({ chat, story, postStatistic }: OwnProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   const { toggleStoryStatistics } = getActions();
   const isLoaded = story && 'content' in story;
 
@@ -65,7 +65,7 @@ function StatisticsRecentStory({ chat, story, postStatistic }: OwnProps) {
   );
 }
 
-function renderSummary(lang: LangFn, chat: ApiChat, blobUrl?: string) {
+function renderSummary(lang: OldLangFn, chat: ApiChat, blobUrl?: string) {
   return (
     <span>
       {blobUrl ? (

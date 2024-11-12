@@ -1,7 +1,9 @@
-import { useCallback, useRef, useState } from '../lib/teact/teact';
+import {
+  getIsHeavyAnimating, useCallback, useRef, useState,
+} from '../lib/teact/teact';
 
 import useForceUpdate from './useForceUpdate';
-import useHeavyAnimationCheck, { isHeavyAnimating } from './useHeavyAnimationCheck';
+import useHeavyAnimation from './useHeavyAnimation';
 import useRunDebounced from './useRunDebounced';
 import useSyncEffect from './useSyncEffect';
 
@@ -43,10 +45,10 @@ function useHeavyAnimationFreeze() {
     isPending.current = false;
     forceUpdate();
   }, [forceUpdate]);
-  useHeavyAnimationCheck(noop, handleUnfreeze);
+  useHeavyAnimation(noop, handleUnfreeze);
 
   return {
-    isFrozen: isHeavyAnimating(),
+    isFrozen: getIsHeavyAnimating(),
     updateWhenUnfrozen,
   };
 }

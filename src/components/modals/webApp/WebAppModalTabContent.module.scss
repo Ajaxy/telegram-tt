@@ -1,0 +1,159 @@
+.root {
+  height: 100%;
+  width: 100%;
+}
+
+.multi-tab {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  z-index: 0;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  transition: opacity 0.25s ease-in-out;
+}
+
+.hide {
+  opacity: 0;
+}
+
+.frame {
+  transition: opacity 0.25s ease-in-out;
+  opacity: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  z-index: 1;
+
+  &.with-button {
+    height: calc(100% - 3.5rem);
+  }
+
+  &.hide {
+    opacity: 0;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.secondary-button,
+.main-button {
+  flex-grow: 1;
+  margin: 0.5rem;
+  transform: translateY(100%);
+  opacity: 0;
+  transition-property: background-color, color, transform, margin-inline, flex-grow, opacity;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
+
+  &.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition-property: height;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
+
+  height: 0rem;
+
+  &.one-row {
+    align-items: center;
+    height: 4rem;
+  }
+
+  &.two-rows {
+    height: 8rem;
+  }
+
+  &.left-to-right {
+    flex-direction: row;
+  }
+
+  &.right-to-left {
+    flex-direction: row-reverse;
+  }
+
+  &.top-to-bottom,
+  &.bottom-to-top {
+    .secondary-button,
+    .main-button {
+      position: absolute;
+      left: 0rem;
+      right: 0rem;
+    }
+  }
+
+  &.top-to-bottom {
+    .secondary-button {
+      top: 0rem;
+    }
+    .main-button {
+      bottom: 0rem;
+    }
+  }
+  &.bottom-to-top {
+    .main-button {
+      top: 0rem;
+    }
+    .secondary-button {
+      bottom: 0rem;
+    }
+  }
+}
+
+.hide-horizontal {
+  .secondary-button,
+  .main-button {
+    transform: translateY(0);
+    flex-grow: 0;
+    margin-inline: 0;
+    padding-inline: 0;
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+
+    &.visible {
+      margin-inline: 0.5rem;
+      flex-grow: 1;
+    }
+  }
+}
+
+.secondary-button-spinner,
+.main-button-spinner {
+  position: absolute;
+}
+
+.web-app-popup {
+  :global(.modal-dialog) {
+    max-width: min(30rem, 100%);
+  }
+
+  &.without-title :global(.modal-content) {
+    padding-top: 0;
+  }
+
+  :global(.modal-content) {
+    padding-left: 2rem;
+  }
+}

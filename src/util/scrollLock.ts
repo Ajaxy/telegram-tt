@@ -67,6 +67,8 @@ export function disableScrolling(el?: HTMLElement | null, _excludedClosestSelect
   document.addEventListener('wheel', preventDefault, { passive: false });
   document.addEventListener('touchmove', preventDefault, { passive: false });
   document.onkeydown = preventDefaultForScrollKeys;
+
+  return enableScrolling;
 }
 
 export function enableScrolling() {

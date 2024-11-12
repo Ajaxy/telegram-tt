@@ -13,12 +13,32 @@
   margin-inline-end: calc($margin - var(--scrollbar-width));
 }
 
+@mixin filter-outline($width: 0.125rem, $color) {
+  filter:
+    drop-shadow($width $width 0 $color)
+    drop-shadow((-$width) $width 0 $color)
+    drop-shadow($width (-$width) 0 $color)
+    drop-shadow((-$width) (-$width) 0 $color);
+}
+
 @mixin gradient-border-top($width, $cutout: 0px) {
   mask-image: linear-gradient(transparent $cutout, black $width);
 }
 
-@mixin gradient-border-bottom($width, $cutout: 0px) {
-  mask-image: linear-gradient(to top, transparent $cutout, black $width);
+@mixin gradient-border-bottom($height, $cutout: 0px) {
+  mask-image: linear-gradient(to top, transparent $cutout, black $height);
+}
+
+@mixin gradient-border-horizontal($borderStart, $borderEnd) {
+  mask-image: linear-gradient(to right, transparent, black $borderStart, black calc(100% - $borderEnd), transparent);
+}
+
+@mixin gradient-border-left($indent, $cutout: 0px) {
+  mask-image: linear-gradient(to right, transparent $cutout, black $indent);
+}
+
+@mixin gradient-border-right($indent, $cutout: 0px) {
+  mask-image: linear-gradient(to left, transparent $cutout, black $indent);
 }
 
 @mixin gradient-border-top-bottom($top, $bottom) {
@@ -33,23 +53,27 @@
   }
 
   @if $colorCount == 2 {
-    #{$property}: repeating-linear-gradient(
-      -45deg,
-      rgb(var(--_accent-color-rgb), 100%),
-      rgb(var(--_accent-color-rgb), 100%) 5px,
-      rgb(var(--_accent-color-rgb), 35%) 5px,
-      rgb(var(--_accent-color-rgb), 35%) 10px
-    );
-  } @else {
-    #{$property}: repeating-linear-gradient(
-      -45deg,
-      rgb(var(--_accent-color-rgb), 100%),
-      rgb(var(--_accent-color-rgb), 100%) 5px,
-      rgb(var(--_accent-color-rgb), 60%) 5px,
-      rgb(var(--_accent-color-rgb), 60%) 10px,
-      rgb(var(--_accent-color-rgb), 20%) 10px,
-      rgb(var(--_accent-color-rgb), 20%) 15px
-    );
+    #{$property}:
+      repeating-linear-gradient(
+        -45deg,
+        rgb(var(--_accent-color-rgb), 100%),
+        rgb(var(--_accent-color-rgb), 100%) 5px,
+        rgb(var(--_accent-color-rgb), 35%) 5px,
+        rgb(var(--_accent-color-rgb), 35%) 10px
+      );
+  }
+
+  @else {
+    #{$property}:
+      repeating-linear-gradient(
+        -45deg,
+        rgb(var(--_accent-color-rgb), 100%),
+        rgb(var(--_accent-color-rgb), 100%) 5px,
+        rgb(var(--_accent-color-rgb), 60%) 5px,
+        rgb(var(--_accent-color-rgb), 60%) 10px,
+        rgb(var(--_accent-color-rgb), 20%) 10px,
+        rgb(var(--_accent-color-rgb), 20%) 15px
+      );
   }
 }
 
@@ -79,7 +103,7 @@
       -webkit-appearance: none;
     }
 
-    &::-moz-slider-thumb {
+    &::-moz-range-thumb {
       -moz-appearance: none;
     }
 

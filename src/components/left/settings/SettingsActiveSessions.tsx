@@ -7,12 +7,12 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSession } from '../../../api/types';
 
-import { formatPastTimeShort } from '../../../util/date/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 import getSessionIcon from './helpers/getSessionIcon';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem from '../../ui/ListItem';
@@ -45,7 +45,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
     changeSessionTtl,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedSessionHash, setOpenedSessionHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();
@@ -145,7 +145,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   function renderCurrentSession(session: ApiSession) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('AuthSessions.CurrentSession')}
         </h4>
 
@@ -177,7 +177,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   function renderOtherSessions(sessionHashes: string[]) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('OtherSessions')}
         </h4>
 
@@ -189,11 +189,11 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
   function renderAutoTerminate() {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('TerminateOldSessionHeader')}
         </h4>
 
-        <p>{lang('IfInactiveFor')}</p>
+        <p className="settings-item-description-larger">{lang('IfInactiveFor')}</p>
         <RadioGroup
           name="session_ttl"
           options={AUTO_TERMINATE_OPTIONS}

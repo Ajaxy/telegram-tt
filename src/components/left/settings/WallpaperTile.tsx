@@ -16,8 +16,8 @@ import { fetchBlob } from '../../../util/files';
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import usePrevious from '../../../hooks/usePrevious';
-import useShowTransition from '../../../hooks/useShowTransition';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -41,7 +41,7 @@ const WallpaperTile: FC<OwnProps> = ({
   const localBlobUrl = document.previewBlobUrl;
   const previewBlobUrl = useMedia(`${localMediaHash}?size=m`);
   const thumbRef = useCanvasBlur(document.thumbnail?.dataUri, Boolean(previewBlobUrl), true);
-  const { transitionClassNames } = useShowTransition(
+  const { transitionClassNames } = useShowTransitionDeprecated(
     Boolean(previewBlobUrl || localBlobUrl),
     undefined,
     undefined,
@@ -52,8 +52,8 @@ const WallpaperTile: FC<OwnProps> = ({
   const {
     mediaData: fullMedia, loadProgress,
   } = useMediaWithLoadProgress(localMediaHash, !isLoadAllowed);
-  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
-  const { shouldRender: shouldRenderSpinner, transitionClassNames: spinnerClassNames } = useShowTransition(
+  const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
+  const { shouldRender: shouldRenderSpinner, transitionClassNames: spinnerClassNames } = useShowTransitionDeprecated(
     (isLoadAllowed && !fullMedia) || slug === UPLOADING_WALLPAPER_SLUG,
     undefined,
     wasLoadDisabled,

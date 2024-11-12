@@ -85,12 +85,20 @@ export function buildApiPhoto(photo: GramJs.Photo, isSpoiler?: boolean): ApiPhot
     .map(buildApiPhotoSize);
 
   return {
+    mediaType: 'photo',
     id: String(photo.id),
     thumbnail: buildApiThumbnailFromStripped(photo.sizes),
     sizes,
     isSpoiler,
+    date: photo.date,
     ...(photo.videoSizes && { videoSizes: compact(photo.videoSizes.map(buildApiVideoSize)), isVideo: true }),
   };
+}
+
+export function buildApiPhotoPreviewSizes(sizes: GramJs.TypePhotoSize[]): ApiPhotoSize[] {
+  return sizes.filter((s): s is GramJs.PhotoSize => (
+    s instanceof GramJs.PhotoSize || s instanceof GramJs.PhotoSizeProgressive
+  )).map(buildApiPhotoSize);
 }
 
 export function buildApiVideoSize(videoSize: GramJs.TypeVideoSize): ApiVideoSize | undefined {
@@ -115,7 +123,7 @@ export function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
   return {
     width: w,
     height: h,
-    type: type as ('m' | 'x' | 'y'),
+    type: type as ('s' | 'm' | 'x' | 'y' | 'w'),
   };
 }
 
@@ -260,9 +268,26 @@ export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMess
     };
   }
 
+  if (entity instanceof GramJs.MessageEntityBlockquote) {
+    return {
+      type: ApiMessageEntityTypes.Blockquote,
+      canCollapse: entity.collapsed,
+      offset,
+      length,
+    };
+  }
+
   return {
     type: type as `${ApiMessageEntityDefault['type']}`,
     offset,
     length,
   };
+}
+
+export function buildAvatarPhotoId(photo: GramJs.TypeUserProfilePhoto | GramJs.TypeChatPhoto) {
+  if ('photoId' in photo) {
+    return photo.photoId.toString();
+  }
+
+  return undefined;
 }

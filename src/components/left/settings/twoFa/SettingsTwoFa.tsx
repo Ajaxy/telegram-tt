@@ -6,7 +6,7 @@ import type { GlobalState } from '../../../../global/types';
 import type { TwoFaDispatch, TwoFaState } from '../../../../hooks/reducers/useTwoFaReducer';
 import { SettingsScreens } from '../../../../types';
 
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import SettingsTwoFaPassword from '../SettingsPasswordForm';
 import SettingsTwoFaCongratulations from './SettingsTwoFaCongratulations';
@@ -153,7 +153,7 @@ const SettingsTwoFa: FC<OwnProps & StateProps> = ({
     provideTwoFaEmailCode({ code });
   }, [provideTwoFaEmailCode]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   switch (currentScreen) {
     case SettingsScreens.TwoFaDisabled:

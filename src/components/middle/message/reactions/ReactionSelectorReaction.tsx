@@ -10,7 +10,7 @@ import useFlag from '../../../../hooks/useFlag';
 import useMedia from '../../../../hooks/useMedia';
 
 import AnimatedSticker from '../../../common/AnimatedSticker';
-import Icon from '../../../common/Icon';
+import Icon from '../../../common/icons/Icon';
 
 import styles from './ReactionSelectorReaction.module.scss';
 

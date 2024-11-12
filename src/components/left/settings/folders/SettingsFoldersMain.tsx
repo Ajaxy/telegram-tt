@@ -18,8 +18,8 @@ import renderText from '../../../common/helpers/renderText';
 
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
-import usePrevious from '../../../../hooks/usePrevious';
+import useOldLang from '../../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import Button from '../../../ui/Button';
@@ -76,7 +76,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     draggedIndex: undefined,
   });
 
-  const prevFolderIds = usePrevious(folderIds);
+  const prevFolderIds = usePreviousDeprecated(folderIds);
 
   // Sync folders state after changing folders in other clients
   useEffect(() => {
@@ -109,7 +109,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     onCreateFolder();
   }, [foldersById, maxFolders, onCreateFolder, openLimitReachedModal]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

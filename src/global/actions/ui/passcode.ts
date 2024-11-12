@@ -4,7 +4,7 @@ import { SettingsScreens } from '../../../types';
 import { getCurrentTabId, signalPasscodeHash } from '../../../util/establishMultitabRole';
 import { cloneDeep } from '../../../util/iteratees';
 import {
-  clearEncryptedSession, decryptSession, encryptSession, forgetPasscode, setupPasscode,
+  clearEncryptedSession, encryptSession, forgetPasscode, setupPasscode,
 } from '../../../util/passcode';
 import { onBeforeUnload } from '../../../util/schedulers';
 import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
@@ -16,7 +16,9 @@ import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 let noLockOnUnload = false;
 onBeforeUnload(() => {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-  if (getGlobal().passcode.hasPasscode && !noLockOnUnload && Object.keys(getGlobal().byTabId).length === 1) {
+  const global = getGlobal();
+  if (!global.isInited) return;
+  if (global.passcode.hasPasscode && !noLockOnUnload && Object.keys(global.byTabId).length === 1) {
     clearStoredSession();
   }
 });
@@ -98,13 +100,6 @@ addActionHandler('unlockScreen', (global, actions, payload): ActionReturnType =>
 
   beforeTabStates.forEach(({ id: tabId, isMasterTab }) => actions.init({ tabId, isMasterTab }));
   actions.initApi();
-});
-
-addActionHandler('decryptSession', (global, actions, payload): ActionReturnType => {
-  const { passcode } = payload;
-  decryptSession(passcode).then(actions.unlockScreen, () => {
-    actions.logInvalidUnlockAttempt();
-  });
 });
 
 const MAX_INVALID_ATTEMPTS = 5;

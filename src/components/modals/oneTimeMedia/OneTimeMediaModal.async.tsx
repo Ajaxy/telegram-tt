@@ -8,8 +8,8 @@ import { Bundles } from '../../../util/moduleLoader';
 import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const OneTimeMediaModalAsync: FC<OwnProps> = (props) => {
-  const { info } = props;
-  const OneTimeMediaModal = useModuleLoader(Bundles.Extra, 'OneTimeMediaModal', !info);
+  const { modal } = props;
+  const OneTimeMediaModal = useModuleLoader(Bundles.Extra, 'OneTimeMediaModal', !modal);
 
   // eslint-disable-next-line react/jsx-props-no-spreading
   return OneTimeMediaModal ? <OneTimeMediaModal {...props} /> : undefined;

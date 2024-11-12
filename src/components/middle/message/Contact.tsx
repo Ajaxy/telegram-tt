@@ -9,8 +9,8 @@ import { selectUser } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
@@ -33,7 +33,7 @@ const UNREGISTERED_CONTACT_ID = '0';
 const Contact: FC<OwnProps & StateProps> = ({
   contact, user, phoneCodeList, noUserColors,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     openChat, openAddContactDialog, showNotification, openChatWithInfo,
   } = getActions();

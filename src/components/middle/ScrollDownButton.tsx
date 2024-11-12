@@ -7,7 +7,7 @@ import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
@@ -32,7 +32,7 @@ const ScrollDownButton: FC<OwnProps> = ({
   onReadAll,
   className,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);

@@ -1,4 +1,3 @@
-import type { ThreadId } from '../../types';
 import type { ApiBotCommand } from './bots';
 import type {
   ApiChatReactions, ApiFormattedText, ApiPhoto, ApiStickerSet,
@@ -30,17 +29,17 @@ export interface ApiChat {
   isVerified?: true;
   isMuted?: boolean;
   muteUntil?: number;
-  isSignaturesShown?: boolean;
+  areSignaturesShown?: boolean;
+  areProfilesShown?: boolean;
   hasPrivateLink?: boolean;
   accessHash?: string;
   isMin?: boolean;
   hasVideoAvatar?: boolean;
-  avatarHash?: string;
+  avatarPhotoId?: string;
   usernames?: ApiUsername[];
   membersCount?: number;
   creationDate?: number;
   isSupport?: true;
-  photos?: ApiPhoto[];
   draftDate?: number;
   isProtected?: boolean;
   fakeType?: ApiFakeType;
@@ -48,10 +47,6 @@ export interface ApiChat {
   emojiStatus?: ApiEmojiStatus;
   isForum?: boolean;
   isForumAsMessages?: true;
-  topics?: Record<ThreadId, ApiTopic>;
-  listedTopicIds?: number[];
-  topicsCount?: number;
-  orderedPinnedTopicIds?: number[];
   boostLevel?: number;
 
   // Calls
@@ -91,6 +86,8 @@ export interface ApiChat {
   hasUnreadStories?: boolean;
   maxStoryId?: number;
 
+  subscriptionUntil?: number;
+
   // Locally determined field
   detectedLanguage?: string;
 }
@@ -120,11 +117,18 @@ export interface ApiChatFullInfo {
     chatId: string;
     maxMessageId?: number;
   };
+  joinInfo?: {
+    joinedDate: number;
+    inviter?: string;
+    isViaRequest?: boolean;
+  };
   linkedChatId?: string;
   botCommands?: ApiBotCommand[];
   enabledReactions?: ApiChatReactions;
+  reactionsLimit?: number;
   sendAsId?: string;
   canViewStatistics?: boolean;
+  canViewMonetization?: boolean;
   recentRequesterIds?: string[];
   requestsPending?: number;
   statisticsDcId?: number;
@@ -134,6 +138,7 @@ export interface ApiChatFullInfo {
   areParticipantsHidden?: boolean;
   isTranslationDisabled?: true;
   hasPinnedStories?: boolean;
+  isPaidReactionAvailable?: boolean;
 
   boostsApplied?: number;
   boostsToUnrestrict?: number;
@@ -150,6 +155,7 @@ export interface ApiChatMember {
   customTitle?: string;
   isAdmin?: true;
   isOwner?: true;
+  isViaRequest?: true;
 }
 
 export interface ApiChatAdminRights {

@@ -9,9 +9,9 @@ import { SettingsScreens } from '../../../types';
 import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
-import PremiumIcon from '../../common/PremiumIcon';
+import StarIcon from '../../common/icons/StarIcon';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 
@@ -79,7 +79,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     }
   }, [isActive, loadGlobalPrivacySettings]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -103,14 +103,20 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   }, [updateContentSettings]);
 
   function getVisibilityValue(setting?: ApiPrivacySettings) {
-    const { visibility } = setting || {};
-    const blockCount = setting ? setting.blockChatIds.length + setting.blockUserIds.length : 0;
-    const allowCount = setting ? setting.allowChatIds.length + setting.allowUserIds.length : 0;
+    if (!setting) return lang('Loading');
+
+    const { visibility, shouldAllowPremium } = setting;
+    const blockCount = setting.blockChatIds.length + setting.blockUserIds.length;
+    const allowCount = setting.allowChatIds.length + setting.allowUserIds.length;
     const total = [];
     if (blockCount) total.push(`-${blockCount}`);
     if (allowCount) total.push(`+${allowCount}`);
 
     const exceptionString = total.length ? `(${total.join(',')})` : '';
+
+    if (shouldAllowPremium) {
+      return lang(exceptionString ? 'ContactsAndPremium' : 'PrivacyPremium');
+    }
 
     switch (visibility) {
       case 'everybody':
@@ -131,6 +137,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       <div className="settings-item pt-3">
         <ListItem
           icon="delete-user"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyBlockedUsers)}
         >
@@ -172,6 +179,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         {webAuthCount > 0 && (
           <ListItem
             icon="web"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => onScreenSelect(SettingsScreens.ActiveWebsites)}
           >
@@ -182,7 +190,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       </div>
 
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PrivacyTitle')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PrivacyTitle')}</h4>
 
         <ListItem
           narrow
@@ -278,7 +286,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         <ListItem
           narrow
           allowDisabledClick
-          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
+          rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyVoiceMessages)}
@@ -292,7 +300,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           narrow
-          rightElement={isCurrentUserPremium && <PremiumIcon big withGradient />}
+          rightElement={isCurrentUserPremium && <StarIcon size="big" type="premium" />}
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyMessages)}

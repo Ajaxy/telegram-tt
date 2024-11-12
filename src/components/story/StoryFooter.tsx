@@ -4,14 +4,16 @@ import { getActions, getGlobal } from '../../global';
 import type { ApiStory } from '../../api/types';
 
 import { HEART_REACTION } from '../../config';
-import { getStoryKey, isUserId } from '../../global/helpers';
+import {
+  getReactionKey, getStoryKey, isSameReaction, isUserId,
+} from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import AvatarList from '../common/AvatarList';
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import ReactionAnimatedEmoji from '../common/reactions/ReactionAnimatedEmoji';
 import Button from '../ui/Button';
 
@@ -27,7 +29,7 @@ const StoryFooter = ({
   className,
 }: OwnProps) => {
   const { openStoryViewModal, openForwardMenu, sendStoryReaction } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     views, isOut, peerId, id: storyId, sentReaction,
@@ -35,8 +37,7 @@ const StoryFooter = ({
   const { viewsCount, forwardsCount, reactionsCount } = views || {};
   const isChannel = !isUserId(peerId);
 
-  const isSentStoryReactionHeart = sentReaction && 'emoticon' in sentReaction
-    ? sentReaction.emoticon === HEART_REACTION.emoticon : false;
+  const isSentStoryReactionHeart = sentReaction && isSameReaction(sentReaction, HEART_REACTION);
 
   const canForward = Boolean(
     (isOut || isChannel)
@@ -152,7 +153,7 @@ const StoryFooter = ({
             >
               {sentReaction && (
                 <ReactionAnimatedEmoji
-                  key={'documentId' in sentReaction ? sentReaction.documentId : sentReaction.emoticon}
+                  key={getReactionKey(sentReaction)}
                   containerId={containerId}
                   reaction={sentReaction}
                   withEffectOnly={isSentStoryReactionHeart}

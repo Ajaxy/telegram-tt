@@ -1,14 +1,22 @@
 import type { ChangeEvent } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, {
+  memo,
+  useRef,
+  useState,
+} from '../../lib/teact/teact';
 
 import type { IconName } from '../../types/icons';
+import type { IRadioOption } from './CheckboxGroup';
 
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
+import Button from './Button';
 import Spinner from './Spinner';
 
 import './Checkbox.scss';
@@ -17,20 +25,29 @@ type OwnProps = {
   id?: string;
   name?: string;
   value?: string;
-  label: TeactNode;
+  label?: TeactNode;
+  labelText?: TeactNode;
   subLabel?: string;
-  checked: boolean;
+  checked?: boolean;
   rightIcon?: IconName;
   disabled?: boolean;
   tabIndex?: number;
-  round?: boolean;
+  withIcon?: boolean;
   blocking?: boolean;
+  permissionGroup?: boolean;
   isLoading?: boolean;
   withCheckedCallback?: boolean;
+  onlyInput?: boolean;
+  isRound?: boolean;
   className?: string;
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>, nestedOptionList?: IRadioOption) => void;
   onCheck?: (isChecked: boolean) => void;
   onClickLabel?: (e: React.MouseEvent, value?: string) => void;
+  nestedCheckbox?: boolean;
+  nestedCheckboxCount?: number | undefined;
+  nestedOptionList?: IRadioOption;
+  leftElement?: TeactNode;
+  values?: string[];
 };
 
 const Checkbox: FC<OwnProps> = ({
@@ -38,37 +55,50 @@ const Checkbox: FC<OwnProps> = ({
   name,
   value,
   label,
+  labelText,
   subLabel,
   checked,
   tabIndex,
   disabled,
-  round,
+  withIcon,
   blocking,
+  permissionGroup,
   isLoading,
   className,
   rightIcon,
+  onlyInput,
+  isRound,
+  nestedCheckbox,
+  nestedCheckboxCount,
+  nestedOptionList,
+  leftElement,
+  values = [],
   onChange,
   onCheck,
   onClickLabel,
 }) => {
-  const lang = useLang();
-
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const labelRef = useRef<HTMLLabelElement>(null);
+  const [showNested, setShowNested] = useState(false);
 
-  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useLastCallback((event: ChangeEvent<HTMLInputElement>) => {
     if (disabled) {
       return;
     }
 
     if (onChange) {
-      onChange(event);
+      onChange(event, nestedOptionList);
     }
 
     if (onCheck) {
       onCheck(event.currentTarget.checked);
     }
-  }, [disabled, onChange, onCheck]);
+  });
+
+  const toggleNested = useLastCallback(() => {
+    setShowNested(!showNested);
+  });
 
   function handleClick(event: React.MouseEvent) {
     if (event.target !== labelRef.current) {
@@ -83,40 +113,76 @@ const Checkbox: FC<OwnProps> = ({
   const labelClassName = buildClassName(
     'Checkbox',
     disabled && 'disabled',
-    round && 'round',
+    withIcon && 'withIcon',
     isLoading && 'loading',
     blocking && 'blocking',
+    nestedCheckbox && 'nested',
+    subLabel && 'withSubLabel',
+    permissionGroup && 'permission-group',
+    Boolean(leftElement) && 'avatar',
+    onlyInput && 'onlyInput',
+    isRound && 'round',
     className,
   );
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
-    <label
-      className={labelClassName}
-      dir={lang.isRtl ? 'rtl' : undefined}
-      onClick={onClickLabel ? handleClick : undefined}
-      ref={labelRef}
-    >
-      <input
-        type="checkbox"
-        id={id}
-        name={name}
-        value={value}
-        checked={checked}
-        disabled={disabled}
-        tabIndex={tabIndex}
-        onChange={handleChange}
-        onClick={onClickLabel ? handleInputClick : undefined}
-      />
-      <div className="Checkbox-main">
-        <span className="label" dir="auto">
-          {typeof label === 'string' ? renderText(label) : label}
-          {rightIcon && <i className={`icon icon-${rightIcon} right-icon`} />}
-        </span>
-        {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
-      </div>
-      {isLoading && <Spinner />}
-    </label>
+    <>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      <label
+        className={labelClassName}
+        dir={lang.isRtl ? 'rtl' : undefined}
+        onClick={onClickLabel ? handleClick : undefined}
+        ref={labelRef}
+      >
+        <input
+          type="checkbox"
+          id={id}
+          name={name}
+          value={value}
+          checked={checked}
+          disabled={disabled}
+          tabIndex={tabIndex}
+          onChange={handleChange}
+          onClick={onClickLabel ? handleInputClick : undefined}
+        />
+        <div className={buildClassName('Checkbox-main', Boolean(leftElement) && 'Nested-avatar-list')}>
+          <span className="label" dir="auto">
+            {leftElement}
+            {typeof label === 'string' ? renderText(label) : label}
+            {labelText && <span className="ml-1">{renderText(labelText)}</span>}
+            {rightIcon && <i className={`icon icon-${rightIcon} right-icon`} />}
+          </span>
+          {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
+        </div>
+        {nestedCheckbox && (
+          <span className="nestedButton" dir="auto">
+            <Button className="button" color="translucent" size="smaller" onClick={toggleNested}>
+              <Icon name="group-filled" className="group-icon" />
+              {nestedCheckboxCount}
+              <Icon name={showNested ? 'up' : 'down'} />
+            </Button>
+          </span>
+        )}
+        {isLoading && <Spinner />}
+      </label>
+      {nestedCheckbox && (
+        <div
+          className={buildClassName('nested-checkbox-group', showNested && 'nested-checkbox-group-open')}
+        >
+          {nestedOptionList?.nestedOptions?.map((nestedOption) => (
+            <Checkbox
+              key={nestedOption.value}
+              leftElement={leftElement}
+              onChange={handleChange}
+              checked={values.indexOf(nestedOption.value) !== -1}
+              values={values}
+              /* eslint-disable-next-line react/jsx-props-no-spreading */
+              {...nestedOption}
+            />
+          ))}
+        </div>
+      )}
+    </>
   );
 };
 

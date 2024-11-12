@@ -5,16 +5,16 @@ import type { ApiMessageStoryData, ApiTypeStory } from '../../../api/types';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useOldLang from '../../../hooks/useOldLang';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import MediaAreaOverlay from '../../story/mediaArea/MediaAreaOverlay';
 
@@ -32,7 +32,7 @@ function BaseStory({
 }: OwnProps) {
   const { openStoryViewer, loadPeerStoriesByIds, showNotification } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { isMobile } = useAppLayout();
   const isExpired = story && 'isDeleted' in story;
   const isLoaded = story && 'content' in story;
@@ -41,7 +41,7 @@ function BaseStory({
   const imgBlobUrl = useMedia(imageHash);
   const thumbnail = isLoaded ? (video ? video.thumbnail?.dataUri : story.content.photo?.thumbnail?.dataUri) : undefined;
   const mediaUrl = useCurrentOrPrev(imgBlobUrl, true);
-  const { shouldRender, transitionClassNames } = useShowTransition(Boolean(mediaUrl));
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(Boolean(mediaUrl));
   const blurredBackgroundRef = useCanvasBlur(
     thumbnail,
     isExpired && !isPreview,
@@ -83,7 +83,9 @@ function BaseStory({
       className={fullClassName}
       onClick={isConnected ? handleClick : undefined}
     >
-      {!isExpired && isPreview && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
+      {!isExpired && isPreview && (
+        <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
+      )}
       {shouldRender && (
         <>
           <img

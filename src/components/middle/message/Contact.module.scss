@@ -1,21 +1,6 @@
 .root {
   position: relative;
   margin: 0.25rem 0.25rem 0.875rem 0.25rem;
-  border-radius: 0.25rem;
-  overflow: hidden;
-  background-color: var(--accent-background-color);
-  color: var(--accent-color);
-
-  &::before {
-    content: "";
-    display: block;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    inset-inline-start: 0;
-    width: 0.1875rem;
-    background: var(--bar-gradient, var(--accent-color));
-  }
 }
 
 .info-container {
@@ -53,7 +38,7 @@
   height: 0.0625rem;
   margin: 0 0.5rem;
   background: var(--accent-color);
-  filter: opacity(0.4)
+  filter: opacity(0.4);
 }
 
 .buttons {
@@ -79,4 +64,3 @@
 .emoji-icon-background {
   margin-bottom: 2.25rem;
 }
-  

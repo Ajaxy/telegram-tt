@@ -31,10 +31,11 @@ import {
   isUserId,
 } from '../../global/helpers';
 import {
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectChat,
   selectChatMessage,
   selectChatMessages,
+  selectCurrentMiddleSearch,
   selectForwardedSender,
   selectIsChatBotNotStarted,
   selectIsChatWithBot,
@@ -50,7 +51,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import cycleRestrict from '../../util/cycleRestrict';
-import { getMessageKey } from '../../util/messageKey';
+import { getMessageKey } from '../../util/keys/messageKey';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
@@ -58,11 +59,11 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useDerivedState from '../../hooks/useDerivedState';
 import useElectronDrag from '../../hooks/useElectronDrag';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
-import { useFastClick } from '../../hooks/useFastClick';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import usePrevious from '../../hooks/usePrevious';
-import useShowTransition from '../../hooks/useShowTransition';
+import useLongPress from '../../hooks/useLongPress';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
@@ -81,6 +82,7 @@ import './MiddleHeader.scss';
 const ANIMATION_DURATION = 350;
 const BACK_BUTTON_INACTIVE_TIME = 450;
 const EMOJI_STATUS_SIZE = 22;
+const SEARCH_LONGTAP_THRESHOLD = 500;
 
 type OwnProps = {
   chatId: string;
@@ -89,9 +91,9 @@ type OwnProps = {
   isComments?: boolean;
   isReady?: boolean;
   isMobile?: boolean;
-  getCurrentPinnedIndexes: Signal<Record<string, number>>;
+  getCurrentPinnedIndex: Signal<number>;
   getLoadingPinnedId: Signal<number | undefined>;
-  onFocusPinnedMessage: (messageId: number) => boolean;
+  onFocusPinnedMessage: (messageId: number) => void;
 };
 
 type StateProps = {
@@ -116,6 +118,7 @@ type StateProps = {
   isSynced?: boolean;
   isFetchingDifference?: boolean;
   emojiStatusSticker?: ApiSticker;
+  isMiddleSearchOpen?: boolean;
 };
 
 const MiddleHeader: FC<OwnProps & StateProps> = ({
@@ -144,10 +147,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   isSyncing,
   isSynced,
   isFetchingDifference,
-  getCurrentPinnedIndexes,
+  getCurrentPinnedIndex,
   getLoadingPinnedId,
   emojiStatusSticker,
   isSavedDialog,
+  isMiddleSearchOpen,
   onFocusPinnedMessage,
 }) => {
   const {
@@ -162,15 +166,14 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openPremiumModal,
     openThread,
     openStickerSet,
+    updateMiddleSearch,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const isBackButtonActive = useRef(true);
   const { isTablet } = useAppLayout();
 
-  const currentPinnedIndexes = useDerivedState(getCurrentPinnedIndexes);
-  const currentPinnedIndex = currentPinnedIndexes[`${chatId}_${threadId}`] || 0;
-  const waitingForPinnedId = useDerivedState(getLoadingPinnedId);
+  const currentPinnedIndex = useDerivedState(getCurrentPinnedIndex);
   const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[currentPinnedIndex] : pinnedMessageIds;
   const pinnedMessage = messagesById && pinnedMessageId ? messagesById[pinnedMessageId] : undefined;
   const pinnedMessagesCount = Array.isArray(pinnedMessageIds)
@@ -197,13 +200,26 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const componentRef = useRef<HTMLDivElement>(null);
   const shouldAnimateTools = useRef<boolean>(true);
 
-  const {
-    handleClick: handleHeaderClick,
-    handleMouseDown: handleHeaderMouseDown,
-  } = useFastClick((e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
-    if (e.type === 'mousedown' && (e.target as Element).closest('.title > .custom-emoji')) return;
+  const handleOpenSearch = useLastCallback(() => {
+    updateMiddleSearch({ chatId, threadId, update: {} });
+  });
+
+  const handleOpenChat = useLastCallback((event: React.MouseEvent | React.TouchEvent) => {
+    if ((event.target as Element).closest('.title > .custom-emoji')) return;
 
     openThreadWithInfo({ chatId, threadId });
+  });
+
+  const {
+    onMouseDown: handleLongPressMouseDown,
+    onMouseUp: handleLongPressMouseUp,
+    onMouseLeave: handleLongPressMouseLeave,
+    onTouchStart: handleLongPressTouchStart,
+    onTouchEnd: handleLongPressTouchEnd,
+  } = useLongPress({
+    onStart: handleOpenSearch,
+    onClick: handleOpenChat,
+    threshold: SEARCH_LONGTAP_THRESHOLD,
   });
 
   const handleUnpinMessage = useLastCallback((messageId: number) => {
@@ -215,10 +231,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
       ? pinnedMessageIds[cycleRestrict(pinnedMessageIds.length, pinnedMessageIds.indexOf(pinnedMessageId!) - 2)]
       : pinnedMessageId!;
 
-    if (onFocusPinnedMessage(messageId)) {
+    if (!getLoadingPinnedId()) {
       focusMessage({
         chatId, threadId, messageId, noForumTopicPanel: true,
       });
+      onFocusPinnedMessage(messageId);
     }
   });
 
@@ -292,27 +309,27 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const {
     shouldRender: shouldShowChatReportPanel,
     transitionClassNames: chatReportPanelClassNames,
-  } = useShowTransition(hasChatSettings);
+  } = useShowTransitionDeprecated(hasChatSettings);
   const renderingChatSettings = useCurrentOrPrev(hasChatSettings ? settings : undefined, true);
 
   const {
     shouldRender: shouldRenderAudioPlayer,
     transitionClassNames: audioPlayerClassNames,
-  } = useShowTransition(Boolean(audioMessage));
+  } = useShowTransitionDeprecated(Boolean(audioMessage));
 
   const renderingAudioMessage = useCurrentOrPrev(audioMessage, true);
 
   const {
     shouldRender: shouldRenderPinnedMessage,
     transitionClassNames: pinnedMessageClassNames,
-  } = useShowTransition(Boolean(pinnedMessage), undefined, true);
+  } = useShowTransitionDeprecated(Boolean(pinnedMessage) && !isMiddleSearchOpen, undefined, true);
 
   const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage, true);
   const renderingPinnedMessagesCount = useCurrentOrPrev(pinnedMessagesCount, true);
   const renderingCanUnpin = useCurrentOrPrev(canUnpin, true);
   const renderingPinnedMessageTitle = useCurrentOrPrev(topMessageTitle);
 
-  const prevTransitionKey = usePrevious(currentTransitionKey);
+  const prevTransitionKey = usePreviousDeprecated(currentTransitionKey);
   const cleanupExceptionKey = (
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
   );
@@ -389,8 +406,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, !isSavedDialog)}
         <div
           className="chat-info-wrapper"
-          onClick={handleHeaderClick}
-          onMouseDown={handleHeaderMouseDown}
+          onMouseDown={handleLongPressMouseDown}
+          onMouseUp={handleLongPressMouseUp}
+          onMouseLeave={handleLongPressMouseLeave}
+          onTouchStart={handleLongPressTouchStart}
+          onTouchEnd={handleLongPressTouchEnd}
         >
           {isUserId(realChatId) ? (
             <PrivateChatInfo
@@ -488,7 +508,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
           onUnpinMessage={renderingCanUnpin ? handleUnpinMessage : undefined}
           onClick={handlePinnedMessageClick}
           onAllPinnedClick={handleAllPinnedClick}
-          isLoading={waitingForPinnedId !== undefined}
+          getLoadingPinnedId={getLoadingPinnedId}
           isFullWidth={isPinnedMessagesFullWidth}
         />
       )}
@@ -562,6 +582,7 @@ export default memo(withGlobal<OwnProps>(
     const emojiStatusSticker = emojiStatus && global.customEmojis.byId[emojiStatus.documentId];
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
+    const isMiddleSearchOpen = Boolean(selectCurrentMiddleSearch(global));
 
     const state: StateProps = {
       typingStatus,
@@ -581,6 +602,7 @@ export default memo(withGlobal<OwnProps>(
       emojiStatusSticker,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
       isSavedDialog,
+      isMiddleSearchOpen,
     };
 
     const messagesById = selectChatMessages(global, chatId);
@@ -610,7 +632,7 @@ export default memo(withGlobal<OwnProps>(
       } = (
         firstPinnedMessage
         && pinnedMessageIds.length === 1
-        && selectAllowedMessageActions(global, firstPinnedMessage, threadId)
+        && selectAllowedMessageActionsSlow(global, firstPinnedMessage, threadId)
       ) || {};
 
       return {

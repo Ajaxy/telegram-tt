@@ -1,0 +1,142 @@
+.root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-top: 3.5rem;
+}
+
+.header {
+  padding: 0.5rem;
+  padding-left: 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.title {
+  margin-inline: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.balance-container {
+  margin-left: auto;
+  align-items: end;
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-caption {
+  font-size: 1rem;
+}
+
+.star-balance {
+  margin-right: 0.1875rem;
+}
+
+.balance {
+  display: flex;
+  font-size: 1rem;
+  font-weight: 500;
+  align-items: center;
+}
+
+.optionsSection {
+  padding: 1rem;
+  padding-bottom: 0.5rem;
+  box-shadow: 0 1px 2px var(--color-default-shadow);
+}
+
+.checkboxTitle {
+  color: var(--color-text);
+  font-size: 1rem;
+  text-transform: initial;
+  margin: 0;
+}
+
+.actionMessageView {
+  display: grid;
+  place-content: center;
+  height: 22.5rem;
+  margin-bottom: 0;
+
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+
+  background-color: var(--theme-background-color);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+
+  :global(html.theme-light) & {
+    background-image: url('../../../assets/chat-bg-br.png');
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: url('../../../assets/chat-bg-pattern-light.png');
+    background-position: top right;
+    background-size: 510px auto;
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+
+    :global(html.theme-dark) & {
+      background-image: url('../../../assets/chat-bg-pattern-dark.png');
+      mix-blend-mode: unset;
+    }
+
+    @media (max-width: 600px) {
+      bottom: auto;
+      height: calc(var(--vh, 1vh) * 100);
+    }
+  }
+}
+
+.messageInput, .limited {
+  margin-bottom: 0.5rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  padding-top: 0.5rem;
+  flex-grow: 1;
+  flex-direction: column;
+  background-color: var(--color-background-secondary);
+}
+
+.switcher {
+  margin-bottom: 0 !important;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.main-button {
+  display: flex;
+  font-weight: 500;
+  font-size: 1rem;
+  height: 3rem;
+}
+
+.star {
+  --color-fill: var(--color-white);
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.1875rem;
+  margin-left: 0.5rem;
+}

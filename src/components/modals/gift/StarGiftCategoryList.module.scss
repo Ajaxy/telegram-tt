@@ -1,0 +1,50 @@
+@use '../../../styles/mixins';
+
+.list {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.0625rem;
+  flex-wrap: nowrap;
+  background-color: var(--color-background);
+  overflow-x: auto;
+  overflow-y: hidden;
+  z-index: 1;
+
+  font-size: 0.875rem;
+  padding-block: 0.25rem;
+  justify-content: flex-start;
+
+  // Prevent first item from being always partially obscured
+  margin-left: -0.5rem;
+  padding-left: 0.5rem;
+
+  @include mixins.gradient-border-horizontal(0.5rem, 0.5rem);
+}
+
+.item-selected,
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  width: auto;
+  padding: 0.375rem 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  border-radius: 1rem;
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--color-background-secondary-accent);
+  }
+}
+
+.selected-item {
+  background-color: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+}
+
+.star {
+  margin-right: 0.1875rem;
+}

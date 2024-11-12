@@ -5,7 +5,7 @@ import React, {
 import { getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiAvailableReaction, ApiReaction, ApiSticker, ApiStickerSet,
+  ApiAvailableReaction, ApiReaction, ApiReactionWithPaid, ApiSticker, ApiStickerSet,
 } from '../../api/types';
 import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 
@@ -34,8 +34,8 @@ import { REM } from './helpers/mediaDimensions';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 import useScrolledState from '../../hooks/useScrolledState';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
@@ -43,7 +43,7 @@ import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
 import StickerSetCover from '../middle/composer/StickerSetCover';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import StickerButton from './StickerButton';
 import StickerSet from './StickerSet';
 
@@ -58,12 +58,13 @@ type OwnProps = {
   loadAndPlay: boolean;
   idPrefix?: string;
   withDefaultTopicIcons?: boolean;
-  onCustomEmojiSelect: (sticker: ApiSticker) => void;
-  onReactionSelect?: (reaction: ApiReaction) => void;
   selectedReactionIds?: string[];
   isStatusPicker?: boolean;
   isReactionPicker?: boolean;
   isTranslucent?: boolean;
+  onCustomEmojiSelect: (sticker: ApiSticker) => void;
+  onReactionSelect?: (reaction: ApiReactionWithPaid) => void;
+  onReactionContext?: (reaction: ApiReactionWithPaid) => void;
   onContextMenuOpen?: NoneToVoidFunction;
   onContextMenuClose?: NoneToVoidFunction;
   onContextMenuClick?: NoneToVoidFunction;
@@ -86,6 +87,7 @@ type StateProps = {
   canAnimate?: boolean;
   isSavedMessages?: boolean;
   isCurrentUserPremium?: boolean;
+  isWithPaidReaction?: boolean;
 };
 
 const HEADER_BUTTON_WIDTH = 2.5 * REM; // px (including margin)
@@ -93,6 +95,7 @@ const HEADER_BUTTON_WIDTH = 2.5 * REM; // px (including margin)
 const DEFAULT_ID_PREFIX = 'custom-emoji-set';
 const TOP_REACTIONS_COUNT = 16;
 const RECENT_REACTIONS_COUNT = 32;
+const RECENT_DEFAULT_STATUS_COUNT = 7;
 const FADED_BUTTON_SET_IDS = new Set([RECENT_SYMBOL_SET_ID, FAVORITE_SYMBOL_SET_ID, POPULAR_SYMBOL_SET_ID]);
 const STICKER_SET_IDS_WITH_COVER = new Set([
   RECENT_SYMBOL_SET_ID,
@@ -127,8 +130,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   defaultTopicIconsId,
   defaultStatusIconsId,
   defaultTagReactions,
+  isWithPaidReaction,
   onCustomEmojiSelect,
   onReactionSelect,
+  onReactionContext,
   onContextMenuOpen,
   onContextMenuClose,
   onContextMenuClick,
@@ -164,7 +169,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     selectStickerSet,
   } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const areAddedLoaded = Boolean(addedCustomEmojiIds);
 
@@ -185,7 +190,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     }
 
     if (isReactionPicker && !isSavedMessages) {
-      const topReactionsSlice = topReactions?.slice(0, TOP_REACTIONS_COUNT) || [];
+      const topReactionsSlice: ApiReactionWithPaid[] = topReactions?.slice(0, TOP_REACTIONS_COUNT) || [];
+      if (isWithPaidReaction) {
+        topReactionsSlice.unshift({ type: 'paid' });
+      }
       if (topReactionsSlice?.length) {
         defaultSets.push({
           id: TOP_SYMBOL_SET_ID,
@@ -201,6 +209,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         .filter((reaction) => !topReactionsSlice.some((topReaction) => isSameReaction(topReaction, reaction)))
         .slice(0, RECENT_REACTIONS_COUNT);
       const cleanAvailableReactions = (availableReactions || [])
+        .filter(({ isInactive }) => !isInactive)
         .map(({ reaction }) => reaction)
         .filter((reaction) => {
           return !topReactionsSlice.some((topReaction) => isSameReaction(topReaction, reaction))
@@ -221,7 +230,9 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     } else if (isStatusPicker) {
       const defaultStatusIconsPack = stickerSetsById[defaultStatusIconsId!];
       if (defaultStatusIconsPack?.stickers?.length) {
-        const stickers = (defaultStatusIconsPack.stickers || []).concat(recentCustomEmojis || []);
+        const stickers = defaultStatusIconsPack.stickers
+          .slice(0, RECENT_DEFAULT_STATUS_COUNT)
+          .concat(recentCustomEmojis || []);
         defaultSets.push({
           ...defaultStatusIconsPack,
           stickers,
@@ -267,6 +278,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     addedCustomEmojiIds, isReactionPicker, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
     customEmojiFeaturedIds, stickerSetsById, topReactions, availableReactions, lang, recentReactions,
     defaultStatusIconsId, defaultTopicIconsId, isSavedMessages, defaultTagReactions, chatEmojiSetId,
+    isWithPaidReaction,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -297,10 +309,6 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
   const handleEmojiSelect = useLastCallback((emoji: ApiSticker) => {
     onCustomEmojiSelect(emoji);
-  });
-
-  const handleReactionSelect = useLastCallback((reaction: ApiReaction) => {
-    onReactionSelect?.(reaction);
   });
 
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
@@ -390,6 +398,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     pickerStyles.main_customEmoji,
     IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll',
     pickerListClassName,
+    pickerStyles.hasHeader,
   );
 
   return (
@@ -436,7 +445,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
               selectedReactionIds={selectedReactionIds}
               availableReactions={availableReactions}
               isTranslucent={isTranslucent}
-              onReactionSelect={handleReactionSelect}
+              onReactionSelect={onReactionSelect}
+              onReactionContext={onReactionContext}
               onStickerSelect={handleEmojiSelect}
               onContextMenuOpen={onContextMenuOpen}
               onContextMenuClose={onContextMenuClose}
@@ -490,6 +500,7 @@ export default memo(withGlobal<OwnProps>(
       topReactions: isReactionPicker ? topReactions : undefined,
       recentReactions: isReactionPicker ? recentReactions : undefined,
       chatEmojiSetId: chatFullInfo?.emojiSet?.id,
+      isWithPaidReaction: isReactionPicker && chatFullInfo?.isPaidReactionAvailable,
       availableReactions: isReactionPicker ? availableReactions : undefined,
       defaultTagReactions: isReactionPicker ? defaultTags : undefined,
     };

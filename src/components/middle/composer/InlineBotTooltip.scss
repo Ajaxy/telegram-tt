@@ -10,6 +10,7 @@
     grid-auto-flow: dense;
     grid-gap: 1px;
     padding: 0;
+    scrollbar-gutter: stable both-edges;
 
     @media (max-width: 600px) {
       grid-template-columns: repeat(4, 1fr);

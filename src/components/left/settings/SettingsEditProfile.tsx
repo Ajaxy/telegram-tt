@@ -18,9 +18,9 @@ import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
-import usePrevious from '../../../hooks/usePrevious';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
@@ -72,7 +72,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
     updateProfile,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const firstEditableUsername = useMemo(() => usernames?.find(({ isEditable }) => isEditable), [usernames]);
   const currentUsername = firstEditableUsername?.username || '';
@@ -91,7 +91,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   const isLoading = progress === ProfileEditProgress.InProgress;
   const isUsernameError = editableUsername === false;
 
-  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
   const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
   const shouldRenderUsernamesManage = usernames && usernames.length > 1;
 

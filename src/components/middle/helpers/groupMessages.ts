@@ -2,7 +2,7 @@ import type { ApiMessage } from '../../../api/types';
 import type { IAlbum } from '../../../types';
 
 import { isActionMessage } from '../../../global/helpers';
-import { getDayStartAt } from '../../../util/date/dateFormat';
+import { getDayStartAt } from '../../../util/dates/dateFormat';
 
 type SenderGroup = (ApiMessage | IAlbum)[];
 
@@ -39,7 +39,7 @@ export function groupMessages(
           messages: [message],
           mainMessage: message,
           hasMultipleCaptions: false,
-        };
+        } satisfies IAlbum;
       } else {
         currentAlbum.messages.push(message);
         if (message.hasComments) {
@@ -54,6 +54,14 @@ export function groupMessages(
           }
         }
       }
+    } else if ((message.content.paidMedia?.extendedMedia.length || 0) > 1) {
+      currentSenderGroup.push({
+        albumId: `paid-${message.id}`,
+        messages: [message],
+        mainMessage: message,
+        hasMultipleCaptions: false,
+        isPaidMedia: true,
+      } satisfies IAlbum);
     } else {
       currentSenderGroup.push(message);
     }
@@ -67,6 +75,7 @@ export function groupMessages(
       currentSenderGroup.push(currentAlbum);
       currentAlbum = undefined;
     }
+
     const lastSenderGroupItem = currentSenderGroup[currentSenderGroup.length - 1];
     if (nextMessage) {
       const nextMessageDayStartsAt = getDayStartAt(nextMessage.date * 1000);
@@ -84,6 +93,7 @@ export function groupMessages(
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
         || message.isOutgoing !== nextMessage.isOutgoing
+        || message.postAuthorTitle !== nextMessage.postAuthorTitle
         || (isActionMessage(message) && !message.content.action?.phoneCall)
         || (isActionMessage(nextMessage) && !nextMessage.content.action?.phoneCall)
         || message.inlineButtons

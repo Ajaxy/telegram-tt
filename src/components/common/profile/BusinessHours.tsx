@@ -6,23 +6,23 @@ import type { ApiBusinessWorkHours } from '../../../api/types';
 
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatWeekday } from '../../../util/date/dateFormat';
+import { formatTime, formatWeekday } from '../../../util/dates/dateFormat';
 import {
   getUtcOffset, getWeekStart, shiftTimeRanges, splitDays,
-} from '../../../util/date/workHours';
+} from '../../../util/dates/workHours';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useSelectorSignal from '../../../hooks/useSelectorSignal';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ListItem from '../../ui/ListItem';
 import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../ui/Transition';
-import Icon from '../Icon';
+import Icon from '../icons/Icon';
 
 import styles from './BusinessHours.module.scss';
 
@@ -39,7 +39,7 @@ const BusinessHours = ({
   const transitionRef = useRef<HTMLDivElement>(null);
   const [isExpanded, expand, collapse] = useFlag(false);
   const [isMyTime, showInMyTime, showInLocalTime] = useFlag(false);
-  const lang = useLang();
+  const lang = useOldLang();
   const forceUpdate = useForceUpdate();
 
   useInterval(forceUpdate, 60 * 1000);
@@ -114,7 +114,7 @@ const BusinessHours = ({
 
   useEffect(() => {
     if (!isExpanded) return;
-    const slide = document.querySelector<HTMLElement>(`.${ACTIVE_SLIDE_CLASS_NAME} .${styles.timetable}`);
+    const slide = document.querySelector<HTMLElement>(`.${ACTIVE_SLIDE_CLASS_NAME} > .${styles.timetable}`);
     if (!slide) return;
 
     const height = slide.offsetHeight;
@@ -124,7 +124,7 @@ const BusinessHours = ({
   }, [isExpanded]);
 
   const handleAnimationStart = useLastCallback(() => {
-    const slide = document.querySelector<HTMLElement>(`.${TO_SLIDE_CLASS_NAME} .${styles.timetable}`)!;
+    const slide = document.querySelector<HTMLElement>(`.${TO_SLIDE_CLASS_NAME} > .${styles.timetable}`)!;
 
     requestMeasure(() => {
       const height = slide.offsetHeight;

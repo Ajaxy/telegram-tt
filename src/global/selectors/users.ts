@@ -1,5 +1,5 @@
 import type {
-  ApiPeer, ApiUser, ApiUserFullInfo, ApiUserStatus,
+  ApiUser, ApiUserCommonChats, ApiUserFullInfo, ApiUserStatus,
 } from '../../api/types';
 import type { GlobalState } from '../types';
 
@@ -15,6 +15,12 @@ export function selectUserStatus<T extends GlobalState>(global: T, userId: strin
 
 export function selectUserFullInfo<T extends GlobalState>(global: T, userId: string): ApiUserFullInfo | undefined {
   return global.users.fullInfoById[userId];
+}
+
+export function selectUserCommonChats<T extends GlobalState>(
+  global: T, userId: string,
+): ApiUserCommonChats | undefined {
+  return global.users.commonChatsById[userId];
 }
 
 export function selectIsUserBlocked<T extends GlobalState>(global: T, userId: string) {
@@ -40,10 +46,6 @@ export function selectUserByPhoneNumber<T extends GlobalState>(global: T, phoneN
   const phoneNumberCleaned = phoneNumber.replace(/[^0-9]/g, '');
 
   return Object.values(global.users.byId).find((user) => user?.phoneNumber === phoneNumberCleaned);
-}
-
-export function selectIsUserOrChatContact<T extends GlobalState>(global: T, peer: ApiPeer) {
-  return global.contactList && global.contactList.userIds.includes(peer.id);
 }
 
 export function selectBot<T extends GlobalState>(global: T, userId: string): ApiUser | undefined {

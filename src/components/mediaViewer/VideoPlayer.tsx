@@ -17,7 +17,7 @@ import useBuffering from '../../hooks/useBuffering';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useFullscreen from '../../hooks/window/useFullscreen';
 import useControlsSignal from './hooks/useControlsSignal';
@@ -48,6 +48,8 @@ type OwnProps = {
   isForceMobileVersion?: boolean;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   isClickDisabled?: boolean;
+  isSponsoredMessage?: boolean;
+  handleSponsoredClick?: (isFromMedia?: boolean) => void;
 };
 
 const MAX_LOOP_DURATION = 30; // Seconds
@@ -72,6 +74,8 @@ const VideoPlayer: FC<OwnProps> = ({
   isProtected,
   isClickDisabled,
   isPreviewDisabled,
+  isSponsoredMessage,
+  handleSponsoredClick,
 }) => {
   const {
     setMediaViewerVolume,
@@ -126,11 +130,15 @@ const VideoPlayer: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(!isBuffered && !isUnsupported, undefined, undefined, 'slow');
+  } = useShowTransitionDeprecated(
+    !isBuffered && !isUnsupported, undefined, undefined, 'slow',
+  );
   const {
     shouldRender: shouldRenderPlayButton,
     transitionClassNames: playButtonClassNames,
-  } = useShowTransition(IS_IOS && !isPlaying && !shouldRenderSpinner && !isUnsupported, undefined, undefined, 'slow');
+  } = useShowTransitionDeprecated(
+    IS_IOS && !isPlaying && !shouldRenderSpinner && !isUnsupported, undefined, undefined, 'slow',
+  );
 
   useEffect(() => {
     lockControls(shouldRenderSpinner);
@@ -167,6 +175,10 @@ const VideoPlayer: FC<OwnProps> = ({
   });
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLVideoElement, MouseEvent>) => {
+    if (isSponsoredMessage) {
+      handleSponsoredClick?.(true);
+      onClose(e);
+    }
     if (isClickDisabled) {
       return;
     }
@@ -177,7 +189,8 @@ const VideoPlayer: FC<OwnProps> = ({
     }
   });
 
-  useVideoCleanup(videoRef, []);
+  useVideoCleanup(videoRef, bufferingHandlers);
+
   const [, setCurrentTime] = useCurrentTimeSignal();
   const [, setIsVideoWaiting] = useVideoWaitingSignal();
 
@@ -323,12 +336,11 @@ const VideoPlayer: FC<OwnProps> = ({
           <ProgressSpinner
             size="xl"
             progress={isBuffered ? 1 : loadProgress}
-            square
             onClick={onClose}
           />
         </div>
       )}
-      {!isGif && !isUnsupported && (
+      {!isGif && !isSponsoredMessage && !isUnsupported && (
         <VideoPlayerControls
           url={url}
           isPlaying={isPlaying}

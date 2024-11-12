@@ -3,15 +3,16 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getStickerPreviewHash } from '../../../global/helpers';
+import { getStickerMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { preloadImage } from '../../../util/files';
 import { REM } from '../helpers/mediaDimensions';
 
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
-import useLang from '../../../hooks/useLang';
+import { useThrottleForHeavyAnimation } from '../../../hooks/useHeavyAnimation';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 import useCustomEmoji from '../hooks/useCustomEmoji';
@@ -74,19 +75,22 @@ const EmojiIconBackground = ({
 
   const dpr = useDevicePixelRatio();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { customEmoji } = useCustomEmoji(emojiDocumentId);
-  const previewMediaHash = customEmoji ? getStickerPreviewHash(customEmoji.id) : undefined;
+  const previewMediaHash = customEmoji ? getStickerMediaHash(customEmoji, 'preview') : undefined;
   const previewUrl = useMedia(previewMediaHash);
 
   const customColor = useDynamicColorListener(containerRef);
 
-  useEffect(() => {
+  const preloadAfterHeavyAnimation = useThrottleForHeavyAnimation(() => {
     if (!previewUrl) return;
-
     preloadImage(previewUrl).then(setEmojiImage);
   }, [previewUrl]);
+
+  useEffect(() => {
+    preloadAfterHeavyAnimation();
+  }, [preloadAfterHeavyAnimation]);
 
   const updateCanvas = useLastCallback(() => {
     const canvas = canvasRef.current;
@@ -122,30 +126,32 @@ const EmojiIconBackground = ({
     context.restore();
   });
 
+  const updateCanvasAfterHeavyAnimation = useThrottleForHeavyAnimation(updateCanvas, [updateCanvas]);
+
   useEffect(() => {
-    updateCanvas();
-  }, [emojiImage, lang.isRtl, customColor]);
+    updateCanvasAfterHeavyAnimation();
+  }, [emojiImage, lang.isRtl, customColor, updateCanvasAfterHeavyAnimation]);
 
-  const updateCanvasSize = useLastCallback((parentWidth: number, parentHeight: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const updateCanvasSize = useThrottleForHeavyAnimation((parentWidth: number, parentHeight: number) => {
+    requestMutation(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    canvas.width = parentWidth * dpr;
-    canvas.height = parentHeight * dpr;
+      canvas.width = parentWidth * dpr;
+      canvas.height = parentHeight * dpr;
 
-    canvas.style.width = `${parentWidth}px`;
-    canvas.style.height = `${parentHeight}px`;
+      canvas.style.width = `${parentWidth}px`;
+      canvas.style.height = `${parentHeight}px`;
 
-    updateCanvas();
-  });
+      updateCanvas();
+    });
+  }, [dpr]);
 
-  const handleResize = useLastCallback((entry: ResizeObserverEntry) => {
+  const handleResize = useThrottleForHeavyAnimation((entry: ResizeObserverEntry) => {
     const { width, height } = entry.contentRect;
 
-    requestMutation(() => {
-      updateCanvasSize(width, height);
-    });
-  });
+    updateCanvasSize(width, height);
+  }, [updateCanvasSize]);
 
   useResizeObserver(containerRef, handleResize);
 
@@ -155,10 +161,8 @@ const EmojiIconBackground = ({
 
     const { width, height } = container.getBoundingClientRect();
 
-    requestMutation(() => {
-      updateCanvasSize(width, height);
-    });
-  }, [dpr]);
+    updateCanvasSize(width, height);
+  }, [updateCanvasSize]);
 
   return (
     <div className={buildClassName(styles.root, className)} ref={containerRef}>

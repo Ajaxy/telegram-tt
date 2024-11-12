@@ -356,6 +356,7 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsPrivacyVisibilityExceptionList
             isAllowList
+            withPremiumCategory={currentScreen === SettingsScreens.PrivacyGroupChatsAllowedContacts}
             screen={currentScreen}
             onScreenSelect={onScreenSelect}
             isActive={isScreenActive || privacyAllowScreens[currentScreen]}

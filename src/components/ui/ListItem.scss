@@ -62,7 +62,7 @@
     outline: none !important;
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 1rem 0.8125rem;
     position: relative;
     overflow: hidden;
     white-space: nowrap;
@@ -73,17 +73,16 @@
 
     body.is-ios &,
     body.is-android & {
-      border-radius: 0 ;
+      border-radius: 0;
     }
 
     @media (max-width: 600px) {
-      border-radius: 0 ;
+      border-radius: 0;
     }
 
     > .ListItem-main-icon {
       font-size: 1.5rem;
-      margin-inline-start: 0.125rem;
-      margin-inline-end: 1.25rem;
+      margin-inline-end: 1.8125rem;
       color: var(--color-text-secondary);
     }
 
@@ -148,7 +147,7 @@
 
       @media (hover: hover) {
         &:hover,
-        &:focus {
+        &:focus-visible {
           --background-color: var(--color-chat-hover);
         }
       }
@@ -179,6 +178,11 @@
 
     .ListItem-button {
       padding: 0.5rem 1rem;
+      min-height: 3rem;
+    }
+
+    .ListItem-main-icon {
+      margin-inline-end: 1.75rem;
     }
   }
 
@@ -267,6 +271,7 @@
     .typing-status {
       font-size: 1rem;
       margin: 0;
+      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       text-align: initial;
@@ -378,60 +383,6 @@
     }
   }
 
-  &.search-result-message {
-    .title {
-      flex-grow: 1;
-      padding-right: 0.125rem;
-    }
-
-    .search-result-message-top {
-      display: flex;
-    }
-
-    h3 {
-      max-width: 80%;
-    }
-
-    h3,
-    .subtitle {
-      font-size: 1rem;
-      line-height: 1.5rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      text-align: left;
-      display: block;
-    }
-
-    .subtitle {
-      color: var(--color-text-secondary);
-
-      .matching-text-highlight {
-        color: var(--color-text);
-        background: #cae3f7;
-        border-radius: 0.25rem;
-        padding: 0 0.125rem;
-        display: inline-block;
-
-        .theme-dark & {
-          --color-text: #000;
-        }
-      }
-    }
-
-    &[dir="rtl"] {
-      .LastMessageMeta {
-        margin-left: 0;
-        margin-right: auto;
-      }
-
-      .subtitle {
-        margin-right: 0;
-        display: block;
-      }
-    }
-  }
-
   &.picker-list-item {
     margin: 0;
 
@@ -451,6 +402,10 @@
       height: 1.5rem;
       margin: 0;
       padding-left: 4rem;
+    }
+
+    .withSubLabel {
+      height: 2.5rem;
     }
 
     &[dir="rtl"] {
@@ -484,6 +439,10 @@
     .subtitle {
       display: block;
       text-align: initial;
+
+      &[dir="rtl"] {
+        text-align: right;
+      }
     }
 
     .title {

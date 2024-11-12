@@ -3,17 +3,17 @@ import type { TypedBroadcastChannel } from '../../../util/multitab';
 import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
 import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
-import type { OriginRequest, ThenArg, WorkerMessageEvent } from './types';
+import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
 
-import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../../config';
+import { DATA_BROADCAST_CHANNEL_NAME, DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
 import { logDebugMessage } from '../../../util/debugConsole';
 import Deferred from '../../../util/Deferred';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
-import { pause } from '../../../util/schedulers';
+import { pause, throttleWithTickEnd } from '../../../util/schedulers';
 import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
 
-type RequestStates = {
+type RequestState = {
   messageId: string;
   resolve: Function;
   reject: Function;
@@ -23,14 +23,18 @@ type RequestStates = {
 
 const HEALTH_CHECK_TIMEOUT = 150;
 const HEALTH_CHECK_MIN_DELAY = 5 * 1000; // 5 sec
+const NO_QUEUE_BEFORE_INIT = new Set(['destroy']);
 
 let worker: Worker | undefined;
-const requestStates = new Map<string, RequestStates>();
-const requestStatesByCallback = new Map<AnyToVoidFunction, RequestStates>();
+
+const requestStates = new Map<string, RequestState>();
+const requestStatesByCallback = new Map<AnyToVoidFunction, RequestState>();
+
+let pendingPayloads: OriginPayload[] = [];
+
 const savedLocalDb: LocalDb = {
   chats: {},
   users: {},
-  messages: {},
   documents: {},
   stickerSets: {},
   photos: {},
@@ -47,6 +51,17 @@ subscribeToMasterChange((isMasterTabNew) => {
 const channel = IS_MULTITAB_SUPPORTED
   ? new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel
   : undefined;
+
+const postMessagesOnTickEnd = throttleWithTickEnd(() => {
+  const payloads = pendingPayloads;
+  pendingPayloads = [];
+  worker?.postMessage({ payloads });
+});
+
+function postMessageOnTickEnd(payload: OriginPayload) {
+  pendingPayloads.push(payload);
+  postMessagesOnTickEnd();
+}
 
 export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
   if (!channel) return;
@@ -139,6 +154,10 @@ export function setShouldEnableDebugLog(value: boolean) {
  */
 export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
   if (!isInited) {
+    if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
+      return Promise.resolve(undefined) as MethodResponse<T>;
+    }
+
     const deferred = new Deferred();
     localApiRequestsQueue.push({ fnName, args, deferred });
 
@@ -179,6 +198,10 @@ export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: Method
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
   if (!isInited && isMasterTab) {
+    if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
+      return Promise.resolve(undefined) as MethodResponse<T>;
+    }
+
     const deferred = new Deferred();
     apiRequestsQueue.push({ fnName, args, deferred });
 
@@ -242,7 +265,7 @@ export function cancelApiProgress(progressCallback: ApiOnProgress) {
 }
 
 export function cancelApiProgressMaster(messageId: string) {
-  worker?.postMessage({
+  postMessageOnTickEnd({
     type: 'cancelProgress',
     messageId,
   });
@@ -250,34 +273,37 @@ export function cancelApiProgressMaster(messageId: string) {
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
   worker?.addEventListener('message', ({ data }: WorkerMessageEvent) => {
-    if (!data) return;
-    if (data.type === 'updates') {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      let DEBUG_startAt: number | undefined;
-      if (DEBUG) {
-        DEBUG_startAt = performance.now();
-      }
-
-      data.updates.forEach(onUpdate);
-
-      if (DEBUG) {
-        const duration = performance.now() - DEBUG_startAt!;
-        if (duration > 5) {
-          // eslint-disable-next-line no-console
-          console.warn(`[API] Slow updates processing: ${data.updates.length} updates in ${duration} ms`);
+    data?.payloads.forEach((payload) => {
+      if (payload.type === 'updates') {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        let DEBUG_startAt: number | undefined;
+        if (DEBUG) {
+          DEBUG_startAt = performance.now();
         }
+
+        payload.updates.forEach(onUpdate);
+
+        if (DEBUG) {
+          const duration = performance.now() - DEBUG_startAt!;
+          if (duration > 5) {
+            // eslint-disable-next-line no-console
+            console.warn(`[API] Slow updates processing: ${payload.updates.length} updates in ${duration} ms`);
+          }
+        }
+      } else if (payload.type === 'methodResponse') {
+        handleMethodResponse(payload);
+      } else if (payload.type === 'methodCallback') {
+        handleMethodCallback(payload);
+      } else if (payload.type === 'unhandledError') {
+        const message = payload.error?.message;
+        if (message && IGNORE_UNHANDLED_ERRORS.has(message)) return;
+        throw new Error(message);
+      } else if (payload.type === 'sendBeacon') {
+        navigator.sendBeacon(payload.url, payload.data);
+      } else if (payload.type === 'debugLog') {
+        logDebugMessage(payload.level, ...payload.args);
       }
-    } else if (data.type === 'methodResponse') {
-      handleMethodResponse(data);
-    } else if (data.type === 'methodCallback') {
-      handleMethodCallback(data);
-    } else if (data.type === 'unhandledError') {
-      throw new Error(data.error?.message);
-    } else if (data.type === 'sendBeacon') {
-      navigator.sendBeacon(data.url, data.data);
-    } else if (data.type === 'debugLog') {
-      logDebugMessage(data.level, ...data.args);
-    }
+    });
   });
 }
 
@@ -315,7 +341,7 @@ function makeRequestToMaster(message: {
     ...message,
   };
 
-  const requestState = { messageId } as RequestStates;
+  const requestState = { messageId } as RequestState;
 
   // Re-wrap type because of `postMessage`
   const promise: Promise<MethodResponse<keyof Methods>> = new Promise((resolve, reject) => {
@@ -347,14 +373,14 @@ function makeRequestToMaster(message: {
   return promise;
 }
 
-function makeRequest(message: OriginRequest) {
+function makeRequest(message: OriginPayload) {
   const messageId = generateUniqueId();
-  const payload: OriginRequest = {
+  const payload: OriginPayload = {
     messageId,
     ...message,
   };
 
-  const requestState = { messageId } as RequestStates;
+  const requestState = { messageId } as RequestState;
 
   // Re-wrap type because of `postMessage`
   const promise: Promise<MethodResponse<keyof Methods>> = new Promise((resolve, reject) => {
@@ -383,7 +409,7 @@ function makeRequest(message: OriginRequest) {
       }
     });
 
-  worker?.postMessage(payload);
+  postMessageOnTickEnd(payload);
 
   return promise;
 }

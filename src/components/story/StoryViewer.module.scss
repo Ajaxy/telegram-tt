@@ -67,6 +67,7 @@
   right: 1rem;
   top: 1rem;
   z-index: 3;
+
   @media (max-width: 600px) {
     display: none;
   }
@@ -118,7 +119,7 @@
   .composer,
   .caption,
   .captionGradient,
-  .captionBackdrop{
+  .captionBackdrop {
     transition: opacity 250ms ease-in-out;
     opacity: 0;
   }
@@ -147,11 +148,13 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate3d(
+  transform:
+    translate3d(
       calc(var(--slide-x, -50%) - var(--slide-translate-x, 0px)),
       calc(-50% - var(--slide-translate-y, 0px)),
       0
-  ) scale(var(--slide-translate-scale, 1));
+    )
+    scale(var(--slide-translate-scale, 1));
   transform-origin: 0 50%;
 
   border-radius: var(--border-radius-default-small);
@@ -159,6 +162,7 @@
   @for $i from -4 through 4 {
     $slideWidth: 10.875rem;
     $basis: 4.25rem;
+
     @if $i < 0 {
       $basis: -12.625rem;
     }
@@ -323,6 +327,7 @@
 }
 
 // Shared styles for the header that are also used in ghost animation
+
 @mixin story-header {
   position: absolute;
   width: 100%;
@@ -432,9 +437,9 @@
   }
 }
 
-
 .closeButton {
   display: none;
+
   @media (max-width: 600px) {
     display: flex;
   }
@@ -447,6 +452,7 @@
 
   :global(.Button) {
     color: white;
+
     @media (max-width: 600px) {
       display: flex;
       &:active,
@@ -458,7 +464,6 @@
     }
   }
 }
-
 
 .visibilityButton {
   min-width: 1.5rem;

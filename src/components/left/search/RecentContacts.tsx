@@ -13,7 +13,7 @@ import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
 
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
@@ -72,7 +72,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
     clearRecentlyFoundChats();
   }, [clearRecentlyFoundChats]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <div className="RecentContacts custom-scroll">
@@ -105,10 +105,11 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
             {lang('Recent')}
 
             <Button
+              className="clear-recent-chats"
               round
               size="smaller"
               color="translucent"
-              ariaLabel="Clear recent chats"
+              ariaLabel={lang('Clear')}
               onClick={handleClearRecentlyFoundChats}
               isRtl={lang.isRtl}
             >

@@ -1,23 +1,21 @@
 import type { ActionReturnType } from '../../types';
 
-import { DEBUG } from '../../../config';
+import { DEBUG, MESSAGE_ID_REQUIRED_ERROR } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
-import { translate } from '../../../util/langProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChats,
   addStories,
   addStoriesForPeer,
-  addUsers,
   removePeerStory,
   updateLastReadStoryForPeer,
   updateLastViewedStoryForPeer,
   updatePeer,
-  updatePeerPinnedStory,
+  updatePeerProfileStory,
+  updatePeerStoriesFullyLoaded,
   updatePeerStoriesHidden,
   updatePeerStory,
   updatePeerStoryViews,
@@ -27,8 +25,10 @@ import {
   updateStoryViews,
   updateStoryViewsLoading,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectPeer, selectPeerStories, selectPeerStory,
+  selectPinnedStories, selectTabState,
 } from '../../selectors';
 
 const INFINITE_LOOP_MARKER = 100;
@@ -65,8 +65,6 @@ addActionHandler('loadAllStories', async (global): Promise<void> => {
     global.stories.stateHash = result.state;
 
     if ('peerStories' in result) {
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = addChats(global, buildCollectionByKey(result.chats, 'id'));
       global = addStories(global, result.peerStories);
       global = updatePeersWithStories(global, result.peerStories);
       global = updateStealthMode(global, result.stealthMode);
@@ -110,8 +108,6 @@ addActionHandler('loadAllHiddenStories', async (global): Promise<void> => {
     global.stories.archiveStateHash = result.state;
 
     if ('peerStories' in result) {
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = addChats(global, buildCollectionByKey(result.chats, 'id'));
       global = addStories(global, result.peerStories);
       global = updatePeersWithStories(global, result.peerStories);
       global = updateStealthMode(global, result.stealthMode);
@@ -151,9 +147,7 @@ addActionHandler('loadPeerSkippedStories', async (global, actions, payload): Pro
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = addStoriesForPeer(global, peerId, result.stories);
+  global = addStoriesForPeer(global, peerId, result.stories, result.pinnedIds);
   setGlobal(global);
 });
 
@@ -170,7 +164,7 @@ addActionHandler('viewStory', async (global, actions, payload): Promise<void> =>
 
   const serverTime = getServerTime();
 
-  if (story.expireDate < serverTime && story.isPinned) {
+  if (story.expireDate < serverTime && story.isInProfile) {
     void callApi('viewStory', { peer, storyId });
   }
 
@@ -212,8 +206,8 @@ addActionHandler('deleteStory', async (global, actions, payload): Promise<void> 
   setGlobal(global);
 });
 
-addActionHandler('toggleStoryPinned', async (global, actions, payload): Promise<void> => {
-  const { peerId, storyId, isPinned } = payload;
+addActionHandler('toggleStoryInProfile', async (global, actions, payload): Promise<void> => {
+  const { peerId, storyId, isInProfile } = payload;
 
   const peer = selectPeer(global, peerId);
   if (!peer) {
@@ -221,16 +215,63 @@ addActionHandler('toggleStoryPinned', async (global, actions, payload): Promise<
   }
 
   const story = selectPeerStory(global, peerId, storyId);
-  const currentIsPinned = story && 'content' in story ? story.isPinned : undefined;
-  global = updatePeerStory(global, peerId, storyId, { isPinned });
-  global = updatePeerPinnedStory(global, peerId, storyId, isPinned);
+  const currentIsPinned = story && 'content' in story ? story.isInProfile : undefined;
+  global = updatePeerStory(global, peerId, storyId, { isInProfile });
+  global = updatePeerProfileStory(global, peerId, storyId, isInProfile);
   setGlobal(global);
 
-  const result = await callApi('toggleStoryPinned', { peer, storyId, isPinned });
+  const result = await callApi('toggleStoryInProfile', { peer, storyId, isInProfile });
+  if (!result?.length) {
+    global = getGlobal();
+    global = updatePeerStory(global, peerId, storyId, { isInProfile: currentIsPinned });
+    global = updatePeerProfileStory(global, peerId, storyId, currentIsPinned);
+    setGlobal(global);
+  }
+});
+
+addActionHandler('toggleStoryPinnedToTop', async (global, actions, payload): Promise<void> => {
+  const { peerId, storyId } = payload;
+  const peer = selectPeer(global, peerId);
+  const peerStories = selectPeerStories(global, peerId);
+  if (!peer || !peerStories) {
+    return;
+  }
+
+  const oldPinnedIds = selectPinnedStories(global, peerId)?.map((s) => s.id) || [];
+  const isRemoving = oldPinnedIds.includes(storyId);
+  const newPinnedIds = isRemoving ? oldPinnedIds.filter((id) => id !== storyId) : [...oldPinnedIds, storyId];
+
+  global = {
+    ...getGlobal(),
+    stories: {
+      ...getGlobal().stories,
+      byPeerId: {
+        ...getGlobal().stories.byPeerId,
+        [peerId]: {
+          ...peerStories,
+          pinnedIds: newPinnedIds.sort((a, b) => b - a),
+        },
+      },
+    },
+  };
+  setGlobal(global);
+  const result = await callApi('toggleStoryPinnedToTop', { peer, storyIds: newPinnedIds });
+
   if (!result) {
     global = getGlobal();
-    global = updatePeerStory(global, peerId, storyId, { isPinned: currentIsPinned });
-    global = updatePeerPinnedStory(global, peerId, storyId, currentIsPinned);
+    global = {
+      ...global,
+      stories: {
+        ...global.stories,
+        byPeerId: {
+          ...global.stories.byPeerId,
+          [peerId]: {
+            ...peerStories,
+            pinnedIds: oldPinnedIds,
+          },
+        },
+      },
+    };
     setGlobal(global);
   }
 });
@@ -246,8 +287,6 @@ addActionHandler('loadPeerStories', async (global, actions, payload): Promise<vo
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addStoriesForPeer(global, peerId, result.stories);
   if (result.lastReadStoryId) {
     global = updateLastReadStoryForPeer(global, peerId, result.lastReadStoryId);
@@ -255,29 +294,33 @@ addActionHandler('loadPeerStories', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
-addActionHandler('loadPeerPinnedStories', async (global, actions, payload): Promise<void> => {
+addActionHandler('loadPeerProfileStories', async (global, actions, payload): Promise<void> => {
   const { peerId, offsetId } = payload;
   const peer = selectPeer(global, peerId);
-  if (!peer) {
+  const peerStories = selectPeerStories(global, peerId);
+  if (!peer || peerStories?.isFullyLoaded) {
     return;
   }
 
-  const result = await callApi('fetchPeerPinnedStories', { peer, offsetId });
+  const result = await callApi('fetchPeerProfileStories', { peer, offsetId });
   if (!result) {
     return;
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = addStoriesForPeer(global, peerId, result.stories);
+  if (Object.values(result.stories).length === 0) {
+    global = updatePeerStoriesFullyLoaded(global, peerId, true);
+  }
+
+  global = addStoriesForPeer(global, peerId, result.stories, result.pinnedIds);
   setGlobal(global);
 });
 
 addActionHandler('loadStoriesArchive', async (global, actions, payload): Promise<void> => {
   const { peerId, offsetId } = payload;
   const peer = selectPeer(global, peerId);
-  if (!peer) return;
+  const peerStories = selectPeerStories(global, peerId);
+  if (!peer || peerStories?.isArchiveFullyLoaded) return;
 
   const result = await callApi('fetchStoriesArchive', { peer, offsetId });
   if (!result) {
@@ -285,9 +328,10 @@ addActionHandler('loadStoriesArchive', async (global, actions, payload): Promise
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-  global = addStoriesForPeer(global, peerId, result.stories, true);
+  if (Object.values(result.stories).length === 0) {
+    global = updatePeerStoriesFullyLoaded(global, peerId, true, true);
+  }
+  global = addStoriesForPeer(global, peerId, result.stories, undefined, true);
   setGlobal(global);
 });
 
@@ -304,8 +348,6 @@ addActionHandler('loadPeerStoriesByIds', async (global, actions, payload): Promi
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addStoriesForPeer(global, peerId, result.stories);
   setGlobal(global);
 });
@@ -324,7 +366,6 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updatePeerStoryViews(global, peerId, storyId, result.views);
   setGlobal(global);
 });
@@ -366,8 +407,6 @@ addActionHandler('loadStoryViewList', async (global, actions, payload): Promise<
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = updateStoryViews(global, storyId, result.views, result.nextOffset, tabId);
   setGlobal(global);
 });
@@ -376,8 +415,8 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
   const {
     peerId,
     storyId,
-    reason,
-    description,
+    description = '',
+    option = '',
     tabId = getCurrentTabId(),
   } = payload;
   const peer = selectPeer(global, peerId);
@@ -385,19 +424,80 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
     return;
   }
 
-  const result = await callApi('reportStory', {
+  const response = await callApi('reportStory', {
     peer,
     storyId,
-    reason,
     description,
+    option,
   });
 
-  actions.showNotification({
-    message: result
-      ? translate('ReportPeer.AlertSuccess')
-      : 'An error occurred while submitting your report. Please, try again later.',
-    tabId,
-  });
+  if (!response) return;
+
+  const { result, error } = response;
+
+  if (error === MESSAGE_ID_REQUIRED_ERROR) {
+    actions.showNotification({
+      message: oldTranslate('lng_report_please_select_messages'),
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
+    return;
+  }
+
+  if (!result) return;
+
+  if (result.type === 'reported') {
+    actions.showNotification({
+      message: result
+        ? oldTranslate('ReportPeer.AlertSuccess')
+        : 'An error occurred while submitting your report. Please, try again later.',
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
+    return;
+  }
+
+  if (result.type === 'selectOption') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      title: result.title,
+      options: result.options,
+      subtitle: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        messageIds: [storyId],
+        subject: 'story',
+        peerId,
+        description,
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+
+  if (result.type === 'comment') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      isOptional: result.isOptional,
+      option: result.option,
+      title: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        messageIds: [storyId],
+        description,
+        peerId,
+        subject: 'story',
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
 });
 
 addActionHandler('editStoryPrivacy', (global, actions, payload): ActionReturnType => {

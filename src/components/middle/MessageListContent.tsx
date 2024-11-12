@@ -1,28 +1,32 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React, { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { MessageListType } from '../../global/types';
 import type { ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import type { MessageDateGroup } from './helpers/groupMessages';
-import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import {
-  getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
+  getMessageHtmlId,
+  getMessageOriginalId,
+  isActionMessage,
+  isOwnMessage,
+  isServiceNotificationMessage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { formatHumanDate } from '../../util/date/dateFormat';
+import { formatHumanDate } from '../../util/dates/dateFormat';
 import { compact } from '../../util/iteratees';
 import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useDerivedSignal from '../../hooks/useDerivedSignal';
-import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
 
@@ -32,7 +36,7 @@ import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
-  isCurrentUserPremium?: boolean;
+  areAdsEnabled?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageIds: number[];
@@ -58,13 +62,13 @@ interface OwnProps {
   isSavedDialog?: boolean;
   onScrollDownToggle: BooleanToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
-  onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
+  onIntersectPinnedMessage: OnIntersectPinnedMessage;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
-  isCurrentUserPremium,
+  areAdsEnabled,
   chatId,
   threadId,
   messageIds,
@@ -90,18 +94,20 @@ const MessageListContent: FC<OwnProps> = ({
   isSavedDialog,
   onScrollDownToggle,
   onNotchToggle,
-  onPinnedIntersectionChange,
+  onIntersectPinnedMessage,
 }) => {
   const { openHistoryCalendar } = getActions();
 
-  const getIsReady = useDerivedSignal(isReady);
+  const getIsHeavyAnimating2 = getIsHeavyAnimating;
+  const getIsReady = useDerivedSignal(() => isReady && !getIsHeavyAnimating2(), [isReady, getIsHeavyAnimating2]);
+
   const areDatesClickable = !isSavedDialog && !isSchedule;
 
   const {
     observeIntersectionForReading,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
-  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onPinnedIntersectionChange, chatId);
+  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onIntersectPinnedMessage, chatId);
 
   const {
     withHistoryTriggers,
@@ -120,7 +126,7 @@ const MessageListContent: FC<OwnProps> = ({
     isReady,
   );
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const unreadDivider = (
     <div className={buildClassName(UNREAD_DIVIDER_CLASS, 'local-action-message')} key="unread-messages">
@@ -132,7 +138,7 @@ const MessageListContent: FC<OwnProps> = ({
   }, 0);
   let appearanceIndex = 0;
 
-  const prevMessageIds = usePrevious(messageIds);
+  const prevMessageIds = usePreviousDeprecated(messageIds);
   const isNewMessage = Boolean(
     messageIds && prevMessageIds && messageIds[messageIds.length - 2] === prevMessageIds[prevMessageIds.length - 1],
   );
@@ -174,7 +180,7 @@ const MessageListContent: FC<OwnProps> = ({
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isJustAdded={isLastInList && isNewMessage}
             isLastInList={isLastInList}
-            onPinnedIntersectionChange={onPinnedIntersectionChange}
+            onIntersectPinnedMessage={onIntersectPinnedMessage}
           />,
         ]);
       }
@@ -243,7 +249,7 @@ const MessageListContent: FC<OwnProps> = ({
             isLastInDocumentGroup={position.isLastInDocumentGroup}
             isLastInList={position.isLastInList}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
-            onPinnedIntersectionChange={onPinnedIntersectionChange}
+            onIntersectPinnedMessage={onIntersectPinnedMessage}
             getIsMessageListReady={getIsReady}
           />,
           message.id === threadId && (
@@ -290,8 +296,14 @@ const MessageListContent: FC<OwnProps> = ({
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
-      {!isCurrentUserPremium && isViewportNewest && (
-        <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
+      {areAdsEnabled && isViewportNewest && (
+        <SponsoredMessage
+          key={chatId}
+          chatId={chatId}
+          containerRef={containerRef}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
+        />
       )}
       {withHistoryTriggers && (
         <div

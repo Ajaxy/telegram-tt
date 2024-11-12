@@ -3,13 +3,14 @@
   display: inline-flex;
   flex-direction: column;
   overflow: hidden;
-  
+
   @media (max-width: 600px) {
     overflow: visible;
   }
 
   @media (max-height: 640px) {
     margin-bottom: 1.75rem;
+
     @at-root .has-footer #{&} {
       margin-bottom: 0;
     }

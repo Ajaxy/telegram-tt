@@ -10,7 +10,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -42,7 +42,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
 }) => {
   const { updateChatMemberBannedRights } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isRemoveUserModalOpen, openRemoveUserModal, closeRemoveUserModal] = useFlag();
 
   useHistoryBack({

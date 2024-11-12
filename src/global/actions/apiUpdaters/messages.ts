@@ -1,5 +1,6 @@
 import type {
-  ApiChat, ApiMessage, ApiPollResult, ApiReactions,
+  ApiChat, ApiMediaExtendedPreview, ApiMessage, ApiReactions,
+  MediaContent,
 } from '../../../api/types';
 import type { ThreadId } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
@@ -14,10 +15,11 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   buildCollectionByKey, omit, pickTruthy, unique,
 } from '../../../util/iteratees';
-import { getMessageKey, isLocalMessageId } from '../../../util/messageKey';
+import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
 import {
+  addPaidReaction,
   checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage,
   isMessageLocal, isUserId,
 } from '../../helpers';
@@ -29,6 +31,7 @@ import {
   clearMessageTranslation,
   deleteChatMessages,
   deleteChatScheduledMessages,
+  deletePeerPhoto,
   deleteQuickReply,
   deleteQuickReplyMessages,
   deleteTopic,
@@ -36,9 +39,12 @@ import {
   replaceThreadParam,
   updateChat,
   updateChatLastMessageId,
+  updateChatMediaLoadingState,
   updateChatMessage,
   updateListedIds,
   updateMessageTranslations,
+  updatePoll,
+  updatePollVote,
   updateQuickReplies,
   updateQuickReplyMessage,
   updateScheduledMessage,
@@ -50,10 +56,10 @@ import {
 import { updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
 import {
+  selectCanAnimateSnapEffect,
   selectChat,
   selectChatLastMessageId,
   selectChatMessage,
-  selectChatMessageByPollId,
   selectChatMessages,
   selectChatScheduledMessages,
   selectCommonBoxChatId,
@@ -70,22 +76,23 @@ import {
   selectSavedDialogIdFromMessage,
   selectScheduledIds,
   selectScheduledMessage,
-  selectSendAs,
   selectTabState,
   selectThreadByMessage,
   selectThreadIdFromMessage,
   selectThreadInfo,
+  selectTopic,
   selectTopicFromMessage,
   selectViewportIds,
 } from '../../selectors';
 
 const ANIMATION_DELAY = 350;
+const SNAP_ANIMATION_DELAY = 1000;
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'newMessage': {
       const {
-        chatId, id, message, shouldForceReply, wasDrafted,
+        chatId, id, message, shouldForceReply, wasDrafted, poll,
       } = update;
       global = updateWithLocalMedia(global, chatId, id, message);
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
@@ -108,6 +115,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         if (isLocal && wasDrafted) {
           global = updateChatLastMessage(global, chatId, newMessage);
         }
+
+        const threadId = selectThreadIdFromMessage(global, newMessage);
+        global = updateChatMediaLoadingState(global, newMessage, chatId, threadId, tabId);
 
         if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage, tabId)) {
           if (isLocal && message.isOutgoing && !(message.content?.action) && !storyReplyInfo?.storyId
@@ -146,14 +156,18 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       });
 
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       // Reload dialogs if chat is not present in the list
-      if (!selectIsChatListed(global, chatId)) {
+      if (!isLocal && !selectIsChatListed(global, chatId)) {
         actions.loadTopChats();
       }
 
-      if (selectIsChatWithSelf(global, chatId) && !isLocal) {
+      if (!isLocal && selectIsChatWithSelf(global, chatId)) {
         const savedDialogId = selectSavedDialogIdFromMessage(global, newMessage);
         if (savedDialogId && !selectIsChatListed(global, savedDialogId, 'saved')) {
           actions.requestSavedDialogUpdate({ chatId: savedDialogId });
@@ -200,7 +214,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'newScheduledMessage': {
-      const { chatId, id, message } = update;
+      const {
+        chatId, id, message, poll,
+      } = update;
 
       global = updateWithLocalMedia(global, chatId, id, message, true);
 
@@ -213,13 +229,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', unique([...threadScheduledIds, id]));
       }
 
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       break;
     }
 
     case 'updateMessage': {
-      const { chatId, id, message } = update;
+      const {
+        chatId, id, message, poll,
+      } = update;
 
       const currentMessage = selectChatMessage(global, chatId, id);
       const chat = selectChat(global, chatId);
@@ -238,13 +260,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = clearMessageTranslation(global, chatId, id);
       }
 
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       break;
     }
 
     case 'updateScheduledMessage': {
-      const { chatId, id, message } = update;
+      const {
+        chatId, id, message, poll,
+      } = update;
 
       const currentMessage = selectScheduledMessage(global, chatId, id);
       if (!currentMessage) {
@@ -260,15 +288,24 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
         global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', threadScheduledIds.sort((a, b) => b - a));
       }
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       break;
     }
 
     case 'updateQuickReplyMessage': {
-      const { id, message } = update;
+      const { id, message, poll } = update;
 
       global = updateQuickReplyMessage(global, id, message);
+
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
       setGlobal(global);
 
       break;
@@ -299,7 +336,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateMessageSendSucceeded': {
-      const { chatId, localId, message } = update;
+      const {
+        chatId, localId, message, poll,
+      } = update;
 
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
 
@@ -317,6 +356,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...message,
         previousLocalId: localId,
       });
+
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
 
       global = {
         ...global,
@@ -351,6 +394,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         lastReadInboxMessageId: message.id,
       });
 
+      // Reload dialogs if chat is not present in the list
+      if (!selectIsChatListed(global, chatId)) {
+        actions.loadTopChats();
+      }
+
       if (selectIsChatWithSelf(global, chatId)) {
         const savedDialogId = selectSavedDialogIdFromMessage(global, newMessage);
         if (savedDialogId && !selectIsChatListed(global, savedDialogId, 'saved')) {
@@ -364,7 +412,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateScheduledMessageSendSucceeded': {
-      const { chatId, localId, message } = update;
+      const {
+        chatId, localId, message, poll,
+      } = update;
       const scheduledIds = selectScheduledIds(global, chatId, MAIN_THREAD_ID) || [];
       global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', [...scheduledIds, message.id]);
 
@@ -382,6 +432,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...message,
         previousLocalId: localId,
       });
+
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
 
       setGlobal(global);
       break;
@@ -417,33 +471,31 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
     }
 
-    case 'updateThreadInfos': {
+    case 'updateThreadInfo': {
       const {
-        threadInfoUpdates,
+        threadInfo,
       } = update;
 
-      global = updateThreadInfos(global, threadInfoUpdates);
-      threadInfoUpdates.forEach((threadInfo) => {
-        const { chatId, threadId } = threadInfo;
-        if (!chatId || !threadId) return;
+      global = updateThreadInfos(global, [threadInfo]);
+      const { chatId, threadId } = threadInfo;
+      if (!chatId || !threadId) return;
 
-        const chat = selectChat(global, chatId);
-        const currentThreadInfo = selectThreadInfo(global, chatId, threadId);
-        if (chat?.isForum && threadInfo.lastReadInboxMessageId !== currentThreadInfo?.lastReadInboxMessageId) {
-          actions.loadTopicById({ chatId, topicId: Number(threadId) });
-        }
+      const chat = selectChat(global, chatId);
+      const currentThreadInfo = selectThreadInfo(global, chatId, threadId);
+      if (chat?.isForum && threadInfo.lastReadInboxMessageId !== currentThreadInfo?.lastReadInboxMessageId) {
+        actions.loadTopicById({ chatId, topicId: Number(threadId) });
+      }
 
-        // Update reply thread last read message id if already read in main thread
-        if (!chat?.isForum) {
-          const lastReadInboxMessageId = chat?.lastReadInboxMessageId;
-          const lastReadInboxMessageIdInThread = threadInfo.lastReadInboxMessageId || lastReadInboxMessageId;
-          if (lastReadInboxMessageId && lastReadInboxMessageIdInThread) {
-            global = updateThreadInfo(global, chatId, threadId, {
-              lastReadInboxMessageId: Math.max(lastReadInboxMessageIdInThread, lastReadInboxMessageId),
-            });
-          }
+      // Update reply thread last read message id if already read in main thread
+      if (!chat?.isForum) {
+        const lastReadInboxMessageId = chat?.lastReadInboxMessageId;
+        const lastReadInboxMessageIdInThread = threadInfo.lastReadInboxMessageId || lastReadInboxMessageId;
+        if (lastReadInboxMessageId && lastReadInboxMessageIdInThread) {
+          global = updateThreadInfo(global, chatId, threadId, {
+            lastReadInboxMessageId: Math.max(lastReadInboxMessageIdInThread, lastReadInboxMessageId),
+          });
         }
-      });
+      }
       setGlobal(global);
 
       break;
@@ -457,7 +509,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const tabId = getCurrentTabId();
         global = deleteChatMessages(global, chatId, Object.keys(messagesById).map(Number));
         setGlobal(global);
-        actions.loadFullChat({ chatId, force: true, tabId });
+        actions.loadFullChat({ chatId, force: true });
         actions.loadViewportMessages({ chatId, threadId: MAIN_THREAD_ID, tabId });
       }
 
@@ -549,97 +601,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateMessagePoll': {
       const { pollId, pollUpdate } = update;
 
-      const message = selectChatMessageByPollId(global, pollId);
+      global = updatePoll(global, pollId, pollUpdate);
 
-      if (message?.content.poll) {
-        const oldResults = message.content.poll.results;
-        let newResults = oldResults;
-        if (pollUpdate.results?.results) {
-          if (!oldResults.results || !pollUpdate.results.isMin) {
-            newResults = pollUpdate.results;
-          } else if (oldResults.results) {
-            newResults = {
-              ...pollUpdate.results,
-              results: pollUpdate.results.results.map((result) => ({
-                ...result,
-                isChosen: oldResults.results!.find((r) => r.option === result.option)?.isChosen,
-              })),
-              isMin: undefined,
-            };
-          }
-        }
-        const updatedPoll = { ...message.content.poll, ...pollUpdate, results: newResults };
-
-        global = updateChatMessage(
-          global,
-          message.chatId,
-          message.id,
-          {
-            content: {
-              ...message.content,
-              poll: updatedPoll,
-            },
-          },
-        );
-        setGlobal(global);
-      }
+      setGlobal(global);
       break;
     }
 
     case 'updateMessagePollVote': {
       const { pollId, peerId, options } = update;
-      const message = selectChatMessageByPollId(global, pollId);
-      if (!message || !message.content.poll || !message.content.poll.results) {
-        break;
-      }
-
-      const { poll } = message.content;
-
-      const currentSendAs = selectSendAs(global, message.chatId);
-
-      const { recentVoterIds, totalVoters, results } = poll.results;
-      const newRecentVoterIds = recentVoterIds ? [...recentVoterIds] : [];
-      const newTotalVoters = totalVoters ? totalVoters + 1 : 1;
-      const newResults = results ? [...results] : [];
-
-      newRecentVoterIds.push(peerId);
-
-      options.forEach((option) => {
-        const targetOptionIndex = newResults.findIndex((result) => result.option === option);
-        const targetOption = newResults[targetOptionIndex];
-        const updatedOption: ApiPollResult = targetOption ? { ...targetOption } : { option, votersCount: 0 };
-
-        updatedOption.votersCount += 1;
-        if (currentSendAs?.id === peerId || peerId === global.currentUserId) {
-          updatedOption.isChosen = true;
-        }
-
-        if (targetOptionIndex) {
-          newResults[targetOptionIndex] = updatedOption;
-        } else {
-          newResults.push(updatedOption);
-        }
-      });
-
-      global = updateChatMessage(
-        global,
-        message.chatId,
-        message.id,
-        {
-          content: {
-            ...message.content,
-            poll: {
-              ...poll,
-              results: {
-                ...poll.results,
-                recentVoterIds: newRecentVoterIds,
-                totalVoters: newTotalVoters,
-                results: newResults,
-              },
-            },
-          },
-        },
-      );
+      global = updatePollVote(global, pollId, peerId, options);
       setGlobal(global);
 
       break;
@@ -669,29 +639,49 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateMessageExtendedMedia': {
       const {
-        chatId, id, media, preview,
+        chatId, id, extendedMedia, isBought,
       } = update;
       const message = selectChatMessage(global, chatId, id);
       const chat = selectChat(global, update.chatId);
 
       if (!chat || !message) return;
 
-      if (preview) {
-        if (!message.content.invoice) return;
+      if (message.content.invoice) {
+        const media = extendedMedia[0];
+        if ('mediaType' in media && media.mediaType === 'extendedMediaPreview') {
+          if (!message.content.invoice) return;
+          global = updateChatMessage(global, chatId, id, {
+            content: {
+              ...message.content,
+              invoice: {
+                ...message.content.invoice,
+                extendedMedia: media,
+              },
+            },
+          });
+          setGlobal(global);
+        } else {
+          const content = media as MediaContent;
+          global = updateChatMessage(global, chatId, id, {
+            content: {
+              ...content,
+            },
+          });
+          setGlobal(global);
+        }
+      }
+
+      if (message.content.paidMedia) {
+        const paidMediaUpdate = isBought ? { isBought, extendedMedia }
+          : { extendedMedia: extendedMedia as ApiMediaExtendedPreview[], isBought: undefined };
+
         global = updateChatMessage(global, chatId, id, {
           content: {
             ...message.content,
-            invoice: {
-              ...message.content.invoice,
-              extendedMedia: preview,
+            paidMedia: {
+              ...message.content.paidMedia,
+              ...paidMediaUpdate,
             },
-          },
-        });
-        setGlobal(global);
-      } else if (media) {
-        global = updateChatMessage(global, chatId, id, {
-          content: {
-            ...media,
           },
         });
         setGlobal(global);
@@ -763,6 +753,12 @@ function updateReactions<T extends GlobalState>(
     return global;
   }
 
+  const localPaidReaction = currentReactions?.results.find((r) => r.localAmount);
+  // Save local count on update, but reset if we sent reaction
+  if (localPaidReaction?.localAmount) {
+    reactions.results = addPaidReaction(reactions.results, localPaidReaction.localAmount);
+  }
+
   global = updateChatMessage(global, chatId, id, { reactions });
 
   if (!isOutgoing) {
@@ -777,13 +773,14 @@ function updateReactions<T extends GlobalState>(
     actions.startActiveReaction({ containerId: messageKey, reaction, tabId: getCurrentTabId() });
   }
 
-  const alreadyHasUnreadReaction = chat.unreadReactions?.includes(id);
+  const hasUnreadReactionsForMessageInChat = chat.unreadReactions?.includes(id);
+  const hasUnreadReactionsInNewReactions = checkIfHasUnreadReactions(global, reactions);
 
   // Only notify about added reactions, not removed ones
-  if (checkIfHasUnreadReactions(global, reactions) && !alreadyHasUnreadReaction) {
+  if (hasUnreadReactionsInNewReactions && !hasUnreadReactionsForMessageInChat) {
     global = updateUnreadReactions(global, chatId, {
       unreadReactionsCount: (chat?.unreadReactionsCount || 0) + 1,
-      unreadReactions: [...(chat?.unreadReactions || []), id],
+      unreadReactions: [...(chat?.unreadReactions || []), id].sort((a, b) => b - a),
     });
 
     const newMessage = selectChatMessage(global, chatId, id);
@@ -797,7 +794,9 @@ function updateReactions<T extends GlobalState>(
         isReaction: true,
       });
     });
-  } else if (alreadyHasUnreadReaction) {
+  }
+
+  if (!hasUnreadReactionsInNewReactions && hasUnreadReactionsForMessageInChat) {
     global = updateUnreadReactions(global, chatId, {
       unreadReactionsCount: (chat?.unreadReactionsCount || 1) - 1,
       unreadReactions: chat?.unreadReactions?.filter((i) => i !== id),
@@ -1034,13 +1033,17 @@ export function deleteMessages<T extends GlobalState>(
         isDeleting: true,
       });
 
-      if (chat.topics?.[id]) {
+      if (selectTopic(global, chatId, id)) {
         global = deleteTopic(global, chatId, id);
       }
 
       const message = selectChatMessage(global, chatId, id);
       if (!message) {
         return;
+      }
+
+      if (message.content.action?.photo) {
+        global = deletePeerPhoto(global, chatId, message.content.action.photo.id, true);
       }
 
       global = updateThreadUnread(global, actions, message, true);
@@ -1060,7 +1063,12 @@ export function deleteMessages<T extends GlobalState>(
       if (!threadInfo?.lastMessageId || !idsSet.has(threadInfo.lastMessageId)) return;
 
       const newLastMessage = findLastMessage(global, chatId, threadId);
-      if (!newLastMessage) return;
+      if (!newLastMessage) {
+        if (chat.isForum && threadId !== MAIN_THREAD_ID) {
+          actions.loadTopicById({ chatId, topicId: Number(threadId) });
+        }
+        return;
+      }
 
       if (threadId === MAIN_THREAD_ID) {
         global = updateChatLastMessage(global, chatId, newLastMessage, true);
@@ -1079,23 +1087,25 @@ export function deleteMessages<T extends GlobalState>(
 
     setGlobal(global);
 
+    const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+
     setTimeout(() => {
       global = getGlobal();
       global = deleteChatMessages(global, chatId, ids);
       setGlobal(global);
-    }, ANIMATION_DELAY);
+    }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
 
     return;
   }
 
   // Common box update
 
-  const chatsIdsToUpdate: string[] = [];
+  const chatIdsToUpdate: string[] = [];
 
   ids.forEach((id) => {
     const commonBoxChatId = selectCommonBoxChatId(global, id);
     if (commonBoxChatId) {
-      chatsIdsToUpdate.push(commonBoxChatId);
+      chatIdsToUpdate.push(commonBoxChatId);
 
       global = updateChatMessage(global, commonBoxChatId, id, {
         isDeleting: true,
@@ -1118,17 +1128,23 @@ export function deleteMessages<T extends GlobalState>(
         }
       }
 
+      if (message?.content.action?.photo) {
+        global = deletePeerPhoto(global, commonBoxChatId, message.content.action.photo.id, true);
+      }
+
+      const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+
       setTimeout(() => {
         global = getGlobal();
         global = deleteChatMessages(global, commonBoxChatId, [id]);
         setGlobal(global);
-      }, ANIMATION_DELAY);
+      }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
     }
   });
 
   setGlobal(global);
 
-  unique(chatsIdsToUpdate).forEach((id) => {
+  unique(chatIdsToUpdate).forEach((id) => {
     actions.requestChatUpdate({ chatId: id });
   });
 }
@@ -1148,6 +1164,8 @@ function deleteScheduledMessages<T extends GlobalState>(
 
   setGlobal(global);
 
+  const isAnimatingAsSnap = selectCanAnimateSnapEffect(global);
+
   setTimeout(() => {
     global = getGlobal();
     global = deleteChatScheduledMessages(global, chatId, ids);
@@ -1156,5 +1174,5 @@ function deleteScheduledMessages<T extends GlobalState>(
       global, chatId, MAIN_THREAD_ID, 'scheduledIds', Object.keys(scheduledMessages || {}).map(Number),
     );
     setGlobal(global);
-  }, ANIMATION_DELAY);
+  }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
 }

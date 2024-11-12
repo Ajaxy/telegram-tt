@@ -12,6 +12,7 @@
   $bm-red: color.red($foreground) * $opacity + color.red($background) * $background-opacity * (1 - $opacity);
   $bm-green: color.green($foreground) * $opacity + color.green($background) * $background-opacity * (1 - $opacity);
   $bm-blue: color.blue($foreground) * $opacity + color.blue($background) * $background-opacity * (1 - $opacity);
+
   @return rgb($bm-red, $bm-green, $bm-blue);
 }
 
@@ -30,6 +31,8 @@ $color-error: #e53935;
 $color-warning: #fb8c00;
 
 $color-yellow: #fdd764;
+$color-orange: #d08a31;
+$color-light-coral: #d08a3133;
 
 $color-white: #ffffff;
 $color-black: #000000;
@@ -42,6 +45,7 @@ $color-text-meta-apple: #8c8c91;
 $color-borders: #dadce0;
 $color-dividers: #c8c6cc;
 $color-dividers-android: #E7E7E7;
+$color-item-hover: #f4f4f5;
 $color-item-active: #ededed;
 $color-chat-hover: #f4f4f5;
 $color-chat-active: #3390ec;
@@ -106,6 +110,11 @@ $color-message-story-mention-to: #74bcff;
   --color-primary-tint: rgba(var(--color-primary), 0.1);
   --color-green: #{$color-green};
   --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
+  --color-success: #{$color-green};
+
+  --accent-color: var(--color-primary);
+  --accent-background-color: var(--color-primary-tint);
+  --accent-background-active-color: var(--color-primary-opacity);
 
   --color-error: #{$color-error};
   --color-error-shade: #{color.mix($color-error, $color-black, 92%)};
@@ -114,6 +123,9 @@ $color-message-story-mention-to: #74bcff;
   --color-warning: #{$color-warning};
 
   --color-yellow: #{$color-yellow};
+
+  --color-orange: #{$color-orange};
+  --color-light-coral: #{$color-light-coral};
 
   --color-links: #{$color-links};
 
@@ -157,6 +169,7 @@ $color-message-story-mention-to: #74bcff;
   --color-chat-username: #3C7EB0;
   --color-chat-hover: #{$color-chat-hover};
   --color-chat-active: #{$color-chat-active};
+  --color-item-hover: #{$color-item-hover};
   --color-item-active: #{$color-item-active};
 
   --color-selection-highlight: #{$color-selection};
@@ -183,6 +196,7 @@ $color-message-story-mention-to: #74bcff;
 
   --color-deleted-account: #9eaab5;
   --color-archive: #9eaab5;
+  --stars-gradient: linear-gradient(90deg, #FFAA00 0%, #FFCD3A 100%);
 
   --color-heart: #ff3c32;
 
@@ -194,7 +208,7 @@ $color-message-story-mention-to: #74bcff;
   --border-radius-default-tiny: 0.375rem;
   --border-radius-messages: 0.9375rem;
   --border-radius-messages-small: 0.375rem;
-  --border-radius-forum-avatar: 25%;
+  --border-radius-forum-avatar: 33.3333%;
   --messages-container-width: 45.5rem;
   --right-column-width: 26.5rem;
   --header-height: 3.5rem;
@@ -222,6 +236,7 @@ $color-message-story-mention-to: #74bcff;
     --symbol-menu-height: 17.6875rem;
   }
 
+  --z-overlay-effects: 10001;
   --z-modal-confirm: 10000;
   --z-portal-menu: 10000;
   --z-symbol-menu-modal: 5000;
@@ -239,16 +254,18 @@ $color-message-story-mention-to: #74bcff;
   --z-modal: 1510;
   --z-modal-menu: 1600;
   --z-media-viewer: 1500;
+  --z-modal-low-priority: 1400;
   --z-video-player-controls: 3;
   --z-drop-area: 55;
   --z-animation-fade: 50;
   --z-menu-bubble: 21;
   --z-menu-backdrop: 20;
+  --z-message-effect: 15;
   --z-message-highlighted: 14;
   --z-forum-panel: 13;
   --z-message-context-menu: 13;
   --z-scroll-down-button: 12;
-  --z-mobile-search: 12;
+  --z-local-search: 12;
   --z-left-header: 11;
   --z-middle-header: 11;
   --z-middle-footer: 11;
@@ -274,9 +291,6 @@ $color-message-story-mention-to: #74bcff;
   --spinner-gray-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iIzcwNzU3OSIvPjwvc3ZnPg==);
   --spinner-yellow-data: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTEwLjggMjIuNEM2IDIxLjkgMi4xIDE4IDEuNiAxMy4yLjkgNy4xIDUuNCAxLjkgMTEuMyAxLjVjLjQgMCAuNy0uMy43LS43IDAtLjQtLjQtLjgtLjgtLjhDNC44LjQtLjIgNS45IDAgMTIuNS4yIDE4LjYgNS40IDIzLjggMTEuNSAyNGM2LjYuMiAxMi00LjggMTIuNC0xMS4yIDAtLjQtLjMtLjgtLjgtLjgtLjQgMC0uNy4zLS43LjctLjMgNS45LTUuNSAxMC40LTExLjYgOS43eiIgZmlsbD0iI0ZERDc2NCIvPjwvc3ZnPg==);
 
-  --drag-target-border: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%23DDDFE0' stroke-width='4' stroke-dasharray='9.1%2c 10.5' stroke-dashoffset='3' stroke-linecap='round'/%3e%3c/svg%3e");
-  --drag-target-border-hovered: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='8' ry='8' stroke='%2363A2E3' stroke-width='4' stroke-dasharray='9.1%2c 10.5' stroke-dashoffset='3' stroke-linecap='round'/%3e%3c/svg%3e");
-
   --premium-gradient: linear-gradient(84.4deg, #6C93FF -4.85%, #976FFF 51.72%, #DF69D1 110.7%);
 
   --layer-blackout-opacity: 0.1;
@@ -290,6 +304,8 @@ $color-message-story-mention-to: #74bcff;
   --safe-area-right: env(safe-area-inset-right);
   --safe-area-bottom: env(safe-area-inset-bottom);
   --safe-area-left: env(safe-area-inset-left);
+
+  --picker-title-shift: 1rem;
 
   body.is-ios {
     --layer-transition: 650ms cubic-bezier(0.22, 1, 0.36, 1);

@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useRef } from '../lib/teact/teact';
+import { useCallback, useRef, useUnmountCleanup } from '../lib/teact/teact';
 
 const DEFAULT_THRESHOLD = 250;
 
-function useLongPress(
-  onStart: NoneToVoidFunction,
-  onEnd: NoneToVoidFunction,
-) {
+function useLongPress({
+  onClick, onStart, onEnd, threshold = DEFAULT_THRESHOLD,
+}: {
+  onStart?: NoneToVoidFunction;
+  onClick?: (event: React.MouseEvent | React.TouchEvent) => void;
+  onEnd?: NoneToVoidFunction;
+  threshold?: number;
+}) {
   const isLongPressActive = useRef(false);
   const isPressed = useRef(false);
   const timerId = useRef<number | undefined>(undefined);
@@ -18,26 +22,28 @@ function useLongPress(
 
     isPressed.current = true;
     timerId.current = window.setTimeout(() => {
-      onStart();
+      onStart?.();
       isLongPressActive.current = true;
-    }, DEFAULT_THRESHOLD);
-  }, [onStart]);
+    }, threshold);
+  }, [onStart, threshold]);
 
-  const cancel = useCallback(() => {
+  const cancel = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!isPressed.current) return;
+
     if (isLongPressActive.current) {
-      onEnd();
+      onEnd?.();
+    } else {
+      onClick?.(e);
     }
 
     isLongPressActive.current = false;
     isPressed.current = false;
     window.clearTimeout(timerId.current);
-  }, [onEnd]);
+  }, [onEnd, onClick]);
 
-  useEffect(() => {
-    return () => {
-      window.clearTimeout(timerId.current);
-    };
-  }, []);
+  useUnmountCleanup(() => {
+    window.clearTimeout(timerId.current);
+  });
 
   return {
     onMouseDown: start,

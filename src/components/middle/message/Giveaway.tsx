@@ -8,8 +8,9 @@ import type {
 } from '../../../api/types';
 
 import {
-  getChatTitle, getUserFullName, isApiPeerChat, isOwnMessage,
+  getChatTitle, getUserFullName, isOwnMessage,
 } from '../../../global/helpers';
+import { isApiPeerChat } from '../../../global/helpers/peers';
 import {
   selectCanPlayAnimatedEmojis,
   selectChat,
@@ -17,19 +18,19 @@ import {
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateAtTime, formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateAtTime, formatDateTimeToString } from '../../../util/dates/dateFormat';
 import { isoToEmoji } from '../../../util/emoji/emoji';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Separator from '../../ui/Separator';
@@ -63,11 +64,11 @@ const Giveaway = ({
   const isLoadingInfo = useRef(false);
   const [giveawayInfo, setGiveawayInfo] = useState<ApiGiveawayInfo | undefined>();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const { giveaway, giveawayResults } = message.content;
   const isResults = Boolean(giveawayResults);
   const {
-    months, untilDate, prizeDescription,
+    months, untilDate, prizeDescription, stars,
   } = (giveaway || giveawayResults)!;
 
   const isOwn = isOwnMessage(message);
@@ -129,12 +130,25 @@ const Giveaway = ({
             </>
           )}
           <p className={styles.description}>
-            {renderText(lang('Chat.Giveaway.Info.Subscriptions', quantity), ['simple_markdown'])}
-            <br />
-            {renderText(lang(
-              'ActionGiftPremiumSubtitle',
-              lang('Chat.Giveaway.Info.Months', months),
-            ), ['simple_markdown'])}
+            {message?.content?.giveaway?.stars ? (
+              <>
+                {renderText(
+                  lang('Chat.Giveaway.Message.Stars.PrizeText', lang('Stars', message?.content?.giveaway?.stars)),
+                  ['simple_markdown'],
+                )}
+                <br />
+                {renderText(lang('AmongWinners', quantity), ['simple_markdown'])}
+              </>
+            ) : (
+              <>
+                {renderText(lang('Chat.Giveaway.Info.Subscriptions', quantity), ['simple_markdown'])}
+                <br />
+                {renderText(lang(
+                  'ActionGiftPremiumSubtitle',
+                  lang('Chat.Giveaway.Info.Months', months),
+                ), ['simple_markdown'])}
+              </>
+            )}
           </p>
         </div>
         <div className={styles.section}>
@@ -215,14 +229,14 @@ const Giveaway = ({
     const isResultsInfo = giveawayInfo.type === 'results';
 
     const chatTitle = isApiPeerChat(sender) ? getChatTitle(lang, sender) : getUserFullName(sender);
-    const duration = lang('Chat.Giveaway.Info.Months', months);
     const endDate = formatDateAtTime(lang, untilDate * 1000);
     const otherChannelsCount = giveaway?.channelIds ? giveaway.channelIds.length - 1 : 0;
     const otherChannelsString = lang('Chat.Giveaway.Info.OtherChannels', otherChannelsCount);
     const isSeveral = otherChannelsCount > 0;
 
     const firstKey = isResultsInfo ? 'BoostingGiveawayHowItWorksTextEnd' : 'BoostingGiveawayHowItWorksText';
-    const firstParagraph = lang(firstKey, [chatTitle, quantity, duration], undefined, quantity);
+    const giveawayDuration = isResultsInfo ? lang('Chat.Giveaway.Info.Months', months) : lang('Stars', stars, 'i');
+    const firstParagraph = lang(firstKey, [chatTitle, quantity, giveawayDuration], undefined, quantity);
 
     const additionalPrizes = prizeDescription
       ? lang('BoostingGiveawayHowItWorksIncludeText', [chatTitle, quantity, prizeDescription], undefined, quantity)

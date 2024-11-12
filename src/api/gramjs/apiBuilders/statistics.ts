@@ -1,12 +1,14 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiChannelMonetizationStatistics,
   ApiChannelStatistics,
   ApiGroupStatistics,
   ApiMessagePublicForward,
   ApiPostStatistics,
   ApiStoryPublicForward,
-  PrepaidGiveaway, StatisticsGraph,
+  ChannelMonetizationBalances,
+  StatisticsGraph,
   StatisticsMessageInteractionCounter,
   StatisticsOverviewItem,
   StatisticsOverviewPercentage,
@@ -14,9 +16,10 @@ import type {
   StatisticsStoryInteractionCounter,
 } from '../../types';
 
-import { buildAvatarHash } from './chats';
-import { buildApiUsernames } from './common';
+import { buildApiUsernames, buildAvatarPhotoId } from './common';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+
+const DECIMALS = 10 ** 9;
 
 export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiChannelStatistics {
   return {
@@ -47,6 +50,20 @@ export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiC
 
     // Recent posts
     recentPosts: stats.recentPostsInteractions.map(buildApiPostInteractionCounter).filter(Boolean),
+  };
+}
+
+export function buildChannelMonetizationStatistics(
+  stats: GramJs.stats.BroadcastRevenueStats,
+): ApiChannelMonetizationStatistics {
+  return {
+    // Graphs
+    topHoursGraph: buildGraph(stats.topHoursGraph),
+    revenueGraph: buildGraph(stats.revenueGraph, undefined, true, stats.usdRate),
+
+    // Statistics overview
+    balances: buildChannelMonetizationBalances(stats.balances),
+    usdRate: stats.usdRate,
   };
 }
 
@@ -137,7 +154,7 @@ export function buildStoryPublicForwards(
 }
 
 export function buildGraph(
-  result: GramJs.TypeStatsGraph, isPercentage?: boolean,
+  result: GramJs.TypeStatsGraph, isPercentage?: boolean, isCurrency?: boolean, currencyRate?: number,
 ): StatisticsGraph | undefined {
   if ((result as GramJs.StatsGraphError).error) {
     return undefined;
@@ -157,6 +174,8 @@ export function buildGraph(
     hasSecondYAxis,
     isStacked: data.stacked && !hasSecondYAxis,
     isPercentage,
+    isCurrency,
+    currencyRate,
     datasets: y.map((item: any) => {
       const key = item[0];
 
@@ -214,15 +233,6 @@ export function buildStatisticsPercentage(data: GramJs.StatsPercentValue): Stati
   };
 }
 
-export function buildPrepaidGiveaway(prepaidGiveaway: GramJs.PrepaidGiveaway): PrepaidGiveaway {
-  return {
-    id: prepaidGiveaway.id.toString(),
-    date: prepaidGiveaway.date,
-    months: prepaidGiveaway.months,
-    quantity: prepaidGiveaway.quantity,
-  };
-}
-
 function getOverviewPeriod(data: GramJs.StatsDateRangeDays): StatisticsOverviewPeriod {
   return {
     maxDate: data.maxDate,
@@ -233,6 +243,8 @@ function getOverviewPeriod(data: GramJs.StatsDateRangeDays): StatisticsOverviewP
 function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs.TypeChat[]): ApiMessagePublicForward {
   const peerId = getApiChatIdFromMtpPeer(message.peerId!);
   const channel = chats.find((c) => buildApiPeerId(c.id, 'channel') === peerId);
+  const channelProfilePhoto = channel && 'photo' in channel && channel.photo instanceof GramJs.Photo
+    ? channel.photo : undefined;
 
   return {
     messageId: message.id,
@@ -243,9 +255,22 @@ function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs
       type: 'chatTypeChannel',
       title: (channel as GramJs.Channel).title,
       usernames: buildApiUsernames(channel as GramJs.Channel),
-      avatarHash: channel && 'photo' in channel
-        ? buildAvatarHash((channel as GramJs.Channel).photo)
-        : undefined,
+      avatarPhotoId: channelProfilePhoto && buildAvatarPhotoId(channelProfilePhoto),
+      hasVideoAvatar: Boolean(channelProfilePhoto?.videoSizes),
     },
+  };
+}
+
+function buildChannelMonetizationBalances({
+  currentBalance,
+  availableBalance,
+  overallRevenue,
+  withdrawalEnabled,
+}: GramJs.BroadcastRevenueBalances): ChannelMonetizationBalances {
+  return {
+    currentBalance: Number(currentBalance) / DECIMALS,
+    availableBalance: Number(availableBalance) / DECIMALS,
+    overallRevenue: Number(overallRevenue) / DECIMALS,
+    isWithdrawalEnabled: withdrawalEnabled,
   };
 }

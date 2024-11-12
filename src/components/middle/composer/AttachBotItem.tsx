@@ -8,8 +8,8 @@ import type { ApiAttachBot } from '../../../api/types';
 import type { IAnchorPosition, ISettings, ThreadId } from '../../../types';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -38,7 +38,7 @@ const AttachBotItem: FC<OwnProps> = ({
 }) => {
   const { callAttachBot, toggleAttachBot } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const icon = useMemo(() => {
     return bot.icons.find(({ name }) => name === 'default_static')?.document;

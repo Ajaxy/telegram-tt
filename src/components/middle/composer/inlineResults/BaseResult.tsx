@@ -3,6 +3,7 @@ import React, { memo } from '../../../../lib/teact/teact';
 
 import type { ApiWebDocument } from '../../../../api/types';
 
+import { getWebDocumentHash } from '../../../../global/helpers';
 import { getFirstLetters } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
 import { preventMessageInputBlurWithBubbling } from '../../helpers/preventMessageInputBlur';
@@ -34,7 +35,7 @@ const BaseResult: FC<OwnProps> = ({
 }) => {
   let content: TeactNode | undefined;
 
-  const thumbnailDataUrl = useMedia(thumbnail ? `webDocument:${thumbnail.url}` : undefined);
+  const thumbnailDataUrl = useMedia(thumbnail ? getWebDocumentHash(thumbnail) : undefined);
   thumbUrl = thumbUrl || thumbnailDataUrl;
 
   if (thumbUrl) {

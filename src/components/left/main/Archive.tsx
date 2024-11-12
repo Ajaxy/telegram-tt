@@ -12,7 +12,7 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import { useFolderManagerForOrderedIds, useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Badge from '../../ui/Badge';
 import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
@@ -33,7 +33,7 @@ const Archive: FC<OwnProps> = ({
   onClick,
 }) => {
   const { updateArchiveSettings } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const orderedChatIds = useFolderManagerForOrderedIds(ARCHIVED_FOLDER_ID);
   const unreadCounters = useFolderManagerForUnreadCounters();

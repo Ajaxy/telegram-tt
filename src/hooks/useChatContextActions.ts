@@ -11,7 +11,7 @@ import {
 } from '../global/helpers';
 import { compact } from '../util/iteratees';
 import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
-import useLang from './useLang';
+import useOldLang from './useOldLang';
 
 const useChatContextActions = ({
   chat,
@@ -42,7 +42,7 @@ const useChatContextActions = ({
   handleChatFolderChange: NoneToVoidFunction;
   handleReport?: NoneToVoidFunction;
 }, isInSearch = false) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { isSelf } = user || {};
   const isServiceNotifications = user?.id === SERVICE_NOTIFICATIONS_USER_ID;
@@ -159,7 +159,7 @@ const useChatContextActions = ({
       ? { title: lang('Unarchive'), icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
       : { title: lang('Archive'), icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
 
-    const canReport = handleReport && (isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf));
+    const canReport = handleReport && !user && (isChatChannel(chat) || isChatGroup(chat));
     const actionReport = canReport
       ? { title: lang('ReportPeer.Report'), icon: 'flag', handler: handleReport }
       : undefined;

@@ -6,11 +6,11 @@ import { selectTheme, selectUser } from '../../global/selectors';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 
 import styles from './PremiumRequiredMessage.module.scss';
@@ -25,7 +25,7 @@ type StateProps = {
 };
 
 function PremiumRequiredMessage({ patternColor, userName }: StateProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   const { openPremiumModal } = getActions();
 
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());

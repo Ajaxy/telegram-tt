@@ -9,7 +9,7 @@ import type { ShippingOption } from '../../types';
 
 import { formatCurrency } from '../../util/formatCurrency';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import RadioGroup from '../ui/RadioGroup';
 
@@ -28,7 +28,7 @@ const Shipping: FC<OwnProps> = ({
   currency,
   dispatch,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     if (!shippingOptions || !shippingOptions.length || state.shipping) {

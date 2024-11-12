@@ -6,6 +6,7 @@
 import type { ApiDimensions, ApiMessage } from '../../../../api/types';
 import type { IAlbum } from '../../../../types';
 
+import { getMessageContent } from '../../../../global/helpers';
 import { clamp } from '../../../../util/math';
 import { getAvailableWidth, REM } from '../../../common/helpers/mediaDimensions';
 import { calculateMediaDimensions } from './mediaDimensions';
@@ -46,10 +47,23 @@ export type IAlbumLayout = {
   containerStyle: ApiDimensions;
 };
 
-function getRatios(messages: ApiMessage[], isMobile?: boolean) {
-  return messages.map(
-    (message) => {
-      const dimensions = calculateMediaDimensions(message, undefined, undefined, isMobile) as ApiDimensions;
+function getRatios(messages: ApiMessage[], isSingleMessage?: boolean, isMobile?: boolean) {
+  const isOutgoing = messages[0].isOutgoing;
+  const allMedia = (isSingleMessage
+    ? messages[0].content.paidMedia!.extendedMedia.map((media) => (
+      'mediaType' in media ? media : (media.photo || media.video)
+    ))
+    : messages.map((message) => (
+      getMessageContent(message).photo || getMessageContent(message).video
+    ))
+  ).filter(Boolean);
+  return allMedia.map(
+    (media) => {
+      const dimensions = calculateMediaDimensions({
+        media,
+        isOwn: isOutgoing,
+        isMobile,
+      }) as ApiDimensions;
 
       return dimensions.width / dimensions.height;
     },
@@ -99,7 +113,7 @@ export function calculateAlbumLayout(
   isMobile?: boolean,
 ): IAlbumLayout {
   const spacing = 2;
-  const ratios = getRatios(album.messages, isMobile);
+  const ratios = getRatios(album.messages, album.isPaidMedia, isMobile);
   const proportions = getProportions(ratios);
   const averageRatio = getAverageRatio(ratios);
   const albumCount = ratios.length;

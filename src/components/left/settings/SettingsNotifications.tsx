@@ -10,7 +10,7 @@ import {
 } from '../../../util/notifications';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useRunDebounced from '../../../hooks/useRunDebounced';
 
 import Checkbox from '../../ui/Checkbox';
@@ -139,7 +139,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     runDebounced(() => playNotifySound(undefined, volume));
   }, [runDebounced, updateWebNotificationSettings]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

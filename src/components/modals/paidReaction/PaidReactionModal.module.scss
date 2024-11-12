@@ -1,0 +1,70 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  margin-bottom: 0;
+  margin-top: 1.25rem;
+}
+
+.slider {
+  margin-top: 1.5rem;
+  flex-shrink: 0;
+}
+
+.description {
+  margin-bottom: 1.5rem;
+}
+
+.title, .description {
+  text-align: center;
+}
+
+.modalBalance {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.25rem;
+  z-index: 3;
+}
+
+.topLabel {
+  background-image: var(--stars-gradient);
+  color: var(--color-white);
+  border-radius: 1rem;
+  padding: 0.25rem 0.75rem;
+}
+
+.top {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+}
+
+.topBadge {
+  background-image: var(--stars-gradient);
+}
+
+.buttonStar {
+  margin-inline-start: 0.25rem;
+}
+
+.topPeer {
+  overflow: hidden;
+  flex-basis: 0;
+  flex-grow: 1;
+}
+
+.checkbox {
+  align-self: center;
+  margin-bottom: 1.5rem;
+}
+
+.disclaimer {
+  font-size: 0.875rem;
+  align-self: center;
+  color: var(--color-text-secondary);
+  margin-bottom: 0;
+}

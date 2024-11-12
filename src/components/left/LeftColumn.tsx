@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import React, { memo, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  memo, useEffect, useMemo, useState,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
@@ -17,7 +19,7 @@ import {
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
-import usePrevious2 from '../../hooks/usePrevious2';
+import usePrevious from '../../hooks/usePrevious';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
@@ -410,7 +412,7 @@ function LeftColumn({
     setContent(LeftColumnContent.Settings);
   });
 
-  useHotkeys({
+  useHotkeys(useMemo(() => ({
     'Mod+Shift+F': handleHotkeySearch,
     // https://support.mozilla.org/en-US/kb/take-screenshots-firefox
     ...(!IS_FIREFOX && {
@@ -421,7 +423,7 @@ function LeftColumn({
       'Mod+9': handleArchivedChats,
     }),
     ...(IS_MAC_OS && IS_APP && { 'Mod+,': handleHotkeySettings }),
-  });
+  }), []));
 
   useEffect(() => {
     clearTwoFaError();
@@ -448,7 +450,7 @@ function LeftColumn({
     setSettingsScreen(screen);
   });
 
-  const prevSettingsScreenRef = useStateRef(usePrevious2(contentType === ContentType.Settings ? settingsScreen : -1));
+  const prevSettingsScreenRef = useStateRef(usePrevious(contentType === ContentType.Settings ? settingsScreen : -1));
 
   useEffect(() => {
     if (!IS_TOUCH_ENV) {
@@ -562,7 +564,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       globalSearch: {
         query,
-        date,
+        minDate,
       },
       shouldSkipHistoryAnimations,
       activeChatFolder,
@@ -589,7 +591,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       searchQuery: query,
-      searchDate: date,
+      searchDate: minDate,
       isFirstChatFolderActive: activeChatFolder === 0,
       shouldSkipHistoryAnimations,
       currentUserId,

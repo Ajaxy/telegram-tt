@@ -20,9 +20,9 @@ import { updateSizes } from '../util/windowSize';
 
 import useAppLayout from '../hooks/useAppLayout';
 import useFlag from '../hooks/useFlag';
-import usePrevious from '../hooks/usePrevious';
+import usePreviousDeprecated from '../hooks/usePreviousDeprecated';
 
-// import Test from './test/TestSvg';
+// import Test from './test/TestLocale';
 import Auth from './auth/Auth';
 import UiLoader from './common/UiLoader';
 import AppInactive from './main/AppInactive';
@@ -38,6 +38,7 @@ type StateProps = {
   hasPasscode?: boolean;
   isInactiveAuth?: boolean;
   hasWebAuthTokenFailed?: boolean;
+  isTestServer?: boolean;
   theme: ThemeKey;
 };
 
@@ -57,6 +58,7 @@ const App: FC<StateProps> = ({
   hasPasscode,
   isInactiveAuth,
   hasWebAuthTokenFailed,
+  isTestServer,
   theme,
 }) => {
   const { disconnect } = getActions();
@@ -180,7 +182,7 @@ const App: FC<StateProps> = ({
     }
   }, [isInactiveAuth, markInactive, unmarkInactive]);
 
-  const prevActiveKey = usePrevious(activeKey);
+  const prevActiveKey = usePreviousDeprecated(activeKey);
 
   // eslint-disable-next-line consistent-return
   function renderContent() {
@@ -221,6 +223,7 @@ const App: FC<StateProps> = ({
       >
         {renderContent}
       </Transition>
+      {activeKey === AppScreens.auth && isTestServer && <div className="test-server-badge">Test server</div>}
     </UiLoader>
   );
 };
@@ -234,6 +237,7 @@ export default withGlobal(
       isInactiveAuth: selectTabState(global).isInactive,
       hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
       theme: selectTheme(global),
+      isTestServer: global.config?.isTestServer,
     };
   },
 )(App);

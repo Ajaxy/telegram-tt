@@ -1,10 +1,10 @@
 import React, { useState } from '../lib/teact/teact';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
-import { getDayStartAt } from '../util/date/dateFormat';
+import { getDayStartAt } from '../util/dates/dateFormat';
 import { getServerTimeOffset } from '../util/serverTime';
-import useLang from './useLang';
 import useLastCallback from './useLastCallback';
+import useOldLang from './useOldLang';
 
 import CalendarModal from '../components/common/CalendarModal.async';
 
@@ -15,7 +15,7 @@ const useSchedule = (
   onCancel?: () => void,
   openAt?: number,
 ) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
   const handleMessageSchedule = useLastCallback((date: Date, isWhenOnline = false) => {

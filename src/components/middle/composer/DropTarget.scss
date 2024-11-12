@@ -8,6 +8,8 @@
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 0.3125rem;
+
+  position: relative;
   display: flex;
   color: #a4acb3;
   box-shadow: 0 1px 2px var(--color-default-shadow);
@@ -16,9 +18,15 @@
     padding: 0.75rem;
   }
 
-  &.hovered .target-content {
-    color: var(--color-primary);
-    background-image: var(--drag-target-border-hovered);
+  &.hovered {
+    .target-content {
+      color: var(--color-primary);
+    }
+
+    .target-outline {
+      stroke: var(--color-primary);
+      animation-play-state: running;
+    }
   }
 
   & + & {
@@ -29,16 +37,41 @@
     margin-bottom: 0;
   }
 
+  .target-outline-container {
+    pointer-events: none;
+    overflow: visible;
+    width: 100%;
+    height: 100%;
+  }
+
+  .target-outline {
+    fill: none;
+
+    stroke: var(--color-placeholders);
+    stroke-width: 2;
+    stroke-dasharray: 11, 8;
+    stroke-linecap: round;
+    stroke-dashoffset: 0;
+
+    transition: 0.2s stroke;
+    animation: outline 0.5s linear infinite;
+    animation-play-state: paused;
+  }
+
   .target-content {
     pointer-events: none;
-    background-image: var(--drag-target-border);
     border-radius: 0.5rem;
     flex: 1 1 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: 0.2s color, 0.2s background-image;
+    transition: 0.2s color;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .icon {
@@ -76,6 +109,15 @@
 
     @media (max-height: 450px) {
       font-size: 0.875rem;
+    }
+  }
+
+  @keyframes outline {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: -19;
     }
   }
 }

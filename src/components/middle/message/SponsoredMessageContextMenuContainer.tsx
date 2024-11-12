@@ -1,16 +1,15 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions } from '../../../global';
 
 import type { ApiSponsoredMessage } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import MessageContextMenu from './MessageContextMenu';
 
@@ -18,30 +17,27 @@ export type OwnProps = {
   isOpen: boolean;
   message: ApiSponsoredMessage;
   anchor: IAnchorPosition;
-  onAboutAds: () => void;
-  onClose: () => void;
-  onCloseAnimationEnd: () => void;
+  onAboutAdsClick: NoneToVoidFunction;
+  onReportAd: NoneToVoidFunction;
+  onClose: NoneToVoidFunction;
+  onCloseAnimationEnd: NoneToVoidFunction;
 };
 
-type StateProps = {
-  canBuyPremium?: boolean;
-};
-
-const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
+const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
   message,
   anchor,
-  onAboutAds,
+  onAboutAdsClick,
+  onReportAd,
   onClose,
   onCloseAnimationEnd,
-  canBuyPremium,
 }) => {
   const { openPremiumModal, showDialog } = getActions();
 
   const [isMenuOpen, , closeMenu] = useFlag(true);
-  const { transitionClassNames } = useShowTransition(isMenuOpen, onCloseAnimationEnd, undefined, false);
+  const { transitionClassNames } = useShowTransitionDeprecated(isMenuOpen, onCloseAnimationEnd, undefined, false);
 
   const handleAboutAdsOpen = useLastCallback(() => {
-    onAboutAds();
+    onAboutAdsClick();
     closeMenu();
   });
 
@@ -60,6 +56,11 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleReportSponsoredMessage = useLastCallback(() => {
+    closeMenu();
+    onReportAd();
+  });
+
   if (!anchor) {
     return undefined;
   }
@@ -72,18 +73,13 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
         message={message}
         onClose={closeMenu}
         onCloseAnimationEnd={closeMenu}
-        onAboutAds={handleAboutAdsOpen}
-        onSponsoredHide={canBuyPremium ? handleSponsoredHide : undefined}
+        onAboutAdsClick={handleAboutAdsOpen}
+        onSponsoredHide={handleSponsoredHide}
         onSponsorInfo={handleSponsorInfo}
+        onSponsoredReport={handleReportSponsoredMessage}
       />
     </div>
   );
 };
 
-export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
-    return {
-      canBuyPremium: !selectIsCurrentUserPremium(global) && !selectIsPremiumPurchaseBlocked(global),
-    };
-  },
-)(SponsoredMessageContextMenuContainer));
+export default memo(SponsoredMessageContextMenuContainer);

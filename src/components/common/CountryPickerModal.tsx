@@ -8,14 +8,14 @@ import type { ApiCountry } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import usePrevious from '../../hooks/usePrevious';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
-import Icon from './Icon';
-import Picker from './Picker';
+import Icon from './icons/Icon';
+import ItemPicker from './pickers/ItemPicker';
 
 import styles from './CountryPickerModal.module.scss';
 
@@ -36,10 +36,10 @@ const CountryPickerModal: FC<OwnProps> = ({
 }) => {
   const { showNotification } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [selectedCountryIds, setSelectedCountryIds] = useState<string[]>([]);
-  const prevSelectedCountryIds = usePrevious(selectedCountryIds);
+  const prevSelectedCountryIds = usePreviousDeprecated(selectedCountryIds);
   const noPickerScrollRestore = prevSelectedCountryIds === selectedCountryIds;
 
   const displayedIds = useMemo(() => {
@@ -47,9 +47,13 @@ const CountryPickerModal: FC<OwnProps> = ({
       return [];
     }
 
-    return countryList
-      .filter((country) => !country.isHidden)
-      .map((country) => country.iso2);
+    return countryList.filter((country) => !country.isHidden && country.iso2 !== 'FT')
+      .map(({
+        iso2, defaultName,
+      }) => ({
+        value: iso2,
+        label: defaultName,
+      }));
   }, [countryList]);
 
   const handleSelectedIdsChange = useLastCallback((newSelectedIds: string[]) => {
@@ -92,14 +96,14 @@ const CountryPickerModal: FC<OwnProps> = ({
       </div>
 
       <div className={buildClassName(styles.main, 'custom-scroll')}>
-        <Picker
+        <ItemPicker
           className={styles.picker}
-          itemIds={displayedIds}
-          selectedIds={selectedCountryIds}
-          onSelectedIdsChange={handleSelectedIdsChange}
+          items={displayedIds}
+          selectedValues={selectedCountryIds}
+          onSelectedValuesChange={handleSelectedIdsChange}
           noScrollRestore={noPickerScrollRestore}
-          isCountryList
-          countryList={countryList}
+          allowMultiple
+          itemInputType="checkbox"
         />
       </div>
 

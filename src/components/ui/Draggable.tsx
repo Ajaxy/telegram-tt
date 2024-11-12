@@ -6,7 +6,7 @@ import React, {
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import styles from './Draggable.module.scss';
 
@@ -44,7 +44,7 @@ const Draggable: FC<OwnProps> = ({
   knobStyle,
   isDisabled,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 

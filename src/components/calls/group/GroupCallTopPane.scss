@@ -35,7 +35,7 @@
   .info {
     display: flex;
     flex-direction: column;
-    line-height: 1.125rem;
+    line-height: 1rem;
 
     .title {
       font-size: 0.875rem;
@@ -48,17 +48,11 @@
     }
   }
 
-  .avatars .Avatar {
-    width: 2.25rem !important;
-    height: 2.25rem !important;
-    margin-inline-end: unset !important;
-  }
-
   .join {
-    height: 1.5rem;
-    border-radius: 1.5rem;
+    height: 1.875rem;
+    border-radius: 1rem;
     font-weight: 500;
-    padding: 1rem 1rem;
+    padding: 0 1rem;
     width: auto;
   }
 }

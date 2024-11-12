@@ -8,12 +8,14 @@ import type { ApiChat, ApiSticker, ApiTopic } from '../../api/types';
 import type { TabState } from '../../global/types';
 
 import { DEFAULT_TOPIC_ICON_STICKER_ID, GENERAL_TOPIC_ID } from '../../config';
-import { selectChat, selectIsCurrentUserPremium, selectTabState } from '../../global/selectors';
+import {
+  selectChat, selectIsCurrentUserPremium, selectTabState, selectTopic,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import TopicIcon from '../common/TopicIcon';
@@ -51,7 +53,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
   const { editTopic, openPremiumModal } = getActions();
   const [title, setTitle] = useState('');
   const [iconEmojiId, setIconEmojiId] = useState<string | undefined>(undefined);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isLoading = Boolean(editTopicPanel?.isLoading);
   const isGeneral = topic?.id === GENERAL_TOPIC_ID;
@@ -185,7 +187,8 @@ export default memo(withGlobal(
   (global): StateProps => {
     const { editTopicPanel } = selectTabState(global);
     const chat = editTopicPanel?.chatId ? selectChat(global, editTopicPanel.chatId) : undefined;
-    const topic = editTopicPanel?.topicId ? chat?.topics?.[editTopicPanel?.topicId] : undefined;
+    const topic = editTopicPanel?.chatId && editTopicPanel?.topicId
+      ? selectTopic(global, editTopicPanel.chatId, editTopicPanel.topicId) : undefined;
 
     return {
       chat,

@@ -16,8 +16,8 @@ import buildClassName from '../../../util/buildClassName';
 import { callApi } from '../../../api/gramjs';
 
 import useForceUpdate from '../../../hooks/useForceUpdate';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -63,7 +63,7 @@ function Statistics({
   dcId,
   messageId,
 }: OwnProps & StateProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);

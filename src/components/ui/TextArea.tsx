@@ -7,8 +7,8 @@ import React, {
 import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 type OwnProps = {
   ref?: RefObject<HTMLTextAreaElement>;
@@ -65,7 +65,7 @@ const TextArea: FC<OwnProps> = ({
     textareaRef = ref;
   }
 
-  const lang = useLang();
+  const lang = useOldLang();
   const labelText = error || success || label;
   const fullClassName = buildClassName(
     'input-group',

@@ -18,8 +18,8 @@ import { selectCurrentLimit } from '../../../global/selectors/limits';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
-import usePrevious from '../../../hooks/usePrevious';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
@@ -82,7 +82,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   const [isRevokeConfirmDialogOpen, openRevokeConfirmDialog, closeRevokeConfirmDialog] = useFlag();
   const [isUsernameLostDialogOpen, openUsernameLostDialog, closeUsernameLostDialog] = useFlag();
 
-  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
   const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
 
   const canUpdate = isProfileFieldsTouched && Boolean(
@@ -160,7 +160,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     updatePrivateLink();
   }, [closeRevokeConfirmDialog, updatePrivateLink]);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const langPrefix1 = isChannel ? 'Channel' : 'Mega';
   const langPrefix2 = isChannel ? 'Channel' : 'Group';
 

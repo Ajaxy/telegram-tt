@@ -1,7 +1,8 @@
 import type { ApiSessionData } from '../api/types';
 
 import {
-  DEBUG, GLOBAL_STATE_CACHE_KEY, SESSION_USER_KEY,
+  DEBUG, IS_SCREEN_LOCKED_CACHE_KEY,
+  SESSION_USER_KEY,
 } from '../config';
 
 const DC_IDS = [1, 2, 3, 4, 5];
@@ -26,9 +27,15 @@ export function hasStoredSession() {
 }
 
 export function storeSession(sessionData: ApiSessionData, currentUserId?: string) {
-  const { mainDcId, keys, hashes } = sessionData;
+  const {
+    mainDcId, keys, hashes, isTest,
+  } = sessionData;
 
-  localStorage.setItem(SESSION_USER_KEY, JSON.stringify({ dcID: mainDcId, id: currentUserId }));
+  localStorage.setItem(SESSION_USER_KEY, JSON.stringify({
+    dcID: mainDcId,
+    id: currentUserId,
+    test: isTest,
+  }));
   localStorage.setItem('dc', String(mainDcId));
   Object.keys(keys).map(Number).forEach((dcId) => {
     localStorage.setItem(`dc${dcId}_auth_key`, JSON.stringify(keys[dcId]));
@@ -63,6 +70,7 @@ export function loadStoredSession(): ApiSessionData | undefined {
     return undefined;
   }
   const mainDcId = Number(userAuth.dcID);
+  const isTest = userAuth.test;
   const keys: Record<number, string> = {};
   const hashes: Record<number, string> = {};
 
@@ -92,6 +100,7 @@ export function loadStoredSession(): ApiSessionData | undefined {
     mainDcId,
     keys,
     hashes,
+    isTest,
   };
 }
 
@@ -109,7 +118,5 @@ export function importTestSession() {
 }
 
 function checkSessionLocked() {
-  const stateFromCache = JSON.parse(localStorage.getItem(GLOBAL_STATE_CACHE_KEY) || '{}');
-
-  return Boolean(stateFromCache?.passcode?.isScreenLocked);
+  return localStorage.getItem(IS_SCREEN_LOCKED_CACHE_KEY) === 'true';
 }

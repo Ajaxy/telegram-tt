@@ -17,11 +17,11 @@ import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useAverageColor from '../../../hooks/useAverageColor';
 import useFlag from '../../../hooks/useFlag';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Skeleton from '../../ui/placeholder/Skeleton';
 
@@ -50,8 +50,8 @@ const SimilarChannels = ({
   count,
   isCurrentUserPremium,
 }: StateProps & OwnProps) => {
-  const lang = useLang();
-  const { toggleChannelRecommendations } = getActions();
+  const lang = useOldLang();
+  const { toggleChannelRecommendations, loadChannelRecommendations } = getActions();
   const [isShowing, markShowing, markNotShowing] = useFlag(false);
   const [isHiding, markHiding, markNotHiding] = useFlag(false);
   // eslint-disable-next-line no-null/no-null
@@ -68,6 +68,7 @@ const SimilarChannels = ({
   const [shoulRenderSkeleton, setShoulRenderSkeleton] = useState(!similarChannelIds);
   const firstSimilarChannels = useMemo(() => similarChannels?.slice(0, SHOW_CHANNELS_NUMBER), [similarChannels]);
   const areSimilarChannelsPresent = Boolean(firstSimilarChannels?.length);
+
   useHorizontalScroll(ref, !areSimilarChannelsPresent || !shouldShowInChat || shoulRenderSkeleton, true);
   const isAnimating = isHiding || isShowing;
   const shouldRenderChannels = Boolean(
@@ -75,6 +76,12 @@ const SimilarChannels = ({
       && (shouldShowInChat || isAnimating)
       && areSimilarChannelsPresent,
   );
+
+  useEffect(() => {
+    if (!similarChannelIds) {
+      loadChannelRecommendations({ chatId });
+    }
+  }, [chatId, similarChannelIds]);
 
   useTimeout(() => setShoulRenderSkeleton(false), MAX_SKELETON_DELAY);
 
@@ -197,7 +204,7 @@ function MoreChannels({
   isCurrentUserPremium: boolean;
 }) {
   const { openPremiumModal, openChatWithInfo } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleClickMore = () => {
     if (isCurrentUserPremium) {

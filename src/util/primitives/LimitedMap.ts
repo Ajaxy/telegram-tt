@@ -31,6 +31,10 @@ export default class LimitedMap<K, V> {
     return this;
   }
 
+  public has(key: K): boolean {
+    return this.map.has(key);
+  }
+
   public delete(key: K): boolean {
     const result = this.map.delete(key);
     if (result) {
