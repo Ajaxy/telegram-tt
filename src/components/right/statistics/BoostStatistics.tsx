@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiBoost, ApiBoostStatistics, ApiTypePrepaidGiveaway } from '../../../api/types';
 import type { TabState } from '../../../global/types';
+import type { CustomPeer } from '../../../types';
 
 import {
   GIVEAWAY_BOOST_PER_PREMIUM,
@@ -17,7 +18,6 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateAtTime } from '../../../util/dates/dateFormat';
-import { CUSTOM_PEER_STAR, CUSTOM_PEER_TO_BE_DISTRIBUTED } from '../../../util/objects/customPeer';
 import { formatInteger } from '../../../util/textFormat';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 
@@ -54,6 +54,19 @@ const GIVEAWAY_IMG_LIST: { [key: number]: string } = {
   3: GiftGreenRound,
   6: GiftBlueRound,
   12: GiftRedRound,
+};
+
+const CUSTOM_PEER_STAR_TEMPLATE: Omit<CustomPeer, 'title' | 'titleKey'> = {
+  isCustomPeer: true,
+  avatarIcon: 'star',
+  peerColorId: 1,
+};
+
+const CUSTOM_PEER_TO_BE_DISTRIBUTED: CustomPeer = {
+  isCustomPeer: true,
+  titleKey: 'BoostingToBeDistributed',
+  avatarIcon: 'user',
+  withPremiumGradient: true,
 };
 
 const BoostStatistics = ({
@@ -199,6 +212,18 @@ const BoostStatistics = ({
   const renderBoostList = useLastCallback((boost) => {
     const hasStars = Boolean(boost?.stars);
 
+    let customPeer: CustomPeer | undefined;
+    if (hasStars) {
+      customPeer = {
+        ...CUSTOM_PEER_STAR_TEMPLATE,
+        title: lang('Stars', boost.stars),
+      };
+    }
+
+    if (!boost.userId) {
+      customPeer = CUSTOM_PEER_TO_BE_DISTRIBUTED;
+    }
+
     return (
       <ListItem
         className="chat-item-clickable"
@@ -208,8 +233,7 @@ const BoostStatistics = ({
         <PrivateChatInfo
           className={styles.user}
           userId={boost.userId}
-          customPeer={hasStars ? { ...CUSTOM_PEER_STAR, titleValue: boost.stars }
-            : (!boost.userId ? CUSTOM_PEER_TO_BE_DISTRIBUTED : undefined)}
+          customPeer={customPeer}
           status={lang('BoostExpireOn', formatDateAtTime(lang, boost.expires * 1000))}
           noEmojiStatus
           forceShowSelf

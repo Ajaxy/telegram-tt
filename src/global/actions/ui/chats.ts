@@ -38,6 +38,11 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
   }
   actions.hideEffectInComposer({ tabId });
 
+  actions.closeStoryViewer({ tabId });
+  actions.closeStarsBalanceModal({ tabId });
+  actions.closeStarsBalanceModal({ tabId });
+  actions.closeStarsTransactionModal({ tabId });
+
   if (!currentMessageList || (
     currentMessageList.chatId !== chatId
     || currentMessageList.threadId !== threadId
@@ -58,6 +63,7 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
 
     global = updateTabState(global, {
       isStatisticsShown: false,
+      monetizationStatistics: undefined,
       boostStatistics: undefined,
       contentToBeScheduled: undefined,
       ...(chatId !== selectTabState(global, tabId).forwardMessages.toChatId && {
@@ -198,4 +204,11 @@ addActionHandler('closeChatlistModal', (global, actions, payload): ActionReturnT
 addActionHandler('requestChatTranslation', (global, actions, payload): ActionReturnType => {
   const { chatId, toLanguageCode, tabId = getCurrentTabId() } = payload;
   return updateRequestedChatTranslation(global, chatId, toLanguageCode, tabId);
+});
+
+addActionHandler('closeChatInviteModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    chatInviteModal: undefined,
+  }, tabId);
 });

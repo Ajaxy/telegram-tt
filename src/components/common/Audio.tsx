@@ -6,7 +6,7 @@ import { getActions } from '../../global';
 
 import type { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 import type { ISettings } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 import { AudioOrigin } from '../../types';
@@ -495,7 +495,7 @@ function getSeeklineSpikeAmounts(isMobile?: boolean, withAvatar?: boolean) {
 }
 
 function renderAudio(
-  lang: LangFn,
+  lang: OldLangFn,
   audio: ApiAudio,
   duration: number,
   isPlaying: boolean,

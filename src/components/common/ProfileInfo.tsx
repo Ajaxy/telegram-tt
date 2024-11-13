@@ -8,7 +8,7 @@ import type {
 import { MediaViewerOrigin } from '../../types';
 
 import {
-  getUserStatus, isAnonymousForwardsChat, isChatChannel, isUserOnline,
+  getUserStatus, isAnonymousForwardsChat, isChatChannel, isSystemBot, isUserOnline,
 } from '../../global/helpers';
 import {
   selectChat,
@@ -251,7 +251,8 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   function renderStatus() {
     const isAnonymousForwards = isAnonymousForwardsChat(peerId);
-    if (isAnonymousForwards) return undefined;
+    const isSystemBotChat = isSystemBot(peerId);
+    if (isAnonymousForwards || isSystemBotChat) return undefined;
 
     if (user) {
       return (

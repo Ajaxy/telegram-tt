@@ -126,9 +126,11 @@ export function addStoryToLocalDb(story: GramJs.TypeStoryItem, peerId: string) {
       addDocumentToLocalDb(doc);
     }
 
-    if (story.media.altDocument instanceof GramJs.Document) {
-      const doc = addStoryRepairInfo(story.media.altDocument, peerId, story);
-      addDocumentToLocalDb(doc);
+    if (story.media.altDocuments) {
+      for (const altDocument of story.media.altDocuments) {
+        const doc = addStoryRepairInfo(altDocument, peerId, story);
+        addDocumentToLocalDb(doc);
+      }
     }
   }
 }

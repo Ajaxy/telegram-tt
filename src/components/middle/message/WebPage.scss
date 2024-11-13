@@ -157,6 +157,7 @@
         margin-bottom: 0 !important;
 
         img {
+          object-fit: cover;
           width: 100%;
           height: 100%;
         }
@@ -195,10 +196,6 @@
     body.is-ios & {
       line-height: 1.125rem;
     }
-  }
-
-  .File .file-preview {
-    margin-inline-end: 0.75rem !important;
   }
 
   @media (min-width: 1921px) {

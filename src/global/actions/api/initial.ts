@@ -40,11 +40,12 @@ import {
 addActionHandler('initApi', (global, actions): ActionReturnType => {
   const initialLocationHash = parseInitialLocationHash();
 
+  const hasTestParam = window.location.search.includes('test') || initialLocationHash?.tgWebAuthTest === '1';
+
   void initApi(actions.apiUpdate, {
     userAgent: navigator.userAgent,
     platform: PLATFORM_ENV,
     sessionData: loadStoredSession(),
-    isTest: window.location.search.includes('test') || initialLocationHash?.tgWebAuthTest === '1',
     isWebmSupported: IS_WEBM_SUPPORTED,
     maxBufferSize: MAX_BUFFER_SIZE,
     webAuthToken: initialLocationHash?.tgWebAuthToken,
@@ -54,6 +55,7 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
     shouldForceHttpTransport: global.settings.byKey.shouldForceHttpTransport,
     shouldDebugExportedSenders: global.settings.byKey.shouldDebugExportedSenders,
     langCode: global.settings.byKey.language,
+    isTestServerRequested: hasTestParam,
   });
 
   void setShouldEnableDebugLog(Boolean(global.settings.byKey.shouldCollectDebugLogs));

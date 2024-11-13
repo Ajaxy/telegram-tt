@@ -207,12 +207,14 @@
       .Link {
         float: right;
         color: var(--color-links);
-        font-weight: 400;
+        font-weight: 500;
         margin-right: 1.5rem;
+        transition: opacity 0.15s ease-in;
 
-        &:focus,
+        &:active,
         &:hover {
-          text-decoration: underline;
+          text-decoration: none;
+          opacity: 0.85;
         }
       }
 

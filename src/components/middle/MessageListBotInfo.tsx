@@ -9,6 +9,7 @@ import {
   getPhotoFullDimensions,
   getVideoDimensions,
   getVideoMediaHash,
+  isChatWithVerificationCodesBot,
 } from '../../global/helpers';
 import { selectBot, selectUserFullInfo } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -34,6 +35,7 @@ type StateProps = {
 };
 
 const MessageListBotInfo: FC<OwnProps & StateProps> = ({
+  chatId,
   botInfo,
   isLoadingBotInfo,
   isInMessageList,
@@ -45,6 +47,8 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
   const botInfoDimensions = botInfo?.photo ? getPhotoFullDimensions(botInfo.photo) : botInfo?.gif
     ? getVideoDimensions(botInfo.gif) : undefined;
   const isBotInfoEmpty = botInfo && !botInfo.description && !botInfo.gif && !botInfo.photo;
+
+  const isVerifyCodes = isChatWithVerificationCodesBot(chatId);
 
   const { width, height } = botInfoDimensions || {};
 
@@ -92,7 +96,12 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
               forceAspectRatio
             />
           )}
-          {botInfo.description && (
+          {isVerifyCodes && (
+            <div className={styles.botInfoDescription}>
+              {lang('VerifyChatInfo')}
+            </div>
+          )}
+          {!isVerifyCodes && botInfo.description && (
             <div className={styles.botInfoDescription}>
               <p className={styles.botInfoTitle}>{lang('BotInfoTitle')}</p>
               {renderText(botInfo.description, ['br', 'emoji', 'links'])}

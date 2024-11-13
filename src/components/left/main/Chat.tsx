@@ -8,6 +8,7 @@ import type {
   ApiMessageOutgoingStatus,
   ApiPeer,
   ApiTopic,
+  ApiTypeStory,
   ApiTypingStatus,
   ApiUser,
   ApiUserStatus,
@@ -21,6 +22,7 @@ import { StoryViewerOrigin } from '../../../types';
 import {
   getMessageAction,
   getPrivateChatUserId,
+  groupStatetefulContent,
   isUserId,
   isUserOnline,
   selectIsChatMuted,
@@ -40,6 +42,7 @@ import {
   selectNotifySettings,
   selectOutgoingStatus,
   selectPeer,
+  selectPeerStory,
   selectTabState,
   selectThreadParam,
   selectTopicFromMessage,
@@ -64,8 +67,8 @@ import useChatListEntry from './hooks/useChatListEntry';
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import StarIcon from '../../common/icons/StarIcon';
 import LastMessageMeta from '../../common/LastMessageMeta';
-import ReportModal from '../../common/ReportModal';
 import ListItem from '../../ui/ListItem';
 import ChatFolderModal from '../ChatFolderModal.async';
 import MuteChatModal from '../MuteChatModal.async';
@@ -91,6 +94,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  lastMessageStory?: ApiTypeStory;
   listedTopicIds?: number[];
   topics?: Record<number, ApiTopic>;
   isMuted?: boolean;
@@ -126,6 +130,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   topics,
   observeIntersection,
   chat,
+  lastMessageStory,
   isMuted,
   user,
   userStatus,
@@ -164,17 +169,16 @@ const Chat: FC<OwnProps & StateProps> = ({
     openForumPanel,
     closeForumPanel,
     setShouldCloseRightColumn,
+    reportMessages,
   } = getActions();
 
   const { isMobile } = useAppLayout();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
-  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
-  const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
 
   const { isForum, isForumAsMessages } = chat || {};
 
@@ -186,6 +190,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     lastMessage,
     typingStatus,
     draft,
+    statefulMediaContent: groupStatetefulContent({ story: lastMessageStory }),
     actionTargetMessage,
     actionTargetUserIds,
     actionTargetChatId,
@@ -268,8 +273,8 @@ const Chat: FC<OwnProps & StateProps> = ({
   });
 
   const handleReport = useLastCallback(() => {
-    markRenderReportModal();
-    openReportModal();
+    if (!chat) return;
+    reportMessages({ chatId: chat.id, messageIds: [] });
   });
 
   const contextActions = useChatContextActions({
@@ -345,12 +350,17 @@ const Chat: FC<OwnProps & StateProps> = ({
           isSavedDialog={isSavedDialog}
           size={isPreview ? 'medium' : 'large'}
           withStory={!user?.isSelf}
-          withStoryGap={isAvatarOnlineShown}
+          withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil)}
           storyViewerOrigin={StoryViewerOrigin.ChatList}
           storyViewerMode="single-peer"
         />
         <div className="avatar-badge-wrapper">
-          <div className={buildClassName('avatar-online', isAvatarOnlineShown && 'avatar-online-shown')} />
+          <div
+            className={buildClassName('avatar-online', 'avatar-badge', isAvatarOnlineShown && 'avatar-online-shown')}
+          />
+          {!isAvatarOnlineShown && Boolean(chat.subscriptionUntil) && (
+            <StarIcon type="gold" className="avatar-badge avatar-subscription" size="adaptive" />
+          )}
           <ChatBadge
             chat={chat}
             isMuted={isMuted}
@@ -420,15 +430,6 @@ const Chat: FC<OwnProps & StateProps> = ({
           chatId={chatId}
         />
       )}
-      {shouldRenderReportModal && (
-        <ReportModal
-          isOpen={isReportModalOpen}
-          onClose={closeReportModal}
-          onCloseAnimationEnd={unmarkRenderReportModal}
-          peerId={chatId}
-          subject="peer"
-        />
-      )}
     </ListItem>
   );
 };
@@ -477,6 +478,9 @@ export default memo(withGlobal<OwnProps>(
 
     const topicsInfo = selectTopicsInfo(global, chatId);
 
+    const storyData = lastMessage?.content.storyData;
+    const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
+
     return {
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
@@ -504,6 +508,7 @@ export default memo(withGlobal<OwnProps>(
       listedTopicIds: topicsInfo?.listedTopicIds,
       topics: topicsInfo?.topicsById,
       isSynced: global.isSynced,
+      lastMessageStory,
     };
   },
 )(Chat));

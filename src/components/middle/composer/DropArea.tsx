@@ -117,7 +117,7 @@ const DropArea: FC<OwnProps> = ({
   );
 
   return (
-    <Portal containerId="#middle-column-portals">
+    <Portal containerSelector="#middle-column-portals">
       <div
         className={className}
         onDragLeave={handleDragLeave}

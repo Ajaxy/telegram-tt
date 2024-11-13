@@ -30,11 +30,15 @@
 }
 
 @mixin gradient-border-horizontal($borderStart, $borderEnd) {
-  mask-image: linear-gradient(to right, transparent, black $borderStart, black $borderEnd, transparent);
+  mask-image: linear-gradient(to right, transparent, black $borderStart, black calc(100% - $borderEnd), transparent);
 }
 
-@mixin gradient-border-left($indent) {
-  mask-image: linear-gradient(to right, transparent, black $indent);
+@mixin gradient-border-left($indent, $cutout: 0px) {
+  mask-image: linear-gradient(to right, transparent $cutout, black $indent);
+}
+
+@mixin gradient-border-right($indent, $cutout: 0px) {
+  mask-image: linear-gradient(to left, transparent $cutout, black $indent);
 }
 
 @mixin gradient-border-top-bottom($top, $bottom) {

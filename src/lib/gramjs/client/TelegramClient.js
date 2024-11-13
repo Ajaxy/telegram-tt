@@ -73,12 +73,13 @@ class TelegramClient {
         systemVersion: undefined,
         appVersion: undefined,
         langCode: 'en',
+        langPack: 'weba',
         systemLangCode: 'en',
         baseLogger: 'gramjs',
         useWSS: false,
         additionalDcsDisabled: false,
-        testServers: false,
         dcId: DEFAULT_DC_ID,
+        isTestServerRequested: false,
         shouldAllowHttpTransport: false,
         shouldForceHttpTransport: false,
         shouldDebugExportedSenders: false,
@@ -158,7 +159,7 @@ class TelegramClient {
                         .toString() || '1.0',
                     appVersion: args.appVersion || '1.0',
                     langCode: args.langCode,
-                    langPack: 'weba',
+                    langPack: args.langPack,
                     systemLangCode: args.systemLangCode,
                     query: x,
                     proxy: undefined, // no proxies yet.
@@ -218,10 +219,10 @@ class TelegramClient {
         this._sender._disconnected = true;
 
         const connection = new this._connection(
-            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this._args.testServers,
+            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this.session.isTestServer,
         );
         const fallbackConnection = new this._fallbackConnection(
-            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this._args.testServers,
+            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this.session.isTestServer,
         );
 
         const newConnection = await this._sender.connect(connection, undefined, fallbackConnection);
@@ -257,7 +258,9 @@ class TelegramClient {
         if (!this.session.serverAddress || (this.session.serverAddress.includes(':') !== this._useIPV6)) {
             const DC = utils.getDC(this.defaultDcId);
             // TODO Fill IP addresses for when `this._useIPV6` is used
-            this.session.setDC(this.defaultDcId, DC.ipAddress, this._args.useWSS ? 443 : 80);
+            this.session.setDC(
+                this.defaultDcId, DC.ipAddress, this._args.useWSS ? 443 : 80, this._args.isTestServerRequested,
+            );
         }
     }
 
@@ -417,7 +420,8 @@ class TelegramClient {
     async _switchDC(newDc) {
         this._log.info(`Reconnecting to new data center ${newDc}`);
         const DC = utils.getDC(newDc);
-        this.session.setDC(newDc, DC.ipAddress, DC.port);
+        const isTestServer = this.session.isTestServer || this._args.isTestServerRequested;
+        this.session.setDC(newDc, DC.ipAddress, DC.port, isTestServer);
         // authKey's are associated with a server, which has now changed
         // so it's not valid anymore. Set to None to force recreating it.
         await this._sender.authKey.setKey(undefined);
@@ -495,7 +499,7 @@ class TelegramClient {
                     dc.port,
                     dcId,
                     this._log,
-                    this._args.testServers,
+                    this.session.isTestServer,
                     // Premium DCs are not stable for obtaining auth keys, so need to we first connect to regular ones
                     hasAuthKey ? isPremium : false,
                 ), undefined, new this._fallbackConnection(
@@ -503,7 +507,7 @@ class TelegramClient {
                     dc.port,
                     dcId,
                     this._log,
-                    this._args.testServers,
+                    this.session.isTestServer,
                     hasAuthKey ? isPremium : false,
                 ));
 
@@ -1000,8 +1004,11 @@ class TelegramClient {
                 if (isExported) this.releaseExportedSender(sender);
                 return result;
             } catch (e) {
-                if (e instanceof errors.ServerError || e.message === 'RPC_CALL_FAIL'
-                    || e.message === 'RPC_MCGET_FAIL') {
+                if (e instanceof errors.ServerError
+                    || e.message === 'RPC_CALL_FAIL'
+                    || e.message === 'RPC_MCGET_FAIL'
+                    || e.message.match(/INTERDC_\d_CALL(_RICH)?_ERROR/)
+                ) {
                     this._log.warn(`Telegram is having internal issues ${e.constructor.name}`);
                     await sleep(2000);
                 } else if (e instanceof errors.FloodWaitError || e instanceof errors.FloodTestPhoneWaitError) {

@@ -10,7 +10,7 @@ import StarIcon from '../../common/icons/StarIcon';
 import styles from './StarsBalanceModal.module.scss';
 
 type OwnProps = {
-  balance: number;
+  balance?: number;
   className?: string;
 };
 
@@ -22,7 +22,7 @@ const BalanceBlock = ({ balance, className }: OwnProps) => {
       <span className={styles.smallerText}>{lang('StarsBalance')}</span>
       <div className={styles.balanceBottom}>
         <StarIcon type="gold" size="middle" />
-        {formatInteger(balance)}
+        {balance !== undefined ? formatInteger(balance) : '…'}
       </div>
     </div>
   );

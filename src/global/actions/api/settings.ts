@@ -373,7 +373,13 @@ addActionHandler('loadLanguages', async (global): Promise<void> => {
   }
 
   global = getGlobal();
-  global = replaceSettings(global, { languages: result });
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      languages: result,
+    },
+  };
   setGlobal(global);
 });
 

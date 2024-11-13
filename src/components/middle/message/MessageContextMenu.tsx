@@ -10,15 +10,17 @@ import type {
   ApiChatReactions,
   ApiMessage,
   ApiPeer,
+  ApiPoll,
   ApiReaction,
   ApiSponsoredMessage,
   ApiStickerSet,
   ApiThreadInfo,
+  ApiTypeStory,
   ApiUser,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { getUserFullName, isUserId } from '../../../global/helpers';
+import { getUserFullName, groupStatetefulContent, isUserId } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -35,6 +37,7 @@ import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/placeholder/Skeleton';
+import LastEditTimeMenuItem from './LastEditTimeMenuItem';
 import ReactionSelector from './reactions/ReactionSelector';
 import ReadTimeMenuItem from './ReadTimeMenuItem';
 
@@ -49,8 +52,11 @@ type OwnProps = {
   anchor: IAnchorPosition;
   targetHref?: string;
   message: ApiMessage | ApiSponsoredMessage;
+  poll?: ApiPoll;
+  story?: ApiTypeStory;
   canSendNow?: boolean;
   enabledReactions?: ApiChatReactions;
+  isWithPaidReaction?: boolean;
   reactionsLimit?: number;
   canReschedule?: boolean;
   canReply?: boolean;
@@ -96,8 +102,8 @@ type OwnProps = {
   onUnpin?: NoneToVoidFunction;
   onForward?: NoneToVoidFunction;
   onDelete?: NoneToVoidFunction;
-  onReport?: NoneToVoidFunction;
   onFaveSticker?: NoneToVoidFunction;
+  onReport?: NoneToVoidFunction;
   onUnfaveSticker?: NoneToVoidFunction;
   onSelect?: NoneToVoidFunction;
   onSend?: NoneToVoidFunction;
@@ -121,6 +127,8 @@ type OwnProps = {
   onShowOriginal?: NoneToVoidFunction;
   onSelectLanguage?: NoneToVoidFunction;
   onToggleReaction?: (reaction: ApiReaction) => void;
+  onSendPaidReaction?: NoneToVoidFunction;
+  onShowPaidReactionModal?: NoneToVoidFunction;
   onReactionPickerOpen?: (position: IAnchorPosition) => void;
 };
 
@@ -135,9 +143,12 @@ const MessageContextMenu: FC<OwnProps> = ({
   defaultTagReactions,
   isOpen,
   message,
+  poll,
+  story,
   isPrivate,
   isCurrentUserPremium,
   enabledReactions,
+  isWithPaidReaction,
   reactionsLimit,
   anchor,
   targetHref,
@@ -151,8 +162,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   canPin,
   canUnpin,
   canDelete,
-  canReport,
   canForward,
+  canReport,
   canFaveSticker,
   canUnfaveSticker,
   canCopy,
@@ -184,8 +195,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onUnpin,
   onForward,
   onDelete,
-  onReport,
   onFaveSticker,
+  onReport,
   onUnfaveSticker,
   onSelect,
   onSend,
@@ -201,6 +212,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   onShowSeenBy,
   onShowReactors,
   onToggleReaction,
+  onSendPaidReaction,
+  onShowPaidReactionModal,
   onCopyMessages,
   onAboutAdsClick,
   onSponsoredHide,
@@ -222,6 +235,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   const noReactions = !isPrivate && !enabledReactions;
   const withReactions = canShowReactionList && !noReactions;
   const isSponsoredMessage = !('id' in message);
+  const isEdited = ('isEdited' in message) && message.isEdited;
   const messageId = !isSponsoredMessage ? message.id : '';
   const seenByDates = !isSponsoredMessage ? message.seenByDates : undefined;
 
@@ -276,6 +290,7 @@ const MessageContextMenu: FC<OwnProps> = ({
     ? []
     : getMessageCopyOptions(
       message,
+      groupStatetefulContent({ poll, story }),
       targetHref,
       canCopy,
       handleAfterCopy,
@@ -356,6 +371,9 @@ const MessageContextMenu: FC<OwnProps> = ({
           currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
           reactionsLimit={reactionsLimit}
           onToggleReaction={onToggleReaction!}
+          onSendPaidReaction={onSendPaidReaction}
+          onShowPaidReactionModal={onShowPaidReactionModal}
+          isWithPaidReaction={isWithPaidReaction}
           isPrivate={isPrivate}
           isReady={isReady}
           canBuyPremium={canBuyPremium}
@@ -500,13 +518,20 @@ const MessageContextMenu: FC<OwnProps> = ({
             </MenuItem>
           </>
         )}
+        {((!isSponsoredMessage && (canLoadReadDate || shouldRenderShowWhen)) || isEdited) && (
+          <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
+        )}
         {!isSponsoredMessage && (canLoadReadDate || shouldRenderShowWhen) && (
           <ReadTimeMenuItem
             canLoadReadDate={canLoadReadDate}
             shouldRenderShowWhen={shouldRenderShowWhen}
             message={message}
-            menuSeparatorSize={hasCustomEmoji ? 'thin' : 'thick'}
             closeContextMenu={onClose}
+          />
+        )}
+        {isEdited && (
+          <LastEditTimeMenuItem
+            message={message}
           />
         )}
       </div>

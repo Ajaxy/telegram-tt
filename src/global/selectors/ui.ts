@@ -4,6 +4,7 @@ import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { IS_SNAP_EFFECT_SUPPORTED } from '../../util/windowEnvironment';
 import { getMessageVideo, getMessageWebPageVideo } from '../helpers/messageMedia';
 import { selectCurrentManagement } from './management';
 import { selectIsStatisticsShown } from './statistics';
@@ -144,4 +145,8 @@ export function selectIsContextMenuTranslucent<T extends GlobalState>(global: T)
 
 export function selectIsSynced<T extends GlobalState>(global: T) {
   return global.isSynced;
+}
+
+export function selectCanAnimateSnapEffect<T extends GlobalState>(global: T) {
+  return IS_SNAP_EFFECT_SUPPORTED && selectPerformanceSettingsValue(global, 'snapEffect');
 }

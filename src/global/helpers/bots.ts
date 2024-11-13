@@ -3,6 +3,8 @@ import type {
   WebApp,
 } from '../types';
 
+import { REPLIES_USER_ID, VERIFICATION_CODES_USER_ID } from '../../config';
+
 export function getBotCoverMediaHash(photo: ApiPhoto) {
   return `photo${photo.id}?size=x`;
 }
@@ -19,4 +21,8 @@ export function getWebAppKey(webApp: Partial<WebApp>) {
   if (webApp.requestUrl) return webApp.requestUrl;
   if (webApp.appName) return `${webApp.botId}?appName=${webApp.appName}`;
   return webApp.botId;
+}
+
+export function isSystemBot(botId: string) {
+  return botId === REPLIES_USER_ID || botId === VERIFICATION_CODES_USER_ID;
 }

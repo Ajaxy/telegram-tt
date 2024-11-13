@@ -79,7 +79,6 @@ const StickerSetCard: FC<OwnProps> = ({
 
   return (
     <ListItem
-      narrow
       className={buildClassName('StickerSetCard', 'chat-item-clickable small-icon', className)}
       style={`height: ${CHAT_HEIGHT_PX}px;`}
       inactive={!firstSticker}

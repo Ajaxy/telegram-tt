@@ -7,13 +7,16 @@ import type {
   ApiChat,
   ApiContact,
   ApiFactCheck,
+  ApiFormattedText,
   ApiGroupCall,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
   ApiKeyboardButton,
   ApiMessage,
+  ApiMessageActionStarGift,
   ApiMessageEntity,
   ApiMessageForwardInfo,
+  ApiMessageReportResult,
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
@@ -38,6 +41,7 @@ import {
   DELETED_COMMENTS_CHANNEL_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
+  STARS_CURRENCY_CODE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -59,6 +63,7 @@ import {
   buildApiPhoto,
 } from './common';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
+import { buildApiStarGift } from './payments';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 
@@ -175,8 +180,14 @@ export function buildApiMessageWithChatId(
 ): ApiMessage {
   const fromId = mtpMessage.fromId ? getApiChatIdFromMtpPeer(mtpMessage.fromId) : undefined;
   const peerId = mtpMessage.peerId ? getApiChatIdFromMtpPeer(mtpMessage.peerId) : undefined;
+
   const isChatWithSelf = !fromId && chatId === currentUserId;
-  const isOutgoing = (mtpMessage.out && !mtpMessage.post) || (isChatWithSelf && !mtpMessage.fwdFrom);
+  const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
+
+  const isSavedOutgoing = Boolean(!forwardInfo || forwardInfo.fromId === currentUserId || forwardInfo.isSavedOutgoing);
+
+  const isOutgoing = !isChatWithSelf ? Boolean(mtpMessage.out && !mtpMessage.post)
+    : isSavedOutgoing;
   const content = buildMessageContent(mtpMessage);
   const action = mtpMessage.action
     && buildAction(mtpMessage.action, fromId, peerId, Boolean(mtpMessage.post), isOutgoing);
@@ -192,7 +203,6 @@ export function buildApiMessageWithChatId(
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
   } = buildReplyButtons(mtpMessage, isInvoiceMedia) || {};
-  const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
   const { mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
@@ -292,6 +302,7 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
     channelPostId: fwdFrom.channelPost,
     isLinkedChannelPost: Boolean(fwdFrom.channelPost && savedFromPeerId && !isChatWithSelf),
     savedFromPeerId,
+    isSavedOutgoing: fwdFrom.savedOut,
     fromId,
     fromChatId: fromId || savedFromPeerId,
     fromMessageId: fwdFrom.savedFromMsgId || fwdFrom.channelPost,
@@ -349,6 +360,21 @@ export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
   };
 }
 
+function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : ApiMessageActionStarGift {
+  const {
+    nameHidden, saved, converted, gift, message, convertStars,
+  } = action;
+
+  return {
+    isNameHidden: Boolean(nameHidden),
+    isSaved: Boolean(saved),
+    isConverted: Boolean(converted),
+    gift: buildApiStarGift(gift),
+    message: message && buildApiFormattedText(message),
+    starsToConvert: convertStars.toJSNumber(),
+  };
+}
+
 function buildAction(
   action: GramJs.TypeMessageAction,
   senderId: string | undefined,
@@ -364,6 +390,7 @@ function buildAction(
   let call: Partial<ApiGroupCall> | undefined;
   let amount: number | undefined;
   let stars: number | undefined;
+  let starGift: ApiMessageActionStarGift | undefined;
   let currency: string | undefined;
   let giftCryptoInfo: {
     currency: string;
@@ -382,6 +409,7 @@ function buildAction(
   let isUnclaimed: boolean | undefined;
   let pluralValue: number | undefined;
   let transactionId: string | undefined;
+  let message: ApiFormattedText | undefined;
 
   let targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -528,6 +556,9 @@ function buildAction(
     } else {
       translationValues.push('%action_origin%', '%gift_payment_amount%');
     }
+    if (action.message) {
+      message = buildApiFormattedText(action.message);
+    }
     if (targetPeerId) {
       targetUserIds.push(targetPeerId);
     }
@@ -584,6 +615,10 @@ function buildAction(
     if (isOutgoing) {
       translationValues.push('%gift_payment_amount%');
     }
+    if (action.message) {
+      message = buildApiFormattedText(action.message);
+    }
+
     currency = action.currency;
     if (action.cryptoCurrency) {
       giftCryptoInfo = {
@@ -667,6 +702,24 @@ function buildAction(
     amount = action.amount.toJSNumber();
     stars = action.stars.toJSNumber();
     transactionId = action.transactionId;
+  } else if (action instanceof GramJs.MessageActionStarGift) {
+    type = 'starGift';
+    if (isOutgoing) {
+      text = 'ActionGiftOutbound';
+      translationValues.push('%gift_payment_amount%');
+    } else {
+      text = 'ActionGiftInbound';
+      translationValues.push('%action_origin%', '%gift_payment_amount%');
+    }
+
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
+      targetChatId = targetPeerId;
+    }
+
+    amount = action.gift.stars.toJSNumber();
+    currency = STARS_CURRENCY_CODE;
+    starGift = buildApiMessageActionStarGift(action);
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -685,6 +738,7 @@ function buildAction(
     photo, // TODO Only used internally now, will be used for the UI in future
     amount,
     stars,
+    starGift,
     currency,
     giftCryptoInfo,
     isGiveaway,
@@ -699,6 +753,7 @@ function buildAction(
     isUnclaimed,
     pluralValue,
     transactionId,
+    message,
   };
 }
 
@@ -828,6 +883,14 @@ function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: bool
         };
       }
 
+      if (button instanceof GramJs.KeyboardButtonCopy) {
+        return {
+          type: 'copy',
+          text,
+          copyText: button.copyText,
+        };
+      }
+
       return {
         type: 'unsupported',
         text,
@@ -873,30 +936,30 @@ export function buildLocalMessage(
   story?: ApiStory | ApiStorySkipped,
   isInvertedMedia?: true,
   effectId?: string,
-): ApiMessage {
+) {
   const localId = getNextLocalMessageId(lastMessageId);
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
 
   const resultReplyInfo = replyInfo && buildReplyInfo(replyInfo, chat.isForum);
 
+  const localPoll = poll && buildNewPoll(poll, localId);
+
   const message = {
     id: localId,
     chatId: chat.id,
-    content: {
-      ...(text && {
-        text: {
-          text,
-          entities,
-        },
-      }),
+    content: omitUndefined({
+      text: text ? {
+        text,
+        entities,
+      } : undefined,
       ...media,
-      ...(sticker && { sticker }),
-      ...(gif && { video: gif }),
-      ...(poll && { poll: buildNewPoll(poll, localId) }),
-      ...(contact && { contact }),
-      ...(story && { storyData: { mediaType: 'storyData', ...story } }),
-    },
+      sticker,
+      video: gif || media?.video,
+      contact,
+      storyData: story && { mediaType: 'storyData', ...story },
+      pollId: localPoll?.id,
+    }),
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
@@ -913,9 +976,14 @@ export function buildLocalMessage(
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
 
-  return {
+  const finalMessage = {
     ...message,
     ...(emojiOnlyCount && { emojiOnlyCount }),
+  };
+
+  return {
+    message: finalMessage,
+    poll: localPoll,
   };
 }
 
@@ -1177,5 +1245,35 @@ export function buildApiQuickReply(reply: GramJs.TypeQuickReply): ApiQuickReply 
     id: shortcutId,
     shortcut,
     topMessageId: topMessage,
+  };
+}
+
+export function buildApiReportResult(
+  result: GramJs.TypeReportResult,
+): ApiMessageReportResult {
+  if (result instanceof GramJs.ReportResultReported) {
+    return {
+      type: 'reported',
+    };
+  }
+
+  if (result instanceof GramJs.ReportResultAddComment) {
+    return {
+      type: 'comment',
+      isOptional: result.optional,
+      option: serializeBytes(result.option),
+    };
+  }
+
+  const title = result.title;
+  const options = result.options.map((option) => ({
+    text: option.text,
+    option: serializeBytes(option.option),
+  }));
+
+  return {
+    type: 'selectOption',
+    title,
+    options,
   };
 }

@@ -7,6 +7,8 @@
 
 import { preloadImage } from './files';
 
+const LUMA_THRESHOLD = 128;
+
 /**
  * HEX > RGB
  * input: 'xxxxxx' (ex. 'ed15fa') case-insensitive
@@ -202,3 +204,22 @@ export function getPatternColor(rgbColor: [number, number, number]) {
 
   return `hsla(${hue * 360}, ${saturation * 100}%, ${value * 100}%, .4)`;
 }
+
+/* eslint-disable no-bitwise */
+export const convertToRGBA = (color: number): string => {
+  const alpha = (color >> 24) & 0xff;
+  const red = (color >> 16) & 0xff;
+  const green = (color >> 8) & 0xff;
+  const blue = color & 0xff;
+
+  const alphaFloat = alpha / 255;
+  return `rgba(${red}, ${green}, ${blue}, ${alphaFloat})`;
+};
+
+export const getTextColor = (color: number): string => {
+  const r = (color >> 16) & 0xff;
+  const g = (color >> 8) & 0xff;
+  const b = color & 0xff;
+  const luma = getColorLuma([r, g, b]);
+  return luma > LUMA_THRESHOLD ? 'black' : 'white';
+};

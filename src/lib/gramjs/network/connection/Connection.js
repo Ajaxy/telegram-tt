@@ -22,6 +22,7 @@ class Connection {
         this._dcId = dcId;
         this._log = loggers;
         this._testServers = testServers;
+
         this._isPremium = isPremium;
         this._connected = false;
         this._sendTask = undefined;

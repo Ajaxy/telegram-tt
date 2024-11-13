@@ -20,7 +20,7 @@ import {
   buildMessagePeerReaction,
 } from '../apiBuilders/reactions';
 import { buildStickerFromDocument } from '../apiBuilders/symbols';
-import { buildInputPeer, buildInputReaction } from '../gramjsBuilders';
+import { buildInputPeer, buildInputReaction, generateRandomTimestampedBigInt } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { invokeRequest } from './client';
 
@@ -150,6 +150,29 @@ export function sendReaction({
   });
 }
 
+export function sendPaidReaction({
+  chat,
+  messageId,
+  count,
+  isPrivate,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  count: number;
+  isPrivate?: boolean;
+}) {
+  return invokeRequest(new GramJs.messages.SendPaidReaction({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    msgId: messageId,
+    randomId: generateRandomTimestampedBigInt(),
+    count,
+    private: isPrivate || undefined,
+  }), {
+    shouldReturnTrue: true,
+    shouldThrow: true,
+  });
+}
+
 export function fetchMessageReactions({
   ids, chat,
 }: {
@@ -215,7 +238,7 @@ export async function fetchTopReactions({ hash = '0' }: { hash?: string }) {
 
   return {
     hash: String(result.hash),
-    reactions: result.reactions.map(buildApiReaction).filter(Boolean),
+    reactions: result.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
   };
 }
 
@@ -231,7 +254,7 @@ export async function fetchRecentReactions({ hash = '0' }: { hash?: string }) {
 
   return {
     hash: String(result.hash),
-    reactions: result.reactions.map(buildApiReaction).filter(Boolean),
+    reactions: result.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
   };
 }
 
@@ -250,7 +273,7 @@ export async function fetchDefaultTagReactions({ hash = '0' }: { hash?: string }
 
   return {
     hash: String(result.hash),
-    reactions: result.reactions.map(buildApiReaction).filter(Boolean),
+    reactions: result.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
   };
 }
 

@@ -4,7 +4,9 @@ import { getActions, getGlobal } from '../../global';
 import type { ApiStory } from '../../api/types';
 
 import { HEART_REACTION } from '../../config';
-import { getStoryKey, isUserId } from '../../global/helpers';
+import {
+  getReactionKey, getStoryKey, isSameReaction, isUserId,
+} from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -35,8 +37,7 @@ const StoryFooter = ({
   const { viewsCount, forwardsCount, reactionsCount } = views || {};
   const isChannel = !isUserId(peerId);
 
-  const isSentStoryReactionHeart = sentReaction && 'emoticon' in sentReaction
-    ? sentReaction.emoticon === HEART_REACTION.emoticon : false;
+  const isSentStoryReactionHeart = sentReaction && isSameReaction(sentReaction, HEART_REACTION);
 
   const canForward = Boolean(
     (isOut || isChannel)
@@ -152,7 +153,7 @@ const StoryFooter = ({
             >
               {sentReaction && (
                 <ReactionAnimatedEmoji
-                  key={'documentId' in sentReaction ? sentReaction.documentId : sentReaction.emoticon}
+                  key={getReactionKey(sentReaction)}
                   containerId={containerId}
                   reaction={sentReaction}
                   withEffectOnly={isSentStoryReactionHeart}

@@ -18,7 +18,8 @@ import type {
   ApiPhoneCall,
   ApiPhoto,
   ApiPoll,
-  ApiPremiumGiftCodeOption, ApiReaction,
+  ApiPremiumGiftCodeOption,
+  ApiReactionWithPaid,
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiSendMessageAction,
@@ -289,6 +290,15 @@ export function buildInputStory(story: ApiStory | ApiStorySkipped) {
 
 export function generateRandomBigInt() {
   return readBigIntFromBuffer(generateRandomBytes(8), true, true);
+}
+
+export function generateRandomTimestampedBigInt() {
+  // 32 bits for timestamp, 32 bits are random
+  const buffer = generateRandomBytes(8);
+  const timestampBuffer = Buffer.alloc(4);
+  timestampBuffer.writeUInt32LE(Math.floor(Date.now() / 1000), 0);
+  buffer.set(timestampBuffer, 4);
+  return readBigIntFromBuffer(buffer, true, true);
 }
 
 export function generateRandomInt() {
@@ -563,6 +573,7 @@ GramJs.TypeInputStorePaymentPurpose {
         : undefined,
       currency: purpose.currency,
       amount: BigInt(purpose.amount),
+      message: purpose.message && buildInputTextWithEntities(purpose.message),
     });
   }
 
@@ -623,6 +634,18 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'stargift': {
+      const {
+        user, shouldHideName, giftId, message,
+      } = invoice;
+      return new GramJs.InputInvoiceStarGift({
+        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+        hideName: shouldHideName || undefined,
+        giftId: BigInt(giftId),
+        message: message && buildInputTextWithEntities(message),
+      });
+    }
+
     case 'stars': {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);
       return new GramJs.InputInvoiceStars({
@@ -634,6 +657,12 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);
       return new GramJs.InputInvoiceStars({
         purpose,
+      });
+    }
+
+    case 'chatInviteSubscription': {
+      return new GramJs.InputInvoiceChatInviteSubscription({
+        hash: invoice.hash,
       });
     }
 
@@ -650,20 +679,21 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
   }
 }
 
-export function buildInputReaction(reaction?: ApiReaction) {
-  if (reaction && 'emoticon' in reaction) {
-    return new GramJs.ReactionEmoji({
-      emoticon: reaction.emoticon,
-    });
+export function buildInputReaction(reaction?: ApiReactionWithPaid) {
+  switch (reaction?.type) {
+    case 'emoji':
+      return new GramJs.ReactionEmoji({
+        emoticon: reaction.emoticon,
+      });
+    case 'custom':
+      return new GramJs.ReactionCustomEmoji({
+        documentId: BigInt(reaction.documentId),
+      });
+    case 'paid':
+      return new GramJs.ReactionPaid();
+    default:
+      return new GramJs.ReactionEmpty();
   }
-
-  if (reaction && 'documentId' in reaction) {
-    return new GramJs.ReactionCustomEmoji({
-      documentId: BigInt(reaction.documentId),
-    });
-  }
-
-  return new GramJs.ReactionEmpty();
 }
 
 export function buildInputChatReactions(chatReactions?: ApiChatReactions) {

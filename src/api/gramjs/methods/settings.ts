@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { LANG_PACKS } from '../../../config';
-import type { ApiInputPrivacyRules, ApiPrivacyKey, LangCode } from '../../../types';
+import type { ApiInputPrivacyRules, ApiPrivacyKey } from '../../../types';
 import type {
   ApiAppConfig,
   ApiConfig,
@@ -14,7 +14,10 @@ import type {
 } from '../../types';
 
 import {
-  ACCEPTABLE_USERNAME_ERRORS, BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK, MAX_INT_32,
+  ACCEPTABLE_USERNAME_ERRORS,
+  BLOCKED_LIST_LIMIT,
+  MAX_INT_32,
+  OLD_DEFAULT_LANG_PACK,
 } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -466,7 +469,7 @@ export async function fetchLangDifference({
 
 export async function fetchLanguages(): Promise<ApiLanguage[] | undefined> {
   const result = await invokeRequest(new GramJs.langpack.GetLanguages({
-    langPack: DEFAULT_LANG_PACK,
+    langPack: OLD_DEFAULT_LANG_PACK,
   }));
   if (!result) {
     return undefined;
@@ -646,7 +649,7 @@ export async function fetchTimezones(hash?: number) {
   };
 }
 
-export async function fetchCountryList({ langCode = 'en' }: { langCode?: LangCode }) {
+export async function fetchCountryList({ langCode = 'en' }: { langCode?: string }) {
   const countryList = await invokeRequest(new GramJs.help.GetCountriesList({
     langCode,
   }));

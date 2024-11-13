@@ -133,6 +133,21 @@ export function selectAnimatedEmoji<T extends GlobalState>(global: T, emoji: str
   return animatedEmojis.stickers.find((sticker) => sticker.emoji === emoji || sticker.emoji === cleanedEmoji);
 }
 
+export function selectRestrictedEmoji<T extends GlobalState>(global: T, emoji: string) {
+  const { restrictedEmoji } = global;
+  if (!restrictedEmoji || !restrictedEmoji.stickers) {
+    return undefined;
+  }
+
+  const cleanedEmoji = cleanEmoji(emoji);
+
+  return restrictedEmoji.stickers.find((sticker) => {
+    if (!sticker.emoji) return undefined;
+    const cleanedStickerEmoji = cleanEmoji(sticker.emoji);
+    return cleanedStickerEmoji === cleanedEmoji;
+  });
+}
+
 export function selectAnimatedEmojiEffect<T extends GlobalState>(global: T, emoji: string) {
   const { animatedEmojiEffects } = global;
   if (!animatedEmojiEffects || !animatedEmojiEffects.stickers) {
@@ -154,6 +169,10 @@ export function selectIsAlwaysHighPriorityEmoji<T extends GlobalState>(
   if (!('id' in stickerSet)) return false;
   return stickerSet.id === global.appConfig?.defaultEmojiStatusesStickerSetId
     || stickerSet.id === RESTRICTED_EMOJI_SET_ID;
+}
+
+export function selectStarGiftSticker<T extends GlobalState>(global: T, id: string) {
+  return global.stickers.starGifts.stickers[id];
 }
 
 export function selectGiftStickerForDuration<T extends GlobalState>(global: T, duration = 1) {

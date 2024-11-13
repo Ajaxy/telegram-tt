@@ -50,7 +50,7 @@ export function hasMessageMedia(message: MediaContainer) {
     || getMessageDocument(message)
     || getMessageSticker(message)
     || getMessageContact(message)
-    || getMessagePoll(message)
+    || getMessagePollId(message)
     || getMessageAction(message)
     || getMessageAudio(message)
     || getMessageVoice(message)
@@ -58,14 +58,13 @@ export function hasMessageMedia(message: MediaContainer) {
 }
 
 export function hasReplaceableMedia(message: MediaContainer) {
-  const video = getMessageVideo(message);
-  return Boolean((
-    getMessagePhoto(message)
-    || (video && !video?.isRound)
-    || getMessageDocument(message)
-    || getMessageSticker(message)
-    || getMessageAudio(message)
-  ));
+  const {
+    text, photo, video, audio, document,
+  } = message.content;
+
+  if (getMessageVoice(message)) return false;
+
+  return Boolean(text || photo || (video && !video.isGif) || audio || document);
 }
 
 export function getMessagePhoto(message: MediaContainer) {
@@ -127,8 +126,8 @@ export function getMessageContact(message: MediaContainer) {
   return message.content.contact;
 }
 
-export function getMessagePoll(message: MediaContainer) {
-  return message.content.poll;
+export function getMessagePollId(message: MediaContainer) {
+  return message.content.pollId;
 }
 
 export function getMessageInvoice(message: MediaContainer) {
@@ -385,6 +384,9 @@ export function getStickerMediaHash(sticker: ApiSticker, target: Target) {
   switch (target) {
     case 'micro':
     case 'pictogram':
+      if (!sticker.previewPhotoSizes?.some((size) => size.type === 's')) {
+        return getStickerMediaHash(sticker, 'preview');
+      }
       return `${base}?size=s`;
     case 'preview':
       return `${base}?size=m`;

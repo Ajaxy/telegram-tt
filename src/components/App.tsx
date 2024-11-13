@@ -38,6 +38,7 @@ type StateProps = {
   hasPasscode?: boolean;
   isInactiveAuth?: boolean;
   hasWebAuthTokenFailed?: boolean;
+  isTestServer?: boolean;
   theme: ThemeKey;
 };
 
@@ -57,6 +58,7 @@ const App: FC<StateProps> = ({
   hasPasscode,
   isInactiveAuth,
   hasWebAuthTokenFailed,
+  isTestServer,
   theme,
 }) => {
   const { disconnect } = getActions();
@@ -221,6 +223,7 @@ const App: FC<StateProps> = ({
       >
         {renderContent}
       </Transition>
+      {activeKey === AppScreens.auth && isTestServer && <div className="test-server-badge">Test server</div>}
     </UiLoader>
   );
 };
@@ -234,6 +237,7 @@ export default withGlobal(
       isInactiveAuth: selectTabState(global).isInactive,
       hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
       theme: selectTheme(global),
+      isTestServer: global.config?.isTestServer,
     };
   },
 )(App);

@@ -42,7 +42,6 @@ import {
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
   ONE_TIME_MEDIA_TTL_SECONDS,
-  REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -50,11 +49,14 @@ import {
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getAllowedAttachmentOptions,
+  getReactionKey,
   getStoryKey,
   hasReplaceableMedia,
   isChatAdmin,
   isChatChannel,
   isChatSuperGroup,
+  isSameReaction,
+  isSystemBot,
   isUserId,
 } from '../../global/helpers';
 import {
@@ -436,8 +438,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
   const chatEmojiSetId = emojiSet?.id;
 
-  const isSentStoryReactionHeart = sentStoryReaction && 'emoticon' in sentStoryReaction
-    ? sentStoryReaction.emoticon === HEART_REACTION.emoticon : false;
+  const isSentStoryReactionHeart = sentStoryReaction && isSameReaction(sentStoryReaction, HEART_REACTION);
 
   useEffect(processMessageInputForCustomEmoji, [getHtml]);
 
@@ -1062,6 +1063,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldUpdateStickerSetOrder,
         isInvertedMedia,
         effectId,
+        webPageMediaSize: attachmentSettings.webPageMediaSize,
+        webPageUrl: hasWebPagePreview ? webPagePreview!.url : undefined,
       });
     }
 
@@ -1503,9 +1506,11 @@ const Composer: FC<OwnProps & StateProps> = ({
     let text: string | undefined;
     let entities: ApiMessageEntity[] | undefined;
 
-    if ('emoticon' in reaction) {
+    if (reaction.type === 'emoji') {
       text = reaction.emoticon;
-    } else {
+    }
+
+    if (reaction.type === 'custom') {
       const sticker = getGlobal().customEmojis.byId[reaction.documentId];
       if (!sticker) {
         return;
@@ -1983,7 +1988,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         >
           {sentStoryReaction && (
             <ReactionAnimatedEmoji
-              key={'documentId' in sentStoryReaction ? sentStoryReaction.documentId : sentStoryReaction.emoticon}
+              key={getReactionKey(sentStoryReaction)}
               containerId={getStoryKey(chatId, storyId!)}
               reaction={sentStoryReaction}
               withEffectOnly={isSentStoryReactionHeart}
@@ -2072,7 +2077,7 @@ export default memo(withGlobal<OwnProps>(
     chatId, threadId, storyId, messageListType, isMobile, type,
   }): StateProps => {
     const chat = selectChat(global, chatId);
-    const chatBot = chatId !== REPLIES_USER_ID ? selectBot(global, chatId) : undefined;
+    const chatBot = !isSystemBot(chatId) ? selectBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isChatWithUser = isUserId(chatId);

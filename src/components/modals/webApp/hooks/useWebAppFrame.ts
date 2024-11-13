@@ -182,10 +182,6 @@ const useWebAppFrame = (
             data: null,
           },
         });
-
-        // showNotification({
-        //   message: 'Clipboard access is not supported in this client yet',
-        // });
       }
 
       if (eventType === 'web_app_open_scan_qr_popup') {

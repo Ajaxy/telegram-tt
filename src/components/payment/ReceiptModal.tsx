@@ -2,13 +2,13 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { ApiInvoice, ApiShippingAddress, ApiWebDocument } from '../../api/types';
-import type { Price } from '../../types';
+import type { ApiReceiptRegular, ApiShippingAddress } from '../../api/types';
 
 import { selectTabState } from '../../global/selectors';
 
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -22,37 +22,13 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  prices?: Price[];
-  shippingPrices: any;
-  tipAmount?: number;
-  totalAmount?: number;
-  currency?: string;
-  info?: {
-    shippingAddress?: ApiShippingAddress;
-    phone?: string;
-    name?: string;
-  };
-  photo?: ApiWebDocument;
-  text?: string;
-  title?: string;
-  credentialsTitle?: string;
-  shippingMethod?: string;
+  receipt?: ApiReceiptRegular;
 };
 
 const ReceiptModal: FC<OwnProps & StateProps> = ({
   isOpen,
   onClose,
-  prices,
-  shippingPrices,
-  tipAmount,
-  totalAmount,
-  currency,
-  info,
-  photo,
-  text,
-  title,
-  credentialsTitle,
-  shippingMethod,
+  receipt,
 }) => {
   const lang = useLang();
 
@@ -64,20 +40,13 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
     }
   }, [isOpen, openModal]);
 
-  const checkoutInfo = useMemo(() => {
-    return getCheckoutInfo(credentialsTitle, info, shippingMethod);
-  }, [info, shippingMethod, credentialsTitle]);
+  const prevReceipt = usePrevious(receipt);
+  const renderingReceipt = receipt || prevReceipt;
 
-  const invoice: ApiInvoice = useMemo(() => {
-    return {
-      mediaType: 'invoice',
-      photo,
-      text: text!,
-      title: title!,
-      amount: totalAmount!,
-      currency: currency!,
-    };
-  }, [currency, photo, text, title, totalAmount]);
+  const checkoutInfo = useMemo(() => {
+    if (!renderingReceipt) return undefined;
+    return getCheckoutInfo(renderingReceipt.credentialsTitle, renderingReceipt.info, renderingReceipt.shippingMethod);
+  }, [renderingReceipt]);
 
   return (
     <Modal
@@ -86,32 +55,35 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
       onClose={closeModal}
       onCloseAnimationEnd={onClose}
     >
-      <div>
-        <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
-          <Button
-            className="close-button"
-            color="translucent"
-            round
-            size="smaller"
-            onClick={closeModal}
-            ariaLabel="Close"
-          >
-            <i className="icon icon-close" />
-          </Button>
-          <h3> {lang('PaymentReceipt')} </h3>
-        </div>
-        <div className="receipt-content custom-scroll">
-          <Checkout
-            prices={prices}
-            shippingPrices={shippingPrices}
-            totalPrice={totalAmount}
-            tipAmount={tipAmount}
-            invoice={invoice}
-            checkoutInfo={checkoutInfo}
-            currency={currency!}
-          />
-        </div>
-      </div>
+      {renderingReceipt && (
+        <>
+          <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
+            <Button
+              className="close-button"
+              color="translucent"
+              round
+              size="smaller"
+              onClick={closeModal}
+              ariaLabel="Close"
+            >
+              <i className="icon icon-close" />
+            </Button>
+            <h3> {lang('PaymentReceipt')} </h3>
+          </div>
+          <div className="receipt-content custom-scroll">
+            <Checkout
+              shippingPrices={renderingReceipt.shippingPrices}
+              totalPrice={renderingReceipt.totalAmount}
+              tipAmount={renderingReceipt.tipAmount}
+              invoice={renderingReceipt.invoice}
+              checkoutInfo={checkoutInfo}
+              title={renderingReceipt.title}
+              description={renderingReceipt.description}
+              photo={renderingReceipt.photo}
+            />
+          </div>
+        </>
+      )}
     </Modal>
   );
 };
@@ -119,39 +91,16 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { receipt } = selectTabState(global).payment;
-    const {
-      currency,
-      prices,
-      info,
-      totalAmount,
-      credentialsTitle,
-      shippingPrices,
-      shippingMethod,
-      photo,
-      text,
-      title,
-      tipAmount,
-    } = (receipt || {});
 
     return {
-      currency,
-      prices,
-      info,
-      tipAmount,
-      totalAmount,
-      credentialsTitle,
-      shippingPrices,
-      shippingMethod,
-      photo,
-      text,
-      title,
+      receipt,
     };
   },
 )(ReceiptModal));
 
 function getCheckoutInfo(paymentMethod?: string,
-  info?:
-  { phone?: string;
+  info?: {
+    phone?: string;
     name?: string;
     shippingAddress?: ApiShippingAddress;
   },

@@ -4,7 +4,7 @@ import type { ApiOldLangPack, ApiOldLangString } from '../api/types';
 import type { LangCode, TimeFormat } from '../types';
 
 import {
-  DEFAULT_LANG_CODE, DEFAULT_LANG_PACK, LANG_CACHE_NAME, LANG_PACKS,
+  DEFAULT_LANG_CODE, LANG_CACHE_NAME, LANG_PACKS, OLD_DEFAULT_LANG_PACK,
 } from '../config';
 import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
@@ -155,14 +155,14 @@ export async function getTranslationForLangString(langCode: string, key: string)
   let translateString: ApiOldLangString | undefined;
   const cachedValue = await cacheApi.fetch(
     LANG_CACHE_NAME,
-    `${DEFAULT_LANG_PACK}_${langCode}_${key}`,
+    `${OLD_DEFAULT_LANG_PACK}_${langCode}_${key}`,
     cacheApi.Type.Json,
   );
 
   if (cachedValue) {
     translateString = cachedValue.value;
   } else {
-    translateString = await fetchRemoteString(DEFAULT_LANG_PACK, langCode, key);
+    translateString = await fetchRemoteString(OLD_DEFAULT_LANG_PACK, langCode, key);
   }
 
   return processTranslation(translateString, key);
@@ -199,7 +199,9 @@ export async function oldSetLanguage(langCode: LangCode, callback?: NoneToVoidFu
   langPack = newLangPack;
   document.documentElement.lang = langCode;
 
-  const { languages, timeFormat } = getGlobal().settings.byKey;
+  const global = getGlobal();
+  const { languages, byKey } = global.settings;
+  const timeFormat = byKey?.timeFormat;
   const langInfo = languages?.find((lang) => lang.langCode === langCode);
   translationFn = createLangFn();
   translationFn.isRtl = Boolean(langInfo?.isRtl);

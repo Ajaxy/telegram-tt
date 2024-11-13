@@ -17,6 +17,23 @@ export function getRequestInputInvoice<T extends GlobalState>(
 ): ApiRequestInputInvoice | undefined {
   if (inputInvoice.type === 'slug') return inputInvoice;
 
+  if (inputInvoice.type === 'stargift') {
+    const {
+      userId, shouldHideName, giftId, message,
+    } = inputInvoice;
+    const user = selectUser(global, userId);
+
+    if (!user) return undefined;
+
+    return {
+      type: 'stargift',
+      user,
+      shouldHideName,
+      giftId,
+      message,
+    };
+  }
+
   if (inputInvoice.type === 'starsgift') {
     const {
       userId, stars, amount, currency,
@@ -53,6 +70,15 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'chatInviteSubscription') {
+    const { hash } = inputInvoice;
+
+    return {
+      type: 'chatInviteSubscription',
+      hash,
+    };
+  }
+
   if (inputInvoice.type === 'message') {
     const chat = selectChat(global, inputInvoice.chatId);
     if (!chat) {
@@ -67,7 +93,7 @@ export function getRequestInputInvoice<T extends GlobalState>(
 
   if (inputInvoice.type === 'giftcode') {
     const {
-      userIds, boostChannelId, amount, currency, option,
+      userIds, boostChannelId, amount, currency, option, message,
     } = inputInvoice;
     const users = userIds.map((id) => selectUser(global, id)).filter(Boolean);
     const boostChannel = boostChannelId ? selectChat(global, boostChannelId) : undefined;
@@ -81,6 +107,7 @@ export function getRequestInputInvoice<T extends GlobalState>(
         currency,
         users,
         boostChannel,
+        message,
       },
     };
   }
@@ -253,6 +280,6 @@ export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiSt
       id: targetChatId!,
     },
     date: message.date,
-    isPrizeStars: true,
+    giveawayPostId: message.id,
   };
 }

@@ -53,9 +53,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
   }, [isActive]);
 
   const [renderingOptions, canExtend] = useMemo(() => {
-    if (!options) {
-      return [undefined, false];
-    }
+    if (!options) return [undefined, false];
 
     const maxOption = options.reduce((max, option) => (
       max.stars > option.stars ? max : option

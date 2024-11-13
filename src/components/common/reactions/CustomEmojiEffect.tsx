@@ -31,7 +31,7 @@ const CustomEmojiEffect: FC<OwnProps> = ({
   particleSize,
   onEnded,
 }) => {
-  const stickerHash = getStickerHashById(reaction.documentId);
+  const stickerHash = getStickerHashById(reaction.documentId, true);
 
   const previewMediaData = useMedia(!isLottie ? stickerHash : undefined);
 

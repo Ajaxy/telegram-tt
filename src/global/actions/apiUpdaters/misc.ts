@@ -1,6 +1,7 @@
 import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
+import { applyLangPackDifference, requestLangPackDifference } from '../../../util/localization';
 import { addActionHandler, setGlobal } from '../../index';
 import {
   addBlockedUser,
@@ -14,6 +15,7 @@ import {
   updateLastReadStoryForPeer,
   updatePeerStory,
   updatePeersWithStories,
+  updatePoll,
   updateStealthMode,
   updateThreadInfos,
 } from '../../reducers';
@@ -22,10 +24,17 @@ import { selectPeerStories, selectPeerStory } from '../../selectors';
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateEntities': {
-      const { users, chats, threadInfos } = update;
+      const {
+        users, chats, threadInfos, polls,
+      } = update;
       if (users) global = addUsers(global, users);
       if (chats) global = addChats(global, chats);
       if (threadInfos) global = updateThreadInfos(global, threadInfos);
+      if (polls) {
+        polls.forEach((poll) => {
+          global = updatePoll(global, poll.id, poll);
+        });
+      }
       setGlobal(global);
       break;
     }
@@ -172,6 +181,28 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       actions.processPremiumFloodWait({
         isUpload: update.isUpload,
       });
+      break;
+    }
+
+    case 'updatePaidReactionPrivacy': {
+      global = {
+        ...global,
+        settings: {
+          ...global.settings,
+          paidReactionPrivacy: update.isPrivate,
+        },
+      };
+      setGlobal(global);
+      break;
+    }
+
+    case 'updateLangPackTooLong': {
+      requestLangPackDifference(update.langCode);
+      break;
+    }
+
+    case 'updateLangPack': {
+      applyLangPackDifference(update.version, update.strings, update.keysToRemove);
     }
   }
 

@@ -19,6 +19,7 @@ import type {
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiPeer,
+  ApiPoll,
   ApiReaction,
   ApiReactionKey,
   ApiSavedReactionTag,
@@ -55,12 +56,12 @@ import {
   isChatChannel,
   isChatGroup,
   isChatPublic,
-  isChatWithRepliesBot,
   isGeoLiveExpired,
   isMessageLocal,
   isMessageTranslatable,
   isOwnMessage,
   isReplyToMessage,
+  isSystemBot,
   isUserId,
 } from '../../../global/helpers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../../global/helpers/replies';
@@ -90,6 +91,7 @@ import {
   selectPeer,
   selectPeerStory,
   selectPerformanceSettingsValue,
+  selectPollFromMessage,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectSender,
@@ -153,8 +155,9 @@ import FakeIcon from '../../common/FakeIcon';
 import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import MessageText from '../../common/MessageText';
-import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import TopicChip from '../../common/TopicChip';
+import { animateSnap } from '../../main/visualEffects/SnapEffectContainer';
 import Button from '../../ui/Button';
 import Album from './Album';
 import AnimatedCustomEmoji from './AnimatedCustomEmoji';
@@ -294,6 +297,8 @@ type StateProps = {
   canTranscribeVoice?: boolean;
   viaBusinessBot?: ApiUser;
   effect?: ApiAvailableEffect;
+  availableStars?: number;
+  poll?: ApiPoll;
 };
 
 type MetaPosition =
@@ -414,6 +419,8 @@ const Message: FC<OwnProps & StateProps> = ({
   canTranscribeVoice,
   viaBusinessBot,
   effect,
+  availableStars,
+  poll,
   onIntersectPinnedMessage,
 }) => {
   const {
@@ -437,6 +444,8 @@ const Message: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
 
   const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
+  const [isPlayingSnapAnimation, setIsPlayingSnapAnimation] = useState(false);
+  const [isPlayingDeleteAnimation, setIsPlayingDeleteAnimation] = useState(false);
   const [shouldPlayEffect, requestEffect, hideEffect] = useFlag();
   const { isMobile, isTouchScreen } = useAppLayout();
 
@@ -503,7 +512,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const {
     photo = paidMediaPhoto, video = paidMediaVideo, audio,
     voice, document, sticker, contact,
-    poll, webPage, invoice, location,
+    webPage, invoice, location,
     action, game, storyData, giveaway,
     giveawayResults,
   } = getMessageContent(message);
@@ -543,7 +552,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const canForward = isChannel && !isScheduled && message.isForwardingAllowed && !isChatProtected;
   const canFocus = Boolean(isPinnedList
     || (forwardInfo
-      && (forwardInfo.isChannelPost || (isChatWithSelf && !isOwn) || isRepliesChat || isAnonymousForwards)
+      && (forwardInfo.isChannelPost || isChatWithSelf || isRepliesChat || isAnonymousForwards)
       && forwardInfo.fromMessageId
     ));
 
@@ -623,7 +632,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleDocumentGroupSelectAll,
     handleTopicChipClick,
     handleStoryClick,
-  } = useInnerHandlers(
+  } = useInnerHandlers({
     lang,
     selectMessage,
     message,
@@ -637,11 +646,12 @@ const Message: FC<OwnProps & StateProps> = ({
     senderPeer,
     botSender,
     messageTopic,
-    Boolean(requestedChatTranslationLanguage),
-    replyStory && 'content' in replyStory ? replyStory : undefined,
+    isTranslatingChat: Boolean(requestedChatTranslationLanguage),
+    story: replyStory && 'content' in replyStory ? replyStory : undefined,
     isReplyPrivate,
     isRepliesChat,
-  );
+    isSavedMessages: isChatWithSelf,
+  });
 
   const handleEffectClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -658,6 +668,17 @@ const Message: FC<OwnProps & StateProps> = ({
       focusLastMessage();
     }
   }, [focusLastMessage, isLastInList, transcribedText, withVoiceTranscription]);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (message.isDeleting && element) {
+      if (animateSnap(element)) {
+        setIsPlayingSnapAnimation(true);
+      } else {
+        setIsPlayingDeleteAnimation(true);
+      }
+    }
+  }, [message.isDeleting]);
 
   const textMessage = album?.hasMultipleCaptions ? undefined : (album?.captionMessage || message);
   const hasTextContent = textMessage && hasMessageText(textMessage);
@@ -678,7 +699,8 @@ const Message: FC<OwnProps & StateProps> = ({
     isContextMenuOpen && 'has-menu-open',
     isFocused && !noFocusHighlight && 'focused',
     isForwarding && 'is-forwarding',
-    message.isDeleting && 'is-deleting',
+    isPlayingDeleteAnimation && 'is-deleting',
+    isPlayingSnapAnimation && 'is-dissolving',
     isInDocumentGroup && 'is-in-document-group',
     isAlbum && 'is-album',
     message.hasUnreadMention && 'has-unread-mention',
@@ -738,6 +760,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && (isCustomShape || ((photo || video || storyData || (location?.mediaType === 'geo')) && !hasText));
 
   const contentClassName = buildContentClassName(message, album, {
+    poll,
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -924,13 +947,13 @@ const Message: FC<OwnProps & StateProps> = ({
       calculatedWidth = Math.max(
         getMinMediaWidth(text?.text, isMediaWithCommentButton), albumLayout.containerStyle.width,
       );
-      if (!asForwarded && calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
+      if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }
 
     if (calculatedWidth) {
-      style = `width: ${calculatedWidth + extraPadding}px`;
+      style = `width: ${calculatedWidth}px`;
       reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
     } else if (sticker && !hasSubheader) {
       const { width } = getStickerDimensions(sticker, isMobile);
@@ -1042,6 +1065,7 @@ const Message: FC<OwnProps & StateProps> = ({
         noRecentReactors={isChannel}
         tags={tags}
         isCurrentUserPremium={isPremium}
+        availableStars={availableStars}
       />
     );
   }
@@ -1054,7 +1078,7 @@ const Message: FC<OwnProps & StateProps> = ({
       noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup
-      && (!hasText || (isInvertedMedia && !hasFactCheck && !hasReactions)) && !asForwarded && !withCommentButton;
+      && (!hasText || (isInvertedMedia && !hasFactCheck && !hasReactions)) && !withCommentButton;
     const textContentClass = buildClassName(
       'text-content',
       'clearfix',
@@ -1463,47 +1487,60 @@ const Message: FC<OwnProps & StateProps> = ({
         {(senderTitle || asForwarded) ? (
           <span
             className={buildClassName(
-              'message-title-name',
+              'message-title-name-container',
               forwardInfo?.hiddenUserName ? 'sender-hidden' : 'interactive',
               senderColor,
             )}
-            onClick={handleSenderClick}
             dir="ltr"
           >
-            {asForwarded && (
-              <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
-            )}
-            {storyData && <Icon name="play-story" />}
-            {shouldRenderForwardAvatar && (
-              <Avatar
-                className="forward-avatar"
-                peer={senderPeer}
-                size="micro"
-              />
-            )}
-            {senderTitle ? renderText(senderTitle) : (asForwarded ? NBSP : undefined)}
-            {!asForwarded && senderEmojiStatus && (
-              <CustomEmoji
-                documentId={senderEmojiStatus.documentId}
-                loopLimit={EMOJI_STATUS_LOOP_LIMIT}
-                observeIntersectionForLoading={observeIntersectionForLoading}
-                observeIntersectionForPlaying={observeIntersectionForPlaying}
-              />
-            )}
-            {!asForwarded && !senderEmojiStatus && senderIsPremium && <StarIcon />}
-            {senderPeer?.fakeType && <FakeIcon fakeType={senderPeer.fakeType} />}
+            <span className="forward-title-container">
+              {asForwarded && (
+                <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
+              )}
+              {asForwarded && (
+                <span className="forward-title">
+                  {lang('ForwardedFrom')}
+                </span>
+              )}
+            </span>
+            <span className="message-title-name">
+              {storyData && <Icon name="play-story" />}
+              {shouldRenderForwardAvatar && (
+                <Avatar
+                  className="forward-avatar"
+                  peer={senderPeer}
+                  size="micro"
+                />
+              )}
+              <span
+                className="sender-title"
+                onClick={handleSenderClick}
+              >
+                {senderTitle ? renderText(senderTitle) : (asForwarded ? NBSP : undefined)}
+              </span>
+              {!asForwarded && senderEmojiStatus && (
+                <CustomEmoji
+                  documentId={senderEmojiStatus.documentId}
+                  loopLimit={EMOJI_STATUS_LOOP_LIMIT}
+                  observeIntersectionForLoading={observeIntersectionForLoading}
+                  observeIntersectionForPlaying={observeIntersectionForPlaying}
+                />
+              )}
+              {!asForwarded && !senderEmojiStatus && senderIsPremium && <StarIcon />}
+              {senderPeer?.fakeType && <FakeIcon fakeType={senderPeer.fakeType} />}
+            </span>
           </span>
         ) : !botSender ? (
           NBSP
         ) : undefined}
-        {botSender && (
+        {botSender?.usernames?.length && (
           <>
             <span className="via">{lang('ViaBot')}</span>
             <span
               className="interactive"
               onClick={handleViaBotClick}
             >
-              {renderText(`@${botSender.usernames![0].username}`)}
+              {renderText(`@${botSender.usernames[0].username}`)}
             </span>
           </>
         )}
@@ -1649,6 +1686,7 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
             tags={tags}
+            availableStars={availableStars}
           />
         )}
       </div>
@@ -1686,7 +1724,7 @@ export default memo(withGlobal<OwnProps>(
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-    const isRepliesChat = isChatWithRepliesBot(chatId);
+    const isSystemBotChat = isSystemBot(chatId);
     const isAnonymousForwards = isAnonymousForwardsChat(chatId);
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
@@ -1715,11 +1753,12 @@ export default memo(withGlobal<OwnProps>(
     const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
     const forwardHeader = forwardInfo || replyFrom;
     const replyMessageSender = replyMessage ? selectSender(global, replyMessage)
-      : forwardHeader && !isRepliesChat && !isAnonymousForwards
+      : forwardHeader && !isSystemBotChat && !isAnonymousForwards
         ? selectSenderFromHeader(global, forwardHeader) : undefined;
     const replyMessageForwardSender = replyMessage && selectForwardedSender(global, replyMessage);
     const replyMessageChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
-    const isReplyPrivate = !isRepliesChat && !isAnonymousForwards && replyMessageChat && !isChatPublic(replyMessageChat)
+    const isReplyPrivate = !isSystemBotChat && !isAnonymousForwards && replyMessageChat
+      && !isChatPublic(replyMessageChat)
       && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = storyReplyId && storyReplyPeerId
@@ -1798,6 +1837,9 @@ export default memo(withGlobal<OwnProps>(
 
     const effect = effectId ? global.availableEffectById[effectId] : undefined;
 
+    const { balance: availableStars } = global.stars || {};
+    const poll = selectPollFromMessage(global, message);
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1821,7 +1863,7 @@ export default memo(withGlobal<OwnProps>(
       isForwarding,
       reactionMessage,
       isChatWithSelf,
-      isRepliesChat,
+      isRepliesChat: isSystemBotChat,
       isAnonymousForwards,
       isChannel,
       isGroup,
@@ -1884,6 +1926,8 @@ export default memo(withGlobal<OwnProps>(
       canTranscribeVoice,
       viaBusinessBot,
       effect,
+      availableStars,
+      poll,
     };
   },
 )(Message));

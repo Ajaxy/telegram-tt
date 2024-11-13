@@ -162,6 +162,7 @@ const StickerView: FC<OwnProps> = ({
           thumbClassName,
           'sticker-media',
         )}
+        style={filterStyle}
         alt=""
         draggable={false}
       />

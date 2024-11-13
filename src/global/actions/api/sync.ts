@@ -73,7 +73,7 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
 
   loadAllChats({
     listType: 'active',
-    onFirstBatchDone: async () => {
+    whenFirstBatchDone: async () => {
       await loadAndReplaceMessages(global, actions);
 
       global = getGlobal();

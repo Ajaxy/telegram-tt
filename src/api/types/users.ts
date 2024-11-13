@@ -3,6 +3,7 @@ import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
 import type { ApiPeerColor } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
+import type { ApiUserStarGift } from './payments';
 
 export interface ApiUser {
   id: string;
@@ -58,6 +59,7 @@ export interface ApiUserFullInfo {
   businessLocation?: ApiBusinessLocation;
   businessWorkHours?: ApiBusinessWorkHours;
   businessIntro?: ApiBusinessIntro;
+  starGiftCount?: number;
 }
 
 export type ApiFakeType = 'fake' | 'scam';
@@ -79,6 +81,11 @@ export interface ApiUserCommonChats {
   ids: string[];
   maxId?: string;
   isFullyLoaded: boolean;
+}
+
+export interface ApiUserGifts {
+  gifts: ApiUserStarGift[];
+  nextOffset?: string;
 }
 
 export interface ApiUsername {

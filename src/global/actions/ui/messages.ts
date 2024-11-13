@@ -29,6 +29,7 @@ import {
   getMediaFormat,
   getMediaHash,
   getMessageDownloadableMedia,
+  getMessageStatefulContent,
   getSenderTitle,
   isChatChannel,
   isJoinedChannelMessage,
@@ -928,6 +929,13 @@ addActionHandler('closeReportAdModal', (global, actions, payload): ActionReturnT
   }, tabId);
 });
 
+addActionHandler('closeReportModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    reportModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('openPreviousReportAdModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const reportAdModal = selectTabState(global, tabId).reportAdModal;
@@ -945,6 +953,40 @@ addActionHandler('openPreviousReportAdModal', (global, actions, payload): Action
       ...reportAdModal,
       sections: reportAdModal.sections.slice(0, -1),
     },
+  }, tabId);
+});
+
+addActionHandler('openPreviousReportModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const reportModal = selectTabState(global, tabId).reportModal;
+  if (!reportModal) {
+    return undefined;
+  }
+
+  if (reportModal.sections.length === 1) {
+    actions.closeReportModal({ tabId });
+    return undefined;
+  }
+
+  return updateTabState(global, {
+    reportModal: {
+      ...reportModal,
+      sections: reportModal.sections.slice(0, -1),
+    },
+  }, tabId);
+});
+
+addActionHandler('openPaidReactionModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
+  return updateTabState(global, {
+    paidReactionModal: { chatId, messageId },
+  }, tabId);
+});
+
+addActionHandler('closePaidReactionModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    paidReactionModal: undefined,
   }, tabId);
 });
 
@@ -971,12 +1013,13 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
   messages.forEach((message) => {
     const sender = isChatChannel(chat) ? chat : selectSender(global, message);
     const senderTitle = `> ${sender ? getSenderTitle(lang, sender) : message.forwardInfo?.hiddenUserName || ''}:`;
+    const statefulContent = getMessageStatefulContent(global, message);
 
     resultHtml.push(senderTitle);
     resultHtml.push(`${renderMessageSummaryHtml(lang, message)}\n`);
 
     resultText.push(senderTitle);
-    resultText.push(`${getMessageSummaryText(lang, message, false, 0, true)}\n`);
+    resultText.push(`${getMessageSummaryText(lang, message, statefulContent, false, 0, true)}\n`);
   });
 
   copyHtmlToClipboard(resultHtml.join('\n'), resultText.join('\n'));

@@ -19,7 +19,7 @@ import type {
 import type { MessageKey } from '../../../util/keys/messageKey';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, ApiDraft, GlobalState, TabArgs,
+  ActionReturnType, ApiDraft, GlobalState, TabArgs, WebPageMediaSize,
 } from '../../types';
 import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../../api/types';
 import { LoadMoreDirection, type ThreadId } from '../../../types';
@@ -27,6 +27,7 @@ import { LoadMoreDirection, type ThreadId } from '../../../types';
 import {
   GIF_MIME_TYPE,
   MAX_MEDIA_FILES_FOR_ALBUM,
+  MESSAGE_ID_REQUIRED_ERROR,
   MESSAGE_LIST_SLICE,
   RE_TELEGRAM_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -118,8 +119,10 @@ import {
   selectMessageReplyInfo,
   selectNoWebPage,
   selectOutlyingListByMessageId,
+  selectPeer,
   selectPeerStory,
   selectPinnedIds,
+  selectPollFromMessage,
   selectRealLastReadId,
   selectReplyCanBeSentToChat,
   selectScheduledMessage,
@@ -823,26 +826,81 @@ addActionHandler('deleteSavedHistory', async (global, actions, payload): Promise
 
 addActionHandler('reportMessages', async (global, actions, payload): Promise<void> => {
   const {
-    messageIds, reason, description, tabId = getCurrentTabId(),
+    messageIds, description = '', option = '', chatId, tabId = getCurrentTabId(),
   } = payload!;
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
+  const chat = selectChat(global, chatId)!;
+
+  const response = await callApi('reportMessages', {
+    peer: chat, messageIds, description, option,
+  });
+
+  if (!response) return;
+
+  const { result, error } = response;
+
+  if (error === MESSAGE_ID_REQUIRED_ERROR) {
+    actions.showNotification({
+      message: oldTranslate('lng_report_please_select_messages'),
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
     return;
   }
 
-  const { chatId } = currentMessageList;
-  const chat = selectChat(global, chatId)!;
+  if (!result) return;
 
-  const result = await callApi('reportMessages', {
-    peer: chat, messageIds, reason, description,
-  });
+  if (result.type === 'reported') {
+    actions.showNotification({
+      message: result
+        ? oldTranslate('ReportPeer.AlertSuccess')
+        : 'An error occurred while submitting your report. Please, try again later.',
+      tabId,
+    });
+    actions.closeReportModal({ tabId });
+    return;
+  }
 
-  actions.showNotification({
-    message: result
-      ? oldTranslate('ReportPeer.AlertSuccess')
-      : 'An error occurred while submitting your report. Please, try again later.',
-    tabId,
-  });
+  if (result.type === 'selectOption') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      title: result.title,
+      options: result.options,
+      subtitle: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        chatId,
+        messageIds,
+        description,
+        subject: 'message',
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
+
+  if (result.type === 'comment') {
+    global = getGlobal();
+    const oldSections = selectTabState(global, tabId).reportModal?.sections;
+    const selectedOption = oldSections?.[oldSections.length - 1]?.options?.find((o) => o.option === option);
+    const newSection = {
+      isOptional: result.isOptional,
+      option: result.option,
+      title: selectedOption?.text,
+    };
+    global = updateTabState(global, {
+      reportModal: {
+        chatId,
+        messageIds,
+        description,
+        subject: 'message',
+        sections: oldSections ? [...oldSections, newSection] : [newSection],
+      },
+    }, tabId);
+    setGlobal(global);
+  }
 });
 
 addActionHandler('sendMessageAction', async (global, actions, payload): Promise<void> => {
@@ -858,6 +916,17 @@ addActionHandler('sendMessageAction', async (global, actions, payload): Promise<
   await callApi('sendMessageAction', {
     peer: chat, threadId, action,
   });
+});
+
+addActionHandler('reportChannelSpam', (global, actions, payload): ActionReturnType => {
+  const { participantId, chatId, messageIds } = payload;
+  const peer = selectPeer(global, participantId);
+  const chat = selectChat(global, chatId);
+  if (!peer || !chat) {
+    return;
+  }
+
+  void callApi('reportChannelSpam', { peer, chat, messageIds });
 });
 
 addActionHandler('markMessageListRead', (global, actions, payload): ActionReturnType => {
@@ -970,7 +1039,7 @@ addActionHandler('clearWebPagePreview', (global, actions, payload): ActionReturn
 });
 
 addActionHandler('sendPollVote', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId, options } = payload!;
+  const { chatId, messageId, options } = payload;
   const chat = selectChat(global, chatId);
 
   if (chat) {
@@ -979,7 +1048,7 @@ addActionHandler('sendPollVote', (global, actions, payload): ActionReturnType =>
 });
 
 addActionHandler('cancelPollVote', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId } = payload!;
+  const { chatId, messageId } = payload;
   const chat = selectChat(global, chatId);
 
   if (chat) {
@@ -990,7 +1059,8 @@ addActionHandler('cancelPollVote', (global, actions, payload): ActionReturnType 
 addActionHandler('closePoll', (global, actions, payload): ActionReturnType => {
   const { chatId, messageId } = payload;
   const chat = selectChat(global, chatId);
-  const poll = selectChatMessage(global, chatId, messageId)?.content.poll;
+  const message = selectChatMessage(global, chatId, messageId);
+  const poll = message && selectPollFromMessage(global, message);
   if (chat && poll) {
     void callApi('closePoll', { chat, messageId, poll });
   }
@@ -999,7 +1069,7 @@ addActionHandler('closePoll', (global, actions, payload): ActionReturnType => {
 addActionHandler('loadPollOptionResults', async (global, actions, payload): Promise<void> => {
   const {
     chat, messageId, option, offset, limit, shouldResetVoters, tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   const result = await callApi('loadPollOptionResults', {
     chat, messageId, option, offset, limit,
@@ -1096,7 +1166,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
   serviceMessages
     .forEach((message) => {
       const { text, entities } = message.content.text || {};
-      const { sticker, poll } = message.content;
+      const { sticker } = message.content;
 
       const replyInfo = selectMessageReplyInfo(global, toChat.id, toThreadId);
 
@@ -1106,7 +1176,6 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
         text,
         entities,
         sticker,
-        poll,
         isSilent,
         scheduledAt,
         sendAs,
@@ -1447,6 +1516,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   lastMessageId?: number;
   isInvertedMedia?: true;
   effectId?: string;
+  webPageMediaSize?: WebPageMediaSize;
 }) {
   let currentMessageKey: MessageKey | undefined;
   const progressCallback = params.attachment ? (progress: number, messageKey: MessageKey) => {
@@ -1824,6 +1894,7 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
     replyingMessage: {},
   }, tabId);
   setGlobal(global);
+  global = getGlobal();
 
   const currentChat = selectCurrentChat(global, tabId);
   const currentThreadId = selectCurrentMessageList(global, tabId)?.threadId;
@@ -2092,6 +2163,11 @@ addActionHandler('loadFactChecks', async (global, actions, payload): Promise<voi
   });
 
   setGlobal(global);
+});
+
+addActionHandler('loadPaidReactionPrivacy', (): ActionReturnType => {
+  callApi('fetchPaidReactionPrivacy');
+  return undefined;
 });
 
 addActionHandler('loadOutboxReadDate', async (global, actions, payload): Promise<void> => {

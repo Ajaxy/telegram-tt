@@ -10,22 +10,6 @@ export const CUSTOM_PEER_PREMIUM: UniqueCustomPeer = {
   withPremiumGradient: true,
 };
 
-export const CUSTOM_PEER_TO_BE_DISTRIBUTED: UniqueCustomPeer = {
-  isCustomPeer: true,
-  type: 'toBeDistributed',
-  titleKey: 'BoostingToBeDistributed',
-  avatarIcon: 'user',
-  withPremiumGradient: true,
-};
-
-export const CUSTOM_PEER_STAR: UniqueCustomPeer = {
-  isCustomPeer: true,
-  type: 'stars',
-  titleKey: 'Stars',
-  avatarIcon: 'star',
-  peerColorId: 1,
-};
-
 export const CUSTOM_PEER_INCLUDED_CHAT_TYPES: UniqueCustomPeer[] = [
   {
     isCustomPeer: true,
@@ -95,3 +79,11 @@ export const CUSTOM_PEER_EXCLUDED_CHAT_TYPES: UniqueCustomPeer[] = [
     peerColorId: 5,
   },
 ];
+
+export const CUSTOM_PEER_HIDDEN: UniqueCustomPeer<'hidden'> = {
+  isCustomPeer: true,
+  type: 'hidden',
+  titleKey: 'StarsTransactionHidden',
+  avatarIcon: 'author-hidden',
+  peerColorId: 4,
+};

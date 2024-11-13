@@ -25,7 +25,7 @@ interface Container {
 
 type GlobalState =
   AnyLiteral
-  & { DEBUG_capturedId?: number };
+  & { DEBUG_randomId?: number };
 type ActionNames = string;
 type ActionPayload = any;
 
@@ -55,10 +55,10 @@ let currentGlobal = {
 } as GlobalState;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-let DEBUG_currentCapturedId: number | undefined;
+let DEBUG_currentRandomId: number | undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const DEBUG_releaseCapturedIdThrottled = throttleWithTickEnd(() => {
-  DEBUG_currentCapturedId = undefined;
+const DEBUG_invalidateGlobalOnTickEnd = throttleWithTickEnd(() => {
+  DEBUG_currentRandomId = Math.random();
 });
 
 const actionHandlers: Record<string, ActionHandler[]> = {};
@@ -86,19 +86,15 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
     if (DEBUG) {
       if (
         !options?.forceOutdated
-        && newGlobal.DEBUG_capturedId && newGlobal.DEBUG_capturedId !== DEBUG_currentCapturedId
+        && newGlobal.DEBUG_randomId && newGlobal.DEBUG_randomId !== DEBUG_currentRandomId
       ) {
         throw new Error('[TeactN.setGlobal] Attempt to set an outdated global');
       }
 
-      DEBUG_currentCapturedId = undefined;
+      DEBUG_currentRandomId = Math.random();
     }
 
     currentGlobal = newGlobal;
-
-    if (DEBUG) {
-      DEBUG_currentCapturedId = Math.random();
-    }
 
     if (options?.forceSyncOnIOs) {
       forceOnHeavyAnimation = true;
@@ -117,9 +113,9 @@ export function getGlobal() {
   if (DEBUG) {
     currentGlobal = {
       ...currentGlobal,
-      DEBUG_capturedId: DEBUG_currentCapturedId,
+      DEBUG_randomId: DEBUG_currentRandomId,
     };
-    DEBUG_releaseCapturedIdThrottled();
+    DEBUG_invalidateGlobalOnTickEnd();
   }
 
   return currentGlobal;

@@ -2,12 +2,16 @@ import type {
   ApiAttachment,
   ApiMessage,
   ApiMessageEntityTextUrl,
-  ApiPeer, ApiSponsoredMessage,
+  ApiPeer,
   ApiStory,
+  ApiTypeStory,
 } from '../../api/types';
-import type { MediaContent } from '../../api/types/messages';
-import type { LangFn } from '../../hooks/useOldLang';
+import type {
+  ApiPoll, MediaContainer, MediaContent, StatefulMediaContent,
+} from '../../api/types/messages';
+import type { OldLangFn } from '../../hooks/useOldLang';
 import type { ThreadId } from '../../types';
+import type { GlobalState } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -19,6 +23,7 @@ import {
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   TME_LINK_PREFIX,
+  VERIFICATION_CODES_USER_ID,
   VIDEO_STICKER_MIME_TYPE,
 } from '../../config';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
@@ -26,10 +31,7 @@ import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '../index';
 import {
-  getChatTitle,
-  getCleanPeerId,
-  isPeerUser,
-  isUserId,
+  getChatTitle, getCleanPeerId, isPeerUser, isUserId,
 } from './chats';
 import { getMainUsername, getUserFullName } from './users';
 
@@ -52,26 +54,48 @@ export function getMessageTranscription(message: ApiMessage) {
   return transcriptionId && global.transcriptions[transcriptionId]?.text;
 }
 
-export function hasMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage) {
+export function hasMessageText(message: MediaContainer) {
   const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
+    text, sticker, photo, video, audio, voice, document, pollId, webPage, contact, invoice, location,
     game, action, storyData, giveaway, giveawayResults, isExpiredVoice, paidMedia,
   } = message.content;
 
   return Boolean(text) || !(
-    sticker || photo || video || audio || voice || document || contact || poll || webPage || invoice || location
+    sticker || photo || video || audio || voice || document || contact || pollId || webPage || invoice || location
     || game || action?.phoneCall || storyData || giveaway || giveawayResults || isExpiredVoice || paidMedia
   );
 }
 
-export function getMessageText(message: ApiMessage | ApiStory | ApiSponsoredMessage) {
+export function getMessageStatefulContent(global: GlobalState, message: ApiMessage): StatefulMediaContent {
+  const poll = message.content.pollId ? global.messages.pollById[message.content.pollId] : undefined;
+
+  const { peerId: storyPeerId, id: storyId } = message.content.storyData || {};
+  const story = storyId && storyPeerId ? global.stories.byPeerId[storyPeerId]?.byId[storyId] : undefined;
+
+  return groupStatetefulContent({ poll, story });
+}
+
+export function groupStatetefulContent({
+  poll,
+  story,
+} : {
+  poll?: ApiPoll;
+  story?: ApiTypeStory;
+}) {
+  return {
+    poll,
+    story: story && 'content' in story ? story : undefined,
+  };
+}
+
+export function getMessageText(message: MediaContainer) {
   return hasMessageText(message) ? message.content.text?.text || CONTENT_NOT_SUPPORTED : undefined;
 }
 
 export function getMessageCustomShape(message: ApiMessage): boolean {
   const {
     text, sticker, photo, video, audio, voice,
-    document, poll, webPage, contact, action,
+    document, pollId, webPage, contact, action,
     game, invoice, location, storyData,
   } = message.content;
 
@@ -79,7 +103,7 @@ export function getMessageCustomShape(message: ApiMessage): boolean {
     return true;
   }
 
-  if (!text || photo || video || audio || voice || document || poll || webPage || contact || action || game || invoice
+  if (!text || photo || video || audio || voice || document || pollId || webPage || contact || action || game || invoice
     || location || storyData) {
     return false;
   }
@@ -184,7 +208,7 @@ export function isAnonymousOwnMessage(message: ApiMessage) {
   return Boolean(message.senderId) && !isUserId(message.senderId) && isOwnMessage(message);
 }
 
-export function getSenderTitle(lang: LangFn, sender: ApiPeer) {
+export function getSenderTitle(lang: OldLangFn, sender: ApiPeer) {
   return isPeerUser(sender) ? getUserFullName(sender) : getChatTitle(lang, sender);
 }
 
@@ -279,30 +303,51 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
   const { text } = contentText;
   let { entities } = contentText;
 
-  if (text && inChatList && 'chatId' in message && message.chatId === SERVICE_NOTIFICATIONS_USER_ID
-    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-    && !getGlobal().settings.byKey.shouldShowLoginCodeInChatList) {
-    const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];
-    if (authCode) {
-      entities = [
-        ...entities || [],
-        {
-          type: ApiMessageEntityTypes.Spoiler,
-          offset: text.indexOf(authCode),
-          length: authCode.length,
-        },
-      ];
-      entities.sort((a, b) => (a.offset > b.offset ? 1 : -1));
+  if (text && 'chatId' in message) {
+    if (message.chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+      const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];
+      if (authCode) {
+        entities = [
+          ...entities || [],
+          {
+            type: inChatList ? ApiMessageEntityTypes.Spoiler : ApiMessageEntityTypes.Code,
+            offset: text.indexOf(authCode),
+            length: authCode.length,
+          },
+        ];
+        entities.sort((a, b) => (a.offset > b.offset ? 1 : -1));
+      }
+    }
+
+    if (inChatList && message.chatId === VERIFICATION_CODES_USER_ID && entities) {
+      // Wrap code entities in spoiler
+      const hasCodeEntities = entities.some((entity) => entity.type === ApiMessageEntityTypes.Code);
+      if (hasCodeEntities) {
+        const oldEntities = entities;
+        entities = [];
+
+        for (let i = 0; i < oldEntities.length; i++) {
+          const entity = oldEntities[i];
+          if (entity.type === ApiMessageEntityTypes.Code) {
+            entities.push({
+              type: ApiMessageEntityTypes.Spoiler,
+              offset: entity.offset,
+              length: entity.length,
+            });
+          }
+          entities.push(entity);
+        }
+      }
     }
   }
 
   return { text, entities };
 }
 
-export function getExpiredMessageDescription(langFn: LangFn, message: ApiMessage): string | undefined {
+export function getExpiredMessageDescription(langFn: OldLangFn, message: ApiMessage): string | undefined {
   return getExpiredMessageContentDescription(langFn, message.content);
 }
-export function getExpiredMessageContentDescription(langFn: LangFn, mediaContent: MediaContent): string | undefined {
+export function getExpiredMessageContentDescription(langFn: OldLangFn, mediaContent: MediaContent): string | undefined {
   const { isExpiredVoice, isExpiredRoundVideo } = mediaContent;
   if (isExpiredVoice) {
     return langFn('Message.VoiceMessageExpired');

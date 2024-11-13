@@ -12,13 +12,13 @@ import type {
 import type { IAlbum } from '../../types';
 import type { IRadioOption } from '../ui/CheckboxGroup';
 
-import { REPLIES_USER_ID } from '../../config';
 import {
   getHasAdminRight,
   getPrivateChatUserId,
   getUserFirstOrLastName, getUserFullName,
   isChatBasicGroup,
   isChatSuperGroup, isOwnMessage,
+  isSystemBot,
   isUserId,
 } from '../../global/helpers';
 import {
@@ -96,7 +96,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   const {
     deleteMessages,
     deleteScheduledMessages,
-    reportMessages,
+    reportChannelSpam,
     deleteChatMember,
     updateChatMemberBannedRights,
     closeDeleteMessageModal,
@@ -231,10 +231,10 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     if (isSchedule) {
       deleteScheduledMessages({ messageIds });
     } else if (!isOwn && (chosenSpanOption || chosenDeleteOption || chosenBanOption) && (isGroup || isSuperGroup)) {
-      if (chosenSpanOption) {
+      if (chosenSpanOption && sender) {
         const filteredMessageIdList = filterMessageIdByUserId(chosenSpanOption, messageIdList!);
         if (filteredMessageIdList && filteredMessageIdList.length) {
-          reportMessages({ messageIds: filteredMessageIdList, reason: 'spam', description: '' });
+          reportChannelSpam({ participantId: sender.id, chatId: chat.id, messageIds: filteredMessageIdList });
         }
       }
 
@@ -449,7 +449,7 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
     const isChatWithBot = Boolean(deleteMessageModal && deleteMessageModal.message
       && selectBot(global, deleteMessageModal.message.chatId));
-    const chatBot = Boolean(chat && chat.id !== REPLIES_USER_ID && selectBot(global, chat.id));
+    const chatBot = Boolean(chat && !isSystemBot(chat.id) && selectBot(global, chat.id));
     const canBanUsers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
     const isOwn = deleteMessageModal && deleteMessageModal.message && isOwnMessage(deleteMessageModal.message);
 

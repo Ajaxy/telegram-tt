@@ -53,7 +53,7 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
 
-import ReportModal from '../common/ReportModal';
+import ReportAvatarModal from '../common/ReportAvatarModal';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
 import Transition from '../ui/Transition';
@@ -136,7 +136,7 @@ const MediaViewer = ({
   const isGhostAnimation = Boolean(withAnimation && !shouldSkipHistoryAnimations);
 
   /* Controls */
-  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
+  const [isReportAvatarModalOpen, openReportAvatarModal, closeReportAvatarModal] = useFlag();
 
   const currentItem = getMediaViewerItem({
     message, avatarOwner, standaloneMedia, profilePhotos, mediaIndex, sponsoredMessage,
@@ -155,7 +155,13 @@ const MediaViewer = ({
     media, isAvatar: Boolean(avatarOwner), origin, delay: isGhostAnimation && ANIMATION_DURATION,
   });
 
-  const canReport = avatarOwner && !isChatWithSelf;
+  const canReportAvatar = (() => {
+    if (isChatWithSelf) return false;
+    if (currentItem?.type !== 'avatar' || !avatarOwner) return false;
+    const info = currentItem.profilePhotos;
+    if (media === info.personalPhoto) return false;
+    return true;
+  })();
   const isVisible = !isHidden && isOpen;
 
   const messageMediaIds = useMemo(() => {
@@ -434,16 +440,15 @@ const MediaViewer = ({
           isVideo={isVideo}
           item={currentItem}
           canUpdateMedia={canUpdateMedia}
-          canReport={canReport}
+          canReportAvatar={canReportAvatar}
           onBeforeDelete={handleBeforeDelete}
-          onReport={openReportModal}
+          onReportAvatar={openReportAvatarModal}
           onCloseMediaViewer={handleClose}
           onForward={handleForward}
         />
-        <ReportModal
-          isOpen={isReportModalOpen}
-          onClose={closeReportModal}
-          subject="media"
+        <ReportAvatarModal
+          isOpen={isReportAvatarModalOpen}
+          onClose={closeReportAvatarModal}
           photo={avatar}
           peerId={avatarOwner?.id}
         />

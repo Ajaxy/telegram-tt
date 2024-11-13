@@ -5,6 +5,7 @@ import { getGlobal } from '../../../../global';
 
 import type {
   ApiChat, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus, ApiUser,
+  StatefulMediaContent,
 } from '../../../../api/types';
 import type { ApiDraft } from '../../../../global/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
@@ -32,6 +33,7 @@ import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEn
 import { ChatAnimationTypes } from './useChatAnimationType';
 
 import useEnsureMessage from '../../../../hooks/useEnsureMessage';
+import useEnsureStory from '../../../../hooks/useEnsureStory';
 import useMedia from '../../../../hooks/useMedia';
 import useOldLang from '../../../../hooks/useOldLang';
 
@@ -45,6 +47,7 @@ export default function useChatListEntry({
   chat,
   topics,
   lastMessage,
+  statefulMediaContent,
   chatId,
   typingStatus,
   draft,
@@ -64,6 +67,7 @@ export default function useChatListEntry({
   chat?: ApiChat;
   topics?: Record<number, ApiTopic>;
   lastMessage?: ApiMessage;
+  statefulMediaContent: StatefulMediaContent | undefined;
   chatId: string;
   typingStatus?: ApiTypingStatus;
   draft?: ApiDraft;
@@ -81,7 +85,7 @@ export default function useChatListEntry({
   orderDiff: number;
   withInterfaceAnimations?: boolean;
 }) {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
@@ -90,10 +94,16 @@ export default function useChatListEntry({
   const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
   useEnsureMessage(chatId, isAction ? replyToMessageId : undefined, actionTargetMessage);
 
-  const mediaHasPreview = lastMessage && !getMessageSticker(lastMessage);
+  const storyData = lastMessage?.content.storyData;
+  const shouldTryLoadingStory = statefulMediaContent && !statefulMediaContent.story;
 
-  const mediaThumbnail = mediaHasPreview ? getMessageMediaThumbDataUri(lastMessage) : undefined;
-  const mediaBlobUrl = useMedia(mediaHasPreview ? getMessageMediaHash(lastMessage, 'micro') : undefined);
+  useEnsureStory(shouldTryLoadingStory ? storyData?.peerId : undefined, storyData?.id, statefulMediaContent?.story);
+
+  const mediaContent = statefulMediaContent?.story || lastMessage;
+  const mediaHasPreview = mediaContent && !getMessageSticker(mediaContent);
+
+  const mediaThumbnail = mediaHasPreview ? getMessageMediaThumbDataUri(mediaContent) : undefined;
+  const mediaBlobUrl = useMedia(mediaHasPreview ? getMessageMediaHash(mediaContent, 'micro') : undefined);
   const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
 
   const actionTargetUsers = useMemo(() => {
@@ -120,8 +130,8 @@ export default function useChatListEntry({
 
     if (canDisplayDraft) {
       return (
-        <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          <span className="draft">{lang('Draft')}</span>
+        <p className="last-message" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
+          <span className="draft">{oldLang('Draft')}</span>
           {renderTextWithEntities({
             text: draft.text?.text || '',
             entities: draft.text?.entities,
@@ -138,8 +148,8 @@ export default function useChatListEntry({
 
     if (isExpiredMessage(lastMessage)) {
       return (
-        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          {getExpiredMessageDescription(lang, lastMessage)}
+        <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
+          {getExpiredMessageDescription(oldLang, lastMessage)}
         </p>
       );
     }
@@ -148,9 +158,9 @@ export default function useChatListEntry({
       const isChat = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId);
 
       return (
-        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
+        <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
           {renderActionMessageText(
-            lang,
+            oldLang,
             lastMessage,
             !isChat ? lastMessageSender as ApiUser : undefined,
             isChat ? chat : undefined,
@@ -166,10 +176,10 @@ export default function useChatListEntry({
       );
     }
 
-    const senderName = getMessageSenderName(lang, chatId, lastMessageSender);
+    const senderName = getMessageSenderName(oldLang, chatId, lastMessageSender);
 
     return (
-      <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
+      <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
         {senderName && (
           <>
             <span className="sender-name">{renderText(senderName)}</span>
@@ -183,7 +193,7 @@ export default function useChatListEntry({
     );
   }, [
     actionTargetChatId, actionTargetMessage, actionTargetUsers, chat, chatId, draft, isAction,
-    isRoundVideo, isTopic, lang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
+    isRoundVideo, isTopic, oldLang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
     observeIntersection, typingStatus, isSavedDialog, isPreview,
   ]);
 

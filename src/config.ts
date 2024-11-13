@@ -51,7 +51,7 @@ export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v42';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v44';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -148,6 +148,9 @@ export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 export const MESSAGE_CONTENT_CLASS_NAME = 'message-content';
 export const MESSAGE_CONTENT_SELECTOR = '.message-content';
 
+export const SNAP_EFFECT_CONTAINER_ID = 'snap-effect-container';
+export const SNAP_EFFECT_ID = 'snap-effect';
+
 export const STARS_ICON_PLACEHOLDER = '⭐';
 export const STARS_CURRENCY_CODE = 'XTR';
 
@@ -167,6 +170,7 @@ export const MAX_INT_32 = 2 ** 31 - 1;
 export const TMP_CHAT_ID = '0';
 
 export const ANIMATION_END_DELAY = 100;
+export const ANIMATION_WAVE_MIN_INTERVAL = 200;
 
 export const SCROLL_MIN_DURATION = 300;
 export const SCROLL_MAX_DURATION = 600;
@@ -222,6 +226,7 @@ export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
 export const BIRTHDAY_NUMBERS_SET = 'FestiveFontEmoji';
+export const RESTRICTED_EMOJI_SET = 'RestrictedEmoji';
 
 export const VIDEO_WEBM_TYPE = 'video/webm';
 export const GIF_MIME_TYPE = 'image/gif';
@@ -284,10 +289,12 @@ export const RE_TELEGRAM_LINK = /^(https?:\/\/)?telegram\.org\//i;
 export const TME_LINK_PREFIX = 'https://t.me/';
 export const BOT_FATHER_USERNAME = 'botfather';
 export const USERNAME_PURCHASE_ERROR = 'USERNAME_PURCHASE_AVAILABLE';
+export const MESSAGE_ID_REQUIRED_ERROR = 'MESSAGE_ID_REQUIRED';
 export const PURCHASE_USERNAME = 'auction';
 export const ACCEPTABLE_USERNAME_ERRORS = new Set([USERNAME_PURCHASE_ERROR, 'USERNAME_INVALID']);
 export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'a.t.me', 'k.t.me', 'z.t.me']);
 export const WEB_APP_PLATFORM = 'weba';
+export const LANG_PACK = 'weba';
 
 // eslint-disable-next-line max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
@@ -295,12 +302,14 @@ export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', '
 export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users'] as const;
 
 export const HEART_REACTION: ApiReactionEmoji = {
+  type: 'emoji',
   emoticon: '❤',
 };
 
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
+export const VERIFICATION_CODES_USER_ID = '489000';
 export const ANONYMOUS_USER_ID = '2666000';
 export const RESTRICTED_EMOJI_SET_ID = '7173162320003080';
 export const CHANNEL_ID_LENGTH = 14; // 14 symbols, based on TDLib's `ZERO_CHANNEL_ID = -1000000000000`
@@ -313,7 +322,7 @@ export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;
 export const DEFAULT_LANG_CODE = 'en';
-export const DEFAULT_LANG_PACK = 'android';
+export const OLD_DEFAULT_LANG_PACK = 'android';
 export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'] as const;
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
 export const FAQ_URL = 'https://telegram.org/faq';

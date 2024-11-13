@@ -58,6 +58,8 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     content.text = buildMessageTextContent(caption, entities);
   }
 
+  const reaction = sentReaction && buildApiReaction(sentReaction);
+
   return omitUndefined<ApiStory>({
     id,
     peerId,
@@ -75,7 +77,7 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     isOut: out,
     visibility: privacy && buildPrivacyRules(privacy),
     mediaAreas: mediaAreas?.map(buildApiMediaArea).filter(Boolean),
-    sentReaction: sentReaction && buildApiReaction(sentReaction),
+    sentReaction: reaction,
     forwardInfo: fwdFrom && buildApiStoryForwardInfo(fwdFrom),
     fromId: fromId && getApiChatIdFromMtpPeer(fromId),
   });
@@ -197,7 +199,9 @@ export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | un
     } = area;
 
     const apiReaction = buildApiReaction(reaction);
-    if (!apiReaction) return undefined;
+    if (!apiReaction) {
+      return undefined;
+    }
 
     return {
       type: 'suggestedReaction',
@@ -226,6 +230,20 @@ export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | un
       type: 'url',
       coordinates: buildApiMediaAreaCoordinates(coordinates),
       url,
+    };
+  }
+
+  if (area instanceof GramJs.MediaAreaWeather) {
+    const {
+      coordinates, emoji, temperatureC, color,
+    } = area;
+
+    return {
+      type: 'weather',
+      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      emoji,
+      temperatureC,
+      color,
     };
   }
 

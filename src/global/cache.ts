@@ -245,11 +245,25 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.topBotApps) {
     cached.topBotApps = initialState.topBotApps;
   }
+
+  if (!cached.reactions.defaultTags?.[0]?.type) {
+    cached.reactions = initialState.reactions;
+  }
+
   if (!cached.users.commonChatsById) {
     cached.users.commonChatsById = initialState.users.commonChatsById;
   }
   if (!cached.chats.topicsInfoById) {
     cached.chats.topicsInfoById = initialState.chats.topicsInfoById;
+  }
+
+  if (!cached.messages.pollById) {
+    cached.messages.pollById = initialState.messages.pollById;
+  }
+
+  if (!cached.stickers.starGifts) {
+    cached.stickers.starGifts = initialState.stickers.starGifts;
+    cached.users.giftsById = initialState.users.giftsById;
   }
 }
 
@@ -286,6 +300,7 @@ function reduceGlobal<T extends GlobalState>(global: T) {
     ...INITIAL_GLOBAL_STATE,
     ...pick(global, [
       'appConfig',
+      'config',
       'authState',
       'authPhoneNumber',
       'authRememberMe',
@@ -484,6 +499,8 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     return acc;
   }, {} as Record<string, Set<ThreadId>>);
 
+  const pollIdsToSave: string[] = [];
+
   chatIdsToSave.forEach((chatId) => {
     const current = global.messages.byChatId[chatId];
     if (!current) {
@@ -523,8 +540,14 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     const cleanedById = Object.values(byId).reduce((acc, message) => {
       if (!message) return acc;
 
-      const cleanedMessage = omitLocalMedia(message);
+      let cleanedMessage = omitLocalMedia(message);
+      cleanedMessage = omitLocalPaidReactions(cleanedMessage);
       acc[message.id] = cleanedMessage;
+
+      if (message.content.pollId) {
+        pollIdsToSave.push(message.content.pollId);
+      }
+
       return acc;
     }, {} as Record<number, ApiMessage>);
 
@@ -536,7 +559,27 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
 
   return {
     byChatId,
+    pollById: pickTruthy(global.messages.pollById, pollIdsToSave),
     sponsoredByChatId: {},
+  };
+}
+
+function omitLocalPaidReactions(message: ApiMessage): ApiMessage {
+  if (!message.reactions?.results.length) return message;
+  return {
+    ...message,
+    reactions: {
+      ...message.reactions,
+      results: message.reactions.results.map((reaction) => {
+        if (reaction.localAmount) {
+          return {
+            ...reaction,
+            localAmount: undefined,
+          };
+        }
+        return reaction;
+      }),
+    },
   };
 }
 

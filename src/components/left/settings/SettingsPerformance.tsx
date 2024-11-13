@@ -15,7 +15,7 @@ import {
 } from '../../../global/initialState';
 import { selectPerformanceSettings } from '../../../global/selectors';
 import { areDeepEqual } from '../../../util/areDeepEqual';
-import { IS_BACKDROP_BLUR_SUPPORTED } from '../../../util/windowEnvironment';
+import { IS_BACKDROP_BLUR_SUPPORTED, IS_SNAP_EFFECT_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
@@ -60,6 +60,7 @@ const PERFORMANCE_OPTIONS: PerformanceSection[] = [
     { key: 'contextMenuAnimations', label: 'Context Menu Animation' },
     { key: 'contextMenuBlur', label: 'Context Menu Blur', disabled: !IS_BACKDROP_BLUR_SUPPORTED },
     { key: 'rightColumnAnimations', label: 'Right Column Animation' },
+    { key: 'snapEffect', label: 'Dust-effect deletion' },
   ]],
   ['Stickers and Emoji', [
     { key: 'animatedEmoji', label: 'Allow Animated Emoji' },
@@ -195,16 +196,19 @@ function SettingsPerformance({
               </div>
               {Boolean(sectionExpandedStates[index]) && (
                 <div className="DropdownList DropdownList--open">
-                  {options.map(({ key, label, disabled }) => (
-                    <Checkbox
-                      key={key}
-                      name={key}
-                      checked={performanceSettings[key]}
-                      label={lang(label)}
-                      disabled={disabled}
-                      onChange={handlePropertyChange}
-                    />
-                  ))}
+                  {options.map(({ key, label, disabled }) => {
+                    if (key === 'snapEffect' && !IS_SNAP_EFFECT_SUPPORTED) return undefined;
+                    return (
+                      <Checkbox
+                        key={key}
+                        name={key}
+                        checked={performanceSettings[key]}
+                        label={lang(label)}
+                        disabled={disabled}
+                        onChange={handlePropertyChange}
+                      />
+                    );
+                  })}
                 </div>
               )}
             </div>

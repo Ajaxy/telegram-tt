@@ -80,7 +80,7 @@ const PickerSelectedItem = <T,>({
       />
     );
 
-    const name = (customPeer && lang(customPeer.titleKey))
+    const name = (customPeer && (customPeer.title || lang(customPeer.titleKey!)))
       || (!chat || (user && !isSavedMessages)
         ? getUserFirstOrLastName(user)
         : getChatTitle(lang, chat, isSavedMessages));

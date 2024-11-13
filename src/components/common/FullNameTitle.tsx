@@ -10,7 +10,12 @@ import type { CustomPeer } from '../../types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../config';
 import {
-  getChatTitle, getUserFullName, isAnonymousForwardsChat, isChatWithRepliesBot, isPeerUser,
+  getChatTitle,
+  getUserFullName,
+  isAnonymousForwardsChat,
+  isChatWithRepliesBot,
+  isChatWithVerificationCodesBot,
+  isPeerUser,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
@@ -67,6 +72,7 @@ const FullNameTitle: FC<OwnProps> = ({
   const isUser = realPeer && isPeerUser(realPeer);
   const title = realPeer && (isUser ? getUserFullName(realPeer) : getChatTitle(lang, realPeer));
   const isPremium = isUser && realPeer.isPremium;
+  const canShowEmojiStatus = withEmojiStatus && !isSavedMessages && realPeer;
 
   const handleTitleClick = useLastCallback((e) => {
     if (!title || !canCopyTitle) {
@@ -80,7 +86,7 @@ const FullNameTitle: FC<OwnProps> = ({
 
   const specialTitle = useMemo(() => {
     if (customPeer) {
-      return lang(customPeer.titleKey, customPeer.titleValue, 'i');
+      return customPeer.title || lang(customPeer.titleKey!);
     }
 
     if (isSavedMessages) {
@@ -95,18 +101,12 @@ const FullNameTitle: FC<OwnProps> = ({
       return lang('RepliesTitle');
     }
 
+    if (isChatWithVerificationCodesBot(realPeer!.id)) {
+      return lang('VerifyCodesNotifications');
+    }
+
     return undefined;
   }, [customPeer, isSavedDialog, isSavedMessages, lang, realPeer]);
-
-  if (specialTitle) {
-    return (
-      <div className={buildClassName('title', styles.root, className)}>
-        <h3 className={buildClassName('fullName', styles.fullName, !allowMultiLine && styles.ellipsis)}>
-          {specialTitle}
-        </h3>
-      </div>
-    );
-  }
 
   return (
     <div className={buildClassName('title', styles.root, className)}>
@@ -121,13 +121,13 @@ const FullNameTitle: FC<OwnProps> = ({
         )}
         onClick={handleTitleClick}
       >
-        {renderText(title || '')}
+        {specialTitle || renderText(title || '')}
       </h3>
       {!iconElement && peer && (
         <>
-          {!noVerified && realPeer?.isVerified && <VerifiedIcon />}
-          {!noFake && realPeer?.fakeType && <FakeIcon fakeType={realPeer.fakeType} />}
-          {withEmojiStatus && realPeer?.emojiStatus && (
+          {!noVerified && peer?.isVerified && <VerifiedIcon />}
+          {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
+          {canShowEmojiStatus && realPeer.emojiStatus && (
             <CustomEmoji
               documentId={realPeer.emojiStatus.documentId}
               size={emojiStatusSize}
@@ -136,7 +136,7 @@ const FullNameTitle: FC<OwnProps> = ({
               onClick={onEmojiStatusClick}
             />
           )}
-          {withEmojiStatus && !realPeer?.emojiStatus && isPremium && <StarIcon />}
+          {canShowEmojiStatus && !realPeer.emojiStatus && isPremium && <StarIcon />}
         </>
       )}
       {iconElement}

@@ -4,7 +4,7 @@ import type {
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
-import { BIRTHDAY_NUMBERS_SET } from '../../../config';
+import { BIRTHDAY_NUMBERS_SET, RESTRICTED_EMOJI_SET } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { oldTranslate } from '../../../util/oldLangProvider';
@@ -281,6 +281,26 @@ addActionHandler('loadBirthdayNumbersStickers', async (global): Promise<void> =>
   global = {
     ...global,
     birthdayNumbers: { ...emojis.set, stickers: emojis.stickers },
+  };
+
+  setGlobal(global);
+});
+
+addActionHandler('loadRestrictedEmojiStickers', async (global): Promise<void> => {
+  const emojis = await callApi('fetchStickers', {
+    stickerSetInfo: {
+      shortName: RESTRICTED_EMOJI_SET,
+    },
+  });
+  if (!emojis) {
+    return;
+  }
+
+  global = getGlobal();
+
+  global = {
+    ...global,
+    restrictedEmoji: { ...emojis.set, stickers: emojis.stickers },
   };
 
   setGlobal(global);

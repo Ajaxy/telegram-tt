@@ -220,6 +220,9 @@ const Avatar: FC<OwnProps> = ({
   } else if (chat) {
     const title = getChatTitle(lang, chat);
     content = title && getFirstLetters(title, isUserId(chat.id) ? 2 : 1);
+  } else if (isCustomPeer) {
+    const title = peer.title || lang(peer.titleKey!);
+    content = title && getFirstLetters(title, 1);
   } else if (text) {
     content = getFirstLetters(text, 2);
   }

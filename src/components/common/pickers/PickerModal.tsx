@@ -28,7 +28,7 @@ const PickerModal = ({
   ...modalProps
 }: OwnProps) => {
   const lang = useOldLang();
-  const hasOnClickHandler = Boolean(onConfirm || modalProps.onClose);
+  const hasButton = Boolean(confirmButtonText || onConfirm);
 
   return (
     <Modal
@@ -44,7 +44,7 @@ const PickerModal = ({
       headerClassName={buildClassName(styles.header, modalProps.headerClassName)}
     >
       {modalProps.children}
-      {hasOnClickHandler && (
+      {hasButton && (
         <div className={styles.buttonWrapper}>
           <Button
             withPremiumGradient={withPremiumGradient}

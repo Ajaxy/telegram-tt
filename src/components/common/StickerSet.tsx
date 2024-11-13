@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
-import type { ApiAvailableReaction, ApiReaction, ApiSticker } from '../../api/types';
+import type { ApiAvailableReaction, ApiReactionWithPaid, ApiSticker } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 
@@ -35,7 +35,7 @@ import useWindowSize from '../../hooks/window/useWindowSize';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Icon from './icons/Icon';
-import ReactionEmoji from './ReactionEmoji';
+import ReactionEmoji from './reactions/ReactionEmoji';
 import StickerButton from './StickerButton';
 
 import grey from '../../assets/icons/forumTopic/grey.svg';
@@ -65,7 +65,8 @@ type OwnProps = {
   observeIntersectionForShowingItems: ObserveFn;
   availableReactions?: ApiAvailableReaction[];
   onStickerSelect?: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
-  onReactionSelect?: (reaction: ApiReaction) => void;
+  onReactionSelect?: (reaction: ApiReactionWithPaid) => void;
+  onReactionContext?: (reaction: ApiReactionWithPaid) => void;
   onStickerUnfave?: (sticker: ApiSticker) => void;
   onStickerFave?: (sticker: ApiSticker) => void;
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
@@ -105,6 +106,7 @@ const StickerSet: FC<OwnProps> = ({
   observeIntersectionForPlayingItems,
   observeIntersectionForShowingItems,
   onReactionSelect,
+  onReactionContext,
   onStickerSelect,
   onStickerUnfave,
   onStickerFave,
@@ -351,6 +353,7 @@ const StickerSet: FC<OwnProps> = ({
               availableReactions={availableReactions}
               observeIntersection={observeIntersectionForPlayingItems}
               onClick={onReactionSelect!}
+              onContextMenu={onReactionContext}
               sharedCanvasRef={sharedCanvasRef}
               sharedCanvasHqRef={sharedCanvasHqRef}
               forcePlayback={forcePlayback}

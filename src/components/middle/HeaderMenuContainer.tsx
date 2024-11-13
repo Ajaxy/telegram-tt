@@ -9,7 +9,6 @@ import type { IAnchorPosition, ThreadId } from '../../types';
 import type { IconName } from '../../types/icons';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { REPLIES_USER_ID } from '../../config';
 import {
   getCanAddContact,
   getCanDeleteChat,
@@ -18,6 +17,7 @@ import {
   getIsSavedDialog,
   isChatChannel,
   isChatGroup,
+  isSystemBot,
   isUserId,
   isUserRightBanned,
   selectIsChatMuted,
@@ -49,7 +49,6 @@ import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import DeleteChatModal from '../common/DeleteChatModal';
-import ReportModal from '../common/ReportModal';
 import MuteChatModal from '../left/MuteChatModal.async';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
@@ -109,9 +108,9 @@ type StateProps = {
   isForum?: boolean;
   isForumAsMessages?: true;
   canAddContact?: boolean;
-  canReportChat?: boolean;
   canDeleteChat?: boolean;
-  canGiftPremium?: boolean;
+  canReportChat?: boolean;
+  canGift?: boolean;
   canCreateTopic?: boolean;
   canEditTopic?: boolean;
   hasLinkedChat?: boolean;
@@ -143,6 +142,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isChatInfoShown,
   canStartBot,
   canSubscribe,
+  canReportChat,
   canSearch,
   canCall,
   canMute,
@@ -156,9 +156,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   chat,
   isPrivate,
   isMuted,
-  canReportChat,
   canDeleteChat,
-  canGiftPremium,
+  canGift,
   hasLinkedChat,
   canAddContact,
   canCreateTopic,
@@ -191,7 +190,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     toggleStatistics,
     openMonetizationStatistics,
     openBoostStatistics,
-    openPremiumGiftModal,
+    openGiftModal,
     openThreadWithInfo,
     openCreateTopicPanel,
     openEditTopicPanel,
@@ -203,13 +202,13 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     unblockUser,
     setViewForumAsMessages,
     openBoostModal,
+    reportMessages,
   } = getActions();
 
   const { isMobile } = useAppLayout();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [shouldCloseFast, setShouldCloseFast] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isMuteModalOpen, setIsMuteModalOpen] = useState(false);
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const { x, y } = anchor;
@@ -219,18 +218,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     (!isChatInfoShown && isForum) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
   );
 
-  const handleReport = useLastCallback(() => {
-    setIsMenuOpen(false);
-    setIsReportModalOpen(true);
-  });
-
-  const closeReportModal = useLastCallback(() => {
-    setIsReportModalOpen(false);
+  const closeMuteModal = useLastCallback(() => {
+    setIsMuteModalOpen(false);
     onClose();
   });
 
-  const closeMuteModal = useLastCallback(() => {
-    setIsMuteModalOpen(false);
+  const handleReport = useLastCallback(() => {
+    setIsMenuOpen(false);
+    reportMessages({ chatId, messageIds: [] });
     onClose();
   });
 
@@ -317,8 +312,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
-  const handleGiftPremiumClick = useLastCallback(() => {
-    openPremiumGiftModal({ forUserIds: [chatId] });
+  const handleGiftClick = useLastCallback(() => {
+    openGiftModal({ forUserId: chatId });
     closeMenu();
   });
 
@@ -672,12 +667,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             </MenuItem>
           )}
           {botButtons}
-          {canGiftPremium && (
+          {canGift && (
             <MenuItem
               icon="gift"
-              onClick={handleGiftPremiumClick}
+              onClick={handleGiftClick}
             >
-              {lang('GiftPremium')}
+              {lang('ProfileSendAGift')}
             </MenuItem>
           )}
           {isBot && (
@@ -725,14 +720,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             chatId={chat.id}
           />
         )}
-        {canReportChat && chat?.id && (
-          <ReportModal
-            isOpen={isReportModalOpen}
-            onClose={closeReportModal}
-            subject="peer"
-            peerId={chat.id}
-          />
-        )}
       </div>
     </Portal>
   );
@@ -749,17 +736,14 @@ export default memo(withGlobal<OwnProps>(
     const canAddContact = user && getCanAddContact(user);
     const isMainThread = threadId === MAIN_THREAD_ID;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-    const canReportChat = isMainThread && (isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf));
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
+    const canReportChat = isMainThread && !user && (isChatChannel(chat) || isChatGroup(chat));
 
-    const chatBot = chatId !== REPLIES_USER_ID ? selectBot(global, chatId) : undefined;
+    const chatBot = !isSystemBot(chatId) ? selectBot(global, chatId) : undefined;
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
     const fullInfo = userFullInfo || chatFullInfo;
-    const canGiftPremium = Boolean(
-      userFullInfo?.premiumGifts?.length
-      && !selectIsPremiumPurchaseBlocked(global),
-    );
+    const canGift = !selectIsPremiumPurchaseBlocked(global) && !isChatWithSelf && isPrivate;
 
     const topic = selectTopic(global, chatId, threadId);
     const canCreateTopic = chat.isForum && (
@@ -781,9 +765,9 @@ export default memo(withGlobal<OwnProps>(
       isForum: chat?.isForum,
       isForumAsMessages: chat?.isForumAsMessages,
       canAddContact,
-      canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
-      canGiftPremium,
+      canReportChat,
+      canGift,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       botCommands: chatBot ? userFullInfo?.botInfo?.commands : undefined,
       botPrivacyPolicyUrl: chatBot ? userFullInfo?.botInfo?.privacyPolicyUrl : undefined,

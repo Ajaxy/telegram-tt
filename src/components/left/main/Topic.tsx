@@ -4,13 +4,13 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat, ApiMessage, ApiMessageOutgoingStatus,
-  ApiPeer, ApiTopic, ApiTypingStatus,
+  ApiPeer, ApiTopic, ApiTypeStory, ApiTypingStatus,
 } from '../../../api/types';
 import type { ApiDraft } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 
-import { getMessageAction } from '../../../global/helpers';
+import { getMessageAction, groupStatetefulContent } from '../../../global/helpers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectCanAnimateInterface,
@@ -20,6 +20,7 @@ import {
   selectCurrentMessageList,
   selectDraft,
   selectOutgoingStatus,
+  selectPeerStory,
   selectThreadInfo,
   selectThreadParam,
   selectTopics,
@@ -59,6 +60,7 @@ type StateProps = {
   chat: ApiChat;
   canDelete?: boolean;
   lastMessage?: ApiMessage;
+  lastMessageStory?: ApiTypeStory;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   actionTargetUserIds?: string[];
@@ -79,6 +81,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   chat,
   style,
   lastMessage,
+  lastMessageStory,
   canScrollDown,
   lastMessageOutgoingStatus,
   observeIntersection,
@@ -142,6 +145,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     isTopic: true,
     typingStatus,
     topics,
+    statefulMediaContent: groupStatetefulContent({ story: lastMessageStory }),
 
     animationType,
     withInterfaceAnimations,
@@ -262,6 +266,9 @@ export default memo(withGlobal<OwnProps>(
 
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
+    const storyData = lastMessage?.content.storyData;
+    const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
+
     return {
       chat,
       lastMessage,
@@ -279,6 +286,7 @@ export default memo(withGlobal<OwnProps>(
       canScrollDown: isSelected && chat?.id === currentChatId && currentThreadId === topic.id,
       wasTopicOpened,
       topics,
+      lastMessageStory,
     };
   },
 )(Topic));

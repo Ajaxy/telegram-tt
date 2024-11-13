@@ -16,7 +16,7 @@ import type {
 
 import {
   APP_CODE_NAME,
-  DEBUG, DEBUG_GRAMJS, IS_TEST, UPLOAD_WORKERS,
+  DEBUG, DEBUG_GRAMJS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,
 } from '../../../config';
 import { pause } from '../../../util/schedulers';
 import {
@@ -69,10 +69,11 @@ export async function init(initialArgs: ApiInitialArgs) {
   }
 
   const {
-    userAgent, platform, sessionData, isTest, isWebmSupported, maxBufferSize, webAuthToken, dcId,
+    userAgent, platform, sessionData, isWebmSupported, maxBufferSize, webAuthToken, dcId,
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
-    shouldDebugExportedSenders, langCode,
+    shouldDebugExportedSenders, langCode, isTestServerRequested,
   } = initialArgs;
+
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
   // eslint-disable-next-line no-restricted-globals
@@ -93,9 +94,11 @@ export async function init(initialArgs: ApiInitialArgs) {
       shouldDebugExportedSenders,
       shouldForceHttpTransport,
       shouldAllowHttpTransport,
-      testServers: isTest,
       dcId,
+      langPack: LANG_PACK,
       langCode,
+      systemLangCode: navigator.language,
+      isTestServerRequested,
     } as any,
   );
 

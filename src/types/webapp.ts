@@ -16,6 +16,16 @@ type WebAppEvent<T, D> = D extends null ? {
   eventData: D;
 };
 
+export type WebAppButtonOptions = {
+  is_visible: boolean;
+  is_active: boolean;
+  text: string;
+  color: string;
+  text_color: string;
+  is_progress_visible: boolean;
+  position?: 'left' | 'right' | 'top' | 'bottom';
+};
+
 export type WebAppInboundEvent =
   WebAppEvent<'iframe_ready', {
     reload_supported?: boolean;
@@ -23,14 +33,8 @@ export type WebAppInboundEvent =
   WebAppEvent<'web_app_data_send', {
     data: string;
   }> |
-  WebAppEvent<'web_app_setup_main_button', {
-    is_visible: boolean;
-    is_active: boolean;
-    text: string;
-    color: string;
-    text_color: string;
-    is_progress_visible: boolean;
-  }> |
+  WebAppEvent<'web_app_setup_main_button', WebAppButtonOptions> |
+  WebAppEvent<'web_app_setup_secondary_button', WebAppButtonOptions> |
   WebAppEvent<'web_app_setup_back_button', {
     is_visible: boolean;
   }> |
@@ -51,6 +55,9 @@ export type WebAppInboundEvent =
     type: 'impact' | 'notification' | 'selection_change';
     impact_style?: 'light' | 'medium' | 'heavy';
     notification_type?: 'error' | 'success' | 'warning';
+  }> |
+  WebAppEvent<'web_app_set_bottom_bar_color', {
+    color: string;
   }> |
   WebAppEvent<'web_app_set_background_color', {
     color: string;
@@ -160,5 +167,6 @@ export type WebAppOutboundEvent =
   WebAppEvent<'biometry_token_updated', {
     status: 'updated' | 'removed' | 'failed';
   }> |
-  WebAppEvent<'main_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed'
+  WebAppEvent<'main_button_pressed' |
+  'secondary_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed'
   | 'reload_iframe', null>;

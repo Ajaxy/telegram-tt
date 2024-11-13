@@ -10,6 +10,7 @@ import {
 import { ManagementProgress } from '../../../types';
 
 import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import PopupManager from '../../../util/PopupManager';
@@ -29,8 +30,8 @@ import {
 } from '../../reducers';
 import {
   activateWebAppIfOpen,
-  addWebAppToOpenList, clearOpenedWebApps, hasOpenedWebApps,
-  removeActiveWebAppFromOpenList, removeWebAppFromOpenList,
+  addWebAppToOpenList, clearOpenedWebApps, hasOpenedMoreThanOneWebApps,
+  hasOpenedWebApps, removeActiveWebAppFromOpenList, removeWebAppFromOpenList,
   replaceInlineBotSettings, replaceInlineBotsIsLoading,
   replaceIsWebAppModalOpen, replaceWebAppModalState, updateWebApp,
 } from '../../reducers/bots';
@@ -76,6 +77,11 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
     case 'url': {
       const { url } = button;
       actions.openUrl({ url, tabId });
+      break;
+    }
+    case 'copy': {
+      copyTextToClipboard(button.copyText);
+      actions.showNotification({ message: oldTranslate('ExactTextCopied', button.copyText), tabId });
       break;
     }
     case 'callback': {
@@ -698,6 +704,35 @@ addActionHandler('openWebAppTab', (global, actions, payload): ActionReturnType =
   }
 });
 
+addActionHandler('openWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
+  const {
+    tabId = getCurrentTabId(),
+  } = payload || {};
+
+  return updateTabState(global, {
+    isWebAppsCloseConfirmationModalOpen: true,
+  }, tabId);
+});
+
+addActionHandler('closeWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
+  const { shouldSkipInFuture, tabId = getCurrentTabId() } = payload || {};
+
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      byKey: {
+        ...global.settings.byKey,
+        shouldSkipWebAppCloseConfirmation: Boolean(shouldSkipInFuture),
+      },
+    },
+  };
+
+  return updateTabState(global, {
+    isWebAppsCloseConfirmationModalOpen: undefined,
+  }, tabId);
+});
+
 addActionHandler('requestAppWebView', async (global, actions, payload): Promise<void> => {
   const {
     botId, appName, startApp, theme, isWriteAllowed, isFromConfirm, shouldSkipBotTrustRequest,
@@ -853,6 +888,43 @@ addActionHandler('closeActiveWebApp', (global, actions, payload): ActionReturnTy
   return global;
 });
 
+addActionHandler('openMoreAppsTab', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+  global = updateTabState(global, {
+    webApps: {
+      ...tabState.webApps,
+      activeWebApp: undefined,
+      isMoreAppsTabActive: true,
+    },
+  }, tabId);
+
+  return global;
+});
+
+addActionHandler('closeMoreAppsTab', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+
+  const openedWebApps = tabState.webApps.openedWebApps;
+
+  const openedWebAppsValues = Object.values(openedWebApps);
+  const openedWebAppsCount = openedWebAppsValues.length;
+
+  global = updateTabState(global, {
+    webApps: {
+      ...tabState.webApps,
+      isMoreAppsTabActive: false,
+      activeWebApp: openedWebAppsCount ? openedWebAppsValues[openedWebAppsCount - 1] : undefined,
+      isModalOpen: openedWebAppsCount > 0,
+    },
+  }, tabId);
+
+  return global;
+});
+
 addActionHandler('closeWebApp', (global, actions, payload): ActionReturnType => {
   const { webApp, skipClosingConfirmation, tabId = getCurrentTabId() } = payload || {};
 
@@ -863,7 +935,15 @@ addActionHandler('closeWebApp', (global, actions, payload): ActionReturnType => 
 });
 
 addActionHandler('closeWebAppModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { shouldSkipConfirmation, tabId = getCurrentTabId() } = payload || {};
+
+  const shouldShowConfirmation = !shouldSkipConfirmation
+  && !global.settings.byKey.shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
+
+  if (shouldShowConfirmation) {
+    actions.openWebAppsCloseConfirmationModal({ tabId });
+    return global;
+  }
 
   global = clearOpenedWebApps(global, tabId);
   if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);

@@ -27,9 +27,15 @@ export function hasStoredSession() {
 }
 
 export function storeSession(sessionData: ApiSessionData, currentUserId?: string) {
-  const { mainDcId, keys, hashes } = sessionData;
+  const {
+    mainDcId, keys, hashes, isTest,
+  } = sessionData;
 
-  localStorage.setItem(SESSION_USER_KEY, JSON.stringify({ dcID: mainDcId, id: currentUserId }));
+  localStorage.setItem(SESSION_USER_KEY, JSON.stringify({
+    dcID: mainDcId,
+    id: currentUserId,
+    test: isTest,
+  }));
   localStorage.setItem('dc', String(mainDcId));
   Object.keys(keys).map(Number).forEach((dcId) => {
     localStorage.setItem(`dc${dcId}_auth_key`, JSON.stringify(keys[dcId]));
@@ -64,6 +70,7 @@ export function loadStoredSession(): ApiSessionData | undefined {
     return undefined;
   }
   const mainDcId = Number(userAuth.dcID);
+  const isTest = userAuth.test;
   const keys: Record<number, string> = {};
   const hashes: Record<number, string> = {};
 
@@ -93,6 +100,7 @@ export function loadStoredSession(): ApiSessionData | undefined {
     mainDcId,
     keys,
     hashes,
+    isTest,
   };
 }
 

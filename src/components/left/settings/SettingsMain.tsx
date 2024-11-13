@@ -53,7 +53,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
     openPremiumModal,
     openSupportChat,
     openUrl,
-    openPremiumGiftingModal,
+    openGiftRecipientPicker,
     openStarsBalanceModal,
   } = getActions();
 
@@ -197,9 +197,9 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             icon="gift"
             narrow
             // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => openPremiumGiftingModal()}
+            onClick={() => openGiftRecipientPicker()}
           >
-            {oldLang('GiftPremiumGifting')}
+            {oldLang('SendAGift')}
           </ListItem>
         )}
       </div>

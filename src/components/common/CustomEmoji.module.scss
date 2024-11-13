@@ -7,6 +7,10 @@
   height: var(--custom-emoji-size);
   position: relative;
   flex: 0 0 var(--custom-emoji-size);
+
+  :global(.rlottie-canvas) {
+    display: block;
+  }
 }
 
 .placeholder {

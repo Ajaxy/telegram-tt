@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
 } from '../../../api/types';
-import type { GlobalState } from '../../../global/types';
+import type { GlobalState, WebPageMediaSize } from '../../../global/types';
 import type { ISettings, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../api/types';
@@ -76,6 +76,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const isInvertedMedia = attachmentSettings.isInvertedMedia;
+  const isSmallerMedia = attachmentSettings.webPageMediaSize === 'small';
 
   const detectLinkDebounced = useDebouncedResolver(() => {
     const formattedText = parseHtmlAsFormattedText(getHtml());
@@ -112,6 +113,8 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   }, [isDisabled, getHtml, noWebPage, webPagePreview]);
   const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isShown);
 
+  const hasMediaSizeOptions = webPagePreview?.hasLargeMedia;
+
   const renderingWebPage = useCurrentOrPrev(webPagePreview, true);
 
   const handleClearWebpagePreview = useLastCallback(() => {
@@ -142,6 +145,10 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
 
   function updateIsInvertedMedia(value?: true) {
     updateAttachmentSettings({ isInvertedMedia: value });
+  }
+
+  function updateIsLargerMedia(value?: WebPageMediaSize) {
+    updateAttachmentSettings({ webPageMediaSize: value });
   }
 
   if (!shouldRender || !renderingWebPage) {
@@ -183,6 +190,19 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
               </MenuItem>
             )
           }
+          {hasMediaSizeOptions && (
+            isSmallerMedia ? (
+            // eslint-disable-next-line react/jsx-no-bind
+              <MenuItem icon="expand" onClick={() => updateIsLargerMedia('large')}>
+                {lang('ChatInput.EditLink.LargerMedia')}
+              </MenuItem>
+            ) : (
+            // eslint-disable-next-line react/jsx-no-bind
+              <MenuItem icon="collapse" onClick={() => updateIsLargerMedia('small')}>
+                {lang(('ChatInput.EditLink.SmallerMedia'))}
+              </MenuItem>
+            )
+          )}
           <MenuItem
             icon="delete"
             // eslint-disable-next-line react/jsx-no-bind

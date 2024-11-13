@@ -54,9 +54,9 @@ type OwnProps = {
   mediaData?: string;
   isVideo: boolean;
   canUpdateMedia?: boolean;
-  canReport?: boolean;
+  canReportAvatar?: boolean;
   activeDownloads?: ActiveDownloads;
-  onReport: NoneToVoidFunction;
+  onReportAvatar: NoneToVoidFunction;
   onBeforeDelete: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
   onForward: NoneToVoidFunction;
@@ -68,13 +68,13 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   isVideo,
   isChatProtected,
   isProtected,
-  canReport,
+  canReportAvatar,
   canDelete,
   canUpdate,
   messageListType,
   activeDownloads,
   origin,
-  onReport,
+  onReportAvatar: onReport,
   onCloseMediaViewer,
   onBeforeDelete,
   onForward,
@@ -247,7 +247,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       }
     }
 
-    if (canReport) {
+    if (canReportAvatar) {
       menuItems.push({
         icon: 'flag',
         onClick: onReport,
@@ -335,7 +335,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       >
         <i className="icon icon-zoom-in" />
       </Button>
-      {canReport && (
+      {canReportAvatar && (
         <Button
           round
           size="smaller"

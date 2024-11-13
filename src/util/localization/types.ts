@@ -7,30 +7,51 @@ import type {
   LangPackStringValueRegular,
 } from '../../api/types';
 import type { TextFilter } from '../../components/common/helpers/renderText';
-import type { LangKey, LangPair } from '../../types/language';
+import type {
+  LangPairPluralWithVariables,
+  LangPairWithVariables,
+  PluralLangKey,
+  PluralLangKeyWithVariables,
+  RegularLangKey,
+  RegularLangKeyWithVariables,
+} from '../../types/language';
 
-type ReplaceTypeValues<T, R> = {
-  [K in keyof T]: R;
-};
-
-export interface LangFnOptions {
-  pluralValue?: number;
+export interface LangFnOptionsRegular {
   withNodes?: never;
+  withMarkdown?: never;
+  pluralValue?: never;
 }
 
-export interface AdvancedLangFnOptions {
-  pluralValue?: number;
+export type LangFnOptionsWithPlural = Omit<LangFnOptionsRegular, 'pluralValue'> & {
+  pluralValue: number;
+};
+
+export type LangFnOptions = LangFnOptionsRegular | LangFnOptionsWithPlural;
+
+export interface AdvancedLangFnOptionsRegular {
   withNodes: true;
   withMarkdown?: boolean;
+  pluralValue?: never;
   renderTextFilters?: TextFilter[];
   specialReplacement?: Record<string, TeactNode>;
 }
 
-type LangPairWithNodes = {
-  [K in keyof LangPair]: LangPair[K] extends object ? ReplaceTypeValues<LangPair[K], TeactNode> : LangPair[K];
+export type AdvancedLangFnOptionsWithPlural = Omit<AdvancedLangFnOptionsRegular, 'pluralValue'> & {
+  pluralValue: number;
 };
 
-type RegularLangFnParameters<T = LangPair> = {
+export type AdvancedLangFnOptions = AdvancedLangFnOptionsRegular | AdvancedLangFnOptionsWithPlural;
+
+type LangPairWithNodes = LangPairWithVariables<TeactNode | undefined>;
+type LangPairPluralWithNodes = LangPairPluralWithVariables<TeactNode | undefined>;
+
+type RegularLangFnParametersWithoutVariables = {
+  key: RegularLangKey;
+  variables?: undefined;
+  options?: LangFnOptions;
+};
+
+type RegularLangFnParametersWithVariables<T = LangPairWithVariables> = {
   [K in keyof T]: {
     key: K;
     variables: T[K];
@@ -38,7 +59,33 @@ type RegularLangFnParameters<T = LangPair> = {
   }
 }[keyof T];
 
-type AdvancedLangFnParameters<T = LangPairWithNodes> = {
+type RegularLangFnPluralParameters = {
+  key: PluralLangKey;
+  variables?: undefined;
+  options: LangFnOptionsWithPlural;
+};
+
+type RegularLangFnPluralParametersWithVariables<T = LangPairPluralWithVariables> = {
+  [K in keyof T]: {
+    key: K;
+    variables: T[K];
+    options: LangFnOptionsWithPlural;
+  }
+}[keyof T];
+
+type RegularLangFnParameters =
+| RegularLangFnParametersWithoutVariables
+| RegularLangFnParametersWithVariables
+| RegularLangFnPluralParameters
+| RegularLangFnPluralParametersWithVariables;
+
+type AdvancedLangFnParametersWithoutVariables = {
+  key: RegularLangKey;
+  variables?: undefined;
+  options: AdvancedLangFnOptions;
+};
+
+type AdvancedLangFnParametersWithVariables<T = LangPairWithNodes> = {
   [K in keyof T]: {
     key: K;
     variables: T[K];
@@ -46,21 +93,56 @@ type AdvancedLangFnParameters<T = LangPairWithNodes> = {
   }
 }[keyof T];
 
-export type LangFnParameters = RegularLangFnParameters | AdvancedLangFnParameters;
-
-export type LangFnWithFunction = {
-  (params: RegularLangFnParameters): string;
-  (params: AdvancedLangFnParameters): TeactNode;
+type AdvancedLangFnPluralParameters = {
+  key: PluralLangKey;
+  variables?: undefined;
+  options: AdvancedLangFnOptionsWithPlural;
 };
 
+type AdvancedLangFnPluralParametersWithVariables<T = LangPairPluralWithNodes> = {
+  [K in keyof T]: {
+    key: K;
+    variables: T[K];
+    options: AdvancedLangFnOptionsWithPlural;
+  }
+}[keyof T];
+
+type AdvancedLangFnParameters =
+| AdvancedLangFnParametersWithoutVariables
+| AdvancedLangFnParametersWithVariables
+| AdvancedLangFnPluralParameters
+| AdvancedLangFnPluralParametersWithVariables;
+
+export type LangFnParameters = RegularLangFnParameters | AdvancedLangFnParameters;
+
 export type LangFn = {
-  <K extends LangKey = LangKey, V extends LangPair[K] = LangPair[K]>(
-    key: K, variables?: V, options?: LangFnOptions,
+  <K = RegularLangKey>(
+    key: K, variables?: undefined, options?: LangFnOptions,
   ): string;
-  <K extends LangKey = LangKey, V extends LangPairWithNodes[K] = LangPairWithNodes[K]>(
+  <K = PluralLangKey>(
+    key: K, variables: undefined, options: LangFnOptionsWithPlural,
+  ): string;
+  <K extends RegularLangKeyWithVariables = RegularLangKeyWithVariables, V = LangPairWithVariables[K]>(
+    key: K, variables: V, options?: LangFnOptions,
+  ): string;
+  <K extends PluralLangKeyWithVariables = PluralLangKeyWithVariables, V = LangPairPluralWithVariables[K]>(
+    key: K, variables: V, options: LangFnOptionsWithPlural,
+  ): string;
+
+  <K = RegularLangKey>(
+    key: K, variables?: undefined, options?: AdvancedLangFnOptions,
+  ): TeactNode;
+  <K = PluralLangKey>(
+    key: K, variables: undefined, options: AdvancedLangFnOptionsWithPlural,
+  ): TeactNode;
+  <K extends RegularLangKeyWithVariables = RegularLangKeyWithVariables, V = LangPairWithVariables[K]>(
     key: K, variables: V, options: AdvancedLangFnOptions,
   ): TeactNode;
-  with: LangFnWithFunction;
+  <K extends PluralLangKeyWithVariables = PluralLangKeyWithVariables, V = LangPairPluralWithVariables[K]>(
+    key: K, variables: V, options: AdvancedLangFnOptionsWithPlural,
+  ): TeactNode;
+
+  with: (params: LangFnParameters) => TeactNode;
   region: (code: string) => string | undefined;
   conjunction: (list: string[]) => string;
   disjunction: (list: string[]) => string;
@@ -101,5 +183,5 @@ export function isLangFnParam(object: unknown): object is LangFnParameters {
 export function areAdvancedLangFnOptions(
   params: LangFnOptions | AdvancedLangFnOptions,
 ): params is AdvancedLangFnOptions {
-  return 'withNodes' in params;
+  return 'withNodes' in params && Boolean(params.withNodes);
 }

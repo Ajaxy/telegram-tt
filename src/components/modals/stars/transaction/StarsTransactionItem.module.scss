@@ -1,7 +1,9 @@
+@use '../../../../styles/mixins';
+
 .root {
   display: flex;
   gap: 0.75rem;
-  padding: 0.25rem;
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
   border-radius: 0.5rem;
   cursor: var(--custom-cursor, pointer);
   transition: background-color 0.25s ease-out;
@@ -28,10 +30,6 @@
   font-weight: 500;
 }
 
-.star {
-  margin-top: -0.25rem;
-}
-
 .title, .description, .date {
   margin-bottom: 0;
 }
@@ -55,4 +53,18 @@
 
 .negative {
   color: var(--color-error);
+}
+
+.preview {
+  position: relative;
+  align-self: flex-start;
+}
+
+.subscriptionStar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+
+  @include mixins.filter-outline(1px, var(--color-background));
 }

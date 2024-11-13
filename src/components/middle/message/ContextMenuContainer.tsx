@@ -6,12 +6,15 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
   ApiAvailableReaction,
+  ApiChat,
   ApiChatReactions,
   ApiMessage,
+  ApiPoll,
   ApiReaction,
   ApiStickerSet,
   ApiStickerSetInfo,
   ApiThreadInfo,
+  ApiTypeStory,
 } from '../../../api/types';
 import type { ActiveDownloads, MessageListType } from '../../../global/types';
 import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
@@ -50,6 +53,8 @@ import {
   selectIsReactionPickerOpen,
   selectMessageCustomEmojiSets,
   selectMessageTranslations,
+  selectPeerStory,
+  selectPollFromMessage,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
@@ -68,7 +73,6 @@ import useSchedule from '../../../hooks/useSchedule';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import PinMessageModal from '../../common/PinMessageModal.async';
-import ReportModal from '../../common/ReportModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import MessageContextMenu from './MessageContextMenu';
 
@@ -88,6 +92,9 @@ export type OwnProps = {
 
 type StateProps = {
   threadId?: ThreadId;
+  poll?: ApiPoll;
+  story?: ApiTypeStory;
+  chat?: ApiChat;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
   defaultTagReactions?: ApiReaction[];
@@ -134,6 +141,7 @@ type StateProps = {
   isInSavedMessages?: boolean;
   isChannel?: boolean;
   canReplyInChat?: boolean;
+  isWithPaidReaction?: boolean;
 };
 
 const selection = window.getSelection();
@@ -149,6 +157,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   customEmojiSetsInfo,
   customEmojiSets,
   album,
+  poll,
+  story,
   anchor,
   targetHref,
   noOptions,
@@ -160,8 +170,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   repliesThreadInfo,
   canUnpin,
   canDelete,
-  canReport,
   canShowReactionsCount,
+  chat,
+  canReport,
   canShowReactionList,
   canEdit,
   enabledReactions,
@@ -192,9 +203,10 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canSelectLanguage,
   isReactionPickerOpen,
   isInSavedMessages,
+  canReplyInChat,
+  isWithPaidReaction,
   onClose,
   onCloseAnimationEnd,
-  canReplyInChat,
 }) => {
   const {
     openThread,
@@ -229,6 +241,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadOutboxReadDate,
     copyMessageLink,
     openDeleteMessageModal,
+    addLocalPaidReaction,
+    openPaidReactionModal,
+    reportMessages,
   } = getActions();
 
   const lang = useOldLang();
@@ -238,7 +253,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     className: false,
   });
   const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
   const [canQuoteSelection, setCanQuoteSelection] = useState(false);
@@ -352,16 +366,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     setIsMenuOpen(false);
     closeMenu();
     openDeleteMessageModal({ isSchedule: messageListType === 'scheduled', album, message });
-  });
-
-  const handleReport = useLastCallback(() => {
-    setIsMenuOpen(false);
-    setIsReportModalOpen(true);
-  });
-
-  const closeReportModal = useLastCallback(() => {
-    setIsReportModalOpen(false);
-    onClose();
   });
 
   const closePinModal = useLastCallback(() => {
@@ -531,6 +535,22 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
+  const handleSendPaidReaction = useLastCallback(() => {
+    addLocalPaidReaction({
+      chatId: message.chatId, messageId: message.id, count: 1,
+    });
+    closeMenu();
+  });
+
+  const handlePaidReactionModalOpen = useLastCallback(() => {
+    openPaidReactionModal({
+      chatId: message.chatId,
+      messageId: message.id,
+    });
+
+    closeMenu();
+  });
+
   const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
     openMessageReactionPicker({ chatId: message.chatId, messageId: message.id, position });
   });
@@ -561,6 +581,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 
+  const handleReport = useLastCallback(() => {
+    if (!chat) return;
+    setIsMenuOpen(false);
+    onClose();
+    reportMessages({
+      chatId: chat.id, messageIds: reportMessageIds,
+    });
+  });
+
   if (noOptions) {
     closeMenu();
 
@@ -577,6 +606,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         availableReactions={availableReactions}
         topReactions={topReactions}
         defaultTagReactions={defaultTagReactions}
+        isWithPaidReaction={isWithPaidReaction}
         message={message}
         isPrivate={isPrivate}
         isCurrentUserPremium={isCurrentUserPremium}
@@ -593,8 +623,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canReply={canReply}
         canQuote={canQuoteSelection}
         canDelete={canDelete}
-        canReport={canReport}
         canPin={canPin}
+        canReport={canReport}
         repliesThreadInfo={repliesThreadInfo}
         canUnpin={canUnpin}
         canEdit={canEdit}
@@ -621,6 +651,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         seenByRecentPeers={seenByRecentPeers}
         isInSavedMessages={isInSavedMessages}
         noReplies={noReplies}
+        poll={poll}
+        story={story}
         onOpenThread={handleOpenThread}
         onReply={handleReply}
         onEdit={handleEdit}
@@ -644,16 +676,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onClosePoll={openClosePollDialog}
         onShowSeenBy={handleOpenSeenByModal}
         onToggleReaction={handleToggleReaction}
+        onSendPaidReaction={handleSendPaidReaction}
+        onShowPaidReactionModal={handlePaidReactionModalOpen}
         onShowReactors={handleOpenReactorListModal}
         onReactionPickerOpen={handleReactionPickerOpen}
         onTranslate={handleTranslate}
         onShowOriginal={handleShowOriginal}
         onSelectLanguage={handleSelectLanguage}
-      />
-      <ReportModal
-        isOpen={isReportModalOpen}
-        onClose={closeReportModal}
-        messageIds={reportMessageIds}
       />
       <PinMessageModal
         isOpen={isPinModalOpen}
@@ -772,19 +801,24 @@ export default memo(withGlobal<OwnProps>(
 
     const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
 
+    const poll = selectPollFromMessage(global, message);
+    const storyData = message.content.storyData;
+    const story = storyData ? selectPeerStory(global, storyData.peerId, storyData.id) : undefined;
+
     return {
       threadId,
+      chat,
       availableReactions,
       topReactions,
       defaultTagReactions: defaultTags,
       noOptions,
+      canReport,
       canSendNow: isScheduled,
       canReschedule: isScheduled,
       canReply: !isPinned && !isScheduled && canReplyGlobally,
       canPin: !isScheduled && canPin,
       canUnpin: !isScheduled && canUnpin,
       canDelete,
-      canReport,
       canEdit: !isPinned && canEdit,
       canForward: !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,
@@ -821,6 +855,9 @@ export default memo(withGlobal<OwnProps>(
       isInSavedMessages,
       isChannel,
       canReplyInChat,
+      isWithPaidReaction: chatFullInfo?.isPaidReactionAvailable,
+      poll,
+      story,
     };
   },
 )(ContextMenuContainer));

@@ -94,7 +94,7 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     deleteMessages,
-    reportMessages,
+    reportChannelSpam,
     deleteChatMember,
     deleteScheduledMessages,
     exitMessageSelectMode,
@@ -227,6 +227,18 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleReportSpam = useLastCallback((userMessagesMap: Record<string, number[]>) => {
+    Object.entries(userMessagesMap).forEach(([userId, messageIdList]) => {
+      if (messageIdList.length) {
+        reportChannelSpam({
+          participantId: userId,
+          chatId: chat!.id,
+          messageIds: messageIdList,
+        });
+      }
+    });
+  });
+
   const handleDeleteMessages = useLastCallback((filteredMessageIdList: number[]) => {
     if (filteredMessageIdList && filteredMessageIdList.length) {
       deleteMessages({ messageIds: filteredMessageIdList, shouldDeleteForAll: true });
@@ -257,10 +269,18 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
     } else if (!isSenderOwner && shouldShowOptions) {
       if (chosenSpanOption) {
         const userIdList = chosenSpanOption.filter((option) => !Number.isNaN(Number(option)));
-        const filteredMessageIdList = filterMessageIdByUserId(userIdList, selectedMessageIds!);
-        if (filteredMessageIdList?.length) {
-          reportMessages({ messageIds: filteredMessageIdList, reason: 'spam', description: '' });
-        }
+        const userMessagesMap = selectedMessageIds!.reduce<Record<string, number[]>>((acc, msgId) => {
+          const sender = selectSenderFromMessage(getGlobal(), chat.id, msgId);
+          if (sender && userIdList.includes(sender.id)) {
+            if (!acc[sender.id]) {
+              acc[sender.id] = [];
+            }
+            acc[sender.id].push(Number(msgId));
+          }
+          return acc;
+        }, {});
+
+        handleReportSpam(userMessagesMap);
       }
 
       if (chosenDeleteOption) {

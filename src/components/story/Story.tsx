@@ -838,7 +838,12 @@ function Story({
           </>
         )}
         {isLoadedStory && fullMediaData && (
-          <MediaAreaOverlay story={story} isActive />
+          <MediaAreaOverlay
+            key={`area-overlay-${storyId}-${peerId}`}
+            story={story}
+            isActive
+            isStoryPlaying={isDropdownMenuOpen}
+          />
         )}
         {!isMobile && (
           <div className={styles.content}>

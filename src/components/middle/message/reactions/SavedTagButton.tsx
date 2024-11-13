@@ -1,7 +1,10 @@
 import React, { memo, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { ApiReaction, ApiSavedReactionTag } from '../../../../api/types';
+import type {
+  ApiReaction,
+  ApiSavedReactionTag,
+} from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import buildClassName from '../../../../util/buildClassName';
@@ -90,7 +93,7 @@ const SavedTagButton = ({
     handleContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(ref, !withContextMenu);
+  } = useContextMenuHandlers(ref, !withContextMenu, undefined, undefined, undefined, true);
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => document.body);

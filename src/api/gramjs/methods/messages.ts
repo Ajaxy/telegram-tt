@@ -1,12 +1,14 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
+import type { WebPageMediaSize } from '../../../global/types';
 import type { ThreadId } from '../../../types';
 import type {
   ApiAttachment,
   ApiChat,
   ApiClickSponsoredMessage,
   ApiContact,
+  ApiError,
   ApiFormattedText,
   ApiGlobalMessageSearchType,
   ApiInputReplyInfo,
@@ -18,7 +20,6 @@ import type {
   ApiPeer,
   ApiPoll,
   ApiReaction,
-  ApiReportReason,
   ApiSendMessageAction,
   ApiSticker,
   ApiStory,
@@ -35,6 +36,7 @@ import {
   GIF_MIME_TYPE,
   MAX_INT_32,
   MENTION_UNREAD_SLICE,
+  MESSAGE_ID_REQUIRED_ERROR,
   PINNED_MESSAGES_LIMIT,
   REACTION_UNREAD_SLICE,
   SUPPORTED_PHOTO_CONTENT_TYPES,
@@ -46,13 +48,19 @@ import { compact, split } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
-import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
+import {
+  buildApiChatFromPreview,
+  buildApiSendAsPeerId,
+} from '../apiBuilders/chats';
 import { buildApiFormattedText } from '../apiBuilders/common';
-import { buildMessageMediaContent, buildMessageTextContent, buildWebPage } from '../apiBuilders/messageContent';
+import {
+  buildMessageMediaContent, buildMessageTextContent, buildPollFromMedia, buildWebPage,
+} from '../apiBuilders/messageContent';
 import {
   buildApiFactCheck,
   buildApiMessage,
   buildApiQuickReply,
+  buildApiReportResult,
   buildApiSponsoredMessage,
   buildApiThreadInfo,
   buildLocalForwardedMessage,
@@ -69,7 +77,6 @@ import {
   buildInputPollFromExisting,
   buildInputReaction,
   buildInputReplyTo,
-  buildInputReportReason,
   buildInputStory,
   buildInputTextWithEntities,
   buildMessageFromUpdate,
@@ -265,6 +272,8 @@ export function sendMessage(
     wasDrafted,
     isInvertedMedia,
     effectId,
+    webPageMediaSize,
+    webPageUrl,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -286,10 +295,15 @@ export function sendMessage(
     wasDrafted?: boolean;
     isInvertedMedia?: true;
     effectId?: string;
+    webPageMediaSize?: WebPageMediaSize;
+    webPageUrl?: string;
   },
   onProgress?: ApiOnProgress,
 ) {
-  const localMessage = buildLocalMessage(
+  const {
+    message: localMessage,
+    poll: localPoll,
+  } = buildLocalMessage(
     chat,
     lastMessageId,
     text,
@@ -313,6 +327,7 @@ export function sendMessage(
     id: localMessage.id,
     chatId: chat.id,
     message: localMessage,
+    poll: localPoll,
     wasDrafted,
   });
 
@@ -367,6 +382,12 @@ export function sendMessage(
       media = buildInputPoll(poll, randomId);
     } else if (story) {
       media = buildInputStory(story);
+    } else if (webPageUrl && webPageMediaSize) {
+      media = new GramJs.InputMediaWebPage({
+        url: webPageUrl,
+        forceLargeMedia: webPageMediaSize === 'large' ? true : undefined,
+        forceSmallMedia: webPageMediaSize === 'small' ? true : undefined,
+      });
     } else if (contact) {
       media = new GramJs.InputMediaContact({
         phoneNumber: contact.phoneNumber,
@@ -887,18 +908,45 @@ export async function deleteSavedHistory({
 }
 
 export async function reportMessages({
-  peer, messageIds, reason, description,
+  peer, messageIds, description, option,
 }: {
-  peer: ApiPeer; messageIds: number[]; reason: ApiReportReason; description?: string;
+  peer: ApiPeer; messageIds: number[]; description: string; option: string;
 }) {
-  const result = await invokeRequest(new GramJs.messages.Report({
-    peer: buildInputPeer(peer.id, peer.accessHash),
-    id: messageIds,
-    reason: buildInputReportReason(reason),
-    message: description,
-  }));
+  try {
+    const result = await invokeRequest(new GramJs.messages.Report({
+      peer: buildInputPeer(peer.id, peer.accessHash),
+      id: messageIds,
+      option: deserializeBytes(option),
+      message: description,
+    }), { shouldThrow: true });
 
-  return result;
+    if (!result) return undefined;
+
+    return { result: buildApiReportResult(result), error: undefined };
+  } catch (err: any) {
+    const errorMessage = (err as ApiError).message;
+
+    if (errorMessage === MESSAGE_ID_REQUIRED_ERROR) {
+      return {
+        result: undefined,
+        error: errorMessage,
+      };
+    }
+
+    throw err;
+  }
+}
+
+export function reportChannelSpam({
+  peer, chat, messageIds,
+}: {
+  peer: ApiPeer; chat: ApiChat; messageIds: number[];
+}) {
+  return invokeRequest(new GramJs.channels.ReportSpam({
+    participant: buildInputPeer(peer.id, peer.accessHash),
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    id: messageIds,
+  }));
 }
 
 export async function sendMessageAction({
@@ -1069,6 +1117,10 @@ export async function fetchFactChecks({
   return results.flatMap((result) => result!).map(buildApiFactCheck);
 }
 
+export function fetchPaidReactionPrivacy() {
+  return invokeRequest(new GramJs.messages.GetPaidReactionPrivacy(), { shouldReturnTrue: true });
+}
+
 export async function fetchDiscussionMessage({
   chat, messageId,
 }: {
@@ -1118,9 +1170,9 @@ export async function fetchDiscussionMessage({
 }
 
 export async function searchMessagesInChat({
-  chat, isSavedDialog, savedTag, type, query = '', threadId, minDate, maxDate, ...pagination
+  peer, isSavedDialog, savedTag, type, query = '', threadId, minDate, maxDate, ...pagination
 }: {
-  chat: ApiChat;
+  peer: ApiPeer;
   isSavedDialog?: boolean;
   savedTag?: ApiReaction;
   type?: ApiMessageSearchType | ApiGlobalMessageSearchType;
@@ -1158,11 +1210,11 @@ export async function searchMessagesInChat({
     }
   }
 
-  const peer = buildInputPeer(chat.id, chat.accessHash);
+  const inputPeer = buildInputPeer(peer.id, peer.accessHash);
 
   const result = await invokeRequest(new GramJs.messages.Search({
-    peer: isSavedDialog ? new GramJs.InputPeerSelf() : peer,
-    savedPeerId: isSavedDialog ? peer : undefined,
+    peer: isSavedDialog ? new GramJs.InputPeerSelf() : inputPeer,
+    savedPeerId: isSavedDialog ? inputPeer : undefined,
     savedReaction: savedTag && [buildInputReaction(savedTag)],
     topMsgId: threadId !== MAIN_THREAD_ID && !isSavedDialog ? Number(threadId) : undefined,
     filter,
@@ -1171,7 +1223,7 @@ export async function searchMessagesInChat({
     maxDate,
     ...pagination,
   }), {
-    abortControllerChatId: chat.id,
+    abortControllerChatId: peer.id,
     abortControllerThreadId: threadId,
   });
 
@@ -1870,6 +1922,7 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
   }
 
   let newContent: MediaContent | undefined;
+  let poll: ApiPoll | undefined;
   if (messageUpdate instanceof GramJs.UpdateShortSentMessage) {
     if (localMessage.content.text && messageUpdate.entities) {
       newContent = {
@@ -1883,6 +1936,7 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
           peerId: buildPeer(localMessage.chatId), id: messageUpdate.id,
         }),
       };
+      poll = buildPollFromMedia(messageUpdate.media);
     }
 
     const mtpMessage = buildMessageFromUpdate(messageUpdate.id, localMessage.chatId, messageUpdate);
@@ -1910,6 +1964,7 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
       sendingState: undefined,
       ...('date' in messageUpdate && { date: messageUpdate.date }),
     },
+    poll,
   });
 
   handleGramJsUpdate(update);

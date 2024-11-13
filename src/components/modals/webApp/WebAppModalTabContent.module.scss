@@ -44,19 +44,19 @@
   display: none;
 }
 
+.secondary-button,
 .main-button {
-  position: absolute;
-  bottom: 0;
-  border-radius: 0;
-
-  z-index: 1;
+  flex-grow: 1;
+  margin: 0.5rem;
   transform: translateY(100%);
-  transition-property: background-color, color, transform;
+  opacity: 0;
+  transition-property: background-color, color, transform, margin-inline, flex-grow, opacity;
   transition-duration: 0.25s;
   transition-timing-function: ease-in-out;
 
   &.visible {
     transform: translateY(0);
+    opacity: 1;
   }
 
   &.hidden {
@@ -64,9 +64,84 @@
   }
 }
 
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition-property: height;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
+
+  height: 0rem;
+
+  &.one-row {
+    align-items: center;
+    height: 4rem;
+  }
+
+  &.two-rows {
+    height: 8rem;
+  }
+
+  &.left-to-right {
+    flex-direction: row;
+  }
+
+  &.right-to-left {
+    flex-direction: row-reverse;
+  }
+
+  &.top-to-bottom,
+  &.bottom-to-top {
+    .secondary-button,
+    .main-button {
+      position: absolute;
+      left: 0rem;
+      right: 0rem;
+    }
+  }
+
+  &.top-to-bottom {
+    .secondary-button {
+      top: 0rem;
+    }
+    .main-button {
+      bottom: 0rem;
+    }
+  }
+  &.bottom-to-top {
+    .main-button {
+      top: 0rem;
+    }
+    .secondary-button {
+      bottom: 0rem;
+    }
+  }
+}
+
+.hide-horizontal {
+  .secondary-button,
+  .main-button {
+    transform: translateY(0);
+    flex-grow: 0;
+    margin-inline: 0;
+    padding-inline: 0;
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+
+    &.visible {
+      margin-inline: 0.5rem;
+      flex-grow: 1;
+    }
+  }
+}
+
+.secondary-button-spinner,
 .main-button-spinner {
   position: absolute;
-  right: 1rem;
 }
 
 .web-app-popup {

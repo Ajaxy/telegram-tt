@@ -104,11 +104,20 @@ const MonetizationStatistics = ({
         return;
       }
 
+      if (containerRef.current) {
+        Array.from(containerRef.current.children).forEach((child) => {
+          child.innerHTML = '';
+          child.classList.add(styles.hidden);
+        });
+      }
+
+      loadedCharts.current = [];
+
       if (!statistics || !containerRef.current) {
         return;
       }
 
-      MONETIZATION_GRAPHS.filter(Boolean).forEach((name, index: number) => {
+      MONETIZATION_GRAPHS.forEach((name, index: number) => {
         const graph = statistics[name as keyof typeof statistics];
         const isAsync = typeof graph === 'string';
 

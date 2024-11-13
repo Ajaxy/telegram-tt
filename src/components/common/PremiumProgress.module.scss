@@ -129,3 +129,14 @@
 .fullProgress {
   border-radius: 0.625rem;
 }
+
+.primary {
+  .progress {
+    background-image: none;
+    background-color: var(--color-primary);
+  }
+
+  .floating-badge {
+    background-color: var(--color-primary);
+  }
+}

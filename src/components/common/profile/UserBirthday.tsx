@@ -53,7 +53,7 @@ const UserBirthday = ({
   animatedEmojiEffects,
   isInSettings,
 }: OwnProps & StateProps) => {
-  const { openPremiumGiftModal, requestConfetti } = getActions();
+  const { openGiftModal, requestConfetti } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const animationPlayedRef = useRef(false);
@@ -144,15 +144,15 @@ const UserBirthday = ({
 
   const canGiftPremium = isToday && !user.isPremium && !user.isSelf && !isPremiumPurchaseBlocked;
 
-  const handleOpenPremiumGiftModal = useLastCallback(() => {
-    openPremiumGiftModal({ forUserIds: [user.id] });
+  const handleOpenGiftModal = useLastCallback(() => {
+    openGiftModal({ forUserId: user.id });
   });
 
   const handleClick = useLastCallback(() => {
     if (!isToday) return;
 
     if (canGiftPremium && animationPlayedRef.current) {
-      handleOpenPremiumGiftModal();
+      handleOpenGiftModal();
       return;
     }
 
@@ -173,7 +173,7 @@ const UserBirthday = ({
         ripple={!isStatic}
         onClick={handleClick}
         isStatic={isStatic}
-        onSecondaryIconClick={handleOpenPremiumGiftModal}
+        onSecondaryIconClick={handleOpenGiftModal}
       >
         <div className="title" dir={lang.isRtl ? 'rtl' : undefined}>
           {renderText(lang(valueKey, [formattedDate, age], undefined, age))}

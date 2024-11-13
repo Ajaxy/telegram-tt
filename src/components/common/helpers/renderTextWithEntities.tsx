@@ -498,8 +498,8 @@ function processEntity({
     case ApiMessageEntityTypes.Code:
       return (
         <code
-          className={buildClassName('text-entity-code', !isProtected && 'clickable')}
-          onClick={!isProtected ? handleCodeClick : undefined}
+          className={buildClassName('text-entity-code', 'clickable')}
+          onClick={handleCodeClick}
           role="textbox"
           tabIndex={0}
           data-entity-type={entity.type}

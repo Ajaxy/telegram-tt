@@ -35,7 +35,7 @@ type StateProps = {
   members?: ApiChatMember[];
 };
 
-const ITEM_HEIGHT = 24 + 32;
+const ITEM_HEIGHT = 24 + 12;
 const BEFORE_ITEMS_COUNT = 2;
 const ITEMS_COUNT = 9;
 

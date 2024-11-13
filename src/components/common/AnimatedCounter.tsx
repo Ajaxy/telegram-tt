@@ -16,6 +16,7 @@ type OwnProps = {
   text: string;
   className?: string;
   isDisabled?: boolean;
+  ref?: React.RefObject<HTMLSpanElement>;
 };
 
 const ANIMATION_TIME = 200;
@@ -31,6 +32,7 @@ const AnimatedCounter: FC<OwnProps> = ({
   text,
   className,
   isDisabled,
+  ref,
 }) => {
   const { isRtl } = useLang();
 
@@ -58,7 +60,7 @@ const AnimatedCounter: FC<OwnProps> = ({
   }, [shouldAnimate, text]);
 
   return (
-    <span className={buildClassName(className, !isDisabled && styles.root)} dir={isRtl ? 'rtl' : undefined}>
+    <span ref={ref} className={buildClassName(className, !isDisabled && styles.root)} dir={isRtl ? 'rtl' : undefined}>
       {characters}
     </span>
   );

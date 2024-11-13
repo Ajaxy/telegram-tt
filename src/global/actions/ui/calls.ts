@@ -199,7 +199,9 @@ addActionHandler('createGroupCallInviteLink', async (global, actions, payload): 
 
   copyTextToClipboard(inviteLink);
   actions.showNotification({
-    message: 'Link copied to clipboard',
+    message: {
+      key: 'LinkCopied',
+    },
     tabId,
   });
 });

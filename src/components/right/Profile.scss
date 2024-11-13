@@ -72,11 +72,16 @@
     &.storiesArchive-list,
     &.stories-list,
     &.media-list,
-    &.previewMedia-list {
+    &.previewMedia-list,
+    &.gifts-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 1fr;
-      grid-gap: 0.0625rem;
+      gap: 0.0625rem;
+    }
+
+    &.gifts-list {
+      gap: 0.625rem;
     }
 
     &.documents-list {
@@ -117,7 +122,8 @@
 
     &.similarChannels-list,
     &.commonChats-list,
-    &.members-list {
+    &.members-list,
+    &.gifts-list {
       padding: 0.5rem;
 
       @media (max-width: 600px) {

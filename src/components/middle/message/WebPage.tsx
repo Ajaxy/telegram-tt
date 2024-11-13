@@ -129,6 +129,7 @@ const WebPage: FC<OwnProps> = ({
     audio,
     type,
     document,
+    mediaSize,
   } = webPage;
   const isStory = type === WEBPAGE_STORY_TYPE;
   const isExpiredStory = story && 'isDeleted' in story;
@@ -136,7 +137,7 @@ const WebPage: FC<OwnProps> = ({
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
   const isArticle = Boolean(truncatedDescription || title || siteName);
   let isSquarePhoto = Boolean(stickers);
-  if (isArticle && webPage?.photo && !webPage.video) {
+  if (isArticle && webPage?.photo && !webPage.video && !webPage.document) {
     const { width, height } = calculateMediaDimensions({
       media: webPage.photo,
       isOwn: message.isOutgoing,
@@ -145,7 +146,7 @@ const WebPage: FC<OwnProps> = ({
       noAvatars,
       isMobile,
     });
-    isSquarePhoto = width === height;
+    isSquarePhoto = (width === height || mediaSize === 'small') && mediaSize !== 'large';
   }
   const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
 
@@ -193,7 +194,7 @@ const WebPage: FC<OwnProps> = ({
         {isStory && (
           <BaseStory story={story} isProtected={isProtected} isConnected={isConnected} isPreview />
         )}
-        {photo && !video && (
+        {photo && !video && !document && (
           <Photo
             photo={photo}
             isOwn={message.isOutgoing}

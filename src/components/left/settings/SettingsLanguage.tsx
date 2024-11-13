@@ -4,6 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiLanguage } from '../../../api/types';
 import type { ISettings, LangCode } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
@@ -29,7 +30,8 @@ type OwnProps = {
 
 type StateProps = {
   isCurrentUserPremium: boolean;
-} & Pick<ISettings, 'languages' | 'language' | 'canTranslate' | 'canTranslateChats' | 'doNotTranslate'>;
+  languages?: ApiLanguage[];
+} & Pick<ISettings, | 'language' | 'canTranslate' | 'canTranslateChats' | 'doNotTranslate'>;
 
 const SettingsLanguage: FC<OwnProps & StateProps> = ({
   isActive,
@@ -44,7 +46,6 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadLanguages,
-    loadAttachBots,
     setSettingOption,
     openPremiumModal,
   } = getActions();
@@ -70,8 +71,6 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
       unmarkIsLoading();
 
       setSettingOption({ language: langCode as LangCode });
-
-      loadAttachBots(); // Should be refetched every language change
     });
   });
 
@@ -167,6 +166,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
           <ItemPicker
             items={options}
             selectedValue={selectedLanguage}
+            forceRenderAllItems
             onSelectedValueChange={handleChange}
             itemInputType="radio"
             className="settings-picker"
@@ -182,8 +182,9 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
-      language, languages, canTranslate, canTranslateChats, doNotTranslate,
+      language, canTranslate, canTranslateChats, doNotTranslate,
     } = global.settings.byKey;
+    const languages = global.settings.languages;
 
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 

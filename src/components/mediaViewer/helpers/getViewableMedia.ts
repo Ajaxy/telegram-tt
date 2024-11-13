@@ -113,8 +113,10 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
   }
 
   if (webPage) {
-    const { photo: webPagePhoto, video: webPageVideo } = webPage;
-    const media = webPageVideo || webPagePhoto;
+    const { photo: webPagePhoto, video: webPageVideo, document: webPageDocument } = webPage;
+    const isDocumentMedia = webPageDocument && (isDocumentPhoto(webPageDocument) || isDocumentVideo(webPageDocument));
+    const mediaDocument = isDocumentMedia ? webPageDocument : undefined;
+    const media = webPageVideo || mediaDocument || webPagePhoto;
     if (media) {
       return {
         media,

@@ -13,6 +13,7 @@ import {
   getMessageAction,
   getMessageRecentReaction,
   getMessageSenderName,
+  getMessageStatefulContent,
   getPrivateChatUserId,
   getUserFullName,
   isActionMessage,
@@ -366,7 +367,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     } else {
       // TODO[forums] Support ApiChat
       const senderName = getMessageSenderName(oldTranslate, chat.id, isChat ? messageSenderChat : messageSenderUser);
-      let summary = getMessageSummaryText(oldTranslate, message, hasReaction, 60);
+      const statefulContent = getMessageStatefulContent(global, message);
+      let summary = getMessageSummaryText(oldTranslate, message, statefulContent, hasReaction, 60);
 
       if (hasReaction) {
         const emoji = getReactionEmoji(reaction);
@@ -401,10 +403,11 @@ async function getAvatar(chat: ApiPeer) {
 
 function getReactionEmoji(reaction: ApiPeerReaction) {
   let emoji;
-  if ('emoticon' in reaction.reaction) {
+  if (reaction.reaction.type === 'emoji') {
     emoji = reaction.reaction.emoticon;
   }
-  if ('documentId' in reaction.reaction) {
+
+  if (reaction.reaction.type === 'custom') {
     // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
     emoji = getGlobal().customEmojis.byId[reaction.reaction.documentId]?.emoji;
   }
@@ -470,7 +473,7 @@ export async function notifyAboutMessage({
   if (isReaction && !activeReaction) return;
 
   // If this is a custom emoji reaction we need to make sure it is loaded
-  if (isReaction && activeReaction && 'documentId' in activeReaction.reaction) {
+  if (isReaction && activeReaction && activeReaction.reaction.type === 'custom') {
     await loadCustomEmoji(activeReaction.reaction.documentId);
   }
 

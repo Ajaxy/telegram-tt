@@ -1,4 +1,4 @@
-import type { ApiChat, ApiMessage, ApiReaction } from '../../api/types';
+import type { ApiChat, ApiMessage, ApiReactionWithPaid } from '../../api/types';
 import type { GlobalState } from '../types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
@@ -40,7 +40,7 @@ export function subtractXForEmojiInteraction(global: GlobalState, x: number) {
 }
 
 export function addMessageReaction<T extends GlobalState>(
-  global: T, message: ApiMessage, userReactions: ApiReaction[],
+  global: T, message: ApiMessage, userReactions: ApiReactionWithPaid[],
 ): T {
   const isInSavedMessages = selectIsChatWithSelf(global, message.chatId);
   const currentReactions = message.reactions || { results: [], areTags: isInSavedMessages };
@@ -57,6 +57,7 @@ export function addMessageReaction<T extends GlobalState>(
 
   userReactions.forEach((reaction) => {
     const { currentUserId } = global;
+    if (reaction.type === 'paid') return;
     recentReactions.unshift({
       peerId: currentSendAs?.id || currentUserId!,
       reaction,

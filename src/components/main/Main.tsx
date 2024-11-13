@@ -10,7 +10,6 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiMessage, ApiUser } from '../../api/types';
 import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
-import type { LangCode } from '../../types';
 import { ElectronEvent } from '../../types/electron';
 
 import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER } from '../../config';
@@ -37,12 +36,13 @@ import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
-import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
+import { IS_ANDROID, IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/windowEnvironment';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
 import useForceUpdate from '../../hooks/useForceUpdate';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -72,7 +72,6 @@ import RightColumn from '../right/RightColumn';
 import StoryViewer from '../story/StoryViewer.async';
 import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import BotTrustModal from './BotTrustModal.async';
-import ConfettiContainer from './ConfettiContainer';
 import DeleteFolderDialog from './DeleteFolderDialog.async';
 import Dialogs from './Dialogs.async';
 import DownloadManager from './DownloadManager';
@@ -84,10 +83,12 @@ import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
 import GiveawayModal from './premium/GiveawayModal.async';
-import PremiumGiftingPickerModal from './premium/PremiumGiftingPickerModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import StarsGiftingPickerModal from './premium/StarsGiftingPickerModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
+import ConfettiContainer from './visualEffects/ConfettiContainer';
+import SnapEffectContainer from './visualEffects/SnapEffectContainer';
+import WaveContainer from './visualEffects/WaveContainer';
 
 import './Main.scss';
 
@@ -114,7 +115,6 @@ type StateProps = {
   openedCustomEmojiSetIds?: string[];
   activeGroupCallId?: string;
   isServiceChatReady?: boolean;
-  language?: LangCode;
   wasTimeFormatSetManually?: boolean;
   isPhoneCallActive?: boolean;
   addedSetIds?: string[];
@@ -136,7 +136,6 @@ type StateProps = {
   isReactionPickerOpen: boolean;
   isGiveawayModalOpen?: boolean;
   isDeleteMessageModalOpen?: boolean;
-  isPremiumGiftingPickerModal?: boolean;
   isStarsGiftingPickerModal?: boolean;
   isCurrentUserPremium?: boolean;
   noRightColumnAnimation?: boolean;
@@ -170,7 +169,6 @@ const Main = ({
   openedCustomEmojiSetIds,
   isServiceChatReady,
   withInterfaceAnimations,
-  language,
   wasTimeFormatSetManually,
   addedSetIds,
   addedCustomEmojiIds,
@@ -187,7 +185,6 @@ const Main = ({
   isPremiumModalOpen,
   isGiveawayModalOpen,
   isDeleteMessageModalOpen,
-  isPremiumGiftingPickerModal,
   isStarsGiftingPickerModal,
   isPaymentModalOpen,
   isReceiptModalOpen,
@@ -203,6 +200,7 @@ const Main = ({
     initMain,
     loadAnimatedEmojis,
     loadBirthdayNumbersStickers,
+    loadRestrictedEmojiStickers,
     loadNotificationSettings,
     loadNotificationExceptions,
     updateIsOnline,
@@ -213,6 +211,7 @@ const Main = ({
     loadAvailableReactions,
     loadStickerSets,
     loadPremiumGifts,
+    loadStarGifts,
     loadDefaultTopicIcons,
     loadAddedStickers,
     loadFavoriteStickers,
@@ -247,6 +246,7 @@ const Main = ({
     loadStarStatus,
     loadAvailableEffects,
     loadTopBotApps,
+    loadPaidReactionPrivacy,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -254,6 +254,8 @@ const Main = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
+
+  const lang = useLang();
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
@@ -324,12 +326,15 @@ const Main = ({
       loadQuickReplies();
       loadStarStatus();
       loadPremiumGifts();
+      loadStarGifts();
       loadAvailableEffects();
       loadBirthdayNumbersStickers();
+      loadRestrictedEmojiStickers();
       loadGenericEmojiEffects();
       loadSavedReactionTags();
       loadAuthorizations();
       loadTopBotApps();
+      loadPaidReactionPrivacy();
     }
   }, [isMasterTab, isSynced]);
 
@@ -344,13 +349,15 @@ const Main = ({
   // Language-based API calls
   useEffect(() => {
     if (isMasterTab) {
-      if (language !== BASE_EMOJI_KEYWORD_LANG) {
-        loadEmojiKeywords({ language: language! });
+      if (lang.code !== BASE_EMOJI_KEYWORD_LANG) {
+        loadEmojiKeywords({ language: lang.code });
       }
 
-      loadCountryList({ langCode: language });
+      loadCountryList({ langCode: lang.code });
+
+      loadAttachBots();
     }
-  }, [language, isMasterTab]);
+  }, [lang, isMasterTab]);
 
   // Re-fetch cached saved emoji for `localDb`
   useEffect(() => {
@@ -393,6 +400,8 @@ const Main = ({
   // Parse deep link
   useEffect(() => {
     if (!isSynced) return;
+    updatePageTitle();
+
     const parsedInitialLocationHash = parseInitialLocationHash();
     if (parsedInitialLocationHash?.tgaddr) {
       processDeepLink(decodeURIComponent(parsedInitialLocationHash.tgaddr));
@@ -559,6 +568,8 @@ const Main = ({
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <DownloadManager />
       <ConfettiContainer />
+      {IS_WAVE_TRANSFORM_SUPPORTED && <WaveContainer />}
+      <SnapEffectContainer />
       <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
@@ -571,7 +582,6 @@ const Main = ({
       <MessageListHistoryHandler />
       <PremiumMainModal isOpen={isPremiumModalOpen} />
       <GiveawayModal isOpen={isGiveawayModalOpen} />
-      <PremiumGiftingPickerModal isOpen={isPremiumGiftingPickerModal} />
       <StarsGiftingPickerModal isOpen={isStarsGiftingPickerModal} />
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
@@ -588,7 +598,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       settings: {
         byKey: {
-          language, wasTimeFormatSetManually,
+          wasTimeFormatSetManually,
         },
       },
       currentUserId,
@@ -613,8 +623,7 @@ export default memo(withGlobal<OwnProps>(
       premiumModal,
       giveawayModal,
       deleteMessageModal,
-      giftingModal,
-      starsGiftingModal,
+      starsGiftingPickerModal,
       isMasterTab,
       payment,
       limitReachedModal,
@@ -653,7 +662,6 @@ export default memo(withGlobal<OwnProps>(
       isServiceChatReady: selectIsServiceChatReady(global),
       activeGroupCallId: isMasterTab ? global.groupCalls.activeGroupCallId : undefined,
       withInterfaceAnimations: selectCanAnimateInterface(global),
-      language,
       wasTimeFormatSetManually,
       isPhoneCallActive: isMasterTab ? Boolean(global.phoneCall) : undefined,
       addedSetIds: global.stickers.added.setIds,
@@ -670,8 +678,7 @@ export default memo(withGlobal<OwnProps>(
       isPremiumModalOpen: premiumModal?.isOpen,
       isGiveawayModalOpen: giveawayModal?.isOpen,
       isDeleteMessageModalOpen: Boolean(deleteMessageModal),
-      isPremiumGiftingPickerModal: giftingModal?.isOpen,
-      isStarsGiftingPickerModal: starsGiftingModal?.isOpen,
+      isStarsGiftingPickerModal: starsGiftingPickerModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),

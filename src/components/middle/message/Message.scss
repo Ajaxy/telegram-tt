@@ -268,6 +268,10 @@
     }
   }
 
+  &.is-dissolving {
+    visibility: hidden;
+  }
+
   &.is-story-mention {
     --background-color: var(--pattern-color);
 
@@ -646,7 +650,7 @@
 
   .message-content {
     &.has-replies:not(.custom-shape),
-    &.has-footer:not(.web-page):not(.is-forwarded) {
+    &.has-footer:not(.web-page) {
       .media-inner,
       .Album {
         --border-bottom-left-radius: 0;
@@ -654,7 +658,7 @@
       }
     }
 
-    &.text.is-inverted-media:not(.is-forwarded) {
+    &.text.is-inverted-media {
       .Album,
       .media-inner {
         --border-top-left-radius: 0;
@@ -757,8 +761,4 @@
 
 .media-inner {
   overflow: hidden;
-}
-
-.Message .custom-shape .message-action-button {
-  bottom: 0.25rem;
 }
