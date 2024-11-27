@@ -138,6 +138,7 @@
 
   &.has-inline-buttons {
     .message-content {
+      --border-bottom-left-radius: var(--border-radius-messages-small);
       --border-bottom-right-radius: var(--border-radius-messages-small);
     }
   }

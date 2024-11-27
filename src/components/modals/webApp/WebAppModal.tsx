@@ -248,9 +248,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   const handleToggleClick = useLastCallback(() => {
     if (attachBot) {
+      const key = getWebAppKey(activeWebApp!);
       updateWebApp({
-        webApp: {
-          ...activeWebApp!,
+        key,
+        update: {
           isRemoveModalOpen: true,
         },
       });

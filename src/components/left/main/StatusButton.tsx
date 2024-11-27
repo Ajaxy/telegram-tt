@@ -6,7 +6,7 @@ import type { ApiEmojiStatus, ApiSticker } from '../../../api/types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
 import { selectUser } from '../../../global/selectors';
-import { getServerTimeOffset } from '../../../util/serverTime';
+import { getServerTime } from '../../../util/serverTime';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -36,7 +36,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
   const [isStatusPickerOpen, openStatusPicker, closeStatusPicker] = useFlag(false);
   const { isMobile } = useAppLayout();
 
-  const delay = emojiStatus?.until ? emojiStatus.until * 1000 - Date.now() + getServerTimeOffset() * 1000 : undefined;
+  const delay = emojiStatus?.until ? (emojiStatus.until - getServerTime()) * 1000 : undefined;
   useTimeout(loadCurrentUser, delay);
 
   useEffectWithPrevDeps(([prevEmojiStatus]) => {
@@ -48,7 +48,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
 
   const handleEmojiStatusSet = useCallback((sticker: ApiSticker) => {
     markShouldShowEffect();
-    setEmojiStatus({ emojiStatus: sticker });
+    setEmojiStatus({ emojiStatusId: sticker.id });
   }, [markShouldShowEffect, setEmojiStatus]);
 
   useTimeout(hideEffect, isEffectShown ? EFFECT_DURATION_MS : undefined);

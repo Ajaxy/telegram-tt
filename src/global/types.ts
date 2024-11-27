@@ -911,6 +911,13 @@ export type TabState = {
     userId?: string;
     gift: ApiUserStarGift | ApiStarGift;
   };
+
+  suggestedStatusModal?: {
+    botId: string;
+    webAppKey?: string;
+    customEmojiId: string;
+    duration?: number;
+  };
 };
 
 export type GlobalState = {
@@ -1333,6 +1340,7 @@ export type WebApp = {
   backgroundColor?: string;
   isBackButtonVisible?: boolean;
   isSettingsButtonVisible?: boolean;
+  plannedEvents?: WebAppOutboundEvent[];
   sendEvent?: (event: WebAppOutboundEvent) => void;
   reloadFrame?: (url: string) => void;
 };
@@ -3115,7 +3123,8 @@ export interface ActionPayloads {
     startParam?: string;
   } & WithTabId;
   updateWebApp: {
-    webApp: Partial<WebApp>;
+    key: string;
+    update: Partial<WebApp>;
   } & WithTabId;
   requestMainWebView: {
     botId: string;
@@ -3260,8 +3269,12 @@ export interface ActionPayloads {
   openMoreAppsTab: WithTabId | undefined;
   closeMoreAppsTab: WithTabId | undefined;
   closeWebApp: {
-    webApp: WebApp;
+    key: string;
     skipClosingConfirmation?: boolean;
+  } & WithTabId;
+  sendWebAppEvent: {
+    webAppKey: string;
+    event: WebAppOutboundEvent;
   } & WithTabId;
   closeWebAppModal: ({
     shouldSkipConfirmation?: boolean;
@@ -3546,9 +3559,17 @@ export interface ActionPayloads {
   closeStarsGiftModal: WithTabId | undefined;
 
   setEmojiStatus: {
-    emojiStatus: ApiSticker;
+    emojiStatusId: string;
     expires?: number;
-  };
+    referrerWebAppKey?: string;
+  } & WithTabId;
+  openSuggestedStatusModal: {
+    botId: string;
+    webAppKey?: string;
+    customEmojiId: string;
+    duration?: number;
+  } & WithTabId;
+  closeSuggestedStatusModal: WithTabId | undefined;
 
   // Invoice
   openInvoice: Exclude<ApiInputInvoice, ApiInputInvoiceStarGift> & WithTabId;

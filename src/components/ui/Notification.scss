@@ -46,6 +46,13 @@
 
   .notification-icon {
     font-size: 1.75rem;
+  }
+
+  .notification-emoji-icon {
+    --custom-emoji-size: 1.75rem;
+  }
+
+  .notification-icon, .notification-emoji-icon {
     margin-inline-end: 0.75rem;
   }
 

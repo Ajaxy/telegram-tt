@@ -125,6 +125,7 @@ export type ApiNotification = {
   disableClickDismiss?: boolean;
   shouldShowTimer?: boolean;
   icon?: IconName;
+  customEmojiIconId?: string;
   dismissAction?: CallbackAction;
 };
 

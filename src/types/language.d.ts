@@ -943,6 +943,7 @@ export interface LangPair {
   'ScheduleSendWhenOnline': undefined;
   'VoipIncoming': undefined;
   'LiveLocationUpdatedJustNow': undefined;
+  'RightNow': undefined;
   'AudioPause': undefined;
   'AudioPlay': undefined;
   'ToggleUserNotifications': undefined;
@@ -1152,6 +1153,8 @@ export interface LangPair {
   'CloseMiniApps': undefined;
   'DoNotAskAgain': undefined;
   'PaymentInfoDone': undefined;
+  'BotSuggestedStatusTitle': undefined;
+  'BotSuggestedStatusUpdated': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1540,6 +1543,13 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'StarsPerMonth': {
     'amount': V;
+  };
+  'BotSuggestedStatusFor': {
+    'bot': V;
+    'duration': V;
+  };
+  'BotSuggestedStatus': {
+    'bot': V;
   };
 }
 

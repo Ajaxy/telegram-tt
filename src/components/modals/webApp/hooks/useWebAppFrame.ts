@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { WebApp } from '../../../../global/types';
 import type { WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
 
+import { getWebAppKey } from '../../../../global/helpers';
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -44,6 +46,8 @@ const useWebAppFrame = (
     setWebAppPaymentSlug,
     openInvoice,
     closeWebApp,
+    openSuggestedStatusModal,
+    updateWebApp,
   } = getActions();
 
   const isReloadSupported = useRef<boolean>(false);
@@ -146,7 +150,10 @@ const useWebAppFrame = (
       }
 
       if (eventType === 'web_app_close') {
-        if (webApp) closeWebApp({ webApp, skipClosingConfirmation: true });
+        if (webApp) {
+          const key = getWebAppKey(webApp);
+          closeWebApp({ key, skipClosingConfirmation: true });
+        }
       }
 
       if (eventType === 'web_app_request_viewport') {
@@ -214,6 +221,51 @@ const useWebAppFrame = (
         });
       }
 
+      if (eventType === 'web_app_set_emoji_status') {
+        const { custom_emoji_id, duration } = eventData;
+
+        if (!custom_emoji_id || typeof custom_emoji_id !== 'string') {
+          sendEvent({
+            eventType: 'emoji_status_failed',
+            eventData: {
+              error: 'SUGGESTED_EMOJI_INVALID',
+            },
+          });
+          return;
+        }
+
+        if (duration) {
+          try {
+            BigInt(duration);
+          } catch (e) {
+            sendEvent({
+              eventType: 'emoji_status_failed',
+              eventData: {
+                error: 'DURATION_INVALID',
+              },
+            });
+            return;
+          }
+        }
+
+        if (!webApp) {
+          sendEvent({
+            eventType: 'emoji_status_failed',
+            eventData: {
+              error: 'UNKNOWN_ERROR',
+            },
+          });
+          return;
+        }
+
+        openSuggestedStatusModal({
+          webAppKey: getWebAppKey(webApp),
+          customEmojiId: custom_emoji_id,
+          duration: Number(duration),
+          botId: webApp.botId,
+        });
+      }
+
       onEvent(data);
     } catch (err) {
       // Ignore other messages
@@ -230,6 +282,21 @@ const useWebAppFrame = (
     lastFrameSizeRef.current = { width, height, isResizing };
     sendViewport(isResizing);
   }, [sendViewport, windowSize]);
+
+  useEffect(() => {
+    if (!webApp?.plannedEvents?.length) return;
+    const events = webApp.plannedEvents;
+    events.forEach((event) => {
+      sendEvent(event);
+    });
+
+    updateWebApp({
+      key: getWebAppKey(webApp),
+      update: {
+        plannedEvents: [],
+      },
+    });
+  }, [sendEvent, webApp]);
 
   useEffect(() => {
     window.addEventListener('message', handleMessage);

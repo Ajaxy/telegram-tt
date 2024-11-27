@@ -509,6 +509,7 @@ export type CustomPeer = {
   peerColorId?: number;
   isVerified?: boolean;
   fakeType?: ApiFakeType;
+  emojiStatusId?: string;
   customPeerAvatarColor?: string;
   withPremiumGradient?: boolean;
 } & ({

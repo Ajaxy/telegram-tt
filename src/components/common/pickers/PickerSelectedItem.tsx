@@ -2,19 +2,19 @@ import type { TeactNode } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiPeer } from '../../../api/types';
 import type { CustomPeer } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
-import { getChatTitle, getUserFirstOrLastName } from '../../../global/helpers';
-import { selectChat, selectUser } from '../../../global/selectors';
+import { isApiPeerChat } from '../../../global/helpers/peers';
+import { selectPeer, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getPeerColorClass } from '../helpers/peerColor';
-import renderText from '../helpers/renderText';
 
 import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../Avatar';
+import FullNameTitle from '../FullNameTitle';
 import Icon from '../icons/Icon';
 
 import './PickerSelectedItem.scss';
@@ -25,6 +25,7 @@ type OwnProps<T = undefined> = {
   // eslint-disable-next-line react/no-unused-prop-types
   forceShowSelf?: boolean;
   customPeer?: CustomPeer;
+  mockPeer?: ApiPeer;
   icon?: IconName;
   title?: string;
   isMinimized?: boolean;
@@ -32,13 +33,12 @@ type OwnProps<T = undefined> = {
   className?: string;
   fluid?: boolean;
   withPeerColors?: boolean;
-  clickArg: T;
-  onClick: (arg: T) => void;
+  clickArg?: T;
+  onClick?: (arg: T) => void;
 };
 
 type StateProps = {
-  chat?: ApiChat;
-  user?: ApiUser;
+  peer?: ApiPeer;
   isSavedMessages?: boolean;
 };
 
@@ -49,8 +49,8 @@ const PickerSelectedItem = <T,>({
   isMinimized,
   canClose,
   clickArg,
-  chat,
-  user,
+  peer,
+  mockPeer,
   customPeer,
   className,
   fluid,
@@ -59,6 +59,11 @@ const PickerSelectedItem = <T,>({
   onClick,
 }: OwnProps<T> & StateProps) => {
   const lang = useOldLang();
+
+  const apiPeer = mockPeer || peer;
+  const anyPeer = customPeer || apiPeer;
+
+  const chat = apiPeer && isApiPeerChat(apiPeer) ? apiPeer : undefined;
 
   let iconElement: TeactNode | undefined;
   let titleText: any;
@@ -71,21 +76,16 @@ const PickerSelectedItem = <T,>({
     );
 
     titleText = title;
-  } else if (customPeer || user || chat) {
+  } else if (anyPeer) {
     iconElement = (
       <Avatar
-        peer={customPeer || user || chat}
+        peer={anyPeer}
         size="small"
         isSavedMessages={isSavedMessages}
       />
     );
 
-    const name = (customPeer && (customPeer.title || lang(customPeer.titleKey!)))
-      || (!chat || (user && !isSavedMessages)
-        ? getUserFirstOrLastName(user)
-        : getChatTitle(lang, chat, isSavedMessages));
-
-    titleText = title || (name ? renderText(name) : undefined);
+    titleText = title || <FullNameTitle peer={anyPeer} isSavedMessages={isSavedMessages} withEmojiStatus />;
   }
 
   const fullClassName = buildClassName(
@@ -95,13 +95,13 @@ const PickerSelectedItem = <T,>({
     isMinimized && 'minimized',
     canClose && 'closeable',
     fluid && 'fluid',
-    withPeerColors && getPeerColorClass(customPeer || chat || user),
+    withPeerColors && getPeerColorClass(customPeer || peer),
   );
 
   return (
     <div
       className={fullClassName}
-      onClick={() => onClick(clickArg)}
+      onClick={() => onClick?.(clickArg!)}
       title={isMinimized ? titleText : undefined}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
@@ -126,13 +126,12 @@ export default memo(withGlobal<OwnProps>(
       return {};
     }
 
-    const chat = selectChat(global, peerId);
+    const peer = selectPeer(global, peerId);
     const user = selectUser(global, peerId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
 
     return {
-      chat,
-      user,
+      peer,
       isSavedMessages,
     };
   },

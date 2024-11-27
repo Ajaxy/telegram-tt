@@ -140,13 +140,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const isActive = (activeWebApp && webApp) && activeWebAppKey === webAppKey;
 
   const updateCurrentWebApp = useLastCallback((updatedPartialWebApp: Partial<WebApp>) => {
-    if (!webApp) return;
-    const updatedWebApp = {
-      ...webApp,
-      ...updatedPartialWebApp,
-    };
-    webApp = updatedWebApp;
-    updateWebApp({ webApp: updatedWebApp });
+    if (!webAppKey) return;
+    updateWebApp({ key: webAppKey, update: updatedPartialWebApp });
   });
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import type {
   ActionReturnType, GlobalState, TabArgs, WebApp,
 } from '../../types';
 import {
-  type ApiChat, type ApiChatType, type ApiContact, type ApiInputMessageReplyInfo, type ApiPeer, type ApiUrlAuthResult,
+  type ApiChat, type ApiContact, type ApiInputMessageReplyInfo, type ApiPeer, type ApiUrlAuthResult,
   MAIN_THREAD_ID,
 } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
@@ -30,10 +30,9 @@ import {
 } from '../../reducers';
 import {
   activateWebAppIfOpen,
-  addWebAppToOpenList, clearOpenedWebApps, hasOpenedMoreThanOneWebApps,
-  hasOpenedWebApps, removeActiveWebAppFromOpenList, removeWebAppFromOpenList,
-  replaceInlineBotSettings, replaceInlineBotsIsLoading,
-  replaceIsWebAppModalOpen, replaceWebAppModalState, updateWebApp,
+  addWebAppToOpenList,
+  replaceInlineBotSettings,
+  replaceInlineBotsIsLoading,
 } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -692,18 +691,6 @@ addActionHandler('loadPreviewMedias', async (global, actions, payload): Promise<
   }
 });
 
-addActionHandler('openWebAppTab', (global, actions, payload): ActionReturnType => {
-  const {
-    webApp, tabId = getCurrentTabId(),
-  } = payload;
-
-  if (webApp) {
-    global = getGlobal();
-    global = addWebAppToOpenList(global, webApp, true, true, tabId);
-    setGlobal(global);
-  }
-});
-
 addActionHandler('openWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
   const {
     tabId = getCurrentTabId(),
@@ -872,143 +859,6 @@ addActionHandler('sendWebViewData', (global, actions, payload): ActionReturnType
   });
 });
 
-addActionHandler('updateWebApp', (global, actions, payload): ActionReturnType => {
-  const {
-    webApp, tabId = getCurrentTabId(),
-  } = payload;
-  return updateWebApp(global, webApp, tabId);
-});
-
-addActionHandler('closeActiveWebApp', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  global = removeActiveWebAppFromOpenList(global, tabId);
-  if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);
-
-  return global;
-});
-
-addActionHandler('openMoreAppsTab', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  const tabState = selectTabState(global, tabId);
-  global = updateTabState(global, {
-    webApps: {
-      ...tabState.webApps,
-      activeWebApp: undefined,
-      isMoreAppsTabActive: true,
-    },
-  }, tabId);
-
-  return global;
-});
-
-addActionHandler('closeMoreAppsTab', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  const tabState = selectTabState(global, tabId);
-
-  const openedWebApps = tabState.webApps.openedWebApps;
-
-  const openedWebAppsValues = Object.values(openedWebApps);
-  const openedWebAppsCount = openedWebAppsValues.length;
-
-  global = updateTabState(global, {
-    webApps: {
-      ...tabState.webApps,
-      isMoreAppsTabActive: false,
-      activeWebApp: openedWebAppsCount ? openedWebAppsValues[openedWebAppsCount - 1] : undefined,
-      isModalOpen: openedWebAppsCount > 0,
-    },
-  }, tabId);
-
-  return global;
-});
-
-addActionHandler('closeWebApp', (global, actions, payload): ActionReturnType => {
-  const { webApp, skipClosingConfirmation, tabId = getCurrentTabId() } = payload || {};
-
-  global = removeWebAppFromOpenList(global, webApp, skipClosingConfirmation, tabId);
-  if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);
-
-  return global;
-});
-
-addActionHandler('closeWebAppModal', (global, actions, payload): ActionReturnType => {
-  const { shouldSkipConfirmation, tabId = getCurrentTabId() } = payload || {};
-
-  const shouldShowConfirmation = !shouldSkipConfirmation
-  && !global.settings.byKey.shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
-
-  if (shouldShowConfirmation) {
-    actions.openWebAppsCloseConfirmationModal({ tabId });
-    return global;
-  }
-
-  global = clearOpenedWebApps(global, tabId);
-  if (!hasOpenedWebApps(global, tabId)) return replaceIsWebAppModalOpen(global, false, tabId);
-
-  return global;
-});
-
-addActionHandler('changeWebAppModalState', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const tabState = selectTabState(global, tabId);
-
-  const newModalState = tabState.webApps.modalState === 'maximized' ? 'minimized' : 'maximized';
-  return replaceWebAppModalState(global, newModalState, tabId);
-});
-
-addActionHandler('setWebAppPaymentSlug', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
-  const tabState = selectTabState(global, tabId);
-  const activeWebApp = tabState.webApps.activeWebApp;
-  if (!activeWebApp?.url) return undefined;
-
-  const updatedApp = {
-    ...activeWebApp,
-    slug: payload.slug,
-  };
-
-  return updateWebApp(global, updatedApp, tabId);
-});
-
-addActionHandler('cancelBotTrustRequest', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    botTrustRequest: undefined,
-  }, tabId);
-});
-
-addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType => {
-  const { botId, isWriteAllowed, tabId = getCurrentTabId() } = payload;
-  const { trustedBotIds } = global;
-
-  const newTrustedBotIds = new Set(trustedBotIds);
-  newTrustedBotIds.add(botId);
-
-  global = {
-    ...global,
-    trustedBotIds: Array.from(newTrustedBotIds),
-  };
-
-  const tabState = selectTabState(global, tabId);
-  if (tabState.botTrustRequest?.onConfirm) {
-    const { action, payload: callbackPayload } = tabState.botTrustRequest.onConfirm;
-    // @ts-ignore
-    actions[action]({
-      ...(callbackPayload as {}),
-      isWriteAllowed,
-    });
-  }
-
-  global = updateTabState(global, {
-    botTrustRequest: undefined,
-  }, tabId);
-
-  setGlobal(global);
-});
-
 addActionHandler('loadAttachBots', async (global): Promise<void> => {
   await loadAttachBots(global);
 
@@ -1148,50 +998,6 @@ addActionHandler('confirmAttachBotInstall', async (global, actions, payload): Pr
     // @ts-ignore
     actions[action](actionPayload);
   }
-});
-
-addActionHandler('cancelAttachBotInstall', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    requestedAttachBotInstall: undefined,
-  }, tabId);
-});
-
-addActionHandler('requestAttachBotInChat', (global, actions, payload): ActionReturnType => {
-  const {
-    bot, filter, startParam, tabId = getCurrentTabId(),
-  } = payload;
-  const currentChatId = selectCurrentMessageList(global, tabId)?.chatId;
-
-  const supportedFilters = bot.attachMenuPeerTypes?.filter((type): type is ApiChatType => (
-    type !== 'self' && filter.includes(type)
-  ));
-
-  if (!supportedFilters?.length) {
-    actions.callAttachBot({
-      chatId: currentChatId || bot.id,
-      bot,
-      startParam,
-      tabId,
-    });
-    return;
-  }
-
-  global = updateTabState(global, {
-    requestedAttachBotInChat: {
-      bot,
-      filter: supportedFilters,
-      startParam,
-    },
-  }, tabId);
-  setGlobal(global);
-});
-
-addActionHandler('cancelAttachBotInChat', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    requestedAttachBotInChat: undefined,
-  }, tabId);
 });
 
 addActionHandler('requestBotUrlAuth', async (global, actions, payload): Promise<void> => {

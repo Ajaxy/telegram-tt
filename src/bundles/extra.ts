@@ -20,6 +20,7 @@ export { default as PremiumMainModal } from '../components/main/premium/PremiumM
 export { default as GiveawayModal } from '../components/main/premium/GiveawayModal';
 export { default as PremiumLimitReachedModal } from '../components/main/premium/common/PremiumLimitReachedModal';
 export { default as StatusPickerMenu } from '../components/left/main/StatusPickerMenu';
+export { default as SuggestedStatusModal } from '../components/modals/suggestedStatus/SuggestedStatusModal';
 export { default as BoostModal } from '../components/modals/boost/BoostModal';
 export { default as GiftCodeModal } from '../components/modals/giftcode/GiftCodeModal';
 export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';

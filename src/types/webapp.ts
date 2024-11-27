@@ -95,6 +95,10 @@ export type WebAppInboundEvent =
   WebAppEvent<'web_app_biometry_update_token', {
     token: string;
   }> |
+  WebAppEvent<'web_app_set_emoji_status', {
+    custom_emoji_id: string;
+    duration?: number;
+  }> |
   WebAppEvent<'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
   | 'web_app_request_phone' | 'web_app_close' | 'web_app_close_scan_qr_popup'
   | 'web_app_request_write_access' | 'web_app_request_phone' | 'iframe_will_reload'
@@ -168,6 +172,10 @@ export type WebAppOutboundEvent =
   WebAppEvent<'biometry_token_updated', {
     status: 'updated' | 'removed' | 'failed';
   }> |
+  WebAppEvent<'emoji_status_failed', {
+    error: 'UNSUPPORTED' | 'USER_DECLINED' | 'SUGGESTED_EMOJI_INVALID'
+    | 'DURATION_INVALID' | 'SERVER_ERROR' | 'UNKNOWN_ERROR';
+  }> |
   WebAppEvent<'main_button_pressed' |
   'secondary_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed'
-  | 'reload_iframe', null>;
+  | 'reload_iframe' | 'emoji_status_set', null>;
