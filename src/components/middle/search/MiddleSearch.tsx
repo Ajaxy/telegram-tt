@@ -218,10 +218,6 @@ const MiddleSearch: FC<StateProps> = ({
   // Focus message
   useEffect(() => {
     if (foundIds?.length) {
-      if (searchType === 'chat') {
-        const [chatId, messageId] = parseSearchResultKey(foundIds[0]);
-        focusMessage({ chatId, messageId, threadId });
-      }
       setFocusedIndex(0);
     } else {
       setFocusedIndex(-1);
