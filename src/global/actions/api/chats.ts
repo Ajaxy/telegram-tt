@@ -1500,7 +1500,8 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, text,
+    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp,
+    text, onChatChanged,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1542,6 +1543,10 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
           text,
         }, tabId,
       );
+      if (onChatChanged) {
+        // @ts-ignore
+        actions[onChatChanged.action](onChatChanged.payload);
+      }
       return;
     }
   }
@@ -1586,6 +1591,10 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     tabId,
     focusMessageId: commentId,
   });
+  if (onChatChanged) {
+    // @ts-ignore
+    actions[onChatChanged.action](onChatChanged.payload);
+  }
 });
 
 addActionHandler('togglePreHistoryHidden', async (global, actions, payload): Promise<void> => {

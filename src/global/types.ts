@@ -1828,6 +1828,7 @@ export interface ActionPayloads {
     startApp?: string;
     text?: string;
     originalParts?: (string | undefined)[];
+    onChatChanged?: CallbackAction;
   } & WithTabId;
   processBoostParameters: {
     usernameOrId: string;
