@@ -312,10 +312,10 @@ const MessageContextMenu: FC<OwnProps> = ({
   const getLayout = useLastCallback(() => {
     const extraHeightAudioPlayer = (isMobile
       && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
-    const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessageWrapper');
-    const extraHeightPinned = (((isMobile && !extraHeightAudioPlayer)
-        || (!isMobile && pinnedElement?.classList.contains('full-width')))
-      && pinnedElement?.offsetHeight) || 0;
+    const middleColumn = document.getElementById('MiddleColumn')!;
+    const middleColumnComputedStyle = getComputedStyle(middleColumn);
+    const headerToolsHeight = parseFloat(middleColumnComputedStyle.getPropertyValue('--middle-header-panes-height'));
+    const extraHeightPinned = headerToolsHeight || 0;
 
     return {
       extraPaddingX: SCROLLBAR_WIDTH,

@@ -265,7 +265,7 @@ const MessageListContent: FC<OwnProps> = ({
 
     return (
       <div
-        className="message-date-group"
+        className={buildClassName('message-date-group', dateGroupIndex === 0 && 'first-message-date-group')}
         key={dateGroup.datetime}
         onMouseDown={preventMessageInputBlur}
         teactFastList

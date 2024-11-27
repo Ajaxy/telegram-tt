@@ -1695,11 +1695,12 @@ export interface ActionPayloads {
     messageId: number;
   };
   pinMessage: {
+    chatId: string;
     messageId: number;
     isUnpin: boolean;
     isOneSide?: boolean;
     isSilent?: boolean;
-  } & WithTabId;
+  };
   deleteMessages: {
     messageIds: number[];
     shouldDeleteForAll?: boolean;
@@ -2114,7 +2115,7 @@ export interface ActionPayloads {
     offsetUserId?: string;
     limit?: number;
   } & WithTabId;
-  hideChatReportPanel: {
+  hideChatReportPane: {
     chatId: string;
   };
   toggleManagement: ({

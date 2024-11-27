@@ -394,12 +394,12 @@ addActionHandler('hideAllChatJoinRequests', async (global, actions, payload): Pr
   setGlobal(global);
 });
 
-addActionHandler('hideChatReportPanel', async (global, actions, payload): Promise<void> => {
+addActionHandler('hideChatReportPane', async (global, actions, payload): Promise<void> => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  const result = await callApi('hideChatReportPanel', chat);
+  const result = await callApi('hideChatReportPane', chat);
   if (!result) return;
 
   global = getGlobal();

@@ -13,6 +13,7 @@ import type { OldLangFn } from '../../hooks/useOldLang';
 import type {
   CustomPeer, NotifyException, NotifySettings, ThreadId,
 } from '../../types';
+import type { LangFn } from '../../util/localization';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -101,7 +102,7 @@ export function getPrivateChatUserId(chat: ApiChat) {
   return chat.id;
 }
 
-export function getChatTitle(lang: OldLangFn, chat: ApiChat, isSelf = false) {
+export function getChatTitle(lang: OldLangFn | LangFn, chat: ApiChat, isSelf = false) {
   if (isSelf) {
     return lang('SavedMessages');
   }

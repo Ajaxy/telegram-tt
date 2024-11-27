@@ -655,7 +655,11 @@
 "Statistics" = "Statistics";
 "EventLogFilterPinnedMessages" = "Pinned messages";
 "UnpinMessageAlertTitle" = "Unpin message";
-"PinnedMessage" = "Pinned message";
+"PinnedMessageTitleSingle" = "Pinned message";
+"PinnedMessageTitle_one" = "Pinned message #{index}";
+"PinnedMessageTitle_other" = "Pinned message #{index}";
+"AccPinnedMessages" = "Pinned Messages";
+"AccUnpinMessage" = "Unpin Message";
 "Comments_one" = "{count} Comment";
 "Comments_other" = "{count} Comments";
 "LeaveAComment" = "Leave a comment";

@@ -1,8 +1,9 @@
+@use "../../../styles/mixins";
+
 .AudioPlayer {
   display: flex;
+  align-items: center;
   margin-left: auto;
-  margin-top: -0.25rem;
-  margin-bottom: -0.25rem;
 
   body.no-page-transitions & {
     transition: none !important;
@@ -170,10 +171,6 @@
       max-width: 10rem;
     }
 
-    @media (max-width: 600px) {
-      max-width: 100%;
-    }
-
     @media (min-width: 1440px) {
       max-width: 24rem;
       .right-column-shown & {
@@ -210,6 +207,15 @@
         font-size: 0.9375rem !important;
         line-height: 1.125rem;
       }
+    }
+  }
+
+  &.full-width-player {
+    @include mixins.header-pane;
+
+    .AudioPlayer-content {
+      max-width: none;
+      flex-grow: 1;
     }
   }
 

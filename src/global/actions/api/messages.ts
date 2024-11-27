@@ -696,10 +696,10 @@ addActionHandler('toggleMessageWebPage', (global, actions, payload): ActionRetur
 
 addActionHandler('pinMessage', (global, actions, payload): ActionReturnType => {
   const {
-    messageId, isUnpin, isOneSide, isSilent, tabId = getCurrentTabId(),
+    chatId, messageId, isUnpin, isOneSide, isSilent,
   } = payload;
 
-  const chat = selectCurrentChat(global, tabId);
+  const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }

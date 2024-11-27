@@ -1,29 +1,36 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { memo, useState } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useState } from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiChatSettings, ApiUser } from '../../api/types';
+import type { ApiChat, ApiUser } from '../../../api/types';
 
 import {
   getChatTitle, getUserFirstOrLastName, getUserFullName, isChatBasicGroup,
-} from '../../global/helpers';
-import { selectChat, selectUser } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
+} from '../../../global/helpers';
+import { selectChat, selectUser } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 
-import useFlag from '../../hooks/useFlag';
-import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useFlag from '../../../hooks/useFlag';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
+import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
-import Button from '../ui/Button';
-import Checkbox from '../ui/Checkbox';
-import ConfirmDialog from '../ui/ConfirmDialog';
+import Icon from '../../common/icons/Icon';
+import Button from '../../ui/Button';
+import Checkbox from '../../ui/Checkbox';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 
-import './ChatReportPanel.scss';
+import './ChatReportPane.scss';
 
 type OwnProps = {
   chatId: string;
   className?: string;
-  settings?: ApiChatSettings;
+  isAutoArchived?: boolean;
+  canReportSpam?: boolean;
+  canAddContact?: boolean;
+  canBlockContact?: boolean;
+  onPaneStateChange?: (state: PaneState) => void;
 };
 
 type StateProps = {
@@ -32,8 +39,17 @@ type StateProps = {
   user?: ApiUser;
 };
 
-const ChatReportPanel: FC<OwnProps & StateProps> = ({
-  chatId, className, chat, user, settings, currentUserId,
+const ChatReportPane: FC<OwnProps & StateProps> = ({
+  chatId,
+  className,
+  isAutoArchived,
+  canReportSpam,
+  canAddContact,
+  canBlockContact,
+  chat,
+  user,
+  currentUserId,
+  onPaneStateChange,
 }) => {
   const {
     openAddContactDialog,
@@ -44,21 +60,23 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     deleteChatUser,
     deleteHistory,
     toggleChatArchived,
-    hideChatReportPanel,
+    hideChatReportPane,
   } = getActions();
 
   const lang = useOldLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
   const [shouldReportSpam, setShouldReportSpam] = useState<boolean>(true);
   const [shouldDeleteChat, setShouldDeleteChat] = useState<boolean>(true);
-  const {
-    isAutoArchived, canReportSpam, canAddContact, canBlockContact,
-  } = settings || {};
   const isBasicGroup = chat && isChatBasicGroup(chat);
+
+  const renderingCanAddContact = useCurrentOrPrev(canAddContact);
+  const renderingCanBlockContact = useCurrentOrPrev(canBlockContact);
+  const renderingCanReportSpam = useCurrentOrPrev(canReportSpam);
+  const renderingIsAutoArchived = useCurrentOrPrev(isAutoArchived);
 
   const handleAddContact = useLastCallback(() => {
     openAddContactDialog({ userId: chatId });
-    if (isAutoArchived) {
+    if (renderingIsAutoArchived) {
       toggleChatArchived({ id: chatId });
     }
   });
@@ -66,7 +84,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
   const handleConfirmBlock = useLastCallback(() => {
     closeBlockUserModal();
     blockUser({ userId: chatId });
-    if (canReportSpam && shouldReportSpam) {
+    if (renderingCanReportSpam && shouldReportSpam) {
       reportSpam({ chatId });
     }
     if (shouldDeleteChat) {
@@ -74,8 +92,8 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const handleCloseReportPanel = useLastCallback(() => {
-    hideChatReportPanel({ chatId });
+  const handleCloseReportPane = useLastCallback(() => {
+    hideChatReportPane({ chatId });
   });
 
   const handleChatReportSpam = useLastCallback(() => {
@@ -89,42 +107,53 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     }
   });
 
-  if (!settings || (!chat && !user)) {
-    return undefined;
-  }
+  const hasAnyButton = canAddContact || canBlockContact || canReportSpam;
+
+  const isRendering = Boolean(hasAnyButton && (chat || user));
+
+  const { ref, shouldRender } = useHeaderPane({
+    isOpen: isRendering,
+    onStateChange: onPaneStateChange,
+  });
+
+  if (!shouldRender) return undefined;
 
   return (
-    <div className={buildClassName('ChatReportPanel', className)} dir={lang.isRtl ? 'rtl' : undefined}>
-      {canAddContact && (
+    <div
+      ref={ref}
+      className={buildClassName('ChatReportPane', className)}
+      dir={lang.isRtl ? 'rtl' : undefined}
+    >
+      {renderingCanAddContact && (
         <Button
           isText
           fluid
           size="tiny"
-          className="UserReportPanel--Button"
+          className="ChatReportPane--Button"
           onClick={handleAddContact}
         >
           {lang('lng_new_contact_add')}
         </Button>
       )}
-      {canBlockContact && (
+      {renderingCanBlockContact && (
         <Button
           color="danger"
           isText
           fluid
           size="tiny"
-          className="UserReportPanel--Button"
+          className="ChatReportPane--Button"
           onClick={openBlockUserModal}
         >
           {lang('lng_new_contact_block')}
         </Button>
       )}
-      {canReportSpam && !canBlockContact && (
+      {renderingCanReportSpam && !renderingCanBlockContact && (
         <Button
           color="danger"
           isText
           fluid
           size="tiny"
-          className="UserReportPanel--Button"
+          className="ChatReportPane--Button"
           onClick={openBlockUserModal}
         >
           {lang('lng_report_spam_and_leave')}
@@ -133,12 +162,12 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
       <Button
         round
         ripple
-        size="tiny"
+        size="smaller"
         color="translucent"
-        onClick={handleCloseReportPanel}
+        onClick={handleCloseReportPane}
         ariaLabel={lang('Close')}
       >
-        <i className="icon icon-close" />
+        <Icon name="close" />
       </Button>
       <ConfirmDialog
         isOpen={isBlockUserModalOpen}
@@ -176,4 +205,4 @@ export default memo(withGlobal<OwnProps>(
     chat: selectChat(global, chatId),
     user: selectUser(global, chatId),
   }),
-)(ChatReportPanel));
+)(ChatReportPane));

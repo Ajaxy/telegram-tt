@@ -89,7 +89,6 @@ type OwnProps = {
   isReady: boolean;
   onScrollDownToggle: BooleanToVoidFunction;
   onNotchToggle: BooleanToVoidFunction;
-  hasTools?: boolean;
   withBottomShift?: boolean;
   withDefaultBg: boolean;
   onIntersectPinnedMessage: OnIntersectPinnedMessage;
@@ -133,7 +132,6 @@ const MESSAGE_FACT_CHECK_UPDATE_INTERVAL = 5 * 1000;
 const MESSAGE_STORY_POLLING_INTERVAL = 5 * 60 * 1000;
 const BOTTOM_THRESHOLD = 50;
 const UNREAD_DIVIDER_TOP = 10;
-const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
 const SCROLL_DEBOUNCE = 200;
 const MESSAGE_ANIMATION_DURATION = 500;
 const BOTTOM_FOCUS_MARGIN = 20;
@@ -146,7 +144,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   type,
-  hasTools,
   isChatLoaded,
   isForum,
   isChannelChat,
@@ -405,7 +402,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
 
     if (!memoFocusingIdRef.current) {
-      updateStickyDates(container, hasTools);
+      updateStickyDates(container);
     }
 
     runDebouncedForScroll(() => {
@@ -474,7 +471,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useSyncEffect(
     () => forceMeasure(() => rememberScrollPositionRef.current()),
     // This will run before modifying content and should match deps for `useLayoutEffectWithPrevDeps` below
-    [messageIds, isViewportNewest, hasTools, rememberScrollPositionRef],
+    [messageIds, isViewportNewest, rememberScrollPositionRef],
   );
   useEffect(
     () => rememberScrollPositionRef.current(),
@@ -591,7 +588,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         newScrollTop = scrollTop + (newAnchorTop - (anchorTopRef.current || 0));
       } else if (unreadDivider) {
         newScrollTop = Math.min(
-          unreadDivider.offsetTop - (hasTools ? UNREAD_DIVIDER_TOP_WITH_TOOLS : UNREAD_DIVIDER_TOP),
+          unreadDivider.offsetTop - UNREAD_DIVIDER_TOP,
           scrollHeight - scrollOffset,
         );
       } else {
@@ -619,7 +616,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       };
     });
     // This should match deps for `useSyncEffect` above
-  }, [messageIds, isViewportNewest, hasTools, getContainerHeight, prevContainerHeightRef, noMessageSendingAnimation]);
+  }, [messageIds, isViewportNewest, getContainerHeight, prevContainerHeightRef, noMessageSendingAnimation]);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
     if (prevIsSelectModeActive !== undefined) {

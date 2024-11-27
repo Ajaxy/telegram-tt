@@ -574,7 +574,9 @@ export interface LangPair {
   'Statistics': undefined;
   'EventLogFilterPinnedMessages': undefined;
   'UnpinMessageAlertTitle': undefined;
-  'PinnedMessage': undefined;
+  'PinnedMessageTitleSingle': undefined;
+  'AccPinnedMessages': undefined;
+  'AccUnpinMessage': undefined;
   'LeaveAComment': undefined;
   'PollsStopWarning': undefined;
   'PollsStopSure': undefined;
@@ -1588,6 +1590,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'PreviewSenderSendFile': {
     'count': V;
+  };
+  'PinnedMessageTitle': {
+    'index': V;
   };
   'Comments': {
     'count': V;

@@ -1,4 +1,4 @@
-@use "../../styles/mixins";
+@use "../../../styles/mixins";
 
 .root {
   display: flex;
@@ -26,6 +26,12 @@
     transition: none !important;
   }
 
+  > :global(.Button) {
+    flex-shrink: 0;
+  }
+}
+
+.mini {
   @media (min-width: 1276px) {
     transform: translate3d(0, 0, 0);
     transition: opacity 0.15s ease, transform var(--layer-transition);
@@ -38,33 +44,10 @@
       transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
     }
   }
-
-  > :global(.Button) {
-    flex-shrink: 0;
-  }
 }
 
-.root:global(.full-width) {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  background: var(--color-background);
-  padding: 0.25rem 0.8125rem 0.25rem 1rem;
-  box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
-  transform: translate3d(0, 0, 0);
-  transition: opacity 0.15s ease, transform var(--layer-transition);
-
-  &::before {
-    content: "";
-    display: block;
-    position: absolute;
-    top: -0.1875rem;
-    left: 0;
-    right: 0;
-    height: 0.125rem;
-    box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
-  }
+.fullWidth {
+  @include mixins.header-pane;
 
   .pinnedMessage {
     margin-top: 0;
@@ -74,12 +57,6 @@
 
   .messageText {
     max-width: none;
-  }
-
-  @media (min-width: 1276px) {
-    :global(#Main.right-column-open) & {
-      padding-left: calc(var(--right-column-width) + 1rem);
-    }
   }
 }
 
@@ -243,31 +220,5 @@
     .messageText {
       max-width: none;
     }
-  }
-
-  .root:global(.full-width) {
-    display: none;
-  }
-
-  .root {
-    @include mixins.header-mobile();
-  }
-}
-
-@media (min-width: 1276px) and (max-width: 1439px) {
-  :global(.MiddleHeader:not(.tools-stacked)) .root {
-    opacity: 1;
-
-    :global(#Main.right-column-open) & {
-      opacity: 0;
-    }
-  }
-}
-
-:global(.tools-stacked.animated) .root {
-  animation: fade-in var(--layer-transition) forwards;
-
-  :global(body.no-page-transitions) & {
-    animation: none;
   }
 }

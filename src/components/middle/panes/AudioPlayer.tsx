@@ -1,47 +1,54 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { useMemo, useRef } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import type { FC } from '../../../lib/teact/teact';
+import React, { useMemo } from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiAudio, ApiChat, ApiMessage, ApiPeer,
-} from '../../api/types';
-import type { AudioOrigin } from '../../types';
+  MediaContent,
+} from '../../../api/types';
 
-import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../config';
+import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../../config';
 import {
   getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle, isMessageLocal,
-} from '../../global/helpers';
-import { selectChat, selectSender, selectTabState } from '../../global/selectors';
-import { makeTrackId } from '../../util/audioPlayer';
-import buildClassName from '../../util/buildClassName';
-import * as mediaLoader from '../../util/mediaLoader';
-import { clearMediaSession } from '../../util/mediaSession';
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
-import renderText from '../common/helpers/renderText';
+} from '../../../global/helpers';
+import {
+  selectChat, selectChatMessage, selectSender, selectTabState,
+} from '../../../global/selectors';
+import { makeTrackId } from '../../../util/audioPlayer';
+import buildClassName from '../../../util/buildClassName';
+import * as mediaLoader from '../../../util/mediaLoader';
+import { clearMediaSession } from '../../../util/mediaSession';
+import { IS_IOS, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import renderText from '../../common/helpers/renderText';
 
-import useAppLayout from '../../hooks/useAppLayout';
-import useAudioPlayer from '../../hooks/useAudioPlayer';
-import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useLastCallback from '../../hooks/useLastCallback';
-import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
-import useOldLang from '../../hooks/useOldLang';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useAudioPlayer from '../../../hooks/useAudioPlayer';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMessageMediaMetadata from '../../../hooks/useMessageMediaMetadata';
+import useOldLang from '../../../hooks/useOldLang';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
-import Button from '../ui/Button';
-import DropdownMenu from '../ui/DropdownMenu';
-import MenuItem from '../ui/MenuItem';
-import RangeSlider from '../ui/RangeSlider';
-import RippleEffect from '../ui/RippleEffect';
+import Button from '../../ui/Button';
+import DropdownMenu from '../../ui/DropdownMenu';
+import MenuItem from '../../ui/MenuItem';
+import RangeSlider from '../../ui/RangeSlider';
+import RippleEffect from '../../ui/RippleEffect';
 
 import './AudioPlayer.scss';
 
 type OwnProps = {
-  message: ApiMessage;
-  origin?: AudioOrigin;
   className?: string;
   noUi?: boolean;
+  isFullWidth?: boolean;
+  isHidden?: boolean;
+  onPaneStateChange?: (state: PaneState) => void;
 };
 
 type StateProps = {
+  message?: ApiMessage;
   sender?: ApiPeer;
   chat?: ApiChat;
   volume: number;
@@ -72,6 +79,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   playbackRate,
   isPlaybackRateActive,
   isMuted,
+  isFullWidth,
+  onPaneStateChange,
 }) => {
   const {
     setAudioPlayerVolume,
@@ -81,16 +90,19 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     closeAudioPlayer,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
   const lang = useOldLang();
+
   const { isMobile } = useAppLayout();
-  const { audio, voice, video } = getMessageContent(message);
+  const renderingMessage = useCurrentOrPrev(message);
+
+  const { audio, voice, video } = renderingMessage ? getMessageContent(renderingMessage) : {} satisfies MediaContent;
   const isVoice = Boolean(voice || video);
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
   const senderName = sender ? getSenderTitle(lang, sender) : undefined;
-  const mediaData = mediaLoader.getFromMemory(getMessageMediaHash(message, 'inline')!) as (string | undefined);
-  const mediaMetadata = useMessageMediaMetadata(message, sender, chat);
+
+  const mediaHash = renderingMessage && getMessageMediaHash(renderingMessage, 'inline');
+  const mediaData = mediaHash && mediaLoader.getFromMemory(mediaHash);
+  const mediaMetadata = useMessageMediaMetadata(renderingMessage, sender, chat);
 
   const {
     playPause,
@@ -104,8 +116,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     toggleMuted,
     setPlaybackRate,
   } = useAudioPlayer(
-    makeTrackId(message),
-    getMediaDuration(message)!,
+    message && makeTrackId(message),
+    message ? getMediaDuration(message)! : 0,
     isVoice ? 'voice' : 'audio',
     mediaData,
     undefined,
@@ -114,18 +126,34 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     true,
     undefined,
     undefined,
-    isMessageLocal(message),
+    message && isMessageLocal(message),
     true,
   );
+
+  const isOpen = Boolean(message);
+  const {
+    ref: transitionRef,
+  } = useShowTransition({
+    isOpen,
+    shouldForceOpen: isFullWidth, // Use pane animation instead
+  });
+
+  const { ref, shouldRender } = useHeaderPane({
+    isOpen,
+    isDisabled: !isFullWidth,
+    ref: transitionRef,
+    onStateChange: onPaneStateChange,
+  });
 
   const {
     isContextMenuOpen,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
-  } = useContextMenuHandlers(ref);
+  } = useContextMenuHandlers(transitionRef, !shouldRender);
 
   const handleClick = useLastCallback(() => {
-    focusMessage({ chatId: message.chatId, messageId: message.id });
+    const { chatId, id } = renderingMessage!;
+    focusMessage({ chatId, messageId: id });
   });
 
   const handleClose = useLastCallback(() => {
@@ -221,12 +249,16 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     return 'icon-volume-3';
   }, [volume, isMuted]);
 
-  if (noUi) {
+  if (noUi || !shouldRender) {
     return undefined;
   }
 
   return (
-    <div className={buildClassName('AudioPlayer', className)} dir={lang.isRtl ? 'rtl' : undefined} ref={ref}>
+    <div
+      className={buildClassName('AudioPlayer', isFullWidth ? 'full-width-player' : 'mini-player', className)}
+      dir={lang.isRtl ? 'rtl' : undefined}
+      ref={ref}
+    >
       <div className="AudioPlayer-content" onClick={handleClick}>
         {audio ? renderAudio(audio) : renderVoice(lang('AttachAudio'), senderName)}
         <RippleEffect />
@@ -365,14 +397,19 @@ function renderPlaybackRateMenuItem(
 }
 
 export default withGlobal<OwnProps>(
-  (global, { message }): StateProps => {
-    const sender = selectSender(global, message);
-    const chat = selectChat(global, message.chatId);
+  (global, { isHidden }): StateProps => {
+    const { audioPlayer } = selectTabState(global);
+    const { chatId, messageId } = audioPlayer;
+    const message = !isHidden && chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
+
+    const sender = message && selectSender(global, message);
+    const chat = message && selectChat(global, message.chatId);
     const {
       volume, playbackRate, isMuted, isPlaybackRateActive,
     } = selectTabState(global).audioPlayer;
 
     return {
+      message,
       sender,
       chat,
       volume,

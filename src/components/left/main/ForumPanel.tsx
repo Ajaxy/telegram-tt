@@ -260,7 +260,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
           )}
       </div>
 
-      {chat && <GroupCallTopPane chatId={chat.id} hasPinnedOffset={false} className={styles.groupCall} />}
+      {chat && <GroupCallTopPane chatId={chat.id} />}
 
       <div className={styles.notch} />
 
