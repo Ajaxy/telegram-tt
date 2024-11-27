@@ -458,9 +458,17 @@ export function selectForwardedSender<T extends GlobalState>(
 
   if (forwardInfo.isChannelPost && forwardInfo.fromChatId) {
     return selectChat(global, forwardInfo.fromChatId);
-  } else if (forwardInfo.fromId) {
+  }
+
+  if (forwardInfo.hiddenUserName) {
+    return undefined;
+  }
+
+  if (forwardInfo.fromId) {
     return selectPeer(global, forwardInfo.fromId);
-  } else if (forwardInfo.savedFromPeerId) {
+  }
+
+  if (forwardInfo.savedFromPeerId) {
     return selectPeer(global, forwardInfo.savedFromPeerId);
   }
 

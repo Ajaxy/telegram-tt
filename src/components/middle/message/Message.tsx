@@ -529,9 +529,9 @@ const Message: FC<OwnProps & StateProps> = ({
     forwardInfo
     && (!isChatWithSelf || isScheduled)
     && !isRepliesChat
-    && !isAnonymousForwards
     && !forwardInfo.isLinkedChannelPost
-    && !isCustomShape
+    && !isAnonymousForwards
+    && !botSender
   ) || Boolean(storyData && !storyData.isMention);
   const canShowSenderBoosts = Boolean(senderBoosts) && !asForwarded && isFirstInGroup;
   const isStoryMention = storyData?.isMention;
@@ -548,8 +548,10 @@ const Message: FC<OwnProps & StateProps> = ({
     !(isContextMenuShown || isInSelectMode || isForwarding)
     && !isInDocumentGroupNotLast
     && !isStoryMention
+    && !((sticker || hasAnimatedEmoji) && asForwarded)
   );
-  const canForward = isChannel && !isScheduled && message.isForwardingAllowed && !isChatProtected;
+  const canForward = isChannel && !isScheduled && message.isForwardingAllowed
+  && !isChatProtected;
   const canFocus = Boolean(isPinnedList
     || (forwardInfo
       && (forwardInfo.isChannelPost || isChatWithSelf || isRepliesChat || isAnonymousForwards)
@@ -560,7 +562,8 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const hasFactCheck = Boolean(factCheck?.text);
 
-  const hasSubheader = hasTopicChip || hasMessageReply || hasStoryReply;
+  const hasForwardedCustomShape = asForwarded && isCustomShape;
+  const hasSubheader = hasTopicChip || hasMessageReply || hasStoryReply || hasForwardedCustomShape;
 
   const selectMessage = useLastCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
     toggleMessageSelection({
@@ -712,6 +715,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isJustAdded && 'is-just-added',
     (hasActiveReactions || shouldPlayEffect) && 'has-active-effect',
     isStoryMention && 'is-story-mention',
+    !canShowActionButton && 'no-action-button',
   );
 
   const text = textMessage && getMessageContent(textMessage).text;
@@ -889,7 +893,7 @@ const Message: FC<OwnProps & StateProps> = ({
       : undefined;
   }, [isAlbum, isOwn, asForwarded, noAvatars, album, isMobile]);
 
-  const extraPadding = asForwarded ? 28 : 0;
+  const extraPadding = asForwarded && !isCustomShape ? 28 : 0;
 
   const sizeCalculations = useMemo(() => {
     let calculatedWidth;
@@ -1074,6 +1078,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const className = buildClassName(
       'content-inner',
       asForwarded && 'forwarded-message',
+      hasForwardedCustomShape && 'forwarded-custom-shape',
       hasSubheader && 'with-subheader',
       noMediaCorners && 'no-media-corners',
     );
@@ -1089,7 +1094,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <div className={className} onDoubleClick={handleContentDoubleClick} dir="auto">
-        {!asForwarded && renderSenderName()}
+        {!asForwarded && shouldRenderSenderName() && renderSenderName()}
         {hasSubheader && (
           <div className="message-subheader">
             {hasTopicChip && (
@@ -1098,6 +1103,14 @@ const Message: FC<OwnProps & StateProps> = ({
                 onClick={handleTopicChipClick}
                 className="message-topic"
               />
+            )}
+            {hasForwardedCustomShape && (
+              <div className="forward-custom-shape-subheader">
+                <div className="message-title">
+                  {renderForwardTitle()}
+                </div>
+                {renderSenderName(true, true)}
+              </div>
             )}
             {hasMessageReply && (
               <EmbeddedMessage
@@ -1459,16 +1472,29 @@ const Message: FC<OwnProps & StateProps> = ({
     return content;
   }
 
-  function renderSenderName() {
+  function shouldRenderSenderName() {
     const media = photo || video || location || paidMedia;
-    const shouldRender = !(isCustomShape && !viaBotId) && (
+    return !(isCustomShape && !viaBotId) && (
       (withSenderName && (!media || hasTopicChip)) || asForwarded || viaBotId || forceSenderName
-    ) && !isInDocumentGroupNotFirst && !(hasMessageReply && isCustomShape);
+    ) && !isInDocumentGroupNotFirst && !(hasMessageReply && isCustomShape) && !hasSubheader;
+  }
 
-    if (!shouldRender) {
-      return undefined;
-    }
+  function renderForwardTitle() {
+    return (
+      <span className="forward-title-container">
+        {asForwarded && (
+          <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
+        )}
+        {asForwarded && (
+          <span className="forward-title">
+            {lang('ForwardedFrom')}
+          </span>
+        )}
+      </span>
+    );
+  }
 
+  function renderSenderName(shouldSkipRenderForwardTitle:boolean = false, shouldSkipRenderAdminTitle: boolean = false) {
     let senderTitle;
     let senderColor;
     if (senderPeer && !(isCustomShape && viaBotId)) {
@@ -1482,6 +1508,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const senderIsPremium = senderPeer && 'isPremium' in senderPeer && senderPeer.isPremium;
 
     const shouldRenderForwardAvatar = asForwarded && senderPeer;
+    const hasBotSenderUsername = botSender?.usernames?.length;
     return (
       <div className="message-title" dir="ltr">
         {(senderTitle || asForwarded) ? (
@@ -1493,16 +1520,7 @@ const Message: FC<OwnProps & StateProps> = ({
             )}
             dir="ltr"
           >
-            <span className="forward-title-container">
-              {asForwarded && (
-                <Icon name={forwardInfo?.hiddenUserName ? 'forward' : 'share-filled'} />
-              )}
-              {asForwarded && (
-                <span className="forward-title">
-                  {lang('ForwardedFrom')}
-                </span>
-              )}
-            </span>
+            {!shouldSkipRenderForwardTitle && renderForwardTitle()}
             <span className="message-title-name">
               {storyData && <Icon name="play-story" />}
               {shouldRenderForwardAvatar && (
@@ -1534,21 +1552,19 @@ const Message: FC<OwnProps & StateProps> = ({
           NBSP
         ) : undefined}
         {botSender?.usernames?.length && (
-          <>
+          <span className="interactive">
             <span className="via">{lang('ViaBot')}</span>
             <span
-              className="interactive"
+              className="sender-title"
               onClick={handleViaBotClick}
             >
               {renderText(`@${botSender.usernames[0].username}`)}
             </span>
-          </>
+          </span>
         )}
         <div className="title-spacer" />
-        {forwardInfo?.isLinkedChannelPost ? (
+        {!shouldSkipRenderAdminTitle && !hasBotSenderUsername ? (forwardInfo?.isLinkedChannelPost ? (
           <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
-        ) : message.forwardInfo?.postAuthorTitle && isGroup && asForwarded ? (
-          <span className="admin-title" dir="auto">{message.forwardInfo?.postAuthorTitle}</span>
         ) : message.postAuthorTitle && isGroup && !asForwarded ? (
           <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
         ) : senderAdminMember && !asForwarded && !viaBotId ? (
@@ -1557,7 +1573,7 @@ const Message: FC<OwnProps & StateProps> = ({
               senderAdminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin',
             )}
           </span>
-        ) : undefined}
+        ) : undefined) : undefined}
         {canShowSenderBoosts && (
           <span className="sender-boosts" aria-hidden>
             <Icon name={senderBoosts > 1 ? 'boosts' : 'boost'} />
@@ -1624,7 +1640,7 @@ const Message: FC<OwnProps & StateProps> = ({
         >
           {asForwarded && !isInDocumentGroupNotFirst && (
             <>
-              {renderSenderName()}
+              {shouldRenderSenderName() && renderSenderName()}
               {forwardAuthor && <span className="admin-title" dir="auto">{forwardAuthor}</span>}
             </>
           )}

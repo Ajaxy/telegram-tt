@@ -1,6 +1,25 @@
 @use "sass:map";
 @use "../../../styles/icons";
 
+@mixin subheader-styles() {
+  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  margin-inline-end: 0.5rem;
+  overflow: hidden;
+
+  padding-inline: 0.4375rem;
+  padding-block: 0.1875rem;
+  border-radius: var(--border-radius-messages-small);
+
+  background-color: var(--pattern-color);
+  max-width: 10rem;
+
+  @media (max-width: 600px) {
+    max-width: calc(90vw - 13rem);
+  }
+
+  box-shadow: 0 1px 2px var(--color-default-shadow);
+}
+
 .message-content {
   position: relative;
   max-width: var(--max-width);
@@ -296,6 +315,7 @@
 
     .message-title-name-container {
       flex-wrap: wrap;
+      padding-right: 0.25rem;
     }
 
     .forward-title-container,
@@ -376,7 +396,6 @@
       text-align: right;
       font-weight: 400;
       font-size: 0.75rem;
-      margin-top: -0.125rem;
       color: rgba(var(--color-text-meta-rgb), 0.75);
       user-select: none;
 
@@ -401,6 +420,14 @@
     justify-content: flex-start;
     gap: 0.25rem;
     padding: 0.125rem 0;
+  }
+
+  .message-subheader .forward-custom-shape-subheader {
+    @include subheader-styles();
+    min-width: 8rem;
+    .message-title {
+      color: white;
+    }
   }
 
   .message-topic {
@@ -556,16 +583,20 @@
       gap: 0.5rem;
 
       & > .message-title {
-        display: inline-flex;
-        position: relative;
+        @include subheader-styles();
         top: 0.125rem;
-        max-width: calc(100% - 3rem);
-        padding: 0 0.5rem;
-        background-color: var(--background-color);
-        border-radius: var(--border-radius-messages);
+
+        position: absolute;
+        left: 100%;
 
         .Message.own & {
-          margin-left: -3rem;
+          left: initial;
+          right: 100%;
+        }
+
+        color: white;
+        .admin-title {
+          color: white;
         }
       }
 
@@ -772,6 +803,16 @@
     max-width: 100%;
   }
 
+  .forwarded-custom-shape .message-subheader {
+    position: absolute;
+    left: 100%;
+
+    .Message.own & {
+      left: initial;
+      right: 100%;
+    }
+  }
+
   .with-subheader {
     display: flex;
     align-items: flex-start;
@@ -922,6 +963,24 @@
   .message-content:not(.custom-shape) & {
     position: relative;
     margin-top: 0.25rem;
+
+    .Album,
+    .media-inner:not(.file-preview) {
+      margin-left: -0.5rem;
+      margin-right: -0.5rem;
+
+      body.is-ios .Message.own & {
+        margin-left: -0.625rem;
+      }
+
+      :not(.has-footer) & {
+        margin-bottom: -0.375rem;
+
+        body.is-ios .Message.own & {
+          margin-bottom: -0.4375rem;
+        }
+      }
+    }
   }
 
   --border-top-left-radius: 0;
@@ -930,24 +989,6 @@
   .has-footer & {
     --border-bottom-left-radius: 0;
     --border-bottom-right-radius: 0;
-  }
-
-  .Album,
-  .media-inner:not(.file-preview) {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-
-    body.is-ios .Message.own & {
-      margin-left: -0.625rem;
-    }
-
-    :not(.has-footer) & {
-      margin-bottom: -0.375rem;
-
-      body.is-ios .Message.own & {
-        margin-bottom: -0.4375rem;
-      }
-    }
   }
 
   .Album {
