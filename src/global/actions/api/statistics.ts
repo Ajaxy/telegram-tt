@@ -16,6 +16,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectChatMessages,
+  selectPeer,
   selectPeerStory,
   selectTabState,
 } from '../../selectors';
@@ -44,16 +45,16 @@ addActionHandler('loadStatistics', async (global, actions, payload): Promise<voi
 
 addActionHandler('loadChannelMonetizationStatistics', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, tabId = getCurrentTabId(),
+    peerId, tabId = getCurrentTabId(),
   } = payload;
-  const chat = selectChat(global, chatId);
-  const fullInfo = selectChatFullInfo(global, chatId);
-  if (!chat || !fullInfo) {
+  const peer = selectPeer(global, peerId);
+  const chatFullInfo = selectChatFullInfo(global, peerId);
+  if (!peer) {
     return;
   }
 
-  const dcId = fullInfo.statisticsDcId;
-  const stats = await callApi('fetchChannelMonetizationStatistics', { chat, dcId });
+  const dcId = chatFullInfo?.statisticsDcId;
+  const stats = await callApi('fetchChannelMonetizationStatistics', { peer, dcId });
 
   if (!stats) {
     return;
@@ -230,18 +231,18 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
 
 addActionHandler('loadMonetizationRevenueWithdrawalUrl', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, currentPassword, onSuccess, tabId = getCurrentTabId(),
+    peerId, currentPassword, onSuccess, tabId = getCurrentTabId(),
   } = payload;
 
   global = updateMonetizationInfo(global, { isLoading: true, error: undefined });
   setGlobal(global);
 
-  const chat = selectChat(global, chatId);
-  if (!chat) {
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
     return;
   }
 
-  const result = await callApi('loadMonetizationRevenueWithdrawalUrl', { chat, currentPassword });
+  const result = await callApi('loadMonetizationRevenueWithdrawalUrl', { peer, currentPassword });
 
   if (!result) {
     return;

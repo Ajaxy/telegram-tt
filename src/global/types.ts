@@ -1734,18 +1734,18 @@ export interface ActionPayloads {
     chatId: string;
   } & WithTabId;
   loadSponsoredMessages: {
-    chatId: string;
+    peerId: string;
   };
   viewSponsoredMessage: {
-    chatId: string;
+    peerId: string;
   };
   clickSponsoredMessage: {
-    chatId: string;
+    peerId: string;
     isMedia?: boolean;
     isFullscreen?: boolean;
   };
   reportSponsoredMessage: {
-    chatId: string;
+    peerId: string;
     randomId: string;
     option?: string;
   } & WithTabId;
@@ -1980,11 +1980,11 @@ export interface ActionPayloads {
     isPercentage?: boolean;
   } & WithTabId;
   loadChannelMonetizationStatistics: {
-    chatId: string;
+    peerId: string;
   } & WithTabId;
 
   loadMonetizationRevenueWithdrawalUrl: {
-    chatId: string;
+    peerId: string;
     currentPassword: string;
     onSuccess: VoidFunction;
   } & WithTabId;

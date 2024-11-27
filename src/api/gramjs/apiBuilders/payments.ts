@@ -512,6 +512,10 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
     return { type: 'ads' };
   }
 
+  if (peer instanceof GramJs.StarsTransactionPeerAPI) {
+    return { type: 'api' };
+  }
+
   if (peer instanceof GramJs.StarsTransactionPeer) {
     return { type: 'peer', id: getApiChatIdFromMtpPeer(peer.peer) };
   }

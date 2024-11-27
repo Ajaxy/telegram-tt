@@ -231,7 +231,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (areAdsEnabled && isChannelChat && isSynced && isReady) {
-      loadSponsoredMessages({ chatId });
+      loadSponsoredMessages({ peerId: chatId });
     }
   }, [chatId, isSynced, isReady, isChannelChat, areAdsEnabled]);
 

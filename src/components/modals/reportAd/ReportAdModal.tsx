@@ -40,7 +40,7 @@ const ReportAdModal = ({
 
   const handleOptionClick = useLastCallback((e, option: string) => {
     const { chatId, randomId } = modal!;
-    reportSponsoredMessage({ chatId, randomId, option });
+    reportSponsoredMessage({ peerId: chatId, randomId, option });
   });
 
   const [renderingSection, renderingDepth] = useMemo(() => {

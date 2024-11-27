@@ -228,6 +228,16 @@ export function buildStarsTransactionCustomPeer(
     };
   }
 
+  if (peer.type === 'api') {
+    return {
+      avatarIcon: 'bots',
+      isCustomPeer: true,
+      titleKey: 'Stars.Intro.Transaction.TelegramBotApi.Title',
+      subtitleKey: 'Stars.Intro.Transaction.TelegramBotApi.Subtitle',
+      peerColorId: 4,
+    };
+  }
+
   return {
     avatarIcon: 'star',
     isCustomPeer: true,

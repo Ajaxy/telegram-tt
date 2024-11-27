@@ -42,7 +42,7 @@ const VerificationMonetizationModal: FC<OwnProps> = ({
 
   const handleSubmit = useLastCallback((password: string) => {
     loadMonetizationRevenueWithdrawalUrl({
-      chatId,
+      peerId: chatId,
       currentPassword: password,
       onSuccess: () => {
         onClose();

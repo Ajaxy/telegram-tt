@@ -6,7 +6,6 @@ import type { ThreadId } from '../../../types';
 import type {
   ApiAttachment,
   ApiChat,
-  ApiClickSponsoredMessage,
   ApiContact,
   ApiError,
   ApiFormattedText,
@@ -51,6 +50,7 @@ import { interpolateArray } from '../../../util/waveform';
 import {
   buildApiChatFromPreview,
   buildApiSendAsPeerId,
+  buildApiSponsoredMessageReportResult,
 } from '../apiBuilders/chats';
 import { buildApiFormattedText } from '../apiBuilders/common';
 import {
@@ -1704,38 +1704,81 @@ export function saveDefaultSendAs({
   }));
 }
 
-export async function fetchSponsoredMessages({ chat }: { chat: ApiChat }) {
-  const result = await invokeRequest(new GramJs.channels.GetSponsoredMessages({
-    channel: buildInputPeer(chat.id, chat.accessHash),
+export async function fetchSponsoredMessages({ peer }: { peer: ApiPeer }) {
+  const result = await invokeRequest(new GramJs.messages.GetSponsoredMessages({
+    peer: buildInputPeer(peer.id, peer.accessHash),
   }));
 
   if (!result || result instanceof GramJs.messages.SponsoredMessagesEmpty || !result.messages.length) {
     return undefined;
   }
 
-  const messages = result.messages.map((message) => buildApiSponsoredMessage(message, chat.id)).filter(Boolean);
+  const messages = result.messages
+    .map((message) => buildApiSponsoredMessage(message, peer.id))
+    .filter(Boolean);
 
   return {
     messages,
   };
 }
 
-export async function viewSponsoredMessage({ chat, random }: { chat: ApiChat; random: string }) {
-  await invokeRequest(new GramJs.channels.ViewSponsoredMessage({
-    channel: buildInputPeer(chat.id, chat.accessHash),
+export async function viewSponsoredMessage({ peer, random }: { peer: ApiPeer; random: string }) {
+  await invokeRequest(new GramJs.messages.ViewSponsoredMessage({
+    peer: buildInputPeer(peer.id, peer.accessHash),
     randomId: deserializeBytes(random),
   }));
 }
 
 export function clickSponsoredMessage({
-  chat, random, isMedia, isFullscreen,
-}: ApiClickSponsoredMessage) {
-  return invokeRequest(new GramJs.channels.ClickSponsoredMessage({
+  peer,
+  random,
+  isMedia,
+  isFullscreen,
+}: {
+  peer: ApiPeer;
+  random: string;
+  isMedia?: boolean;
+  isFullscreen?: boolean;
+}) {
+  return invokeRequest(new GramJs.messages.ClickSponsoredMessage({
     media: isMedia || undefined,
     fullscreen: isFullscreen || undefined,
-    channel: buildInputPeer(chat.id, chat.accessHash),
+    peer: buildInputPeer(peer.id, peer.accessHash),
     randomId: deserializeBytes(random),
   }));
+}
+
+export async function reportSponsoredMessage({
+  peer,
+  randomId,
+  option,
+}: {
+  peer: ApiPeer;
+  randomId: string;
+  option: string;
+}) {
+  try {
+    const result = await invokeRequest(new GramJs.messages.ReportSponsoredMessage({
+      peer: buildInputPeer(peer.id, peer.accessHash),
+      randomId: deserializeBytes(randomId),
+      option: deserializeBytes(option),
+    }), {
+      shouldThrow: true,
+    });
+
+    if (!result) {
+      return undefined;
+    }
+
+    return buildApiSponsoredMessageReportResult(result);
+  } catch (err) {
+    if (err instanceof Error && err.message === 'PREMIUM_ACCOUNT_REQUIRED') {
+      return {
+        type: 'premiumRequired' as const,
+      };
+    }
+    return undefined;
+  }
 }
 
 export async function readAllMentions({

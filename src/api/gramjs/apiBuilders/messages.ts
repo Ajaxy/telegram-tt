@@ -371,7 +371,7 @@ function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : A
     isConverted: Boolean(converted),
     gift: buildApiStarGift(gift),
     message: message && buildApiFormattedText(message),
-    starsToConvert: convertStars.toJSNumber(),
+    starsToConvert: convertStars?.toJSNumber(),
   };
 }
 

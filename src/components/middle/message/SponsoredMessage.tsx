@@ -106,7 +106,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     return shouldObserve ? observeIntersection(contentRef.current!, (target) => {
       if (target.isIntersecting) {
-        viewSponsoredMessage({ chatId });
+        viewSponsoredMessage({ peerId: chatId });
       }
     }) : undefined;
   }, [chatId, shouldObserve, observeIntersection, viewSponsoredMessage]);
@@ -117,7 +117,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   };
 
   const handleReportSponsoredMessage = useLastCallback(() => {
-    reportSponsoredMessage({ chatId, randomId: message!.randomId });
+    reportSponsoredMessage({ peerId: chatId, randomId: message!.randomId });
   });
 
   const handleHideSponsoredMessage = useLastCallback(() => {
@@ -134,12 +134,12 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   const handleClick = useLastCallback(() => {
     if (!message) return;
 
-    clickSponsoredMessage({ isMedia: photo || isGif ? true : undefined, chatId });
+    clickSponsoredMessage({ isMedia: photo || isGif ? true : undefined, peerId: chatId });
     openUrl({ url: message!.url, shouldSkipModal: true });
   });
 
   const handleOpenMedia = useLastCallback(() => {
-    clickSponsoredMessage({ isMedia: true, chatId });
+    clickSponsoredMessage({ isMedia: true, peerId: chatId });
     openMediaViewer({
       origin: MediaViewerOrigin.SponsoredMessage,
       chatId,

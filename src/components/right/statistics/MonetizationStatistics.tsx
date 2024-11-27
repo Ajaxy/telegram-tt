@@ -90,7 +90,7 @@ const MonetizationStatistics = ({
 
   useEffect(() => {
     if (chatId) {
-      loadChannelMonetizationStatistics({ chatId });
+      loadChannelMonetizationStatistics({ peerId: chatId });
       loadPasswordInfo();
     }
   }, [chatId, loadChannelMonetizationStatistics]);
