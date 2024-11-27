@@ -1473,7 +1473,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const media = photo || video || location || paidMedia;
     return !(isCustomShape && !viaBotId) && (
       (withSenderName && (!media || hasTopicChip)) || asForwarded || viaBotId || forceSenderName
-    ) && !isInDocumentGroupNotFirst && !(hasMessageReply && isCustomShape) && !hasSubheader;
+    ) && !isInDocumentGroupNotFirst && !(hasMessageReply && isCustomShape);
   }
 
   function renderForwardTitle() {
