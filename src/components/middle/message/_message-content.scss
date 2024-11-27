@@ -76,6 +76,9 @@
     unicode-bidi: plaintext;
     border-radius: 0.25rem;
     position: relative;
+
+    overflow: clip;
+    overflow-clip-margin: 0.5rem;
   }
 
   .transcription {
