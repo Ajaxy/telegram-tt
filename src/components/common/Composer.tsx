@@ -1654,6 +1654,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         onRemoveSymbol={removeSymbolAttachmentModal}
         onEmojiSelect={insertTextAndUpdateCursorAttachmentModal}
         editingMessage={editingMessage}
+        onSendWhenOnline={handleSendWhenOnline}
+        canScheduleUntilOnline={canScheduleUntilOnline && !isViewOnceEnabled}
       />
       <PollModal
         isOpen={pollModal.isOpen}
