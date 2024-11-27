@@ -47,6 +47,7 @@ export type WebAppInboundEvent =
   }> |
   WebAppEvent<'web_app_open_tg_link', {
     path_full: string;
+    force_request?: boolean;
   }> |
   WebAppEvent<'web_app_open_invoice', {
     slug: string;

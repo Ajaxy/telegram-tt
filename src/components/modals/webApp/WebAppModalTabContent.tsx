@@ -382,9 +382,9 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   function handleEvent(event: WebAppInboundEvent) {
     const { eventType, eventData } = event;
-    if (eventType === 'web_app_open_tg_link' && !isPaymentModalOpen) {
+    if (eventType === 'web_app_open_tg_link') {
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;
-      openTelegramLink({ url: linkUrl });
+      openTelegramLink({ url: linkUrl, shouldIgnoreCache: eventData.force_request });
       closeActiveWebApp();
     }
 

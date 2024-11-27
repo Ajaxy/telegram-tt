@@ -1270,6 +1270,7 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Prom
 addActionHandler('openTelegramLink', async (global, actions, payload): Promise<void> => {
   const {
     url,
+    shouldIgnoreCache,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1357,6 +1358,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
       stickerSetInfo: {
         shortName: part2,
       },
+      shouldIgnoreCache,
       tabId,
     });
     return;

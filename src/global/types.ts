@@ -1813,6 +1813,7 @@ export interface ActionPayloads {
   };
   openTelegramLink: {
     url: string;
+    shouldIgnoreCache?: boolean;
   } & WithTabId;
   resolveBusinessChatLink: {
     slug: string;
@@ -2997,7 +2998,10 @@ export interface ActionPayloads {
     stickerSet: ApiStickerSet;
   };
 
-  openStickerSet: { stickerSetInfo: ApiStickerSetInfo } & WithTabId;
+  openStickerSet: {
+    stickerSetInfo: ApiStickerSetInfo;
+    shouldIgnoreCache?: boolean;
+  } & WithTabId;
   closeStickerSetModal: WithTabId | undefined;
 
   loadStickersForEmoji: {
