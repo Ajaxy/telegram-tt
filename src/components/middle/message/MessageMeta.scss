@@ -9,8 +9,9 @@
   border-radius: 0.625rem;
   padding: 0 0.25rem;
   color: white;
+  line-height: 1;
+
   cursor: var(--custom-cursor, pointer);
-  max-width: calc(100% - 0.5rem);
   user-select: none;
 
   .message-time,
@@ -31,17 +32,11 @@
   }
 
   .message-time {
-    margin-right: 0.375rem;
-  }
-
-  body.is-ios & {
-    .message-time {
-      margin-right: 0.25rem;
-    }
+    margin-right: 0.25rem;
   }
 
   .message-views {
-    margin-inline-start: 0.1875rem;
+    margin-inline-start: 0.125rem;
   }
 
   .message-translated {
@@ -67,6 +62,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-right: 0.375rem;
+    max-width: 16ch; // Limit long text to 16 characters
 
     .emoji-small {
       width: 1rem !important;
@@ -102,7 +98,7 @@
     right: 0.25rem;
     left: auto;
     height: 1.125rem;
-    padding: 0 0.3125rem 0 0.6875rem;
+    padding: 0 0.3125rem 0 0.375rem;
 
     .MessageOutgoingStatus .icon {
       background: transparent;
