@@ -76,6 +76,7 @@ const MiddleHeaderPanes = ({
   } = useShowTransition({
     isOpen: !isMiddleSearchOpen,
     withShouldRender: true,
+    noMountTransition: true,
   });
 
   useEffectOnce(() => {
