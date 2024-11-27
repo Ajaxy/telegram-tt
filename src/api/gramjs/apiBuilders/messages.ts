@@ -996,6 +996,7 @@ export function buildLocalForwardedMessage({
   noCaptions,
   isCurrentUserPremium,
   lastMessageId,
+  sendAs,
 }: {
   toChat: ApiChat;
   toThreadId?: number;
@@ -1005,6 +1006,7 @@ export function buildLocalForwardedMessage({
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
   lastMessageId?: number;
+  sendAs?: ApiPeer;
 }): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
   const {
@@ -1049,7 +1051,7 @@ export function buildLocalForwardedMessage({
     content: updatedContent,
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
-    senderId: currentUserId,
+    senderId: sendAs?.id || currentUserId,
     sendingState: 'messageSendingStatePending',
     groupedId,
     isInAlbum,
@@ -1059,7 +1061,7 @@ export function buildLocalForwardedMessage({
     ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
 
     ...(emojiOnlyCount && { emojiOnlyCount }),
-    // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
+    // Forward info doesn't get added when user forwards own messages and when forwarding audio
     ...(message.chatId !== currentUserId && !isAudio && !noAuthors && {
       forwardInfo: {
         date: message.forwardInfo?.date || message.date,

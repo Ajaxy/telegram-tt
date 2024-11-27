@@ -1527,6 +1527,7 @@ export async function forwardMessages({
       noCaptions,
       isCurrentUserPremium,
       lastMessageId,
+      sendAs,
     });
     localMessages[randomIds[index].toString()] = localMessage;
 
