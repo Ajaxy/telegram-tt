@@ -1836,6 +1836,7 @@ export interface ActionPayloads {
     startAttach?: string;
     attach?: string;
     startApp?: string;
+    choose?: ApiChatType[];
     text?: string;
     originalParts?: (string | undefined)[];
     onChatChanged?: CallbackAction;

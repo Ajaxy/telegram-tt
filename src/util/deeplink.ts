@@ -17,7 +17,9 @@ export const processDeepLink = (url: string): boolean => {
       case 'privateMessageLink':
         handlePrivateMessageLink(parsedLink, actions);
         return true;
-      case 'publicUsernameOrBotLink':
+      case 'publicUsernameOrBotLink': {
+        const choose = parseChooseParameter(parsedLink.choose);
+
         actions.openChatByUsername({
           username: parsedLink.username,
           startParam: parsedLink.start,
@@ -25,9 +27,11 @@ export const processDeepLink = (url: string): boolean => {
           startApp: parsedLink.startApp,
           startAttach: parsedLink.startAttach,
           attach: parsedLink.attach,
+          choose,
           originalParts: [parsedLink.username, parsedLink.appName],
         });
         return true;
+      }
       case 'businessChatLink':
         actions.resolveBusinessChatLink({
           slug: parsedLink.slug,
@@ -65,7 +69,6 @@ export const processDeepLink = (url: string): boolean => {
     openStickerSet,
     joinVoiceChatByLink,
     openInvoice,
-    processAttachBotParameters,
     openChatWithDraft,
     checkChatlistInvite,
     openStoryViewerByUsername,
@@ -81,10 +84,7 @@ export const processDeepLink = (url: string): boolean => {
         appname, startapp, story, text,
       } = params;
 
-      const hasStartAttach = params.hasOwnProperty('startattach');
-      const hasStartApp = params.hasOwnProperty('startapp');
       const hasBoost = params.hasOwnProperty('boost');
-      const choose = parseChooseParameter(params.choose);
       const threadId = Number(thread) || Number(topic) || undefined;
 
       if (domain !== 'telegrampassport') {
@@ -94,12 +94,6 @@ export const processDeepLink = (url: string): boolean => {
             startApp: startapp,
             originalParts: [domain, appname],
             text,
-          });
-        } else if ((hasStartAttach && choose) || (!appname && hasStartApp)) {
-          processAttachBotParameters({
-            username: domain,
-            filter: choose,
-            startParam: startattach || startapp,
           });
         } else if (params.hasOwnProperty('voicechat') || params.hasOwnProperty('livestream')) {
           joinVoiceChatByLink({
@@ -206,12 +200,6 @@ export const processDeepLink = (url: string): boolean => {
   return true;
 };
 
-export function parseChooseParameter(choose?: string) {
-  if (!choose) return undefined;
-  const types = choose.toLowerCase().split(' ');
-  return types.filter((type): type is ApiChatType => API_CHAT_TYPES.includes(type as ApiChatType));
-}
-
 export function formatShareText(url?: string, text?: string, title?: string): ApiFormattedText {
   return {
     text: [url, title, text].filter(Boolean).join('\n'),
@@ -235,4 +223,10 @@ function handlePrivateMessageLink(link: PrivateMessageLink, actions: ReturnType<
     threadId,
     messageId,
   });
+}
+
+function parseChooseParameter(choose?: string) {
+  if (!choose) return undefined;
+  const types = choose.toLowerCase().split(' ');
+  return types.filter((type): type is ApiChatType => API_CHAT_TYPES.includes(type as ApiChatType));
 }
