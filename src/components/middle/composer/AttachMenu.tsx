@@ -57,7 +57,7 @@ export type OwnProps = {
   onPollCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
   onMenuClose: NoneToVoidFunction;
-  hasReplaceableMedia?: boolean;
+  canEditMedia?: boolean;
   editingMessage?: ApiMessage;
 };
 
@@ -80,7 +80,7 @@ const AttachMenu: FC<OwnProps> = ({
   onMenuOpen,
   onMenuClose,
   onPollCreate,
-  hasReplaceableMedia,
+  canEditMedia,
   editingMessage,
 }) => {
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
@@ -171,7 +171,7 @@ const AttachMenu: FC<OwnProps> = ({
   return (
     <div className="AttachMenu">
       {
-        editingMessage && hasReplaceableMedia ? (
+        editingMessage && canEditMedia ? (
           <ResponsiveHoverButton
             id="replace-menu-button"
             className={isAttachMenuOpen ? 'AttachMenu--button activated' : 'AttachMenu--button'}
@@ -246,7 +246,7 @@ const AttachMenu: FC<OwnProps> = ({
           <MenuItem icon="poll" onClick={onPollCreate}>{lang('Poll')}</MenuItem>
         )}
 
-        {!editingMessage && !hasReplaceableMedia && !isScheduled && bots?.map((bot) => (
+        {!editingMessage && !canEditMedia && !isScheduled && bots?.map((bot) => (
           <AttachBotItem
             bot={bot}
             chatId={chatId}

@@ -48,10 +48,10 @@ import {
 } from '../../config';
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
+  canEditMedia,
   getAllowedAttachmentOptions,
   getReactionKey,
   getStoryKey,
-  hasReplaceableMedia,
   isChatAdmin,
   isChatChannel,
   isChatSuperGroup,
@@ -433,7 +433,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [isInputHasFocus, markInputHasFocus, unmarkInputHasFocus] = useFlag();
   const [isAttachMenuOpen, onAttachMenuOpen, onAttachMenuClose] = useFlag();
 
-  const canMediaBeReplaced = editingMessage && hasReplaceableMedia(editingMessage);
+  const canMediaBeReplaced = editingMessage && canEditMedia(editingMessage);
 
   const { emojiSet, members: groupChatMembers, botCommands: chatBotCommands } = chatFullInfo || {};
   const chatEmojiSetId = emojiSet?.id;
@@ -1890,7 +1890,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               chatId={chatId}
               threadId={threadId}
               editingMessage={editingMessage}
-              hasReplaceableMedia={canMediaBeReplaced}
+              canEditMedia={canMediaBeReplaced}
               isButtonVisible={!activeVoiceRecording}
               canAttachMedia={canAttachMedia}
               canAttachPolls={canAttachPolls}
