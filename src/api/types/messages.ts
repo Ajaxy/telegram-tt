@@ -116,6 +116,7 @@ export interface ApiVideo {
   previewBlobUrl?: string;
   size: number;
   noSound?: boolean;
+  waveform?: number[];
 }
 
 export interface ApiAudio {

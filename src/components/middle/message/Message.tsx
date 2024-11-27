@@ -115,7 +115,6 @@ import {
   calculateDimensionsForMessageMedia,
   getStickerDimensions,
   REM,
-  ROUND_VIDEO_DIMENSIONS_PX,
 } from '../../common/helpers/mediaDimensions';
 import { getPeerColorClass } from '../../common/helpers/peerColor';
 import renderText from '../../common/helpers/renderText';
@@ -520,9 +519,11 @@ const Message: FC<OwnProps & StateProps> = ({
   const messageReplyInfo = getMessageReplyInfo(message);
   const storyReplyInfo = getStoryReplyInfo(message);
 
+  const withVoiceTranscription = Boolean(!isTranscriptionHidden && (isTranscriptionError || transcribedText));
+
   const hasStoryReply = Boolean(storyReplyInfo);
   const hasThread = Boolean(repliesThreadInfo) && messageListType === 'thread';
-  const isCustomShape = getMessageCustomShape(message);
+  const isCustomShape = !withVoiceTranscription && getMessageCustomShape(message);
   const hasAnimatedEmoji = isCustomShape && (animatedEmoji || animatedCustomEmoji);
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
   const asForwarded = (
@@ -558,8 +559,6 @@ const Message: FC<OwnProps & StateProps> = ({
       && forwardInfo.fromMessageId
     ));
 
-  const noUserColors = isOwn && !isCustomShape;
-
   const hasFactCheck = Boolean(factCheck?.text);
 
   const hasForwardedCustomShape = asForwarded && isCustomShape;
@@ -575,7 +574,8 @@ const Message: FC<OwnProps & StateProps> = ({
   });
 
   const messageSender = canShowSender ? sender : undefined;
-  const withVoiceTranscription = Boolean(!isTranscriptionHidden && (isTranscriptionError || transcribedText));
+
+  const noUserColors = isOwn && !isCustomShape;
 
   const shouldPreferOriginSender = forwardInfo
     && (isChatWithSelf || isRepliesChat || isAnonymousForwards || !messageSender);
@@ -760,7 +760,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
     && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl;
 
-  const hasOutsideReactions = hasReactions
+  const hasOutsideReactions = !withVoiceTranscription && hasReactions
     && (isCustomShape || ((photo || video || storyData || (location?.mediaType === 'geo')) && !hasText));
 
   const contentClassName = buildContentClassName(message, album, {
@@ -904,20 +904,11 @@ const Message: FC<OwnProps & StateProps> = ({
 
     if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
       let width: number | undefined;
-      if (photo) {
-        width = calculateMediaDimensions({
-          media: photo,
-          isOwn,
-          asForwarded,
-          noAvatars,
-          isMobile,
-        }).width;
-      } else if (video) {
-        if (isRoundVideo) {
-          width = ROUND_VIDEO_DIMENSIONS_PX;
-        } else {
+      if (photo || video) {
+        const media = (photo || video);
+        if (media && !isRoundVideo) {
           width = calculateMediaDimensions({
-            media: video,
+            media,
             isOwn,
             asForwarded,
             noAvatars,
@@ -1193,16 +1184,22 @@ const Message: FC<OwnProps & StateProps> = ({
             chatId={chatId}
           />
         )}
-        {!isAlbum && isRoundVideo && (
+        {!isAlbum && isRoundVideo && !withVoiceTranscription && (
           <RoundVideo
             message={message}
             observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             isDownloading={isDownloading}
             onReadMedia={shouldReadMedia ? handleReadMedia : undefined}
+            onHideTranscription={setTranscriptionHidden}
+            isTranscriptionError={isTranscriptionError}
+            isTranscribed={Boolean(transcribedText)}
+            canTranscribe={canTranscribeVoice && !hasTtl}
+            isTranscriptionHidden={isTranscriptionHidden}
+            isTranscribing={isTranscribing}
           />
         )}
-        {(audio || voice) && (
+        {(audio || voice || withVoiceTranscription) && (
           <Audio
             theme={theme}
             message={message}

@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect, useLayoutEffect, useRef, useSignal, useState,
+  useEffect, useLayoutEffect,
+  useRef, useSignal, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -47,6 +48,12 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   onStop?: NoneToVoidFunction;
   onReadMedia?: NoneToVoidFunction;
+  onHideTranscription?: (isHidden: boolean) => void;
+  isTranscriptionError?: boolean;
+  canTranscribe?: boolean;
+  isTranscribed?: boolean;
+  isTranscriptionHidden?: boolean;
+  isTranscribing?: boolean;
 };
 
 const PROGRESS_CENTER = ROUND_VIDEO_DIMENSIONS_PX / 2;
@@ -65,6 +72,12 @@ const RoundVideo: FC<OwnProps> = ({
   observeIntersection,
   onStop,
   onReadMedia,
+  isTranscriptionError,
+  isTranscribed,
+  canTranscribe,
+  onHideTranscription,
+  isTranscriptionHidden,
+  isTranscribing,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -73,11 +86,11 @@ const RoundVideo: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const circleRef = useRef<SVGCircleElement>(null);
 
-  const video = message.content.video!;
-
-  const { cancelMediaDownload, openOneTimeMediaModal } = getActions();
+  const { cancelMediaDownload, openOneTimeMediaModal, transcribeAudio } = getActions();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
+
+  const video = message.content.video!;
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersecting);
@@ -181,7 +194,11 @@ const RoundVideo: FC<OwnProps> = ({
     togglePlaying();
   }, [isInOneTimeModal]);
 
-  const handleClick = useLastCallback(() => {
+  const handleClick = useLastCallback((event) => {
+    if (event.target.closest('.transcribe-button')) {
+      return;
+    }
+
     if (!mediaData) {
       setIsLoadAllowed((isAllowed) => !isAllowed);
 
@@ -207,6 +224,10 @@ const RoundVideo: FC<OwnProps> = ({
     setProgress(playerEl.currentTime / playerEl.duration);
   });
 
+  const handleTranscribe = useLastCallback(() => {
+    transcribeAudio({ chatId: message.chatId, messageId: message.id });
+  });
+
   function renderPlayWrapper() {
     return (
       <div className="play-wrapper">
@@ -223,6 +244,14 @@ const RoundVideo: FC<OwnProps> = ({
       </div>
     );
   }
+
+  const handleButtonClick = useLastCallback(() => {
+    if ((isTranscribed || isTranscriptionError) && onHideTranscription) {
+      onHideTranscription(!isTranscriptionHidden);
+    } else if (!isTranscribing) {
+      handleTranscribe();
+    }
+  });
 
   return (
     <div
@@ -297,6 +326,31 @@ const RoundVideo: FC<OwnProps> = ({
           {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
           {(!isActivated || playerRef.current!.paused) && <Icon name="muted" />}
         </div>
+      )}
+      {canTranscribe && (
+        <Button
+          onClick={handleButtonClick}
+          className="transcribe-button"
+        >
+          {isTranscribed || isTranscriptionError ? <Icon name="down" /> : <Icon name="transcribe" />}
+          {isTranscribing && (
+            <svg viewBox="0 0 32 24" className="loading-svg">
+              <rect
+                className="loading-rect"
+                fill="transparent"
+                width="32"
+                height="24"
+                stroke-width="3"
+                stroke-linejoin="round"
+                rx="6"
+                ry="6"
+                stroke="white"
+                stroke-dashoffset="1"
+                stroke-dasharray="32,68"
+              />
+            </svg>
+          )}
+        </Button>
       )}
     </div>
   );

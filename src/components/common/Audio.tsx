@@ -4,7 +4,9 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
+import type {
+  ApiAudio, ApiMessage, ApiVideo, ApiVoice,
+} from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
 import type { OldLangFn } from '../../hooks/useOldLang';
 import type { ISettings } from '../../types';
@@ -118,6 +120,7 @@ const Audio: FC<OwnProps> = ({
   } = message;
   const audio = contentAudio || getMessageWebPageAudio(message);
   const media = (voice || video || audio)!;
+  const mediaSource = (voice || video);
   const isVoice = Boolean(voice || video);
   const isSeeking = useRef<boolean>(false);
   // eslint-disable-next-line no-null/no-null
@@ -186,7 +189,7 @@ const Audio: FC<OwnProps> = ({
 
   const waveformCanvasRef = useWaveformCanvas(
     theme,
-    voice,
+    mediaSource,
     (isMediaUnread && !isOwn && !isReverse) ? 1 : playProgress,
     isOwn,
     !noAvatars,
@@ -462,10 +465,10 @@ const Audio: FC<OwnProps> = ({
         transferProgress,
         onDateClick ? handleDateClick : undefined,
       )}
-      {origin === AudioOrigin.SharedMedia && (voice || video) && renderWithTitle()}
-      {(origin === AudioOrigin.Inline || isInOneTimeModal) && voice && (
+      {origin === AudioOrigin.SharedMedia && mediaSource && renderWithTitle()}
+      {(origin === AudioOrigin.Inline || isInOneTimeModal || isTranscribed) && mediaSource && (
         renderVoice(
-          voice,
+          mediaSource,
           seekerRef,
           waveformCanvasRef,
           hasTtl ? reversePlayProgress : playProgress,
@@ -553,7 +556,7 @@ function renderAudio(
 }
 
 function renderVoice(
-  voice: ApiVoice,
+  media: ApiVoice | ApiVideo,
   seekerRef: React.Ref<HTMLDivElement>,
   waveformCanvasRef: React.Ref<HTMLCanvasElement>,
   playProgress: number,
@@ -604,7 +607,7 @@ function renderVoice(
                   stroke-linejoin="round"
                   rx="6"
                   ry="6"
-                  stroke="var(--accent-color)"
+                  stroke="white"
                   stroke-dashoffset="1"
                   stroke-dasharray="32,68"
                 />
@@ -618,7 +621,7 @@ function renderVoice(
         dir="auto"
       >
         {playProgress === 0 || playProgress === 1
-          ? formatMediaDuration(voice.duration) : formatMediaDuration(voice.duration * playProgress)}
+          ? formatMediaDuration(media!.duration) : formatMediaDuration(media!.duration * playProgress)}
       </p>
     </div>
   );
@@ -626,7 +629,7 @@ function renderVoice(
 
 function useWaveformCanvas(
   theme: ISettings['theme'],
-  voice?: ApiVoice,
+  media?: ApiVoice | ApiVideo,
   playProgress = 0,
   isOwn = false,
   withAvatar = false,
@@ -637,11 +640,11 @@ function useWaveformCanvas(
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { data: spikes, peak } = useMemo(() => {
-    if (!voice) {
+    if (!media) {
       return undefined;
     }
 
-    const { waveform, duration } = voice;
+    const { waveform, duration } = media;
     if (!waveform) {
       return {
         data: new Array(Math.min(duration, MAX_EMPTY_WAVEFORM_POINTS)).fill(0),
@@ -655,7 +658,7 @@ function useWaveformCanvas(
     const decodedWaveform = decodeWaveform(new Uint8Array(waveform));
 
     return interpolateArray(decodedWaveform, spikesCount);
-  }, [isMobile, voice, withAvatar]) || {};
+  }, [isMobile, media, withAvatar]) || {};
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;

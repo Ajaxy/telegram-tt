@@ -98,6 +98,7 @@ export function buildContentClassName(
 
   if (isCustomShape) {
     classNames.push('custom-shape');
+
     if (isRoundVideo) {
       classNames.push('round');
     }
@@ -106,8 +107,10 @@ export function buildContentClassName(
       classNames.push('has-comment-counter');
     }
   }
-  if (isMedia) {
+  if (isMedia && !withVoiceTranscription) {
     classNames.push('media');
+  } else if (video) {
+    classNames.push('video');
   } else if (audio) {
     classNames.push('audio');
   } else if (voice) {
@@ -178,7 +181,8 @@ export function buildContentClassName(
       classNames.push('has-background');
     }
 
-    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName || hasFactCheck) {
+    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText
+      || forceSenderName || hasFactCheck || withVoiceTranscription) {
       classNames.push('has-solid-background');
     }
 

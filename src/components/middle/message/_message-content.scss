@@ -930,6 +930,12 @@
   .Message:not(.own) & {
     --hover-color: var(--color-reply-hover);
     --active-color: var(--color-reply-active);
+
+    &.has-subheader {
+      .MessageMeta {
+        right: 5.6875rem;
+      }
+    }
   }
 
   .Message.own & {
@@ -949,7 +955,18 @@
         }
       }
     }
+
+    &.has-subheader {
+      .RoundVideo .transcribe-button {
+        right: 0.8125rem;
+      }
+    }
   }
+}
+
+.message-content.voice,
+.message-content.video {
+  width: min-content;
 }
 
 .forwarded-message {
