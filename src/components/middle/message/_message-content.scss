@@ -570,6 +570,10 @@
   .no-media-corners {
     --border-top-left-radius: 0;
     --border-top-right-radius: 0;
+
+    .Album {
+      margin-inline: auto !important;
+    }
   }
 
   &.custom-shape.is-via-bot {
@@ -958,34 +962,9 @@
 }
 
 .forwarded-message {
-  .message-content.contact &,
-  .message-content.poll &,
-  .message-content.giveaway & {
-    // MessageOutgoingStatus's icon needs more space
-    margin-bottom: 0.5rem;
-  }
-
   .message-content:not(.custom-shape) & {
     position: relative;
     margin-top: 0.25rem;
-
-    .Album,
-    .media-inner:not(.file-preview) {
-      margin-left: -0.5rem;
-      margin-right: -0.5rem;
-
-      body.is-ios .Message.own & {
-        margin-left: -0.625rem;
-      }
-
-      :not(.has-footer) & {
-        margin-bottom: -0.375rem;
-
-        body.is-ios .Message.own & {
-          margin-bottom: -0.4375rem;
-        }
-      }
-    }
   }
 
   --border-top-left-radius: 0;
@@ -997,17 +976,7 @@
   }
 
   .Album {
-    margin-bottom: 0.125rem;
-
-    .message-content.media.text & {
-      margin-top: 0.25rem;
-      --border-bottom-left-radius: inherit;
-      --border-bottom-right-radius: inherit;
-
-      + .message-paid-media-status {
-        margin-right: 0;
-      }
-    }
+    margin-top: 0 !important;
   }
 }
 

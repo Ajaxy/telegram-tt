@@ -889,9 +889,9 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const albumLayout = useMemo(() => {
     return isAlbum
-      ? calculateAlbumLayout(isOwn, Boolean(asForwarded), Boolean(noAvatars), album!, isMobile)
+      ? calculateAlbumLayout(isOwn, Boolean(noAvatars), album!, isMobile)
       : undefined;
-  }, [isAlbum, isOwn, asForwarded, noAvatars, album, isMobile]);
+  }, [isAlbum, isOwn, noAvatars, album, isMobile]);
 
   const extraPadding = asForwarded && !isCustomShape ? 28 : 0;
 
