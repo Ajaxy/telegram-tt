@@ -3,18 +3,6 @@
   overflow: hidden;
   margin: auto;
 
-  .message-content.media.text & {
-    margin: -0.3125rem -0.5rem 0.3125rem;
-
-    + .message-paid-media-status {
-      margin-right: -0.5rem;
-    }
-  }
-
-  body.is-ios .Message.own .message-content.has-solid-background :not(.forwarded-message) & {
-    margin: -0.3125rem -0.5rem 0.3125rem -0.625rem;
-  }
-
   &,
   .message-content.media.text & {
     > .album-item-select-wrapper .media-inner {

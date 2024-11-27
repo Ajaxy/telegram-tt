@@ -642,17 +642,15 @@
   &.text .media-inner,
   &.is-via-bot .media-inner,
   &.has-subheader .media-inner,
-  &.has-subheader .Album {
+  &.has-subheader .Album,
+  &.is-forwarded .media-inner,
+  &.is-forwarded .Album {
     margin-left: -0.5rem;
     margin-right: -0.5rem;
 
     body.is-ios .Message.own & {
       margin-left: -0.625rem;
     }
-  }
-
-  &.is-forwarded.text .media-inner {
-    margin-top: 0;
   }
 
   &.text .media-inner {
@@ -674,10 +672,12 @@
   }
 
   &.has-subheader .media-inner,
-  &.force-sender-name .Album,
   &.has-subheader .Album,
+  &.force-sender-name .Album,
+  &.is-forwarded .media-inner,
+  &.is-forwarded .Album,
   .message-title ~ .media-inner {
-    margin-top: 0.375rem;
+    margin-top: 0.25rem;
     margin-bottom: -0.375rem;
 
     body.is-ios .Message.own & {
@@ -962,21 +962,12 @@
 }
 
 .forwarded-message {
-  .message-content:not(.custom-shape) & {
-    position: relative;
-    margin-top: 0.25rem;
-  }
-
   --border-top-left-radius: 0;
   --border-top-right-radius: 0;
 
   .has-footer & {
     --border-bottom-left-radius: 0;
     --border-bottom-right-radius: 0;
-  }
-
-  .Album {
-    margin-top: 0 !important;
   }
 }
 
