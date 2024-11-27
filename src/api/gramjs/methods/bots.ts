@@ -194,6 +194,7 @@ export async function requestWebView({
   theme,
   sendAs,
   isFromBotMenu,
+  isFullscreen,
 }: {
   isSilent?: boolean;
   peer: ApiPeer;
@@ -204,6 +205,7 @@ export async function requestWebView({
   theme?: ApiThemeParameters;
   sendAs?: ApiPeer;
   isFromBotMenu?: boolean;
+  isFullscreen?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.RequestWebView({
     silent: isSilent || undefined,
@@ -215,6 +217,7 @@ export async function requestWebView({
     fromBotMenu: isFromBotMenu || undefined,
     platform: WEB_APP_PLATFORM,
     replyTo: replyInfo && buildInputReplyTo(replyInfo),
+    fullscreen: isFullscreen ? true : undefined,
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 
@@ -222,6 +225,7 @@ export async function requestWebView({
     return {
       url: result.url,
       queryId: result.queryId?.toString(),
+      isFullScreen: Boolean(result.fullscreen),
     };
   }
 
@@ -232,17 +236,20 @@ export async function requestMainWebView({
   peer,
   bot,
   startParam,
+  mode,
   theme,
 }: {
   peer: ApiPeer;
   bot: ApiUser;
   startParam?: string;
+  mode?: string;
   theme?: ApiThemeParameters;
 }) {
   const result = await invokeRequest(new GramJs.messages.RequestMainWebView({
     peer: buildInputPeer(peer.id, peer.accessHash),
     bot: buildInputPeer(bot.id, bot.accessHash),
     startParam,
+    fullscreen: mode === 'fullscreen' || undefined,
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     platform: WEB_APP_PLATFORM,
   }));
@@ -254,6 +261,7 @@ export async function requestMainWebView({
   return {
     url: result.url,
     queryId: result.queryId?.toString(),
+    isFullscreen: Boolean(result.fullscreen),
   };
 }
 
@@ -310,12 +318,14 @@ export async function requestAppWebView({
   peer,
   app,
   startParam,
+  mode,
   theme,
   isWriteAllowed,
 }: {
   peer: ApiPeer;
   app: ApiBotApp;
   startParam?: string;
+  mode?: string;
   theme?: ApiThemeParameters;
   isWriteAllowed?: boolean;
 }) {
@@ -326,9 +336,10 @@ export async function requestAppWebView({
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     platform: WEB_APP_PLATFORM,
     writeAllowed: isWriteAllowed || undefined,
+    fullscreen: mode === 'fullscreen' || undefined,
   }));
 
-  return result?.url;
+  return { url: result?.url, isFullscreen: Boolean(result?.fullscreen) };
 }
 
 export function prolongWebView({

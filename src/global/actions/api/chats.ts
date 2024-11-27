@@ -1438,6 +1438,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
       startAttach: params.startattach,
       attach: params.attach,
       startApp: params.startapp,
+      mode: params.mode,
       originalParts: [part1, part2, part3],
       tabId,
     });
@@ -1491,7 +1492,7 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp,
+    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, mode,
     text, onChatChanged, choose,
     tabId = getCurrentTabId(),
   } = payload;
@@ -1530,6 +1531,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
         peerId: chat.id,
         theme,
         tabId,
+        mode,
       });
       return;
     }
@@ -1579,6 +1581,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       botId: chatByUsername.id,
       tabId,
       startApp,
+      mode,
       theme,
     });
     return;

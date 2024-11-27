@@ -149,7 +149,7 @@ export type MessageListType =
 
 export type ChatListType = 'active' | 'archived' | 'saved';
 
-export type WebAppModalStateType = 'maximized' | 'minimized';
+export type WebAppModalStateType = 'fullScreen' | 'maximized' | 'minimized';
 
 export interface MessageList {
   chatId: string;
@@ -1844,6 +1844,7 @@ export interface ActionPayloads {
     startAttach?: string;
     attach?: string;
     startApp?: string;
+    mode?: string;
     choose?: ApiChatType[];
     text?: string;
     originalParts?: (string | undefined)[];
@@ -3121,6 +3122,7 @@ export interface ActionPayloads {
     buttonText: string;
     isFromBotMenu?: boolean;
     startParam?: string;
+    isFullscreen?: boolean;
   } & WithTabId;
   updateWebApp: {
     key: string;
@@ -3131,6 +3133,7 @@ export interface ActionPayloads {
     peerId: string;
     theme?: ApiThemeParameters;
     startParam?: string;
+    mode?: string;
     shouldMarkBotTrusted?: boolean;
   } & WithTabId;
   prolongWebView: {
@@ -3155,6 +3158,7 @@ export interface ActionPayloads {
     appName: string;
     theme?: ApiThemeParameters;
     startApp?: string;
+    mode?: string;
     isWriteAllowed?: boolean;
     isFromConfirm?: boolean;
     shouldSkipBotTrustRequest?: boolean;
@@ -3279,7 +3283,9 @@ export interface ActionPayloads {
   closeWebAppModal: ({
     shouldSkipConfirmation?: boolean;
   } & WithTabId) | undefined;
-  changeWebAppModalState: WithTabId | undefined;
+  changeWebAppModalState: {
+    state: WebAppModalStateType;
+  } & WithTabId;
 
   // Misc
   refreshLangPackFromCache: {

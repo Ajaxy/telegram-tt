@@ -1,9 +1,12 @@
+@use "../../../styles/mixins";
+
 .root {
   height: 100%;
   width: 100%;
 }
 
 .multi-tab {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 0;
@@ -156,4 +159,125 @@
   :global(.modal-content) {
     padding-left: 2rem;
   }
+}
+
+.closeIcon {
+  --color-header-text: white;
+  position: relative;
+  transform: rotate(-45deg);
+
+  &,
+  &::before,
+  &::after {
+    width: 0.875rem;
+    height: 0.125rem;
+    border-radius: 0.125rem;
+    background-color: var(--color-header-text);
+    transition: var(--slide-transition) transform, var(--color-transition) background-color;
+  }
+
+  &::before,
+  &::after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: "";
+  }
+
+  &::before {
+    transform: rotate(90deg);
+  }
+
+  &.state-back {
+    transform: rotate(180deg);
+
+    &::before {
+      transform: rotate(45deg) scaleX(0.75) translate(0, -0.3125rem);
+    }
+
+    &::after {
+      transform: rotate(-45deg) scaleX(0.75) translate(0, 0.3125rem);
+    }
+  }
+}
+
+.backIconContainer {
+  padding-right: 0.25rem;
+}
+
+.moreIcon {
+  transform: rotate(90deg);
+}
+
+.headerPanel {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 1rem;
+  padding-inline-end: calc(1rem + var(--scrollbar-width));
+  justify-content: space-between;
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.headerSplitButton {
+  display: flex;
+  flex-direction: row;
+}
+
+.headerButton {
+  height: 1.75rem;
+  width: fit-content;
+  font-size: 0.875rem;
+  font-weight: 500;
+  position: relative;
+  cursor: var(--custom-cursor, pointer);
+  flex-shrink: 0;
+  overflow: hidden;
+
+  outline: none !important;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  color: white;
+  border-radius: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(25px);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  padding: 0.25rem;
+  padding-inline: 0.625rem;
+}
+
+.left {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.right {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+
+.buttonCaptionContainer {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: width 0.25s ease-in-out;
+  height: 100%;
+}
+
+.backButtonCaption {
+  width: fit-content;
+  max-width: 20rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }

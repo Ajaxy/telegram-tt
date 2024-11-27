@@ -110,11 +110,9 @@ addActionHandler('closeWebAppModal', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('changeWebAppModalState', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const tabState = selectTabState(global, tabId);
+  const { state, tabId = getCurrentTabId() } = payload;
 
-  const newModalState = tabState.webApps.modalState === 'maximized' ? 'minimized' : 'maximized';
-  return replaceWebAppModalState(global, newModalState, tabId);
+  return replaceWebAppModalState(global, state, tabId);
 });
 
 addActionHandler('setWebAppPaymentSlug', (global, actions, payload): ActionReturnType => {

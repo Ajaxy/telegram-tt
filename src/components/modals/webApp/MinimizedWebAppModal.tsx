@@ -61,7 +61,7 @@ const MinimizedWebAppModal = ({
   });
 
   const handleExpandClick = useLastCallback(() => {
-    changeWebAppModalState();
+    changeWebAppModalState({ state: 'maximized' });
   });
 
   if (!isMinimizedState) return undefined;

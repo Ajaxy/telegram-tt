@@ -54,6 +54,8 @@ import {
 } from '../../selectors';
 import { fetchChatByUsername } from './chats';
 
+import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
+
 const GAMEE_URL = 'https://prizes.gamee.com/';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runDebouncedForSearch = debounce((cb) => cb(), 500, false);
@@ -533,6 +535,7 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
   global = getGlobal();
   const newActiveApp: WebApp = {
     requestUrl: url,
+    appName: bot.firstName,
     url: webViewUrl,
     botId,
     buttonText,
@@ -543,7 +546,7 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
 
 addActionHandler('requestWebView', async (global, actions, payload): Promise<void> => {
   const {
-    url, botId, peerId, theme, isSilent, buttonText, isFromBotMenu, startParam,
+    url, botId, peerId, theme, isSilent, buttonText, isFromBotMenu, startParam, isFullscreen,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -586,17 +589,19 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
     isFromBotMenu,
     startParam,
     sendAs,
+    isFullscreen,
   });
   if (!result) {
     return;
   }
 
-  const { url: webViewUrl, queryId } = result;
+  const { url: webViewUrl, queryId, isFullScreen } = result;
 
   global = getGlobal();
   const newActiveApp: WebApp = {
     requestUrl: url,
     url: webViewUrl,
+    appName: bot.firstName,
     botId,
     peerId,
     queryId,
@@ -605,11 +610,15 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
   };
   global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
   setGlobal(global);
+
+  if (isFullScreen && getIsWebAppsFullscreenSupported()) {
+    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+  }
 });
 
 addActionHandler('requestMainWebView', async (global, actions, payload): Promise<void> => {
   const {
-    botId, peerId, theme, startParam, shouldMarkBotTrusted,
+    botId, peerId, theme, startParam, mode, shouldMarkBotTrusted,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -644,16 +653,18 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
     peer,
     theme,
     startParam,
+    mode,
   });
   if (!result) {
     return;
   }
 
-  const { url: webViewUrl, queryId } = result;
+  const { url: webViewUrl, queryId, isFullscreen } = result;
 
   global = getGlobal();
   const newActiveApp: WebApp = {
     url: webViewUrl,
+    appName: bot.firstName,
     botId,
     peerId,
     queryId,
@@ -661,6 +672,10 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
   };
   global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
   setGlobal(global);
+
+  if (isFullscreen && getIsWebAppsFullscreenSupported()) {
+    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+  }
 });
 
 addActionHandler('loadPreviewMedias', async (global, actions, payload): Promise<void> => {
@@ -722,7 +737,7 @@ addActionHandler('closeWebAppsCloseConfirmationModal', (global, actions, payload
 
 addActionHandler('requestAppWebView', async (global, actions, payload): Promise<void> => {
   const {
-    botId, appName, startApp, theme, isWriteAllowed, isFromConfirm, shouldSkipBotTrustRequest,
+    botId, appName, startApp, mode, theme, isWriteAllowed, isFromConfirm, shouldSkipBotTrustRequest,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -794,10 +809,11 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
 
   const peer = selectCurrentChat(global, tabId);
 
-  const url = await callApi('requestAppWebView', {
+  const { url, isFullscreen } = await callApi('requestAppWebView', {
     peer: peer || bot,
     app: botApp,
     startParam: startApp,
+    mode,
     isWriteAllowed,
     theme,
   });
@@ -811,14 +827,17 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
 
   const newActiveApp: WebApp = {
     url,
+    appName: appName && bot.firstName,
     peerId,
     botId,
-    appName,
     buttonText: '',
   };
   global = addWebAppToOpenList(global, newActiveApp, true, true, tabId);
-
   setGlobal(global);
+
+  if (isFullscreen && getIsWebAppsFullscreenSupported()) {
+    actions.changeWebAppModalState({ state: 'fullScreen', tabId });
+  }
 });
 
 addActionHandler('prolongWebView', async (global, actions, payload): Promise<void> => {

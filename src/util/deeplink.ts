@@ -25,6 +25,7 @@ export const processDeepLink = (url: string): boolean => {
           startParam: parsedLink.start,
           text: parsedLink.text,
           startApp: parsedLink.startApp,
+          mode: parsedLink.mode,
           startAttach: parsedLink.startAttach,
           attach: parsedLink.attach,
           choose,
@@ -81,7 +82,7 @@ export const processDeepLink = (url: string): boolean => {
     case 'resolve': {
       const {
         domain, phone, post, comment, voicechat, livestream, start, startattach, attach, thread, topic,
-        appname, startapp, story, text,
+        appname, startapp, mode, story, text,
       } = params;
 
       const hasBoost = params.hasOwnProperty('boost');
@@ -92,6 +93,7 @@ export const processDeepLink = (url: string): boolean => {
           openChatByUsername({
             username: domain,
             startApp: startapp,
+            mode,
             originalParts: [domain, appname],
             text,
           });
@@ -117,6 +119,7 @@ export const processDeepLink = (url: string): boolean => {
             messageId: post ? Number(post) : undefined,
             commentId: comment ? Number(comment) : undefined,
             startParam: start,
+            mode,
             startAttach: startattach,
             attach,
             threadId,

@@ -26,6 +26,13 @@ export type WebAppButtonOptions = {
   position?: 'left' | 'right' | 'top' | 'bottom';
 };
 
+export type SafeArea = {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
 export type WebAppInboundEvent =
   WebAppEvent<'iframe_ready', {
     reload_supported?: boolean;
@@ -102,7 +109,10 @@ export type WebAppInboundEvent =
   WebAppEvent<'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
   | 'web_app_request_phone' | 'web_app_close' | 'web_app_close_scan_qr_popup'
   | 'web_app_request_write_access' | 'web_app_request_phone' | 'iframe_will_reload'
-  | 'web_app_biometry_get_info' | 'web_app_biometry_open_settings', null>;
+  | 'web_app_biometry_get_info' | 'web_app_biometry_open_settings'
+  | 'web_app_request_fullscreen' | 'web_app_exit_fullscreen'
+  | 'web_app_request_safe_area' | 'web_app_request_content_safe_area',
+  null>;
 
 export type WebAppOutboundEvent =
   WebAppEvent<'viewport_changed', {
@@ -111,6 +121,8 @@ export type WebAppOutboundEvent =
     is_expanded?: boolean;
     is_state_stable?: boolean;
   }> |
+  WebAppEvent<'content_safe_area_changed', SafeArea> |
+  WebAppEvent<'safe_area_changed', SafeArea> |
   WebAppEvent<'theme_changed', {
     theme_params: {
       bg_color: string;
@@ -132,6 +144,12 @@ export type WebAppOutboundEvent =
   }> |
   WebAppEvent<'popup_closed', {
     button_id?: string;
+  }> |
+  WebAppEvent<'fullscreen_changed', {
+    is_fullscreen: boolean;
+  }> |
+  WebAppEvent<'fullscreen_failed', {
+    error: 'UNSUPPORTED' | string;
   }> |
   WebAppEvent<'qr_text_received', {
     data: string;

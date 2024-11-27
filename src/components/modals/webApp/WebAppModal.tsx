@@ -20,6 +20,7 @@ import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { getColorLuma } from '../../../util/colors';
 import { hexToRgb } from '../../../util/switchTheme';
+import windowSize from '../../../util/windowSize';
 
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -89,12 +90,16 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const minimizedStateSize = useMemo(() => {
     return { width: 300, height: 40 };
   }, []);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [getFrameSize, setFrameSize] = useSignal(
     { width: maximizedStateSize.width, height: maximizedStateSize.height - minimizedStateSize.height },
   );
 
   function getSize() {
-    return modal?.modalState === 'maximized' ? maximizedStateSize : minimizedStateSize;
+    if (modal?.modalState === 'fullScreen') return windowSize.get();
+    if (modal?.modalState === 'maximized') return maximizedStateSize;
+    return minimizedStateSize;
   }
 
   const {
@@ -118,6 +123,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
   const isOpen = modal?.isModalOpen || false;
   const isMaximizedState = modal?.modalState === 'maximized';
+  const isMinimizedState = modal?.modalState === 'minimized';
+  const isFullScreen = modal?.modalState === 'fullScreen';
 
   const supportMultiTabMode = !isMobile;
   // eslint-disable-next-line no-null/no-null
@@ -151,14 +158,24 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const containerElement = ref.current;
 
   useEffect(() => {
-    setIsDraggingEnabled(Boolean(supportMultiTabMode && headerElement && containerElement));
-  }, [supportMultiTabMode, headerElement, containerElement]);
+    setIsDraggingEnabled(Boolean(supportMultiTabMode && headerElement && containerElement && !isFullScreen));
+  }, [supportMultiTabMode, headerElement, containerElement, isFullScreen]);
+
+  useEffect(() => {
+    changeWebAppModalState({ state: 'maximized' });
+  }, [supportMultiTabMode]);
 
   const {
     isDragging,
     style: draggableStyle,
     size,
-  } = useDraggable(ref, headerRef, isDraggingEnabled, getSize());
+  } = useDraggable(
+    ref,
+    headerRef,
+    isDraggingEnabled,
+    getSize(),
+    isFullScreen,
+  );
 
   const currentSize = size || getSize();
 
@@ -170,7 +187,16 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       const height = currentHeight - minimizedStateSize.height;
       setFrameSize({ width: currentWidth, height });
     }
-  }, [currentWidth, currentHeight, isMaximizedState, minimizedStateSize, setFrameSize]);
+    if (isFullScreen) {
+      setFrameSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+  }, [currentWidth,
+    currentHeight,
+    isMaximizedState,
+    minimizedStateSize,
+    setFrameSize,
+    isFullScreen,
+    isMinimizedState]);
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -275,7 +301,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleCollapseClick = useLastCallback(() => {
-    changeWebAppModalState();
+    changeWebAppModalState({ state: 'minimized' });
   });
 
   const handleOpenMoreAppsTabClick = useLastCallback(() => {
@@ -497,7 +523,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  useHorizontalScroll(containerRef, !isOpen || !isMaximizedState || !(containerRef.current));
+  useHorizontalScroll(containerRef, !isOpen || isMinimizedState || !(containerRef.current));
 
   function renderTabs() {
     return (
@@ -606,7 +632,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       className={buildClassName(
         styles.root,
         supportMultiTabMode && styles.multiTab,
-        !isMaximizedState && styles.minimized,
+        isMinimizedState && styles.minimized,
+        isFullScreen && styles.fullScreen,
       )}
       dialogStyle={supportMultiTabMode ? draggableStyle : undefined}
       isOpen={isOpen}
@@ -617,6 +644,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       noBackdrop
       noBackdropClose
     >
+      {isFullScreen && renderMoreMenu()}
       {openedWebApps && sessionKeys?.map((key) => (
         <WebAppModalTabContent
           key={key}
@@ -625,7 +653,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           registerReloadFrameCallback={registerReloadFrameCallback}
           webApp={openedWebApps[key]}
           isDragging={isDragging}
-          frameSize={supportMultiTabMode ? getFrameSize() : undefined}
+          onContextMenuButtonClick={handleContextMenu}
           isMultiTabSupported={supportMultiTabMode}
         />
       ))}

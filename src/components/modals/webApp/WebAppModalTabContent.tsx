@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
-import type { TabState, WebApp } from '../../../global/types';
+import type { TabState, WebApp, WebAppModalStateType } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
 import type { PopupOptions, WebAppInboundEvent, WebAppOutboundEvent } from '../../../types/webapp';
 
@@ -23,18 +23,22 @@ import { callApi } from '../../../api/gramjs';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
+import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
+import useFullscreen, { checkIfFullscreen } from '../../../hooks/window/useFullscreen';
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Modal from '../../ui/Modal';
 import Spinner from '../../ui/Spinner';
+import Transition from '../../ui/Transition';
 
 import styles from './WebAppModalTabContent.module.scss';
 
@@ -53,6 +57,7 @@ export type OwnProps = {
   webApp?: WebApp;
   registerSendEventCallback: (callback: (event: WebAppOutboundEvent) => void) => void;
   registerReloadFrameCallback: (callback: (url: string) => void) => void;
+  onContextMenuButtonClick: (e: React.MouseEvent) => void;
   isDragging?: boolean;
   frameSize?: { width: number; height: number };
   isMultiTabSupported? : boolean;
@@ -65,15 +70,17 @@ type StateProps = {
   theme?: ThemeKey;
   isPaymentModalOpen?: boolean;
   paymentStatus?: TabState['payment']['status'];
-  isMaximizedState: boolean;
+  modalState?: WebAppModalStateType;
 };
 
 const NBSP = '\u00A0';
 
 const MAIN_BUTTON_ANIMATION_TIME = 250;
 const ANIMATION_WAIT = 400;
+const COLLAPSING_WAIT = 350;
 const POPUP_SEQUENTIAL_LIMIT = 3;
 const POPUP_RESET_DELAY = 2000; // 2s
+const APP_NAME_DISPLAY_DURATION = 3800;
 const SANDBOX_ATTRIBUTES = [
   'allow-scripts',
   'allow-same-origin',
@@ -99,9 +106,10 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   registerSendEventCallback,
   registerReloadFrameCallback,
   isDragging,
-  isMaximizedState,
+  modalState,
   frameSize,
   isMultiTabSupported,
+  onContextMenuButtonClick,
 }) => {
   const {
     closeActiveWebApp,
@@ -113,6 +121,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     sharePhoneWithBot,
     updateWebApp,
     resetPaymentStatus,
+    changeWebAppModalState,
+    closeWebAppModal,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [secondaryButton, setSecondaryButton] = useState<WebAppButton | undefined>();
@@ -127,9 +137,35 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     unlockPopupsAt, handlePopupOpened, handlePopupClosed,
   } = usePopupLimit(POPUP_SEQUENTIAL_LIMIT, POPUP_RESET_DELAY);
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line no-null/no-null
+  const headerButtonRef = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line no-null/no-null
+  const headerButtonCaptionRef = useRef<HTMLDivElement>(null);
+
+  const isFullscreen = modalState === 'fullScreen';
+  const isMinimizedState = modalState === 'minimized';
+
+  const exitFullScreenCallback = useLastCallback(() => {
+    setTimeout(() => { changeWebAppModalState({ state: 'maximized' }); }, COLLAPSING_WAIT);
+  });
+
+  // eslint-disable-next-line no-null/no-null
+  const fullscreenElementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    fullscreenElementRef.current = document.querySelector('#portals') as HTMLElement;
+  }, []);
+
+  const [, setFullscreen, exitFullscreen] = useFullscreen(fullscreenElementRef, exitFullScreenCallback);
+
   const activeWebApp = modal?.activeWebApp;
+  const activeWebAppName = activeWebApp?.appName;
   const {
-    url, buttonText, headerColor, serverHeaderColorKey, serverHeaderColor,
+    url, buttonText, headerColor, serverHeaderColorKey, serverHeaderColor, isBackButtonVisible,
   } = webApp || {};
   const isCloseModalOpen = Boolean(webApp?.isCloseModalOpen);
   const isRemoveModalOpen = Boolean(webApp?.isRemoveModalOpen);
@@ -158,8 +194,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const isSimple = Boolean(buttonText);
 
   const {
-    reloadFrame, sendEvent, sendViewport, sendTheme,
-  } = useWebAppFrame(frameRef, isOpen, isSimple, handleEvent, webApp, markLoaded);
+    reloadFrame, sendEvent, sendFullScreenChanged, sendViewport, sendSafeArea, sendTheme,
+  } = useWebAppFrame(frameRef, isOpen, isFullscreen, isSimple, handleEvent, webApp, markLoaded);
 
   useEffect(() => {
     if (isActive) registerSendEventCallback(sendEvent);
@@ -247,6 +283,32 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       sendThemeCallback();
     }, ANIMATION_WAIT);
   }, [theme]);
+
+  const setFullscreenCallback = useLastCallback(() => {
+    if (!checkIfFullscreen() && isActive) {
+      setFullscreen?.();
+    }
+  });
+
+  const exitIfFullscreenCallback = useLastCallback(() => {
+    if (checkIfFullscreen() && isActive) {
+      exitFullscreen?.();
+    }
+  });
+
+  const sendFullScreenChangedCallback = useLastCallback(
+    (value: boolean) => { if (isActive) sendFullScreenChanged(value); },
+  );
+
+  useEffect(() => {
+    if (isFullscreen) {
+      setFullscreenCallback();
+      sendFullScreenChangedCallback(true);
+    } else {
+      exitIfFullscreenCallback();
+      sendFullScreenChangedCallback(false);
+    }
+  }, [isFullscreen]);
 
   useSyncEffect(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
@@ -377,6 +439,24 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   function handleEvent(event: WebAppInboundEvent) {
     const { eventType, eventData } = event;
+
+    if (eventType === 'web_app_request_fullscreen') {
+      if (getIsWebAppsFullscreenSupported()) {
+        changeWebAppModalState({ state: 'fullScreen' });
+      } else {
+        sendEvent({
+          eventType: 'fullscreen_failed',
+          eventData: {
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+    }
+
+    if (eventType === 'web_app_exit_fullscreen') {
+      exitIfFullscreenCallback();
+    }
+
     if (eventType === 'web_app_open_tg_link') {
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl, shouldIgnoreCache: eventData.force_request });
@@ -514,14 +594,19 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const [shouldShowMainButton, setShouldShowMainButton] = useState(false);
   const [shouldShowSecondaryButton, setShouldShowSecondaryButton] = useState(false);
 
+  const [shouldShowAppNameInFullscreen, setShouldShowAppNameInFullscreen] = useState(false);
+
+  const [backButtonTextWidth, setBackButtonTextWidth] = useState(0);
+
   // Notify view that height changed
   useSyncEffect(() => {
     setTimeout(() => {
       sendViewport();
+      sendSafeArea();
     }, ANIMATION_WAIT);
   }, [shouldShowSecondaryButton, shouldHideSecondaryButton,
     shouldShowMainButton, shouldShowMainButton,
-    secondaryButton?.position, sendViewport]);
+    secondaryButton?.position, sendViewport, sendSafeArea]);
 
   const isVerticalLayout = secondaryButtonCurrentPosition === 'top' || secondaryButtonCurrentPosition === 'bottom';
   const isHorizontalLayout = !isVerticalLayout;
@@ -536,6 +621,35 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const mainButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
   const secondaryButtonChangeTimeout = useRef<ReturnType<typeof setTimeout>>();
   const secondaryButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const appNameDisplayTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (isFullscreen && isOpen && Boolean(activeWebAppName)) {
+      setShouldShowAppNameInFullscreen(true);
+
+      if (appNameDisplayTimeout.current) {
+        clearTimeout(appNameDisplayTimeout.current);
+      }
+
+      appNameDisplayTimeout.current = setTimeout(() => {
+        setShouldShowAppNameInFullscreen(false);
+        appNameDisplayTimeout.current = undefined;
+      }, APP_NAME_DISPLAY_DURATION);
+    } else {
+      setShouldShowAppNameInFullscreen(false);
+
+      if (appNameDisplayTimeout.current) {
+        clearTimeout(appNameDisplayTimeout.current);
+        appNameDisplayTimeout.current = undefined;
+      }
+    }
+
+    return () => {
+      if (appNameDisplayTimeout.current) {
+        clearTimeout(appNameDisplayTimeout.current);
+      }
+    };
+  }, [isFullscreen, isOpen, activeWebAppName]);
 
   useEffect(() => {
     if (mainButtonChangeTimeout.current) clearTimeout(mainButtonChangeTimeout.current);
@@ -590,30 +704,140 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const frameWidth = frameSize?.width || 0;
   let frameHeight = frameSize?.height || 0;
   if (shouldDecreaseWebFrameSize) { frameHeight -= 4 * REM; }
-  const frameStyle = buildStyle(
+  const frameStyle = frameSize ? buildStyle(
     `left: ${0}px;`,
     `top: ${0}px;`,
     `width: ${frameWidth}px;`,
     `height: ${frameHeight}px;`,
     isDragging ? 'pointer-events: none;' : '',
+  ) : isDragging ? 'pointer-events: none;' : '';
+
+  const handleBackClick = useLastCallback(() => {
+    if (isBackButtonVisible) {
+      sendEvent({
+        eventType: 'back_button_pressed',
+      });
+    } else {
+      exitIfFullscreenCallback();
+      sendFullScreenChanged(false);
+      changeWebAppModalState({ state: 'maximized' });
+      closeWebAppModal();
+    }
+  });
+
+  const handleCollapseClick = useLastCallback(() => {
+    exitIfFullscreenCallback();
+  });
+
+  const handleShowContextMenu = useLastCallback((e: React.MouseEvent) => {
+    onContextMenuButtonClick(e);
+  });
+
+  const backIconClass = buildClassName(
+    styles.closeIcon,
+    isBackButtonVisible && styles.stateBack,
   );
+  const backButtonCaption = shouldShowAppNameInFullscreen ? activeWebAppName
+    : lang(isBackButtonVisible ? 'Back' : 'Close');
+
+  const hasHeaderElement = headerButtonCaptionRef?.current;
+
+  useEffect(() => {
+    const width = headerButtonCaptionRef?.current?.clientWidth || 0;
+    setBackButtonTextWidth(width);
+  }, [backButtonCaption, hasHeaderElement]);
+
+  function getBackButtonActiveKey() {
+    if (shouldShowAppNameInFullscreen) return 0;
+    return isBackButtonVisible ? 1 : 2;
+  }
+
+  function renderFullscreenBackButtonCaption() {
+    return (
+      <span
+        className={styles.buttonCaptionContainer}
+        style={
+          `width: ${backButtonTextWidth}px;`
+        }
+      >
+        <Transition
+          activeKey={getBackButtonActiveKey()}
+          name="slideFade"
+        >
+          <div
+            ref={headerButtonCaptionRef}
+            className={styles.backButtonCaption}
+          >
+            {backButtonCaption}
+          </div>
+        </Transition>
+      </span>
+    );
+  }
+
+  function renderFullscreenHeaderPanel() {
+    return (
+      <div className={styles.headerPanel}>
+        <div ref={headerButtonRef} className={styles.headerButton} onClick={handleBackClick}>
+          <div className={styles.backIconContainer}>
+            <div className={backIconClass} />
+          </div>
+          {renderFullscreenBackButtonCaption()}
+        </div>
+        <div className={styles.headerSplitButton}>
+          <div
+            className={buildClassName(
+              styles.headerButton,
+              styles.left,
+            )}
+          >
+            <Icon
+              name="down"
+              className={buildClassName(
+                styles.icon,
+                styles.collapseIcon,
+              )}
+              onClick={handleCollapseClick}
+            />
+          </div>
+          <div
+            className={buildClassName(
+              styles.headerButton,
+              styles.right,
+            )}
+          >
+            <Icon
+              name="more"
+              className={buildClassName(
+                styles.icon,
+                styles.moreIcon,
+              )}
+              onClick={handleShowContextMenu}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
+      ref={containerRef}
       className={buildClassName(
         styles.root,
         !isActive && styles.hidden,
         isMultiTabSupported && styles.multiTab,
       )}
     >
-      {isMaximizedState && <Spinner className={buildClassName(styles.loadingSpinner, isLoaded && styles.hide)} />}
+      {isFullscreen && getIsWebAppsFullscreenSupported() && renderFullscreenHeaderPanel()}
+      {!isMinimizedState && <Spinner className={buildClassName(styles.loadingSpinner, isLoaded && styles.hide)} />}
       <iframe
         className={buildClassName(
           styles.frame,
           shouldDecreaseWebFrameSize && styles.withButton,
           !isLoaded && styles.hide,
         )}
-        style={frameSize ? frameStyle : undefined}
+        style={frameStyle}
         src={url}
         title={`${bot?.firstName} Web App`}
         sandbox={SANDBOX_ATTRIBUTES}
@@ -621,7 +845,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         allowFullScreen
         ref={frameRef}
       />
-      {isMaximizedState && (
+      {!isMinimizedState && (
         <div
           style={`background-color: ${bottomBarColor};`}
           className={buildClassName(
@@ -739,7 +963,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
     const { botId: activeBotId } = modal?.activeWebApp || {};
-    const isMaximizedState = modal?.modalState === 'maximized';
+    const modalState = modal?.modalState;
 
     const attachBot = activeBotId ? global.attachMenu.bots[activeBotId] : undefined;
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
@@ -757,7 +981,7 @@ export default memo(withGlobal<OwnProps>(
       theme,
       isPaymentModalOpen: isPaymentModalOpen || Boolean(starsInputInvoice),
       paymentStatus,
-      isMaximizedState,
+      modalState,
     };
   },
 )(WebAppModalTabContent));
