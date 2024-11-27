@@ -2,12 +2,13 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useState } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiPeer } from '../../../api/types';
 
 import {
   getChatTitle, getUserFirstOrLastName, getUserFullName, isChatBasicGroup,
 } from '../../../global/helpers';
-import { selectChat, selectUser } from '../../../global/selectors';
+import { isApiPeerChat, isApiPeerUser } from '../../../global/helpers/peers';
+import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -35,8 +36,7 @@ type OwnProps = {
 
 type StateProps = {
   currentUserId?: string;
-  chat?: ApiChat;
-  user?: ApiUser;
+  peer?: ApiPeer;
 };
 
 const ChatReportPane: FC<OwnProps & StateProps> = ({
@@ -46,8 +46,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
   canReportSpam,
   canAddContact,
   canBlockContact,
-  chat,
-  user,
+  peer,
   currentUserId,
   onPaneStateChange,
 }) => {
@@ -67,6 +66,10 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
   const [shouldReportSpam, setShouldReportSpam] = useState<boolean>(true);
   const [shouldDeleteChat, setShouldDeleteChat] = useState<boolean>(true);
+
+  const renderingPeer = useCurrentOrPrev(peer);
+  const chat = renderingPeer && isApiPeerChat(renderingPeer) ? renderingPeer : undefined;
+  const user = renderingPeer && isApiPeerUser(renderingPeer) ? renderingPeer : undefined;
   const isBasicGroup = chat && isChatBasicGroup(chat);
 
   const renderingCanAddContact = useCurrentOrPrev(canAddContact);
@@ -109,7 +112,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
 
   const hasAnyButton = canAddContact || canBlockContact || canReportSpam;
 
-  const isRendering = Boolean(hasAnyButton && (chat || user));
+  const isRendering = Boolean(hasAnyButton && peer);
 
   const { ref, shouldRender } = useHeaderPane({
     isOpen: isRendering,
@@ -202,7 +205,6 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => ({
     currentUserId: global.currentUserId,
-    chat: selectChat(global, chatId),
-    user: selectUser(global, chatId),
+    peer: selectPeer(global, chatId),
   }),
 )(ChatReportPane));

@@ -24,13 +24,13 @@ import {
 } from '../../global/helpers';
 import {
   selectBot,
+  selectCanGift,
   selectCanManage,
   selectCanTranslateChat,
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
   selectIsChatWithSelf,
-  selectIsPremiumPurchaseBlocked,
   selectIsRightColumnShown,
   selectNotifyExceptions,
   selectNotifySettings,
@@ -743,7 +743,7 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
     const fullInfo = userFullInfo || chatFullInfo;
-    const canGift = !selectIsPremiumPurchaseBlocked(global) && !isChatWithSelf && isPrivate;
+    const canGift = selectCanGift(global, chatId);
 
     const topic = selectTopic(global, chatId, threadId);
     const canCreateTopic = chat.isForum && (

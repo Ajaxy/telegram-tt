@@ -39,7 +39,7 @@ export default function useHeaderPane<RefType extends HTMLElement = HTMLDivEleme
   withResizeObserver?: boolean;
   onStateChange?: (state: PaneState) => void;
 }) {
-  const [shouldRender, setShouldRender] = useState(true);
+  const [shouldRender, setShouldRender] = useState(isOpen);
   // eslint-disable-next-line no-null/no-null
   const localRef = useRef<RefType>(null);
   const ref = providedRef || localRef;

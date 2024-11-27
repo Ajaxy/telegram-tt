@@ -772,6 +772,7 @@ const Message: FC<OwnProps & StateProps> = ({
     hasThread: hasThread && !noComments,
     forceSenderName,
     hasCommentCounter: hasThread && repliesThreadInfo.messagesCount > 0,
+    hasCommentButton: withCommentButton,
     hasActionButton: canForward || canFocus,
     hasReactions,
     isGeoLiveActive: location?.mediaType === 'geoLive' && !isGeoLiveExpired(message),
