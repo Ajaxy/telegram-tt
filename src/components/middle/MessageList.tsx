@@ -227,10 +227,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [firstUnreadId]);
 
   useEffect(() => {
-    if (areAdsEnabled && isChannelChat && isSynced && isReady) {
+    const canHaveAds = isChannelChat || isBot;
+    if (areAdsEnabled && canHaveAds && isSynced && isReady) {
       loadSponsoredMessages({ peerId: chatId });
     }
-  }, [chatId, isSynced, isReady, isChannelChat, areAdsEnabled]);
+  }, [chatId, isSynced, isReady, isChannelChat, isBot, areAdsEnabled]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useSyncEffect(() => {
@@ -695,7 +696,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         />
       ) : hasMessages ? (
         <MessageListContent
-          areAdsEnabled={areAdsEnabled}
+          canShowAds={areAdsEnabled && isChannelChat}
           chatId={chatId}
           isComments={isComments}
           isChannelChat={isChannelChat}

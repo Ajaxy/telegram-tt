@@ -31,9 +31,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-x: hidden;
 }
 
 .separator {
   margin-block: 1rem;
-  width: 110%;
+  width: calc(100% + 2rem); // Hack to cover modal paddings
 }

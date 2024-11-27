@@ -12,7 +12,6 @@ import type {
   ApiPeer,
   ApiPoll,
   ApiReaction,
-  ApiSponsoredMessage,
   ApiStickerSet,
   ApiThreadInfo,
   ApiTypeStory,
@@ -51,7 +50,7 @@ type OwnProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
   targetHref?: string;
-  message: ApiMessage | ApiSponsoredMessage;
+  message: ApiMessage;
   poll?: ApiPoll;
   story?: ApiTypeStory;
   canSendNow?: boolean;
@@ -119,10 +118,6 @@ type OwnProps = {
   onClosePoll?: NoneToVoidFunction;
   onShowSeenBy?: NoneToVoidFunction;
   onShowReactors?: NoneToVoidFunction;
-  onAboutAdsClick?: NoneToVoidFunction;
-  onSponsoredHide?: NoneToVoidFunction;
-  onSponsorInfo?: NoneToVoidFunction;
-  onSponsoredReport?: NoneToVoidFunction;
   onTranslate?: NoneToVoidFunction;
   onShowOriginal?: NoneToVoidFunction;
   onSelectLanguage?: NoneToVoidFunction;
@@ -215,10 +210,6 @@ const MessageContextMenu: FC<OwnProps> = ({
   onSendPaidReaction,
   onShowPaidReactionModal,
   onCopyMessages,
-  onAboutAdsClick,
-  onSponsoredHide,
-  onSponsorInfo,
-  onSponsoredReport,
   onReactionPickerOpen,
   onTranslate,
   onShowOriginal,
@@ -234,10 +225,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   const lang = useOldLang();
   const noReactions = !isPrivate && !enabledReactions;
   const withReactions = canShowReactionList && !noReactions;
-  const isSponsoredMessage = !('id' in message);
   const isEdited = ('isEdited' in message) && message.isEdited;
-  const messageId = !isSponsoredMessage ? message.id : '';
-  const seenByDates = !isSponsoredMessage ? message.seenByDates : undefined;
+  const seenByDates = message.seenByDates;
 
   const [areItemsHidden, hideItems] = useFlag();
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
@@ -286,23 +275,19 @@ const MessageContextMenu: FC<OwnProps> = ({
     onClose();
   });
 
-  const copyOptions = isSponsoredMessage
-    ? []
-    : getMessageCopyOptions(
-      message,
-      groupStatetefulContent({ poll, story }),
-      targetHref,
-      canCopy,
-      handleAfterCopy,
-      canCopyLink ? onCopyLink : undefined,
-      onCopyMessages,
-      onCopyNumber,
-    );
+  const copyOptions = getMessageCopyOptions(
+    message,
+    groupStatetefulContent({ poll, story }),
+    targetHref,
+    canCopy,
+    handleAfterCopy,
+    canCopyLink ? onCopyLink : undefined,
+    onCopyMessages,
+    onCopyNumber,
+  );
 
   const getTriggerElement = useLastCallback(() => {
-    return isSponsoredMessage
-      ? document.querySelector('.Transition_slide-active > .MessageList .SponsoredMessage')
-      : document.querySelector(`.Transition_slide-active > .MessageList div[data-message-id="${messageId}"]`);
+    return document.querySelector(`.Transition_slide-active > .MessageList div[data-message-id="${message.id}"]`);
   });
 
   const getRootElement = useLastCallback(() => document.querySelector('.Transition_slide-active > .MessageList'));
@@ -368,7 +353,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           topReactions={topReactions}
           allAvailableReactions={availableReactions}
           defaultTagReactions={defaultTagReactions}
-          currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
+          currentReactions={message.reactions?.results}
           reactionsLimit={reactionsLimit}
           onToggleReaction={onToggleReaction!}
           onSendPaidReaction={onSendPaidReaction}
@@ -464,26 +449,7 @@ const MessageContextMenu: FC<OwnProps> = ({
             )}
           </>
         )}
-        {isSponsoredMessage && message.sponsorInfo && (
-          <MenuItem icon="channel" onClick={onSponsorInfo}>{lang('SponsoredMessageSponsor')}</MenuItem>
-        )}
-        {isSponsoredMessage && (
-          <MenuItem icon="info" onClick={onAboutAdsClick}>
-            {lang(message.canReport ? 'AboutRevenueSharingAds' : 'SponsoredMessageInfo')}
-          </MenuItem>
-        )}
-        {isSponsoredMessage && message.canReport && (
-          <MenuItem icon="hand-stop" onClick={onSponsoredReport}>
-            {lang('ReportAd')}
-          </MenuItem>
-        )}
-        {isSponsoredMessage && onSponsoredHide && (
-          <>
-            <MenuSeparator />
-            <MenuItem icon="close-circle" onClick={onSponsoredHide}>{lang('HideAd')}</MenuItem>
-          </>
-        )}
-        {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
+        {(canShowSeenBy || canShowReactionsCount) && (
           <>
             <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
             <MenuItem
@@ -518,10 +484,10 @@ const MessageContextMenu: FC<OwnProps> = ({
             </MenuItem>
           </>
         )}
-        {((!isSponsoredMessage && (canLoadReadDate || shouldRenderShowWhen)) || isEdited) && (
+        {(canLoadReadDate || shouldRenderShowWhen || isEdited) && (
           <MenuSeparator size={hasCustomEmoji ? 'thin' : 'thick'} />
         )}
-        {!isSponsoredMessage && (canLoadReadDate || shouldRenderShowWhen) && (
+        {(canLoadReadDate || shouldRenderShowWhen) && (
           <ReadTimeMenuItem
             canLoadReadDate={canLoadReadDate}
             shouldRenderShowWhen={shouldRenderShowWhen}

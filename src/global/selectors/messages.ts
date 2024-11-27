@@ -1251,8 +1251,7 @@ export function selectCanForwardMessages<T extends GlobalState>(global: T, chatI
 }
 
 export function selectSponsoredMessage<T extends GlobalState>(global: T, chatId: string) {
-  const chat = selectChat(global, chatId);
-  const message = chat && isChatChannel(chat) ? global.messages.sponsoredByChatId[chatId] : undefined;
+  const message = global.messages.sponsoredByChatId[chatId];
 
   return message && message.expiresAt >= Math.round(Date.now() / 1000) ? message : undefined;
 }

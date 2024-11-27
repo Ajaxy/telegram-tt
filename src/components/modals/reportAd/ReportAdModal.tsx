@@ -20,7 +20,7 @@ import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../
 
 import styles from './ReportAdModal.module.scss';
 
-const ADDED_PADDING = 40;
+const ADDED_PADDING = 56;
 
 export type OwnProps = {
   modal: TabState['reportAdModal'];
@@ -64,7 +64,11 @@ const ReportAdModal = ({
     const parts = template.split('{link}');
     return [
       parts[0],
-      <SafeLink text={lang('lng_report_sponsored_reported_link')} url={lang('ReportAd.Help_URL')} />,
+      <SafeLink
+        withNormalWordBreak
+        text={lang('lng_report_sponsored_reported_link')}
+        url={lang('ReportAd.Help_URL')}
+      />,
       parts[1],
     ];
   }, [lang, modal]);
@@ -123,6 +127,7 @@ const ReportAdModal = ({
     <Modal
       isOpen={isOpen}
       hasCloseButton
+      className={styles.root}
       header={header}
       onClose={closeReportAdModal}
     >

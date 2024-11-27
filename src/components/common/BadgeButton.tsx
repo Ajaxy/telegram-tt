@@ -7,7 +7,7 @@ import styles from './BadgeButton.module.scss';
 type OwnProps = {
   children: React.ReactNode;
   className?: string;
-  onClick?: NoneToVoidFunction;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 };
 
 const BadgeButton = ({

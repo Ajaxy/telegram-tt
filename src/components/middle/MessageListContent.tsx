@@ -36,7 +36,7 @@ import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
-  areAdsEnabled?: boolean;
+  canShowAds?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageIds: number[];
@@ -68,7 +68,7 @@ interface OwnProps {
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
-  areAdsEnabled,
+  canShowAds,
   chatId,
   threadId,
   messageIds,
@@ -308,7 +308,7 @@ const MessageListContent: FC<OwnProps> = ({
         key="fab-trigger"
         className="fab-trigger"
       />
-      {areAdsEnabled && isViewportNewest && (
+      {canShowAds && isViewportNewest && (
         <SponsoredMessage
           key={chatId}
           chatId={chatId}

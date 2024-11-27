@@ -7,6 +7,7 @@ import { selectTabState } from '../../global/selectors';
 import { pick } from '../../util/iteratees';
 
 import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal.async';
+import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
 import BoostModal from './boost/BoostModal.async';
 import ChatInviteModal from './chatInvite/ChatInviteModal.async';
@@ -55,7 +56,8 @@ type ModalKey = keyof Pick<TabState,
 'giftModal' |
 'isGiftRecipientPickerOpen' |
 'isWebAppsCloseConfirmationModalOpen' |
-'giftInfoModal'
+'giftInfoModal' |
+'aboutAdsModal'
 >;
 
 type StateProps = {
@@ -94,6 +96,7 @@ const MODALS: ModalRegistry = {
   isGiftRecipientPickerOpen: GiftRecipientPicker,
   isWebAppsCloseConfirmationModalOpen: WebAppsCloseConfirmationModal,
   giftInfoModal: GiftInfoModal,
+  aboutAdsModal: AboutAdsModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

@@ -22,6 +22,7 @@ import { applyAnimationState, type PaneState } from './hooks/useHeaderPane';
 
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import AudioPlayer from './panes/AudioPlayer';
+import BotAdPane from './panes/BotAdPane';
 import ChatReportPane from './panes/ChatReportPane';
 import HeaderPinnedMessage from './panes/HeaderPinnedMessage';
 
@@ -64,6 +65,7 @@ const MiddleHeaderPanes = ({
   const [getPinnedState, setPinnedState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getGroupCallState, setGroupCallState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getChatReportState, setChatReportState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
+  const [getBotAdState, setBotAdState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
 
   const isPinnedMessagesFullWidth = isAudioPlayerRendered || !isDesktop;
 
@@ -85,9 +87,10 @@ const MiddleHeaderPanes = ({
     const pinnedState = getPinnedState();
     const groupCallState = getGroupCallState();
     const chatReportState = getChatReportState();
+    const botAdState = getBotAdState();
 
     // Keep in sync with the order of the panes in the DOM
-    const stateArray = [audioPlayerState, groupCallState, chatReportState, pinnedState];
+    const stateArray = [audioPlayerState, groupCallState, chatReportState, pinnedState, botAdState];
 
     const isFirstRender = isFirstRenderRef.current;
     const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0);
@@ -100,7 +103,7 @@ const MiddleHeaderPanes = ({
     setExtraStyles(middleColumn, {
       '--middle-header-panes-height': `${totalHeight}px`,
     });
-  }, [getAudioPlayerState, getGroupCallState, getPinnedState, getChatReportState]);
+  }, [getAudioPlayerState, getGroupCallState, getPinnedState, getChatReportState, getBotAdState]);
 
   if (!shouldRender) return undefined;
 
@@ -135,6 +138,11 @@ const MiddleHeaderPanes = ({
         onPaneStateChange={setPinnedState}
         isFullWidth
         shouldHide={!isPinnedMessagesFullWidth}
+      />
+      <BotAdPane
+        chatId={chatId}
+        messageListType={messageListType}
+        onPaneStateChange={setBotAdState}
       />
     </div>
   );

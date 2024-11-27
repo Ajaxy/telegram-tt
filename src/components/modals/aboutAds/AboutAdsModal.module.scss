@@ -8,6 +8,12 @@
   padding-inline: 1.5rem;
 }
 
+.moreButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
 .secondary {
   color: var(--color-text-secondary);
 }
@@ -16,4 +22,5 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  line-height: 1.25;
 }

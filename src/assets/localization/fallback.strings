@@ -704,7 +704,8 @@
 "Answer_other" = "{count} answers";
 "Vote" = "Vote";
 "MessageRecommendedLabel" = "recommended";
-"SponsoredMessage" = "ad";
+"SponsoredMessageAd" = "Ad";
+"SponsoredMessageAdWhatIsThis" = "what's this?";
 "PremiumStickerTooltip" = "This set contains premium stickers like this one.";
 "ViewAction" = "View";
 "Loading" = "Loading...";

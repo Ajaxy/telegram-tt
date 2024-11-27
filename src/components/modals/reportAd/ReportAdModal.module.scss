@@ -2,6 +2,12 @@
   overflow-x: hidden;
 }
 
+.root {
+  :global(.modal-dialog) {
+    max-width: 23rem;
+  }
+}
+
 .modalTitle {
   display: flex;
   flex-direction: column;
@@ -15,7 +21,7 @@
 }
 
 .option {
-  margin-bottom: 0.25rem !important;
+  margin-bottom: 0rem !important;
 }
 
 .optionButton {

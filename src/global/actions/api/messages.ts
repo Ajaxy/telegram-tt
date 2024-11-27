@@ -62,6 +62,7 @@ import {
   isServiceNotificationMessage,
   isUserBot,
 } from '../../helpers';
+import { isApiPeerUser } from '../../helpers/peers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
@@ -112,6 +113,7 @@ import {
   selectFocusedMessageId,
   selectForwardsCanBeSentToChat,
   selectForwardsContainVoiceMessages,
+  selectIsChatBotNotStarted,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectLanguageCode,
@@ -1628,6 +1630,10 @@ addActionHandler('loadSponsoredMessages', async (global, actions, payload): Prom
   const { peerId } = payload;
   const peer = selectPeer(global, peerId);
   if (!peer) {
+    return;
+  }
+
+  if (isApiPeerUser(peer) && selectIsChatBotNotStarted(global, peer.id)) {
     return;
   }
 

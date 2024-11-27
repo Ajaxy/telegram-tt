@@ -610,7 +610,8 @@ export interface LangPair {
   'ChatPollTotalVotesResultEmpty': undefined;
   'Vote': undefined;
   'MessageRecommendedLabel': undefined;
-  'SponsoredMessage': undefined;
+  'SponsoredMessageAd': undefined;
+  'SponsoredMessageAdWhatIsThis': undefined;
   'PremiumStickerTooltip': undefined;
   'ViewAction': undefined;
   'Loading': undefined;

@@ -25,7 +25,7 @@ export { default as GiftCodeModal } from '../components/modals/giftcode/GiftCode
 export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';
 export { default as ChatInviteModal } from '../components/modals/chatInvite/ChatInviteModal';
 
-export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
+export { default as AboutAdsModal } from '../components/modals/aboutAds/AboutAdsModal';
 export { default as AboutMonetizationModal } from '../components/common/AboutMonetizationModal';
 export { default as VerificationMonetizationModal } from '../components/common/VerificationMonetizationModal';
 export { default as ReportAdModal } from '../components/modals/reportAd/ReportAdModal';

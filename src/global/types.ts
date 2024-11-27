@@ -388,6 +388,10 @@ export type TabState = {
     messageId: number;
   };
 
+  aboutAdsModal?: {
+    chatId: string;
+  };
+
   reactionPicker?: {
     chatId?: string;
     messageId?: number;
@@ -1750,6 +1754,10 @@ export interface ActionPayloads {
     randomId: string;
     option?: string;
   } & WithTabId;
+  openAboutAdsModal: {
+    chatId: string;
+  } & WithTabId;
+  closeAboutAdsModal: WithTabId | undefined;
   openPreviousReportAdModal: WithTabId | undefined;
   openPreviousReportModal: WithTabId | undefined;
   closeReportAdModal: WithTabId | undefined;
