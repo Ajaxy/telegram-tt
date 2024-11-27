@@ -83,9 +83,9 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
 
   const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
   const contentRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
   const shouldObserve = Boolean(message);
 
   const { isMobile } = useAppLayout();
