@@ -5,7 +5,9 @@ import { getActions } from '../../global';
 import type { ApiMessage } from '../../api/types';
 import type { Signal } from '../../util/signals';
 
-import { getMessageIsSpoiler, getMessageMediaHash, getMessageSingleInlineButton } from '../../global/helpers';
+import {
+  getMessageIsSpoiler, getMessageMediaHash, getMessageSingleInlineButton, getMessageVideo,
+} from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getPictogramDimensions, REM } from '../common/helpers/mediaDimensions';
@@ -56,8 +58,12 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
   const { clickBotInlineButton } = getActions();
   const lang = useOldLang();
 
+  const video = getMessageVideo(message);
+  const gif = video?.isGif ? video : undefined;
+  const isVideoThumbnail = Boolean(gif && !gif.previewPhotoSizes?.length);
+
   const mediaThumbnail = useThumbnail(message);
-  const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
+  const mediaBlobUrl = useMedia(getMessageMediaHash(message, isVideoThumbnail ? 'full' : 'pictogram'));
   const isSpoiler = getMessageIsSpoiler(message);
 
   const isLoading = Boolean(useDerivedState(getLoadingPinnedId));
@@ -86,13 +92,14 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
 
   const { handleClick, handleMouseDown } = useFastClick(onClick);
 
-  function renderPictogram(thumbDataUri?: string, blobUrl?: string, spoiler?: boolean) {
+  function renderPictogram(thumbDataUri?: string, blobUrl?: string, isFullVideo?: boolean, asSpoiler?: boolean) {
     const { width, height } = getPictogramDimensions();
     const srcUrl = blobUrl || thumbDataUri;
+    const shouldRenderVideo = isFullVideo && blobUrl;
 
     return (
       <div className={styles.pinnedThumb}>
-        {thumbDataUri && !spoiler && (
+        {thumbDataUri && !asSpoiler && !shouldRenderVideo && (
           <img
             className={styles.pinnedThumbImage}
             src={srcUrl}
@@ -102,8 +109,18 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
             draggable={false}
           />
         )}
+        {shouldRenderVideo && !asSpoiler && (
+          <video
+            src={blobUrl}
+            width={width}
+            height={height}
+            playsInline
+            disablePictureInPicture
+            className={styles.pinnedThumbImage}
+          />
+        )}
         {thumbDataUri
-          && <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(spoiler)} width={width} height={height} />}
+          && <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(asSpoiler)} width={width} height={height} />}
       </div>
     );
   }
@@ -168,6 +185,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           {renderPictogram(
             mediaThumbnail,
             mediaBlobUrl,
+            isVideoThumbnail,
             isSpoiler,
           )}
         </Transition>

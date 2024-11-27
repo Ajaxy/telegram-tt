@@ -101,11 +101,15 @@ const EmbeddedMessage: FC<OwnProps> = ({
     };
   }, [message, replyInfo]);
 
-  const mediaHash = containedMedia && getMessageMediaHash(containedMedia, 'pictogram');
+  const gif = containedMedia?.content?.video?.isGif ? containedMedia.content.video : undefined;
+  const isVideoThumbnail = Boolean(gif && !gif.previewPhotoSizes?.length);
+
+  const mediaHash = containedMedia && getMessageMediaHash(containedMedia, isVideoThumbnail ? 'full' : 'pictogram');
   const mediaBlobUrl = useMedia(mediaHash, !isIntersecting);
   const mediaThumbnail = useThumbnail(containedMedia);
-  const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
-  const isSpoiler = Boolean(message && getMessageIsSpoiler(message));
+
+  const isRoundVideo = Boolean(containedMedia && getMessageRoundVideo(containedMedia));
+  const isSpoiler = Boolean(containedMedia && getMessageIsSpoiler(containedMedia));
   const isQuote = Boolean(replyInfo?.type === 'message' && replyInfo.isQuote);
   const replyForwardInfo = replyInfo?.type === 'message' ? replyInfo.replyFrom : undefined;
 
@@ -234,7 +238,9 @@ const EmbeddedMessage: FC<OwnProps> = ({
     >
       <div className="hover-effect" />
       <RippleEffect />
-      {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
+      {mediaThumbnail && renderPictogram(
+        mediaThumbnail, mediaBlobUrl, isVideoThumbnail, isRoundVideo, isProtected, isSpoiler,
+      )}
       {sender?.color?.backgroundEmojiId && (
         <EmojiIconBackground
           emojiDocumentId={sender.color.backgroundEmojiId}
@@ -262,6 +268,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 function renderPictogram(
   thumbDataUri: string,
   blobUrl?: string,
+  isFullVideo?: boolean,
   isRoundVideo?: boolean,
   isProtected?: boolean,
   isSpoiler?: boolean,
@@ -269,10 +276,11 @@ function renderPictogram(
   const { width, height } = getPictogramDimensions();
 
   const srcUrl = blobUrl || thumbDataUri;
+  const shouldRenderVideo = isFullVideo && blobUrl;
 
   return (
     <div className={buildClassName('embedded-thumb', isRoundVideo && 'round')}>
-      {!isSpoiler && (
+      {!isSpoiler && !shouldRenderVideo && (
         <img
           src={srcUrl}
           width={width}
@@ -282,7 +290,22 @@ function renderPictogram(
           draggable={false}
         />
       )}
-      <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(isSpoiler)} width={width} height={height} />
+      {!isSpoiler && shouldRenderVideo && (
+        <video
+          src={blobUrl}
+          width={width}
+          height={height}
+          playsInline
+          disablePictureInPicture
+          className="pictogram"
+        />
+      )}
+      <MediaSpoiler
+        thumbDataUri={shouldRenderVideo ? thumbDataUri : srcUrl}
+        isVisible={Boolean(isSpoiler)}
+        width={width}
+        height={height}
+      />
       {isProtected && <span className="protector" />}
     </div>
   );
