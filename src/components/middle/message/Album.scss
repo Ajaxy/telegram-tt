@@ -3,6 +3,10 @@
   overflow: hidden;
   margin: auto;
 
+  .message-content:not(.is-forwarded).media.text & {
+    margin: -0.3125rem -0.5rem 0.3125rem;
+  }
+
   &,
   .message-content.media.text & {
     > .album-item-select-wrapper .media-inner {
