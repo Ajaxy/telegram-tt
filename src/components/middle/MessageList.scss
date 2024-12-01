@@ -66,6 +66,10 @@
     }
   }
 
+  .first-message-date-group {
+    padding-top: var(--middle-header-panes-height);
+  }
+
   &.no-composer {
     margin-bottom: 0;
 
@@ -379,15 +383,11 @@
 
   &.scrolled:not(.is-animating) .sticky-date {
     position: sticky;
-    top: 0.625rem;
+    top: calc(0.625rem + var(--middle-header-panes-height));
   }
 
   &.is-animating .message-select-control {
     display: none !important;
-  }
-
-  .has-header-tools & .sticky-date {
-    top: 3.75rem !important;
   }
 
   .local-action-message,

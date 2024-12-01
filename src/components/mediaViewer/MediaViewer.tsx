@@ -262,7 +262,7 @@ const MediaViewer = ({
   const handleSponsoredClick = useLastCallback((isFromMedia?: boolean) => {
     if (!sponsoredMessage || !chatId) return;
 
-    clickSponsoredMessage({ isMedia: isFromMedia, isFullscreen: true, chatId });
+    clickSponsoredMessage({ isMedia: isFromMedia, isFullscreen: true, peerId: chatId });
     openUrl({ url: sponsoredMessage!.url });
     closeMediaViewer();
   });

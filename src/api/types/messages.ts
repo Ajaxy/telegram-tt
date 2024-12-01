@@ -116,6 +116,7 @@ export interface ApiVideo {
   previewBlobUrl?: string;
   size: number;
   noSound?: boolean;
+  waveform?: number[];
 }
 
 export interface ApiAudio {
@@ -463,7 +464,7 @@ export interface ApiMessageActionStarGift {
   isConverted?: boolean;
   gift: ApiStarGift;
   message?: ApiFormattedText;
-  starsToConvert: number;
+  starsToConvert?: number;
 }
 
 export interface ApiAction {
@@ -1068,13 +1069,6 @@ export type ApiSponsoredMessageReportResult = {
     text: string;
     option: string;
   }[];
-};
-
-export type ApiClickSponsoredMessage = {
-  chat: ApiChat;
-  random: string;
-  isMedia?: boolean;
-  isFullscreen?: boolean;
 };
 
 export const MAIN_THREAD_ID = -1;

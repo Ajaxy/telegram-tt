@@ -749,6 +749,10 @@ function scheduleEffect(
 
   if (cleanup) {
     const runEffectCleanup = () => safeExec(() => {
+      if (componentInstance.mountState === MountState.Unmounted) {
+        return;
+      }
+
       // eslint-disable-next-line @typescript-eslint/naming-convention
       let DEBUG_startAt: number | undefined;
       if (DEBUG) {
@@ -767,8 +771,6 @@ function scheduleEffect(
           );
         }
       }
-
-      return undefined;
     }, () => {
       // eslint-disable-next-line no-console, max-len
       console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`, componentInstance);

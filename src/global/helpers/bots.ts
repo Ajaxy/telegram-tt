@@ -20,7 +20,7 @@ export function convertToApiChatType(type: string): ApiChatType | undefined {
 export function getWebAppKey(webApp: Partial<WebApp>) {
   if (webApp.requestUrl) return webApp.requestUrl;
   if (webApp.appName) return `${webApp.botId}?appName=${webApp.appName}`;
-  return webApp.botId;
+  return webApp.botId!;
 }
 
 export function isSystemBot(botId: string) {

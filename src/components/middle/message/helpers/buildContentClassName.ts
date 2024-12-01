@@ -17,6 +17,7 @@ export function buildContentClassName(
     hasThread,
     forceSenderName,
     hasCommentCounter,
+    hasCommentButton,
     hasActionButton,
     hasReactions,
     isGeoLiveActive,
@@ -32,6 +33,7 @@ export function buildContentClassName(
     hasThread?: boolean;
     forceSenderName?: boolean;
     hasCommentCounter?: boolean;
+    hasCommentButton?: boolean;
     hasActionButton?: boolean;
     hasReactions?: boolean;
     isGeoLiveActive?: boolean;
@@ -98,6 +100,7 @@ export function buildContentClassName(
 
   if (isCustomShape) {
     classNames.push('custom-shape');
+
     if (isRoundVideo) {
       classNames.push('round');
     }
@@ -106,8 +109,10 @@ export function buildContentClassName(
       classNames.push('has-comment-counter');
     }
   }
-  if (isMedia) {
+  if (isMedia && !withVoiceTranscription) {
     classNames.push('media');
+  } else if (video) {
+    classNames.push('video');
   } else if (audio) {
     classNames.push('audio');
   } else if (voice) {
@@ -178,7 +183,8 @@ export function buildContentClassName(
       classNames.push('has-background');
     }
 
-    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName || hasFactCheck) {
+    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText
+      || forceSenderName || hasFactCheck || withVoiceTranscription) {
       classNames.push('has-solid-background');
     }
 
@@ -186,7 +192,7 @@ export function buildContentClassName(
       classNames.push('has-fact-check');
     }
 
-    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || (location && asForwarded))) {
+    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || hasCommentButton)) {
       classNames.push('has-appendix');
     }
   }

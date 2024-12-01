@@ -8,7 +8,7 @@ import type { ApiBotInlineMediaResult, ApiSticker } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import buildClassName from '../../util/buildClassName';
-import { getServerTimeOffset } from '../../util/serverTime';
+import { getServerTime } from '../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
@@ -198,8 +198,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     handleContextMenuClose();
     onContextMenuClick?.();
     setEmojiStatus({
-      emojiStatus: sticker,
-      expires: Date.now() / 1000 + duration + getServerTimeOffset(),
+      emojiStatusId: sticker.id,
+      expires: getServerTime() + duration,
     });
   });
 

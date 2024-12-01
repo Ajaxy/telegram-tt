@@ -6,7 +6,6 @@ import useRunDebounced from '../../../hooks/useRunDebounced';
 
 const DEBOUNCE = 1000;
 const STICKY_TOP = 10;
-const STICKY_TOP_WITH_TOOLS = 60;
 
 export default function useStickyDates() {
   // For some reason we can not synchronously hide a sticky element (from `useLayoutEffect`) when chat opens
@@ -15,7 +14,7 @@ export default function useStickyDates() {
 
   const runDebounced = useRunDebounced(DEBOUNCE, true);
 
-  const updateStickyDates = useLastCallback((container: HTMLDivElement, hasTools?: boolean) => {
+  const updateStickyDates = useLastCallback((container: HTMLDivElement) => {
     markIsScrolled();
 
     if (!document.body.classList.contains('is-scrolling-messages')) {
@@ -25,7 +24,7 @@ export default function useStickyDates() {
     }
 
     runDebounced(() => {
-      const stuckDateEl = findStuckDate(container, hasTools);
+      const stuckDateEl = findStuckDate(container);
       if (stuckDateEl) {
         requestMutation(() => {
           stuckDateEl.classList.add('stuck');
@@ -49,13 +48,16 @@ export default function useStickyDates() {
   };
 }
 
-function findStuckDate(container: HTMLElement, hasTools?: boolean) {
+function findStuckDate(container: HTMLElement) {
   const allElements = container.querySelectorAll<HTMLDivElement>('.sticky-date');
   const containerTop = container.scrollTop;
+
+  const computedStyle = getComputedStyle(container);
+  const headerActionsHeight = parseInt(computedStyle.getPropertyValue('--middle-header-panes-height'), 10);
 
   return Array.from(allElements).find((el) => {
     const { offsetTop, offsetHeight } = el;
     const top = offsetTop - containerTop;
-    return -offsetHeight <= top && top <= (hasTools ? STICKY_TOP_WITH_TOOLS : STICKY_TOP);
+    return -offsetHeight <= top && top <= (headerActionsHeight || STICKY_TOP);
   });
 }

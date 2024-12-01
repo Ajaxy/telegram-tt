@@ -10,16 +10,14 @@
 }
 
 .checkout-picture {
-  height: 6rem;
-  border-radius: 0.5rem;
+  margin: 0.25rem 0.75rem 0 0;
 
-  @supports (aspect-ratio: 1) {
-    margin: 0.25rem 0.75rem 0 0;
-    min-width: 0;
-    width: 100%;
-    max-width: 8rem;
-    height: auto;
-  }
+  min-width: 0;
+  width: 100%;
+  max-width: 8rem;
+  height: auto;
+
+  border-radius: 0.5rem;
 }
 
 .text {

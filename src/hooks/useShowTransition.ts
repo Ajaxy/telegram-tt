@@ -23,6 +23,7 @@ type BaseHookParams<RefType extends HTMLElement> = {
   closeDuration?: number;
   className?: string | false;
   prefix?: string;
+  shouldForceOpen?: boolean;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };
 
@@ -66,6 +67,7 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
     closeDuration = CLOSE_DURATION,
     className = 'fast',
     prefix = '',
+    shouldForceOpen,
     onCloseAnimationEnd,
   } = params;
 
@@ -81,6 +83,11 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
 
   useSyncEffectWithPrevDeps(([prevIsOpen]) => {
     const options = optionsRef.current;
+
+    if (shouldForceOpen) {
+      setState('open');
+      return;
+    }
 
     if (isOpen) {
       if (closingTimeoutRef.current) {
@@ -106,7 +113,7 @@ export default function useShowTransition<RefType extends HTMLElement = HTMLDivE
         onCloseEndLast();
       }, options.closeDuration);
     }
-  }, [isOpen]);
+  }, [isOpen, shouldForceOpen]);
 
   const applyClassNames = useLastCallback(() => {
     const element = ref.current;

@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { WebApp } from '../../../../global/types';
 import type { WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
 
+import { getWebAppKey } from '../../../../global/helpers';
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useWindowSize from '../../../../hooks/window/useWindowSize';
@@ -30,10 +33,12 @@ const SCROLLBAR_STYLE = `* {
 }`;
 
 const RELOAD_TIMEOUT = 500;
+const SAFE_AREA_HEIGHT = 3.675 * REM;
 
 const useWebAppFrame = (
   ref: React.RefObject<HTMLIFrameElement>,
   isOpen: boolean,
+  isFullscreen: boolean,
   isSimpleView: boolean,
   onEvent: (event: WebAppInboundEvent) => void,
   webApp?: WebApp,
@@ -44,6 +49,8 @@ const useWebAppFrame = (
     setWebAppPaymentSlug,
     openInvoice,
     closeWebApp,
+    openSuggestedStatusModal,
+    updateWebApp,
   } = getActions();
 
   const isReloadSupported = useRef<boolean>(false);
@@ -70,6 +77,15 @@ const useWebAppFrame = (
     if (!ref.current?.contentWindow) return;
     ref.current.contentWindow.postMessage(JSON.stringify(event), '*');
   }, [ref]);
+
+  const sendFullScreenChanged = useCallback((value: boolean) => {
+    sendEvent({
+      eventType: 'fullscreen_changed',
+      eventData: {
+        is_fullscreen: value,
+      },
+    });
+  }, [sendEvent]);
 
   const forceReloadFrame = useLastCallback((url: string) => {
     if (!ref.current) return;
@@ -110,6 +126,33 @@ const useWebAppFrame = (
     });
   }, [sendEvent, ref]);
 
+  const sendSafeArea = useCallback(() => {
+    if (!ref.current) {
+      return;
+    }
+    const { height } = ref.current.getBoundingClientRect();
+    const safeAreaHeight = isFullscreen ? SAFE_AREA_HEIGHT : 0;
+    sendEvent({
+      eventType: 'safe_area_changed',
+      eventData: {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: height - safeAreaHeight,
+      },
+    });
+
+    sendEvent({
+      eventType: 'content_safe_area_changed',
+      eventData: {
+        left: 0,
+        right: 0,
+        top: safeAreaHeight,
+        bottom: 0,
+      },
+    });
+  }, [sendEvent, isFullscreen, ref]);
+
   const sendTheme = useCallback(() => {
     sendEvent({
       eventType: 'theme_changed',
@@ -146,11 +189,22 @@ const useWebAppFrame = (
       }
 
       if (eventType === 'web_app_close') {
-        if (webApp) closeWebApp({ webApp, skipClosingConfirmation: true });
+        if (webApp) {
+          const key = getWebAppKey(webApp);
+          closeWebApp({ key, skipClosingConfirmation: true });
+        }
       }
 
       if (eventType === 'web_app_request_viewport') {
         sendViewport(windowSize.isResizing);
+      }
+
+      if (eventType === 'web_app_request_safe_area') {
+        sendSafeArea();
+      }
+
+      if (eventType === 'web_app_request_content_safe_area') {
+        sendSafeArea();
       }
 
       if (eventType === 'web_app_request_theme') {
@@ -214,13 +268,59 @@ const useWebAppFrame = (
         });
       }
 
+      if (eventType === 'web_app_set_emoji_status') {
+        const { custom_emoji_id, duration } = eventData;
+
+        if (!custom_emoji_id || typeof custom_emoji_id !== 'string') {
+          sendEvent({
+            eventType: 'emoji_status_failed',
+            eventData: {
+              error: 'SUGGESTED_EMOJI_INVALID',
+            },
+          });
+          return;
+        }
+
+        if (duration) {
+          try {
+            BigInt(duration);
+          } catch (e) {
+            sendEvent({
+              eventType: 'emoji_status_failed',
+              eventData: {
+                error: 'DURATION_INVALID',
+              },
+            });
+            return;
+          }
+        }
+
+        if (!webApp) {
+          sendEvent({
+            eventType: 'emoji_status_failed',
+            eventData: {
+              error: 'UNKNOWN_ERROR',
+            },
+          });
+          return;
+        }
+
+        openSuggestedStatusModal({
+          webAppKey: getWebAppKey(webApp),
+          customEmojiId: custom_emoji_id,
+          duration: Number(duration),
+          botId: webApp.botId,
+        });
+      }
+
       onEvent(data);
     } catch (err) {
       // Ignore other messages
     }
   }, [
     isSimpleView, sendEvent, onEvent, sendCustomStyle, webApp,
-    sendTheme, sendViewport, onLoad, windowSize.isResizing, ref,
+    sendTheme, sendViewport, sendSafeArea, onLoad, windowSize.isResizing,
+    ref,
   ]);
 
   useEffect(() => {
@@ -229,7 +329,23 @@ const useWebAppFrame = (
       && lastFrameSizeRef.current.height === height && !lastFrameSizeRef.current.isResizing) return;
     lastFrameSizeRef.current = { width, height, isResizing };
     sendViewport(isResizing);
-  }, [sendViewport, windowSize]);
+    sendSafeArea();
+  }, [sendViewport, sendSafeArea, windowSize]);
+
+  useEffect(() => {
+    if (!webApp?.plannedEvents?.length) return;
+    const events = webApp.plannedEvents;
+    events.forEach((event) => {
+      sendEvent(event);
+    });
+
+    updateWebApp({
+      key: getWebAppKey(webApp),
+      update: {
+        plannedEvents: [],
+      },
+    });
+  }, [sendEvent, webApp]);
 
   useEffect(() => {
     window.addEventListener('message', handleMessage);
@@ -239,14 +355,15 @@ const useWebAppFrame = (
   useEffect(() => {
     if (isOpen && ref.current?.contentWindow) {
       sendViewport();
+      sendSafeArea();
       ignoreEventsRef.current = false;
     } else {
       lastFrameSizeRef.current = undefined;
     }
-  }, [isOpen, sendViewport, ref]);
+  }, [isOpen, isFullscreen, sendViewport, sendSafeArea, ref]);
 
   return {
-    sendEvent, reloadFrame, sendViewport, sendTheme,
+    sendEvent, sendFullScreenChanged, reloadFrame, sendViewport, sendSafeArea, sendTheme,
   };
 };
 

@@ -1,5 +1,6 @@
 import type { OldLangFn } from '../../hooks/useOldLang';
 import type { TimeFormat } from '../../types';
+import type { LangFn } from '../localization';
 
 import withCache from '../withCache';
 
@@ -374,29 +375,28 @@ export function formatDateAtTime(
   return lang('formatDateAtTime', [formattedDate, time]);
 }
 
-export function formatDateInFuture(
-  lang: OldLangFn,
-  currentTime: number,
-  datetime: number,
-) {
-  const diff = Math.ceil(datetime - currentTime);
-  if (diff < 0) {
+export function formatShortDuration(lang: LangFn, duration: number) {
+  if (duration < 0) {
     return lang('RightNow');
   }
 
-  if (diff < 60) {
-    return lang('Seconds', diff);
+  if (duration < 60) {
+    const count = Math.ceil(duration);
+    return lang('Seconds', { count }, { pluralValue: duration });
   }
 
-  if (diff < 60 * 60) {
-    return lang('Minutes', Math.ceil(diff / 60));
+  if (duration < 60 * 60) {
+    const count = Math.ceil(duration / 60);
+    return lang('Minutes', { count }, { pluralValue: count });
   }
 
-  if (diff < 60 * 60 * 24) {
-    return lang('Hours', Math.ceil(diff / (60 * 60)));
+  if (duration < 60 * 60 * 24) {
+    const count = Math.ceil(duration / (60 * 60));
+    return lang('Hours', { count }, { pluralValue: count });
   }
 
-  return lang('Days', Math.ceil(diff / (60 * 60 * 24)));
+  const count = Math.ceil(duration / (60 * 60 * 24));
+  return lang('Days', { count }, { pluralValue: count });
 }
 
 function isValidDate(day: number, month: number, year = 2021): boolean {

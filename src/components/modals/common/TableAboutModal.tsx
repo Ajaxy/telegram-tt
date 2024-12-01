@@ -59,7 +59,7 @@ const TableAboutModal = ({
       <Separator className={styles.separator} />
       {footer}
       {buttonText && (
-        <Button onClick={onButtonClick || onClose}>{buttonText}</Button>
+        <Button size="smaller" onClick={onButtonClick || onClose}>{buttonText}</Button>
       )}
     </Modal>
   );

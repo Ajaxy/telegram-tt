@@ -44,7 +44,6 @@ import {
   buildApiChatReactions,
   buildApiChatSettings,
   buildApiMissingInvitedUser,
-  buildApiSponsoredMessageReportResult,
   buildApiTopic,
   buildChatMember,
   buildChatMembers,
@@ -69,7 +68,6 @@ import {
 } from '../gramjsBuilders';
 import {
   addPhotoToLocalDb,
-  deserializeBytes,
   isChatFolder,
 } from '../helpers';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
@@ -1982,40 +1980,4 @@ export async function fetchChannelRecommendations({ chat }: { chat?: ApiChat }) 
     similarChannels,
     count: result instanceof GramJs.messages.ChatsSlice ? result.count : similarChannels.length,
   };
-}
-
-export async function reportSponsoredMessage({
-  chat,
-  randomId,
-  option,
-}: {
-  chat: ApiChat;
-  randomId: string;
-  option: string;
-}) {
-  const { id, accessHash } = chat;
-  const channel = buildInputEntity(id, accessHash);
-
-  try {
-    const result = await invokeRequest(new GramJs.channels.ReportSponsoredMessage({
-      channel: channel as GramJs.InputChannel,
-      randomId: deserializeBytes(randomId),
-      option: deserializeBytes(option),
-    }), {
-      shouldThrow: true,
-    });
-
-    if (!result) {
-      return undefined;
-    }
-
-    return buildApiSponsoredMessageReportResult(result);
-  } catch (err) {
-    if (err instanceof Error && err.message === 'PREMIUM_ACCOUNT_REQUIRED') {
-      return {
-        type: 'premiumRequired' as const,
-      };
-    }
-    return undefined;
-  }
 }

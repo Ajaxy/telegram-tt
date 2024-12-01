@@ -473,10 +473,11 @@ function processEntity({
           {renderNestedMessagePart()}
         </a>
       );
-    case ApiMessageEntityTypes.Hashtag:
+    case ApiMessageEntityTypes.Hashtag: {
+      const [tag, username] = entityContent.split('@');
       return (
         <a
-          onClick={handleHashtagClick}
+          onClick={() => handleHashtagClick(tag, username)}
           className="text-entity-link"
           dir="auto"
           data-entity-type={entity.type}
@@ -484,10 +485,12 @@ function processEntity({
           {renderNestedMessagePart()}
         </a>
       );
-    case ApiMessageEntityTypes.Cashtag:
+    }
+    case ApiMessageEntityTypes.Cashtag: {
+      const [tag, username] = entityContent.split('@');
       return (
         <a
-          onClick={handleHashtagClick}
+          onClick={() => handleHashtagClick(tag, username)}
           className="text-entity-link"
           dir="auto"
           data-entity-type={entity.type}
@@ -495,6 +498,7 @@ function processEntity({
           {renderNestedMessagePart()}
         </a>
       );
+    }
     case ApiMessageEntityTypes.Code:
       return (
         <code
@@ -658,8 +662,19 @@ function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {
   getActions().sendBotCommand({ command: e.currentTarget.innerText });
 }
 
-function handleHashtagClick(e: React.MouseEvent<HTMLAnchorElement>) {
-  getActions().searchHashtag({ hashtag: e.currentTarget.innerText });
+function handleHashtagClick(hashtag?: string, username?: string) {
+  if (!hashtag) return;
+  if (username) {
+    getActions().openChatByUsername({
+      username,
+      onChatChanged: {
+        action: 'searchHashtag',
+        payload: { hashtag },
+      },
+    });
+    return;
+  }
+  getActions().searchHashtag({ hashtag });
 }
 
 function handleCodeClick(e: React.MouseEvent<HTMLElement>) {

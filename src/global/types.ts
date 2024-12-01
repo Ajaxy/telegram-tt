@@ -149,7 +149,7 @@ export type MessageListType =
 
 export type ChatListType = 'active' | 'archived' | 'saved';
 
-export type WebAppModalStateType = 'maximized' | 'minimized';
+export type WebAppModalStateType = 'fullScreen' | 'maximized' | 'minimized';
 
 export interface MessageList {
   chatId: string;
@@ -386,6 +386,10 @@ export type TabState = {
   reactorModal?: {
     chatId: string;
     messageId: number;
+  };
+
+  aboutAdsModal?: {
+    chatId: string;
   };
 
   reactionPicker?: {
@@ -907,6 +911,13 @@ export type TabState = {
     userId?: string;
     gift: ApiUserStarGift | ApiStarGift;
   };
+
+  suggestedStatusModal?: {
+    botId: string;
+    webAppKey?: string;
+    customEmojiId: string;
+    duration?: number;
+  };
 };
 
 export type GlobalState = {
@@ -1329,6 +1340,7 @@ export type WebApp = {
   backgroundColor?: string;
   isBackButtonVisible?: boolean;
   isSettingsButtonVisible?: boolean;
+  plannedEvents?: WebAppOutboundEvent[];
   sendEvent?: (event: WebAppOutboundEvent) => void;
   reloadFrame?: (url: string) => void;
 };
@@ -1695,11 +1707,12 @@ export interface ActionPayloads {
     messageId: number;
   };
   pinMessage: {
+    chatId: string;
     messageId: number;
     isUnpin: boolean;
     isOneSide?: boolean;
     isSilent?: boolean;
-  } & WithTabId;
+  };
   deleteMessages: {
     messageIds: number[];
     shouldDeleteForAll?: boolean;
@@ -1734,21 +1747,25 @@ export interface ActionPayloads {
     chatId: string;
   } & WithTabId;
   loadSponsoredMessages: {
-    chatId: string;
+    peerId: string;
   };
   viewSponsoredMessage: {
-    chatId: string;
+    peerId: string;
   };
   clickSponsoredMessage: {
-    chatId: string;
+    peerId: string;
     isMedia?: boolean;
     isFullscreen?: boolean;
   };
   reportSponsoredMessage: {
-    chatId: string;
+    peerId: string;
     randomId: string;
     option?: string;
   } & WithTabId;
+  openAboutAdsModal: {
+    chatId: string;
+  } & WithTabId;
+  closeAboutAdsModal: WithTabId | undefined;
   openPreviousReportAdModal: WithTabId | undefined;
   openPreviousReportModal: WithTabId | undefined;
   closeReportAdModal: WithTabId | undefined;
@@ -1813,6 +1830,7 @@ export interface ActionPayloads {
   };
   openTelegramLink: {
     url: string;
+    shouldIgnoreCache?: boolean;
   } & WithTabId;
   resolveBusinessChatLink: {
     slug: string;
@@ -1826,8 +1844,11 @@ export interface ActionPayloads {
     startAttach?: string;
     attach?: string;
     startApp?: string;
+    mode?: string;
+    choose?: ApiChatType[];
     text?: string;
     originalParts?: (string | undefined)[];
+    onChatChanged?: CallbackAction;
   } & WithTabId;
   processBoostParameters: {
     usernameOrId: string;
@@ -1978,11 +1999,11 @@ export interface ActionPayloads {
     isPercentage?: boolean;
   } & WithTabId;
   loadChannelMonetizationStatistics: {
-    chatId: string;
+    peerId: string;
   } & WithTabId;
 
   loadMonetizationRevenueWithdrawalUrl: {
-    chatId: string;
+    peerId: string;
     currentPassword: string;
     onSuccess: VoidFunction;
   } & WithTabId;
@@ -2112,7 +2133,7 @@ export interface ActionPayloads {
     offsetUserId?: string;
     limit?: number;
   } & WithTabId;
-  hideChatReportPanel: {
+  hideChatReportPane: {
     chatId: string;
   };
   toggleManagement: ({
@@ -2996,7 +3017,10 @@ export interface ActionPayloads {
     stickerSet: ApiStickerSet;
   };
 
-  openStickerSet: { stickerSetInfo: ApiStickerSetInfo } & WithTabId;
+  openStickerSet: {
+    stickerSetInfo: ApiStickerSetInfo;
+    shouldIgnoreCache?: boolean;
+  } & WithTabId;
   closeStickerSetModal: WithTabId | undefined;
 
   loadStickersForEmoji: {
@@ -3098,15 +3122,18 @@ export interface ActionPayloads {
     buttonText: string;
     isFromBotMenu?: boolean;
     startParam?: string;
+    isFullscreen?: boolean;
   } & WithTabId;
   updateWebApp: {
-    webApp: Partial<WebApp>;
+    key: string;
+    update: Partial<WebApp>;
   } & WithTabId;
   requestMainWebView: {
     botId: string;
     peerId: string;
     theme?: ApiThemeParameters;
     startParam?: string;
+    mode?: string;
     shouldMarkBotTrusted?: boolean;
   } & WithTabId;
   prolongWebView: {
@@ -3131,6 +3158,7 @@ export interface ActionPayloads {
     appName: string;
     theme?: ApiThemeParameters;
     startApp?: string;
+    mode?: string;
     isWriteAllowed?: boolean;
     isFromConfirm?: boolean;
     shouldSkipBotTrustRequest?: boolean;
@@ -3245,13 +3273,19 @@ export interface ActionPayloads {
   openMoreAppsTab: WithTabId | undefined;
   closeMoreAppsTab: WithTabId | undefined;
   closeWebApp: {
-    webApp: WebApp;
+    key: string;
     skipClosingConfirmation?: boolean;
+  } & WithTabId;
+  sendWebAppEvent: {
+    webAppKey: string;
+    event: WebAppOutboundEvent;
   } & WithTabId;
   closeWebAppModal: ({
     shouldSkipConfirmation?: boolean;
   } & WithTabId) | undefined;
-  changeWebAppModalState: WithTabId | undefined;
+  changeWebAppModalState: {
+    state: WebAppModalStateType;
+  } & WithTabId;
 
   // Misc
   refreshLangPackFromCache: {
@@ -3531,9 +3565,17 @@ export interface ActionPayloads {
   closeStarsGiftModal: WithTabId | undefined;
 
   setEmojiStatus: {
-    emojiStatus: ApiSticker;
+    emojiStatusId: string;
     expires?: number;
-  };
+    referrerWebAppKey?: string;
+  } & WithTabId;
+  openSuggestedStatusModal: {
+    botId: string;
+    webAppKey?: string;
+    customEmojiId: string;
+    duration?: number;
+  } & WithTabId;
+  closeSuggestedStatusModal: WithTabId | undefined;
 
   // Invoice
   openInvoice: Exclude<ApiInputInvoice, ApiInputInvoiceStarGift> & WithTabId;

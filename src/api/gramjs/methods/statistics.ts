@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiMessagePublicForward, ApiPostStatistics, ApiStoryPublicForward, StatisticsGraph,
+  ApiChat, ApiMessagePublicForward, ApiPeer, ApiPostStatistics, ApiStoryPublicForward, StatisticsGraph,
 } from '../../types';
 
 import { STATISTICS_PUBLIC_FORWARDS_LIMIT } from '../../../config';
@@ -39,10 +39,13 @@ export async function fetchChannelStatistics({
 }
 
 export async function fetchChannelMonetizationStatistics({
-  chat, dcId,
-}: { chat: ApiChat; dcId?: number }) {
+  peer, dcId,
+}: {
+  peer: ApiPeer;
+  dcId?: number;
+}) {
   const result = await invokeRequest(new GramJs.stats.GetBroadcastRevenueStats({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    peer: buildInputPeer(peer.id, peer.accessHash),
   }), {
     dcId,
   });
@@ -214,8 +217,11 @@ export async function fetchStoryPublicForwards({
 }
 
 export async function loadMonetizationRevenueWithdrawalUrl({
-  chat, currentPassword,
-}: { chat: ApiChat; currentPassword: string }) {
+  peer, currentPassword,
+}: {
+  peer: ApiPeer;
+  currentPassword: string;
+}) {
   try {
     const password = await getPassword(currentPassword);
 
@@ -224,7 +230,7 @@ export async function loadMonetizationRevenueWithdrawalUrl({
     }
 
     const result = await invokeRequest(new GramJs.stats.GetBroadcastRevenueWithdrawalUrl({
-      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+      peer: buildInputPeer(peer.id, peer.accessHash),
       password,
     }), {
       shouldThrow: true,

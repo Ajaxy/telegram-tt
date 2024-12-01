@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import { useEffect, useSignal, useState } from '../lib/teact/teact';
+import {
+  useEffect, useSignal, useState,
+} from '../lib/teact/teact';
 
 import buildStyle from '../util/buildStyle';
 import { captureEvents } from '../util/captureEvents';
@@ -17,12 +19,14 @@ export interface Point {
 }
 
 let resizeTimeout: number | undefined;
+const FULLSCREEN_POSITION = { x: 0, y: 0 };
 
 export default function useDraggable(
   ref: RefObject<HTMLElement>,
   dragHandleElementRef: RefObject<HTMLElement>,
-  isEnabled: boolean = true,
+  isDragEnabled: boolean = true,
   originalSize: Size,
+  isFullscreen: boolean = false,
 ) {
   const [elementCurrentPosition, setElementCurrentPosition] = useState<Point | undefined>(undefined);
   const [elementCurrentSize, setElementCurrentSize] = useState<Size | undefined>(undefined);
@@ -48,6 +52,14 @@ export default function useDraggable(
     };
   }
 
+  const updateCurrentPosition = useLastCallback((position: Point) => {
+    if (!isFullscreen) setElementCurrentPosition({ x: position.x, y: position.y });
+  });
+
+  const getActualPosition = useLastCallback(() => {
+    return isFullscreen ? FULLSCREEN_POSITION : elementCurrentPosition;
+  });
+
   const getCenteredPosition = useLastCallback(() => {
     if (!elementCurrentSize) return undefined;
     const { width, height } = elementCurrentSize;
@@ -71,7 +83,7 @@ export default function useDraggable(
       const centeredPosition = getCenteredPosition();
       if (!centeredPosition) return;
 
-      setElementCurrentPosition({ x: centeredPosition.x, y: centeredPosition.y });
+      updateCurrentPosition(centeredPosition);
       setIsInitiated();
     }
   }, [elementCurrentSize, isInitiated, element]);
@@ -95,10 +107,10 @@ export default function useDraggable(
   });
 
   useEffect(() => {
-    if (!isEnabled) {
+    if (!isDragEnabled) {
       stopDragging();
     }
-  }, [isEnabled]);
+  }, [isDragEnabled]);
 
   const ensurePositionInVisibleArea = (x: number, y: number) => {
     const visibleArea = getVisibleArea();
@@ -121,10 +133,11 @@ export default function useDraggable(
   };
 
   const adjustPositionWithinBounds = useLastCallback(() => {
+    if (isFullscreen) return;
     const position = !wasElementShown ? getCenteredPosition() : elementCurrentPosition;
     if (!elementCurrentSize || !position) return;
     const newPosition = ensurePositionInVisibleArea(position.x, position.y);
-    setElementCurrentPosition(newPosition);
+    updateCurrentPosition(newPosition);
   });
 
   const ensureSizeInVisibleArea = useLastCallback((sizeForCheck: Size) => {
@@ -192,7 +205,7 @@ export default function useDraggable(
 
   useEffect(() => {
     let cleanup: NoneToVoidFunction | undefined;
-    if (dragHandleElement && isEnabled) {
+    if (dragHandleElement && isDragEnabled) {
       cleanup = captureEvents(dragHandleElement, {
         onCapture: handleStartDrag,
         onDrag: handleDrag,
@@ -202,11 +215,13 @@ export default function useDraggable(
       });
     }
     return cleanup;
-  }, [handleDrag, handleStartDrag, isEnabled, dragHandleElement]);
+  }, [handleDrag, handleStartDrag, isDragEnabled, dragHandleElement]);
 
   const cursorStyle = isDragging ? 'cursor: grabbing !important; ' : '';
 
-  if (!isInitiated || !elementCurrentSize || !elementCurrentPosition) {
+  const actualPosition = getActualPosition();
+
+  if (!isInitiated || !elementCurrentSize || !actualPosition) {
     return {
       isDragging: false,
       style: cursorStyle,
@@ -214,10 +229,10 @@ export default function useDraggable(
   }
 
   const style = buildStyle(
-    `left: ${elementCurrentPosition.x}px;`,
-    `top: ${elementCurrentPosition.y}px;`,
-    `width: ${elementCurrentSize.width}px;`,
-    `height: ${elementCurrentSize.height}px;`,
+    `left: ${actualPosition.x}px;`,
+    `top: ${actualPosition.y}px;`,
+    !isFullscreen && `max-width: ${elementCurrentSize.width}px;`,
+    !isFullscreen && `max-height: ${elementCurrentSize.height}px;`,
     'position: fixed;',
     (isDragging || isWindowsResizing) && 'transition: none !important;',
     cursorStyle,

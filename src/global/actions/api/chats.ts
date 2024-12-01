@@ -32,7 +32,7 @@ import {
   TOPICS_SLICE_SECOND_LOAD,
 } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatShareText, parseChooseParameter, processDeepLink } from '../../../util/deeplink';
+import { formatShareText, processDeepLink } from '../../../util/deeplink';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
@@ -1270,6 +1270,7 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload): Prom
 addActionHandler('openTelegramLink', async (global, actions, payload): Promise<void> => {
   const {
     url,
+    shouldIgnoreCache,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1281,7 +1282,6 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
     joinVoiceChatByLink,
     focusMessage,
     openInvoice,
-    processAttachBotParameters,
     checkChatlistInvite,
     openChatByUsername: openChatByUsernameAction,
     openStoryViewerByUsername,
@@ -1316,9 +1316,6 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
     hash = part2;
   }
 
-  const hasStartAttach = params.hasOwnProperty('startattach');
-  const hasStartApp = params.hasOwnProperty('startapp');
-  const choose = parseChooseParameter(params.choose);
   const storyId = part2 === 's' && (Number(part3) || undefined);
   const hasBoost = params.hasOwnProperty('boost');
 
@@ -1357,6 +1354,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
       stickerSetInfo: {
         shortName: part2,
       },
+      shouldIgnoreCache,
       tabId,
     });
     return;
@@ -1430,13 +1428,6 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
       slug: part2,
       tabId,
     });
-  } else if ((hasStartAttach && choose) || (!part2 && hasStartApp)) {
-    processAttachBotParameters({
-      username: part1,
-      filter: choose,
-      startParam: params.startattach || params.startapp,
-      tabId,
-    });
   } else if (shouldTryOpenChat) {
     openChatByUsernameAction({
       username: part1,
@@ -1447,6 +1438,7 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
       startAttach: params.startattach,
       attach: params.attach,
       startApp: params.startapp,
+      mode: params.mode,
       originalParts: [part1, part2, part3],
       tabId,
     });
@@ -1500,7 +1492,8 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, text,
+    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, mode,
+    text, onChatChanged, choose,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1516,6 +1509,17 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       });
       return;
     }
+
+    if (startAttach !== undefined && choose) {
+      actions.processAttachBotParameters({
+        username,
+        filter: choose,
+        startParam: startAttach || startApp,
+        tabId,
+      });
+      return;
+    }
+
     if (startApp !== undefined && !webAppName) {
       const theme = extractCurrentThemeParams();
       const chatByUsername = await fetchChatByUsername(global, username);
@@ -1527,6 +1531,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
         peerId: chat.id,
         theme,
         tabId,
+        mode,
       });
       return;
     }
@@ -1542,6 +1547,10 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
           text,
         }, tabId,
       );
+      if (onChatChanged) {
+        // @ts-ignore
+        actions[onChatChanged.action](onChatChanged.payload);
+      }
       return;
     }
   }
@@ -1572,6 +1581,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       botId: chatByUsername.id,
       tabId,
       startApp,
+      mode,
       theme,
     });
     return;
@@ -1586,6 +1596,10 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     tabId,
     focusMessageId: commentId,
   });
+  if (onChatChanged) {
+    // @ts-ignore
+    actions[onChatChanged.action](onChatChanged.payload);
+  }
 });
 
 addActionHandler('togglePreHistoryHidden', async (global, actions, payload): Promise<void> => {

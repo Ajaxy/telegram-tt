@@ -574,7 +574,9 @@ export interface LangPair {
   'Statistics': undefined;
   'EventLogFilterPinnedMessages': undefined;
   'UnpinMessageAlertTitle': undefined;
-  'PinnedMessage': undefined;
+  'PinnedMessageTitleSingle': undefined;
+  'AccPinnedMessages': undefined;
+  'AccUnpinMessage': undefined;
   'LeaveAComment': undefined;
   'PollsStopWarning': undefined;
   'PollsStopSure': undefined;
@@ -608,7 +610,8 @@ export interface LangPair {
   'ChatPollTotalVotesResultEmpty': undefined;
   'Vote': undefined;
   'MessageRecommendedLabel': undefined;
-  'SponsoredMessage': undefined;
+  'SponsoredMessageAd': undefined;
+  'SponsoredMessageAdWhatIsThis': undefined;
   'PremiumStickerTooltip': undefined;
   'ViewAction': undefined;
   'Loading': undefined;
@@ -940,6 +943,7 @@ export interface LangPair {
   'ScheduleSendWhenOnline': undefined;
   'VoipIncoming': undefined;
   'LiveLocationUpdatedJustNow': undefined;
+  'RightNow': undefined;
   'AudioPause': undefined;
   'AudioPlay': undefined;
   'ToggleUserNotifications': undefined;
@@ -1149,6 +1153,8 @@ export interface LangPair {
   'CloseMiniApps': undefined;
   'DoNotAskAgain': undefined;
   'PaymentInfoDone': undefined;
+  'BotSuggestedStatusTitle': undefined;
+  'BotSuggestedStatusUpdated': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1538,6 +1544,13 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsPerMonth': {
     'amount': V;
   };
+  'BotSuggestedStatusFor': {
+    'bot': V;
+    'duration': V;
+  };
+  'BotSuggestedStatus': {
+    'bot': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -1588,6 +1601,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'PreviewSenderSendFile': {
     'count': V;
+  };
+  'PinnedMessageTitle': {
+    'index': V;
   };
   'Comments': {
     'count': V;

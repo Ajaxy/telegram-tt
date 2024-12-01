@@ -326,6 +326,10 @@ export interface ApiStarsTransactionPeerAds {
   type: 'ads';
 }
 
+export interface ApiStarsTransactionApi {
+  type: 'api';
+}
+
 export interface ApiStarsTransactionPeerPeer {
   type: 'peer';
   id: string;
@@ -338,6 +342,7 @@ export type ApiStarsTransactionPeer =
 | ApiStarsTransactionPeerPremiumBot
 | ApiStarsTransactionPeerFragment
 | ApiStarsTransactionPeerAds
+| ApiStarsTransactionApi
 | ApiStarsTransactionPeerPeer;
 
 export interface ApiStarsTransaction {

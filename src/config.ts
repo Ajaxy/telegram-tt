@@ -154,14 +154,8 @@ export const SNAP_EFFECT_ID = 'snap-effect';
 export const STARS_ICON_PLACEHOLDER = '⭐';
 export const STARS_CURRENCY_CODE = 'XTR';
 
-// Screen width where Pinned Message / Audio Player in the Middle Header can be safely displayed
-export const SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN = 1440; // px
-// Screen width where Pinned Message / Audio Player in the Middle Header shouldn't collapse with ChatInfo
-export const SAFE_SCREEN_WIDTH_FOR_CHAT_INFO = 1150; // px
-
 export const MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN = 1275; // px
 export const MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN = 925; // px
-export const MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES = 1340; // px
 export const MOBILE_SCREEN_MAX_WIDTH = 600; // px
 export const MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH = 950; // px
 export const MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT = 450; // px

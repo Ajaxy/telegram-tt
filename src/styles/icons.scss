@@ -74,31 +74,31 @@ $icons-map: (
   "chat-badge": "\f12b",
   "chats-badge": "\f12c",
   "check": "\f12d",
-  "clock": "\f12e",
-  "close-circle": "\f12f",
-  "close-topic": "\f130",
-  "close": "\f131",
-  "cloud-download": "\f132",
-  "collapse-modal": "\f133",
-  "collapse": "\f134",
-  "colorize": "\f135",
-  "comments-sticker": "\f136",
-  "comments": "\f137",
-  "copy-media": "\f138",
-  "copy": "\f139",
-  "darkmode": "\f13a",
-  "data": "\f13b",
-  "delete-filled": "\f13c",
-  "delete-left": "\f13d",
-  "delete-user": "\f13e",
-  "delete": "\f13f",
-  "document": "\f140",
-  "double-badge": "\f141",
-  "down": "\f142",
-  "download": "\f143",
-  "eats": "\f144",
-  "edit": "\f145",
-  "edited": "\f146",
+  "clock-edit": "\f12e",
+  "clock": "\f12f",
+  "close-circle": "\f130",
+  "close-topic": "\f131",
+  "close": "\f132",
+  "cloud-download": "\f133",
+  "collapse-modal": "\f134",
+  "collapse": "\f135",
+  "colorize": "\f136",
+  "comments-sticker": "\f137",
+  "comments": "\f138",
+  "copy-media": "\f139",
+  "copy": "\f13a",
+  "darkmode": "\f13b",
+  "data": "\f13c",
+  "delete-filled": "\f13d",
+  "delete-left": "\f13e",
+  "delete-user": "\f13f",
+  "delete": "\f140",
+  "document": "\f141",
+  "double-badge": "\f142",
+  "down": "\f143",
+  "download": "\f144",
+  "eats": "\f145",
+  "edit": "\f146",
   "email": "\f147",
   "enter": "\f148",
   "expand-modal": "\f149",
@@ -411,6 +411,9 @@ $icons-map: (
 .icon-check::before {
   content: map.get($icons-map, "check");
 }
+.icon-clock-edit::before {
+  content: map.get($icons-map, "clock-edit");
+}
 .icon-clock::before {
   content: map.get($icons-map, "clock");
 }
@@ -482,9 +485,6 @@ $icons-map: (
 }
 .icon-edit::before {
   content: map.get($icons-map, "edit");
-}
-.icon-edited::before {
-  content: map.get($icons-map, "edited");
 }
 .icon-email::before {
   content: map.get($icons-map, "email");

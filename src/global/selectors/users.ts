@@ -3,6 +3,7 @@ import type {
 } from '../../api/types';
 import type { GlobalState } from '../types';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { isUserBot } from '../helpers';
 
 export function selectUser<T extends GlobalState>(global: T, userId: string): ApiUser | undefined {
@@ -41,7 +42,9 @@ export function selectIsGiveawayGiftsPurchaseAvailable<T extends GlobalState>(gl
   return global.appConfig?.isGiveawayGiftsPurchaseAvailable ?? true;
 }
 
-// Slow, not to be used in `withGlobal`
+/**
+ * Slow, not to be used in `withGlobal`
+ */
 export function selectUserByPhoneNumber<T extends GlobalState>(global: T, phoneNumber: string) {
   const phoneNumberCleaned = phoneNumber.replace(/[^0-9]/g, '');
 
@@ -55,4 +58,11 @@ export function selectBot<T extends GlobalState>(global: T, userId: string): Api
   }
 
   return user;
+}
+
+export function selectCanGift<T extends GlobalState>(global: T, userId: string) {
+  const bot = selectBot(global, userId);
+  const user = selectUser(global, userId);
+
+  return !selectIsPremiumPurchaseBlocked(global) && !bot && !user?.isSelf && userId !== SERVICE_NOTIFICATIONS_USER_ID;
 }

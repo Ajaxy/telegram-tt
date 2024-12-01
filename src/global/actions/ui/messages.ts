@@ -1050,3 +1050,21 @@ addActionHandler('closeDeleteMessageModal', (global, actions, payload): ActionRe
     deleteMessageModal: undefined,
   }, tabId);
 });
+
+addActionHandler('openAboutAdsModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    aboutAdsModal: {
+      chatId,
+    },
+  }, tabId);
+});
+
+addActionHandler('closeAboutAdsModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    aboutAdsModal: undefined,
+  }, tabId);
+});

@@ -57,14 +57,12 @@ export function hasMessageMedia(message: MediaContainer) {
   ));
 }
 
-export function hasReplaceableMedia(message: MediaContainer) {
+export function canEditMedia(message: MediaContainer) {
   const {
-    text, photo, video, audio, document,
+    photo, video, altVideos, audio, document, text, webPage, ...otherMedia
   } = message.content;
 
-  if (getMessageVoice(message)) return false;
-
-  return Boolean(text || photo || (video && !video.isGif) || audio || document);
+  return !video?.isRound && !Object.keys(otherMedia).length;
 }
 
 export function getMessagePhoto(message: MediaContainer) {

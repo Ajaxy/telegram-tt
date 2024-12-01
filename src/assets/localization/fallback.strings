@@ -655,7 +655,11 @@
 "Statistics" = "Statistics";
 "EventLogFilterPinnedMessages" = "Pinned messages";
 "UnpinMessageAlertTitle" = "Unpin message";
-"PinnedMessage" = "Pinned message";
+"PinnedMessageTitleSingle" = "Pinned message";
+"PinnedMessageTitle_one" = "Pinned message #{index}";
+"PinnedMessageTitle_other" = "Pinned message #{index}";
+"AccPinnedMessages" = "Pinned Messages";
+"AccUnpinMessage" = "Unpin Message";
 "Comments_one" = "{count} Comment";
 "Comments_other" = "{count} Comments";
 "LeaveAComment" = "Leave a comment";
@@ -700,7 +704,8 @@
 "Answer_other" = "{count} answers";
 "Vote" = "Vote";
 "MessageRecommendedLabel" = "recommended";
-"SponsoredMessage" = "ad";
+"SponsoredMessageAd" = "Ad";
+"SponsoredMessageAdWhatIsThis" = "what's this?";
 "PremiumStickerTooltip" = "This set contains premium stickers like this one.";
 "ViewAction" = "View";
 "Loading" = "Loading...";
@@ -1106,6 +1111,7 @@
 "LiveLocationUpdatedMinutesAgo_one" = "updated 1 minute ago";
 "LiveLocationUpdatedMinutesAgo_other" = "updated {count} minutes ago";
 "LiveLocationUpdatedTodayAt" = "updated at {time}";
+"RightNow" = "Just now";
 "Seconds_one" = "{count} second";
 "Seconds_other" = "{count} seconds";
 "Minutes_one" = "{count} minute";
@@ -1378,3 +1384,7 @@
 "CloseMiniApps" = "Close Mini Apps";
 "DoNotAskAgain" = "Don't ask again";
 "PaymentInfoDone" = "Proceed to checkout";
+"BotSuggestedStatusFor" = "Do you want to set this emoji status suggested by **{bot}** for **{duration}**?";
+"BotSuggestedStatus" = "Do you want to set this emoji status suggested by **{bot}**?";
+"BotSuggestedStatusTitle" = "Set Emoji Status";
+"BotSuggestedStatusUpdated" = "Your emoji status is updated.";

@@ -29,9 +29,11 @@ import {
   updateUserSearch,
   updateUserSearchFetchingStatus,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatFullInfo,
+  selectIsCurrentUserPremium,
   selectPeer,
   selectPeerPhotos,
   selectTabState,
@@ -388,10 +390,62 @@ addActionHandler('reportSpam', (global, actions, payload): ActionReturnType => {
   void callApi('reportSpam', peer);
 });
 
-addActionHandler('setEmojiStatus', (global, actions, payload): ActionReturnType => {
-  const { emojiStatus, expires } = payload;
+addActionHandler('setEmojiStatus', async (global, actions, payload): Promise<void> => {
+  const {
+    emojiStatusId, referrerWebAppKey, expires, tabId = getCurrentTabId(),
+  } = payload;
 
-  void callApi('updateEmojiStatus', emojiStatus, expires);
+  const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+  if (!isCurrentUserPremium) {
+    if (referrerWebAppKey) {
+      actions.sendWebAppEvent({
+        webAppKey: referrerWebAppKey,
+        event: {
+          eventType: 'emoji_status_failed',
+          eventData: {
+            error: 'USER_DECLINED',
+          },
+        },
+        tabId,
+      });
+    }
+
+    actions.openPremiumModal({ initialSection: 'emoji_status', tabId });
+    return;
+  }
+
+  const result = await callApi('updateEmojiStatus', emojiStatusId, expires);
+
+  if (referrerWebAppKey) {
+    if (!result) {
+      actions.sendWebAppEvent({
+        webAppKey: referrerWebAppKey,
+        event: {
+          eventType: 'emoji_status_failed',
+          eventData: {
+            error: 'SERVER_ERROR',
+          },
+        },
+        tabId,
+      });
+      return;
+    }
+
+    actions.sendWebAppEvent({
+      webAppKey: referrerWebAppKey,
+      event: {
+        eventType: 'emoji_status_set',
+      },
+      tabId,
+    });
+    actions.showNotification({
+      message: {
+        key: 'BotSuggestedStatusUpdated',
+      },
+      customEmojiIconId: emojiStatusId,
+      tabId,
+    });
+  }
 });
 
 addActionHandler('saveCloseFriends', async (global, actions, payload): Promise<void> => {
@@ -416,5 +470,41 @@ addActionHandler('saveCloseFriends', async (global, actions, payload): Promise<v
       isCloseFriend: true,
     });
   });
+  setGlobal(global);
+});
+
+addActionHandler('openSuggestedStatusModal', async (global, actions, payload): Promise<void> => {
+  const {
+    customEmojiId, duration, botId, webAppKey, tabId = getCurrentTabId(),
+  } = payload;
+
+  const customEmoji = await callApi('fetchCustomEmoji', {
+    documentId: [customEmojiId],
+  });
+  if (!customEmoji?.[0]) {
+    if (webAppKey) {
+      actions.sendWebAppEvent({
+        webAppKey,
+        event: {
+          eventType: 'emoji_status_failed',
+          eventData: {
+            error: 'SUGGESTED_EMOJI_INVALID',
+          },
+        },
+        tabId,
+      });
+    }
+    return;
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    suggestedStatusModal: {
+      customEmojiId,
+      duration,
+      webAppKey,
+      botId,
+    },
+  }, tabId);
   setGlobal(global);
 });

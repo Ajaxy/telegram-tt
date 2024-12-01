@@ -55,6 +55,10 @@
     color: white;
     background-color: var(--pattern-color);
 
+    .no-action-button & {
+      bottom: 0;
+    }
+
     opacity: 0;
     transition: opacity 150ms, backdrop-filter 150ms, filter 150ms;
 
@@ -119,7 +123,7 @@
     }
   }
 
-  .is-forwarded &,
+  .is-forwarded:not(.custom-shape) &,
   .document &,
   .audio &,
   .voice &,

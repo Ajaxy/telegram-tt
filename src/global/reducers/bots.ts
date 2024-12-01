@@ -37,20 +37,19 @@ export function replaceInlineBotsIsLoading<T extends GlobalState>(
 }
 
 export function updateWebApp <T extends GlobalState>(
-  global: T, webApp: Partial<WebApp>,
+  global: T, key: string, webAppUpdate: Partial<WebApp>,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const currentTabState = selectTabState(global, tabId);
   const openedWebApps = currentTabState.webApps.openedWebApps;
 
-  const key = webApp && getWebAppKey(webApp);
-  const originalWebApp = key ? openedWebApps[key] : undefined;
+  const originalWebApp = openedWebApps[key];
 
   if (!originalWebApp) return global;
 
   const updatedValue = {
     ...originalWebApp,
-    ...webApp,
+    ...webAppUpdate,
   };
 
   const updatedWebAppKey = getWebAppKey(updatedValue);
@@ -143,18 +142,22 @@ export function removeActiveWebAppFromOpenList<T extends GlobalState>(
 
   if (!currentTabState.webApps.activeWebApp) return global;
 
-  return removeWebAppFromOpenList(global, currentTabState.webApps.activeWebApp, false, tabId);
+  const key = getWebAppKey(currentTabState.webApps.activeWebApp);
+
+  return removeWebAppFromOpenList(global, key, false, tabId);
 }
 
 export function removeWebAppFromOpenList<T extends GlobalState>(
-  global: T, webApp: WebApp, skipClosingConfirmation?: boolean,
+  global: T, key: string, skipClosingConfirmation?: boolean,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const currentTabState = selectTabState(global, tabId);
   const openedWebApps = currentTabState.webApps.openedWebApps;
+  const webApp = openedWebApps[key];
+  if (!webApp) return global;
 
   if (!skipClosingConfirmation && webApp.shouldConfirmClosing) {
-    return updateWebApp(global, { ...webApp, isCloseModalOpen: true }, tabId);
+    return updateWebApp(global, key, { isCloseModalOpen: true }, tabId);
   }
 
   const updatedOpenedWebApps = { ...openedWebApps };
@@ -164,7 +167,7 @@ export function removeWebAppFromOpenList<T extends GlobalState>(
 
   if (removingWebAppKey) {
     delete updatedOpenedWebApps[removingWebAppKey];
-    newOpenedKeys = currentTabState.webApps.openedOrderedKeys.filter((key) => key !== removingWebAppKey);
+    newOpenedKeys = currentTabState.webApps.openedOrderedKeys.filter((k) => k !== removingWebAppKey);
   }
 
   const activeWebApp = currentTabState.webApps.activeWebApp;

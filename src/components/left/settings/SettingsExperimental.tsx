@@ -71,6 +71,10 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
     requestWave({ startX: e.clientX, startY: e.clientY });
   });
 
+  const handleRequestConfetti = useLastCallback(() => {
+    requestConfetti({ withStars: true });
+  });
+
   const handleSnap = useLastCallback(() => {
     const button = snapButtonRef.current;
     if (!button) return;
@@ -98,8 +102,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
       </div>
       <div className="settings-item">
         <ListItem
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => requestConfetti({ withStars: true })}
+          onClick={handleRequestConfetti}
           icon="animations"
         >
           <div className="title">Launch some confetti!</div>
