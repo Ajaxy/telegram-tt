@@ -256,7 +256,7 @@ async function parseMedia(
 }
 
 function getMimeType(data: Uint8Array, fallbackMimeType = 'image/jpeg') {
-  if (data.length < 4) {
+  if (!data || data.length < 4) {
     return fallbackMimeType;
   }
 
