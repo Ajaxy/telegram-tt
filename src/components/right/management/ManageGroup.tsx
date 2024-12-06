@@ -445,6 +445,9 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
                 checked={!chatFullInfo.isPreHistoryHidden}
                 label={lang('ChatHistory')}
                 onChange={handleTogglePreHistory}
+                subLabel={
+                  chatFullInfo.isPreHistoryHidden ? lang('ChatHistoryHiddenInfo2') : lang('ChatHistoryVisibleInfo')
+                }
                 disabled={!canBanUsers}
               />
             </div>
