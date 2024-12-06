@@ -24,7 +24,6 @@
 
 .phone {
   color: var(--color-text);
-  line-height: 1rem;
 }
 
 .name,
@@ -38,7 +37,7 @@
   height: 0.0625rem;
   margin: 0 0.5rem;
   background: var(--accent-color);
-  filter: opacity(0.4);
+  filter: opacity(0.35);
 }
 
 .buttons {
