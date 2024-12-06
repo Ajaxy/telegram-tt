@@ -1393,6 +1393,9 @@
 "BotSuggestedStatus" = "Do you want to set this emoji status suggested by **{bot}**?";
 "BotSuggestedStatusTitle" = "Set Emoji Status";
 "BotSuggestedStatusUpdated" = "Your emoji status is updated.";
+"BotDownloadFileTitle" = "Download File";
+"BotDownloadFileDescription" = "**{bot}** suggests you to download **{filename}**";
+"BotDownloadFileButton" = "Download";
 "PrivacyGifts" = "Gifts";
 "PrivacyGiftsTitle" = "Who can display gifts on my profile?"
 "PrivacyGiftsInfo" = "Choose whether gifts from specific senders need your approval before they're visible to others on your profile."

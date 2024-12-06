@@ -1159,6 +1159,8 @@ export interface LangPair {
   'VideoConversionView': undefined;
   'BotSuggestedStatusTitle': undefined;
   'BotSuggestedStatusUpdated': undefined;
+  'BotDownloadFileTitle': undefined;
+  'BotDownloadFileButton': undefined;
   'PrivacyGifts': undefined;
   'PrivacyGiftsTitle': undefined;
   'PrivacyGiftsInfo': undefined;
@@ -1562,6 +1564,10 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'BotSuggestedStatus': {
     'bot': V;
+  };
+  'BotDownloadFileDescription': {
+    'bot': V;
+    'filename': V;
   };
   'StarsSubscribeBotButtonMonth': {
     'amount': V;

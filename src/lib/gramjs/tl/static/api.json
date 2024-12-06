@@ -276,6 +276,7 @@
     "bots.getPopularAppBots",
     "bots.setBotInfo",
     "bots.getPreviewMedias",
+    "bots.checkDownloadFileParams",
     "payments.getPaymentForm",
     "payments.getPaymentReceipt",
     "payments.validateRequestedInfo",

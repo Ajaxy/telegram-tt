@@ -19,6 +19,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
+import download from '../../../util/download';
 import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -27,6 +28,7 @@ import renderText from '../../common/helpers/renderText';
 import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
@@ -133,6 +135,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const [popupParameters, setPopupParameters] = useState<PopupOptions | undefined>();
   const [isRequestingPhone, setIsRequestingPhone] = useState(false);
   const [isRequestingWriteAccess, setIsRequestingWriteAccess] = useState(false);
+  const [requestedFileDownload, setRequestedFileDownload] = useState<{ url: string; fileName: string } | undefined>();
   const [bottomBarColor, setBottomBarColor] = useState<string | undefined>();
   const {
     unlockPopupsAt, handlePopupOpened, handlePopupClosed,
@@ -190,7 +193,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const frameRef = useRef<HTMLIFrameElement>(null);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const isOpen = modal?.isModalOpen || false;
   const isSimple = Boolean(buttonText);
 
@@ -359,6 +363,20 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleRejectFileDownload = useLastCallback((shouldCloseActive?: boolean) => {
+    if (shouldCloseActive) {
+      setRequestedFileDownload(undefined);
+      handlePopupClosed();
+    }
+
+    sendEvent({
+      eventType: 'file_download_requested',
+      eventData: {
+        status: 'cancelled',
+      },
+    });
+  });
+
   const handleRejectWriteAccess = useLastCallback(() => {
     sendEvent({
       eventType: 'write_access_requested',
@@ -403,6 +421,41 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
     setIsRequestingWriteAccess(!canWrite);
   }
+
+  async function handleCheckDownloadFile(fileUrl: string, fileName: string) {
+    const canDownload = await callApi('checkBotDownloadFileParams', {
+      bot: bot!,
+      url: fileUrl,
+      fileName,
+    });
+
+    if (!canDownload) {
+      sendEvent({
+        eventType: 'file_download_requested',
+        eventData: {
+          status: 'cancelled',
+        },
+      });
+      return;
+    }
+
+    setRequestedFileDownload({ url: fileUrl, fileName });
+    handlePopupOpened();
+  }
+
+  const handleDownloadFile = useLastCallback(() => {
+    if (!requestedFileDownload) return;
+    setRequestedFileDownload(undefined);
+    handlePopupClosed();
+
+    download(requestedFileDownload.url, requestedFileDownload.fileName);
+    sendEvent({
+      eventType: 'file_download_requested',
+      eventData: {
+        status: 'downloading',
+      },
+    });
+  });
 
   async function handleInvokeCustomMethod(requestId: string, method: string, parameters: string) {
     const result = await callApi('invokeWebViewCustomMethod', {
@@ -576,6 +629,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       const { method, params, req_id: requestId } = eventData;
       handleInvokeCustomMethod(requestId, method, JSON.stringify(params));
     }
+
+    if (eventType === 'web_app_request_file_download') {
+      if (requestedFileDownload || unlockPopupsAt > Date.now()) {
+        handleRejectFileDownload();
+        return;
+      }
+      handleCheckDownloadFile(eventData.url, eventData.file_name);
+    }
   }
 
   const mainButtonCurrentColor = useCurrentOrPrev(mainButton?.color, true);
@@ -739,7 +800,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     isBackButtonVisible && styles.stateBack,
   );
   const backButtonCaption = shouldShowAppNameInFullscreen ? activeWebAppName
-    : lang(isBackButtonVisible ? 'Back' : 'Close');
+    : oldLang(isBackButtonVisible ? 'Back' : 'Close');
 
   const hasHeaderElement = headerButtonCaptionRef?.current;
 
@@ -895,22 +956,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
           </Button>
         </div>
       ) }
-      <ConfirmDialog
-        isOpen={isRequestingPhone}
-        onClose={handleRejectPhone}
-        title={lang('ShareYouPhoneNumberTitle')}
-        text={lang('AreYouSureShareMyContactInfoBot')}
-        confirmHandler={handleAcceptPhone}
-        confirmLabel={lang('ContactShare')}
-      />
-      <ConfirmDialog
-        isOpen={isRequestingWriteAccess}
-        onClose={handleRejectWriteAccess}
-        title={lang('lng_bot_allow_write_title')}
-        text={lang('lng_bot_allow_write')}
-        confirmHandler={handleAcceptWriteAccess}
-        confirmLabel={lang('lng_bot_allow_write_confirm')}
-      />
       {popupParameters && (
         <Modal
           isOpen={Boolean(popupParameters)}
@@ -933,7 +978,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
                 // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => handleAppPopupClose(button.id)}
               >
-                {button.text || lang(DEFAULT_BUTTON_TEXT[button.type])}
+                {button.text || oldLang(DEFAULT_BUTTON_TEXT[button.type])}
               </Button>
             ))}
           </div>
@@ -941,19 +986,50 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       )}
 
       <ConfirmDialog
+        isOpen={isRequestingPhone}
+        onClose={handleRejectPhone}
+        title={oldLang('ShareYouPhoneNumberTitle')}
+        text={oldLang('AreYouSureShareMyContactInfoBot')}
+        confirmHandler={handleAcceptPhone}
+        confirmLabel={oldLang('ContactShare')}
+      />
+      <ConfirmDialog
+        isOpen={isRequestingWriteAccess}
+        onClose={handleRejectWriteAccess}
+        title={oldLang('lng_bot_allow_write_title')}
+        text={oldLang('lng_bot_allow_write')}
+        confirmHandler={handleAcceptWriteAccess}
+        confirmLabel={oldLang('lng_bot_allow_write_confirm')}
+      />
+      <ConfirmDialog
+        isOpen={Boolean(requestedFileDownload)}
+        title={lang('BotDownloadFileTitle')}
+        textParts={lang('BotDownloadFileDescription', {
+          bot: bot?.firstName,
+          filename: requestedFileDownload?.fileName,
+        }, {
+          withNodes: true,
+          withMarkdown: true,
+        })}
+        confirmLabel={lang('BotDownloadFileButton')}
+        onClose={handleRejectFileDownload}
+        confirmHandler={handleDownloadFile}
+      />
+
+      <ConfirmDialog
         isOpen={isCloseModalOpen}
         onClose={handleHideCloseModal}
-        title={lang('lng_bot_close_warning_title')}
-        text={lang('lng_bot_close_warning')}
+        title={oldLang('lng_bot_close_warning_title')}
+        text={oldLang('lng_bot_close_warning')}
         confirmHandler={handleConfirmCloseModal}
         confirmIsDestructive
-        confirmLabel={lang('lng_bot_close_warning_sure')}
+        confirmLabel={oldLang('lng_bot_close_warning_sure')}
       />
       <ConfirmDialog
         isOpen={isRemoveModalOpen}
         onClose={handleHideRemoveModal}
-        title={lang('BotRemoveFromMenuTitle')}
-        textParts={renderText(lang('BotRemoveFromMenu', bot?.firstName), ['simple_markdown'])}
+        title={oldLang('BotRemoveFromMenuTitle')}
+        textParts={renderText(oldLang('BotRemoveFromMenu', bot?.firstName), ['simple_markdown'])}
         confirmHandler={handleRemoveAttachBot}
         confirmIsDestructive
       />

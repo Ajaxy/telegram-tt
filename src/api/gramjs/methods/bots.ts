@@ -593,6 +593,24 @@ export async function fetchPreviewMedias({ bot } : { bot: ApiUser }) {
   return previews;
 }
 
+export function checkBotDownloadFileParams({
+  bot,
+  fileName,
+  url,
+}: {
+  bot: ApiUser;
+  fileName: string;
+  url: string;
+}) {
+  return invokeRequest(new GramJs.bots.CheckDownloadFileParams({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    fileName,
+    url,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {
   return results.map((result) => {
     if (result instanceof GramJs.BotInlineMediaResult) {
