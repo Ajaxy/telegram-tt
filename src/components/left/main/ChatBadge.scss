@@ -97,4 +97,8 @@
       }
     }
   }
+
+  &.miniapp {
+    z-index: calc(var(--z-chat-ripple) + 1);
+  }
 }
