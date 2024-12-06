@@ -1153,6 +1153,10 @@ export interface LangPair {
   'CloseMiniApps': undefined;
   'DoNotAskAgain': undefined;
   'PaymentInfoDone': undefined;
+  'VideoConversionTitle': undefined;
+  'VideoConversionText': undefined;
+  'VideoConversionDone': undefined;
+  'VideoConversionView': undefined;
   'BotSuggestedStatusTitle': undefined;
   'BotSuggestedStatusUpdated': undefined;
 }

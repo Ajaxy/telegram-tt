@@ -60,6 +60,7 @@ export interface ApiUserFullInfo {
   businessWorkHours?: ApiBusinessWorkHours;
   businessIntro?: ApiBusinessIntro;
   starGiftCount?: number;
+  hasScheduledMessages?: boolean;
 }
 
 export type ApiFakeType = 'fake' | 'scam';

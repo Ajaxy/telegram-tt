@@ -511,6 +511,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     chatPhoto,
     translationsDisabled,
     reactionsLimit,
+    hasScheduled,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -540,6 +541,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
       isTranslationDisabled: translationsDisabled,
       isPreHistoryHidden: true,
+      hasScheduledMessages: hasScheduled,
     },
     chats,
     userStatusesById,
@@ -602,6 +604,7 @@ async function getFullChannelInfo(
     boostsUnrestrict,
     canViewRevenue: canViewMonetization,
     paidReactionsAvailable,
+    hasScheduled,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -692,6 +695,7 @@ async function getFullChannelInfo(
       boostsApplied,
       boostsToUnrestrict: boostsUnrestrict,
       isPaidReactionAvailable: paidReactionsAvailable,
+      hasScheduledMessages: hasScheduled,
     },
     chats,
     userStatusesById: statusesById,

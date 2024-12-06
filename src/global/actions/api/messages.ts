@@ -84,6 +84,7 @@ import {
   updateListedIds,
   updateMessageTranslation,
   updateOutlyingLists,
+  updatePeerFullInfo,
   updateQuickReplies,
   updateQuickReplyMessages,
   updateRequestedMessageTranslation,
@@ -1213,6 +1214,10 @@ addActionHandler('loadScheduledHistory', async (global, actions, payload): Promi
   global = getGlobal();
   global = updateScheduledMessages(global, chat.id, byId);
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'scheduledIds', ids);
+  if (!ids.length) {
+    global = updatePeerFullInfo(global, chat.id, { hasScheduledMessages: false });
+  }
+
   if (chat?.isForum) {
     const scheduledPerThread: Record<ThreadId, number[]> = {};
     messages.forEach((message) => {

@@ -19,7 +19,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
   const {
     fullUser: {
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
-      profilePhoto, voiceMessagesForbidden, premiumGifts,
+      profilePhoto, voiceMessagesForbidden, premiumGifts, hasScheduled,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount,
@@ -51,6 +51,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     personalChannelMessageId: personalChannelMessage,
     areAdsEnabled: sponsoredEnabled,
     starGiftCount: stargiftsCount,
+    hasScheduledMessages: hasScheduled,
   };
 }
 

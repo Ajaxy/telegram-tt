@@ -1384,6 +1384,10 @@
 "CloseMiniApps" = "Close Mini Apps";
 "DoNotAskAgain" = "Don't ask again";
 "PaymentInfoDone" = "Proceed to checkout";
+"VideoConversionTitle" = "Improving Video...";
+"VideoConversionText" = "The video will be published after it's optimized for the best viewing experience.";
+"VideoConversionDone" = "Video published.";
+"VideoConversionView" = "View";
 "BotSuggestedStatusFor" = "Do you want to set this emoji status suggested by **{bot}** for **{duration}**?";
 "BotSuggestedStatus" = "Do you want to set this emoji status suggested by **{bot}**?";
 "BotSuggestedStatusTitle" = "Set Emoji Status";

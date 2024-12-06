@@ -45,7 +45,7 @@ import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnl
 import { fetchFile } from '../../../util/files';
 import { compact, split } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
-import { getServerTimeOffset } from '../../../util/serverTime';
+import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import {
   buildApiChatFromPreview,
@@ -1942,22 +1942,42 @@ function handleMultipleLocalMessagesUpdate(
     return;
   }
 
-  update.updates.forEach((u) => {
-    if (u instanceof GramJs.UpdateMessageID) {
-      const localMessage = localMessages[u.randomId.toString()];
-      handleLocalMessageUpdate(localMessage, u);
-    } else {
-      handleGramJsUpdate(u);
-    }
+  const updateMessageIds = update.updates.filter((u): u is GramJs.UpdateMessageID => (
+    u instanceof GramJs.UpdateMessageID
+  ));
+
+  // Server can return `UpdateNewScheduledMessage` that we currently process as video that requires processing
+  updateMessageIds.forEach((updateMessageId) => {
+    const updateNewScheduledMessage = update.updates
+      .find((scheduledUpdate): scheduledUpdate is GramJs.UpdateNewScheduledMessage => {
+        if (!(scheduledUpdate instanceof GramJs.UpdateNewScheduledMessage)) return false;
+        return scheduledUpdate.message.id === updateMessageId.id;
+      });
+
+    const localMessage = localMessages[updateMessageId.randomId.toString()];
+    handleLocalMessageUpdate(localMessage, updateMessageId, updateNewScheduledMessage);
   });
+
+  const otherUpdates = update.updates.filter((u) => {
+    if (u instanceof GramJs.UpdateMessageID) return false;
+    if (u instanceof GramJs.UpdateNewScheduledMessage) return false;
+    return true;
+  });
+
+  handleGramJsUpdate(otherUpdates);
 }
 
-function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeUpdates) {
+function handleLocalMessageUpdate(
+  localMessage: ApiMessage, update: GramJs.TypeUpdates, scheduledMessageUpdate?: GramJs.UpdateNewScheduledMessage,
+) {
   let messageUpdate;
   if (update instanceof GramJs.UpdateShortSentMessage || update instanceof GramJs.UpdateMessageID) {
     messageUpdate = update;
   } else if ('updates' in update) {
     messageUpdate = update.updates.find((u): u is GramJs.UpdateMessageID => u instanceof GramJs.UpdateMessageID);
+    scheduledMessageUpdate = update.updates.find((u): u is GramJs.UpdateNewScheduledMessage => (
+      u instanceof GramJs.UpdateNewScheduledMessage
+    ));
   }
 
   if (!messageUpdate) {
@@ -1987,16 +2007,20 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
     processMessageAndUpdateThreadInfo(mtpMessage);
   }
 
-  // Edge case for "Send When Online"
-  const isSentBefore = 'date' in messageUpdate && messageUpdate.date * 1000 < Date.now() + getServerTimeOffset() * 1000;
+  const newScheduledMessage = scheduledMessageUpdate?.message && buildApiMessage(scheduledMessageUpdate.message);
 
-  sendApiUpdate({
-    '@type': localMessage.isScheduled && !isSentBefore
-      ? 'updateScheduledMessageSendSucceeded'
-      : 'updateMessageSendSucceeded',
-    chatId: localMessage.chatId,
-    localId: localMessage.id,
-    message: {
+  // Edge case for "Send When Online"
+  const isSentBefore = 'date' in messageUpdate && messageUpdate.date < getServerTime();
+
+  if (newScheduledMessage?.isVideoProcessingPending) {
+    sendApiUpdate({
+      '@type': 'updateVideoProcessingPending',
+      chatId: localMessage.chatId,
+      localId: localMessage.id,
+      newScheduledMessageId: newScheduledMessage?.id,
+    });
+  } else {
+    const updatedMessage: ApiMessage = {
       ...localMessage,
       ...(newContent && {
         content: {
@@ -2007,9 +2031,18 @@ function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeU
       id: messageUpdate.id,
       sendingState: undefined,
       ...('date' in messageUpdate && { date: messageUpdate.date }),
-    },
-    poll,
-  });
+    };
+
+    sendApiUpdate({
+      '@type': localMessage.isScheduled && !isSentBefore
+        ? 'updateScheduledMessageSendSucceeded'
+        : 'updateMessageSendSucceeded',
+      chatId: localMessage.chatId,
+      localId: localMessage.id,
+      message: updatedMessage,
+      poll,
+    });
+  }
 
   handleGramJsUpdate(update);
 }

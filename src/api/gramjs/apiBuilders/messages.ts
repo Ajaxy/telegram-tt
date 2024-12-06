@@ -215,6 +215,7 @@ export function buildApiMessageWithChatId(
   const hasComments = mtpMessage.replies?.comments;
   const senderBoosts = mtpMessage.fromBoostsApplied;
   const factCheck = mtpMessage.factcheck && buildApiFactCheck(mtpMessage.factcheck);
+  const isVideoProcessingPending = mtpMessage.videoProcessingPending;
 
   const isInvertedMedia = mtpMessage.invertMedia;
 
@@ -262,6 +263,7 @@ export function buildApiMessageWithChatId(
     factCheck,
     effectId: mtpMessage.effect?.toString(),
     isInvertedMedia,
+    isVideoProcessingPending,
   });
 }
 

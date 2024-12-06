@@ -754,6 +754,7 @@ export interface ApiMessage {
   factCheck?: ApiFactCheck;
   effectId?: string;
   isInvertedMedia?: true;
+  isVideoProcessingPending?: true;
 }
 
 export interface ApiReactions {

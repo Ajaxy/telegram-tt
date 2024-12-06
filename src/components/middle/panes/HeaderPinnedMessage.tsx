@@ -132,7 +132,7 @@ const HeaderPinnedMessage = ({
     if (isSynced && (threadId === MAIN_THREAD_ID || chat?.isForum)) {
       loadPinnedMessages({ chatId, threadId });
     }
-  }, [chatId, threadId, isSynced, chat]);
+  }, [chatId, threadId, isSynced, chat?.isForum]);
 
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 

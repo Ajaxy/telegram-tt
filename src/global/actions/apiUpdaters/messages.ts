@@ -43,6 +43,7 @@ import {
   updateChatMessage,
   updateListedIds,
   updateMessageTranslations,
+  updatePeerFullInfo,
   updatePoll,
   updatePollVote,
   updateQuickReplies,
@@ -87,6 +88,8 @@ import {
 
 const ANIMATION_DELAY = 350;
 const SNAP_ANIMATION_DELAY = 1000;
+const VIDEO_PROCESSING_NOTIFICATION_DELAY = 1000;
+let lastVideoProcessingNotificationTime = 0;
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
@@ -233,6 +236,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = updatePoll(global, poll.id, poll);
       }
 
+      global = updatePeerFullInfo(global, chatId, {
+        hasScheduledMessages: true,
+      });
+
       setGlobal(global);
 
       break;
@@ -332,6 +339,49 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'deleteQuickReply': {
       global = deleteQuickReply(global, update.quickReplyId);
       setGlobal(global);
+      break;
+    }
+
+    case 'updateVideoProcessingPending': {
+      const {
+        chatId, localId, newScheduledMessageId,
+      } = update;
+
+      global = deleteChatMessages(global, chatId, [localId]);
+      global = updatePeerFullInfo(global, chatId, {
+        hasScheduledMessages: true,
+      });
+
+      setGlobal(global);
+
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        const currentMessageList = selectCurrentMessageList(global, tabId);
+        if (currentMessageList?.chatId !== chatId) return;
+
+        const now = Date.now();
+        if (now - lastVideoProcessingNotificationTime < VIDEO_PROCESSING_NOTIFICATION_DELAY) {
+          return;
+        }
+        lastVideoProcessingNotificationTime = now;
+
+        actions.showNotification({
+          message: {
+            key: 'VideoConversionText',
+          },
+          title: {
+            key: 'VideoConversionTitle',
+          },
+          tabId,
+        });
+
+        actions.focusMessage({
+          chatId,
+          messageId: newScheduledMessageId,
+          messageListType: 'scheduled',
+          tabId,
+        });
+      });
+
       break;
     }
 
@@ -524,7 +574,37 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'deleteScheduledMessages': {
-      const { ids, chatId } = update;
+      const { ids, newIds, chatId } = update;
+
+      const hadVideoProcessing = ids?.some((id) => (
+        selectScheduledMessage(global, chatId, id)?.isVideoProcessingPending
+      ));
+      const processedVideoId = newIds?.find((id) => {
+        const message = selectChatMessage(global, chatId, id);
+        return message?.content.video;
+      });
+
+      if (hadVideoProcessing && processedVideoId) {
+        Object.values(global.byTabId).forEach(({ id: tabId }) => {
+          actions.showNotification({
+            message: {
+              key: 'VideoConversionDone',
+            },
+            actionText: {
+              key: 'VideoConversionView',
+            },
+            action: {
+              action: 'focusMessage',
+              payload: {
+                chatId,
+                messageId: processedVideoId,
+                tabId,
+              },
+            },
+            tabId,
+          });
+        });
+      }
 
       deleteScheduledMessages(chatId, ids, actions, global);
       break;
@@ -1150,12 +1230,8 @@ export function deleteMessages<T extends GlobalState>(
 }
 
 function deleteScheduledMessages<T extends GlobalState>(
-  chatId: string | undefined, ids: number[], actions: RequiredGlobalActions, global: T,
+  chatId: string, ids: number[], actions: RequiredGlobalActions, global: T,
 ) {
-  if (!chatId) {
-    return;
-  }
-
   ids.forEach((id) => {
     global = updateScheduledMessage(global, chatId, id, {
       isDeleting: true,

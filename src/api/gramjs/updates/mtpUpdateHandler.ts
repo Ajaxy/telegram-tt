@@ -384,6 +384,7 @@ export function updater(update: Update) {
     sendApiUpdate({
       '@type': 'deleteScheduledMessages',
       ids: update.messages,
+      newIds: update.sentMessages,
       chatId: getApiChatIdFromMtpPeer(update.peer),
     });
   } else if (update instanceof GramJs.UpdateDeleteChannelMessages) {

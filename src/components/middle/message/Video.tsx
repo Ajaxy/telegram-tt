@@ -249,6 +249,7 @@ const Video = <T,>({
           muted
           loop
           playsInline
+          disablePictureInPicture
           draggable={!isProtected}
           onTimeUpdate={handleTimeUpdate}
           onReady={markPlayerReady}

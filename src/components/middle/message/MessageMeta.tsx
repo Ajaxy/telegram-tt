@@ -163,6 +163,7 @@ const MessageMeta: FC<OwnProps> = ({
           </>
         )}
         {message.isEdited && `${lang('EditedMessage')} `}
+        {message.isVideoProcessingPending && `${lang('lng_approximate')} `}
         {date}
       </span>
       {outgoingStatus && (

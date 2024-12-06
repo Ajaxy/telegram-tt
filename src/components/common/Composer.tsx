@@ -84,7 +84,6 @@ import {
   selectPerformanceSettingsValue,
   selectRequestedDraft,
   selectRequestedDraftFiles,
-  selectScheduledIds,
   selectTabState,
   selectTheme,
   selectTopicFromMessage,
@@ -1771,7 +1770,7 @@ const Composer: FC<OwnProps & StateProps> = ({
                   onActivate={handleActivateBotCommandMenu}
                   ariaLabel="Open bot command keyboard"
                 >
-                  <i className="icon icon-bot-commands-filled" />
+                  <Icon name="bot-commands-filled" />
                 </ResponsiveHoverButton>
               )}
               {canShowSendAs && (sendAsUser || sendAsChat) && (
@@ -1866,7 +1865,7 @@ const Composer: FC<OwnProps & StateProps> = ({
                   onClick={handleAllScheduledClick}
                   ariaLabel="Open scheduled messages"
                 >
-                  <i className="icon icon-schedule" />
+                  <Icon name="schedule" />
                 </Button>
               )}
               {Boolean(botKeyboardMessageId) && !activeVoiceRecording && !editingMessage && (
@@ -1877,7 +1876,7 @@ const Composer: FC<OwnProps & StateProps> = ({
                   onActivate={openBotKeyboard}
                   ariaLabel="Open bot command keyboard"
                 >
-                  <i className="icon icon-bot-command" />
+                  <Icon name="bot-command" />
                 </ResponsiveHoverButton>
               )}
             </>
@@ -1974,7 +1973,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           onClick={stopRecordingVoice}
           ariaLabel="Cancel voice recording"
         >
-          <i className="icon icon-delete" />
+          <Icon name="delete" />
         </Button>
       )}
       {isInStoryViewer && !activeVoiceRecording && (
@@ -1997,14 +1996,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             />
           )}
           {(!sentStoryReaction || isSentStoryReactionHeart) && (
-            <i
-              className={buildClassName(
-                'icon',
-                'icon-heart',
-                isSentStoryReactionHeart && 'story-reaction-heart',
-              )}
-              aria-hidden
-            />
+            <Icon name="heart" className={buildClassName(isSentStoryReactionHeart && 'story-reaction-heart')} />
           )}
         </Button>
       )}
@@ -2027,11 +2019,11 @@ const Composer: FC<OwnProps & StateProps> = ({
           mainButtonState === MainButtonState.Send && canShowCustomSendMenu ? handleContextMenu : undefined
         }
       >
-        <i className="icon icon-send" />
-        <i className="icon icon-microphone-alt" />
-        {onForward && <i className="icon icon-forward" />}
-        {isInMessageList && <i className="icon icon-schedule" />}
-        {isInMessageList && <i className="icon icon-check" />}
+        <Icon name="send" />
+        <Icon name="microphone-alt" />
+        {onForward && <Icon name="forward" />}
+        {isInMessageList && <Icon name="schedule" />}
+        {isInMessageList && <Icon name="check" />}
       </Button>
       {effectEmoji && (
         <span className="effect-icon" onClick={handleRemoveEffect}>
@@ -2083,11 +2075,10 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isChatWithUser = isUserId(chatId);
-    const chatBotFullInfo = isChatWithBot ? selectUserFullInfo(global, chatBot.id) : undefined;
+    const userFullInfo = isChatWithUser ? selectUserFullInfo(global, chatId) : undefined;
     const chatFullInfo = !isChatWithUser ? selectChatFullInfo(global, chatId) : undefined;
     const messageWithActualBotKeyboard = (isChatWithBot || !isChatWithUser)
       && selectNewestMessageWithBotKeyboardButtons(global, chatId, threadId);
-    const scheduledIds = selectScheduledIds(global, chatId, threadId);
     const {
       language, shouldSuggestStickers, shouldSuggestCustomEmoji, shouldUpdateStickerSetOrder,
     } = global.settings.byKey;
@@ -2117,7 +2108,7 @@ export default memo(withGlobal<OwnProps>(
       && messageListType === currentMessageList?.type
       && !isStoryViewerOpen;
     const user = selectUser(global, chatId);
-    const canSendVoiceByPrivacy = (user && !selectUserFullInfo(global, user.id)?.noVoiceMessages) ?? true;
+    const canSendVoiceByPrivacy = (user && !userFullInfo?.noVoiceMessages) ?? true;
     const slowMode = chatFullInfo?.slowMode;
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
@@ -2140,7 +2131,6 @@ export default memo(withGlobal<OwnProps>(
 
     const noWebPage = selectNoWebPage(global, chatId, threadId);
 
-    const isContactRequirePremium = selectUserFullInfo(global, chatId)?.isContactRequirePremium;
     const areEffectsSupported = isChatWithUser && !isChatWithBot
     && !isInScheduledList && !isChatWithSelf && type !== 'story' && chatId !== SERVICE_NOTIFICATIONS_USER_ID;
     const canPlayEffect = selectPerformanceSettingsValue(global, 'stickerEffects');
@@ -2165,7 +2155,7 @@ export default memo(withGlobal<OwnProps>(
       isSelectModeActive: selectIsInSelectMode(global),
       withScheduledButton: (
         messageListType === 'thread'
-        && Boolean(scheduledIds?.length)
+        && (userFullInfo || chatFullInfo)?.hasScheduledMessages
       ),
       isInScheduledList,
       botKeyboardMessageId,
@@ -2187,8 +2177,8 @@ export default memo(withGlobal<OwnProps>(
       emojiKeywords: emojiKeywords?.keywords,
       inlineBots: tabState.inlineBots.byUsername,
       isInlineBotLoading: tabState.inlineBots.isLoading,
-      botCommands: chatBotFullInfo ? (chatBotFullInfo.botInfo?.commands || false) : undefined,
-      botMenuButton: chatBotFullInfo?.botInfo?.menuButton,
+      botCommands: userFullInfo ? (userFullInfo.botInfo?.commands || false) : undefined,
+      botMenuButton: userFullInfo?.botInfo?.menuButton,
       sendAsUser,
       sendAsChat,
       sendAsId,
@@ -2218,7 +2208,7 @@ export default memo(withGlobal<OwnProps>(
       canSendQuickReplies,
       noWebPage,
       webPagePreview: selectTabState(global).webPagePreview,
-      isContactRequirePremium,
+      isContactRequirePremium: userFullInfo?.isContactRequirePremium,
       effect,
       effectReactions,
       areEffectsSupported,
