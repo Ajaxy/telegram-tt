@@ -37,6 +37,13 @@
   margin-bottom: 0;
 }
 
+.title {
+  text-align: center;
+  text-wrap: balance;
+  font-size: 1.75rem;
+  line-height: 1.25;
+}
+
 .tid {
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;

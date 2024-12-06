@@ -233,6 +233,7 @@ export function buildApiInvoice(invoice: GramJs.Invoice): ApiInvoice {
     phoneToProvider,
     shippingAddressRequested,
     flexible,
+    subscriptionPeriod,
   } = invoice;
 
   const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
@@ -258,6 +259,7 @@ export function buildApiInvoice(invoice: GramJs.Invoice): ApiInvoice {
     isPhoneSentToProvider: phoneToProvider,
     isShippingAddressRequested: shippingAddressRequested,
     isFlexible: flexible,
+    subscriptionPeriod,
   };
 }
 
@@ -559,8 +561,13 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
 
 export function buildApiStarsSubscription(subscription: GramJs.StarsSubscription): ApiStarsSubscription {
   const {
-    id, peer, pricing, untilDate, canRefulfill, canceled, chatInviteHash, missingBalance,
+    id, peer, pricing, untilDate, canRefulfill, canceled, chatInviteHash, missingBalance, botCanceled, photo, title,
+    invoiceSlug,
   } = subscription;
+
+  if (photo) {
+    addWebDocumentToLocalDb(photo);
+  }
 
   return {
     id,
@@ -571,6 +578,10 @@ export function buildApiStarsSubscription(subscription: GramJs.StarsSubscription
     canRefulfill,
     hasMissingBalance: missingBalance,
     chatInviteHash,
+    hasBotCancelled: botCanceled,
+    title,
+    photo: photo && buildApiWebDocument(photo),
+    invoiceSlug,
   };
 }
 

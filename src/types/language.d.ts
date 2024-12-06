@@ -1509,6 +1509,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'SendPaidReaction': {
     'amount': V;
   };
+  'StarsPay': {
+    'amount': V;
+  };
   'StarsReactionTerms': {
     'link': V;
   };
@@ -1554,6 +1557,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'BotSuggestedStatus': {
     'bot': V;
+  };
+  'StarsSubscribeBotButtonMonth': {
+    'amount': V;
   };
 }
 
@@ -1729,6 +1735,11 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'StarsSubscribeText': {
     'chat': V;
+    'amount': V;
+  };
+  'StarsSubscribeBotText': {
+    'name': V;
+    'bot': V;
     'amount': V;
   };
 }

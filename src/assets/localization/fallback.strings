@@ -1346,6 +1346,7 @@
 "LimitedGiftsCategory" = "Limited";
 "PremiumGiftDescription" = "Premium";
 "SendPaidReaction" = "Send ⭐️{amount}";
+"StarsPay" = "Confirm and Pay {amount}";
 "StarsReactionTerms" = "By sending Stars you agree to the {link}";
 "StarsReactionLinkText" = "Terms of Service";
 "StarsReactionLink" = "https://telegram.org/tos/stars";
@@ -1392,3 +1393,6 @@
 "BotSuggestedStatus" = "Do you want to set this emoji status suggested by **{bot}**?";
 "BotSuggestedStatusTitle" = "Set Emoji Status";
 "BotSuggestedStatusUpdated" = "Your emoji status is updated.";
+"StarsSubscribeBotText_one" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** star per month?"
+"StarsSubscribeBotText_other" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** stars per month?"
+"StarsSubscribeBotButtonMonth" = "Subscribe for {amount} / month";

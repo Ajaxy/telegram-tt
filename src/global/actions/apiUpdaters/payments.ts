@@ -42,7 +42,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateStarPaymentStateCompleted': {
       const { paymentState, tabId } = update;
-      const { inputInvoice, subscriptionInfo } = paymentState;
+      const { inputInvoice, subscriptionInfo, form } = paymentState;
       if (inputInvoice?.type === 'chatInviteSubscription' && subscriptionInfo) {
         const amount = subscriptionInfo.subscriptionPricing!.amount;
 
@@ -52,6 +52,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           message: langProvider.oldTranslate('StarsSubscriptionCompletedText', [
             amount,
             subscriptionInfo.title,
+          ], undefined, amount),
+          icon: 'star',
+        });
+      }
+
+      if (form?.invoice.subscriptionPeriod) {
+        const amount = form.invoice.totalAmount;
+        actions.showNotification({
+          tabId,
+          title: langProvider.oldTranslate('StarsSubscriptionCompleted'),
+          message: langProvider.oldTranslate('StarsSubscriptionCompletedText', [
+            amount,
+            form.title,
           ], undefined, amount),
           icon: 'star',
         });

@@ -6,7 +6,7 @@ import type {
 } from '../../api/types';
 import type { PaymentStep, ShippingOption } from '../../types';
 import type {
-  GlobalState, StarsTransactionType, TabArgs, TabState,
+  GlobalState, StarsSubscriptions, StarsTransactionType, TabArgs, TabState,
 } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
@@ -182,13 +182,33 @@ export function appendStarsSubscriptions<T extends GlobalState>(
   const newObject = {
     list: (global.stars.subscriptions?.list || []).concat(subscriptions),
     nextOffset,
-  };
+  } satisfies StarsSubscriptions;
 
   return {
     ...global,
     stars: {
       ...global.stars,
       subscriptions: newObject,
+    },
+  };
+}
+
+export function updateStarsSubscriptionLoading<T extends GlobalState>(
+  global: T, isLoading: boolean,
+): T {
+  const subscriptions = global.stars?.subscriptions;
+  if (!subscriptions) {
+    return global;
+  }
+
+  return {
+    ...global,
+    stars: {
+      ...global.stars,
+      subscriptions: {
+        ...subscriptions,
+        isLoading,
+      },
     },
   };
 }

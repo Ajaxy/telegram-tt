@@ -375,6 +375,10 @@ export interface ApiStarsSubscription {
   canRefulfill?: true;
   hasMissingBalance?: true;
   chatInviteHash?: string;
+  hasBotCancelled?: true;
+  title?: string;
+  photo?: ApiWebDocument;
+  invoiceSlug?: string;
 }
 
 export interface ApiStarTopupOption {

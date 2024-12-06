@@ -1,18 +1,20 @@
 import React, { memo } from '../../lib/teact/teact';
 
-import type { ApiPeer } from '../../api/types';
+import type { ApiPeer, ApiWebDocument } from '../../api/types';
 import type { CustomPeer } from '../../types';
 import type { IconName } from '../../types/icons';
 
 import buildClassName from '../../util/buildClassName';
 
-import Avatar from './Avatar';
+import Avatar, { type AvatarSize } from './Avatar';
 import Icon from './icons/Icon';
 
 import styles from './PeerBadge.module.scss';
 
 type OwnProps = {
-  peer: ApiPeer | CustomPeer;
+  peer?: ApiPeer | CustomPeer;
+  avatarWebPhoto?: ApiWebDocument;
+  avatarSize?: AvatarSize;
   text?: string;
   badgeText?: string;
   badgeIcon?: IconName;
@@ -24,7 +26,9 @@ type OwnProps = {
 };
 
 const PeerBadge = ({
-  peer,
+  peer: avatarPeer,
+  avatarWebPhoto,
+  avatarSize,
   text,
   badgeText,
   badgeIcon,
@@ -40,7 +44,7 @@ const PeerBadge = ({
       onClick={onClick}
     >
       <div className={styles.top}>
-        <Avatar size="large" peer={peer} />
+        <Avatar size={avatarSize} peer={avatarPeer} webPhoto={avatarWebPhoto} />
         {badgeText && (
           <div className={buildClassName(styles.badge, badgeClassName)}>
             {badgeIcon && <Icon name={badgeIcon} className={badgeIconClassName} />}

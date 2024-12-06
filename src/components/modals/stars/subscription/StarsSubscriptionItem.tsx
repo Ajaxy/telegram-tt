@@ -33,7 +33,7 @@ function selectProvidedPeer(peerId: string) {
 const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
   const { openStarsSubscriptionModal } = getActions();
   const {
-    peerId, pricing, until, isCancelled,
+    peerId, pricing, until, isCancelled, title, photo,
   } = subscription;
   const lang = useOldLang();
 
@@ -57,6 +57,12 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
       </div>
       <div className={styles.info}>
         <h3 className={styles.title}>{getSenderTitle(lang, peer)}</h3>
+        {title && (
+          <p className={styles.subtitle}>
+            {photo && <Avatar webPhoto={photo} size="micro" />}
+            {title}
+          </p>
+        )}
         <p className={styles.description}>
           {lang(
             hasExpired ? 'StarsSubscriptionExpired'

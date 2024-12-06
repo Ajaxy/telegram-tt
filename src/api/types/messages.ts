@@ -342,6 +342,7 @@ export interface ApiInvoice {
   currency: string;
   isTest?: boolean;
   isRecurring?: boolean;
+  subscriptionPeriod?: number;
   termsUrl?: string;
   maxTipAmount?: number;
   suggestedTipAmounts?: number[];

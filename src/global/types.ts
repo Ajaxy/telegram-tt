@@ -190,6 +190,7 @@ export type StarsTransactionHistory = Record<StarsTransactionType, {
 export type StarsSubscriptions = {
   list: ApiStarsSubscription[];
   nextOffset?: string;
+  isLoading?: boolean;
 };
 
 export type ConfettiStyle = 'poppers' | 'top-down';

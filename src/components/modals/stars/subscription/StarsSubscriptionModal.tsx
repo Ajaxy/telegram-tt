@@ -8,6 +8,7 @@ import type {
 import type { TabState } from '../../../../global/types';
 
 import { STARS_ICON_PLACEHOLDER } from '../../../../config';
+import { isApiPeerUser } from '../../../../global/helpers/peers';
 import {
   selectPeer,
 } from '../../../../global/selectors';
@@ -46,6 +47,7 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
     changeStarsSubscription,
     checkChatInvite,
     loadStarStatus,
+    openInvoice,
   } = getActions();
   const oldLang = useOldLang();
   const lang = useLang();
@@ -69,7 +71,8 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
       return 'renew';
     }
 
-    if (!isActive) {
+    const canRestart = subscription.chatInviteHash || subscription.invoiceSlug;
+    if (!isActive && canRestart) {
       return 'restart';
     }
 
@@ -87,7 +90,14 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
         break;
       }
       case 'restart': {
-        checkChatInvite({ hash: subscription.chatInviteHash! });
+        if (subscription.chatInviteHash) {
+          checkChatInvite({ hash: subscription.chatInviteHash });
+        } else if (subscription.invoiceSlug) {
+          openInvoice({
+            type: 'slug',
+            slug: subscription.invoiceSlug,
+          });
+        }
         loadStarStatus();
         break;
       }
@@ -109,13 +119,15 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
     }
 
     const {
-      pricing, until, isCancelled, canRefulfill,
+      pricing, until, isCancelled, canRefulfill, photo, title, hasBotCancelled,
     } = subscription;
+
+    const isBotSubscription = isApiPeerUser(peer);
 
     const header = (
       <div className={buildClassName(styles.header, styles.starsHeader)}>
         <div className={styles.avatarWrapper}>
-          <Avatar peer={peer} size="jumbo" />
+          <Avatar peer={!photo ? peer : undefined} webPhoto={photo} size="jumbo" />
           <StarIcon className={styles.subscriptionStar} type="gold" size="adaptive" />
         </div>
         <img
@@ -124,7 +136,7 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
           alt=""
           draggable={false}
         />
-        <h1 className={styles.title}>{oldLang('StarsSubscriptionTitle')}</h1>
+        <h1 className={styles.title}>{title || oldLang('StarsSubscriptionTitle')}</h1>
         <p className={styles.amount}>
           {lang('StarsPerMonth', {
             amount: pricing.amount,
@@ -141,9 +153,16 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
     const tableData: TableData = [];
 
     tableData.push([
-      oldLang('StarsSubscriptionChannel'),
+      oldLang(isBotSubscription ? 'StarsSubscriptionBot' : 'StarsSubscriptionChannel'),
       { chatId: peer.id },
     ]);
+
+    if (title) {
+      tableData.push([
+        oldLang('StarsSubscriptionBotProduct'),
+        title,
+      ]);
+    }
 
     const hasExpired = until < Date.now() / 1000;
     tableData.push([
@@ -162,7 +181,9 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
       <span className={styles.footer}>
         <p className={styles.secondary}>{footerTos}</p>
         {isCancelled && (
-          <p className={styles.danger}>{oldLang('StarsSubscriptionCancelledText')}</p>
+          <p className={styles.danger}>
+            {oldLang(hasBotCancelled ? 'StarsSubscriptionBotCancelledText' : 'StarsSubscriptionCancelledText')}
+          </p>
         )}
         {canRefulfill && (
           <p className={styles.secondary}>

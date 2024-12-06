@@ -292,8 +292,10 @@ body:not(.is-ios) {
   vertical-align: text-top;
 }
 
-.star-amount-icon {
-  margin-inline-start: 0.5em; // Prevent sticking to the text without using `white-space: pre`
+// Increase specificity to override the default icon style
+.star-amount-icon.star-amount-icon {
+  line-height: inherit; // Vertical centring
+  margin-inline-start: 0.375em; // Prevent sticking to the text without using `white-space: pre`
 }
 
 .shared-canvas-container {

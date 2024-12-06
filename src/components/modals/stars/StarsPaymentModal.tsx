@@ -11,6 +11,8 @@ import {
   selectChat, selectChatMessage, selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { formatStarsAsIcon } from '../../../util/localization/format';
+import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -21,6 +23,8 @@ import usePrevious from '../../../hooks/usePrevious';
 
 import Avatar from '../../common/Avatar';
 import StarIcon from '../../common/icons/StarIcon';
+import PeerBadge from '../../common/PeerBadge';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -58,6 +62,8 @@ const StarPaymentModal = ({
 
   const { form, subscriptionInfo } = renderingModal || {};
   const amount = form?.invoice?.totalAmount || subscriptionInfo?.subscriptionPricing?.amount;
+  const isBotSubscription = Boolean(form?.invoice.subscriptionPeriod);
+  const canShowPeerItem = !subscriptionInfo?.subscriptionPricing;
 
   const photo = form?.photo;
 
@@ -102,8 +108,21 @@ const StarPaymentModal = ({
       });
     }
 
+    if (isBotSubscription) {
+      return lang('StarsSubscribeBotText', {
+        name: form.title,
+        amount,
+        bot: botName,
+      }, {
+        pluralValue: amount!,
+      });
+    }
+
     return oldLang('Stars.Transfer.Info', [form!.title, botName, starsText]);
-  }, [renderingModal, bot, oldLang, amount, paidMediaMessage, subscriptionInfo, form, paidMediaChat, lang]);
+  }, [
+    renderingModal?.inputInvoice, bot, oldLang, amount, paidMediaMessage, subscriptionInfo, isBotSubscription, form,
+    paidMediaChat, lang,
+  ]);
 
   const disclaimerText = useMemo(() => {
     if (subscriptionInfo) {
@@ -160,25 +179,31 @@ const StarPaymentModal = ({
             <StarIcon type="gold" size="adaptive" className={styles.avatarStar} />
           </>
         ) : (
-          <>
-            <Avatar peer={bot} size="giant" />
-            {photo && <Avatar className={styles.paymentPhoto} webPhoto={photo} size="giant" />}
-          </>
+          <PeerBadge
+            peer={!photo ? bot : undefined}
+            avatarWebPhoto={photo}
+            avatarSize="giant"
+            badgeIcon="star"
+            badgeText={formatInteger(amount!)}
+            badgeClassName={styles.amountBadge}
+            className={styles.paymentPhoto}
+          />
         )}
         <img className={styles.paymentImageBackground} src={StarsBackground} alt="" draggable={false} />
       </div>
       <h2 className={styles.headerText}>
         {inviteCustomPeer ? oldLang('StarsSubscribeTitle') : oldLang('StarsConfirmPurchaseTitle')}
       </h2>
+      {canShowPeerItem && <PickerSelectedItem className={styles.botItem} peerId={form?.botId} />}
       <div className={styles.description}>
         {renderText(descriptionText, ['simple_markdown', 'emoji'])}
       </div>
       <Button className={styles.paymentButton} size="smaller" onClick={handlePayment} isLoading={isLoading}>
-        {oldLang('Stars.Transfer.Pay')}
-        <div className={styles.paymentAmount}>
-          {amount}
-          <StarIcon className={styles.paymentButtonStar} size="small" />
-        </div>
+        {lang(isBotSubscription ? 'StarsSubscribeBotButtonMonth' : 'StarsPay', {
+          amount: formatStarsAsIcon(lang, amount!, true),
+        }, {
+          withNodes: true,
+        })}
       </Button>
       {disclaimerText && (
         <div className={buildClassName(styles.disclaimer, styles.smallerText)}>

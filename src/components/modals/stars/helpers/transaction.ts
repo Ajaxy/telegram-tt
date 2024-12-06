@@ -5,7 +5,7 @@ import { buildStarsTransactionCustomPeer } from '../../../../global/helpers/paym
 
 export function getTransactionTitle(lang: OldLangFn, transaction: ApiStarsTransaction) {
   if (transaction.extendedMedia) return lang('StarMediaPurchase');
-  if (transaction.subscriptionPeriod) return lang('StarSubscriptionPurchase');
+  if (transaction.subscriptionPeriod) return transaction.title || lang('StarSubscriptionPurchase');
   if (transaction.isReaction) return lang('StarsReactionsSent');
   if (transaction.giveawayPostId) return lang('StarsGiveawayPrizeReceived');
   if (transaction.isMyGift) return lang('StarsGiftSent');

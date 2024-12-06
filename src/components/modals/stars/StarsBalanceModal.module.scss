@@ -109,6 +109,10 @@
   unicode-bidi: plaintext;
 }
 
+.botItem {
+  margin-bottom: 0.75rem;
+}
+
 .hiddenHeader {
   transform: translateY(-100%);
 }
@@ -191,15 +195,9 @@
   transform: translate(-50%, -50%);
 }
 
-.paymentAmount {
-  display: flex;
-  line-height: 1.125;
-  gap: 0.125rem;
-}
-
 .paymentButton {
   display: flex;
-  gap: 0.125rem;
+  align-items: center;
   margin-top: 1rem;
 }
 
@@ -224,4 +222,21 @@
 .disclaimer {
   margin-top: 0.5rem;
   color: var(--color-text-secondary);
+}
+
+.amountBadge {
+  background-image: var(--stars-gradient);
+}
+
+.loadMore {
+  justify-content: flex-start;
+  gap: 0.75rem;
+}
+
+.loadMoreIcon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.5rem;
 }

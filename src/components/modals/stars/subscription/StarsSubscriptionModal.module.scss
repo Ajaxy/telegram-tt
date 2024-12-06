@@ -21,6 +21,13 @@
   margin-bottom: 0;
 }
 
+.title {
+  text-align: center;
+  text-wrap: balance;
+  font-size: 1.75rem;
+  line-height: 1.25;
+}
+
 .amount {
   display: flex;
   align-items: center;
