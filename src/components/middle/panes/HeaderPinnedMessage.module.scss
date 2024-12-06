@@ -49,6 +49,8 @@
 .fullWidth {
   @include mixins.header-pane;
 
+  height: 3.5rem;
+
   .pinnedMessage {
     margin-top: 0;
     margin-bottom: 0;
