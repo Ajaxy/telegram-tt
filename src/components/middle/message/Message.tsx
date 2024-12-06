@@ -575,12 +575,13 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const messageSender = canShowSender ? sender : undefined;
 
-  const noUserColors = isOwn && !isCustomShape;
-
   const shouldPreferOriginSender = forwardInfo
     && (isChatWithSelf || isRepliesChat || isAnonymousForwards || !messageSender);
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
-  const messageColorPeer = originSender || sender;
+
+  const messageColorPeer = asForwarded ? originSender : sender;
+  const noUserColors = isOwn && !isCustomShape;
+
   const senderPeer = (forwardInfo || storyData) ? originSender : messageSender;
   const hasTtl = hasMessageTtl(message);
 
@@ -777,7 +778,7 @@ const Message: FC<OwnProps & StateProps> = ({
     hasReactions,
     isGeoLiveActive: location?.mediaType === 'geoLive' && !isGeoLiveExpired(message),
     withVoiceTranscription,
-    peerColorClass: getPeerColorClass(messageColorPeer, noUserColors),
+    peerColorClass: getPeerColorClass(messageColorPeer, noUserColors, true),
     hasOutsideReactions,
   });
 
@@ -1395,7 +1396,7 @@ const Message: FC<OwnProps & StateProps> = ({
         theme={theme}
         story={webPageStory}
         isConnected={isConnected}
-        backgroundEmojiId={sender?.color?.backgroundEmojiId}
+        backgroundEmojiId={messageColorPeer?.color?.backgroundEmojiId}
         shouldWarnAboutSvg={shouldWarnAboutSvg}
         autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
         onAudioPlay={handleAudioPlay}
