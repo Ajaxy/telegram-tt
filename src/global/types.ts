@@ -106,6 +106,7 @@ import type {
   ApiPrivacyKey,
   ApiPrivacySettings,
   AudioOrigin,
+  BotsPrivacyType,
   ChatCreationProgress,
   ChatMediaSearchParams,
   EmojiKeywords,
@@ -1492,6 +1493,7 @@ export interface ActionPayloads {
     isAllowList: boolean;
     updatedIds: string[];
     isPremiumAllowed?: true;
+    botsPrivacy: BotsPrivacyType;
   };
   loadNotificationExceptions: undefined;
   setThemeSettings: { theme: ThemeKey } & Partial<IThemeSettings>;

@@ -3,13 +3,14 @@ import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiPhoto } from '../../../api/types';
-import type { ApiPrivacySettings } from '../../../types';
+import type { ApiPrivacySettings, BotsPrivacyType } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectIsCurrentUserPremium, selectUserFullInfo } from '../../../global/selectors';
 import { getPrivacyKey } from './helpers/privacy';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -106,18 +107,19 @@ function PrivacySubsection({
   onScreenSelect: (screen: SettingsScreens) => void;
 }) {
   const { setPrivacyVisibility } = getActions();
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const visibilityOptions = useMemo(() => {
     const hasNobody = screen !== SettingsScreens.PrivacyAddByPhone;
     const options = [
-      { value: 'everybody', label: lang('P2PEverybody') },
+      { value: 'everybody', label: oldLang('P2PEverybody') },
       {
         value: 'contacts',
         label: isPremiumRequired ? (
-          <PrivacyLockedOption label={lang('P2PContacts')} />
+          <PrivacyLockedOption label={oldLang('P2PContacts')} />
         ) : (
-          lang('P2PContacts')
+          oldLang('P2PContacts')
         ),
         hidden: isPremiumRequired,
       },
@@ -127,15 +129,15 @@ function PrivacySubsection({
       options.push({
         value: 'nobody',
         label: isPremiumRequired ? (
-          <PrivacyLockedOption label={lang('P2PNobody')} />
+          <PrivacyLockedOption label={oldLang('P2PNobody')} />
         ) : (
-          lang('P2PNobody')
+          oldLang('P2PNobody')
         ),
         hidden: isPremiumRequired,
       });
     }
     return options;
-  }, [lang, screen, isPremiumRequired]);
+  }, [oldLang, screen, isPremiumRequired]);
 
   const primaryExceptionLists = useMemo(() => {
     if (screen === SettingsScreens.PrivacyAddByPhone) {
@@ -155,65 +157,81 @@ function PrivacySubsection({
 
   const descriptionText = useMemo(() => {
     switch (screen) {
+      case SettingsScreens.PrivacyGifts:
+        return lang('PrivacyGiftsInfo');
       case SettingsScreens.PrivacyLastSeen:
-        return lang('CustomHelp');
+        return oldLang('CustomHelp');
       case SettingsScreens.PrivacyAddByPhone: {
-        return privacy?.visibility === 'everybody' ? lang('PrivacyPhoneInfo') : lang('PrivacyPhoneInfo3');
+        return privacy?.visibility === 'everybody' ? oldLang('PrivacyPhoneInfo') : oldLang('PrivacyPhoneInfo3');
       }
       case SettingsScreens.PrivacyVoiceMessages:
-        return lang('PrivacyVoiceMessagesInfo');
+        return oldLang('PrivacyVoiceMessagesInfo');
       default:
         return undefined;
     }
-  }, [lang, screen, privacy]);
+  }, [oldLang, lang, screen, privacy]);
 
   const headerText = useMemo(() => {
     switch (screen) {
       case SettingsScreens.PrivacyPhoneNumber:
-        return lang('PrivacyPhoneTitle');
+        return oldLang('PrivacyPhoneTitle');
       case SettingsScreens.PrivacyAddByPhone:
-        return lang('PrivacyPhoneTitle2');
+        return oldLang('PrivacyPhoneTitle2');
       case SettingsScreens.PrivacyLastSeen:
-        return lang('LastSeenTitle');
+        return oldLang('LastSeenTitle');
       case SettingsScreens.PrivacyProfilePhoto:
-        return lang('PrivacyProfilePhotoTitle');
+        return oldLang('PrivacyProfilePhotoTitle');
       case SettingsScreens.PrivacyBio:
-        return lang('PrivacyBioTitle');
+        return oldLang('PrivacyBioTitle');
       case SettingsScreens.PrivacyBirthday:
-        return lang('PrivacyBirthdayTitle');
+        return oldLang('PrivacyBirthdayTitle');
+      case SettingsScreens.PrivacyGifts:
+        return lang('PrivacyGiftsTitle');
       case SettingsScreens.PrivacyForwarding:
-        return lang('PrivacyForwardsTitle');
+        return oldLang('PrivacyForwardsTitle');
       case SettingsScreens.PrivacyVoiceMessages:
-        return lang('PrivacyVoiceMessagesTitle');
+        return oldLang('PrivacyVoiceMessagesTitle');
       case SettingsScreens.PrivacyGroupChats:
-        return lang('WhoCanAddMe');
+        return oldLang('WhoCanAddMe');
       case SettingsScreens.PrivacyPhoneCall:
-        return lang('WhoCanCallMe');
+        return oldLang('WhoCanCallMe');
       case SettingsScreens.PrivacyPhoneP2P:
-        return lang('PrivacyP2P');
+        return oldLang('PrivacyP2P');
       default:
         return undefined;
     }
-  }, [lang, screen]);
+  }, [oldLang, lang, screen]);
 
-  const prepareSubtitle = useLastCallback((userIds?: string[], chatIds?: string[], shouldAllowPremium?: boolean) => {
-    const userIdsCount = userIds?.length || 0;
-    const chatIdsCount = chatIds?.length || 0;
+  const prepareSubtitle = useLastCallback(
+    (userIds?: string[], chatIds?: string[], shouldAllowPremium?: boolean, botsPrivacy?: BotsPrivacyType) => {
+      const userIdsCount = userIds?.length || 0;
+      const chatIdsCount = chatIds?.length || 0;
+      const isAllowBots = botsPrivacy === 'allow';
+      const hasPeers = userIdsCount || chatIdsCount;
 
-    if (!userIdsCount && !chatIdsCount) {
-      return shouldAllowPremium ? lang('PrivacyPremium') : lang('EditAdminAddUsers');
-    } else if (shouldAllowPremium) {
-      return lang('ContactsAndPremium');
-    }
+      if (!hasPeers && !isAllowBots) {
+        return shouldAllowPremium ? oldLang('PrivacyPremium') : oldLang('EditAdminAddUsers');
+      } else if (shouldAllowPremium) {
+        return oldLang('ContactsAndPremium');
+      }
 
-    const userCountString = userIdsCount > 0 ? lang('Users', userIdsCount) : undefined;
-    const chatCountString = chatIdsCount > 0 ? lang('Chats', chatIdsCount) : undefined;
+      const userCountString = userIdsCount > 0 ? oldLang('Users', userIdsCount) : undefined;
+      const chatCountString = chatIdsCount > 0 ? oldLang('Chats', chatIdsCount) : undefined;
 
-    return [userCountString, chatCountString].filter(Boolean).join(', ');
-  });
+      const botPrivacyString = isAllowBots ? lang('PrivacyValueBots') : '';
+      const peersString = lang.conjunction([userCountString, chatCountString].filter(Boolean));
+
+      return [botPrivacyString, peersString].filter(Boolean).join(' ');
+    },
+  );
 
   const allowedString = useMemo(() => {
-    return prepareSubtitle(privacy?.allowUserIds, privacy?.allowChatIds, privacy?.shouldAllowPremium);
+    return prepareSubtitle(
+      privacy?.allowUserIds,
+      privacy?.allowChatIds,
+      privacy?.shouldAllowPremium,
+      privacy?.botsPrivacy,
+    );
   }, [privacy]);
 
   const blockString = useMemo(() => {
@@ -239,6 +257,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyBioAllowedContacts;
       case SettingsScreens.PrivacyBirthday:
         return SettingsScreens.PrivacyBirthdayAllowedContacts;
+      case SettingsScreens.PrivacyGifts:
+        return SettingsScreens.PrivacyGiftsAllowedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingAllowedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -264,6 +284,8 @@ function PrivacySubsection({
         return SettingsScreens.PrivacyBioDeniedContacts;
       case SettingsScreens.PrivacyBirthday:
         return SettingsScreens.PrivacyBirthdayDeniedContacts;
+      case SettingsScreens.PrivacyGifts:
+        return SettingsScreens.PrivacyGiftsDeniedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingDeniedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -280,7 +302,7 @@ function PrivacySubsection({
   return (
     <>
       <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{headerText}</h4>
+        <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>{headerText}</h4>
         <RadioGroup
           name={`visibility-${privacyKey}`}
           options={visibilityOptions}
@@ -288,13 +310,13 @@ function PrivacySubsection({
           selected={privacy?.visibility}
         />
         {descriptionText && (
-          <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>{descriptionText}</p>
+          <p className="settings-item-description-larger" dir={oldLang.isRtl ? 'rtl' : undefined}>{descriptionText}</p>
         )}
       </div>
       {!isPremiumRequired && (primaryExceptionLists.shouldShowAllowed || primaryExceptionLists.shouldShowDenied) && (
         <div className="settings-item">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-            {lang('PrivacyExceptions')}
+          <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
+            {oldLang('PrivacyExceptions')}
           </h4>
           {primaryExceptionLists.shouldShowAllowed && (
             <ListItem
@@ -306,7 +328,7 @@ function PrivacySubsection({
               }}
             >
               <div className="multiline-menu-item full-size">
-                <span className="title">{lang('AlwaysAllow')}</span>
+                <span className="title">{oldLang('AlwaysAllow')}</span>
                 <span className="subtitle">{allowedString}</span>
               </div>
             </ListItem>
@@ -321,7 +343,7 @@ function PrivacySubsection({
               }}
             >
               <div className="multiline-menu-item full-size">
-                <span className="title">{lang('NeverAllow')}</span>
+                <span className="title">{oldLang('NeverAllow')}</span>
                 <span className="subtitle">{blockString}</span>
               </div>
             </ListItem>
@@ -365,6 +387,10 @@ export default memo(withGlobal<OwnProps>(
 
       case SettingsScreens.PrivacyBirthday:
         primaryPrivacy = privacy.birthday;
+        break;
+
+      case SettingsScreens.PrivacyGifts:
+        primaryPrivacy = privacy.gifts;
         break;
 
       case SettingsScreens.PrivacyPhoneP2P:

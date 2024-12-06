@@ -466,6 +466,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'birthday':
       return new GramJs.InputPrivacyKeyBirthday();
+
+    case 'gifts':
+      return new GramJs.InputPrivacyKeyStarGiftsAutoSave();
   }
 
   return undefined;
@@ -798,6 +801,14 @@ export function buildInputPrivacyRules(
   }
   if (rules.shouldAllowPremium) {
     privacyRules.push(new GramJs.InputPrivacyValueAllowPremium());
+  }
+
+  if (rules.botsPrivacy === 'allow') {
+    privacyRules.push(new GramJs.InputPrivacyValueAllowBots());
+  }
+
+  if (rules.botsPrivacy === 'disallow') {
+    privacyRules.push(new GramJs.InputPrivacyValueDisallowBots());
   }
 
   if (!rules.isUnspecified) {

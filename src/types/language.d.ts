@@ -1159,6 +1159,11 @@ export interface LangPair {
   'VideoConversionView': undefined;
   'BotSuggestedStatusTitle': undefined;
   'BotSuggestedStatusUpdated': undefined;
+  'PrivacyGifts': undefined;
+  'PrivacyGiftsTitle': undefined;
+  'PrivacyGiftsInfo': undefined;
+  'PrivacyValueBots': undefined;
+  'CustomShareGiftsInfo': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

@@ -7,6 +7,7 @@ import { getActions } from '../../../global';
 import { SettingsScreens } from '../../../types';
 
 import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../../hooks/useLang';
 import useMultiClick from '../../../hooks/useMultiClick';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -75,146 +76,151 @@ const SettingsHeader: FC<OwnProps> = ({
     );
   }, [isMobile]);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   function renderHeaderContent() {
     switch (currentScreen) {
       case SettingsScreens.EditProfile:
-        return <h3>{lang('lng_settings_information')}</h3>;
+        return <h3>{oldLang('lng_settings_information')}</h3>;
       case SettingsScreens.General:
-        return <h3>{lang('General')}</h3>;
+        return <h3>{oldLang('General')}</h3>;
       case SettingsScreens.QuickReaction:
-        return <h3>{lang('DoubleTapSetting')}</h3>;
+        return <h3>{oldLang('DoubleTapSetting')}</h3>;
       case SettingsScreens.CustomEmoji:
-        return <h3>{lang('Emoji')}</h3>;
+        return <h3>{oldLang('Emoji')}</h3>;
       case SettingsScreens.Notifications:
-        return <h3>{lang('Notifications')}</h3>;
+        return <h3>{oldLang('Notifications')}</h3>;
       case SettingsScreens.DataStorage:
-        return <h3>{lang('DataSettings')}</h3>;
+        return <h3>{oldLang('DataSettings')}</h3>;
       case SettingsScreens.Privacy:
-        return <h3>{lang('PrivacySettings')}</h3>;
+        return <h3>{oldLang('PrivacySettings')}</h3>;
       case SettingsScreens.Language:
-        return <h3>{lang('Language')}</h3>;
+        return <h3>{oldLang('Language')}</h3>;
       case SettingsScreens.DoNotTranslate:
-        return <h3>{lang('DoNotTranslate')}</h3>;
+        return <h3>{oldLang('DoNotTranslate')}</h3>;
       case SettingsScreens.Stickers:
-        return <h3>{lang('StickersName')}</h3>;
+        return <h3>{oldLang('StickersName')}</h3>;
       case SettingsScreens.Experimental:
-        return <h3>{lang('lng_settings_experimental')}</h3>;
+        return <h3>{oldLang('lng_settings_experimental')}</h3>;
 
       case SettingsScreens.GeneralChatBackground:
-        return <h3>{lang('ChatBackground')}</h3>;
+        return <h3>{oldLang('ChatBackground')}</h3>;
       case SettingsScreens.GeneralChatBackgroundColor:
-        return <h3>{lang('SetColor')}</h3>;
+        return <h3>{oldLang('SetColor')}</h3>;
 
       case SettingsScreens.PrivacyPhoneNumber:
-        return <h3>{lang('PrivacyPhone')}</h3>;
+        return <h3>{oldLang('PrivacyPhone')}</h3>;
       case SettingsScreens.PrivacyLastSeen:
-        return <h3>{lang('PrivacyLastSeen')}</h3>;
+        return <h3>{oldLang('PrivacyLastSeen')}</h3>;
       case SettingsScreens.PrivacyProfilePhoto:
-        return <h3>{lang('Privacy.ProfilePhoto')}</h3>;
+        return <h3>{oldLang('Privacy.ProfilePhoto')}</h3>;
       case SettingsScreens.PrivacyBio:
-        return <h3>{lang('PrivacyBio')}</h3>;
+        return <h3>{oldLang('PrivacyBio')}</h3>;
       case SettingsScreens.PrivacyBirthday:
-        return <h3>{lang('PrivacyBirthday')}</h3>;
+        return <h3>{oldLang('PrivacyBirthday')}</h3>;
+      case SettingsScreens.PrivacyGifts:
+        return <h3>{lang('PrivacyGifts')}</h3>;
       case SettingsScreens.PrivacyForwarding:
-        return <h3>{lang('PrivacyForwards')}</h3>;
+        return <h3>{oldLang('PrivacyForwards')}</h3>;
       case SettingsScreens.PrivacyVoiceMessages:
-        return <h3>{lang('PrivacyVoiceMessages')}</h3>;
+        return <h3>{oldLang('PrivacyVoiceMessages')}</h3>;
       case SettingsScreens.PrivacyMessages:
-        return <h3>{lang('PrivacyMessages')}</h3>;
+        return <h3>{oldLang('PrivacyMessages')}</h3>;
       case SettingsScreens.PrivacyGroupChats:
-        return <h3>{lang('AutodownloadGroupChats')}</h3>;
+        return <h3>{oldLang('AutodownloadGroupChats')}</h3>;
       case SettingsScreens.PrivacyPhoneCall:
-        return <h3>{lang('Calls')}</h3>;
+        return <h3>{oldLang('Calls')}</h3>;
 
       case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
       case SettingsScreens.PrivacyLastSeenAllowedContacts:
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyBioAllowedContacts:
       case SettingsScreens.PrivacyBirthdayAllowedContacts:
+      case SettingsScreens.PrivacyGiftsAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
       case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
       case SettingsScreens.PrivacyPhoneCallAllowedContacts:
       case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
-        return <h3>{lang('AlwaysShareWith')}</h3>;
+        return <h3>{oldLang('AlwaysShareWith')}</h3>;
       case SettingsScreens.PrivacyPhoneNumberDeniedContacts:
       case SettingsScreens.PrivacyLastSeenDeniedContacts:
       case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       case SettingsScreens.PrivacyBioDeniedContacts:
       case SettingsScreens.PrivacyBirthdayDeniedContacts:
+      case SettingsScreens.PrivacyGiftsDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:
       case SettingsScreens.PrivacyVoiceMessagesDeniedContacts:
       case SettingsScreens.PrivacyGroupChatsDeniedContacts:
       case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
-        return <h3>{lang('NeverShareWith')}</h3>;
+        return <h3>{oldLang('NeverShareWith')}</h3>;
 
       case SettingsScreens.Performance:
-        return <h3>{lang('Animations and Performance')}</h3>;
+        return <h3>{oldLang('Animations and Performance')}</h3>;
 
       case SettingsScreens.ActiveSessions:
-        return <h3>{lang('SessionsTitle')}</h3>;
+        return <h3>{oldLang('SessionsTitle')}</h3>;
       case SettingsScreens.ActiveWebsites:
-        return <h3>{lang('OtherWebSessions')}</h3>;
+        return <h3>{oldLang('OtherWebSessions')}</h3>;
       case SettingsScreens.PrivacyBlockedUsers:
-        return <h3>{lang('BlockedUsers')}</h3>;
+        return <h3>{oldLang('BlockedUsers')}</h3>;
 
       case SettingsScreens.TwoFaDisabled:
       case SettingsScreens.TwoFaEnabled:
-        return <h3>{lang('TwoStepVerification')}</h3>;
+        return <h3>{oldLang('TwoStepVerification')}</h3>;
       case SettingsScreens.TwoFaNewPassword:
       case SettingsScreens.TwoFaChangePasswordNew:
       case SettingsScreens.TwoFaChangePasswordConfirm:
-        return <h3>{lang('PleaseEnterCurrentPassword')}</h3>;
+        return <h3>{oldLang('PleaseEnterCurrentPassword')}</h3>;
       case SettingsScreens.TwoFaNewPasswordConfirm:
-        return <h3>{lang('PleaseReEnterPassword')}</h3>;
+        return <h3>{oldLang('PleaseReEnterPassword')}</h3>;
       case SettingsScreens.TwoFaNewPasswordHint:
       case SettingsScreens.TwoFaChangePasswordHint:
-        return <h3>{lang('PasswordHint')}</h3>;
+        return <h3>{oldLang('PasswordHint')}</h3>;
       case SettingsScreens.TwoFaNewPasswordEmail:
       case SettingsScreens.TwoFaRecoveryEmail:
-        return <h3>{lang('RecoveryEmailTitle')}</h3>;
+        return <h3>{oldLang('RecoveryEmailTitle')}</h3>;
       case SettingsScreens.TwoFaNewPasswordEmailCode:
       case SettingsScreens.TwoFaRecoveryEmailCode:
         return <h3>Recovery Email Code</h3>;
       case SettingsScreens.TwoFaCongratulations:
-        return <h3>{lang('TwoStepVerificationPasswordSet')}</h3>;
+        return <h3>{oldLang('TwoStepVerificationPasswordSet')}</h3>;
       case SettingsScreens.TwoFaChangePasswordCurrent:
       case SettingsScreens.TwoFaTurnOff:
       case SettingsScreens.TwoFaRecoveryEmailCurrentPassword:
-        return <h3>{lang('PleaseEnterCurrentPassword')}</h3>;
+        return <h3>{oldLang('PleaseEnterCurrentPassword')}</h3>;
 
       case SettingsScreens.PasscodeDisabled:
       case SettingsScreens.PasscodeEnabled:
       case SettingsScreens.PasscodeNewPasscode:
       case SettingsScreens.PasscodeNewPasscodeConfirm:
       case SettingsScreens.PasscodeCongratulations:
-        return <h3>{lang('Passcode')}</h3>;
+        return <h3>{oldLang('Passcode')}</h3>;
 
       case SettingsScreens.PasscodeTurnOff:
-        return <h3>{lang('PasscodeController.Disable.Title')}</h3>;
+        return <h3>{oldLang('PasscodeController.Disable.Title')}</h3>;
 
       case SettingsScreens.PasscodeChangePasscodeCurrent:
       case SettingsScreens.PasscodeChangePasscodeNew:
-        return <h3>{lang('PasscodeController.Change.Title')}</h3>;
+        return <h3>{oldLang('PasscodeController.Change.Title')}</h3>;
 
       case SettingsScreens.PasscodeChangePasscodeConfirm:
-        return <h3>{lang('PasscodeController.ReEnterPasscode.Placeholder')}</h3>;
+        return <h3>{oldLang('PasscodeController.ReEnterPasscode.Placeholder')}</h3>;
 
       case SettingsScreens.Folders:
-        return <h3>{lang('Filters')}</h3>;
+        return <h3>{oldLang('Filters')}</h3>;
       case SettingsScreens.FoldersCreateFolder:
-        return <h3>{lang('FilterNew')}</h3>;
+        return <h3>{oldLang('FilterNew')}</h3>;
       case SettingsScreens.FoldersShare:
-        return <h3>{lang('FolderLinkScreen.Title')}</h3>;
+        return <h3>{oldLang('FolderLinkScreen.Title')}</h3>;
       case SettingsScreens.FoldersEditFolder:
       case SettingsScreens.FoldersEditFolderFromChatList:
       case SettingsScreens.FoldersEditFolderInvites:
         return (
           <div className="settings-main-header">
-            <h3>{lang('FilterEdit')}</h3>
+            <h3>{oldLang('FilterEdit')}</h3>
             {Boolean(editedFolderId) && (
               <DropdownMenu
                 className="settings-more-menu"
@@ -222,7 +228,7 @@ const SettingsHeader: FC<OwnProps> = ({
                 positionX="right"
               >
                 <MenuItem icon="delete" destructive onClick={openDeleteFolderConfirmation}>
-                  {lang('Delete')}
+                  {oldLang('Delete')}
                 </MenuItem>
               </DropdownMenu>
             )}
@@ -234,7 +240,7 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.FoldersExcludedChatsFromChatList:
         return (
           <h3>
-            {lang(
+            {oldLang(
               currentScreen === SettingsScreens.FoldersIncludedChats
                   || currentScreen === SettingsScreens.FoldersIncludedChatsFromChatList
                 ? 'FilterInclude' : 'FilterExclude',
@@ -246,7 +252,7 @@ const SettingsHeader: FC<OwnProps> = ({
           <div className="settings-main-header">
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
             <h3 onClick={handleMultiClick}>
-              {lang('SETTINGS')}
+              {oldLang('SETTINGS')}
             </h3>
 
             <Button
@@ -256,7 +262,7 @@ const SettingsHeader: FC<OwnProps> = ({
               color="translucent"
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
-              ariaLabel={lang('lng_settings_information')}
+              ariaLabel={oldLang('lng_settings_information')}
             >
               <i className="icon icon-edit" />
             </Button>
@@ -265,7 +271,7 @@ const SettingsHeader: FC<OwnProps> = ({
               trigger={SettingsMenuButton}
               positionX="right"
             >
-              <MenuItem icon="logout" onClick={openSignOutConfirmation}>{lang('LogOutTitle')}</MenuItem>
+              <MenuItem icon="logout" onClick={openSignOutConfirmation}>{oldLang('LogOutTitle')}</MenuItem>
             </DropdownMenu>
           </div>
         );
@@ -279,7 +285,7 @@ const SettingsHeader: FC<OwnProps> = ({
         size="smaller"
         color="translucent"
         onClick={onReset}
-        ariaLabel={lang('AccDescrGoBack')}
+        ariaLabel={oldLang('AccDescrGoBack')}
       >
         <i className="icon icon-arrow-left" />
       </Button>
@@ -287,8 +293,8 @@ const SettingsHeader: FC<OwnProps> = ({
       <ConfirmDialog
         isOpen={isSignOutDialogOpen}
         onClose={closeSignOutConfirmation}
-        text={lang('lng_sure_logout')}
-        confirmLabel={lang('AccountSettings.Logout')}
+        text={oldLang('lng_sure_logout')}
+        confirmLabel={oldLang('AccountSettings.Logout')}
         confirmHandler={handleSignOutMessage}
         confirmIsDestructive
       />

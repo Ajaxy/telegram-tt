@@ -91,6 +91,8 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
       return 'bio';
     case 'PrivacyKeyBirthday':
       return 'birthday';
+    case 'PrivacyKeyStarGiftsAutoSave':
+      return 'gifts';
   }
 
   return undefined;

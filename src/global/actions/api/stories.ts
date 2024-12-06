@@ -241,12 +241,13 @@ addActionHandler('toggleStoryPinnedToTop', async (global, actions, payload): Pro
   const isRemoving = oldPinnedIds.includes(storyId);
   const newPinnedIds = isRemoving ? oldPinnedIds.filter((id) => id !== storyId) : [...oldPinnedIds, storyId];
 
+  global = getGlobal();
   global = {
-    ...getGlobal(),
+    ...global,
     stories: {
-      ...getGlobal().stories,
+      ...global.stories,
       byPeerId: {
-        ...getGlobal().stories.byPeerId,
+        ...global.stories.byPeerId,
         [peerId]: {
           ...peerStories,
           pinnedIds: newPinnedIds.sort((a, b) => b - a),
@@ -520,6 +521,7 @@ addActionHandler('editStoryPrivacy', (global, actions, payload): ActionReturnTyp
     isUnspecified: privacy.isUnspecified,
     allowedIds,
     blockedIds,
+    botsPrivacy: 'none',
   });
 
   void callApi('editStoryPrivacy', {

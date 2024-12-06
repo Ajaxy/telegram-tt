@@ -1393,6 +1393,11 @@
 "BotSuggestedStatus" = "Do you want to set this emoji status suggested by **{bot}**?";
 "BotSuggestedStatusTitle" = "Set Emoji Status";
 "BotSuggestedStatusUpdated" = "Your emoji status is updated.";
+"PrivacyGifts" = "Gifts";
+"PrivacyGiftsTitle" = "Who can display gifts on my profile?"
+"PrivacyGiftsInfo" = "Choose whether gifts from specific senders need your approval before they're visible to others on your profile."
+"PrivacyValueBots" = "Mini Apps"
+"CustomShareGiftsInfo" = "You can add users or entire groups as exceptions that will override the settings above."
 "StarsSubscribeBotText_one" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** star per month?"
 "StarsSubscribeBotText_other" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** stars per month?"
 "StarsSubscribeBotButtonMonth" = "Subscribe for {amount} / month";

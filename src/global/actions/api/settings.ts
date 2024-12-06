@@ -396,6 +396,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     callApi('fetchPrivacySettings', 'voiceMessages'),
     callApi('fetchPrivacySettings', 'bio'),
     callApi('fetchPrivacySettings', 'birthday'),
+    callApi('fetchPrivacySettings', 'gifts'),
   ]);
 
   if (result.some((e) => e === undefined)) {
@@ -414,6 +415,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     voiceMessagesSettings,
     bioSettings,
     birthdaySettings,
+    giftsSettings,
   ] = result as {
     rules: ApiPrivacySettings;
   }[];
@@ -436,6 +438,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
         voiceMessages: voiceMessagesSettings.rules,
         bio: bioSettings.rules,
         birthday: birthdaySettings.rules,
+        gifts: giftsSettings.rules,
       },
     },
   };
@@ -477,6 +480,7 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
     visibility,
     allowedIds: [...settings.allowUserIds, ...settings.allowChatIds],
     blockedIds: [...settings.blockUserIds, ...settings.blockChatIds],
+    botsPrivacy: settings.botsPrivacy,
   });
 
   const result = await callApi('setPrivacySettings', privacyKey, rules);
@@ -502,7 +506,7 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
 
 addActionHandler('setPrivacySettings', async (global, actions, payload): Promise<void> => {
   const {
-    privacyKey, isAllowList, updatedIds, isPremiumAllowed,
+    privacyKey, isAllowList, updatedIds, isPremiumAllowed, botsPrivacy,
   } = payload!;
   const {
     privacy: { [privacyKey]: settings },
@@ -518,6 +522,7 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
     shouldAllowPremium: isPremiumAllowed,
     allowedIds: isAllowList ? updatedIds : [...settings.allowUserIds, ...settings.allowChatIds],
     blockedIds: !isAllowList ? updatedIds : [...settings.blockUserIds, ...settings.blockChatIds],
+    botsPrivacy,
   });
 
   const result = await callApi('setPrivacySettings', privacyKey, rules);

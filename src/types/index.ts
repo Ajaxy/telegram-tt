@@ -134,6 +134,8 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   shouldSkipWebAppCloseConfirmation: boolean;
 }
 
+export type BotsPrivacyType = 'allow' | 'disallow' | 'none';
+
 export interface ApiPrivacySettings {
   visibility: PrivacyVisibility;
   isUnspecified?: boolean;
@@ -142,6 +144,7 @@ export interface ApiPrivacySettings {
   blockUserIds: string[];
   blockChatIds: string[];
   shouldAllowPremium?: true;
+  botsPrivacy: BotsPrivacyType;
 }
 
 export interface ApiInputPrivacyRules {
@@ -152,6 +155,7 @@ export interface ApiInputPrivacyRules {
   blockedUsers?: ApiUser[];
   blockedChats?: ApiChat[];
   shouldAllowPremium?: true;
+  botsPrivacy: BotsPrivacyType;
 }
 
 export type IAnchorPosition = {
@@ -183,6 +187,7 @@ export enum SettingsScreens {
   PrivacyProfilePhoto,
   PrivacyBio,
   PrivacyBirthday,
+  PrivacyGifts,
   PrivacyPhoneCall,
   PrivacyPhoneP2P,
   PrivacyForwarding,
@@ -199,6 +204,8 @@ export enum SettingsScreens {
   PrivacyBioDeniedContacts,
   PrivacyBirthdayAllowedContacts,
   PrivacyBirthdayDeniedContacts,
+  PrivacyGiftsAllowedContacts,
+  PrivacyGiftsDeniedContacts,
   PrivacyPhoneCallAllowedContacts,
   PrivacyPhoneCallDeniedContacts,
   PrivacyPhoneP2PAllowedContacts,
@@ -407,7 +414,7 @@ export type MiddleSearchResults = {
 };
 
 export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
-'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday';
+'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday' | 'gifts';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
 
 export interface LoadingState {
