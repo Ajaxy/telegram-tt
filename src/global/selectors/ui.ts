@@ -156,3 +156,12 @@ export function selectWebApp<T extends GlobalState>(
 ) {
   return selectTabState(global, tabId).webApps.openedWebApps[key];
 }
+
+export function selectActiveWebApp<T extends GlobalState>(
+  global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const activeWebAppKey = selectTabState(global, tabId).webApps.activeWebAppKey;
+  if (!activeWebAppKey) return undefined;
+
+  return selectWebApp(global, activeWebAppKey, tabId);
+}

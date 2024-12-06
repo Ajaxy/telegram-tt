@@ -16,7 +16,9 @@ import {
   updateWebApp,
 } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
-import { selectCurrentMessageList, selectTabState, selectWebApp } from '../../selectors';
+import {
+  selectActiveWebApp, selectCurrentMessageList, selectTabState, selectWebApp,
+} from '../../selectors';
 
 addActionHandler('openWebAppTab', (global, actions, payload): ActionReturnType => {
   const {
@@ -53,7 +55,7 @@ addActionHandler('openMoreAppsTab', (global, actions, payload): ActionReturnType
   global = updateTabState(global, {
     webApps: {
       ...tabState.webApps,
-      activeWebApp: undefined,
+      activeWebAppKey: undefined,
       isMoreAppsTabActive: true,
     },
   }, tabId);
@@ -68,14 +70,14 @@ addActionHandler('closeMoreAppsTab', (global, actions, payload): ActionReturnTyp
 
   const openedWebApps = tabState.webApps.openedWebApps;
 
-  const openedWebAppsValues = Object.values(openedWebApps);
-  const openedWebAppsCount = openedWebAppsValues.length;
+  const openedWebAppsKeys = Object.keys(openedWebApps);
+  const openedWebAppsCount = openedWebAppsKeys.length;
 
   global = updateTabState(global, {
     webApps: {
       ...tabState.webApps,
       isMoreAppsTabActive: false,
-      activeWebApp: openedWebAppsCount ? openedWebAppsValues[openedWebAppsCount - 1] : undefined,
+      activeWebAppKey: openedWebAppsCount ? openedWebAppsKeys[openedWebAppsCount - 1] : undefined,
       isModalOpen: openedWebAppsCount > 0,
     },
   }, tabId);
@@ -117,8 +119,7 @@ addActionHandler('changeWebAppModalState', (global, actions, payload): ActionRet
 
 addActionHandler('setWebAppPaymentSlug', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload;
-  const tabState = selectTabState(global, tabId);
-  const activeWebApp = tabState.webApps.activeWebApp;
+  const activeWebApp = selectActiveWebApp(global, tabId);
   if (!activeWebApp?.url) return undefined;
 
   const key = getWebAppKey(activeWebApp);

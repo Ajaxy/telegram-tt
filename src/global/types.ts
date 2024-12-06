@@ -695,7 +695,7 @@ export type TabState = {
   };
 
   webApps: {
-    activeWebApp?: WebApp;
+    activeWebAppKey?: string;
     openedOrderedKeys: string[];
     sessionKeys: string[];
     openedWebApps: Record<string, WebApp>;

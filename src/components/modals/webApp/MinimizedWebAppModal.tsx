@@ -7,7 +7,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiUser } from '../../../api/types';
 import type { WebApp } from '../../../global/types';
 
-import { selectTabState, selectUser } from '../../../global/selectors';
+import { selectActiveWebApp, selectTabState, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 
@@ -126,7 +126,7 @@ export default memo(withGlobal(
     const tabState = selectTabState(global);
     const webApps = tabState.webApps;
 
-    const { botId } = webApps?.activeWebApp || {};
+    const { botId } = selectActiveWebApp(global) || {};
     const { modalState, openedWebApps } = webApps || {};
     const isMinimizedState = modalState === 'minimized';
     const activeTabBot = botId ? selectUser(global, botId) : undefined;

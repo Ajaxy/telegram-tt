@@ -15,6 +15,7 @@ import { convertToApiChatType } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
   selectCurrentChat, selectTabState, selectTheme, selectUser,
+  selectWebApp,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
@@ -162,7 +163,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   const [, setFullscreen, exitFullscreen] = useFullscreen(fullscreenElementRef, exitFullScreenCallback);
 
-  const activeWebApp = modal?.activeWebApp;
+  const activeWebApp = modal?.activeWebAppKey ? modal.openedWebApps[modal.activeWebAppKey] : undefined;
   const activeWebAppName = activeWebApp?.appName;
   const {
     url, buttonText, headerColor, serverHeaderColorKey, serverHeaderColor, isBackButtonVisible,
@@ -962,7 +963,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
-    const { botId: activeBotId } = modal?.activeWebApp || {};
+    const activeWebApp = modal?.activeWebAppKey ? selectWebApp(global, modal.activeWebAppKey) : undefined;
+    const { botId: activeBotId } = activeWebApp || {};
     const modalState = modal?.modalState;
 
     const attachBot = activeBotId ? global.attachMenu.bots[activeBotId] : undefined;
