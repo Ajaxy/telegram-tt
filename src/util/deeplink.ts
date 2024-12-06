@@ -6,7 +6,6 @@ import type { DeepLinkMethod, PrivateMessageLink } from './deepLinkParser';
 import { API_CHAT_TYPES, RE_TG_LINK } from '../config';
 import { toChannelId } from '../global/helpers';
 import { tryParseDeepLink } from './deepLinkParser';
-import { IS_SAFARI } from './windowEnvironment';
 
 export const processDeepLink = (url: string): boolean => {
   const actions = getActions();
@@ -54,13 +53,12 @@ export const processDeepLink = (url: string): boolean => {
   }
 
   const {
-    protocol, searchParams, pathname, hostname,
+    protocol, searchParams, hostname,
   } = new URL(url);
 
   if (protocol !== 'tg:') return false;
 
-  // Safari thinks the path in tg://path links is hostname for some reason
-  const method = (IS_SAFARI ? hostname : pathname).replace(/^\/\//, '') as DeepLinkMethod;
+  const method = hostname as DeepLinkMethod;
   const params = Object.fromEntries(searchParams);
 
   const {
