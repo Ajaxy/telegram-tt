@@ -40,7 +40,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
   useTimeout(loadCurrentUser, delay);
 
   useEffectWithPrevDeps(([prevEmojiStatus]) => {
-    if (shouldShowEffect && emojiStatus && prevEmojiStatus && emojiStatus.documentId !== prevEmojiStatus.documentId) {
+    if (shouldShowEffect && emojiStatus && emojiStatus.documentId !== prevEmojiStatus?.documentId) {
       showEffect();
       unmarkShouldShowEffect();
     }
