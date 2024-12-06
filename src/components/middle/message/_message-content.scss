@@ -515,6 +515,10 @@
         --color-primary: var(--color-selection-highlight);
       }
     }
+
+    .CommentButton {
+      margin-top: 0.625rem;
+    }
   }
 
   &.voice,
