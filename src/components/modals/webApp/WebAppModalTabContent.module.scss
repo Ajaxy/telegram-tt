@@ -60,10 +60,20 @@
   &.visible {
     transform: translateY(0);
     opacity: 1;
+
+    &:hover {
+      filter: brightness(0.9);
+    }
   }
 
   &.hidden {
     visibility: hidden;
+  }
+}
+
+.secondary-button.visible:hover {
+  :global(.theme-dark) & {
+    filter: brightness(1.5);
   }
 }
 
