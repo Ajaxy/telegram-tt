@@ -2,7 +2,6 @@ import type {
   ApiChat, ApiChatFullInfo, ApiChatType,
 } from '../../api/types';
 import type { ChatListType, GlobalState, TabArgs } from '../types';
-import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,
@@ -114,9 +113,8 @@ export function selectChatType<T extends GlobalState>(global: T, chatId: string)
 }
 
 export function selectIsChatBotNotStarted<T extends GlobalState>(global: T, chatId: string) {
-  const chat = selectChat(global, chatId);
   const bot = selectBot(global, chatId);
-  if (!chat || !bot) {
+  if (!bot) {
     return false;
   }
 
@@ -125,13 +123,7 @@ export function selectIsChatBotNotStarted<T extends GlobalState>(global: T, chat
     return true;
   }
 
-  const messageInfo = global.messages.byChatId[chatId];
-  if (!messageInfo) {
-    return false;
-  }
-
-  const { listedIds } = messageInfo.threadsById[MAIN_THREAD_ID] || {};
-  return listedIds && !listedIds.length;
+  return Boolean(!lastMessage);
 }
 
 export function selectAreActiveChatsLoaded<T extends GlobalState>(global: T): boolean {
