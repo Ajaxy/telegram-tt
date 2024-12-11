@@ -194,6 +194,17 @@ const WebPage: FC<OwnProps> = ({
         {isStory && (
           <BaseStory story={story} isProtected={isProtected} isConnected={isConnected} isPreview />
         )}
+        {isArticle && (
+          <div className="WebPage-text">
+            <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
+            {!inPreview && title && (
+              <p className="site-title">{renderText(title)}</p>
+            )}
+            {truncatedDescription && (
+              <p className="site-description">{renderText(truncatedDescription, ['emoji', 'br'])}</p>
+            )}
+          </div>
+        )}
         {photo && !video && !document && (
           <Photo
             photo={photo}
@@ -211,17 +222,6 @@ const WebPage: FC<OwnProps> = ({
             onClick={isMediaInteractive ? handleMediaClick : undefined}
             onCancelUpload={onCancelMediaTransfer}
           />
-        )}
-        {isArticle && (
-          <div className="WebPage-text">
-            <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
-            {!inPreview && title && (
-              <p className="site-title">{renderText(title)}</p>
-            )}
-            {truncatedDescription && (
-              <p className="site-description">{renderText(truncatedDescription, ['emoji', 'br'])}</p>
-            )}
-          </div>
         )}
         {!inPreview && video && (
           <Video
