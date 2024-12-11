@@ -307,6 +307,8 @@ $color-message-story-mention-to: #74bcff;
 
   --picker-title-shift: 1rem;
 
+  --middle-header-panes-height: 0px;
+
   body.is-ios {
     --layer-transition: 650ms cubic-bezier(0.22, 1, 0.36, 1);
     --layer-transition-behind: 650ms cubic-bezier(0.33, 1, 0.68, 1);
