@@ -1,11 +1,14 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect,
+  useMemo,
   useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
+import type {
+  ApiAttachBot, ApiBotAppSettings, ApiChat, ApiUser,
+} from '../../../api/types';
 import type { TabState, WebApp, WebAppModalStateType } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
 import type { PopupOptions, WebAppInboundEvent, WebAppOutboundEvent } from '../../../types/webapp';
@@ -14,7 +17,7 @@ import { TME_LINK_PREFIX } from '../../../config';
 import { convertToApiChatType } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
-  selectCurrentChat, selectTabState, selectTheme, selectUser,
+  selectCurrentChat, selectTabState, selectTheme, selectUser, selectUserFullInfo,
   selectWebApp,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -69,6 +72,7 @@ export type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   bot?: ApiUser;
+  botAppSettings?: ApiBotAppSettings;
   attachBot?: ApiAttachBot;
   theme?: ThemeKey;
   isPaymentModalOpen?: boolean;
@@ -113,6 +117,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   frameSize,
   isMultiTabSupported,
   onContextMenuButtonClick,
+  botAppSettings,
 }) => {
   const {
     closeActiveWebApp,
@@ -169,8 +174,13 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const activeWebApp = modal?.activeWebAppKey ? modal.openedWebApps[modal.activeWebAppKey] : undefined;
   const activeWebAppName = activeWebApp?.appName;
   const {
-    url, buttonText, headerColor, serverHeaderColorKey, serverHeaderColor, isBackButtonVisible,
+    url, buttonText, isBackButtonVisible,
   } = webApp || {};
+
+  const {
+    placeholderPath,
+  } = botAppSettings || {};
+
   const isCloseModalOpen = Boolean(webApp?.isCloseModalOpen);
   const isRemoveModalOpen = Boolean(webApp?.isRemoveModalOpen);
 
@@ -184,11 +194,36 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     updateWebApp({ key: webAppKey, update: updatedPartialWebApp });
   });
 
+  const themeParams = useMemo(() => {
+    return extractCurrentThemeParams();
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [theme]);
+
   useEffect(() => {
-    const themeParams = extractCurrentThemeParams();
     setBottomBarColor(themeParams.secondary_bg_color);
-    updateCurrentWebApp({ headerColor: themeParams.bg_color, backgroundColor: themeParams.bg_color });
-  }, []);
+  }, [themeParams]);
+
+  const themeBackgroundColor = themeParams.bg_color;
+  const [backgroundColorFromEvent, setBackgroundColorFromEvent] = useState<string | undefined>();
+  const backgroundColorFromSettings = theme === 'light' ? botAppSettings?.backgroundColor
+    : botAppSettings?.backgroundDarkColor;
+
+  useEffect(() => {
+    const color = backgroundColorFromEvent || backgroundColorFromSettings || themeBackgroundColor;
+
+    updateCurrentWebApp({ backgroundColor: color });
+  }, [themeBackgroundColor, backgroundColorFromEvent, backgroundColorFromSettings]);
+
+  const themeHeaderColor = themeParams.bg_color;
+  const [headerColorFromEvent, setHeaderColorFromEvent] = useState<string | undefined>();
+  const headerColorFromSettings = theme === 'light' ? botAppSettings?.headerColor
+    : botAppSettings?.headerDarkColor;
+
+  useEffect(() => {
+    const color = headerColorFromEvent || headerColorFromSettings || themeHeaderColor;
+
+    updateCurrentWebApp({ headerColor: color });
+  }, [themeHeaderColor, headerColorFromEvent, headerColorFromSettings]);
 
   // eslint-disable-next-line no-null/no-null
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -210,8 +245,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     if (isActive) registerReloadFrameCallback(reloadFrame);
   }, [reloadFrame, registerReloadFrameCallback, isActive]);
 
-  const isMainButtonVisible = mainButton?.isVisible && mainButton.text.trim().length > 0;
-  const isSecondaryButtonVisible = secondaryButton?.isVisible && secondaryButton.text.trim().length > 0;
+  const isMainButtonVisible = isLoaded && mainButton?.isVisible && mainButton.text.trim().length > 0;
+  const isSecondaryButtonVisible = isLoaded && secondaryButton?.isVisible && secondaryButton.text.trim().length > 0;
 
   const handleHideCloseModal = useLastCallback(() => {
     updateCurrentWebApp({ isCloseModalOpen: false });
@@ -254,32 +289,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     handleAppPopupClose();
   });
 
-  const calculateHeaderColor = useLastCallback(
-    (serverColorKey? : 'bg_color' | 'secondary_bg_color', serverColor? : string) => {
-      if (serverColorKey) {
-        const themeParams = extractCurrentThemeParams();
-        const key = serverColorKey;
-        const newColor = themeParams[key];
-        const color = validateHexColor(newColor) ? newColor : headerColor;
-        updateCurrentWebApp({ headerColor: color, serverHeaderColorKey: key });
-      }
-
-      if (serverColor) {
-        const color = validateHexColor(serverColor) ? serverColor : headerColor;
-        updateCurrentWebApp({ headerColor: color, serverHeaderColor: serverColor });
-      }
-    },
-  );
-
-  const updateHeaderColor = useLastCallback(
-    () => {
-      calculateHeaderColor(serverHeaderColorKey, serverHeaderColor);
-    },
-  );
-
   const sendThemeCallback = useLastCallback(() => {
     sendTheme();
-    updateHeaderColor();
   });
 
   // Notify view that theme changed
@@ -526,13 +537,12 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_set_background_color') {
-      const themeParams = extractCurrentThemeParams();
-      const color = validateHexColor(eventData.color) ? eventData.color : themeParams.bg_color;
-      updateCurrentWebApp({ backgroundColor: color });
+      setBackgroundColorFromEvent(validateHexColor(eventData.color) ? eventData.color : undefined);
     }
 
     if (eventType === 'web_app_set_header_color') {
-      calculateHeaderColor(eventData.color_key, eventData.color);
+      const key = eventData.color_key;
+      setHeaderColorFromEvent(eventData.color || (key ? themeParams[key] : undefined));
     }
 
     if (eventType === 'web_app_set_bottom_bar_color') {
@@ -882,6 +892,32 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderDefaultPlaceholder() {
+    const className = buildClassName(styles.loadingPlaceholder, styles.defaultPlaceholderGrid, isLoaded && styles.hide);
+    return (
+      <div className={className}>
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+      </div>
+    );
+  }
+
+  function renderPlaceholder() {
+    if (!placeholderPath) {
+      return renderDefaultPlaceholder();
+    }
+    return (
+      <svg
+        className={buildClassName(styles.loadingPlaceholder, isLoaded && styles.hide)}
+        viewBox="0 0 512 512"
+      >
+        <path className={styles.placeholderPath} d={placeholderPath} />
+      </svg>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -892,7 +928,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       )}
     >
       {isFullscreen && getIsWebAppsFullscreenSupported() && renderFullscreenHeaderPanel()}
-      {!isMinimizedState && <Spinner className={buildClassName(styles.loadingSpinner, isLoaded && styles.hide)} />}
+      {!isMinimizedState && renderPlaceholder()}
       <iframe
         className={buildClassName(
           styles.frame,
@@ -1045,6 +1081,8 @@ export default memo(withGlobal<OwnProps>(
 
     const attachBot = activeBotId ? global.attachMenu.bots[activeBotId] : undefined;
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
+    const userFullInfo = activeBotId ? selectUserFullInfo(global, activeBotId) : undefined;
+    const botAppSettings = userFullInfo?.botInfo?.appSettings;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
     const { isPaymentModalOpen, status: regularPaymentStatus } = selectTabState(global).payment;
@@ -1060,6 +1098,7 @@ export default memo(withGlobal<OwnProps>(
       isPaymentModalOpen: isPaymentModalOpen || Boolean(starsInputInvoice),
       paymentStatus,
       modalState,
+      botAppSettings,
     };
   },
 )(WebAppModalTabContent));

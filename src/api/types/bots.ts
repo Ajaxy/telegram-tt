@@ -67,6 +67,14 @@ type ApiBotMenuButtonWebApp = {
 
 export type ApiBotMenuButton = ApiBotMenuButtonWebApp | ApiBotMenuButtonCommands;
 
+export interface ApiBotAppSettings {
+  placeholderPath?: string;
+  backgroundColor?: string;
+  backgroundDarkColor?: string;
+  headerColor?: string;
+  headerDarkColor?: string;
+}
+
 export interface ApiBotInfo {
   botId: string;
   commands?: ApiBotCommand[];
@@ -76,6 +84,7 @@ export interface ApiBotInfo {
   menuButton: ApiBotMenuButton;
   privacyPolicyUrl?: string;
   hasPreviewMedia?: true;
+  appSettings?: ApiBotAppSettings;
 }
 
 export interface ApiBotPreviewMedia extends MediaContainer {

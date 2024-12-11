@@ -1337,8 +1337,6 @@ export type WebApp = {
   isCloseModalOpen?: boolean;
   shouldConfirmClosing?: boolean;
   headerColor?: string;
-  serverHeaderColor?: string;
-  serverHeaderColorKey?: 'bg_color' | 'secondary_bg_color';
   backgroundColor?: string;
   isBackButtonVisible?: boolean;
   isSettingsButtonVisible?: boolean;

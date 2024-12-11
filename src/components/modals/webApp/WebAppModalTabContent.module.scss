@@ -13,13 +13,48 @@
   z-index: 0;
 }
 
-.loading-spinner {
+.loadingPlaceholder {
+  width: 4rem;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 
   transition: opacity 0.25s ease-in-out;
+}
+
+@keyframes fadeOpacityBreath {
+  0% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.placeholderPath {
+  animation: 2s linear -0.8s infinite fadeOpacityBreath;
+}
+
+.defaultPlaceholderGrid {
+  width: 4.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem;
+  margin: 0 auto;
+  animation: 2s linear -0.8s infinite fadeOpacityBreath;
+}
+
+.placeholderSquare {
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: black;
+  border-radius: 0.375rem;
 }
 
 .hide {

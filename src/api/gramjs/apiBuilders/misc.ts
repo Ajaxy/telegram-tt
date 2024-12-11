@@ -10,6 +10,7 @@ import type {
   LangPackStringValue,
 } from '../../types';
 
+import { numberToHexColor } from '../../../util/colors';
 import {
   buildCollectionByCallback, omit, omitUndefined, pick,
 } from '../../../util/iteratees';
@@ -297,7 +298,7 @@ export function buildApiLanguage(lang: GramJs.TypeLangPackLanguage): ApiLanguage
 
 function buildApiPeerColorSet(colorSet: GramJs.help.TypePeerColorSet) {
   if (colorSet instanceof GramJs.help.PeerColorSet) {
-    return colorSet.colors.map((color) => `#${color.toString(16).padStart(6, '0')}`);
+    return colorSet.colors.map((color) => numberToHexColor(color));
   }
   return undefined;
 }
