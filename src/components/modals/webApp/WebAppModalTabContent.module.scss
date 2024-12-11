@@ -95,15 +95,29 @@
   }
 
   &.two-rows {
-    height: 8rem;
+    height: 7.75rem;
   }
 
   &.left-to-right {
     flex-direction: row;
+
+    .secondary-button {
+      margin-right: 0.25rem !important;
+    }
+    .main-button {
+      margin-left: 0.25rem !important;
+    }
   }
 
   &.right-to-left {
     flex-direction: row-reverse;
+
+    .secondary-button {
+      margin-left: 0.25rem !important;
+    }
+    .main-button {
+      margin-right: 0.25rem !important;
+    }
   }
 
   &.top-to-bottom,
@@ -119,9 +133,11 @@
   &.top-to-bottom {
     .secondary-button {
       top: 0rem;
+      margin-bottom: 0.25rem !important;
     }
     .main-button {
       bottom: 0rem;
+      margin-top: 0.25rem !important;
     }
   }
   &.bottom-to-top {

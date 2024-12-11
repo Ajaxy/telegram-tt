@@ -85,6 +85,7 @@ const Contact: FC<OwnProps & StateProps> = ({
               isText
               color="translucent"
               ripple
+              size="tiny"
               onClick={handleOpenChat}
               className={styles.button}
             >
@@ -95,6 +96,7 @@ const Contact: FC<OwnProps & StateProps> = ({
                 isText
                 color="translucent"
                 ripple
+                size="tiny"
                 onClick={handleAddContact}
                 className={styles.button}
               >

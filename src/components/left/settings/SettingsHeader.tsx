@@ -132,30 +132,35 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneCall:
         return <h3>{oldLang('Calls')}</h3>;
 
-      case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
       case SettingsScreens.PrivacyLastSeenAllowedContacts:
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyBioAllowedContacts:
+      case SettingsScreens.PrivacyGroupChatsAllowedContacts:
+        return <h3>{oldLang('AlwaysShareWith')}</h3>;
+
+      case SettingsScreens.PrivacyLastSeenDeniedContacts:
+      case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
+      case SettingsScreens.PrivacyBioDeniedContacts:
+      case SettingsScreens.PrivacyGroupChatsDeniedContacts:
+        return <h3>{oldLang('NeverShareWith')}</h3>;
+
+      case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
       case SettingsScreens.PrivacyBirthdayAllowedContacts:
       case SettingsScreens.PrivacyGiftsAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
       case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
-      case SettingsScreens.PrivacyGroupChatsAllowedContacts:
       case SettingsScreens.PrivacyPhoneCallAllowedContacts:
       case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
-        return <h3>{oldLang('AlwaysShareWith')}</h3>;
+        return <h3>{oldLang('AlwaysAllow')}</h3>;
+
       case SettingsScreens.PrivacyPhoneNumberDeniedContacts:
-      case SettingsScreens.PrivacyLastSeenDeniedContacts:
-      case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
-      case SettingsScreens.PrivacyBioDeniedContacts:
       case SettingsScreens.PrivacyBirthdayDeniedContacts:
       case SettingsScreens.PrivacyGiftsDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:
       case SettingsScreens.PrivacyVoiceMessagesDeniedContacts:
-      case SettingsScreens.PrivacyGroupChatsDeniedContacts:
       case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
-        return <h3>{oldLang('NeverShareWith')}</h3>;
+        return <h3>{oldLang('NeverAllow')}</h3>;
 
       case SettingsScreens.Performance:
         return <h3>{oldLang('Animations and Performance')}</h3>;
