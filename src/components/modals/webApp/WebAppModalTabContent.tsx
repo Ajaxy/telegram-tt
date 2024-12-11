@@ -30,6 +30,7 @@ import renderText from '../../common/helpers/renderText';
 
 import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -325,6 +326,30 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       sendFullScreenChangedCallback(false);
     }
   }, [isFullscreen]);
+
+  const visibilityChangedCallBack = useLastCallback((visibility: boolean) => {
+    sendEvent({
+      eventType: 'visibility_changed',
+      eventData: {
+        is_visible: visibility,
+      },
+    });
+  });
+
+  useEffect(() => {
+    if (isLoaded) {
+      visibilityChangedCallBack(Boolean(isActive));
+    }
+  }, [isActive, isLoaded]);
+
+  useEffectWithPrevDeps(([prevModalState]) => {
+    if (modalState === 'minimized') {
+      visibilityChangedCallBack(false);
+    }
+    if (modalState && prevModalState === 'minimized') {
+      visibilityChangedCallBack(true);
+    }
+  }, [modalState]);
 
   useSyncEffect(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;

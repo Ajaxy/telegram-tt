@@ -306,6 +306,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     changeWebAppModalState({ state: 'minimized' });
   });
 
+  const handleFullscreenClick = useLastCallback(() => {
+    changeWebAppModalState({ state: 'fullScreen' });
+  });
+
   const handleOpenMoreAppsTabClick = useLastCallback(() => {
     openMoreAppsTab();
   });
@@ -587,6 +591,20 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         </Button>
         {renderTabs()}
         {renderMoreMenu()}
+
+        <Button
+          className={buildClassName(
+            styles.windowStateButton,
+            styles.fullscreenButton,
+            'no-drag',
+          )}
+          round
+          color="translucent"
+          size="tiny"
+          onClick={handleFullscreenClick}
+        >
+          <Icon className={styles.stateIcon} name="expand-modal" />
+        </Button>
 
         <Button
           className={buildClassName(

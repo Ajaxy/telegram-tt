@@ -152,6 +152,9 @@ export type WebAppOutboundEvent =
   WebAppEvent<'fullscreen_changed', {
     is_fullscreen: boolean;
   }> |
+  WebAppEvent<'visibility_changed', {
+    is_visible: boolean;
+  }> |
   WebAppEvent<'fullscreen_failed', {
     error: 'UNSUPPORTED' | string;
   }> |
