@@ -10,7 +10,7 @@ export {
 } from './auth';
 
 export {
-  fetchChats, fetchUserChats, fetchFullChat, searchChats, requestChatUpdate, fetchChatSettings,
+  fetchChats, fetchUserChats, normalizeChatData, fetchFullChat, searchChats, requestChatUpdate, fetchChatSettings,
   saveDraft, fetchChat, updateChatMutedState, updateTopicMutedState,
   createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
   toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
