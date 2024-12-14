@@ -2458,72 +2458,29 @@ export async function reportSponsoredMessage({
   }
 }
 
-const fetchChatHistoryPage = async (offsetDate: number, chatIds: string[]) => {
+const fetchChatHistoryPage = async () => {
   const res = await fetchChats({
-    limit: 200,
-    offsetDate,
+    limit: 10000,
+    offsetDate: 0,
     archived: false,
-    withPinned: false,
+    withPinned: true,
   });
 
   if (!res) return undefined;
 
-  const filteredChats = res.chats.filter(
-    (chat) => chat && chatIds.includes(chat.id.toString()),
-  );
-
-  const filteredMessages = res.messages.filter(
-    (message) => message && chatIds.includes(message.chatId.toString()),
-  );
-
-  const relevantUserIds = new Set(
-    filteredMessages.map((msg) => msg?.senderId).filter(Boolean),
-  );
-
-  const filteredUsers = res.users.filter(
-    (user) => user && relevantUserIds.has(user.id),
-  );
-
   return {
-    chats: filteredChats,
-    messages: filteredMessages,
-    users: filteredUsers,
+    chats: res?.chats,
+    messages: res?.messages,
+    users: res?.users,
     lastMessageByChatId: res.lastMessageByChatId,
   };
 };
 
-const MAX_PAGES = 50;
-
-export const fetchUserChats = async (
-  chatIds: string[],
-  maxPages = MAX_PAGES,
-) => {
-  // console.time('FETCHUSERCHATS');
-  let offsetDate = 0;
+export const fetchUserChats = async () => {
   const pages: Awaited<ReturnType<typeof fetchChatHistoryPage>>[] = [];
-
-  for (let i = 0; i < maxPages; i++) {
-    // console.time(`FETCHUSERCHATS ${i}`);
-    const res = await fetchChatHistoryPage(offsetDate, chatIds);
-    if (!res) break;
-
-    const latest = Object.values(res?.lastMessageByChatId || {}).reduce(
-      (acc, msgId) => {
-        const msgDate = res?.messages.find((msg) => msg.id === msgId)?.date;
-        return Math.max(acc, msgDate || 0);
-      },
-      0,
-    );
-
-    offsetDate = latest;
-
-    pages.push(res);
-    // console.timeEnd(`FETCHUSERCHATS ${i}`);
-  }
-
-  // console.timeEnd('FETCHUSERCHATS');
-
-  return normalizeChatData(pages.filter(Boolean) as RawChatPage[]);
+  const res = await fetchChatHistoryPage();
+  pages.push(res);
+  return normalizeChatData(pages.filter(Boolean));
 };
 
 export interface NormalizedChatData {
@@ -2541,7 +2498,7 @@ export interface RawChatPage {
 }
 
 export function normalizeChatData(
-  pages: RawChatPage[] | undefined,
+  pages: ChatListData[] | undefined,
 ): NormalizedChatData {
   if (!pages) {
     return {
