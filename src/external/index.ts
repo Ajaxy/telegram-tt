@@ -11,10 +11,17 @@ import { addActionHandler } from "../global";
 import { ActionReturnType } from "../global/types";
 import { getCurrentTabId } from "../util/establishMultitabRole";
 import { selectTabState } from "../global/selectors";
+import { updateOriginWithBranch } from "./func"
 
 const DEFAULT_ORIGIN = "https://crm.dise.app";
 
-const MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
+const DISE_ENV = process.env.DISE_ENV 
+
+let MAIN_FRAME_ORIGIN = process.env.MAIN_FRAME_ORIGIN || DEFAULT_ORIGIN;
+
+// if (DISE_ENV === 'testing') {
+//   MAIN_FRAME_ORIGIN = updateOriginWithBranch(MAIN_FRAME_ORIGIN);
+// }
 
 let actions = new Responder<Actions>("actions", MAIN_FRAME_ORIGIN);
 
