@@ -118,18 +118,21 @@ export async function fetchChats({
   archived,
   withPinned,
   lastLocalServiceMessageId,
+  offsetId,
 }: {
   limit: number;
   offsetDate?: number;
   archived?: boolean;
   withPinned?: boolean;
   lastLocalServiceMessageId?: number;
+  offsetId?: number;
 }): Promise<ChatListData | undefined> {
   const result = await invokeRequest(
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
       limit,
       offsetDate,
+      offsetId,
       ...(withPinned && { excludePinned: true }),
     }),
   );
@@ -2458,15 +2461,22 @@ export async function reportSponsoredMessage({
   }
 }
 
-const fetchChatHistoryPage = async (offsetDate: number, chatIds: string[]) => {
+const fetchChatHistoryPage = async (
+  offsetId: number | undefined,
+  chatIds: string[],
+  offsetDate: number | undefined,
+) => {
   const res = await fetchChats({
     limit: 200,
-    offsetDate,
+    offsetId,
     archived: false,
     withPinned: false,
+    offsetDate,
   });
 
-  if (!res) return undefined;
+  if (!res) {
+    return undefined;
+  }
 
   const filteredChats = res.chats.filter(
     (chat) => chat && chatIds.includes(chat.id.toString()),
@@ -2484,11 +2494,14 @@ const fetchChatHistoryPage = async (offsetDate: number, chatIds: string[]) => {
     (user) => user && relevantUserIds.has(user.id),
   );
 
+  const offset = res.messages.sort((a, b) => a.date - b.date)[0].id;
+
   return {
     chats: filteredChats,
     messages: filteredMessages,
     users: filteredUsers,
     lastMessageByChatId: res.lastMessageByChatId,
+    offsetId: offset,
   };
 };
 
@@ -2497,33 +2510,31 @@ const MAX_PAGES = 50;
 export const fetchUserChats = async (
   chatIds: string[],
   maxPages = MAX_PAGES,
+  offset?: {
+    id: number | undefined;
+    date: number | undefined;
+  },
 ) => {
-  // console.time('FETCHUSERCHATS');
-  let offsetDate = 0;
+  let offsetId: number | undefined = offset?.id;
+  let offsetDate: number | undefined = offset?.date;
   const pages: Awaited<ReturnType<typeof fetchChatHistoryPage>>[] = [];
 
   for (let i = 0; i < maxPages; i++) {
-    // console.time(`FETCHUSERCHATS ${i}`);
-    const res = await fetchChatHistoryPage(offsetDate, chatIds);
+    const res = await fetchChatHistoryPage(offsetId, chatIds, offsetDate);
     if (!res) break;
 
-    const latest = Object.values(res?.lastMessageByChatId || {}).reduce(
-      (acc, msgId) => {
-        const msgDate = res?.messages.find((msg) => msg.id === msgId)?.date;
-        return Math.max(acc, msgDate || 0);
-      },
-      0,
-    );
+    // Find the last message ID from the current batch
+    const lastMessage = res.messages.sort((a, b) => a.date - b.date)[0];
 
-    offsetDate = latest;
-
+    offsetId = res.offsetId;
+    offsetDate = lastMessage?.date;
     pages.push(res);
-    // console.timeEnd(`FETCHUSERCHATS ${i}`);
   }
 
-  // console.timeEnd('FETCHUSERCHATS');
-
-  return normalizeChatData(pages.filter(Boolean) as RawChatPage[]);
+  return normalizeChatData(pages.filter(Boolean) as RawChatPage[], {
+    offsetId,
+    offsetDate,
+  });
 };
 
 export interface NormalizedChatData {
@@ -2531,6 +2542,8 @@ export interface NormalizedChatData {
   users: Record<string, ApiUser>;
   messages: Record<string, ApiMessage>;
   lastMessages: Record<string, number>;
+  offsetId?: number;
+  offsetDate?: number;
 }
 
 export interface RawChatPage {
@@ -2542,6 +2555,10 @@ export interface RawChatPage {
 
 export function normalizeChatData(
   pages: RawChatPage[] | undefined,
+  offset?: {
+    offsetId?: number;
+    offsetDate?: number;
+  },
 ): NormalizedChatData {
   if (!pages) {
     return {
@@ -2599,5 +2616,9 @@ export function normalizeChatData(
     } as NormalizedChatData,
   );
 
-  return normalizedData;
+  return {
+    ...normalizedData,
+    offsetId: offset?.offsetId,
+    offsetDate: offset?.offsetDate,
+  };
 }
