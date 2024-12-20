@@ -84,7 +84,7 @@ const WebPage: FC<OwnProps> = ({
   onCancelMediaTransfer,
   isEditing,
 }) => {
-  const { openTelegramLink } = getActions();
+  const { openUrl, openTelegramLink } = getActions();
   const webPage = getMessageWebPage(message);
   const { isMobile } = useAppLayout();
   // eslint-disable-next-line no-null/no-null
@@ -150,10 +150,6 @@ const WebPage: FC<OwnProps> = ({
   }
   const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
 
-  function handleTextClick() {
-    window.open(url, '_blank', 'noopener');
-  }
-
   const className = buildClassName(
     'WebPage',
     inPreview && 'in-preview',
@@ -200,7 +196,7 @@ const WebPage: FC<OwnProps> = ({
         {isArticle && (
           <div
             className={buildClassName('WebPage-text', !inPreview && 'WebPage-text_interactive')}
-            onClick={!inPreview ? handleTextClick : undefined}
+            onClick={!inPreview ? () => openUrl({ url, shouldSkipModal: true }) : undefined}
           >
             <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
             {!inPreview && title && (

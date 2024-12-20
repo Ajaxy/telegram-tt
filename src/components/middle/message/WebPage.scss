@@ -93,7 +93,7 @@
     position: relative;
 
     &_interactive {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
       transition: opacity 0.15s;
 
       &:hover {
