@@ -95,6 +95,7 @@ const WebPage: FC<OwnProps> = ({
   const handleMediaClick = useLastCallback(() => {
     onMediaClick!();
   });
+
   const handleContainerClick = useLastCallback((e: React.MouseEvent) => {
     onContainerClick?.(e);
   });
@@ -149,6 +150,10 @@ const WebPage: FC<OwnProps> = ({
   }
   const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;
 
+  function handleTextClick() {
+    window.open(url, '_blank', 'noopener');
+  }
+
   const className = buildClassName(
     'WebPage',
     inPreview && 'in-preview',
@@ -193,7 +198,10 @@ const WebPage: FC<OwnProps> = ({
           <BaseStory story={story} isProtected={isProtected} isConnected={isConnected} isPreview />
         )}
         {isArticle && (
-          <div className="WebPage-text">
+          <div
+            className={buildClassName('WebPage-text', !inPreview && 'WebPage-text_interactive')}
+            onClick={!inPreview ? handleTextClick : undefined}
+          >
             <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
             {!inPreview && title && (
               <p className="site-title">{renderText(title)}</p>

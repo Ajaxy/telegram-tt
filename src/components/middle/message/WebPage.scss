@@ -50,6 +50,7 @@
 
     &.interactive {
       cursor: var(--custom-cursor, pointer);
+
       &:active {
         background-color: var(--background-active-color);
       }
@@ -90,6 +91,15 @@
     flex-grow: 1;
     align-items: flex-start;
     position: relative;
+
+    &_interactive {
+      cursor: pointer;
+      transition: opacity 0.15s;
+
+      &:hover {
+        opacity: 0.75;
+      }
+    }
   }
 
   .media-inner {
