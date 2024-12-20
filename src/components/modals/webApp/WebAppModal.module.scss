@@ -24,6 +24,78 @@
       overflow: hidden;
     }
 
+    .resizeHandle {
+      position: absolute;
+      background: transparent;
+      z-index: var(--z-resize-grip);
+
+      &.top,
+      &.bottom {
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 0.5rem;
+        cursor: ns-resize;
+      }
+
+      &.left,
+      &.right {
+        top: 0;
+        bottom: 0;
+        width: 0.5rem;
+        height: 100%;
+        cursor: ew-resize;
+      }
+
+      &.top {
+        top: 0;
+      }
+
+      &.bottom {
+        bottom: 0;
+      }
+
+      &.left {
+        left: 0;
+      }
+
+      &.right {
+        right: 0;
+      }
+
+      &.topLeft,
+      &.topRight,
+      &.bottomLeft,
+      &.bottomRight {
+        width: 0.5rem;
+        height: 0.5rem;
+      }
+
+      &.topLeft {
+        top: 0;
+        left: 0;
+        cursor: nwse-resize;
+      }
+
+      &.topRight {
+        top: 0;
+        right: 0;
+        cursor: nesw-resize;
+      }
+
+      &.bottomLeft {
+        bottom: 0;
+        left: 0;
+        cursor: nesw-resize;
+      }
+
+      &.bottomRight {
+        bottom: 0;
+        right: 0;
+        cursor: nwse-resize;
+      }
+    }
+
     .modal-container {
       pointer-events: none;
     }

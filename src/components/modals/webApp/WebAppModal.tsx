@@ -12,6 +12,7 @@ import type { TabState, WebApp } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
 import type { WebAppOutboundEvent } from '../../../types/webapp';
 
+import { RESIZE_HANDLE_CLASS_NAME } from '../../../config';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
   selectCurrentChat, selectTheme, selectUser,
@@ -65,6 +66,10 @@ type StateProps = {
 const PROLONG_INTERVAL = 45000; // 45s
 const LUMA_THRESHOLD = 128;
 
+const MINIMIZED_STATE_SIZE = { width: 300, height: 40 };
+const DEFAULT_MAXIMIZED_STATE_SIZE = { width: 420, height: 730 };
+const MAXIMIZED_STATE_MINIMUM_SIZE = { width: 300, height: 300 };
+
 const WebAppModal: FC<OwnProps & StateProps> = ({
   modal,
   chat,
@@ -85,22 +90,18 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     closeMoreAppsTab,
   } = getActions();
 
-  const maximizedStateSize = useMemo(() => {
-    return { width: 420, height: 730 };
-  }, []);
-  const minimizedStateSize = useMemo(() => {
-    return { width: 300, height: 40 };
-  }, []);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [getFrameSize, setFrameSize] = useSignal(
-    { width: maximizedStateSize.width, height: maximizedStateSize.height - minimizedStateSize.height },
+  const [getMaximizedStateSize, setMaximizedStateSize] = useSignal(
+    { width: DEFAULT_MAXIMIZED_STATE_SIZE.width, height: DEFAULT_MAXIMIZED_STATE_SIZE.height },
   );
 
   function getSize() {
     if (modal?.modalState === 'fullScreen') return windowSize.get();
-    if (modal?.modalState === 'maximized') return maximizedStateSize;
-    return minimizedStateSize;
+    if (modal?.modalState === 'maximized') return getMaximizedStateSize();
+    return MINIMIZED_STATE_SIZE;
+  }
+  function getMinimumSize() {
+    if (modal?.modalState === 'maximized') return MAXIMIZED_STATE_MINIMUM_SIZE;
+    return undefined;
   }
 
   const {
@@ -169,6 +170,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   const {
     isDragging,
+    isResizing,
     style: draggableStyle,
     size,
   } = useDraggable(
@@ -177,28 +179,19 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     isDraggingEnabled,
     getSize(),
     isFullScreen,
+    getMinimumSize(),
   );
 
   const currentSize = size || getSize();
 
   const currentWidth = currentSize.width;
   const currentHeight = currentSize.height;
+
   useEffect(() => {
-    if (currentHeight === minimizedStateSize.height && currentWidth === minimizedStateSize.width) return;
-    if (isMaximizedState) {
-      const height = currentHeight - minimizedStateSize.height;
-      setFrameSize({ width: currentWidth, height });
+    if (isResizing) {
+      setMaximizedStateSize({ width: currentWidth, height: currentHeight });
     }
-    if (isFullScreen) {
-      setFrameSize({ width: window.innerWidth, height: window.innerHeight });
-    }
-  }, [currentWidth,
-    currentHeight,
-    isMaximizedState,
-    minimizedStateSize,
-    setFrameSize,
-    isFullScreen,
-    isMinimizedState]);
+  }, [currentHeight, currentWidth, isResizing, setMaximizedStateSize]);
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -646,6 +639,25 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function buildResizeHandleClass(handleClassName: string) {
+    return buildClassName(RESIZE_HANDLE_CLASS_NAME, handleClassName);
+  }
+
+  function renderResizeHandles() {
+    return (
+      <>
+        <div className={buildResizeHandleClass('top')} />
+        <div className={buildResizeHandleClass('bottom')} />
+        <div className={buildResizeHandleClass('left')} />
+        <div className={buildResizeHandleClass('right')} />
+        <div className={buildResizeHandleClass('topLeft')} />
+        <div className={buildResizeHandleClass('topRight')} />
+        <div className={buildResizeHandleClass('bottomLeft')} />
+        <div className={buildResizeHandleClass('bottomRight')} />
+      </>
+    );
+  }
+
   return (
     <Modal
       dialogRef={ref}
@@ -656,6 +668,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         isFullScreen && styles.fullScreen,
       )}
       dialogStyle={supportMultiTabMode ? draggableStyle : undefined}
+      dialogContent={isDraggingEnabled ? renderResizeHandles() : undefined}
       isOpen={isOpen}
       isLowStackPriority
       onClose={handleModalClose}
@@ -672,9 +685,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           registerSendEventCallback={registerSendEventCallback}
           registerReloadFrameCallback={registerReloadFrameCallback}
           webApp={openedWebApps[key]}
-          isDragging={isDragging}
+          isTransforming={isDragging || isResizing}
           onContextMenuButtonClick={handleContextMenu}
           isMultiTabSupported={supportMultiTabMode}
+          modalHeight={currentHeight}
         />
       ))}
       { isMoreAppsTabActive && (<MoreAppsTabContent />)}
