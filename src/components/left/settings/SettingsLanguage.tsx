@@ -159,7 +159,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
         </div>
       )}
       <div className="settings-item settings-item-picker">
-        <h4 className="settings-item-header settings-picker-title">
+        <h4 className="settings-item-header">
           {lang('Localization.InterfaceLanguage')}
         </h4>
         {options ? (

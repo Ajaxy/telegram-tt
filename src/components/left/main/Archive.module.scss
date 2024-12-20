@@ -1,5 +1,9 @@
 .root {
   --background-color: var(--color-background);
+
+  :global(.ListItem-button) {
+    min-height: auto;
+  }
 }
 
 .minimized {

@@ -128,7 +128,7 @@
 
 .main-button {
   display: flex;
-  font-weight: 500;
+  font-weight: var(--font-weight-semibold);
   font-size: 1rem;
   height: 3rem;
 }

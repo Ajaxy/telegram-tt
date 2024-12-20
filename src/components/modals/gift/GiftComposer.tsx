@@ -12,6 +12,7 @@ import { getUserFullName } from '../../../global/helpers';
 import { selectTabState, selectTheme, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
+import { formatStarsAsIcon } from '../../../util/localization/format';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -174,7 +175,7 @@ function GiftComposer({
     const userFullName = getUserFullName(user)!;
 
     const amount = isStarGift
-      ? formatCurrency(gift.stars, STARS_CURRENCY_CODE, lang.code, { iconClassName: 'star-amount-icon' })
+      ? formatStarsAsIcon(lang, gift.stars, true)
       : formatCurrency(gift.amount, gift.currency);
 
     return (

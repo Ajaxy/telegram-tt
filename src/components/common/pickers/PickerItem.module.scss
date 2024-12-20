@@ -57,6 +57,7 @@
 }
 
 .subtitle {
+  padding-bottom: 0.3125rem;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   grid-row: 2;
@@ -87,7 +88,7 @@
 .startInput {
   grid-row: 1 / 3;
   grid-column: 1;
-  margin-inline-end: 1.25rem;
+  margin-inline-end: 1.1875rem;
 }
 
 .endInput {

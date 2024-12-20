@@ -19,6 +19,7 @@
   > .profile-info > .ChatExtra {
     padding: 0.875rem 0.5rem 0.5rem;
 
+    @include mixins.adapt-padding-to-scrollbar(0.5rem);
     @include mixins.side-panel-section;
 
     .narrow {
@@ -125,6 +126,8 @@
     &.members-list,
     &.gifts-list {
       padding: 0.5rem;
+
+      @include mixins.adapt-padding-to-scrollbar(0.5rem);
 
       @media (max-width: 600px) {
         padding: 0.5rem 0;

@@ -327,7 +327,7 @@ function PrivacySubsection({
                 onScreenSelect(allowedContactsScreen);
               }}
             >
-              <div className="multiline-menu-item full-size">
+              <div className="multiline-item full-size">
                 <span className="title">{oldLang('AlwaysAllow')}</span>
                 <span className="subtitle">{allowedString}</span>
               </div>
@@ -342,7 +342,7 @@ function PrivacySubsection({
                 onScreenSelect(deniedContactsScreen);
               }}
             >
-              <div className="multiline-menu-item full-size">
+              <div className="multiline-item full-size">
                 <span className="title">{oldLang('NeverAllow')}</span>
                 <span className="subtitle">{blockString}</span>
               </div>

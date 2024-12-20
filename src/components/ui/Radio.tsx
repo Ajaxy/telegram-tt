@@ -56,6 +56,7 @@ const Radio: FC<OwnProps> = ({
     withIcon && 'with-icon',
     isLoading && 'loading',
     onlyInput && 'onlyInput',
+    Boolean(subLabel) && 'withSubLabel',
   );
 
   return (

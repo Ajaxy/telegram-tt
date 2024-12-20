@@ -85,7 +85,7 @@ const StickerSetCard: FC<OwnProps> = ({
       onClick={handleCardClick}
     >
       {renderPreview()}
-      <div className="multiline-menu-item">
+      <div className="multiline-item">
         <div className="title">{stickerSet.title}</div>
         <div className="subtitle">{lang('StickerPack.StickerCount', stickerSet.count, 'i')}</div>
       </div>

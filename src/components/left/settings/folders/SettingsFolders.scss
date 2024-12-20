@@ -99,6 +99,14 @@
   padding-inline-end: 3rem;
 }
 
+.settings-sortable-item .Button {
+  margin-right: -1rem;
+  &:hover,
+  &:active {
+    background-color: transparent !important;
+  }
+}
+
 .picker-category-title {
   padding-top: 0.75rem;
 }

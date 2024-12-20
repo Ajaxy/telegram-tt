@@ -173,6 +173,7 @@ const ReportModal = ({
       isOpen={isOpen}
       header={header}
       onClose={closeReportMessageModalHandler}
+      contentClassName={styles.content}
       className={buildClassName(styles.root, modal?.subject === 'story' && 'component-theme-dark')}
     >
       <Transition
@@ -188,6 +189,7 @@ const ReportModal = ({
           {renderingSection?.options?.map((option) => (
             <ListItem
               narrow
+              nonInteractive
               secondaryIcon="next"
               className={styles.option}
               buttonClassName={styles.optionButton}

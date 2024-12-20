@@ -173,7 +173,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
             value={title}
             onChange={handleTitleChange}
           />
-          <p className="text-muted hint">{lang('LinkNameHelp')}</p>
+          <p className="section-help hint">{lang('LinkNameHelp')}</p>
         </div>
         <div className="section">
           <div className="section-header">{lang('LimitByPeriod')}</div>
@@ -209,7 +209,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
               {formatFullDate(lang, customExpireDate)} {formatTime(lang, customExpireDate)}
             </Button>
           )}
-          <p className="text-muted hint">{lang('TimeLimitHelp')}</p>
+          <p className="section-help hint">{lang('TimeLimitHelp')}</p>
         </div>
         {!isRequestNeeded && (
           <div className="section">
@@ -240,7 +240,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
                 onChange={handleCustomUsageLimitChange}
               />
             )}
-            <p className="text-muted hint">{lang('UsesLimitHelp')}</p>
+            <p className="section-help hint">{lang('UsesLimitHelp')}</p>
           </div>
         )}
         <FloatingActionButton

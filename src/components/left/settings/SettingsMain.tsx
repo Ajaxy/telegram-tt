@@ -82,7 +82,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-content custom-scroll">
-      <div className="settings-main-menu">
+      <div className="settings-main-menu self-profile">
         {currentUserId && (
           <ProfileInfo
             peerId={currentUserId}
@@ -96,6 +96,8 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             isInSettings
           />
         )}
+      </div>
+      <div className="settings-main-menu">
         <ListItem
           icon="settings"
           narrow

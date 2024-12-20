@@ -22,6 +22,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
+import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
@@ -206,7 +207,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         {canCreateNewFolder && (
           <Button
           // TODO: Refactor button component to handle icon placemenet with props
-            className="with-icon mb-2"
+            className="settings-button with-icon mb-2"
             color="primary"
             size="smaller"
             pill
@@ -214,7 +215,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             onClick={handleCreateFolder}
             isRtl={lang.isRtl}
           >
-            <i className="icon icon-add" />
+            <Icon name="add" />
             {lang('CreateNewFilter')}
           </Button>
         )}

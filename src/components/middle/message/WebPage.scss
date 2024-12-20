@@ -3,7 +3,7 @@
   margin-top: 0.25rem;
   margin-bottom: 0.125rem;
   padding-block: 0.1875rem;
-  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
   line-height: 1.125rem;
   max-width: 29rem;
   background-color: var(--accent-background-color);
@@ -168,12 +168,12 @@
 
   .site-name {
     color: var(--accent-color);
-    font-weight: 500;
+    font-weight: var(--font-weight-semibold);
     margin-bottom: 0.125rem;
   }
 
   .site-title {
-    font-weight: 500;
+    font-weight: var(--font-weight-semibold);
     margin-bottom: 0.125rem;
   }
 

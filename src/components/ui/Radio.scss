@@ -1,11 +1,20 @@
 .Radio {
-  display: block;
   position: relative;
-  padding-inline-start: 3.5rem;
+  width: 100%;
+  min-height: 3rem;
+
+  display: flex;
+  align-items: center;
+
+  padding-inline-start: 4.25rem;
   text-align: left;
-  margin-block: 0.75rem;
-  line-height: 1.5rem;
   cursor: var(--custom-cursor, pointer);
+  margin: 0;
+
+  &:hover {
+    background-color: var(--color-chat-hover);
+    border-radius: var(--border-radius-default);
+  }
 
   &.disabled {
     pointer-events: none;
@@ -25,6 +34,10 @@
         right: 1.5rem;
       }
     }
+  }
+
+  &.withSubLabel .Radio-main {
+    padding: 0.4375rem 0 0.5625rem 0;
   }
 
   &.hidden-widget {
@@ -49,14 +62,14 @@
       content: "";
       display: block;
       position: absolute;
-      left: 1rem;
       top: 50%;
-      width: 1.25rem;
-      height: 1.25rem;
       transform: translateY(-50%);
     }
 
     &::before {
+      width: 1.25rem;
+      height: 1.25rem;
+      left: 1.125rem; // 1 + ((1.5 - 1.25) / 2)
       border: 2px solid var(--color-borders-input);
       border-radius: 50%;
       background-color: var(--color-background);
@@ -65,9 +78,9 @@
     }
 
     &::after {
-      left: 1.3125rem;
       width: 0.625rem;
       height: 0.625rem;
+      left: 1.4375rem; // 1 + ((1.5 - 0.625) / 2)
       border-radius: 50%;
       background: var(--color-primary);
       opacity: 0;
@@ -79,6 +92,7 @@
       word-break: break-word;
       unicode-bidi: plaintext;
       text-align: left;
+      line-height: 1.25rem;
     }
 
     .subLabel {
@@ -87,6 +101,7 @@
       line-height: 1rem;
       color: var(--color-text-secondary);
       unicode-bidi: plaintext;
+      margin-top: 0.25rem;
     }
 
     .subLabelLink {
@@ -153,6 +168,8 @@
   }
 
   &.onlyInput {
+    min-height: auto;
+    position: relative;
     margin-block: 0 1.25rem;
     line-height: 1.25rem;
     padding-inline-start: 1.25rem;

@@ -8,7 +8,7 @@
   margin: 0;
   border: none;
   padding: 0.625rem 1.125rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   border-top-left-radius: var(--border-radius-messages-small);
   border-top-right-radius: var(--border-radius-messages-small);

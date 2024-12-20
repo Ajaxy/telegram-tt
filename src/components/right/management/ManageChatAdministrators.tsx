@@ -123,7 +123,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
         </div>
 
         <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <p className="text-muted" dir="auto">
+          <p className="section-help" dir="auto">
             {lang(isChannel
               ? 'Channel.Management.AddModeratorHelp'
               : 'Group.Management.AddModeratorHelp')}
@@ -171,7 +171,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
                     onChange={handleToggleProfiles}
                   />
                 </div>
-                <p className="section-info">
+                <p className="section-info section-info_push">
                   {lang('ChannelSignProfilesInfo')}
                 </p>
               </>

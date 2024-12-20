@@ -111,7 +111,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
         onClick={() => handleOpenSessionModal(session.hash)}
       >
         <Avatar className={styles.avatar} peer={bot} size="tiny" />
-        <div className="multiline-menu-item full-size" dir="auto">
+        <div className="multiline-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           {bot && <FullNameTitle className={styles.title} peer={bot} />}
           <span className={buildClassName('subtitle', 'black', 'tight', styles.platform)}>

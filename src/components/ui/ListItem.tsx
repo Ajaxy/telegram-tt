@@ -74,6 +74,7 @@ interface OwnProps {
   clickArg?: any;
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
+  nonInteractive?: boolean;
 }
 
 const ListItem: FC<OwnProps> = ({
@@ -110,6 +111,7 @@ const ListItem: FC<OwnProps> = ({
   clickArg,
   onSecondaryIconClick,
   onDragEnter,
+  nonInteractive,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -244,6 +246,7 @@ const ListItem: FC<OwnProps> = ({
         {!multiline && children}
         {secondaryIcon && (
           <Button
+            nonInteractive={nonInteractive}
             className={buildClassName('secondary-icon', secondaryIconClassName)}
             round
             color="translucent"

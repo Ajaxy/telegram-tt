@@ -8,6 +8,10 @@
   }
 }
 
+.content {
+  padding: 0.5rem !important;
+}
+
 .modalTitle {
   display: flex;
   flex-direction: column;
@@ -22,8 +26,8 @@
 .optionText {
   width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .option {

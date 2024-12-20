@@ -204,7 +204,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
               renderValue={renderReactionsMaxCountValue}
               isCenteredLayout
             />
-            <p className="section-info mt-4">
+            <p className="section-info section-info_push">
               {lang('ChannelReactions.MaxCount.Info')}
             </p>
           </div>
@@ -219,7 +219,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
             options={reactionsOptions}
             onChange={handleReactionsOptionChange}
           />
-          <p className="section-info mt-4">
+          <p className="section-info section-info_push">
             {localEnabledReactions?.type === 'all' && lang('EnableAllReactionsInfo')}
             {localEnabledReactions?.type === 'some' && lang('EnableSomeReactionsInfo')}
             {!localEnabledReactions && lang('DisableReactionsInfo')}

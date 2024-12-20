@@ -12,6 +12,10 @@
   .left-header {
     padding-right: 0.8125rem;
   }
+
+  .self-profile .ProfileInfo {
+    margin: -0.5rem 0 0.75rem -0.5rem;
+  }
 }
 
 .settings-main-header {
@@ -105,24 +109,14 @@
 .settings-main-menu {
   padding: 0.5rem;
 
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
   @include mixins.side-panel-section;
-
-  > .ChatExtra {
-    padding: 0 0.5rem 0.3125rem;
-    margin: 0 -0.5rem 0.625rem;
-
-    @include mixins.side-panel-section;
-
-    .ListItem.narrow {
-      margin-bottom: 0.25rem;
-    }
-  }
 
   .ListItem.narrow:not(.multiline) {
     margin-bottom: 0;
 
     .ListItem-button {
-      padding: 1rem;
+      min-height: 3.5rem;
     }
   }
 }
@@ -145,8 +139,8 @@
 
   &-header {
     font-size: 1rem;
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-secondary);
-    margin-bottom: 1.25rem;
     padding-inline-start: 1rem;
     position: relative;
   }
@@ -201,13 +195,9 @@
       margin-bottom: 0;
     }
 
-    .multiline-menu-item {
-      white-space: initial;
-      flex-grow: 1;
-
-      &.full-size {
-        width: 100%;
-        overflow: hidden;
+    .multiline-item {
+      .subtitle.tight {
+        line-height: 1rem;
       }
 
       .date {
@@ -215,35 +205,6 @@
         font-size: 0.75rem;
         margin-left: 1rem;
         color: var(--color-text-secondary);
-      }
-
-      .title,
-      .subtitle {
-        display: block;
-        text-align: left;
-      }
-
-      .title {
-        line-height: 1.25rem;
-      }
-
-      .subtitle {
-        font-size: 0.875rem;
-        line-height: 1.5rem;
-        color: var(--color-text-secondary);
-
-        & + .subtitle {
-          margin-top: -0.25rem;
-        }
-
-        &.black {
-          color: var(--color-text);
-        }
-
-        &.tight {
-          line-height: 1.3125rem;
-          margin-bottom: 0.1875rem;
-        }
       }
     }
 
@@ -291,17 +252,10 @@
     }
 
     &[dir="rtl"] {
-      .multiline-menu-item {
-        .title,
-        .subtitle {
-          text-align: right;
-        }
-
-        .date {
-          float: left;
-          margin-left: 0;
-          margin-right: 1rem;
-        }
+      .multiline-item .date {
+        float: left;
+        margin-left: 0;
+        margin-right: 1rem;
       }
     }
   }
@@ -321,13 +275,8 @@
     }
   }
 
-  .Radio + .Radio,
-  .Checkbox + .Checkbox {
-    margin-top: 2rem;
-  }
-
   > .Checkbox, > .Radio {
-    padding-inline-start: 4.25rem;
+    padding-inline-start: 4.1875rem;
   }
 
   &__current-value {
@@ -342,8 +291,8 @@
   padding-block: 0;
 }
 
-.settings-picker-title {
-  margin-inline-start: var(--picker-title-shift);
+.settings-input {
+  padding: 0.5rem 1rem 0 1rem;
 }
 
 .settings-fab-wrapper {
@@ -366,7 +315,7 @@
 }
 
 .settings-edit-profile {
-  padding: 0 1.5rem;
+  padding: 0 1.5rem !important;
 }
 
 .settings-quick-reaction {
@@ -384,6 +333,7 @@
 .settings-dropdown-section {
   .DropdownList {
     position: relative;
+    padding: 0 0 0 3rem;
 
     &--open {
       transform: translate(0, 0);
@@ -411,4 +361,8 @@
 
 .block-user-button {
   z-index: var(--z-chat-float-button);
+}
+
+.settings-button {
+  font-weight: var(--font-weight-semibold);
 }

@@ -275,7 +275,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
                 />
               </div>
             )}
-            <p className="text-muted">
+            <p className="section-info section-info_push">
               {isJoinToSend ? lang('ChannelSettingsJoinRequestInfo') : lang('ChannelSettingsJoinToSendInfo')}
             </p>
           </div>

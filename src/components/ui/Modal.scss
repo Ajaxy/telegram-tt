@@ -17,7 +17,7 @@
   &.pin,
   &.unpin-all {
     .modal-dialog {
-      max-width: 23rem;
+      max-width: 24rem;
     }
   }
 
@@ -103,7 +103,7 @@
 
   .modal-header,
   %modal-header {
-    padding: 1rem 1rem 0;
+    padding: 1.3125rem 1.3125rem 0;
     display: flex;
     align-items: center;
     flex-shrink: 0;
@@ -151,7 +151,7 @@
   .modal-content {
     width: 100%;
     flex-grow: 1;
-    padding: 1rem;
+    padding: 1rem 1.5rem 1.1875rem;
     overflow-y: auto;
     max-height: 92vh;
 
@@ -207,7 +207,7 @@
     width: auto;
     height: auto;
     text-align: right;
-    font-weight: 500;
+    font-weight: var(--font-weight-semibold);
     white-space: pre-wrap;
   }
 

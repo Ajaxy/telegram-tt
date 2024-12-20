@@ -164,7 +164,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
               hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
             )}
           >
-            <div className="multiline-menu-item">
+            <div className="multiline-item">
               <span className="title">{oldLang('Passcode')}</span>
               <span className="subtitle" dir="auto">
                 {oldLang(hasPasscode ? 'PasswordOn' : 'PasswordOff')}
@@ -180,7 +180,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             hasPassword ? SettingsScreens.TwoFaEnabled : SettingsScreens.TwoFaDisabled,
           )}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('TwoStepVerification')}</span>
             <span className="subtitle" dir="auto">
               {oldLang(hasPassword ? 'PasswordOn' : 'PasswordOff')}
@@ -209,7 +209,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyPhoneNumber)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('PrivacyPhoneTitle')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.phoneNumber)}
@@ -222,7 +222,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyLastSeen)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('LastSeenTitle')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.lastSeen)}
@@ -235,7 +235,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyProfilePhoto)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('PrivacyProfilePhotoTitle')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.profilePhoto)}
@@ -248,7 +248,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyBio)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('PrivacyBio')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.bio)}
@@ -261,7 +261,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyBirthday)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('PrivacyBirthday')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.birthday)}
@@ -274,7 +274,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyGifts)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{lang('PrivacyGifts')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.gifts)}
@@ -287,7 +287,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyForwarding)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('PrivacyForwardsTitle')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.forwards)}
@@ -300,7 +300,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyPhoneCall)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('WhoCanCallMe')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.phoneCall)}
@@ -315,7 +315,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyVoiceMessages)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('PrivacyVoiceMessagesTitle')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.voiceMessages)}
@@ -329,7 +329,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyMessages)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('PrivacyMessagesTitle')}</span>
             <span className="subtitle" dir="auto">
               {shouldNewNonContactPeersRequirePremium
@@ -344,7 +344,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.PrivacyGroupChats)}
         >
-          <div className="multiline-menu-item">
+          <div className="multiline-item">
             <span className="title">{oldLang('WhoCanAddMe')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacy.chatInvite)}

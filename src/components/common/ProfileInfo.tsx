@@ -291,7 +291,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   return (
     <div
-      className={buildClassName('ProfileInfo', forceShowSelf && styles.self)}
+      className={buildClassName('ProfileInfo')}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
       <div className={styles.photoWrapper}>

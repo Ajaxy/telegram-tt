@@ -7,7 +7,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { OldLangFn } from '../../../hooks/useOldLang';
 import type { TextPart } from '../../../types';
 
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { SERVICE_NOTIFICATIONS_USER_ID, STARS_CURRENCY_CODE } from '../../../config';
 import {
   getChatTitle,
   getExpiredMessageDescription,
@@ -168,12 +168,19 @@ export function renderActionMessageText(
   }
 
   if (unprocessed.includes('%gift_payment_amount%')) {
-    const price = formatCurrencyAsString(amount!, currency!, oldLang.code);
-    let priceText = price;
+    let priceText;
 
-    if (giftCryptoInfo) {
-      const cryptoPrice = formatCurrencyAsString(giftCryptoInfo.amount, giftCryptoInfo.currency, oldLang.code);
-      priceText = `${cryptoPrice} (${price})`;
+    if (currency && currency === STARS_CURRENCY_CODE) {
+      priceText = oldLang('ActionGiftStarsTitle', amount!);
+    } else {
+      const price = formatCurrencyAsString(amount!, currency!, oldLang.code);
+
+      if (giftCryptoInfo) {
+        const cryptoPrice = formatCurrencyAsString(giftCryptoInfo.amount, giftCryptoInfo.currency, oldLang.code);
+        priceText = `${cryptoPrice} (${price})`;
+      } else {
+        priceText = price;
+      }
     }
 
     processed = processPlaceholder(

@@ -328,25 +328,26 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             onChange={handleSetPhoto}
             disabled={!canChangeInfo}
           />
-          <InputText
-            id="group-title"
-            label={lang('GroupName')}
-            onChange={handleTitleChange}
-            value={title}
-            error={error === GROUP_TITLE_EMPTY ? error : undefined}
-            disabled={!canChangeInfo}
-          />
-          <TextArea
-            id="group-about"
-            className="mb-2"
-            label={lang('DescriptionPlaceholder')}
-            maxLength={GROUP_MAX_DESCRIPTION}
-            maxLengthIndicator={(GROUP_MAX_DESCRIPTION - about.length).toString()}
-            onChange={handleAboutChange}
-            value={about}
-            disabled={!canChangeInfo}
-            noReplaceNewlines
-          />
+          <div className="settings-edit">
+            <InputText
+              id="group-title"
+              label={lang('GroupName')}
+              onChange={handleTitleChange}
+              value={title}
+              error={error === GROUP_TITLE_EMPTY ? error : undefined}
+              disabled={!canChangeInfo}
+            />
+            <TextArea
+              id="group-about"
+              label={lang('DescriptionPlaceholder')}
+              maxLength={GROUP_MAX_DESCRIPTION}
+              maxLengthIndicator={(GROUP_MAX_DESCRIPTION - about.length).toString()}
+              onChange={handleAboutChange}
+              value={about}
+              disabled={!canChangeInfo}
+              noReplaceNewlines
+            />
+          </div>
           {chat.isCreator && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('GroupType')}</span>
