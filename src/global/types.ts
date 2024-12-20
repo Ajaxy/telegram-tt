@@ -1843,6 +1843,7 @@ export interface ActionPayloads {
     messageId?: number;
     commentId?: number;
     startParam?: string;
+    ref?: string;
     startAttach?: string;
     attach?: string;
     startApp?: string;

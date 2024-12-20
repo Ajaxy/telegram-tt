@@ -1493,7 +1493,7 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
     username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, mode,
-    text, onChatChanged, choose,
+    text, onChatChanged, choose, ref,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1502,7 +1502,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   const isWebApp = webAppName && !Number(webAppName) && !originalParts?.[2];
 
   if (!commentId) {
-    if (startAttach === undefined && messageId && !startParam
+    if (startAttach === undefined && messageId && !startParam && !ref
       && chat?.usernames?.some((c) => c.username === username)) {
       actions.focusMessage({
         chatId: chat.id, threadId, messageId, tabId,
@@ -1542,6 +1542,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
           threadId,
           channelPostId: messageId,
           startParam,
+          ref,
           startAttach,
           attach,
           text,
@@ -3013,6 +3014,7 @@ async function openChatByUsername<T extends GlobalState>(
     threadId?: ThreadId;
     channelPostId?: number;
     startParam?: string;
+    ref?: string;
     startAttach?: string;
     attach?: string;
     text?: string;
@@ -3020,7 +3022,7 @@ async function openChatByUsername<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const {
-    username, threadId, channelPostId, startParam, startAttach, attach, text,
+    username, threadId, channelPostId, startParam, ref, startAttach, attach, text,
   } = params;
   global = getGlobal();
   const currentChat = selectCurrentChat(global, tabId);
@@ -3049,7 +3051,7 @@ async function openChatByUsername<T extends GlobalState>(
   }
 
   const starRefStartPrefixes = global.appConfig?.starRefStartPrefixes;
-  let referrer = '';
+  let referrer = ref;
   if (startParam && starRefStartPrefixes?.length) {
     const prefix = starRefStartPrefixes.find((p) => startParam.startsWith(p));
     if (prefix) {
@@ -3075,7 +3077,7 @@ async function openChatByUsername<T extends GlobalState>(
     actions.openThread({ chatId: chat.id, threadId: threadId ?? MAIN_THREAD_ID, tabId });
   }
 
-  if (startParam) {
+  if (startParam && !referrer) {
     actions.startBot({ botId: chat.id, param: startParam });
   }
 

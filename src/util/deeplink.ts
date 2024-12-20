@@ -22,6 +22,7 @@ export const processDeepLink = (url: string): boolean => {
         actions.openChatByUsername({
           username: parsedLink.username,
           startParam: parsedLink.start,
+          ref: parsedLink.ref,
           text: parsedLink.text,
           startApp: parsedLink.startApp,
           mode: parsedLink.mode,
