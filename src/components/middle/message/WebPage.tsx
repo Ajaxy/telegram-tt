@@ -22,6 +22,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import Audio from '../../common/Audio';
 import Document from '../../common/Document';
 import EmojiIconBackground from '../../common/embedded/EmojiIconBackground';
+import PeerColorWrapper from '../../common/PeerColorWrapper';
 import SafeLink from '../../common/SafeLink';
 import StickerView from '../../common/StickerView';
 import Button from '../../ui/Button';
@@ -86,8 +87,6 @@ const WebPage: FC<OwnProps> = ({
   const { openTelegramLink } = getActions();
   const webPage = getMessageWebPage(message);
   const { isMobile } = useAppLayout();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const stickersRef = useRef<HTMLDivElement>(null);
 
@@ -177,8 +176,7 @@ const WebPage: FC<OwnProps> = ({
   }
 
   return (
-    <div
-      ref={ref}
+    <PeerColorWrapper
       className={className}
       data-initial={(siteName || displayUrl)[0]}
       dir={lang.isRtl ? 'rtl' : 'auto'}
@@ -292,7 +290,7 @@ const WebPage: FC<OwnProps> = ({
         )}
       </div>
       {quickButtonLangKey && renderQuickButton(quickButtonLangKey)}
-    </div>
+    </PeerColorWrapper>
   );
 };
 
