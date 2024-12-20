@@ -27,6 +27,7 @@ export interface DownloadFileParams {
     start?: number;
     end?: number;
     progressCallback?: OnProgress;
+    isPriority?: boolean;
 }
 
 // Chunk sizes for `upload.getFile` must be multiple of the smallest size
@@ -34,6 +35,8 @@ const MIN_CHUNK_SIZE = 4096;
 const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
+
+const NEW_CONNECTION_QUEUE_THRESHOLD = 5;
 
 // when the sender requests hangs for 60 second we will reimport
 const SENDER_TIMEOUT = 60 * 1000;
@@ -136,7 +139,7 @@ async function downloadFile2(
         partSizeKb, end,
     } = fileParams;
     const {
-        fileSize,
+        fileSize, dcId, progressCallback, isPriority, start = 0,
     } = fileParams;
 
     const fileId = 'id' in inputLocation ? inputLocation.id : undefined;
@@ -148,7 +151,6 @@ async function downloadFile2(
 
     logWithId('Downloading file...');
     const isPremium = Boolean(client.isPremium);
-    const { dcId, progressCallback, start = 0 } = fileParams;
 
     end = end && end < fileSize ? end : fileSize - 1;
 
@@ -159,7 +161,7 @@ async function downloadFile2(
     const partSize = partSizeKb * 1024;
     const partsCount = end ? Math.ceil((end + 1 - start + 1) / partSize) : 1;
     const noParallel = !end;
-    const shouldUseMultipleConnections = fileSize
+    const shouldUseMultipleConnections = Boolean(fileSize)
         && fileSize >= MULTIPLE_CONNECTIONS_MIN_FILE_SIZE
         && !noParallel;
     let deferred: Deferred | undefined;
@@ -173,11 +175,6 @@ async function downloadFile2(
     const fileView = new FileView(end - start + 1);
     const promises: Promise<any>[] = [];
     let offset = start;
-    // Pick the least busy foreman
-    // For some reason, fresh connections give out a higher speed for the first couple of seconds
-    // I have no idea why, but this may speed up the download of small files
-    const activeCounts = foremans.map(({ activeWorkers }) => activeWorkers);
-    let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
     // Used for files with unknown size and for manual cancellations
     let hasEnded = false;
 
@@ -206,13 +203,9 @@ async function downloadFile2(
             isPrecise = true;
         }
 
-        // Use only first connection for avatars, because no size is known and we don't want to
-        // download empty parts using all connections at once
-        const senderIndex = !shouldUseMultipleConnections ? 0 : currentForemanIndex % (
-            isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS
-        );
+        const senderIndex = getFreeForemanIndex(isPremium, shouldUseMultipleConnections);
 
-        await foremans[senderIndex].requestWorker();
+        await foremans[senderIndex].requestWorker(isPriority);
 
         if (deferred) await deferred.promise;
 
@@ -316,7 +309,6 @@ async function downloadFile2(
         })(offset));
 
         offset += limit;
-        currentForemanIndex++;
 
         if (end && (offset > end)) {
             break;
@@ -324,4 +316,28 @@ async function downloadFile2(
     }
     await Promise.all(promises);
     return fileView.getData();
+}
+
+function getFreeForemanIndex(isPremium: boolean, forceNewConnection?: boolean) {
+    const availableConnections = isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS;
+    let foremanIndex = 0;
+    let minQueueLength = Infinity;
+    for (let i = 0; i < availableConnections; i++) {
+        const foreman = foremans[i];
+        // If worker is free, return it
+        if (!foreman.queueLength) return i;
+
+        // Potentially create a new connection if the current queue is too long
+        if (!forceNewConnection && foreman.queueLength <= NEW_CONNECTION_QUEUE_THRESHOLD) {
+            return i;
+        }
+
+        // If every connection is equally busy, prefer the last one in the list
+        if (foreman.queueLength <= minQueueLength) {
+            foremanIndex = i;
+            minQueueLength = foreman.activeWorkers;
+        }
+    }
+
+    return foremanIndex;
 }

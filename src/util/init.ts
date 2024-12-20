@@ -31,6 +31,9 @@ export async function initGlobal(force: boolean = false, prevGlobal?: GlobalStat
 
   if (force) {
     global.byTabId = prevGlobal.byTabId;
+
+    // Keep the theme if it was set before
+    global.settings.byKey.theme = prevGlobal.settings.byKey.theme;
   }
 
   setGlobal(global);

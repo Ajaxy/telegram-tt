@@ -480,8 +480,11 @@ class TelegramClient {
                 await this._waitingForAuthKey[dcId];
 
                 const authKey = this.session.getAuthKey(dcId);
-                await sender.authKey.setKey(authKey.getKey());
-                hasAuthKey = Boolean(sender.authKey.getKey());
+
+                hasAuthKey = Boolean(sender.authKey?.getKey());
+                if (hasAuthKey) {
+                    await sender.authKey.setKey(authKey.getKey());
+                }
             } else {
                 this._waitingForAuthKey[dcId] = new Promise((resolve) => {
                     firstConnectResolver = resolve;
@@ -512,15 +515,18 @@ class TelegramClient {
                 ));
 
                 if (this.session.dcId !== dcId && !sender._authenticated) {
-                    this._log.info(`Exporting authorization for data center ${dc.ipAddress}`);
-                    const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId }));
+                    // Prevent another connection from trying to export the auth key while we're doing it
+                    await navigator.locks.request('GRAMJS_AUTH_EXPORT', async () => {
+                        this._log.info(`Exporting authorization for data center ${dc.ipAddress}`);
+                        const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId }));
 
-                    const req = this._initWith(new requests.auth.ImportAuthorization({
-                        id: auth.id,
-                        bytes: auth.bytes,
-                    }));
-                    await sender.send(req);
-                    sender._authenticated = true;
+                        const req = this._initWith(new requests.auth.ImportAuthorization({
+                            id: auth.id,
+                            bytes: auth.bytes,
+                        }));
+                        await sender.send(req);
+                        sender._authenticated = true;
+                    });
                 }
 
                 sender.dcId = dcId;
@@ -669,6 +675,7 @@ class TelegramClient {
      * @param [args[end] {number}]
      * @param [args[dcId] {number}]
      * @param [args[workers] {number}]
+     * @param [args[isPriority] {boolean}]
      * @returns {Promise<Buffer>}
      */
     downloadFile(inputLocation, args = {}) {
@@ -721,6 +728,7 @@ class TelegramClient {
 
         return this.downloadFile(loc, {
             dcId,
+            isPriority: true,
         });
     }
 
