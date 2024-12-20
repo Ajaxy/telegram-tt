@@ -124,6 +124,7 @@ export async function fetchChats({
     offsetId,
     limit,
     offsetDate,
+    folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
     ...(withPinned && { excludePinned: true }),
   }));
   const resultPinned = withPinned
