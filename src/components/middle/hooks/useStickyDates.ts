@@ -25,16 +25,15 @@ export default function useStickyDates() {
 
     runDebounced(() => {
       const stuckDateEl = findStuckDate(container);
-      if (stuckDateEl) {
-        requestMutation(() => {
-          stuckDateEl.classList.add('stuck');
-        });
-      }
 
       requestMutation(() => {
         const currentStuck = document.querySelector('.stuck');
         if (currentStuck) {
           currentStuck.classList.remove('stuck');
+        }
+
+        if (stuckDateEl) {
+          stuckDateEl.classList.add('stuck');
         }
 
         document.body.classList.remove('is-scrolling-messages');
@@ -58,6 +57,6 @@ function findStuckDate(container: HTMLElement) {
   return Array.from(allElements).find((el) => {
     const { offsetTop, offsetHeight } = el;
     const top = offsetTop - containerTop;
-    return -offsetHeight <= top && top <= (headerActionsHeight || STICKY_TOP);
+    return -offsetHeight <= top && top <= headerActionsHeight + STICKY_TOP;
   });
 }
