@@ -243,6 +243,7 @@ export interface ApiAppConfig {
   isStarsGiftEnabled?: boolean;
   starGiftMaxMessageLength?: number;
   starGiftMaxConvertPeriod?: number;
+  starRefStartPrefixes?: string[];
 }
 
 export interface ApiConfig {

@@ -51,6 +51,7 @@ import {
   buildLangStrings,
   buildPrivacyKey,
 } from '../apiBuilders/misc';
+import { buildApiStarsAmount } from '../apiBuilders/payments';
 import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
   buildApiReaction,
@@ -1059,7 +1060,7 @@ export function updater(update: Update) {
   } else if (update instanceof GramJs.UpdateStarsBalance) {
     sendApiUpdate({
       '@type': 'updateStarsBalance',
-      balance: update.balance.toJSNumber(),
+      balance: buildApiStarsAmount(update.balance),
     });
   } else if (update instanceof GramJs.UpdatePaidReactionPrivacy) {
     sendApiUpdate({

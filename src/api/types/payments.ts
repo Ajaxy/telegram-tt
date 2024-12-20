@@ -302,6 +302,11 @@ export type ApiCheckedGiftCode = {
   usedAt?: number;
 };
 
+export interface ApiStarsAmount {
+  amount: number;
+  nanos: number;
+}
+
 export interface ApiStarsTransactionPeerUnsupported {
   type: 'unsupported';
 }
@@ -349,7 +354,7 @@ export interface ApiStarsTransaction {
   id?: string;
   peer: ApiStarsTransactionPeer;
   messageId?: number;
-  stars: number;
+  stars: ApiStarsAmount;
   isRefund?: true;
   isGift?: true;
   starGift?: ApiStarGift;
@@ -364,6 +369,7 @@ export interface ApiStarsTransaction {
   photo?: ApiWebDocument;
   extendedMedia?: BoughtPaidMedia[];
   subscriptionPeriod?: number;
+  starRefCommision?: number;
 }
 
 export interface ApiStarsSubscription {

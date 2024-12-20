@@ -7,6 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiPremiumGiftCodeOption,
   ApiStarGift,
+  ApiStarsAmount,
   ApiUser,
 } from '../../../api/types';
 import type { StarGiftCategory, TabState } from '../../../global/types';
@@ -45,7 +46,7 @@ type StateProps = {
   boostPerSentGift?: number;
   starGiftsById?: Record<string, ApiStarGift>;
   starGiftCategoriesByName: Record<StarGiftCategory, string[]>;
-  starBalance?: number;
+  starBalance?: ApiStarsAmount;
   user?: ApiUser;
 };
 

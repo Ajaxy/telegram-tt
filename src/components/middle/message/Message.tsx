@@ -296,7 +296,6 @@ type StateProps = {
   canTranscribeVoice?: boolean;
   viaBusinessBot?: ApiUser;
   effect?: ApiAvailableEffect;
-  availableStars?: number;
   poll?: ApiPoll;
 };
 
@@ -418,7 +417,6 @@ const Message: FC<OwnProps & StateProps> = ({
   canTranscribeVoice,
   viaBusinessBot,
   effect,
-  availableStars,
   poll,
   onIntersectPinnedMessage,
 }) => {
@@ -1062,7 +1060,6 @@ const Message: FC<OwnProps & StateProps> = ({
         noRecentReactors={isChannel}
         tags={tags}
         isCurrentUserPremium={isPremium}
-        availableStars={availableStars}
       />
     );
   }
@@ -1701,7 +1698,6 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
             tags={tags}
-            availableStars={availableStars}
           />
         )}
       </div>
@@ -1852,7 +1848,6 @@ export default memo(withGlobal<OwnProps>(
 
     const effect = effectId ? global.availableEffectById[effectId] : undefined;
 
-    const { balance: availableStars } = global.stars || {};
     const poll = selectPollFromMessage(global, message);
 
     return {
@@ -1941,7 +1936,6 @@ export default memo(withGlobal<OwnProps>(
       canTranscribeVoice,
       viaBusinessBot,
       effect,
-      availableStars,
       poll,
     };
   },

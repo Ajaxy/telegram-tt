@@ -2912,14 +2912,15 @@ export async function migrateChat<T extends GlobalState>(
 export async function fetchChatByUsername<T extends GlobalState>(
   global: T,
   username: string,
+  referrer?: string,
 ) {
   global = getGlobal();
-  const localChat = selectChatByUsername(global, username);
+  const localChat = !referrer ? selectChatByUsername(global, username) : undefined;
   if (localChat && !localChat.isMin) {
     return localChat;
   }
 
-  const { chat, user } = await callApi('getChatByUsername', username) || {};
+  const { chat, user } = await callApi('getChatByUsername', username, referrer) || {};
   if (!chat) {
     return undefined;
   }
@@ -3047,7 +3048,16 @@ async function openChatByUsername<T extends GlobalState>(
     actions.openChat({ id: TMP_CHAT_ID, tabId });
   }
 
-  const chat = await fetchChatByUsername(global, username);
+  const starRefStartPrefixes = global.appConfig?.starRefStartPrefixes;
+  let referrer = '';
+  if (startParam && starRefStartPrefixes?.length) {
+    const prefix = starRefStartPrefixes.find((p) => startParam.startsWith(p));
+    if (prefix) {
+      referrer = startParam.slice(prefix.length);
+    }
+  }
+
+  const chat = await fetchChatByUsername(global, username, referrer);
   if (!chat) {
     if (!isCurrentChat) {
       actions.openPreviousChat({ tabId });

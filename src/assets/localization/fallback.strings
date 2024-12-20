@@ -1377,6 +1377,7 @@
 "StarsSubscribeInfoLinkText" = "Terms of Service";
 "StarsSubscribeInfoLink" = "https://telegram.org/tos/stars";
 "StarsPerMonth" = "⭐️{amount}/month";
+"StarsBalance" = "Balance";
 "OpenApp" = "Open App";
 "PopularApps" = "Popular Apps";
 "SearchApps" = "Search Apps";

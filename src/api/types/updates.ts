@@ -34,6 +34,7 @@ import type {
 import type {
   ApiEmojiInteraction, ApiError, ApiNotifyException, ApiSessionData,
 } from './misc';
+import type { ApiStarsAmount } from './payments';
 import type { LangPackStringValue } from './settings';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
@@ -760,7 +761,7 @@ export type ApiUpdatePremiumFloodWait = {
 
 export type ApiUpdateStarsBalance = {
   '@type': 'updateStarsBalance';
-  balance: number;
+  balance: ApiStarsAmount;
 };
 
 export type ApiUpdateDeleteProfilePhoto = {

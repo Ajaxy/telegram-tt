@@ -21,6 +21,7 @@ import type {
   ApiReceipt,
   ApiStarGift,
   ApiStarGiveawayOption,
+  ApiStarsAmount,
   ApiStarsGiveawayWinnerOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
@@ -461,6 +462,13 @@ export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiSta
   };
 }
 
+export function buildApiStarsAmount(amount: GramJs.StarsAmount): ApiStarsAmount {
+  return {
+    amount: amount.amount.toJSNumber(),
+    nanos: amount.nanos,
+  };
+}
+
 export function buildApiStarsGiveawayWinnersOption(
   option: GramJs.StarsGiveawayWinnersOption,
 ): ApiStarsGiveawayWinnerOption {
@@ -528,7 +536,7 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
     date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
-    subscriptionPeriod, stargift, giveawayPostId,
+    subscriptionPeriod, stargift, giveawayPostId, starrefCommissionPermille,
   } = transaction;
 
   if (photo) {
@@ -538,11 +546,13 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
   const boughtExtendedMedia = extendedMedia?.map((m) => buildMessageMediaContent(m))
     .filter(Boolean) as BoughtPaidMedia[];
 
+  const starRefCommision = starrefCommissionPermille ? starrefCommissionPermille / 10 : undefined;
+
   return {
     id,
     date,
     peer: buildApiStarsTransactionPeer(peer),
-    stars: stars.toJSNumber(),
+    stars: buildApiStarsAmount(stars),
     title,
     description,
     photo: photo && buildApiWebDocument(photo),
@@ -556,6 +566,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     isReaction: reaction,
     starGift: stargift && buildApiStarGift(stargift),
     giveawayPostId,
+    starRefCommision,
   };
 }
 

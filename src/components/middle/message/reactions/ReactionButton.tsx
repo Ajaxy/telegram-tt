@@ -40,14 +40,13 @@ type OwnProps = {
   recentReactors?: ApiPeer[];
   className?: string;
   chosenClassName?: string;
-  availableStars?: number;
   observeIntersection?: ObserveFn;
   onClick?: (reaction: ApiReaction) => void;
   onPaidClick?: (count: number) => void;
 };
 
-function selectAreStarsLoaded(global: GlobalState) {
-  return Boolean(global.stars);
+function selectStarsState(global: GlobalState) {
+  return global.stars;
 }
 
 const ReactionButton = ({
@@ -57,7 +56,6 @@ const ReactionButton = ({
   recentReactors,
   className,
   chosenClassName,
-  availableStars,
   chatId,
   messageId,
   observeIntersection,
@@ -78,7 +76,8 @@ const ReactionButton = ({
 
   const isPaid = reaction.reaction.type === 'paid';
 
-  const areStarsLoaded = useSelector(selectAreStarsLoaded);
+  const starsState = useSelector(selectStarsState);
+  const areStarsLoaded = Boolean(starsState);
 
   const handlePaidClick = useLastCallback((count = 1) => {
     onPaidClick?.(count);
@@ -120,7 +119,7 @@ const ReactionButton = ({
     const button = ref.current;
     if (!amount || !button || amount === prevReaction?.localAmount) return;
 
-    if (areStarsLoaded && (!availableStars || amount > availableStars)) {
+    if (areStarsLoaded && amount > starsState.balance.amount) {
       openStarsBalanceModal({
         originReaction: {
           chatId,
@@ -153,7 +152,7 @@ const ReactionButton = ({
       duration: 500 * currentScale,
       easing: 'ease-out',
     });
-  }, [reaction, availableStars, areStarsLoaded, chatId, messageId]);
+  }, [reaction, starsState?.balance, areStarsLoaded, chatId, messageId]);
 
   const prevAmount = usePrevious(reaction.localAmount);
 

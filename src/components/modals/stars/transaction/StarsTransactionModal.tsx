@@ -19,8 +19,9 @@ import {
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
-import { getTransactionTitle } from '../helpers/transaction';
+import { getTransactionTitle, isNegativeStarsAmount } from '../helpers/transaction';
 
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 import usePrevious from '../../../../hooks/usePrevious';
@@ -51,6 +52,8 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
   modal, peer, canPlayAnimatedEmojis, topSticker,
 }) => {
   const { showNotification, openMediaViewer, closeStarsTransactionModal } = getActions();
+
+  const lang = useLang();
   const oldLang = useOldLang();
   const { transaction } = modal || {};
 
@@ -70,7 +73,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     }
 
     const {
-      giveawayPostId, photo,
+      giveawayPostId, photo, stars,
     } = transaction;
 
     const customPeer = (transaction.peer && transaction.peer.type !== 'peer'
@@ -130,8 +133,10 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         {title && <h1 className={styles.title}>{title}</h1>}
         <p className={styles.description}>{description}</p>
         <p className={styles.amount}>
-          <span className={buildClassName(styles.amount, transaction.stars < 0 ? styles.negative : styles.positive)}>
-            {formatStarsTransactionAmount(transaction.stars)}
+          <span
+            className={buildClassName(styles.amount, isNegativeStarsAmount(stars) ? styles.negative : styles.positive)}
+          >
+            {formatStarsTransactionAmount(lang, stars)}
           </span>
           <StarIcon type="gold" size="middle" />
         </p>
@@ -140,9 +145,26 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const tableData: TableData = [];
 
+    if (transaction.starRefCommision) {
+      tableData.push([
+        oldLang('StarsTransaction.StarRefReason.Title'),
+        oldLang('StarsTransaction.StarRefReason.Program'),
+      ]);
+    }
+
+    let peerLabel;
+    if (isNegativeStarsAmount(stars) || transaction.isMyGift) {
+      peerLabel = oldLang('Stars.Transaction.To');
+    } else if (transaction.starRefCommision) {
+      peerLabel = oldLang('StarsTransaction.StarRefReason.Miniapp');
+    } else if (peerId) {
+      peerLabel = oldLang('Star.Transaction.From');
+    } else {
+      peerLabel = oldLang('Stars.Transaction.Via');
+    }
+
     tableData.push([
-      oldLang(transaction.stars < 0 || transaction.isMyGift ? 'Stars.Transaction.To'
-        : peerId ? 'Star.Transaction.From' : 'Stars.Transaction.Via'),
+      peerLabel,
       peerId ? { chatId: peerId } : toName || '',
     ]);
 
@@ -198,7 +220,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       tableData,
       footer,
     };
-  }, [transaction, oldLang, peer, topSticker, canPlayAnimatedEmojis]);
+  }, [transaction, oldLang, lang, peer, topSticker, canPlayAnimatedEmojis]);
 
   const prevModalData = usePrevious(starModalData);
   const renderingModalData = prevModalData || starModalData;
@@ -222,7 +244,7 @@ export default memo(withGlobal<OwnProps>(
     const peer = peerId ? selectPeer(global, peerId) : undefined;
 
     const starCount = modal?.transaction.stars;
-    const starsGiftSticker = modal?.transaction.isGift && selectGiftStickerForStars(global, starCount);
+    const starsGiftSticker = modal?.transaction.isGift && selectGiftStickerForStars(global, starCount?.amount);
 
     const starGiftStickerId = modal?.transaction.starGift?.stickerId;
     const starGiftSticker = starGiftStickerId && selectStarGiftSticker(global, starGiftStickerId);

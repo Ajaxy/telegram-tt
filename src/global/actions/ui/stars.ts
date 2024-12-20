@@ -119,7 +119,7 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
 
   const starBalance = global.stars?.balance;
 
-  if (!shouldIgnoreBalance && starBalance && topup && topup.balanceNeeded <= starBalance) {
+  if (!shouldIgnoreBalance && starBalance && topup && topup.balanceNeeded <= starBalance.amount) {
     actions.showNotification({
       message: langProvider.oldTranslate('StarsTopupLinkEnough'),
       actionText: langProvider.oldTranslate('StarsTopupLinkTopupAnyway'),

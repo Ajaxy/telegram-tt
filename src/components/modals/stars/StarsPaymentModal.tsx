@@ -150,7 +150,7 @@ const StarPaymentModal = ({
       return;
     }
 
-    if (amount > balance) {
+    if (amount > balance.amount) {
       openStarsBalanceModal({
         originStarsPayment: modal,
       });

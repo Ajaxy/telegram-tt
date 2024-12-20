@@ -81,7 +81,7 @@ const StarsBalanceModal = ({
     || originReaction?.amount
     || originGift?.gift.stars
     || topup?.balanceNeeded;
-  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance || 0) : undefined;
+  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance?.amount || 0) : undefined;
   const starsNeededText = useMemo(() => {
     const global = getGlobal();
 

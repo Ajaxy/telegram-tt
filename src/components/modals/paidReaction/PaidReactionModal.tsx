@@ -3,7 +3,9 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
+import type {
+  ApiChat, ApiMessage, ApiStarsAmount, ApiUser,
+} from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { CustomPeer } from '../../../types';
 
@@ -38,7 +40,7 @@ type StateProps = {
   message?: ApiMessage;
   chat?: ApiChat;
   maxAmount: number;
-  starBalance?: number;
+  starBalance?: ApiStarsAmount;
   defaultPrivacy?: boolean;
 };
 

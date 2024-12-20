@@ -68,6 +68,7 @@ import type {
   ApiSponsoredMessage,
   ApiStarGift,
   ApiStarGiveawayOption,
+  ApiStarsAmount,
   ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStarTopupOption,
@@ -1290,7 +1291,7 @@ export type GlobalState = {
 
   stars?: {
     topupOptions: ApiStarTopupOption[];
-    balance: number;
+    balance: ApiStarsAmount;
     history: StarsTransactionHistory;
     subscriptions?: StarsSubscriptions;
   };
