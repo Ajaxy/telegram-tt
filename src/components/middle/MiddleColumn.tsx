@@ -21,6 +21,7 @@ import {
   EDITABLE_INPUT_ID,
   GENERAL_TOPIC_ID,
   SUPPORTED_PHOTO_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
   TMP_CHAT_ID,
 } from '../../config';
 import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -153,6 +154,10 @@ type StateProps = {
 
 function isImage(item: DataTransferItem) {
   return item.kind === 'file' && item.type && SUPPORTED_PHOTO_CONTENT_TYPES.has(item.type);
+}
+
+function isVideo(item: DataTransferItem) {
+  return item.kind === 'file' && item.type && SUPPORTED_VIDEO_CONTENT_TYPES.has(item.type);
 }
 
 const LAYER_ANIMATION_DURATION_MS = 450 + ANIMATION_END_DELAY;
@@ -354,8 +359,7 @@ function MiddleColumn({
       // Filter unnecessary element for drag and drop images in Firefox (https://github.com/Ajaxy/telegram-tt/issues/49)
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#image
       .filter((item) => item.type !== 'text/uri-list')
-      // As of September 2021, native clients suggest "send quick, but compressed" only for images
-      .every(isImage);
+      .every((item) => isImage(item) || isVideo(item));
 
     setDropAreaState(shouldDrawQuick ? DropAreaState.QuickFile : DropAreaState.Document);
   });
