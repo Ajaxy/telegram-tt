@@ -122,7 +122,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
           />
         )}
         {shouldDisplayAvatar && (
-          <Avatar peer={avatarPeer} webPhoto={photo} size="jumbo" />
+          <Avatar peer={avatarPeer} webPhoto={photo} size="giant" />
         )}
         <img
           className={buildClassName(styles.starsBackground)}
