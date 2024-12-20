@@ -13,6 +13,10 @@
   position: relative;
   cursor: var(--custom-cursor, pointer);
 
+  :global(html.theme-dark) & {
+    background-color: var(--color-background);
+  }
+
   &::before {
     content: "";
     position: absolute;

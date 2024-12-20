@@ -19,6 +19,10 @@
   margin-left: -0.5rem;
   padding-left: 0.5rem;
 
+  :global(html.theme-dark) & {
+    background-color: #181818;
+  }
+
   @include mixins.gradient-border-horizontal(0.5rem, 0.5rem);
 }
 
@@ -43,6 +47,20 @@
 .selected-item {
   background-color: var(--color-background-secondary);
   color: var(--color-text-secondary);
+}
+
+:global(html.theme-dark) {
+
+  .item-selected,
+  .item {
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  .selected-item {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 .star {

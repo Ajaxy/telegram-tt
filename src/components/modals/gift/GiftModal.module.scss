@@ -7,6 +7,10 @@
 .root :global(.modal-content) {
   padding: 0;
   background-color: var(--color-background);
+
+  :global(html.theme-dark) & {
+    background-color: #181818;
+  }
 }
 
 .root :global(.modal-dialog),

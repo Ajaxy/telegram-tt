@@ -285,6 +285,10 @@
     color: var(--color-white);
     --ripple-color: rgba(0, 0, 0, 0.08);
 
+    .theme-dark & {
+      background-color: #CF8920;
+    }
+
     @include active-styles() {
       background-color: #FFB727CC;
     }
