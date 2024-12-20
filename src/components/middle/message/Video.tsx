@@ -123,20 +123,22 @@ const Video = <T,>({
   const hasThumb = Boolean(thumbDataUri);
   const withBlurredBackground = Boolean(forcedWidth);
 
+  const isInline = fullMediaData && wasIntersectedRef.current;
+
+  const isUnsupported = useUnsupportedMedia(videoRef, true, !isInline);
+
   const previewMediaHash = !isPaidPreview ? getVideoMediaHash(video, 'preview') : undefined;
   const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
   const canLoadPreview = isIntersectingForLoading;
   const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview);
-  const previewRef = useMediaTransition<HTMLImageElement>((hasThumb || previewBlobUrl) && !isPlayerReady);
+  const shouldHidePreview = isPlayerReady && !isUnsupported;
+  const previewRef = useMediaTransition<HTMLImageElement>((hasThumb || previewBlobUrl) && !shouldHidePreview);
 
   const noThumb = Boolean(!hasThumb || previewBlobUrl || isPlayerReady);
   const thumbRef = useBlurredMediaThumbRef(video, noThumb);
   useMediaTransition(!noThumb, { ref: thumbRef });
   const blurredBackgroundRef = useBlurredMediaThumbRef(video, !withBlurredBackground);
 
-  const isInline = fullMediaData && wasIntersectedRef.current;
-
-  const isUnsupported = useUnsupportedMedia(videoRef, true, !isInline);
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     !isPaidPreview ? getVideoMediaHash(video, 'download') : undefined,
     !isDownloading,
@@ -169,7 +171,8 @@ const Video = <T,>({
     setPlayProgress(Math.max(0, e.currentTarget.currentTime - 1));
   });
 
-  const duration = (Number.isFinite(videoRef.current?.duration) ? videoRef.current?.duration : video.duration) || 0;
+  const duration = (Number.isFinite(videoRef.current?.duration) && !isUnsupported
+    ? videoRef.current?.duration : video.duration) || 0;
 
   const {
     width, height,
