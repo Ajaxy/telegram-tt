@@ -64,5 +64,6 @@ export function selectCanGift<T extends GlobalState>(global: T, userId: string) 
   const bot = selectBot(global, userId);
   const user = selectUser(global, userId);
 
-  return !selectIsPremiumPurchaseBlocked(global) && !bot && !user?.isSelf && userId !== SERVICE_NOTIFICATIONS_USER_ID;
+  return !selectIsPremiumPurchaseBlocked(global) && user && !bot
+    && !user.isSelf && userId !== SERVICE_NOTIFICATIONS_USER_ID;
 }
