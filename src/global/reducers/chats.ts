@@ -86,7 +86,7 @@ export function updateChatsLastMessageId<T extends GlobalState>(
   };
 }
 
-export function updateChatListIds<T extends GlobalState>(
+export function addChatListIds<T extends GlobalState>(
   global: T, type: ChatListType, idsUpdate: string[],
 ): T {
   const { [type]: listIds } = global.chats.listIds;

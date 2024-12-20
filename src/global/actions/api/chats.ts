@@ -55,6 +55,7 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
+  addChatListIds,
   addChatMembers,
   addChats,
   addMessages,
@@ -76,7 +77,6 @@ import {
   updateChat,
   updateChatFullInfo,
   updateChatLastMessageId,
-  updateChatListIds,
   updateChatListSecondaryInfo,
   updateChats,
   updateChatsLastMessageId,
@@ -600,7 +600,7 @@ addActionHandler('requestSavedDialogUpdate', async (global, actions, payload): P
 
   if (result.messages.length) {
     global = updateChatLastMessageId(global, chatId, result.messages[0].id, 'saved');
-    global = updateChatListIds(global, 'saved', [chatId]);
+    global = addChatListIds(global, 'saved', [chatId]);
 
     setGlobal(global);
   } else {
@@ -2748,7 +2748,7 @@ async function loadChats(
   const offsetDate = params.nextOffsetDate;
   const offsetId = params.nextOffsetId;
 
-  const isFirstBatch = !offsetPeer && !offsetDate && !offsetId;
+  const isFirstBatch = !shouldIgnorePagination && !offsetPeer && !offsetDate && !offsetId;
 
   const result = listType === 'saved' ? await callApi('fetchSavedChats', {
     limit: CHAT_LIST_LOAD_SLICE,
@@ -2783,7 +2783,7 @@ async function loadChats(
     global = replaceChatListIds(global, listType, chatIds);
     global = replaceUserStatuses(global, result.userStatusesById);
   } else {
-    global = updateChatListIds(global, listType, chatIds);
+    global = addChatListIds(global, listType, chatIds);
     global = addUserStatuses(global, result.userStatusesById);
   }
 
