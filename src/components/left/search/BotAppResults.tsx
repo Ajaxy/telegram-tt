@@ -114,6 +114,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
                 <LeftSearchResultChat
                   chatId={id}
                   onClick={handleChatClick}
+                  withOpenAppButton
                 />
               );
             })}
@@ -127,6 +128,7 @@ const BotAppResults: FC<OwnProps & StateProps> = ({
                 <LeftSearchResultChat
                   chatId={id}
                   onClick={handleChatClick}
+                  withOpenAppButton
                 />
               );
             })}

@@ -119,7 +119,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
           {recentlyFoundChatIds.map((id) => (
             <LeftSearchResultChat
               chatId={id}
-              isRecent
+              withOpenAppButton
               onClick={handleClick}
             />
           ))}

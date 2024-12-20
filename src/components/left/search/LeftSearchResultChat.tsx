@@ -28,7 +28,7 @@ import MuteChatModal from '../MuteChatModal.async';
 type OwnProps = {
   chatId: string;
   withUsername?: boolean;
-  isRecent?: boolean;
+  withOpenAppButton?: boolean;
   onClick: (id: string) => void;
 };
 
@@ -48,7 +48,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   isPinned,
   isMuted,
   canChangeFolder,
-  isRecent,
+  withOpenAppButton,
   onClick,
 }) => {
   const { requestMainWebView } = getActions();
@@ -121,7 +121,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
           storyViewerOrigin={StoryViewerOrigin.SearchResult}
         />
       )}
-      {isRecent && user?.hasMainMiniApp && (
+      {withOpenAppButton && user?.hasMainMiniApp && (
         <Button
           className="ChatBadge miniapp"
           pill
