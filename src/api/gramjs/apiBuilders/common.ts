@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
-import type { ApiPrivacySettings, PrivacyVisibility } from '../../../types';
+import type { ApiPrivacySettings, BotsPrivacyType, PrivacyVisibility } from '../../../types';
 import type {
   ApiFormattedText,
   ApiMessageEntity,
@@ -163,6 +163,7 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
   let blockUserIds: string[] | undefined;
   let blockChatIds: string[] | undefined;
   let shouldAllowPremium: true | undefined;
+  let botsPrivacy: BotsPrivacyType = 'none';
 
   const localChats = localDb.chats;
 
@@ -198,6 +199,10 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
       });
     } else if (rule instanceof GramJs.PrivacyValueAllowPremium) {
       shouldAllowPremium = true;
+    } else if (rule instanceof GramJs.PrivacyValueAllowBots) {
+      botsPrivacy = 'allow';
+    } else if (rule instanceof GramJs.PrivacyValueDisallowBots) {
+      botsPrivacy = 'disallow';
     }
   });
 
@@ -215,6 +220,7 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
     blockUserIds: blockUserIds || [],
     blockChatIds: blockChatIds || [],
     shouldAllowPremium,
+    botsPrivacy,
   };
 }
 

@@ -126,7 +126,7 @@ addActionHandler('sendStarGift', async (global, actions, payload): Promise<void>
 
   if (balance === undefined) return;
 
-  if (balance < gift.stars) {
+  if (balance.amount < gift.stars) {
     actions.openStarsBalanceModal({ tabId });
     return;
   }

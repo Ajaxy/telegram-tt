@@ -19,6 +19,13 @@
   flex-grow: 1;
 }
 
+.subtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-size: 0.875rem;
+}
+
 .status {
   display: flex;
   flex-direction: column;
@@ -37,7 +44,7 @@
   font-weight: 500;
 }
 
-.title, .description {
+.title, .description, .subtitle {
   margin-bottom: 0;
 }
 

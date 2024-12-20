@@ -764,8 +764,8 @@ addActionHandler('loadFeaturedEmojiStickers', async (global): Promise<void> => {
 });
 
 addActionHandler('openStickerSet', async (global, actions, payload): Promise<void> => {
-  const { stickerSetInfo, tabId = getCurrentTabId() } = payload;
-  if (!selectStickerSet(global, stickerSetInfo)) {
+  const { stickerSetInfo, shouldIgnoreCache, tabId = getCurrentTabId() } = payload;
+  if (shouldIgnoreCache || !selectStickerSet(global, stickerSetInfo)) {
     await loadStickers(global, actions, stickerSetInfo);
   }
 

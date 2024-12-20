@@ -36,6 +36,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
+import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useScrolledState from '../../hooks/useScrolledState';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
@@ -168,6 +169,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     observeIntersectionForCovers,
     selectStickerSet,
   } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
+
+  const canLoadAndPlay = usePrevDuringAnimation(loadAndPlay || undefined, SLIDE_TRANSITION_DURATION);
 
   const lang = useOldLang();
 
@@ -344,7 +347,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}
-              noPlay={!canAnimate || !loadAndPlay}
+              noPlay={!canAnimate || !canLoadAndPlay}
               forcePlayback
               observeIntersection={observeIntersectionForCovers}
               sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
@@ -361,7 +364,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         size={STICKER_SIZE_PICKER_HEADER}
         title={stickerSet.title}
         className={buttonClassName}
-        noPlay={!canAnimate || !loadAndPlay}
+        noPlay={!canAnimate || !canLoadAndPlay}
         observeIntersection={observeIntersectionForCovers}
         noContextMenu
         isCurrentUserPremium
@@ -427,7 +430,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
             <StickerSet
               key={stickerSet.id}
               stickerSet={stickerSet}
-              loadAndPlay={Boolean(canAnimate && loadAndPlay)}
+              loadAndPlay={Boolean(canAnimate && canLoadAndPlay)}
               index={i}
               idPrefix={prefix}
               observeIntersection={observeIntersectionForSet}

@@ -20,11 +20,8 @@ import {
   EDITABLE_INPUT_CSS_SELECTOR,
   EDITABLE_INPUT_ID,
   GENERAL_TOPIC_ID,
-  MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
-  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
-  MOBILE_SCREEN_MAX_WIDTH,
-  SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SUPPORTED_PHOTO_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
   TMP_CHAT_ID,
 } from '../../config';
 import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
@@ -45,7 +42,6 @@ import {
   selectCanAnimateInterface,
   selectChat,
   selectChatFullInfo,
-  selectChatMessage,
   selectCurrentMessageList,
   selectCurrentMiddleSearch,
   selectDraft,
@@ -95,6 +91,7 @@ import FloatingActionButtons from './FloatingActionButtons';
 import MessageList from './MessageList';
 import MessageSelectToolbar from './MessageSelectToolbar.async';
 import MiddleHeader from './MiddleHeader';
+import MiddleHeaderPanes from './MiddleHeaderPanes';
 import PremiumRequiredPlaceholder from './PremiumRequiredPlaceholder';
 import ReactorListModal from './ReactorListModal.async';
 import MiddleSearch from './search/MiddleSearch.async';
@@ -119,9 +116,6 @@ type StateProps = {
   canPost?: boolean;
   currentUserBannedRights?: ApiChatBannedRights;
   defaultBannedRights?: ApiChatBannedRights;
-  hasPinned?: boolean;
-  hasAudioPlayer?: boolean;
-  hasButtonInHeader?: boolean;
   pinnedMessagesCount?: number;
   theme: ThemeKey;
   customBackground?: string;
@@ -162,6 +156,10 @@ function isImage(item: DataTransferItem) {
   return item.kind === 'file' && item.type && SUPPORTED_PHOTO_CONTENT_TYPES.has(item.type);
 }
 
+function isVideo(item: DataTransferItem) {
+  return item.kind === 'file' && item.type && SUPPORTED_VIDEO_CONTENT_TYPES.has(item.type);
+}
+
 const LAYER_ANIMATION_DURATION_MS = 450 + ANIMATION_END_DELAY;
 
 function MiddleColumn({
@@ -178,9 +176,6 @@ function MiddleColumn({
   canPost,
   currentUserBannedRights,
   defaultBannedRights,
-  hasPinned,
-  hasAudioPlayer,
-  hasButtonInHeader,
   pinnedMessagesCount,
   customBackground,
   theme,
@@ -251,15 +246,6 @@ function MiddleColumn({
   } = usePinnedMessage(chatId, threadId, pinnedIds);
 
   const closeAnimationDuration = isMobile ? LAYER_ANIMATION_DURATION_MS : undefined;
-  const hasTools = hasPinned && (
-    windowWidth < MOBILE_SCREEN_MAX_WIDTH
-    || hasAudioPlayer
-    || (
-      isRightColumnShown && windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
-      && windowWidth < SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
-    )
-    || (!isMobile && hasButtonInHeader && windowWidth < MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES)
-  );
 
   const renderingChatId = usePrevDuringAnimation(chatId, closeAnimationDuration);
   const renderingThreadId = usePrevDuringAnimation(threadId, closeAnimationDuration);
@@ -271,7 +257,6 @@ function MiddleColumn({
   const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration)
     && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && !renderingCanUnblock
     && chatId !== TMP_CHAT_ID && !isContactRequirePremium;
-  const renderingHasTools = usePrevDuringAnimation(hasTools, closeAnimationDuration);
   const renderingIsScrollDownShown = usePrevDuringAnimation(
     isScrollDownShown, closeAnimationDuration,
   ) && chatId !== TMP_CHAT_ID;
@@ -374,8 +359,7 @@ function MiddleColumn({
       // Filter unnecessary element for drag and drop images in Firefox (https://github.com/Ajaxy/telegram-tt/issues/49)
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#image
       .filter((item) => item.type !== 'text/uri-list')
-      // As of September 2021, native clients suggest "send quick, but compressed" only for images
-      .every(isImage);
+      .every((item) => isImage(item) || isVideo(item));
 
     setDropAreaState(shouldDrawQuick ? DropAreaState.QuickFile : DropAreaState.Document);
   });
@@ -430,7 +414,6 @@ function MiddleColumn({
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const className = buildClassName(
-    renderingHasTools && 'has-header-tools',
     MASK_IMAGE_DISABLED ? 'mask-image-disabled' : 'mask-image-enabled',
   );
 
@@ -522,12 +505,20 @@ function MiddleColumn({
       {Boolean(renderingChatId && renderingThreadId) && (
         <>
           <div className="messages-layout" onDragEnter={renderingCanPost ? handleDragEnter : undefined}>
+            <MiddleHeaderPanes
+              key={renderingChatId}
+              chatId={renderingChatId!}
+              threadId={renderingThreadId!}
+              messageListType={renderingMessageListType!}
+              getCurrentPinnedIndex={getCurrentPinnedIndex}
+              getLoadingPinnedId={getLoadingPinnedId}
+              onFocusPinnedMessage={handleFocusPinnedMessage}
+            />
             <MiddleHeader
               chatId={renderingChatId!}
               threadId={renderingThreadId!}
               messageListType={renderingMessageListType!}
               isComments={isComments}
-              isReady={isReady}
               isMobile={isMobile}
               getCurrentPinnedIndex={getCurrentPinnedIndex}
               getLoadingPinnedId={getLoadingPinnedId}
@@ -548,7 +539,6 @@ function MiddleColumn({
                 type={renderingMessageListType!}
                 isComments={isComments}
                 canPost={renderingCanPost!}
-                hasTools={renderingHasTools}
                 onScrollDownToggle={setIsScrollDownShown}
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
@@ -728,7 +718,7 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
-      seenByModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
+      seenByModal, reactorModal, shouldSkipHistoryAnimations,
       chatLanguageModal, privacySettingsNoticeModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
@@ -763,7 +753,6 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const bot = selectBot(global, chatId);
     const pinnedIds = selectPinnedIds(global, chatId, threadId);
-    const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
 
     const threadInfo = selectThreadInfo(global, chatId, threadId);
@@ -790,15 +779,10 @@ export default memo(withGlobal<OwnProps>(
     const shouldBlockSendInForum = chat?.isForum
       ? threadId === MAIN_THREAD_ID && !draftReplyInfo && (selectTopic(global, chatId, GENERAL_TOPIC_ID)?.isClosed)
       : false;
-    const audioMessage = audioChatId && audioMessageId
-      ? selectChatMessage(global, audioChatId, audioMessageId)
-      : undefined;
     const topics = selectTopics(global, chatId);
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
     const canShowOpenChatButton = isSavedDialog && threadId !== ANONYMOUS_USER_ID;
-
-    const isCommentThread = threadId !== MAIN_THREAD_ID && !isSavedDialog && !chat?.isForum;
 
     const canUnpin = chat && (
       isPrivate || (
@@ -829,9 +813,6 @@ export default memo(withGlobal<OwnProps>(
       isPinnedMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
-      hasPinned: isCommentThread || Boolean(!isPinnedMessageList && pinnedIds?.length),
-      hasAudioPlayer: Boolean(audioMessage),
-      hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
       shouldSkipHistoryAnimations,
       isChannel,

@@ -18,6 +18,7 @@ import { formatCurrency } from '../../util/formatCurrency';
 import renderText from '../common/helpers/renderText';
 
 import useMedia from '../../hooks/useMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useOldLang from '../../hooks/useOldLang';
 
 import SafeLink from '../common/SafeLink';
@@ -89,6 +90,8 @@ const Checkout: FC<OwnProps> = ({
   } = (checkoutInfo || {});
 
   const photoUrl = useMedia(getWebDocumentHash(photo));
+
+  const ref = useMediaTransition<HTMLImageElement>(photoUrl);
 
   const handleTipsClick = useCallback((tips: number) => {
     dispatch!({ type: 'setTipAmount', payload: maxTipAmount ? Math.min(tips, maxTipAmount) : tips });
@@ -164,7 +167,17 @@ const Checkout: FC<OwnProps> = ({
   return (
     <div className={styles.root}>
       <div className={styles.description}>
-        {photoUrl && <img className={styles.checkoutPicture} src={photoUrl} draggable={false} alt="" />}
+        {photoUrl && (
+          <img
+            ref={ref}
+            className={styles.checkoutPicture}
+            src={photoUrl}
+            draggable={false}
+            width={photo!.dimensions?.width}
+            height={photo!.dimensions?.height}
+            alt=""
+          />
+        )}
         {!photoUrl && photo && (
           <Skeleton
             width={photo.dimensions?.width}

@@ -45,7 +45,7 @@ export default function usePinnedMessage(
     if (currentPinnedIndex >= pinnedLength) {
       setPinnedIndexByKey({
         ...getPinnedIndexByKey(),
-        [key]: Math.max(0, pinnedLength - 1),
+        [key]: clampIndex(pinnedLength - 1),
       });
     }
   }, [getPinnedIndexByKey, key, pinnedIds?.length, setPinnedIndexByKey]);
@@ -68,7 +68,7 @@ export default function usePinnedMessage(
       const newPinnedIndex = pinnedIds.indexOf(loadingPinnedId);
       setPinnedIndexByKey({
         ...getPinnedIndexByKey(),
-        [key]: newPinnedIndex,
+        [key]: clampIndex(newPinnedIndex),
       });
       setLoadingPinnedId(undefined);
     }
@@ -87,11 +87,10 @@ export default function usePinnedMessage(
 
     if (focusedMessageId) {
       const pinnedIndexAboveFocused = pinnedIds.findIndex((id) => id < focusedMessageId);
-      const newIndex = pinnedIndexAboveFocused !== -1 ? pinnedIndexAboveFocused : 0;
 
       setPinnedIndexByKey({
         ...getPinnedIndexByKey(),
-        [key]: newIndex,
+        [key]: clampIndex(pinnedIndexAboveFocused),
       });
     } else if (viewportPinnedIds.length) {
       const maxViewportPinnedId = Math.max(...viewportPinnedIds);
@@ -99,7 +98,7 @@ export default function usePinnedMessage(
 
       setPinnedIndexByKey({
         ...getPinnedIndexByKey(),
-        [key]: newIndex,
+        [key]: clampIndex(newIndex),
       });
     }
   });
@@ -136,4 +135,8 @@ export default function usePinnedMessage(
     getCurrentPinnedIndex,
     getLoadingPinnedId,
   };
+}
+
+function clampIndex(id: number) {
+  return Math.max(0, id);
 }

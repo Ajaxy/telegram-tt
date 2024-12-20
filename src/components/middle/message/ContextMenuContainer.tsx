@@ -406,7 +406,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleUnpin = useLastCallback(() => {
-    pinMessage({ messageId: message.id, isUnpin: true });
+    pinMessage({ chatId: message.chatId, messageId: message.id, isUnpin: true });
     closeMenu();
   });
 

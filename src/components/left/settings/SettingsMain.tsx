@@ -2,17 +2,19 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiStarsAmount } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 
 import { FAQ_URL, PRIVACY_URL } from '../../../config';
+import { formatStarsAmount } from '../../../global/helpers/payments';
 import {
   selectIsGiveawayGiftsPurchaseAvailable,
   selectIsPremiumPurchaseBlocked,
 } from '../../../global/selectors';
-import { formatInteger } from '../../../util/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -33,7 +35,7 @@ type StateProps = {
   currentUserId?: string;
   canBuyPremium?: boolean;
   isGiveawayAvailable?: boolean;
-  starsBalance?: number;
+  starsBalance?: ApiStarsAmount;
   shouldDisplayStars?: boolean;
 };
 
@@ -59,6 +61,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
   const [isSupportDialogOpen, openSupportDialog, closeSupportDialog] = useFlag(false);
 
+  const lang = useLang();
   const oldLang = useOldLang();
 
   useEffect(() => {
@@ -79,7 +82,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-content custom-scroll">
-      <div className="settings-main-menu">
+      <div className="settings-main-menu self-profile">
         {currentUserId && (
           <ProfileInfo
             peerId={currentUserId}
@@ -93,6 +96,8 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             isInSettings
           />
         )}
+      </div>
+      <div className="settings-main-menu">
         <ListItem
           icon="settings"
           narrow
@@ -188,7 +193,9 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           >
             {oldLang('MenuTelegramStars')}
             {Boolean(starsBalance) && (
-              <span className="settings-item__current-value">{formatInteger(starsBalance)}</span>
+              <span className="settings-item__current-value">
+                {formatStarsAmount(lang, starsBalance)}
+              </span>
             )}
           </ListItem>
         )}

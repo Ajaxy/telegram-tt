@@ -1,33 +1,9 @@
 @use "../../styles/mixins";
 
-@mixin mobile-header-styles() {
-  .AudioPlayer {
-    @include mixins.header-mobile;
-
-    flex-direction: row;
-    margin-top: 0;
-    padding: 0.25rem 0.5rem;
-
-    &-content {
-      padding: 0 0.5rem;
-      flex-grow: 1;
-    }
-
-    > .Button, > .playback-rate-menu {
-      margin: -0.0625rem 0 0;
-    }
-
-    > .player-close {
-      margin-left: auto;
-    }
-  }
-}
-
 .MiddleHeader {
   display: flex;
   align-items: center;
   width: 100%;
-  box-shadow: 0 2px 2px var(--color-light-shadow);
   background: var(--color-background);
   position: relative;
   z-index: var(--z-middle-header);
@@ -118,18 +94,7 @@
       }
     }
 
-    @media (min-width: 1276px) and (max-width: 1439px) {
-      .HeaderActions {
-        transform: translate3d(0, 0, 0);
-        transition: transform var(--layer-transition);
-
-        #Main.right-column-open & {
-          transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
-        }
-      }
-    }
-
-    @media (min-width: 1440px) {
+    @media (min-width: 1276px) {
       transform: translate3d(0, 0, 0);
       transition: transform var(--layer-transition);
 
@@ -141,34 +106,6 @@
     // @optimization
     #Main.right-column-animating & {
       pointer-events: none;
-    }
-  }
-
-  @media (min-width: 1276px) and (max-width: 1439px) {
-    &:not(.tools-stacked) .AudioPlayer {
-      opacity: 1;
-
-      #Main.right-column-open & {
-        opacity: 0;
-      }
-    }
-  }
-
-  &.tools-stacked .AudioPlayer {
-    @include mobile-header-styles();
-
-    @media (min-width: 1150px) {
-      #Main.right-column-open & {
-        padding-right: calc(0.5rem + var(--right-column-width));
-      }
-    }
-  }
-
-  &.tools-stacked.animated .AudioPlayer {
-    animation: fade-in var(--layer-transition) forwards;
-
-    body.no-page-transitions & {
-      animation: none;
     }
   }
 
@@ -382,10 +319,6 @@
       right: 0;
       top: 0;
     }
-  }
-
-  @media (max-width: 600px) {
-    @include mobile-header-styles();
   }
 
   body.is-electron.is-macos & {

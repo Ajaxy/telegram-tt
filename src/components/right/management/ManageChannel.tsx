@@ -218,25 +218,26 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             onChange={handleSetPhoto}
             disabled={!canChangeInfo}
           />
-          <InputText
-            id="channel-title"
-            label={lang('EnterChannelName')}
-            onChange={handleTitleChange}
-            value={title}
-            error={error === CHANNEL_TITLE_EMPTY ? error : undefined}
-            disabled={!canChangeInfo}
-          />
-          <TextArea
-            id="channel-about"
-            className="mb-2"
-            label={lang('DescriptionPlaceholder')}
-            onChange={handleAboutChange}
-            value={about}
-            maxLength={CHANNEL_MAX_DESCRIPTION}
-            maxLengthIndicator={(CHANNEL_MAX_DESCRIPTION - about.length).toString()}
-            disabled={!canChangeInfo}
-            noReplaceNewlines
-          />
+          <div className="settings-edit">
+            <InputText
+              id="channel-title"
+              label={lang('EnterChannelName')}
+              onChange={handleTitleChange}
+              value={title}
+              error={error === CHANNEL_TITLE_EMPTY ? error : undefined}
+              disabled={!canChangeInfo}
+            />
+            <TextArea
+              id="channel-about"
+              label={lang('DescriptionPlaceholder')}
+              onChange={handleAboutChange}
+              value={about}
+              maxLength={CHANNEL_MAX_DESCRIPTION}
+              maxLengthIndicator={(CHANNEL_MAX_DESCRIPTION - about.length).toString()}
+              disabled={!canChangeInfo}
+              noReplaceNewlines
+            />
+          </div>
           {chat.isCreator && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('ChannelType')}</span>

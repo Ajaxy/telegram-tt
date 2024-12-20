@@ -36,7 +36,7 @@ import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
-  areAdsEnabled?: boolean;
+  canShowAds?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageIds: number[];
@@ -68,7 +68,7 @@ interface OwnProps {
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
-  areAdsEnabled,
+  canShowAds,
   chatId,
   threadId,
   messageIds,
@@ -265,7 +265,7 @@ const MessageListContent: FC<OwnProps> = ({
 
     return (
       <div
-        className="message-date-group"
+        className={buildClassName('message-date-group', dateGroupIndex === 0 && 'first-message-date-group')}
         key={dateGroup.datetime}
         onMouseDown={preventMessageInputBlur}
         teactFastList
@@ -296,15 +296,6 @@ const MessageListContent: FC<OwnProps> = ({
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
-      {areAdsEnabled && isViewportNewest && (
-        <SponsoredMessage
-          key={chatId}
-          chatId={chatId}
-          containerRef={containerRef}
-          observeIntersectionForLoading={observeIntersectionForLoading}
-          observeIntersectionForPlaying={observeIntersectionForPlaying}
-        />
-      )}
       {withHistoryTriggers && (
         <div
           ref={forwardsTriggerRef}
@@ -317,6 +308,15 @@ const MessageListContent: FC<OwnProps> = ({
         key="fab-trigger"
         className="fab-trigger"
       />
+      {canShowAds && isViewportNewest && (
+        <SponsoredMessage
+          key={chatId}
+          chatId={chatId}
+          containerRef={containerRef}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
+        />
+      )}
     </div>
   );
 };

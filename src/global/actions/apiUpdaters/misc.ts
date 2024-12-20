@@ -136,10 +136,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateWebViewResultSent':
       Object.values(global.byTabId).forEach((tabState) => {
-        if (tabState.webApps.activeWebApp?.queryId === update.queryId) {
-          actions.resetDraftReplyInfo({ tabId: tabState.id });
-          actions.closeActiveWebApp({ tabId: tabState.id });
-        }
+        Object.entries(tabState.webApps.openedWebApps).forEach(([webAppKey, webApp]) => {
+          if (webApp.queryId === update.queryId) {
+            actions.resetDraftReplyInfo({ tabId: tabState.id });
+            actions.closeWebApp({ key: webAppKey, tabId: tabState.id });
+          }
+        });
       });
       break;
 

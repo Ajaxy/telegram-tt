@@ -1,12 +1,15 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect,
+  useMemo,
   useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
-import type { TabState, WebApp } from '../../../global/types';
+import type {
+  ApiAttachBot, ApiBotAppSettings, ApiChat, ApiUser,
+} from '../../../api/types';
+import type { TabState, WebApp, WebAppModalStateType } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
 import type { PopupOptions, WebAppInboundEvent, WebAppOutboundEvent } from '../../../types/webapp';
 
@@ -14,27 +17,33 @@ import { TME_LINK_PREFIX } from '../../../config';
 import { convertToApiChatType } from '../../../global/helpers';
 import { getWebAppKey } from '../../../global/helpers/bots';
 import {
-  selectCurrentChat, selectTabState, selectTheme, selectUser,
+  selectCurrentChat, selectTabState, selectTheme, selectUser, selectUserFullInfo,
+  selectWebApp,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import buildStyle from '../../../util/buildStyle';
+import download from '../../../util/download';
 import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
-import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
+import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
+import useFullscreen, { checkIfFullscreen } from '../../../hooks/window/useFullscreen';
 import usePopupLimit from './hooks/usePopupLimit';
 import useWebAppFrame from './hooks/useWebAppFrame';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Modal from '../../ui/Modal';
 import Spinner from '../../ui/Spinner';
+import Transition from '../../ui/Transition';
 
 import styles from './WebAppModalTabContent.module.scss';
 
@@ -53,27 +62,31 @@ export type OwnProps = {
   webApp?: WebApp;
   registerSendEventCallback: (callback: (event: WebAppOutboundEvent) => void) => void;
   registerReloadFrameCallback: (callback: (url: string) => void) => void;
-  isDragging?: boolean;
-  frameSize?: { width: number; height: number };
+  onContextMenuButtonClick: (e: React.MouseEvent) => void;
+  isTransforming?: boolean;
   isMultiTabSupported? : boolean;
+  modalHeight: number;
 };
 
 type StateProps = {
   chat?: ApiChat;
   bot?: ApiUser;
+  botAppSettings?: ApiBotAppSettings;
   attachBot?: ApiAttachBot;
   theme?: ThemeKey;
   isPaymentModalOpen?: boolean;
   paymentStatus?: TabState['payment']['status'];
-  isMaximizedState: boolean;
+  modalState?: WebAppModalStateType;
 };
 
 const NBSP = '\u00A0';
 
 const MAIN_BUTTON_ANIMATION_TIME = 250;
 const ANIMATION_WAIT = 400;
+const COLLAPSING_WAIT = 350;
 const POPUP_SEQUENTIAL_LIMIT = 3;
 const POPUP_RESET_DELAY = 2000; // 2s
+const APP_NAME_DISPLAY_DURATION = 3800;
 const SANDBOX_ATTRIBUTES = [
   'allow-scripts',
   'allow-same-origin',
@@ -98,10 +111,12 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   paymentStatus,
   registerSendEventCallback,
   registerReloadFrameCallback,
-  isDragging,
-  isMaximizedState,
-  frameSize,
+  isTransforming,
+  modalState,
   isMultiTabSupported,
+  onContextMenuButtonClick,
+  botAppSettings,
+  modalHeight,
 }) => {
   const {
     closeActiveWebApp,
@@ -113,6 +128,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     sharePhoneWithBot,
     updateWebApp,
     resetPaymentStatus,
+    changeWebAppModalState,
+    closeWebAppModal,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [secondaryButton, setSecondaryButton] = useState<WebAppButton | undefined>();
@@ -122,15 +139,47 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const [popupParameters, setPopupParameters] = useState<PopupOptions | undefined>();
   const [isRequestingPhone, setIsRequestingPhone] = useState(false);
   const [isRequestingWriteAccess, setIsRequestingWriteAccess] = useState(false);
+  const [requestedFileDownload, setRequestedFileDownload] = useState<{ url: string; fileName: string } | undefined>();
   const [bottomBarColor, setBottomBarColor] = useState<string | undefined>();
   const {
     unlockPopupsAt, handlePopupOpened, handlePopupClosed,
   } = usePopupLimit(POPUP_SEQUENTIAL_LIMIT, POPUP_RESET_DELAY);
 
-  const activeWebApp = modal?.activeWebApp;
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line no-null/no-null
+  const headerButtonRef = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line no-null/no-null
+  const headerButtonCaptionRef = useRef<HTMLDivElement>(null);
+
+  const isFullscreen = modalState === 'fullScreen';
+  const isMinimizedState = modalState === 'minimized';
+
+  const exitFullScreenCallback = useLastCallback(() => {
+    setTimeout(() => { changeWebAppModalState({ state: 'maximized' }); }, COLLAPSING_WAIT);
+  });
+
+  // eslint-disable-next-line no-null/no-null
+  const fullscreenElementRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    fullscreenElementRef.current = document.querySelector('#portals') as HTMLElement;
+  }, []);
+
+  const [, setFullscreen, exitFullscreen] = useFullscreen(fullscreenElementRef, exitFullScreenCallback);
+
+  const activeWebApp = modal?.activeWebAppKey ? modal.openedWebApps[modal.activeWebAppKey] : undefined;
+  const activeWebAppName = activeWebApp?.appName;
   const {
-    url, buttonText, headerColor, serverHeaderColorKey, serverHeaderColor,
+    url, buttonText, isBackButtonVisible,
   } = webApp || {};
+
+  const {
+    placeholderPath,
+  } = botAppSettings || {};
+
   const isCloseModalOpen = Boolean(webApp?.isCloseModalOpen);
   const isRemoveModalOpen = Boolean(webApp?.isRemoveModalOpen);
 
@@ -140,31 +189,52 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const isActive = (activeWebApp && webApp) && activeWebAppKey === webAppKey;
 
   const updateCurrentWebApp = useLastCallback((updatedPartialWebApp: Partial<WebApp>) => {
-    if (!webApp) return;
-    const updatedWebApp = {
-      ...webApp,
-      ...updatedPartialWebApp,
-    };
-    webApp = updatedWebApp;
-    updateWebApp({ webApp: updatedWebApp });
+    if (!webAppKey) return;
+    updateWebApp({ key: webAppKey, update: updatedPartialWebApp });
   });
 
+  const themeParams = useMemo(() => {
+    return extractCurrentThemeParams();
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [theme]);
+
   useEffect(() => {
-    const themeParams = extractCurrentThemeParams();
     setBottomBarColor(themeParams.secondary_bg_color);
-    updateCurrentWebApp({ headerColor: themeParams.bg_color, backgroundColor: themeParams.bg_color });
-  }, []);
+  }, [themeParams]);
+
+  const themeBackgroundColor = themeParams.bg_color;
+  const [backgroundColorFromEvent, setBackgroundColorFromEvent] = useState<string | undefined>();
+  const backgroundColorFromSettings = theme === 'light' ? botAppSettings?.backgroundColor
+    : botAppSettings?.backgroundDarkColor;
+
+  useEffect(() => {
+    const color = backgroundColorFromEvent || backgroundColorFromSettings || themeBackgroundColor;
+
+    updateCurrentWebApp({ backgroundColor: color });
+  }, [themeBackgroundColor, backgroundColorFromEvent, backgroundColorFromSettings]);
+
+  const themeHeaderColor = themeParams.bg_color;
+  const [headerColorFromEvent, setHeaderColorFromEvent] = useState<string | undefined>();
+  const headerColorFromSettings = theme === 'light' ? botAppSettings?.headerColor
+    : botAppSettings?.headerDarkColor;
+
+  useEffect(() => {
+    const color = headerColorFromEvent || headerColorFromSettings || themeHeaderColor;
+
+    updateCurrentWebApp({ headerColor: color });
+  }, [themeHeaderColor, headerColorFromEvent, headerColorFromSettings]);
 
   // eslint-disable-next-line no-null/no-null
   const frameRef = useRef<HTMLIFrameElement>(null);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const isOpen = modal?.isModalOpen || false;
   const isSimple = Boolean(buttonText);
 
   const {
-    reloadFrame, sendEvent, sendViewport, sendTheme,
-  } = useWebAppFrame(frameRef, isOpen, isSimple, handleEvent, webApp, markLoaded);
+    reloadFrame, sendEvent, sendFullScreenChanged, sendViewport, sendSafeArea, sendTheme,
+  } = useWebAppFrame(frameRef, isOpen, isFullscreen, isSimple, handleEvent, webApp, markLoaded);
 
   useEffect(() => {
     if (isActive) registerSendEventCallback(sendEvent);
@@ -174,8 +244,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     if (isActive) registerReloadFrameCallback(reloadFrame);
   }, [reloadFrame, registerReloadFrameCallback, isActive]);
 
-  const isMainButtonVisible = mainButton?.isVisible && mainButton.text.trim().length > 0;
-  const isSecondaryButtonVisible = secondaryButton?.isVisible && secondaryButton.text.trim().length > 0;
+  const isMainButtonVisible = isLoaded && mainButton?.isVisible && mainButton.text.trim().length > 0;
+  const isSecondaryButtonVisible = isLoaded && secondaryButton?.isVisible && secondaryButton.text.trim().length > 0;
 
   const handleHideCloseModal = useLastCallback(() => {
     updateCurrentWebApp({ isCloseModalOpen: false });
@@ -218,32 +288,8 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     handleAppPopupClose();
   });
 
-  const calculateHeaderColor = useLastCallback(
-    (serverColorKey? : 'bg_color' | 'secondary_bg_color', serverColor? : string) => {
-      if (serverColorKey) {
-        const themeParams = extractCurrentThemeParams();
-        const key = serverColorKey;
-        const newColor = themeParams[key];
-        const color = validateHexColor(newColor) ? newColor : headerColor;
-        updateCurrentWebApp({ headerColor: color, serverHeaderColorKey: key });
-      }
-
-      if (serverColor) {
-        const color = validateHexColor(serverColor) ? serverColor : headerColor;
-        updateCurrentWebApp({ headerColor: color, serverHeaderColor: serverColor });
-      }
-    },
-  );
-
-  const updateHeaderColor = useLastCallback(
-    () => {
-      calculateHeaderColor(serverHeaderColorKey, serverHeaderColor);
-    },
-  );
-
   const sendThemeCallback = useLastCallback(() => {
     sendTheme();
-    updateHeaderColor();
   });
 
   // Notify view that theme changed
@@ -252,6 +298,56 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       sendThemeCallback();
     }, ANIMATION_WAIT);
   }, [theme]);
+
+  const setFullscreenCallback = useLastCallback(() => {
+    if (!checkIfFullscreen() && isActive) {
+      setFullscreen?.();
+    }
+  });
+
+  const exitIfFullscreenCallback = useLastCallback(() => {
+    if (checkIfFullscreen() && isActive) {
+      exitFullscreen?.();
+    }
+  });
+
+  const sendFullScreenChangedCallback = useLastCallback(
+    (value: boolean) => { if (isActive) sendFullScreenChanged(value); },
+  );
+
+  useEffect(() => {
+    if (isFullscreen) {
+      setFullscreenCallback();
+      sendFullScreenChangedCallback(true);
+    } else {
+      exitIfFullscreenCallback();
+      sendFullScreenChangedCallback(false);
+    }
+  }, [isFullscreen]);
+
+  const visibilityChangedCallBack = useLastCallback((visibility: boolean) => {
+    sendEvent({
+      eventType: 'visibility_changed',
+      eventData: {
+        is_visible: visibility,
+      },
+    });
+  });
+
+  useEffect(() => {
+    if (isLoaded) {
+      visibilityChangedCallBack(Boolean(isActive));
+    }
+  }, [isActive, isLoaded]);
+
+  useEffectWithPrevDeps(([prevModalState]) => {
+    if (modalState === 'minimized') {
+      visibilityChangedCallBack(false);
+    }
+    if (modalState && prevModalState === 'minimized') {
+      visibilityChangedCallBack(true);
+    }
+  }, [modalState]);
 
   useSyncEffect(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
@@ -301,6 +397,20 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleRejectFileDownload = useLastCallback((shouldCloseActive?: boolean) => {
+    if (shouldCloseActive) {
+      setRequestedFileDownload(undefined);
+      handlePopupClosed();
+    }
+
+    sendEvent({
+      eventType: 'file_download_requested',
+      eventData: {
+        status: 'cancelled',
+      },
+    });
+  });
+
   const handleRejectWriteAccess = useLastCallback(() => {
     sendEvent({
       eventType: 'write_access_requested',
@@ -346,6 +456,41 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     setIsRequestingWriteAccess(!canWrite);
   }
 
+  async function handleCheckDownloadFile(fileUrl: string, fileName: string) {
+    const canDownload = await callApi('checkBotDownloadFileParams', {
+      bot: bot!,
+      url: fileUrl,
+      fileName,
+    });
+
+    if (!canDownload) {
+      sendEvent({
+        eventType: 'file_download_requested',
+        eventData: {
+          status: 'cancelled',
+        },
+      });
+      return;
+    }
+
+    setRequestedFileDownload({ url: fileUrl, fileName });
+    handlePopupOpened();
+  }
+
+  const handleDownloadFile = useLastCallback(() => {
+    if (!requestedFileDownload) return;
+    setRequestedFileDownload(undefined);
+    handlePopupClosed();
+
+    download(requestedFileDownload.url, requestedFileDownload.fileName);
+    sendEvent({
+      eventType: 'file_download_requested',
+      eventData: {
+        status: 'downloading',
+      },
+    });
+  });
+
   async function handleInvokeCustomMethod(requestId: string, method: string, parameters: string) {
     const result = await callApi('invokeWebViewCustomMethod', {
       bot: bot!,
@@ -382,9 +527,27 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
   function handleEvent(event: WebAppInboundEvent) {
     const { eventType, eventData } = event;
-    if (eventType === 'web_app_open_tg_link' && !isPaymentModalOpen) {
+
+    if (eventType === 'web_app_request_fullscreen') {
+      if (getIsWebAppsFullscreenSupported()) {
+        changeWebAppModalState({ state: 'fullScreen' });
+      } else {
+        sendEvent({
+          eventType: 'fullscreen_failed',
+          eventData: {
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+    }
+
+    if (eventType === 'web_app_exit_fullscreen') {
+      exitIfFullscreenCallback();
+    }
+
+    if (eventType === 'web_app_open_tg_link') {
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;
-      openTelegramLink({ url: linkUrl });
+      openTelegramLink({ url: linkUrl, shouldIgnoreCache: eventData.force_request });
       closeActiveWebApp();
     }
 
@@ -397,13 +560,12 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_set_background_color') {
-      const themeParams = extractCurrentThemeParams();
-      const color = validateHexColor(eventData.color) ? eventData.color : themeParams.bg_color;
-      updateCurrentWebApp({ backgroundColor: color });
+      setBackgroundColorFromEvent(validateHexColor(eventData.color) ? eventData.color : undefined);
     }
 
     if (eventType === 'web_app_set_header_color') {
-      calculateHeaderColor(eventData.color_key, eventData.color);
+      const key = eventData.color_key;
+      setHeaderColorFromEvent(eventData.color || (key ? themeParams[key] : undefined));
     }
 
     if (eventType === 'web_app_set_bottom_bar_color') {
@@ -500,6 +662,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       const { method, params, req_id: requestId } = eventData;
       handleInvokeCustomMethod(requestId, method, JSON.stringify(params));
     }
+
+    if (eventType === 'web_app_request_file_download') {
+      if (requestedFileDownload || unlockPopupsAt > Date.now()) {
+        handleRejectFileDownload();
+        return;
+      }
+      handleCheckDownloadFile(eventData.url, eventData.file_name);
+    }
   }
 
   const mainButtonCurrentColor = useCurrentOrPrev(mainButton?.color, true);
@@ -519,14 +689,20 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const [shouldShowMainButton, setShouldShowMainButton] = useState(false);
   const [shouldShowSecondaryButton, setShouldShowSecondaryButton] = useState(false);
 
+  const [shouldShowAppNameInFullscreen, setShouldShowAppNameInFullscreen] = useState(false);
+
+  const [backButtonTextWidth, setBackButtonTextWidth] = useState(0);
+
   // Notify view that height changed
   useSyncEffect(() => {
     setTimeout(() => {
       sendViewport();
-    }, ANIMATION_WAIT);
+      sendSafeArea();
+    }, isTransforming ? 0 : ANIMATION_WAIT);
   }, [shouldShowSecondaryButton, shouldHideSecondaryButton,
     shouldShowMainButton, shouldShowMainButton,
-    secondaryButton?.position, sendViewport]);
+    secondaryButton?.position, sendViewport, isTransforming, modalHeight,
+    sendSafeArea]);
 
   const isVerticalLayout = secondaryButtonCurrentPosition === 'top' || secondaryButtonCurrentPosition === 'bottom';
   const isHorizontalLayout = !isVerticalLayout;
@@ -541,6 +717,35 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
   const mainButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
   const secondaryButtonChangeTimeout = useRef<ReturnType<typeof setTimeout>>();
   const secondaryButtonFastTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const appNameDisplayTimeout = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (isFullscreen && isOpen && Boolean(activeWebAppName)) {
+      setShouldShowAppNameInFullscreen(true);
+
+      if (appNameDisplayTimeout.current) {
+        clearTimeout(appNameDisplayTimeout.current);
+      }
+
+      appNameDisplayTimeout.current = setTimeout(() => {
+        setShouldShowAppNameInFullscreen(false);
+        appNameDisplayTimeout.current = undefined;
+      }, APP_NAME_DISPLAY_DURATION);
+    } else {
+      setShouldShowAppNameInFullscreen(false);
+
+      if (appNameDisplayTimeout.current) {
+        clearTimeout(appNameDisplayTimeout.current);
+        appNameDisplayTimeout.current = undefined;
+      }
+    }
+
+    return () => {
+      if (appNameDisplayTimeout.current) {
+        clearTimeout(appNameDisplayTimeout.current);
+      }
+    };
+  }, [isFullscreen, isOpen, activeWebAppName]);
 
   useEffect(() => {
     if (mainButtonChangeTimeout.current) clearTimeout(mainButtonChangeTimeout.current);
@@ -592,33 +797,160 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     }
   }, [setShouldDecreaseWebFrameSize, shouldShowSecondaryButton, shouldShowMainButton]);
 
-  const frameWidth = frameSize?.width || 0;
-  let frameHeight = frameSize?.height || 0;
-  if (shouldDecreaseWebFrameSize) { frameHeight -= 4 * REM; }
-  const frameStyle = buildStyle(
-    `left: ${0}px;`,
-    `top: ${0}px;`,
-    `width: ${frameWidth}px;`,
-    `height: ${frameHeight}px;`,
-    isDragging ? 'pointer-events: none;' : '',
+  const frameStyle = isTransforming ? 'pointer-events: none;' : '';
+
+  const handleBackClick = useLastCallback(() => {
+    if (isBackButtonVisible) {
+      sendEvent({
+        eventType: 'back_button_pressed',
+      });
+    } else {
+      exitIfFullscreenCallback();
+      sendFullScreenChanged(false);
+      changeWebAppModalState({ state: 'maximized' });
+      closeWebAppModal();
+    }
+  });
+
+  const handleCollapseClick = useLastCallback(() => {
+    exitIfFullscreenCallback();
+  });
+
+  const handleShowContextMenu = useLastCallback((e: React.MouseEvent) => {
+    onContextMenuButtonClick(e);
+  });
+
+  const backIconClass = buildClassName(
+    styles.closeIcon,
+    isBackButtonVisible && styles.stateBack,
   );
+  const backButtonCaption = shouldShowAppNameInFullscreen ? activeWebAppName
+    : oldLang(isBackButtonVisible ? 'Back' : 'Close');
+
+  const hasHeaderElement = headerButtonCaptionRef?.current;
+
+  useEffect(() => {
+    const width = headerButtonCaptionRef?.current?.clientWidth || 0;
+    setBackButtonTextWidth(width);
+  }, [backButtonCaption, hasHeaderElement]);
+
+  function getBackButtonActiveKey() {
+    if (shouldShowAppNameInFullscreen) return 0;
+    return isBackButtonVisible ? 1 : 2;
+  }
+
+  function renderFullscreenBackButtonCaption() {
+    return (
+      <span
+        className={styles.buttonCaptionContainer}
+        style={
+          `width: ${backButtonTextWidth}px;`
+        }
+      >
+        <Transition
+          activeKey={getBackButtonActiveKey()}
+          name="slideFade"
+        >
+          <div
+            ref={headerButtonCaptionRef}
+            className={styles.backButtonCaption}
+          >
+            {backButtonCaption}
+          </div>
+        </Transition>
+      </span>
+    );
+  }
+
+  function renderFullscreenHeaderPanel() {
+    return (
+      <div className={styles.headerPanel}>
+        <div ref={headerButtonRef} className={styles.headerButton} onClick={handleBackClick}>
+          <div className={styles.backIconContainer}>
+            <div className={backIconClass} />
+          </div>
+          {renderFullscreenBackButtonCaption()}
+        </div>
+        <div className={styles.headerSplitButton}>
+          <div
+            className={buildClassName(
+              styles.headerButton,
+              styles.left,
+            )}
+          >
+            <Icon
+              name="down"
+              className={buildClassName(
+                styles.icon,
+                styles.collapseIcon,
+              )}
+              onClick={handleCollapseClick}
+            />
+          </div>
+          <div
+            className={buildClassName(
+              styles.headerButton,
+              styles.right,
+            )}
+          >
+            <Icon
+              name="more"
+              className={buildClassName(
+                styles.icon,
+                styles.moreIcon,
+              )}
+              onClick={handleShowContextMenu}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderDefaultPlaceholder() {
+    const className = buildClassName(styles.loadingPlaceholder, styles.defaultPlaceholderGrid, isLoaded && styles.hide);
+    return (
+      <div className={className}>
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+        <div className={styles.placeholderSquare} />
+      </div>
+    );
+  }
+
+  function renderPlaceholder() {
+    if (!placeholderPath) {
+      return renderDefaultPlaceholder();
+    }
+    return (
+      <svg
+        className={buildClassName(styles.loadingPlaceholder, isLoaded && styles.hide)}
+        viewBox="0 0 512 512"
+      >
+        <path className={styles.placeholderPath} d={placeholderPath} />
+      </svg>
+    );
+  }
 
   return (
     <div
+      ref={containerRef}
       className={buildClassName(
         styles.root,
         !isActive && styles.hidden,
         isMultiTabSupported && styles.multiTab,
       )}
     >
-      {isMaximizedState && <Spinner className={buildClassName(styles.loadingSpinner, isLoaded && styles.hide)} />}
+      {isFullscreen && getIsWebAppsFullscreenSupported() && renderFullscreenHeaderPanel()}
+      {!isMinimizedState && renderPlaceholder()}
       <iframe
         className={buildClassName(
           styles.frame,
           shouldDecreaseWebFrameSize && styles.withButton,
           !isLoaded && styles.hide,
         )}
-        style={frameSize ? frameStyle : undefined}
+        style={frameStyle}
         src={url}
         title={`${bot?.firstName} Web App`}
         sandbox={SANDBOX_ATTRIBUTES}
@@ -626,7 +958,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         allowFullScreen
         ref={frameRef}
       />
-      {isMaximizedState && (
+      {!isMinimizedState && (
         <div
           style={`background-color: ${bottomBarColor};`}
           className={buildClassName(
@@ -675,22 +1007,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
           </Button>
         </div>
       ) }
-      <ConfirmDialog
-        isOpen={isRequestingPhone}
-        onClose={handleRejectPhone}
-        title={lang('ShareYouPhoneNumberTitle')}
-        text={lang('AreYouSureShareMyContactInfoBot')}
-        confirmHandler={handleAcceptPhone}
-        confirmLabel={lang('ContactShare')}
-      />
-      <ConfirmDialog
-        isOpen={isRequestingWriteAccess}
-        onClose={handleRejectWriteAccess}
-        title={lang('lng_bot_allow_write_title')}
-        text={lang('lng_bot_allow_write')}
-        confirmHandler={handleAcceptWriteAccess}
-        confirmLabel={lang('lng_bot_allow_write_confirm')}
-      />
       {popupParameters && (
         <Modal
           isOpen={Boolean(popupParameters)}
@@ -713,7 +1029,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
                 // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => handleAppPopupClose(button.id)}
               >
-                {button.text || lang(DEFAULT_BUTTON_TEXT[button.type])}
+                {button.text || oldLang(DEFAULT_BUTTON_TEXT[button.type])}
               </Button>
             ))}
           </div>
@@ -721,19 +1037,50 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
       )}
 
       <ConfirmDialog
+        isOpen={isRequestingPhone}
+        onClose={handleRejectPhone}
+        title={oldLang('ShareYouPhoneNumberTitle')}
+        text={oldLang('AreYouSureShareMyContactInfoBot')}
+        confirmHandler={handleAcceptPhone}
+        confirmLabel={oldLang('ContactShare')}
+      />
+      <ConfirmDialog
+        isOpen={isRequestingWriteAccess}
+        onClose={handleRejectWriteAccess}
+        title={oldLang('lng_bot_allow_write_title')}
+        text={oldLang('lng_bot_allow_write')}
+        confirmHandler={handleAcceptWriteAccess}
+        confirmLabel={oldLang('lng_bot_allow_write_confirm')}
+      />
+      <ConfirmDialog
+        isOpen={Boolean(requestedFileDownload)}
+        title={lang('BotDownloadFileTitle')}
+        textParts={lang('BotDownloadFileDescription', {
+          bot: bot?.firstName,
+          filename: requestedFileDownload?.fileName,
+        }, {
+          withNodes: true,
+          withMarkdown: true,
+        })}
+        confirmLabel={lang('BotDownloadFileButton')}
+        onClose={handleRejectFileDownload}
+        confirmHandler={handleDownloadFile}
+      />
+
+      <ConfirmDialog
         isOpen={isCloseModalOpen}
         onClose={handleHideCloseModal}
-        title={lang('lng_bot_close_warning_title')}
-        text={lang('lng_bot_close_warning')}
+        title={oldLang('lng_bot_close_warning_title')}
+        text={oldLang('lng_bot_close_warning')}
         confirmHandler={handleConfirmCloseModal}
         confirmIsDestructive
-        confirmLabel={lang('lng_bot_close_warning_sure')}
+        confirmLabel={oldLang('lng_bot_close_warning_sure')}
       />
       <ConfirmDialog
         isOpen={isRemoveModalOpen}
         onClose={handleHideRemoveModal}
-        title={lang('BotRemoveFromMenuTitle')}
-        textParts={renderText(lang('BotRemoveFromMenu', bot?.firstName), ['simple_markdown'])}
+        title={oldLang('BotRemoveFromMenuTitle')}
+        textParts={renderText(oldLang('BotRemoveFromMenu', bot?.firstName), ['simple_markdown'])}
         confirmHandler={handleRemoveAttachBot}
         confirmIsDestructive
       />
@@ -743,11 +1090,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
-    const { botId: activeBotId } = modal?.activeWebApp || {};
-    const isMaximizedState = modal?.modalState === 'maximized';
+    const activeWebApp = modal?.activeWebAppKey ? selectWebApp(global, modal.activeWebAppKey) : undefined;
+    const { botId: activeBotId } = activeWebApp || {};
+    const modalState = modal?.modalState;
 
     const attachBot = activeBotId ? global.attachMenu.bots[activeBotId] : undefined;
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
+    const userFullInfo = activeBotId ? selectUserFullInfo(global, activeBotId) : undefined;
+    const botAppSettings = userFullInfo?.botInfo?.appSettings;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
     const { isPaymentModalOpen, status: regularPaymentStatus } = selectTabState(global).payment;
@@ -762,7 +1112,8 @@ export default memo(withGlobal<OwnProps>(
       theme,
       isPaymentModalOpen: isPaymentModalOpen || Boolean(starsInputInvoice),
       paymentStatus,
-      isMaximizedState,
+      modalState,
+      botAppSettings,
     };
   },
 )(WebAppModalTabContent));

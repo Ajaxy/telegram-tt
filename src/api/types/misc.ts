@@ -125,6 +125,7 @@ export type ApiNotification = {
   disableClickDismiss?: boolean;
   shouldShowTimer?: boolean;
   icon?: IconName;
+  customEmojiIconId?: string;
   dismissAction?: CallbackAction;
 };
 
@@ -242,6 +243,7 @@ export interface ApiAppConfig {
   isStarsGiftEnabled?: boolean;
   starGiftMaxMessageLength?: number;
   starGiftMaxConvertPeriod?: number;
+  starRefStartPrefixes?: string[];
 }
 
 export interface ApiConfig {

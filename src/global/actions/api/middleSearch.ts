@@ -134,7 +134,7 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
 
   currentSearch = selectCurrentMiddleSearch(global, tabId);
   const hasTagChanged = currentSearch?.savedTag && !isSameReaction(savedTag, currentSearch.savedTag);
-  const hasSearchChanged = currentSearch?.fetchingQuery && currentSearch.fetchingQuery !== query;
+  const hasSearchChanged = currentSearch?.fetchingQuery !== query;
   if (!currentSearch || hasSearchChanged || hasTagChanged) {
     return;
   }

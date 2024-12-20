@@ -4,8 +4,9 @@ import { ElectronEvent } from '../../types/electron';
 
 import { IS_IOS } from '../../util/windowEnvironment';
 
+type ElementType = HTMLElement;
 type RefType = {
-  current: HTMLVideoElement | null;
+  current: ElementType | null;
 };
 
 type ReturnType = [boolean, () => void, () => void] | [false];
@@ -13,11 +14,12 @@ type CallbackType = (isPlayed: boolean) => void;
 
 const prop = getBrowserFullscreenElementProp();
 
-export default function useFullscreen(elRef: RefType, setIsPlayed: CallbackType): ReturnType {
+export default function useFullscreen(elRef: RefType, exitCallback?: CallbackType,
+  enterCallback?: CallbackType): ReturnType {
   const [isFullscreen, setIsFullscreen] = useState(Boolean(prop && document[prop]));
 
   const setFullscreen = () => {
-    if (!elRef.current || !(prop || IS_IOS)) {
+    if (!elRef.current || !(prop || IS_IOS) || isFullscreen) {
       return;
     }
     safeRequestFullscreen(elRef.current);
@@ -33,35 +35,45 @@ export default function useFullscreen(elRef: RefType, setIsPlayed: CallbackType)
   };
 
   useLayoutEffect(() => {
-    const video = elRef.current;
+    const element = elRef.current;
     const listener = () => {
       const isEnabled = Boolean(prop && document[prop]);
       setIsFullscreen(isEnabled);
+      if (isEnabled) {
+        enterCallback?.(false);
+      } else {
+        exitCallback?.(false);
+      }
       // In Firefox fullscreen video controls are not visible by default, so we force them manually
-      video!.controls = isEnabled;
+      if (element instanceof HTMLVideoElement) element.controls = isEnabled;
     };
-    const listenerEnter = () => { setIsFullscreen(true); };
+
+    const listenerEnter = () => {
+      setIsFullscreen(true);
+      if (enterCallback) enterCallback(true);
+    };
+
     const listenerExit = () => {
       setIsFullscreen(false);
-      setIsPlayed(false);
+      if (exitCallback) exitCallback(false);
     };
 
     document.addEventListener('fullscreenchange', listener, false);
     document.addEventListener('webkitfullscreenchange', listener, false);
     document.addEventListener('mozfullscreenchange', listener, false);
 
-    if (video) {
-      video.addEventListener('webkitbeginfullscreen', listenerEnter, false);
-      video.addEventListener('webkitendfullscreen', listenerExit, false);
+    if (element) {
+      element.addEventListener('webkitbeginfullscreen', listenerEnter, false);
+      element.addEventListener('webkitendfullscreen', listenerExit, false);
     }
 
     return () => {
       document.removeEventListener('fullscreenchange', listener, false);
       document.removeEventListener('webkitfullscreenchange', listener, false);
       document.removeEventListener('mozfullscreenchange', listener, false);
-      if (video) {
-        video.removeEventListener('webkitbeginfullscreen', listenerEnter, false);
-        video.removeEventListener('webkitendfullscreen', listenerExit, false);
+      if (element) {
+        element.removeEventListener('webkitbeginfullscreen', listenerEnter, false);
+        element.removeEventListener('webkitendfullscreen', listenerExit, false);
       }
     };
     // eslint-disable-next-line
@@ -117,15 +129,15 @@ export function checkIfFullscreen() {
   return Boolean(fullscreenProp && document[fullscreenProp]);
 }
 
-export function safeRequestFullscreen(video: HTMLVideoElement) {
-  if (video.requestFullscreen) {
-    video.requestFullscreen();
-  } else if (video.webkitRequestFullscreen) {
-    video.webkitRequestFullscreen();
-  } else if (video.webkitEnterFullscreen) {
-    video.webkitEnterFullscreen();
-  } else if (video.mozRequestFullScreen) {
-    video.mozRequestFullScreen();
+export function safeRequestFullscreen(element: ElementType) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullscreen();
+  } else if (element.webkitEnterFullscreen) {
+    element.webkitEnterFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen();
   }
 }
 

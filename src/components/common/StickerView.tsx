@@ -116,11 +116,11 @@ const StickerView: FC<OwnProps> = ({
   const previewMediaData = useMedia(previewMediaHash, !shouldLoadPreview);
   const withPreview = shouldLoadPreview || cachedPreview;
 
-  const shouldSkipFullMedia = Boolean(shouldForcePreview || (
+  const shouldSkipLoadingFullMedia = Boolean(shouldForcePreview || (
     fullMediaHash === previewMediaHash && (cachedPreview || previewMediaData)
   ));
-  const fullMediaData = useMedia(fullMediaHash || `sticker${id}`, !shouldLoad || shouldSkipFullMedia);
-  const shouldRenderFullMedia = isReadyToMountFullMedia && !shouldSkipFullMedia && fullMediaData && !isVideoBroken;
+  const fullMediaData = useMedia(fullMediaHash || `sticker${id}`, !shouldLoad || shouldSkipLoadingFullMedia);
+  const shouldRenderFullMedia = isReadyToMountFullMedia && fullMediaData && !isVideoBroken;
   const [isPlayerReady, markPlayerReady] = useFlag();
   const isFullMediaReady = shouldRenderFullMedia && (isStatic || isPlayerReady);
 
@@ -148,7 +148,8 @@ const StickerView: FC<OwnProps> = ({
     size,
     (withSharedAnimation ? customColor : undefined),
     dpr,
-  ].filter(Boolean).join('_')), [customColor, dpr, id, randomIdPrefix, size, withSharedAnimation]);
+  ].filter(Boolean).join('_')
+  ), [id, size, customColor, dpr, withSharedAnimation, randomIdPrefix]);
 
   return (
     <>

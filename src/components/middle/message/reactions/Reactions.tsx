@@ -36,7 +36,6 @@ type OwnProps = {
   isCurrentUserPremium?: boolean;
   observeIntersection?: ObserveFn;
   noRecentReactors?: boolean;
-  availableStars?: number;
 };
 
 const MAX_RECENT_AVATARS = 3;
@@ -52,7 +51,6 @@ const Reactions: FC<OwnProps> = ({
   noRecentReactors,
   isCurrentUserPremium,
   tags,
-  availableStars,
 }) => {
   const {
     toggleReaction,
@@ -216,7 +214,6 @@ const Reactions: FC<OwnProps> = ({
             onClick={handleClick}
             onPaidClick={handlePaidClick}
             observeIntersection={observeIntersection}
-            availableStars={availableStars}
           />
         )
       ))}

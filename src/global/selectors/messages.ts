@@ -458,9 +458,17 @@ export function selectForwardedSender<T extends GlobalState>(
 
   if (forwardInfo.isChannelPost && forwardInfo.fromChatId) {
     return selectChat(global, forwardInfo.fromChatId);
-  } else if (forwardInfo.fromId) {
+  }
+
+  if (forwardInfo.hiddenUserName) {
+    return undefined;
+  }
+
+  if (forwardInfo.fromId) {
     return selectPeer(global, forwardInfo.fromId);
-  } else if (forwardInfo.savedFromPeerId) {
+  }
+
+  if (forwardInfo.savedFromPeerId) {
     return selectPeer(global, forwardInfo.savedFromPeerId);
   }
 
@@ -1243,8 +1251,7 @@ export function selectCanForwardMessages<T extends GlobalState>(global: T, chatI
 }
 
 export function selectSponsoredMessage<T extends GlobalState>(global: T, chatId: string) {
-  const chat = selectChat(global, chatId);
-  const message = chat && isChatChannel(chat) ? global.messages.sponsoredByChatId[chatId] : undefined;
+  const message = global.messages.sponsoredByChatId[chatId];
 
   return message && message.expiresAt >= Math.round(Date.now() / 1000) ? message : undefined;
 }

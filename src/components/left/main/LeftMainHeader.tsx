@@ -116,7 +116,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
-  const { isMobile } = useAppLayout();
+  const { isMobile, isDesktop } = useAppLayout();
 
   const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
 
@@ -189,7 +189,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     lockScreen();
   });
 
-  const isSearchFocused = (
+  const isSearchFocused = (!isDesktop && !isMessageListOpen) && (
     Boolean(globalSearchChatId)
     || content === LeftColumnContent.GlobalSearch
     || content === LeftColumnContent.Contacts

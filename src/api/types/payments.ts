@@ -302,6 +302,11 @@ export type ApiCheckedGiftCode = {
   usedAt?: number;
 };
 
+export interface ApiStarsAmount {
+  amount: number;
+  nanos: number;
+}
+
 export interface ApiStarsTransactionPeerUnsupported {
   type: 'unsupported';
 }
@@ -326,6 +331,10 @@ export interface ApiStarsTransactionPeerAds {
   type: 'ads';
 }
 
+export interface ApiStarsTransactionApi {
+  type: 'api';
+}
+
 export interface ApiStarsTransactionPeerPeer {
   type: 'peer';
   id: string;
@@ -338,13 +347,14 @@ export type ApiStarsTransactionPeer =
 | ApiStarsTransactionPeerPremiumBot
 | ApiStarsTransactionPeerFragment
 | ApiStarsTransactionPeerAds
+| ApiStarsTransactionApi
 | ApiStarsTransactionPeerPeer;
 
 export interface ApiStarsTransaction {
   id?: string;
   peer: ApiStarsTransactionPeer;
   messageId?: number;
-  stars: number;
+  stars: ApiStarsAmount;
   isRefund?: true;
   isGift?: true;
   starGift?: ApiStarGift;
@@ -359,6 +369,7 @@ export interface ApiStarsTransaction {
   photo?: ApiWebDocument;
   extendedMedia?: BoughtPaidMedia[];
   subscriptionPeriod?: number;
+  starRefCommision?: number;
 }
 
 export interface ApiStarsSubscription {
@@ -370,6 +381,10 @@ export interface ApiStarsSubscription {
   canRefulfill?: true;
   hasMissingBalance?: true;
   chatInviteHash?: string;
+  hasBotCancelled?: true;
+  title?: string;
+  photo?: ApiWebDocument;
+  invoiceSlug?: string;
 }
 
 export interface ApiStarTopupOption {

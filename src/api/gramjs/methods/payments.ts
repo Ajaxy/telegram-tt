@@ -19,6 +19,7 @@ import {
   buildApiPremiumPromo,
   buildApiReceipt,
   buildApiStarGift,
+  buildApiStarsAmount,
   buildApiStarsGiftOptions,
   buildApiStarsGiveawayOptions,
   buildApiStarsSubscription,
@@ -534,7 +535,7 @@ export async function fetchStarsStatus() {
     history: result.history?.map(buildApiStarsTransaction),
     nextSubscriptionOffset: result.subscriptionsNextOffset,
     subscriptions: result.subscriptions?.map(buildApiStarsSubscription),
-    balance: result.balance.toJSNumber(),
+    balance: buildApiStarsAmount(result.balance),
   };
 }
 
@@ -564,7 +565,7 @@ export async function fetchStarsTransactions({
   return {
     nextOffset: result.nextOffset,
     history: result.history?.map(buildApiStarsTransaction),
-    balance: result.balance.toJSNumber(),
+    balance: buildApiStarsAmount(result.balance),
   };
 }
 
@@ -610,7 +611,7 @@ export async function fetchStarsSubscriptions({
   return {
     nextOffset: result.subscriptionsNextOffset,
     subscriptions: result.subscriptions.map(buildApiStarsSubscription),
-    balance: result.balance.toJSNumber(),
+    balance: buildApiStarsAmount(result.balance),
   };
 }
 

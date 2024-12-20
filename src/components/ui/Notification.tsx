@@ -13,12 +13,14 @@ import { isLangFnParam } from '../../util/localization/types';
 import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
+import CustomEmoji from '../common/CustomEmoji';
 import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Portal from './Portal';
@@ -32,6 +34,7 @@ type OwnProps = {
 
 const DEFAULT_DURATION = 3000;
 const ANIMATION_DURATION = 150;
+const CUSTOM_EMOJI_SIZE = 1.75 * REM;
 
 const Notification: FC<OwnProps> = ({
   notification,
@@ -51,6 +54,7 @@ const Notification: FC<OwnProps> = ({
     dismissAction,
     duration = DEFAULT_DURATION,
     icon,
+    customEmojiIconId,
     shouldShowTimer,
     title,
     containerSelector,
@@ -155,7 +159,16 @@ const Notification: FC<OwnProps> = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <Icon name={icon || 'info-filled'} className="notification-icon" />
+        {customEmojiIconId ? (
+          <CustomEmoji
+            className="notification-emoji-icon"
+            forceAlways
+            size={CUSTOM_EMOJI_SIZE}
+            documentId={customEmojiIconId}
+          />
+        ) : (
+          <Icon name={icon || 'info-filled'} className="notification-icon" />
+        )}
         <div className="content">
           {renderedTitle && (
             <div className="notification-title">{renderedTitle}</div>

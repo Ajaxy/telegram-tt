@@ -116,6 +116,7 @@ export interface ApiVideo {
   previewBlobUrl?: string;
   size: number;
   noSound?: boolean;
+  waveform?: number[];
 }
 
 export interface ApiAudio {
@@ -341,6 +342,7 @@ export interface ApiInvoice {
   currency: string;
   isTest?: boolean;
   isRecurring?: boolean;
+  subscriptionPeriod?: number;
   termsUrl?: string;
   maxTipAmount?: number;
   suggestedTipAmounts?: number[];
@@ -463,7 +465,7 @@ export interface ApiMessageActionStarGift {
   isConverted?: boolean;
   gift: ApiStarGift;
   message?: ApiFormattedText;
-  starsToConvert: number;
+  starsToConvert?: number;
 }
 
 export interface ApiAction {
@@ -753,6 +755,7 @@ export interface ApiMessage {
   factCheck?: ApiFactCheck;
   effectId?: string;
   isInvertedMedia?: true;
+  isVideoProcessingPending?: true;
 }
 
 export interface ApiReactions {
@@ -1068,13 +1071,6 @@ export type ApiSponsoredMessageReportResult = {
     text: string;
     option: string;
   }[];
-};
-
-export type ApiClickSponsoredMessage = {
-  chat: ApiChat;
-  random: string;
-  isMedia?: boolean;
-  isFullscreen?: boolean;
 };
 
 export const MAIN_THREAD_ID = -1;

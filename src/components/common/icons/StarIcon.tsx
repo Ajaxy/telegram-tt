@@ -29,6 +29,17 @@ const StarIcon: FC<OwnProps> = ({
   const randomId = useUniqueId();
   const validSvgRandomId = `svg-${randomId}`; // ID must start with a letter
 
+  const renderIcon = () => {
+    switch (type) {
+      case 'gold':
+        return <GoldStarIcon randomId={validSvgRandomId} />;
+      case 'premium':
+        return <PremiumStarIcon randomId={validSvgRandomId} />;
+      default:
+        return <RegularStarIcon />;
+    }
+  };
+
   return (
     <i
       onClick={onClick}
@@ -41,11 +52,7 @@ const StarIcon: FC<OwnProps> = ({
       )}
       style={style}
     >
-      {type === 'gold'
-        ? <GoldStarIcon randomId={validSvgRandomId} />
-        : type === 'premium'
-          ? <PremiumStarIcon randomId={validSvgRandomId} />
-          : <RegularStarIcon />}
+      {renderIcon()}
     </i>
   );
 };

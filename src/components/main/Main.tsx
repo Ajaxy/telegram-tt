@@ -8,7 +8,7 @@ import React, {
 import { addExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiChatFolder, ApiMessage, ApiUser } from '../../api/types';
+import type { ApiChatFolder, ApiUser } from '../../api/types';
 import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
 import { ElectronEvent } from '../../types/electron';
 
@@ -61,10 +61,10 @@ import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
 import LeftColumn from '../left/LeftColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
-import AudioPlayer from '../middle/AudioPlayer';
 import ReactionPicker from '../middle/message/reactions/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
+import AudioPlayer from '../middle/panes/AudioPlayer';
 import ModalContainer from '../modals/ModalContainer';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
@@ -107,7 +107,6 @@ type StateProps = {
   isForwardModalOpen: boolean;
   hasNotifications: boolean;
   hasDialogs: boolean;
-  audioMessage?: ApiMessage;
   safeLinkModalUrl?: string;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -159,7 +158,6 @@ const Main = ({
   isForwardModalOpen,
   hasNotifications,
   hasDialogs,
-  audioMessage,
   activeGroupCallId,
   safeLinkModalUrl,
   isHistoryCalendarOpen,
@@ -545,7 +543,7 @@ const Main = ({
       <DraftRecipientPicker requestedDraft={requestedDraft} />
       <Notifications isOpen={hasNotifications} />
       <Dialogs isOpen={hasDialogs} />
-      {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
+      <AudioPlayer noUi />
       <ModalContainer />
       <SafeLinkModal url={safeLinkModalUrl} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
@@ -613,7 +611,6 @@ export default memo(withGlobal<OwnProps>(
       openedCustomEmojiSetIds,
       shouldSkipHistoryAnimations,
       openedGame,
-      audioPlayer,
       isLeftColumnShown,
       historyCalendarSelectedAt,
       notifications,
@@ -630,10 +627,6 @@ export default memo(withGlobal<OwnProps>(
       deleteFolderDialogModal,
     } = selectTabState(global);
 
-    const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
-    const audioMessage = audioChatId && audioMessageId
-      ? selectChatMessage(global, audioChatId, audioMessageId)
-      : undefined;
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;
     const { chatId } = selectCurrentMessageList(global) || {};
@@ -653,7 +646,6 @@ export default memo(withGlobal<OwnProps>(
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       hasNotifications: Boolean(notifications.length),
       hasDialogs: Boolean(dialogs.length),
-      audioMessage,
       safeLinkModalUrl,
       isHistoryCalendarOpen: Boolean(historyCalendarSelectedAt),
       shouldSkipHistoryAnimations,

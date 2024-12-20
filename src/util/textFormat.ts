@@ -29,6 +29,10 @@ export function formatIntegerCompact(views: number) {
   return `${formatFixedNumber(views / 1e6)}M`;
 }
 
+export function formatPercent(value: number, fractionDigits = 1) {
+  return `${Number.isInteger(value) ? value : value.toFixed(fractionDigits)}%`;
+}
+
 export const getFirstLetters = withCache((phrase: string, count = 2) => {
   return phrase
     .replace(/[.,!@#$%^&*()_+=\-`~[\]/\\{}:"|<>?]+/gi, '')

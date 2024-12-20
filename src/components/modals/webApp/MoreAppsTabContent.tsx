@@ -20,7 +20,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import SearchInput from '../../ui/SearchInput';
-import WebAppGridItem from './WebAppGridtem';
+import WebAppGridItem from './WebAppGridItem';
 
 import styles from './MoreAppsTabContent.module.scss';
 

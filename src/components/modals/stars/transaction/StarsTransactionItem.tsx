@@ -14,9 +14,11 @@ import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { CUSTOM_PEER_PREMIUM } from '../../../../util/objects/customPeer';
-import { getTransactionTitle } from '../helpers/transaction';
+import renderText from '../../../common/helpers/renderText';
+import { getTransactionTitle, isNegativeStarsAmount } from '../helpers/transaction';
 
 import useSelector from '../../../../hooks/data/useSelector';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
@@ -47,24 +49,25 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
     extendedMedia,
     subscriptionPeriod,
   } = transaction;
-  const lang = useOldLang();
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   const peerId = transactionPeer.type === 'peer' ? transactionPeer.id : undefined;
   const peer = useSelector(selectOptionalPeer(peerId));
 
   const data = useMemo(() => {
-    let title = getTransactionTitle(lang, transaction);
+    let title = getTransactionTitle(oldLang, transaction);
     let description;
     let status: string | undefined;
     let avatarPeer: ApiPeer | CustomPeer | undefined;
 
     if (transaction.peer.type === 'peer') {
-      description = peer && getSenderTitle(lang, peer);
+      description = peer && getSenderTitle(oldLang, peer);
       avatarPeer = peer || CUSTOM_PEER_PREMIUM;
     } else {
       const customPeer = buildStarsTransactionCustomPeer(transaction.peer);
-      title = customPeer.title || lang(customPeer.titleKey!);
-      description = lang(customPeer.subtitleKey!);
+      title = customPeer.title || oldLang(customPeer.titleKey!);
+      description = oldLang(customPeer.subtitleKey!);
       avatarPeer = customPeer;
     }
 
@@ -73,15 +76,15 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
     }
 
     if (transaction.isRefund) {
-      status = lang('StarsRefunded');
+      status = oldLang('StarsRefunded');
     }
 
     if (transaction.hasFailed) {
-      status = lang('StarsFailed');
+      status = oldLang('StarsFailed');
     }
 
     if (transaction.isPending) {
-      status = lang('StarsPending');
+      status = oldLang('StarsPending');
     }
 
     return {
@@ -90,7 +93,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
       avatarPeer,
       status,
     };
-  }, [lang, peer, transaction]);
+  }, [oldLang, peer, transaction]);
 
   const handleClick = useLastCallback(() => {
     openStarsTransactionModal({ transaction });
@@ -107,15 +110,19 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
       </div>
       <div className={styles.info}>
         <h3 className={styles.title}>{data.title}</h3>
-        <p className={styles.description}>{data.description}</p>
+        {data.description && (
+          <p className={styles.description}>{renderText(data.description)}</p>
+        )}
         <p className={styles.date}>
-          {formatDateTimeToString(date * 1000, lang.code, true)}
+          {formatDateTimeToString(date * 1000, oldLang.code, true)}
           {data.status && ` — (${data.status})`}
         </p>
       </div>
       <div className={styles.stars}>
-        <span className={buildClassName(styles.amount, stars < 0 ? styles.negative : styles.positive)}>
-          {formatStarsTransactionAmount(stars)}
+        <span
+          className={buildClassName(styles.amount, isNegativeStarsAmount(stars) ? styles.negative : styles.positive)}
+        >
+          {formatStarsTransactionAmount(lang, stars)}
         </span>
         <StarIcon className={styles.star} type="gold" size="adaptive" />
       </div>

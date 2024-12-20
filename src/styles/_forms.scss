@@ -15,10 +15,10 @@
 
   label {
     display: block;
-    padding: 0 0.25rem;
     position: absolute;
-    left: 0.75rem;
+    left: 1rem;
     top: 0.6875rem;
+    padding: 0 0.3125rem;
     background-color: var(--color-background);
     font-size: 1rem;
     font-weight: 400;
@@ -49,7 +49,7 @@
   &.success label,
   .form-control:focus + label,
   .form-control.focus + label {
-    transform: scale(0.75) translate(-0.5rem, -2.25rem);
+    transform: scale(0.75) translate(0, -2rem);
   }
 
   input::placeholder,
@@ -108,7 +108,7 @@
   display: block;
   width: 100%;
   height: 3rem;
-  padding: calc(0.75rem - var(--border-width)) calc(0.9rem - var(--border-width));
+  padding: calc(0.75rem - var(--border-width)) calc(1.1875rem - var(--border-width)) 0.6875rem;
   border: var(--border-width) solid var(--color-borders-input);
   border-radius: var(--border-radius-default);
   color: var(--color-text);
@@ -196,7 +196,7 @@ textarea.form-control {
   resize: none;
   overflow: hidden;
   line-height: 1.3125rem;
-  padding-top: calc(1rem - var(--border-width));
+  padding-top: calc(0.8125rem - var(--border-width));
   padding-bottom: calc(1rem - var(--border-width));
 }
 

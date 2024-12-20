@@ -150,3 +150,18 @@ export function selectIsSynced<T extends GlobalState>(global: T) {
 export function selectCanAnimateSnapEffect<T extends GlobalState>(global: T) {
   return IS_SNAP_EFFECT_SUPPORTED && selectPerformanceSettingsValue(global, 'snapEffect');
 }
+
+export function selectWebApp<T extends GlobalState>(
+  global: T, key: string, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).webApps.openedWebApps[key];
+}
+
+export function selectActiveWebApp<T extends GlobalState>(
+  global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const activeWebAppKey = selectTabState(global, tabId).webApps.activeWebAppKey;
+  if (!activeWebAppKey) return undefined;
+
+  return selectWebApp(global, activeWebAppKey, tabId);
+}

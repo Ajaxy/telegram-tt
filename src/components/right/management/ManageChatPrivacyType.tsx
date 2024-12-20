@@ -265,7 +265,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
             options={forwardingOptions}
             onChange={handleForwardingOptionChange}
           />
-          <p className="section-info">
+          <p className="section-info section-info_push">
             {isChannel
               ? lang('ChannelVisibility.Forwarding.ChannelInfo')
               : lang('ChannelVisibility.Forwarding.GroupInfo')}

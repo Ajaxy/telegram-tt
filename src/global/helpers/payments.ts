@@ -2,14 +2,15 @@ import type {
   ApiInputInvoice,
   ApiMessage,
   ApiRequestInputInvoice,
+  ApiStarsAmount,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarsTransactionPeerPeer,
 } from '../../api/types';
 import type { CustomPeer } from '../../types';
+import type { LangFn } from '../../util/localization';
 import type { GlobalState } from '../types';
 
-import { formatInteger } from '../../util/textFormat';
 import { selectChat, selectUser } from '../selectors';
 
 export function getRequestInputInvoice<T extends GlobalState>(
@@ -228,6 +229,16 @@ export function buildStarsTransactionCustomPeer(
     };
   }
 
+  if (peer.type === 'api') {
+    return {
+      avatarIcon: 'bots',
+      isCustomPeer: true,
+      titleKey: 'Stars.Intro.Transaction.TelegramBotApi.Title',
+      subtitleKey: 'Stars.Intro.Transaction.TelegramBotApi.Subtitle',
+      peerColorId: 4,
+    };
+  }
+
   return {
     avatarIcon: 'star',
     isCustomPeer: true,
@@ -237,12 +248,17 @@ export function buildStarsTransactionCustomPeer(
   };
 }
 
-export function formatStarsTransactionAmount(amount: number) {
+export function formatStarsTransactionAmount(lang: LangFn, starsAmount: ApiStarsAmount) {
+  const amount = starsAmount.amount + starsAmount.nanos / 1e9;
   if (amount < 0) {
-    return `- ${formatInteger(Math.abs(amount))}`;
+    return `- ${lang.number(Math.abs(amount))}`;
   }
 
-  return `+ ${formatInteger(amount)}`;
+  return `+ ${lang.number(amount)}`;
+}
+
+export function formatStarsAmount(lang: LangFn, starsAmount: ApiStarsAmount) {
+  return lang.number(starsAmount.amount + starsAmount.nanos / 1e9);
 }
 
 export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransaction | undefined {
@@ -254,7 +270,10 @@ export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransa
 
   return {
     id: transactionId!,
-    stars: stars!,
+    stars: {
+      amount: stars!,
+      nanos: 0,
+    },
     peer: {
       type: 'peer',
       id: message.isOutgoing ? message.chatId : (message.senderId || message.chatId),
@@ -274,7 +293,10 @@ export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiSt
 
   return {
     id: transactionId!,
-    stars: stars!,
+    stars: {
+      amount: stars!,
+      nanos: 0,
+    },
     peer: {
       type: 'peer',
       id: targetChatId!,

@@ -216,6 +216,10 @@ export const convertToRGBA = (color: number): string => {
   return `rgba(${red}, ${green}, ${blue}, ${alphaFloat})`;
 };
 
+export const numberToHexColor = (color: number): string => {
+  return `#${color.toString(16).padStart(6, '0')}`;
+};
+
 export const getTextColor = (color: number): string => {
   const r = (color >> 16) & 0xff;
   const g = (color >> 8) & 0xff;

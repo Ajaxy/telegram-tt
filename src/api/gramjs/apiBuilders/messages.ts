@@ -215,6 +215,7 @@ export function buildApiMessageWithChatId(
   const hasComments = mtpMessage.replies?.comments;
   const senderBoosts = mtpMessage.fromBoostsApplied;
   const factCheck = mtpMessage.factcheck && buildApiFactCheck(mtpMessage.factcheck);
+  const isVideoProcessingPending = mtpMessage.videoProcessingPending;
 
   const isInvertedMedia = mtpMessage.invertMedia;
 
@@ -262,6 +263,7 @@ export function buildApiMessageWithChatId(
     factCheck,
     effectId: mtpMessage.effect?.toString(),
     isInvertedMedia,
+    isVideoProcessingPending,
   });
 }
 
@@ -300,7 +302,8 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
     isImported: fwdFrom.imported,
     isChannelPost: Boolean(fwdFrom.channelPost),
     channelPostId: fwdFrom.channelPost,
-    isLinkedChannelPost: Boolean(fwdFrom.channelPost && savedFromPeerId && !isChatWithSelf),
+    isLinkedChannelPost: Boolean(fwdFrom.channelPost && savedFromPeerId === fromId
+      && fwdFrom.savedFromMsgId === fwdFrom.channelPost && !isChatWithSelf),
     savedFromPeerId,
     isSavedOutgoing: fwdFrom.savedOut,
     fromId,
@@ -371,7 +374,7 @@ function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : A
     isConverted: Boolean(converted),
     gift: buildApiStarGift(gift),
     message: message && buildApiFormattedText(message),
-    starsToConvert: convertStars.toJSNumber(),
+    starsToConvert: convertStars?.toJSNumber(),
   };
 }
 
@@ -996,6 +999,7 @@ export function buildLocalForwardedMessage({
   noCaptions,
   isCurrentUserPremium,
   lastMessageId,
+  sendAs,
 }: {
   toChat: ApiChat;
   toThreadId?: number;
@@ -1005,6 +1009,7 @@ export function buildLocalForwardedMessage({
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
   lastMessageId?: number;
+  sendAs?: ApiPeer;
 }): ApiMessage {
   const localId = getNextLocalMessageId(lastMessageId);
   const {
@@ -1049,7 +1054,7 @@ export function buildLocalForwardedMessage({
     content: updatedContent,
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
-    senderId: currentUserId,
+    senderId: sendAs?.id || currentUserId,
     sendingState: 'messageSendingStatePending',
     groupedId,
     isInAlbum,
@@ -1059,7 +1064,7 @@ export function buildLocalForwardedMessage({
     ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
 
     ...(emojiOnlyCount && { emojiOnlyCount }),
-    // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
+    // Forward info doesn't get added when user forwards own messages and when forwarding audio
     ...(message.chatId !== currentUserId && !isAudio && !noAuthors && {
       forwardInfo: {
         date: message.forwardInfo?.date || message.date,

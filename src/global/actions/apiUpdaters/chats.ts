@@ -11,6 +11,7 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
+  addChatListIds,
   addUnreadMentions,
   deleteChatMessages,
   deletePeerPhoto,
@@ -21,7 +22,6 @@ import {
   replaceThreadParam,
   updateChat,
   updateChatFullInfo,
-  updateChatListIds,
   updateChatListType,
   updatePeerStoriesHidden,
   updateTopic,
@@ -114,7 +114,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       global = getGlobal();
-      global = updateChatListIds(global, listType, [update.id]);
+      global = addChatListIds(global, listType, [update.id]);
       setGlobal(global);
 
       return undefined;
@@ -162,6 +162,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         return undefined;
       }
 
+      const isLocal = isLocalMessageId(message.id!);
+
       const chat = selectChat(global, update.chatId);
       if (!chat) {
         return undefined;
@@ -169,19 +171,21 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const hasMention = Boolean(update.message.id && update.message.hasUnreadMention);
 
-      global = updateChat(global, update.chatId, {
-        unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
-      });
-
-      if (hasMention) {
-        global = addUnreadMentions(global, update.chatId, chat, [update.message.id!], true);
-      }
-
-      const topic = chat.isForum ? selectTopicFromMessage(global, message as ApiMessage) : undefined;
-      if (topic) {
-        global = updateTopic(global, update.chatId, topic.id, {
-          unreadCount: topic.unreadCount ? topic.unreadCount + 1 : 1,
+      if (!isLocal) {
+        global = updateChat(global, update.chatId, {
+          unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
         });
+
+        if (hasMention) {
+          global = addUnreadMentions(global, update.chatId, chat, [update.message.id!], true);
+        }
+
+        const topic = chat.isForum ? selectTopicFromMessage(global, message as ApiMessage) : undefined;
+        if (topic) {
+          global = updateTopic(global, update.chatId, topic.id, {
+            unreadCount: topic.unreadCount ? topic.unreadCount + 1 : 1,
+          });
+        }
       }
 
       setGlobal(global);

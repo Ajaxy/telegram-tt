@@ -471,6 +471,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'birthday':
       return new GramJs.InputPrivacyKeyBirthday();
+
+    case 'gifts':
+      return new GramJs.InputPrivacyKeyStarGiftsAutoSave();
   }
 
   return undefined;
@@ -717,20 +720,20 @@ export function buildInputChatReactions(chatReactions?: ApiChatReactions) {
   return new GramJs.ChatReactionsNone();
 }
 
-export function buildInputEmojiStatus(emojiStatus: ApiSticker, expires?: number) {
-  if (emojiStatus.id === DEFAULT_STATUS_ICON_ID) {
+export function buildInputEmojiStatus(emojiStatusId: string, expires?: number) {
+  if (emojiStatusId === DEFAULT_STATUS_ICON_ID) {
     return new GramJs.EmojiStatusEmpty();
   }
 
   if (expires) {
     return new GramJs.EmojiStatusUntil({
-      documentId: BigInt(emojiStatus.id),
+      documentId: BigInt(emojiStatusId),
       until: expires,
     });
   }
 
   return new GramJs.EmojiStatus({
-    documentId: BigInt(emojiStatus.id),
+    documentId: BigInt(emojiStatusId),
   });
 }
 
@@ -803,6 +806,14 @@ export function buildInputPrivacyRules(
   }
   if (rules.shouldAllowPremium) {
     privacyRules.push(new GramJs.InputPrivacyValueAllowPremium());
+  }
+
+  if (rules.botsPrivacy === 'allow') {
+    privacyRules.push(new GramJs.InputPrivacyValueAllowBots());
+  }
+
+  if (rules.botsPrivacy === 'disallow') {
+    privacyRules.push(new GramJs.InputPrivacyValueDisallowBots());
   }
 
   if (!rules.isUnspecified) {

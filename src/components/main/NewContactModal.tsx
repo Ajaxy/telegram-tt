@@ -213,17 +213,17 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
         <Button
           isText
           className="confirm-dialog-button"
-          onClick={handleClose}
-        >
-          {lang('Cancel')}
-        </Button>
-        <Button
-          isText
-          className="confirm-dialog-button"
           disabled={!canBeSubmitted}
           onClick={handleSubmit}
         >
           {lang('Done')}
+        </Button>
+        <Button
+          isText
+          className="confirm-dialog-button"
+          onClick={handleClose}
+        >
+          {lang('Cancel')}
         </Button>
       </div>
     </Modal>

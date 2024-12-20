@@ -193,19 +193,21 @@ const ManageUser: FC<OwnProps & StateProps> = ({
             noEmojiStatus
             withFullInfo
           />
-          <InputText
-            id="user-first-name"
-            label={lang('UserInfo.FirstNamePlaceholder')}
-            onChange={handleFirstNameChange}
-            value={firstName}
-            error={error === ERROR_FIRST_NAME_MISSING ? error : undefined}
-          />
-          <InputText
-            id="user-last-name"
-            label={lang('UserInfo.LastNamePlaceholder')}
-            onChange={handleLastNameChange}
-            value={lastName}
-          />
+          <div className="settings-edit">
+            <InputText
+              id="user-first-name"
+              label={lang('UserInfo.FirstNamePlaceholder')}
+              onChange={handleFirstNameChange}
+              value={firstName}
+              error={error === ERROR_FIRST_NAME_MISSING ? error : undefined}
+            />
+            <InputText
+              id="user-last-name"
+              label={lang('UserInfo.LastNamePlaceholder')}
+              onChange={handleLastNameChange}
+              value={lastName}
+            />
+          </div>
           <div className="ListItem narrow">
             <Checkbox
               checked={isNotificationsEnabled}
@@ -242,7 +244,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
                 {lang('UserInfo.ResetCustomPhoto')}
               </ListItem>
             )}
-            <p className="text-muted" dir="auto">{lang('UserInfo.CustomPhotoInfo', user.firstName)}</p>
+            <p className="section-help" dir="auto">{lang('UserInfo.CustomPhotoInfo', user.firstName)}</p>
           </div>
         )}
         <div className="section">

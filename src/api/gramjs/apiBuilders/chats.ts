@@ -23,7 +23,7 @@ import type {
   ApiTopic,
 } from '../../types';
 
-import { omitUndefined, pick, pickTruthy } from '../../../util/iteratees';
+import { pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb, serializeBytes } from '../helpers';
 import { buildApiPhoto, buildApiUsernames, buildAvatarPhotoId } from './common';
@@ -71,7 +71,7 @@ function buildApiChatFieldsFromPeerEntity(
   const areProfilesShown = Boolean('signatureProfiles' in peerEntity && peerEntity.signatureProfiles);
   const subscriptionUntil = 'subscriptionUntilDate' in peerEntity ? peerEntity.subscriptionUntilDate : undefined;
 
-  return omitUndefined<PeerEntityApiChatFields>({
+  return {
     isMin,
     hasPrivateLink,
     areSignaturesShown,
@@ -104,7 +104,7 @@ function buildApiChatFieldsFromPeerEntity(
     emojiStatus,
     boostLevel,
     subscriptionUntil,
-  });
+  };
 }
 
 export function buildApiChatFromDialog(

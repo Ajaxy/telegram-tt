@@ -280,7 +280,7 @@ export function hideAllChatJoinRequests({
   });
 }
 
-export function hideChatReportPanel(chat: ApiChat) {
+export function hideChatReportPane(chat: ApiChat) {
   const { id, accessHash } = chat;
 
   return invokeRequest(new GramJs.messages.HidePeerSettingsBar({

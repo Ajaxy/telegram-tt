@@ -45,7 +45,7 @@ export function getMessageCopyOptions(
   const photo = getMessagePhoto(message)
     || (!getMessageWebPageVideo(message) ? getMessageWebPagePhoto(message) : undefined);
   const contact = getMessageContact(message);
-  const mediaHash = photo ? getPhotoMediaHash(photo, 'inline') : undefined;
+  const mediaHash = photo ? getPhotoMediaHash(photo, 'full') : undefined;
   const canImageBeCopied = canCopy && photo && (mediaHash || hasMediaLocalBlobUrl(photo))
     && CLIPBOARD_ITEM_SUPPORTED && !IS_SAFARI;
   const selection = window.getSelection();

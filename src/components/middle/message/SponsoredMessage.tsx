@@ -27,13 +27,12 @@ import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT }
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useFlag from '../../../hooks/useFlag';
 import { type ObserveFn, useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
-import AboutAdsModal from '../../common/AboutAdsModal.async';
 import Avatar from '../../common/Avatar';
+import BadgeButton from '../../common/BadgeButton';
 import Icon from '../../common/icons/Icon';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
 import Button from '../../ui/Button';
@@ -77,15 +76,15 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     openUrl,
     hideSponsoredMessages,
     clickSponsoredMessage,
-    reportSponsoredMessage,
     openMediaViewer,
+    openAboutAdsModal,
   } = getActions();
 
   const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
   const contentRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
   const shouldObserve = Boolean(message);
 
   const { isMobile } = useAppLayout();
@@ -101,12 +100,11 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref, undefined, true, IS_ANDROID);
-  const [isAboutAdsModalOpen, openAboutAdsModal, closeAboutAdsModal] = useFlag(false);
 
   useEffect(() => {
     return shouldObserve ? observeIntersection(contentRef.current!, (target) => {
       if (target.isIntersecting) {
-        viewSponsoredMessage({ chatId });
+        viewSponsoredMessage({ peerId: chatId });
       }
     }) : undefined;
   }, [chatId, shouldObserve, observeIntersection, viewSponsoredMessage]);
@@ -115,10 +113,6 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     preventMessageInputBlur(e);
     handleBeforeContextMenu(e);
   };
-
-  const handleReportSponsoredMessage = useLastCallback(() => {
-    reportSponsoredMessage({ chatId, randomId: message!.randomId });
-  });
 
   const handleHideSponsoredMessage = useLastCallback(() => {
     hideSponsoredMessages();
@@ -134,17 +128,21 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   const handleClick = useLastCallback(() => {
     if (!message) return;
 
-    clickSponsoredMessage({ isMedia: photo || isGif ? true : undefined, chatId });
-    openUrl({ url: message!.url, shouldSkipModal: true });
+    clickSponsoredMessage({ isMedia: photo || isGif ? true : undefined, peerId: chatId });
+    openUrl({ url: message.url, shouldSkipModal: true });
   });
 
   const handleOpenMedia = useLastCallback(() => {
-    clickSponsoredMessage({ isMedia: true, chatId });
+    clickSponsoredMessage({ isMedia: true, peerId: chatId });
     openMediaViewer({
       origin: MediaViewerOrigin.SponsoredMessage,
       chatId,
       isSponsoredMessage: true,
     });
+  });
+
+  const handleOpenAboutAdsModal = useLastCallback(() => {
+    openAboutAdsModal({ chatId });
   });
 
   const extraPadding = 0;
@@ -283,7 +281,9 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           )}
           <span className={buildClassName('message-title message-type', hasMedia && 'has-media')}>
             {message!.isRecommended ? lang('Message.RecommendedLabel') : lang('SponsoredMessage')}
-            <span onClick={openAboutAdsModal} className="ad-about">{lang('SponsoredMessageAdWhatIsThis')}</span>
+            <BadgeButton onClick={handleOpenAboutAdsModal} className="ad-about">
+              {lang('SponsoredMessageAdWhatIsThis')}
+            </BadgeButton>
           </span>
           {renderContent()}
         </PeerColorWrapper>
@@ -318,18 +318,12 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
         <SponsoredMessageContextMenuContainer
           isOpen={isContextMenuOpen}
           anchor={contextMenuAnchor}
+          triggerRef={ref}
           message={message!}
-          onAboutAdsClick={openAboutAdsModal}
-          onReportAd={handleReportSponsoredMessage}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         />
       )}
-      <AboutAdsModal
-        isOpen={isAboutAdsModalOpen}
-        isMonetizationSharing={message.canReport}
-        onClose={closeAboutAdsModal}
-      />
     </div>
   );
 };

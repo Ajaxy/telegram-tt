@@ -32,7 +32,7 @@ export function formatCurrencyAsString(
 ) {
   const price = totalPrice / 10 ** getCurrencyExp(currency);
 
-  if ((options?.shouldOmitFractions || currency === STARS_CURRENCY_CODE) && price % 1 === 0) {
+  if ((options?.shouldOmitFractions || currency === STARS_CURRENCY_CODE) && Number.isInteger(price)) {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency,

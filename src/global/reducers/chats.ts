@@ -6,7 +6,7 @@ import type { ChatListType, GlobalState } from '../types';
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
 import {
-  areSortedArraysEqual, buildCollectionByKey, omit, pick, unique,
+  areSortedArraysEqual, buildCollectionByKey, omit, omitUndefined, pick, unique,
 } from '../../util/iteratees';
 import { selectChatFullInfo } from '../selectors';
 
@@ -86,7 +86,7 @@ export function updateChatsLastMessageId<T extends GlobalState>(
   };
 }
 
-export function updateChatListIds<T extends GlobalState>(
+export function addChatListIds<T extends GlobalState>(
   global: T, type: ChatListType, idsUpdate: string[],
 ): T {
   const { [type]: listIds } = global.chats.listIds;
@@ -310,7 +310,7 @@ function getUpdatedChat<T extends GlobalState>(
     return undefined;
   }
 
-  return updatedChat;
+  return omitUndefined(updatedChat);
 }
 
 export function updateChatListType<T extends GlobalState>(

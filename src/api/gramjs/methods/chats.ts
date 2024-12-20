@@ -44,7 +44,6 @@ import {
   buildApiChatReactions,
   buildApiChatSettings,
   buildApiMissingInvitedUser,
-  buildApiSponsoredMessageReportResult,
   buildApiTopic,
   buildChatMember,
   buildChatMembers,
@@ -69,7 +68,6 @@ import {
 } from '../gramjsBuilders';
 import {
   addPhotoToLocalDb,
-  deserializeBytes,
   isChatFolder,
 } from '../helpers';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
@@ -126,6 +124,7 @@ export async function fetchChats({
     offsetId,
     limit,
     offsetDate,
+    folderId: archived ? ARCHIVED_FOLDER_ID : undefined,
     ...(withPinned && { excludePinned: true }),
   }));
   const resultPinned = withPinned
@@ -513,6 +512,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     chatPhoto,
     translationsDisabled,
     reactionsLimit,
+    hasScheduled,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -542,6 +542,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
       isTranslationDisabled: translationsDisabled,
       isPreHistoryHidden: true,
+      hasScheduledMessages: hasScheduled,
     },
     chats,
     userStatusesById,
@@ -604,6 +605,7 @@ async function getFullChannelInfo(
     boostsUnrestrict,
     canViewRevenue: canViewMonetization,
     paidReactionsAvailable,
+    hasScheduled,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -694,6 +696,7 @@ async function getFullChannelInfo(
       boostsApplied,
       boostsToUnrestrict: boostsUnrestrict,
       isPaidReactionAvailable: paidReactionsAvailable,
+      hasScheduledMessages: hasScheduled,
     },
     chats,
     userStatusesById: statusesById,
@@ -1128,9 +1131,10 @@ export async function getChatByPhoneNumber(phoneNumber: string) {
   return processResolvedPeer(result);
 }
 
-export async function getChatByUsername(username: string) {
+export async function getChatByUsername(username: string, referrer?: string) {
   const result = await invokeRequest(new GramJs.contacts.ResolveUsername({
     username,
+    referer: referrer,
   }));
 
   return processResolvedPeer(result);
@@ -1982,40 +1986,4 @@ export async function fetchChannelRecommendations({ chat }: { chat?: ApiChat }) 
     similarChannels,
     count: result instanceof GramJs.messages.ChatsSlice ? result.count : similarChannels.length,
   };
-}
-
-export async function reportSponsoredMessage({
-  chat,
-  randomId,
-  option,
-}: {
-  chat: ApiChat;
-  randomId: string;
-  option: string;
-}) {
-  const { id, accessHash } = chat;
-  const channel = buildInputEntity(id, accessHash);
-
-  try {
-    const result = await invokeRequest(new GramJs.channels.ReportSponsoredMessage({
-      channel: channel as GramJs.InputChannel,
-      randomId: deserializeBytes(randomId),
-      option: deserializeBytes(option),
-    }), {
-      shouldThrow: true,
-    });
-
-    if (!result) {
-      return undefined;
-    }
-
-    return buildApiSponsoredMessageReportResult(result);
-  } catch (err) {
-    if (err instanceof Error && err.message === 'PREMIUM_ACCOUNT_REQUIRED') {
-      return {
-        type: 'premiumRequired' as const,
-      };
-    }
-    return undefined;
-  }
 }

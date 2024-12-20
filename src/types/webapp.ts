@@ -26,6 +26,13 @@ export type WebAppButtonOptions = {
   position?: 'left' | 'right' | 'top' | 'bottom';
 };
 
+export type SafeArea = {
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
 export type WebAppInboundEvent =
   WebAppEvent<'iframe_ready', {
     reload_supported?: boolean;
@@ -47,6 +54,7 @@ export type WebAppInboundEvent =
   }> |
   WebAppEvent<'web_app_open_tg_link', {
     path_full: string;
+    force_request?: boolean;
   }> |
   WebAppEvent<'web_app_open_invoice', {
     slug: string;
@@ -94,10 +102,21 @@ export type WebAppInboundEvent =
   WebAppEvent<'web_app_biometry_update_token', {
     token: string;
   }> |
+  WebAppEvent<'web_app_set_emoji_status', {
+    custom_emoji_id: string;
+    duration?: number;
+  }> |
+  WebAppEvent<'web_app_request_file_download', {
+    url: string;
+    file_name: string;
+  }> |
   WebAppEvent<'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
   | 'web_app_request_phone' | 'web_app_close' | 'web_app_close_scan_qr_popup'
   | 'web_app_request_write_access' | 'web_app_request_phone' | 'iframe_will_reload'
-  | 'web_app_biometry_get_info' | 'web_app_biometry_open_settings', null>;
+  | 'web_app_biometry_get_info' | 'web_app_biometry_open_settings'
+  | 'web_app_request_fullscreen' | 'web_app_exit_fullscreen'
+  | 'web_app_request_safe_area' | 'web_app_request_content_safe_area',
+  null>;
 
 export type WebAppOutboundEvent =
   WebAppEvent<'viewport_changed', {
@@ -106,6 +125,8 @@ export type WebAppOutboundEvent =
     is_expanded?: boolean;
     is_state_stable?: boolean;
   }> |
+  WebAppEvent<'content_safe_area_changed', SafeArea> |
+  WebAppEvent<'safe_area_changed', SafeArea> |
   WebAppEvent<'theme_changed', {
     theme_params: {
       bg_color: string;
@@ -127,6 +148,15 @@ export type WebAppOutboundEvent =
   }> |
   WebAppEvent<'popup_closed', {
     button_id?: string;
+  }> |
+  WebAppEvent<'fullscreen_changed', {
+    is_fullscreen: boolean;
+  }> |
+  WebAppEvent<'visibility_changed', {
+    is_visible: boolean;
+  }> |
+  WebAppEvent<'fullscreen_failed', {
+    error: 'UNSUPPORTED' | string;
   }> |
   WebAppEvent<'qr_text_received', {
     data: string;
@@ -167,6 +197,13 @@ export type WebAppOutboundEvent =
   WebAppEvent<'biometry_token_updated', {
     status: 'updated' | 'removed' | 'failed';
   }> |
+  WebAppEvent<'emoji_status_failed', {
+    error: 'UNSUPPORTED' | 'USER_DECLINED' | 'SUGGESTED_EMOJI_INVALID'
+    | 'DURATION_INVALID' | 'SERVER_ERROR' | 'UNKNOWN_ERROR';
+  }> |
+  WebAppEvent<'file_download_requested', {
+    status: 'cancelled' | 'downloading';
+  }> |
   WebAppEvent<'main_button_pressed' |
   'secondary_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed'
-  | 'reload_iframe', null>;
+  | 'reload_iframe' | 'emoji_status_set', null>;

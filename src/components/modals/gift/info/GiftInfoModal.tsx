@@ -10,6 +10,7 @@ import buildClassName from '../../../../util/buildClassName';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
+import { getServerTime } from '../../../../util/serverTime';
 import { formatInteger } from '../../../../util/textFormat';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
@@ -67,7 +68,7 @@ const GiftInfoModal = ({
   const canUpdate = Boolean(userGift?.fromId && userGift.messageId);
   const isSender = userGift?.fromId === currentUserId;
   const canConvertDifference = (userGift && starGiftMaxConvertPeriod && (
-    userGift.date + starGiftMaxConvertPeriod - Date.now() / 1000
+    userGift.date + starGiftMaxConvertPeriod - getServerTime()
   )) || 0;
   const conversionLeft = Math.ceil(canConvertDifference / 60 / 60 / 24);
 

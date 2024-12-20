@@ -6,12 +6,12 @@ const LOOKUP = 'AACAAAAHAAALMAAAQASTAVAAAZaacaaaahaaalmaaaqastava.az0123456789-,
 
 export function pathBytesToSvg(bytes: Buffer, width: number, height: number) {
   return TEMPLATE
-    .replace('{{path}}', buildPath(bytes))
+    .replace('{{path}}', buildSvgPath(bytes))
     .replace('{{width}}', String(width))
     .replace('{{height}}', String(height));
 }
 
-function buildPath(bytes: Buffer) {
+export function buildSvgPath(bytes: Buffer) {
   let path = 'M';
 
   const len = bytes.length;

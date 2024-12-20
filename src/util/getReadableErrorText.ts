@@ -76,6 +76,7 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   PROVIDER_ACCOUNT_TIMEOUT: 'Request to the payment provider has expired',
 
   STARGIFT_CONVERT_TOO_OLD: 'This gift no longer can be converted to Stars',
+  SUBSCRIPTION_ALREADY_ACTIVE: 'You are already subscribed',
 
   PEERS_LIST_EMPTY: 'No chats are added to the list',
 

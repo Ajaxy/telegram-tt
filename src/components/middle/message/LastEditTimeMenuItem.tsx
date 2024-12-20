@@ -23,7 +23,7 @@ function LastEditTimeMenuItem({
   const shouldRenderSkeleton = !editDate;
 
   return (
-    <MenuItem icon="edited" className={styles.item}>
+    <MenuItem icon="clock-edit" className={styles.item}>
       {shouldRenderSkeleton ? <Skeleton className={styles.skeleton} /> : Boolean(editDate)
         && lang('Chat.PrivateMessageEditTimestamp.Date', formatDateAtTime(lang, editDate * 1000))}
     </MenuItem>

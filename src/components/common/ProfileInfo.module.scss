@@ -1,20 +1,3 @@
-.self {
-  margin: 0 -0.5rem 0.75rem;
-  overflow: hidden;
-
-  &:global(.ghost) {
-    margin: 0;
-  }
-
-  .info {
-    padding-bottom: 0.75rem;
-  }
-
-  .status {
-    line-height: 1rem;
-  }
-}
-
 .fallbackPhoto {
   position: absolute;
   z-index: 1;

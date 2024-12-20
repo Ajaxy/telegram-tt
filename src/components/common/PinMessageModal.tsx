@@ -37,6 +37,7 @@ type StateProps = {
 
 const PinMessageModal: FC<OwnProps & StateProps> = ({
   isOpen,
+  chatId,
   messageId,
   isChannel,
   isGroup,
@@ -49,17 +50,17 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
 
   const handlePinMessageForAll = useCallback(() => {
     pinMessage({
-      messageId, isUnpin: false,
+      chatId, messageId, isUnpin: false,
     });
     onClose();
-  }, [pinMessage, messageId, onClose]);
+  }, [chatId, messageId, onClose]);
 
   const handlePinMessage = useCallback(() => {
     pinMessage({
-      messageId, isUnpin: false, isOneSide: true, isSilent: true,
+      chatId, messageId, isUnpin: false, isOneSide: true, isSilent: true,
     });
     onClose();
-  }, [messageId, onClose, pinMessage]);
+  }, [chatId, messageId, onClose]);
 
   const lang = useOldLang();
 

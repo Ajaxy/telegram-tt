@@ -56,7 +56,7 @@ const StarsBalanceModal = ({
   modal, starsBalanceState, canBuyPremium,
 }: OwnProps & StateProps) => {
   const {
-    closeStarsBalanceModal, loadStarsTransactions, openStarsGiftingPickerModal, openInvoice,
+    closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
   } = getActions();
 
   const { balance, history, subscriptions } = starsBalanceState || {};
@@ -81,7 +81,7 @@ const StarsBalanceModal = ({
     || originReaction?.amount
     || originGift?.gift.stars
     || topup?.balanceNeeded;
-  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance || 0) : undefined;
+  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance?.amount || 0) : undefined;
   const starsNeededText = useMemo(() => {
     const global = getGlobal();
 
@@ -152,6 +152,10 @@ const StarsBalanceModal = ({
     loadStarsTransactions({
       type: TRANSACTION_TYPES[selectedTabIndex],
     });
+  });
+
+  const handleLoadMoreSubscriptions = useLastCallback(() => {
+    loadStarsSubscriptions();
   });
 
   const openStarsGiftingPickerModalHandler = useLastCallback(() => {
@@ -240,6 +244,19 @@ const StarsBalanceModal = ({
                   subscription={subscription}
                 />
               ))}
+              {subscriptions?.nextOffset && (
+                <Button
+                  isText
+                  disabled={subscriptions.isLoading}
+                  size="smaller"
+                  noForcedUpperCase
+                  className={styles.loadMore}
+                  onClick={handleLoadMoreSubscriptions}
+                >
+                  <Icon name="down" className={styles.loadMoreIcon} />
+                  {oldLang('StarMySubscriptionsExpand')}
+                </Button>
+              )}
             </div>
           </div>
         )}

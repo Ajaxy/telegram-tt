@@ -436,14 +436,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           amount: formatInteger(amount!),
           user: targetUser || 'User',
         }, {
-          pluralValue: amount,
+          pluralValue: amount!,
           withNodes: true,
           withMarkdown: true,
         })
         : lang('GiftInfoDescriptionConverted', {
           amount: formatInteger(amount!),
         }, {
-          pluralValue: amount,
+          pluralValue: amount!,
           withNodes: true,
           withMarkdown: true,
         });
