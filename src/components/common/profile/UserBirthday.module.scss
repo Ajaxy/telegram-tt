@@ -20,7 +20,8 @@
 
   pointer-events: none;
 
-  animation: 2.75s float 0.25s,
+  animation:
+    2.75s float 0.25s,
     2s show-up calc(var(--digit-offset) * 0.5s),
     1s dissapear 2s;
   animation-timing-function: ease-in;

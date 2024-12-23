@@ -9,15 +9,15 @@ import type { IconName } from '../../types/icons';
 import { getUserFullName, isUserId } from '../../global/helpers';
 import { selectPeer } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/date/dateFormat';
+import { formatDateAtTime } from '../../util/dates/dateFormat';
 import { REM } from '../common/helpers/mediaDimensions';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
-import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
+import ReactionStaticEmoji from '../common/reactions/ReactionStaticEmoji';
 import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 
 import styles from './StoryViewModal.module.scss';
@@ -52,7 +52,7 @@ const StoryView = ({
     closeStoryViewModal,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleClick = useLastCallback(() => {
     const { type } = storyView;

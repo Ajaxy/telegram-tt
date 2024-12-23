@@ -9,14 +9,14 @@ import { selectTabState, selectUser } from '../../global/selectors';
 import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Modal, { ANIMATION_DURATION } from '../ui/Modal';
 import Separator from '../ui/Separator';
 import AnimatedIconWithPreview from './AnimatedIconWithPreview';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import styles from './PrivacySettingsNoticeModal.module.scss';
 
@@ -32,7 +32,7 @@ type StateProps = {
 const CLOSE_ANIMATION_DURATION = ANIMATION_DURATION + ANIMATION_END_DELAY;
 
 const PrivacySettingsNoticeModal = ({ isOpen, isReadDate, user }: OwnProps & StateProps) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     updateGlobalPrivacySettings,
     openPremiumModal,

@@ -2,11 +2,11 @@ import type { ActionReturnType } from '../../types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import { omit } from '../../../util/iteratees';
+import * as langProvider from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { addChats, addStoriesForPeer, addUsers } from '../../reducers';
+import { addStoriesForPeer } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectCurrentViewedStory,
@@ -39,8 +39,6 @@ addActionHandler('openStoryViewer', async (global, actions, payload): Promise<vo
       return;
     }
     global = getGlobal();
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-    global = addChats(global, buildCollectionByKey(result.chats, 'id'));
     global = addStoriesForPeer(global, peerId, result.stories);
   }
 
@@ -286,7 +284,7 @@ addActionHandler('copyStoryLink', async (global, actions, payload): Promise<void
 
   copyTextToClipboard(link);
   actions.showNotification({
-    message: langProvider.translate('LinkCopied'),
+    message: langProvider.oldTranslate('LinkCopied'),
     tabId,
   });
 });
@@ -314,8 +312,8 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   }
 
   actions.showNotification({
-    message: langProvider.translate(message),
-    actionText: langProvider.translate('Story.ToastViewInChat'),
+    message: langProvider.oldTranslate(message),
+    actionText: langProvider.oldTranslate('Story.ToastViewInChat'),
     action: [{
       action: 'closeStoryViewer',
       payload: undefined,
@@ -428,5 +426,13 @@ addActionHandler('closeBoostStatistics', (global, actions, payload): ActionRetur
 
   return updateTabState(global, {
     boostStatistics: undefined,
+  }, tabId);
+});
+
+addActionHandler('closeMonetizationStatistics', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    monetizationStatistics: undefined,
   }, tabId);
 });

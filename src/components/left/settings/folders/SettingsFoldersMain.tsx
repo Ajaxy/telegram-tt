@@ -18,10 +18,11 @@ import renderText from '../../../common/helpers/renderText';
 
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
-import usePrevious from '../../../../hooks/usePrevious';
+import useOldLang from '../../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
+import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
@@ -76,7 +77,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     draggedIndex: undefined,
   });
 
-  const prevFolderIds = usePrevious(folderIds);
+  const prevFolderIds = usePreviousDeprecated(folderIds);
 
   // Sync folders state after changing folders in other clients
   useEffect(() => {
@@ -109,7 +110,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     onCreateFolder();
   }, [foldersById, maxFolders, onCreateFolder, openLimitReachedModal]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -206,7 +207,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         {canCreateNewFolder && (
           <Button
           // TODO: Refactor button component to handle icon placemenet with props
-            className="with-icon mb-2"
+            className="settings-button with-icon mb-2"
             color="primary"
             size="smaller"
             pill
@@ -214,7 +215,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             onClick={handleCreateFolder}
             isRtl={lang.isRtl}
           >
-            <i className="icon icon-add" />
+            <Icon name="add" />
             {lang('CreateNewFilter')}
           </Button>
         )}

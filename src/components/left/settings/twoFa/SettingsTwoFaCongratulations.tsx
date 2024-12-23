@@ -7,7 +7,7 @@ import { STICKER_SIZE_TWO_FA } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import Button from '../../../ui/Button';
@@ -21,7 +21,7 @@ type OwnProps = {
 const SettingsTwoFaCongratulations: FC<OwnProps> = ({
   isActive, onReset, onScreenSelect,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleClick = useCallback(() => {
     onScreenSelect(SettingsScreens.Privacy);

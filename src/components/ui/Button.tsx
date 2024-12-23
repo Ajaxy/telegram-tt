@@ -7,7 +7,9 @@ import buildStyle from '../../util/buildStyle';
 import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
+import Sparkles from '../common/Sparkles';
 import RippleEffect from './RippleEffect';
 import Spinner from './Spinner';
 
@@ -20,13 +22,14 @@ export type OwnProps = {
   size?: 'default' | 'smaller' | 'tiny';
   color?: (
     'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black'
-    | 'translucent-bordered' | 'dark' | 'green' | 'adaptive'
+    | 'translucent-bordered' | 'dark' | 'green' | 'adaptive' | 'stars'
   );
   backgroundImage?: string;
   id?: string;
   className?: string;
   round?: boolean;
   pill?: boolean;
+  badge?: boolean;
   fluid?: boolean;
   isText?: boolean;
   isLoading?: boolean;
@@ -46,7 +49,9 @@ export type OwnProps = {
   isShiny?: boolean;
   isRectangular?: boolean;
   withPremiumGradient?: boolean;
+  withSparkleEffect?: boolean;
   noPreventDefault?: boolean;
+  noForcedUpperCase?: boolean;
   shouldStopPropagation?: boolean;
   style?: string;
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -80,11 +85,13 @@ const Button: FC<OwnProps> = ({
   className,
   round,
   pill,
+  badge,
   fluid,
   isText,
   isLoading,
   isShiny,
   withPremiumGradient,
+  withSparkleEffect,
   onTransitionEnd,
   ariaLabel,
   ariaControls,
@@ -102,6 +109,7 @@ const Button: FC<OwnProps> = ({
   isRectangular,
   noPreventDefault,
   shouldStopPropagation,
+  noForcedUpperCase,
   style,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -109,6 +117,8 @@ const Button: FC<OwnProps> = ({
   if (ref) {
     elementRef = ref;
   }
+
+  const lang = useOldLang();
 
   const [isClicked, setIsClicked] = useState(false);
 
@@ -122,6 +132,7 @@ const Button: FC<OwnProps> = ({
     round && 'round',
     pill && 'pill',
     fluid && 'fluid',
+    badge && 'badge',
     isNotInteractive && 'disabled',
     nonInteractive && 'non-interactive',
     allowDisabledClick && 'click-allowed',
@@ -134,6 +145,7 @@ const Button: FC<OwnProps> = ({
     isShiny && 'shiny',
     withPremiumGradient && 'premium',
     isRectangular && 'rectangular',
+    noForcedUpperCase && 'no-upper-case',
   );
 
   const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -161,6 +173,21 @@ const Button: FC<OwnProps> = ({
     }
   });
 
+  const content = (
+    <>
+      {withSparkleEffect && <Sparkles preset="button" />}
+      {isLoading ? (
+        <div>
+          <span dir={isRtl ? 'auto' : undefined}>{lang('Cache.ClearProgress')}</span>
+          <Spinner color={isText ? 'blue' : 'white'} />
+        </div>
+      ) : children}
+      {!isNotInteractive && ripple && (
+        <RippleEffect />
+      )}
+    </>
+  );
+
   if (href) {
     return (
       <a
@@ -176,11 +203,10 @@ const Button: FC<OwnProps> = ({
         aria-controls={ariaControls}
         style={style}
         onTransitionEnd={onTransitionEnd}
+        target="_blank"
+        rel="noreferrer"
       >
-        {children}
-        {!isNotInteractive && ripple && (
-          <RippleEffect />
-        )}
+        {content}
       </a>
     );
   }
@@ -207,15 +233,7 @@ const Button: FC<OwnProps> = ({
       dir={isRtl ? 'rtl' : undefined}
       style={buildStyle(style, backgroundImage && `background-image: url(${backgroundImage})`) || undefined}
     >
-      {isLoading ? (
-        <div>
-          <span dir={isRtl ? 'auto' : undefined}>Please wait...</span>
-          <Spinner color={isText ? 'blue' : 'white'} />
-        </div>
-      ) : children}
-      {!isNotInteractive && ripple && (
-        <RippleEffect />
-      )}
+      {content}
     </button>
   );
 };

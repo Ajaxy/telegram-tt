@@ -8,8 +8,8 @@ import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 
 import useLastCallback from '../../../hooks/useLastCallback';
-import usePrevious from '../../../hooks/usePrevious';
-import useShowTransition from '../../../hooks/useShowTransition';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
@@ -32,7 +32,7 @@ const MentionTooltip: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
 
   const handleUserSelect = useLastCallback((userId: string, forceFocus = false) => {
     // No need for expensive global updates on users, so we avoid them
@@ -74,7 +74,7 @@ const MentionTooltip: FC<OwnProps> = ({
     }
   }, [filteredUsers, onClose]);
 
-  const prevChatMembers = usePrevious(
+  const prevChatMembers = usePreviousDeprecated(
     filteredUsers?.length
       ? filteredUsers
       : undefined,

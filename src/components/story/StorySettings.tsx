@@ -13,8 +13,8 @@ import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
@@ -91,12 +91,12 @@ function StorySettings({
   currentUserId,
   onClose,
 }: OwnProps & StateProps) {
-  const { editStoryPrivacy, toggleStoryPinned } = getActions();
+  const { editStoryPrivacy, toggleStoryInProfile } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isOpenModal, openModal, closeModal] = useFlag(false);
   const [privacy, setPrivacy] = useState<ApiPrivacySettings | undefined>(visibility);
-  const [isPinned, setIsPinned] = useState(story?.isPinned);
+  const [isPinned, setIsPinned] = useState(story?.isInProfile);
   const [activeKey, setActiveKey] = useState<Screens>(Screens.privacy);
   const [editingBlockingCategory, setEditingBlockingCategory] = useState<PrivacyVisibility>('everybody');
   const isBackButton = activeKey !== Screens.privacy;
@@ -195,8 +195,8 @@ function StorySettings({
       storyId: story!.id,
       privacy: privacy!,
     });
-    if (story!.isPinned !== isPinned) {
-      toggleStoryPinned({ peerId: story!.peerId, storyId: story!.id, isPinned });
+    if (story!.isInProfile !== isPinned) {
+      toggleStoryInProfile({ peerId: story!.peerId, storyId: story!.id, isInProfile: isPinned });
     }
     closeModal();
   });

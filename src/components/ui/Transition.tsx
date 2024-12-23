@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  beginHeavyAnimation, useEffect, useLayoutEffect, useRef,
+} from '../../lib/teact/teact';
 import {
   addExtraClass, removeExtraClass, setExtraStyles, toggleExtraClass,
 } from '../../lib/teact/teact-dom';
@@ -14,8 +16,7 @@ import { omit } from '../../util/iteratees';
 import { allowSwipeControlForTransition } from '../../util/swipeController';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import './Transition.scss';
 
@@ -43,6 +44,7 @@ export type TransitionProps = {
   className?: string;
   slideClassName?: string;
   withSwipeControl?: boolean;
+  isBlockingAnimation?: boolean;
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
   children: React.ReactNode | ChildrenFn;
@@ -82,6 +84,7 @@ function Transition({
   className,
   slideClassName,
   withSwipeControl,
+  isBlockingAnimation,
   onStart,
   onStop,
   children,
@@ -98,7 +101,7 @@ function Transition({
   }
 
   const rendersRef = useRef<Record<number, React.ReactNode | ChildrenFn>>({});
-  const prevActiveKey = usePrevious<any>(activeKey);
+  const prevActiveKey = usePreviousDeprecated<any>(activeKey);
   const forceUpdate = useForceUpdate();
   const isAnimatingRef = useRef(false);
   const isSwipeJustCancelledRef = useRef(false);
@@ -151,7 +154,9 @@ function Transition({
       addExtraClass(el, CLASSES.slide);
 
       if (slideClassName) {
-        addExtraClass(el, slideClassName);
+        slideClassName.split(/\s+/).forEach((token) => {
+          addExtraClass(el, token);
+        });
       }
     });
 
@@ -197,6 +202,7 @@ function Transition({
         childNodes[activeIndex],
         childNodes[prevActiveIndex],
         shouldRestoreHeight,
+        isBlockingAnimation,
         onStart,
         onStop,
       );
@@ -233,7 +239,7 @@ function Transition({
     });
 
     isAnimatingRef.current = true;
-    const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
+    const endHeavyAnimation = beginHeavyAnimation(undefined, isBlockingAnimation);
     onStart?.();
 
     toggleExtraClass(container, `Transition-${name}`, !isBackwards);
@@ -245,6 +251,7 @@ function Transition({
 
       requestMutation(() => {
         if (activeKey !== currentKeyRef.current) {
+          endHeavyAnimation();
           return;
         }
 
@@ -268,7 +275,7 @@ function Transition({
         }
 
         onStop?.();
-        dispatchHeavyAnimationStop();
+        endHeavyAnimation();
         isAnimatingRef.current = false;
 
         cleanup();
@@ -290,7 +297,7 @@ function Transition({
             giveUpAnimationEnd();
             isSwipeJustCancelledRef.current = true;
             onStop?.();
-            dispatchHeavyAnimationStop();
+            endHeavyAnimation();
             isAnimatingRef.current = false;
           },
         );
@@ -317,6 +324,7 @@ function Transition({
     shouldDisableAnimation,
     forceUpdate,
     withSwipeControl,
+    isBlockingAnimation,
     cleanupOnlyKey,
   ]);
 
@@ -390,6 +398,7 @@ function performSlideOptimized(
   toSlide: ChildNode,
   fromSlide?: ChildNode,
   shouldRestoreHeight?: boolean,
+  isBlockingAnimation?: boolean,
   onStart?: NoneToVoidFunction,
   onStop?: NoneToVoidFunction,
 ) {
@@ -423,7 +432,7 @@ function performSlideOptimized(
   }
 
   isAnimatingRef.current = true;
-  const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
+  const endHeavyAnimation = beginHeavyAnimation(undefined, isBlockingAnimation);
   onStart?.();
 
   toggleExtraClass(container, `Transition-${name}`, !isBackwards);
@@ -472,6 +481,7 @@ function performSlideOptimized(
 
     requestMutation(() => {
       if (activeKey !== currentKeyRef.current) {
+        endHeavyAnimation();
         return;
       }
 
@@ -488,7 +498,7 @@ function performSlideOptimized(
       }
 
       onStop?.();
-      dispatchHeavyAnimationStop();
+      endHeavyAnimation();
       isAnimatingRef.current = false;
 
       cleanup();

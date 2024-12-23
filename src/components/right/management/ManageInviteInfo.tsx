@@ -7,11 +7,11 @@ import type { ApiChatInviteImporter, ApiExportedInvite, ApiUser } from '../../..
 import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/date/dateFormat';
+import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Button from '../../ui/Button';
@@ -50,7 +50,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     openChat,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     usage = 0, usageLimit, link, adminId,
   } = invite || {};
@@ -82,7 +82,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     return (
       <div className="section">
         <p>{importers.length ? lang('PeopleJoined', usage) : lang('NoOneJoined')}</p>
-        <p className="text-muted">
+        <p className="section-help">
           {!importers.length && (
             usageLimit ? lang('PeopleCanJoinViaLinkCount', usageLimit - usage) : lang('NoOneJoinedYet')
           )}
@@ -115,7 +115,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     return (
       <div className="section">
         <p>{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</p>
-        <p className="text-muted">
+        <p className="section-help">
           {requesters.map((requester) => (
             <ListItem
               className="chat-item-clickable scroll-item small-icon"
@@ -138,7 +138,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     <div className="Management ManageInviteInfo">
       <div className="custom-scroll">
         {!invite && (
-          <p className="text-muted">{lang('Loading')}</p>
+          <p className="section-help">{lang('Loading')}</p>
         )}
         {invite && (
           <>
@@ -152,7 +152,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
               />
               <Button className="copy-link" onClick={handleCopyClicked}>{lang('CopyLink')}</Button>
               {Boolean(expireDate) && (
-                <p className="text-muted">
+                <p className="section-help">
                   {isExpired
                     ? lang('ExpiredLink')
                     : lang('LinkExpiresIn', `${formatFullDate(lang, expireDate)} ${formatTime(lang, expireDate)}`)}

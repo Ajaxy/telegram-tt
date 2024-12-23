@@ -1,6 +1,6 @@
 import type {
   ApiDimensions,
-  ApiPhoto, ApiSticker, ApiThumbnail, ApiVideo,
+  ApiPhoto, ApiSticker, ApiThumbnail, ApiVideo, MediaContainer,
 } from './messages';
 
 export type ApiInlineResultType = (
@@ -9,6 +9,7 @@ export type ApiInlineResultType = (
 );
 
 export interface ApiWebDocument {
+  mediaType: 'webDocument';
   url: string;
   size: number;
   mimeType: string;
@@ -66,6 +67,14 @@ type ApiBotMenuButtonWebApp = {
 
 export type ApiBotMenuButton = ApiBotMenuButtonWebApp | ApiBotMenuButtonCommands;
 
+export interface ApiBotAppSettings {
+  placeholderPath?: string;
+  backgroundColor?: string;
+  backgroundDarkColor?: string;
+  headerColor?: string;
+  headerDarkColor?: string;
+}
+
 export interface ApiBotInfo {
   botId: string;
   commands?: ApiBotCommand[];
@@ -73,4 +82,11 @@ export interface ApiBotInfo {
   photo?: ApiPhoto;
   gif?: ApiVideo;
   menuButton: ApiBotMenuButton;
+  privacyPolicyUrl?: string;
+  hasPreviewMedia?: true;
+  appSettings?: ApiBotAppSettings;
+}
+
+export interface ApiBotPreviewMedia extends MediaContainer {
+  date: number;
 }

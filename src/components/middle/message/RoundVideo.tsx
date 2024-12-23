@@ -1,9 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
+  useEffect, useLayoutEffect,
+  useRef, useSignal, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -12,11 +10,14 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../../api/types';
 
 import {
-  getMessageMediaFormat, getMessageMediaHash, getMessageMediaThumbDataUri, hasMessageTtl,
+  getMediaFormat,
+  getMessageMediaThumbDataUri,
+  getVideoMediaHash,
+  hasMessageTtl,
 } from '../../../global/helpers';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/date/dateFormat';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import safePlay from '../../../util/safePlay';
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 
@@ -26,12 +27,11 @@ import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useSignal from '../../../hooks/useSignal';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 import Button from '../../ui/Button';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -48,6 +48,12 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   onStop?: NoneToVoidFunction;
   onReadMedia?: NoneToVoidFunction;
+  onHideTranscription?: (isHidden: boolean) => void;
+  isTranscriptionError?: boolean;
+  canTranscribe?: boolean;
+  isTranscribed?: boolean;
+  isTranscriptionHidden?: boolean;
+  isTranscribing?: boolean;
 };
 
 const PROGRESS_CENTER = ROUND_VIDEO_DIMENSIONS_PX / 2;
@@ -66,6 +72,12 @@ const RoundVideo: FC<OwnProps> = ({
   observeIntersection,
   onStop,
   onReadMedia,
+  isTranscriptionError,
+  isTranscribed,
+  canTranscribe,
+  onHideTranscription,
+  isTranscriptionHidden,
+  isTranscribing,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -74,22 +86,22 @@ const RoundVideo: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const circleRef = useRef<SVGCircleElement>(null);
 
-  const video = message.content.video!;
-
-  const { cancelMessageMediaDownload, openOneTimeMediaModal } = getActions();
+  const { cancelMediaDownload, openOneTimeMediaModal, transcribeAudio } = getActions();
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
+
+  const video = message.content.video!;
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersecting);
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'inline'),
+    getVideoMediaHash(video, 'inline'),
     !shouldLoad,
-    getMessageMediaFormat(message, 'inline'),
+    getMediaFormat(video, 'inline'),
   );
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'download'),
+    getVideoMediaHash(video, 'download'),
     !isDownloading,
     ApiMediaFormat.BlobUrl,
   );
@@ -100,16 +112,20 @@ const RoundVideo: FC<OwnProps> = ({
   const shouldRenderSpoiler = hasTtl && !isInOneTimeModal;
   const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
   const noThumb = !hasThumb || isPlayerReady || shouldRenderSpoiler;
-  const thumbRef = useBlurredMediaThumbRef(message, noThumb);
-  const thumbClassNames = useMediaTransition(!noThumb);
+  const thumbRef = useBlurredMediaThumbRef(video, noThumb);
+  useMediaTransition(!noThumb, { ref: thumbRef });
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const isTransferring = (isLoadAllowed && !isPlayerReady) || isDownloading;
-  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
+  const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
 
   const {
-    shouldRender: shouldSpinnerRender,
-    transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, wasLoadDisabled);
+    ref: spinnerRef,
+    shouldRender: shouldRenderSpinner,
+  } = useShowTransition({
+    isOpen: isTransferring,
+    noMountTransition: wasLoadDisabled,
+    withShouldRender: true,
+  });
 
   const [isActivated, setIsActivated] = useState(false);
 
@@ -178,7 +194,11 @@ const RoundVideo: FC<OwnProps> = ({
     togglePlaying();
   }, [isInOneTimeModal]);
 
-  const handleClick = useLastCallback(() => {
+  const handleClick = useLastCallback((event) => {
+    if (event.target.closest('.transcribe-button')) {
+      return;
+    }
+
     if (!mediaData) {
       setIsLoadAllowed((isAllowed) => !isAllowed);
 
@@ -186,7 +206,7 @@ const RoundVideo: FC<OwnProps> = ({
     }
 
     if (isDownloading) {
-      cancelMessageMediaDownload({ message });
+      cancelMediaDownload({ media: video });
       return;
     }
 
@@ -202,6 +222,10 @@ const RoundVideo: FC<OwnProps> = ({
   const handleTimeUpdate = useLastCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
     setProgress(playerEl.currentTime / playerEl.duration);
+  });
+
+  const handleTranscribe = useLastCallback(() => {
+    transcribeAudio({ chatId: message.chatId, messageId: message.id });
   });
 
   function renderPlayWrapper() {
@@ -220,6 +244,14 @@ const RoundVideo: FC<OwnProps> = ({
       </div>
     );
   }
+
+  const handleButtonClick = useLastCallback(() => {
+    if ((isTranscribed || isTranscriptionError) && onHideTranscription) {
+      onHideTranscription(!isTranscriptionHidden);
+    } else if (!isTranscribing) {
+      handleTranscribe();
+    }
+  });
 
   return (
     <div
@@ -260,7 +292,7 @@ const RoundVideo: FC<OwnProps> = ({
       {!shouldRenderSpoiler && (
         <canvas
           ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
+          className="thumbnail"
           style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
         />
       )}
@@ -280,12 +312,12 @@ const RoundVideo: FC<OwnProps> = ({
           </svg>
         )}
       </div>
-      {shouldSpinnerRender && (
-        <div className={`media-loading ${spinnerClassNames}`}>
+      {shouldRenderSpinner && (
+        <div ref={spinnerRef} className="media-loading">
           <ProgressSpinner progress={isDownloading ? downloadProgress : loadProgress} />
         </div>
       )}
-      {shouldRenderSpoiler && !shouldSpinnerRender && renderPlayWrapper()}
+      {shouldRenderSpoiler && !shouldRenderSpinner && renderPlayWrapper()}
       {!mediaData && !isLoadAllowed && (
         <i className="icon icon-download" />
       )}
@@ -294,6 +326,31 @@ const RoundVideo: FC<OwnProps> = ({
           {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
           {(!isActivated || playerRef.current!.paused) && <Icon name="muted" />}
         </div>
+      )}
+      {canTranscribe && (
+        <Button
+          onClick={handleButtonClick}
+          className="transcribe-button"
+        >
+          {isTranscribed || isTranscriptionError ? <Icon name="down" /> : <Icon name="transcribe" />}
+          {isTranscribing && (
+            <svg viewBox="0 0 32 24" className="loading-svg">
+              <rect
+                className="loading-rect"
+                fill="transparent"
+                width="32"
+                height="24"
+                stroke-width="3"
+                stroke-linejoin="round"
+                rx="6"
+                ry="6"
+                stroke="white"
+                stroke-dashoffset="1"
+                stroke-dasharray="32,68"
+              />
+            </svg>
+          )}
+        </Button>
       )}
     </div>
   );

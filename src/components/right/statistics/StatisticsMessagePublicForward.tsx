@@ -7,7 +7,7 @@ import type { ApiMessagePublicForward } from '../../../api/types';
 import { getMainUsername } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 
@@ -18,7 +18,7 @@ export type OwnProps = {
 };
 
 const StatisticsMessagePublicForward: FC<OwnProps> = ({ data }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { openChatByUsername } = getActions();
 
   const username = useMemo(() => (data.chat ? getMainUsername(data.chat) : undefined), [data.chat]);

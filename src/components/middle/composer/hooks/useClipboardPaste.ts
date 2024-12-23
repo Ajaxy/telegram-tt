@@ -14,7 +14,7 @@ import buildAttachment from '../helpers/buildAttachment';
 import { preparePastedHtml } from '../helpers/cleanHtml';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
 
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 const MAX_MESSAGE_LENGTH = 4096;
 
@@ -32,7 +32,7 @@ const useClipboardPaste = (
   onCustomEmojiStripped?: VoidFunction,
 ) => {
   const { showNotification } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     if (!isActive) {

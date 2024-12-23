@@ -3,22 +3,8 @@
   overflow: hidden;
   margin: auto;
 
-  .message-content.media.text & {
+  .message-content:not(.is-forwarded).media.text & {
     margin: -0.3125rem -0.5rem 0.3125rem;
-  }
-
-  body.is-ios .Message.own .message-content.has-solid-background :not(.forwarded-message) & {
-    margin: -0.3125rem -0.5rem 0.3125rem -0.625rem;
-  }
-
-  .forwarded-message & {
-    margin-bottom: 0.125rem;
-
-    .message-content.media.text & {
-      margin: 0 0 0.3125rem;
-      --border-bottom-left-radius: inherit;
-      --border-bottom-right-radius: inherit;
-    }
   }
 
   &,

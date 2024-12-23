@@ -6,7 +6,8 @@ import type { ApiFormattedText, ApiMessage, ApiStory } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMessageEntityTypes } from '../../api/types';
 
-import { extractMessageText, getMessageText, stripCustomEmoji } from '../../global/helpers';
+import { CONTENT_NOT_SUPPORTED } from '../../config';
+import { extractMessageText, stripCustomEmoji } from '../../global/helpers';
 import trimText from '../../util/trimText';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
 
@@ -29,6 +30,8 @@ interface OwnProps {
   inChatList?: boolean;
   forcePlayback?: boolean;
   focusedQuote?: string;
+  isInSelectMode?: boolean;
+  canBeEmpty?: boolean;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -49,6 +52,8 @@ function MessageText({
   inChatList,
   forcePlayback,
   focusedQuote,
+  isInSelectMode,
+  canBeEmpty,
 }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -77,9 +82,8 @@ function MessageText({
     return customEmojisCount >= MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS;
   }, [entities]) || 0;
 
-  if (!text) {
-    const contentNotSupportedText = getMessageText(messageOrStory);
-    return contentNotSupportedText ? [trimText(contentNotSupportedText, truncateLength)] : undefined as any;
+  if (!text && !canBeEmpty) {
+    return <span className="content-unsupported">{CONTENT_NOT_SUPPORTED}</span>;
   }
 
   return (
@@ -104,6 +108,7 @@ function MessageText({
           cacheBuster: textCacheBusterRef.current.toString(),
           forcePlayback,
           focusedQuote,
+          isInSelectMode,
         }),
       ].flat().filter(Boolean)}
     </>

@@ -12,14 +12,14 @@ import {
   getMessageVideo,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDuration } from '../../util/date/dateFormat';
+import { formatMediaDuration } from '../../util/dates/dateFormat';
 import stopEvent from '../../util/stopEvent';
 
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 
 import MediaSpoiler from './MediaSpoiler';
 
@@ -46,7 +46,7 @@ const Media: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'), !isIntersecting);
-  const transitionClassNames = useMediaTransition(mediaBlobUrl);
+  const transitionClassNames = useMediaTransitionDeprecated(mediaBlobUrl);
 
   const video = getMessageVideo(message);
 

@@ -5,7 +5,7 @@ import type { OwnProps as ButtonProps } from './Button';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from './Button';
 
@@ -30,7 +30,7 @@ const FloatingActionButton: FC<OwnProps> = ({
   onClick,
   children,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const buttonClassName = buildClassName(
     'FloatingActionButton',

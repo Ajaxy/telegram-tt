@@ -1,11 +1,11 @@
 import { useRef } from '../lib/teact/teact';
 
 import useForceUpdate from './useForceUpdate';
-import usePrevious from './usePrevious';
+import usePreviousDeprecated from './usePreviousDeprecated';
 import useSyncEffect from './useSyncEffect';
 
 export default function usePrevDuringAnimation<T>(current: T, duration?: number): T {
-  const prev = usePrevious(current, true);
+  const prev = usePreviousDeprecated(current, true);
   const timeoutRef = useRef<number>();
   const forceUpdate = useForceUpdate();
   // eslint-disable-next-line no-null/no-null

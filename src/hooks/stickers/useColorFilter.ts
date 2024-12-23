@@ -1,31 +1,21 @@
 import { useEffect } from '../../lib/teact/teact';
 
+import { addSvgDefinition, removeSvgDefinition, SVG_NAMESPACE } from '../../util/svgController';
 import { hexToRgb } from '../../util/switchTheme';
 
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const SVG_MAP = new Map<string, SvgColorFilter>();
 
 class SvgColorFilter {
   public filterId: string;
-
-  public element: SVGSVGElement;
 
   private referenceCount = 0;
 
   constructor(public color: string) {
     this.filterId = `color-filter-${color.slice(1)}`;
 
-    this.element = document.createElementNS(SVG_NAMESPACE, 'svg');
-    this.element.width.baseVal.valueAsString = '0px';
-    this.element.height.baseVal.valueAsString = '0px';
-
-    const defs = document.createElementNS(SVG_NAMESPACE, 'defs');
-    this.element.appendChild(defs);
-
     const filter = document.createElementNS(SVG_NAMESPACE, 'filter');
-    filter.id = this.filterId;
     filter.setAttribute('color-interpolation-filters', 'sRGB');
-    defs.appendChild(filter);
+    addSvgDefinition(filter, this.filterId);
 
     const feColorMatrix = document.createElementNS(SVG_NAMESPACE, 'feColorMatrix');
     feColorMatrix.setAttribute('type', 'matrix');
@@ -37,8 +27,6 @@ class SvgColorFilter {
     );
 
     filter.appendChild(feColorMatrix);
-
-    document.body.appendChild(this.element);
   }
 
   public getFilterId() {
@@ -49,7 +37,7 @@ class SvgColorFilter {
   public removeReference() {
     this.referenceCount -= 1;
     if (this.referenceCount === 0) {
-      this.element.remove();
+      removeSvgDefinition(this.filterId);
     }
   }
 

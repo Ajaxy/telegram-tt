@@ -3,7 +3,7 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage, StatisticsMessageInteractionCounter } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import {
   getMessageMediaHash,
@@ -12,13 +12,13 @@ import {
   getMessageVideo,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
-import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import StatisticsRecentPostMeta from './StatisticsRecentPostMeta';
 
 import styles from './StatisticsRecentPost.module.scss';
@@ -29,7 +29,7 @@ export type OwnProps = {
 };
 
 const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { toggleMessageStatistics } = getActions();
 
   const mediaThumbnail = getMessageMediaThumbDataUri(message);
@@ -67,7 +67,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
   );
 };
 
-function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
+function renderSummary(lang: OldLangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
   if (!blobUrl) {
     return renderMessageSummary(lang, message);
   }

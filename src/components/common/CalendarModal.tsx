@@ -3,15 +3,15 @@ import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 
-import type { LangFn } from '../../hooks/useLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 
 import { MAX_INT_32 } from '../../config';
 import buildClassName from '../../util/buildClassName';
-import { formatDateToString, formatTime, getDayStart } from '../../util/date/dateFormat';
+import { formatDateToString, formatTime, getDayStart } from '../../util/dates/dateFormat';
 
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -60,7 +60,7 @@ const CalendarModal: FC<OwnProps> = ({
   onSubmit,
   onSecondButtonClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const now = new Date();
 
   const minDate = useMemo(() => {
@@ -73,7 +73,7 @@ const CalendarModal: FC<OwnProps> = ({
   }, [isPastMode, maxAt]);
 
   const passedSelectedDate = useMemo(() => (selectedAt ? new Date(selectedAt) : new Date()), [selectedAt]);
-  const prevIsOpen = usePrevious(isOpen);
+  const prevIsOpen = usePreviousDeprecated(isOpen);
   const [isTimeInputFocused, markTimeInputAsFocused] = useFlag(false);
 
   const [selectedDate, setSelectedDate] = useState<Date>(passedSelectedDate);
@@ -401,7 +401,7 @@ function formatDay(year: number, month: number, day: number) {
   return `${year}-${month + 1}-${day}`;
 }
 
-function formatSubmitLabel(lang: LangFn, date: Date) {
+function formatSubmitLabel(lang: OldLangFn, date: Date) {
   const day = formatDateToString(date, lang.code);
   const today = formatDateToString(new Date(), lang.code);
 

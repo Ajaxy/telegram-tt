@@ -1,18 +1,18 @@
-import type { ApiMessage } from '../../../../api/types';
+import type { ApiMessage, StatefulMediaContent } from '../../../../api/types';
 import type { IconName } from '../../../../types/icons';
 import { ApiMediaFormat } from '../../../../api/types';
 
 import {
   getMessageContact,
   getMessageHtmlId,
-  getMessageMediaHash,
   getMessagePhoto,
   getMessageText,
-  getMessageTextWithSpoilers,
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
-  hasMessageLocalBlobUrl,
+  getPhotoMediaHash,
+  hasMediaLocalBlobUrl,
 } from '../../../../global/helpers';
+import { getMessageTextWithSpoilers } from '../../../../global/helpers/messageSummary';
 import {
   CLIPBOARD_ITEM_SUPPORTED,
   copyHtmlToClipboard,
@@ -21,6 +21,7 @@ import {
 } from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
 import * as mediaLoader from '../../../../util/mediaLoader';
+import { IS_SAFARI } from '../../../../util/windowEnvironment';
 import { renderMessageText } from '../../../common/helpers/renderMessageText';
 
 type ICopyOptions = {
@@ -31,6 +32,7 @@ type ICopyOptions = {
 
 export function getMessageCopyOptions(
   message: ApiMessage,
+  statefulContent: StatefulMediaContent | undefined,
   href?: string,
   canCopy?: boolean,
   afterEffect?: () => void,
@@ -43,9 +45,9 @@ export function getMessageCopyOptions(
   const photo = getMessagePhoto(message)
     || (!getMessageWebPageVideo(message) ? getMessageWebPagePhoto(message) : undefined);
   const contact = getMessageContact(message);
-  const mediaHash = getMessageMediaHash(message, 'inline');
-  const canImageBeCopied = canCopy && photo && (mediaHash || hasMessageLocalBlobUrl(message))
-    && CLIPBOARD_ITEM_SUPPORTED;
+  const mediaHash = photo ? getPhotoMediaHash(photo, 'full') : undefined;
+  const canImageBeCopied = canCopy && photo && (mediaHash || hasMediaLocalBlobUrl(photo))
+    && CLIPBOARD_ITEM_SUPPORTED && !IS_SAFARI;
   const selection = window.getSelection();
 
   if (canImageBeCopied) {
@@ -93,7 +95,12 @@ export function getMessageCopyOptions(
           const clipboardText = renderMessageText(
             { message, shouldRenderAsHtml: true },
           );
-          if (clipboardText) copyHtmlToClipboard(clipboardText.join(''), getMessageTextWithSpoilers(message)!);
+          if (clipboardText) {
+            copyHtmlToClipboard(
+              clipboardText.join(''),
+              getMessageTextWithSpoilers(message, statefulContent)!,
+            );
+          }
         }
 
         afterEffect?.();

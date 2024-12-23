@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../lib/gramjs';
 
-import type { StoryRepairInfo } from './localDb';
+import type { RepairInfo } from './localDb';
 
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 import localDb from './localDb';
@@ -20,6 +20,9 @@ const LOG_SUFFIX = {
   'UNEXPECTED RESPONSE': '#D1191C',
 };
 
+export type MessageRepairContext = Pick<GramJs.TypeMessage, 'peerId' | 'id'>;
+export type MediaRepairContext = MessageRepairContext;
+
 export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
     return undefined;
@@ -34,58 +37,76 @@ export function isChatFolder(
   return filter instanceof GramJs.DialogFilter || filter instanceof GramJs.DialogFilterChatlist;
 }
 
-export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageService) {
-  const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
+export function addMessageToLocalDb(message: GramJs.TypeMessage | GramJs.TypeSponsoredMessage) {
+  if (message instanceof GramJs.Message) {
+    if (message.media) addMediaToLocalDb(message.media, message);
 
-  let mockMessage = message;
-  if (message instanceof GramJs.Message
-    && message.media instanceof GramJs.MessageMediaInvoice
-    && message.media.extendedMedia instanceof GramJs.MessageExtendedMedia) {
-    mockMessage = new GramJs.Message({
-      ...message,
-      media: message.media.extendedMedia.media,
-    });
-  }
-
-  localDb.messages[messageFullId] = mockMessage;
-
-  if (mockMessage instanceof GramJs.Message) {
-    if (mockMessage.media) addMediaToLocalDb(mockMessage.media);
-
-    if (mockMessage.replyTo instanceof GramJs.MessageReplyHeader && mockMessage.replyTo.replyMedia) {
-      addMediaToLocalDb(mockMessage.replyTo.replyMedia);
+    if (message.replyTo instanceof GramJs.MessageReplyHeader && message.replyTo.replyMedia) {
+      addMediaToLocalDb(message.replyTo.replyMedia, message);
     }
   }
 
-  if (mockMessage instanceof GramJs.MessageService && 'photo' in mockMessage.action) {
-    addPhotoToLocalDb(mockMessage.action.photo);
+  if (message instanceof GramJs.MessageService && 'photo' in message.action) {
+    const photo = addMessageRepairInfo(message.action.photo, message);
+    addPhotoToLocalDb(photo);
+  }
+
+  if (message instanceof GramJs.SponsoredMessage && message.photo) {
+    addPhotoToLocalDb(message.photo);
   }
 }
 
-function addMediaToLocalDb(media: GramJs.TypeMessageMedia) {
-  if (media instanceof GramJs.MessageMediaDocument
-    && media.document instanceof GramJs.Document
-  ) {
-    localDb.documents[String(media.document.id)] = media.document;
+export function addMediaToLocalDb(media: GramJs.TypeMessageMedia, context?: MediaRepairContext) {
+  if (media instanceof GramJs.MessageMediaDocument && media.document) {
+    const document = addMessageRepairInfo(media.document, context);
+    addDocumentToLocalDb(document);
   }
 
   if (media instanceof GramJs.MessageMediaWebPage
     && media.webpage instanceof GramJs.WebPage
-    && media.webpage.document instanceof GramJs.Document
   ) {
-    localDb.documents[String(media.webpage.document.id)] = media.webpage.document;
+    if (media.webpage.document) {
+      const document = addMessageRepairInfo(media.webpage.document, context);
+      addDocumentToLocalDb(document);
+    }
+    if (media.webpage.photo) {
+      const photo = addMessageRepairInfo(media.webpage.photo, context);
+      addPhotoToLocalDb(photo);
+    }
   }
 
   if (media instanceof GramJs.MessageMediaGame) {
-    if (media.game.document instanceof GramJs.Document) {
-      localDb.documents[String(media.game.document.id)] = media.game.document;
+    if (media.game.document) {
+      const document = addMessageRepairInfo(media.game.document, context);
+      addDocumentToLocalDb(document);
     }
-    addPhotoToLocalDb(media.game.photo);
+
+    const photo = addMessageRepairInfo(media.game.photo, context);
+    addPhotoToLocalDb(photo);
   }
 
-  if (media instanceof GramJs.MessageMediaInvoice
-    && media.photo) {
-    localDb.webDocuments[String(media.photo.url)] = media.photo;
+  if (media instanceof GramJs.MessageMediaPhoto && media.photo) {
+    const photo = addMessageRepairInfo(media.photo, context);
+    addPhotoToLocalDb(photo);
+  }
+
+  if (media instanceof GramJs.MessageMediaInvoice) {
+    if (media.photo) {
+      const photo = addMessageRepairInfo(media.photo, context);
+      addWebDocumentToLocalDb(photo);
+    }
+
+    if (media.extendedMedia instanceof GramJs.MessageExtendedMedia) {
+      addMediaToLocalDb(media.extendedMedia.media, context);
+    }
+  }
+
+  if (media instanceof GramJs.MessageMediaPaidMedia) {
+    media.extendedMedia.forEach((extendedMedia) => {
+      if (extendedMedia instanceof GramJs.MessageExtendedMedia) {
+        addMediaToLocalDb(extendedMedia.media, context);
+      }
+    });
   }
 }
 
@@ -94,27 +115,22 @@ export function addStoryToLocalDb(story: GramJs.TypeStoryItem, peerId: string) {
     return;
   }
 
-  const storyData = {
-    id: story.id,
-    peerId,
-  };
-
-  if (story.media instanceof GramJs.MessageMediaPhoto) {
-    const photo = story.media.photo as GramJs.Photo & StoryRepairInfo;
-    photo.storyData = storyData;
+  if (story.media instanceof GramJs.MessageMediaPhoto && story.media.photo) {
+    const photo = addStoryRepairInfo(story.media.photo, peerId, story);
     addPhotoToLocalDb(photo);
   }
+
   if (story.media instanceof GramJs.MessageMediaDocument) {
     if (story.media.document instanceof GramJs.Document) {
-      const doc = story.media.document as GramJs.Document & StoryRepairInfo;
-      doc.storyData = storyData;
-      localDb.documents[String(story.media.document.id)] = doc;
+      const doc = addStoryRepairInfo(story.media.document, peerId, story);
+      addDocumentToLocalDb(doc);
     }
 
-    if (story.media.altDocument instanceof GramJs.Document) {
-      const doc = story.media.altDocument as GramJs.Document & StoryRepairInfo;
-      doc.storyData = storyData;
-      localDb.documents[String(story.media.altDocument.id)] = doc;
+    if (story.media.altDocuments) {
+      for (const altDocument of story.media.altDocuments) {
+        const doc = addStoryRepairInfo(altDocument, peerId, story);
+        addDocumentToLocalDb(doc);
+      }
     }
   }
 }
@@ -123,6 +139,42 @@ export function addPhotoToLocalDb(photo: GramJs.TypePhoto) {
   if (photo instanceof GramJs.Photo) {
     localDb.photos[String(photo.id)] = photo;
   }
+}
+
+export function addDocumentToLocalDb(document: GramJs.TypeDocument) {
+  if (document instanceof GramJs.Document) {
+    localDb.documents[String(document.id)] = document;
+  }
+}
+
+export function addStoryRepairInfo<T extends GramJs.TypeDocument | GramJs.TypeWebDocument | GramJs.TypePhoto>(
+  media: T, peerId: string, story: GramJs.TypeStoryItem,
+) : T & RepairInfo {
+  if (!(media instanceof GramJs.Document && media instanceof GramJs.Photo)) return media;
+  const repairableMedia = media as T & RepairInfo;
+  repairableMedia.localRepairInfo = {
+    type: 'story',
+    peerId,
+    id: story.id,
+  };
+  return repairableMedia;
+}
+
+export function addMessageRepairInfo<T extends GramJs.TypeDocument | GramJs.TypeWebDocument | GramJs.TypePhoto>(
+  media: T, context?: MediaRepairContext,
+) : T & RepairInfo {
+  if (!context?.peerId) return media;
+  if (!(media instanceof GramJs.Document || media instanceof GramJs.Photo || media instanceof GramJs.WebDocument)) {
+    return media;
+  }
+
+  const repairableMedia = media as T & RepairInfo;
+  repairableMedia.localRepairInfo = {
+    type: 'message',
+    peerId: getApiChatIdFromMtpPeer(context.peerId),
+    id: context.id,
+  };
+  return repairableMedia;
 }
 
 export function addChatToLocalDb(chat: GramJs.Chat | GramJs.Channel) {
@@ -139,37 +191,18 @@ export function addChatToLocalDb(chat: GramJs.Chat | GramJs.Channel) {
 export function addUserToLocalDb(user: GramJs.User) {
   const id = buildApiPeerId(user.id, 'user');
   const storedUser = localDb.users[id];
+
+  if (user.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(user.photo);
+  }
+
   if (storedUser && !storedUser.min && user.min) return;
 
   localDb.users[id] = user;
 }
 
-export function addEntitiesToLocalDb(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
-  entities.forEach((entity) => {
-    if (entity instanceof GramJs.User) {
-      addUserToLocalDb(entity);
-    } else if ((entity instanceof GramJs.Chat || entity instanceof GramJs.Channel)) {
-      addChatToLocalDb(entity);
-    }
-  });
-}
-
-export function swapLocalInvoiceMedia(
-  chatId: string, messageId: number, extendedMedia: GramJs.TypeMessageExtendedMedia,
-) {
-  const localMessage = localDb.messages[`${chatId}-${messageId}`];
-  if (!(localMessage instanceof GramJs.Message) || !localMessage.media) return;
-
-  if (extendedMedia instanceof GramJs.MessageExtendedMediaPreview) {
-    if (!(localMessage.media instanceof GramJs.MessageMediaInvoice)) {
-      return;
-    }
-    localMessage.media.extendedMedia = extendedMedia;
-  }
-
-  if (extendedMedia instanceof GramJs.MessageExtendedMedia) {
-    localMessage.media = extendedMedia.media;
-  }
+export function addWebDocumentToLocalDb(webDocument: GramJs.TypeWebDocument) {
+  localDb.webDocuments[webDocument.url] = webDocument;
 }
 
 export function serializeBytes(value: Buffer) {

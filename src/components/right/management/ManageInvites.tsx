@@ -11,7 +11,7 @@ import { STICKER_SIZE_INVITES, TME_LINK_PREFIX } from '../../../config';
 import { getMainUsername, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/date/dateFormat';
+import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
@@ -19,7 +19,7 @@ import useInterval from '../../../hooks/schedulers/useInterval';
 import useFlag from '../../../hooks/useFlag';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import LinkField from '../../common/LinkField';
@@ -71,7 +71,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     setOpenedInviteInfo,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isDeleteRevokeAllDialogOpen, openDeleteRevokeAllDialog, closeDeleteRevokeAllDialog] = useFlag();
   const [isRevokeDialogOpen, openRevokeDialog, closeRevokeDialog] = useFlag();
@@ -278,16 +278,18 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             size={STICKER_SIZE_INVITES}
             className="section-icon"
           />
-          <p className="text-muted">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
+          <p className="section-help">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
         </div>
         {primaryInviteLink && (
-          <LinkField
-            className="section"
-            link={primaryInviteLink}
-            withShare
-            onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
-            title={chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
-          />
+          <div className="section">
+            <LinkField
+              className="settings-input"
+              link={primaryInviteLink}
+              withShare
+              onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
+              title={chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
+            />
+          </div>
         )}
         <div className="section" teactFastList>
           <Button isText key="create" className="create-link" onClick={handleCreateNewClick}>
@@ -310,11 +312,11 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
               </span>
             </ListItem>
           ))}
-          <p className="text-muted hint" key="links-hint">{lang('ManageLinksInfoHelp')}</p>
+          <p className="section-help hint" key="links-hint">{lang('ManageLinksInfoHelp')}</p>
         </div>
         {revokedExportedInvites && Boolean(revokedExportedInvites.length) && (
           <div className="section" teactFastList>
-            <p className="text-muted" key="title">{lang('RevokedLinks')}</p>
+            <p className="section-help" key="title">{lang('RevokedLinks')}</p>
             <ListItem
               icon="delete"
               destructive

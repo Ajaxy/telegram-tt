@@ -7,8 +7,8 @@ import type { TabState } from '../../../global/types';
 
 import { selectChatFolder } from '../../../global/selectors';
 
-import useLang from '../../../hooks/useLang';
-import usePrevious from '../../../hooks/usePrevious';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import Modal from '../../ui/Modal';
 import Tab from '../../ui/Tab';
@@ -32,11 +32,11 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { closeChatlistModal } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isOpen = Boolean(modal);
-  const renderingInfo = usePrevious(modal) || modal;
-  const renderingFolder = usePrevious(folder) || folder;
+  const renderingInfo = usePreviousDeprecated(modal) || modal;
+  const renderingFolder = usePreviousDeprecated(folder) || folder;
 
   const title = useMemo(() => {
     if (!renderingInfo) return undefined;

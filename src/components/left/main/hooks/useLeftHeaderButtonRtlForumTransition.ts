@@ -1,12 +1,12 @@
 import { useRef } from '../../../../lib/teact/teact';
 
 import useForceUpdate from '../../../../hooks/useForceUpdate';
-import usePrevious from '../../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 export default function useLeftHeaderButtonRtlForumTransition(shouldHideSearch?: boolean) {
   const forceUpdate = useForceUpdate();
   const shouldDisableDropdownMenuTransitionRef = useRef(shouldHideSearch);
-  const prevShouldHideSearch = usePrevious(shouldHideSearch);
+  const prevShouldHideSearch = usePreviousDeprecated(shouldHideSearch);
 
   function handleDropdownMenuTransitionEnd() {
     shouldDisableDropdownMenuTransitionRef.current = Boolean(shouldHideSearch);

@@ -5,21 +5,20 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
-import type { LangCode } from '../../types';
 
 import { DEFAULT_LANG_CODE, STRICTERDOM_ENABLED } from '../../config';
 import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import buildClassName from '../../util/buildClassName';
-import { setLanguage } from '../../util/langProvider';
+import { oldSetLanguage } from '../../util/oldLangProvider';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import useAsync from '../../hooks/useAsync';
 import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
-import useLangString from '../../hooks/useLangString';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
+import useOldLang from '../../hooks/useOldLang';
+import useOldLangString from '../../hooks/useOldLangString';
 
 import AnimatedIcon from '../common/AnimatedIcon';
 import Button from '../ui/Button';
@@ -29,7 +28,7 @@ import blankUrl from '../../assets/blank.png';
 
 type StateProps =
   Pick<GlobalState, 'connectionState' | 'authState' | 'authQrCode'>
-  & { language?: LangCode };
+  & { language?: string };
 
 const DATA_PREFIX = 'tg://login?token=';
 const QR_SIZE = 280;
@@ -57,12 +56,12 @@ const AuthCode: FC<StateProps> = ({
   } = getActions();
 
   const suggestedLanguage = getSuggestedLanguage();
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
   const isConnected = connectionState === 'connectionStateReady';
-  const continueText = useLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
+  const continueText = useOldLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
   const [isQrMounted, markQrMounted, unmarkQrMounted] = useFlag();
 
@@ -90,7 +89,7 @@ const AuthCode: FC<StateProps> = ({
     });
   }, []);
 
-  const transitionClassNames = useMediaTransition(isQrMounted);
+  const transitionClassNames = useMediaTransitionDeprecated(isQrMounted);
 
   useLayoutEffect(() => {
     if (!authQrCode || !qrCode) {
@@ -130,14 +129,14 @@ const AuthCode: FC<StateProps> = ({
 
   useEffect(() => {
     if (isConnected) {
-      void setLanguage(DEFAULT_LANG_CODE);
+      void oldSetLanguage(DEFAULT_LANG_CODE);
     }
   }, [isConnected]);
 
   const handleLangChange = useCallback(() => {
     markIsLoading();
 
-    void setLanguage(suggestedLanguage, () => {
+    void oldSetLanguage(suggestedLanguage, () => {
       unmarkIsLoading();
 
       setSettingOption({ language: suggestedLanguage });

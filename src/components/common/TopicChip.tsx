@@ -8,7 +8,7 @@ import { getTopicColorCssVariable } from '../../util/forumColors';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import TopicIcon from './TopicIcon';
 
@@ -29,7 +29,7 @@ const TopicChip: FC<OwnProps> = ({
   className,
   onClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   return (
     <div
       className={buildClassName(styles.root, className)}

@@ -8,7 +8,7 @@ import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { areLinesWrapping } from '../helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 import useWindowSize from '../../../hooks/window/useWindowSize';
 
 import styles from './CodeOverlay.module.scss';
@@ -27,7 +27,7 @@ const CodeOverlay: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const windowSize = useWindowSize();
-  const lang = useLang();
+  const lang = useOldLang();
   const [isWordWrap, setIsWordWrap] = useState(true);
   const [withWordWrapButton, setWithWordWrapButton] = useState(false);
 

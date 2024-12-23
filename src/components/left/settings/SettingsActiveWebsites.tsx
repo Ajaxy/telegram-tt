@@ -7,11 +7,11 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiWebSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatPastTimeShort } from '../../../util/date/dateFormat';
+import { formatPastTimeShort } from '../../../util/dates/dateFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -42,7 +42,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
     terminateAllWebAuthorizations,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isConfirmTerminateAllDialogOpen, openConfirmTerminateAllDialog, closeConfirmTerminateAllDialog] = useFlag();
   const [openedWebsiteHash, setOpenedWebsiteHash] = useState<string | undefined>();
   const [isModalOpen, openModal, closeModal] = useFlag();
@@ -81,7 +81,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
   function renderSessions(sessionHashes: string[]) {
     return (
       <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
           {lang('WebSessionsTitle')}
         </h4>
 
@@ -111,7 +111,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
         onClick={() => handleOpenSessionModal(session.hash)}
       >
         <Avatar className={styles.avatar} peer={bot} size="tiny" />
-        <div className="multiline-menu-item full-size" dir="auto">
+        <div className="multiline-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           {bot && <FullNameTitle className={styles.title} peer={bot} />}
           <span className={buildClassName('subtitle', 'black', 'tight', styles.platform)}>

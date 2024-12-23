@@ -10,12 +10,13 @@ import {
   MEDIA_PROGRESSIVE_CACHE_NAME,
 } from '../../../config';
 import { updateAppBadge } from '../../../util/appBadge';
+import { MAIN_IDB_STORE, PASSCODE_IDB_STORE } from '../../../util/browser/idb';
 import * as cacheApi from '../../../util/cacheApi';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { unsubscribe } from '../../../util/notifications';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { parseInitialLocationHash, resetInitialLocationHash, resetLocationHash } from '../../../util/routing';
+import { pause } from '../../../util/schedulers';
 import {
   clearStoredSession,
   loadStoredSession,
@@ -33,17 +34,18 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
-  addUsers, clearGlobalForLockScreen, updateManagementProgress, updatePasscodeSettings,
+  clearGlobalForLockScreen, updateManagementProgress, updatePasscodeSettings,
 } from '../../reducers';
 
 addActionHandler('initApi', (global, actions): ActionReturnType => {
   const initialLocationHash = parseInitialLocationHash();
 
+  const hasTestParam = window.location.search.includes('test') || initialLocationHash?.tgWebAuthTest === '1';
+
   void initApi(actions.apiUpdate, {
     userAgent: navigator.userAgent,
     platform: PLATFORM_ENV,
     sessionData: loadStoredSession(),
-    isTest: window.location.search.includes('test') || initialLocationHash?.tgWebAuthTest === '1',
     isWebmSupported: IS_WEBM_SUPPORTED,
     maxBufferSize: MAX_BUFFER_SIZE,
     webAuthToken: initialLocationHash?.tgWebAuthToken,
@@ -53,6 +55,7 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
     shouldForceHttpTransport: global.settings.byKey.shouldForceHttpTransport,
     shouldDebugExportedSenders: global.settings.byKey.shouldDebugExportedSenders,
     langCode: global.settings.byKey.language,
+    isTestServerRequested: hasTestParam,
   });
 
   void setShouldEnableDebugLog(Boolean(global.settings.byKey.shouldCollectDebugLogs));
@@ -107,7 +110,6 @@ addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise
   if (!result) return;
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
   setGlobal(global);
 
@@ -166,7 +168,7 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
     resetInitialLocationHash();
     resetLocationHash();
     await unsubscribe();
-    await callApi('destroy');
+    await Promise.race([callApi('destroy'), pause(3000)]);
     await forceWebsync(false);
   } catch (err) {
     // Do nothing
@@ -193,6 +195,9 @@ addActionHandler('reset', (global, actions): ActionReturnType => {
   void cacheApi.clear(MEDIA_CACHE_NAME_AVATARS);
   void cacheApi.clear(MEDIA_PROGRESSIVE_CACHE_NAME);
   void cacheApi.clear(CUSTOM_BG_CACHE_NAME);
+
+  MAIN_IDB_STORE.clear();
+  PASSCODE_IDB_STORE.clear();
 
   const langCachePrefix = LANG_CACHE_NAME.replace(/\d+$/, '');
   const langCacheVersion = Number((LANG_CACHE_NAME.match(/\d+$/) || ['0'])[0]);

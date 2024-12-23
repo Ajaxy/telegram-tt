@@ -1,22 +1,26 @@
-import type { Api } from "../../../lib/gramjs";
-import type { TypedBroadcastChannel } from "../../../util/multitab";
-import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from "../../types";
-import type { LocalDb } from "../localDb";
-import type { MethodArgs, MethodResponse, Methods } from "../methods/types";
-import type { OriginRequest, ThenArg, WorkerMessageEvent } from "./types";
+import type { Api } from '../../../lib/gramjs';
+import type { TypedBroadcastChannel } from '../../../util/multitab';
+import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
+import type { LocalDb } from '../localDb';
+import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
+import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
 
-import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from "../../../config";
-import { logDebugMessage } from "../../../util/debugConsole";
-import Deferred from "../../../util/Deferred";
+import {
+  DATA_BROADCAST_CHANNEL_NAME,
+  DEBUG,
+  IGNORE_UNHANDLED_ERRORS,
+} from '../../../config';
+import { logDebugMessage } from '../../../util/debugConsole';
+import Deferred from '../../../util/Deferred';
 import {
   getCurrentTabId,
   subscribeToMasterChange,
-} from "../../../util/establishMultitabRole";
-import generateUniqueId from "../../../util/generateUniqueId";
-import { pause } from "../../../util/schedulers";
-import { IS_MULTITAB_SUPPORTED } from "../../../util/windowEnvironment";
+} from '../../../util/establishMultitabRole';
+import generateUniqueId from '../../../util/generateUniqueId';
+import { pause, throttleWithTickEnd } from '../../../util/schedulers';
+import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
 
-type RequestStates = {
+type RequestState = {
   messageId: string;
   resolve: Function;
   reject: Function;
@@ -26,14 +30,18 @@ type RequestStates = {
 
 const HEALTH_CHECK_TIMEOUT = 150;
 const HEALTH_CHECK_MIN_DELAY = 5 * 1000; // 5 sec
+const NO_QUEUE_BEFORE_INIT = new Set(['destroy']);
 
 let worker: Worker | undefined;
-const requestStates = new Map<string, RequestStates>();
-const requestStatesByCallback = new Map<AnyToVoidFunction, RequestStates>();
+
+const requestStates = new Map<string, RequestState>();
+const requestStatesByCallback = new Map<AnyToVoidFunction, RequestState>();
+
+let pendingPayloads: OriginPayload[] = [];
+
 const savedLocalDb: LocalDb = {
   chats: {},
   users: {},
-  messages: {},
   documents: {},
   stickerSets: {},
   photos: {},
@@ -51,11 +59,22 @@ const channel = IS_MULTITAB_SUPPORTED
   ? (new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel)
   : undefined;
 
+const postMessagesOnTickEnd = throttleWithTickEnd(() => {
+  const payloads = pendingPayloads;
+  pendingPayloads = [];
+  worker?.postMessage({ payloads });
+});
+
+function postMessageOnTickEnd(payload: OriginPayload) {
+  pendingPayloads.push(payload);
+  postMessagesOnTickEnd();
+}
+
 export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
   if (!channel) return;
 
   channel.postMessage({
-    type: "initApi",
+    type: 'initApi',
     token: getCurrentTabId(),
     initialArgs,
   });
@@ -68,8 +87,7 @@ let localApiRequestsQueue: {
   args: any;
   deferred: Deferred<any>;
 }[] = [];
-let apiRequestsQueue: { fnName: any; args: any; deferred: Deferred<any> }[] =
-  [];
+let apiRequestsQueue: { fnName: any; args: any; deferred: Deferred<any> }[] = [];
 let isInited = false;
 
 export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
@@ -83,19 +101,19 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
   if (!worker) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
-      console.log(">>> START LOAD WORKER");
+      console.log('>>> START LOAD WORKER');
     }
 
-    worker = new Worker(new URL("./worker.ts", import.meta.url));
+    worker = new Worker(new URL('./worker.ts', import.meta.url));
     subscribeToWorker(onUpdate);
 
-    if (initialArgs.platform === "iOS") {
+    if (initialArgs.platform === 'iOS') {
       setupIosHealthCheck();
     }
   }
 
   return makeRequest({
-    type: "initApi",
+    type: 'initApi',
     args: [initialArgs, savedLocalDb],
   }).then(() => {
     isInited = true;
@@ -128,7 +146,7 @@ export function callApiOnMasterTab(payload: any) {
   if (!channel) return;
 
   channel.postMessage({
-    type: "callApi",
+    type: 'callApi',
     token: getCurrentTabId(),
     ...payload,
   });
@@ -136,7 +154,7 @@ export function callApiOnMasterTab(payload: any) {
 
 export function setShouldEnableDebugLog(value: boolean) {
   return makeRequest({
-    type: "toggleDebugMode",
+    type: 'toggleDebugMode',
     isEnabled: value,
   });
 }
@@ -150,6 +168,10 @@ export function callApiLocal<T extends keyof Methods>(
   ...args: MethodArgs<T>
 ) {
   if (!isInited) {
+    if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
+      return Promise.resolve(undefined) as MethodResponse<T>;
+    }
+
     const deferred = new Deferred();
     localApiRequestsQueue.push({ fnName, args, deferred });
 
@@ -157,7 +179,7 @@ export function callApiLocal<T extends keyof Methods>(
   }
 
   const promise = makeRequest({
-    type: "callMethod",
+    type: 'callMethod',
     name: fnName,
     args,
   });
@@ -176,8 +198,7 @@ export function callApiLocal<T extends keyof Methods>(
         // Unwrap all chained promises
         const response = await promise;
         // Make sure responses do not include `VirtualClass` instances
-        const allowedResponse: Exclude<typeof response, ForbiddenResponses> =
-          response;
+        const allowedResponse: Exclude<typeof response, ForbiddenResponses> = response;
         // Suppress "unused variable" constraint
         void allowedResponse;
       } catch (err) {
@@ -194,6 +215,10 @@ export function callApi<T extends keyof Methods>(
   ...args: MethodArgs<T>
 ) {
   if (!isInited && isMasterTab) {
+    if (NO_QUEUE_BEFORE_INIT.has(fnName)) {
+      return Promise.resolve(undefined) as MethodResponse<T>;
+    }
+
     const deferred = new Deferred();
     apiRequestsQueue.push({ fnName, args, deferred });
 
@@ -202,14 +227,14 @@ export function callApi<T extends keyof Methods>(
 
   const promise = isMasterTab
     ? makeRequest({
-        type: "callMethod",
-        name: fnName,
-        args,
-      })
+      type: 'callMethod',
+      name: fnName,
+      args,
+    })
     : makeRequestToMaster({
-        name: fnName,
-        args,
-      });
+      name: fnName,
+      args,
+    });
 
   // Some TypeScript magic to make sure `VirtualClass` is never returned from any method
   if (DEBUG) {
@@ -225,8 +250,7 @@ export function callApi<T extends keyof Methods>(
         // Unwrap all chained promises
         const response = await promise;
         // Make sure responses do not include `VirtualClass` instances
-        const allowedResponse: Exclude<typeof response, ForbiddenResponses> =
-          response;
+        const allowedResponse: Exclude<typeof response, ForbiddenResponses> = response;
         // Suppress "unused variable" constraint
         void allowedResponse;
       } catch (err) {
@@ -252,7 +276,7 @@ export function cancelApiProgress(progressCallback: ApiOnProgress) {
     if (!channel) return;
 
     channel.postMessage({
-      type: "cancelApiProgress",
+      type: 'cancelApiProgress',
       token: getCurrentTabId(),
       messageId,
     });
@@ -260,44 +284,47 @@ export function cancelApiProgress(progressCallback: ApiOnProgress) {
 }
 
 export function cancelApiProgressMaster(messageId: string) {
-  worker?.postMessage({
-    type: "cancelProgress",
+  postMessageOnTickEnd({
+    type: 'cancelProgress',
     messageId,
   });
 }
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
-  worker?.addEventListener("message", ({ data }: WorkerMessageEvent) => {
-    if (!data) return;
-    if (data.type === "updates") {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      let DEBUG_startAt: number | undefined;
-      if (DEBUG) {
-        DEBUG_startAt = performance.now();
-      }
-
-      data.updates.forEach(onUpdate);
-
-      if (DEBUG) {
-        const duration = performance.now() - DEBUG_startAt!;
-        if (duration > 5) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `[API] Slow updates processing: ${data.updates.length} updates in ${duration} ms`
-          );
+  worker?.addEventListener('message', ({ data }: WorkerMessageEvent) => {
+    data?.payloads.forEach((payload) => {
+      if (payload.type === 'updates') {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        let DEBUG_startAt: number | undefined;
+        if (DEBUG) {
+          DEBUG_startAt = performance.now();
         }
+
+        payload.updates.forEach(onUpdate);
+
+        if (DEBUG) {
+          const duration = performance.now() - DEBUG_startAt!;
+          if (duration > 5) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `[API] Slow updates processing: ${payload.updates.length} updates in ${duration} ms`,
+            );
+          }
+        }
+      } else if (payload.type === 'methodResponse') {
+        handleMethodResponse(payload);
+      } else if (payload.type === 'methodCallback') {
+        handleMethodCallback(payload);
+      } else if (payload.type === 'unhandledError') {
+        const message = payload.error?.message;
+        if (message && IGNORE_UNHANDLED_ERRORS.has(message)) return;
+        throw new Error(message);
+      } else if (payload.type === 'sendBeacon') {
+        navigator.sendBeacon(payload.url, payload.data);
+      } else if (payload.type === 'debugLog') {
+        logDebugMessage(payload.level, ...payload.args);
       }
-    } else if (data.type === "methodResponse") {
-      handleMethodResponse(data);
-    } else if (data.type === "methodCallback") {
-      handleMethodCallback(data);
-    } else if (data.type === "unhandledError") {
-      throw new Error(data.error?.message);
-    } else if (data.type === "sendBeacon") {
-      navigator.sendBeacon(data.url, data.data);
-    } else if (data.type === "debugLog") {
-      logDebugMessage(data.level, ...data.args);
-    }
+    });
   });
 }
 
@@ -335,19 +362,19 @@ export function makeRequestToMaster(message: {
     ...message,
   };
 
-  const requestState = { messageId } as RequestStates;
+  const requestState = { messageId } as RequestState;
 
   // Re-wrap type because of `postMessage`
   const promise: Promise<MethodResponse<keyof Methods>> = new Promise(
     (resolve, reject) => {
       Object.assign(requestState, { resolve, reject });
-    }
+    },
   );
 
   if (
-    "args" in payload &&
-    "name" in payload &&
-    typeof payload.args[1] === "function"
+    'args' in payload
+    && 'name' in payload
+    && typeof payload.args[1] === 'function'
   ) {
     payload.withCallback = true;
 
@@ -373,26 +400,26 @@ export function makeRequestToMaster(message: {
   return promise;
 }
 
-export function makeRequest(message: OriginRequest) {
+export function makeRequest(message: OriginPayload) {
   const messageId = generateUniqueId();
-  const payload: OriginRequest = {
+  const payload: OriginPayload = {
     messageId,
     ...message,
   };
 
-  const requestState = { messageId } as RequestStates;
+  const requestState = { messageId } as RequestState;
 
   // Re-wrap type because of `postMessage`
   const promise: Promise<MethodResponse<keyof Methods>> = new Promise(
     (resolve, reject) => {
       Object.assign(requestState, { resolve, reject });
-    }
+    },
   );
 
   if (
-    "args" in payload &&
-    "name" in payload &&
-    typeof payload.args[1] === "function"
+    'args' in payload
+    && 'name' in payload
+    && typeof payload.args[1] === 'function'
   ) {
     payload.withCallback = true;
 
@@ -415,7 +442,7 @@ export function makeRequest(message: OriginRequest) {
       }
     });
 
-  worker?.postMessage(payload);
+  postMessageOnTickEnd(payload);
 
   return promise;
 }
@@ -424,7 +451,7 @@ const startedAt = Date.now();
 
 // Workaround for iOS sometimes stops interacting with worker
 function setupIosHealthCheck() {
-  window.addEventListener("focus", () => {
+  window.addEventListener('focus', () => {
     void ensureWorkerPing();
     // Sometimes a single check is not enough
     setTimeout(() => ensureWorkerPing(), 1000);
@@ -436,12 +463,10 @@ async function ensureWorkerPing() {
 
   try {
     await Promise.race([
-      makeRequest({ type: "ping" }),
-      pause(HEALTH_CHECK_TIMEOUT).then(() =>
-        isResolved
-          ? undefined
-          : Promise.reject(new Error("HEALTH_CHECK_TIMEOUT"))
-      ),
+      makeRequest({ type: 'ping' }),
+      pause(HEALTH_CHECK_TIMEOUT).then(() => (isResolved
+        ? undefined
+        : Promise.reject(new Error('HEALTH_CHECK_TIMEOUT')))),
     ]);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -450,7 +475,7 @@ async function ensureWorkerPing() {
     if (Date.now() - startedAt >= HEALTH_CHECK_MIN_DELAY) {
       worker?.terminate();
       worker = undefined;
-      updateCallback({ "@type": "requestReconnectApi" });
+      updateCallback({ '@type': 'requestReconnectApi' });
     }
   } finally {
     isResolved = true;

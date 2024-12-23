@@ -3,12 +3,12 @@ import { getActions } from '../../../../global';
 
 import type { ApiAttachment, ApiMessage } from '../../../../api/types';
 
-import { canReplaceMessageMedia, getAttachmentType } from '../../../../global/helpers';
+import { canReplaceMessageMedia, getAttachmentMediaType } from '../../../../global/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import buildAttachment from '../helpers/buildAttachment';
 
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 export default function useAttachmentModal({
   attachments,
@@ -35,7 +35,7 @@ export default function useAttachmentModal({
   insertNextText: VoidFunction;
   editedMessage: ApiMessage | undefined;
 }) {
-  const lang = useLang();
+  const lang = useOldLang();
   const { openLimitReachedModal, showAllowedMessageTypesNotification, showNotification } = getActions();
   const [shouldForceAsFile, setShouldForceAsFile] = useState<boolean>(false);
   const [shouldForceCompression, setShouldForceCompression] = useState<boolean>(false);
@@ -55,11 +55,11 @@ export default function useAttachmentModal({
       }
 
       if (newAttachments.some((attachment) => {
-        const type = getAttachmentType(attachment);
+        const type = getAttachmentMediaType(attachment);
 
         return (type === 'audio' && !canSendAudios && !canSendDocuments)
           || (type === 'video' && !canSendVideos && !canSendDocuments)
-          || (type === 'image' && !canSendPhotos && !canSendDocuments)
+          || (type === 'photo' && !canSendPhotos && !canSendDocuments)
           || (type === 'file' && !canSendDocuments);
       })) {
         showAllowedMessageTypesNotification({ chatId });
@@ -70,16 +70,15 @@ export default function useAttachmentModal({
       } else {
         setAttachments(newAttachments);
         const shouldForce = newAttachments.some((attachment) => {
-          const type = getAttachmentType(attachment);
+          const type = getAttachmentMediaType(attachment);
 
           return (type === 'audio' && !canSendAudios)
             || (type === 'video' && !canSendVideos)
-            || (type === 'image' && !canSendPhotos);
+            || (type === 'photo' && !canSendPhotos);
         });
 
         setShouldForceAsFile(Boolean(shouldForce && canSendDocuments));
         setShouldForceCompression(!canSendDocuments);
-        setShouldSuggestCompression(undefined);
       }
     },
   );

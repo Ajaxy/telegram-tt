@@ -15,9 +15,9 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import usePrevious from '../../../hooks/usePrevious';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import SliderDots from '../../common/SliderDots';
 import Button from '../../ui/Button';
@@ -46,6 +46,7 @@ export const PREMIUM_FEATURE_TITLES: Record<ApiPremiumSection, string> = {
   saved_tags: 'PremiumPreviewTags2',
   last_seen: 'PremiumPreviewLastSeen',
   message_privacy: 'PremiumPreviewMessagePrivacy',
+  effects: 'Premium.MessageEffects',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
@@ -66,6 +67,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<ApiPremiumSection, string> = {
   saved_tags: 'PremiumPreviewTagsDescription2',
   last_seen: 'PremiumPreviewLastSeenDescription',
   message_privacy: 'PremiumPreviewMessagePrivacyDescription',
+  effects: 'Premium.MessageEffectsInfo',
 };
 
 const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
@@ -117,7 +119,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   onBack,
   onClickSubscribe,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(PREMIUM_FEATURE_SECTIONS.indexOf(initialSection));
@@ -127,7 +129,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   const [isScrolledToTop, setIsScrolledToTop] = useState(true);
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
 
-  const prevInitialSection = usePrevious(initialSection);
+  const prevInitialSection = usePreviousDeprecated(initialSection);
 
   const filteredSections = useMemo(() => {
     if (!premiumPromoOrder) return PREMIUM_FEATURE_SECTIONS;

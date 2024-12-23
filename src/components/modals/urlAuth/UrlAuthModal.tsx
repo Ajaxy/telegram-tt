@@ -13,7 +13,7 @@ import { ensureProtocol } from '../../../util/ensureProtocol';
 import renderText from '../../common/helpers/renderText';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -38,7 +38,7 @@ const UrlAuthModal: FC<OwnProps & StateProps> = ({
   const { domain, botId, shouldRequestWriteAccess } = currentAuth?.request || {};
   const bot = botId ? getGlobal().users.byId[botId] : undefined;
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleOpen = useCallback(() => {
     if (modal?.url && isLoginChecked) {

@@ -7,9 +7,9 @@ import type { ApiChatFolder, ApiChatlistInviteAlready } from '../../../api/types
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Badge from '../../ui/Badge';
 import Button from '../../ui/Button';
 
@@ -23,7 +23,7 @@ type OwnProps = {
 const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
   const { closeChatlistModal, joinChatlistInvite } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(invite.missingPeerIds);
 
@@ -72,10 +72,13 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
                 {selectedPeerIds.length === invite.missingPeerIds.length ? lang('DeselectAll') : lang('SelectAll')}
               </div>
             </div>
-            <Picker
+            <PeerPicker
               itemIds={invite.missingPeerIds}
               onSelectedIdsChange={setSelectedPeerIds}
               selectedIds={selectedPeerIds}
+              allowMultiple
+              withStatus
+              itemInputType="checkbox"
             />
           </>
         )}
@@ -84,10 +87,13 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
             {lang('FolderLinkHeaderAlready')}
           </div>
         </div>
-        <Picker
+        <PeerPicker
           itemIds={invite.alreadyPeerIds}
           lockedSelectedIds={invite.alreadyPeerIds}
           selectedIds={invite.alreadyPeerIds}
+          allowMultiple
+          withStatus
+          itemInputType="checkbox"
         />
       </div>
       <Button

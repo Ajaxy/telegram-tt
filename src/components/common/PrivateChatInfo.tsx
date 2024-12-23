@@ -5,29 +5,30 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiChatMember, ApiTypingStatus, ApiUser, ApiUserStatus,
 } from '../../api/types';
-import type { StoryViewerOrigin } from '../../types';
+import type { CustomPeer, StoryViewerOrigin } from '../../types';
 import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin } from '../../types';
 
 import {
-  getMainUsername, getUserStatus, isUserOnline,
+  getMainUsername, getUserStatus, isSystemBot, isUserOnline,
 } from '../../global/helpers';
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import RippleEffect from '../ui/RippleEffect';
 import Avatar from './Avatar';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 import TypingStatus from './TypingStatus';
 
 type OwnProps = {
-  userId: string;
+  userId?: string;
+  customPeer?: CustomPeer;
   typingStatus?: ApiTypingStatus;
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
@@ -38,7 +39,6 @@ type OwnProps = {
   withMediaViewer?: boolean;
   withUsername?: boolean;
   withStory?: boolean;
-  isUnknownUser?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
@@ -67,6 +67,7 @@ type StateProps =
   };
 
 const PrivateChatInfo: FC<OwnProps & StateProps> = ({
+  customPeer,
   typingStatus,
   avatarSize = 'medium',
   status,
@@ -82,7 +83,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   noEmojiStatus,
   noFake,
   noVerified,
-  isUnknownUser,
   noRtl,
   user,
   userStatus,
@@ -102,17 +102,17 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   const {
     loadFullUser,
     openMediaViewer,
-    loadProfilePhotos,
+    loadMoreProfilePhotos,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { id: userId } = user || {};
 
   useEffect(() => {
     if (userId) {
       if (withFullInfo && isSynced) loadFullUser({ userId });
-      if (withMediaViewer) loadProfilePhotos({ profileId: userId });
+      if (withMediaViewer) loadMoreProfilePhotos({ peerId: userId, isPreload: true });
     }
   }, [userId, withFullInfo, withMediaViewer, isSynced]);
 
@@ -121,8 +121,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       if (user && hasMedia) {
         e.stopPropagation();
         openMediaViewer({
-          avatarOwnerId: user.id,
-          mediaId: 0,
+          isAvatarView: true,
+          chatId: user.id,
+          mediaIndex: 0,
           origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
         });
       }
@@ -131,7 +132,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
   const mainUsername = useMemo(() => user && withUsername && getMainUsername(user), [user, withUsername]);
 
-  if (!user && !isUnknownUser) {
+  if (!user && !customPeer) {
     return undefined;
   }
 
@@ -153,12 +154,24 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       );
     }
 
+    if (customPeer?.subtitleKey) {
+      return (
+        <span className="status" dir="auto">
+          <span className="user-status" dir="auto">{lang(customPeer.subtitleKey)}</span>
+        </span>
+      );
+    }
+
     if (!user) {
       return undefined;
     }
 
     if (typingStatus) {
       return <TypingStatus typingStatus={typingStatus} />;
+    }
+
+    if (isSystemBot(user.id)) {
+      return undefined;
     }
 
     const translatedStatus = getUserStatus(lang, user, userStatus);
@@ -194,7 +207,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
     return (
       <FullNameTitle
-        peer={user!}
+        peer={customPeer || user!}
         noFake={noFake}
         noVerified={noVerified}
         withEmojiStatus={!noEmojiStatus}
@@ -202,7 +215,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         isSavedMessages={isSavedMessages}
         isSavedDialog={isSavedDialog}
         onEmojiStatusClick={onEmojiStatusClick}
-        isUnknownUser={isUnknownUser}
         iconElement={iconElement}
       />
     );
@@ -222,10 +234,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       <Avatar
         key={user?.id}
         size={avatarSize}
-        peer={user}
+        peer={customPeer || user}
         className={buildClassName(isSavedDialog && 'overlay-avatar')}
         isSavedMessages={isSavedMessages}
-        isUnknownUser={isUnknownUser}
         isSavedDialog={isSavedDialog}
         withStory={withStory}
         storyViewerOrigin={storyViewerOrigin}
@@ -245,11 +256,11 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
     const { isSynced } = global;
-    const user = selectUser(global, userId);
-    const userStatus = selectUserStatus(global, userId);
+    const user = userId ? selectUser(global, userId) : undefined;
+    const userStatus = userId ? selectUserStatus(global, userId) : undefined;
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const self = isSavedMessages ? user : selectUser(global, global.currentUserId!);
-    const areMessagesLoaded = Boolean(selectChatMessages(global, userId));
+    const areMessagesLoaded = Boolean(userId && selectChatMessages(global, userId));
 
     return {
       user,

@@ -1,17 +1,19 @@
-import * as langProvider from '../util/langProvider';
+import {
+  addLocalizationCallback,
+  getTranslationFn,
+  type LangFn,
+} from '../util/localization';
 import useEffectOnce from './useEffectOnce';
 import useForceUpdate from './useForceUpdate';
-
-export type LangFn = langProvider.LangFn;
 
 const useLang = (): LangFn => {
   const forceUpdate = useForceUpdate();
 
   useEffectOnce(() => {
-    return langProvider.addCallback(forceUpdate);
+    return addLocalizationCallback(forceUpdate);
   });
 
-  return langProvider.getTranslationFn();
+  return getTranslationFn();
 };
 
 export default useLang;

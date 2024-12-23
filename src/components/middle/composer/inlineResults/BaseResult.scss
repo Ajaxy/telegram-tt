@@ -1,13 +1,5 @@
 .BaseResult {
-  &.chat-item-clickable > .ListItem-button {
-    padding-left: 1.25rem !important;
-    padding-right: 1.25rem !important;
-
-    .title {
-      display: block;
-      text-overflow: ellipsis;
-    }
-  }
+  padding-bottom: 0.5rem;
 
   .thumb {
     background-color: var(--color-background-secondary);

@@ -1,4 +1,5 @@
 .Avatar {
+  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
   --color-user: var(--color-primary);
   --radius: 50%;
 
@@ -27,12 +28,16 @@
     z-index: 1;
     align-items: center;
     justify-content: center;
-    background-image: linear-gradient(var(--color-white) -125%, var(--color-user));
+    background-image: linear-gradient(var(--color-white) -300%, var(--color-user));
   }
 
   &__media {
     width: 100%;
     height: 100%;
+  }
+
+  &.force-fit &__media {
+    object-fit: cover;
   }
 
   .emoji {
@@ -127,6 +132,17 @@
     .emoji {
       width: 2.5rem;
       height: 2.5rem;
+    }
+  }
+
+  &.size-huge {
+    width: 6rem;
+    height: 6rem;
+    font-size: 3rem;
+
+    .emoji {
+      width: 3rem;
+      height: 3rem;
     }
   }
 
@@ -236,11 +252,21 @@
   }
 
   &.has-unread-story::before {
-    background-image: linear-gradient(215.87deg, var(--color-avatar-story-unread-from) -1.61%, var(--color-avatar-story-unread-to) 97.44%);
+    background-image:
+      linear-gradient(
+        215.87deg,
+        var(--color-avatar-story-unread-from) -1.61%,
+        var(--color-avatar-story-unread-to) 97.44%,
+      );
   }
 
   &.has-unread-story.close-friend::before {
-    background-image: linear-gradient(215.87deg, var(--color-avatar-story-friend-unread-from) -1.61%, var(--color-avatar-story-friend-unread-to) 97.44%);
+    background-image:
+      linear-gradient(
+        215.87deg,
+        var(--color-avatar-story-friend-unread-from) -1.61%,
+        var(--color-avatar-story-friend-unread-to) 97.44%,
+      );
   }
 
   .poster {
@@ -258,7 +284,7 @@
     --color-user: var(--color-deleted-account);
   }
 
-  &.unknown-user {
-    background: var(--premium-gradient);
+  &.premium-gradient-bg > .inner {
+    background-image: var(--premium-gradient);
   }
 }

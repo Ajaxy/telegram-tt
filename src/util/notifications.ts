@@ -13,7 +13,7 @@ import {
   getMessageAction,
   getMessageRecentReaction,
   getMessageSenderName,
-  getMessageSummaryText,
+  getMessageStatefulContent,
   getPrivateChatUserId,
   getUserFullName,
   isActionMessage,
@@ -21,6 +21,7 @@ import {
   selectIsChatMuted,
   selectShouldShowMessagePreview,
 } from '../global/helpers';
+import { getMessageSummaryText } from '../global/helpers/messageSummary';
 import { getMessageReplyInfo } from '../global/helpers/replies';
 import { addNotifyExceptions, replaceSettings } from '../global/reducers';
 import {
@@ -35,8 +36,8 @@ import {
 import { callApi } from '../api/gramjs';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
 import { buildCollectionByKey } from './iteratees';
-import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
+import { oldTranslate } from './oldLangProvider';
 import { debounce } from './schedulers';
 import { IS_ELECTRON, IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
 
@@ -353,7 +354,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
 
     if (isActionMessage(message)) {
       body = renderActionMessageText(
-        translate,
+        oldTranslate,
         message,
         !isChat ? messageSenderUser : undefined,
         isChat ? chat : undefined,
@@ -365,12 +366,13 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
       ) as string;
     } else {
       // TODO[forums] Support ApiChat
-      const senderName = getMessageSenderName(translate, chat.id, isChat ? messageSenderChat : messageSenderUser);
-      let summary = getMessageSummaryText(translate, message, hasReaction, 60);
+      const senderName = getMessageSenderName(oldTranslate, chat.id, isChat ? messageSenderChat : messageSenderUser);
+      const statefulContent = getMessageStatefulContent(global, message);
+      let summary = getMessageSummaryText(oldTranslate, message, statefulContent, hasReaction, 60);
 
       if (hasReaction) {
         const emoji = getReactionEmoji(reaction);
-        summary = translate('PushReactText', [emoji, summary]);
+        summary = oldTranslate('PushReactText', [emoji, summary]);
       }
 
       body = senderName ? `${senderName}: ${summary}` : summary;
@@ -379,7 +381,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     body = 'New message';
   }
 
-  let title = isScreenLocked ? APP_NAME : getChatTitle(translate, chat, isSelf);
+  let title = isScreenLocked ? APP_NAME : getChatTitle(oldTranslate, chat, isSelf);
 
   if (message.isSilent) {
     title += ' 🔕';
@@ -401,10 +403,11 @@ async function getAvatar(chat: ApiPeer) {
 
 function getReactionEmoji(reaction: ApiPeerReaction) {
   let emoji;
-  if ('emoticon' in reaction.reaction) {
+  if (reaction.reaction.type === 'emoji') {
     emoji = reaction.reaction.emoticon;
   }
-  if ('documentId' in reaction.reaction) {
+
+  if (reaction.reaction.type === 'custom') {
     // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
     emoji = getGlobal().customEmojis.byId[reaction.reaction.documentId]?.emoji;
   }
@@ -431,10 +434,11 @@ export async function notifyAboutCall({
   };
 
   if ('vibrate' in navigator) {
+    // @ts-ignore
     options.vibrate = [200, 100, 200];
   }
 
-  const notification = new Notification(translate('VoipIncoming'), options);
+  const notification = new Notification(oldTranslate('VoipIncoming'), options);
 
   notification.onclick = () => {
     notification.close();
@@ -469,7 +473,7 @@ export async function notifyAboutMessage({
   if (isReaction && !activeReaction) return;
 
   // If this is a custom emoji reaction we need to make sure it is loaded
-  if (isReaction && activeReaction && 'documentId' in activeReaction.reaction) {
+  if (isReaction && activeReaction && activeReaction.reaction.type === 'custom') {
     await loadCustomEmoji(activeReaction.reaction.documentId);
   }
 
@@ -507,6 +511,7 @@ export async function notifyAboutMessage({
     };
 
     if ('vibrate' in navigator) {
+      // @ts-ignore
       options.vibrate = [200, 100, 200];
     }
 

@@ -1,0 +1,33 @@
+@use '../../styles/mixins';
+
+.root {
+  display: inline-block;
+  width: 100%;
+}
+
+.collapsed {
+  @include mixins.gradient-border-bottom(1rem);
+}
+
+.gradientContainer {
+  margin-top: 0.125rem;
+  margin-bottom: 0.125rem;
+  max-height: inherit;
+}
+
+.collapseIcon {
+  position: absolute;
+  display: grid;
+  place-items: center;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+
+  bottom: 0;
+  right: 0;
+}
+
+.clickable {
+  cursor: var(--custom-cursor, pointer);
+}

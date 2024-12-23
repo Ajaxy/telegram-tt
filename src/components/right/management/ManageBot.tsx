@@ -22,11 +22,11 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import AvatarEditable from '../../ui/AvatarEditable';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
@@ -74,7 +74,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
   const [isFieldTouched, markFieldTouched, unmarkProfileTouched] = useFlag(false);
   const [isAvatarTouched, markAvatarTouched, unmarkAvatarTouched] = useFlag(false);
   const [error, setError] = useState<string | undefined>();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const username = useMemo(() => (user ? getMainUsername(user) : undefined), [user]);
 

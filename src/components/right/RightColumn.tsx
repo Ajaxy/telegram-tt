@@ -33,9 +33,9 @@ import Management from './management/Management.async';
 import PollResults from './PollResults.async';
 import Profile from './Profile';
 import RightHeader from './RightHeader';
-import RightSearch from './RightSearch.async';
 import BoostStatistics from './statistics/BoostStatistics';
 import MessageStatistics from './statistics/MessageStatistics.async';
+import MonetizationStatistics from './statistics/MonetizationStatistics';
 import Statistics from './statistics/Statistics.async';
 import StoryStatistics from './statistics/StoryStatistics.async';
 import StickerSearch from './StickerSearch.async';
@@ -87,7 +87,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const {
     toggleChatInfo,
     toggleManagement,
-    closeLocalTextSearch,
     setStickerSearchQuery,
     setGifSearchQuery,
     closePollResults,
@@ -104,6 +103,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     closeEditTopicPanel,
     closeBoostStatistics,
     setShouldCloseRightColumn,
+    closeMonetizationStatistics,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -117,12 +117,12 @@ const RightColumn: FC<OwnProps & StateProps> = ({
 
   const isOpen = contentKey !== undefined;
   const isProfile = contentKey === RightColumnContent.ChatInfo;
-  const isSearch = contentKey === RightColumnContent.Search;
   const isManagement = contentKey === RightColumnContent.Management;
   const isStatistics = contentKey === RightColumnContent.Statistics;
   const isMessageStatistics = contentKey === RightColumnContent.MessageStatistics;
   const isStoryStatistics = contentKey === RightColumnContent.StoryStatistics;
   const isBoostStatistics = contentKey === RightColumnContent.BoostStatistics;
+  const isMonetizationStatistics = contentKey === RightColumnContent.MonetizationStatistics;
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
@@ -200,11 +200,9 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       case RightColumnContent.BoostStatistics:
         closeBoostStatistics();
         break;
-      case RightColumnContent.Search: {
-        blurSearchInput();
-        closeLocalTextSearch();
+      case RightColumnContent.MonetizationStatistics:
+        closeMonetizationStatistics();
         break;
-      }
       case RightColumnContent.StickerSearch:
         blurSearchInput();
         setStickerSearchQuery({ query: undefined });
@@ -318,16 +316,6 @@ const RightColumn: FC<OwnProps & StateProps> = ({
             onProfileStateChange={setProfileState}
           />
         );
-      case RightColumnContent.Search:
-        return (
-          <RightSearch
-            key={`right_search_${chatId!}`}
-            chatId={chatId!}
-            threadId={threadId!}
-            onClose={close}
-            isActive={isOpen && isActive}
-          />
-        );
       case RightColumnContent.Management:
         return (
           <Management
@@ -347,6 +335,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         return <Statistics chatId={chatId!} />;
       case RightColumnContent.BoostStatistics:
         return <BoostStatistics />;
+      case RightColumnContent.MonetizationStatistics:
+        return <MonetizationStatistics />;
       case RightColumnContent.MessageStatistics:
         return <MessageStatistics chatId={chatId!} isActive={isOpen && isActive} />;
       case RightColumnContent.StoryStatistics:
@@ -380,10 +370,10 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           threadId={threadId}
           isColumnOpen={isOpen}
           isProfile={isProfile}
-          isSearch={isSearch}
           isManagement={isManagement}
           isStatistics={isStatistics}
           isBoostStatistics={isBoostStatistics}
+          isMonetizationStatistics={isMonetizationStatistics}
           isMessageStatistics={isMessageStatistics}
           isStoryStatistics={isStoryStatistics}
           isStickerSearch={isStickerSearch}

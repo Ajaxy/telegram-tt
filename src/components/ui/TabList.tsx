@@ -5,11 +5,12 @@ import type { MenuItemContextAction } from './ListItem';
 
 import { ALL_FOLDER_ID } from '../../config';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
+import buildClassName from '../../util/buildClassName';
 import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
-import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Tab from './Tab';
 
@@ -28,7 +29,8 @@ type OwnProps = {
   tabs: readonly TabWithProperties[];
   areFolders?: boolean;
   activeTab: number;
-  big?: boolean;
+  className?: string;
+  tabClassName?: string;
   onSwitchTab: (index: number) => void;
   contextRootElementSelector?: string;
 };
@@ -38,12 +40,12 @@ const TAB_SCROLL_THRESHOLD_PX = 16;
 const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
 const TabList: FC<OwnProps> = ({
-  tabs, areFolders, activeTab, big, onSwitchTab,
-  contextRootElementSelector,
+  tabs, areFolders, activeTab, onSwitchTab,
+  contextRootElementSelector, className, tabClassName,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const previousActiveTab = usePrevious(activeTab);
+  const previousActiveTab = usePreviousDeprecated(activeTab);
 
   useHorizontalScroll(containerRef, undefined, true);
 
@@ -71,11 +73,11 @@ const TabList: FC<OwnProps> = ({
     animateHorizontalScroll(container, newLeft, SCROLL_DURATION);
   }, [activeTab]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <div
-      className={`TabList no-scrollbar ${big ? 'big' : ''}`}
+      className={buildClassName('TabList', 'no-scrollbar', className)}
       ref={containerRef}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
@@ -93,6 +95,7 @@ const TabList: FC<OwnProps> = ({
           clickArg={i}
           contextActions={tab.contextActions}
           contextRootElementSelector={contextRootElementSelector}
+          className={tabClassName}
         />
       ))}
     </div>

@@ -1,0 +1,59 @@
+@use '../../../styles/mixins';
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: min(92vh, 40rem) !important;
+  overflow-x: hidden;
+}
+
+.title {
+  background-color: var(--color-background-secondary);
+}
+
+.value {
+  background-color: var(--color-background);
+  word-break: break-word;
+  min-width: 2rem;
+}
+
+.table {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  border-radius: 0.3125rem;
+  border: 1px solid var(--color-borders);
+  background-color: var(--color-borders);
+  gap: 1px;
+
+  flex-shrink: 0;
+
+  overflow: hidden;
+}
+
+.noFooter {
+  margin-top: 1.5rem;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  position: relative;
+  min-height: 2.5rem;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.avatar {
+  align-self: center;
+}
+
+.chatItem {
+  margin: 0;
+  width: fit-content;
+  background-color: var(--color-background);
+  color: var(--color-primary);
+}

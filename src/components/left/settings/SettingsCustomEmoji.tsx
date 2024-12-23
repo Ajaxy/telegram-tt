@@ -13,7 +13,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import StickerSetCard from '../../common/StickerSetCard';
 import Checkbox from '../../ui/Checkbox';
@@ -40,7 +40,7 @@ const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
   onReset,
 }) => {
   const { openStickerSet, setSettingOption } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const stickerSettingsRef = useRef<HTMLDivElement>(null);

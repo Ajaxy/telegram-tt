@@ -3,7 +3,7 @@ import { useMemo } from '../../../../lib/teact/teact';
 import { mapValues } from '../../../../util/iteratees';
 import { useChatAnimationType } from './useChatAnimationType';
 
-import usePrevious from '../../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 export default function useOrderDiff(orderedIds: (string | number)[] | undefined, key?: string) {
   const orderById = useMemo(() => {
@@ -17,8 +17,8 @@ export default function useOrderDiff(orderedIds: (string | number)[] | undefined
     }, {} as Record<string, number>);
   }, [orderedIds]);
 
-  const prevOrderById = usePrevious(orderById);
-  const prevChatId = usePrevious(key);
+  const prevOrderById = usePreviousDeprecated(orderById);
+  const prevChatId = usePreviousDeprecated(key);
 
   const orderDiffById = useMemo(() => {
     if (!orderById || !prevOrderById || key !== prevChatId) {

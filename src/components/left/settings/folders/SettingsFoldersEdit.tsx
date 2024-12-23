@@ -16,15 +16,12 @@ import { selectCanShareFolder } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
+import { CUSTOM_PEER_EXCLUDED_CHAT_TYPES, CUSTOM_PEER_INCLUDED_CHAT_TYPES } from '../../../../util/objects/customPeer';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
-import {
-  EXCLUDED_CHAT_TYPES,
-  INCLUDED_CHAT_TYPES,
-  selectChatFilters,
-} from '../../../../hooks/reducers/useFoldersReducer';
+import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import GroupChatInfo from '../../../common/GroupChatInfo';
@@ -32,7 +29,6 @@ import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import InputText from '../../../ui/InputText';
 import ListItem from '../../../ui/ListItem';
-import ShowMoreButton from '../../../ui/ShowMoreButton';
 import Spinner from '../../../ui/Spinner';
 
 type OwnProps = {
@@ -113,11 +109,11 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   const {
     selectedChatIds: includedChatIds,
     selectedChatTypes: includedChatTypes,
-  } = selectChatFilters(state, 'included');
+  } = useMemo(() => selectChatFilters(state, 'included'), [state]);
   const {
     selectedChatIds: excludedChatIds,
     selectedChatTypes: excludedChatTypes,
-  } = selectChatFilters(state, 'excluded');
+  } = useMemo(() => selectChatFilters(state, 'excluded'), [state]);
 
   useEffect(() => {
     setIsIncludedChatsListExpanded(false);
@@ -147,7 +143,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     loadedActiveChatIds, loadedArchivedChatIds,
   ]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -217,8 +213,8 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
   function renderChatType(key: string, mode: 'included' | 'excluded') {
     const chatType = mode === 'included'
-      ? INCLUDED_CHAT_TYPES.find(({ key: typeKey }) => typeKey === key)
-      : EXCLUDED_CHAT_TYPES.find(({ key: typeKey }) => typeKey === key);
+      ? CUSTOM_PEER_INCLUDED_CHAT_TYPES.find(({ type: typeKey }) => typeKey === key)
+      : CUSTOM_PEER_EXCLUDED_CHAT_TYPES.find(({ type: typeKey }) => typeKey === key);
 
     if (!chatType) {
       return undefined;
@@ -226,13 +222,15 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
     return (
       <ListItem
-        key={chatType.key}
+        key={chatType.type}
         className="settings-folders-list-item mb-1"
-        icon={chatType.icon}
         narrow
         inactive
       >
-        {lang(chatType.title)}
+        <PrivateChatInfo
+          avatarSize="small"
+          customPeer={chatType}
+        />
       </ListItem>
     );
   }
@@ -265,12 +263,16 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           </ListItem>
         ))}
         {(!isExpanded && leftChatsCount > 0) && (
-          <ShowMoreButton
-            count={leftChatsCount}
-            itemName="chat"
+          <ListItem
+            key="load-more"
+            className="settings-folders-list-item"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={clickHandler}
-          />
+            icon="down"
+          >
+            {lang('FilterShowMoreChats', leftChatsCount, 'i')}
+          </ListItem>
         )}
       </>
     );
@@ -313,8 +315,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterInclude')}</h4>
 
             <ListItem
-              className="settings-folders-list-item color-primary mb-0"
+              className="settings-folders-list-item color-primary"
               icon="add"
+              narrow
               onClick={onAddIncludedChats}
             >
               {lang('FilterAddChats')}
@@ -329,8 +332,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
             <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>{lang('FilterExclude')}</h4>
 
             <ListItem
-              className="settings-folders-list-item color-primary mb-0"
+              className="settings-folders-list-item color-primary"
               icon="add"
+              narrow
               onClick={onAddExcludedChats}
             >
               {lang('FilterAddChats')}
@@ -346,8 +350,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           </h4>
 
           <ListItem
-            className="settings-folders-list-item color-primary mb-0"
+            className="settings-folders-list-item color-primary"
             icon="add"
+            narrow
             onClick={handleCreateInviteClick}
           >
             {lang('ChatListFilter.CreateLinkNew')}
@@ -355,8 +360,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
           {invites?.map((invite) => (
             <ListItem
-              className="settings-folders-list-item mb-0"
+              className="settings-folders-list-item"
               icon="link"
+              narrow
               multiline
               onClick={handleEditInviteClick}
               clickArg={invite.url}

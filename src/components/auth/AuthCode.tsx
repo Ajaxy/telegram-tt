@@ -12,7 +12,7 @@ import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import TrackingMonkey from '../common/TrackingMonkey';
 import InputText from '../ui/InputText';
@@ -34,7 +34,7 @@ const AuthCode: FC<StateProps> = ({
     clearAuthError,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 

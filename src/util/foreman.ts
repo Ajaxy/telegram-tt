@@ -3,29 +3,38 @@ import Deferred from './Deferred';
 export class Foreman {
   private deferreds: Deferred[] = [];
 
+  private priorityDeferreds: Deferred[] = [];
+
   activeWorkers = 0;
 
   constructor(private maxWorkers: number) {
   }
 
-  requestWorker() {
+  requestWorker(isPriority?: boolean) {
     if (this.activeWorkers === this.maxWorkers) {
       const deferred = new Deferred();
-      this.deferreds.push(deferred);
+      if (isPriority) {
+        this.priorityDeferreds.push(deferred);
+      } else {
+        this.deferreds.push(deferred);
+      }
       return deferred.promise;
-    } else {
-      this.activeWorkers++;
     }
 
+    this.activeWorkers++;
     return Promise.resolve();
   }
 
   releaseWorker() {
-    if (this.deferreds.length && (this.activeWorkers === this.maxWorkers)) {
-      const deferred = this.deferreds.shift()!;
+    if (this.queueLength) {
+      const deferred = (this.priorityDeferreds.shift() || this.deferreds.shift())!;
       deferred.resolve();
     } else {
       this.activeWorkers--;
     }
+  }
+
+  get queueLength() {
+    return this.deferreds.length + this.priorityDeferreds.length;
   }
 }

@@ -9,8 +9,8 @@ import { selectUser } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
@@ -33,7 +33,7 @@ const UNREGISTERED_CONTACT_ID = '0';
 const Contact: FC<OwnProps & StateProps> = ({
   contact, user, phoneCodeList, noUserColors,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     openChat, openAddContactDialog, showNotification, openChatWithInfo,
   } = getActions();
@@ -67,7 +67,7 @@ const Contact: FC<OwnProps & StateProps> = ({
       className={styles.root}
     >
       <div className={styles.infoContainer} onClick={handleClick}>
-        <Avatar size="large" peer={user} text={getContactName(contact)} />
+        <Avatar size="medium" peer={user} text={getContactName(contact)} />
         <div className={styles.info}>
           <div className={styles.name}>
             {user ? getUserFullName(user) : getContactName(contact)}
@@ -85,6 +85,7 @@ const Contact: FC<OwnProps & StateProps> = ({
               isText
               color="translucent"
               ripple
+              size="tiny"
               onClick={handleOpenChat}
               className={styles.button}
             >
@@ -95,6 +96,7 @@ const Contact: FC<OwnProps & StateProps> = ({
                 isText
                 color="translucent"
                 ripple
+                size="tiny"
                 onClick={handleAddContact}
                 className={styles.button}
               >

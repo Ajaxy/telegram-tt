@@ -11,7 +11,7 @@ import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { getStickerMediaHash } from '../../../global/helpers';
 import { selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateToString } from '../../../util/date/dateFormat';
+import { formatDateToString } from '../../../util/dates/dateFormat';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/windowEnvironment';
@@ -19,8 +19,8 @@ import renderText from '../helpers/renderText';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import ListItem from '../../ui/ListItem';
 import StickerView from '../StickerView';
@@ -53,13 +53,13 @@ const UserBirthday = ({
   animatedEmojiEffects,
   isInSettings,
 }: OwnProps & StateProps) => {
-  const { openGiftPremiumModal, requestConfetti } = getActions();
+  const { openGiftModal, requestConfetti } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const animationPlayedRef = useRef(false);
   const [isPlayingAnimation, playAnimation, stopAnimation] = useFlag();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     formattedDate,
@@ -105,12 +105,12 @@ const UserBirthday = ({
     if (!isToday || !numbersForAge) return;
 
     numbersForAge.forEach((sticker) => {
-      const hash = getStickerMediaHash(sticker.id);
+      const hash = getStickerMediaHash(sticker, 'preview');
       mediaLoader.fetch(hash, ApiMediaFormat.BlobUrl);
     });
 
     if (effectSticker) {
-      const effectHash = getStickerMediaHash(effectSticker.id);
+      const effectHash = getStickerMediaHash(effectSticker, 'preview');
       mediaLoader.fetch(effectHash, ApiMediaFormat.BlobUrl);
     }
   }, [effectSticker, isToday, numbersForAge]);
@@ -145,7 +145,7 @@ const UserBirthday = ({
   const canGiftPremium = isToday && !user.isPremium && !user.isSelf && !isPremiumPurchaseBlocked;
 
   const handleOpenGiftModal = useLastCallback(() => {
-    openGiftPremiumModal({ forUserIds: [user.id] });
+    openGiftModal({ forUserId: user.id });
   });
 
   const handleClick = useLastCallback(() => {
@@ -175,7 +175,9 @@ const UserBirthday = ({
         isStatic={isStatic}
         onSecondaryIconClick={handleOpenGiftModal}
       >
-        <div className="title">{renderText(lang(valueKey, [formattedDate, age], undefined, age))}</div>
+        <div className="title" dir={lang.isRtl ? 'rtl' : undefined}>
+          {renderText(lang(valueKey, [formattedDate, age], undefined, age))}
+        </div>
         <span className="subtitle">{lang(isToday ? 'ProfileBirthdayToday' : 'ProfileBirthday')}</span>
       </ListItem>
       {isPlayingAnimation && IS_OFFSET_PATH_SUPPORTED && numbersForAge?.map((sticker, index) => (

@@ -28,6 +28,7 @@ import { IS_ELECTRON } from '../../../util/windowEnvironment';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';
@@ -70,6 +71,7 @@ const LeftSideMenuItems = ({
     openUrl,
     openChatWithInfo,
   } = getActions();
+  const oldLang = useOldLang();
   const lang = useLang();
 
   const animationLevelValue = animationLevel !== ANIMATION_LEVEL_MIN
@@ -117,7 +119,7 @@ const LeftSideMenuItems = ({
   });
 
   const handleOpenTipsChat = useLastCallback(() => {
-    openChatByUsername({ username: lang('Settings.TipsUsername') });
+    openChatByUsername({ username: oldLang('Settings.TipsUsername') });
   });
 
   const handleBugReportClick = useLastCallback(() => {
@@ -134,14 +136,14 @@ const LeftSideMenuItems = ({
         icon="saved-messages"
         onClick={handleSelectSaved}
       >
-        {lang('SavedMessages')}
+        {oldLang('SavedMessages')}
       </MenuItem>
       {archiveSettings.isHidden && (
         <MenuItem
           icon="archive"
           onClick={onSelectArchived}
         >
-          <span className="menu-item-name">{lang('ArchivedChats')}</span>
+          <span className="menu-item-name">{oldLang('ArchivedChats')}</span>
           {archivedUnreadChatsCount > 0 && (
             <div className="right-badge">{archivedUnreadChatsCount}</div>
           )}
@@ -151,7 +153,7 @@ const LeftSideMenuItems = ({
         icon="user"
         onClick={onSelectContacts}
       >
-        {lang('Contacts')}
+        {oldLang('Contacts')}
       </MenuItem>
       {bots.map((bot) => (
         <AttachBotItem
@@ -167,22 +169,22 @@ const LeftSideMenuItems = ({
         icon="play-story"
         onClick={handleOpenMyStories}
       >
-        {lang('Settings.MyStories')}
+        {oldLang('Settings.MyStories')}
       </MenuItem>
       <MenuItem
         icon="settings"
         onClick={onSelectSettings}
       >
-        {lang('Settings')}
+        {oldLang('Settings')}
       </MenuItem>
       <MenuItem
         icon="darkmode"
         onClick={handleDarkModeToggle}
       >
-        <span className="menu-item-name">{lang('lng_menu_night_mode')}</span>
+        <span className="menu-item-name">{oldLang('lng_menu_night_mode')}</span>
         <Switcher
           id="darkmode"
-          label={lang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
+          label={oldLang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
           checked={theme === 'dark'}
           noAnimation
         />
@@ -191,27 +193,27 @@ const LeftSideMenuItems = ({
         icon="animations"
         onClick={handleAnimationLevelChange}
       >
-        <span className="menu-item-name capitalize">{lang('Appearance.Animations').toLowerCase()}</span>
+        <span className="menu-item-name capitalize">{oldLang('Appearance.Animations').toLowerCase()}</span>
         <Toggle value={animationLevelValue} />
       </MenuItem>
       <MenuItem
         icon="help"
         onClick={handleOpenTipsChat}
       >
-        {lang('TelegramFeatures')}
+        {oldLang('TelegramFeatures')}
       </MenuItem>
       <MenuItem
         icon="bug"
         onClick={handleBugReportClick}
       >
-        Report Bug
+        {lang('MenuReportBug')}
       </MenuItem>
       {IS_BETA && (
         <MenuItem
           icon="permissions"
           onClick={handleChangelogClick}
         >
-          Beta Changelog
+          {lang('MenuBetaChangelog')}
         </MenuItem>
       )}
       {withOtherVersions && (
@@ -221,7 +223,7 @@ const LeftSideMenuItems = ({
           href={`${WEB_VERSION_BASE}k`}
           onClick={handleSwitchToWebK}
         >
-          Switch to K Version
+          {lang('MenuSwitchToK')}
         </MenuItem>
       )}
       {canInstall && (
@@ -229,7 +231,7 @@ const LeftSideMenuItems = ({
           icon="install"
           onClick={getPromptInstall()}
         >
-          Install App
+          {lang('MenuInstallApp')}
         </MenuItem>
       )}
     </>

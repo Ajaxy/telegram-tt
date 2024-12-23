@@ -10,10 +10,8 @@ import {
   toggleStream,
 } from '../../../lib/secret-sauce';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { addUsers } from '../../reducers';
 import {
   removeGroupCall,
   updateActiveGroupCall,
@@ -238,7 +236,7 @@ addActionHandler('connectToActiveGroupCall', async (global, actions, payload): P
     global = getGlobal();
     const chat = selectChat(global, groupCall.chatId);
     if (!chat) return;
-    await loadFullChat(global, actions, chat, tabId);
+    await loadFullChat(global, actions, chat);
   }
 });
 
@@ -263,11 +261,7 @@ addActionHandler('connectToActivePhoneCall', async (global, actions): Promise<vo
 
   if (!result) {
     if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
-    return;
   }
-  global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  setGlobal(global);
 });
 
 addActionHandler('acceptCall', async (global): Promise<void> => {
@@ -281,13 +275,7 @@ addActionHandler('acceptCall', async (global): Promise<void> => {
   await callApi('createPhoneCallState', [false]);
 
   const gB = await callApi('acceptPhoneCall', [dhConfig])!;
-  const result = await callApi('acceptCall', { call: phoneCall, gB });
-  if (!result) {
-    return;
-  }
-  global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  setGlobal(global);
+  await callApi('acceptCall', { call: phoneCall, gB });
 });
 
 addActionHandler('sendSignalingData', (global, actions, payload): ActionReturnType => {

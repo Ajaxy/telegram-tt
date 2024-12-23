@@ -1,5 +1,5 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useMemo } from '../../../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../../global';
 
 import type {
@@ -10,14 +10,16 @@ import type {
   ApiSavedReactionTag,
 } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
+import type { ThreadId } from '../../../../types';
 
 import { getReactionKey, isReactionChosen } from '../../../../global/helpers';
 import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import { getMessageKey } from '../../../../util/messageKey';
+import { getMessageKey } from '../../../../util/keys/messageKey';
 
-import useLang from '../../../../hooks/useLang';
+import useEffectOnce from '../../../../hooks/useEffectOnce';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import ReactionButton from './ReactionButton';
 import SavedTagButton from './SavedTagButton';
@@ -26,6 +28,7 @@ import './Reactions.scss';
 
 type OwnProps = {
   message: ApiMessage;
+  threadId?: ThreadId;
   isOutside?: boolean;
   maxWidth?: number;
   metaChildren?: React.ReactNode;
@@ -36,9 +39,11 @@ type OwnProps = {
 };
 
 const MAX_RECENT_AVATARS = 3;
+const PAID_SEND_DELAY = 5000;
 
 const Reactions: FC<OwnProps> = ({
   message,
+  threadId,
   isOutside,
   maxWidth,
   metaChildren,
@@ -49,11 +54,14 @@ const Reactions: FC<OwnProps> = ({
 }) => {
   const {
     toggleReaction,
-    setLocalTextSearchTag,
-    searchTextMessagesLocal,
+    addLocalPaidReaction,
+    updateMiddleSearch,
+    performMiddleSearch,
     openPremiumModal,
+    resetLocalPaidReactions,
+    showNotification,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { results, areTags, recentReactions } = message.reactions!;
 
@@ -106,8 +114,8 @@ const Reactions: FC<OwnProps> = ({
         return;
       }
 
-      setLocalTextSearchTag({ tag: reaction });
-      searchTextMessagesLocal();
+      updateMiddleSearch({ chatId: message.chatId, threadId, update: { savedTag: reaction } });
+      performMiddleSearch({ chatId: message.chatId, threadId });
       return;
     }
 
@@ -118,11 +126,53 @@ const Reactions: FC<OwnProps> = ({
     });
   });
 
+  const paidLocalCount = useMemo(() => results.find((r) => r.reaction.type === 'paid')?.localAmount || 0, [results]);
+
+  const handlePaidClick = useLastCallback((count: number) => {
+    addLocalPaidReaction({
+      chatId: message.chatId,
+      messageId: message.id,
+      count,
+    });
+  });
+
+  useEffect(() => {
+    if (!paidLocalCount) return;
+
+    showNotification({
+      localId: getMessageKey(message),
+      title: lang('StarsSentTitle'),
+      message: lang('StarsSentText', paidLocalCount),
+      actionText: lang('StarsSentUndo'),
+      cacheBreaker: paidLocalCount.toString(),
+      action: {
+        action: 'resetLocalPaidReactions',
+        payload: { chatId: message.chatId, messageId: message.id },
+      },
+      dismissAction: {
+        action: 'sendPaidReaction',
+        payload: { chatId: message.chatId, messageId: message.id },
+      },
+      duration: PAID_SEND_DELAY,
+      shouldShowTimer: true,
+      disableClickDismiss: true,
+      icon: 'star',
+    });
+  }, [lang, message, paidLocalCount]);
+
   const handleRemoveReaction = useLastCallback((reaction: ApiReaction) => {
     toggleReaction({
       chatId: message.chatId,
       messageId: message.id,
       reaction,
+    });
+  });
+
+  // Reset paid reactions on unmount
+  useEffectOnce(() => () => {
+    resetLocalPaidReactions({
+      chatId: message.chatId,
+      messageId: message.id,
     });
   });
 
@@ -143,7 +193,7 @@ const Reactions: FC<OwnProps> = ({
             containerId={messageKey}
             isOwnMessage={message.isOutgoing}
             isChosen={isChosen}
-            reaction={reaction.reaction}
+            reaction={reaction.reaction as ApiReaction}
             tag={tag}
             withContextMenu={isCurrentUserPremium}
             onClick={handleClick}
@@ -153,6 +203,8 @@ const Reactions: FC<OwnProps> = ({
         ) : (
           <ReactionButton
             key={reactionKey}
+            chatId={message.chatId}
+            messageId={message.id}
             className="message-reaction"
             chosenClassName="chosen"
             containerId={messageKey}
@@ -160,6 +212,7 @@ const Reactions: FC<OwnProps> = ({
             recentReactors={recentReactors}
             reaction={reaction}
             onClick={handleClick}
+            onPaidClick={handlePaidClick}
             observeIntersection={observeIntersection}
           />
         )

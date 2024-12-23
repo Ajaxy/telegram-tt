@@ -6,13 +6,13 @@ import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
 
 import useAppLayout from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import styles from './LinkField.module.scss';
 
@@ -33,7 +33,7 @@ const InviteLink: FC<OwnProps> = ({
   withShare,
   onRevoke,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { showNotification, openChatWithDraft } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -43,7 +43,9 @@ const InviteLink: FC<OwnProps> = ({
   const copyLink = useLastCallback(() => {
     copyTextToClipboard(link);
     showNotification({
-      message: lang('LinkCopied'),
+      message: {
+        key: 'LinkCopied',
+      },
     });
   });
 

@@ -1,6 +1,7 @@
+import { useSignal } from '../lib/teact/teact';
+
 import type { Signal } from '../util/signals';
 
-import useSignal from './useSignal';
 import { useSignalEffect } from './useSignalEffect';
 import { useStateRef } from './useStateRef';
 import useSyncEffect from './useSyncEffect';

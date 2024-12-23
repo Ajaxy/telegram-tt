@@ -3,15 +3,15 @@ import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gram
 
 import type { ApiChat } from '../../types';
 import type { invokeRequest } from '../methods/client';
-import type { Update } from './updater';
 
 import { DEBUG } from '../../../config';
 import SortedQueue from '../../../util/SortedQueue';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildInputEntity, buildMtpPeerId } from '../gramjsBuilders';
-import { addEntitiesToLocalDb } from '../helpers';
 import localDb from '../localDb';
-import { dispatchUserAndChatUpdates, sendUpdate, updater } from './updater';
+import { sendApiUpdate } from './apiUpdateEmitter';
+import { processAndUpdateEntities } from './entityProcessor';
+import { type Update, updater } from './mtpUpdateHandler';
 
 import { buildLocalUpdatePts, type UpdatePts } from './UpdatePts';
 
@@ -139,6 +139,7 @@ function applyUpdate(updateObject: SeqUpdate | PtsUpdate) {
   }
 
   if (updateObject instanceof GramJs.UpdatesCombined || updateObject instanceof GramJs.Updates) {
+    processAndUpdateEntities(updateObject);
     const entities = updateObject.users.concat(updateObject.chats);
 
     updateObject.updates.forEach((update) => {
@@ -277,7 +278,7 @@ export async function getDifference() {
     return;
   }
 
-  sendUpdate({
+  sendApiUpdate({
     '@type': 'updateFetchingDifference',
     isFetching: true,
   });
@@ -296,7 +297,7 @@ export async function getDifference() {
   if (response instanceof GramJs.updates.DifferenceEmpty) {
     localDb.commonBoxState.seq = response.seq;
     localDb.commonBoxState.date = response.date;
-    sendUpdate({
+    sendApiUpdate({
       '@type': 'updateFetchingDifference',
       isFetching: false,
     });
@@ -313,7 +314,7 @@ export async function getDifference() {
     return;
   }
 
-  sendUpdate({
+  sendApiUpdate({
     '@type': 'updateFetchingDifference',
     isFetching: false,
   });
@@ -366,7 +367,7 @@ async function getChannelDifference(channelId: string) {
 function forceSync() {
   reset();
 
-  sendUpdate({
+  sendApiUpdate({
     '@type': 'requestSync',
   });
 
@@ -425,11 +426,7 @@ function processDifference(
     }));
   });
 
-  addEntitiesToLocalDb(difference.users);
-  addEntitiesToLocalDb(difference.chats);
-
-  dispatchUserAndChatUpdates(difference.users);
-  dispatchUserAndChatUpdates(difference.chats);
+  processAndUpdateEntities(difference);
 
   // Ignore `pts`/`seq` holes when applying updates from difference
   // BUT, if we got an `UpdateChannelTooLong`, make sure to process other updates after receiving `ChannelDifference`

@@ -4,7 +4,7 @@ import { withGlobal } from '../../../global';
 
 import type { ApiTopic } from '../../../api/types';
 
-import { selectChat } from '../../../global/selectors';
+import { selectTopic } from '../../../global/selectors';
 import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 
@@ -60,8 +60,7 @@ const LeftSearchResultTopic: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, topicId }): StateProps => {
-    const chat = selectChat(global, chatId);
-    const topic = chat?.topics?.[topicId];
+    const topic = selectTopic(global, chatId, topicId);
 
     return {
       topic,

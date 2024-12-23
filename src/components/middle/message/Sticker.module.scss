@@ -1,0 +1,23 @@
+.root {
+  overflow: visible !important;
+  contain: layout;
+  position: relative;
+
+  &:not(.inactive) {
+    cursor: var(--custom-cursor, pointer);
+  }
+}
+
+.mirrored {
+  transform: scaleX(-1);
+}
+
+.inactive {
+  pointer-events: none;
+}
+
+.effect {
+  position: fixed;
+  z-index: var(--z-message-effect);
+  pointer-events: none;
+}

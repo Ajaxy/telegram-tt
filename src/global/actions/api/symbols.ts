@@ -4,11 +4,11 @@ import type {
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
-import { BIRTHDAY_NUMBERS_SET } from '../../../config';
+import { BIRTHDAY_NUMBERS_SET, RESTRICTED_EMOJI_SET } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { translate } from '../../../util/langProvider';
-import * as langProvider from '../../../util/langProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import { pause, throttle } from '../../../util/schedulers';
 import searchWords from '../../../util/searchWords';
 import { callApi } from '../../../api/gramjs';
@@ -68,8 +68,7 @@ addActionHandler('loadStickerSets', async (global, actions): Promise<void> => {
   });
 });
 
-addActionHandler('loadAddedStickers', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
+addActionHandler('loadAddedStickers', async (global, actions): Promise<void> => {
   const {
     added: {
       setIds: addedSetIds = [],
@@ -93,7 +92,6 @@ addActionHandler('loadAddedStickers', async (global, actions, payload): Promise<
     }
     actions.loadStickers({
       stickerSetInfo: { id, accessHash: cached[id].accessHash },
-      tabId,
     });
 
     if (i % ADDED_SETS_THROTTLE_CHUNK === 0 && i > 0) {
@@ -242,10 +240,10 @@ addActionHandler('loadDefaultStatusIcons', async (global): Promise<void> => {
 });
 
 addActionHandler('loadStickers', (global, actions, payload): ActionReturnType => {
-  const { stickerSetInfo, tabId = getCurrentTabId() } = payload;
+  const { stickerSetInfo } = payload;
   const cachedSet = selectStickerSet(global, stickerSetInfo);
   if (cachedSet && cachedSet.count === cachedSet?.stickers?.length) return; // Already fully loaded
-  void loadStickers(global, actions, stickerSetInfo, tabId);
+  void loadStickers(global, actions, stickerSetInfo);
 });
 
 addActionHandler('loadAnimatedEmojis', async (global): Promise<void> => {
@@ -283,6 +281,26 @@ addActionHandler('loadBirthdayNumbersStickers', async (global): Promise<void> =>
   global = {
     ...global,
     birthdayNumbers: { ...emojis.set, stickers: emojis.stickers },
+  };
+
+  setGlobal(global);
+});
+
+addActionHandler('loadRestrictedEmojiStickers', async (global): Promise<void> => {
+  const emojis = await callApi('fetchStickers', {
+    stickerSetInfo: {
+      shortName: RESTRICTED_EMOJI_SET,
+    },
+  });
+  if (!emojis) {
+    return;
+  }
+
+  global = getGlobal();
+
+  global = {
+    ...global,
+    restrictedEmoji: { ...emojis.set, stickers: emojis.stickers },
   };
 
   setGlobal(global);
@@ -337,9 +355,9 @@ addActionHandler('saveGif', async (global, actions, payload): Promise<void> => {
 
   if (!shouldUnsave && length && length >= limit) {
     actions.showNotification({
-      title: langProvider.translate('LimitReachedFavoriteGifs', limit.toString()),
-      message: isPremium ? langProvider.translate('LimitReachedFavoriteGifsSubtitlePremium')
-        : langProvider.translate('LimitReachedFavoriteGifsSubtitle',
+      title: langProvider.oldTranslate('LimitReachedFavoriteGifs', limit.toString()),
+      message: isPremium ? langProvider.oldTranslate('LimitReachedFavoriteGifsSubtitlePremium')
+        : langProvider.oldTranslate('LimitReachedFavoriteGifsSubtitle',
           premiumLimit.toString()),
       ...(!isPremium && {
         action: {
@@ -383,9 +401,9 @@ addActionHandler('faveSticker', (global, actions, payload): ActionReturnType => 
 
   if (current >= limit) {
     actions.showNotification({
-      title: langProvider.translate('LimitReachedFavoriteStickers', limit.toString()),
-      message: isPremium ? langProvider.translate('LimitReachedFavoriteStickersSubtitlePremium')
-        : langProvider.translate('LimitReachedFavoriteStickersSubtitle',
+      title: langProvider.oldTranslate('LimitReachedFavoriteStickers', limit.toString()),
+      message: isPremium ? langProvider.oldTranslate('LimitReachedFavoriteStickersSubtitlePremium')
+        : langProvider.oldTranslate('LimitReachedFavoriteStickersSubtitle',
           premiumLimit.toString()),
       ...(!isPremium && {
         action: {
@@ -552,7 +570,6 @@ async function loadStickers<T extends GlobalState>(
   global: T,
   actions: RequiredGlobalActions,
   stickerSetInfo: ApiStickerSetInfo,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   let stickerSet: { set: ApiStickerSet; stickers: ApiSticker[]; packs: Record<string, ApiSticker[]> } | undefined;
   try {
@@ -562,18 +579,20 @@ async function loadStickers<T extends GlobalState>(
     );
   } catch (error) {
     if ((error as ApiError).message === 'STICKERSET_INVALID') {
-      actions.showNotification({
-        message: translate('StickerPack.ErrorNotFound'),
-        tabId,
-      });
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        actions.showNotification({
+          message: oldTranslate('StickerPack.ErrorNotFound'),
+          tabId,
+        });
 
-      if ('shortName' in stickerSetInfo
-        && selectTabState(global, tabId).openedStickerSetShortName === stickerSetInfo.shortName) {
-        global = updateTabState(global, {
-          openedStickerSetShortName: undefined,
-        }, tabId);
-        setGlobal(global);
-      }
+        if ('shortName' in stickerSetInfo
+          && selectTabState(global, tabId).openedStickerSetShortName === stickerSetInfo.shortName) {
+          global = updateTabState(global, {
+            openedStickerSetShortName: undefined,
+          }, tabId);
+          setGlobal(global);
+        }
+      });
       return;
     }
   }
@@ -745,9 +764,9 @@ addActionHandler('loadFeaturedEmojiStickers', async (global): Promise<void> => {
 });
 
 addActionHandler('openStickerSet', async (global, actions, payload): Promise<void> => {
-  const { stickerSetInfo, tabId = getCurrentTabId() } = payload;
-  if (!selectStickerSet(global, stickerSetInfo)) {
-    await loadStickers(global, actions, stickerSetInfo, tabId);
+  const { stickerSetInfo, shouldIgnoreCache, tabId = getCurrentTabId() } = payload;
+  if (shouldIgnoreCache || !selectStickerSet(global, stickerSetInfo)) {
+    await loadStickers(global, actions, stickerSetInfo);
   }
 
   global = getGlobal();

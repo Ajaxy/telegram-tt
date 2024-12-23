@@ -26,12 +26,13 @@ const { uploadFile } = require('./uploadFile');
 const {
     updateTwoFaSettings,
     getTmpPassword,
+    getCurrentPassword,
 } = require('./2fa');
 const RequestState = require('../network/RequestState');
 const Deferred = require('../../../util/Deferred').default;
 
 const DEFAULT_DC_ID = 2;
-const WEBDOCUMENT_DC_ID = 4;
+const DEFAULT_WEBDOCUMENT_DC_ID = 4;
 const EXPORTED_SENDER_RECONNECT_TIMEOUT = 1000; // 1 sec
 const EXPORTED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
 const WEBDOCUMENT_REQUEST_PART_SIZE = 131072; // 128kb
@@ -72,12 +73,13 @@ class TelegramClient {
         systemVersion: undefined,
         appVersion: undefined,
         langCode: 'en',
+        langPack: 'weba',
         systemLangCode: 'en',
         baseLogger: 'gramjs',
         useWSS: false,
         additionalDcsDisabled: false,
-        testServers: false,
         dcId: DEFAULT_DC_ID,
+        isTestServerRequested: false,
         shouldAllowHttpTransport: false,
         shouldForceHttpTransport: false,
         shouldDebugExportedSenders: false,
@@ -157,7 +159,7 @@ class TelegramClient {
                         .toString() || '1.0',
                     appVersion: args.appVersion || '1.0',
                     langCode: args.langCode,
-                    langPack: 'weba',
+                    langPack: args.langPack,
                     systemLangCode: args.systemLangCode,
                     query: x,
                     proxy: undefined, // no proxies yet.
@@ -217,10 +219,10 @@ class TelegramClient {
         this._sender._disconnected = true;
 
         const connection = new this._connection(
-            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this._args.testServers,
+            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this.session.isTestServer,
         );
         const fallbackConnection = new this._fallbackConnection(
-            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this._args.testServers,
+            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this.session.isTestServer,
         );
 
         const newConnection = await this._sender.connect(connection, undefined, fallbackConnection);
@@ -244,6 +246,10 @@ class TelegramClient {
         }
         this._connectedDeferred.resolve();
         this._isSwitchingDc = false;
+
+        // Prepare file connection on current DC to speed up initial media loading
+        const mediaSender = await this._borrowExportedSender(this.session.dcId, false, undefined, 0, this.isPremium);
+        if (mediaSender) this.releaseExportedSender(mediaSender);
     }
 
     async _initSession() {
@@ -252,7 +258,9 @@ class TelegramClient {
         if (!this.session.serverAddress || (this.session.serverAddress.includes(':') !== this._useIPV6)) {
             const DC = utils.getDC(this.defaultDcId);
             // TODO Fill IP addresses for when `this._useIPV6` is used
-            this.session.setDC(this.defaultDcId, DC.ipAddress, this._args.useWSS ? 443 : 80);
+            this.session.setDC(
+                this.defaultDcId, DC.ipAddress, this._args.useWSS ? 443 : 80, this._args.isTestServerRequested,
+            );
         }
     }
 
@@ -412,7 +420,8 @@ class TelegramClient {
     async _switchDC(newDc) {
         this._log.info(`Reconnecting to new data center ${newDc}`);
         const DC = utils.getDC(newDc);
-        this.session.setDC(newDc, DC.ipAddress, DC.port);
+        const isTestServer = this.session.isTestServer || this._args.isTestServerRequested;
+        this.session.setDC(newDc, DC.ipAddress, DC.port, isTestServer);
         // authKey's are associated with a server, which has now changed
         // so it's not valid anymore. Set to None to force recreating it.
         await this._sender.authKey.setKey(undefined);
@@ -471,8 +480,11 @@ class TelegramClient {
                 await this._waitingForAuthKey[dcId];
 
                 const authKey = this.session.getAuthKey(dcId);
-                await sender.authKey.setKey(authKey.getKey());
-                hasAuthKey = Boolean(sender.authKey.getKey());
+
+                hasAuthKey = Boolean(sender.authKey?.getKey());
+                if (hasAuthKey) {
+                    await sender.authKey.setKey(authKey.getKey());
+                }
             } else {
                 this._waitingForAuthKey[dcId] = new Promise((resolve) => {
                     firstConnectResolver = resolve;
@@ -490,7 +502,7 @@ class TelegramClient {
                     dc.port,
                     dcId,
                     this._log,
-                    this._args.testServers,
+                    this.session.isTestServer,
                     // Premium DCs are not stable for obtaining auth keys, so need to we first connect to regular ones
                     hasAuthKey ? isPremium : false,
                 ), undefined, new this._fallbackConnection(
@@ -498,20 +510,23 @@ class TelegramClient {
                     dc.port,
                     dcId,
                     this._log,
-                    this._args.testServers,
+                    this.session.isTestServer,
                     hasAuthKey ? isPremium : false,
                 ));
 
                 if (this.session.dcId !== dcId && !sender._authenticated) {
-                    this._log.info(`Exporting authorization for data center ${dc.ipAddress}`);
-                    const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId }));
+                    // Prevent another connection from trying to export the auth key while we're doing it
+                    await navigator.locks.request('GRAMJS_AUTH_EXPORT', async () => {
+                        this._log.info(`Exporting authorization for data center ${dc.ipAddress}`);
+                        const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId }));
 
-                    const req = this._initWith(new requests.auth.ImportAuthorization({
-                        id: auth.id,
-                        bytes: auth.bytes,
-                    }));
-                    await sender.send(req);
-                    sender._authenticated = true;
+                        const req = this._initWith(new requests.auth.ImportAuthorization({
+                            id: auth.id,
+                            bytes: auth.bytes,
+                        }));
+                        await sender.send(req);
+                        sender._authenticated = true;
+                    });
                 }
 
                 sender.dcId = dcId;
@@ -660,6 +675,7 @@ class TelegramClient {
      * @param [args[end] {number}]
      * @param [args[dcId] {number}]
      * @param [args[workers] {number}]
+     * @param [args[isPriority] {boolean}]
      * @returns {Promise<Buffer>}
      */
     downloadFile(inputLocation, args = {}) {
@@ -698,47 +714,21 @@ class TelegramClient {
     }
 
     downloadProfilePhoto(entity, isBig = false) {
-        // ('User', 'Chat', 'UserFull', 'ChatFull')
-        const ENTITIES = [0x2da17977, 0xc5af5d94, 0x1f4661b9, 0xd49a2697];
-        // ('InputPeer', 'InputUser', 'InputChannel')
-        // const INPUTS = [0xc91c90b6, 0xe669bf46, 0x40f202fd]
-        // Todo account for input methods
-        const sizeType = isBig ? 'x' : 'm';
-        let photo;
-        if (!(ENTITIES.includes(entity.SUBCLASS_OF_ID))) {
-            photo = entity;
-        } else {
-            if (!entity.photo) {
-                // Special case: may be a ChatFull with photo:Photo
-                if (!entity.chatPhoto) {
-                    return undefined;
-                }
+        const photo = entity.photo;
 
-                return this._downloadPhoto(
-                    entity.chatPhoto, { sizeType },
-                );
-            }
-            photo = entity.photo;
-        }
+        if (!(photo instanceof constructors.UserProfilePhoto
+            || photo instanceof constructors.ChatPhoto)) return undefined;
 
-        let dcId;
-        let loc;
-        if (photo instanceof constructors.UserProfilePhoto || photo instanceof constructors.ChatPhoto) {
-            dcId = photo.dcId;
-            loc = new constructors.InputPeerPhotoFileLocation({
-                peer: utils.getInputPeer(entity),
-                photoId: photo.photoId,
-                big: isBig,
-            });
-        } else {
-            // It doesn't make any sense to check if `photo` can be used
-            // as input location, because then this method would be able
-            // to "download the profile photo of a message", i.e. its
-            // media which should be done with `download_media` instead.
-            return undefined;
-        }
+        const dcId = photo.dcId;
+        const loc = new constructors.InputPeerPhotoFileLocation({
+            peer: utils.getInputPeer(entity),
+            photoId: photo.photoId,
+            big: isBig,
+        });
+
         return this.downloadFile(loc, {
             dcId,
+            isPriority: true,
         });
     }
 
@@ -812,10 +802,16 @@ class TelegramClient {
         if (!(photo instanceof constructors.Photo)) {
             return undefined;
         }
+
+        const maxSize = photo.sizes.reduce((max, current) => {
+            if (!current.w) return max;
+            return max.w > current.w ? max : current;
+        });
         const isVideoSize = args.sizeType === 'u' || args.sizeType === 'v';
-        const size = this._pickFileSize(isVideoSize
-            ? [...photo.videoSizes, ...photo.sizes]
-            : photo.sizes, args.sizeType);
+        const size = !args.sizeType
+            ? maxSize
+            : this._pickFileSize(isVideoSize ? [...photo.videoSizes, ...photo.sizes] : photo.sizes, args.sizeType);
+
         if (!size || (size instanceof constructors.PhotoSizeEmpty)) {
             return undefined;
         }
@@ -902,7 +898,10 @@ class TelegramClient {
                     offset,
                     limit: WEBDOCUMENT_REQUEST_PART_SIZE,
                 });
-                const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
+
+                const sender = await this._borrowExportedSender(
+                    this._config?.webfileDcId || DEFAULT_WEBDOCUMENT_DC_ID,
+                );
                 const res = await sender.send(downloaded);
                 this.releaseExportedSender(sender);
                 offset += 131072;
@@ -949,7 +948,7 @@ class TelegramClient {
                         offset,
                         limit: WEBDOCUMENT_REQUEST_PART_SIZE,
                     });
-                    const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
+                    const sender = await this._borrowExportedSender(DEFAULT_WEBDOCUMENT_DC_ID);
                     const res = await sender.send(downloaded);
                     this.releaseExportedSender(sender);
                     offset += 131072;
@@ -1013,8 +1012,11 @@ class TelegramClient {
                 if (isExported) this.releaseExportedSender(sender);
                 return result;
             } catch (e) {
-                if (e instanceof errors.ServerError || e.message === 'RPC_CALL_FAIL'
-                    || e.message === 'RPC_MCGET_FAIL') {
+                if (e instanceof errors.ServerError
+                    || e.message === 'RPC_CALL_FAIL'
+                    || e.message === 'RPC_MCGET_FAIL'
+                    || e.message.match(/INTERDC_\d_CALL(_RICH)?_ERROR/)
+                ) {
                     this._log.warn(`Telegram is having internal issues ${e.constructor.name}`);
                     await sleep(2000);
                 } else if (e instanceof errors.FloodWaitError || e instanceof errors.FloodTestPhoneWaitError) {
@@ -1095,10 +1097,18 @@ class TelegramClient {
         return undefined;
     }
 
+    async loadConfig() {
+        if (!this._config) {
+            this._config = await this.invoke(new requests.help.GetConfig());
+        }
+    }
+
     async start(authParams) {
         if (!this.isConnected()) {
             await this.connect();
         }
+
+        this.loadConfig();
 
         if (await checkAuthorization(this, authParams.shouldThrowIfUnauthorized)) {
             return;
@@ -1122,6 +1132,10 @@ class TelegramClient {
 
     getTmpPassword(currentPassword, ttl) {
         return getTmpPassword(this, currentPassword, ttl);
+    }
+
+    getCurrentPassword(currentPassword) {
+        return getCurrentPassword(this, currentPassword);
     }
 
     // event region

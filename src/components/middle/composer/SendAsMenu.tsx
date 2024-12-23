@@ -8,9 +8,9 @@ import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
+import useOldLang from '../../../hooks/useOldLang';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import Avatar from '../../common/Avatar';
@@ -43,7 +43,7 @@ const SendAsMenu: FC<OwnProps> = ({
   const usersById = getGlobal().users.byId;
   const chatsById = getGlobal().chats.byId;
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 

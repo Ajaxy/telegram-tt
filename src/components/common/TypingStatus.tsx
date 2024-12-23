@@ -8,7 +8,7 @@ import { getUserFirstOrLastName } from '../../global/helpers';
 import { selectUser } from '../../global/selectors';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import DotAnimation from './DotAnimation';
 
@@ -23,7 +23,7 @@ type StateProps = {
 };
 
 const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const typingUserName = typingUser && !typingUser.isSelf && getUserFirstOrLastName(typingUser);
   const content = lang(typingStatus.action)
     // Fix for translation "{user} is typing"

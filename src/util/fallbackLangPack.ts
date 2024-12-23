@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import type { ApiLangPack } from '../api/types';
+import type { ApiOldLangPack } from '../api/types';
 
 export default {
   Search: 'Search',
@@ -505,9 +505,12 @@ export default {
   'ChannelVisibility.Forwarding.Disabled': 'Restrict Forwarding',
   'Settings.TipsUsername': 'TelegramTips',
   FoldersAllChatsDesc: 'All unarchived chats',
+  'Conversation.ErrorInaccessibleMessage': 'Unfortunately, you can\'t access this message. You aren\'t a member of the chat where it was posted.',
   'Video.Unsupported.Desktop': 'Unfortunately, this video can\'t be played on Telegram Web. Try opening it with our **desktop app** instead.',
   'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Telegram Web. Try opening it with our **mobile app** instead.',
   SlowModeWait: 'Slow Mode — %d',
   OpenMapWith: 'Open map with...',
   FullDateTimeFormat: '%@, %@',
-} as ApiLangPack;
+  ProfileOpenAppTerms: 'Terms of Service for Mini Apps',
+  ProfileBotOpenAppInfoLink: 'https://telegram.org/tos/mini-apps',
+} as ApiOldLangPack;

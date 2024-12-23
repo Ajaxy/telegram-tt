@@ -67,203 +67,213 @@ $icons-map: (
   "camera": "\f124",
   "car": "\f125",
   "card": "\f126",
-  "channel-filled": "\f127",
-  "channel": "\f128",
-  "channelviews": "\f129",
-  "chat-badge": "\f12a",
-  "chats-badge": "\f12b",
-  "check": "\f12c",
-  "clock": "\f12d",
-  "close-circle": "\f12e",
-  "close-topic": "\f12f",
-  "close": "\f130",
-  "cloud-download": "\f131",
-  "collapse": "\f132",
-  "colorize": "\f133",
-  "comments-sticker": "\f134",
-  "comments": "\f135",
-  "copy-media": "\f136",
-  "copy": "\f137",
-  "darkmode": "\f138",
-  "data": "\f139",
-  "delete-filled": "\f13a",
-  "delete-left": "\f13b",
-  "delete-user": "\f13c",
-  "delete": "\f13d",
-  "document": "\f13e",
-  "double-badge": "\f13f",
-  "down": "\f140",
-  "download": "\f141",
-  "eats": "\f142",
-  "edit": "\f143",
-  "email": "\f144",
-  "enter": "\f145",
-  "expand": "\f146",
-  "eye-closed-outline": "\f147",
-  "eye-closed": "\f148",
-  "eye-outline": "\f149",
-  "eye": "\f14a",
-  "favorite-filled": "\f14b",
-  "favorite": "\f14c",
-  "file-badge": "\f14d",
-  "flag": "\f14e",
-  "folder-badge": "\f14f",
-  "folder": "\f150",
-  "fontsize": "\f151",
-  "forums": "\f152",
-  "forward": "\f153",
-  "fullscreen": "\f154",
-  "gifs": "\f155",
-  "gift": "\f156",
-  "group-filled": "\f157",
-  "group": "\f158",
-  "grouped-disable": "\f159",
-  "grouped": "\f15a",
-  "hand-stop": "\f15b",
-  "hashtag": "\f15c",
-  "heart-outline": "\f15d",
-  "heart": "\f15e",
-  "help": "\f15f",
-  "info-filled": "\f160",
-  "info": "\f161",
-  "install": "\f162",
-  "italic": "\f163",
-  "key": "\f164",
-  "keyboard": "\f165",
-  "lamp": "\f166",
-  "language": "\f167",
-  "large-pause": "\f168",
-  "large-play": "\f169",
-  "link-badge": "\f16a",
-  "link-broken": "\f16b",
-  "link": "\f16c",
-  "location": "\f16d",
-  "lock-badge": "\f16e",
-  "lock": "\f16f",
-  "logout": "\f170",
-  "loop": "\f171",
-  "mention": "\f172",
-  "message-failed": "\f173",
-  "message-pending": "\f174",
-  "message-read": "\f175",
-  "message-succeeded": "\f176",
-  "message": "\f177",
-  "microphone-alt": "\f178",
-  "microphone": "\f179",
-  "monospace": "\f17a",
-  "more-circle": "\f17b",
-  "more": "\f17c",
-  "mute": "\f17d",
-  "muted": "\f17e",
-  "my-notes": "\f17f",
-  "new-chat-filled": "\f180",
-  "next": "\f181",
-  "nochannel": "\f182",
-  "noise-suppression": "\f183",
-  "non-contacts": "\f184",
-  "one-filled": "\f185",
-  "open-in-new-tab": "\f186",
-  "password-off": "\f187",
-  "pause": "\f188",
-  "permissions": "\f189",
-  "phone-discard-outline": "\f18a",
-  "phone-discard": "\f18b",
-  "phone": "\f18c",
-  "photo": "\f18d",
-  "pin-badge": "\f18e",
-  "pin-list": "\f18f",
-  "pin": "\f190",
-  "pinned-chat": "\f191",
-  "pinned-message": "\f192",
-  "pip": "\f193",
-  "play-story": "\f194",
-  "play": "\f195",
-  "poll": "\f196",
-  "premium": "\f197",
-  "previous": "\f198",
-  "privacy-policy": "\f199",
-  "quote-text": "\f19a",
-  "quote": "\f19b",
-  "readchats": "\f19c",
-  "recent": "\f19d",
-  "reload": "\f19e",
-  "remove": "\f19f",
-  "reopen-topic": "\f1a0",
-  "replace": "\f1a1",
-  "replies": "\f1a2",
-  "reply-filled": "\f1a3",
-  "reply": "\f1a4",
-  "revenue-split": "\f1a5",
-  "revote": "\f1a6",
-  "save-story": "\f1a7",
-  "saved-messages": "\f1a8",
-  "schedule": "\f1a9",
-  "search": "\f1aa",
-  "select": "\f1ab",
-  "send-outline": "\f1ac",
-  "send": "\f1ad",
-  "settings-filled": "\f1ae",
-  "settings": "\f1af",
-  "share-filled": "\f1b0",
-  "share-screen-outlined": "\f1b1",
-  "share-screen-stop": "\f1b2",
-  "share-screen": "\f1b3",
-  "sidebar": "\f1b4",
-  "skip-next": "\f1b5",
-  "skip-previous": "\f1b6",
-  "smallscreen": "\f1b7",
-  "smile": "\f1b8",
-  "sort": "\f1b9",
-  "speaker-muted-story": "\f1ba",
-  "speaker-outline": "\f1bb",
-  "speaker-story": "\f1bc",
-  "speaker": "\f1bd",
-  "spoiler-disable": "\f1be",
-  "spoiler": "\f1bf",
-  "sport": "\f1c0",
-  "stats": "\f1c1",
-  "stealth-future": "\f1c2",
-  "stealth-past": "\f1c3",
-  "stickers": "\f1c4",
-  "stop-raising-hand": "\f1c5",
-  "stop": "\f1c6",
-  "story-caption": "\f1c7",
-  "story-expired": "\f1c8",
-  "story-priority": "\f1c9",
-  "story-reply": "\f1ca",
-  "strikethrough": "\f1cb",
-  "tag-add": "\f1cc",
-  "tag-crossed": "\f1cd",
-  "tag-filter": "\f1ce",
-  "tag-name": "\f1cf",
-  "tag": "\f1d0",
-  "timer": "\f1d1",
-  "transcribe": "\f1d2",
-  "truck": "\f1d3",
-  "unarchive": "\f1d4",
-  "underlined": "\f1d5",
-  "unlock-badge": "\f1d6",
-  "unlock": "\f1d7",
-  "unmute": "\f1d8",
-  "unpin": "\f1d9",
-  "unread": "\f1da",
-  "up": "\f1db",
-  "user-filled": "\f1dc",
-  "user-online": "\f1dd",
-  "user": "\f1de",
-  "video-outlined": "\f1df",
-  "video-stop": "\f1e0",
-  "video": "\f1e1",
-  "view-once": "\f1e2",
-  "voice-chat": "\f1e3",
-  "volume-1": "\f1e4",
-  "volume-2": "\f1e5",
-  "volume-3": "\f1e6",
-  "web": "\f1e7",
-  "webapp": "\f1e8",
-  "word-wrap": "\f1e9",
-  "zoom-in": "\f1ea",
-  "zoom-out": "\f1eb",
+  "cash-circle": "\f127",
+  "channel-filled": "\f128",
+  "channel": "\f129",
+  "channelviews": "\f12a",
+  "chat-badge": "\f12b",
+  "chats-badge": "\f12c",
+  "check": "\f12d",
+  "clock-edit": "\f12e",
+  "clock": "\f12f",
+  "close-circle": "\f130",
+  "close-topic": "\f131",
+  "close": "\f132",
+  "cloud-download": "\f133",
+  "collapse-modal": "\f134",
+  "collapse": "\f135",
+  "colorize": "\f136",
+  "comments-sticker": "\f137",
+  "comments": "\f138",
+  "copy-media": "\f139",
+  "copy": "\f13a",
+  "darkmode": "\f13b",
+  "data": "\f13c",
+  "delete-filled": "\f13d",
+  "delete-left": "\f13e",
+  "delete-user": "\f13f",
+  "delete": "\f140",
+  "document": "\f141",
+  "double-badge": "\f142",
+  "down": "\f143",
+  "download": "\f144",
+  "eats": "\f145",
+  "edit": "\f146",
+  "email": "\f147",
+  "enter": "\f148",
+  "expand-modal": "\f149",
+  "expand": "\f14a",
+  "eye-closed-outline": "\f14b",
+  "eye-closed": "\f14c",
+  "eye-outline": "\f14d",
+  "eye": "\f14e",
+  "favorite-filled": "\f14f",
+  "favorite": "\f150",
+  "file-badge": "\f151",
+  "flag": "\f152",
+  "folder-badge": "\f153",
+  "folder": "\f154",
+  "fontsize": "\f155",
+  "forums": "\f156",
+  "forward": "\f157",
+  "fullscreen": "\f158",
+  "gifs": "\f159",
+  "gift": "\f15a",
+  "group-filled": "\f15b",
+  "group": "\f15c",
+  "grouped-disable": "\f15d",
+  "grouped": "\f15e",
+  "hand-stop": "\f15f",
+  "hashtag": "\f160",
+  "heart-outline": "\f161",
+  "heart": "\f162",
+  "help": "\f163",
+  "info-filled": "\f164",
+  "info": "\f165",
+  "install": "\f166",
+  "italic": "\f167",
+  "key": "\f168",
+  "keyboard": "\f169",
+  "lamp": "\f16a",
+  "language": "\f16b",
+  "large-pause": "\f16c",
+  "large-play": "\f16d",
+  "link-badge": "\f16e",
+  "link-broken": "\f16f",
+  "link": "\f170",
+  "location": "\f171",
+  "lock-badge": "\f172",
+  "lock": "\f173",
+  "logout": "\f174",
+  "loop": "\f175",
+  "mention": "\f176",
+  "message-failed": "\f177",
+  "message-pending": "\f178",
+  "message-read": "\f179",
+  "message-succeeded": "\f17a",
+  "message": "\f17b",
+  "microphone-alt": "\f17c",
+  "microphone": "\f17d",
+  "monospace": "\f17e",
+  "more-circle": "\f17f",
+  "more": "\f180",
+  "move-caption-down": "\f181",
+  "move-caption-up": "\f182",
+  "mute": "\f183",
+  "muted": "\f184",
+  "my-notes": "\f185",
+  "new-chat-filled": "\f186",
+  "next": "\f187",
+  "nochannel": "\f188",
+  "noise-suppression": "\f189",
+  "non-contacts": "\f18a",
+  "one-filled": "\f18b",
+  "open-in-new-tab": "\f18c",
+  "password-off": "\f18d",
+  "pause": "\f18e",
+  "permissions": "\f18f",
+  "phone-discard-outline": "\f190",
+  "phone-discard": "\f191",
+  "phone": "\f192",
+  "photo": "\f193",
+  "pin-badge": "\f194",
+  "pin-list": "\f195",
+  "pin": "\f196",
+  "pinned-chat": "\f197",
+  "pinned-message": "\f198",
+  "pip": "\f199",
+  "play-story": "\f19a",
+  "play": "\f19b",
+  "poll": "\f19c",
+  "previous": "\f19d",
+  "privacy-policy": "\f19e",
+  "quote-text": "\f19f",
+  "quote": "\f1a0",
+  "readchats": "\f1a1",
+  "recent": "\f1a2",
+  "reload": "\f1a3",
+  "remove-quote": "\f1a4",
+  "remove": "\f1a5",
+  "reopen-topic": "\f1a6",
+  "replace": "\f1a7",
+  "replies": "\f1a8",
+  "reply-filled": "\f1a9",
+  "reply": "\f1aa",
+  "revenue-split": "\f1ab",
+  "revote": "\f1ac",
+  "save-story": "\f1ad",
+  "saved-messages": "\f1ae",
+  "schedule": "\f1af",
+  "search": "\f1b0",
+  "select": "\f1b1",
+  "send-outline": "\f1b2",
+  "send": "\f1b3",
+  "settings-filled": "\f1b4",
+  "settings": "\f1b5",
+  "share-filled": "\f1b6",
+  "share-screen-outlined": "\f1b7",
+  "share-screen-stop": "\f1b8",
+  "share-screen": "\f1b9",
+  "show-message": "\f1ba",
+  "sidebar": "\f1bb",
+  "skip-next": "\f1bc",
+  "skip-previous": "\f1bd",
+  "smallscreen": "\f1be",
+  "smile": "\f1bf",
+  "sort": "\f1c0",
+  "speaker-muted-story": "\f1c1",
+  "speaker-outline": "\f1c2",
+  "speaker-story": "\f1c3",
+  "speaker": "\f1c4",
+  "spoiler-disable": "\f1c5",
+  "spoiler": "\f1c6",
+  "sport": "\f1c7",
+  "star": "\f1c8",
+  "stars-lock": "\f1c9",
+  "stats": "\f1ca",
+  "stealth-future": "\f1cb",
+  "stealth-past": "\f1cc",
+  "stickers": "\f1cd",
+  "stop-raising-hand": "\f1ce",
+  "stop": "\f1cf",
+  "story-caption": "\f1d0",
+  "story-expired": "\f1d1",
+  "story-priority": "\f1d2",
+  "story-reply": "\f1d3",
+  "strikethrough": "\f1d4",
+  "tag-add": "\f1d5",
+  "tag-crossed": "\f1d6",
+  "tag-filter": "\f1d7",
+  "tag-name": "\f1d8",
+  "tag": "\f1d9",
+  "timer": "\f1da",
+  "toncoin": "\f1db",
+  "transcribe": "\f1dc",
+  "truck": "\f1dd",
+  "unarchive": "\f1de",
+  "underlined": "\f1df",
+  "unlock-badge": "\f1e0",
+  "unlock": "\f1e1",
+  "unmute": "\f1e2",
+  "unpin": "\f1e3",
+  "unread": "\f1e4",
+  "up": "\f1e5",
+  "user-filled": "\f1e6",
+  "user-online": "\f1e7",
+  "user": "\f1e8",
+  "video-outlined": "\f1e9",
+  "video-stop": "\f1ea",
+  "video": "\f1eb",
+  "view-once": "\f1ec",
+  "voice-chat": "\f1ed",
+  "volume-1": "\f1ee",
+  "volume-2": "\f1ef",
+  "volume-3": "\f1f0",
+  "web": "\f1f1",
+  "webapp": "\f1f2",
+  "word-wrap": "\f1f3",
+  "zoom-in": "\f1f4",
+  "zoom-out": "\f1f5",
 );
 
 .icon-active-sessions::before {
@@ -380,6 +390,9 @@ $icons-map: (
 .icon-card::before {
   content: map.get($icons-map, "card");
 }
+.icon-cash-circle::before {
+  content: map.get($icons-map, "cash-circle");
+}
 .icon-channel-filled::before {
   content: map.get($icons-map, "channel-filled");
 }
@@ -398,6 +411,9 @@ $icons-map: (
 .icon-check::before {
   content: map.get($icons-map, "check");
 }
+.icon-clock-edit::before {
+  content: map.get($icons-map, "clock-edit");
+}
 .icon-clock::before {
   content: map.get($icons-map, "clock");
 }
@@ -412,6 +428,9 @@ $icons-map: (
 }
 .icon-cloud-download::before {
   content: map.get($icons-map, "cloud-download");
+}
+.icon-collapse-modal::before {
+  content: map.get($icons-map, "collapse-modal");
 }
 .icon-collapse::before {
   content: map.get($icons-map, "collapse");
@@ -472,6 +491,9 @@ $icons-map: (
 }
 .icon-enter::before {
   content: map.get($icons-map, "enter");
+}
+.icon-expand-modal::before {
+  content: map.get($icons-map, "expand-modal");
 }
 .icon-expand::before {
   content: map.get($icons-map, "expand");
@@ -638,6 +660,12 @@ $icons-map: (
 .icon-more::before {
   content: map.get($icons-map, "more");
 }
+.icon-move-caption-down::before {
+  content: map.get($icons-map, "move-caption-down");
+}
+.icon-move-caption-up::before {
+  content: map.get($icons-map, "move-caption-up");
+}
 .icon-mute::before {
   content: map.get($icons-map, "mute");
 }
@@ -716,9 +744,6 @@ $icons-map: (
 .icon-poll::before {
   content: map.get($icons-map, "poll");
 }
-.icon-premium::before {
-  content: map.get($icons-map, "premium");
-}
 .icon-previous::before {
   content: map.get($icons-map, "previous");
 }
@@ -739,6 +764,9 @@ $icons-map: (
 }
 .icon-reload::before {
   content: map.get($icons-map, "reload");
+}
+.icon-remove-quote::before {
+  content: map.get($icons-map, "remove-quote");
 }
 .icon-remove::before {
   content: map.get($icons-map, "remove");
@@ -803,6 +831,9 @@ $icons-map: (
 .icon-share-screen::before {
   content: map.get($icons-map, "share-screen");
 }
+.icon-show-message::before {
+  content: map.get($icons-map, "show-message");
+}
 .icon-sidebar::before {
   content: map.get($icons-map, "sidebar");
 }
@@ -841,6 +872,12 @@ $icons-map: (
 }
 .icon-sport::before {
   content: map.get($icons-map, "sport");
+}
+.icon-star::before {
+  content: map.get($icons-map, "star");
+}
+.icon-stars-lock::before {
+  content: map.get($icons-map, "stars-lock");
 }
 .icon-stats::before {
   content: map.get($icons-map, "stats");
@@ -892,6 +929,9 @@ $icons-map: (
 }
 .icon-timer::before {
   content: map.get($icons-map, "timer");
+}
+.icon-toncoin::before {
+  content: map.get($icons-map, "toncoin");
 }
 .icon-transcribe::before {
   content: map.get($icons-map, "transcribe");

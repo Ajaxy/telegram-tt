@@ -6,7 +6,7 @@ import { getActions } from '../../../global';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 import InputText from '../../ui/InputText';
@@ -26,7 +26,7 @@ const RatePhoneCallModal: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [rating, setRating] = useState<number | undefined>();
 
   const handleSend = useCallback(() => {

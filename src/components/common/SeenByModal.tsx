@@ -3,11 +3,11 @@ import { getActions, withGlobal } from '../../global';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatDateAtTime } from '../../util/date/dateFormat';
+import { formatDateAtTime } from '../../util/dates/dateFormat';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
@@ -35,7 +35,7 @@ function SeenByModal({
     closeSeenByModal,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderingSeenByDates = useCurrentOrPrev(seenByDates, true);
   const memberIds = useMemo(() => {

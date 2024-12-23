@@ -10,11 +10,18 @@ export function selectPaymentInputInvoice<T extends GlobalState>(
   return selectTabState(global, tabId).payment.inputInvoice;
 }
 
-export function selectPaymentFormId<T extends GlobalState>(
+export function selectPaymentForm<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return selectTabState(global, tabId).payment.formId;
+  return selectTabState(global, tabId).payment.form;
+}
+
+export function selectStarsPayment<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).starsPayment;
 }
 
 export function selectPaymentRequestId<T extends GlobalState>(
@@ -28,14 +35,14 @@ export function selectProviderPublishableKey<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return selectTabState(global, tabId).payment.nativeParams?.publishableKey;
+  return selectTabState(global, tabId).payment.form?.nativeParams.publishableKey;
 }
 
 export function selectProviderPublicToken<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return selectTabState(global, tabId).payment.nativeParams?.publicToken;
+  return selectTabState(global, tabId).payment.form?.nativeParams.publicToken;
 }
 
 export function selectStripeCredentials<T extends GlobalState>(

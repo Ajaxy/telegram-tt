@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 
-import type { ApiLangPack } from '../api/types';
+import type { ApiOldLangPack } from '../api/types';
 
 export const fallbackLangPackInitial = {
   WrongNumber: 'Wrong number?',
@@ -30,4 +30,4 @@ export const fallbackLangPackInitial = {
   PASSWORD_HASH_INVALID: 'Incorrect password',
   PHONE_PASSWORD_FLOOD: 'Limit exceeded. Please try again later.',
   PHONE_NUMBER_BANNED: 'This phone number is banned.',
-} as ApiLangPack;
+} as ApiOldLangPack;

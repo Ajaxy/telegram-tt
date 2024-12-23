@@ -1,8 +1,10 @@
-import Api from '../tl/api';
 import type TelegramClient from './TelegramClient';
-import utils from '../Utils';
+
+import Api from '../tl/api';
+
 import { sleep } from '../Helpers';
 import { computeCheck as computePasswordSrpCheck } from '../Password';
+import utils from '../Utils';
 
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);

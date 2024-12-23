@@ -173,6 +173,6 @@ const api = {
   'rlottie:destroy': destroy,
 };
 
-createWorkerInterface(api);
+createWorkerInterface(api, 'media');
 
 export type RLottieApi = typeof api;

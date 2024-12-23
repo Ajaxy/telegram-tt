@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { TeactNode } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -12,19 +12,19 @@ import useAppLayout from '../../../hooks/useAppLayout';
 type OwnProps = {
   userId?: string;
   username?: string;
-  children: React.ReactNode;
+  children: TeactNode;
 };
 
 type StateProps = {
   userOrChat?: ApiPeer;
 };
 
-const MentionLink: FC<OwnProps & StateProps> = ({
+const MentionLink = ({
   userId,
   username,
   userOrChat,
   children,
-}) => {
+}: OwnProps & StateProps) => {
   const {
     openChat,
     openChatByUsername,

@@ -5,7 +5,7 @@ import React, {
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
@@ -34,7 +34,7 @@ const NewChatButton: FC<OwnProps> = ({
     }
   }, [isShown]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const fabClassName = buildClassName(
     'NewChatButton',

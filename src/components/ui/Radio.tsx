@@ -4,7 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Spinner from './Spinner';
 
@@ -12,18 +12,20 @@ import './Radio.scss';
 
 type OwnProps = {
   id?: string;
-  name: string;
-  label: TeactNode;
-  subLabel?: string;
-  value: string;
-  checked: boolean;
+  name?: string;
+  label?: TeactNode;
+  subLabel?: TeactNode;
+  value?: string;
+  checked?: boolean;
   disabled?: boolean;
   isLink?: boolean;
   hidden?: boolean;
   isLoading?: boolean;
+  withIcon?: boolean;
   className?: string;
+  onlyInput?: boolean;
   subLabelClassName?: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onSubLabelClick?: MouseEventHandler<HTMLSpanElement> | undefined;
 };
 
@@ -39,17 +41,22 @@ const Radio: FC<OwnProps> = ({
   hidden,
   isLoading,
   className,
-  onChange,
+  onlyInput,
+  withIcon,
   isLink,
+  onChange,
   onSubLabelClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const fullClassName = buildClassName(
     'Radio',
     className,
     disabled && 'disabled',
     hidden && 'hidden-widget',
+    withIcon && 'with-icon',
     isLoading && 'loading',
+    onlyInput && 'onlyInput',
+    Boolean(subLabel) && 'withSubLabel',
   );
 
   return (

@@ -25,8 +25,8 @@ import { compact } from '../../../util/iteratees';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
 
@@ -78,7 +78,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     createGroupCallInviteLink,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 

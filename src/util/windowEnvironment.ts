@@ -69,8 +69,15 @@ export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
 );
 export const IS_REQUEST_FULLSCREEN_SUPPORTED = 'requestFullscreen' in document.createElement('div');
-export const ARE_CALLS_SUPPORTED = !IS_FIREFOX;
+export const ARE_CALLS_SUPPORTED = !IS_FIREFOX; // https://bugzilla.mozilla.org/show_bug.cgi?id=1923416
 export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slideFade' : IS_IOS ? 'slideLayers' : 'pushSlide';
+
+export const IS_WAVE_TRANSFORM_SUPPORTED = !IS_MOBILE
+  && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1808785
+  && !IS_SAFARI; // https://bugs.webkit.org/show_bug.cgi?id=245510
+export const IS_SNAP_EFFECT_SUPPORTED = !IS_MOBILE
+  && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1896504
+  && !IS_SAFARI;
 
 const TEST_VIDEO = document.createElement('video');
 
@@ -98,7 +105,8 @@ export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()'
 export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;
 export const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in window;
 export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA && IS_MOBILE);
-export const IS_TRANSLATION_SUPPORTED = !IS_TEST && Boolean(Intl.DisplayNames);
+export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
+export const IS_INTL_LIST_FORMAT_SUPPORTED = 'ListFormat' in Intl;
 
 export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 

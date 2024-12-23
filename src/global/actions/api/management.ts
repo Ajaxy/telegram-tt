@@ -2,13 +2,12 @@ import type { ActionReturnType } from '../../types';
 import { ManagementProgress } from '../../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import * as langProvider from '../../../util/oldLangProvider';
 import { callApi } from '../../../api/gramjs';
 import { getUserFirstOrLastName } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addUsers, updateChat, updateChatFullInfo, updateManagement, updateManagementProgress,
+  updateChat, updateChatFullInfo, updateManagement, updateManagementProgress,
 } from '../../reducers';
 import {
   selectChat, selectCurrentMessageList, selectTabState, selectUser,
@@ -124,9 +123,7 @@ addActionHandler('loadExportedChatInvites', async (global, actions, payload): Pr
     return;
   }
   global = getGlobal();
-  const { invites, users } = result;
-
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
+  const { invites } = result;
 
   const update = isRevoked ? { revokedInvites: invites } : { invites };
   global = updateManagement(global, chatId, update, tabId);
@@ -153,7 +150,7 @@ addActionHandler('editExportedChatInvite', async (global, actions, payload): Pro
     return;
   }
 
-  const { oldInvite, newInvite, users } = result;
+  const { oldInvite, newInvite } = result;
 
   global = getGlobal();
   const { management } = selectTabState(global, tabId);
@@ -166,8 +163,6 @@ addActionHandler('editExportedChatInvite', async (global, actions, payload): Pro
   } else {
     invites.push(newInvite);
   }
-
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
 
   global = updateManagement(global, chatId, {
     invites,
@@ -269,7 +264,7 @@ addActionHandler('loadChatInviteImporters', async (
   if (!result) {
     return;
   }
-  const { importers, users } = result;
+  const { importers } = result;
 
   global = getGlobal();
   const currentInviteInfo = selectTabState(global, tabId).management.byChatId[chatId]?.inviteInfo;
@@ -283,7 +278,6 @@ addActionHandler('loadChatInviteImporters', async (
       importers,
     },
   }, tabId);
-  global = addUsers(global, users);
   setGlobal(global);
 });
 
@@ -308,7 +302,7 @@ addActionHandler('loadChatInviteRequesters', async (
   if (!result) {
     return;
   }
-  const { importers, users } = result;
+  const { importers } = result;
 
   global = getGlobal();
   const currentInviteInfo = selectTabState(global, tabId).management.byChatId[chatId]?.inviteInfo;
@@ -321,7 +315,6 @@ addActionHandler('loadChatInviteRequesters', async (
       requesters: importers,
     },
   }, tabId);
-  global = addUsers(global, users);
   setGlobal(global);
 });
 
@@ -343,11 +336,10 @@ addActionHandler('loadChatJoinRequests', async (global, actions, payload): Promi
   if (!result) {
     return;
   }
-  const { importers, users } = result;
+  const { importers } = result;
 
   global = getGlobal();
   global = updateChat(global, chatId, { joinRequests: importers });
-  global = addUsers(global, users);
   setGlobal(global);
 });
 
@@ -402,12 +394,12 @@ addActionHandler('hideAllChatJoinRequests', async (global, actions, payload): Pr
   setGlobal(global);
 });
 
-addActionHandler('hideChatReportPanel', async (global, actions, payload): Promise<void> => {
+addActionHandler('hideChatReportPane', async (global, actions, payload): Promise<void> => {
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  const result = await callApi('hideChatReportPanel', chat);
+  const result = await callApi('hideChatReportPane', chat);
   if (!result) return;
 
   global = getGlobal();
@@ -443,7 +435,6 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   setGlobal(global);
 
   const { id, accessHash } = user;
@@ -455,7 +446,7 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
     return;
   }
 
-  actions.loadProfilePhotos({ profileId: userId });
+  actions.loadMoreProfilePhotos({ peerId: userId, shouldInvalidateCache: true });
 
   global = getGlobal();
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
@@ -463,7 +454,7 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
 
   if (file && !isSuggest) {
     actions.showNotification({
-      message: langProvider.translate('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
+      message: langProvider.oldTranslate('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
       tabId,
     });
   }
