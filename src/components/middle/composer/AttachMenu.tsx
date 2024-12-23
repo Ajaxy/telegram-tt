@@ -10,7 +10,7 @@ import type { ISettings, ThreadId } from '../../../types';
 
 import {
   CONTENT_TYPES_WITH_PREVIEW, DEBUG_LOG_FILENAME, SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import {
@@ -26,11 +26,11 @@ import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
@@ -57,7 +57,7 @@ export type OwnProps = {
   onPollCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
   onMenuClose: NoneToVoidFunction;
-  hasReplaceableMedia?: boolean;
+  canEditMedia?: boolean;
   editingMessage?: ApiMessage;
 };
 
@@ -80,7 +80,7 @@ const AttachMenu: FC<OwnProps> = ({
   onMenuOpen,
   onMenuClose,
   onPollCreate,
-  hasReplaceableMedia,
+  canEditMedia,
   editingMessage,
 }) => {
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
@@ -132,7 +132,7 @@ const AttachMenu: FC<OwnProps> = ({
   const handleQuickSelect = useLastCallback(() => {
     openSystemFilesDialog(
       Array.from(canSendVideoAndPhoto ? CONTENT_TYPES_WITH_PREVIEW : (
-        canSendPhotos ? SUPPORTED_IMAGE_CONTENT_TYPES : SUPPORTED_VIDEO_CONTENT_TYPES
+        canSendPhotos ? SUPPORTED_PHOTO_CONTENT_TYPES : SUPPORTED_VIDEO_CONTENT_TYPES
       )).join(','),
       (e) => handleFileSelect(e, true),
     );
@@ -162,7 +162,7 @@ const AttachMenu: FC<OwnProps> = ({
       : undefined;
   }, [attachBots, chatId, peerType]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   if (!isButtonVisible) {
     return undefined;
@@ -171,7 +171,7 @@ const AttachMenu: FC<OwnProps> = ({
   return (
     <div className="AttachMenu">
       {
-        editingMessage && hasReplaceableMedia ? (
+        editingMessage && canEditMedia ? (
           <ResponsiveHoverButton
             id="replace-menu-button"
             className={isAttachMenuOpen ? 'AttachMenu--button activated' : 'AttachMenu--button'}
@@ -246,7 +246,7 @@ const AttachMenu: FC<OwnProps> = ({
           <MenuItem icon="poll" onClick={onPollCreate}>{lang('Poll')}</MenuItem>
         )}
 
-        {!editingMessage && !hasReplaceableMedia && !isScheduled && bots?.map((bot) => (
+        {!editingMessage && !canEditMedia && !isScheduled && bots?.map((bot) => (
           <AttachBotItem
             bot={bot}
             chatId={chatId}

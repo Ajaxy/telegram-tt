@@ -6,7 +6,7 @@ import React, {
 import type { IconName } from '../../types/icons';
 
 import buildClassName from '../../util/buildClassName';
-import { formatMediaDateTime, formatPastTimeShort } from '../../util/date/dateFormat';
+import { formatMediaDateTime, formatPastTimeShort } from '../../util/dates/dateFormat';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
@@ -14,9 +14,9 @@ import renderText from './helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
-import useLang from '../../hooks/useLang';
-import useMediaTransition from '../../hooks/useMediaTransition';
-import useShowTransition from '../../hooks/useShowTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
+import useOldLang from '../../hooks/useOldLang';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import Link from '../ui/Link';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -64,7 +64,7 @@ const File: FC<OwnProps> = ({
   onClick,
   onDateClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   let elementRef = useRef<HTMLDivElement>(null);
   if (ref) {
@@ -75,12 +75,12 @@ const File: FC<OwnProps> = ({
   const [withThumb] = useState(!previewData);
   const noThumb = Boolean(previewData);
   const thumbRef = useCanvasBlur(thumbnailDataUri, noThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED);
-  const thumbClassNames = useMediaTransition(!noThumb);
+  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
 
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, true);
+  } = useShowTransitionDeprecated(isTransferring, undefined, true);
 
   const color = getColorFromExtension(extension);
   const sizeString = getFileSizeString(size);

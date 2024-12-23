@@ -10,8 +10,8 @@ import {
   isUsernameValid, MAX_USERNAME_LENGTH, MIN_UPDATE_USERNAME_LENGTH, USERNAME_REGEX,
 } from '../../util/username';
 
-import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import InputText from '../ui/InputText';
 
@@ -39,11 +39,11 @@ const UsernameInput: FC<OwnProps> = ({
   const { checkUsername, checkPublicLink } = getActions();
   const [username, setUsername] = useState(currentUsername || '');
 
-  const lang = useLang();
+  const lang = useOldLang();
   const langPrefix = asLink ? 'SetUrl' : 'Username';
   const label = asLink ? lang('SetUrlPlaceholder') : lang('Username');
 
-  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
   const renderingIsUsernameAvailable = currentUsername !== username
     ? (isUsernameAvailable ?? previousIsUsernameAvailable) : undefined;
   const isChecking = username && currentUsername !== username && checkedUsername !== username;

@@ -1,23 +1,18 @@
-import type { ApiMessage } from '../../../../api/types';
+import { getMediaThumbUri, type MediaWithThumbs } from '../../../../global/helpers';
 
-import { getMessageMediaThumbDataUri } from '../../../../global/helpers';
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../../util/windowEnvironment';
+import useOffscreenCanvasBlur from '../../../../hooks/useOffscreenCanvasBlur';
 
-import useAppLayout from '../../../../hooks/useAppLayout';
-import useCanvasBlur from '../../../../hooks/useCanvasBlur';
+type CanvasBlurReturnType = ReturnType<typeof useOffscreenCanvasBlur>;
 
 export default function useBlurredMediaThumbRef(
-  message: ApiMessage,
-  isDisabled?: boolean | string,
-  forcedUri?: string,
+  forcedUri: string | undefined, isDisabled: boolean,
+): CanvasBlurReturnType;
+export default function useBlurredMediaThumbRef(media: MediaWithThumbs, isDisabled?: boolean) : CanvasBlurReturnType;
+export default function useBlurredMediaThumbRef(
+  media: MediaWithThumbs | string | undefined,
+  isDisabled?: boolean,
 ) {
-  const { isMobile } = useAppLayout();
+  const dataUri = media ? typeof media === 'string' ? media : getMediaThumbUri(media) : undefined;
 
-  const dataUri = forcedUri || getMessageMediaThumbDataUri(message);
-
-  return useCanvasBlur(
-    dataUri,
-    Boolean(isDisabled),
-    isMobile && !IS_CANVAS_FILTER_SUPPORTED,
-  );
+  return useOffscreenCanvasBlur(dataUri, isDisabled);
 }

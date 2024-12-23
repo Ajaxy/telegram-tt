@@ -5,11 +5,9 @@ import arePropsShallowEqual, { logUnequalProps } from '../../util/arePropsShallo
 import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
 import { throttleWithTickEnd } from '../../util/schedulers';
-import { requestMeasure } from '../fasterdom/fasterdom';
-import React, { DEBUG_resolveComponentName, useEffect } from './teact';
+import React, { DEBUG_resolveComponentName, getIsHeavyAnimating, useUnmountCleanup } from './teact';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
-import { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useUniqueId from '../../hooks/useUniqueId';
 
 export default React;
@@ -27,7 +25,7 @@ interface Container {
 
 type GlobalState =
   AnyLiteral
-  & { DEBUG_capturedId?: number };
+  & { DEBUG_randomId?: number };
 type ActionNames = string;
 type ActionPayload = any;
 
@@ -52,13 +50,15 @@ type ActivationFn<OwnProps = undefined> = (
   global: GlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn,
 ) => boolean;
 
-let currentGlobal = {} as GlobalState;
+let currentGlobal = {
+  isInited: false,
+} as GlobalState;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-let DEBUG_currentCapturedId: number | undefined;
+let DEBUG_currentRandomId: number | undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const DEBUG_releaseCapturedIdThrottled = throttleWithTickEnd(() => {
-  DEBUG_currentCapturedId = undefined;
+const DEBUG_invalidateGlobalOnTickEnd = throttleWithTickEnd(() => {
+  DEBUG_currentRandomId = Math.random();
 });
 
 const actionHandlers: Record<string, ActionHandler[]> = {};
@@ -73,8 +73,8 @@ let forceOnHeavyAnimation = true;
 function runCallbacks() {
   if (forceOnHeavyAnimation) {
     forceOnHeavyAnimation = false;
-  } else if (isHeavyAnimating()) {
-    requestMeasure(runCallbacksThrottled);
+  } else if (getIsHeavyAnimating()) {
+    getIsHeavyAnimating.once(runCallbacksThrottled);
     return;
   }
 
@@ -86,19 +86,15 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
     if (DEBUG) {
       if (
         !options?.forceOutdated
-        && newGlobal.DEBUG_capturedId && newGlobal.DEBUG_capturedId !== DEBUG_currentCapturedId
+        && newGlobal.DEBUG_randomId && newGlobal.DEBUG_randomId !== DEBUG_currentRandomId
       ) {
         throw new Error('[TeactN.setGlobal] Attempt to set an outdated global');
       }
 
-      DEBUG_currentCapturedId = undefined;
+      DEBUG_currentRandomId = Math.random();
     }
 
     currentGlobal = newGlobal;
-
-    if (DEBUG) {
-      DEBUG_currentCapturedId = Math.random();
-    }
 
     if (options?.forceSyncOnIOs) {
       forceOnHeavyAnimation = true;
@@ -117,9 +113,9 @@ export function getGlobal() {
   if (DEBUG) {
     currentGlobal = {
       ...currentGlobal,
-      DEBUG_capturedId: DEBUG_currentCapturedId,
+      DEBUG_randomId: DEBUG_currentRandomId,
     };
-    DEBUG_releaseCapturedIdThrottled();
+    DEBUG_invalidateGlobalOnTickEnd();
   }
 
   return currentGlobal;
@@ -254,11 +250,9 @@ export function withGlobal<OwnProps extends AnyLiteral>(
       const id = useUniqueId();
       const forceUpdate = useForceUpdate();
 
-      useEffect(() => {
-        return () => {
-          containers.delete(id);
-        };
-      }, [id]);
+      useUnmountCleanup(() => {
+        containers.delete(id);
+      });
 
       let container = containers.get(id)!;
       if (!container) {

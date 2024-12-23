@@ -9,11 +9,12 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { translate } from '../../../util/langProvider';
+import { oldTranslate } from '../../../util/oldLangProvider';
 import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
 import renderText from './renderText';
 
 import MentionLink from '../../middle/message/MentionLink';
+import Blockquote from '../Blockquote';
 import CodeBlock from '../code/CodeBlock';
 import CustomEmoji from '../CustomEmoji';
 import SafeLink from '../SafeLink';
@@ -46,6 +47,7 @@ export function renderTextWithEntities({
   cacheBuster,
   forcePlayback,
   focusedQuote,
+  isInSelectMode,
 }: {
   text: string;
   entities?: ApiMessageEntity[];
@@ -64,6 +66,7 @@ export function renderTextWithEntities({
   cacheBuster?: string;
   forcePlayback?: boolean;
   focusedQuote?: string;
+  isInSelectMode?: boolean;
 }) {
   if (!entities?.length) {
     return renderMessagePart({
@@ -170,6 +173,7 @@ export function renderTextWithEntities({
         sharedCanvasHqRef,
         cacheBuster,
         forcePlayback,
+        isInSelectMode,
       });
 
     if (Array.isArray(newEntity)) {
@@ -384,6 +388,7 @@ function processEntity({
   sharedCanvasHqRef,
   cacheBuster,
   forcePlayback,
+  isInSelectMode,
 } : {
   entity: ApiMessageEntity;
   entityContent: TextPart;
@@ -402,6 +407,7 @@ function processEntity({
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
+  isInSelectMode?: boolean;
 }) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
@@ -433,6 +439,7 @@ function processEntity({
           key={cacheBuster ? `${cacheBuster}-${entity.offset}` : undefined}
           documentId={entity.documentId}
           size={emojiSize}
+          isSelectable
           withSharedAnimation
           sharedCanvasRef={sharedCanvasRef}
           sharedCanvasHqRef={sharedCanvasHqRef}
@@ -451,11 +458,9 @@ function processEntity({
       return <strong data-entity-type={entity.type}>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
       return (
-        <span className="text-entity-blockquote-wrapper">
-          <blockquote data-entity-type={entity.type}>
-            {renderNestedMessagePart()}
-          </blockquote>
-        </span>
+        <Blockquote canBeCollapsible={entity.canCollapse} isToggleDisabled={isInSelectMode}>
+          {renderNestedMessagePart()}
+        </Blockquote>
       );
     case ApiMessageEntityTypes.BotCommand:
       return (
@@ -468,10 +473,11 @@ function processEntity({
           {renderNestedMessagePart()}
         </a>
       );
-    case ApiMessageEntityTypes.Hashtag:
+    case ApiMessageEntityTypes.Hashtag: {
+      const [tag, username] = entityContent.split('@');
       return (
         <a
-          onClick={handleHashtagClick}
+          onClick={() => handleHashtagClick(tag, username)}
           className="text-entity-link"
           dir="auto"
           data-entity-type={entity.type}
@@ -479,10 +485,12 @@ function processEntity({
           {renderNestedMessagePart()}
         </a>
       );
-    case ApiMessageEntityTypes.Cashtag:
+    }
+    case ApiMessageEntityTypes.Cashtag: {
+      const [tag, username] = entityContent.split('@');
       return (
         <a
-          onClick={handleHashtagClick}
+          onClick={() => handleHashtagClick(tag, username)}
           className="text-entity-link"
           dir="auto"
           data-entity-type={entity.type}
@@ -490,11 +498,12 @@ function processEntity({
           {renderNestedMessagePart()}
         </a>
       );
+    }
     case ApiMessageEntityTypes.Code:
       return (
         <code
-          className={buildClassName('text-entity-code', !isProtected && 'clickable')}
-          onClick={!isProtected ? handleCodeClick : undefined}
+          className={buildClassName('text-entity-code', 'clickable')}
+          onClick={handleCodeClick}
           role="textbox"
           tabIndex={0}
           data-entity-type={entity.type}
@@ -550,6 +559,7 @@ function processEntity({
         <SafeLink
           url={getLinkUrl(entityText, entity)}
           text={entityText}
+          withNormalWordBreak
         >
           {renderNestedMessagePart()}
         </SafeLink>
@@ -564,6 +574,7 @@ function processEntity({
           key={cacheBuster ? `${cacheBuster}-${entity.offset}` : undefined}
           documentId={entity.documentId}
           size={emojiSize}
+          isSelectable
           withSharedAnimation
           sharedCanvasRef={sharedCanvasRef}
           sharedCanvasHqRef={sharedCanvasHqRef}
@@ -651,14 +662,24 @@ function handleBotCommandClick(e: React.MouseEvent<HTMLAnchorElement>) {
   getActions().sendBotCommand({ command: e.currentTarget.innerText });
 }
 
-function handleHashtagClick(e: React.MouseEvent<HTMLAnchorElement>) {
-  getActions().setLocalTextSearchQuery({ query: e.currentTarget.innerText });
-  getActions().searchTextMessagesLocal();
+function handleHashtagClick(hashtag?: string, username?: string) {
+  if (!hashtag) return;
+  if (username) {
+    getActions().openChatByUsername({
+      username,
+      onChatChanged: {
+        action: 'searchHashtag',
+        payload: { hashtag },
+      },
+    });
+    return;
+  }
+  getActions().searchHashtag({ hashtag });
 }
 
 function handleCodeClick(e: React.MouseEvent<HTMLElement>) {
   copyTextToClipboard(e.currentTarget.innerText);
   getActions().showNotification({
-    message: translate('TextCopied'),
+    message: oldTranslate('TextCopied'),
   });
 }

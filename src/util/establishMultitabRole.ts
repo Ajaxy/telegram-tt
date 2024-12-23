@@ -3,6 +3,8 @@ import { createCallbackManager } from './callbacks';
 import { getPasscodeHash, setPasscodeHash } from './passcode';
 import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 
+import Deferred from './Deferred';
+
 const ESTABLISH_TIMEOUT = 100;
 
 const { addCallback, runCallbacks } = createCallbackManager();
@@ -12,6 +14,7 @@ const collectedTokens = new Set([token]);
 let channel = IS_MULTITAB_SUPPORTED ? new BroadcastChannel(ESTABLISH_BROADCAST_CHANNEL_NAME) : undefined;
 
 let isEstablished = false;
+const initialEstablishment = new Deferred();
 let masterToken: number | undefined;
 let isWaitingForMaster = false;
 let reestablishToken: number | undefined;
@@ -36,6 +39,7 @@ const handleMessage = ({ data }: { data: EstablishMessage }) => {
   if (data.hasGaveUpMaster && isWaitingForMaster) {
     masterToken = token;
     isWaitingForMaster = false;
+    initialEstablishment.resolve();
     runCallbacks(true);
     return;
   }
@@ -67,6 +71,7 @@ const handleMessage = ({ data }: { data: EstablishMessage }) => {
         isEstablished = true;
         masterToken = token;
         reestablishToken = undefined;
+        initialEstablishment.resolve();
         runCallbacks(true);
       }
     }
@@ -98,6 +103,7 @@ const handleMessage = ({ data }: { data: EstablishMessage }) => {
             reestablishToken,
           });
         }
+        initialEstablishment.resolve();
         isEstablished = true;
       } else if (prevLength !== collectedTokens.size) {
         channel.postMessage({
@@ -117,6 +123,7 @@ const handleMessage = ({ data }: { data: EstablishMessage }) => {
             reestablishToken,
           });
         }
+        initialEstablishment.resolve();
         isEstablished = true;
       }
     } else if (!data.masterToken) {
@@ -141,6 +148,7 @@ export function establishMultitabRole(shouldReestablishMasterToSelf?: boolean) {
   setTimeout(() => {
     if (masterToken === undefined) {
       masterToken = token;
+      initialEstablishment.resolve();
       runCallbacks(true);
     } else if (shouldReestablishMasterToSelf) {
       reestablishMasterToSelf();
@@ -184,6 +192,8 @@ export function reestablishMasterToSelf() {
 
 export const subscribeToTokenDied = addCallbackTokenDied;
 export const subscribeToMasterChange = addCallback;
+
+export const initialEstablishmentPromise = initialEstablishment.promise;
 
 export function isCurrentTabMaster() {
   return masterToken === token;

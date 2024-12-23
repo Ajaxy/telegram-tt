@@ -11,8 +11,8 @@ import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
-import useLang from '../../../hooks/useLang';
-import usePrevious from '../../../hooks/usePrevious';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Button from '../../ui/Button';
@@ -51,13 +51,13 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
     playGroupCallSound,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const muteMouseDownState = useRef('up');
 
   const [isRequestingToSpeak, setIsRequestingToSpeak] = useState(false);
   const isConnecting = connectionState !== 'connected';
   const shouldRaiseHand = !canSelfUnmute && isMuted;
-  const prevShouldRaiseHand = usePrevious(shouldRaiseHand);
+  const prevShouldRaiseHand = usePreviousDeprecated(shouldRaiseHand);
 
   useEffect(() => {
     if (prevShouldRaiseHand && !shouldRaiseHand) {

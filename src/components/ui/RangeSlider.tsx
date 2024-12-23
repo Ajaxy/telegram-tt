@@ -4,7 +4,7 @@ import React, { memo, useCallback, useMemo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import './RangeSlider.scss';
 
@@ -20,6 +20,7 @@ type OwnProps = {
   className?: string;
   renderValue?: (value: number) => string;
   onChange: (value: number) => void;
+  isCenteredLayout?: boolean;
 };
 
 const RangeSlider: FC<OwnProps> = ({
@@ -34,8 +35,9 @@ const RangeSlider: FC<OwnProps> = ({
   className,
   renderValue,
   onChange,
+  isCenteredLayout,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     onChange(Number(event.currentTarget.value));
   }, [onChange]);
@@ -56,16 +58,38 @@ const RangeSlider: FC<OwnProps> = ({
     }
   }, [options, value, max, min, step]);
 
-  return (
-    <div className={mainClassName}>
-      {label && (
+  function renderTopRow() {
+    if (isCenteredLayout) {
+      return (
         <div className="slider-top-row" dir={lang.isRtl ? 'rtl' : undefined}>
-          <span className="label" dir="auto">{label}</span>
           {!options && (
-            <span className="value" dir="auto">{renderValue ? renderValue(value) : value}</span>
+            <>
+              <span className="value-min" dir="auto">{min}</span>
+              <span className="label" dir="auto">{renderValue ? renderValue(value) : value}</span>
+              <span className="value-max" dir="auto">{max}</span>
+            </>
           )}
         </div>
-      )}
+      );
+    }
+
+    if (!label) {
+      return undefined;
+    }
+
+    return (
+      <div className="slider-top-row" dir={lang.isRtl ? 'rtl' : undefined}>
+        <span className="label" dir="auto">{label}</span>
+        {!options && (
+          <span className="value" dir="auto">{renderValue ? renderValue(value) : value}</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={mainClassName}>
+      {renderTopRow()}
       <div className="slider-main">
         <div
           className="slider-fill-track"

@@ -8,7 +8,7 @@ import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers'
 import { compact } from '../../../../util/iteratees';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/windowEnvironment';
 
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 export default function useTopicContextActions({
   topic,
@@ -25,7 +25,7 @@ export default function useTopicContextActions({
   handleDelete?: NoneToVoidFunction;
   handleMute?: NoneToVoidFunction;
 }) {
-  const lang = useLang();
+  const lang = useOldLang();
 
   return useMemo(() => {
     const {

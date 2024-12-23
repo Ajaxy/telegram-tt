@@ -39,6 +39,8 @@ async function processQueue() {
 function downloadOne({ url, filename }: PendingDownload) {
   const link = document.createElement('a');
   link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
   link.download = filename;
   try {
     link.click();

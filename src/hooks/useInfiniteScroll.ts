@@ -5,7 +5,7 @@ import { LoadMoreDirection } from '../types';
 import { areSortedArraysEqual } from '../util/iteratees';
 import useForceUpdate from './useForceUpdate';
 import useLastCallback from './useLastCallback';
-import usePrevious from './usePrevious';
+import usePreviousDeprecated from './usePreviousDeprecated';
 
 type GetMore = (args: { direction: LoadMoreDirection }) => void;
 type LoadMoreBackwards = (args: { offsetId?: string | number }) => void;
@@ -17,19 +17,20 @@ const useInfiniteScroll = <ListId extends string | number>(
   listIds?: ListId[],
   isDisabled = false,
   listSlice = DEFAULT_LIST_SLICE,
-): [ListId[]?, GetMore?] => {
+): [ListId[]?, GetMore?, number?] => {
   const requestParamsRef = useRef<{
     direction?: LoadMoreDirection;
     offsetId?: ListId;
   }>();
 
-  const currentStateRef = useRef<{ viewportIds: ListId[]; isOnTop: boolean } | undefined>();
+  const currentStateRef = useRef<{ viewportIds: ListId[]; isOnTop: boolean; offset: number } | undefined>();
   if (!currentStateRef.current && listIds && !isDisabled) {
     const {
       newViewportIds,
       newIsOnTop,
+      fromOffset,
     } = getViewportSlice(listIds, LoadMoreDirection.Forwards, listSlice, listIds[0]);
-    currentStateRef.current = { viewportIds: newViewportIds, isOnTop: newIsOnTop };
+    currentStateRef.current = { viewportIds: newViewportIds, isOnTop: newIsOnTop, offset: fromOffset };
   }
 
   const forceUpdate = useForceUpdate();
@@ -38,19 +39,19 @@ const useInfiniteScroll = <ListId extends string | number>(
     requestParamsRef.current = {};
   }
 
-  const prevListIds = usePrevious(listIds);
-  const prevIsDisabled = usePrevious(isDisabled);
+  const prevListIds = usePreviousDeprecated(listIds);
+  const prevIsDisabled = usePreviousDeprecated(isDisabled);
   if (listIds && !isDisabled && (listIds !== prevListIds || isDisabled !== prevIsDisabled)) {
     const { viewportIds, isOnTop } = currentStateRef.current || {};
     const currentMiddleId = viewportIds && !isOnTop ? viewportIds[Math.round(viewportIds.length / 2)] : undefined;
     const defaultOffsetId = currentMiddleId && listIds.includes(currentMiddleId) ? currentMiddleId : listIds[0];
     const { offsetId = defaultOffsetId, direction = LoadMoreDirection.Forwards } = requestParamsRef.current || {};
-    const { newViewportIds, newIsOnTop } = getViewportSlice(listIds, direction, listSlice, offsetId);
+    const { newViewportIds, newIsOnTop, fromOffset } = getViewportSlice(listIds, direction, listSlice, offsetId);
 
     requestParamsRef.current = {};
 
     if (!viewportIds || !areSortedArraysEqual(viewportIds, newViewportIds)) {
-      currentStateRef.current = { viewportIds: newViewportIds, isOnTop: newIsOnTop };
+      currentStateRef.current = { viewportIds: newViewportIds, isOnTop: newIsOnTop, offset: fromOffset };
     }
   } else if (!listIds) {
     currentStateRef.current = undefined;
@@ -75,11 +76,11 @@ const useInfiniteScroll = <ListId extends string | number>(
     }
 
     const {
-      newViewportIds, areSomeLocal, areAllLocal, newIsOnTop,
+      newViewportIds, areSomeLocal, areAllLocal, newIsOnTop, fromOffset,
     } = getViewportSlice(listIds, direction, listSlice, offsetId);
 
     if (areSomeLocal && !(viewportIds && areSortedArraysEqual(viewportIds, newViewportIds))) {
-      currentStateRef.current = { viewportIds: newViewportIds, isOnTop: newIsOnTop };
+      currentStateRef.current = { viewportIds: newViewportIds, isOnTop: newIsOnTop, offset: fromOffset };
       forceUpdate();
     }
 
@@ -92,7 +93,7 @@ const useInfiniteScroll = <ListId extends string | number>(
     }
   });
 
-  return isDisabled ? [listIds] : [currentStateRef.current?.viewportIds, getMore];
+  return isDisabled ? [listIds] : [currentStateRef.current?.viewportIds, getMore, currentStateRef.current?.offset];
 };
 
 function getViewportSlice<ListId extends string | number>(
@@ -127,6 +128,7 @@ function getViewportSlice<ListId extends string | number>(
     areSomeLocal,
     areAllLocal,
     newIsOnTop: newViewportIds[0] === sourceIds[0],
+    fromOffset: from,
   };
 }
 

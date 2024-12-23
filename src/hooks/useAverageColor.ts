@@ -1,15 +1,15 @@
 import { useEffect, useState } from '../lib/teact/teact';
 
-import type { ApiChat } from '../api/types';
+import type { ApiPeer } from '../api/types';
 import { ApiMediaFormat } from '../api/types';
 
 import { getChatAvatarHash } from '../global/helpers';
 import { getAverageColor, rgb2hex } from '../util/colors';
 import useMedia from './useMedia';
 
-function useAverageColor(chat: ApiChat, fallbackColor = '#00000000') {
+function useAverageColor(peer: ApiPeer, fallbackColor = '#00000000') {
   const [color, setColor] = useState(fallbackColor);
-  const imgBlobUrl = useMedia(getChatAvatarHash(chat), false, ApiMediaFormat.BlobUrl);
+  const imgBlobUrl = useMedia(getChatAvatarHash(peer), false, ApiMediaFormat.BlobUrl);
 
   useEffect(() => {
     (async () => {

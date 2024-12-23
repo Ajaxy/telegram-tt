@@ -36,7 +36,6 @@ function OptimizedVideo({
   }
 
   const { handlePlaying: handlePlayingForAutoPause } = useVideoAutoPause(ref, canPlay, isPriority);
-  useVideoCleanup(ref, []);
 
   const isReadyRef = useRef(false);
   const handleReady = useLastCallback(() => {
@@ -76,6 +75,8 @@ function OptimizedVideo({
 
     return mergedHandlers;
   }, [otherBufferingHandlers, restProps]);
+
+  useVideoCleanup(ref, mergedOtherBufferingHandlers);
 
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading

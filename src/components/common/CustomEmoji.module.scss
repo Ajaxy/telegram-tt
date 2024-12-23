@@ -1,14 +1,23 @@
 .root {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   vertical-align: text-bottom;
   width: var(--custom-emoji-size);
   height: var(--custom-emoji-size);
   position: relative;
   flex: 0 0 var(--custom-emoji-size);
 
-  canvas {
+  :global(.rlottie-canvas) {
     display: block;
   }
+}
+
+.placeholder {
+  width: 85%;
+  height: 85%;
+  background-color: #77777719;
+  border-radius: 0.3125rem;
 }
 
 .thumb {

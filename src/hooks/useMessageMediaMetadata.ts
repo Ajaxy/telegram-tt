@@ -2,17 +2,18 @@ import { useMemo } from '../lib/teact/teact';
 
 import type {
   ApiAudio, ApiChat, ApiMessage, ApiPeer, ApiVoice,
+  MediaContent,
 } from '../api/types';
 
 import {
-  getAudioHasCover, getChatAvatarHash, getChatTitle, getMessageContent, getMessageMediaHash, getSenderTitle,
+  getAudioHasCover, getChatAvatarHash, getChatTitle, getMediaHash, getMessageContent, getSenderTitle,
 } from '../global/helpers';
 import { resizeImage, scaleImage } from '../util/imageResize';
 import { buildMediaMetadata } from '../util/mediaSession';
 import { AVATAR_FULL_DIMENSIONS } from '../components/common/helpers/mediaDimensions';
 import useAsync from './useAsync';
-import useLang from './useLang';
 import useMedia from './useMedia';
+import useOldLang from './useOldLang';
 
 import telegramLogoPath from '../assets/telegram-logo-filled.svg';
 
@@ -21,16 +22,16 @@ const MINIMAL_SIZE = 115; // spec says 100, but on Chrome 93 it's not showing
 
 // TODO Add support for video in future
 const useMessageMediaMetadata = (
-  message: ApiMessage, sender?: ApiPeer, chat?: ApiChat,
+  message?: ApiMessage, sender?: ApiPeer, chat?: ApiChat,
 ): MediaMetadata | undefined => {
-  const lang = useLang();
+  const lang = useOldLang();
 
-  const { audio, voice } = getMessageContent(message);
+  const { audio, voice } = message ? getMessageContent(message) : {} satisfies MediaContent;
   const title = audio ? (audio.title || audio.fileName) : voice ? 'Voice message' : '';
   const artist = audio?.performer || (sender && getSenderTitle(lang, sender));
   const album = (chat && getChatTitle(lang, chat)) || 'Telegram';
 
-  const audioCoverHash = (audio && getAudioHasCover(audio) && getMessageMediaHash(message, 'pictogram'));
+  const audioCoverHash = (audio && getAudioHasCover(audio) && getMediaHash(audio, 'pictogram'));
   const avatarHash = sender && getChatAvatarHash(sender, 'big');
   const hash = (audio && audioCoverHash) || (voice && avatarHash);
   const media = useMedia(hash);

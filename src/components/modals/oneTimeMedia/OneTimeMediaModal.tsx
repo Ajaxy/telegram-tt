@@ -9,9 +9,9 @@ import { selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useOldLang from '../../../hooks/useOldLang';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Audio from '../../common/Audio';
 import RoundVideo from '../../middle/message/RoundVideo';
@@ -30,13 +30,13 @@ const OneTimeMediaModal = ({
     closeOneTimeMediaModal,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const message = useCurrentOrPrev(modal?.message, true);
 
   const {
     shouldRender,
     transitionClassNames,
-  } = useShowTransition(Boolean(modal));
+  } = useShowTransitionDeprecated(Boolean(modal));
 
   const handlePlayVoice = useLastCallback(() => {
     return undefined;

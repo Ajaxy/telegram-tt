@@ -13,6 +13,7 @@
     padding: 0.1875rem 0.625rem;
     max-height: 75vh;
     overflow-y: scroll;
+
     @include mixins.adapt-padding-to-scrollbar(0.625rem);
 
     .row {

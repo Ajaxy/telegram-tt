@@ -18,11 +18,15 @@ export default function launchMediaWorkers() {
     instances = new Array(MAX_WORKERS).fill(undefined).map(
       () => {
         const worker = new Worker(new URL('../lib/mediaWorker/index.worker.ts', import.meta.url));
-        const connector = createConnector<MediaWorkerApi>(worker);
+        const connector = createConnector<MediaWorkerApi>(worker, undefined, 'media');
         return { worker, connector };
       },
     );
   }
 
   return instances;
+}
+
+export function requestMediaWorker(payload: Parameters<Connector<MediaWorkerApi>['request']>[0], index: number) {
+  return launchMediaWorkers()[index].connector.request(payload);
 }

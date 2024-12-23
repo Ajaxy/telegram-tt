@@ -11,8 +11,8 @@ import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useLang from '../../../hooks/useLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useOldLang from '../../../hooks/useOldLang';
+import useHeaderPane, { type PaneState } from '../../middle/hooks/useHeaderPane';
 
 import AvatarList from '../../common/AvatarList';
 import Button from '../../ui/Button';
@@ -21,8 +21,8 @@ import './GroupCallTopPane.scss';
 
 type OwnProps = {
   chatId: string;
-  hasPinnedOffset: boolean;
   className?: string;
+  onPaneStateChange?: (state: PaneState) => void;
 };
 
 type StateProps = {
@@ -37,14 +37,14 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   isActive,
   className,
   groupCall,
-  hasPinnedOffset,
+  onPaneStateChange,
 }) => {
   const {
     requestMasterAndJoinGroupCall,
     subscribeToGroupCallUpdates,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleJoinGroupCall = useCallback(() => {
     requestMasterAndJoinGroupCall({
@@ -86,23 +86,24 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
     };
   }, [groupCall?.id, groupCall?.isLoaded, isActive, subscribeToGroupCallUpdates]);
 
-  const {
-    shouldRender,
-    transitionClassNames,
-  } = useShowTransition(Boolean(groupCall && isActive));
-
   const renderingParticipantCount = useCurrentOrPrev(groupCall?.participantsCount, true);
   const renderingFetchedParticipants = useCurrentOrPrev(fetchedParticipants, true);
+
+  const isRendering = Boolean(groupCall && isActive);
+
+  const { ref, shouldRender } = useHeaderPane({
+    isOpen: isRendering,
+    onStateChange: onPaneStateChange,
+  });
 
   if (!shouldRender) return undefined;
 
   return (
     <div
+      ref={ref}
       className={buildClassName(
         'GroupCallTopPane',
-        hasPinnedOffset && 'has-pinned-offset',
         className,
-        transitionClassNames,
       )}
       onClick={handleJoinGroupCall}
     >

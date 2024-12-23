@@ -5,6 +5,7 @@ import type {
   ApiAttachBotIcon,
   ApiAttachMenuPeerType,
   ApiBotApp,
+  ApiBotAppSettings,
   ApiBotCommand,
   ApiBotInfo,
   ApiBotInlineMediaResult,
@@ -16,11 +17,13 @@ import type {
   ApiMessagesBotApp,
 } from '../../types';
 
+import { numberToHexColor } from '../../../util/colors';
 import { pick } from '../../../util/iteratees';
-import localDb from '../localDb';
+import { addDocumentToLocalDb } from '../helpers';
 import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messageContent';
+import { buildSvgPath } from './pathBytesToSvg';
 import { buildApiPeerId } from './peers';
 import { buildStickerFromDocument } from './symbols';
 
@@ -100,7 +103,7 @@ function buildApiAttachMenuIcon(icon: GramJs.AttachMenuBotIcon): ApiAttachBotIco
 
   if (!document) return undefined;
 
-  localDb.documents[String(icon.icon.id)] = icon.icon;
+  addDocumentToLocalDb(icon.icon);
 
   return {
     name: icon.name,
@@ -110,7 +113,8 @@ function buildApiAttachMenuIcon(icon: GramJs.AttachMenuBotIcon): ApiAttachBotIco
 
 export function buildApiBotInfo(botInfo: GramJs.BotInfo, chatId: string): ApiBotInfo {
   const {
-    description, descriptionPhoto, descriptionDocument, userId, commands, menuButton,
+    description, descriptionPhoto, descriptionDocument, userId, commands, menuButton, privacyPolicyUrl,
+    hasPreviewMedias, appSettings,
   } = botInfo;
 
   const botId = userId && buildApiPeerId(userId, 'user');
@@ -125,7 +129,21 @@ export function buildApiBotInfo(botInfo: GramJs.BotInfo, chatId: string): ApiBot
     gif,
     photo,
     menuButton: buildApiBotMenuButton(menuButton),
+    privacyPolicyUrl,
     commands: commandsArray?.length ? commandsArray : undefined,
+    hasPreviewMedia: hasPreviewMedias,
+    appSettings: appSettings && buildBotAppSettings(appSettings),
+  };
+}
+
+export function buildBotAppSettings(settings: GramJs.BotAppSettings): ApiBotAppSettings {
+  const placeholderPath = settings.placeholderPath && buildSvgPath(settings.placeholderPath);
+  return {
+    backgroundColor: settings.backgroundColor ? numberToHexColor(settings.backgroundColor) : undefined,
+    backgroundDarkColor: settings.backgroundDarkColor ? numberToHexColor(settings.backgroundDarkColor) : undefined,
+    headerColor: settings.headerColor ? numberToHexColor(settings.headerColor) : undefined,
+    headerDarkColor: settings.headerDarkColor ? numberToHexColor(settings.headerDarkColor) : undefined,
+    placeholderPath,
   };
 }
 

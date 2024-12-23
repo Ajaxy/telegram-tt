@@ -12,7 +12,7 @@ import { isoToEmoji } from '../../util/emoji/emoji';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
 import DropdownMenu from '../ui/DropdownMenu';
@@ -42,7 +42,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
   onChange,
   phoneCodeList,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 

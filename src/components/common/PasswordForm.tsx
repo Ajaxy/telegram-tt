@@ -12,7 +12,7 @@ import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useAppLayout from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 
@@ -53,7 +53,7 @@ const PasswordForm: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const { isMobile } = useAppLayout();
   const [password, setPassword] = useState('');

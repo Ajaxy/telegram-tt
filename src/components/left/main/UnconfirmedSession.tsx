@@ -3,8 +3,8 @@ import { getActions } from '../../../global';
 
 import type { ApiSession } from '../../../api/types';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 
 import Button from '../../ui/Button';
@@ -20,7 +20,7 @@ const UnconfirmedSession = ({ sessions, onHeightChange } : OwnProps) => {
   const { changeSessionSettings, terminateAuthorization, showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
 
   useResizeObserver(ref, (entry) => {
     const height = entry.borderBoxSize?.[0]?.blockSize || entry.contentRect.height;

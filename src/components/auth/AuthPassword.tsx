@@ -6,7 +6,7 @@ import type { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import PasswordForm from '../common/PasswordForm';
 import MonkeyPassword from '../common/PasswordMonkey';
@@ -18,7 +18,7 @@ const AuthPassword: FC<StateProps> = ({
 }) => {
   const { setAuthPassword, clearAuthError } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChangePasswordVisibility = useCallback((isVisible) => {

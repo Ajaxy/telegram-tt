@@ -7,7 +7,7 @@ import buildStyle from '../../util/buildStyle';
 
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 
 import AnimatedIcon from './AnimatedIcon';
 
@@ -27,10 +27,10 @@ function AnimatedIconWithPreview(props: OwnProps) {
   } = props;
 
   const [isThumbOpen, , unmarkThumbOpen] = useFlag(Boolean(thumbDataUri));
-  const thumbClassNames = useMediaTransition(isThumbOpen);
+  const thumbClassNames = useMediaTransitionDeprecated(isThumbOpen);
 
   const [isPreviewOpen, markPreviewOpen, unmarkPreviewOpen] = useFlag(loadedPreviewUrls.has(previewUrl));
-  const previewClassNames = useMediaTransition(isPreviewOpen);
+  const previewClassNames = useMediaTransitionDeprecated(isPreviewOpen);
 
   const [isAnimationReady, markAnimationReady] = useFlag(false);
 

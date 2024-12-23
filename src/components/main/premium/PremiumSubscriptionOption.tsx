@@ -7,7 +7,7 @@ import type { ApiPremiumGiftCodeOption, ApiPremiumGiftOption } from '../../../ap
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import styles from './PremiumSubscriptionOption.module.scss';
 
@@ -24,7 +24,7 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
   option, checked, fullMonthlyAmount,
   onChange, className, isGiveaway,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     months, amount, currency,

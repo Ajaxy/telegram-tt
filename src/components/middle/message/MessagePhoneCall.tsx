@@ -5,11 +5,11 @@ import { getActions } from '../../../global';
 import type { ApiMessage, PhoneCallAction } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatTime, formatTimeDuration } from '../../../util/date/dateFormat';
+import { formatTime, formatTimeDuration } from '../../../util/dates/dateFormat';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Button from '../../ui/Button';
 
@@ -28,7 +28,7 @@ const MessagePhoneCall: FC<OwnProps> = ({
 }) => {
   const { requestMasterAndRequestCall } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const {
     isOutgoing, isVideo, reason, duration,
   } = phoneCall;

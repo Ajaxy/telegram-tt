@@ -1,7 +1,6 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { useEffect, useRef, useState } from '../../../lib/teact/teact';
 
-import type { ApiMessage } from '../../../api/types';
+import type { ApiMediaExtendedPreview, ApiPhoto } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ISettings } from '../../../types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
@@ -9,13 +8,7 @@ import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import {
-  getMediaTransferState,
-  getMessageMediaFormat,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
-  getMessagePhoto,
-  getMessageWebPagePhoto,
-  isOwnMessage,
+  getMediaFormat, getMediaThumbUri, getMediaTransferState, getPhotoMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
@@ -28,16 +21,19 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import MediaSpoiler from '../../common/MediaSpoiler';
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
-export type OwnProps = {
+export type OwnProps<T> = {
   id?: string;
-  message: ApiMessage;
+  photo: ApiPhoto | ApiMediaExtendedPreview;
+  isInWebPage?: boolean;
+  messageText?: string;
+  isOwn?: boolean;
   observeIntersection?: ObserveFn;
   noAvatars?: boolean;
   canAutoLoad?: boolean;
@@ -53,13 +49,18 @@ export type OwnProps = {
   isDownloading?: boolean;
   isProtected?: boolean;
   theme: ISettings['theme'];
-  onClick?: (id: number) => void;
-  onCancelUpload?: (message: ApiMessage) => void;
+  className?: string;
+  clickArg?: T;
+  onClick?: (arg: T, e: React.MouseEvent<HTMLElement>) => void;
+  onCancelUpload?: (arg: T) => void;
 };
 
-const Photo: FC<OwnProps> = ({
+// eslint-disable-next-line @typescript-eslint/comma-dangle
+const Photo = <T,>({
   id,
-  message,
+  photo,
+  messageText,
+  isOwn,
   observeIntersection,
   noAvatars,
   canAutoLoad,
@@ -75,71 +76,83 @@ const Photo: FC<OwnProps> = ({
   isDownloading,
   isProtected,
   theme,
+  isInWebPage,
+  clickArg,
+  className,
   onClick,
   onCancelUpload,
-}) => {
+}: OwnProps<T>) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
+  const isPaidPreview = photo.mediaType === 'extendedMediaPreview';
 
-  const photo = (getMessagePhoto(message) || getMessageWebPagePhoto(message))!;
-  const localBlobUrl = photo.blobUrl;
+  const localBlobUrl = !isPaidPreview ? photo.blobUrl : undefined;
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
-  const shouldLoad = isLoadAllowed && isIntersecting;
+  const shouldLoad = isLoadAllowed && isIntersecting && !isPaidPreview;
   const {
     mediaData, loadProgress,
-  } = useMediaWithLoadProgress(getMessageMediaHash(message, size), !shouldLoad);
+  } = useMediaWithLoadProgress(!isPaidPreview ? getPhotoMediaHash(photo, size) : undefined, !shouldLoad);
   const fullMediaData = localBlobUrl || mediaData;
 
   const withBlurredBackground = Boolean(forcedWidth);
   const [withThumb] = useState(!fullMediaData);
   const noThumb = Boolean(fullMediaData);
-  const thumbRef = useBlurredMediaThumbRef(message, noThumb);
-  const blurredBackgroundRef = useBlurredMediaThumbRef(message, !withBlurredBackground);
-  const thumbClassNames = useMediaTransition(!noThumb);
-  const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const thumbRef = useBlurredMediaThumbRef(photo, noThumb);
+  useMediaTransition(!noThumb, { ref: thumbRef });
+  const blurredBackgroundRef = useBlurredMediaThumbRef(photo, !withBlurredBackground);
+  const thumbDataUri = getMediaThumbUri(photo);
 
-  const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(photo.isSpoiler);
+  const [isSpoilerShown, showSpoiler, hideSpoiler] = useFlag(isPaidPreview || photo.isSpoiler);
 
   useEffect(() => {
-    if (photo.isSpoiler) {
+    if (isPaidPreview || photo.isSpoiler) {
       showSpoiler();
     } else {
       hideSpoiler();
     }
-  }, [photo.isSpoiler]);
+  }, [isPaidPreview, photo]);
 
   const {
     loadProgress: downloadProgress,
   } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'download'), !isDownloading, getMessageMediaFormat(message, 'download'),
+    !isPaidPreview ? getPhotoMediaHash(photo, 'download') : undefined,
+    !isDownloading,
+    !isPaidPreview ? getMediaFormat(photo, 'download') : undefined,
   );
 
   const {
     isUploading, isTransferring, transferProgress,
   } = getMediaTransferState(
-    message,
     uploadProgress || (isDownloading ? downloadProgress : loadProgress),
     shouldLoad && !fullMediaData,
     uploadProgress !== undefined,
   );
-  const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
+  const wasLoadDisabled = usePreviousDeprecated(isLoadAllowed) === false;
 
   const {
+    ref: spinnerRef,
     shouldRender: shouldRenderSpinner,
-    transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, wasLoadDisabled, 'slow');
+  } = useShowTransition({
+    isOpen: isTransferring,
+    noMountTransition: wasLoadDisabled,
+    className: 'slow',
+    withShouldRender: true,
+  });
   const {
+    ref: downloadButtonRef,
     shouldRender: shouldRenderDownloadButton,
-    transitionClassNames: downloadButtonClassNames,
-  } = useShowTransition(!fullMediaData && !isLoadAllowed);
+  } = useShowTransition({
+    isOpen: !fullMediaData && !isLoadAllowed,
+    withShouldRender: true,
+  });
 
-  const handleClick = useLastCallback(() => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
     if (isUploading) {
-      onCancelUpload?.(message);
+      onCancelUpload?.(clickArg!);
       return;
     }
 
@@ -153,10 +166,9 @@ const Photo: FC<OwnProps> = ({
       return;
     }
 
-    onClick?.(message.id);
+    onClick?.(clickArg!, e);
   });
 
-  const isOwn = isOwnMessage(message);
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {
       if (prevShouldAffectAppendix) {
@@ -167,7 +179,8 @@ const Photo: FC<OwnProps> = ({
 
     const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
     if (fullMediaData) {
-      getCustomAppendixBg(fullMediaData, isOwn, isSelected, theme).then((appendixBg) => {
+      const messageId = Number(contentEl.closest<HTMLDivElement>('.Message')!.dataset.messageId);
+      getCustomAppendixBg(fullMediaData, Boolean(isOwn), messageId, isSelected, theme).then((appendixBg) => {
         requestMutation(() => {
           contentEl.style.setProperty('--appendix-bg', appendixBg);
           contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
@@ -178,14 +191,23 @@ const Photo: FC<OwnProps> = ({
     }
   }, [shouldAffectAppendix, fullMediaData, isOwn, isInSelectMode, isSelected, theme]);
 
-  const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, asForwarded, noAvatars, isMobile);
+  const { width, height, isSmall } = dimensions || calculateMediaDimensions({
+    media: photo,
+    isOwn,
+    asForwarded,
+    noAvatars,
+    isMobile,
+    messageText,
+    isInWebPage,
+  });
 
-  const className = buildClassName(
+  const componentClassName = buildClassName(
     'media-inner',
     !isUploading && !nonInteractive && 'interactive',
     isSmall && 'small-image',
-    width === height && 'square-image',
+    (width === height || size === 'pictogram') && 'square-image',
     height < MIN_MEDIA_HEIGHT && 'fix-min-height',
+    className,
   );
 
   const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
@@ -195,29 +217,32 @@ const Photo: FC<OwnProps> = ({
     <div
       id={id}
       ref={ref}
-      className={className}
+      className={componentClassName}
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
-      <img
-        src={fullMediaData}
-        className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
-        alt=""
-        style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
-        draggable={!isProtected}
-      />
+      {withBlurredBackground && (
+        <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />
+      )}
+      {fullMediaData && (
+        <img
+          src={fullMediaData}
+          className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
+          alt=""
+          style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
+          draggable={!isProtected}
+        />
+      )}
       {withThumb && (
-        <canvas ref={thumbRef} className={buildClassName('thumbnail', thumbClassNames)} />
+        <canvas ref={thumbRef} className="thumbnail" />
       )}
       {isProtected && <span className="protector" />}
       {shouldRenderSpinner && !shouldRenderDownloadButton && (
-        <div className={`media-loading ${spinnerClassNames}`}>
+        <div ref={spinnerRef} className="media-loading">
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {shouldRenderDownloadButton
-        && <i className={buildClassName('icon', 'icon-download', downloadButtonClassNames)} />}
+      {shouldRenderDownloadButton && <i ref={downloadButtonRef} className="icon icon-download" />}
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation

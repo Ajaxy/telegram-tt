@@ -101,6 +101,16 @@ class EmailUnconfirmedError extends BadRequestError {
     }
 }
 
+class PasswordModifiedError extends BadRequestError {
+    constructor(args) {
+        const seconds = Number(args.capture || 0);
+        super(`The password was modified less than 24 hours ago, try again in ${seconds} seconds.`);
+        // eslint-disable-next-line max-len
+        this.message = `The password was modified less than 24 hours ago, try again in ${seconds} seconds.`;
+        this.seconds = seconds;
+    }
+}
+
 const rpcErrorRe = [
     [/FILE_MIGRATE_(\d+)/, FileMigrateError],
     [/FLOOD_TEST_PHONE_WAIT_(\d+)/, FloodTestPhoneWaitError],
@@ -112,6 +122,7 @@ const rpcErrorRe = [
     [/USER_MIGRATE_(\d+)/, UserMigrateError],
     [/NETWORK_MIGRATE_(\d+)/, NetworkMigrateError],
     [/EMAIL_UNCONFIRMED_(\d+)/, EmailUnconfirmedError],
+    [/PASSWORD_TOO_FRESH_(\d+)/, PasswordModifiedError],
     [/^Timeout$/, TimedOutError],
 ];
 module.exports = {
@@ -126,4 +137,5 @@ module.exports = {
     NetworkMigrateError,
     MsgWaitError,
     EmailUnconfirmedError,
+    PasswordModifiedError,
 };

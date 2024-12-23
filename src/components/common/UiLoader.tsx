@@ -10,13 +10,14 @@ import { selectIsRightColumnShown, selectTabState } from '../../global/selectors
 import buildClassName from '../../util/buildClassName';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
+import { localizationReadyPromise } from '../../util/localization';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
 import { pause } from '../../util/schedulers';
 
 import useEffectOnce from '../../hooks/useEffectOnce';
 import useFlag from '../../hooks/useFlag';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 // Workaround for incorrect bundling by Webpack: force including in the main chunk
 import '../ui/Modal.scss';
@@ -80,6 +81,7 @@ const preloadTasks = {
       .then(preloadFonts),
     preloadAvatars(),
     preloadImage(spoilerMaskPath),
+    localizationReadyPromise,
   ]),
   authPhoneNumber: () => Promise.all([
     preloadFonts(),
@@ -108,7 +110,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   const [isReady, markReady] = useFlag();
   const {
     shouldRender: shouldRenderMask, transitionClassNames,
-  } = useShowTransition(!isReady, undefined, true);
+  } = useShowTransitionDeprecated(!isReady, undefined, true);
 
   useEffectOnce(() => {
     let timeout: number | undefined;

@@ -1,0 +1,31 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.5rem;
+}
+
+.participantCount {
+  color: var(--color-text-secondary);
+}
+
+.participants {
+  display: flex;
+  overflow-x: scroll;
+  gap: 0.5rem;
+  align-self: stretch;
+}
+
+.participant {
+  min-width: 4.5rem;
+  width: 4.5rem;
+  margin-inline: auto;
+}
+
+.buttons {
+  align-self: flex-end;
+  margin-top: 0.5rem;
+}

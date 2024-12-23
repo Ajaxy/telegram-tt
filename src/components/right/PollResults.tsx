@@ -2,15 +2,16 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { ApiChat, ApiMessage } from '../../api/types';
+import type { ApiChat, ApiMessage, ApiPoll } from '../../api/types';
 
-import { getMessagePoll } from '../../global/helpers';
-import { selectChat, selectChatMessage, selectTabState } from '../../global/selectors';
+import {
+  selectChat, selectChatMessage, selectPollFromMessage, selectTabState,
+} from '../../global/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
-import renderText from '../common/helpers/renderText';
+import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Loading from '../ui/Loading';
 import PollAnswerResults from './PollAnswerResults';
@@ -25,26 +26,28 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   message?: ApiMessage;
+  poll?: ApiPoll;
 };
 
 const PollResults: FC<OwnProps & StateProps> = ({
   isActive,
   chat,
   message,
+  poll,
   onClose,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
     onBack: onClose,
   });
 
-  if (!message || !chat) {
+  if (!message || !poll || !chat) {
     return <Loading />;
   }
 
-  const { summary, results } = getMessagePoll(message)!;
+  const { summary, results } = poll;
   if (!results.results) {
     return undefined;
   }
@@ -53,11 +56,16 @@ const PollResults: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="PollResults" dir={lang.isRtl ? 'rtl' : undefined}>
-      <h3 className="poll-question" dir="auto">{renderText(summary.question, ['emoji', 'br'])}</h3>
+      <h3 className="poll-question" dir="auto">
+        {renderTextWithEntities({
+          text: summary.question.text,
+          entities: summary.question.entities,
+        })}
+      </h3>
       <div className="poll-results-list custom-scroll">
         {summary.answers.map((answer) => (
           <PollAnswerResults
-            key={`${message.id}-${answer.option}`}
+            key={`${poll.id}-${answer.option}`}
             chat={chat}
             message={message}
             answer={answer}
@@ -82,10 +90,12 @@ export default memo(withGlobal(
 
     const chat = selectChat(global, chatId);
     const message = selectChatMessage(global, chatId, messageId);
+    const poll = message && selectPollFromMessage(global, message);
 
     return {
       chat,
       message,
+      poll,
     };
   },
 )(PollResults));

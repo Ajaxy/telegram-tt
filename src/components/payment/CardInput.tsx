@@ -8,7 +8,7 @@ import { CardType, detectCardType } from '../common/helpers/detectCardType';
 import { formatCardNumber } from '../middle/helpers/inputFormatters';
 
 import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import InputText from '../ui/InputText';
 
@@ -27,7 +27,7 @@ export type OwnProps = {
 };
 
 const CardInput : FC<OwnProps> = ({ value, error, onChange }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const cardNumberRef = useRef<HTMLInputElement>(null);
 

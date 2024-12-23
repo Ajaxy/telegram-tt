@@ -3,7 +3,7 @@ import type { ApiAttachment } from '../../../../api/types';
 import {
   GIF_MIME_TYPE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../../config';
 import { parseAudioMetadata } from '../../../../util/audio';
@@ -29,7 +29,7 @@ export default async function buildAttachment(
   let previewBlobUrl;
   let shouldSendAsFile;
 
-  if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
+  if (SUPPORTED_PHOTO_CONTENT_TYPES.has(mimeType)) {
     const img = await preloadImage(blobUrl);
     const { width, height } = img;
     shouldSendAsFile = !validateAspectRatio(width, height);
@@ -117,7 +117,7 @@ export function prepareAttachmentsToSend(
 
     return {
       ...attach,
-      shouldSendAsFile: !attach.voice ? true : undefined,
+      shouldSendAsFile: !(attach.voice || attach.audio) || undefined,
       shouldSendAsSpoiler: undefined,
     };
   });

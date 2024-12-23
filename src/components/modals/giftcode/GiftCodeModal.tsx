@@ -1,4 +1,4 @@
-import React, { memo } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiPeer } from '../../../api/types';
@@ -7,16 +7,14 @@ import type { TabState } from '../../../global/types';
 import { TME_LINK_PREFIX } from '../../../config';
 import { selectChatMessage, selectSender } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/date/dateFormat';
+import { formatDateTimeToString } from '../../../util/dates/dateFormat';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import LinkField from '../../common/LinkField';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
-import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
+import TableInfoModal, { type TableData } from '../common/TableInfoModal';
 
 import styles from './GiftCodeModal.module.scss';
 
@@ -39,17 +37,12 @@ const GiftCodeModal = ({
   messageSender,
 }: OwnProps & StateProps) => {
   const {
-    closeGiftCodeModal, openChat, applyGiftCode, focusMessage,
+    closeGiftCodeModal, applyGiftCode, focusMessage,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const isOpen = Boolean(modal);
 
   const canUse = (!modal?.info.toId || modal?.info.toId === currentUserId) && !modal?.info.usedAt;
-
-  const handleOpenChat = useLastCallback((peerId: string) => {
-    openChat({ id: peerId });
-    closeGiftCodeModal();
-  });
 
   const handleOpenGiveaway = useLastCallback(() => {
     if (!modal || !modal.info.giveawayMessageId) return;
@@ -68,101 +61,63 @@ const GiftCodeModal = ({
     closeGiftCodeModal();
   });
 
-  function renderContent() {
+  const modalData = useMemo(() => {
     if (!modal) return undefined;
     const { slug, info } = modal;
 
     const fromId = info.fromId || messageSender?.id;
 
-    return (
+    const header = (
       <>
-        <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
+        <img src={PremiumLogo} alt="" className={styles.logo} />
         <p className={styles.centered}>{renderText(lang('lng_gift_link_about'), ['simple_markdown'])}</p>
         <LinkField title="BoostingGiftLink" link={`${TME_LINK_PREFIX}/${GIFTCODE_PATH}/${slug}`} />
-        <table className={styles.table}>
-          <tr>
-            <td className={styles.title}>{lang('BoostingFrom')}</td>
-            <td>
-              {fromId ? (
-                <PickerSelectedItem
-                  peerId={fromId}
-                  className={styles.chatItem}
-                  forceShowSelf
-                  fluid
-                  clickArg={fromId}
-                  onClick={handleOpenChat}
-                />
-              ) : lang('BoostingNoRecipient')}
-            </td>
-          </tr>
-          <tr>
-            <td className={styles.title}>
-              {lang('BoostingTo')}
-            </td>
-            <td>
-              {info.toId ? (
-                <PickerSelectedItem
-                  peerId={info.toId}
-                  className={styles.chatItem}
-                  forceShowSelf
-                  fluid
-                  clickArg={info.toId}
-                  onClick={handleOpenChat}
-                />
-              ) : lang('BoostingNoRecipient')}
-            </td>
-          </tr>
-          <tr>
-            <td className={styles.title}>
-              {lang('BoostingGift')}
-            </td>
-            <td>
-              {lang('BoostingTelegramPremiumFor', lang('Months', info.months, 'i'))}
-            </td>
-          </tr>
-          <tr>
-            <td className={styles.title}>
-              {lang('BoostingReason')}
-            </td>
-            <td className={buildClassName(info.giveawayMessageId && styles.clickable)} onClick={handleOpenGiveaway}>
-              {info.isFromGiveaway && !info.toId ? lang('BoostingIncompleteGiveaway')
-                : lang(info.isFromGiveaway ? 'BoostingGiveaway' : 'BoostingYouWereSelected')}
-            </td>
-          </tr>
-          <tr>
-            <td className={styles.title}>
-              {lang('BoostingDate')}
-            </td>
-            <td>
-              {formatDateTimeToString(info.date * 1000, lang.code, true)}
-            </td>
-          </tr>
-        </table>
-        <span className={styles.centered}>
-          {renderText(
-            info.usedAt ? lang('BoostingUsedLinkDate', formatDateTimeToString(info.usedAt * 1000, lang.code, true))
-              : lang('BoostingSendLinkToAnyone'),
-            ['simple_markdown'],
-          )}
-        </span>
-        <Button onClick={handleButtonClick}>
-          {canUse ? lang('BoostingUseLink') : lang('Close')}
-        </Button>
       </>
     );
-  }
+
+    const tableData = [
+      [lang('BoostingFrom'), fromId ? { chatId: fromId } : lang('BoostingNoRecipient')],
+      [lang('BoostingTo'), info.toId ? { chatId: info.toId } : lang('BoostingNoRecipient')],
+      [lang('BoostingGift'), lang('BoostingTelegramPremiumFor', lang('Months', info.months, 'i'))],
+      [lang('BoostingReason'), (
+        <span className={buildClassName(info.giveawayMessageId && styles.clickable)} onClick={handleOpenGiveaway}>
+          {info.isFromGiveaway && !info.toId ? lang('BoostingIncompleteGiveaway')
+            : lang(info.isFromGiveaway ? 'BoostingGiveaway' : 'BoostingYouWereSelected')}
+        </span>
+      )],
+      [lang('BoostingDate'), formatDateTimeToString(info.date * 1000, lang.code, true)],
+    ] satisfies TableData;
+
+    const footer = (
+      <span className={styles.centered}>
+        {renderText(
+          info.usedAt ? lang('BoostingUsedLinkDate', formatDateTimeToString(info.usedAt * 1000, lang.code, true))
+            : lang('BoostingSendLinkToAnyone'),
+          ['simple_markdown'],
+        )}
+      </span>
+    );
+
+    return {
+      header,
+      tableData,
+      footer,
+    };
+  }, [lang, messageSender?.id, modal]);
+
+  if (!modalData) return undefined;
 
   return (
-    <Modal
+    <TableInfoModal
       isOpen={isOpen}
-      hasCloseButton
-      isSlim
       title={lang('lng_gift_link_title')}
-      contentClassName={styles.content}
+      tableData={modalData.tableData}
+      header={modalData.header}
+      footer={modalData.footer}
+      buttonText={canUse ? lang('BoostingUseLink') : lang('Close')}
+      onButtonClick={handleButtonClick}
       onClose={closeGiftCodeModal}
-    >
-      {renderContent()}
-    </Modal>
+    />
   );
 };
 

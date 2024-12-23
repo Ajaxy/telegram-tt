@@ -1,28 +1,23 @@
+import { throttleWithFullyIdle } from '../../../lib/teact/heavyAnimation';
+
 import type { ApiUserStatus } from '../../../api/types';
 import type { ActionReturnType, RequiredGlobalState } from '../../types';
 
-import { throttle } from '../../../util/schedulers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  deleteContact, replaceUserStatuses, updatePeerStoriesHidden, updateUser, updateUserFullInfo,
+  deleteContact,
+  replaceUserStatuses,
+  updatePeerStoriesHidden,
+  updateUser,
+  updateUserFullInfo,
 } from '../../reducers';
 import {
-  selectIsChatWithSelf,
-  selectIsCurrentUserPremium,
-  selectUser,
-  selectUserFullInfo,
+  selectIsChatWithSelf, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
 } from '../../selectors';
 
-const STATUS_UPDATE_THROTTLE = 3000;
-
-const flushStatusUpdatesThrottled = throttle(flushStatusUpdates, STATUS_UPDATE_THROTTLE, true);
+const updateStatusesOnFullyIdle = throttleWithFullyIdle(flushStatusUpdates);
 
 let pendingStatusUpdates: Record<string, ApiUserStatus> = {};
-
-function scheduleStatusUpdate(userId: string, statusUpdate: ApiUserStatus) {
-  pendingStatusUpdates[userId] = statusUpdate;
-  flushStatusUpdatesThrottled();
-}
 
 function flushStatusUpdates() {
   // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
@@ -85,7 +80,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateUserStatus': {
       // Status updates come very often so we throttle them
-      scheduleStatusUpdate(update.userId, update.status);
+      pendingStatusUpdates[update.userId] = update.status;
+      updateStatusesOnFullyIdle();
       return undefined;
     }
 

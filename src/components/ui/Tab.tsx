@@ -12,7 +12,6 @@ import renderText from '../common/helpers/renderText';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMenuPosition from '../../hooks/useMenuPosition';
 
 import Menu from './Menu';
 import MenuItem from './MenuItem';
@@ -106,7 +105,7 @@ const Tab: FC<OwnProps> = ({
   }, [isActive, previousActiveTab]);
 
   const {
-    contextMenuPosition, handleContextMenu, handleBeforeContextMenu, handleContextMenuClose,
+    contextMenuAnchor, handleContextMenu, handleBeforeContextMenu, handleContextMenuClose,
     handleContextMenuHide, isContextMenuOpen,
   } = useContextMenuHandlers(tabRef, !contextActions);
 
@@ -131,16 +130,6 @@ const Tab: FC<OwnProps> = ({
   );
   const getLayout = useLastCallback(() => ({ withPortal: true }));
 
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
-
   return (
     <div
       className={buildClassName('Tab', onClick && 'Tab--interactive', className)}
@@ -158,14 +147,14 @@ const Tab: FC<OwnProps> = ({
         <i className="platform" />
       </span>
 
-      {contextActions && contextMenuPosition !== undefined && (
+      {contextActions && contextMenuAnchor !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
           className="Tab-context-menu"
           autoClose
           onClose={handleContextMenuClose}

@@ -9,7 +9,7 @@ import type { TabState } from '../../../global/types';
 import { MINI_APP_TOS_URL } from '../../../config';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -26,7 +26,7 @@ const AttachBotInstallModal: FC<OwnProps> = ({
 
   const [isTosAccepted, setIsTosAccepted] = useState(false);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleConfirm = useCallback(() => {
     confirmAttachBotInstall({

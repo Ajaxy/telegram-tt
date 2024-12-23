@@ -15,8 +15,7 @@ import renderText from '../../common/helpers/renderText';
 import formatGroupCallVolume from './helpers/formatGroupCallVolume';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useLang from '../../../hooks/useLang';
-import useMenuPosition from '../../../hooks/useMenuPosition';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -42,7 +41,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const {
     isSelf, isMutedByMe, isMuted, hasVideoStream, hasPresentationStream,
@@ -52,7 +51,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
 
   const {
     isContextMenuOpen,
-    contextMenuPosition,
+    contextMenuAnchor,
     handleContextMenu,
     handleBeforeContextMenu,
     handleContextMenuClose,
@@ -74,16 +73,6 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
   const getLayout = useCallback(
     () => ({ withPortal: true }),
     [],
-  );
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
   );
 
   const hasCustomVolume = Boolean(
@@ -147,11 +136,11 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
       <GroupCallParticipantMenu
         participant={participant}
         isDropdownOpen={isContextMenuOpen}
-        positionX={positionX}
-        positionY={positionY}
-        transformOriginX={transformOriginX}
-        transformOriginY={transformOriginY}
-        style={menuStyle}
+        anchor={contextMenuAnchor}
+        getTriggerElement={getTriggerElement}
+        getRootElement={getRootElement}
+        getMenuElement={getMenuElement}
+        getLayout={getLayout}
         onClose={handleContextMenuClose}
         onCloseAnimationEnd={handleContextMenuHide}
         menuRef={menuRef}

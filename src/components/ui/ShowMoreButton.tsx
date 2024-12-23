@@ -1,7 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from './Button';
 
@@ -22,7 +22,7 @@ const ShowMoreButton: FC<OwnProps> = ({
   isLoading,
   onClick,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <Button

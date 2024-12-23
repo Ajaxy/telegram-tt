@@ -8,7 +8,7 @@ import type { ApiCountry } from '../../api/types';
 import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
 import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
@@ -49,7 +49,7 @@ const ShippingInfo: FC<OwnProps> = ({
     }
   }, [state.countryIso2]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useFocusAfterAnimation(inputRef);
 

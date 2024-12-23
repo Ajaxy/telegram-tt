@@ -10,10 +10,10 @@ import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
 import styles from './CloseFriends.module.scss';
@@ -31,7 +31,7 @@ function CloseFriends({
 }: OwnProps) {
   const { saveCloseFriends } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSubmitShown, setIsSubmitShown] = useState<boolean>(false);
   const [newSelectedContactIds, setNewSelectedContactIds] = useState<string[]>([]);
@@ -64,15 +64,19 @@ function CloseFriends({
 
   return (
     <>
-      <Picker
+      <PeerPicker
         itemIds={displayedIds || []}
         selectedIds={newSelectedContactIds}
         filterValue={searchQuery}
         filterPlaceholder={lang('Search')}
         searchInputId="close-friends-picker-search"
         isSearchable
+        withDefaultPadding
         onSelectedIdsChange={handleSelectedContactIdsChange}
         onFilterChange={setSearchQuery}
+        allowMultiple
+        withStatus
+        itemInputType="checkbox"
       />
 
       <div className={buildClassName(styles.buttonHolder, isSubmitShown && styles.active)}>

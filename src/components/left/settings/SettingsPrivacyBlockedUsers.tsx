@@ -11,7 +11,7 @@ import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
@@ -42,7 +42,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
 }) => {
   const { unblockUser } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
   const handleUnblockClick = useCallback((userId: string) => {
     unblockUser({ userId });

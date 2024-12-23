@@ -5,10 +5,10 @@ import type {
   ApiUpdateAuthorizationStateType,
   ApiUser,
   ApiUserFullInfo,
-  OnApiUpdate,
 } from '../../types';
 
 import { DEBUG } from '../../../config';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 
 const ApiErrors: { [k: string]: string } = {
   PHONE_NUMBER_INVALID: 'Invalid phone number.',
@@ -23,20 +23,14 @@ const authController: {
   reject?: Function;
 } = {};
 
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
-
 export function onWebAuthTokenFailed() {
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateWebAuthTokenFailed',
   });
 }
 
 export function onRequestPhoneNumber() {
-  onUpdate(buildAuthStateUpdate('authorizationStateWaitPhoneNumber'));
+  sendApiUpdate(buildAuthStateUpdate('authorizationStateWaitPhoneNumber'));
 
   return new Promise<string>((resolve, reject) => {
     authController.resolve = resolve;
@@ -45,7 +39,7 @@ export function onRequestPhoneNumber() {
 }
 
 export function onRequestCode(isCodeViaApp = false) {
-  onUpdate({
+  sendApiUpdate({
     ...buildAuthStateUpdate('authorizationStateWaitCode'),
     isCodeViaApp,
   });
@@ -57,7 +51,7 @@ export function onRequestCode(isCodeViaApp = false) {
 }
 
 export function onRequestPassword(hint?: string, noReset?: boolean) {
-  onUpdate({
+  sendApiUpdate({
     ...buildAuthStateUpdate('authorizationStateWaitPassword'),
     hint,
     noReset,
@@ -69,7 +63,7 @@ export function onRequestPassword(hint?: string, noReset?: boolean) {
 }
 
 export function onRequestRegistration() {
-  onUpdate(buildAuthStateUpdate('authorizationStateWaitRegistration'));
+  sendApiUpdate(buildAuthStateUpdate('authorizationStateWaitRegistration'));
 
   return new Promise<[string, string?]>((resolve) => {
     authController.resolve = resolve;
@@ -77,7 +71,7 @@ export function onRequestRegistration() {
 }
 
 export function onRequestQrCode(qrCode: { token: Buffer; expires: number }) {
-  onUpdate({
+  sendApiUpdate({
     ...buildAuthStateUpdate('authorizationStateWaitQrCode'),
     qrCode: {
       token: btoa(String.fromCharCode(...qrCode.token)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
@@ -109,18 +103,18 @@ export function onAuthError(err: Error) {
     }
   }
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateAuthorizationError',
     message,
   });
 }
 
 export function onAuthReady() {
-  onUpdate(buildAuthStateUpdate('authorizationStateReady'));
+  sendApiUpdate(buildAuthStateUpdate('authorizationStateReady'));
 }
 
 export function onCurrentUserUpdate(currentUser: ApiUser, currentUserFullInfo: ApiUserFullInfo) {
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateCurrentUser',
     currentUser,
     currentUserFullInfo,

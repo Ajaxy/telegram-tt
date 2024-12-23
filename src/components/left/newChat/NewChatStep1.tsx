@@ -8,9 +8,9 @@ import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
@@ -27,28 +27,28 @@ type StateProps = {
   localContactIds?: string[];
   searchQuery?: string;
   isSearching?: boolean;
-  localUserIds?: string[];
-  globalUserIds?: string[];
+  localPeerIds?: string[];
+  globalPeerIds?: string[];
 };
 
 const NewChatStep1: FC<OwnProps & StateProps> = ({
   isChannel,
   isActive,
   selectedMemberIds,
-  onSelectedMemberIdsChange,
-  onNextStep,
-  onReset,
   localContactIds,
   searchQuery,
   isSearching,
-  localUserIds,
-  globalUserIds,
+  localPeerIds,
+  globalPeerIds,
+  onSelectedMemberIdsChange,
+  onNextStep,
+  onReset,
 }) => {
   const {
     setGlobalSearchQuery,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -67,20 +67,17 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
     return sortChatIds(
       unique([
         ...foundContactIds,
-        ...(localUserIds || []),
-        ...(globalUserIds || []),
+        ...(localPeerIds || []),
+        ...(globalPeerIds || []),
       ]).filter((contactId) => {
         const user = usersById[contactId];
-        if (!user) {
-          return true;
-        }
 
-        return !user.isSelf && (user.canBeInvitedToGroup || !isUserBot(user));
+        return user && !user.isSelf && (user.canBeInvitedToGroup || !isUserBot(user));
       }),
       false,
       selectedMemberIds,
     );
-  }, [localContactIds, searchQuery, localUserIds, globalUserIds, selectedMemberIds]);
+  }, [localContactIds, searchQuery, localPeerIds, globalPeerIds, selectedMemberIds]);
 
   const handleNextStep = useCallback(() => {
     setGlobalSearchQuery({ query: '' });
@@ -102,7 +99,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
         <h3>{lang('GroupAddMembers')}</h3>
       </div>
       <div className="NewChat-inner step-1">
-        <Picker
+        <PeerPicker
           itemIds={displayedIds}
           selectedIds={selectedMemberIds}
           filterValue={searchQuery}
@@ -110,6 +107,10 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           searchInputId="new-group-picker-search"
           isLoading={isSearching}
           isSearchable
+          allowMultiple
+          withStatus
+          itemInputType="checkbox"
+          withDefaultPadding
           onSelectedIdsChange={onSelectedMemberIdsChange}
           onFilterChange={handleFilterChange}
         />
@@ -136,15 +137,15 @@ export default memo(withGlobal<OwnProps>(
       globalResults,
       localResults,
     } = selectTabState(global).globalSearch;
-    const { userIds: globalUserIds } = globalResults || {};
-    const { userIds: localUserIds } = localResults || {};
+    const { peerIds: globalPeerIds } = globalResults || {};
+    const { peerIds: localPeerIds } = localResults || {};
 
     return {
       localContactIds,
       searchQuery,
       isSearching: fetchingStatus?.chats,
-      globalUserIds,
-      localUserIds,
+      globalPeerIds,
+      localPeerIds,
     };
   },
 )(NewChatStep1));

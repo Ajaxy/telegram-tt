@@ -7,11 +7,12 @@ import type { ApiStory } from '../../api/types';
 
 import { requestForcedReflow, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
+import calcTextLineHeightAndCount from '../../util/element/calcTextLineHeightAndCount';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import EmbeddedStoryForward from '../common/embedded/EmbeddedStoryForward';
 import MessageText from '../common/MessageText';
@@ -32,7 +33,7 @@ const LINES_TO_SHOW = 3;
 function StoryCaption({
   story, isExpanded, className, onExpand, onFold,
 }: OwnProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -64,7 +65,7 @@ function StoryCaption({
   }, [isExpanded]);
 
   const canExpand = hasOverflow && !isInExpandedState;
-  const { shouldRender: shouldRenderShowMore, transitionClassNames } = useShowTransition(
+  const { shouldRender: shouldRenderShowMore, transitionClassNames } = useShowTransitionDeprecated(
     canExpand, undefined, true, 'slow', true,
   );
 
@@ -94,8 +95,8 @@ function StoryCaption({
       const textContainer = textRef.current;
 
       const textOffsetTop = textContainer.offsetTop;
-      const lineHeight = parseInt(getComputedStyle(textContainer).lineHeight, 10);
-      const isOverflowing = textContainer.clientHeight > lineHeight * LINES_TO_SHOW;
+      const { lineHeight, totalLines } = calcTextLineHeightAndCount(textContainer);
+      const isOverflowing = totalLines > LINES_TO_SHOW;
       const overflowShift = textOffsetTop + lineHeight * LINES_TO_SHOW;
 
       return () => {

@@ -1,0 +1,20 @@
+@use "../../../styles/mixins";
+
+.ChatReportPane {
+  @include mixins.header-pane;
+
+  display: flex;
+  align-items: center;
+
+  body.no-page-transitions & {
+    .ripple-container {
+      display: none;
+    }
+  }
+
+  &--Button {
+    margin-left: 0.25rem;
+    flex: 1 1 50%;
+    white-space: nowrap;
+  }
+}

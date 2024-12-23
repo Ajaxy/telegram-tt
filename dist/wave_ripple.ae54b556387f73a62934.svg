@@ -1,0 +1,27 @@
+<!-- Displacement map for "shockwave" -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
+  <style>
+    #mix {
+      mix-blend-mode: screen;
+    }
+  </style>
+  <linearGradient id="red">
+    <stop offset="0%" stop-color="red" />
+    <stop offset="100%" stop-color="red" stop-opacity="0" />
+  </linearGradient>
+  <linearGradient id="blue" gradientTransform="rotate(90)">
+    <stop offset="0%" stop-color="blue" />
+    <stop offset="100%" stop-color="blue" stop-opacity="0" />
+  </linearGradient>
+  <radialGradient id="grey">
+    <stop offset="60%" stop-color="grey" stop-opacity="1" />
+    <stop offset="80%" stop-color="grey" stop-opacity="0" />
+    <stop offset="100%" stop-color="grey" stop-opacity="1" />
+  </radialGradient>
+  <g>
+    <rect width="1" height="1" fill="black" />
+    <rect width="1" height="1" fill="url(#red)" />
+    <rect width="1" height="1" fill="url(#blue)" id="mix" />
+    <rect width="1" height="1" fill="url(#grey)" />
+  </g>
+</svg>

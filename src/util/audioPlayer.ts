@@ -1,12 +1,12 @@
 import { getActions, getGlobal } from '../global';
 
 import type { ApiMessage } from '../api/types';
-import type { MessageKey } from './messageKey';
+import type { MessageKey } from './keys/messageKey';
 import { AudioOrigin, GlobalSearchContent } from '../types';
 
 import { requestNextMutation } from '../lib/fasterdom/fasterdom';
 import { selectCurrentMessageList, selectTabState } from '../global/selectors';
-import { getMessageServerKey, parseMessageKey } from './messageKey';
+import { getMessageServerKey, parseMessageKey } from './keys/messageKey';
 import { isSafariPatchInProgress, patchSafariProgressiveAudio } from './patchSafariProgressiveAudio';
 import safePlay from './safePlay';
 import { IS_SAFARI } from './windowEnvironment';

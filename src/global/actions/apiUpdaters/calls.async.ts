@@ -8,13 +8,12 @@ import {
   joinPhoneCall, processSignalingMessage,
 } from '../../../lib/secret-sauce';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
+import { omit } from '../../../util/iteratees';
+import * as langProvider from '../../../util/oldLangProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { addUsers } from '../../reducers';
 import { updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
 import { selectActiveGroupCall, selectGroupCallParticipant, selectPhoneCallUser } from '../../selectors/calls';
@@ -112,7 +111,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           const user = selectPhoneCallUser(global);
           if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
           actions.showNotification({
-            message: langProvider.translate('VoipPeerIncompatible', user?.firstName),
+            message: langProvider.oldTranslate('VoipPeerIncompatible', user?.firstName),
             tabId: getCurrentTabId(),
           });
           return undefined;
@@ -143,14 +142,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           };
           setGlobal(global);
 
-          const result = await callApi('confirmCall', {
+          callApi('confirmCall', {
             call, gA, keyFingerprint,
           });
-          if (result) {
-            global = getGlobal();
-            global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-            setGlobal(global);
-          }
         })();
       } else if (state === 'active' && connections && phoneCall?.state !== 'active') {
         if (!isOutgoing) {

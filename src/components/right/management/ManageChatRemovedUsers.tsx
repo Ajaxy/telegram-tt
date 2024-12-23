@@ -10,7 +10,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -42,7 +42,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
 }) => {
   const { updateChatMemberBannedRights } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isRemoveUserModalOpen, openRemoveUserModal, closeRemoveUserModal] = useFlag();
 
   useHistoryBack({
@@ -84,7 +84,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <p className="text-muted">{lang(isChannel ? 'NoBlockedChannel2' : 'NoBlockedGroup2')}</p>
+          <p className="section-help">{lang(isChannel ? 'NoBlockedChannel2' : 'NoBlockedGroup2')}</p>
 
           {removedMembers.map((member) => (
             <ListItem

@@ -1,14 +1,17 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React, {
+  memo, useEffect, useRef, useState,
+} from '../../lib/teact/teact';
 
 import type { IconName } from '../../types/icons';
 
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
+import useResizeObserver from '../../hooks/useResizeObserver';
 
-import Icon from './Icon';
+import Icon from './icons/Icon';
 
 import styles from './PremiumProgress.module.scss';
 
@@ -18,42 +21,78 @@ type OwnProps = {
   floatingBadgeIcon?: IconName;
   floatingBadgeText?: string;
   progress?: number;
+  isPrimary?: boolean;
   className?: string;
 };
 
-const PROGRESS_LOCK = 0.1;
-
-const LimitPreview: FC<OwnProps> = ({
+const PremiumProgress: FC<OwnProps> = ({
   leftText,
   rightText,
   floatingBadgeText,
   floatingBadgeIcon,
   progress,
+  isPrimary,
   className,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
+  // eslint-disable-next-line no-null/no-null
+  const floatingBadgeRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const parentContainerRef = useRef<HTMLDivElement>(null);
+
+  const [shiftX, setShiftX] = useState(0);
+  const [tailPosition, setTailPosition] = useState(0);
+
+  const updateBadgePosition = () => {
+    if (floatingBadgeRef.current && parentContainerRef.current && progress !== undefined) {
+      const badgeWidth = floatingBadgeRef.current.offsetWidth;
+      const parentWidth = parentContainerRef.current.offsetWidth;
+      const minShift = badgeWidth / 2;
+      const maxShift = parentWidth - badgeWidth / 2;
+      const currentShift = progress * parentWidth;
+      const safeShift = Math.max(minShift, Math.min(currentShift, maxShift));
+
+      setShiftX(safeShift / parentWidth);
+
+      let newTailPosition;
+      if (currentShift < minShift) {
+        newTailPosition = (progress * parentWidth) / (minShift * 2);
+      } else if (currentShift > maxShift) {
+        const progressMapped = (progress - (maxShift / parentWidth)) / (1 - maxShift / parentWidth);
+        newTailPosition = 0.5 + (progressMapped * 0.4);
+      } else {
+        newTailPosition = 0.5;
+      }
+      setTailPosition(newTailPosition);
+    }
+  };
+
+  useEffect(updateBadgePosition, [progress]);
+
+  useResizeObserver(parentContainerRef, updateBadgePosition);
 
   const hasFloatingBadge = Boolean(floatingBadgeIcon || floatingBadgeText);
   const isProgressFull = Boolean(progress) && progress > 0.99;
 
-  const tailPosition = progress && (progress < PROGRESS_LOCK ? 0 : progress > 1 - PROGRESS_LOCK ? 1 : 0.5);
-
   return (
     <div
+      ref={parentContainerRef}
       className={buildClassName(
         styles.root,
         hasFloatingBadge && styles.withBadge,
+        isPrimary && styles.primary,
         className,
       )}
       style={buildStyle(
         progress !== undefined && `--progress: ${progress}`,
         tailPosition !== undefined && `--tail-position: ${tailPosition}`,
+        `--shift-x: ${shiftX}`,
       )}
     >
       {hasFloatingBadge && (
         <div className={styles.badgeContainer}>
           <div className={styles.floatingBadgeWrapper}>
-            <div className={styles.floatingBadge}>
+            <div className={styles.floatingBadge} ref={floatingBadgeRef}>
               {floatingBadgeIcon && <Icon name={floatingBadgeIcon} className={styles.floatingBadgeIcon} />}
               {floatingBadgeText && (
                 <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>
@@ -87,4 +126,4 @@ const LimitPreview: FC<OwnProps> = ({
   );
 };
 
-export default memo(LimitPreview);
+export default memo(PremiumProgress);

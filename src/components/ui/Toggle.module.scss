@@ -36,12 +36,12 @@
 
   &.mid::after {
     transform: translate(calc(var(--widget-width) / 2 - calc(var(--thumb-size) / 2)), -50%);
-    border-color: var(--color-primary)
+    border-color: var(--color-primary);
   }
 
   &.max::after {
     transform: translate(calc(var(--widget-width) - var(--thumb-size) + 0.125rem), -50%);
-    border-color: var(--color-primary)
+    border-color: var(--color-primary);
   }
 }
 

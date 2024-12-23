@@ -1,12 +1,10 @@
 import { useMemo } from '../lib/teact/teact';
 import { getGlobal } from '../global';
 
-import type { ApiMessage, ApiSticker } from '../api/types';
+import type { ApiSticker, MediaContainer } from '../api/types';
 
 import { getMessageMediaThumbDataUri } from '../global/helpers';
 import { selectTheme } from '../global/selectors';
-
-type MediaContainer = Pick<ApiMessage, 'content'>;
 
 export default function useThumbnail(media?: MediaContainer | ApiSticker) {
   const isMediaContainer = media && 'content' in media;

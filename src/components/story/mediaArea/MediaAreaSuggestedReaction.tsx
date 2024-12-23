@@ -82,12 +82,12 @@ const MediaAreaSuggestedReaction = ({
   return (
     <div
       ref={ref}
-      className={buildClassName(styles.suggestedReaction, isDark && styles.dark, className)}
+      className={buildClassName(isDark ? styles.dark : styles.light, className)}
       style={buildStyle(style, `--custom-emoji-size: ${customEmojiSize}px`)}
       onClick={handleClick}
     >
       <div
-        className={buildClassName(styles.background, isFlipped && styles.flipped)}
+        className={buildClassName(styles.reactionBackground, isFlipped && styles.flipped)}
       />
       {Boolean(customEmojiSize) && (
         <ReactionAnimatedEmoji

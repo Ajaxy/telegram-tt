@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import { getActions } from '../../../global';
 
 import type { MessageListType } from '../../../global/types';
-import type { PinnedIntersectionChangedCallback } from './usePinnedMessage';
+import type { OnIntersectPinnedMessage } from './usePinnedMessage';
 
 import { IS_ANDROID } from '../../../util/windowEnvironment';
 
@@ -17,7 +17,7 @@ export default function useMessageObservers(
   type: MessageListType,
   containerRef: RefObject<HTMLDivElement>,
   memoFirstUnreadIdRef: { current: number | undefined },
-  onPinnedIntersectionChange: PinnedIntersectionChangedCallback,
+  onIntersectPinnedMessage: OnIntersectPinnedMessage,
   chatId: string,
 ) {
   const {
@@ -44,12 +44,9 @@ export default function useMessageObservers(
     const viewportPinnedIdsToAdd: number[] = [];
     const viewportPinnedIdsToRemove: number[] = [];
     const scheduledToUpdateViews: number[] = [];
-    let isReversed = false;
 
     entries.forEach((entry) => {
-      const {
-        isIntersecting, target, boundingClientRect, rootBounds,
-      } = entry;
+      const { isIntersecting, target } = entry;
 
       const { dataset } = target as HTMLDivElement;
       const messageId = Number(dataset.lastMessageId || dataset.messageId);
@@ -58,9 +55,6 @@ export default function useMessageObservers(
 
       if (!isIntersecting) {
         if (dataset.isPinned) {
-          if (rootBounds && boundingClientRect.bottom < rootBounds.top) {
-            isReversed = true;
-          }
           viewportPinnedIdsToRemove.push(albumMainId || messageId);
         }
         return;
@@ -100,7 +94,7 @@ export default function useMessageObservers(
     }
 
     if (viewportPinnedIdsToAdd.length || viewportPinnedIdsToRemove.length) {
-      onPinnedIntersectionChange({ viewportPinnedIdsToAdd, viewportPinnedIdsToRemove, isReversed });
+      onIntersectPinnedMessage({ viewportPinnedIdsToAdd, viewportPinnedIdsToRemove });
     }
 
     if (scheduledToUpdateViews.length) {

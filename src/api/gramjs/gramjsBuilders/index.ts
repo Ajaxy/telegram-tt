@@ -18,7 +18,8 @@ import type {
   ApiPhoneCall,
   ApiPhoto,
   ApiPoll,
-  ApiPremiumGiftCodeOption, ApiReaction,
+  ApiPremiumGiftCodeOption,
+  ApiReactionWithPaid,
   ApiReportReason,
   ApiRequestInputInvoice,
   ApiSendMessageAction,
@@ -169,9 +170,12 @@ export function buildInputPoll(pollParams: ApiNewPoll, randomId: BigInt.BigInteg
   const poll = new GramJs.Poll({
     id: randomId,
     publicVoters: summary.isPublic,
-    question: summary.question,
+    question: buildInputTextWithEntities(summary.question),
     answers: summary.answers.map(({ text, option }) => {
-      return new GramJs.PollAnswer({ text, option: deserializeBytes(option) });
+      return new GramJs.PollAnswer({
+        text: buildInputTextWithEntities(text),
+        option: deserializeBytes(option),
+      });
     }),
     quiz: summary.quiz,
     multipleChoice: summary.multipleChoice,
@@ -200,9 +204,12 @@ export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
     poll: new GramJs.Poll({
       id: BigInt(poll.id),
       publicVoters: poll.summary.isPublic,
-      question: poll.summary.question,
+      question: buildInputTextWithEntities(poll.summary.question),
       answers: poll.summary.answers.map(({ text, option }) => {
-        return new GramJs.PollAnswer({ text, option: deserializeBytes(option) });
+        return new GramJs.PollAnswer({
+          text: buildInputTextWithEntities(text),
+          option: deserializeBytes(option),
+        });
       }),
       quiz: poll.summary.quiz,
       multipleChoice: poll.summary.multipleChoice,
@@ -285,6 +292,15 @@ export function generateRandomBigInt() {
   return readBigIntFromBuffer(generateRandomBytes(8), true, true);
 }
 
+export function generateRandomTimestampedBigInt() {
+  // 32 bits for timestamp, 32 bits are random
+  const buffer = generateRandomBytes(8);
+  const timestampBuffer = Buffer.alloc(4);
+  timestampBuffer.writeUInt32LE(Math.floor(Date.now() / 1000), 0);
+  buffer.set(timestampBuffer, 4);
+  return readBigIntFromBuffer(buffer, true, true);
+}
+
 export function generateRandomInt() {
   return readBigIntFromBuffer(generateRandomBytes(4), true, true).toJSNumber();
 }
@@ -344,36 +360,6 @@ export function buildMtpMessageEntity(entity: ApiMessageEntity): GramJs.TypeMess
     default:
       return new GramJs.MessageEntityUnknown({ offset, length });
   }
-}
-
-export function isMessageWithMedia(message: GramJs.Message | GramJs.UpdateServiceNotification) {
-  const { media } = message;
-  if (!media) {
-    return false;
-  }
-
-  return (
-    media instanceof GramJs.MessageMediaPhoto
-    || media instanceof GramJs.MessageMediaDocument
-    || (
-      media instanceof GramJs.MessageMediaWebPage
-      && media.webpage instanceof GramJs.WebPage
-      && (
-        media.webpage.photo instanceof GramJs.Photo || (
-          media.webpage.document instanceof GramJs.Document
-        )
-      )
-    ) || (
-      media instanceof GramJs.MessageMediaGame
-      && (media.game.document instanceof GramJs.Document || media.game.photo instanceof GramJs.Photo)
-    ) || (
-      media instanceof GramJs.MessageMediaInvoice && (media.photo || media.extendedMedia)
-    )
-  );
-}
-
-export function isServiceMessageWithMedia(message: GramJs.MessageService) {
-  return 'photo' in message.action && message.action.photo instanceof GramJs.Photo;
 }
 
 export function buildChatPhotoForLocalDb(photo: GramJs.TypePhoto) {
@@ -480,6 +466,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'birthday':
       return new GramJs.InputPrivacyKeyBirthday();
+
+    case 'gifts':
+      return new GramJs.InputPrivacyKeyStarGiftsAutoSave();
   }
 
   return undefined;
@@ -562,6 +551,23 @@ export function buildInputPhoneCall({ id, accessHash }: ApiPhoneCall) {
 
 export function buildInputStorePaymentPurpose(purpose: ApiInputStorePaymentPurpose):
 GramJs.TypeInputStorePaymentPurpose {
+  if (purpose.type === 'stars') {
+    return new GramJs.InputStorePaymentStarsTopup({
+      stars: BigInt(purpose.stars),
+      currency: purpose.currency,
+      amount: BigInt(purpose.amount),
+    });
+  }
+
+  if (purpose.type === 'starsgift') {
+    return new GramJs.InputStorePaymentStarsGift({
+      userId: buildInputEntity(purpose.user.id, purpose.user.accessHash) as GramJs.InputUser,
+      stars: BigInt(purpose.stars),
+      currency: purpose.currency,
+      amount: BigInt(purpose.amount),
+    });
+  }
+
   if (purpose.type === 'giftcode') {
     return new GramJs.InputStorePaymentPremiumGiftCode({
       users: purpose.users.map((user) => buildInputEntity(user.id, user.accessHash) as GramJs.InputUser),
@@ -570,10 +576,28 @@ GramJs.TypeInputStorePaymentPurpose {
         : undefined,
       currency: purpose.currency,
       amount: BigInt(purpose.amount),
+      message: purpose.message && buildInputTextWithEntities(purpose.message),
     });
   }
 
   const randomId = generateRandomBigInt();
+
+  if (purpose.type === 'starsgiveaway') {
+    return new GramJs.InputStorePaymentStarsGiveaway({
+      boostPeer: buildInputPeer(purpose.chat.id, purpose.chat.accessHash),
+      additionalPeers: purpose.additionalChannels?.map((chat) => buildInputPeer(chat.id, chat.accessHash)),
+      stars: BigInt(purpose.stars!),
+      countriesIso2: purpose.countries,
+      prizeDescription: purpose.prizeDescription,
+      onlyNewSubscribers: purpose.isOnlyForNewSubscribers || undefined,
+      winnersAreVisible: purpose.areWinnersVisible || undefined,
+      untilDate: purpose.untilDate,
+      currency: purpose.currency,
+      amount: BigInt(purpose.amount),
+      users: purpose.users,
+      randomId,
+    });
+  }
 
   return new GramJs.InputStorePaymentPremiumGiveaway({
     boostPeer: buildInputPeer(purpose.chat.id, purpose.chat.accessHash),
@@ -613,6 +637,38 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'stargift': {
+      const {
+        user, shouldHideName, giftId, message,
+      } = invoice;
+      return new GramJs.InputInvoiceStarGift({
+        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+        hideName: shouldHideName || undefined,
+        giftId: BigInt(giftId),
+        message: message && buildInputTextWithEntities(message),
+      });
+    }
+
+    case 'stars': {
+      const purpose = buildInputStorePaymentPurpose(invoice.purpose);
+      return new GramJs.InputInvoiceStars({
+        purpose,
+      });
+    }
+
+    case 'starsgiveaway': {
+      const purpose = buildInputStorePaymentPurpose(invoice.purpose);
+      return new GramJs.InputInvoiceStars({
+        purpose,
+      });
+    }
+
+    case 'chatInviteSubscription': {
+      return new GramJs.InputInvoiceChatInviteSubscription({
+        hash: invoice.hash,
+      });
+    }
+
     case 'giveaway':
     default: {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);
@@ -626,20 +682,21 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
   }
 }
 
-export function buildInputReaction(reaction?: ApiReaction) {
-  if (reaction && 'emoticon' in reaction) {
-    return new GramJs.ReactionEmoji({
-      emoticon: reaction.emoticon,
-    });
+export function buildInputReaction(reaction?: ApiReactionWithPaid) {
+  switch (reaction?.type) {
+    case 'emoji':
+      return new GramJs.ReactionEmoji({
+        emoticon: reaction.emoticon,
+      });
+    case 'custom':
+      return new GramJs.ReactionCustomEmoji({
+        documentId: BigInt(reaction.documentId),
+      });
+    case 'paid':
+      return new GramJs.ReactionPaid();
+    default:
+      return new GramJs.ReactionEmpty();
   }
-
-  if (reaction && 'documentId' in reaction) {
-    return new GramJs.ReactionCustomEmoji({
-      documentId: BigInt(reaction.documentId),
-    });
-  }
-
-  return new GramJs.ReactionEmpty();
 }
 
 export function buildInputChatReactions(chatReactions?: ApiChatReactions) {
@@ -658,20 +715,20 @@ export function buildInputChatReactions(chatReactions?: ApiChatReactions) {
   return new GramJs.ChatReactionsNone();
 }
 
-export function buildInputEmojiStatus(emojiStatus: ApiSticker, expires?: number) {
-  if (emojiStatus.id === DEFAULT_STATUS_ICON_ID) {
+export function buildInputEmojiStatus(emojiStatusId: string, expires?: number) {
+  if (emojiStatusId === DEFAULT_STATUS_ICON_ID) {
     return new GramJs.EmojiStatusEmpty();
   }
 
   if (expires) {
     return new GramJs.EmojiStatusUntil({
-      documentId: BigInt(emojiStatus.id),
+      documentId: BigInt(emojiStatusId),
       until: expires,
     });
   }
 
   return new GramJs.EmojiStatus({
-    documentId: BigInt(emojiStatus.id),
+    documentId: BigInt(emojiStatusId),
   });
 }
 
@@ -744,6 +801,14 @@ export function buildInputPrivacyRules(
   }
   if (rules.shouldAllowPremium) {
     privacyRules.push(new GramJs.InputPrivacyValueAllowPremium());
+  }
+
+  if (rules.botsPrivacy === 'allow') {
+    privacyRules.push(new GramJs.InputPrivacyValueAllowBots());
+  }
+
+  if (rules.botsPrivacy === 'disallow') {
+    privacyRules.push(new GramJs.InputPrivacyValueDisallowBots());
   }
 
   if (!rules.isUnspecified) {

@@ -15,7 +15,7 @@ import { getTopicColors } from '../../util/forumColors';
 import { REM } from '../common/helpers/mediaDimensions';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import TopicIcon from '../common/TopicIcon';
@@ -50,7 +50,7 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
   const [title, setTitle] = useState('');
   const [iconColorIndex, setIconColorIndex] = useState(0);
   const [iconEmojiId, setIconEmojiId] = useState<string | undefined>(undefined);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isTouched = Boolean(title);
   const isLoading = Boolean(createTopicPanel?.isLoading);

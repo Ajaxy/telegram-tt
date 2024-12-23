@@ -1,11 +1,10 @@
-import twemojiRegex from '../../lib/twemojiRegex';
+import EMOJI_REGEX from '../../lib/twemojiRegex';
 import fixNonStandardEmoji from './fixNonStandardEmoji';
 
 const DETECT_UP_TO = 100;
-const MAX_LENGTH = DETECT_UP_TO * 8; // Maximum 8 per one emoji.
-const RE_EMOJI_ONLY = new RegExp(`^(?:${twemojiRegex.source})+$`, '');
+const MAX_LENGTH = DETECT_UP_TO * 8; // Maximum 8 code points per one emoji.
 
-const parseEmojiOnlyString = (text: string): number | false => {
+export default function parseEmojiOnlyString(text: string): number | false {
   const standardizedText = fixNonStandardEmoji(text);
   const lines = standardizedText.split('\n');
   const textWithoutNewlines = lines.join('');
@@ -13,35 +12,43 @@ const parseEmojiOnlyString = (text: string): number | false => {
     return false;
   }
 
-  const isEmojiOnly = Boolean(textWithoutNewlines.match(RE_EMOJI_ONLY));
-  if (!isEmojiOnly) {
+  const totalCount = countIfEmojiOnly(textWithoutNewlines);
+  if (!totalCount || totalCount > DETECT_UP_TO) {
     return false;
   }
-  const countPerLine = lines.map((line) => {
-    let emojiCount = 0;
-    while (twemojiRegex.exec(line)) {
-      emojiCount++;
 
-      if (emojiCount > DETECT_UP_TO) {
-        twemojiRegex.lastIndex = 0;
-        return -1;
-      }
-    }
-
-    return emojiCount;
-  });
-
+  // Calculate max emoji count per column or line. Used in UI to determine the size of the emoji.
   let max = lines.length;
-  for (let i = 0; i < countPerLine.length; i++) {
-    if (countPerLine[i] === -1) {
+  for (const line of lines) {
+    const count = countIfEmojiOnly(line);
+    if (count === false) {
       return false;
     }
-    if (countPerLine[i] > max) {
-      max = countPerLine[i];
+    if (count > max) {
+      max = count;
     }
   }
 
   return max;
-};
+}
 
-export default parseEmojiOnlyString;
+function countIfEmojiOnly(line: string): false | number {
+  const iterator = line.matchAll(EMOJI_REGEX);
+  let count = 0;
+  let currentIndex = 0;
+
+  for (const match of iterator) {
+    if (match.index !== currentIndex) {
+      return false;
+    }
+
+    count++;
+    currentIndex = match.index + match[0].length;
+  }
+
+  if (currentIndex !== line.length) {
+    return false;
+  }
+
+  return count;
+}

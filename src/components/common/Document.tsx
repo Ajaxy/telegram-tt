@@ -1,36 +1,33 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiMessage } from '../../api/types';
+import type { ApiDocument, ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../config';
 import {
+  getDocumentMediaHash,
+  getMediaFormat,
+  getMediaThumbUri,
   getMediaTransferState,
-  getMessageMediaFormat,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
-  getMessageWebPageDocument,
-  isMessageDocumentVideo,
+  isDocumentVideo,
 } from '../../global/helpers';
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
+import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import File from './File';
 
 type OwnProps = {
-  message: ApiMessage;
+  document: ApiDocument;
   observeIntersection?: ObserveFn;
   smaller?: boolean;
   isSelected?: boolean;
@@ -46,14 +43,19 @@ type OwnProps = {
   shouldWarnAboutSvg?: boolean;
   onCancelUpload?: () => void;
   onMediaClick?: () => void;
-  onDateClick?: (messageId: number, chatId: string) => void;
-};
+} & ({
+  message: ApiMessage;
+  onDateClick: (arg: ApiMessage) => void;
+} | {
+  message?: ApiMessage;
+  onDateClick?: never;
+});
 
 const BYTES_PER_MB = 1024 * 1024;
 const SVG_EXTENSIONS = new Set(['svg', 'svgz']);
 
-const Document: FC<OwnProps> = ({
-  message,
+const Document = ({
+  document,
   observeIntersection,
   smaller,
   canAutoLoad,
@@ -67,20 +69,19 @@ const Document: FC<OwnProps> = ({
   isSelectable,
   shouldWarnAboutSvg,
   isDownloading,
+  message,
   onCancelUpload,
   onMediaClick,
   onDateClick,
-}) => {
-  const { cancelMessageMediaDownload, downloadMessageMedia, setSettingOption } = getActions();
+}: OwnProps) => {
+  const { cancelMediaDownload, downloadMedia, setSettingOption } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
   const [shouldNotWarnAboutSvg, setShouldNotWarnAboutSvg] = useState(false);
-
-  const document = message.content.document! || getMessageWebPageDocument(message);
 
   const { fileName, size, timestamp } = document;
   const extension = getDocumentExtension(document) || '';
@@ -100,32 +101,29 @@ const Document: FC<OwnProps> = ({
 
   const shouldDownload = Boolean(isDownloading || (isLoadAllowed && wasIntersected));
 
-  const documentHash = getMessageMediaHash(message, 'download');
+  const documentHash = getDocumentMediaHash(document, 'download');
   const { loadProgress: downloadProgress, mediaData } = useMediaWithLoadProgress(
-    documentHash, !shouldDownload, getMessageMediaFormat(message, 'download'), undefined, true,
+    documentHash, !shouldDownload, getMediaFormat(document, 'download'), undefined, true,
   );
   const isLoaded = Boolean(mediaData);
 
   const {
     isUploading, isTransferring, transferProgress,
   } = getMediaTransferState(
-    message,
     uploadProgress || downloadProgress,
     shouldDownload && !isLoaded,
     uploadProgress !== undefined,
   );
 
   const hasPreview = getDocumentHasPreview(document);
-  const thumbDataUri = hasPreview ? getMessageMediaThumbDataUri(message) : undefined;
+  const thumbDataUri = hasPreview ? getMediaThumbUri(document) : undefined;
   const localBlobUrl = hasPreview ? document.previewBlobUrl : undefined;
-  const previewData = useMedia(getMessageMediaHash(message, 'pictogram'), !isIntersecting);
+  const previewData = useMedia(getDocumentMediaHash(document, 'pictogram'), !isIntersecting);
 
-  const withMediaViewer = onMediaClick && Boolean(document.mediaType) && (
-    SUPPORTED_VIDEO_CONTENT_TYPES.has(document.mimeType) || SUPPORTED_IMAGE_CONTENT_TYPES.has(document.mimeType)
-  );
+  const withMediaViewer = onMediaClick && document.innerMediaType;
 
   const handleDownload = useLastCallback(() => {
-    downloadMessageMedia({ message });
+    downloadMedia({ media: document, originMessage: message });
   });
 
   const handleClick = useLastCallback(() => {
@@ -137,7 +135,7 @@ const Document: FC<OwnProps> = ({
     }
 
     if (isDownloading) {
-      cancelMessageMediaDownload({ message });
+      cancelMediaDownload({ media: document });
       return;
     }
 
@@ -166,7 +164,7 @@ const Document: FC<OwnProps> = ({
   });
 
   const handleDateClick = useLastCallback(() => {
-    onDateClick!(message.id, message.chatId);
+    onDateClick?.(message);
   });
 
   return (
@@ -187,7 +185,7 @@ const Document: FC<OwnProps> = ({
         sender={sender}
         isSelectable={isSelectable}
         isSelected={isSelected}
-        actionIcon={withMediaViewer ? (isMessageDocumentVideo(message) ? 'play' : 'eye') : 'download'}
+        actionIcon={withMediaViewer ? (isDocumentVideo(document) ? 'play' : 'eye') : 'download'}
         onClick={handleClick}
         onDateClick={onDateClick ? handleDateClick : undefined}
       />

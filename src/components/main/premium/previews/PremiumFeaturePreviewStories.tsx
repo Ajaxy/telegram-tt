@@ -7,7 +7,7 @@ import { selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 import useScrolledState from '../../../../hooks/useScrolledState';
 import useDevicePixelRatio from '../../../../hooks/window/useDevicePixelRatio';
 
@@ -63,7 +63,7 @@ const PremiumFeaturePreviewVideo = ({
   // eslint-disable-next-line no-null/no-null
   const circleRef = useRef<HTMLCanvasElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const dpr = useDevicePixelRatio();
 

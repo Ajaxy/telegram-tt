@@ -1,0 +1,26 @@
+@use '../../styles/mixins';
+
+.modalContent {
+  padding: 0 !important;
+  overflow-y: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.root :global(.modal-dialog) {
+  max-height: 70%;
+  max-width: 26.25rem;
+  overflow: hidden;
+}
+
+.main {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 1rem 0.5rem;
+
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
+}
+
+.footer {
+  margin: 0.5rem;
+}

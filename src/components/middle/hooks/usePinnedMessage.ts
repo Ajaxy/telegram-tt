@@ -1,172 +1,142 @@
-import { useEffect, useRef } from '../../../lib/teact/teact';
+import { useEffect, useSignal } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import type { ThreadId } from '../../../types';
 
-import {
-  selectFocusedMessageId,
-  selectListedIds,
-  selectOutlyingListByMessageId,
-} from '../../../global/selectors';
+import { selectFocusedMessageId, selectListedIds, selectOutlyingListByMessageId } from '../../../global/selectors';
 import cycleRestrict from '../../../util/cycleRestrict';
 import { unique } from '../../../util/iteratees';
-import { clamp } from '../../../util/math';
 
+import useDerivedSignal from '../../../hooks/useDerivedSignal';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useSignal from '../../../hooks/useSignal';
 
-type PinnedIntersectionChangedParams = {
+export type OnIntersectPinnedMessage = (params: {
   viewportPinnedIdsToAdd?: number[];
   viewportPinnedIdsToRemove?: number[];
-  isReversed?: boolean;
-  hasScrolled?: boolean;
-  isUnmount?: boolean;
-};
+  shouldCancelWaiting?: boolean;
+}) => void;
 
-export type PinnedIntersectionChangedCallback = (params: PinnedIntersectionChangedParams) => void;
+let viewportPinnedIds: number[] | undefined;
+let lastFocusedId: number | undefined;
 
 export default function usePinnedMessage(
-  chatId?: string, threadId?: ThreadId, pinnedIds?: number[], topMessageId?: number,
+  chatId?: string, threadId?: ThreadId, pinnedIds?: number[],
 ) {
-  const [getCurrentPinnedIndexes, setCurrentPinnedIndexes] = useSignal<Record<string, number>>({});
-  const [getForceNextPinnedInHeader, setForceNextPinnedInHeader] = useSignal<boolean | undefined>();
-  const viewportPinnedIdsRef = useRef<number[] | undefined>();
+  const [getPinnedIndexByKey, setPinnedIndexByKey] = useSignal<Record<string, number>>({});
   const [getLoadingPinnedId, setLoadingPinnedId] = useSignal<number | undefined>();
-
   const key = chatId ? `${chatId}_${threadId}` : undefined;
+  const getCurrentPinnedIndex = useDerivedSignal(
+    () => (getPinnedIndexByKey()[key!] ?? 0),
+    [getPinnedIndexByKey, key],
+  );
 
   // Reset when switching chat
   useEffect(() => {
-    setForceNextPinnedInHeader(undefined);
-    viewportPinnedIdsRef.current = undefined;
+    viewportPinnedIds = undefined;
     setLoadingPinnedId(undefined);
   }, [
-    chatId, setCurrentPinnedIndexes, setForceNextPinnedInHeader, setLoadingPinnedId, threadId,
+    chatId, setPinnedIndexByKey, setLoadingPinnedId, threadId,
   ]);
 
   useEffect(() => {
     if (!key) return;
-    const currentPinnedIndex = getCurrentPinnedIndexes()[key];
+    const currentPinnedIndex = getPinnedIndexByKey()[key];
     const pinnedLength = pinnedIds?.length || 0;
     if (currentPinnedIndex >= pinnedLength) {
-      setCurrentPinnedIndexes({
-        ...getCurrentPinnedIndexes(),
-        [key]: Math.max(0, pinnedLength - 1),
+      setPinnedIndexByKey({
+        ...getPinnedIndexByKey(),
+        [key]: clampIndex(pinnedLength - 1),
       });
     }
-  }, [getCurrentPinnedIndexes, key, pinnedIds?.length, setCurrentPinnedIndexes]);
+  }, [getPinnedIndexByKey, key, pinnedIds?.length, setPinnedIndexByKey]);
 
-  const onIntersectionChanged = useLastCallback(({
-    viewportPinnedIdsToAdd = [], viewportPinnedIdsToRemove = [], isReversed, hasScrolled, isUnmount,
-  }: PinnedIntersectionChangedParams) => {
-    if (!chatId || !threadId || !key) return;
+  const handleIntersectPinnedMessage: OnIntersectPinnedMessage = useLastCallback(({
+    viewportPinnedIdsToAdd = [],
+    viewportPinnedIdsToRemove = [],
+    shouldCancelWaiting,
+  }) => {
+    if (!chatId || !threadId || !key || !pinnedIds?.length) return;
 
-    const global = getGlobal();
-
-    const pinnedMessagesCount = pinnedIds?.length || 0;
-
-    if (!pinnedMessagesCount || !pinnedIds) return;
-
-    const waitingForPinnedId = getLoadingPinnedId();
-    if (waitingForPinnedId && !hasScrolled) {
-      const newPinnedIndex = pinnedIds.indexOf(waitingForPinnedId);
-      setCurrentPinnedIndexes({
-        ...getCurrentPinnedIndexes(),
-        [key]: newPinnedIndex,
-      });
+    if (shouldCancelWaiting) {
+      lastFocusedId = undefined;
       setLoadingPinnedId(undefined);
-    }
-
-    if (hasScrolled) {
-      setForceNextPinnedInHeader(undefined);
-      setLoadingPinnedId(undefined);
-    }
-
-    const forceNextPinnedInHeader = getForceNextPinnedInHeader();
-
-    const currentViewportPinnedIds = viewportPinnedIdsRef.current;
-
-    // Unmounting the Message component will fire this action, and if we've already marked the pin as
-    // outside the viewport, we don't need to do anything
-    if (isUnmount
-      && viewportPinnedIdsToAdd.length === 0 && viewportPinnedIdsToRemove.length === 1
-      && !currentViewportPinnedIds?.includes(viewportPinnedIdsToRemove[0])) {
       return;
     }
 
-    const newPinnedViewportIds = unique(
-      (currentViewportPinnedIds?.filter((id) => !viewportPinnedIdsToRemove.includes(id)) || [])
+    const loadingPinnedId = getLoadingPinnedId();
+    if (loadingPinnedId) {
+      const newPinnedIndex = pinnedIds.indexOf(loadingPinnedId);
+      setPinnedIndexByKey({
+        ...getPinnedIndexByKey(),
+        [key]: clampIndex(newPinnedIndex),
+      });
+      setLoadingPinnedId(undefined);
+    }
+
+    viewportPinnedIds = unique(
+      (viewportPinnedIds?.filter((id) => !viewportPinnedIdsToRemove.includes(id)) ?? [])
         .concat(viewportPinnedIdsToAdd),
     );
 
-    viewportPinnedIdsRef.current = newPinnedViewportIds;
+    // Sometimes this callback is called after focus has been reset in global, so we leverage `lastFocusedId`
+    const focusedMessageId = selectFocusedMessageId(getGlobal(), chatId) || lastFocusedId;
 
-    const focusedMessageId = selectFocusedMessageId(global, chatId);
-    // Focused to some non-pinned message
-    if (!newPinnedViewportIds.length && isUnmount && focusedMessageId && !pinnedIds.includes(focusedMessageId)) {
-      const firstPinnedIdAfterFocused = pinnedIds.find((id) => id < focusedMessageId);
-      if (firstPinnedIdAfterFocused) {
-        const newIndex = pinnedIds.indexOf(firstPinnedIdAfterFocused);
-        setCurrentPinnedIndexes({
-          ...getCurrentPinnedIndexes(),
-          [key]: newIndex,
-        });
-      }
+    if (lastFocusedId && viewportPinnedIds.includes(lastFocusedId)) {
+      lastFocusedId = undefined;
     }
 
-    if (forceNextPinnedInHeader || isUnmount) {
+    if (focusedMessageId) {
+      const pinnedIndexAboveFocused = pinnedIds.findIndex((id) => id < focusedMessageId);
+
+      setPinnedIndexByKey({
+        ...getPinnedIndexByKey(),
+        [key]: clampIndex(pinnedIndexAboveFocused),
+      });
+    } else if (viewportPinnedIds.length) {
+      const maxViewportPinnedId = Math.max(...viewportPinnedIds);
+      const newIndex = pinnedIds.indexOf(maxViewportPinnedId);
+
+      setPinnedIndexByKey({
+        ...getPinnedIndexByKey(),
+        [key]: clampIndex(newIndex),
+      });
+    }
+  });
+
+  const handleFocusPinnedMessage = useLastCallback((messageId: number) => {
+    // Focusing on a post in comments
+    if (!chatId || !threadId || !pinnedIds?.length) {
       return;
     }
 
-    const maxId = Math.max(...newPinnedViewportIds);
-    const maxIdIndex = pinnedIds.findIndex((id) => id === maxId);
-    const delta = isReversed ? 0 : 1;
-    const newIndex = newPinnedViewportIds.length ? maxIdIndex : (
-      currentViewportPinnedIds?.length
-        ? clamp(pinnedIds.indexOf(currentViewportPinnedIds[0]) + delta, 0, pinnedIds.length - 1)
-        : 0
-    );
-
-    setCurrentPinnedIndexes({
-      ...getCurrentPinnedIndexes(),
-      [key]: newIndex,
-    });
-  });
-
-  const onFocusPinnedMessage = useLastCallback((messageId: number): boolean => {
-    if (!chatId || !threadId || !key || getLoadingPinnedId()) return false;
+    lastFocusedId = messageId;
 
     const global = getGlobal();
-    if (!pinnedIds?.length) {
-      // Focusing on a post in comments
-      return topMessageId === messageId;
-    }
-
-    const index = pinnedIds.indexOf(messageId);
-    const newPinnedIndex = cycleRestrict(pinnedIds.length, index + 1);
-    setForceNextPinnedInHeader(true);
-
     const listedIds = selectListedIds(global, chatId, threadId);
     const isMessageLoaded = listedIds?.includes(messageId)
       || selectOutlyingListByMessageId(global, chatId, threadId, messageId);
 
+    const currentIndex = pinnedIds.indexOf(messageId);
+    const newIndex = cycleRestrict(pinnedIds.length, currentIndex + 1);
+
     if (isMessageLoaded) {
-      setCurrentPinnedIndexes({
-        ...getCurrentPinnedIndexes(),
-        [key]: newPinnedIndex,
+      setPinnedIndexByKey({
+        ...getPinnedIndexByKey(),
+        [key!]: newIndex,
       });
-      return true;
     } else {
-      setLoadingPinnedId(pinnedIds[newPinnedIndex]);
-      return true;
+      setLoadingPinnedId(pinnedIds[newIndex]);
     }
   });
 
   return {
-    onIntersectionChanged,
-    onFocusPinnedMessage,
-    getCurrentPinnedIndexes,
+    handleIntersectPinnedMessage,
+    handleFocusPinnedMessage,
+    getCurrentPinnedIndex,
     getLoadingPinnedId,
-    getForceNextPinnedInHeader,
   };
+}
+
+function clampIndex(id: number) {
+  return Math.max(0, id);
 }

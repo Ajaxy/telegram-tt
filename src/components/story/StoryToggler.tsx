@@ -1,18 +1,16 @@
-import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
+import React, {
+  beginHeavyAnimation, memo, useEffect, useMemo,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
 import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
-import {
-  selectIsForumPanelOpen, selectPerformanceSettingsValue, selectTabState,
-} from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
+import { selectIsForumPanelOpen, selectPerformanceSettingsValue, selectTabState } from '../../global/selectors';
 import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ribbonAnimation';
 
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useStoryPreloader from './hooks/useStoryPreloader';
 
@@ -52,7 +50,7 @@ function StoryToggler({
 }: OwnProps & StateProps) {
   const { toggleStoryRibbon } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const peers = useMemo(() => {
     if (orderedPeerIds.length === 1) {
@@ -92,15 +90,19 @@ function StoryToggler({
 
   const isVisible = canShow && isShown;
   // For some reason, setting 'slow' here also fixes scroll freezes on iOS when collapsing Story Ribbon
-  const { shouldRender, transitionClassNames } = useShowTransition(isVisible, undefined, undefined, 'slow');
+  const { ref, shouldRender } = useShowTransition<HTMLButtonElement>({
+    isOpen: isVisible,
+    className: 'slow',
+    withShouldRender: true,
+  });
 
   useEffect(() => {
     if (!withAnimation || isForumPanelOpen) return;
     if (isVisible) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(isArchived);
     } else {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateOpening(isArchived);
     }
   }, [isArchived, isVisible, withAnimation, isForumPanelOpen]);
@@ -111,9 +113,10 @@ function StoryToggler({
 
   return (
     <button
+      ref={ref}
       type="button"
       id="StoryToggler"
-      className={buildClassName(styles.root, transitionClassNames)}
+      className={styles.root}
       aria-label={lang('Chat.Context.Peer.OpenStory')}
       onClick={() => toggleStoryRibbon({ isShown: true, isArchived })}
       dir={lang.isRtl ? 'rtl' : undefined}

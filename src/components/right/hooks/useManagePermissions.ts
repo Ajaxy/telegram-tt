@@ -109,11 +109,17 @@ export default function useManagePermissions(defaultPermissions: ApiChatBannedRi
     }));
   }, [defaultPermissions, permissions]);
 
+  const resetPermissions = useCallback(() => {
+    setPermissions(defaultPermissions || {});
+    setHavePermissionChanged(false);
+  }, [defaultPermissions]);
+
   return {
     permissions,
     isLoading,
     havePermissionChanged,
     handlePermissionChange,
     setIsLoading,
+    resetPermissions,
   };
 }
