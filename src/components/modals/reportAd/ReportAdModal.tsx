@@ -8,10 +8,10 @@ import type { TabState } from '../../../global/types';
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
@@ -20,7 +20,7 @@ import Transition, { ACTIVE_SLIDE_CLASS_NAME, TO_SLIDE_CLASS_NAME } from '../../
 
 import styles from './ReportAdModal.module.scss';
 
-const ADDED_PADDING = 40;
+const ADDED_PADDING = 56;
 
 export type OwnProps = {
   modal: TabState['reportAdModal'];
@@ -32,7 +32,7 @@ const ReportAdModal = ({
   const {
     reportSponsoredMessage, closeReportAdModal, openPreviousReportAdModal,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const isOpen = Boolean(modal);
 
   // eslint-disable-next-line no-null/no-null
@@ -40,7 +40,7 @@ const ReportAdModal = ({
 
   const handleOptionClick = useLastCallback((e, option: string) => {
     const { chatId, randomId } = modal!;
-    reportSponsoredMessage({ chatId, randomId, option });
+    reportSponsoredMessage({ peerId: chatId, randomId, option });
   });
 
   const [renderingSection, renderingDepth] = useMemo(() => {
@@ -64,7 +64,11 @@ const ReportAdModal = ({
     const parts = template.split('{link}');
     return [
       parts[0],
-      <SafeLink text={lang('lng_report_sponsored_reported_link')} url={lang('ReportAd.Help_URL')} />,
+      <SafeLink
+        withNormalWordBreak
+        text={lang('lng_report_sponsored_reported_link')}
+        url={lang('ReportAd.Help_URL')}
+      />,
       parts[1],
     ];
   }, [lang, modal]);
@@ -123,6 +127,7 @@ const ReportAdModal = ({
     <Modal
       isOpen={isOpen}
       hasCloseButton
+      className={styles.root}
       header={header}
       onClose={closeReportAdModal}
     >

@@ -2,7 +2,7 @@ import type { ApiPeerStories, ApiTypeStory } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { selectPeer } from './chats';
+import { selectPeer } from './peers';
 import { selectTabState } from './tabs';
 
 export function selectCurrentViewedStory<T extends GlobalState>(
@@ -33,6 +33,16 @@ export function selectPeerStory<T extends GlobalState>(
   global: T, peerId: string, storyId: number,
 ): ApiTypeStory | undefined {
   return selectPeerStories(global, peerId)?.byId[storyId];
+}
+
+export function selectPinnedStories<T extends GlobalState>(
+  global: T, peerId: string,
+) {
+  const stories = selectPeerStories(global, peerId);
+  if (!stories?.pinnedIds?.length) return undefined;
+  return stories.pinnedIds.map((id) => stories.byId[id]).filter((s) => (
+    s && 'isInProfile' in s && s.isInProfile
+  ));
 }
 
 export function selectPeerFirstUnreadStoryId<T extends GlobalState>(
@@ -124,7 +134,7 @@ function getPeerStoryIdsForViewer<T extends GlobalState>(
   isPrivate?: boolean,
 ): number[] | undefined {
   const peerStories = selectPeerStories(global, peerId);
-  const storySourceProp = isArchive ? 'archiveIds' : isPrivate ? 'pinnedIds' : 'orderedIds';
+  const storySourceProp = isArchive ? 'archiveIds' : isPrivate ? 'profileIds' : 'orderedIds';
   const storyIds = peerStories?.[storySourceProp];
 
   if (!peerStories || !storyIds?.length) {

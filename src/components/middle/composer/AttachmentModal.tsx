@@ -15,11 +15,11 @@ import {
   BASE_EMOJI_KEYWORD_LANG,
   EDITABLE_INPUT_MODAL_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getAttachmentType, isUserId } from '../../../global/helpers';
+import { getAttachmentMediaType, isUserId } from '../../../global/helpers';
 import { selectChatFullInfo, selectIsChatWithSelf } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
@@ -33,11 +33,13 @@ import { getHtmlTextLength } from './helpers/getHtmlTextLength';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useDerivedState from '../../../hooks/useDerivedState';
+import useEffectOnce from '../../../hooks/useEffectOnce';
 import useFlag from '../../../hooks/useFlag';
 import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import usePrevious from '../../../hooks/usePrevious';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useResizeObserver from '../../../hooks/useResizeObserver';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
@@ -74,15 +76,17 @@ export type OwnProps = {
   isForCurrentMessageList?: boolean;
   forceDarkTheme?: boolean;
   onCaptionUpdate: (html: string) => void;
-  onSend: (sendCompressed: boolean, sendGrouped: boolean) => void;
+  onSend: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
   onFileAppend: (files: File[], isSpoiler?: boolean) => void;
   onAttachmentsUpdate: (attachments: ApiAttachment[]) => void;
   onClear: NoneToVoidFunction;
-  onSendSilent: (sendCompressed: boolean, sendGrouped: boolean) => void;
-  onSendScheduled: (sendCompressed: boolean, sendGrouped: boolean) => void;
+  onSendSilent: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
+  onSendScheduled: (sendCompressed: boolean, sendGrouped: boolean, isInvertedMedia?: true) => void;
   onCustomEmojiSelect: (emoji: ApiSticker) => void;
   onRemoveSymbol: VoidFunction;
   onEmojiSelect: (emoji: string) => void;
+  canScheduleUntilOnline?: boolean;
+  onSendWhenOnline?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -138,10 +142,16 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   onCustomEmojiSelect,
   onRemoveSymbol,
   onEmojiSelect,
+  canScheduleUntilOnline,
+  onSendWhenOnline,
 }) => {
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const svgRef = useRef<SVGSVGElement>(null);
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const mainButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -149,13 +159,13 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const inputRef = useRef<HTMLDivElement>(null);
 
   const hideTimeoutRef = useRef<number>();
-  const prevAttachments = usePrevious(attachments);
+  const prevAttachments = usePreviousDeprecated(attachments);
   const renderingAttachments = attachments.length ? attachments : prevAttachments;
   const { isMobile } = useAppLayout();
 
   const isEditing = editingMessage && Boolean(editingMessage);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
-  const isEditingMessageFile = attachments?.length && getAttachmentType(attachments[0]);
+  const isEditingMessageFile = isEditing && attachments?.length && getAttachmentMediaType(attachments[0]);
   const notEditingFile = isEditingMessageFile !== 'file';
 
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
@@ -167,6 +177,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     (shouldSendCompressed || shouldForceCompression || isInAlbum) && !shouldForceAsFile,
   );
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
+  const isInvertedMedia = attachmentSettings.isInvertedMedia;
 
   const {
     handleScroll: handleAttachmentsScroll,
@@ -183,6 +194,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!isOpen) {
       closeSymbolMenu();
+      updateAttachmentSettings({ isInvertedMedia: undefined });
     }
   }, [closeSymbolMenu, isOpen]);
 
@@ -257,6 +269,16 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   }, [attachmentSettings, isOpen, shouldSuggestCompression]);
 
   useEffect(() => {
+    if (!isOpen) {
+      updateAttachmentSettings({ isInvertedMedia: undefined });
+    }
+  }, [updateAttachmentSettings, isOpen, shouldSuggestCompression]);
+
+  function setIsInvertedMedia(value?: true) {
+    updateAttachmentSettings({ isInvertedMedia: value });
+  }
+
+  useEffect(() => {
     if (isOpen && isMobile) {
       removeAllSelections();
     }
@@ -273,10 +295,11 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (isOpen) {
       const send = ((shouldSchedule || shouldSendScheduled) && isForMessage && !editingMessage) ? onSendScheduled
         : isSilent ? onSendSilent : onSend;
-      send(isSendingCompressed, shouldSendGrouped);
+      send(isSendingCompressed, shouldSendGrouped, isInvertedMedia);
       updateAttachmentSettings({
         shouldCompress: shouldSuggestCompression === undefined ? isSendingCompressed : undefined,
         shouldSendGrouped,
+        isInvertedMedia,
       });
     }
   });
@@ -375,6 +398,22 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     }));
   });
 
+  const handleResize = useLastCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) {
+      return;
+    }
+
+    const { width, height } = svg.getBoundingClientRect();
+    svg.viewBox.baseVal.width = width;
+    svg.viewBox.baseVal.height = height;
+  });
+
+  // Can't listen for SVG resize
+  useResizeObserver(ref, handleResize);
+
+  useEffectOnce(handleResize);
+
   useEffect(() => {
     const mainButton = mainButtonRef.current;
     const input = document.getElementById(ATTACHMENT_MODAL_INPUT_ID);
@@ -415,7 +454,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const [areAllPhotos, areAllVideos, areAllAudios] = useMemo(() => {
     if (!isQuickGallery || !renderingAttachments) return [false, false, false];
-    const everyPhoto = renderingAttachments.every((a) => SUPPORTED_IMAGE_CONTENT_TYPES.has(a.mimeType));
+    const everyPhoto = renderingAttachments.every((a) => SUPPORTED_PHOTO_CONTENT_TYPES.has(a.mimeType));
     const everyVideo = renderingAttachments.every((a) => SUPPORTED_VIDEO_CONTENT_TYPES.has(a.mimeType));
     const everyAudio = renderingAttachments.every((a) => SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType));
     return [everyPhoto, everyVideo, everyAudio];
@@ -431,6 +470,14 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   }
 
   const isMultiple = renderingAttachments.length > 1;
+
+  const canInvertMedia = (() => {
+    if (isEditing) return false;
+    if (!hasMedia) return false;
+    if (!shouldForceAsFile && !shouldForceCompression && !isSendingCompressed) return false;
+    if (isMultiple && shouldSendGrouped) return false;
+    return true;
+  })();
 
   let title = '';
   if (areAllPhotos) {
@@ -467,13 +514,26 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               {hasMedia && (
                 <>
                   {
+                    canInvertMedia && (!isInvertedMedia ? (
+                      // eslint-disable-next-line react/jsx-no-bind
+                      <MenuItem icon="move-caption-up" onClick={() => setIsInvertedMedia(true)}>
+                        {lang('PreviewSender.MoveTextUp')}
+                      </MenuItem>
+                    ) : (
+                      // eslint-disable-next-line react/jsx-no-bind
+                      <MenuItem icon="move-caption-down" onClick={() => setIsInvertedMedia(undefined)}>
+                        {lang(('PreviewSender.MoveTextDown'))}
+                      </MenuItem>
+                    ))
+                  }
+                  {
                     !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
-                    // eslint-disable-next-line react/jsx-no-bind
+                      // eslint-disable-next-line react/jsx-no-bind
                       <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
                         {lang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
                       </MenuItem>
                     ) : (
-                    // eslint-disable-next-line react/jsx-no-bind
+                      // eslint-disable-next-line react/jsx-no-bind
                       <MenuItem icon="photo" onClick={() => setShouldSendCompressed(true)}>
                         {isMultiple ? 'Send All as Media' : 'Send as Media'}
                       </MenuItem>
@@ -502,7 +562,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                     Ungroup All Media
                   </MenuItem>
                 ) : (
-                // eslint-disable-next-line react/jsx-no-bind
+                  // eslint-disable-next-line react/jsx-no-bind
                   <MenuItem icon="grouped" onClick={() => setShouldSendGrouped(true)}>
                     Group All Media
                   </MenuItem>
@@ -541,6 +601,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         data-attach-description={lang('Preview.Dragging.AddItems', 10)}
         data-dropzone
       >
+        <svg className={styles.dropOutlineContainer}>
+          <rect className={styles.dropOutline} x="0" y="0" width="100%" height="100%" rx="8" />
+        </svg>
         <div
           className={buildClassName(
             styles.attachments,
@@ -647,6 +710,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                   onClose={handleContextMenuClose}
                   onCloseAnimationEnd={handleContextMenuHide}
                   isSavedMessages={isChatWithSelf}
+                  onSendWhenOnline={onSendWhenOnline}
+                  canScheduleUntilOnline={canScheduleUntilOnline}
                 />
               )}
             </div>

@@ -17,11 +17,10 @@ import { formatInteger } from '../../../util/textFormat';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarEditable from '../../ui/AvatarEditable';
-import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
@@ -42,7 +41,6 @@ type StateProps = {
   chat: ApiChat;
   chatFullInfo?: ApiChatFullInfo;
   progress?: ManagementProgress;
-  isSignaturesShown: boolean;
   canChangeInfo?: boolean;
   canInvite?: boolean;
   exportedInvites?: ApiExportedInvite[];
@@ -57,7 +55,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   chat,
   chatFullInfo,
   progress,
-  isSignaturesShown,
   canChangeInfo,
   canInvite,
   exportedInvites,
@@ -68,7 +65,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     updateChat,
-    toggleSignatures,
     closeManagement,
     leaveChannel,
     deleteChannel,
@@ -89,7 +85,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   const [error, setError] = useState<string | undefined>();
   const imageHash = chat && getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
@@ -97,10 +93,11 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
+    if (!canInvite) return;
     loadExportedChatInvites({ chatId });
     loadExportedChatInvites({ chatId, isRevoked: true });
     loadChatJoinRequests({ chatId });
-  }, [chatId]);
+  }, [chatId, canInvite]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -170,10 +167,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     });
   }, [about, chatId, photo, title, updateChat]);
 
-  const handleToggleSignatures = useCallback(() => {
-    toggleSignatures({ chatId, isEnabled: !isSignaturesShown });
-  }, [chatId, isSignaturesShown, toggleSignatures]);
-
   const handleClickSubscribers = useCallback(() => {
     onScreenSelect(ManagementScreens.ChannelSubscribers);
   }, [onScreenSelect]);
@@ -225,25 +218,26 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             onChange={handleSetPhoto}
             disabled={!canChangeInfo}
           />
-          <InputText
-            id="channel-title"
-            label={lang('EnterChannelName')}
-            onChange={handleTitleChange}
-            value={title}
-            error={error === CHANNEL_TITLE_EMPTY ? error : undefined}
-            disabled={!canChangeInfo}
-          />
-          <TextArea
-            id="channel-about"
-            className="mb-2"
-            label={lang('DescriptionPlaceholder')}
-            onChange={handleAboutChange}
-            value={about}
-            maxLength={CHANNEL_MAX_DESCRIPTION}
-            maxLengthIndicator={(CHANNEL_MAX_DESCRIPTION - about.length).toString()}
-            disabled={!canChangeInfo}
-            noReplaceNewlines
-          />
+          <div className="settings-edit">
+            <InputText
+              id="channel-title"
+              label={lang('EnterChannelName')}
+              onChange={handleTitleChange}
+              value={title}
+              error={error === CHANNEL_TITLE_EMPTY ? error : undefined}
+              disabled={!canChangeInfo}
+            />
+            <TextArea
+              id="channel-about"
+              label={lang('DescriptionPlaceholder')}
+              onChange={handleAboutChange}
+              value={about}
+              maxLength={CHANNEL_MAX_DESCRIPTION}
+              maxLengthIndicator={(CHANNEL_MAX_DESCRIPTION - about.length).toString()}
+              disabled={!canChangeInfo}
+              noReplaceNewlines
+            />
+          </div>
           {chat.isCreator && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('ChannelType')}</span>
@@ -295,13 +289,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               {chatReactionsDescription}
             </span>
           </ListItem>
-          <div className="ListItem narrow">
-            <Checkbox
-              checked={isSignaturesShown}
-              label={lang('ChannelSignMessages')}
-              onChange={handleToggleSignatures}
-            />
-          </div>
         </div>
         <div className="section">
           <ListItem
@@ -318,12 +305,11 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             onClick={handleClickSubscribers}
           >
             <span className="title" dir="auto">{lang('ChannelSubscribers')}</span>
-            <span className="subtitle" dir="auto">{lang('Subscribers', chat.membersCount ?? 0, 'i')}</span>
+            <span className="subtitle" dir="auto">{formatInteger(chat.membersCount!)}</span>
           </ListItem>
           <ListItem
             icon="delete-user"
             multiline
-            narrow
             onClick={handleRemovedUsersClick}
           >
             <span className="title">{lang('ChannelBlockedUsers')}</span>
@@ -365,14 +351,12 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId)!;
     const { management } = selectTabState(global);
     const { progress } = management;
-    const isSignaturesShown = Boolean(chat?.isSignaturesShown);
     const { invites } = management.byChatId[chatId] || {};
 
     return {
       chat,
       chatFullInfo: selectChatFullInfo(global, chatId),
       progress,
-      isSignaturesShown,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
       canInvite: getHasAdminRight(chat, 'inviteUsers'),
       exportedInvites: invites,

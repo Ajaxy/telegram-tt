@@ -13,7 +13,7 @@ import renderText from '../../../common/helpers/renderText';
 import useAppLayout from '../../../../hooks/useAppLayout';
 import useFlag from '../../../../hooks/useFlag';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Button from '../../../ui/Button';
@@ -94,7 +94,7 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
     onSubmit();
   }, [onSubmit, unmarkIsConfirmShown]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,

@@ -7,8 +7,8 @@ import { selectIsCurrentUserPremium, selectTabState } from '../../global/selecto
 import buildClassName from '../../util/buildClassName';
 import { getServerTime } from '../../util/serverTime';
 
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
@@ -40,7 +40,7 @@ const StealthModeModal = ({ isOpen, stealthMode, isCurrentUserPremium } : StateP
     }
   }, [stealthMode, isOpen]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleTimerEnds = useLastCallback(() => {
     setIsOnCooldown(false);

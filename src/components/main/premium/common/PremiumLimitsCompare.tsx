@@ -5,7 +5,7 @@ import type { IconName } from '../../../../types/icons';
 
 import buildClassName from '../../../../util/buildClassName';
 
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import styles from './PremiumLimitsCompare.module.scss';
 
@@ -24,7 +24,7 @@ const PremiumLimitsCompare: FC<OwnProps> = ({
   floatingBadgeIcon,
   rightStyle,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <div className={buildClassName(styles.root, className)}>

@@ -4,16 +4,16 @@ import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { canReplaceMessageMedia, isUploadingFileSticker } from '../../../global/helpers';
+import { canReplaceMessageMedia } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildAttachment from './helpers/buildAttachment';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import usePrevious from '../../../hooks/usePrevious';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useOldLang from '../../../hooks/useOldLang';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Portal from '../../ui/Portal';
 import DropTarget from './DropTarget';
@@ -39,12 +39,12 @@ const DROP_LEAVE_TIMEOUT_MS = 150;
 const DropArea: FC<OwnProps> = ({
   isOpen, withQuick, onHide, onFileSelect, editingMessage,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
   const { showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
   const hideTimeoutRef = useRef<number>(null);
-  const prevWithQuick = usePrevious(withQuick);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
+  const prevWithQuick = usePreviousDeprecated(withQuick);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);
@@ -59,9 +59,8 @@ const DropArea: FC<OwnProps> = ({
       const folderFiles = await getFilesFromDataTransferItems(dt.items);
       const newAttachment = folderFiles && await buildAttachment(folderFiles[0].name, folderFiles[0]);
       const canReplace = editingMessage && newAttachment && canReplaceMessageMedia(editingMessage, newAttachment);
-      const isFileSticker = newAttachment && isUploadingFileSticker(newAttachment);
 
-      if (canReplace || isFileSticker) {
+      if (canReplace) {
         showNotification({ message: lang(isInAlbum ? 'lng_edit_media_album_error' : 'lng_edit_media_invalid_file') });
         return;
       }
@@ -118,7 +117,7 @@ const DropArea: FC<OwnProps> = ({
   );
 
   return (
-    <Portal containerId="#middle-column-portals">
+    <Portal containerSelector="#middle-column-portals">
       <div
         className={className}
         onDragLeave={handleDragLeave}

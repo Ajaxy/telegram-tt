@@ -13,9 +13,9 @@ import buildClassName from '../../../util/buildClassName';
 import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useOldLang from '../../../hooks/useOldLang';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Button from '../../ui/Button';
 import Transition from '../../ui/Transition';
@@ -86,7 +86,7 @@ const LeftMain: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderUpdateButton,
     transitionClassNames: updateButtonClassNames,
-  } = useShowTransition(isAppUpdateAvailable || isElectronUpdateAvailable);
+  } = useShowTransitionDeprecated(isAppUpdateAvailable || isElectronUpdateAvailable);
 
   const isMouseInside = useRef(false);
 
@@ -162,7 +162,7 @@ const LeftMain: FC<OwnProps> = ({
     };
   }, [content]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <div
@@ -222,7 +222,7 @@ const LeftMain: FC<OwnProps> = ({
       {shouldRenderUpdateButton && (
         <Button
           fluid
-          pill
+          badge
           className={buildClassName('btn-update', updateButtonClassNames)}
           onClick={handleUpdateClick}
         >

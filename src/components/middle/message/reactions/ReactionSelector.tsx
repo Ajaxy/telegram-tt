@@ -3,7 +3,12 @@ import React, { memo, useMemo, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type {
-  ApiAvailableReaction, ApiChatReactions, ApiReaction, ApiReactionCount,
+  ApiAvailableReaction,
+  ApiChatReactions,
+  ApiReaction,
+  ApiReactionCount,
+  ApiReactionCustomEmoji,
+  ApiReactionPaid,
 } from '../../../../api/types';
 import type { IAnchorPosition } from '../../../../types';
 
@@ -12,8 +17,8 @@ import {
 } from '../../../../global/helpers';
 import buildClassName, { createClassNameBuilder } from '../../../../util/buildClassName';
 
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import Button from '../../../ui/Button';
 import Link from '../../../ui/Link';
@@ -22,14 +27,17 @@ import ReactionSelectorReaction from './ReactionSelectorReaction';
 
 import './ReactionSelector.scss';
 
+type RenderableReactions = (ApiAvailableReaction | ApiReactionCustomEmoji | ApiReactionPaid)[];
+
 type OwnProps = {
   enabledReactions?: ApiChatReactions;
   isPrivate?: boolean;
   topReactions?: ApiReaction[];
   defaultTagReactions?: ApiReaction[];
+  effectReactions?: ApiReaction[];
   allAvailableReactions?: ApiAvailableReaction[];
   currentReactions?: ApiReactionCount[];
-  maxUniqueReactions?: number;
+  reactionsLimit?: number;
   isReady?: boolean;
   canBuyPremium?: boolean;
   isCurrentUserPremium?: boolean;
@@ -37,8 +45,12 @@ type OwnProps = {
   className?: string;
   isInSavedMessages?: boolean;
   isInStoryViewer?: boolean;
+  isForEffects?: boolean;
+  isWithPaidReaction?: boolean;
   onClose?: NoneToVoidFunction;
   onToggleReaction: (reaction: ApiReaction) => void;
+  onSendPaidReaction?: NoneToVoidFunction;
+  onShowPaidReactionModal?: NoneToVoidFunction;
   onShowMore: (position: IAnchorPosition) => void;
 };
 
@@ -52,7 +64,7 @@ const ReactionSelector: FC<OwnProps> = ({
   defaultTagReactions,
   enabledReactions,
   currentReactions,
-  maxUniqueReactions,
+  reactionsLimit,
   isPrivate,
   isReady,
   canPlayAnimatedEmojis,
@@ -60,42 +72,58 @@ const ReactionSelector: FC<OwnProps> = ({
   isCurrentUserPremium,
   isInSavedMessages,
   isInStoryViewer,
+  isForEffects,
+  effectReactions,
+  isWithPaidReaction,
   onClose,
   onToggleReaction,
+  onSendPaidReaction,
+  onShowPaidReactionModal,
   onShowMore,
 }) => {
   const { openPremiumModal } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const lang = useLang();
+  const lang = useOldLang();
 
   const areReactionsLocked = isInSavedMessages && !isCurrentUserPremium && !isInStoryViewer;
 
+  const shouldUseCurrentReactions = Boolean(reactionsLimit
+    && currentReactions && currentReactions.length >= reactionsLimit);
+
   const availableReactions = useMemo(() => {
-    const reactions = isInSavedMessages ? defaultTagReactions
-      : (enabledReactions?.type === 'some' ? enabledReactions.allowed
-        : allAvailableReactions?.map((reaction) => reaction.reaction));
-    const filteredReactions = reactions?.map((reaction) => {
-      const isCustomReaction = 'documentId' in reaction;
+    const reactions = (() => {
+      if (shouldUseCurrentReactions) return currentReactions?.map((reaction) => reaction.reaction);
+      if (isForEffects) return effectReactions;
+      if (isInSavedMessages) return defaultTagReactions;
+      if (enabledReactions?.type === 'some') return enabledReactions.allowed;
+      return allAvailableReactions?.map((reaction) => reaction.reaction);
+    })();
+
+    const filteredReactions: RenderableReactions = reactions?.map((reaction) => {
+      const isCustomReaction = reaction.type === 'custom';
       const availableReaction = allAvailableReactions?.find((r) => isSameReaction(r.reaction, reaction));
+
+      if (isForEffects) return availableReaction;
+
       if ((!isCustomReaction && !availableReaction) || availableReaction?.isInactive) return undefined;
 
-      if (!isPrivate && (!enabledReactions || !canSendReaction(reaction, enabledReactions))) {
-        return undefined;
-      }
-
-      if (maxUniqueReactions && currentReactions && currentReactions.length >= maxUniqueReactions
-        && !currentReactions.some(({ reaction: currentReaction }) => isSameReaction(reaction, currentReaction))) {
+      if (!isPrivate && !shouldUseCurrentReactions
+         && (!enabledReactions || !canSendReaction(reaction, enabledReactions))) {
         return undefined;
       }
 
       return isCustomReaction ? reaction : availableReaction;
     }).filter(Boolean) || [];
 
-    return sortReactions(filteredReactions, topReactions);
+    const sortedReactions = sortReactions(filteredReactions, topReactions);
+    if (isWithPaidReaction) {
+      sortedReactions.unshift({ type: 'paid' });
+    }
+    return sortedReactions;
   }, [
     allAvailableReactions, currentReactions, defaultTagReactions, enabledReactions, isInSavedMessages, isPrivate,
-    maxUniqueReactions, topReactions,
+    topReactions, isForEffects, effectReactions, shouldUseCurrentReactions, isWithPaidReaction,
   ]);
 
   const reactionsToRender = useMemo(() => {
@@ -151,13 +179,17 @@ const ReactionSelector: FC<OwnProps> = ({
       return lang('StoryReactionsHint');
     }
 
+    if (isForEffects) {
+      return lang('AddEffectMessageHint');
+    }
+
     return undefined;
-  }, [isCurrentUserPremium, isInSavedMessages, isInStoryViewer, lang]);
+  }, [isCurrentUserPremium, isInSavedMessages, isInStoryViewer, lang, isForEffects]);
 
   if (!reactionsToRender.length) return undefined;
 
   return (
-    <div className={buildClassName(cn('&', lang.isRtl && 'isRtl'), className)} ref={ref}>
+    <div className={buildClassName(cn('&'), className)} ref={ref}>
       <div className={cn('bubble-small', lang.isRtl && 'isRtl')} />
       <div className={cn('items-wrapper')}>
         <div className={cn('bubble-big', lang.isRtl && 'isRtl')} />
@@ -180,6 +212,8 @@ const ReactionSelector: FC<OwnProps> = ({
                   key={getReactionKey(reaction)}
                   isReady={isReady}
                   onToggleReaction={onToggleReaction}
+                  onSendPaidReaction={onSendPaidReaction}
+                  onShowPaidReactionModal={onShowPaidReactionModal}
                   reaction={reaction}
                   noAppearAnimation={!canPlayAnimatedEmojis}
                   chosen={userReactionIndexes.has(i)}

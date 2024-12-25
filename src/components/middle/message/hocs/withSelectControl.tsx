@@ -14,9 +14,11 @@ import buildClassName from '../../../../util/buildClassName';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
-type OwnProps =
-  PhotoProps
-  & VideoProps;
+type OwnProps<T> =
+  (PhotoProps<T> | VideoProps<T>) & {
+    clickArg: number;
+    noSelectControls?: boolean;
+  };
 
 type StateProps = {
   isInSelectMode?: boolean;
@@ -24,18 +26,19 @@ type StateProps = {
 };
 
 export default function withSelectControl(WrappedComponent: FC) {
-  const ComponentWithSelectControl: FC<OwnProps & StateProps> = (props) => {
+  // eslint-disable-next-line @typescript-eslint/comma-dangle
+  const ComponentWithSelectControl = <T,>(props: OwnProps<T> & StateProps) => {
     const {
       isInSelectMode,
       isSelected,
-      message,
       dimensions,
+      clickArg,
     } = props;
     const { toggleMessageSelection } = getActions();
 
     const handleMessageSelect = useLastCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
       e.stopPropagation();
-      toggleMessageSelection({ messageId: message.id, withShift: e?.shiftKey });
+      toggleMessageSelection({ messageId: clickArg, withShift: e?.shiftKey });
     });
 
     const newProps = useMemo(() => {
@@ -72,13 +75,13 @@ export default function withSelectControl(WrappedComponent: FC) {
     );
   };
 
-  return memo(withGlobal<OwnProps>(
+  return memo(withGlobal<OwnProps<unknown>>(
     (global, ownProps) => {
-      const { message } = ownProps;
+      const { clickArg, noSelectControls } = ownProps;
       return {
-        isInSelectMode: selectIsInSelectMode(global),
-        isSelected: selectIsMessageSelected(global, message.id),
+        isInSelectMode: !noSelectControls && selectIsInSelectMode(global),
+        isSelected: !noSelectControls && selectIsMessageSelected(global, clickArg),
       };
     },
-  )(ComponentWithSelectControl));
+  )(ComponentWithSelectControl)) as typeof ComponentWithSelectControl;
 }

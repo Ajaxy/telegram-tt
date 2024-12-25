@@ -1,4 +1,8 @@
+import type { TeactNode } from '../../lib/teact/teact';
+
 import type { ApiLimitType, ApiPremiumSection, CallbackAction } from '../../global/types';
+import type { IconName } from '../../types/icons';
+import type { LangFnParameters } from '../../util/localization';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
 
@@ -16,6 +20,7 @@ export interface ApiInitialArgs {
   shouldForceHttpTransport?: boolean;
   shouldDebugExportedSenders?: boolean;
   langCode: string;
+  isTestServerRequested?: boolean;
 }
 
 export interface ApiOnProgress {
@@ -95,6 +100,7 @@ export interface ApiWebSession {
 
 export interface ApiSessionData {
   mainDcId: number;
+  isTest?: true;
   keys: Record<number, string | number[]>;
   hashes: Record<number, string | number[]>;
 }
@@ -108,12 +114,19 @@ export type ApiNotifyException = {
 
 export type ApiNotification = {
   localId: string;
-  title?: string;
-  message: string;
-  actionText?: string;
+  containerSelector?: string;
+  title?: string | LangFnParameters;
+  message: TeactNode | LangFnParameters;
+  cacheBreaker?: string;
+  actionText?: string | LangFnParameters;
   action?: CallbackAction | CallbackAction[];
   className?: string;
   duration?: number;
+  disableClickDismiss?: boolean;
+  shouldShowTimer?: boolean;
+  icon?: IconName;
+  customEmojiIconId?: string;
+  dismissAction?: CallbackAction;
 };
 
 export type ApiError = {
@@ -126,16 +139,6 @@ export type ApiError = {
 export type ApiFieldError = {
   field: string;
   message: string;
-};
-
-export type ApiInviteInfo = {
-  title: string;
-  about?: string;
-  hash: string;
-  isChannel?: boolean;
-  participantsCount?: number;
-  isRequestNeeded?: true;
-  photo?: ApiPhoto;
 };
 
 export type ApiExportedInvite = {
@@ -151,6 +154,31 @@ export type ApiExportedInvite = {
   requested?: number;
   title?: string;
   adminId: string;
+};
+
+export type ApiChatInviteInfo = {
+  title: string;
+  about?: string;
+  photo?: ApiPhoto;
+  isScam?: boolean;
+  isFake?: boolean;
+  isChannel?: boolean;
+  isVerified?: boolean;
+  isSuperGroup?: boolean;
+  isPublic?: boolean;
+  participantsCount?: number;
+  participantIds?: string[];
+  color: number;
+  isBroadcast?: boolean;
+  isRequestNeeded?: boolean;
+  subscriptionFormId?: string;
+  canRefulfillSubscription?: boolean;
+  subscriptionPricing?: ApiStarsSubscriptionPricing;
+};
+
+export type ApiStarsSubscriptionPricing = {
+  period: number;
+  amount: number;
 };
 
 export type ApiChatInviteImporter = {
@@ -203,12 +231,19 @@ export interface ApiAppConfig {
   storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
+  maxPinnedStoriesCount?: number;
   groupTranscribeLevelMin?: number;
   canLimitNewMessagesWithoutPremium?: boolean;
   bandwidthPremiumNotifyPeriod?: number;
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;
   channelRestrictAdsLevelMin?: number;
+  paidReactionMaxAmount?: number;
+  isChannelRevenueWithdrawalEnabled?: boolean;
+  isStarsGiftEnabled?: boolean;
+  starGiftMaxMessageLength?: number;
+  starGiftMaxConvertPeriod?: number;
+  starRefStartPrefixes?: string[];
 }
 
 export interface ApiConfig {
@@ -217,6 +252,7 @@ export interface ApiConfig {
   gifSearchUsername?: string;
   maxGroupSize: number;
   autologinToken?: string;
+  isTestServer?: boolean;
 }
 
 export type ApiPeerColorSet = string[];
@@ -275,4 +311,13 @@ export interface ApiCollectionInfo {
   cryptoCurrency: string;
   purchaseDate: number;
   url: string;
+}
+
+export interface ApiPeerPhotos {
+  fallbackPhoto?: ApiPhoto;
+  personalPhoto?: ApiPhoto;
+  photos: ApiPhoto[];
+  count: number;
+  nextOffset?: number;
+  isLoading?: boolean;
 }

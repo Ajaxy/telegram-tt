@@ -1,6 +1,6 @@
 import type { ActionReturnType } from '../../types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { DEFAULT_PLAYBACK_RATE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
@@ -8,8 +8,8 @@ import { selectTabState } from '../../selectors';
 
 addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, threadId, mediaId, avatarOwnerId, profilePhotoIndex, origin, volume, playbackRate, isMuted,
-    tabId = getCurrentTabId(),
+    chatId, threadId = MAIN_THREAD_ID, messageId, mediaIndex, isAvatarView, isSponsoredMessage, origin,
+    withDynamicLoading, standaloneMedia, tabId = getCurrentTabId(),
   } = payload;
 
   const tabState = selectTabState(global, tabId);
@@ -19,21 +19,17 @@ addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType
       ...tabState.mediaViewer,
       chatId,
       threadId,
-      mediaId,
-      avatarOwnerId,
-      profilePhotoIndex,
+      messageId,
+      mediaIndex: mediaIndex || 0,
+      isAvatarView,
+      isSponsoredMessage,
       origin,
+      standaloneMedia,
       isHidden: false,
-      volume: volume ?? tabState.mediaViewer.volume,
-      playbackRate: (
-        playbackRate
-        || tabState.mediaViewer.playbackRate
-        || global.mediaViewer.lastPlaybackRate
-        || DEFAULT_PLAYBACK_RATE
-      ),
-      isMuted: isMuted || tabState.mediaViewer.isMuted,
+      withDynamicLoading,
     },
     forwardMessages: {},
+    isShareMessageModalShown: false,
   }, tabId);
 });
 

@@ -1,9 +1,9 @@
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 
 import styles from './PrivacyLockedOption.module.scss';
 
@@ -12,7 +12,7 @@ type OwnProps = {
 };
 
 function PrivacyLockedOption({ label }: OwnProps) {
-  const lang = useLang();
+  const lang = useOldLang();
   const { showNotification } = getActions();
 
   return (

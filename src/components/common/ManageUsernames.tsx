@@ -10,8 +10,8 @@ import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { isBetween } from '../../util/math';
 
-import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Draggable from '../ui/Draggable';
@@ -45,11 +45,11 @@ const ManageUsernames: FC<OwnProps> = ({
     sortUsernames,
     sortChatUsernames,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const [usernameForConfirm, setUsernameForConfirm] = useState<ApiUsername | undefined>();
 
   const usernameList = useMemo(() => usernames.map(({ username }) => username), [usernames]);
-  const prevUsernameList = usePrevious(usernameList);
+  const prevUsernameList = usePreviousDeprecated(usernameList);
 
   const [state, setState] = useState<SortState>({
     orderedUsernames: usernameList,

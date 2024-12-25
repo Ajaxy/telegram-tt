@@ -1,16 +1,19 @@
+import type { ReactNode } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
 import type {
-  ApiBoostStatistics,
+  ApiBoostStatistics, ApiChannelMonetizationStatistics,
   ApiChannelStatistics, ApiGroupStatistics, ApiPostStatistics, StatisticsOverviewItem,
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatFullDate } from '../../../util/date/dateFormat';
+import { formatFullDate } from '../../../util/dates/dateFormat';
 import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
+
+import Icon from '../../common/icons/Icon';
 
 import styles from './StatisticsOverview.module.scss';
 
@@ -94,22 +97,31 @@ const BOOST_OVERVIEW: OverviewCell[][] = [
   ],
 ];
 
-type StatisticsType = 'channel' | 'group' | 'message' | 'boost' | 'story';
+type StatisticsType = 'channel' | 'group' | 'message' | 'boost' | 'story' | 'monetization';
 
 export type OwnProps = {
   type: StatisticsType;
   title?: string;
   className?: string;
-  statistics: ApiChannelStatistics | ApiGroupStatistics | ApiPostStatistics | ApiBoostStatistics;
+  isToncoin?: boolean;
+  statistics:
+  ApiChannelStatistics |
+  ApiGroupStatistics |
+  ApiPostStatistics |
+  ApiBoostStatistics |
+  ApiChannelMonetizationStatistics;
+  subtitle?: ReactNode;
 };
 
 const StatisticsOverview: FC<OwnProps> = ({
   title,
   type,
   statistics,
+  isToncoin,
   className,
+  subtitle,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const renderOverviewItemValue = ({ change, percentage }: StatisticsOverviewItem) => {
     if (!change) {
@@ -131,7 +143,26 @@ const StatisticsOverview: FC<OwnProps> = ({
     );
   };
 
+  const renderBalanceCell = (balance: number, usdRate: number, text: string) => {
+    const [integerTonPart, decimalTonPart] = balance.toFixed(4).split('.');
+    const [integerUsdPart, decimalUsdPart] = (balance * usdRate).toFixed(2).split('.');
+    return (
+      <div>
+        <Icon className={styles.toncoin} name="toncoin" />
+        <b className={styles.tableValue}>
+          {integerTonPart}<span className={styles.decimalPart}>.{decimalTonPart}</span>
+        </b>
+        {' '}
+        <span className={styles.tableHeading}>
+          ≈ ${integerUsdPart}<span className={styles.decimalUsdPart}>.{decimalUsdPart}</span>
+        </span>
+        <h3 className={styles.tableHeading}>{lang(text)}</h3>
+      </div>
+    );
+  };
+
   const { period } = (statistics as ApiGroupStatistics);
+  const { balances, usdRate } = (statistics as ApiChannelMonetizationStatistics);
 
   const schema = getSchemaByType(type);
 
@@ -152,7 +183,15 @@ const StatisticsOverview: FC<OwnProps> = ({
       </div>
 
       <table className={styles.table}>
-        {schema.map((row) => (
+        {isToncoin ? (
+          <tr>
+            <td className={styles.tableCell}>
+              {renderBalanceCell(balances?.availableBalance || 0, usdRate || 0, 'lng_channel_earn_available')}
+              {renderBalanceCell(balances?.currentBalance || 0, usdRate || 0, 'lng_channel_earn_reward')}
+              {renderBalanceCell(balances?.overallRevenue || 0, usdRate || 0, 'lng_channel_earn_total')}
+            </td>
+          </tr>
+        ) : schema.map((row) => (
           <tr>
             {row.map((cell: OverviewCell) => {
               const field = (statistics as any)[cell.name];
@@ -198,6 +237,8 @@ const StatisticsOverview: FC<OwnProps> = ({
           </tr>
         ))}
       </table>
+
+      {subtitle}
     </div>
   );
 };

@@ -7,7 +7,9 @@ import React, {
 import type { ApiPollAnswer, ApiPollResult } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import renderText from '../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
+
+import Icon from '../../common/icons/Icon';
 
 import './PollOption.scss';
 
@@ -59,13 +61,16 @@ const PollOption: FC<OwnProps> = ({
             shouldAnimate && 'animate',
           )}
           >
-            <i className={buildClassName('icon', correctAnswer ? 'icon-check' : 'icon-close')} />
+            <Icon name={correctAnswer ? 'check' : 'close'} className="poll-option-icon" />
           </span>
         )}
       </div>
       <div className="poll-option-right">
         <div className="poll-option-text" dir="auto">
-          {renderText(answer.text)}
+          {renderTextWithEntities({
+            text: answer.text.text,
+            entities: answer.text.entities,
+          })}
         </div>
         <div className={buildClassName('poll-option-answer', showIcon && !correctAnswer && 'wrong')}>
           {shouldAnimate && (

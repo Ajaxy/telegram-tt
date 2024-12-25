@@ -1,8 +1,4 @@
 .StickerSetCard {
-  .settings-item &.ListItem {
-    margin-bottom: 0.5rem;
-  }
-
   .StickerButton,
   .Button {
     width: 3rem;
@@ -21,7 +17,7 @@
     max-height: 100%;
   }
 
-  .multiline-menu-item {
+  .multiline-item {
     display: flex;
     flex-direction: column;
     justify-content: center;

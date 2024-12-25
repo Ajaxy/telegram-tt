@@ -1,0 +1,27 @@
+.root {
+  position: relative;
+}
+
+.buyButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 2;
+}
+
+.boughtStatus {
+  right: 0.1875rem;
+  left: auto !important;
+}
+
+.star {
+  margin-inline: 0.25rem 0.0625rem;
+}
+
+.buttonText {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}

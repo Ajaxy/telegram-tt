@@ -65,8 +65,11 @@
     > .Button {
       opacity: 1;
       transform: scale(1);
-      transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s,
-      color 0.15s;
+      transition:
+        opacity var(--select-transition),
+        transform var(--select-transition),
+        background-color 0.15s,
+        color 0.15s;
 
       body.no-message-composer-animations & {
         transition: none !important;
@@ -207,13 +210,14 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(
+      background:
+        linear-gradient(
           90deg,
           rgba(255, 255, 255, 0) 0%,
           rgba(255, 255, 255, 0.4) 2%,
           rgba(255, 255, 255, 0.4) 98%,
           rgba(255, 255, 255, 0) 100%
-      );
+        );
       opacity: 0;
       transition: opacity 350ms ease;
 
@@ -228,13 +232,14 @@
     }
 
     html.theme-dark &::before {
-      background: linear-gradient(
+      background:
+        linear-gradient(
           90deg,
           rgba(127, 127, 127, 0) 0%,
           rgba(127, 127, 127, 0.4) 2%,
           rgba(127, 127, 127, 0.4) 98%,
           rgba(127, 127, 127, 0) 100%
-      );
+        );
     }
   }
 }

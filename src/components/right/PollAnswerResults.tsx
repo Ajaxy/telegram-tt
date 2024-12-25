@@ -14,9 +14,10 @@ import type {
 
 import { isUserId } from '../../global/helpers';
 import { selectTabState } from '../../global/selectors';
+import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
-import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import useOldLang from '../../hooks/useOldLang';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
@@ -57,11 +58,11 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
     closePollResults,
   } = getActions();
 
-  const prevVotersCount = usePrevious<number>(answerVote.votersCount);
+  const prevVotersCount = usePreviousDeprecated<number>(answerVote.votersCount);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const areVotersLoaded = Boolean(voters);
   const { option, text } = answer;
-  const lang = useLang();
+  const lang = useOldLang();
 
   useEffect(() => {
     // For update when new votes arrive or when the user takes back his vote
@@ -133,7 +134,12 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
         {voters && renderViewMoreButton()}
       </div>
       <div className="answer-head" dir={lang.isRtl ? 'rtl' : undefined}>
-        <span className="answer-title" dir="auto">{text}</span>
+        <span className="answer-title" dir="auto">
+          {renderTextWithEntities({
+            text: text.text,
+            entities: text.entities,
+          })}
+        </span>
         <span className="answer-percent" dir={lang.isRtl ? 'auto' : undefined}>
           {getPercentage(answerVote.votersCount, totalVoters)}%
         </span>

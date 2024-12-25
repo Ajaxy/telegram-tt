@@ -116,7 +116,7 @@ const ChatList: FC<OwnProps> = ({
   }, [shouldShowUnconfirmedSessions]);
 
   // Support <Alt>+<Up/Down> to navigate between chats
-  useHotkeys(isActive && orderedIds?.length ? {
+  useHotkeys(useMemo(() => (isActive && orderedIds?.length ? {
     'Alt+ArrowUp': (e: KeyboardEvent) => {
       e.preventDefault();
       openNextChat({ targetIndexDelta: -1, orderedIds });
@@ -125,7 +125,7 @@ const ChatList: FC<OwnProps> = ({
       e.preventDefault();
       openNextChat({ targetIndexDelta: 1, orderedIds });
     },
-  } : undefined);
+  } : undefined), [isActive, orderedIds]));
 
   // Support <Cmd>+<Digit> to navigate between chats
   useEffect(() => {

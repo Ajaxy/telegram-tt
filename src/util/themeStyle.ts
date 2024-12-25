@@ -13,6 +13,7 @@ export function extractCurrentThemeParams(): ApiThemeParameters {
   const linkColor = getPropertyHexColor(style, '--color-links')!;
   const hintColor = secondaryTextColor;
   const secondaryBgColor = getPropertyHexColor(style, '--color-background-secondary')!;
+  const sectionSeparatorColor = getPropertyHexColor(style, '--color-divider')!;
 
   const headerBgColor = backgroundColor;
   const accentTextColor = getPropertyHexColor(style, '--color-primary')!;
@@ -35,6 +36,7 @@ export function extractCurrentThemeParams(): ApiThemeParameters {
     section_header_text_color: sectionHeaderTextColor,
     subtitle_text_color: subtitleTextColor,
     destructive_text_color: destructiveTextColor,
+    section_separator_color: sectionSeparatorColor,
   };
 }
 

@@ -1,4 +1,6 @@
-import type { TmpPasswordResult, TwoFaParams, updateTwoFaSettings } from './2fa';
+import type {
+    PasswordResult, TmpPasswordResult, TwoFaParams, TwoFaPasswordParams, updateTwoFaSettings,
+} from './2fa';
 import type { BotAuthParams, UserAuthParams } from './auth';
 import type { downloadFile, DownloadFileParams } from './downloadFile';
 import type { uploadFile, UploadFileParams } from './uploadFile';
@@ -23,6 +25,8 @@ declare class TelegramClient {
     async updateTwoFaSettings(Params: TwoFaParams): ReturnType<typeof updateTwoFaSettings>;
 
     async getTmpPassword(currentPassword: string, ttl?: number): Promise<TmpPasswordResult>;
+
+    async getCurrentPassword(Params: TwoFaPasswordParams): Promise<PasswordResult>;
 
     setPingCallback(callback: () => Promise<void>);
 

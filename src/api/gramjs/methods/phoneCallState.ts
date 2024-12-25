@@ -129,7 +129,7 @@ function computeEmojiIndex(bytes: Uint8Array) {
     .or((BigInt(bytes[7])));
 }
 
-export async function generateEmojiFingerprint(
+async function generateEmojiFingerprint(
   authKey: Uint8Array, gA: Uint8Array, emojiData: Uint16Array, emojiOffsets: number[],
 ) {
   const hash = await Helpers.sha256(Buffer.concat([new Uint8Array(authKey), new Uint8Array(gA)]));

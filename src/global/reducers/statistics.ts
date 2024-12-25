@@ -1,4 +1,5 @@
 import type {
+  ApiChannelMonetizationStatistics,
   ApiChannelStatistics, ApiGroupStatistics, ApiPostStatistics, StatisticsGraph,
 } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
@@ -62,6 +63,18 @@ export function updateStatisticsGraph<T extends GlobalState>(
           [name]: update,
         },
       },
+    },
+  }, tabId);
+}
+
+export function updateChannelMonetizationStatistics<T extends GlobalState>(
+  global: T, statistics: ApiChannelMonetizationStatistics,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  return updateTabState(global, {
+    statistics: {
+      ...selectTabState(global, tabId).statistics,
+      monetization: statistics,
     },
   }, tabId);
 }

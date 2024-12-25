@@ -1,27 +1,26 @@
 @keyframes bar-animation-transform-1 {
-  0%   { transform: scaleY(0.33); }
-  12.5%  { transform: scaleY(1.66); }
-  25%  { transform: scaleY(0.33); }
-  37.5%  { transform: scaleY(1); }
-  50%  { transform: scaleY(0.33); }
-  62.5%  { transform: scaleY(1.66); }
-  75%  { transform: scaleY(0.33); }
+  0% { transform: scaleY(0.33); }
+  12.5% { transform: scaleY(1.66); }
+  25% { transform: scaleY(0.33); }
+  37.5% { transform: scaleY(1); }
+  50% { transform: scaleY(0.33); }
+  62.5% { transform: scaleY(1.66); }
+  75% { transform: scaleY(0.33); }
   87.5% { transform: scaleY(1.66); }
-  100%   { transform: scaleY(0.33); }
+  100% { transform: scaleY(0.33); }
 }
 
 @keyframes bar-animation-transform-2 {
-  0%   { transform: scaleY(1); }
-  12.5%  { transform: scaleY(0.33); }
-  25%  { transform: scaleY(1.66); }
-  37.5%  { transform: scaleY(0.33); }
-  50%  { transform: scaleY(1); }
-  62.5%  { transform: scaleY(0.33); }
-  75%  { transform: scaleY(1.66); }
+  0% { transform: scaleY(1); }
+  12.5% { transform: scaleY(0.33); }
+  25% { transform: scaleY(1.66); }
+  37.5% { transform: scaleY(0.33); }
+  50% { transform: scaleY(1); }
+  62.5% { transform: scaleY(0.33); }
+  75% { transform: scaleY(1.66); }
   87.5% { transform: scaleY(0.33); }
-  100%   { transform: scaleY(1); }
+  100% { transform: scaleY(1); }
 }
-
 
 .root {
   position: absolute;
@@ -35,7 +34,6 @@
   overflow: hidden;
   z-index: 1;
 }
-
 
 .indicator {
   width: 100%;

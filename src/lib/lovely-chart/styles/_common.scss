@@ -8,9 +8,9 @@
   -webkit-user-select: none;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
-  &.lovely-chart--state-invisible > * {
-    display: none;
-  }
+  // &.lovely-chart--state-invisible > * {
+  //   display: none;
+  // }
 
   > canvas,
   .lovely-chart--tooltip canvas {

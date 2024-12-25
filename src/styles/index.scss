@@ -1,3 +1,5 @@
+/* stylelint-disable @stylistic/value-list-comma-newline-after */
+/* stylelint-disable @stylistic/declaration-colon-newline-after */
 @use "reboot";
 @use "variables";
 @use "mixins";
@@ -27,9 +29,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   user-select: none;
 
-  --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell,
-    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono", "Consolas", monospace;
+  --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
+  Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono",
+  "Consolas", monospace;
+  --font-family-rounded: -ui-rounded, "Numbers Rounded", "Roboto", "Helvetica Neue", sans-serif;
+  --font-family-condensed: "Roboto Condensed", "Roboto", "Helvetica Neue", sans-serif;
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
@@ -56,24 +61,29 @@ html.theme-dark {
 
 body.is-ios,
 body.is-macos {
-  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue",
+  sans-serif;
 }
 
 html[lang="fa"],
 html[lang="fa"] body {
-  --font-family: "Vazirmatn", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
-    Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-family: "Vazirmatn", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen,
+  Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 
   &.is-ios,
   &.is-macos {
-    --font-family: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
-      Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    --font-family: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Segoe UI", Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   }
 }
 
 body.is-ios {
   --border-radius-messages: 1rem;
   --border-radius-messages-small: 0.5rem;
+}
+
+body.is-windows {
+  --font-weight-semibold: 500;
 }
 
 body.is-electron {
@@ -118,6 +128,11 @@ body.cursor-ew-resize {
 
 .hidden {
   visibility: hidden;
+}
+
+.svg-definitions {
+  position: fixed; // Firefox requires definition to be visible
+  top: -99999px;
 }
 
 .allow-selection {
@@ -276,6 +291,18 @@ body:not(.is-ios) {
   left: 0;
 }
 
+.star-currency-icon {
+  font-size: 1rem !important;
+  vertical-align: text-top;
+}
+
+// Increase specificity to override the default icon style
+.star-amount-icon.star-amount-icon {
+  line-height: inherit; // Vertical centring
+  margin-inline-start: 0.375em; // Prevent sticking to the text without using `white-space: pre`
+  margin-inline-end: 0.2em; // Prevent sticking to the text without using `white-space: pre`
+}
+
 .shared-canvas-container {
   position: relative;
 }
@@ -334,6 +361,7 @@ body:not(.is-ios) {
   --color-chat-hover: rgb(44, 44, 44);
   --color-chat-active: rgb(118, 106, 200);
   --color-chat-active-greyed: rgb(146, 136, 211);
+  --color-item-hover: rgb(44, 44, 44);
   --color-item-active: rgb(41, 41, 41);
   --color-text: rgb(255, 255, 255);
   --color-text-rgb: 255, 255, 255;
@@ -351,6 +379,7 @@ body:not(.is-ios) {
   --color-default-shadow: rgb(16, 16, 16, 0.612);
   --color-light-shadow: rgb(0, 0, 0, 0.251);
   --color-green: rgb(135, 116, 225);
+  --color-success: rgb(0, 199, 62);
   --color-text-meta-colored: rgb(131, 120, 219);
   --color-reply-hover: rgb(39, 39, 39);
   --color-reply-active: rgb(46, 47, 47);

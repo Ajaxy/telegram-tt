@@ -16,24 +16,22 @@ import {
   selectChatFullInfo,
   selectCurrentGifSearch,
   selectCurrentStickerSearch,
-  selectCurrentTextSearch,
   selectIsChatWithSelf,
   selectTabState,
+  selectTopic,
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { getDayStartAt } from '../../util/date/dateFormat';
-import { debounce } from '../../util/schedulers';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useElectronDrag from '../../hooks/useElectronDrag';
 import useFlag from '../../hooks/useFlag';
 import { useFolderManagerForChatsCount } from '../../hooks/useFolderManager';
-import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useOldLang from '../../hooks/useOldLang';
 
-import Icon from '../common/Icon';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import SearchInput from '../ui/SearchInput';
@@ -46,11 +44,11 @@ type OwnProps = {
   threadId?: ThreadId;
   isColumnOpen?: boolean;
   isProfile?: boolean;
-  isSearch?: boolean;
   isManagement?: boolean;
   isStatistics?: boolean;
   isBoostStatistics?: boolean;
   isMessageStatistics?: boolean;
+  isMonetizationStatistics?: boolean;
   isStoryStatistics?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
@@ -71,7 +69,6 @@ type StateProps = {
   isChannel?: boolean;
   userId?: string;
   isSelf?: boolean;
-  messageSearchQuery?: string;
   stickerSearchQuery?: string;
   gifSearchQuery?: string;
   isEditingInvite?: boolean;
@@ -85,7 +82,6 @@ type StateProps = {
 };
 
 const COLUMN_ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
-const runDebouncedForSearch = debounce((cb) => cb(), 200, false);
 
 enum HeaderContent {
   Profile,
@@ -97,6 +93,7 @@ enum HeaderContent {
   MessageStatistics,
   StoryStatistics,
   BoostStatistics,
+  MonetizationStatistics,
   Management,
   ManageInitial,
   ManageChannelSubscribers,
@@ -132,11 +129,11 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   threadId,
   isColumnOpen,
   isProfile,
-  isSearch,
   isManagement,
   isStatistics,
   isMessageStatistics,
   isStoryStatistics,
+  isMonetizationStatistics,
   isBoostStatistics,
   isStickerSearch,
   isGifSearch,
@@ -151,7 +148,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isSelf,
   canManage,
   isChannel,
-  messageSearchQuery,
   stickerSearchQuery,
   gifSearchQuery,
   isEditingInvite,
@@ -167,12 +163,9 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   canEditBot,
 }) => {
   const {
-    setLocalTextSearchQuery,
     setStickerSearchQuery,
     setGifSearchQuery,
-    searchTextMessagesLocal,
     toggleManagement,
-    openHistoryCalendar,
     openAddContactDialog,
     toggleStatistics,
     setEditingExportedInvite,
@@ -194,14 +187,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     deleteExportedChatInvite({ chatId: chatId!, link: currentInviteInfo!.link });
     onScreenSelect(ManagementScreens.Invites);
     closeDeleteDialog();
-  });
-
-  const handleMessageSearchQueryChange = useLastCallback((query: string) => {
-    setLocalTextSearchQuery({ query });
-
-    if (query.length) {
-      runDebouncedForSearch(searchTextMessagesLocal);
-    }
   });
 
   const handleStickerSearchQueryChange = useLastCallback((query: string) => {
@@ -241,7 +226,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     }, COLUMN_ANIMATION_DURATION);
   }, [isColumnOpen]);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const contentKey = isProfile ? (
     profileState === ProfileState.Profile ? (
       HeaderContent.Profile
@@ -254,8 +239,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     ) : profileState === ProfileState.SavedDialogs ? (
       HeaderContent.SavedDialogs
     ) : -1 // Never reached
-  ) : isSearch ? (
-    HeaderContent.Search
   ) : isPollResults ? (
     HeaderContent.PollResults
   ) : isStickerSearch ? (
@@ -318,6 +301,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     HeaderContent.CreateTopic
   ) : isEditingTopic ? (
     HeaderContent.EditTopic
+  ) : isMonetizationStatistics ? (
+    HeaderContent.MonetizationStatistics
   ) : undefined; // When column is closed
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
@@ -350,26 +335,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     switch (renderingContentKey) {
       case HeaderContent.PollResults:
         return <h3 className="title">{lang('PollResults')}</h3>;
-      case HeaderContent.Search:
-        return (
-          <>
-            <SearchInput
-              parentContainerClassName="RightSearch"
-              value={messageSearchQuery}
-              onChange={handleMessageSearchQueryChange}
-            />
-            <Button
-              round
-              size="smaller"
-              color="translucent"
-              // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
-              ariaLabel="Search messages by date"
-            >
-              <i className="icon icon-calendar" />
-            </Button>
-          </>
-        );
       case HeaderContent.AddingMembers:
         return <h3 className="title">{lang(isChannel ? 'ChannelAddSubscribers' : 'GroupAddMembers')}</h3>;
       case HeaderContent.ManageInitial:
@@ -471,6 +436,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3 className="title">{lang('Stats.StoryTitle')}</h3>;
       case HeaderContent.BoostStatistics:
         return <h3 className="title">{lang('Boosts')}</h3>;
+      case HeaderContent.MonetizationStatistics:
+        return <h3 className="title">{lang('lng_channel_earn_title')}</h3>;
       case HeaderContent.SharedMedia:
         return <h3 className="title">{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:
@@ -610,14 +577,13 @@ export default withGlobal<OwnProps>(
     chatId, isProfile, isManagement, threadId,
   }): StateProps => {
     const tabState = selectTabState(global);
-    const { query: messageSearchQuery } = selectCurrentTextSearch(global) || {};
     const { query: stickerSearchQuery } = selectCurrentStickerSearch(global) || {};
     const { query: gifSearchQuery } = selectCurrentGifSearch(global) || {};
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const user = isProfile && chatId && isUserId(chatId) ? selectUser(global, chatId) : undefined;
     const isChannel = chat && isChatChannel(chat);
     const isInsideTopic = chat?.isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
-    const topic = isInsideTopic ? chat.topics?.[threadId!] : undefined;
+    const topic = isInsideTopic ? selectTopic(global, chatId!, threadId!) : undefined;
     const canEditTopic = isInsideTopic && topic && getCanManageTopic(chat, topic);
     const isBot = user && isUserBot(user);
     const isSavedMessages = chatId ? selectIsChatWithSelf(global, chatId) : undefined;
@@ -643,7 +609,6 @@ export default withGlobal<OwnProps>(
       canEditTopic,
       userId: user?.id,
       isSelf: user?.isSelf,
-      messageSearchQuery,
       stickerSearchQuery,
       gifSearchQuery,
       isEditingInvite,

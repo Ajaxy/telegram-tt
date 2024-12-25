@@ -1,8 +1,8 @@
-import { useEffect, useRef } from '../../../../lib/teact/teact';
+import { getIsHeavyAnimating, useEffect, useRef } from '../../../../lib/teact/teact';
 
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 
-import useHeavyAnimationCheck, { isHeavyAnimating } from '../../../../hooks/useHeavyAnimationCheck';
+import useHeavyAnimation from '../../../../hooks/useHeavyAnimation';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../../../hooks/usePriorityPlaybackCheck';
 import useBackgroundMode, { isBackgroundModeActive } from '../../../../hooks/window/useBackgroundMode';
@@ -26,7 +26,7 @@ export default function useVideoAutoPause(
   });
 
   useBackgroundMode(pause, unfreezePlayingOnRaf, !canPlay || isPriority);
-  useHeavyAnimationCheck(pause, unfreezePlaying, !canPlay || isPriority);
+  useHeavyAnimation(pause, unfreezePlaying, !canPlay || isPriority);
   usePriorityPlaybackCheck(pause, unfreezePlaying, !canPlay || isPriority);
 
   const handlePlaying = useLastCallback(() => {
@@ -81,5 +81,5 @@ function usePlayPause(mediaRef: React.RefObject<HTMLMediaElement>) {
 }
 
 function isFrozen() {
-  return isHeavyAnimating() || isPriorityPlaybackActive() || isBackgroundModeActive();
+  return getIsHeavyAnimating() || isPriorityPlaybackActive() || isBackgroundModeActive();
 }

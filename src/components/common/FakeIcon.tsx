@@ -3,7 +3,7 @@ import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiFakeType } from '../../api/types';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import './FakeIcon.scss';
 
@@ -14,7 +14,7 @@ type OwnProps = {
 const FakeIcon: FC<OwnProps> = ({
   fakeType,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   return (
     <span className="FakeIcon">

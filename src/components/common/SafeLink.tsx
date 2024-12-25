@@ -1,5 +1,5 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import type { TeactNode } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import { ApiMessageEntityTypes } from '../../api/types';
@@ -17,17 +17,19 @@ type OwnProps = {
   url?: string;
   text: string;
   className?: string;
-  children?: React.ReactNode;
+  children?: TeactNode;
+  withNormalWordBreak?: boolean;
   isRtl?: boolean;
 };
 
-const SafeLink: FC<OwnProps> = ({
+const SafeLink = ({
   url,
   text,
   className,
   children,
+  withNormalWordBreak,
   isRtl,
-}) => {
+}: OwnProps) => {
   const { openUrl } = getActions();
 
   const content = children || text;
@@ -48,7 +50,7 @@ const SafeLink: FC<OwnProps> = ({
 
   const classNames = buildClassName(
     className || 'text-entity-link',
-    text.length > 50 && 'long-word-break-all',
+    !withNormalWordBreak && 'word-break-all',
   );
 
   return (
@@ -96,4 +98,4 @@ function getUnicodeUrl(url?: string) {
   return undefined;
 }
 
-export default memo(SafeLink);
+export default SafeLink;

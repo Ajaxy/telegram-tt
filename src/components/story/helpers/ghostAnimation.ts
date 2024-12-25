@@ -225,7 +225,7 @@ function getNodes(origin: StoryViewerOrigin, userId: string) {
       containerSelector = '#LeftColumn .chat-list';
       break;
     case StoryViewerOrigin.SearchResult:
-      containerSelector = '#LeftColumn .LeftSearch';
+      containerSelector = '#LeftColumn .LeftSearch--container';
       break;
   }
 

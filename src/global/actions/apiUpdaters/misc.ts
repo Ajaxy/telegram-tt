@@ -1,10 +1,13 @@
 import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
+import { applyLangPackDifference, requestLangPackDifference } from '../../../util/localization';
 import { addActionHandler, setGlobal } from '../../index';
 import {
   addBlockedUser,
+  addChats,
   addStoriesForPeer,
+  addUsers,
   removeBlockedUser,
   removePeerStory,
   setConfirmPaymentUrl,
@@ -12,12 +15,30 @@ import {
   updateLastReadStoryForPeer,
   updatePeerStory,
   updatePeersWithStories,
+  updatePoll,
   updateStealthMode,
+  updateThreadInfos,
 } from '../../reducers';
 import { selectPeerStories, selectPeerStory } from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
+    case 'updateEntities': {
+      const {
+        users, chats, threadInfos, polls,
+      } = update;
+      if (users) global = addUsers(global, users);
+      if (chats) global = addChats(global, chats);
+      if (threadInfos) global = updateThreadInfos(global, threadInfos);
+      if (polls) {
+        polls.forEach((poll) => {
+          global = updatePoll(global, poll.id, poll);
+        });
+      }
+      setGlobal(global);
+      break;
+    }
+
     case 'updatePeerBlocked':
       if (update.isBlocked) {
         return addBlockedUser(global, update.id);
@@ -115,10 +136,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateWebViewResultSent':
       Object.values(global.byTabId).forEach((tabState) => {
-        if (tabState.webApp?.queryId === update.queryId) {
-          actions.resetDraftReplyInfo({ tabId: tabState.id });
-          actions.closeWebApp({ tabId: tabState.id });
-        }
+        Object.entries(tabState.webApps.openedWebApps).forEach(([webAppKey, webApp]) => {
+          if (webApp.queryId === update.queryId) {
+            actions.resetDraftReplyInfo({ tabId: tabState.id });
+            actions.closeWebApp({ key: webAppKey, tabId: tabState.id });
+          }
+        });
       });
       break;
 
@@ -153,13 +176,35 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
 
     case 'updateAttachMenuBots':
-      actions.loadAttachBots({ hash: global.attachMenu.hash });
+      actions.loadAttachBots();
       break;
 
     case 'updatePremiumFloodWait': {
       actions.processPremiumFloodWait({
         isUpload: update.isUpload,
       });
+      break;
+    }
+
+    case 'updatePaidReactionPrivacy': {
+      global = {
+        ...global,
+        settings: {
+          ...global.settings,
+          paidReactionPrivacy: update.isPrivate,
+        },
+      };
+      setGlobal(global);
+      break;
+    }
+
+    case 'updateLangPackTooLong': {
+      requestLangPackDifference(update.langCode);
+      break;
+    }
+
+    case 'updateLangPack': {
+      applyLangPackDifference(update.version, update.strings, update.keysToRemove);
     }
   }
 

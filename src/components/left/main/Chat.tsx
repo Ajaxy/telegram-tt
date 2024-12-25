@@ -8,6 +8,7 @@ import type {
   ApiMessageOutgoingStatus,
   ApiPeer,
   ApiTopic,
+  ApiTypeStory,
   ApiTypingStatus,
   ApiUser,
   ApiUserStatus,
@@ -20,7 +21,7 @@ import { StoryViewerOrigin } from '../../../types';
 
 import {
   getMessageAction,
-  getPrivateChatUserId,
+  groupStatetefulContent,
   isUserId,
   isUserOnline,
   selectIsChatMuted,
@@ -40,9 +41,11 @@ import {
   selectNotifySettings,
   selectOutgoingStatus,
   selectPeer,
+  selectPeerStory,
   selectTabState,
   selectThreadParam,
   selectTopicFromMessage,
+  selectTopicsInfo,
   selectUser,
   selectUserStatus,
 } from '../../../global/selectors';
@@ -50,21 +53,21 @@ import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 
+import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useSelectorSignal from '../../../hooks/useSelectorSignal';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useChatListEntry from './hooks/useChatListEntry';
 
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import StarIcon from '../../common/icons/StarIcon';
 import LastMessageMeta from '../../common/LastMessageMeta';
-import ReportModal from '../../common/ReportModal';
 import ListItem from '../../ui/ListItem';
 import ChatFolderModal from '../ChatFolderModal.async';
 import MuteChatModal from '../MuteChatModal.async';
@@ -90,6 +93,9 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  lastMessageStory?: ApiTypeStory;
+  listedTopicIds?: number[];
+  topics?: Record<number, ApiTopic>;
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
@@ -110,6 +116,7 @@ type StateProps = {
   lastMessageId?: number;
   lastMessage?: ApiMessage;
   currentUserId: string;
+  isSynced?: boolean;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -118,8 +125,11 @@ const Chat: FC<OwnProps & StateProps> = ({
   orderDiff,
   animationType,
   isPinned,
+  listedTopicIds,
+  topics,
   observeIntersection,
   chat,
+  lastMessageStory,
   isMuted,
   user,
   userStatus,
@@ -145,6 +155,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   isPreview,
   previewMessageId,
   className,
+  isSynced,
   onDragEnter,
 }) => {
   const {
@@ -157,17 +168,16 @@ const Chat: FC<OwnProps & StateProps> = ({
     openForumPanel,
     closeForumPanel,
     setShouldCloseRightColumn,
+    reportMessages,
   } = getActions();
 
   const { isMobile } = useAppLayout();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
-  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
-  const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
 
   const { isForum, isForumAsMessages } = chat || {};
 
@@ -179,6 +189,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     lastMessage,
     typingStatus,
     draft,
+    statefulMediaContent: groupStatetefulContent({ story: lastMessageStory }),
     actionTargetMessage,
     actionTargetUserIds,
     actionTargetChatId,
@@ -190,6 +201,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     orderDiff,
     isSavedDialog,
     isPreview,
+    topics,
   });
 
   const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
@@ -260,8 +272,8 @@ const Chat: FC<OwnProps & StateProps> = ({
   });
 
   const handleReport = useLastCallback(() => {
-    markRenderReportModal();
-    openReportModal();
+    if (!chat) return;
+    reportMessages({ chatId: chat.id, messageIds: [] });
   });
 
   const contextActions = useChatContextActions({
@@ -284,13 +296,13 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   // Load the forum topics to display unread count badge
   useEffect(() => {
-    if (isIntersecting && isForum && chat && chat.listedTopicIds === undefined) {
+    if (isIntersecting && isForum && isSynced && listedTopicIds === undefined) {
       loadTopics({ chatId });
     }
-  }, [chat, chatId, isForum, isIntersecting]);
+  }, [chatId, listedTopicIds, isSynced, isForum, isIntersecting]);
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
-  const { hasShownClass: isAvatarOnlineShown } = useShowTransition(isOnline);
+  const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
 
   const href = useMemo(() => {
     if (!IS_OPEN_IN_NEW_TAB_SUPPORTED) return undefined;
@@ -335,14 +347,27 @@ const Chat: FC<OwnProps & StateProps> = ({
           peer={peer}
           isSavedMessages={user?.isSelf}
           isSavedDialog={isSavedDialog}
+          size={isPreview ? 'medium' : 'large'}
           withStory={!user?.isSelf}
-          withStoryGap={isAvatarOnlineShown}
+          withStoryGap={isAvatarOnlineShown || Boolean(chat.subscriptionUntil)}
           storyViewerOrigin={StoryViewerOrigin.ChatList}
           storyViewerMode="single-peer"
         />
         <div className="avatar-badge-wrapper">
-          <div className={buildClassName('avatar-online', isAvatarOnlineShown && 'avatar-online-shown')} />
-          <ChatBadge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant forceHidden={getIsForumPanelClosed} />
+          <div
+            className={buildClassName('avatar-online', 'avatar-badge', isAvatarOnlineShown && 'avatar-online-shown')}
+          />
+          {!isAvatarOnlineShown && Boolean(chat.subscriptionUntil) && (
+            <StarIcon type="gold" className="avatar-badge avatar-subscription" size="adaptive" />
+          )}
+          <ChatBadge
+            chat={chat}
+            isMuted={isMuted}
+            shouldShowOnlyMostImportant
+            forceHidden={getIsForumPanelClosed}
+            topics={topics}
+            isSelected={isSelected}
+          />
         </div>
         {chat.isCallActive && chat.isCallNotEmpty && (
           <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={withInterfaceAnimations} />
@@ -375,6 +400,9 @@ const Chat: FC<OwnProps & StateProps> = ({
               isPinned={isPinned}
               isMuted={isMuted}
               isSavedDialog={isSavedDialog}
+              hasMiniApp={user?.hasMainMiniApp}
+              topics={topics}
+              isSelected={isSelected}
             />
           )}
         </div>
@@ -404,15 +432,6 @@ const Chat: FC<OwnProps & StateProps> = ({
           chatId={chatId}
         />
       )}
-      {shouldRenderReportModal && (
-        <ReportModal
-          isOpen={isReportModalOpen}
-          onClose={closeReportModal}
-          onCloseAnimationEnd={unmarkRenderReportModal}
-          peerId={chatId}
-          subject="peer"
-        />
-      )}
     </ListItem>
   );
 };
@@ -422,6 +441,7 @@ export default memo(withGlobal<OwnProps>(
     chatId, isSavedDialog, isPreview, previewMessageId,
   }): StateProps => {
     const chat = selectChat(global, chatId);
+    const user = selectUser(global, chatId);
     if (!chat) {
       return {
         currentUserId: global.currentUserId!,
@@ -441,7 +461,6 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, chat.id, replyToMessageId)
       : undefined;
     const { targetUserIds: actionTargetUserIds, targetChatId: actionTargetChatId } = lastMessageAction || {};
-    const privateChatUserId = getPrivateChatUserId(chat);
 
     const {
       chatId: currentChatId,
@@ -453,11 +472,15 @@ export default memo(withGlobal<OwnProps>(
     const isSelectedForum = (chat.isForum && chatId === currentChatId)
       || chatId === selectTabState(global).forumPanelChatId;
 
-    const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
-    const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
+    const userStatus = selectUserStatus(global, chatId);
     const lastMessageTopic = lastMessage && selectTopicFromMessage(global, lastMessage);
 
     const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
+
+    const topicsInfo = selectTopicsInfo(global, chatId);
+
+    const storyData = lastMessage?.content.storyData;
+    const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
 
     return {
       chat,
@@ -483,6 +506,10 @@ export default memo(withGlobal<OwnProps>(
       lastMessage,
       lastMessageId,
       currentUserId: global.currentUserId!,
+      listedTopicIds: topicsInfo?.listedTopicIds,
+      topics: topicsInfo?.topicsById,
+      isSynced: global.isSynced,
+      lastMessageStory,
     };
   },
 )(Chat));

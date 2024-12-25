@@ -9,19 +9,19 @@ import type { ApiCountryCode } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { formatDateAtTime } from '../../../util/date/dateFormat';
-import { formatCurrency } from '../../../util/formatCurrency';
+import { formatDateAtTime } from '../../../util/dates/dateFormat';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import formatUsername from '../../common/helpers/formatUsername';
 import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
-import Icon from '../../common/Icon';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import Icon from '../../common/icons/Icon';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
@@ -47,7 +47,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
     openUrl,
     showNotification,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const isUsername = modal?.type === 'username';
 
@@ -56,7 +56,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleOpenChat = useLastCallback(() => {
-    openChat({ id: modal!.userId });
+    openChat({ id: modal!.peerId });
     handleClose();
   });
 
@@ -91,8 +91,8 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
     if (!modal) return undefined;
     const key = isUsername ? 'FragmentUsernameMessage' : 'FragmentPhoneMessage';
     const date = formatDateAtTime(lang, modal.purchaseDate * 1000);
-    const currency = formatCurrency(modal.amount, modal.currency, lang.code);
-    const cryptoCurrency = formatCurrency(modal.cryptoAmount, modal.cryptoCurrency, lang.code);
+    const currency = formatCurrencyAsString(modal.amount, modal.currency, lang.code);
+    const cryptoCurrency = formatCurrencyAsString(modal.cryptoAmount, modal.cryptoCurrency, lang.code);
     const paid = `${cryptoCurrency} (${currency})`;
     return lang(key, [date, paid]);
   }, [modal, isUsername, lang]);
@@ -126,14 +126,15 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
       <PickerSelectedItem
         fluid
         className={styles.chip}
-        peerId={modal?.userId}
+        peerId={modal?.peerId}
         forceShowSelf
+        clickArg={modal?.peerId}
         onClick={handleOpenChat}
       />
       <p className={styles.description}>
         {description && renderText(description, ['simple_markdown'])}
       </p>
-      <div className="dialog-buttons">
+      <div className="dialog-buttons dialog-buttons-centered">
         <Button className="confirm-dialog-button" onClick={handleOpenUrl}>
           {lang('FragmentUsernameOpen')}
         </Button>

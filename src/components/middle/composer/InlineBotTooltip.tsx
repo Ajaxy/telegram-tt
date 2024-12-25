@@ -16,8 +16,8 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import usePrevious from '../../../hooks/usePrevious';
-import useShowTransition from '../../../hooks/useShowTransition';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -71,7 +71,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const renderedIsGallery = useCurrentOrPrev(isGallery, shouldRender);
   const {
     observe: observeIntersection,
@@ -117,7 +117,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
     });
   });
 
-  const prevInlineBotResults = usePrevious(
+  const prevInlineBotResults = usePreviousDeprecated(
     inlineBotResults?.length
       ? inlineBotResults
       : undefined,

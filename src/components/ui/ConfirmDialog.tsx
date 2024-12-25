@@ -6,7 +6,7 @@ import type { TextPart } from '../../types';
 import buildClassName from '../../util/buildClassName';
 
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from './Button';
 import Modal from './Modal';
@@ -46,7 +46,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);

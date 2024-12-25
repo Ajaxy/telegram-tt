@@ -44,8 +44,8 @@
       background: var(--color-error);
     }
 
-    .is-forwarded & > .icon {
-      margin-left: 1px;
+    .poll-option-icon {
+      line-height: 1rem;
     }
 
     &.animate {

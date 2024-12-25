@@ -1,0 +1,36 @@
+.root {
+  position: absolute;
+  top: 3.5rem;
+  left: 0;
+
+  width: 100%;
+
+  z-index: var(--z-middle-header);
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: width var(--layer-transition);
+
+  @media (min-width: 1276px) {
+    :global(#Main.right-column-open) & {
+      width: calc(100% - var(--right-column-width));
+    }
+  }
+
+  /* stylelint-disable-next-line plugin/selector-tag-no-without-class */
+  > div:last-child {
+    box-shadow: 0 2px 2px var(--color-light-shadow);
+  }
+
+  // In case if there are no children, we need to have a shadow
+  &::before {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    top: -2px;
+    height: 2px;
+    left: 0;
+    right: 0;
+    box-shadow: 0 2px 2px var(--color-light-shadow);
+    z-index: -100; // Hide behind the children
+  }
+}

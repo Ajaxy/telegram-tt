@@ -31,7 +31,7 @@ const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
 export default function renderText(
   part: TextPart,
   filters: Array<TextFilter> = ['emoji'],
-  params?: { highlight?: string; quote?: string },
+  params?: { highlight?: string; quote?: string; markdownPostProcessor?: (part: string) => TeactNode },
 ): TeactNode[] {
   if (typeof part !== 'string') {
     return [part];
@@ -73,7 +73,7 @@ export default function renderText(
         return addLinks(text, true);
 
       case 'simple_markdown':
-        return replaceSimpleMarkdown(text, 'jsx');
+        return replaceSimpleMarkdown(text, 'jsx', params?.markdownPostProcessor);
 
       case 'simple_markdown_html':
         return replaceSimpleMarkdown(text, 'html');
@@ -266,7 +266,12 @@ function addLinks(textParts: TextPart[], allowOnlyTgLinks?: boolean): TextPart[]
   }, []);
 }
 
-function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] {
+function replaceSimpleMarkdown(
+  textParts: TextPart[], type: 'jsx' | 'html', postProcessor?: (part: string) => TeactNode,
+): TextPart[] {
+  // Currently supported only for JSX. If needed, add typings to support HTML as well.
+  const postProcess = postProcessor || ((part: string) => part);
+
   return textParts.reduce<TextPart[]>((result, part) => {
     if (typeof part !== 'string') {
       result.push(part);
@@ -275,14 +280,14 @@ function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): Tex
 
     const parts = part.split(SIMPLE_MARKDOWN_REGEX);
     const entities: string[] = part.match(SIMPLE_MARKDOWN_REGEX) || [];
-    result.push(parts[0]);
+    result.push(postProcess(parts[0]));
 
     return entities.reduce((entityResult: TextPart[], entity, i) => {
       if (type === 'jsx') {
         entityResult.push(
           entity.startsWith('**')
-            ? <b>{entity.replace(/\*\*/g, '')}</b>
-            : <i>{entity.replace(/__/g, '')}</i>,
+            ? <b>{postProcess(entity.replace(/\*\*/g, ''))}</b>
+            : <i>{postProcess(entity.replace(/__/g, ''))}</i>,
         );
       } else {
         entityResult.push(
@@ -294,7 +299,7 @@ function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): Tex
 
       const index = i * 2 + 2;
       if (parts[index]) {
-        entityResult.push(parts[index]);
+        entityResult.push(postProcess(parts[index]));
       }
 
       return entityResult;

@@ -1,5 +1,5 @@
 import { GUTTER, AXES_FONT, X_AXIS_HEIGHT, X_AXIS_SHIFT_START, PLOT_TOP_PADDING } from './constants';
-import { humanize } from './format';
+import { formatCryptoValue, humanize } from './format';
 import { getCssColor } from './skin';
 import { applyXEdgeOpacity, applyYEdgeOpacity, xScaleLevelToStep, yScaleLevelToStep } from './formulas';
 import { toPixels } from './Projection';
@@ -47,6 +47,8 @@ export function createAxes(context, data, plotSize, colors) {
 
     if (data.isPercentage) {
       _drawYAxisPercents(projection);
+    } else if (data.isCurrency) {
+      _drawYAxisCurrency(projection, data);
     } else {
       _drawYAxisScaled(
         state,
@@ -160,6 +162,50 @@ export function createAxes(context, data, plotSize, colors) {
 
       context.fillStyle = getCssColor(colors, 'y-axis-text', 1);
       context.fillText(`${value * 100}%`, GUTTER, yPx - GUTTER / 4);
+
+      context.moveTo(GUTTER, yPx);
+      context.strokeStyle = getCssColor(colors, 'grid-lines', 1);
+      context.lineTo(plotSize.width - GUTTER, yPx);
+    });
+
+    context.stroke();
+  }
+
+  function _drawYAxisCurrency(projection, data) {
+    const formatValue = data.datasets[0].values.map(value => formatCryptoValue(value));
+
+    const total = formatValue.reduce((sum, value) => sum + value, 0);
+    const avg1 = total / formatValue.length;
+    const avg2 = total / (formatValue.length / 2);
+    const avg3 = total / (formatValue.length / 3);
+
+    const averageRate1 = avg1 * data.currencyRate;
+    const averageRate2 = avg2 * data.currencyRate;
+    const averageRate3 = avg3 * data.currencyRate;
+
+    const totalAvg = [0, avg1, avg2, avg3];
+    const totalRate = [0, averageRate1, averageRate2, averageRate3];
+
+    const [, height] = projection.getSize();
+
+    context.font = AXES_FONT;
+    context.textAlign = 'left';
+    context.textBaseline = 'bottom';
+    context.lineWidth = 1;
+
+    context.beginPath();
+
+    totalAvg.forEach((value, index) => {
+      const yPx = height - height * (value / Math.max(...formatValue)) + PLOT_TOP_PADDING;
+
+      context.fillStyle = getCssColor(colors, 'y-axis-text', 1);
+
+      context.fillText(`${value.toFixed(2)} TON`, GUTTER, yPx - GUTTER / 4);
+
+      context.textAlign = 'right';
+      context.fillText(`$${totalRate[index].toFixed(2)}`, plotSize.width - GUTTER, yPx - GUTTER / 4);
+
+      context.textAlign = 'left';
 
       context.moveTo(GUTTER, yPx);
       context.strokeStyle = getCssColor(colors, 'grid-lines', 1);

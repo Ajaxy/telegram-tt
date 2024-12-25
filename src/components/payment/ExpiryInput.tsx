@@ -3,7 +3,7 @@ import React, { memo, useCallback } from '../../lib/teact/teact';
 
 import { formatCardExpiry } from '../middle/helpers/inputFormatters';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import InputText from '../ui/InputText';
 
@@ -16,7 +16,7 @@ export type OwnProps = {
 };
 
 const ExpiryInput : FC<OwnProps> = ({ value, error, onChange }) => {
-  const lang = useLang();
+  const lang = useOldLang();
 
   const handleChange = useCallback((e) => {
     const newValue = e.target.value;

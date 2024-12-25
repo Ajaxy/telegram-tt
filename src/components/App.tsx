@@ -1,50 +1,51 @@
-import type { FC } from "../lib/teact/teact";
-import React, { useEffect, useLayoutEffect } from "../lib/teact/teact";
-import { getActions, withGlobal } from "../global";
+import type { FC } from '../lib/teact/teact';
+import React, { useEffect, useLayoutEffect } from '../lib/teact/teact';
+import { getActions, withGlobal } from '../global';
 
-import type { GlobalState } from "../global/types";
-import type { ThemeKey } from "../types";
-import type { UiLoaderPage } from "./common/UiLoader";
+import type { GlobalState } from '../global/types';
+import type { ThemeKey } from '../types';
+import type { UiLoaderPage } from './common/UiLoader';
 
 import {
   DARK_THEME_BG_COLOR,
   INACTIVE_MARKER,
   LIGHT_THEME_BG_COLOR,
   PAGE_TITLE,
-} from "../config";
-import { selectTabState, selectTheme } from "../global/selectors";
-import { addActiveTabChangeListener } from "../util/activeTabMonitor";
-import buildClassName from "../util/buildClassName";
-import { setupBeforeInstallPrompt } from "../util/installPrompt";
-import { parseInitialLocationHash } from "../util/routing";
-import { hasStoredSession } from "../util/sessions";
+} from '../config';
+import { selectTabState, selectTheme } from '../global/selectors';
+import { addActiveTabChangeListener } from '../util/activeTabMonitor';
+import buildClassName from '../util/buildClassName';
+import { setupBeforeInstallPrompt } from '../util/installPrompt';
+import { parseInitialLocationHash } from '../util/routing';
+import { hasStoredSession } from '../util/sessions';
 import {
   IS_INSTALL_PROMPT_SUPPORTED,
   IS_MULTITAB_SUPPORTED,
   PLATFORM_ENV,
-} from "../util/windowEnvironment";
-import { updateSizes } from "../util/windowSize";
+} from '../util/windowEnvironment';
+import { updateSizes } from '../util/windowSize';
 
-import useAppLayout from "../hooks/useAppLayout";
-import useFlag from "../hooks/useFlag";
-import usePrevious from "../hooks/usePrevious";
+import useAppLayout from '../hooks/useAppLayout';
+import useFlag from '../hooks/useFlag';
+import usePreviousDeprecated from '../hooks/usePreviousDeprecated';
 
-// import Test from './test/TestSvg';
-import Auth from "./auth/Auth";
-import UiLoader from "./common/UiLoader";
-import AppInactive from "./main/AppInactive";
-import LockScreen from "./main/LockScreen.async";
-import Main from "./main/Main.async";
-import Transition from "./ui/Transition";
+// import Test from './test/TestLocale';
+import Auth from './auth/Auth';
+import UiLoader from './common/UiLoader';
+import AppInactive from './main/AppInactive';
+import LockScreen from './main/LockScreen.async';
+import Main from './main/Main.async';
+import Transition from './ui/Transition';
 
-import styles from "./App.module.scss";
+import styles from './App.module.scss';
 
 type StateProps = {
-  authState: GlobalState["authState"];
+  authState: GlobalState['authState'];
   isScreenLocked?: boolean;
   hasPasscode?: boolean;
   isInactiveAuth?: boolean;
   hasWebAuthTokenFailed?: boolean;
+  isTestServer?: boolean;
   theme: ThemeKey;
 };
 
@@ -64,13 +65,14 @@ const App: FC<StateProps> = ({
   hasPasscode,
   isInactiveAuth,
   hasWebAuthTokenFailed,
+  isTestServer,
   theme,
 }) => {
   const { disconnect } = getActions();
 
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
-  const isMobileOs = PLATFORM_ENV === "iOS" || PLATFORM_ENV === "Android";
+  const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
 
   useEffect(() => {
     if (IS_INSTALL_PROMPT_SUPPORTED) {
@@ -85,22 +87,22 @@ const App: FC<StateProps> = ({
       e.preventDefault();
       if (!e.dataTransfer) return;
       if (!(e.target as HTMLElement).dataset.dropzone) {
-        e.dataTransfer.dropEffect = "none";
+        e.dataTransfer.dropEffect = 'none';
       } else {
-        e.dataTransfer.dropEffect = "copy";
+        e.dataTransfer.dropEffect = 'copy';
       }
     };
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
     };
-    body.addEventListener("drop", handleDrop);
-    body.addEventListener("dragover", handleDrag);
-    body.addEventListener("dragenter", handleDrag);
+    body.addEventListener('drop', handleDrop);
+    body.addEventListener('dragover', handleDrag);
+    body.addEventListener('dragenter', handleDrag);
 
     return () => {
-      body.removeEventListener("drop", handleDrop);
-      body.removeEventListener("dragover", handleDrag);
-      body.removeEventListener("dragenter", handleDrag);
+      body.removeEventListener('drop', handleDrop);
+      body.removeEventListener('dragover', handleDrag);
+      body.removeEventListener('dragenter', handleDrag);
     };
   }, []);
 
@@ -112,55 +114,55 @@ const App: FC<StateProps> = ({
   if (isInactive) {
     activeKey = AppScreens.inactive;
   } else if (isScreenLocked) {
-    page = "lock";
+    page = 'lock';
     activeKey = AppScreens.lock;
   } else if (authState) {
     switch (authState) {
-      case "authorizationStateWaitPhoneNumber":
-        page = "authPhoneNumber";
+      case 'authorizationStateWaitPhoneNumber':
+        page = 'authPhoneNumber';
         activeKey = AppScreens.auth;
         break;
-      case "authorizationStateWaitCode":
-        page = "authCode";
+      case 'authorizationStateWaitCode':
+        page = 'authCode';
         activeKey = AppScreens.auth;
         break;
-      case "authorizationStateWaitPassword":
-        page = "authPassword";
+      case 'authorizationStateWaitPassword':
+        page = 'authPassword';
         activeKey = AppScreens.auth;
         break;
-      case "authorizationStateWaitRegistration":
+      case 'authorizationStateWaitRegistration':
         activeKey = AppScreens.auth;
         break;
-      case "authorizationStateWaitQrCode":
-        page = "authQrCode";
+      case 'authorizationStateWaitQrCode':
+        page = 'authQrCode';
         activeKey = AppScreens.auth;
         break;
-      case "authorizationStateClosed":
-      case "authorizationStateClosing":
-      case "authorizationStateLoggingOut":
-      case "authorizationStateReady":
-        page = "main";
+      case 'authorizationStateClosed':
+      case 'authorizationStateClosing':
+      case 'authorizationStateLoggingOut':
+      case 'authorizationStateReady':
+        page = 'main';
         activeKey = AppScreens.main;
         break;
     }
   } else if (hasStoredSession()) {
-    page = "main";
+    page = 'main';
     activeKey = AppScreens.main;
   } else if (hasPasscode) {
     activeKey = AppScreens.lock;
   } else {
-    page = isMobileOs ? "authPhoneNumber" : "authQrCode";
+    page = isMobileOs ? 'authPhoneNumber' : 'authQrCode';
     activeKey = AppScreens.auth;
   }
 
   if (
-    activeKey !== AppScreens.lock &&
-    activeKey !== AppScreens.inactive &&
-    activeKey !== AppScreens.main &&
-    parseInitialLocationHash()?.tgWebAuthToken &&
-    !hasWebAuthTokenFailed
+    activeKey !== AppScreens.lock
+    && activeKey !== AppScreens.inactive
+    && activeKey !== AppScreens.main
+    && parseInitialLocationHash()?.tgWebAuthToken
+    && !hasWebAuthTokenFailed
   ) {
-    page = "main";
+    page = 'main';
     activeKey = AppScreens.main;
   }
 
@@ -189,7 +191,7 @@ const App: FC<StateProps> = ({
     }
   }, [isInactiveAuth, markInactive, unmarkInactive]);
 
-  const prevActiveKey = usePrevious(activeKey);
+  const prevActiveKey = usePreviousDeprecated(activeKey);
 
   // eslint-disable-next-line consistent-return
   function renderContent() {
@@ -210,16 +212,15 @@ const App: FC<StateProps> = ({
       document.body.classList.add(styles.bg);
     } else {
       setTimeout(() => {
-        window.location.href =
-          process.env.MAIN_FRAME_ORIGIN || "https://crm.slise.xyz";
+        window.location.href = process.env.MAIN_FRAME_ORIGIN || 'https://crm.slise.xyz';
       }, 5000);
     }
   }, []);
 
   useLayoutEffect(() => {
     document.body.style.setProperty(
-      "--theme-background-color",
-      theme === "dark" ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR
+      '--theme-background-color',
+      theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
     );
   }, [theme]);
 
@@ -227,7 +228,7 @@ const App: FC<StateProps> = ({
     document.body.classList.remove(styles.bg);
     return (
       <h1>
-        Can't detect DISE, go to{" "}
+        Can&apos;t detect DISE, go to{' '}
         <a href={process.env.MAIN_FRAME_ORIGIN}>
           {process.env.MAIN_FRAME_ORIGIN}
         </a>
@@ -242,15 +243,18 @@ const App: FC<StateProps> = ({
         activeKey={activeKey}
         shouldCleanup
         className={buildClassName(
-          "full-height",
-          (activeKey === AppScreens.auth ||
-            prevActiveKey === AppScreens.auth) &&
-            "is-auth"
+          'full-height',
+          (activeKey === AppScreens.auth
+            || prevActiveKey === AppScreens.auth)
+            && 'is-auth',
         )}
         renderCount={TRANSITION_RENDER_COUNT}
       >
         {renderContent}
       </Transition>
+      {activeKey === AppScreens.auth && isTestServer && (
+        <div className="test-server-badge">Test server</div>
+      )}
     </UiLoader>
   );
 };
@@ -264,5 +268,6 @@ export default withGlobal((global): StateProps => {
     hasWebAuthTokenFailed:
       global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
     theme: selectTheme(global),
+    isTestServer: global.config?.isTestServer,
   };
 })(App);

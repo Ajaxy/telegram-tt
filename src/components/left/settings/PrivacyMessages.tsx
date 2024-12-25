@@ -4,8 +4,8 @@ import { getActions, withGlobal } from '../../../global';
 import { selectIsCurrentUserPremium, selectNewNoncontactPeersRequirePremium } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import RadioGroup from '../../ui/RadioGroup';
 import PremiumStatusItem from './PremiumStatusItem';
@@ -30,7 +30,7 @@ function PrivacyMessages({
   onReset,
 }: OwnProps & StateProps) {
   const { updateGlobalPrivacySettings } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const canChange = isCurrentUserPremium || canLimitNewMessagesWithoutPremium;
 

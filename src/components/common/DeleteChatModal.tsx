@@ -17,7 +17,7 @@ import {
 import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import renderText from './helpers/renderText';
 
-import useLang from '../../hooks/useLang';
+import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -70,7 +70,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     blockUser,
   } = getActions();
 
-  const lang = useLang();
+  const lang = useOldLang();
   const chatTitle = getChatTitle(lang, chat);
 
   const handleDeleteForAll = useCallback(() => {

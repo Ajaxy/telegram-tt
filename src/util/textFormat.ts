@@ -1,4 +1,4 @@
-import type { LangFn } from '../hooks/useLang';
+import type { OldLangFn } from '../hooks/useOldLang';
 
 import EMOJI_REGEX from '../lib/twemojiRegex';
 import fixNonStandardEmoji from './emoji/fixNonStandardEmoji';
@@ -11,7 +11,7 @@ export function formatInteger(value: number) {
 function formatFixedNumber(number: number) {
   const fixed = String(number.toFixed(1));
   if (fixed.substr(-2) === '.0') {
-    return Math.round(number);
+    return Math.floor(number);
   }
 
   return number.toFixed(1).replace('.', ',');
@@ -27,6 +27,10 @@ export function formatIntegerCompact(views: number) {
   }
 
   return `${formatFixedNumber(views / 1e6)}M`;
+}
+
+export function formatPercent(value: number, fractionDigits = 1) {
+  return `${Number.isInteger(value) ? value : value.toFixed(fractionDigits)}%`;
 }
 
 export const getFirstLetters = withCache((phrase: string, count = 2) => {
@@ -48,7 +52,7 @@ export const getFirstLetters = withCache((phrase: string, count = 2) => {
 });
 
 const FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB'];
-export function formatFileSize(lang: LangFn, bytes: number, decimals = 1): string {
+export function formatFileSize(lang: OldLangFn, bytes: number, decimals = 1): string {
   if (bytes === 0) {
     return lang('FileSize.B', 0);
   }

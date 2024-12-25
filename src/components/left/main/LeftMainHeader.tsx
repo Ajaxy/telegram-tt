@@ -22,7 +22,7 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { formatDateToString } from '../../../util/date/dateFormat';
+import { formatDateToString } from '../../../util/dates/dateFormat';
 import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -32,10 +32,11 @@ import useFlag from '../../../hooks/useFlag';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
 import StoryToggler from '../../story/StoryToggler';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
@@ -113,8 +114,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     requestNextSettingsScreen,
   } = getActions();
 
+  const oldLang = useOldLang();
   const lang = useLang();
-  const { isMobile } = useAppLayout();
+  const { isMobile, isDesktop } = useAppLayout();
 
   const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
 
@@ -126,7 +128,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   }, [searchDate]);
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
-    lang,
+    oldLang,
     connectionState,
     isSyncing || isFetchingDifference,
     isMessageListOpen,
@@ -144,12 +146,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     }
   });
 
-  useHotkeys(canSetPasscode ? {
+  useHotkeys(useMemo(() => (canSetPasscode ? {
     'Ctrl+Shift+L': handleLockScreenHotkey,
     'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
     ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
-  } : undefined);
+  } : undefined), [canSetPasscode]));
 
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -161,7 +163,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         className={isOpen ? 'active' : ''}
         // eslint-disable-next-line react/jsx-no-bind
         onClick={hasMenu ? onTrigger : () => onReset()}
-        ariaLabel={hasMenu ? lang('AccDescrOpenMenu2') : 'Return to chat list'}
+        ariaLabel={hasMenu ? oldLang('AccDescrOpenMenu2') : 'Return to chat list'}
       >
         <div className={buildClassName(
           'animated-menu-icon',
@@ -171,7 +173,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         />
       </Button>
     );
-  }, [hasMenu, isMobile, lang, onReset, shouldSkipTransition]);
+  }, [hasMenu, isMobile, oldLang, onReset, shouldSkipTransition]);
 
   const handleSearchFocus = useLastCallback(() => {
     if (!searchQuery) {
@@ -187,7 +189,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     lockScreen();
   });
 
-  const isSearchFocused = (
+  const isSearchFocused = (!isDesktop && !isMessageListOpen) && (
     Boolean(globalSearchChatId)
     || content === LeftColumnContent.GlobalSearch
     || content === LeftColumnContent.Contacts
@@ -220,18 +222,22 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           <PickerSelectedItem
             icon="calendar"
             title={selectedSearchDate}
+            fluid
             canClose
             isMinimized={Boolean(globalSearchChatId)}
-            className="search-date"
+            className="left-search-picker-item search-date"
             onClick={setGlobalSearchDate}
             clickArg={CLEAR_DATE_SEARCH_PARAM}
           />
         )}
         {globalSearchChatId && (
           <PickerSelectedItem
+            className="left-search-picker-item"
             peerId={globalSearchChatId}
             onClick={setGlobalSearchChatId}
+            fluid
             canClose
+            isMinimized
             clickArg={CLEAR_CHAT_SEARCH_PARAM}
           />
         )}
@@ -242,20 +248,20 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   return (
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header" ref={headerRef}>
-        {lang.isRtl && <div className="DropdownMenuFiller" />}
+        {oldLang.isRtl && <div className="DropdownMenuFiller" />}
         <DropdownMenu
           trigger={MainButton}
           footer={`${APP_NAME} ${versionString}`}
           className={buildClassName(
             'main-menu',
-            lang.isRtl && 'rtl',
-            shouldHideSearch && lang.isRtl && 'right-aligned',
-            shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
+            oldLang.isRtl && 'rtl',
+            shouldHideSearch && oldLang.isRtl && 'right-aligned',
+            shouldDisableDropdownMenuTransitionRef.current && oldLang.isRtl && 'disable-transition',
           )}
           forceOpen={isBotMenuOpen}
-          positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
+          positionX={shouldHideSearch && oldLang.isRtl ? 'right' : 'left'}
           transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
-          onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
+          onTransitionEnd={oldLang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
           <LeftSideMenuItems
             onSelectArchived={onSelectArchived}
@@ -267,7 +273,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         </DropdownMenu>
         <SearchInput
           inputId="telegram-search-input"
-          parentContainerClassName="LeftSearch"
+          resultsItemSelector=".LeftSearch .ListItem-button"
           className={buildClassName(
             (globalSearchChatId || searchDate) ? 'with-picker-item' : undefined,
             shouldHideSearch && 'SearchInput--hidden',
@@ -295,7 +301,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             ripple={!isMobile}
             size="smaller"
             color="translucent"
-            ariaLabel={`${lang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
+            ariaLabel={`${oldLang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
             onClick={handleLockScreen}
             className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
           >
@@ -322,7 +328,7 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const tabState = selectTabState(global);
     const {
-      query: searchQuery, fetchingStatus, chatId, date,
+      query: searchQuery, fetchingStatus, chatId, minDate,
     } = tabState.globalSearch;
     const {
       connectionState, isSyncing, isFetchingDifference,
@@ -333,7 +339,7 @@ export default memo(withGlobal<OwnProps>(
       searchQuery,
       isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
       globalSearchChatId: chatId,
-      searchDate: date,
+      searchDate: minDate,
       theme: selectTheme(global),
       connectionState,
       isSyncing,

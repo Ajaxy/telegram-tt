@@ -28,8 +28,7 @@ const asCacheApiType = {
 
 const PROGRESSIVE_URL_PREFIX = `${IS_PACKAGED_ELECTRON ? ELECTRON_HOST_URL : '.'}/progressive/`;
 const URL_DOWNLOAD_PREFIX = './download/';
-const RETRY_MEDIA_AFTER = 2000;
-const MAX_MEDIA_RETRIES = 3;
+const MAX_MEDIA_RETRIES = 5;
 
 const memoryCache = new Map<string, ApiPreparedMedia>();
 const fetchPromises = new Map<string, Promise<ApiPreparedMedia | undefined>>();
@@ -162,7 +161,7 @@ async function fetchFromCacheOrRemote(
       throw new Error(`Failed to fetch media ${url}`);
     }
     await new Promise((resolve) => {
-      setTimeout(resolve, RETRY_MEDIA_AFTER);
+      setTimeout(resolve, getRetryTimeout(retryNumber));
     });
     // eslint-disable-next-line no-console
     if (DEBUG) console.debug(`Retrying to fetch media ${url}`);
@@ -233,4 +232,9 @@ if (IS_PROGRESSIVE_SUPPORTED) {
       },
     }, [arrayBuffer!]);
   });
+}
+
+function getRetryTimeout(retryNumber: number) {
+  // 250ms, 500ms, 1s, 2s, 4s
+  return 250 * 2 ** retryNumber;
 }

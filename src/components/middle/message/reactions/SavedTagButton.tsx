@@ -1,9 +1,9 @@
-import type { FC } from '../../../../lib/teact/teact';
 import React, { memo, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type {
-  ApiReaction, ApiSavedReactionTag,
+  ApiReaction,
+  ApiSavedReactionTag,
 } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
@@ -12,9 +12,8 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useContextMenuHandlers from '../../../../hooks/useContextMenuHandlers';
 import useFlag from '../../../../hooks/useFlag';
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
-import useMenuPosition from '../../../../hooks/useMenuPosition';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import ReactionAnimatedEmoji from '../../../common/reactions/ReactionAnimatedEmoji';
 import PromptDialog from '../../../modals/prompt/PromptDialog';
@@ -28,7 +27,7 @@ const REACTION_SIZE = 1.25 * REM;
 const TITLE_MAX_LENGTH = 15;
 const LOOP_LIMIT = 1;
 
-const SavedTagButton: FC<{
+type OwnProps = {
   reaction: ApiReaction;
   tag?: ApiSavedReactionTag;
   containerId: string;
@@ -42,7 +41,9 @@ const SavedTagButton: FC<{
   observeIntersection?: ObserveFn;
   onClick?: (reaction: ApiReaction) => void;
   onRemove?: (reaction: ApiReaction) => void;
-}> = ({
+};
+
+const SavedTagButton = ({
   reaction,
   tag,
   containerId,
@@ -56,14 +57,14 @@ const SavedTagButton: FC<{
   observeIntersection,
   onClick,
   onRemove,
-}) => {
+}: OwnProps) => {
   const { editSavedReactionTag } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLButtonElement>(null);
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const lang = useLang();
+  const lang = useOldLang();
   const [isRenamePromptOpen, openRenamePrompt, closeRenamePrompt] = useFlag();
 
   const { title, count } = tag || {};
@@ -87,28 +88,17 @@ const SavedTagButton: FC<{
 
   const {
     isContextMenuOpen,
-    contextMenuPosition,
+    contextMenuAnchor,
     handleBeforeContextMenu,
     handleContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(ref, !withContextMenu);
+  } = useContextMenuHandlers(ref, !withContextMenu, undefined, undefined, undefined, true);
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => document.body);
   const getMenuElement = useLastCallback(() => menuRef.current);
-
-  const getLayout = () => ({ withPortal: true, shouldAvoidNegativePosition: true });
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
+  const getLayout = useLastCallback(() => ({ withPortal: true, shouldAvoidNegativePosition: true }));
 
   if (withCount && count === 0) {
     return undefined;
@@ -165,15 +155,15 @@ const SavedTagButton: FC<{
           onSubmit={handleRenameTag}
         />
       )}
-      {withContextMenu && contextMenuPosition && (
+      {withContextMenu && contextMenuAnchor && (
         <Menu
           ref={menuRef}
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
           autoClose
           withPortal
           onClose={handleContextMenuClose}

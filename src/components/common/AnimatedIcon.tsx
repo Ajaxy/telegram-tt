@@ -6,7 +6,7 @@ import buildClassName from '../../util/buildClassName';
 
 import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 
 import AnimatedSticker from './AnimatedSticker';
 
@@ -29,7 +29,7 @@ function AnimatedIcon(props: OwnProps) {
     ...otherProps
   } = props;
   const [isAnimationLoaded, markAnimationLoaded] = useFlag(false);
-  const transitionClassNames = useMediaTransition(noTransition || isAnimationLoaded);
+  const transitionClassNames = useMediaTransitionDeprecated(noTransition || isAnimationLoaded);
 
   const handleLoad = useLastCallback(() => {
     markAnimationLoaded();

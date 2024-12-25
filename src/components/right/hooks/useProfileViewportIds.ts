@@ -12,26 +12,51 @@ import sortChatIds from '../../common/helpers/sortChatIds';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
-export default function useProfileViewportIds(
-  loadMoreMembers: AnyToVoidFunction,
-  loadCommonChats: AnyToVoidFunction,
-  searchMessages: AnyToVoidFunction,
-  loadStories: AnyToVoidFunction,
-  loadStoriesArchive: AnyToVoidFunction,
-  tabType: ProfileTabType,
-  mediaSearchType?: SharedMediaType,
-  groupChatMembers?: ApiChatMember[],
-  commonChatIds?: string[],
-  usersById?: Record<string, ApiUser>,
-  userStatusesById?: Record<string, ApiUserStatus>,
-  chatsById?: Record<string, ApiChat>,
-  chatMessages?: Record<number, ApiMessage>,
-  foundIds?: number[],
-  threadId?: ThreadId,
-  storyIds?: number[],
-  archiveStoryIds?: number[],
-  similarChannels?: string[],
-) {
+export default function useProfileViewportIds({
+  loadMoreMembers,
+  loadCommonChats,
+  searchMessages,
+  loadStories,
+  loadStoriesArchive,
+  loadMoreGifts,
+  tabType,
+  mediaSearchType,
+  groupChatMembers,
+  commonChatIds,
+  usersById,
+  userStatusesById,
+  chatsById,
+  chatMessages,
+  foundIds,
+  threadId,
+  storyIds,
+  giftIds,
+  pinnedStoryIds,
+  archiveStoryIds,
+  similarChannels,
+} : {
+  loadMoreMembers: AnyToVoidFunction;
+  loadCommonChats: AnyToVoidFunction;
+  searchMessages: AnyToVoidFunction;
+  loadStories: AnyToVoidFunction;
+  loadStoriesArchive: AnyToVoidFunction;
+  loadMoreGifts: AnyToVoidFunction;
+  tabType: ProfileTabType;
+  mediaSearchType?: SharedMediaType;
+  groupChatMembers?: ApiChatMember[];
+  commonChatIds?: string[];
+  usersById?: Record<string, ApiUser>;
+  userStatusesById?: Record<string, ApiUserStatus>;
+  chatsById?: Record<string, ApiChat>;
+  chatMessages?: Record<number, ApiMessage>;
+  foundIds?: number[];
+  threadId?: ThreadId;
+  storyIds?: number[];
+  giftIds?: string[];
+  pinnedStoryIds?: number[];
+  archiveStoryIds?: number[];
+  similarChannels?: string[];
+}) {
   const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
 
   const memberIds = useMemo(() => {
@@ -82,8 +107,20 @@ export default function useProfileViewportIds(
     loadCommonChats, chatIds,
   );
 
+  const sortedStoryIds = useMemo(() => {
+    if (!storyIds?.length) return storyIds;
+    const pinnedStoryIdsSet = new Set(pinnedStoryIds);
+    return storyIds.slice().sort((a, b) => {
+      const aIsPinned = pinnedStoryIdsSet.has(a);
+      const bIsPinned = pinnedStoryIdsSet.has(b);
+      if (aIsPinned && !bIsPinned) return -1;
+      if (!aIsPinned && bIsPinned) return 1;
+      return b - a;
+    });
+  }, [storyIds, pinnedStoryIds]);
+
   const [storyViewportIds, getMoreStories, noProfileInfoForStories] = useInfiniteScrollForLoadableItems(
-    loadStories, storyIds,
+    loadStories, sortedStoryIds,
   );
 
   const [
@@ -146,6 +183,10 @@ export default function useProfileViewportIds(
       break;
     case 'similarChannels':
       viewportIds = similarChannels;
+      break;
+    case 'gifts':
+      viewportIds = giftIds;
+      getMore = loadMoreGifts;
       break;
     case 'dialogs':
       noProfileInfo = true;

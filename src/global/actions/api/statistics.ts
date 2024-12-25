@@ -1,12 +1,13 @@
+import type { ActionReturnType } from '../../types';
+
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChats,
-  addUsers,
+  updateChannelMonetizationStatistics,
   updateMessageStatistics,
+  updateMonetizationInfo,
   updateStatistics,
   updateStatisticsGraph,
   updateStoryStatistics,
@@ -15,6 +16,7 @@ import {
   selectChat,
   selectChatFullInfo,
   selectChatMessages,
+  selectPeer,
   selectPeerStory,
   selectTabState,
 } from '../../selectors';
@@ -35,11 +37,31 @@ addActionHandler('loadStatistics', async (global, actions, payload): Promise<voi
     return;
   }
 
+  const { stats } = result;
   global = getGlobal();
-  const { stats, users } = result;
-
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = updateStatistics(global, chatId, stats, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadChannelMonetizationStatistics', async (global, actions, payload): Promise<void> => {
+  const {
+    peerId, tabId = getCurrentTabId(),
+  } = payload;
+  const peer = selectPeer(global, peerId);
+  const chatFullInfo = selectChatFullInfo(global, peerId);
+  if (!peer) {
+    return;
+  }
+
+  const dcId = chatFullInfo?.statisticsDcId;
+  const stats = await callApi('fetchChannelMonetizationStatistics', { peer, dcId });
+
+  if (!stats) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateChannelMonetizationStatistics(global, stats, tabId);
   setGlobal(global);
 });
 
@@ -189,8 +211,6 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
 
   const {
     publicForwards,
-    users,
-    chats,
     count,
     nextOffset,
   } = await callApi('fetchStoryPublicForwards', {
@@ -198,13 +218,6 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
   }) || {};
 
   global = getGlobal();
-
-  if (chats) {
-    global = addChats(global, buildCollectionByKey(chats, 'id'));
-  }
-  if (users) {
-    global = addUsers(global, buildCollectionByKey(users, 'id'));
-  }
   global = updateStoryStatistics(global, {
     ...stats,
     publicForwards: count || publicForwards?.length,
@@ -214,4 +227,42 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
     nextOffset,
   }, tabId);
   setGlobal(global);
+});
+
+addActionHandler('loadMonetizationRevenueWithdrawalUrl', async (global, actions, payload): Promise<void> => {
+  const {
+    peerId, currentPassword, onSuccess, tabId = getCurrentTabId(),
+  } = payload;
+
+  global = updateMonetizationInfo(global, { isLoading: true, error: undefined });
+  setGlobal(global);
+
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
+    return;
+  }
+
+  const result = await callApi('loadMonetizationRevenueWithdrawalUrl', { peer, currentPassword });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateMonetizationInfo(global, { isLoading: false });
+  setGlobal(global);
+
+  if (result) {
+    onSuccess();
+    actions.openUrl({
+      url: result.url,
+      shouldSkipModal: true,
+      tabId,
+      ignoreDeepLinks: true,
+    });
+  }
+});
+
+addActionHandler('clearMonetizationInfo', (global): ActionReturnType => {
+  return updateMonetizationInfo(global, { error: undefined });
 });

@@ -27,6 +27,7 @@ const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
+const CANVAS_CLASS = 'rlottie-canvas';
 
 const workers = launchMediaWorkers().map(({ connector }) => connector);
 const instancesByRenderId = new Map<string, RLottie>();
@@ -280,6 +281,8 @@ class RLottie {
       requestMutation(() => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d')!;
+
+        canvas.classList.add(CANVAS_CLASS);
 
         canvas.style.width = `${size}px`;
         canvas.style.height = `${size}px`;

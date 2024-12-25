@@ -17,12 +17,12 @@ import renderText from '../../../common/helpers/renderText';
 
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import LinkField from '../../../common/LinkField';
-import Picker from '../../../common/Picker';
+import PeerPicker from '../../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import Spinner from '../../../ui/Spinner';
 
@@ -55,7 +55,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   const {
     createChatlistInvite, deleteChatlistInvite, editChatlistInvite, showNotification,
   } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
 
   const [isTouched, setIsTouched] = useState(false);
 
@@ -167,14 +167,16 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
         isDisabled={!chatsCount || isTouched}
       />
 
-      <div className="settings-item settings-item-chatlist">
-        <Picker
+      <div className="settings-item settings-item-picker">
+        <PeerPicker
           itemIds={itemIds}
-          lockedSelectedIds={lockedIds}
+          lockedUnselectedIds={lockedIds}
           onSelectedIdsChange={handleSelectedIdsChange}
           selectedIds={selectedIds}
           onDisabledClick={handleClickDisabled}
-          isRoundCheckbox
+          allowMultiple
+          withStatus
+          itemInputType="checkbox"
         />
       </div>
 

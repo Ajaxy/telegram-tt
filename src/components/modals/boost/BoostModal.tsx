@@ -7,7 +7,7 @@ import type { TabState } from '../../../global/types';
 import { getChatTitle, isChatAdmin, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo, selectIsCurrentUserPremium } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatDateInFuture } from '../../../util/date/dateFormat';
+import { formatShortDuration } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
 import renderText from '../../common/helpers/renderText';
@@ -15,9 +15,10 @@ import renderText from '../../common/helpers/renderText';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
-import Icon from '../../common/Icon';
+import Icon from '../../common/icons/Icon';
 import PremiumProgress from '../../common/PremiumProgress';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -79,6 +80,7 @@ const BoostModal = ({
 
   const isOpen = Boolean(modal);
 
+  const oldLang = useOldLang();
   const lang = useLang();
 
   useEffect(() => {
@@ -92,16 +94,16 @@ const BoostModal = ({
       return undefined;
     }
 
-    return getChatTitle(lang, chat);
-  }, [chat, lang]);
+    return getChatTitle(oldLang, chat);
+  }, [chat, oldLang]);
 
   const boostedChatTitle = useMemo(() => {
     if (!prevBoostedChat) {
       return undefined;
     }
 
-    return getChatTitle(lang, prevBoostedChat);
-  }, [prevBoostedChat, lang]);
+    return getChatTitle(oldLang, prevBoostedChat);
+  }, [prevBoostedChat, oldLang]);
 
   const {
     isStatusLoaded,
@@ -118,7 +120,7 @@ const BoostModal = ({
     if (!modal?.boostStatus || !chat) {
       return {
         isStatusLoaded: false,
-        title: lang('Loading'),
+        title: oldLang('Loading'),
       };
     }
 
@@ -140,23 +142,23 @@ const BoostModal = ({
 
     const hasBoost = hasMyBoost;
 
-    const left = lang('BoostsLevel', currentLevel);
-    const right = hasNextLevel ? lang('BoostsLevel', currentLevel + 1) : undefined;
+    const left = oldLang('BoostsLevel', currentLevel);
+    const right = hasNextLevel ? oldLang('BoostsLevel', currentLevel + 1) : undefined;
 
-    const moreBoosts = lang('ChannelBoost.MoreBoosts', remainingBoosts);
+    const moreBoosts = oldLang('ChannelBoost.MoreBoosts', remainingBoosts);
 
-    const modalTitle = isChannel ? lang('BoostChannel') : lang('BoostGroup');
+    const modalTitle = isChannel ? oldLang('BoostChannel') : oldLang('BoostGroup');
 
     const boostsLeftToUnrestrict = (chatFullInfo?.boostsToUnrestrict || 0) - (chatFullInfo?.boostsApplied || 0);
 
     let description: string | undefined;
     if (isMaxLevel) {
-      description = lang('BoostsMaxLevelReached');
+      description = oldLang('BoostsMaxLevelReached');
     } else if (boostsLeftToUnrestrict > 0 && !isChatAdmin(chat)) {
-      const boostTimes = lang('GroupBoost.BoostToUnrestrict.Times', boostsLeftToUnrestrict);
-      description = lang('GroupBoost.BoostToUnrestrict', [boostTimes, chatTitle]);
+      const boostTimes = oldLang('GroupBoost.BoostToUnrestrict.Times', boostsLeftToUnrestrict);
+      description = oldLang('GroupBoost.BoostToUnrestrict', [boostTimes, chatTitle]);
     } else {
-      description = lang('ChannelBoost.MoreBoostsNeeded.Text', [chatTitle, moreBoosts]);
+      description = oldLang('ChannelBoost.MoreBoostsNeeded.Text', [chatTitle, moreBoosts]);
     }
 
     return {
@@ -172,7 +174,7 @@ const BoostModal = ({
       isBoosted: hasBoost,
       canBoostMore: areBoostsInDifferentChannels && !isMaxLevel,
     };
-  }, [chat, chatTitle, modal, lang, chatFullInfo, isChannel]);
+  }, [chat, chatTitle, modal, oldLang, chatFullInfo, isChannel]);
 
   const isBoostDisabled = !modal?.myBoosts?.length && isCurrentUserPremium;
   const isReplacingBoost = boost?.chatId && boost.chatId !== modal?.chatId;
@@ -238,7 +240,7 @@ const BoostModal = ({
         />
         {isBoosted && (
           <div className={buildClassName(styles.description, styles.bold)}>
-            {lang('ChannelBoost.YouBoostedChannelText', chatTitle)}
+            {oldLang('ChannelBoost.YouBoostedChannelText', chatTitle)}
           </div>
         )}
         <div className={styles.description}>
@@ -249,12 +251,12 @@ const BoostModal = ({
             {canBoostMore ? (
               <>
                 <Icon name="boost" />
-                {lang(isChannel ? 'ChannelBoost.BoostChannel' : 'GroupBoost.BoostGroup')}
+                {oldLang(isChannel ? 'ChannelBoost.BoostChannel' : 'GroupBoost.BoostGroup')}
               </>
-            ) : lang('OK')}
+            ) : oldLang('OK')}
           </Button>
           <Button isText className="confirm-dialog-button" onClick={handleCloseClick}>
-            {lang('Cancel')}
+            {oldLang('Cancel')}
           </Button>
         </div>
       </>
@@ -286,14 +288,16 @@ const BoostModal = ({
             <Avatar peer={chat} size="large" />
           </div>
           <div>
-            {renderText(lang('ChannelBoost.ReplaceBoost', [boostedChatTitle, chatTitle]), ['simple_markdown', 'emoji'])}
+            {renderText(
+              oldLang('ChannelBoost.ReplaceBoost', [boostedChatTitle, chatTitle]), ['simple_markdown', 'emoji'],
+            )}
           </div>
           <div className="dialog-buttons">
             <Button isText className="confirm-dialog-button" onClick={handleApplyBoost}>
-              {lang('Replace')}
+              {oldLang('Replace')}
             </Button>
             <Button isText className="confirm-dialog-button" onClick={closeReplaceModal}>
-              {lang('Cancel')}
+              {oldLang('Cancel')}
             </Button>
           </div>
         </Modal>
@@ -302,15 +306,15 @@ const BoostModal = ({
         <ConfirmDialog
           isOpen={isWaitDialogOpen}
           isOnlyConfirm
-          confirmLabel={lang('OK')}
-          title={lang('ChannelBoost.Error.BoostTooOftenTitle')}
+          confirmLabel={oldLang('OK')}
+          title={oldLang('ChannelBoost.Error.BoostTooOftenTitle')}
           onClose={closeWaitDialog}
           confirmHandler={closeWaitDialog}
         >
           {renderText(
-            lang(
+            oldLang(
               'ChannelBoost.Error.BoostTooOftenText',
-              formatDateInFuture(lang, getServerTime(), boost!.cooldownUntil),
+              formatShortDuration(lang, boost!.cooldownUntil - getServerTime()),
             ),
             ['simple_markdown', 'emoji'],
           )}
@@ -319,12 +323,12 @@ const BoostModal = ({
       {!isCurrentUserPremium && (
         <ConfirmDialog
           isOpen={isPremiumDialogOpen}
-          confirmLabel={lang('Common.Yes')}
-          title={lang('PremiumNeeded')}
+          confirmLabel={oldLang('Common.Yes')}
+          title={oldLang('PremiumNeeded')}
           onClose={closePremiumDialog}
           confirmHandler={handleProceedPremium}
         >
-          {renderText(lang('PremiumNeededForBoosting'), ['simple_markdown', 'emoji'])}
+          {renderText(oldLang('PremiumNeededForBoosting'), ['simple_markdown', 'emoji'])}
         </ConfirmDialog>
       )}
     </Modal>

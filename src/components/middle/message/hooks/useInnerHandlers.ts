@@ -4,7 +4,7 @@ import { getActions } from '../../../../global';
 import type {
   ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiUser,
 } from '../../../../api/types';
-import type { LangFn } from '../../../../hooks/useLang';
+import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin } from '../../../../types';
@@ -13,33 +13,53 @@ import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
-export default function useInnerHandlers(
-  lang: LangFn,
-  selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
-  message: ApiMessage,
-  chatId: string,
-  threadId: ThreadId,
-  isInDocumentGroup: boolean,
-  asForwarded?: boolean,
-  isScheduled?: boolean,
-  album?: IAlbum,
-  avatarPeer?: ApiPeer,
-  senderPeer?: ApiPeer,
-  botSender?: ApiUser,
-  messageTopic?: ApiTopic,
-  isTranslatingChat?: boolean,
-  story?: ApiStory,
-  isReplyPrivate?: boolean,
-  isRepliesChat?: boolean,
-) {
+export default function useInnerHandlers({
+  lang,
+  selectMessage,
+  message,
+  chatId,
+  threadId,
+  isInDocumentGroup,
+  asForwarded,
+  isScheduled,
+  album,
+  avatarPeer,
+  senderPeer,
+  botSender,
+  messageTopic,
+  isTranslatingChat,
+  story,
+  isReplyPrivate,
+  isRepliesChat,
+  isSavedMessages,
+}: {
+  lang: OldLangFn;
+  selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void;
+  message: ApiMessage;
+  chatId: string;
+  threadId: ThreadId;
+  isInDocumentGroup: boolean;
+  asForwarded?: boolean;
+  isScheduled?: boolean;
+  album?: IAlbum;
+  avatarPeer?: ApiPeer;
+  senderPeer?: ApiPeer;
+  botSender?: ApiUser;
+  messageTopic?: ApiTopic;
+  isTranslatingChat?: boolean;
+  story?: ApiStory;
+  isReplyPrivate?: boolean;
+  isRepliesChat?: boolean;
+  isSavedMessages?: boolean;
+}) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelUploadMedia, sendPollVote, openForwardMenu,
-    openChatLanguageModal, openThread, openStoryViewer,
+    openChatLanguageModal, openThread, openStoryViewer, searchChatMediaMessages,
   } = getActions();
 
   const {
-    id: messageId, forwardInfo, groupedId,
+    id: messageId, forwardInfo, groupedId, content: { paidMedia },
   } = message;
 
   const {
@@ -98,21 +118,48 @@ export default function useInnerHandlers(
     openMediaViewer({
       chatId,
       threadId,
-      mediaId: messageId,
+      messageId,
       origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
     });
+  });
+  const openMediaViewerWithPhotoOrVideo = useLastCallback((withDynamicLoading: boolean): void => {
+    if (paidMedia && !paidMedia.isBought) return;
+    if (withDynamicLoading) {
+      searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
+    }
+    openMediaViewer({
+      chatId,
+      threadId,
+      messageId,
+      origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
+      withDynamicLoading,
+    });
+  });
+  const handlePhotoMediaClick = useLastCallback((): void => {
+    const withDynamicLoading = !isScheduled && !paidMedia;
+    openMediaViewerWithPhotoOrVideo(withDynamicLoading);
+  });
+  const handleVideoMediaClick = useLastCallback(() => {
+    const isGif = message.content?.video?.isGif;
+    const withDynamicLoading = !isGif && !isScheduled && !paidMedia;
+    openMediaViewerWithPhotoOrVideo(withDynamicLoading);
   });
 
   const handleAudioPlay = useLastCallback((): void => {
     openAudioPlayer({ chatId, messageId });
   });
 
-  const handleAlbumMediaClick = useLastCallback((albumMessageId: number): void => {
+  const handleAlbumMediaClick = useLastCallback((albumMessageId: number, albumIndex?: number): void => {
+    if (paidMedia && !paidMedia.isBought) return;
+
+    searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
     openMediaViewer({
       chatId,
       threadId,
-      mediaId: albumMessageId,
+      messageId: albumMessageId,
+      mediaIndex: albumIndex,
       origin: isScheduled ? MediaViewerOrigin.ScheduledAlbum : MediaViewerOrigin.Album,
+      withDynamicLoading: !paidMedia,
     });
   });
 
@@ -148,9 +195,11 @@ export default function useInnerHandlers(
   });
 
   const handleFocusForwarded = useLastCallback(() => {
+    const originalChatId = (isSavedMessages && forwardInfo!.savedFromPeerId) || forwardInfo!.fromChatId!;
+
     if (isInDocumentGroup) {
       focusMessage({
-        chatId: forwardInfo!.fromChatId!, groupedId, groupedChatId: chatId, messageId: forwardInfo!.fromMessageId!,
+        chatId: originalChatId, groupedId, groupedChatId: chatId, messageId: forwardInfo!.fromMessageId!,
       });
       return;
     }
@@ -163,7 +212,7 @@ export default function useInnerHandlers(
       });
     } else {
       focusMessage({
-        chatId: forwardInfo!.fromChatId!, messageId: forwardInfo!.fromMessageId!,
+        chatId: originalChatId, messageId: forwardInfo!.fromMessageId!,
       });
     }
   });
@@ -213,6 +262,8 @@ export default function useInnerHandlers(
     handleMediaClick,
     handleAudioPlay,
     handleAlbumMediaClick,
+    handlePhotoMediaClick,
+    handleVideoMediaClick,
     handleMetaClick: selectWithGroupedId,
     handleTranslationClick,
     handleOpenThread,

@@ -1,7 +1,12 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useRef, useState,
+  getIsHeavyAnimating,
+  memo,
+  useEffect,
+  useRef,
+  useState,
+  useUnmountCleanup,
 } from '../../lib/teact/teact';
 
 import type RLottieInstance from '../../lib/rlottie/RLottie';
@@ -16,7 +21,8 @@ import { IS_ELECTRON } from '../../util/windowEnvironment';
 
 import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
+import useFlag from '../../hooks/useFlag';
+import useHeavyAnimation from '../../hooks/useHeavyAnimation';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
 import useSharedIntersectionObserver from '../../hooks/useSharedIntersectionObserver';
@@ -96,6 +102,16 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   const rgbColor = useRef<[number, number, number] | undefined>();
 
+  const shouldForceOnHeavyAnimation = forceAlways || forceOnHeavyAnimation;
+  // Delay initialization until heavy animation ends
+  const [
+    canInitialize, markCanInitialize, unmarkCanInitialize,
+  ] = useFlag(!getIsHeavyAnimating() || shouldForceOnHeavyAnimation);
+  useHeavyAnimation(unmarkCanInitialize, markCanInitialize, shouldForceOnHeavyAnimation);
+  useEffect(() => {
+    if (shouldForceOnHeavyAnimation) markCanInitialize();
+  }, [shouldForceOnHeavyAnimation]);
+
   useSyncEffect(() => {
     if (color && !shouldUseColorFilter) {
       const { r, g, b } = hexToRgb(color);
@@ -106,11 +122,9 @@ const AnimatedSticker: FC<OwnProps> = ({
   }, [color, shouldUseColorFilter]);
 
   const isUnmountedRef = useRef(false);
-  useEffect(() => {
-    return () => {
-      isUnmountedRef.current = true;
-    };
-  }, []);
+  useUnmountCleanup(() => {
+    isUnmountedRef.current = true;
+  });
 
   const init = useLastCallback(() => {
     if (
@@ -118,6 +132,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       || isUnmountedRef.current
       || !tgsUrl
       || (sharedCanvas && (!sharedCanvasCoords || !sharedCanvas.offsetWidth || !sharedCanvas.offsetHeight))
+      || (getIsHeavyAnimating() && !shouldForceOnHeavyAnimation)
     ) {
       return;
     }
@@ -154,12 +169,13 @@ const AnimatedSticker: FC<OwnProps> = ({
   });
 
   useEffect(() => {
+    if (!canInitialize) return;
     if (getRLottie()) {
       init();
     } else {
       ensureRLottie().then(init);
     }
-  }, [init, tgsUrl, sharedCanvas, sharedCanvasCoords]);
+  }, [init, tgsUrl, sharedCanvas, sharedCanvasCoords, canInitialize]);
 
   const throttledInit = useThrottledCallback(init, [init], THROTTLE_MS);
   useSharedIntersectionObserver(sharedCanvas, throttledInit);
@@ -170,11 +186,9 @@ const AnimatedSticker: FC<OwnProps> = ({
     animation.setColor(rgbColor.current);
   }, [color, animation]);
 
-  useEffect(() => {
-    return () => {
-      animationRef.current?.removeView(viewId);
-    };
-  }, [viewId]);
+  useUnmountCleanup(() => {
+    animationRef.current?.removeView(viewId);
+  });
 
   const playAnimation = useLastCallback((shouldRestart = false) => {
     if (
@@ -239,7 +253,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [playAnimation, animation, tgsUrl]);
 
-  useHeavyAnimationCheck(pauseAnimation, playAnimation, !playKey || forceAlways || forceOnHeavyAnimation);
+  useHeavyAnimation(pauseAnimation, playAnimation, !playKey || shouldForceOnHeavyAnimation);
   usePriorityPlaybackCheck(pauseAnimation, playAnimation, !playKey || forceAlways);
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,
@@ -269,5 +283,5 @@ export default memo(AnimatedSticker);
 
 function isFrozen(forceAlways = false, forceOnHeavyAnimation = false) {
   if (forceAlways) return false;
-  return (!forceOnHeavyAnimation && isHeavyAnimating()) || isPriorityPlaybackActive() || isBackgroundModeActive();
+  return (!forceOnHeavyAnimation && getIsHeavyAnimating()) || isPriorityPlaybackActive() || isBackgroundModeActive();
 }

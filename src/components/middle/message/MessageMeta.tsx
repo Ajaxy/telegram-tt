@@ -7,14 +7,15 @@ import type {
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/date/dateFormat';
+import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/dates/dateFormat';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
+import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
+import Icon from '../../common/icons/Icon';
 import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
 
 import './MessageMeta.scss';
@@ -30,8 +31,10 @@ type OwnProps = {
   isTranslated?: boolean;
   isPinned?: boolean;
   withFullDate?: boolean;
+  effectEmoji?: string;
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   onTranslationClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onEffectClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   renderQuickReactionButton?: () => TeactNode | undefined;
   onOpenThread: NoneToVoidFunction;
 };
@@ -47,12 +50,14 @@ const MessageMeta: FC<OwnProps> = ({
   isTranslated,
   isPinned,
   withFullDate,
+  effectEmoji,
   onClick,
   onTranslationClick,
+  onEffectClick,
   onOpenThread,
 }) => {
   const { showNotification } = getActions();
-  const lang = useLang();
+  const lang = useOldLang();
   const [isActivated, markActivated] = useFlag();
 
   function handleImportedClick(e: React.MouseEvent) {
@@ -118,15 +123,20 @@ const MessageMeta: FC<OwnProps> = ({
       onClick={onClick}
       data-ignore-on-paste
     >
+      {effectEmoji && (
+        <span className="message-effect-icon" onClick={onEffectClick}>
+          {renderText(effectEmoji)}
+        </span>
+      )}
       {isTranslated && (
-        <i className="icon icon-language message-translated" onClick={onTranslationClick} />
+        <Icon name="language" className="message-translated" onClick={onTranslationClick} />
       )}
       {Boolean(message.viewsCount) && (
         <>
           <span className="message-views">
             {formatIntegerCompact(message.viewsCount!)}
           </span>
-          <i className="icon icon-channelviews" />
+          <Icon name="channelviews" />
         </>
       )}
       {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
@@ -134,11 +144,11 @@ const MessageMeta: FC<OwnProps> = ({
           <span className="message-replies">
             <AnimatedCounter text={formatIntegerCompact(repliesThreadInfo!.messagesCount!)} />
           </span>
-          <i className="icon icon-reply-filled" />
+          <Icon name="reply-filled" />
         </span>
       )}
       {isPinned && (
-        <i className="icon icon-pinned-message message-pinned" />
+        <Icon name="pinned-message" className="message-pinned" />
       )}
       {signature && (
         <span className="message-signature">{renderText(signature)}</span>
@@ -153,6 +163,7 @@ const MessageMeta: FC<OwnProps> = ({
           </>
         )}
         {message.isEdited && `${lang('EditedMessage')} `}
+        {message.isVideoProcessingPending && `${lang('lng_approximate')} `}
         {date}
       </span>
       {outgoingStatus && (

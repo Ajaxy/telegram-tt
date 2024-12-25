@@ -11,7 +11,7 @@ import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 
 import useAppLayout from '../../../../hooks/useAppLayout';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useLang from '../../../../hooks/useLang';
+import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import InputText from '../../../ui/InputText';
@@ -58,7 +58,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
     }
   }, [focusDelayTimeoutMs]);
 
-  const lang = useLang();
+  const lang = useOldLang();
 
   useHistoryBack({
     isActive,
