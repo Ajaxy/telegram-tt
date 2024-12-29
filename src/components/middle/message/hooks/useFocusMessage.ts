@@ -14,17 +14,27 @@ const BOTTOM_FOCUS_OFFSET = 500;
 const RELOCATED_FOCUS_OFFSET = SCROLL_MAX_DISTANCE;
 const FOCUS_MARGIN = 20;
 
-export default function useFocusMessage(
-  elementRef: { current: HTMLDivElement | null },
-  chatId: string,
-  isFocused?: boolean,
-  focusDirection?: FocusDirection,
-  noFocusHighlight?: boolean,
-  isResizingContainer?: boolean,
-  isJustAdded?: boolean,
-  isQuote?: boolean,
-  scrollTargetPosition?: ScrollTargetPosition,
-) {
+export default function useFocusMessage({
+  elementRef,
+  chatId,
+  isFocused,
+  focusDirection,
+  noFocusHighlight,
+  isResizingContainer,
+  isJustAdded,
+  isQuote,
+  scrollTargetPosition,
+}: {
+  elementRef: { current: HTMLDivElement | null };
+  chatId: string;
+  isFocused?: boolean;
+  focusDirection?: FocusDirection;
+  noFocusHighlight?: boolean;
+  isResizingContainer?: boolean;
+  isJustAdded?: boolean;
+  isQuote?: boolean;
+  scrollTargetPosition?: ScrollTargetPosition;
+}) {
   const isRelocatedRef = useRef(!isJustAdded);
 
   useLayoutEffect(() => {

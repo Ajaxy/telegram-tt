@@ -136,7 +136,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     message.replyInfo?.type === 'message' ? message.replyInfo.replyToMsgId : undefined,
     targetMessage,
   );
-  useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight, isJustAdded);
+  useFocusMessage({
+    elementRef: ref,
+    chatId: message.chatId,
+    isFocused,
+    focusDirection,
+    noFocusHighlight,
+    isJustAdded,
+  });
 
   useUnmountCleanup(() => {
     if (message.isPinned) {

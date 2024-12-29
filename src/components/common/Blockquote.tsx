@@ -40,12 +40,16 @@ const Blockquote = ({ canBeCollapsible, isToggleDisabled, children }: OwnProps) 
   });
 
   return (
-    <span className={styles.root} onClick={canExpand ? handleExpand : undefined}>
+    <span
+      className={buildClassName(styles.root, isCollapsed && styles.collapsed)}
+      onClick={canExpand ? handleExpand : undefined}
+    >
       <blockquote
+        className={styles.blockquote}
         ref={ref}
         data-entity-type={ApiMessageEntityTypes.Blockquote}
       >
-        <div className={buildClassName(styles.gradientContainer, isCollapsed && styles.collapsed)}>
+        <div className={styles.gradientContainer}>
           {children}
         </div>
         {isCollapsible && (

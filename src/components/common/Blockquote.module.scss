@@ -5,14 +5,18 @@
   width: 100%;
 }
 
-.collapsed {
-  @include mixins.gradient-border-bottom(1rem);
+.collapsed .blockquote {
+  max-height: 4lh;
 }
 
 .gradientContainer {
   margin-top: 0.125rem;
   margin-bottom: 0.125rem;
   max-height: inherit;
+
+  .collapsed & {
+    @include mixins.gradient-border-bottom(1rem);
+  }
 }
 
 .collapseIcon {

@@ -832,17 +832,17 @@ const Message: FC<OwnProps & StateProps> = ({
     replyStory,
   );
 
-  useFocusMessage(
-    ref,
+  useFocusMessage({
+    elementRef: ref,
     chatId,
     isFocused,
     focusDirection,
     noFocusHighlight,
     isResizingContainer,
     isJustAdded,
-    Boolean(focusedQuote),
+    isQuote: Boolean(focusedQuote),
     scrollTargetPosition,
-  );
+  });
 
   const viaBusinessBotTitle = viaBusinessBot ? getPeerTitle(lang, viaBusinessBot) : undefined;
 
