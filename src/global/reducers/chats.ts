@@ -374,10 +374,6 @@ export function updateChatListSecondaryInfo<T extends GlobalState>(
         ...global.chats.totalCount,
         [totalCountKey]: info.totalChatCount,
       },
-      isFullyLoaded: {
-        ...global.chats.isFullyLoaded,
-        [type]: false,
-      },
     },
   };
 }
