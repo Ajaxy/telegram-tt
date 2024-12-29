@@ -44,6 +44,7 @@ import {
 import {
   selectActiveDownloads,
   selectAllowedMessageActionsSlow,
+  selectCanForwardMessage,
   selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
   selectCanTranslateMessage,
@@ -732,7 +733,6 @@ export default memo(withGlobal<OwnProps>(
       canDelete,
       canReport,
       canEdit,
-      canForward,
       canFaveSticker,
       canUnfaveSticker,
       canCopy,
@@ -743,6 +743,7 @@ export default memo(withGlobal<OwnProps>(
       canRevote,
       canClosePoll,
     } = (threadId && selectAllowedMessageActionsSlow(global, message, threadId)) || {};
+    const canForward = selectCanForwardMessage(global, message);
 
     const userStatus = isPrivate ? selectUserStatus(global, chat.id) : undefined;
     const isOwn = isOwnMessage(message);

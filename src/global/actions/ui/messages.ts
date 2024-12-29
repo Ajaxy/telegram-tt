@@ -50,8 +50,10 @@ import {
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectAllowedMessageActionsSlow,
+  selectCanForwardMessage,
   selectChat,
   selectChatLastMessageId,
+  selectChatMessage,
   selectChatMessages,
   selectChatScheduledMessages,
   selectCurrentChat,
@@ -610,7 +612,16 @@ addActionHandler('openForwardMenuForSelectedMessages', (global, actions, payload
 
   const { chatId: fromChatId, messageIds } = tabState.selectedMessages;
 
-  actions.openForwardMenu({ fromChatId, messageIds, tabId });
+  const forwardableMessageIds = messageIds.filter((id) => {
+    const message = selectChatMessage(global, fromChatId, id);
+    return message && selectCanForwardMessage(global, message);
+  });
+
+  if (!forwardableMessageIds.length) {
+    return;
+  }
+
+  actions.openForwardMenu({ fromChatId, messageIds: forwardableMessageIds, tabId });
 });
 
 addActionHandler('cancelMediaDownload', (global, actions, payload): ActionReturnType => {

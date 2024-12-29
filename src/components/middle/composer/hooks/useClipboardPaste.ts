@@ -16,8 +16,6 @@ import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferIt
 
 import useOldLang from '../../../../hooks/useOldLang';
 
-const MAX_MESSAGE_LENGTH = 4096;
-
 const TYPE_HTML = 'text/html';
 const DOCUMENT_TYPE_WORD = 'urn:schemas-microsoft-com:office:word';
 const NAMESPACE_PREFIX_WORD = 'xmlns:w';
@@ -49,7 +47,7 @@ const useClipboardPaste = (
         return;
       }
 
-      const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
+      const pastedText = e.clipboardData.getData('text');
       const html = e.clipboardData.getData('text/html');
 
       let pastedFormattedText = html ? parseHtmlAsFormattedText(

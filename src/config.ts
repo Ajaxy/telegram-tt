@@ -364,7 +364,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   dialogFiltersChats: [100, 200],
   dialogFilters: [10, 20],
   dialogFolderPinned: [5, 10],
-  captionLength: [1024, 2048],
+  captionLength: [1024, 4096],
   channels: [500, 1000],
   channelsPublic: [10, 20],
   aboutLength: [70, 140],
@@ -373,6 +373,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   recommendedChannels: [10, 100],
   savedDialogsPinned: [5, 100],
 };
+export const DEFAULT_MAX_MESSAGE_LENGTH = 4096;
 
 export const ONE_TIME_MEDIA_TTL_SECONDS = 2147483647;
 

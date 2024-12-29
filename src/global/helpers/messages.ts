@@ -408,3 +408,34 @@ export function getMessageLink(peer: ApiPeer, topicId?: ThreadId, messageId?: nu
   const messagePart = messageId ? `/${messageId}` : '';
   return `${TME_LINK_PREFIX}${chatPart}${topicPart}${messagePart}`;
 }
+
+export function splitMessagesForForwarding(messages: ApiMessage[], limit: number): ApiMessage[][] {
+  const result: ApiMessage[][] = [];
+  let currentArr: ApiMessage[] = [];
+
+  // Group messages by `groupedId`
+  messages.reduce<ApiMessage[][]>((acc, message) => {
+    const lastGroup = acc[acc.length - 1];
+    if (message.groupedId && lastGroup?.[0]?.groupedId === message.groupedId) {
+      lastGroup.push(message);
+      return acc;
+    }
+
+    acc.push([message]);
+    return acc;
+  }, []).forEach((batch) => {
+    // Fit them into `limit` size
+    if (currentArr.length + batch.length > limit) {
+      result.push(currentArr);
+      currentArr = [];
+    }
+
+    currentArr.push(...batch);
+  });
+
+  if (currentArr.length) {
+    result.push(currentArr);
+  }
+
+  return result;
+}

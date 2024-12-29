@@ -1963,7 +1963,10 @@ function handleMultipleLocalMessagesUpdate(
     return true;
   });
 
-  handleGramJsUpdate(otherUpdates);
+  // Illegal monkey patching. Easier than creating mock update object
+  update.updates = otherUpdates;
+
+  handleGramJsUpdate(update);
 }
 
 function handleLocalMessageUpdate(

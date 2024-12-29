@@ -249,6 +249,9 @@ export interface ApiConfig {
   maxGroupSize: number;
   autologinToken?: string;
   isTestServer?: boolean;
+  maxMessageLength: number;
+  editTimeLimit: number;
+  maxForwardedCount: number;
 }
 
 export type ApiPeerColorSet = string[];

@@ -228,14 +228,21 @@ export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlA
 }
 
 export function buildApiConfig(config: GramJs.Config): ApiConfig {
-  const defaultReaction = config.reactionsDefault && buildApiReaction(config.reactionsDefault);
+  const {
+    testMode, expires, gifSearchUsername, chatSizeMax, autologinToken, reactionsDefault,
+    messageLengthMax, editTimeLimit, forwardedCountMax,
+  } = config;
+  const defaultReaction = reactionsDefault && buildApiReaction(reactionsDefault);
   return {
-    isTestServer: config.testMode,
-    expiresAt: config.expires,
-    gifSearchUsername: config.gifSearchUsername,
+    isTestServer: testMode,
+    expiresAt: expires,
+    gifSearchUsername,
     defaultReaction,
-    maxGroupSize: config.chatSizeMax,
-    autologinToken: config.autologinToken,
+    maxGroupSize: chatSizeMax,
+    autologinToken,
+    maxMessageLength: messageLengthMax,
+    editTimeLimit,
+    maxForwardedCount: forwardedCountMax,
   };
 }
 

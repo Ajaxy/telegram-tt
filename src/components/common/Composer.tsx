@@ -44,6 +44,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   BASE_EMOJI_KEYWORD_LANG,
+  DEFAULT_MAX_MESSAGE_LENGTH,
   EDITABLE_INPUT_MODAL_ID,
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
@@ -270,6 +271,7 @@ type StateProps =
     areEffectsSupported?: boolean;
     canPlayEffect?: boolean;
     shouldPlayEffect?: boolean;
+    maxMessageLength: number;
   };
 
 enum MainButtonState {
@@ -291,7 +293,6 @@ const SCREEN_WIDTH_TO_HIDE_PLACEHOLDER = 600; // px
 
 const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;
 const SELECT_MODE_TRANSITION_MS = 200;
-const MESSAGE_MAX_LENGTH = 4096;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
 
@@ -384,6 +385,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   areEffectsSupported,
   canPlayEffect,
   shouldPlayEffect,
+  maxMessageLength,
 }) => {
   const {
     sendMessage,
@@ -871,7 +873,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const validateTextLength = useLastCallback((text: string, isAttachmentModal?: boolean) => {
-    const maxLength = isAttachmentModal ? captionLimit : MESSAGE_MAX_LENGTH;
+    const maxLength = isAttachmentModal ? captionLimit : maxMessageLength;
     if (text?.length > maxLength) {
       const extraLength = text.length - maxLength;
       showDialog({
@@ -2145,6 +2147,8 @@ export default memo(withGlobal<OwnProps>(
     const effect = effectId ? global.availableEffectById[effectId] : undefined;
     const effectReactions = global.reactions.effectReactions;
 
+    const maxMessageLength = global.config?.maxMessageLength || DEFAULT_MAX_MESSAGE_LENGTH;
+
     return {
       availableReactions: global.reactions.availableReactions,
       topReactions: type === 'story' ? global.reactions.topReactions : undefined,
@@ -2220,6 +2224,7 @@ export default memo(withGlobal<OwnProps>(
       areEffectsSupported,
       canPlayEffect,
       shouldPlayEffect,
+      maxMessageLength,
     };
   },
 )(Composer));
