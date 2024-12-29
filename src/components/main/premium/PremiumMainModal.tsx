@@ -246,23 +246,6 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     });
   });
 
-  const stickerSetTitle = useMemo(() => {
-    if (!fromUserStatusSet || !fromUser) return undefined;
-
-    const template = lang('lng_premium_emoji_status_title').replace('{user}', getUserFullName(fromUser)!);
-    const [first, second] = template.split('{link}');
-
-    const emoji = fromUserStatusSet.thumbCustomEmojiId ? (
-      <CustomEmoji className={styles.stickerSetLinkIcon} documentId={fromUserStatusSet.thumbCustomEmojiId} />
-    ) : undefined;
-    const link = (
-      <span className={styles.stickerSetLink} onClick={handleOpenStatusSet}>
-        {emoji}{renderText(fromUserStatusSet.title)}
-      </span>
-    );
-    return [renderText(first), link, renderText(second)];
-  }, [fromUser, fromUserStatusSet, lang]);
-
   const fullMonthlyAmount = useMemo(() => {
     const monthOption = promo?.options.find((option) => option.months === 1);
     if (!monthOption) {
@@ -288,14 +271,35 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
   function getHeaderText() {
     if (isGift) {
-      return fromUser?.id === currentUserId
-        ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle', [getUserFullName(toUser), monthsAmount])
-        : lang('TelegramPremiumUserGiftedPremiumDialogTitle', [getUserFullName(fromUser), monthsAmount]);
+      return renderText(
+        fromUser?.id === currentUserId
+          ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle', [getUserFullName(toUser), monthsAmount])
+          : lang('TelegramPremiumUserGiftedPremiumDialogTitle', [getUserFullName(fromUser), monthsAmount]),
+        ['simple_markdown', 'emoji'],
+      );
     }
 
-    return fromUser
-      ? lang('TelegramPremiumUserDialogTitle', getUserFullName(fromUser))
-      : lang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium');
+    if (fromUserStatusSet && fromUser) {
+      const template = lang('lng_premium_emoji_status_title').replace('{user}', getUserFullName(fromUser)!);
+      const [first, second] = template.split('{link}');
+
+      const emoji = fromUserStatusSet.thumbCustomEmojiId ? (
+        <CustomEmoji className={styles.stickerSetLinkIcon} documentId={fromUserStatusSet.thumbCustomEmojiId} />
+      ) : undefined;
+      const link = (
+        <span className={styles.stickerSetLink} onClick={handleOpenStatusSet}>
+          {emoji}{renderText(fromUserStatusSet.title)}
+        </span>
+      );
+      return [renderText(first), link, renderText(second)];
+    }
+
+    return renderText(
+      fromUser
+        ? lang('TelegramPremiumUserDialogTitle', getUserFullName(fromUser))
+        : lang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium'),
+      ['simple_markdown', 'emoji'],
+    );
   }
 
   function getHeaderDescription() {
@@ -368,7 +372,9 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             >
               <i className="icon icon-close" />
             </Button>
-            {fromUserStatusEmoji ? (
+            {isGift ? (
+              <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
+            ) : fromUserStatusEmoji ? (
               <CustomEmoji
                 className={styles.statusEmoji}
                 onClick={handleOpenStatusSet}
@@ -376,11 +382,9 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                 isBig
                 size={STATUS_EMOJI_SIZE}
               />
-            ) : (
-              <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
-            )}
+            ) : undefined}
             <h2 className={buildClassName(styles.headerText, fromUserStatusSet && styles.stickerSetText)}>
-              {fromUserStatusSet ? stickerSetTitle : renderText(getHeaderText(), ['simple_markdown', 'emoji'])}
+              {getHeaderText()}
             </h2>
             <div className={styles.description}>
               {renderText(getHeaderDescription(), ['simple_markdown', 'emoji'])}
