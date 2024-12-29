@@ -117,8 +117,6 @@
     }
 
     .label {
-      display: flex;
-      align-items: center;
       word-break: break-word;
       unicode-bidi: plaintext;
       text-align: left;
@@ -167,6 +165,8 @@
     }
 
     .label {
+      display: flex;
+      align-items: center;
       column-gap: 0.6875rem;
     }
   }
