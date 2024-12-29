@@ -25,6 +25,11 @@ export default function setTooltipItemVisible(selector: string, index: number, c
   if (!visibleIndexes.includes(index)
     || (index === first && !isFullyVisible(container, allElements[first]))) {
     const position = index > visibleIndexes[visibleIndexes.length - 1] ? 'start' : 'end';
-    animateScroll(container, allElements[index], position, SCROLL_MARGIN);
+    animateScroll({
+      container,
+      element: allElements[index],
+      position,
+      margin: SCROLL_MARGIN,
+    });
   }
 }

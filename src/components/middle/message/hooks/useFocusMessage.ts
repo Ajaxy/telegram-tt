@@ -48,17 +48,19 @@ export default function useFocusMessage({
       const scrollPosition = scrollTargetPosition || isToBottom ? 'end' : 'centerOrTop';
 
       const exec = () => {
-        const result = animateScroll(
-          messagesContainer,
-          elementRef.current!,
-          scrollPosition,
-          FOCUS_MARGIN,
-          focusDirection !== undefined ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined,
-          focusDirection,
-          undefined,
-          isResizingContainer,
-          true,
-        );
+        const maxDistance = focusDirection !== undefined
+          ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined;
+
+        const result = animateScroll({
+          container: messagesContainer,
+          element: elementRef.current!,
+          position: scrollPosition,
+          margin: FOCUS_MARGIN,
+          maxDistance,
+          forceDirection: focusDirection,
+          forceNormalContainerHeight: isResizingContainer,
+          shouldReturnMutationFn: true,
+        });
 
         if (isQuote) {
           const firstQuote = elementRef.current!.querySelector<HTMLSpanElement>('.is-quote');

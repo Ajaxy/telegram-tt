@@ -31,6 +31,7 @@ import useScrollHooks from './hooks/useScrollHooks';
 
 import ActionMessage from './ActionMessage';
 import Message from './message/Message';
+import SenderGroupContainer from './message/SenderGroupContainer';
 import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
@@ -142,12 +143,10 @@ const MessageListContent: FC<OwnProps> = ({
     messageIds && prevMessageIds && messageIds[messageIds.length - 2] === prevMessageIds[prevMessageIds.length - 1],
   );
 
-  const dateGroups = messageGroups.map((
-    dateGroup: MessageDateGroup,
-    dateGroupIndex: number,
-    dateGroupsArray: MessageDateGroup[],
-  ) => {
-    const senderGroups = dateGroup.senderGroups.map((
+  function calculateSenderGroups(
+    dateGroup: MessageDateGroup, dateGroupIndex: number, dateGroupsArray: MessageDateGroup[],
+  ) {
+    return dateGroup.senderGroups.map((
       senderGroup,
       senderGroupIndex,
       senderGroupsArray,
@@ -186,7 +185,7 @@ const MessageListContent: FC<OwnProps> = ({
 
       let currentDocumentGroupId: string | undefined;
 
-      return senderGroup.map((
+      const senderGroupElements = senderGroup.map((
         messageOrAlbum,
         messageIndex,
       ) => {
@@ -260,7 +259,44 @@ const MessageListContent: FC<OwnProps> = ({
           ),
         ]);
       }).flat();
+
+      if (!withUsers) return senderGroupElements;
+
+      const lastMessageOrAlbum = senderGroup[senderGroup.length - 1];
+      const lastMessage = isAlbum(lastMessageOrAlbum) ? lastMessageOrAlbum.mainMessage : lastMessageOrAlbum;
+      const lastMessageId = getMessageOriginalId(lastMessage);
+
+      const isTopicTopMessage = lastMessage.id === threadId;
+      const isOwn = isOwnMessage(lastMessage);
+
+      const firstMessageOrAlbum = senderGroup[0];
+      const firstMessage = isAlbum(firstMessageOrAlbum) ? firstMessageOrAlbum.mainMessage : firstMessageOrAlbum;
+      const firstMessageId = getMessageOriginalId(firstMessage);
+
+      const key = `${firstMessageId}-${lastMessageId}`;
+      const id = (firstMessageId === lastMessageId) ? `message-group-${firstMessageId}`
+        : `message-group-${firstMessageId}-${lastMessageId}`;
+
+      const withAvatar = withUsers && !isOwn && (!isTopicTopMessage || !isComments);
+      return (
+        <SenderGroupContainer
+          key={key}
+          id={id}
+          message={lastMessage}
+          withAvatar={withAvatar}
+        >
+          {senderGroupElements}
+        </SenderGroupContainer>
+      );
     });
+  }
+
+  const dateGroups = messageGroups.map((
+    dateGroup: MessageDateGroup,
+    dateGroupIndex: number,
+    dateGroupsArray: MessageDateGroup[],
+  ) => {
+    const senderGroups = calculateSenderGroups(dateGroup, dateGroupIndex, dateGroupsArray);
 
     return (
       <div

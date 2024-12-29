@@ -555,16 +555,13 @@ const MessageList: FC<OwnProps & StateProps> = ({
         // Break out of `forceLayout`
         requestMeasure(() => {
           const shouldScrollToBottom = !isBackgroundModeActive() || !firstUnreadElement;
-
-          animateScroll(
+          animateScroll({
             container,
-            shouldScrollToBottom ? lastItemElement! : firstUnreadElement!,
-            shouldScrollToBottom ? 'end' : 'start',
-            BOTTOM_FOCUS_MARGIN,
-            undefined,
-            undefined,
-            noMessageSendingAnimation ? 0 : undefined,
-          );
+            element: shouldScrollToBottom ? lastItemElement! : firstUnreadElement!,
+            position: shouldScrollToBottom ? 'end' : 'start',
+            margin: BOTTOM_FOCUS_MARGIN,
+            forceDuration: noMessageSendingAnimation ? 0 : undefined,
+          });
         });
       }
 

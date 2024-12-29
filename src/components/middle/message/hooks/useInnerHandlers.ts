@@ -23,7 +23,6 @@ export default function useInnerHandlers({
   asForwarded,
   isScheduled,
   album,
-  avatarPeer,
   senderPeer,
   botSender,
   messageTopic,
@@ -65,14 +64,6 @@ export default function useInnerHandlers({
   const {
     replyToMsgId, replyToPeerId, replyToTopId, isQuote, quoteText,
   } = getMessageReplyInfo(message) || {};
-
-  const handleAvatarClick = useLastCallback(() => {
-    if (!avatarPeer) {
-      return;
-    }
-
-    openChat({ id: avatarPeer.id });
-  });
 
   const handleSenderClick = useLastCallback(() => {
     if (!senderPeer) {
@@ -255,7 +246,6 @@ export default function useInnerHandlers({
   });
 
   return {
-    handleAvatarClick,
     handleSenderClick,
     handleViaBotClick,
     handleReplyClick,

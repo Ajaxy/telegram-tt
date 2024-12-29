@@ -97,7 +97,12 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
         return;
       }
 
-      animateScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
+      animateScroll({
+        container: messagesContainer,
+        element: lastMessageElement,
+        position: 'end',
+        margin: FOCUS_MARGIN,
+      });
     }
   });
 

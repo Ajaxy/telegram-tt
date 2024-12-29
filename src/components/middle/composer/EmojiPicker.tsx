@@ -174,7 +174,13 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     setActiveCategoryIndex(index);
     const categoryEl = containerRef.current!.closest<HTMLElement>('.SymbolMenu-main')!
       .querySelector(`#emoji-category-${index}`)! as HTMLElement;
-    animateScroll(containerRef.current!, categoryEl, 'start', FOCUS_MARGIN, SMOOTH_SCROLL_DISTANCE);
+    animateScroll({
+      container: containerRef.current!,
+      element: categoryEl,
+      position: 'start',
+      margin: FOCUS_MARGIN,
+      maxDistance: SMOOTH_SCROLL_DISTANCE,
+    });
   });
 
   const handleEmojiSelect = useLastCallback((emoji: string, name: string) => {

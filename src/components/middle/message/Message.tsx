@@ -618,7 +618,6 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const {
-    handleAvatarClick,
     handleSenderClick,
     handleViaBotClick,
     handleReplyClick,
@@ -973,19 +972,6 @@ const Message: FC<OwnProps & StateProps> = ({
   const {
     contentWidth, noMediaCorners, style, reactionsMaxWidth,
   } = sizeCalculations;
-
-  function renderAvatar() {
-    const hiddenName = (!avatarPeer && forwardInfo) ? forwardInfo.hiddenUserName : undefined;
-
-    return (
-      <Avatar
-        size="small"
-        peer={avatarPeer}
-        text={hiddenName}
-        onClick={avatarPeer ? handleAvatarClick : undefined}
-      />
-    );
-  }
 
   function renderMessageText(isForAnimation?: boolean) {
     if (!textMessage) return undefined;
@@ -1629,7 +1615,6 @@ const Message: FC<OwnProps & StateProps> = ({
           )}
         </div>
       )}
-      {withAvatar && renderAvatar()}
       <div
         className={buildClassName('message-content-wrapper',
           contentClassName.includes('text') && 'can-select-text',
