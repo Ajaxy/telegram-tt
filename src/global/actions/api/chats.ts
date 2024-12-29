@@ -49,7 +49,6 @@ import {
   isChatChannel,
   isChatSuperGroup,
   isUserBot,
-  toChannelId,
 } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
@@ -1280,12 +1279,10 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
     openStickerSet,
     openChatWithDraft,
     joinVoiceChatByLink,
-    focusMessage,
     openInvoice,
     checkChatlistInvite,
     openChatByUsername: openChatByUsernameAction,
     openStoryViewerByUsername,
-    processBoostParameters,
     checkGiftCode,
   } = actions;
 
@@ -1317,7 +1314,6 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
   }
 
   const storyId = part2 === 's' && (Number(part3) || undefined);
-  const hasBoost = params.hasOwnProperty('boost');
 
   if (part1.match(/^\+([0-9]+)(\?|$)/)) {
     openChatByPhoneNumber({
@@ -1392,30 +1388,6 @@ addActionHandler('openTelegramLink', async (global, actions, payload): Promise<v
       inviteHash: params.voicechat || params.livestream,
       tabId,
     });
-  } else if (part1 === 'boost') {
-    const username = part2;
-    const id = params.c;
-
-    const isPrivate = !username && Boolean(id);
-
-    processBoostParameters({
-      usernameOrId: username || id,
-      isPrivate,
-      tabId,
-    });
-  } else if (hasBoost) {
-    const isPrivate = part1 === 'c' && Boolean(chatOrChannelPostId);
-    processBoostParameters({
-      usernameOrId: chatOrChannelPostId || part1,
-      isPrivate,
-      tabId,
-    });
-  } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
-    focusMessage({
-      chatId: toChannelId(chatOrChannelPostId),
-      messageId,
-      tabId,
-    });
   } else if (part1.startsWith('$')) {
     openInvoice({
       type: 'slug',
@@ -1455,16 +1427,15 @@ addActionHandler('processBoostParameters', async (global, actions, payload): Pro
   let chat: ApiChat | undefined;
 
   if (isPrivate) {
-    const chatId = toChannelId(usernameOrId);
-    chat = selectChat(global, chatId);
+    chat = selectChat(global, usernameOrId);
     if (!chat) {
-      actions.showNotification({ message: 'Chat does not exist', tabId });
+      actions.showNotification({ message: { key: 'PrivateChannelInaccessible' }, tabId });
       return;
     }
   } else {
     chat = await fetchChatByUsername(global, usernameOrId);
     if (!chat) {
-      actions.showNotification({ message: 'User does not exist', tabId });
+      actions.showNotification({ message: { key: 'NoUsernameFound' }, tabId });
       return;
     }
   }

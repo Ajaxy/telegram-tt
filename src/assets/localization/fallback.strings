@@ -987,7 +987,8 @@
 "StickerPackErrorNotFound" = "Sorry, this sticker set doesn't seem to exist.";
 "ContactsPhoneNumberNotRegistred" = "The person with this phone number is not registered on Telegram yet.";
 "VoipPeerIncompatible" = "**{user}**'s app is using an incompatible protocol. They need to update their app before you can call them.";
-"NoUsernameFound" = "Username not found.";
+"NoUsernameFound" = "Username not found";
+"PrivateChannelInaccessible" = "Unfortunately, you can't access this chat. You need to be a member to do that.";
 "HiddenName" = "Deleted Account";
 "ChannelPersmissionDeniedSendMessagesForever" = "The admins of this group have restricted your ability to send messages.";
 "ChannelPersmissionDeniedSendMessagesDefaultRestrictedText" = "Sending messages is not allowed in this group.";

@@ -2330,6 +2330,9 @@ export interface ActionPayloads {
     noForumTopicPanel?: boolean;
     isComments?: boolean;
   } & WithTabId;
+  openPrivateChannel: {
+    id: string;
+  } & WithTabId;
   loadFullChat: {
     chatId: string;
     withPhotos?: boolean;

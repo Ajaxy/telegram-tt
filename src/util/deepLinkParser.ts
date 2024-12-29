@@ -1,6 +1,7 @@
 import type { ThreadId } from '../types';
 
 import { RE_TG_LINK, RE_TME_LINK } from '../config';
+import { toChannelId } from '../global/helpers';
 import { ensureProtocol } from './ensureProtocol';
 import { isUsernameValid } from './username';
 
@@ -16,7 +17,6 @@ interface PublicMessageLink {
   threadId?: ThreadId;
   commentId?: number;
   mediaTimestamp?: string;
-  isBoost: boolean;
 }
 
 export interface PrivateMessageLink {
@@ -27,7 +27,6 @@ export interface PrivateMessageLink {
   threadId?: ThreadId;
   commentId?: number;
   mediaTimestamp?: string;
-  isBoost: boolean;
 }
 
 interface ShareLink {
@@ -70,6 +69,17 @@ interface PublicUsernameOrBotLink {
   choose?: string;
 }
 
+interface PrivateChannelLink {
+  type: 'privateChannelLink';
+  channelId: string;
+}
+
+interface ChatBoostLink {
+  type: 'chatBoostLink';
+  username?: string;
+  id?: string;
+}
+
 interface BusinessChatLink {
   type: 'businessChatLink';
   slug: string;
@@ -93,22 +103,22 @@ type DeepLink =
   ShareLink |
   ChatFolderLink |
   PublicUsernameOrBotLink |
+  PrivateChannelLink |
   BusinessChatLink |
   PremiumReferrerLink |
-  PremiumMultigiftLink;
+  PremiumMultigiftLink |
+  ChatBoostLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
 type DeepLinkType = DeepLink['type'] | 'unknown';
 
-type PrivateMessageLinkBuilderParams = Omit<BuilderParams<PrivateMessageLink>, 'isSingle' | 'isBoost'> & {
-  single: string | undefined;
-  boost: string | undefined;
+type PrivateMessageLinkBuilderParams = Omit<BuilderParams<PrivateMessageLink>, 'isSingle'> & {
+  single?: string;
 };
 
-type PublicMessageLinkBuilderParams = Omit<BuilderParams<PublicMessageLink>, 'isSingle' | 'isBoost'> & {
-  single: string | undefined;
-  boost: string | undefined;
+type PublicMessageLinkBuilderParams = Omit<BuilderParams<PublicMessageLink>, 'isSingle'> & {
+  single?: string;
 };
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
@@ -133,7 +143,7 @@ function parseDeepLink(url: string) {
   if (!correctUrl) {
     return undefined;
   }
-  if (correctUrl.startsWith('https:')) {
+  if (correctUrl.startsWith('https:') || correctUrl.startsWith('http:')) {
     const urlParsed = new URL(correctUrl);
     return parseHttpLink(urlParsed);
   }
@@ -155,7 +165,7 @@ function parseTgLink(url: URL) {
   switch (deepLinkType) {
     case 'publicMessageLink': {
       const {
-        domain, post, single, thread, comment, t, boost,
+        domain, post, single, thread, comment, t,
       } = queryParams;
       return buildPublicMessageLink({
         username: domain,
@@ -164,12 +174,11 @@ function parseTgLink(url: URL) {
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
-        boost,
       });
     }
     case 'privateMessageLink': {
       const {
-        channel, post, single, thread, comment, t, boost,
+        channel, post, single, thread, comment, t,
       } = queryParams;
       return buildPrivateMessageLink({
         channelId: channel,
@@ -178,7 +187,6 @@ function parseTgLink(url: URL) {
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
-        boost,
       });
     }
     case 'shareLink':
@@ -209,12 +217,17 @@ function parseTgLink(url: URL) {
         choose: queryParams.choose,
         ref: queryParams.ref,
       });
+    case 'privateChannelLink': {
+      return buildPrivateChannelLink({ channelId: queryParams.channel });
+    }
     case 'businessChatLink':
       return buildBusinessChatLink({ slug: queryParams.slug });
     case 'premiumReferrerLink':
       return buildPremiumReferrerLink({ referrer: queryParams.ref });
     case 'premiumMultigiftLink':
       return buildPremiumMultigiftLink({ referrer: queryParams.ref });
+    case 'chatBoostLink':
+      return buildChatBoostLink({ username: queryParams.domain, id: queryParams.channel });
     default:
       break;
   }
@@ -232,7 +245,7 @@ function parseHttpLink(url: URL) {
   switch (deepLinkType) {
     case 'publicMessageLink': {
       const {
-        single, comment, t, boost,
+        single, comment, t,
       } = queryParams;
       const {
         username,
@@ -254,12 +267,11 @@ function parseHttpLink(url: URL) {
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
-        boost,
       });
     }
     case 'privateMessageLink': {
       const {
-        single, comment, t, boost,
+        single, comment, t,
       } = queryParams;
       const {
         channelId,
@@ -281,7 +293,6 @@ function parseHttpLink(url: URL) {
         threadId: thread,
         commentId: comment,
         mediaTimestamp: t,
-        boost,
       });
     }
     case 'shareLink': {
@@ -304,8 +315,21 @@ function parseHttpLink(url: URL) {
         choose: queryParams.choose,
         ref: queryParams.ref,
       });
+    case 'privateChannelLink': {
+      return buildPrivateChannelLink({ channelId: pathParams[1] });
+    }
     case 'businessChatLink':
       return buildBusinessChatLink({ slug: pathParams[1] });
+    case 'chatBoostLink': {
+      if (pathParams[0] === 'boost') {
+        return buildChatBoostLink({ username: pathParams[1], id: queryParams.c });
+      }
+      const isPrivateChannel = pathParams[0] === 'c';
+      return buildChatBoostLink({
+        username: !isPrivateChannel ? pathParams[0] : undefined,
+        id: isPrivateChannel ? pathParams[1] : undefined,
+      });
+    }
     default:
       break;
   }
@@ -319,24 +343,24 @@ function getHttpDeepLinkType(
   const len = pathParams.length;
   const method = pathParams[0];
   if (len === 1) {
-    if (method === 'share') {
-      return 'shareLink';
-    }
+    if (method === 'share') return 'shareLink';
+    if (method === 'boost' || queryParams.boost !== undefined) return 'chatBoostLink';
+
     if (isUsernameValid(method)) {
       return 'publicUsernameOrBotLink';
     }
   } else if (len === 2) {
-    if (method === 'addlist') {
-      return 'chatFolderLink';
+    if (method === 'addlist') return 'chatFolderLink';
+    if (method === 'login') return 'loginCodeLink';
+    if (method === 'm') return 'businessChatLink';
+    if (method === 'boost') return 'chatBoostLink';
+    if (method === 'c') {
+      if (queryParams.boost !== undefined) return 'chatBoostLink';
+      return 'privateChannelLink';
     }
-    if (method === 'login') {
-      return 'loginCodeLink';
-    }
+
     if (isUsernameValid(pathParams[0]) && isNumber(pathParams[1])) {
       return 'publicMessageLink';
-    }
-    if (method === 'm') {
-      return 'businessChatLink';
     }
   } else if (len === 3) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
@@ -377,8 +401,9 @@ function getTgDeepLinkType(
     }
     case 'privatepost': {
       const { channel, post } = queryParams;
-      if (channel && post) {
-        return 'privateMessageLink';
+      if (channel) {
+        if (post) return 'privateMessageLink';
+        return 'privateChannelLink';
       }
       break;
     }
@@ -396,6 +421,8 @@ function getTgDeepLinkType(
       return 'premiumReferrerLink';
     case 'premium_multigift':
       return 'premiumMultigiftLink';
+    case 'boost':
+      return 'chatBoostLink';
     default:
       break;
   }
@@ -416,7 +443,7 @@ function buildShareLink(params: BuilderParams<ShareLink>): BuilderReturnType<Sha
 
 function buildPublicMessageLink(params: PublicMessageLinkBuilderParams): BuilderReturnType<PublicMessageLink> {
   const {
-    messageId, threadId, commentId, username, single, mediaTimestamp, boost,
+    messageId, threadId, commentId, username, single, mediaTimestamp,
   } = params;
   if (!username || !isUsernameValid(username)) {
     return undefined;
@@ -438,13 +465,12 @@ function buildPublicMessageLink(params: PublicMessageLinkBuilderParams): Builder
     threadId: threadId ? Number(threadId) : undefined,
     commentId: commentId ? Number(commentId) : undefined,
     mediaTimestamp,
-    isBoost: boost === '',
   };
 }
 
 function buildPrivateMessageLink(params: PrivateMessageLinkBuilderParams): BuilderReturnType<PrivateMessageLink> {
   const {
-    messageId, threadId, commentId, channelId, single, mediaTimestamp, boost,
+    messageId, threadId, commentId, channelId, single, mediaTimestamp,
   } = params;
   if (!channelId || !isNumber(channelId)) {
     return undefined;
@@ -466,7 +492,6 @@ function buildPrivateMessageLink(params: PrivateMessageLinkBuilderParams): Build
     threadId: threadId ? Number(threadId) : undefined,
     commentId: commentId ? Number(commentId) : undefined,
     mediaTimestamp,
-    isBoost: boost === '',
   };
 }
 
@@ -557,6 +582,37 @@ function buildPublicUsernameOrBotLink(
   };
 }
 
+function buildPrivateChannelLink(params: BuilderParams<PrivateChannelLink>): BuilderReturnType<PrivateChannelLink> {
+  const {
+    channelId,
+  } = params;
+  if (!channelId) {
+    return undefined;
+  }
+
+  return {
+    type: 'privateChannelLink',
+    channelId: toChannelId(channelId),
+  };
+}
+
+export function buildChatBoostLink(params: BuilderParams<ChatBoostLink>): BuilderReturnType<ChatBoostLink> {
+  const {
+    username,
+    id,
+  } = params;
+
+  if (!username && !id) {
+    return undefined;
+  }
+
+  return {
+    type: 'chatBoostLink',
+    username,
+    id: id ? toChannelId(id) : undefined,
+  };
+}
+
 function buildBusinessChatLink(params: BuilderParams<BusinessChatLink>): BuilderReturnType<BusinessChatLink> {
   const {
     slug,
@@ -587,8 +643,9 @@ function buildPremiumReferrerLink(params: BuilderParams<PremiumReferrerLink>): B
   };
 }
 
-function buildPremiumMultigiftLink(params: BuilderParams<PremiumMultigiftLink>):
-BuilderReturnType<PremiumMultigiftLink> {
+function buildPremiumMultigiftLink(
+  params: BuilderParams<PremiumMultigiftLink>,
+): BuilderReturnType<PremiumMultigiftLink> {
   const {
     referrer,
   } = params;
