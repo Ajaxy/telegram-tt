@@ -18,7 +18,7 @@
 }
 
 .button {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-size: 1rem;
   height: 3rem;
 }
@@ -40,7 +40,7 @@
 
 .header-text {
   font-size: 1.5rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-align: center;
   margin-inline: 0.5rem;
 }
@@ -79,7 +79,7 @@
 
 .premium-header-text {
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   margin: 0 0 0 3rem;
   unicode-bidi: plaintext;
 }
@@ -128,7 +128,7 @@
 .subscription {
   margin: 1rem 1.625rem 1.3125rem 1.5rem;
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
   color: var(--color-text-secondary);
 
   @include mixins.adapt-margin-to-scrollbar(1rem);
@@ -206,7 +206,7 @@
 
 .floatingBadgeValue {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .subscriptionFooter {

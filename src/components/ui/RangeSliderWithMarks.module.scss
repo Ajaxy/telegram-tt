@@ -41,7 +41,7 @@
 
 .mark {
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   position: relative;
   display: flex;

@@ -36,7 +36,7 @@
   :global(.Button.pill) {
     max-width: 100%;
     margin-top: 0.625rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     padding-inline-start: 0.75rem;
     unicode-bidi: plaintext;
 

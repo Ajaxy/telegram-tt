@@ -111,7 +111,7 @@
 
   .modal-title {
     font-size: 1.25rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;

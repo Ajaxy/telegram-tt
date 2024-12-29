@@ -16,7 +16,7 @@
   :global(.lovely-chart--tooltip-title),
   :global(.lovely-chart--tooltip-dataset-value),
   :global(.lovely-chart--percentage-title) {
-    font-weight: 500 !important;
+    font-weight: var(--font-weight-medium) !important;
   }
 
   :global(.lovely-chart--container-type-pie) {

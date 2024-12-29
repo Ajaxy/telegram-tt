@@ -296,7 +296,7 @@
   height: 1.75rem;
   width: fit-content;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   position: relative;
   cursor: var(--custom-cursor, pointer);
   flex-shrink: 0;

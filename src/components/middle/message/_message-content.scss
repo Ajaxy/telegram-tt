@@ -371,7 +371,7 @@
 
     .via {
       padding-right: 0.25rem;
-      font-weight: 400;
+      font-weight: var(--font-weight-normal);
     }
 
     span + .via {
@@ -397,7 +397,7 @@
     .admin-title {
       margin-left: 1rem;
       text-align: right;
-      font-weight: 400;
+      font-weight: var(--font-weight-normal);
       font-size: 0.75rem;
       color: rgba(var(--color-text-meta-rgb), 0.75);
       user-select: none;

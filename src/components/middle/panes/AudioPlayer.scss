@@ -181,7 +181,7 @@
     .AudioPlayer & .title {
       display: block;
       margin-top: 0.125rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       font-size: 0.875rem !important;
       line-height: 1rem;
       white-space: nowrap;

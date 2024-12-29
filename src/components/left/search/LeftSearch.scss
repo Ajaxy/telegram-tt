@@ -44,7 +44,7 @@
     padding-left: 0.5rem;
     margin-bottom: 1rem;
 
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     font-size: 1rem;
     color: var(--color-text-secondary);
 
@@ -167,7 +167,7 @@
       align-items: center;
       font-size: 1rem;
       line-height: 1.6875rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       overflow: hidden;
 
       .topic-icon {
@@ -196,7 +196,7 @@
       .Link {
         float: right;
         color: var(--color-links);
-        font-weight: 500;
+        font-weight: var(--font-weight-medium);
         margin-right: 0.5rem;
         transition: opacity 0.15s ease-in;
 

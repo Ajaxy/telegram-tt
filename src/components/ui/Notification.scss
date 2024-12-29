@@ -40,7 +40,7 @@
   }
 
   .notification-title {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
 
   .notification-icon {
@@ -61,7 +61,7 @@
 
   .notification-button {
     color: var(--color-primary);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     text-transform: none;
     margin-inline-start: 0.125rem;
     height: 2rem;

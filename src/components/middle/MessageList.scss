@@ -296,7 +296,7 @@
     display: flex;
     gap: 0.25rem;
     line-height: 1.5;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
 
   .action-message-user-caption {

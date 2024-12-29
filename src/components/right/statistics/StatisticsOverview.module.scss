@@ -6,7 +6,7 @@
 
 .header {
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -43,7 +43,7 @@
 }
 
 .tableValue {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-size: 1.25rem;
 }
 

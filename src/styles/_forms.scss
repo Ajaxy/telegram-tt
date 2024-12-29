@@ -21,7 +21,7 @@
     padding: 0 0.3125rem;
     background-color: var(--color-background);
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
     color: var(--color-placeholders);
     transition: transform 0.15s ease-out, color 0.15s ease-out;
     cursor: var(--custom-cursor, text);

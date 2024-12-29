@@ -95,7 +95,7 @@
 
   .title {
     font-size: 1.3125rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     letter-spacing: -0.18px;
 
     @media (max-height: 450px) {

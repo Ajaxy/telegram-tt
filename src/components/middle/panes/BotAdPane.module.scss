@@ -40,7 +40,7 @@
 
 .title, .info {
   font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.25rem;
 }
 

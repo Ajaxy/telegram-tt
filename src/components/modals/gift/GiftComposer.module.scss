@@ -21,7 +21,7 @@
 .title {
   margin-inline: 0.5rem;
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .balance-container {
@@ -42,7 +42,7 @@
 .balance {
   display: flex;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   align-items: center;
 }
 

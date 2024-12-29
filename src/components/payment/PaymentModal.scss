@@ -71,7 +71,7 @@ $modalHeaderAndFooterHeight: 8.375rem;
 
     button {
       text-transform: none;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
     }
 
     .button-text {

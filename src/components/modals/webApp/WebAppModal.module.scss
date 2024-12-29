@@ -256,7 +256,7 @@
   padding-right: 1rem;
 
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-overflow: ellipsis;
 
   border-top-right-radius: var(--border-radius-default);

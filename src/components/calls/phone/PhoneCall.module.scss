@@ -107,7 +107,7 @@
   color: white;
   max-width: 20rem;
   text-align: center;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   opacity: 0;
   transition: 0.25s ease-in-out opacity;
 

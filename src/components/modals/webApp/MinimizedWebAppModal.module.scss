@@ -1,7 +1,7 @@
 .root {
   height: 2.5rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 
   border-radius: var(--border-radius-default);
   background-color: transparent;

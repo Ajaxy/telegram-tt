@@ -13,7 +13,7 @@
 
 .user-count-badge {
   font-family: var(--font-family-condensed);
-  font-weight: 600 !important;
+  font-weight: var(--font-weight-semibold) !important;
   font-size: 0.5rem !important;
   border-width: 1px !important;
   bottom: 0 !important;
@@ -34,6 +34,6 @@
   font-size: 0.625rem !important;
 
   height: 1.625rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 0.75rem;
 }

@@ -12,7 +12,7 @@
   border-bottom-right-radius: var(--border-bottom-right-radius);
   border-bottom-left-radius: var(--border-bottom-left-radius);
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 2.125rem;
   color: var(--accent-color);
   white-space: nowrap;

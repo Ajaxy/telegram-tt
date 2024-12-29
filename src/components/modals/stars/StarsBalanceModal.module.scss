@@ -43,7 +43,7 @@
 
 .sectionTitle {
   color: var(--color-primary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-size: 1rem;
   align-self: flex-start;
   padding: 0.25rem 0.75rem;
@@ -74,7 +74,7 @@
 
 .headerHext {
   font-size: 1.5rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-align: center;
   margin-inline: 0.5rem;
 }
@@ -104,7 +104,7 @@
 
 .starHeaderText {
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   margin: 0 0 0 3rem;
   unicode-bidi: plaintext;
 }
@@ -137,7 +137,7 @@
 
 .balanceBottom {
   line-height: 1.5;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   display: flex;
   align-items: center;
   gap: 0.25rem;

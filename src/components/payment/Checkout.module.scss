@@ -47,7 +47,7 @@
   flex-direction: row;
   align-content: space-between;
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 
   &-main {
     color: var(--color-text);
@@ -77,7 +77,7 @@
   color: var(--color-primary);
   transition: background-color 200ms, color 200ms;
   cursor: var(--custom-cursor, pointer);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 
   &:hover,
   &:focus {
@@ -123,7 +123,7 @@
     font-size: 1rem;
     line-height: 1.4375rem;
     margin-bottom: 0;
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
     word-break: break-word;
     color: var(--color-text);
     text-transform: capitalize;

@@ -34,7 +34,7 @@
 .pickerCategoryTitle {
   color: var(--color-text-secondary);
   padding-inline: 0.5rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 
   &:not(:first-child) {
     border-top: 1px solid var(--color-borders);
