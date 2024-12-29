@@ -983,7 +983,7 @@
 .text-entity-link {
   color: var(--color-links) !important;
   text-decoration: none !important;
-  word-break: break-word;
+  overflow-wrap: break-word;
   cursor: var(--custom-cursor, pointer);
   unicode-bidi: initial;
 

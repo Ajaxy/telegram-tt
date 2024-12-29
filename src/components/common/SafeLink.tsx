@@ -18,7 +18,6 @@ type OwnProps = {
   text: string;
   className?: string;
   children?: TeactNode;
-  withNormalWordBreak?: boolean;
   isRtl?: boolean;
 };
 
@@ -27,19 +26,18 @@ const SafeLink = ({
   text,
   className,
   children,
-  withNormalWordBreak,
   isRtl,
 }: OwnProps) => {
   const { openUrl } = getActions();
 
   const content = children || text;
-  const isSafe = url === text;
+  const isRegularLink = url === text;
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (!url) return true;
 
     e.preventDefault();
-    openUrl({ url, shouldSkipModal: isSafe });
+    openUrl({ url, shouldSkipModal: isRegularLink });
 
     return false;
   });
@@ -50,7 +48,7 @@ const SafeLink = ({
 
   const classNames = buildClassName(
     className || 'text-entity-link',
-    !withNormalWordBreak && 'word-break-all',
+    isRegularLink && 'word-break-all',
   );
 
   return (
