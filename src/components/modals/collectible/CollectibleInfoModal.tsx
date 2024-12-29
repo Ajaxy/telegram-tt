@@ -21,7 +21,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
@@ -123,7 +123,7 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
       <h3 className={styles.title}>
         {title && renderText(title, ['simple_markdown'])}
       </h3>
-      <PickerSelectedItem
+      <PeerChip
         fluid
         className={styles.chip}
         peerId={modal?.peerId}

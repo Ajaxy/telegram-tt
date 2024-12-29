@@ -9,7 +9,7 @@ import type {
 
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../../config';
 import {
-  getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle, isMessageLocal,
+  getMediaDuration, getMessageContent, getMessageMediaHash, getPeerTitle, isMessageLocal,
 } from '../../../global/helpers';
 import {
   selectChat, selectChatMessage, selectSender, selectTabState,
@@ -98,7 +98,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   const { audio, voice, video } = renderingMessage ? getMessageContent(renderingMessage) : {} satisfies MediaContent;
   const isVoice = Boolean(voice || video);
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
-  const senderName = sender ? getSenderTitle(lang, sender) : undefined;
+  const senderName = sender ? getPeerTitle(lang, sender) : undefined;
 
   const mediaHash = renderingMessage && getMessageMediaHash(renderingMessage, 'inline');
   const mediaData = mediaHash && mediaLoader.getFromMemory(mediaHash);

@@ -230,7 +230,8 @@
     justify-content: space-between;
     align-items: flex-end;
 
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-inline: 0.25rem;
 
     box-shadow: inset 0 -1px 0 0 var(--color-borders);
     background-color: var(--color-background);
@@ -238,7 +239,7 @@
     overflow-x: auto;
     overflow-y: hidden;
 
-    > .PickerSelectedItem {
+    .left-search-local-suggestion {
       flex-shrink: 0;
     }
 

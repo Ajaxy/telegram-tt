@@ -10,7 +10,7 @@ import type {
 import type { IconName } from '../../../types/icons';
 
 import {
-  getSenderTitle,
+  getPeerTitle,
   isUserId,
 } from '../../../global/helpers';
 import { selectPeer, selectPeerStory } from '../../../global/selectors';
@@ -59,7 +59,7 @@ const EmbeddedStoryForward: FC<OwnProps & StateProps> = ({
     }
   }, [forwardInfo, story]);
 
-  const senderTitle = sender ? getSenderTitle(lang, sender) : forwardInfo.fromName;
+  const senderTitle = sender ? getPeerTitle(lang, sender) : forwardInfo.fromName;
 
   const openOriginalStory = useLastCallback(() => {
     const { fromPeerId, storyId } = forwardInfo;

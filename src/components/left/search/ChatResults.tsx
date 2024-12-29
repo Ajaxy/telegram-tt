@@ -28,7 +28,7 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useOldLang from '../../../hooks/useOldLang';
 
 import NothingFound from '../../common/NothingFound';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Link from '../../ui/Link';
 import ChatMessage from './ChatMessage';
@@ -266,8 +266,9 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           ref={chatSelectionRef}
         >
           {localResults.map((id) => (
-            <PickerSelectedItem
+            <PeerChip
               peerId={id}
+              className="left-search-local-suggestion"
               onClick={handlePickerItemClick}
               clickArg={id}
             />

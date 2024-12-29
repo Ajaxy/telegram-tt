@@ -14,7 +14,7 @@ import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
-import { getSenderTitle, isChatChannel, isUserId } from '../../global/helpers';
+import { getPeerTitle, isChatChannel, isUserId } from '../../global/helpers';
 import {
   selectChat,
   selectIsCurrentUserPremium,
@@ -199,7 +199,7 @@ function Story({
     isOut && (story!.date + viewersExpirePeriod) < getServerTime(),
   );
 
-  const forwardSenderTitle = forwardSender ? getSenderTitle(lang, forwardSender)
+  const forwardSenderTitle = forwardSender ? getPeerTitle(lang, forwardSender)
     : (isLoadedStory && story.forwardInfo?.fromName);
 
   const canCopyLink = Boolean(
@@ -492,7 +492,7 @@ function Story({
       : story.isForContacts ? 'contacts' : (story.isForCloseFriends ? 'closeFriends' : 'nobody');
 
     let message;
-    const myName = getSenderTitle(lang, peer);
+    const myName = getPeerTitle(lang, peer);
     switch (visibility) {
       case 'nobody':
         message = lang('StorySelectedContactsHint', myName);
@@ -643,7 +643,7 @@ function Story({
         />
         <div className={styles.senderMeta}>
           <span onClick={handleOpenChat} className={styles.senderName}>
-            {renderText(getSenderTitle(lang, peer) || '')}
+            {renderText(getPeerTitle(lang, peer) || '')}
           </span>
           <div className={styles.storyMetaRow}>
             {forwardSenderTitle && (
@@ -668,7 +668,7 @@ function Story({
               >
                 <Avatar peer={fromPeer} size="micro" />
                 <span className={styles.headerTitle}>
-                  {renderText(getSenderTitle(lang, fromPeer) || '')}
+                  {renderText(getPeerTitle(lang, fromPeer) || '')}
                 </span>
               </span>
             )}
@@ -853,7 +853,7 @@ function Story({
                 withStory
                 storyViewerMode="disabled"
               />
-              <div className={styles.name}>{renderText(getSenderTitle(lang, peer) || '')}</div>
+              <div className={styles.name}>{renderText(getPeerTitle(lang, peer) || '')}</div>
             </div>
           </div>
         )}

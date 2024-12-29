@@ -26,8 +26,8 @@ import Radio from '../../ui/Radio';
 import Avatar from '../Avatar';
 import FullNameTitle from '../FullNameTitle';
 import Icon from '../icons/Icon';
+import PeerChip from '../PeerChip';
 import PickerItem from './PickerItem';
-import PickerSelectedItem from './PickerSelectedItem';
 
 import styles from './PickerStyles.module.scss';
 
@@ -335,7 +335,8 @@ const PeerPicker = ({
       {isSearchable && (
         <div className={buildClassName(styles.header, 'custom-scroll')} dir={lang.isRtl ? 'rtl' : undefined}>
           {selectedCategories?.map((category) => (
-            <PickerSelectedItem
+            <PeerChip
+              className={styles.peerChip}
               customPeer={categoriesByType[category]}
               onClick={handleItemClick}
               clickArg={category}
@@ -343,7 +344,8 @@ const PeerPicker = ({
             />
           ))}
           {lockedSelectedIds?.map((id, i) => (
-            <PickerSelectedItem
+            <PeerChip
+              className={styles.peerChip}
               peerId={id}
               isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
               forceShowSelf={forceShowSelf}
@@ -352,7 +354,8 @@ const PeerPicker = ({
             />
           ))}
           {unlockedSelectedIds.map((id, i) => (
-            <PickerSelectedItem
+            <PeerChip
+              className={styles.peerChip}
               peerId={id}
               isMinimized={
                 shouldMinimize && i + (lockedSelectedIds?.length || 0) < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT

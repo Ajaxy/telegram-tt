@@ -8,7 +8,7 @@ import type {
 import type { GlobalState } from '../../../../global/types';
 import type { CustomPeer } from '../../../../types';
 
-import { getSenderTitle } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers';
 import { buildStarsTransactionCustomPeer, formatStarsTransactionAmount } from '../../../../global/helpers/payments';
 import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
@@ -62,7 +62,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
     let avatarPeer: ApiPeer | CustomPeer | undefined;
 
     if (transaction.peer.type === 'peer') {
-      description = peer && getSenderTitle(oldLang, peer);
+      description = peer && getPeerTitle(oldLang, peer);
       avatarPeer = peer || CUSTOM_PEER_PREMIUM;
     } else {
       const customPeer = buildStarsTransactionCustomPeer(transaction.peer);

@@ -4,7 +4,7 @@ import { getActions } from '../../global';
 import type { ApiPeer } from '../../api/types';
 import { StoryViewerOrigin } from '../../types';
 
-import { getSenderTitle, isUserId } from '../../global/helpers';
+import { getPeerTitle, isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
@@ -101,7 +101,7 @@ function StoryRibbonButton({ peer, isArchived }: OwnProps) {
         storyViewerMode="full"
       />
       <div className={buildClassName(styles.name, peer.hasUnreadStories && styles.name_hasUnreadStory)}>
-        {isSelf ? lang('MyStory') : getSenderTitle(lang, peer)}
+        {isSelf ? lang('MyStory') : getPeerTitle(lang, peer)}
       </div>
       {contextMenuAnchor !== undefined && (
         <Menu

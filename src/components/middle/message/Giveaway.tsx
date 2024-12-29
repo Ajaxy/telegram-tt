@@ -30,7 +30,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Separator from '../../ui/Separator';
@@ -160,7 +160,7 @@ const Giveaway = ({
           </p>
           <div className={styles.peers}>
             {channelIds.map((peerId) => (
-              <PickerSelectedItem
+              <PeerChip
                 peerId={peerId}
                 forceShowSelf
                 fluid
@@ -203,7 +203,7 @@ const Giveaway = ({
           </strong>
           <div className={styles.peers}>
             {winnerIds.map((peerId) => (
-              <PickerSelectedItem
+              <PeerChip
                 peerId={peerId}
                 forceShowSelf
                 fluid

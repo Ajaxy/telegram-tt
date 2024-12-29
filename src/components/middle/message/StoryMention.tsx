@@ -5,7 +5,7 @@ import type {
   ApiMessage, ApiPeer, ApiTypeStory, ApiUser,
 } from '../../../api/types';
 
-import { getSenderTitle, getStoryMediaHash, getUserFirstOrLastName } from '../../../global/helpers';
+import { getPeerTitle, getStoryMediaHash, getUserFirstOrLastName } from '../../../global/helpers';
 import {
   selectPeer,
   selectPeerStories,
@@ -69,7 +69,7 @@ function StoryMention({
 
     return isDeleted
       ? lang('ExpiredStoryMention')
-      : lang('StoryMentionedTitle', getSenderTitle(lang, peer!));
+      : lang('StoryMentionedTitle', getPeerTitle(lang, peer!));
   }
 
   return (

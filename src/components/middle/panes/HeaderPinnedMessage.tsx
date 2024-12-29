@@ -12,7 +12,7 @@ import {
   getMessageMediaHash,
   getMessageSingleInlineButton,
   getMessageVideo,
-  getSenderTitle,
+  getPeerTitle,
 } from '../../../global/helpers';
 import {
   selectAllowedMessageActionsSlow,
@@ -110,7 +110,7 @@ const HeaderPinnedMessage = ({
     ? pinnedMessageIds.length : (pinnedMessageIds ? 1 : 0);
   const pinnedMessageNumber = Math.max(pinnedMessagesCount - currentPinnedIndex, 1);
 
-  const topMessageTitle = topMessageSender ? getSenderTitle(lang, topMessageSender) : undefined;
+  const topMessageTitle = topMessageSender ? getPeerTitle(lang, topMessageSender) : undefined;
 
   const video = pinnedMessage && getMessageVideo(pinnedMessage);
   const gif = video?.isGif ? video : undefined;

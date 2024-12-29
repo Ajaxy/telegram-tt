@@ -36,7 +36,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import StoryToggler from '../../story/StoryToggler';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
@@ -219,19 +219,20 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     return (
       <>
         {selectedSearchDate && (
-          <PickerSelectedItem
+          <PeerChip
             icon="calendar"
             title={selectedSearchDate}
             fluid
             canClose
             isMinimized={Boolean(globalSearchChatId)}
-            className="left-search-picker-item search-date"
+            className="left-search-picker-item"
             onClick={setGlobalSearchDate}
+            isCloseNonDestructive
             clickArg={CLEAR_DATE_SEARCH_PARAM}
           />
         )}
         {globalSearchChatId && (
-          <PickerSelectedItem
+          <PeerChip
             className="left-search-picker-item"
             peerId={globalSearchChatId}
             onClick={setGlobalSearchChatId}

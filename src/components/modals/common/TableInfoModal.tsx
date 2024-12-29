@@ -9,7 +9,7 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
@@ -71,7 +71,7 @@ const TableInfoModal = ({
             {label && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}
             <div className={buildClassName(styles.cell, styles.value, !label && styles.fullWidth)}>
               {typeof value === 'object' && 'chatId' in value ? (
-                <PickerSelectedItem
+                <PeerChip
                   peerId={value.chatId}
                   className={styles.chatItem}
                   forceShowSelf

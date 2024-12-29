@@ -51,7 +51,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/icons/Icon';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import SearchInput from '../../ui/SearchInput';
@@ -519,7 +519,7 @@ const MiddleSearch: FC<StateProps> = ({
     switch (type) {
       case 'chat':
         return (
-          <PickerSelectedItem
+          <PeerChip
             className={buildClassName(styles.searchType, isSelected && styles.selectedType)}
             fluid
             peerId={chat?.id}
@@ -530,7 +530,7 @@ const MiddleSearch: FC<StateProps> = ({
         );
       case 'myChats':
         return (
-          <PickerSelectedItem
+          <PeerChip
             className={buildClassName(styles.searchType, isSelected && styles.selectedType)}
             fluid
             peerId={currentUserId}
@@ -542,7 +542,7 @@ const MiddleSearch: FC<StateProps> = ({
         );
       case 'channels':
         return (
-          <PickerSelectedItem
+          <PeerChip
             className={buildClassName(styles.searchType, isSelected && styles.selectedType)}
             fluid
             customPeer={CHANNELS_PEER}

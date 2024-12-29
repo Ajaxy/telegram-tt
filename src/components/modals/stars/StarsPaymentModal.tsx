@@ -24,7 +24,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import Avatar from '../../common/Avatar';
 import StarIcon from '../../common/icons/StarIcon';
 import PeerBadge from '../../common/PeerBadge';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -194,7 +194,7 @@ const StarPaymentModal = ({
       <h2 className={styles.headerText}>
         {inviteCustomPeer ? oldLang('StarsSubscribeTitle') : oldLang('StarsConfirmPurchaseTitle')}
       </h2>
-      {canShowPeerItem && <PickerSelectedItem className={styles.botItem} peerId={form?.botId} />}
+      {canShowPeerItem && <PeerChip className={styles.botItem} peerId={form?.botId} />}
       <div className={styles.description}>
         {renderText(descriptionText, ['simple_markdown', 'emoji'])}
       </div>

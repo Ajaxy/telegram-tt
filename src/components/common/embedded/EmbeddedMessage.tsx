@@ -14,7 +14,7 @@ import {
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageRoundVideo,
-  getSenderTitle,
+  getPeerTitle,
   isActionMessage,
   isChatChannel,
   isChatGroup,
@@ -120,10 +120,10 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   const lang = useOldLang();
 
-  const senderTitle = sender ? getSenderTitle(lang, sender)
+  const senderTitle = sender ? getPeerTitle(lang, sender)
     : (replyForwardInfo?.hiddenUserName || message?.forwardInfo?.hiddenUserName);
-  const senderChatTitle = senderChat ? getSenderTitle(lang, senderChat) : undefined;
-  const forwardSenderTitle = forwardSender ? getSenderTitle(lang, forwardSender)
+  const senderChatTitle = senderChat ? getPeerTitle(lang, senderChat) : undefined;
+  const forwardSenderTitle = forwardSender ? getPeerTitle(lang, forwardSender)
     : message?.forwardInfo?.hiddenUserName;
   const areSendersSame = sender && sender.id === forwardSender?.id;
 

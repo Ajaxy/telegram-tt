@@ -10,7 +10,7 @@ import type {
   ApiPoll, MediaContainer, MediaContent, StatefulMediaContent,
 } from '../../api/types/messages';
 import type { OldLangFn } from '../../hooks/useOldLang';
-import type { ThreadId } from '../../types';
+import type { CustomPeer, ThreadId } from '../../types';
 import type { LangFn } from '../../util/localization';
 import type { GlobalState } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
@@ -209,8 +209,12 @@ export function isAnonymousOwnMessage(message: ApiMessage) {
   return Boolean(message.senderId) && !isUserId(message.senderId) && isOwnMessage(message);
 }
 
-export function getSenderTitle(lang: OldLangFn | LangFn, sender: ApiPeer) {
-  return isPeerUser(sender) ? getUserFullName(sender) : getChatTitle(lang, sender);
+export function getPeerTitle(lang: OldLangFn | LangFn, peer: ApiPeer | CustomPeer) {
+  if ('isCustomPeer' in peer) {
+    // TODO: Remove any after full migration to new lang
+    return peer.titleKey ? lang(peer.titleKey as any) : peer.title;
+  }
+  return isPeerUser(peer) ? getUserFullName(peer) : getChatTitle(lang, peer);
 }
 
 export function getSendingState(message: ApiMessage) {

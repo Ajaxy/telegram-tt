@@ -146,5 +146,10 @@
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-medium);
     padding-right: 0;
+
+    &[dir="rtl"] {
+      left: auto;
+      right: -0.125rem;
+    }
   }
 }

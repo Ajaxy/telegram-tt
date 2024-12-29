@@ -61,7 +61,6 @@
 .peer {
   background-color: var(--accent-background-color);
   color: var(--accent-color);
-  margin: unset;
 
   &:hover, &:active, &:focus {
     background-color: var(--accent-background-active-color);

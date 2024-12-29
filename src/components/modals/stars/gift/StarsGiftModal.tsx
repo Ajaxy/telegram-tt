@@ -10,7 +10,7 @@ import type {
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
-import { getSenderTitle } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers';
 import {
   selectUser,
 } from '../../../../global/selectors';
@@ -194,7 +194,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
         </h2>
         <p className={styles.description}>
           {user ? renderText(
-            oldLang('ActionGiftStarsSubtitle', getSenderTitle(oldLang, user)), ['simple_markdown'],
+            oldLang('ActionGiftStarsSubtitle', getPeerTitle(oldLang, user)), ['simple_markdown'],
           ) : oldLang('Stars.Purchase.GetStarsInfo')}
         </p>
         <div className={styles.section}>

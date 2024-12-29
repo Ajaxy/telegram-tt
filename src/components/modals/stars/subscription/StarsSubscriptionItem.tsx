@@ -6,7 +6,7 @@ import type {
 } from '../../../../api/types';
 import type { GlobalState } from '../../../../global/types';
 
-import { getSenderTitle } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers';
 import { selectPeer } from '../../../../global/selectors';
 import { formatDateToString } from '../../../../util/dates/dateFormat';
 import { formatInteger } from '../../../../util/textFormat';
@@ -56,7 +56,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
         <StarIcon className={styles.subscriptionStar} type="gold" size="small" />
       </div>
       <div className={styles.info}>
-        <h3 className={styles.title}>{getSenderTitle(lang, peer)}</h3>
+        <h3 className={styles.title}>{getPeerTitle(lang, peer)}</h3>
         {title && (
           <p className={styles.subtitle}>
             {photo && <Avatar webPhoto={photo} size="micro" />}

@@ -1,12 +1,10 @@
-.PickerSelectedItem {
+.root {
   display: flex;
   align-items: center;
   background: var(--color-chat-hover);
   height: 2rem;
   min-width: 2rem;
-  margin-bottom: 0.5rem;
-  margin-left: 0.25rem;
-  margin-right: 0.25rem;
+  margin-inline: 0.25rem;
   padding-right: 1rem;
   border-radius: 1rem;
   cursor: var(--custom-cursor, pointer);
@@ -28,27 +26,18 @@
   &.closeable:hover {
     background-color: rgba(var(--color-error-rgb), 0.16);
 
-    .item-remove {
+    .remove {
       opacity: 1;
-    }
-
-    .Avatar,
-    .item-icon {
-      opacity: 0;
     }
   }
 
-  &.search-date {
-    .item-remove {
+  &.nonDestructive {
+    .remove {
       background: var(--color-primary);
     }
 
     &:hover {
       background: var(--color-chat-hover);
-    }
-
-    .item-name {
-      font-size: 0.875rem;
     }
   }
 
@@ -56,20 +45,16 @@
     max-width: unset;
   }
 
-  .Avatar,
-  .item-icon {
+  .avatar,
+  .iconWrapper {
     width: 2rem;
     height: 2rem;
     opacity: 1;
     flex-shrink: 0;
     transition: opacity 0.15s ease;
-
-    .icon {
-      font-size: 1rem;
-    }
   }
 
-  .item-icon {
+  .iconWrapper {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -85,13 +70,13 @@
     }
   }
 
-  .item-name {
+  .name {
     margin-left: 0.5rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 
-    .emoji.emoji-small {
+    :global(.emoji.emoji-small) {
       width: 1.125rem;
       height: 1.125rem;
       background-size: 1.125rem;
@@ -99,7 +84,7 @@
     }
   }
 
-  .item-remove {
+  .remove {
     position: absolute;
     left: 0;
     top: 0;
@@ -114,14 +99,15 @@
     color: white;
     opacity: 0;
     transition: opacity 0.15s ease;
+    z-index: 1;
   }
 
-  &.square-avatar {
+  &.squareAvatar {
     border-start-start-radius: 0.625rem;
     border-end-start-radius: 0.625rem;
     --border-radius-forum-avatar: 0.625rem;
 
-    &.minimized, .item-remove {
+    &.minimized, .remove {
       border-radius: 0.625rem;
     }
   }
@@ -135,17 +121,12 @@
       padding-left: 0;
     }
 
-    .SearchInput & {
-      left: auto;
-      right: -0.125rem;
-    }
-
-    .item-name {
+    .name {
       margin-left: 0;
       margin-right: 0.5rem;
     }
 
-    .item-remove {
+    .remove {
       left: auto;
       right: 0;
     }

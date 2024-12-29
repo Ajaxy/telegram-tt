@@ -1,23 +1,24 @@
-import type { TeactNode } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../global';
+import type { TeactNode } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
+import { withGlobal } from '../../global';
 
-import type { ApiPeer } from '../../../api/types';
-import type { CustomPeer } from '../../../types';
-import type { IconName } from '../../../types/icons';
+import type { ApiPeer } from '../../api/types';
+import type { CustomPeer } from '../../types';
+import type { IconName } from '../../types/icons';
 
-import { isApiPeerChat } from '../../../global/helpers/peers';
-import { selectPeer, selectUser } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import { getPeerColorClass } from '../helpers/peerColor';
+import { getPeerTitle } from '../../global/helpers';
+import { isApiPeerChat } from '../../global/helpers/peers';
+import { selectPeer, selectUser } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
+import { getPeerColorClass } from './helpers/peerColor';
 
-import useOldLang from '../../../hooks/useOldLang';
+import useOldLang from '../../hooks/useOldLang';
 
-import Avatar from '../Avatar';
-import FullNameTitle from '../FullNameTitle';
-import Icon from '../icons/Icon';
+import Avatar from './Avatar';
+import FullNameTitle from './FullNameTitle';
+import Icon from './icons/Icon';
 
-import './PickerSelectedItem.scss';
+import styles from './PeerChip.module.scss';
 
 type OwnProps<T = undefined> = {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -30,6 +31,7 @@ type OwnProps<T = undefined> = {
   title?: string;
   isMinimized?: boolean;
   canClose?: boolean;
+  isCloseNonDestructive?: boolean;
   className?: string;
   fluid?: boolean;
   withPeerColors?: boolean;
@@ -43,11 +45,12 @@ type StateProps = {
 };
 
 // eslint-disable-next-line @typescript-eslint/comma-dangle
-const PickerSelectedItem = <T,>({
+const PeerChip = <T,>({
   icon,
   title,
   isMinimized,
   canClose,
+  isCloseNonDestructive,
   clickArg,
   peer,
   mockPeer,
@@ -66,36 +69,40 @@ const PickerSelectedItem = <T,>({
   const chat = apiPeer && isApiPeerChat(apiPeer) ? apiPeer : undefined;
 
   let iconElement: TeactNode | undefined;
-  let titleText: any;
+  let titleElement: TeactNode | undefined;
+  let titleText: string | undefined;
 
   if (icon && title) {
     iconElement = (
-      <div className="item-icon">
-        <Icon name={icon} />
+      <div className={styles.iconWrapper}>
+        <Icon name={icon} style={styles.icon} />
       </div>
     );
 
-    titleText = title;
+    titleElement = title;
   } else if (anyPeer) {
     iconElement = (
       <Avatar
+        className={styles.avatar}
         peer={anyPeer}
         size="small"
         isSavedMessages={isSavedMessages}
       />
     );
 
-    titleText = title || <FullNameTitle peer={anyPeer} isSavedMessages={isSavedMessages} withEmojiStatus />;
+    titleText = getPeerTitle(lang, anyPeer) || title;
+    titleElement = title || <FullNameTitle peer={anyPeer} isSavedMessages={isSavedMessages} withEmojiStatus />;
   }
 
   const fullClassName = buildClassName(
-    'PickerSelectedItem',
-    className,
-    (chat?.isForum || customPeer?.isAvatarSquare) && 'square-avatar',
-    isMinimized && 'minimized',
-    canClose && 'closeable',
-    fluid && 'fluid',
+    styles.root,
+    (chat?.isForum || customPeer?.isAvatarSquare) && styles.squareAvatar,
+    isMinimized && styles.minimized,
+    canClose && styles.closeable,
+    isCloseNonDestructive && styles.nonDestructive,
+    fluid && styles.fluid,
     withPeerColors && getPeerColorClass(customPeer || peer),
+    className,
   );
 
   return (
@@ -107,12 +114,12 @@ const PickerSelectedItem = <T,>({
     >
       {iconElement}
       {!isMinimized && (
-        <div className="item-name" dir="auto">
-          {titleText}
+        <div className={styles.name} dir="auto">
+          {titleElement}
         </div>
       )}
       {canClose && (
-        <div className="item-remove">
+        <div className={styles.remove}>
           <Icon name="close" />
         </div>
       )}
@@ -135,4 +142,4 @@ export default memo(withGlobal<OwnProps>(
       isSavedMessages,
     };
   },
-)(PickerSelectedItem)) as typeof PickerSelectedItem;
+)(PeerChip)) as typeof PeerChip;
