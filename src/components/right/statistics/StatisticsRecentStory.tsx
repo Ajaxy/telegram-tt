@@ -80,7 +80,7 @@ function renderSummary(lang: OldLangFn, chat: ApiChat, blobUrl?: string) {
       ) : (
         <Avatar
           peer={chat}
-          size="small-mobile"
+          size="small"
           className={styles.image}
           withStorySolid
           forceUnreadStorySolid

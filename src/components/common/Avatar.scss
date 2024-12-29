@@ -2,12 +2,14 @@
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
   --color-user: var(--color-primary);
   --radius: 50%;
+  --_size: 0px;
+  --_font-size: max(calc(var(--_size) / 2 - 2px), 0.75rem);
 
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 3.375rem;
-  height: 3.375rem;
+  width: var(--_size);
+  height: var(--_size);
   border-radius: var(--radius);
   color: white;
   font-weight: bold;
@@ -15,6 +17,17 @@
   white-space: nowrap;
   user-select: none;
   position: relative;
+
+  font-size: var(--_font-size);
+
+  .emoji {
+    width: var(--_font-size);
+    height: var(--_font-size);
+  }
+
+  &__icon {
+    font-size: calc(var(--_size) / 2);
+  }
 
   > .inner {
     overflow: hidden;
@@ -40,123 +53,6 @@
     object-fit: cover;
   }
 
-  .emoji {
-    width: 1rem;
-    height: 1rem;
-  }
-
-  &__icon {
-    font-size: 1.25em;
-  }
-
-  &.size-micro {
-    width: 1rem;
-    height: 1rem;
-    font-size: 0.5rem;
-
-    .emoji {
-      width: 0.5625rem;
-      height: 0.5625rem;
-    }
-  }
-
-  &.size-tiny {
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.875rem;
-
-    .emoji {
-      width: 0.875rem;
-      height: 0.875rem;
-    }
-  }
-
-  &.size-mini {
-    width: 1.5rem;
-    height: 1.5rem;
-    font-size: 0.75rem;
-
-    .emoji {
-      width: 0.75rem;
-      height: 0.75rem;
-    }
-  }
-
-  &.size-small {
-    width: 2.125rem;
-    height: 2.125rem;
-    font-size: 0.875rem;
-
-    .emoji {
-      width: 0.875rem;
-      height: 0.875rem;
-    }
-  }
-
-  &.size-small-mobile {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 0.875rem;
-
-    .emoji {
-      width: 0.875rem;
-      height: 0.875rem;
-    }
-  }
-
-  &.size-medium {
-    width: 2.75rem;
-    height: 2.75rem;
-    font-size: 1.1875rem;
-
-    .emoji {
-      width: 1rem;
-      height: 1rem;
-    }
-  }
-
-  &.size-large {
-    font-size: 1.3125rem;
-
-    .emoji {
-      width: 1.3125rem;
-      height: 1.3125rem;
-    }
-  }
-
-  &.size-giant {
-    width: 5rem;
-    height: 5rem;
-    font-size: 2.5rem;
-
-    .emoji {
-      width: 2.5rem;
-      height: 2.5rem;
-    }
-  }
-
-  &.size-huge {
-    width: 6rem;
-    height: 6rem;
-    font-size: 3rem;
-
-    .emoji {
-      width: 3rem;
-      height: 3rem;
-    }
-  }
-
-  &.size-jumbo {
-    width: 7.5rem;
-    height: 7.5rem;
-    font-size: 3.5rem;
-
-    .emoji {
-      width: 3.5rem;
-      height: 3.5rem;
-    }
-  }
-
   &.interactive {
     cursor: var(--custom-cursor, pointer);
   }
@@ -173,15 +69,15 @@
   }
 
   &.with-story-solid {
-    width: 3rem;
-    height: 3rem;
+    width: calc(var(--_size) - 0.25rem);
+    height: calc(var(--_size) - 0.25rem);
     margin: 0.1875rem;
 
     &::before {
       content: "";
       position: absolute;
-      width: 3.5rem;
-      height: 3.5rem;
+      width: calc(var(--_size) + 0.25rem);
+      height: calc(var(--_size) + 0.25rem);
       left: -0.25rem;
       top: -0.25rem;
       border-radius: 50%;
@@ -191,58 +87,13 @@
     &::after {
       content: "";
       position: absolute;
-      width: 3.25rem;
-      height: 3.25rem;
+      width: var(--_size);
+      height: var(--_size);
       left: -0.125rem;
       top: -0.125rem;
       border-radius: 50%;
       z-index: 0;
       background: var(--color-background);
-    }
-
-    &.size-tiny {
-      width: 1.75rem;
-      height: 1.75rem;
-
-      &::before {
-        width: 2.25rem;
-        height: 2.25rem;
-      }
-
-      &::after {
-        width: 2rem;
-        height: 2rem;
-      }
-    }
-
-    &.size-medium {
-      width: 2.5rem;
-      height: 2.5rem;
-
-      &::before {
-        width: 3rem;
-        height: 3rem;
-      }
-
-      &::after {
-        width: 2.75rem;
-        height: 2.75rem;
-      }
-    }
-
-    &.size-small-mobile {
-      width: 2.25rem;
-      height: 2.25rem;
-
-      &::before {
-        width: 2.75rem;
-        height: 2.75rem;
-      }
-
-      &::after {
-        width: 2.5rem;
-        height: 2.5rem;
-      }
     }
 
     &.online::after {

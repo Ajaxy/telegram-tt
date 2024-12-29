@@ -133,21 +133,26 @@ const Modal: FC<OwnProps> = ({
     }
 
     if (!title && !withCloseButton) return undefined;
+    const closeButton = (
+      <Button
+        className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
+        round
+        color="translucent"
+        size="smaller"
+        ariaLabel={lang('Close')}
+        onClick={onClose}
+      >
+        <Icon name="close" />
+      </Button>
+    );
+
+    if (hasAbsoluteCloseButton) {
+      return closeButton;
+    }
 
     return (
       <div className={buildClassName('modal-header', headerClassName)}>
-        {withCloseButton && (
-          <Button
-            className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
-            round
-            color="translucent"
-            size="smaller"
-            ariaLabel={lang('Close')}
-            onClick={onClose}
-          >
-            <Icon name="close" />
-          </Button>
-        )}
+        {withCloseButton && closeButton}
         <div className="modal-title">{title}</div>
       </div>
     );

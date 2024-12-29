@@ -979,7 +979,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <Avatar
-        size={isMobile ? 'small-mobile' : 'small'}
+        size="small"
         peer={avatarPeer}
         text={hiddenName}
         onClick={avatarPeer ? handleAvatarClick : undefined}

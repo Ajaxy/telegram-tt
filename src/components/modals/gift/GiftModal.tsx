@@ -51,6 +51,8 @@ type StateProps = {
   user?: ApiUser;
 };
 
+const AVATAR_SIZE = 100;
+
 const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   modal,
   starGiftsById,
@@ -234,7 +236,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
       <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
         <div className={styles.avatars}>
           <Avatar
-            size="huge"
+            size={AVATAR_SIZE}
             peer={user}
           />
           <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />

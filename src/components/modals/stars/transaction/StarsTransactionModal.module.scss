@@ -16,13 +16,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.25rem;
+  margin-block: 1rem;
   position: relative;
-}
-
-.starsHeader {
-  gap: normal;
 }
 
 .amount {
@@ -42,7 +38,8 @@
   text-wrap: balance;
   font-size: 1.5rem;
   font-weight: var(--font-weight-semibold);
-  margin: 0.5rem 0 0.25rem;
+  margin-top: 1rem;
+  line-height: 1.25;
 }
 
 .tid {
@@ -69,8 +66,8 @@
 
 .starsBackground {
   position: absolute;
-  height: 8rem;
-  top: 0;
+  height: 7rem;
+  top: -0.75rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: -1;

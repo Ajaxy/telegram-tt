@@ -104,7 +104,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     const avatarPeer = !photo ? (peer || customPeer) : undefined;
 
     const header = (
-      <div className={buildClassName(styles.header, styles.starsHeader)}>
+      <div className={styles.header}>
         {media && (
           <PaidMediaThumb
             className={buildClassName(styles.mediaPreview, 'transaction-media-preview')}
@@ -124,12 +124,14 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
         {shouldDisplayAvatar && (
           <Avatar peer={avatarPeer} webPhoto={photo} size="giant" />
         )}
-        <img
-          className={buildClassName(styles.starsBackground)}
-          src={StarsBackground}
-          alt=""
-          draggable={false}
-        />
+        {!topSticker && (
+          <img
+            className={buildClassName(styles.starsBackground)}
+            src={StarsBackground}
+            alt=""
+            draggable={false}
+          />
+        )}
         {title && <h1 className={styles.title}>{title}</h1>}
         <p className={styles.description}>{description}</p>
         <p className={styles.amount}>
