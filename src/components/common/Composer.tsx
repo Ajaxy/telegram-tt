@@ -15,6 +15,7 @@ import type {
   ApiBotMenuButton,
   ApiChat,
   ApiChatFullInfo,
+  ApiDraft,
   ApiFormattedText,
   ApiMessage,
   ApiMessageEntity,
@@ -29,10 +30,15 @@ import type {
   ApiWebPage,
 } from '../../api/types';
 import type {
-  ApiDraft, GlobalState, MessageList, MessageListType, TabState,
+  GlobalState, TabState,
 } from '../../global/types';
 import type {
-  IAnchorPosition, InlineBotSettings, ISettings, ThreadId,
+  IAnchorPosition,
+  InlineBotSettings,
+  ISettings,
+  MessageList,
+  MessageListType,
+  ThreadId,
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 

@@ -9,9 +9,11 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiAttachBot, ApiBotAppSettings, ApiChat, ApiUser,
 } from '../../../api/types';
-import type { TabState, WebApp, WebAppModalStateType } from '../../../global/types';
+import type { TabState } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
-import type { PopupOptions, WebAppInboundEvent, WebAppOutboundEvent } from '../../../types/webapp';
+import type {
+  PopupOptions, WebApp, WebAppInboundEvent, WebAppModalStateType, WebAppOutboundEvent,
+} from '../../../types/webapp';
 
 import { TME_LINK_PREFIX } from '../../../config';
 import { convertToApiChatType } from '../../../global/helpers';

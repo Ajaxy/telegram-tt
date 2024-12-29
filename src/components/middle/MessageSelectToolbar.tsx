@@ -3,7 +3,7 @@ import React, { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
-import type { MessageListType } from '../../global/types';
+import type { MessageListType } from '../../types';
 import type { IconName } from '../../types/icons';
 
 import {

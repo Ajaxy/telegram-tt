@@ -1,6 +1,7 @@
 import type {
   ApiAttachment,
   ApiChat,
+  ApiDraft,
   ApiError,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
@@ -19,10 +20,10 @@ import type {
 import type { MessageKey } from '../../../util/keys/messageKey';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, ApiDraft, GlobalState, TabArgs, WebPageMediaSize,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../../api/types';
-import { LoadMoreDirection, type ThreadId } from '../../../types';
+import { LoadMoreDirection, type ThreadId, type WebPageMediaSize } from '../../../types';
 
 import {
   GIF_MIME_TYPE,

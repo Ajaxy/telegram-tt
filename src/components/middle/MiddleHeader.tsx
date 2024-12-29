@@ -7,10 +7,10 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiChat, ApiMessage, ApiSticker, ApiTypingStatus,
 } from '../../api/types';
-import type { GlobalState, MessageListType } from '../../global/types';
+import type { GlobalState } from '../../global/types';
 import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { StoryViewerOrigin, type ThreadId } from '../../types';
+import { type MessageListType, StoryViewerOrigin, type ThreadId } from '../../types';
 
 import {
   EDITABLE_INPUT_CSS_SELECTOR,

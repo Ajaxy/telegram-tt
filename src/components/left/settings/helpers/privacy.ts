@@ -1,4 +1,4 @@
-import type { ApiPrivacyKey } from '../../../../types';
+import type { ApiPrivacyKey } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 
 export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefined {

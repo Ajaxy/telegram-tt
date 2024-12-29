@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { MessageList as GlobalMessageList } from '../../global/types';
+import type { MessageList as GlobalMessageList } from '../../types';
 
 import { selectTabState } from '../../global/selectors';
 import { createLocationHash } from '../../util/routing';

@@ -81,7 +81,7 @@ function runCallbacks() {
   callbacks.forEach((cb) => cb(currentGlobal));
 }
 
-export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
+export function setUntypedGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
     if (DEBUG) {
       if (
@@ -109,7 +109,7 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
   }
 }
 
-export function getGlobal() {
+export function getUntypedGlobal() {
   if (DEBUG) {
     currentGlobal = {
       ...currentGlobal,
@@ -121,7 +121,7 @@ export function getGlobal() {
   return currentGlobal;
 }
 
-export function getActions() {
+export function getUntypedActions() {
   return actions;
 }
 
@@ -134,13 +134,13 @@ let actionQueue: NoneToVoidFunction[] = [];
 function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions) {
   actionQueue.push(() => {
     actionHandlers[name]?.forEach((handler) => {
-      const response = handler(DEBUG ? getGlobal() : currentGlobal, actions, payload);
+      const response = handler(DEBUG ? getUntypedGlobal() : currentGlobal, actions, payload);
       if (!response || typeof response.then === 'function') {
         return;
       }
 
       // eslint-disable-next-line eslint-multitab-tt/set-global-only-variable
-      setGlobal(response as GlobalState, options);
+      setUntypedGlobal(response as GlobalState, options);
     });
   });
 
@@ -218,7 +218,7 @@ function updateContainers() {
   }
 }
 
-export function addActionHandler(name: ActionNames, handler: ActionHandler) {
+export function addUntypedActionHandler(name: ActionNames, handler: ActionHandler) {
   if (!actionHandlers[name]) {
     actionHandlers[name] = [];
 
@@ -241,7 +241,7 @@ export function removeCallback(cb: Function) {
   }
 }
 
-export function withGlobal<OwnProps extends AnyLiteral>(
+export function withUntypedGlobal<OwnProps extends AnyLiteral>(
   mapStateToProps: MapStateToProps<OwnProps> = () => ({}),
   activationFn?: ActivationFn<OwnProps>,
 ) {
@@ -330,14 +330,14 @@ export function typify<
   };
 
   return {
-    getGlobal: getGlobal as <T extends ProjectGlobalState>() => T,
-    setGlobal: setGlobal as (state: ProjectGlobalState, options?: ActionOptions) => void,
-    getActions: getActions as () => ProjectActions,
-    addActionHandler: addActionHandler as <ActionName extends ProjectActionNames>(
+    getGlobal: getUntypedGlobal as <T extends ProjectGlobalState>() => T,
+    setGlobal: setUntypedGlobal as (state: ProjectGlobalState, options?: ActionOptions) => void,
+    getActions: getUntypedActions as () => ProjectActions,
+    addActionHandler: addUntypedActionHandler as <ActionName extends ProjectActionNames>(
       name: ActionName,
       handler: ActionHandlers[ActionName],
     ) => void,
-    withGlobal: withGlobal as <OwnProps extends AnyLiteral>(
+    withGlobal: withUntypedGlobal as <OwnProps extends AnyLiteral>(
       mapStateToProps: (global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral,
       activationFn?: (global: ProjectGlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn) => boolean,
     ) => (Component: FC) => FC<OwnProps>,
@@ -345,8 +345,8 @@ export function typify<
 }
 
 if (DEBUG) {
-  (window as any).getGlobal = getGlobal;
-  (window as any).setGlobal = setGlobal;
+  (window as any).getGlobal = getUntypedGlobal;
+  (window as any).setGlobal = setUntypedGlobal;
 
   document.addEventListener('dblclick', () => {
     // eslint-disable-next-line no-console

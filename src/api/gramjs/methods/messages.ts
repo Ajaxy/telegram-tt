@@ -1,8 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { WebPageMediaSize } from '../../../global/types';
-import type { ThreadId } from '../../../types';
+import type { ThreadId, WebPageMediaSize } from '../../../types';
 import type {
   ApiAttachment,
   ApiChat,

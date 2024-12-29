@@ -8,10 +8,16 @@ import type {
   ApiPeer, ApiSponsoredMessage,
   ApiStickerSetInfo,
 } from '../../api/types';
-import type { ThreadId } from '../../types';
+import type {
+  ChatTranslatedMessages,
+  MessageListType,
+  TabThread,
+  Thread,
+  ThreadId,
+} from '../../types';
 import type { IAllowedAttachmentOptions } from '../helpers';
 import type {
-  ChatTranslatedMessages, GlobalState, MessageListType, TabArgs, TabThread, Thread,
+  GlobalState, TabArgs,
 } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 

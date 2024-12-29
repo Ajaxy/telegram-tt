@@ -2,14 +2,15 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { LANG_PACKS } from '../../../config';
-import type { ApiInputPrivacyRules, ApiPrivacyKey } from '../../../types';
 import type {
   ApiAppConfig,
   ApiConfig,
   ApiError,
+  ApiInputPrivacyRules,
   ApiLanguage,
   ApiNotifyException,
   ApiPhoto,
+  ApiPrivacyKey,
   ApiUser,
 } from '../../types';
 

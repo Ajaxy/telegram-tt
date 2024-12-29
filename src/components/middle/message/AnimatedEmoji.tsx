@@ -3,8 +3,8 @@ import React, { memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
 import type { ApiSticker } from '../../../api/types';
-import type { ActiveEmojiInteraction } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { ActiveEmojiInteraction } from '../../../types';
 
 import {
   selectAnimatedEmoji,

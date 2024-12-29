@@ -2,8 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ActiveDownloads, MessageListType } from '../../global/types';
-import type { MediaViewerOrigin } from '../../types';
+import type { ActiveDownloads, MediaViewerOrigin, MessageListType } from '../../types';
 import type { MenuItemProps } from '../ui/MenuItem';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 

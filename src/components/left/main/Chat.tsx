@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat,
+  ApiDraft,
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiPeer,
@@ -13,7 +14,6 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../../api/types';
-import type { ApiDraft } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 import { MAIN_THREAD_ID } from '../../../api/types';

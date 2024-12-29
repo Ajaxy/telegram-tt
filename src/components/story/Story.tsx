@@ -9,7 +9,7 @@ import type {
   ApiMediaAreaChannelPost,
   ApiPeer, ApiStealthMode, ApiStory, ApiTypeStory,
 } from '../../api/types';
-import type { IDimensions } from '../../global/types';
+import type { IDimensions } from '../../types';
 import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 

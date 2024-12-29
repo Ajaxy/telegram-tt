@@ -4,10 +4,9 @@ import React, {
 import { getGlobal } from '../../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus, ApiUser,
+  ApiChat, ApiDraft, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus, ApiUser,
   StatefulMediaContent,
 } from '../../../../api/types';
-import type { ApiDraft } from '../../../../global/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';

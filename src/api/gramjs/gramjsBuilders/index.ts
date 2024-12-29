@@ -2,7 +2,6 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 
-import type { ApiInputPrivacyRules, ApiPrivacyKey } from '../../../types';
 import type {
   ApiBotApp,
   ApiChatAdminRights,
@@ -11,6 +10,7 @@ import type {
   ApiChatReactions,
   ApiFormattedText,
   ApiGroupCall,
+  ApiInputPrivacyRules,
   ApiInputReplyInfo,
   ApiInputStorePaymentPurpose,
   ApiMessageEntity,
@@ -19,6 +19,7 @@ import type {
   ApiPhoto,
   ApiPoll,
   ApiPremiumGiftCodeOption,
+  ApiPrivacyKey,
   ApiReactionWithPaid,
   ApiReportReason,
   ApiRequestInputInvoice,

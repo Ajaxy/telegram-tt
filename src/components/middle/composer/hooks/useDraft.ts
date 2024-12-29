@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { ApiMessage } from '../../../../api/types';
-import type { ApiDraft } from '../../../../global/types';
+import type { ApiDraft, ApiMessage } from '../../../../api/types';
 import type { ThreadId } from '../../../../types';
 import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';

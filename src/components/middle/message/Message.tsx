@@ -28,10 +28,16 @@ import type {
   ApiTypeStory,
   ApiUser,
 } from '../../../api/types';
-import type { ActiveEmojiInteraction, ChatTranslatedMessages, MessageListType } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
-  FocusDirection, IAlbum, ISettings, ScrollTargetPosition, ThreadId,
+  ActiveEmojiInteraction,
+  ChatTranslatedMessages,
+  FocusDirection,
+  IAlbum,
+  ISettings,
+  MessageListType,
+  ScrollTargetPosition,
+  ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import type { OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';

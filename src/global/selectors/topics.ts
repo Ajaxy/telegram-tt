@@ -1,5 +1,5 @@
-import type { ThreadId } from '../../types';
-import type { GlobalState, TopicsInfo } from '../types';
+import type { ThreadId, TopicsInfo } from '../../types';
+import type { GlobalState } from '../types';
 
 export function selectTopicsInfo<T extends GlobalState>(global: T, chatId: string): TopicsInfo | undefined {
   return global.chats.topicsInfoById[chatId];

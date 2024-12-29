@@ -1,7 +1,8 @@
 import React, { memo, useRef } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ConfettiStyle, TabState } from '../../../global/types';
+import type { TabState } from '../../../global/types';
+import type { ConfettiStyle } from '../../../types';
 
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { selectTabState } from '../../../global/selectors';

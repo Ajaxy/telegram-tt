@@ -2,10 +2,10 @@ import type {
   ApiChat, ApiMediaExtendedPreview, ApiMessage, ApiReactions,
   MediaContent,
 } from '../../../api/types';
-import type { ThreadId } from '../../../types';
+import type { ActiveEmojiInteraction, ThreadId } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, ActiveEmojiInteraction, GlobalState, RequiredGlobalState,
+  ActionReturnType, GlobalState, RequiredGlobalState,
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 

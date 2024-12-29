@@ -1,16 +1,18 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
-import type { ApiPrivacySettings, BotsPrivacyType, PrivacyVisibility } from '../../../types';
 import type {
   ApiFormattedText,
   ApiMessageEntity,
   ApiMessageEntityDefault,
   ApiPhoto,
   ApiPhotoSize,
+  ApiPrivacySettings,
   ApiThumbnail,
   ApiUsername,
   ApiVideoSize,
+  BotsPrivacyType,
+  PrivacyVisibility,
 } from '../../types';
 import {
   ApiMessageEntityTypes,

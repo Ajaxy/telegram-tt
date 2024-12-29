@@ -1,7 +1,6 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiDraft } from '../../../global/types';
 import type {
   ApiChat,
   ApiChatAdminRights,
@@ -9,6 +8,7 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatReactions,
+  ApiDraft,
   ApiGroupCall,
   ApiMessage,
   ApiMissingInvitedUser,

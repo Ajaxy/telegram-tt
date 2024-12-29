@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import { useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { MessageListType } from '../../../global/types';
+import type { MessageListType } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { LoadMoreDirection } from '../../../types';
 

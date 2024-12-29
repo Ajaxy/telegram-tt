@@ -1,7 +1,4 @@
-import type { ApiUsername } from '../../../api/types';
-import type {
-  ApiPrivacySettings,
-} from '../../../types';
+import type { ApiPrivacySettings, ApiUsername } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import {
   ProfileEditProgress,

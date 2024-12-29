@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiBusinessIntro, ApiSticker, ApiUpdateConnectionStateType, ApiUser,
 } from '../../api/types';
-import type { MessageList } from '../../global/types';
+import type { MessageList } from '../../types';
 
 import { getUserFullName } from '../../global/helpers';
 import {

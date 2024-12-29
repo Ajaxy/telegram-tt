@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import { getActions } from '../../../global';
 
-import type { MessageListType } from '../../../global/types';
+import type { MessageListType } from '../../../types';
 import type { OnIntersectPinnedMessage } from './usePinnedMessage';
 
 import { IS_ANDROID } from '../../../util/windowEnvironment';

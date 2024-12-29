@@ -5,9 +5,9 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiPremiumPromo, ApiPremiumSubscriptionOption, ApiSticker, ApiStickerSet, ApiUser,
+  ApiPremiumPromo, ApiPremiumSection, ApiPremiumSubscriptionOption, ApiSticker, ApiStickerSet, ApiUser,
 } from '../../../api/types';
-import type { ApiPremiumSection, GlobalState } from '../../../global/types';
+import type { GlobalState } from '../../../global/types';
 
 import { PREMIUM_FEATURE_SECTIONS, TME_LINK_PREFIX } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';

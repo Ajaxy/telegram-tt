@@ -10,8 +10,9 @@ import type {
 import type {
   ActiveEmojiInteraction,
   MessageListType,
-} from '../../global/types';
-import type { ThemeKey, ThreadId } from '../../types';
+  ThemeKey,
+  ThreadId,
+} from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {

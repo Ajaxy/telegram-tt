@@ -2,7 +2,7 @@ import type { FC } from '../../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
-import type { ApiLimitTypeWithModal } from '../../../../global/types';
+import type { ApiLimitTypeWithModal } from '../../../../api/types';
 import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IconName } from '../../../../types/icons';
 

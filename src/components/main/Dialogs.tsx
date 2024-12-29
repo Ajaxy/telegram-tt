@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiContact, ApiError,
 } from '../../api/types';
-import type { MessageList } from '../../global/types';
+import type { MessageList } from '../../types';
 
 import { selectCurrentMessageList, selectTabState } from '../../global/selectors';
 import getReadableErrorText from '../../util/getReadableErrorText';

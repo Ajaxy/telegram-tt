@@ -8,8 +8,8 @@ import React, {
 import { addExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiChatFolder, ApiUser } from '../../api/types';
-import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
+import type { ApiChatFolder, ApiLimitTypeWithModal, ApiUser } from '../../api/types';
+import type { TabState } from '../../global/types';
 import { ElectronEvent } from '../../types/electron';
 
 import { BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER } from '../../config';

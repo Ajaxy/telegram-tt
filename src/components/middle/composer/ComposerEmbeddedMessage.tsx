@@ -7,8 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiChat, ApiInputMessageReplyInfo, ApiMessage, ApiPeer,
 } from '../../../api/types';
-import type { MessageListType } from '../../../global/types';
-import type { ThreadId } from '../../../types/index';
+import type { MessageListType, ThreadId } from '../../../types/index';
 
 import { isChatChannel, stripCustomEmoji } from '../../../global/helpers';
 import {

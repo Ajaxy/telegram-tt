@@ -3,8 +3,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { MessageListType } from '../../global/types';
-import type { ThreadId } from '../../types';
+import type { MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import type { MessageDateGroup } from './helpers/groupMessages';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';

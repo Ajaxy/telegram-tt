@@ -1,5 +1,5 @@
 import React, { memo } from '../../../lib/teact/teact';
-import { getActions } from '../../../lib/teact/teactn';
+import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 

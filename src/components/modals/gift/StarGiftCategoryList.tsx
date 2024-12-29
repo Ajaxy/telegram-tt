@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { StarGiftCategory } from '../../../global/types';
+import type { StarGiftCategory } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
 

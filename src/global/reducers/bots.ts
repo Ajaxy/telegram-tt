@@ -1,6 +1,7 @@
 import type { InlineBotSettings } from '../../types';
+import type { WebApp, WebAppModalStateType } from '../../types/webapp';
 import type {
-  GlobalState, TabArgs, WebApp, WebAppModalStateType,
+  GlobalState, TabArgs,
 } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';

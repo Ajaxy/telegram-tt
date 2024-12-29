@@ -2,8 +2,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiLimitType, ApiPremiumSection } from '../../../global/types';
-import type { ApiAppConfig } from '../../types';
+import type { ApiAppConfig, ApiLimitType, ApiPremiumSection } from '../../types';
 
 import {
   DEFAULT_LIMITS,

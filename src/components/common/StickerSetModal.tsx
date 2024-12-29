@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
-import type { MessageList } from '../../global/types';
+import type { MessageList } from '../../types';
 
 import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL, TME_LINK_PREFIX } from '../../config';
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';

@@ -5,8 +5,8 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
 } from '../../../api/types';
-import type { GlobalState, WebPageMediaSize } from '../../../global/types';
-import type { ISettings, ThreadId } from '../../../types';
+import type { GlobalState } from '../../../global/types';
+import type { ISettings, ThreadId, WebPageMediaSize } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../api/types';
 

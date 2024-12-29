@@ -1,8 +1,8 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiInputPrivacyRules } from '../../../types';
 import type {
   ApiError,
+  ApiInputPrivacyRules,
   ApiPeer,
   ApiPeerStories,
   ApiReaction,

@@ -1,3 +1,30 @@
+import type { ApiInputMessageReplyInfo } from '../api/types';
+
+export type WebAppModalStateType = 'fullScreen' | 'maximized' | 'minimized';
+
+export type WebApp = {
+  url: string;
+  requestUrl?: string;
+  botId: string;
+  appName?: string;
+  buttonText: string;
+  peerId?: string;
+  queryId?: string;
+  slug?: string;
+  replyInfo?: ApiInputMessageReplyInfo;
+  canSendMessages?: boolean;
+  isRemoveModalOpen?: boolean;
+  isCloseModalOpen?: boolean;
+  shouldConfirmClosing?: boolean;
+  headerColor?: string;
+  backgroundColor?: string;
+  isBackButtonVisible?: boolean;
+  isSettingsButtonVisible?: boolean;
+  plannedEvents?: WebAppOutboundEvent[];
+  sendEvent?: (event: WebAppOutboundEvent) => void;
+  reloadFrame?: (url: string) => void;
+};
+
 export type PopupOptions = {
   title: string;
   message: string;

@@ -1,4 +1,4 @@
-import type { IDimensions } from '../../../global/types';
+import type { IDimensions } from '../../../types';
 
 import { roundToNearestEven } from '../../../util/math';
 

@@ -1,4 +1,4 @@
-import type { ApiPremiumSection } from '../../global/types';
+import type { PREMIUM_FEATURE_SECTIONS } from '../../config';
 import type { ApiWebDocument } from './bots';
 import type { ApiChat } from './chats';
 import type {
@@ -9,7 +9,6 @@ import type {
   ApiPaymentCredentials,
   BoughtPaidMedia,
 } from './messages';
-import type { ApiStarsSubscriptionPricing } from './misc';
 import type { StatisticsOverviewPercentage } from './statistics';
 import type { ApiUser } from './users';
 
@@ -115,6 +114,8 @@ export interface ApiReceiptRegular {
 }
 
 export type ApiReceipt = ApiReceiptRegular | ApiReceiptStars;
+
+export type ApiPremiumSection = typeof PREMIUM_FEATURE_SECTIONS[number];
 
 export interface ApiPremiumPromo {
   videoSections: ApiPremiumSection[];
@@ -387,6 +388,11 @@ export interface ApiStarsSubscription {
   invoiceSlug?: string;
 }
 
+export type ApiStarsSubscriptionPricing = {
+  period: number;
+  amount: number;
+};
+
 export interface ApiStarTopupOption {
   isExtended?: true;
   stars: number;
@@ -409,3 +415,5 @@ export interface ApiStarGiveawayOption {
   amount: number;
   winners: ApiStarsGiveawayWinnerOption[];
 }
+
+export type ApiPaymentStatus = 'paid' | 'failed' | 'pending' | 'cancelled';

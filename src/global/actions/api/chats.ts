@@ -4,12 +4,12 @@ import type {
 } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType,
-  ChatListType, GlobalState, TabArgs,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import {
   ChatCreationProgress,
+  type ChatListType,
   ManagementProgress,
   NewChatMembersProgress,
   SettingsScreens,

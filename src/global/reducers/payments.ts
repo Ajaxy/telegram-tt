@@ -5,9 +5,14 @@ import type {
   ApiStarsSubscription,
   ApiStarsTransaction,
 } from '../../api/types';
-import type { PaymentStep, ShippingOption } from '../../types';
 import type {
-  GlobalState, StarsSubscriptions, StarsTransactionType, TabArgs, TabState,
+  PaymentStep,
+  ShippingOption,
+  StarsSubscriptions,
+  StarsTransactionType,
+} from '../../types';
+import type {
+  GlobalState, TabArgs, TabState,
 } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';

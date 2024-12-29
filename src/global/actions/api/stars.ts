@@ -1,6 +1,4 @@
-import type {
-  StarGiftCategory,
-} from '../../types';
+import type { StarGiftCategory } from '../../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';

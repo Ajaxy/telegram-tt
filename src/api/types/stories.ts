@@ -1,4 +1,3 @@
-import type { ApiPrivacySettings } from '../../types';
 import type {
   ApiGeoPoint,
   ApiMessage,
@@ -8,6 +7,7 @@ import type {
   ApiStoryForwardInfo,
   MediaContent,
 } from './messages';
+import type { ApiPrivacySettings } from './settings';
 
 export interface ApiStory {
   '@type'?: 'story';

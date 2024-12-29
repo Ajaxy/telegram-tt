@@ -8,10 +8,9 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type {
   ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiTopic,
 } from '../../api/types';
-import type { MessageListType } from '../../global/types';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
-import { LoadMoreDirection, type ThreadId } from '../../types';
+import { LoadMoreDirection, type MessageListType, type ThreadId } from '../../types';
 
 import {
   ANIMATION_END_DELAY,

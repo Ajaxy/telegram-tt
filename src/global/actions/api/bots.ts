@@ -1,10 +1,15 @@
 import type { InlineBotSettings } from '../../../types';
+import type { WebApp } from '../../../types/webapp';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, GlobalState, TabArgs, WebApp,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 import {
-  type ApiChat, type ApiContact, type ApiInputMessageReplyInfo, type ApiPeer, type ApiUrlAuthResult,
+  type ApiChat,
+  type ApiContact,
+  type ApiInputMessageReplyInfo,
+  type ApiPeer,
+  type ApiUrlAuthResult,
   MAIN_THREAD_ID,
 } from '../../../api/types';
 import { ManagementProgress } from '../../../types';

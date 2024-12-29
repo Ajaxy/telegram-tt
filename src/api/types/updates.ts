@@ -1,4 +1,4 @@
-import type { ApiDraft, TabState } from '../../global/types';
+import type { TabState } from '../../global/types';
 import type {
   GroupCallConnectionData,
   GroupCallConnectionState,
@@ -6,7 +6,7 @@ import type {
   VideoRotation,
   VideoState,
 } from '../../lib/secret-sauce';
-import type { ApiPrivacyKey, PrivacyVisibility, ThreadId } from '../../types';
+import type { ThreadId } from '../../types';
 import type { ApiBotMenuButton } from './bots';
 import type {
   ApiGroupCall, ApiPhoneCall,
@@ -16,6 +16,7 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatMember,
+  ApiDraft,
   ApiTypingStatus,
 } from './chats';
 import type {
@@ -35,7 +36,7 @@ import type {
   ApiEmojiInteraction, ApiError, ApiNotifyException, ApiSessionData,
 } from './misc';
 import type { ApiStarsAmount } from './payments';
-import type { LangPackStringValue } from './settings';
+import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
   ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,

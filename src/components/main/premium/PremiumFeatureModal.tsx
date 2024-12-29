@@ -4,8 +4,13 @@ import React, {
 } from '../../../lib/teact/teact';
 import { toggleExtraClass } from '../../../lib/teact/teact-dom';
 
-import type { ApiPremiumPromo, ApiPremiumSubscriptionOption } from '../../../api/types';
-import type { ApiLimitTypeForPromo, ApiPremiumSection, GlobalState } from '../../../global/types';
+import type {
+  ApiLimitTypeForPromo,
+  ApiPremiumPromo,
+  ApiPremiumSection,
+  ApiPremiumSubscriptionOption,
+} from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 
 import { PREMIUM_BOTTOM_VIDEOS, PREMIUM_FEATURE_SECTIONS, PREMIUM_LIMITS_ORDER } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';

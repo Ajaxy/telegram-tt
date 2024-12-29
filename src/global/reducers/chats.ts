@@ -1,7 +1,8 @@
 import type {
   ApiChat, ApiChatFullInfo, ApiChatMember,
 } from '../../api/types';
-import type { ChatListType, GlobalState } from '../types';
+import type { ChatListType } from '../../types';
+import type { GlobalState } from '../types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';

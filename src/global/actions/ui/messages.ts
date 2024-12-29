@@ -1,11 +1,10 @@
 import type { ApiMessage } from '../../../api/types';
 import type {
   ActionReturnType,
-  ActiveDownloads,
   GlobalState,
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { FocusDirection } from '../../../types';
+import { type ActiveDownloads, FocusDirection } from '../../../types';
 
 import {
   ANIMATION_END_DELAY,

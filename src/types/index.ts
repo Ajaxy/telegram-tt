@@ -5,18 +5,25 @@ import type {
   ApiBotInlineResult,
   ApiBotInlineSwitchPm,
   ApiBotInlineSwitchWebview,
-  ApiChat,
   ApiChatInviteImporter,
   ApiDocument,
+  ApiDraft,
   ApiExportedInvite,
   ApiFakeType,
+  ApiFormattedText,
   ApiLabeledPrice,
+  ApiMediaFormat,
   ApiMessage,
   ApiPhoto,
   ApiReaction,
   ApiReactionWithPaid,
+  ApiStarGift,
+  ApiStarsSubscription,
+  ApiStarsTransaction,
   ApiStickerSet,
-  ApiUser,
+  ApiThreadInfo,
+  ApiTopic,
+  ApiTypingStatus,
   ApiVideo,
 } from '../api/types';
 import type { SearchResultKey } from '../util/keys/searchResultKey';
@@ -132,30 +139,6 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   shouldDebugExportedSenders?: boolean;
   shouldWarnAboutSvg?: boolean;
   shouldSkipWebAppCloseConfirmation: boolean;
-}
-
-export type BotsPrivacyType = 'allow' | 'disallow' | 'none';
-
-export interface ApiPrivacySettings {
-  visibility: PrivacyVisibility;
-  isUnspecified?: boolean;
-  allowUserIds: string[];
-  allowChatIds: string[];
-  blockUserIds: string[];
-  blockChatIds: string[];
-  shouldAllowPremium?: true;
-  botsPrivacy: BotsPrivacyType;
-}
-
-export interface ApiInputPrivacyRules {
-  visibility: PrivacyVisibility;
-  isUnspecified?: boolean;
-  allowedUsers?: ApiUser[];
-  allowedChats?: ApiChat[];
-  blockedUsers?: ApiUser[];
-  blockedChats?: ApiChat[];
-  shouldAllowPremium?: true;
-  botsPrivacy: BotsPrivacyType;
 }
 
 export type IAnchorPosition = {
@@ -413,10 +396,6 @@ export type MiddleSearchResults = {
   foundIds?: SearchResultKey[];
 };
 
-export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
-'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday' | 'gifts';
-export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
-
 export interface LoadingState {
   areAllItemsLoadedForwards: boolean;
   areAllItemsLoadedBackwards: boolean;
@@ -530,3 +509,130 @@ export type CustomPeer = {
 export type UniqueCustomPeer<T = CustomPeerType> = CustomPeer & {
   type: T;
 };
+
+export type MessageListType =
+  'thread'
+  | 'pinned'
+  | 'scheduled';
+
+export type ChatListType = 'active' | 'archived' | 'saved';
+
+export interface MessageList {
+  chatId: string;
+  threadId: ThreadId;
+  type: MessageListType;
+}
+
+export interface ActiveEmojiInteraction {
+  id: number;
+  x: number;
+  y: number;
+  messageId?: number;
+  startSize?: number;
+  animatedEffect?: string;
+  isReversed?: boolean;
+}
+
+export type ActiveDownloads = Record<string, {
+  format: ApiMediaFormat;
+  filename: string;
+  size: number;
+  originChatId?: string;
+  originMessageId?: number;
+}>;
+
+export type IDimensions = {
+  width: number;
+  height: number;
+};
+
+export type StarsTransactionType = 'all' | 'inbound' | 'outbound';
+export type StarsTransactionHistory = Record<StarsTransactionType, {
+  transactions: ApiStarsTransaction[];
+  nextOffset?: string;
+} | undefined>;
+export type StarsSubscriptions = {
+  list: ApiStarsSubscription[];
+  nextOffset?: string;
+  isLoading?: boolean;
+};
+
+export type ConfettiStyle = 'poppers' | 'top-down';
+
+export type StarGiftInfo = {
+  userId: string;
+  gift: ApiStarGift;
+  shouldHideName?: boolean;
+  message?: ApiFormattedText;
+};
+
+export interface TabThread {
+  scrollOffset?: number;
+  replyStack?: number[];
+  viewportIds?: number[];
+}
+
+export interface Thread {
+  lastScrollOffset?: number;
+  lastViewportIds?: number[];
+  listedIds?: number[];
+  outlyingLists?: number[][];
+  pinnedIds?: number[];
+  scheduledIds?: number[];
+  editingId?: number;
+  editingScheduledId?: number;
+  editingDraft?: ApiFormattedText;
+  editingScheduledDraft?: ApiFormattedText;
+  draft?: ApiDraft;
+  noWebPage?: boolean;
+  threadInfo?: ApiThreadInfo;
+  firstMessageId?: number;
+  typingStatus?: ApiTypingStatus;
+}
+
+export interface ServiceNotification {
+  id: number;
+  message: ApiMessage;
+  version?: string;
+  isUnread?: boolean;
+  isDeleted?: boolean;
+}
+
+export interface TopicsInfo {
+  totalCount: number;
+  topicsById: Record<ThreadId, ApiTopic>;
+  listedTopicIds?: number[];
+  orderedPinnedTopicIds?: number[];
+}
+
+export type TranslatedMessage = {
+  isPending?: boolean;
+  text?: ApiFormattedText;
+};
+
+export type ChatTranslatedMessages = {
+  byLangCode: Record<string, Record<number, TranslatedMessage>>;
+};
+
+export type ChatRequestedTranslations = {
+  toLanguage?: string;
+  manualMessages?: Record<number, string>;
+};
+
+export type ConfettiParams = OptionalCombine<{
+  style?: ConfettiStyle;
+  withStars?: boolean;
+}, {
+  top?: number;
+  left?: number;
+  width?: number;
+  height?: number;
+}>;
+
+export type WebPageMediaSize = 'large' | 'small';
+
+export type StarGiftCategory = number | 'all' | 'limited';
+
+export type CallSound = (
+  'join' | 'allowTalk' | 'leave' | 'connecting' | 'incoming' | 'end' | 'connect' | 'busy' | 'ringing'
+);

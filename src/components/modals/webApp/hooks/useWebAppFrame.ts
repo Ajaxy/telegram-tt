@@ -2,8 +2,7 @@
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { WebApp } from '../../../../global/types';
-import type { WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
+import type { WebApp, WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
 
 import { getWebAppKey } from '../../../../global/helpers';
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';

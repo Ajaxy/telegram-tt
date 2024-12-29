@@ -3,10 +3,9 @@ import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiMessageOutgoingStatus,
+  ApiChat, ApiDraft, ApiMessage, ApiMessageOutgoingStatus,
   ApiPeer, ApiTopic, ApiTypeStory, ApiTypingStatus,
 } from '../../../api/types';
-import type { ApiDraft } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 

@@ -2,8 +2,8 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiTopic } from '../../api/types';
-import type { MessageListType } from '../../global/types';
 import type { OldLangFn } from '../../hooks/useOldLang';
+import type { MessageListType } from '../../types';
 
 import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';

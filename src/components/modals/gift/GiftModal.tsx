@@ -10,7 +10,8 @@ import type {
   ApiStarsAmount,
   ApiUser,
 } from '../../../api/types';
-import type { StarGiftCategory, TabState } from '../../../global/types';
+import type { TabState } from '../../../global/types';
+import type { StarGiftCategory } from '../../../types';
 
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';

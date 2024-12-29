@@ -1,7 +1,7 @@
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiPremiumSection } from '../../../global/types';
+import type { ApiPremiumSection } from '../../../api/types';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';

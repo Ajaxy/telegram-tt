@@ -3,8 +3,8 @@ import { getIsHeavyAnimating, onFullyIdle } from '../lib/teact/teact';
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
 import type { ApiAvailableReaction, ApiMessage } from '../api/types';
-import type { ThreadId } from '../types';
-import type { ActionReturnType, GlobalState, MessageList } from './types';
+import type { MessageList, ThreadId } from '../types';
+import type { ActionReturnType, GlobalState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import {

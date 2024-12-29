@@ -1,12 +1,19 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiPrivacyKey } from '../../../types';
 import type {
   ApiChatLink,
-  ApiCollectionInfo,
-  ApiConfig, ApiCountry, ApiLanguage, ApiOldLangString,
+  ApiCollectibleInfo,
+  ApiConfig,
+  ApiCountry,
+  ApiLanguage,
+  ApiOldLangString,
   ApiPeerColors,
-  ApiSession, ApiTimezone, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
+  ApiPrivacyKey,
+  ApiSession,
+  ApiTimezone,
+  ApiUrlAuthResult,
+  ApiWallpaper,
+  ApiWebSession,
   LangPackStringValue,
 } from '../../types';
 
@@ -332,7 +339,7 @@ export function buildApiChatLink(data: GramJs.account.ResolvedBusinessChatLinks)
   };
 }
 
-export function buildApiCollectibleInfo(info: GramJs.fragment.TypeCollectibleInfo): ApiCollectionInfo {
+export function buildApiCollectibleInfo(info: GramJs.fragment.TypeCollectibleInfo): ApiCollectibleInfo {
   const {
     amount,
     currency,

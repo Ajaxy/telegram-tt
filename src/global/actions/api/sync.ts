@@ -1,8 +1,8 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
-import type { ThreadId } from '../../../types';
+import type { Thread, ThreadId } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
-import type { ActionReturnType, GlobalState, Thread } from '../../types';
+import type { ActionReturnType, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';

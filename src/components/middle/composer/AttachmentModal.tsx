@@ -7,8 +7,8 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiAttachment, ApiChatMember, ApiMessage, ApiSticker,
 } from '../../../api/types';
-import type { GlobalState, MessageListType } from '../../../global/types';
-import type { ThreadId } from '../../../types';
+import type { GlobalState } from '../../../global/types';
+import type { MessageListType, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import {

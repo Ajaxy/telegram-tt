@@ -16,8 +16,13 @@ import type {
   ApiThreadInfo,
   ApiTypeStory,
 } from '../../../api/types';
-import type { ActiveDownloads, MessageListType } from '../../../global/types';
-import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
+import type {
+  ActiveDownloads,
+  IAlbum,
+  IAnchorPosition,
+  MessageListType,
+  ThreadId,
+} from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';

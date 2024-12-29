@@ -1,5 +1,4 @@
-import type { WebPageMediaSize } from '../../global/types';
-import type { ThreadId } from '../../types';
+import type { ThreadId, WebPageMediaSize } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat, ApiPeerColor } from './chats';

@@ -1,7 +1,6 @@
 import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiPremiumSection } from '../../../global/types';
 import type {
   ApiBoost,
   ApiBoostsStatus,
@@ -15,6 +14,7 @@ import type {
   ApiPaymentSavedInfo,
   ApiPremiumGiftCodeOption,
   ApiPremiumPromo,
+  ApiPremiumSection,
   ApiPremiumSubscriptionOption,
   ApiPrepaidGiveaway,
   ApiPrepaidStarsGiveaway,

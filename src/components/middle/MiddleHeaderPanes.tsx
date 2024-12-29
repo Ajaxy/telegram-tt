@@ -4,8 +4,7 @@ import React, {
 import { setExtraStyles } from '../../lib/teact/teact-dom';
 import { withGlobal } from '../../global';
 
-import type { MessageListType } from '../../global/types';
-import type { ThreadId } from '../../types';
+import type { MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import { type ApiChat, MAIN_THREAD_ID } from '../../api/types';
 

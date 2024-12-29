@@ -2,8 +2,7 @@ import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';
-import type { MessageListType } from '../../../global/types';
-import type { ThreadId } from '../../../types';
+import type { MessageListType, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { MAIN_THREAD_ID } from '../../../api/types';
 

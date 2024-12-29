@@ -4,8 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { MessageListType } from '../../global/types';
-import type { IAnchorPosition, ThreadId } from '../../types';
+import type { IAnchorPosition, MessageListType, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { ManagementScreens } from '../../types';
 

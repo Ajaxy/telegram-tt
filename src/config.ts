@@ -1,5 +1,6 @@
-import type { ApiReactionEmoji } from './api/types';
-import type { ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection } from './global/types';
+import type {
+  ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection, ApiReactionEmoji,
+} from './api/types';
 
 export const APP_CODE_NAME = 'A';
 export const APP_NAME = process.env.APP_NAME || `Telegram Web ${APP_CODE_NAME}`;

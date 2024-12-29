@@ -15,7 +15,7 @@ import type {
   ApiWebDocument,
   MediaContainer,
 } from '../../api/types';
-import type { ActiveDownloads } from '../types';
+import type { ActiveDownloads } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
 import {

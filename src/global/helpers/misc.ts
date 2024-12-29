@@ -1,4 +1,4 @@
-import type { ApiInputPrivacyRules, BotsPrivacyType, PrivacyVisibility } from '../../types';
+import type { ApiInputPrivacyRules, BotsPrivacyType, PrivacyVisibility } from '../../api/types';
 import type { GlobalState } from '../types';
 
 import { partition } from '../../util/iteratees';

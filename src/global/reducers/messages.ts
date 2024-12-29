@@ -1,9 +1,17 @@
 import type {
   ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
 } from '../../api/types';
-import type { FocusDirection, ScrollTargetPosition, ThreadId } from '../../types';
 import type {
-  GlobalState, MessageList, MessageListType, TabArgs, TabState, TabThread, Thread,
+  FocusDirection,
+  MessageList,
+  MessageListType,
+  ScrollTargetPosition,
+  TabThread,
+  Thread,
+  ThreadId,
+} from '../../types';
+import type {
+  GlobalState, TabArgs, TabState,
 } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 

@@ -1,11 +1,11 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiDraft } from '../../../global/types';
 import type {
   ApiAction,
   ApiAttachment,
   ApiChat,
   ApiContact,
+  ApiDraft,
   ApiFactCheck,
   ApiFormattedText,
   ApiGroupCall,

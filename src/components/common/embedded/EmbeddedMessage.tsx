@@ -5,8 +5,8 @@ import type {
   ApiChat,
   ApiMessage, ApiPeer, ApiReplyInfo, MediaContainer,
 } from '../../../api/types';
-import type { ChatTranslatedMessages } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { ChatTranslatedMessages } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
 import { CONTENT_NOT_SUPPORTED } from '../../../config';

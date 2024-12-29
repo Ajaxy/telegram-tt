@@ -8,9 +8,9 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
-import type { TabState, WebApp } from '../../../global/types';
+import type { TabState } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
-import type { WebAppOutboundEvent } from '../../../types/webapp';
+import type { WebApp, WebAppOutboundEvent } from '../../../types/webapp';
 
 import { RESIZE_HANDLE_CLASS_NAME } from '../../../config';
 import { getWebAppKey } from '../../../global/helpers/bots';

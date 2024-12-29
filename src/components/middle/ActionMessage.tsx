@@ -7,9 +7,8 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type {
   ApiChat, ApiMessage, ApiSticker, ApiTopic, ApiUser,
 } from '../../api/types';
-import type { MessageListType } from '../../global/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { FocusDirection, ThreadId } from '../../types';
+import type { FocusDirection, MessageListType, ThreadId } from '../../types';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 
 import { getChatTitle, getMessageHtmlId, isJoinedChannelMessage } from '../../global/helpers';

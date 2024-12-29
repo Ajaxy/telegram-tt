@@ -2,8 +2,8 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiPrivacySettings } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';

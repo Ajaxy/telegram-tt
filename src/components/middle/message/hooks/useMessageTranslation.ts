@@ -1,7 +1,7 @@
 import { useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { ChatTranslatedMessages } from '../../../../global/types';
+import type { ChatTranslatedMessages } from '../../../../types';
 
 import { throttle } from '../../../../util/schedulers';
 
