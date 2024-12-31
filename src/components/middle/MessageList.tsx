@@ -56,6 +56,7 @@ import { orderBy } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
+import { getOffsetToContainer } from '../../util/scroll';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
@@ -585,7 +586,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         newScrollTop = scrollTop + (newAnchorTop - (anchorTopRef.current || 0));
       } else if (unreadDivider) {
         newScrollTop = Math.min(
-          unreadDivider.offsetTop - UNREAD_DIVIDER_TOP,
+          getOffsetToContainer(unreadDivider, container).top - UNREAD_DIVIDER_TOP,
           scrollHeight - scrollOffset,
         );
       } else {

@@ -13,6 +13,7 @@ import {
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../global/selectors';
 import { animateSingle, cancelSingleAnimation } from './animation';
+import { getOffsetToContainer } from './scroll';
 import { IS_ANDROID } from './windowEnvironment';
 
 export type AnimateScrollArgs = {
@@ -53,22 +54,6 @@ export function restartCurrentScrollAnimation() {
   requestMeasure(() => {
     requestMutation(createMutateFunction(currentArgs!));
   });
-}
-
-function getOffsetToContainer(element: HTMLElement, container: HTMLElement) {
-  let offsetTop = 0;
-  let offsetLeft = 0;
-
-  let current: HTMLElement | null = element;
-
-  while (current && current !== container && !current.contains(container)) {
-    offsetTop += current.offsetTop;
-    offsetLeft += current.offsetLeft;
-
-    current = current.offsetParent as HTMLElement;
-  }
-
-  return { top: offsetTop, left: offsetLeft };
 }
 
 function createMutateFunction(args: AnimateScrollArgs) {
