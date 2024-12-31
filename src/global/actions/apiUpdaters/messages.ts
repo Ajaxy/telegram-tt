@@ -166,7 +166,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       setGlobal(global);
 
       // Reload dialogs if chat is not present in the list
-      if (!isLocal && chat && !chat.isNotJoined && !selectIsChatListed(global, chatId)) {
+      if (!isLocal && !chat?.isNotJoined && !selectIsChatListed(global, chatId)) {
         actions.loadTopChats();
       }
 
@@ -446,7 +446,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const chat = selectChat(global, chatId);
       // Reload dialogs if chat is not present in the list
-      if (chat && !chat.isNotJoined && !selectIsChatListed(global, chatId)) {
+      if (!chat?.isNotJoined && !selectIsChatListed(global, chatId)) {
         actions.loadTopChats();
       }
 
