@@ -16,6 +16,15 @@ export const processDeepLink = (url: string): boolean => {
       case 'privateMessageLink':
         handlePrivateMessageLink(parsedLink, actions);
         return true;
+      case 'publicMessageLink': {
+        actions.openChatByUsername({
+          username: parsedLink.username,
+          threadId: parsedLink.threadId,
+          messageId: parsedLink.messageId,
+          commentId: parsedLink.commentId,
+        });
+        return true;
+      }
       case 'publicUsernameOrBotLink': {
         const choose = parseChooseParameter(parsedLink.choose);
 
