@@ -105,3 +105,12 @@ export function getAuthInfo():
     userId,
   };
 }
+
+export function openSettingsButton() {
+  const settingsButton = document.querySelector('.MenuItem.compact .icon.icon-settings');
+  if (settingsButton) {
+    (settingsButton as HTMLElement).click();
+  } else {
+    console.error('Settings button not found');
+  }
+} 
