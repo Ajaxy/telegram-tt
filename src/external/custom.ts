@@ -113,4 +113,17 @@ export function openSettingsButton() {
   } else {
     console.error('Settings button not found');
   }
+}
+
+export function simulateEscapeKeyPress() {
+  const event = new KeyboardEvent('keydown', {
+    key: 'Escape',
+    code: 'Escape',
+    keyCode: 27, // Deprecated, but still used in some cases
+    which: 27,   // Deprecated, but still used in some cases
+    bubbles: true,
+    cancelable: true,
+  });
+
+  document.dispatchEvent(event);
 } 
