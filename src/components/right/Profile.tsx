@@ -19,6 +19,7 @@ import type { TabState } from '../../global/types';
 import type {
   ISettings, ProfileState, ProfileTabType, SharedMediaType, ThreadId,
 } from '../../types';
+import type { RegularLangKey } from '../../types/language';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
@@ -68,6 +69,7 @@ import useCacheBuster from '../../hooks/useCacheBuster';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import useAsyncRendering from './hooks/useAsyncRendering';
@@ -151,14 +153,14 @@ type StateProps = {
 
 type TabProps = {
   type: ProfileTabType;
-  title: string;
+  key: RegularLangKey;
 };
 
 const TABS: TabProps[] = [
-  { type: 'media', title: 'SharedMediaTab2' },
-  { type: 'documents', title: 'SharedFilesTab2' },
-  { type: 'links', title: 'SharedLinksTab2' },
-  { type: 'audio', title: 'SharedMusicTab2' },
+  { type: 'media', key: 'ProfileTabMedia' },
+  { type: 'documents', key: 'ProfileTabFiles' },
+  { type: 'links', key: 'ProfileTabLinks' },
+  { type: 'audio', key: 'ProfileTabMusic' },
 ];
 
 const HIDDEN_RENDER_DELAY = 1000;
@@ -231,42 +233,63 @@ const Profile: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
-  const lang = useOldLang();
+
+  const oldLang = useOldLang();
+  const lang = useLang();
+
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
   const profileId = isSavedDialog ? String(threadId) : chatId;
   const isSavedMessages = profileId === currentUserId && !isSavedDialog;
 
-  const tabs = useMemo(() => ([
-    ...(isSavedMessages && !isSavedDialog ? [{ type: 'dialogs' as const, title: 'SavedDialogsTab' }] : []),
-    ...(hasStoriesTab ? [{ type: 'stories' as const, title: 'ProfileStories' }] : []),
-    ...(hasStoriesTab && isSavedMessages ? [{ type: 'storiesArchive' as const, title: 'ProfileStoriesArchive' }] : []),
-    ...(hasGiftsTab ? [{ type: 'gifts' as const, title: 'ProfileGifts' }] : []),
-    ...(hasMembersTab ? [{
-      type: 'members' as const, title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
-    }] : []),
-    ...(hasPreviewMediaTab ? [{
-      type: 'previewMedia' as const, title: 'ProfileBotPreviewTab',
-    }] : []),
-    ...TABS,
-    // TODO The filter for voice messages currently does not work
-    // in forum topics. Return it when it's fixed on the server side.
-    ...(!isTopicInfo ? [{ type: 'voice' as const, title: 'SharedVoiceTab2' }] : []),
-    ...(hasCommonChatsTab ? [{ type: 'commonChats' as const, title: 'SharedGroupsTab2' }] : []),
-    ...(isChannel && similarChannels?.length
-      ? [{ type: 'similarChannels' as const, title: 'SimilarChannelsTab' }]
-      : []),
-  ]), [
-    hasCommonChatsTab,
-    hasMembersTab,
-    hasPreviewMediaTab,
-    hasStoriesTab,
-    hasGiftsTab,
-    isChannel,
-    isTopicInfo,
-    similarChannels,
-    isSavedMessages,
-    isSavedDialog,
+  const tabs = useMemo(() => {
+    const arr: TabProps[] = [];
+    if (isSavedMessages && !isSavedDialog) {
+      arr.push({ type: 'dialogs', key: 'ProfileTabSavedDialogs' });
+    }
+
+    if (hasStoriesTab) {
+      arr.push({ type: 'stories', key: 'ProfileTabStories' });
+    }
+
+    if (hasStoriesTab && isSavedMessages) {
+      arr.push({ type: 'storiesArchive', key: 'ProfileTabStoriesArchive' });
+    }
+
+    if (hasGiftsTab) {
+      arr.push({ type: 'gifts', key: 'ProfileTabGifts' });
+    }
+
+    if (hasMembersTab) {
+      arr.push({ type: 'members', key: isChannel ? 'ProfileTabSubscribers' : 'ProfileTabMembers' });
+    }
+
+    if (hasPreviewMediaTab) {
+      arr.push({ type: 'previewMedia', key: 'ProfileTabBotPreview' });
+    }
+
+    arr.push(...TABS);
+
+    // Voice messages filter currently does not work in forum topics. Return it when it's fixed on the server side.
+    if (!isTopicInfo) {
+      arr.push({ type: 'voice', key: 'ProfileTabVoice' });
+    }
+
+    if (hasCommonChatsTab) {
+      arr.push({ type: 'commonChats', key: 'ProfileTabSharedGroups' });
+    }
+
+    if (isChannel && similarChannels?.length) {
+      arr.push({ type: 'similarChannels', key: 'ProfileTabSimilarChannels' });
+    }
+
+    return arr.map((tab) => ({
+      type: tab.type,
+      title: lang(tab.key),
+    }));
+  }, [
+    isSavedMessages, isSavedDialog, hasStoriesTab, hasGiftsTab, hasMembersTab, hasPreviewMediaTab, isTopicInfo,
+    hasCommonChatsTab, isChannel, similarChannels?.length, lang,
   ]);
 
   const initialTab = useMemo(() => {
@@ -471,7 +494,7 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
-      title: lang('lng_context_remove_from_group'),
+      title: oldLang('lng_context_remove_from_group'),
       icon: 'stop',
       handler: () => {
         setDeletingUserId(memberId);
@@ -506,28 +529,28 @@ const Profile: FC<OwnProps & StateProps> = ({
           text = areMembersHidden ? 'You have no access to group members list.' : 'No members found';
           break;
         case 'commonChats':
-          text = lang('NoGroupsInCommon');
+          text = oldLang('NoGroupsInCommon');
           break;
         case 'documents':
-          text = lang('lng_media_file_empty');
+          text = oldLang('lng_media_file_empty');
           break;
         case 'links':
-          text = lang('lng_media_link_empty');
+          text = oldLang('lng_media_link_empty');
           break;
         case 'audio':
-          text = lang('lng_media_song_empty');
+          text = oldLang('lng_media_song_empty');
           break;
         case 'voice':
-          text = lang('lng_media_audio_empty');
+          text = oldLang('lng_media_audio_empty');
           break;
         case 'stories':
-          text = lang('StoryList.SavedEmptyState.Title');
+          text = oldLang('StoryList.SavedEmptyState.Title');
           break;
         case 'storiesArchive':
-          text = lang('StoryList.ArchivedEmptyState.Title');
+          text = oldLang('StoryList.ArchivedEmptyState.Title');
           break;
         default:
-          text = lang('SharedMedia.EmptyTitle');
+          text = oldLang('SharedMedia.EmptyTitle');
       }
 
       return (
@@ -540,7 +563,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     return (
       <div
         className={`content ${resultType}-list`}
-        dir={lang.isRtl && resultType === 'media' ? 'rtl' : undefined}
+        dir={oldLang.isRtl && resultType === 'media' ? 'rtl' : undefined}
         teactFastList
       >
         {resultType === 'media' ? (
@@ -612,7 +635,7 @@ const Profile: FC<OwnProps & StateProps> = ({
                 key={id}
                 theme={theme}
                 message={messagesById[id]}
-                senderTitle={getSenderName(lang, messagesById[id], chatsById, usersById)}
+                senderTitle={getSenderName(oldLang, messagesById[id], chatsById, usersById)}
                 origin={AudioOrigin.SharedMedia}
                 date={messagesById[id].date}
                 className="scroll-item"
@@ -679,11 +702,11 @@ const Profile: FC<OwnProps & StateProps> = ({
               <>
                 {/* eslint-disable-next-line react/jsx-no-bind */}
                 <Button className="show-more-channels" size="smaller" onClick={() => openPremiumModal()}>
-                  {lang('UnlockSimilar')}
+                  {oldLang('UnlockSimilar')}
                   <i className="icon icon-unlock-badge" />
                 </Button>
                 <div className="more-similar">
-                  {renderText(lang('MoreSimilarText', limitSimilarChannels), ['simple_markdown'])}
+                  {renderText(oldLang('MoreSimilarText', limitSimilarChannels), ['simple_markdown'])}
                 </div>
               </>
             )}
@@ -721,7 +744,7 @@ const Profile: FC<OwnProps & StateProps> = ({
         >
           <Transition
             ref={transitionRef}
-            name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+            name={oldLang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
             activeKey={activeKey}
             renderCount={tabs.length}
             shouldRestoreHeight
@@ -739,7 +762,7 @@ const Profile: FC<OwnProps & StateProps> = ({
         <FloatingActionButton
           isShown={resultType === 'members'}
           onClick={handleNewMemberDialogOpen}
-          ariaLabel={lang('lng_channel_add_users')}
+          ariaLabel={oldLang('lng_channel_add_users')}
         >
           <i className="icon icon-add-user-filled" />
         </FloatingActionButton>

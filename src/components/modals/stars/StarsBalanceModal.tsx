@@ -5,6 +5,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiStarTopupOption } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
+import type { RegularLangKey } from '../../../types/language';
 
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
@@ -35,10 +36,10 @@ import StarLogo from '../../../assets/icons/StarLogo.svg';
 import StarsBackground from '../../../assets/stars-bg.png';
 
 const TRANSACTION_TYPES = ['all', 'inbound', 'outbound'] as const;
-const TRANSACTION_TABS: TabWithProperties[] = [
-  { title: 'StarsTransactionsAll' },
-  { title: 'StarsTransactionsIncoming' },
-  { title: 'StarsTransactionsOutgoing' },
+const TRANSACTION_TABS_KEYS: RegularLangKey[] = [
+  'StarsTransactionsAll',
+  'StarsTransactionsIncoming',
+  'StarsTransactionsOutgoing',
 ];
 const TRANSACTION_ITEM_CLASS = 'StarsTransactionItem';
 const SUBSCRIPTION_PURPOSE = 'subs';
@@ -112,6 +113,12 @@ const StarsBalanceModal = ({
 
   const shouldShowItems = Boolean(history?.all?.transactions.length && !shouldOpenOnBuy);
   const shouldSuggestGifting = !shouldOpenOnBuy;
+
+  const transactionTabs: TabWithProperties[] = useMemo(() => {
+    return TRANSACTION_TABS_KEYS.map((key) => ({
+      title: lang(key),
+    }));
+  }, [lang]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -266,7 +273,7 @@ const StarsBalanceModal = ({
               <Transition
                 name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
                 activeKey={selectedTabIndex}
-                renderCount={TRANSACTION_TABS.length}
+                renderCount={TRANSACTION_TABS_KEYS.length}
                 shouldRestoreHeight
                 className={styles.transition}
               >
@@ -292,7 +299,7 @@ const StarsBalanceModal = ({
               className={styles.tabs}
               tabClassName={styles.tab}
               activeTab={selectedTabIndex}
-              tabs={TRANSACTION_TABS}
+              tabs={transactionTabs}
               onSwitchTab={setSelectedTabIndex}
             />
           </div>

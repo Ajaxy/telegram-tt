@@ -408,6 +408,8 @@ export interface LangPair {
   'PasscodeControllerChangeTitle': undefined;
   'FilterNew': undefined;
   'FilterEdit': undefined;
+  'FilterDelete': undefined;
+  'FilterShare': undefined;
   'AutoDeleteConfirm': undefined;
   'LogOutTitle': undefined;
   'AccDescrGoBack': undefined;
@@ -1172,6 +1174,32 @@ export interface LangPair {
   'PrivateChatsSearchContext': undefined;
   'GroupChatsSearchContext': undefined;
   'ChannelsSearchContext': undefined;
+  'SearchTabChats': undefined;
+  'SearchTabChannels': undefined;
+  'SearchTabApps': undefined;
+  'SearchTabMedia': undefined;
+  'SearchTabLinks': undefined;
+  'SearchTabFiles': undefined;
+  'SearchTabMusic': undefined;
+  'SearchTabVoice': undefined;
+  'SearchTabMessages': undefined;
+  'StarsTransactionsAll': undefined;
+  'StarsTransactionsIncoming': undefined;
+  'StarsTransactionsOutgoing': undefined;
+  'ProfileTabSavedDialogs': undefined;
+  'ProfileTabStories': undefined;
+  'ProfileTabStoriesArchive': undefined;
+  'ProfileTabGifts': undefined;
+  'ProfileTabSubscribers': undefined;
+  'ProfileTabMembers': undefined;
+  'ProfileTabBotPreview': undefined;
+  'ProfileTabMedia': undefined;
+  'ProfileTabFiles': undefined;
+  'ProfileTabLinks': undefined;
+  'ProfileTabMusic': undefined;
+  'ProfileTabVoice': undefined;
+  'ProfileTabSharedGroups': undefined;
+  'ProfileTabSimilarChannels': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

@@ -24,8 +24,8 @@ import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntit
 import useDerivedState from '../../../hooks/useDerivedState';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import StoryRibbon from '../../story/StoryRibbon';
@@ -95,7 +95,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useEffect(() => {
     loadChatFolders();
@@ -151,7 +151,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
       if (canShareFolder) {
         contextActions.push({
-          title: lang('ChatList.ContextMenuShare'),
+          title: lang('FilterShare'),
           icon: 'link',
           handler: () => {
             const chatListCount = Object.values(chatFoldersById).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);
@@ -187,7 +187,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         });
 
         contextActions.push({
-          title: lang('FilterDeleteItem'),
+          title: lang('FilterDelete'),
           icon: 'delete',
           destructive: true,
           handler: () => {
