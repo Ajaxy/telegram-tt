@@ -298,7 +298,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           <InputText
             className="mb-0"
             label={lang('FilterNameHint')}
-            value={state.folder.title}
+            value={state.folder.title.text}
             onChange={handleChange}
             error={state.error && state.error === ERROR_NO_TITLE ? ERROR_NO_TITLE : undefined}
           />

@@ -207,7 +207,8 @@ export interface ApiRestrictionReason {
 
 export interface ApiChatFolder {
   id: number;
-  title: string;
+  title: ApiFormattedText;
+  noTitleAnimations?: true;
   description?: string;
   emoticon?: string;
   contacts?: true;

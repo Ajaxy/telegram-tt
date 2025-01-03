@@ -124,7 +124,7 @@ const INITIAL_STATE: FoldersState = {
   mode: 'create',
   chatFilter: '',
   folder: {
-    title: '',
+    title: { text: '' },
     includedChatIds: [],
     excludedChatIds: [],
   },
@@ -133,14 +133,14 @@ const INITIAL_STATE: FoldersState = {
 const foldersReducer: StateReducer<FoldersState, FoldersActions> = (
   state,
   action,
-) => {
+): FoldersState => {
   switch (action.type) {
     case 'setTitle':
       return {
         ...state,
         folder: {
           ...state.folder,
-          title: action.payload,
+          title: { text: action.payload },
         },
         isTouched: true,
       };
@@ -184,7 +184,7 @@ const foldersReducer: StateReducer<FoldersState, FoldersActions> = (
           ...state,
           folder: {
             ...omit(state.folder, INCLUDE_FILTER_FIELDS),
-            title: state.folder.title ? state.folder.title : getSuggestedFolderName(state.includeFilters),
+            title: state.folder.title ? state.folder.title : { text: getSuggestedFolderName(state.includeFilters) },
             ...state.includeFilters,
           },
           includeFilters: undefined,

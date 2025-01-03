@@ -26,7 +26,9 @@ import type {
 import { pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb, serializeBytes } from '../helpers';
-import { buildApiPhoto, buildApiUsernames, buildAvatarPhotoId } from './common';
+import {
+  buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
+} from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
   buildApiEmojiStatus,
@@ -419,7 +421,8 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter | GramJs.DialogFi
       pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
       hasMyInvites: filter.hasMyInvites,
       isChatList: true,
-      title: filter.title.text,
+      noTitleAnimations: filter.titleNoanimate,
+      title: buildApiFormattedText(filter.title),
     };
   }
 
@@ -432,7 +435,8 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter | GramJs.DialogFi
     pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     excludedChatIds: filter.excludePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
-    title: filter.title.text,
+    title: buildApiFormattedText(filter.title),
+    noTitleAnimations: filter.titleNoanimate,
   };
 }
 

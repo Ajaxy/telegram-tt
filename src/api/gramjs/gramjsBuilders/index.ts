@@ -238,6 +238,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
     pinnedChatIds,
     includedChatIds,
     excludedChatIds,
+    noTitleAnimations,
   } = folder;
 
   const pinnedPeers = pinnedChatIds
@@ -255,17 +256,18 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
   if (folder.isChatList) {
     return new GramJs.DialogFilterChatlist({
       id: folder.id,
-      title: buildInputTextWithEntities({ text: folder.title, entities: [] }),
+      title: buildInputTextWithEntities(folder.title),
       emoticon: emoticon || undefined,
       pinnedPeers,
       includePeers,
       hasMyInvites: folder.hasMyInvites,
+      titleNoanimate: noTitleAnimations,
     });
   }
 
   return new GramJs.DialogFilter({
     id: folder.id,
-    title: buildInputTextWithEntities({ text: folder.title, entities: [] }),
+    title: buildInputTextWithEntities(folder.title),
     emoticon: emoticon || undefined,
     contacts: contacts || undefined,
     nonContacts: nonContacts || undefined,
@@ -278,6 +280,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
     pinnedPeers,
     includePeers,
     excludePeers,
+    titleNoanimate: noTitleAnimations,
   });
 }
 

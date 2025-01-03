@@ -4,6 +4,8 @@ import React, {
 } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
+import type { ApiChatFolder } from '../../../../api/types';
+
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { isChatChannel, isUserBot } from '../../../../global/helpers';
 import {
@@ -13,10 +15,11 @@ import {
 } from '../../../../global/selectors';
 import { partition } from '../../../../util/iteratees';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
-import renderText from '../../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
@@ -33,9 +36,7 @@ type OwnProps = {
 
 type StateProps = {
   folderId?: number;
-  title?: string;
-  includedChatIds?: string[];
-  pinnedChatIds?: string[];
+  folder?: ApiChatFolder;
   peerIds?: string[];
   url?: string;
   isLoading?: boolean;
@@ -45,9 +46,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   isActive,
   onReset,
   folderId,
-  title,
-  includedChatIds,
-  pinnedChatIds,
+  folder,
   peerIds,
   url,
   isLoading,
@@ -55,7 +54,9 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   const {
     createChatlistInvite, deleteChatlistInvite, editChatlistInvite, showNotification,
   } = getActions();
-  const lang = useOldLang();
+
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   const [isTouched, setIsTouched] = useState(false);
 
@@ -84,8 +85,8 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   });
 
   const itemIds = useMemo(() => {
-    return (includedChatIds || []).concat(pinnedChatIds || []);
-  }, [includedChatIds, pinnedChatIds]);
+    return (folder?.includedChatIds || []).concat(folder?.pinnedChatIds || []);
+  }, [folder?.includedChatIds, folder?.pinnedChatIds]);
 
   const [unlockedIds, lockedIds] = useMemo(() => {
     const global = getGlobal();
@@ -114,19 +115,19 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
     const chat = selectChat(global, id);
     if (user && isUserBot(user)) {
       showNotification({
-        message: lang('FolderLinkScreen.AlertTextUnavailableBot'),
+        message: oldLang('FolderLinkScreen.AlertTextUnavailableBot'),
       });
     } else if (user) {
       showNotification({
-        message: lang('FolderLinkScreen.AlertTextUnavailableUser'),
+        message: oldLang('FolderLinkScreen.AlertTextUnavailableUser'),
       });
     } else if (chat && isChatChannel(chat)) {
       showNotification({
-        message: lang('FolderLinkScreen.AlertTextUnavailablePublicChannel'),
+        message: oldLang('FolderLinkScreen.AlertTextUnavailablePublicChannel'),
       });
     } else {
       showNotification({
-        message: lang('FolderLinkScreen.AlertTextUnavailablePublicGroup'),
+        message: oldLang('FolderLinkScreen.AlertTextUnavailablePublicGroup'),
       });
     }
   });
@@ -153,15 +154,26 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
           className="settings-content-icon"
         />
 
-        <p className="settings-item-description mb-3" dir="auto">
-          {renderText(lang('FolderLinkScreen.TitleDescriptionSelected', [title, chatsCount]),
-            ['simple_markdown'])}
-        </p>
+        {folder && (
+          <p className="settings-item-description mb-3" dir="auto">
+            {lang('FolderLinkTitleDescription', {
+              folder: renderTextWithEntities({
+                text: folder.title.text,
+                entities: folder.title.entities,
+                noCustomEmojiPlayback: folder.noTitleAnimations,
+              }),
+              chats: lang('FolderLinkTitleDescriptionChats', { count: chatsCount }, { pluralValue: chatsCount }),
+            }, {
+              withMarkdown: true,
+              withNodes: true,
+            })}
+          </p>
+        )}
       </div>
 
       <LinkField
         className="settings-item"
-        link={!url ? lang('Loading') : url}
+        link={!url ? oldLang('Loading') : url}
         withShare
         onRevoke={handleRevoke}
         isDisabled={!chatsCount || isTouched}
@@ -204,9 +216,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       folderId,
-      title: folder?.title,
-      includedChatIds: folder?.includedChatIds,
-      pinnedChatIds: folder?.pinnedChatIds,
+      folder,
       url,
       isLoading,
       peerIds: invite?.peerIds,

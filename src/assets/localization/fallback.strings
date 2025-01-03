@@ -1406,3 +1406,6 @@
 "StarsSubscribeBotText_one" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** star per month?"
 "StarsSubscribeBotText_other" = "Do you want to subscribe to **{name}** in **{bot}** for **{amount}** stars per month?"
 "StarsSubscribeBotButtonMonth" = "Subscribe for {amount} / month";
+"FolderLinkTitleDescription" = "Anyone with this link can add {folder} folder and {chats} selected below.";
+"FolderLinkTitleDescriptionChats_one" = "the chat";
+"FolderLinkTitleDescriptionChats_other" = "the {count} chats";

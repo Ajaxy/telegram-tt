@@ -46,6 +46,7 @@ export function renderTextWithEntities({
   sharedCanvasHqRef,
   cacheBuster,
   forcePlayback,
+  noCustomEmojiPlayback,
   focusedQuote,
   isInSelectMode,
 }: {
@@ -65,6 +66,7 @@ export function renderTextWithEntities({
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
+  noCustomEmojiPlayback?: boolean;
   focusedQuote?: string;
   isInSelectMode?: boolean;
 }) {
@@ -173,6 +175,7 @@ export function renderTextWithEntities({
         sharedCanvasHqRef,
         cacheBuster,
         forcePlayback,
+        noCustomEmojiPlayback,
         isInSelectMode,
       });
 
@@ -388,6 +391,7 @@ function processEntity({
   sharedCanvasHqRef,
   cacheBuster,
   forcePlayback,
+  noCustomEmojiPlayback,
   isInSelectMode,
 } : {
   entity: ApiMessageEntity;
@@ -407,6 +411,7 @@ function processEntity({
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
+  noCustomEmojiPlayback?: boolean;
   isInSelectMode?: boolean;
 }) {
   const entityText = typeof entityContent === 'string' && entityContent;
@@ -447,6 +452,7 @@ function processEntity({
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withTranslucentThumb={withTranslucentThumbs}
           forceAlways={forcePlayback}
+          noPlay={noCustomEmojiPlayback}
         />
       );
     }
@@ -581,6 +587,7 @@ function processEntity({
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withTranslucentThumb={withTranslucentThumbs}
           forceAlways={forcePlayback}
+          noPlay={noCustomEmojiPlayback}
         />
       );
     default:

@@ -1574,6 +1574,10 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsSubscribeBotButtonMonth': {
     'amount': V;
   };
+  'FolderLinkTitleDescription': {
+    'folder': V;
+    'chats': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -1754,6 +1758,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
     'name': V;
     'bot': V;
     'amount': V;
+  };
+  'FolderLinkTitleDescriptionChats': {
+    'count': V;
   };
 }
 export type RegularLangKey = keyof LangPair;
