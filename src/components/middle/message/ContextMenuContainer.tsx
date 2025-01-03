@@ -32,6 +32,8 @@ import {
   getIsDownloading,
   getMessageDownloadableMedia,
   getMessageVideo,
+  getPrivateChatUserId,
+  getUserFullName,
   hasMessageTtl,
   isActionMessage,
   isChatChannel,
@@ -46,6 +48,7 @@ import {
   selectAllowedMessageActionsSlow,
   selectBot,
   selectCanForwardMessage,
+  selectCanGift,
   selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
   selectCanTranslateMessage,
@@ -67,6 +70,7 @@ import {
   selectStickerSet,
   selectThreadInfo,
   selectTopic,
+  selectUser,
   selectUserStatus,
 } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -149,6 +153,8 @@ type StateProps = {
   isChannel?: boolean;
   canReplyInChat?: boolean;
   isWithPaidReaction?: boolean;
+  contactUserFullName?: string;
+  canGift?: boolean;
 };
 
 const selection = window.getSelection();
@@ -214,6 +220,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   isWithPaidReaction,
   onClose,
   onCloseAnimationEnd,
+  contactUserFullName,
+  canGift,
 }) => {
   const {
     openThread,
@@ -690,6 +698,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onTranslate={handleTranslate}
         onShowOriginal={handleShowOriginal}
         onSelectLanguage={handleSelectLanguage}
+        contactUserFullName={contactUserFullName}
+        canGift={canGift}
       />
       <PinMessageModal
         isOpen={isPinModalOpen}
@@ -719,6 +729,9 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, message.chatId);
     const isPrivate = chat && isUserId(chat.id);
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, message.chatId) : undefined;
+    const contactUserFullName = chat && isUserId(chat.id)
+      ? getUserFullName(selectUser(global, getPrivateChatUserId(chat)!))
+      : undefined;
 
     const {
       seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions, readDateExpiresAt,
@@ -815,6 +828,8 @@ export default memo(withGlobal<OwnProps>(
     const storyData = message.content.storyData;
     const story = storyData ? selectPeerStory(global, storyData.peerId, storyData.id) : undefined;
 
+    const canGift = selectCanGift(global, message.chatId);
+
     return {
       threadId,
       chat,
@@ -868,6 +883,8 @@ export default memo(withGlobal<OwnProps>(
       isWithPaidReaction: chatFullInfo?.isPaidReactionAvailable,
       poll,
       story,
+      contactUserFullName,
+      canGift,
     };
   },
 )(ContextMenuContainer));
