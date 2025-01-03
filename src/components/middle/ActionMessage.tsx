@@ -19,6 +19,7 @@ import {
   selectChatMessage,
   selectGiftStickerForDuration,
   selectGiftStickerForStars,
+  selectIsCurrentUserPremium,
   selectIsMessageFocused,
   selectStarGiftSticker,
   selectTabState,
@@ -47,7 +48,9 @@ import Avatar from '../common/Avatar';
 import GiftRibbon from '../common/gift/GiftRibbon';
 import Sparkles from '../common/Sparkles';
 import ActionMessageSuggestedAvatar from './ActionMessageSuggestedAvatar';
+import ActionMessageUpdatedAvatar from './ActionMessageUpdatedAvatar';
 import ContextMenuContainer from './message/ContextMenuContainer.async';
+import Reactions from './message/reactions/Reactions';
 import SimilarChannels from './message/SimilarChannels';
 
 type OwnProps = {
@@ -82,6 +85,7 @@ type StateProps = {
   starsGiftSticker?: ApiSticker;
   canPlayAnimatedEmojis?: boolean;
   patternColor?: string;
+  isCurrentUserPremium?: boolean;
 };
 
 const APPEARANCE_DELAY = 10;
@@ -89,6 +93,7 @@ const STAR_GIFT_STICKER_SIZE = 120;
 
 const ActionMessage: FC<OwnProps & StateProps> = ({
   message,
+  threadId,
   isEmbedded,
   appearanceOrder = 0,
   isJustAdded,
@@ -114,6 +119,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onIntersectPinnedMessage,
+  isCurrentUserPremium,
 }) => {
   const {
     openPremiumModal,
@@ -156,10 +162,13 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const isPremiumGift = message.content.action?.type === 'giftPremium';
   const isGiftCode = message.content.action?.type === 'giftCode';
   const isSuggestedAvatar = message.content.action?.type === 'suggestProfilePhoto' && message.content.action!.photo;
+  const isUpdatedAvatar = message.content.action?.type === 'updateProfilePhoto' && message.content.action!.photo;
   const isJoinedMessage = isJoinedChannelMessage(message);
   const isStarsGift = message.content.action?.type === 'giftStars';
   const isStarGift = message.content.action?.type === 'starGift';
   const isPrizeStars = message.content.action?.type === 'prizeStars';
+
+  const withServiceReactions = Boolean(message.areReactionsPossible && message?.reactions);
 
   useEffect(() => {
     if (noAppearanceAnimation) {
@@ -548,7 +557,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const className = buildClassName(
     'ActionMessage message-list-item',
     isFocused && !noFocusHighlight && 'focused',
-    (isPremiumGift || isSuggestedAvatar) && 'centered-action',
+    (isPremiumGift || isSuggestedAvatar || isUpdatedAvatar) && 'centered-action',
     isContextMenuShown && 'has-menu-open',
     isLastInList && 'last-in-list',
     transitionClassNames,
@@ -564,7 +573,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
-      {!isSuggestedAvatar && !isGiftCode && !isJoinedMessage && (
+      {!isSuggestedAvatar && !isGiftCode && !isJoinedMessage && !isUpdatedAvatar && (
         <span className="action-message-content" onClick={handleClick}>{renderContent()}</span>
       )}
       {isPremiumGift && renderGift()}
@@ -575,6 +584,9 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       {isSuggestedAvatar && (
         <ActionMessageSuggestedAvatar message={message} renderContent={renderContent} />
       )}
+      {isUpdatedAvatar && (
+        <ActionMessageUpdatedAvatar message={message} renderContent={renderContent} />
+      )}
       {isJoinedMessage && <SimilarChannels chatId={targetChatId!} />}
       {contextMenuAnchor && (
         <ContextMenuContainer
@@ -584,6 +596,15 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           messageListType="thread"
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
+        />
+      )}
+      {withServiceReactions && (
+        <Reactions
+          isOutside
+          message={message!}
+          threadId={threadId}
+          observeIntersection={observeIntersectionForPlaying}
+          isCurrentUserPremium={isCurrentUserPremium}
         />
       )}
     </div>
@@ -646,6 +667,7 @@ export default memo(withGlobal<OwnProps>(
         focusDirection,
         noFocusHighlight,
       }),
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(ActionMessage));

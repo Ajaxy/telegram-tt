@@ -232,7 +232,8 @@ const MessageContextMenu: FC<OwnProps> = ({
   const scrollableRef = useRef<HTMLDivElement>(null);
   const lang = useOldLang();
   const noReactions = !isPrivate && !enabledReactions;
-  const withReactions = canShowReactionList && !noReactions;
+  const areReactionsPossible = message.areReactionsPossible;
+  const withReactions = (canShowReactionList && !noReactions) || areReactionsPossible;
   const isEdited = ('isEdited' in message) && message.isEdited;
   const seenByDates = message.seenByDates;
   const isPremiumGift = message.content.action?.type === 'giftPremium';

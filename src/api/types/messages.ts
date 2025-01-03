@@ -478,6 +478,7 @@ export interface ApiAction {
   | 'chatCreate'
   | 'topicCreate'
   | 'suggestProfilePhoto'
+  | 'updateProfilePhoto'
   | 'joinedChannel'
   | 'chatBoost'
   | 'receipt'
@@ -755,6 +756,7 @@ export interface ApiMessage {
   effectId?: string;
   isInvertedMedia?: true;
   isVideoProcessingPending?: true;
+  areReactionsPossible?: true;
 }
 
 export interface ApiReactions {

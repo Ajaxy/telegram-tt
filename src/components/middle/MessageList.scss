@@ -339,6 +339,13 @@
     }
   }
 
+  .action-message-updated-avatar {
+    background: transparent !important;
+    margin-top: 0.5rem;
+    cursor: var(--custom-cursor, pointer);
+    outline: none;
+  }
+
   .action-message-button {
     position: relative;
     display: inline-block;

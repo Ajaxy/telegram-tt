@@ -13,6 +13,12 @@
     margin-top: 0.25rem;
   }
 
+  &.with-service-reactions {
+    justify-content: center;
+    max-width: 19rem;
+    margin: 0.3rem auto;
+  }
+
   .own &.is-outside {
     flex-direction: row-reverse;
   }

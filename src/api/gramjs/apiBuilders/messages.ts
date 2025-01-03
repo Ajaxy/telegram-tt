@@ -216,6 +216,7 @@ export function buildApiMessageWithChatId(
   const senderBoosts = mtpMessage.fromBoostsApplied;
   const factCheck = mtpMessage.factcheck && buildApiFactCheck(mtpMessage.factcheck);
   const isVideoProcessingPending = mtpMessage.videoProcessingPending;
+  const areReactionsPossible = mtpMessage.reactionsArePossible;
 
   const isInvertedMedia = mtpMessage.invertMedia;
 
@@ -242,6 +243,7 @@ export function buildApiMessageWithChatId(
     editDate: mtpMessage.editDate,
     isMediaUnread,
     hasUnreadMention: mtpMessage.mentioned && isMediaUnread,
+    areReactionsPossible,
     isMentioned: mtpMessage.mentioned,
     ...(groupedId && {
       groupedId,
@@ -439,6 +441,7 @@ function buildAction(
       text = 'Notification.ChangedGroupPhoto';
       translationValues.push('%action_origin%');
     }
+    type = 'updateProfilePhoto';
   } else if (action instanceof GramJs.MessageActionChatDeletePhoto) {
     if (isChannelPost) {
       text = 'Channel.MessagePhotoRemoved';

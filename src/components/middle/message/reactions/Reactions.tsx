@@ -64,6 +64,7 @@ const Reactions: FC<OwnProps> = ({
   const lang = useOldLang();
 
   const { results, areTags, recentReactions } = message.reactions!;
+  const withServiceReactions = Boolean(message.areReactionsPossible && message.reactions);
 
   const totalCount = useMemo(() => (
     results.reduce((acc, reaction) => acc + reaction.count, 0)
@@ -178,7 +179,11 @@ const Reactions: FC<OwnProps> = ({
 
   return (
     <div
-      className={buildClassName('Reactions', isOutside && 'is-outside')}
+      className={buildClassName(
+        'Reactions',
+        isOutside && 'is-outside',
+        withServiceReactions && 'with-service-reactions',
+      )}
       style={maxWidth ? `max-width: ${maxWidth}px` : undefined}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
     >
