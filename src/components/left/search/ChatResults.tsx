@@ -1,10 +1,11 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useMemo, useRef, useState,
+  memo, useCallback, useEffect,
+  useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiMessage } from '../../../api/types';
+import type { ApiMessage, ApiMessageSearchContext } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { ALL_FOLDER_ID, GLOBAL_SUGGESTED_CHANNELS_ID } from '../../../config';
@@ -14,6 +15,7 @@ import {
   isChatChannel,
 } from '../../../global/helpers';
 import { selectSimilarChannelIds, selectTabState } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { getOrderedIds } from '../../../util/folderManager';
 import { unique } from '../../../util/iteratees';
 import { parseSearchResultKey, type SearchResultKey } from '../../../util/keys/searchResultKey';
@@ -23,18 +25,28 @@ import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
 import useAppLayout from '../../../hooks/useAppLayout';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useEffectOnce from '../../../hooks/useEffectOnce';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import NothingFound from '../../common/NothingFound';
 import PeerChip from '../../common/PeerChip';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Link from '../../ui/Link';
+import Loading from '../../ui/Loading';
+import Menu from '../../ui/Menu';
+import MenuItem from '../../ui/MenuItem';
+import Transition from '../../ui/Transition';
 import ChatMessage from './ChatMessage';
 import DateSuggest from './DateSuggest';
 import LeftSearchResultChat from './LeftSearchResultChat';
 import RecentContacts from './RecentContacts';
+
+import './ChatResults.scss';
 
 export type OwnProps = {
   searchQuery?: string;
@@ -78,17 +90,22 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   onSearchDateSelect,
 }) => {
   const {
-    openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId, loadChannelRecommendations,
+    openChat, addRecentlyFoundChatId, searchMessagesGlobal,
+    setGlobalSearchChatId, loadChannelRecommendations,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const chatSelectionRef = useRef<HTMLDivElement>(null);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const { isMobile } = useAppLayout();
   const [shouldShowMoreLocal, setShouldShowMoreLocal] = useState<boolean>(false);
   const [shouldShowMoreGlobal, setShouldShowMoreGlobal] = useState<boolean>(false);
+  const [searchContext, setSearchContext] = useState<ApiMessageSearchContext>('all');
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffectOnce(() => {
     if (isChannelList) loadChannelRecommendations({});
@@ -99,11 +116,12 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       runThrottled(() => {
         searchMessagesGlobal({
           type: isChannelList ? 'channels' : 'text',
+          context: searchContext,
         });
       });
     }
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
-  }, [searchQuery]);
+  }, [searchQuery, searchContext]);
 
   const handleChatClick = useCallback(
     (id: string) => {
@@ -124,6 +142,79 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     setGlobalSearchChatId({ id });
   }, [setGlobalSearchChatId]);
 
+  function getSearchContextCaption(context: ApiMessageSearchContext) {
+    if (context === 'users') return lang('PrivateChatsSearchContext');
+    if (context === 'groups') return lang('GroupChatsSearchContext');
+    if (context === 'channels') return lang('ChannelsSearchContext');
+    return lang('AllChatsSearchContext');
+  }
+
+  const {
+    isContextMenuOpen, contextMenuAnchor, handleContextMenu,
+    handleContextMenuClose, handleContextMenuHide,
+  } = useContextMenuHandlers(ref);
+
+  const getRootElement = useLastCallback(() => ref.current!);
+  const getMenuElement = useLastCallback(() => ref.current!.querySelector('.chatResultsContextMenu .bubble'));
+  const getTriggerElement = useLastCallback(() => ref.current!.querySelector('.menuTrigger'));
+
+  const handleClickContext = useLastCallback((e: React.MouseEvent): void => {
+    handleContextMenu(e);
+  });
+
+  const itemPlaceholderClass = buildClassName('icon', 'iconPlaceholder');
+
+  function renderContextMenu() {
+    return (
+      <Menu
+        isOpen={isContextMenuOpen}
+        anchor={contextMenuAnchor}
+        getTriggerElement={getTriggerElement}
+        getRootElement={getRootElement}
+        getMenuElement={getMenuElement}
+        className="chatResultsContextMenu"
+        onClose={handleContextMenuClose}
+        onCloseAnimationEnd={handleContextMenuHide}
+        autoClose
+      >
+        <>
+          <MenuItem
+            icon={searchContext === 'all' ? 'check' : undefined}
+            customIcon={searchContext !== 'all' ? <i className={itemPlaceholderClass} /> : undefined}
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => setSearchContext('all')}
+          >
+            {getSearchContextCaption('all')}
+          </MenuItem>
+          <MenuItem
+            icon={searchContext === 'users' ? 'check' : undefined}
+            customIcon={searchContext !== 'users' ? <i className={itemPlaceholderClass} /> : undefined}
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => setSearchContext('users')}
+          >
+            {getSearchContextCaption('users')}
+          </MenuItem>
+          <MenuItem
+            icon={searchContext === 'groups' ? 'check' : undefined}
+            customIcon={searchContext !== 'groups' ? <i className={itemPlaceholderClass} /> : undefined}
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => setSearchContext('groups')}
+          >
+            {getSearchContextCaption('groups')}
+          </MenuItem>
+          <MenuItem
+            icon={searchContext === 'channels' ? 'check' : undefined}
+            customIcon={searchContext !== 'channels' ? <i className={itemPlaceholderClass} /> : undefined}
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => setSearchContext('channels')}
+          >
+            {getSearchContextCaption('channels')}
+          </MenuItem>
+        </>
+      </Menu>
+    );
+  }
+
   const localResults = useMemo(() => {
     if (!isChannelList && (!searchQuery || (searchQuery.startsWith('@') && searchQuery.length < 2))) {
       return MEMO_EMPTY_ARRAY;
@@ -139,7 +230,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       const chat = chatsById[id];
       return chat && isChatChannel(chat);
     });
-    const localChatIds = filterChatsByName(lang, filteredChatIds, chatsById, searchQuery, currentUserId);
+    const localChatIds = filterChatsByName(oldLang, filteredChatIds, chatsById, searchQuery, currentUserId);
 
     if (isChannelList) return localChatIds;
 
@@ -149,7 +240,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     ];
 
     const localContactIds = filterUsersByName(
-      contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
+      contactIdsWithMe, usersById, searchQuery, currentUserId, oldLang('SavedMessages'),
     );
 
     const localPeerIds = [
@@ -161,7 +252,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       ...sortChatIds(localPeerIds, undefined, currentUserId ? [currentUserId] : undefined),
       ...sortChatIds(accountPeerIds || []),
     ]);
-  }, [searchQuery, lang, currentUserId, contactIds, accountPeerIds, isChannelList]);
+  }, [searchQuery, oldLang, currentUserId, contactIds, accountPeerIds, isChannelList]);
 
   useHorizontalScroll(chatSelectionRef, !localResults.length || isChannelList, true);
 
@@ -202,6 +293,17 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       .filter(Boolean);
   }, [searchQuery, searchDate, foundIds, isChannelList, globalMessagesByChatId]);
 
+  useEffect(() => {
+    if (!searchQuery) return;
+    searchMessagesGlobal({
+      type: isChannelList ? 'channels' : 'text',
+      context: searchContext,
+      shouldResetResultsByType: true,
+      shouldCheckFetchingMessagesStatus: true,
+    });
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [searchContext]);
+
   const handleClickShowMoreLocal = useCallback(() => {
     setShouldShowMoreLocal(!shouldShowMoreLocal);
   }, [shouldShowMoreLocal]);
@@ -213,7 +315,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   function renderFoundMessage(message: ApiMessage) {
     const chatsById = getGlobal().chats.byId;
 
-    const text = renderMessageSummary(lang, message);
+    const text = renderMessageSummary(oldLang, message);
     const chat = chatsById[message.chatId];
 
     if (!text || !chat) {
@@ -229,17 +331,22 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     );
   }
 
-  const nothingFound = fetchingStatus && !fetchingStatus.chats && !fetchingStatus.messages
-    && !localResults.length && !globalResults.length && !foundMessages.length;
+  const actualFoundIds = foundMessages;
+
+  const nothingFound = searchContext === 'all' && fetchingStatus && !fetchingStatus.chats && !fetchingStatus.messages
+    && !localResults.length && !globalResults.length && !actualFoundIds.length;
+  const isMessagesFetching = fetchingStatus?.messages;
 
   if (!searchQuery && !searchDate && !isChannelList) {
     return <RecentContacts onReset={onReset} />;
   }
 
+  const shouldRenderMessagesSection = searchContext === 'all' ? Boolean(actualFoundIds.length) : true;
+
   return (
     <InfiniteScroll
       className="LeftSearch--content custom-scroll"
-      items={foundMessages}
+      items={actualFoundIds}
       onLoadMore={handleLoadMore}
       // To prevent scroll jumps caused by delayed local results rendering
       noScrollRestoreOnTop
@@ -255,14 +362,14 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {nothingFound && (
         <NothingFound
-          text={lang('ChatList.Search.NoResults')}
-          description={lang('ChatList.Search.NoResultsDescription')}
+          text={oldLang('ChatList.Search.NoResults')}
+          description={oldLang('ChatList.Search.NoResultsDescription')}
         />
       )}
       {Boolean(localResults.length) && !isChannelList && (
         <div
           className="chat-selection no-scrollbar"
-          dir={lang.isRtl ? 'rtl' : undefined}
+          dir={oldLang.isRtl ? 'rtl' : undefined}
           ref={chatSelectionRef}
         >
           {localResults.map((id) => (
@@ -277,13 +384,13 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {Boolean(localResults.length) && (
         <div className="search-section">
-          <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
+          <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
             {localResults.length > LESS_LIST_ITEMS_AMOUNT && (
               <Link className="Link" onClick={handleClickShowMoreLocal}>
-                {lang(shouldShowMoreLocal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+                {oldLang(shouldShowMoreLocal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
               </Link>
             )}
-            {lang(isChannelList ? 'SearchMyChannels' : 'DialogList.SearchSectionDialogs')}
+            {oldLang(isChannelList ? 'SearchMyChannels' : 'DialogList.SearchSectionDialogs')}
           </h3>
           {localResults.map((id, index) => {
             if (!shouldShowMoreLocal && index >= LESS_LIST_ITEMS_AMOUNT) {
@@ -301,13 +408,13 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {Boolean(globalResults.length) && (
         <div className="search-section">
-          <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
+          <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
             {globalResults.length > LESS_LIST_ITEMS_AMOUNT && (
               <Link className="Link" onClick={handleClickShowMoreGlobal}>
-                {lang(shouldShowMoreGlobal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
+                {oldLang(shouldShowMoreGlobal ? 'ChatList.Search.ShowLess' : 'ChatList.Search.ShowMore')}
               </Link>
             )}
-            {lang('DialogList.SearchSectionGlobal')}
+            {oldLang('DialogList.SearchSectionGlobal')}
           </h3>
           {globalResults.map((id, index) => {
             if (!shouldShowMoreGlobal && index >= LESS_LIST_ITEMS_AMOUNT) {
@@ -326,8 +433,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {Boolean(suggestedChannelIds?.length) && !searchQuery && (
         <div className="search-section">
-          <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>
-            {lang('SearchRecommendedChannels')}
+          <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
+            {oldLang('SearchRecommendedChannels')}
           </h3>
           {suggestedChannelIds.map((id) => {
             return (
@@ -340,12 +447,35 @@ const ChatResults: FC<OwnProps & StateProps> = ({
           })}
         </div>
       )}
-      {Boolean(foundMessages.length) && (
-        <div className="search-section">
-          <h3 className="section-heading" dir={lang.isRtl ? 'auto' : undefined}>{lang('SearchMessages')}</h3>
-          {foundMessages.map(renderFoundMessage)}
-        </div>
-      )}
+      <div className="menuOwner" ref={ref}>
+        {renderContextMenu()}
+        {shouldRenderMessagesSection && (
+          <div className="search-section">
+            <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
+              <Link className="Link menuTrigger dropDownLink" onClick={handleClickContext}>
+                {lang('SearchContextCaption', {
+                  type: getSearchContextCaption(searchContext),
+                }, {
+                  withNodes: true,
+                })}
+
+                <Transition
+                  name="fade"
+                  shouldCleanup
+                  activeKey={Number(isMessagesFetching)}
+                  className="iconContainer"
+                  slideClassName="iconContainerSlide"
+                >
+                  {isMessagesFetching && (<Loading />)}
+                  {!isMessagesFetching && <Icon name="down" />}
+                </Transition>
+              </Link>
+              {oldLang('SearchMessages')}
+            </h3>
+            {actualFoundIds.map(renderFoundMessage)}
+          </div>
+        )}
+      </div>
     </InfiniteScroll>
   );
 };

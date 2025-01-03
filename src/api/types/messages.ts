@@ -1008,6 +1008,7 @@ export type ApiTranscription = {
 
 export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'profilePhoto';
 export type ApiGlobalMessageSearchType = 'text' | 'channels' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
+export type ApiMessageSearchContext = 'all' | 'users' | 'groups' | 'channels';
 
 export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
 | 'copyright' | 'geoIrrelevant' | 'fake' | 'illegalDrugs' | 'personalDetails' | 'other';

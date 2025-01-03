@@ -1168,6 +1168,10 @@ export interface LangPair {
   'PrivacyGiftsInfo': undefined;
   'PrivacyValueBots': undefined;
   'CustomShareGiftsInfo': undefined;
+  'AllChatsSearchContext': undefined;
+  'PrivateChatsSearchContext': undefined;
+  'GroupChatsSearchContext': undefined;
+  'ChannelsSearchContext': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1573,6 +1577,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'StarsSubscribeBotButtonMonth': {
     'amount': V;
+  };
+  'SearchContextCaption': {
+    'type': V;
   };
   'FolderLinkTitleDescription': {
     'folder': V;

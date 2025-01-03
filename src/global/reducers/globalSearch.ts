@@ -57,6 +57,7 @@ export function updateGlobalSearchResults<T extends GlobalState>(
       resultsByType: {
         ...(selectTabState(global, tabId).globalSearch || {}).resultsByType,
         [type]: {
+          foundIds: foundIdsForType,
           totalCount,
           nextOffsetId,
           nextOffsetRate,

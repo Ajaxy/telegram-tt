@@ -21,6 +21,7 @@ import type {
   ApiLimitTypeWithModal,
   ApiMessage,
   ApiMessageEntity,
+  ApiMessageSearchContext,
   ApiNewPoll,
   ApiNotification,
   ApiPaymentStatus,
@@ -386,6 +387,9 @@ export interface ActionPayloads {
   } & WithTabId;
   searchMessagesGlobal: {
     type: ApiGlobalMessageSearchType;
+    context?: ApiMessageSearchContext;
+    shouldResetResultsByType?: boolean;
+    shouldCheckFetchingMessagesStatus?: boolean;
   } & WithTabId;
   searchPopularBotApps: WithTabId | undefined;
   addRecentlyFoundChatId: {
