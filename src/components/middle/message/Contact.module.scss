@@ -53,9 +53,13 @@
     background-color: transparent;
     color: var(--accent-color);
     --ripple-color: var(--accent-background-active-color);
+    opacity: 1;
+    transition: 0.25s ease-in-out opacity;
 
     &:not(.disabled):not(:disabled):hover {
-      background-color: var(--accent-background-active-color);
+      color: var(--accent-color);
+      background-color: transparent;
+      opacity: 0.75;
     }
   }
 }
