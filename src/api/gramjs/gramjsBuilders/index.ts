@@ -255,7 +255,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
   if (folder.isChatList) {
     return new GramJs.DialogFilterChatlist({
       id: folder.id,
-      title: folder.title,
+      title: buildInputTextWithEntities({ text: folder.title, entities: [] }),
       emoticon: emoticon || undefined,
       pinnedPeers,
       includePeers,
@@ -265,7 +265,7 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
 
   return new GramJs.DialogFilter({
     id: folder.id,
-    title: folder.title,
+    title: buildInputTextWithEntities({ text: folder.title, entities: [] }),
     emoticon: emoticon || undefined,
     contacts: contacts || undefined,
     nonContacts: nonContacts || undefined,

@@ -412,25 +412,27 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter | GramJs.DialogFi
   if (filter instanceof GramJs.DialogFilterChatlist) {
     return {
       ...pickTruthy(filter, [
-        'id', 'title', 'emoticon',
+        'id', 'emoticon',
       ]),
       excludedChatIds: [],
       includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
       pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
       hasMyInvites: filter.hasMyInvites,
       isChatList: true,
+      title: filter.title.text,
     };
   }
 
   return {
     ...pickTruthy(filter, [
-      'id', 'title', 'emoticon', 'contacts', 'nonContacts', 'groups', 'bots',
+      'id', 'emoticon', 'contacts', 'nonContacts', 'groups', 'bots',
       'excludeMuted', 'excludeRead', 'excludeArchived',
     ]),
     channels: filter.broadcasts,
     pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     excludedChatIds: filter.excludePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+    title: filter.title.text,
   };
 }
 
@@ -601,7 +603,7 @@ export function buildApiChatlistInvite(
   if (invite instanceof GramJs.chatlists.ChatlistInvite) {
     return {
       slug,
-      title: invite.title,
+      title: invite.title.text,
       emoticon: invite.emoticon,
       peerIds: invite.peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     };

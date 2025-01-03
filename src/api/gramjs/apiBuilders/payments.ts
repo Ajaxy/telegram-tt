@@ -547,6 +547,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     .filter(Boolean) as BoughtPaidMedia[];
 
   const starRefCommision = starrefCommissionPermille ? starrefCommissionPermille / 10 : undefined;
+  const supportedStarGift = (stargift instanceof GramJs.StarGift) ? stargift : undefined;
 
   return {
     id,
@@ -564,7 +565,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     extendedMedia: boughtExtendedMedia,
     subscriptionPeriod,
     isReaction: reaction,
-    starGift: stargift && buildApiStarGift(stargift),
+    starGift: supportedStarGift && buildApiStarGift(supportedStarGift),
     giveawayPostId,
     starRefCommision,
   };
@@ -609,7 +610,9 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
   };
 }
 
-export function buildApiStarGift(startGift: GramJs.StarGift): ApiStarGift {
+export function buildApiStarGift(startGift: GramJs.TypeStarGift): ApiStarGift | undefined {
+  const isTypeSupported = startGift instanceof GramJs.StarGift;
+  if (!isTypeSupported) return undefined;
   const {
     id, limited, sticker, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate,
     soldOut,
@@ -635,7 +638,8 @@ export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUser
   } = userStarGift;
 
   return {
-    gift: buildApiStarGift(gift),
+    // ToDo: Use `!` temporarily to support layer 196
+    gift: buildApiStarGift(gift)!,
     date,
     starsToConvert: convertStars?.toJSNumber(),
     fromId: fromId && buildApiPeerId(fromId, 'user'),

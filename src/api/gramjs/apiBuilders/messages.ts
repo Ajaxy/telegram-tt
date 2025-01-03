@@ -372,7 +372,8 @@ function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : A
     isNameHidden: Boolean(nameHidden),
     isSaved: Boolean(saved),
     isConverted: Boolean(converted),
-    gift: buildApiStarGift(gift),
+    // ToDo: Use `!` temporarily to support layer 196
+    gift: buildApiStarGift(gift)!,
     message: message && buildApiFormattedText(message),
     starsToConvert: convertStars?.toJSNumber(),
   };
@@ -705,7 +706,7 @@ function buildAction(
     amount = action.amount.toJSNumber();
     stars = action.stars.toJSNumber();
     transactionId = action.transactionId;
-  } else if (action instanceof GramJs.MessageActionStarGift) {
+  } else if (action instanceof GramJs.MessageActionStarGift && action.gift instanceof GramJs.StarGift) {
     type = 'starGift';
     if (isOutgoing) {
       text = 'ActionGiftOutbound';
