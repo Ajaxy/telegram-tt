@@ -3,7 +3,8 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding-inline: 1rem !important;
   max-height: min(92vh, 40rem) !important;
   overflow-x: hidden;
 }

@@ -467,6 +467,16 @@ export interface ApiMessageActionStarGift {
   starsToConvert?: number;
 }
 
+export interface ApiMessageActionStarGiftUnique {
+  isUpgrade?: true;
+  isTransferred?: true;
+  isSaved?: true;
+  isRefunded?: true;
+  gift: ApiStarGift;
+  canExportAt?: number;
+  transferStars?: number;
+}
+
 export interface ApiAction {
   mediaType: 'action';
   text: string;
@@ -487,6 +497,7 @@ export interface ApiAction {
   | 'giftCode'
   | 'prizeStars'
   | 'starGift'
+  | 'starGiftUnique'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;
@@ -497,7 +508,7 @@ export interface ApiAction {
     currency: string;
     amount: number;
   };
-  starGift?: ApiMessageActionStarGift;
+  starGift?: ApiMessageActionStarGift | ApiMessageActionStarGiftUnique;
   translationValues: string[];
   call?: Partial<ApiGroupCall>;
   phoneCall?: PhoneCallAction;

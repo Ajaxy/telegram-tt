@@ -14,6 +14,7 @@ import type {
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageActionStarGift,
+  ApiMessageActionStarGiftUnique,
   ApiMessageEntity,
   ApiMessageForwardInfo,
   ApiMessageReportResult,
@@ -380,6 +381,24 @@ function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : A
   };
 }
 
+function buildApiMessageActionStarGiftUnique(
+  action: GramJs.MessageActionStarGiftUnique,
+): ApiMessageActionStarGiftUnique {
+  const {
+    gift, canExportAt, refunded, saved, transferStars, transferred, upgrade,
+  } = action;
+
+  return {
+    gift: buildApiStarGift(gift),
+    canExportAt,
+    isRefunded: refunded,
+    isSaved: saved,
+    transferStars: transferStars?.toJSNumber(),
+    isTransferred: transferred,
+    isUpgrade: upgrade,
+  };
+}
+
 function buildAction(
   action: GramJs.TypeMessageAction,
   senderId: string | undefined,
@@ -395,7 +414,7 @@ function buildAction(
   let call: Partial<ApiGroupCall> | undefined;
   let amount: number | undefined;
   let stars: number | undefined;
-  let starGift: ApiMessageActionStarGift | undefined;
+  let starGift: ApiMessageActionStarGift | ApiMessageActionStarGiftUnique | undefined;
   let currency: string | undefined;
   let giftCryptoInfo: {
     currency: string;
@@ -710,6 +729,7 @@ function buildAction(
     transactionId = action.transactionId;
   } else if (action instanceof GramJs.MessageActionStarGift && action.gift instanceof GramJs.StarGift) {
     type = 'starGift';
+    starGift = buildApiMessageActionStarGift(action);
     if (isOutgoing) {
       text = 'ActionGiftOutbound';
       translationValues.push('%gift_payment_amount%');
@@ -725,7 +745,15 @@ function buildAction(
 
     amount = action.gift.stars.toJSNumber();
     currency = STARS_CURRENCY_CODE;
-    starGift = buildApiMessageActionStarGift(action);
+  } else if (action instanceof GramJs.MessageActionStarGiftUnique && action.gift instanceof GramJs.StarGiftUnique) {
+    type = 'starGiftUnique';
+    text = isOutgoing ? 'Notification.StarsGift.UpgradeYou' : 'Notification.StarsGift.Upgrade';
+    starGift = buildApiMessageActionStarGiftUnique(action);
+
+    if (targetPeerId) {
+      targetUserIds.push(targetPeerId);
+      targetChatId = targetPeerId;
+    }
   } else {
     text = 'ChatList.UnsupportedMessage';
   }

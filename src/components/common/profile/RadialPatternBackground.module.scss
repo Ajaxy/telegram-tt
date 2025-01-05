@@ -6,7 +6,9 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(var(--_bg-1), var(--_bg-2)), radial-gradient(circle, #ffffff32, #ffffff00);
+    background-image:
+      radial-gradient(circle closest-side, #ffffff32, #ffffff00),
+      radial-gradient(closest-side, var(--_bg-1), var(--_bg-2));
   }
 }
 

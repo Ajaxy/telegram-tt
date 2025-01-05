@@ -5,7 +5,7 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiSticker, ApiTopic, ApiUser,
+  ApiChat, ApiMessage, ApiMessageActionStarGift, ApiSticker, ApiTopic, ApiUser,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FocusDirection, MessageListType, ThreadId } from '../../types';
@@ -28,6 +28,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatInteger, formatIntegerCompact } from '../../util/textFormat';
+import { getGiftAttributes, getStickerFromGift } from '../common/helpers/gifts';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import renderText from '../common/helpers/renderText';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
@@ -45,6 +46,7 @@ import useFocusMessage from './message/hooks/useFocusMessage';
 import AnimatedIconFromSticker from '../common/AnimatedIconFromSticker';
 import Avatar from '../common/Avatar';
 import GiftRibbon from '../common/gift/GiftRibbon';
+import RadialPatternBackground from '../common/profile/RadialPatternBackground';
 import Sparkles from '../common/Sparkles';
 import ActionMessageSuggestedAvatar from './ActionMessageSuggestedAvatar';
 import ActionMessageUpdatedAvatar from './ActionMessageUpdatedAvatar';
@@ -163,6 +165,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const isJoinedMessage = isJoinedChannelMessage(message);
   const isStarsGift = message.content.action?.type === 'giftStars';
   const isStarGift = message.content.action?.type === 'starGift';
+  const isStarGiftUnique = message.content.action?.type === 'starGiftUnique';
   const isPrizeStars = message.content.action?.type === 'prizeStars';
 
   const withServiceReactions = Boolean(message.areReactionsPossible && message?.reactions);
@@ -318,7 +321,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     const giftMessage = message.content.action?.message;
     return (
       <span
-        className="action-message-gift action-message-gift-code"
+        className="action-message-gift action-message-centered"
         tabIndex={0}
         role="button"
         onClick={handleGiftCodeClick}
@@ -366,7 +369,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   function renderStarsGift() {
     return (
       <span
-        className="action-message-gift action-message-gift-code"
+        className="action-message-gift action-message-centered"
         tabIndex={0}
         role="button"
         onClick={handleStarGiftClick}
@@ -421,9 +424,9 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   }
 
   function renderStarGiftUserDescription() {
-    const starGift = message.content.action?.starGift;
+    const starGift = message.content.action?.starGift as ApiMessageActionStarGift;
     const targetUser = targetUsers && targetUsers[0]?.firstName;
-    const starGiftMessage = message.content.action?.starGift?.message;
+    const starGiftMessage = starGift?.message;
     if (!starGift) return undefined;
 
     if (starGiftMessage) {
@@ -468,11 +471,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   function renderStarGift() {
     const starGift = message.content.action?.starGift;
-    if (!starGift || starGift.gift.type === 'starGiftUnique') return undefined;
+    if (!starGift || starGift.gift.type !== 'starGift') return undefined;
 
     return (
       <span
-        className="action-message-gift action-message-gift-code action-message-star-gift"
+        className="action-message-gift action-message-centered"
         tabIndex={0}
         role="button"
         onClick={handleStarGiftClick}
@@ -507,12 +510,83 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderStarGiftUnique() {
+    const starGift = message.content.action?.starGift;
+    if (!starGift || starGift.gift.type !== 'starGiftUnique') return undefined;
+
+    const sticker = getStickerFromGift(starGift.gift)!;
+    const attributes = getGiftAttributes(starGift.gift);
+    const { backdrop, pattern, model } = attributes || {};
+
+    if (!backdrop || !pattern || !model) return undefined;
+
+    const backgroundColors = [backdrop.centerColor, backdrop.edgeColor];
+
+    return (
+      <span
+        className="action-message-gift action-message-centered action-message-unique"
+        tabIndex={0}
+        role="button"
+        onClick={handleStarGiftClick}
+      >
+        <div className="action-message-unique-background-wrapper">
+          <RadialPatternBackground
+            className="action-message-unique-background"
+            backgroundColors={backgroundColors}
+            patternColor={backdrop.patternColor}
+            patternIcon={pattern.sticker}
+          />
+        </div>
+        <AnimatedIconFromSticker
+          sticker={sticker}
+          play={canPlayAnimatedEmojis}
+          noLoop
+          nonInteractive
+          size={STAR_GIFT_STICKER_SIZE}
+        />
+        {renderStarGiftUserCaption()}
+        <div className="action-message-unique-title" style={`color: ${backdrop.textColor}`}>
+          {starGift.gift.title} #{starGift.gift.number}
+        </div>
+        <div className="action-message-unique-properties" style={`color: ${backdrop.textColor}`}>
+          <div className="action-message-unique-property">
+            {oldLang('Gift2AttributeModel')}
+          </div>
+          <div className="action-message-unique-value">
+            {model.name}
+          </div>
+          <div className="action-message-unique-property">
+            {oldLang('Gift2AttributeBackdrop')}
+          </div>
+          <div className="action-message-unique-value">
+            {backdrop.name}
+          </div>
+          <div className="action-message-unique-property">
+            {oldLang('Gift2AttributeSymbol')}
+          </div>
+          <div className="action-message-unique-value">
+            {pattern.name}
+          </div>
+        </div>
+
+        <div className="action-message-button">
+          <Sparkles preset="button" />
+          {oldLang('Gift2UniqueView')}
+        </div>
+        <GiftRibbon
+          color={backdrop.patternColor || 'blue'}
+          text={oldLang('ActionStarGift')}
+        />
+      </span>
+    );
+  }
+
   function renderPrizeStars() {
     const isUnclaimed = message.content.action?.isUnclaimed;
 
     return (
       <span
-        className="action-message-gift action-message-gift-code"
+        className="action-message-gift action-message-centered"
         tabIndex={0}
         role="button"
         onClick={handlePrizeStarsClick}
@@ -577,6 +651,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       {isGiftCode && renderGiftCode()}
       {isStarsGift && renderStarsGift()}
       {isStarGift && renderStarGift()}
+      {isStarGiftUnique && renderStarGiftUnique()}
       {isPrizeStars && renderPrizeStars()}
       {isSuggestedAvatar && (
         <ActionMessageSuggestedAvatar message={message} renderContent={renderContent} />

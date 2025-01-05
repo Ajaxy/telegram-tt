@@ -28,6 +28,7 @@ type OwnProps = {
   footer?: TeactNode;
   buttonText?: string;
   className?: string;
+  hasBackdrop?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
 };
@@ -41,6 +42,7 @@ const TableInfoModal = ({
   footer,
   buttonText,
   className,
+  hasBackdrop,
   onClose,
   onButtonClick,
 }: OwnProps) => {
@@ -55,6 +57,7 @@ const TableInfoModal = ({
       isOpen={isOpen}
       hasCloseButton={Boolean(title)}
       hasAbsoluteCloseButton={!title}
+      absoluteCloseButtonColor={hasBackdrop ? 'translucent-white' : undefined}
       isSlim
       title={title}
       className={className}

@@ -13,14 +13,14 @@ import { preloadImage } from '../../../util/files';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useResizeObserver from '../../../hooks/useResizeObserver';
-import { useSignalEffect } from '../../../hooks/useSignalEffect';
+import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
 import styles from './RadialPatternBackground.module.scss';
 
 type OwnProps = {
   backgroundColors: string[];
-  patternColor: string;
-  patternIcon: ApiSticker;
+  patternColor?: string;
+  patternIcon?: ApiSticker;
   className?: string;
 };
 
@@ -28,32 +28,33 @@ const RINGS = 3;
 const BASE_RING_ITEM_COUNT = 8;
 const RING_INCREMENT = 0.5;
 const CENTER_EMPTINESS = 0.05;
-const MAX_RADIUS = 0.5;
+const MAX_RADIUS = 0.4;
 const BASE_ICON_SIZE = 20;
 
-const MIN_SIZE = 200;
+const MIN_SIZE = 250;
 
 const PATTERN_POSITIONS = (() => {
-  const coordinates: { x: number; y: number; alpha: number; sizeFactor: number }[] = [];
+  const coordinates: { x: number; y: number; sizeFactor: number }[] = [];
   for (let ring = 1; ring <= RINGS; ring++) {
     const ringItemCount = Math.floor(BASE_RING_ITEM_COUNT * (1 + (ring - 1) * RING_INCREMENT));
     const ringProgress = ring / RINGS;
     const ringRadius = CENTER_EMPTINESS + (MAX_RADIUS - CENTER_EMPTINESS) * ringProgress;
 
+    const angleShift = ring % 2 === 0 ? Math.PI / ringItemCount : 0;
+
     for (let i = 0; i < ringItemCount; i++) {
-      const angle = (i / ringItemCount) * Math.PI * 2;
+      const angle = (i / ringItemCount) * Math.PI * 2 + angleShift;
       // Slightly oval
       const xOffset = ringRadius * 1.71 * Math.cos(angle);
       const yOffset = ringRadius * Math.sin(angle);
 
       const x = 0.5 + xOffset;
       const y = 0.5 + yOffset;
-      const alpha = 0.2 + Math.min((1 - ringProgress + (Math.random() / 2 - 0.5)), 0) * 0.8;
 
       const sizeFactor = 1.4 - ringProgress * Math.random();
 
       coordinates.push({
-        x, y, alpha, sizeFactor,
+        x, y, sizeFactor,
       });
     }
   }
@@ -73,9 +74,11 @@ const RadialPatternBackground = ({
 
   const [getContainerSize, setContainerSize] = useSignal({ width: 0, height: 0 });
 
+  const dpr = useDevicePixelRatio();
+
   const [emojiImage, setEmojiImage] = useState<HTMLImageElement | undefined>();
 
-  const previewMediaHash = getStickerMediaHash(patternIcon, 'preview');
+  const previewMediaHash = patternIcon && getStickerMediaHash(patternIcon, 'preview');
   const previewUrl = useMedia(previewMediaHash);
 
   useEffect(() => {
@@ -109,22 +112,34 @@ const RadialPatternBackground = ({
 
     ctx.save();
     PATTERN_POSITIONS.forEach(({
-      x, y, alpha, sizeFactor,
+      x, y, sizeFactor,
     }) => {
-      const centerShift = (width - Math.max(width, MIN_SIZE)) / 2; // Shift coords if canvas is smaller than `MIN_SIZE`
-      const renderX = x * Math.max(width, MIN_SIZE) + centerShift;
-      const renderY = y * Math.max(height, MIN_SIZE) + centerShift;
+      const centerShift = (width - Math.max(width, MIN_SIZE * dpr)) / 2; // Shift coords if canvas is smaller than `MIN_SIZE`
+      const renderX = x * Math.max(width, MIN_SIZE * dpr) + centerShift;
+      const renderY = y * Math.max(height, MIN_SIZE * dpr) + centerShift;
 
-      const size = BASE_ICON_SIZE * sizeFactor * (centerShift ? 0.8 : 1);
+      const size = BASE_ICON_SIZE * dpr * sizeFactor * (centerShift ? 0.8 : 1);
 
-      ctx.globalAlpha = alpha;
       ctx.drawImage(emojiImage, renderX - size / 2, renderY - size / 2, size, size);
     });
     ctx.restore();
 
+    if (patternColor) {
+      ctx.save();
+      ctx.fillStyle = patternColor;
+      ctx.globalCompositeOperation = 'source-atop';
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    }
+
+    const radialGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
+    radialGradient.addColorStop(0, '#FFFFFF00');
+    radialGradient.addColorStop(1, '#FFFFFF');
+
+    // Alpha mask
     ctx.save();
-    ctx.fillStyle = patternColor;
-    ctx.globalCompositeOperation = 'source-atop';
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = radialGradient;
     ctx.fillRect(0, 0, width, height);
     ctx.restore();
   });
@@ -133,7 +148,7 @@ const RadialPatternBackground = ({
     draw();
   }, [emojiImage]);
 
-  useSignalEffect(() => {
+  useEffect(() => {
     const { width, height } = getContainerSize();
     const canvas = canvasRef.current!;
     if (!width || !height) {
@@ -141,14 +156,13 @@ const RadialPatternBackground = ({
     }
 
     const maxSide = Math.max(width, height);
-    const dpr = window.devicePixelRatio;
     requestMutation(() => {
       canvas.width = maxSide * dpr;
       canvas.height = maxSide * dpr;
 
       draw();
     });
-  }, [getContainerSize]);
+  }, [getContainerSize, dpr]);
 
   return (
     <div

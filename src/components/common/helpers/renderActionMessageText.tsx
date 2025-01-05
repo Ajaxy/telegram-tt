@@ -93,6 +93,10 @@ export function renderActionMessageText(
       .replace('un2', '%action_origin%')
       .replace(/\*\*/g, '');
   }
+  if (translationKey.startsWith('Notification.StarsGift.Upgrade')) {
+    unprocessed = unprocessed
+      .replace('%@', '%action_origin%');
+  }
   if (translationKey === 'BoostingReceivedPrizeFrom') {
     unprocessed = unprocessed
       .replace('**%s**', '%target_chat%')

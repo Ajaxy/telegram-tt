@@ -286,12 +286,37 @@
     font-weight: var(--font-weight-semibold);
   }
 
-  .action-message-gift-code {
+  .action-message-centered {
     margin-inline: auto;
+  }
+
+  .action-message-unique {
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -0.25rem;
+      background: var(--pattern-color);
+      border-radius: calc(var(--border-radius-messages) + 0.25rem);
+      z-index: -1;
+    }
+  }
+
+  .action-message-unique-background-wrapper {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .action-message-unique-background {
+    position: absolute;
+    inset: 0;
+    top: -6rem;
   }
 
   .action-message-user-caption,
   .action-message-stars-balance {
+    position: relative;
     margin-top: 0.5rem;
     display: flex;
     gap: 0.25rem;
@@ -305,6 +330,31 @@
     font-weight: var(--font-weight-semibold);
   }
 
+  .action-message-unique-title {
+    position: relative;
+    font-size: 0.875rem;
+  }
+
+  .action-message-unique-properties {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+
+    position: relative;
+  }
+
+  .action-message-unique-value {
+    color: white;
+    justify-self: flex-start;
+  }
+
+  .action-message-unique-property {
+    justify-self: flex-end;
+    font-weight: var(--font-weight-normal);
+  }
+
   .action-message-user-avatar {
     margin-left: 0.25rem;
   }
@@ -316,6 +366,7 @@
   }
 
   .action-message-gift-subtitle {
+    position: relative;
     font-weight: normal;
     text-wrap: balance;
     font-size: 0.8125rem;

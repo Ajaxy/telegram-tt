@@ -138,14 +138,12 @@ const GiftInfoModal = ({
     const isVisibleForMe = isNameHidden && targetUser;
 
     const description = (() => {
-      if (!userGift) {
-        return lang('GiftInfoSoldOutDescription');
-      }
       if (gift.type === 'starGiftUnique') {
         return lang('GiftInfoCollectible', {
           number: gift.number,
         });
       }
+      if (!userGift) return lang('GiftInfoSoldOutDescription');
       if (!canUpdate && !isSender) return undefined;
       if (!starsToConvert || canConvertDifference < 0) return undefined;
       if (isConverted) {
@@ -186,8 +184,8 @@ const GiftInfoModal = ({
     })();
 
     function getTitle() {
-      if (!userGift) return lang('GiftInfoSoldOutTitle');
       if (gift?.type === 'starGiftUnique') return gift.title;
+      if (!userGift) return lang('GiftInfoSoldOutTitle');
 
       return canUpdate ? lang('GiftInfoReceived') : lang('GiftInfoTitle');
     }
@@ -219,7 +217,7 @@ const GiftInfoModal = ({
           </p>
         )}
         {description && (
-          <p className={buildClassName(styles.description, !userGift && styles.soldOut)}>
+          <p className={buildClassName(styles.description, !userGift && gift?.type === 'starGift' && styles.soldOut)}>
             {description}
           </p>
         )}
@@ -457,6 +455,7 @@ const GiftInfoModal = ({
       <TableInfoModal
         isOpen={isOpen}
         header={modalData?.header}
+        hasBackdrop={Boolean(radialPatternBackdrop)}
         tableData={modalData?.tableData}
         footer={modalData?.footer}
         className={styles.modal}

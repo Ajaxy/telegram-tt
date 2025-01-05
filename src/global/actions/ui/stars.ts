@@ -1,4 +1,4 @@
-import type { ApiUserStarGift } from '../../../api/types';
+import type { ApiMessageActionStarGift, ApiUserStarGift } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -242,8 +242,14 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
   if (!message || !message.content.action) return;
 
   const action = message.content.action;
+  if (action.type === 'starGiftUnique') {
+    actions.openGiftInfoModal({ gift: action.starGift?.gift!, tabId });
+    return;
+  }
+
   if (action.type !== 'starGift') return;
-  const starGift = action.starGift!;
+
+  const starGift = action.starGift! as ApiMessageActionStarGift;
 
   const giftReceiverId = message.isOutgoing ? message.chatId : global.currentUserId!;
 
