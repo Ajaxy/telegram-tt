@@ -65,8 +65,8 @@ function buildApiChatFieldsFromPeerEntity(
   const isForum = Boolean('forum' in peerEntity && peerEntity.forum);
   const areStoriesHidden = Boolean('storiesHidden' in peerEntity && peerEntity.storiesHidden);
   const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
-  const botVerificationIconId = 'botVerificationIconId' in peerEntity
-    ? peerEntity.botVerificationIconId?.toString() : undefined;
+  const botVerificationIconId = 'botVerificationIcon' in peerEntity
+    ? peerEntity.botVerificationIcon?.toString() : undefined;
   const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
   const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
   const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
