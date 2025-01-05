@@ -261,7 +261,8 @@ export interface ApiTopic {
 }
 
 export interface ApiChatlistInviteNew {
-  title: string;
+  title: ApiFormattedText;
+  noTitleAnimations?: true;
   emoticon?: string;
   peerIds: string[];
   slug: string;

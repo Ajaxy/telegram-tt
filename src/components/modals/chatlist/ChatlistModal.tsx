@@ -63,7 +63,13 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
         noCustomEmojiPlayback: renderingFolder.noTitleAnimations,
       });
     }
-    if (renderingInfo?.invite && 'title' in renderingInfo.invite) return renderingInfo.invite.title;
+    if (renderingInfo?.invite && 'title' in renderingInfo.invite) {
+      return renderTextWithEntities({
+        text: renderingInfo.invite.title.text,
+        entities: renderingInfo.invite.title.entities,
+        noCustomEmojiPlayback: renderingInfo.invite.noTitleAnimations,
+      });
+    }
     return undefined;
   }, [renderingFolder, renderingInfo]);
 

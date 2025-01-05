@@ -1174,6 +1174,9 @@ export interface LangPair {
   'PrivateChatsSearchContext': undefined;
   'GroupChatsSearchContext': undefined;
   'ChannelsSearchContext': undefined;
+  'FolderLinkSubtitleNew': undefined;
+  'FolderLinkSubtitleAlready': undefined;
+  'FolderLinkAddFolder': undefined;
   'SearchTabChats': undefined;
   'SearchTabChannels': undefined;
   'SearchTabApps': undefined;
@@ -1613,6 +1616,19 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'folder': V;
     'chats': V;
   };
+  'FolderLinkSubtitleAdd': {
+    'chats': V;
+    'title': V;
+  };
+  'FolderLinkNotificationDeletedTitle': {
+    'title': V;
+  };
+  'FolderLinkNotificationAddedTitle': {
+    'title': V;
+  };
+  'FolderLinkNotificationUpdatedTitle': {
+    'title': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -1795,6 +1811,18 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
     'amount': V;
   };
   'FolderLinkTitleDescriptionChats': {
+    'count': V;
+  };
+  'FolderLinkSubtitleAddCount': {
+    'count': V;
+  };
+  'FolderLinkNotificationDeletedSubtitle': {
+    'count': V;
+  };
+  'FolderLinkNotificationAddedSubtitle': {
+    'count': V;
+  };
+  'FolderLinkNotificationUpdatedSubtitle': {
     'count': V;
   };
 }

@@ -36,7 +36,9 @@ import { formatShareText, processDeepLink } from '../../../util/deeplink';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
-import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
+import {
+  buildCollectionByKey, omit, pick, unique,
+} from '../../../util/iteratees';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
 import * as langProvider from '../../../util/oldLangProvider';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -2329,18 +2331,54 @@ addActionHandler('joinChatlistInvite', async (global, actions, payload): Promise
   const { invite, peerIds, tabId = getCurrentTabId() } = payload;
 
   const peers = peerIds.map((peerId) => selectChat(global, peerId)).filter(Boolean);
-  const notJoinedCount = peers.filter((peer) => peer.isNotJoined).length;
+  const currentNotJoinedCount = peers.filter((peer) => peer.isNotJoined).length;
 
-  const folder = 'folderId' in invite ? selectChatFolder(global, invite.folderId) : undefined;
-  const folderTitle = 'title' in invite ? invite.title : folder?.title;
+  const existingFolder = 'folderId' in invite ? selectChatFolder(global, invite.folderId) : undefined;
+  const folderTitle = ('title' in invite ? invite.title : existingFolder?.title)!;
 
   try {
     const result = await callApi('joinChatlistInvite', { slug: invite.slug, peers });
     if (!result) return;
 
+    if (existingFolder) {
+      actions.showNotification({
+        title: {
+          key: 'FolderLinkNotificationUpdatedTitle',
+          variables: {
+            title: folderTitle.text,
+          },
+        },
+        message: {
+          key: 'FolderLinkNotificationUpdatedSubtitle',
+          variables: {
+            count: currentNotJoinedCount,
+          },
+          options: {
+            pluralValue: currentNotJoinedCount,
+          },
+        },
+        tabId,
+      });
+
+      return;
+    }
+
     actions.showNotification({
-      title: langProvider.oldTranslate(folder ? 'FolderLinkUpdatedTitle' : 'FolderLinkAddedTitle', folderTitle),
-      message: langProvider.oldTranslate('FolderLinkAddedSubtitle', notJoinedCount, 'i'),
+      title: {
+        key: 'FolderLinkNotificationAddedTitle',
+        variables: {
+          title: folderTitle.text,
+        },
+      },
+      message: {
+        key: 'FolderLinkNotificationAddedSubtitle',
+        variables: {
+          count: currentNotJoinedCount,
+        },
+        options: {
+          pluralValue: currentNotJoinedCount,
+        },
+      },
       tabId,
     });
   } catch (error) {
@@ -2362,10 +2400,24 @@ addActionHandler('leaveChatlist', async (global, actions, payload): Promise<void
   const result = await callApi('leaveChatlist', { folderId, peers });
 
   if (!result) return;
+  if (!folder) return;
 
   actions.showNotification({
-    title: langProvider.oldTranslate('FolderLinkDeletedTitle', folder.title),
-    message: langProvider.oldTranslate('FolderLinkDeletedSubtitle', peers.length, 'i'),
+    title: {
+      key: 'FolderLinkNotificationDeletedTitle',
+      variables: {
+        title: folder.title.text,
+      },
+    },
+    message: {
+      key: 'FolderLinkNotificationDeletedSubtitle',
+      variables: {
+        count: peers.length,
+      },
+      options: {
+        pluralValue: peers.length,
+      },
+    },
     tabId,
   });
 });
@@ -2549,13 +2601,14 @@ addActionHandler('openDeleteChatFolderModal', async (global, actions, payload): 
   if (!folder) return;
 
   if (folder.isChatList && (!folder.hasMyInvites || isConfirmedForChatlist)) {
+    const currentIds = getOrderedIds(folderId);
     const suggestions = await callApi('fetchLeaveChatlistSuggestions', { folderId });
     global = getGlobal();
     global = updateTabState(global, {
       chatlistModal: {
         removal: {
           folderId,
-          suggestedPeerIds: suggestions,
+          suggestedPeerIds: unique([...(suggestions || []), ...(currentIds || [])]),
         },
       },
     }, tabId);

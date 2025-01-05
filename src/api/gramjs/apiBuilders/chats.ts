@@ -607,7 +607,8 @@ export function buildApiChatlistInvite(
   if (invite instanceof GramJs.chatlists.ChatlistInvite) {
     return {
       slug,
-      title: invite.title.text,
+      title: buildApiFormattedText(invite.title),
+      noTitleAnimations: invite.titleNoanimate,
       emoticon: invite.emoticon,
       peerIds: invite.peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     };
