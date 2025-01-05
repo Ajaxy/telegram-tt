@@ -22,6 +22,7 @@ import { applyAnimationState, type PaneState } from './hooks/useHeaderPane';
 import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import AudioPlayer from './panes/AudioPlayer';
 import BotAdPane from './panes/BotAdPane';
+import BotVerificationPane from './panes/BotVerificationPane';
 import ChatReportPane from './panes/ChatReportPane';
 import HeaderPinnedMessage from './panes/HeaderPinnedMessage';
 
@@ -65,6 +66,7 @@ const MiddleHeaderPanes = ({
   const [getGroupCallState, setGroupCallState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getChatReportState, setChatReportState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getBotAdState, setBotAdState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
+  const [getBotVerificationState, setBotVerificationState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
 
   const isPinnedMessagesFullWidth = isAudioPlayerRendered || !isDesktop;
 
@@ -84,13 +86,15 @@ const MiddleHeaderPanes = ({
 
   useSignalEffect(() => {
     const audioPlayerState = getAudioPlayerState();
+    const botVerificationState = getBotVerificationState();
     const pinnedState = getPinnedState();
     const groupCallState = getGroupCallState();
     const chatReportState = getChatReportState();
     const botAdState = getBotAdState();
 
     // Keep in sync with the order of the panes in the DOM
-    const stateArray = [audioPlayerState, groupCallState, chatReportState, pinnedState, botAdState];
+    const stateArray = [audioPlayerState, groupCallState,
+      chatReportState, botVerificationState, pinnedState, botAdState];
 
     const isFirstRender = isFirstRenderRef.current;
     const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0);
@@ -103,7 +107,8 @@ const MiddleHeaderPanes = ({
     setExtraStyles(middleColumn, {
       '--middle-header-panes-height': `${totalHeight}px`,
     });
-  }, [getAudioPlayerState, getGroupCallState, getPinnedState, getChatReportState, getBotAdState]);
+  }, [getAudioPlayerState, getGroupCallState, getPinnedState,
+    getChatReportState, getBotAdState, getBotVerificationState]);
 
   if (!shouldRender) return undefined;
 
@@ -127,6 +132,10 @@ const MiddleHeaderPanes = ({
         canReportSpam={settings?.canReportSpam}
         isAutoArchived={settings?.isAutoArchived}
         onPaneStateChange={setChatReportState}
+      />
+      <BotVerificationPane
+        peerId={chatId}
+        onPaneStateChange={setBotVerificationState}
       />
       <HeaderPinnedMessage
         chatId={chatId}

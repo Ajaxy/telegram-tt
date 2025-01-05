@@ -175,6 +175,7 @@ export type ApiChatInviteInfo = {
   subscriptionFormId?: string;
   canRefulfillSubscription?: boolean;
   subscriptionPricing?: ApiStarsSubscriptionPricing;
+  botVerification?: ApiBotVerification;
 };
 
 export type ApiChatInviteImporter = {
@@ -319,6 +320,12 @@ export interface ApiPeerPhotos {
   count: number;
   nextOffset?: number;
   isLoading?: boolean;
+}
+
+export interface ApiBotVerification {
+  botId: string;
+  iconId: string;
+  description: string;
 }
 
 export type ApiLimitType =

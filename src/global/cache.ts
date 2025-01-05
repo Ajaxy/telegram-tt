@@ -260,6 +260,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.messages.pollById) {
     cached.messages.pollById = initialState.messages.pollById;
   }
+  if (!cached.settings.botVerificationShownPeerIds) {
+    cached.settings.botVerificationShownPeerIds = initialState.settings.botVerificationShownPeerIds;
+  }
 }
 
 function updateCache(force?: boolean) {
@@ -610,7 +613,9 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
 }
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
-  const { byKey, themes, performance } = global.settings;
+  const {
+    byKey, themes, performance, botVerificationShownPeerIds,
+  } = global.settings;
 
   return {
     byKey,
@@ -618,6 +623,7 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     performance,
     privacy: {},
     notifyExceptions: {},
+    botVerificationShownPeerIds,
   };
 }
 

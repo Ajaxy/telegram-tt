@@ -27,7 +27,7 @@ import { pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb, serializeBytes } from '../helpers';
 import {
-  buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
+  buildApiBotVerification, buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
 } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
@@ -65,6 +65,8 @@ function buildApiChatFieldsFromPeerEntity(
   const isForum = Boolean('forum' in peerEntity && peerEntity.forum);
   const areStoriesHidden = Boolean('storiesHidden' in peerEntity && peerEntity.storiesHidden);
   const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
+  const botVerificationIconId = 'botVerificationIconId' in peerEntity
+    ? peerEntity.botVerificationIconId?.toString() : undefined;
   const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
   const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
   const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
@@ -105,6 +107,7 @@ function buildApiChatFieldsFromPeerEntity(
     hasStories: Boolean(maxStoryId) && !storiesUnavailable,
     emojiStatus,
     boostLevel,
+    botVerificationIconId,
     subscriptionUntil,
   };
 }
@@ -685,7 +688,7 @@ export function buildApiSponsoredMessageReportResult(
 export function buildApiChatInviteInfo(invite: GramJs.ChatInvite): ApiChatInviteInfo {
   const {
     color, participants, participantsCount, photo, title, about, scam, fake, verified, megagroup, channel, broadcast,
-    requestNeeded, subscriptionFormId, subscriptionPricing, canRefulfillSubscription,
+    requestNeeded, subscriptionFormId, subscriptionPricing, canRefulfillSubscription, botVerification,
   } = invite;
 
   let apiPhoto;
@@ -714,6 +717,7 @@ export function buildApiChatInviteInfo(invite: GramJs.ChatInvite): ApiChatInvite
     subscriptionPricing: subscriptionPricing && buildApiStarsSubscriptionPricing(subscriptionPricing),
     canRefulfillSubscription,
     participantIds: participants?.map((participant) => buildApiPeerId(participant.id, 'user')).filter(Boolean),
+    botVerification: botVerification && buildApiBotVerification(botVerification),
   };
 }
 

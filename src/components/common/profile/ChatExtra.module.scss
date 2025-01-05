@@ -24,9 +24,19 @@
   margin-bottom: 0;
 }
 
+.botVerificationSection,
 .sectionInfo {
   color: var(--color-text-secondary);
   font-size: 0.875rem;
+}
+
+.botVerificationSection {
+  padding-inline: 1.25rem;
+}
+
+.botVerificationIcon {
+  --custom-emoji-size: 1rem;
+  padding-inline-end: 0.125rem;
 }
 
 .personalChannelSubscribers {

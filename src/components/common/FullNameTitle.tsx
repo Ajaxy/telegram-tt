@@ -107,9 +107,18 @@ const FullNameTitle: FC<OwnProps> = ({
 
     return undefined;
   }, [customPeer, isSavedDialog, isSavedMessages, lang, realPeer]);
+  const botVerificationIconId = realPeer?.botVerificationIconId;
 
   return (
     <div className={buildClassName('title', styles.root, className)}>
+      {botVerificationIconId && (
+        <CustomEmoji
+          documentId={botVerificationIconId}
+          size={emojiStatusSize}
+          loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
+          observeIntersectionForLoading={observeIntersection}
+        />
+      )}
       <h3
         dir="auto"
         role="button"

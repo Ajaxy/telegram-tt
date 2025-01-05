@@ -5,6 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type {
+  ApiBotVerification,
   ApiChat, ApiCountryCode, ApiUser, ApiUserFullInfo, ApiUsername,
 } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -49,6 +50,7 @@ import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import Switcher from '../../ui/Switcher';
+import CustomEmoji from '../CustomEmoji';
 import SafeLink from '../SafeLink';
 import BusinessHours from './BusinessHours';
 import UserBirthday from './UserBirthday';
@@ -75,6 +77,7 @@ type StateProps = {
   hasSavedMessages?: boolean;
   personalChannel?: ApiChat;
   hasMainMiniApp?: boolean;
+  botVerification?: ApiBotVerification;
 };
 
 const DEFAULT_MAP_CONFIG = {
@@ -84,6 +87,7 @@ const DEFAULT_MAP_CONFIG = {
 };
 
 const runDebounced = debounce((cb) => cb(), 500, false);
+const BOT_VERIFICATION_ICON_SIZE = 16;
 
 const ChatExtra: FC<OwnProps & StateProps> = ({
   chatOrUserId,
@@ -101,6 +105,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   hasSavedMessages,
   personalChannel,
   hasMainMiniApp,
+  botVerification,
 }) => {
   const {
     showNotification,
@@ -437,6 +442,16 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span>{oldLang('SavedMessagesTab')}</span>
         </ListItem>
       )}
+      {botVerification && (
+        <div className={styles.botVerificationSection}>
+          <CustomEmoji
+            className={styles.botVerificationIcon}
+            documentId={botVerification.iconId}
+            size={BOT_VERIFICATION_ICON_SIZE}
+          />
+          {botVerification.description}
+        </div>
+      )}
     </div>
   );
 };
@@ -454,6 +469,8 @@ export default memo(withGlobal<OwnProps>(
 
     const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
     const userFullInfo = user && selectUserFullInfo(global, user.id);
+
+    const botVerification = userFullInfo?.botVerification || chatFullInfo?.botVerification;
 
     const chatInviteLink = chatFullInfo?.inviteLink;
 
@@ -488,6 +505,7 @@ export default memo(withGlobal<OwnProps>(
       hasSavedMessages,
       personalChannel,
       hasMainMiniApp,
+      botVerification,
     };
   },
 )(ChatExtra));

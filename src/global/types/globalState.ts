@@ -401,6 +401,7 @@ export type GlobalState = {
     lastPremiumBandwithNotificationDate?: number;
     paidReactionPrivacy?: boolean;
     languages?: ApiLanguage[];
+    botVerificationShownPeerIds: string[];
   };
 
   push?: {

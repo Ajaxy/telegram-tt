@@ -296,6 +296,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     performance: INITIAL_PERFORMANCE_STATE_MAX,
     privacy: {},
     notifyExceptions: {},
+    botVerificationShownPeerIds: [],
   },
 
   serviceNotifications: [],

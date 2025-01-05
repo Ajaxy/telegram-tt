@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
 import type {
+  ApiBotVerification,
   ApiFormattedText,
   ApiMessageEntity,
   ApiMessageEntityDefault,
@@ -298,4 +299,12 @@ export function buildAvatarPhotoId(photo: GramJs.TypeUserProfilePhoto | GramJs.T
   }
 
   return undefined;
+}
+
+export function buildApiBotVerification(botVerification: GramJs.BotVerification): ApiBotVerification {
+  return {
+    botId: buildApiPeerId(botVerification.botId, 'user'),
+    iconId: botVerification.icon.toString(),
+    description: botVerification.description,
+  };
 }

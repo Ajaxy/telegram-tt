@@ -2,7 +2,7 @@ import type { ApiBotCommand } from './bots';
 import type {
   ApiChatReactions, ApiFormattedText, ApiInputMessageReplyInfo, ApiPhoto, ApiStickerSet,
 } from './messages';
-import type { ApiChatInviteImporter } from './misc';
+import type { ApiBotVerification, ApiChatInviteImporter } from './misc';
 import type {
   ApiEmojiStatus, ApiFakeType, ApiUser, ApiUsername,
 } from './users';
@@ -48,6 +48,7 @@ export interface ApiChat {
   isForum?: boolean;
   isForumAsMessages?: true;
   boostLevel?: number;
+  botVerificationIconId?: string;
 
   // Calls
   isCallActive?: boolean;
@@ -143,6 +144,7 @@ export interface ApiChatFullInfo {
 
   boostsApplied?: number;
   boostsToUnrestrict?: number;
+  botVerification?: ApiBotVerification;
 }
 
 export interface ApiChatMember {

@@ -269,6 +269,9 @@ export interface ActionPayloads {
   saveCloseFriends: {
     userIds: string[];
   };
+  markBotVerificationInfoShown: {
+    peerId: string;
+  };
 
   // Message search
   openMiddleSearch: WithTabId | undefined;
