@@ -123,6 +123,7 @@ const SuggestedStatusModal = ({ modal, currentUser, bot }: OwnProps & StateProps
       {mockPeerWithStatus && (
         <PeerChip
           mockPeer={mockPeerWithStatus}
+          withEmojiStatus
         />
       )}
       <Button size="smaller" onClick={handleSetStatus}>

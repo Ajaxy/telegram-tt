@@ -71,6 +71,10 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
       avatarPeer = customPeer;
     }
 
+    if (transaction.isGiftUpgrade && transaction.starGift?.type === 'starGiftUnique') {
+      description = transaction.starGift.title;
+    }
+
     if (transaction.photo) {
       avatarPeer = undefined;
     }

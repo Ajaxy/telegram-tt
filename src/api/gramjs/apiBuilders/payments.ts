@@ -20,6 +20,7 @@ import type {
   ApiPrepaidStarsGiveaway,
   ApiReceipt,
   ApiStarGift,
+  ApiStarGiftAttribute,
   ApiStarGiveawayOption,
   ApiStarsAmount,
   ApiStarsGiveawayWinnerOption,
@@ -31,13 +32,15 @@ import type {
   BoughtPaidMedia,
 } from '../../types';
 
-import { addWebDocumentToLocalDb } from '../helpers';
+import { numberToHexColor } from '../../../util/colors';
+import { addDocumentToLocalDb, addWebDocumentToLocalDb } from '../helpers';
 import { buildApiStarsSubscriptionPricing } from './chats';
 import { buildApiFormattedText, buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildMessageMediaContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildStatisticsPercentage } from './statistics';
+import { buildStickerFromDocument } from './symbols';
 
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {
   if (!shippingOptions) {
@@ -536,7 +539,7 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
     date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
-    subscriptionPeriod, stargift, giveawayPostId, starrefCommissionPermille,
+    subscriptionPeriod, stargift, giveawayPostId, starrefCommissionPermille, stargiftUpgrade,
   } = transaction;
 
   if (photo) {
@@ -547,7 +550,6 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     .filter(Boolean) as BoughtPaidMedia[];
 
   const starRefCommision = starrefCommissionPermille ? starrefCommissionPermille / 10 : undefined;
-  const supportedStarGift = (stargift instanceof GramJs.StarGift) ? stargift : undefined;
 
   return {
     id,
@@ -565,9 +567,10 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     extendedMedia: boughtExtendedMedia,
     subscriptionPeriod,
     isReaction: reaction,
-    starGift: supportedStarGift && buildApiStarGift(supportedStarGift),
+    starGift: stargift && buildApiStarGift(stargift),
     giveawayPostId,
     starRefCommision,
+    isGiftUpgrade: stargiftUpgrade,
   };
 }
 
@@ -610,18 +613,38 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
   };
 }
 
-export function buildApiStarGift(startGift: GramJs.TypeStarGift): ApiStarGift | undefined {
-  const isTypeSupported = startGift instanceof GramJs.StarGift;
-  if (!isTypeSupported) return undefined;
+export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
+  if (starGift instanceof GramJs.StarGiftUnique) {
+    const {
+      id, num, ownerId, title, attributes, availabilityIssued, availabilityTotal,
+    } = starGift;
+
+    return {
+      type: 'starGiftUnique',
+      id: id.toString(),
+      number: num,
+      ownerId: buildApiPeerId(ownerId, 'user'),
+      attributes: attributes.map(buildApiStarGiftAttribute).filter(Boolean),
+      title,
+      totalCount: availabilityTotal,
+      issuedCount: availabilityIssued,
+    };
+  }
+
   const {
-    id, limited, sticker, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate,
-    soldOut,
-  } = startGift;
+    id, limited, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate, soldOut,
+    birthday, upgradeStars,
+  } = starGift;
+
+  addDocumentToLocalDb(starGift.sticker);
+
+  const sticker = buildStickerFromDocument(starGift.sticker)!;
 
   return {
+    type: 'starGift',
     id: id.toString(),
     isLimited: limited,
-    stickerId: sticker.id.toString(),
+    sticker,
     stars: stars.toJSNumber(),
     availabilityRemains,
     availabilityTotal,
@@ -629,7 +652,75 @@ export function buildApiStarGift(startGift: GramJs.TypeStarGift): ApiStarGift | 
     firstSaleDate,
     lastSaleDate,
     isSoldOut: soldOut,
+    isBirthday: birthday,
+    upgradeStars: upgradeStars?.toJSNumber(),
   };
+}
+
+export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribute): ApiStarGiftAttribute | undefined {
+  if (attribute instanceof GramJs.StarGiftAttributeModel) {
+    const sticker = buildStickerFromDocument(attribute.document);
+    if (!sticker) {
+      return undefined;
+    }
+
+    addDocumentToLocalDb(attribute.document);
+
+    return {
+      type: 'model',
+      name: attribute.name,
+      rarityPercent: attribute.rarityPermille / 10,
+      sticker,
+    };
+  }
+
+  if (attribute instanceof GramJs.StarGiftAttributePattern) {
+    const sticker = buildStickerFromDocument(attribute.document);
+    if (!sticker) {
+      return undefined;
+    }
+
+    addDocumentToLocalDb(attribute.document);
+
+    return {
+      type: 'pattern',
+      name: attribute.name,
+      rarityPercent: attribute.rarityPermille / 10,
+      sticker,
+    };
+  }
+
+  if (attribute instanceof GramJs.StarGiftAttributeBackdrop) {
+    const {
+      name, rarityPermille, centerColor, edgeColor, patternColor, textColor,
+    } = attribute;
+
+    return {
+      type: 'backdrop',
+      name,
+      rarityPercent: rarityPermille / 10,
+      centerColor: numberToHexColor(centerColor),
+      edgeColor: numberToHexColor(edgeColor),
+      patternColor: numberToHexColor(patternColor),
+      textColor: numberToHexColor(textColor),
+    };
+  }
+
+  if (attribute instanceof GramJs.StarGiftAttributeOriginalDetails) {
+    const {
+      date, recipientId, message, senderId,
+    } = attribute;
+
+    return {
+      type: 'originalDetails',
+      date,
+      recipientId: recipientId && buildApiPeerId(recipientId, 'user'),
+      message: message && buildApiFormattedText(message),
+      senderId: senderId && buildApiPeerId(senderId, 'user'),
+    };
+  }
+
+  return undefined;
 }
 
 export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUserStarGift {
@@ -638,8 +729,7 @@ export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUser
   } = userStarGift;
 
   return {
-    // ToDo: Use `!` temporarily to support layer 196
-    gift: buildApiStarGift(gift)!,
+    gift: buildApiStarGift(gift),
     date,
     starsToConvert: convertStars?.toJSNumber(),
     fromId: fromId && buildApiPeerId(fromId, 'user'),

@@ -15,7 +15,7 @@ import Modal from '../../ui/Modal';
 
 import styles from './TableInfoModal.module.scss';
 
-type ChatItem = { chatId: string };
+type ChatItem = { chatId: string; withEmojiStatus?: boolean };
 
 export type TableData = [TeactNode | undefined, TeactNode | ChatItem][];
 
@@ -76,6 +76,7 @@ const TableInfoModal = ({
                   className={styles.chatItem}
                   forceShowSelf
                   fluid
+                  withEmojiStatus={value.withEmojiStatus}
                   clickArg={value.chatId}
                   onClick={handleOpenChat}
                 />

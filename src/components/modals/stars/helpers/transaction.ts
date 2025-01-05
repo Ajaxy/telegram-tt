@@ -8,6 +8,7 @@ export function getTransactionTitle(lang: OldLangFn, transaction: ApiStarsTransa
   if (transaction.starRefCommision) {
     return lang('StarTransactionCommission', formatPercent(transaction.starRefCommision));
   }
+  if (transaction.isGiftUpgrade) return lang('Gift2TransactionUpgraded');
   if (transaction.extendedMedia) return lang('StarMediaPurchase');
   if (transaction.subscriptionPeriod) return transaction.title || lang('StarSubscriptionPurchase');
   if (transaction.isReaction) return lang('StarsReactionsSent');

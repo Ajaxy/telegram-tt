@@ -21,6 +21,7 @@
     border-radius: 0.625rem;
     background-color: var(--color-hover-overlay);
     pointer-events: none;
+    z-index: 1;
   }
 
   &:hover::before {
@@ -32,15 +33,6 @@
   position: absolute;
   top: 0.25rem;
   left: 0.25rem;
-}
-
-.stars {
-  display: flex;
-  align-items: center;
-  gap: 0.125rem;
-
-  color: #E88011;
-  font-weight: var(--font-weight-medium);
 }
 
 .hiddenGift {
@@ -59,4 +51,9 @@
   color: white;
   font-size: 1.25rem;
   backdrop-filter: blur(0.5rem);
+}
+
+.radialPattern {
+  position: absolute;
+  inset: 0;
 }

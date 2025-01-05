@@ -1,3 +1,7 @@
+.modal :global(.modal-dialog) {
+  overflow: hidden;
+}
+
 .header {
   display: flex;
   flex-direction: column;
@@ -25,6 +29,7 @@
 
 .description {
   text-align: center;
+  color: var(--_color-description, var(--color-text));
 }
 
 .footerDescription {
@@ -43,4 +48,33 @@
   display: flex;
   align-items: center;
   gap: 0.125rem;
+}
+
+.radialPattern {
+  position: absolute;
+  top: -3rem;
+  left: -1.5rem;
+  right: -1.5rem;
+  height: 16.5rem;
+
+  z-index: -1;
+}
+
+.uniqueAttribute {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.uniqueGift {
+  gap: 0;
+
+  .giftSticker {
+    margin-block: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+    color: white;
+  }
 }

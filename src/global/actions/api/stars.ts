@@ -89,26 +89,27 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
     return;
   }
 
-  const { gifts, stickers } = result;
-
-  const starGiftsById = buildCollectionByKey(gifts, 'id');
+  const starGiftsById = buildCollectionByKey(result, 'id');
 
   const starGiftCategoriesByName: Record<StarGiftCategory, string[]> = {
     all: [],
+    stock: [],
     limited: [],
   };
 
   const allStarGiftIds = Object.keys(starGiftsById);
   const allStarGifts = Object.values(starGiftsById);
 
-  const limitedStarGiftIds = allStarGifts.map(
-    (gift) => {
-      return gift.isLimited ? gift.id : undefined;
-    },
-  ).filter(Boolean) as string[];
+  const limitedStarGiftIds = allStarGifts.map((gift) => (gift.isLimited ? gift.id : undefined))
+    .filter(Boolean) as string[];
+
+  const stockedStarGiftIds = allStarGifts.map((gift) => (
+    gift.availabilityRemains || !gift.availabilityTotal ? gift.id : undefined
+  )).filter(Boolean) as string[];
 
   starGiftCategoriesByName.all = allStarGiftIds;
   starGiftCategoriesByName.limited = limitedStarGiftIds;
+  starGiftCategoriesByName.stock = stockedStarGiftIds;
 
   allStarGifts.forEach((gift) => {
     const starsCategory = gift.stars;
@@ -123,12 +124,6 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
     ...global,
     starGiftsById,
     starGiftCategoriesByName,
-    stickers: {
-      ...global.stickers,
-      starGifts: {
-        stickers,
-      },
-    },
   };
   setGlobal(global);
 });

@@ -35,6 +35,7 @@ type OwnProps<T = undefined> = {
   className?: string;
   fluid?: boolean;
   withPeerColors?: boolean;
+  withEmojiStatus?: boolean;
   clickArg?: T;
   onClick?: (arg: T) => void;
 };
@@ -59,6 +60,7 @@ const PeerChip = <T,>({
   fluid,
   isSavedMessages,
   withPeerColors,
+  withEmojiStatus,
   onClick,
 }: OwnProps<T> & StateProps) => {
   const lang = useOldLang();
@@ -91,7 +93,9 @@ const PeerChip = <T,>({
     );
 
     titleText = getPeerTitle(lang, anyPeer) || title;
-    titleElement = title || <FullNameTitle peer={anyPeer} isSavedMessages={isSavedMessages} withEmojiStatus />;
+    titleElement = title || (
+      <FullNameTitle peer={anyPeer} isSavedMessages={isSavedMessages} withEmojiStatus={withEmojiStatus} />
+    );
   }
 
   const fullClassName = buildClassName(

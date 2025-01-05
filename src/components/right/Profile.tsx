@@ -713,7 +713,12 @@ const Profile: FC<OwnProps & StateProps> = ({
           </div>
         ) : resultType === 'gifts' ? (
           (gifts?.map((gift) => (
-            <UserGift userId={chatId} key={`${gift.date}-${gift.fromId}-${gift.gift.id}`} gift={gift} />
+            <UserGift
+              userId={chatId}
+              key={`${gift.date}-${gift.fromId}-${gift.gift.id}`}
+              gift={gift}
+              observeIntersection={observeIntersectionForMedia}
+            />
           )))
         ) : undefined}
       </div>

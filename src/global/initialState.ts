@@ -183,6 +183,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   starGiftCategoriesByName: {
     all: [],
     limited: [],
+    stock: [],
   },
 
   stickers: {
@@ -206,9 +207,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     effect: {
       stickers: [],
       emojis: [],
-    },
-    starGifts: {
-      stickers: {},
     },
     forEmoji: {},
   },

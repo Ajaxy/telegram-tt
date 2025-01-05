@@ -17,7 +17,7 @@ import type {
   ApiPhoto,
   ApiReaction,
   ApiReactionWithPaid,
-  ApiStarGift,
+  ApiStarGiftRegular,
   ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStickerSet,
@@ -561,7 +561,7 @@ export type ConfettiStyle = 'poppers' | 'top-down';
 
 export type StarGiftInfo = {
   userId: string;
-  gift: ApiStarGift;
+  gift: ApiStarGiftRegular;
   shouldHideName?: boolean;
   message?: ApiFormattedText;
 };
@@ -631,7 +631,7 @@ export type ConfettiParams = OptionalCombine<{
 
 export type WebPageMediaSize = 'large' | 'small';
 
-export type StarGiftCategory = number | 'all' | 'limited';
+export type StarGiftCategory = number | 'all' | 'limited' | 'stock';
 
 export type CallSound = (
   'join' | 'allowTalk' | 'leave' | 'connecting' | 'incoming' | 'end' | 'connect' | 'busy' | 'ringing'

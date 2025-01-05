@@ -7,6 +7,7 @@ import type {
   ApiInvoice,
   ApiMessageEntity,
   ApiPaymentCredentials,
+  ApiSticker,
   BoughtPaidMedia,
 } from './messages';
 import type { StatisticsOverviewPercentage } from './statistics';
@@ -189,10 +190,11 @@ export type ApiInputStorePaymentStarsGiveaway = {
 export type ApiInputStorePaymentPurpose = ApiInputStorePaymentGiveaway | ApiInputStorePaymentGiftcode |
 ApiInputStorePaymentStarsTopup | ApiInputStorePaymentStarsGift | ApiInputStorePaymentStarsGiveaway;
 
-export type ApiStarGift = {
+export interface ApiStarGiftRegular {
+  type: 'starGift';
   isLimited?: true;
   id: string;
-  stickerId: string;
+  sticker: ApiSticker;
   stars: number;
   availabilityRemains?: number;
   availabilityTotal?: number;
@@ -200,7 +202,57 @@ export type ApiStarGift = {
   isSoldOut?: true;
   firstSaleDate?: number;
   lastSaleDate?: number;
-};
+  isBirthday?: true;
+  upgradeStars?: number;
+}
+
+export interface ApiStarGiftUnique {
+  type: 'starGiftUnique';
+  id: string;
+  title: string;
+  number: number;
+  ownerId: string;
+  issuedCount: number;
+  totalCount: number;
+  attributes: ApiStarGiftAttribute[];
+}
+
+export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;
+
+export interface ApiStarGiftAttributeModel {
+  type: 'model';
+  name: string;
+  rarityPercent: number;
+  sticker: ApiSticker;
+}
+
+export interface ApiStarGiftAttributePattern {
+  type: 'pattern';
+  name: string;
+  rarityPercent: number;
+  sticker: ApiSticker;
+}
+
+export interface ApiStarGiftAttributeBackdrop {
+  type: 'backdrop';
+  name: string;
+  centerColor: string;
+  edgeColor: string;
+  patternColor: string;
+  textColor: string;
+  rarityPercent: number;
+}
+
+export interface ApiStarGiftAttributeOriginalDetails {
+  type: 'originalDetails';
+  senderId?: string;
+  recipientId: string;
+  date: number;
+  message?: ApiFormattedText;
+}
+
+export type ApiStarGiftAttribute = ApiStarGiftAttributeModel | ApiStarGiftAttributePattern
+| ApiStarGiftAttributeBackdrop | ApiStarGiftAttributeOriginalDetails;
 
 export interface ApiUserStarGift {
   isNameHidden?: boolean;
@@ -371,6 +423,7 @@ export interface ApiStarsTransaction {
   extendedMedia?: BoughtPaidMedia[];
   subscriptionPeriod?: number;
   starRefCommision?: number;
+  isGiftUpgrade?: true;
 }
 
 export interface ApiStarsSubscription {

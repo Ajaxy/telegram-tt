@@ -6,9 +6,12 @@
   background-color: var(--accent-background-active-color);
   color: var(--accent-color);
 
-  cursor: var(--custom-cursor, pointer);
   filter: brightness(1);
   transition: 150ms filter ease-in;
+}
+
+.clickable {
+  cursor: var(--custom-cursor, pointer);
 
   &:hover {
     filter: brightness(1.1);

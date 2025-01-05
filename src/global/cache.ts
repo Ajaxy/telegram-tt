@@ -260,11 +260,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.messages.pollById) {
     cached.messages.pollById = initialState.messages.pollById;
   }
-
-  if (!cached.stickers.starGifts) {
-    cached.stickers.starGifts = initialState.stickers.starGifts;
-    cached.users.giftsById = initialState.users.giftsById;
-  }
 }
 
 function updateCache(force?: boolean) {

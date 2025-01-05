@@ -374,8 +374,7 @@ function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : A
     isNameHidden: Boolean(nameHidden),
     isSaved: Boolean(saved),
     isConverted: Boolean(converted),
-    // ToDo: Use `!` temporarily to support layer 196
-    gift: buildApiStarGift(gift)!,
+    gift: buildApiStarGift(gift),
     message: message && buildApiFormattedText(message),
     starsToConvert: convertStars?.toJSNumber(),
   };

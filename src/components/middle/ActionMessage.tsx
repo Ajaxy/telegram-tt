@@ -21,7 +21,6 @@ import {
   selectGiftStickerForStars,
   selectIsCurrentUserPremium,
   selectIsMessageFocused,
-  selectStarGiftSticker,
   selectTabState,
   selectTheme,
   selectTopicFromMessage,
@@ -81,7 +80,6 @@ type StateProps = {
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   premiumGiftSticker?: ApiSticker;
-  starGiftSticker?: ApiSticker;
   starsGiftSticker?: ApiSticker;
   canPlayAnimatedEmojis?: boolean;
   patternColor?: string;
@@ -108,7 +106,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   focusDirection,
   noFocusHighlight,
   premiumGiftSticker,
-  starGiftSticker,
   starsGiftSticker,
   isInsideTopic,
   topic,
@@ -471,7 +468,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   function renderStarGift() {
     const starGift = message.content.action?.starGift;
-    if (!starGift) return undefined;
+    if (!starGift || starGift.gift.type === 'starGiftUnique') return undefined;
 
     return (
       <span
@@ -482,7 +479,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       >
 
         <AnimatedIconFromSticker
-          sticker={starGiftSticker}
+          sticker={starGift.gift.sticker}
           play={canPlayAnimatedEmojis}
           noLoop
           nonInteractive
@@ -522,7 +519,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       >
         <AnimatedIconFromSticker
           key={message.id}
-          sticker={starGiftSticker}
+          sticker={starsGiftSticker}
           play={canPlayAnimatedEmojis}
           noLoop
           nonInteractive
@@ -642,9 +639,7 @@ export default memo(withGlobal<OwnProps>(
     const giftDuration = content.action?.months;
     const premiumGiftSticker = selectGiftStickerForDuration(global, giftDuration);
 
-    const starGift = content.action?.type === 'starGift' ? content.action.starGift?.gift : undefined;
     const starCount = content.action?.stars;
-    const starGiftSticker = starGift?.stickerId ? selectStarGiftSticker(global, starGift.stickerId) : undefined;
     const starsGiftSticker = selectGiftStickerForStars(global, starCount);
 
     const topic = selectTopicFromMessage(global, message);
@@ -658,7 +653,6 @@ export default memo(withGlobal<OwnProps>(
       targetMessage,
       isFocused,
       premiumGiftSticker,
-      starGiftSticker,
       starsGiftSticker,
       topic,
       patternColor,

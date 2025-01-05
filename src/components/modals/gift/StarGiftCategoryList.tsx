@@ -46,12 +46,9 @@ const StarGiftCategoryList = ({
   }
 
   function renderCategoryName(category: StarGiftCategory) {
-    if (category === 'all') {
-      return lang('AllGiftsCategory');
-    }
-    if (category === 'limited') {
-      return lang('LimitedGiftsCategory');
-    }
+    if (category === 'all') return lang('AllGiftsCategory');
+    if (category === 'stock') return lang('StockGiftsCategory');
+    if (category === 'limited') return lang('LimitedGiftsCategory');
     return category;
   }
 
@@ -64,7 +61,7 @@ const StarGiftCategoryList = ({
         )}
         onClick={() => handleItemClick(category)}
       >
-        {category !== 'all' && category !== 'limited' && (
+        {Number.isInteger(category) && (
           <StarIcon
             className={styles.star}
             type="gold"
@@ -81,6 +78,7 @@ const StarGiftCategoryList = ({
   return (
     <div ref={ref} className={buildClassName(styles.list, 'no-scrollbar')}>
       {renderCategoryItem('all')}
+      {renderCategoryItem('stock')}
       {renderCategoryItem('limited')}
       {starCategories.map(renderCategoryItem)}
     </div>

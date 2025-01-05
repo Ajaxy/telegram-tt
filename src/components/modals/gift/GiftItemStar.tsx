@@ -1,13 +1,14 @@
-import React, { memo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import React, { memo, useRef } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type {
-  ApiStarGift,
-  ApiSticker,
+  ApiStarGiftRegular,
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 
+import useFlag from '../../../hooks/useFlag';
+import { type ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -19,24 +20,27 @@ import Button from '../../ui/Button';
 import styles from './GiftItem.module.scss';
 
 export type OwnProps = {
-  gift: ApiStarGift;
-  onClick: (gift: ApiStarGift) => void;
-};
-
-export type StateProps = {
-  sticker?: ApiSticker;
+  gift: ApiStarGiftRegular;
+  observeIntersection?: ObserveFn;
+  onClick: (gift: ApiStarGiftRegular) => void;
 };
 
 const GIFT_STICKER_SIZE = 90;
 
-function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
+function GiftItemStar({ gift, observeIntersection, onClick }: OwnProps) {
   const { openGiftInfoModal } = getActions();
+
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
+
   const lang = useLang();
+  const [shouldPlay, play] = useFlag();
 
   const {
     stars,
     isLimited,
     isSoldOut,
+    sticker,
   } = gift;
 
   const handleGiftClick = useLastCallback(() => {
@@ -48,10 +52,13 @@ function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
     onClick(gift);
   });
 
-  if (!sticker) return undefined;
+  useOnIntersect(ref, observeIntersection, (entry) => {
+    if (entry.isIntersecting) play();
+  });
 
   return (
     <div
+      ref={ref}
       className={buildClassName(styles.container, styles.starGift)}
       tabIndex={0}
       role="button"
@@ -60,6 +67,7 @@ function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
       <AnimatedIconFromSticker
         sticker={sticker}
         noLoop
+        play={shouldPlay}
         nonInteractive
         size={GIFT_STICKER_SIZE}
       />
@@ -75,12 +83,4 @@ function GiftItemStar({ sticker, gift, onClick }: OwnProps & StateProps) {
   );
 }
 
-export default memo(withGlobal<OwnProps>(
-  (global, { gift }): StateProps => {
-    const sticker = global.stickers.starGifts.stickers[gift.stickerId];
-
-    return {
-      sticker,
-    };
-  },
-)(GiftItemStar));
+export default memo(GiftItemStar);

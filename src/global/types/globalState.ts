@@ -27,7 +27,7 @@ import type {
   ApiSavedReactionTag,
   ApiSession,
   ApiSponsoredMessage,
-  ApiStarGift,
+  ApiStarGiftRegular,
   ApiStarsAmount,
   ApiStarTopupOption,
   ApiStealthMode,
@@ -290,7 +290,7 @@ export type GlobalState = {
     };
   };
   availableEffectById: Record<string, ApiAvailableEffect>;
-  starGiftsById: Record<string, ApiStarGift>;
+  starGiftsById: Record<string, ApiStarGiftRegular>;
   starGiftCategoriesByName: Record<StarGiftCategory, string[]>;
 
   stickers: {
@@ -327,9 +327,6 @@ export type GlobalState = {
     effect: {
       stickers: ApiSticker[];
       emojis: ApiSticker[];
-    };
-    starGifts: {
-      stickers: Record<string, ApiSticker>;
     };
   };
 

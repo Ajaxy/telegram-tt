@@ -42,7 +42,8 @@ const GiftRecipientPicker: FC<OwnProps & StateProps> = ({
 
   const displayedUserIds = useMemo(() => {
     const usersById = getGlobal().users.byId;
-    const filteredContactIds = userIds ? filterUsersByName(userIds, usersById, searchQuery) : [];
+    const idsWithSelf = userIds ? userIds.concat(currentUserId!) : undefined;
+    const filteredContactIds = idsWithSelf ? filterUsersByName(idsWithSelf, usersById, searchQuery) : [];
 
     return sortChatIds(unique(filteredContactIds).filter((userId) => {
       const user = usersById[userId];
@@ -50,8 +51,8 @@ const GiftRecipientPicker: FC<OwnProps & StateProps> = ({
         return true;
       }
 
-      return !isUserBot(user) && userId !== currentUserId;
-    }));
+      return !isUserBot(user);
+    }), undefined, [currentUserId!]);
   }, [currentUserId, searchQuery, userIds]);
 
   const handleSelectedUserIdsChange = useLastCallback((selectedId: string) => {
@@ -79,6 +80,7 @@ const GiftRecipientPicker: FC<OwnProps & StateProps> = ({
         isSearchable
         withDefaultPadding
         withStatus
+        forceShowSelf
       />
     </PickerModal>
   );
