@@ -283,28 +283,7 @@ const SettingsHeader: FC<OwnProps> = ({
     }
   }
 
-  return (
-    <div className="left-header">
-      <Button
-        round
-        size="smaller"
-        color="translucent"
-        onClick={onReset}
-        ariaLabel={oldLang('AccDescrGoBack')}
-      >
-        <i className="icon icon-arrow-left" />
-      </Button>
-      {renderHeaderContent()}
-      <ConfirmDialog
-        isOpen={isSignOutDialogOpen}
-        onClose={closeSignOutConfirmation}
-        text={oldLang('lng_sure_logout')}
-        confirmLabel={oldLang('AccountSettings.Logout')}
-        confirmHandler={handleSignOutMessage}
-        confirmIsDestructive
-      />
-    </div>
-  );
+  return 
 };
 
 export default memo(SettingsHeader);
