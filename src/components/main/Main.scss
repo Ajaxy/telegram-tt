@@ -28,8 +28,15 @@
 }
 
 #LeftColumn {
+  // Dise hide left column
   --left-column-min-width: 16rem;
   --left-column-max-width: 26.5rem;
+
+  // These values will be applied when isLeftColumnMinimized is true
+  &.minimized {
+    --left-column-min-width: 0;
+    --left-column-max-width: 0;
+  }
 
   width: 33vw;
   min-width: var(--left-column-min-width);
@@ -37,7 +44,6 @@
   height: 100%;
   overflow: hidden;
   position: relative;
-
   background-color: var(--color-background);
 
   @media (min-width: 926px) {
@@ -46,7 +52,7 @@
 
   @media (min-width: 1276px) {
     width: 25vw;
-    --left-column-max-width: 33vw;
+    --left-column-max-width: 40vw;
   }
 
   @media (max-width: 925px) {

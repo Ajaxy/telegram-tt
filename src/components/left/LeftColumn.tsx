@@ -30,6 +30,7 @@ import NewChat from './newChat/NewChat.async';
 import Settings from './settings/Settings.async';
 
 import './LeftColumn.scss';
+import { getLeftColumnMinimized } from '../../external/custom';
 
 interface OwnProps {
   ref: RefObject<HTMLDivElement>;
@@ -417,19 +418,7 @@ function LeftColumn({
     setContent(LeftColumnContent.Settings);
   });
 
-  useHotkeys(useMemo(() => ({
-    'Mod+Shift+F': handleHotkeySearch,
-    // https://support.mozilla.org/en-US/kb/take-screenshots-firefox
-    ...(!IS_FIREFOX && {
-      'Mod+Shift+S': handleHotkeySavedMessages,
-    }),
-    ...(IS_APP && {
-      'Mod+0': handleHotkeySavedMessages,
-      'Mod+9': handleArchivedChats,
-    }),
-    ...(IS_MAC_OS && IS_APP && { 'Mod+,': handleHotkeySettings }),
-  }), []));
-
+  
   useEffect(() => {
     clearTwoFaError();
 
@@ -556,6 +545,7 @@ function LeftColumn({
       shouldWrap
       wrapExceptionKey={ContentType.Main}
       id="LeftColumn"
+      className={getLeftColumnMinimized() ? 'minimized' : ''}
       withSwipeControl
     >
       {renderContent}

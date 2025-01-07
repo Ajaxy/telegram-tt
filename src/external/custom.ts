@@ -8,7 +8,20 @@ import {
   selectPeer,
   selectUser,
   selectUserFullInfo,
+  selectTabState,
 } from '../global/selectors';
+
+import { LeftColumnContent } from '../types';
+
+let isLeftColumnMinimized = true;
+
+export function setLeftColumnMinimized(value: boolean) {
+  isLeftColumnMinimized = value;
+}
+
+export function getLeftColumnMinimized() {
+  return isLeftColumnMinimized;
+}
 
 export function getChatsInTheFolder(folderId: number) {
   const g = getGlobal();
@@ -107,20 +120,33 @@ export function getAuthInfo():
 }
 
 export function openSettingsButton() {
-  const settingsButton = document.querySelector('.MenuItem.compact .icon.icon-settings');
-  if (settingsButton) {
-    (settingsButton as HTMLElement).click();
-  } else {
-    console.error('Settings button not found');
-  }
+  setLeftColumnMinimized(false);
+  
+  const tryCloseMessages = () => {
+    if (document.querySelector('.messages-layout')) {
+      simulateEscapeKeyPress();
+      // Use setTimeout to avoid blocking the main thread
+      setTimeout(tryCloseMessages, 100);
+    } else {
+      const settingsButton = document.querySelector('.MenuItem.compact .icon.icon-settings');
+      if (settingsButton) {
+        (settingsButton as HTMLElement).click();
+      } else {
+        console.error('Settings button not found');
+      }
+    }
+  };
+
+  tryCloseMessages();
 }
 
 export function simulateEscapeKeyPress() {
+
   const event = new KeyboardEvent('keydown', {
-    key: 'Escape',
-    code: 'Escape',
-    keyCode: 27, // Deprecated, but still used in some cases
-    which: 27,   // Deprecated, but still used in some cases
+    key: 'ScrollLock',
+    code: 'ScrollLock',
+    keyCode: 145, 
+    which: 145,
     bubbles: true,
     cancelable: true,
   });
