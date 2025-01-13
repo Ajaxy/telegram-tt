@@ -1,0 +1,7 @@
+/*
+    Cache-Control: no-store
+    X-Content-Type-Options: nosniff
+    Referrer-Policy: no-referrer
+    Content-Security-Policy: base-uri 'self'; frame-ancestors 'self' https://*.dise.app https://*.slise.xyz https://slise-crm-app.pages.dev; frame-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self'; worker-src 'self'
+    Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
