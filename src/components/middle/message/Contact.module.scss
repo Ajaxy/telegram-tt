@@ -42,13 +42,11 @@
 
 .buttons {
   display: flex;
-  padding-block: 0.125rem;
 
   .button {
     width: auto;
     flex: 1;
-    height: 2.25rem;
-    margin-block: 0.25rem;
+    height: 2rem;
     font-weight: var(--font-weight-medium);
     background-color: transparent;
     color: var(--accent-color);
