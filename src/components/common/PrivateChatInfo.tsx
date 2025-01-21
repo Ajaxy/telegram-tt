@@ -16,6 +16,7 @@ import { selectChatMessages, selectUser, selectUserStatus } from '../../global/s
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
+import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -66,6 +67,8 @@ type StateProps =
     isSynced?: boolean;
   };
 
+const UPDATE_INTERVAL = 1000 * 60; // 1 min
+
 const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   customPeer,
   typingStatus,
@@ -115,6 +118,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       if (withMediaViewer) loadMoreProfilePhotos({ peerId: userId, isPreload: true });
     }
   }, [userId, withFullInfo, withMediaViewer, isSynced]);
+
+  useIntervalForceUpdate(UPDATE_INTERVAL);
 
   const handleAvatarViewerOpen = useLastCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
