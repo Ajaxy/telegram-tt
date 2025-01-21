@@ -25,7 +25,6 @@ const ActionMessageUpdatedAvatar: FC<OwnProps> = ({
   } = getActions();
 
   const lang = useOldLang();
-  const isVideo = message.content.action!.photo?.isVideo;
 
   const handleViewUpdatedAvatar = () => {
     openMediaViewer({
@@ -49,7 +48,7 @@ const ActionMessageUpdatedAvatar: FC<OwnProps> = ({
         <Avatar
           photo={message.content.action!.photo}
           loopIndefinitely
-          withVideo={isVideo}
+          withVideo
           size="jumbo"
         />
       </span>

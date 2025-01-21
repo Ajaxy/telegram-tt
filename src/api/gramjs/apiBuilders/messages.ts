@@ -769,7 +769,7 @@ function buildAction(
     type,
     targetUserIds,
     targetChatId,
-    photo, // TODO Only used internally now, will be used for the UI in future
+    photo,
     amount,
     stars,
     starGift,

@@ -182,7 +182,7 @@ const Reactions: FC<OwnProps> = ({
       className={buildClassName(
         'Reactions',
         isOutside && 'is-outside',
-        withServiceReactions && 'with-service-reactions',
+        withServiceReactions && 'is-service',
       )}
       style={maxWidth ? `max-width: ${maxWidth}px` : undefined}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
