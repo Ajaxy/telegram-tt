@@ -565,6 +565,7 @@ export type StarGiftInfo = {
   gift: ApiStarGiftRegular;
   shouldHideName?: boolean;
   message?: ApiFormattedText;
+  shouldUpgrade?: boolean;
 };
 
 export interface TabThread {

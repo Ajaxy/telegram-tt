@@ -15,10 +15,12 @@ export type TableAboutData = [IconName | undefined, TeactNode, TeactNode][];
 type OwnProps = {
   isOpen?: boolean;
   listItemData?: TableAboutData;
-  headerIconName: IconName;
+  headerIconName?: IconName;
   header?: TeactNode;
   footer?: TeactNode;
   buttonText?: string;
+  hasBackdrop?: boolean;
+  withSeparator?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
 };
@@ -30,6 +32,8 @@ const TableAboutModal = ({
   header,
   footer,
   buttonText,
+  hasBackdrop,
+  withSeparator,
   onClose,
   onButtonClick,
 }: OwnProps) => {
@@ -38,9 +42,11 @@ const TableAboutModal = ({
       isOpen={isOpen}
       className={styles.root}
       contentClassName={styles.content}
+      hasAbsoluteCloseButton
+      absoluteCloseButtonColor={hasBackdrop ? 'translucent-white' : undefined}
       onClose={onClose}
     >
-      <div className={styles.topIcon}><Icon name={headerIconName} /></div>
+      {headerIconName && <div className={styles.topIcon}><Icon name={headerIconName} /></div>}
       {header}
       <div>
         {listItemData?.map(([icon, title, subtitle]) => {
@@ -56,7 +62,7 @@ const TableAboutModal = ({
           );
         })}
       </div>
-      <Separator className={styles.separator} />
+      {withSeparator && <Separator className={styles.separator} />}
       {footer}
       {buttonText && (
         <Button size="smaller" onClick={onButtonClick || onClose}>{buttonText}</Button>

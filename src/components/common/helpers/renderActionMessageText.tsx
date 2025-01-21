@@ -95,7 +95,7 @@ export function renderActionMessageText(
   }
   if (translationKey.startsWith('Notification.StarsGift.Upgrade')) {
     unprocessed = unprocessed
-      .replace('%@', '%action_origin%');
+      .replace('%@', '%action_origin_chat%');
   }
   if (translationKey.startsWith('ActionUniqueGiftTransfer')) {
     unprocessed = unprocessed
@@ -132,6 +132,18 @@ export function renderActionMessageText(
     ) : actionOriginChat ? (
       renderChatContent(oldLang, actionOriginChat, noLinks) || NBSP
     ) : 'User',
+    '',
+  );
+
+  unprocessed = processed.pop() as string;
+  content.push(...processed);
+
+  processed = processPlaceholder(
+    unprocessed,
+    '%action_origin_chat%',
+    actionOriginChat ? (
+      renderChatContent(oldLang, actionOriginChat, noLinks) || NBSP
+    ) : 'Chat',
     '',
   );
 

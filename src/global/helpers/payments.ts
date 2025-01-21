@@ -20,7 +20,7 @@ export function getRequestInputInvoice<T extends GlobalState>(
 
   if (inputInvoice.type === 'stargift') {
     const {
-      userId, shouldHideName, giftId, message,
+      userId, shouldHideName, giftId, message, shouldUpgrade,
     } = inputInvoice;
     const user = selectUser(global, userId);
 
@@ -32,6 +32,7 @@ export function getRequestInputInvoice<T extends GlobalState>(
       shouldHideName,
       giftId,
       message,
+      shouldUpgrade,
     };
   }
 
@@ -169,6 +170,15 @@ export function getRequestInputInvoice<T extends GlobalState>(
         isOnlyForNewSubscribers,
         prizeDescription,
       },
+    };
+  }
+
+  if (inputInvoice.type === 'stargiftUpgrade') {
+    const { messageId, shouldKeepOriginalDetails } = inputInvoice;
+    return {
+      type: 'stargiftUpgrade',
+      messageId,
+      shouldKeepOriginalDetails,
     };
   }
 

@@ -216,6 +216,7 @@ export interface ApiStarGiftUnique {
   issuedCount: number;
   totalCount: number;
   attributes: ApiStarGiftAttribute[];
+  slug: string;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;
@@ -264,6 +265,9 @@ export interface ApiUserStarGift {
   message?: ApiFormattedText;
   messageId?: number;
   starsToConvert?: number;
+  canUpgrade?: true;
+  alreadyPaidUpgradeStars?: number;
+  transferStars?: number;
   isConverted?: boolean; // Local field, used for Action Message
   upgradeMsgId?: number; // Local field, used for Action Message
 }

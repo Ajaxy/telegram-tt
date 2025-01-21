@@ -33,6 +33,7 @@ import type {
   ApiReactionWithPaid,
   ApiReceiptRegular,
   ApiStarGift,
+  ApiStarGiftAttribute,
   ApiStarGiveawayOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
@@ -713,10 +714,18 @@ export type TabState = {
     gift: ApiUserStarGift | ApiStarGift;
   };
 
+  giftUpgradeModal?: {
+    sampleAttributes: ApiStarGiftAttribute[];
+    recipientId?: string;
+    gift?: ApiUserStarGift;
+  };
+
   suggestedStatusModal?: {
     botId: string;
     webAppKey?: string;
     customEmojiId: string;
     duration?: number;
   };
+
+  isWaitingForStarGiftUpgrade?: true;
 };

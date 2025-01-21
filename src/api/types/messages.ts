@@ -6,7 +6,7 @@ import type {
   ApiInputStorePaymentPurpose,
   ApiLabeledPrice,
   ApiPremiumGiftCodeOption,
-  ApiStarGift,
+  ApiStarGiftRegular,
   ApiStarGiftUnique,
 } from './payments';
 import type {
@@ -265,6 +265,7 @@ export type ApiInputInvoiceStarGift = {
   userId: string;
   giftId: string;
   message?: ApiFormattedText;
+  shouldUpgrade?: true;
 };
 
 export type ApiInputInvoiceStarsGiveaway = {
@@ -287,8 +288,14 @@ export type ApiInputInvoiceChatInviteSubscription = {
   hash: string;
 };
 
+export type ApiInputInvoiceStarGiftUpgrade = {
+  type: 'stargiftUpgrade';
+  messageId: number;
+  shouldKeepOriginalDetails?: true;
+};
+
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
+| ApiInputInvoiceGiftCode | ApiInputInvoiceStars | ApiInputInvoiceStarsGift | ApiInputInvoiceStarGiftUpgrade
 | ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription;
 
 /* Used for Invoice request */
@@ -325,6 +332,7 @@ export type ApiRequestInputInvoiceStarGift = {
   user: ApiUser;
   giftId: string;
   message?: ApiFormattedText;
+  shouldUpgrade?: true;
 };
 
 export type ApiRequestInputInvoiceChatInviteSubscription = {
@@ -332,9 +340,15 @@ export type ApiRequestInputInvoiceChatInviteSubscription = {
   hash: string;
 };
 
+export type ApiRequestInputInvoiceStarGiftUpgrade = {
+  type: 'stargiftUpgrade';
+  messageId: number;
+  shouldKeepOriginalDetails?: true;
+};
+
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
 | ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway
-| ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift;
+| ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift | ApiRequestInputInvoiceStarGiftUpgrade;
 
 export interface ApiInvoice {
   prices: ApiLabeledPrice[];
@@ -464,12 +478,13 @@ export interface ApiMessageActionStarGift {
   isNameHidden: boolean;
   isSaved: boolean;
   isConverted?: true;
-  gift: ApiStarGift;
+  gift: ApiStarGiftRegular;
   message?: ApiFormattedText;
   starsToConvert?: number;
   canUpgrade?: true;
   isUpgraded?: true;
   upgradeMsgId?: number;
+  alreadyPaidUpgradeStars?: number;
 }
 
 export interface ApiMessageActionStarGiftUnique {
@@ -478,7 +493,7 @@ export interface ApiMessageActionStarGiftUnique {
   isTransferred?: true;
   isSaved?: true;
   isRefunded?: true;
-  gift: ApiStarGift;
+  gift: ApiStarGiftUnique;
   canExportAt?: number;
   transferStars?: number;
 }

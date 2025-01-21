@@ -643,13 +643,14 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
 
     case 'stargift': {
       const {
-        user, shouldHideName, giftId, message,
+        user, shouldHideName, giftId, message, shouldUpgrade,
       } = invoice;
       return new GramJs.InputInvoiceStarGift({
         userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
         hideName: shouldHideName || undefined,
         giftId: BigInt(giftId),
         message: message && buildInputTextWithEntities(message),
+        includeUpgrade: shouldUpgrade,
       });
     }
 
@@ -670,6 +671,13 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
     case 'chatInviteSubscription': {
       return new GramJs.InputInvoiceChatInviteSubscription({
         hash: invoice.hash,
+      });
+    }
+
+    case 'stargiftUpgrade': {
+      return new GramJs.InputInvoiceStarGiftUpgrade({
+        msgId: invoice.messageId,
+        keepOriginalDetails: invoice.shouldKeepOriginalDetails,
       });
     }
 

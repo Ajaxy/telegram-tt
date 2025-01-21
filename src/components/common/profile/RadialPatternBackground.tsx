@@ -1,5 +1,5 @@
 import React, {
-  memo, useEffect, useRef, useSignal, useState,
+  memo, useEffect, useMemo, useRef, useSignal, useState,
 } from '../../../lib/teact/teact';
 
 import type { ApiSticker } from '../../../api/types';
@@ -22,6 +22,7 @@ type OwnProps = {
   patternColor?: string;
   patternIcon?: ApiSticker;
   className?: string;
+  clearBottomSector?: boolean;
 };
 
 const RINGS = 3;
@@ -33,38 +34,11 @@ const BASE_ICON_SIZE = 20;
 
 const MIN_SIZE = 250;
 
-const PATTERN_POSITIONS = (() => {
-  const coordinates: { x: number; y: number; sizeFactor: number }[] = [];
-  for (let ring = 1; ring <= RINGS; ring++) {
-    const ringItemCount = Math.floor(BASE_RING_ITEM_COUNT * (1 + (ring - 1) * RING_INCREMENT));
-    const ringProgress = ring / RINGS;
-    const ringRadius = CENTER_EMPTINESS + (MAX_RADIUS - CENTER_EMPTINESS) * ringProgress;
-
-    const angleShift = ring % 2 === 0 ? Math.PI / ringItemCount : 0;
-
-    for (let i = 0; i < ringItemCount; i++) {
-      const angle = (i / ringItemCount) * Math.PI * 2 + angleShift;
-      // Slightly oval
-      const xOffset = ringRadius * 1.71 * Math.cos(angle);
-      const yOffset = ringRadius * Math.sin(angle);
-
-      const x = 0.5 + xOffset;
-      const y = 0.5 + yOffset;
-
-      const sizeFactor = 1.4 - ringProgress * Math.random();
-
-      coordinates.push({
-        x, y, sizeFactor,
-      });
-    }
-  }
-  return coordinates;
-})();
-
 const RadialPatternBackground = ({
   backgroundColors,
   patternColor,
   patternIcon,
+  clearBottomSector,
   className,
 }: OwnProps) => {
   // eslint-disable-next-line no-null/no-null
@@ -85,6 +59,39 @@ const RadialPatternBackground = ({
     if (!previewUrl) return;
     preloadImage(previewUrl).then(setEmojiImage);
   }, [previewUrl]);
+
+  const patternPositions = useMemo(() => {
+    const coordinates: { x: number; y: number; sizeFactor: number }[] = [];
+    for (let ring = 1; ring <= RINGS; ring++) {
+      const ringItemCount = Math.floor(BASE_RING_ITEM_COUNT * (1 + (ring - 1) * RING_INCREMENT));
+      const ringProgress = ring / RINGS;
+      const ringRadius = CENTER_EMPTINESS + (MAX_RADIUS - CENTER_EMPTINESS) * ringProgress;
+
+      const angleShift = ring % 2 === 0 ? Math.PI / ringItemCount : 0;
+
+      for (let i = 0; i < ringItemCount; i++) {
+        const angle = (i / ringItemCount) * Math.PI * 2 + angleShift;
+
+        if (clearBottomSector && angle > Math.PI * 0.45 && angle < Math.PI * 0.55) {
+          continue;
+        }
+
+        // Slightly oval
+        const xOffset = ringRadius * 1.71 * Math.cos(angle);
+        const yOffset = ringRadius * Math.sin(angle);
+
+        const x = 0.5 + xOffset;
+        const y = 0.5 + yOffset;
+
+        const sizeFactor = 1.4 - ringProgress * Math.random();
+
+        coordinates.push({
+          x, y, sizeFactor,
+        });
+      }
+    }
+    return coordinates;
+  }, [clearBottomSector]);
 
   useResizeObserver(containerRef, (entry) => {
     setContainerSize({
@@ -111,7 +118,7 @@ const RadialPatternBackground = ({
     if (!width || !height) return;
 
     ctx.save();
-    PATTERN_POSITIONS.forEach(({
+    patternPositions.forEach(({
       x, y, sizeFactor,
     }) => {
       const centerShift = (width - Math.max(width, MIN_SIZE * dpr)) / 2; // Shift coords if canvas is smaller than `MIN_SIZE`

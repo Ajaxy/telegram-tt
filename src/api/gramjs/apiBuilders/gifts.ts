@@ -15,7 +15,7 @@ import { buildStickerFromDocument } from './symbols';
 export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   if (starGift instanceof GramJs.StarGiftUnique) {
     const {
-      id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal,
+      id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug,
     } = starGift;
 
     return {
@@ -28,6 +28,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       title,
       totalCount: availabilityTotal,
       issuedCount: availabilityIssued,
+      slug,
     };
   }
 
@@ -125,7 +126,7 @@ export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribut
 
 export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUserStarGift {
   const {
-    gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved,
+    gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved, upgradeStars, transferStars, canUpgrade,
   } = userStarGift;
 
   return {
@@ -137,5 +138,8 @@ export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUser
     messageId: msgId,
     isNameHidden: nameHidden,
     isUnsaved: unsaved,
+    canUpgrade,
+    alreadyPaidUpgradeStars: upgradeStars?.toJSNumber(),
+    transferStars: transferStars?.toJSNumber(),
   };
 }

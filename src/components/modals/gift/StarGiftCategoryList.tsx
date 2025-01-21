@@ -19,22 +19,22 @@ type OwnProps = {
 };
 
 type StateProps = {
-  starGiftCategoriesByName: Record<StarGiftCategory, string[]>;
+  idsByCategory?: Record<StarGiftCategory, string[]>;
 };
 
 const StarGiftCategoryList = ({
-  starGiftCategoriesByName,
+  idsByCategory,
   onCategoryChanged,
 }: StateProps & OwnProps) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
-  const starCategories: number[] = useMemo(() => Object.keys(starGiftCategoriesByName)
+  const starCategories: number[] | undefined = useMemo(() => idsByCategory && Object.keys(idsByCategory)
     .filter((category) => category !== 'all' && category !== 'limited')
     .map(Number)
     .sort((a, b) => a - b),
-  [starGiftCategoriesByName]);
+  [idsByCategory]);
 
   const [selectedCategory, setSelectedCategory] = useState<StarGiftCategory>('all');
 
@@ -80,17 +80,17 @@ const StarGiftCategoryList = ({
       {renderCategoryItem('all')}
       {renderCategoryItem('stock')}
       {renderCategoryItem('limited')}
-      {starCategories.map(renderCategoryItem)}
+      {starCategories?.map(renderCategoryItem)}
     </div>
   );
 };
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { starGiftCategoriesByName } = global;
+    const { starGifts } = global;
 
     return {
-      starGiftCategoriesByName,
+      idsByCategory: starGifts?.idsByCategory,
     };
   },
 )(StarGiftCategoryList));

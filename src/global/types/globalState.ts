@@ -298,8 +298,10 @@ export type GlobalState = {
     };
   };
   availableEffectById: Record<string, ApiAvailableEffect>;
-  starGiftsById: Record<string, ApiStarGiftRegular>;
-  starGiftCategoriesByName: Record<StarGiftCategory, string[]>;
+  starGifts?: {
+    byId: Record<string, ApiStarGiftRegular>;
+    idsByCategory: Record<StarGiftCategory, string[]>;
+  };
 
   stickers: {
     setsById: Record<string, ApiStickerSet>;

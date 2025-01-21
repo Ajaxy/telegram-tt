@@ -17,6 +17,7 @@ import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.a
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
+import GiftUpgradeModal from './gift/upgrade/GiftUpgradeModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
@@ -63,7 +64,8 @@ type ModalKey = keyof Pick<TabState,
 'suggestedStatusModal' |
 'emojiStatusAccessModal' |
 'locationAccessModal' |
-'aboutAdsModal'
+'aboutAdsModal' |
+'giftUpgradeModal'
 >;
 
 type StateProps = {
@@ -106,6 +108,7 @@ const MODALS: ModalRegistry = {
   emojiStatusAccessModal: EmojiStatusAccessModal,
   locationAccessModal: LocationAccessModal,
   aboutAdsModal: AboutAdsModal,
+  giftUpgradeModal: GiftUpgradeModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

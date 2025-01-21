@@ -128,7 +128,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     getReceipt,
     openGiftInfoModalFromMessage,
     openPrizeStarsTransactionFromGiveaway,
-    showNotification,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -240,16 +239,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const handleStarGiftClick = () => {
     const starGift = message.content.action?.starGift;
     if (!starGift) return;
-    if (starGift.type === 'starGift' && starGift.canUpgrade && !message.isOutgoing) {
-      showNotification({
-        title: {
-          key: 'ActionUnsupportedTitle',
-        },
-        message: {
-          key: 'ActionUnsupportedDescription',
-        },
-      });
-    }
 
     openGiftInfoModalFromMessage({
       chatId: message.chatId,
@@ -534,7 +523,8 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
         <div className="action-message-button">
           <Sparkles preset="button" />
-          {starGift.canUpgrade && !message.isOutgoing ? lang('ActionStarGiftUnpack') : oldLang('ActionGiftPremiumView')}
+          {starGift.alreadyPaidUpgradeStars && (!message.isOutgoing || targetUsers?.[0]?.isSelf)
+            ? lang('ActionStarGiftUnpack') : oldLang('ActionGiftPremiumView')}
         </div>
         {starGift.gift.availabilityTotal && (
           <GiftRibbon
@@ -558,11 +548,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
     const backgroundColors = [backdrop.centerColor, backdrop.edgeColor];
 
+    const adaptedPatternColor = `${backdrop.patternColor.slice(0, 7)}55`;
+
     return (
       <span
         className="action-message-gift action-message-centered action-message-unique"
         tabIndex={0}
         role="button"
+        style={`--pattern-color: ${adaptedPatternColor}`}
         onClick={handleStarGiftClick}
       >
         <div className="action-message-unique-background-wrapper">
@@ -571,6 +564,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
             backgroundColors={backgroundColors}
             patternColor={backdrop.patternColor}
             patternIcon={pattern.sticker}
+            clearBottomSector
           />
         </div>
         <AnimatedIconFromSticker
@@ -610,7 +604,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           {oldLang('Gift2UniqueView')}
         </div>
         <GiftRibbon
-          color={backdrop.patternColor || 'blue'}
+          color={adaptedPatternColor}
           text={oldLang('ActionStarGift')}
         />
       </span>

@@ -23,6 +23,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import PremiumProgress from '../../common/PremiumProgress';
 import ActionMessage from '../../middle/ActionMessage';
 import Button from '../../ui/Button';
+import Link from '../../ui/Link';
 import ListItem from '../../ui/ListItem';
 import Switcher from '../../ui/Switcher';
 import TextArea from '../../ui/TextArea';
@@ -61,12 +62,13 @@ function GiftComposer({
   currentUserId,
   isPaymentFormLoading,
 }: OwnProps & StateProps) {
-  const { sendStarGift, openInvoice } = getActions();
+  const { sendStarGift, openInvoice, openGiftUpgradeModal } = getActions();
 
   const lang = useLang();
 
   const [giftMessage, setGiftMessage] = useState<string>('');
   const [shouldHideName, setShouldHideName] = useState<boolean>(false);
+  const [shouldPayForUpgrade, setShouldPayForUpgrade] = useState<boolean>(false);
 
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
@@ -119,6 +121,7 @@ function GiftComposer({
             } : undefined,
             isNameHidden: shouldHideName,
             starsToConvert: gift.starsToConvert,
+            canUpgrade: shouldPayForUpgrade || undefined,
             isSaved: false,
             gift,
           },
@@ -126,7 +129,7 @@ function GiftComposer({
         },
       },
     } satisfies ApiMessage;
-  }, [currentUserId, gift, giftMessage, isStarGift, shouldHideName, userId]);
+  }, [currentUserId, gift, giftMessage, isStarGift, shouldHideName, shouldPayForUpgrade, userId]);
 
   const handleGiftMessageChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setGiftMessage(e.target.value);
@@ -136,6 +139,18 @@ function GiftComposer({
     setShouldHideName(!shouldHideName);
   });
 
+  const handleShouldPayForUpgradeChange = useLastCallback(() => {
+    setShouldPayForUpgrade(!shouldPayForUpgrade);
+  });
+
+  const handleOpenUpgradePreview = useLastCallback(() => {
+    if (!isStarGift) return;
+    openGiftUpgradeModal({
+      giftId: gift.id,
+      peerId: userId,
+    });
+  });
+
   const handleMainButtonClick = useLastCallback(() => {
     if (isStarGift) {
       sendStarGift({
@@ -143,6 +158,7 @@ function GiftComposer({
         shouldHideName,
         gift,
         message: giftMessage ? { text: giftMessage } : undefined,
+        shouldUpgrade: shouldPayForUpgrade,
       });
       return;
     }
@@ -159,6 +175,8 @@ function GiftComposer({
 
   function renderOptionsSection() {
     const symbolsLeft = captionLimit ? captionLimit - giftMessage.length : undefined;
+
+    const userFullName = getUserFullName(user)!;
     return (
       <div className={styles.optionsSection}>
         <TextArea
@@ -170,6 +188,31 @@ function GiftComposer({
           maxLengthIndicator={symbolsLeft && symbolsLeft < LIMIT_DISPLAY_THRESHOLD ? symbolsLeft.toString() : undefined}
         />
 
+        {isStarGift && gift.upgradeStars && (
+          <ListItem className={styles.switcher} narrow ripple onClick={handleShouldPayForUpgradeChange}>
+            <span>
+              {lang('GiftMakeUnique', {
+                stars: formatStarsAsIcon(lang, gift.upgradeStars, { className: styles.switcherStarIcon }),
+              }, { withNodes: true })}
+            </span>
+            <Switcher
+              checked={shouldPayForUpgrade}
+              onChange={handleShouldPayForUpgradeChange}
+              label={lang('GiftMakeUniqueAcc')}
+            />
+          </ListItem>
+        )}
+        {isStarGift && (
+          <div className={styles.description}>
+            {lang('GiftMakeUniqueDescription', {
+              user: userFullName,
+              link: <Link isPrimary onClick={handleOpenUpgradePreview}>{lang('GiftMakeUniqueLink')}</Link>,
+            }, {
+              withNodes: true,
+            })}
+          </div>
+        )}
+
         {isStarGift && (
           <ListItem className={styles.switcher} narrow ripple onClick={handleShouldHideNameChange}>
             <span>{lang('GiftHideMyName')}</span>
@@ -180,27 +223,22 @@ function GiftComposer({
             />
           </ListItem>
         )}
-      </div>
-    );
-  }
-
-  function renderFooter() {
-    const userFullName = getUserFullName(user)!;
-
-    const amount = isStarGift
-      ? formatStarsAsIcon(lang, gift.stars, true)
-      : formatCurrency(gift.amount, gift.currency);
-
-    return (
-      <div className={styles.footer}>
         {isStarGift && (
           <div className={styles.description}>
             {lang('GiftHideNameDescription', { profile: userFullName, receiver: userFullName })}
           </div>
         )}
+      </div>
+    );
+  }
 
-        <div className={styles.spacer} />
+  function renderFooter() {
+    const amount = isStarGift
+      ? formatStarsAsIcon(lang, gift.stars + (shouldPayForUpgrade ? gift.upgradeStars! : 0), { asFont: true })
+      : formatCurrency(gift.amount, gift.currency);
 
+    return (
+      <div className={styles.footer}>
         {isStarGift && gift.availabilityRemains && (
           <PremiumProgress
             isPrimary
@@ -236,7 +274,7 @@ function GiftComposer({
   );
 
   return (
-    <div className={buildClassName(styles.root, 'no-scroll')}>
+    <div className={buildClassName(styles.root, 'custom-scroll')}>
       <div
         className={buildClassName(styles.actionMessageView, 'MessageList')}
         // @ts-ignore -- FIXME: Find a way to disable interactions but keep a11y
@@ -253,6 +291,7 @@ function GiftComposer({
         <ActionMessage key={isStarGift ? gift.id : gift.months} message={localMessage} />
       </div>
       {renderOptionsSection()}
+      <div className={styles.spacer} />
       {renderFooter()}
     </div>
   );

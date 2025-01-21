@@ -181,12 +181,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     hash: {},
   },
   availableEffectById: {},
-  starGiftsById: {},
-  starGiftCategoriesByName: {
-    all: [],
-    limited: [],
-    stock: [],
-  },
 
   stickers: {
     setsById: {},

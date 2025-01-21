@@ -264,6 +264,8 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
     messageId: (!message.isOutgoing || chatId === global.currentUserId) ? message.id : undefined,
     isConverted: starGift.isConverted,
     upgradeMsgId: starGift.upgradeMsgId,
+    canUpgrade: starGift.canUpgrade,
+    alreadyPaidUpgradeStars: starGift.alreadyPaidUpgradeStars,
   } satisfies ApiUserStarGift;
 
   actions.openGiftInfoModal({ userId: giftReceiverId, gift, tabId });
@@ -289,5 +291,13 @@ addActionHandler('closeGiftInfoModal', (global, actions, payload): ActionReturnT
 
   return updateTabState(global, {
     giftInfoModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('closeGiftUpgradeModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giftUpgradeModal: undefined,
   }, tabId);
 });

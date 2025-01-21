@@ -1164,15 +1164,15 @@ export interface LangPair {
   'GiftInfoSent': undefined;
   'GiftInfoReceived': undefined;
   'GiftInfoTitle': undefined;
+  'GiftInfoDescriptionFreeUpgrade': undefined;
+  'GiftInfoDescriptionUpgraded': undefined;
   'GiftInfoFrom': undefined;
   'GiftInfoDate': undefined;
   'GiftInfoValue': undefined;
-  'GiftInfoMakeVisible': undefined;
-  'GiftInfoMakeInvisible': undefined;
   'GiftInfoConvertTitle': undefined;
   'GiftInfoConvertDescription2': undefined;
-  'GiftInfoSavedView': undefined;
-  'GiftInfoHidden': undefined;
+  'GiftInfoSavedHide': undefined;
+  'GiftInfoSavedShow': undefined;
   'GiftInfoAvailability': undefined;
   'GiftInfoFirstSale': undefined;
   'GiftInfoLastSale': undefined;
@@ -1186,6 +1186,21 @@ export interface LangPair {
   'GiftInfoStatus': undefined;
   'GiftInfoStatusNonUnique': undefined;
   'GiftInfoViewUpgraded': undefined;
+  'GiftInfoUpgradeBadge': undefined;
+  'GiftInfoUpgradeForFree': undefined;
+  'GiftUpgradeUniqueTitle': undefined;
+  'GiftUpgradeUniqueDescription': undefined;
+  'GiftUpgradeTransferableTitle': undefined;
+  'GiftUpgradeTransferableDescription': undefined;
+  'GiftUpgradeTradeableTitle': undefined;
+  'GiftUpgradeTradeableDescription': undefined;
+  'GiftUpgradeTitle': undefined;
+  'GiftUpgradeTextOwn': undefined;
+  'GiftUpgradeKeepDetails': undefined;
+  'GiftUpgradedTitle': undefined;
+  'GiftUpgradedDescription': undefined;
+  'GiftMakeUniqueAcc': undefined;
+  'GiftMakeUniqueLink': undefined;
   'AllGiftsCategory': undefined;
   'LimitedGiftsCategory': undefined;
   'StockGiftsCategory': undefined;
@@ -1200,12 +1215,6 @@ export interface LangPair {
   'GiftFrom': undefined;
   'ReceivedGift': undefined;
   'SentGift': undefined;
-  'StarGiftInfoLinkCaption': undefined;
-  'StarGiftDisplayOnMyPage': undefined;
-  'StarGiftConvertTo': undefined;
-  'StarGiftHideFromMyPage': undefined;
-  'StarGiftSenderPrivacyNote': undefined;
-  'StarGiftAvailability': undefined;
   'StarsSubscribeInfoLinkText': undefined;
   'StarsSubscribeInfoLink': undefined;
   'StarsBalance': undefined;
@@ -1629,11 +1638,17 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'GiftSend': {
     'amount': V;
   };
+  'GiftInfoDescriptionFreeUpgradeOut': {
+    'user': V;
+  };
   'GiftInfoConvertDescription1': {
     'user': V;
     'amount': V;
   };
   'GiftInfoSaved': {
+    'link': V;
+  };
+  'GiftInfoHidden': {
     'link': V;
   };
   'GiftInfoIssued': {
@@ -1662,6 +1677,19 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'user': V;
     'date': V;
     'text': V;
+  };
+  'GiftUpgradeText': {
+    'peer': V;
+  };
+  'GiftUpgradeButton': {
+    'amount': V;
+  };
+  'GiftMakeUnique': {
+    'stars': V;
+  };
+  'GiftMakeUniqueDescription': {
+    'user': V;
+    'link': V;
   };
   'StarsAmount': {
     'amount': V;
@@ -1694,19 +1722,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'ActionStarGiftOutDescriptionUpgrade': {
     'user': V;
-  };
-  'StarGiftInfoDescriptionInbound': {
-    'count': V;
-    'link': V;
-  };
-  'StarGiftInfoDescriptionOutgoing': {
-    'user': V;
-    'count': V;
-    'link': V;
-  };
-  'StarGiftAvailabilityValue': {
-    'number': V;
-    'total': V;
   };
   'StarsSubscribeInfo': {
     'link': V;
@@ -1915,6 +1930,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'GiftInfoDescriptionOut': {
     'user': V;
+    'amount': V;
+  };
+  'GiftInfoDescriptionUpgrade': {
     'amount': V;
   };
   'GiftInfoDescriptionConverted': {

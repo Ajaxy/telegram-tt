@@ -14,6 +14,7 @@ import type {
 import { DEBUG } from '../../../config';
 import {
   buildApiStarGift,
+  buildApiStarGiftAttribute,
   buildApiUserStarGift,
 } from '../apiBuilders/gifts';
 import {
@@ -646,9 +647,40 @@ export async function fetchUniqueStarGift({ slug }: {
 }) {
   const result = await invokeRequest(new GramJs.payments.GetUniqueStarGift({ slug }));
 
+  if (!result) return undefined;
+
+  const gift = buildApiStarGift(result.gift);
+  if (gift.type !== 'starGiftUnique') return undefined;
+  return gift;
+}
+
+export async function fetchStarGiftUpgradePreview({
+  giftId,
+}: {
+  giftId: string;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetStarGiftUpgradePreview({
+    giftId: BigInt(giftId),
+  }));
+
   if (!result) {
     return undefined;
   }
-  const gift = buildApiStarGift(result.gift);
-  return gift.type === 'starGiftUnique' ? gift : undefined;
+
+  return result.sampleAttributes.map(buildApiStarGiftAttribute).filter(Boolean);
+}
+
+export function upgradeGift({
+  messageId,
+  shouldKeepOriginalDetails,
+}: {
+  messageId: number;
+  shouldKeepOriginalDetails?: true;
+}) {
+  return invokeRequest(new GramJs.payments.UpgradeStarGift({
+    msgId: messageId,
+    keepOriginalDetails: shouldKeepOriginalDetails,
+  }), {
+    shouldReturnTrue: true,
+  });
 }

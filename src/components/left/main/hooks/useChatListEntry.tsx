@@ -4,7 +4,7 @@ import React, {
 import { getGlobal } from '../../../../global';
 
 import type {
-  ApiChat, ApiDraft, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus, ApiUser,
+  ApiChat, ApiDraft, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus,
   StatefulMediaContent,
 } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
@@ -21,10 +21,9 @@ import {
   getMessageSticker,
   getMessageVideo,
   isActionMessage,
-  isChatChannel,
-  isChatGroup,
   isExpiredMessage,
 } from '../../../../global/helpers';
+import { isApiPeerChat } from '../../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 import buildClassName from '../../../../util/buildClassName';
 import { renderActionMessageText } from '../../../common/helpers/renderActionMessageText';
@@ -155,15 +154,13 @@ export default function useChatListEntry({
     }
 
     if (isAction) {
-      const isChat = chat && (isChatChannel(chat) || isChatGroup(chat));
-
       return (
         <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
           {renderActionMessageText(
             oldLang,
             lastMessage,
-            !isChat ? lastMessageSender as ApiUser : undefined,
-            isChat ? chat : undefined,
+            lastMessageSender && !isApiPeerChat(lastMessageSender) ? lastMessageSender : undefined,
+            lastMessageSender && isApiPeerChat(lastMessageSender) ? lastMessageSender : chat,
             actionTargetUsers,
             actionTargetMessage,
             actionTargetChatId,

@@ -1,0 +1,11 @@
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  align-self: stretch;
+}
+
+.footerButton {
+  margin-top: 0.5rem;
+}

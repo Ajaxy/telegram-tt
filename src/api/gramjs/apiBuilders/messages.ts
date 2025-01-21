@@ -26,6 +26,8 @@ import type {
   ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
+  ApiStarGiftRegular,
+  ApiStarGiftUnique,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -369,7 +371,7 @@ export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
 
 function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : ApiMessageActionStarGift {
   const {
-    nameHidden, saved, converted, gift, message, convertStars, canUpgrade, upgraded, upgradeMsgId,
+    nameHidden, saved, converted, gift, message, convertStars, canUpgrade, upgraded, upgradeMsgId, upgradeStars,
   } = action;
 
   return {
@@ -377,12 +379,13 @@ function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : A
     isNameHidden: Boolean(nameHidden),
     isSaved: Boolean(saved),
     isConverted: converted,
-    gift: buildApiStarGift(gift),
+    gift: buildApiStarGift(gift) as ApiStarGiftRegular,
     message: message && buildApiFormattedText(message),
     starsToConvert: convertStars?.toJSNumber(),
     canUpgrade,
     isUpgraded: upgraded,
     upgradeMsgId,
+    alreadyPaidUpgradeStars: upgradeStars?.toJSNumber(),
   };
 }
 
@@ -395,7 +398,7 @@ function buildApiMessageActionStarGiftUnique(
 
   return {
     type: 'starGiftUnique',
-    gift: buildApiStarGift(gift),
+    gift: buildApiStarGift(gift) as ApiStarGiftUnique,
     canExportAt,
     isRefunded: refunded,
     isSaved: saved,
@@ -757,7 +760,7 @@ function buildAction(
       text = action.upgrade ? 'Notification.StarsGift.UpgradeYou' : 'ActionUniqueGiftTransferOutbound';
     } else {
       text = action.upgrade ? 'Notification.StarsGift.Upgrade' : 'ActionUniqueGiftTransferInbound';
-      translationValues.push('%action_origin%');
+      translationValues.push('%action_origin_chat%');
     }
 
     starGift = buildApiMessageActionStarGiftUnique(action);

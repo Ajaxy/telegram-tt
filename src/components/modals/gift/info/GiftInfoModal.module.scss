@@ -32,11 +32,16 @@
   color: var(--_color-description, var(--color-text));
 }
 
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .footerDescription {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
   text-align: center;
-  margin-bottom: 1rem;
 }
 
 .unknown {
@@ -81,4 +86,8 @@
   .description {
     font-size: 0.875rem;
   }
+}
+
+.starAmountIcon {
+  margin-inline-start: 0 !important;
 }

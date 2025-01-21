@@ -359,8 +359,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
       body = renderActionMessageText(
         oldTranslate,
         message,
-        !isChat ? messageSenderUser : undefined,
-        isChat ? chat : undefined,
+        messageSenderUser,
+        chat,
         actionTargetUsers,
         actionTargetMessage,
         actionTargetChatId,

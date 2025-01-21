@@ -1,5 +1,6 @@
 .root :global(.modal-dialog) {
   width: 26.25rem;
+  overflow: hidden;
 }
 
 .title, .description {

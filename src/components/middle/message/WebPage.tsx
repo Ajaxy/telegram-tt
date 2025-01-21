@@ -147,8 +147,10 @@ const WebPage: FC<OwnProps & StateProps> = ({
   const isStory = type === WEBPAGE_STORY_TYPE;
   const isGift = type === WEBPAGE_GIFT_TYPE;
   const isExpiredStory = story && 'isDeleted' in story;
+
   const quickButtonLangKey = !inPreview && !isExpiredStory ? getWebpageButtonLangKey(type) : undefined;
   const quickButtonTitle = quickButtonLangKey && lang(quickButtonLangKey);
+
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
   const isArticle = Boolean(truncatedDescription || title || siteName);
   let isSquarePhoto = Boolean(stickers);
@@ -185,6 +187,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
         size="tiny"
         color="translucent"
         isRectangular
+        noForcedUpperCase
         onClick={handleOpenTelegramLink}
       >
         {caption}

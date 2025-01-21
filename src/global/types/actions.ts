@@ -681,9 +681,9 @@ export interface ActionPayloads {
     tipAmount?: number;
   } & WithTabId;
   sendStarPaymentForm: {
-    starGift?: {
+    directInfo?: {
       formId: string;
-      inputInvoice: ApiInputInvoiceStarGift;
+      inputInvoice: ApiInputInvoice;
     };
   } & WithTabId;
   getReceipt: {
@@ -2311,6 +2311,17 @@ export interface ActionPayloads {
     gift: ApiStarGift;
   }) & WithTabId;
   closeGiftInfoModal: WithTabId | undefined;
+  openGiftUpgradeModal: {
+    giftId: string;
+    peerId?: string;
+    gift?: ApiUserStarGift;
+  } & WithTabId;
+  closeGiftUpgradeModal: WithTabId | undefined;
+  upgradeGift: {
+    messageId: number;
+    shouldKeepOriginalDetails?: boolean;
+    upgradeStars?: number;
+  } & WithTabId;
   loadUserGifts: {
     userId: string;
     shouldRefresh?: boolean;

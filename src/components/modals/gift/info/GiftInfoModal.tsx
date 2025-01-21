@@ -59,6 +59,7 @@ const GiftInfoModal = ({
     convertGiftToStars,
     openChatWithInfo,
     focusMessage,
+    openGiftUpgradeModal,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -81,16 +82,16 @@ const GiftInfoModal = ({
   const giftSticker = gift && getStickerFromGift(gift);
 
   const canFocusUpgrade = Boolean(userGift?.upgradeMsgId);
-  const canUpdate = Boolean(userGift?.messageId) && !isSender && !canFocusUpgrade;
+  const canUpdate = Boolean(userGift?.messageId) && targetUser?.id === currentUserId && !canFocusUpgrade;
 
   const handleClose = useLastCallback(() => {
     closeGiftInfoModal();
   });
 
   const handleFocusUpgraded = useLastCallback(() => {
-    if (!userGift?.upgradeMsgId) return;
-    const { upgradeMsgId, fromId } = userGift;
-    focusMessage({ chatId: fromId!, messageId: upgradeMsgId! });
+    if (!userGift?.upgradeMsgId || !targetUser) return;
+    const { upgradeMsgId } = userGift;
+    focusMessage({ chatId: targetUser.id, messageId: upgradeMsgId! });
     handleClose();
   });
 
@@ -107,9 +108,9 @@ const GiftInfoModal = ({
     handleClose();
   });
 
-  const handleOpenProfile = useLastCallback(() => {
-    openChatWithInfo({ id: currentUserId!, profileTab: 'gifts' });
-    handleClose();
+  const handleOpenUpgradeModal = useLastCallback(() => {
+    if (!userGift) return;
+    openGiftUpgradeModal({ giftId: userGift.gift.id, gift: userGift });
   });
 
   const giftAttributes = useMemo(() => {
@@ -136,6 +137,30 @@ const GiftInfoModal = ({
     );
   }, [giftAttributes, isOpen]);
 
+  const renderFooterButton = useLastCallback(() => {
+    if (canFocusUpgrade) {
+      return (
+        <Button size="smaller" onClick={handleFocusUpgraded}>
+          {lang('GiftInfoViewUpgraded')}
+        </Button>
+      );
+    }
+
+    if (canUpdate && userGift?.alreadyPaidUpgradeStars && !userGift.upgradeMsgId) {
+      return (
+        <Button size="smaller" isShiny onClick={handleOpenUpgradeModal}>
+          {lang('GiftInfoUpgradeForFree')}
+        </Button>
+      );
+    }
+
+    return (
+      <Button size="smaller" onClick={handleClose}>
+        {lang('OK')}
+      </Button>
+    );
+  });
+
   const modalData = useMemo(() => {
     if (!typeGift || !gift) {
       return undefined;
@@ -154,9 +179,14 @@ const GiftInfoModal = ({
         });
       }
       if (!userGift) return lang('GiftInfoSoldOutDescription');
+      if (userGift.upgradeMsgId) return lang('GiftInfoDescriptionUpgraded');
+      if (userGift.canUpgrade && userGift.alreadyPaidUpgradeStars) {
+        return canUpdate
+          ? lang('GiftInfoDescriptionFreeUpgrade')
+          : lang('GiftInfoDescriptionFreeUpgradeOut', { user: getUserFullName(targetUser)! });
+      }
       if (!canUpdate && !isSender) return undefined;
-      if (!starsToConvert || canConvertDifference < 0) return undefined;
-      if (isConverted) {
+      if (isConverted && starsToConvert) {
         return canUpdate
           ? lang('GiftInfoDescriptionConverted', {
             amount: formatInteger(starsToConvert!),
@@ -175,13 +205,23 @@ const GiftInfoModal = ({
           });
       }
 
+      if (userGift.canUpgrade && canUpdate) {
+        return lang('GiftInfoDescriptionUpgrade', {
+          amount: formatInteger(starsToConvert!),
+        }, {
+          pluralValue: starsToConvert!,
+          withNodes: true,
+          withMarkdown: true,
+        });
+      }
+
       return canUpdate
         ? lang('GiftInfoDescription', {
           amount: starsToConvert,
         }, {
           withNodes: true,
           withMarkdown: true,
-          pluralValue: starsToConvert,
+          pluralValue: starsToConvert || 0,
         })
         : lang('GiftInfoDescriptionOut', {
           amount: starsToConvert,
@@ -189,7 +229,7 @@ const GiftInfoModal = ({
         }, {
           withNodes: true,
           withMarkdown: true,
-          pluralValue: starsToConvert,
+          pluralValue: starsToConvert || 0,
         });
     })();
 
@@ -269,10 +309,12 @@ const GiftInfoModal = ({
         ]);
       }
 
+      const starsValue = gift.stars + (userGift?.alreadyPaidUpgradeStars || 0);
+
       tableData.push([
         lang('GiftInfoValue'),
         <div className={styles.giftValue}>
-          {formatStarsAsIcon(lang, gift.stars)}
+          {formatStarsAsIcon(lang, starsValue, { className: styles.starAmountIcon })}
           {canUpdate && canConvertDifference > 0 && Boolean(starsToConvert) && (
             <BadgeButton onClick={openConvertConfirm}>
               {lang('GiftInfoConvert', { amount: starsToConvert }, { pluralValue: starsToConvert })}
@@ -296,7 +338,10 @@ const GiftInfoModal = ({
       if (gift.upgradeStars) {
         tableData.push([
           lang('GiftInfoStatus'),
-          lang('GiftInfoStatusNonUnique'),
+          <div className={styles.giftValue}>
+            {lang('GiftInfoStatusNonUnique')}
+            {canUpdate && <BadgeButton onClick={handleOpenUpgradeModal}>{lang('GiftInfoUpgradeBadge')}</BadgeButton>}
+          </div>,
         ]);
       }
 
@@ -424,12 +469,11 @@ const GiftInfoModal = ({
         {canUpdate && (
           <div className={styles.footerDescription}>
             <div>
-              {isUnsaved ? lang('GiftInfoHidden')
-                : lang('GiftInfoSaved', {
-                  link: <Link isPrimary onClick={handleOpenProfile}>{lang('GiftInfoSavedView')}</Link>,
-                }, {
-                  withNodes: true,
-                })}
+              {lang(isUnsaved ? 'GiftInfoHidden' : 'GiftInfoSaved', {
+                link: <Link isPrimary onClick={handleTriggerVisibility}>{lang('GiftInfoSavedHide')}</Link>,
+              }, {
+                withNodes: true,
+              })}
             </div>
             {isVisibleForMe && (
               <div>
@@ -438,21 +482,7 @@ const GiftInfoModal = ({
             )}
           </div>
         )}
-        {canFocusUpgrade && (
-          <Button size="smaller" onClick={handleFocusUpgraded}>
-            {lang('GiftInfoViewUpgraded')}
-          </Button>
-        )}
-        {!canUpdate && !canFocusUpgrade && (
-          <Button size="smaller" onClick={handleClose}>
-            {lang('OK')}
-          </Button>
-        )}
-        {canUpdate && (
-          <Button size="smaller" onClick={handleTriggerVisibility}>
-            {lang(isUnsaved ? 'GiftInfoMakeVisible' : 'GiftInfoMakeInvisible')}
-          </Button>
-        )}
+        {renderFooterButton()}
       </div>
     );
 
@@ -463,7 +493,7 @@ const GiftInfoModal = ({
     };
   }, [
     typeGift, userGift, targetUser, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang, gift,
-    radialPatternBackdrop, giftAttributes, canFocusUpgrade,
+    radialPatternBackdrop, giftAttributes, renderFooterButton,
   ]);
 
   return (

@@ -1,9 +1,15 @@
+@use "../../../styles/mixins";
+
 .root {
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-top: 3.5rem;
+  padding-inline: 0.75rem;
+
+  @include mixins.adapt-padding-to-scrollbar(0.75rem);
 }
 
 .header {
@@ -47,9 +53,9 @@
 }
 
 .optionsSection {
-  padding: 1rem;
+  padding-top: 1rem;
   padding-bottom: 0.5rem;
-  box-shadow: 0 1px 2px var(--color-default-shadow);
+  padding-inline: 0.25rem;
 }
 
 .checkboxTitle {
@@ -68,6 +74,9 @@
   position: relative;
   overflow: hidden;
   flex: 0 0 auto;
+
+  border-bottom-right-radius: var(--border-radius-default);
+  border-bottom-left-radius: var(--border-radius-default);
 
   background-color: var(--theme-background-color);
   background-position: center;
@@ -112,18 +121,28 @@
   justify-content: space-between;
   padding: 1rem;
   padding-top: 0.5rem;
+  margin-inline: -0.75rem; // Account for padding
   flex-grow: 1;
   flex-direction: column;
   background-color: var(--color-background-secondary);
+
+  position: sticky;
+  bottom: 0;
 }
 
 .switcher {
-  margin-bottom: 0 !important;
+  margin-bottom: 0.25rem;
+}
+
+.switcherStarIcon {
+  margin-inline: 0 !important;
 }
 
 .description {
   color: var(--color-text-secondary);
   font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
 }
 
 .main-button {

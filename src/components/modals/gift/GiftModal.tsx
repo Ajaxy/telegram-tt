@@ -47,7 +47,7 @@ export type GiftOption = ApiPremiumGiftCodeOption | ApiStarGiftRegular;
 type StateProps = {
   boostPerSentGift?: number;
   starGiftsById?: Record<string, ApiStarGiftRegular>;
-  starGiftCategoriesByName: Record<StarGiftCategory, string[]>;
+  starGiftIdsByCategory?: Record<StarGiftCategory, string[]>;
   starBalance?: ApiStarsAmount;
   user?: ApiUser;
   isSelf?: boolean;
@@ -59,7 +59,7 @@ const INTERSECTION_THROTTLE = 200;
 const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   modal,
   starGiftsById,
-  starGiftCategoriesByName,
+  starGiftIdsByCategory,
   starBalance,
   user,
   isSelf,
@@ -206,7 +206,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   function renderStarGifts() {
     return (
       <div className={styles.starGiftsContainer}>
-        {starGiftsById && starGiftCategoriesByName[selectedCategory].map((giftId) => {
+        {starGiftsById && starGiftIdsByCategory?.[selectedCategory].map((giftId) => {
           const gift = starGiftsById[giftId];
           return (
             <GiftItemStar
@@ -331,8 +331,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
   const {
-    starGiftsById,
-    starGiftCategoriesByName,
+    starGifts,
     stars,
     currentUserId,
   } = global;
@@ -342,8 +341,8 @@ export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
 
   return {
     boostPerSentGift: global.appConfig?.boostsPerSentGift,
-    starGiftsById,
-    starGiftCategoriesByName,
+    starGiftsById: starGifts?.byId,
+    starGiftIdsByCategory: starGifts?.idsByCategory,
     starBalance: stars?.balance,
     user,
     isSelf,

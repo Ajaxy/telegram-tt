@@ -21,7 +21,7 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import './Transition.scss';
 
 type AnimationName = (
-  'none' | 'slide' | 'slideRtl' | 'slideFade' | 'zoomFade' | 'slideLayers'
+  'none' | 'slide' | 'slideRtl' | 'slideFade' | 'zoomFade' | 'zoomBounceSemiFade' | 'slideLayers'
   | 'fade' | 'pushSlide' | 'reveal' | 'slideOptimized' | 'slideOptimizedRtl' | 'semiFade'
   | 'slideVertical' | 'slideVerticalFade' | 'slideFadeAndroid'
   );
@@ -63,7 +63,7 @@ export const ACTIVE_SLIDE_CLASS_NAME = CLASSES.active;
 export const TO_SLIDE_CLASS_NAME = CLASSES.to;
 
 const DISABLEABLE_ANIMATIONS = new Set<AnimationName>([
-  'slide', 'slideRtl', 'slideFade', 'zoomFade', 'slideLayers', 'pushSlide', 'reveal',
+  'slide', 'slideRtl', 'slideFade', 'zoomFade', 'zoomBounceSemiFade', 'slideLayers', 'pushSlide', 'reveal',
   'slideOptimized', 'slideOptimizedRtl', 'slideVertical', 'slideVerticalFade',
 ]);
 

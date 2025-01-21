@@ -1,5 +1,7 @@
+import type { RegularLangKey } from '../../../../types/language';
+
 // https://github.com/telegramdesktop/tdesktop/blob/3da787791f6d227f69b32bf4003bc6071d05e2ac/Telegram/SourceFiles/history/view/history_view_view_button.cpp#L51
-export function getWebpageButtonLangKey(type?: string) {
+export function getWebpageButtonLangKey(type?: string): RegularLangKey | undefined {
   switch (type) {
     case 'telegram_channel_request':
     case 'telegram_megagroup_request':
