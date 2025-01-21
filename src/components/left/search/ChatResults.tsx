@@ -452,24 +452,26 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         {shouldRenderMessagesSection && (
           <div className="search-section">
             <h3 className="section-heading" dir={oldLang.isRtl ? 'auto' : undefined}>
-              <Link className="Link menuTrigger dropDownLink" onClick={handleClickContext}>
-                {lang('SearchContextCaption', {
-                  type: getSearchContextCaption(searchContext),
-                }, {
-                  withNodes: true,
-                })}
+              {!isChannelList && (
+                <Link className="Link menuTrigger dropDownLink" onClick={handleClickContext}>
+                  {lang('SearchContextCaption', {
+                    type: getSearchContextCaption(searchContext),
+                  }, {
+                    withNodes: true,
+                  })}
 
-                <Transition
-                  name="fade"
-                  shouldCleanup
-                  activeKey={Number(isMessagesFetching)}
-                  className="iconContainer"
-                  slideClassName="iconContainerSlide"
-                >
-                  {isMessagesFetching && (<Loading />)}
-                  {!isMessagesFetching && <Icon name="down" />}
-                </Transition>
-              </Link>
+                  <Transition
+                    name="fade"
+                    shouldCleanup
+                    activeKey={Number(isMessagesFetching)}
+                    className="iconContainer"
+                    slideClassName="iconContainerSlide"
+                  >
+                    {isMessagesFetching && (<Loading />)}
+                    {!isMessagesFetching && <Icon name="down" />}
+                  </Transition>
+                </Link>
+              )}
               {oldLang('SearchMessages')}
             </h3>
             {actualFoundIds.map(renderFoundMessage)}
