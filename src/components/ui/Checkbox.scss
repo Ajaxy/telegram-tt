@@ -86,7 +86,11 @@
   }
 
   .Checkbox-main {
-    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    flex-grow: 1;
 
     &::before,
     &::after {
@@ -124,14 +128,18 @@
     }
 
     .right-icon {
+      grid-column: 2;
+      grid-row: span 2;
       margin-left: auto;
       margin-right: 0.5rem;
       color: var(--color-text-secondary);
       font-size: 1.25rem;
+      align-self: center;
     }
 
     .subLabel {
-      display: block;
+      grid-column: 1;
+      grid-row: 2;
       font-size: 0.875rem;
       line-height: 1rem;
       color: var(--color-text-secondary);

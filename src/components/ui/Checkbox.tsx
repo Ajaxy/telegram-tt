@@ -155,9 +155,9 @@ const Checkbox: FC<OwnProps> = ({
             {leftElement}
             {typeof label === 'string' ? renderText(label) : label}
             {labelText && <span className="ml-1">{renderText(labelText)}</span>}
-            {rightIcon && <i className={`icon icon-${rightIcon} right-icon`} />}
           </span>
           {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
+          {rightIcon && <Icon name={rightIcon} className="right-icon" />}
         </div>
         {nestedCheckbox && (
           <span className="nestedButton" dir="auto">
