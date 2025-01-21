@@ -40,6 +40,7 @@ import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
+import useMessageResizeObserver from '../../hooks/useResizeMessageObserver';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useFocusMessage from './message/hooks/useFocusMessage';
 
@@ -170,6 +171,8 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const isPrizeStars = message.content.action?.type === 'prizeStars';
 
   const withServiceReactions = Boolean(message.areReactionsPossible && message?.reactions);
+
+  useMessageResizeObserver(ref, isLastInList);
 
   useEffect(() => {
     if (noAppearanceAnimation) {
