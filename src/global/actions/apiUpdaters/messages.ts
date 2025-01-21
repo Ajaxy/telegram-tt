@@ -410,6 +410,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...currentMessage,
         ...message,
         previousLocalId: localId,
+        isDeleting: undefined,
       });
 
       if (poll) {
@@ -487,6 +488,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...currentMessage,
         ...message,
         previousLocalId: localId,
+        isDeleting: undefined,
       });
 
       if (poll) {
@@ -1177,7 +1179,9 @@ export function deleteMessages<T extends GlobalState>(
 
     setTimeout(() => {
       global = getGlobal();
-      global = deleteChatMessages(global, chatId, ids);
+      // Prevent local deletion of sent messages in case of desync
+      const stillDeletedIds = ids.filter((id) => selectChatMessage(global, chatId, id)?.isDeleting);
+      global = deleteChatMessages(global, chatId, stillDeletedIds);
       setGlobal(global);
     }, isAnimatingAsSnap ? SNAP_ANIMATION_DELAY : ANIMATION_DELAY);
 
