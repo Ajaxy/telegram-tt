@@ -217,6 +217,7 @@
     "messages.clickSponsoredMessage",
     "messages.reportSponsoredMessage",
     "messages.getSponsoredMessages",
+    "messages.reportMessagesDelivery",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",

@@ -18,6 +18,7 @@ import {
 import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
 import { notifyAboutMessage } from '../../../util/notifications';
 import { onTickEnd } from '../../../util/schedulers';
+import { getServerTime } from '../../../util/serverTime';
 import {
   addPaidReaction,
   checkIfHasUnreadReactions, getIsSavedDialog, getMessageContent, getMessageText, isActionMessage,
@@ -161,6 +162,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (poll) {
         global = updatePoll(global, poll.id, poll);
+      }
+
+      if (message.reportDeliveryUntilDate && message.reportDeliveryUntilDate > getServerTime()) {
+        actions.reportMessageDelivery({ chatId, messageId: id });
       }
 
       setGlobal(global);

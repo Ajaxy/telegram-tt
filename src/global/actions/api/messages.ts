@@ -2284,6 +2284,31 @@ addActionHandler('copyMessageLink', async (global, actions, payload): Promise<vo
   );
 });
 
+const MESSAGES_TO_REPORT_DELIVERY = new Map<string, number[]>();
+let reportDeliveryTimeout: number | undefined;
+addActionHandler('reportMessageDelivery', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId } = payload;
+  const currentIds = MESSAGES_TO_REPORT_DELIVERY.get(chatId) || [];
+  currentIds.push(messageId);
+  MESSAGES_TO_REPORT_DELIVERY.set(chatId, currentIds);
+
+  if (!reportDeliveryTimeout) {
+    // Slightly unsafe in the multitab environment, but there is no better way to do it now.
+    // Not critical if user manages to close the tab in a show window before the report is sent.
+    reportDeliveryTimeout = window.setTimeout(() => {
+      reportDeliveryTimeout = undefined;
+
+      MESSAGES_TO_REPORT_DELIVERY.forEach((messageIds, cId) => {
+        const chat = selectChat(global, cId);
+        if (!chat) return;
+
+        callApi('reportMessagesDelivery', { chat, messageIds });
+      });
+      MESSAGES_TO_REPORT_DELIVERY.clear();
+    }, 500);
+  }
+});
+
 function countSortedIds(ids: number[], from: number, to: number) {
   // If ids are outside viewport, we cannot get correct count
   if (ids.length === 0 || from < ids[0] || to > ids[ids.length - 1]) return undefined;

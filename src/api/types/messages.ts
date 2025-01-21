@@ -773,6 +773,7 @@ export interface ApiMessage {
   isInvertedMedia?: true;
   isVideoProcessingPending?: true;
   areReactionsPossible?: true;
+  reportDeliveryUntilDate?: number;
 }
 
 export interface ApiReactions {

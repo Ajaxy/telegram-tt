@@ -2443,6 +2443,11 @@ export interface ActionPayloads {
     botId: string;
     isAccessGranted: boolean;
   };
+
+  reportMessageDelivery: {
+    chatId: string;
+    messageId: number;
+  };
 }
 
 export interface RequiredActionPayloads {

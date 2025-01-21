@@ -267,6 +267,7 @@ export function buildApiMessageWithChatId(
     effectId: mtpMessage.effect?.toString(),
     isInvertedMedia,
     isVideoProcessingPending,
+    reportDeliveryUntilDate: mtpMessage.reportDeliveryUntilDate,
   });
 }
 
