@@ -36,6 +36,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useChatListEntry from './hooks/useChatListEntry';
 import useTopicContextActions from './hooks/useTopicContextActions';
 
+import Icon from '../../common/icons/Icon';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import TopicIcon from '../../common/TopicIcon';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -190,15 +191,10 @@ const Topic: FC<OwnProps & StateProps> = ({
             <TopicIcon topic={topic} className={styles.topicIcon} observeIntersection={observeIntersection} />
             <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
           </div>
-          {topic.isMuted && <i className="icon icon-muted" />}
+          {topic.isMuted && <Icon name="muted" />}
           <div className="separator" />
           {isClosed && (
-            <i className={buildClassName(
-              'icon',
-              'icon-lock-badge',
-              styles.closedIcon,
-            )}
-            />
+            <Icon name="lock-badge" className={styles.closedIcon} />
           )}
           {lastMessage && (
             <LastMessageMeta

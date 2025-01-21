@@ -26,6 +26,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import useScrolledState from '../../hooks/useScrolledState';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -129,13 +130,8 @@ function StoryViewModal({
         onClick={onTrigger}
         ariaLabel={lang('SortBy')}
       >
-        <i className={buildClassName(
-          'icon',
-          areReactionsFirst ? 'icon-heart-outline' : 'icon-recent',
-          styles.iconSort,
-        )}
-        />
-        <i className={buildClassName('icon icon-down', styles.iconDown)} />
+        <Icon name={areReactionsFirst ? 'heart-outline' : 'recent'} className={styles.iconSort} />
+        <Icon name="down" className={styles.iconDown} />
       </Button>
     );
   }, [areReactionsFirst, lang]);
@@ -181,13 +177,13 @@ function StoryViewModal({
               <MenuItem icon="heart-outline" onClick={markReactionsFirst}>
                 {lang('SortByReactions')}
                 {areReactionsFirst && (
-                  <i className={buildClassName('icon icon-check', styles.check)} aria-hidden />
+                  <Icon name="check" className={styles.check} />
                 )}
               </MenuItem>
               <MenuItem icon="recent" onClick={unmarkReactionsFirst}>
                 {lang('SortByTime')}
                 {!areReactionsFirst && (
-                  <i className={buildClassName('icon icon-check', styles.check)} aria-hidden />
+                  <Icon name="check" className={styles.check} />
                 )}
               </MenuItem>
             </DropdownMenu>

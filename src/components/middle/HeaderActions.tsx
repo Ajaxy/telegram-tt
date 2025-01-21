@@ -37,6 +37,7 @@ import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -290,7 +291,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel={lang('TranslateMessage')}
       >
-        <i className="icon icon-language" aria-hidden />
+        <Icon name="language" />
       </Button>
     );
   }, [isRightColumnShown, lang]);
@@ -376,7 +377,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleSearchClick}
               ariaLabel={lang('Conversation.SearchPlaceholder')}
             >
-              <i className="icon icon-search" aria-hidden />
+              <Icon name="search" />
             </Button>
           )}
           {canCall && (
@@ -387,7 +388,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleRequestCall}
               ariaLabel="Call"
             >
-              <i className="icon icon-phone" aria-hidden />
+              <Icon name="phone" />
             </Button>
           )}
         </>
@@ -402,7 +403,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           onClick={handleJoinRequestsClick}
           ariaLabel={isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
         >
-          <i className="icon icon-user" aria-hidden />
+          <Icon name="user" />
           <div className="badge">{pendingJoinRequests}</div>
         </Button>
       )}
@@ -417,7 +418,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         ariaLabel="More actions"
         onClick={handleHeaderMenuOpen}
       >
-        <i className="icon icon-more" aria-hidden />
+        <Icon name="more" />
       </Button>
       {menuAnchor && (
         <HeaderMenuContainer

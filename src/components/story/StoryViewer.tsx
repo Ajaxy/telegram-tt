@@ -14,7 +14,6 @@ import {
   selectPerformanceSettingsValue,
   selectTabState,
 } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
@@ -27,6 +26,7 @@ import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCh
 import useSlideSizes from './hooks/useSlideSizes';
 import useStoryProps from './hooks/useStoryProps';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
 import StealthModeModal from './StealthModeModal';
@@ -158,7 +158,7 @@ function StoryViewer({
         ariaLabel={lang('Close')}
         onClick={handleClose}
       >
-        <i className={buildClassName('icon icon-close')} aria-hidden />
+        <Icon name="close" />
       </Button>
 
       <StorySlides

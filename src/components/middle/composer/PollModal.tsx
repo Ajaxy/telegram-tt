@@ -13,6 +13,7 @@ import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import InputText from '../../ui/InputText';
@@ -245,7 +246,7 @@ const PollModal: FC<OwnProps> = ({
     return (
       <div className="modal-header-condensed">
         <Button round color="translucent" size="smaller" ariaLabel="Cancel poll creation" onClick={onClear}>
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <div className="modal-title">{lang('NewPoll')}</div>
         <Button
@@ -283,7 +284,7 @@ const PollModal: FC<OwnProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => removeOption(index)}
           >
-            <i className="icon icon-close" />
+            <Icon name="close" />
           </Button>
         )}
       </div>

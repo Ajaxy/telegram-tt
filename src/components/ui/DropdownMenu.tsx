@@ -3,6 +3,7 @@ import React, {
   useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Menu from './Menu';
 
@@ -87,7 +88,7 @@ const DropdownMenu: FC<OwnProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [trigger]);

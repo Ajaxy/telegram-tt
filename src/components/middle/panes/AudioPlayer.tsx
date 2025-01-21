@@ -6,6 +6,7 @@ import type {
   ApiAudio, ApiChat, ApiMessage, ApiPeer,
   MediaContent,
 } from '../../../api/types';
+import type { IconName } from '../../../types/icons';
 
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../../config';
 import {
@@ -31,6 +32,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -242,11 +244,11 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     );
   });
 
-  const volumeIcon = useMemo(() => {
-    if (volume === 0 || isMuted) return 'icon-muted';
-    if (volume < 0.3) return 'icon-volume-1';
-    if (volume < 0.6) return 'icon-volume-2';
-    return 'icon-volume-3';
+  const volumeIcon: IconName = useMemo(() => {
+    if (volume === 0 || isMuted) return 'muted';
+    if (volume < 0.3) return 'volume-1';
+    if (volume < 0.6) return 'volume-2';
+    return 'volume-3';
   }, [volume, isMuted]);
 
   if (noUi || !shouldRender) {
@@ -274,7 +276,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={requestPreviousTrack}
         ariaLabel="Previous track"
       >
-        <i className="icon icon-skip-previous" />
+        <Icon name="skip-previous" />
       </Button>
       <Button
         round
@@ -285,8 +287,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={playPause}
         ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
       >
-        <i className="icon icon-play" />
-        <i className="icon icon-pause" />
+        <Icon name="play" />
+        <Icon name="pause" />
       </Button>
       <Button
         round
@@ -298,7 +300,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={requestNextTrack}
         ariaLabel="Next track"
       >
-        <i className="icon icon-skip-next" />
+        <Icon name="skip-next" />
       </Button>
 
       <div className="volume-button-wrapper">
@@ -311,7 +313,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
           onClick={handleVolumeClick}
           ripple={!isMobile}
         >
-          <i className={buildClassName('icon', volumeIcon)} />
+          <Icon name={volumeIcon} />
         </Button>
 
         {!IS_IOS && (
@@ -349,7 +351,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={handleClose}
         ariaLabel="Close player"
       >
-        <i className="icon icon-close" />
+        <Icon name="close" />
       </Button>
     </div>
   );
@@ -389,7 +391,7 @@ function renderPlaybackRateMenuItem(
       // eslint-disable-next-line react/jsx-no-bind
       onClick={() => onClick(rate)}
       icon={isSelected ? 'check' : undefined}
-      customIcon={!isSelected ? <i className="icon icon-placeholder" /> : undefined}
+      customIcon={!isSelected ? <Icon name="placeholder" /> : undefined}
     >
       {rate}X
     </MenuItem>

@@ -183,7 +183,7 @@ function SimilarChannel({ channel }: { channel: ApiChat }) {
     <div className={styles.item} onClick={() => openChat({ id: channel.id })}>
       <Avatar className={styles.avatar} key={channel.id} size="large" peer={channel} />
       <div style={`background: ${color}`} className={styles.badge}>
-        <i className={buildClassName(styles.icon, 'icon icon-user-filled')} />
+        <Icon name="user-filled" className={styles.icon} />
         <span className={styles.membersCount}>{formatIntegerCompact(channel?.membersCount || 0)}
         </span>
       </div>

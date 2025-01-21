@@ -25,6 +25,7 @@ import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
+import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 import ProgressSpinner from '../../ui/ProgressSpinner';
 
@@ -242,7 +243,7 @@ const Photo = <T,>({
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {shouldRenderDownloadButton && <i ref={downloadButtonRef} className="icon icon-download" />}
+      {shouldRenderDownloadButton && <Icon ref={downloadButtonRef} name="download" />}
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation

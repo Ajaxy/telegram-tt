@@ -37,6 +37,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import Loading from '../ui/Loading';
 import MenuItem from '../ui/MenuItem';
 import Modal from '../ui/Modal';
+import Icon from './icons/Icon';
 import StickerButton from './StickerButton';
 
 import './StickerSetModal.scss';
@@ -183,7 +184,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [isMobile]);
@@ -194,7 +195,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     return (
       <div className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <div className="modal-title">
           {renderingStickerSet ? renderText(renderingStickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}

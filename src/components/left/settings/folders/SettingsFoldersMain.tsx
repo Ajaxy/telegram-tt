@@ -310,10 +310,10 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                       entities: folder.title.entities,
                       noCustomEmojiPlayback: folder.noTitleAnimations,
                     })}
-                    {isBlocked && <i className="icon icon-lock-badge settings-folders-blocked-icon" />}
+                    {isBlocked && <Icon name="lock-badge" className="settings-folders-blocked-icon" />}
                   </span>
                   <span className="subtitle">
-                    {folder.isChatList && <i className="icon icon-link mr-1" />}
+                    {folder.isChatList && <Icon name="link" className="mr-1" />}
                     {folder.subtitle}
                   </span>
                 </ListItem>

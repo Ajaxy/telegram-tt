@@ -36,6 +36,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import { useFullscreenStatus } from '../../../hooks/window/useFullscreen';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
+import Icon from '../../common/icons/Icon';
 import PeerChip from '../../common/PeerChip';
 import StoryToggler from '../../story/StoryToggler';
 import Button from '../../ui/Button';
@@ -310,7 +311,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             onClick={handleLockScreen}
             className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
           >
-            <i className="icon icon-lock" />
+            <Icon name="lock" />
           </Button>
         )}
         <ShowTransition

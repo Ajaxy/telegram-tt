@@ -7,6 +7,8 @@ import { getTopicDefaultIcon } from '../../util/forumColors';
 import { getFirstLetters } from '../../util/textFormat';
 import renderText from './helpers/renderText';
 
+import Icon from './icons/Icon';
+
 import styles from './TopicDefaultIcon.module.scss';
 
 type OwnProps = {
@@ -30,8 +32,9 @@ const TopicDefaultIcon: FC<OwnProps> = ({
 
   if (topicId === GENERAL_TOPIC_ID) {
     return (
-      <i
-        className={buildClassName(styles.root, className, 'icon', 'icon-hashtag', 'general-forum-icon')}
+      <Icon
+        name="hashtag"
+        className={buildClassName(styles.root, className, 'general-forum-icon')}
         onClick={onClick}
       />
     );

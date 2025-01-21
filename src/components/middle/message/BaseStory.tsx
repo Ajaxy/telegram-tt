@@ -16,6 +16,7 @@ import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
+import Icon from '../../common/icons/Icon';
 import MediaAreaOverlay from '../../story/mediaArea/MediaAreaOverlay';
 
 import styles from './BaseStory.module.scss';
@@ -99,7 +100,7 @@ function BaseStory({
       )}
       {isExpired && (
         <span>
-          <i className={buildClassName(styles.expiredIcon, 'icon icon-story-expired')} aria-hidden />
+          <Icon name="story-expired" className={styles.expiredIcon} />
           {lang('StoryExpiredSubtitle')}
         </span>
       )}

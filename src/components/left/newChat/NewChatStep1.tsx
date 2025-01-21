@@ -10,6 +10,7 @@ import sortChatIds from '../../common/helpers/sortChatIds';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -94,7 +95,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           onClick={onReset}
           ariaLabel="Return to Chat List"
         >
-          <i className="icon icon-arrow-left" />
+          <Icon name="arrow-left" />
         </Button>
         <h3>{lang('GroupAddMembers')}</h3>
       </div>
@@ -120,7 +121,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           onClick={handleNextStep}
           ariaLabel={isChannel ? 'Continue To Channel Info' : 'Continue To Group Info'}
         >
-          <i className="icon icon-arrow-right" />
+          <Icon name="arrow-right" />
         </FloatingActionButton>
       </div>
     </div>

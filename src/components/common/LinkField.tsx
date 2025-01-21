@@ -69,7 +69,7 @@ const InviteLink: FC<OwnProps> = ({
         onClick={onTrigger}
         ariaLabel={lang('AccDescrOpenMenu2')}
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [isMobile, lang]);

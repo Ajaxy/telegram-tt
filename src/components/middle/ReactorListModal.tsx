@@ -25,6 +25,7 @@ import useOldLang from '../../hooks/useOldLang';
 
 import Avatar from '../common/Avatar';
 import FullNameTitle from '../common/FullNameTitle';
+import Icon from '../common/icons/Icon';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import ReactionStaticEmoji from '../common/reactions/ReactionStaticEmoji';
 import Button from '../ui/Button';
@@ -154,7 +155,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => setChosenTab(undefined)}
           >
-            <i className="icon icon-heart" />
+            <Icon name="heart" />
             {Boolean(reactors?.count) && formatIntegerCompact(reactors.count)}
           </Button>
           {allReactions.map((reaction) => {
@@ -210,7 +211,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                       <div className="info">
                         <FullNameTitle peer={peer} withEmojiStatus />
                         <span className="status" dir="auto">
-                          <i className="icon icon-heart-outline status-icon" />
+                          <Icon name="heart-outline" className="status-icon" />
                           {formatDateAtTime(lang, r.addedDate * 1000)}
                         </span>
                       </div>

@@ -8,6 +8,8 @@ import buildStyle from '../../util/buildStyle';
 
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
+
 import styles from './Draggable.module.scss';
 
 type TPoint = {
@@ -162,7 +164,7 @@ const Draggable: FC<OwnProps> = ({
           onTouchStart={handleMouseDown}
           style={knobStyle}
         >
-          <i className="icon icon-sort" aria-hidden />
+          <Icon name="sort" />
         </div>
       )}
     </div>

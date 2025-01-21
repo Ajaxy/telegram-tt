@@ -2,6 +2,7 @@ import React, { memo, useLayoutEffect, useRef } from '../../../../lib/teact/teac
 import { withGlobal } from '../../../../global';
 
 import type { ApiUser } from '../../../../api/types';
+import type { IconName } from '../../../../types/icons';
 
 import { selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
@@ -41,7 +42,7 @@ const STORY_FEATURE_DESCRIPTIONS = {
   stories_link: 'PremiumStoriesFormattingDescription',
 };
 
-const STORY_FEATURE_ICONS = {
+const STORY_FEATURE_ICONS: Record<string, IconName> = {
   stories_order: 'story-priority',
   stories_stealth: 'eye-closed-outline',
   stories_views: 'eye-outline',

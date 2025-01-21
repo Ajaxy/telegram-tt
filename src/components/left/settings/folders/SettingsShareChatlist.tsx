@@ -24,6 +24,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
+import Icon from '../../../common/icons/Icon';
 import LinkField from '../../../common/LinkField';
 import PeerPicker from '../../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
@@ -201,7 +202,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
     </div>

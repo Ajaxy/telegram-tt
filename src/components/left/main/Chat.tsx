@@ -67,6 +67,7 @@ import useChatListEntry from './hooks/useChatListEntry';
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import StarIcon from '../../common/icons/StarIcon';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import ListItem from '../../ui/ListItem';
@@ -383,7 +384,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             isSavedDialog={isSavedDialog}
             observeIntersection={observeIntersection}
           />
-          {isMuted && !isSavedDialog && <i className="icon icon-muted" />}
+          {isMuted && !isSavedDialog && <Icon name="muted" />}
           <div className="separator" />
           {lastMessage && (
             <LastMessageMeta

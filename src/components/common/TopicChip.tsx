@@ -10,6 +10,7 @@ import renderText from './helpers/renderText';
 
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from './icons/Icon';
 import TopicIcon from './TopicIcon';
 
 import styles from './TopicChip.module.scss';
@@ -40,8 +41,8 @@ const TopicChip: FC<OwnProps> = ({
         ? <TopicIcon topic={topic} size={TOPIC_ICON_SIZE} />
         : <img src={blankSrc} alt="" draggable={false} />}
       {topic?.title ? renderText(topic.title) : lang('Loading')}
-      {topic?.isClosed && <i className="icon icon-lock" />}
-      <i className="icon icon-next" />
+      {topic?.isClosed && <Icon name="lock" />}
+      <Icon name="next" />
     </div>
   );
 };

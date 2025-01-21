@@ -22,6 +22,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
+import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import NothingFound from '../../common/NothingFound';
 import Button from '../../ui/Button';
@@ -298,7 +299,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           {(!temporalInvites || !temporalInvites.length) && <NothingFound text="No links found" key="nothing" />}
           {temporalInvites?.map((invite) => (
             <ListItem
-              leftElement={<i className={`icon icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
+              leftElement={<Icon name="link" className={`link-status-icon ${getInviteIconClass(invite)}`} />}
               secondaryIcon="more"
               multiline
               // eslint-disable-next-line react/jsx-no-bind
@@ -327,7 +328,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             </ListItem>
             {revokedExportedInvites?.map((invite) => (
               <ListItem
-                leftElement={<i className={`icon icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
+                leftElement={<Icon name="link" className={`link-status-icon ${getInviteIconClass(invite)}`} />}
                 secondaryIcon="more"
                 multiline
                 // eslint-disable-next-line react/jsx-no-bind

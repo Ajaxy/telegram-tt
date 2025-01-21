@@ -27,6 +27,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Spinner from '../ui/Spinner';
@@ -573,10 +574,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
           onClick={step === PaymentStep.Checkout ? closeModal : handleBackClick}
           ariaLabel="Close"
         >
-          <i className={buildClassName(
-            'icon', step === PaymentStep.Checkout ? 'icon-close' : 'icon-arrow-left',
-          )}
-          />
+          <Icon name={step === PaymentStep.Checkout ? 'close' : 'arrow-left'} />
         </Button>
         <h3>{modalHeader}</h3>
       </div>

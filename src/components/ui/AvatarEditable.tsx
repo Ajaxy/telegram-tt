@@ -6,6 +6,7 @@ import React, {
 
 import buildClassName from '../../util/buildClassName';
 
+import Icon from '../common/icons/Icon';
 import CropModal from './CropModal';
 
 import './AvatarEditable.scss';
@@ -76,7 +77,7 @@ const AvatarEditable: FC<OwnProps> = ({
           onChange={handleSelectFile}
           accept="image/png, image/jpeg"
         />
-        <i className="icon icon-camera-add" />
+        <Icon name="camera-add" />
         {croppedBlobUrl && <img src={croppedBlobUrl} draggable={false} alt="Avatar" />}
       </label>
       <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />

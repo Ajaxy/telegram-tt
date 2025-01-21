@@ -6,6 +6,7 @@ import React, {
 import { withGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
+import type { IconName } from '../../../types/icons';
 import type {
   EmojiData,
   EmojiModule,
@@ -30,6 +31,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useScrolledState from '../../../hooks/useScrolledState';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
 import EmojiCategory from './EmojiCategory';
@@ -45,16 +47,16 @@ type StateProps = Pick<GlobalState, 'recentEmojis'>;
 
 type EmojiCategoryData = { id: string; name: string; emojis: string[] };
 
-const ICONS_BY_CATEGORY: Record<string, string> = {
-  recent: 'icon-recent',
-  people: 'icon-smile',
-  nature: 'icon-animals',
-  foods: 'icon-eats',
-  activity: 'icon-sport',
-  places: 'icon-car',
-  objects: 'icon-lamp',
-  symbols: 'icon-language',
-  flags: 'icon-flag',
+const ICONS_BY_CATEGORY: Record<string, IconName> = {
+  recent: 'recent',
+  people: 'smile',
+  nature: 'animals',
+  foods: 'eats',
+  activity: 'sport',
+  places: 'car',
+  objects: 'lamp',
+  symbols: 'language',
+  flags: 'flag',
 };
 
 const OPEN_ANIMATION_DELAY = 200;
@@ -200,7 +202,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
         onClick={() => selectCategory(index)}
         ariaLabel={category.name}
       >
-        <i className={buildClassName('icon', icon)} />
+        <Icon name={icon} />
       </Button>
     );
   }

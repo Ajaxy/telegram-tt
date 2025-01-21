@@ -83,6 +83,7 @@ import Audio from '../common/Audio';
 import Document from '../common/Document';
 import UserGift from '../common/gift/UserGift';
 import GroupChatInfo from '../common/GroupChatInfo';
+import Icon from '../common/icons/Icon';
 import Media from '../common/Media';
 import NothingFound from '../common/NothingFound';
 import PreviewMedia from '../common/PreviewMedia';
@@ -721,7 +722,7 @@ const Profile: FC<OwnProps & StateProps> = ({
                 {/* eslint-disable-next-line react/jsx-no-bind */}
                 <Button className="show-more-channels" size="smaller" onClick={() => openPremiumModal()}>
                   {oldLang('UnlockSimilar')}
-                  <i className="icon icon-unlock-badge" />
+                  <Icon name="unlock-badge" />
                 </Button>
                 <div className="more-similar">
                   {renderText(oldLang('MoreSimilarText', limitSimilarPeers), ['simple_markdown'])}
@@ -760,7 +761,7 @@ const Profile: FC<OwnProps & StateProps> = ({
                 {/* eslint-disable-next-line react/jsx-no-bind */}
                 <Button className="show-more-bots" size="smaller" onClick={() => openPremiumModal()}>
                   {lang('UnlockMoreSimilarBots')}
-                  <i className="icon icon-unlock-badge" />
+                  <Icon name="unlock-badge" />
                 </Button>
                 <div className="more-similar">
                   {renderText(lang('MoreSimilarBotsText', { count: limitSimilarPeers }, {
@@ -829,7 +830,7 @@ const Profile: FC<OwnProps & StateProps> = ({
           onClick={handleNewMemberDialogOpen}
           ariaLabel={oldLang('lng_channel_add_users')}
         >
-          <i className="icon icon-add-user-filled" />
+          <Icon name="add-user-filled" />
         </FloatingActionButton>
       )}
       {canDeleteMembers && (

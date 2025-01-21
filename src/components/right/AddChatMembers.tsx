@@ -20,6 +20,7 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
+import Icon from '../common/icons/Icon';
 import PeerPicker from '../common/pickers/PeerPicker';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import Spinner from '../ui/Spinner';
@@ -142,7 +143,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
           {isLoading ? (
             <Spinner color="white" />
           ) : (
-            <i className="icon icon-arrow-right" />
+            <Icon name="arrow-right" />
           )}
         </FloatingActionButton>
       </div>

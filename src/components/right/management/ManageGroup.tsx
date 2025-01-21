@@ -28,6 +28,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import AvatarEditable from '../../ui/AvatarEditable';
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -469,7 +470,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
       <ConfirmDialog

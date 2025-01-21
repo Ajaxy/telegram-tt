@@ -17,6 +17,7 @@ import useOldLang from '../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
 
+import Icon from '../common/icons/Icon';
 import StoryRibbon from '../story/StoryRibbon';
 import StoryToggler from '../story/StoryToggler';
 import Button from '../ui/Button';
@@ -103,7 +104,7 @@ const ArchivedChats: FC<OwnProps> = ({
           )}
           onTransitionEnd={handleDropdownMenuTransitionEnd}
         >
-          <i className="icon icon-arrow-left" />
+          <Icon name="arrow-left" />
         </Button>
         {shouldRenderTitle && <h3 className={titleClassNames}>{lang('ArchivedChats')}</h3>}
         <div className="story-toggler-wrapper">

@@ -21,6 +21,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
+import Icon from '../../common/icons/Icon';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
 import UsernameInput from '../../common/UsernameInput';
@@ -281,7 +282,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
       <ConfirmDialog

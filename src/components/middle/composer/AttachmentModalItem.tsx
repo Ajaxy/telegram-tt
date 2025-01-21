@@ -12,6 +12,7 @@ import { REM } from '../../common/helpers/mediaDimensions';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import File from '../../common/File';
+import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 
 import styles from './AttachmentModalItem.module.scss';
@@ -84,8 +85,10 @@ const AttachmentModalItem: FC<OwnProps> = ({
               smaller
             />
             {onDelete && (
-              <i
-                className={buildClassName('icon', 'icon-delete', styles.actionItem, styles.deleteFile)}
+              <Icon
+                name="delete"
+                className={buildClassName(styles.actionItem, styles.deleteFile)}
+                // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => onDelete(index)}
               />
             )}
@@ -113,19 +116,14 @@ const AttachmentModalItem: FC<OwnProps> = ({
       />
       {shouldRenderOverlay && (
         <div className={styles.overlay}>
-          <i
-            className={buildClassName(
-              'icon',
-              attachment.shouldSendAsSpoiler ? 'icon-spoiler-disable' : 'icon-spoiler',
-              styles.actionItem,
-            )}
+          <Icon
+            name={attachment.shouldSendAsSpoiler ? 'spoiler-disable' : 'spoiler'}
+            className={styles.actionItem}
             onClick={handleSpoilerClick}
           />
           {onDelete && (
-            <i
-              className={buildClassName('icon', 'icon-delete', styles.actionItem)}
-              onClick={() => onDelete(index)}
-            />
+            // eslint-disable-next-line react/jsx-no-bind
+            <Icon name="delete" className={styles.actionItem} onClick={() => onDelete(index)} />
           )}
         </div>
       )}

@@ -16,6 +16,7 @@ import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
+import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -180,7 +181,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
 

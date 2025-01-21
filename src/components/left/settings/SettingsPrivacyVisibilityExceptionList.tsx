@@ -22,6 +22,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
@@ -200,7 +201,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         onClick={handleSubmit}
         ariaLabel={isAllowList ? oldLang('AlwaysAllow') : oldLang('NeverAllow')}
       >
-        <i className="icon icon-check" />
+        <Icon name="check" />
       </FloatingActionButton>
     </div>
   );

@@ -413,7 +413,7 @@ const Audio: FC<OwnProps> = ({
     <div className={fullClassName} dir={lang.isRtl ? 'rtl' : 'ltr'}>
       {isSelectable && (
         <div className="message-select-control">
-          {isSelected && <i className="icon icon-select" />}
+          {isSelected && <Icon name="select" />}
         </div>
       )}
       {renderTooglePlayWrapper()}
@@ -448,7 +448,7 @@ const Audio: FC<OwnProps> = ({
           ariaLabel={isDownloading ? 'Cancel download' : 'Download'}
           onClick={handleDownloadClick}
         >
-          <i className={buildClassName('icon', isDownloading ? 'icon-close' : 'icon-arrow-down')} />
+          <Icon name={isDownloading ? 'close' : 'arrow-down'} />
         </Button>
       )}
       {origin === AudioOrigin.Search && renderWithTitle()}
@@ -589,12 +589,12 @@ function renderVoice(
             }
           }}
           >
-            <i className={buildClassName(
-              'transcribe-icon',
-              'icon',
-              (isTranscribed || isTranscriptionError) ? 'icon-down' : 'icon-transcribe',
-              (isTranscribed || isTranscriptionError) && !isTranscriptionHidden && 'transcribe-shown',
-            )}
+            <Icon
+              name={(isTranscribed || isTranscriptionError) ? 'down' : 'transcribe'}
+              className={buildClassName(
+                'transcribe-icon',
+                (isTranscribed || isTranscriptionError) && !isTranscriptionHidden && 'transcribe-shown',
+              )}
             />
             {isTranscribing && (
               <svg viewBox="0 0 32 24" className="loading-svg">

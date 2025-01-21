@@ -15,6 +15,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
+import Icon from './icons/Icon';
 
 type OwnProps = {
   submitLabel?: string;
@@ -149,7 +150,7 @@ const PasswordForm: FC<OwnProps> = ({
           title="Toggle password visibility"
           aria-label="Toggle password visibility"
         >
-          <i className={buildClassName('icon', isPasswordVisible ? 'icon-eye' : 'icon-eye-closed')} />
+          <Icon name={isPasswordVisible ? 'eye' : 'eye-closed'} />
         </div>
       </div>
       {description && <p className="description">{description}</p>}

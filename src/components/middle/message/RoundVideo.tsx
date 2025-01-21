@@ -319,7 +319,7 @@ const RoundVideo: FC<OwnProps> = ({
       )}
       {shouldRenderSpoiler && !shouldRenderSpinner && renderPlayWrapper()}
       {!mediaData && !isLoadAllowed && (
-        <i className="icon icon-download" />
+        <Icon name="download" />
       )}
       {!isInOneTimeModal && (
         <div className="message-media-duration">

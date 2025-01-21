@@ -5,6 +5,7 @@ import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import Button from '../ui/Button';
+import Icon from './icons/Icon';
 
 import styles from './SliderDots.module.scss';
 
@@ -46,7 +47,7 @@ const SliderDots: FC<OwnProps> = ({
           round
           onClick={handleGoBack}
         >
-          <i className="icon icon-previous" />
+          <Icon name="previous" />
         </Button>
       )}
       <div className={styles.root} style={`--start-from: ${startFrom}; --length: ${length}; --count: ${count};`}>
@@ -81,7 +82,7 @@ const SliderDots: FC<OwnProps> = ({
           disabled={active === length - 1}
           onClick={handleGoForward}
         >
-          <i className="icon icon-next" />
+          <Icon name="next" />
         </Button>
       )}
     </div>

@@ -25,6 +25,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import GroupChatInfo from '../../../common/GroupChatInfo';
+import Icon from '../../../common/icons/Icon';
 import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import InputText from '../../../ui/InputText';
@@ -386,7 +387,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         {state.isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
     </div>

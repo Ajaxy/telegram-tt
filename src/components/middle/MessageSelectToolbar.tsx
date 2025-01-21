@@ -24,6 +24,7 @@ import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DeleteSelectedMessageModal from './DeleteSelectedMessageModal';
 
@@ -143,7 +144,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
         title={label}
         aria-label={label}
       >
-        <i className={buildClassName('icon', `icon-${icon}`)} />
+        <Icon name={icon} />
       </div>
     );
   };
@@ -157,7 +158,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
           onClick={handleExitMessageSelectMode}
           ariaLabel="Exit select mode"
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
           {formattedMessagesCount}

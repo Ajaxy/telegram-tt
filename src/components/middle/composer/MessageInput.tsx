@@ -33,6 +33,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import TextTimer from '../../ui/TextTimer';
 import TextFormatter from './TextFormatter.async';
@@ -597,7 +598,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
               dir="auto"
             >
               {!isAttachmentModalInput && !canSendPlainText
-                && <i className="icon icon-lock-badge placeholder-icon" />}
+                && <Icon name="lock-badge" className="placeholder-icon" />}
               {shouldDisplayTimer ? (
                 <TextTimer langKey={timedPlaceholderLangKey!} endsAt={timedPlaceholderDate!} onEnd={handleTimerEnd} />
               ) : placeholder}

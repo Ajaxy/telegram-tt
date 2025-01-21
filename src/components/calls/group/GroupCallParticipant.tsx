@@ -19,6 +19,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import ListItem from '../../ui/ListItem';
 import GroupCallParticipantMenu from './GroupCallParticipantMenu';
 import OutlinedMicrophoneIcon from './OutlinedMicrophoneIcon';
@@ -128,9 +129,9 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
     >
       <FullNameTitle peer={peer} withEmojiStatus className={styles.title} />
       <span className={buildClassName(styles.subtitle, 'subtitle', aboutColor)}>
-        {hasPresentationStream && <i className="icon icon-share-screen" aria-hidden />}
-        {hasVideoStream && <i className="icon icon-video" aria-hidden />}
-        {hasCustomVolume && <i className="icon icon-speaker" aria-hidden />}
+        {hasPresentationStream && <Icon name="share-screen" />}
+        {hasVideoStream && <Icon name="video" />}
+        {hasCustomVolume && <Icon name="speaker" />}
         <span className={styles.subtitleText}>{renderText(aboutText)}</span>
       </span>
       <GroupCallParticipantMenu

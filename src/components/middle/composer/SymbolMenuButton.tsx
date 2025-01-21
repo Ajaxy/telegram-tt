@@ -11,6 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Spinner from '../../ui/Spinner';
@@ -150,8 +151,8 @@ const SymbolMenuButton: FC<OwnProps> = ({
           onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
           ariaLabel="Choose emoji, sticker or GIF"
         >
-          <i className="icon icon-smile" />
-          <i className="icon icon-keyboard" />
+          <Icon name="smile" />
+          <Icon name="keyboard" />
           {isSymbolMenuOpen && !isSymbolMenuLoaded && <Spinner color="gray" />}
         </Button>
       ) : (
@@ -163,7 +164,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
           ariaLabel="Choose emoji, sticker or GIF"
         >
           <div ref={triggerRef} className="symbol-menu-trigger" />
-          <i className="icon icon-smile" />
+          <Icon name="smile" />
         </ResponsiveHoverButton>
       )}
 

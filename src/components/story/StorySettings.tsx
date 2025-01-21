@@ -17,6 +17,7 @@ import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
 import Modal from '../ui/Modal';
@@ -323,7 +324,7 @@ function StorySettings({
                   className={styles.icon}
                   style={`--color-from: ${option.color[0]}; --color-to: ${option.color[1]}`}
                 >
-                  <i className={`icon icon-${option.icon}`} />
+                  <Icon name={option.icon} />
                 </span>
                 <div className={styles.optionContent}>
                   <span className={buildClassName(styles.option_name)}>{lang(option.name)}</span>
@@ -336,7 +337,7 @@ function StorySettings({
                       onClick={(e) => { handleActionClick(e, option.actions!); }}
                     >
                       <span className={styles.actionInner}>{renderActionName(option.actions)}</span>
-                      <i className="icon icon-next" aria-hidden />
+                      <Icon name="next" />
                     </div>
                   )}
                 </div>

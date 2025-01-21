@@ -25,6 +25,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -219,7 +220,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     <div className={buildClassName('WebPagePreview', transitionClassNames)} ref={ref}>
       <div className="WebPagePreview_inner">
         <div className="WebPagePreview-left-icon" onClick={handlePreviewClick}>
-          <i className="icon icon-link" />
+          <Icon name="link" />
         </div>
         <WebPage
           message={messageStub}
@@ -236,7 +237,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
           ariaLabel="Clear Webpage Preview"
           onClick={handleClearWebpagePreview}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         {!isEditing && renderContextMenu()}
       </div>

@@ -378,7 +378,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('Edit')}
                   onClick={handleEditInviteClick}
                 >
-                  <i className="icon icon-edit" />
+                  <Icon name="edit" />
                 </Button>
               )}
               {currentInviteInfo && currentInviteInfo.isRevoked && (
@@ -390,7 +390,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     ariaLabel={lang('Delete')}
                     onClick={openDeleteDialog}
                   >
-                    <i className="icon icon-delete" />
+                    <Icon name="delete" />
                   </Button>
                   <ConfirmDialog
                     isOpen={isDeleteDialogOpen}
@@ -475,7 +475,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('AddContact')}
                   onClick={handleAddContact}
                 >
-                  <i className="icon icon-add-user" aria-hidden />
+                  <Icon name="add-user" />
                 </Button>
               )}
               {canManage && !isInsideTopic && (
@@ -486,7 +486,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('Edit')}
                   onClick={handleToggleManagement}
                 >
-                  <i className="icon icon-edit" />
+                  <Icon name="edit" />
                 </Button>
               )}
               {canEditBot && (
@@ -508,7 +508,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('EditTopic')}
                   onClick={toggleEditTopic}
                 >
-                  <i className="icon icon-edit" />
+                  <Icon name="edit" />
                 </Button>
               )}
               {canViewStatistics && (
@@ -519,7 +519,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('Statistics')}
                   onClick={handleToggleStatistics}
                 >
-                  <i className="icon icon-stats" />
+                  <Icon name="stats" />
                 </Button>
               )}
             </section>

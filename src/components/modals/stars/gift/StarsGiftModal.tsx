@@ -23,6 +23,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import Avatar from '../../../common/Avatar';
+import Icon from '../../../common/icons/Icon';
 import SafeLink from '../../../common/SafeLink';
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
@@ -165,7 +166,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
           onClick={() => closeStarsGiftModal()}
           ariaLabel={oldLang('Close')}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>

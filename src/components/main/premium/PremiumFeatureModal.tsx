@@ -24,6 +24,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
+import Icon from '../../common/icons/Icon';
 import SliderDots from '../../common/SliderDots';
 import Button from '../../ui/Button';
 import PremiumLimitPreview from './common/PremiumLimitPreview';
@@ -221,7 +222,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
         onClick={onBack}
         ariaLabel={lang('Back')}
       >
-        <i className="icon icon-arrow-left" />
+        <Icon name="arrow-left" />
       </Button>
 
       <div className={styles.preview} />

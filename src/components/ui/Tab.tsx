@@ -13,6 +13,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
 
+import Icon from '../common/icons/Icon';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
 import MenuSeparator from './MenuSeparator';
@@ -143,7 +144,7 @@ const Tab: FC<OwnProps> = ({
         {Boolean(badgeCount) && (
           <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
         )}
-        {isBlocked && <i className="icon icon-lock-badge blocked" />}
+        {isBlocked && <Icon name="lock-badge" className="blocked" />}
         <i className="platform" />
       </span>
 

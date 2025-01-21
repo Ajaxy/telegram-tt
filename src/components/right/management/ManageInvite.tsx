@@ -16,6 +16,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CalendarModal from '../../common/CalendarModal';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -249,7 +250,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
           disabled={isSubmitBlocked}
           ariaLabel={editingInvite ? lang('SaveLink') : lang('CreateLink')}
         >
-          <i className="icon icon-check" />
+          <Icon name="check" />
         </FloatingActionButton>
       </div>
       <CalendarModal
