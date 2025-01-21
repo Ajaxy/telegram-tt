@@ -1,8 +1,7 @@
 import type TelegramClient from './TelegramClient';
 
-import errors from '../errors';
-// eslint-disable-next-line import/no-named-default
-import { default as Api } from '../tl/api';
+import { EmailUnconfirmedError, PasswordModifiedError, RPCError } from '../errors';
+import Api from '../tl/api';
 
 import { generateRandomBytes } from '../Helpers';
 import { computeCheck, computeDigest } from '../Password';
@@ -23,7 +22,7 @@ export interface TwoFaPasswordParams {
 }
 
 export type TmpPasswordResult = Api.account.TmpPassword | { error: string } | undefined;
-export type PasswordResult = Api.account.Password | { error: string } | undefined;
+export type PasswordResult = Api.TypeInputCheckPasswordSRP | { error: string } | undefined;
 
 /**
  * Changes the 2FA settings of the logged in user.
@@ -83,9 +82,13 @@ export async function updateTwoFaSettings(
 
     const pwd = await client.invoke(new Api.account.GetPassword());
 
-    if (!(pwd.newAlgo instanceof Api.PasswordKdfAlgoUnknown)) {
-        pwd.newAlgo.salt1 = Buffer.concat([pwd.newAlgo.salt1, generateRandomBytes(32)]);
+    const newAlgo = pwd.newAlgo;
+
+    if (newAlgo instanceof Api.PasswordKdfAlgoUnknown) {
+        throw new Error('Password algorithm is unknown');
     }
+
+    newAlgo.salt1 = Buffer.concat([newAlgo.salt1, generateRandomBytes(32)]);
     if (!pwd.hasPassword && currentPassword) {
         currentPassword = undefined;
     }
@@ -101,8 +104,8 @@ export async function updateTwoFaSettings(
         await client.invoke(new Api.account.UpdatePasswordSettings({
             password,
             newSettings: new Api.account.PasswordInputSettings({
-                newAlgo: pwd.newAlgo,
-                newPasswordHash: newPassword ? await computeDigest(pwd.newAlgo, newPassword) : Buffer.alloc(0),
+                newAlgo,
+                newPasswordHash: newPassword ? await computeDigest(newAlgo, newPassword) : Buffer.alloc(0),
                 hint,
                 email,
                 // not explained what it does and it seems to always be set to empty in tdesktop
@@ -110,7 +113,7 @@ export async function updateTwoFaSettings(
             }),
         }));
     } catch (e) {
-        if (e instanceof errors.EmailUnconfirmedError) {
+        if (e instanceof EmailUnconfirmedError) {
             // eslint-disable-next-line no-constant-condition
             while (true) {
                 try {
@@ -147,9 +150,9 @@ export async function getTmpPassword(client: TelegramClient, currentPassword: st
         }));
 
         return result;
-    } catch (err: any) {
-        if (err.message === 'PASSWORD_HASH_INVALID') {
-            return { error: err.message };
+    } catch (err: unknown) {
+        if (err instanceof RPCError && err.errorMessage === 'PASSWORD_HASH_INVALID') {
+            return { error: err.errorMessage };
         }
 
         throw err;
@@ -162,7 +165,7 @@ export async function getCurrentPassword(
         currentPassword,
         onPasswordCodeError,
     }: TwoFaPasswordParams,
-) {
+): Promise<PasswordResult> {
     const pwd = await client.invoke(new Api.account.GetPassword());
 
     if (!pwd) {
@@ -172,10 +175,11 @@ export async function getCurrentPassword(
     try {
         return currentPassword ? await computeCheck(pwd, currentPassword!) : new Api.InputCheckPasswordEmpty();
     } catch (err: any) {
-        if (err instanceof errors.PasswordModifiedError) {
-            return onPasswordCodeError!(err);
-        } else if (err.message === 'PASSWORD_HASH_INVALID') {
-            return { error: err.message };
+        if (err instanceof PasswordModifiedError) {
+            onPasswordCodeError!(err);
+            return undefined;
+        } else if (err instanceof RPCError && err.errorMessage ==='PASSWORD_HASH_INVALID') {
+            return { error: err.errorMessage };
         } else {
             throw err;
         }

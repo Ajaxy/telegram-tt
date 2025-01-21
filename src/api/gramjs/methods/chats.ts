@@ -1,5 +1,6 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
 import type {
   ApiChat,
@@ -1460,11 +1461,12 @@ export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
     if (addChatUsersResult) {
       return addChatUsersResult.flat().filter(Boolean);
     }
-  } catch (err) {
+  } catch (err: unknown) {
+    const message = err instanceof RPCError ? err.errorMessage : (err as Error).message;
     sendApiUpdate({
       '@type': 'error',
       error: {
-        message: (err as Error).message,
+        message,
       },
     });
   }

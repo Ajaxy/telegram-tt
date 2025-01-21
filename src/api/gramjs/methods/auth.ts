@@ -1,4 +1,4 @@
-import { errors } from '../../../lib/gramjs';
+import { FloodWaitError, RPCError } from '../../../lib/gramjs/errors';
 
 import type {
   ApiUpdateAuthorizationState,
@@ -87,11 +87,13 @@ export function onRequestQrCode(qrCode: { token: Buffer; expires: number }) {
 export function onAuthError(err: Error) {
   let message: string;
 
-  if (err instanceof errors.FloodWaitError) {
+  if (err instanceof FloodWaitError) {
     const hours = Math.ceil(Number(err.seconds) / 60 / 60);
     message = `Too many attempts. Try again in ${hours > 1 ? `${hours} hours` : 'an hour'}`;
+  } else if (err instanceof RPCError) {
+    message = ApiErrors[err.errorMessage];
   } else {
-    message = ApiErrors[err.message];
+    message = err.message;
   }
 
   if (!message) {

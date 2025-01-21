@@ -221,7 +221,7 @@ function buildStatisticsOverview({ current, previous }: GramJs.StatsAbsValueAndP
   return {
     current,
     change,
-    ...(previous && { percentage: (change ? ((Math.abs(change) / previous) * 100) : 0).toFixed(2) }),
+    percentage: (change ? ((Math.abs(change) / previous) * 100) : 0).toFixed(2),
   };
 }
 

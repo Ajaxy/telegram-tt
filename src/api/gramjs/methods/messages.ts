@@ -1,5 +1,6 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
 import type { ThreadId, WebPageMediaSize } from '../../../types';
 import type {
@@ -153,7 +154,7 @@ export async function fetchMessages({
       abortControllerThreadId: threadId,
     });
   } catch (err: any) {
-    if (err.message === 'CHANNEL_PRIVATE') {
+    if (err.errorMessage === 'CHANNEL_PRIVATE') {
       sendApiUpdate({
         '@type': 'updateChat',
         id: chat.id,
@@ -421,7 +422,7 @@ export function sendMessage(
       });
       if (update) handleLocalMessageUpdate(localMessage, update);
     } catch (error: any) {
-      if (error.message === 'PRIVACY_PREMIUM_REQUIRED') {
+      if (error.errorMessage === 'PRIVACY_PREMIUM_REQUIRED') {
         sendApiUpdate({ '@type': 'updateRequestUserUpdate', id: chat.id });
       }
 
@@ -1786,8 +1787,8 @@ export async function reportSponsoredMessage({
     }
 
     return buildApiSponsoredMessageReportResult(result);
-  } catch (err) {
-    if (err instanceof Error && err.message === 'PREMIUM_ACCOUNT_REQUIRED') {
+  } catch (err: unknown) {
+    if (err instanceof RPCError && err.errorMessage === 'PREMIUM_ACCOUNT_REQUIRED') {
       return {
         type: 'premiumRequired' as const,
       };

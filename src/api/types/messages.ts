@@ -24,7 +24,7 @@ export interface ApiPhotoSize extends ApiDimensions {
 
 export interface ApiVideoSize extends ApiDimensions {
   type: 'u' | 'v';
-  videoStartTs: number;
+  videoStartTs?: number;
   size: number;
 }
 

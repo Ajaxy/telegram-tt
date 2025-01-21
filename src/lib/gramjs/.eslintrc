@@ -3,6 +3,7 @@
   "plugins": [
     "@typescript-eslint"
   ],
+  "root": true,
   "rules": {
     "indent": [
       "error",

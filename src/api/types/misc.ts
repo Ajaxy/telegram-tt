@@ -101,9 +101,9 @@ export interface ApiWebSession {
 
 export interface ApiSessionData {
   mainDcId: number;
-  isTest?: true;
   keys: Record<number, string | number[]>;
   hashes: Record<number, string | number[]>;
+  isTest?: true;
 }
 
 export type ApiNotifyException = {

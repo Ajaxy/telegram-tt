@@ -1,11 +1,11 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
 import type { LANG_PACKS } from '../../../config';
 import type {
   ApiAppConfig,
   ApiConfig,
-  ApiError,
   ApiInputPrivacyRules,
   ApiLanguage,
   ApiNotifyException,
@@ -77,17 +77,15 @@ export async function checkUsername(username: string) {
     });
 
     return { result, error: undefined };
-  } catch (error) {
-    const errorMessage = (error as ApiError).message;
-
-    if (ACCEPTABLE_USERNAME_ERRORS.has(errorMessage)) {
+  } catch (err: unknown) {
+    if (err instanceof RPCError && ACCEPTABLE_USERNAME_ERRORS.has(err.errorMessage)) {
       return {
         result: false,
-        error: errorMessage,
+        error: err.errorMessage,
       };
     }
 
-    throw error;
+    throw err;
   }
 }
 

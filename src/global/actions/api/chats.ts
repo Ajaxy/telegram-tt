@@ -2173,7 +2173,7 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
   try {
     result = await callApi('toggleForum', { chat, isEnabled });
   } catch (error) {
-    if ((error as ApiError).message.startsWith('A wait of')) {
+    if ((error as ApiError).message === 'FLOOD') {
       actions.showNotification({ message: langProvider.oldTranslate('FloodWait'), tabId });
     } else {
       actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });

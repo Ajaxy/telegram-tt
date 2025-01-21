@@ -577,7 +577,7 @@ async function loadStickers<T extends GlobalState>(
       'fetchStickers',
       { stickerSetInfo },
     );
-  } catch (error) {
+  } catch (error: unknown) {
     if ((error as ApiError).message === 'STICKERSET_INVALID') {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         actions.showNotification({
