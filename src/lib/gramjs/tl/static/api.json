@@ -277,6 +277,7 @@
     "bots.setBotInfo",
     "bots.getPreviewMedias",
     "bots.checkDownloadFileParams",
+    "bots.toggleUserEmojiStatusPermission",
     "payments.getPaymentForm",
     "payments.getPaymentReceipt",
     "payments.validateRequestedInfo",

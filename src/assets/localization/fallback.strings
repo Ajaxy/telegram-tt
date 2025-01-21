@@ -1405,6 +1405,7 @@
 "CloseMiniApps" = "Close Mini Apps";
 "DoNotAskAgain" = "Don't ask again";
 "PaymentInfoDone" = "Proceed to checkout";
+"EmojiStatusAccessText" = "**{name}** requests access to set your **emoji status**. You will be able to revoke this access in the profile page of **{name}**.";
 "VideoConversionTitle" = "Improving Video...";
 "VideoConversionText" = "The video will be published after it's optimized for the best viewing experience.";
 "VideoConversionDone" = "Video published.";
@@ -1473,3 +1474,5 @@
 "ProfileTabVoice" = "Voice";
 "ProfileTabSharedGroups" = "Groups";
 "ProfileTabSimilarChannels" = "Similar Channels";
+"LocationPermissionText" = "**{name}** requests access to set your **location**. You will be able to revoke this access in the profile page of **{name}**.";
+

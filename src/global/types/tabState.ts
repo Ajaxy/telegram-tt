@@ -40,6 +40,7 @@ import type {
   ApiSticker,
   ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
+  ApiUser,
   ApiUserStarGift,
   ApiVideo,
   ApiWebPage,
@@ -508,6 +509,16 @@ export type TabState = {
     bot: ApiAttachBot;
     filter: ApiChatType[];
     startParam?: string;
+  };
+
+  emojiStatusAccessModal?: {
+    bot: ApiUser;
+    webAppKey: string;
+  };
+
+  locationAccessModal?: {
+    bot: ApiUser;
+    webAppKey: string;
   };
 
   confetti?: {

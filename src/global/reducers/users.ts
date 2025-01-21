@@ -1,6 +1,11 @@
 import type {
-  ApiMissingInvitedUser, ApiUser, ApiUserCommonChats, ApiUserFullInfo, ApiUserStatus,
+  ApiMissingInvitedUser,
+  ApiUser,
+  ApiUserCommonChats,
+  ApiUserFullInfo,
+  ApiUserStatus,
 } from '../../api/types';
+import type { BotAppPermissions } from '../../types';
 import type { GlobalState, TabArgs, TabState } from '../types';
 
 import { areDeepEqual } from '../../util/areDeepEqual';
@@ -294,4 +299,26 @@ export function updateMissingInvitedUsers<T extends GlobalState>(
       chatId,
     },
   }, tabId);
+}
+
+export function updateBotAppPermissions<T extends GlobalState>(
+  global: T,
+  botId: string,
+  permissions: BotAppPermissions,
+): T {
+  const { botAppPermissionsById } = global.users;
+
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      botAppPermissionsById: {
+        ...botAppPermissionsById,
+        [botId]: {
+          ...botAppPermissionsById[botId],
+          ...permissions,
+        },
+      },
+    },
+  };
 }

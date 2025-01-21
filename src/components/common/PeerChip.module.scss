@@ -45,6 +45,10 @@
     max-width: unset;
   }
 
+  &.notClickable {
+    cursor: default;
+  }
+
   .avatar,
   .iconWrapper {
     width: 2rem;

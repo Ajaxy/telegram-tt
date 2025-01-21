@@ -25,6 +25,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
+      botCanManageEmojiStatus,
     },
     users,
   } = mtpUserFull;
@@ -54,6 +55,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     botVerification: botVerification && buildApiBotVerification(botVerification),
     areAdsEnabled: sponsoredEnabled,
     starGiftCount: stargiftsCount,
+    isBotCanManageEmojiStatus: botCanManageEmojiStatus,
     hasScheduledMessages: hasScheduled,
   };
 }

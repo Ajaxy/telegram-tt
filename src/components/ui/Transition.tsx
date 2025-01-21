@@ -340,8 +340,8 @@ function Transition({
       return;
     }
 
-    const { clientHeight } = activeElement || {};
-    if (!clientHeight) {
+    const { clientHeight, clientWidth } = activeElement || {};
+    if (!clientHeight || !clientWidth) {
       return;
     }
 

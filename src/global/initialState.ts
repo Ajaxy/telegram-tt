@@ -103,6 +103,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     previewMediaByBotId: {},
     commonChatsById: {},
     giftsById: {},
+    botAppPermissionsById: {},
   },
 
   chats: {

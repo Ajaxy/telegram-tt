@@ -38,6 +38,7 @@ type OwnProps<T = undefined> = {
   withEmojiStatus?: boolean;
   clickArg?: T;
   onClick?: (arg: T) => void;
+  itemClassName?: string;
 };
 
 type StateProps = {
@@ -62,6 +63,7 @@ const PeerChip = <T,>({
   withPeerColors,
   withEmojiStatus,
   onClick,
+  itemClassName,
 }: OwnProps<T> & StateProps) => {
   const lang = useOldLang();
 
@@ -105,6 +107,7 @@ const PeerChip = <T,>({
     canClose && styles.closeable,
     isCloseNonDestructive && styles.nonDestructive,
     fluid && styles.fluid,
+    !onClick && styles.notClickable,
     withPeerColors && getPeerColorClass(customPeer || peer),
     className,
   );
@@ -118,7 +121,7 @@ const PeerChip = <T,>({
     >
       {iconElement}
       {!isMinimized && (
-        <div className={styles.name} dir="auto">
+        <div className={buildClassName(styles.name, itemClassName)} dir="auto">
           {titleElement}
         </div>
       )}

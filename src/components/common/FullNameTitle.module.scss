@@ -1,6 +1,7 @@
 .root {
   display: flex !important;
   align-items: center;
+  justify-content: space-between;
   gap: 0.25rem;
 
   :global(.custom-emoji) {
@@ -17,8 +18,6 @@
   }
 }
 
-.ellipsis {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.transition {
+  width: 1.5rem;
 }

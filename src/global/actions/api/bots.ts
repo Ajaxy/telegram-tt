@@ -31,7 +31,11 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
-  removeBlockedUser, updateManagementProgress, updateUser, updateUserFullInfo,
+  removeBlockedUser,
+  updateBotAppPermissions,
+  updateManagementProgress,
+  updateUser,
+  updateUserFullInfo,
 } from '../../reducers';
 import {
   activateWebAppIfOpen,
@@ -1315,6 +1319,44 @@ addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> =
 
   global = getGlobal();
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('toggleUserEmojiStatusPermission', async (global, actions, payload): Promise<void> => {
+  const {
+    botId, isEnabled, isBotAccessEmojiGranted,
+  } = payload;
+
+  const bot = selectBot(global, botId);
+
+  if (!botId || !bot) {
+    return;
+  }
+
+  const result = await callApi('toggleUserEmojiStatusPermission', {
+    bot, isEnabled,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateUserFullInfo(global, botId, {
+    isBotCanManageEmojiStatus: isEnabled,
+    isBotAccessEmojiGranted,
+  });
+  setGlobal(global);
+});
+
+addActionHandler('toggleUserLocationPermission', (global, actions, payload): ActionReturnType => {
+  const {
+    botId, isAccessGranted,
+  } = payload;
+
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
+  global = getGlobal();
+  global = updateBotAppPermissions(global, bot.id, { geolocation: isAccessGranted });
   setGlobal(global);
 });
 

@@ -62,6 +62,8 @@ export interface ApiUserFullInfo {
   businessWorkHours?: ApiBusinessWorkHours;
   businessIntro?: ApiBusinessIntro;
   starGiftCount?: number;
+  isBotCanManageEmojiStatus?: boolean;
+  isBotAccessEmojiGranted?: boolean;
   hasScheduledMessages?: boolean;
   botVerification?: ApiBotVerification;
 }

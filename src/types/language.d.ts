@@ -1631,6 +1631,12 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsPerMonth': {
     'amount': V;
   };
+  'EmojiStatusAccessText': {
+    'name': V;
+  };
+  'LocationPermissionText': {
+    'name': V;
+  };
   'BotSuggestedStatusFor': {
     'bot': V;
     'duration': V;

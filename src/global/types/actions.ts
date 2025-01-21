@@ -84,11 +84,7 @@ import type {
   ThreadId,
   WebPageMediaSize,
 } from '../../types';
-import type {
-  WebApp,
-  WebAppModalStateType,
-  WebAppOutboundEvent,
-} from '../../types/webapp';
+import type { WebApp, WebAppModalStateType, WebAppOutboundEvent } from '../../types/webapp';
 import type { DownloadableMedia } from '../helpers';
 import type { TabState } from './tabState';
 
@@ -2424,6 +2420,29 @@ export interface ActionPayloads {
     file?: File;
     isSuggest?: boolean;
   } & WithTabId;
+
+  openEmojiStatusAccessModal: {
+    bot?: ApiUser;
+    webAppKey?: string;
+  } & WithTabId;
+  closeEmojiStatusAccessModal: WithTabId | undefined;
+
+  openLocationAccessModal: {
+    bot?: ApiUser;
+    webAppKey?: string;
+  } & WithTabId;
+  closeLocationAccessModal: WithTabId | undefined;
+
+  toggleUserEmojiStatusPermission: {
+    botId: string;
+    isEnabled: boolean;
+    isBotAccessEmojiGranted?: boolean;
+  };
+
+  toggleUserLocationPermission: {
+    botId: string;
+    isAccessGranted: boolean;
+  };
 }
 
 export interface RequiredActionPayloads {

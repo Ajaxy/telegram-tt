@@ -224,3 +224,53 @@ addActionHandler('cancelAttachBotInChat', (global, actions, payload): ActionRetu
     requestedAttachBotInChat: undefined,
   }, tabId);
 });
+
+addActionHandler('openEmojiStatusAccessModal', (global, actions, payload): ActionReturnType => {
+  const {
+    bot, webAppKey, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (!bot || !webAppKey) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    emojiStatusAccessModal: {
+      bot,
+      webAppKey,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeEmojiStatusAccessModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    emojiStatusAccessModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openLocationAccessModal', (global, actions, payload): ActionReturnType => {
+  const {
+    bot, webAppKey, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (!bot || !webAppKey) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    locationAccessModal: {
+      bot,
+      webAppKey,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeLocationAccessModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    locationAccessModal: undefined,
+  }, tabId);
+});

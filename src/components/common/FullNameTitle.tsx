@@ -25,6 +25,7 @@ import renderText from './helpers/renderText';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Transition from '../ui/Transition';
 import CustomEmoji from './CustomEmoji';
 import FakeIcon from './FakeIcon';
 import StarIcon from './icons/StarIcon';
@@ -44,7 +45,6 @@ type OwnProps = {
   noLoopLimit?: boolean;
   canCopyTitle?: boolean;
   iconElement?: React.ReactNode;
-  allowMultiLine?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
 };
@@ -61,7 +61,6 @@ const FullNameTitle: FC<OwnProps> = ({
   noLoopLimit,
   canCopyTitle,
   iconElement,
-  allowMultiLine,
   onEmojiStatusClick,
   observeIntersection,
 }) => {
@@ -125,7 +124,6 @@ const FullNameTitle: FC<OwnProps> = ({
         className={buildClassName(
           'fullName',
           styles.fullName,
-          !allowMultiLine && styles.ellipsis,
           canCopyTitle && styles.canCopy,
         )}
         onClick={handleTitleClick}
@@ -137,13 +135,22 @@ const FullNameTitle: FC<OwnProps> = ({
           {!noVerified && peer?.isVerified && <VerifiedIcon />}
           {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
           {canShowEmojiStatus && realPeer.emojiStatus && (
-            <CustomEmoji
-              documentId={realPeer.emojiStatus.documentId}
-              size={emojiStatusSize}
-              loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
-              observeIntersectionForLoading={observeIntersection}
-              onClick={onEmojiStatusClick}
-            />
+            <Transition
+              className={styles.transition}
+              activeKey={Number(realPeer.emojiStatus.documentId)}
+              name="fade"
+              shouldCleanup
+              shouldRestoreHeight
+            >
+              <CustomEmoji
+                forceAlways
+                documentId={realPeer.emojiStatus.documentId}
+                size={emojiStatusSize}
+                loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
+                observeIntersectionForLoading={observeIntersection}
+                onClick={onEmojiStatusClick}
+              />
+            </Transition>
           )}
           {canShowEmojiStatus && !realPeer.emojiStatus && isPremium && <StarIcon />}
         </>

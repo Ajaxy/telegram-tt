@@ -611,6 +611,15 @@ export function checkBotDownloadFileParams({
   });
 }
 
+export function toggleUserEmojiStatusPermission({ bot, isEnabled } : { bot: ApiUser; isEnabled: boolean }) {
+  return invokeRequest(new GramJs.bots.ToggleUserEmojiStatusPermission({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    enabled: isEnabled,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {
   return results.map((result) => {
     if (result instanceof GramJs.BotInlineMediaResult) {

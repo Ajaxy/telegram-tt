@@ -636,3 +636,7 @@ export type StarGiftCategory = number | 'all' | 'limited' | 'stock';
 export type CallSound = (
   'join' | 'allowTalk' | 'leave' | 'connecting' | 'incoming' | 'end' | 'connect' | 'busy' | 'ringing'
 );
+
+export type BotAppPermissions = {
+  geolocation?: boolean;
+};

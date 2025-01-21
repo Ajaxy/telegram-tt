@@ -140,3 +140,28 @@ function isLastEmojiVersionSupported() {
 
   return Math.abs(newEmojiWidth - legacyEmojiWidth) < ALLOWABLE_CALCULATION_ERROR_SIZE;
 }
+
+export const IS_GEOLOCATION_SUPPORTED = 'geolocation' in navigator;
+
+export const getGeolocationStatus = async () => {
+  try {
+    const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+
+    if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
+      const geolocation = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => resolve(position.coords),
+          (error) => reject(error),
+        );
+      });
+      return { accessRequested: true, accessGranted: true, geolocation };
+    }
+    if (permissionStatus.state === 'denied') {
+      return { accessRequested: true, accessGranted: false };
+    }
+  } catch (error) {
+    return { accessRequested: false, accessGranted: false };
+  }
+
+  return { accessRequested: false, accessGranted: false };
+};

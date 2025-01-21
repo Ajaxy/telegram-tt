@@ -47,6 +47,7 @@ import type {
   ApiWebSession,
 } from '../../api/types';
 import type {
+  BotAppPermissions,
   ChatListType,
   ChatTranslatedMessages,
   EmojiKeywords,
@@ -172,6 +173,7 @@ export type GlobalState = {
     previewMediaByBotId: Record<string, ApiBotPreviewMedia[]>;
     commonChatsById: Record<string, ApiUserCommonChats>;
     giftsById: Record<string, ApiUserGifts>;
+    botAppPermissionsById: Record<string, BotAppPermissions>;
   };
   profilePhotosById: Record<string, ApiPeerPhotos>;
 

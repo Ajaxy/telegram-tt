@@ -2,7 +2,13 @@
 import { getIsHeavyAnimating, onFullyIdle } from '../lib/teact/teact';
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
-import type { ApiAvailableReaction, ApiMessage } from '../api/types';
+import type {
+  ApiAvailableReaction,
+  ApiBotPreviewMedia,
+  ApiMessage,
+  ApiUserCommonChats,
+  ApiUserGifts,
+} from '../api/types';
 import type { MessageList, ThreadId } from '../types';
 import type { ActionReturnType, GlobalState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
@@ -253,6 +259,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.users.commonChatsById) {
     cached.users.commonChatsById = initialState.users.commonChatsById;
   }
+  if (!cached.users.botAppPermissionsById) {
+    cached.users.botAppPermissionsById = initialState.users.botAppPermissionsById;
+  }
   if (!cached.chats.topicsInfoById) {
     cached.chats.topicsInfoById = initialState.chats.topicsInfoById;
   }
@@ -373,10 +382,18 @@ function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['cust
   };
 }
 
-function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
+function reduceUsers<T extends GlobalState>(global: T): {
+  commonChatsById: Record<string, ApiUserCommonChats>;
+  giftsById: Record<string, ApiUserGifts>;
+  botAppPermissionsById: any;
+  statusesById: any;
+  fullInfoById: any;
+  byId: any;
+  previewMediaByBotId: Record<string, ApiBotPreviewMedia[]>;
+} {
   const {
     users: {
-      byId, statusesById, fullInfoById,
+      byId, statusesById, fullInfoById, botAppPermissionsById,
     }, currentUserId,
   } = global;
   const currentChatIds = compact(
@@ -413,6 +430,7 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     byId: pickTruthy(byId, idsToSave),
     statusesById: pickTruthy(statusesById, idsToSave),
     fullInfoById: pickTruthy(fullInfoById, idsToSave),
+    botAppPermissionsById,
   };
 }
 
