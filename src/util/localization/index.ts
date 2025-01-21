@@ -10,6 +10,7 @@ import type { LangKey, LangVariable } from '../../types/language';
 import {
   type AdvancedLangFnOptions,
   type AdvancedLangFnOptionsWithPlural,
+  type AdvancedLangFnParameters,
   areAdvancedLangFnOptions,
   isDeletedLangString,
   isPluralLangString,
@@ -18,6 +19,7 @@ import {
   type LangFnOptionsWithPlural,
   type LangFnParameters,
   type LangFormatters,
+  type RegularLangFnParameters,
 } from './types';
 
 import { DEBUG, LANG_PACK } from '../../config';
@@ -440,4 +442,6 @@ export {
 export type {
   LangFn,
   LangFnParameters,
+  RegularLangFnParameters,
+  AdvancedLangFnParameters,
 };

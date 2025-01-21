@@ -73,7 +73,7 @@ type RegularLangFnPluralParametersWithVariables<T = LangPairPluralWithVariables>
   }
 }[keyof T];
 
-type RegularLangFnParameters =
+export type RegularLangFnParameters =
 | RegularLangFnParametersWithoutVariables
 | RegularLangFnParametersWithVariables
 | RegularLangFnPluralParameters
@@ -107,7 +107,7 @@ type AdvancedLangFnPluralParametersWithVariables<T = LangPairPluralWithNodes> = 
   }
 }[keyof T];
 
-type AdvancedLangFnParameters =
+export type AdvancedLangFnParameters =
 | AdvancedLangFnParametersWithoutVariables
 | AdvancedLangFnParametersWithVariables
 | AdvancedLangFnPluralParameters
