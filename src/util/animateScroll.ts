@@ -12,8 +12,8 @@ import {
 } from '../config';
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../global/selectors';
+import getOffsetToContainer from './visibility/getOffsetToContainer';
 import { animateSingle, cancelSingleAnimation } from './animation';
-import { getOffsetToContainer } from './scroll';
 import { IS_ANDROID } from './windowEnvironment';
 
 export type AnimateScrollArgs = {

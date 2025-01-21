@@ -6,7 +6,7 @@ import type { ApiSticker } from '../../../api/types';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import buildClassName from '../../../util/buildClassName';
 import findInViewport from '../../../util/findInViewport';
-import isFullyVisible from '../../../util/isFullyVisible';
+import isFullyVisible from '../../../util/visibility/isFullyVisible';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';

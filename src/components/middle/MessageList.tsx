@@ -56,7 +56,7 @@ import { orderBy } from '../../util/iteratees';
 import { isLocalMessageId } from '../../util/keys/messageKey';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
-import { getOffsetToContainer } from '../../util/scroll';
+import getOffsetToContainer from '../../util/visibility/getOffsetToContainer';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 

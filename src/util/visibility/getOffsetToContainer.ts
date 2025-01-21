@@ -1,4 +1,4 @@
-export function getOffsetToContainer(element: HTMLElement, container: HTMLElement) {
+export default function getOffsetToContainer(element: HTMLElement, container: HTMLElement) {
   let offsetTop = 0;
   let offsetLeft = 0;
 

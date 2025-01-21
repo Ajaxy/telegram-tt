@@ -1,4 +1,4 @@
-import windowSize from './windowSize';
+import windowSize from '../windowSize';
 
 export function isElementInViewport(el: HTMLElement) {
   if (el.style.display === 'none') {
