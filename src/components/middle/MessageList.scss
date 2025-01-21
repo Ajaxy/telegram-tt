@@ -273,6 +273,10 @@
     align-items: center;
   }
 
+  .centered-action .action-message-content {
+    max-width: 17rem;
+  }
+
   .action-message-gift {
     display: flex !important;
     width: 13.75rem;

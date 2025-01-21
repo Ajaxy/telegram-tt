@@ -32,7 +32,6 @@ import {
   getIsDownloading,
   getMessageDownloadableMedia,
   getMessageVideo,
-  getPrivateChatUserId,
   getUserFullName,
   hasMessageTtl,
   isActionMessage,

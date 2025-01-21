@@ -5,15 +5,18 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage, ApiUser } from '../../../api/types';
+import type { ThemeKey } from '../../../types';
 import type { GiftOption } from './GiftModal';
 
 import { STARS_CURRENCY_CODE } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
 import { selectTabState, selectTheme, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 
+import useCustomBackground from '../../../hooks/useCustomBackground';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -33,7 +36,11 @@ export type OwnProps = {
 
 export type StateProps = {
   captionLimit?: number;
+  theme: ThemeKey;
+  isBackgroundBlurred?: boolean;
   patternColor?: string;
+  customBackground?: string;
+  backgroundColor?: string;
   user?: ApiUser;
   currentUserId?: string;
   isPaymentFormLoading?: boolean;
@@ -46,7 +53,11 @@ function GiftComposer({
   userId,
   user,
   captionLimit,
+  theme,
+  isBackgroundBlurred,
   patternColor,
+  backgroundColor,
+  customBackground,
   currentUserId,
   isPaymentFormLoading,
 }: OwnProps & StateProps) {
@@ -56,6 +67,8 @@ function GiftComposer({
 
   const [giftMessage, setGiftMessage] = useState<string>('');
   const [shouldHideName, setShouldHideName] = useState<boolean>(false);
+
+  const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const isStarGift = 'id' in gift;
 
@@ -214,14 +227,29 @@ function GiftComposer({
     );
   }
 
+  const bgClassName = buildClassName(
+    styles.background,
+    styles.withTransition,
+    customBackground && styles.customBgImage,
+    backgroundColor && styles.customBgColor,
+    customBackground && isBackgroundBlurred && styles.blurred,
+  );
+
   return (
     <div className={buildClassName(styles.root, 'no-scroll')}>
       <div
         className={buildClassName(styles.actionMessageView, 'MessageList')}
         // @ts-ignore -- FIXME: Find a way to disable interactions but keep a11y
         inert
-        style={`--pattern-color: ${patternColor}`}
+        style={buildStyle(
+          `--pattern-color: ${patternColor}`,
+          backgroundColor && `--theme-background-color: ${backgroundColor}`,
+        )}
       >
+        <div
+          className={bgClassName}
+          style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
+        />
         <ActionMessage key={isStarGift ? gift.id : gift.months} message={localMessage} />
       </div>
       {renderOptionsSection()}
@@ -234,7 +262,10 @@ export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const theme = selectTheme(global);
     const {
+      isBlurred: isBackgroundBlurred,
       patternColor,
+      background: customBackground,
+      backgroundColor,
     } = global.settings.themes[theme] || {};
     const user = selectUser(global, userId);
 
@@ -242,7 +273,11 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       user,
+      theme,
+      isBackgroundBlurred,
       patternColor,
+      customBackground,
+      backgroundColor,
       captionLimit: global.appConfig?.starGiftMaxMessageLength,
       currentUserId: global.currentUserId,
       isPaymentFormLoading: tabState.isPaymentFormLoading,
