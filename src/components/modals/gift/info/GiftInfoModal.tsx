@@ -306,7 +306,7 @@ const GiftInfoModal = ({
         ]);
       }
 
-      if (gift.upgradeStars) {
+      if (gift.upgradeStars && !userGift?.upgradeMsgId) {
         tableData.push([
           lang('GiftInfoStatus'),
           <div className={styles.giftValue}>

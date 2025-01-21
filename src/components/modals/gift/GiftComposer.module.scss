@@ -70,13 +70,15 @@
   place-content: center;
   height: 22.5rem;
   margin-bottom: 0;
+  margin-top: 0.75rem;
+
+  padding: 0.5rem;
 
   position: relative;
   overflow: hidden;
   flex: 0 0 auto;
 
-  border-bottom-right-radius: var(--border-radius-default);
-  border-bottom-left-radius: var(--border-radius-default);
+  border-radius: var(--border-radius-default);
 
   background-color: var(--theme-background-color);
   background-position: center;

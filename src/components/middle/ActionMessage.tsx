@@ -441,6 +441,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     }
     const amountToConvert = starGift?.starsToConvert;
 
+    if (starGift.isSaved) {
+      return lang('ActionStarGiftDisplaying');
+    }
+
+    if (starGift.isUpgraded) {
+      return lang('ActionStarGiftUpgraded');
+    }
+
     if (message.isOutgoing) {
       if (amountToConvert) {
         return lang('ActionStarGiftOutDescription', {
@@ -454,14 +462,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           user: targetUser || 'User',
         });
       }
-    }
-
-    if (starGift.isSaved) {
-      return lang('ActionStarGiftDisplaying');
-    }
-
-    if (starGift.isUpgraded) {
-      return lang('ActionStarGiftUpgraded');
     }
 
     if (starGift.isConverted) {
