@@ -68,3 +68,17 @@
 
   @include mixins.filter-outline(1px, var(--color-background));
 }
+
+.uniqueGiftBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.25rem;
+}
+
+.uniqueGift {
+  margin-inline: 0.25rem;
+  margin-top: 0.25rem;
+}

@@ -2,6 +2,10 @@
 
 .modal {
   z-index: calc(var(--z-modal-low-priority) + 1);
+
+  :global(.modal-dialog) {
+    overflow: hidden;
+  }
 }
 
 .positive {
@@ -18,7 +22,10 @@
   align-items: center;
   gap: 0.25rem;
   margin-block: 1rem;
-  position: relative;
+}
+
+.uniqueGift {
+  margin-block: 0;
 }
 
 .amount {

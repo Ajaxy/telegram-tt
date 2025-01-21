@@ -8,18 +8,9 @@
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  position: relative;
 }
 
-.amount {
-  display: flex;
-  gap: 0.25rem;
-  font-size: 1rem;
-  font-weight: var(--font-weight-medium);
-  line-height: 1.325;
-}
-
-.title, .description, .amount {
+.title, .description {
   margin-bottom: 0;
 }
 
@@ -55,16 +46,6 @@
   line-height: 1;
 }
 
-.radialPattern {
-  position: absolute;
-  top: -3rem;
-  left: -1rem;
-  right: -1rem;
-  height: 16.5rem;
-
-  z-index: -1;
-}
-
 .uniqueAttribute {
   display: flex;
   align-items: center;
@@ -72,20 +53,7 @@
 }
 
 .uniqueGift {
-  gap: 0;
-
-  .giftSticker {
-    margin-block: 1rem;
-  }
-
-  .title {
-    font-size: 1.25rem;
-    color: white;
-  }
-
-  .description {
-    font-size: 0.875rem;
-  }
+  margin-bottom: 0;
 }
 
 .starAmountIcon {

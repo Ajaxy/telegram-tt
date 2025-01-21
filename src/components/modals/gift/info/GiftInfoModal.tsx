@@ -10,7 +10,6 @@ import type { TabState } from '../../../../global/types';
 import { getUserFullName } from '../../../../global/helpers';
 import { selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
-import buildStyle from '../../../../util/buildStyle';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
@@ -28,12 +27,11 @@ import useOldLang from '../../../../hooks/useOldLang';
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
 import BadgeButton from '../../../common/BadgeButton';
-import StarIcon from '../../../common/icons/StarIcon';
-import RadialPatternBackground from '../../../common/profile/RadialPatternBackground';
 import Button from '../../../ui/Button';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
 import Link from '../../../ui/Link';
 import TableInfoModal, { type TableData } from '../../common/TableInfoModal';
+import UniqueGiftHeader from '../UniqueGiftHeader';
 
 import styles from './GiftInfoModal.module.scss';
 
@@ -117,26 +115,6 @@ const GiftInfoModal = ({
     return gift && getGiftAttributes(gift);
   }, [gift]);
 
-  const radialPatternBackdrop = useMemo(() => {
-    const { backdrop, pattern } = giftAttributes || {};
-
-    if (!backdrop || !pattern || !isOpen) {
-      return undefined;
-    }
-
-    const backdropColors = [backdrop.centerColor, backdrop.edgeColor];
-    const patternColor = backdrop.patternColor;
-
-    return (
-      <RadialPatternBackground
-        className={styles.radialPattern}
-        backgroundColors={backdropColors}
-        patternColor={patternColor}
-        patternIcon={pattern.sticker}
-      />
-    );
-  }, [giftAttributes, isOpen]);
-
   const renderFooterButton = useLastCallback(() => {
     if (canFocusUpgrade) {
       return (
@@ -173,11 +151,6 @@ const GiftInfoModal = ({
     const isVisibleForMe = isNameHidden && targetUser;
 
     const description = (() => {
-      if (gift.type === 'starGiftUnique') {
-        return lang('GiftInfoCollectible', {
-          number: gift.number,
-        });
-      }
       if (!userGift) return lang('GiftInfoSoldOutDescription');
       if (userGift.upgradeMsgId) return lang('GiftInfoDescriptionUpgraded');
       if (userGift.canUpgrade && userGift.alreadyPaidUpgradeStars) {
@@ -240,32 +213,30 @@ const GiftInfoModal = ({
       return canUpdate ? lang('GiftInfoReceived') : lang('GiftInfoTitle');
     }
 
-    const descriptionColor = giftAttributes?.backdrop?.textColor;
+    const isUniqueGift = gift.type === 'starGiftUnique';
 
-    const header = (
-      <div
-        className={buildClassName(styles.header, radialPatternBackdrop && styles.uniqueGift)}
-        style={buildStyle(descriptionColor && `--_color-description: ${descriptionColor}`)}
-      >
-        {radialPatternBackdrop}
+    const uniqueGiftHeader = isUniqueGift && (
+      <div className={buildClassName(styles.header, styles.uniqueGift)}>
+        <UniqueGiftHeader
+          backdropAttribute={giftAttributes!.backdrop!}
+          patternAttribute={giftAttributes!.pattern!}
+          modelAttribute={giftAttributes!.model!}
+          title={gift.title}
+          subtitle={lang('GiftInfoCollectible', { number: gift.number })}
+        />
+      </div>
+    );
+
+    const regularHeader = (
+      <div className={styles.header}>
         <AnimatedIconFromSticker
           className={styles.giftSticker}
           sticker={giftSticker}
-          noLoop={false}
-          nonInteractive
           size={STICKER_SIZE}
         />
         <h1 className={styles.title}>
           {getTitle()}
         </h1>
-        {gift.type === 'starGift' && (
-          <p className={styles.amount}>
-            <span className={styles.amount}>
-              {formatInteger(gift.stars)}
-            </span>
-            <StarIcon type="gold" size="middle" />
-          </p>
-        )}
         {description && (
           <p className={buildClassName(styles.description, !userGift && gift?.type === 'starGift' && styles.soldOut)}>
             {description}
@@ -487,13 +458,13 @@ const GiftInfoModal = ({
     );
 
     return {
-      header,
+      header: isUniqueGift ? uniqueGiftHeader : regularHeader,
       tableData,
       footer,
     };
   }, [
     typeGift, userGift, targetUser, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang, gift,
-    radialPatternBackdrop, giftAttributes, renderFooterButton,
+    giftAttributes, renderFooterButton,
   ]);
 
   return (
@@ -501,7 +472,7 @@ const GiftInfoModal = ({
       <TableInfoModal
         isOpen={isOpen}
         header={modalData?.header}
-        hasBackdrop={Boolean(radialPatternBackdrop)}
+        hasBackdrop={gift?.type === 'starGiftUnique'}
         tableData={modalData?.tableData}
         footer={modalData?.footer}
         className={styles.modal}
