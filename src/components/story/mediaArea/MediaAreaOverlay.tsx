@@ -27,11 +27,13 @@ type OwnProps = {
 const STORY_ASPECT_RATIO = 9 / 16;
 const PERCENTAGE_BASE = 100;
 
+const NO_SHINY_TYPES = new Set<ApiMediaArea['type']>(['channelPost', 'uniqueGift']);
+
 const MediaAreaOverlay = ({
   story, isActive, className, isStoryPlaying,
 }: OwnProps) => {
   const {
-    openMapModal, focusMessage, closeStoryViewer, openUrl,
+    openMapModal, openUniqueGiftBySlug, focusMessage, closeStoryViewer, openUrl,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -85,6 +87,10 @@ const MediaAreaOverlay = ({
         openUrl({ url: mediaArea.url });
         break;
       }
+      case 'uniqueGift': {
+        openUniqueGiftBySlug({ slug: mediaArea.slug });
+        break;
+      }
     }
   };
 
@@ -100,8 +106,9 @@ const MediaAreaOverlay = ({
           case 'geoPoint':
           case 'venue':
           case 'channelPost':
-          case 'url': {
-            const isShiny = isActive && (mediaArea.type !== 'channelPost');
+          case 'url':
+          case 'uniqueGift': {
+            const isShiny = isActive && !NO_SHINY_TYPES.has(mediaArea.type);
             return (
               <div
                 className={buildClassName(styles.mediaArea, isShiny && styles.shiny)}

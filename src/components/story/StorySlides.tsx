@@ -43,7 +43,6 @@ import styles from './StoryViewer.module.scss';
 
 interface OwnProps {
   isOpen?: boolean;
-  isReportModalOpen?: boolean;
   isDeleteModalOpen?: boolean;
   onDelete: (story: ApiTypeStory) => void;
   onReport: NoneToVoidFunction;
@@ -80,7 +79,6 @@ function StorySlides({
   isPrivate,
   isArchive,
   byPeerId,
-  isReportModalOpen,
   isDeleteModalOpen,
   onDelete,
   onClose,
@@ -380,7 +378,6 @@ function StorySlides({
             dimensions={slideSizes.activeSlide}
             isPrivateStories={renderingIsPrivate}
             isArchivedStories={renderingIsArchive}
-            isReportModalOpen={isReportModalOpen}
             isDeleteModalOpen={isDeleteModalOpen}
             isSingleStory={isSingleStory}
             getIsAnimating={getIsAnimating}
@@ -438,7 +435,6 @@ function StorySlides({
           dimensions={slideSizes.activeSlide}
           isPrivateStories={renderingIsPrivate}
           isArchivedStories={renderingIsArchive}
-          isReportModalOpen={isReportModalOpen}
           isDeleteModalOpen={isDeleteModalOpen}
           isSingleStory={isSingleStory}
           getIsAnimating={getIsAnimating}

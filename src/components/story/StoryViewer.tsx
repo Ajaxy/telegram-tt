@@ -48,7 +48,6 @@ interface StateProps {
   shouldSkipHistoryAnimations?: boolean;
   withAnimation?: boolean;
   isPrivacyModalOpen?: boolean;
-  isReportModalOpen?: boolean;
 }
 
 function StoryViewer({
@@ -60,7 +59,6 @@ function StoryViewer({
   shouldSkipHistoryAnimations,
   withAnimation,
   isPrivacyModalOpen,
-  isReportModalOpen,
 }: StateProps) {
   const { closeStoryViewer, closeStoryPrivacyEditor, reportStory } = getActions();
 
@@ -165,7 +163,6 @@ function StoryViewer({
 
       <StorySlides
         isOpen={isOpen}
-        isReportModalOpen={isReportModalOpen}
         isDeleteModalOpen={isDeleteModalOpen}
         onReport={openMessageReport}
         onClose={handleClose}
@@ -188,17 +185,14 @@ export default memo(withGlobal((global): StateProps => {
   const {
     shouldSkipHistoryAnimations, storyViewer: {
       storyId, peerId, isPrivacyModalOpen, origin,
-    }, reportModal,
+    },
   } = selectTabState(global);
   const story = peerId && storyId ? selectPeerStory(global, peerId, storyId) : undefined;
   const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
-  const isReportModalOpen = Boolean(reportModal);
-
   return {
     isOpen: selectIsStoryViewerOpen(global),
     shouldSkipHistoryAnimations,
-    isReportModalOpen,
     peerId: peerId!,
     storyId,
     story,

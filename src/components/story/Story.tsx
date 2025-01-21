@@ -72,8 +72,6 @@ interface OwnProps {
   storyId: number;
   dimensions: IDimensions;
   // eslint-disable-next-line react/no-unused-prop-types
-  isReportModalOpen?: boolean;
-  // eslint-disable-next-line react/no-unused-prop-types
   isDeleteModalOpen?: boolean;
   isPrivateStories?: boolean;
   isArchivedStories?: boolean;
@@ -908,7 +906,6 @@ function Story({
 export default memo(withGlobal<OwnProps>((global, {
   peerId,
   storyId,
-  isReportModalOpen,
   isDeleteModalOpen,
 }): StateProps => {
   const { appConfig } = global;
@@ -927,13 +924,15 @@ export default memo(withGlobal<OwnProps>((global, {
     premiumModal,
     safeLinkModalUrl,
     mapModal,
+    reportModal,
+    giftInfoModal,
   } = tabState;
   const { isOpen: isPremiumModalOpen } = premiumModal || {};
   const story = selectPeerStory(global, peerId, storyId);
   const isLoadedStory = story && 'content' in story;
   const shouldForcePause = Boolean(
-    viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
-    || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal,
+    viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || reportModal || isPrivacyModalOpen
+    || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal || giftInfoModal,
   );
 
   const forwardInfo = isLoadedStory ? story.forwardInfo : undefined;
