@@ -1,10 +1,10 @@
 import React, { memo } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
-import { SNAP_EFFECT_CONTAINER_ID, SNAP_EFFECT_ID } from '../../../config';
+import { SNAP_EFFECT_CONTAINER_ID, SNAP_EFFECT_ID, SVG_NAMESPACE } from '../../../config';
 import { selectCanAnimateSnapEffect } from '../../../global/selectors';
+import jsxToHtml from '../../../util/element/jsxToHtml';
 import generateUniqueId from '../../../util/generateUniqueId';
-import { SVG_NAMESPACE } from '../../../util/svgController';
 
 import styles from './SnapEffectContainer.module.scss';
 
@@ -39,29 +39,25 @@ export function animateSnap(element: HTMLElement) {
   const seed = Math.floor(Date.now() / 1000);
   const filterId = `${SNAP_EFFECT_ID}-${generateUniqueId()}`;
 
-  const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
-  svg.setAttribute('class', styles.ghost);
-  svg.setAttribute('width', `${width}px`);
-  svg.setAttribute('height', `${height}px`);
-  svg.setAttribute('style', `left: ${x}px; top: ${y}px;`);
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  const component = (
+    <svg
+      className={styles.ghost}
+      width={width}
+      height={height}
+      style={`left: ${x}px; top: ${y}px;`}
+      viewBox={`0 0 ${width} ${height}`}
+    >
+      <defs>
+        {createFilter(filterId, Math.min(width, height), seed)}
+      </defs>
+      <g filter={`url(#${filterId})`}>
+        <foreignObject className={styles.elementContainer} width={width} height={height} />
+      </g>
+    </svg>
+  );
 
-  const defs = document.createElementNS(SVG_NAMESPACE, 'defs');
-  svg.appendChild(defs);
-
-  const filter = createFilter(Math.min(width, height), seed);
-  filter.setAttribute('id', filterId);
-  defs.appendChild(filter);
-
-  const g = document.createElementNS(SVG_NAMESPACE, 'g');
-  g.setAttribute('filter', `url(#${filterId})`);
-  svg.appendChild(g);
-
-  const foreignObject = document.createElementNS(SVG_NAMESPACE, 'foreignObject');
-  foreignObject.setAttribute('class', styles.elementContainer);
-  foreignObject.setAttribute('width', `${width}px`);
-  foreignObject.setAttribute('height', `${height}px`);
-  g.appendChild(foreignObject);
+  const svg = jsxToHtml(component)[0] as HTMLElement;
+  const foreignObject = svg.querySelector('foreignObject')!;
 
   const computedStyle = window.getComputedStyle(element);
   const clone = element.cloneNode(true) as HTMLElement;
@@ -83,90 +79,45 @@ export function animateSnap(element: HTMLElement) {
   return true;
 }
 
-function createFilter(smallestSide: number, baseSeed: number = 42) {
-  const filter = document.createElementNS(SVG_NAMESPACE, 'filter');
-  filter.setAttribute('x', '-150%');
-  filter.setAttribute('y', '-150%');
-  filter.setAttribute('width', '400%');
-  filter.setAttribute('height', '400%');
-  filter.setAttribute('color-interpolation-filters', 'sRGB');
-
-  const feTurbulence = document.createElementNS(SVG_NAMESPACE, 'feTurbulence');
-  feTurbulence.setAttribute('type', 'fractalNoise');
-  feTurbulence.setAttribute('baseFrequency', '0.5');
-  feTurbulence.setAttribute('numOctaves', '1');
-  feTurbulence.setAttribute('result', 'dustNoise');
-  feTurbulence.setAttribute('seed', baseSeed.toString());
-  filter.appendChild(feTurbulence);
-
-  const feComponentTransfer = document.createElementNS(SVG_NAMESPACE, 'feComponentTransfer');
-  feComponentTransfer.setAttribute('in', 'dustNoise');
-  feComponentTransfer.setAttribute('result', 'dustNoiseMask');
-  filter.appendChild(feComponentTransfer);
-
-  const feFuncA = document.createElementNS(SVG_NAMESPACE, 'feFuncA');
-  feFuncA.setAttribute('type', 'linear');
-  feFuncA.setAttribute('slope', '5');
-  feFuncA.setAttribute('intercept', '0');
-  feComponentTransfer.appendChild(feFuncA);
-
-  const feFuncAAnimate = document.createElementNS(SVG_NAMESPACE, 'animate');
-  feFuncAAnimate.setAttribute('attributeName', 'slope');
-  feFuncAAnimate.setAttribute('values', '5; 2; 1; 0');
-  feFuncAAnimate.setAttribute('dur', `${DURATION}ms`);
-  feFuncAAnimate.setAttribute('fill', 'freeze');
-  feFuncA.appendChild(feFuncAAnimate);
-
-  const feComposite = document.createElementNS(SVG_NAMESPACE, 'feComposite');
-  feComposite.setAttribute('in', 'SourceGraphic');
-  feComposite.setAttribute('in2', 'dustNoiseMask');
-  feComposite.setAttribute('operator', 'in');
-  feComposite.setAttribute('result', 'dustySource');
-  filter.appendChild(feComposite);
-
-  const feTurbulence2 = document.createElementNS(SVG_NAMESPACE, 'feTurbulence');
-  feTurbulence2.setAttribute('type', 'fractalNoise');
-  feTurbulence2.setAttribute('baseFrequency', '0.015');
-  feTurbulence2.setAttribute('numOctaves', '1');
-  feTurbulence2.setAttribute('result', 'displacementNoice1');
-  feTurbulence2.setAttribute('seed', (baseSeed + 1).toString());
-  filter.appendChild(feTurbulence2);
-
-  const feTurbulence3 = document.createElementNS(SVG_NAMESPACE, 'feTurbulence');
-  feTurbulence3.setAttribute('type', 'fractalNoise');
-  feTurbulence3.setAttribute('baseFrequency', '1');
-  feTurbulence3.setAttribute('numOctaves', '2');
-  feTurbulence3.setAttribute('result', 'displacementNoice2');
-  feTurbulence3.setAttribute('seed', (baseSeed + 2).toString());
-  filter.appendChild(feTurbulence3);
-
-  const feMerge = document.createElementNS(SVG_NAMESPACE, 'feMerge');
-  feMerge.setAttribute('result', 'combinedNoise');
-  filter.appendChild(feMerge);
-
-  const feMergeNode1 = document.createElementNS(SVG_NAMESPACE, 'feMergeNode');
-  feMergeNode1.setAttribute('in', 'displacementNoice1');
-  feMerge.appendChild(feMergeNode1);
-
-  const feMergeNode2 = document.createElementNS(SVG_NAMESPACE, 'feMergeNode');
-  feMergeNode2.setAttribute('in', 'displacementNoice2');
-  feMerge.appendChild(feMergeNode2);
-
-  const feDisplacementMap = document.createElementNS(SVG_NAMESPACE, 'feDisplacementMap');
-  feDisplacementMap.setAttribute('in', 'dustySource');
-  feDisplacementMap.setAttribute('in2', 'combinedNoise');
-  feDisplacementMap.setAttribute('scale', '0');
-
-  feDisplacementMap.setAttribute('xChannelSelector', 'R');
-  feDisplacementMap.setAttribute('yChannelSelector', 'G');
-  filter.appendChild(feDisplacementMap);
-
-  const feDisplacementMapAnimate = document.createElementNS(SVG_NAMESPACE, 'animate');
-  feDisplacementMapAnimate.setAttribute('attributeName', 'scale');
-  feDisplacementMapAnimate.setAttribute('values', `0; ${smallestSide * 3}`);
-  feDisplacementMapAnimate.setAttribute('dur', `${DURATION}ms`);
-  feDisplacementMapAnimate.setAttribute('fill', 'freeze');
-  feDisplacementMap.appendChild(feDisplacementMapAnimate);
-
-  return filter;
+function createFilter(id: string, smallestSide: number, baseSeed: number = 42) {
+  return (
+    <filter
+      xmlns={SVG_NAMESPACE}
+      id={id}
+      x="-150%"
+      y="-150%"
+      width="400%"
+      height="400%"
+      color-interpolation-filters="sRGB"
+    >
+      <feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="1" result="dustNoise" seed={baseSeed} />
+      <feComponentTransfer in="dustNoise" result="dustNoiseMask">
+        <feFuncA type="linear" slope="5" intercept="0">
+          <animate attributeName="slope" values="5; 2; 1; 0" dur={`${DURATION}ms`} fill="freeze" />
+        </feFuncA>
+      </feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="dustNoiseMask" operator="in" result="dustySource" />
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.015"
+        numOctaves="1"
+        result="displacementNoise1"
+        seed={baseSeed + 1}
+      />
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="1"
+        numOctaves="2"
+        result="displacementNoise2"
+        seed={baseSeed + 2}
+      />
+      <feMerge result="combinedNoise">
+        <feMergeNode in="displacementNoise1" />
+        <feMergeNode in="displacementNoise2" />
+      </feMerge>
+      <feDisplacementMap in="dustySource" in2="combinedNoise" scale="0" xChannelSelector="R" yChannelSelector="G">
+        <animate attributeName="scale" values={`0; ${smallestSide * 3}`} dur={`${DURATION}ms`} fill="freeze" />
+      </feDisplacementMap>
+    </filter>
+  );
 }

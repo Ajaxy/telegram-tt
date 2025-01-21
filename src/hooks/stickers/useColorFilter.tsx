@@ -1,7 +1,9 @@
-import { useEffect } from '../../lib/teact/teact';
+import React, { useEffect } from '../../lib/teact/teact';
 
-import { addSvgDefinition, removeSvgDefinition, SVG_NAMESPACE } from '../../util/svgController';
+import { SVG_NAMESPACE } from '../../config';
 import { hexToRgb } from '../../util/switchTheme';
+
+import { addSvgDefinition, removeSvgDefinition } from '../../components/main/SvgController';
 
 const SVG_MAP = new Map<string, SvgColorFilter>();
 
@@ -13,20 +15,16 @@ class SvgColorFilter {
   constructor(public color: string) {
     this.filterId = `color-filter-${color.slice(1)}`;
 
-    const filter = document.createElementNS(SVG_NAMESPACE, 'filter');
-    filter.setAttribute('color-interpolation-filters', 'sRGB');
-    addSvgDefinition(filter, this.filterId);
-
-    const feColorMatrix = document.createElementNS(SVG_NAMESPACE, 'feColorMatrix');
-    feColorMatrix.setAttribute('type', 'matrix');
-
     const rgbColor = hexToRgb(color);
-    feColorMatrix.setAttribute(
-      'values',
-      `0 0 0 0 ${rgbColor.r / 255} 0 0 0 0 ${rgbColor.g / 255} 0 0 0 0 ${rgbColor.b / 255} 0 0 0 1 0`,
+    addSvgDefinition(
+      <filter color-interpolation-filters="sRGB" xmlns={SVG_NAMESPACE}>
+        <feColorMatrix
+          type="matrix"
+          values={`0 0 0 0 ${rgbColor.r / 255} 0 0 0 0 ${rgbColor.g / 255} 0 0 0 0 ${rgbColor.b / 255} 0 0 0 1 0`}
+        />
+      </filter>,
+      this.filterId,
     );
-
-    filter.appendChild(feColorMatrix);
   }
 
   public getFilterId() {

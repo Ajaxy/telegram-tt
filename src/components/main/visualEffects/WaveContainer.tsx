@@ -5,13 +5,15 @@ import { withGlobal } from '../../../global';
 
 import type { TabState } from '../../../global/types';
 
+import { SVG_NAMESPACE } from '../../../config';
 import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { addSvgDefinition, removeSvgDefinition, SVG_NAMESPACE } from '../../../util/svgController';
 import windowSize from '../../../util/windowSize';
 
 import useLastCallback from '../../../hooks/useLastCallback';
+
+import { addSvgDefinition, removeSvgDefinition } from '../SvgController';
 
 import styles from './WaveContainer.module.scss';
 
@@ -62,26 +64,19 @@ const WaveContainer = ({ waveInfo }: StateProps) => {
   }, [waveInfo]);
 
   useEffect(() => {
-    const filter = document.createElementNS(SVG_NAMESPACE, 'filter');
-    filter.setAttribute('x', '0');
-    filter.setAttribute('y', '0');
-    filter.setAttribute('width', '1');
-    filter.setAttribute('height', '1');
-    filter.setAttribute('color-interpolation-filters', 'sRGB');
-    addSvgDefinition(filter, FILTER_ID);
-
-    const feImage = document.createElementNS(SVG_NAMESPACE, 'feImage');
-    feImage.setAttribute('href', waveRipple);
-    feImage.setAttribute('result', 'waveImage');
-    filter.appendChild(feImage);
-
-    const feDisplacementMap = document.createElementNS(SVG_NAMESPACE, 'feDisplacementMap');
-    feDisplacementMap.setAttribute('in', 'SourceGraphic');
-    feDisplacementMap.setAttribute('in2', 'waveImage');
-    feDisplacementMap.setAttribute('scale', FILTER_SCALE);
-    feDisplacementMap.setAttribute('xChannelSelector', 'R');
-    feDisplacementMap.setAttribute('yChannelSelector', 'B');
-    filter.appendChild(feDisplacementMap);
+    addSvgDefinition(
+      <filter x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB" xmlns={SVG_NAMESPACE}>
+        <feImage href={waveRipple} result="waveImage" />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="waveImage"
+          scale={FILTER_SCALE}
+          xChannelSelector="R"
+          yChannelSelector="B"
+        />
+      </filter>,
+      FILTER_ID,
+    );
 
     return () => {
       removeSvgDefinition(FILTER_ID);
