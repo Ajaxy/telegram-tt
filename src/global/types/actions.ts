@@ -2302,7 +2302,7 @@ export interface ActionPayloads {
     userId: string;
     shouldRefresh?: boolean;
   };
-  changeGiftVisilibity: {
+  changeGiftVisibility: {
     userId: string;
     messageId: number;
     shouldUnsave?: boolean;

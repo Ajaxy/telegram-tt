@@ -15,6 +15,7 @@
 
   .self-profile .ProfileInfo {
     margin: -0.5rem 0 0.75rem -0.5rem;
+    margin-inline-end: calc(min(var(--scrollbar-width) - 0.5rem, 0px));
   }
 }
 

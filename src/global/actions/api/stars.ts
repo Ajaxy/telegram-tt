@@ -222,7 +222,7 @@ addActionHandler('fulfillStarsSubscription', async (global, actions, payload): P
   actions.loadStarStatus();
 });
 
-addActionHandler('changeGiftVisilibity', async (global, actions, payload): Promise<void> => {
+addActionHandler('changeGiftVisibility', async (global, actions, payload): Promise<void> => {
   const { userId, messageId, shouldUnsave } = payload;
 
   const user = selectUser(global, userId);

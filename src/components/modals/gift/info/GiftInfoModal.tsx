@@ -55,7 +55,7 @@ const GiftInfoModal = ({
 }: OwnProps & StateProps) => {
   const {
     closeGiftInfoModal,
-    changeGiftVisilibity,
+    changeGiftVisibility,
     convertGiftToStars,
     openChatWithInfo,
     focusMessage,
@@ -97,7 +97,7 @@ const GiftInfoModal = ({
 
   const handleTriggerVisibility = useLastCallback(() => {
     const { fromId, messageId, isUnsaved } = userGift!;
-    changeGiftVisilibity({ userId: fromId!, messageId: messageId!, shouldUnsave: !isUnsaved });
+    changeGiftVisibility({ userId: fromId!, messageId: messageId!, shouldUnsave: !isUnsaved });
     handleClose();
   });
 

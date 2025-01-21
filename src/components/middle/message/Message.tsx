@@ -666,13 +666,15 @@ const Message: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     const element = ref.current;
-    if (message.isDeleting && element) {
+    const isPartialAlbumDelete = message.isInAlbum && album?.messages.some((msg) => !msg.isDeleting);
+    if (message.isDeleting && element && !isPartialAlbumDelete) {
       if (animateSnap(element)) {
         setIsPlayingSnapAnimation(true);
       } else {
         setIsPlayingDeleteAnimation(true);
       }
     }
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- Only start animation on `isDeleting` change
   }, [message.isDeleting]);
 
   const textMessage = album?.hasMultipleCaptions ? undefined : (album?.captionMessage || message);

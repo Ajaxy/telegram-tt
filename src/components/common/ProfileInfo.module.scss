@@ -50,6 +50,8 @@
   top: 0;
   bottom: 0;
 
+  overflow: hidden;
+
   > :global(.Transition) {
     width: 100%;
     height: 100%;
