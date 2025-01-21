@@ -27,6 +27,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CustomEmoji from '../../common/CustomEmoji';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
@@ -370,11 +371,9 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               onClick={() => closePremiumModal()}
               ariaLabel={lang('Close')}
             >
-              <i className="icon icon-close" />
+              <Icon name="close" />
             </Button>
-            {isGift ? (
-              <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
-            ) : fromUserStatusEmoji ? (
+            {fromUserStatusEmoji ? (
               <CustomEmoji
                 className={styles.statusEmoji}
                 onClick={handleOpenStatusSet}
@@ -382,7 +381,9 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                 isBig
                 size={STATUS_EMOJI_SIZE}
               />
-            ) : undefined}
+            ) : (
+              <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
+            )}
             <h2 className={buildClassName(styles.headerText, fromUserStatusSet && styles.stickerSetText)}>
               {getHeaderText()}
             </h2>
