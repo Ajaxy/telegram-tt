@@ -42,7 +42,6 @@ import {
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { fetchFile } from '../../../util/files';
 import { compact, split } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
@@ -624,7 +623,6 @@ export async function editMessage({
   const messageUpdate: Partial<ApiMessage> = {
     ...message,
     content: newContent,
-    emojiOnlyCount: getEmojiOnlyCountForMessage(newContent, message.groupedId),
     isInvertedMedia,
   };
 

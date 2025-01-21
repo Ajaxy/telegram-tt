@@ -27,6 +27,7 @@ import { isLocalMessageId, type MessageKey } from '../../util/keys/messageKey';
 import {
   hasMessageTtl, isMediaLoadableInViewer, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
+import { getEmojiOnlyCountForMessage } from '../helpers/getEmojiOnlyCountForMessage';
 import {
   selectChatMessage,
   selectChatMessages,
@@ -264,9 +265,18 @@ export function updateChatMessage<T extends GlobalState>(
       };
     }
   }
+
+  let emojiOnlyCount = message?.emojiOnlyCount;
+  if (messageUpdate.content) {
+    emojiOnlyCount = getEmojiOnlyCountForMessage(
+      messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
+    );
+  }
+
   const updatedMessage = {
     ...message,
     ...messageUpdate,
+    emojiOnlyCount,
   };
 
   if (!updatedMessage.id) {
@@ -283,9 +293,18 @@ export function updateScheduledMessage<T extends GlobalState>(
   global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>,
 ): T {
   const message = selectScheduledMessage(global, chatId, messageId)!;
+
+  let emojiOnlyCount = message?.emojiOnlyCount;
+  if (messageUpdate.content) {
+    emojiOnlyCount = getEmojiOnlyCountForMessage(
+      messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
+    );
+  }
+
   const updatedMessage = {
     ...message,
     ...messageUpdate,
+    emojiOnlyCount,
   };
 
   if (!updatedMessage.id) {
