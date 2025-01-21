@@ -26,6 +26,7 @@ import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from './helpers/renderText';
 
+import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -63,6 +64,7 @@ const EMOJI_STATUS_SIZE = 24;
 const EMOJI_TOPIC_SIZE = 120;
 const LOAD_MORE_THRESHOLD = 3;
 const MAX_PHOTO_DASH_COUNT = 30;
+const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
 
 const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
@@ -87,6 +89,8 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useOldLang();
+
+  useIntervalForceUpdate(user ? STATUS_UPDATE_INTERVAL : undefined);
 
   const photos = profilePhotos?.photos || MEMO_EMPTY_ARRAY;
   const prevMediaIndex = usePreviousDeprecated(mediaIndex);
