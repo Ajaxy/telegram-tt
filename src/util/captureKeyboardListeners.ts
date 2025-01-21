@@ -15,8 +15,8 @@ const keyToHandlerName: Record<string, HandlerName> = {
   Enter: 'onEnter',
   Backspace: 'onBackspace',
   Delete: 'onDelete',
-  Esc: 'onEsc',
-  Escape: 'onEsc',
+  // Hide keyboard Dise
+  ScrollLock: 'onEsc',
   ArrowUp: 'onUp',
   ArrowDown: 'onDown',
   ArrowLeft: 'onLeft',
