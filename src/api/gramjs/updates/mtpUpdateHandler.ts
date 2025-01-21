@@ -468,6 +468,13 @@ export function updater(update: Update) {
       id: update.id,
       message: { viewsCount: update.views },
     });
+  } else if (update instanceof GramJs.UpdateChannelMessageForwards) {
+    sendApiUpdate({
+      '@type': 'updateMessage',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      id: update.id,
+      message: { forwardsCount: update.forwards },
+    });
 
     // Chats
   } else if (update instanceof GramJs.UpdateReadHistoryInbox) {

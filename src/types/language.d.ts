@@ -627,6 +627,10 @@ export interface LangPair {
   'ContextCopySelectedItems': undefined;
   'EditAdminGroupDeleteMessages': undefined;
   'Reminders': undefined;
+  'MessageMetaEdited': undefined;
+  'MessageMetaApproximate': undefined;
+  'MessageMetaImported': undefined;
+  'ImportedInfo': undefined;
   'ScheduledMessagesEmptyPlaceholder': undefined;
   'ConversationCloudStorageInfoTitle': undefined;
   'ConversationClousStorageInfoDescription1': undefined;
@@ -1396,6 +1400,12 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'MessageScheduledOn': {
     'date': V;
   };
+  'MessageTooltipEditedDate': {
+    'date': V;
+  };
+  'MessageTooltipForwardedDate': {
+    'date': V;
+  };
   'EmptyGroupInfoLine1': {
     'count': V;
   };
@@ -1759,6 +1769,15 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
     'count': V;
   };
   'Messages': {
+    'count': V;
+  };
+  'MessageTooltipForwards': {
+    'count': V;
+  };
+  'MessageTooltipViews': {
+    'count': V;
+  };
+  'MessageTooltipReplies': {
     'count': V;
   };
   'Hours': {
