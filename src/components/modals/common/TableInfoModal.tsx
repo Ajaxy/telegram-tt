@@ -78,7 +78,6 @@ const TableInfoModal = ({
                   peerId={value.chatId}
                   className={styles.chatItem}
                   forceShowSelf
-                  fluid
                   withEmojiStatus={value.withEmojiStatus}
                   clickArg={value.chatId}
                   onClick={handleOpenChat}

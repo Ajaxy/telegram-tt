@@ -226,7 +226,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           <PeerChip
             icon="calendar"
             title={selectedSearchDate}
-            fluid
             canClose
             isMinimized={Boolean(globalSearchChatId)}
             className="left-search-picker-item"
@@ -240,7 +239,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             className="left-search-picker-item"
             peerId={globalSearchChatId}
             onClick={setGlobalSearchChatId}
-            fluid
             canClose
             isMinimized
             clickArg={CLEAR_CHAT_SEARCH_PARAM}

@@ -124,7 +124,6 @@ const CollectibleInfoModal: FC<OwnProps & StateProps> = ({
         {title && renderText(title, ['simple_markdown'])}
       </h3>
       <PeerChip
-        fluid
         className={styles.chip}
         peerId={modal?.peerId}
         forceShowSelf

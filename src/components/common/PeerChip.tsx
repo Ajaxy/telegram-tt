@@ -33,7 +33,6 @@ type OwnProps<T = undefined> = {
   canClose?: boolean;
   isCloseNonDestructive?: boolean;
   className?: string;
-  fluid?: boolean;
   withPeerColors?: boolean;
   withEmojiStatus?: boolean;
   clickArg?: T;
@@ -58,7 +57,6 @@ const PeerChip = <T,>({
   mockPeer,
   customPeer,
   className,
-  fluid,
   isSavedMessages,
   withPeerColors,
   withEmojiStatus,
@@ -106,7 +104,6 @@ const PeerChip = <T,>({
     isMinimized && styles.minimized,
     canClose && styles.closeable,
     isCloseNonDestructive && styles.nonDestructive,
-    fluid && styles.fluid,
     !onClick && styles.notClickable,
     withPeerColors && getPeerColorClass(customPeer || peer),
     className,

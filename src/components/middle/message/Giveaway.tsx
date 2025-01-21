@@ -163,7 +163,6 @@ const Giveaway = ({
               <PeerChip
                 peerId={peerId}
                 forceShowSelf
-                fluid
                 withPeerColors={!isOwn}
                 className={styles.peer}
                 clickArg={peerId}
@@ -206,7 +205,6 @@ const Giveaway = ({
               <PeerChip
                 peerId={peerId}
                 forceShowSelf
-                fluid
                 withPeerColors={!isOwn}
                 className={styles.peer}
                 clickArg={peerId}

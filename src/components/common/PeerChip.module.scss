@@ -5,15 +5,13 @@
   height: 2rem;
   min-width: 2rem;
   margin-inline: 0.25rem;
-  padding-right: 1rem;
+  padding-right: 0.75rem;
   border-radius: 1rem;
   cursor: var(--custom-cursor, pointer);
   position: relative;
   overflow: hidden;
   flex-shrink: 1;
   transition: background-color 0.15s ease;
-
-  max-width: calc(50% - 0.5rem);
 
   &.minimized {
     padding-right: 0;
@@ -39,10 +37,6 @@
     &:hover {
       background: var(--color-chat-hover);
     }
-  }
-
-  &.fluid {
-    max-width: unset;
   }
 
   &.notClickable {

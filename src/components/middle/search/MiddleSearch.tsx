@@ -521,7 +521,6 @@ const MiddleSearch: FC<StateProps> = ({
         return (
           <PeerChip
             className={buildClassName(styles.searchType, isSelected && styles.selectedType)}
-            fluid
             peerId={chat?.id}
             title={oldLang('SearchThisChat')}
             clickArg="chat"
@@ -532,7 +531,6 @@ const MiddleSearch: FC<StateProps> = ({
         return (
           <PeerChip
             className={buildClassName(styles.searchType, isSelected && styles.selectedType)}
-            fluid
             peerId={currentUserId}
             forceShowSelf
             title={oldLang('SearchMyMessages')}
@@ -544,7 +542,6 @@ const MiddleSearch: FC<StateProps> = ({
         return (
           <PeerChip
             className={buildClassName(styles.searchType, isSelected && styles.selectedType)}
-            fluid
             customPeer={CHANNELS_PEER}
             title={oldLang('SearchPublicPosts')}
             clickArg="channels"
