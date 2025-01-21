@@ -211,7 +211,8 @@ export interface ApiStarGiftUnique {
   id: string;
   title: string;
   number: number;
-  ownerId: string;
+  ownerId?: string;
+  ownerName?: string;
   issuedCount: number;
   totalCount: number;
   attributes: ApiStarGiftAttribute[];

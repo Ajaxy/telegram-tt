@@ -616,14 +616,15 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
 export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   if (starGift instanceof GramJs.StarGiftUnique) {
     const {
-      id, num, ownerId, title, attributes, availabilityIssued, availabilityTotal,
+      id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal,
     } = starGift;
 
     return {
       type: 'starGiftUnique',
       id: id.toString(),
       number: num,
-      ownerId: buildApiPeerId(ownerId, 'user'),
+      ownerId: ownerId && buildApiPeerId(ownerId, 'user'),
+      ownerName,
       attributes: attributes.map(buildApiStarGiftAttribute).filter(Boolean),
       title,
       totalCount: availabilityTotal,

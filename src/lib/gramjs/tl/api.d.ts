@@ -234,7 +234,7 @@ namespace Api {
   export type TypeBaseTheme = BaseThemeClassic | BaseThemeDay | BaseThemeNight | BaseThemeTinted | BaseThemeArctic;
   export type TypeInputThemeSettings = InputThemeSettings;
   export type TypeThemeSettings = ThemeSettings;
-  export type TypeWebPageAttribute = WebPageAttributeTheme | WebPageAttributeStory | WebPageAttributeStickerSet;
+  export type TypeWebPageAttribute = WebPageAttributeTheme | WebPageAttributeStory | WebPageAttributeStickerSet | WebPageAttributeUniqueStarGift;
   export type TypeBankCardOpenUrl = BankCardOpenUrl;
   export type TypeDialogFilter = DialogFilter | DialogFilterDefault | DialogFilterChatlist;
   export type TypeDialogFilterSuggested = DialogFilterSuggested;
@@ -315,7 +315,7 @@ namespace Api {
   export type TypeExportedStoryLink = ExportedStoryLink;
   export type TypeStoriesStealthMode = StoriesStealthMode;
   export type TypeMediaAreaCoordinates = MediaAreaCoordinates;
-  export type TypeMediaArea = MediaAreaVenue | InputMediaAreaVenue | MediaAreaGeoPoint | MediaAreaSuggestedReaction | MediaAreaChannelPost | InputMediaAreaChannelPost | MediaAreaUrl | MediaAreaWeather;
+  export type TypeMediaArea = MediaAreaVenue | InputMediaAreaVenue | MediaAreaGeoPoint | MediaAreaSuggestedReaction | MediaAreaChannelPost | InputMediaAreaChannelPost | MediaAreaUrl | MediaAreaWeather | MediaAreaStarGift;
   export type TypePeerStories = PeerStories;
   export type TypePremiumGiftCodeOption = PremiumGiftCodeOption;
   export type TypePrepaidGiveaway = PrepaidGiveaway | PrepaidStarsGiveaway;
@@ -501,6 +501,7 @@ namespace Api {
     export type TypeBotPreparedInlineMessage = messages.BotPreparedInlineMessage;
     export type TypePreparedInlineMessage = messages.PreparedInlineMessage;
     export type TypeFoundStickers = messages.FoundStickersNotModified | messages.FoundStickers;
+    export type TypeWebPagePreview = messages.WebPagePreview;
   }
 
   export namespace updates {
@@ -597,6 +598,7 @@ namespace Api {
     export type TypeConnectedStarRefBots = payments.ConnectedStarRefBots;
     export type TypeSuggestedStarRefBots = payments.SuggestedStarRefBots;
     export type TypeStarGiftUpgradePreview = payments.StarGiftUpgradePreview;
+    export type TypeUniqueStarGift = payments.UniqueStarGift;
   }
 
   export namespace phone {
@@ -626,6 +628,7 @@ namespace Api {
 
   export namespace users {
     export type TypeUserFull = users.UserFull;
+    export type TypeUsers = users.Users | users.UsersSlice;
   }
 
   export namespace chatlists {
@@ -8261,6 +8264,11 @@ namespace Api {
     textColor?: true;
     stickers: Api.TypeDocument[];
   };
+  export class WebPageAttributeUniqueStarGift extends VirtualClass<{
+    gift: Api.TypeStarGift;
+  }> {
+    gift: Api.TypeStarGift;
+  };
   export class BankCardOpenUrl extends VirtualClass<{
     url: string;
     name: string;
@@ -9760,6 +9768,13 @@ namespace Api {
     temperatureC: double;
     color: int;
   };
+  export class MediaAreaStarGift extends VirtualClass<{
+    coordinates: Api.TypeMediaAreaCoordinates;
+    slug: string;
+  }> {
+    coordinates: Api.TypeMediaAreaCoordinates;
+    slug: string;
+  };
   export class PeerStories extends VirtualClass<{
     // flags: undefined;
     peer: Api.TypePeer;
@@ -10666,18 +10681,24 @@ namespace Api {
     upgradeStars?: long;
   };
   export class StarGiftUnique extends VirtualClass<{
+    // flags: undefined;
     id: long;
     title: string;
+    slug: string;
     num: int;
-    ownerId: long;
+    ownerId?: long;
+    ownerName?: string;
     attributes: Api.TypeStarGiftAttribute[];
     availabilityIssued: int;
     availabilityTotal: int;
   }> {
+    // flags: undefined;
     id: long;
     title: string;
+    slug: string;
     num: int;
-    ownerId: long;
+    ownerId?: long;
+    ownerName?: string;
     attributes: Api.TypeStarGiftAttribute[];
     availabilityIssued: int;
     availabilityTotal: int;
@@ -12208,6 +12229,13 @@ namespace Api {
       hash: long;
       stickers: Api.TypeDocument[];
     };
+    export class WebPagePreview extends VirtualClass<{
+      media: Api.TypeMessageMedia;
+      users: Api.TypeUser[];
+    }> {
+      media: Api.TypeMessageMedia;
+      users: Api.TypeUser[];
+    };
   }
 
   export namespace updates {
@@ -13238,6 +13266,13 @@ namespace Api {
     }> {
       sampleAttributes: Api.TypeStarGiftAttribute[];
     };
+    export class UniqueStarGift extends VirtualClass<{
+      gift: Api.TypeStarGift;
+      users: Api.TypeUser[];
+    }> {
+      gift: Api.TypeStarGift;
+      users: Api.TypeUser[];
+    };
   }
 
   export namespace phone {
@@ -13459,6 +13494,18 @@ namespace Api {
     }> {
       fullUser: Api.TypeUserFull;
       chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    };
+    export class Users extends VirtualClass<{
+      users: Api.TypeUser[];
+    }> {
+      users: Api.TypeUser[];
+    };
+    export class UsersSlice extends VirtualClass<{
+      count: int;
+      users: Api.TypeUser[];
+    }> {
+      count: int;
       users: Api.TypeUser[];
     };
   }
@@ -15448,7 +15495,7 @@ namespace Api {
       // flags: undefined;
       message: string;
       entities?: Api.TypeMessageEntity[];
-    }>, Api.TypeMessageMedia> {
+    }>, messages.TypeWebPagePreview> {
       // flags: undefined;
       message: string;
       entities?: Api.TypeMessageEntity[];
@@ -18268,6 +18315,11 @@ namespace Api {
       peer: Api.TypeInputPeer;
       customDescription?: string;
     };
+    export class GetBotRecommendations extends Request<Partial<{
+      bot: Api.TypeInputUser;
+    }>, users.TypeUsers> {
+      bot: Api.TypeInputUser;
+    };
   }
 
   export namespace payments {
@@ -18610,6 +18662,11 @@ namespace Api {
       msgId: int[];
     }>, payments.TypeUserStarGifts> {
       msgId: int[];
+    };
+    export class GetUniqueStarGift extends Request<Partial<{
+      slug: string;
+    }>, payments.TypeUniqueStarGift> {
+      slug: string;
     };
   }
 
@@ -19569,8 +19626,8 @@ namespace Api {
     | upload.SaveFilePart | upload.GetFile | upload.SaveBigFilePart | upload.GetWebFile | upload.GetCdnFile | upload.ReuploadCdnFile | upload.GetCdnFileHashes | upload.GetFileHashes
     | help.GetConfig | help.GetNearestDc | help.GetAppUpdate | help.GetInviteText | help.GetSupport | help.SetBotUpdatesStatus | help.GetCdnConfig | help.GetRecentMeUrls | help.GetTermsOfServiceUpdate | help.AcceptTermsOfService | help.GetDeepLinkInfo | help.GetAppConfig | help.SaveAppLog | help.GetPassportConfig | help.GetSupportName | help.GetUserInfo | help.EditUserInfo | help.GetPromoData | help.HidePromoData | help.DismissSuggestion | help.GetCountriesList | help.GetPremiumPromo | help.GetPeerColors | help.GetPeerProfileColors | help.GetTimezonesList
     | channels.ReadHistory | channels.DeleteMessages | channels.ReportSpam | channels.GetMessages | channels.GetParticipants | channels.GetParticipant | channels.GetChannels | channels.GetFullChannel | channels.CreateChannel | channels.EditAdmin | channels.EditTitle | channels.EditPhoto | channels.CheckUsername | channels.UpdateUsername | channels.JoinChannel | channels.LeaveChannel | channels.InviteToChannel | channels.DeleteChannel | channels.ExportMessageLink | channels.ToggleSignatures | channels.GetAdminedPublicChannels | channels.EditBanned | channels.GetAdminLog | channels.SetStickers | channels.ReadMessageContents | channels.DeleteHistory | channels.TogglePreHistoryHidden | channels.GetLeftChannels | channels.GetGroupsForDiscussion | channels.SetDiscussionGroup | channels.EditCreator | channels.EditLocation | channels.ToggleSlowMode | channels.GetInactiveChannels | channels.ConvertToGigagroup | channels.GetSendAs | channels.DeleteParticipantHistory | channels.ToggleJoinToSend | channels.ToggleJoinRequest | channels.ReorderUsernames | channels.ToggleUsername | channels.DeactivateAllUsernames | channels.ToggleForum | channels.CreateForumTopic | channels.GetForumTopics | channels.GetForumTopicsByID | channels.EditForumTopic | channels.UpdatePinnedForumTopic | channels.DeleteTopicHistory | channels.ReorderPinnedForumTopics | channels.ToggleAntiSpam | channels.ReportAntiSpamFalsePositive | channels.ToggleParticipantsHidden | channels.UpdateColor | channels.ToggleViewForumAsMessages | channels.GetChannelRecommendations | channels.UpdateEmojiStatus | channels.SetBoostsToUnblockRestrictions | channels.SetEmojiStickers | channels.RestrictSponsoredMessages | channels.SearchPosts
-    | bots.SendCustomRequest | bots.AnswerWebhookJSONQuery | bots.SetBotCommands | bots.ResetBotCommands | bots.GetBotCommands | bots.SetBotMenuButton | bots.GetBotMenuButton | bots.SetBotBroadcastDefaultAdminRights | bots.SetBotGroupDefaultAdminRights | bots.SetBotInfo | bots.GetBotInfo | bots.ReorderUsernames | bots.ToggleUsername | bots.CanSendMessage | bots.AllowSendMessage | bots.InvokeWebViewCustomMethod | bots.GetPopularAppBots | bots.AddPreviewMedia | bots.EditPreviewMedia | bots.DeletePreviewMedia | bots.ReorderPreviewMedias | bots.GetPreviewInfo | bots.GetPreviewMedias | bots.UpdateUserEmojiStatus | bots.ToggleUserEmojiStatusPermission | bots.CheckDownloadFileParams | bots.GetAdminedBots | bots.UpdateStarRefProgram | bots.SetCustomVerification
-    | payments.GetPaymentForm | payments.GetPaymentReceipt | payments.ValidateRequestedInfo | payments.SendPaymentForm | payments.GetSavedInfo | payments.ClearSavedInfo | payments.GetBankCardData | payments.ExportInvoice | payments.AssignAppStoreTransaction | payments.AssignPlayMarketTransaction | payments.CanPurchasePremium | payments.GetPremiumGiftCodeOptions | payments.CheckGiftCode | payments.ApplyGiftCode | payments.GetGiveawayInfo | payments.LaunchPrepaidGiveaway | payments.GetStarsTopupOptions | payments.GetStarsStatus | payments.GetStarsTransactions | payments.SendStarsForm | payments.RefundStarsCharge | payments.GetStarsRevenueStats | payments.GetStarsRevenueWithdrawalUrl | payments.GetStarsRevenueAdsAccountUrl | payments.GetStarsTransactionsByID | payments.GetStarsGiftOptions | payments.GetStarsSubscriptions | payments.ChangeStarsSubscription | payments.FulfillStarsSubscription | payments.GetStarsGiveawayOptions | payments.GetStarGifts | payments.GetUserStarGifts | payments.SaveStarGift | payments.ConvertStarGift | payments.BotCancelStarsSubscription | payments.GetConnectedStarRefBots | payments.GetConnectedStarRefBot | payments.GetSuggestedStarRefBots | payments.ConnectStarRefBot | payments.EditConnectedStarRefBot | payments.GetStarGiftUpgradePreview | payments.UpgradeStarGift | payments.TransferStarGift | payments.GetUserStarGift
+    | bots.SendCustomRequest | bots.AnswerWebhookJSONQuery | bots.SetBotCommands | bots.ResetBotCommands | bots.GetBotCommands | bots.SetBotMenuButton | bots.GetBotMenuButton | bots.SetBotBroadcastDefaultAdminRights | bots.SetBotGroupDefaultAdminRights | bots.SetBotInfo | bots.GetBotInfo | bots.ReorderUsernames | bots.ToggleUsername | bots.CanSendMessage | bots.AllowSendMessage | bots.InvokeWebViewCustomMethod | bots.GetPopularAppBots | bots.AddPreviewMedia | bots.EditPreviewMedia | bots.DeletePreviewMedia | bots.ReorderPreviewMedias | bots.GetPreviewInfo | bots.GetPreviewMedias | bots.UpdateUserEmojiStatus | bots.ToggleUserEmojiStatusPermission | bots.CheckDownloadFileParams | bots.GetAdminedBots | bots.UpdateStarRefProgram | bots.SetCustomVerification | bots.GetBotRecommendations
+    | payments.GetPaymentForm | payments.GetPaymentReceipt | payments.ValidateRequestedInfo | payments.SendPaymentForm | payments.GetSavedInfo | payments.ClearSavedInfo | payments.GetBankCardData | payments.ExportInvoice | payments.AssignAppStoreTransaction | payments.AssignPlayMarketTransaction | payments.CanPurchasePremium | payments.GetPremiumGiftCodeOptions | payments.CheckGiftCode | payments.ApplyGiftCode | payments.GetGiveawayInfo | payments.LaunchPrepaidGiveaway | payments.GetStarsTopupOptions | payments.GetStarsStatus | payments.GetStarsTransactions | payments.SendStarsForm | payments.RefundStarsCharge | payments.GetStarsRevenueStats | payments.GetStarsRevenueWithdrawalUrl | payments.GetStarsRevenueAdsAccountUrl | payments.GetStarsTransactionsByID | payments.GetStarsGiftOptions | payments.GetStarsSubscriptions | payments.ChangeStarsSubscription | payments.FulfillStarsSubscription | payments.GetStarsGiveawayOptions | payments.GetStarGifts | payments.GetUserStarGifts | payments.SaveStarGift | payments.ConvertStarGift | payments.BotCancelStarsSubscription | payments.GetConnectedStarRefBots | payments.GetConnectedStarRefBot | payments.GetSuggestedStarRefBots | payments.ConnectStarRefBot | payments.EditConnectedStarRefBot | payments.GetStarGiftUpgradePreview | payments.UpgradeStarGift | payments.TransferStarGift | payments.GetUserStarGift | payments.GetUniqueStarGift
     | stickers.CreateStickerSet | stickers.RemoveStickerFromSet | stickers.ChangeStickerPosition | stickers.AddStickerToSet | stickers.SetStickerSetThumb | stickers.CheckShortName | stickers.SuggestShortName | stickers.ChangeSticker | stickers.RenameStickerSet | stickers.DeleteStickerSet | stickers.ReplaceSticker
     | phone.GetCallConfig | phone.RequestCall | phone.AcceptCall | phone.ConfirmCall | phone.ReceivedCall | phone.DiscardCall | phone.SetCallRating | phone.SaveCallDebug | phone.SendSignalingData | phone.CreateGroupCall | phone.JoinGroupCall | phone.LeaveGroupCall | phone.InviteToGroupCall | phone.DiscardGroupCall | phone.ToggleGroupCallSettings | phone.GetGroupCall | phone.GetGroupParticipants | phone.CheckGroupCall | phone.ToggleGroupCallRecord | phone.EditGroupCallParticipant | phone.EditGroupCallTitle | phone.GetGroupCallJoinAs | phone.ExportGroupCallInvite | phone.ToggleGroupCallStartSubscription | phone.StartScheduledGroupCall | phone.SaveDefaultGroupCallJoinAs | phone.JoinGroupCallPresentation | phone.LeaveGroupCallPresentation | phone.GetGroupCallStreamChannels | phone.GetGroupCallStreamRtmpUrl | phone.SaveCallLog | phone.CreateConferenceCall
     | langpack.GetLangPack | langpack.GetStrings | langpack.GetDifference | langpack.GetLanguages | langpack.GetLanguage

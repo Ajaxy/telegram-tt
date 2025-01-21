@@ -1403,7 +1403,7 @@ export async function fetchWebPagePreview({
     entities: textWithEntities.entities,
   }));
 
-  return preview && buildWebPage(preview);
+  return preview && buildWebPage(preview.media);
 }
 
 export async function sendPollVote({
