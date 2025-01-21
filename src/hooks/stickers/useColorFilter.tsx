@@ -1,9 +1,8 @@
 import React, { useEffect } from '../../lib/teact/teact';
 
 import { SVG_NAMESPACE } from '../../config';
+import { addSvgDefinition, removeSvgDefinition } from '../../util/svgController';
 import { hexToRgb } from '../../util/switchTheme';
-
-import { addSvgDefinition, removeSvgDefinition } from '../../components/main/SvgController';
 
 const SVG_MAP = new Map<string, SvgColorFilter>();
 

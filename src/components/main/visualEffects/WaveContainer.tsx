@@ -9,11 +9,10 @@ import { SVG_NAMESPACE } from '../../../config';
 import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
+import { addSvgDefinition, removeSvgDefinition } from '../../../util/svgController';
 import windowSize from '../../../util/windowSize';
 
 import useLastCallback from '../../../hooks/useLastCallback';
-
-import { addSvgDefinition, removeSvgDefinition } from '../SvgController';
 
 import styles from './WaveContainer.module.scss';
 
