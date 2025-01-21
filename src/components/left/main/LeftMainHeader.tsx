@@ -120,7 +120,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
 
+  const areContactsVisible = content === LeftColumnContent.Contacts;
   const hasMenu = content === LeftColumnContent.ChatList;
+
   const selectedSearchDate = useMemo(() => {
     return searchDate
       ? formatDateToString(new Date(searchDate * 1000))
@@ -215,6 +217,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const headerRef = useRef<HTMLDivElement>(null);
   useElectronDrag(headerRef);
 
+  const withStoryToggler = !isSearchFocused && !selectedSearchDate && !globalSearchChatId && !areContactsVisible;
+
   const searchContent = useMemo(() => {
     return (
       <>
@@ -293,7 +297,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           onSpinnerClick={connectionStatusPosition === 'minimized' ? toggleConnectionStatus : undefined}
         >
           {searchContent}
-          <StoryToggler canShow={!isSearchFocused && !selectedSearchDate && !globalSearchChatId} />
+          <StoryToggler
+            canShow={withStoryToggler}
+          />
         </SearchInput>
         {isCurrentUserPremium && <StatusButton />}
         {hasPasscode && (
