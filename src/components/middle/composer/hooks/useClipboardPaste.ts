@@ -46,7 +46,7 @@ const useClipboardPaste = (
       }
 
       const input = (e.target as HTMLElement)?.closest(CLOSEST_CONTENT_EDITABLE_SELECTOR);
-      if (input && !VALID_TARGET_IDS.has(input.id)) {
+      if (!input || !VALID_TARGET_IDS.has(input.id)) {
         return;
       }
 
