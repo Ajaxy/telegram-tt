@@ -117,6 +117,34 @@ addActionHandler('changeWebAppModalState', (global, actions, payload): ActionRet
   return replaceWebAppModalState(global, state, tabId);
 });
 
+addActionHandler('updateMiniAppCachedPosition', (global, actions, payload): ActionReturnType => {
+  const { position } = payload;
+
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      miniAppsCachedPosition: position,
+    },
+  };
+
+  return global;
+});
+
+addActionHandler('updateMiniAppCachedSize', (global, actions, payload): ActionReturnType => {
+  const { size } = payload;
+
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      miniAppsCachedSize: size,
+    },
+  };
+
+  return global;
+});
+
 addActionHandler('setWebAppPaymentSlug', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload;
   const activeWebApp = selectActiveWebApp(global, tabId);

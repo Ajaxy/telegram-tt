@@ -629,6 +629,16 @@ export type ConfettiParams = OptionalCombine<{
   height?: number;
 }>;
 
+export interface Size {
+  width: number;
+  height: number;
+}
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
 export type WebPageMediaSize = 'large' | 'small';
 
 export type StarGiftCategory = number | 'all' | 'limited' | 'stock';

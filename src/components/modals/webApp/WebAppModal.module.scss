@@ -210,7 +210,6 @@
   display: flex;
   align-items: center;
   height: 100%;
-  flex-grow: 1;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -231,6 +230,12 @@
   &::-webkit-scrollbar-thumb {
     background-color: rgba(0, 0, 0, 0);
   }
+}
+
+.tool-bar {
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .tab-button-wrapper {
@@ -362,8 +367,12 @@
   height: 1.75rem !important;
 }
 
+.more-apps-button {
+  margin-right: auto;
+}
+
 .fullscreenButton {
-  margin-right: 0.5rem;
+  margin-inline: 0.5rem;
 }
 
 .tab-close-button {

@@ -32,7 +32,7 @@ const SCROLLBAR_STYLE = `* {
 }`;
 
 const RELOAD_TIMEOUT = 500;
-const SAFE_AREA_HEIGHT = 3.675 * REM;
+const FULLSCREEN_BUTTONS_AREA_HEIGHT = 3.675 * REM;
 
 const useWebAppFrame = (
   ref: React.RefObject<HTMLIFrameElement>,
@@ -129,15 +129,13 @@ const useWebAppFrame = (
     if (!ref.current) {
       return;
     }
-    const { height } = ref.current.getBoundingClientRect();
-    const safeAreaHeight = isFullscreen ? SAFE_AREA_HEIGHT : 0;
     sendEvent({
       eventType: 'safe_area_changed',
       eventData: {
         left: 0,
         right: 0,
         top: 0,
-        bottom: height - safeAreaHeight,
+        bottom: 0,
       },
     });
 
@@ -146,7 +144,7 @@ const useWebAppFrame = (
       eventData: {
         left: 0,
         right: 0,
-        top: safeAreaHeight,
+        top: isFullscreen ? FULLSCREEN_BUTTONS_AREA_HEIGHT : 0,
         bottom: 0,
       },
     });
@@ -328,7 +326,6 @@ const useWebAppFrame = (
       && lastFrameSizeRef.current.height === height && !lastFrameSizeRef.current.isResizing) return;
     lastFrameSizeRef.current = { width, height, isResizing };
     sendViewport(isResizing);
-    sendSafeArea();
   }, [sendViewport, sendSafeArea, windowSize]);
 
   useEffect(() => {

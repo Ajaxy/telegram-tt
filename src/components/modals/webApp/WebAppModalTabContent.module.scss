@@ -3,6 +3,11 @@
 .root {
   height: 100%;
   width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  z-index: 0;
 }
 
 .multi-tab {
@@ -84,13 +89,21 @@
 
 .secondary-button,
 .main-button {
+  --color-transition: 0.15s;
+  --transform-transition: 0.25s ease-in-out;
+
   flex-grow: 1;
   margin: 0.5rem;
   transform: translateY(100%);
   opacity: 0;
-  transition-property: background-color, color, transform, margin-inline, flex-grow, opacity, filter;
-  transition-duration: 0.25s;
-  transition-timing-function: ease-in-out;
+  transition:
+  background-color var(--color-transition),
+  color var(--color-transition),
+  opacity var(--color-transition),
+  filter var(--color-transition),
+  transform var(--transform-transition),
+  margin-inline var(--transform-transition),
+  flex-grow var(--transform-transition);
 
   &.visible {
     transform: translateY(0);
@@ -127,10 +140,18 @@
   &.one-row {
     align-items: center;
     height: 4rem;
+
+    @media (max-width: 600px) {
+      height: 3.5rem;
+    }
   }
 
   &.two-rows {
     height: 7.75rem;
+
+    @media (max-width: 600px) {
+      height: 6.9375rem;
+    }
   }
 
   &.left-to-right {

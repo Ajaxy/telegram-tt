@@ -9,7 +9,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
-import type { ThemeKey } from '../../../types';
+import type { Point, Size, ThemeKey } from '../../../types';
 import type { WebApp, WebAppOutboundEvent } from '../../../types/webapp';
 
 import { RESIZE_HANDLE_CLASS_NAME } from '../../../config';
@@ -61,6 +61,8 @@ type StateProps = {
   bot?: ApiUser;
   attachBot?: ApiAttachBot;
   theme?: ThemeKey;
+  cachedSize?: Size;
+  cachedPosition?: Point;
 };
 
 const PROLONG_INTERVAL = 45000; // 45s
@@ -76,6 +78,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   bot,
   attachBot,
   theme,
+  cachedSize,
+  cachedPosition,
 }) => {
   const {
     closeActiveWebApp,
@@ -88,11 +92,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     updateWebApp,
     openMoreAppsTab,
     closeMoreAppsTab,
+    updateMiniAppCachedPosition,
+    updateMiniAppCachedSize,
   } = getActions();
 
-  const [getMaximizedStateSize, setMaximizedStateSize] = useSignal(
-    { width: DEFAULT_MAXIMIZED_STATE_SIZE.width, height: DEFAULT_MAXIMIZED_STATE_SIZE.height },
-  );
+  const [getMaximizedStateSize, setMaximizedStateSize] = useSignal(cachedSize || DEFAULT_MAXIMIZED_STATE_SIZE);
 
   function getSize() {
     if (modal?.modalState === 'fullScreen') return windowSize.get();
@@ -173,6 +177,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     isResizing,
     style: draggableStyle,
     size,
+    position,
   } = useDraggable(
     ref,
     headerRef,
@@ -180,7 +185,20 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     getSize(),
     isFullScreen,
     getMinimumSize(),
+    cachedPosition,
   );
+
+  const x = position?.x;
+  const y = position?.y;
+  useEffect(() => {
+    if (!isDragging && x !== undefined && y !== undefined) {
+      updateMiniAppCachedPosition({ position: { x, y } });
+    }
+  }, [isDragging, x, y]);
+
+  useEffect(() => {
+    if (!isDragging && size && isMaximizedState) { updateMiniAppCachedSize({ size }); }
+  }, [isDragging, isMaximizedState, size]);
 
   const currentSize = size || getSize();
 
@@ -544,7 +562,6 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           )
         ))}
         {isMoreAppsTabActive && renderMoreAppsTab()}
-        {!isMoreAppsTabActive && renderMoreAppsButton()}
       </div>
     );
   }
@@ -585,32 +602,38 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         {renderTabs()}
         {renderMoreMenu()}
 
-        <Button
-          className={buildClassName(
-            styles.windowStateButton,
-            styles.fullscreenButton,
-            'no-drag',
-          )}
-          round
-          color="translucent"
-          size="tiny"
-          onClick={handleFullscreenClick}
-        >
-          <Icon className={styles.stateIcon} name="expand-modal" />
-        </Button>
+        <div className={styles.toolBar}>
+          {!isMoreAppsTabActive && renderMoreAppsButton()}
 
-        <Button
-          className={buildClassName(
-            styles.windowStateButton,
-            'no-drag',
+          {!isMoreAppsTabActive && (
+            <Button
+              className={buildClassName(
+                styles.windowStateButton,
+                styles.fullscreenButton,
+                'no-drag',
+              )}
+              round
+              color="translucent"
+              size="tiny"
+              onClick={handleFullscreenClick}
+            >
+              <Icon className={styles.stateIcon} name="expand-modal" />
+            </Button>
           )}
-          round
-          color="translucent"
-          size="tiny"
-          onClick={handleCollapseClick}
-        >
-          <Icon className={styles.stateIcon} name="collapse-modal" />
-        </Button>
+
+          <Button
+            className={buildClassName(
+              styles.windowStateButton,
+              'no-drag',
+            )}
+            round
+            color="translucent"
+            size="tiny"
+            onClick={handleCollapseClick}
+          >
+            <Icon className={styles.stateIcon} name="collapse-modal" />
+          </Button>
+        </div>
       </div>
     );
   }
@@ -705,12 +728,16 @@ export default memo(withGlobal<OwnProps>(
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
+    const cachedPosition = global.settings.miniAppsCachedPosition;
+    const cachedSize = global.settings.miniAppsCachedSize;
 
     return {
       attachBot,
       bot,
       chat,
       theme,
+      cachedPosition,
+      cachedSize,
     };
   },
 )(WebAppModal));

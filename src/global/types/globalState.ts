@@ -55,7 +55,9 @@ import type {
   IThemeSettings,
   NotifyException,
   PerformanceType,
+  Point,
   ServiceNotification,
+  Size,
   StarGiftCategory,
   StarsSubscriptions,
   StarsTransactionHistory,
@@ -404,6 +406,8 @@ export type GlobalState = {
     paidReactionPrivacy?: boolean;
     languages?: ApiLanguage[];
     botVerificationShownPeerIds: string[];
+    miniAppsCachedPosition?: Point;
+    miniAppsCachedSize?: Size;
   };
 
   push?: {

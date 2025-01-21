@@ -632,7 +632,7 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
   const {
-    byKey, themes, performance, botVerificationShownPeerIds,
+    byKey, themes, performance, botVerificationShownPeerIds, miniAppsCachedPosition, miniAppsCachedSize,
   } = global.settings;
 
   return {
@@ -642,6 +642,8 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     privacy: {},
     notifyExceptions: {},
     botVerificationShownPeerIds,
+    miniAppsCachedPosition,
+    miniAppsCachedSize,
   };
 }
 

@@ -32,7 +32,7 @@
   justify-content: center;
   align-items: center;
   gap: 0.125rem;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
   padding: 0.125rem;
   padding-bottom: 1.25em;
 }

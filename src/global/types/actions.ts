@@ -73,10 +73,12 @@ import type {
   NewChatMembersProgress,
   PaymentStep,
   PerformanceType,
+  Point,
   ProfileTabType,
   ScrollTargetPosition,
   SettingsScreens,
   SharedMediaType,
+  Size,
   StarGiftInfo,
   StarsTransactionType,
   StoryViewerOrigin,
@@ -2040,7 +2042,12 @@ export interface ActionPayloads {
   changeWebAppModalState: {
     state: WebAppModalStateType;
   } & WithTabId;
-
+  updateMiniAppCachedPosition: {
+    position: Point;
+  };
+  updateMiniAppCachedSize: {
+    size: Size;
+  };
   // Misc
   refreshLangPackFromCache: {
     langCode: string;
