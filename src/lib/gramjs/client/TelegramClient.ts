@@ -103,8 +103,8 @@ const PING_WAKE_UP_WARNING_TIMEOUT = 1000; // 1 sec
 
 const PING_DISCONNECT_DELAY = 60000; // 1 min
 
-// All types
-const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'] as const;
+// All types, sorted by size
+const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f', 'i', 'j'] as const;
 export type SizeType = typeof sizeTypes[number];
 
 class TelegramClient {
@@ -866,52 +866,26 @@ class TelegramClient {
         });
     }
 
-    getThumb(
-        thumbs: (Api.TypePhotoSize | Api.TypeVideoSize)[],
-        thumb?: string | Api.TypePhotoSize | Api.VideoSize
-    ) {
-        function sortThumb(thumb: Api.TypePhotoSize | Api.TypeVideoSize) {
-            if (thumb instanceof Api.PhotoStrippedSize) {
-                return thumb.bytes.length;
-            }
-            if (thumb instanceof Api.PhotoCachedSize) {
-                return thumb.bytes.length;
-            }
-            if (thumb instanceof Api.PhotoSize) {
-                return thumb.size;
-            }
-            if (thumb instanceof Api.PhotoSizeProgressive) {
-                return Math.max(...thumb.sizes);
-            }
-            if (thumb instanceof Api.VideoSize) {
-                return thumb.size;
-            }
-            return 0;
+    pickFileSize(sizes: (Api.TypePhotoSize | Api.TypeVideoSize)[], sizeType?: SizeType) {
+        if (!sizes?.length) return undefined;
+        if (!sizeType) {
+            const maxSize = sizes.reduce((max, current) => {
+                if (!('w' in current)) return max;
+                if (!max || !('w' in max)) return current;
+                return max.w > current.w ? max : current;
+            }, undefined as Api.TypePhotoSize | Api.TypeVideoSize | undefined);
+            return maxSize;
         }
 
-        thumbs = thumbs.sort((a, b) => sortThumb(a) - sortThumb(b));
-        const correctThumbs = [];
-        for (const t of thumbs) {
-            if (!(t instanceof Api.PhotoPathSize)) {
-                correctThumbs.push(t);
+        const indexOfSize = sizeTypes.indexOf(sizeType);
+        let size;
+        for (let i = indexOfSize; i < sizeTypes.length; i++) {
+            size = sizes.find((s) => 'type' in s && s.type === sizeTypes[i]);
+            if (size) {
+                return size;
             }
         }
-        if (thumb == undefined) {
-            return correctThumbs.pop();
-        } else if (typeof thumb == "string") {
-            for (const t of correctThumbs) {
-                if ("type" in t && t.type == thumb) {
-                    return t;
-                }
-            }
-        } else if (
-            thumb instanceof Api.PhotoSize ||
-            thumb instanceof Api.PhotoCachedSize ||
-            thumb instanceof Api.PhotoStrippedSize ||
-            thumb instanceof Api.VideoSize
-        ) {
-            return thumb;
-        }
+        return undefined;
     }
 
     _downloadCachedPhotoSize(size: Api.PhotoCachedSize | Api.PhotoStrippedSize) {
@@ -937,7 +911,7 @@ class TelegramClient {
 
         const isVideoSize = args.sizeType === 'u' || args.sizeType === 'v';
         const videoSizes = isVideoSize ? photo.videoSizes! : [];
-        const size = this.getThumb([...videoSizes, ...photo.sizes], args.sizeType);
+        const size = this.pickFileSize([...videoSizes, ...photo.sizes], args.sizeType);
 
         if (!size
             || size instanceof Api.PhotoSizeEmpty
@@ -985,7 +959,7 @@ class TelegramClient {
 
         let size;
         if (args.sizeType) {
-            size = this.getThumb([...(doc.thumbs || []), ...(doc.videoThumbs || [])], args.sizeType);
+            size = this.pickFileSize([...(doc.thumbs || []), ...(doc.videoThumbs || [])], args.sizeType);
             if (!size && doc.mimeType.startsWith('video/')) {
                 return undefined;
             }
