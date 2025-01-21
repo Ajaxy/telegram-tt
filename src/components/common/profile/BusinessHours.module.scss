@@ -10,15 +10,17 @@
 
 .icon {
   align-self: flex-start;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
 .left, .bottom {
   display: flex;
   flex-direction: column;
+  line-height: 1.4;
 }
 
 .status {
+  font-size: 0.875rem;
   color: var(--color-error);
 }
 
@@ -36,6 +38,7 @@
   display: inline-block;
   padding: 0 0.5rem;
   border-radius: 0.75rem;
+  font-size: 0.875rem;
   color: var(--color-primary);
   background-color: var(--color-primary-tint);
   align-self: flex-end;
@@ -50,8 +53,10 @@
 }
 
 .transition {
+  margin-bottom: 0.5rem;
+  height: 0;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: height 0.25s ease-in-out;
+  transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .timetable {
@@ -59,7 +64,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.5rem;
-  margin-top: 0.25rem;
+  margin-top: 0.6875rem;
 }
 
 .schedule {
@@ -73,6 +78,7 @@
 .weekday {
   word-break: break-all;
   line-height: 1.25;
+  font-size: 0.875rem;
 }
 
 .current-day {
