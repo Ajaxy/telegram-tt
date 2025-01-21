@@ -7,6 +7,7 @@ import { computeCheck as computePasswordSrpCheck } from '../Password';
 import { getDisplayName } from '../Utils';
 import { Update } from './TelegramClient';
 import { RPCError } from '../errors';
+import { getServerTime } from '../../../util/serverTime';
 
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);
@@ -33,7 +34,6 @@ interface ApiCredentials {
 }
 
 const DEFAULT_INITIAL_METHOD = 'phoneNumber';
-const QR_CODE_TIMEOUT = 30000;
 
 export async function authFlow(
     client: TelegramClient,
@@ -70,7 +70,7 @@ export async function checkAuthorization(client: TelegramClient, shouldThrow = f
         await client.invoke(new Api.updates.GetState());
         return true;
     } catch (err: unknown) {
-        if ((err instanceof RPCError && err.errorMessage === 'Disconnect') || shouldThrow) throw err;
+        if ((err instanceof Error && err.message === 'Disconnect') || shouldThrow) throw err;
         return false;
     }
 }
@@ -249,7 +249,7 @@ async function signInUserWithQrCode(
 
             await Promise.race([
                 authParams.qrCode({ token, expires }),
-                sleep(QR_CODE_TIMEOUT),
+                sleep((expires - getServerTime()) * 1000),
             ]);
         }
     })();
