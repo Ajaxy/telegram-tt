@@ -129,7 +129,7 @@ type OwnProps = {
   onSendPaidReaction?: NoneToVoidFunction;
   onShowPaidReactionModal?: NoneToVoidFunction;
   onReactionPickerOpen?: (position: IAnchorPosition) => void;
-  contactUserFullName?: string;
+  userFullName?: string;
   canGift?: boolean;
 };
 
@@ -220,7 +220,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onTranslate,
   onShowOriginal,
   onSelectLanguage,
-  contactUserFullName,
+  userFullName,
   canGift,
 }) => {
   const {
@@ -238,10 +238,10 @@ const MessageContextMenu: FC<OwnProps> = ({
   const seenByDates = message.seenByDates;
   const isPremiumGift = message.content.action?.type === 'giftPremium';
   const isGiftCode = message.content.action?.type === 'giftCode';
-  const isStarsGift = message.content.action?.type === 'giftStars';
   const isStarGift = message.content.action?.type === 'starGift';
+  const isStarGiftUnique = message.content.action?.type === 'starGiftUnique';
   const shouldShowGiftButton = isUserId(message.chatId)
-    && canGift && (isPremiumGift || isGiftCode || isStarsGift || isStarGift);
+    && canGift && (isPremiumGift || isGiftCode || isStarGift || isStarGiftUnique);
 
   const [areItemsHidden, hideItems] = useFlag();
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
@@ -403,7 +403,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           && (
             <MenuItem icon="gift" onClick={handleGiftClick}>
               {message?.isOutgoing ? lang('SendAnotherGift')
-                : lang('Conversation.ContextMenuSendGiftTo', contactUserFullName)}
+                : lang('Conversation.ContextMenuSendGiftTo', userFullName)}
             </MenuItem>
           )}
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}
