@@ -1491,9 +1491,12 @@
 "ProfileTabVoice" = "Voice";
 "ProfileTabSharedGroups" = "Groups";
 "ProfileTabSimilarChannels" = "Similar Channels";
+"ProfileTabSimilarBots" = "Similar Bots";
 "ActionUnsupportedTitle" = "Action not supported yet";
 "ActionUnsupportedDescription" = "Please, use one of our apps to complete this action.";
 "LocationPermissionText" = "**{name}** requests access to set your **location**. You will be able to revoke this access in the profile page of **{name}**.";
+"UnlockMoreSimilarBots" = "Show More Apps";
+"MoreSimilarBotsText" = "Subscribe to **Telegram Premium** to unlock up to {count} similar apps."
 "GiftWasNotFound" = "Gift was not found";
 "ViewButtonRequestJoin" = "REQUEST TO JOIN";
 "ViewButtonMessage" = "VIEW MESSAGE";
@@ -1509,4 +1512,3 @@
 "ViewButtonBoost" = "BOOST";
 "ViewButtonStickerset" = "VIEW STICKERS";
 "ViewButtonGiftUnique" = "VIEW COLLECTIBLE";
-

@@ -57,6 +57,7 @@ import type {
   PerformanceType,
   Point,
   ServiceNotification,
+  SimilarBotsInfo,
   Size,
   StarGiftCategory,
   StarsSubscriptions,
@@ -223,6 +224,8 @@ export type GlobalState = {
       count: number;
     }
     >;
+
+    similarBotsById: Record<string, SimilarBotsInfo>;
   };
 
   messages: {

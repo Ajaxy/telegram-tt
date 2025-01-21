@@ -323,6 +323,13 @@ export function selectSimilarChannelIds<T extends GlobalState>(
   return global.chats.similarChannelsById[chatId];
 }
 
+export function selectSimilarBotsIds<T extends GlobalState>(
+  global: T,
+  chatId: string,
+) {
+  return global.chats.similarBotsById[chatId];
+}
+
 export function selectChatLastMessageId<T extends GlobalState>(
   global: T, chatId: string, listType: 'all' | 'saved' = 'all',
 ) {

@@ -1682,6 +1682,7 @@ channels.getChannelRecommendations#25a71742 flags:# channel:flags.0?InputChannel
 channels.searchPosts#d19f987b hashtag:string offset_rate:int offset_peer:InputPeer offset_id:int limit:int = messages.Messages;
 bots.setBotInfo#10cf3123 flags:# bot:flags.2?InputUser lang_code:string name:flags.3?string about:flags.0?string description:flags.1?string = Bool;
 bots.canSendMessage#1359f4e6 bot:InputUser = Bool;
+bots.getBotRecommendations#a1b70815 bot:InputUser = users.Users;
 bots.allowSendMessage#f132e3ef bot:InputUser = Updates;
 bots.invokeWebViewCustomMethod#87fc5e7 bot:InputUser custom_method:string params:DataJSON = DataJSON;
 bots.getPopularAppBots#c2510192 offset:string limit:int = bots.PopularAppBots;

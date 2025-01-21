@@ -1220,8 +1220,10 @@ export interface LangPair {
   'ProfileTabVoice': undefined;
   'ProfileTabSharedGroups': undefined;
   'ProfileTabSimilarChannels': undefined;
+  'ProfileTabSimilarBots': undefined;
   'ActionUnsupportedTitle': undefined;
   'ActionUnsupportedDescription': undefined;
+  'UnlockMoreSimilarBots': undefined;
   'GiftWasNotFound': undefined;
   'ViewButtonRequestJoin': undefined;
   'ViewButtonMessage': undefined;
@@ -1704,6 +1706,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'LocationPermissionText': {
     'name': V;
+  };
+  'MoreSimilarBotsText': {
+    'count': V;
   };
 }
 

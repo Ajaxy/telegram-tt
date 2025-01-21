@@ -39,6 +39,7 @@ import {
   isChatChannel,
   isChatGroup,
   isUserBot,
+  isUserId,
   isUserRightBanned,
 } from '../../global/helpers';
 import {
@@ -50,6 +51,7 @@ import {
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
   selectPeerStories,
+  selectSimilarBotsIds,
   selectSimilarChannelIds,
   selectTabState,
   selectTheme,
@@ -112,6 +114,7 @@ type OwnProps = {
 type StateProps = {
   theme: ISettings['theme'];
   isChannel?: boolean;
+  isBot?: boolean;
   currentUserId?: string;
   messagesById?: Record<number, ApiMessage>;
   foundIds?: number[];
@@ -142,9 +145,10 @@ type StateProps = {
   nextProfileTab?: ProfileTabType;
   shouldWarnAboutSvg?: boolean;
   similarChannels?: string[];
+  similarBots?: string[];
   botPreviewMedia? : ApiBotPreviewMedia[];
   isCurrentUserPremium?: boolean;
-  limitSimilarChannels: number;
+  limitSimilarPeers: number;
   isTopicInfo?: boolean;
   isSavedDialog?: boolean;
   forceScrollProfileTab?: boolean;
@@ -172,6 +176,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   profileState,
   theme,
   isChannel,
+  isBot,
   currentUserId,
   messagesById,
   foundIds,
@@ -203,8 +208,9 @@ const Profile: FC<OwnProps & StateProps> = ({
   nextProfileTab,
   shouldWarnAboutSvg,
   similarChannels,
+  similarBots,
   isCurrentUserPremium,
-  limitSimilarChannels,
+  limitSimilarPeers,
   isTopicInfo,
   isSavedDialog,
   forceScrollProfileTab,
@@ -225,6 +231,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadStoriesArchive,
     openPremiumModal,
     loadChannelRecommendations,
+    loadBotRecommendations,
     loadPreviewMedias,
     loadUserGifts,
   } = getActions();
@@ -283,13 +290,17 @@ const Profile: FC<OwnProps & StateProps> = ({
       arr.push({ type: 'similarChannels', key: 'ProfileTabSimilarChannels' });
     }
 
+    if (isBot && similarBots?.length) {
+      arr.push({ type: 'similarBots', key: 'ProfileTabSimilarBots' });
+    }
+
     return arr.map((tab) => ({
       type: tab.type,
       title: lang(tab.key),
     }));
   }, [
     isSavedMessages, isSavedDialog, hasStoriesTab, hasGiftsTab, hasMembersTab, hasPreviewMediaTab, isTopicInfo,
-    hasCommonChatsTab, isChannel, similarChannels?.length, lang,
+    hasCommonChatsTab, isChannel, isBot, similarChannels?.length, similarBots?.length, lang,
   ]);
 
   const initialTab = useMemo(() => {
@@ -329,6 +340,12 @@ const Profile: FC<OwnProps & StateProps> = ({
       loadChannelRecommendations({ chatId });
     }
   }, [chatId, isChannel, similarChannels, isSynced]);
+
+  useEffect(() => {
+    if (isBot && !similarBots && isSynced) {
+      loadBotRecommendations({ userId: chatId });
+    }
+  }, [chatId, isBot, similarBots, isSynced]);
 
   const giftIds = useMemo(() => {
     return gifts?.map(({ date, gift, fromId }) => `${date}-${fromId}-${gift.id}`);
@@ -371,6 +388,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     pinnedStoryIds,
     archiveStoryIds,
     similarChannels,
+    similarBots,
   });
   const isFirstTab = (isSavedMessages && resultType === 'dialogs')
     || (hasStoriesTab && resultType === 'stories')
@@ -706,7 +724,49 @@ const Profile: FC<OwnProps & StateProps> = ({
                   <i className="icon icon-unlock-badge" />
                 </Button>
                 <div className="more-similar">
-                  {renderText(oldLang('MoreSimilarText', limitSimilarChannels), ['simple_markdown'])}
+                  {renderText(oldLang('MoreSimilarText', limitSimilarPeers), ['simple_markdown'])}
+                </div>
+              </>
+            )}
+          </div>
+        ) : resultType === 'similarBots' ? (
+          <div key={resultType}>
+            {(viewportIds as string[])!.map((userId, i) => (
+              <ListItem
+                key={userId}
+                teactOrderKey={i}
+                className={buildClassName(
+                  'chat-item-clickable search-result',
+                  !isCurrentUserPremium && i === similarBots!.length - 1 && 'blured',
+                )}
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={() => openChat({ id: userId })}
+              >
+                {isUserId(userId) ? (
+                  <PrivateChatInfo
+                    userId={userId}
+                    avatarSize="medium"
+                  />
+                ) : (
+                  <GroupChatInfo
+                    chatId={userId}
+                    avatarSize="medium"
+                  />
+                )}
+              </ListItem>
+            ))}
+            {!isCurrentUserPremium && (
+              <>
+                {/* eslint-disable-next-line react/jsx-no-bind */}
+                <Button className="show-more-bots" size="smaller" onClick={() => openPremiumModal()}>
+                  {lang('UnlockMoreSimilarBots')}
+                  <i className="icon icon-unlock-badge" />
+                </Button>
+                <div className="more-similar">
+                  {renderText(lang('MoreSimilarBotsText', { count: limitSimilarPeers }, {
+                    withNodes: true,
+                    withMarkdown: true,
+                  }))}
                 </div>
               </>
             )}
@@ -814,6 +874,7 @@ export default memo(withGlobal<OwnProps>(
 
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
+    const isBot = user && isUserBot(user);
     const hasMembersTab = !isTopicInfo && !isSavedDialog && (isGroup || (isChannel && isChatAdmin(chat!)));
     const members = chatFullInfo?.members;
     const adminMembersById = chatFullInfo?.adminMembersById;
@@ -825,6 +886,7 @@ export default memo(withGlobal<OwnProps>(
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
     const activeDownloads = selectActiveDownloads(global);
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
+    const { similarBotsIds } = selectSimilarBotsIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
     const peer = user || chat;
@@ -851,6 +913,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       theme: selectTheme(global),
       isChannel,
+      isBot,
       messagesById,
       foundIds,
       mediaSearchType,
@@ -879,12 +942,13 @@ export default memo(withGlobal<OwnProps>(
       forceScrollProfileTab: selectTabState(global).forceScrollProfileTab,
       shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       similarChannels: similarChannelIds,
+      similarBots: similarBotsIds,
       botPreviewMedia,
       isCurrentUserPremium,
       isTopicInfo,
       isSavedDialog,
       isSynced: global.isSynced,
-      limitSimilarChannels: selectPremiumLimit(global, 'recommendedChannels'),
+      limitSimilarPeers: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: commonChats?.ids }),
     };

@@ -463,3 +463,24 @@ export function toggleSimilarChannels<T extends GlobalState>(
     },
   };
 }
+
+export function addSimilarBots<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  similarBotsIds: string[],
+  count?: number,
+) {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      similarBotsById: {
+        ...global.chats.similarBotsById,
+        [chatId]: {
+          similarBotsIds,
+          count,
+        },
+      },
+    },
+  };
+}

@@ -375,6 +375,7 @@ export type ProfileTabType =
   | 'stories'
   | 'storiesArchive'
   | 'similarChannels'
+  | 'similarBots'
   | 'dialogs'
   | 'gifts';
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
@@ -617,6 +618,11 @@ export type ChatTranslatedMessages = {
 export type ChatRequestedTranslations = {
   toLanguage?: string;
   manualMessages?: Record<number, string>;
+};
+
+export type SimilarBotsInfo = {
+  similarBotsIds?: string[];
+  count: number;
 };
 
 export type ConfettiParams = OptionalCombine<{

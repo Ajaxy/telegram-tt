@@ -60,6 +60,7 @@ import {
   addChatMembers,
   addChats,
   addMessages,
+  addSimilarBots,
   addSimilarChannels,
   addUsers,
   addUserStatuses,
@@ -2691,6 +2692,32 @@ addActionHandler('loadChannelRecommendations', async (global, actions, payload):
 
   global = getGlobal();
   global = addSimilarChannels(global, chatId || GLOBAL_SUGGESTED_CHANNELS_ID, Object.keys(chatsById), count);
+  setGlobal(global);
+});
+
+addActionHandler('loadBotRecommendations', async (global, actions, payload): Promise<void> => {
+  const { userId } = payload;
+  const user = selectChat(global, userId);
+
+  if (!user) {
+    return;
+  }
+
+  const result = await callApi('fetchBotsRecommendations', {
+    user,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  const { similarBots, count } = result;
+
+  const users = buildCollectionByKey(similarBots, 'id');
+
+  global = getGlobal();
+  global = addUsers(global, users);
+  global = addSimilarBots(global, userId, Object.keys(users), count);
   setGlobal(global);
 });
 

@@ -220,6 +220,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.chats.similarChannelsById = initialState.chats.similarChannelsById;
   }
 
+  if (!cached.chats.similarBotsById) {
+    cached.chats.similarBotsById = initialState.chats.similarBotsById;
+  }
+
   if (!cached.chats.lastMessageIds) {
     cached.chats.lastMessageIds = initialState.chats.lastMessageIds;
   }
@@ -472,6 +476,7 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
   return {
     ...global.chats,
     similarChannelsById: {},
+    similarBotsById: {},
     isFullyLoaded: {},
     loadingParameters: INITIAL_GLOBAL_STATE.chats.loadingParameters,
     byId: pickTruthy(global.chats.byId, idsToSave),

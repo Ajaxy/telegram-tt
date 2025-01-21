@@ -122,6 +122,7 @@
     }
 
     &.similarChannels-list,
+    &.similarBots-list,
     &.commonChats-list,
     &.members-list,
     &.gifts-list {
@@ -134,11 +135,13 @@
       }
     }
 
+    &.similarBots-list,
     &.similarChannels-list {
       .ListItem.blured {
         filter: opacity(0.8);
       }
 
+      .show-more-bots,
       .show-more-channels {
         width: calc(100% - 1rem);
         margin: 0 auto;

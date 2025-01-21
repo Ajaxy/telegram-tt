@@ -271,6 +271,7 @@
     "channels.getChannelRecommendations",
     "channels.searchPosts",
     "channels.reportSpam",
+    "bots.getBotRecommendations",
     "bots.canSendMessage",
     "bots.allowSendMessage",
     "bots.invokeWebViewCustomMethod",

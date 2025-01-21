@@ -693,3 +693,21 @@ export async function fetchPopularAppBots({
     nextOffset: result.nextOffset,
   };
 }
+
+export async function fetchBotsRecommendations({ user }: { user: ApiChat }) {
+  if (!user) return undefined;
+  const inputUser = buildInputEntity(user.id, user.accessHash) as GramJs.InputUser;
+  const result = await invokeRequest(new GramJs.bots.GetBotRecommendations({
+    bot: inputUser,
+  }));
+  if (!result) {
+    return undefined;
+  }
+
+  const similarBots = result?.users.map(buildApiUser).filter(Boolean);
+
+  return {
+    similarBots,
+    count: result instanceof GramJs.users.UsersSlice ? result.count : similarBots.length,
+  };
+}

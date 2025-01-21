@@ -1008,6 +1008,9 @@ export interface ActionPayloads {
   loadChannelRecommendations: {
     chatId?: string;
   };
+  loadBotRecommendations: {
+    userId: string;
+  };
   toggleChannelRecommendations: {
     chatId: string;
   };
