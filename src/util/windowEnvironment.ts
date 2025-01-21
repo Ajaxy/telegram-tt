@@ -108,6 +108,8 @@ export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA &&
 export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
 export const IS_INTL_LIST_FORMAT_SUPPORTED = 'ListFormat' in Intl;
 
+export const IS_BAD_URL_PARSER = new URL('tg://host').host !== 'host';
+
 export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 
 export const SCROLLBAR_WIDTH = (() => {

@@ -6,6 +6,7 @@ import type { DeepLinkMethod, PrivateMessageLink } from './deepLinkParser';
 import { API_CHAT_TYPES, RE_TG_LINK } from '../config';
 import { toChannelId } from '../global/helpers';
 import { tryParseDeepLink } from './deepLinkParser';
+import { IS_BAD_URL_PARSER } from './windowEnvironment';
 
 export const processDeepLink = (url: string): boolean => {
   const actions = getActions();
@@ -74,9 +75,11 @@ export const processDeepLink = (url: string): boolean => {
     return false;
   }
 
+  const urlToParse = IS_BAD_URL_PARSER ? url.replace(/^tg:\/\//, 'https://') : url;
+
   const {
     protocol, searchParams, hostname,
-  } = new URL(url);
+  } = new URL(urlToParse);
 
   if (protocol !== 'tg:') return false;
 

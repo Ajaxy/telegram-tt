@@ -4,6 +4,7 @@ import { RE_TG_LINK, RE_TME_LINK } from '../config';
 import { toChannelId } from '../global/helpers';
 import { ensureProtocol } from './ensureProtocol';
 import { isUsernameValid } from './username';
+import { IS_BAD_URL_PARSER } from './windowEnvironment';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
@@ -148,8 +149,8 @@ function parseDeepLink(url: string) {
     return parseHttpLink(urlParsed);
   }
   if (correctUrl.startsWith('tg:')) {
-    // Chrome parse url with tg: protocol incorrectly
-    const urlParsed = new URL(correctUrl.replace(/^tg:/, 'http:'));
+    const urlToParse = IS_BAD_URL_PARSER ? correctUrl.replace(/^tg:\/\//, 'https://') : correctUrl;
+    const urlParsed = new URL(urlToParse);
     return parseTgLink(urlParsed);
   }
   return undefined;
