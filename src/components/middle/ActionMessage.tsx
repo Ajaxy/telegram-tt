@@ -446,7 +446,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         return lang('ActionStarGiftOutDescription', {
           user: targetUser || 'User',
           count: amountToConvert,
-        }, { withNodes: true });
+        }, { withNodes: true, pluralValue: amountToConvert });
       }
 
       if (starGift.canUpgrade) {
@@ -486,7 +486,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     if (amountToConvert) {
       return lang('ActionStarGiftDescription', {
         count: amountToConvert,
-      }, { withNodes: true });
+      }, { withNodes: true, pluralValue: amountToConvert });
     }
 
     if (starGift.canUpgrade) {

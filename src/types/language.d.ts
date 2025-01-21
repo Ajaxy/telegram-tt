@@ -1713,13 +1713,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'ActionStarGiftOutTitle': {
     'count': V;
   };
-  'ActionStarGiftOutDescription': {
-    'user': V;
-    'count': V;
-  };
-  'ActionStarGiftDescription': {
-    'count': V;
-  };
   'ActionStarGiftOutDescriptionUpgrade': {
     'user': V;
   };
@@ -1957,6 +1950,13 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'MiniAppsMoreTabs': {
     'botName': V;
+    'count': V;
+  };
+  'ActionStarGiftOutDescription': {
+    'user': V;
+    'count': V;
+  };
+  'ActionStarGiftDescription': {
     'count': V;
   };
   'StarsSubscribeText': {
