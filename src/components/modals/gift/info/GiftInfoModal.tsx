@@ -312,11 +312,10 @@ const GiftInfoModal = ({
       const {
         model, backdrop, pattern, originalDetails,
       } = giftAttributes || {};
-      const ownerId = gift.ownerId;
       const ownerName = gift.ownerName;
       tableData.push([
         lang('GiftInfoOwner'),
-        ownerId ? { chatId: ownerId } : ownerName || '',
+        gift.ownerId ? { chatId: gift.ownerId } : ownerName || '',
       ]);
 
       if (model) {

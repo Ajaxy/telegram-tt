@@ -21,6 +21,10 @@
 }
 
 .message-content {
+  &.gift {
+    --max-width: 18rem;
+  }
+
   position: relative;
   max-width: var(--max-width);
 

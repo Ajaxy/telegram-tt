@@ -63,8 +63,8 @@ import {
   buildApiFormattedText,
   buildApiPhoto,
 } from './common';
+import { buildApiStarGift } from './gifts';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
-import { buildApiStarGift } from './payments';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildMessageReactions } from './reactions';
 

@@ -34,6 +34,14 @@
     border-radius: 0.25rem;
   }
 
+  &--unique-sticker {
+    position: relative;
+    width: 7.5rem;
+    height: 7.5rem;
+    overflow: hidden;
+    margin-block: 0.5rem;
+  }
+
   &--stickers {
     color: var(--accent-color);
     border-radius: 0 !important;
@@ -60,6 +68,7 @@
   .WebPage--content {
     position: relative;
 
+    &.is-gift,
     &.is-story {
       display: flex;
       flex-direction: column-reverse;
@@ -83,6 +92,12 @@
       background-color: transparent !important;
       opacity: 0.85;
     }
+  }
+
+  .with-gift &--quick-button {
+    border-top: inherit;
+    margin-top: 0.0625rem;
+    margin-bottom: -0.125rem;
   }
 
   &-text {

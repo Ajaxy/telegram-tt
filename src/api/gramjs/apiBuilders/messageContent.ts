@@ -15,6 +15,7 @@ import type {
   ApiPaidMedia,
   ApiPhoto,
   ApiPoll,
+  ApiStarGiftUnique,
   ApiSticker,
   ApiVideo,
   ApiVoice,
@@ -42,6 +43,7 @@ import {
   buildApiThumbnailFromPath,
   buildApiThumbnailFromStripped,
 } from './common';
+import { buildApiStarGift } from './gifts';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildStickerFromDocument, processStickerResult } from './symbols';
 
@@ -753,9 +755,12 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     audio = buildAudioFromDocument(document);
   }
   let story: ApiWebPageStoryData | undefined;
+  let gift: ApiStarGiftUnique | undefined;
   let stickers: ApiWebPageStickerData | undefined;
   const attributeStory = attributes
     ?.find((a): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
+  const attributeGift = attributes
+    ?.find((a): a is GramJs.WebPageAttributeUniqueStarGift => a instanceof GramJs.WebPageAttributeUniqueStarGift);
   if (attributeStory) {
     const peerId = getApiChatIdFromMtpPeer(attributeStory.peer);
     story = {
@@ -766,6 +771,10 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     if (attributeStory.story instanceof GramJs.StoryItem) {
       addStoryToLocalDb(attributeStory.story, peerId);
     }
+  }
+  if (attributeGift) {
+    const starGift = buildApiStarGift(attributeGift.gift);
+    gift = starGift.type === 'starGiftUnique' ? starGift : undefined;
   }
   const attributeStickers = attributes?.find((a): a is GramJs.WebPageAttributeStickerSet => (
     a instanceof GramJs.WebPageAttributeStickerSet
@@ -798,6 +807,7 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     video,
     audio,
     story,
+    gift,
     stickers,
     mediaSize,
   };

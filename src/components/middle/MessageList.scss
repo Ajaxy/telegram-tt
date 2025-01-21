@@ -277,6 +277,7 @@
     max-width: 17rem;
   }
 
+  .web-page-gift,
   .action-message-gift {
     display: flex !important;
     width: 13.75rem;
@@ -290,10 +291,21 @@
     font-weight: var(--font-weight-semibold);
   }
 
+  .web-page-gift {
+    position: relative;
+    min-width: 12.5rem;
+    width: 100%;
+    margin-top: 0;
+    padding-block: 2rem !important;
+    border-radius: 0.25rem;
+  }
+
+  .web-page-centered,
   .action-message-centered {
     margin-inline: auto;
   }
 
+  .web-page-unique,
   .action-message-unique {
     &::before {
       content: "";
@@ -305,6 +317,7 @@
     }
   }
 
+  .web-page-unique-background-wrapper,
   .action-message-unique-background-wrapper {
     position: absolute;
     inset: 0;
@@ -312,10 +325,14 @@
     border-radius: inherit;
   }
 
+  .web-page-unique-background,
   .action-message-unique-background {
     position: absolute;
     inset: 0;
     top: -6rem;
+  }
+  .web-page-unique-background {
+    top: -1rem;
   }
 
   .action-message-user-caption,

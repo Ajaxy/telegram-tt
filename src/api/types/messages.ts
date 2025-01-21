@@ -7,6 +7,7 @@ import type {
   ApiLabeledPrice,
   ApiPremiumGiftCodeOption,
   ApiStarGift,
+  ApiStarGiftUnique,
 } from './payments';
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
@@ -543,6 +544,7 @@ export interface ApiWebPage {
   document?: ApiDocument;
   video?: ApiVideo;
   story?: ApiWebPageStoryData;
+  gift?: ApiStarGiftUnique;
   stickers?: ApiWebPageStickerData;
   mediaSize?: WebPageMediaSize;
   hasLargeMedia?: boolean;

@@ -8,7 +8,8 @@ import { IS_BAD_URL_PARSER } from './windowEnvironment';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup';
+'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
+| 'nft';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -96,6 +97,11 @@ interface PremiumMultigiftLink {
   referrer: string;
 }
 
+interface GiftUniqueLink {
+  type: 'giftUniqueLink';
+  slug: string;
+}
+
 type DeepLink =
   TelegramPassportLink |
   LoginCodeLink |
@@ -108,7 +114,8 @@ type DeepLink =
   BusinessChatLink |
   PremiumReferrerLink |
   PremiumMultigiftLink |
-  ChatBoostLink;
+  ChatBoostLink |
+  GiftUniqueLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
@@ -229,6 +236,8 @@ function parseTgLink(url: URL) {
       return buildPremiumMultigiftLink({ referrer: queryParams.ref });
     case 'chatBoostLink':
       return buildChatBoostLink({ username: queryParams.domain, id: queryParams.channel });
+    case 'giftUniqueLink':
+      return buildGiftUniqueLink({ slug: queryParams.slug });
     default:
       break;
   }
@@ -331,6 +340,12 @@ function parseHttpLink(url: URL) {
         id: isPrivateChannel ? pathParams[1] : undefined,
       });
     }
+    case 'giftUniqueLink': {
+      const slug = pathParams.slice(1).join('/');
+      return buildGiftUniqueLink({
+        slug,
+      });
+    }
     default:
       break;
   }
@@ -355,6 +370,7 @@ function getHttpDeepLinkType(
     if (method === 'login') return 'loginCodeLink';
     if (method === 'm') return 'businessChatLink';
     if (method === 'boost') return 'chatBoostLink';
+    if (method === 'nft') return 'giftUniqueLink';
     if (method === 'c') {
       if (queryParams.boost !== undefined) return 'chatBoostLink';
       return 'privateChannelLink';
@@ -370,6 +386,7 @@ function getHttpDeepLinkType(
     if (isUsernameValid(pathParams[0]) && pathParams.slice(1).every(isNumber)) {
       return 'publicMessageLink';
     }
+    if (method === 'nft') return 'giftUniqueLink';
   } else if (len === 4) {
     if (method === 'c' && pathParams.slice(1).every(isNumber)) {
       return 'privateMessageLink';
@@ -424,6 +441,8 @@ function getTgDeepLinkType(
       return 'premiumMultigiftLink';
     case 'boost':
       return 'chatBoostLink';
+    case 'nft':
+      return 'giftUniqueLink';
     default:
       break;
   }
@@ -625,6 +644,21 @@ function buildBusinessChatLink(params: BuilderParams<BusinessChatLink>): Builder
 
   return {
     type: 'businessChatLink',
+    slug,
+  };
+}
+
+function buildGiftUniqueLink(params: BuilderParams<GiftUniqueLink>): BuilderReturnType<GiftUniqueLink> {
+  const {
+    slug,
+  } = params;
+
+  if (!slug) {
+    return undefined;
+  }
+
+  return {
+    type: 'giftUniqueLink',
     slug,
   };
 }

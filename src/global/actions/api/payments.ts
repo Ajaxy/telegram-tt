@@ -990,3 +990,23 @@ addActionHandler('launchPrepaidStarsGiveaway', async (global, actions, payload):
 
   actions.openBoostStatistics({ chatId, tabId });
 });
+
+addActionHandler('openUniqueGiftBySlug', async (global, actions, payload): Promise<void> => {
+  const {
+    slug, tabId = getCurrentTabId(),
+  } = payload;
+
+  const gift = await callApi('fetchUniqueStarGift', { slug });
+
+  if (!gift) {
+    actions.showNotification({
+      message: {
+        key: 'GiftWasNotFound',
+      },
+      tabId,
+    });
+    return;
+  }
+
+  actions.openGiftInfoModal({ gift, tabId });
+});

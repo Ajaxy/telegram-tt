@@ -1,36 +1,38 @@
 // https://github.com/telegramdesktop/tdesktop/blob/3da787791f6d227f69b32bf4003bc6071d05e2ac/Telegram/SourceFiles/history/view/history_view_view_button.cpp#L51
-export function getWebpageButtonText(type?: string) {
+export function getWebpageButtonLangKey(type?: string) {
   switch (type) {
     case 'telegram_channel_request':
     case 'telegram_megagroup_request':
     case 'telegram_chat_request':
-      return 'lng_view_button_request_join';
+      return 'ViewButtonRequestJoin';
     case 'telegram_message':
-      return 'lng_view_button_message';
+      return 'ViewButtonMessage';
     case 'telegram_bot':
-      return 'lng_view_button_bot';
+      return 'ViewButtonBot';
     case 'telegram_voicechat':
-      return 'lng_view_button_voice_chat';
+      return 'ViewButtonVoiceChat';
     case 'telegram_livestream':
-      return 'lng_view_button_voice_chat_channel';
+      return 'ViewButtonVoiceChatChannel';
     case 'telegram_megagroup':
     case 'telegram_chat':
-      return 'lng_view_button_group';
+      return 'ViewButtonGroup';
     case 'telegram_channel':
-      return 'lng_view_button_channel';
+      return 'ViewButtonChannel';
     case 'telegram_user':
-      return 'lng_view_button_user';
+      return 'ViewButtonUser';
     case 'telegram_botapp':
-      return 'lng_view_button_bot_app';
+      return 'ViewButtonBotApp';
     case 'telegram_chatlist':
       return 'ViewChatList';
     case 'telegram_story':
-      return 'lng_view_button_story';
+      return 'ViewButtonStory';
     case 'telegram_channel_boost':
     case 'telegram_group_boost':
-      return 'lng_view_button_boost';
+      return 'ViewButtonBoost';
     case 'telegram_stickerset':
-      return 'lng_view_button_stickerset';
+      return 'ViewButtonStickerset';
+    case 'telegram_nft':
+      return 'ViewButtonGiftUnique';
     default:
       return undefined;
   }

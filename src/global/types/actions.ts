@@ -1468,6 +1468,9 @@ export interface ActionPayloads {
     storyId: number;
     origin?: StoryViewerOrigin;
   } & WithTabId;
+  openUniqueGiftBySlug: {
+    slug: string;
+  } & WithTabId;
   openPreviousStory: WithTabId | undefined;
   openNextStory: WithTabId | undefined;
   setStoryViewerMuted: {

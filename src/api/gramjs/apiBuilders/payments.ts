@@ -19,8 +19,6 @@ import type {
   ApiPrepaidGiveaway,
   ApiPrepaidStarsGiveaway,
   ApiReceipt,
-  ApiStarGift,
-  ApiStarGiftAttribute,
   ApiStarGiveawayOption,
   ApiStarsAmount,
   ApiStarsGiveawayWinnerOption,
@@ -28,19 +26,17 @@ import type {
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
-  ApiUserStarGift,
   BoughtPaidMedia,
 } from '../../types';
 
-import { numberToHexColor } from '../../../util/colors';
-import { addDocumentToLocalDb, addWebDocumentToLocalDb } from '../helpers';
+import { addWebDocumentToLocalDb } from '../helpers';
 import { buildApiStarsSubscriptionPricing } from './chats';
-import { buildApiFormattedText, buildApiMessageEntity } from './common';
+import { buildApiMessageEntity } from './common';
+import { buildApiStarGift } from './gifts';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildMessageMediaContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildStatisticsPercentage } from './statistics';
-import { buildStickerFromDocument } from './symbols';
 
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {
   if (!shippingOptions) {
@@ -610,133 +606,5 @@ export function buildApiStarTopupOption(option: GramJs.TypeStarsTopupOption): Ap
     currency,
     stars: stars.toJSNumber(),
     isExtended: extended,
-  };
-}
-
-export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
-  if (starGift instanceof GramJs.StarGiftUnique) {
-    const {
-      id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal,
-    } = starGift;
-
-    return {
-      type: 'starGiftUnique',
-      id: id.toString(),
-      number: num,
-      ownerId: ownerId && buildApiPeerId(ownerId, 'user'),
-      ownerName,
-      attributes: attributes.map(buildApiStarGiftAttribute).filter(Boolean),
-      title,
-      totalCount: availabilityTotal,
-      issuedCount: availabilityIssued,
-    };
-  }
-
-  const {
-    id, limited, stars, availabilityRemains, availabilityTotal, convertStars, firstSaleDate, lastSaleDate, soldOut,
-    birthday, upgradeStars,
-  } = starGift;
-
-  addDocumentToLocalDb(starGift.sticker);
-
-  const sticker = buildStickerFromDocument(starGift.sticker)!;
-
-  return {
-    type: 'starGift',
-    id: id.toString(),
-    isLimited: limited,
-    sticker,
-    stars: stars.toJSNumber(),
-    availabilityRemains,
-    availabilityTotal,
-    starsToConvert: convertStars.toJSNumber(),
-    firstSaleDate,
-    lastSaleDate,
-    isSoldOut: soldOut,
-    isBirthday: birthday,
-    upgradeStars: upgradeStars?.toJSNumber(),
-  };
-}
-
-export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribute): ApiStarGiftAttribute | undefined {
-  if (attribute instanceof GramJs.StarGiftAttributeModel) {
-    const sticker = buildStickerFromDocument(attribute.document);
-    if (!sticker) {
-      return undefined;
-    }
-
-    addDocumentToLocalDb(attribute.document);
-
-    return {
-      type: 'model',
-      name: attribute.name,
-      rarityPercent: attribute.rarityPermille / 10,
-      sticker,
-    };
-  }
-
-  if (attribute instanceof GramJs.StarGiftAttributePattern) {
-    const sticker = buildStickerFromDocument(attribute.document);
-    if (!sticker) {
-      return undefined;
-    }
-
-    addDocumentToLocalDb(attribute.document);
-
-    return {
-      type: 'pattern',
-      name: attribute.name,
-      rarityPercent: attribute.rarityPermille / 10,
-      sticker,
-    };
-  }
-
-  if (attribute instanceof GramJs.StarGiftAttributeBackdrop) {
-    const {
-      name, rarityPermille, centerColor, edgeColor, patternColor, textColor,
-    } = attribute;
-
-    return {
-      type: 'backdrop',
-      name,
-      rarityPercent: rarityPermille / 10,
-      centerColor: numberToHexColor(centerColor),
-      edgeColor: numberToHexColor(edgeColor),
-      patternColor: numberToHexColor(patternColor),
-      textColor: numberToHexColor(textColor),
-    };
-  }
-
-  if (attribute instanceof GramJs.StarGiftAttributeOriginalDetails) {
-    const {
-      date, recipientId, message, senderId,
-    } = attribute;
-
-    return {
-      type: 'originalDetails',
-      date,
-      recipientId: recipientId && buildApiPeerId(recipientId, 'user'),
-      message: message && buildApiFormattedText(message),
-      senderId: senderId && buildApiPeerId(senderId, 'user'),
-    };
-  }
-
-  return undefined;
-}
-
-export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUserStarGift {
-  const {
-    gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved,
-  } = userStarGift;
-
-  return {
-    gift: buildApiStarGift(gift),
-    date,
-    starsToConvert: convertStars?.toJSNumber(),
-    fromId: fromId && buildApiPeerId(fromId, 'user'),
-    message: message && buildApiFormattedText(message),
-    messageId: msgId,
-    isNameHidden: nameHidden,
-    isUnsaved: unsaved,
   };
 }

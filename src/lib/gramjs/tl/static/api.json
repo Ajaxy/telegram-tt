@@ -384,5 +384,6 @@
     "payments.getUserStarGifts",
     "payments.saveStarGift",
     "payments.convertStarGift",
+    "payments.getUniqueStarGift",
     "fragment.getCollectibleInfo"
 ]

@@ -66,6 +66,9 @@ export const processDeepLink = (url: string): boolean => {
           isPrivate: Boolean(parsedLink.id),
         });
         return true;
+      case 'giftUniqueLink':
+        actions.openUniqueGiftBySlug({ slug: parsedLink.slug });
+        return true;
       default:
         break;
     }

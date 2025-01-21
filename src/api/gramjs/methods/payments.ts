@@ -13,6 +13,10 @@ import type {
 
 import { DEBUG } from '../../../config';
 import {
+  buildApiStarGift,
+  buildApiUserStarGift,
+} from '../apiBuilders/gifts';
+import {
   buildApiBoost,
   buildApiBoostsStatus,
   buildApiCheckedGiftCode,
@@ -22,14 +26,12 @@ import {
   buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
   buildApiReceipt,
-  buildApiStarGift,
   buildApiStarsAmount,
   buildApiStarsGiftOptions,
   buildApiStarsGiveawayOptions,
   buildApiStarsSubscription,
   buildApiStarsTransaction,
   buildApiStarTopupOption,
-  buildApiUserStarGift,
   buildShippingOptions,
 } from '../apiBuilders/payments';
 import { buildApiPeerId } from '../apiBuilders/peers';
@@ -637,4 +639,16 @@ export async function fetchStarsTopupOptions() {
   }
 
   return result.map(buildApiStarTopupOption);
+}
+
+export async function fetchUniqueStarGift({ slug }: {
+  slug: string;
+}) {
+  const result = await invokeRequest(new GramJs.payments.GetUniqueStarGift({ slug }));
+
+  if (!result) {
+    return undefined;
+  }
+  const gift = buildApiStarGift(result.gift);
+  return gift.type === 'starGiftUnique' ? gift : undefined;
 }

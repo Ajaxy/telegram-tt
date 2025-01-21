@@ -1222,6 +1222,21 @@ export interface LangPair {
   'ProfileTabSimilarChannels': undefined;
   'ActionUnsupportedTitle': undefined;
   'ActionUnsupportedDescription': undefined;
+  'GiftWasNotFound': undefined;
+  'ViewButtonRequestJoin': undefined;
+  'ViewButtonMessage': undefined;
+  'ViewButtonBot': undefined;
+  'ViewButtonVoiceChat': undefined;
+  'ViewButtonVoiceChatChannel': undefined;
+  'ViewButtonGroup': undefined;
+  'ViewButtonChannel': undefined;
+  'ViewButtonUser': undefined;
+  'ViewButtonBotApp': undefined;
+  'ViewChatList': undefined;
+  'ViewButtonStory': undefined;
+  'ViewButtonBoost': undefined;
+  'ViewButtonStickerset': undefined;
+  'ViewButtonGiftUnique': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

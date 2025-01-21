@@ -1494,3 +1494,19 @@
 "ActionUnsupportedTitle" = "Action not supported yet";
 "ActionUnsupportedDescription" = "Please, use one of our apps to complete this action.";
 "LocationPermissionText" = "**{name}** requests access to set your **location**. You will be able to revoke this access in the profile page of **{name}**.";
+"GiftWasNotFound" = "Gift was not found";
+"ViewButtonRequestJoin" = "REQUEST TO JOIN";
+"ViewButtonMessage" = "VIEW MESSAGE";
+"ViewButtonBot" = "VIEW BOT";
+"ViewButtonVoiceChat" = "VOICE CHAT";
+"ViewButtonVoiceChatChannel" = "LIVE STREAM";
+"ViewButtonGroup" = "VIEW GROUP";
+"ViewButtonChannel" = "VIEW CHANNEL";
+"ViewButtonUser" = "SEND MESSAGE";
+"ViewButtonBotApp" = "LAUNCH";
+"ViewChatList" = "VIEW CHAT LIST";
+"ViewButtonStory" = "VIEW STORY";
+"ViewButtonBoost" = "BOOST";
+"ViewButtonStickerset" = "VIEW STICKERS";
+"ViewButtonGiftUnique" = "VIEW COLLECTIBLE";
+
