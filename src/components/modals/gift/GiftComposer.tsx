@@ -113,13 +113,13 @@ function GiftComposer({
           currency: STARS_CURRENCY_CODE,
           amount: gift.stars,
           starGift: {
+            type: 'starGift',
             message: giftMessage?.length ? {
               text: giftMessage,
             } : undefined,
             isNameHidden: shouldHideName,
             starsToConvert: gift.starsToConvert,
             isSaved: false,
-            isConverted: false,
             gift,
           },
           translationValues: ['%action_origin%', '%gift_payment_amount%'],

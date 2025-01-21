@@ -127,6 +127,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     getReceipt,
     openGiftInfoModalFromMessage,
     openPrizeStarsTransactionFromGiveaway,
+    showNotification,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -234,6 +235,19 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   };
 
   const handleStarGiftClick = () => {
+    const starGift = message.content.action?.starGift;
+    if (!starGift) return;
+    if (starGift.type === 'starGift' && starGift.canUpgrade && !message.isOutgoing) {
+      showNotification({
+        title: {
+          key: 'ActionUnsupportedTitle',
+        },
+        message: {
+          key: 'ActionUnsupportedDescription',
+        },
+      });
+    }
+
     openGiftInfoModalFromMessage({
       chatId: message.chatId,
       messageId: message.id,
@@ -402,9 +416,10 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   function renderStarGiftUserCaption() {
     const targetUser = targetUsers && targetUsers[0];
-    if (!targetUser || !senderUser) return undefined;
+    const starGift = message.content.action?.starGift;
+    if (!targetUser || !senderUser || !starGift) return undefined;
 
-    if (message.isOutgoing) {
+    if (message.isOutgoing || (starGift.type === 'starGiftUnique' && starGift.isUpgrade)) {
       return (
         <div className="action-message-user-caption">
           <span> {lang('GiftTo')} </span>
@@ -432,45 +447,65 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     if (starGiftMessage) {
       return renderTextWithEntities({ text: starGiftMessage.text, entities: starGiftMessage.entities });
     }
-    const amount = starGift?.starsToConvert;
+    const amountToConvert = starGift?.starsToConvert;
 
     if (message.isOutgoing) {
-      return lang('ActionStarGiftOutDescription', {
-        user: targetUser || 'User',
-        count: amount,
-      }, { withNodes: true });
+      if (amountToConvert) {
+        return lang('ActionStarGiftOutDescription', {
+          user: targetUser || 'User',
+          count: amountToConvert,
+        }, { withNodes: true });
+      }
+
+      if (starGift.canUpgrade) {
+        return lang('ActionStarGiftOutDescriptionUpgrade', {
+          user: targetUser || 'User',
+        });
+      }
     }
 
     if (starGift.isSaved) {
       return lang('ActionStarGiftDisplaying');
     }
 
+    if (starGift.isUpgraded) {
+      return lang('ActionStarGiftUpgraded');
+    }
+
     if (starGift.isConverted) {
       return message.isOutgoing
         ? lang('GiftInfoDescriptionOutConverted', {
-          amount: formatInteger(amount!),
+          amount: formatInteger(amountToConvert!),
           user: targetUser || 'User',
         }, {
-          pluralValue: amount!,
+          pluralValue: amountToConvert!,
           withNodes: true,
           withMarkdown: true,
         })
         : lang('GiftInfoDescriptionConverted', {
-          amount: formatInteger(amount!),
+          amount: formatInteger(amountToConvert!),
         }, {
-          pluralValue: amount!,
+          pluralValue: amountToConvert!,
           withNodes: true,
           withMarkdown: true,
         });
     }
 
-    return lang('ActionStarGiftDescription', {
-      count: amount,
-    }, { withNodes: true });
+    if (amountToConvert) {
+      return lang('ActionStarGiftDescription', {
+        count: amountToConvert,
+      }, { withNodes: true });
+    }
+
+    if (starGift.canUpgrade) {
+      return lang('ActionStarGiftDescriptionUpgrade');
+    }
+
+    return undefined;
   }
 
   function renderStarGift() {
-    const starGift = message.content.action?.starGift;
+    const starGift = message.content.action?.starGift as ApiMessageActionStarGift;
     if (!starGift || starGift.gift.type !== 'starGift') return undefined;
 
     return (
@@ -494,12 +529,10 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           {renderStarGiftUserDescription()}
         </div>
 
-        {!message.isOutgoing && (
-          <div className="action-message-button">
-            <Sparkles preset="button" />
-            {oldLang('ActionGiftPremiumView')}
-          </div>
-        )}
+        <div className="action-message-button">
+          <Sparkles preset="button" />
+          {starGift.canUpgrade && !message.isOutgoing ? lang('ActionStarGiftUnpack') : oldLang('ActionGiftPremiumView')}
+        </div>
         {starGift.gift.availabilityTotal && (
           <GiftRibbon
             color={patternColor || 'blue'}

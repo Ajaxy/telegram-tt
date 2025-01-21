@@ -58,6 +58,7 @@ const GiftInfoModal = ({
     changeGiftVisilibity,
     convertGiftToStars,
     openChatWithInfo,
+    focusMessage,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -70,7 +71,6 @@ const GiftInfoModal = ({
   const { gift: typeGift } = renderingModal || {};
   const isUserGift = typeGift && 'gift' in typeGift;
   const userGift = isUserGift ? typeGift : undefined;
-  const canUpdate = Boolean(userGift?.messageId);
   const isSender = userGift?.fromId === currentUserId;
   const canConvertDifference = (userGift && starGiftMaxConvertPeriod && (
     userGift.date + starGiftMaxConvertPeriod - getServerTime()
@@ -80,8 +80,19 @@ const GiftInfoModal = ({
   const gift = isUserGift ? typeGift.gift : typeGift;
   const giftSticker = gift && getStickerFromGift(gift);
 
+  const canFocusUpgrade = Boolean(userGift?.upgradeMsgId);
+  const canUpdate = gift?.type === 'starGiftUnique'
+    ? gift.ownerId === currentUserId : Boolean(userGift?.messageId) && !isSender && !canFocusUpgrade;
+
   const handleClose = useLastCallback(() => {
     closeGiftInfoModal();
+  });
+
+  const handleFocusUpgraded = useLastCallback(() => {
+    if (!userGift?.upgradeMsgId) return;
+    const { upgradeMsgId, fromId } = userGift;
+    focusMessage({ chatId: fromId!, messageId: upgradeMsgId! });
+    handleClose();
   });
 
   const handleTriggerVisibility = useLastCallback(() => {
@@ -201,7 +212,7 @@ const GiftInfoModal = ({
         <AnimatedIconFromSticker
           className={styles.giftSticker}
           sticker={giftSticker}
-          noLoop
+          noLoop={false}
           nonInteractive
           size={STICKER_SIZE}
         />
@@ -429,7 +440,12 @@ const GiftInfoModal = ({
             )}
           </div>
         )}
-        {!canUpdate && (
+        {canFocusUpgrade && (
+          <Button size="smaller" onClick={handleFocusUpgraded}>
+            {lang('GiftInfoViewUpgraded')}
+          </Button>
+        )}
+        {!canUpdate && !canFocusUpgrade && (
           <Button size="smaller" onClick={handleClose}>
             {lang('OK')}
           </Button>
@@ -449,7 +465,7 @@ const GiftInfoModal = ({
     };
   }, [
     typeGift, userGift, targetUser, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang, gift,
-    radialPatternBackdrop, giftAttributes,
+    radialPatternBackdrop, giftAttributes, canFocusUpgrade,
   ]);
 
   return (

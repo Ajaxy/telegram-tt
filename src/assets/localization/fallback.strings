@@ -1357,6 +1357,7 @@
 "GiftInfoOriginalInfoTextSender" = "Gifted by {sender} to {user} on {date} with comment \"{text}\"."
 "GiftInfoStatus" = "Status";
 "GiftInfoStatusNonUnique" = "Non-Unique";
+"GiftInfoViewUpgraded" = "View Upgraded Gift";
 "StarsAmount" = "⭐️{amount}";
 "StarsAmountText_one" = "{amount} Star";
 "StarsAmountText_other" = "{amount} Stars";
@@ -1377,6 +1378,10 @@
 "ActionStarGiftOutDescription" = "{user} can display this gift on their page or convert it to {count} Stars.";
 "ActionStarGiftDescription" = "Display this gift on your page or convert it to {count} Stars.";
 "ActionStarGiftDisplaying" = "You kept this gift on your page.";
+"ActionStarGiftOutDescriptionUpgrade" = "{user} can turn this gift to a unique collectible.";
+"ActionStarGiftDescriptionUpgrade" = "Tap “Unpack” to turn this gift to a unique collectible.";
+"ActionStarGiftUpgraded" = "This gift was upgraded.";
+"ActionStarGiftUnpack" = "Unpack";
 "GiftTo" = "Gift to";
 "GiftFrom" = "Gift from";
 "ReceivedGift" = "Received Gift";
@@ -1474,5 +1479,6 @@
 "ProfileTabVoice" = "Voice";
 "ProfileTabSharedGroups" = "Groups";
 "ProfileTabSimilarChannels" = "Similar Channels";
+"ActionUnsupportedTitle" = "Action not supported yet";
+"ActionUnsupportedDescription" = "Please, use one of our apps to complete this action.";
 "LocationPermissionText" = "**{name}** requests access to set your **location**. You will be able to revoke this access in the profile page of **{name}**.";
-

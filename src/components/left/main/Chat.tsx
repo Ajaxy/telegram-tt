@@ -42,6 +42,7 @@ import {
   selectOutgoingStatus,
   selectPeer,
   selectPeerStory,
+  selectSender,
   selectTabState,
   selectThreadParam,
   selectTopicFromMessage,
@@ -452,10 +453,11 @@ export default memo(withGlobal<OwnProps>(
     const lastMessage = previewMessageId
       ? selectChatMessage(global, chatId, previewMessageId)
       : selectChatLastMessage(global, chatId, isSavedDialog ? 'saved' : 'all');
-    const { senderId, isOutgoing, forwardInfo } = lastMessage || {};
-    const actualSenderId = isSavedDialog ? forwardInfo?.fromId : senderId;
+    const { isOutgoing, forwardInfo } = lastMessage || {};
+    const savedDialogSender = isSavedDialog && forwardInfo?.fromId ? selectPeer(global, forwardInfo.fromId) : undefined;
+    const messageSender = lastMessage ? selectSender(global, lastMessage) : undefined;
+    const lastMessageSender = savedDialogSender || messageSender;
     const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
-    const lastMessageSender = actualSenderId ? selectPeer(global, actualSenderId) : undefined;
     const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chat.id, replyToMessageId)

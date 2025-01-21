@@ -459,15 +459,20 @@ export type ApiNewPoll = {
 };
 
 export interface ApiMessageActionStarGift {
+  type: 'starGift';
   isNameHidden: boolean;
   isSaved: boolean;
-  isConverted?: boolean;
+  isConverted?: true;
   gift: ApiStarGift;
   message?: ApiFormattedText;
   starsToConvert?: number;
+  canUpgrade?: true;
+  isUpgraded?: true;
+  upgradeMsgId?: number;
 }
 
 export interface ApiMessageActionStarGiftUnique {
+  type: 'starGiftUnique';
   isUpgrade?: true;
   isTransferred?: true;
   isSaved?: true;

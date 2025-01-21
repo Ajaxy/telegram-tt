@@ -263,6 +263,7 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
     fromId: message.isOutgoing ? global.currentUserId : message.chatId,
     messageId: (!message.isOutgoing || chatId === global.currentUserId) ? message.id : undefined,
     isConverted: starGift.isConverted,
+    upgradeMsgId: starGift.upgradeMsgId,
   } satisfies ApiUserStarGift;
 
   actions.openGiftInfoModal({ userId: giftReceiverId, gift, tabId });

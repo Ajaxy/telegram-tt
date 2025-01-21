@@ -265,6 +265,7 @@ export interface ApiUserStarGift {
   messageId?: number;
   starsToConvert?: number;
   isConverted?: boolean; // Local field, used for Action Message
+  upgradeMsgId?: number; // Local field, used for Action Message
 }
 
 export interface ApiPremiumGiftCodeOption {

@@ -97,6 +97,11 @@ export function renderActionMessageText(
     unprocessed = unprocessed
       .replace('%@', '%action_origin%');
   }
+  if (translationKey.startsWith('ActionUniqueGiftTransfer')) {
+    unprocessed = unprocessed
+      .replace('un1', '%action_origin%')
+      .replace(/\*\*/g, '');
+  }
   if (translationKey === 'BoostingReceivedPrizeFrom') {
     unprocessed = unprocessed
       .replace('**%s**', '%target_chat%')

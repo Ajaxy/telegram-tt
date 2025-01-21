@@ -20,10 +20,10 @@ import {
   selectDraft,
   selectOutgoingStatus,
   selectPeerStory,
+  selectSender,
   selectThreadInfo,
   selectThreadParam,
   selectTopics,
-  selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
@@ -248,10 +248,9 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
 
     const lastMessage = selectChatMessage(global, chatId, topic.lastMessageId);
-    const { senderId, isOutgoing } = lastMessage || {};
+    const { isOutgoing } = lastMessage || {};
     const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
-    const lastMessageSender = senderId
-      ? (selectUser(global, senderId) || selectChat(global, senderId)) : undefined;
+    const lastMessageSender = lastMessage && selectSender(global, lastMessage);
     const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chatId, replyToMessageId)

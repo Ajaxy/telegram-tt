@@ -368,16 +368,20 @@ export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
 
 function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : ApiMessageActionStarGift {
   const {
-    nameHidden, saved, converted, gift, message, convertStars,
+    nameHidden, saved, converted, gift, message, convertStars, canUpgrade, upgraded, upgradeMsgId,
   } = action;
 
   return {
+    type: 'starGift',
     isNameHidden: Boolean(nameHidden),
     isSaved: Boolean(saved),
-    isConverted: Boolean(converted),
+    isConverted: converted,
     gift: buildApiStarGift(gift),
     message: message && buildApiFormattedText(message),
     starsToConvert: convertStars?.toJSNumber(),
+    canUpgrade,
+    isUpgraded: upgraded,
+    upgradeMsgId,
   };
 }
 
@@ -389,6 +393,7 @@ function buildApiMessageActionStarGiftUnique(
   } = action;
 
   return {
+    type: 'starGiftUnique',
     gift: buildApiStarGift(gift),
     canExportAt,
     isRefunded: refunded,
@@ -747,7 +752,13 @@ function buildAction(
     currency = STARS_CURRENCY_CODE;
   } else if (action instanceof GramJs.MessageActionStarGiftUnique && action.gift instanceof GramJs.StarGiftUnique) {
     type = 'starGiftUnique';
-    text = isOutgoing ? 'Notification.StarsGift.UpgradeYou' : 'Notification.StarsGift.Upgrade';
+    if (isOutgoing) {
+      text = action.upgrade ? 'Notification.StarsGift.UpgradeYou' : 'ActionUniqueGiftTransferOutbound';
+    } else {
+      text = action.upgrade ? 'Notification.StarsGift.Upgrade' : 'ActionUniqueGiftTransferInbound';
+      translationValues.push('%action_origin%');
+    }
+
     starGift = buildApiMessageActionStarGiftUnique(action);
 
     if (targetPeerId) {

@@ -5,12 +5,12 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type {
+  ApiBotVerification,
   ApiChat,
   ApiCountryCode,
   ApiUser,
   ApiUserFullInfo,
   ApiUsername,
-  ApiBotVerification,
 } from '../../../api/types';
 import type { BotAppPermissions } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';

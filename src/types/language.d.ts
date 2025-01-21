@@ -1138,6 +1138,7 @@ export interface LangPair {
   'GiftAttributeSymbol': undefined;
   'GiftInfoStatus': undefined;
   'GiftInfoStatusNonUnique': undefined;
+  'GiftInfoViewUpgraded': undefined;
   'AllGiftsCategory': undefined;
   'LimitedGiftsCategory': undefined;
   'StockGiftsCategory': undefined;
@@ -1145,6 +1146,9 @@ export interface LangPair {
   'StarsReactionLinkText': undefined;
   'StarsReactionLink': undefined;
   'ActionStarGiftDisplaying': undefined;
+  'ActionStarGiftDescriptionUpgrade': undefined;
+  'ActionStarGiftUpgraded': undefined;
+  'ActionStarGiftUnpack': undefined;
   'GiftTo': undefined;
   'GiftFrom': undefined;
   'ReceivedGift': undefined;
@@ -1212,6 +1216,8 @@ export interface LangPair {
   'ProfileTabVoice': undefined;
   'ProfileTabSharedGroups': undefined;
   'ProfileTabSimilarChannels': undefined;
+  'ActionUnsupportedTitle': undefined;
+  'ActionUnsupportedDescription': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1612,6 +1618,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'ActionStarGiftDescription': {
     'count': V;
   };
+  'ActionStarGiftOutDescriptionUpgrade': {
+    'user': V;
+  };
   'StarGiftInfoDescriptionInbound': {
     'count': V;
     'link': V;
@@ -1632,9 +1641,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'amount': V;
   };
   'EmojiStatusAccessText': {
-    'name': V;
-  };
-  'LocationPermissionText': {
     'name': V;
   };
   'BotSuggestedStatusFor': {
@@ -1670,6 +1676,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'FolderLinkNotificationUpdatedTitle': {
     'title': V;
+  };
+  'LocationPermissionText': {
+    'name': V;
   };
 }
 

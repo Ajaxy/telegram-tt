@@ -22,6 +22,7 @@ import {
   getMessageVideo,
   isActionMessage,
   isChatChannel,
+  isChatGroup,
   isExpiredMessage,
 } from '../../../../global/helpers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
@@ -154,7 +155,7 @@ export default function useChatListEntry({
     }
 
     if (isAction) {
-      const isChat = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId);
+      const isChat = chat && (isChatChannel(chat) || isChatGroup(chat));
 
       return (
         <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
