@@ -28,6 +28,7 @@ import {
   selectChat,
   selectChatMessage,
   selectCurrentMessageList,
+  selectIsChatWithSelf,
   selectNotifyExceptions,
   selectNotifySettings,
   selectTopicFromMessage,
@@ -299,7 +300,9 @@ function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
   if (!areSettingsLoaded) return false;
   const global = getGlobal();
   const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
-  if ((isMuted && !message.isMentioned) || chat.isNotJoined || !chat.isListed) {
+  const shouldNotifyAboutMessage = !message.content?.action?.phoneCall;
+  if (isMuted || !shouldNotifyAboutMessage
+     || chat.isNotJoined || !chat.isListed || selectIsChatWithSelf(global, chat.id)) {
     return false;
   }
   // On touch devices show notifications when chat is not active
