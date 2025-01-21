@@ -20,6 +20,9 @@ const TYPE_HTML = 'text/html';
 const DOCUMENT_TYPE_WORD = 'urn:schemas-microsoft-com:office:word';
 const NAMESPACE_PREFIX_WORD = 'xmlns:w';
 
+const VALID_TARGET_IDS = new Set([EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID]);
+const CLOSEST_CONTENT_EDITABLE_SELECTOR = 'div[contenteditable]';
+
 const useClipboardPaste = (
   isActive: boolean,
   insertTextAndUpdateCursor: (text: ApiFormattedText, inputId?: string) => void,
@@ -42,8 +45,15 @@ const useClipboardPaste = (
         return;
       }
 
-      const input = document.activeElement;
-      if (input && ![EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID].includes(input.id)) {
+      const input = (e.target as HTMLElement)?.closest(CLOSEST_CONTENT_EDITABLE_SELECTOR);
+      if (input && !VALID_TARGET_IDS.has(input.id)) {
+        return;
+      }
+
+      e.preventDefault();
+
+      // Some extensions can trigger paste into their panels without focus
+      if (document.activeElement !== input) {
         return;
       }
 
@@ -62,7 +72,6 @@ const useClipboardPaste = (
       const { items } = e.clipboardData;
       let files: File[] | undefined = [];
 
-      e.preventDefault();
       if (items.length > 0) {
         files = await getFilesFromDataTransferItems(items);
         if (editedMessage) {
