@@ -133,7 +133,7 @@ const RadialPatternBackground = ({
     }
 
     const radialGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 2);
-    radialGradient.addColorStop(0, '#FFFFFF00');
+    radialGradient.addColorStop(0, '#FFFFFF77');
     radialGradient.addColorStop(1, '#FFFFFF');
 
     // Alpha mask

@@ -3,6 +3,7 @@ import type {
   ApiUser,
   ApiUserCommonChats,
   ApiUserFullInfo,
+  ApiUserStarGift,
   ApiUserStatus,
 } from '../../api/types';
 import type { BotAppPermissions } from '../../types';
@@ -321,4 +322,27 @@ export function updateBotAppPermissions<T extends GlobalState>(
       },
     },
   };
+}
+
+export function replaceUserGifts<T extends GlobalState>(
+  global: T,
+  userId: string,
+  gifts: ApiUserStarGift[],
+  nextOffset?: string,
+): T {
+  global = {
+    ...global,
+    users: {
+      ...global.users,
+      giftsById: {
+        ...global.users.giftsById,
+        [userId]: {
+          gifts,
+          nextOffset,
+        },
+      },
+    },
+  };
+
+  return global;
 }

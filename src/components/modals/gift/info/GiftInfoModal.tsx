@@ -81,8 +81,7 @@ const GiftInfoModal = ({
   const giftSticker = gift && getStickerFromGift(gift);
 
   const canFocusUpgrade = Boolean(userGift?.upgradeMsgId);
-  const canUpdate = gift?.type === 'starGiftUnique'
-    ? gift.ownerId === currentUserId : Boolean(userGift?.messageId) && !isSender && !canFocusUpgrade;
+  const canUpdate = Boolean(userGift?.messageId) && !isSender && !canFocusUpgrade;
 
   const handleClose = useLastCallback(() => {
     closeGiftInfoModal();
@@ -96,14 +95,14 @@ const GiftInfoModal = ({
   });
 
   const handleTriggerVisibility = useLastCallback(() => {
-    const { fromId, messageId, isUnsaved } = userGift!;
-    changeGiftVisibility({ userId: fromId!, messageId: messageId!, shouldUnsave: !isUnsaved });
+    const { messageId, isUnsaved } = userGift!;
+    changeGiftVisibility({ messageId: messageId!, shouldUnsave: !isUnsaved });
     handleClose();
   });
 
   const handleConvertToStars = useLastCallback(() => {
-    const { fromId, messageId } = userGift!;
-    convertGiftToStars({ userId: fromId!, messageId: messageId! });
+    const { messageId } = userGift!;
+    convertGiftToStars({ messageId: messageId! });
     closeConvertConfirm();
     handleClose();
   });

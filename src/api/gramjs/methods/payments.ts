@@ -468,7 +468,6 @@ export function saveStarGift({
   messageId,
   shouldUnsave,
 }: {
-  user: ApiUser;
   messageId: number;
   shouldUnsave?: boolean;
 }) {
@@ -481,7 +480,6 @@ export function saveStarGift({
 export function convertStarGift({
   messageId,
 }: {
-  user: ApiUser;
   messageId: number;
 }) {
   return invokeRequest(new GramJs.payments.ConvertStarGift({

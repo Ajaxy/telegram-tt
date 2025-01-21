@@ -341,17 +341,24 @@
 
   .action-message-unique-properties {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: min-content 1fr;
+    justify-content: center;
     gap: 0.375rem;
     font-size: 0.875rem;
     margin-top: 0.5rem;
 
     position: relative;
+
+    white-space: nowrap;
   }
 
   .action-message-unique-value {
     color: white;
     justify-self: flex-start;
+    width: 100%; // Grid ellipsis hack
+    text-align: initial;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .action-message-unique-property {

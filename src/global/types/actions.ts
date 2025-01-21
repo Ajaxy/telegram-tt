@@ -2303,12 +2303,10 @@ export interface ActionPayloads {
     shouldRefresh?: boolean;
   };
   changeGiftVisibility: {
-    userId: string;
     messageId: number;
     shouldUnsave?: boolean;
   };
   convertGiftToStars: {
-    userId: string;
     messageId: number;
   } & WithTabId;
 
