@@ -217,10 +217,10 @@ addActionHandler('setAuthRememberMe', (global, actions, payload): ActionReturnTy
   };
 });
 
-addActionHandler('clearAuthError', (global): ActionReturnType => {
+addActionHandler('clearAuthErrorKey', (global): ActionReturnType => {
   return {
     ...global,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 

@@ -17,7 +17,7 @@ import {
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
@@ -41,14 +41,6 @@ type StateProps =
     shouldUseSystemTheme: boolean;
   };
 
-const TIME_FORMAT_OPTIONS: IRadioOption[] = [{
-  label: '12-hour',
-  value: '12h',
-}, {
-  label: '24-hour',
-  value: '24h',
-}];
-
 const SettingsGeneral: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
@@ -63,28 +55,36 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     setSettingOption,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   const { isMobile } = useAppLayout();
   const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
 
+  const timeFormatOptions: IRadioOption[] = [{
+    label: lang('SettingsTimeFormat12'),
+    value: '12h',
+  }, {
+    label: lang('SettingsTimeFormat24'),
+    value: '24h',
+  }];
+
   const appearanceThemeOptions: IRadioOption[] = [{
-    label: lang('EmptyChat.Appearance.Light'),
+    label: lang('EmptyChatAppearanceLight'),
     value: 'light',
   }, {
-    label: lang('EmptyChat.Appearance.Dark'),
+    label: lang('EmptyChatAppearanceDark'),
     value: 'dark',
   }, {
-    label: lang('EmptyChat.Appearance.System'),
+    label: lang('EmptyChatAppearanceSystem'),
     value: 'auto',
   }];
 
   const keyboardSendOptions = !isMobileDevice ? [
-    { value: 'enter', label: lang('lng_settings_send_enter'), subLabel: 'New line by Shift + Enter' },
+    { value: 'enter', label: lang('SettingsSendEnter'), subLabel: lang('SettingsSendEnterDescription') },
     {
       value: 'ctrl-enter',
-      label: lang(IS_MAC_OS || IS_IOS ? 'lng_settings_send_cmdenter' : 'lng_settings_send_ctrlenter'),
-      subLabel: 'New line by Enter',
+      label: lang(IS_MAC_OS || IS_IOS ? 'SettingsSendCmdenter' : 'SettingsSendCtrlenter'),
+      subLabel: lang('SettingsSendPlusEnterDescription'),
     },
   ] : undefined;
 
@@ -134,7 +134,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content custom-scroll">
       <div className="settings-item pt-3">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('SETTINGS')}</h4>
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Settings')}</h4>
 
         <RangeSlider
           label={lang('TextSize')}
@@ -155,7 +155,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
         {IS_ELECTRON && IS_WINDOWS && (
           <Checkbox
-            label={lang('GeneralSettings.StatusBarItem')}
+            label={lang('SettingsTray')}
             checked={Boolean(isTrayIconEnabled)}
             onCheck={handleIsTrayIconEnabledChange}
           />
@@ -176,11 +176,11 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          Time Format
+          {lang('SettingsTimeFormat')}
         </h4>
         <RadioGroup
           name="timeformat"
-          options={TIME_FORMAT_OPTIONS}
+          options={timeFormatOptions}
           selected={timeFormat}
           onChange={handleTimeFormatChange}
         />
@@ -188,7 +188,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
       {keyboardSendOptions && (
         <div className="settings-item">
-          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('VoiceOver.Keyboard')}</h4>
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('SettingsKeyboard')}</h4>
 
           <RadioGroup
             name="keyboard-send-settings"

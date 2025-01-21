@@ -142,7 +142,7 @@ export interface LangPair {
   'LoginQRLogin': undefined;
   'LoginQRTitle': undefined;
   'LoginQRHelp1': undefined;
-  'LoginQR2Help2': undefined;
+  'LoginQRHelp2': undefined;
   'LoginQRHelp3': undefined;
   'LoginQRCancel': undefined;
   'YourName': undefined;
@@ -344,6 +344,8 @@ export interface LangPair {
   'AuthSessionsViewBrowser': undefined;
   'AuthSessionsViewLocationInfo': undefined;
   'AuthSessionsLogOutApplications': undefined;
+  'AuthKeepSignedIn': undefined;
+  'AuthTitle': undefined;
   'ClearOtherWebSessionsHelp': undefined;
   'AreYouSureWebSessions': undefined;
   'AutoDownloadMaxFileSize': undefined;
@@ -369,10 +371,17 @@ export interface LangPair {
   'SettingsSendEnter': undefined;
   'SettingsSendCmdenter': undefined;
   'SettingsSendCtrlenter': undefined;
+  'SettingsSendEnterDescription': undefined;
+  'SettingsSendPlusEnterDescription': undefined;
+  'SettingsTimeFormat': undefined;
+  'SettingsTimeFormat12': undefined;
+  'SettingsTimeFormat24': undefined;
+  'SettingsKeyboard': undefined;
+  'SettingsTray': undefined;
+  'SettingsOfflineNotificationUnsupported': undefined;
   'TextSize': undefined;
   'ChatBackground': undefined;
   'Theme': undefined;
-  'VoiceOverKeyboard': undefined;
   'AccDescrStickers': undefined;
   'DoubleTapSetting': undefined;
   'SuggestStickers': undefined;
@@ -544,10 +553,46 @@ export interface LangPair {
   'PollsSolutionTitle': undefined;
   'CreatePollExplanationInfo': undefined;
   'VoipGroupPersonalAccount': undefined;
+  'MenuStickers': undefined;
+  'MenuAnimations': undefined;
+  'MenuStars': undefined;
+  'MenuSendGift': undefined;
+  'MenuTelegramFaq': undefined;
+  'MenuPrivacyPolicy': undefined;
+  'MenuAskText': undefined;
+  'SettingsPerformanceSliderTitle': undefined;
+  'SettingsPerformanceSliderSubtitle': undefined;
+  'SettingsPerformanceSliderLow': undefined;
+  'SettingsPerformanceSliderMedium': undefined;
+  'SettingsPerformanceSliderCustom': undefined;
+  'SettingsPerformanceSliderHigh': undefined;
+  'SettingsPerformanceInterfaceAnimations': undefined;
+  'SettingsPerformanceStickers': undefined;
+  'SettingsPerformanceMediaAutoplay': undefined;
+  'SettingsPerformancePageTransitions': undefined;
+  'SettingsPerformanceSending': undefined;
+  'SettingsPerformanceMediaViewer': undefined;
+  'SettingsPerformanceComposer': undefined;
+  'SettingsPerformanceContextAnimation': undefined;
+  'SettingsPerformanceContextBlur': undefined;
+  'SettingsPerformanceRightColumn': undefined;
+  'SettingsPerformanceThanos': undefined;
+  'SettingsPerformanceAnimatedEmoji': undefined;
+  'SettingsPerformanceLoopStickers': undefined;
+  'SettingsPerformanceReactionEffects': undefined;
+  'SettingsPerformanceStickerEffects': undefined;
+  'SettingsPerformanceAutoplayGif': undefined;
+  'SettingsPerformanceAutoplayVideo': undefined;
   'FavoriteStickers': undefined;
   'PremiumStickers': undefined;
   'GroupStickers': undefined;
   'ErrorSendRestrictedStickersAll': undefined;
+  'ErrorPhoneNumberInvalid': undefined;
+  'ErrorCodeInvalid': undefined;
+  'ErrorIncorrectPassword': undefined;
+  'ErrorPasswordFlood': undefined;
+  'ErrorPhoneBanned': undefined;
+  'ErrorUnexpected': undefined;
   'NoStickers': undefined;
   'ClearRecentEmoji': undefined;
   'TextFormatAddLinkTitle': undefined;
@@ -994,7 +1039,6 @@ export interface LangPair {
   'SettingsAnimationsHigh': undefined;
   'Settings12HourFormat': undefined;
   'Settings24HourFormat': undefined;
-  'SettingsSendEnterDescription': undefined;
   'SettingsSendCtrlEnterDescription': undefined;
   'AriaMoreButton': undefined;
   'RecoveryEmailCode': undefined;
@@ -1094,7 +1138,6 @@ export interface LangPair {
   'HideCaption': undefined;
   'ChangeRecipient': undefined;
   'DragToSortAria': undefined;
-  'SettingsTimeFormat': undefined;
   'MenuReportBug': undefined;
   'MenuBetaChangelog': undefined;
   'MenuSwitchToK': undefined;
@@ -1239,6 +1282,7 @@ export interface LangPair {
   'ViewButtonBoost': undefined;
   'ViewButtonStickerset': undefined;
   'ViewButtonGiftUnique': undefined;
+  'AuthContinueOnThisLanguage': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1403,6 +1447,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'SlowModeHint': {
     'time': V;
+  };
+  'ErrorUnexpectedMessage': {
+    'error': V;
   };
   'EditedDate': {
     'date': V;
@@ -1760,6 +1807,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'PreviewSenderSendFile': {
     'count': V;
+  };
+  'ErrorFlood': {
+    'hour': V;
   };
   'PinnedMessageTitle': {
     'index': V;

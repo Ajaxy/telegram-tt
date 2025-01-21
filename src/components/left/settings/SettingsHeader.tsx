@@ -163,7 +163,7 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{oldLang('NeverAllow')}</h3>;
 
       case SettingsScreens.Performance:
-        return <h3>{oldLang('Animations and Performance')}</h3>;
+        return <h3>{lang('MenuAnimations')}</h3>;
 
       case SettingsScreens.ActiveSessions:
         return <h3>{oldLang('SessionsTitle')}</h3>;

@@ -7,6 +7,7 @@ import type {
   VideoState,
 } from '../../lib/secret-sauce';
 import type { ThreadId } from '../../types';
+import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiBotMenuButton } from './bots';
 import type {
   ApiGroupCall, ApiPhoneCall,
@@ -84,7 +85,7 @@ export type ApiUpdateSession = {
 
 export type ApiUpdateAuthorizationError = {
   '@type': 'updateAuthorizationError';
-  message: string;
+  errorKey: RegularLangFnParameters;
 };
 
 export type ApiUpdateConnectionState = {

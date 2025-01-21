@@ -180,10 +180,9 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
 }
 
 function onUpdateAuthorizationError<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationError) {
-  global = getGlobal();
   global = {
     ...global,
-    authError: update.message,
+    authErrorKey: update.errorKey,
   };
   setGlobal(global);
 }

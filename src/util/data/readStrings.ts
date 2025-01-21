@@ -1,7 +1,7 @@
 import { DEBUG } from '../../config';
 
 export default function readStrings(data: string): Record<string, string> {
-  const lines = data.split(/;?\r?\n/);
+  const lines = data.split(/;\r?\n?/);
   const result: Record<string, string> = {};
   for (const line of lines) {
     if (!line.startsWith('"')) continue;

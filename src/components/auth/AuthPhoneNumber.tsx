@@ -18,8 +18,8 @@ import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import useFlag from '../../hooks/useFlag';
-import useOldLang from '../../hooks/useOldLang';
-import useOldLangString from '../../hooks/useOldLangString';
+import useLang from '../../hooks/useLang';
+import useLangString from '../../hooks/useLangString';
 
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
@@ -32,7 +32,7 @@ import monkeyPath from '../../assets/monkey.svg';
 type StateProps = Pick<GlobalState, (
   'connectionState' | 'authState' |
   'authPhoneNumber' | 'authIsLoading' |
-  'authIsLoadingQrCode' | 'authError' |
+  'authIsLoadingQrCode' | 'authErrorKey' |
   'authRememberMe' | 'authNearestCountry'
 )> & {
   language?: string;
@@ -49,7 +49,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
   authPhoneNumber,
   authIsLoading,
   authIsLoadingQrCode,
-  authError,
+  authErrorKey,
   authRememberMe,
   authNearestCountry,
   phoneCodeList,
@@ -60,18 +60,18 @@ const AuthPhoneNumber: FC<StateProps> = ({
     setAuthRememberMe,
     loadNearestCountry,
     loadCountryList,
-    clearAuthError,
+    clearAuthErrorKey,
     goToAuthQrCode,
     setSettingOption,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestedLanguage = getSuggestedLanguage();
 
   const isConnected = connectionState === 'connectionStateReady';
-  const continueText = useOldLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
+  const continueText = useLangString('AuthContinueOnThisLanguage', suggestedLanguage);
   const [country, setCountry] = useState<ApiCountryCode | undefined>();
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [isTouched, setIsTouched] = useState(false);
@@ -161,8 +161,8 @@ const AuthPhoneNumber: FC<StateProps> = ({
   }, []);
 
   const handlePhoneNumberChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    if (authError) {
-      clearAuthError();
+    if (authErrorKey) {
+      clearAuthErrorKey();
     }
 
     // This is for further screens. We delay it until user input to speed up the initial loading.
@@ -186,7 +186,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
       && value.length - fullNumber.length > 1 && !isJustPastedRef.current
     );
     parseFullNumber(shouldFixSafariAutoComplete ? `${country!.countryCode} ${value}` : value);
-  }, [authError, clearAuthError, country, fullNumber, parseFullNumber]);
+  }, [authErrorKey, country, fullNumber, parseFullNumber]);
 
   const handleKeepSessionChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setAuthRememberMe(e.target.checked);
@@ -214,7 +214,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
     <div id="auth-phone-number-form" className="custom-scroll">
       <div className="auth-form">
         <div id="logo" />
-        <h1>Telegram</h1>
+        <h1>{lang('AuthTitle')}</h1>
         <p className="note">{lang('StartText')}</p>
         <form className="form" action="" onSubmit={handleSubmit}>
           <CountryCodeInput
@@ -226,29 +226,29 @@ const AuthPhoneNumber: FC<StateProps> = ({
           <InputText
             ref={inputRef}
             id="sign-in-phone-number"
-            label={lang('Login.PhonePlaceholder')}
+            label={lang('LoginPhonePlaceholder')}
             value={fullNumber}
-            error={authError && lang(authError)}
+            error={authErrorKey && lang.withRegular(authErrorKey)}
             inputMode="tel"
             onChange={handlePhoneNumberChange}
             onPaste={IS_SAFARI ? handlePaste : undefined}
           />
           <Checkbox
             id="sign-in-keep-session"
-            label="Keep me signed in"
+            label={lang('AuthKeepSignedIn')}
             checked={Boolean(authRememberMe)}
             onChange={handleKeepSessionChange}
           />
           {canSubmit && (
             isAuthReady ? (
-              <Button type="submit" ripple isLoading={authIsLoading}>{lang('Login.Next')}</Button>
+              <Button type="submit" ripple isLoading={authIsLoading}>{lang('LoginNext')}</Button>
             ) : (
               <Loading />
             )
           )}
           {isAuthReady && (
             <Button isText ripple isLoading={authIsLoadingQrCode} onClick={handleGoToAuthQrCode}>
-              {lang('Login.QR.Login')}
+              {lang('LoginQRLogin')}
             </Button>
           )}
           {suggestedLanguage && suggestedLanguage !== language && continueText && (
@@ -274,7 +274,7 @@ export default memo(withGlobal(
         'authPhoneNumber',
         'authIsLoading',
         'authIsLoadingQrCode',
-        'authError',
+        'authErrorKey',
         'authRememberMe',
         'authNearestCountry',
       ]),

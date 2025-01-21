@@ -10,7 +10,7 @@ import {
 } from '../../../util/notifications';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import useRunDebounced from '../../../hooks/useRunDebounced';
 
 import Checkbox from '../../ui/Checkbox';
@@ -139,7 +139,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     runDebounced(() => playNotifySound(undefined, volume));
   }, [runDebounced, updateWebNotificationSettings]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -150,27 +150,27 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     <div className="settings-content custom-scroll">
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          Web notifications
+          {lang('NotificationsWeb')}
         </h4>
         <Checkbox
-          label="Web notifications"
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasWebNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          label={lang('NotificationsWeb')}
+          subLabel={lang(hasWebNotifications ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasWebNotifications}
           disabled={!areNotificationsSupported}
           onChange={handleWebNotificationsChange}
         />
         <Checkbox
-          label="Offline notifications"
+          label={lang('NotificationsOffline')}
           disabled={!hasWebNotifications || !areOfflineNotificationsSupported}
-          // eslint-disable-next-line max-len
-          subLabel={areOfflineNotificationsSupported ? lang(hasPushNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled') : 'Not supported'}
+          subLabel={areOfflineNotificationsSupported
+            ? lang(hasPushNotifications ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')
+            : lang('SettingsOfflineNotificationUnsupported')}
           checked={hasPushNotifications}
           onChange={handlePushNotificationsChange}
         />
         <div className="settings-item-slider">
           <RangeSlider
-            label="Sound"
+            label={lang('NotificationsSound')}
             min={0}
             max={10}
             disabled={!areNotificationsSupported}
@@ -186,16 +186,16 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForPrivateChats')}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasPrivateChatsNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          subLabel={lang(hasPrivateChatsNotifications
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasPrivateChatsNotifications}
           onChange={handlePrivateChatsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
           disabled={!hasPrivateChatsNotifications}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasPrivateChatsMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          subLabel={lang(hasPrivateChatsMessagePreview
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasPrivateChatsMessagePreview}
           onChange={handlePrivateChatsPreviewChange}
         />
@@ -206,14 +206,14 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForGroups')}
-          subLabel={lang(hasGroupNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          subLabel={lang(hasGroupNotifications ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasGroupNotifications}
           onChange={handleGroupsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
           disabled={!hasGroupNotifications}
-          subLabel={lang(hasGroupMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          subLabel={lang(hasGroupMessagePreview ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasGroupMessagePreview}
           onChange={handleGroupsPreviewChange}
         />
@@ -224,16 +224,14 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForChannels')}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasBroadcastNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          subLabel={lang(hasBroadcastNotifications ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasBroadcastNotifications}
           onChange={handleChannelsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
           disabled={!hasBroadcastNotifications}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasBroadcastMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          subLabel={lang(hasBroadcastMessagePreview ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasBroadcastMessagePreview}
           onChange={handleChannelsPreviewChange}
         />

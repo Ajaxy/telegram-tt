@@ -1,6 +1,7 @@
 import type { TeactNode } from '../../lib/teact/teact';
 
 import type {
+  ApiLanguage,
   LangPackStringValue,
   LangPackStringValueDeleted,
   LangPackStringValuePlural,
@@ -143,6 +144,8 @@ export type LangFn = {
   ): TeactNode;
 
   with: (params: LangFnParameters) => TeactNode;
+  withRegular: (params: RegularLangFnParameters) => string;
+  withAdvanced: (params: AdvancedLangFnParameters) => TeactNode;
   region: (code: string) => string | undefined;
   conjunction: (list: string[]) => string;
   disjunction: (list: string[]) => string;
@@ -150,6 +153,7 @@ export type LangFn = {
   isRtl?: boolean;
   code: string;
   pluralCode: string;
+  languageInfo: ApiLanguage;
 };
 
 type ListFormat = Pick<Intl.ListFormat, 'format'>;

@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
@@ -11,14 +10,13 @@ import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import buildClassName from '../../util/buildClassName';
 import { oldSetLanguage } from '../../util/oldLangProvider';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
-import renderText from '../common/helpers/renderText';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
 import useAsync from '../../hooks/useAsync';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLangString from '../../hooks/useLangString';
 import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
-import useOldLang from '../../hooks/useOldLang';
-import useOldLangString from '../../hooks/useOldLangString';
 
 import AnimatedIcon from '../common/AnimatedIcon';
 import Button from '../ui/Button';
@@ -44,24 +42,24 @@ function ensureQrCodeStyling() {
   return qrCodeStylingPromise;
 }
 
-const AuthCode: FC<StateProps> = ({
+const AuthCode = ({
   connectionState,
   authState,
   authQrCode,
   language,
-}) => {
+}: StateProps) => {
   const {
     returnToAuthPhoneNumber,
     setSettingOption,
   } = getActions();
 
   const suggestedLanguage = getSuggestedLanguage();
-  const lang = useOldLang();
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const qrCodeRef = useRef<HTMLDivElement>(null);
 
   const isConnected = connectionState === 'connectionStateReady';
-  const continueText = useOldLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
+  const continueText = useLangString('AuthContinueOnThisLanguage', suggestedLanguage);
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
   const [isQrMounted, markQrMounted, unmarkQrMounted] = useFlag();
 
@@ -173,14 +171,14 @@ const AuthCode: FC<StateProps> = ({
           </div>
           {!isQrMounted && <div className="qr-loading"><Loading /></div>}
         </div>
-        <h1>{lang('Login.QR.Title')}</h1>
+        <h1>{lang('LoginQRTitle')}</h1>
         <ol>
-          <li><span>{lang('Login.QR.Help1')}</span></li>
-          <li><span>{renderText(lang('Login.QR2.Help2'), ['simple_markdown'])}</span></li>
-          <li><span>{lang('Login.QR.Help3')}</span></li>
+          <li><span>{lang('LoginQRHelp1')}</span></li>
+          <li><span>{lang('LoginQRHelp2', undefined, { withNodes: true, withMarkdown: true })}</span></li>
+          <li><span>{lang('LoginQRHelp3')}</span></li>
         </ol>
         {isAuthReady && (
-          <Button isText onClick={habdleReturnToAuthPhoneNumber}>{lang('Login.QR.Cancel')}</Button>
+          <Button isText onClick={habdleReturnToAuthPhoneNumber}>{lang('LoginQRCancel')}</Button>
         )}
         {suggestedLanguage && suggestedLanguage !== language && continueText && (
           <Button isText isLoading={isLoading} onClick={handleLangChange}>{continueText}</Button>

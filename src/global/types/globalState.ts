@@ -68,6 +68,7 @@ import type {
   TopicsInfo,
   WebPageMediaSize,
 } from '../../types';
+import type { RegularLangFnParameters } from '../../util/localization';
 import type { TabState } from './tabState';
 
 export type GlobalState = {
@@ -145,7 +146,7 @@ export type GlobalState = {
   authPhoneNumber?: string;
   authIsLoading?: boolean;
   authIsLoadingQrCode?: boolean;
-  authError?: string;
+  authErrorKey?: RegularLangFnParameters;
   authRememberMe?: boolean;
   authNearestCountry?: string;
   authIsCodeViaApp?: boolean;

@@ -1,4 +1,6 @@
-const INITIAL_KEYS = [
+import type { LangKey } from '../../types/language';
+
+const INITIAL_KEYS: LangKey[] = [
   'WrongNumber',
   'SentAppCode',
   'LoginJustSentSms',
@@ -11,7 +13,7 @@ const INITIAL_KEYS = [
   'LoginQRTitle',
   'LoginQRHelp1',
   'LoginQRHelp2',
-  'LoginQR2Help2',
+  'LoginQRHelp2',
   'LoginQRHelp3',
   'LoginQRCancel',
   'YourName',
@@ -21,6 +23,14 @@ const INITIAL_KEYS = [
   'LoginSelectCountryTitle',
   'CountryNone',
   'PleaseEnterPassword',
+  'ErrorPhoneNumberInvalid',
+  'ErrorCodeInvalid',
+  'ErrorIncorrectPassword',
+  'ErrorPasswordFlood',
+  'ErrorPhoneBanned',
+  'ErrorFlood',
+  'ErrorUnexpected',
+  'ErrorUnexpectedMessage',
 ];
 
 export default INITIAL_KEYS;

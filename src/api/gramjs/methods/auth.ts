@@ -1,5 +1,7 @@
 import { FloodWaitError, RPCError } from '../../../lib/gramjs/errors';
 
+import type { RegularLangKey } from '../../../types/language';
+import type { RegularLangFnParameters } from '../../../util/localization';
 import type {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationStateType,
@@ -10,12 +12,12 @@ import type {
 import { DEBUG } from '../../../config';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 
-const ApiErrors: { [k: string]: string } = {
-  PHONE_NUMBER_INVALID: 'Invalid phone number.',
-  PHONE_CODE_INVALID: 'Invalid code.',
-  PASSWORD_HASH_INVALID: 'Incorrect password.',
-  PHONE_PASSWORD_FLOOD: 'Limit exceeded. Please try again later.',
-  PHONE_NUMBER_BANNED: 'This phone number is banned.',
+const ApiErrors: Record<string, RegularLangKey> = {
+  PHONE_NUMBER_INVALID: 'ErrorPhoneNumberInvalid',
+  PHONE_CODE_INVALID: 'ErrorCodeInvalid',
+  PASSWORD_HASH_INVALID: 'ErrorIncorrectPassword',
+  PHONE_PASSWORD_FLOOD: 'ErrorPasswordFlood',
+  PHONE_NUMBER_BANNED: 'ErrorPhoneBanned',
 };
 
 const authController: {
@@ -85,19 +87,30 @@ export function onRequestQrCode(qrCode: { token: Buffer; expires: number }) {
 }
 
 export function onAuthError(err: Error) {
-  let message: string;
+  let messageKey: RegularLangFnParameters | undefined;
 
   if (err instanceof FloodWaitError) {
     const hours = Math.ceil(Number(err.seconds) / 60 / 60);
-    message = `Too many attempts. Try again in ${hours > 1 ? `${hours} hours` : 'an hour'}`;
+    messageKey = {
+      key: 'ErrorFlood',
+      variables: { hour: hours },
+      options: { pluralValue: hours },
+    };
   } else if (err instanceof RPCError) {
-    message = ApiErrors[err.errorMessage];
-  } else {
-    message = err.message;
+    messageKey = {
+      key: ApiErrors[err.errorMessage],
+    };
+  } else if (err.message) {
+    messageKey = {
+      key: 'ErrorUnexpectedMessage',
+      variables: { error: err.message },
+    };
   }
 
-  if (!message) {
-    message = 'Unexpected Error';
+  if (!messageKey) {
+    messageKey = {
+      key: 'ErrorUnexpected',
+    };
 
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -107,7 +120,7 @@ export function onAuthError(err: Error) {
 
   sendApiUpdate({
     '@type': 'updateAuthorizationError',
-    message,
+    errorKey: messageKey,
   });
 }
 

@@ -116,7 +116,7 @@ export interface ActionPayloads {
   };
   returnToAuthPhoneNumber: undefined;
   setAuthRememberMe: boolean;
-  clearAuthError: undefined;
+  clearAuthErrorKey: undefined;
   uploadProfilePhoto: {
     file: File;
     isFallback?: boolean;
