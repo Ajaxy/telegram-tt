@@ -61,9 +61,12 @@ export const IS_VOICE_RECORDING_SUPPORTED = Boolean(
   ),
 );
 export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && (IS_MAC_OS || IS_IOS) && isLastEmojiVersionSupported();
+
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
+const chromeVersion = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)?.[2];
+const hasBrokenServiceWorkerStreaming = chromeVersion && Number(chromeVersion) >= 132; // TODO: Update constraint when bug is fixed
 // TODO Consider failed service worker
-export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
+export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED && !hasBrokenServiceWorkerStreaming;
 export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; codecs=opus'));
 export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
