@@ -241,18 +241,18 @@ const AuthPhoneNumber: FC<StateProps> = ({
           />
           {canSubmit && (
             isAuthReady ? (
-              <Button type="submit" ripple isLoading={authIsLoading}>{lang('LoginNext')}</Button>
+              <Button size="smaller" type="submit" ripple isLoading={authIsLoading}>{lang('LoginNext')}</Button>
             ) : (
               <Loading />
             )
           )}
           {isAuthReady && (
-            <Button isText ripple isLoading={authIsLoadingQrCode} onClick={handleGoToAuthQrCode}>
+            <Button size="smaller" isText ripple isLoading={authIsLoadingQrCode} onClick={handleGoToAuthQrCode}>
               {lang('LoginQRLogin')}
             </Button>
           )}
           {suggestedLanguage && suggestedLanguage !== language && continueText && (
-            <Button isText isLoading={isLoading} onClick={handleLangChange}>{continueText}</Button>
+            <Button size="smaller" isText isLoading={isLoading} onClick={handleLangChange}>{continueText}</Button>
           )}
         </form>
       </div>

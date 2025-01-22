@@ -76,7 +76,7 @@ const AuthRegister: FC<StateProps> = ({
             autoComplete="family-name"
           />
           {isButtonShown && (
-            <Button type="submit" ripple isLoading={authIsLoading}>{lang('Next')}</Button>
+            <Button size="smaller" type="submit" ripple isLoading={authIsLoading}>{lang('Next')}</Button>
           )}
         </form>
       </div>
