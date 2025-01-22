@@ -451,7 +451,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
     if (message.isOutgoing) {
       if (amountToConvert) {
-        return lang('ActionStarGiftOutDescription', {
+        return lang('ActionStarGiftOutDescription2', {
           user: targetUser || 'User',
           count: amountToConvert,
         }, { withNodes: true, pluralValue: amountToConvert });
@@ -484,7 +484,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     }
 
     if (amountToConvert) {
-      return lang('ActionStarGiftDescription', {
+      return lang('ActionStarGiftDescription2', {
         count: amountToConvert,
       }, { withNodes: true, pluralValue: amountToConvert });
     }
@@ -638,12 +638,13 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         </span>
         <span className="action-message-subtitle">
           {renderText(lang(
-            'PrizeCredits', {
+            'PrizeCredits2', {
               count: (
                 <b>{formatInteger(message.content.action?.stars!)}</b>
               ),
             }, {
               withNodes: true,
+              pluralValue: message.content.action?.stars!,
             },
           ), ['simple_markdown'])}
         </span>

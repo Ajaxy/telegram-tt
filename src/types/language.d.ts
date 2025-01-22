@@ -1703,9 +1703,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsReactionTerms': {
     'link': V;
   };
-  'PrizeCredits': {
-    'count': V;
-  };
   'ActionStarGiftTitle': {
     'user': V;
     'count': V;
@@ -1952,11 +1949,14 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
     'botName': V;
     'count': V;
   };
-  'ActionStarGiftOutDescription': {
+  'PrizeCredits2': {
+    'count': V;
+  };
+  'ActionStarGiftOutDescription2': {
     'user': V;
     'count': V;
   };
-  'ActionStarGiftDescription': {
+  'ActionStarGiftDescription2': {
     'count': V;
   };
   'StarsSubscribeText': {
