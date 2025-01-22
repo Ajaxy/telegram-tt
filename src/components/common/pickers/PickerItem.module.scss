@@ -19,9 +19,19 @@
   transition-property: background-color, opacity;
   transition-duration: 150ms;
 
+  :global(body.is-ios) &,
+  :global(body.is-android) & {
+    border-radius: 0;
+    padding-inline-start: 0.75rem;
+  }
+
+  :global(body.is-ios) & {
+    padding-inline-end: 0;
+  }
+
   @media (max-width: 600px) {
     border-radius: 0;
-    padding-inline: 0.5rem;
+    padding-inline-start: 0.5rem !important;
   }
 }
 
@@ -38,7 +48,7 @@
 
 .separator {
   grid-row: 2;
-  grid-column: 2 / 4;
+  grid-column: 3;
   /* stylelint-disable-next-line plugin/whole-pixel */
   height: 0.5px;
   background-color: var(--color-dividers);

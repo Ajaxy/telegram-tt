@@ -4,6 +4,7 @@
   .modal-dialog {
     height: 70%;
     max-width: 25rem;
+    overflow: hidden;
 
     @media (max-width: 600px) {
       height: 90%;
