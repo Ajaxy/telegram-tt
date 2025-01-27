@@ -308,7 +308,7 @@ const GiftInfoModal = ({
         >
           <Icon name="close" />
         </Button>
-        {contextMenu}
+        {isOpen && contextMenu}
       </div>
     );
 
@@ -586,7 +586,7 @@ const GiftInfoModal = ({
     };
   }, [
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang,
-    gift, giftAttributes, renderFooterButton, isTargetChat, SettingsMenuButton,
+    gift, giftAttributes, renderFooterButton, isTargetChat, SettingsMenuButton, isOpen,
   ]);
 
   return (
