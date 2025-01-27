@@ -128,6 +128,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     getReceipt,
     openGiftInfoModalFromMessage,
     openPrizeStarsTransactionFromGiveaway,
+    markMentionsRead,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -194,6 +195,12 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       requestConfetti({ withStars: true });
     }
   }, [isVisible, requestConfetti]);
+
+  useEffect(() => {
+    if (isVisible && message.hasUnreadMention) {
+      markMentionsRead({ messageIds: [message.id] });
+    }
+  }, [message.hasUnreadMention, isVisible]);
 
   const { transitionClassNames } = useShowTransitionDeprecated(isShown, undefined, noAppearanceAnimation, false);
 
