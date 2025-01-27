@@ -71,11 +71,13 @@ import {
 import {
   addPhotoToLocalDb,
   addStoryToLocalDb,
+} from '../helpers/localDb';
+import {
   isChatFolder,
   log,
   resolveMessageApiChatId,
   serializeBytes,
-} from '../helpers';
+} from '../helpers/misc';
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate, scheduleMutedTopicUpdate } from '../scheduleUnmute';
 import { sendApiUpdate } from './apiUpdateEmitter';

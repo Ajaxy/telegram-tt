@@ -3,7 +3,7 @@ import {
   sessions,
   type Update,
 } from '../../../lib/gramjs';
-import type { TwoFaParams, TwoFaPasswordParams } from '../../../lib/gramjs/client/2fa';
+import type { TwoFaParams } from '../../../lib/gramjs/client/2fa';
 import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
 import { RPCError } from '../../../lib/gramjs/errors';
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
@@ -30,8 +30,11 @@ import { buildApiStory } from '../apiBuilders/stories';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import { buildInputPeerFromLocalDb, getEntityTypeById } from '../gramjsBuilders';
 import {
-  addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
-} from '../helpers';
+  addStoryToLocalDb, addUserToLocalDb,
+} from '../helpers/localDb';
+import {
+  isResponseUpdate, log,
+} from '../helpers/misc';
 import localDb, { clearLocalDb, type RepairInfo } from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { processAndUpdateEntities, processMessageAndUpdateThreadInfo } from '../updates/entityProcessor';
@@ -376,8 +379,8 @@ export function getTmpPassword(currentPassword: string, ttl?: number) {
   return client.getTmpPassword(currentPassword, ttl);
 }
 
-export function getCurrentPassword(params: TwoFaPasswordParams) {
-  return client.getCurrentPassword(params);
+export function getCurrentPassword(currentPassword?: string) {
+  return client.getCurrentPassword(currentPassword);
 }
 
 export function abortChatRequests(params: { chatId: string; threadId?: ThreadId }) {

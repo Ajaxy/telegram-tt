@@ -25,7 +25,8 @@ import type {
 
 import { pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
-import { addPhotoToLocalDb, addUserToLocalDb, serializeBytes } from '../helpers';
+import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
+import { serializeBytes } from '../helpers/misc';
 import {
   buildApiBotVerification, buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
 } from './common';

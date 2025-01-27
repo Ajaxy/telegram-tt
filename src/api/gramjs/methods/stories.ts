@@ -26,7 +26,8 @@ import {
   buildInputPrivacyRules,
   buildInputReaction,
 } from '../gramjsBuilders';
-import { addStoryToLocalDb, deserializeBytes } from '../helpers';
+import { addStoryToLocalDb } from '../helpers/localDb';
+import { deserializeBytes } from '../helpers/misc';
 import { invokeRequest } from './client';
 
 export async function fetchAllStories({

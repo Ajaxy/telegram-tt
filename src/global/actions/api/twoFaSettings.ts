@@ -19,7 +19,7 @@ addActionHandler('loadPasswordInfo', async (global): Promise<void> => {
 addActionHandler('checkPassword', async (global, actions, payload): Promise<void> => {
   const { currentPassword, onSuccess } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
   setGlobal(global);
 
   const isSuccess = await callApi('checkPassword', currentPassword);
@@ -36,7 +36,7 @@ addActionHandler('checkPassword', async (global, actions, payload): Promise<void
 addActionHandler('clearPassword', async (global, actions, payload): Promise<void> => {
   const { currentPassword, onSuccess } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
   setGlobal(global);
 
   const isSuccess = await callApi('clearPassword', currentPassword);
@@ -55,7 +55,7 @@ addActionHandler('updatePassword', async (global, actions, payload): Promise<voi
     currentPassword, password, hint, email, onSuccess,
   } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
   setGlobal(global);
 
   const isSuccess = await callApi('updatePassword', currentPassword, password, hint, email);
@@ -74,7 +74,7 @@ addActionHandler('updateRecoveryEmail', async (global, actions, payload): Promis
     currentPassword, email, onSuccess,
   } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
   setGlobal(global);
 
   const isSuccess = await callApi('updateRecoveryEmail', currentPassword, email);
@@ -95,5 +95,5 @@ addActionHandler('provideTwoFaEmailCode', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('clearTwoFaError', (global): ActionReturnType => {
-  return updateTwoFaSettings(global, { error: undefined });
+  return updateTwoFaSettings(global, { errorKey: undefined });
 });

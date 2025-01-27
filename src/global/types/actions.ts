@@ -173,7 +173,11 @@ export interface ActionPayloads {
   updatePerformanceSettings: Partial<PerformanceType>;
   loadPasswordInfo: undefined;
   clearTwoFaError: undefined;
-  clearMonetizationInfo: undefined;
+  openMonetizationVerificationModal: {
+    chatId: string;
+  } & WithTabId;
+  clearMonetizationVerificationError: WithTabId | undefined;
+  closeMonetizationVerificationModal: WithTabId | undefined;
   updatePassword: {
     currentPassword: string;
     password: string;
@@ -756,10 +760,9 @@ export interface ActionPayloads {
     peerId: string;
   } & WithTabId;
 
-  loadMonetizationRevenueWithdrawalUrl: {
+  processMonetizationRevenueWithdrawalUrl: {
     peerId: string;
     currentPassword: string;
-    onSuccess: VoidFunction;
   } & WithTabId;
 
   // ui
@@ -2322,6 +2325,15 @@ export interface ActionPayloads {
     gift: ApiInputSavedStarGift;
     shouldKeepOriginalDetails?: boolean;
     upgradeStars?: number;
+  } & WithTabId;
+  openGiftWithdrawModal: {
+    gift: ApiSavedStarGift;
+  } & WithTabId;
+  clearGiftWithdrawError: WithTabId | undefined;
+  closeGiftWithdrawModal: WithTabId | undefined;
+  processStarGiftWithdrawal: {
+    gift: ApiInputSavedStarGift;
+    password: string;
   } & WithTabId;
   loadPeerSavedGifts: {
     peerId: string;

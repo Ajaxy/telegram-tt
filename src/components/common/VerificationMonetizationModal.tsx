@@ -1,14 +1,16 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo,
   useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, withGlobal } from '../../global';
+
+import type { TabState } from '../../global/types';
 
 import buildClassName from '../../util/buildClassName';
 
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useOldLang from '../../hooks/useOldLang';
 
 import Modal from '../ui/Modal';
 import PasswordForm from './PasswordForm';
@@ -16,62 +18,63 @@ import PasswordForm from './PasswordForm';
 import styles from './VerificationMonetizationModal.module.scss';
 
 export type OwnProps = {
-  isOpen: boolean;
-  onClose: NoneToVoidFunction;
-  chatId: string;
-  passwordHint?: string;
-  error?: string;
-  isLoading?: boolean;
+  modal: TabState['monetizationVerificationModal'];
 };
 
-const VerificationMonetizationModal: FC<OwnProps> = ({
-  isOpen,
-  chatId,
-  onClose,
+type StateProps = {
+  passwordHint?: string;
+};
+
+const VerificationMonetizationModal = ({
+  modal,
   passwordHint,
-  error,
-  isLoading,
-}) => {
+}: OwnProps & StateProps) => {
   const {
-    clearMonetizationInfo, loadMonetizationRevenueWithdrawalUrl,
+    closeMonetizationVerificationModal, clearMonetizationVerificationError, processMonetizationRevenueWithdrawalUrl,
   } = getActions();
 
-  const lang = useOldLang();
+  const isOpen = Boolean(modal);
+
+  const renderingModal = useCurrentOrPrev(modal);
+
+  const lang = useLang();
 
   const [shouldShowPassword, setShouldShowPassword] = useState(false);
 
   const handleSubmit = useLastCallback((password: string) => {
-    loadMonetizationRevenueWithdrawalUrl({
-      peerId: chatId,
+    if (!renderingModal) return;
+    processMonetizationRevenueWithdrawalUrl({
+      peerId: renderingModal.chatId,
       currentPassword: password,
-      onSuccess: () => {
-        onClose();
-      },
     });
   });
 
   const handleClearError = useLastCallback(() => {
-    clearMonetizationInfo();
+    clearMonetizationVerificationError();
+  });
+
+  const handleClose = useLastCallback(() => {
+    closeMonetizationVerificationModal();
   });
 
   return (
     <Modal
       isOpen={isOpen}
       hasCloseButton
-      title={lang('EnterPassword')}
+      title={lang('CheckPasswordTitle')}
       className={styles.root}
       contentClassName={styles.content}
-      onClose={onClose}
+      onClose={handleClose}
     >
       <div className={buildClassName(styles.content, 'settings-content password-form custom-scroll')}>
         <div className="settings-item pt-0">
           <PasswordForm
             shouldShowSubmit
-            placeholder={lang('Password')}
-            error={error && lang(error)}
-            description={lang('Channel.OwnershipTransfer.EnterPasswordText')}
+            placeholder={lang('CheckPasswordPlaceholder')}
+            error={renderingModal?.errorKey && lang.withRegular(renderingModal.errorKey)}
+            description={lang('CheckPasswordDescription')}
             clearError={handleClearError}
-            isLoading={isLoading}
+            isLoading={renderingModal?.isLoading}
             hint={passwordHint}
             isPasswordVisible={shouldShowPassword}
             shouldResetValue={isOpen}
@@ -84,4 +87,16 @@ const VerificationMonetizationModal: FC<OwnProps> = ({
   );
 };
 
-export default memo(VerificationMonetizationModal);
+export default memo(withGlobal(
+  (global): StateProps => {
+    const {
+      twoFaSettings: {
+        hint: passwordHint,
+      },
+    } = global;
+
+    return {
+      passwordHint,
+    };
+  },
+)(VerificationMonetizationModal));

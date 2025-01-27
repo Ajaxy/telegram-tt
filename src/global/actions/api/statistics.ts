@@ -1,5 +1,3 @@
-import type { ActionReturnType } from '../../types';
-
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
@@ -7,10 +5,10 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   updateChannelMonetizationStatistics,
   updateMessageStatistics,
-  updateMonetizationInfo,
   updateStatistics,
   updateStatisticsGraph,
   updateStoryStatistics,
+  updateVerifyMonetizationModal,
 } from '../../reducers';
 import {
   selectChat,
@@ -229,12 +227,14 @@ addActionHandler('loadStoryPublicForwards', async (global, actions, payload): Pr
   setGlobal(global);
 });
 
-addActionHandler('loadMonetizationRevenueWithdrawalUrl', async (global, actions, payload): Promise<void> => {
+addActionHandler('processMonetizationRevenueWithdrawalUrl', async (global, actions, payload): Promise<void> => {
   const {
-    peerId, currentPassword, onSuccess, tabId = getCurrentTabId(),
+    peerId, currentPassword, tabId = getCurrentTabId(),
   } = payload;
 
-  global = updateMonetizationInfo(global, { isLoading: true, error: undefined });
+  global = updateVerifyMonetizationModal(global, {
+    isLoading: true,
+  }, tabId);
   setGlobal(global);
 
   const peer = selectPeer(global, peerId);
@@ -242,27 +242,26 @@ addActionHandler('loadMonetizationRevenueWithdrawalUrl', async (global, actions,
     return;
   }
 
-  const result = await callApi('loadMonetizationRevenueWithdrawalUrl', { peer, currentPassword });
+  const result = await callApi('fetchMonetizationRevenueWithdrawalUrl', { peer, currentPassword });
 
   if (!result) {
     return;
   }
 
   global = getGlobal();
-  global = updateMonetizationInfo(global, { isLoading: false });
+  global = updateVerifyMonetizationModal(global, {
+    isLoading: false,
+    errorKey: 'error' in result ? result.messageKey : undefined,
+  }, tabId);
   setGlobal(global);
 
-  if (result) {
-    onSuccess();
+  if ('url' in result) {
     actions.openUrl({
       url: result.url,
       shouldSkipModal: true,
       tabId,
       ignoreDeepLinks: true,
     });
+    actions.closeMonetizationVerificationModal({ tabId });
   }
-});
-
-addActionHandler('clearMonetizationInfo', (global): ActionReturnType => {
-  return updateMonetizationInfo(global, { error: undefined });
 });

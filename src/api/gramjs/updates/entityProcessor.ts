@@ -9,7 +9,7 @@ import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildPollFromMedia } from '../apiBuilders/messageContent';
 import { buildApiThreadInfoFromMessage } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
-import { addChatToLocalDb, addMessageToLocalDb, addUserToLocalDb } from '../helpers';
+import { addChatToLocalDb, addMessageToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { sendImmediateApiUpdate } from './apiUpdateEmitter';
 
 const TYPE_USER = new Set(['User', 'UserEmpty']);

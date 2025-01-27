@@ -6,6 +6,7 @@ import type { TabState } from '../../global/types';
 import { selectTabState } from '../../global/selectors';
 import { pick } from '../../util/iteratees';
 
+import VerificationMonetizationModal from '../common/VerificationMonetizationModal.async';
 import WebAppsCloseConfirmationModal from '../main/WebAppsCloseConfirmationModal.async';
 import AboutAdsModal from './aboutAds/AboutAdsModal.async';
 import AttachBotInstallModal from './attachBotInstall/AttachBotInstallModal.async';
@@ -14,6 +15,7 @@ import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.async';
+import GiftWithdrawModal from './gift/fragment/GiftWithdrawModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
@@ -65,7 +67,9 @@ type ModalKey = keyof Pick<TabState,
 'emojiStatusAccessModal' |
 'locationAccessModal' |
 'aboutAdsModal' |
-'giftUpgradeModal'
+'giftUpgradeModal' |
+'monetizationVerificationModal' |
+'giftWithdrawModal'
 >;
 
 type StateProps = {
@@ -109,6 +113,8 @@ const MODALS: ModalRegistry = {
   locationAccessModal: LocationAccessModal,
   aboutAdsModal: AboutAdsModal,
   giftUpgradeModal: GiftUpgradeModal,
+  monetizationVerificationModal: VerificationMonetizationModal,
+  giftWithdrawModal: GiftWithdrawModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

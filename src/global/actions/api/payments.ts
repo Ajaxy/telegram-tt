@@ -2,6 +2,7 @@ import type {
   ApiInputInvoice, ApiInputInvoiceStarGift, ApiInputInvoiceStarGiftUpgrade, ApiRequestInputInvoice,
 } from '../../../api/types';
 import type { ApiCredentials } from '../../../components/payment/PaymentModal';
+import type { RegularLangFnParameters } from '../../../util/localization';
 import type {
   ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
@@ -397,7 +398,7 @@ async function sendSmartGlocalCredentials<T extends GlobalState>(
 
   if (result.status !== 'ok') {
     // TODO после получения документации сделать аналог getStripeError(result.error);
-    const error = { description: 'payment error' };
+    const error = { descriptionKey: { key: 'ErrorUnexpected' } satisfies RegularLangFnParameters };
     global = getGlobal();
     global = updateTabState(global, {
       payment: {
@@ -554,9 +555,9 @@ addActionHandler('validatePaymentPassword', async (global, actions, payload): Pr
   global = getGlobal();
 
   if (!result) {
-    global = updatePayment(global, { error: { message: 'Unknown Error', field: 'password' } }, tabId);
+    global = updatePayment(global, { error: { messageKey: { key: 'ErrorUnexpected' }, field: 'password' } }, tabId);
   } else if ('error' in result) {
-    global = updatePayment(global, { error: { message: result.error, field: 'password' } }, tabId);
+    global = updatePayment(global, { error: { messageKey: result.messageKey, field: 'password' } }, tabId);
   } else {
     global = updatePayment(global, { temporaryPassword: result, step: PaymentStep.Checkout }, tabId);
   }
@@ -1062,4 +1063,52 @@ addActionHandler('openUniqueGiftBySlug', async (global, actions, payload): Promi
   }
 
   actions.openGiftInfoModal({ gift, tabId });
+});
+
+addActionHandler('processStarGiftWithdrawal', async (global, actions, payload): Promise<void> => {
+  const {
+    gift, password, tabId = getCurrentTabId(),
+  } = payload;
+
+  let giftWithdrawModal = selectTabState(global, tabId).giftWithdrawModal;
+  if (!giftWithdrawModal) return;
+
+  global = updateTabState(global, {
+    giftWithdrawModal: {
+      ...giftWithdrawModal,
+      isLoading: true,
+      errorKey: undefined,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const inputGift = getRequestInputSavedStarGift(global, gift);
+  if (!inputGift) {
+    return;
+  }
+
+  const result = await callApi('fetchStarGiftWithdrawalUrl', { inputGift, password });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  giftWithdrawModal = selectTabState(global, tabId).giftWithdrawModal;
+  if (!giftWithdrawModal) return;
+
+  if ('error' in result) {
+    global = updateTabState(global, {
+      giftWithdrawModal: {
+        ...giftWithdrawModal,
+        isLoading: false,
+        errorKey: result.messageKey,
+      },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  actions.openUrl({ url: result.url, shouldSkipModal: true, tabId });
+  actions.closeGiftWithdrawModal({ tabId });
 });

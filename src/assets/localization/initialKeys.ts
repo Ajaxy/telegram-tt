@@ -28,7 +28,7 @@ const INITIAL_KEYS: LangKey[] = [
   'ErrorIncorrectPassword',
   'ErrorPasswordFlood',
   'ErrorPhoneBanned',
-  'ErrorFlood',
+  'ErrorFloodTime',
   'ErrorUnexpected',
   'ErrorUnexpectedMessage',
 ];

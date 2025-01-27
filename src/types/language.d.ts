@@ -590,10 +590,17 @@ export interface LangPair {
   'ErrorSendRestrictedStickersAll': undefined;
   'ErrorPhoneNumberInvalid': undefined;
   'ErrorCodeInvalid': undefined;
+  'ErrorEmailCodeInvalid': undefined;
   'ErrorIncorrectPassword': undefined;
   'ErrorPasswordFlood': undefined;
   'ErrorPhoneBanned': undefined;
   'ErrorUnexpected': undefined;
+  'ErrorEmailUnconfirmed': undefined;
+  'ErrorEmailHashExpired': undefined;
+  'ErrorNewSaltInvalid': undefined;
+  'ErrorPasswordChanged': undefined;
+  'ErrorPasswordMissing': undefined;
+  'ErrorUnspecified': undefined;
   'NoStickers': undefined;
   'ClearRecentEmoji': undefined;
   'TextFormatAddLinkTitle': undefined;
@@ -1190,6 +1197,7 @@ export interface LangPair {
   'GiftInfoViewUpgraded': undefined;
   'GiftInfoUpgradeBadge': undefined;
   'GiftInfoUpgradeForFree': undefined;
+  'GiftInfoWithdraw': undefined;
   'GiftUpgradeUniqueTitle': undefined;
   'GiftUpgradeUniqueDescription': undefined;
   'GiftUpgradeTransferableTitle': undefined;
@@ -1203,6 +1211,8 @@ export interface LangPair {
   'GiftUpgradedDescription': undefined;
   'GiftMakeUniqueAcc': undefined;
   'GiftMakeUniqueLink': undefined;
+  'GiftWithdrawTitle': undefined;
+  'GiftWithdrawSubmit': undefined;
   'AllGiftsCategory': undefined;
   'LimitedGiftsCategory': undefined;
   'StockGiftsCategory': undefined;
@@ -1296,6 +1306,9 @@ export interface LangPair {
   'ViewButtonGiftUnique': undefined;
   'AuthContinueOnThisLanguage': undefined;
   'Share': undefined;
+  'CheckPasswordTitle': undefined;
+  'CheckPasswordPlaceholder': undefined;
+  'CheckPasswordDescription': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1459,6 +1472,12 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'peer': V;
   };
   'SlowModeHint': {
+    'time': V;
+  };
+  'ErrorFloodTime': {
+    'time': V;
+  };
+  'ErrorPasswordFresh': {
     'time': V;
   };
   'ErrorUnexpectedMessage': {
@@ -1707,6 +1726,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'peer': V;
     'link': V;
   };
+  'GiftWithdrawDescription': {
+    'gift': V;
+  };
   'StarsAmount': {
     'amount': V;
   };
@@ -1828,9 +1850,6 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'PreviewSenderSendFile': {
     'count': V;
-  };
-  'ErrorFlood': {
-    'hour': V;
   };
   'PinnedMessageTitle': {
     'index': V;
@@ -1957,6 +1976,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   'GiftInfoAvailabilityValue': {
     'count': V;
     'total': V;
+  };
+  'GiftWithdrawWait': {
+    'days': V;
   };
   'StarsAmountText': {
     'amount': V;

@@ -45,13 +45,15 @@ import {
   buildShippingInfo,
 } from '../gramjsBuilders';
 import {
+  checkErrorType,
   deserializeBytes,
   serializeBytes,
-} from '../helpers';
+  wrapError,
+} from '../helpers/misc';
 import localDb from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { handleGramJsUpdate, invokeRequest } from './client';
-import { getTemporaryPaymentPassword } from './twoFaSettings';
+import { getPassword, getTemporaryPaymentPassword } from './twoFaSettings';
 
 export async function validateRequestedInfo({
   inputInvoice,
@@ -688,4 +690,43 @@ export function upgradeGift({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchStarGiftWithdrawalUrl({
+  inputGift,
+  password,
+}: {
+  inputGift: ApiRequestInputSavedStarGift;
+  password: string;
+}) {
+  try {
+    const passwordCheck = await getPassword(password);
+
+    if (!passwordCheck) {
+      return undefined;
+    }
+
+    if ('error' in passwordCheck) {
+      return passwordCheck;
+    }
+
+    const result = await invokeRequest(new GramJs.payments.GetStarGiftWithdrawalUrl({
+      stargift: buildInputSavedStarGift(inputGift),
+      password: passwordCheck,
+    }), {
+      shouldThrow: true,
+    });
+
+    if (!result) {
+      return undefined;
+    }
+
+    return { url: result.url };
+  } catch (err: unknown) {
+    if (!checkErrorType(err)) return undefined;
+
+    return wrapError(err);
+  }
+
+  return undefined;
 }

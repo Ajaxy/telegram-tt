@@ -9,7 +9,7 @@ import {
   clearStarPayment, openStarsTransactionModal,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectChatMessage, selectStarsPayment } from '../../selectors';
+import { selectChatMessage, selectStarsPayment, selectTabState } from '../../selectors';
 
 addActionHandler('processOriginStarsPayment', (global, actions, payload): ActionReturnType => {
   const { originData, status, tabId = getCurrentTabId() } = payload;
@@ -300,5 +300,37 @@ addActionHandler('closeGiftUpgradeModal', (global, actions, payload): ActionRetu
 
   return updateTabState(global, {
     giftUpgradeModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openGiftWithdrawModal', (global, actions, payload): ActionReturnType => {
+  const { gift, tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giftWithdrawModal: {
+      gift,
+    },
+  }, tabId);
+});
+
+addActionHandler('closeGiftWithdrawModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giftWithdrawModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('clearGiftWithdrawError', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+  const giftWithdrawModal = tabState?.giftWithdrawModal;
+  if (!giftWithdrawModal) return undefined;
+
+  return updateTabState(global, {
+    giftWithdrawModal: {
+      ...giftWithdrawModal,
+      errorKey: undefined,
+    },
   }, tabId);
 });

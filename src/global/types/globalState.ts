@@ -109,13 +109,8 @@ export type GlobalState = {
   twoFaSettings: {
     hint?: string;
     isLoading?: boolean;
-    error?: string;
+    errorKey?: RegularLangFnParameters;
     waitingEmailCodeLength?: number;
-  };
-
-  monetizationInfo: {
-    isLoading?: boolean;
-    error?: string;
   };
 
   attachmentSettings: {

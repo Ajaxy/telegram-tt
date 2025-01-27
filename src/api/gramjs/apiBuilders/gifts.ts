@@ -8,7 +8,7 @@ import type {
 } from '../../types';
 
 import { numberToHexColor } from '../../../util/colors';
-import { addDocumentToLocalDb } from '../helpers';
+import { addDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiFormattedText } from './common';
 import { getApiChatIdFromMtpPeer } from './peers';
 import { buildStickerFromDocument } from './symbols';
@@ -129,7 +129,7 @@ export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribut
 export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId: string): ApiSavedStarGift {
   const {
     gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved, upgradeStars, transferStars, canUpgrade,
-    savedId,
+    savedId, canExportAt,
   } = userStarGift;
 
   const inputGift: ApiInputSavedStarGift | undefined = savedId && peerId
@@ -150,5 +150,6 @@ export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId
     transferStars: transferStars?.toJSNumber(),
     inputGift,
     savedId: savedId?.toString(),
+    canExportAt,
   };
 }

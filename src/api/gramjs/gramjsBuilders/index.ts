@@ -37,7 +37,7 @@ import {
 
 import { CHANNEL_ID_LENGTH, DEFAULT_STATUS_ICON_ID } from '../../../config';
 import { pick } from '../../../util/iteratees';
-import { deserializeBytes } from '../helpers';
+import { deserializeBytes } from '../helpers/misc';
 import localDb from '../localDb';
 
 function checkIfChannelId(id: string) {

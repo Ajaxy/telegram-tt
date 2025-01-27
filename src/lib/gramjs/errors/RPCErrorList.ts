@@ -136,7 +136,7 @@ export class EmailUnconfirmedError extends BadRequestError {
     }
 }
 
-export class PasswordModifiedError extends BadRequestError {
+export class PasswordFreshError extends BadRequestError {
     public seconds: number;
 
     constructor(args: any) {
@@ -159,6 +159,6 @@ export const rpcErrorRe = new Map<RegExp, any>([
     [/USER_MIGRATE_(\d+)/, UserMigrateError],
     [/NETWORK_MIGRATE_(\d+)/, NetworkMigrateError],
     [/EMAIL_UNCONFIRMED_(\d+)/, EmailUnconfirmedError],
-    [/PASSWORD_TOO_FRESH_(\d+)/, PasswordModifiedError],
+    [/PASSWORD_TOO_FRESH_(\d+)/, PasswordFreshError],
     [/^Timeout$/, TimedOutError],
 ]);

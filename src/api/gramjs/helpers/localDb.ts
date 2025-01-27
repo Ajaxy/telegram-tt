@@ -1,41 +1,10 @@
-import { Api as GramJs } from '../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { RepairInfo } from './localDb';
-
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
-import localDb from './localDb';
-
-const LOG_BACKGROUND = '#111111DD';
-const LOG_PREFIX_COLOR = '#E4D00A';
-const LOG_SUFFIX = {
-  INVOKE: '#49DBF5',
-  BEACON: '#F549DB',
-  RESPONSE: '#6887F7',
-  CONNECTING: '#E4D00A',
-  CONNECTED: '#26D907',
-  'CONNECTING ERROR': '#D1191C',
-  'INVOKE ERROR': '#D1191C',
-  UPDATE: '#0DD151',
-  'UNEXPECTED UPDATE': '#9C9C9C',
-  'UNEXPECTED RESPONSE': '#D1191C',
-};
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import localDb, { type RepairInfo } from '../localDb';
 
 export type MessageRepairContext = Pick<GramJs.TypeMessage, 'peerId' | 'id'>;
 export type MediaRepairContext = MessageRepairContext;
-
-export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
-  if (!(mtpMessage instanceof GramJs.Message || mtpMessage instanceof GramJs.MessageService)) {
-    return undefined;
-  }
-
-  return getApiChatIdFromMtpPeer(mtpMessage.peerId);
-}
-
-export function isChatFolder(
-  filter?: GramJs.TypeDialogFilter,
-): filter is GramJs.DialogFilter | GramJs.DialogFilterChatlist {
-  return filter instanceof GramJs.DialogFilter || filter instanceof GramJs.DialogFilterChatlist;
-}
 
 export function addMessageToLocalDb(message: GramJs.TypeMessage | GramJs.TypeSponsoredMessage) {
   if (message instanceof GramJs.Message) {
@@ -203,34 +172,4 @@ export function addUserToLocalDb(user: GramJs.User) {
 
 export function addWebDocumentToLocalDb(webDocument: GramJs.TypeWebDocument) {
   localDb.webDocuments[webDocument.url] = webDocument;
-}
-
-export function serializeBytes(value: Buffer) {
-  return String.fromCharCode(...value);
-}
-
-export function deserializeBytes(value: string) {
-  return Buffer.from(value, 'binary');
-}
-
-export function log(suffix: keyof typeof LOG_SUFFIX, ...data: any) {
-  /* eslint-disable max-len */
-  /* eslint-disable no-console */
-  const func = suffix === 'UNEXPECTED RESPONSE' ? console.error
-    : suffix === 'INVOKE ERROR' || suffix === 'UNEXPECTED UPDATE' ? console.warn : console.log;
-  /* eslint-enable no-console */
-  func(
-    `%cGramJS%c${suffix}`,
-    `color: ${LOG_PREFIX_COLOR}; background: ${LOG_BACKGROUND}; padding: 0.25rem; border-radius: 0.25rem;`,
-    `color: ${LOG_SUFFIX[suffix]}; background: ${LOG_BACKGROUND}; padding: 0.25rem; border-radius: 0.25rem; margin-left: 0.25rem;`,
-    ...data,
-  );
-  /* eslint-enable max-len */
-}
-
-export function isResponseUpdate<T extends GramJs.AnyRequest>(result: T['__response']): result is GramJs.TypeUpdate {
-  return result instanceof GramJs.UpdatesTooLong || result instanceof GramJs.UpdateShortMessage
-    || result instanceof GramJs.UpdateShortChatMessage || result instanceof GramJs.UpdateShort
-    || result instanceof GramJs.UpdatesCombined || result instanceof GramJs.Updates
-    || result instanceof GramJs.UpdateShortSentMessage;
 }

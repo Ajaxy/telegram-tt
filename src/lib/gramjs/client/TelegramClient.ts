@@ -24,7 +24,6 @@ import {
     TwoFaParams,
     TmpPasswordResult,
     PasswordResult,
-    TwoFaPasswordParams,
 } from './2fa';
 import RequestState from '../network/RequestState';
 import Deferred from '../../../util/Deferred';
@@ -1264,8 +1263,8 @@ class TelegramClient {
         return getTmpPassword(this, currentPassword, ttl);
     }
 
-    getCurrentPassword(params: TwoFaPasswordParams): Promise<PasswordResult | undefined> {
-        return getCurrentPassword(this, params);
+    getCurrentPassword(currentPassword?: string): Promise<PasswordResult | undefined> {
+        return getCurrentPassword(this, currentPassword);
     }
 
     // event region

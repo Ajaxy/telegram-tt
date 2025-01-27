@@ -39,8 +39,8 @@ import {
   addPhotoToLocalDb,
   addUserToLocalDb,
   addWebDocumentToLocalDb,
-  deserializeBytes,
-} from '../helpers';
+} from '../helpers/localDb';
+import { deserializeBytes } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
 

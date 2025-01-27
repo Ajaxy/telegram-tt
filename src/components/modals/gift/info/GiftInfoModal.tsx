@@ -72,6 +72,7 @@ const GiftInfoModal = ({
     openGiftUpgradeModal,
     showNotification,
     openChatWithDraft,
+    openGiftWithdrawModal,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -125,6 +126,11 @@ const GiftInfoModal = ({
     if (!starGiftUniqueLink) return;
     openChatWithDraft({ text: { text: starGiftUniqueLink } });
     handleClose();
+  });
+
+  const handleWithdraw = useLastCallback(() => {
+    if (savedGift?.gift.type !== 'starGiftUnique') return;
+    openGiftWithdrawModal({ gift: savedGift });
   });
 
   const handleFocusUpgraded = useLastCallback(() => {
@@ -291,6 +297,11 @@ const GiftInfoModal = ({
         >
           {lang('Share')}
         </MenuItem>
+        {canUpdate && isUniqueGift && (
+          <MenuItem icon="diamond" onClick={handleWithdraw}>
+            {lang('GiftInfoWithdraw')}
+          </MenuItem>
+        )}
       </DropdownMenu>
     );
 

@@ -1,7 +1,3 @@
-import { FloodWaitError, RPCError } from '../../../lib/gramjs/errors';
-
-import type { RegularLangKey } from '../../../types/language';
-import type { RegularLangFnParameters } from '../../../util/localization';
 import type {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationStateType,
@@ -9,16 +5,8 @@ import type {
   ApiUserFullInfo,
 } from '../../types';
 
-import { DEBUG } from '../../../config';
+import { wrapError } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
-
-const ApiErrors: Record<string, RegularLangKey> = {
-  PHONE_NUMBER_INVALID: 'ErrorPhoneNumberInvalid',
-  PHONE_CODE_INVALID: 'ErrorCodeInvalid',
-  PASSWORD_HASH_INVALID: 'ErrorIncorrectPassword',
-  PHONE_PASSWORD_FLOOD: 'ErrorPasswordFlood',
-  PHONE_NUMBER_BANNED: 'ErrorPhoneBanned',
-};
 
 const authController: {
   resolve?: Function;
@@ -87,36 +75,7 @@ export function onRequestQrCode(qrCode: { token: Buffer; expires: number }) {
 }
 
 export function onAuthError(err: Error) {
-  let messageKey: RegularLangFnParameters | undefined;
-
-  if (err instanceof FloodWaitError) {
-    const hours = Math.ceil(Number(err.seconds) / 60 / 60);
-    messageKey = {
-      key: 'ErrorFlood',
-      variables: { hour: hours },
-      options: { pluralValue: hours },
-    };
-  } else if (err instanceof RPCError) {
-    messageKey = {
-      key: ApiErrors[err.errorMessage],
-    };
-  } else if (err.message) {
-    messageKey = {
-      key: 'ErrorUnexpectedMessage',
-      variables: { error: err.message },
-    };
-  }
-
-  if (!messageKey) {
-    messageKey = {
-      key: 'ErrorUnexpected',
-    };
-
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }
+  const { messageKey } = wrapError(err);
 
   sendApiUpdate({
     '@type': 'updateAuthorizationError',

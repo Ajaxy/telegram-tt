@@ -17,7 +17,7 @@ import {
   buildMtpPeerId,
   getEntityTypeById,
 } from '../gramjsBuilders';
-import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
+import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';

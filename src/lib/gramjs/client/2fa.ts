@@ -1,6 +1,7 @@
 import type TelegramClient from './TelegramClient';
+import type { WrappedError } from '../../../api/gramjs/helpers/misc';
 
-import { EmailUnconfirmedError, PasswordModifiedError, RPCError } from '../errors';
+import { EmailUnconfirmedError } from '../errors';
 import Api from '../tl/api';
 
 import { generateRandomBytes } from '../Helpers';
@@ -16,13 +17,8 @@ export interface TwoFaParams {
     onEmailCodeError?: (err: Error) => void;
 }
 
-export interface TwoFaPasswordParams {
-    currentPassword?: string;
-    onPasswordCodeError?: (err: Error) => void;
-}
-
-export type TmpPasswordResult = Api.account.TmpPassword | { error: string } | undefined;
-export type PasswordResult = Api.TypeInputCheckPasswordSRP | { error: string } | undefined;
+export type TmpPasswordResult = Api.account.TmpPassword | WrappedError | undefined;
+export type PasswordResult = Api.TypeInputCheckPasswordSRP | WrappedError | undefined;
 
 /**
  * Changes the 2FA settings of the logged in user.
@@ -143,28 +139,17 @@ export async function getTmpPassword(client: TelegramClient, currentPassword: st
     }
 
     const inputPassword = await computeCheck(pwd, currentPassword);
-    try {
-        const result = await client.invoke(new Api.account.GetTmpPassword({
-            password: inputPassword,
-            period: ttl,
-        }));
+    const result = await client.invoke(new Api.account.GetTmpPassword({
+        password: inputPassword,
+        period: ttl,
+    }));
 
-        return result;
-    } catch (err: unknown) {
-        if (err instanceof RPCError && err.errorMessage === 'PASSWORD_HASH_INVALID') {
-            return { error: err.errorMessage };
-        }
-
-        throw err;
-    }
+    return result;
 }
 
 export async function getCurrentPassword(
     client: TelegramClient,
-    {
-        currentPassword,
-        onPasswordCodeError,
-    }: TwoFaPasswordParams,
+    currentPassword?: string,
 ): Promise<PasswordResult> {
     const pwd = await client.invoke(new Api.account.GetPassword());
 
@@ -172,16 +157,5 @@ export async function getCurrentPassword(
         return undefined;
     }
 
-    try {
-        return currentPassword ? await computeCheck(pwd, currentPassword!) : new Api.InputCheckPasswordEmpty();
-    } catch (err: any) {
-        if (err instanceof PasswordModifiedError) {
-            onPasswordCodeError!(err);
-            return undefined;
-        } else if (err instanceof RPCError && err.errorMessage ==='PASSWORD_HASH_INVALID') {
-            return { error: err.errorMessage };
-        } else {
-            throw err;
-        }
-    }
+    return currentPassword ? await computeCheck(pwd, currentPassword!) : new Api.InputCheckPasswordEmpty();
 }

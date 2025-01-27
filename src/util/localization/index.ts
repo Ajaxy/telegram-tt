@@ -361,7 +361,7 @@ function getString(langKey: LangKey, count: number) {
 
 function processTranslation(
   langKey: LangKey,
-  variables?: Record<string, LangVariable>,
+  variables?: Record<string, LangVariable | RegularLangFnParameters>,
   options?: LangFnOptions | LangFnOptionsWithPlural,
 ): string {
   const cacheKey = `${langKey}-${JSON.stringify(variables)}-${JSON.stringify(options)}`;
@@ -377,6 +377,9 @@ function processTranslation(
   const variableEntries = variables ? Object.entries(variables) : [];
   const finalString = variableEntries.reduce((result, [key, value]) => {
     if (value === undefined) return result;
+    if (typeof value === 'object') { // Allow recursive variables in basic `lang.with`
+      value = processTranslation(value.key, value.variables, value.options);
+    }
 
     const valueAsString = Number.isFinite(value) ? formatters!.number.format(value as number) : String(value);
     return result.replace(`{${key}}`, valueAsString);

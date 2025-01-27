@@ -69,8 +69,8 @@ import {
 } from '../gramjsBuilders';
 import {
   addPhotoToLocalDb,
-  isChatFolder,
-} from '../helpers';
+} from '../helpers/localDb';
+import { isChatFolder } from '../helpers/misc';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import {

@@ -310,6 +310,7 @@
     "payments.upgradeStarGift",
     "payments.transferStarGift",
     "payments.getUniqueStarGift",
+    "payments.getStarGiftWithdrawalUrl",
     "langpack.getLangPack",
     "langpack.getStrings",
     "langpack.getLanguages",

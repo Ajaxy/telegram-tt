@@ -20,7 +20,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...global,
         twoFaSettings: {
           ...global.twoFaSettings,
-          error: update.message,
+          errorKey: update.messageKey,
         },
       };
     }

@@ -89,7 +89,7 @@ import {
 import {
   deserializeBytes,
   resolveMessageApiChatId,
-} from '../helpers';
+} from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { processMessageAndUpdateThreadInfo } from '../updates/entityProcessor';
 import { processAffectedHistory, updateChannelState } from '../updates/updateManager';

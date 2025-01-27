@@ -19,7 +19,7 @@ import type {
 
 import { numberToHexColor } from '../../../util/colors';
 import { pick } from '../../../util/iteratees';
-import { addDocumentToLocalDb } from '../helpers';
+import { addDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messageContent';

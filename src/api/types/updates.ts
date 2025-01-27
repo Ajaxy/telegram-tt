@@ -491,12 +491,7 @@ export type ApiUpdateSavedGifs = {
 
 export type ApiUpdateTwoFaError = {
   '@type': 'updateTwoFaError';
-  message: string;
-};
-
-export type ApiUpdatePasswordError = {
-  '@type': 'updatePasswordError';
-  error: string;
+  messageKey: RegularLangFnParameters;
 };
 
 export type ApiUpdateNotifySettings = {
@@ -819,7 +814,7 @@ export type ApiUpdate = (
   ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
   ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage | ApiUpdateStarPaymentStateCompleted |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
-  ApiUpdateTwoFaError | ApiUpdatePasswordError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
+  ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |

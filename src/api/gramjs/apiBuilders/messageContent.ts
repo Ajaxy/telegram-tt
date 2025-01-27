@@ -32,8 +32,9 @@ import { SUPPORTED_PHOTO_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEB
 import { generateWaveform } from '../../../util/generateWaveform';
 import { pick } from '../../../util/iteratees';
 import {
-  addMediaToLocalDb, addStoryToLocalDb, type MediaRepairContext, serializeBytes,
-} from '../helpers';
+  addMediaToLocalDb, addStoryToLocalDb, type MediaRepairContext,
+} from '../helpers/localDb';
+import { serializeBytes } from '../helpers/misc';
 import {
   buildApiFormattedText,
   buildApiMessageEntity,

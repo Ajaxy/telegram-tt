@@ -171,7 +171,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
       paymentDispatch({
         type: 'setFormErrors',
         payload: {
-          [error.field]: error.message,
+          [error.field]: error.messageKey,
         },
       });
     }
@@ -250,8 +250,7 @@ const PaymentModal: FC<OwnProps & StateProps> = ({
         isOpen={Boolean(error)}
         onClose={handleErrorModalClose}
       >
-        <h4>{error.description || 'Error'}</h4>
-        <p>{error.description || 'Error'}</p>
+        <h4>{error.descriptionKey ? lang.withRegular(error.descriptionKey) : lang('ErrorUnspecified')}</h4>
         <div className="dialog-buttons mt-2">
           <Button
             isText

@@ -271,6 +271,7 @@ export interface ApiSavedStarGift {
   canUpgrade?: true;
   alreadyPaidUpgradeStars?: number;
   transferStars?: number;
+  canExportAt?: number;
   isConverted?: boolean; // Local field, used for Action Message
   upgradeMsgId?: number; // Local field, used for Action Message
 }

@@ -428,11 +428,3 @@ addActionHandler('closeBoostStatistics', (global, actions, payload): ActionRetur
     boostStatistics: undefined,
   }, tabId);
 });
-
-addActionHandler('closeMonetizationStatistics', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    monetizationStatistics: undefined,
-  }, tabId);
-});

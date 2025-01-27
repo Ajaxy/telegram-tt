@@ -82,6 +82,7 @@ import type {
 } from '../../types';
 import type { WebApp, WebAppModalStateType } from '../../types/webapp';
 import type { SearchResultKey } from '../../util/keys/searchResultKey';
+import type { RegularLangFnParameters } from '../../util/localization';
 import type { CallbackAction } from './actions';
 
 export type TabState = {
@@ -377,8 +378,8 @@ export type TabState = {
     receipt?: ApiReceiptRegular;
     error?: {
       field?: string;
-      message?: string;
-      description?: string;
+      messageKey?: RegularLangFnParameters;
+      descriptionKey?: RegularLangFnParameters;
     };
     isPaymentModalOpen?: boolean;
     isExtendedMedia?: boolean;
@@ -720,11 +721,23 @@ export type TabState = {
     gift?: ApiSavedStarGift;
   };
 
+  giftWithdrawModal?: {
+    gift: ApiSavedStarGift;
+    isLoading?: boolean;
+    errorKey?: RegularLangFnParameters;
+  };
+
   suggestedStatusModal?: {
     botId: string;
     webAppKey?: string;
     customEmojiId: string;
     duration?: number;
+  };
+
+  monetizationVerificationModal?: {
+    chatId: string;
+    isLoading?: boolean;
+    errorKey?: RegularLangFnParameters;
   };
 
   isWaitingForStarGiftUpgrade?: true;

@@ -43,7 +43,7 @@ import {
   buildInputPrivacyKey,
   buildInputPrivacyRules,
 } from '../gramjsBuilders';
-import { addPhotoToLocalDb } from '../helpers';
+import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
 import { getClient, invokeRequest, uploadFile } from './client';
 

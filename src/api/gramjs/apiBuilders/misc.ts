@@ -22,7 +22,7 @@ import {
   buildCollectionByCallback, omit, omitUndefined, pick,
 } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
-import { addUserToLocalDb } from '../helpers';
+import { addUserToLocalDb } from '../helpers/localDb';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';

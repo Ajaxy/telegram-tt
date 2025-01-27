@@ -88,6 +88,7 @@ export type FontIconName =
   | 'fontsize'
   | 'forums'
   | 'forward'
+  | 'fragment'
   | 'fullscreen'
   | 'gifs'
   | 'gift'

@@ -31,10 +31,7 @@ export default {
   "ErrorIncorrectPassword": "Invalid password, please try again.",
   "ErrorPasswordFlood": "Too many attempts, please try again later.",
   "ErrorPhoneBanned": "This phone number is banned.",
-  "ErrorFlood": {
-    "one": "Too many attempts, please try again in {hour} hour",
-    "other": "Too many attempts, please try again in {hour} hours"
-  },
+  "ErrorFloodTime": "Too many attempts, please try again in {time}.",
   "ErrorUnexpected": "Unexpected error",
   "ErrorUnexpectedMessage": "Unexpected error: {error}"
 } as Record<LangKey, LangPackStringValue>;

@@ -29,7 +29,7 @@ import type {
   BoughtPaidMedia,
 } from '../../types';
 
-import { addWebDocumentToLocalDb } from '../helpers';
+import { addWebDocumentToLocalDb } from '../helpers/localDb';
 import { buildApiStarsSubscriptionPricing } from './chats';
 import { buildApiMessageEntity } from './common';
 import { buildApiStarGift } from './gifts';

@@ -58,9 +58,8 @@ import { buildPeer } from '../gramjsBuilders';
 import {
   addPhotoToLocalDb,
   type MediaRepairContext,
-  resolveMessageApiChatId,
-  serializeBytes,
-} from '../helpers';
+} from '../helpers/localDb';
+import { resolveMessageApiChatId, serializeBytes } from '../helpers/misc';
 import { buildApiCallDiscardReason } from './calls';
 import {
   buildApiFormattedText,

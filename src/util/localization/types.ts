@@ -11,6 +11,7 @@ import type { TextFilter } from '../../components/common/helpers/renderText';
 import type {
   LangPairPluralWithVariables,
   LangPairWithVariables,
+  LangVariable,
   PluralLangKey,
   PluralLangKeyWithVariables,
   RegularLangKey,
@@ -55,7 +56,9 @@ type RegularLangFnParametersWithoutVariables = {
 type RegularLangFnParametersWithVariables<T = LangPairWithVariables> = {
   [K in keyof T]: {
     key: K;
-    variables: T[K];
+    variables: {
+      [key in keyof T[K]]: LangVariable | RegularLangFnParameters;
+    };
     options?: LangFnOptions;
   }
 }[keyof T];
@@ -69,7 +72,9 @@ type RegularLangFnPluralParameters = {
 type RegularLangFnPluralParametersWithVariables<T = LangPairPluralWithVariables> = {
   [K in keyof T]: {
     key: K;
-    variables: T[K];
+    variables: {
+      [key in keyof T[K]]: LangVariable | RegularLangFnParameters;
+    };
     options: LangFnOptionsWithPlural;
   }
 }[keyof T];

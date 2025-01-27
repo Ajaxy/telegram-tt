@@ -245,6 +245,7 @@ const Main = ({
     loadAvailableEffects,
     loadTopBotApps,
     loadPaidReactionPrivacy,
+    loadPasswordInfo,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -333,6 +334,7 @@ const Main = ({
       loadAuthorizations();
       loadTopBotApps();
       loadPaidReactionPrivacy();
+      loadPasswordInfo();
     }
   }, [isMasterTab, isSynced]);
 

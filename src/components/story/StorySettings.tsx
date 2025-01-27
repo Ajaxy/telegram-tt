@@ -11,6 +11,7 @@ import type { IconName } from '../../types/icons';
 import { getPeerTitle, getUserFullName } from '../../global/helpers';
 import { selectPeerStory, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { getHours } from '../../util/dates/units';
 import stopEvent from '../../util/stopEvent';
 
 import useFlag from '../../hooks/useFlag';
@@ -299,7 +300,7 @@ function StorySettings({
   }
 
   function renderPrivacyList() {
-    const storyLifeTime = story ? convertSecondsToHours(story.expireDate - story.date) : 0;
+    const storyLifeTime = story ? getHours(story.expireDate - story.date) : 0;
 
     return (
       <>
@@ -419,15 +420,3 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     currentUserId: global.currentUserId!,
   };
 })(StorySettings));
-
-function convertSecondsToHours(seconds: number): number {
-  const secondsInHour = 3600;
-  const minutesInHour = 60;
-
-  const hours = Math.floor(seconds / secondsInHour);
-  const remainingSeconds = seconds % secondsInHour;
-  const remainingMinutes = Math.floor(remainingSeconds / minutesInHour);
-
-  // If remaining minutes are greater than or equal to 30, round up the hours
-  return remainingMinutes >= 30 ? hours + 1 : hours;
-}
