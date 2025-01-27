@@ -433,6 +433,12 @@
     margin-top: 0.6875rem;
     background-color: var(--pattern-color);
     font-weight: var(--font-weight-semibold);
+    transition: opacity 0.15s;
+
+    &:hover,
+    &:focus {
+      opacity: 0.8;
+    }
   }
 
   .sticky-date {
