@@ -850,8 +850,21 @@ const Message: FC<OwnProps & StateProps> = ({
       animateUnreadReaction({ messageIds: [messageId] });
     }
 
+    const unreadMentionsIds: number[] = [];
     if (message.hasUnreadMention) {
-      markMentionsRead({ messageIds: [messageId] });
+      unreadMentionsIds.push(message.id);
+    }
+
+    if (album) {
+      for (const albumMessage of album.messages) {
+        if (albumMessage.hasUnreadMention) {
+          unreadMentionsIds.push(albumMessage.id);
+        }
+      }
+    }
+
+    if (unreadMentionsIds.length) {
+      markMentionsRead({ messageIds: unreadMentionsIds });
     }
   }, [hasUnreadReaction, messageId, animateUnreadReaction, message.hasUnreadMention]);
 
