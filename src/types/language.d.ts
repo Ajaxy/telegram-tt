@@ -1295,6 +1295,7 @@ export interface LangPair {
   'ViewButtonStickerset': undefined;
   'ViewButtonGiftUnique': undefined;
   'AuthContinueOnThisLanguage': undefined;
+  'Share': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

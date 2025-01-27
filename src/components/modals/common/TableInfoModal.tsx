@@ -25,6 +25,7 @@ type OwnProps = {
   tableData?: TableData;
   headerAvatarPeer?: ApiPeer | CustomPeer;
   header?: TeactNode;
+  modalHeader?: TeactNode;
   footer?: TeactNode;
   buttonText?: string;
   className?: string;
@@ -39,6 +40,7 @@ const TableInfoModal = ({
   tableData,
   headerAvatarPeer,
   header,
+  modalHeader,
   footer,
   buttonText,
   className,
@@ -59,6 +61,7 @@ const TableInfoModal = ({
       hasAbsoluteCloseButton={!title}
       absoluteCloseButtonColor={hasBackdrop ? 'translucent-white' : undefined}
       isSlim
+      header={modalHeader}
       title={title}
       className={className}
       contentClassName={styles.content}

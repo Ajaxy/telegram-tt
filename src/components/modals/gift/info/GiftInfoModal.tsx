@@ -1,4 +1,4 @@
-import type { TeactNode } from '../../../../lib/teact/teact';
+import type { FC, TeactNode } from '../../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
@@ -7,6 +7,7 @@ import type {
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
+import { TME_LINK_PREFIX } from '../../../../config';
 import { getHasAdminRight, getPeerTitle } from '../../../../global/helpers';
 import { isApiPeerChat } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
@@ -32,7 +33,9 @@ import BadgeButton from '../../../common/BadgeButton';
 import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
+import DropdownMenu from '../../../ui/DropdownMenu';
 import Link from '../../../ui/Link';
+import MenuItem from '../../../ui/MenuItem';
 import TableInfoModal, { type TableData } from '../../common/TableInfoModal';
 import UniqueGiftHeader from '../UniqueGiftHeader';
 
@@ -68,6 +71,7 @@ const GiftInfoModal = ({
     focusMessage,
     openGiftUpgradeModal,
     showNotification,
+    openChatWithDraft,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -103,6 +107,26 @@ const GiftInfoModal = ({
     closeGiftInfoModal();
   });
 
+  const starGiftUniqueLink = useMemo(() => {
+    const slug = gift?.type === 'starGiftUnique' ? gift.slug : undefined;
+    if (!slug) return undefined;
+    return `${TME_LINK_PREFIX}nft/${slug}`;
+  }, [gift]);
+
+  const handleCopyLink = useLastCallback(() => {
+    if (!starGiftUniqueLink) return;
+    copyTextToClipboard(starGiftUniqueLink);
+    showNotification({
+      message: lang('LinkCopied'),
+    });
+  });
+
+  const handleLinkShare = useLastCallback(() => {
+    if (!starGiftUniqueLink) return;
+    openChatWithDraft({ text: { text: starGiftUniqueLink } });
+    handleClose();
+  });
+
   const handleFocusUpgraded = useLastCallback(() => {
     if (!savedGift?.upgradeMsgId || !renderingTargetPeer) return;
     const { upgradeMsgId } = savedGift;
@@ -131,6 +155,21 @@ const GiftInfoModal = ({
   const giftAttributes = useMemo(() => {
     return gift && getGiftAttributes(gift);
   }, [gift]);
+
+  const SettingsMenuButton: FC<{ onTrigger: () => void; isMenuOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isMenuOpen }) => (
+      <Button
+        round
+        size="smaller"
+        color="translucent-white"
+        className={isMenuOpen ? 'active' : ''}
+        onClick={onTrigger}
+        ariaLabel={lang('AriaMoreButton')}
+      >
+        <Icon name="more" />
+      </Button>
+    );
+  }, [lang]);
 
   const renderFooterButton = useLastCallback(() => {
     if (canFocusUpgrade) {
@@ -233,6 +272,45 @@ const GiftInfoModal = ({
     }
 
     const isUniqueGift = gift.type === 'starGiftUnique';
+
+    const contextMenu = (
+      <DropdownMenu
+        className="with-menu-transitions"
+        trigger={SettingsMenuButton}
+        positionX="right"
+      >
+        <MenuItem
+          icon="link-badge"
+          onClick={handleCopyLink}
+        >
+          {lang('CopyLink')}
+        </MenuItem>
+        <MenuItem
+          icon="forward"
+          onClick={handleLinkShare}
+        >
+          {lang('Share')}
+        </MenuItem>
+      </DropdownMenu>
+    );
+
+    const uniqueGiftModalHeader = (
+      <div
+        className={styles.modalHeader}
+      >
+        <Button
+          className={styles.modalCloseButton}
+          round
+          color="translucent-white"
+          size="smaller"
+          ariaLabel={lang('Close')}
+          onClick={handleClose}
+        >
+          <Icon name="close" />
+        </Button>
+        {contextMenu}
+      </div>
+    );
 
     const uniqueGiftHeader = isUniqueGift && (
       <div className={buildClassName(styles.header, styles.uniqueGift)}>
@@ -501,19 +579,21 @@ const GiftInfoModal = ({
     );
 
     return {
+      modalHeader: isUniqueGift ? uniqueGiftModalHeader : undefined,
       header: isUniqueGift ? uniqueGiftHeader : regularHeader,
       tableData,
       footer,
     };
   }, [
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang,
-    gift, giftAttributes, renderFooterButton, isTargetChat,
+    gift, giftAttributes, renderFooterButton, isTargetChat, SettingsMenuButton,
   ]);
 
   return (
     <>
       <TableInfoModal
         isOpen={isOpen}
+        modalHeader={modalData?.modalHeader}
         header={modalData?.header}
         hasBackdrop={gift?.type === 'starGiftUnique'}
         tableData={modalData?.tableData}
