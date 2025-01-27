@@ -1,9 +1,9 @@
 import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiUser, ApiUserStarGift } from '../../../api/types';
+import type { ApiPeer, ApiSavedStarGift } from '../../../api/types';
 
-import { selectUser } from '../../../global/selectors';
+import { selectPeer } from '../../../global/selectors';
 import { CUSTOM_PEER_HIDDEN } from '../../../util/objects/customPeer';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift, getTotalGiftAvailability } from '../helpers/gifts';
@@ -19,22 +19,22 @@ import Icon from '../icons/Icon';
 import RadialPatternBackground from '../profile/RadialPatternBackground';
 import GiftRibbon from './GiftRibbon';
 
-import styles from './UserGift.module.scss';
+import styles from './SavedGift.module.scss';
 
 type OwnProps = {
-  userId: string;
-  gift: ApiUserStarGift;
+  peerId: string;
+  gift: ApiSavedStarGift;
   observeIntersection?: ObserveFn;
 };
 
 type StateProps = {
-  fromPeer?: ApiUser;
+  fromPeer?: ApiPeer;
 };
 
 const GIFT_STICKER_SIZE = 90;
 
-const UserGift = ({
-  userId,
+const SavedGift = ({
+  peerId,
   gift,
   fromPeer,
   observeIntersection,
@@ -50,7 +50,7 @@ const UserGift = ({
 
   const handleClick = useLastCallback(() => {
     openGiftInfoModal({
-      userId,
+      peerId,
       gift,
     });
   });
@@ -92,7 +92,7 @@ const UserGift = ({
   return (
     <div ref={ref} className={styles.root} onClick={handleClick}>
       {radialPatternBackdrop}
-      <Avatar className={styles.avatar} peer={avatarPeer} size="micro" />
+      {!radialPatternBackdrop && <Avatar className={styles.avatar} peer={avatarPeer} size="micro" />}
       <AnimatedIconFromSticker
         sticker={sticker}
         noLoop
@@ -117,10 +117,10 @@ const UserGift = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { gift }): StateProps => {
-    const fromPeer = gift.fromId ? selectUser(global, gift.fromId) : undefined;
+    const fromPeer = gift.fromId ? selectPeer(global, gift.fromId) : undefined;
 
     return {
       fromPeer,
     };
   },
-)(UserGift));
+)(SavedGift));

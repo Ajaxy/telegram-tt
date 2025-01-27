@@ -17,6 +17,7 @@ import type {
   ApiInputInvoice,
   ApiInputInvoiceStarGift,
   ApiInputMessageReplyInfo,
+  ApiInputSavedStarGift,
   ApiKeyboardButton,
   ApiLimitTypeWithModal,
   ApiMessage,
@@ -32,6 +33,7 @@ import type {
   ApiReaction,
   ApiReactionWithPaid,
   ApiReportReason,
+  ApiSavedStarGift,
   ApiSendMessageAction,
   ApiSessionData,
   ApiStarGift,
@@ -44,7 +46,6 @@ import type {
   ApiTypePrepaidGiveaway,
   ApiUpdate,
   ApiUser,
-  ApiUserStarGift,
   ApiVideo,
   BotsPrivacyType,
   PrivacyVisibility,
@@ -2305,8 +2306,8 @@ export interface ActionPayloads {
     messageId: number;
   } & WithTabId;
   openGiftInfoModal: ({
-    userId: string;
-    gift: ApiUserStarGift;
+    peerId: string;
+    gift: ApiSavedStarGift;
   } | {
     gift: ApiStarGift;
   }) & WithTabId;
@@ -2314,24 +2315,24 @@ export interface ActionPayloads {
   openGiftUpgradeModal: {
     giftId: string;
     peerId?: string;
-    gift?: ApiUserStarGift;
+    gift?: ApiSavedStarGift;
   } & WithTabId;
   closeGiftUpgradeModal: WithTabId | undefined;
   upgradeGift: {
-    messageId: number;
+    gift: ApiInputSavedStarGift;
     shouldKeepOriginalDetails?: boolean;
     upgradeStars?: number;
   } & WithTabId;
-  loadUserGifts: {
-    userId: string;
+  loadPeerSavedGifts: {
+    peerId: string;
     shouldRefresh?: boolean;
   };
   changeGiftVisibility: {
-    messageId: number;
+    gift: ApiInputSavedStarGift;
     shouldUnsave?: boolean;
   };
   convertGiftToStars: {
-    messageId: number;
+    gift: ApiInputSavedStarGift;
   } & WithTabId;
 
   openStarsGiftModal: ({

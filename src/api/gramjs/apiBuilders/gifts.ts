@@ -1,29 +1,31 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiInputSavedStarGift,
+  ApiSavedStarGift,
   ApiStarGift,
   ApiStarGiftAttribute,
-  ApiUserStarGift,
 } from '../../types';
 
 import { numberToHexColor } from '../../../util/colors';
 import { addDocumentToLocalDb } from '../helpers';
 import { buildApiFormattedText } from './common';
-import { buildApiPeerId } from './peers';
+import { getApiChatIdFromMtpPeer } from './peers';
 import { buildStickerFromDocument } from './symbols';
 
 export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   if (starGift instanceof GramJs.StarGiftUnique) {
     const {
-      id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug,
+      id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
     } = starGift;
 
     return {
       type: 'starGiftUnique',
       id: id.toString(),
       number: num,
-      ownerId: ownerId && buildApiPeerId(ownerId, 'user'),
+      ownerId: ownerId && getApiChatIdFromMtpPeer(ownerId),
       ownerName,
+      ownerAddress,
       attributes: attributes.map(buildApiStarGiftAttribute).filter(Boolean),
       title,
       totalCount: availabilityTotal,
@@ -115,25 +117,30 @@ export function buildApiStarGiftAttribute(attribute: GramJs.TypeStarGiftAttribut
     return {
       type: 'originalDetails',
       date,
-      recipientId: recipientId && buildApiPeerId(recipientId, 'user'),
+      recipientId: recipientId && getApiChatIdFromMtpPeer(recipientId),
       message: message && buildApiFormattedText(message),
-      senderId: senderId && buildApiPeerId(senderId, 'user'),
+      senderId: senderId && getApiChatIdFromMtpPeer(senderId),
     };
   }
 
   return undefined;
 }
 
-export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUserStarGift {
+export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId: string): ApiSavedStarGift {
   const {
     gift, date, convertStars, fromId, message, msgId, nameHidden, unsaved, upgradeStars, transferStars, canUpgrade,
+    savedId,
   } = userStarGift;
+
+  const inputGift: ApiInputSavedStarGift | undefined = savedId && peerId
+    ? { type: 'chat', chatId: peerId, savedId: savedId.toString() }
+    : msgId ? { type: 'user', messageId: msgId } : undefined;
 
   return {
     gift: buildApiStarGift(gift),
     date,
     starsToConvert: convertStars?.toJSNumber(),
-    fromId: fromId && buildApiPeerId(fromId, 'user'),
+    fromId: fromId && getApiChatIdFromMtpPeer(fromId),
     message: message && buildApiFormattedText(message),
     messageId: msgId,
     isNameHidden: nameHidden,
@@ -141,5 +148,7 @@ export function buildApiUserStarGift(userStarGift: GramJs.UserStarGift): ApiUser
     canUpgrade,
     alreadyPaidUpgradeStars: upgradeStars?.toJSNumber(),
     transferStars: transferStars?.toJSNumber(),
+    inputGift,
+    savedId: savedId?.toString(),
   };
 }

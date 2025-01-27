@@ -63,9 +63,10 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
 
   const handleUpgrade = useLastCallback(() => {
     const gift = renderingModal?.gift;
-    if (!gift?.messageId) return;
+    if (!gift?.inputGift) return;
+
     upgradeGift({
-      messageId: gift.messageId,
+      gift: gift.inputGift,
       shouldKeepOriginalDetails,
       upgradeStars: !gift.alreadyPaidUpgradeStars ? (gift.gift as ApiStarGiftRegular).upgradeStars : undefined,
     });
@@ -114,7 +115,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
     ] satisfies TableAboutData;
 
     const subtitle = renderingRecipient
-      ? lang('GiftUpgradeText', { peer: getPeerTitle(lang, renderingRecipient) })
+      ? lang('GiftPeerUpgradeText', { peer: getPeerTitle(lang, renderingRecipient) })
       : lang('GiftUpgradeTextOwn');
 
     const header = (

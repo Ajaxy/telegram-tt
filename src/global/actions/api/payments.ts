@@ -17,6 +17,7 @@ import { callApi } from '../../../api/gramjs';
 import { isChatChannel, isChatSuperGroup } from '../../helpers';
 import {
   getRequestInputInvoice,
+  getRequestInputSavedStarGift,
 } from '../../helpers/payments';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
@@ -123,12 +124,12 @@ addActionHandler('openInvoice', async (global, actions, payload): Promise<void> 
 
 addActionHandler('sendStarGift', (global, actions, payload): ActionReturnType => {
   const {
-    gift, userId, message, shouldHideName, shouldUpgrade, tabId = getCurrentTabId(),
+    gift, peerId, message, shouldHideName, shouldUpgrade, tabId = getCurrentTabId(),
   } = payload;
 
   const inputInvoice: ApiInputInvoiceStarGift = {
     type: 'stargift',
-    userId,
+    peerId,
     giftId: gift.id,
     message,
     shouldHideName,
@@ -520,7 +521,7 @@ addActionHandler('openGiftModal', async (global, actions, payload): Promise<void
   global = getGlobal();
   global = updateTabState(global, {
     giftModal: {
-      forUserId,
+      forPeerId: forUserId,
       gifts,
     },
   }, tabId);
@@ -956,8 +957,13 @@ addActionHandler('launchPrepaidStarsGiveaway', async (global, actions, payload):
 
 addActionHandler('upgradeGift', (global, actions, payload): ActionReturnType => {
   const {
-    messageId, shouldKeepOriginalDetails, upgradeStars, tabId = getCurrentTabId(),
+    gift, shouldKeepOriginalDetails, upgradeStars, tabId = getCurrentTabId(),
   } = payload;
+
+  const requestSavedGift = getRequestInputSavedStarGift(global, gift);
+  if (!requestSavedGift) {
+    return;
+  }
 
   global = updateTabState(global, {
     isWaitingForStarGiftUpgrade: true,
@@ -971,7 +977,7 @@ addActionHandler('upgradeGift', (global, actions, payload): ActionReturnType => 
 
   if (!upgradeStars) {
     callApi('upgradeGift', {
-      messageId,
+      inputSavedGift: requestSavedGift,
       shouldKeepOriginalDetails: shouldKeepOriginalDetails || undefined,
     });
 
@@ -980,7 +986,7 @@ addActionHandler('upgradeGift', (global, actions, payload): ActionReturnType => 
 
   const invoice: ApiInputInvoiceStarGiftUpgrade = {
     type: 'stargiftUpgrade',
-    messageId,
+    inputSavedGift: gift,
     shouldKeepOriginalDetails: shouldKeepOriginalDetails || undefined,
   };
 

@@ -5,7 +5,6 @@ import type {
 import type { BotAppPermissions } from '../../types';
 import type { GlobalState } from '../types';
 
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { isUserBot } from '../helpers';
 
 export function selectUser<T extends GlobalState>(global: T, userId: string): ApiUser | undefined {
@@ -60,14 +59,6 @@ export function selectBot<T extends GlobalState>(global: T, userId: string): Api
   }
 
   return user;
-}
-
-export function selectCanGift<T extends GlobalState>(global: T, userId: string) {
-  const bot = selectBot(global, userId);
-  const user = selectUser(global, userId);
-
-  return !selectIsPremiumPurchaseBlocked(global) && user && !bot
-    && !user.isSelf && userId !== SERVICE_NOTIFICATIONS_USER_ID;
 }
 
 export function selectBotAppPermissions<T extends GlobalState>(

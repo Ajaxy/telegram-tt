@@ -1,21 +1,21 @@
-import type { ApiUserStarGift } from '../../../api/types';
+import type { ApiSavedStarGift } from '../../../api/types';
 import type { StarGiftCategory } from '../../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
+import { areInputSavedGiftsEqual, getRequestInputSavedStarGift } from '../../helpers/payments';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   appendStarsSubscriptions,
   appendStarsTransactions,
-  replaceUserGifts,
+  replacePeerSavedGifts,
   updateStarsBalance,
   updateStarsSubscriptionLoading,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectPeer,
-  selectUser,
 } from '../../selectors';
 
 addActionHandler('loadStarStatus', async (global): Promise<void> => {
@@ -133,19 +133,19 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
   setGlobal(global);
 });
 
-addActionHandler('loadUserGifts', async (global, actions, payload): Promise<void> => {
-  const { userId, shouldRefresh } = payload;
+addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise<void> => {
+  const { peerId, shouldRefresh } = payload;
 
-  const user = selectUser(global, userId);
-  if (!user) return;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
 
-  const currentGifts = global.users.giftsById[userId];
+  const currentGifts = global.peers.giftsById[peerId];
   const localNextOffset = currentGifts?.nextOffset;
 
   if (!shouldRefresh && currentGifts && !localNextOffset) return; // Already loaded all
 
-  const result = await callApi('fetchUserStarGifts', {
-    user,
+  const result = await callApi('fetchSavedStarGifts', {
+    peer,
     offset: !shouldRefresh ? localNextOffset : '',
   });
 
@@ -157,7 +157,7 @@ addActionHandler('loadUserGifts', async (global, actions, payload): Promise<void
 
   const newGifts = currentGifts && !shouldRefresh ? currentGifts.gifts.concat(result.gifts) : result.gifts;
 
-  global = replaceUserGifts(global, userId, newGifts, result.nextOffset);
+  global = replacePeerSavedGifts(global, peerId, newGifts, result.nextOffset);
   setGlobal(global);
 });
 
@@ -216,53 +216,59 @@ addActionHandler('fulfillStarsSubscription', async (global, actions, payload): P
 });
 
 addActionHandler('changeGiftVisibility', async (global, actions, payload): Promise<void> => {
-  const { messageId, shouldUnsave } = payload;
+  const { gift, shouldUnsave } = payload;
 
-  const currentUserId = global.currentUserId!;
+  const peerId = gift.type === 'user' ? global.currentUserId! : gift.chatId;
 
-  const oldGifts = global.users.giftsById[currentUserId];
+  const requestInputGift = getRequestInputSavedStarGift(global, gift);
+  if (!requestInputGift) return;
+
+  const oldGifts = global.peers.giftsById[peerId];
   if (oldGifts?.gifts?.length) {
-    const newGifts = oldGifts.gifts.map((gift) => {
-      if (gift.messageId === messageId) {
+    const newGifts = oldGifts.gifts.map((g) => {
+      if (g.inputGift && areInputSavedGiftsEqual(g.inputGift, gift)) {
         return {
-          ...gift,
+          ...g,
           isUnsaved: shouldUnsave,
-        } satisfies ApiUserStarGift;
+        } satisfies ApiSavedStarGift;
       }
-      return gift;
+      return g;
     });
-    global = replaceUserGifts(global, currentUserId, newGifts, oldGifts.nextOffset);
+    global = replacePeerSavedGifts(global, peerId, newGifts, oldGifts.nextOffset);
     setGlobal(global);
   }
 
   const result = await callApi('saveStarGift', {
-    messageId,
+    inputGift: requestInputGift,
     shouldUnsave,
   });
   global = getGlobal();
 
   if (!result) {
-    global = replaceUserGifts(global, currentUserId, oldGifts.gifts, oldGifts.nextOffset);
+    global = replacePeerSavedGifts(global, peerId, oldGifts.gifts, oldGifts.nextOffset);
     setGlobal(global);
     return;
   }
 
   // Reload gift list to avoid issues with pagination
-  actions.loadUserGifts({ userId: currentUserId, shouldRefresh: true });
+  actions.loadPeerSavedGifts({ peerId, shouldRefresh: true });
 });
 
 addActionHandler('convertGiftToStars', async (global, actions, payload): Promise<void> => {
-  const { messageId, tabId = getCurrentTabId() } = payload;
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  const requestInputGift = getRequestInputSavedStarGift(global, gift);
+  if (!requestInputGift) return;
 
   const result = await callApi('convertStarGift', {
-    messageId,
+    inputSavedGift: requestInputGift,
   });
 
   if (!result) {
     return;
   }
 
-  actions.loadUserGifts({ userId: global.currentUserId!, shouldRefresh: true });
+  actions.loadPeerSavedGifts({ peerId: global.currentUserId!, shouldRefresh: true });
   actions.openStarsBalanceModal({ tabId });
 });
 

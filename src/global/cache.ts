@@ -4,10 +4,7 @@ import { addCallback, removeCallback } from '../lib/teact/teactn';
 
 import type {
   ApiAvailableReaction,
-  ApiBotPreviewMedia,
   ApiMessage,
-  ApiUserCommonChats,
-  ApiUserGifts,
 } from '../api/types';
 import type { MessageList, ThreadId } from '../types';
 import type { ActionReturnType, GlobalState } from './types';
@@ -276,6 +273,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.settings.botVerificationShownPeerIds) {
     cached.settings.botVerificationShownPeerIds = initialState.settings.botVerificationShownPeerIds;
   }
+
+  if (!cached.peers) {
+    cached.peers = initialState.peers;
+  }
 }
 
 function updateCache(force?: boolean) {
@@ -386,15 +387,7 @@ function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['cust
   };
 }
 
-function reduceUsers<T extends GlobalState>(global: T): {
-  commonChatsById: Record<string, ApiUserCommonChats>;
-  giftsById: Record<string, ApiUserGifts>;
-  botAppPermissionsById: any;
-  statusesById: any;
-  fullInfoById: any;
-  byId: any;
-  previewMediaByBotId: Record<string, ApiBotPreviewMedia[]>;
-} {
+function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
   const {
     users: {
       byId, statusesById, fullInfoById, botAppPermissionsById,

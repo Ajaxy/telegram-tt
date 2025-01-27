@@ -561,7 +561,7 @@ export type StarsSubscriptions = {
 export type ConfettiStyle = 'poppers' | 'top-down';
 
 export type StarGiftInfo = {
-  userId: string;
+  peerId: string;
   gift: ApiStarGiftRegular;
   shouldHideName?: boolean;
   message?: ApiFormattedText;

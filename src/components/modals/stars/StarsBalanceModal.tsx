@@ -7,7 +7,7 @@ import type { ApiStarTopupOption } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 import type { RegularLangKey } from '../../../types/language';
 
-import { getChatTitle, getUserFullName } from '../../../global/helpers';
+import { getChatTitle, getPeerTitle, getUserFullName } from '../../../global/helpers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
@@ -99,9 +99,9 @@ const StarsBalanceModal = ({
     }
 
     if (originGift) {
-      const user = selectUser(global, originGift.userId);
-      if (!user) return undefined;
-      return oldLang('StarsNeededTextGift', getUserFullName(user));
+      const peer = selectUser(global, originGift.peerId);
+      if (!peer) return undefined;
+      return oldLang('StarsNeededTextGift', getPeerTitle(lang, peer));
     }
 
     if (topup?.purpose === SUBSCRIPTION_PURPOSE) {
@@ -109,7 +109,7 @@ const StarsBalanceModal = ({
     }
 
     return undefined;
-  }, [originReaction, originStarsPayment, originGift, topup?.purpose, oldLang]);
+  }, [originReaction, originStarsPayment, originGift, topup?.purpose, lang, oldLang]);
 
   const shouldShowItems = Boolean(history?.all?.transactions.length && !shouldOpenOnBuy);
   const shouldSuggestGifting = !shouldOpenOnBuy;

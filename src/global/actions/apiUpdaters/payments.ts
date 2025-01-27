@@ -76,7 +76,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
         const giftModalState = selectTabState(global, tabId).giftModal;
 
-        if (giftModalState && inputInvoice.userIds[0] === giftModalState.forUserId) {
+        if (giftModalState && inputInvoice.userIds[0] === giftModalState.forPeerId) {
           global = updateTabState(global, {
             giftModal: {
               ...giftModalState,

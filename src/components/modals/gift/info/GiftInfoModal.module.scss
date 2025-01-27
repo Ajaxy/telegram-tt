@@ -52,10 +52,25 @@
   gap: 0.25rem;
 }
 
+/* stylelint-disable-next-line plugin/stylelint-group-selectors */
 .uniqueGift {
   margin-bottom: 0;
 }
 
 .starAmountIcon {
   margin-inline-start: 0 !important;
+}
+
+.ownerAddress {
+  font-family: var(--font-family-monospace);
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  overflow: hidden;
+}
+
+.copyIcon {
+  margin-inline-start: 0.25rem;
+  color: var(--color-primary);
+  pointer-events: none;
 }

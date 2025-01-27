@@ -218,6 +218,7 @@ export interface LangPair {
   'SavedMessagesInfo': undefined;
   'BlockedListNotFound': undefined;
   'TextCopied': undefined;
+  'WalletAddressCopied': undefined;
   'Copy': undefined;
   'DeleteAndStop': undefined;
   'DeleteForAll': undefined;
@@ -1161,6 +1162,7 @@ export interface LangPair {
   'GiftSoldOut': undefined;
   'GiftMessagePlaceholder': undefined;
   'GiftHideMyName': undefined;
+  'GiftHideNameDescriptionChannel': undefined;
   'GiftInfoSent': undefined;
   'GiftInfoReceived': undefined;
   'GiftInfoTitle': undefined;
@@ -1208,6 +1210,7 @@ export interface LangPair {
   'StarsReactionLinkText': undefined;
   'StarsReactionLink': undefined;
   'ActionStarGiftDisplaying': undefined;
+  'ActionStarGiftChannelDisplaying': undefined;
   'ActionStarGiftDescriptionUpgrade': undefined;
   'ActionStarGiftUpgraded': undefined;
   'ActionStarGiftUnpack': undefined;
@@ -1622,6 +1625,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarGiftDescription': {
     'user': V;
   };
+  'StarGiftDescriptionChannel': {
+    'peer': V;
+  };
   'GiftDiscount': {
     'percent': V;
   };
@@ -1632,23 +1638,28 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'count': V;
   };
   'GiftHideNameDescription': {
-    'profile': V;
     'receiver': V;
   };
   'GiftSend': {
     'amount': V;
   };
-  'GiftInfoDescriptionFreeUpgradeOut': {
-    'user': V;
+  'GiftInfoPeerDescriptionFreeUpgradeOut': {
+    'peer': V;
   };
-  'GiftInfoConvertDescription1': {
-    'user': V;
+  'GiftInfoPeerConvertDescription': {
+    'peer': V;
     'amount': V;
   };
   'GiftInfoSaved': {
     'link': V;
   };
   'GiftInfoHidden': {
+    'link': V;
+  };
+  'GiftInfoChannelSaved': {
+    'link': V;
+  };
+  'GiftInfoChannelHidden': {
     'link': V;
   };
   'GiftInfoIssued': {
@@ -1658,27 +1669,27 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'GiftInfoCollectible': {
     'number': V;
   };
-  'GiftInfoOriginalInfo': {
-    'user': V;
+  'GiftInfoPeerOriginalInfo': {
+    'peer': V;
     'date': V;
   };
-  'GiftInfoOriginalInfoSender': {
+  'GiftInfoPeerOriginalInfoSender': {
     'sender': V;
-    'user': V;
+    'peer': V;
     'date': V;
   };
-  'GiftInfoOriginalInfoText': {
-    'user': V;
+  'GiftInfoPeerOriginalInfoText': {
+    'peer': V;
     'date': V;
     'text': V;
   };
-  'GiftInfoOriginalInfoTextSender': {
+  'GiftInfoPeerOriginalInfoTextSender': {
     'sender': V;
-    'user': V;
+    'peer': V;
     'date': V;
     'text': V;
   };
-  'GiftUpgradeText': {
+  'GiftPeerUpgradeText': {
     'peer': V;
   };
   'GiftUpgradeButton': {
@@ -1689,6 +1700,10 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'GiftMakeUniqueDescription': {
     'user': V;
+    'link': V;
+  };
+  'GiftMakeUniqueDescriptionChannel': {
+    'peer': V;
     'link': V;
   };
   'StarsAmount': {
@@ -1703,15 +1718,15 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsReactionTerms': {
     'link': V;
   };
-  'ActionStarGiftTitle': {
-    'user': V;
+  'ActionStarGiftPeerTitle': {
+    'peer': V;
     'count': V;
   };
   'ActionStarGiftOutTitle': {
     'count': V;
   };
-  'ActionStarGiftOutDescriptionUpgrade': {
-    'user': V;
+  'ActionStarGiftPeerOutDescriptionUpgrade': {
+    'peer': V;
   };
   'StarsSubscribeInfo': {
     'link': V;
@@ -1918,8 +1933,8 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   'GiftInfoDescription': {
     'amount': V;
   };
-  'GiftInfoDescriptionOut': {
-    'user': V;
+  'GiftInfoPeerDescriptionOut': {
+    'peer': V;
     'amount': V;
   };
   'GiftInfoDescriptionUpgrade': {
@@ -1928,8 +1943,8 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   'GiftInfoDescriptionConverted': {
     'amount': V;
   };
-  'GiftInfoDescriptionOutConverted': {
-    'user': V;
+  'GiftInfoPeerDescriptionOutConverted': {
+    'peer': V;
     'amount': V;
   };
   'GiftInfoConvert': {
@@ -1952,8 +1967,8 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   'PrizeCredits2': {
     'count': V;
   };
-  'ActionStarGiftOutDescription2': {
-    'user': V;
+  'ActionStarGiftPeerOutDescription': {
+    'peer': V;
     'count': V;
   };
   'ActionStarGiftDescription2': {

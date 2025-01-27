@@ -34,7 +34,7 @@ import { getGlobal } from '../index';
 import {
   getChatTitle, getCleanPeerId, isPeerUser, isUserId,
 } from './chats';
-import { getMainUsername, getUserFullName } from './users';
+import { getMainUsername, getUserFirstOrLastName, getUserFullName } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
@@ -210,6 +210,16 @@ export function isAnonymousOwnMessage(message: ApiMessage) {
 }
 
 export function getPeerTitle(lang: OldLangFn | LangFn, peer: ApiPeer | CustomPeer) {
+  if (!peer) return undefined;
+  if ('isCustomPeer' in peer) {
+    // TODO: Remove any after full migration to new lang
+    return peer.titleKey ? lang(peer.titleKey as any) : peer.title;
+  }
+  return isPeerUser(peer) ? getUserFirstOrLastName(peer) : getChatTitle(lang, peer);
+}
+
+export function getPeerFullTitle(lang: OldLangFn | LangFn, peer: ApiPeer | CustomPeer) {
+  if (!peer) return undefined;
   if ('isCustomPeer' in peer) {
     // TODO: Remove any after full migration to new lang
     return peer.titleKey ? lang(peer.titleKey as any) : peer.title;

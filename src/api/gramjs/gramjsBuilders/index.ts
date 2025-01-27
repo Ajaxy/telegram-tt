@@ -23,6 +23,7 @@ import type {
   ApiReactionWithPaid,
   ApiReportReason,
   ApiRequestInputInvoice,
+  ApiRequestInputSavedStarGift,
   ApiSendMessageAction,
   ApiSticker,
   ApiStory,
@@ -643,10 +644,10 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
 
     case 'stargift': {
       const {
-        user, shouldHideName, giftId, message, shouldUpgrade,
+        peer, shouldHideName, giftId, message, shouldUpgrade,
       } = invoice;
       return new GramJs.InputInvoiceStarGift({
-        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+        peer: buildInputPeer(peer.id, peer.accessHash),
         hideName: shouldHideName || undefined,
         giftId: BigInt(giftId),
         message: message && buildInputTextWithEntities(message),
@@ -676,7 +677,7 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
 
     case 'stargiftUpgrade': {
       return new GramJs.InputInvoiceStarGiftUpgrade({
-        msgId: invoice.messageId,
+        stargift: buildInputSavedStarGift(invoice.inputSavedGift),
         keepOriginalDetails: invoice.shouldKeepOriginalDetails,
       });
     }
@@ -732,15 +733,9 @@ export function buildInputEmojiStatus(emojiStatusId: string, expires?: number) {
     return new GramJs.EmojiStatusEmpty();
   }
 
-  if (expires) {
-    return new GramJs.EmojiStatusUntil({
-      documentId: BigInt(emojiStatusId),
-      until: expires,
-    });
-  }
-
   return new GramJs.EmojiStatus({
     documentId: BigInt(emojiStatusId),
+    until: expires,
   });
 }
 
@@ -844,4 +839,17 @@ export function buildInputPrivacyRules(
   }
 
   return privacyRules;
+}
+
+export function buildInputSavedStarGift(inputGift: ApiRequestInputSavedStarGift) {
+  if (inputGift.type === 'user') {
+    return new GramJs.InputSavedStarGiftUser({
+      msgId: inputGift.messageId,
+    });
+  }
+
+  return new GramJs.InputSavedStarGiftChat({
+    peer: buildInputPeer(inputGift.chat.id, inputGift.chat.accessHash),
+    savedId: BigInt(inputGift.savedId),
+  });
 }

@@ -303,7 +303,7 @@
     "payments.refundStarsCharge",
     "payments.getStarsGiftOptions",
     "payments.getStarGifts",
-    "payments.getUserStarGifts",
+    "payments.getSavedStarGifts",
     "payments.saveStarGift",
     "payments.convertStarGift",
     "payments.getStarGiftUpgradePreview",

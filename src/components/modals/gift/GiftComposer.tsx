@@ -4,13 +4,14 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiMessage, ApiUser } from '../../../api/types';
+import type { ApiMessage, ApiPeer } from '../../../api/types';
 import type { ThemeKey } from '../../../types';
 import type { GiftOption } from './GiftModal';
 
 import { STARS_CURRENCY_CODE } from '../../../config';
-import { getUserFullName } from '../../../global/helpers';
-import { selectTabState, selectTheme, selectUser } from '../../../global/selectors';
+import { getPeerTitle } from '../../../global/helpers';
+import { isApiPeerUser } from '../../../global/helpers/peers';
+import { selectPeer, selectTabState, selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -32,7 +33,7 @@ import styles from './GiftComposer.module.scss';
 
 export type OwnProps = {
   gift: GiftOption;
-  userId: string;
+  peerId: string;
 };
 
 export type StateProps = {
@@ -42,7 +43,7 @@ export type StateProps = {
   patternColor?: string;
   customBackground?: string;
   backgroundColor?: string;
-  user?: ApiUser;
+  peer?: ApiPeer;
   currentUserId?: string;
   isPaymentFormLoading?: boolean;
 };
@@ -51,8 +52,8 @@ const LIMIT_DISPLAY_THRESHOLD = 50;
 
 function GiftComposer({
   gift,
-  userId,
-  user,
+  peerId,
+  peer,
   captionLimit,
   theme,
   isBackgroundBlurred,
@@ -73,6 +74,7 @@ function GiftComposer({
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const isStarGift = 'id' in gift;
+  const isPeerUser = peer && isApiPeerUser(peer);
 
   const localMessage = useMemo(() => {
     if (!isStarGift) {
@@ -84,7 +86,7 @@ function GiftComposer({
         date: Math.floor(Date.now() / 1000),
         content: {
           action: {
-            targetUserIds: [userId],
+            targetChatId: peerId,
             mediaType: 'action',
             text: 'ActionGiftInbound',
             type: 'giftPremium',
@@ -108,7 +110,7 @@ function GiftComposer({
       date: Math.floor(Date.now() / 1000),
       content: {
         action: {
-          targetUserIds: [userId],
+          targetChatId: peerId,
           mediaType: 'action',
           text: 'ActionGiftInbound',
           type: 'starGift',
@@ -122,14 +124,17 @@ function GiftComposer({
             isNameHidden: shouldHideName,
             starsToConvert: gift.starsToConvert,
             canUpgrade: shouldPayForUpgrade || undefined,
+            alreadyPaidUpgradeStars: shouldPayForUpgrade ? gift.upgradeStars : undefined,
             isSaved: false,
             gift,
+            peerId,
+            fromId: currentUserId,
           },
           translationValues: ['%action_origin%', '%gift_payment_amount%'],
         },
       },
     } satisfies ApiMessage;
-  }, [currentUserId, gift, giftMessage, isStarGift, shouldHideName, shouldPayForUpgrade, userId]);
+  }, [currentUserId, gift, giftMessage, isStarGift, shouldHideName, shouldPayForUpgrade, peerId]);
 
   const handleGiftMessageChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setGiftMessage(e.target.value);
@@ -147,14 +152,14 @@ function GiftComposer({
     if (!isStarGift) return;
     openGiftUpgradeModal({
       giftId: gift.id,
-      peerId: userId,
+      peerId,
     });
   });
 
   const handleMainButtonClick = useLastCallback(() => {
     if (isStarGift) {
       sendStarGift({
-        userId,
+        peerId,
         shouldHideName,
         gift,
         message: giftMessage ? { text: giftMessage } : undefined,
@@ -165,7 +170,7 @@ function GiftComposer({
 
     openInvoice({
       type: 'giftcode',
-      userIds: [userId],
+      userIds: [peerId],
       currency: gift.currency,
       amount: gift.amount,
       option: gift,
@@ -176,7 +181,7 @@ function GiftComposer({
   function renderOptionsSection() {
     const symbolsLeft = captionLimit ? captionLimit - giftMessage.length : undefined;
 
-    const userFullName = getUserFullName(user)!;
+    const title = getPeerTitle(lang, peer!)!;
     return (
       <div className={styles.optionsSection}>
         <TextArea
@@ -204,12 +209,19 @@ function GiftComposer({
         )}
         {isStarGift && (
           <div className={styles.description}>
-            {lang('GiftMakeUniqueDescription', {
-              user: userFullName,
-              link: <Link isPrimary onClick={handleOpenUpgradePreview}>{lang('GiftMakeUniqueLink')}</Link>,
-            }, {
-              withNodes: true,
-            })}
+            {isPeerUser
+              ? lang('GiftMakeUniqueDescription', {
+                user: title,
+                link: <Link isPrimary onClick={handleOpenUpgradePreview}>{lang('GiftMakeUniqueLink')}</Link>,
+              }, {
+                withNodes: true,
+              })
+              : lang('GiftMakeUniqueDescriptionChannel', {
+                peer: title,
+                link: <Link isPrimary onClick={handleOpenUpgradePreview}>{lang('GiftMakeUniqueLink')}</Link>,
+              }, {
+                withNodes: true,
+              })}
           </div>
         )}
 
@@ -225,7 +237,7 @@ function GiftComposer({
         )}
         {isStarGift && (
           <div className={styles.description}>
-            {lang('GiftHideNameDescription', { profile: userFullName, receiver: userFullName })}
+            {isPeerUser ? lang('GiftHideNameDescription', { receiver: title }) : lang('GiftHideNameDescriptionChannel')}
           </div>
         )}
       </div>
@@ -298,7 +310,7 @@ function GiftComposer({
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { userId }): StateProps => {
+  (global, { peerId }): StateProps => {
     const theme = selectTheme(global);
     const {
       isBlurred: isBackgroundBlurred,
@@ -306,12 +318,12 @@ export default memo(withGlobal<OwnProps>(
       background: customBackground,
       backgroundColor,
     } = global.settings.themes[theme] || {};
-    const user = selectUser(global, userId);
+    const peer = selectPeer(global, peerId);
 
     const tabState = selectTabState(global);
 
     return {
-      user,
+      peer,
       theme,
       isBackgroundBlurred,
       patternColor,

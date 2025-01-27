@@ -1,7 +1,9 @@
 import type {
   ApiInputInvoice,
+  ApiInputSavedStarGift,
   ApiMessage,
   ApiRequestInputInvoice,
+  ApiRequestInputSavedStarGift,
   ApiStarsAmount,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
@@ -11,7 +13,8 @@ import type { CustomPeer } from '../../types';
 import type { LangFn } from '../../util/localization';
 import type { GlobalState } from '../types';
 
-import { selectChat, selectUser } from '../selectors';
+import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import { selectChat, selectPeer, selectUser } from '../selectors';
 
 export function getRequestInputInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice,
@@ -20,15 +23,15 @@ export function getRequestInputInvoice<T extends GlobalState>(
 
   if (inputInvoice.type === 'stargift') {
     const {
-      userId, shouldHideName, giftId, message, shouldUpgrade,
+      peerId, shouldHideName, giftId, message, shouldUpgrade,
     } = inputInvoice;
-    const user = selectUser(global, userId);
+    const peer = selectPeer(global, peerId);
 
-    if (!user) return undefined;
+    if (!peer) return undefined;
 
     return {
       type: 'stargift',
-      user,
+      peer,
       shouldHideName,
       giftId,
       message,
@@ -174,11 +177,33 @@ export function getRequestInputInvoice<T extends GlobalState>(
   }
 
   if (inputInvoice.type === 'stargiftUpgrade') {
-    const { messageId, shouldKeepOriginalDetails } = inputInvoice;
+    const { inputSavedGift, shouldKeepOriginalDetails } = inputInvoice;
+    const savedGift = getRequestInputSavedStarGift(global, inputSavedGift);
+    if (!savedGift) return undefined;
+
     return {
       type: 'stargiftUpgrade',
-      messageId,
+      inputSavedGift: savedGift,
       shouldKeepOriginalDetails,
+    };
+  }
+
+  return undefined;
+}
+
+export function getRequestInputSavedStarGift<T extends GlobalState>(
+  global: T, inputGift: ApiInputSavedStarGift,
+): ApiRequestInputSavedStarGift | undefined {
+  if (inputGift.type === 'user') return inputGift;
+
+  if (inputGift.type === 'chat') {
+    const chat = selectChat(global, inputGift.chatId);
+    if (!chat) return undefined;
+
+    return {
+      type: 'chat',
+      chat,
+      savedId: inputGift.savedId,
     };
   }
 
@@ -314,4 +339,8 @@ export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiSt
     date: message.date,
     giveawayPostId: message.id,
   };
+}
+
+export function areInputSavedGiftsEqual(one: ApiInputSavedStarGift, two: ApiInputSavedStarGift) {
+  return arePropsShallowEqual(one, two);
 }

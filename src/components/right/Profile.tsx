@@ -10,9 +10,9 @@ import type {
   ApiChat,
   ApiChatMember,
   ApiMessage,
+  ApiSavedStarGift,
   ApiTypeStory,
   ApiUser,
-  ApiUserStarGift,
   ApiUserStatus,
 } from '../../api/types';
 import type { TabState } from '../../global/types';
@@ -81,7 +81,7 @@ import useTransitionFixes from './hooks/useTransitionFixes';
 
 import Audio from '../common/Audio';
 import Document from '../common/Document';
-import UserGift from '../common/gift/UserGift';
+import SavedGift from '../common/gift/SavedGift';
 import GroupChatInfo from '../common/GroupChatInfo';
 import Icon from '../common/icons/Icon';
 import Media from '../common/Media';
@@ -125,7 +125,7 @@ type StateProps = {
   hasMembersTab?: boolean;
   hasPreviewMediaTab?: boolean;
   hasGiftsTab?: boolean;
-  gifts?: ApiUserStarGift[];
+  gifts?: ApiSavedStarGift[];
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
@@ -234,7 +234,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadChannelRecommendations,
     loadBotRecommendations,
     loadPreviewMedias,
-    loadUserGifts,
+    loadPeerSavedGifts,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -364,7 +364,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadStoriesArchive({ peerId: currentUserId!, offsetId });
   }, [currentUserId]);
   const handleLoadGifts = useCallback(() => {
-    loadUserGifts({ userId: chatId });
+    loadPeerSavedGifts({ peerId: chatId });
   }, [chatId]);
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds({
@@ -774,8 +774,8 @@ const Profile: FC<OwnProps & StateProps> = ({
           </div>
         ) : resultType === 'gifts' ? (
           (gifts?.map((gift) => (
-            <UserGift
-              userId={chatId}
+            <SavedGift
+              peerId={chatId}
               key={`${gift.date}-${gift.fromId}-${gift.gift.id}`}
               gift={gift}
               observeIntersection={observeIntersectionForMedia}
@@ -908,8 +908,8 @@ export default memo(withGlobal<OwnProps>(
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
-    const hasGiftsTab = Boolean(userFullInfo?.starGiftCount) && !isSavedDialog;
-    const userGifts = global.users.giftsById[chatId];
+    const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
+    const peerGifts = global.peers.giftsById[chatId];
 
     return {
       theme: selectTheme(global),
@@ -934,7 +934,7 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       storyIds,
       hasGiftsTab,
-      gifts: userGifts?.gifts,
+      gifts: peerGifts?.gifts,
       pinnedStoryIds,
       archiveStoryIds,
       storyByIds,

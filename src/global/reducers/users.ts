@@ -1,9 +1,9 @@
 import type {
   ApiMissingInvitedUser,
+  ApiSavedStarGift,
   ApiUser,
   ApiUserCommonChats,
   ApiUserFullInfo,
-  ApiUserStarGift,
   ApiUserStatus,
 } from '../../api/types';
 import type { BotAppPermissions } from '../../types';
@@ -324,19 +324,19 @@ export function updateBotAppPermissions<T extends GlobalState>(
   };
 }
 
-export function replaceUserGifts<T extends GlobalState>(
+export function replacePeerSavedGifts<T extends GlobalState>(
   global: T,
-  userId: string,
-  gifts: ApiUserStarGift[],
+  peerId: string,
+  gifts: ApiSavedStarGift[],
   nextOffset?: string,
 ): T {
   global = {
     ...global,
-    users: {
-      ...global.users,
+    peers: {
+      ...global.peers,
       giftsById: {
-        ...global.users.giftsById,
-        [userId]: {
+        ...global.peers.giftsById,
+        [peerId]: {
           gifts,
           nextOffset,
         },

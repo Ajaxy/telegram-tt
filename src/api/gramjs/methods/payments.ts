@@ -6,16 +6,16 @@ import type {
   ApiInputStorePaymentPurpose,
   ApiPeer,
   ApiRequestInputInvoice,
+  ApiRequestInputSavedStarGift,
   ApiStarGiftRegular,
   ApiThemeParameters,
-  ApiUser,
 } from '../../types';
 
 import { DEBUG } from '../../../config';
 import {
+  buildApiSavedStarGift,
   buildApiStarGift,
   buildApiStarGiftAttribute,
-  buildApiUserStarGift,
 } from '../apiBuilders/gifts';
 import {
   buildApiBoost,
@@ -37,7 +37,12 @@ import {
 } from '../apiBuilders/payments';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import {
-  buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildInputThemeParams, buildShippingInfo,
+  buildInputInvoice,
+  buildInputPeer,
+  buildInputSavedStarGift,
+  buildInputStorePaymentPurpose,
+  buildInputThemeParams,
+  buildShippingInfo,
 } from '../gramjsBuilders';
 import {
   deserializeBytes,
@@ -440,17 +445,17 @@ export async function fetchStarGifts() {
   return result.gifts.map(buildApiStarGift).filter((gift): gift is ApiStarGiftRegular => gift.type === 'starGift');
 }
 
-export async function fetchUserStarGifts({
-  user,
+export async function fetchSavedStarGifts({
+  peer,
   offset = '',
   limit,
 }: {
-  user: ApiUser;
+  peer: ApiPeer;
   offset?: string;
   limit?: number;
 }) {
-  const result = await invokeRequest(new GramJs.payments.GetUserStarGifts({
-    userId: buildInputPeer(user.id, user.accessHash),
+  const result = await invokeRequest(new GramJs.payments.GetSavedStarGifts({
+    peer: buildInputPeer(peer.id, peer.accessHash),
     offset,
     limit,
   }));
@@ -459,7 +464,7 @@ export async function fetchUserStarGifts({
     return undefined;
   }
 
-  const gifts = result.gifts.map(buildApiUserStarGift);
+  const gifts = result.gifts.map((g) => buildApiSavedStarGift(g, peer.id));
 
   return {
     gifts,
@@ -468,25 +473,25 @@ export async function fetchUserStarGifts({
 }
 
 export function saveStarGift({
-  messageId,
+  inputGift,
   shouldUnsave,
 }: {
-  messageId: number;
+  inputGift: ApiRequestInputSavedStarGift;
   shouldUnsave?: boolean;
 }) {
   return invokeRequest(new GramJs.payments.SaveStarGift({
-    msgId: messageId,
+    stargift: buildInputSavedStarGift(inputGift),
     unsave: shouldUnsave || undefined,
   }));
 }
 
 export function convertStarGift({
-  messageId,
+  inputSavedGift,
 }: {
-  messageId: number;
+  inputSavedGift: ApiRequestInputSavedStarGift;
 }) {
   return invokeRequest(new GramJs.payments.ConvertStarGift({
-    msgId: messageId,
+    stargift: buildInputSavedStarGift(inputSavedGift),
   }));
 }
 
@@ -671,14 +676,14 @@ export async function fetchStarGiftUpgradePreview({
 }
 
 export function upgradeGift({
-  messageId,
+  inputSavedGift,
   shouldKeepOriginalDetails,
 }: {
-  messageId: number;
+  inputSavedGift: ApiRequestInputSavedStarGift;
   shouldKeepOriginalDetails?: true;
 }) {
   return invokeRequest(new GramJs.payments.UpgradeStarGift({
-    msgId: messageId,
+    stargift: buildInputSavedStarGift(inputSavedGift),
     keepOriginalDetails: shouldKeepOriginalDetails,
   }), {
     shouldReturnTrue: true,

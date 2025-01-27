@@ -1,4 +1,4 @@
-import type { ApiMessageActionStarGift, ApiUserStarGift } from '../../../api/types';
+import type { ApiMessageActionStarGift, ApiSavedStarGift } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -266,9 +266,10 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
     upgradeMsgId: starGift.upgradeMsgId,
     canUpgrade: starGift.canUpgrade,
     alreadyPaidUpgradeStars: starGift.alreadyPaidUpgradeStars,
-  } satisfies ApiUserStarGift;
+    inputGift: starGift.inputSavedGift,
+  } satisfies ApiSavedStarGift;
 
-  actions.openGiftInfoModal({ userId: giftReceiverId, gift, tabId });
+  actions.openGiftInfoModal({ peerId: giftReceiverId, gift, tabId });
 });
 
 addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnType => {
@@ -276,11 +277,11 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
     gift, tabId = getCurrentTabId(),
   } = payload;
 
-  const userId = 'userId' in payload ? payload.userId : undefined;
+  const peerId = 'peerId' in payload ? payload.peerId : undefined;
 
   return updateTabState(global, {
     giftInfoModal: {
-      userId,
+      peerId,
       gift,
     },
   }, tabId);

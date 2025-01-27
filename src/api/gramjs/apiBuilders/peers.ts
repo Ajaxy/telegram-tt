@@ -52,10 +52,11 @@ export function buildApiPeerColor(peerColor: GramJs.TypePeerColor): ApiPeerColor
 
 export function buildApiEmojiStatus(mtpEmojiStatus: GramJs.TypeEmojiStatus): ApiEmojiStatus | undefined {
   if (mtpEmojiStatus instanceof GramJs.EmojiStatus) {
-    return { documentId: mtpEmojiStatus.documentId.toString() };
+    return { documentId: mtpEmojiStatus.documentId.toString(), until: mtpEmojiStatus.until };
   }
 
-  if (mtpEmojiStatus instanceof GramJs.EmojiStatusUntil) {
+  // TODO: Support other parameters
+  if (mtpEmojiStatus instanceof GramJs.EmojiStatusCollectible) {
     return { documentId: mtpEmojiStatus.documentId.toString(), until: mtpEmojiStatus.until };
   }
 

@@ -62,15 +62,21 @@ export function replacePeerPhotos<T extends GlobalState>(
   if (!value) {
     return {
       ...global,
-      profilePhotosById: omit(global.profilePhotosById, [peerId]),
+      peers: {
+        ...global.peers,
+        profilePhotosById: omit(global.peers.profilePhotosById, [peerId]),
+      },
     };
   }
 
   return {
     ...global,
-    profilePhotosById: {
-      ...global.profilePhotosById,
-      [peerId]: value,
+    peers: {
+      ...global.peers,
+      profilePhotosById: {
+        ...global.peers.profilePhotosById,
+        [peerId]: value,
+      },
     },
   };
 }

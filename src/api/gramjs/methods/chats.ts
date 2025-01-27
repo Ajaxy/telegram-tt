@@ -608,6 +608,8 @@ async function getFullChannelInfo(
     canViewRevenue: canViewMonetization,
     paidReactionsAvailable,
     hasScheduled,
+    stargiftsCount,
+    stargiftsAvailable,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -700,6 +702,8 @@ async function getFullChannelInfo(
       botVerification: botVerification && buildApiBotVerification(botVerification),
       isPaidReactionAvailable: paidReactionsAvailable,
       hasScheduledMessages: hasScheduled,
+      starGiftCount: stargiftsCount,
+      areStarGiftsAvailable: Boolean(stargiftsAvailable),
     },
     chats,
     userStatusesById: statusesById,

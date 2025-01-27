@@ -11,7 +11,9 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FocusDirection, MessageListType, ThreadId } from '../../types';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 
-import { getChatTitle, getMessageHtmlId, isJoinedChannelMessage } from '../../global/helpers';
+import {
+  getChatTitle, getMessageHtmlId, getPeerTitle, isJoinedChannelMessage,
+} from '../../global/helpers';
 import { getMessageReplyInfo } from '../../global/helpers/replies';
 import {
   selectCanPlayAnimatedEmojis,
@@ -21,6 +23,7 @@ import {
   selectGiftStickerForStars,
   selectIsCurrentUserPremium,
   selectIsMessageFocused,
+  selectPeer,
   selectTabState,
   selectTheme,
   selectTopicFromMessage,
@@ -86,6 +89,7 @@ type StateProps = {
   starsGiftSticker?: ApiSticker;
   canPlayAnimatedEmojis?: boolean;
   patternColor?: string;
+  currentUserId?: string;
   isCurrentUserPremium?: boolean;
 };
 
@@ -119,6 +123,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onIntersectPinnedMessage,
+  currentUserId,
   isCurrentUserPremium,
 }) => {
   const {
@@ -407,16 +412,24 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   }
 
   function renderStarGiftUserCaption() {
-    const targetUser = targetUsers && targetUsers[0];
     const starGift = message.content.action?.starGift;
-    if (!targetUser || !senderUser || !starGift) return undefined;
+    if (!starGift) return undefined;
+    const { fromId, peerId } = starGift;
 
-    if (message.isOutgoing || (starGift.type === 'starGiftUnique' && starGift.isUpgrade)) {
+    const fromPeer = fromId ? selectPeer(getGlobal(), fromId) : undefined;
+    const targetPeer = peerId
+      ? selectPeer(getGlobal(), peerId)
+      : starGift.type === 'starGiftUnique' && !message.isOutgoing
+        ? targetChat : undefined;
+
+    if (targetPeer && targetPeer.id !== currentUserId) {
       return (
         <div className="action-message-user-caption">
           <span> {lang('GiftTo')} </span>
-          <Avatar className="action-message-user-avatar" size="micro" peer={targetChat} />
-          <span> {targetUser.firstName} </span>
+          {starGift.type === 'starGift' && (
+            <Avatar className="action-message-user-avatar" size="micro" peer={targetPeer} />
+          )}
+          <span> {getPeerTitle(lang, targetPeer)} </span>
         </div>
       );
     }
@@ -424,15 +437,17 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     return (
       <div className="action-message-user-caption">
         <span> {lang('GiftFrom')} </span>
-        <Avatar className="action-message-user-avatar" size="micro" peer={senderUser} />
-        <span> {senderUser.firstName} </span>
+        {starGift.type === 'starGift' && (
+          <Avatar className="action-message-user-avatar" size="micro" peer={fromPeer || senderUser} />
+        )}
+        <span> {getPeerTitle(lang, fromPeer || senderUser!)} </span>
       </div>
     );
   }
 
   function renderStarGiftUserDescription() {
     const starGift = message.content.action?.starGift as ApiMessageActionStarGift;
-    const targetUser = targetUsers && targetUsers[0]?.firstName;
+    const targetChatTitle = targetChat && getPeerTitle(lang, targetChat);
     const starGiftMessage = starGift?.message;
     if (!starGift) return undefined;
 
@@ -442,7 +457,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     const amountToConvert = starGift?.starsToConvert;
 
     if (starGift.isSaved) {
-      return lang('ActionStarGiftDisplaying');
+      return lang(starGift.savedId ? 'ActionStarGiftChannelDisplaying' : 'ActionStarGiftDisplaying');
     }
 
     if (starGift.isUpgraded) {
@@ -451,24 +466,24 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
     if (message.isOutgoing) {
       if (amountToConvert) {
-        return lang('ActionStarGiftOutDescription2', {
-          user: targetUser || 'User',
+        return lang('ActionStarGiftPeerOutDescription', {
+          peer: targetChatTitle || 'Someone',
           count: amountToConvert,
         }, { withNodes: true, pluralValue: amountToConvert });
       }
 
       if (starGift.canUpgrade) {
-        return lang('ActionStarGiftOutDescriptionUpgrade', {
-          user: targetUser || 'User',
+        return lang('ActionStarGiftPeerOutDescriptionUpgrade', {
+          peer: targetChatTitle || 'Someone',
         });
       }
     }
 
     if (starGift.isConverted) {
       return message.isOutgoing
-        ? lang('GiftInfoDescriptionOutConverted', {
+        ? lang('GiftInfoPeerDescriptionOutConverted', {
           amount: formatInteger(amountToConvert!),
-          user: targetUser || 'User',
+          peer: targetChatTitle || 'Chat',
         }, {
           pluralValue: amountToConvert!,
           withNodes: true,
@@ -768,6 +783,7 @@ export default memo(withGlobal<OwnProps>(
         noFocusHighlight,
       }),
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      currentUserId: global.currentUserId,
     };
   },
 )(ActionMessage));

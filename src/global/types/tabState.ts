@@ -32,6 +32,7 @@ import type {
   ApiPremiumSection,
   ApiReactionWithPaid,
   ApiReceiptRegular,
+  ApiSavedStarGift,
   ApiStarGift,
   ApiStarGiftAttribute,
   ApiStarGiveawayOption,
@@ -42,7 +43,6 @@ import type {
   ApiTypePrepaidGiveaway,
   ApiTypeStoryView,
   ApiUser,
-  ApiUserStarGift,
   ApiVideo,
   ApiWebPage,
 } from '../../api/types';
@@ -603,8 +603,8 @@ export type TabState = {
 
   giftModal?: {
     isCompleted?: boolean;
-    forUserId: string;
-    gifts: ApiPremiumGiftCodeOption[];
+    forPeerId: string;
+    gifts?: ApiPremiumGiftCodeOption[];
   };
 
   limitReachedModal?: {
@@ -710,14 +710,14 @@ export type TabState = {
   };
 
   giftInfoModal?: {
-    userId?: string;
-    gift: ApiUserStarGift | ApiStarGift;
+    peerId?: string;
+    gift: ApiSavedStarGift | ApiStarGift;
   };
 
   giftUpgradeModal?: {
     sampleAttributes: ApiStarGiftAttribute[];
     recipientId?: string;
-    gift?: ApiUserStarGift;
+    gift?: ApiSavedStarGift;
   };
 
   suggestedStatusModal?: {

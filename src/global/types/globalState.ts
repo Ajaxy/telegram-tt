@@ -24,6 +24,7 @@ import type {
   ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
+  ApiSavedGifts,
   ApiSavedReactionTag,
   ApiSession,
   ApiSponsoredMessage,
@@ -40,7 +41,6 @@ import type {
   ApiUser,
   ApiUserCommonChats,
   ApiUserFullInfo,
-  ApiUserGifts,
   ApiUserStatus,
   ApiVideo,
   ApiWallpaper,
@@ -176,10 +176,13 @@ export type GlobalState = {
     fullInfoById: Record<string, ApiUserFullInfo>;
     previewMediaByBotId: Record<string, ApiBotPreviewMedia[]>;
     commonChatsById: Record<string, ApiUserCommonChats>;
-    giftsById: Record<string, ApiUserGifts>;
     botAppPermissionsById: Record<string, BotAppPermissions>;
   };
-  profilePhotosById: Record<string, ApiPeerPhotos>;
+
+  peers: {
+    profilePhotosById: Record<string, ApiPeerPhotos>;
+    giftsById: Record<string, ApiSavedGifts>;
+  };
 
   chats: {
     // TODO Replace with `Partial<Record>` to properly handle missing keys

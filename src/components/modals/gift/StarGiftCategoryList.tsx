@@ -78,8 +78,8 @@ const StarGiftCategoryList = ({
   return (
     <div ref={ref} className={buildClassName(styles.list, 'no-scrollbar')}>
       {renderCategoryItem('all')}
-      {renderCategoryItem('stock')}
       {renderCategoryItem('limited')}
+      {renderCategoryItem('stock')}
       {starCategories?.map(renderCategoryItem)}
     </div>
   );

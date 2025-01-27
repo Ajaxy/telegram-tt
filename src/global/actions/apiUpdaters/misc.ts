@@ -1,6 +1,7 @@
 import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { applyLangPackDifference, requestLangPackDifference } from '../../../util/localization';
 import { addActionHandler, setGlobal } from '../../index';
 import {
@@ -211,9 +212,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'newMessage': {
       const actionStarGift = update.message.content?.action?.starGift;
-      if (actionStarGift?.type !== 'starGiftUnique' || !update.message.isOutgoing) {
-        return undefined;
-      }
+      if (!update.message.isOutgoing && update.message.chatId !== SERVICE_NOTIFICATIONS_USER_ID) return undefined;
+      if (actionStarGift?.type !== 'starGiftUnique') return undefined;
+
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const tabState = selectTabState(global, tabId);
         if (tabState.isWaitingForStarGiftUpgrade) {

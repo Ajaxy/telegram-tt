@@ -11,6 +11,7 @@ import type {
   ApiGroupCall,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
+  ApiInputSavedStarGift,
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageActionStarGift,
@@ -193,7 +194,7 @@ export function buildApiMessageWithChatId(
     : isSavedOutgoing;
   const content = buildMessageContent(mtpMessage);
   const action = mtpMessage.action
-    && buildAction(mtpMessage.action, fromId, peerId, Boolean(mtpMessage.post), isOutgoing);
+    && buildAction(mtpMessage.action, mtpMessage.id, fromId, peerId, Boolean(mtpMessage.post), isOutgoing);
   if (action) {
     content.action = action;
   }
@@ -369,16 +370,29 @@ export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
   };
 }
 
-function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : ApiMessageActionStarGift {
+function buildApiMessageActionStarGift(
+  action: GramJs.MessageActionStarGift, messageId: number,
+): ApiMessageActionStarGift {
   const {
     nameHidden, saved, converted, gift, message, convertStars, canUpgrade, upgraded, upgradeMsgId, upgradeStars,
+    peer, savedId, fromId,
   } = action;
+
+  const inputSavedGift: ApiInputSavedStarGift = savedId && peer ? {
+    type: 'chat',
+    chatId: getApiChatIdFromMtpPeer(peer),
+    savedId: savedId.toString(),
+  } : {
+    type: 'user',
+    messageId,
+  };
 
   return {
     type: 'starGift',
     isNameHidden: Boolean(nameHidden),
     isSaved: Boolean(saved),
     isConverted: converted,
+    fromId: fromId && getApiChatIdFromMtpPeer(fromId),
     gift: buildApiStarGift(gift) as ApiStarGiftRegular,
     message: message && buildApiFormattedText(message),
     starsToConvert: convertStars?.toJSNumber(),
@@ -386,15 +400,27 @@ function buildApiMessageActionStarGift(action: GramJs.MessageActionStarGift) : A
     isUpgraded: upgraded,
     upgradeMsgId,
     alreadyPaidUpgradeStars: upgradeStars?.toJSNumber(),
+    peerId: peer && getApiChatIdFromMtpPeer(peer),
+    savedId: savedId?.toString(),
+    inputSavedGift,
   };
 }
 
 function buildApiMessageActionStarGiftUnique(
-  action: GramJs.MessageActionStarGiftUnique,
+  action: GramJs.MessageActionStarGiftUnique, messageId: number,
 ): ApiMessageActionStarGiftUnique {
   const {
-    gift, canExportAt, refunded, saved, transferStars, transferred, upgrade,
+    gift, canExportAt, refunded, saved, transferStars, transferred, upgrade, fromId, peer, savedId,
   } = action;
+
+  const inputSavedGift: ApiInputSavedStarGift = savedId && peer ? {
+    type: 'chat',
+    chatId: getApiChatIdFromMtpPeer(peer),
+    savedId: savedId.toString(),
+  } : {
+    type: 'user',
+    messageId,
+  };
 
   return {
     type: 'starGiftUnique',
@@ -405,11 +431,16 @@ function buildApiMessageActionStarGiftUnique(
     transferStars: transferStars?.toJSNumber(),
     isTransferred: transferred,
     isUpgrade: upgrade,
+    fromId: fromId && getApiChatIdFromMtpPeer(fromId),
+    peerId: peer && getApiChatIdFromMtpPeer(peer),
+    savedId: savedId?.toString(),
+    inputSavedGift,
   };
 }
 
 function buildAction(
   action: GramJs.TypeMessageAction,
+  messageId: number,
   senderId: string | undefined,
   targetPeerId: string | undefined,
   isChannelPost: boolean,
@@ -738,7 +769,7 @@ function buildAction(
     transactionId = action.transactionId;
   } else if (action instanceof GramJs.MessageActionStarGift && action.gift instanceof GramJs.StarGift) {
     type = 'starGift';
-    starGift = buildApiMessageActionStarGift(action);
+    starGift = buildApiMessageActionStarGift(action, messageId);
     if (isOutgoing) {
       text = 'ActionGiftOutbound';
       translationValues.push('%gift_payment_amount%');
@@ -763,9 +794,11 @@ function buildAction(
       translationValues.push('%action_origin_chat%');
     }
 
-    starGift = buildApiMessageActionStarGiftUnique(action);
+    starGift = buildApiMessageActionStarGiftUnique(action, messageId);
 
-    if (targetPeerId) {
+    if (action.peer) {
+      targetChatId = getApiChatIdFromMtpPeer(action.peer);
+    } else if (targetPeerId) {
       targetUserIds.push(targetPeerId);
       targetChatId = targetPeerId;
     }

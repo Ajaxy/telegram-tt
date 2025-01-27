@@ -141,6 +141,8 @@ export interface ApiChatFullInfo {
   hasPinnedStories?: boolean;
   isPaidReactionAvailable?: boolean;
   hasScheduledMessages?: boolean;
+  starGiftCount?: number;
+  areStarGiftsAvailable?: boolean;
 
   boostsApplied?: number;
   boostsToUnrestrict?: number;

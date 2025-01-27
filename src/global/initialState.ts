@@ -102,8 +102,12 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     fullInfoById: {},
     previewMediaByBotId: {},
     commonChatsById: {},
-    giftsById: {},
     botAppPermissionsById: {},
+  },
+
+  peers: {
+    giftsById: {},
+    profilePhotosById: {},
   },
 
   chats: {
@@ -310,7 +314,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     isHidden: false,
   },
 
-  profilePhotosById: {},
   monetizationInfo: {},
 };
 

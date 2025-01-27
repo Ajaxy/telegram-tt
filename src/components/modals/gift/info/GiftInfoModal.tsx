@@ -3,13 +3,15 @@ import React, { memo, useMemo } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
 import type {
-  ApiUser,
+  ApiPeer,
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
-import { getUserFullName } from '../../../../global/helpers';
-import { selectUser } from '../../../../global/selectors';
+import { getHasAdminRight, getPeerTitle } from '../../../../global/helpers';
+import { isApiPeerChat } from '../../../../global/helpers/peers';
+import { selectPeer } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
+import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
@@ -27,6 +29,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
 import BadgeButton from '../../../common/BadgeButton';
+import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
 import Link from '../../../ui/Link';
@@ -40,16 +43,22 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  userFrom?: ApiUser;
-  targetUser?: ApiUser;
+  fromPeer?: ApiPeer;
+  targetPeer?: ApiPeer;
   currentUserId?: string;
   starGiftMaxConvertPeriod?: number;
+  hasAdminRights?: boolean;
 };
 
 const STICKER_SIZE = 120;
 
 const GiftInfoModal = ({
-  modal, userFrom, targetUser, currentUserId, starGiftMaxConvertPeriod,
+  modal,
+  fromPeer,
+  targetPeer,
+  currentUserId,
+  starGiftMaxConvertPeriod,
+  hasAdminRights,
 }: OwnProps & StateProps) => {
   const {
     closeGiftInfoModal,
@@ -58,6 +67,7 @@ const GiftInfoModal = ({
     openChatWithInfo,
     focusMessage,
     openGiftUpgradeModal,
+    showNotification,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -67,48 +77,55 @@ const GiftInfoModal = ({
 
   const isOpen = Boolean(modal);
   const renderingModal = useCurrentOrPrev(modal);
+  const renderingFromPeer = useCurrentOrPrev(fromPeer);
+  const renderingTargetPeer = useCurrentOrPrev(targetPeer);
+
+  const isTargetChat = renderingTargetPeer && isApiPeerChat(renderingTargetPeer);
+
   const { gift: typeGift } = renderingModal || {};
-  const isUserGift = typeGift && 'gift' in typeGift;
-  const userGift = isUserGift ? typeGift : undefined;
-  const isSender = userGift?.fromId === currentUserId;
-  const canConvertDifference = (userGift && starGiftMaxConvertPeriod && (
-    userGift.date + starGiftMaxConvertPeriod - getServerTime()
+  const isSavedGift = typeGift && 'gift' in typeGift;
+  const savedGift = isSavedGift ? typeGift : undefined;
+  const isSender = savedGift?.fromId === currentUserId;
+  const canConvertDifference = (savedGift && starGiftMaxConvertPeriod && (
+    savedGift.date + starGiftMaxConvertPeriod - getServerTime()
   )) || 0;
   const conversionLeft = Math.ceil(canConvertDifference / 60 / 60 / 24);
 
-  const gift = isUserGift ? typeGift.gift : typeGift;
+  const gift = isSavedGift ? typeGift.gift : typeGift;
   const giftSticker = gift && getStickerFromGift(gift);
 
-  const canFocusUpgrade = Boolean(userGift?.upgradeMsgId);
-  const canUpdate = Boolean(userGift?.messageId) && targetUser?.id === currentUserId && !canFocusUpgrade;
+  const canFocusUpgrade = Boolean(savedGift?.upgradeMsgId);
+  const canUpdate = !canFocusUpgrade && savedGift?.inputGift && (
+    isTargetChat ? hasAdminRights : renderingTargetPeer?.id === currentUserId
+  );
 
   const handleClose = useLastCallback(() => {
     closeGiftInfoModal();
   });
 
   const handleFocusUpgraded = useLastCallback(() => {
-    if (!userGift?.upgradeMsgId || !targetUser) return;
-    const { upgradeMsgId } = userGift;
-    focusMessage({ chatId: targetUser.id, messageId: upgradeMsgId! });
+    if (!savedGift?.upgradeMsgId || !renderingTargetPeer) return;
+    const { upgradeMsgId } = savedGift;
+    focusMessage({ chatId: renderingTargetPeer.id, messageId: upgradeMsgId! });
     handleClose();
   });
 
   const handleTriggerVisibility = useLastCallback(() => {
-    const { messageId, isUnsaved } = userGift!;
-    changeGiftVisibility({ messageId: messageId!, shouldUnsave: !isUnsaved });
+    const { inputGift, isUnsaved } = savedGift!;
+    changeGiftVisibility({ gift: inputGift!, shouldUnsave: !isUnsaved });
     handleClose();
   });
 
   const handleConvertToStars = useLastCallback(() => {
-    const { messageId } = userGift!;
-    convertGiftToStars({ messageId: messageId! });
+    const { inputGift } = savedGift!;
+    convertGiftToStars({ gift: inputGift! });
     closeConvertConfirm();
     handleClose();
   });
 
   const handleOpenUpgradeModal = useLastCallback(() => {
-    if (!userGift) return;
-    openGiftUpgradeModal({ giftId: userGift.gift.id, gift: userGift });
+    if (!savedGift) return;
+    openGiftUpgradeModal({ giftId: savedGift.gift.id, gift: savedGift });
   });
 
   const giftAttributes = useMemo(() => {
@@ -124,7 +141,7 @@ const GiftInfoModal = ({
       );
     }
 
-    if (canUpdate && userGift?.alreadyPaidUpgradeStars && !userGift.upgradeMsgId) {
+    if (canUpdate && savedGift?.alreadyPaidUpgradeStars && !savedGift.upgradeMsgId) {
       return (
         <Button size="smaller" isShiny onClick={handleOpenUpgradeModal}>
           {lang('GiftInfoUpgradeForFree')}
@@ -146,17 +163,19 @@ const GiftInfoModal = ({
 
     const {
       fromId, isNameHidden, starsToConvert, isUnsaved, isConverted,
-    } = userGift || {};
+    } = savedGift || {};
 
-    const isVisibleForMe = isNameHidden && targetUser;
+    const isVisibleForMe = isNameHidden && renderingTargetPeer;
 
     const description = (() => {
-      if (!userGift) return lang('GiftInfoSoldOutDescription');
-      if (userGift.upgradeMsgId) return lang('GiftInfoDescriptionUpgraded');
-      if (userGift.canUpgrade && userGift.alreadyPaidUpgradeStars) {
+      if (!savedGift) return lang('GiftInfoSoldOutDescription');
+      if (isTargetChat) return undefined;
+
+      if (savedGift.upgradeMsgId) return lang('GiftInfoDescriptionUpgraded');
+      if (savedGift.canUpgrade && savedGift.alreadyPaidUpgradeStars) {
         return canUpdate
           ? lang('GiftInfoDescriptionFreeUpgrade')
-          : lang('GiftInfoDescriptionFreeUpgradeOut', { user: getUserFullName(targetUser)! });
+          : lang('GiftInfoPeerDescriptionFreeUpgradeOut', { peer: getPeerTitle(lang, renderingTargetPeer!)! });
       }
       if (!canUpdate && !isSender) return undefined;
       if (isConverted && starsToConvert) {
@@ -168,9 +187,9 @@ const GiftInfoModal = ({
             withNodes: true,
             withMarkdown: true,
           })
-          : lang('GiftInfoDescriptionOutConverted', {
+          : lang('GiftInfoPeerDescriptionOutConverted', {
             amount: formatInteger(starsToConvert!),
-            user: getUserFullName(targetUser)!,
+            peer: getPeerTitle(lang, renderingTargetPeer!)!,
           }, {
             pluralValue: starsToConvert,
             withNodes: true,
@@ -178,7 +197,7 @@ const GiftInfoModal = ({
           });
       }
 
-      if (userGift.canUpgrade && canUpdate) {
+      if (savedGift.canUpgrade && canUpdate) {
         return lang('GiftInfoDescriptionUpgrade', {
           amount: formatInteger(starsToConvert!),
         }, {
@@ -196,9 +215,9 @@ const GiftInfoModal = ({
           withMarkdown: true,
           pluralValue: starsToConvert || 0,
         })
-        : lang('GiftInfoDescriptionOut', {
+        : lang('GiftInfoPeerDescriptionOut', {
           amount: starsToConvert,
-          user: getUserFullName(targetUser)!,
+          peer: getPeerTitle(lang, renderingTargetPeer!)!,
         }, {
           withNodes: true,
           withMarkdown: true,
@@ -208,7 +227,7 @@ const GiftInfoModal = ({
 
     function getTitle() {
       if (gift?.type === 'starGiftUnique') return gift.title;
-      if (!userGift) return lang('GiftInfoSoldOutTitle');
+      if (!savedGift) return lang('GiftInfoSoldOutTitle');
 
       return canUpdate ? lang('GiftInfoReceived') : lang('GiftInfoTitle');
     }
@@ -238,7 +257,7 @@ const GiftInfoModal = ({
           {getTitle()}
         </h1>
         {description && (
-          <p className={buildClassName(styles.description, !userGift && gift?.type === 'starGift' && styles.soldOut)}>
+          <p className={buildClassName(styles.description, !savedGift && gift?.type === 'starGift' && styles.soldOut)}>
             {description}
           </p>
         )}
@@ -259,10 +278,10 @@ const GiftInfoModal = ({
         ]);
       }
 
-      if (userGift?.date) {
+      if (savedGift?.date) {
         tableData.push([
           lang('GiftInfoDate'),
-          formatDateTimeToString(userGift.date * 1000, lang.code, true),
+          formatDateTimeToString(savedGift.date * 1000, lang.code, true),
         ]);
       }
 
@@ -280,7 +299,7 @@ const GiftInfoModal = ({
         ]);
       }
 
-      const starsValue = gift.stars + (userGift?.alreadyPaidUpgradeStars || 0);
+      const starsValue = gift.stars + (savedGift?.alreadyPaidUpgradeStars || 0);
 
       tableData.push([
         lang('GiftInfoValue'),
@@ -306,7 +325,7 @@ const GiftInfoModal = ({
         ]);
       }
 
-      if (gift.upgradeStars && !userGift?.upgradeMsgId) {
+      if (gift.upgradeStars && !savedGift?.upgradeMsgId) {
         tableData.push([
           lang('GiftInfoStatus'),
           <div className={styles.giftValue}>
@@ -316,23 +335,43 @@ const GiftInfoModal = ({
         ]);
       }
 
-      if (userGift?.message) {
+      if (savedGift?.message) {
         tableData.push([
           undefined,
-          renderTextWithEntities(userGift.message),
+          renderTextWithEntities(savedGift.message),
         ]);
       }
     }
 
     if (gift.type === 'starGiftUnique') {
+      const { ownerName, ownerAddress, ownerId } = gift;
       const {
         model, backdrop, pattern, originalDetails,
       } = giftAttributes || {};
-      const ownerName = gift.ownerName;
-      tableData.push([
-        lang('GiftInfoOwner'),
-        gift.ownerId ? { chatId: gift.ownerId } : ownerName || '',
-      ]);
+
+      if (ownerAddress) {
+        tableData.push([
+          lang('GiftInfoOwner'),
+          <span
+            className={styles.ownerAddress}
+            onClick={() => {
+              copyTextToClipboard(ownerAddress);
+              showNotification({
+                message: { key: 'WalletAddressCopied' },
+                icon: 'copy',
+              });
+            }}
+          >
+            {ownerAddress}
+            <Icon className={styles.copyIcon} name="copy" />
+          </span>,
+        ]);
+      } else {
+        tableData.push([
+          lang('GiftInfoOwner'),
+          ownerId ? { chatId: ownerId } : ownerName || '',
+        ]);
+      }
 
       if (model) {
         tableData.push([
@@ -373,34 +412,34 @@ const GiftInfoModal = ({
         const {
           date, recipientId, message, senderId,
         } = originalDetails;
-        const global = getGlobal(); // User names does not need to be reactive
+        const global = getGlobal(); // Peer titles do not need to be reactive
 
         const openChat = (id: string) => {
           openChatWithInfo({ id });
           closeGiftInfoModal();
         };
 
-        const recipient = selectUser(global, recipientId)!;
-        const sender = senderId ? selectUser(global, senderId) : undefined;
+        const recipient = selectPeer(global, recipientId)!;
+        const sender = senderId ? selectPeer(global, senderId) : undefined;
 
         const formattedDate = formatDateTimeToString(date * 1000, lang.code, true);
         const recipientLink = (
           // eslint-disable-next-line react/jsx-no-bind
           <Link onClick={() => openChat(recipientId)} isPrimary>
-            {getUserFullName(recipient)}
+            {getPeerTitle(lang, recipient)}
           </Link>
         );
 
         let text: TeactNode | undefined;
         if (!sender || senderId === recipientId) {
-          text = message ? lang('GiftInfoOriginalInfoText', {
-            user: recipientLink,
+          text = message ? lang('GiftInfoPeerOriginalInfoText', {
+            peer: recipientLink,
             text: renderTextWithEntities(message),
             date: formattedDate,
           }, {
             withNodes: true,
-          }) : lang('GiftInfoOriginalInfo', {
-            user: recipientLink,
+          }) : lang('GiftInfoPeerOriginalInfo', {
+            peer: recipientLink,
             date: formattedDate,
           }, {
             withNodes: true,
@@ -409,18 +448,18 @@ const GiftInfoModal = ({
           const senderLink = (
             // eslint-disable-next-line react/jsx-no-bind
             <Link onClick={() => openChat(sender.id)} isPrimary>
-              {getUserFullName(sender)}
+              {getPeerTitle(lang, sender)}
             </Link>
           );
-          text = message ? lang('GiftInfoOriginalInfoTextSender', {
-            user: recipientLink,
+          text = message ? lang('GiftInfoPeerOriginalInfoTextSender', {
+            peer: recipientLink,
             sender: senderLink,
             text: renderTextWithEntities(message),
             date: formattedDate,
           }, {
             withNodes: true,
-          }) : lang('GiftInfoOriginalInfoSender', {
-            user: recipientLink,
+          }) : lang('GiftInfoPeerOriginalInfoSender', {
+            peer: recipientLink,
             date: formattedDate,
             sender: senderLink,
           }, {
@@ -440,8 +479,12 @@ const GiftInfoModal = ({
         {canUpdate && (
           <div className={styles.footerDescription}>
             <div>
-              {lang(isUnsaved ? 'GiftInfoHidden' : 'GiftInfoSaved', {
-                link: <Link isPrimary onClick={handleTriggerVisibility}>{lang('GiftInfoSavedHide')}</Link>,
+              {lang(`GiftInfo${isTargetChat ? 'Channel' : ''}${isUnsaved ? 'Hidden' : 'Saved'}`, {
+                link: (
+                  <Link isPrimary onClick={handleTriggerVisibility}>
+                    {lang(`GiftInfoSaved${isUnsaved ? 'Show' : 'Hide'}`)}
+                  </Link>
+                ),
               }, {
                 withNodes: true,
               })}
@@ -463,8 +506,8 @@ const GiftInfoModal = ({
       footer,
     };
   }, [
-    typeGift, userGift, targetUser, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang, gift,
-    giftAttributes, renderFooterButton,
+    typeGift, savedGift, renderingTargetPeer, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang,
+    gift, giftAttributes, renderFooterButton, isTargetChat,
   ]);
 
   return (
@@ -478,7 +521,7 @@ const GiftInfoModal = ({
         className={styles.modal}
         onClose={handleClose}
       />
-      {userGift && (
+      {savedGift && (
         <ConfirmDialog
           isOpen={isConvertConfirmOpen}
           onClose={closeConvertConfirm}
@@ -486,9 +529,9 @@ const GiftInfoModal = ({
           title={lang('GiftInfoConvertTitle')}
         >
           <div>
-            {lang('GiftInfoConvertDescription1', {
-              amount: formatStarsAsText(lang, userGift.starsToConvert!),
-              user: getUserFullName(userFrom)!,
+            {lang('GiftInfoPeerConvertDescription', {
+              amount: formatStarsAsText(lang, savedGift.starsToConvert!),
+              peer: getPeerTitle(lang, renderingFromPeer!)!,
             }, {
               withNodes: true,
               withMarkdown: true,
@@ -515,17 +558,20 @@ const GiftInfoModal = ({
 export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
     const typeGift = modal?.gift;
-    const isUserGift = typeGift && 'gift' in typeGift;
+    const isSavedGift = typeGift && 'gift' in typeGift;
 
-    const fromId = isUserGift && typeGift.fromId;
-    const userFrom = fromId ? selectUser(global, fromId) : undefined;
-    const targetUser = modal?.userId ? selectUser(global, modal.userId) : undefined;
+    const fromId = isSavedGift && typeGift.fromId;
+    const fromPeer = fromId ? selectPeer(global, fromId) : undefined;
+    const targetPeer = modal?.peerId ? selectPeer(global, modal.peerId) : undefined;
+    const chat = targetPeer && isApiPeerChat(targetPeer) ? targetPeer : undefined;
+    const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');
 
     return {
-      userFrom,
-      targetUser,
+      fromPeer,
+      targetPeer,
       currentUserId: global.currentUserId,
       starGiftMaxConvertPeriod: global.appConfig?.starGiftMaxConvertPeriod,
+      hasAdminRights,
     };
   },
 )(GiftInfoModal));

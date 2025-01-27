@@ -4,7 +4,7 @@ import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from
 import type { ApiPeerColor } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
 import type { ApiBotVerification } from './misc';
-import type { ApiUserStarGift } from './payments';
+import type { ApiSavedStarGift } from './payments';
 
 export interface ApiUser {
   id: string;
@@ -89,8 +89,8 @@ export interface ApiUserCommonChats {
   isFullyLoaded: boolean;
 }
 
-export interface ApiUserGifts {
-  gifts: ApiUserStarGift[];
+export interface ApiSavedGifts {
+  gifts: ApiSavedStarGift[];
   nextOffset?: string;
 }
 
