@@ -17,7 +17,7 @@ export default function useLangString(key: RegularLangKey, langCode?: string) {
       langPack: LANG_PACK,
       keys: [key],
     });
-    const langString = result?.strings[0];
+    const langString = result?.strings[key];
     if (!langString || typeof langString !== 'string') return undefined;
     return langString;
   });

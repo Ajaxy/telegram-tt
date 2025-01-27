@@ -1,11 +1,11 @@
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef,
+  memo, useCallback, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
-import { DEFAULT_LANG_CODE, STRICTERDOM_ENABLED } from '../../config';
+import { STRICTERDOM_ENABLED } from '../../config';
 import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import buildClassName from '../../util/buildClassName';
 import { oldSetLanguage } from '../../util/oldLangProvider';
@@ -124,12 +124,6 @@ const AuthCode = ({
 
     return undefined;
   }, [isConnected, authQrCode, isQrMounted, markQrMounted, unmarkQrMounted, qrCode]);
-
-  useEffect(() => {
-    if (isConnected) {
-      void oldSetLanguage(DEFAULT_LANG_CODE);
-    }
-  }, [isConnected]);
 
   const handleLangChange = useCallback(() => {
     markIsLoading();

@@ -4,7 +4,7 @@ import type { ApiOldLangPack, ApiOldLangString } from '../api/types';
 import type { LangCode, TimeFormat } from '../types';
 
 import {
-  DEFAULT_LANG_CODE, LANG_CACHE_NAME, LANG_PACKS,
+  LANG_CACHE_NAME, LANG_PACKS,
 } from '../config';
 import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
@@ -229,7 +229,7 @@ async function fetchRemote(langCode: string): Promise<ApiOldLangPack | undefined
 }
 
 function getPluralOption(amount: number) {
-  const langCode = currentLangCode || DEFAULT_LANG_CODE;
+  const langCode = currentLangCode || 'en';
   const optionIndex = PLURAL_RULES[langCode as keyof typeof PLURAL_RULES]
     ? PLURAL_RULES[langCode as keyof typeof PLURAL_RULES](amount)
     : 0;

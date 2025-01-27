@@ -322,7 +322,6 @@ export const DELETED_COMMENTS_CHANNEL_ID = '-1000000000777';
 export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;
-export const DEFAULT_LANG_CODE = 'en';
 export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'] as const;
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
 export const FAQ_URL = 'https://telegram.org/faq';
