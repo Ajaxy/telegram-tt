@@ -16,9 +16,8 @@ export function selectPeerPhotos<T extends GlobalState>(global: T, peerId: strin
 export function selectCanGift<T extends GlobalState>(global: T, peerId: string) {
   const bot = selectBot(global, peerId);
   const user = selectUser(global, peerId);
-  const chat = selectChat(global, peerId);
 
-  const areStarGiftsAvailable = chat ? selectChatFullInfo(global, peerId)?.areStarGiftsAvailable : user;
+  const areStarGiftsAvailable = selectChatFullInfo(global, peerId)?.areStarGiftsAvailable || user;
 
   return Boolean(!selectIsPremiumPurchaseBlocked(global) && !bot && peerId !== SERVICE_NOTIFICATIONS_USER_ID
     && areStarGiftsAvailable);

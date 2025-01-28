@@ -17,6 +17,7 @@ import { getPeerTitle, getUserFullName } from '../../../global/helpers';
 import { isApiPeerChat, isApiPeerUser } from '../../../global/helpers/peers';
 import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { throttle } from '../../../util/schedulers';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -56,6 +57,9 @@ type StateProps = {
 
 const AVATAR_SIZE = 100;
 const INTERSECTION_THROTTLE = 200;
+const SCROLL_THROTTLE = 200;
+
+const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, true);
 
 const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   modal,
@@ -133,21 +137,25 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
     if (!isOpen) {
       setIsHeaderHidden(true);
       setSelectedGift(undefined);
+      setSelectedCategory('all');
     }
   }, [isOpen]);
 
   const handleScroll = useLastCallback((e: React.UIEvent<HTMLDivElement>) => {
     if (selectedGift) return;
+    const currentTarget = e.currentTarget;
 
-    const { scrollTop } = e.currentTarget;
+    runThrottledForScroll(() => {
+      const { scrollTop } = currentTarget;
 
-    setIsHeaderHidden(scrollTop <= 150);
+      setIsHeaderHidden(scrollTop <= 150);
 
-    if (transitionRef.current && giftHeaderRef.current) {
-      const { top: headerTop } = giftHeaderRef.current.getBoundingClientRect();
-      const { top: transitionTop } = transitionRef.current.getBoundingClientRect();
-      setIsHeaderForStarGifts(headerTop - transitionTop <= 0);
-    }
+      if (transitionRef.current && giftHeaderRef.current) {
+        const { top: headerTop } = giftHeaderRef.current.getBoundingClientRect();
+        const { top: transitionTop } = transitionRef.current.getBoundingClientRect();
+        setIsHeaderForStarGifts(headerTop - transitionTop <= 0);
+      }
+    });
   });
 
   const giftPremiumDescription = lang('GiftPremiumDescription', {
