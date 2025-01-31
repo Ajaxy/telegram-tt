@@ -1,3 +1,4 @@
+import { onFullyIdle } from '../lib/teact/teact';
 import { addCallback } from '../lib/teact/teactn';
 import { addActionHandler, getGlobal } from '../global';
 
@@ -17,11 +18,12 @@ import {
   selectNotifyExceptions,
   selectNotifySettings,
   selectTabState,
+  selectTopics,
 } from '../global/selectors';
 import arePropsShallowEqual from './arePropsShallowEqual';
 import { createCallbackManager } from './callbacks';
 import { areSortedArraysEqual, unique } from './iteratees';
-import { onIdle, throttle } from './schedulers';
+import { throttle } from './schedulers';
 
 interface FolderSummary {
   id: number;
@@ -73,6 +75,7 @@ let prevGlobal: {
   isSavedFolderFullyLoaded?: boolean;
   lastAllMessageIds?: GlobalState['chats']['lastMessageIds']['all'];
   lastSavedMessageIds?: GlobalState['chats']['lastMessageIds']['saved'];
+  topicsInfoById: GlobalState['chats']['topicsInfoById'];
   chatsById: Record<string, ApiChat>;
   foldersById: Record<string, ApiChatFolder>;
   usersById: Record<string, ApiUser>;
@@ -112,7 +115,7 @@ if (DEBUG) {
 }
 
 const updateFolderManagerThrottled = throttle(() => {
-  onIdle(() => {
+  onFullyIdle(() => {
     updateFolderManager(getGlobal());
   });
 }, UPDATE_THROTTLE);
@@ -214,6 +217,7 @@ function updateFolderManager(global: GlobalState) {
   const areChatsChanged = global.chats.byId !== prevGlobal.chatsById;
   const areSavedLastMessageIdsChanged = global.chats.lastMessageIds.saved !== prevGlobal.lastSavedMessageIds;
   const areAllLastMessageIdsChanged = global.chats.lastMessageIds.all !== prevGlobal.lastAllMessageIds;
+  const areTopicsChanged = global.chats.topicsInfoById !== prevGlobal.topicsInfoById;
   const areUsersChanged = global.users.byId !== prevGlobal.usersById;
   const areNotifySettingsChanged = selectNotifySettings(global) !== prevGlobal.notifySettings;
   const areNotifyExceptionsChanged = selectNotifyExceptions(global) !== prevGlobal.notifyExceptions;
@@ -228,7 +232,7 @@ function updateFolderManager(global: GlobalState) {
 
   if (!(
     isAllFolderChanged || isArchivedFolderChanged || isSavedFolderChanged || areFoldersChanged
-    || areChatsChanged || areUsersChanged || areNotifySettingsChanged || areNotifyExceptionsChanged
+    || areChatsChanged || areUsersChanged || areTopicsChanged || areNotifySettingsChanged || areNotifyExceptionsChanged
     || areSavedLastMessageIdsChanged || areAllLastMessageIdsChanged
   )
   ) {
@@ -514,8 +518,9 @@ function buildChatSummary<T extends GlobalState>(
   const {
     id, type, isRestricted, isNotJoined, migratedTo, folderId,
     unreadCount: chatUnreadCount, unreadMentionsCount: chatUnreadMentionsCount, hasUnreadMark,
-    isForum, topics,
+    isForum,
   } = chat;
+  const topics = selectTopics(global, chat.id);
 
   const { unreadCount, unreadMentionsCount } = isForum
     ? Object.values(topics || {}).reduce((acc, topic) => {
@@ -804,6 +809,7 @@ function buildInitials() {
       foldersById: {},
       chatsById: {},
       usersById: {},
+      topicsInfoById: {},
       notifySettings: {} as NotifySettings,
       notifyExceptions: {},
     },

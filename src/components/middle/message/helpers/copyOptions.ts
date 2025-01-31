@@ -1,4 +1,4 @@
-import type { ApiMessage } from '../../../../api/types';
+import type { ApiMessage, StatefulMediaContent } from '../../../../api/types';
 import type { IconName } from '../../../../types/icons';
 import { ApiMediaFormat } from '../../../../api/types';
 
@@ -32,6 +32,7 @@ type ICopyOptions = {
 
 export function getMessageCopyOptions(
   message: ApiMessage,
+  statefulContent: StatefulMediaContent | undefined,
   href?: string,
   canCopy?: boolean,
   afterEffect?: () => void,
@@ -44,7 +45,7 @@ export function getMessageCopyOptions(
   const photo = getMessagePhoto(message)
     || (!getMessageWebPageVideo(message) ? getMessageWebPagePhoto(message) : undefined);
   const contact = getMessageContact(message);
-  const mediaHash = photo ? getPhotoMediaHash(photo, 'inline') : undefined;
+  const mediaHash = photo ? getPhotoMediaHash(photo, 'full') : undefined;
   const canImageBeCopied = canCopy && photo && (mediaHash || hasMediaLocalBlobUrl(photo))
     && CLIPBOARD_ITEM_SUPPORTED && !IS_SAFARI;
   const selection = window.getSelection();
@@ -94,7 +95,12 @@ export function getMessageCopyOptions(
           const clipboardText = renderMessageText(
             { message, shouldRenderAsHtml: true },
           );
-          if (clipboardText) copyHtmlToClipboard(clipboardText.join(''), getMessageTextWithSpoilers(message)!);
+          if (clipboardText) {
+            copyHtmlToClipboard(
+              clipboardText.join(''),
+              getMessageTextWithSpoilers(message, statefulContent)!,
+            );
+          }
         }
 
         afterEffect?.();

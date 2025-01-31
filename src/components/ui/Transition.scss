@@ -255,6 +255,17 @@
     }
   }
 
+  &-zoomBounceSemiFade,
+  &-zoomBounceSemiFadeBackwards {
+    > .Transition_slide-from {
+      animation: zoom-bounce 0.25s ease-in-out;
+    }
+
+    > .Transition_slide-to {
+      animation: fade-in-opacity 250ms ease, zoom-bounce 0.25s ease-in-out;
+    }
+  }
+
   &-fade,
   &-fadeBackwards {
     > .Transition_slide-from {
@@ -739,5 +750,19 @@
   }
   100% {
     clip-path: inset(0 100% 0 0);
+  }
+}
+
+@keyframes zoom-bounce {
+  0% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(0.95);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

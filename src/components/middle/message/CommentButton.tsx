@@ -14,6 +14,7 @@ import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
 import Avatar from '../../common/Avatar';
+import Icon from '../../common/icons/Icon';
 import Spinner from '../../ui/Spinner';
 
 import './CommentButton.scss';
@@ -105,14 +106,14 @@ const CommentButton: FC<OwnProps> = ({
       role="button"
       tabIndex={0}
     >
-      <i
+      <Icon
+        name="comments-sticker"
         className={buildClassName(
-          'CommentButton_icon-comments icon icon-comments-sticker',
+          'CommentButton_icon-comments',
           isLoading && shouldRenderLoading && 'CommentButton_hidden',
         )}
-        aria-hidden
       />
-      {!recentRepliers?.length && <i className="icon icon-comments" aria-hidden />}
+      {!recentRepliers?.length && <Icon name="comments" />}
       {renderRecentRepliers()}
       <div className="label" dir="auto">
         {messagesCount ? commentsText : lang('LeaveAComment')}
@@ -127,12 +128,12 @@ const CommentButton: FC<OwnProps> = ({
             color={isCustomShape ? 'white' : 'blue'}
           />
         ) }
-        <i
+        <Icon
+          name="next"
           className={buildClassName(
-            'CommentButton_icon-open icon icon-next',
+            'CommentButton_icon-open',
             isLoading && shouldRenderLoading && 'CommentButton_hidden',
           )}
-          aria-hidden
         />
       </div>
     </div>

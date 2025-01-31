@@ -81,6 +81,6 @@ const api = {
   'video-preview:destroy': destroy,
 };
 
-createWorkerInterface(api);
+createWorkerInterface(api, 'media');
 
 export type VideoPreviewApi = typeof api;

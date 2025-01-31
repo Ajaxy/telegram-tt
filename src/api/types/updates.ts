@@ -1,4 +1,4 @@
-import type { ApiDraft } from '../../global/types';
+import type { TabState } from '../../global/types';
 import type {
   GroupCallConnectionData,
   GroupCallConnectionState,
@@ -6,7 +6,8 @@ import type {
   VideoRotation,
   VideoState,
 } from '../../lib/secret-sauce';
-import type { ApiPrivacyKey, PrivacyVisibility, ThreadId } from '../../types';
+import type { ThreadId } from '../../types';
+import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiBotMenuButton } from './bots';
 import type {
   ApiGroupCall, ApiPhoneCall,
@@ -16,11 +17,11 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatMember,
+  ApiDraft,
   ApiTypingStatus,
 } from './chats';
 import type {
   ApiFormattedText,
-  ApiInputInvoice,
   ApiMediaExtendedPreview,
   ApiMessage,
   ApiPhoto,
@@ -33,8 +34,10 @@ import type {
   BoughtPaidMedia,
 } from './messages';
 import type {
-  ApiEmojiInteraction, ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
+  ApiEmojiInteraction, ApiError, ApiNotifyException, ApiSessionData,
 } from './misc';
+import type { ApiStarsAmount } from './payments';
+import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
   ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,
@@ -82,7 +85,7 @@ export type ApiUpdateSession = {
 
 export type ApiUpdateAuthorizationError = {
   '@type': 'updateAuthorizationError';
-  message: string;
+  errorKey: RegularLangFnParameters;
 };
 
 export type ApiUpdateConnectionState = {
@@ -112,11 +115,6 @@ export type ApiUpdateChatLastMessage = {
 export type ApiUpdateChatJoin = {
   '@type': 'updateChatJoin';
   id: string;
-};
-
-export type ApiUpdateShowInvite = {
-  '@type': 'showInvite';
-  data: ApiInviteInfo;
 };
 
 export type ApiUpdateChatLeave = {
@@ -210,6 +208,7 @@ export type ApiUpdateNewScheduledMessage = {
   id: number;
   message: ApiMessage;
   wasDrafted?: boolean;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateNewMessage = {
@@ -219,6 +218,7 @@ export type ApiUpdateNewMessage = {
   message: Partial<ApiMessage>;
   shouldForceReply?: boolean;
   wasDrafted?: boolean;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateMessage = {
@@ -226,6 +226,7 @@ export type ApiUpdateMessage = {
   chatId: string;
   id: number;
   message: Partial<ApiMessage>;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateScheduledMessage = {
@@ -233,12 +234,14 @@ export type ApiUpdateScheduledMessage = {
   chatId: string;
   id: number;
   message: Partial<ApiMessage>;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateQuickReplyMessage = {
   '@type': 'updateQuickReplyMessage';
   id: number;
   message: Partial<ApiMessage>;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateDeleteQuickReplyMessages = {
@@ -264,9 +267,9 @@ export type ApiUpdatePinnedMessageIds = {
   messageIds: number[];
 };
 
-export type ApiUpdateThreadInfos = {
-  '@type': 'updateThreadInfos';
-  threadInfoUpdates: Partial<ApiThreadInfo>[];
+export type ApiUpdateThreadInfo = {
+  '@type': 'updateThreadInfo';
+  threadInfo: Partial<ApiThreadInfo>;
 };
 
 export type ApiUpdateScheduledMessageSendSucceeded = {
@@ -274,6 +277,7 @@ export type ApiUpdateScheduledMessageSendSucceeded = {
   chatId: string;
   localId: number;
   message: ApiMessage;
+  poll?: ApiPoll;
 };
 
 export type ApiUpdateMessageSendSucceeded = {
@@ -281,6 +285,14 @@ export type ApiUpdateMessageSendSucceeded = {
   chatId: string;
   localId: number;
   message: ApiMessage;
+  poll?: ApiPoll;
+};
+
+export type ApiUpdateVideoProcessingPending = {
+  '@type': 'updateVideoProcessingPending';
+  chatId: string;
+  localId: number;
+  newScheduledMessageId: number;
 };
 
 export type ApiUpdateMessageSendFailed = {
@@ -330,7 +342,8 @@ export type ApiUpdateDeleteMessages = {
 export type ApiUpdateDeleteScheduledMessages = {
   '@type': 'deleteScheduledMessages';
   ids: number[];
-  chatId?: string;
+  newIds?: number[];
+  chatId: string;
 };
 
 export type ApiUpdateDeleteHistory = {
@@ -478,7 +491,7 @@ export type ApiUpdateSavedGifs = {
 
 export type ApiUpdateTwoFaError = {
   '@type': 'updateTwoFaError';
-  message: string;
+  messageKey: RegularLangFnParameters;
 };
 
 export type ApiUpdateNotifySettings = {
@@ -516,7 +529,14 @@ export type ApiUpdatePaymentVerificationNeeded = {
 
 export type ApiUpdatePaymentStateCompleted = {
   '@type': 'updatePaymentStateCompleted';
-  inputInvoice: ApiInputInvoice;
+  paymentState: TabState['payment'];
+  tabId: number;
+};
+
+export type ApiUpdateStarPaymentStateCompleted = {
+  '@type': 'updateStarPaymentStateCompleted';
+  paymentState: TabState['starsPayment'];
+  tabId: number;
 };
 
 export type ApiUpdatePrivacy = {
@@ -738,7 +758,7 @@ export type ApiUpdatePremiumFloodWait = {
 
 export type ApiUpdateStarsBalance = {
   '@type': 'updateStarsBalance';
-  balance: number;
+  balance: ApiStarsAmount;
 };
 
 export type ApiUpdateDeleteProfilePhoto = {
@@ -753,25 +773,50 @@ export type ApiUpdateNewProfilePhoto = {
   photo: ApiPhoto;
 };
 
+export type ApiUpdateEntities = {
+  '@type': 'updateEntities';
+  users?: Record<string, ApiUser>;
+  chats?: Record<string, ApiChat>;
+  threadInfos?: ApiThreadInfo[];
+  polls?: ApiPoll[];
+};
+
+export type ApiUpdatePaidReactionPrivacy = {
+  '@type': 'updatePaidReactionPrivacy';
+  isPrivate: boolean;
+};
+
+export type ApiUpdateLangPackTooLong = {
+  '@type': 'updateLangPackTooLong';
+  langCode: string;
+};
+
+export type ApiUpdateLangPack = {
+  '@type': 'updateLangPack';
+  version: number;
+  strings: Record<string, LangPackStringValue>;
+  keysToRemove: string[];
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdatePinnedMessageIds |
   ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder | ApiUpdateRecommendedChatFolders |
-  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfos | ApiUpdateCommonBoxMessages |
+  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed | ApiUpdateServiceNotification |
-  ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo |
+  ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |
   ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
-  ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
+  ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage | ApiUpdateStarPaymentStateCompleted |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
   ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
-  ApiUpdateServerTimeOffset | ApiUpdateShowInvite | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
+  ApiUpdateServerTimeOffset | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
@@ -785,7 +830,8 @@ export type ApiUpdate = (
   ApiUpdateViewForumAsMessages | ApiUpdateSavedDialogPinned | ApiUpdatePinnedSavedDialogIds | ApiUpdateChatLastMessage |
   ApiUpdateDeleteSavedHistory | ApiUpdatePremiumFloodWait | ApiUpdateStarsBalance |
   ApiUpdateQuickReplyMessage | ApiUpdateQuickReplies | ApiDeleteQuickReply | ApiUpdateDeleteQuickReplyMessages |
-  ApiUpdateDeleteProfilePhoto | ApiUpdateNewProfilePhoto
+  ApiUpdateDeleteProfilePhoto | ApiUpdateNewProfilePhoto | ApiUpdateEntities | ApiUpdatePaidReactionPrivacy |
+  ApiUpdateLangPackTooLong | ApiUpdateLangPack
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

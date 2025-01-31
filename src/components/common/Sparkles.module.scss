@@ -1,0 +1,47 @@
+.root {
+  position: absolute;
+  inset: 0;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.progress {
+  --_progress: 0;
+
+  z-index: 0;
+  font-size: 0.75rem;
+  opacity: 0.8;
+  overflow: hidden;
+}
+
+.button {
+  font-size: 0.5rem;
+}
+
+.symbol {
+  --_duration-shift: 0s;
+  --_shift-x: 0;
+  --_shift-y: 0;
+
+  position: absolute;
+
+  width: 0.5rem;
+  height: 0.5rem;
+
+  animation: sparkle 5s infinite;
+  animation-delay: var(--_duration-shift);
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--_shift-x), var(--_shift-y));
+  }
+}

@@ -1,0 +1,137 @@
+@use "../../../styles/mixins";
+
+.root {
+  --_size: 1.875rem;
+  --progress: 0;
+
+  position: relative;
+  padding-top: 4rem;
+  overflow-x: hidden;
+
+  @include mixins.reset-range();
+}
+
+.slider {
+  height: var(--_size) !important;
+  margin-bottom: 0 !important;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: var(--_size);
+    border-radius: 1rem;
+    background-color: var(--color-background-secondary);
+  }
+
+  &::-moz-range-track {
+    height: var(--_size);
+    border-radius: 1rem;
+    background-color: var(--color-background-secondary);
+  }
+
+  &::-webkit-slider-thumb {
+    height: var(--_size);
+    width: var(--_size);
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+  }
+
+  &::-moz-range-thumb {
+    height: var(--_size);
+    width: var(--_size);
+    background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.sparkles {
+  left: 0;
+  bottom: 0;
+  height: var(--_size);
+  pointer-events: none;
+
+  --_width: calc(var(--progress) * 100% - 1rem);
+  mask-image: linear-gradient(to right, black var(--_width), transparent calc(var(--_width) + 0.5rem));
+
+  color: white;
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: var(--_size);
+  pointer-events: none;
+  border-radius: 1rem;
+
+  min-width: var(--_size);
+  width: calc(var(--_size) + (var(--progress) * (100% - var(--_size))));
+
+  background-image: var(--stars-gradient);
+
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0.125rem;
+    top: 0.125rem;
+    width: 1.625rem;
+    height: 1.625rem;
+    border-radius: 50%;
+    background-color: white;
+    z-index: 1;
+  }
+}
+
+.floatingBadgeWrapper {
+  --_min-x: 0;
+  --_max-x: 100%;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  transform:
+  translateX(
+    clamp(
+      var(--_min-x),
+      calc(var(--_size) / 2 + var(--progress) * (100% - var(--_size))),
+      var(--_max-x),
+    )
+  );
+  pointer-events: none;
+}
+
+.floatingBadge {
+  --_speed: 0;
+  position: absolute;
+  top: -1rem;
+  left: 0;
+  transform: translate(-50%, -100%);
+}
+
+.floatingBadgeText {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+
+  background-image: var(--stars-gradient);
+
+  line-height: 1;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  color: white;
+  white-space: nowrap;
+}
+
+.floatingBadgeTriangle {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 33%);
+  z-index: -1;
+}

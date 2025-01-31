@@ -1,54 +1,108 @@
 import type { ActionReturnType } from '../../types';
 
-import { areDeepEqual } from '../../../util/areDeepEqual';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
 import * as langProvider from '../../../util/oldLangProvider';
 import { addActionHandler, setGlobal } from '../../index';
-import { closeInvoice, updateStarsBalance } from '../../reducers';
+import { updateStarsBalance } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updatePaymentStateCompleted': {
-      Object.values(global.byTabId).forEach(({ id: tabId }) => {
-        const { inputInvoice, invoice } = selectTabState(global, tabId).payment;
+      const { paymentState, tabId } = update;
+      const form = paymentState.form!;
+      const { invoice } = form;
 
-        if (!areDeepEqual(inputInvoice, update.inputInvoice)) return;
+      const { totalAmount, currency } = invoice;
 
-        if (invoice) {
-          const { amount, currency, title } = invoice;
+      if (paymentState.inputInvoice?.type === 'stars') {
+        actions.closeStarsBalanceModal({ tabId });
+        actions.showNotification({
+          message: langProvider.oldTranslate('StarsAcquiredInfo', paymentState.inputInvoice.stars),
+          title: langProvider.oldTranslate('StarsAcquired'),
+          icon: 'star',
+          tabId,
+        });
+        actions.requestConfetti({ withStars: true, tabId });
+      } else {
+        actions.showNotification({
+          tabId,
+          message: langProvider.oldTranslate('PaymentInfoHint', [
+            formatCurrencyAsString(totalAmount, currency, langProvider.getTranslationFn().code),
+            form.title,
+          ]),
+        });
+      }
 
-          actions.showNotification({
-            tabId,
-            message: langProvider.oldTranslate('PaymentInfoHint', [
-              formatCurrencyAsString(amount, currency, langProvider.getTranslationFn().code),
-              title,
-            ]),
-          });
+      setGlobal(global);
+
+      break;
+    }
+
+    case 'updateStarPaymentStateCompleted': {
+      const { paymentState, tabId } = update;
+      const { inputInvoice, subscriptionInfo, form } = paymentState;
+      if (inputInvoice?.type === 'chatInviteSubscription' && subscriptionInfo) {
+        const amount = subscriptionInfo.subscriptionPricing!.amount;
+
+        actions.showNotification({
+          tabId,
+          title: langProvider.oldTranslate('StarsSubscriptionCompleted'),
+          message: langProvider.oldTranslate('StarsSubscriptionCompletedText', [
+            amount,
+            subscriptionInfo.title,
+          ], undefined, amount),
+          icon: 'star',
+        });
+      }
+
+      if (form?.invoice.subscriptionPeriod) {
+        const amount = form.invoice.totalAmount;
+        actions.showNotification({
+          tabId,
+          title: langProvider.oldTranslate('StarsSubscriptionCompleted'),
+          message: langProvider.oldTranslate('StarsSubscriptionCompletedText', [
+            amount,
+            form.title,
+          ], undefined, amount),
+          icon: 'star',
+        });
+      }
+
+      if (inputInvoice?.type === 'giftcode') {
+        if (!inputInvoice.userIds) {
+          return;
+        }
+        const giftModalState = selectTabState(global, tabId).giftModal;
+
+        if (giftModalState && inputInvoice.userIds[0] === giftModalState.forPeerId) {
+          global = updateTabState(global, {
+            giftModal: {
+              ...giftModalState,
+              isCompleted: true,
+            },
+          }, tabId);
+        }
+      }
+
+      if (inputInvoice?.type === 'starsgift') {
+        if (!inputInvoice.userId) {
+          return;
+        }
+        const starsModalState = selectTabState(global, tabId).starsGiftModal;
+
+        if (starsModalState?.isOpen && inputInvoice.userId === starsModalState.forUserId) {
+          global = updateTabState(global, {
+            starsGiftModal: {
+              ...starsModalState,
+              isCompleted: true,
+            },
+          }, tabId);
         }
 
-        if (inputInvoice?.type === 'giftcode') {
-          if (!inputInvoice.userIds) {
-            return;
-          }
-          const giftModalState = selectTabState(global, tabId).giftPremiumModal;
-
-          if (giftModalState && giftModalState.isOpen
-            && areDeepEqual(inputInvoice.userIds, giftModalState.forUserIds)) {
-            global = updateTabState(global, {
-              giftPremiumModal: {
-                ...giftModalState,
-                isCompleted: true,
-              },
-            }, tabId);
-            global = closeInvoice(global, tabId);
-          }
-        }
-
-        setGlobal(global);
-      });
-
+        actions.requestConfetti({ withStars: true, tabId });
+      }
       break;
     }
 

@@ -101,9 +101,9 @@
 .chat-list {
   background: var(--color-background);
   height: 100%;
-  padding: 0.5rem 0.4375rem 0.5rem 0.4375rem;
+  padding: 0.5rem;
 
-  @include mixins.adapt-padding-to-scrollbar(0.4375rem);
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
 
   overflow-x: hidden;
   overflow-y: scroll;

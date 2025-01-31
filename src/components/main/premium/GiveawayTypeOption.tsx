@@ -11,7 +11,7 @@ import Icon from '../../common/icons/Icon';
 
 import styles from './GiveawayTypeOption.module.scss';
 
-type ApiGiveawayType = 'random_users' | 'specific_users';
+type ApiGiveawayType = 'premium_giveaway' | 'stars_giveaway';
 
 type OwnProps = {
   option: ApiGiveawayType;
@@ -54,7 +54,6 @@ const GiveawayTypeOption: FC<OwnProps> = ({
     <label
       className={buildClassName(styles.wrapper, className)}
       dir={lang.isRtl ? 'rtl' : undefined}
-      onClick={handleClick}
       role="button"
       tabIndex={0}
     >
@@ -74,7 +73,7 @@ const GiveawayTypeOption: FC<OwnProps> = ({
             {lang(`${name}`)}
           </h3>
           {isLink ? (
-            <div className={styles.link}>
+            <div className={styles.link} onClick={handleClick}>
               <span>{displayText}</span>
               <Icon name="next" />
             </div>

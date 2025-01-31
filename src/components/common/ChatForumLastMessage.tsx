@@ -8,7 +8,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiChat } from '../../api/types';
+import type { ApiChat, ApiTopic } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { getOrderedTopics } from '../../global/helpers';
@@ -26,6 +26,7 @@ import styles from './ChatForumLastMessage.module.scss';
 
 type OwnProps = {
   chat: ApiChat;
+  topics?: Record<number, ApiTopic>;
   renderLastMessage: () => React.ReactNode;
   observeIntersection?: ObserveFn;
 };
@@ -35,6 +36,7 @@ const MAX_TOPICS = 3;
 
 const ChatForumLastMessage: FC<OwnProps> = ({
   chat,
+  topics,
   renderLastMessage,
   observeIntersection,
 }) => {
@@ -48,12 +50,12 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   const lang = useOldLang();
 
   const [lastActiveTopic, ...otherTopics] = useMemo(() => {
-    if (!chat.topics) {
+    if (!topics) {
       return [];
     }
 
-    return getOrderedTopics(Object.values(chat.topics), undefined, true).slice(0, MAX_TOPICS);
-  }, [chat.topics]);
+    return getOrderedTopics(Object.values(topics), undefined, true).slice(0, MAX_TOPICS);
+  }, [topics]);
 
   const [isReversedCorner, setIsReversedCorner] = useState(false);
   const [overwrittenWidth, setOverwrittenWidth] = useState<number | undefined>(undefined);

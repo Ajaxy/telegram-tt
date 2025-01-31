@@ -13,7 +13,7 @@ import { unique } from '../../../util/iteratees';
 
 import useOldLang from '../../../hooks/useOldLang';
 
-import ChatOrUserPicker from '../../common/ChatOrUserPicker';
+import ChatOrUserPicker from '../../common/pickers/ChatOrUserPicker';
 
 export type OwnProps = {
   isOpen: boolean;

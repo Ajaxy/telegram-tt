@@ -3,6 +3,8 @@ import React, { memo, useMemo } from '../../../lib/teact/teact';
 
 import { formatDateToString } from '../../../util/dates/dateFormat';
 
+import Icon from '../../common/icons/Icon';
+
 import './DateSuggest.scss';
 
 const SUGGESTION_COUNT = 8;
@@ -25,7 +27,7 @@ const DateSuggest: FC<OwnProps> = ({
             className="date-item"
             key={text}
           >
-            <i className="icon icon-calendar" />
+            <Icon name="calendar" />
             <span>{text}</span>
           </div>
         );

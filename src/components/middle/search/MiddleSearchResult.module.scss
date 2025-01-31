@@ -1,0 +1,58 @@
+.root {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.625rem;
+  outline: none;
+
+  color: var(--color-text);
+  font-size: 0.875rem;
+  cursor: var(--custom-cursor, pointer);
+
+  @media (hover: hover) {
+    &:hover,
+    &:focus-visible,
+    &.active {
+      background-color: var(--color-chat-hover);
+    }
+  }
+
+  :global {
+    .matching-text-highlight {
+      color: var(--color-text);
+      background: #cae3f7;
+      border-radius: 0.25rem;
+      padding: 0 0.125rem;
+      display: inline-block;
+
+      :global(.theme-dark) & {
+        --color-text: #000;
+      }
+    }
+  }
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.topRow {
+  display: flex;
+}
+
+.meta {
+  margin-inline-start: auto;
+  padding-inline-start: 0.5rem;
+}
+
+.subtitle {
+  position: relative;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.25;
+}

@@ -29,6 +29,7 @@ export const INITIAL_PERFORMANCE_STATE_MAX: PerformanceType = {
   rightColumnAnimations: true,
   stickerEffects: true,
   storyRibbonAnimations: true,
+  snapEffect: true,
 };
 
 export const INITIAL_PERFORMANCE_STATE_MID: PerformanceType = {
@@ -46,6 +47,7 @@ export const INITIAL_PERFORMANCE_STATE_MID: PerformanceType = {
   rightColumnAnimations: false,
   stickerEffects: false,
   storyRibbonAnimations: false,
+  snapEffect: false,
 };
 
 export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
@@ -63,6 +65,7 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
   rightColumnAnimations: false,
   stickerEffects: false,
   storyRibbonAnimations: false,
+  snapEffect: false,
 };
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {
@@ -97,6 +100,14 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byId: {},
     statusesById: {},
     fullInfoById: {},
+    previewMediaByBotId: {},
+    commonChatsById: {},
+    botAppPermissionsById: {},
+  },
+
+  peers: {
+    giftsById: {},
+    profilePhotosById: {},
   },
 
   chats: {
@@ -108,11 +119,19 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byId: {},
     fullInfoById: {},
     similarChannelsById: {},
+    similarBotsById: {},
+    topicsInfoById: {},
+    loadingParameters: {
+      active: {},
+      archived: {},
+      saved: {},
+    },
   },
 
   messages: {
     byChatId: {},
     sponsoredByChatId: {},
+    pollById: {},
   },
 
   stories: {
@@ -134,6 +153,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     shouldCompress: true,
     shouldSendGrouped: true,
     isInvertedMedia: undefined,
+    webPageMediaSize: undefined,
   },
 
   scheduledMessages: {
@@ -208,6 +228,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   topPeers: {},
 
   topInlineBots: {},
+  topBotApps: {},
 
   activeSessions: {
     byHash: {},
@@ -246,6 +267,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       notificationSoundVolume: 5,
       shouldSuggestStickers: true,
       shouldSuggestCustomEmoji: true,
+      shouldSkipWebAppCloseConfirmation: false,
       shouldUpdateStickerSetOrder: true,
       language: 'en',
       timeFormat: '24h',
@@ -274,6 +296,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     performance: INITIAL_PERFORMANCE_STATE_MAX,
     privacy: {},
     notifyExceptions: {},
+    botVerificationShownPeerIds: [],
   },
 
   serviceNotifications: [],
@@ -313,11 +336,20 @@ export const INITIAL_TAB_STATE: TabState = {
     byUsername: {},
   },
 
+  webApps: {
+    openedWebApps: {},
+    openedOrderedKeys: [],
+    sessionKeys: [],
+    modalState: 'maximized',
+    isModalOpen: false,
+    isMoreAppsTabActive: false,
+  },
+
   globalSearch: {},
 
   userSearch: {},
 
-  localTextSearch: {
+  middleSearch: {
     byChatThreadKey: {},
   },
 
@@ -352,6 +384,8 @@ export const INITIAL_TAB_STATE: TabState = {
 
   isShareMessageModalShown: false,
 
+  isWebAppsCloseConfirmationModalOpen: false,
+
   forwardMessages: {},
 
   replyingMessage: {},
@@ -359,6 +393,7 @@ export const INITIAL_TAB_STATE: TabState = {
   pollResults: {},
 
   payment: {},
+  starsPayment: {},
 
   notifications: [],
 

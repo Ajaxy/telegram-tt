@@ -20,8 +20,9 @@ import renderText from '../../common/helpers/renderText';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
+import Icon from '../../common/icons/Icon';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
 import UsernameInput from '../../common/UsernameInput';
@@ -91,7 +92,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   const isLoading = progress === ProfileEditProgress.InProgress;
   const isUsernameError = editableUsername === false;
 
-  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
   const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
   const shouldRenderUsernamesManage = usernames && usernames.length > 1;
 
@@ -247,13 +248,15 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
         <div className="settings-item">
           <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('Username')}</h4>
 
-          <UsernameInput
-            currentUsername={currentUsername}
-            isLoading={isLoading}
-            isUsernameAvailable={isUsernameAvailable}
-            checkedUsername={checkedUsername}
-            onChange={handleUsernameChange}
-          />
+          <div className="settings-input">
+            <UsernameInput
+              currentUsername={currentUsername}
+              isLoading={isLoading}
+              isUsernameAvailable={isUsernameAvailable}
+              checkedUsername={checkedUsername}
+              onChange={handleUsernameChange}
+            />
+          </div>
 
           {editUsernameError === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
           <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -284,7 +287,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
     </div>

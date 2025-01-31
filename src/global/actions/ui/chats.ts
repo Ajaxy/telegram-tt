@@ -6,13 +6,13 @@ import { createMessageHashUrl } from '../../../util/routing';
 import { IS_ELECTRON } from '../../../util/windowEnvironment';
 import { addActionHandler, setGlobal } from '../../index';
 import {
+  closeMiddleSearch,
   exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList, updateRequestedChatTranslation,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat, selectCurrentMessageList, selectTabState,
 } from '../../selectors';
-import { closeLocalTextSearch } from './localSearch';
 
 addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
   const {
@@ -38,6 +38,11 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
   }
   actions.hideEffectInComposer({ tabId });
 
+  actions.closeStoryViewer({ tabId });
+  actions.closeStarsBalanceModal({ tabId });
+  actions.closeStarsBalanceModal({ tabId });
+  actions.closeStarsTransactionModal({ tabId });
+
   if (!currentMessageList || (
     currentMessageList.chatId !== chatId
     || currentMessageList.threadId !== threadId
@@ -50,13 +55,15 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
         activeReactions: {},
         shouldPreventComposerAnimation: true,
       }, tabId);
+
+      global = closeMiddleSearch(global, chatId, threadId, tabId);
     }
 
     global = exitMessageSelectMode(global, tabId);
-    global = closeLocalTextSearch(global, tabId);
 
     global = updateTabState(global, {
       isStatisticsShown: false,
+      monetizationStatistics: undefined,
       boostStatistics: undefined,
       contentToBeScheduled: undefined,
       ...(chatId !== selectTabState(global, tabId).forwardMessages.toChatId && {
@@ -79,6 +86,22 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
   actions.updatePageTitle({ tabId });
 
   return updateCurrentMessageList(global, chatId, threadId, type, shouldReplaceHistory, shouldReplaceLast, tabId);
+});
+
+addActionHandler('openPrivateChannel', (global, actions, payload): ActionReturnType => {
+  const { id, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, id);
+  if (!chat) {
+    actions.showNotification({
+      message: {
+        key: 'PrivateChannelInaccessible',
+      },
+      tabId,
+    });
+    return;
+  }
+
+  actions.openChat({ id, tabId });
 });
 
 addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnType => {
@@ -197,4 +220,11 @@ addActionHandler('closeChatlistModal', (global, actions, payload): ActionReturnT
 addActionHandler('requestChatTranslation', (global, actions, payload): ActionReturnType => {
   const { chatId, toLanguageCode, tabId = getCurrentTabId() } = payload;
   return updateRequestedChatTranslation(global, chatId, toLanguageCode, tabId);
+});
+
+addActionHandler('closeChatInviteModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    chatInviteModal: undefined,
+  }, tabId);
 });

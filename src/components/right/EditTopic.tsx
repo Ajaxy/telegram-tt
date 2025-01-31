@@ -8,7 +8,9 @@ import type { ApiChat, ApiSticker, ApiTopic } from '../../api/types';
 import type { TabState } from '../../global/types';
 
 import { DEFAULT_TOPIC_ICON_STICKER_ID, GENERAL_TOPIC_ID } from '../../config';
-import { selectChat, selectIsCurrentUserPremium, selectTabState } from '../../global/selectors';
+import {
+  selectChat, selectIsCurrentUserPremium, selectTabState, selectTopic,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
 
@@ -16,6 +18,7 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import useOldLang from '../../hooks/useOldLang';
 
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
+import Icon from '../common/icons/Icon';
 import TopicIcon from '../common/TopicIcon';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import InputText from '../ui/InputText';
@@ -174,7 +177,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
     </div>
@@ -185,7 +188,8 @@ export default memo(withGlobal(
   (global): StateProps => {
     const { editTopicPanel } = selectTabState(global);
     const chat = editTopicPanel?.chatId ? selectChat(global, editTopicPanel.chatId) : undefined;
-    const topic = editTopicPanel?.topicId ? chat?.topics?.[editTopicPanel?.topicId] : undefined;
+    const topic = editTopicPanel?.chatId && editTopicPanel?.topicId
+      ? selectTopic(global, editTopicPanel.chatId, editTopicPanel.topicId) : undefined;
 
     return {
       chat,

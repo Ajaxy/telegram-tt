@@ -22,6 +22,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
+import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import NothingFound from '../../common/NothingFound';
 import Button from '../../ui/Button';
@@ -278,16 +279,18 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             size={STICKER_SIZE_INVITES}
             className="section-icon"
           />
-          <p className="text-muted">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
+          <p className="section-help">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
         </div>
         {primaryInviteLink && (
-          <LinkField
-            className="section"
-            link={primaryInviteLink}
-            withShare
-            onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
-            title={chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
-          />
+          <div className="section">
+            <LinkField
+              className="settings-input"
+              link={primaryInviteLink}
+              withShare
+              onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
+              title={chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
+            />
+          </div>
         )}
         <div className="section" teactFastList>
           <Button isText key="create" className="create-link" onClick={handleCreateNewClick}>
@@ -296,7 +299,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           {(!temporalInvites || !temporalInvites.length) && <NothingFound text="No links found" key="nothing" />}
           {temporalInvites?.map((invite) => (
             <ListItem
-              leftElement={<i className={`icon icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
+              leftElement={<Icon name="link" className={`link-status-icon ${getInviteIconClass(invite)}`} />}
               secondaryIcon="more"
               multiline
               // eslint-disable-next-line react/jsx-no-bind
@@ -310,11 +313,11 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
               </span>
             </ListItem>
           ))}
-          <p className="text-muted hint" key="links-hint">{lang('ManageLinksInfoHelp')}</p>
+          <p className="section-help hint" key="links-hint">{lang('ManageLinksInfoHelp')}</p>
         </div>
         {revokedExportedInvites && Boolean(revokedExportedInvites.length) && (
           <div className="section" teactFastList>
-            <p className="text-muted" key="title">{lang('RevokedLinks')}</p>
+            <p className="section-help" key="title">{lang('RevokedLinks')}</p>
             <ListItem
               icon="delete"
               destructive
@@ -325,7 +328,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             </ListItem>
             {revokedExportedInvites?.map((invite) => (
               <ListItem
-                leftElement={<i className={`icon icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
+                leftElement={<Icon name="link" className={`link-status-icon ${getInviteIconClass(invite)}`} />}
                 secondaryIcon="more"
                 multiline
                 // eslint-disable-next-line react/jsx-no-bind

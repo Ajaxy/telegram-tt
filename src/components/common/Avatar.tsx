@@ -4,8 +4,7 @@ import React, { memo, useMemo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type {
-  ApiChat, ApiPeer, ApiPhoto, ApiUser,
-  ApiWebDocument,
+  ApiPeer, ApiPhoto, ApiWebDocument,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { CustomPeer, StoryViewerOrigin } from '../../types';
@@ -22,17 +21,21 @@ import {
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
+  isPeerChat,
+  isPeerUser,
   isUserId,
 } from '../../global/helpers';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 import { getFirstLetters } from '../../util/textFormat';
+import { REM } from './helpers/mediaDimensions';
 import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
 import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -43,7 +46,19 @@ import './Avatar.scss';
 
 const LOOP_COUNT = 3;
 
-export type AvatarSize = 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'giant' | 'jumbo';
+export const AVATAR_SIZES = {
+  micro: REM,
+  mini: 1.5 * REM,
+  tiny: 2 * REM,
+  small: 2.125 * REM,
+  medium: 2.75 * REM,
+  large: 3.375 * REM,
+  giant: 5.625 * REM,
+  jumbo: 7.5 * REM,
+};
+
+export type AvatarSize =
+  'micro' | 'mini' | 'tiny' | 'small' | 'medium' | 'large' | 'giant' | 'jumbo' | number;
 
 const cn = createClassNameBuilder('Avatar');
 cn.media = cn('media');
@@ -102,9 +117,8 @@ const Avatar: FC<OwnProps> = ({
   const videoLoopCountRef = useRef(0);
   const isCustomPeer = peer && 'isCustomPeer' in peer;
   const realPeer = peer && !isCustomPeer ? peer : undefined;
-  const isPeerChat = realPeer && 'title' in realPeer;
-  const user = peer && !isPeerChat ? peer as ApiUser : undefined;
-  const chat = peer && isPeerChat ? peer as ApiChat : undefined;
+  const user = realPeer && isPeerUser(realPeer) ? realPeer : undefined;
+  const chat = realPeer && isPeerChat(realPeer) ? realPeer : undefined;
   const isDeleted = user && isDeletedUser(user);
   const isReplies = realPeer && isChatWithRepliesBot(realPeer.id);
   const isAnonymousForwards = realPeer && isAnonymousForwardsChat(realPeer.id);
@@ -112,12 +126,14 @@ const Avatar: FC<OwnProps> = ({
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
+  const pxSize = typeof size === 'number' ? size : AVATAR_SIZES[size];
+
   const shouldLoadVideo = withVideo && photo?.isVideo;
 
-  const shouldFetchBig = size === 'jumbo';
+  const isBig = pxSize >= AVATAR_SIZES.jumbo;
   if (!isSavedMessages && !isDeleted) {
     if ((user && !noPersonalPhoto) || chat) {
-      imageHash = getChatAvatarHash(peer as ApiPeer, shouldFetchBig ? 'big' : undefined);
+      imageHash = getChatAvatarHash(peer as ApiPeer, isBig ? 'big' : undefined);
     } else if (photo) {
       imageHash = `photo${photo.id}?size=m`;
       if (photo.isVideo && withVideo) {
@@ -158,7 +174,7 @@ const Avatar: FC<OwnProps> = ({
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
   const shouldPlayVideo = Boolean(videoBlobUrl && shouldLoadVideo);
 
-  const transitionClassNames = useMediaTransition(hasBlobUrl);
+  const transitionClassNames = useMediaTransitionDeprecated(hasBlobUrl);
 
   const handleVideoEnded = useLastCallback((e) => {
     const video = e.currentTarget;
@@ -218,6 +234,9 @@ const Avatar: FC<OwnProps> = ({
   } else if (chat) {
     const title = getChatTitle(lang, chat);
     content = title && getFirstLetters(title, isUserId(chat.id) ? 2 : 1);
+  } else if (isCustomPeer) {
+    const title = peer.title || lang(peer.titleKey!);
+    content = title && getFirstLetters(title, 1);
   } else if (text) {
     content = getFirstLetters(text, 2);
   }
@@ -225,9 +244,10 @@ const Avatar: FC<OwnProps> = ({
   const isRoundedRect = (isCustomPeer && peer.isAvatarSquare)
   || (isForum && !((withStory || withStorySolid) && realPeer?.hasStories));
   const isPremiumGradient = isCustomPeer && peer.withPremiumGradient;
+  const customColor = isCustomPeer && peer.customPeerAvatarColor;
 
   const fullClassName = buildClassName(
-    `Avatar size-${size}`,
+    'Avatar',
     className,
     getPeerColorClass(peer),
     !peer && text && 'hidden-user',
@@ -273,14 +293,15 @@ const Avatar: FC<OwnProps> = ({
       data-peer-id={realPeer?.id}
       data-test-sender-id={IS_TEST ? realPeer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
+      style={buildStyle(`--_size: ${pxSize}px;`, customColor && `--color-user: ${customColor}`)}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
       <div className="inner">
-        {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
+        {typeof content === 'string' ? renderText(content, [isBig ? 'hq_emoji' : 'emoji']) : content}
       </div>
       {withStory && realPeer?.hasStories && (
-        <AvatarStoryCircle peerId={realPeer.id} size={size} withExtraGap={withStoryGap} />
+        <AvatarStoryCircle peerId={realPeer.id} size={pxSize} withExtraGap={withStoryGap} />
       )}
     </div>
   );

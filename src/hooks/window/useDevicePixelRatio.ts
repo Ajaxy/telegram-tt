@@ -14,7 +14,7 @@ export default function useDevicePixelRatio() {
   const [dpr, setDpr] = useState(window.devicePixelRatio);
 
   useEffectOnce(() => {
-    callbacks.addCallback(() => {
+    return callbacks.addCallback(() => {
       setDpr(window.devicePixelRatio);
     });
   });

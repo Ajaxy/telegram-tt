@@ -1,5 +1,6 @@
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 import type { TimeFormat } from '../../types';
+import type { LangFn } from '../localization';
 
 import withCache from '../withCache';
 
@@ -39,7 +40,7 @@ function toIsoString(date: Date) {
 }
 
 // @optimization `toLocaleTimeString` is avoided because of bad performance
-export function formatTime(lang: LangFn, datetime: number | Date) {
+export function formatTime(lang: OldLangFn, datetime: number | Date) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   const timeFormat = lang.timeFormat || '24h';
 
@@ -53,7 +54,7 @@ export function formatTime(lang: LangFn, datetime: number | Date) {
   return `${String(hours).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}${marker}`;
 }
 
-export function formatPastTimeShort(lang: LangFn, datetime: number | Date, alwaysShowTime = false) {
+export function formatPastTimeShort(lang: OldLangFn, datetime: number | Date, alwaysShowTime = false) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
 
   const time = formatTime(lang, date);
@@ -76,16 +77,16 @@ export function formatPastTimeShort(lang: LangFn, datetime: number | Date, alway
   return alwaysShowTime ? lang('FullDateTimeFormat', [formattedDate, time]) : formattedDate;
 }
 
-export function formatFullDate(lang: LangFn, datetime: number | Date) {
+export function formatFullDate(lang: OldLangFn, datetime: number | Date) {
   return formatDateToString(datetime, lang.code, false, 'numeric');
 }
 
-export function formatMonthAndYear(lang: LangFn, date: Date, isShort = false) {
+export function formatMonthAndYear(lang: OldLangFn, date: Date, isShort = false) {
   return formatDateToString(date, lang.code, false, isShort ? 'short' : 'long', true);
 }
 
 export function formatCountdown(
-  lang: LangFn,
+  lang: OldLangFn,
   msLeft: number,
 ) {
   const days = Math.floor(msLeft / MILLISECONDS_IN_DAY);
@@ -104,7 +105,7 @@ export function formatCountdown(
   }
 }
 
-export function formatCountdownShort(lang: LangFn, msLeft: number): string {
+export function formatCountdownShort(lang: OldLangFn, msLeft: number): string {
   if (msLeft < 60 * 1000) {
     return Math.ceil(msLeft / 1000).toString();
   } else if (msLeft < 60 * 60 * 1000) {
@@ -116,7 +117,7 @@ export function formatCountdownShort(lang: LangFn, msLeft: number): string {
   }
 }
 
-export function formatLastUpdated(lang: LangFn, currentTime: number, lastUpdated = currentTime) {
+export function formatLastUpdated(lang: OldLangFn, currentTime: number, lastUpdated = currentTime) {
   const seconds = currentTime - lastUpdated;
   if (seconds < 60) {
     return lang('LiveLocationUpdated.JustNow');
@@ -127,7 +128,7 @@ export function formatLastUpdated(lang: LangFn, currentTime: number, lastUpdated
   }
 }
 
-export function formatRelativeTime(lang: LangFn, currentTime: number, lastUpdated = currentTime) {
+export function formatRelativeTime(lang: OldLangFn, currentTime: number, lastUpdated = currentTime) {
   const seconds = currentTime - lastUpdated;
 
   if (seconds < 60) {
@@ -156,7 +157,7 @@ export function formatRelativeTime(lang: LangFn, currentTime: number, lastUpdate
 
 type DurationType = 'Seconds' | 'Minutes' | 'Hours' | 'Days' | 'Weeks';
 
-export function formatTimeDuration(lang: LangFn, duration: number, showLast = 2) {
+export function formatTimeDuration(lang: OldLangFn, duration: number, showLast = 2) {
   if (!duration) {
     return undefined;
   }
@@ -196,7 +197,7 @@ export function formatTimeDuration(lang: LangFn, duration: number, showLast = 2)
 }
 
 export function formatHumanDate(
-  lang: LangFn,
+  lang: OldLangFn,
   datetime: number | Date,
   isShort = false,
   noWeekdays = false,
@@ -237,13 +238,13 @@ export function formatHumanDate(
  * Returns weekday name
  * @param day 0 - Sunday, 1 - Monday, ...
  */
-export function formatWeekday(lang: LangFn, day: number, isShort = false) {
+export function formatWeekday(lang: OldLangFn, day: number, isShort = false) {
   const weekDay = WEEKDAYS_FULL[day];
   return isShort ? lang(`Weekday.Short${weekDay}`) : lang(`Weekday.${weekDay}`);
 }
 
 export function formatMediaDateTime(
-  lang: LangFn,
+  lang: OldLangFn,
   datetime: number | Date,
   isUpperFirst?: boolean,
 ) {
@@ -350,7 +351,7 @@ export function formatDateTimeToString(
 }
 
 export function formatDateAtTime(
-  lang: LangFn,
+  lang: OldLangFn,
   datetime: number | Date,
 ) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
@@ -374,29 +375,28 @@ export function formatDateAtTime(
   return lang('formatDateAtTime', [formattedDate, time]);
 }
 
-export function formatDateInFuture(
-  lang: LangFn,
-  currentTime: number,
-  datetime: number,
-) {
-  const diff = Math.ceil(datetime - currentTime);
-  if (diff < 0) {
+export function formatShortDuration(lang: LangFn, duration: number) {
+  if (duration < 0) {
     return lang('RightNow');
   }
 
-  if (diff < 60) {
-    return lang('Seconds', diff);
+  if (duration < 60) {
+    const count = Math.ceil(duration);
+    return lang('Seconds', { count }, { pluralValue: duration });
   }
 
-  if (diff < 60 * 60) {
-    return lang('Minutes', Math.ceil(diff / 60));
+  if (duration < 60 * 60) {
+    const count = Math.ceil(duration / 60);
+    return lang('Minutes', { count }, { pluralValue: count });
   }
 
-  if (diff < 60 * 60 * 24) {
-    return lang('Hours', Math.ceil(diff / (60 * 60)));
+  if (duration < 60 * 60 * 24) {
+    const count = Math.ceil(duration / (60 * 60));
+    return lang('Hours', { count }, { pluralValue: count });
   }
 
-  return lang('Days', Math.ceil(diff / (60 * 60 * 24)));
+  const count = Math.ceil(duration / (60 * 60 * 24));
+  return lang('Days', { count }, { pluralValue: count });
 }
 
 function isValidDate(day: number, month: number, year = 2021): boolean {

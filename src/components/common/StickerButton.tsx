@@ -8,7 +8,7 @@ import type { ApiBotInlineMediaResult, ApiSticker } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import buildClassName from '../../util/buildClassName';
-import { getServerTimeOffset } from '../../util/serverTime';
+import { getServerTime } from '../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
@@ -16,7 +16,6 @@ import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListene
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMenuPosition from '../../hooks/useMenuPosition';
 import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
@@ -118,29 +117,18 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const isIntesectingForShowing = useIsIntersecting(ref, observeIntersectionForShowing);
 
   const {
-    isContextMenuOpen, contextMenuPosition,
+    isContextMenuOpen, contextMenuAnchor,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
-  const shouldRenderContextMenu = Boolean(!noContextMenu && contextMenuPosition);
+  const shouldRenderContextMenu = Boolean(!noContextMenu && contextMenuAnchor);
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!.closest('.custom-scroll, .no-scrollbar'));
   const getMenuElement = useLastCallback(() => {
     return isStatusPicker ? menuRef.current : ref.current!.querySelector('.sticker-context-menu .bubble');
   });
-
-  const getLayout = () => ({ withPortal: isStatusPicker, shouldAvoidNegativePosition: true });
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
+  const getLayout = useLastCallback(() => ({ withPortal: isStatusPicker, shouldAvoidNegativePosition: true }));
 
   useEffect(() => {
     if (isContextMenuOpen) {
@@ -210,8 +198,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     handleContextMenuClose();
     onContextMenuClick?.();
     setEmojiStatus({
-      emojiStatus: sticker,
-      expires: Date.now() / 1000 + duration + getServerTimeOffset(),
+      emojiStatusId: sticker.id,
+      expires: getServerTime() + duration,
     });
   });
 
@@ -311,6 +299,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           shouldPreloadPreview
           noLoad={!shouldLoad}
           noPlay={!shouldPlay}
+          noVideoOnMobile
           withSharedAnimation
           sharedCanvasRef={sharedCanvasRef}
           withTranslucentThumb={withTranslucentThumb}
@@ -345,11 +334,11 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
         <Menu
           ref={menuRef}
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
           className="sticker-context-menu"
           autoClose
           withPortal={isStatusPicker}

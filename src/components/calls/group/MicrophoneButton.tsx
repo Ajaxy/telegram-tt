@@ -12,7 +12,7 @@ import { vibrateShort } from '../../../util/vibrate';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Button from '../../ui/Button';
@@ -57,7 +57,7 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
   const [isRequestingToSpeak, setIsRequestingToSpeak] = useState(false);
   const isConnecting = connectionState !== 'connected';
   const shouldRaiseHand = !canSelfUnmute && isMuted;
-  const prevShouldRaiseHand = usePrevious(shouldRaiseHand);
+  const prevShouldRaiseHand = usePreviousDeprecated(shouldRaiseHand);
 
   useEffect(() => {
     if (prevShouldRaiseHand && !shouldRaiseHand) {

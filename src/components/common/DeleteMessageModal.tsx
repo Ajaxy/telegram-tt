@@ -12,28 +12,29 @@ import type {
 import type { IAlbum } from '../../types';
 import type { IRadioOption } from '../ui/CheckboxGroup';
 
-import { REPLIES_USER_ID } from '../../config';
 import {
   getHasAdminRight,
   getPrivateChatUserId,
   getUserFirstOrLastName, getUserFullName,
   isChatBasicGroup,
   isChatSuperGroup, isOwnMessage,
+  isSystemBot,
   isUserId,
 } from '../../global/helpers';
 import {
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectBot,
   selectChat, selectChatFullInfo, selectCurrentMessageIds,
-  selectCurrentMessageList, selectSenderFromMessage, selectTabState,
+  selectCurrentMessageList, selectSender, selectSenderFromMessage, selectTabState,
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import renderText from './helpers/renderText';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useManagePermissions from '../right/hooks/useManagePermissions';
 
 import PermissionCheckboxList from '../main/PermissionCheckboxList';
@@ -95,13 +96,13 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   const {
     deleteMessages,
     deleteScheduledMessages,
-    reportMessages,
+    reportChannelSpam,
     deleteChatMember,
     updateChatMemberBannedRights,
     closeDeleteMessageModal,
   } = getActions();
 
-  const prevIsOpen = usePrevious(isOpen);
+  const prevIsOpen = usePreviousDeprecated(isOpen);
 
   const lang = useOldLang();
 
@@ -128,6 +129,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   const shouldShowAdditionalOptions = useMemo(() => {
     return user && user.id !== currentUserId;
   }, [user, currentUserId]);
+
+  const shouldShowOptions = shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup);
 
   const userName = useMemo(() => {
     const usersById = getGlobal().users.byId;
@@ -180,8 +183,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   });
 
   const filterMessageIdByUserId = useLastCallback((userIds: string[], selectedMessageIdList: number[]) => {
+    if (!chat) return MEMO_EMPTY_ARRAY;
     return selectedMessageIdList.filter((msgId) => {
-      const senderPeer = selectSenderFromMessage(getGlobal(), chat, msgId);
+      const senderPeer = selectSenderFromMessage(getGlobal(), chat.id, msgId);
       return senderPeer && userIds.includes(senderPeer.id);
     });
   });
@@ -218,6 +222,8 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleDeleteMessageForSelf = useLastCallback(() => {
+    if (!chat) return;
+
     onConfirm?.();
     const messageIds = album?.messages
       ? album.messages.map(({ id }) => id)
@@ -225,10 +231,10 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     if (isSchedule) {
       deleteScheduledMessages({ messageIds });
     } else if (!isOwn && (chosenSpanOption || chosenDeleteOption || chosenBanOption) && (isGroup || isSuperGroup)) {
-      if (chosenSpanOption) {
+      if (chosenSpanOption && sender) {
         const filteredMessageIdList = filterMessageIdByUserId(chosenSpanOption, messageIdList!);
         if (filteredMessageIdList && filteredMessageIdList.length) {
-          reportMessages({ messageIds: filteredMessageIdList, reason: 'spam', description: '' });
+          reportChannelSpam({ participantId: sender.id, chatId: chat.id, messageIds: filteredMessageIdList });
         }
       }
 
@@ -239,7 +245,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
       if (chosenBanOption && !havePermissionChanged && message) {
         const filteredUserIdList = chosenBanOption.filter((userId) => messageIds?.some((msgId) => {
-          const senderPeer = selectSenderFromMessage(getGlobal(), chat, msgId);
+          const senderPeer = selectSenderFromMessage(getGlobal(), chat.id, msgId);
           return senderPeer && senderPeer.id === userId;
         }));
         handleDeleteMember(filteredUserIdList);
@@ -251,7 +257,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
       if (chosenBanOption && havePermissionChanged) {
         const filteredUserIdList = chosenBanOption.filter((userId) => messageIds?.some((msgId) => {
-          const senderPeer = selectSenderFromMessage(getGlobal(), chat, msgId);
+          const senderPeer = selectSenderFromMessage(getGlobal(), chat.id, msgId);
           return senderPeer && senderPeer.id === userId;
         }));
         handleUpdateChatMemberBannedRights(filteredUserIdList);
@@ -294,15 +300,14 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
 
   function renderHeader() {
     return (
-      <div className={styles.container} dir={lang.isRtl ? 'rtl' : undefined}>
-        {(shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule) && (
+      <div className={shouldShowOptions && styles.container} dir={lang.isRtl ? 'rtl' : undefined}>
+        {shouldShowOptions && (
           <Avatar
             size="small"
             peer={user!}
           />
         )}
-        <h3 className={styles.title}>{lang('DeleteSingleMessagesTitle')}
-        </h3>
+        <h3 className={shouldShowOptions ? styles.title : styles.singleTitle}>{lang('DeleteSingleMessagesTitle')}</h3>
       </div>
     );
   }
@@ -365,7 +370,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     >
       <div className={buildClassName(styles.mainContainer, 'custom-scroll')}>
         {renderHeader()}
-        {(shouldShowAdditionalOptions && !canDeleteForAll && !isSchedule && (isGroup || isSuperGroup)) && (
+        {shouldShowOptions && (
           <>
             <p className={styles.actionTitle}>{lang('DeleteAdditionalActions')}</p>
             {renderAdditionalActionOptions()}
@@ -433,19 +438,18 @@ export default memo(withGlobal<OwnProps>(
     const chatFullInfo = chat && selectChatFullInfo(global, chat.id);
     const { threadId, type } = selectCurrentMessageList(global) || {};
     const { canDeleteForAll } = (deleteMessageModal && deleteMessageModal.message && threadId
-      && selectAllowedMessageActions(global, deleteMessageModal.message, threadId)) || {};
+      && selectAllowedMessageActionsSlow(global, deleteMessageModal.message, threadId)) || {};
     const adminMembersById = chatFullInfo && chatFullInfo?.adminMembersById;
     const messageIdList = chat && selectCurrentMessageIds(global, chat.id, threadId!, type!);
     const isGroup = Boolean(chat) && isChatBasicGroup(chat);
     const isSuperGroup = Boolean(chat) && isChatSuperGroup(chat);
-    const sender = deleteMessageModal && chat && deleteMessageModal.message
-      && selectSenderFromMessage(global, chat, deleteMessageModal.message.id);
+    const sender = deleteMessageModal?.message && selectSender(global, deleteMessageModal.message);
     const contactName = chat && isUserId(chat.id)
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
     const isChatWithBot = Boolean(deleteMessageModal && deleteMessageModal.message
       && selectBot(global, deleteMessageModal.message.chatId));
-    const chatBot = Boolean(chat && chat.id !== REPLIES_USER_ID && selectBot(global, chat.id));
+    const chatBot = Boolean(chat && !isSystemBot(chat.id) && selectBot(global, chat.id));
     const canBanUsers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
     const isOwn = deleteMessageModal && deleteMessageModal.message && isOwnMessage(deleteMessageModal.message);
 

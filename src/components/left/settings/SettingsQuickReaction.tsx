@@ -6,7 +6,7 @@ import type { ApiAvailableReaction } from '../../../api/types';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
-import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
@@ -47,7 +47,7 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
 
   const handleChange = useCallback((reaction: string) => {
     setDefaultReaction({
-      reaction: { emoticon: reaction },
+      reaction: { type: 'emoji', emoticon: reaction },
     });
   }, [setDefaultReaction]);
 
@@ -58,6 +58,7 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
         options={options}
         selected={selectedReaction}
         onChange={handleChange}
+        withIcon
       />
     </div>
   );

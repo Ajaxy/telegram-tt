@@ -50,12 +50,12 @@ export default (sessionDescription: RTCSessionDescriptionInit, isP2p = false): J
 
     const parameters = sections[sectionName].filter((l) => l.startsWith('a=fmtp')).map((l) => {
       const [, id, data] = l.match(/:(\d+)\s(.+)/) || [];
-      const d = data.split(';').reduce((acc: Record<string, string>, q) => {
+      const d = data?.split(';').reduce((acc: Record<string, string>, q) => {
         const [name, value] = q.split('=');
         acc[name] = value;
         return acc;
       }, {});
-      if (Object.values(d).some((z) => !z)) return undefined;
+      if (!d || Object.values(d).some((z) => !z)) return undefined;
       return { id: Number(id), data: d };
     }).filter(Boolean);
 

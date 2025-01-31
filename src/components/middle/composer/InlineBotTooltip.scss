@@ -1,7 +1,7 @@
 .InlineBotTooltip {
   .switch-pm .title {
     margin: 0 auto;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
 
   &.gallery {
@@ -10,6 +10,7 @@
     grid-auto-flow: dense;
     grid-gap: 1px;
     padding: 0;
+    scrollbar-gutter: stable both-edges;
 
     @media (max-width: 600px) {
       grid-template-columns: repeat(4, 1fr);

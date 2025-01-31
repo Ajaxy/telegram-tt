@@ -11,6 +11,8 @@ import { areLinesWrapping } from '../helpers/renderText';
 import useOldLang from '../../../hooks/useOldLang';
 import useWindowSize from '../../../hooks/window/useWindowSize';
 
+import Icon from '../icons/Icon';
+
 import styles from './CodeOverlay.module.scss';
 
 export type OwnProps = {
@@ -63,12 +65,12 @@ const CodeOverlay: FC<OwnProps> = ({
       <div className={contentClass}>
         {withWordWrapButton && (
           <div className={wrapClass} onClick={handleWordWrapClick} title="Word Wrap">
-            <i className="icon icon-word-wrap" />
+            <Icon name="word-wrap" />
           </div>
         )}
         {!noCopy && (
           <div className={styles.copy} onClick={handleCopy} title={lang('Copy')}>
-            <i className="icon icon-copy" />
+            <Icon name="copy" />
           </div>
         )}
       </div>

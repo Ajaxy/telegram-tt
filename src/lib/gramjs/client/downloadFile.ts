@@ -4,12 +4,13 @@ import type TelegramClient from './TelegramClient';
 
 import Deferred from '../../../util/Deferred';
 import { Foreman } from '../../../util/foreman';
-import errors from '../errors';
+import { FloodPremiumWaitError, FloodWaitError, RPCError } from '../errors';
 import Api from '../tl/api';
 
 import LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
 import { sleep } from '../Helpers';
 import { getDownloadPartSize } from '../Utils';
+import type { SizeType } from './TelegramClient';
 
 interface OnProgress {
     isCanceled?: boolean;
@@ -20,12 +21,19 @@ interface OnProgress {
 }
 
 export interface DownloadFileParams {
-    dcId: number;
-    fileSize: number;
+    fileSize?: number;
     workers?: number;
     partSizeKb?: number;
     start?: number;
     end?: number;
+    progressCallback?: OnProgress;
+    isPriority?: boolean;
+}
+
+export type DownloadFileWithDcParams = DownloadFileParams & { dcId: number };
+
+export interface DownloadMediaParams {
+    sizeType?: SizeType;
     progressCallback?: OnProgress;
 }
 
@@ -34,6 +42,8 @@ const MIN_CHUNK_SIZE = 4096;
 const DEFAULT_CHUNK_SIZE = 64; // kb
 const ONE_MB = 1024 * 1024;
 const DISCONNECT_SLEEP = 1000;
+
+const NEW_CONNECTION_QUEUE_THRESHOLD = 5;
 
 // when the sender requests hangs for 60 second we will reimport
 const SENDER_TIMEOUT = 60 * 1000;
@@ -84,7 +94,7 @@ class FileView {
         }
     }
 
-    getData(): Promise<Buffer | File> {
+    async getData(): Promise<Buffer | File> {
         if (this.type === 'opfs') {
             return this.largeFile!.getFile();
         } else {
@@ -95,19 +105,19 @@ class FileView {
 
 export async function downloadFile(
     client: TelegramClient,
-    inputLocation: Api.InputFileLocation,
-    fileParams: DownloadFileParams,
+    inputLocation: Api.TypeInputFileLocation,
+    fileParams: DownloadFileWithDcParams,
     shouldDebugExportedSenders?: boolean,
 ) {
     const { dcId } = fileParams;
     for (let i = 0; i < SENDER_RETRIES; i++) {
         try {
             return await downloadFile2(client, inputLocation, fileParams, shouldDebugExportedSenders);
-        } catch (err: any) {
-            if (
-                (err.message.startsWith('SESSION_REVOKED') || err.message.startsWith('CONNECTION_NOT_INITED'))
-                && i < SENDER_RETRIES - 1
-            ) {
+        } catch (err: unknown) {
+            if (err instanceof RPCError && (
+                err.errorMessage.startsWith('SESSION_REVOKED')
+                || err.errorMessage.startsWith('CONNECTION_NOT_INITED')
+            ) && i < SENDER_RETRIES - 1) {
                 await client._cleanupExportedSenders(dcId);
             } else {
                 throw err;
@@ -128,15 +138,15 @@ const foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM).fill(undefined)
 
 async function downloadFile2(
     client: TelegramClient,
-    inputLocation: Api.InputFileLocation,
-    fileParams: DownloadFileParams,
+    inputLocation: Api.TypeInputFileLocation,
+    fileParams: DownloadFileWithDcParams,
     shouldDebugExportedSenders?: boolean,
 ) {
     let {
-        partSizeKb, end,
+        partSizeKb, end = 0,
     } = fileParams;
     const {
-        fileSize,
+        fileSize, dcId, progressCallback, isPriority, start = 0,
     } = fileParams;
 
     const fileId = 'id' in inputLocation ? inputLocation.id : undefined;
@@ -148,18 +158,21 @@ async function downloadFile2(
 
     logWithId('Downloading file...');
     const isPremium = Boolean(client.isPremium);
-    const { dcId, progressCallback, start = 0 } = fileParams;
 
-    end = end && end < fileSize ? end : fileSize - 1;
+    if (fileSize) {
+        end = end && end < fileSize ? end : fileSize - 1;
+    }
+
+    const rangeSize = end ? end - start + 1 : undefined;
 
     if (!partSizeKb) {
-        partSizeKb = fileSize ? getDownloadPartSize(start ? (end - start + 1) : fileSize) : DEFAULT_CHUNK_SIZE;
+        partSizeKb = fileSize ? getDownloadPartSize(rangeSize || fileSize) : DEFAULT_CHUNK_SIZE;
     }
 
     const partSize = partSizeKb * 1024;
-    const partsCount = end ? Math.ceil((end + 1 - start + 1) / partSize) : 1;
+    const partsCount = rangeSize ? Math.ceil(rangeSize / partSize) : 1;
     const noParallel = !end;
-    const shouldUseMultipleConnections = fileSize
+    const shouldUseMultipleConnections = Boolean(fileSize)
         && fileSize >= MULTIPLE_CONNECTIONS_MIN_FILE_SIZE
         && !noParallel;
     let deferred: Deferred | undefined;
@@ -170,14 +183,9 @@ async function downloadFile2(
 
     client._log.info(`Downloading file in chunks of ${partSize} bytes`);
 
-    const fileView = new FileView(end - start + 1);
+    const fileView = new FileView(rangeSize);
     const promises: Promise<any>[] = [];
     let offset = start;
-    // Pick the least busy foreman
-    // For some reason, fresh connections give out a higher speed for the first couple of seconds
-    // I have no idea why, but this may speed up the download of small files
-    const activeCounts = foremans.map(({ activeWorkers }) => activeWorkers);
-    let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
     // Used for files with unknown size and for manual cancellations
     let hasEnded = false;
 
@@ -206,13 +214,9 @@ async function downloadFile2(
             isPrecise = true;
         }
 
-        // Use only first connection for avatars, because no size is known and we don't want to
-        // download empty parts using all connections at once
-        const senderIndex = !shouldUseMultipleConnections ? 0 : currentForemanIndex % (
-            isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS
-        );
+        const senderIndex = getFreeForemanIndex(isPremium, shouldUseMultipleConnections);
 
-        await foremans[senderIndex].requestWorker();
+        await foremans[senderIndex].requestWorker(isPriority);
 
         if (deferred) await deferred.promise;
 
@@ -250,7 +254,7 @@ async function downloadFile2(
                         }, 6000);
                     }
                     // sometimes a session is revoked and will cause this to hang.
-                    const result = await Promise.race([
+                    const result = (await Promise.race([
                         sender.send(new Api.upload.GetFile({
                             location: inputLocation,
                             offset: BigInt(offsetMemo),
@@ -267,8 +271,12 @@ async function downloadFile2(
                                 return Promise.reject(new Error('SESSION_REVOKED'));
                             }
                         }),
-                    ]);
+                    ]))!;
                     client.releaseExportedSender(sender);
+
+                    if (result instanceof Api.upload.FileCdnRedirect) {
+                        throw new Error('CDN download not supported');
+                    }
 
                     isDone2 = true;
                     if (progressCallback) {
@@ -295,8 +303,8 @@ async function downloadFile2(
                     if (sender && !sender.isConnected()) {
                         await sleep(DISCONNECT_SLEEP);
                         continue;
-                    } else if (err instanceof errors.FloodWaitError) {
-                        if (err instanceof errors.FloodPremiumWaitError && !isPremiumFloodWaitSent) {
+                    } else if (err instanceof FloodWaitError) {
+                        if (err instanceof FloodPremiumWaitError && !isPremiumFloodWaitSent) {
                             sender?._updateCallback(new LocalUpdatePremiumFloodWait(false));
                             isPremiumFloodWaitSent = true;
                         }
@@ -309,14 +317,13 @@ async function downloadFile2(
                     if (deferred) deferred.resolve();
 
                     hasEnded = true;
-                    client.releaseExportedSender(sender);
+                    if (sender) client.releaseExportedSender(sender);
                     throw err;
                 }
             }
         })(offset));
 
         offset += limit;
-        currentForemanIndex++;
 
         if (end && (offset > end)) {
             break;
@@ -324,4 +331,28 @@ async function downloadFile2(
     }
     await Promise.all(promises);
     return fileView.getData();
+}
+
+function getFreeForemanIndex(isPremium: boolean, forceNewConnection?: boolean) {
+    const availableConnections = isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS;
+    let foremanIndex = 0;
+    let minQueueLength = Infinity;
+    for (let i = 0; i < availableConnections; i++) {
+        const foreman = foremans[i];
+        // If worker is free, return it
+        if (!foreman.queueLength) return i;
+
+        // Potentially create a new connection if the current queue is too long
+        if (!forceNewConnection && foreman.queueLength <= NEW_CONNECTION_QUEUE_THRESHOLD) {
+            return i;
+        }
+
+        // If every connection is equally busy, prefer the last one in the list
+        if (foreman.queueLength <= minQueueLength) {
+            foremanIndex = i;
+            minQueueLength = foreman.activeWorkers;
+        }
+    }
+
+    return foremanIndex;
 }

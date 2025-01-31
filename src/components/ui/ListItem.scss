@@ -54,15 +54,14 @@
   }
 
   .ListItem-button {
-    width: 100%;
-    height: 100%;
+    min-height: 3rem;
     background-color: var(--background-color);
     border: none !important;
     box-shadow: none !important;
     outline: none !important;
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 0 1rem;
     position: relative;
     overflow: hidden;
     white-space: nowrap;
@@ -82,13 +81,12 @@
 
     > .ListItem-main-icon {
       font-size: 1.5rem;
-      margin-inline-start: 0.125rem;
-      margin-inline-end: 1.25rem;
       color: var(--color-text-secondary);
+      margin-right: 1.75rem;
     }
 
     > .Switcher {
-      margin-left: auto;
+      margin-inline-start: auto;
     }
   }
 
@@ -96,10 +94,6 @@
     .ListItem-button {
       transition: background-color 150ms ease-in-out;
     }
-  }
-
-  .title, .subtitle {
-    line-height: 1.5rem;
   }
 
   .user-status,
@@ -172,14 +166,6 @@
 
   &.has-menu-open .ListItem-button {
     --background-color: var(--color-chat-hover);
-  }
-
-  &.narrow {
-    margin-bottom: 0.75rem;
-
-    .ListItem-button {
-      padding: 0.5rem 1rem;
-    }
   }
 
   &.inactive {
@@ -267,6 +253,7 @@
     .typing-status {
       font-size: 1rem;
       margin: 0;
+      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       text-align: initial;
@@ -280,7 +267,7 @@
 
     .title {
       h3 {
-        font-weight: 500;
+        font-weight: var(--font-weight-semibold);
       }
     }
 
@@ -378,60 +365,6 @@
     }
   }
 
-  &.search-result-message {
-    .title {
-      flex-grow: 1;
-      padding-right: 0.125rem;
-    }
-
-    .search-result-message-top {
-      display: flex;
-    }
-
-    h3 {
-      max-width: 80%;
-    }
-
-    h3,
-    .subtitle {
-      font-size: 1rem;
-      line-height: 1.5rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      text-align: left;
-      display: block;
-    }
-
-    .subtitle {
-      color: var(--color-text-secondary);
-
-      .matching-text-highlight {
-        color: var(--color-text);
-        background: #cae3f7;
-        border-radius: 0.25rem;
-        padding: 0 0.125rem;
-        display: inline-block;
-
-        .theme-dark & {
-          --color-text: #000;
-        }
-      }
-    }
-
-    &[dir="rtl"] {
-      .LastMessageMeta {
-        margin-left: 0;
-        margin-right: auto;
-      }
-
-      .subtitle {
-        margin-right: 0;
-        display: block;
-      }
-    }
-  }
-
   &.picker-list-item {
     margin: 0;
 
@@ -451,6 +384,10 @@
       height: 1.5rem;
       margin: 0;
       padding-left: 4rem;
+    }
+
+    .withSubLabel {
+      height: 2.5rem;
     }
 
     &[dir="rtl"] {
@@ -476,6 +413,8 @@
     white-space: initial;
     overflow: hidden;
 
+    padding: 0.4375rem 0 0.5625rem 0;
+
     .word-break {
       overflow-wrap: break-word;
     }
@@ -484,6 +423,10 @@
     .subtitle {
       display: block;
       text-align: initial;
+
+      &[dir="rtl"] {
+        text-align: right;
+      }
     }
 
     .title {
@@ -494,12 +437,9 @@
 
     .subtitle {
       font-size: 0.875rem;
-      line-height: 1.5rem;
+      line-height: 1rem;
       color: var(--color-text-secondary);
-
-      & + .subtitle {
-        margin-top: -0.25rem;
-      }
+      margin-top: 0.25rem;
 
       &.black {
         color: var(--color-text);

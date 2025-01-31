@@ -1,4 +1,6 @@
-import type { ApiMessage, ApiPeer } from '../../../api/types';
+import type {
+  ApiMessage, ApiPeer, ApiPeerPhotos, ApiSponsoredMessage,
+} from '../../../api/types';
 import type { MediaViewerMedia } from '../../../types';
 
 import { getMessageContent, isDocumentPhoto, isDocumentVideo } from '../../../global/helpers';
@@ -10,11 +12,16 @@ export type MediaViewerItem = {
 } | {
   type: 'avatar';
   avatarOwner: ApiPeer;
+  profilePhotos: ApiPeerPhotos;
   mediaIndex: number;
 } | {
   type: 'standalone';
   media: MediaViewerMedia[];
   mediaIndex: number;
+} | {
+  type: 'sponsoredMessage';
+  message: ApiSponsoredMessage;
+  mediaIndex?: number;
 };
 
 type ViewableMedia = {
@@ -23,17 +30,20 @@ type ViewableMedia = {
 };
 
 export function getMediaViewerItem({
-  message, avatarOwner, standaloneMedia, mediaIndex,
+  message, avatarOwner, profilePhotos, standaloneMedia, mediaIndex, sponsoredMessage,
 }: {
   message?: ApiMessage;
   avatarOwner?: ApiPeer;
+  profilePhotos?: ApiPeerPhotos;
   standaloneMedia?: MediaViewerMedia[];
+  sponsoredMessage?: ApiSponsoredMessage;
   mediaIndex?: number;
 }): MediaViewerItem | undefined {
-  if (avatarOwner) {
+  if (avatarOwner && profilePhotos) {
     return {
       type: 'avatar',
       avatarOwner,
+      profilePhotos,
       mediaIndex: mediaIndex!,
     };
   }
@@ -54,6 +64,14 @@ export function getMediaViewerItem({
     };
   }
 
+  if (sponsoredMessage) {
+    return {
+      type: 'sponsoredMessage',
+      message: sponsoredMessage,
+      mediaIndex,
+    };
+  }
+
   return undefined;
 }
 
@@ -68,7 +86,7 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
   }
 
   if (params.type === 'avatar') {
-    const avatar = params.avatarOwner.profilePhotos?.photos[params.mediaIndex];
+    const avatar = params.profilePhotos?.photos[params.mediaIndex];
     if (avatar) {
       return {
         media: avatar,
@@ -95,8 +113,10 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
   }
 
   if (webPage) {
-    const { photo: webPagePhoto, video: webPageVideo } = webPage;
-    const media = webPageVideo || webPagePhoto;
+    const { photo: webPagePhoto, video: webPageVideo, document: webPageDocument } = webPage;
+    const isDocumentMedia = webPageDocument && (isDocumentPhoto(webPageDocument) || isDocumentVideo(webPageDocument));
+    const mediaDocument = isDocumentMedia ? webPageDocument : undefined;
+    const media = webPageVideo || mediaDocument || webPagePhoto;
     if (media) {
       return {
         media,

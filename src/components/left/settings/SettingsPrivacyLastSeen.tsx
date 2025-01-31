@@ -1,7 +1,7 @@
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { PrivacyVisibility } from '../../../types';
+import type { PrivacyVisibility } from '../../../api/types';
 
 import { selectIsCurrentUserPremium, selectShouldHideReadMarks } from '../../../global/selectors';
 import renderText from '../../common/helpers/renderText';
@@ -55,8 +55,7 @@ const SettingsPrivacyLastSeen = ({
       )}
       <div className="settings-item">
         <ListItem
-          leftElement={<StarIcon className="icon" type="premium" size="big" />}
-          className="settings-main-menu-star"
+          leftElement={<StarIcon className="icon ListItem-main-icon" type="premium" size="big" />}
           onClick={handleOpenPremiumModal}
         >
           {isCurrentUserPremium ? lang('PrivacyLastSeenPremiumForPremium') : lang('PrivacyLastSeenPremium')}

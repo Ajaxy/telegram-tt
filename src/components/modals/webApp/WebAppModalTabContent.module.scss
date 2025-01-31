@@ -1,0 +1,365 @@
+@use "../../../styles/mixins";
+
+.root {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  z-index: 0;
+}
+
+.multi-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  z-index: 0;
+}
+
+.loadingPlaceholder {
+  width: 4rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  transition: opacity 0.25s ease-in-out;
+}
+
+@keyframes fadeOpacityBreath {
+  0% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.placeholderPath {
+  animation: 2s linear -0.8s infinite fadeOpacityBreath;
+}
+
+.defaultPlaceholderGrid {
+  width: 4.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem;
+  margin: 0 auto;
+  animation: 2s linear -0.8s infinite fadeOpacityBreath;
+}
+
+.placeholderSquare {
+  width: 100%;
+  aspect-ratio: 1;
+  background-color: black;
+  border-radius: 0.375rem;
+}
+
+.hide {
+  opacity: 0;
+}
+
+.frame {
+  transition: opacity 0.25s ease-in-out;
+  opacity: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  z-index: 1;
+
+  &.with-button {
+    height: calc(100% - 3.5rem);
+  }
+
+  &.hide {
+    opacity: 0;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.secondary-button,
+.main-button {
+  --color-transition: 0.15s;
+  --transform-transition: 0.25s ease-in-out;
+
+  flex-grow: 1;
+  margin: 0.5rem;
+  transform: translateY(100%);
+  opacity: 0;
+  transition:
+  background-color var(--color-transition),
+  color var(--color-transition),
+  opacity var(--color-transition),
+  filter var(--color-transition),
+  transform var(--transform-transition),
+  margin-inline var(--transform-transition),
+  flex-grow var(--transform-transition);
+
+  &.visible {
+    transform: translateY(0);
+    opacity: 1;
+
+    &:hover {
+      filter: brightness(0.9);
+    }
+  }
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
+.secondary-button.visible:hover {
+  :global(.theme-dark) & {
+    filter: brightness(1.5);
+  }
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition-property: height;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
+
+  height: 0rem;
+
+  &.one-row {
+    align-items: center;
+    height: 4rem;
+
+    @media (max-width: 600px) {
+      height: 3.5rem;
+    }
+  }
+
+  &.two-rows {
+    height: 7.75rem;
+
+    @media (max-width: 600px) {
+      height: 6.9375rem;
+    }
+  }
+
+  &.left-to-right {
+    flex-direction: row;
+
+    .secondary-button {
+      margin-right: 0.25rem !important;
+    }
+    .main-button {
+      margin-left: 0.25rem !important;
+    }
+  }
+
+  &.right-to-left {
+    flex-direction: row-reverse;
+
+    .secondary-button {
+      margin-left: 0.25rem !important;
+    }
+    .main-button {
+      margin-right: 0.25rem !important;
+    }
+  }
+
+  &.top-to-bottom,
+  &.bottom-to-top {
+    .secondary-button,
+    .main-button {
+      position: absolute;
+      left: 0rem;
+      right: 0rem;
+    }
+  }
+
+  &.top-to-bottom {
+    .secondary-button {
+      top: 0rem;
+      margin-bottom: 0.25rem !important;
+    }
+    .main-button {
+      bottom: 0rem;
+      margin-top: 0.25rem !important;
+    }
+  }
+  &.bottom-to-top {
+    .main-button {
+      top: 0rem;
+    }
+    .secondary-button {
+      bottom: 0rem;
+    }
+  }
+}
+
+.hide-horizontal {
+  .secondary-button,
+  .main-button {
+    transform: translateY(0);
+    flex-grow: 0;
+    margin-inline: 0;
+    padding-inline: 0;
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+
+    &.visible {
+      margin-inline: 0.5rem;
+      flex-grow: 1;
+    }
+  }
+}
+
+.secondary-button-spinner,
+.main-button-spinner {
+  position: absolute;
+}
+
+.web-app-popup {
+  :global(.modal-dialog) {
+    max-width: min(30rem, 100%);
+  }
+
+  &.without-title :global(.modal-content) {
+    padding-top: 0;
+  }
+
+  :global(.modal-content) {
+    padding-left: 2rem;
+  }
+}
+
+.closeIcon {
+  --color-header-text: white;
+  position: relative;
+  transform: rotate(-45deg);
+
+  &,
+  &::before,
+  &::after {
+    width: 0.875rem;
+    height: 0.125rem;
+    border-radius: 0.125rem;
+    background-color: var(--color-header-text);
+    transition: var(--slide-transition) transform, var(--color-transition) background-color;
+  }
+
+  &::before,
+  &::after {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: "";
+  }
+
+  &::before {
+    transform: rotate(90deg);
+  }
+
+  &.state-back {
+    transform: rotate(180deg);
+
+    &::before {
+      transform: rotate(45deg) scaleX(0.75) translate(0, -0.3125rem);
+    }
+
+    &::after {
+      transform: rotate(-45deg) scaleX(0.75) translate(0, 0.3125rem);
+    }
+  }
+}
+
+.backIconContainer {
+  padding-right: 0.25rem;
+}
+
+.moreIcon {
+  transform: rotate(90deg);
+}
+
+.headerPanel {
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 1rem;
+  padding-inline-end: calc(1rem + var(--scrollbar-width));
+  justify-content: space-between;
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.headerSplitButton {
+  display: flex;
+  flex-direction: row;
+}
+
+.headerButton {
+  height: 1.75rem;
+  width: fit-content;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  position: relative;
+  cursor: var(--custom-cursor, pointer);
+  flex-shrink: 0;
+  overflow: hidden;
+
+  outline: none !important;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  color: white;
+  border-radius: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(25px);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  padding: 0.25rem;
+  padding-inline: 0.625rem;
+}
+
+.left {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.right {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+
+.buttonCaptionContainer {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: width 0.25s ease-in-out;
+  height: 100%;
+}
+
+.backButtonCaption {
+  width: fit-content;
+  max-width: 20rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

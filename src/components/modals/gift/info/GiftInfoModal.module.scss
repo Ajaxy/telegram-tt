@@ -1,0 +1,88 @@
+.modal :global(.modal-dialog) {
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.title, .description {
+  margin-bottom: 0;
+}
+
+.soldOut {
+  color: var(--color-error);
+}
+
+.description {
+  text-align: center;
+  color: var(--_color-description, var(--color-text));
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footerDescription {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.unknown {
+  margin-inline-start: 0.25rem;
+}
+
+.giftValue {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  line-height: 1;
+}
+
+.uniqueAttribute {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* stylelint-disable-next-line plugin/stylelint-group-selectors */
+.uniqueGift {
+  margin-bottom: 0;
+}
+
+.starAmountIcon {
+  margin-inline-start: 0 !important;
+}
+
+.modalHeader {
+  z-index: 1;
+  width: 100%;
+  padding: 0.375rem;
+  position: absolute;
+  display: flex;
+
+  .modalCloseButton {
+    margin-right: auto;
+  }
+}
+
+.ownerAddress {
+  font-family: var(--font-family-monospace);
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  overflow: hidden;
+}
+
+.copyIcon {
+  margin-inline-start: 0.25rem;
+  color: var(--color-primary);
+  pointer-events: none;
+}

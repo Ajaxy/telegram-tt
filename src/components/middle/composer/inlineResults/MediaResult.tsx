@@ -10,7 +10,7 @@ import buildClassName from '../../../../util/buildClassName';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useMedia from '../../../../hooks/useMedia';
-import useMediaTransition from '../../../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../../../hooks/useMediaTransitionDeprecated';
 
 import BaseResult from './BaseResult';
 
@@ -43,7 +43,7 @@ const MediaResult: FC<OwnProps> = ({
 
   const thumbnailBlobUrl = useMedia(getWebDocumentHash(webThumbnail));
   const mediaBlobUrl = useMedia(photo && getPhotoMediaHash(photo, 'pictogram'));
-  const transitionClassNames = useMediaTransition(mediaBlobUrl || thumbnailBlobUrl);
+  const transitionClassNames = useMediaTransitionDeprecated(mediaBlobUrl || thumbnailBlobUrl);
 
   const handleClick = useLastCallback(() => {
     onClick(inlineResult);

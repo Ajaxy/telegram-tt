@@ -4,10 +4,12 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiCountry, ApiPaymentCredentials } from '../../api/types';
+import type {
+  ApiChat, ApiCountry, ApiInvoice, ApiLabeledPrice, ApiPaymentCredentials, ApiPaymentFormRegular,
+} from '../../api/types';
 import type { TabState } from '../../global/types';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
-import type { Price, ShippingOption } from '../../types';
+import type { ShippingOption } from '../../types';
 import type { PaymentFormSubmitEvent } from './ConfirmPayment';
 import { PaymentStep } from '../../types';
 
@@ -20,10 +22,12 @@ import { detectCardTypeText } from '../common/helpers/detectCardType';
 
 import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import Spinner from '../ui/Spinner';
@@ -49,15 +53,13 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  step?: PaymentStep;
   chat?: ApiChat;
-  isNameRequested?: boolean;
-  isShippingAddressRequested?: boolean;
-  isPhoneRequested?: boolean;
-  isEmailRequested?: boolean;
-  shouldSendPhoneToProvider?: boolean;
-  shouldSendEmailToProvider?: boolean;
-  currency?: string;
-  prices?: Price[];
+  nativeProvider?: string;
+  invoice?: ApiInvoice;
+  form?: ApiPaymentFormRegular;
+  error?: TabState['payment']['error'];
+  prices?: ApiLabeledPrice[];
   isProviderError?: boolean;
   needCardholderName?: boolean;
   needCountry?: boolean;
@@ -65,6 +67,7 @@ type StateProps = {
   confirmPaymentUrl?: string;
   countryList: ApiCountry[];
   hasShippingOptions?: boolean;
+  shippingOptions?: ShippingOption[];
   requestId?: string;
   smartGlocalToken?: string;
   stripeId?: string;
@@ -75,32 +78,17 @@ type StateProps = {
   botName?: string;
 };
 
-type GlobalStateProps = Pick<TabState['payment'], (
-  'step' | 'shippingOptions' |
-  'savedInfo' | 'canSaveCredentials' | 'nativeProvider' | 'passwordMissing' | 'invoice' | 'error'
-)>;
-
 const NETWORK_REQUEST_TIMEOUT_S = 3;
 
-const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
+const PaymentModal: FC<OwnProps & StateProps> = ({
   isOpen,
   onClose,
   step,
   shippingOptions,
-  savedInfo,
-  canSaveCredentials,
-  isNameRequested,
-  isShippingAddressRequested,
-  isPhoneRequested,
-  isEmailRequested,
-  shouldSendPhoneToProvider,
-  shouldSendEmailToProvider,
-  currency,
-  passwordMissing,
+  form,
   isProviderError,
   invoice,
   nativeProvider,
-  prices,
   needCardholderName,
   needCountry,
   needZip,
@@ -128,15 +116,16 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     setSmartGlocalCardInfo,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [isModalOpen, openModal, closeModal] = useFlag();
   const [paymentState, paymentDispatch] = usePaymentReducer();
   const [isLoading, setIsLoading] = useState(false);
   const [isTosAccepted, setIsTosAccepted] = useState(false);
   const [twoFaPassword, setTwoFaPassword] = useState('');
-  const prevStep = usePrevious(step, true);
-  const prevRequestId = usePrevious(requestId);
+  const prevStep = usePreviousDeprecated(step, true);
+  const prevRequestId = usePreviousDeprecated(requestId);
   const canRenderFooter = step !== PaymentStep.ConfirmPayment;
 
   const setStep = useCallback((nextStep) => {
@@ -182,17 +171,17 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       paymentDispatch({
         type: 'setFormErrors',
         payload: {
-          [error.field]: error.message,
+          [error.field]: error.messageKey,
         },
       });
     }
   }, [error, paymentDispatch]);
 
   useEffect(() => {
-    if (savedInfo) {
+    if (form?.savedInfo) {
       const {
         name: fullName, phone, email, shippingAddress,
-      } = savedInfo;
+      } = form.savedInfo;
       const {
         countryIso2, ...shippingAddressRest
       } = shippingAddress || {};
@@ -213,7 +202,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         },
       });
     }
-  }, [savedInfo, paymentDispatch, countryList]);
+  }, [form, paymentDispatch, countryList]);
 
   useEffect(() => {
     if (savedCredentials?.length) {
@@ -233,8 +222,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       return 0;
     }
 
-    return getTotalPrice(prices, shippingOptions, paymentState.shipping, paymentState.tipAmount);
-  }, [step, prices, shippingOptions, paymentState.shipping, paymentState.tipAmount]);
+    return getTotalPrice(invoice?.prices, shippingOptions, paymentState.shipping, paymentState.tipAmount);
+  }, [step, invoice?.prices, shippingOptions, paymentState.shipping, paymentState.tipAmount]);
 
   const checkoutInfo = useMemo(() => {
     if (step !== PaymentStep.Checkout) {
@@ -261,14 +250,13 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         isOpen={Boolean(error)}
         onClose={handleErrorModalClose}
       >
-        <h4>{error.description || 'Error'}</h4>
-        <p>{error.description || 'Error'}</p>
+        <h4>{error.descriptionKey ? lang.withRegular(error.descriptionKey) : lang('ErrorUnspecified')}</h4>
         <div className="dialog-buttons mt-2">
           <Button
             isText
             onClick={handleClearPaymentError}
           >
-            {lang('OK')}
+            {oldLang('OK')}
           </Button>
         </div>
       </Modal>
@@ -295,19 +283,20 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       case PaymentStep.Checkout:
         return (
           <Checkout
-            prices={prices}
+            title={form!.title}
+            description={form!.description}
+            photo={form!.photo}
             dispatch={paymentDispatch}
             shippingPrices={paymentState.shipping && shippingOptions
               ? getShippingPrices(shippingOptions, paymentState.shipping)
               : undefined}
             totalPrice={totalPrice}
-            invoice={invoice}
+            invoice={invoice!}
             checkoutInfo={checkoutInfo}
             isPaymentFormUrl={isPaymentFormUrl}
-            currency={currency!}
             hasShippingOptions={hasShippingOptions}
             tipAmount={paymentState.tipAmount}
-            needAddress={Boolean(isShippingAddressRequested)}
+            needAddress={Boolean(invoice?.isShippingAddressRequested)}
             savedCredentials={savedCredentials}
             isTosAccepted={isTosAccepted}
             onAcceptTos={setIsTosAccepted}
@@ -337,7 +326,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           <PaymentInfo
             state={paymentState}
             dispatch={paymentDispatch}
-            canSaveCredentials={Boolean(!passwordMissing && canSaveCredentials)}
+            canSaveCredentials={Boolean(!form!.isPasswordMissing && form!.canSaveCredentials)}
             needCardholderName={needCardholderName}
             needCountry={needCountry}
             needZip={needZip}
@@ -349,10 +338,10 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           <ShippingInfo
             state={paymentState}
             dispatch={paymentDispatch}
-            needAddress={Boolean(isShippingAddressRequested)}
-            needEmail={Boolean(isEmailRequested || shouldSendEmailToProvider)}
-            needPhone={Boolean(isPhoneRequested || shouldSendPhoneToProvider)}
-            needName={Boolean(isNameRequested)}
+            needAddress={Boolean(invoice?.isShippingAddressRequested)}
+            needEmail={Boolean(invoice?.isEmailRequested || invoice?.isEmailSentToProvider)}
+            needPhone={Boolean(invoice?.isPhoneRequested || invoice?.isPhoneSentToProvider)}
+            needName={Boolean(invoice?.isNameRequested)}
             countryList={countryList!}
           />
         );
@@ -362,7 +351,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
             state={paymentState}
             dispatch={paymentDispatch}
             shippingOptions={shippingOptions || []}
-            currency={currency!}
+            currency={invoice!.currency}
           />
         );
       case PaymentStep.ConfirmPayment:
@@ -429,7 +418,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           return;
         }
 
-        if (savedInfo && !requestId && !paymentState.shipping) {
+        if (form?.savedInfo && !requestId && !paymentState.shipping) {
           setIsLoading(true);
           validateRequest();
           return;
@@ -455,16 +444,16 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         }
 
         const { phone, email, fullName } = paymentState;
-        const shouldFillRequestedData = (isEmailRequested && !email)
-          || (isPhoneRequested && !phone)
-          || (isNameRequested && !fullName);
+        const shouldFillRequestedData = (invoice?.isEmailRequested && !email)
+          || (invoice?.isPhoneRequested && !phone)
+          || (invoice?.isNameRequested && !fullName);
 
-        if ((isShippingAddressRequested && !requestId) || shouldFillRequestedData) {
+        if ((invoice?.isShippingAddressRequested && !requestId) || shouldFillRequestedData) {
           setStep(PaymentStep.ShippingInfo);
           return;
         }
 
-        if (isShippingAddressRequested && !paymentState.shipping && shippingOptions?.length) {
+        if (invoice?.isShippingAddressRequested && !paymentState.shipping && shippingOptions?.length) {
           setStep(PaymentStep.Shipping);
           return;
         }
@@ -498,27 +487,27 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   const modalHeader = useMemo(() => {
     switch (step) {
       case PaymentStep.Checkout:
-        return lang('PaymentCheckout');
+        return oldLang('PaymentCheckout');
       case PaymentStep.ShippingInfo:
-        return lang('PaymentShippingInfo');
+        return oldLang('PaymentShippingInfo');
       case PaymentStep.Shipping:
-        return lang('PaymentShippingMethod');
+        return oldLang('PaymentShippingMethod');
       case PaymentStep.SavedPayments:
-        return lang('PaymentCheckoutMethod');
+        return oldLang('PaymentCheckoutMethod');
       case PaymentStep.ConfirmPassword:
-        return lang('Checkout.PasswordEntry.Title');
+        return oldLang('Checkout.PasswordEntry.Title');
       case PaymentStep.PaymentInfo:
-        return lang('PaymentCardInfo');
+        return oldLang('PaymentCardInfo');
       case PaymentStep.ConfirmPayment:
-        return lang('Checkout.WebConfirmation.Title');
+        return oldLang('Checkout.WebConfirmation.Title');
       default:
         return '';
     }
-  }, [step, lang]);
+  }, [step, oldLang]);
 
   const buttonText = step === PaymentStep.Checkout
-    ? lang('Checkout.PayPrice', formatCurrencyAsString(totalPrice, currency!, lang.code))
-    : lang('Next');
+    ? oldLang('Checkout.PayPrice', formatCurrencyAsString(totalPrice, invoice!.currency, oldLang.code))
+    : lang('PaymentInfoDone');
 
   function getIsSubmitDisabled() {
     if (isLoading) {
@@ -559,7 +548,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
             isText
             onClick={closeModal}
           >
-            {lang('OK')}
+            {oldLang('OK')}
           </Button>
         </div>
       </Modal>
@@ -575,7 +564,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       onClose={closeModal}
       onCloseAnimationEnd={handleModalClose}
     >
-      <div className="header" dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className="header" dir={oldLang.isRtl ? 'rtl' : undefined}>
         <Button
           className="close-button"
           color="translucent"
@@ -584,10 +573,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           onClick={step === PaymentStep.Checkout ? closeModal : handleBackClick}
           ariaLabel="Close"
         >
-          <i className={buildClassName(
-            'icon', step === PaymentStep.Checkout ? 'icon-close' : 'icon-arrow-left',
-          )}
-          />
+          <Icon name={step === PaymentStep.Checkout ? 'close' : 'arrow-left'} />
         </Button>
         <h3>{modalHeader}</h3>
       </div>
@@ -610,6 +596,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       {canRenderFooter && (
         <div className="footer">
           <Button
+            className="button-text"
             type="submit"
             onClick={handleButtonClick}
             disabled={isSubmitDisabled}
@@ -625,41 +612,26 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps & GlobalStateProps => {
+  (global): StateProps => {
     const {
+      form,
       step,
       shippingOptions,
-      savedInfo,
-      canSaveCredentials,
-      invoice,
-      invoiceContainer,
-      nativeProvider,
-      nativeParams,
-      passwordMissing,
       error,
       confirmPaymentUrl,
       inputInvoice,
       requestId,
       stripeCredentials,
       smartGlocalCredentials,
-      savedCredentials,
       temporaryPassword,
       isExtendedMedia,
       url,
-      botId,
-      type,
     } = selectTabState(global).payment;
 
+    const { invoice, nativeParams, nativeProvider } = form || {};
     const countryList = global.countryList.general;
 
-    // Handled in `StarPaymentModal`
-    if (type === 'stars') {
-      return {
-        countryList,
-      };
-    }
-
-    let providerName = nativeProvider;
+    let providerName = form?.nativeProvider;
     if (!providerName && url) {
       providerName = url.startsWith(DONATE_PROVIDER_URL) ? DONATE_PROVIDER : undefined;
     }
@@ -667,36 +639,16 @@ export default memo(withGlobal<OwnProps>(
     const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId!) : undefined;
     const isProviderError = Boolean(invoice && (!providerName || !SUPPORTED_PROVIDERS.has(providerName)));
     const { needCardholderName, needCountry, needZip } = (nativeParams || {});
-    const {
-      isNameRequested,
-      isShippingAddressRequested,
-      isPhoneRequested,
-      isEmailRequested,
-      shouldSendPhoneToProvider,
-      shouldSendEmailToProvider,
-      currency,
-      prices,
-    } = (invoiceContainer || {});
-    const bot = botId ? selectUser(global, botId) : undefined;
+    const bot = form?.botId ? selectUser(global, form.botId) : undefined;
     const botName = getUserFullName(bot);
 
     return {
       step,
       chat,
       shippingOptions,
-      savedInfo,
-      canSaveCredentials,
       nativeProvider: providerName,
-      passwordMissing,
-      isNameRequested,
-      isShippingAddressRequested,
-      isPhoneRequested,
-      isEmailRequested,
-      shouldSendPhoneToProvider,
-      shouldSendEmailToProvider,
-      currency,
-      prices,
       isProviderError,
+      form,
       invoice,
       needCardholderName,
       needCountry,
@@ -709,7 +661,6 @@ export default memo(withGlobal<OwnProps>(
       hasShippingOptions: Boolean(shippingOptions?.length),
       smartGlocalToken: smartGlocalCredentials?.token,
       stripeId: stripeCredentials?.id,
-      savedCredentials,
       passwordValidUntil: temporaryPassword?.validUntil,
       isExtendedMedia,
       botName,
@@ -727,7 +678,7 @@ function getShippingPrices(shippingOptions: ShippingOption[], shippingOption: st
 }
 
 function getTotalPrice(
-  prices: Price[] = [],
+  prices: ApiLabeledPrice[] = [],
   shippingOptions: ShippingOption[] | undefined,
   shippingOption: string,
   tipAmount: number,

@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
 
 import type { MenuItemContextAction } from './ListItem';
@@ -12,8 +12,8 @@ import renderText from '../common/helpers/renderText';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMenuPosition from '../../hooks/useMenuPosition';
 
+import Icon from '../common/icons/Icon';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
 import MenuSeparator from './MenuSeparator';
@@ -22,7 +22,7 @@ import './Tab.scss';
 
 type OwnProps = {
   className?: string;
-  title: string;
+  title: TeactNode;
   isActive?: boolean;
   isBlocked?: boolean;
   badgeCount?: number;
@@ -106,7 +106,7 @@ const Tab: FC<OwnProps> = ({
   }, [isActive, previousActiveTab]);
 
   const {
-    contextMenuPosition, handleContextMenu, handleBeforeContextMenu, handleContextMenuClose,
+    contextMenuAnchor, handleContextMenu, handleBeforeContextMenu, handleContextMenuClose,
     handleContextMenuHide, isContextMenuOpen,
   } = useContextMenuHandlers(tabRef, !contextActions);
 
@@ -131,16 +131,6 @@ const Tab: FC<OwnProps> = ({
   );
   const getLayout = useLastCallback(() => ({ withPortal: true }));
 
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
-  );
-
   return (
     <div
       className={buildClassName('Tab', onClick && 'Tab--interactive', className)}
@@ -150,22 +140,22 @@ const Tab: FC<OwnProps> = ({
       ref={tabRef}
     >
       <span className="Tab_inner">
-        {renderText(title)}
+        {typeof title === 'string' ? renderText(title) : title}
         {Boolean(badgeCount) && (
           <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
         )}
-        {isBlocked && <i className="icon icon-lock-badge blocked" />}
+        {isBlocked && <Icon name="lock-badge" className="blocked" />}
         <i className="platform" />
       </span>
 
-      {contextActions && contextMenuPosition !== undefined && (
+      {contextActions && contextMenuAnchor !== undefined && (
         <Menu
           isOpen={isContextMenuOpen}
-          transformOriginX={transformOriginX}
-          transformOriginY={transformOriginY}
-          positionX={positionX}
-          positionY={positionY}
-          style={menuStyle}
+          anchor={contextMenuAnchor}
+          getTriggerElement={getTriggerElement}
+          getRootElement={getRootElement}
+          getMenuElement={getMenuElement}
+          getLayout={getLayout}
           className="Tab-context-menu"
           autoClose
           onClose={handleContextMenuClose}

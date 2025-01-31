@@ -6,6 +6,7 @@ import type {
   ApiUpdateServerTimeOffset,
   ApiUpdateSession,
 } from '../../../api/types';
+import type { LangCode } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState } from '../../types';
 
@@ -97,7 +98,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 });
 
 function onUpdateApiReady<T extends GlobalState>(global: T) {
-  void oldSetLanguage(global.settings.byKey.language);
+  void oldSetLanguage(global.settings.byKey.language as LangCode);
 }
 
 function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationState) {
@@ -179,10 +180,9 @@ function onUpdateAuthorizationState<T extends GlobalState>(global: T, update: Ap
 }
 
 function onUpdateAuthorizationError<T extends GlobalState>(global: T, update: ApiUpdateAuthorizationError) {
-  global = getGlobal();
   global = {
     ...global,
-    authError: update.message,
+    authErrorKey: update.errorKey,
   };
   setGlobal(global);
 }
@@ -243,9 +243,20 @@ function onUpdateConnectionState<T extends GlobalState>(
 
 function onUpdateSession<T extends GlobalState>(global: T, actions: RequiredGlobalActions, update: ApiUpdateSession) {
   const { sessionData } = update;
-  global = getGlobal();
   const { authRememberMe, authState } = global;
   const isEmpty = !sessionData || !sessionData.mainDcId;
+
+  const isTest = sessionData?.isTest;
+  if (isTest) {
+    global = {
+      ...global,
+      config: {
+        ...global.config,
+        isTestServer: isTest,
+      },
+    };
+    setGlobal(global);
+  }
 
   if (!authRememberMe || authState !== 'authorizationStateReady' || isEmpty) {
     return;

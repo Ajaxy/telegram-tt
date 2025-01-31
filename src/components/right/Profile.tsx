@@ -6,9 +6,11 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
+  ApiBotPreviewMedia,
   ApiChat,
   ApiChatMember,
   ApiMessage,
+  ApiSavedStarGift,
   ApiTypeStory,
   ApiUser,
   ApiUserStatus,
@@ -17,6 +19,7 @@ import type { TabState } from '../../global/types';
 import type {
   ISettings, ProfileState, ProfileTabType, SharedMediaType, ThreadId,
 } from '../../types';
+import type { RegularLangKey } from '../../types/language';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
@@ -31,6 +34,7 @@ import {
   getIsDownloading,
   getIsSavedDialog,
   getMessageDocument,
+  getMessageDownloadableMedia,
   isChatAdmin,
   isChatChannel,
   isChatGroup,
@@ -46,12 +50,14 @@ import {
   selectCurrentSharedMediaSearch,
   selectIsCurrentUserPremium,
   selectIsRightColumnShown,
-  selectPeerFullInfo,
   selectPeerStories,
+  selectSimilarBotsIds,
   selectSimilarChannelIds,
   selectTabState,
   selectTheme,
   selectUser,
+  selectUserCommonChats,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import { selectPremiumLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
@@ -63,7 +69,9 @@ import { getSenderName } from '../left/search/helpers/getSenderName';
 import usePeerStoriesPolling from '../../hooks/polling/usePeerStoriesPolling';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useFlag from '../../hooks/useFlag';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import useAsyncRendering from './hooks/useAsyncRendering';
@@ -73,9 +81,12 @@ import useTransitionFixes from './hooks/useTransitionFixes';
 
 import Audio from '../common/Audio';
 import Document from '../common/Document';
+import SavedGift from '../common/gift/SavedGift';
 import GroupChatInfo from '../common/GroupChatInfo';
+import Icon from '../common/icons/Icon';
 import Media from '../common/Media';
 import NothingFound from '../common/NothingFound';
+import PreviewMedia from '../common/PreviewMedia';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import ChatExtra from '../common/profile/ChatExtra';
 import ProfileInfo from '../common/ProfileInfo';
@@ -104,14 +115,17 @@ type OwnProps = {
 type StateProps = {
   theme: ISettings['theme'];
   isChannel?: boolean;
+  isBot?: boolean;
   currentUserId?: string;
-  resolvedUserId?: string;
   messagesById?: Record<number, ApiMessage>;
   foundIds?: number[];
   mediaSearchType?: SharedMediaType;
   hasCommonChatsTab?: boolean;
   hasStoriesTab?: boolean;
   hasMembersTab?: boolean;
+  hasPreviewMediaTab?: boolean;
+  hasGiftsTab?: boolean;
+  gifts?: ApiSavedStarGift[];
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
@@ -132,23 +146,26 @@ type StateProps = {
   nextProfileTab?: ProfileTabType;
   shouldWarnAboutSvg?: boolean;
   similarChannels?: string[];
+  similarBots?: string[];
+  botPreviewMedia? : ApiBotPreviewMedia[];
   isCurrentUserPremium?: boolean;
-  limitSimilarChannels: number;
+  limitSimilarPeers: number;
   isTopicInfo?: boolean;
   isSavedDialog?: boolean;
   forceScrollProfileTab?: boolean;
+  isSynced?: boolean;
 };
 
 type TabProps = {
   type: ProfileTabType;
-  title: string;
+  key: RegularLangKey;
 };
 
 const TABS: TabProps[] = [
-  { type: 'media', title: 'SharedMediaTab2' },
-  { type: 'documents', title: 'SharedFilesTab2' },
-  { type: 'links', title: 'SharedLinksTab2' },
-  { type: 'audio', title: 'SharedMusicTab2' },
+  { type: 'media', key: 'ProfileTabMedia' },
+  { type: 'documents', key: 'ProfileTabFiles' },
+  { type: 'links', key: 'ProfileTabLinks' },
+  { type: 'audio', key: 'ProfileTabMusic' },
 ];
 
 const HIDDEN_RENDER_DELAY = 1000;
@@ -158,10 +175,9 @@ const Profile: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   profileState,
-  onProfileStateChange,
   theme,
   isChannel,
-  resolvedUserId,
+  isBot,
   currentUserId,
   messagesById,
   foundIds,
@@ -173,6 +189,10 @@ const Profile: FC<OwnProps & StateProps> = ({
   hasCommonChatsTab,
   hasStoriesTab,
   hasMembersTab,
+  hasPreviewMediaTab,
+  hasGiftsTab,
+  gifts,
+  botPreviewMedia,
   areMembersHidden,
   canAddMembers,
   canDeleteMembers,
@@ -189,11 +209,14 @@ const Profile: FC<OwnProps & StateProps> = ({
   nextProfileTab,
   shouldWarnAboutSvg,
   similarChannels,
+  similarBots,
   isCurrentUserPremium,
-  limitSimilarChannels,
+  limitSimilarPeers,
   isTopicInfo,
   isSavedDialog,
   forceScrollProfileTab,
+  isSynced,
+  onProfileStateChange,
 }) => {
   const {
     setSharedMediaSearchType,
@@ -209,42 +232,76 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadStoriesArchive,
     openPremiumModal,
     loadChannelRecommendations,
+    loadBotRecommendations,
+    loadPreviewMedias,
+    loadPeerSavedGifts,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
-  const lang = useOldLang();
+
+  const oldLang = useOldLang();
+  const lang = useLang();
+
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
-  const profileId = isSavedDialog ? String(threadId) : (resolvedUserId || chatId);
+  const profileId = isSavedDialog ? String(threadId) : chatId;
   const isSavedMessages = profileId === currentUserId && !isSavedDialog;
 
-  const tabs = useMemo(() => ([
-    ...(isSavedMessages && !isSavedDialog ? [{ type: 'dialogs' as const, title: 'SavedDialogsTab' }] : []),
-    ...(hasStoriesTab ? [{ type: 'stories' as const, title: 'ProfileStories' }] : []),
-    ...(hasStoriesTab && isSavedMessages ? [{ type: 'storiesArchive' as const, title: 'ProfileStoriesArchive' }] : []),
-    ...(hasMembersTab ? [{
-      type: 'members' as const, title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
-    }] : []),
-    ...TABS,
-    // TODO The filter for voice messages currently does not work
-    // in forum topics. Return it when it's fixed on the server side.
-    ...(!isTopicInfo ? [{ type: 'voice' as const, title: 'SharedVoiceTab2' }] : []),
-    ...(hasCommonChatsTab ? [{ type: 'commonChats' as const, title: 'SharedGroupsTab2' }] : []),
-    ...(isChannel && similarChannels?.length
-      ? [{ type: 'similarChannels' as const, title: 'SimilarChannelsTab' }]
-      : []),
-  ]), [
-    hasCommonChatsTab,
-    hasMembersTab,
-    hasStoriesTab,
-    isChannel,
-    isTopicInfo,
-    similarChannels,
-    isSavedMessages,
-    isSavedDialog,
+  const tabs = useMemo(() => {
+    const arr: TabProps[] = [];
+    if (isSavedMessages && !isSavedDialog) {
+      arr.push({ type: 'dialogs', key: 'ProfileTabSavedDialogs' });
+    }
+
+    if (hasStoriesTab) {
+      arr.push({ type: 'stories', key: 'ProfileTabStories' });
+    }
+
+    if (hasStoriesTab && isSavedMessages) {
+      arr.push({ type: 'storiesArchive', key: 'ProfileTabStoriesArchive' });
+    }
+
+    if (hasGiftsTab) {
+      arr.push({ type: 'gifts', key: 'ProfileTabGifts' });
+    }
+
+    if (hasMembersTab) {
+      arr.push({ type: 'members', key: isChannel ? 'ProfileTabSubscribers' : 'ProfileTabMembers' });
+    }
+
+    if (hasPreviewMediaTab) {
+      arr.push({ type: 'previewMedia', key: 'ProfileTabBotPreview' });
+    }
+
+    arr.push(...TABS);
+
+    // Voice messages filter currently does not work in forum topics. Return it when it's fixed on the server side.
+    if (!isTopicInfo) {
+      arr.push({ type: 'voice', key: 'ProfileTabVoice' });
+    }
+
+    if (hasCommonChatsTab) {
+      arr.push({ type: 'commonChats', key: 'ProfileTabSharedGroups' });
+    }
+
+    if (isChannel && similarChannels?.length) {
+      arr.push({ type: 'similarChannels', key: 'ProfileTabSimilarChannels' });
+    }
+
+    if (isBot && similarBots?.length) {
+      arr.push({ type: 'similarBots', key: 'ProfileTabSimilarBots' });
+    }
+
+    return arr.map((tab) => ({
+      type: tab.type,
+      title: lang(tab.key),
+    }));
+  }, [
+    isSavedMessages, isSavedDialog, hasStoriesTab, hasGiftsTab, hasMembersTab, hasPreviewMediaTab, isTopicInfo,
+    hasCommonChatsTab, isChannel, isBot, similarChannels?.length, similarBots?.length, lang,
   ]);
 
   const initialTab = useMemo(() => {
@@ -256,6 +313,8 @@ const Profile: FC<OwnProps & StateProps> = ({
     return index === -1 ? 0 : index;
   }, [nextProfileTab, tabs]);
 
+  const [allowAutoScrollToTabs, startAutoScrollToTabsIfNeeded, stopAutoScrollToTabs] = useFlag(false);
+
   const [activeTab, setActiveTab] = useState(initialTab);
 
   useEffect(() => {
@@ -266,42 +325,72 @@ const Profile: FC<OwnProps & StateProps> = ({
     setActiveTab(index);
   }, [nextProfileTab, tabs]);
 
+  const handleSwitchTab = useCallback((index: number) => {
+    startAutoScrollToTabsIfNeeded();
+    setActiveTab(index);
+  }, []);
+
   useEffect(() => {
-    if (isChannel && !similarChannels) {
+    if (hasPreviewMediaTab && !botPreviewMedia) {
+      loadPreviewMedias({ botId: chatId });
+    }
+  }, [chatId, botPreviewMedia, hasPreviewMediaTab]);
+
+  useEffect(() => {
+    if (isChannel && !similarChannels && isSynced) {
       loadChannelRecommendations({ chatId });
     }
-  }, [chatId, isChannel, similarChannels]);
+  }, [chatId, isChannel, similarChannels, isSynced]);
+
+  useEffect(() => {
+    if (isBot && !similarBots && isSynced) {
+      loadBotRecommendations({ userId: chatId });
+    }
+  }, [chatId, isBot, similarBots, isSynced]);
+
+  const giftIds = useMemo(() => {
+    return gifts?.map(({ date, gift, fromId }) => `${date}-${fromId}-${gift.id}`);
+  }, [gifts]);
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
+  const handleLoadCommonChats = useCallback(() => {
+    loadCommonChats({ userId: chatId });
+  }, [chatId]);
   const handleLoadPeerStories = useCallback(({ offsetId }: { offsetId: number }) => {
     loadPeerProfileStories({ peerId: chatId, offsetId });
   }, [chatId]);
   const handleLoadStoriesArchive = useCallback(({ offsetId }: { offsetId: number }) => {
     loadStoriesArchive({ peerId: currentUserId!, offsetId });
   }, [currentUserId]);
+  const handleLoadGifts = useCallback(() => {
+    loadPeerSavedGifts({ peerId: chatId });
+  }, [chatId]);
 
-  const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
+  const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds({
     loadMoreMembers,
-    loadCommonChats,
-    searchSharedMediaMessages,
-    handleLoadPeerStories,
-    handleLoadStoriesArchive,
+    searchMessages: searchSharedMediaMessages,
+    loadStories: handleLoadPeerStories,
+    loadStoriesArchive: handleLoadStoriesArchive,
+    loadMoreGifts: handleLoadGifts,
+    loadCommonChats: handleLoadCommonChats,
     tabType,
     mediaSearchType,
-    members,
+    groupChatMembers: members,
     commonChatIds,
     usersById,
     userStatusesById,
     chatsById,
-    messagesById,
+    chatMessages: messagesById,
     foundIds,
     threadId,
     storyIds,
+    giftIds,
     pinnedStoryIds,
     archiveStoryIds,
     similarChannels,
-  );
+    similarBots,
+  });
   const isFirstTab = (isSavedMessages && resultType === 'dialogs')
     || (hasStoriesTab && resultType === 'stories')
     || resultType === 'members'
@@ -310,12 +399,18 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   usePeerStoriesPolling(resultType === 'members' ? viewportIds as string[] : undefined);
 
+  const handleStopAutoScrollToTabs = useLastCallback(() => {
+    stopAutoScrollToTabs();
+  });
+
   const { handleScroll } = useProfileState(
     containerRef,
     resultType,
     profileState,
     onProfileStateChange,
     forceScrollProfileTab,
+    allowAutoScrollToTabs,
+    handleStopAutoScrollToTabs,
   );
 
   const { applyTransitionFix, releaseTransitionFix } = useTransitionFixes(containerRef);
@@ -347,6 +442,15 @@ const Profile: FC<OwnProps & StateProps> = ({
       threadId: MAIN_THREAD_ID,
       messageId,
       origin: MediaViewerOrigin.SharedMedia,
+    });
+  });
+
+  const handleSelectPreviewMedia = useLastCallback((index: number) => {
+    openMediaViewer({
+      standaloneMedia: botPreviewMedia?.flatMap((item) => item?.content.photo
+      || item?.content.video).filter(Boolean),
+      origin: MediaViewerOrigin.PreviewMedia,
+      mediaIndex: index,
     });
   });
 
@@ -402,14 +506,14 @@ const Profile: FC<OwnProps & StateProps> = ({
   if (isFirstTab) {
     renderingDelay = !isRightColumnShown ? HIDDEN_RENDER_DELAY : 0;
     // @optimization Used to delay first render of secondary tabs while animating
-  } else if (!viewportIds) {
+  } else if (!viewportIds && !botPreviewMedia) {
     renderingDelay = SLIDE_TRANSITION_DURATION;
   }
   const canRenderContent = useAsyncRendering([chatId, threadId, resultType, renderingActiveTab], renderingDelay);
 
   function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
-      title: lang('lng_context_remove_from_group'),
+      title: oldLang('lng_context_remove_from_group'),
       icon: 'stop',
       handler: () => {
         setDeletingUserId(memberId);
@@ -424,7 +528,7 @@ const Profile: FC<OwnProps & StateProps> = ({
       );
     }
 
-    if (!viewportIds || !canRenderContent || !messagesById) {
+    if ((!viewportIds && !botPreviewMedia) || !canRenderContent || !messagesById) {
       const noSpinner = isFirstTab && !canRenderContent;
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
 
@@ -436,7 +540,7 @@ const Profile: FC<OwnProps & StateProps> = ({
       );
     }
 
-    if (!viewportIds.length) {
+    if (viewportIds && !viewportIds?.length) {
       let text: string;
 
       switch (resultType) {
@@ -444,28 +548,28 @@ const Profile: FC<OwnProps & StateProps> = ({
           text = areMembersHidden ? 'You have no access to group members list.' : 'No members found';
           break;
         case 'commonChats':
-          text = lang('NoGroupsInCommon');
+          text = oldLang('NoGroupsInCommon');
           break;
         case 'documents':
-          text = lang('lng_media_file_empty');
+          text = oldLang('lng_media_file_empty');
           break;
         case 'links':
-          text = lang('lng_media_link_empty');
+          text = oldLang('lng_media_link_empty');
           break;
         case 'audio':
-          text = lang('lng_media_song_empty');
+          text = oldLang('lng_media_song_empty');
           break;
         case 'voice':
-          text = lang('lng_media_audio_empty');
+          text = oldLang('lng_media_audio_empty');
           break;
         case 'stories':
-          text = lang('StoryList.SavedEmptyState.Title');
+          text = oldLang('StoryList.SavedEmptyState.Title');
           break;
         case 'storiesArchive':
-          text = lang('StoryList.ArchivedEmptyState.Title');
+          text = oldLang('StoryList.ArchivedEmptyState.Title');
           break;
         default:
-          text = lang('SharedMedia.EmptyTitle');
+          text = oldLang('SharedMedia.EmptyTitle');
       }
 
       return (
@@ -478,7 +582,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     return (
       <div
         className={`content ${resultType}-list`}
-        dir={lang.isRtl && resultType === 'media' ? 'rtl' : undefined}
+        dir={oldLang.isRtl && resultType === 'media' ? 'rtl' : undefined}
         teactFastList
       >
         {resultType === 'media' ? (
@@ -541,21 +645,26 @@ const Profile: FC<OwnProps & StateProps> = ({
             />
           ))
         ) : resultType === 'voice' ? (
-          (viewportIds as number[])!.map((id) => messagesById[id] && (
-            <Audio
-              key={id}
-              theme={theme}
-              message={messagesById[id]}
-              senderTitle={getSenderName(lang, messagesById[id], chatsById, usersById)}
-              origin={AudioOrigin.SharedMedia}
-              date={messagesById[id].date}
-              className="scroll-item"
-              onPlay={handlePlayAudio}
-              onDateClick={handleMessageFocus}
-              canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={getIsDownloading(activeDownloads, messagesById[id].content.voice!)}
-            />
-          ))
+          (viewportIds as number[])!.map((id) => {
+            const message = messagesById[id];
+            if (!message) return undefined;
+            const media = messagesById[id] && getMessageDownloadableMedia(message)!;
+            return messagesById[id] && (
+              <Audio
+                key={id}
+                theme={theme}
+                message={messagesById[id]}
+                senderTitle={getSenderName(oldLang, messagesById[id], chatsById, usersById)}
+                origin={AudioOrigin.SharedMedia}
+                date={messagesById[id].date}
+                className="scroll-item"
+                onPlay={handlePlayAudio}
+                onDateClick={handleMessageFocus}
+                canDownload={!isChatProtected && !messagesById[id].isProtected}
+                isDownloading={getIsDownloading(activeDownloads, media)}
+              />
+            );
+          })
         ) : resultType === 'members' ? (
           (viewportIds as string[])!.map((id, i) => (
             <ListItem
@@ -581,6 +690,17 @@ const Profile: FC<OwnProps & StateProps> = ({
               <GroupChatInfo chatId={id} />
             </ListItem>
           ))
+        ) : resultType === 'previewMedia' ? (
+          botPreviewMedia!.map((media, i) => (
+            <PreviewMedia
+              key={media.date}
+              media={media}
+              isProtected={isChatProtected}
+              observeIntersection={observeIntersectionForMedia}
+              onClick={handleSelectPreviewMedia}
+              index={i}
+            />
+          ))
         ) : resultType === 'similarChannels' ? (
           <div key={resultType}>
             {(viewportIds as string[])!.map((channelId, i) => (
@@ -601,15 +721,66 @@ const Profile: FC<OwnProps & StateProps> = ({
               <>
                 {/* eslint-disable-next-line react/jsx-no-bind */}
                 <Button className="show-more-channels" size="smaller" onClick={() => openPremiumModal()}>
-                  {lang('UnlockSimilar')}
-                  <i className="icon icon-unlock-badge" />
+                  {oldLang('UnlockSimilar')}
+                  <Icon name="unlock-badge" />
                 </Button>
                 <div className="more-similar">
-                  {renderText(lang('MoreSimilarText', limitSimilarChannels), ['simple_markdown'])}
+                  {renderText(oldLang('MoreSimilarText', limitSimilarPeers), ['simple_markdown'])}
                 </div>
               </>
             )}
           </div>
+        ) : resultType === 'similarBots' ? (
+          <div key={resultType}>
+            {(viewportIds as string[])!.map((userId, i) => (
+              <ListItem
+                key={userId}
+                teactOrderKey={i}
+                className={buildClassName(
+                  'chat-item-clickable search-result',
+                  !isCurrentUserPremium && i === similarBots!.length - 1 && 'blured',
+                )}
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={() => openChat({ id: userId })}
+              >
+                {isUserId(userId) ? (
+                  <PrivateChatInfo
+                    userId={userId}
+                    avatarSize="medium"
+                  />
+                ) : (
+                  <GroupChatInfo
+                    chatId={userId}
+                    avatarSize="medium"
+                  />
+                )}
+              </ListItem>
+            ))}
+            {!isCurrentUserPremium && (
+              <>
+                {/* eslint-disable-next-line react/jsx-no-bind */}
+                <Button className="show-more-bots" size="smaller" onClick={() => openPremiumModal()}>
+                  {lang('UnlockMoreSimilarBots')}
+                  <Icon name="unlock-badge" />
+                </Button>
+                <div className="more-similar">
+                  {renderText(lang('MoreSimilarBotsText', { count: limitSimilarPeers }, {
+                    withNodes: true,
+                    withMarkdown: true,
+                  }))}
+                </div>
+              </>
+            )}
+          </div>
+        ) : resultType === 'gifts' ? (
+          (gifts?.map((gift) => (
+            <SavedGift
+              peerId={chatId}
+              key={`${gift.date}-${gift.fromId}-${gift.gift.id}`}
+              gift={gift}
+              observeIntersection={observeIntersectionForMedia}
+            />
+          )))
         ) : undefined}
       </div>
     );
@@ -639,7 +810,7 @@ const Profile: FC<OwnProps & StateProps> = ({
         >
           <Transition
             ref={transitionRef}
-            name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+            name={oldLang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
             activeKey={activeKey}
             renderCount={tabs.length}
             shouldRestoreHeight
@@ -649,7 +820,7 @@ const Profile: FC<OwnProps & StateProps> = ({
           >
             {renderContent()}
           </Transition>
-          <TabList big activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
+          <TabList activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={handleSwitchTab} />
         </div>
       )}
 
@@ -657,9 +828,9 @@ const Profile: FC<OwnProps & StateProps> = ({
         <FloatingActionButton
           isShown={resultType === 'members'}
           onClick={handleNewMemberDialogOpen}
-          ariaLabel={lang('lng_channel_add_users')}
+          ariaLabel={oldLang('lng_channel_add_users')}
         >
-          <i className="icon icon-add-user-filled" />
+          <Icon name="add-user-filled" />
         </FloatingActionButton>
       )}
       {canDeleteMembers && (
@@ -686,9 +857,12 @@ export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, isMobile,
   }): StateProps => {
+    const user = selectUser(global, chatId);
     const chat = selectChat(global, chatId);
     const chatFullInfo = selectChatFullInfo(global, chatId);
+    const userFullInfo = selectUserFullInfo(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
+
     const { currentType: mediaSearchType, resultsByType } = selectCurrentSharedMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
 
@@ -701,6 +875,7 @@ export default memo(withGlobal<OwnProps>(
 
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
+    const isBot = user && isUserBot(user);
     const hasMembersTab = !isTopicInfo && !isSavedDialog && (isGroup || (isChannel && isChatAdmin(chat!)));
     const members = chatFullInfo?.members;
     const adminMembersById = chatFullInfo?.adminMembersById;
@@ -712,19 +887,19 @@ export default memo(withGlobal<OwnProps>(
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
     const activeDownloads = selectActiveDownloads(global);
     const { similarChannelIds } = selectSimilarChannelIds(global, chatId) || {};
+    const { similarBotsIds } = selectSimilarBotsIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
-    let hasCommonChatsTab;
-    let resolvedUserId;
-    let user;
-    if (isUserId(chatId)) {
-      resolvedUserId = chatId;
-      user = selectUser(global, resolvedUserId);
-      hasCommonChatsTab = user && !user.isSelf && !isUserBot(user) && !isSavedDialog;
-    }
-
     const peer = user || chat;
-    const peerFullInfo = selectPeerFullInfo(global, chatId);
+    const peerFullInfo = userFullInfo || chatFullInfo;
+
+    const hasCommonChatsTab = user && !user.isSelf && !isUserBot(user) && !isSavedDialog
+      && Boolean(userFullInfo?.commonChatsCount);
+    const commonChats = selectUserCommonChats(global, chatId);
+
+    const hasPreviewMediaTab = userFullInfo?.botInfo?.hasPreviewMedia;
+    const botPreviewMedia = global.users.previewMediaByBotId[chatId];
+
     const hasStoriesTab = peer && (user?.isSelf || (!peer.areStoriesHidden && peerFullInfo?.hasPinnedStories))
       && !isSavedDialog;
     const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
@@ -733,16 +908,20 @@ export default memo(withGlobal<OwnProps>(
     const storyByIds = peerStories?.byId;
     const archiveStoryIds = peerStories?.archiveIds;
 
+    const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
+    const peerGifts = global.peers.giftsById[chatId];
+
     return {
       theme: selectTheme(global),
       isChannel,
-      resolvedUserId,
+      isBot,
       messagesById,
       foundIds,
       mediaSearchType,
       hasCommonChatsTab,
       hasStoriesTab,
       hasMembersTab,
+      hasPreviewMediaTab,
       areMembersHidden,
       canAddMembers,
       canDeleteMembers,
@@ -754,6 +933,8 @@ export default memo(withGlobal<OwnProps>(
       userStatusesById,
       chatsById,
       storyIds,
+      hasGiftsTab,
+      gifts: peerGifts?.gifts,
       pinnedStoryIds,
       archiveStoryIds,
       storyByIds,
@@ -762,12 +943,15 @@ export default memo(withGlobal<OwnProps>(
       forceScrollProfileTab: selectTabState(global).forceScrollProfileTab,
       shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       similarChannels: similarChannelIds,
+      similarBots: similarBotsIds,
+      botPreviewMedia,
       isCurrentUserPremium,
       isTopicInfo,
       isSavedDialog,
-      limitSimilarChannels: selectPremiumLimit(global, 'recommendedChannels'),
+      isSynced: global.isSynced,
+      limitSimilarPeers: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
-      ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
+      ...(hasCommonChatsTab && user && { commonChatIds: commonChats?.ids }),
     };
   },
 )(Profile));

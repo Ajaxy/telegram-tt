@@ -7,14 +7,16 @@
   background: var(--color-links);
   border-radius: 50%;
   cursor: var(--custom-cursor, pointer);
-  transform: scale(1);
+  position: absolute;
+  left: var(--fill-percentage);
+  transform: scale(1) translate(-45%, -50%);
   transition: transform 0.3s ease-in-out;
   z-index: 2;
   -webkit-appearance: none;
   appearance: none;
 
   &:hover {
-    transform: scale(1.5);
+    transform: scale(1.5) translate(-30%, -30%);
   }
 }
 
@@ -39,7 +41,7 @@
 
 .mark {
   font-size: 0.8125rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   position: relative;
   display: flex;
@@ -68,30 +70,6 @@
       var(--color-text-secondary) var(--fill-percentage),
       var(--color-text-secondary) 100%
     );
-}
-
-.slider::before,
-.slider::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  height: 100%;
-  transition: transform 0.2s ease;
-  z-index: -1;
-  transform-origin: left;
-}
-
-.slider::before {
-  left: 0;
-  background-color: var(--color-links);
-  transform: scaleX(var(--fill-percentage-before));
-}
-
-.slider::after {
-  right: 0;
-  background: var(--color-text-secondary);
-  transform: scaleX(var(--fill-percentage-after));
-  transform-origin: right;
 }
 
 .slider::-webkit-slider-thumb {

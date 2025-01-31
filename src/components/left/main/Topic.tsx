@@ -3,14 +3,13 @@ import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiMessageOutgoingStatus,
-  ApiPeer, ApiTopic, ApiTypingStatus,
+  ApiChat, ApiDraft, ApiMessage, ApiMessageOutgoingStatus,
+  ApiPeer, ApiTopic, ApiTypeStory, ApiTypingStatus,
 } from '../../../api/types';
-import type { ApiDraft } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 
-import { getMessageAction } from '../../../global/helpers';
+import { getMessageAction, groupStatetefulContent } from '../../../global/helpers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectCanAnimateInterface,
@@ -20,9 +19,11 @@ import {
   selectCurrentMessageList,
   selectDraft,
   selectOutgoingStatus,
+  selectPeerStory,
+  selectSender,
   selectThreadInfo,
   selectThreadParam,
-  selectUser,
+  selectTopics,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
@@ -35,6 +36,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useChatListEntry from './hooks/useChatListEntry';
 import useTopicContextActions from './hooks/useTopicContextActions';
 
+import Icon from '../../common/icons/Icon';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import TopicIcon from '../../common/TopicIcon';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -58,6 +60,7 @@ type StateProps = {
   chat: ApiChat;
   canDelete?: boolean;
   lastMessage?: ApiMessage;
+  lastMessageStory?: ApiTypeStory;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   actionTargetUserIds?: string[];
@@ -68,6 +71,7 @@ type StateProps = {
   canScrollDown?: boolean;
   wasTopicOpened?: boolean;
   withInterfaceAnimations?: boolean;
+  topics?: Record<number, ApiTopic>;
 };
 
 const Topic: FC<OwnProps & StateProps> = ({
@@ -77,6 +81,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   chat,
   style,
   lastMessage,
+  lastMessageStory,
   canScrollDown,
   lastMessageOutgoingStatus,
   observeIntersection,
@@ -91,6 +96,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   typingStatus,
   draft,
   wasTopicOpened,
+  topics,
 }) => {
   const {
     openThread,
@@ -138,6 +144,8 @@ const Topic: FC<OwnProps & StateProps> = ({
     observeIntersection,
     isTopic: true,
     typingStatus,
+    topics,
+    statefulMediaContent: groupStatetefulContent({ story: lastMessageStory }),
 
     animationType,
     withInterfaceAnimations,
@@ -183,15 +191,10 @@ const Topic: FC<OwnProps & StateProps> = ({
             <TopicIcon topic={topic} className={styles.topicIcon} observeIntersection={observeIntersection} />
             <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
           </div>
-          {topic.isMuted && <i className="icon icon-muted" />}
+          {topic.isMuted && <Icon name="muted" />}
           <div className="separator" />
           {isClosed && (
-            <i className={buildClassName(
-              'icon',
-              'icon-lock-badge',
-              styles.closedIcon,
-            )}
-            />
+            <Icon name="lock-badge" className={styles.closedIcon} />
           )}
           {lastMessage && (
             <LastMessageMeta
@@ -208,6 +211,7 @@ const Topic: FC<OwnProps & StateProps> = ({
             isMuted={isMuted}
             topic={topic}
             wasTopicOpened={wasTopicOpened}
+            topics={topics}
           />
         </div>
       </div>
@@ -240,10 +244,9 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
 
     const lastMessage = selectChatMessage(global, chatId, topic.lastMessageId);
-    const { senderId, isOutgoing } = lastMessage || {};
+    const { isOutgoing } = lastMessage || {};
     const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
-    const lastMessageSender = senderId
-      ? (selectUser(global, senderId) || selectChat(global, senderId)) : undefined;
+    const lastMessageSender = lastMessage && selectSender(global, lastMessage);
     const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chatId, replyToMessageId)
@@ -253,8 +256,12 @@ export default memo(withGlobal<OwnProps>(
     const draft = selectDraft(global, chatId, topic.id);
     const threadInfo = selectThreadInfo(global, chatId, topic.id);
     const wasTopicOpened = Boolean(threadInfo?.lastReadInboxMessageId);
+    const topics = selectTopics(global, chatId);
 
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
+
+    const storyData = lastMessage?.content.storyData;
+    const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
 
     return {
       chat,
@@ -272,6 +279,8 @@ export default memo(withGlobal<OwnProps>(
       }),
       canScrollDown: isSelected && chat?.id === currentChatId && currentThreadId === topic.id,
       wasTopicOpened,
+      topics,
+      lastMessageStory,
     };
   },
 )(Topic));

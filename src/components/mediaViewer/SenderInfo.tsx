@@ -6,7 +6,7 @@ import type { ApiChat, ApiPeer } from '../../api/types';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
 import {
-  getSenderTitle, isChatChannel, isChatGroup, isUserId,
+  getPeerTitle, isChatChannel, isChatGroup, isUserId,
 } from '../../global/helpers';
 import {
   selectSender,
@@ -68,15 +68,18 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     if (!item || item.type === 'standalone') return undefined;
 
     const avatarOwner = item.type === 'avatar' ? item.avatarOwner : undefined;
-    const avatar = avatarOwner?.profilePhotos?.photos[item.mediaIndex!];
-    const isFallbackAvatar = avatar?.id === avatarOwner?.profilePhotos?.fallbackPhoto?.id;
+    const profilePhotos = item.type === 'avatar' ? item.profilePhotos : undefined;
+    const avatar = profilePhotos?.photos[item.mediaIndex!];
+    const isFallbackAvatar = avatar?.id === profilePhotos?.fallbackPhoto?.id;
+    const isPersonalAvatar = avatar?.id === profilePhotos?.personalPhoto?.id;
     const date = item.type === 'message' ? item.message.date : avatar?.date;
     if (!date) return undefined;
 
     const formattedDate = formatMediaDateTime(lang, date * 1000, true);
-    const count = avatarOwner?.profilePhotos?.count
-      && (avatarOwner.profilePhotos.count + (avatarOwner?.profilePhotos?.fallbackPhoto ? 1 : 0));
-    const countText = count && lang('Of', [item.mediaIndex! + 1, count]);
+    const count = profilePhotos?.count
+      && (profilePhotos.count + (profilePhotos?.fallbackPhoto ? 1 : 0));
+    const currentIndex = item.mediaIndex! + 1 + (profilePhotos?.personalPhoto ? -1 : 0);
+    const countText = count && lang('Of', [currentIndex, count]);
 
     const parts: string[] = [];
     if (avatar) {
@@ -84,13 +87,16 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
       const isChannel = chat && isChatChannel(chat);
       const isGroup = chat && isChatGroup(chat);
       parts.push(lang(
-        isFallbackAvatar ? 'lng_mediaview_profile_public_photo'
-          : isChannel ? 'lng_mediaview_channel_photo'
-            : isGroup ? 'lng_mediaview_group_photo' : 'lng_mediaview_profile_photo',
+        isPersonalAvatar ? 'lng_mediaview_profile_photo_by_you'
+          : isFallbackAvatar ? 'lng_mediaview_profile_public_photo'
+            : isChannel ? 'lng_mediaview_channel_photo'
+              : isGroup ? 'lng_mediaview_group_photo' : 'lng_mediaview_profile_photo',
       ));
     }
 
-    if (countText) parts.push(countText);
+    if (countText && !isPersonalAvatar && !isFallbackAvatar) {
+      parts.push(countText);
+    }
 
     parts.push(formattedDate);
 
@@ -101,7 +107,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
-  const senderTitle = getSenderTitle(lang, owner);
+  const senderTitle = getPeerTitle(lang, owner);
 
   return (
     <div className="SenderInfo" onClick={handleFocusMessage}>

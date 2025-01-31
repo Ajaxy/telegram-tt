@@ -7,6 +7,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { RegularLangKey } from '../../../types/language';
 import { GlobalSearchContent } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
@@ -14,12 +15,13 @@ import { parseDateString } from '../../../util/dates/dateFormat';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import AudioResults from './AudioResults';
+import BotAppResults from './BotAppResults';
 import ChatMessageResults from './ChatMessageResults';
 import ChatResults from './ChatResults';
 import FileResults from './FileResults';
@@ -40,19 +42,25 @@ type StateProps = {
   chatId?: string;
 };
 
-const TABS = [
-  { type: GlobalSearchContent.ChatList, title: 'SearchAllChatsShort' },
-  { type: GlobalSearchContent.ChannelList, title: 'ChannelsTab' },
-  { type: GlobalSearchContent.Media, title: 'SharedMediaTab2' },
-  { type: GlobalSearchContent.Links, title: 'SharedLinksTab2' },
-  { type: GlobalSearchContent.Files, title: 'SharedFilesTab2' },
-  { type: GlobalSearchContent.Music, title: 'SharedMusicTab2' },
-  { type: GlobalSearchContent.Voice, title: 'SharedVoiceTab2' },
+type TabInfo = {
+  type: GlobalSearchContent;
+  key: RegularLangKey;
+};
+
+const TABS: TabInfo[] = [
+  { type: GlobalSearchContent.ChatList, key: 'SearchTabChats' },
+  { type: GlobalSearchContent.ChannelList, key: 'SearchTabChannels' },
+  { type: GlobalSearchContent.BotApps, key: 'SearchTabApps' },
+  { type: GlobalSearchContent.Media, key: 'SearchTabMedia' },
+  { type: GlobalSearchContent.Links, key: 'SearchTabLinks' },
+  { type: GlobalSearchContent.Files, key: 'SearchTabFiles' },
+  { type: GlobalSearchContent.Music, key: 'SearchTabMusic' },
+  { type: GlobalSearchContent.Voice, key: 'SearchTabVoice' },
 ];
 
-const CHAT_TABS = [
-  { type: GlobalSearchContent.ChatList, title: 'All Messages' },
-  ...TABS.slice(2), // Skip ChatList and ChannelList, replaced with All Messages
+const CHAT_TABS: TabInfo[] = [
+  { type: GlobalSearchContent.ChatList, key: 'SearchTabMessages' },
+  ...TABS.slice(3), // Skip ChatList, ChannelList and BotApps, replaced with All Messages
 ];
 
 const LeftSearch: FC<OwnProps & StateProps> = ({
@@ -68,11 +76,17 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
     setGlobalSearchDate,
   } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [activeTab, setActiveTab] = useState(currentContent);
   const dateSearchQuery = useMemo(() => parseDateString(searchQuery), [searchQuery]);
 
-  const tabs = chatId ? CHAT_TABS : TABS;
+  const tabs = useMemo(() => {
+    const arr = chatId ? CHAT_TABS : TABS;
+    return arr.map((tab) => ({
+      ...tab,
+      title: lang(tab.key),
+    }));
+  }, [chatId, lang]);
 
   const handleSwitchTab = useLastCallback((index: number) => {
     const tab = tabs[index];
@@ -143,6 +157,13 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
                 <AudioResults
                   key="voice"
                   isVoice
+                  searchQuery={searchQuery}
+                />
+              );
+            case GlobalSearchContent.BotApps:
+              return (
+                <BotAppResults
+                  key="botApps"
                   searchQuery={searchQuery}
                 />
               );

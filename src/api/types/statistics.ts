@@ -1,4 +1,5 @@
 import type { ApiChat } from './chats';
+import type { ApiTypePrepaidGiveaway } from './payments';
 
 export interface ApiChannelStatistics {
   growthGraph?: StatisticsGraph | string;
@@ -21,6 +22,13 @@ export interface ApiChannelStatistics {
   sharesPerStory: StatisticsOverviewItem;
   reactionsPerStory: StatisticsOverviewItem;
   recentPosts: Array<StatisticsMessageInteractionCounter | StatisticsStoryInteractionCounter>;
+}
+
+export interface ApiChannelMonetizationStatistics {
+  topHoursGraph?: StatisticsGraph | string;
+  revenueGraph?: StatisticsGraph | string;
+  balances?: ChannelMonetizationBalances;
+  usdRate?: number;
 }
 
 export interface ApiGroupStatistics {
@@ -54,7 +62,7 @@ export interface ApiBoostStatistics {
   boosts: number;
   premiumSubscribers: StatisticsOverviewPercentage;
   remainingBoosts: number;
-  prepaidGiveaways: PrepaidGiveaway[];
+  prepaidGiveaways: ApiTypePrepaidGiveaway[];
 }
 
 export interface ApiMessagePublicForward {
@@ -79,6 +87,8 @@ export interface StatisticsGraph {
   labels: Array<string | number>;
   isStacked: boolean;
   isPercentage?: boolean;
+  isCurrency?: boolean;
+  currencyRate?: number;
   hideCaption: boolean;
   hasSecondYAxis: boolean;
   minimapRange: {
@@ -106,13 +116,6 @@ export interface StatisticsOverviewPercentage {
   percentage: string;
 }
 
-export interface PrepaidGiveaway {
-  id: string;
-  months: number;
-  quantity: number;
-  date: number;
-}
-
 export interface StatisticsOverviewPeriod {
   maxDate: number;
   minDate: number;
@@ -130,4 +133,11 @@ export interface StatisticsStoryInteractionCounter {
   viewsCount: number;
   forwardsCount: number;
   reactionsCount: number;
+}
+
+export interface ChannelMonetizationBalances {
+  currentBalance: number;
+  availableBalance: number;
+  overallRevenue: number;
+  isWithdrawalEnabled?: boolean;
 }

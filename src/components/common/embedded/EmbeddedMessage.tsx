@@ -5,8 +5,8 @@ import type {
   ApiChat,
   ApiMessage, ApiPeer, ApiReplyInfo, MediaContainer,
 } from '../../../api/types';
-import type { ChatTranslatedMessages } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { ChatTranslatedMessages } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
 import { CONTENT_NOT_SUPPORTED } from '../../../config';
@@ -14,7 +14,7 @@ import {
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageRoundVideo,
-  getSenderTitle,
+  getPeerTitle,
   isActionMessage,
   isChatChannel,
   isChatGroup,
@@ -101,11 +101,15 @@ const EmbeddedMessage: FC<OwnProps> = ({
     };
   }, [message, replyInfo]);
 
-  const mediaHash = containedMedia && getMessageMediaHash(containedMedia, 'pictogram');
+  const gif = containedMedia?.content?.video?.isGif ? containedMedia.content.video : undefined;
+  const isVideoThumbnail = Boolean(gif && !gif.previewPhotoSizes?.length);
+
+  const mediaHash = containedMedia && getMessageMediaHash(containedMedia, isVideoThumbnail ? 'full' : 'pictogram');
   const mediaBlobUrl = useMedia(mediaHash, !isIntersecting);
   const mediaThumbnail = useThumbnail(containedMedia);
-  const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
-  const isSpoiler = Boolean(message && getMessageIsSpoiler(message));
+
+  const isRoundVideo = Boolean(containedMedia && getMessageRoundVideo(containedMedia));
+  const isSpoiler = Boolean(containedMedia && getMessageIsSpoiler(containedMedia));
   const isQuote = Boolean(replyInfo?.type === 'message' && replyInfo.isQuote);
   const replyForwardInfo = replyInfo?.type === 'message' ? replyInfo.replyFrom : undefined;
 
@@ -116,10 +120,10 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   const lang = useOldLang();
 
-  const senderTitle = sender ? getSenderTitle(lang, sender)
+  const senderTitle = sender ? getPeerTitle(lang, sender)
     : (replyForwardInfo?.hiddenUserName || message?.forwardInfo?.hiddenUserName);
-  const senderChatTitle = senderChat ? getSenderTitle(lang, senderChat) : undefined;
-  const forwardSenderTitle = forwardSender ? getSenderTitle(lang, forwardSender)
+  const senderChatTitle = senderChat ? getPeerTitle(lang, senderChat) : undefined;
+  const forwardSenderTitle = forwardSender ? getPeerTitle(lang, forwardSender)
     : message?.forwardInfo?.hiddenUserName;
   const areSendersSame = sender && sender.id === forwardSender?.id;
 
@@ -152,7 +156,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
     return (
       <MessageSummary
-        lang={lang}
         message={message}
         noEmoji={Boolean(mediaThumbnail)}
         translatedText={translatedText}
@@ -165,7 +168,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   function renderMediaContentType(media?: MediaContainer) {
     if (!media || media.content.text) return NBSP;
-    const description = getMediaContentTypeDescription(lang, media.content);
+    const description = getMediaContentTypeDescription(lang, media.content, {});
     if (!description || description === CONTENT_NOT_SUPPORTED) return NBSP;
     return (
       <span>
@@ -235,7 +238,9 @@ const EmbeddedMessage: FC<OwnProps> = ({
     >
       <div className="hover-effect" />
       <RippleEffect />
-      {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
+      {mediaThumbnail && renderPictogram(
+        mediaThumbnail, mediaBlobUrl, isVideoThumbnail, isRoundVideo, isProtected, isSpoiler,
+      )}
       {sender?.color?.backgroundEmojiId && (
         <EmojiIconBackground
           emojiDocumentId={sender.color.backgroundEmojiId}
@@ -263,6 +268,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 function renderPictogram(
   thumbDataUri: string,
   blobUrl?: string,
+  isFullVideo?: boolean,
   isRoundVideo?: boolean,
   isProtected?: boolean,
   isSpoiler?: boolean,
@@ -270,10 +276,11 @@ function renderPictogram(
   const { width, height } = getPictogramDimensions();
 
   const srcUrl = blobUrl || thumbDataUri;
+  const shouldRenderVideo = isFullVideo && blobUrl;
 
   return (
     <div className={buildClassName('embedded-thumb', isRoundVideo && 'round')}>
-      {!isSpoiler && (
+      {!isSpoiler && !shouldRenderVideo && (
         <img
           src={srcUrl}
           width={width}
@@ -283,7 +290,22 @@ function renderPictogram(
           draggable={false}
         />
       )}
-      <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(isSpoiler)} width={width} height={height} />
+      {!isSpoiler && shouldRenderVideo && (
+        <video
+          src={blobUrl}
+          width={width}
+          height={height}
+          playsInline
+          disablePictureInPicture
+          className="pictogram"
+        />
+      )}
+      <MediaSpoiler
+        thumbDataUri={shouldRenderVideo ? thumbDataUri : srcUrl}
+        isVisible={Boolean(isSpoiler)}
+        width={width}
+        height={height}
+      />
       {isProtected && <span className="protector" />}
     </div>
   );

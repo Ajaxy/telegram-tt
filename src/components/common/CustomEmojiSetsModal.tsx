@@ -4,8 +4,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../lib/teact/teact';
-import { getGlobal } from '../../lib/teact/teactn';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiSticker } from '../../api/types';
 
@@ -15,7 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Modal from '../ui/Modal';
 import StickerSetCard from './StickerSetCard';
@@ -49,7 +48,7 @@ const CustomEmojiSetsModal: FC<OwnProps & StateProps> = ({
     rootRef: customEmojiModalRef, isDisabled: !customEmojiSets,
   });
 
-  const prevCustomEmojiSets = usePrevious(customEmojiSets);
+  const prevCustomEmojiSets = usePreviousDeprecated(customEmojiSets);
   const renderingCustomEmojiSets = customEmojiSets || prevCustomEmojiSets;
 
   const handleSetClick = useLastCallback((sticker: ApiSticker) => {

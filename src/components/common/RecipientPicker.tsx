@@ -4,7 +4,6 @@ import { getGlobal, withGlobal } from '../../global';
 
 import type { ApiChatType } from '../../api/types';
 import type { ThreadId } from '../../types';
-import { MAIN_THREAD_ID } from '../../api/types';
 
 import { API_CHAT_TYPES } from '../../config';
 import {
@@ -20,7 +19,7 @@ import sortChatIds from './helpers/sortChatIds';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useOldLang from '../../hooks/useOldLang';
 
-import ChatOrUserPicker from './ChatOrUserPicker';
+import ChatOrUserPicker from './pickers/ChatOrUserPicker';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -80,13 +79,19 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
       const user = usersById[id];
       if (user && isDeletedUser(user)) return false;
 
-      return chat && getCanPostInChat(chat, MAIN_THREAD_ID, undefined, chatFullInfoById[id]);
+      return chat && getCanPostInChat(chat, undefined, undefined, chatFullInfoById[id]);
     });
 
-    const sorted = sortChatIds(unique([
-      ...filterChatsByName(lang, chatIds, chatsById, search, currentUserId),
-      ...(contactIds && filter.includes('users') ? filterUsersByName(contactIds, usersById, search) : []),
-    ]), undefined, priorityIds);
+    const sorted = sortChatIds(
+      unique([
+        ...(currentUserId ? [currentUserId] : []),
+        ...filterChatsByName(lang, chatIds, chatsById, search, currentUserId),
+        ...(contactIds && filter.includes('users') ? filterUsersByName(contactIds, usersById, search) : []),
+      ]),
+      undefined,
+      priorityIds,
+      currentUserId,
+    );
 
     return filterChatIdsByType(global, sorted, filter);
   }, [pinnedIds, currentUserId, activeListIds, search, archivedListIds, lang, contactIds, filter, isOpen]);
@@ -98,6 +103,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
       isOpen={isOpen}
       className={className}
       chatOrUserIds={renderingIds}
+      currentUserId={currentUserId}
       searchPlaceholder={searchPlaceholder}
       search={search}
       onSearchChange={setSearch}

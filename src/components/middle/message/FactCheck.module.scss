@@ -4,11 +4,10 @@
   margin-top: 0.5rem;
   font-size: 0.875rem;
   padding-block: 0.25rem;
-  padding-inline-end: 0.25rem;
 }
 
 .title {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .content {

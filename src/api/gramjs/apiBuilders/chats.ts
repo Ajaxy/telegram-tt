@@ -8,6 +8,7 @@ import type {
   ApiChatBannedRights,
   ApiChatFolder,
   ApiChatInviteImporter,
+  ApiChatInviteInfo,
   ApiChatlistExportedInvite,
   ApiChatlistInvite,
   ApiChatMember,
@@ -18,13 +19,17 @@ import type {
   ApiRestrictionReason,
   ApiSendAsPeerId,
   ApiSponsoredMessageReportResult,
+  ApiStarsSubscriptionPricing,
   ApiTopic,
 } from '../../types';
 
-import { omitUndefined, pick, pickTruthy } from '../../../util/iteratees';
+import { pick, pickTruthy } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
-import { serializeBytes } from '../helpers';
-import { buildApiUsernames, buildAvatarPhotoId } from './common';
+import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
+import { serializeBytes } from '../helpers/misc';
+import {
+  buildApiBotVerification, buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
+} from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
   buildApiEmojiStatus,
@@ -51,7 +56,7 @@ function buildApiChatFieldsFromPeerEntity(
   const hasVideoAvatar = 'photo' in peerEntity && peerEntity.photo && 'hasVideo' in peerEntity.photo
     && peerEntity.photo.hasVideo;
   const avatarPhotoId = ('photo' in peerEntity) && peerEntity.photo ? buildAvatarPhotoId(peerEntity.photo) : undefined;
-  const isSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
+  const areSignaturesShown = Boolean('signatures' in peerEntity && peerEntity.signatures);
   const hasPrivateLink = Boolean('hasLink' in peerEntity && peerEntity.hasLink);
   const isScam = Boolean('scam' in peerEntity && peerEntity.scam);
   const isFake = Boolean('fake' in peerEntity && peerEntity.fake);
@@ -61,16 +66,21 @@ function buildApiChatFieldsFromPeerEntity(
   const isForum = Boolean('forum' in peerEntity && peerEntity.forum);
   const areStoriesHidden = Boolean('storiesHidden' in peerEntity && peerEntity.storiesHidden);
   const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
+  const botVerificationIconId = 'botVerificationIcon' in peerEntity
+    ? peerEntity.botVerificationIcon?.toString() : undefined;
   const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
   const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
   const emojiStatus = ('emojiStatus' in peerEntity && peerEntity.emojiStatus)
     ? buildApiEmojiStatus(peerEntity.emojiStatus) : undefined;
   const boostLevel = ('level' in peerEntity) ? peerEntity.level : undefined;
+  const areProfilesShown = Boolean('signatureProfiles' in peerEntity && peerEntity.signatureProfiles);
+  const subscriptionUntil = 'subscriptionUntilDate' in peerEntity ? peerEntity.subscriptionUntilDate : undefined;
 
-  return omitUndefined<PeerEntityApiChatFields>({
+  return {
     isMin,
     hasPrivateLink,
-    isSignaturesShown,
+    areSignaturesShown,
+    areProfilesShown,
     usernames,
     accessHash,
     hasVideoAvatar,
@@ -98,7 +108,9 @@ function buildApiChatFieldsFromPeerEntity(
     hasStories: Boolean(maxStoryId) && !storiesUnavailable,
     emojiStatus,
     boostLevel,
-  });
+    botVerificationIconId,
+    subscriptionUntil,
+  };
 }
 
 export function buildApiChatFromDialog(
@@ -328,6 +340,7 @@ export function buildChatMember(
     bannedRights: 'bannedRights' in member ? omitVirtualClassFields(member.bannedRights) : undefined,
     adminRights: 'adminRights' in member ? omitVirtualClassFields(member.adminRights) : undefined,
     customTitle: 'rank' in member ? member.rank : undefined,
+    isViaRequest: 'viaRequest' in member ? member.viaRequest : undefined,
     ...((member instanceof GramJs.ChannelParticipantAdmin || member instanceof GramJs.ChatParticipantAdmin) && {
       isAdmin: true,
     }),
@@ -405,25 +418,29 @@ export function buildApiChatFolder(filter: GramJs.DialogFilter | GramJs.DialogFi
   if (filter instanceof GramJs.DialogFilterChatlist) {
     return {
       ...pickTruthy(filter, [
-        'id', 'title', 'emoticon',
+        'id', 'emoticon',
       ]),
       excludedChatIds: [],
       includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
       pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
       hasMyInvites: filter.hasMyInvites,
       isChatList: true,
+      noTitleAnimations: filter.titleNoanimate,
+      title: buildApiFormattedText(filter.title),
     };
   }
 
   return {
     ...pickTruthy(filter, [
-      'id', 'title', 'emoticon', 'contacts', 'nonContacts', 'groups', 'bots',
+      'id', 'emoticon', 'contacts', 'nonContacts', 'groups', 'bots',
       'excludeMuted', 'excludeRead', 'excludeArchived',
     ]),
     channels: filter.broadcasts,
     pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     excludedChatIds: filter.excludePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+    title: buildApiFormattedText(filter.title),
+    noTitleAnimations: filter.titleNoanimate,
   };
 }
 
@@ -527,7 +544,7 @@ export function buildApiChatReactions(chatReactions?: GramJs.TypeChatReactions):
   if (chatReactions instanceof GramJs.ChatReactionsSome) {
     return {
       type: 'some',
-      allowed: chatReactions.reactions.map(buildApiReaction).filter(Boolean),
+      allowed: chatReactions.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
     };
   }
 
@@ -594,7 +611,8 @@ export function buildApiChatlistInvite(
   if (invite instanceof GramJs.chatlists.ChatlistInvite) {
     return {
       slug,
-      title: invite.title,
+      title: buildApiFormattedText(invite.title),
+      noTitleAnimations: invite.titleNoanimate,
       emoticon: invite.emoticon,
       peerIds: invite.peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
     };
@@ -665,5 +683,50 @@ export function buildApiSponsoredMessageReportResult(
     type: 'selectOption',
     title,
     options,
+  };
+}
+
+export function buildApiChatInviteInfo(invite: GramJs.ChatInvite): ApiChatInviteInfo {
+  const {
+    color, participants, participantsCount, photo, title, about, scam, fake, verified, megagroup, channel, broadcast,
+    requestNeeded, subscriptionFormId, subscriptionPricing, canRefulfillSubscription, botVerification,
+  } = invite;
+
+  let apiPhoto;
+  if (photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(photo);
+    apiPhoto = buildApiPhoto(photo);
+  }
+
+  participants?.forEach(addUserToLocalDb);
+
+  return {
+    title,
+    about,
+    isFake: fake,
+    isScam: scam,
+    isVerified: verified,
+    isSuperGroup: megagroup,
+    isPublic: invite.public,
+    participantsCount,
+    color,
+    isChannel: channel,
+    isBroadcast: broadcast,
+    isRequestNeeded: requestNeeded,
+    photo: apiPhoto,
+    subscriptionFormId: subscriptionFormId?.toString(),
+    subscriptionPricing: subscriptionPricing && buildApiStarsSubscriptionPricing(subscriptionPricing),
+    canRefulfillSubscription,
+    participantIds: participants?.map((participant) => buildApiPeerId(participant.id, 'user')).filter(Boolean),
+    botVerification: botVerification && buildApiBotVerification(botVerification),
+  };
+}
+
+export function buildApiStarsSubscriptionPricing(
+  pricing: GramJs.StarsSubscriptionPricing,
+): ApiStarsSubscriptionPricing {
+  return {
+    period: pricing.period,
+    amount: pricing.amount.toJSNumber(),
   };
 }

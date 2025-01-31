@@ -1,7 +1,7 @@
 import React, { memo, type TeactNode } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiPeer, ApiWebDocument } from '../../../api/types';
+import type { ApiPeer } from '../../../api/types';
 import type { CustomPeer } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
@@ -9,28 +9,27 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
 import styles from './TableInfoModal.module.scss';
 
-type ChatItem = { chatId: string };
+type ChatItem = { chatId: string; withEmojiStatus?: boolean };
 
-export type TableData = [TeactNode, TeactNode | ChatItem][];
+export type TableData = [TeactNode | undefined, TeactNode | ChatItem][];
 
 type OwnProps = {
   isOpen?: boolean;
   title?: string;
   tableData?: TableData;
-  headerImageUrl?: string;
   headerAvatarPeer?: ApiPeer | CustomPeer;
-  headerAvatarWebPhoto?: ApiWebDocument;
-  noHeaderImage?: boolean;
   header?: TeactNode;
+  modalHeader?: TeactNode;
   footer?: TeactNode;
   buttonText?: string;
   className?: string;
+  hasBackdrop?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
 };
@@ -39,14 +38,13 @@ const TableInfoModal = ({
   isOpen,
   title,
   tableData,
-  headerImageUrl,
   headerAvatarPeer,
-  headerAvatarWebPhoto,
-  noHeaderImage,
   header,
+  modalHeader,
   footer,
   buttonText,
   className,
+  hasBackdrop,
   onClose,
   onButtonClick,
 }: OwnProps) => {
@@ -56,49 +54,50 @@ const TableInfoModal = ({
     onClose();
   });
 
-  const withAvatar = Boolean(headerAvatarPeer || headerAvatarWebPhoto);
-
   return (
     <Modal
       isOpen={isOpen}
       hasCloseButton={Boolean(title)}
       hasAbsoluteCloseButton={!title}
+      absoluteCloseButtonColor={hasBackdrop ? 'translucent-white' : undefined}
       isSlim
+      header={modalHeader}
       title={title}
       className={className}
       contentClassName={styles.content}
       onClose={onClose}
     >
-      {!noHeaderImage && (
-        withAvatar ? (
-          <Avatar peer={headerAvatarPeer} webPhoto={headerAvatarWebPhoto} size="jumbo" className={styles.avatar} />
-        ) : (
-          <img className={styles.logo} src={headerImageUrl} alt="" draggable={false} />
-        )
+      {headerAvatarPeer && (
+        <Avatar peer={headerAvatarPeer} size="jumbo" className={styles.avatar} />
       )}
       {header}
-      <table className={styles.table}>
+      <div className={styles.table}>
         {tableData?.map(([label, value]) => (
-          <tr className={styles.row}>
-            <td className={buildClassName(styles.cell, styles.title)}>{label}</td>
-            <td className={buildClassName(styles.cell, styles.value)}>
+          <>
+            {label && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}
+            <div className={buildClassName(styles.cell, styles.value, !label && styles.fullWidth)}>
               {typeof value === 'object' && 'chatId' in value ? (
-                <PickerSelectedItem
+                <PeerChip
                   peerId={value.chatId}
                   className={styles.chatItem}
                   forceShowSelf
-                  fluid
+                  withEmojiStatus={value.withEmojiStatus}
                   clickArg={value.chatId}
                   onClick={handleOpenChat}
                 />
               ) : value}
-            </td>
-          </tr>
+            </div>
+          </>
         ))}
-      </table>
+      </div>
       {footer}
       {buttonText && (
-        <Button onClick={onButtonClick || onClose}>{buttonText}</Button>
+        <Button
+          className={!footer ? styles.noFooter : undefined}
+          size="smaller"
+          onClick={onButtonClick || onClose}
+        >{buttonText}
+        </Button>
       )}
     </Modal>
   );

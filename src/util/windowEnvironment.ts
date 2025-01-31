@@ -61,16 +61,29 @@ export const IS_VOICE_RECORDING_SUPPORTED = Boolean(
   ),
 );
 export const IS_EMOJI_SUPPORTED = PLATFORM_ENV && (IS_MAC_OS || IS_IOS) && isLastEmojiVersionSupported();
+
 export const IS_SERVICE_WORKER_SUPPORTED = 'serviceWorker' in navigator;
+
+// Remove in mid-late 2025 when Chromium 132 is no longer a problem
+// https://issues.chromium.org/issues/390581541
+const chromeVersion = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)?.[2];
+const hasBrokenServiceWorkerStreaming = chromeVersion && Number(chromeVersion) === 132;
 // TODO Consider failed service worker
-export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED;
+export const IS_PROGRESSIVE_SUPPORTED = IS_SERVICE_WORKER_SUPPORTED && !hasBrokenServiceWorkerStreaming;
 export const IS_OPUS_SUPPORTED = Boolean((new Audio()).canPlayType('audio/ogg; codecs=opus'));
 export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
 );
 export const IS_REQUEST_FULLSCREEN_SUPPORTED = 'requestFullscreen' in document.createElement('div');
-export const ARE_CALLS_SUPPORTED = !IS_FIREFOX;
+export const ARE_CALLS_SUPPORTED = !IS_FIREFOX; // https://bugzilla.mozilla.org/show_bug.cgi?id=1923416
 export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slideFade' : IS_IOS ? 'slideLayers' : 'pushSlide';
+
+export const IS_WAVE_TRANSFORM_SUPPORTED = !IS_MOBILE
+  && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1808785
+  && !IS_SAFARI; // https://bugs.webkit.org/show_bug.cgi?id=245510
+export const IS_SNAP_EFFECT_SUPPORTED = !IS_MOBILE
+  && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1896504
+  && !IS_SAFARI;
 
 const TEST_VIDEO = document.createElement('video');
 
@@ -100,6 +113,8 @@ export const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in window;
 export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA && IS_MOBILE);
 export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
 export const IS_INTL_LIST_FORMAT_SUPPORTED = 'ListFormat' in Intl;
+
+export const IS_BAD_URL_PARSER = new URL('tg://host').host !== 'host';
 
 export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 
@@ -133,3 +148,28 @@ function isLastEmojiVersionSupported() {
 
   return Math.abs(newEmojiWidth - legacyEmojiWidth) < ALLOWABLE_CALCULATION_ERROR_SIZE;
 }
+
+export const IS_GEOLOCATION_SUPPORTED = 'geolocation' in navigator;
+
+export const getGeolocationStatus = async () => {
+  try {
+    const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+
+    if (permissionStatus.state === 'granted' || permissionStatus.state === 'prompt') {
+      const geolocation = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => resolve(position.coords),
+          (error) => reject(error),
+        );
+      });
+      return { accessRequested: true, accessGranted: true, geolocation };
+    }
+    if (permissionStatus.state === 'denied') {
+      return { accessRequested: true, accessGranted: false };
+    }
+  } catch (error) {
+    return { accessRequested: false, accessGranted: false };
+  }
+
+  return { accessRequested: false, accessGranted: false };
+};

@@ -4,11 +4,10 @@ import React, {
 import { getGlobal } from '../../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus, ApiUser,
+  ApiChat, ApiDraft, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus,
+  StatefulMediaContent,
 } from '../../../../api/types';
-import type { ApiDraft } from '../../../../global/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../../../hooks/useOldLang';
 
 import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
@@ -22,9 +21,9 @@ import {
   getMessageSticker,
   getMessageVideo,
   isActionMessage,
-  isChatChannel,
   isExpiredMessage,
 } from '../../../../global/helpers';
+import { isApiPeerChat } from '../../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 import buildClassName from '../../../../util/buildClassName';
 import { renderActionMessageText } from '../../../common/helpers/renderActionMessageText';
@@ -33,10 +32,12 @@ import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEn
 import { ChatAnimationTypes } from './useChatAnimationType';
 
 import useEnsureMessage from '../../../../hooks/useEnsureMessage';
+import useEnsureStory from '../../../../hooks/useEnsureStory';
 import useMedia from '../../../../hooks/useMedia';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
+import Icon from '../../../common/icons/Icon';
 import MessageSummary from '../../../common/MessageSummary';
 import TypingStatus from '../../../common/TypingStatus';
 
@@ -44,7 +45,9 @@ const ANIMATION_DURATION = 200;
 
 export default function useChatListEntry({
   chat,
+  topics,
   lastMessage,
+  statefulMediaContent,
   chatId,
   typingStatus,
   draft,
@@ -62,7 +65,9 @@ export default function useChatListEntry({
   isPreview,
 }: {
   chat?: ApiChat;
+  topics?: Record<number, ApiTopic>;
   lastMessage?: ApiMessage;
+  statefulMediaContent: StatefulMediaContent | undefined;
   chatId: string;
   typingStatus?: ApiTypingStatus;
   draft?: ApiDraft;
@@ -80,7 +85,7 @@ export default function useChatListEntry({
   orderDiff: number;
   withInterfaceAnimations?: boolean;
 }) {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
@@ -89,10 +94,16 @@ export default function useChatListEntry({
   const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
   useEnsureMessage(chatId, isAction ? replyToMessageId : undefined, actionTargetMessage);
 
-  const mediaHasPreview = lastMessage && !getMessageSticker(lastMessage);
+  const storyData = lastMessage?.content.storyData;
+  const shouldTryLoadingStory = statefulMediaContent && !statefulMediaContent.story;
 
-  const mediaThumbnail = mediaHasPreview ? getMessageMediaThumbDataUri(lastMessage) : undefined;
-  const mediaBlobUrl = useMedia(mediaHasPreview ? getMessageMediaHash(lastMessage, 'micro') : undefined);
+  useEnsureStory(shouldTryLoadingStory ? storyData?.peerId : undefined, storyData?.id, statefulMediaContent?.story);
+
+  const mediaContent = statefulMediaContent?.story || lastMessage;
+  const mediaHasPreview = mediaContent && !getMessageSticker(mediaContent);
+
+  const mediaThumbnail = mediaHasPreview ? getMessageMediaThumbDataUri(mediaContent) : undefined;
+  const mediaBlobUrl = useMedia(mediaHasPreview ? getMessageMediaHash(mediaContent, 'micro') : undefined);
   const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
 
   const actionTargetUsers = useMemo(() => {
@@ -119,8 +130,8 @@ export default function useChatListEntry({
 
     if (canDisplayDraft) {
       return (
-        <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          <span className="draft">{lang('Draft')}</span>
+        <p className="last-message" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
+          <span className="draft">{oldLang('Draft')}</span>
           {renderTextWithEntities({
             text: draft.text?.text || '',
             entities: draft.text?.entities,
@@ -137,22 +148,20 @@ export default function useChatListEntry({
 
     if (isExpiredMessage(lastMessage)) {
       return (
-        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          {getExpiredMessageDescription(lang, lastMessage)}
+        <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
+          {getExpiredMessageDescription(oldLang, lastMessage)}
         </p>
       );
     }
 
     if (isAction) {
-      const isChat = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId);
-
       return (
-        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
+        <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
           {renderActionMessageText(
-            lang,
+            oldLang,
             lastMessage,
-            !isChat ? lastMessageSender as ApiUser : undefined,
-            isChat ? chat : undefined,
+            lastMessageSender && !isApiPeerChat(lastMessageSender) ? lastMessageSender : undefined,
+            lastMessageSender && isApiPeerChat(lastMessageSender) ? lastMessageSender : chat,
             actionTargetUsers,
             actionTargetMessage,
             actionTargetChatId,
@@ -165,24 +174,24 @@ export default function useChatListEntry({
       );
     }
 
-    const senderName = getMessageSenderName(lang, chatId, lastMessageSender);
+    const senderName = getMessageSenderName(oldLang, chatId, lastMessageSender);
 
     return (
-      <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
+      <p className="last-message shared-canvas-container" dir={oldLang.isRtl ? 'auto' : 'ltr'}>
         {senderName && (
           <>
             <span className="sender-name">{renderText(senderName)}</span>
             <span className="colon">:</span>
           </>
         )}
-        {!isSavedDialog && lastMessage.forwardInfo && (<i className="icon icon-share-filled chat-prefix-icon" />)}
-        {lastMessage.replyInfo?.type === 'story' && (<i className="icon icon-story-reply chat-prefix-icon" />)}
-        {renderSummary(lang, lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
+        {!isSavedDialog && lastMessage.forwardInfo && (<Icon name="share-filled" className="chat-prefix-icon" />)}
+        {lastMessage.replyInfo?.type === 'story' && (<Icon name="story-reply" className="chat-prefix-icon" />)}
+        {renderSummary(lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );
   }, [
     actionTargetChatId, actionTargetMessage, actionTargetUsers, chat, chatId, draft, isAction,
-    isRoundVideo, isTopic, lang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
+    isRoundVideo, isTopic, oldLang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
     observeIntersection, typingStatus, isSavedDialog, isPreview,
   ]);
 
@@ -193,6 +202,7 @@ export default function useChatListEntry({
           chat={chat}
           renderLastMessage={renderLastMessageOrTyping}
           observeIntersection={observeIntersection}
+          topics={topics}
         />
       );
     }
@@ -243,11 +253,10 @@ export default function useChatListEntry({
 }
 
 function renderSummary(
-  lang: LangFn, message: ApiMessage, observeIntersection?: ObserveFn, blobUrl?: string, isRoundVideo?: boolean,
+  message: ApiMessage, observeIntersection?: ObserveFn, blobUrl?: string, isRoundVideo?: boolean,
 ) {
   const messageSummary = (
     <MessageSummary
-      lang={lang}
       message={message}
       noEmoji={Boolean(blobUrl)}
       observeIntersectionForLoading={observeIntersection}
@@ -271,7 +280,7 @@ function renderSummary(
         }
         draggable={false}
       />
-      {getMessageVideo(message) && <i className="icon icon-play" />}
+      {getMessageVideo(message) && <Icon name="play" />}
       {messageSummary}
     </span>
   );

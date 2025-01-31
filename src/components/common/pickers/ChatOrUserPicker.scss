@@ -1,0 +1,131 @@
+@use "../../../styles/mixins";
+
+.ChatOrUserPicker {
+  .modal-dialog {
+    height: 70%;
+    max-width: 25rem;
+    overflow: hidden;
+
+    @media (max-width: 600px) {
+      height: 90%;
+    }
+  }
+
+  &_slide {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+
+    .Button {
+      margin-right: 0.5rem;
+    }
+
+    .input-group {
+      margin: 0;
+      flex: 1;
+    }
+
+    .form-control {
+      border: none;
+      box-shadow: none !important;
+
+      height: 2.75rem;
+      padding: 0.5rem;
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+      unicode-bidi: plaintext;
+    }
+  }
+
+  .modal-content {
+    padding: 0 !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    > .Transition {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .picker-list {
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-inline: 0.5rem;
+
+      @include mixins.adapt-padding-to-scrollbar(0.5rem);
+
+      body.is-ios &,
+      body.is-android & {
+        padding: 0;
+      }
+
+      @media (max-width: 600px) {
+        padding: 0;
+      }
+    }
+  }
+
+  .no-results {
+    height: 100%;
+    margin: 0;
+    padding: 1rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+  }
+
+  .scroll-container {
+    position: relative;
+  }
+
+  .ChatOrUserPicker-item {
+    position: absolute;
+    width: 100%;
+
+    .online {
+      color: var(--color-primary);
+    }
+  }
+
+  .topic-icon {
+    --custom-emoji-size: 2.75rem;
+
+    margin-inline-end: 0.25rem !important;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 2.75rem !important;
+  }
+
+  .topic-icon-letter {
+    font-size: 1.5rem;
+  }
+
+  .topic-item {
+    .ListItem-button {
+      display: flex;
+      align-items: center;
+
+      font-size: 1rem;
+      line-height: 1.6875rem;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .fullName {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .emoji-small {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}

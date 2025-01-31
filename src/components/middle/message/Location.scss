@@ -154,7 +154,7 @@
     padding: 0.3125rem 0.5rem 0.25rem;
 
     &-title {
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       grid-area: 1 / 1 / 2 / 2;
     }
 
@@ -184,7 +184,7 @@
     left: 0;
     transform: translateY(-50%);
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     line-height: 1;
     width: 100%;
     text-align: center;

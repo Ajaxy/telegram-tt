@@ -10,10 +10,16 @@ export default function sortChatIds(
   chatIds: string[],
   shouldPrioritizeVerified = false,
   priorityIds?: string[],
+  currentUserId?: string,
 ) {
   // Avoid calling sort on every global change
   const global = getGlobal();
+
   return orderBy(chatIds, (id) => {
+    if (id === currentUserId) {
+      return Infinity;
+    }
+
     const chat = selectChat(global, id);
     if (!chat) {
       return 0;

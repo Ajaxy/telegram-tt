@@ -19,6 +19,7 @@
   > .profile-info > .ChatExtra {
     padding: 0.875rem 0.5rem 0.5rem;
 
+    @include mixins.adapt-padding-to-scrollbar(0.5rem);
     @include mixins.side-panel-section;
 
     .narrow {
@@ -46,18 +47,6 @@
     background: var(--color-background);
     top: -1px;
     z-index: 1;
-
-    .Tab {
-      padding: 1rem 0.75rem;
-
-      &_inner {
-        white-space: nowrap;
-      }
-
-      .platform {
-        bottom: -1rem;
-      }
-    }
   }
 
   .Transition {
@@ -83,11 +72,17 @@
 
     &.storiesArchive-list,
     &.stories-list,
-    &.media-list {
+    &.media-list,
+    &.previewMedia-list,
+    &.gifts-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-auto-rows: 1fr;
-      grid-gap: 0.0625rem;
+      gap: 0.0625rem;
+    }
+
+    &.gifts-list {
+      gap: 0.625rem;
     }
 
     &.documents-list {
@@ -127,24 +122,26 @@
     }
 
     &.similarChannels-list,
+    &.similarBots-list,
     &.commonChats-list,
-    &.members-list {
+    &.members-list,
+    &.gifts-list {
       padding: 0.5rem;
+
+      @include mixins.adapt-padding-to-scrollbar(0.5rem);
 
       @media (max-width: 600px) {
         padding: 0.5rem 0;
-
-        .ListItem.chat-item-clickable {
-          margin: 0;
-        }
       }
     }
 
+    &.similarBots-list,
     &.similarChannels-list {
       .ListItem.blured {
         filter: opacity(0.8);
       }
 
+      .show-more-bots,
       .show-more-channels {
         width: calc(100% - 1rem);
         margin: 0 auto;

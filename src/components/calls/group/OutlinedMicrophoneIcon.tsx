@@ -6,7 +6,7 @@ import type { GroupCallParticipant } from '../../../lib/secret-sauce';
 import { THRESHOLD } from '../../../lib/secret-sauce';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 
@@ -24,10 +24,10 @@ const OutlinedMicrophoneIcon: FC<OwnProps> = ({
   const { isMuted, isMutedByMe } = participant;
   const isSpeaking = (participant.amplitude || 0) > THRESHOLD;
   const isRaiseHand = Boolean(participant.raiseHandRating);
-  const prevIsRaiseHand = usePrevious(isRaiseHand);
+  const prevIsRaiseHand = usePreviousDeprecated(isRaiseHand);
   const canSelfUnmute = Boolean(participant?.canSelfUnmute);
   const shouldRaiseHand = !canSelfUnmute && isMuted;
-  const prevIsMuted = usePrevious(isMuted);
+  const prevIsMuted = usePreviousDeprecated(isMuted);
 
   const playSegment: [number, number] = useMemo(() => {
     if (isMuted && !prevIsMuted) {

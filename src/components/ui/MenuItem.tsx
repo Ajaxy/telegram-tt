@@ -10,11 +10,11 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
+
 import './MenuItem.scss';
 
 export type MenuItemProps = {
-  icon?: IconName | 'A' | 'K';
-  isCharIcon?: boolean;
   customIcon?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
@@ -28,7 +28,13 @@ export type MenuItemProps = {
   ariaLabel?: string;
   withWrap?: boolean;
   withPreventDefaultOnMouseDown?: boolean;
-};
+} & ({
+  icon: 'A' | 'K';
+  isCharIcon: true;
+} | {
+  icon?: IconName;
+  isCharIcon?: false;
+});
 
 const MenuItem: FC<MenuItemProps> = (props) => {
   const {
@@ -89,10 +95,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
   const content = (
     <>
       {!customIcon && icon && (
-        <i
-          className={isCharIcon ? 'icon icon-char' : `icon icon-${icon}`}
-          data-char={isCharIcon ? icon : undefined}
-        />
+        <Icon name={isCharIcon ? 'char' : icon} character={isCharIcon ? icon : undefined} />
       )}
       {customIcon}
       {children}

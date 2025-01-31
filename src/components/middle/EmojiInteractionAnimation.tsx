@@ -1,10 +1,11 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
+  beginHeavyAnimation,
   memo, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ActiveEmojiInteraction } from '../../global/types';
+import type { ActiveEmojiInteraction } from '../../types';
 
 import {
   selectAnimatedEmojiEffect,
@@ -13,7 +14,6 @@ import buildClassName from '../../util/buildClassName';
 import { IS_ANDROID } from '../../util/windowEnvironment';
 
 import useFlag from '../../hooks/useFlag';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 
@@ -74,11 +74,11 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
   }, [handleCancelAnimation]);
 
   useLayoutEffect(() => {
-    const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
+    const endHeavyAnimation = beginHeavyAnimation();
 
     timeoutRef.current = setTimeout(() => {
       stop();
-      dispatchHeavyAnimationStop();
+      endHeavyAnimation();
     }, PLAYING_DURATION);
   }, [stop]);
 

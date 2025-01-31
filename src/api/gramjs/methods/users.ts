@@ -2,15 +2,13 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiPeer, ApiSticker,
-  ApiUser, OnApiUpdate,
+  ApiChat, ApiPeer, ApiUser,
 } from '../../types';
 
-import { COMMON_CHATS_LIMIT } from '../../../config';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { buildApiPeerId } from '../apiBuilders/peers';
-import { buildApiUser, buildApiUserFullInfo, buildApiUsersAndStatuses } from '../apiBuilders/users';
+import { buildApiUser, buildApiUserFullInfo, buildApiUserStatuses } from '../apiBuilders/users';
 import {
   buildInputContact,
   buildInputEmojiStatus,
@@ -19,16 +17,11 @@ import {
   buildMtpPeerId,
   getEntityTypeById,
 } from '../gramjsBuilders';
-import { addEntitiesToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
+import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
-import { searchMessagesLocal } from './messages';
-
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
+import { searchMessagesInChat } from './messages';
 
 export async function fetchFullUser({
   id,
@@ -47,10 +40,6 @@ export async function fetchFullUser({
   if (!result) {
     return undefined;
   }
-
-  updateLocalDb(result);
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
 
   if (result.fullUser.profilePhoto) {
     addPhotoToLocalDb(result.fullUser.profilePhoto);
@@ -82,7 +71,7 @@ export async function fetchFullUser({
 
   const user = users.find(({ id: userId }) => userId === id)!;
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateUser',
     id,
     user,
@@ -97,32 +86,21 @@ export async function fetchFullUser({
   };
 }
 
-export async function fetchCommonChats(id: string, accessHash?: string, maxId?: string) {
-  const commonChats = await invokeRequest(new GramJs.messages.GetCommonChats({
-    userId: buildInputEntity(id, accessHash) as GramJs.InputUser,
+export async function fetchCommonChats(user: ApiUser, maxId?: string) {
+  const result = await invokeRequest(new GramJs.messages.GetCommonChats({
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
     maxId: maxId ? buildMtpPeerId(maxId, getEntityTypeById(maxId)) : undefined,
-    limit: COMMON_CHATS_LIMIT,
   }));
 
-  if (!commonChats) {
+  if (!result) {
     return undefined;
   }
 
-  updateLocalDb(commonChats);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const chatIds = chats.map(({ id: chatId }) => chatId);
+  const count = 'count' in result ? result.count : chatIds.length;
 
-  const chatIds: string[] = [];
-  const chats: ApiChat[] = [];
-
-  commonChats.chats.forEach((mtpChat) => {
-    const chat = buildApiChatFromPreview(mtpChat);
-
-    if (chat) {
-      chats.push(chat);
-      chatIds.push(chat.id);
-    }
-  });
-
-  return { chats, chatIds, isFullyLoaded: chatIds.length < COMMON_CHATS_LIMIT };
+  return { chatIds, count };
 }
 
 export async function fetchNearestCountry() {
@@ -139,12 +117,11 @@ export async function fetchTopUsers() {
     return undefined;
   }
 
-  const users = topPeers.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
+  const users = topPeers.users.map(buildApiUser).filter((user): user is ApiUser => Boolean(user) && !user.isSelf);
   const ids = users.map(({ id }) => id);
 
   return {
     ids,
-    users,
   };
 }
 
@@ -154,14 +131,12 @@ export async function fetchContactList() {
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-
-  const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
+  const users = result.users.map(buildApiUser).filter(Boolean) as ApiUser[];
+  const userStatusesById = buildApiUserStatuses(result.users);
 
   return {
     users,
     userStatusesById,
-    chats: result.users.map((user) => buildApiChatFromPreview(user)).filter(Boolean),
   };
 }
 
@@ -173,9 +148,13 @@ export async function fetchUsers({ users }: { users: ApiUser[] }) {
     return undefined;
   }
 
-  addEntitiesToLocalDb(result);
+  const apiUsers = result.map(buildApiUser).filter(Boolean) as ApiUser[];
+  const userStatusesById = buildApiUserStatuses(result);
 
-  return buildApiUsersAndStatuses(result);
+  return {
+    users: apiUsers,
+    userStatusesById,
+  };
 }
 
 export async function importContact({
@@ -246,7 +225,7 @@ export async function deleteContact({
     return;
   }
 
-  onUpdate({
+  sendApiUpdate({
     '@type': 'deleteContact',
     id,
   });
@@ -277,7 +256,7 @@ export async function fetchProfilePhotos({
       return undefined;
     }
 
-    updateLocalDb(result);
+    result.photos.forEach(addPhotoToLocalDb);
 
     const count = result instanceof GramJs.photos.PhotosSlice ? result.count : result.photos.length;
     const proposedNextOffsetId = offset + result.photos.length;
@@ -288,15 +267,14 @@ export async function fetchProfilePhotos({
       photos: result.photos
         .filter((photo): photo is GramJs.Photo => photo instanceof GramJs.Photo)
         .map((photo) => buildApiPhoto(photo)),
-      users: result.users.map(buildApiUser).filter(Boolean),
       nextOffsetId,
     };
   }
 
   if (chat?.isRestricted) return undefined;
 
-  const result = await searchMessagesLocal({
-    chat: chat!,
+  const result = await searchMessagesInChat({
+    peer,
     type: 'profilePhoto',
     limit,
   });
@@ -306,13 +284,12 @@ export async function fetchProfilePhotos({
   }
 
   const {
-    messages, users, totalCount, nextOffsetId,
+    messages, totalCount, nextOffsetId,
   } = result;
 
   return {
     count: totalCount,
     photos: messages.map((message) => message.content.action!.photo).filter(Boolean),
-    users,
     nextOffsetId,
   };
 }
@@ -327,9 +304,9 @@ export function reportSpam(userOrChat: ApiPeer) {
   });
 }
 
-export function updateEmojiStatus(emojiStatus: ApiSticker, expires?: number) {
+export function updateEmojiStatus(emojiStatusId: string, expires?: number) {
   return invokeRequest(new GramJs.account.UpdateEmojiStatus({
-    emojiStatus: buildInputEmojiStatus(emojiStatus, expires),
+    emojiStatus: buildInputEmojiStatus(emojiStatusId, expires),
   }), {
     shouldReturnTrue: true,
   });
@@ -341,18 +318,4 @@ export function saveCloseFriends(userIds: string[]) {
   return invokeRequest(new GramJs.contacts.EditCloseFriends({ id }), {
     shouldReturnTrue: true,
   });
-}
-
-function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice | GramJs.messages.Chats)) {
-  if ('chats' in result) {
-    addEntitiesToLocalDb(result.chats);
-  }
-
-  if ('photos' in result) {
-    result.photos.forEach(addPhotoToLocalDb);
-  }
-
-  if ('users' in result) {
-    addEntitiesToLocalDb(result.users);
-  }
 }

@@ -51,7 +51,7 @@ const SimilarChannels = ({
   isCurrentUserPremium,
 }: StateProps & OwnProps) => {
   const lang = useOldLang();
-  const { toggleChannelRecommendations } = getActions();
+  const { toggleChannelRecommendations, loadChannelRecommendations } = getActions();
   const [isShowing, markShowing, markNotShowing] = useFlag(false);
   const [isHiding, markHiding, markNotHiding] = useFlag(false);
   // eslint-disable-next-line no-null/no-null
@@ -68,6 +68,7 @@ const SimilarChannels = ({
   const [shoulRenderSkeleton, setShoulRenderSkeleton] = useState(!similarChannelIds);
   const firstSimilarChannels = useMemo(() => similarChannels?.slice(0, SHOW_CHANNELS_NUMBER), [similarChannels]);
   const areSimilarChannelsPresent = Boolean(firstSimilarChannels?.length);
+
   useHorizontalScroll(ref, !areSimilarChannelsPresent || !shouldShowInChat || shoulRenderSkeleton, true);
   const isAnimating = isHiding || isShowing;
   const shouldRenderChannels = Boolean(
@@ -75,6 +76,12 @@ const SimilarChannels = ({
       && (shouldShowInChat || isAnimating)
       && areSimilarChannelsPresent,
   );
+
+  useEffect(() => {
+    if (!similarChannelIds) {
+      loadChannelRecommendations({ chatId });
+    }
+  }, [chatId, similarChannelIds]);
 
   useTimeout(() => setShoulRenderSkeleton(false), MAX_SKELETON_DELAY);
 
@@ -176,7 +183,7 @@ function SimilarChannel({ channel }: { channel: ApiChat }) {
     <div className={styles.item} onClick={() => openChat({ id: channel.id })}>
       <Avatar className={styles.avatar} key={channel.id} size="large" peer={channel} />
       <div style={`background: ${color}`} className={styles.badge}>
-        <i className={buildClassName(styles.icon, 'icon icon-user-filled')} />
+        <Icon name="user-filled" className={styles.icon} />
         <span className={styles.membersCount}>{formatIntegerCompact(channel?.membersCount || 0)}
         </span>
       </div>

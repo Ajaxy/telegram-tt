@@ -3,15 +3,20 @@
   align-items: center;
   gap: 0.25rem;
 
-  .fullName {
-    margin-bottom: 0;
-
-    &.canCopy {
-      pointer-events: all;
-    }
-  }
-
   :global(.custom-emoji) {
     color: var(--color-primary);
   }
+}
+
+.fullName {
+  font-size: 1em;
+  margin-bottom: 0;
+
+  &.canCopy {
+    pointer-events: all;
+  }
+}
+
+.transition {
+  width: 1.5rem;
 }

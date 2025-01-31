@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiSticker, ApiStickerSetInfo, ApiVideo, OnApiUpdate,
+  ApiSticker, ApiStickerSetInfo, ApiVideo,
 } from '../../types';
 
 import { DEFAULT_GIF_SEARCH_BOT_USERNAME, RECENT_STATUS_LIMIT, RECENT_STICKERS_LIMIT } from '../../../config';
@@ -13,13 +13,8 @@ import {
 } from '../apiBuilders/symbols';
 import { buildInputDocument, buildInputStickerSet, buildInputStickerSetShortName } from '../gramjsBuilders';
 import localDb from '../localDb';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
-
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
 
 export async function fetchCustomEmojiSets({ hash = '0' }: { hash?: string }) {
   const allStickers = await invokeRequest(new GramJs.messages.GetEmojiStickers({ hash: BigInt(hash) }));
@@ -132,7 +127,7 @@ export async function faveSticker({
 
   const result = await invokeRequest(request);
   if (result) {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateFavoriteStickers',
     });
   }
@@ -325,7 +320,7 @@ export async function installStickerSet({ stickerSetId, accessHash }: { stickerS
   }));
 
   if (result) {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateStickerSet',
       id: stickerSetId,
       stickerSet: { installedDate: Date.now() },
@@ -339,7 +334,7 @@ export async function uninstallStickerSet({ stickerSetId, accessHash }: { sticke
   }));
 
   if (result) {
-    onUpdate({
+    sendApiUpdate({
       '@type': 'updateStickerSet',
       id: stickerSetId,
       stickerSet: { installedDate: undefined },

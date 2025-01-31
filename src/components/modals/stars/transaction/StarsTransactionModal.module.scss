@@ -1,0 +1,108 @@
+@use "../../../../styles/mixins";
+
+.modal {
+  z-index: calc(var(--z-modal-low-priority) + 1);
+
+  :global(.modal-dialog) {
+    overflow: hidden;
+  }
+}
+
+.positive {
+  color: var(--color-success);
+}
+
+.negative {
+  color: var(--color-error);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-block: 1rem;
+}
+
+.uniqueGift {
+  margin-block: 0;
+}
+
+.amount {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.325;
+}
+
+.title, .description, .amount {
+  margin-bottom: 0;
+}
+
+.title {
+  text-align: center;
+  text-wrap: balance;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  margin-top: 1rem;
+  line-height: 1.25;
+}
+
+.tid {
+  font-family: var(--font-family-monospace);
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  overflow: hidden;
+  white-space: nowrap;
+
+  @include mixins.gradient-border-right(3rem, 1rem);
+}
+
+.description {
+  text-align: center;
+}
+
+.footer {
+  text-align: center;
+  margin-block: 0.5rem;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.starsBackground {
+  position: absolute;
+  height: 7rem;
+  top: -0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+}
+
+.copyIcon {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+
+  margin-inline-start: 0.25rem;
+  color: var(--color-primary);
+  pointer-events: none;
+}
+
+.mediaPreview {
+  margin-block: 1.5rem 1rem;
+  cursor: var(--custom-cursor, pointer);
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.starGiftSticker {
+  height: 150px;
+  width: 150px;
+  position: relative;
+}

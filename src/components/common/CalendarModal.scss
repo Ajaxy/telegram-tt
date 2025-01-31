@@ -67,7 +67,7 @@
     position: relative;
     border-radius: 4rem;
     outline: none !important;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     margin: 0.125rem 0.625rem;
 
     @media (max-width: 600px) {

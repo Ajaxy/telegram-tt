@@ -66,6 +66,10 @@
     }
   }
 
+  .first-message-date-group {
+    padding-top: var(--middle-header-panes-height);
+  }
+
   &.no-composer {
     margin-bottom: 0;
 
@@ -88,6 +92,14 @@
 
       &.ActionMessage {
         padding-bottom: 0.125rem;
+      }
+    }
+
+    &:has(.sponsored-media-preview) {
+      margin-bottom: 5.625rem;
+
+      .last-in-list {
+        margin-bottom: 1rem;
       }
     }
   }
@@ -228,9 +240,9 @@
       background: var(--pattern-color);
       color: white;
       font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
-      font-weight: 500;
-      line-height: 1.75;
-      padding: 0 0.5rem;
+      font-weight: var(--font-weight-medium);
+      line-height: 1rem;
+      padding: 0.1875rem 0.5rem;
       border-radius: var(--border-radius-messages);
       word-break: break-word;
       position: relative;
@@ -238,8 +250,8 @@
 
       body.is-ios &,
       body.is-macos & {
-        font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
-        line-height: calc(var(--message-text-size, 1rem) + 0.2rem);
+        font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
+        line-height: calc(var(--message-text-size, 1rem) + 0.09375rem);
       }
 
       .emoji-small {
@@ -261,8 +273,14 @@
     align-items: center;
   }
 
+  .centered-action .action-message-content {
+    max-width: 17rem;
+  }
+
+  .web-page-gift,
   .action-message-gift {
     display: flex !important;
+    width: 13.75rem;
     flex-direction: column;
     align-items: center;
     line-height: 1rem !important;
@@ -270,17 +288,116 @@
     margin-top: 0.5rem;
     cursor: var(--custom-cursor, pointer);
     outline: none;
+    font-weight: var(--font-weight-semibold);
   }
 
-  .action-message-gift-code {
-    width: 20rem;
+  .web-page-gift {
+    position: relative;
+    min-width: 12.5rem;
+    width: 100%;
+    margin-top: 0;
+    padding-block: 2rem !important;
+    border-radius: 0.25rem;
+  }
+
+  .web-page-centered,
+  .action-message-centered {
     margin-inline: auto;
+  }
+
+  .web-page-unique,
+  .action-message-unique {
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -0.25rem;
+      background: var(--pattern-color);
+      border-radius: calc(var(--border-radius-messages) + 0.25rem);
+      z-index: -1;
+    }
+  }
+
+  .web-page-unique-background-wrapper,
+  .action-message-unique-background-wrapper {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  .web-page-unique-background,
+  .action-message-unique-background {
+    position: absolute;
+    inset: 0;
+    top: -6rem;
+  }
+  .web-page-unique-background {
+    top: -1rem;
+  }
+
+  .action-message-user-caption,
+  .action-message-stars-balance {
+    position: relative;
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+    line-height: 1.5;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .action-message-user-caption {
+    align-items: center;
+    font-size: 0.9375rem;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .action-message-unique-title {
+    position: relative;
+    font-size: 0.875rem;
+  }
+
+  .action-message-unique-properties {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    justify-content: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+
+    position: relative;
+
+    white-space: nowrap;
+  }
+
+  .action-message-unique-value {
+    color: white;
+    justify-self: flex-start;
+    width: 100%; // Grid ellipsis hack
+    text-align: initial;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .action-message-unique-property {
+    justify-self: flex-end;
+    font-weight: var(--font-weight-normal);
+  }
+
+  .action-message-user-avatar {
+    margin-left: 0.25rem;
   }
 
   .action-message-subtitle {
     margin-top: 1rem;
     font-weight: normal;
     text-wrap: balance;
+  }
+
+  .action-message-gift-subtitle {
+    position: relative;
+    font-weight: normal;
+    text-wrap: balance;
+    font-size: 0.8125rem;
   }
 
   .action-message-suggested-avatar {
@@ -301,12 +418,27 @@
     }
   }
 
-  .action-message-button {
-    display: inline-block;
-    border-radius: var(--border-radius-default);
-    padding: 0.5rem 0.75rem;
+  .action-message-updated-avatar {
+    background: transparent !important;
     margin-top: 0.5rem;
+    cursor: var(--custom-cursor, pointer);
+    outline: none;
+  }
+
+  .action-message-button {
+    position: relative;
+    display: inline-block;
+    border-radius: var(--border-radius-modal);
+    padding: 0.5rem 1.5rem;
+    margin-top: 0.6875rem;
     background-color: var(--pattern-color);
+    font-weight: var(--font-weight-semibold);
+    transition: opacity 0.15s;
+
+    &:hover,
+    &:focus {
+      opacity: 0.8;
+    }
   }
 
   .sticky-date {
@@ -345,15 +477,11 @@
 
   &.scrolled:not(.is-animating) .sticky-date {
     position: sticky;
-    top: 0.625rem;
+    top: calc(0.625rem + var(--middle-header-panes-height));
   }
 
   &.is-animating .message-select-control {
     display: none !important;
-  }
-
-  .has-header-tools & .sticky-date {
-    top: 3.75rem !important;
   }
 
   .local-action-message,

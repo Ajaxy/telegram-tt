@@ -24,7 +24,7 @@ export default function useCollapsibleLines<T extends HTMLElement, C extends HTM
 
   useLayoutEffect(() => {
     const element = (cutoutRef || ref).current;
-    if (isDisabled || !element) return;
+    if (isDisabled || !element || isFirstRenderRef.current) return;
 
     requestMutation(() => {
       element.style.maxHeight = isCollapsed ? `${cutoutHeightRef.current}px` : '';

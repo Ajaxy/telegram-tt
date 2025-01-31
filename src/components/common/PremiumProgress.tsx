@@ -21,15 +21,17 @@ type OwnProps = {
   floatingBadgeIcon?: IconName;
   floatingBadgeText?: string;
   progress?: number;
+  isPrimary?: boolean;
   className?: string;
 };
 
-const LimitPreview: FC<OwnProps> = ({
+const PremiumProgress: FC<OwnProps> = ({
   leftText,
   rightText,
   floatingBadgeText,
   floatingBadgeIcon,
   progress,
+  isPrimary,
   className,
 }) => {
   const lang = useOldLang();
@@ -78,6 +80,7 @@ const LimitPreview: FC<OwnProps> = ({
       className={buildClassName(
         styles.root,
         hasFloatingBadge && styles.withBadge,
+        isPrimary && styles.primary,
         className,
       )}
       style={buildStyle(
@@ -123,4 +126,4 @@ const LimitPreview: FC<OwnProps> = ({
   );
 };
 
-export default memo(LimitPreview);
+export default memo(PremiumProgress);

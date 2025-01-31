@@ -7,11 +7,11 @@ import { getActions, getGlobal } from '../../../global';
 import type { ApiChatlistInviteNew } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import renderText from '../../common/helpers/renderText';
 
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Badge from '../../ui/Badge';
 import Button from '../../ui/Button';
 
@@ -24,7 +24,8 @@ type OwnProps = {
 const ChatlistNew: FC<OwnProps> = ({ invite }) => {
   const { closeChatlistModal, joinChatlistInvite } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
+  const oldLang = useOldLang();
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(invite.peerIds);
 
   const joinedIds = useMemo(() => {
@@ -53,12 +54,12 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
   return (
     <div className={styles.content}>
       <div className={styles.description}>
-        {renderText(lang('FolderLinkSubtitle', invite.title), ['simple_markdown', 'emoji'])}
+        {lang('FolderLinkSubtitleNew')}
       </div>
       <div className={buildClassName(styles.pickerWrapper, 'custom-scroll')}>
         <div className={styles.pickerHeader}>
           <div className={styles.pickerHeaderInfo}>
-            {lang('FolderLinkHeaderChatsJoin', selectedCount, 'i')}
+            {oldLang('FolderLinkHeaderChatsJoin', selectedCount, 'i')}
           </div>
           <div
             className={styles.selectionToggle}
@@ -66,14 +67,17 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
             tabIndex={0}
             onClick={handleSelectionToggle}
           >
-            {selectedPeerIds.length === invite.peerIds.length ? lang('DeselectAll') : lang('SelectAll')}
+            {selectedPeerIds.length === invite.peerIds.length ? oldLang('DeselectAll') : oldLang('SelectAll')}
           </div>
         </div>
-        <Picker
+        <PeerPicker
           itemIds={invite.peerIds}
           lockedSelectedIds={joinedIds}
           onSelectedIdsChange={setSelectedPeerIds}
           selectedIds={selectedPeerIds}
+          allowMultiple
+          withStatus
+          itemInputType="checkbox"
         />
       </div>
       <Button
@@ -82,7 +86,7 @@ const ChatlistNew: FC<OwnProps> = ({ invite }) => {
         disabled={!selectedPeerIds.length}
       >
         <div className={styles.buttonText}>
-          {lang('FolderLinkButtonAdd', invite.title)}
+          {lang('FolderLinkAddFolder')}
           <Badge className={styles.buttonBadge} text={badgeText} isAlternateColor />
         </div>
       </Button>

@@ -1,0 +1,32 @@
+.root {
+  position: relative;
+}
+
+.avatarContainer {
+  position: absolute;
+  flex-direction: column-reverse;
+  display: flex;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+
+  transform: translateX(0);
+  transition: transform var(--select-transition);
+
+  :global(.select-mode-active) & {
+    transform: translateX(2.5rem);
+  }
+}
+
+.senderAvatar {
+  position: sticky !important;
+  bottom: 0.25rem;
+
+  :global(.select-mode-active) & {
+    bottom: 5rem;
+
+    @media (max-width: 600px) {
+      bottom: 3.6875rem;
+    }
+  }
+}

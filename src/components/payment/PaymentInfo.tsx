@@ -7,6 +7,7 @@ import React, {
 import type { ApiCountry } from '../../api/types';
 import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
+import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 
 import Checkbox from '../ui/Checkbox';
@@ -75,94 +76,97 @@ const PaymentInfo: FC<OwnProps> = ({
     dispatch({ type: 'changeSaveCredentials', payload: e.target.value });
   }, [dispatch]);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const { formErrors = {} } = state;
 
   return (
     <div className="PaymentInfo">
       <form>
-        <h5>{lang('PaymentCardTitle')}</h5>
+        <h5>{oldLang('PaymentCardTitle')}</h5>
         <CardInput
           onChange={handleCardNumberChange}
           value={state.cardNumber}
-          error={formErrors.cardNumber}
+          error={formErrors.cardNumber && lang.withRegular(formErrors.cardNumber)}
         />
-        { needCardholderName && (
+        {needCardholderName && (
           <InputText
-            label={lang('Checkout.NewCard.CardholderNamePlaceholder')}
+            label={oldLang('Checkout.NewCard.CardholderNamePlaceholder')}
             onChange={handleCardholderChange}
             value={state.cardholder}
             inputMode="text"
             tabIndex={0}
-            error={formErrors.cardholder}
+            error={formErrors.cardholder && lang.withRegular(formErrors.cardholder)}
           />
         )}
         <section className="inline-inputs">
           <ExpiryInput
             value={state.expiry}
             onChange={handleExpiryChange}
-            error={formErrors.expiry}
+            error={formErrors.expiry && lang.withRegular(formErrors.expiry)}
           />
           <InputText
-            label={lang('lng_payments_card_cvc')}
+            label={oldLang('lng_payments_card_cvc')}
             onChange={handleCvvChange}
             value={state.cvv}
             inputMode="numeric"
             maxLength={3}
             tabIndex={0}
-            error={formErrors.cvv}
+            error={formErrors.cvv && lang.withRegular(formErrors.cvv)}
             teactExperimentControlled
           />
         </section>
-        { needCountry || needZip ? (
-          <h5>{lang('PaymentBillingAddress')}</h5>
-        ) : undefined }
-        { needCountry && (
-          <Select
-            label={lang('PaymentShippingCountry')}
-            onChange={handleCountryChange}
-            value={state.billingCountry}
-            hasArrow={Boolean(true)}
-            id="billing-country"
-            error={formErrors.billingCountry}
+        {needCountry || needZip ? (
+          <h5>{oldLang('PaymentBillingAddress')}</h5>
+        ) : undefined}
+        <section className="inline-inputs">
+          {needCountry && (
+            <Select
+              label={oldLang('PaymentShippingCountry')}
+              onChange={handleCountryChange}
+              value={state.billingCountry}
+              hasArrow={Boolean(true)}
+              id="billing-country"
+              error={formErrors.billingCountry && lang.withRegular(formErrors.billingCountry)}
+              tabIndex={0}
+              ref={selectCountryRef}
+            >
+              {
+                countryList.map(({ defaultName, name }) => (
+                  <option
+                    value={defaultName}
+                    className="county-item"
+                    selected={defaultName === state.billingCountry}
+                  >
+                    {defaultName || name}
+                  </option>
+                ))
+              }
+            </Select>
+          )}
+          {needZip && (
+            <InputText
+              label={oldLang('PaymentShippingZipPlaceholder')}
+              onChange={handleBillingPostCodeChange}
+              value={state.billingZip}
+              inputMode="text"
+              tabIndex={0}
+              maxLength={12}
+              error={formErrors.billingZip && lang.withRegular(formErrors.billingZip)}
+            />
+          )}
+        </section>
+        <div className="checkbox">
+          <Checkbox
+            label={oldLang('PaymentCardSavePaymentInformation')}
+            checked={canSaveCredentials ? state.saveCredentials : false}
             tabIndex={0}
-            ref={selectCountryRef}
-          >
-            {
-              countryList.map(({ defaultName, name }) => (
-                <option
-                  value={defaultName}
-                  className="county-item"
-                  selected={defaultName === state.billingCountry}
-                >
-                  {defaultName || name}
-                </option>
-              ))
-            }
-          </Select>
-        ) }
-        { needZip && (
-          <InputText
-            label={lang('PaymentShippingZipPlaceholder')}
-            onChange={handleBillingPostCodeChange}
-            value={state.billingZip}
-            inputMode="text"
-            tabIndex={0}
-            maxLength={12}
-            error={formErrors.billingZip}
+            subLabel={oldLang(canSaveCredentials ? 'Checkout.NewCard.SaveInfoHelp' : 'Checkout.2FA.Text')}
+            onChange={handleChangeSaveCredentials}
+            disabled={!canSaveCredentials}
           />
-        )}
-        <Checkbox
-          label={lang('PaymentCardSavePaymentInformation')}
-          checked={canSaveCredentials ? state.saveCredentials : false}
-          tabIndex={0}
-          onChange={handleChangeSaveCredentials}
-          disabled={!canSaveCredentials}
-        />
-        <p className="description">
-          {lang(canSaveCredentials ? 'Checkout.NewCard.SaveInfoHelp' : 'Checkout.2FA.Text')}
-        </p>
+        </div>
       </form>
     </div>
   );

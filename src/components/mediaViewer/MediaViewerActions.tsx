@@ -2,8 +2,8 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ActiveDownloads, MessageListType } from '../../global/types';
-import type { MediaViewerOrigin } from '../../types';
+import type { ActiveDownloads, MediaViewerOrigin, MessageListType } from '../../types';
+import type { IconName } from '../../types/icons';
 import type { MenuItemProps } from '../ui/MenuItem';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
@@ -16,7 +16,7 @@ import {
 } from '../../global/helpers';
 import {
   selectActiveDownloads,
-  selectAllowedMessageActions,
+  selectAllowedMessageActionsSlow,
   selectCurrentMessageList,
   selectIsChatProtected,
   selectIsMessageProtected,
@@ -32,6 +32,7 @@ import useOldLang from '../../hooks/useOldLang';
 import useZoomChange from './hooks/useZoomChangeSignal';
 
 import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -54,9 +55,9 @@ type OwnProps = {
   mediaData?: string;
   isVideo: boolean;
   canUpdateMedia?: boolean;
-  canReport?: boolean;
+  canReportAvatar?: boolean;
   activeDownloads?: ActiveDownloads;
-  onReport: NoneToVoidFunction;
+  onReportAvatar: NoneToVoidFunction;
   onBeforeDelete: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
   onForward: NoneToVoidFunction;
@@ -68,13 +69,13 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   isVideo,
   isChatProtected,
   isProtected,
-  canReport,
+  canReportAvatar,
   canDelete,
   canUpdate,
   messageListType,
   activeDownloads,
   origin,
-  onReport,
+  onReportAvatar: onReport,
   onCloseMediaViewer,
   onBeforeDelete,
   onForward,
@@ -110,7 +111,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     if (isDownloading) {
       cancelMediaDownload({ media });
     } else {
-      downloadMedia({ media });
+      const message = item?.type === 'message' ? item.message : undefined;
+      downloadMedia({ media, originMessage: message });
     }
   });
 
@@ -128,8 +130,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
   const handleUpdate = useLastCallback(() => {
     if (item?.type !== 'avatar') return;
-    const { avatarOwner, mediaIndex } = item;
-    const avatarPhoto = avatarOwner.profilePhotos?.photos[mediaIndex]!;
+    const { avatarOwner, profilePhotos, mediaIndex } = item;
+    const avatarPhoto = profilePhotos?.photos[mediaIndex]!;
     if (isUserId(avatarOwner.id)) {
       updateProfilePhoto({ photo: avatarPhoto });
     } else {
@@ -158,7 +160,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, []);
@@ -170,7 +172,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         onClose={closeDeleteModal}
         onConfirm={onBeforeDelete}
         profileId={item.avatarOwner.id}
-        photo={item.avatarOwner.profilePhotos!.photos[item.mediaIndex!]}
+        photo={item.profilePhotos.photos[item.mediaIndex!]}
       />
     ) : undefined;
   }
@@ -180,7 +182,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    return isVideo ? (
+    return item?.type !== 'sponsoredMessage' && (isVideo ? (
       <Button
         round
         size="smaller"
@@ -191,7 +193,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         {isDownloading ? (
           <ProgressSpinner progress={downloadProgress} size="s" onClick={handleDownloadClick} />
         ) : (
-          <i className="icon icon-download" />
+          <Icon name="download" />
         )}
       </Button>
     ) : (
@@ -203,9 +205,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         color="translucent-white"
         ariaLabel={lang('AccActionDownload')}
       >
-        <i className="icon icon-download" />
+        <Icon name="download" />
       </Button>
-    );
+    ));
   }
 
   const openDeleteModalHandler = useLastCallback(() => {
@@ -246,7 +248,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       }
     }
 
-    if (canReport) {
+    if (canReportAvatar) {
       menuItems.push({
         icon: 'flag',
         onClick: onReport,
@@ -286,7 +288,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           }) => (
             <MenuItem
               key={icon}
-              icon={icon}
+              icon={icon as IconName}
               href={href}
               download={download}
               onClick={onClick}
@@ -312,7 +314,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('Forward')}
           onClick={onForward}
         >
-          <i className="icon icon-forward" />
+          <Icon name="forward" />
         </Button>
       )}
       {renderDownloadButton()}
@@ -323,7 +325,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('MediaZoomOut')}
         onClick={handleZoomOut}
       >
-        <i className="icon icon-zoom-out" />
+        <Icon name="zoom-out" />
       </Button>
       <Button
         round
@@ -332,9 +334,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('MediaZoomIn')}
         onClick={handleZoomIn}
       >
-        <i className="icon icon-zoom-in" />
+        <Icon name="zoom-in" />
       </Button>
-      {canReport && (
+      {canReportAvatar && (
         <Button
           round
           size="smaller"
@@ -342,7 +344,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang(isVideo ? 'PeerInfo.ReportProfileVideo' : 'PeerInfo.ReportProfilePhoto')}
           onClick={onReport}
         >
-          <i className="icon icon-flag" />
+          <Icon name="flag" />
         </Button>
       )}
       {canUpdate && (
@@ -353,7 +355,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('ProfilePhoto.SetMainPhoto')}
           onClick={handleUpdate}
         >
-          <i className="icon icon-copy-media" />
+          <Icon name="copy-media" />
         </Button>
       )}
       {canDelete && (
@@ -364,7 +366,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('Delete')}
           onClick={openDeleteModalHandler}
         >
-          <i className="icon icon-delete" />
+          <Icon name="delete" />
         </Button>
       )}
       <Button
@@ -374,7 +376,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('Close')}
         onClick={onCloseMediaViewer}
       >
-        <i className="icon icon-close" />
+        <Icon name="close" />
       </Button>
       {canDelete && renderDeleteModal()}
     </div>
@@ -390,7 +392,7 @@ export default memo(withGlobal<OwnProps>(
 
     const message = item?.type === 'message' ? item.message : undefined;
     const avatarOwner = item?.type === 'avatar' ? item.avatarOwner : undefined;
-    const avatarPhoto = avatarOwner?.profilePhotos?.photos[item!.mediaIndex!];
+    const avatarPhoto = item?.type === 'avatar' && item.profilePhotos.photos[item.mediaIndex];
 
     const currentMessageList = selectCurrentMessageList(global);
     const { threadId } = selectCurrentMessageList(global) || {};
@@ -398,7 +400,7 @@ export default memo(withGlobal<OwnProps>(
     const activeDownloads = selectActiveDownloads(global);
     const isChatProtected = message && selectIsChatProtected(global, message?.chatId);
     const { canDelete: canDeleteMessage } = (threadId
-      && message && selectAllowedMessageActions(global, message, threadId)) || {};
+      && message && selectAllowedMessageActionsSlow(global, message, threadId)) || {};
     const isCurrentAvatar = avatarPhoto && (avatarPhoto.id === avatarOwner?.avatarPhotoId);
     const canDeleteAvatar = canUpdateMedia && Boolean(avatarPhoto);
     const canDelete = canDeleteMessage || canDeleteAvatar;

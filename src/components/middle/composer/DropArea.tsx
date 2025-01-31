@@ -12,8 +12,8 @@ import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferIte
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
-import useShowTransition from '../../../hooks/useShowTransition';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import Portal from '../../ui/Portal';
 import DropTarget from './DropTarget';
@@ -43,8 +43,8 @@ const DropArea: FC<OwnProps> = ({
   const { showNotification } = getActions();
   // eslint-disable-next-line no-null/no-null
   const hideTimeoutRef = useRef<number>(null);
-  const prevWithQuick = usePrevious(withQuick);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
+  const prevWithQuick = usePreviousDeprecated(withQuick);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const isInAlbum = editingMessage && editingMessage?.groupedId;
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);
@@ -117,7 +117,7 @@ const DropArea: FC<OwnProps> = ({
   );
 
   return (
-    <Portal containerId="#middle-column-portals">
+    <Portal containerSelector="#middle-column-portals">
       <div
         className={className}
         onDragLeave={handleDragLeave}

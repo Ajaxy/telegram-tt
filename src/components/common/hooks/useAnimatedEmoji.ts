@@ -1,7 +1,7 @@
 import { useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ActiveEmojiInteraction } from '../../../global/types';
+import type { ActiveEmojiInteraction } from '../../../types';
 
 import buildStyle from '../../../util/buildStyle';
 import safePlay from '../../../util/safePlay';

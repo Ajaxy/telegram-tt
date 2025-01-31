@@ -34,7 +34,7 @@
 
 .title {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.5rem;
 }
 
@@ -196,7 +196,7 @@
 
 .members-count {
   font-size: 0.5625rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
   line-height: 0.6875rem;
 }
 
@@ -204,7 +204,7 @@
   text-align: center;
   height: 1.625rem;
   font-size: 0.6875rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
   line-height: 0.8125rem;
   max-width: 3.4375rem;
   margin-top: 0.125rem;

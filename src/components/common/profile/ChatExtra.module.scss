@@ -1,6 +1,6 @@
 .businessLocation {
-  width: 4rem;
-  height: 4rem;
+  width: 3rem;
+  height: 3rem;
   object-fit: cover;
   border-radius: 0.25rem;
   flex-shrink: 0;
@@ -24,6 +24,21 @@
   margin-bottom: 0;
 }
 
+.botVerificationSection,
+.sectionInfo {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.botVerificationSection {
+  padding-inline: 1.25rem;
+}
+
+.botVerificationIcon {
+  --custom-emoji-size: 1rem;
+  margin-inline-end: 0.25rem;
+}
+
 .personalChannelSubscribers {
   grid-column: 2;
   grid-row: 1;
@@ -35,4 +50,13 @@
 .personalChannelItem {
   grid-column: 1 / span 2;
   grid-row: 2;
+
+  :global(.Avatar) {
+    margin-right: 0.9375rem !important;
+  }
+}
+
+.openAppButton {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }

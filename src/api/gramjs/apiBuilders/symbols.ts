@@ -7,7 +7,7 @@ import type {
 import { LOTTIE_STICKER_MIME_TYPE, VIDEO_STICKER_MIME_TYPE } from '../../../config';
 import { compact } from '../../../util/iteratees';
 import localDb from '../localDb';
-import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
+import { buildApiPhotoPreviewSizes, buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
 
 export function buildStickerFromDocument(document: GramJs.TypeDocument,
   isNoPremium?: boolean, isPremium?: boolean): ApiSticker | undefined {
@@ -73,6 +73,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument,
   ) : pathThumb && sizeAttribute ? (
     buildApiThumbnailFromPath(pathThumb, sizeAttribute)
   ) : undefined;
+  const previewPhotoSizes = document.thumbs && buildApiPhotoPreviewSizes(document.thumbs);
 
   const { w: width, h: height } = cachedThumb as GramJs.PhotoCachedSize || sizeAttribute || {};
 
@@ -94,6 +95,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument,
     hasEffect,
     isFree,
     shouldUseTextColor,
+    previewPhotoSizes,
   };
 }
 

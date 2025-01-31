@@ -19,8 +19,9 @@ import { selectCurrentLimit } from '../../../global/selectors/limits';
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
+import Icon from '../../common/icons/Icon';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
 import UsernameInput from '../../common/UsernameInput';
@@ -82,7 +83,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   const [isRevokeConfirmDialogOpen, openRevokeConfirmDialog, closeRevokeConfirmDialog] = useFlag();
   const [isUsernameLostDialogOpen, openUsernameLostDialog, closeUsernameLostDialog] = useFlag();
 
-  const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
+  const previousIsUsernameAvailable = usePreviousDeprecated(isUsernameAvailable);
   const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
 
   const canUpdate = isProfileFieldsTouched && Boolean(
@@ -265,7 +266,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
             options={forwardingOptions}
             onChange={handleForwardingOptionChange}
           />
-          <p className="section-info">
+          <p className="section-info section-info_push">
             {isChannel
               ? lang('ChannelVisibility.Forwarding.ChannelInfo')
               : lang('ChannelVisibility.Forwarding.GroupInfo')}
@@ -281,7 +282,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
       <ConfirmDialog

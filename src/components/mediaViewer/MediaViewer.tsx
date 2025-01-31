@@ -1,15 +1,21 @@
 import React, {
+  beginHeavyAnimation,
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
   ApiChat,
-  ApiMessage, ApiPeer, ApiPhoto,
+  ApiMessage,
+  ApiPeer,
+  ApiPeerPhotos,
+  ApiPhoto,
+  ApiSponsoredMessage,
 } from '../../api/types';
 import { type MediaViewerMedia, MediaViewerOrigin, type ThreadId } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getChatMediaMessageIds, getMessagePaidMedia, isChatAdmin, isUserId,
 } from '../../global/helpers';
@@ -23,8 +29,9 @@ import {
   selectListedIds,
   selectOutlyingListByMessageId,
   selectPeer,
+  selectPeerPhotos,
   selectPerformanceSettingsValue,
-  selectScheduledMessage,
+  selectScheduledMessage, selectSponsoredMessage,
   selectTabState,
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
@@ -39,15 +46,15 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useElectronDrag from '../../hooks/useElectronDrag';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import { exitPictureInPictureIfNeeded, usePictureInPictureSignal } from '../../hooks/usePictureInPicture';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
 
-import ReportModal from '../common/ReportModal';
+import Icon from '../common/icons/Icon';
+import ReportAvatarModal from '../common/ReportAvatarModal';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
 import Transition from '../ui/Transition';
@@ -68,7 +75,9 @@ type StateProps = {
   origin?: MediaViewerOrigin;
   avatar?: ApiPhoto;
   avatarOwner?: ApiPeer;
+  profilePhotos?: ApiPeerPhotos;
   chatMessages?: Record<number, ApiMessage>;
+  sponsoredMessage?: ApiSponsoredMessage;
   standaloneMedia?: MediaViewerMedia[];
   mediaIndex?: number;
   isHidden?: boolean;
@@ -93,7 +102,9 @@ const MediaViewer = ({
   origin,
   avatar,
   avatarOwner,
+  profilePhotos,
   chatMessages,
+  sponsoredMessage,
   standaloneMedia,
   mediaIndex,
   withAnimation,
@@ -111,23 +122,25 @@ const MediaViewer = ({
     toggleChatInfo,
     searchChatMediaMessages,
     loadMoreProfilePhotos,
+    clickSponsoredMessage,
+    openUrl,
   } = getActions();
 
-  const isOpen = Boolean(avatarOwner || message || standaloneMedia);
+  const isOpen = Boolean(avatarOwner || message || standaloneMedia || sponsoredMessage);
   const { isMobile } = useAppLayout();
 
   /* Animation */
   const animationKey = useRef<number>();
-  const senderId = message?.senderId || avatarOwner?.id;
-  const prevSenderId = usePrevious<string | undefined>(senderId);
+  const senderId = message?.senderId || avatarOwner?.id || message?.chatId;
+  const prevSenderId = usePreviousDeprecated<string | undefined>(senderId);
   const headerAnimation = withAnimation ? 'slideFade' : 'none';
   const isGhostAnimation = Boolean(withAnimation && !shouldSkipHistoryAnimations);
 
   /* Controls */
-  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
+  const [isReportAvatarModalOpen, openReportAvatarModal, closeReportAvatarModal] = useFlag();
 
   const currentItem = getMediaViewerItem({
-    message, avatarOwner, standaloneMedia, mediaIndex,
+    message, avatarOwner, standaloneMedia, profilePhotos, mediaIndex, sponsoredMessage,
   });
   const { media, isSingle } = getViewableMedia(currentItem) || {};
 
@@ -143,7 +156,13 @@ const MediaViewer = ({
     media, isAvatar: Boolean(avatarOwner), origin, delay: isGhostAnimation && ANIMATION_DURATION,
   });
 
-  const canReport = avatarOwner && !isChatWithSelf;
+  const canReportAvatar = (() => {
+    if (isChatWithSelf) return false;
+    if (currentItem?.type !== 'avatar' || !avatarOwner) return false;
+    const info = currentItem.profilePhotos;
+    if (media === info.personalPhoto) return false;
+    return true;
+  })();
   const isVisible = !isHidden && isOpen;
 
   const messageMediaIds = useMemo(() => {
@@ -180,7 +199,9 @@ const MediaViewer = ({
 
   useEffect(() => {
     if (isMobile) {
-      document.body.classList.toggle('is-media-viewer-open', isOpen);
+      requestMutation(() => {
+        document.body.classList.toggle('is-media-viewer-open', isOpen);
+      });
     }
   }, [isMobile, isOpen]);
 
@@ -198,23 +219,23 @@ const MediaViewer = ({
     };
   }, [forceUpdate]);
 
-  const prevMessage = usePrevious<ApiMessage | undefined>(message);
-  const prevIsHidden = usePrevious<boolean | undefined>(isHidden);
-  const prevOrigin = usePrevious(origin);
-  const prevItem = usePrevious(currentItem);
-  const prevBestImageData = usePrevious(bestImageData);
+  const prevMessage = usePreviousDeprecated<ApiMessage | undefined>(message);
+  const prevIsHidden = usePreviousDeprecated<boolean | undefined>(isHidden);
+  const prevOrigin = usePreviousDeprecated(origin);
+  const prevItem = usePreviousDeprecated(currentItem);
+  const prevBestImageData = usePreviousDeprecated(bestImageData);
   const textParts = message ? renderMessageText({ message, forcePlayback: true, isForMediaViewer: true }) : undefined;
   const hasFooter = Boolean(textParts);
   const shouldAnimateOpening = prevIsHidden && prevItem !== currentItem;
 
   useEffect(() => {
     if (isGhostAnimation && isOpen && (shouldAnimateOpening || !prevItem)) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateOpening(hasFooter, origin!, bestImageData!, dimensions!, isVideo, message, mediaIndex);
     }
 
     if (isGhostAnimation && !isOpen && prevItem) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      beginHeavyAnimation(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(prevOrigin!, prevBestImageData!, prevMessage, prevItem?.mediaIndex);
     }
   }, [
@@ -239,6 +260,14 @@ const MediaViewer = ({
     }
   });
 
+  const handleSponsoredClick = useLastCallback((isFromMedia?: boolean) => {
+    if (!sponsoredMessage || !chatId) return;
+
+    clickSponsoredMessage({ isMedia: isFromMedia, isFullscreen: true, peerId: chatId });
+    openUrl({ url: sponsoredMessage!.url });
+    closeMediaViewer();
+  });
+
   const handleForward = useLastCallback(() => {
     openForwardMenu({
       fromChatId: chatId!,
@@ -260,7 +289,7 @@ const MediaViewer = ({
     if (!item || isLoadingMoreMedia) return;
 
     if (item.type === 'avatar') {
-      const isNearEnd = item.mediaIndex >= item.avatarOwner.profilePhotos!.photos.length - AVATAR_LOAD_TRIGGER;
+      const isNearEnd = item.mediaIndex >= item.profilePhotos.photos.length - AVATAR_LOAD_TRIGGER;
       if (!isNearEnd) return;
       loadMoreProfilePhotos({ peerId: item.avatarOwner.id });
     }
@@ -284,10 +313,25 @@ const MediaViewer = ({
     }
 
     if (from.type === 'avatar') {
-      const { avatarOwner: fromAvatarOwner, mediaIndex: fromMediaIndex } = from;
+      const { avatarOwner: fromAvatarOwner, profilePhotos: fromProfilePhotos, mediaIndex: fromMediaIndex } = from;
       const nextIndex = fromMediaIndex + direction;
-      if (nextIndex >= 0 && fromAvatarOwner.profilePhotos && nextIndex < fromAvatarOwner.profilePhotos.photos.length) {
-        return { type: 'avatar', avatarOwner: fromAvatarOwner, mediaIndex: nextIndex };
+      if (nextIndex >= 0 && fromProfilePhotos && nextIndex < fromProfilePhotos.photos.length) {
+        return {
+          type: 'avatar',
+          avatarOwner: fromAvatarOwner,
+          profilePhotos: fromProfilePhotos,
+          mediaIndex: nextIndex,
+        };
+      }
+
+      return undefined;
+    }
+
+    if (from.type === 'sponsoredMessage') {
+      const { message: fromSponsoredMessage, mediaIndex: fromSponsoredMessageIndex } = from;
+      const nextIndex = fromSponsoredMessageIndex! + direction;
+      if (nextIndex >= 0 && fromSponsoredMessage) {
+        return { type: 'sponsoredMessage', message: fromSponsoredMessage, mediaIndex: nextIndex };
       }
 
       return undefined;
@@ -342,7 +386,7 @@ const MediaViewer = ({
   });
 
   const handleBeforeDelete = useLastCallback(() => {
-    const mediaCount = avatarOwner?.profilePhotos?.photos.length
+    const mediaCount = profilePhotos?.photos.length
       || standaloneMedia?.length || messageMediaIds?.length || 0;
     if (mediaCount <= 1 || !currentItem) {
       handleClose();
@@ -383,7 +427,7 @@ const MediaViewer = ({
             ariaLabel={lang('Close')}
             onClick={handleClose}
           >
-            <i className="icon icon-close" />
+            <Icon name="close" />
           </Button>
         )}
         <Transition activeKey={animationKey.current!} name={headerAnimation}>
@@ -397,16 +441,15 @@ const MediaViewer = ({
           isVideo={isVideo}
           item={currentItem}
           canUpdateMedia={canUpdateMedia}
-          canReport={canReport}
+          canReportAvatar={canReportAvatar}
           onBeforeDelete={handleBeforeDelete}
-          onReport={openReportModal}
+          onReportAvatar={openReportAvatarModal}
           onCloseMediaViewer={handleClose}
           onForward={handleForward}
         />
-        <ReportModal
-          isOpen={isReportModalOpen}
-          onClose={closeReportModal}
-          subject="media"
+        <ReportAvatarModal
+          isOpen={isReportAvatarModalOpen}
+          onClose={closeReportAvatarModal}
           photo={avatar}
           peerId={avatarOwner?.id}
         />
@@ -431,6 +474,7 @@ const MediaViewer = ({
         selectItem={openMediaViewerItem}
         isHidden={isHidden}
         onFooterClick={handleFooterClick}
+        handleSponsoredClick={handleSponsoredClick}
       />
     </ShowTransition>
   );
@@ -449,6 +493,7 @@ export default memo(withGlobal(
       standaloneMedia,
       mediaIndex,
       isAvatarView,
+      isSponsoredMessage,
     } = mediaViewer;
     const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
@@ -462,9 +507,10 @@ export default memo(withGlobal(
         canUpdateMedia = isUserId(peer.id) ? peer.id === currentUserId : isChatAdmin(peer as ApiChat);
       }
 
-      const profilePhotos = peer?.profilePhotos;
+      const profilePhotos = selectPeerPhotos(global, chatId!);
 
       return {
+        profilePhotos,
         avatar: profilePhotos?.photos[mediaIndex!],
         avatarOwner: peer,
         isLoadingMoreMedia: profilePhotos?.isLoading,
@@ -486,6 +532,13 @@ export default memo(withGlobal(
         message = selectScheduledMessage(global, chatId, messageId);
       } else {
         message = selectChatMessage(global, chatId, messageId);
+      }
+    }
+
+    let sponsoredMessage: ApiSponsoredMessage | undefined;
+    if (isSponsoredMessage && chatId) {
+      if (origin === MediaViewerOrigin.SponsoredMessage) {
+        sponsoredMessage = selectSponsoredMessage(global, chatId);
       }
     }
 
@@ -528,6 +581,7 @@ export default memo(withGlobal(
       origin,
       message,
       chatMessages,
+      sponsoredMessage,
       collectedMessageIds,
       withAnimation,
       isHidden,

@@ -19,7 +19,7 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import Icon from '../../../common/icons/Icon';
-import Picker from '../../../common/Picker';
+import PeerPicker from '../../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import Loading from '../../../ui/Loading';
 
@@ -128,6 +128,7 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
         },
       });
     }
+    setIsTouched(true);
   });
 
   useHistoryBack({
@@ -141,7 +142,7 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="Picker settings-folders-chat-list">
-      <Picker
+      <PeerPicker
         categories={shouldHideChatTypes ? undefined : chatTypes}
         itemIds={displayedIds}
         selectedIds={selectedChatIds}
@@ -151,7 +152,10 @@ const SettingsFoldersChatFilters: FC<OwnProps & StateProps> = ({
         categoryPlaceholderKey="FilterChatTypes"
         searchInputId="new-group-picker-search"
         isSearchable
-        isRoundCheckbox
+        withDefaultPadding
+        withPeerTypes
+        allowMultiple
+        itemInputType="checkbox"
         onSelectedIdsChange={handleSelectedIdsChange}
         onSelectedCategoriesChange={handleSelectedChatTypesChange}
         onFilterChange={handleFilterChange}

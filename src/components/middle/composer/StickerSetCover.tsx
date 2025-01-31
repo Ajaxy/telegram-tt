@@ -17,7 +17,7 @@ import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorList
 import useCoordsInSharedCanvas from '../../../hooks/useCoordsInSharedCanvas';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
-import useMediaTransition from '../../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
 import useCustomEmoji from '../../common/hooks/useCustomEmoji';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -68,7 +68,7 @@ const StickerSetCover: FC<OwnProps> = ({
   const mediaHash = ((hasThumbnail && !shouldFallbackToStatic) || hasAnimatedThumb) && `stickerSet${stickerSet.id}`;
   const mediaData = useMedia(mediaHash, !isIntersecting);
   const isReady = thumbCustomEmojiId || mediaData || staticMediaData;
-  const transitionClassNames = useMediaTransition(isReady);
+  const transitionClassNames = useMediaTransitionDeprecated(isReady);
 
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 

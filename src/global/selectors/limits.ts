@@ -1,4 +1,5 @@
-import type { ApiLimitType, GlobalState } from '../types';
+import type { ApiLimitType } from '../../api/types';
+import type { GlobalState } from '../types';
 
 import { DEFAULT_LIMITS } from '../../config';
 import { selectIsCurrentUserPremium } from './users';

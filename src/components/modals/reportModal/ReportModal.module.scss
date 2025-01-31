@@ -1,0 +1,96 @@
+.slide { // Do not remove .slide, identifier used in JS
+  overflow-x: hidden;
+}
+
+.root {
+  :global(.modal-dialog) {
+    max-width: 23rem;
+  }
+}
+
+.content {
+  padding: 0.5rem !important;
+}
+
+.modalTitle {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+}
+
+.optionText {
+  width: 100%;
+  overflow: hidden;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.option {
+  margin-bottom: 0 !important;
+}
+
+.optionButton {
+  padding-block: 0 !important;
+  padding: 0 0 0 1rem !important;
+}
+
+.sectionTitle {
+  color: var(--color-primary);
+  padding-inline: 1rem;
+  margin-top: 0.75rem;
+  font-weight: var(--font-weight-medium);
+  font-size: 1rem;
+}
+
+.description {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  color: var(--color-text-secondary);
+  padding-inline: 1rem;
+}
+
+.title {
+  margin-bottom: 0;
+  font-size: 1.1875rem;
+}
+
+.hasDepth {
+  margin-top: 0;
+}
+
+.titleMultiline > .title {
+  font-size: 1rem;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.transition {
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.25s ease-in-out;
+  overflow: hidden;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.optionInfo {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.reportIcon {
+  margin-bottom: 2rem;
+}

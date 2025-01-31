@@ -1,29 +1,15 @@
-import { Api as GramJs, errors } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { OnApiUpdate } from '../../types';
-
-import { DEBUG } from '../../../config';
-import { getTmpPassword, invokeRequest, updateTwoFaSettings } from './client';
-
-const ApiErrors: { [k: string]: string } = {
-  EMAIL_UNCONFIRMED: 'Email unconfirmed',
-  EMAIL_HASH_EXPIRED: 'Email hash expired',
-  NEW_SALT_INVALID: 'The new salt is invalid',
-  NEW_SETTINGS_INVALID: 'The new password settings are invalid',
-  CODE_INVALID: 'Invalid Code',
-  PASSWORD_HASH_INVALID: 'Invalid Password',
-};
+import { checkErrorType, wrapError } from '../helpers/misc';
+import { sendApiUpdate } from '../updates/apiUpdateEmitter';
+import {
+  getCurrentPassword, getTmpPassword, invokeRequest, updateTwoFaSettings,
+} from './client';
 
 const emailCodeController: {
   resolve?: Function;
   reject?: Function;
 } = {};
-
-let onUpdate: OnApiUpdate;
-
-export function init(_onUpdate: OnApiUpdate) {
-  onUpdate = _onUpdate;
-}
 
 export async function getPasswordInfo() {
   const result = await invokeRequest(new GramJs.account.GetPassword());
@@ -37,7 +23,7 @@ export async function getPasswordInfo() {
 }
 
 function onRequestEmailCode(length: number) {
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateTwoFaStateWaitCode',
     length,
   });
@@ -49,7 +35,23 @@ function onRequestEmailCode(length: number) {
 }
 
 export function getTemporaryPaymentPassword(password: string, ttl?: number) {
-  return getTmpPassword(password, ttl);
+  try {
+    return getTmpPassword(password, ttl);
+  } catch (err: unknown) {
+    if (!checkErrorType(err)) return undefined;
+
+    return Promise.resolve(wrapError(err));
+  }
+}
+
+export function getPassword(password: string) {
+  try {
+    return getCurrentPassword(password);
+  } catch (err: unknown) {
+    if (!checkErrorType(err)) return undefined;
+
+    return Promise.resolve(wrapError(err));
+  }
 }
 
 export async function checkPassword(currentPassword: string) {
@@ -118,26 +120,10 @@ export function provideRecoveryEmailCode(code: string) {
 }
 
 function onError(err: Error) {
-  let message: string;
+  const wrappedError = wrapError(err);
 
-  if (err instanceof errors.FloodWaitError) {
-    const hours = Math.ceil(Number(err.seconds) / 60 / 60);
-    message = `Too many attempts. Try again in ${hours > 1 ? `${hours} hours` : 'an hour'}`;
-  } else {
-    message = ApiErrors[err.message];
-  }
-
-  if (!message) {
-    message = 'Unexpected Error';
-
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }
-
-  onUpdate({
+  sendApiUpdate({
     '@type': 'updateTwoFaError',
-    message,
+    messageKey: wrappedError.messageKey,
   });
 }

@@ -138,6 +138,7 @@
 
   &.has-inline-buttons {
     .message-content {
+      --border-bottom-left-radius: var(--border-radius-messages-small);
       --border-bottom-right-radius: var(--border-radius-messages-small);
     }
   }
@@ -266,6 +267,10 @@
       transform: scale(0.3) translateX(var(--deleting-translate-x));
       transform-origin: bottom;
     }
+  }
+
+  &.is-dissolving {
+    visibility: hidden;
   }
 
   &.is-story-mention {
@@ -731,6 +736,10 @@
     width: 1px;
     visibility: hidden;
   }
+
+  .giveaway-result-content {
+    min-width: 17rem;
+  }
 }
 
 // Border-radius styles
@@ -753,8 +762,4 @@
 
 .media-inner {
   overflow: hidden;
-}
-
-.Message .custom-shape .message-action-button {
-  bottom: 0.25rem;
 }

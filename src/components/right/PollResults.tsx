@@ -2,10 +2,11 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { ApiChat, ApiMessage } from '../../api/types';
+import type { ApiChat, ApiMessage, ApiPoll } from '../../api/types';
 
-import { getMessagePoll } from '../../global/helpers';
-import { selectChat, selectChatMessage, selectTabState } from '../../global/selectors';
+import {
+  selectChat, selectChatMessage, selectPollFromMessage, selectTabState,
+} from '../../global/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
@@ -25,12 +26,14 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   message?: ApiMessage;
+  poll?: ApiPoll;
 };
 
 const PollResults: FC<OwnProps & StateProps> = ({
   isActive,
   chat,
   message,
+  poll,
   onClose,
 }) => {
   const lang = useOldLang();
@@ -40,11 +43,11 @@ const PollResults: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  if (!message || !chat) {
+  if (!message || !poll || !chat) {
     return <Loading />;
   }
 
-  const { summary, results } = getMessagePoll(message)!;
+  const { summary, results } = poll;
   if (!results.results) {
     return undefined;
   }
@@ -62,7 +65,7 @@ const PollResults: FC<OwnProps & StateProps> = ({
       <div className="poll-results-list custom-scroll">
         {summary.answers.map((answer) => (
           <PollAnswerResults
-            key={`${message.id}-${answer.option}`}
+            key={`${poll.id}-${answer.option}`}
             chat={chat}
             message={message}
             answer={answer}
@@ -87,10 +90,12 @@ export default memo(withGlobal(
 
     const chat = selectChat(global, chatId);
     const message = selectChatMessage(global, chatId, messageId);
+    const poll = message && selectPollFromMessage(global, message);
 
     return {
       chat,
       message,
+      poll,
     };
   },
 )(PollResults));

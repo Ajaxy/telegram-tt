@@ -22,10 +22,10 @@ import formatGroupCallVolume from './helpers/formatGroupCallVolume';
 import useInterval from '../../../hooks/schedulers/useInterval';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
 
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import GroupCallParticipantMenu from './GroupCallParticipantMenu';
@@ -209,7 +209,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
 
   const {
     isContextMenuOpen,
-    contextMenuPosition,
+    contextMenuAnchor,
     handleContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
@@ -230,16 +230,6 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   const getLayout = useCallback(
     () => ({ withPortal: true }),
     [],
-  );
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-    getLayout,
   );
 
   const handleClickPin = useCallback(() => {
@@ -303,7 +293,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
             ariaLabel={lang(isPinned ? 'lng_group_call_context_unpin_camera' : 'lng_group_call_context_pin_camera')}
             onClick={handleClickPin}
           >
-            <i className={buildClassName('icon', isPinned ? 'icon-unpin' : 'icon-pin')} />
+            <Icon name={isPinned ? 'unpin' : 'pin'} />
           </Button>
         )}
         <div className={styles.bottomPanel}>
@@ -318,11 +308,11 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
       <GroupCallParticipantMenu
         participant={participant}
         isDropdownOpen={isContextMenuOpen}
-        positionX={positionX}
-        positionY={positionY}
-        transformOriginX={transformOriginX}
-        transformOriginY={transformOriginY}
-        style={menuStyle}
+        anchor={contextMenuAnchor}
+        getTriggerElement={getTriggerElement}
+        getRootElement={getRootElement}
+        getMenuElement={getMenuElement}
+        getLayout={getLayout}
         onClose={handleContextMenuClose}
         onCloseAnimationEnd={handleContextMenuHide}
         menuRef={menuRef}

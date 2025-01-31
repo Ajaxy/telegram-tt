@@ -7,6 +7,7 @@ import { withGlobal } from '../../../global';
 import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { GlobalActions } from '../../../global';
 import type { ThreadId } from '../../../types';
+import type { MenuPositionOptions } from '../../ui/Menu';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectIsContextMenuTranslucent, selectTabState } from '../../../global/selectors';
@@ -17,11 +18,12 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
-import { UnfreezableMenu } from '../../ui/Menu';
+import Menu from '../../ui/Menu';
 import Portal from '../../ui/Portal';
 import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
@@ -61,12 +63,8 @@ export type OwnProps = {
   className?: string;
   isAttachmentModal?: boolean;
   canSendPlainText?: boolean;
-  positionX?: 'left' | 'right';
-  positionY?: 'top' | 'bottom';
-  transformOriginX?: number;
-  transformOriginY?: number;
-  style?: string;
-};
+}
+& MenuPositionOptions;
 
 type StateProps = {
   isLeftColumnShown: boolean;
@@ -87,11 +85,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   isAttachmentModal,
   canSendPlainText,
   className,
-  positionX,
-  positionY,
-  transformOriginX,
-  transformOriginY,
-  style,
   isBackgroundTranslucent,
   onLoad,
   onClose,
@@ -103,6 +96,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   onSearchOpen,
   addRecentEmoji,
   addRecentCustomEmoji,
+  ...menuPositionOptions
 }) => {
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
@@ -110,7 +104,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, onClose, false, false);
 
   const lang = useOldLang();
 
@@ -277,7 +271,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           size="tiny"
           onClick={onClose}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
       )}
       <SymbolMenuFooter
@@ -323,10 +317,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <UnfreezableMenu
+    <Menu
       isOpen={isOpen}
-      positionX={isAttachmentModal ? positionX : 'left'}
-      positionY={isAttachmentModal ? positionY : 'bottom'}
       onClose={onClose}
       withPortal={isAttachmentModal}
       className={buildClassName('SymbolMenu', className)}
@@ -335,12 +327,14 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
-      transformOriginX={transformOriginX}
-      transformOriginY={transformOriginY}
-      style={style}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...(isAttachmentModal ? menuPositionOptions : {
+        positionX: 'left',
+        positionY: 'bottom',
+      })}
     >
       {content}
-    </UnfreezableMenu>
+    </Menu>
   );
 };
 

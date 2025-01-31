@@ -31,13 +31,13 @@ const SafeLink = ({
   const { openUrl } = getActions();
 
   const content = children || text;
-  const isSafe = url === text;
+  const isRegularLink = url === text;
 
   const handleClick = useLastCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (!url) return true;
 
     e.preventDefault();
-    openUrl({ url, shouldSkipModal: isSafe });
+    openUrl({ url, shouldSkipModal: isRegularLink });
 
     return false;
   });
@@ -48,7 +48,7 @@ const SafeLink = ({
 
   const classNames = buildClassName(
     className || 'text-entity-link',
-    text.length > 50 && 'long-word-break-all',
+    isRegularLink && 'word-break-all',
   );
 
   return (

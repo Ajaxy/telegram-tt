@@ -1,4 +1,4 @@
-import type { ApiPrivacyKey } from '../../../../types';
+import type { ApiPrivacyKey } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 
 export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefined {
@@ -23,6 +23,10 @@ export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefine
     case SettingsScreens.PrivacyBirthdayAllowedContacts:
     case SettingsScreens.PrivacyBirthdayDeniedContacts:
       return 'birthday';
+    case SettingsScreens.PrivacyGifts:
+    case SettingsScreens.PrivacyGiftsAllowedContacts:
+    case SettingsScreens.PrivacyGiftsDeniedContacts:
+      return 'gifts';
     case SettingsScreens.PrivacyForwarding:
     case SettingsScreens.PrivacyForwardingAllowedContacts:
     case SettingsScreens.PrivacyForwardingDeniedContacts:

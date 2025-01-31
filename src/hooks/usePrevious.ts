@@ -1,17 +1,15 @@
 import { useRef } from '../lib/teact/teact';
 
-// Deprecated. Use `usePrevious2` instead
-function usePrevious<T extends any>(next: T): T | undefined;
-function usePrevious<T extends any>(next: T, shouldSkipUndefined: true): Exclude<T, undefined> | undefined;
-function usePrevious<T extends any>(next: T, shouldSkipUndefined?: boolean): Exclude<T, undefined> | undefined;
-function usePrevious<T extends any>(next: T, shouldSkipUndefined?: boolean) {
-  const ref = useRef<T>();
-  const { current } = ref;
-  if (!shouldSkipUndefined || next !== undefined) {
-    ref.current = next;
+// This is not render-dependent and will never allow previous to match current
+export default function usePrevious<T extends any>(current: T) {
+  const prevRef = useRef<T>();
+  const lastRef = useRef<T>();
+
+  if (lastRef.current !== current) {
+    prevRef.current = lastRef.current;
   }
 
-  return current;
-}
+  lastRef.current = current;
 
-export default usePrevious;
+  return prevRef.current;
+}

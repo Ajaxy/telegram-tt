@@ -9,6 +9,7 @@ import {
   getPhotoFullDimensions,
   getVideoDimensions,
   getVideoMediaHash,
+  isChatWithVerificationCodesBot,
 } from '../../global/helpers';
 import { selectBot, selectUserFullInfo } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -17,7 +18,6 @@ import renderText from '../common/helpers/renderText';
 
 import useMedia from '../../hooks/useMedia';
 import useOldLang from '../../hooks/useOldLang';
-import useDevicePixelRatio from '../../hooks/window/useDevicePixelRatio';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Skeleton from '../ui/placeholder/Skeleton';
@@ -35,24 +35,22 @@ type StateProps = {
 };
 
 const MessageListBotInfo: FC<OwnProps & StateProps> = ({
+  chatId,
   botInfo,
   isLoadingBotInfo,
   isInMessageList,
 }) => {
   const lang = useOldLang();
-  const dpr = useDevicePixelRatio();
 
   const botInfoPhotoUrl = useMedia(botInfo?.photo ? getBotCoverMediaHash(botInfo.photo) : undefined);
   const botInfoGifUrl = useMedia(botInfo?.gif ? getVideoMediaHash(botInfo.gif, 'full') : undefined);
   const botInfoDimensions = botInfo?.photo ? getPhotoFullDimensions(botInfo.photo) : botInfo?.gif
     ? getVideoDimensions(botInfo.gif) : undefined;
-  const botInfoRealDimensions = botInfoDimensions && {
-    width: botInfoDimensions.width / dpr,
-    height: botInfoDimensions.height / dpr,
-  };
   const isBotInfoEmpty = botInfo && !botInfo.description && !botInfo.gif && !botInfo.photo;
 
-  const { width, height } = botInfoRealDimensions || {};
+  const isVerifyCodes = isChatWithVerificationCodesBot(chatId);
+
+  const { width, height } = botInfoDimensions || {};
 
   const isEmptyOrLoading = isBotInfoEmpty || isLoadingBotInfo;
 
@@ -65,16 +63,16 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
       {botInfo && (
         <div
           className={styles.botInfo}
-          style={botInfoRealDimensions && (
-            `width: ${botInfoRealDimensions.width}px`
+          style={buildStyle(
+            width ? `width: ${width}px` : undefined,
           )}
         >
           {botInfoPhotoUrl && (
             <img
               className={styles.media}
               src={botInfoPhotoUrl}
-              width={botInfoRealDimensions?.width}
-              height={botInfoRealDimensions?.height}
+              width={width}
+              height={height}
               alt="Bot info"
             />
           )}
@@ -93,12 +91,17 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
           {botInfoDimensions && !botInfoPhotoUrl && !botInfoGifUrl && (
             <Skeleton
               className={styles.media}
-              width={botInfoRealDimensions?.width}
-              height={botInfoRealDimensions?.height}
+              width={width}
+              height={height}
               forceAspectRatio
             />
           )}
-          {botInfo.description && (
+          {isVerifyCodes && (
+            <div className={styles.botInfoDescription}>
+              {lang('VerifyChatInfo')}
+            </div>
+          )}
+          {!isVerifyCodes && botInfo.description && (
             <div className={styles.botInfoDescription}>
               <p className={styles.botInfoTitle}>{lang('BotInfoTitle')}</p>
               {renderText(botInfo.description, ['br', 'emoji', 'links'])}

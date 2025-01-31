@@ -9,7 +9,7 @@ addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnT
   const {
     query,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
   return updateUserSearch(global, {
     globalUserIds: undefined,
@@ -20,7 +20,7 @@ addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnT
 });
 
 addActionHandler('openAddContactDialog', (global, actions, payload): ActionReturnType => {
-  const { userId, tabId = getCurrentTabId() } = payload!;
+  const { userId, tabId = getCurrentTabId() } = payload;
 
   return updateTabState(global, {
     newContact: { userId },
@@ -41,4 +41,12 @@ addActionHandler('closeNewContactDialog', (global, actions, payload): ActionRetu
   const { tabId = getCurrentTabId() } = payload || {};
 
   return closeNewContactDialog(global, tabId);
+});
+
+addActionHandler('closeSuggestedStatusModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    suggestedStatusModal: undefined,
+  }, tabId);
 });

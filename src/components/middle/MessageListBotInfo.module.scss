@@ -7,14 +7,13 @@
 }
 
 .bot-info {
-  max-width: 80%;
+  max-width: min(80%, 25rem);
   display: flex;
   flex-direction: column;
 
   background-color: var(--color-background);
   color: var(--color-text);
   font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
-  line-height: 1.75;
   border-radius: var(--border-radius-messages);
   overflow: hidden;
   text-align: initial;
@@ -22,10 +21,11 @@
 
 .bot-info-description {
   padding: 0.5rem 1rem;
+  text-wrap: pretty;
 }
 
 .bot-info-title {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   margin-bottom: 0.25rem;
 }
 

@@ -1,0 +1,29 @@
+.root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  z-index: var(--z-overlay-effects);
+}
+
+.ghost {
+  position: absolute;
+  overflow: visible !important;
+
+  animation: scale 1s ease-in forwards !important;
+  transform-origin: bottom;
+}
+
+.elementContainer {
+  overflow: visible;
+}
+
+@keyframes scale {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.2);
+  }
+}

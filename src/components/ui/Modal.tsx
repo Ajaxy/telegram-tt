@@ -1,5 +1,5 @@
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { useEffect, useRef } from '../../lib/teact/teact';
+import React, { beginHeavyAnimation, useEffect } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
@@ -9,7 +9,6 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
 import trapFocus from '../../util/trapFocus';
 
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -17,63 +16,69 @@ import useOldLang from '../../hooks/useOldLang';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import Icon from '../common/icons/Icon';
-import Button from './Button';
+import Button, { type OwnProps as ButtonProps } from './Button';
 import Portal from './Portal';
 
 import './Modal.scss';
 
 export const ANIMATION_DURATION = 200;
 
-type OwnProps = {
+export type OwnProps = {
   title?: string | TextPart[];
   className?: string;
   contentClassName?: string;
+  headerClassName?: string;
   isOpen?: boolean;
   header?: TeactNode;
   isSlim?: boolean;
   hasCloseButton?: boolean;
   hasAbsoluteCloseButton?: boolean;
+  absoluteCloseButtonColor?: ButtonProps['color'];
   noBackdrop?: boolean;
   noBackdropClose?: boolean;
   children: React.ReactNode;
   style?: string;
+  dialogStyle?: string;
+  dialogRef?: React.RefObject<HTMLDivElement>;
+  isLowStackPriority?: boolean;
+  dialogContent?: React.ReactNode;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
-  dialogRef?: React.RefObject<HTMLDivElement>;
 };
 
-type StateProps = {
-  shouldSkipHistoryAnimations?: boolean;
-};
-
-const Modal: FC<OwnProps & StateProps> = ({
+const Modal: FC<OwnProps> = ({
   dialogRef,
   title,
   className,
   contentClassName,
+  headerClassName,
   isOpen,
   isSlim,
   header,
   hasCloseButton,
   hasAbsoluteCloseButton,
+  absoluteCloseButtonColor = 'translucent',
   noBackdrop,
   noBackdropClose,
   children,
   style,
+  dialogStyle,
+  isLowStackPriority,
+  dialogContent,
   onClose,
   onCloseAnimationEnd,
   onEnter,
-  shouldSkipHistoryAnimations,
 }) => {
   const {
+    ref: modalRef,
     shouldRender,
-    transitionClassNames,
-  } = useShowTransition(
-    isOpen, onCloseAnimationEnd, shouldSkipHistoryAnimations, undefined, shouldSkipHistoryAnimations,
-  );
-  // eslint-disable-next-line no-null/no-null
-  const modalRef = useRef<HTMLDivElement>(null);
+  } = useShowTransition({
+    isOpen,
+    onCloseAnimationEnd,
+    withShouldRender: true,
+  });
+
   const withCloseButton = hasCloseButton || hasAbsoluteCloseButton;
 
   useEffect(() => {
@@ -99,7 +104,7 @@ const Modal: FC<OwnProps & StateProps> = ({
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: onClose, onEnter: handleEnter }) : undefined
   ), [isOpen, onClose, handleEnter]);
-  useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen]);
+  useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen, modalRef]);
 
   useHistoryBack({
     isActive: isOpen,
@@ -110,7 +115,7 @@ const Modal: FC<OwnProps & StateProps> = ({
     document.body.classList.toggle('has-open-dialog', Boolean(isOpen));
 
     if (isOpen || (!isOpen && prevIsOpen !== undefined)) {
-      dispatchHeavyAnimationEvent(ANIMATION_DURATION);
+      beginHeavyAnimation(ANIMATION_DURATION);
     }
 
     return () => {
@@ -130,21 +135,26 @@ const Modal: FC<OwnProps & StateProps> = ({
     }
 
     if (!title && !withCloseButton) return undefined;
+    const closeButton = (
+      <Button
+        className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
+        round
+        color={absoluteCloseButtonColor}
+        size="smaller"
+        ariaLabel={lang('Close')}
+        onClick={onClose}
+      >
+        <Icon name="close" />
+      </Button>
+    );
+
+    if (hasAbsoluteCloseButton) {
+      return closeButton;
+    }
 
     return (
-      <div className="modal-header">
-        {withCloseButton && (
-          <Button
-            className={buildClassName(hasAbsoluteCloseButton && 'modal-absolute-close-button')}
-            round
-            color="translucent"
-            size="smaller"
-            ariaLabel={lang('Close')}
-            onClick={onClose}
-          >
-            <Icon name="close" />
-          </Button>
-        )}
+      <div className={buildClassName('modal-header', headerClassName)}>
+        {withCloseButton && closeButton}
         <div className="modal-title">{title}</div>
       </div>
     );
@@ -153,9 +163,9 @@ const Modal: FC<OwnProps & StateProps> = ({
   const fullClassName = buildClassName(
     'Modal',
     className,
-    transitionClassNames,
     noBackdrop && 'transparent-backdrop',
     isSlim && 'slim',
+    isLowStackPriority && 'low-priority',
   );
 
   return (
@@ -168,8 +178,9 @@ const Modal: FC<OwnProps & StateProps> = ({
       >
         <div className="modal-container">
           <div className="modal-backdrop" onClick={!noBackdropClose ? onClose : undefined} />
-          <div className="modal-dialog" ref={dialogRef}>
+          <div className="modal-dialog" ref={dialogRef} style={dialogStyle}>
             {renderHeader()}
+            {dialogContent}
             <div className={buildClassName('modal-content custom-scroll', contentClassName)} style={style}>
               {children}
             </div>

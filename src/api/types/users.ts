@@ -3,7 +3,8 @@ import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
 import type { ApiPeerColor } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
-import type { ApiPeerPhotos } from './misc';
+import type { ApiBotVerification } from './misc';
+import type { ApiSavedStarGift } from './payments';
 
 export interface ApiUser {
   id: string;
@@ -23,14 +24,8 @@ export interface ApiUser {
   accessHash?: string;
   hasVideoAvatar?: boolean;
   avatarPhotoId?: string;
-  profilePhotos?: ApiPeerPhotos;
   botPlaceholder?: string;
   canBeInvitedToGroup?: boolean;
-  commonChats?: {
-    ids: string[];
-    maxId: string;
-    isFullyLoaded: boolean;
-  };
   fakeType?: ApiFakeType;
   isAttachBot?: boolean;
   emojiStatus?: ApiEmojiStatus;
@@ -40,6 +35,9 @@ export interface ApiUser {
   maxStoryId?: number;
   color?: ApiPeerColor;
   canEditBot?: boolean;
+  hasMainMiniApp?: boolean;
+  botActiveUsers?: number;
+  botVerificationIconId?: string;
 }
 
 export interface ApiUserFullInfo {
@@ -63,6 +61,11 @@ export interface ApiUserFullInfo {
   businessLocation?: ApiBusinessLocation;
   businessWorkHours?: ApiBusinessWorkHours;
   businessIntro?: ApiBusinessIntro;
+  starGiftCount?: number;
+  isBotCanManageEmojiStatus?: boolean;
+  isBotAccessEmojiGranted?: boolean;
+  hasScheduledMessages?: boolean;
+  botVerification?: ApiBotVerification;
 }
 
 export type ApiFakeType = 'fake' | 'scam';
@@ -78,6 +81,17 @@ export interface ApiUserStatus {
   expires?: number;
   isReadDateRestrictedByMe?: boolean;
   isReadDateRestricted?: boolean;
+}
+
+export interface ApiUserCommonChats {
+  ids: string[];
+  maxId?: string;
+  isFullyLoaded: boolean;
+}
+
+export interface ApiSavedGifts {
+  gifts: ApiSavedStarGift[];
+  nextOffset?: string;
 }
 
 export interface ApiUsername {

@@ -1,13 +1,14 @@
 import type { ApiGroupCall } from '../../../api/types';
+import type { CallSound } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, CallSound, GlobalState, TabArgs,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import { omit } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
 import safePlay from '../../../util/safePlay';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
@@ -17,7 +18,6 @@ import {
   addActionHandler, getGlobal,
   setGlobal,
 } from '../../index';
-import { addChats, addUsers } from '../../reducers';
 import { updateGroupCall } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -107,31 +107,19 @@ async function fetchGroupCall<T extends GlobalState>(global: T, groupCall: Parti
     undefined,
     existingGroupCall?.isLoaded ? undefined : result.groupCall.participantsCount,
   );
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
 
   setGlobal(global);
 
   return result.groupCall;
 }
 
-async function fetchGroupCallParticipants<T extends GlobalState>(
-  global: T,
+function requestGroupCallParticipants(
   groupCall: Partial<ApiGroupCall>, nextOffset?: string,
 ) {
-  const result = await callApi('fetchGroupCallParticipants', {
+  return callApi('fetchGroupCallParticipants', {
     call: groupCall as ApiGroupCall,
     offset: nextOffset,
   });
-
-  if (!result) return;
-
-  global = getGlobal();
-
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-
-  setGlobal(global);
 }
 
 addActionHandler('toggleGroupCallPanel', (global, actions, payload): ActionReturnType => {
@@ -150,7 +138,7 @@ addActionHandler('subscribeToGroupCallUpdates', async (global, actions, payload)
   if (subscribed) {
     await fetchGroupCall(global, groupCall);
     global = getGlobal();
-    await fetchGroupCallParticipants(global, groupCall);
+    await requestGroupCallParticipants(groupCall);
   }
 
   await callApi('toggleGroupCallStartSubscription', {
@@ -212,7 +200,9 @@ addActionHandler('createGroupCallInviteLink', async (global, actions, payload): 
 
   copyTextToClipboard(inviteLink);
   actions.showNotification({
-    message: 'Link copied to clipboard',
+    message: {
+      key: 'LinkCopied',
+    },
     tabId,
   });
 });
@@ -228,7 +218,7 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload): Promis
   }
 
   global = getGlobal();
-  const full = await loadFullChat(global, actions, chat, tabId);
+  const full = await loadFullChat(global, actions, chat);
 
   if (full?.groupCall) {
     actions.requestMasterAndJoinGroupCall({
@@ -308,7 +298,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
 
     if (!chat) return;
 
-    await loadFullChat(global, actions, chat, tabId);
+    await loadFullChat(global, actions, chat);
     global = getGlobal();
     groupCall = selectChatGroupCall(global, chatId);
   } else if (!groupCall && id && accessHash) {
@@ -373,7 +363,7 @@ addActionHandler('loadMoreGroupCallParticipants', (global): ActionReturnType => 
     return;
   }
 
-  void fetchGroupCallParticipants(global, groupCall, groupCall.nextOffset);
+  void requestGroupCallParticipants(groupCall, groupCall.nextOffset);
 });
 
 addActionHandler('requestMasterAndRequestCall', (global, actions, payload): ActionReturnType => {

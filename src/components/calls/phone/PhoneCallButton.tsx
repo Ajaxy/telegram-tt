@@ -5,6 +5,7 @@ import type { IconName } from '../../../types/icons';
 
 import buildClassName from '../../../util/buildClassName';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 import styles from './PhoneCallButton.module.scss';
@@ -38,7 +39,7 @@ const PhoneCallButton: FC<OwnProps> = ({
         onClick={onClick}
         disabled={isDisabled}
       >
-        {customIcon || <i className={buildClassName(iconClassName, 'icon', `icon-${icon}`)} />}
+        {customIcon || <Icon name={icon!} className={iconClassName} />}
       </Button>
       <div className={styles.buttonText}>{label}</div>
     </div>

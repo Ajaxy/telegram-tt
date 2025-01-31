@@ -60,12 +60,11 @@ function getMaxMessageWidthRem(fromOwnMessage?: boolean, noAvatars?: boolean, is
 
 export function getAvailableWidth(
   fromOwnMessage?: boolean,
-  asForwarded?: boolean,
   isWebPageMedia?: boolean,
   noAvatars?: boolean,
   isMobile?: boolean,
 ) {
-  const extraPaddingRem = asForwarded && isWebPageMedia ? 2.25 : (asForwarded || isWebPageMedia ? 1.625 : 0);
+  const extraPaddingRem = isWebPageMedia ? 1.625 : 0;
   const availableWidthRem = getMaxMessageWidthRem(fromOwnMessage, noAvatars, isMobile) - extraPaddingRem;
 
   return availableWidthRem * REM;
@@ -86,7 +85,6 @@ export function calculateDimensionsForMessageMedia({
   width,
   height,
   fromOwnMessage,
-  asForwarded,
   isWebPageMedia,
   isGif,
   noAvatars,
@@ -102,7 +100,7 @@ export function calculateDimensionsForMessageMedia({
   isMobile?: boolean;
 }): ApiDimensions {
   const aspectRatio = height / width;
-  const availableWidth = getAvailableWidth(fromOwnMessage, asForwarded, isWebPageMedia, noAvatars, isMobile);
+  const availableWidth = getAvailableWidth(fromOwnMessage, isWebPageMedia, noAvatars, isMobile);
   const availableHeight = getAvailableHeight(isGif, aspectRatio);
   const mediaWidth = isGif ? Math.max(GIF_MIN_WIDTH, width) : width;
   const mediaHeight = isGif ? height * (mediaWidth / width) : height;

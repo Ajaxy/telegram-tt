@@ -11,6 +11,7 @@ import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 import styles from './MessagePhoneCall.module.scss';
@@ -70,15 +71,14 @@ const MessagePhoneCall: FC<OwnProps> = ({
         disabled={!ARE_CALLS_SUPPORTED}
         ariaLabel={lang(isOutgoing ? 'CallAgain' : 'CallBack')}
       >
-        <i className={buildClassName('icon', isVideo ? 'icon-video-outlined' : 'icon-phone')} />
+        <Icon name={isVideo ? 'video-outlined' : 'phone'} />
       </Button>
       <div className={styles.info}>
         <div className={styles.reason}>{lang(reasonText)}</div>
         <div className={styles.meta}>
-          <i
+          <Icon
+            name="arrow-right"
             className={buildClassName(
-              'icon',
-              'icon-arrow-right',
               styles.arrow,
               isMissed && styles.missed,
               isCancelled && styles.canceled,

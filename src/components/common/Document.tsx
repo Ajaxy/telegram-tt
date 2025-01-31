@@ -47,7 +47,7 @@ type OwnProps = {
   message: ApiMessage;
   onDateClick: (arg: ApiMessage) => void;
 } | {
-  message?: never;
+  message?: ApiMessage;
   onDateClick?: never;
 });
 
@@ -123,7 +123,7 @@ const Document = ({
   const withMediaViewer = onMediaClick && document.innerMediaType;
 
   const handleDownload = useLastCallback(() => {
-    downloadMedia({ media: document });
+    downloadMedia({ media: document, originMessage: message });
   });
 
   const handleClick = useLastCallback(() => {

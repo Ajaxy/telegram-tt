@@ -4,8 +4,9 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
+import type { ApiPrivacySettings } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ApiPrivacySettings, CustomPeerType } from '../../../types';
+import type { CustomPeerType, UniqueCustomPeer } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
@@ -18,14 +19,17 @@ import { getPrivacyKey } from './helpers/privacy';
 
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import Icon from '../../common/icons/Icon';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
 export type OwnProps = {
   isAllowList?: boolean;
   withPremiumCategory?: boolean;
+  withMiniAppsCategory?: boolean;
   screen: SettingsScreens;
   isActive?: boolean;
   onScreenSelect: (screen: SettingsScreens) => void;
@@ -42,6 +46,7 @@ const PREMIUM_CATEGORY = [CUSTOM_PEER_PREMIUM];
 const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
   isAllowList,
   withPremiumCategory,
+  withMiniAppsCategory,
   screen,
   isActive,
   currentUserId,
@@ -51,7 +56,23 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
 }) => {
   const { setPrivacySettings } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
+
+  const customPeerBots : UniqueCustomPeer = useMemo(() => {
+    return {
+      isCustomPeer: true,
+      type: 'bots',
+      title: lang('PrivacyValueBots'),
+      avatarIcon: 'bots',
+      isAvatarSquare: true,
+      peerColorId: 6,
+    };
+  }, [lang]);
+
+  const miniAppsCategory = useMemo(() => {
+    return [customPeerBots];
+  }, [customPeerBots]);
 
   const selectedContactIds = useMemo(() => {
     if (!settings) {
@@ -68,9 +89,10 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
     if (!settings) {
       return [];
     }
-
-    return [settings.shouldAllowPremium ? CUSTOM_PEER_PREMIUM.type : undefined].filter(Boolean);
-  }, [settings]);
+    if (settings.shouldAllowPremium) { return [CUSTOM_PEER_PREMIUM.type]; }
+    if (settings.botsPrivacy === 'allow' && isAllowList) { return [customPeerBots.type]; }
+    return [];
+  }, [settings, isAllowList, customPeerBots]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSubmitShown, setIsSubmitShown] = useState<boolean>(false);
   const [newSelectedContactIds, setNewSelectedContactIds] = useState<string[]>(selectedContactIds);
@@ -100,16 +122,16 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         return chatId !== currentUserId && chatId !== SERVICE_NOTIFICATIONS_USER_ID && !isChannel && !isDeleted;
       });
 
-    const filteredChats = filterChatsByName(lang, chatIds, chatsById, searchQuery);
+    const filteredChats = filterChatsByName(oldLang, chatIds, chatsById, searchQuery);
 
     // Show only relevant items
     if (searchQuery) return filteredChats;
 
     return unique([
       ...selectedContactIds,
-      ...filterChatsByName(lang, chatIds, chatsById, searchQuery),
+      ...filterChatsByName(oldLang, chatIds, chatsById, searchQuery),
     ]);
-  }, [folderAllOrderedIds, folderArchivedOrderedIds, selectedContactIds, lang, searchQuery, currentUserId]);
+  }, [folderAllOrderedIds, folderArchivedOrderedIds, selectedContactIds, oldLang, searchQuery, currentUserId]);
 
   const handleSelectedCategoriesChange = useCallback((value: CustomPeerType[]) => {
     setNewSelectedCategoryTypes(value);
@@ -127,39 +149,59 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
       isAllowList: Boolean(isAllowList),
       updatedIds: newSelectedContactIds,
       isPremiumAllowed: newSelectedCategoryTypes.includes(CUSTOM_PEER_PREMIUM.type) || undefined,
+      botsPrivacy: (!withMiniAppsCategory) ? 'none'
+        : (newSelectedCategoryTypes.includes(customPeerBots.type) ? 'allow' : 'disallow'),
     });
 
     onScreenSelect(SettingsScreens.Privacy);
-  }, [isAllowList, newSelectedCategoryTypes, newSelectedContactIds, onScreenSelect, screen]);
+  }, [
+    isAllowList,
+    withMiniAppsCategory,
+    newSelectedCategoryTypes,
+    newSelectedContactIds,
+    onScreenSelect,
+    screen,
+    customPeerBots,
+  ]);
 
   useHistoryBack({
     isActive,
     onBack: onReset,
   });
 
+  function getCustomCategory() {
+    if (withPremiumCategory) return PREMIUM_CATEGORY;
+    if (withMiniAppsCategory && isAllowList) return miniAppsCategory;
+    return undefined;
+  }
+
   return (
     <div className="NewChat-inner step-1">
-      <Picker
-        categories={withPremiumCategory ? PREMIUM_CATEGORY : undefined}
+      <PeerPicker
+        categories={getCustomCategory()}
         itemIds={displayedIds || []}
         selectedIds={newSelectedContactIds}
         selectedCategories={newSelectedCategoryTypes}
         filterValue={searchQuery}
-        filterPlaceholder={isAllowList ? lang('AlwaysAllowPlaceholder') : lang('NeverAllowPlaceholder')}
+        filterPlaceholder={isAllowList ? oldLang('AlwaysAllowPlaceholder') : oldLang('NeverAllowPlaceholder')}
         categoryPlaceholderKey="PrivacyUserTypes"
         searchInputId="new-group-picker-search"
         isSearchable
         onSelectedIdsChange={handleSelectedContactIdsChange}
         onSelectedCategoriesChange={handleSelectedCategoriesChange}
         onFilterChange={setSearchQuery}
+        allowMultiple
+        itemInputType="checkbox"
+        withDefaultPadding
+        withStatus
       />
 
       <FloatingActionButton
         isShown={isSubmitShown}
         onClick={handleSubmit}
-        ariaLabel={isAllowList ? lang('AlwaysAllow') : lang('NeverAllow')}
+        ariaLabel={isAllowList ? oldLang('AlwaysAllow') : oldLang('NeverAllow')}
       >
-        <i className="icon icon-check" />
+        <Icon name="check" />
       </FloatingActionButton>
     </div>
   );
@@ -183,6 +225,9 @@ function getCurrentPrivacySettings(global: GlobalState, screen: SettingsScreens)
     case SettingsScreens.PrivacyBirthdayAllowedContacts:
     case SettingsScreens.PrivacyBirthdayDeniedContacts:
       return privacy.birthday;
+    case SettingsScreens.PrivacyGiftsAllowedContacts:
+    case SettingsScreens.PrivacyGiftsDeniedContacts:
+      return privacy.gifts;
     case SettingsScreens.PrivacyPhoneCallAllowedContacts:
     case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       return privacy.phoneCall;

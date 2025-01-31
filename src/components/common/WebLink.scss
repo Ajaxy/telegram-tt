@@ -23,7 +23,7 @@
     justify-content: center;
     border-radius: var(--border-radius-messages-small);
     text-transform: uppercase;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     font-size: 1.5rem;
   }
 
@@ -48,7 +48,7 @@
   .site-name {
     display: block;
     color: var(--color-links);
-    font-weight: 400;
+    font-weight: var(--font-weight-normal);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -56,7 +56,7 @@
 
   .site-title {
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: var(--font-weight-medium);
     margin-bottom: 0.0625rem;
     line-height: 1.3125rem;
   }

@@ -22,7 +22,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     margin-bottom: 0.5rem;
     color: var(--accent-color);
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);

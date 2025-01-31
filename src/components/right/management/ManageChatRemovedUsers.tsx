@@ -12,6 +12,7 @@ import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
@@ -84,7 +85,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <p className="text-muted">{lang(isChannel ? 'NoBlockedChannel2' : 'NoBlockedGroup2')}</p>
+          <p className="section-help">{lang(isChannel ? 'NoBlockedChannel2' : 'NoBlockedGroup2')}</p>
 
           {removedMembers.map((member) => (
             <ListItem
@@ -106,7 +107,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
               onClick={openRemoveUserModal}
               ariaLabel={lang('Channel.EditAdmin.Permission.BanUsers')}
             >
-              <i className="icon icon-add-user-filled" />
+              <Icon name="add-user-filled" />
             </FloatingActionButton>
           )}
           {chat && canDeleteMembers && (

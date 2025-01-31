@@ -1,7 +1,7 @@
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiPremiumSection } from '../../../global/types';
+import type { ApiPremiumSection } from '../../../api/types';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
@@ -21,8 +21,7 @@ function PremiumStatusItem({ premiumSection }: OwnProps) {
   return (
     <div className="settings-item">
       <ListItem
-        leftElement={<StarIcon className="icon" type="premium" size="big" />}
-        className="settings-main-menu-star"
+        leftElement={<StarIcon className="icon ListItem-main-icon" type="premium" size="big" />}
         onClick={handleOpenPremiumModal}
       >
         {lang('PrivacyLastSeenPremium')}

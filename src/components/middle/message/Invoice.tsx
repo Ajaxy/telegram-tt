@@ -46,7 +46,7 @@ const Invoice: FC<OwnProps> = ({
 
   const {
     title,
-    text,
+    description,
     amount,
     currency,
     isTest,
@@ -56,6 +56,7 @@ const Invoice: FC<OwnProps> = ({
   const photoUrl = useMedia(getWebDocumentHash(photo));
   const withBlurredBackground = Boolean(forcedWidth);
   const blurredBackgroundRef = useBlurredMediaThumbRef(photoUrl, !withBlurredBackground);
+  const messageId = message.id;
 
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {
@@ -67,14 +68,14 @@ const Invoice: FC<OwnProps> = ({
 
     if (photoUrl) {
       const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
-      getCustomAppendixBg(photoUrl, false, isSelected, theme).then((appendixBg) => {
+      getCustomAppendixBg(photoUrl, false, messageId, isSelected, theme).then((appendixBg) => {
         requestMutation(() => {
           contentEl.style.setProperty('--appendix-bg', appendixBg);
           contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
         });
       });
     }
-  }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme]);
+  }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme, messageId]);
 
   const width = forcedWidth || photo?.dimensions?.width;
 
@@ -92,8 +93,8 @@ const Invoice: FC<OwnProps> = ({
       {title && (
         <p className="title">{renderText(title)}</p>
       )}
-      {text && (
-        <div>{renderText(text, ['emoji', 'br'])}</div>
+      {description && (
+        <div>{renderText(description, ['emoji', 'br'])}</div>
       )}
       <div className={`description ${photo ? 'has-image' : ''}`}>
         {Boolean(photo) && (

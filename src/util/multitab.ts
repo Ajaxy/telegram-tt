@@ -1,4 +1,5 @@
 /* eslint-disable eslint-multitab-tt/set-global-only-variable */
+import { onFullyIdle } from '../lib/teact/teact';
 import { addCallback } from '../lib/teact/teactn';
 import { getActions, getGlobal, setGlobal } from '../global';
 
@@ -111,12 +112,37 @@ type BroadcastChannelMessage = (
 
 let resolveGlobalPromise: VoidFunction | undefined;
 let isFirstGlobalResolved = false;
-let prevGlobal: GlobalState | undefined;
+let currentGlobal: GlobalState | undefined;
 let isDisabled = false;
 
 const channel = IS_MULTITAB_SUPPORTED
   ? new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel
   : undefined;
+
+let isBroadcastDiffScheduled = false;
+let lastBroadcastDiffGlobal: GlobalState | undefined;
+
+function broadcastDiffOnIdle() {
+  if (isBroadcastDiffScheduled) return;
+
+  isBroadcastDiffScheduled = true;
+  lastBroadcastDiffGlobal = currentGlobal;
+
+  onFullyIdle(() => {
+    if (!channel) return;
+
+    const diff = deepDiff(lastBroadcastDiffGlobal, currentGlobal);
+
+    if (typeof diff !== 'symbol') {
+      channel.postMessage({
+        type: 'globalDiffUpdate',
+        diff,
+      });
+    }
+
+    isBroadcastDiffScheduled = false;
+  });
+}
 
 export function unsubcribeFromMultitabBroadcastChannel() {
   if (channel) {
@@ -158,16 +184,16 @@ export function subscribeToMultitabBroadcastChannel() {
 
   addCallback((global: GlobalState) => {
     if (!isFirstGlobalResolved || isDisabled) {
-      prevGlobal = global;
+      currentGlobal = global;
       return;
     }
 
-    if (prevGlobal === global) {
+    if (currentGlobal === global) {
       return;
     }
 
-    if (!prevGlobal) {
-      prevGlobal = global;
+    if (!currentGlobal) {
+      currentGlobal = global;
       channel.postMessage({
         type: 'globalUpdate',
         global,
@@ -175,16 +201,9 @@ export function subscribeToMultitabBroadcastChannel() {
       return;
     }
 
-    const diff = deepDiff(prevGlobal, global);
+    broadcastDiffOnIdle();
 
-    if (typeof diff !== 'symbol') {
-      channel.postMessage({
-        type: 'globalDiffUpdate',
-        diff,
-      });
-    }
-
-    prevGlobal = global;
+    currentGlobal = global;
   });
 
   channel.addEventListener('message', handleMessage);
@@ -210,9 +229,9 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
       const global = deepMerge(oldGlobal, diff);
 
       // @ts-ignore
-      global.DEBUG_capturedId = oldGlobal.DEBUG_capturedId;
+      global.DEBUG_randomId = oldGlobal.DEBUG_randomId;
 
-      prevGlobal = global;
+      currentGlobal = global;
       setGlobal(global);
       break;
     }
@@ -221,8 +240,8 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
       if (isFirstGlobalResolved) return;
       const oldGlobal = getGlobal();
       // @ts-ignore
-      data.global.DEBUG_capturedId = oldGlobal.DEBUG_capturedId;
-      prevGlobal = data.global;
+      data.global.DEBUG_randomId = oldGlobal.DEBUG_randomId;
+      currentGlobal = data.global;
       setGlobal(data.global);
       if (resolveGlobalPromise) {
         resolveGlobalPromise();

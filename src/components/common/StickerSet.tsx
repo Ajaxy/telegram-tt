@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
-import type { ApiAvailableReaction, ApiReaction, ApiSticker } from '../../api/types';
+import type { ApiAvailableReaction, ApiReactionWithPaid, ApiSticker } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 
@@ -27,7 +27,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import useWindowSize from '../../hooks/window/useWindowSize';
@@ -35,7 +35,7 @@ import useWindowSize from '../../hooks/window/useWindowSize';
 import Button from '../ui/Button';
 import ConfirmDialog from '../ui/ConfirmDialog';
 import Icon from './icons/Icon';
-import ReactionEmoji from './ReactionEmoji';
+import ReactionEmoji from './reactions/ReactionEmoji';
 import StickerButton from './StickerButton';
 
 import grey from '../../assets/icons/forumTopic/grey.svg';
@@ -65,7 +65,8 @@ type OwnProps = {
   observeIntersectionForShowingItems: ObserveFn;
   availableReactions?: ApiAvailableReaction[];
   onStickerSelect?: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
-  onReactionSelect?: (reaction: ApiReaction) => void;
+  onReactionSelect?: (reaction: ApiReactionWithPaid) => void;
+  onReactionContext?: (reaction: ApiReactionWithPaid) => void;
   onStickerUnfave?: (sticker: ApiSticker) => void;
   onStickerFave?: (sticker: ApiSticker) => void;
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
@@ -105,6 +106,7 @@ const StickerSet: FC<OwnProps> = ({
   observeIntersectionForPlayingItems,
   observeIntersectionForShowingItems,
   onReactionSelect,
+  onReactionContext,
   onStickerSelect,
   onStickerUnfave,
   onStickerFave,
@@ -138,7 +140,7 @@ const StickerSet: FC<OwnProps> = ({
   const [itemsPerRow, setItemsPerRow] = useState(getItemsPerRowFallback(windowWidth));
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection ?? observeIntersectionForShowingItems);
-  const transitionClassNames = useMediaTransition(isIntersecting);
+  const transitionClassNames = useMediaTransitionDeprecated(isIntersecting);
 
   // `isNearActive` is set in advance during animation, but it is not reliable for short sets
   const shouldRender = isNearActive || isIntersecting;
@@ -351,6 +353,7 @@ const StickerSet: FC<OwnProps> = ({
               availableReactions={availableReactions}
               observeIntersection={observeIntersectionForPlayingItems}
               onClick={onReactionSelect!}
+              onContextMenu={onReactionContext}
               sharedCanvasRef={sharedCanvasRef}
               sharedCanvasHqRef={sharedCanvasHqRef}
               forcePlayback={forcePlayback}

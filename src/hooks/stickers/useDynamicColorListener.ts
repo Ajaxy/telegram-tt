@@ -10,7 +10,8 @@ import useResizeObserver from '../useResizeObserver';
 const TRANSITION_PROPERTY = 'color';
 const TRANSITION_STYLE = `50ms ${TRANSITION_PROPERTY} linear`;
 
-export default function useDynamicColorListener(ref: React.RefObject<HTMLElement>, isDisabled?: boolean) {
+export default function useDynamicColorListener(ref: React.RefObject<HTMLElement>,
+  isDisabled?: boolean) {
   const [hexColor, setHexColor] = useState<string | undefined>();
 
   const updateColor = useLastCallback(() => {

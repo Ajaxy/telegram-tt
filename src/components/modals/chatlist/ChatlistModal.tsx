@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { FC, TeactNode } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -6,9 +6,10 @@ import type { ApiChatFolder } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { selectChatFolder } from '../../../global/selectors';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import Modal from '../../ui/Modal';
 import Tab from '../../ui/Tab';
@@ -35,8 +36,8 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
   const lang = useOldLang();
 
   const isOpen = Boolean(modal);
-  const renderingInfo = usePrevious(modal) || modal;
-  const renderingFolder = usePrevious(folder) || folder;
+  const renderingInfo = usePreviousDeprecated(modal) || modal;
+  const renderingFolder = usePreviousDeprecated(folder) || folder;
 
   const title = useMemo(() => {
     if (!renderingInfo) return undefined;
@@ -55,8 +56,20 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
   }, [lang, renderingInfo]);
 
   const renderingFolderTitle = useMemo(() => {
-    if (renderingFolder) return renderingFolder.title;
-    if (renderingInfo?.invite && 'title' in renderingInfo.invite) return renderingInfo.invite.title;
+    if (renderingFolder) {
+      return renderTextWithEntities({
+        text: renderingFolder.title.text,
+        entities: renderingFolder.title.entities,
+        noCustomEmojiPlayback: renderingFolder.noTitleAnimations,
+      });
+    }
+    if (renderingInfo?.invite && 'title' in renderingInfo.invite) {
+      return renderTextWithEntities({
+        text: renderingInfo.invite.title.text,
+        entities: renderingInfo.invite.title.entities,
+        noCustomEmojiPlayback: renderingInfo.invite.noTitleAnimations,
+      });
+    }
     return undefined;
   }, [renderingFolder, renderingInfo]);
 
@@ -66,12 +79,18 @@ const ChatlistInviteModal: FC<OwnProps & StateProps> = ({
     return undefined;
   }, [renderingInfo]);
 
-  function renderFolders(folderTitle: string) {
+  function renderFolders(folderTitle: TeactNode) {
     return (
       <div className={styles.foldersWrapper}>
         <div className={styles.folders}>
           <Tab className={styles.folder} title={lang('FolderLinkPreviewLeft')} />
-          <Tab className={styles.folder} isActive badgeCount={folderTabNumber} isBadgeActive title={folderTitle} />
+          <Tab
+            className={styles.folder}
+            isActive
+            badgeCount={folderTabNumber}
+            isBadgeActive
+            title={folderTitle}
+          />
           <Tab className={styles.folder} title={lang('FolderLinkPreviewRight')} />
         </div>
       </div>

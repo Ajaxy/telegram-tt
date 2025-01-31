@@ -17,7 +17,7 @@ import { pause } from '../../util/schedulers';
 
 import useEffectOnce from '../../hooks/useEffectOnce';
 import useFlag from '../../hooks/useFlag';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 // Workaround for incorrect bundling by Webpack: force including in the main chunk
 import '../ui/Modal.scss';
@@ -110,7 +110,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   const [isReady, markReady] = useFlag();
   const {
     shouldRender: shouldRenderMask, transitionClassNames,
-  } = useShowTransition(!isReady, undefined, true);
+  } = useShowTransitionDeprecated(!isReady, undefined, true);
 
   useEffectOnce(() => {
     let timeout: number | undefined;

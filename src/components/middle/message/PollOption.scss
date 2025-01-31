@@ -17,7 +17,7 @@
     width: 1.75rem;
     margin-inline-end: 0.5rem;
     flex-shrink: 0;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     font-size: 0.875rem;
     text-align: right;
 
@@ -44,8 +44,8 @@
       background: var(--color-error);
     }
 
-    .is-forwarded & > .icon {
-      margin-left: 1px;
+    .poll-option-icon {
+      line-height: 1rem;
     }
 
     &.animate {

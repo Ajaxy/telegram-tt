@@ -1,0 +1,45 @@
+.root {
+  height: 2.5rem;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+
+  border-radius: var(--border-radius-default);
+  background-color: transparent;
+  padding: 0;
+  padding-inline: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.window-state-button,
+.button {
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+
+.window-state-button {
+  margin-left: auto;
+}
+
+.avatars {
+  margin-left: 0.5rem;
+}
+
+.state-icon,
+.icon {
+  color: var(--color-text-secondary);
+  opacity: 0.75;
+}
+
+.state-icon {
+  font-size: 2rem !important;
+}
+
+.title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}

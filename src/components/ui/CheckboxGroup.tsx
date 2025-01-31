@@ -22,9 +22,9 @@ type OwnProps = {
   options: IRadioOption[];
   selected?: string[];
   disabled?: boolean;
-  round?: boolean;
   nestedCheckbox?: boolean;
   loadingOptions?: string[];
+  isRound?: boolean;
   onChange: (value: string[]) => void;
 };
 
@@ -33,9 +33,9 @@ const CheckboxGroup: FC<OwnProps> = ({
   options,
   selected = [],
   disabled,
-  round,
   nestedCheckbox,
   loadingOptions,
+  isRound,
   onChange,
 }) => {
   const [values, setValues] = useState<string[]>(selected || []);
@@ -89,13 +89,13 @@ const CheckboxGroup: FC<OwnProps> = ({
             value={option.value}
             checked={selected.indexOf(option.value) !== -1}
             disabled={option.disabled || disabled}
-            round={round}
             isLoading={loadingOptions ? loadingOptions.indexOf(option.value) !== -1 : undefined}
             onChange={handleChange}
             nestedCheckbox={nestedCheckbox}
             nestedCheckboxCount={getCheckedNestedCount(option.nestedOptions ?? [])}
             nestedOptionList={option}
             values={values}
+            isRound={isRound}
           />
         );
       })}

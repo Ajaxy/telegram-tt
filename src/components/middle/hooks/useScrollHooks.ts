@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import { useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { MessageListType } from '../../../global/types';
+import type { MessageListType } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { LoadMoreDirection } from '../../../types';
 
@@ -66,12 +66,12 @@ export default function useScrollHooks(
     }
 
     const container = containerRef.current;
-    if (!container) {
-      return;
-    }
+    const fabTrigger = fabTriggerRef.current;
+    if (!container || !fabTrigger) return;
 
     const { offsetHeight, scrollHeight, scrollTop } = container;
-    const scrollBottom = Math.round(scrollHeight - scrollTop - offsetHeight);
+    const fabOffsetTop = fabTrigger.offsetTop;
+    const scrollBottom = Math.round(fabOffsetTop - scrollTop - offsetHeight);
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
     const isAtBottom = scrollBottom <= NOTCH_THRESHOLD;
 

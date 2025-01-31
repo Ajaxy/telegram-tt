@@ -17,7 +17,7 @@ import useOldLang from '../../hooks/useOldLang';
 
 import GroupChatInfo from '../common/GroupChatInfo';
 import PrivateChatInfo from '../common/PrivateChatInfo';
-import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
+import ReactionStaticEmoji from '../common/reactions/ReactionStaticEmoji';
 import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 
 import styles from './StoryViewModal.module.scss';

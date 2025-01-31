@@ -6,14 +6,14 @@ import type { ApiSticker } from '../../../api/types';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import buildClassName from '../../../util/buildClassName';
 import findInViewport from '../../../util/findInViewport';
-import isFullyVisible from '../../../util/isFullyVisible';
+import isFullyVisible from '../../../util/visibility/isFullyVisible';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import Loading from '../../ui/Loading';
@@ -79,7 +79,7 @@ const EmojiTooltip: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen, undefined, undefined, false);
   const listEmojis: (Emoji | ApiSticker)[] = usePrevDuringAnimation(
     emojis.length ? [...customEmojis, ...emojis] : undefined, CLOSE_DURATION,
   ) || [];

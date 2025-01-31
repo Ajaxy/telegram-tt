@@ -53,7 +53,7 @@ const UserBirthday = ({
   animatedEmojiEffects,
   isInSettings,
 }: OwnProps & StateProps) => {
-  const { openGiftPremiumModal, requestConfetti } = getActions();
+  const { openGiftModal, requestConfetti } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const animationPlayedRef = useRef(false);
@@ -145,7 +145,7 @@ const UserBirthday = ({
   const canGiftPremium = isToday && !user.isPremium && !user.isSelf && !isPremiumPurchaseBlocked;
 
   const handleOpenGiftModal = useLastCallback(() => {
-    openGiftPremiumModal({ forUserIds: [user.id] });
+    openGiftModal({ forUserId: user.id });
   });
 
   const handleClick = useLastCallback(() => {
@@ -175,7 +175,9 @@ const UserBirthday = ({
         isStatic={isStatic}
         onSecondaryIconClick={handleOpenGiftModal}
       >
-        <div className="title">{renderText(lang(valueKey, [formattedDate, age], undefined, age))}</div>
+        <div className="title" dir={lang.isRtl ? 'rtl' : undefined}>
+          {renderText(lang(valueKey, [formattedDate, age], undefined, age))}
+        </div>
         <span className="subtitle">{lang(isToday ? 'ProfileBirthdayToday' : 'ProfileBirthday')}</span>
       </ListItem>
       {isPlayingAnimation && IS_OFFSET_PATH_SUPPORTED && numbersForAge?.map((sticker, index) => (

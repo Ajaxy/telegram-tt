@@ -19,7 +19,7 @@ import {
   selectIsChatWithSelf,
   selectPeer, selectPeerStories, selectPeerStory, selectTabState, selectUser,
 } from '../selectors';
-import { updatePeer } from './general';
+import { updatePeer } from './peers';
 import { updateTabState } from './tabs';
 
 export function addStories<T extends GlobalState>(global: T, newStoriesByPeerId: Record<string, ApiPeerStories>): T {

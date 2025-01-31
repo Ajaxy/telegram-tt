@@ -12,7 +12,6 @@ import {
   TOP_REACTIONS_LIMIT,
 } from '../../../config';
 import { split } from '../../../util/iteratees';
-import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import {
   buildApiAvailableEffect,
   buildApiAvailableReaction,
@@ -21,9 +20,7 @@ import {
   buildMessagePeerReaction,
 } from '../apiBuilders/reactions';
 import { buildStickerFromDocument } from '../apiBuilders/symbols';
-import { buildApiUser } from '../apiBuilders/users';
-import { buildInputPeer, buildInputReaction } from '../gramjsBuilders';
-import { addEntitiesToLocalDb } from '../helpers';
+import { buildInputPeer, buildInputReaction, generateRandomTimestampedBigInt } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { invokeRequest } from './client';
 
@@ -153,6 +150,29 @@ export function sendReaction({
   });
 }
 
+export function sendPaidReaction({
+  chat,
+  messageId,
+  count,
+  isPrivate,
+}: {
+  chat: ApiChat;
+  messageId: number;
+  count: number;
+  isPrivate?: boolean;
+}) {
+  return invokeRequest(new GramJs.messages.SendPaidReaction({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    msgId: messageId,
+    randomId: generateRandomTimestampedBigInt(),
+    count,
+    private: isPrivate || undefined,
+  }), {
+    shouldReturnTrue: true,
+    shouldThrow: true,
+  });
+}
+
 export function fetchMessageReactions({
   ids, chat,
 }: {
@@ -187,14 +207,9 @@ export async function fetchMessageReactionsList({
     return undefined;
   }
 
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-
   const { nextOffset, reactions, count } = result;
 
   return {
-    users: result.users.map(buildApiUser).filter(Boolean),
-    chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
     nextOffset,
     reactions: reactions.map(buildMessagePeerReaction).filter(Boolean),
     count,
@@ -223,7 +238,7 @@ export async function fetchTopReactions({ hash = '0' }: { hash?: string }) {
 
   return {
     hash: String(result.hash),
-    reactions: result.reactions.map(buildApiReaction).filter(Boolean),
+    reactions: result.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
   };
 }
 
@@ -239,7 +254,7 @@ export async function fetchRecentReactions({ hash = '0' }: { hash?: string }) {
 
   return {
     hash: String(result.hash),
-    reactions: result.reactions.map(buildApiReaction).filter(Boolean),
+    reactions: result.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
   };
 }
 
@@ -258,7 +273,7 @@ export async function fetchDefaultTagReactions({ hash = '0' }: { hash?: string }
 
   return {
     hash: String(result.hash),
-    reactions: result.reactions.map(buildApiReaction).filter(Boolean),
+    reactions: result.reactions.map((r) => buildApiReaction(r)).filter(Boolean),
   };
 }
 

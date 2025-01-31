@@ -1,5 +1,5 @@
 .modal {
-  z-index: calc(var(--z-media-viewer) - 1);
+  z-index: calc(var(--z-modal-low-priority) + 1);
 }
 
 .positive {
@@ -23,7 +23,7 @@
   display: flex;
   gap: 0.25rem;
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.325;
 }
 

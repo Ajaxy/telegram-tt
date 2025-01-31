@@ -6,7 +6,7 @@ import type { ApiPeer, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import {
-  getSenderTitle,
+  getPeerTitle,
   getStoryMediaHash,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -59,7 +59,7 @@ const EmbeddedStory: FC<OwnProps> = ({
   const mediaThumbnail = isVideoStory ? story.content.video!.thumbnail?.dataUri : undefined;
   const pictogramUrl = mediaBlobUrl || mediaThumbnail;
 
-  const senderTitle = sender ? getSenderTitle(lang, sender) : undefined;
+  const senderTitle = sender ? getPeerTitle(lang, sender) : undefined;
   const handleFastClick = useLastCallback(() => {
     if (story && !isExpiredStory) {
       onClick();

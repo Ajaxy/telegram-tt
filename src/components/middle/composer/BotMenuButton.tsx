@@ -2,7 +2,9 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../../common/helpers/renderText';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 type OwnProps = {
@@ -51,8 +53,8 @@ const BotMenuButton: FC<OwnProps> = ({
       onClick={onClick}
       ariaLabel="Open bot command keyboard"
     >
-      <i className={buildClassName('bot-menu-icon', 'icon', 'icon-webapp', isOpen && 'open')} />
-      <span ref={textRef} className="bot-menu-text">{text}</span>
+      <Icon name="webapp" className={buildClassName('bot-menu-icon', isOpen && 'open')} />
+      <span ref={textRef} className="bot-menu-text">{renderText(text)}</span>
     </Button>
   );
 };

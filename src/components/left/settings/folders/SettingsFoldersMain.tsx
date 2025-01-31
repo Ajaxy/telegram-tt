@@ -14,14 +14,15 @@ import { isBetween } from '../../../../util/math';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { throttle } from '../../../../util/schedulers';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
-import renderText from '../../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
 import { useFolderManagerForChatsCount } from '../../../../hooks/useFolderManager';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useOldLang from '../../../../hooks/useOldLang';
-import usePrevious from '../../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../../hooks/usePreviousDeprecated';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
+import Icon from '../../../common/icons/Icon';
 import Button from '../../../ui/Button';
 import Draggable from '../../../ui/Draggable';
 import ListItem from '../../../ui/ListItem';
@@ -76,7 +77,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
     draggedIndex: undefined,
   });
 
-  const prevFolderIds = usePrevious(folderIds);
+  const prevFolderIds = usePreviousDeprecated(folderIds);
 
   // Sync folders state after changing folders in other clients
   useEffect(() => {
@@ -132,7 +133,10 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
       if (id === ALL_FOLDER_ID) {
         return {
           id,
-          title: lang('FilterAllChats'),
+          title: {
+            text: lang('FilterAllChats'),
+            entities: [],
+          },
         };
       }
 
@@ -141,6 +145,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         title: folder.title,
         subtitle: getFolderDescriptionText(lang, folder, chatsCountByFolderId[folder.id]),
         isChatList: folder.isChatList,
+        noTitleAnimations: folder.noTitleAnimations,
       };
     });
   }, [folderIds, foldersById, lang, chatsCountByFolderId]);
@@ -206,7 +211,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         {canCreateNewFolder && (
           <Button
           // TODO: Refactor button component to handle icon placemenet with props
-            className="with-icon mb-2"
+            className="settings-button with-icon mb-2"
             color="primary"
             size="smaller"
             pill
@@ -214,7 +219,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             onClick={handleCreateFolder}
             isRtl={lang.isRtl}
           >
-            <i className="icon icon-add" />
+            <Icon name="add" />
             {lang('CreateNewFilter')}
           </Button>
         )}
@@ -251,7 +256,11 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     allowSelection
                   >
                     <span className="title">
-                      {folder.title}
+                      {renderTextWithEntities({
+                        text: folder.title.text,
+                        entities: folder.title.entities,
+                        noCustomEmojiPlayback: folder.noTitleAnimations,
+                      })}
                     </span>
                     <span className="subtitle">{lang('FoldersAllChatsDesc')}</span>
                   </ListItem>
@@ -296,11 +305,15 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                   }}
                 >
                   <span className="title">
-                    {renderText(folder.title, ['emoji'])}
-                    {isBlocked && <i className="icon icon-lock-badge settings-folders-blocked-icon" />}
+                    {renderTextWithEntities({
+                      text: folder.title.text,
+                      entities: folder.title.entities,
+                      noCustomEmojiPlayback: folder.noTitleAnimations,
+                    })}
+                    {isBlocked && <Icon name="lock-badge" className="settings-folders-blocked-icon" />}
                   </span>
                   <span className="subtitle">
-                    {folder.isChatList && <i className="icon icon-link mr-1" />}
+                    {folder.isChatList && <Icon name="link" className="mr-1" />}
                     {folder.subtitle}
                   </span>
                 </ListItem>
@@ -329,7 +342,13 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             >
               <div className="settings-folders-recommended-item">
                 <div className="multiline-item">
-                  <span className="title">{renderText(folder.title, ['emoji'])}</span>
+                  <span className="title">
+                    {renderTextWithEntities({
+                      text: folder.title.text,
+                      entities: folder.title.entities,
+                      noCustomEmojiPlayback: folder.noTitleAnimations,
+                    })}
+                  </span>
                   <span className="subtitle">{folder.description}</span>
                 </div>
 

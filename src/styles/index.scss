@@ -20,7 +20,7 @@ body {
   padding: 0;
   font-size: 16px;
   color: var(--color-text);
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
   line-height: 1.5;
   text-align: left;
   overflow: hidden;
@@ -30,9 +30,12 @@ body {
   user-select: none;
 
   --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu,
-    Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   --font-family-monospace: "Cascadia Mono", "Roboto Mono", "Droid Sans Mono", 'SF Mono', "Menlo", "Ubuntu Mono",
-    "Consolas", monospace;
+  "Consolas", monospace;
+  --font-family-rounded: -ui-rounded, "Numbers Rounded", "Roboto", "Helvetica Neue", sans-serif;
+  --font-family-condensed: "Roboto Condensed", "Roboto", "Helvetica Neue", sans-serif;
+  --font-weight-semibold: 500; // Note: Roboto is naturally quite bold, so 500 works well as default
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
@@ -60,24 +63,28 @@ html.theme-dark {
 body.is-ios,
 body.is-macos {
   --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue",
-    sans-serif;
+  sans-serif;
 }
 
 html[lang="fa"],
 html[lang="fa"] body {
   --font-family: "Vazirmatn", "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen,
-    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 
   &.is-ios,
   &.is-macos {
     --font-family: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Segoe UI", Oxygen,
-      Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   }
 }
 
 body.is-ios {
   --border-radius-messages: 1rem;
   --border-radius-messages-small: 0.5rem;
+}
+
+body.is-macos {
+  --font-weight-semibold: 600;
 }
 
 body.is-electron {
@@ -122,6 +129,11 @@ body.cursor-ew-resize {
 
 .hidden {
   visibility: hidden;
+}
+
+.svg-definitions {
+  position: fixed; // Firefox requires definition to be visible
+  top: -99999px;
 }
 
 .allow-selection {
@@ -199,10 +211,6 @@ body:not(.is-ios) {
   &::-webkit-scrollbar {
     display: none;
   }
-}
-
-.canvas-blur-setup {
-  will-change: width, height;
 }
 
 .emoji-small {
@@ -289,6 +297,13 @@ body:not(.is-ios) {
   vertical-align: text-top;
 }
 
+// Increase specificity to override the default icon style
+.star-amount-icon.star-amount-icon {
+  line-height: inherit; // Vertical centring
+  margin-inline-start: 0.375em; // Prevent sticking to the text without using `white-space: pre`
+  margin-inline-end: 0.2em; // Prevent sticking to the text without using `white-space: pre`
+}
+
 .shared-canvas-container {
   position: relative;
 }
@@ -347,6 +362,7 @@ body:not(.is-ios) {
   --color-chat-hover: rgb(44, 44, 44);
   --color-chat-active: rgb(118, 106, 200);
   --color-chat-active-greyed: rgb(146, 136, 211);
+  --color-item-hover: rgb(44, 44, 44);
   --color-item-active: rgb(41, 41, 41);
   --color-text: rgb(255, 255, 255);
   --color-text-rgb: 255, 255, 255;

@@ -26,7 +26,7 @@ import useForceUpdate from '../../../hooks/useForceUpdate';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
-import usePrevious from '../../../hooks/usePrevious';
+import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useDevicePixelRatio from '../../../hooks/window/useDevicePixelRatio';
 
 import Avatar from '../../common/Avatar';
@@ -81,7 +81,7 @@ const Location: FC<OwnProps> = ({
 
   const mediaHash = buildStaticMapHash(point, width, height, zoom, dpr);
   const mediaBlobUrl = useMedia(mediaHash);
-  const prevMediaBlobUrl = usePrevious(mediaBlobUrl, true);
+  const prevMediaBlobUrl = usePreviousDeprecated(mediaBlobUrl, true);
   const mapBlobUrl = mediaBlobUrl || prevMediaBlobUrl;
 
   const accuracyRadiusPx = useMemo(() => {

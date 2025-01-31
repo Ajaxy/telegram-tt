@@ -301,7 +301,7 @@
   margin-top: 0.25rem;
   color: var(--color-white);
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -399,7 +399,7 @@
 
 .senderName {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
@@ -604,7 +604,7 @@
   bottom: -0.25rem;
   right: 0.5rem;
   color: var(--color-white);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   cursor: var(--custom-cursor, pointer);
 }
 

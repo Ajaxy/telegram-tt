@@ -15,6 +15,12 @@ const MONTH_EMOTICON: Record<number, string> = {
   24: `${5}\u{FE0F}\u20E3`,
 };
 
+const STAR_EMOTICON: Record<number, string> = {
+  1000: `${2}\u{FE0F}\u20E3`,
+  2500: `${3}\u{FE0F}\u20E3`,
+  5000: `${4}\u{FE0F}\u20E3`,
+};
+
 export function selectIsStickerFavorite<T extends GlobalState>(global: T, sticker: ApiSticker) {
   const { stickers } = global.stickers.favorite;
   return stickers && stickers.some(({ id }) => id === sticker.id);
@@ -127,6 +133,21 @@ export function selectAnimatedEmoji<T extends GlobalState>(global: T, emoji: str
   return animatedEmojis.stickers.find((sticker) => sticker.emoji === emoji || sticker.emoji === cleanedEmoji);
 }
 
+export function selectRestrictedEmoji<T extends GlobalState>(global: T, emoji: string) {
+  const { restrictedEmoji } = global;
+  if (!restrictedEmoji || !restrictedEmoji.stickers) {
+    return undefined;
+  }
+
+  const cleanedEmoji = cleanEmoji(emoji);
+
+  return restrictedEmoji.stickers.find((sticker) => {
+    if (!sticker.emoji) return undefined;
+    const cleanedStickerEmoji = cleanEmoji(sticker.emoji);
+    return cleanedStickerEmoji === cleanedEmoji;
+  });
+}
+
 export function selectAnimatedEmojiEffect<T extends GlobalState>(global: T, emoji: string) {
   const { animatedEmojiEffects } = global;
   if (!animatedEmojiEffects || !animatedEmojiEffects.stickers) {
@@ -154,5 +175,22 @@ export function selectGiftStickerForDuration<T extends GlobalState>(global: T, d
   const stickers = global.premiumGifts?.stickers;
   if (!stickers) return undefined;
   const emoji = MONTH_EMOTICON[duration];
+  return stickers.find((sticker) => sticker.emoji === emoji) || stickers[0];
+}
+
+export function selectGiftStickerForStars<T extends GlobalState>(global: T, starCount?: number) {
+  const stickers = global.premiumGifts?.stickers;
+
+  if (!stickers || !starCount) return undefined;
+
+  let emoji;
+  if (starCount <= 1000) {
+    emoji = STAR_EMOTICON[1000];
+  } else if (starCount < 2500) {
+    emoji = STAR_EMOTICON[2500];
+  } else {
+    emoji = STAR_EMOTICON[5000];
+  }
+
   return stickers.find((sticker) => sticker.emoji === emoji) || stickers[0];
 }

@@ -3,7 +3,7 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage, StatisticsMessageInteractionCounter } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import {
   getMessageMediaHash,
@@ -67,7 +67,7 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
   );
 };
 
-function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
+function renderSummary(lang: OldLangFn, message: ApiMessage, blobUrl?: string, isRoundVideo?: boolean) {
   if (!blobUrl) {
     return renderMessageSummary(lang, message);
   }

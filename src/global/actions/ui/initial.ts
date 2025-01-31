@@ -1,5 +1,6 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
+import type { LangCode } from '../../../types';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -134,7 +135,7 @@ addCallback((global: GlobalState) => {
 
   const performanceType = selectPerformanceSettings(global);
 
-  void oldSetLanguage(language, undefined, true);
+  void oldSetLanguage(language as LangCode, undefined, true);
 
   requestMutation(() => {
     document.documentElement.style.setProperty(
@@ -216,10 +217,10 @@ addActionHandler('setAuthRememberMe', (global, actions, payload): ActionReturnTy
   };
 });
 
-addActionHandler('clearAuthError', (global): ActionReturnType => {
+addActionHandler('clearAuthErrorKey', (global): ActionReturnType => {
   return {
     ...global,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 

@@ -1,11 +1,17 @@
 import type {
-  ApiMissingInvitedUser, ApiUser, ApiUserFullInfo, ApiUserStatus,
+  ApiMissingInvitedUser,
+  ApiSavedStarGift,
+  ApiUser,
+  ApiUserCommonChats,
+  ApiUserFullInfo,
+  ApiUserStatus,
 } from '../../api/types';
+import type { BotAppPermissions } from '../../types';
 import type { GlobalState, TabArgs, TabState } from '../types';
 
 import { areDeepEqual } from '../../util/areDeepEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { omit, pick } from '../../util/iteratees';
+import { omit, omitUndefined, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectTabState } from '../selectors';
 import { updateChat } from './chats';
@@ -26,19 +32,19 @@ function updateContactList<T extends GlobalState>(global: T, updatedUsers: ApiUs
 
   if (!contactUserIds) return global;
 
-  const newContactUserIds = updatedUsers
-    .filter((user) => user?.isContact && !contactUserIds.includes(user.id))
+  const contactUserIdsFromUpdate = updatedUsers
+    .filter((user) => user?.isContact)
     .map((user) => user.id);
 
-  if (newContactUserIds.length === 0) return global;
+  if (contactUserIdsFromUpdate.length === 0) return global;
 
   return {
     ...global,
     contactList: {
-      userIds: [
-        ...newContactUserIds,
+      userIds: unique([
+        ...contactUserIdsFromUpdate,
         ...contactUserIds,
-      ],
+      ]),
     },
   };
 }
@@ -140,7 +146,7 @@ function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial
     return undefined;
   }
 
-  return updatedUser;
+  return omitUndefined(updatedUser);
 }
 
 export function deleteContact<T extends GlobalState>(global: T, userId: string): T {
@@ -240,18 +246,28 @@ export function updateUserFullInfo<T extends GlobalState>(
   };
 }
 
+export function updateUserCommonChats<T extends GlobalState>(
+  global: T, userId: string, commonChats: ApiUserCommonChats,
+): T {
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      commonChatsById: {
+        ...global.users.commonChatsById,
+        [userId]: commonChats,
+      },
+    },
+  };
+}
+
 // @optimization Allows to avoid redundant updates which cause a lot of renders
 export function addUserStatuses<T extends GlobalState>(global: T, newById: Record<string, ApiUserStatus>): T {
   const { statusesById } = global.users;
 
-  const newKeys = Object.keys(newById).filter((id) => !statusesById[id]);
-  if (!newKeys.length) {
-    return global;
-  }
-
   global = replaceUserStatuses(global, {
     ...statusesById,
-    ...pick(newById, newKeys),
+    ...newById,
   });
 
   return global;
@@ -284,4 +300,49 @@ export function updateMissingInvitedUsers<T extends GlobalState>(
       chatId,
     },
   }, tabId);
+}
+
+export function updateBotAppPermissions<T extends GlobalState>(
+  global: T,
+  botId: string,
+  permissions: BotAppPermissions,
+): T {
+  const { botAppPermissionsById } = global.users;
+
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      botAppPermissionsById: {
+        ...botAppPermissionsById,
+        [botId]: {
+          ...botAppPermissionsById[botId],
+          ...permissions,
+        },
+      },
+    },
+  };
+}
+
+export function replacePeerSavedGifts<T extends GlobalState>(
+  global: T,
+  peerId: string,
+  gifts: ApiSavedStarGift[],
+  nextOffset?: string,
+): T {
+  global = {
+    ...global,
+    peers: {
+      ...global.peers,
+      giftsById: {
+        ...global.peers.giftsById,
+        [peerId]: {
+          gifts,
+          nextOffset,
+        },
+      },
+    },
+  };
+
+  return global;
 }

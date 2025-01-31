@@ -7,8 +7,8 @@
   width: auto;
   margin: 0;
   border: none;
-  padding: 0.625rem 0.25rem;
-  font-weight: 500;
+  padding: 0.625rem 1.125rem;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   border-top-left-radius: var(--border-radius-messages-small);
   border-top-right-radius: var(--border-radius-messages-small);
@@ -44,11 +44,12 @@
     }
   }
 
-  > span {
+  .Tab_inner {
     position: relative;
     display: flex;
     align-items: center;
     white-space: nowrap;
+    gap: 1px; // Prevent custom emoji sticking to the text
   }
 
   .badge {
@@ -61,7 +62,7 @@
     color: white;
     font-size: 0.875rem;
     line-height: 1.3125rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     text-align: center;
     flex-shrink: 0;
 
@@ -85,12 +86,12 @@
 
   .platform {
     position: absolute;
-    bottom: calc(-0.625rem - 1px);
-    left: 0;
+    bottom: -0.625rem;
+    left: -0.5rem;
+    right: -0.5rem;
     opacity: 0;
     background-color: var(--color-primary);
     height: 0.1875rem;
-    width: 100%;
     border-radius: 0.1875rem 0.1875rem 0 0;
     pointer-events: none;
     box-sizing: content-box;

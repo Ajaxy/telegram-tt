@@ -1,0 +1,19 @@
+.root {
+  font-size: 0.75rem;
+  line-height: 1;
+  border-radius: 1em;
+  padding: 0.25em 0.5em;
+  background-color: var(--accent-background-active-color);
+  color: var(--accent-color);
+
+  filter: brightness(1);
+  transition: 150ms filter ease-in;
+}
+
+.clickable {
+  cursor: var(--custom-cursor, pointer);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}

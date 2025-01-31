@@ -5,12 +5,12 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../api/types';
-import type { LangFn } from '../../hooks/useOldLang';
 import type { IconName } from '../../types/icons';
 import { MediaViewerOrigin, type StoryViewerOrigin, type ThreadId } from '../../types';
 
 import {
   getChatTypeString,
+  getGroupStatus,
   getMainUsername,
   isChatSuperGroup,
 } from '../../global/helpers';
@@ -20,6 +20,7 @@ import {
   selectChatOnlineCount,
   selectThreadInfo,
   selectThreadMessagesCount,
+  selectTopic,
   selectUser,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -261,30 +262,13 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   );
 };
 
-function getGroupStatus(lang: LangFn, chat: ApiChat) {
-  const chatTypeString = lang(getChatTypeString(chat));
-  const { membersCount } = chat;
-
-  if (chat.isRestricted) {
-    return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
-  }
-
-  if (!membersCount) {
-    return chatTypeString;
-  }
-
-  return chatTypeString === 'Channel'
-    ? lang('Subscribers', membersCount, 'i')
-    : lang('Members', membersCount, 'i');
-}
-
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }): StateProps => {
     const chat = selectChat(global, chatId);
     const threadInfo = threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;
     const areMessagesLoaded = Boolean(selectChatMessages(global, chatId));
-    const topic = threadId ? chat?.topics?.[threadId] : undefined;
+    const topic = threadId ? selectTopic(global, chatId, threadId) : undefined;
     const messagesCount = topic && selectThreadMessagesCount(global, chatId, threadId!);
     const self = selectUser(global, global.currentUserId!);
 

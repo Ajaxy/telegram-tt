@@ -2,10 +2,10 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { MessageListType } from '../../global/types';
+import type { MessageListType } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { selectChat, selectCurrentMessageList } from '../../global/selectors';
+import { selectChat, selectCurrentMessageList, selectCurrentMiddleSearch } from '../../global/selectors';
 import animateScroll from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
 
@@ -97,7 +97,12 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
         return;
       }
 
-      animateScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
+      animateScroll({
+        container: messagesContainer,
+        element: lastMessageElement,
+        position: 'end',
+        margin: FOCUS_MARGIN,
+      });
     }
   });
 
@@ -153,8 +158,10 @@ export default memo(withGlobal<OwnProps>(
 
     const { chatId, threadId, type: messageListType } = currentMessageList;
     const chat = selectChat(global, chatId);
+    const hasActiveMiddleSearch = Boolean(selectCurrentMiddleSearch(global));
 
-    const shouldShowCount = chat && threadId === MAIN_THREAD_ID && messageListType === 'thread';
+    const shouldShowCount = chat && threadId === MAIN_THREAD_ID && messageListType === 'thread'
+      && !hasActiveMiddleSearch;
 
     return {
       messageListType,

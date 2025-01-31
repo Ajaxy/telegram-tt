@@ -6,7 +6,7 @@ import type {
   ApiChat, ApiMessage, ApiMessageOutgoingStatus,
   ApiUser,
 } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import {
   getMessageIsSpoiler,
@@ -30,6 +30,7 @@ import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import Link from '../../ui/Link';
 import ListItem from '../../ui/ListItem';
 
@@ -111,7 +112,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
 };
 
 function renderSummary(
-  lang: LangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string, isRoundVideo?: boolean,
+  lang: OldLangFn, message: ApiMessage, blobUrl?: string, searchQuery?: string, isRoundVideo?: boolean,
 ) {
   if (!blobUrl) {
     return renderMessageSummary(lang, message, undefined, searchQuery);
@@ -129,7 +130,7 @@ function renderSummary(
         }
         draggable={false}
       />
-      {getMessageVideo(message) && <i className="icon icon-play" />}
+      {getMessageVideo(message) && <Icon name="play" />}
       {renderMessageSummary(lang, message, true, searchQuery)}
     </span>
   );

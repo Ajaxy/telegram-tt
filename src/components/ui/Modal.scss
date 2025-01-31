@@ -7,13 +7,17 @@
     z-index: var(--z-modal-confirm);
   }
 
+  &.low-priority {
+    z-index: var(--z-modal-low-priority);
+  }
+
   &.delete,
   &.error,
   &.confirm,
   &.pin,
   &.unpin-all {
     .modal-dialog {
-      max-width: 23rem;
+      max-width: 24rem;
     }
   }
 
@@ -31,11 +35,11 @@
 
   &.slim {
     .modal-dialog {
-      max-width: 25rem;
+      max-width: 26.25rem;
     }
 
     .modal-content {
-      max-height: min(92vh, 32rem);
+      max-height: min(92vh, 36rem);
     }
   }
 
@@ -99,7 +103,7 @@
 
   .modal-header,
   %modal-header {
-    padding: 1rem 1rem 0;
+    padding: 1.3125rem 1.3125rem 0;
     display: flex;
     align-items: center;
     flex-shrink: 0;
@@ -107,7 +111,7 @@
 
   .modal-title {
     font-size: 1.25rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     flex: 1 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -147,7 +151,7 @@
   .modal-content {
     width: 100%;
     flex-grow: 1;
-    padding: 1rem;
+    padding: 1rem 1.5rem 1.1875rem;
     overflow-y: auto;
     max-height: 92vh;
 
@@ -161,7 +165,6 @@
   .modal-content,
   .modal-content > p {
     unicode-bidi: plaintext;
-    text-align: initial;
   }
 
   .modal-about {
@@ -204,7 +207,7 @@
     width: auto;
     height: auto;
     text-align: right;
-    font-weight: 500;
+    font-weight: var(--font-weight-semibold);
     white-space: pre-wrap;
   }
 
@@ -214,8 +217,8 @@
 
   .modal-absolute-close-button {
     position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
+    top: 0.375rem;
+    left: 0.375rem;
     z-index: 1;
   }
 }

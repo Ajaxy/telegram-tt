@@ -1,4 +1,4 @@
-import type { ApiMessage } from '../../../../api/types';
+import type { ApiMessage, ApiPoll } from '../../../../api/types';
 import type { IAlbum } from '../../../../types';
 
 import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
@@ -9,6 +9,7 @@ export function buildContentClassName(
   message: ApiMessage,
   album?: IAlbum,
   {
+    poll,
     hasSubheader,
     isCustomShape,
     isLastInGroup,
@@ -16,6 +17,7 @@ export function buildContentClassName(
     hasThread,
     forceSenderName,
     hasCommentCounter,
+    hasCommentButton,
     hasActionButton,
     hasReactions,
     isGeoLiveActive,
@@ -23,6 +25,7 @@ export function buildContentClassName(
     peerColorClass,
     hasOutsideReactions,
   }: {
+    poll?: ApiPoll;
     hasSubheader?: boolean;
     isCustomShape?: boolean | number;
     isLastInGroup?: boolean;
@@ -30,6 +33,7 @@ export function buildContentClassName(
     hasThread?: boolean;
     forceSenderName?: boolean;
     hasCommentCounter?: boolean;
+    hasCommentButton?: boolean;
     hasActionButton?: boolean;
     hasReactions?: boolean;
     isGeoLiveActive?: boolean;
@@ -41,11 +45,12 @@ export function buildContentClassName(
   const { paidMedia } = getMessageContent(message);
   const { photo: paidMediaPhoto, video: paidMediaVideo } = getSingularPaidMedia(paidMedia);
 
+  const content = getMessageContent(message);
   const {
     photo = paidMediaPhoto, video = paidMediaVideo,
-    audio, voice, document, poll, webPage, contact, location, invoice, storyData,
+    audio, voice, document, webPage, contact, location, invoice, storyData,
     giveaway, giveawayResults,
-  } = getMessageContent(message);
+  } = content;
   const text = album?.hasMultipleCaptions ? undefined : getMessageContent(album?.captionMessage || message).text;
   const hasFactCheck = Boolean(message.factCheck?.text);
 
@@ -57,6 +62,7 @@ export function buildContentClassName(
   const isMedia = storyData || photo || video || location || invoice?.extendedMedia || paidMedia;
   const hasText = text || location?.mediaType === 'venue' || isGeoLiveActive || hasFactCheck;
   const isMediaWithNoText = isMedia && !hasText;
+  const hasInlineKeyboard = Boolean(message.inlineButtons);
   const isViaBot = Boolean(message.viaBotId);
 
   const hasFooter = (() => {
@@ -84,12 +90,17 @@ export function buildContentClassName(
     classNames.push('no-text');
   }
 
+  if (!Object.keys(content).length) {
+    classNames.push('unsupported');
+  }
+
   if (hasActionButton) {
     classNames.push('has-action-button');
   }
 
   if (isCustomShape) {
     classNames.push('custom-shape');
+
     if (isRoundVideo) {
       classNames.push('round');
     }
@@ -98,8 +109,10 @@ export function buildContentClassName(
       classNames.push('has-comment-counter');
     }
   }
-  if (isMedia) {
+  if (isMedia && !withVoiceTranscription) {
     classNames.push('media');
+  } else if (video) {
+    classNames.push('video');
   } else if (audio) {
     classNames.push('audio');
   } else if (voice) {
@@ -124,6 +137,10 @@ export function buildContentClassName(
 
     if (webPage.document) {
       classNames.push('document');
+    }
+
+    if (webPage.gift) {
+      classNames.push('gift');
     }
   }
 
@@ -170,7 +187,8 @@ export function buildContentClassName(
       classNames.push('has-background');
     }
 
-    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName || hasFactCheck) {
+    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText
+      || forceSenderName || hasFactCheck || withVoiceTranscription) {
       classNames.push('has-solid-background');
     }
 
@@ -178,7 +196,7 @@ export function buildContentClassName(
       classNames.push('has-fact-check');
     }
 
-    if (isLastInGroup && (photo || !isMediaWithNoText || (location && asForwarded))) {
+    if (isLastInGroup && !hasInlineKeyboard && (photo || !isMediaWithNoText || hasCommentButton)) {
       classNames.push('has-appendix');
     }
   }

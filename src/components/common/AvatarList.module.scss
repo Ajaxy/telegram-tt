@@ -1,43 +1,11 @@
 .root {
+  --_size: 0px;
+  --half-size: calc(var(--_size) / 2);
+  --spacing: calc(var(--_size) * 0.4);
+  --spacing-gap: calc(var(--_size) * 0.04);
+
   display: flex;
   position: relative;
-  --spacing: calc(var(--size) * 0.4);
-  --spacing-gap: calc(var(--size) * 0.04);
-  --size: 0px;
-
-  --half-size: calc(var(--size) / 2);
-}
-
-.size-micro {
-  --size: 1rem;
-}
-
-.size-mini {
-  --size: 1.5rem;
-}
-
-.size-tiny {
-  --size: 2rem;
-}
-
-.size-small {
-  --size: 2.125rem;
-}
-
-.size-small-mobile {
-  --size: 2.5rem;
-}
-
-.size-medium {
-  --size: 2.75rem;
-}
-
-.size-large {
-  --size: 3.375rem;
-}
-
-.size-jumbo {
-  --size: 7.5rem;
 }
 
 .avatar {
@@ -73,7 +41,7 @@
 
   font-size: 0.75rem;
   line-height: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 
   padding: 0rem 0.25rem;
 }

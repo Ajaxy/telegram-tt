@@ -13,6 +13,7 @@ import { selectTabState } from '../../../global/selectors';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import AvatarEditable from '../../ui/AvatarEditable';
 import Button from '../../ui/Button';
@@ -157,7 +158,7 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
           onClick={() => onReset()}
           ariaLabel="Return to member selection"
         >
-          <i className="icon icon-arrow-left" />
+          <Icon name="arrow-left" />
         </Button>
         <h3>{lang(isChannel ? 'NewChannel' : 'NewGroup')}</h3>
       </div>
@@ -211,7 +212,7 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-arrow-right" />
+          <Icon name="arrow-right" />
         )}
       </FloatingActionButton>
     </div>

@@ -58,6 +58,8 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     content.text = buildMessageTextContent(caption, entities);
   }
 
+  const reaction = sentReaction && buildApiReaction(sentReaction);
+
   return omitUndefined<ApiStory>({
     id,
     peerId,
@@ -75,7 +77,7 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     isOut: out,
     visibility: privacy && buildPrivacyRules(privacy),
     mediaAreas: mediaAreas?.map(buildApiMediaArea).filter(Boolean),
-    sentReaction: sentReaction && buildApiReaction(sentReaction),
+    sentReaction: reaction,
     forwardInfo: fwdFrom && buildApiStoryForwardInfo(fwdFrom),
     fromId: fromId && getApiChatIdFromMtpPeer(fromId),
   });
@@ -164,44 +166,47 @@ function buildApiMediaAreaCoordinates(coordinates: GramJs.TypeMediaAreaCoordinat
 }
 
 export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | undefined {
+  const coordinates = buildApiMediaAreaCoordinates(area.coordinates);
   if (area instanceof GramJs.MediaAreaVenue) {
-    const { geo, title, coordinates } = area;
+    const { geo, title } = area;
     const point = buildGeoPoint(geo);
 
     if (!point) return undefined;
 
     return {
       type: 'venue',
-      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      coordinates,
       geo: point,
       title,
     };
   }
 
   if (area instanceof GramJs.MediaAreaGeoPoint) {
-    const { geo, coordinates } = area;
+    const { geo } = area;
     const point = buildGeoPoint(geo);
 
     if (!point) return undefined;
 
     return {
       type: 'geoPoint',
-      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      coordinates,
       geo: point,
     };
   }
 
   if (area instanceof GramJs.MediaAreaSuggestedReaction) {
     const {
-      coordinates, reaction, dark, flipped,
+      reaction, dark, flipped,
     } = area;
 
     const apiReaction = buildApiReaction(reaction);
-    if (!apiReaction) return undefined;
+    if (!apiReaction) {
+      return undefined;
+    }
 
     return {
       type: 'suggestedReaction',
-      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      coordinates,
       reaction: apiReaction,
       ...(dark && { isDark: true }),
       ...(flipped && { isFlipped: true }),
@@ -209,23 +214,47 @@ export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | un
   }
 
   if (area instanceof GramJs.MediaAreaChannelPost) {
-    const { coordinates, channelId, msgId } = area;
+    const { channelId, msgId } = area;
 
     return {
       type: 'channelPost',
-      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      coordinates,
       channelId: buildApiPeerId(channelId, 'channel'),
       messageId: msgId,
     };
   }
 
   if (area instanceof GramJs.MediaAreaUrl) {
-    const { coordinates, url } = area;
+    const { url } = area;
 
     return {
       type: 'url',
-      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      coordinates,
       url,
+    };
+  }
+
+  if (area instanceof GramJs.MediaAreaWeather) {
+    const {
+      emoji, temperatureC, color,
+    } = area;
+
+    return {
+      type: 'weather',
+      coordinates,
+      emoji,
+      temperatureC,
+      color,
+    };
+  }
+
+  if (area instanceof GramJs.MediaAreaStarGift) {
+    const { slug } = area;
+
+    return {
+      type: 'uniqueGift',
+      coordinates,
+      slug,
     };
   }
 

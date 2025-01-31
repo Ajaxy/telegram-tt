@@ -29,8 +29,6 @@
 
     .TabList {
       justify-content: flex-start;
-      padding-left: 0.5625rem;
-      padding-bottom: 1px;
       border-bottom: 0;
       z-index: 1;
 
@@ -45,15 +43,6 @@
 
     .Tab {
       flex: 0 0 auto;
-      padding-left: 0.625rem;
-      padding-right: 0.625rem;
-
-      /* stylelint-disable-next-line */
-      > span {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-        white-space: pre;
-      }
     }
 
     > .Transition {

@@ -6,7 +6,7 @@ import type {
   ApiTypeStory,
   StatisticsStoryInteractionCounter,
 } from '../../../api/types';
-import type { LangFn } from '../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../hooks/useOldLang';
 
 import { getStoryMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -65,7 +65,7 @@ function StatisticsRecentStory({ chat, story, postStatistic }: OwnProps) {
   );
 }
 
-function renderSummary(lang: LangFn, chat: ApiChat, blobUrl?: string) {
+function renderSummary(lang: OldLangFn, chat: ApiChat, blobUrl?: string) {
   return (
     <span>
       {blobUrl ? (
@@ -80,7 +80,7 @@ function renderSummary(lang: LangFn, chat: ApiChat, blobUrl?: string) {
       ) : (
         <Avatar
           peer={chat}
-          size="small-mobile"
+          size="small"
           className={styles.image}
           withStorySolid
           forceUnreadStorySolid

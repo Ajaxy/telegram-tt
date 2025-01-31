@@ -1,0 +1,180 @@
+@use '../../../styles/mixins';
+
+.root {
+  z-index: calc(var(--z-modal-low-priority) + 1);
+}
+
+.root :global(.modal-content) {
+  padding: 0;
+  background-color: var(--color-background);
+
+  :global(html.theme-dark) & {
+    background-color: #181818;
+  }
+}
+
+.root :global(.modal-dialog),
+.transition,
+.content {
+  height: min(92vh, 45rem);
+  max-height: none !important;
+}
+
+.root :global(.modal-dialog),
+.root :global(.modal-content),
+.transition {
+  overflow: hidden;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  overflow-y: scroll;
+  height: 100%;
+  padding-bottom: 1rem;
+  padding-inline: 1rem;
+
+  @include mixins.adapt-padding-to-scrollbar(1rem);
+}
+
+.giftSection {
+  padding: 1.5rem;
+}
+
+.section {
+  padding: 0.5rem;
+}
+
+.starGiftsContainer,
+.premiumGiftsGallery {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.75rem;
+}
+
+.starGiftsContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0rem;
+  padding: 0.125rem;
+  padding-top: 0.75rem;
+}
+
+.header {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  border-bottom: 0.0625rem solid var(--color-borders);
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  height: 3.5rem;
+  padding: 0.5rem;
+  background: var(--color-background);
+  transition: 0.25s ease-out transform;
+  overflow: hidden;
+}
+
+.headerSlide {
+  display: flex;
+  align-items: center;
+}
+
+.headerText {
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 0;
+}
+
+.hiddenHeader {
+  transform: translateY(-100%);
+}
+
+.commonHeaderText {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 0 4.5rem;
+  unicode-bidi: plaintext;
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.375rem;
+  left: 0.375rem;
+  z-index: 3;
+}
+
+.balance {
+  position: absolute;
+  top: 0.75rem;
+  right: 1.25rem;
+  z-index: 3;
+}
+
+.avatars {
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  z-index: 1;
+}
+
+.logoBackground {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 7rem;
+}
+
+.center {
+  text-align: center;
+}
+
+.description {
+  text-align: center;
+  line-height: 1.375;
+  margin: 0.25rem 1rem 1rem;
+  max-width: 25rem;
+}
+
+.starGiftsDescription {
+  margin-bottom: 0.625rem;
+}
+
+.boostIcon {
+  color: var(--color-primary);
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.optionBottom {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.secondaryInfo {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  padding: 0.5rem 1rem;
+}
+
+.footer {
+  margin: 0 1.5rem 1rem;
+}
+
+.starGiftsTransition {
+  overflow: hidden;
+  min-height: calc(100% - 3.5rem);
+  height: auto;
+}

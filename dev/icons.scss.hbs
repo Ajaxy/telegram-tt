@@ -3,9 +3,15 @@
 .icon-char::before {
   font-family: Roboto, "Helvetica Neue", sans-serif;
   content: attr(data-char);
-  width: 1.5rem;
+  width: 1em;
   text-align: center;
   display: block;
+}
+
+.icon-placeholder::before {
+  content: '';
+  display: block;
+  width: 1em;
 }
 
 @mixin icon {

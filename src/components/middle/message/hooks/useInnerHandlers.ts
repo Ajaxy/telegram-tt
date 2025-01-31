@@ -4,7 +4,7 @@ import { getActions } from '../../../../global';
 import type {
   ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiUser,
 } from '../../../../api/types';
-import type { LangFn } from '../../../../hooks/useOldLang';
+import type { OldLangFn } from '../../../../hooks/useOldLang';
 import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin } from '../../../../types';
@@ -13,25 +13,44 @@ import { getMessageReplyInfo } from '../../../../global/helpers/replies';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
-export default function useInnerHandlers(
-  lang: LangFn,
-  selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
-  message: ApiMessage,
-  chatId: string,
-  threadId: ThreadId,
-  isInDocumentGroup: boolean,
-  asForwarded?: boolean,
-  isScheduled?: boolean,
-  album?: IAlbum,
-  avatarPeer?: ApiPeer,
-  senderPeer?: ApiPeer,
-  botSender?: ApiUser,
-  messageTopic?: ApiTopic,
-  isTranslatingChat?: boolean,
-  story?: ApiStory,
-  isReplyPrivate?: boolean,
-  isRepliesChat?: boolean,
-) {
+export default function useInnerHandlers({
+  lang,
+  selectMessage,
+  message,
+  chatId,
+  threadId,
+  isInDocumentGroup,
+  asForwarded,
+  isScheduled,
+  album,
+  senderPeer,
+  botSender,
+  messageTopic,
+  isTranslatingChat,
+  story,
+  isReplyPrivate,
+  isRepliesChat,
+  isSavedMessages,
+}: {
+  lang: OldLangFn;
+  selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void;
+  message: ApiMessage;
+  chatId: string;
+  threadId: ThreadId;
+  isInDocumentGroup: boolean;
+  asForwarded?: boolean;
+  isScheduled?: boolean;
+  album?: IAlbum;
+  avatarPeer?: ApiPeer;
+  senderPeer?: ApiPeer;
+  botSender?: ApiUser;
+  messageTopic?: ApiTopic;
+  isTranslatingChat?: boolean;
+  story?: ApiStory;
+  isReplyPrivate?: boolean;
+  isRepliesChat?: boolean;
+  isSavedMessages?: boolean;
+}) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelUploadMedia, sendPollVote, openForwardMenu,
@@ -45,14 +64,6 @@ export default function useInnerHandlers(
   const {
     replyToMsgId, replyToPeerId, replyToTopId, isQuote, quoteText,
   } = getMessageReplyInfo(message) || {};
-
-  const handleAvatarClick = useLastCallback(() => {
-    if (!avatarPeer) {
-      return;
-    }
-
-    openChat({ id: avatarPeer.id });
-  });
 
   const handleSenderClick = useLastCallback(() => {
     if (!senderPeer) {
@@ -175,9 +186,11 @@ export default function useInnerHandlers(
   });
 
   const handleFocusForwarded = useLastCallback(() => {
+    const originalChatId = (isSavedMessages && forwardInfo!.savedFromPeerId) || forwardInfo!.fromChatId!;
+
     if (isInDocumentGroup) {
       focusMessage({
-        chatId: forwardInfo!.fromChatId!, groupedId, groupedChatId: chatId, messageId: forwardInfo!.fromMessageId!,
+        chatId: originalChatId, groupedId, groupedChatId: chatId, messageId: forwardInfo!.fromMessageId!,
       });
       return;
     }
@@ -190,7 +203,7 @@ export default function useInnerHandlers(
       });
     } else {
       focusMessage({
-        chatId: forwardInfo!.fromChatId!, messageId: forwardInfo!.fromMessageId!,
+        chatId: originalChatId, messageId: forwardInfo!.fromMessageId!,
       });
     }
   });
@@ -233,7 +246,6 @@ export default function useInnerHandlers(
   });
 
   return {
-    handleAvatarClick,
     handleSenderClick,
     handleViaBotClick,
     handleReplyClick,

@@ -1,4 +1,4 @@
-import type { IDimensions } from '../../../global/types';
+import type { IDimensions } from '../../../types';
 import { StoryViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY } from '../../../config';
@@ -225,7 +225,7 @@ function getNodes(origin: StoryViewerOrigin, userId: string) {
       containerSelector = '#LeftColumn .chat-list';
       break;
     case StoryViewerOrigin.SearchResult:
-      containerSelector = '#LeftColumn .LeftSearch';
+      containerSelector = '#LeftColumn .LeftSearch--container';
       break;
   }
 

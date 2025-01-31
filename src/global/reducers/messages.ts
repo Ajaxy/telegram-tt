@@ -1,26 +1,34 @@
 import type {
-  ApiMessage, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
+  ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
 } from '../../api/types';
-import type { FocusDirection, ScrollTargetPosition, ThreadId } from '../../types';
 import type {
-  GlobalState, MessageList, MessageListType, TabArgs, TabState, TabThread, Thread,
+  FocusDirection,
+  MessageList,
+  MessageListType,
+  ScrollTargetPosition,
+  TabThread,
+  Thread,
+  ThreadId,
+} from '../../types';
+import type {
+  GlobalState, TabArgs, TabState,
 } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   IS_MOCKED_CLIENT, IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
 } from '../../config';
+import { areDeepEqual } from '../../util/areDeepEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
 } from '../../util/iteratees';
-import { isLocalMessageId, type MessageKey } from '../../util/messageKey';
+import { isLocalMessageId, type MessageKey } from '../../util/keys/messageKey';
 import {
-  hasMessageTtl, isMediaLoadableInViewer,
-  mergeIdRanges, orderHistoryIds, orderPinnedIds,
+  hasMessageTtl, isMediaLoadableInViewer, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
+import { getEmojiOnlyCountForMessage } from '../helpers/getEmojiOnlyCountForMessage';
 import {
-  selectChat,
   selectChatMessage,
   selectChatMessages,
   selectChatScheduledMessages,
@@ -30,6 +38,7 @@ import {
   selectMessageIdsByGroupId,
   selectOutlyingLists,
   selectPinnedIds,
+  selectPoll,
   selectQuickReplyMessage,
   selectScheduledIds,
   selectScheduledMessage,
@@ -38,14 +47,11 @@ import {
   selectThreadInfo,
   selectViewportIds,
 } from '../selectors';
-import { removeIdFromSearchResults } from './localSearch';
+import { removeIdFromSearchResults } from './middleSearch';
 import { updateTabState } from './tabs';
 import { clearMessageTranslation } from './translations';
 
-type MessageStoreSections = {
-  byId: Record<number, ApiMessage>;
-  threadsById: Record<number, Thread>;
-};
+type MessageStoreSections = GlobalState['messages']['byChatId'][string];
 
 export function updateCurrentMessageList<T extends GlobalState>(
   global: T,
@@ -61,10 +67,18 @@ export function updateCurrentMessageList<T extends GlobalState>(
   if (shouldReplaceHistory || (IS_TEST && !IS_MOCKED_CLIENT)) {
     newMessageLists = chatId ? [{ chatId, threadId, type }] : [];
   } else if (chatId) {
-    const last = messageLists[messageLists.length - 1];
-    if (!last || last.chatId !== chatId || last.threadId !== threadId || last.type !== type) {
-      if (last && (last.chatId === TMP_CHAT_ID || shouldReplaceLast)) {
-        newMessageLists = [...messageLists.slice(0, -1), { chatId, threadId, type }];
+    const current = messageLists[messageLists.length - 1];
+    if (current?.chatId === chatId && current.threadId === threadId && current.type === type) {
+      return global;
+    }
+
+    if (current && (current.chatId === TMP_CHAT_ID || shouldReplaceLast)) {
+      newMessageLists = [...messageLists.slice(0, -1), { chatId, threadId, type }];
+    } else {
+      const previous = messageLists[messageLists.length - 2];
+
+      if (previous?.chatId === chatId && previous.threadId === threadId && previous.type === type) {
+        newMessageLists = messageLists.slice(0, -1);
       } else {
         newMessageLists = [...messageLists, { chatId, threadId, type }];
       }
@@ -127,7 +141,7 @@ export function updateThread<T extends GlobalState>(
   });
 }
 
-function updateMessageStore<T extends GlobalState>(
+export function updateMessageStore<T extends GlobalState>(
   global: T, chatId: string, update: Partial<MessageStoreSections>,
 ): T {
   const current = global.messages.byChatId[chatId] || { byId: {}, threadsById: {} };
@@ -184,6 +198,30 @@ export function addMessages<T extends GlobalState>(
   return global;
 }
 
+export function replaceMessages<T extends GlobalState>(
+  global: T, messages: ApiMessage[],
+): T {
+  const updatedByChatId = messages.reduce((messagesByChatId, message: ApiMessage) => {
+    if (!messagesByChatId[message.chatId]) {
+      messagesByChatId[message.chatId] = {};
+    }
+    messagesByChatId[message.chatId][message.id] = message;
+
+    return messagesByChatId;
+  }, {} as Record<string, Record<number, ApiMessage>>);
+
+  Object.keys(updatedByChatId).forEach((chatId) => {
+    const currentById = selectChatMessages(global, chatId) || {};
+    const newById = {
+      ...currentById,
+      ...updatedByChatId[chatId],
+    };
+    global = replaceChatMessages(global, chatId, newById);
+  });
+
+  return global;
+}
+
 export function addChatMessagesById<T extends GlobalState>(
   global: T, chatId: string, newById: Record<number, ApiMessage>,
 ): T {
@@ -200,10 +238,18 @@ export function addChatMessagesById<T extends GlobalState>(
 }
 
 export function updateChatMessage<T extends GlobalState>(
-  global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>,
+  global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>, withDeepCheck = false,
 ): T {
   const byId = selectChatMessages(global, chatId) || {};
   const message = byId[messageId];
+
+  if (withDeepCheck && message) {
+    const updateKeys = Object.keys(messageUpdate) as (keyof ApiMessage)[];
+    if (areDeepEqual(pick(message, updateKeys), messageUpdate)) {
+      return global;
+    }
+  }
+
   if (message && messageUpdate.isMediaUnread === false && hasMessageTtl(message)) {
     if (message.content.voice) {
       messageUpdate.content = {
@@ -219,9 +265,18 @@ export function updateChatMessage<T extends GlobalState>(
       };
     }
   }
+
+  let emojiOnlyCount = message?.emojiOnlyCount;
+  if (messageUpdate.content) {
+    emojiOnlyCount = getEmojiOnlyCountForMessage(
+      messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
+    );
+  }
+
   const updatedMessage = {
     ...message,
     ...messageUpdate,
+    emojiOnlyCount,
   };
 
   if (!updatedMessage.id) {
@@ -238,9 +293,18 @@ export function updateScheduledMessage<T extends GlobalState>(
   global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>,
 ): T {
   const message = selectScheduledMessage(global, chatId, messageId)!;
+
+  let emojiOnlyCount = message?.emojiOnlyCount;
+  if (messageUpdate.content) {
+    emojiOnlyCount = getEmojiOnlyCountForMessage(
+      messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
+    );
+  }
+
   const updatedMessage = {
     ...message,
     ...messageUpdate,
+    emojiOnlyCount,
   };
 
   if (!updatedMessage.id) {
@@ -345,6 +409,17 @@ export function deleteChatMessages<T extends GlobalState>(
     }
 
     Object.values(global.byTabId).forEach(({ id: tabId }) => {
+      const tabState = selectTabState(global, tabId);
+      const activeDownloadsInChat = Object.entries(tabState.activeDownloads).filter(
+        ([, { originChatId, originMessageId }]) => originChatId === chatId && originMessageId,
+      );
+
+      activeDownloadsInChat.forEach(([mediaHash, context]) => {
+        if (messageIds.includes(context.originMessageId!)) {
+          global = cancelMessageMediaDownload(global, [mediaHash], tabId);
+        }
+      });
+
       mediaIdsToRemove.forEach((mediaId) => {
         global = removeIdFromSearchResults(global, chatId, threadId, mediaId, tabId);
       });
@@ -567,15 +642,9 @@ export function updateThreadInfo<T extends GlobalState>(
     ...update,
   } as ApiThreadInfo;
 
-  if (!doNotUpdateLinked) {
+  if (!doNotUpdateLinked && !newThreadInfo.isCommentsInfo) {
     const linkedUpdate = pick(newThreadInfo, ['messagesCount', 'lastMessageId', 'lastReadInboxMessageId']);
-    if (newThreadInfo.isCommentsInfo) {
-      if (newThreadInfo.threadId) {
-        global = updateThreadInfo(
-          global, newThreadInfo.chatId, newThreadInfo.threadId, linkedUpdate, true,
-        );
-      }
-    } else if (newThreadInfo.fromChannelId && newThreadInfo.fromMessageId) {
+    if (newThreadInfo.fromChannelId && newThreadInfo.fromMessageId) {
       global = updateThreadInfo(
         global, newThreadInfo.fromChannelId, newThreadInfo.fromMessageId, linkedUpdate, true,
       );
@@ -589,10 +658,12 @@ export function updateThreadInfos<T extends GlobalState>(
   global: T, updates: Partial<ApiThreadInfo>[],
 ): T {
   updates.forEach((update) => {
-    global = updateThreadInfo(global,
+    global = updateThreadInfo(
+      global,
       update.isCommentsInfo ? update.originChannelId! : update.chatId!,
       update.isCommentsInfo ? update.originMessageId! : update.threadId!,
-      update);
+      update,
+    );
   });
 
   return global;
@@ -635,26 +706,28 @@ export function updateQuickReplyMessages<T extends GlobalState>(
   };
 }
 
-export function updateFocusedMessage<T extends GlobalState>({
-  global,
-  chatId,
-  messageId,
-  threadId = MAIN_THREAD_ID,
-  noHighlight = false,
-  isResizingContainer = false,
-  quote,
-  scrollTargetPosition,
-}: {
-  global: T;
-  chatId?: string;
-  messageId?: number;
-  threadId?: ThreadId;
-  noHighlight?: boolean;
-  isResizingContainer?: boolean;
-  quote?: string;
-  scrollTargetPosition?: ScrollTargetPosition;
-},
-...[tabId = getCurrentTabId()]: TabArgs<T>): T {
+export function updateFocusedMessage<T extends GlobalState>(
+  {
+    global,
+    chatId,
+    messageId,
+    threadId = MAIN_THREAD_ID,
+    noHighlight = false,
+    isResizingContainer = false,
+    quote,
+    scrollTargetPosition,
+  }: {
+    global: T;
+    chatId?: string;
+    messageId?: number;
+    threadId?: ThreadId;
+    noHighlight?: boolean;
+    isResizingContainer?: boolean;
+    quote?: string;
+    scrollTargetPosition?: ScrollTargetPosition;
+  },
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
   return updateTabState(global, {
     focusedMessage: {
       ...selectTabState(global, tabId).focusedMessage,
@@ -809,32 +882,6 @@ export function updateThreadUnreadFromForwardedMessage<T extends GlobalState>(
   return global;
 }
 
-export function updateTopicLastMessageId<T extends GlobalState>(
-  global: T, chatId: string, threadId: ThreadId, lastMessageId: number,
-) {
-  const chat = selectChat(global, chatId);
-  if (!chat?.topics?.[threadId]) return global;
-  return {
-    ...global,
-    chats: {
-      ...global.chats,
-      byId: {
-        ...global.chats.byId,
-        [chatId]: {
-          ...chat,
-          topics: {
-            ...chat.topics,
-            [threadId]: {
-              ...chat.topics[threadId],
-              lastMessageId,
-            },
-          },
-        },
-      },
-    },
-  };
-}
-
 export function addActiveMediaDownload<T extends GlobalState>(
   global: T,
   mediaHash: string,
@@ -914,4 +961,95 @@ export function deleteQuickReply<T extends GlobalState>(
       byId: omit(global.quickReplies.byId, [quickReplyId]),
     },
   };
+}
+
+export function updatePoll<T extends GlobalState>(
+  global: T,
+  pollId: string,
+  pollUpdate: Partial<ApiPoll>,
+) {
+  const poll = selectPoll(global, pollId);
+
+  const oldResults = poll?.results;
+  let newResults = oldResults || pollUpdate.results;
+  if (poll && pollUpdate.results?.results) {
+    if (!poll.results || !pollUpdate.results.isMin) {
+      newResults = pollUpdate.results;
+    } else if (oldResults.results) {
+      // Update voters counts, but keep local `isChosen` values
+      newResults = {
+        ...pollUpdate.results,
+        results: pollUpdate.results.results.map((result) => ({
+          ...result,
+          isChosen: oldResults.results!.find((r) => r.option === result.option)?.isChosen,
+        })),
+        isMin: undefined,
+      };
+    }
+  }
+
+  const updatedPoll = {
+    ...poll,
+    ...pollUpdate,
+    results: newResults,
+  } satisfies ApiPoll;
+  if (!updatedPoll.id) {
+    return global;
+  }
+
+  return {
+    ...global,
+    messages: {
+      ...global.messages,
+      pollById: {
+        ...global.messages.pollById,
+        [pollId]: updatedPoll,
+      },
+    },
+  };
+}
+
+export function updatePollVote<T extends GlobalState>(
+  global: T,
+  pollId: string,
+  peerId: string,
+  options: string[],
+) {
+  const poll = selectPoll(global, pollId);
+  if (!poll) {
+    return global;
+  }
+
+  const { recentVoterIds, totalVoters, results } = poll.results;
+  const newRecentVoterIds = recentVoterIds ? [...recentVoterIds] : [];
+  const newTotalVoters = totalVoters ? totalVoters + 1 : 1;
+  const newResults = results ? [...results] : [];
+
+  newRecentVoterIds.push(peerId);
+
+  options.forEach((option) => {
+    const targetOptionIndex = newResults.findIndex((result) => result.option === option);
+    const targetOption = newResults[targetOptionIndex];
+    const updatedOption: ApiPollResult = targetOption ? { ...targetOption } : { option, votersCount: 0 };
+
+    updatedOption.votersCount += 1;
+    if (peerId === global.currentUserId) {
+      updatedOption.isChosen = true;
+    }
+
+    if (targetOptionIndex) {
+      newResults[targetOptionIndex] = updatedOption;
+    } else {
+      newResults.push(updatedOption);
+    }
+  });
+
+  return updatePoll(global, pollId, {
+    results: {
+      ...poll.results,
+      recentVoterIds: newRecentVoterIds,
+      totalVoters: newTotalVoters,
+      results: newResults,
+    },
+  });
 }

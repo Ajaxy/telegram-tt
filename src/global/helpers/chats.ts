@@ -4,21 +4,27 @@ import type {
   ApiChatBannedRights,
   ApiChatFolder,
   ApiChatFullInfo,
+  ApiChatInviteInfo,
   ApiPeer,
   ApiTopic,
   ApiUser,
 } from '../../api/types';
-import type { LangFn } from '../../hooks/useOldLang';
-import type { NotifyException, NotifySettings, ThreadId } from '../../types';
+import type { OldLangFn } from '../../hooks/useOldLang';
+import type {
+  CustomPeer, NotifyException, NotifySettings, ThreadId,
+} from '../../types';
+import type { LangFn } from '../../util/localization';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ANONYMOUS_USER_ID,
   ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
+  VERIFICATION_CODES_USER_ID,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getGlobal } from '..';
+import { isSystemBot } from './bots';
 import { getMainUsername, getUserFirstOrLastName } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
@@ -27,16 +33,20 @@ export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
 }
 
+export function isPeerChat(entity: ApiPeer): entity is ApiChat {
+  return 'title' in entity;
+}
+
+export function isPeerUser(entity: ApiPeer): entity is ApiUser {
+  return !isPeerChat(entity);
+}
+
 export function isChannelId(entityId: string) {
   return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-1');
 }
 
 export function toChannelId(mtpId: string) {
   return `-1${mtpId.padStart(CHANNEL_ID_LENGTH - 2, '0')}`;
-}
-
-export function isApiPeerChat(peer: ApiPeer): peer is ApiChat {
-  return 'title' in peer;
 }
 
 export function isChatGroup(chat: ApiChat) {
@@ -61,6 +71,10 @@ export function isCommonBoxChat(chat: ApiChat) {
 
 export function isChatWithRepliesBot(chatId: string) {
   return chatId === REPLIES_USER_ID;
+}
+
+export function isChatWithVerificationCodesBot(chatId: string) {
+  return chatId === VERIFICATION_CODES_USER_ID;
 }
 
 export function isAnonymousForwardsChat(chatId: string) {
@@ -88,7 +102,7 @@ export function getPrivateChatUserId(chat: ApiChat) {
   return chat.id;
 }
 
-export function getChatTitle(lang: LangFn, chat: ApiChat, isSelf = false) {
+export function getChatTitle(lang: OldLangFn | LangFn, chat: ApiChat, isSelf = false) {
   if (isSelf) {
     return lang('SavedMessages');
   }
@@ -123,7 +137,7 @@ export function isChatAdmin(chat: ApiChat) {
 }
 
 export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {
-  return chat.adminRights ? chat.adminRights[key] : false;
+  return chat.adminRights?.[key] || false;
 }
 
 export function getCanManageTopic(chat: ApiChat, topic: ApiTopic) {
@@ -141,15 +155,14 @@ export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights,
 }
 
 export function getCanPostInChat(
-  chat: ApiChat, threadId: ThreadId, isMessageThread?: boolean, chatFullInfo?: ApiChatFullInfo,
+  chat: ApiChat, topic?: ApiTopic, isMessageThread?: boolean, chatFullInfo?: ApiChatFullInfo,
 ) {
-  if (threadId !== MAIN_THREAD_ID) {
+  if (topic) {
     if (chat.isForum) {
       if (chat.isNotJoined) {
         return false;
       }
 
-      const topic = chat.topics?.[threadId];
       if (topic?.isClosed && !topic.isOwner && !getHasAdminRight(chat, 'manageTopics')) {
         return false;
       }
@@ -157,7 +170,7 @@ export function getCanPostInChat(
   }
 
   if (chat.isRestricted || chat.isForbidden || chat.migratedTo
-    || (!isMessageThread && chat.isNotJoined) || isChatWithRepliesBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
+    || (!isMessageThread && chat.isNotJoined) || isSystemBot(chat.id) || isAnonymousForwardsChat(chat.id)) {
     return false;
   }
 
@@ -235,7 +248,7 @@ export function getAllowedAttachmentOptions(
 }
 
 export function getMessageSendingRestrictionReason(
-  lang: LangFn,
+  lang: OldLangFn,
   currentUserBannedRights?: ApiChatBannedRights,
   defaultBannedRights?: ApiChatBannedRights,
 ) {
@@ -260,18 +273,22 @@ export function getMessageSendingRestrictionReason(
 }
 
 export function getForumComposerPlaceholder(
-  lang: LangFn, chat?: ApiChat, threadId: ThreadId = MAIN_THREAD_ID, isReplying?: boolean,
+  lang: OldLangFn,
+  chat?: ApiChat,
+  threadId: ThreadId = MAIN_THREAD_ID,
+  topics?: Record<number, ApiTopic>,
+  isReplying?: boolean,
 ) {
   if (!chat?.isForum) {
     return undefined;
   }
 
   if (threadId === MAIN_THREAD_ID) {
-    if (isReplying || (chat.topics && !chat.topics[GENERAL_TOPIC_ID]?.isClosed)) return undefined;
+    if (isReplying || (topics && !topics[GENERAL_TOPIC_ID]?.isClosed)) return undefined;
     return lang('lng_forum_replies_only');
   }
 
-  const topic = chat.topics?.[threadId];
+  const topic = topics?.[Number(threadId)];
   if (!topic) {
     return undefined;
   }
@@ -325,7 +342,7 @@ export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }
 
-export function getFolderDescriptionText(lang: LangFn, folder: ApiChatFolder, chatsCount?: number) {
+export function getFolderDescriptionText(lang: OldLangFn, folder: ApiChatFolder, chatsCount?: number) {
   const {
     excludedChatIds, includedChatIds,
     bots, groups, contacts, nonContacts, channels,
@@ -360,18 +377,16 @@ export function getFolderDescriptionText(lang: LangFn, folder: ApiChatFolder, ch
   }
 }
 
-export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiPeer) {
+export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: ApiPeer) {
   if (!sender || isUserId(chatId)) {
     return undefined;
   }
 
-  if (!isUserId(sender.id)) {
+  if (isPeerChat(sender)) {
     if (chatId === sender.id) return undefined;
 
-    return (sender as ApiChat).title;
+    return sender.title;
   }
-
-  sender = sender as ApiUser;
 
   if (sender.isSelf) {
     return lang('FromYou');
@@ -381,7 +396,7 @@ export function getMessageSenderName(lang: LangFn, chatId: string, sender?: ApiP
 }
 
 export function filterChatsByName(
-  lang: LangFn,
+  lang: OldLangFn,
   chatIds: string[],
   chatsById: Record<string, ApiChat>,
   query?: string,
@@ -459,4 +474,34 @@ export function getPeerColorCount(peer: ApiPeer) {
 
 export function getIsSavedDialog(chatId: string, threadId: ThreadId | undefined, currentUserId: string | undefined) {
   return chatId === currentUserId && threadId !== MAIN_THREAD_ID;
+}
+
+export function getGroupStatus(lang: OldLangFn, chat: ApiChat) {
+  const chatTypeString = lang(getChatTypeString(chat));
+  const { membersCount } = chat;
+
+  if (chat.isRestricted) {
+    return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
+  }
+
+  if (!membersCount) {
+    return chatTypeString;
+  }
+
+  return chatTypeString === 'Channel'
+    ? lang('Subscribers', membersCount, 'i')
+    : lang('Members', membersCount, 'i');
+}
+
+export function getCustomPeerFromInvite(invite: ApiChatInviteInfo): CustomPeer {
+  const {
+    title, color, isVerified, isFake, isScam,
+  } = invite;
+  return {
+    isCustomPeer: true,
+    title,
+    peerColorId: color,
+    isVerified,
+    fakeType: isFake ? 'fake' : isScam ? 'scam' : undefined,
+  };
 }

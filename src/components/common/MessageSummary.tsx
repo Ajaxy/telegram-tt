@@ -1,13 +1,16 @@
 import React, { memo } from '../../lib/teact/teact';
+import { withGlobal } from '../../global';
 
-import type { ApiFormattedText, ApiMessage } from '../../api/types';
+import type {
+  ApiFormattedText, ApiMessage, ApiPoll, ApiTypeStory,
+} from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { LangFn } from '../../hooks/useOldLang';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import {
   extractMessageText,
-  getMessagePoll,
+  getMessagePollId,
+  groupStatetefulContent,
 } from '../../global/helpers';
 import {
   getMessageSummaryDescription,
@@ -15,45 +18,57 @@ import {
   getMessageSummaryText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../global/helpers/messageSummary';
+import { selectPeerStory, selectPollFromMessage } from '../../global/selectors';
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 
+import useOldLang from '../../hooks/useOldLang';
+
 import MessageText from './MessageText';
 
-interface OwnProps {
-  lang: LangFn;
+type OwnProps = {
   message: ApiMessage;
   translatedText?: ApiFormattedText;
   noEmoji?: boolean;
   highlight?: string;
   truncateLength?: number;
-  observeIntersectionForLoading?: ObserveFn;
-  observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
   inChatList?: boolean;
   emojiSize?: number;
-}
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
+};
+
+type StateProps = {
+  poll?: ApiPoll;
+  story?: ApiTypeStory;
+};
 
 function MessageSummary({
-  lang,
   message,
   translatedText,
   noEmoji = false,
   highlight,
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
-  observeIntersectionForLoading,
-  observeIntersectionForPlaying,
   withTranslucentThumbs = false,
   inChatList = false,
   emojiSize,
-}: OwnProps) {
+  poll,
+  story,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
+}: OwnProps & StateProps) {
+  const lang = useOldLang();
   const { text, entities } = extractMessageText(message, inChatList) || {};
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
   const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
-  const hasPoll = Boolean(getMessagePoll(message));
+  const hasPoll = Boolean(getMessagePollId(message));
+
+  const statefulContent = groupStatetefulContent({ poll, story });
 
   if ((!text || (!hasSpoilers && !hasCustomEmoji)) && !hasPoll) {
-    const summaryText = translatedText?.text || getMessageSummaryText(lang, message, noEmoji);
+    const summaryText = translatedText?.text
+      || getMessageSummaryText(lang, message, statefulContent, noEmoji, truncateLength);
     const trimmedText = trimText(summaryText, truncateLength);
 
     return (
@@ -90,10 +105,21 @@ function MessageSummary({
     <>
       {[
         emoji ? renderText(`${emoji} `) : undefined,
-        getMessageSummaryDescription(lang, message, renderMessageText()),
+        getMessageSummaryDescription(lang, message, statefulContent, renderMessageText()),
       ].flat().filter(Boolean)}
     </>
   );
 }
 
-export default memo(MessageSummary);
+export default memo(withGlobal<OwnProps>(
+  (global, { message }): StateProps => {
+    const poll = selectPollFromMessage(global, message);
+    const storyData = message.content.storyData;
+    const story = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
+
+    return {
+      poll,
+      story,
+    };
+  },
+)(MessageSummary));

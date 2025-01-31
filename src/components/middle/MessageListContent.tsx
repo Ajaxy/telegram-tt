@@ -1,18 +1,21 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React, { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { MessageListType } from '../../global/types';
-import type { ThreadId } from '../../types';
+import type { MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import type { MessageDateGroup } from './helpers/groupMessages';
-import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import {
-  getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
+  getMessageHtmlId,
+  getMessageOriginalId,
+  isActionMessage,
+  isOwnMessage,
+  isServiceNotificationMessage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate } from '../../util/dates/dateFormat';
@@ -22,17 +25,18 @@ import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useDerivedSignal from '../../hooks/useDerivedSignal';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
 
 import ActionMessage from './ActionMessage';
 import Message from './message/Message';
+import SenderGroupContainer from './message/SenderGroupContainer';
 import SponsoredMessage from './message/SponsoredMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
-  areAdsEnabled?: boolean;
+  canShowAds?: boolean;
   chatId: string;
   threadId: ThreadId;
   messageIds: number[];
@@ -58,13 +62,13 @@ interface OwnProps {
   isSavedDialog?: boolean;
   onScrollDownToggle: BooleanToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
-  onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
+  onIntersectPinnedMessage: OnIntersectPinnedMessage;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
 
 const MessageListContent: FC<OwnProps> = ({
-  areAdsEnabled,
+  canShowAds,
   chatId,
   threadId,
   messageIds,
@@ -90,18 +94,20 @@ const MessageListContent: FC<OwnProps> = ({
   isSavedDialog,
   onScrollDownToggle,
   onNotchToggle,
-  onPinnedIntersectionChange,
+  onIntersectPinnedMessage,
 }) => {
   const { openHistoryCalendar } = getActions();
 
-  const getIsReady = useDerivedSignal(isReady);
+  const getIsHeavyAnimating2 = getIsHeavyAnimating;
+  const getIsReady = useDerivedSignal(() => isReady && !getIsHeavyAnimating2(), [isReady, getIsHeavyAnimating2]);
+
   const areDatesClickable = !isSavedDialog && !isSchedule;
 
   const {
     observeIntersectionForReading,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
-  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onPinnedIntersectionChange, chatId);
+  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onIntersectPinnedMessage, chatId);
 
   const {
     withHistoryTriggers,
@@ -132,17 +138,15 @@ const MessageListContent: FC<OwnProps> = ({
   }, 0);
   let appearanceIndex = 0;
 
-  const prevMessageIds = usePrevious(messageIds);
+  const prevMessageIds = usePreviousDeprecated(messageIds);
   const isNewMessage = Boolean(
     messageIds && prevMessageIds && messageIds[messageIds.length - 2] === prevMessageIds[prevMessageIds.length - 1],
   );
 
-  const dateGroups = messageGroups.map((
-    dateGroup: MessageDateGroup,
-    dateGroupIndex: number,
-    dateGroupsArray: MessageDateGroup[],
-  ) => {
-    const senderGroups = dateGroup.senderGroups.map((
+  function calculateSenderGroups(
+    dateGroup: MessageDateGroup, dateGroupIndex: number, dateGroupsArray: MessageDateGroup[],
+  ) {
+    return dateGroup.senderGroups.map((
       senderGroup,
       senderGroupIndex,
       senderGroupsArray,
@@ -174,14 +178,14 @@ const MessageListContent: FC<OwnProps> = ({
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isJustAdded={isLastInList && isNewMessage}
             isLastInList={isLastInList}
-            onPinnedIntersectionChange={onPinnedIntersectionChange}
+            onIntersectPinnedMessage={onIntersectPinnedMessage}
           />,
         ]);
       }
 
       let currentDocumentGroupId: string | undefined;
 
-      return senderGroup.map((
+      const senderGroupElements = senderGroup.map((
         messageOrAlbum,
         messageIndex,
       ) => {
@@ -243,7 +247,7 @@ const MessageListContent: FC<OwnProps> = ({
             isLastInDocumentGroup={position.isLastInDocumentGroup}
             isLastInList={position.isLastInList}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
-            onPinnedIntersectionChange={onPinnedIntersectionChange}
+            onIntersectPinnedMessage={onIntersectPinnedMessage}
             getIsMessageListReady={getIsReady}
           />,
           message.id === threadId && (
@@ -255,11 +259,48 @@ const MessageListContent: FC<OwnProps> = ({
           ),
         ]);
       }).flat();
+
+      if (!withUsers) return senderGroupElements;
+
+      const lastMessageOrAlbum = senderGroup[senderGroup.length - 1];
+      const lastMessage = isAlbum(lastMessageOrAlbum) ? lastMessageOrAlbum.mainMessage : lastMessageOrAlbum;
+      const lastMessageId = getMessageOriginalId(lastMessage);
+
+      const isTopicTopMessage = lastMessage.id === threadId;
+      const isOwn = isOwnMessage(lastMessage);
+
+      const firstMessageOrAlbum = senderGroup[0];
+      const firstMessage = isAlbum(firstMessageOrAlbum) ? firstMessageOrAlbum.mainMessage : firstMessageOrAlbum;
+      const firstMessageId = getMessageOriginalId(firstMessage);
+
+      const key = `${firstMessageId}-${lastMessageId}`;
+      const id = (firstMessageId === lastMessageId) ? `message-group-${firstMessageId}`
+        : `message-group-${firstMessageId}-${lastMessageId}`;
+
+      const withAvatar = withUsers && !isOwn && (!isTopicTopMessage || !isComments);
+      return (
+        <SenderGroupContainer
+          key={key}
+          id={id}
+          message={lastMessage}
+          withAvatar={withAvatar}
+        >
+          {senderGroupElements}
+        </SenderGroupContainer>
+      );
     });
+  }
+
+  const dateGroups = messageGroups.map((
+    dateGroup: MessageDateGroup,
+    dateGroupIndex: number,
+    dateGroupsArray: MessageDateGroup[],
+  ) => {
+    const senderGroups = calculateSenderGroups(dateGroup, dateGroupIndex, dateGroupsArray);
 
     return (
       <div
-        className="message-date-group"
+        className={buildClassName('message-date-group', dateGroupIndex === 0 && 'first-message-date-group')}
         key={dateGroup.datetime}
         onMouseDown={preventMessageInputBlur}
         teactFastList
@@ -290,9 +331,6 @@ const MessageListContent: FC<OwnProps> = ({
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
-      {areAdsEnabled && isViewportNewest && (
-        <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
-      )}
       {withHistoryTriggers && (
         <div
           ref={forwardsTriggerRef}
@@ -305,6 +343,15 @@ const MessageListContent: FC<OwnProps> = ({
         key="fab-trigger"
         className="fab-trigger"
       />
+      {canShowAds && isViewportNewest && (
+        <SponsoredMessage
+          key={chatId}
+          chatId={chatId}
+          containerRef={containerRef}
+          observeIntersectionForLoading={observeIntersectionForLoading}
+          observeIntersectionForPlaying={observeIntersectionForPlaying}
+        />
+      )}
     </div>
   );
 };

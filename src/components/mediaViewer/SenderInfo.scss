@@ -26,7 +26,7 @@
 
   .title {
     line-height: 1.4375rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     white-space: pre;
     overflow: hidden;
     text-overflow: ellipsis;

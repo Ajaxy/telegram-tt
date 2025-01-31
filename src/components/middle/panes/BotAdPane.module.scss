@@ -1,0 +1,53 @@
+@use "../../../styles/mixins";
+
+.root {
+  @include mixins.header-pane;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: auto;
+
+  line-height: 1.25;
+
+  cursor: var(--custom-cursor, pointer);
+
+  // Slight variation from mixins.header-pane
+  padding-left: max(1rem, env(safe-area-inset-left));
+  transition: background-color 0.2s, transform var(--slide-transition);
+
+  &:hover {
+    background-color: var(--color-background-selected);
+  }
+}
+
+.content {
+  flex-grow: 1;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--accent-color);
+}
+
+.avatar {
+  --radius: 0.25rem;
+
+  flex-shrink: 0;
+}
+
+.title, .info {
+  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25rem;
+}
+
+.text {
+  font-size: 0.8125rem;
+}
+
+.aboutAd {
+  font-size: 0.6875rem;
+}

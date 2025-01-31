@@ -2,6 +2,7 @@ import React, { memo, useLayoutEffect, useRef } from '../../../../lib/teact/teac
 import { withGlobal } from '../../../../global';
 
 import type { ApiUser } from '../../../../api/types';
+import type { IconName } from '../../../../types/icons';
 
 import { selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
@@ -11,7 +12,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 import useScrolledState from '../../../../hooks/useScrolledState';
 import useDevicePixelRatio from '../../../../hooks/window/useDevicePixelRatio';
 
-import Avatar from '../../../common/Avatar';
+import Avatar, { AVATAR_SIZES } from '../../../common/Avatar';
 import { drawGradientCircle } from '../../../common/AvatarStoryCircle';
 import PremiumFeatureItem from '../PremiumFeatureItem';
 
@@ -41,7 +42,7 @@ const STORY_FEATURE_DESCRIPTIONS = {
   stories_link: 'PremiumStoriesFormattingDescription',
 };
 
-const STORY_FEATURE_ICONS = {
+const STORY_FEATURE_ICONS: Record<string, IconName> = {
   stories_order: 'story-priority',
   stories_stealth: 'eye-closed-outline',
   stories_views: 'eye-outline',
@@ -53,7 +54,7 @@ const STORY_FEATURE_ICONS = {
 
 const STORY_FEATURE_ORDER = Object.keys(STORY_FEATURE_TITLES) as (keyof typeof STORY_FEATURE_TITLES)[];
 
-const CIRCLE_SIZE = 5.25 * REM;
+const CIRCLE_SIZE = AVATAR_SIZES.giant + 0.25 * REM;
 const CIRCLE_SEGMENTS = 8;
 const CIRCLE_READ_SEGMENTS = 0;
 

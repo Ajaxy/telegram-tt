@@ -14,12 +14,13 @@ import renderText from './helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
-import useShowTransition from '../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated';
 
 import Link from '../ui/Link';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import Icon from './icons/Icon';
 
 import './File.scss';
 
@@ -75,12 +76,12 @@ const File: FC<OwnProps> = ({
   const [withThumb] = useState(!previewData);
   const noThumb = Boolean(previewData);
   const thumbRef = useCanvasBlur(thumbnailDataUri, noThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED);
-  const thumbClassNames = useMediaTransition(!noThumb);
+  const thumbClassNames = useMediaTransitionDeprecated(!noThumb);
 
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, true);
+  } = useShowTransitionDeprecated(isTransferring, undefined, true);
 
   const color = getColorFromExtension(extension);
   const sizeString = getFileSizeString(size);
@@ -103,7 +104,7 @@ const File: FC<OwnProps> = ({
     <div ref={elementRef} className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       {isSelectable && (
         <div className="message-select-control">
-          {isSelected && <i className="icon icon-select" />}
+          {isSelected && <Icon name="select" />}
         </div>
       )}
       <div className="file-icon-container" onClick={isUploading ? undefined : onClick}>
@@ -120,7 +121,7 @@ const File: FC<OwnProps> = ({
             {withThumb && (
               <canvas
                 ref={thumbRef}
-                className={buildClassName('thumbnail', 'canvas-blur-setup', thumbClassNames)}
+                className={buildClassName('thumbnail', thumbClassNames)}
               />
             )}
           </div>
@@ -141,13 +142,9 @@ const File: FC<OwnProps> = ({
           </div>
         )}
         {onClick && (
-          <i
-            className={buildClassName(
-              'action-icon',
-              'icon',
-              actionIcon ? `icon-${actionIcon}` : 'icon-download',
-              shouldSpinnerRender && 'hidden',
-            )}
+          <Icon
+            name={actionIcon || 'download'}
+            className={buildClassName('action-icon', shouldSpinnerRender && 'hidden')}
           />
         )}
       </div>

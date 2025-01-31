@@ -1,8 +1,10 @@
 import type bigInt from 'big-integer';
 import BigInt from 'big-integer';
-import AuthKey from '../../../lib/gramjs/crypto/AuthKey';
-import Logger from '../../../lib/gramjs/extensions/Logger';
-import Helpers from '../../../lib/gramjs/Helpers';
+import { AuthKey } from '../../../lib/gramjs/crypto/AuthKey';
+import { Logger } from '../../../lib/gramjs/extensions';
+import {
+  convertToLittle, getByteArray, modExp, readBigIntFromBuffer, sha1, sha256,
+} from '../../../lib/gramjs/Helpers';
 import MTProtoState from '../../../lib/gramjs/network/MTProtoState';
 
 type DhConfig = {
@@ -39,58 +41,62 @@ class PhoneCallState {
   }
 
   async requestCall({ p, g, random }: DhConfig) {
-    const pBN = Helpers.readBigIntFromBuffer(Buffer.from(p), false);
-    const randomBN = Helpers.readBigIntFromBuffer(Buffer.from(random), false);
+    const pBN = readBigIntFromBuffer(Buffer.from(p), false);
+    const randomBN = readBigIntFromBuffer(Buffer.from(random), false);
 
-    const gA = Helpers.modExp(BigInt(g), randomBN, pBN);
+    const gA = modExp(BigInt(g), randomBN, pBN);
 
     this.gA = gA;
     this.p = pBN;
     this.random = randomBN;
 
-    const gAHash: Buffer = await Helpers.sha256(Helpers.getByteArray(gA));
+    const gAHash: Buffer = await sha256(getByteArray(gA));
     return Array.from(gAHash);
   }
 
   acceptCall({ p, g, random }: DhConfig) {
-    const pLast = Helpers.readBigIntFromBuffer(p, false);
-    const randomLast = Helpers.readBigIntFromBuffer(random, false);
+    const pLast = readBigIntFromBuffer(p, false);
+    const randomLast = readBigIntFromBuffer(random, false);
 
-    const gB = Helpers.modExp(BigInt(g), randomLast, pLast);
+    const gB = modExp(BigInt(g), randomLast, pLast);
     this.gB = gB;
     this.p = pLast;
     this.random = randomLast;
 
-    return Array.from(Helpers.getByteArray(gB));
+    return Array.from(getByteArray(gB));
   }
 
   async confirmCall(gAOrB: number[], emojiData: Uint16Array, emojiOffsets: number[]) {
-    if (this.isOutgoing) {
-      this.gB = Helpers.readBigIntFromBuffer(Buffer.from(gAOrB), false);
-    } else {
-      this.gA = Helpers.readBigIntFromBuffer(Buffer.from(gAOrB), false);
+    if (!this.random || !this.p) {
+      throw new Error('Values not set');
     }
-    const authKey = Helpers.modExp(
+
+    if (this.isOutgoing) {
+      this.gB = readBigIntFromBuffer(Buffer.from(gAOrB), false);
+    } else {
+      this.gA = readBigIntFromBuffer(Buffer.from(gAOrB), false);
+    }
+    const authKey = modExp(
       !this.isOutgoing ? this.gA : this.gB,
       this.random,
       this.p,
     );
-    const fingerprint: Buffer = await Helpers.sha1(Helpers.getByteArray(authKey));
-    const keyFingerprint = Helpers.readBigIntFromBuffer(fingerprint.slice(-8).reverse(), false);
+    const fingerprint: Buffer = await sha1(getByteArray(authKey));
+    const keyFingerprint = readBigIntFromBuffer(fingerprint.slice(-8).reverse(), false);
 
     const emojis = await generateEmojiFingerprint(
-      Helpers.getByteArray(authKey),
-      Helpers.getByteArray(this.gA),
+      getByteArray(authKey),
+      getByteArray(this.gA!),
       emojiData,
       emojiOffsets,
     );
 
     const key = new AuthKey();
-    await key.setKey(Helpers.getByteArray(authKey));
+    await key.setKey(getByteArray(authKey));
     this.state = new MTProtoState(key, new Logger(), true, this.isOutgoing);
     this.resolveState!();
 
-    return { gA: Array.from(Helpers.getByteArray(this.gA)), keyFingerprint: keyFingerprint.toString(), emojis };
+    return { gA: Array.from(getByteArray(this.gA!)), keyFingerprint: keyFingerprint.toString(), emojis };
   }
 
   async encode(data: string) {
@@ -99,7 +105,7 @@ class PhoneCallState {
     const seqArray = new Uint32Array(1);
     seqArray[0] = this.seq++;
     const encodedData = await this.state.encryptMessageData(
-      Buffer.concat([Helpers.convertToLittle(seqArray), Buffer.from(data)]),
+      Buffer.concat([convertToLittle(seqArray), Buffer.from(data)]),
     );
     return Array.from(encodedData);
   }
@@ -129,10 +135,10 @@ function computeEmojiIndex(bytes: Uint8Array) {
     .or((BigInt(bytes[7])));
 }
 
-export async function generateEmojiFingerprint(
+async function generateEmojiFingerprint(
   authKey: Uint8Array, gA: Uint8Array, emojiData: Uint16Array, emojiOffsets: number[],
 ) {
-  const hash = await Helpers.sha256(Buffer.concat([new Uint8Array(authKey), new Uint8Array(gA)]));
+  const hash = await sha256(Buffer.concat([new Uint8Array(authKey), new Uint8Array(gA)]));
   const result = [];
   const emojiCount = emojiOffsets.length - 1;
   const kPartSize = 8;

@@ -10,7 +10,7 @@ export function getPeerColorClass(peer?: ApiPeer | CustomPeer, noUserColors?: bo
   }
 
   if ('isCustomPeer' in peer) {
-    if (!peer.peerColorId) return undefined;
+    if (peer.peerColorId === undefined) return undefined;
     return `peer-color-${peer.peerColorId}`;
   }
   return noUserColors ? `peer-color-count-${getPeerColorCount(peer)}` : `peer-color-${getPeerColorKey(peer)}`;

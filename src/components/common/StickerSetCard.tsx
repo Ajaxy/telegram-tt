@@ -79,14 +79,13 @@ const StickerSetCard: FC<OwnProps> = ({
 
   return (
     <ListItem
-      narrow
       className={buildClassName('StickerSetCard', 'chat-item-clickable small-icon', className)}
       style={`height: ${CHAT_HEIGHT_PX}px;`}
       inactive={!firstSticker}
       onClick={handleCardClick}
     >
       {renderPreview()}
-      <div className="multiline-menu-item">
+      <div className="multiline-item">
         <div className="title">{stickerSet.title}</div>
         <div className="subtitle">{lang('StickerPack.StickerCount', stickerSet.count, 'i')}</div>
       </div>

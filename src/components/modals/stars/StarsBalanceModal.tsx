@@ -1,19 +1,19 @@
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiStarTopupOption, ApiUser } from '../../../api/types';
+import type { ApiStarTopupOption } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
+import type { RegularLangKey } from '../../../types/language';
 
-import { getUserFullName } from '../../../global/helpers';
-import { selectUser } from '../../../global/selectors';
+import { getChatTitle, getPeerTitle, getUserFullName } from '../../../global/helpers';
+import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { formatCurrency } from '../../../util/formatCurrency';
-import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -26,7 +26,9 @@ import Modal from '../../ui/Modal';
 import TabList, { type TabWithProperties } from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import BalanceBlock from './BalanceBlock';
-import TransactionItem from './StarsTransactionItem';
+import StarTopupOptionList from './StarTopupOptionList';
+import StarsSubscriptionItem from './subscription/StarsSubscriptionItem';
+import StarsTransactionItem from './transaction/StarsTransactionItem';
 
 import styles from './StarsBalanceModal.module.scss';
 
@@ -34,12 +36,13 @@ import StarLogo from '../../../assets/icons/StarLogo.svg';
 import StarsBackground from '../../../assets/stars-bg.png';
 
 const TRANSACTION_TYPES = ['all', 'inbound', 'outbound'] as const;
-
-const TRANSACTION_TABS: TabWithProperties[] = [
-  { title: 'StarsTransactionsAll' },
-  { title: 'StarsTransactionsIncoming' },
-  { title: 'StarsTransactionsOutgoing' },
+const TRANSACTION_TABS_KEYS: RegularLangKey[] = [
+  'StarsTransactionsAll',
+  'StarsTransactionsIncoming',
+  'StarsTransactionsOutgoing',
 ];
+const TRANSACTION_ITEM_CLASS = 'StarsTransactionItem';
+const SUBSCRIPTION_PURPOSE = 'subs';
 
 export type OwnProps = {
   modal: TabState['starsBalanceModal'];
@@ -47,78 +50,104 @@ export type OwnProps = {
 
 type StateProps = {
   starsBalanceState?: GlobalState['stars'];
-  originPaymentBot?: ApiUser;
+  canBuyPremium?: boolean;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, originPaymentBot,
+  modal, starsBalanceState, canBuyPremium,
 }: OwnProps & StateProps) => {
-  const { closeStarsBalanceModal, loadStarsTransactions, openInvoice } = getActions();
+  const {
+    closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
+  } = getActions();
 
-  const { balance, history, topupOptions } = starsBalanceState || {};
+  const { balance, history, subscriptions } = starsBalanceState || {};
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const [isHeaderHidden, setHeaderHidden] = useState(true);
-  const [areOptionsExtended, markOptionsExtended, unmarkOptionsExtended] = useFlag();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const [areBuyOptionsShown, showBuyOptions, hideBuyOptions] = useFlag();
 
   const isOpen = Boolean(modal && starsBalanceState);
 
-  const productStarsPrice = modal?.originPayment?.invoice?.amount;
-  const starsNeeded = productStarsPrice ? productStarsPrice - (balance || 0) : undefined;
-  const originBotName = originPaymentBot && getUserFullName(originPaymentBot);
-  const shouldShowTransactions = Boolean(history?.all?.transactions.length && !modal?.originPayment);
+  const {
+    originStarsPayment, originReaction, originGift, topup,
+  } = modal || {};
+
+  const shouldOpenOnBuy = originStarsPayment || originReaction || originGift || topup;
+
+  const ongoingTransactionAmount = originStarsPayment?.form?.invoice?.totalAmount
+    || originStarsPayment?.subscriptionInfo?.subscriptionPricing?.amount
+    || originReaction?.amount
+    || originGift?.gift.stars
+    || topup?.balanceNeeded;
+  const starsNeeded = ongoingTransactionAmount ? ongoingTransactionAmount - (balance?.amount || 0) : undefined;
+  const starsNeededText = useMemo(() => {
+    const global = getGlobal();
+
+    if (originReaction) {
+      const channel = selectChat(global, originReaction.chatId);
+      if (!channel) return undefined;
+      return oldLang('StarsNeededTextReactions', getChatTitle(oldLang, channel));
+    }
+
+    if (originStarsPayment) {
+      const bot = originStarsPayment.form?.botId ? selectUser(global, originStarsPayment.form.botId) : undefined;
+      if (!bot) return undefined;
+      return oldLang('StarsNeededText', getUserFullName(bot));
+    }
+
+    if (originGift) {
+      const peer = selectUser(global, originGift.peerId);
+      if (!peer) return undefined;
+      return oldLang('StarsNeededTextGift', getPeerTitle(lang, peer));
+    }
+
+    if (topup?.purpose === SUBSCRIPTION_PURPOSE) {
+      return oldLang('StarsNeededTextLink');
+    }
+
+    return undefined;
+  }, [originReaction, originStarsPayment, originGift, topup?.purpose, lang, oldLang]);
+
+  const shouldShowItems = Boolean(history?.all?.transactions.length && !shouldOpenOnBuy);
+  const shouldSuggestGifting = !shouldOpenOnBuy;
+
+  const transactionTabs: TabWithProperties[] = useMemo(() => {
+    return TRANSACTION_TABS_KEYS.map((key) => ({
+      title: lang(key),
+    }));
+  }, [lang]);
 
   useEffect(() => {
     if (!isOpen) {
       setHeaderHidden(true);
-      unmarkOptionsExtended();
       setSelectedTabIndex(0);
+      hideBuyOptions();
     }
   }, [isOpen]);
 
-  const [renderingOptions, canExtend] = useMemo(() => {
-    if (!topupOptions) {
-      return [undefined, false];
+  useEffect(() => {
+    if (shouldOpenOnBuy) {
+      showBuyOptions();
+      return;
     }
 
-    const maxOption = topupOptions.reduce((max, option) => (
-      max.stars > option.stars ? max : option
-    ));
-    const forceShowAll = starsNeeded && maxOption.stars < starsNeeded;
-
-    const result: { option: ApiStarTopupOption; starsCount: number }[] = [];
-    let currentStackedStarsCount = 0;
-    let canExtendOptions = false;
-    topupOptions.forEach((option) => {
-      if (!option.isExtended) currentStackedStarsCount++;
-
-      if (starsNeeded && !forceShowAll && option.stars < starsNeeded) return;
-      if (!areOptionsExtended && option.isExtended) {
-        canExtendOptions = true;
-        return;
-      }
-      result.push({
-        option,
-        starsCount: currentStackedStarsCount,
-      });
-    });
-
-    return [result, canExtendOptions];
-  }, [areOptionsExtended, topupOptions, starsNeeded]);
+    hideBuyOptions();
+  }, [shouldOpenOnBuy]);
 
   const tosText = useMemo(() => {
     if (!isOpen) return undefined;
 
-    const text = lang('lng_credits_summary_options_about');
+    const text = oldLang('lng_credits_summary_options_about');
     const parts = text.split('{link}');
     return [
       parts[0],
-      <SafeLink url={lang('StarsTOSLink')} text={lang('lng_credits_summary_options_about_link')} />,
+      <SafeLink url={oldLang('StarsTOSLink')} text={oldLang('lng_credits_summary_options_about_link')} />,
       parts[1],
     ];
-  }, [isOpen, lang]);
+  }, [isOpen, oldLang]);
 
   function handleScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop } = e.currentTarget;
@@ -126,16 +155,26 @@ const StarsBalanceModal = ({
     setHeaderHidden(scrollTop <= 150);
   }
 
-  const handleClick = useLastCallback((option: ApiStarTopupOption) => {
-    openInvoice({
-      type: 'stars',
-      option,
+  const handleLoadMoreTransactions = useLastCallback(() => {
+    loadStarsTransactions({
+      type: TRANSACTION_TYPES[selectedTabIndex],
     });
   });
 
-  const handleLoadMore = useLastCallback(() => {
-    loadStarsTransactions({
-      type: TRANSACTION_TYPES[selectedTabIndex],
+  const handleLoadMoreSubscriptions = useLastCallback(() => {
+    loadStarsSubscriptions();
+  });
+
+  const openStarsGiftingPickerModalHandler = useLastCallback(() => {
+    openStarsGiftingPickerModal({});
+  });
+
+  const handleBuyStars = useLastCallback((option: ApiStarTopupOption) => {
+    openInvoice({
+      type: 'stars',
+      stars: option.stars,
+      currency: option.currency,
+      amount: option.amount,
     });
   });
 
@@ -153,110 +192,128 @@ const StarsBalanceModal = ({
         >
           <Icon name="close" />
         </Button>
-        <BalanceBlock balance={balance || 0} className={styles.modalBalance} />
+        <BalanceBlock balance={balance} className={styles.modalBalance} />
         <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
           <h2 className={styles.starHeaderText}>
-            {lang('TelegramStars')}
+            {oldLang('TelegramStars')}
           </h2>
         </div>
         <div className={styles.section}>
           <img className={styles.logo} src={StarLogo} alt="" draggable={false} />
           <img className={styles.logoBackground} src={StarsBackground} alt="" draggable={false} />
           <h2 className={styles.headerText}>
-            {starsNeeded ? lang('StarsNeededTitle', starsNeeded) : lang('TelegramStars')}
+            {starsNeeded ? oldLang('StarsNeededTitle', ongoingTransactionAmount) : oldLang('TelegramStars')}
           </h2>
           <div className={styles.description}>
             {renderText(
-              starsNeeded ? lang('StarsNeededText', originBotName) : lang('TelegramStarsInfo'),
+              starsNeededText || oldLang('TelegramStarsInfo'),
               ['simple_markdown', 'emoji'],
             )}
           </div>
-          <div className={styles.options}>
-            {renderingOptions?.map(({ option, starsCount }) => (
-              <StarTopupOption option={option} starsCount={starsCount} onClick={handleClick} />
-            ))}
-            {!areOptionsExtended && canExtend && (
-              <Button className={styles.moreOptions} isText noForcedUpperCase onClick={markOptionsExtended}>
-                {lang('Stars.Purchase.ShowMore')}
-                <Icon className={styles.iconDown} name="down" />
-              </Button>
-            )}
-          </div>
-        </div>
-        <div className={styles.secondaryInfo}>
-          {tosText}
-        </div>
-        {shouldShowTransactions && (
-          <>
-            <TabList
-              big
-              activeTab={selectedTabIndex}
-              tabs={TRANSACTION_TABS}
-              onSwitchTab={setSelectedTabIndex}
+          {canBuyPremium && !areBuyOptionsShown && (
+            <Button
+              className={styles.starButton}
+              onClick={showBuyOptions}
+            >
+              {oldLang('Star.List.BuyMoreStars')}
+            </Button>
+          )}
+          {canBuyPremium && !areBuyOptionsShown && shouldSuggestGifting && (
+            <Button
+              className={buildClassName(styles.starButton, 'settings-main-menu-star')}
+              color="translucent"
+              onClick={openStarsGiftingPickerModalHandler}
+            >
+              <StarIcon className="icon" type="gold" size="big" />
+              {oldLang('TelegramStarsGift')}
+            </Button>
+          )}
+          {areBuyOptionsShown && starsBalanceState?.topupOptions && (
+            <StarTopupOptionList
+              starsNeeded={starsNeeded}
+              options={starsBalanceState.topupOptions}
+              onClick={handleBuyStars}
             />
+          )}
+        </div>
+        {areBuyOptionsShown && (
+          <div className={styles.tos}>
+            {tosText}
+          </div>
+        )}
+        {shouldShowItems && Boolean(subscriptions?.list.length) && (
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>{oldLang('StarMySubscriptions')}</h3>
+            <div className={styles.subscriptions}>
+              {subscriptions?.list.map((subscription) => (
+                <StarsSubscriptionItem
+                  key={subscription.id}
+                  subscription={subscription}
+                />
+              ))}
+              {subscriptions?.nextOffset && (
+                <Button
+                  isText
+                  disabled={subscriptions.isLoading}
+                  size="smaller"
+                  noForcedUpperCase
+                  className={styles.loadMore}
+                  onClick={handleLoadMoreSubscriptions}
+                >
+                  <Icon name="down" className={styles.loadMoreIcon} />
+                  {oldLang('StarMySubscriptionsExpand')}
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+        {shouldShowItems && (
+          <div className={styles.container}>
             <div className={styles.section}>
               <Transition
                 name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
                 activeKey={selectedTabIndex}
-                renderCount={TRANSACTION_TABS.length}
+                renderCount={TRANSACTION_TABS_KEYS.length}
                 shouldRestoreHeight
                 className={styles.transition}
               >
                 <InfiniteScroll
-                  onLoadMore={handleLoadMore}
+                  onLoadMore={handleLoadMoreTransactions}
                   items={history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions}
+                  scrollContainerClosest={`.${styles.main}`}
+                  itemSelector={`.${TRANSACTION_ITEM_CLASS}`}
                   className={styles.transactions}
                   noFastList
                 >
                   {history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions.map((transaction) => (
-                    <TransactionItem
+                    <StarsTransactionItem
                       key={`${transaction.id}-${transaction.isRefund}`}
                       transaction={transaction}
+                      className={TRANSACTION_ITEM_CLASS}
                     />
                   ))}
                 </InfiniteScroll>
               </Transition>
             </div>
-          </>
+            <TabList
+              className={styles.tabs}
+              tabClassName={styles.tab}
+              activeTab={selectedTabIndex}
+              tabs={transactionTabs}
+              onSwitchTab={setSelectedTabIndex}
+            />
+          </div>
         )}
       </div>
     </Modal>
   );
 };
 
-function StarTopupOption({
-  option, starsCount, onClick,
-}: {
-  option: ApiStarTopupOption; starsCount: number; onClick?: (option: ApiStarTopupOption) => void;
-}) {
-  const lang = useOldLang();
-
-  return (
-    <div className={styles.option} key={option.stars} onClick={() => onClick?.(option)}>
-      <div className={styles.optionTop}>
-        +{formatInteger(option.stars)}
-        {/* Switch directionality for correct order. Can't use flex because https://issues.chromium.org/issues/40249030 */}
-        <div className={styles.stackedStars} dir={lang.isRtl ? 'ltr' : 'rtl'}>
-          {Array.from({ length: starsCount }).map(() => (
-            <StarIcon className={styles.stackedStar} type="gold" size="big" />
-          ))}
-        </div>
-      </div>
-      <div className={styles.optionBottom}>
-        {formatCurrency(option.amount, option.currency, lang.code)}
-      </div>
-    </div>
-  );
-}
-
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
-    const botId = modal?.originPayment?.botId;
-    const bot = botId ? selectUser(global, botId) : undefined;
-
+  (global): StateProps => {
     return {
       starsBalanceState: global.stars,
-      originPaymentBot: bot,
+      canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
     };
   },
 )(StarsBalanceModal));

@@ -1,9 +1,9 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, useMemo,
-  useRef, useState,
+  useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Menu from './Menu';
 
@@ -44,12 +44,11 @@ const DropdownMenu: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleIsOpen = () => {
     setIsOpen(!isOpen);
+
     if (isOpen) {
       onClose?.();
     } else {
@@ -89,14 +88,13 @@ const DropdownMenu: FC<OwnProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [trigger]);
 
   return (
     <div
-      ref={dropdownRef}
       className={`DropdownMenu ${className || ''}`}
       onKeyDown={handleKeyDown}
       onTransitionEnd={onTransitionEnd}
@@ -105,7 +103,6 @@ const DropdownMenu: FC<OwnProps> = ({
 
       <Menu
         ref={menuRef}
-        containerRef={dropdownRef}
         isOpen={isOpen || Boolean(forceOpen)}
         className={className || ''}
         transformOriginX={transformOriginX}
@@ -115,7 +112,6 @@ const DropdownMenu: FC<OwnProps> = ({
         footer={footer}
         autoClose
         onClose={handleClose}
-        shouldSkipTransition={forceOpen}
         onCloseAnimationEnd={onHide}
         onMouseEnterBackdrop={onMouseEnterBackdrop}
       >

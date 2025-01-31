@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
-import type { MessageList } from '../../global/types';
+import type { MessageList } from '../../types';
 
 import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL, TME_LINK_PREFIX } from '../../config';
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
@@ -19,6 +19,7 @@ import {
   selectShouldSchedule,
   selectStickerSet,
   selectThreadInfo,
+  selectTopic,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { copyTextToClipboard } from '../../util/clipboard';
@@ -27,7 +28,7 @@ import renderText from './helpers/renderText';
 import useAppLayout from '../../hooks/useAppLayout';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useSchedule from '../../hooks/useSchedule';
 import useScrolledState from '../../hooks/useScrolledState';
 
@@ -36,6 +37,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import Loading from '../ui/Loading';
 import MenuItem from '../ui/MenuItem';
 import Modal from '../ui/Modal';
+import Icon from './icons/Icon';
 import StickerButton from './StickerButton';
 
 import './StickerSetModal.scss';
@@ -90,7 +92,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 
   const { isMobile } = useAppLayout();
 
-  const prevStickerSet = usePrevious(stickerSet);
+  const prevStickerSet = usePreviousDeprecated(stickerSet);
   const renderingStickerSet = stickerSet || prevStickerSet;
 
   const isAdded = Boolean(!renderingStickerSet?.isArchived && renderingStickerSet?.installedDate);
@@ -182,7 +184,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [isMobile]);
@@ -193,7 +195,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     return (
       <div className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <div className="modal-title">
           {renderingStickerSet ? renderText(renderingStickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
@@ -263,8 +265,9 @@ export default memo(withGlobal<OwnProps>(
     const sendOptions = chat ? getAllowedAttachmentOptions(chat, chatFullInfo) : undefined;
     const threadInfo = chatId && threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+    const topic = chatId && threadId ? selectTopic(global, chatId, threadId) : undefined;
     const canSendStickers = Boolean(
-      chat && threadId && getCanPostInChat(chat, threadId, isMessageThread, chatFullInfo)
+      chat && threadId && getCanPostInChat(chat, topic, isMessageThread, chatFullInfo)
         && sendOptions?.canSendStickers,
     );
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);

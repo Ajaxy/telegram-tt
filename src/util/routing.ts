@@ -1,5 +1,4 @@
-import type { MessageListType } from '../global/types';
-import type { ThreadId } from '../types';
+import type { MessageListType, ThreadId } from '../types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import { IS_MOCKED_CLIENT } from '../config';

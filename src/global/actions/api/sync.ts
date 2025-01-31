@@ -1,8 +1,8 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
-import type { ThreadId } from '../../../types';
+import type { Thread, ThreadId } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
-import type { ActionReturnType, GlobalState, Thread } from '../../types';
+import type { ActionReturnType, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
@@ -36,6 +36,7 @@ import {
   selectEditingId,
   selectTabState,
   selectThreadInfo,
+  selectTopics,
 } from '../../selectors';
 
 const RELEASE_STATUS_TIMEOUT = 15000; // 15 sec;
@@ -72,8 +73,7 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
 
   loadAllChats({
     listType: 'active',
-    shouldReplace: true,
-    onReplace: async () => {
+    whenFirstBatchDone: async () => {
       await loadAndReplaceMessages(global, actions);
 
       global = getGlobal();
@@ -90,8 +90,8 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
         console.log('>>> FINISH SYNC');
       }
 
-      loadAllChats({ listType: 'archived', shouldReplace: true });
-      loadAllChats({ listType: 'saved', shouldReplace: true });
+      loadAllChats({ listType: 'archived' });
+      loadAllChats({ listType: 'saved' });
       preloadTopChatMessages();
       loadAllStories();
       loadAllHiddenStories();
@@ -161,10 +161,10 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         const localMessages = currentChatId === SERVICE_NOTIFICATIONS_USER_ID
           ? global.serviceNotifications.filter(({ isDeleted }) => !isDeleted).map(({ message }) => message)
           : [];
-        const topicLastMessages = currentChat.isForum && currentChat.topics
-          ? Object.values(currentChat.topics)
-            .map(({ lastMessageId }) => currentChatMessages[lastMessageId])
-            .filter(Boolean)
+        const topics = selectTopics(global, currentChatId);
+        const topicLastMessages = topics ? Object.values(topics)
+          .map(({ lastMessageId }) => currentChatMessages[lastMessageId])
+          .filter(Boolean)
           : [];
 
         const resultMessageIds = result.messages.map(({ id }) => id);

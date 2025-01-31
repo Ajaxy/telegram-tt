@@ -17,10 +17,10 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import ItemPicker, { type ItemPickerOption } from '../../common/pickers/ItemPicker';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
-import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;
@@ -30,7 +30,8 @@ type OwnProps = {
 
 type StateProps = {
   isCurrentUserPremium: boolean;
-} & Pick<ISettings, 'languages' | 'language' | 'canTranslate' | 'canTranslateChats' | 'doNotTranslate'>;
+  languages?: ApiLanguage[];
+} & Pick<ISettings, | 'language' | 'canTranslate' | 'canTranslateChats' | 'doNotTranslate'>;
 
 const SettingsLanguage: FC<OwnProps & StateProps> = ({
   isActive,
@@ -45,7 +46,6 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadLanguages,
-    loadAttachBots,
     setSettingOption,
     openPremiumModal,
   } = getActions();
@@ -71,14 +71,23 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
       unmarkIsLoading();
 
       setSettingOption({ language: langCode as LangCode });
-
-      loadAttachBots(); // Should be refetched every language change
     });
   });
 
   const options = useMemo(() => {
-    return languages ? buildOptions(languages) : undefined;
-  }, [languages]);
+    if (!languages) return undefined;
+    const currentLangCode = (window.navigator.language || 'en').toLowerCase();
+    const shortLangCode = currentLangCode.substr(0, 2);
+
+    return languages.map(({ langCode, nativeName, name }) => ({
+      value: langCode,
+      label: nativeName,
+      subLabel: name,
+      isLoading: langCode === selectedLanguage && isLoading,
+    } satisfies ItemPickerOption)).sort((a) => {
+      return currentLangCode && (a.value === currentLangCode || a.value === shortLangCode) ? -1 : 0;
+    });
+  }, [isLoading, languages, selectedLanguage]);
 
   const handleShouldTranslateChange = useLastCallback((newValue: boolean) => {
     setSettingOption({ canTranslate: newValue });
@@ -128,7 +137,6 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
             onCheck={handleShouldTranslateChange}
           />
           <Checkbox
-            className="pb-2"
             label={lang('ShowTranslateChatButton')}
             checked={canTranslateChatsEnabled}
             disabled={!isCurrentUserPremium}
@@ -138,6 +146,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
           />
           {(canTranslate || canTranslateChatsEnabled) && (
             <ListItem
+              narrow
               onClick={handleDoNotSelectOpen}
             >
               {lang('DoNotTranslate')}
@@ -149,15 +158,18 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
           </p>
         </div>
       )}
-      <div className="settings-item">
-        <h4 className="settings-item-header mb-4">{lang('Localization.InterfaceLanguage')}</h4>
+      <div className="settings-item settings-item-picker">
+        <h4 className="settings-item-header">
+          {lang('Localization.InterfaceLanguage')}
+        </h4>
         {options ? (
-          <RadioGroup
-            name="language-settings"
-            options={options}
-            selected={selectedLanguage}
-            loadingOption={isLoading ? selectedLanguage : undefined}
-            onChange={handleChange}
+          <ItemPicker
+            items={options}
+            selectedValue={selectedLanguage}
+            forceRenderAllItems
+            onSelectedValueChange={handleChange}
+            itemInputType="radio"
+            className="settings-picker"
           />
         ) : (
           <Loading />
@@ -167,24 +179,12 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   );
 };
 
-function buildOptions(languages: ApiLanguage[]) {
-  const currentLangCode = (window.navigator.language || 'en').toLowerCase();
-  const shortLangCode = currentLangCode.substr(0, 2);
-
-  return languages.map(({ langCode, nativeName, name }) => ({
-    value: langCode,
-    label: nativeName,
-    subLabel: name,
-  })).sort((a) => {
-    return currentLangCode && (a.value === currentLangCode || a.value === shortLangCode) ? -1 : 0;
-  });
-}
-
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
-      language, languages, canTranslate, canTranslateChats, doNotTranslate,
+      language, canTranslate, canTranslateChats, doNotTranslate,
     } = global.settings.byKey;
+    const languages = global.settings.languages;
 
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 

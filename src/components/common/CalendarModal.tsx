@@ -3,7 +3,7 @@ import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 
-import type { LangFn } from '../../hooks/useOldLang';
+import type { OldLangFn } from '../../hooks/useOldLang';
 
 import { MAX_INT_32 } from '../../config';
 import buildClassName from '../../util/buildClassName';
@@ -11,10 +11,11 @@ import { formatDateToString, formatTime, getDayStart } from '../../util/dates/da
 
 import useFlag from '../../hooks/useFlag';
 import useOldLang from '../../hooks/useOldLang';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+import Icon from './icons/Icon';
 
 import './CalendarModal.scss';
 
@@ -73,7 +74,7 @@ const CalendarModal: FC<OwnProps> = ({
   }, [isPastMode, maxAt]);
 
   const passedSelectedDate = useMemo(() => (selectedAt ? new Date(selectedAt) : new Date()), [selectedAt]);
-  const prevIsOpen = usePrevious(isOpen);
+  const prevIsOpen = usePreviousDeprecated(isOpen);
   const [isTimeInputFocused, markTimeInputAsFocused] = useFlag(false);
 
   const [selectedDate, setSelectedDate] = useState<Date>(passedSelectedDate);
@@ -258,7 +259,7 @@ const CalendarModal: FC<OwnProps> = ({
             color="translucent"
             onClick={onClose}
           >
-            <i className="icon icon-close" />
+            <Icon name="close" />
           </Button>
 
           <h4>
@@ -274,7 +275,7 @@ const CalendarModal: FC<OwnProps> = ({
             disabled={shouldDisablePrevMonth}
             onClick={!shouldDisablePrevMonth ? handlePrevMonth : undefined}
           >
-            <i className="icon icon-previous" />
+            <Icon name="previous" />
           </Button>
 
           <Button
@@ -284,7 +285,7 @@ const CalendarModal: FC<OwnProps> = ({
             disabled={shouldDisableNextMonth}
             onClick={!shouldDisableNextMonth ? handleNextMonth : undefined}
           >
-            <i className="icon icon-next" />
+            <Icon name="next" />
           </Button>
         </div>
       </div>
@@ -401,7 +402,7 @@ function formatDay(year: number, month: number, day: number) {
   return `${year}-${month + 1}-${day}`;
 }
 
-function formatSubmitLabel(lang: LangFn, date: Date) {
+function formatSubmitLabel(lang: OldLangFn, date: Date) {
   const day = formatDateToString(date, lang.code);
   const today = formatDateToString(new Date(), lang.code);
 

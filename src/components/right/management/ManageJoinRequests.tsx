@@ -89,7 +89,7 @@ const ManageJoinRequests: FC<OwnProps & StateProps> = ({
             <Spinner key="loading" />
           )}
           {chat?.joinRequests?.length === 0 && (
-            <p className="text-muted" key="empty">
+            <p className="section-help" key="empty">
               {isChannel ? lang('NoSubscribeRequestsDescription') : lang('NoMemberRequestsDescription')}
             </p>
           )}

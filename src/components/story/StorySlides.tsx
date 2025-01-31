@@ -32,7 +32,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
-import usePrevious from '../../hooks/usePrevious';
+import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useWindowSize from '../../hooks/window/useWindowSize';
 import useSlideSizes from './hooks/useSlideSizes';
 
@@ -43,7 +43,6 @@ import styles from './StoryViewer.module.scss';
 
 interface OwnProps {
   isOpen?: boolean;
-  isReportModalOpen?: boolean;
   isDeleteModalOpen?: boolean;
   onDelete: (story: ApiTypeStory) => void;
   onReport: NoneToVoidFunction;
@@ -80,7 +79,6 @@ function StorySlides({
   isPrivate,
   isArchive,
   byPeerId,
-  isReportModalOpen,
   isDeleteModalOpen,
   onDelete,
   onClose,
@@ -91,7 +89,7 @@ function StorySlides({
   const containerRef = useRef<HTMLDivElement>(null);
   const [renderingPeerId, setRenderingPeerId] = useState(currentPeerId);
   const [renderingStoryId, setRenderingStoryId] = useState(currentStoryId);
-  const prevPeerId = usePrevious(currentPeerId);
+  const prevPeerId = usePreviousDeprecated(currentPeerId);
   const renderingIsArchive = useCurrentOrPrev(isArchive, true);
   const renderingIsPrivate = useCurrentOrPrev(isPrivate, true);
   const renderingIsSinglePeer = useCurrentOrPrev(isSinglePeer, true);
@@ -380,7 +378,6 @@ function StorySlides({
             dimensions={slideSizes.activeSlide}
             isPrivateStories={renderingIsPrivate}
             isArchivedStories={renderingIsArchive}
-            isReportModalOpen={isReportModalOpen}
             isDeleteModalOpen={isDeleteModalOpen}
             isSingleStory={isSingleStory}
             getIsAnimating={getIsAnimating}
@@ -438,7 +435,6 @@ function StorySlides({
           dimensions={slideSizes.activeSlide}
           isPrivateStories={renderingIsPrivate}
           isArchivedStories={renderingIsArchive}
-          isReportModalOpen={isReportModalOpen}
           isDeleteModalOpen={isDeleteModalOpen}
           isSingleStory={isSingleStory}
           getIsAnimating={getIsAnimating}

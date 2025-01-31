@@ -1,0 +1,256 @@
+@use "../../../styles/mixins";
+
+.root {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 3.5rem;
+  padding-inline: 0.75rem;
+
+  @include mixins.adapt-padding-to-scrollbar(0.75rem);
+}
+
+.header {
+  padding: 0.5rem;
+  padding-left: 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.title {
+  margin-inline: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+}
+
+.balance-container {
+  margin-left: auto;
+  align-items: end;
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-caption {
+  font-size: 1rem;
+}
+
+.star-balance {
+  margin-right: 0.1875rem;
+}
+
+.balance {
+  display: flex;
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  align-items: center;
+}
+
+.optionsSection {
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
+  padding-inline: 0.25rem;
+}
+
+.checkboxTitle {
+  color: var(--color-text);
+  font-size: 1rem;
+  text-transform: initial;
+  margin: 0;
+}
+
+.actionMessageView {
+  display: grid;
+  place-content: center;
+  height: 22.5rem;
+  margin-bottom: 0;
+  margin-top: 0.75rem;
+
+  padding: 0.5rem;
+
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 auto;
+
+  border-radius: var(--border-radius-default);
+
+  background-color: var(--theme-background-color);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+
+  :global(html.theme-light) & {
+    background-image: url('../../../assets/chat-bg-br.png');
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: url('../../../assets/chat-bg-pattern-light.png');
+    background-position: top right;
+    background-size: 510px auto;
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+
+    :global(html.theme-dark) & {
+      background-image: url('../../../assets/chat-bg-pattern-dark.png');
+      mix-blend-mode: unset;
+    }
+
+    @media (max-width: 600px) {
+      bottom: auto;
+      height: calc(var(--vh, 1vh) * 100);
+    }
+  }
+}
+
+.messageInput, .limited {
+  margin-bottom: 0.5rem;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  padding-top: 0.5rem;
+  margin-inline: -0.75rem; // Account for padding
+  flex-grow: 1;
+  flex-direction: column;
+  background-color: var(--color-background-secondary);
+
+  position: sticky;
+  bottom: 0;
+}
+
+.switcher {
+  margin-bottom: 0.25rem;
+}
+
+.switcherStarIcon {
+  margin-inline: 0 !important;
+}
+
+.description {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
+}
+
+.main-button {
+  display: flex;
+  font-weight: var(--font-weight-semibold);
+  font-size: 1rem;
+  height: 3rem;
+}
+
+.star {
+  --color-fill: var(--color-white);
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.1875rem;
+  margin-left: 0.5rem;
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+  background-color: var(--theme-background-color);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  :global(html.theme-light) &:not(.customBgImage)::before {
+    background-image: url('../../../assets/chat-bg-br.png');
+  }
+
+  &:not(.customBgImage).customBgColor::before {
+    display: none;
+  }
+
+  &.customBgImage::before {
+    background-image: var(--custom-background) !important;
+    transform: scale(1.1);
+  }
+
+  :global(body:not(.no-page-transitions)) &.withTransition {
+    transition: background-color 0.2s;
+
+    &.customBgImage::before {
+      transition: background-image var(--layer-transition);
+    }
+  }
+
+  &.customBgImage.blurred::before {
+    filter: blur(12px);
+  }
+
+  @media screen and (min-width: 1276px) {
+    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
+      overflow: hidden;
+      transform: scale(1);
+      transform-origin: left center;
+    }
+  }
+
+  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn::before {
+    @media screen and (min-width: 1276px) {
+      transform: scaleX(0.73) !important;
+    }
+
+    @media screen and (min-width: 1921px) {
+      transform: scaleX(0.8) !important;
+    }
+
+    @media screen and (min-width: 2600px) {
+      transform: scaleX(0.95) !important;
+    }
+  }
+
+  /* stylelint-disable-next-line @stylistic/max-line-length */
+  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn.withTransition::before {
+    transition: transform var(--layer-transition);
+  }
+
+  &:not(.customBgImage):not(.customBgColor)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: url('../../../assets/chat-bg-pattern-light.png');
+    background-position: top right;
+    background-size: 510px auto;
+    background-repeat: repeat;
+    mix-blend-mode: overlay;
+
+    :global(html.theme-dark) & {
+      background-image: url('../../../assets/chat-bg-pattern-dark.png');
+      mix-blend-mode: unset;
+    }
+  }
+}

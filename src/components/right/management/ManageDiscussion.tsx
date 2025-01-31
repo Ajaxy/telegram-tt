@@ -259,19 +259,23 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
         {linkedChat && (
           <div className="section">
             <h3 className="section-heading">{lang('ChannelSettingsJoinTitle')}</h3>
-            <Checkbox
-              checked={isJoinToSend}
-              onCheck={handleJoinToSendCheck}
-              label={lang('ChannelSettingsJoinToSend')}
-            />
-            {isJoinToSend && (
+            <div className="ListItem narrow">
               <Checkbox
-                checked={isJoinRequest}
-                onCheck={handleJoinRequestCheck}
-                label={lang('ChannelSettingsJoinRequest')}
+                checked={isJoinToSend}
+                onCheck={handleJoinToSendCheck}
+                label={lang('ChannelSettingsJoinToSend')}
               />
+            </div>
+            {isJoinToSend && (
+              <div className="ListItem narrow">
+                <Checkbox
+                  checked={isJoinRequest}
+                  onCheck={handleJoinRequestCheck}
+                  label={lang('ChannelSettingsJoinRequest')}
+                />
+              </div>
             )}
-            <p className="text-muted">
+            <p className="section-info section-info_push">
               {isJoinToSend ? lang('ChannelSettingsJoinRequestInfo') : lang('ChannelSettingsJoinToSendInfo')}
             </p>
           </div>

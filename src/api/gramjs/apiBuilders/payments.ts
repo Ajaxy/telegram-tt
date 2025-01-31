@@ -1,26 +1,42 @@
+import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiPremiumSection } from '../../../global/types';
 import type {
   ApiBoost,
   ApiBoostsStatus,
   ApiCheckedGiftCode,
   ApiGiveawayInfo,
-  ApiInvoice, ApiLabeledPrice, ApiMyBoost, ApiPaymentCredentials,
-  ApiPaymentForm, ApiPaymentSavedInfo, ApiPremiumGiftCodeOption, ApiPremiumPromo, ApiPremiumSubscriptionOption,
+  ApiInvoice,
+  ApiLabeledPrice,
+  ApiMyBoost,
+  ApiPaymentCredentials,
+  ApiPaymentForm,
+  ApiPaymentSavedInfo,
+  ApiPremiumGiftCodeOption,
+  ApiPremiumPromo,
+  ApiPremiumSection,
+  ApiPremiumSubscriptionOption,
+  ApiPrepaidGiveaway,
+  ApiPrepaidStarsGiveaway,
   ApiReceipt,
+  ApiStarGiveawayOption,
+  ApiStarsAmount,
+  ApiStarsGiveawayWinnerOption,
+  ApiStarsSubscription,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
   ApiStarTopupOption,
   BoughtPaidMedia,
 } from '../../types';
 
-import { addWebDocumentToLocalDb } from '../helpers';
+import { addWebDocumentToLocalDb } from '../helpers/localDb';
+import { buildApiStarsSubscriptionPricing } from './chats';
 import { buildApiMessageEntity } from './common';
+import { buildApiStarGift } from './gifts';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildApiWebDocument, buildMessageMediaContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
-import { buildPrepaidGiveaway, buildStatisticsPercentage } from './statistics';
+import { buildStatisticsPercentage } from './statistics';
 
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {
   if (!shippingOptions) {
@@ -51,23 +67,20 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
 
   if (receipt instanceof GramJs.payments.PaymentReceiptStars) {
     const {
-      botId, currency, date, description: text, title, totalAmount, transactionId,
+      botId, currency, date, description, title, totalAmount, transactionId, invoice,
     } = receipt;
-
-    if (photo) {
-      addWebDocumentToLocalDb(photo);
-    }
 
     return {
       type: 'stars',
       currency,
-      botId: buildApiPeerId(botId, 'user'),
       date,
-      text,
+      botId: buildApiPeerId(botId, 'user'),
+      description,
       title,
       totalAmount: -totalAmount.toJSNumber(),
       transactionId,
-      photo: photo && buildApiWebDocument(photo),
+      photo: buildApiWebDocument(photo),
+      invoice: buildApiInvoice(invoice),
     };
   }
 
@@ -75,21 +88,18 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
     invoice,
     info,
     shipping,
-    currency,
     totalAmount,
     credentialsTitle,
     tipAmount,
     title,
-    description: text,
+    description,
+    botId,
+    currency,
+    date,
+    providerId,
   } = receipt;
 
   const { shippingAddress, phone, name } = (info || {});
-
-  const { prices } = invoice;
-  const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
-    label,
-    amount: amount.toJSNumber(),
-  }));
 
   let shippingPrices: ApiLabeledPrice[] | undefined;
   let shippingMethod: string | undefined;
@@ -106,28 +116,50 @@ export function buildApiReceipt(receipt: GramJs.payments.TypePaymentReceipt): Ap
 
   return {
     type: 'regular',
-    currency,
-    prices: mappedPrices,
     info: { shippingAddress, phone, name },
     totalAmount: totalAmount.toJSNumber(),
+    currency,
+    date,
     credentialsTitle,
     shippingPrices,
     shippingMethod,
     tipAmount: tipAmount ? tipAmount.toJSNumber() : 0,
     title,
-    text,
+    description,
+    botId: buildApiPeerId(botId, 'user'),
+    providerId: providerId.toString(),
     photo: photo && buildApiWebDocument(photo),
+    invoice: buildApiInvoice(invoice),
   };
 }
 
 export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiPaymentForm {
+  if (form instanceof GramJs.payments.PaymentFormStarGift) {
+    const { formId } = form;
+    return {
+      type: 'stargift',
+      formId: String(formId),
+      invoice: buildApiInvoice(form.invoice),
+    };
+  }
+
   if (form instanceof GramJs.payments.PaymentFormStars) {
-    const { botId, formId } = form;
+    const {
+      botId, formId, title, description, photo,
+    } = form;
+
+    if (photo) {
+      addWebDocumentToLocalDb(photo);
+    }
 
     return {
       type: 'stars',
       botId: buildApiPeerId(botId, 'user'),
       formId: String(formId),
+      title,
+      description,
+      photo: buildApiWebDocument(photo),
+      invoice: buildApiInvoice(form.invoice),
     };
   }
 
@@ -143,25 +175,14 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
     savedCredentials,
     url,
     botId,
+    description,
+    title,
+    photo,
   } = form;
 
-  const {
-    test: isTest,
-    nameRequested: isNameRequested,
-    phoneRequested: isPhoneRequested,
-    emailRequested: isEmailRequested,
-    shippingAddressRequested: isShippingAddressRequested,
-    flexible: isFlexible,
-    phoneToProvider: shouldSendPhoneToProvider,
-    emailToProvider: shouldSendEmailToProvider,
-    currency,
-    prices,
-  } = invoice;
-
-  const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
-    label,
-    amount: amount.toJSNumber(),
-  }));
+  if (photo) {
+    addWebDocumentToLocalDb(photo);
+  }
   const { shippingAddress } = savedInfo || {};
   const cleanedInfo: ApiPaymentSavedInfo | undefined = savedInfo ? omitVirtualClassFields(savedInfo) : undefined;
   if (cleanedInfo && shippingAddress) {
@@ -172,6 +193,9 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
 
   return {
     type: 'regular',
+    title,
+    description,
+    photo: buildApiWebDocument(photo),
     url,
     botId: buildApiPeerId(botId, 'user'),
     canSaveCredentials,
@@ -180,18 +204,7 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
     providerId: String(providerId),
     nativeProvider,
     savedInfo: cleanedInfo,
-    invoiceContainer: {
-      isTest,
-      isNameRequested,
-      isPhoneRequested,
-      isEmailRequested,
-      isShippingAddressRequested,
-      isFlexible,
-      shouldSendPhoneToProvider,
-      shouldSendEmailToProvider,
-      currency,
-      prices: mappedPrices,
-    },
+    invoice: buildApiInvoice(invoice),
     nativeParams: {
       needCardholderName: Boolean(nativeData?.need_cardholder_name),
       needCountry: Boolean(nativeData?.need_country),
@@ -204,28 +217,49 @@ export function buildApiPaymentForm(form: GramJs.payments.TypePaymentForm): ApiP
   };
 }
 
-export function buildApiInvoiceFromForm(form: GramJs.payments.TypePaymentForm): ApiInvoice {
+export function buildApiInvoice(invoice: GramJs.Invoice): ApiInvoice {
   const {
-    invoice, description: text, title, photo,
-  } = form;
-  const {
-    test, currency, prices, recurring, termsUrl, maxTipAmount, suggestedTipAmounts,
+    test,
+    currency,
+    prices,
+    recurring,
+    termsUrl,
+    maxTipAmount,
+    suggestedTipAmounts,
+    emailRequested,
+    emailToProvider,
+    nameRequested,
+    phoneRequested,
+    phoneToProvider,
+    shippingAddressRequested,
+    flexible,
+    subscriptionPeriod,
   } = invoice;
 
-  const totalAmount = prices.reduce((ac, cur) => ac + cur.amount.toJSNumber(), 0);
+  const mappedPrices: ApiLabeledPrice[] = prices.map(({ label, amount }) => ({
+    label,
+    amount: amount.toJSNumber(),
+  }));
+
+  const totalAmount = prices.reduce((acc, cur) => acc.add(cur.amount), bigInt(0)).toJSNumber();
 
   return {
-    mediaType: 'invoice',
-    text,
-    title,
-    photo: buildApiWebDocument(photo),
-    amount: totalAmount,
+    totalAmount,
     currency,
     isTest: test,
     isRecurring: recurring,
     termsUrl,
+    prices: mappedPrices,
     maxTipAmount: maxTipAmount?.toJSNumber(),
-    ...(suggestedTipAmounts && { suggestedTipAmounts: suggestedTipAmounts.map((tip) => tip.toJSNumber()) }),
+    suggestedTipAmounts: suggestedTipAmounts?.map((tip) => tip.toJSNumber()),
+    isEmailRequested: emailRequested,
+    isEmailSentToProvider: emailToProvider,
+    isNameRequested: nameRequested,
+    isPhoneRequested: phoneRequested,
+    isPhoneSentToProvider: phoneToProvider,
+    isShippingAddressRequested: shippingAddressRequested,
+    isFlexible: flexible,
+    subscriptionPeriod,
   };
 }
 
@@ -262,19 +296,46 @@ export function buildApiPaymentCredentials(credentials: GramJs.PaymentSavedCrede
   return credentials.map(({ id, title }) => ({ id, title }));
 }
 
+export function buildPrepaidGiveaway(
+  interaction: GramJs.TypePrepaidGiveaway,
+): ApiPrepaidGiveaway | ApiPrepaidStarsGiveaway {
+  if (interaction instanceof GramJs.PrepaidGiveaway) {
+    return {
+      type: 'giveaway',
+      id: interaction.id.toString(),
+      date: interaction.date,
+      months: interaction.months,
+      quantity: interaction.quantity,
+    };
+  }
+
+  return {
+    type: 'starsGiveaway',
+    id: interaction.id.toString(),
+    stars: interaction.stars.toJSNumber(),
+    quantity: interaction.quantity,
+    boosts: interaction.boosts,
+    date: interaction.date,
+  };
+}
+
 export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): ApiBoostsStatus {
   const {
-    level, boostUrl, boosts, myBoost, currentLevelBoosts, nextLevelBoosts, premiumAudience, prepaidGiveaways,
+    level, boostUrl, boosts,
+    giftBoosts, myBoost, currentLevelBoosts, nextLevelBoosts,
+    premiumAudience, prepaidGiveaways,
   } = boostStatus;
+
   return {
     level,
     currentLevelBoosts,
     boosts,
     hasMyBoost: Boolean(myBoost),
     boostUrl,
+    giftBoosts,
     nextLevelBoosts,
     ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
-    ...(prepaidGiveaways && { prepaidGiveaways: prepaidGiveaways.map(buildPrepaidGiveaway) }),
+    ...(prepaidGiveaways && { prepaidGiveaways: prepaidGiveaways.map((m) => buildPrepaidGiveaway(m)) }),
   };
 }
 
@@ -285,6 +346,7 @@ export function buildApiBoost(boost: GramJs.Boost): ApiBoost {
     expires,
     giveaway,
     gift,
+    stars,
   } = boost;
 
   return {
@@ -293,6 +355,7 @@ export function buildApiBoost(boost: GramJs.Boost): ApiBoost {
     expires,
     isFromGiveaway: giveaway,
     isGift: gift,
+    stars: stars?.toJSNumber(),
   };
 }
 
@@ -339,6 +402,7 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       refunded,
       startDate,
       winnersCount,
+      starsPrize,
     } = info;
 
     return {
@@ -350,6 +414,7 @@ export function buildApiGiveawayInfo(info: GramJs.payments.TypeGiveawayInfo): Ap
       giftCodeSlug,
       isRefunded: refunded,
       isWinner: winner,
+      starsPrize: starsPrize?.toJSNumber(),
     };
   }
 }
@@ -383,6 +448,58 @@ export function buildApiPremiumGiftCodeOption(option: GramJs.PremiumGiftCodeOpti
   };
 }
 
+export function buildApiStarsGiftOptions(option: GramJs.StarsGiftOption): ApiStarTopupOption {
+  const {
+    extended, stars, amount, currency,
+  } = option;
+
+  return {
+    isExtended: extended,
+    stars: stars.toJSNumber(),
+    amount: amount.toJSNumber(),
+    currency,
+  };
+}
+
+export function buildApiStarsAmount(amount: GramJs.StarsAmount): ApiStarsAmount {
+  return {
+    amount: amount.amount.toJSNumber(),
+    nanos: amount.nanos,
+  };
+}
+
+export function buildApiStarsGiveawayWinnersOption(
+  option: GramJs.StarsGiveawayWinnersOption,
+): ApiStarsGiveawayWinnerOption {
+  const {
+    default: isDefault, users, perUserStars,
+  } = option;
+
+  return {
+    isDefault,
+    users,
+    perUserStars: perUserStars.toJSNumber(),
+  };
+}
+
+export function buildApiStarsGiveawayOptions(option: GramJs.StarsGiveawayOption): ApiStarGiveawayOption {
+  const {
+    extended, default: isDefault, stars, yearlyBoosts, amount, winners, currency,
+  } = option;
+
+  const winnerList = winners?.map((m) => buildApiStarsGiveawayWinnersOption(m)).filter(Boolean);
+
+  return {
+    isExtended: extended,
+    isDefault,
+    yearlyBoosts,
+    stars: stars.toJSNumber(),
+    amount: amount.toJSNumber(),
+    currency,
+    winners: winnerList,
+  };
+}
+
 export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPeer): ApiStarsTransactionPeer {
   if (peer instanceof GramJs.StarsTransactionPeerAppStore) {
     return { type: 'appStore' };
@@ -404,6 +521,10 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
     return { type: 'ads' };
   }
 
+  if (peer instanceof GramJs.StarsTransactionPeerAPI) {
+    return { type: 'api' };
+  }
+
   if (peer instanceof GramJs.StarsTransactionPeer) {
     return { type: 'peer', id: getApiChatIdFromMtpPeer(peer.peer) };
   }
@@ -413,7 +534,8 @@ export function buildApiStarsTransactionPeer(peer: GramJs.TypeStarsTransactionPe
 
 export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): ApiStarsTransaction {
   const {
-    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending,
+    date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
+    subscriptionPeriod, stargift, giveawayPostId, starrefCommissionPermille, stargiftUpgrade,
   } = transaction;
 
   if (photo) {
@@ -423,11 +545,13 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
   const boughtExtendedMedia = extendedMedia?.map((m) => buildMessageMediaContent(m))
     .filter(Boolean) as BoughtPaidMedia[];
 
+  const starRefCommision = starrefCommissionPermille ? starrefCommissionPermille / 10 : undefined;
+
   return {
     id,
     date,
     peer: buildApiStarsTransactionPeer(peer),
-    stars: stars.toJSNumber(),
+    stars: buildApiStarsAmount(stars),
     title,
     description,
     photo: photo && buildApiWebDocument(photo),
@@ -435,7 +559,40 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     hasFailed: failed,
     isPending: pending,
     messageId: msgId,
+    isGift: gift,
     extendedMedia: boughtExtendedMedia,
+    subscriptionPeriod,
+    isReaction: reaction,
+    starGift: stargift && buildApiStarGift(stargift),
+    giveawayPostId,
+    starRefCommision,
+    isGiftUpgrade: stargiftUpgrade,
+  };
+}
+
+export function buildApiStarsSubscription(subscription: GramJs.StarsSubscription): ApiStarsSubscription {
+  const {
+    id, peer, pricing, untilDate, canRefulfill, canceled, chatInviteHash, missingBalance, botCanceled, photo, title,
+    invoiceSlug,
+  } = subscription;
+
+  if (photo) {
+    addWebDocumentToLocalDb(photo);
+  }
+
+  return {
+    id,
+    peerId: getApiChatIdFromMtpPeer(peer),
+    until: untilDate,
+    pricing: buildApiStarsSubscriptionPricing(pricing),
+    isCancelled: canceled,
+    canRefulfill,
+    hasMissingBalance: missingBalance,
+    chatInviteHash,
+    hasBotCancelled: botCanceled,
+    title,
+    photo: photo && buildApiWebDocument(photo),
+    invoiceSlug,
   };
 }
 

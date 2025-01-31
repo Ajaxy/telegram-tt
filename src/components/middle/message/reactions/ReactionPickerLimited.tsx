@@ -8,6 +8,7 @@ import { withGlobal } from '../../../../global';
 import type {
   ApiAvailableReaction, ApiChatReactions, ApiMessage,
   ApiReaction,
+  ApiReactionWithPaid,
 } from '../../../../api/types';
 
 import {
@@ -20,22 +21,24 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 import useAppLayout from '../../../../hooks/useAppLayout';
 import useWindowSize from '../../../../hooks/window/useWindowSize';
 
-import ReactionEmoji from '../../../common/ReactionEmoji';
+import ReactionEmoji from '../../../common/reactions/ReactionEmoji';
 
 import styles from './ReactionPickerLimited.module.scss';
 
 type OwnProps = {
   chatId: string;
   loadAndPlay: boolean;
-  onReactionSelect?: (reaction: ApiReaction) => void;
   selectedReactionIds?: string[];
   message?: ApiMessage;
+  onReactionSelect: (reaction: ApiReactionWithPaid) => void;
+  onReactionContext?: (reaction: ApiReactionWithPaid) => void;
 };
 
 type StateProps = {
   enabledReactions?: ApiChatReactions;
   availableReactions?: ApiAvailableReaction[];
   topReactions: ApiReaction[];
+  isWithPaidReaction?: boolean;
   canAnimate?: boolean;
   isSavedMessages?: boolean;
   reactionsLimit?: number;
@@ -56,9 +59,11 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
   availableReactions,
   topReactions,
   selectedReactionIds,
-  onReactionSelect,
+  isWithPaidReaction,
   message,
   reactionsLimit,
+  onReactionSelect,
+  onReactionContext,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -74,18 +79,34 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
 
   const allAvailableReactions = useMemo(() => {
     if (shouldUseCurrentReactions) {
-      return currentReactions.map(({ reaction }) => reaction);
+      const reactions = currentReactions.map(({ reaction }) => reaction);
+      if (isWithPaidReaction) {
+        reactions.unshift({ type: 'paid' });
+      }
+      return reactions;
     }
+
     if (!enabledReactions) {
       return [];
     }
 
     if (enabledReactions.type === 'all') {
-      return sortReactions((availableReactions || []).map(({ reaction }) => reaction), topReactions);
+      const reactionsToSort: ApiReactionWithPaid[] = (availableReactions || []).map(({ reaction }) => reaction);
+      if (isWithPaidReaction) {
+        reactionsToSort.unshift({ type: 'paid' });
+      }
+      return sortReactions(reactionsToSort, topReactions);
     }
 
-    return sortReactions(enabledReactions.allowed, topReactions);
-  }, [availableReactions, enabledReactions, topReactions, shouldUseCurrentReactions, currentReactions]);
+    const reactionsToSort: ApiReactionWithPaid[] = enabledReactions.allowed;
+    if (isWithPaidReaction) {
+      reactionsToSort.unshift({ type: 'paid' });
+    }
+
+    return sortReactions(reactionsToSort, topReactions);
+  }, [
+    availableReactions, enabledReactions, topReactions, shouldUseCurrentReactions, currentReactions, isWithPaidReaction,
+  ]);
 
   const pickerHeight = useMemo(() => {
     const pickerWidth = Math.min(MODAL_MAX_WIDTH_REM * REM, windowWidth);
@@ -118,6 +139,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
                 loadAndPlay={loadAndPlay}
                 availableReactions={availableReactions}
                 onClick={onReactionSelect!}
+                onContextMenu={onReactionContext}
                 sharedCanvasRef={sharedCanvasRef}
                 sharedCanvasHqRef={sharedCanvasHqRef}
               />
@@ -134,13 +156,14 @@ export default memo(withGlobal<OwnProps>(
     const { availableReactions, topReactions } = global.reactions;
 
     const { maxUniqueReactions } = global.appConfig || {};
-    const { enabledReactions } = selectChatFullInfo(global, chatId) || {};
+    const { enabledReactions, isPaidReactionAvailable } = selectChatFullInfo(global, chatId) || {};
 
     return {
       enabledReactions,
       availableReactions,
       topReactions,
       reactionsLimit: maxUniqueReactions,
+      isWithPaidReaction: isPaidReactionAvailable,
     };
   },
 )(ReactionPickerLimited));

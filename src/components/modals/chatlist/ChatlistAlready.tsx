@@ -6,10 +6,12 @@ import type { ApiChatFolder, ApiChatlistInviteAlready } from '../../../api/types
 
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
-import Picker from '../../common/Picker';
+import PeerPicker from '../../common/pickers/PeerPicker';
 import Badge from '../../ui/Badge';
 import Button from '../../ui/Button';
 
@@ -23,17 +25,28 @@ type OwnProps = {
 const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
   const { closeChatlistModal, joinChatlistInvite } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
+  const oldLang = useOldLang();
 
   const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(invite.missingPeerIds);
 
   const hasChatsToAdd = Boolean(invite.missingPeerIds.length);
+  const isNew = invite.alreadyPeerIds.length === 0;
   const newChatsCount = hasChatsToAdd ? invite.missingPeerIds.length : 0;
   const badgeText = selectedPeerIds.length ? selectedPeerIds.length.toString() : undefined;
 
-  const descriptionText = hasChatsToAdd
-    ? lang('FolderLinkSubtitleChats', [newChatsCount, folder.title], undefined, newChatsCount)
-    : lang('FolderLinkSubtitleAlready', folder.title);
+  const descriptionText = isNew ? lang('FolderLinkSubtitleNew')
+    : newChatsCount ? lang('FolderLinkSubtitleAdd', {
+      chats: lang('FolderLinkSubtitleAddCount', { count: newChatsCount }, { pluralValue: newChatsCount }),
+      title: renderTextWithEntities({
+        text: folder.title.text,
+        entities: folder.title.entities,
+        noCustomEmojiPlayback: folder.noTitleAnimations,
+      }),
+    }, {
+      withNodes: true,
+      withMarkdown: true,
+    }) : lang('FolderLinkSubtitleAlready');
 
   const handleButtonClick = useCallback(() => {
     closeChatlistModal();
@@ -61,7 +74,7 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
           <>
             <div className={styles.pickerHeader}>
               <div className={styles.pickerHeaderInfo}>
-                {lang('FolderLinkHeaderChatsJoin', selectedPeerIds.length, 'i')}
+                {oldLang('FolderLinkHeaderChatsJoin', selectedPeerIds.length, 'i')}
               </div>
               <div
                 className={styles.selectionToggle}
@@ -69,25 +82,32 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
                 tabIndex={0}
                 onClick={handleSelectionToggle}
               >
-                {selectedPeerIds.length === invite.missingPeerIds.length ? lang('DeselectAll') : lang('SelectAll')}
+                {selectedPeerIds.length === invite.missingPeerIds.length
+                  ? oldLang('DeselectAll') : oldLang('SelectAll')}
               </div>
             </div>
-            <Picker
+            <PeerPicker
               itemIds={invite.missingPeerIds}
               onSelectedIdsChange={setSelectedPeerIds}
               selectedIds={selectedPeerIds}
+              allowMultiple
+              withStatus
+              itemInputType="checkbox"
             />
           </>
         )}
         <div className={styles.pickerHeader}>
           <div className={styles.pickerHeaderInfo}>
-            {lang('FolderLinkHeaderAlready')}
+            {oldLang('FolderLinkHeaderAlready')}
           </div>
         </div>
-        <Picker
+        <PeerPicker
           itemIds={invite.alreadyPeerIds}
           lockedSelectedIds={invite.alreadyPeerIds}
           selectedIds={invite.alreadyPeerIds}
+          allowMultiple
+          withStatus
+          itemInputType="checkbox"
         />
       </div>
       <Button
@@ -95,10 +115,10 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
         onClick={handleButtonClick}
       >
         <div className={styles.buttonText}>
-          {!selectedPeerIds.length && lang('OK')}
+          {!selectedPeerIds.length && oldLang('OK')}
           {Boolean(selectedPeerIds.length) && (
             <>
-              {lang('FolderLinkButtonJoinPlural', selectedPeerIds.length, 'i')}
+              {oldLang('FolderLinkButtonJoinPlural', selectedPeerIds.length, 'i')}
               <Badge className={styles.buttonBadge} text={badgeText} isAlternateColor />
             </>
           )}

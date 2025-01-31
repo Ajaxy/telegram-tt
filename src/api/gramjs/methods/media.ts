@@ -1,6 +1,7 @@
+import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { TelegramClient } from '../../../lib/gramjs';
+import type { SizeType, TelegramClient } from '../../../lib/gramjs';
 import type { ApiOnProgress, ApiParsedMedia } from '../../types';
 import {
   ApiMediaFormat,
@@ -88,15 +89,16 @@ async function download(
   } = parsed;
 
   if (entityType === 'staticMap') {
-    const accessHash = entityId;
+    const accessHash = bigInt(entityId);
     const parsedParams = new URLSearchParams(params);
-    const long = parsedParams.get('long');
-    const lat = parsedParams.get('lat');
-    const w = parsedParams.get('w');
-    const h = parsedParams.get('h');
-    const zoom = parsedParams.get('zoom');
-    const scale = parsedParams.get('scale');
-    const accuracyRadius = parsedParams.get('accuracy_radius');
+    const long = Number(parsedParams.get('long'));
+    const lat = Number(parsedParams.get('lat'));
+    const w = Number(parsedParams.get('w'));
+    const h = Number(parsedParams.get('h'));
+    const zoom = Number(parsedParams.get('zoom'));
+    const scale = Number(parsedParams.get('scale'));
+    const accuracyRadiusStr = parsedParams.get('accuracy_radius');
+    const accuracyRadius = accuracyRadiusStr ? Number(accuracyRadiusStr) : undefined;
 
     const data = await client.downloadStaticMap(accessHash, long, lat, w, h, zoom, scale, accuracyRadius);
     return {
@@ -167,13 +169,13 @@ async function download(
 
     return { mimeType, data, fullSize };
   } else if (entityType === 'stickerSet') {
-    const data = await client.downloadStickerSetThumb(entity);
-    const mimeType = getMimeType(data);
+    const data = await client.downloadStickerSetThumb(entity as GramJs.StickerSet);
+    const mimeType = data && getMimeType(data);
 
     return { mimeType, data };
   } else {
-    const data = await client.downloadProfilePhoto(entity, mediaMatchType === 'profile');
-    const mimeType = getMimeType(data);
+    const data = await client.downloadProfilePhoto(entity as GramJs.Chat | GramJs.User, mediaMatchType === 'profile');
+    const mimeType = data && getMimeType(data);
 
     return { mimeType, data };
   }
@@ -181,8 +183,12 @@ async function download(
 
 // eslint-disable-next-line no-async-without-await/no-async-without-await
 async function parseMedia(
-  data: Buffer, mediaFormat: ApiMediaFormat, mimeType?: string,
+  data: Buffer | File, mediaFormat: ApiMediaFormat, mimeType?: string,
 ): Promise<ApiParsedMedia | undefined> {
+  if (data instanceof File) {
+    return data;
+  }
+
   switch (mediaFormat) {
     case ApiMediaFormat.BlobUrl:
       return new Blob([data], { type: mimeType });
@@ -246,7 +252,7 @@ export function parseMediaUrl(url: string) {
 
   let entityType: EntityType;
   const params = mediaMatch[3];
-  const sizeType = params?.replace('?size=', '') || undefined;
+  const sizeType = params?.replace('?size=', '') as SizeType || undefined;
 
   if (mediaMatch[1] === 'avatar' || mediaMatch[1] === 'profile') {
     entityType = getEntityTypeById(entityId);

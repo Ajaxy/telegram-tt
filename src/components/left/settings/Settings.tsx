@@ -110,6 +110,11 @@ const PRIVACY_BIRTHDAY_SCREENS = [
   SettingsScreens.PrivacyBirthdayDeniedContacts,
 ];
 
+const PRIVACY_GIFTS_SCREENS = [
+  SettingsScreens.PrivacyGiftsAllowedContacts,
+  SettingsScreens.PrivacyGiftsDeniedContacts,
+];
+
 const PRIVACY_PHONE_CALL_SCREENS = [
   SettingsScreens.PrivacyPhoneCallAllowedContacts,
   SettingsScreens.PrivacyPhoneCallDeniedContacts,
@@ -204,6 +209,7 @@ const Settings: FC<OwnProps> = ({
       [SettingsScreens.PrivacyProfilePhoto]: PRIVACY_PROFILE_PHOTO_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyBio]: PRIVACY_BIO_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyBirthday]: PRIVACY_BIRTHDAY_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyGifts]: PRIVACY_GIFTS_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyPhoneCall]: PRIVACY_PHONE_CALL_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyPhoneP2P]: PRIVACY_PHONE_P2P_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(activeScreen),
@@ -330,6 +336,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyProfilePhoto:
       case SettingsScreens.PrivacyBio:
       case SettingsScreens.PrivacyBirthday:
+      case SettingsScreens.PrivacyGifts:
       case SettingsScreens.PrivacyPhoneCall:
       case SettingsScreens.PrivacyForwarding:
       case SettingsScreens.PrivacyVoiceMessages:
@@ -348,6 +355,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyBioAllowedContacts:
       case SettingsScreens.PrivacyBirthdayAllowedContacts:
+      case SettingsScreens.PrivacyGiftsAllowedContacts:
       case SettingsScreens.PrivacyPhoneCallAllowedContacts:
       case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
@@ -357,6 +365,7 @@ const Settings: FC<OwnProps> = ({
           <SettingsPrivacyVisibilityExceptionList
             isAllowList
             withPremiumCategory={currentScreen === SettingsScreens.PrivacyGroupChatsAllowedContacts}
+            withMiniAppsCategory={currentScreen === SettingsScreens.PrivacyGiftsAllowedContacts}
             screen={currentScreen}
             onScreenSelect={onScreenSelect}
             isActive={isScreenActive || privacyAllowScreens[currentScreen]}
@@ -369,6 +378,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       case SettingsScreens.PrivacyBioDeniedContacts:
       case SettingsScreens.PrivacyBirthdayDeniedContacts:
+      case SettingsScreens.PrivacyGiftsDeniedContacts:
       case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:

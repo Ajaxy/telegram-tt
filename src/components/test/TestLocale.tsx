@@ -9,6 +9,9 @@ const storedParameter: LangFnParameters = {
   variables: {
     count: 42,
   },
+  options: {
+    pluralValue: 42,
+  },
 };
 
 const storedAdvancedParameter: LangFnParameters = {
@@ -39,7 +42,7 @@ const TestLocale = () => {
           withMarkdown: true,
         })}
       </p>
-      <p>{lang('Participants', { count: 42 })}</p>
+      <p>{lang('Participants', { count: 42 }, { pluralValue: 42 })}</p>
       <p>
         {lang('ChatServiceGroupUpdatedPinnedMessage1', {
           message: 'Some message',

@@ -1,5 +1,6 @@
 import type { ApiFormattedText } from '../../api/types';
-import type { GlobalState, TabArgs, TranslatedMessage } from '../types';
+import type { TranslatedMessage } from '../../types';
+import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit } from '../../util/iteratees';

@@ -25,18 +25,20 @@ type OwnProps = {
   id?: string;
   name?: string;
   value?: string;
-  label: TeactNode;
+  label?: TeactNode;
   labelText?: TeactNode;
   subLabel?: string;
   checked?: boolean;
   rightIcon?: IconName;
   disabled?: boolean;
   tabIndex?: number;
-  round?: boolean;
+  withIcon?: boolean;
   blocking?: boolean;
   permissionGroup?: boolean;
   isLoading?: boolean;
   withCheckedCallback?: boolean;
+  onlyInput?: boolean;
+  isRound?: boolean;
   className?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>, nestedOptionList?: IRadioOption) => void;
   onCheck?: (isChecked: boolean) => void;
@@ -58,20 +60,22 @@ const Checkbox: FC<OwnProps> = ({
   checked,
   tabIndex,
   disabled,
-  round,
+  withIcon,
   blocking,
   permissionGroup,
   isLoading,
   className,
   rightIcon,
-  onChange,
-  onCheck,
-  onClickLabel,
+  onlyInput,
+  isRound,
   nestedCheckbox,
   nestedCheckboxCount,
   nestedOptionList,
   leftElement,
   values = [],
+  onChange,
+  onCheck,
+  onClickLabel,
 }) => {
   const lang = useOldLang();
   // eslint-disable-next-line no-null/no-null
@@ -109,12 +113,16 @@ const Checkbox: FC<OwnProps> = ({
   const labelClassName = buildClassName(
     'Checkbox',
     disabled && 'disabled',
-    round && 'round',
+    withIcon && 'withIcon',
     isLoading && 'loading',
     blocking && 'blocking',
     nestedCheckbox && 'nested',
+    subLabel && 'withSubLabel',
     permissionGroup && 'permission-group',
     Boolean(leftElement) && 'avatar',
+    onlyInput && 'onlyInput',
+    isRound && 'round',
+    Boolean(rightIcon) && 'withNestedList',
     className,
   );
 
@@ -138,14 +146,18 @@ const Checkbox: FC<OwnProps> = ({
           onChange={handleChange}
           onClick={onClickLabel ? handleInputClick : undefined}
         />
-        <div className={buildClassName('Checkbox-main', Boolean(leftElement) && 'Nested-avatar-list')}>
+        <div className={buildClassName(
+          'Checkbox-main',
+          Boolean(leftElement) && 'Nested-avatar-list',
+        )}
+        >
           <span className="label" dir="auto">
             {leftElement}
             {typeof label === 'string' ? renderText(label) : label}
             {labelText && <span className="ml-1">{renderText(labelText)}</span>}
-            {rightIcon && <i className={`icon icon-${rightIcon} right-icon`} />}
           </span>
           {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
+          {rightIcon && <Icon name={rightIcon} className="right-icon" />}
         </div>
         {nestedCheckbox && (
           <span className="nestedButton" dir="auto">

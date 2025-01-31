@@ -27,7 +27,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useFlag from '../../hooks/useFlag';
 import useMedia from '../../hooks/useMedia';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
 import useOldLang from '../../hooks/useOldLang';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -82,7 +82,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   const fullMediaData = videoBlobUrl || photoBlobUrl;
   const [isVideoReady, markVideoReady] = useFlag();
   const isFullMediaReady = Boolean(fullMediaData && (!isVideo || isVideoReady));
-  const transitionClassNames = useMediaTransition(isFullMediaReady);
+  const transitionClassNames = useMediaTransitionDeprecated(isFullMediaReady);
   const isBlurredThumb = canHaveMedia && !isFullMediaReady && !previewBlobUrl && photo?.thumbnail?.dataUri;
   const blurredThumbCanvasRef = useCanvasBlur(
     photo?.thumbnail?.dataUri, !isBlurredThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED,
@@ -123,7 +123,7 @@ const ProfilePhoto: FC<OwnProps> = ({
     content = (
       <>
         {isBlurredThumb ? (
-          <canvas ref={blurredThumbCanvasRef} className="thumb canvas-blur-setup" />
+          <canvas ref={blurredThumbCanvasRef} className="thumb" />
         ) : (
           <img src={previewBlobUrl} draggable={false} className="thumb" alt="" />
         )}

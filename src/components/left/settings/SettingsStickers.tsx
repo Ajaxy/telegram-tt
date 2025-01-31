@@ -22,7 +22,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useOldLang from '../../../hooks/useOldLang';
 
-import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import ReactionStaticEmoji from '../../common/reactions/ReactionStaticEmoji';
 import StickerSetCard from '../../common/StickerSetCard';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
@@ -102,7 +102,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
           onCheck={handleSuggestStickersChange}
         />
         <ListItem
-          className="mt-4"
+          narrow
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.CustomEmoji)}
           icon="smile"
@@ -113,6 +113,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
         {defaultReaction && (
           <ListItem
             className="SettingsDefaultReaction"
+            narrow
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => onScreenSelect(SettingsScreens.QuickReaction)}
           >

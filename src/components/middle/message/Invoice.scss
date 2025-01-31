@@ -1,7 +1,7 @@
 .Invoice {
   .title {
     color: var(--accent-color);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     margin-bottom: 0;
   }
 
@@ -41,7 +41,7 @@
         background-color: rgba(0, 0, 0, 0.4);
         border-radius: var(--border-radius-messages-small);
         color: var(--color-white);
-        font-weight: 500;
+        font-weight: var(--font-weight-medium);
       }
     }
 

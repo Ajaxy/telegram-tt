@@ -5,7 +5,7 @@ import type { GlobalState } from '../../global/types';
 import type { Signal, SignalSetter } from '../../util/signals';
 
 import { createSignal } from '../../util/signals';
-import useEffectOnce from '../useEffectOnce';
+import useSyncEffect from '../useSyncEffect';
 
 /*
   This hook is a more performant variation of the standard React `useSelector` hook. It allows to:
@@ -31,24 +31,25 @@ addCallback((global: GlobalState) => {
 
 function useSelectorSignal<T extends unknown>(selector: Selector<T>): Signal<T> {
   let state = bySelector.get(selector);
-
   if (!state) {
     const [getter, setter] = createSignal(selector(getGlobal()));
     state = { clientsCount: 0, getter, setter };
     bySelector.set(selector, state);
   }
 
-  useEffectOnce(() => {
-    state!.clientsCount++;
+  useSyncEffect(() => {
+    const state2 = bySelector.get(selector)!;
+
+    state2.clientsCount++;
 
     return () => {
-      state!.clientsCount--;
+      state2.clientsCount--;
 
-      if (!state!.clientsCount) {
+      if (!state2.clientsCount) {
         bySelector.delete(selector);
       }
     };
-  });
+  }, [selector]);
 
   return state.getter as Signal<T>;
 }

@@ -1,9 +1,16 @@
-import type { ThreadId } from '../../types';
+import type { ThreadId, WebPageMediaSize } from '../../types';
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
-import type { ApiChat, ApiPeerColor } from './chats';
-import type { ApiInputStorePaymentPurpose, ApiPremiumGiftCodeOption, ApiStarTopupOption } from './payments';
-import type { ApiMessageStoryData, ApiWebPageStickerData, ApiWebPageStoryData } from './stories';
+import type { ApiPeerColor } from './chats';
+import type {
+  ApiInputSavedStarGift,
+  ApiLabeledPrice,
+  ApiStarGiftRegular,
+  ApiStarGiftUnique,
+} from './payments';
+import type {
+  ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
+} from './stories';
 
 export interface ApiDimensions {
   width: number;
@@ -16,7 +23,7 @@ export interface ApiPhotoSize extends ApiDimensions {
 
 export interface ApiVideoSize extends ApiDimensions {
   type: 'u' | 'v';
-  videoStartTs: number;
+  videoStartTs?: number;
   size: number;
 }
 
@@ -47,6 +54,7 @@ export interface ApiSticker {
   width?: number;
   height?: number;
   thumbnail?: ApiThumbnail;
+  previewPhotoSizes?: ApiPhotoSize[];
   isPreloadedGlobally?: boolean;
   hasEffect?: boolean;
   isFree?: boolean;
@@ -101,10 +109,12 @@ export interface ApiVideo {
   hasVideoPreview?: boolean;
   isSpoiler?: boolean;
   thumbnail?: ApiThumbnail;
+  previewPhotoSizes?: ApiPhotoSize[];
   blobUrl?: string;
   previewBlobUrl?: string;
   size: number;
   noSound?: boolean;
+  waveform?: number[];
 }
 
 export interface ApiAudio {
@@ -135,6 +145,7 @@ export interface ApiDocument {
   timestamp?: number;
   mimeType: string;
   thumbnail?: ApiThumbnail;
+  previewPhotoSizes?: ApiPhotoSize[];
   previewBlobUrl?: string;
   innerMediaType?: 'photo' | 'video';
   mediaSize?: ApiDimensions;
@@ -194,90 +205,35 @@ export interface ApiPoll {
   };
 }
 
-/* Used for Invoice UI */
-export type ApiInputInvoiceMessage = {
-  type: 'message';
-  chatId: string;
-  messageId: number;
-  isExtendedMedia?: boolean;
-};
-
-export type ApiInputInvoiceSlug = {
-  type: 'slug';
-  slug: string;
-};
-
-export type ApiInputInvoiceGiveaway = {
-  type: 'giveaway';
-  chatId: string;
-  additionalChannelIds?: string[];
-  isOnlyForNewSubscribers?: boolean;
-  areWinnersVisible?: boolean;
-  prizeDescription?: string;
-  countries?: string[];
-  untilDate: number;
-  currency: string;
-  amount: number;
-  option: ApiPremiumGiftCodeOption;
-};
-
-export type ApiInputInvoiceGiftCode = {
-  type: 'giftcode';
-  userIds: string[];
-  boostChannelId?: string;
-  currency: string;
-  amount: number;
-  option: ApiPremiumGiftCodeOption;
-};
-
-export type ApiInputInvoiceStars = {
-  type: 'stars';
-  option: ApiStarTopupOption;
-};
-
-export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode | ApiInputInvoiceStars;
-
-/* Used for Invoice request */
-export type ApiRequestInputInvoiceMessage = {
-  type: 'message';
-  chat: ApiChat;
-  messageId: number;
-};
-
-export type ApiRequestInputInvoiceSlug = {
-  type: 'slug';
-  slug: string;
-};
-
-export type ApiRequestInputInvoiceGiveaway = {
-  type: 'giveaway';
-  purpose: ApiInputStorePaymentPurpose;
-  option: ApiPremiumGiftCodeOption;
-};
-
-export type ApiRequestInputInvoiceStars = {
-  type: 'stars';
-  option: ApiStarTopupOption;
-};
-
-export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
-| ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars;
-
 export interface ApiInvoice {
-  mediaType: 'invoice';
-  text: string;
-  title: string;
-  photo?: ApiWebDocument;
-  amount: number;
+  prices: ApiLabeledPrice[];
+  totalAmount: number;
   currency: string;
-  receiptMsgId?: number;
   isTest?: boolean;
   isRecurring?: boolean;
+  subscriptionPeriod?: number;
   termsUrl?: string;
-  extendedMedia?: ApiMediaExtendedPreview;
   maxTipAmount?: number;
   suggestedTipAmounts?: number[];
+  isNameRequested?: boolean;
+  isPhoneRequested?: boolean;
+  isEmailRequested?: boolean;
+  isShippingAddressRequested?: boolean;
+  isFlexible?: boolean;
+  isPhoneSentToProvider?: boolean;
+  isEmailSentToProvider?: boolean;
+}
+
+export interface ApiMediaInvoice {
+  mediaType: 'invoice';
+  title: string;
+  description: string;
+  photo?: ApiWebDocument;
+  isTest?: boolean;
+  receiptMessageId?: number;
+  currency: string;
+  amount: number;
+  extendedMedia?: ApiMediaExtendedPreview;
 }
 
 export interface ApiMediaExtendedPreview {
@@ -338,7 +294,8 @@ export type ApiGame = {
 export type ApiGiveaway = {
   mediaType: 'giveaway';
   quantity: number;
-  months: number;
+  months?: number;
+  stars?: number;
   untilDate: number;
   isOnlyForNewSubscribers?: true;
   countries?: string[];
@@ -348,7 +305,8 @@ export type ApiGiveaway = {
 
 export type ApiGiveawayResults = {
   mediaType: 'giveawayResults';
-  months: number;
+  months?: number;
+  stars?: number;
   untilDate: number;
   isRefunded?: true;
   isOnlyForNewSubscribers?: true;
@@ -370,6 +328,39 @@ export type ApiNewPoll = {
   };
 };
 
+export interface ApiMessageActionStarGift {
+  type: 'starGift';
+  isNameHidden: boolean;
+  isSaved: boolean;
+  isConverted?: true;
+  gift: ApiStarGiftRegular;
+  message?: ApiFormattedText;
+  starsToConvert?: number;
+  canUpgrade?: true;
+  isUpgraded?: true;
+  upgradeMsgId?: number;
+  alreadyPaidUpgradeStars?: number;
+  fromId?: string;
+  peerId?: string;
+  savedId?: string;
+  inputSavedGift?: ApiInputSavedStarGift;
+}
+
+export interface ApiMessageActionStarGiftUnique {
+  type: 'starGiftUnique';
+  isUpgrade?: true;
+  isTransferred?: true;
+  isSaved?: true;
+  isRefunded?: true;
+  gift: ApiStarGiftUnique;
+  canExportAt?: number;
+  transferStars?: number;
+  fromId?: string;
+  peerId?: string;
+  savedId?: string;
+  inputSavedGift?: ApiInputSavedStarGift;
+}
+
 export interface ApiAction {
   mediaType: 'action';
   text: string;
@@ -381,17 +372,27 @@ export interface ApiAction {
   | 'chatCreate'
   | 'topicCreate'
   | 'suggestProfilePhoto'
+  | 'updateProfilePhoto'
   | 'joinedChannel'
   | 'chatBoost'
   | 'receipt'
+  | 'giftStars'
+  | 'giftPremium'
+  | 'giftCode'
+  | 'prizeStars'
+  | 'starGift'
+  | 'starGiftUnique'
   | 'other';
   photo?: ApiPhoto;
   amount?: number;
+  stars?: number;
+  transactionId?: string;
   currency?: string;
   giftCryptoInfo?: {
     currency: string;
     amount: number;
   };
+  starGift?: ApiMessageActionStarGift | ApiMessageActionStarGiftUnique;
   translationValues: string[];
   call?: Partial<ApiGroupCall>;
   phoneCall?: PhoneCallAction;
@@ -403,6 +404,7 @@ export interface ApiAction {
   isGiveaway?: boolean;
   isUnclaimed?: boolean;
   pluralValue?: number;
+  message?: ApiFormattedText;
 }
 
 export interface ApiWebPage {
@@ -420,7 +422,10 @@ export interface ApiWebPage {
   document?: ApiDocument;
   video?: ApiVideo;
   story?: ApiWebPageStoryData;
+  gift?: ApiStarGiftUnique;
   stickers?: ApiWebPageStickerData;
+  mediaSize?: WebPageMediaSize;
+  hasLargeMedia?: boolean;
 }
 
 export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;
@@ -469,6 +474,7 @@ export interface ApiMessageForwardInfo {
   fromChatId?: string;
   fromId?: string;
   savedFromPeerId?: string;
+  isSavedOutgoing?: boolean;
   fromMessageId?: number;
   hiddenUserName?: string;
   postAuthorTitle?: string;
@@ -560,16 +566,16 @@ export type MediaContent = {
   text?: ApiFormattedText;
   photo?: ApiPhoto;
   video?: ApiVideo;
-  altVideo?: ApiVideo;
+  altVideos?: ApiVideo[];
   document?: ApiDocument;
   sticker?: ApiSticker;
   contact?: ApiContact;
-  poll?: ApiPoll;
+  pollId?: string;
   action?: ApiAction;
   webPage?: ApiWebPage;
   audio?: ApiAudio;
   voice?: ApiVoice;
-  invoice?: ApiInvoice;
+  invoice?: ApiMediaInvoice;
   location?: ApiLocation;
   game?: ApiGame;
   storyData?: ApiMessageStoryData;
@@ -582,6 +588,11 @@ export type MediaContent = {
 };
 export type MediaContainer = {
   content: MediaContent;
+};
+
+export type StatefulMediaContent = {
+  poll?: ApiPoll;
+  story?: ApiStory;
 };
 
 export type BoughtPaidMedia = Pick<MediaContent, 'photo' | 'video'>;
@@ -640,6 +651,9 @@ export interface ApiMessage {
   factCheck?: ApiFactCheck;
   effectId?: string;
   isInvertedMedia?: true;
+  isVideoProcessingPending?: true;
+  areReactionsPossible?: true;
+  reportDeliveryUntilDate?: number;
 }
 
 export interface ApiReactions {
@@ -647,6 +661,7 @@ export interface ApiReactions {
   areTags?: boolean;
   results: ApiReactionCount[];
   recentReactions?: ApiPeerReaction[];
+  topReactors?: ApiMessageReactor[];
 }
 
 export interface ApiPeerReaction {
@@ -658,10 +673,21 @@ export interface ApiPeerReaction {
   addedDate: number;
 }
 
+export interface ApiMessageReactor {
+  isTop?: true;
+  isMe?: true;
+  count: number;
+  isAnonymous?: true;
+  peerId?: string;
+}
+
 export interface ApiReactionCount {
   chosenOrder?: number;
   count: number;
-  reaction: ApiReaction;
+  reaction: ApiReactionWithPaid;
+  localAmount?: number;
+  localIsPrivate?: boolean;
+  localPreviousChosenOrder?: number;
 }
 
 export interface ApiAvailableReaction {
@@ -700,16 +726,23 @@ type ApiChatReactionsSome = {
 export type ApiChatReactions = ApiChatReactionsAll | ApiChatReactionsSome;
 
 export type ApiReactionEmoji = {
+  type: 'emoji';
   emoticon: string;
 };
 
 export type ApiReactionCustomEmoji = {
+  type: 'custom';
   documentId: string;
 };
 
-export type ApiReaction = ApiReactionEmoji | ApiReactionCustomEmoji;
+export type ApiReactionPaid = {
+  type: 'paid';
+};
 
-export type ApiReactionKey = `${string}-${string}`;
+export type ApiReaction = ApiReactionEmoji | ApiReactionCustomEmoji;
+export type ApiReactionWithPaid = ApiReaction | ApiReactionPaid;
+
+export type ApiReactionKey = `${string}-${string}` | 'paid' | 'unsupported';
 
 export type ApiSavedReactionTag = {
   reaction: ApiReaction;
@@ -727,7 +760,7 @@ interface ApiBaseThreadInfo {
 
 export interface ApiCommentsInfo extends ApiBaseThreadInfo {
   isCommentsInfo: true;
-  threadId?: ThreadId;
+  threadId?: never;
   originChannelId: string;
   originMessageId: number;
 }
@@ -742,12 +775,27 @@ export interface ApiMessageThreadInfo extends ApiBaseThreadInfo {
 
 export type ApiThreadInfo = ApiCommentsInfo | ApiMessageThreadInfo;
 
+export type ApiMessageReportResult = {
+  type: 'reported';
+} | {
+  type: 'comment';
+  isOptional?: boolean;
+  option: string;
+} | {
+  type: 'selectOption';
+  title: string;
+  options: {
+    text: string;
+    option: string;
+  }[];
+};
+
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
 export type ApiSponsoredMessage = {
+  chatId: string;
   randomId: string;
   isRecommended?: true;
-  text: ApiFormattedText;
   expiresAt: number;
   sponsorInfo?: string;
   additionalInfo?: string;
@@ -756,6 +804,7 @@ export type ApiSponsoredMessage = {
   title: string;
   url: string;
   photo?: ApiPhoto;
+  content: MediaContent;
   peerColor?: ApiPeerColor;
 };
 
@@ -821,11 +870,11 @@ interface ApiKeyboardButtonUrlAuth {
   buttonId: number;
 }
 
-export type ApiTranscription = {
+interface ApiKeyboardButtonCopy {
+  type: 'copy';
   text: string;
-  isPending?: boolean;
-  transcriptionId: string;
-};
+  copyText: string;
+}
 
 export type ApiKeyboardButton = (
   ApiKeyboardButtonSimple
@@ -838,6 +887,7 @@ export type ApiKeyboardButton = (
   | ApiKeyboardButtonWebView
   | ApiKeyboardButtonSimpleWebView
   | ApiKeyboardButtonUrlAuth
+  | ApiKeyboardButtonCopy
 );
 
 export type ApiKeyboardButtons = ApiKeyboardButton[][];
@@ -849,8 +899,15 @@ export type ApiReplyKeyboard = {
   [K in 'inlineButtons' | 'keyboardButtons']?: ApiKeyboardButtons;
 };
 
+export type ApiTranscription = {
+  text: string;
+  isPending?: boolean;
+  transcriptionId: string;
+};
+
 export type ApiMessageSearchType = 'text' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'profilePhoto';
 export type ApiGlobalMessageSearchType = 'text' | 'channels' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
+export type ApiMessageSearchContext = 'all' | 'users' | 'groups' | 'channels';
 
 export type ApiReportReason = 'spam' | 'violence' | 'pornography' | 'childAbuse'
 | 'copyright' | 'geoIrrelevant' | 'fake' | 'illegalDrugs' | 'personalDetails' | 'other';

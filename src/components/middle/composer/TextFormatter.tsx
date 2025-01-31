@@ -17,9 +17,10 @@ import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 import './TextFormatter.scss';
@@ -64,7 +65,7 @@ const TextFormatter: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const linkUrlInputRef = useRef<HTMLInputElement>(null);
-  const { shouldRender, transitionClassNames } = useShowTransition(isOpen);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isOpen);
   const [isLinkControlOpen, openLinkControl, closeLinkControl] = useFlag();
   const [linkUrl, setLinkUrl] = useState('');
   const [isEditingLink, setIsEditingLink] = useState(false);
@@ -428,7 +429,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('spoiler')}
           onClick={handleSpoilerText}
         >
-          <i className="icon icon-eye-closed" />
+          <Icon name="eye-closed" />
         </Button>
         <div className="TextFormatter-divider" />
         <Button
@@ -437,7 +438,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('bold')}
           onClick={handleBoldText}
         >
-          <i className="icon icon-bold" />
+          <Icon name="bold" />
         </Button>
         <Button
           color="translucent"
@@ -445,7 +446,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('italic')}
           onClick={handleItalicText}
         >
-          <i className="icon icon-italic" />
+          <Icon name="italic" />
         </Button>
         <Button
           color="translucent"
@@ -453,7 +454,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('underline')}
           onClick={handleUnderlineText}
         >
-          <i className="icon icon-underlined" />
+          <Icon name="underlined" />
         </Button>
         <Button
           color="translucent"
@@ -461,7 +462,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('strikethrough')}
           onClick={handleStrikethroughText}
         >
-          <i className="icon icon-strikethrough" />
+          <Icon name="strikethrough" />
         </Button>
         <Button
           color="translucent"
@@ -469,18 +470,18 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('monospace')}
           onClick={handleMonospaceText}
         >
-          <i className="icon icon-monospace" />
+          <Icon name="monospace" />
         </Button>
         <div className="TextFormatter-divider" />
         <Button color="translucent" ariaLabel={lang('TextFormat.AddLinkTitle')} onClick={openLinkControl}>
-          <i className="icon icon-link" />
+          <Icon name="link" />
         </Button>
       </div>
 
       <div className="TextFormatter-link-control">
         <div className="TextFormatter-buttons">
           <Button color="translucent" ariaLabel={lang('Cancel')} onClick={closeLinkControl}>
-            <i className="icon icon-arrow-left" />
+            <Icon name="arrow-left" />
           </Button>
           <div className="TextFormatter-divider" />
 
@@ -509,7 +510,7 @@ const TextFormatter: FC<OwnProps> = ({
               className="color-primary"
               onClick={handleLinkUrlConfirm}
             >
-              <i className="icon icon-check" />
+              <Icon name="check" />
             </Button>
           </div>
         </div>

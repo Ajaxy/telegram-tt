@@ -1,33 +1,9 @@
 @use "../../styles/mixins";
 
-@mixin mobile-header-styles() {
-  .AudioPlayer {
-    @include mixins.header-mobile;
-
-    flex-direction: row;
-    margin-top: 0;
-    padding: 0.25rem 0.5rem;
-
-    &-content {
-      padding: 0 0.5rem;
-      flex-grow: 1;
-    }
-
-    > .Button, > .playback-rate-menu {
-      margin: -0.0625rem 0 0;
-    }
-
-    > .player-close {
-      margin-left: auto;
-    }
-  }
-}
-
 .MiddleHeader {
   display: flex;
   align-items: center;
   width: 100%;
-  box-shadow: 0 2px 2px var(--color-light-shadow);
   background: var(--color-background);
   position: relative;
   z-index: var(--z-middle-header);
@@ -74,7 +50,7 @@
       border-radius: 0.625rem;
       font-size: 0.75rem;
       line-height: 1.25rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       text-align: center;
 
       position: absolute;
@@ -118,18 +94,7 @@
       }
     }
 
-    @media (min-width: 1276px) and (max-width: 1439px) {
-      .HeaderActions {
-        transform: translate3d(0, 0, 0);
-        transition: transform var(--layer-transition);
-
-        #Main.right-column-open & {
-          transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
-        }
-      }
-    }
-
-    @media (min-width: 1440px) {
+    @media (min-width: 1276px) {
       transform: translate3d(0, 0, 0);
       transition: transform var(--layer-transition);
 
@@ -144,36 +109,8 @@
     }
   }
 
-  @media (min-width: 1276px) and (max-width: 1439px) {
-    &:not(.tools-stacked) .AudioPlayer {
-      opacity: 1;
-
-      #Main.right-column-open & {
-        opacity: 0;
-      }
-    }
-  }
-
-  &.tools-stacked .AudioPlayer {
-    @include mobile-header-styles();
-
-    @media (min-width: 1150px) {
-      #Main.right-column-open & {
-        padding-right: calc(0.5rem + var(--right-column-width));
-      }
-    }
-  }
-
-  &.tools-stacked.animated .AudioPlayer {
-    animation: fade-in var(--layer-transition) forwards;
-
-    body.no-page-transitions & {
-      animation: none;
-    }
-  }
-
   h3 {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     font-size: 1.125rem;
     line-height: 1.375rem;
     white-space: pre;
@@ -185,7 +122,7 @@
     body.is-ios &,
     body.is-macos & {
       font-size: 1.0625rem;
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
     }
 
     @media (max-width: 600px) {
@@ -281,7 +218,7 @@
     }
   }
 
-  .Avatar, .topic-header-icon {
+  .ChatInfo .Avatar, .topic-header-icon {
     // TODO For some reason webpack imports `Audio.scss` second time when loading calls bundle
     width: 2.5rem !important;
     height: 2.5rem !important;
@@ -376,16 +313,12 @@
       color: white;
       font-size: 0.75rem;
       line-height: 1rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       text-align: center;
       flex-shrink: 0;
       right: 0;
       top: 0;
     }
-  }
-
-  @media (max-width: 600px) {
-    @include mobile-header-styles();
   }
 
   body.is-electron.is-macos & {

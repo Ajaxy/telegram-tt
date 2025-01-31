@@ -1,0 +1,114 @@
+@use "../../../../styles/mixins";
+
+.modalDialog :global(.modal-dialog) {
+  overflow: hidden;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.main {
+  height: 100%;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.headerInfo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  margin: 1rem;
+  width: 6.25rem;
+  height: 6.25rem;
+  min-height: 6.25rem;
+}
+
+.logoBackground {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 8rem;
+}
+
+.description {
+  text-align: center;
+  margin-inline: 0.5rem;
+  margin-bottom: 1rem;
+  text-wrap: balance;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0.5rem;
+
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
+}
+
+.header {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  border-bottom: 0.0625rem solid var(--color-borders);
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  height: 3.5rem;
+  padding: 0.5rem;
+  background: var(--color-background);
+  transition: 0.25s ease-out transform;
+}
+
+.starHeaderText {
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 0 3.5rem;
+  unicode-bidi: plaintext;
+}
+
+.hiddenHeader {
+  transform: translateY(-100%);
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 3;
+}
+
+.avatar {
+  margin: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.center {
+  text-align: center;
+}
+
+.secondaryInfo {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  padding: 1rem;
+  margin-top: auto;
+}
+
+@media (max-width: 450px) {
+  .modalDialog :global(.modal-dialog) {
+    max-width: 100% !important;
+  }
+}

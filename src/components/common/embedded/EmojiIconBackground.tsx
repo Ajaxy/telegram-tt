@@ -9,7 +9,7 @@ import { preloadImage } from '../../../util/files';
 import { REM } from '../helpers/mediaDimensions';
 
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
-import { useThrottleForHeavyAnimation } from '../../../hooks/useHeavyAnimationCheck';
+import { useThrottleForHeavyAnimation } from '../../../hooks/useHeavyAnimation';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';

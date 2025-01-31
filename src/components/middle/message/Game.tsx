@@ -39,6 +39,7 @@ const Game: FC<OwnProps> = ({
 
   const handleGameClick = () => {
     clickBotInlineButton({
+      chatId: message.chatId,
       messageId: message.id,
       button: message.inlineButtons![0][0],
     });

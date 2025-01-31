@@ -18,6 +18,7 @@
 
   .file-icon-container {
     position: relative;
+    margin-inline-end: 0.75rem;
   }
 
   .file-progress,
@@ -25,7 +26,6 @@
   .file-preview {
     width: 3.375rem;
     height: 3.375rem;
-    margin-inline-end: 0.75rem;
     border-radius: var(--border-radius-messages-small);
     background: var(--color-primary);
     display: flex;
@@ -45,10 +45,13 @@
     flex-shrink: 0;
     position: relative;
     color: white;
+    clip-path: polygon(0 0, calc(100% - 1.125rem) 0, 100% 1.125rem, 100% 100%, 0 100%);
+
+    transition: clip-path 0.15s ease-in;
 
     .file-ext {
       font-size: 1rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       transition: opacity 0.15s;
     }
 
@@ -59,13 +62,8 @@
       top: 0;
       right: 0;
       border-bottom-left-radius: 0.25rem;
-      background: rgba(black, 0.25);
-      border-color:
-        transparent
-        var(--file-icon-border-color, var(--background-color))
-        transparent
-        var(--file-icon-border-color, var(--background-color));
-      border-width: 0 1.125rem 1.125rem 0;
+      border-color: rgba(black, 0.25);
+      border-width: 0.5625rem;
       border-style: solid;
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: border-width 0.15s ease-in;
@@ -103,10 +101,15 @@
 
   &.interactive .file-icon-container {
     cursor: var(--custom-cursor, pointer);
+    margin-inline-end: 0.75rem;
 
     &:hover {
       .file-icon::after {
         border-width: 0;
+      }
+
+      .file-icon {
+        clip-path: polygon(0 0, 100% 0, 100% 0, 100% 100%, 0 100%);
       }
 
       .action-icon {
@@ -141,7 +144,7 @@
   .file-title {
     font-size: 1rem;
     line-height: 1.5rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     overflow: hidden;
     text-overflow: ellipsis;
 
@@ -190,7 +193,7 @@
     }
 
     .file-title {
-      font-weight: 400;
+      font-weight: var(--font-weight-normal);
     }
 
     .file-subtitle {

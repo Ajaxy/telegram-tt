@@ -4,8 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { MessageListType } from '../../global/types';
-import type { IAnchorPosition, ThreadId } from '../../types';
+import type { IAnchorPosition, MessageListType, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import { ManagementScreens } from '../../types';
 
@@ -38,6 +37,7 @@ import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -66,6 +66,7 @@ interface StateProps {
   canCall?: boolean;
   canMute?: boolean;
   canViewStatistics?: boolean;
+  canViewMonetization?: boolean;
   canViewBoosts?: boolean;
   canShowBoostModal?: boolean;
   canLeave?: boolean;
@@ -100,6 +101,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canCall,
   canMute,
   canViewStatistics,
+  canViewMonetization,
   canViewBoosts,
   canShowBoostModal,
   canLeave,
@@ -123,7 +125,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   const {
     joinChannel,
     sendBotCommand,
-    openLocalTextSearch,
+    openMiddleSearch,
     restartBot,
     requestMasterAndRequestCall,
     requestNextManagementScreen,
@@ -140,12 +142,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const lang = useOldLang();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
+  const [menuAnchor, setMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
 
   const handleHeaderMenuOpen = useLastCallback(() => {
     setIsMenuOpen(true);
     const rect = menuButtonRef.current!.getBoundingClientRect();
-    setMenuPosition({ x: rect.right, y: rect.bottom });
+    setMenuAnchor({ x: rect.right, y: rect.bottom });
   });
 
   const handleHeaderMenuClose = useLastCallback(() => {
@@ -153,7 +155,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   });
 
   const handleHeaderMenuHide = useLastCallback(() => {
-    setMenuPosition(undefined);
+    setMenuAnchor(undefined);
   });
 
   const handleSubscribeClick = useLastCallback(() => {
@@ -196,12 +198,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    openLocalTextSearch();
+    openMiddleSearch();
 
     if (isMobile) {
       // iOS requires synchronous focus on user event.
-      const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
-      searchInput.focus();
+      setFocusInSearchInput();
     } else if (noAnimation) {
       // The second RAF is necessary because Teact must update the state and render the async component
       requestMeasure(() => {
@@ -275,9 +276,9 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     showNotification({ message: getTextWithLanguage('AddedToDoNotTranslate', detectedChatLanguage) });
   });
 
-  useHotkeys({
+  useHotkeys(useMemo(() => ({
     'Mod+F': handleHotkeySearchClick,
-  });
+  }), []));
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -290,7 +291,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel={lang('TranslateMessage')}
       >
-        <i className="icon icon-language" aria-hidden />
+        <Icon name="language" />
       </Button>
     );
   }, [isRightColumnShown, lang]);
@@ -376,7 +377,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleSearchClick}
               ariaLabel={lang('Conversation.SearchPlaceholder')}
             >
-              <i className="icon icon-search" aria-hidden />
+              <Icon name="search" />
             </Button>
           )}
           {canCall && (
@@ -387,7 +388,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleRequestCall}
               ariaLabel="Call"
             >
-              <i className="icon icon-phone" aria-hidden />
+              <Icon name="phone" />
             </Button>
           )}
         </>
@@ -402,7 +403,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           onClick={handleJoinRequestsClick}
           ariaLabel={isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
         >
-          <i className="icon icon-user" aria-hidden />
+          <Icon name="user" />
           <div className="badge">{pendingJoinRequests}</div>
         </Button>
       )}
@@ -417,14 +418,14 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         ariaLabel="More actions"
         onClick={handleHeaderMenuOpen}
       >
-        <i className="icon icon-more" aria-hidden />
+        <Icon name="more" />
       </Button>
-      {menuPosition && (
+      {menuAnchor && (
         <HeaderMenuContainer
           chatId={chatId}
           threadId={threadId}
           isOpen={isMenuOpen}
-          anchor={menuPosition}
+          anchor={menuAnchor}
           withExtraActions={isMobile || !canExpandActions}
           isChannel={isChannel}
           canStartBot={canStartBot}
@@ -434,6 +435,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           canMute={canMute}
           canViewStatistics={canViewStatistics}
           canViewBoosts={canViewBoosts}
+          canViewMonetization={canViewMonetization}
           canShowBoostModal={canShowBoostModal}
           canLeave={canLeave}
           canEnterVoiceChat={canEnterVoiceChat}
@@ -500,6 +502,7 @@ export default memo(withGlobal<OwnProps>(
     const canCreateVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && !chat.isCallActive
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
     const canViewStatistics = isMainThread && chatFullInfo?.canViewStatistics;
+    const canViewMonetization = isMainThread && chatFullInfo?.canViewMonetization;
     const canViewBoosts = isMainThread
       && (isSuperGroup || isChannel) && (canViewStatistics || getHasAdminRight(chat, 'postStories'));
     const canShowBoostModal = !canViewBoosts && (isSuperGroup || isChannel);
@@ -522,6 +525,7 @@ export default memo(withGlobal<OwnProps>(
       canCall,
       canMute,
       canViewStatistics,
+      canViewMonetization,
       canViewBoosts,
       canShowBoostModal,
       canLeave,
@@ -543,6 +547,6 @@ export default memo(withGlobal<OwnProps>(
 )(HeaderActions));
 
 function setFocusInSearchInput() {
-  const searchInput = document.querySelector<HTMLInputElement>('.RightHeader .SearchInput input');
+  const searchInput = document.querySelector<HTMLInputElement>('#MiddleSearch input');
   searchInput?.focus();
 }

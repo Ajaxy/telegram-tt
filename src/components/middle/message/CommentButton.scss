@@ -12,7 +12,7 @@
   border-bottom-right-radius: var(--border-bottom-right-radius);
   border-bottom-left-radius: var(--border-bottom-left-radius);
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 2.125rem;
   color: var(--accent-color);
   white-space: nowrap;
@@ -54,6 +54,10 @@
     align-items: flex-start;
     color: white;
     background-color: var(--pattern-color);
+
+    .no-action-button & {
+      bottom: 0;
+    }
 
     opacity: 0;
     transition: opacity 150ms, backdrop-filter 150ms, filter 150ms;
@@ -119,13 +123,14 @@
     }
   }
 
-  .is-forwarded &,
+  .is-forwarded:not(.custom-shape) &,
   .document &,
   .audio &,
   .voice &,
   .poll &,
   .text &,
-  .giveaway & {
+  .giveaway &,
+  .unsupported & {
     border-top: 1px solid var(--color-borders);
   }
 
@@ -144,7 +149,8 @@
   .message-content.poll &,
   .message-content.giveaway &,
   .message-content.has-solid-background.text &,
-  .message-content.has-solid-background.is-forwarded & {
+  .message-content.has-solid-background.is-forwarded &,
+  .message-content.unsupported & {
     width: calc(100% + 1rem);
   }
 

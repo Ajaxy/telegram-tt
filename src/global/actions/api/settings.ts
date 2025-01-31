@@ -1,7 +1,4 @@
-import type { ApiUser, ApiUsername } from '../../../api/types';
-import type {
-  ApiPrivacySettings,
-} from '../../../types';
+import type { ApiPrivacySettings, ApiUsername } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import {
   ProfileEditProgress,
@@ -19,8 +16,8 @@ import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addBlockedUser, addNotifyExceptions, addUsers, deletePeerPhoto,
-  removeBlockedUser, replaceSettings, updateChat, updateChats,
+  addBlockedUser, addNotifyExceptions, deletePeerPhoto,
+  removeBlockedUser, replaceSettings, updateChat,
   updateNotifySettings, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -47,12 +44,7 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
   setGlobal(global);
 
   if (photo) {
-    const result = await callApi('uploadProfilePhoto', photo);
-    if (result) {
-      global = getGlobal();
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      setGlobal(global);
-    }
+    await callApi('uploadProfilePhoto', photo);
   }
 
   if (firstName || lastName || about) {
@@ -119,10 +111,6 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise
   const result = await callApi('updateProfilePhoto', photo, isFallback);
   if (!result) return;
 
-  const { users } = result;
-  global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
-  setGlobal(global);
   actions.loadFullUser({ userId: currentUserId, withPhotos: true });
 });
 
@@ -261,13 +249,6 @@ addActionHandler('loadBlockedUsers', async (global): Promise<void> => {
 
   global = getGlobal();
 
-  if (result.users?.length) {
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  }
-  if (result.chats?.length) {
-    global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
-  }
-
   global = {
     ...global,
     blocked: {
@@ -389,7 +370,13 @@ addActionHandler('loadLanguages', async (global): Promise<void> => {
   }
 
   global = getGlobal();
-  global = replaceSettings(global, { languages: result });
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      languages: result,
+    },
+  };
   setGlobal(global);
 });
 
@@ -406,6 +393,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     callApi('fetchPrivacySettings', 'voiceMessages'),
     callApi('fetchPrivacySettings', 'bio'),
     callApi('fetchPrivacySettings', 'birthday'),
+    callApi('fetchPrivacySettings', 'gifts'),
   ]);
 
   if (result.some((e) => e === undefined)) {
@@ -424,15 +412,12 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     voiceMessagesSettings,
     bioSettings,
     birthdaySettings,
+    giftsSettings,
   ] = result as {
-    users: ApiUser[];
     rules: ApiPrivacySettings;
   }[];
 
-  const allUsers = result.flatMap((e) => e!.users);
-
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(allUsers, 'id'));
   global = {
     ...global,
     settings: {
@@ -450,6 +435,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
         voiceMessages: voiceMessagesSettings.rules,
         bio: bioSettings.rules,
         birthday: birthdaySettings.rules,
+        gifts: giftsSettings.rules,
       },
     },
   };
@@ -466,7 +452,6 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
     }
 
     global = getGlobal();
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
     global = {
       ...global,
       settings: {
@@ -492,6 +477,7 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
     visibility,
     allowedIds: [...settings.allowUserIds, ...settings.allowChatIds],
     blockedIds: [...settings.blockUserIds, ...settings.blockChatIds],
+    botsPrivacy: settings.botsPrivacy,
   });
 
   const result = await callApi('setPrivacySettings', privacyKey, rules);
@@ -502,7 +488,6 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
   onSuccess?.();
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = {
     ...global,
     settings: {
@@ -518,7 +503,7 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
 
 addActionHandler('setPrivacySettings', async (global, actions, payload): Promise<void> => {
   const {
-    privacyKey, isAllowList, updatedIds, isPremiumAllowed,
+    privacyKey, isAllowList, updatedIds, isPremiumAllowed, botsPrivacy,
   } = payload!;
   const {
     privacy: { [privacyKey]: settings },
@@ -534,6 +519,7 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
     shouldAllowPremium: isPremiumAllowed,
     allowedIds: isAllowList ? updatedIds : [...settings.allowUserIds, ...settings.allowChatIds],
     blockedIds: !isAllowList ? updatedIds : [...settings.blockUserIds, ...settings.blockChatIds],
+    botsPrivacy,
   });
 
   const result = await callApi('setPrivacySettings', privacyKey, rules);
@@ -542,7 +528,6 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
   }
 
   global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   global = {
     ...global,
     settings: {
@@ -760,7 +745,7 @@ addActionHandler('toggleUsername', async (global, actions, payload): Promise<voi
 
 addActionHandler('toggleChatUsername', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, username, isActive, tabId = getCurrentTabId(),
+    chatId, username, isActive,
   } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.usernames) {
@@ -786,7 +771,7 @@ addActionHandler('toggleChatUsername', async (global, actions, payload): Promise
   });
 
   if (!result) {
-    actions.loadFullChat({ chatId, tabId });
+    actions.loadFullChat({ chatId });
   }
 });
 

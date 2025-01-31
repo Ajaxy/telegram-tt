@@ -4,6 +4,7 @@ import type { ApiError, ApiNotification } from '../../../api/types';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
+  ANIMATION_WAVE_MIN_INTERVAL,
   DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../../config';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
@@ -16,7 +17,7 @@ import { refreshFromCache } from '../../../util/localization';
 import * as langProvider from '../../../util/oldLangProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
-import { IS_ELECTRON } from '../../../util/windowEnvironment';
+import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
@@ -31,7 +32,9 @@ import {
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectIsTrustedBot,
+  selectSender,
   selectTabState,
+  selectTopic,
 } from '../../selectors';
 
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
@@ -303,10 +306,13 @@ addActionHandler('reorderStickerSets', (global, actions, payload): ActionReturnT
 
 addActionHandler('showNotification', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId(), ...notification } = payload;
-  notification.localId = generateUniqueId();
+  const hasLocalId = notification.localId;
+  notification.localId ||= generateUniqueId();
 
   const newNotifications = [...selectTabState(global, tabId).notifications];
-  const existingNotificationIndex = newNotifications.findIndex((n) => n.message === notification.message);
+  const existingNotificationIndex = newNotifications.findIndex((n) => (
+    hasLocalId ? n.localId === notification.localId : n.message === notification.message
+  ));
   if (existingNotificationIndex !== -1) {
     newNotifications.splice(existingNotificationIndex, 1);
   }
@@ -433,7 +439,7 @@ addActionHandler('openGame', (global, actions, payload): ActionReturnType => {
   const message = selectChatMessage(global, chatId, messageId);
   if (!message) return;
 
-  const botId = message.viaBotId || message.senderId;
+  const botId = message.viaBotId || selectSender(global, message)?.id;
   if (!botId) return;
 
   if (!selectIsTrustedBot(global, botId)) {
@@ -484,9 +490,29 @@ addActionHandler('requestConfetti', (global, actions, payload): ActionReturnType
   }, tabId);
 });
 
+addActionHandler('requestWave', (global, actions, payload): ActionReturnType => {
+  const {
+    startX, startY, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (!IS_WAVE_TRANSFORM_SUPPORTED || !selectCanAnimateInterface(global)) return undefined;
+
+  const tabState = selectTabState(global, tabId);
+  const currentLastTime = tabState.wave?.lastWaveTime || 0;
+  if (Date.now() - currentLastTime < ANIMATION_WAVE_MIN_INTERVAL) return undefined;
+
+  return updateTabState(global, {
+    wave: {
+      lastWaveTime: Date.now(),
+      startX,
+      startY,
+    },
+  }, tabId);
+});
+
 addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionReturnType => {
   const {
-    shouldCompress, shouldSendGrouped, isInvertedMedia,
+    shouldCompress, shouldSendGrouped, isInvertedMedia, webPageMediaSize,
   } = payload;
 
   return {
@@ -495,6 +521,7 @@ addActionHandler('updateAttachmentSettings', (global, actions, payload): ActionR
       shouldCompress: shouldCompress ?? global.attachmentSettings.shouldCompress,
       shouldSendGrouped: shouldSendGrouped ?? global.attachmentSettings.shouldSendGrouped,
       isInvertedMedia,
+      webPageMediaSize,
     },
   };
 });
@@ -520,7 +547,7 @@ addActionHandler('setReactionEffect', (global, actions, payload): ActionReturnTy
     chatId, threadId, reaction, tabId = getCurrentTabId(),
   } = payload;
 
-  const emoticon = reaction && 'emoticon' in reaction && reaction.emoticon;
+  const emoticon = reaction?.type === 'emoji' && reaction.emoticon;
   if (!emoticon) return;
 
   const effect = Object.values(global.availableEffectById)
@@ -744,10 +771,12 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   const { tabId = getCurrentTabId() } = payload || {};
   const { canDisplayChatInTitle } = global.settings.byKey;
   const currentUserId = global.currentUserId;
+  const isTestServer = global.config?.isTestServer;
+  const prefix = isTestServer ? '[T] ' : '';
 
   if (document.title.includes(INACTIVE_MARKER)) {
     updateIcon(false);
-    setPageTitleInstant(`${PAGE_TITLE} ${INACTIVE_MARKER}`);
+    setPageTitleInstant(`${prefix}${PAGE_TITLE} ${INACTIVE_MARKER}`);
     return;
   }
 
@@ -757,7 +786,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const newUnread = notificationCount - global.initialUnreadNotifications;
 
     if (newUnread > 0) {
-      setPageTitleInstant(`${newUnread} notification${newUnread > 1 ? 's' : ''}`);
+      setPageTitleInstant(`${prefix}${newUnread} notification${newUnread > 1 ? 's' : ''}`);
       updateIcon(true);
       return;
     }
@@ -772,17 +801,18 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const currentChat = selectChat(global, chatId);
     if (currentChat) {
       const title = getChatTitle(langProvider.oldTranslate, currentChat, chatId === currentUserId);
-      if (currentChat.isForum && currentChat.topics?.[threadId]) {
-        setPageTitle(`${title} › ${currentChat.topics[threadId].title}`);
+      const topic = selectTopic(global, chatId, threadId);
+      if (currentChat.isForum && topic) {
+        setPageTitle(`${prefix}${title} › ${topic.title}`);
         return;
       }
 
-      setPageTitle(title);
+      setPageTitle(`${prefix}${title}`);
       return;
     }
   }
 
-  setPageTitleInstant(IS_ELECTRON ? '' : PAGE_TITLE);
+  setPageTitleInstant(IS_ELECTRON ? '' : `${prefix}${PAGE_TITLE}`);
 });
 
 addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionReturnType => {

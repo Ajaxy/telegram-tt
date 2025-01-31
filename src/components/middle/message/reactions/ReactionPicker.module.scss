@@ -34,7 +34,7 @@
     transform: scale(1) !important;
   }
 
-  @media (max-width: 440px) {
+  @media (max-width: 600px) {
     max-width: min(calc(100% - 1rem), 26.25rem);
     left: 50% !important;
     right: auto !important;
@@ -62,7 +62,7 @@
 
   transform-origin: 70% 100% !important;
 
-  @media (max-width: 440px) {
+  @media (max-width: 600px) {
     &:global(.bubble) {
       transform-origin: 30% 100% !important;
     }

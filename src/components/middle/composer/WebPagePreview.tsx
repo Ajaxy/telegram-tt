@@ -1,14 +1,12 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  memo, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ISettings, ThreadId } from '../../../types';
+import type { ISettings, ThreadId, WebPageMediaSize } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
@@ -23,11 +21,11 @@ import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useDerivedSignal from '../../../hooks/useDerivedSignal';
 import useDerivedState from '../../../hooks/useDerivedState';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -79,6 +77,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   const isInvertedMedia = attachmentSettings.isInvertedMedia;
+  const isSmallerMedia = attachmentSettings.webPageMediaSize === 'small';
 
   const detectLinkDebounced = useDebouncedResolver(() => {
     const formattedText = parseHtmlAsFormattedText(getHtml());
@@ -113,7 +112,9 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   const isShown = useDerivedState(() => {
     return Boolean(webPagePreview && getHtml() && !noWebPage && !isDisabled);
   }, [isDisabled, getHtml, noWebPage, webPagePreview]);
-  const { shouldRender, transitionClassNames } = useShowTransition(isShown);
+  const { shouldRender, transitionClassNames } = useShowTransitionDeprecated(isShown);
+
+  const hasMediaSizeOptions = webPagePreview?.hasLargeMedia;
 
   const renderingWebPage = useCurrentOrPrev(webPagePreview, true);
 
@@ -122,7 +123,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   });
 
   const {
-    isContextMenuOpen, contextMenuPosition, handleContextMenu,
+    isContextMenuOpen, contextMenuAnchor, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref, isEditing, true);
 
@@ -130,15 +131,6 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
   const getRootElement = useLastCallback(() => ref.current!);
   const getMenuElement = useLastCallback(
     () => ref.current!.querySelector('.web-page-preview-context-menu .bubble'),
-  );
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
   );
 
   const handlePreviewClick = useLastCallback((e: React.MouseEvent): void => {
@@ -154,6 +146,10 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
 
   function updateIsInvertedMedia(value?: true) {
     updateAttachmentSettings({ isInvertedMedia: value });
+  }
+
+  function updateIsLargerMedia(value?: WebPageMediaSize) {
+    updateAttachmentSettings({ webPageMediaSize: value });
   }
 
   if (!shouldRender || !renderingWebPage) {
@@ -172,11 +168,10 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     return (
       <Menu
         isOpen={isContextMenuOpen}
-        transformOriginX={transformOriginX}
-        transformOriginY={transformOriginY}
-        positionX={positionX}
-        positionY={positionY}
-        style={menuStyle}
+        anchor={contextMenuAnchor}
+        getTriggerElement={getTriggerElement}
+        getRootElement={getRootElement}
+        getMenuElement={getMenuElement}
         className="web-page-preview-context-menu"
         onClose={handleContextMenuClose}
         onCloseAnimationEnd={handleContextMenuHide}
@@ -185,7 +180,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
         <>
           {
             isInvertedMedia ? (
-            // eslint-disable-next-line react/jsx-no-bind
+              // eslint-disable-next-line react/jsx-no-bind
               <MenuItem icon="move-caption-up" onClick={() => updateIsInvertedMedia(undefined)}>
                 {lang('PreviewSender.MoveTextUp')}
               </MenuItem>
@@ -196,6 +191,19 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
               </MenuItem>
             )
           }
+          {hasMediaSizeOptions && (
+            isSmallerMedia ? (
+            // eslint-disable-next-line react/jsx-no-bind
+              <MenuItem icon="expand" onClick={() => updateIsLargerMedia('large')}>
+                {lang('ChatInput.EditLink.LargerMedia')}
+              </MenuItem>
+            ) : (
+            // eslint-disable-next-line react/jsx-no-bind
+              <MenuItem icon="collapse" onClick={() => updateIsLargerMedia('small')}>
+                {lang(('ChatInput.EditLink.SmallerMedia'))}
+              </MenuItem>
+            )
+          )}
           <MenuItem
             icon="delete"
             // eslint-disable-next-line react/jsx-no-bind
@@ -212,7 +220,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     <div className={buildClassName('WebPagePreview', transitionClassNames)} ref={ref}>
       <div className="WebPagePreview_inner">
         <div className="WebPagePreview-left-icon" onClick={handlePreviewClick}>
-          <i className="icon icon-link" />
+          <Icon name="link" />
         </div>
         <WebPage
           message={messageStub}
@@ -229,7 +237,7 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
           ariaLabel="Clear Webpage Preview"
           onClick={handleClearWebpagePreview}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         {!isEditing && renderContextMenu()}
       </div>

@@ -1,5 +1,10 @@
-import type { ApiLimitType, ApiPremiumSection, CallbackAction } from '../../global/types';
+import type { TeactNode } from '../../lib/teact/teact';
+
+import type { CallbackAction } from '../../global/types';
+import type { IconName } from '../../types/icons';
+import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
+import type { ApiPremiumSection, ApiStarsSubscriptionPricing } from './payments';
 import type { ApiUser } from './users';
 
 export interface ApiInitialArgs {
@@ -16,6 +21,7 @@ export interface ApiInitialArgs {
   shouldForceHttpTransport?: boolean;
   shouldDebugExportedSenders?: boolean;
   langCode: string;
+  isTestServerRequested?: boolean;
 }
 
 export interface ApiOnProgress {
@@ -97,6 +103,7 @@ export interface ApiSessionData {
   mainDcId: number;
   keys: Record<number, string | number[]>;
   hashes: Record<number, string | number[]>;
+  isTest?: true;
 }
 
 export type ApiNotifyException = {
@@ -108,12 +115,19 @@ export type ApiNotifyException = {
 
 export type ApiNotification = {
   localId: string;
-  title?: string;
-  message: string;
-  actionText?: string;
+  containerSelector?: string;
+  title?: string | RegularLangFnParameters;
+  message: TeactNode | RegularLangFnParameters;
+  cacheBreaker?: string;
+  actionText?: string | RegularLangFnParameters;
   action?: CallbackAction | CallbackAction[];
   className?: string;
   duration?: number;
+  disableClickDismiss?: boolean;
+  shouldShowTimer?: boolean;
+  icon?: IconName;
+  customEmojiIconId?: string;
+  dismissAction?: CallbackAction;
 };
 
 export type ApiError = {
@@ -126,16 +140,6 @@ export type ApiError = {
 export type ApiFieldError = {
   field: string;
   message: string;
-};
-
-export type ApiInviteInfo = {
-  title: string;
-  about?: string;
-  hash: string;
-  isChannel?: boolean;
-  participantsCount?: number;
-  isRequestNeeded?: true;
-  photo?: ApiPhoto;
 };
 
 export type ApiExportedInvite = {
@@ -151,6 +155,27 @@ export type ApiExportedInvite = {
   requested?: number;
   title?: string;
   adminId: string;
+};
+
+export type ApiChatInviteInfo = {
+  title: string;
+  about?: string;
+  photo?: ApiPhoto;
+  isScam?: boolean;
+  isFake?: boolean;
+  isChannel?: boolean;
+  isVerified?: boolean;
+  isSuperGroup?: boolean;
+  isPublic?: boolean;
+  participantsCount?: number;
+  participantIds?: string[];
+  color: number;
+  isBroadcast?: boolean;
+  isRequestNeeded?: boolean;
+  subscriptionFormId?: string;
+  canRefulfillSubscription?: boolean;
+  subscriptionPricing?: ApiStarsSubscriptionPricing;
+  botVerification?: ApiBotVerification;
 };
 
 export type ApiChatInviteImporter = {
@@ -210,6 +235,12 @@ export interface ApiAppConfig {
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;
   channelRestrictAdsLevelMin?: number;
+  paidReactionMaxAmount?: number;
+  isChannelRevenueWithdrawalEnabled?: boolean;
+  isStarsGiftEnabled?: boolean;
+  starGiftMaxMessageLength?: number;
+  starGiftMaxConvertPeriod?: number;
+  starRefStartPrefixes?: string[];
 }
 
 export interface ApiConfig {
@@ -218,6 +249,10 @@ export interface ApiConfig {
   gifSearchUsername?: string;
   maxGroupSize: number;
   autologinToken?: string;
+  isTestServer?: boolean;
+  maxMessageLength: number;
+  editTimeLimit: number;
+  maxForwardedCount: number;
 }
 
 export type ApiPeerColorSet = string[];
@@ -269,7 +304,7 @@ type ApiUrlAuthResultDefault = {
 
 export type ApiUrlAuthResult = ApiUrlAuthResultRequest | ApiUrlAuthResultAccepted | ApiUrlAuthResultDefault;
 
-export interface ApiCollectionInfo {
+export interface ApiCollectibleInfo {
   amount: number;
   currency: string;
   cryptoAmount: number;
@@ -286,3 +321,33 @@ export interface ApiPeerPhotos {
   nextOffset?: number;
   isLoading?: boolean;
 }
+
+export interface ApiBotVerification {
+  botId: string;
+  iconId: string;
+  description: string;
+}
+
+export type ApiLimitType =
+  | 'uploadMaxFileparts'
+  | 'stickersFaved'
+  | 'savedGifs'
+  | 'dialogFiltersChats'
+  | 'dialogFilters'
+  | 'dialogFolderPinned'
+  | 'captionLength'
+  | 'channels'
+  | 'channelsPublic'
+  | 'aboutLength'
+  | 'chatlistInvites'
+  | 'chatlistJoined'
+  | 'recommendedChannels'
+  | 'savedDialogsPinned';
+
+export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
+  'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels'
+)>;
+
+export type ApiLimitTypeForPromo = Exclude<ApiLimitType,
+'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned'
+>;

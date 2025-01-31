@@ -1,17 +1,18 @@
-import type { ApiReactionEmoji } from '../../../api/types';
+import type { ApiError, ApiReaction, ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
-  buildCollectionByCallback, buildCollectionByKey, omit, unique,
+  buildCollectionByCallback, buildCollectionByKey, omit, partition, unique,
 } from '../../../util/iteratees';
+import { getMessageKey } from '../../../util/keys/messageKey';
 import * as mediaLoader from '../../../util/mediaLoader';
-import { getMessageKey } from '../../../util/messageKey';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { callApi } from '../../../api/gramjs';
 import {
+  addPaidReaction,
   getDocumentMediaHash,
   getReactionKey,
   getUserReactions,
@@ -20,7 +21,7 @@ import {
 } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addChatMessagesById, addChats, addUsers, updateChat, updateChatMessage,
+  addChatMessagesById, updateChat, updateChatMessage,
 } from '../../reducers';
 import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
@@ -92,6 +93,7 @@ addActionHandler('loadAvailableEffects', async (global): Promise<void> => {
   for (const effect of effects) {
     if (effect.effectAnimationId) {
       const reaction: ApiReactionEmoji = {
+        type: 'emoji',
         emoticon: effect.emoticon,
       };
       reactions.push(reaction);
@@ -208,7 +210,9 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
     ? userReactions.filter((userReaction) => !isSameReaction(userReaction, reaction)) : [...userReactions, reaction];
 
   const limit = selectMaxUserReactions(global);
-  const reactions = newUserReactions.slice(-limit);
+  const [paidReactions, regularReactions] = partition(newUserReactions, (r) => r.type === 'paid');
+  const trimmedRegularReactions = regularReactions.slice(-limit) as ApiReaction[];
+  const localReactions = [...paidReactions, ...trimmedRegularReactions];
   const messageKey = getMessageKey(message);
 
   if (selectPerformanceSettingsValue(global, 'reactionEffects')) {
@@ -219,14 +223,14 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
     }
   }
 
-  global = addMessageReaction(global, message, reactions);
+  global = addMessageReaction(global, message, localReactions);
   setGlobal(global);
 
   try {
     await callApi('sendReaction', {
       chat,
       messageId,
-      reactions,
+      reactions: trimmedRegularReactions,
       shouldAddToRecent,
     });
 
@@ -237,6 +241,71 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
     global = getGlobal();
     global = addMessageReaction(global, message, userReactions);
     setGlobal(global);
+  }
+});
+
+addActionHandler('addLocalPaidReaction', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, messageId, count, isPrivate, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+
+  if (!chat || !message) {
+    return;
+  }
+
+  const currentReactions = message.reactions?.results || [];
+  const newReactions = addPaidReaction(currentReactions, count, isPrivate);
+  global = updateChatMessage(global, message.chatId, message.id, {
+    reactions: {
+      ...currentReactions,
+      results: newReactions,
+    },
+  });
+  setGlobal(global);
+
+  const messageKey = getMessageKey(message);
+  if (selectPerformanceSettingsValue(global, 'reactionEffects')) {
+    actions.startActiveReaction({
+      containerId: messageKey,
+      reaction: {
+        type: 'paid',
+      },
+      tabId,
+    });
+  }
+});
+
+addActionHandler('sendPaidReaction', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId, messageId, forcedAmount, tabId = getCurrentTabId(),
+  } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectChatMessage(global, chatId, messageId);
+
+  if (!chat || !message) {
+    return;
+  }
+
+  const paidReaction = message.reactions?.results?.find((r) => r.reaction.type === 'paid');
+  const count = forcedAmount || paidReaction?.localAmount || 0;
+  if (!count) {
+    return;
+  }
+  actions.resetLocalPaidReactions({ chatId, messageId });
+
+  try {
+    await callApi('sendPaidReaction', {
+      chat,
+      messageId,
+      count,
+      isPrivate: paidReaction?.localIsPrivate,
+    });
+  } catch (error) {
+    if ((error as ApiError).message === 'BALANCE_TOO_LOW') {
+      actions.openStarsBalanceModal({ originReaction: { chatId, messageId, amount: count }, tabId });
+    }
   }
 });
 
@@ -336,10 +405,6 @@ addActionHandler('loadReactors', async (global, actions, payload): Promise<void>
   }
 
   global = getGlobal();
-
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
-
   global = updateChatMessage(global, chatId, messageId, {
     reactors: result,
   });
@@ -409,15 +474,13 @@ addActionHandler('fetchUnreadReactions', async (global, actions, payload): Promi
     return;
   }
 
-  const { messages, chats, users } = result;
+  const { messages } = result;
 
   const byId = buildCollectionByKey(messages, 'id');
   const ids = Object.keys(byId).map(Number);
 
   global = getGlobal();
   global = addChatMessagesById(global, chat.id, byId);
-  global = addUsers(global, buildCollectionByKey(users, 'id'));
-  global = addChats(global, buildCollectionByKey(chats, 'id'));
   global = updateUnreadReactions(global, chatId, {
     unreadReactions: unique([...(chat.unreadReactions || []), ...ids]).sort((a, b) => b - a),
   });

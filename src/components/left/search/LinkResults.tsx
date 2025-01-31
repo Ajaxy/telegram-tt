@@ -9,8 +9,8 @@ import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import buildClassName from '../../../util/buildClassName';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dates/dateFormat';
+import { parseSearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
@@ -75,9 +75,9 @@ const LinkResults: FC<OwnProps & StateProps> = ({
     }
 
     return foundIds.map((id) => {
-      const [chatId, messageId] = id.split('_');
+      const [chatId, messageId] = parseSearchResultKey(id);
 
-      return globalMessagesByChatId[chatId]?.byId[Number(messageId)];
+      return globalMessagesByChatId[chatId]?.byId[messageId];
     }).filter(Boolean);
   }, [globalMessagesByChatId, foundIds]);
 
@@ -91,32 +91,31 @@ const LinkResults: FC<OwnProps & StateProps> = ({
       const shouldDrawDateDivider = isFirst
         || toYearMonth(message.date) !== toYearMonth(foundMessages[index - 1].date);
       return (
-        <div
-          className="ListItem small-icon"
-          dir={lang.isRtl ? 'rtl' : undefined}
-          key={message.id}
-        >
+        <>
           {shouldDrawDateDivider && (
             <p
-              className={buildClassName(
-                'section-heading',
-                isFirst && 'section-heading-first',
-                !isFirst && 'section-heading-with-border',
-              )}
+              className="section-heading"
+              key={message.date}
               dir={lang.isRtl ? 'rtl' : undefined}
             >
               {formatMonthAndYear(lang, new Date(message.date * 1000))}
             </p>
           )}
-          <WebLink
+          <div
+            className="ListItem small-icon"
+            dir={lang.isRtl ? 'rtl' : undefined}
             key={message.id}
-            message={message}
-            senderTitle={getSenderName(lang, message, chatsById, usersById)}
-            isProtected={isChatProtected || message.isProtected}
-            observeIntersection={observeIntersectionForMedia}
-            onMessageClick={handleMessageFocus}
-          />
-        </div>
+          >
+            <WebLink
+              key={message.id}
+              message={message}
+              senderTitle={getSenderName(lang, message, chatsById, usersById)}
+              isProtected={isChatProtected || message.isProtected}
+              observeIntersection={observeIntersectionForMedia}
+              onMessageClick={handleMessageFocus}
+            />
+          </div>
+        </>
       );
     });
   }
@@ -124,10 +123,10 @@ const LinkResults: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([searchQuery], SLIDE_TRANSITION_DURATION) && !isLoading;
 
   return (
-    <div ref={containerRef} className="LeftSearch">
+    <div ref={containerRef} className="LeftSearch--content">
       <InfiniteScroll
         className="search-content documents-list custom-scroll"
-        items={foundMessages}
+        items={canRenderContents ? foundMessages : undefined}
         onLoadMore={handleLoadMore}
         noFastList
       >

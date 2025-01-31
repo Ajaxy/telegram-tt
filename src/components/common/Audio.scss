@@ -160,7 +160,7 @@
   }
 
   .title {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     margin: 0;
     line-height: 1.25;
     white-space: nowrap;
@@ -391,7 +391,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-weight: 400;
+      font-weight: var(--font-weight-normal);
       line-height: 1.5rem;
     }
 

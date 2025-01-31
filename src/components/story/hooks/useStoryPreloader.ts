@@ -9,7 +9,7 @@ import unloadVideo from '../../../util/browser/unloadVideo';
 import { preloadImage } from '../../../util/files';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { getProgressiveUrl } from '../../../util/mediaLoader';
-import { makeProgressiveLoader } from '../../../util/progressieveLoader';
+import { makeProgressiveLoader } from '../../../util/progressiveLoader';
 import { pause } from '../../../util/schedulers';
 import { PRIMARY_VIDEO_MIME } from '../helpers/videoFormats';
 
@@ -101,7 +101,7 @@ function getPreloadMediaHashes(peerId: string, storyId: number) {
     });
     // Thumbnail
     mediaHashes.push({ hash: getStoryMediaHash(story), format: ApiMediaFormat.BlobUrl });
-    if (story.content.altVideo) {
+    if (story.content.altVideos) {
       mediaHashes.push({
         hash: getStoryMediaHash(story, 'full', true)!,
         format: ApiMediaFormat.Progressive,

@@ -57,7 +57,7 @@
 }
 
 .heading {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-size: 0.9375rem;
   color: var(--color-text-secondary);
 }

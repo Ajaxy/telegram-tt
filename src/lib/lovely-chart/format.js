@@ -62,6 +62,10 @@ export function formatInteger(n) {
   return String(n).replace(/\d(?=(\d{3})+$)/g, '$& ');
 }
 
+export function formatCryptoValue(n) {
+  return Number(n / 10 ** 9);
+}
+
 export function getFullLabelDate(label, { isShort = false } = {}) {
   return getLabelDate(label, { isShort, displayWeekDay: true });
 }

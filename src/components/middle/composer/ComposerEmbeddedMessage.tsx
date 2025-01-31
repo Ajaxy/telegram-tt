@@ -7,8 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiChat, ApiInputMessageReplyInfo, ApiMessage, ApiPeer,
 } from '../../../api/types';
-import type { MessageListType } from '../../../global/types';
-import type { ThreadId } from '../../../types/index';
+import type { MessageListType, ThreadId } from '../../../types/index';
 
 import { isChatChannel, stripCustomEmoji } from '../../../global/helpers';
 import {
@@ -34,9 +33,8 @@ import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useMenuPosition from '../../../hooks/useMenuPosition';
 import useOldLang from '../../../hooks/useOldLang';
-import useShowTransition from '../../../hooks/useShowTransition';
+import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import { ClosableEmbeddedMessage } from '../../common/embedded/EmbeddedMessage';
 import Icon from '../../common/icons/Icon';
@@ -131,7 +129,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const {
     shouldRender, transitionClassNames,
-  } = useShowTransition(
+  } = useShowTransitionDeprecated(
     isShown && !isReplyToTopicStart && !isReplyToDiscussion,
     undefined,
     !shouldAnimate,
@@ -160,7 +158,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
 
   const {
-    isContextMenuOpen, contextMenuPosition, handleContextMenu,
+    isContextMenuOpen, contextMenuAnchor, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
@@ -198,15 +196,6 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => ref.current!);
   const getMenuElement = useLastCallback(() => ref.current!.querySelector('.forward-context-menu .bubble'));
-
-  const {
-    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useMenuPosition(
-    contextMenuPosition,
-    getTriggerElement,
-    getRootElement,
-    getMenuElement,
-  );
 
   useEffect(() => {
     if (!shouldRender) {
@@ -291,16 +280,15 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           ariaLabel={oldLang('Cancel')}
           onClick={handleClearClick}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         {(isShowingReply || isForwarding) && !isContextMenuDisabled && (
           <Menu
             isOpen={isContextMenuOpen}
-            transformOriginX={transformOriginX}
-            transformOriginY={transformOriginY}
-            positionX={positionX}
-            positionY={positionY}
-            style={menuStyle}
+            anchor={contextMenuAnchor}
+            getTriggerElement={getTriggerElement}
+            getRootElement={getRootElement}
+            getMenuElement={getMenuElement}
             className="forward-context-menu"
             onClose={handleContextMenuClose}
             onCloseAnimationEnd={handleContextMenuHide}
@@ -309,7 +297,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
               <>
                 <MenuItem
                   icon={!noAuthors ? 'message-succeeded' : undefined}
-                  customIcon={noAuthors ? <i className="icon icon-placeholder" /> : undefined}
+                  customIcon={noAuthors ? <Icon name="placeholder" /> : undefined}
                   // eslint-disable-next-line react/jsx-no-bind
                   onClick={() => setForwardNoAuthors({
                     noAuthors: false,
@@ -319,7 +307,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                 </MenuItem>
                 <MenuItem
                   icon={noAuthors ? 'message-succeeded' : undefined}
-                  customIcon={!noAuthors ? <i className="icon icon-placeholder" /> : undefined}
+                  customIcon={!noAuthors ? <Icon name="placeholder" /> : undefined}
                   // eslint-disable-next-line react/jsx-no-bind
                   onClick={() => setForwardNoAuthors({
                     noAuthors: true,
@@ -332,7 +320,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     <MenuSeparator />
                     <MenuItem
                       icon={!noCaptions ? 'message-succeeded' : undefined}
-                      customIcon={noCaptions ? <i className="icon icon-placeholder" /> : undefined}
+                      customIcon={noCaptions ? <Icon name="placeholder" /> : undefined}
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => setForwardNoCaptions({
                         noCaptions: false,
@@ -342,7 +330,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     </MenuItem>
                     <MenuItem
                       icon={noCaptions ? 'message-succeeded' : undefined}
-                      customIcon={!noCaptions ? <i className="icon icon-placeholder" /> : undefined}
+                      customIcon={!noCaptions ? <Icon name="placeholder" /> : undefined}
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => setForwardNoCaptions({
                         noCaptions: true,

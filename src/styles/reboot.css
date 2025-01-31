@@ -54,7 +54,7 @@ h5,
 h6 {
   margin-top: 0;
   margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 abbr[title],
@@ -102,7 +102,7 @@ dfn {
 dt,
 b,
 strong {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 small {

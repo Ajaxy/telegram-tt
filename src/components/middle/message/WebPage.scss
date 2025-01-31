@@ -1,8 +1,9 @@
 .WebPage {
+  color: var(--color-text);
   margin-top: 0.25rem;
   margin-bottom: 0.125rem;
-  padding: 0.1875rem;
-  font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+  padding-block: 0.1875rem;
+  font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
   line-height: 1.125rem;
   max-width: 29rem;
   background-color: var(--accent-background-color);
@@ -11,11 +12,7 @@
   overflow: hidden;
 
   &.with-video {
-    padding: 0.1875rem 0.375rem;
-  }
-
-  &.with-document {
-    --file-icon-border-color: var(--accent-background-color);
+    padding-block: 0.375rem;
   }
 
   &--background-icons {
@@ -37,42 +34,41 @@
     border-radius: 0.25rem;
   }
 
+  &--unique-sticker {
+    position: relative;
+    width: 7.5rem;
+    height: 7.5rem;
+    overflow: hidden;
+    margin-block: 0.5rem;
+  }
+
   &--stickers {
     color: var(--accent-color);
     border-radius: 0 !important;
   }
 
   &.in-preview {
+    padding-inline-start: 0.5rem;
+    padding-inline-end: 0.375rem;
     border-radius: 0.25rem;
     background-color: var(--color-primary-tint);
     height: 2.625rem;
     margin: 0;
-    padding: 0.125rem 0.25rem 0.125rem 0.625rem;
     transition: background-color 0.2s ease-in;
 
     &.interactive {
       cursor: var(--custom-cursor, pointer);
+
       &:active {
         background-color: var(--background-active-color);
       }
     }
   }
 
-  &::before {
-    content: "";
-    display: block;
-    position: absolute;
-    top: 0;
-    inset-inline-start: 0;
-    bottom: 0;
-    width: 3px;
-    background: var(--bar-gradient, var(--accent-color));
-  }
-
   .WebPage--content {
     position: relative;
-    margin-inline-start: 0.25rem;
 
+    &.is-gift,
     &.is-story {
       display: flex;
       flex-direction: column-reverse;
@@ -98,16 +94,33 @@
     }
   }
 
+  .with-gift &--quick-button {
+    border-top: inherit;
+    margin-top: 0.0625rem;
+    margin-bottom: -0.125rem;
+  }
+
   &-text {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     align-items: flex-start;
     position: relative;
+
+    &_interactive {
+      cursor: var(--custom-cursor, pointer);
+      transition: opacity 0.15s;
+
+      &:hover {
+        opacity: 0.75;
+      }
+    }
   }
 
   .media-inner {
     margin: 0 !important;
+    margin-block-end: 0.1875rem !important;
+    margin-block-start: 0.25rem !important;
 
     &,
     & img,
@@ -129,6 +142,7 @@
       img {
         width: 100% !important;
         height: 100% !important;
+        object-fit: contain;
       }
     }
   }
@@ -156,6 +170,7 @@
         margin-bottom: 0 !important;
 
         img {
+          object-fit: cover;
           width: 100%;
           height: 100%;
         }
@@ -178,12 +193,12 @@
 
   .site-name {
     color: var(--accent-color);
-    font-weight: 500;
+    font-weight: var(--font-weight-semibold);
     margin-bottom: 0.125rem;
   }
 
   .site-title {
-    font-weight: 500;
+    font-weight: var(--font-weight-semibold);
     margin-bottom: 0.125rem;
   }
 
@@ -194,10 +209,6 @@
     body.is-ios & {
       line-height: 1.125rem;
     }
-  }
-
-  .File .file-preview {
-    margin-inline-end: 0.75rem !important;
   }
 
   @media (min-width: 1921px) {

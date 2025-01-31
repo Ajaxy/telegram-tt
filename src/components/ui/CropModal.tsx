@@ -8,6 +8,7 @@ import { blobToDataUri, blobToFile } from '../../util/files';
 
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Loading from './Loading';
 import Modal from './Modal';
@@ -126,7 +127,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
         onClick={handleCropClick}
         ariaLabel={lang('CropImage')}
       >
-        <i className="icon icon-check" />
+        <Icon name="check" />
       </Button>
     </Modal>
   );

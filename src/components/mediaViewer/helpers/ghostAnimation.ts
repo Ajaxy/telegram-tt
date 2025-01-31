@@ -5,8 +5,9 @@ import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getMessageHtmlId } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
-import { isElementInViewport } from '../../../util/isElementInViewport';
 import stopEvent from '../../../util/stopEvent';
+import getOffsetToContainer from '../../../util/visibility/getOffsetToContainer';
+import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import windowSize from '../../../util/windowSize';
 import {
@@ -128,11 +129,13 @@ export function animateClosing(
   let fromScaleY = fromHeight / toHeight;
 
   const shouldFadeOut = (
-    [MediaViewerOrigin.Inline, MediaViewerOrigin.ScheduledInline].includes(origin)
-    && !isMessageImageFullyVisible(container, toImage)
-  ) || (
-    [MediaViewerOrigin.Album, MediaViewerOrigin.ScheduledAlbum].includes(origin)
-    && !isMessageImageFullyVisible(container, toImage)
+    [
+      MediaViewerOrigin.Inline,
+      MediaViewerOrigin.ScheduledInline,
+      MediaViewerOrigin.Album,
+      MediaViewerOrigin.ScheduledAlbum,
+    ].includes(origin)
+    && !isMessageImageFullyVisible(toImage)
   );
 
   if ([
@@ -266,15 +269,13 @@ function uncover(realWidth: number, realHeight: number, top: number, left: numbe
   };
 }
 
-function isMessageImageFullyVisible(container: HTMLElement, imageEl: HTMLElement) {
+function isMessageImageFullyVisible(imageEl: HTMLElement) {
   const messageListElement = document.querySelector<HTMLDivElement>('.Transition_slide-active > .MessageList')!;
-  let imgOffsetTop = container.offsetTop + imageEl.closest<HTMLDivElement>('.content-inner, .WebPage')!.offsetTop;
-  if (container.id.includes('album-media-')) {
-    imgOffsetTop += container.parentElement!.offsetTop + container.closest<HTMLDivElement>('.Message')!.offsetTop;
-  }
 
-  return imgOffsetTop > messageListElement.scrollTop
-    && imgOffsetTop + imageEl.offsetHeight < messageListElement.scrollTop + messageListElement.offsetHeight;
+  const { top } = getOffsetToContainer(imageEl, messageListElement);
+
+  return top > messageListElement.scrollTop
+    && top + imageEl.offsetHeight < messageListElement.scrollTop + messageListElement.offsetHeight;
 }
 
 function getTopOffset(hasFooter: boolean) {
@@ -297,6 +298,11 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
       // eslint-disable-next-line max-len
       containerSelector = `.Transition_slide-active > .MessageList #album-media-${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = '.full-media';
+      break;
+
+    case MediaViewerOrigin.PreviewMedia:
+      containerSelector = `#preview-media${index}`;
+      mediaSelector = 'img';
       break;
 
     case MediaViewerOrigin.SharedMedia:
@@ -334,6 +340,11 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
       mediaSelector = index === 0 ? `.stars-transaction-media-${index} :is(img, video)` : undefined;
       break;
 
+    case MediaViewerOrigin.SponsoredMessage:
+      containerSelector = '.Transition_slide-active > .MessageList .sponsored-media-preview';
+      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media,${MESSAGE_CONTENT_SELECTOR} .thumbnail:not(.blurred-bg)`;
+      break;
+
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.Inline:
     default:
@@ -358,6 +369,7 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.Inline:
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.StarsTransaction:
+    case MediaViewerOrigin.PreviewMedia:
       ghost.classList.add('rounded-corners');
       break;
 

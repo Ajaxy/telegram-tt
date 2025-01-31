@@ -1,16 +1,19 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
-import type { ApiPrivacySettings, PrivacyVisibility } from '../../../types';
 import type {
+  ApiBotVerification,
   ApiFormattedText,
   ApiMessageEntity,
   ApiMessageEntityDefault,
   ApiPhoto,
   ApiPhotoSize,
+  ApiPrivacySettings,
   ApiThumbnail,
   ApiUsername,
   ApiVideoSize,
+  BotsPrivacyType,
+  PrivacyVisibility,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -95,6 +98,12 @@ export function buildApiPhoto(photo: GramJs.Photo, isSpoiler?: boolean): ApiPhot
   };
 }
 
+export function buildApiPhotoPreviewSizes(sizes: GramJs.TypePhotoSize[]): ApiPhotoSize[] {
+  return sizes.filter((s): s is GramJs.PhotoSize => (
+    s instanceof GramJs.PhotoSize || s instanceof GramJs.PhotoSizeProgressive
+  )).map(buildApiPhotoSize);
+}
+
 export function buildApiVideoSize(videoSize: GramJs.TypeVideoSize): ApiVideoSize | undefined {
   if (!(videoSize instanceof GramJs.VideoSize)) return undefined;
 
@@ -157,6 +166,7 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
   let blockUserIds: string[] | undefined;
   let blockChatIds: string[] | undefined;
   let shouldAllowPremium: true | undefined;
+  let botsPrivacy: BotsPrivacyType = 'none';
 
   const localChats = localDb.chats;
 
@@ -192,6 +202,10 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
       });
     } else if (rule instanceof GramJs.PrivacyValueAllowPremium) {
       shouldAllowPremium = true;
+    } else if (rule instanceof GramJs.PrivacyValueAllowBots) {
+      botsPrivacy = 'allow';
+    } else if (rule instanceof GramJs.PrivacyValueDisallowBots) {
+      botsPrivacy = 'disallow';
     }
   });
 
@@ -209,6 +223,7 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
     blockUserIds: blockUserIds || [],
     blockChatIds: blockChatIds || [],
     shouldAllowPremium,
+    botsPrivacy,
   };
 }
 
@@ -284,4 +299,12 @@ export function buildAvatarPhotoId(photo: GramJs.TypeUserProfilePhoto | GramJs.T
   }
 
   return undefined;
+}
+
+export function buildApiBotVerification(botVerification: GramJs.BotVerification): ApiBotVerification {
+  return {
+    botId: buildApiPeerId(botVerification.botId, 'user'),
+    iconId: botVerification.icon.toString(),
+    description: botVerification.description,
+  };
 }
