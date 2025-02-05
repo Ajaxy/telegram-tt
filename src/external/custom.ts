@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { getGlobal } from '../global';
 
 import {
@@ -8,10 +9,7 @@ import {
   selectPeer,
   selectUser,
   selectUserFullInfo,
-  selectTabState,
 } from '../global/selectors';
-
-import { LeftColumnContent } from '../types';
 
 let isLeftColumnMinimized = true;
 
@@ -121,7 +119,7 @@ export function getAuthInfo():
 
 export function openSettingsButton() {
   setLeftColumnMinimized(false);
-  
+
   const tryCloseMessages = () => {
     if (document.querySelector('.messages-layout')) {
       simulateEscapeKeyPress();
@@ -141,15 +139,47 @@ export function openSettingsButton() {
 }
 
 export function simulateEscapeKeyPress() {
-
   const event = new KeyboardEvent('keydown', {
     key: 'ScrollLock',
     code: 'ScrollLock',
-    keyCode: 145, 
+    keyCode: 145,
     which: 145,
     bubbles: true,
     cancelable: true,
   });
 
   document.dispatchEvent(event);
-} 
+}
+
+export function findChatByTitle(searchTitle: string) {
+  const g = getGlobal();
+
+  // Case insensitive search
+  const normalizedSearch = searchTitle.toLowerCase().trim();
+
+  // Find the first chat that matches the title
+  const foundChat = Object.values(g.chats?.byId || {}).find((chat) => chat.title?.toLowerCase().includes(normalizedSearch));
+
+  if (!foundChat) {
+    return undefined;
+  }
+
+  // Return in the same format as getChatWithLastMessageById
+  const id = foundChat.id.toString();
+  const chatLastMessage = selectChatLastMessage(g, id);
+  const userShortInfo = chatLastMessage?.senderId
+    ? selectUser(g, chatLastMessage.senderId)
+    : undefined;
+  const userFullInfo = chatLastMessage?.senderId
+    ? selectUserFullInfo(g, chatLastMessage.senderId)
+    : undefined;
+
+  return {
+    chat: selectChat(g, id),
+    id: Number(foundChat.id),
+    chatFullInfo: selectChatFullInfo(g, id),
+    msg: chatLastMessage,
+    lastMessageUserInfo: userShortInfo,
+    userFullInfo,
+  };
+}
