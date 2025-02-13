@@ -223,11 +223,12 @@ export function formatHumanDate(
       return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(lang('Weekday.Yesterday'));
     }
 
-    const weekAgo = new Date(today);
-    const weekAhead = new Date(today);
-    weekAgo.setDate(today.getDate() - 7);
-    weekAhead.setDate(today.getDate() + 7);
-    if (date >= weekAgo && date <= weekAhead) {
+    const limitBefore = new Date(today);
+    limitBefore.setDate(today.getDate() - 6); // Avoid returning same weekday as today
+    const limitAhead = new Date(today);
+    limitAhead.setDate(today.getDate() + 6);
+
+    if (date >= limitBefore && date <= limitAhead) {
       const weekDayString = formatWeekday(lang, date.getDay(), isShort);
       return (isUpperFirst || !isShort ? upperFirst : lowerFirst)(weekDayString);
     }
