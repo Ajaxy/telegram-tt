@@ -509,7 +509,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return (
           <>
             <h3 className="title">{lang('ProfileTabGifts')}</h3>
-            {canUseGiftFilter && (
+            {canUseGiftFilter && chatId && (
               <section className="tools">
                 <DropdownMenu
                   trigger={PrimaryLinkMenuButton}
@@ -520,7 +520,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     icon={giftsSortType === 'byDate' ? 'calendar-filter' : 'cash-circle'}
                     // eslint-disable-next-line react/jsx-no-bind
                     onClick={() => updateGiftProfileFilter(
-                      { filter: { sortType: giftsSortType === 'byDate' ? 'byValue' : 'byDate' } },
+                      { peerId: chatId, filter: { sortType: giftsSortType === 'byDate' ? 'byValue' : 'byDate' } },
                     )}
                   >
                     {lang(giftsSortType === 'byDate' ? 'GiftSortByDate' : 'GiftSortByValue')}
@@ -532,7 +532,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     icon={shouldIncludeUnlimitedGifts ? 'check' : 'placeholder'}
                     // eslint-disable-next-line react/jsx-no-bind
                     onClick={() => updateGiftProfileFilter(
-                      { filter: { shouldIncludeUnlimited: !shouldIncludeUnlimitedGifts } },
+                      { peerId: chatId, filter: { shouldIncludeUnlimited: !shouldIncludeUnlimitedGifts } },
                     )}
                   >
                     {lang('GiftFilterUnlimited')}
@@ -542,7 +542,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     icon={shouldIncludeLimitedGifts ? 'check' : 'placeholder'}
                     // eslint-disable-next-line react/jsx-no-bind
                     onClick={() => updateGiftProfileFilter(
-                      { filter: { shouldIncludeLimited: !shouldIncludeLimitedGifts } },
+                      { peerId: chatId, filter: { shouldIncludeLimited: !shouldIncludeLimitedGifts } },
                     )}
                   >
                     {lang('GiftFilterLimited')}
@@ -552,7 +552,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     icon={shouldIncludeUniqueGifts ? 'check' : 'placeholder'}
                     // eslint-disable-next-line react/jsx-no-bind
                     onClick={() => updateGiftProfileFilter(
-                      { filter: { shouldIncludeUnique: !shouldIncludeUniqueGifts } },
+                      { peerId: chatId, filter: { shouldIncludeUnique: !shouldIncludeUniqueGifts } },
                     )}
                   >
                     {lang('GiftFilterUnique')}
@@ -565,7 +565,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                         icon={shouldIncludeDisplayedGifts ? 'check' : 'placeholder'}
                         // eslint-disable-next-line react/jsx-no-bind
                         onClick={() => updateGiftProfileFilter(
-                          { filter: { shouldIncludeDisplayed: !shouldIncludeDisplayedGifts } },
+                          { peerId: chatId, filter: { shouldIncludeDisplayed: !shouldIncludeDisplayedGifts } },
                         )}
                       >
                         {lang('GiftFilterDisplayed')}
@@ -575,7 +575,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                         icon={shouldIncludeHiddenGifts ? 'check' : 'placeholder'}
                         // eslint-disable-next-line react/jsx-no-bind
                         onClick={() => updateGiftProfileFilter(
-                          { filter: { shouldIncludeHidden: !shouldIncludeHiddenGifts } },
+                          { peerId: chatId, filter: { shouldIncludeHidden: !shouldIncludeHiddenGifts } },
                         )}
                       >
                         {lang('GiftFilterHidden')}

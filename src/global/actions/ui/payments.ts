@@ -2,7 +2,7 @@ import type { ActionReturnType } from '../../types';
 
 import { DEFAULT_GIFT_PROFILE_FILTER_OPTIONS } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { addActionHandler } from '../../index';
+import { addActionHandler, setGlobal } from '../../index';
 import {
   clearPayment,
   updatePayment,
@@ -68,7 +68,7 @@ addActionHandler('closeGiftCodeModal', (global, actions, payload): ActionReturnT
 });
 
 addActionHandler('updateGiftProfileFilter', (global, actions, payload): ActionReturnType => {
-  const { filter, tabId = getCurrentTabId() } = payload || {};
+  const { filter, peerId, tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
 
   const prevFilter = tabState.savedGifts.filter;
@@ -98,23 +98,40 @@ addActionHandler('updateGiftProfileFilter', (global, actions, payload): ActionRe
     };
   }
 
-  return updateTabState(global, {
+  global = updateTabState(global, {
     savedGifts: {
-      giftsByPeerId: {},
+      ...tabState.savedGifts,
+      giftsByPeerId: {
+        [peerId]: tabState.savedGifts.giftsByPeerId[peerId],
+      },
       filter: updatedFilter,
     },
   }, tabId);
+  setGlobal(global);
+
+  actions.loadPeerSavedGifts({
+    peerId, shouldRefresh: true, withTransition: true, tabId: tabState.id,
+  });
 });
 
 addActionHandler('resetGiftProfileFilter', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { peerId, tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
 
-  return updateTabState(global, {
+  global = updateTabState(global, {
     savedGifts: {
-      giftsByPeerId: {},
+      ...tabState.savedGifts,
+      giftsByPeerId: {
+        [peerId]: tabState.savedGifts.giftsByPeerId[peerId],
+      },
       filter: {
         ...DEFAULT_GIFT_PROFILE_FILTER_OPTIONS,
       },
     },
   }, tabId);
+  setGlobal(global);
+
+  actions.loadPeerSavedGifts({
+    peerId, shouldRefresh: true, withTransition: true, tabId: tabState.id,
+  });
 });

@@ -2369,6 +2369,7 @@ export interface ActionPayloads {
   loadPeerSavedGifts: {
     peerId: string;
     shouldRefresh?: boolean;
+    withTransition?: boolean;
   } & WithTabId;
   changeGiftVisibility: {
     gift: ApiInputSavedStarGift;
@@ -2397,9 +2398,12 @@ export interface ActionPayloads {
   closeSuggestedStatusModal: WithTabId | undefined;
 
   updateGiftProfileFilter: {
+    peerId: string;
     filter: Partial<GiftProfileFilterOptions>;
   } & WithTabId;
-  resetGiftProfileFilter: WithTabId | undefined;
+  resetGiftProfileFilter: {
+    peerId: string;
+  } & WithTabId;
 
   // Invoice
   openInvoice: Exclude<ApiInputInvoice, ApiInputInvoiceStarGift> & WithTabId;

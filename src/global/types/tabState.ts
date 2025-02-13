@@ -209,6 +209,7 @@ export type TabState = {
   savedGifts: {
     giftsByPeerId: Record<string, ApiSavedGifts>;
     filter: GiftProfileFilterOptions;
+    transitionKey?: number;
   };
 
   globalSearch: {

@@ -138,7 +138,7 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
 
 addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise<void> => {
   const {
-    peerId, shouldRefresh, tabId = getCurrentTabId(),
+    peerId, shouldRefresh, withTransition, tabId = getCurrentTabId(),
   } = payload;
 
   const peer = selectPeer(global, peerId);
@@ -149,19 +149,34 @@ addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise
 
   if (!shouldRefresh && currentGifts && !localNextOffset) return; // Already loaded all
 
+  global = getGlobal();
+  const fetchingFilter = selectGiftProfileFilter(global, peerId, tabId);
+
   const result = await callApi('fetchSavedStarGifts', {
     peer,
     offset: !shouldRefresh ? localNextOffset : '',
-    filter: selectGiftProfileFilter(global, peerId, tabId),
+    filter: fetchingFilter,
   });
 
-  if (!result) {
+  global = getGlobal();
+  const currentFilter = selectGiftProfileFilter(global, peerId, tabId);
+
+  if (!result || currentFilter !== fetchingFilter) {
     return;
   }
 
-  global = getGlobal();
-
   const newGifts = currentGifts && !shouldRefresh ? currentGifts.gifts.concat(result.gifts) : result.gifts;
+
+  const tabState = selectTabState(global, tabId);
+
+  if (withTransition) {
+    global = updateTabState(global, {
+      savedGifts: {
+        ...tabState.savedGifts,
+        transitionKey: (tabState?.savedGifts.transitionKey || 0) + 1,
+      },
+    }, tabId);
+  }
 
   global = replacePeerSavedGifts(global, peerId, newGifts, result.nextOffset, tabId);
   setGlobal(global);

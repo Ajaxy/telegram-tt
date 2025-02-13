@@ -131,6 +131,7 @@ type StateProps = {
   hasPreviewMediaTab?: boolean;
   hasGiftsTab?: boolean;
   gifts?: ApiSavedStarGift[];
+  giftsTransitionKey: number;
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
@@ -199,6 +200,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   hasPreviewMediaTab,
   hasGiftsTab,
   gifts,
+  giftsTransitionKey,
   botPreviewMedia,
   areMembersHidden,
   canAddMembers,
@@ -490,7 +492,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   }, [hasMembersTab, activeTab, tabs]);
 
   const handleResetGiftsFilter = useLastCallback(() => {
-    resetGiftProfileFilter();
+    resetGiftProfileFilter({ peerId: chatId });
   });
 
   useEffect(() => {
@@ -827,6 +829,20 @@ const Profile: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const shouldUseTransitionForContent = resultType === 'gifts';
+  const contentTransitionKey = giftsTransitionKey;
+
+  function renderContentWithTransition() {
+    return (
+      <Transition
+        activeKey={contentTransitionKey}
+        name="fade"
+      >
+        {renderContent()}
+      </Transition>
+    );
+  }
+
   return (
     <InfiniteScroll
       ref={containerRef}
@@ -859,7 +875,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             onStart={applyTransitionFix}
             onStop={handleTransitionStop}
           >
-            {renderContent()}
+            {shouldUseTransitionForContent ? renderContentWithTransition() : renderContent()}
           </Transition>
           <TabList activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={handleSwitchTab} />
         </div>
@@ -952,6 +968,7 @@ export default memo(withGlobal<OwnProps>(
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
     const peerGifts = selectTabState(global).savedGifts.giftsByPeerId[chatId];
+    const giftsTransitionKey = selectTabState(global).savedGifts.transitionKey || 0;
 
     const isNotDefaultGiftFilter = !selectIsGiftProfileFilterDefault(global);
 
@@ -979,6 +996,7 @@ export default memo(withGlobal<OwnProps>(
       storyIds,
       hasGiftsTab,
       gifts: peerGifts?.gifts,
+      giftsTransitionKey,
       pinnedStoryIds,
       archiveStoryIds,
       storyByIds,
