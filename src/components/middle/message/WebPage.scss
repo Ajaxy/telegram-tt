@@ -56,6 +56,10 @@
     margin: 0;
     transition: background-color 0.2s ease-in;
 
+    &.with-gift {
+      line-height: 1;
+    }
+
     &.interactive {
       cursor: var(--custom-cursor, pointer);
 
@@ -67,6 +71,12 @@
 
   .WebPage--content {
     position: relative;
+
+    &.is-gift {
+      .site-title {
+        font-weight: var(--font-weight-normal);
+      }
+    }
 
     &.is-gift,
     &.is-story {
