@@ -1,8 +1,10 @@
 import type { ActionReturnType } from '../../types';
 
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { replaceSettings, updateTwoFaSettings } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 
 addActionHandler('loadPasswordInfo', async (global): Promise<void> => {
   const result = await callApi('getPasswordInfo');
@@ -72,15 +74,22 @@ addActionHandler('updatePassword', async (global, actions, payload): Promise<voi
 addActionHandler('updateRecoveryEmail', async (global, actions, payload): Promise<void> => {
   const {
     currentPassword, email, onSuccess,
+    tabId = getCurrentTabId(),
   } = payload;
 
   global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
+  global = updateTabState(global, {
+    recoveryEmail: email,
+  }, tabId);
   setGlobal(global);
 
   const isSuccess = await callApi('updateRecoveryEmail', currentPassword, email);
 
   global = getGlobal();
   global = updateTwoFaSettings(global, { isLoading: false, waitingEmailCodeLength: undefined });
+  global = updateTabState(global, {
+    recoveryEmail: undefined,
+  }, tabId);
   setGlobal(global);
 
   if (isSuccess) {

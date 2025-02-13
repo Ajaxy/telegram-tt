@@ -190,7 +190,7 @@ export interface ActionPayloads {
     currentPassword: string;
     email: string;
     onSuccess: VoidFunction;
-  };
+  } & WithTabId;
   clearPassword: {
     currentPassword: string;
     onSuccess: VoidFunction;

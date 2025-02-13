@@ -199,6 +199,8 @@ export type TabState = {
 
   shouldPlayEffectInComposer?: true;
 
+  recoveryEmail?: string;
+
   inlineBots: {
     isLoading: boolean;
     byUsername: Record<string, false | InlineBotSettings>;
