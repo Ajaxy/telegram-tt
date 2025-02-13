@@ -1089,6 +1089,9 @@ export interface ActionPayloads {
   } & WithTabId;
   openPrivateChannel: {
     id: string;
+    threadId?: ThreadId;
+    messageId?: number;
+    commentId?: number;
   } & WithTabId;
   loadFullChat: {
     chatId: string;

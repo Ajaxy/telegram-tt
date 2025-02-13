@@ -88,22 +88,6 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
   return updateCurrentMessageList(global, chatId, threadId, type, shouldReplaceHistory, shouldReplaceLast, tabId);
 });
 
-addActionHandler('openPrivateChannel', (global, actions, payload): ActionReturnType => {
-  const { id, tabId = getCurrentTabId() } = payload;
-  const chat = selectChat(global, id);
-  if (!chat) {
-    actions.showNotification({
-      message: {
-        key: 'PrivateChannelInaccessible',
-      },
-      tabId,
-    });
-    return;
-  }
-
-  actions.openChat({ id, tabId });
-});
-
 addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnType => {
   const { chatId, threadId = MAIN_THREAD_ID } = payload;
 
