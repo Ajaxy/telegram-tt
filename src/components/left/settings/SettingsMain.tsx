@@ -35,7 +35,6 @@ type StateProps = {
   canBuyPremium?: boolean;
   isGiveawayAvailable?: boolean;
   starsBalance?: ApiStarsAmount;
-  shouldDisplayStars?: boolean;
 };
 
 const SettingsMain: FC<OwnProps & StateProps> = ({
@@ -45,7 +44,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   canBuyPremium,
   isGiveawayAvailable,
   starsBalance,
-  shouldDisplayStars,
   onScreenSelect,
   onReset,
 }) => {
@@ -182,21 +180,19 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
             {lang('TelegramPremium')}
           </ListItem>
         )}
-        {shouldDisplayStars && (
-          <ListItem
-            leftElement={<StarIcon className="icon ListItem-main-icon" type="gold" size="big" />}
-            narrow
-            // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => openStarsBalanceModal({})}
-          >
-            {lang('MenuStars')}
-            {Boolean(starsBalance) && (
-              <span className="settings-item__current-value">
-                {formatStarsAmount(lang, starsBalance)}
-              </span>
-            )}
-          </ListItem>
-        )}
+        <ListItem
+          leftElement={<StarIcon className="icon ListItem-main-icon" type="gold" size="big" />}
+          narrow
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => openStarsBalanceModal({})}
+        >
+          {lang('MenuStars')}
+          {Boolean(starsBalance) && (
+            <span className="settings-item__current-value">
+              {formatStarsAmount(lang, starsBalance)}
+            </span>
+          )}
+        </ListItem>
         {isGiveawayAvailable && (
           <ListItem
             icon="gift"
@@ -250,7 +246,6 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId } = global;
     const isGiveawayAvailable = selectIsGiveawayGiftsPurchaseAvailable(global);
     const starsBalance = global.stars?.balance;
-    const shouldDisplayStars = Boolean(global.stars?.history?.all?.transactions.length);
 
     return {
       sessionCount: global.activeSessions.orderedHashes.length,
@@ -258,7 +253,6 @@ export default memo(withGlobal<OwnProps>(
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
       isGiveawayAvailable,
       starsBalance,
-      shouldDisplayStars,
     };
   },
 )(SettingsMain));

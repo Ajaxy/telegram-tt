@@ -13,6 +13,10 @@
   max-width: 26.25rem;
 }
 
+.minimal :global(.modal-dialog) {
+  height: auto;
+}
+
 .root :global(.modal-dialog),
 .root :global(.modal-content),
 .transition {

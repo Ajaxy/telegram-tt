@@ -51,10 +51,11 @@ export type OwnProps = {
 type StateProps = {
   starsBalanceState?: GlobalState['stars'];
   canBuyPremium?: boolean;
+  shouldForceHeight?: boolean;
 };
 
 const StarsBalanceModal = ({
-  modal, starsBalanceState, canBuyPremium,
+  modal, starsBalanceState, canBuyPremium, shouldForceHeight,
 }: OwnProps & StateProps) => {
   const {
     closeStarsBalanceModal, loadStarsTransactions, loadStarsSubscriptions, openStarsGiftingPickerModal, openInvoice,
@@ -179,7 +180,11 @@ const StarsBalanceModal = ({
   });
 
   return (
-    <Modal className={styles.root} isOpen={isOpen} onClose={closeStarsBalanceModal}>
+    <Modal
+      className={buildClassName(styles.root, !shouldForceHeight && styles.minimal)}
+      isOpen={isOpen}
+      onClose={closeStarsBalanceModal}
+    >
       <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
         <Button
           round
@@ -311,7 +316,10 @@ const StarsBalanceModal = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const shouldForceHeight = Boolean(global.stars?.history?.all?.transactions.length);
+
     return {
+      shouldForceHeight,
       starsBalanceState: global.stars,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
     };
