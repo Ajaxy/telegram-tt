@@ -129,8 +129,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     }
     const global = getGlobal();
     const senderArray = getSendersFromSelectedMessages(global, chat.id, messageIds);
-    return senderArray ? unique(senderArray).filter((peer) => peer?.id !== chat?.id && peer?.id !== linkedChatId) : MEMO_EMPTY_ARRAY;
-  }, [chat, isChannel, messageIds]);
+    return senderArray ? unique(senderArray)
+      .filter((peer) => peer?.id !== chat?.id && peer?.id !== linkedChatId) : MEMO_EMPTY_ARRAY;
+  }, [chat, isChannel, linkedChatId, messageIds]);
 
   const buildNestedOptionListWithAvatars = useLastCallback(() => {
     return peerList.map((member) => {
@@ -411,10 +412,6 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     );
   }
 
-  if (!messageIds) {
-    return undefined;
-  }
-
   return (
     <Modal
       isOpen={isOpen}
@@ -448,7 +445,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         )}
         {(canDeleteForAll || chatBot || !shouldShowOption) && (
           <>
-            <p>{messageIds.length > 1
+            <p>{messageIds && messageIds.length > 1
               ? lang('AreYouSureDeleteFewMessages') : lang('AreYouSureDeleteSingleMessage')}
             </p>
             {willDeleteForCurrentUserOnly && (
