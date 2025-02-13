@@ -18,7 +18,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
-import StarIcon from '../../common/icons/StarIcon';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -225,11 +224,11 @@ const StarsBalanceModal = ({
           )}
           {canBuyPremium && !areBuyOptionsShown && shouldSuggestGifting && (
             <Button
-              className={buildClassName(styles.starButton, 'settings-main-menu-star')}
-              color="translucent"
+              isText
+              noForcedUpperCase
+              className={styles.starButton}
               onClick={openStarsGiftingPickerModalHandler}
             >
-              <StarIcon className="icon" type="gold" size="big" />
               {oldLang('TelegramStarsGift')}
             </Button>
           )}
