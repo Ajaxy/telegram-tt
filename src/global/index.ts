@@ -14,13 +14,18 @@ type ProjectActionTypes =
 type ProjectActionNames = keyof ProjectActionTypes;
 
 type Helper<T, E> = Exclude<T, E> extends never ? {} : Exclude<T, E>;
+
+export type TabStateActionNames = {
+  [ActionName in ProjectActionNames]:
+  'tabId' extends keyof Helper<ProjectActionTypes[ActionName], undefined> ? ActionName : never
+}[ProjectActionNames];
 // `Required` actions are called from actions to ensure the `tabId` is always provided if needed.
 // There are three types of actions:
 // 1. With tabId, which is made required when calling action from another action handler
 // 2. Without payload (= undefined), hence made the payload not required
 // 3. With payload, hence made the payload required
 export type RequiredGlobalActions = {
-  [ActionName in ProjectActionNames]: 'tabId' extends keyof Helper<ProjectActionTypes[ActionName], undefined> ? ((
+  [ActionName in ProjectActionNames]: ActionName extends TabStateActionNames ? ((
     payload: ProjectActionTypes[ActionName] & { tabId: number },
     options?: ActionOptions,
   ) => void) :

@@ -1380,6 +1380,7 @@
 "GiftHideNameDescription" = "You can hide your name and message from visitors to {receiver}'s profile. {receiver} will still see your name and message.";
 "GiftHideNameDescriptionChannel" = "You can hide your name and message from all visitors of this channel except its admins.";
 "GiftSend" = "Send a Gift for {amount}";
+"GiftUnique" = "{title} #{number}";
 "GiftInfoSent" = "Sent Gift";
 "GiftInfoReceived" = "Received Gift";
 "GiftInfoTitle" = "Gift";
@@ -1436,7 +1437,15 @@
 "GiftInfoViewUpgraded" = "View Upgraded Gift";
 "GiftInfoUpgradeBadge" = "upgrade";
 "GiftInfoUpgradeForFree" = "Upgrade For Free";
-"GiftInfoWithdraw" = "Withdraw";
+"GiftInfoTransfer" = "Transfer";
+"GiftTransferTitle" = "Transfer";
+"GiftTransferTON" = "Send via Blockchain";
+"GiftTransferTONBlocked" = "unlocks in {time}";
+"GiftTransferConfirmDescription" = "Do you want to transfer ownership of **{gift}** to **{peer}** for **{amount}**?";
+"GiftTransferConfirmDescriptionFree" = "Do you want to transfer ownership of **{gift}** to **{peer}**?";
+"GiftTransferConfirmButton" = "Transfer for {amount}";
+"GiftTransferConfirmButtonFree" = "Transfer";
+"GiftTransferSuccessMessage" = "You have successfully gifted {gift} to {peer}.";
 "GiftUpgradeUniqueTitle" = "Unique";
 "GiftUpgradeUniqueDescription" = "Turn your gift into a unique collectible that you can transfer or auction.";
 "GiftUpgradeTransferableTitle" = "Transferable";

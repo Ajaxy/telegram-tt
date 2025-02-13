@@ -2,7 +2,8 @@ import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { applyLangPackDifference, requestLangPackDifference } from '../../../util/localization';
+import { applyLangPackDifference, getTranslationFn, requestLangPackDifference } from '../../../util/localization';
+import { getPeerTitle } from '../../helpers';
 import { addActionHandler, setGlobal } from '../../index';
 import {
   addBlockedUser,
@@ -21,7 +22,12 @@ import {
   updateThreadInfos,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectPeerStories, selectPeerStory, selectTabState } from '../../selectors';
+import {
+  selectPeer,
+  selectPeerStories,
+  selectPeerStory,
+  selectTabState,
+} from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
@@ -235,7 +241,44 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             isWaitingForStarGiftUpgrade: undefined,
           }, tabId);
         }
+
+        if (tabState.isWaitingForStarGiftTransfer) {
+          const chatId = update.message.chatId;
+          const receiver = chatId ? selectPeer(global, chatId) : undefined;
+          if (receiver) {
+            actions.focusMessage({
+              chatId: receiver.id,
+              messageId: update.message.id!,
+              tabId,
+            });
+
+            actions.showNotification({
+              message: {
+                key: 'GiftTransferSuccessMessage',
+                variables: {
+                  gift: {
+                    key: 'GiftUnique',
+                    variables: {
+                      title: actionStarGift.gift.title,
+                      number: actionStarGift.gift.number,
+                    },
+                  },
+                  peer: getPeerTitle(getTranslationFn(), receiver),
+                },
+              },
+              tabId,
+            });
+          }
+
+          actions.requestConfetti({ withStars: true, tabId });
+
+          global = updateTabState(global, {
+            isWaitingForStarGiftTransfer: undefined,
+          }, tabId);
+        }
       });
+
+      setGlobal(global);
     }
   }
 

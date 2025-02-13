@@ -682,6 +682,13 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'stargiftTransfer': {
+      return new GramJs.InputInvoiceStarGiftTransfer({
+        stargift: buildInputSavedStarGift(invoice.inputSavedGift),
+        toId: buildInputPeer(invoice.recipient.id, invoice.recipient.accessHash),
+      });
+    }
+
     case 'giveaway':
     default: {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);

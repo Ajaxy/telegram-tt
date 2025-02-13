@@ -722,6 +722,10 @@ export type TabState = {
     gift: ApiSavedStarGift | ApiStarGift;
   };
 
+  giftTransferModal?: {
+    gift: ApiSavedStarGift;
+  };
+
   giftUpgradeModal?: {
     sampleAttributes: ApiStarGiftAttribute[];
     recipientId?: string;
@@ -748,4 +752,5 @@ export type TabState = {
   };
 
   isWaitingForStarGiftUpgrade?: true;
+  isWaitingForStarGiftTransfer?: true;
 };

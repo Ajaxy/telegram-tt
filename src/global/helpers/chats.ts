@@ -22,7 +22,6 @@ import {
   VERIFICATION_CODES_USER_ID,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
-import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getGlobal } from '..';
 import { isSystemBot } from './bots';
 import { getMainUsername, getUserFirstOrLastName } from './users';
@@ -393,36 +392,6 @@ export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: A
   }
 
   return getUserFirstOrLastName(sender);
-}
-
-export function filterChatsByName(
-  lang: OldLangFn,
-  chatIds: string[],
-  chatsById: Record<string, ApiChat>,
-  query?: string,
-  currentUserId?: string,
-) {
-  if (!query) {
-    return chatIds;
-  }
-
-  const searchWords = prepareSearchWordsForNeedle(query);
-
-  return chatIds.filter((id) => {
-    const chat = chatsById[id];
-    if (!chat) {
-      return false;
-    }
-    const isSelf = id === currentUserId;
-
-    const translatedTitle = getChatTitle(lang, chat, isSelf);
-    if (isSelf) {
-      // Search both "Saved Messages" and user title
-      return searchWords(translatedTitle) || searchWords(chat.title);
-    }
-
-    return searchWords(translatedTitle) || Boolean(chat.usernames?.find(({ username }) => searchWords(username)));
-  });
 }
 
 export function isChatPublic(chat: ApiChat) {

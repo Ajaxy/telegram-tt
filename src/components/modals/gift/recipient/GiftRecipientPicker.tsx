@@ -1,12 +1,10 @@
-import type { FC } from '../../../../lib/teact/teact';
 import React, {
   memo, useMemo, useState,
 } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
-import {
-  filterUsersByName, isUserBot,
-} from '../../../../global/helpers';
+import { filterPeersByQuery } from '../../../../global/helpers/peers';
+import { selectCanGift } from '../../../../global/selectors';
 import { unique } from '../../../../util/iteratees';
 import sortChatIds from '../../../common/helpers/sortChatIds';
 
@@ -24,15 +22,14 @@ export type OwnProps = {
 
 interface StateProps {
   currentUserId?: string;
-  userSelectionLimit?: number;
   userIds?: string[];
 }
 
-const GiftRecipientPicker: FC<OwnProps & StateProps> = ({
+const GiftRecipientPicker = ({
   modal,
   currentUserId,
   userIds,
-}) => {
+}: OwnProps & StateProps) => {
   const { closeGiftRecipientPicker, openGiftModal } = getActions();
 
   const oldLang = useOldLang();
@@ -41,17 +38,12 @@ const GiftRecipientPicker: FC<OwnProps & StateProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const displayedUserIds = useMemo(() => {
-    const usersById = getGlobal().users.byId;
+    const global = getGlobal();
     const idsWithSelf = userIds ? userIds.concat(currentUserId!) : undefined;
-    const filteredContactIds = idsWithSelf ? filterUsersByName(idsWithSelf, usersById, searchQuery) : [];
+    const filteredPeerIds = idsWithSelf ? filterPeersByQuery({ ids: idsWithSelf, query: searchQuery }) : [];
 
-    return sortChatIds(unique(filteredContactIds).filter((userId) => {
-      const user = usersById[userId];
-      if (!user) {
-        return true;
-      }
-
-      return !isUserBot(user);
+    return sortChatIds(unique(filteredPeerIds).filter((peerId) => {
+      return selectCanGift(global, peerId);
     }), undefined, [currentUserId!]);
   }, [currentUserId, searchQuery, userIds]);
 
@@ -92,6 +84,5 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
     currentUserId,
     userIds: global.contactList?.userIds,
-    userSelectionLimit: global.appConfig?.giveawayAddPeersMax,
   };
 })(GiftRecipientPicker));

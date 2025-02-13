@@ -620,12 +620,12 @@ async function getFullChannelInfo(
     ? exportedInvite.link
     : undefined;
 
-  const { members, userStatusesById } = (canViewParticipants && await fetchMembers(id, accessHash)) || {};
+  const { members, userStatusesById } = (canViewParticipants && await fetchMembers({ chat })) || {};
   const { members: kickedMembers, userStatusesById: bannedStatusesById } = (
-    canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'kicked')
+    canViewParticipants && adminRights && await fetchMembers({ chat, memberFilter: 'kicked' })
   ) || {};
   const { members: adminMembers, userStatusesById: adminStatusesById } = (
-    canViewParticipants && await fetchMembers(id, accessHash, 'admin')
+    canViewParticipants && await fetchMembers({ chat, memberFilter: 'admin' })
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
   const memberInfoRequest = !chat.isNotJoined && chat.type === 'chatTypeChannel'
@@ -1285,22 +1285,31 @@ export function toggleSignatures({
 type ChannelMembersFilter =
   'kicked'
   | 'admin'
-  | 'recent';
+  | 'recent'
+  | 'search';
 
-export async function fetchMembers(
-  chatId: string,
-  accessHash: string,
-  memberFilter: ChannelMembersFilter = 'recent',
-  offset?: number,
-) {
+export async function fetchMembers({
+  chat,
+  memberFilter = 'recent',
+  offset,
+  query = '',
+} : {
+  chat: ApiChat;
+  memberFilter?: ChannelMembersFilter;
+  offset?: number;
+  query?: string;
+}) {
   let filter: GramJs.TypeChannelParticipantsFilter;
 
   switch (memberFilter) {
     case 'kicked':
-      filter = new GramJs.ChannelParticipantsKicked({ q: '' });
+      filter = new GramJs.ChannelParticipantsKicked({ q: query });
       break;
     case 'admin':
       filter = new GramJs.ChannelParticipantsAdmins();
+      break;
+    case 'search':
+      filter = new GramJs.ChannelParticipantsSearch({ q: query });
       break;
     default:
       filter = new GramJs.ChannelParticipantsRecent();
@@ -1308,12 +1317,12 @@ export async function fetchMembers(
   }
 
   const result = await invokeRequest(new GramJs.channels.GetParticipants({
-    channel: buildInputEntity(chatId, accessHash) as GramJs.InputChannel,
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
     filter,
     offset,
     limit: MEMBERS_LOAD_SLICE,
   }), {
-    abortControllerChatId: chatId,
+    abortControllerChatId: chat.id,
   });
 
   if (!result || result instanceof GramJs.channels.ChannelParticipantsNotModified) {

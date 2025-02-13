@@ -11,8 +11,9 @@ import { SettingsScreens } from '../../../types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
-  filterChatsByName, isChatChannel, isDeletedUser,
+  isChatChannel, isDeletedUser,
 } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { unique } from '../../../util/iteratees';
 import { CUSTOM_PEER_PREMIUM } from '../../../util/objects/customPeer';
 import { getPrivacyKey } from './helpers/privacy';
@@ -122,16 +123,16 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         return chatId !== currentUserId && chatId !== SERVICE_NOTIFICATIONS_USER_ID && !isChannel && !isDeleted;
       });
 
-    const filteredChats = filterChatsByName(oldLang, chatIds, chatsById, searchQuery);
+    const filteredChats = filterPeersByQuery({ ids: chatIds, query: searchQuery });
 
     // Show only relevant items
     if (searchQuery) return filteredChats;
 
     return unique([
       ...selectedContactIds,
-      ...filterChatsByName(oldLang, chatIds, chatsById, searchQuery),
+      ...chatIds,
     ]);
-  }, [folderAllOrderedIds, folderArchivedOrderedIds, selectedContactIds, oldLang, searchQuery, currentUserId]);
+  }, [folderAllOrderedIds, folderArchivedOrderedIds, selectedContactIds, searchQuery, currentUserId]);
 
   const handleSelectedCategoriesChange = useCallback((value: CustomPeerType[]) => {
     setNewSelectedCategoryTypes(value);

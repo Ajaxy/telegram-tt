@@ -278,7 +278,6 @@ function StorySettings({
             id="deny-list"
             contactListIds={contactListIds}
             currentUserId={currentUserId}
-            usersById={usersById}
             selectedIds={selectedBlockedIds}
             onSelect={handleDenyUserIdsChange}
           />
@@ -291,7 +290,6 @@ function StorySettings({
             contactListIds={contactListIds}
             lockedIds={lockedIds}
             currentUserId={currentUserId}
-            usersById={usersById}
             selectedIds={privacy?.allowUserIds}
             onSelect={handleAllowUserIdsChange}
           />

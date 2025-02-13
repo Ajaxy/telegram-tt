@@ -188,6 +188,19 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'stargiftTransfer') {
+    const { inputSavedGift, recipientId } = inputInvoice;
+    const savedGift = getRequestInputSavedStarGift(global, inputSavedGift);
+    const peer = selectPeer(global, recipientId);
+    if (!savedGift || !peer) return undefined;
+
+    return {
+      type: 'stargiftTransfer',
+      inputSavedGift: savedGift,
+      recipient: peer,
+    };
+  }
+
   return undefined;
 }
 

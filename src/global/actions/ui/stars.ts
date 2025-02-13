@@ -3,6 +3,7 @@ import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/oldLangProvider';
+import { addTabStateResetterAction } from '../../helpers/meta';
 import { getPrizeStarsTransactionFromGiveaway, getStarsTransactionFromGift } from '../../helpers/payments';
 import { addActionHandler } from '../../index';
 import {
@@ -63,13 +64,7 @@ addActionHandler('openGiftRecipientPicker', (global, actions, payload): ActionRe
   }, tabId);
 });
 
-addActionHandler('closeGiftRecipientPicker', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    isGiftRecipientPickerOpen: undefined,
-  }, tabId);
-});
+addTabStateResetterAction('closeGiftRecipientPicker', 'isGiftRecipientPickerOpen');
 
 addActionHandler('openStarsGiftingPickerModal', (global, actions, payload): ActionReturnType => {
   const {
@@ -83,13 +78,7 @@ addActionHandler('openStarsGiftingPickerModal', (global, actions, payload): Acti
   }, tabId);
 });
 
-addActionHandler('closeStarsGiftingPickerModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    starsGiftingPickerModal: undefined,
-  }, tabId);
-});
+addTabStateResetterAction('closeStarsGiftingPickerModal', 'starsGiftingPickerModal');
 
 addActionHandler('openPrizeStarsTransactionFromGiveaway', (global, actions, payload): ActionReturnType => {
   const {
@@ -148,13 +137,7 @@ addActionHandler('openStarsBalanceModal', (global, actions, payload): ActionRetu
   }, tabId);
 });
 
-addActionHandler('closeStarsBalanceModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    starsBalanceModal: undefined,
-  }, tabId);
-});
+addTabStateResetterAction('closeStarsBalanceModal', 'starsBalanceModal');
 
 addActionHandler('closeStarsPaymentModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
@@ -193,13 +176,7 @@ addActionHandler('openStarsTransactionFromGift', (global, actions, payload): Act
   return openStarsTransactionModal(global, transaction, tabId);
 });
 
-addActionHandler('closeStarsTransactionModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    starsTransactionModal: undefined,
-  }, tabId);
-});
+addTabStateResetterAction('closeStarsTransactionModal', 'starsTransactionModal');
 
 addActionHandler('openStarsSubscriptionModal', (global, actions, payload): ActionReturnType => {
   const { subscription, tabId = getCurrentTabId() } = payload;
@@ -211,20 +188,9 @@ addActionHandler('openStarsSubscriptionModal', (global, actions, payload): Actio
   }, tabId);
 });
 
-addActionHandler('closeStarsSubscriptionModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+addTabStateResetterAction('closeStarsSubscriptionModal', 'starsSubscriptionModal');
 
-  return updateTabState(global, {
-    starsSubscriptionModal: undefined,
-  }, tabId);
-});
-
-addActionHandler('closeGiftModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    giftModal: undefined,
-  }, tabId);
-});
+addTabStateResetterAction('closeGiftModal', 'giftModal');
 
 addActionHandler('closeStarsGiftModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
@@ -287,21 +253,9 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
   }, tabId);
 });
 
-addActionHandler('closeGiftInfoModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+addTabStateResetterAction('closeGiftInfoModal', 'giftInfoModal');
 
-  return updateTabState(global, {
-    giftInfoModal: undefined,
-  }, tabId);
-});
-
-addActionHandler('closeGiftUpgradeModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    giftUpgradeModal: undefined,
-  }, tabId);
-});
+addTabStateResetterAction('closeGiftUpgradeModal', 'giftUpgradeModal');
 
 addActionHandler('openGiftWithdrawModal', (global, actions, payload): ActionReturnType => {
   const { gift, tabId = getCurrentTabId() } = payload || {};
@@ -313,13 +267,7 @@ addActionHandler('openGiftWithdrawModal', (global, actions, payload): ActionRetu
   }, tabId);
 });
 
-addActionHandler('closeGiftWithdrawModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    giftWithdrawModal: undefined,
-  }, tabId);
-});
+addTabStateResetterAction('closeGiftWithdrawModal', 'giftWithdrawModal');
 
 addActionHandler('clearGiftWithdrawError', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
@@ -334,3 +282,15 @@ addActionHandler('clearGiftWithdrawError', (global, actions, payload): ActionRet
     },
   }, tabId);
 });
+
+addActionHandler('openGiftTransferModal', (global, actions, payload): ActionReturnType => {
+  const { gift, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    giftTransferModal: {
+      gift,
+    },
+  }, tabId);
+});
+
+addTabStateResetterAction('closeGiftTransferModal', 'giftTransferModal');

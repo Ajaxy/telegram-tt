@@ -92,7 +92,7 @@ import type { WebApp, WebAppModalStateType, WebAppOutboundEvent } from '../../ty
 import type { DownloadableMedia } from '../helpers';
 import type { TabState } from './tabState';
 
-type WithTabId = { tabId?: number };
+export type WithTabId = { tabId?: number };
 
 export interface ActionPayloads {
   // system
@@ -2308,6 +2308,7 @@ export interface ActionPayloads {
   } & WithTabId;
   closeGiftModal: WithTabId | undefined;
   sendStarGift: StarGiftInfo & WithTabId;
+
   openGiftInfoModalFromMessage: {
     chatId: string;
     messageId: number;
@@ -2319,6 +2320,7 @@ export interface ActionPayloads {
     gift: ApiStarGift;
   }) & WithTabId;
   closeGiftInfoModal: WithTabId | undefined;
+
   openGiftUpgradeModal: {
     giftId: string;
     peerId?: string;
@@ -2330,6 +2332,7 @@ export interface ActionPayloads {
     shouldKeepOriginalDetails?: boolean;
     upgradeStars?: number;
   } & WithTabId;
+
   openGiftWithdrawModal: {
     gift: ApiSavedStarGift;
   } & WithTabId;
@@ -2339,6 +2342,17 @@ export interface ActionPayloads {
     gift: ApiInputSavedStarGift;
     password: string;
   } & WithTabId;
+
+  openGiftTransferModal: {
+    gift: ApiSavedStarGift;
+  } & WithTabId;
+  transferGift: {
+    gift: ApiInputSavedStarGift;
+    transferStars?: number;
+    recipientId: string;
+  } & WithTabId;
+  closeGiftTransferModal: WithTabId | undefined;
+
   loadPeerSavedGifts: {
     peerId: string;
     shouldRefresh?: boolean;

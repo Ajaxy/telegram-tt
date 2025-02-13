@@ -5,11 +5,11 @@ import React, {
   useMemo,
   useState,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
 import { LoadMoreDirection } from '../../../types';
 
-import { filterUsersByName } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
@@ -57,8 +57,7 @@ const MoreAppsTabContent: FC<OwnProps & StateProps> = ({
   const filteredFoundIds = useMemo(() => {
     if (!foundIds) return [];
 
-    const usersById = getGlobal().users.byId;
-    return filterUsersByName(foundIds, usersById, searchQuery);
+    return filterPeersByQuery({ ids: foundIds, query: searchQuery, type: 'user' });
   }, [foundIds, searchQuery]);
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {

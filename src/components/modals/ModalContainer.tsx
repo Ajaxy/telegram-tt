@@ -15,11 +15,12 @@ import ChatInviteModal from './chatInvite/ChatInviteModal.async';
 import ChatlistModal from './chatlist/ChatlistModal.async';
 import CollectibleInfoModal from './collectible/CollectibleInfoModal.async';
 import EmojiStatusAccessModal from './emojiStatusAccess/EmojiStatusAccessModal.async';
-import GiftWithdrawModal from './gift/fragment/GiftWithdrawModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
+import GiftTransferModal from './gift/transfer/GiftTransferModal.async';
 import GiftUpgradeModal from './gift/upgrade/GiftUpgradeModal.async';
+import GiftWithdrawModal from './gift/withdraw/GiftWithdrawModal.async';
 import GiftCodeModal from './giftcode/GiftCodeModal.async';
 import InviteViaLinkModal from './inviteViaLink/InviteViaLinkModal.async';
 import LocationAccessModal from './locationAccess/LocationAccessModal.async';
@@ -69,7 +70,8 @@ type ModalKey = keyof Pick<TabState,
 'aboutAdsModal' |
 'giftUpgradeModal' |
 'monetizationVerificationModal' |
-'giftWithdrawModal'
+'giftWithdrawModal' |
+'giftTransferModal'
 >;
 
 type StateProps = {
@@ -115,6 +117,7 @@ const MODALS: ModalRegistry = {
   giftUpgradeModal: GiftUpgradeModal,
   monetizationVerificationModal: VerificationMonetizationModal,
   giftWithdrawModal: GiftWithdrawModal,
+  giftTransferModal: GiftTransferModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

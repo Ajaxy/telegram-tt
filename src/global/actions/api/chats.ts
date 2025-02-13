@@ -1941,7 +1941,7 @@ addActionHandler('loadMoreMembers', async (global, actions, payload): Promise<vo
   const offset = selectChatFullInfo(global, chat.id)?.members?.length;
   if (offset !== undefined && chat.membersCount !== undefined && offset >= chat.membersCount) return;
 
-  const result = await callApi('fetchMembers', chat.id, chat.accessHash!, 'recent', offset);
+  const result = await callApi('fetchMembers', { chat, offset });
   if (!result) {
     return;
   }

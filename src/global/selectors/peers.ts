@@ -3,9 +3,10 @@ import type { GlobalState, TabArgs } from '../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { isDeletedUser } from '../helpers';
 import { selectChat, selectChatFullInfo } from './chats';
 import { selectTabState } from './tabs';
-import { selectBot, selectIsPremiumPurchaseBlocked, selectUser } from './users';
+import { selectBot, selectUser } from './users';
 
 export function selectPeer<T extends GlobalState>(global: T, peerId: string): ApiPeer | undefined {
   return selectUser(global, peerId) || selectChat(global, peerId);
@@ -19,10 +20,11 @@ export function selectCanGift<T extends GlobalState>(global: T, peerId: string) 
   const bot = selectBot(global, peerId);
   const user = selectUser(global, peerId);
 
-  const areStarGiftsAvailable = selectChatFullInfo(global, peerId)?.areStarGiftsAvailable || user;
+  if (user) {
+    return !bot && peerId !== SERVICE_NOTIFICATIONS_USER_ID && !isDeletedUser(user);
+  }
 
-  return Boolean(!selectIsPremiumPurchaseBlocked(global) && !bot && peerId !== SERVICE_NOTIFICATIONS_USER_ID
-    && areStarGiftsAvailable);
+  return selectChatFullInfo(global, peerId)?.areStarGiftsAvailable;
 }
 
 export function selectPeerSavedGifts<T extends GlobalState>(

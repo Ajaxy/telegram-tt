@@ -5,7 +5,7 @@ import { getActions } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
 
-import { filterUsersByName } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 
@@ -43,8 +43,8 @@ function CloseFriends({
 
   const displayedIds = useMemo(() => {
     const contactIds = (contactListIds || []).filter((id) => id !== currentUserId);
-    return unique(filterUsersByName([...closeFriendIds, ...contactIds], usersById, searchQuery));
-  }, [closeFriendIds, contactListIds, currentUserId, searchQuery, usersById]);
+    return unique(filterPeersByQuery({ ids: [...closeFriendIds, ...contactIds], query: searchQuery, type: 'user' }));
+  }, [closeFriendIds, contactListIds, currentUserId, searchQuery]);
 
   useEffectWithPrevDeps(([prevIsActive]) => {
     if (!prevIsActive && isActive) {

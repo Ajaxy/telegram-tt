@@ -2,7 +2,8 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import { filterUsersByName, isUserBot } from '../../../global/helpers';
+import { isUserBot } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
@@ -63,7 +64,8 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    const foundContactIds = localContactIds ? filterUsersByName(localContactIds, usersById, searchQuery) : [];
+    const foundContactIds = localContactIds
+      ? filterPeersByQuery({ ids: localContactIds, query: searchQuery, type: 'user' }) : [];
 
     return sortChatIds(
       unique([

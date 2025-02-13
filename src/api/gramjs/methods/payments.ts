@@ -694,7 +694,7 @@ export async function fetchStarGiftUpgradePreview({
   return result.sampleAttributes.map(buildApiStarGiftAttribute).filter(Boolean);
 }
 
-export function upgradeGift({
+export function upgradeStarGift({
   inputSavedGift,
   shouldKeepOriginalDetails,
 }: {
@@ -704,6 +704,21 @@ export function upgradeGift({
   return invokeRequest(new GramJs.payments.UpgradeStarGift({
     stargift: buildInputSavedStarGift(inputSavedGift),
     keepOriginalDetails: shouldKeepOriginalDetails,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function transferStarGift({
+  inputSavedGift,
+  toPeer,
+}: {
+  inputSavedGift: ApiRequestInputSavedStarGift;
+  toPeer: ApiPeer;
+}) {
+  return invokeRequest(new GramJs.payments.TransferStarGift({
+    stargift: buildInputSavedStarGift(inputSavedGift),
+    toId: buildInputPeer(toPeer.id, toPeer.accessHash),
   }), {
     shouldReturnTrue: true,
   });

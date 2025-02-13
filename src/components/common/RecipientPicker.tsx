@@ -7,17 +7,17 @@ import type { ThreadId } from '../../types';
 
 import { API_CHAT_TYPES } from '../../config';
 import {
-  filterChatsByName,
-  filterUsersByName,
   getCanPostInChat,
   isDeletedUser,
 } from '../../global/helpers';
-import { filterChatIdsByType } from '../../global/selectors';
+import { filterPeersByQuery } from '../../global/helpers/peers';
+import {
+  filterChatIdsByType, selectChat, selectChatFullInfo, selectUser,
+} from '../../global/selectors';
 import { unique } from '../../util/iteratees';
 import sortChatIds from './helpers/sortChatIds';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useOldLang from '../../hooks/useOldLang';
 
 import ChatOrUserPicker from './pickers/ChatOrUserPicker';
 
@@ -55,7 +55,6 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
   onClose,
   onCloseAnimationEnd,
 }) => {
-  const lang = useOldLang();
   const [search, setSearch] = useState('');
   const ids = useMemo(() => {
     if (!isOpen) return undefined;
@@ -67,34 +66,36 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
 
     // No need for expensive global updates on users, so we avoid them
     const global = getGlobal();
-    const usersById = global.users.byId;
-    const chatsById = global.chats.byId;
-    const chatFullInfoById = global.chats.fullInfoById;
 
-    const chatIds = [
+    const peerIds = [
       ...(activeListIds || []),
       ...((search && archivedListIds) || []),
     ].filter((id) => {
-      const chat = chatsById[id];
-      const user = usersById[id];
+      const chat = selectChat(global, id);
+      const user = selectUser(global, id);
       if (user && isDeletedUser(user)) return false;
 
-      return chat && getCanPostInChat(chat, undefined, undefined, chatFullInfoById[id]);
+      const chatFullInfo = selectChatFullInfo(global, id);
+
+      return chat && chatFullInfo && getCanPostInChat(chat, undefined, undefined, chatFullInfo);
     });
 
     const sorted = sortChatIds(
-      unique([
-        ...(currentUserId ? [currentUserId] : []),
-        ...filterChatsByName(lang, chatIds, chatsById, search, currentUserId),
-        ...(contactIds && filter.includes('users') ? filterUsersByName(contactIds, usersById, search) : []),
-      ]),
+      filterPeersByQuery({
+        ids: unique([
+          ...(currentUserId ? [currentUserId] : []),
+          ...peerIds,
+          ...(contactIds || []),
+        ]),
+        query: search,
+      }),
       undefined,
       priorityIds,
       currentUserId,
     );
 
     return filterChatIdsByType(global, sorted, filter);
-  }, [pinnedIds, currentUserId, activeListIds, search, archivedListIds, lang, contactIds, filter, isOpen]);
+  }, [pinnedIds, currentUserId, activeListIds, search, archivedListIds, contactIds, filter, isOpen]);
 
   const renderingIds = useCurrentOrPrev(ids, true)!;
 

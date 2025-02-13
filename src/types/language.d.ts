@@ -1197,7 +1197,10 @@ export interface LangPair {
   'GiftInfoViewUpgraded': undefined;
   'GiftInfoUpgradeBadge': undefined;
   'GiftInfoUpgradeForFree': undefined;
-  'GiftInfoWithdraw': undefined;
+  'GiftInfoTransfer': undefined;
+  'GiftTransferTitle': undefined;
+  'GiftTransferTON': undefined;
+  'GiftTransferConfirmButtonFree': undefined;
   'GiftUpgradeUniqueTitle': undefined;
   'GiftUpgradeUniqueDescription': undefined;
   'GiftUpgradeTransferableTitle': undefined;
@@ -1672,6 +1675,10 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'GiftSend': {
     'amount': V;
   };
+  'GiftUnique': {
+    'title': V;
+    'number': V;
+  };
   'GiftInfoPeerDescriptionFreeUpgradeOut': {
     'peer': V;
   };
@@ -1717,6 +1724,25 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'peer': V;
     'date': V;
     'text': V;
+  };
+  'GiftTransferTONBlocked': {
+    'time': V;
+  };
+  'GiftTransferConfirmDescription': {
+    'gift': V;
+    'peer': V;
+    'amount': V;
+  };
+  'GiftTransferConfirmDescriptionFree': {
+    'gift': V;
+    'peer': V;
+  };
+  'GiftTransferConfirmButton': {
+    'amount': V;
+  };
+  'GiftTransferSuccessMessage': {
+    'gift': V;
+    'peer': V;
   };
   'GiftPeerUpgradeText': {
     'peer': V;

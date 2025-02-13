@@ -31,18 +31,18 @@ import PickerItem from './PickerItem';
 
 import styles from './PickerStyles.module.scss';
 
-type SingleModeProps = {
+type SingleModeProps<CategoryType extends string> = {
   allowMultiple?: false;
   itemInputType?: 'radio';
   selectedId?: string;
   selectedIds?: never; // Help TS to throw an error if this is passed
-  selectedCategory?: CustomPeerType;
+  selectedCategory?: CategoryType;
   selectedCategories?: never;
-  onSelectedCategoryChange?: (category: CustomPeerType) => void;
+  onSelectedCategoryChange?: (category: CategoryType) => void;
   onSelectedIdChange?: (id: string) => void;
 };
 
-type MultipleModeProps = {
+type MultipleModeProps<CategoryType extends string> = {
   allowMultiple: true;
   itemInputType: 'checkbox';
   selectedId?: never;
@@ -50,14 +50,14 @@ type MultipleModeProps = {
   lockedSelectedIds?: string[];
   lockedUnselectedIds?: string[];
   selectedCategory?: never;
-  selectedCategories?: CustomPeerType[];
-  onSelectedCategoriesChange?: (categories: CustomPeerType[]) => void;
+  selectedCategories?: CategoryType[];
+  onSelectedCategoriesChange?: (categories: CategoryType[]) => void;
   onSelectedIdsChange?: (Ids: string[]) => void;
 };
 
-type OwnProps = {
+type OwnProps<CategoryType extends string> = {
   className?: string;
-  categories?: UniqueCustomPeer[];
+  categories?: UniqueCustomPeer<CategoryType>[];
   itemIds: string[];
   lockedUnselectedSubtitle?: string;
   filterValue?: string;
@@ -73,11 +73,12 @@ type OwnProps = {
   isViewOnly?: boolean;
   withStatus?: boolean;
   withPeerTypes?: boolean;
+  withPeerUsernames?: boolean;
   withDefaultPadding?: boolean;
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (id: string, isSelected: boolean) => void;
   onLoadMore?: () => void;
-} & (SingleModeProps | MultipleModeProps);
+} & (SingleModeProps<CategoryType> | MultipleModeProps<CategoryType>);
 
 // Focus slows down animation, also it breaks transition layout in Chrome
 const FOCUS_DELAY_MS = 500;
@@ -87,7 +88,7 @@ const ALWAYS_FULL_ITEMS_COUNT = 5;
 
 const ITEM_CLASS_NAME = 'PeerPickerItem';
 
-const PeerPicker = ({
+const PeerPicker = <CategoryType extends string = CustomPeerType>({
   className,
   categories,
   itemIds,
@@ -106,12 +107,13 @@ const PeerPicker = ({
   itemInputType,
   withStatus,
   withPeerTypes,
+  withPeerUsernames,
   withDefaultPadding,
   onFilterChange,
   onDisabledClick,
   onLoadMore,
   ...optionalProps
-}: OwnProps) => {
+}: OwnProps<CategoryType>) => {
   const lang = useOldLang();
 
   const allowMultiple = optionalProps.allowMultiple;
@@ -268,7 +270,16 @@ const PeerPicker = ({
 
     function getSubtitle() {
       if (isAlwaysUnselected) return [lockedUnselectedSubtitle];
-      if (withStatus && peer) {
+      if (!peer) return undefined;
+
+      if (withPeerUsernames) {
+        const username = peer.usernames?.[0]?.username;
+        if (username) {
+          return [`@${username}`];
+        }
+      }
+
+      if (withStatus) {
         if (isApiPeerChat(peer)) {
           return [getGroupStatus(lang, peer)];
         }
@@ -279,10 +290,12 @@ const PeerPicker = ({
           buildClassName(isUserOnline(peer, userStatus, true) && styles.onlineStatus),
         ];
       }
-      if (withPeerTypes && peer) {
+
+      if (withPeerTypes) {
         const langKey = getPeerTypeKey(peer);
         return langKey && [lang(langKey)];
       }
+
       return undefined;
     }
 
@@ -316,7 +329,7 @@ const PeerPicker = ({
   }, [
     categoriesByType, forceShowSelf, isViewOnly, itemClassName, itemInputType, lang, lockedSelectedIdsSet,
     lockedUnselectedIdsSet, lockedUnselectedSubtitle, onDisabledClick, selectedCategories, selectedIds,
-    withPeerTypes, withStatus,
+    withPeerTypes, withStatus, withPeerUsernames,
   ]);
 
   const beforeChildren = useMemo(() => {

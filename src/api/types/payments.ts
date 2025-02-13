@@ -589,9 +589,16 @@ export type ApiInputInvoiceStarGiftUpgrade = {
   shouldKeepOriginalDetails?: true;
 };
 
+export type ApiInputInvoiceStarGiftTransfer = {
+  type: 'stargiftTransfer';
+  inputSavedGift: ApiInputSavedStarGift;
+  recipientId: string;
+};
+
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode | ApiInputInvoiceStars | ApiInputInvoiceStarsGift | ApiInputInvoiceStarGiftUpgrade
-| ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription;
+| ApiInputInvoiceGiftCode | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
+| ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription
+| ApiInputInvoiceStarGiftUpgrade | ApiInputInvoiceStarGiftTransfer;
 
 /* Used for Invoice request */
 export type ApiRequestInputInvoiceMessage = {
@@ -641,6 +648,13 @@ export type ApiRequestInputInvoiceStarGiftUpgrade = {
   shouldKeepOriginalDetails?: true;
 };
 
+export type ApiRequestInputInvoiceStarGiftTransfer = {
+  type: 'stargiftTransfer';
+  inputSavedGift: ApiRequestInputSavedStarGift;
+  recipient: ApiPeer;
+};
+
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
 | ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway
-| ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift | ApiRequestInputInvoiceStarGiftUpgrade;
+| ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift | ApiRequestInputInvoiceStarGiftUpgrade
+| ApiRequestInputInvoiceStarGiftTransfer;

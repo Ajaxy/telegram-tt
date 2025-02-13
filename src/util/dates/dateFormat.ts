@@ -3,6 +3,7 @@ import type { TimeFormat } from '../../types';
 import type { LangFn } from '../localization';
 
 import withCache from '../withCache';
+import { getDays } from './units';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS_FULL = [
@@ -86,22 +87,26 @@ export function formatMonthAndYear(lang: OldLangFn, date: Date, isShort = false)
 }
 
 export function formatCountdown(
-  lang: OldLangFn,
-  msLeft: number,
+  lang: LangFn,
+  secondsLeft: number,
 ) {
-  const days = Math.floor(msLeft / MILLISECONDS_IN_DAY);
-  if (msLeft < 0) {
+  const days = getDays(secondsLeft);
+  if (secondsLeft < 0) {
     return 0;
   } else if (days < 1) {
-    return formatMediaDuration(msLeft / 1000);
+    return formatMediaDuration(secondsLeft);
   } else if (days < 7) {
-    return lang('Days', days);
+    const count = days;
+    return lang('Days', { count }, { pluralValue: count });
   } else if (days < 30) {
-    return lang('Weeks', Math.floor(days / 7));
+    const count = Math.floor(days / 7);
+    return lang('Weeks', { count }, { pluralValue: count });
   } else if (days < 365) {
-    return lang('Months', Math.floor(days / 30));
+    const count = Math.floor(days / 30);
+    return lang('Months', { count }, { pluralValue: count });
   } else {
-    return lang('Years', Math.floor(days / 365));
+    const count = Math.floor(days / 365);
+    return lang('Years', { count }, { pluralValue: count });
   }
 }
 
