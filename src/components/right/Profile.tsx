@@ -363,8 +363,8 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadPeerProfileStories({ peerId: chatId, offsetId });
   }, [chatId]);
   const handleLoadStoriesArchive = useCallback(({ offsetId }: { offsetId: number }) => {
-    loadStoriesArchive({ peerId: currentUserId!, offsetId });
-  }, [currentUserId]);
+    loadStoriesArchive({ peerId: chatId, offsetId });
+  }, [chatId]);
   const handleLoadGifts = useCallback(() => {
     loadPeerSavedGifts({ peerId: chatId });
   }, [chatId]);

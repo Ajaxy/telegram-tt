@@ -334,8 +334,8 @@ function Transition({
     }
 
     const container = containerRef.current!;
-    const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`)
-      || container.querySelector<HTMLDivElement>(`.${CLASSES.from}`);
+    const activeElement = container.querySelector<HTMLDivElement>(`:scope > .${CLASSES.active}`)
+      || container.querySelector<HTMLDivElement>(`:scope > .${CLASSES.from}`);
     if (!activeElement) {
       return;
     }
