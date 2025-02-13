@@ -338,18 +338,21 @@ const PollModal: FC<OwnProps> = ({
       <div className="quiz-mode">
         {!shouldBeAnonymous && (
           <Checkbox
+            className="dialog-checkbox"
             label={lang('PollAnonymous')}
             checked={isAnonymous}
             onChange={handleIsAnonymousChange}
           />
         )}
         <Checkbox
+          className="dialog-checkbox"
           label={lang('PollMultiple')}
           checked={isMultipleAnswers}
           disabled={isQuizMode}
           onChange={handleMultipleAnswersChange}
         />
         <Checkbox
+          className="dialog-checkbox"
           label={lang('PollQuiz')}
           checked={isQuizMode}
           disabled={isMultipleAnswers || isQuiz !== undefined}

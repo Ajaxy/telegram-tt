@@ -173,7 +173,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
         <Icon name="close" />
       </Button>
       <ConfirmDialog
-        isOpen={true}
+        isOpen={isBlockUserModalOpen}
         onClose={closeBlockUserModal}
         title={lang('BlockUserTitle', user ? getUserFirstOrLastName(user) : getChatTitle(lang, chat!))}
         text={user
@@ -185,6 +185,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
       >
         {user && (
           <Checkbox
+            className="dialog-checkbox"
             label={lang('DeleteThisChat')}
             checked={shouldDeleteChat}
             onCheck={setShouldDeleteChat}
@@ -192,6 +193,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
         )}
         {user && canReportSpam && (
           <Checkbox
+            className="dialog-checkbox"
             label={lang('ReportChat')}
             checked={shouldReportSpam}
             onCheck={setShouldReportSpam}

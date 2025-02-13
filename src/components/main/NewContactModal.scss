@@ -43,5 +43,9 @@
   &__help-text {
     font-size: 0.9375rem;
     color: var(--color-text-secondary);
+
+    &__negative {
+      margin-top: -1rem;
+    }
   }
 }
