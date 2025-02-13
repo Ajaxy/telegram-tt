@@ -73,7 +73,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
     ].filter((id) => {
       const chat = selectChat(global, id);
       const user = selectUser(global, id);
-      if (user && isDeletedUser(user)) return false;
+      if (user && !isDeletedUser(user)) return true;
 
       const chatFullInfo = selectChatFullInfo(global, id);
 
