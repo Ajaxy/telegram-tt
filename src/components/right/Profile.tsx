@@ -110,6 +110,7 @@ type OwnProps = {
   profileState: ProfileState;
   isMobile?: boolean;
   onProfileStateChange: (state: ProfileState) => void;
+  isActive: boolean;
 };
 
 type StateProps = {
@@ -173,6 +174,7 @@ const INTERSECTION_THROTTLE = 500;
 
 const Profile: FC<OwnProps & StateProps> = ({
   chatId,
+  isActive,
   threadId,
   profileState,
   theme,
@@ -826,7 +828,8 @@ const Profile: FC<OwnProps & StateProps> = ({
 
       {canAddMembers && (
         <FloatingActionButton
-          isShown={resultType === 'members'}
+          className={buildClassName(!isActive && 'hidden')}
+          isShown={canRenderContent}
           onClick={handleNewMemberDialogOpen}
           ariaLabel={oldLang('lng_channel_add_users')}
         >

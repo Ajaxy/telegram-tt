@@ -34,8 +34,15 @@
     }
   }
 
+  .hidden {
+    display: none;
+  }
+
   .FloatingActionButton {
     z-index: 1;
+    &.revealed {
+      transition-delay: 0.2s;
+    }
   }
 }
 

@@ -17,7 +17,7 @@ import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
-import AnimatedIcon from '../../common/AnimatedIcon';
+import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Avatar from '../../common/Avatar';
 import GroupChatInfo from '../../common/GroupChatInfo';
 import NothingFound from '../../common/NothingFound';
@@ -248,7 +248,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section">
-          <AnimatedIcon
+          <AnimatedIconWithPreview
             tgsUrl={LOCAL_TGS_URLS.DiscussionGroups}
             size={STICKER_SIZE_DISCUSSION_GROUPS}
             className="section-icon"

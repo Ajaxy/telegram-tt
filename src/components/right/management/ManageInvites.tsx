@@ -21,7 +21,7 @@ import useForceUpdate from '../../../hooks/useForceUpdate';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
-import AnimatedIcon from '../../common/AnimatedIcon';
+import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import NothingFound from '../../common/NothingFound';
@@ -274,7 +274,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     <div className="Management ManageInvites">
       <div className="custom-scroll">
         <div className="section">
-          <AnimatedIcon
+          <AnimatedIconWithPreview
             tgsUrl={LOCAL_TGS_URLS.Invite}
             size={STICKER_SIZE_INVITES}
             className="section-icon"
