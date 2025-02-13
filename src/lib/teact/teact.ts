@@ -722,6 +722,8 @@ function useEffectBase(
     };
   }
 
+  if (effectConfig) effectConfig.schedule = undefined; // Help GC
+
   byCursor[cursor] = {
     ...effectConfig,
     dependencies,
