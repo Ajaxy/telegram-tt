@@ -294,7 +294,6 @@ addActionHandler('sendStarPaymentForm', async (global, actions, payload): Promis
   global = updateStarsPayment(global, { status: 'paid' }, tabId);
   setGlobal(global);
   actions.closeStarsPaymentModal({ tabId });
-  actions.closeGiftModal({ tabId });
 
   if ('channelId' in result) {
     actions.openChat({ id: result.channelId, tabId });

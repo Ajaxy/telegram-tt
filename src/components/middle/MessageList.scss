@@ -340,7 +340,8 @@
     position: relative;
     margin-top: 0.5rem;
     display: flex;
-    gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: center;
     line-height: 1.5;
     font-weight: var(--font-weight-medium);
   }
@@ -384,7 +385,7 @@
   }
 
   .action-message-user-avatar {
-    margin-left: 0.25rem;
+    margin: 0 0.25rem;
   }
 
   .action-message-subtitle {

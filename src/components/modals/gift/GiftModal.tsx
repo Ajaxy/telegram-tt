@@ -70,7 +70,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   isSelf,
 }) => {
   const {
-    closeGiftModal, requestConfetti,
+    closeGiftModal,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -109,29 +109,6 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   const {
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: scrollerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
-
-  const showConfetti = useLastCallback(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (isOpen) {
-      const {
-        top, left, width, height,
-      } = dialog.querySelector('.modal-content')!.getBoundingClientRect();
-      requestConfetti({
-        top,
-        left,
-        width,
-        height,
-        withStars: true,
-      });
-    }
-  });
-
-  useEffect(() => {
-    if (renderingModal?.isCompleted) {
-      showConfetti();
-    }
-  }, [renderingModal]);
 
   useEffect(() => {
     if (!isOpen) {

@@ -613,7 +613,6 @@ export type TabState = {
   };
 
   giftModal?: {
-    isCompleted?: boolean;
     forPeerId: string;
     gifts?: ApiPremiumGiftCodeOption[];
   };
