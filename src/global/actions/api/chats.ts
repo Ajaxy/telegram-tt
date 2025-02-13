@@ -61,7 +61,6 @@ import {
   addChats,
   addMessages,
   addSimilarBots,
-  addSimilarChannels,
   addUsers,
   addUserStatuses,
   deleteChatMessages,
@@ -73,6 +72,7 @@ import {
   replaceChatListIds,
   replaceChatListLoadingParameters,
   replaceMessages,
+  replaceSimilarChannels,
   replaceThreadParam,
   replaceUserStatuses,
   toggleSimilarChannels,
@@ -2691,7 +2691,7 @@ addActionHandler('loadChannelRecommendations', async (global, actions, payload):
   const chatsById = buildCollectionByKey(similarChannels, 'id');
 
   global = getGlobal();
-  global = addSimilarChannels(global, chatId || GLOBAL_SUGGESTED_CHANNELS_ID, Object.keys(chatsById), count);
+  global = replaceSimilarChannels(global, chatId || GLOBAL_SUGGESTED_CHANNELS_ID, Object.keys(chatsById), count);
   setGlobal(global);
 });
 

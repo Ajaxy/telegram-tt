@@ -215,14 +215,11 @@ export type GlobalState = {
     forDiscussionIds?: string[];
     // Obtained from GetFullChat / GetFullChannel
     fullInfoById: Record<string, ApiChatFullInfo>;
-    similarChannelsById: Record<
-    string,
-    {
-      shouldShowInChat: boolean;
-      similarChannelIds: string[];
-      count: number;
-    }
-    >;
+    similarChannelsById: Partial<Record<string, {
+      isExpanded: boolean;
+      similarChannelIds?: string[];
+      count?: number;
+    }>>;
 
     similarBotsById: Record<string, SimilarBotsInfo>;
   };

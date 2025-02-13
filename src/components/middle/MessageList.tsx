@@ -261,7 +261,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       }
 
       const { shouldAppendJoinMessage, shouldAppendJoinMessageAfterCurrent } = (() => {
-        if (!channelJoinInfo) return undefined;
+        if (!channelJoinInfo || type !== 'thread') return undefined;
         if (prevMessage
           && prevMessage.date < channelJoinInfo.joinedDate && channelJoinInfo.joinedDate <= message.date) {
           return { shouldAppendJoinMessage: true, shouldAppendJoinMessageAfterCurrent: false };
