@@ -49,6 +49,7 @@ import {
   selectChatMessages,
   selectCurrentSharedMediaSearch,
   selectIsCurrentUserPremium,
+  selectIsGiftProfileFilterDefault,
   selectIsRightColumnShown,
   selectPeerStories,
   selectSimilarBotsIds,
@@ -63,6 +64,7 @@ import { selectPremiumLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
 import { getSenderName } from '../left/search/helpers/getSenderName';
 
@@ -79,6 +81,7 @@ import useProfileState from './hooks/useProfileState';
 import useProfileViewportIds from './hooks/useProfileViewportIds';
 import useTransitionFixes from './hooks/useTransitionFixes';
 
+import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import Audio from '../common/Audio';
 import Document from '../common/Document';
 import SavedGift from '../common/gift/SavedGift';
@@ -96,6 +99,7 @@ import MediaStory from '../story/MediaStory';
 import Button from '../ui/Button';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import InfiniteScroll from '../ui/InfiniteScroll';
+import Link from '../ui/Link';
 import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 import Spinner from '../ui/Spinner';
 import TabList from '../ui/TabList';
@@ -155,6 +159,7 @@ type StateProps = {
   isSavedDialog?: boolean;
   forceScrollProfileTab?: boolean;
   isSynced?: boolean;
+  isNotDefaultGiftFilter?: boolean;
 };
 
 type TabProps = {
@@ -219,6 +224,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   forceScrollProfileTab,
   isSynced,
   onProfileStateChange,
+  isNotDefaultGiftFilter,
 }) => {
   const {
     setSharedMediaSearchType,
@@ -237,6 +243,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     loadBotRecommendations,
     loadPreviewMedias,
     loadPeerSavedGifts,
+    resetGiftProfileFilter,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -482,6 +489,10 @@ const Profile: FC<OwnProps & StateProps> = ({
     setActiveTab(Math.min(newActiveTab, tabs.length - 1));
   }, [hasMembersTab, activeTab, tabs]);
 
+  const handleResetGiftsFilter = useLastCallback(() => {
+    resetGiftProfileFilter();
+  });
+
   useEffect(() => {
     if (!transitionRef.current || !IS_TOUCH_ENV) {
       return undefined;
@@ -523,6 +534,28 @@ const Profile: FC<OwnProps & StateProps> = ({
     }];
   }
 
+  function renderNothingFoundGiftsWithFilter() {
+    return (
+      <div className="nothing-found-gifts">
+        <AnimatedIconWithPreview
+          size={160}
+          tgsUrl={LOCAL_TGS_URLS.SearchingDuck}
+          nonInteractive
+          noLoop
+        />
+        <div className="description">
+          {lang('GiftSearchEmpty')}
+        </div>
+        <Link
+          className="date"
+          onClick={handleResetGiftsFilter}
+        >
+          {lang('GiftSearchReset')}
+        </Link>
+      </div>
+    );
+  }
+
   function renderContent() {
     if (resultType === 'dialogs') {
       return (
@@ -535,7 +568,9 @@ const Profile: FC<OwnProps & StateProps> = ({
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
 
       return (
-        <div className="content empty-list">
+        <div
+          className="content empty-list"
+        >
           {!noSpinner && !forceRenderHiddenMembers && <Spinner />}
           {forceRenderHiddenMembers && <NothingFound text="You have no access to group members list." />}
         </div>
@@ -544,6 +579,10 @@ const Profile: FC<OwnProps & StateProps> = ({
 
     if (viewportIds && !viewportIds?.length) {
       let text: string;
+
+      if (resultType === 'gifts' && isNotDefaultGiftFilter) {
+        return renderNothingFoundGiftsWithFilter();
+      }
 
       switch (resultType) {
         case 'members':
@@ -912,7 +951,9 @@ export default memo(withGlobal<OwnProps>(
     const archiveStoryIds = peerStories?.archiveIds;
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
-    const peerGifts = global.peers.giftsById[chatId];
+    const peerGifts = selectTabState(global).savedGifts.giftsByPeerId[chatId];
+
+    const isNotDefaultGiftFilter = !selectIsGiftProfileFilterDefault(global);
 
     return {
       theme: selectTheme(global),
@@ -952,6 +993,7 @@ export default memo(withGlobal<OwnProps>(
       isTopicInfo,
       isSavedDialog,
       isSynced: global.isSynced,
+      isNotDefaultGiftFilter,
       limitSimilarPeers: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: commonChats?.ids }),

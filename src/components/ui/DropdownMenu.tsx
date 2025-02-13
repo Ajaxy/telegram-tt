@@ -24,6 +24,7 @@ type OwnProps = {
   onTransitionEnd?: NoneToVoidFunction;
   onMouseEnterBackdrop?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   children: React.ReactNode;
+  autoClose?: boolean;
 };
 
 const DropdownMenu: FC<OwnProps> = ({
@@ -41,6 +42,7 @@ const DropdownMenu: FC<OwnProps> = ({
   onTransitionEnd,
   onMouseEnterBackdrop,
   onHide,
+  autoClose = true,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
@@ -110,7 +112,7 @@ const DropdownMenu: FC<OwnProps> = ({
         positionX={positionX}
         positionY={positionY}
         footer={footer}
-        autoClose
+        autoClose={autoClose}
         onClose={handleClose}
         onCloseAnimationEnd={onHide}
         onMouseEnterBackdrop={onMouseEnterBackdrop}

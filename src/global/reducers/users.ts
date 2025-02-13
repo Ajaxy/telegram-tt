@@ -329,20 +329,20 @@ export function replacePeerSavedGifts<T extends GlobalState>(
   peerId: string,
   gifts: ApiSavedStarGift[],
   nextOffset?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  global = {
-    ...global,
-    peers: {
-      ...global.peers,
-      giftsById: {
-        ...global.peers.giftsById,
+  const tabState = selectTabState(global, tabId);
+
+  return updateTabState(global, {
+    savedGifts: {
+      ...tabState.savedGifts,
+      giftsByPeerId: {
+        ...tabState.savedGifts.giftsByPeerId,
         [peerId]: {
           gifts,
           nextOffset,
         },
       },
     },
-  };
-
-  return global;
+  }, tabId);
 }

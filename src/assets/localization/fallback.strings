@@ -1599,6 +1599,15 @@
 "ViewButtonGiftUnique" = "VIEW COLLECTIBLE";
 "AuthContinueOnThisLanguage" = "Continue in English";
 "Share" = "Share";
+"GiftSortByDate" = "Sort by Date";
+"GiftSortByValue" = "Sort by Value";
+"GiftFilterUnlimited" = "Unlimited";
+"GiftFilterLimited" = "Limited";
+"GiftFilterUnique" = "Unique";
+"GiftFilterDisplayed" = "Displayed";
+"GiftFilterHidden" = "Hidden";
+"GiftSearchEmpty" = "No matching gifts";
+"GiftSearchReset" = "View All Gifts";
 "CheckPasswordTitle" = "Enter Password";
 "CheckPasswordPlaceholder" = "Password";
 "CheckPasswordDescription" = "Please enter your password to continue.";

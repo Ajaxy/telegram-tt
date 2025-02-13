@@ -20,6 +20,7 @@ import MonkeyPeek from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyPeek.tgs
 import MonkeyTracking from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyTracking.tgs';
 import ReadTime from '../../../assets/tgs/ReadTime.tgs';
 import Report from '../../../assets/tgs/Report.tgs';
+import SearchingDuck from '../../../assets/tgs/SearchingDuck.tgs';
 import Congratulations from '../../../assets/tgs/settings/Congratulations.tgs';
 import DiscussionGroups from '../../../assets/tgs/settings/DiscussionGroupsDucks.tgs';
 import Experimental from '../../../assets/tgs/settings/Experimental.tgs';
@@ -64,4 +65,5 @@ export const LOCAL_TGS_URLS = {
   StarReactionEffect,
   StarReaction,
   Report,
+  SearchingDuck,
 };

@@ -417,6 +417,7 @@ export enum ProfileState {
   Profile,
   SharedMedia,
   MemberList,
+  GiftList,
   StoryList,
   SavedDialogs,
 }
@@ -656,4 +657,13 @@ export type CallSound = (
 
 export type BotAppPermissions = {
   geolocation?: boolean;
+};
+
+export type GiftProfileFilterOptions = {
+  sortType: 'byDate' | 'byValue';
+  shouldIncludeUnlimited: boolean;
+  shouldIncludeLimited: boolean;
+  shouldIncludeUnique: boolean;
+  shouldIncludeDisplayed: boolean;
+  shouldIncludeHidden: boolean;
 };

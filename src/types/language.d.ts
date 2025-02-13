@@ -1306,6 +1306,15 @@ export interface LangPair {
   'ViewButtonGiftUnique': undefined;
   'AuthContinueOnThisLanguage': undefined;
   'Share': undefined;
+  'GiftSortByDate': undefined;
+  'GiftSortByValue': undefined;
+  'GiftFilterUnlimited': undefined;
+  'GiftFilterLimited': undefined;
+  'GiftFilterUnique': undefined;
+  'GiftFilterDisplayed': undefined;
+  'GiftFilterHidden': undefined;
+  'GiftSearchEmpty': undefined;
+  'GiftSearchReset': undefined;
   'CheckPasswordTitle': undefined;
   'CheckPasswordPlaceholder': undefined;
   'CheckPasswordDescription': undefined;

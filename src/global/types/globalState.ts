@@ -24,7 +24,6 @@ import type {
   ApiQuickReply,
   ApiReaction,
   ApiReactionKey,
-  ApiSavedGifts,
   ApiSavedReactionTag,
   ApiSession,
   ApiSponsoredMessage,
@@ -176,7 +175,6 @@ export type GlobalState = {
 
   peers: {
     profilePhotosById: Record<string, ApiPeerPhotos>;
-    giftsById: Record<string, ApiSavedGifts>;
   };
 
   chats: {

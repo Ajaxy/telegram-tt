@@ -59,6 +59,7 @@ import type {
   CallSound,
   ChatListType,
   ConfettiParams,
+  GiftProfileFilterOptions,
   GlobalSearchContent,
   IAlbum,
   IAnchorPosition,
@@ -2341,11 +2342,11 @@ export interface ActionPayloads {
   loadPeerSavedGifts: {
     peerId: string;
     shouldRefresh?: boolean;
-  };
+  } & WithTabId;
   changeGiftVisibility: {
     gift: ApiInputSavedStarGift;
     shouldUnsave?: boolean;
-  };
+  } & WithTabId;
   convertGiftToStars: {
     gift: ApiInputSavedStarGift;
   } & WithTabId;
@@ -2368,6 +2369,11 @@ export interface ActionPayloads {
     duration?: number;
   } & WithTabId;
   closeSuggestedStatusModal: WithTabId | undefined;
+
+  updateGiftProfileFilter: {
+    filter: Partial<GiftProfileFilterOptions>;
+  } & WithTabId;
+  resetGiftProfileFilter: WithTabId | undefined;
 
   // Invoice
   openInvoice: Exclude<ApiInputInvoice, ApiInputInvoiceStarGift> & WithTabId;

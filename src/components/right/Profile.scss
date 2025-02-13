@@ -46,6 +46,36 @@
   }
 }
 
+.nothing-found-gifts {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding-top: 5rem;
+  height: 100%;
+
+  .description {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    margin-block: 1rem;
+    unicode-bidi: plaintext;
+  }
+
+  .Link {
+    color: var(--color-links);
+    font-weight: var(--font-weight-medium);
+    transition: opacity 0.15s ease-in;
+
+    &:active,
+    &:hover {
+      text-decoration: none;
+      opacity: 0.85;
+    }
+  }
+}
+
 .shared-media {
   display: flex;
   flex-direction: column-reverse;

@@ -32,6 +32,7 @@ import type {
   ApiPremiumSection,
   ApiReactionWithPaid,
   ApiReceiptRegular,
+  ApiSavedGifts,
   ApiSavedStarGift,
   ApiStarGift,
   ApiStarGiftAttribute,
@@ -57,6 +58,7 @@ import type {
   ChatRequestedTranslations,
   ConfettiStyle,
   FocusDirection,
+  GiftProfileFilterOptions,
   GlobalSearchContent,
   IAlbum,
   IAnchorPosition,
@@ -200,6 +202,11 @@ export type TabState = {
   inlineBots: {
     isLoading: boolean;
     byUsername: Record<string, false | InlineBotSettings>;
+  };
+
+  savedGifts: {
+    giftsByPeerId: Record<string, ApiSavedGifts>;
+    filter: GiftProfileFilterOptions;
   };
 
   globalSearch: {

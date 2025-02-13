@@ -1,5 +1,6 @@
 import type { ActionReturnType } from '../../types';
 
+import { DEFAULT_GIFT_PROFILE_FILTER_OPTIONS } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addActionHandler } from '../../index';
 import {
@@ -63,5 +64,57 @@ addActionHandler('closeGiftCodeModal', (global, actions, payload): ActionReturnT
 
   return updateTabState(global, {
     giftCodeModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('updateGiftProfileFilter', (global, actions, payload): ActionReturnType => {
+  const { filter, tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+
+  const prevFilter = tabState.savedGifts.filter;
+  let updatedFilter = {
+    ...prevFilter,
+    ...filter,
+  };
+
+  if (!updatedFilter.shouldIncludeUnlimited
+    && !updatedFilter.shouldIncludeLimited
+    && !updatedFilter.shouldIncludeUnique) {
+    updatedFilter = {
+      ...prevFilter,
+      shouldIncludeUnlimited: true,
+      shouldIncludeLimited: true,
+      shouldIncludeUnique: true,
+      ...filter,
+    };
+  }
+
+  if (!updatedFilter.shouldIncludeDisplayed && !updatedFilter.shouldIncludeHidden) {
+    updatedFilter = {
+      ...prevFilter,
+      shouldIncludeDisplayed: true,
+      shouldIncludeHidden: true,
+      ...filter,
+    };
+  }
+
+  return updateTabState(global, {
+    savedGifts: {
+      giftsByPeerId: {},
+      filter: updatedFilter,
+    },
+  }, tabId);
+});
+
+addActionHandler('resetGiftProfileFilter', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    savedGifts: {
+      giftsByPeerId: {},
+      filter: {
+        ...DEFAULT_GIFT_PROFILE_FILTER_OPTIONS,
+      },
+    },
   }, tabId);
 });

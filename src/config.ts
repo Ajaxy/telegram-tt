@@ -1,6 +1,9 @@
 import type {
   ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection, ApiReactionEmoji,
 } from './api/types';
+import type {
+  GiftProfileFilterOptions,
+} from './types';
 
 export const APP_CODE_NAME = 'A';
 export const APP_NAME = process.env.APP_NAME || `Telegram Web ${APP_CODE_NAME}`;
@@ -427,3 +430,12 @@ export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [
   'dialogFiltersChats',
   'recommendedChannels',
 ];
+
+export const DEFAULT_GIFT_PROFILE_FILTER_OPTIONS : GiftProfileFilterOptions = {
+  sortType: 'byDate',
+  shouldIncludeUnlimited: true,
+  shouldIncludeLimited: true,
+  shouldIncludeUnique: true,
+  shouldIncludeDisplayed: true,
+  shouldIncludeHidden: true,
+} as const;
