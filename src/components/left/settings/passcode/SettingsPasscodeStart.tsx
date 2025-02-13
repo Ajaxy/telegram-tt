@@ -44,7 +44,7 @@ const SettingsPasscodeStart: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item pt-0">
+      <div className="settings-item pt-2">
         <Button onClick={onStart}>{lang('EnablePasscode')}</Button>
       </div>
     </div>

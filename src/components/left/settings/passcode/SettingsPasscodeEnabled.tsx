@@ -41,7 +41,7 @@ const SettingsPasscodeEnabled: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item pt-0">
+      <div className="settings-item pt-2">
         <ListItem
           icon="edit"
           // eslint-disable-next-line react/jsx-no-bind

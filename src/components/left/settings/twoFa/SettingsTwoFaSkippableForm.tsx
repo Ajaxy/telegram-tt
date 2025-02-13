@@ -110,7 +110,7 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
         </p>
       </div>
 
-      <div className="settings-item pt-0">
+      <div className="settings-item pt-2">
         <form action="" onSubmit={handleSubmit}>
           <InputText
             ref={inputRef}

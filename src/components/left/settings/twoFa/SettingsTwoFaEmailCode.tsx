@@ -91,7 +91,7 @@ const SettingsTwoFaEmailCode: FC<OwnProps & StateProps> = ({
         </p>
       </div>
 
-      <div className="settings-item pt-0">
+      <div className="settings-item pt-2">
         <InputText
           value={value}
           ref={inputRef}

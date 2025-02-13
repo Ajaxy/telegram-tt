@@ -67,7 +67,7 @@ const SettingsPasswordForm: FC<OwnProps> = ({
         <PasswordMonkey isBig isPasswordVisible={shouldShowPassword} />
       </div>
 
-      <div className="settings-item pt-0">
+      <div className="settings-item pt-2">
         <PasswordForm
           error={validationError || error}
           hint={hint}
