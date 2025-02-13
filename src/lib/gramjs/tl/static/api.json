@@ -60,6 +60,7 @@
     "account.toggleUsername",
     "account.resolveBusinessChatLink",
     "account.toggleSponsoredMessages",
+    "account.getCollectibleEmojiStatuses",
     "users.getUsers",
     "users.getFullUser",
     "contacts.getContacts",

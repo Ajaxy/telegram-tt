@@ -3,14 +3,16 @@ import React, { memo, useMemo } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
 import type {
+  ApiEmojiStatusCollectible,
+  ApiEmojiStatusType,
   ApiPeer,
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
-import { TME_LINK_PREFIX } from '../../../../config';
+import { DEFAULT_STATUS_ICON_ID, TME_LINK_PREFIX } from '../../../../config';
 import { getHasAdminRight, getPeerTitle } from '../../../../global/helpers';
 import { isApiPeerChat } from '../../../../global/helpers/peers';
-import { selectPeer } from '../../../../global/selectors';
+import { selectPeer, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';
 import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
@@ -51,6 +53,8 @@ type StateProps = {
   currentUserId?: string;
   starGiftMaxConvertPeriod?: number;
   hasAdminRights?: boolean;
+  currentUserEmojiStatus?: ApiEmojiStatusType;
+  collectibleEmojiStatuses?: ApiEmojiStatusType[];
 };
 
 const STICKER_SIZE = 120;
@@ -62,6 +66,8 @@ const GiftInfoModal = ({
   currentUserId,
   starGiftMaxConvertPeriod,
   hasAdminRights,
+  currentUserEmojiStatus,
+  collectibleEmojiStatuses,
 }: OwnProps & StateProps) => {
   const {
     closeGiftInfoModal,
@@ -72,6 +78,8 @@ const GiftInfoModal = ({
     openGiftUpgradeModal,
     showNotification,
     openChatWithDraft,
+    openGiftStatusInfoModal,
+    setEmojiStatus,
     openGiftTransferModal,
   } = getActions();
 
@@ -99,6 +107,25 @@ const GiftInfoModal = ({
   const gift = isSavedGift ? typeGift.gift : typeGift;
   const giftSticker = gift && getStickerFromGift(gift);
 
+  const currenUniqueEmojiStatusSlug = currentUserEmojiStatus?.type === 'collectible'
+    ? currentUserEmojiStatus.slug : undefined;
+
+  const starGiftUniqueSlug = gift?.type === 'starGiftUnique' ? gift.slug : undefined;
+  const starGiftUniqueLink = useMemo(() => {
+    if (!starGiftUniqueSlug) return undefined;
+    return `${TME_LINK_PREFIX}nft/${starGiftUniqueSlug}`;
+  }, [starGiftUniqueSlug]);
+  const userCollectibleStatus = useMemo(() => {
+    if (!starGiftUniqueSlug) return undefined;
+    return collectibleEmojiStatuses?.find((
+      status,
+    ) => status.type === 'collectible' && status.slug === starGiftUniqueSlug) as ApiEmojiStatusCollectible | undefined;
+  }, [starGiftUniqueSlug, collectibleEmojiStatuses]);
+
+  const isGiftUnique = gift && gift.type === 'starGiftUnique';
+  const canTakeOff = isGiftUnique && currenUniqueEmojiStatusSlug === gift.slug;
+  const canWear = userCollectibleStatus && !canTakeOff;
+
   const canFocusUpgrade = Boolean(savedGift?.upgradeMsgId);
   const canUpdate = !canFocusUpgrade && savedGift?.inputGift && (
     isTargetChat ? hasAdminRights : renderingTargetPeer?.id === currentUserId
@@ -107,12 +134,6 @@ const GiftInfoModal = ({
   const handleClose = useLastCallback(() => {
     closeGiftInfoModal();
   });
-
-  const starGiftUniqueLink = useMemo(() => {
-    const slug = gift?.type === 'starGiftUnique' ? gift.slug : undefined;
-    if (!slug) return undefined;
-    return `${TME_LINK_PREFIX}nft/${slug}`;
-  }, [gift]);
 
   const handleCopyLink = useLastCallback(() => {
     if (!starGiftUniqueLink) return;
@@ -131,6 +152,19 @@ const GiftInfoModal = ({
   const handleTransfer = useLastCallback(() => {
     if (savedGift?.gift.type !== 'starGiftUnique') return;
     openGiftTransferModal({ gift: savedGift });
+  });
+
+  const handleWear = useLastCallback(() => {
+    if (gift?.type !== 'starGiftUnique' || !userCollectibleStatus) return;
+    openGiftStatusInfoModal({ emojiStatus: userCollectibleStatus });
+  });
+
+  const handleTakeOff = useLastCallback(() => {
+    if (canTakeOff) {
+      setEmojiStatus({
+        emojiStatus: { type: 'regular', documentId: DEFAULT_STATUS_ICON_ID },
+      });
+    }
   });
 
   const handleFocusUpgraded = useLastCallback(() => {
@@ -271,35 +305,37 @@ const GiftInfoModal = ({
     })();
 
     function getTitle() {
-      if (gift?.type === 'starGiftUnique') return gift.title;
+      if (isGiftUnique) return gift.title;
       if (!savedGift) return lang('GiftInfoSoldOutTitle');
 
       return canUpdate ? lang('GiftInfoReceived') : lang('GiftInfoTitle');
     }
 
-    const isUniqueGift = gift.type === 'starGiftUnique';
-
-    const contextMenu = (
+    const uniqueGiftContextMenu = (
       <DropdownMenu
         className="with-menu-transitions"
         trigger={SettingsMenuButton}
         positionX="right"
       >
-        <MenuItem
-          icon="link-badge"
-          onClick={handleCopyLink}
-        >
+        <MenuItem icon="link-badge" onClick={handleCopyLink}>
           {lang('CopyLink')}
         </MenuItem>
-        <MenuItem
-          icon="forward"
-          onClick={handleLinkShare}
-        >
+        <MenuItem icon="forward" onClick={handleLinkShare}>
           {lang('Share')}
         </MenuItem>
-        {canUpdate && isUniqueGift && (
+        {canUpdate && isGiftUnique && (
           <MenuItem icon="diamond" onClick={handleTransfer}>
             {lang('GiftInfoTransfer')}
+          </MenuItem>
+        )}
+        {canWear && (
+          <MenuItem icon="crown-wear" onClick={handleWear}>
+            {lang('GiftInfoWear')}
+          </MenuItem>
+        )}
+        {canTakeOff && (
+          <MenuItem icon="crown-take-off" onClick={handleTakeOff}>
+            {lang('GiftInfoTakeOff')}
           </MenuItem>
         )}
       </DropdownMenu>
@@ -319,11 +355,11 @@ const GiftInfoModal = ({
         >
           <Icon name="close" />
         </Button>
-        {isOpen && contextMenu}
+        {isOpen && uniqueGiftContextMenu}
       </div>
     );
 
-    const uniqueGiftHeader = isUniqueGift && (
+    const uniqueGiftHeader = isGiftUnique && (
       <div className={buildClassName(styles.header, styles.uniqueGift)}>
         <UniqueGiftHeader
           backdropAttribute={giftAttributes!.backdrop!}
@@ -432,7 +468,7 @@ const GiftInfoModal = ({
       }
     }
 
-    if (gift.type === 'starGiftUnique') {
+    if (isGiftUnique) {
       const { ownerName, ownerAddress, ownerId } = gift;
       const {
         model, backdrop, pattern, originalDetails,
@@ -458,7 +494,7 @@ const GiftInfoModal = ({
       } else {
         tableData.push([
           lang('GiftInfoOwner'),
-          ownerId ? { chatId: ownerId } : ownerName || '',
+          ownerId ? { chatId: ownerId, withEmojiStatus: true } : ownerName || '',
         ]);
       }
 
@@ -590,14 +626,16 @@ const GiftInfoModal = ({
     );
 
     return {
-      modalHeader: isUniqueGift ? uniqueGiftModalHeader : undefined,
-      header: isUniqueGift ? uniqueGiftHeader : regularHeader,
+      modalHeader: isGiftUnique ? uniqueGiftModalHeader : undefined,
+      header: isGiftUnique ? uniqueGiftHeader : regularHeader,
       tableData,
       footer,
     };
   }, [
-    typeGift, savedGift, renderingTargetPeer, giftSticker, lang, canUpdate, canConvertDifference, isSender, oldLang,
-    gift, giftAttributes, renderFooterButton, isTargetChat, SettingsMenuButton, isOpen,
+    typeGift, savedGift, renderingTargetPeer, giftSticker, lang,
+    canUpdate, canConvertDifference, isSender, oldLang,
+    gift, giftAttributes, renderFooterButton, isTargetChat,
+    SettingsMenuButton, isOpen, isGiftUnique, canWear, canTakeOff,
   ]);
 
   return (
@@ -606,7 +644,7 @@ const GiftInfoModal = ({
         isOpen={isOpen}
         modalHeader={modalData?.modalHeader}
         header={modalData?.header}
-        hasBackdrop={gift?.type === 'starGiftUnique'}
+        hasBackdrop={isGiftUnique}
         tableData={modalData?.tableData}
         footer={modalData?.footer}
         className={styles.modal}
@@ -656,6 +694,9 @@ export default memo(withGlobal<OwnProps>(
     const targetPeer = modal?.peerId ? selectPeer(global, modal.peerId) : undefined;
     const chat = targetPeer && isApiPeerChat(targetPeer) ? targetPeer : undefined;
     const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');
+    const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
+    const currentUserEmojiStatus = currentUser?.emojiStatus;
+    const collectibleEmojiStatuses = global.collectibleEmojiStatuses?.statuses;
 
     return {
       fromPeer,
@@ -663,6 +704,8 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: global.currentUserId,
       starGiftMaxConvertPeriod: global.appConfig?.starGiftMaxConvertPeriod,
       hasAdminRights,
+      currentUserEmojiStatus,
+      collectibleEmojiStatuses,
     };
   },
 )(GiftInfoModal));

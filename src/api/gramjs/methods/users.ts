@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiPeer, ApiUser,
+  ApiChat, ApiEmojiStatusType, ApiPeer, ApiUser,
 } from '../../types';
 
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -304,9 +304,9 @@ export function reportSpam(userOrChat: ApiPeer) {
   });
 }
 
-export function updateEmojiStatus(emojiStatusId: string, expires?: number) {
+export function updateEmojiStatus(emojiStatus: ApiEmojiStatusType) {
   return invokeRequest(new GramJs.account.UpdateEmojiStatus({
-    emojiStatus: buildInputEmojiStatus(emojiStatusId, expires),
+    emojiStatus: buildInputEmojiStatus(emojiStatus),
   }), {
     shouldReturnTrue: true,
   });

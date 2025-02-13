@@ -144,6 +144,10 @@
   justify-content: flex-end;
   pointer-events: none;
 
+  :global(.statusSparkles) {
+    color: var(--color-white) !important;
+  }
+
   &:dir(rtl) {
     .status {
       text-align: right;

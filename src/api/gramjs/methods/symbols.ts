@@ -276,6 +276,23 @@ export async function fetchDefaultStatusEmojis() {
   };
 }
 
+export async function fetchCollectibleEmojiStatuses({ hash = '0' }: { hash?: string }) {
+  const result = await invokeRequest(new GramJs.account.GetCollectibleEmojiStatuses(
+    { hash: BigInt(hash) },
+  ));
+
+  if (!(result instanceof GramJs.account.EmojiStatuses)) {
+    return undefined;
+  }
+
+  const statuses = result.statuses.map(buildApiEmojiStatus).filter(Boolean);
+
+  return {
+    statuses,
+    hash: String(result.hash),
+  };
+}
+
 export async function searchStickers({ query, hash = '0' }: { query: string; hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.SearchStickerSets({
     q: query,

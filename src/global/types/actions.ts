@@ -50,6 +50,7 @@ import type {
   BotsPrivacyType,
   PrivacyVisibility,
 } from '../../api/types';
+import type { ApiEmojiStatusCollectible, ApiEmojiStatusType } from '../../api/types/users';
 import type { ApiCredentials } from '../../components/payment/PaymentModal';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
@@ -1831,6 +1832,7 @@ export interface ActionPayloads {
   clearRecentCustomEmoji: undefined;
   loadFeaturedEmojiStickers: undefined;
   loadDefaultStatusIcons: undefined;
+  loadUserCollectibleStatuses: undefined;
   loadRecentEmojiStatuses: undefined;
 
   // Bots
@@ -2345,6 +2347,10 @@ export interface ActionPayloads {
   } & WithTabId;
   clearGiftWithdrawError: WithTabId | undefined;
   closeGiftWithdrawModal: WithTabId | undefined;
+  openGiftStatusInfoModal: {
+    emojiStatus: ApiEmojiStatusCollectible;
+  } & WithTabId;
+  closeGiftStatusInfoModal: WithTabId | undefined;
   processStarGiftWithdrawal: {
     gift: ApiInputSavedStarGift;
     password: string;
@@ -2379,8 +2385,7 @@ export interface ActionPayloads {
   closeStarsGiftModal: WithTabId | undefined;
 
   setEmojiStatus: {
-    emojiStatusId: string;
-    expires?: number;
+    emojiStatus: ApiEmojiStatusType;
     referrerWebAppKey?: string;
   } & WithTabId;
   openSuggestedStatusModal: {

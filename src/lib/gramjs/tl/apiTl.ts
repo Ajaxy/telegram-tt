@@ -1462,6 +1462,7 @@ account.reorderUsernames#ef500eab order:Vector<string> = Bool;
 account.toggleUsername#58d6b376 username:string active:Bool = Bool;
 account.resolveBusinessChatLink#5492e5ee slug:string = account.ResolvedBusinessChatLinks;
 account.toggleSponsoredMessages#b9d9a38d enabled:Bool = Bool;
+account.getCollectibleEmojiStatuses#2e7b4543 hash:long = account.EmojiStatuses;
 users.getUsers#d91a548 id:Vector<InputUser> = Vector<User>;
 users.getFullUser#b60f5918 id:InputUser = users.UserFull;
 contacts.getContacts#5dd69e12 hash:long = contacts.Contacts;

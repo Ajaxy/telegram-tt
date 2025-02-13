@@ -1437,6 +1437,9 @@
 "GiftInfoViewUpgraded" = "View Upgraded Gift";
 "GiftInfoUpgradeBadge" = "upgrade";
 "GiftInfoUpgradeForFree" = "Upgrade For Free";
+"GiftInfoWithdraw" = "Withdraw";
+"GiftInfoWear" = "Wear";
+"GiftInfoTakeOff" = "Take Off";
 "GiftInfoTransfer" = "Transfer";
 "GiftTransferTitle" = "Transfer";
 "GiftTransferTON" = "Send via Blockchain";
@@ -1620,3 +1623,13 @@
 "CheckPasswordTitle" = "Enter Password";
 "CheckPasswordPlaceholder" = "Password";
 "CheckPasswordDescription" = "Please enter your password to continue.";
+"UniqueStatusWearTitle" = "Wear {gift}";
+"UniqueStatusBenefitsDescription" = "and get these benefits:";
+"UniqueStatusBadgeBenefitTitle" = "Radiant Badge";
+"UniqueStatusBadgeDescription" = "The glittering icon of this item will be displayed next to your name.";
+"UniqueStatusProfileDesignBenefitTitle" = "Unique Profile Design";
+"UniqueStatusProfileDesignDescription" = "Your profile page will get the color and the symbol of this item.";
+"UniqueStatusProofOfOwnershipBenefitTitle" = "Proof of Ownership";
+"UniqueStatusProofOfOwnershipDescription" = "Tapping the icon of this item next to your name will show its info and owner.";
+"UniqueStatusWearButton" = "Start Wearing";
+"CollectibleStatusesCategory" = "Collectibles";

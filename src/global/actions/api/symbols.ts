@@ -239,6 +239,31 @@ addActionHandler('loadDefaultStatusIcons', async (global): Promise<void> => {
   setGlobal(global);
 });
 
+addActionHandler('loadUserCollectibleStatuses', async (global, actions): Promise<void> => {
+  setGlobal(global);
+
+  const { hash } = global.collectibleEmojiStatuses || {};
+
+  const result = await callApi('fetchCollectibleEmojiStatuses', { hash });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+
+  global = {
+    ...global,
+    collectibleEmojiStatuses: {
+      hash: result.hash,
+      statuses: result.statuses,
+    },
+  };
+  setGlobal(global);
+  const documentIds = result.statuses.map(({ documentId }) => documentId);
+
+  actions.loadCustomEmojis({ ids: documentIds });
+});
+
 addActionHandler('loadStickers', (global, actions, payload): ActionReturnType => {
   const { stickerSetInfo } = payload;
   const cachedSet = selectStickerSet(global, stickerSetInfo);

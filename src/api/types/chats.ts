@@ -4,7 +4,7 @@ import type {
 } from './messages';
 import type { ApiBotVerification, ApiChatInviteImporter } from './misc';
 import type {
-  ApiEmojiStatus, ApiFakeType, ApiUser, ApiUsername,
+  ApiEmojiStatusType, ApiFakeType, ApiUser, ApiUsername,
 } from './users';
 
 type ApiChatType = (
@@ -44,7 +44,7 @@ export interface ApiChat {
   isProtected?: boolean;
   fakeType?: ApiFakeType;
   color?: ApiPeerColor;
-  emojiStatus?: ApiEmojiStatus;
+  emojiStatus?: ApiEmojiStatusType;
   isForum?: boolean;
   isForumAsMessages?: true;
   boostLevel?: number;

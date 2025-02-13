@@ -230,6 +230,7 @@ const Main = ({
     openThread,
     toggleLeftColumn,
     loadRecentEmojiStatuses,
+    loadUserCollectibleStatuses,
     updatePageTitle,
     loadTopReactions,
     loadRecentReactions,
@@ -335,6 +336,7 @@ const Main = ({
       loadTopBotApps();
       loadPaidReactionPrivacy();
       loadPasswordInfo();
+      loadUserCollectibleStatuses();
     }
   }, [isMasterTab, isSynced]);
 

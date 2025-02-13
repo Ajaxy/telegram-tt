@@ -2,6 +2,8 @@ import React, { memo, type TeactNode } from '../../../lib/teact/teact';
 
 import type { IconName } from '../../../types/icons';
 
+import buildClassName from '../../../util/buildClassName';
+
 import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
@@ -13,6 +15,7 @@ import styles from './TableAboutModal.module.scss';
 export type TableAboutData = [IconName | undefined, TeactNode, TeactNode][];
 
 type OwnProps = {
+  contentClassName?: string;
   isOpen?: boolean;
   listItemData?: TableAboutData;
   headerIconName?: IconName;
@@ -36,11 +39,12 @@ const TableAboutModal = ({
   withSeparator,
   onClose,
   onButtonClick,
+  contentClassName,
 }: OwnProps) => {
   return (
     <Modal
       isOpen={isOpen}
-      className={styles.root}
+      className={buildClassName(styles.root, contentClassName)}
       contentClassName={styles.content}
       hasAbsoluteCloseButton
       absoluteCloseButtonColor={hasBackdrop ? 'translucent-white' : undefined}
@@ -55,6 +59,7 @@ const TableAboutModal = ({
               isStatic
               multiline
               icon={icon}
+              iconClassName={styles.listItemIcon}
             >
               <span className="title">{title}</span>
               <span className="subtitle">{subtitle}</span>

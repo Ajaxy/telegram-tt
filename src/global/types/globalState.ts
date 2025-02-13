@@ -11,6 +11,7 @@ import type {
   ApiConfig,
   ApiCountry,
   ApiCountryCode,
+  ApiEmojiStatusType,
   ApiGroupCall,
   ApiLanguage,
   ApiMessage,
@@ -360,6 +361,11 @@ export type GlobalState = {
   defaultStatusIconsId?: string;
   premiumGifts?: ApiStickerSet;
   emojiKeywords: Record<string, EmojiKeywords | undefined>;
+
+  collectibleEmojiStatuses?: {
+    statuses: ApiEmojiStatusType[];
+    hash?: string;
+  };
 
   gifs: {
     saved: {

@@ -9,5 +9,6 @@ export { default as GiftModal } from '../components/modals/gift/GiftModal';
 export { default as GiftRecipientPicker } from '../components/modals/gift/recipient/GiftRecipientPicker';
 export { default as GiftInfoModal } from '../components/modals/gift/info/GiftInfoModal';
 export { default as GiftUpgradeModal } from '../components/modals/gift/upgrade/GiftUpgradeModal';
+export { default as GiftStatusInfoModal } from '../components/modals/gift/status/GiftStatusInfoModal';
 export { default as GiftWithdrawModal } from '../components/modals/gift/withdraw/GiftWithdrawModal';
 export { default as GiftTransferModal } from '../components/modals/gift/transfer/GiftTransferModal';

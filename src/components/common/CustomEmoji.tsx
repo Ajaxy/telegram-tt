@@ -13,6 +13,7 @@ import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListene
 import useLastCallback from '../../hooks/useLastCallback';
 import useCustomEmoji from './hooks/useCustomEmoji';
 
+import Sparkles from './Sparkles';
 import StickerView from './StickerView';
 
 import styles from './CustomEmoji.module.scss';
@@ -41,6 +42,9 @@ type OwnProps = {
   observeIntersectionForPlaying?: ObserveFn;
   onClick?: NoneToVoidFunction;
   onAnimationEnd?: NoneToVoidFunction;
+  withSparkles?: boolean;
+  sparklesClassName?: string;
+  sparklesStyle?: string;
 };
 
 const STICKER_SIZE = 20;
@@ -67,6 +71,9 @@ const CustomEmoji: FC<OwnProps> = ({
   observeIntersectionForPlaying,
   onClick,
   onAnimationEnd,
+  withSparkles,
+  sparklesStyle,
+  sparklesClassName,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -114,6 +121,7 @@ const CustomEmoji: FC<OwnProps> = ({
       ref={containerRef}
       className={buildClassName(
         styles.root,
+        withSparkles && styles.withSparkles,
         className,
         'custom-emoji',
         'emoji',
@@ -125,6 +133,16 @@ const CustomEmoji: FC<OwnProps> = ({
       data-alt={customEmoji?.emoji}
       style={style}
     >
+      {withSparkles && (
+        <Sparkles
+          className={buildClassName(
+            styles.sparkles,
+            sparklesClassName,
+          )}
+          style={sparklesStyle}
+          preset="button"
+        />
+      )}
       {isSelectable && (
         <img
           className={styles.highlightCatch}

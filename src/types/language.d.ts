@@ -1197,6 +1197,9 @@ export interface LangPair {
   'GiftInfoViewUpgraded': undefined;
   'GiftInfoUpgradeBadge': undefined;
   'GiftInfoUpgradeForFree': undefined;
+  'GiftInfoWithdraw': undefined;
+  'GiftInfoWear': undefined;
+  'GiftInfoTakeOff': undefined;
   'GiftInfoTransfer': undefined;
   'GiftTransferTitle': undefined;
   'GiftTransferTON': undefined;
@@ -1321,6 +1324,15 @@ export interface LangPair {
   'CheckPasswordTitle': undefined;
   'CheckPasswordPlaceholder': undefined;
   'CheckPasswordDescription': undefined;
+  'UniqueStatusBenefitsDescription': undefined;
+  'UniqueStatusBadgeBenefitTitle': undefined;
+  'UniqueStatusBadgeDescription': undefined;
+  'UniqueStatusProfileDesignBenefitTitle': undefined;
+  'UniqueStatusProfileDesignDescription': undefined;
+  'UniqueStatusProofOfOwnershipBenefitTitle': undefined;
+  'UniqueStatusProofOfOwnershipDescription': undefined;
+  'UniqueStatusWearButton': undefined;
+  'CollectibleStatusesCategory': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -1834,6 +1846,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'MoreSimilarBotsText': {
     'count': V;
+  };
+  'UniqueStatusWearTitle': {
+    'gift': V;
   };
 }
 

@@ -28,6 +28,10 @@
   margin-bottom: 1rem;
 }
 
+.listItemIcon {
+  color: var(--accent-color) !important;
+}
+
 .content {
   display: flex;
   flex-direction: column;

@@ -269,6 +269,24 @@ addActionHandler('openGiftWithdrawModal', (global, actions, payload): ActionRetu
 
 addTabStateResetterAction('closeGiftWithdrawModal', 'giftWithdrawModal');
 
+addActionHandler('openGiftStatusInfoModal', (global, actions, payload): ActionReturnType => {
+  const { emojiStatus, tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giftStatusInfoModal: {
+      emojiStatus,
+    },
+  }, tabId);
+});
+
+addActionHandler('closeGiftStatusInfoModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giftStatusInfoModal: undefined,
+  }, tabId);
+});
+
 addActionHandler('clearGiftWithdrawError', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);

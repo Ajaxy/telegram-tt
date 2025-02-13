@@ -3,13 +3,12 @@
   align-items: center;
   background: var(--color-chat-hover);
   height: 2rem;
-  min-width: 2rem;
   margin-inline: 0.25rem;
   padding-right: 0.75rem;
   border-radius: 1rem;
   cursor: var(--custom-cursor, pointer);
   position: relative;
-  overflow: hidden;
+  min-width: 0;
   flex-shrink: 1;
   transition: background-color 0.15s ease;
 
@@ -71,7 +70,7 @@
   .name {
     margin-left: 0.5rem;
     white-space: nowrap;
-    overflow: hidden;
+    min-width: 0;
     text-overflow: ellipsis;
 
     :global(.emoji.emoji-small) {

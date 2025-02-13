@@ -5,11 +5,14 @@ import React, {
 import { getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiAvailableReaction, ApiReaction, ApiReactionWithPaid, ApiSticker, ApiStickerSet,
+  ApiAvailableReaction,
+  ApiEmojiStatusType,
+  ApiReaction, ApiReactionWithPaid, ApiSticker, ApiStickerSet,
 } from '../../api/types';
 import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 
 import {
+  COLLECTIBLE_STATUS_SET_ID,
   FAVORITE_SYMBOL_SET_ID,
   POPULAR_SYMBOL_SET_ID,
   RECENT_SYMBOL_SET_ID,
@@ -28,12 +31,13 @@ import {
 } from '../../global/selectors';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import buildClassName from '../../util/buildClassName';
-import { pickTruthy, unique } from '../../util/iteratees';
+import { pickTruthy, unique, uniqueByField } from '../../util/iteratees';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { REM } from './helpers/mediaDimensions';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -75,6 +79,7 @@ type StateProps = {
   customEmojisById?: Record<string, ApiSticker>;
   recentCustomEmojiIds?: string[];
   recentStatusEmojis?: ApiSticker[];
+  collectibleStatuses?: ApiEmojiStatusType[];
   chatEmojiSetId?: string;
   topReactions?: ApiReaction[];
   recentReactions?: ApiReaction[];
@@ -114,6 +119,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   recentCustomEmojiIds,
   selectedReactionIds,
   recentStatusEmojis,
+  collectibleStatuses,
   stickerSetsById,
   chatEmojiSetId,
   topReactions,
@@ -160,6 +166,11 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       : Object.values(pickTruthy(customEmojisById!, recentCustomEmojiIds!));
   }, [customEmojisById, isStatusPicker, recentCustomEmojiIds, recentStatusEmojis]);
 
+  const collectibleStatusEmojis = useMemo(() => {
+    const collectibleStatusEmojiIds = collectibleStatuses?.map((status) => status.documentId);
+    return customEmojisById && collectibleStatusEmojiIds?.map((id) => customEmojisById[id]).filter(Boolean);
+  }, [customEmojisById, collectibleStatuses]);
+
   const prefix = `${idPrefix}-custom-emoji`;
   const {
     activeSetIndex,
@@ -172,7 +183,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
   const canLoadAndPlay = usePrevDuringAnimation(loadAndPlay || undefined, SLIDE_TRANSITION_DURATION);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const areAddedLoaded = Boolean(addedCustomEmojiIds);
 
@@ -184,7 +196,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         defaultSets.push({
           id: TOP_SYMBOL_SET_ID,
           accessHash: '',
-          title: lang('PremiumPreviewTags'),
+          title: oldLang('PremiumPreviewTags'),
           reactions: defaultTagReactions,
           count: defaultTagReactions.length,
           isEmoji: true,
@@ -201,7 +213,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         defaultSets.push({
           id: TOP_SYMBOL_SET_ID,
           accessHash: '',
-          title: lang('Reactions'),
+          title: oldLang('Reactions'),
           reactions: topReactionsSlice,
           count: topReactionsSlice.length,
           isEmoji: true,
@@ -224,7 +236,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         defaultSets.push({
           id: isPopular ? POPULAR_SYMBOL_SET_ID : RECENT_SYMBOL_SET_ID,
           accessHash: '',
-          title: lang(isPopular ? 'PopularReactions' : 'RecentStickers'),
+          title: oldLang(isPopular ? 'PopularReactions' : 'RecentStickers'),
           reactions: allRecentReactions,
           count: allRecentReactions.length,
           isEmoji: true,
@@ -233,15 +245,26 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     } else if (isStatusPicker) {
       const defaultStatusIconsPack = stickerSetsById[defaultStatusIconsId!];
       if (defaultStatusIconsPack?.stickers?.length) {
-        const stickers = defaultStatusIconsPack.stickers
+        const stickers = uniqueByField(defaultStatusIconsPack.stickers
           .slice(0, RECENT_DEFAULT_STATUS_COUNT)
-          .concat(recentCustomEmojis || []);
+          .concat(recentCustomEmojis || []), 'id');
         defaultSets.push({
           ...defaultStatusIconsPack,
           stickers,
           count: stickers.length,
           id: RECENT_SYMBOL_SET_ID,
-          title: lang('RecentStickers'),
+          title: oldLang('RecentStickers'),
+          isEmoji: true,
+        });
+      }
+      if (collectibleStatusEmojis?.length) {
+        defaultSets.push({
+          id: COLLECTIBLE_STATUS_SET_ID,
+          accessHash: '',
+          count: collectibleStatusEmojis.length,
+          stickers: collectibleStatusEmojis,
+          title: lang('CollectibleStatusesCategory'),
+          isEmoji: true,
         });
       }
     } else if (withDefaultTopicIcons) {
@@ -250,14 +273,14 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         defaultSets.push({
           ...defaultTopicIconsPack,
           id: RECENT_SYMBOL_SET_ID,
-          title: lang('RecentStickers'),
+          title: oldLang('RecentStickers'),
         });
       }
     } else if (recentCustomEmojis?.length) {
       defaultSets.push({
         id: RECENT_SYMBOL_SET_ID,
         accessHash: '0',
-        title: lang('RecentStickers'),
+        title: oldLang('RecentStickers'),
         stickers: recentCustomEmojis,
         count: recentCustomEmojis.length,
         isEmoji: true,
@@ -279,9 +302,9 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     ];
   }, [
     addedCustomEmojiIds, isReactionPicker, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
-    customEmojiFeaturedIds, stickerSetsById, topReactions, availableReactions, lang, recentReactions,
+    customEmojiFeaturedIds, stickerSetsById, topReactions, availableReactions, oldLang, recentReactions,
     defaultStatusIconsId, defaultTopicIconsId, isSavedMessages, defaultTagReactions, chatEmojiSetId,
-    isWithPaidReaction,
+    isWithPaidReaction, collectibleStatusEmojis, lang,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -383,7 +406,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     return (
       <div className={fullClassName}>
         {noPopulatedSets ? (
-          <div className={pickerStyles.pickerDisabled}>{lang('NoStickers')}</div>
+          <div className={pickerStyles.pickerDisabled}>{oldLang('NoStickers')}</div>
         ) : (
           <Loading />
         )}
@@ -487,11 +510,13 @@ export default memo(withGlobal<OwnProps>(
 
     const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
+    const collectibleStatuses = global.collectibleEmojiStatuses?.statuses;
 
     return {
-      customEmojisById: !isStatusPicker ? customEmojisById : undefined,
+      customEmojisById,
       recentCustomEmojiIds: !isStatusPicker ? recentCustomEmojiIds : undefined,
       recentStatusEmojis: isStatusPicker ? recentStatusEmojis : undefined,
+      collectibleStatuses: isStatusPicker ? collectibleStatuses : undefined,
       stickerSetsById,
       addedCustomEmojiIds: global.customEmojis.added.setIds,
       canAnimate: selectCanPlayAnimatedEmojis(global),

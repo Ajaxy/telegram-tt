@@ -6,11 +6,22 @@
   :global(.custom-emoji) {
     color: var(--color-primary);
   }
+
+  :global(.statusSparkles) {
+    color: var(--accent-color);
+    :global(.selected) & {
+      color: white;
+    }
+  }
 }
 
 .fullName {
   font-size: 1em;
   margin-bottom: 0;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 
   &.canCopy {
     pointer-events: all;

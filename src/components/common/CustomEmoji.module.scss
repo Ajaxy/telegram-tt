@@ -13,6 +13,15 @@
   }
 }
 
+.withSparkles {
+  position: relative;
+}
+
+.sparkles {
+  position: absolute;
+  inset: -0.25rem;
+}
+
 .placeholder {
   width: 85%;
   height: 85%;

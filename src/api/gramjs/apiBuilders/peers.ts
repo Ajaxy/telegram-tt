@@ -1,9 +1,10 @@
 import type BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiEmojiStatus, ApiPeerColor } from '../../types';
+import type { ApiEmojiStatusType, ApiPeerColor } from '../../types';
 
 import { CHANNEL_ID_LENGTH } from '../../../config';
+import { numberToHexColor } from '../../../util/colors';
 
 export function isPeerUser(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerUser {
   return peer.hasOwnProperty('userId');
@@ -50,14 +51,30 @@ export function buildApiPeerColor(peerColor: GramJs.TypePeerColor): ApiPeerColor
   };
 }
 
-export function buildApiEmojiStatus(mtpEmojiStatus: GramJs.TypeEmojiStatus): ApiEmojiStatus | undefined {
+export function buildApiEmojiStatus(mtpEmojiStatus: GramJs.TypeEmojiStatus):
+ApiEmojiStatusType | undefined {
   if (mtpEmojiStatus instanceof GramJs.EmojiStatus) {
-    return { documentId: mtpEmojiStatus.documentId.toString(), until: mtpEmojiStatus.until };
+    return {
+      type: 'regular',
+      documentId: mtpEmojiStatus.documentId.toString(),
+      until: mtpEmojiStatus.until,
+    };
   }
 
-  // TODO: Support other parameters
   if (mtpEmojiStatus instanceof GramJs.EmojiStatusCollectible) {
-    return { documentId: mtpEmojiStatus.documentId.toString(), until: mtpEmojiStatus.until };
+    return {
+      type: 'collectible',
+      collectibleId: mtpEmojiStatus.collectibleId.toString(),
+      documentId: mtpEmojiStatus.documentId.toString(),
+      title: mtpEmojiStatus.title,
+      slug: mtpEmojiStatus.slug,
+      patternDocumentId: mtpEmojiStatus.patternDocumentId.toString(),
+      centerColor: numberToHexColor(mtpEmojiStatus.centerColor),
+      edgeColor: numberToHexColor(mtpEmojiStatus.edgeColor),
+      patternColor: numberToHexColor(mtpEmojiStatus.patternColor),
+      textColor: numberToHexColor(mtpEmojiStatus.textColor),
+      until: mtpEmojiStatus.until,
+    };
   }
 
   return undefined;

@@ -40,7 +40,7 @@ import type { ApiStarsAmount } from './payments';
 import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
-  ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,
+  ApiEmojiStatusType, ApiUser, ApiUserFullInfo, ApiUserStatus,
 } from './users';
 
 export type ApiUpdateReady = {
@@ -419,7 +419,7 @@ export type ApiUpdateUserStatus = {
 export type ApiUpdateUserEmojiStatus = {
   '@type': 'updateUserEmojiStatus';
   userId: string;
-  emojiStatus?: ApiEmojiStatus;
+  emojiStatus?: ApiEmojiStatusType;
 };
 
 export type ApiUpdateRecentEmojiStatuses = {
