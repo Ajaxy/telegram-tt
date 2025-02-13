@@ -76,7 +76,7 @@ const CheckboxGroup: FC<OwnProps> = ({
   });
   const getCheckedNestedCount = useLastCallback((nestedOptions: IRadioOption[]) => {
     const checkedCount = nestedOptions?.filter((nestedOption) => values.includes(nestedOption.value)).length;
-    return checkedCount > 0 ? checkedCount : undefined;
+    return checkedCount > 0 ? checkedCount : nestedOptions.length;
   });
 
   return (

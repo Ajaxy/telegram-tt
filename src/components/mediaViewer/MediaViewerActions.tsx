@@ -2,6 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { ApiChat } from '../../api/types';
 import type { ActiveDownloads, MediaViewerOrigin, MessageListType } from '../../types';
 import type { IconName } from '../../types/icons';
 import type { MenuItemProps } from '../ui/MenuItem';
@@ -16,7 +17,7 @@ import {
 } from '../../global/helpers';
 import {
   selectActiveDownloads,
-  selectAllowedMessageActionsSlow,
+  selectAllowedMessageActionsSlow, selectCurrentChat,
   selectCurrentMessageList,
   selectIsChatProtected,
   selectIsMessageProtected,
@@ -45,6 +46,7 @@ type StateProps = {
   isProtected?: boolean;
   isChatProtected?: boolean;
   canDelete?: boolean;
+  chat?: ApiChat;
   canUpdate?: boolean;
   messageListType?: MessageListType;
   origin?: MediaViewerOrigin;
@@ -67,6 +69,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   item,
   mediaData,
   isVideo,
+  chat,
   isChatProtected,
   isProtected,
   canReportAvatar,
@@ -211,10 +214,11 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   }
 
   const openDeleteModalHandler = useLastCallback(() => {
-    if (item?.type === 'message') {
+    if (item?.type === 'message' && chat) {
       openDeleteMessageModal({
+        chatId: chat?.id,
+        messageIds: [item.message.id],
         isSchedule: messageListType === 'scheduled',
-        message: item.message,
         onConfirm: onBeforeDelete,
       });
     } else {
@@ -394,6 +398,7 @@ export default memo(withGlobal<OwnProps>(
     const avatarOwner = item?.type === 'avatar' ? item.avatarOwner : undefined;
     const avatarPhoto = item?.type === 'avatar' && item.profilePhotos.photos[item.mediaIndex];
 
+    const chat = selectCurrentChat(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { threadId } = selectCurrentMessageList(global) || {};
     const isProtected = selectIsMessageProtected(global, message);
@@ -410,6 +415,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       activeDownloads,
       isProtected,
+      chat,
       isChatProtected,
       canDelete,
       canUpdate,

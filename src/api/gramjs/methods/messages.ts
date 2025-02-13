@@ -832,6 +832,37 @@ export async function deleteMessages({
   });
 }
 
+export async function deleteParticipantHistory({
+  chat, peer, isRepeat = false,
+}: {
+  chat: ApiChat; peer: ApiPeer; isRepeat?: boolean;
+}) {
+  const result = await invokeRequest(
+    new GramJs.channels.DeleteParticipantHistory({
+      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+      participant: buildInputPeer(peer.id, peer.accessHash),
+    }),
+  );
+
+  if (!result) {
+    return;
+  }
+
+  processAffectedHistory(chat, result);
+
+  if (!isRepeat) {
+    sendApiUpdate({
+      '@type': 'deleteParticipantHistory',
+      chatId: chat.id,
+      peerId: peer.id,
+    });
+  }
+
+  if (result.offset) {
+    await deleteParticipantHistory({ chat, peer, isRepeat: true });
+  }
+}
+
 export function deleteScheduledMessages({
   chat, messageIds,
 }: {

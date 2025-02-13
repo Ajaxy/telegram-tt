@@ -182,7 +182,12 @@ export const SCROLL_SHORT_TRANSITION_MAX_DISTANCE = 300; // px
 // Average duration of message sending animation
 export const API_UPDATE_THROTTLE = Math.round((SCROLL_MIN_DURATION + SCROLL_MAX_DURATION) / 2);
 export const API_THROTTLE_RESET_UPDATES = new Set([
-  'newMessage', 'newScheduledMessage', 'deleteMessages', 'deleteScheduledMessages', 'deleteHistory',
+  'newMessage',
+  'newScheduledMessage',
+  'deleteMessages',
+  'deleteScheduledMessages',
+  'deleteHistory',
+  'deleteParticipantHistory',
 ]);
 
 export const LOCK_SCREEN_ANIMATION_DURATION_MS = 200;

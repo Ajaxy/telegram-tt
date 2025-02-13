@@ -173,7 +173,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
         <Icon name="close" />
       </Button>
       <ConfirmDialog
-        isOpen={isBlockUserModalOpen}
+        isOpen={true}
         onClose={closeBlockUserModal}
         title={lang('BlockUserTitle', user ? getUserFirstOrLastName(user) : getChatTitle(lang, chat!))}
         text={user

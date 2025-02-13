@@ -269,11 +269,11 @@
   position: absolute;
   width: 100%;
   left: 0.125rem;
-  padding: 0 0.5rem 0 3.375rem;
+  padding: 0 0.5rem 0 3.5rem;
   background: var(--color-background);
 
   &--open {
-    transform: translateY(0.25rem);
+    transform: translateY(0.025rem);
   }
 }
 

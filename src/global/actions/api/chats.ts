@@ -745,7 +745,9 @@ addActionHandler('joinChannel', async (global, actions, payload): Promise<void> 
 });
 
 addActionHandler('deleteChatUser', (global, actions, payload): ActionReturnType => {
-  const { chatId, userId, tabId = getCurrentTabId() } = payload;
+  const {
+    chatId, userId, shouldRevokeHistory, tabId = getCurrentTabId(),
+  } = payload;
   const chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
   if (!chat || !user) {
@@ -759,7 +761,7 @@ addActionHandler('deleteChatUser', (global, actions, payload): ActionReturnType 
     actions.openChat({ id: undefined, tabId });
   }
 
-  void callApi('deleteChatUser', { chat, user });
+  void callApi('deleteChatUser', { chat, user, shouldRevokeHistory });
 });
 
 addActionHandler('deleteChat', (global, actions, payload): ActionReturnType => {

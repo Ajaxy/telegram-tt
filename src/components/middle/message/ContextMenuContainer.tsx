@@ -379,7 +379,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const handleDelete = useLastCallback(() => {
     setIsMenuOpen(false);
     closeMenu();
-    openDeleteMessageModal({ isSchedule: messageListType === 'scheduled', album, message });
+    const messageIds = album?.messages
+      ? album.messages.map(({ id }) => id)
+      : [message.id];
+    openDeleteMessageModal({
+      chatId: message.chatId,
+      messageIds,
+      isSchedule: messageListType === 'scheduled',
+    });
   });
 
   const closePinModal = useLastCallback(() => {

@@ -1037,17 +1037,16 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
 
 addActionHandler('openDeleteMessageModal', (global, actions, payload): ActionReturnType => {
   const {
-    message, isSchedule, album,
+    chatId, messageIds, isSchedule,
     tabId = getCurrentTabId(),
   } = payload;
 
   global = getGlobal();
-
   global = updateTabState(global, {
     deleteMessageModal: {
+      chatId,
+      messageIds,
       isSchedule,
-      album,
-      message,
     },
   }, tabId);
   setGlobal(global);

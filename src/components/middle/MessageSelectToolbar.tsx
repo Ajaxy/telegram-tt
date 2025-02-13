@@ -18,7 +18,6 @@ import {
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
-import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -26,7 +25,6 @@ import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
 import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
-import DeleteSelectedMessageModal from './DeleteSelectedMessageModal';
 
 import './MessageSelectToolbar.scss';
 
@@ -71,10 +69,9 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     copySelectedMessages,
     showNotification,
     reportMessages,
+    openDeleteMessageModal,
   } = getActions();
   const lang = useOldLang();
-
-  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
 
   useCopySelectedMessages(isActive);
 
@@ -82,16 +79,25 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     exitMessageSelectMode();
   });
 
+  const handleDelete = useLastCallback(() => {
+    if (!selectedMessageIds || !chat) return;
+    openDeleteMessageModal({
+      chatId: chat.id,
+      messageIds: selectedMessageIds,
+      isSchedule,
+    });
+  });
+
   useEffect(() => {
-    return isActive && !isDeleteModalOpen && !isAnyModalOpen
+    return isActive && !isAnyModalOpen
       ? captureKeyboardListeners({
-        onBackspace: canDeleteMessages ? openDeleteModal : undefined,
-        onDelete: canDeleteMessages ? openDeleteModal : undefined,
+        onBackspace: canDeleteMessages ? handleDelete : undefined,
+        onDelete: canDeleteMessages ? handleDelete : undefined,
         onEsc: handleExitMessageSelectMode,
       })
       : undefined;
   }, [
-    isActive, isDeleteModalOpen, openDeleteModal, handleExitMessageSelectMode, isAnyModalOpen,
+    isActive, handleDelete, handleExitMessageSelectMode, isAnyModalOpen,
     canDeleteMessages,
   ]);
 
@@ -181,18 +187,11 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
               renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy)
             )}
             {canDeleteMessages && (
-              renderButton('delete', lang('EditAdminGroupDeleteMessages'), openDeleteModal, true)
+              renderButton('delete', lang('EditAdminGroupDeleteMessages'), handleDelete, true)
             )}
           </div>
         )}
       </div>
-      {canDeleteMessages && (
-        <DeleteSelectedMessageModal
-          isOpen={isDeleteModalOpen}
-          isSchedule={isSchedule}
-          onClose={closeDeleteModal}
-        />
-      )}
     </div>
   );
 };
@@ -211,7 +210,8 @@ export default memo(withGlobal<OwnProps>(
     const canForward = !isSchedule && chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
     const isShareMessageModalOpen = tabState.isShareMessageModalShown;
     const isAnyModalOpen = Boolean(isShareMessageModalOpen || tabState.requestedDraft
-      || tabState.requestedAttachBotInChat || tabState.requestedAttachBotInstall || tabState.reportModal);
+      || tabState.requestedAttachBotInChat || tabState.requestedAttachBotInstall || tabState.reportModal
+      || tabState.deleteMessageModal);
 
     return {
       chat,

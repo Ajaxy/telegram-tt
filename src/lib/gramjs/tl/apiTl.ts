@@ -1668,6 +1668,7 @@ channels.togglePreHistoryHidden#eabbb94c channel:InputChannel enabled:Bool = Upd
 channels.getGroupsForDiscussion#f5dad378 = messages.Chats;
 channels.setDiscussionGroup#40582bb2 broadcast:InputChannel group:InputChannel = Bool;
 channels.getSendAs#dc770ee peer:InputPeer = channels.SendAsPeers;
+channels.deleteParticipantHistory#367544db channel:InputChannel participant:InputPeer = messages.AffectedHistory;
 channels.toggleJoinToSend#e4cb9580 channel:InputChannel enabled:Bool = Updates;
 channels.toggleJoinRequest#4c2985b6 channel:InputChannel enabled:Bool = Updates;
 channels.reorderUsernames#b45ced1d channel:InputChannel order:Vector<string> = Bool;

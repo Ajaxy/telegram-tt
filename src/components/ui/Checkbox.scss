@@ -166,7 +166,7 @@
       content: "";
       display: block;
       position: absolute;
-      left: 3.5rem;
+      left: 1.125rem;
       width: 1.125rem;
       height: 1.125rem;
     }
@@ -217,7 +217,7 @@
     align-items: center;
     gap: 0.3125rem;
     margin-block: 0;
-    padding: 0 0 0 3.5rem;
+    padding: 0 0 0 4.1875rem;
 
     &:hover,
     &:focus-visible {
@@ -253,7 +253,8 @@
   }
 
   &.avatar {
-    padding-inline-start: 5.5rem;
+    padding-inline-start: 3.5rem;
+    margin-inline-start: 3.125rem;
   }
 
   .button {

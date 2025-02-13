@@ -840,14 +840,15 @@ export function joinChannel({
 }
 
 export function deleteChatUser({
-  chat, user,
+  chat, user, shouldRevokeHistory,
 }: {
-  chat: ApiChat; user: ApiUser;
+  chat: ApiChat; user: ApiUser; shouldRevokeHistory?: boolean;
 }) {
   if (chat.type !== 'chatTypeBasicGroup') return undefined;
   return invokeRequest(new GramJs.messages.DeleteChatUser({
     chatId: buildInputEntity(chat.id, chat.accessHash) as BigInt.BigInteger,
     userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    revokeHistory: shouldRevokeHistory || undefined,
   }), {
     shouldReturnTrue: true,
   });

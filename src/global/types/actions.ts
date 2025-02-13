@@ -61,7 +61,6 @@ import type {
   ConfettiParams,
   GiftProfileFilterOptions,
   GlobalSearchContent,
-  IAlbum,
   IAnchorPosition,
   ISettings,
   IThemeSettings,
@@ -475,6 +474,10 @@ export interface ActionPayloads {
     messageIds: number[];
     shouldDeleteForAll?: boolean;
   } & WithTabId;
+  deleteParticipantHistory: {
+    peerId: string;
+    chatId: string;
+  } & WithTabId;
   markMessageListRead: {
     maxId: number;
   } & WithTabId;
@@ -649,7 +652,11 @@ export interface ActionPayloads {
   replyToNextMessage: {
     targetIndexDelta: number;
   } & WithTabId;
-  deleteChatUser: { chatId: string; userId: string } & WithTabId;
+  deleteChatUser: {
+    chatId: string;
+    userId: string;
+    shouldRevokeHistory?: boolean;
+  } & WithTabId;
   deleteChat: { chatId: string } & WithTabId;
 
   // chat creation
@@ -2286,9 +2293,9 @@ export interface ActionPayloads {
   closePaidReactionModal: WithTabId | undefined;
 
   openDeleteMessageModal: ({
-    message?: ApiMessage;
+    chatId: string;
+    messageIds: number[];
     isSchedule?: boolean;
-    album?: IAlbum;
     onConfirm?: NoneToVoidFunction;
   } & WithTabId);
   closeDeleteMessageModal: WithTabId | undefined;

@@ -40,7 +40,7 @@ type StateProps = {
   isFormFullyDisabled?: boolean;
 };
 
-const ITEM_HEIGHT = 24 + 32;
+const ITEM_HEIGHT = 48;
 const SHIFT_HEIGHT_MINUS = 1;
 const BEFORE_ITEMS_COUNT = 2;
 const BEFORE_USER_INFO_HEIGHT = 96;

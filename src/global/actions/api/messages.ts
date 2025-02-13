@@ -760,6 +760,16 @@ addActionHandler('deleteMessages', (global, actions, payload): ActionReturnType 
   }
 });
 
+addActionHandler('deleteParticipantHistory', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, peerId,
+  } = payload;
+  const chat = selectChat(global, chatId)!;
+  const peer = selectPeer(global, peerId)!;
+
+  void callApi('deleteParticipantHistory', { chat, peer });
+});
+
 addActionHandler('deleteScheduledMessages', (global, actions, payload): ActionReturnType => {
   const { messageIds, tabId = getCurrentTabId() } = payload;
   const currentMessageList = selectCurrentMessageList(global, tabId);

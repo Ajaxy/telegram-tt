@@ -240,6 +240,7 @@
     "help.getPremiumPromo",
     "channels.readHistory",
     "channels.deleteMessages",
+    "channels.deleteParticipantHistory",
     "channels.getMessages",
     "channels.getParticipants",
     "channels.getParticipant",

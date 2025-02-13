@@ -60,7 +60,6 @@ import type {
   FocusDirection,
   GiftProfileFilterOptions,
   GlobalSearchContent,
-  IAlbum,
   IAnchorPosition,
   InlineBotSettings,
   ManagementProgress,
@@ -581,9 +580,9 @@ export type TabState = {
   };
 
   deleteMessageModal?: {
-    message?: ApiMessage;
+    chatId: string;
+    messageIds: number[];
     isSchedule?: boolean;
-    album?: IAlbum;
     onConfirm?: NoneToVoidFunction;
   };
 
