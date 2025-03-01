@@ -836,6 +836,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   function renderContentWithTransition() {
     return (
       <Transition
+        className={`${resultType}-list`}
         activeKey={contentTransitionKey}
         name="fade"
       >
@@ -844,11 +845,16 @@ const Profile: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const activeListSelector = `.shared-media-transition > .Transition_slide-active.${resultType}-list`;
+  const itemSelector = !shouldUseTransitionForContent
+    ? `${activeListSelector} > .scroll-item`
+    : `${activeListSelector} > .Transition_slide-active > .content > .scroll-item`;
+
   return (
     <InfiniteScroll
       ref={containerRef}
       className="Profile custom-scroll"
-      itemSelector={`.shared-media-transition > .Transition_slide-active.${resultType}-list > .scroll-item`}
+      itemSelector={itemSelector}
       items={canRenderContent ? viewportIds : undefined}
       cacheBuster={cacheBuster}
       sensitiveArea={PROFILE_SENSITIVE_AREA}

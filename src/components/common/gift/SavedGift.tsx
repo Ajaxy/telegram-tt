@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiPeer, ApiSavedStarGift } from '../../../api/types';
 
 import { selectPeer } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { CUSTOM_PEER_HIDDEN } from '../../../util/objects/customPeer';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift, getTotalGiftAvailability } from '../helpers/gifts';
@@ -90,7 +91,11 @@ const SavedGift = ({
   const totalIssued = getTotalGiftAvailability(gift.gift);
 
   return (
-    <div ref={ref} className={styles.root} onClick={handleClick}>
+    <div
+      ref={ref}
+      className={buildClassName(styles.root, 'scroll-item')}
+      onClick={handleClick}
+    >
       {radialPatternBackdrop}
       {!radialPatternBackdrop && <Avatar className={styles.avatar} peer={avatarPeer} size="micro" />}
       <AnimatedIconFromSticker
