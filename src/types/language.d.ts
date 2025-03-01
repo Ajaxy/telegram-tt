@@ -1403,6 +1403,7 @@ export interface LangPair {
   'PeerPersonalAccount': undefined;
   'PeerChannel': undefined;
   'WebAppCollapse': undefined;
+  'GiftSent': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
