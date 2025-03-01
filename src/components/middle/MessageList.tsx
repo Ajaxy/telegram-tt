@@ -38,6 +38,7 @@ import {
   selectCurrentMessageIds,
   selectFirstUnreadId,
   selectFocusedMessageId,
+  selectIsChatProtected,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectIsInSelectMode,
@@ -124,6 +125,7 @@ type StateProps = {
   currentUserId: string;
   areAdsEnabled?: boolean;
   channelJoinInfo?: ApiChatFullInfo['joinInfo'];
+  isChatProtected?: boolean;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
@@ -178,6 +180,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isContactRequirePremium,
   areAdsEnabled,
   channelJoinInfo,
+  isChatProtected,
   onIntersectPinnedMessage,
   onScrollDownToggle,
   onNotchToggle,
@@ -653,6 +656,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     isScrolled && 'scrolled',
     !isReady && 'is-animating',
     hasOpenChatButton && 'saved-dialog',
+    isChatProtected && 'hide-on-print',
   );
 
   const hasMessages = (messageIds && messageGroups) || lastMessage;
@@ -795,6 +799,7 @@ export default memo(withGlobal<OwnProps>(
       isForum: chat.isForum,
       isEmptyThread,
       currentUserId,
+      isChatProtected: selectIsChatProtected(global, chatId),
       ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },

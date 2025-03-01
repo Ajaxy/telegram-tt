@@ -683,6 +683,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const containerClassName = buildClassName(
     'Message message-list-item',
     isFirstInGroup && 'first-in-group',
+    isProtected && 'hide-on-print',
     isProtected && !hasTextContent ? 'is-protected' : 'allow-selection',
     isLastInGroup && 'last-in-group',
     isFirstInDocumentGroup && 'first-in-document-group',

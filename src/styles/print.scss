@@ -55,4 +55,8 @@
     background: var(--color-background-own) !important;
     color: var(--color-text) !important;
   }
+
+  .hide-on-print {
+    visibility: hidden !important;
+  }
 }
