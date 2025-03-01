@@ -3,7 +3,7 @@
   overflow: hidden;
   margin: auto;
 
-  .message-content:not(.is-forwarded).media.text & {
+  .message-content:not(.is-forwarded):not(.has-replies).media.text & {
     margin: -0.3125rem -0.5rem 0.3125rem;
   }
 
