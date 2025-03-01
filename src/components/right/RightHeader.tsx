@@ -523,7 +523,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                       { peerId: chatId, filter: { sortType: giftsSortType === 'byDate' ? 'byValue' : 'byDate' } },
                     )}
                   >
-                    {lang(giftsSortType === 'byDate' ? 'GiftSortByDate' : 'GiftSortByValue')}
+                    {lang(giftsSortType === 'byDate' ? 'GiftSortByValue' : 'GiftSortByDate')}
                   </MenuItem>
 
                   <MenuSeparator />
