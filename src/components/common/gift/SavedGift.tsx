@@ -59,7 +59,7 @@ const SavedGift = ({
     if (entry.isIntersecting) play();
   });
 
-  const avatarPeer = (gift.isNameHidden || !fromPeer) ? CUSTOM_PEER_HIDDEN : fromPeer;
+  const avatarPeer = (gift.isNameHidden && !fromPeer) ? CUSTOM_PEER_HIDDEN : fromPeer;
 
   const sticker = getStickerFromGift(gift.gift);
 

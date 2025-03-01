@@ -19,6 +19,7 @@ type OwnProps = {
   className?: string;
   children?: TeactNode;
   isRtl?: boolean;
+  shouldSkipModal?: boolean;
 };
 
 const SafeLink = ({
@@ -27,6 +28,7 @@ const SafeLink = ({
   className,
   children,
   isRtl,
+  shouldSkipModal,
 }: OwnProps) => {
   const { openUrl } = getActions();
 
@@ -37,7 +39,7 @@ const SafeLink = ({
     if (!url) return true;
 
     e.preventDefault();
-    openUrl({ url, shouldSkipModal: isRegularLink });
+    openUrl({ url, shouldSkipModal: shouldSkipModal || isRegularLink });
 
     return false;
   });

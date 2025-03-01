@@ -81,7 +81,7 @@ function GiftComposer({
       return {
         id: -1,
         chatId: '0',
-        isOutgoing: true,
+        isOutgoing: false,
         senderId: currentUserId,
         date: Math.floor(Date.now() / 1000),
         content: {
@@ -99,7 +99,7 @@ function GiftComposer({
 
     return {
       id: -1,
-      chatId: currentUserId!,
+      chatId: '0',
       isOutgoing: false,
       senderId: currentUserId,
       date: Math.floor(Date.now() / 1000),

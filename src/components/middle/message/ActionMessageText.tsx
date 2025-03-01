@@ -28,7 +28,7 @@ import {
   getPinnedMediaValue,
   renderMessageLink,
   renderPeerLink,
-  translateWithOutgoing,
+  translateWithYou,
 } from './helpers/messageActions';
 
 import useLang from '../../../hooks/useLang';
@@ -114,7 +114,7 @@ const ActionMessageText = ({
               asPreview,
             );
 
-            return translateWithOutgoing(
+            return translateWithYou(
               lang, 'ActionPinnedText', isOutgoing, { text: textLink, from: senderLink },
             );
           }
@@ -122,13 +122,13 @@ const ActionMessageText = ({
           const mediaValue = getPinnedMediaValue(lang, replyMessage);
           if (mediaValue) {
             const messageLink = renderMessageLink(replyMessage, mediaValue, asPreview);
-            return translateWithOutgoing(
+            return translateWithYou(
               lang, 'ActionPinnedMedia', isOutgoing, { from: senderLink, media: messageLink },
             );
           }
         }
 
-        return translateWithOutgoing(
+        return translateWithYou(
           lang,
           'ActionPinnedNotFound',
           isOutgoing,
@@ -143,7 +143,7 @@ const ActionMessageText = ({
         const gameLink = gameTitle && renderMessageLink(replyMessage, renderText(gameTitle), asPreview);
 
         if (gameLink) {
-          return translateWithOutgoing(
+          return translateWithYou(
             lang,
             'ActionGameScore',
             isOutgoing,
@@ -152,7 +152,7 @@ const ActionMessageText = ({
           );
         }
 
-        return translateWithOutgoing(
+        return translateWithYou(
           lang, 'ActionGameScoreNoGame', isOutgoing, { from: senderLink, count: score }, { pluralValue: score },
         );
       }
@@ -161,7 +161,7 @@ const ActionMessageText = ({
         return lang('ActionUserJoinedByLink', { from: senderLink }, { withNodes: true });
 
       case 'chatJoinedByRequest':
-        return translateWithOutgoing(lang, 'ActionJoinedByRequest', isOutgoing, { from: senderLink });
+        return translateWithYou(lang, 'ActionJoinedByRequest', isOutgoing, { from: senderLink });
 
       case 'channelJoined': {
         const { isViaRequest, inviterId } = action;
@@ -177,16 +177,16 @@ const ActionMessageText = ({
       case 'chatEditTitle': {
         const { title } = action;
         if (isChannel) return lang('ActionChangedTitleChannel', { title });
-        return translateWithOutgoing(lang, 'ActionChangedTitle', isOutgoing, { title, from: senderLink });
+        return translateWithYou(lang, 'ActionChangedTitle', isOutgoing, { title, from: senderLink });
       }
 
       case 'chatDeletePhoto':
         return isChannel ? lang('ActionRemovedPhotoChannel')
-          : translateWithOutgoing(lang, 'ActionRemovedPhoto', isOutgoing, { from: senderLink });
+          : translateWithYou(lang, 'ActionRemovedPhoto', isOutgoing, { from: senderLink });
 
       case 'chatEditPhoto':
         return isChannel ? lang('ActionChangedPhotoChannel')
-          : translateWithOutgoing(lang, 'ActionChangedPhoto', isOutgoing, { from: senderLink });
+          : translateWithYou(lang, 'ActionChangedPhoto', isOutgoing, { from: senderLink });
 
       case 'chatCreate': {
         const { title } = action;
@@ -196,7 +196,7 @@ const ActionMessageText = ({
       case 'channelCreate': {
         const { title } = action;
         return isChannel ? lang('ActionCreatedChannel')
-          : translateWithOutgoing(lang, 'ActionCreatedChat', isOutgoing, { title, from: senderLink });
+          : translateWithYou(lang, 'ActionCreatedChat', isOutgoing, { title, from: senderLink });
       }
 
       case 'chatMigrateTo': {
@@ -325,7 +325,7 @@ const ActionMessageText = ({
       }
 
       case 'boostApply':
-        return translateWithOutgoing(
+        return translateWithYou(
           lang,
           'ActionBoostApply',
           isOutgoing,
@@ -337,27 +337,27 @@ const ActionMessageText = ({
         const { userIds } = action;
 
         if (sender?.id === userIds[0]) {
-          return translateWithOutgoing(lang, 'ActionUserJoined', isOutgoing, { from: senderLink });
+          return translateWithYou(lang, 'ActionUserJoined', isOutgoing, { from: senderLink });
         }
 
         if (userIds.length === 1) {
           const user = selectPeer(global, userIds[0]);
           const userTitle = (user && getPeerTitle(lang, user)) || userFallbackText;
           const userLink = renderPeerLink(user?.id, userTitle, asPreview);
-          return translateWithOutgoing(lang, 'ActionAddUser', isOutgoing, { from: senderLink, user: userLink });
+          return translateWithYou(lang, 'ActionAddUser', isOutgoing, { from: senderLink, user: userLink });
         }
 
         const users = userIds.map((userId) => selectPeer(global, userId)).filter(Boolean);
 
         if (!users.length) {
-          return translateWithOutgoing(lang, 'ActionAddUser', isOutgoing, { from: senderLink, user: userFallbackText });
+          return translateWithYou(lang, 'ActionAddUser', isOutgoing, { from: senderLink, user: userFallbackText });
         }
 
         const userLinks = users.map((user) => (
           renderPeerLink(user.id, getPeerTitle(lang, user) || userFallbackText, asPreview)
         ));
 
-        return translateWithOutgoing(
+        return translateWithYou(
           lang, 'ActionAddUsersMany', isOutgoing, { from: senderLink, users: conjuctionWithNodes(lang, userLinks) },
         );
       }
@@ -365,13 +365,13 @@ const ActionMessageText = ({
       case 'chatDeleteUser': {
         const { userId } = action;
         if (sender?.id === userId) {
-          return translateWithOutgoing(lang, 'ActionUserLeft', isOutgoing, { from: senderLink });
+          return translateWithYou(lang, 'ActionUserLeft', isOutgoing, { from: senderLink });
         }
 
         const user = selectPeer(global, userId);
         const userTitle = (user && getPeerTitle(lang, user)) || userFallbackText;
         const userLink = renderPeerLink(user?.id, userTitle, asPreview);
-        return translateWithOutgoing(lang, 'ActionKickUser', isOutgoing, { from: senderLink, user: userLink });
+        return translateWithYou(lang, 'ActionKickUser', isOutgoing, { from: senderLink, user: userLink });
       }
 
       case 'botAllowed': {
@@ -444,7 +444,7 @@ const ActionMessageText = ({
         if (isServiceNotificationsChat) {
           return lang('ActionGiftTextCostAnonymous', { cost }, { withNodes: true });
         }
-        return translateWithOutgoing(
+        return translateWithYou(
           lang, 'ActionGiftTextCost', isOutgoing, { from: senderLink, cost: renderStrong(cost) },
         );
       }
@@ -485,13 +485,13 @@ const ActionMessageText = ({
           const user = selectPeer(global, userIds[0]);
           const userTitle = (user && getPeerTitle(lang, user)) || userFallbackText;
           const userLink = renderPeerLink(user?.id, userTitle, asPreview);
-          return translateWithOutgoing(lang, 'ActionVideoInvited', isOutgoing, { from: senderLink, user: userLink });
+          return translateWithYou(lang, 'ActionVideoInvited', isOutgoing, { from: senderLink, user: userLink });
         }
 
         const users = userIds.map((userId) => selectPeer(global, userId)).filter(Boolean);
 
         if (!users.length) {
-          return translateWithOutgoing(
+          return translateWithYou(
             lang, 'ActionVideoInvited', isOutgoing, { from: senderLink, user: userFallbackText },
           );
         }
@@ -500,7 +500,7 @@ const ActionMessageText = ({
           renderPeerLink(user.id, getPeerTitle(lang, user) || userFallbackText, asPreview)
         ));
 
-        return translateWithOutgoing(
+        return translateWithYou(
           lang, 'ActionVideoInvitedMany', isOutgoing, { from: senderLink, users: conjuctionWithNodes(lang, userLinks) },
         );
       }
@@ -570,7 +570,7 @@ const ActionMessageText = ({
 
           const channelTitle = (channelPeer && getPeerTitle(lang, channelPeer)) || channelFallbackText;
           const channelLink = renderPeerLink(peerId, channelTitle, asPreview);
-          return translateWithOutgoing(
+          return translateWithYou(
             lang, 'ActionStarGiftSentChannel', isYou, { user: fromLink, channel: channelLink, cost },
           );
         }
@@ -610,7 +610,7 @@ const ActionMessageText = ({
           const channelLink = renderPeerLink(peerId, channelTitle, asPreview);
 
           if (isUpgrade) {
-            return translateWithOutgoing(
+            return translateWithYou(
               lang, 'ActionStarGiftUpgradedChannel', isYou, { user: fromLink, channel: channelLink },
             );
           }
@@ -620,7 +620,7 @@ const ActionMessageText = ({
               return lang('ActionStarGiftTransferredUnknownChannel', { channel: channelLink }, { withNodes: true });
             }
 
-            return translateWithOutgoing(
+            return translateWithYou(
               lang, 'ActionStarGiftTransferredChannel', isYou, { user: fromLink, channel: channelLink },
             );
           }
@@ -670,7 +670,7 @@ const ActionMessageText = ({
         const actionPeer = (isOutgoing ? chat : sender)!;
         const actionPeerLink = renderPeerLink(actionPeer.id, getPeerTitle(lang, actionPeer) || userFallbackText);
 
-        return translateWithOutgoing(lang, 'ActionSuggestedPhoto', isOutgoing, { user: actionPeerLink });
+        return translateWithYou(lang, 'ActionSuggestedPhoto', isOutgoing, { user: actionPeerLink });
       }
 
       case 'webViewDataSent':
@@ -688,7 +688,7 @@ const ActionMessageText = ({
         return lang('ActionHistoryCleared');
 
       case 'screenshotTaken':
-        return translateWithOutgoing(lang, 'ActionScreenshotTaken', isOutgoing, { from: senderLink });
+        return translateWithYou(lang, 'ActionScreenshotTaken', isOutgoing, { from: senderLink });
 
       case 'contactSignUp':
         return lang('ActionUserRegistered', { from: senderLink }, { withNodes: true });

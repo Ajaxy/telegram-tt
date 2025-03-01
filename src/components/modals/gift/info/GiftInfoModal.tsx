@@ -19,7 +19,7 @@ import { formatDateTimeToString } from '../../../../util/dates/dateFormat';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
 import { CUSTOM_PEER_HIDDEN } from '../../../../util/objects/customPeer';
 import { getServerTime } from '../../../../util/serverTime';
-import { formatInteger, formatPercent } from '../../../../util/textFormat';
+import { formatPercent } from '../../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift } from '../../../common/helpers/gifts';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 
@@ -109,6 +109,7 @@ const GiftInfoModal = ({
 
   const gift = isSavedGift ? typeGift.gift : typeGift;
   const giftSticker = gift && getStickerFromGift(gift);
+  const hasConvertOption = canConvertDifference > 0 && Boolean(savedGift?.starsToConvert);
 
   const currenUniqueEmojiStatusSlug = currentUserEmojiStatus?.type === 'collectible'
     ? currentUserEmojiStatus.slug : undefined;
@@ -244,8 +245,9 @@ const GiftInfoModal = ({
     }
 
     const {
-      fromId, isNameHidden, starsToConvert, isUnsaved, isConverted,
+      fromId, isNameHidden, starsToConvert, isUnsaved, isConverted, upgradeMsgId,
     } = savedGift || {};
+    const canConvert = hasConvertOption && Boolean(starsToConvert);
 
     const isVisibleForMe = isNameHidden && renderingTargetPeer;
 
@@ -260,17 +262,17 @@ const GiftInfoModal = ({
           : lang('GiftInfoPeerDescriptionFreeUpgradeOut', { peer: getPeerTitle(lang, renderingTargetPeer!)! });
       }
       if (!canUpdate && !isSender) return undefined;
-      if (isConverted && starsToConvert) {
+      if (isConverted && canConvert) {
         return canUpdate
           ? lang('GiftInfoDescriptionConverted', {
-            amount: formatInteger(starsToConvert!),
+            amount: starsToConvert,
           }, {
             pluralValue: starsToConvert,
             withNodes: true,
             withMarkdown: true,
           })
           : lang('GiftInfoPeerDescriptionOutConverted', {
-            amount: formatInteger(starsToConvert!),
+            amount: starsToConvert,
             peer: getPeerTitle(lang, renderingTargetPeer!)!,
           }, {
             pluralValue: starsToConvert,
@@ -280,31 +282,45 @@ const GiftInfoModal = ({
       }
 
       if (savedGift.canUpgrade && canUpdate) {
-        return lang('GiftInfoDescriptionUpgrade', {
-          amount: formatInteger(starsToConvert!),
-        }, {
-          pluralValue: starsToConvert!,
-          withNodes: true,
-          withMarkdown: true,
-        });
+        if (canConvert) {
+          return lang('GiftInfoDescriptionUpgrade', {
+            amount: starsToConvert,
+          }, {
+            pluralValue: starsToConvert,
+            withNodes: true,
+            withMarkdown: true,
+          });
+        }
+
+        return lang('GiftInfoDescriptionUpgradeRegular');
       }
 
-      return canUpdate
-        ? lang('GiftInfoDescription', {
-          amount: starsToConvert,
-        }, {
-          withNodes: true,
-          withMarkdown: true,
-          pluralValue: starsToConvert || 0,
-        })
-        : lang('GiftInfoPeerDescriptionOut', {
+      if (canUpdate) {
+        if (canConvert) {
+          return lang('GiftInfoDescription', {
+            amount: starsToConvert,
+          }, {
+            withNodes: true,
+            withMarkdown: true,
+            pluralValue: starsToConvert,
+          });
+        }
+
+        return lang('GiftInfoDescriptionRegular');
+      }
+
+      if (canConvert) {
+        return lang('GiftInfoPeerDescriptionOut', {
           amount: starsToConvert,
           peer: getPeerTitle(lang, renderingTargetPeer!)!,
         }, {
           withNodes: true,
           withMarkdown: true,
-          pluralValue: starsToConvert || 0,
+          pluralValue: starsToConvert,
         });
+      }
+
+      return lang('GiftInfoPeerDescriptionOutRegular', { peer: getPeerTitle(lang, renderingTargetPeer!)! });
     })();
 
     function getTitle() {
@@ -394,15 +410,17 @@ const GiftInfoModal = ({
 
     const tableData: TableData = [];
     if (gift.type === 'starGift') {
-      if ((fromId || isNameHidden)) {
+      const hasFrom = fromId || isNameHidden;
+
+      if (hasFrom) {
         tableData.push([
           lang('GiftInfoFrom'),
-          fromId ? { chatId: fromId } : (
+          !fromId ? (
             <>
               <Avatar size="small" peer={CUSTOM_PEER_HIDDEN} />
               <span className={styles.unknown}>{oldLang(CUSTOM_PEER_HIDDEN.titleKey!)}</span>
             </>
-          ),
+          ) : { chatId: fromId },
         ]);
       }
 
@@ -433,7 +451,7 @@ const GiftInfoModal = ({
         lang('GiftInfoValue'),
         <div className={styles.giftValue}>
           {formatStarsAsIcon(lang, starsValue, { className: styles.starAmountIcon })}
-          {canUpdate && canConvertDifference > 0 && Boolean(starsToConvert) && (
+          {canUpdate && hasConvertOption && Boolean(starsToConvert) && (
             <BadgeButton onClick={openConvertConfirm}>
               {lang('GiftInfoConvert', { amount: starsToConvert }, { pluralValue: starsToConvert })}
             </BadgeButton>
@@ -453,7 +471,7 @@ const GiftInfoModal = ({
         ]);
       }
 
-      if (gift.upgradeStars && !savedGift?.upgradeMsgId) {
+      if (gift.upgradeStars && !upgradeMsgId) {
         tableData.push([
           lang('GiftInfoStatus'),
           <div className={styles.giftValue}>
@@ -613,7 +631,7 @@ const GiftInfoModal = ({
             {tonLink && (
               <div>
                 {lang('GiftInfoTonText', {
-                  link: <SafeLink url={tonLink} text={lang('GiftInfoTonLinkText')} />,
+                  link: <SafeLink url={tonLink} shouldSkipModal text={lang('GiftInfoTonLinkText')} />,
                 }, { withNodes: true })}
               </div>
             )}
@@ -649,7 +667,7 @@ const GiftInfoModal = ({
     };
   }, [
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang,
-    canUpdate, canConvertDifference, isSender, oldLang, tonExplorerUrl,
+    canUpdate, hasConvertOption, isSender, oldLang, tonExplorerUrl,
     gift, giftAttributes, renderFooterButton, isTargetChat,
     SettingsMenuButton, isOpen, isGiftUnique, canWear, canTakeOff,
   ]);
@@ -682,7 +700,7 @@ const GiftInfoModal = ({
               withMarkdown: true,
             })}
           </div>
-          {canConvertDifference > 0 && (
+          {hasConvertOption && (
             <div>
               {lang('GiftInfoConvertDescriptionPeriod', {
                 count: conversionLeft,
@@ -704,20 +722,21 @@ export default memo(withGlobal<OwnProps>(
   (global, { modal }): StateProps => {
     const typeGift = modal?.gift;
     const isSavedGift = typeGift && 'gift' in typeGift;
+    const currentUserId = global.currentUserId;
 
     const fromId = isSavedGift && typeGift.fromId;
     const fromPeer = fromId ? selectPeer(global, fromId) : undefined;
     const targetPeer = modal?.peerId ? selectPeer(global, modal.peerId) : undefined;
     const chat = targetPeer && isApiPeerChat(targetPeer) ? targetPeer : undefined;
     const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');
-    const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
+    const currentUser = selectUser(global, currentUserId!);
     const currentUserEmojiStatus = currentUser?.emojiStatus;
     const collectibleEmojiStatuses = global.collectibleEmojiStatuses?.statuses;
 
     return {
       fromPeer,
       targetPeer,
-      currentUserId: global.currentUserId,
+      currentUserId,
       starGiftMaxConvertPeriod: global.appConfig?.starGiftMaxConvertPeriod,
       tonExplorerUrl: global.appConfig?.tonExplorerUrl,
       hasAdminRights,

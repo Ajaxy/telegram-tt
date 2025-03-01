@@ -30,15 +30,15 @@ type VariablesForKey<K extends LangKey> =
       ? LangPairPluralWithVariables<TeactNode | undefined>[K] | SuffixKey<LangPairPluralWithVariables, K>
       : undefined;
 
-export function translateWithOutgoing<K extends LangKey>(
+export function translateWithYou<K extends LangKey>(
   lang: LangFn,
   key: K,
-  isOutgoing: boolean,
+  isYou: boolean,
   variables: VariablesForKey<K>,
   options?: { pluralValue?: number; asText?: boolean; isMarkdown?: boolean },
 ): TeactNode {
   const { pluralValue, asText, isMarkdown } = options || {};
-  const translationKey = isOutgoing ? (`${key}You` as LangKey) : key;
+  const translationKey = isYou ? (`${key}You` as LangKey) : key;
 
   return lang(
     // @ts-ignore -- I have no idea if this even possible to type correctly

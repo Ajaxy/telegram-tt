@@ -1169,6 +1169,8 @@ export interface LangPair {
   'GiftInfoSent': undefined;
   'GiftInfoReceived': undefined;
   'GiftInfoTitle': undefined;
+  'GiftInfoDescriptionRegular': undefined;
+  'GiftInfoDescriptionUpgradeRegular': undefined;
   'GiftInfoDescriptionFreeUpgrade': undefined;
   'GiftInfoDescriptionUpgraded': undefined;
   'GiftInfoFrom': undefined;
@@ -1749,6 +1751,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'GiftUnique': {
     'title': V;
     'number': V;
+  };
+  'GiftInfoPeerDescriptionOutRegular': {
+    'peer': V;
   };
   'GiftInfoPeerDescriptionFreeUpgradeOut': {
     'peer': V;

@@ -17,7 +17,7 @@ import { getServerTime } from '../../../../util/serverTime';
 import { formatIntegerCompact } from '../../../../util/textFormat';
 import { getStickerFromGift } from '../../../common/helpers/gifts';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
-import { renderPeerLink, translateWithOutgoing } from '../helpers/messageActions';
+import { renderPeerLink, translateWithYou } from '../helpers/messageActions';
 
 import useDynamicColorListener from '../../../../hooks/stickers/useDynamicColorListener';
 import { type ObserveFn } from '../../../../hooks/useIntersectionObserver';
@@ -86,20 +86,20 @@ const StarGiftAction = ({
     }
 
     if (action.alreadyPaidUpgradeStars) {
-      return translateWithOutgoing(
-        lang, 'ActionStarGiftUpgradeText', !isOutgoing, { peer: peerLink },
+      return translateWithYou(
+        lang, 'ActionStarGiftUpgradeText', !isOutgoing || isSelf, { peer: peerLink },
       );
     }
 
     if (action.isConverted) {
-      return translateWithOutgoing(
-        lang, 'ActionStarGiftConvertedText', !isOutgoing, { peer: peerLink, amount: starsAmount },
+      return translateWithYou(
+        lang, 'ActionStarGiftConvertedText', !isOutgoing || isSelf, { peer: peerLink, amount: starsAmount },
       );
     }
 
     if (starGiftMaxConvertPeriod && getServerTime() < message.date + starGiftMaxConvertPeriod) {
-      return translateWithOutgoing(
-        lang, 'ActionStarGiftConvertText', !isOutgoing, { peer: peerLink, amount: starsAmount },
+      return translateWithYou(
+        lang, 'ActionStarGiftConvertText', !isOutgoing || isSelf, { peer: peerLink, amount: starsAmount },
       );
     }
 
@@ -109,11 +109,12 @@ const StarGiftAction = ({
       );
     }
 
-    return translateWithOutgoing(
-      lang, 'ActionStarGiftNoConvertText', !isOutgoing, { peer: peerLink },
+    return translateWithYou(
+      lang, 'ActionStarGiftNoConvertText', !isOutgoing || isSelf, { peer: peerLink },
     );
   }, [
     action, fallbackPeerTitle, isChannel, isOutgoing, lang, message.date, peer?.id, peerTitle, starGiftMaxConvertPeriod,
+    isSelf,
   ]);
 
   return (

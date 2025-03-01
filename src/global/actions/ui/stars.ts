@@ -219,6 +219,8 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
     ? { type: 'chat', chatId, savedId: action.savedId }
     : { type: 'user', messageId };
 
+  const fromId = action.fromId || (message.isOutgoing ? global.currentUserId! : message.chatId);
+
   const gift: ApiSavedStarGift = {
     date: message.date,
     gift: action.gift,
@@ -226,7 +228,7 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
     starsToConvert: starGift?.starsToConvert,
     isNameHidden: starGift?.isNameHidden,
     isUnsaved: !action.isSaved,
-    fromId: action.fromId,
+    fromId,
     messageId: message.id,
     isConverted: starGift?.isConverted,
     upgradeMsgId: starGift?.upgradeMsgId,

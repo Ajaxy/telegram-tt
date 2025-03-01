@@ -1378,10 +1378,13 @@
 "GiftInfoTitle" = "Gift";
 "GiftInfoDescription_one" = "You can keep this gift in your Profile or convert it to **{amount}** Star.";
 "GiftInfoDescription_other" = "You can keep this gift in your Profile or convert it to **{amount}** Stars.";
+"GiftInfoDescriptionRegular" = "You can add this gift to your profile or hide it";
 "GiftInfoPeerDescriptionOut_one" = "{peer} can keep this gift in profile or convert it to **{amount}** Star.";
 "GiftInfoPeerDescriptionOut_other" = "{peer} can keep this gift in profile or convert it to **{amount}** Stars.";
+"GiftInfoPeerDescriptionOutRegular" = "{peer} can add this gift to their profile or hide it";
 "GiftInfoDescriptionUpgrade_one" = "You can keep this gift, upgrade it, or sell it for **{amount}** Star.";
 "GiftInfoDescriptionUpgrade_other" = "You can keep this gift, upgrade it, or sell it for **{amount}** Stars.";
+"GiftInfoDescriptionUpgradeRegular" = "You can add this gift to your profile or turn it into a unique transferable collectible.";
 "GiftInfoDescriptionConverted_one" = "You converted this gift to **{amount}** Star.";
 "GiftInfoDescriptionConverted_other" = "You converted this gift to **{amount}** Stars.";
 "GiftInfoPeerDescriptionOutConverted_one" = "{peer} converted this gift to **{amount}** Star.";
