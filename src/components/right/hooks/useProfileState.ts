@@ -89,7 +89,7 @@ export default function useProfileState(
     }
 
     let state: ProfileState = ProfileState.Profile;
-    if (container.scrollTop >= tabListEl.offsetTop) {
+    if (Math.ceil(container.scrollTop) >= tabListEl.offsetTop) {
       state = getStateFromTabType(tabType);
     }
 
