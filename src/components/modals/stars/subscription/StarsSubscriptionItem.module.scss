@@ -39,6 +39,7 @@
 
 .title, .description, .subtitle {
   margin-bottom: 0;
+  line-height: 1.25;
 }
 
 .title {
@@ -50,12 +51,10 @@
   align-items: center;
   gap: 0.125rem;
   font-size: 0.8125rem;
-  line-height: 1rem;
 }
 
 .description, .statusPeriod, .statusEnded {
   font-size: 0.8125rem;
-  line-height: 1rem;
   color: var(--color-text-secondary);
 }
 

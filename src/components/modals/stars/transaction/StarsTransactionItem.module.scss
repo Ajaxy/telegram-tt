@@ -32,6 +32,7 @@
 
 .title, .description, .date {
   margin-bottom: 0;
+  line-height: 1.25;
 }
 
 .title {
@@ -40,7 +41,6 @@
 
 .description, .date {
   font-size: 0.8125rem;
-  line-height: 1rem;
 }
 
 .date {
@@ -78,7 +78,7 @@
   border-radius: 0.25rem;
 }
 
-.uniqueGift {
+.giftSticker {
   margin-inline: 0.25rem;
   margin-top: 0.25rem;
 }

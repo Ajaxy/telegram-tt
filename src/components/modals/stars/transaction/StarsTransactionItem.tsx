@@ -36,7 +36,7 @@ type OwnProps = {
   className?: string;
 };
 
-const UNIQUE_GIFT_STICKER_SIZE = 36;
+const GIFT_STICKER_SIZE = 36;
 
 function selectOptionalPeer(peerId?: string) {
   return (global: GlobalState) => (
@@ -59,8 +59,9 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
 
   const peerId = transactionPeer.type === 'peer' ? transactionPeer.id : undefined;
   const peer = useSelector(selectOptionalPeer(peerId));
-  const uniqueGift = transaction.starGift?.type === 'starGiftUnique' ? transaction.starGift : undefined;
-  const uniqueGiftSticker = uniqueGift && getStickerFromGift(uniqueGift);
+  const starGift = transaction.starGift;
+  const isUniqueGift = starGift?.type === 'starGiftUnique';
+  const giftSticker = starGift && getStickerFromGift(starGift);
 
   const data = useMemo(() => {
     let title = getTransactionTitle(oldLang, transaction);
@@ -107,8 +108,8 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
   }, [oldLang, peer, transaction]);
 
   const previewContent = useMemo(() => {
-    if (uniqueGiftSticker) {
-      const { backdrop } = getGiftAttributes(uniqueGift)!;
+    if (isUniqueGift) {
+      const { backdrop } = getGiftAttributes(starGift)!;
       const backgroundColors = [backdrop!.centerColor, backdrop!.edgeColor];
 
       return (
@@ -118,12 +119,23 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
             backgroundColors={backgroundColors}
           />
           <AnimatedIconFromSticker
-            className={styles.uniqueGift}
-            sticker={uniqueGiftSticker}
-            size={UNIQUE_GIFT_STICKER_SIZE}
+            className={styles.giftSticker}
+            sticker={giftSticker}
+            size={GIFT_STICKER_SIZE}
             play={false}
           />
         </>
+      );
+    }
+
+    if (giftSticker) {
+      return (
+        <AnimatedIconFromSticker
+          className={styles.giftSticker}
+          sticker={giftSticker}
+          size={GIFT_STICKER_SIZE}
+          play={false}
+        />
       );
     }
 
@@ -139,7 +151,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
         )}
       </>
     );
-  }, [extendedMedia, photo, uniqueGiftSticker, subscriptionPeriod, data.avatarPeer, uniqueGift]);
+  }, [isUniqueGift, extendedMedia, photo, data.avatarPeer, subscriptionPeriod, starGift, giftSticker]);
 
   const handleClick = useLastCallback(() => {
     openStarsTransactionModal({ transaction });
