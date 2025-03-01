@@ -71,6 +71,10 @@ export default function useHeaderPane<RefType extends HTMLElement = HTMLDivEleme
 
   useTimeout(() => {
     setShouldRender(false);
+    onStateChange?.({
+      height: 0,
+      isOpen: false,
+    });
   }, !isOpen ? CLOSE_DURATION : undefined);
 
   // Should be `useCallback` to trigger effect on deps change
