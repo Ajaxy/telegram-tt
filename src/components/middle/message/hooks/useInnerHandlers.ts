@@ -196,11 +196,20 @@ export default function useInnerHandlers({
     }
 
     if (replyToPeerId && replyToTopId) {
-      focusMessage({
-        chatId: replyToPeerId,
-        threadId: replyToTopId,
-        messageId: forwardInfo!.fromMessageId!,
-      });
+      if (isRepliesChat) {
+        openThread({
+          isComments: true,
+          originChannelId: replyToPeerId,
+          originMessageId: replyToTopId,
+          focusMessageId: forwardInfo!.fromMessageId!,
+        });
+      } else {
+        focusMessage({
+          chatId: replyToPeerId,
+          threadId: replyToTopId,
+          messageId: forwardInfo!.fromMessageId!,
+        });
+      }
     } else {
       focusMessage({
         chatId: originalChatId, messageId: forwardInfo!.fromMessageId!,
