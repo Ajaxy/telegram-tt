@@ -17,6 +17,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
   if (starGift instanceof GramJs.StarGiftUnique) {
     const {
       id, num, ownerId, ownerName, title, attributes, availabilityIssued, availabilityTotal, slug, ownerAddress,
+      giftAddress,
     } = starGift;
 
     return {
@@ -31,6 +32,7 @@ export function buildApiStarGift(starGift: GramJs.TypeStarGift): ApiStarGift {
       totalCount: availabilityTotal,
       issuedCount: availabilityIssued,
       slug,
+      giftAddress,
     };
   }
 

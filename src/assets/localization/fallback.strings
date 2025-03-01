@@ -1405,6 +1405,8 @@
 "GiftInfoChannelHidden" = "This gift is hidden from visitors of your channel. {link}";
 "GiftInfoSavedHide" = "Hide >";
 "GiftInfoSavedShow" = "Show >";
+"GiftInfoTonText" = "This gift is on the TON Blockchain. {link}";
+"GiftInfoTonLinkText" = "View >";
 "GiftInfoAvailability" = "Availability";
 "GiftInfoAvailabilityValue_one" = "{count} of {total} left";
 "GiftInfoAvailabilityValue_other" = "{count} of {total} left";
@@ -1569,7 +1571,8 @@
 "ActionUnsupportedDescription" = "Please use one of our apps to complete this action.";
 "LocationPermissionText" = "**{name}** requests access to set your **location**. You will be able to revoke this access in the profile page of **{name}**.";
 "UnlockMoreSimilarBots" = "Show More Apps";
-"MoreSimilarBotsText" = "Subscribe to **Telegram Premium** to unlock up to {count} similar apps.";
+"MoreSimilarBotsDescription_one" = "Subscribe to **Telegram Premium** to unlock up to {count} similar bot.";
+"MoreSimilarBotsDescription_other" = "Subscribe to **Telegram Premium** to unlock up to {count} similar bots.";
 "GiftWasNotFound" = "Gift was not found";
 "ViewButtonRequestJoin" = "REQUEST TO JOIN";
 "ViewButtonMessage" = "VIEW MESSAGE";

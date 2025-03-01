@@ -33,6 +33,7 @@ import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import Avatar from '../../../common/Avatar';
 import BadgeButton from '../../../common/BadgeButton';
 import Icon from '../../../common/icons/Icon';
+import SafeLink from '../../../common/SafeLink';
 import Button from '../../../ui/Button';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
 import DropdownMenu from '../../../ui/DropdownMenu';
@@ -55,6 +56,7 @@ type StateProps = {
   hasAdminRights?: boolean;
   currentUserEmojiStatus?: ApiEmojiStatusType;
   collectibleEmojiStatuses?: ApiEmojiStatusType[];
+  tonExplorerUrl?: string;
 };
 
 const STICKER_SIZE = 120;
@@ -68,6 +70,7 @@ const GiftInfoModal = ({
   hasAdminRights,
   currentUserEmojiStatus,
   collectibleEmojiStatuses,
+  tonExplorerUrl,
 }: OwnProps & StateProps) => {
   const {
     closeGiftInfoModal,
@@ -599,21 +602,34 @@ const GiftInfoModal = ({
       }
     }
 
+    const tonLink = tonExplorerUrl && isGiftUnique && gift.giftAddress && (
+      `${tonExplorerUrl}${gift.giftAddress}`
+    );
+
     const footer = (
       <div className={styles.footer}>
-        {canUpdate && (
+        {(canUpdate || tonLink) && (
           <div className={styles.footerDescription}>
-            <div>
-              {lang(`GiftInfo${isTargetChat ? 'Channel' : ''}${isUnsaved ? 'Hidden' : 'Saved'}`, {
-                link: (
-                  <Link isPrimary onClick={handleTriggerVisibility}>
-                    {lang(`GiftInfoSaved${isUnsaved ? 'Show' : 'Hide'}`)}
-                  </Link>
-                ),
-              }, {
-                withNodes: true,
-              })}
-            </div>
+            {tonLink && (
+              <div>
+                {lang('GiftInfoTonText', {
+                  link: <SafeLink url={tonLink} text={lang('GiftInfoTonLinkText')} />,
+                }, { withNodes: true })}
+              </div>
+            )}
+            {canUpdate && (
+              <div>
+                {lang(`GiftInfo${isTargetChat ? 'Channel' : ''}${isUnsaved ? 'Hidden' : 'Saved'}`, {
+                  link: (
+                    <Link isPrimary onClick={handleTriggerVisibility}>
+                      {lang(`GiftInfoSaved${isUnsaved ? 'Show' : 'Hide'}`)}
+                    </Link>
+                  ),
+                }, {
+                  withNodes: true,
+                })}
+              </div>
+            )}
             {isVisibleForMe && (
               <div>
                 {lang('GiftInfoSenderHidden')}
@@ -633,7 +649,7 @@ const GiftInfoModal = ({
     };
   }, [
     typeGift, savedGift, renderingTargetPeer, giftSticker, lang,
-    canUpdate, canConvertDifference, isSender, oldLang,
+    canUpdate, canConvertDifference, isSender, oldLang, tonExplorerUrl,
     gift, giftAttributes, renderFooterButton, isTargetChat,
     SettingsMenuButton, isOpen, isGiftUnique, canWear, canTakeOff,
   ]);
@@ -703,6 +719,7 @@ export default memo(withGlobal<OwnProps>(
       targetPeer,
       currentUserId: global.currentUserId,
       starGiftMaxConvertPeriod: global.appConfig?.starGiftMaxConvertPeriod,
+      tonExplorerUrl: global.appConfig?.tonExplorerUrl,
       hasAdminRights,
       currentUserEmojiStatus,
       collectibleEmojiStatuses,

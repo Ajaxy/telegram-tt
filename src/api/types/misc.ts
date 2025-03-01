@@ -241,6 +241,7 @@ export interface ApiAppConfig {
   starGiftMaxMessageLength?: number;
   starGiftMaxConvertPeriod?: number;
   starRefStartPrefixes?: string[];
+  tonExplorerUrl?: string;
 }
 
 export interface ApiConfig {

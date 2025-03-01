@@ -807,9 +807,10 @@ const Profile: FC<OwnProps & StateProps> = ({
                   <Icon name="unlock-badge" />
                 </Button>
                 <div className="more-similar">
-                  {renderText(lang('MoreSimilarBotsText', { count: limitSimilarPeers }, {
+                  {renderText(lang('MoreSimilarBotsDescription', { count: limitSimilarPeers }, {
                     withNodes: true,
                     withMarkdown: true,
+                    pluralValue: limitSimilarPeers,
                   }))}
                 </div>
               </>

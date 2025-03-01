@@ -1178,6 +1178,7 @@ export interface LangPair {
   'GiftInfoConvertDescription2': undefined;
   'GiftInfoSavedHide': undefined;
   'GiftInfoSavedShow': undefined;
+  'GiftInfoTonLinkText': undefined;
   'GiftInfoAvailability': undefined;
   'GiftInfoFirstSale': undefined;
   'GiftInfoLastSale': undefined;
@@ -1768,6 +1769,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'GiftInfoChannelHidden': {
     'link': V;
   };
+  'GiftInfoTonText': {
+    'link': V;
+  };
   'GiftInfoIssued': {
     'issued': V;
     'total': V;
@@ -1891,9 +1895,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'LocationPermissionText': {
     'name': V;
-  };
-  'MoreSimilarBotsText': {
-    'count': V;
   };
   'ActionPinnedText': {
     'from': V;
@@ -2422,6 +2423,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
     'count': V;
   };
   'FolderLinkNotificationUpdatedSubtitle': {
+    'count': V;
+  };
+  'MoreSimilarBotsDescription': {
     'count': V;
   };
   'ActionGameScore': {

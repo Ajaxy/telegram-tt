@@ -218,6 +218,7 @@ export interface ApiStarGiftUnique {
   totalCount: number;
   attributes: ApiStarGiftAttribute[];
   slug: string;
+  giftAddress?: string;
 }
 
 export type ApiStarGift = ApiStarGiftRegular | ApiStarGiftUnique;
