@@ -25,7 +25,6 @@ import { getMediaContentTypeDescription } from '../../../global/helpers/messageS
 import buildClassName from '../../../util/buildClassName';
 import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';
-import { getPeerColorClass } from '../helpers/peerColor';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
@@ -41,7 +40,7 @@ import RippleEffect from '../../ui/RippleEffect';
 import Icon from '../icons/Icon';
 import MediaSpoiler from '../MediaSpoiler';
 import MessageSummary from '../MessageSummary';
-import EmojiIconBackground from './EmojiIconBackground';
+import PeerColorWrapper from '../PeerColorWrapper';
 
 import './EmbeddedMessage.scss';
 
@@ -223,12 +222,15 @@ const EmbeddedMessage: FC<OwnProps> = ({
   }
 
   return (
-    <div
+    <PeerColorWrapper
+      peer={sender}
+      emojiIconClassName=' className="EmbeddedMessage--background-icons"'
       ref={ref}
+      shouldReset
+      noUserColors={noUserColors}
       className={buildClassName(
         'EmbeddedMessage',
         className,
-        getPeerColorClass(sender, noUserColors, true),
         isQuote && 'is-quote',
         mediaThumbnail && 'with-thumb',
       )}
@@ -240,12 +242,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
       <RippleEffect />
       {mediaThumbnail && renderPictogram(
         mediaThumbnail, mediaBlobUrl, isVideoThumbnail, isRoundVideo, isProtected, isSpoiler,
-      )}
-      {sender?.color?.backgroundEmojiId && (
-        <EmojiIconBackground
-          emojiDocumentId={sender.color.backgroundEmojiId}
-          className="EmbeddedMessage--background-icons"
-        />
       )}
       <div className="message-text">
         <p className={buildClassName('embedded-text-wrapper', isQuote && 'multiline')}>
@@ -261,7 +257,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </PeerColorWrapper>
   );
 };
 
