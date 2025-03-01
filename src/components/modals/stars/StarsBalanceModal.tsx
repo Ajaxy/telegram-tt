@@ -288,6 +288,7 @@ const StarsBalanceModal = ({
                   itemSelector={`.${TRANSACTION_ITEM_CLASS}`}
                   className={styles.transactions}
                   noFastList
+                  noScrollRestoreOnTop
                 >
                   {history?.[TRANSACTION_TYPES[selectedTabIndex]]?.transactions.map((transaction) => (
                     <StarsTransactionItem

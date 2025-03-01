@@ -9,7 +9,7 @@
 }
 
 .root :global(.modal-dialog) {
-  height: min(calc(55vh + 41px + 193px), 90vh);
+  height: min(45rem, 90vh);
   max-width: 26.25rem;
 }
 
