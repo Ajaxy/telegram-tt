@@ -1335,6 +1335,7 @@ export interface LangPair {
   'CollectibleStatusesCategory': undefined;
   'PeerPersonalAccount': undefined;
   'PeerChannel': undefined;
+  'WebAppCollapse': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

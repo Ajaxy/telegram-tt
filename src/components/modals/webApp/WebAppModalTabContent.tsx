@@ -972,14 +972,14 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
               styles.headerButton,
               styles.left,
             )}
+            tabIndex={0}
+            role="button"
+            aria-label={lang('WebAppCollapse')}
+            onClick={handleCollapseClick}
           >
             <Icon
               name="down"
-              className={buildClassName(
-                styles.icon,
-                styles.collapseIcon,
-              )}
-              onClick={handleCollapseClick}
+              className={styles.icon}
             />
           </div>
           <div
@@ -987,6 +987,11 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
               styles.headerButton,
               styles.right,
             )}
+            tabIndex={0}
+            role="button"
+            aria-haspopup="menu"
+            aria-label={lang('AriaMoreButton')}
+            onClick={handleShowContextMenu}
           >
             <Icon
               name="more"
@@ -994,7 +999,6 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
                 styles.icon,
                 styles.moreIcon,
               )}
-              onClick={handleShowContextMenu}
             />
           </div>
         </div>

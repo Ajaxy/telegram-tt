@@ -302,6 +302,7 @@
   padding: 1rem;
   padding-inline-end: calc(1rem + var(--scrollbar-width));
   justify-content: space-between;
+  pointer-events: none;
 }
 
 .icon {
@@ -331,6 +332,7 @@
   border-radius: 1rem;
   background-color: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(25px);
+  pointer-events: auto;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
