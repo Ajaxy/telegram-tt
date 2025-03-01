@@ -1625,6 +1625,15 @@ const Message: FC<OwnProps & StateProps> = ({
               isLoadingComments && 'message-action-buttons-shown',
             )}
             >
+              {withCommentButton && isCustomShape && (
+                <CommentButton
+                  threadInfo={repliesThreadInfo}
+                  disabled={noComments}
+                  isLoading={isLoadingComments}
+                  isCustomShape
+                  asActionButton
+                />
+              )}
               {canForward && (
                 <Button
                   className="message-action-button"
@@ -1651,12 +1660,11 @@ const Message: FC<OwnProps & StateProps> = ({
               )}
             </div>
           )}
-          {withCommentButton && (
+          {withCommentButton && !(canShowActionButton && isCustomShape) && (
             <CommentButton
               threadInfo={repliesThreadInfo}
               disabled={noComments}
               isLoading={isLoadingComments}
-              isCustomShape={isCustomShape}
             />
           )}
           {withAppendix && <MessageAppendix isOwn={isOwn} />}

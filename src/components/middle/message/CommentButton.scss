@@ -111,6 +111,22 @@
     }
   }
 
+  &.as-action-button {
+    position: static;
+    background-color: transparent;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      backdrop-filter: none;
+      filter: none;
+    }
+
+    &::after {
+      top: 1.5rem;
+      bottom: auto;
+    }
+  }
+
   &:hover {
     background: var(--hover-color);
 
