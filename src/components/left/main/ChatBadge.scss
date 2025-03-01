@@ -48,6 +48,12 @@
     padding: 0 0.375rem;
   }
 
+  body.is-ios &.miniapp {
+    line-height: 1.5rem;
+    min-width: 1.5rem;
+    height: 1.5rem;
+  }
+
   &.mention,
   &.unread:not(.muted),
   &.unopened:not(.muted) {
