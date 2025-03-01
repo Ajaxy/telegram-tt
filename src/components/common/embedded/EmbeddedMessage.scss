@@ -119,6 +119,7 @@
   }
 
   .embedded-chat-icon {
+    margin-inline-end: 0.25rem;
     font-size: 0.75rem;
     vertical-align: middle;
   }
@@ -133,13 +134,25 @@
       align-items: center;
       flex-wrap: nowrap;
       flex: 1;
-      column-gap: 0.25rem;
     }
 
-    .message-title, .embedded-sender, .embedded-sender-chat {
+    .message-title, .embedded-sender, .embedded-sender-chat,
+    .embedded-message-title, .forward-sender-title {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .embedded-sender-wrapper,
+    .embedded-forward-sender-wrapper {
+      display: flex;
+      align-items: center;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    .embedded-sender-wrapper {
+      flex-shrink: 0;
     }
 
     .embedded-text-wrapper {

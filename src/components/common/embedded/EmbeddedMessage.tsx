@@ -192,7 +192,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
     const isReplyToQuote = isInComposer && Boolean(replyInfo && 'quoteText' in replyInfo && replyInfo?.quoteText);
 
     return (
-      <>
+      <span className="embedded-sender-wrapper">
         {checkShouldRenderSenderTitle() && (
           <span className="embedded-sender">
             {renderText(isReplyToQuote ? lang('ReplyToQuote', senderTitle) : senderTitle)}
@@ -204,7 +204,18 @@ const EmbeddedMessage: FC<OwnProps> = ({
             {renderText(senderChatTitle)}
           </span>
         )}
-      </>
+      </span>
+    );
+  }
+
+  function renderForwardSender() {
+    return forwardSenderTitle && !areSendersSame && (
+      <span className="embedded-forward-sender-wrapper">
+        <Icon name={forwardSender ? 'share-filled' : 'forward'} className="embedded-origin-icon" />
+        <span className="forward-sender-title">
+          {renderText(forwardSenderTitle)}
+        </span>
+      </span>
     );
   }
 
@@ -236,12 +247,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         </p>
         <div className="message-title">
           {renderSender()}
-          {forwardSenderTitle && !areSendersSame && (
-            <>
-              <Icon name={forwardSender ? 'share-filled' : 'forward'} className="embedded-origin-icon" />
-              {renderText(forwardSenderTitle)}
-            </>
-          )}
+          {renderForwardSender()}
         </div>
       </div>
     </PeerColorWrapper>
