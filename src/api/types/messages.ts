@@ -279,7 +279,7 @@ export interface ApiGeoLive {
   mediaType: 'geoLive';
   geo: ApiGeoPoint;
   heading?: number;
-  period?: number;
+  period: number;
 }
 
 export type ApiLocation = ApiGeo | ApiVenue | ApiGeoLive;
