@@ -225,7 +225,7 @@ export function buildApiMessageWithChatId(
 
   const savedPeerId = mtpMessage.savedPeerId && getApiChatIdFromMtpPeer(mtpMessage.savedPeerId);
 
-  return omitUndefined<ApiMessage>({
+  return {
     id: mtpMessage.id,
     chatId,
     isOutgoing,
@@ -270,7 +270,7 @@ export function buildApiMessageWithChatId(
     isInvertedMedia,
     isVideoProcessingPending,
     reportDeliveryUntilDate: mtpMessage.reportDeliveryUntilDate,
-  });
+  };
 }
 
 export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | undefined {

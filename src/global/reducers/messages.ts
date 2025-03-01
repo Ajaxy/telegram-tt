@@ -21,7 +21,7 @@ import {
 import { areDeepEqual } from '../../util/areDeepEqual';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
-  areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
+  areSortedArraysEqual, excludeSortedArray, omit, omitUndefined, pick, pickTruthy, unique,
 } from '../../util/iteratees';
 import { isLocalMessageId, type MessageKey } from '../../util/keys/messageKey';
 import {
@@ -273,11 +273,11 @@ export function updateChatMessage<T extends GlobalState>(
     );
   }
 
-  const updatedMessage = {
+  const updatedMessage = omitUndefined({
     ...message,
     ...messageUpdate,
     emojiOnlyCount,
-  };
+  });
 
   if (!updatedMessage.id) {
     return global;
