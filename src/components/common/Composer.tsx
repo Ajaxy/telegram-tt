@@ -1125,10 +1125,11 @@ const Composer: FC<OwnProps & StateProps> = ({
       const { id, queryId, isSilent } = args;
       sendInlineBotResult({
         id,
+        chatId,
+        threadId,
         queryId,
         scheduledAt,
         isSilent,
-        messageList,
       });
       return;
     }
@@ -1272,8 +1273,9 @@ const Composer: FC<OwnProps & StateProps> = ({
       sendInlineBotResult({
         id: inlineResult.id,
         queryId: inlineResult.queryId,
+        threadId,
+        chatId,
         isSilent,
-        messageList: currentMessageList!,
       });
     }
 

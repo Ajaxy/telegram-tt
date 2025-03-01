@@ -219,6 +219,7 @@
     "messages.reportSponsoredMessage",
     "messages.getSponsoredMessages",
     "messages.reportMessagesDelivery",
+    "messages.getPreparedInlineMessage",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",

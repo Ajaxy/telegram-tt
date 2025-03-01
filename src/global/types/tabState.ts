@@ -30,6 +30,7 @@ import type {
   ApiPremiumGiftCodeOption,
   ApiPremiumPromo,
   ApiPremiumSection,
+  ApiPreparedInlineMessage,
   ApiReactionWithPaid,
   ApiReceiptRegular,
   ApiSavedGifts,
@@ -497,6 +498,18 @@ export type TabState = {
   pollModal: {
     isOpen: boolean;
     isQuiz?: boolean;
+  };
+
+  preparedMessageModal?: {
+    message: ApiPreparedInlineMessage;
+    webAppKey: string;
+    botId: string;
+  };
+
+  sharePreparedMessageModal?: {
+    webAppKey: string;
+    message: ApiPreparedInlineMessage;
+    filter: ApiChatType[];
   };
 
   webApps: {

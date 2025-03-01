@@ -103,9 +103,11 @@ export interface ApiUsername {
 export type ApiChatType = typeof API_CHAT_TYPES[number];
 export type ApiAttachMenuPeerType = 'self' | ApiChatType;
 
+export type ApiInlineQueryPeerType = 'self' | 'supergroups' | ApiChatType;
+
 type ApiAttachBotForMenu = {
   isForAttachMenu: true;
-  attachMenuPeerTypes: ApiAttachMenuPeerType[];
+  attachMenuPeerTypes?: ApiAttachMenuPeerType[];
 };
 
 type ApiAttachBotBase = {

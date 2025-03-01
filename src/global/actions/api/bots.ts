@@ -381,14 +381,13 @@ addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType
 
 addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturnType => {
   const {
-    id, queryId, isSilent, scheduledAt, messageList,
+    id, queryId, isSilent, scheduledAt, threadId, chatId,
     tabId = getCurrentTabId(),
   } = payload;
   if (!id) {
     return;
   }
 
-  const { chatId, threadId } = messageList;
   const chat = selectChat(global, chatId)!;
   const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
 

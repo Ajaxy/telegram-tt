@@ -1,11 +1,14 @@
 import type {
-  ApiDimensions,
-  ApiPhoto, ApiSticker, ApiThumbnail, ApiVideo, MediaContainer,
+  ApiDimensions, ApiDocument,
+  ApiPhoto, ApiReplyKeyboard,
+  ApiSticker, ApiThumbnail,
+  ApiVideo, MediaContainer,
+  MediaContent,
 } from './messages';
 
 export type ApiInlineResultType = (
   'article' | 'audio' | 'contact' | 'document' | 'game' | 'gif' | 'location' | 'mpeg4_gif' |
-  'photo' | 'sticker' | 'venue' | 'video' | 'voice' | 'file'
+  'photo' | 'sticker' | 'venue' | 'video' | 'voice' | 'file' | 'geo'
 );
 
 export interface ApiWebDocument {
@@ -17,6 +20,11 @@ export interface ApiWebDocument {
   dimensions?: ApiDimensions;
 }
 
+export type ApiBotInlineMessage = {
+  content: MediaContent;
+  replyMarkup?: ApiReplyKeyboard;
+};
+
 export interface ApiBotInlineResult {
   id: string;
   queryId: string;
@@ -24,7 +32,9 @@ export interface ApiBotInlineResult {
   title?: string;
   description?: string;
   url?: string;
+  content?: ApiWebDocument;
   webThumbnail?: ApiWebDocument;
+  sendMessage: ApiBotInlineMessage;
 }
 
 export interface ApiBotInlineMediaResult {
@@ -34,9 +44,11 @@ export interface ApiBotInlineMediaResult {
   title?: string;
   description?: string;
   sticker?: ApiSticker;
+  document?: ApiDocument;
   photo?: ApiPhoto;
   gif?: ApiVideo;
   thumbnail?: ApiThumbnail;
+  sendMessage: ApiBotInlineMessage;
 }
 
 export interface ApiBotInlineSwitchPm {

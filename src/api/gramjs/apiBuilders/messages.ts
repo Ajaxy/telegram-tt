@@ -8,7 +8,6 @@ import type {
   ApiFactCheck,
   ApiInputMessageReplyInfo,
   ApiInputReplyInfo,
-  ApiKeyboardButton,
   ApiMessage,
   ApiMessageEntity,
   ApiMessageForwardInfo,
@@ -17,9 +16,9 @@ import type {
   ApiPeer,
   ApiPhoto,
   ApiPoll,
+  ApiPreparedInlineMessage,
   ApiQuickReply,
   ApiReplyInfo,
-  ApiReplyKeyboard,
   ApiSponsoredMessage,
   ApiSticker,
   ApiStory,
@@ -28,9 +27,7 @@ import type {
   ApiVideo,
   MediaContent,
 } from '../../types';
-import {
-  ApiMessageEntityTypes, MAIN_THREAD_ID,
-} from '../../types';
+import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../types';
 
 import {
   DELETED_COMMENTS_CHANNEL_ID,
@@ -47,10 +44,18 @@ import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
 import {
+  addDocumentToLocalDb,
   addPhotoToLocalDb,
+  addWebDocumentToLocalDb,
   type MediaRepairContext,
 } from '../helpers/localDb';
 import { resolveMessageApiChatId, serializeBytes } from '../helpers/misc';
+import {
+  buildApiBotInlineMediaResult,
+  buildApiBotInlineResult,
+  buildApiInlineQueryPeerType,
+  buildReplyButtons,
+} from './bots';
 import {
   buildApiFormattedText,
   buildApiPhoto,
@@ -193,7 +198,7 @@ export function buildApiMessageWithChatId(
   const isEdited = Boolean(mtpMessage.editDate) && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
-  } = buildReplyButtons(mtpMessage, isInvoiceMedia) || {};
+  } = buildReplyButtons(mtpMessage.replyMarkup, mtpMessage.id) || {};
   const { mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
@@ -354,159 +359,6 @@ export function buildApiFactCheck(factCheck: GramJs.FactCheck): ApiFactCheck {
     hash: factCheck.hash.toString(),
     text: factCheck.text && buildApiFormattedText(factCheck.text),
     countryCode: factCheck.country,
-  };
-}
-
-function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: boolean): ApiReplyKeyboard | undefined {
-  const { replyMarkup, media } = message;
-
-  if (!(replyMarkup instanceof GramJs.ReplyKeyboardMarkup || replyMarkup instanceof GramJs.ReplyInlineMarkup)) {
-    return undefined;
-  }
-
-  const markup = replyMarkup.rows.map(({ buttons }) => {
-    return buttons.map((button): ApiKeyboardButton | undefined => {
-      const { text } = button;
-
-      if (button instanceof GramJs.KeyboardButton) {
-        return {
-          type: 'command',
-          text,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonUrl) {
-        if (button.url.includes('?startgroup=')) {
-          return {
-            type: 'unsupported',
-            text,
-          };
-        }
-
-        return {
-          type: 'url',
-          text,
-          url: button.url,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonCallback) {
-        if (button.requiresPassword) {
-          return {
-            type: 'unsupported',
-            text,
-          };
-        }
-
-        return {
-          type: 'callback',
-          text,
-          data: serializeBytes(button.data),
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonRequestPoll) {
-        return {
-          type: 'requestPoll',
-          text,
-          isQuiz: button.quiz,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonRequestPhone) {
-        return {
-          type: 'requestPhone',
-          text,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonBuy) {
-        if (media instanceof GramJs.MessageMediaInvoice && media.receiptMsgId) {
-          return {
-            type: 'receipt',
-            receiptMessageId: media.receiptMsgId,
-          };
-        }
-        if (shouldSkipBuyButton) return undefined;
-        return {
-          type: 'buy',
-          text,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonGame) {
-        return {
-          type: 'game',
-          text,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonSwitchInline) {
-        return {
-          type: 'switchBotInline',
-          text,
-          query: button.query,
-          isSamePeer: button.samePeer,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonUserProfile) {
-        return {
-          type: 'userProfile',
-          text,
-          userId: button.userId.toString(),
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonSimpleWebView) {
-        return {
-          type: 'simpleWebView',
-          text,
-          url: button.url,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonWebView) {
-        return {
-          type: 'webView',
-          text,
-          url: button.url,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonUrlAuth) {
-        return {
-          type: 'urlAuth',
-          text,
-          url: button.url,
-          buttonId: button.buttonId,
-        };
-      }
-
-      if (button instanceof GramJs.KeyboardButtonCopy) {
-        return {
-          type: 'copy',
-          text,
-          copyText: button.copyText,
-        };
-      }
-
-      return {
-        type: 'unsupported',
-        text,
-      };
-    }).filter(Boolean);
-  });
-
-  if (markup.every((row) => !row.length)) return undefined;
-
-  return {
-    [replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? 'keyboardButtons' : 'inlineButtons']: markup,
-    ...(replyMarkup instanceof GramJs.ReplyKeyboardMarkup && {
-      keyboardPlaceholder: replyMarkup.placeholder,
-      isKeyboardSingleUse: replyMarkup.singleUse,
-      isKeyboardSelective: replyMarkup.selective,
-    }),
   };
 }
 
@@ -877,5 +729,38 @@ export function buildApiReportResult(
     type: 'selectOption',
     title,
     options,
+  };
+}
+
+function processInlineBotResult(queryId: string, result: GramJs.TypeBotInlineResult) {
+  if (result instanceof GramJs.BotInlineMediaResult) {
+    if (result.document instanceof GramJs.Document) {
+      addDocumentToLocalDb(result.document);
+    }
+
+    if (result.photo instanceof GramJs.Photo) {
+      addPhotoToLocalDb(result.photo);
+    }
+
+    return buildApiBotInlineMediaResult(result, queryId);
+  }
+
+  if (result.thumb) {
+    addWebDocumentToLocalDb(result.thumb);
+  }
+
+  return buildApiBotInlineResult(result, queryId);
+}
+
+export function buildPreparedInlineMessage(
+  result: GramJs.messages.TypePreparedInlineMessage,
+): ApiPreparedInlineMessage {
+  const queryId = result.queryId.toString();
+
+  return {
+    queryId,
+    result: processInlineBotResult(queryId, result.result),
+    peerTypes: result.peerTypes?.map(buildApiInlineQueryPeerType),
+    cacheTime: result.cacheTime,
   };
 }

@@ -137,6 +137,9 @@ export type WebAppInboundEvent =
     url: string;
     file_name: string;
   }> |
+  WebAppEvent<'web_app_send_prepared_message', {
+    id: string;
+  }> |
   WebAppEvent<'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
   | 'web_app_request_phone' | 'web_app_close' | 'web_app_close_scan_qr_popup'
   | 'web_app_request_write_access' | 'iframe_will_reload'
@@ -259,6 +262,10 @@ export type WebAppOutboundEvent =
   WebAppEvent<'file_download_requested', {
     status: 'cancelled' | 'downloading';
   }> |
+  WebAppEvent<'prepared_message_failed', {
+    error: 'UNSUPPORTED' | 'MESSAGE_EXPIRED' | 'MESSAGE_SEND_FAILED'
+    | 'USER_DECLINED' | 'UNKNOWN_ERROR';
+  }> |
   WebAppEvent<'main_button_pressed' |
   'secondary_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed'
-  | 'reload_iframe' | 'emoji_status_set', null>;
+  | 'reload_iframe' | 'prepared_message_sent' | 'emoji_status_set', null>;

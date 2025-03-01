@@ -24,11 +24,15 @@ import type {
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
+  ApiUser,
   ApiUserStatus,
   ApiVideo,
   MediaContent,
 } from '../../types';
-import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../types';
+import {
+  MAIN_THREAD_ID,
+  MESSAGE_DELETED,
+} from '../../types';
 
 import {
   API_GENERAL_ID_LIMIT,
@@ -65,6 +69,7 @@ import {
   buildApiThreadInfo,
   buildLocalForwardedMessage,
   buildLocalMessage,
+  buildPreparedInlineMessage,
   buildUploadingMedia,
 } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -2177,4 +2182,19 @@ export async function exportMessageLink({
   }));
 
   return result?.link;
+}
+
+export async function fetchPreparedInlineMessage({
+  bot, id,
+}: {
+  bot: ApiUser;
+  id: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetPreparedInlineMessage({
+    bot: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+    id,
+  }));
+  if (!result) return undefined;
+
+  return buildPreparedInlineMessage(result);
 }

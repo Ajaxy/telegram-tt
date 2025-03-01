@@ -28,6 +28,7 @@ import type {
   ApiPaymentStatus,
   ApiPhoto,
   ApiPremiumSection,
+  ApiPreparedInlineMessage,
   ApiPrivacyKey,
   ApiPrivacySettings,
   ApiReaction,
@@ -528,6 +529,17 @@ export interface ActionPayloads {
     chatId: string;
   } & WithTabId;
   closeAboutAdsModal: WithTabId | undefined;
+  openPreparedInlineMessageModal: {
+    botId: string;
+    messageId: string;
+    webAppKey: string;
+  } & WithTabId;
+  closePreparedInlineMessageModal: WithTabId | undefined;
+  openSharePreparedMessageModal: {
+    webAppKey: string;
+    message: ApiPreparedInlineMessage;
+  } & WithTabId;
+  closeSharePreparedMessageModal: WithTabId | undefined;
   openPreviousReportAdModal: WithTabId | undefined;
   openPreviousReportModal: WithTabId | undefined;
   closeReportAdModal: WithTabId | undefined;
@@ -1872,7 +1884,8 @@ export interface ActionPayloads {
   sendInlineBotResult: {
     id: string;
     queryId: string;
-    messageList: MessageList;
+    chatId: string;
+    threadId: ThreadId;
     isSilent?: boolean;
     scheduledAt?: number;
   } & WithTabId;

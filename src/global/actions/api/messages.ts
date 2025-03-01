@@ -1,6 +1,7 @@
 import type {
   ApiAttachment,
   ApiChat,
+  ApiChatType,
   ApiDraft,
   ApiError,
   ApiInputMessageReplyInfo,
@@ -2340,6 +2341,59 @@ addActionHandler('reportMessageDelivery', (global, actions, payload): ActionRetu
       MESSAGES_TO_REPORT_DELIVERY.clear();
     }, 500);
   }
+});
+
+addActionHandler('openPreparedInlineMessageModal', async (global, actions, payload): Promise<void> => {
+  const {
+    botId, messageId, webAppKey, tabId = getCurrentTabId(),
+  } = payload;
+
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
+  const result = await callApi('fetchPreparedInlineMessage', {
+    bot,
+    id: messageId,
+  });
+  if (!result) {
+    actions.sendWebAppEvent({
+      webAppKey,
+      event: {
+        eventType: 'prepared_message_failed',
+        eventData: { error: 'MESSAGE_EXPIRED' },
+      },
+      tabId,
+    });
+    return;
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    preparedMessageModal: {
+      message: result,
+      webAppKey,
+      botId,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('openSharePreparedMessageModal', (global, actions, payload): ActionReturnType => {
+  const {
+    webAppKey, message, tabId = getCurrentTabId(),
+  } = payload;
+
+  const supportedFilters = message.peerTypes?.filter((type): type is ApiChatType => type !== 'self');
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    sharePreparedMessageModal: {
+      webAppKey,
+      filter: supportedFilters,
+      message,
+    },
+  }, tabId);
+  setGlobal(global);
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {

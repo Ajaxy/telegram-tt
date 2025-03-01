@@ -201,9 +201,9 @@ type MessagePositionProperties = {
 type OwnProps =
   {
     message: ApiMessage;
-    observeIntersectionForBottom: ObserveFn;
-    observeIntersectionForLoading: ObserveFn;
-    observeIntersectionForPlaying: ObserveFn;
+    observeIntersectionForBottom?: ObserveFn;
+    observeIntersectionForLoading?: ObserveFn;
+    observeIntersectionForPlaying?: ObserveFn;
     album?: IAlbum;
     noAvatars?: boolean;
     withAvatar?: boolean;
@@ -214,9 +214,9 @@ type OwnProps =
     noReplies: boolean;
     appearanceOrder: number;
     isJustAdded: boolean;
-    memoFirstUnreadIdRef: { current: number | undefined };
-    getIsMessageListReady: Signal<boolean>;
-    onIntersectPinnedMessage: OnIntersectPinnedMessage;
+    memoFirstUnreadIdRef?: { current: number | undefined };
+    getIsMessageListReady?: Signal<boolean>;
+    onIntersectPinnedMessage?: OnIntersectPinnedMessage;
   }
   & MessagePositionProperties;
 
@@ -494,7 +494,7 @@ const Message: FC<OwnProps & StateProps> = ({
   useUnmountCleanup(() => {
     if (message.isPinned) {
       const id = album ? album.mainMessage.id : messageId;
-      onIntersectPinnedMessage({ viewportPinnedIdsToRemove: [id] });
+      onIntersectPinnedMessage?.({ viewportPinnedIdsToRemove: [id] });
     }
   });
 
@@ -729,7 +729,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if ((sticker?.hasEffect || effect) && ((
-      memoFirstUnreadIdRef.current && messageId >= memoFirstUnreadIdRef.current
+      memoFirstUnreadIdRef?.current && messageId >= memoFirstUnreadIdRef.current
     ) || isLocal)) {
       requestEffect();
     }
@@ -1105,7 +1105,7 @@ const Message: FC<OwnProps & StateProps> = ({
             )}
           </div>
         )}
-        {sticker && (
+        {sticker && observeIntersectionForLoading && observeIntersectionForPlaying && (
           <Sticker
             message={message}
             observeIntersection={observeIntersectionForLoading}
@@ -1383,7 +1383,7 @@ const Message: FC<OwnProps & StateProps> = ({
   function renderInvertibleMediaContent(hasCustomAppendix: boolean) {
     const content = (
       <>
-        {isAlbum && (
+        {isAlbum && observeIntersectionForLoading && (
           <Album
             album={album!}
             albumLayout={albumLayout!}

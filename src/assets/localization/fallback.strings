@@ -154,6 +154,8 @@
 "Code" = "Code";
 "Open" = "Open";
 "LoginHeaderPassword" = "Enter Password";
+"BotShareMessageShare" = "Share with...";
+"BotShareMessage" = "Share Message";
 "LoginEnterPasswordDescription" = "You have Two-Step Verification enabled, so your account is protected with an additional password.";
 "StartText" = "Please confirm your country code\nand enter your phone number.";
 "LoginPhonePlaceholder" = "Your phone number";
@@ -538,8 +540,10 @@
 "EditAdminTransferSetPassword" = "Set Password";
 "WebAppAddToAttachmentText" = "{bot} requests your permission to be added as an option to your attachment menu, so you can access it from any chat.";
 "BotOpenPageTitle" = "Open page";
+"WebAppShareMessageInfo" = "{user} mini app suggests you to send this message to a chat you select.";
 "BotPermissionGameAlert" = "Allow {bot} to pass your Telegram name and id (not your phone number) to pages you open with this bot?";
 "BotOpenPageMessage" = "**{bot}** would like to open its web app to proceed.\n\nIt will be able to access your **IP address** and basic device info.";
+"BotSharedToOne" = "Sent message to {peer}";
 "FilterDeleteAlert" = "Are you sure you want to remove this folder? Your chats will not be deleted.";
 "RequestToJoinChannelSentDescription" = "You will be added to the channel once its admins approve your request.";
 "RequestToJoinGroupSentDescription" = "You will be added to the group once an admin approves your request.";

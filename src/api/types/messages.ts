@@ -1,5 +1,9 @@
 import type { ThreadId, WebPageMediaSize } from '../../types';
-import type { ApiWebDocument } from './bots';
+import type {
+  ApiBotInlineMediaResult,
+  ApiBotInlineResult,
+  ApiWebDocument,
+} from './bots';
 import type { ApiPeerColor } from './chats';
 import type { ApiMessageAction } from './messageActions';
 import type {
@@ -9,6 +13,7 @@ import type {
 import type {
   ApiMessageStoryData, ApiStory, ApiWebPageStickerData, ApiWebPageStoryData,
 } from './stories';
+import type { ApiInlineQueryPeerType } from './users';
 
 export interface ApiDimensions {
   width: number;
@@ -255,12 +260,12 @@ export interface ApiGeoPoint {
   accuracyRadius?: number;
 }
 
-interface ApiGeo {
+export interface ApiGeo {
   mediaType: 'geo';
   geo: ApiGeoPoint;
 }
 
-interface ApiVenue {
+export interface ApiVenue {
   mediaType: 'venue';
   geo: ApiGeoPoint;
   title: string;
@@ -270,11 +275,11 @@ interface ApiVenue {
   venueType: string;
 }
 
-interface ApiGeoLive {
+export interface ApiGeoLive {
   mediaType: 'geoLive';
   geo: ApiGeoPoint;
   heading?: number;
-  period: number;
+  period?: number;
 }
 
 export type ApiLocation = ApiGeo | ApiVenue | ApiGeoLive;
@@ -913,6 +918,13 @@ export type ApiSponsoredMessageReportResult = {
     text: string;
     option: string;
   }[];
+};
+
+export type ApiPreparedInlineMessage = {
+  queryId: string;
+  result: ApiBotInlineResult | ApiBotInlineMediaResult;
+  peerTypes: ApiInlineQueryPeerType[];
+  cacheTime: number;
 };
 
 export const MAIN_THREAD_ID = -1;

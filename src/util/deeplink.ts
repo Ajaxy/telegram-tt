@@ -231,6 +231,11 @@ export function formatShareText(url?: string, text?: string, title?: string): Ap
 
 function parseChooseParameter(choose?: string) {
   if (!choose) return undefined;
-  const types = choose.toLowerCase().split(' ');
+  const types = choose.toLowerCase().split(' ').flatMap((type) => {
+    if (type === 'groups') {
+      return ['chats', 'groups'];
+    }
+    return [type];
+  });
   return types.filter((type): type is ApiChatType => API_CHAT_TYPES.includes(type as ApiChatType));
 }

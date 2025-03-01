@@ -13,32 +13,280 @@ import type {
   ApiBotInlineSwitchPm,
   ApiBotInlineSwitchWebview,
   ApiBotMenuButton,
+  ApiInlineQueryPeerType,
   ApiInlineResultType,
+  ApiKeyboardButton,
   ApiMessagesBotApp,
+  ApiReplyKeyboard,
+  MediaContainer,
+  MediaContent,
 } from '../../types';
 
 import { numberToHexColor } from '../../../util/colors';
 import { pick } from '../../../util/iteratees';
+import { generateRandomInt } from '../gramjsBuilders';
 import { addDocumentToLocalDb } from '../helpers/localDb';
-import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
+import { serializeBytes } from '../helpers/misc';
+import { buildApiMessageEntity, buildApiPhoto } from './common';
 import { omitVirtualClassFields } from './helpers';
-import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messageContent';
+import {
+  buildApiDocument,
+  buildApiWebDocument,
+  buildAudioFromDocument,
+  buildGeoPoint,
+  buildVideoFromDocument,
+} from './messageContent';
 import { buildSvgPath } from './pathBytesToSvg';
 import { buildApiPeerId } from './peers';
 import { buildStickerFromDocument } from './symbols';
 
+export function buildReplyButtons(
+  replyMarkup: GramJs.TypeReplyMarkup | undefined,
+  receiptMessageId?: number,
+): ApiReplyKeyboard | undefined {
+  if (!(replyMarkup instanceof GramJs.ReplyKeyboardMarkup || replyMarkup instanceof GramJs.ReplyInlineMarkup)) {
+    return undefined;
+  }
+
+  const markup = replyMarkup.rows.map(({ buttons }) => {
+    return buttons.map((button): ApiKeyboardButton | undefined => {
+      const { text } = button;
+
+      if (button instanceof GramJs.KeyboardButton) {
+        return {
+          type: 'command',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonUrl) {
+        if (button.url.includes('?startgroup=')) {
+          return {
+            type: 'unsupported',
+            text,
+          };
+        }
+
+        return {
+          type: 'url',
+          text,
+          url: button.url,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonCallback) {
+        if (button.requiresPassword) {
+          return {
+            type: 'unsupported',
+            text,
+          };
+        }
+
+        return {
+          type: 'callback',
+          text,
+          data: serializeBytes(button.data),
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonRequestPoll) {
+        return {
+          type: 'requestPoll',
+          text,
+          isQuiz: button.quiz,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonRequestPhone) {
+        return {
+          type: 'requestPhone',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonBuy) {
+        if (receiptMessageId) {
+          return {
+            type: 'receipt',
+            receiptMessageId,
+          };
+        }
+        return {
+          type: 'buy',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonGame) {
+        return {
+          type: 'game',
+          text,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonSwitchInline) {
+        return {
+          type: 'switchBotInline',
+          text,
+          query: button.query,
+          isSamePeer: button.samePeer,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonUserProfile) {
+        return {
+          type: 'userProfile',
+          text,
+          userId: button.userId.toString(),
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonSimpleWebView) {
+        return {
+          type: 'simpleWebView',
+          text,
+          url: button.url,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonWebView) {
+        return {
+          type: 'webView',
+          text,
+          url: button.url,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonUrlAuth) {
+        return {
+          type: 'urlAuth',
+          text,
+          url: button.url,
+          buttonId: button.buttonId,
+        };
+      }
+
+      if (button instanceof GramJs.KeyboardButtonCopy) {
+        return {
+          type: 'copy',
+          text,
+          copyText: button.copyText,
+        };
+      }
+
+      return {
+        type: 'unsupported',
+        text,
+      };
+    }).filter(Boolean);
+  });
+
+  if (markup.every((row) => !row.length)) return undefined;
+
+  return {
+    [replyMarkup instanceof GramJs.ReplyKeyboardMarkup ? 'keyboardButtons' : 'inlineButtons']: markup,
+    ...(replyMarkup instanceof GramJs.ReplyKeyboardMarkup && {
+      keyboardPlaceholder: replyMarkup.placeholder,
+      isKeyboardSingleUse: replyMarkup.singleUse,
+      isKeyboardSelective: replyMarkup.selective,
+    }),
+  };
+}
+
+export function buildBotInlineMessage(
+  sendMessage: GramJs.TypeBotInlineMessage, type: string, document?: GramJs.TypeDocument, photo?: GramJs.TypePhoto,
+): MediaContainer & { replyMarkup?: ApiReplyKeyboard } {
+  const content: MediaContent = {};
+
+  if (sendMessage instanceof GramJs.BotInlineMessageText) {
+    content.text = {
+      text: sendMessage.message,
+      entities: sendMessage.entities?.map(buildApiMessageEntity),
+    };
+  } else if (sendMessage instanceof GramJs.BotInlineMessageMediaAuto) {
+    if (type === 'photo' && photo instanceof GramJs.Photo) {
+      content.photo = buildApiPhoto(photo);
+    } else if (type === 'audio' && document instanceof GramJs.Document) {
+      content.audio = buildAudioFromDocument(document);
+    } else if (type === 'video' && document instanceof GramJs.Document) {
+      content.video = buildVideoFromDocument(document);
+    } else if (type === 'sticker' && document instanceof GramJs.Document) {
+      content.sticker = buildStickerFromDocument(document);
+    } else if (type === 'file' && document instanceof GramJs.Document) {
+      content.document = buildApiDocument(document);
+    } else if (type === 'gif' && document instanceof GramJs.Document) {
+      content.video = buildVideoFromDocument(document);
+    } else {
+      content.text = {
+        text: sendMessage.message,
+        entities: sendMessage.entities?.map(buildApiMessageEntity),
+      };
+    }
+  } else if (sendMessage instanceof GramJs.BotInlineMessageMediaGeo) {
+    content.location = {
+      mediaType: 'geo',
+      geo: buildGeoPoint(sendMessage.geo)!,
+    };
+  } else if (sendMessage instanceof GramJs.BotInlineMessageMediaVenue) {
+    content.location = {
+      mediaType: 'venue',
+      geo: buildGeoPoint(sendMessage.geo)!,
+      title: sendMessage.title,
+      address: sendMessage.address,
+      provider: sendMessage.provider,
+      venueId: sendMessage.venueId,
+      venueType: sendMessage.venueType,
+    };
+  } else if (sendMessage instanceof GramJs.BotInlineMessageMediaContact) {
+    content.contact = {
+      mediaType: 'contact',
+      phoneNumber: sendMessage.phoneNumber,
+      firstName: sendMessage.firstName,
+      lastName: sendMessage.lastName,
+      userId: '0',
+    };
+  } else if (sendMessage instanceof GramJs.BotInlineMessageMediaInvoice) {
+    content.invoice = {
+      mediaType: 'invoice',
+      isTest: sendMessage.test,
+      title: sendMessage.title,
+      description: sendMessage.description,
+      photo: buildApiWebDocument(sendMessage.photo),
+      currency: sendMessage.currency,
+      amount: sendMessage.totalAmount.toJSNumber(),
+    };
+  } else {
+    const mediaSize = sendMessage.forceSmallMedia ? 'small' : sendMessage.forceLargeMedia ? 'large' : undefined;
+
+    content.webPage = {
+      mediaType: 'webpage',
+      id: generateRandomInt(),
+      mediaSize,
+      url: sendMessage.url,
+      displayUrl: sendMessage.url,
+    };
+  }
+
+  return {
+    content,
+    replyMarkup: buildReplyButtons(sendMessage.replyMarkup) || undefined,
+  };
+}
+
 export function buildApiBotInlineResult(result: GramJs.BotInlineResult, queryId: string): ApiBotInlineResult {
   const {
-    id, type, title, description, url, thumb,
+    id, type, title, description, url, thumb, content, sendMessage,
   } = result;
 
   return {
     id,
     queryId,
     type: type as ApiInlineResultType,
+    sendMessage: buildBotInlineMessage(sendMessage, type),
     title,
     description,
     url,
+    content: buildApiWebDocument(content),
     webThumbnail: buildApiWebDocument(thumb),
   };
 }
@@ -47,7 +295,7 @@ export function buildApiBotInlineMediaResult(
   result: GramJs.BotInlineMediaResult, queryId: string,
 ): ApiBotInlineMediaResult {
   const {
-    id, type, title, description, photo, document,
+    id, type, title, description, sendMessage, photo, document,
   } = result;
 
   return {
@@ -59,9 +307,10 @@ export function buildApiBotInlineMediaResult(
     ...(type === 'sticker' && document instanceof GramJs.Document && { sticker: buildStickerFromDocument(document) }),
     ...(photo instanceof GramJs.Photo && { photo: buildApiPhoto(photo) }),
     ...(type === 'gif' && document instanceof GramJs.Document && { gif: buildVideoFromDocument(document) }),
-    ...(type === 'video' && document instanceof GramJs.Document && {
-      thumbnail: buildApiThumbnailFromStripped(document.thumbs),
-    }),
+    ...(type === 'file' && document instanceof GramJs.Document && { document: buildApiDocument(document) }),
+    ...(type === 'audio' && document instanceof GramJs.Document && { audio: buildAudioFromDocument(document) }),
+    ...(type === 'video' && document instanceof GramJs.Document && { video: buildVideoFromDocument(document) }),
+    sendMessage: buildBotInlineMessage(sendMessage, type, document, photo),
   };
 }
 
@@ -80,20 +329,22 @@ export function buildApiAttachBot(bot: GramJs.AttachMenuBot): ApiAttachBot {
     shortName: bot.shortName,
     isForAttachMenu: bot.showInAttachMenu!,
     isForSideMenu: bot.showInSideMenu,
-    attachMenuPeerTypes: bot.peerTypes?.map(buildApiAttachMenuPeerType)!,
+    attachMenuPeerTypes: bot.peerTypes && buildApiAttachMenuPeerType(bot.peerTypes),
     icons: bot.icons.map(buildApiAttachMenuIcon).filter(Boolean),
     isInactive: bot.inactive,
     isDisclaimerNeeded: bot.sideMenuDisclaimerNeeded,
   };
 }
 
-function buildApiAttachMenuPeerType(peerType: GramJs.TypeAttachMenuPeerType): ApiAttachMenuPeerType {
-  if (peerType instanceof GramJs.AttachMenuPeerTypeBotPM) return 'bots';
-  if (peerType instanceof GramJs.AttachMenuPeerTypePM) return 'users';
-  if (peerType instanceof GramJs.AttachMenuPeerTypeChat) return 'chats';
-  if (peerType instanceof GramJs.AttachMenuPeerTypeBroadcast) return 'channels';
-  if (peerType instanceof GramJs.AttachMenuPeerTypeSameBotPM) return 'self';
-  return undefined!; // Never reached
+function buildApiAttachMenuPeerType(peerTypes: GramJs.TypeAttachMenuPeerType[]): ApiAttachMenuPeerType[] {
+  return peerTypes.flatMap((peerType) => {
+    if (peerType instanceof GramJs.AttachMenuPeerTypeBotPM) return ['bots'];
+    if (peerType instanceof GramJs.AttachMenuPeerTypePM) return ['users'];
+    if (peerType instanceof GramJs.AttachMenuPeerTypeChat) return ['chats', 'groups'];
+    if (peerType instanceof GramJs.AttachMenuPeerTypeBroadcast) return ['channels'];
+    if (peerType instanceof GramJs.AttachMenuPeerTypeSameBotPM) return ['self'];
+    return [];
+  });
 }
 
 function buildApiAttachMenuIcon(icon: GramJs.AttachMenuBotIcon): ApiAttachBotIcon | undefined {
@@ -199,4 +450,14 @@ export function buildApiMessagesBotApp(botApp: GramJs.messages.BotApp): ApiMessa
     isInactive: inactive,
     shouldRequestWriteAccess: requestWriteAccess,
   };
+}
+
+export function buildApiInlineQueryPeerType(peerType: GramJs.TypeInlineQueryPeerType): ApiInlineQueryPeerType {
+  if (peerType instanceof GramJs.InlineQueryPeerTypeBotPM) return 'bots';
+  if (peerType instanceof GramJs.InlineQueryPeerTypePM) return 'users';
+  if (peerType instanceof GramJs.InlineQueryPeerTypeChat) return 'chats';
+  if (peerType instanceof GramJs.InlineQueryPeerTypeMegagroup) return 'supergroups';
+  if (peerType instanceof GramJs.InlineQueryPeerTypeBroadcast) return 'channels';
+  if (peerType instanceof GramJs.InlineQueryPeerTypeSameBotPM) return 'self';
+  return undefined!; // Never reached
 }

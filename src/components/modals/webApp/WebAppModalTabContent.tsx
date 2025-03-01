@@ -148,6 +148,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
     openLocationAccessModal,
     changeWebAppModalState,
     closeWebAppModal,
+    openPreparedInlineMessageModal,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [secondaryButton, setSecondaryButton] = useState<WebAppButton | undefined>();
@@ -696,6 +697,12 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         return;
       }
       handleCheckDownloadFile(eventData.url, eventData.file_name);
+    }
+
+    if (eventType === 'web_app_send_prepared_message') {
+      if (!bot || !webAppKey) return;
+      const { id } = eventData;
+      openPreparedInlineMessageModal({ botId: bot.id, messageId: id, webAppKey });
     }
 
     if (eventType === 'web_app_request_emoji_status_access') {

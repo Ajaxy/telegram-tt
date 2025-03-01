@@ -483,6 +483,8 @@ export interface LangPair {
   'SetAdditionalPasswordInfo': undefined;
   'EditAdminTransferSetPassword': undefined;
   'BotOpenPageTitle': undefined;
+  'BotShareMessageShare': undefined;
+  'BotShareMessage': undefined;
   'FilterDeleteAlert': undefined;
   'RequestToJoinChannelSentDescription': undefined;
   'RequestToJoinGroupSentDescription': undefined;
@@ -1547,6 +1549,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'ConversationOpenBotLinkAllowMessages': {
     'bot': V;
   };
+  'WebAppShareMessageInfo': {
+    'user': V;
+  };
   'BlockUserTitle': {
     'user': V;
   };
@@ -2215,6 +2220,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'UniqueStatusWearTitle': {
     'gift': V;
+  };
+  'BotSharedToOne': {
+    'peer': V;
   };
 }
 

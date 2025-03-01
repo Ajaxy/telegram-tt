@@ -1,7 +1,7 @@
 import type { FC } from '../../../../lib/teact/teact';
 import React, { memo } from '../../../../lib/teact/teact';
 
-import type { ApiBotInlineMediaResult, ApiBotInlineResult, ApiVideo } from '../../../../api/types';
+import type { ApiBotInlineMediaResult, ApiVideo } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -13,7 +13,7 @@ type OwnProps = {
   isSavedMessages?: boolean;
   canSendGifs?: boolean;
   observeIntersection: ObserveFn;
-  onClick: (result: ApiBotInlineResult, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onClick: (result: ApiBotInlineMediaResult, isSilent?: boolean, shouldSchedule?: boolean) => void;
 };
 
 const GifResult: FC<OwnProps> = ({

@@ -77,7 +77,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
 
       const chatFullInfo = selectChatFullInfo(global, id);
 
-      return chat && chatFullInfo && getCanPostInChat(chat, undefined, undefined, chatFullInfo);
+      return chat && (!chatFullInfo || getCanPostInChat(chat, undefined, undefined, chatFullInfo));
     });
 
     const sorted = sortChatIds(

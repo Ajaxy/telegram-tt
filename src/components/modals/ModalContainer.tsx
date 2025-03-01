@@ -28,8 +28,10 @@ import LocationAccessModal from './locationAccess/LocationAccessModal.async';
 import MapModal from './map/MapModal.async';
 import OneTimeMediaModal from './oneTimeMedia/OneTimeMediaModal.async';
 import PaidReactionModal from './paidReaction/PaidReactionModal.async';
+import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
+import SharePreparedMessageModal from './sharePreparedMessage/SharePreparedMessageModal.async';
 import StarsGiftModal from './stars/gift/StarsGiftModal.async';
 import StarsBalanceModal from './stars/StarsBalanceModal.async';
 import StarsPaymentModal from './stars/StarsPaymentModal.async';
@@ -72,6 +74,8 @@ type ModalKey = keyof Pick<TabState,
 'giftUpgradeModal' |
 'monetizationVerificationModal' |
 'giftWithdrawModal' |
+'preparedMessageModal' |
+'sharePreparedMessageModal' |
 'giftStatusInfoModal' |
 'giftTransferModal'
 >;
@@ -120,6 +124,8 @@ const MODALS: ModalRegistry = {
   monetizationVerificationModal: VerificationMonetizationModal,
   giftWithdrawModal: GiftWithdrawModal,
   giftStatusInfoModal: GiftStatusInfoModal,
+  preparedMessageModal: PreparedMessageModal,
+  sharePreparedMessageModal: SharePreparedMessageModal,
   giftTransferModal: GiftTransferModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];

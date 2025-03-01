@@ -154,7 +154,8 @@ const AttachMenu: FC<OwnProps> = ({
     return attachBots
       ? Object.values(attachBots).filter((bot) => {
         if (!peerType || !bot.isForAttachMenu) return false;
-        if (peerType === 'bots' && bot.id === chatId && bot.attachMenuPeerTypes.includes('self')) {
+        if (peerType === 'bots' && bot.id === chatId
+          && bot.attachMenuPeerTypes && bot.attachMenuPeerTypes.includes('self')) {
           return true;
         }
         return bot.attachMenuPeerTypes!.includes(peerType);

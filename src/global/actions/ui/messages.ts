@@ -1077,3 +1077,19 @@ addActionHandler('closeAboutAdsModal', (global, actions, payload): ActionReturnT
     aboutAdsModal: undefined,
   }, tabId);
 });
+
+addActionHandler('closePreparedInlineMessageModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    preparedMessageModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('closeSharePreparedMessageModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    sharePreparedMessageModal: undefined,
+  }, tabId);
+});
