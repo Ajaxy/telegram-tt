@@ -285,6 +285,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
       isSlim
       contentClassName={styles.content}
       className={buildClassName(styles.modalDialog, styles.root)}
+      isLowStackPriority
     >
       <Button
         className={styles.closeButton}
@@ -296,7 +297,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
       >
         <div className={buttonClassName} />
       </Button>
-      <BalanceBlock className={styles.balance} balance={starBalance} />
+      <BalanceBlock className={styles.balance} balance={starBalance} withAddButton />
       <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
         <Transition
           name="slideVerticalFade"

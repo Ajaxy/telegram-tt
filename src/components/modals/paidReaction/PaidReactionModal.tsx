@@ -298,11 +298,15 @@ const PaidReactionModal = ({
       isSlim
       hasAbsoluteCloseButton
       contentClassName={styles.content}
+      isLowStackPriority
     >
-      <div className={styles.headerControlPanel}>
+      <div className={styles.sendAsPeersMenuContainer}>
         {sendAsPeersMenu}
-        <BalanceBlock balance={starBalance} className={styles.modalBalance} />
       </div>
+      <div className={styles.headerControlPanel}>
+        <BalanceBlock balance={starBalance} className={styles.modalBalance} withAddButton />
+      </div>
+
       <StarSlider
         className={styles.slider}
         defaultValue={DEFAULT_STARS_AMOUNT}

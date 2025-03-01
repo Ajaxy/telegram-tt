@@ -76,6 +76,14 @@
   margin-right: 0.25rem;
 }
 
+.sendAsPeersMenuContainer {
+  z-index: 3;
+  display: flex;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .headerControlPanel {
   display: flex;
   align-items: center;

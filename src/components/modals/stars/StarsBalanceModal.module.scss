@@ -128,7 +128,34 @@
   z-index: 3;
 }
 
-.balance {
+.addStarsButton {
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+
+  transition: opacity 0.15s;
+  opacity: 1;
+
+  &:hover,
+  &:active {
+    opacity: 0.75;
+  }
+}
+
+.addStarsIcon {
+  font-size: 0.75rem !important;
+}
+
+.balanceBlock {
+  display: flex;
+  align-items: center;
+}
+
+.balanceInfo {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
