@@ -49,7 +49,6 @@ import {
   selectChatMessages,
   selectCurrentSharedMediaSearch,
   selectIsCurrentUserPremium,
-  selectIsGiftProfileFilterDefault,
   selectIsRightColumnShown,
   selectPeerStories,
   selectSimilarBotsIds,
@@ -160,7 +159,6 @@ type StateProps = {
   isSavedDialog?: boolean;
   forceScrollProfileTab?: boolean;
   isSynced?: boolean;
-  isNotDefaultGiftFilter?: boolean;
 };
 
 type TabProps = {
@@ -226,7 +224,6 @@ const Profile: FC<OwnProps & StateProps> = ({
   forceScrollProfileTab,
   isSynced,
   onProfileStateChange,
-  isNotDefaultGiftFilter,
 }) => {
   const {
     setSharedMediaSearchType,
@@ -579,12 +576,14 @@ const Profile: FC<OwnProps & StateProps> = ({
       );
     }
 
-    if (viewportIds && !viewportIds?.length) {
-      let text: string;
+    const isViewportIdsEmpty = viewportIds && !viewportIds?.length;
 
-      if (resultType === 'gifts' && isNotDefaultGiftFilter) {
-        return renderNothingFoundGiftsWithFilter();
-      }
+    if (isViewportIdsEmpty && resultType === 'gifts') {
+      return renderNothingFoundGiftsWithFilter();
+    }
+
+    if (isViewportIdsEmpty) {
+      let text: string;
 
       switch (resultType) {
         case 'members':
@@ -977,8 +976,6 @@ export default memo(withGlobal<OwnProps>(
     const peerGifts = selectTabState(global).savedGifts.giftsByPeerId[chatId];
     const giftsTransitionKey = selectTabState(global).savedGifts.transitionKey || 0;
 
-    const isNotDefaultGiftFilter = !selectIsGiftProfileFilterDefault(global);
-
     return {
       theme: selectTheme(global),
       isChannel,
@@ -1018,7 +1015,6 @@ export default memo(withGlobal<OwnProps>(
       isTopicInfo,
       isSavedDialog,
       isSynced: global.isSynced,
-      isNotDefaultGiftFilter,
       limitSimilarPeers: selectPremiumLimit(global, 'recommendedChannels'),
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: commonChats?.ids }),
