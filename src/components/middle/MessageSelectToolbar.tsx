@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useEffect } from '../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
@@ -18,6 +18,7 @@ import {
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
+import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -25,6 +26,8 @@ import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
 import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
+import Checkbox from '../ui/Checkbox';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 import './MessageSelectToolbar.scss';
 
@@ -45,6 +48,7 @@ type StateProps = {
   hasProtectedMessage?: boolean;
   isAnyModalOpen?: boolean;
   selectedMessageIds?: number[];
+  shouldWarnAboutSvg?: boolean;
 };
 
 const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
@@ -61,6 +65,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   hasProtectedMessage,
   isAnyModalOpen,
   selectedMessageIds,
+  shouldWarnAboutSvg,
 }) => {
   const {
     exitMessageSelectMode,
@@ -70,10 +75,14 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     showNotification,
     reportMessages,
     openDeleteMessageModal,
+    setSettingOption,
   } = getActions();
   const lang = useOldLang();
 
   useCopySelectedMessages(isActive);
+
+  const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
+  const [shouldNotWarnAboutSvg, setShouldNotWarnAboutSvg] = useState(false);
 
   const handleExitMessageSelectMode = useLastCallback(() => {
     exitMessageSelectMode();
@@ -112,6 +121,21 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   const handleDownload = useLastCallback(() => {
     downloadSelectedMessages();
     exitMessageSelectMode();
+  });
+
+  const handleMessageDownload = useLastCallback(() => {
+    if (shouldWarnAboutSvg) {
+      openSvgDialog();
+      return;
+    }
+
+    handleDownload();
+  });
+
+  const handleSvgConfirm = useLastCallback(() => {
+    setSettingOption({ shouldWarnAboutSvg: false });
+    closeSvgDialog();
+    handleDownload();
   });
 
   const prevSelectedMessagesCount = usePreviousDeprecated(selectedMessagesCount || undefined, true);
@@ -156,43 +180,58 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   };
 
   return (
-    <div className={className}>
-      <div className="MessageSelectToolbar-inner">
-        <Button
-          color="translucent"
-          round
-          onClick={handleExitMessageSelectMode}
-          ariaLabel="Exit select mode"
-        >
-          <Icon name="close" />
-        </Button>
-        <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
-          {formattedMessagesCount}
-        </span>
+    <>
+      <div className={className}>
+        <div className="MessageSelectToolbar-inner">
+          <Button
+            color="translucent"
+            round
+            onClick={handleExitMessageSelectMode}
+            ariaLabel="Exit select mode"
+          >
+            <Icon name="close" />
+          </Button>
+          <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
+            {formattedMessagesCount}
+          </span>
 
-        {Boolean(selectedMessagesCount) && (
-          <div className="MessageSelectToolbar-actions">
-            {messageListType !== 'scheduled' && canForwardMessages && (
-              renderButton(
-                'forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages,
-              )
-            )}
-            {canReportMessages && (
-              renderButton('flag', lang('Conversation.ReportMessages'), openMessageReport)
-            )}
-            {canDownloadMessages && !hasProtectedMessage && (
-              renderButton('download', lang('lng_media_download'), handleDownload)
-            )}
-            {!hasProtectedMessage && (
-              renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy)
-            )}
-            {canDeleteMessages && (
-              renderButton('delete', lang('EditAdminGroupDeleteMessages'), handleDelete, true)
-            )}
-          </div>
-        )}
+          {Boolean(selectedMessagesCount) && (
+            <div className="MessageSelectToolbar-actions">
+              {messageListType !== 'scheduled' && canForwardMessages && (
+                renderButton(
+                  'forward', lang('Chat.ForwardActionHeader'), openForwardMenuForSelectedMessages,
+                )
+              )}
+              {canReportMessages && (
+                renderButton('flag', lang('Conversation.ReportMessages'), openMessageReport)
+              )}
+              {canDownloadMessages && !hasProtectedMessage && (
+                renderButton('download', lang('lng_media_download'), handleMessageDownload)
+              )}
+              {!hasProtectedMessage && (
+                renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy)
+              )}
+              {canDeleteMessages && (
+                renderButton('delete', lang('EditAdminGroupDeleteMessages'), handleDelete, true)
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      <ConfirmDialog
+        isOpen={isSvgDialogOpen}
+        onClose={closeSvgDialog}
+        confirmHandler={handleSvgConfirm}
+      >
+        {lang('lng_launch_svg_warning')}
+        <Checkbox
+          className="dialog-checkbox"
+          checked={shouldNotWarnAboutSvg}
+          label={lang('lng_launch_exe_dont_ask')}
+          onCheck={setShouldNotWarnAboutSvg}
+        />
+      </ConfirmDialog>
+    </>
   );
 };
 
@@ -224,6 +263,7 @@ export default memo(withGlobal<OwnProps>(
       selectedMessageIds,
       hasProtectedMessage,
       isAnyModalOpen,
+      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
     };
   },
 )(MessageSelectToolbar));
