@@ -284,6 +284,18 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.messages = initialState.messages;
     cached.chats.listIds = initialState.chats.listIds;
   }
+
+  if (cached.cacheVersion < 2) {
+    if (cached.settings.themes.dark) {
+      cached.settings.themes.dark.patternColor = initialState.settings.themes.dark!.patternColor;
+    }
+
+    if (cached.settings.themes.light) {
+      cached.settings.themes.light.patternColor = initialState.settings.themes.light!.patternColor;
+    }
+
+    cached.cacheVersion = 2;
+  }
 }
 
 function updateCache(force?: boolean) {
