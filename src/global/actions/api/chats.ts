@@ -1506,8 +1506,9 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
         botId: chatByUsername.id,
         peerId: chat.id,
         theme,
-        tabId,
+        startParam: startApp,
         mode,
+        tabId,
       });
       return;
     }
