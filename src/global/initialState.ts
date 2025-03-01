@@ -133,6 +133,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byChatId: {},
     sponsoredByChatId: {},
     pollById: {},
+    playbackByChatId: {},
   },
 
   stories: {

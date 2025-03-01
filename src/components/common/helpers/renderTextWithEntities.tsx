@@ -3,7 +3,7 @@ import { getActions } from '../../../global';
 
 import type { ApiFormattedText, ApiMessageEntity } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { TextPart } from '../../../types';
+import type { TextPart, ThreadId } from '../../../types';
 import type { TextFilter } from './renderText';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
@@ -48,6 +48,10 @@ export function renderTextWithEntities({
   noCustomEmojiPlayback,
   focusedQuote,
   isInSelectMode,
+  chatId,
+  messageId,
+  threadId,
+  maxTimestamp,
 }: {
   text: string;
   entities?: ApiMessageEntity[];
@@ -67,6 +71,10 @@ export function renderTextWithEntities({
   noCustomEmojiPlayback?: boolean;
   focusedQuote?: string;
   isInSelectMode?: boolean;
+  chatId?: string;
+  messageId?: number;
+  threadId?: ThreadId;
+  maxTimestamp?: number;
 }) {
   if (!entities?.length) {
     return renderMessagePart({
@@ -172,6 +180,10 @@ export function renderTextWithEntities({
         forcePlayback,
         noCustomEmojiPlayback,
         isInSelectMode,
+        chatId,
+        messageId,
+        threadId,
+        maxTimestamp,
       });
 
     if (Array.isArray(newEntity)) {
@@ -383,6 +395,10 @@ function processEntity({
   forcePlayback,
   noCustomEmojiPlayback,
   isInSelectMode,
+  chatId,
+  messageId,
+  threadId,
+  maxTimestamp,
 } : {
   entity: ApiMessageEntity;
   entityContent: TextPart;
@@ -402,6 +418,10 @@ function processEntity({
   forcePlayback?: boolean;
   noCustomEmojiPlayback?: boolean;
   isInSelectMode?: boolean;
+  chatId?: string;
+  messageId?: number;
+  threadId?: ThreadId;
+  maxTimestamp?: number;
 }) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
@@ -559,6 +579,21 @@ function processEntity({
       );
     case ApiMessageEntityTypes.Underline:
       return <ins data-entity-type={entity.type}>{renderNestedMessagePart()}</ins>;
+    case ApiMessageEntityTypes.Timestamp:
+      if (!chatId || !messageId || !maxTimestamp || entity.timestamp > maxTimestamp) {
+        return renderNestedMessagePart();
+      }
+
+      return (
+        <a
+          onClick={() => handleTimecodeClick(chatId, messageId, threadId, entity.timestamp)}
+          className="text-entity-link"
+          dir="auto"
+          data-entity-type={entity.type}
+        >
+          {renderNestedMessagePart()}
+        </a>
+      );
     case ApiMessageEntityTypes.Spoiler:
       return <Spoiler containerId={containerId}>{renderNestedMessagePart()}</Spoiler>;
     case ApiMessageEntityTypes.CustomEmoji:
@@ -675,5 +710,13 @@ function handleCodeClick(e: React.MouseEvent<HTMLElement>) {
   copyTextToClipboard(e.currentTarget.innerText);
   getActions().showNotification({
     message: oldTranslate('TextCopied'),
+  });
+}
+
+function handleTimecodeClick(
+  chatId: string, messageId: number, threadId: ThreadId | undefined, timestamp: number,
+) {
+  getActions().openMediaFromTimestamp({
+    chatId, messageId, threadId, timestamp,
   });
 }

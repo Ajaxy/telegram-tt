@@ -29,6 +29,7 @@ import type {
 import type { UniversalMessage } from './messages';
 
 import { SUPPORTED_PHOTO_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_WEBM_TYPE } from '../../../config';
+import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { generateWaveform } from '../../../util/generateWaveform';
 import { pick } from '../../../util/iteratees';
 import {
@@ -64,9 +65,11 @@ export function buildMessageContent(
 
   if (mtpMessage.message && !hasUnsupportedMedia
     && !content.sticker && !content.pollId && !content.contact && !content.video?.isRound) {
+    const text = buildMessageTextContent(mtpMessage.message, mtpMessage.entities);
+    const textWithTimestamps = addTimestampEntities(text);
     content = {
       ...content,
-      text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
+      text: textWithTimestamps,
     };
   }
 
@@ -197,10 +200,15 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
   return buildApiPhoto(media.photo, media.spoiler);
 }
 
-export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: boolean): ApiVideo | undefined {
+export function buildVideoFromDocument(document: GramJs.Document, params?: {
+  isSpoiler?: boolean;
+  timestamp?: number;
+}): ApiVideo | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
   }
+
+  const { isSpoiler, timestamp } = params || {};
 
   const {
     id, mimeType, thumbs, size, videoThumbs, attributes,
@@ -249,6 +257,7 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
     thumbnail: buildApiThumbnailFromStripped(thumbs),
     size: size.toJSNumber(),
     isSpoiler,
+    timestamp,
     hasVideoPreview,
     previewPhotoSizes,
     waveform,
@@ -299,7 +308,7 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
     return undefined;
   }
 
-  return buildVideoFromDocument(media.document, media.spoiler);
+  return buildVideoFromDocument(media.document, { isSpoiler: media.spoiler, timestamp: media.videoTimestamp });
 }
 
 function buildAltVideos(media: GramJs.TypeMessageMedia): ApiVideo[] | undefined {
@@ -309,7 +318,7 @@ function buildAltVideos(media: GramJs.TypeMessageMedia): ApiVideo[] | undefined 
 
   const altVideos = media.altDocuments.filter((d): d is GramJs.Document => (
     d instanceof GramJs.Document && d.mimeType.startsWith('video')
-  )).map((alt) => buildVideoFromDocument(alt, media.spoiler))
+  )).map((alt) => buildVideoFromDocument(alt, { isSpoiler: media.spoiler }))
     .filter(Boolean);
   if (!altVideos.length) {
     return undefined;

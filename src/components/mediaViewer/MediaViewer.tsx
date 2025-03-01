@@ -245,7 +245,9 @@ const MediaViewer = ({
 
   const handleClose = useLastCallback(() => closeMediaViewer());
 
-  const handleFooterClick = useLastCallback(() => {
+  const handleFooterClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target instanceof HTMLElement && e.target.closest('a')) return; // Prevent closing on timestamp click
+
     handleClose();
 
     if (!chatId || !messageId) return;

@@ -285,6 +285,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.chats.listIds = initialState.chats.listIds;
   }
 
+  if (!cached.messages.playbackByChatId) {
+    cached.messages.playbackByChatId = initialState.messages.playbackByChatId;
+  }
+
   if (cached.cacheVersion < 2) {
     if (cached.settings.themes.dark) {
       cached.settings.themes.dark.patternColor = initialState.settings.themes.dark!.patternColor;
@@ -594,6 +598,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     byChatId,
     pollById: pickTruthy(global.messages.pollById, pollIdsToSave),
     sponsoredByChatId: {},
+    playbackByChatId: {},
   };
 }
 

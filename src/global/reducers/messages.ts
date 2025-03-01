@@ -19,6 +19,7 @@ import {
   IS_MOCKED_CLIENT, IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
 } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
+import { addTimestampEntities } from '../../util/dates/timestamp';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   areSortedArraysEqual, excludeSortedArray, omit, omitUndefined, pick, pickTruthy, unique,
@@ -271,16 +272,19 @@ export function updateChatMessage<T extends GlobalState>(
   }
 
   let emojiOnlyCount = message?.emojiOnlyCount;
+  let text = message?.content?.text;
   if (messageUpdate.content) {
     emojiOnlyCount = getEmojiOnlyCountForMessage(
       messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
     );
+    text = messageUpdate.content.text ? addTimestampEntities(messageUpdate.content.text) : text;
   }
 
   const updatedMessage = omitUndefined({
     ...message,
     ...messageUpdate,
     emojiOnlyCount,
+    text,
   });
 
   if (!updatedMessage.id) {
@@ -299,16 +303,19 @@ export function updateScheduledMessage<T extends GlobalState>(
   const message = selectScheduledMessage(global, chatId, messageId)!;
 
   let emojiOnlyCount = message?.emojiOnlyCount;
+  let text = message?.content?.text;
   if (messageUpdate.content) {
     emojiOnlyCount = getEmojiOnlyCountForMessage(
       messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
     );
+    text = messageUpdate.content.text ? addTimestampEntities(messageUpdate.content.text) : text;
   }
 
   const updatedMessage = {
     ...message,
     ...messageUpdate,
     emojiOnlyCount,
+    text,
   };
 
   if (!updatedMessage.id) {

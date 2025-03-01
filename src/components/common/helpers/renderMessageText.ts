@@ -2,7 +2,7 @@ import { getGlobal } from '../../../global';
 
 import type { ApiMessage, ApiSponsoredMessage } from '../../../api/types';
 import type { OldLangFn } from '../../../hooks/useOldLang';
-import type { TextPart } from '../../../types';
+import type { TextPart, ThreadId } from '../../../types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import {
@@ -30,6 +30,8 @@ export function renderMessageText({
   forcePlayback,
   shouldRenderAsHtml,
   isForMediaViewer,
+  threadId,
+  maxTimestamp,
 } : {
   message: ApiMessage | ApiSponsoredMessage;
   highlight?: string;
@@ -40,6 +42,8 @@ export function renderMessageText({
   forcePlayback?: boolean;
   shouldRenderAsHtml?: boolean;
   isForMediaViewer?: boolean;
+  threadId?: ThreadId;
+  maxTimestamp?: number;
 }) {
   const { text, entities } = message.content.text || {};
 
@@ -60,6 +64,10 @@ export function renderMessageText({
     asPreview,
     isProtected,
     forcePlayback,
+    messageId: 'id' in message ? message.id : undefined,
+    chatId: message.chatId,
+    threadId,
+    maxTimestamp,
   });
 }
 

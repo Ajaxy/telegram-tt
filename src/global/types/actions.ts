@@ -614,6 +614,7 @@ export interface ActionPayloads {
     choose?: ApiChatType[];
     text?: string;
     originalParts?: (string | undefined)[];
+    timestamp?: number;
     onChatChanged?: CallbackAction;
   } & WithTabId;
   processBoostParameters: {
@@ -946,6 +947,7 @@ export interface ActionPayloads {
     noForumTopicPanel?: boolean;
     quote?: string;
     scrollTargetPosition?: ScrollTargetPosition;
+    timestamp?: number;
   } & WithTabId;
 
   focusLastMessage: WithTabId | undefined;
@@ -1104,6 +1106,7 @@ export interface ActionPayloads {
     threadId?: ThreadId;
     messageId?: number;
     commentId?: number;
+    timestamp?: number;
   } & WithTabId;
   loadFullChat: {
     chatId: string;
@@ -1595,8 +1598,14 @@ export interface ActionPayloads {
     isSponsoredMessage?: boolean;
     origin: MediaViewerOrigin;
     withDynamicLoading?: boolean;
+    timestamp?: number;
   } & WithTabId;
   closeMediaViewer: WithTabId | undefined;
+  updateLastPlaybackTimestamp: {
+    chatId: string;
+    messageId: number;
+    timestamp?: number;
+  };
   setMediaViewerVolume: {
     volume: number;
   } & WithTabId;
@@ -1609,6 +1618,12 @@ export interface ActionPayloads {
   setMediaViewerHidden: {
     isHidden: boolean;
   } & WithTabId;
+  openMediaFromTimestamp: {
+    chatId: string;
+    messageId: number;
+    threadId?: ThreadId;
+    timestamp: number;
+  } & WithTabId;
   openAudioPlayer: {
     chatId: string;
     threadId?: ThreadId;
@@ -1617,6 +1632,7 @@ export interface ActionPayloads {
     volume?: number;
     playbackRate?: number;
     isMuted?: boolean;
+    timestamp?: number;
   } & WithTabId;
   closeAudioPlayer: WithTabId | undefined;
   setAudioPlayerVolume: {

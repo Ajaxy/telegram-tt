@@ -92,11 +92,14 @@ import {
   selectIsMessageProtected,
   selectIsMessageSelected,
   selectMessageIdsByGroupId,
+  selectMessageLastPlaybackTimestamp,
+  selectMessageTimestampableDuration,
   selectOutgoingStatus,
   selectPeer,
   selectPeerStory,
   selectPerformanceSettingsValue,
   selectPollFromMessage,
+  selectReplyMessage,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectSender,
@@ -296,6 +299,8 @@ type StateProps = {
   viaBusinessBot?: ApiUser;
   effect?: ApiAvailableEffect;
   poll?: ApiPoll;
+  maxTimestamp?: number;
+  lastPlaybackTimestamp?: number;
 };
 
 type MetaPosition =
@@ -413,6 +418,8 @@ const Message: FC<OwnProps & StateProps> = ({
   viaBusinessBot,
   effect,
   poll,
+  maxTimestamp,
+  lastPlaybackTimestamp,
   onIntersectPinnedMessage,
 }) => {
   const {
@@ -609,6 +616,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleViaBotClick,
     handleReplyClick,
     handleMediaClick,
+    handleDocumentClick,
     handleAudioPlay,
     handleAlbumMediaClick,
     handlePhotoMediaClick,
@@ -645,6 +653,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isReplyPrivate,
     isRepliesChat,
     isSavedMessages: isChatWithSelf,
+    lastPlaybackTimestamp,
   });
 
   const handleEffectClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -961,6 +970,8 @@ const Message: FC<OwnProps & StateProps> = ({
         withTranslucentThumbs={isCustomShape}
         isInSelectMode={isInSelectMode}
         canBeEmpty={hasFactCheck}
+        maxTimestamp={maxTimestamp}
+        threadId={threadId}
       />
     );
   }
@@ -1194,7 +1205,7 @@ const Message: FC<OwnProps & StateProps> = ({
             uploadProgress={uploadProgress}
             isSelectable={isInDocumentGroup}
             isSelected={isSelected}
-            onMediaClick={handleMediaClick}
+            onMediaClick={handleDocumentClick}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
             shouldWarnAboutSvg={shouldWarnAboutSvg}
@@ -1357,11 +1368,13 @@ const Message: FC<OwnProps & StateProps> = ({
         theme={theme}
         story={webPageStory}
         isConnected={isConnected}
+        lastPlaybackTimestamp={lastPlaybackTimestamp}
         backgroundEmojiId={messageColorPeer?.color?.backgroundEmojiId}
         shouldWarnAboutSvg={shouldWarnAboutSvg}
         autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
         onAudioPlay={handleAudioPlay}
         onMediaClick={handleMediaClick}
+        onDocumentClick={handleDocumentClick}
         onCancelMediaTransfer={handleCancelUpload}
       />
     );
@@ -1414,6 +1427,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isDownloading={isDownloading}
             isProtected={isProtected}
             asForwarded={asForwarded}
+            lastPlaybackTimestamp={lastPlaybackTimestamp}
             onClick={handleVideoMediaClick}
             onCancelUpload={handleCancelUpload}
           />
@@ -1724,7 +1738,7 @@ export default memo(withGlobal<OwnProps>(
     const { peerId: storyReplyPeerId, storyId: storyReplyId } = getStoryReplyInfo(message) || {};
 
     const shouldHideReply = replyToMsgId && replyToMsgId === threadId;
-    const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
+    const replyMessage = selectReplyMessage(global, message);
     const forwardHeader = forwardInfo || replyFrom;
     const replyMessageSender = replyMessage ? selectSender(global, replyMessage)
       : forwardHeader && !isSystemBotChat && !isAnonymousForwards
@@ -1813,6 +1827,10 @@ export default memo(withGlobal<OwnProps>(
 
     const poll = selectPollFromMessage(global, message);
 
+    const maxTimestamp = selectMessageTimestampableDuration(global, message);
+
+    const lastPlaybackTimestamp = selectMessageLastPlaybackTimestamp(global, chatId, message.id);
+
     return {
       theme: selectTheme(global),
       forceSenderName,
@@ -1900,6 +1918,8 @@ export default memo(withGlobal<OwnProps>(
       viaBusinessBot,
       effect,
       poll,
+      maxTimestamp,
+      lastPlaybackTimestamp,
     };
   },
 )(Message));

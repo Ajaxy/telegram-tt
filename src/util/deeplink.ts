@@ -19,6 +19,7 @@ export const processDeepLink = (url: string): boolean => {
           threadId: parsedLink.threadId,
           messageId: parsedLink.messageId,
           commentId: parsedLink.commentId,
+          timestamp: parsedLink.timestamp,
         });
         return true;
       case 'publicMessageLink': {
@@ -27,6 +28,7 @@ export const processDeepLink = (url: string): boolean => {
           threadId: parsedLink.threadId,
           messageId: parsedLink.messageId,
           commentId: parsedLink.commentId,
+          timestamp: parsedLink.timestamp,
         });
         return true;
       }

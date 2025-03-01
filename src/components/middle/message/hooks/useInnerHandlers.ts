@@ -1,4 +1,3 @@
-import type React from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type {
@@ -9,7 +8,9 @@ import type { IAlbum, ThreadId } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin } from '../../../../types';
 
+import { getMessagePhoto, getMessageWebPagePhoto } from '../../../../global/helpers';
 import { getMessageReplyInfo } from '../../../../global/helpers/replies';
+import { tryParseDeepLink } from '../../../../util/deepLinkParser';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
@@ -31,6 +32,7 @@ export default function useInnerHandlers({
   isReplyPrivate,
   isRepliesChat,
   isSavedMessages,
+  lastPlaybackTimestamp,
 }: {
   lang: OldLangFn;
   selectMessage: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void;
@@ -50,6 +52,7 @@ export default function useInnerHandlers({
   isReplyPrivate?: boolean;
   isRepliesChat?: boolean;
   isSavedMessages?: boolean;
+  lastPlaybackTimestamp?: number;
 }) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
@@ -58,7 +61,7 @@ export default function useInnerHandlers({
   } = getActions();
 
   const {
-    id: messageId, forwardInfo, groupedId, content: { paidMedia },
+    id: messageId, forwardInfo, groupedId, content: { paidMedia, video, webPage },
   } = message;
 
   const {
@@ -115,7 +118,7 @@ export default function useInnerHandlers({
     });
   });
 
-  const handleMediaClick = useLastCallback((): void => {
+  const handleDocumentClick = useLastCallback((): void => {
     openMediaViewer({
       chatId,
       threadId,
@@ -123,16 +126,24 @@ export default function useInnerHandlers({
       origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
     });
   });
+
   const openMediaViewerWithPhotoOrVideo = useLastCallback((withDynamicLoading: boolean): void => {
     if (paidMedia && !paidMedia.isBought) return;
     if (withDynamicLoading) {
       searchChatMediaMessages({ chatId, threadId, currentMediaMessageId: messageId });
     }
+
+    const parsedLink = webPage?.url && tryParseDeepLink(webPage.url);
+
+    const videoContent = video || webPage?.video;
+    const webpageTimestamp = parsedLink && 'timestamp' in parsedLink ? parsedLink.timestamp : undefined;
+
     openMediaViewer({
       chatId,
       threadId,
       messageId,
       origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
+      timestamp: lastPlaybackTimestamp || videoContent?.timestamp || webpageTimestamp,
       withDynamicLoading,
     });
   });
@@ -144,6 +155,15 @@ export default function useInnerHandlers({
     const isGif = message.content?.video?.isGif;
     const withDynamicLoading = !isGif && !isScheduled && !paidMedia;
     openMediaViewerWithPhotoOrVideo(withDynamicLoading);
+  });
+
+  const handleMediaClick = useLastCallback((): void => {
+    const photo = getMessagePhoto(message) || getMessageWebPagePhoto(message);
+    if (photo) {
+      handlePhotoMediaClick();
+    }
+
+    handleVideoMediaClick();
   });
 
   const handleAudioPlay = useLastCallback((): void => {
@@ -268,6 +288,7 @@ export default function useInnerHandlers({
     handleSenderClick,
     handleViaBotClick,
     handleReplyClick,
+    handleDocumentClick,
     handleMediaClick,
     handleAudioPlay,
     handleAlbumMediaClick,

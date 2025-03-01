@@ -41,6 +41,7 @@ import {
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
+import { addTimestampEntities } from '../../../util/dates/timestamp';
 import { omitUndefined, pick } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
@@ -544,14 +545,13 @@ export function buildLocalMessage(
 
   const localPoll = poll && buildNewPoll(poll, localId);
 
+  const formattedText = text ? addTimestampEntities({ text, entities }) : undefined;
+
   const message = {
     id: localId,
     chatId: chat.id,
     content: omitUndefined({
-      text: text ? {
-        text,
-        entities,
-      } : undefined,
+      text: formattedText,
       ...media,
       sticker,
       video: gif || media?.video,
@@ -628,11 +628,12 @@ export function buildLocalForwardedMessage({
     text: content.text.text,
     entities: content.text.entities.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji),
   } : content.text;
+  const textWithTimestamps = strippedText && addTimestampEntities(strippedText);
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
 
   const updatedContent = {
     ...content,
-    text: !shouldHideText ? strippedText : undefined,
+    text: !shouldHideText ? textWithTimestamps : undefined,
   };
 
   // TODO Prepare reply info between forwarded messages locally, to prevent height jumps

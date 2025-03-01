@@ -46,6 +46,7 @@ import {
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
   getSendingState,
+  getTimestampableMedia,
   hasMessageTtl,
   isActionMessage,
   isChatBasicGroup,
@@ -1500,4 +1501,29 @@ export function selectMessageReplyInfo<T extends GlobalState>(
   };
 
   return replyInfo;
+}
+
+export function selectReplyMessage<T extends GlobalState>(global: T, message: ApiMessage) {
+  const { replyToMsgId, replyToPeerId } = getMessageReplyInfo(message) || {};
+  const replyMessage = replyToMsgId
+    ? selectChatMessage(global, replyToPeerId || message.chatId, replyToMsgId) : undefined;
+
+  return replyMessage;
+}
+
+export function selectMessageTimestampableDuration<T extends GlobalState>(
+  global: T, message: ApiMessage, noReplies?: boolean,
+) {
+  const replyMessage = !noReplies ? selectReplyMessage(global, message) : undefined;
+
+  const timestampableMedia = getTimestampableMedia(message);
+  const replyTimestampableMedia = replyMessage && getTimestampableMedia(replyMessage);
+
+  return timestampableMedia?.duration || replyTimestampableMedia?.duration;
+}
+
+export function selectMessageLastPlaybackTimestamp<T extends GlobalState>(
+  global: T, chatId: string, messageId: number,
+) {
+  return global.messages.playbackByChatId[chatId]?.byId[messageId];
 }

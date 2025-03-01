@@ -17,3 +17,7 @@ export function getDays(seconds: number, roundDown?: boolean) {
   const roundFunc = roundDown ? Math.floor : Math.ceil;
   return roundFunc(seconds / DAY);
 }
+
+export function getSeconds(hours: number, minutes: number, seconds: number) {
+  return hours * HOUR + minutes * MINUTE + seconds;
+}

@@ -230,6 +230,9 @@ export type GlobalState = {
       byId: Record<number, ApiMessage>;
       threadsById: Record<ThreadId, Thread>;
     }>;
+    playbackByChatId: Record<string, {
+      byId: Record<number, number>;
+    }>;
     sponsoredByChatId: Record<string, ApiSponsoredMessage>;
     pollById: Record<string, ApiPoll>;
   };

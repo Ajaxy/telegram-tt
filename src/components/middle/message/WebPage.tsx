@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useRef } from '../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage, ApiTypeStory } from '../../../api/types';
@@ -9,6 +9,7 @@ import { AudioOrigin, type ISettings } from '../../../types';
 import { getMessageWebPage } from '../../../global/helpers';
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { tryParseDeepLink } from '../../../util/deepLinkParser';
 import trimText from '../../../util/trimText';
 import renderText from '../../common/helpers/renderText';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
@@ -43,8 +44,6 @@ const EMOJI_SIZE = 38;
 
 type OwnProps = {
   message: ApiMessage;
-  observeIntersectionForLoading?: ObserveFn;
-  observeIntersectionForPlaying?: ObserveFn;
   noAvatars?: boolean;
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
@@ -58,11 +57,15 @@ type OwnProps = {
   story?: ApiTypeStory;
   shouldWarnAboutSvg?: boolean;
   autoLoadFileMaxSizeMb?: number;
+  lastPlaybackTimestamp?: number;
+  isEditing?: boolean;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   onAudioPlay?: NoneToVoidFunction;
   onMediaClick?: NoneToVoidFunction;
+  onDocumentClick?: NoneToVoidFunction;
   onCancelMediaTransfer?: NoneToVoidFunction;
   onContainerClick?: ((e: React.MouseEvent) => void);
-  isEditing?: boolean;
 };
 type StateProps = {
   canPlayAnimatedEmojis: boolean;
@@ -70,8 +73,6 @@ type StateProps = {
 
 const WebPage: FC<OwnProps & StateProps> = ({
   message,
-  observeIntersectionForLoading,
-  observeIntersectionForPlaying,
   noAvatars,
   canAutoLoad,
   canAutoPlay,
@@ -85,11 +86,15 @@ const WebPage: FC<OwnProps & StateProps> = ({
   backgroundEmojiId,
   shouldWarnAboutSvg,
   autoLoadFileMaxSizeMb,
+  lastPlaybackTimestamp,
+  isEditing,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   onMediaClick,
+  onDocumentClick,
   onContainerClick,
   onAudioPlay,
   onCancelMediaTransfer,
-  isEditing,
 }) => {
   const { openUrl, openTelegramLink } = getActions();
   const webPage = getMessageWebPage(message);
@@ -122,6 +127,12 @@ const WebPage: FC<OwnProps & StateProps> = ({
 
   const hasCustomColor = stickers?.isWithTextColor || stickers?.documents?.[0]?.shouldUseTextColor;
   const customColor = useDynamicColorListener(stickersRef, undefined, !hasCustomColor);
+
+  const linkTimestamp = useMemo(() => {
+    const parsedLink = webPage?.url && tryParseDeepLink(webPage?.url);
+    if (!parsedLink || !('timestamp' in parsedLink)) return undefined;
+    return parsedLink.timestamp;
+  }, [webPage?.url]);
 
   if (!webPage) {
     return undefined;
@@ -265,6 +276,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
             asForwarded={asForwarded}
             isDownloading={isDownloading}
             isProtected={isProtected}
+            lastPlaybackTimestamp={lastPlaybackTimestamp || linkTimestamp}
             onClick={isMediaInteractive ? handleMediaClick : undefined}
             onCancelUpload={onCancelMediaTransfer}
           />
@@ -286,7 +298,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
             message={message}
             observeIntersection={observeIntersectionForLoading}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
-            onMediaClick={handleMediaClick}
+            onMediaClick={onDocumentClick}
             onCancelUpload={onCancelMediaTransfer}
             isDownloading={isDownloading}
             shouldWarnAboutSvg={shouldWarnAboutSvg}

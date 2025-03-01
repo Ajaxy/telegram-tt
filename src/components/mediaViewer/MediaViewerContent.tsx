@@ -1,14 +1,15 @@
 import React, { memo } from '../../lib/teact/teact';
-import { withGlobal } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import type {
   ApiDimensions, ApiMessage, ApiSponsoredMessage,
 } from '../../api/types';
-import type { MediaViewerOrigin } from '../../types';
+import type { MediaViewerOrigin, ThreadId } from '../../types';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
+import { MEDIA_TIMESTAMP_SAVE_MINIMUM_DURATION } from '../../config';
 import {
-  selectIsMessageProtected, selectTabState,
+  selectIsMessageProtected, selectMessageTimestampableDuration, selectTabState,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
@@ -18,8 +19,11 @@ import { renderMessageText } from '../common/helpers/renderMessageText';
 import getViewableMedia from './helpers/getViewableMedia';
 
 import useAppLayout from '../../hooks/useAppLayout';
+import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
+import { useSignalEffect } from '../../hooks/useSignalEffect';
+import useThrottledCallback from '../../hooks/useThrottledCallback';
 import useControlsSignal from './hooks/useControlsSignal';
 import { useMediaProps } from './hooks/useMediaProps';
 
@@ -35,7 +39,7 @@ type OwnProps = {
   withAnimation?: boolean;
   isMoving?: boolean;
   onClose: () => void;
-  onFooterClick: () => void;
+  onFooterClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleSponsoredClick: () => void;
 };
 
@@ -47,10 +51,14 @@ type StateProps = {
   isMuted: boolean;
   isHidden?: boolean;
   playbackRate: number;
+  threadId?: ThreadId;
+  timestamp?: number;
+  maxTimestamp?: number;
 };
 
 const ANIMATION_DURATION = 350;
 const MOBILE_VERSION_CONTROL_WIDTH = 350;
+const PLAYBACK_SAVE_INTERVAL = 1000;
 
 const MediaViewerContent = ({
   item,
@@ -64,10 +72,15 @@ const MediaViewerContent = ({
   isMuted,
   isHidden,
   isMoving,
+  threadId,
+  timestamp,
+  maxTimestamp,
   onClose,
   onFooterClick,
   handleSponsoredClick,
 }: OwnProps & StateProps) => {
+  const { updateLastPlaybackTimestamp } = getActions();
+
   const lang = useOldLang();
 
   const isAvatar = item.type === 'avatar';
@@ -90,6 +103,7 @@ const MediaViewerContent = ({
   });
 
   const [, toggleControls] = useControlsSignal();
+  const [getCurrentTime] = useCurrentTimeSignal();
 
   const isOpen = Boolean(media);
   const { isMobile } = useAppLayout();
@@ -97,6 +111,21 @@ const MediaViewerContent = ({
   const toggleControlsOnMove = useLastCallback(() => {
     toggleControls(true);
   });
+
+  const updatePlaybackTimestamp = useThrottledCallback(() => {
+    if (!isActive || !textMessage || media?.mediaType !== 'video') return;
+    if (media.duration < MEDIA_TIMESTAMP_SAVE_MINIMUM_DURATION) return;
+
+    const message = 'id' in textMessage ? textMessage : undefined;
+    const currentTime = getCurrentTime();
+    if (!currentTime || !message || message.isInAlbum) return;
+
+    // Reset timestamp if we are close to the end of the video
+    const newTimestamp = media.duration - currentTime > PLAYBACK_SAVE_INTERVAL / 1000 ? currentTime : undefined;
+    updateLastPlaybackTimestamp({ chatId: message.chatId, messageId: message.id, timestamp: newTimestamp });
+  }, [getCurrentTime, isActive, media, textMessage], PLAYBACK_SAVE_INTERVAL);
+
+  useSignalEffect(updatePlaybackTimestamp, [getCurrentTime]);
 
   if (!media) return undefined;
 
@@ -143,7 +172,9 @@ const MediaViewerContent = ({
 
   const textParts = textMessage && (textMessage.content.action?.type === 'suggestProfilePhoto'
     ? lang('Conversation.SuggestedPhotoTitle')
-    : renderMessageText({ message: textMessage, forcePlayback: true, isForMediaViewer: true }));
+    : renderMessageText({
+      message: textMessage, maxTimestamp, threadId, forcePlayback: true, isForMediaViewer: true,
+    }));
   const buttonText = textMessage && 'buttonText' in textMessage ? textMessage.buttonText : undefined;
   const hasFooter = Boolean(textParts);
   const posterSize = calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);
@@ -187,6 +218,7 @@ const MediaViewerContent = ({
           playbackRate={playbackRate}
           isSponsoredMessage={isSponsoredMessage}
           handleSponsoredClick={handleSponsoredClick}
+          timestamp={timestamp}
         />
       ))}
       {textParts && (
@@ -212,10 +244,14 @@ export default memo(withGlobal<OwnProps>(
       playbackRate,
       isHidden,
       origin,
+      timestamp,
+      threadId,
     } = selectTabState(global).mediaViewer;
     const message = item.type === 'message' ? item.message : undefined;
     const sponsoredMessage = item.type === 'sponsoredMessage' ? item.message : undefined;
     const textMessage = message || sponsoredMessage;
+
+    const maxTimestamp = message && selectMessageTimestampableDuration(global, message, true);
 
     return {
       origin,
@@ -225,6 +261,9 @@ export default memo(withGlobal<OwnProps>(
       isMuted,
       isHidden,
       playbackRate,
+      threadId,
+      timestamp,
+      maxTimestamp,
     };
   },
 )(MediaViewerContent));

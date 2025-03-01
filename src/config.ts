@@ -100,6 +100,8 @@ export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
 export const STORY_VIEWS_MIN_CONTACTS_FILTER = 20;
 
+export const MEDIA_TIMESTAMP_SAVE_MINIMUM_DURATION = 30; // 30s
+
 export const GLOBAL_SUGGESTED_CHANNELS_ID = 'global';
 
 // As in Telegram for Android

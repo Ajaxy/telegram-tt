@@ -34,6 +34,7 @@ import ProgressSpinner from '../../ui/ProgressSpinner';
 export type OwnProps<T> = {
   id?: string;
   video: ApiVideo | ApiMediaExtendedPreview;
+  lastPlaybackTimestamp?: number;
   isOwn?: boolean;
   isInWebPage?: boolean;
   observeIntersectionForLoading?: ObserveFn;
@@ -71,6 +72,7 @@ const Video = <T,>({
   isDownloading,
   isProtected,
   className,
+  lastPlaybackTimestamp,
   clickArg,
   onClick,
   onCancelUpload,
@@ -301,6 +303,12 @@ const Video = <T,>({
           {!isPaidPreview && video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
           {isUnsupported && <Icon name="message-failed" className="playback-failed" />}
         </div>
+      )}
+      {Boolean(lastPlaybackTimestamp) && (
+        <div
+          className="message-media-last-progress"
+          style={`--_progress: ${Math.floor((lastPlaybackTimestamp / duration) * 100)}%`}
+        />
       )}
     </div>
   );

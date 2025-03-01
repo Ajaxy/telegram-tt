@@ -186,7 +186,7 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
 
 addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, threadId, messageId, origin, volume, playbackRate, isMuted,
+    chatId, threadId, messageId, origin, volume, playbackRate, isMuted, timestamp,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -196,6 +196,7 @@ addActionHandler('openAudioPlayer', (global, actions, payload): ActionReturnType
       chatId,
       threadId,
       messageId,
+      timestamp,
       origin: origin ?? tabState.audioPlayer.origin,
       volume: volume ?? tabState.audioPlayer.volume,
       playbackRate: playbackRate || tabState.audioPlayer.playbackRate || global.audioPlayer.lastPlaybackRate,
@@ -404,7 +405,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
     replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel, quote, scrollTargetPosition,
-    tabId = getCurrentTabId(),
+    timestamp, tabId = getCurrentTabId(),
   } = payload;
 
   let { messageId } = payload;
@@ -414,6 +415,11 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     actions.showNotification({ message: oldTranslate('Conversation.ErrorInaccessibleMessage'), tabId });
     return undefined;
   }
+
+  const onMessageReady = timestamp
+    ? () => actions.openMediaFromTimestamp({
+      chatId, threadId, messageId, timestamp, tabId,
+    }) : undefined;
 
   if (groupedId !== undefined) {
     const ids = selectForwardedMessageIdsByGroupId(global, groupedChatId!, groupedId);
@@ -472,6 +478,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
       noForumTopicPanel,
       tabId,
     });
+    onMessageReady?.();
     return undefined;
   }
 
@@ -503,6 +510,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     threadId,
     tabId,
     shouldForceRender: true,
+    onLoaded: onMessageReady,
   });
   return undefined;
 });

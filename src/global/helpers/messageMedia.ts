@@ -663,3 +663,10 @@ export function getIsDownloading(activeDownloads: ActiveDownloads, media: Downlo
   if (!hash) return false;
   return Boolean(activeDownloads[hash]);
 }
+
+export function getTimestampableMedia(message: MediaContainer) {
+  return getMessageVideo(message)
+    || getMessageWebPageVideo(message)
+    || getMessageAudio(message)
+    || getMessageVoice(message);
+}

@@ -209,6 +209,26 @@ function getEntityDataFromNode(
     };
   }
 
+  if (type === ApiMessageEntityTypes.Timestamp) {
+    const timestamp = Number((node as HTMLElement).dataset.timestamp);
+    if (Number.isNaN(timestamp)) {
+      return {
+        index,
+        entity: undefined,
+      };
+    }
+
+    return {
+      index,
+      entity: {
+        type,
+        offset,
+        length,
+        timestamp,
+      },
+    };
+  }
+
   return {
     index,
     entity: {

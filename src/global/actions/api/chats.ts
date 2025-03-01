@@ -1469,7 +1469,7 @@ addActionHandler('acceptChatInvite', async (global, actions, payload): Promise<v
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
     username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp, mode,
-    text, onChatChanged, choose, ref,
+    text, onChatChanged, choose, ref, timestamp,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -1481,7 +1481,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     if (startAttach === undefined && messageId && !startParam && !ref
       && chat?.usernames?.some((c) => c.username === username)) {
       actions.focusMessage({
-        chatId: chat.id, threadId, messageId, tabId,
+        chatId: chat.id, threadId, messageId, timestamp, tabId,
       });
       return;
     }
@@ -1523,6 +1523,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
           startAttach,
           attach,
           text,
+          timestamp,
         }, tabId,
       );
       if (onChatChanged) {
@@ -1542,6 +1543,14 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       tabId,
       focusMessageId: commentId,
     });
+    if (timestamp) {
+      actions.openMediaFromTimestamp({
+        chatId: usernameChat.id,
+        messageId: commentId,
+        timestamp,
+        tabId,
+      });
+    }
     return;
   }
 
@@ -1574,6 +1583,16 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     tabId,
     focusMessageId: commentId,
   });
+
+  if (timestamp) {
+    actions.openMediaFromTimestamp({
+      chatId: chatByUsername.id,
+      messageId: commentId || messageId!,
+      timestamp,
+      tabId,
+    });
+  }
+
   if (onChatChanged) {
     // @ts-ignore
     actions[onChatChanged.action](onChatChanged.payload);
@@ -1582,7 +1601,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
 
 addActionHandler('openPrivateChannel', (global, actions, payload): ActionReturnType => {
   const {
-    id, commentId, messageId, threadId, tabId = getCurrentTabId(),
+    id, commentId, messageId, threadId, timestamp, tabId = getCurrentTabId(),
   } = payload;
   const chat = selectChat(global, id);
   if (!chat) {
@@ -1600,10 +1619,19 @@ addActionHandler('openPrivateChannel', (global, actions, payload): ActionReturnT
     return;
   }
 
+  if (timestamp) {
+    actions.openMediaFromTimestamp({
+      chatId: id,
+      messageId: commentId || messageId!,
+      timestamp,
+      tabId,
+    });
+  }
+
   if (commentId && messageId) {
     actions.openThread({
       isComments: true,
-      originChannelId: chat.id,
+      originChannelId: id,
       originMessageId: messageId,
       tabId,
       focusMessageId: commentId,
@@ -1614,6 +1642,7 @@ addActionHandler('openPrivateChannel', (global, actions, payload): ActionReturnT
   openChatWithParams(global, actions, chat, {
     messageId,
     threadId,
+    timestamp,
   }, tabId);
 });
 
@@ -3109,11 +3138,12 @@ async function openChatByUsername<T extends GlobalState>(
     startAttach?: string;
     attach?: string;
     text?: string;
+    timestamp?: number;
   },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const {
-    username, threadId, channelPostId, startParam, ref, startAttach, attach, text,
+    username, threadId, channelPostId, startParam, ref, startAttach, attach, text, timestamp,
   } = params;
   const currentChat = selectCurrentChat(global, tabId);
 
@@ -3168,6 +3198,7 @@ async function openChatByUsername<T extends GlobalState>(
     startAttach,
     attach,
     text,
+    timestamp,
   }, tabId);
 }
 
@@ -3184,11 +3215,12 @@ async function openChatWithParams<T extends GlobalState>(
     startAttach?: string;
     attach?: string;
     text?: string;
+    timestamp?: number;
   },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const {
-    isCurrentChat, threadId, messageId, startParam, referrer, startAttach, attach, text,
+    isCurrentChat, threadId, messageId, startParam, referrer, startAttach, attach, text, timestamp,
   } = params;
 
   if (messageId) {
@@ -3211,7 +3243,7 @@ async function openChatWithParams<T extends GlobalState>(
 
     if (!isTopicProcessed) {
       actions.focusMessage({
-        chatId: chat.id, threadId, messageId, tabId,
+        chatId: chat.id, threadId, messageId, timestamp, tabId,
       });
     }
   } else if (!isCurrentChat) {
@@ -3229,6 +3261,12 @@ async function openChatWithParams<T extends GlobalState>(
 
   if (text) {
     actions.openChatWithDraft({ chatId: chat.id, text: { text }, tabId });
+  }
+
+  if (messageId && timestamp) {
+    actions.openMediaFromTimestamp({
+      chatId: chat.id, threadId, messageId, timestamp, tabId,
+    });
   }
 }
 

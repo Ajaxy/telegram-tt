@@ -4,6 +4,7 @@ import React, {
 
 import type { ApiFormattedText, ApiMessage, ApiStory } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { ThreadId } from '../../types';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import { CONTENT_NOT_SUPPORTED } from '../../config';
@@ -16,6 +17,7 @@ import useUniqueId from '../../hooks/useUniqueId';
 
 interface OwnProps {
   messageOrStory: ApiMessage | ApiStory;
+  threadId?: ThreadId;
   translatedText?: ApiFormattedText;
   isForAnimation?: boolean;
   emojiSize?: number;
@@ -32,6 +34,7 @@ interface OwnProps {
   focusedQuote?: string;
   isInSelectMode?: boolean;
   canBeEmpty?: boolean;
+  maxTimestamp?: number;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -54,6 +57,8 @@ function MessageText({
   focusedQuote,
   isInSelectMode,
   canBeEmpty,
+  maxTimestamp,
+  threadId,
 }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -109,6 +114,10 @@ function MessageText({
           forcePlayback,
           focusedQuote,
           isInSelectMode,
+          maxTimestamp,
+          chatId: 'chatId' in messageOrStory ? messageOrStory.chatId : undefined,
+          messageId: messageOrStory.id,
+          threadId,
         }),
       ].flat().filter(Boolean)}
     </>

@@ -321,6 +321,7 @@ export type TabState = {
     playbackRate: number;
     isMuted: boolean;
     isHidden?: boolean;
+    timestamp?: number;
   };
 
   audioPlayer: {
@@ -331,6 +332,7 @@ export type TabState = {
     volume: number;
     playbackRate: number;
     isPlaybackRateActive?: boolean;
+    timestamp?: number;
     isMuted: boolean;
   };
 

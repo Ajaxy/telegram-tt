@@ -43,6 +43,34 @@
   &.fix-min-height {
     min-height: 5rem;
   }
+
+  .message-media-last-progress {
+    --_progress: 0%;
+    --_color: var(--color-primary);
+
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0.25rem;
+    background-color: rgba(255 255 255 / 0.3);
+
+    .theme-dark & {
+      --_color: white;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: var(--_progress);
+      height: 100%;
+      background-color: var(--_color);
+      border-top-right-radius: 0.125rem;
+      border-bottom-right-radius: 0.125;
+    }
+  }
 }
 
 .animated-close-icon {

@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useMemo } from '../../../lib/teact/teact';
+import React, { useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -57,6 +57,7 @@ type StateProps = {
   playbackRate: number;
   isPlaybackRateActive?: boolean;
   isMuted: boolean;
+  timestamp?: number;
 };
 
 const PLAYBACK_RATES: Record<number, number> = {
@@ -82,6 +83,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   isPlaybackRateActive,
   isMuted,
   isFullWidth,
+  timestamp,
   onPaneStateChange,
 }) => {
   const {
@@ -117,6 +119,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     setVolume,
     toggleMuted,
     setPlaybackRate,
+    setCurrentTime,
   } = useAudioPlayer(
     message && makeTrackId(message),
     message ? getMediaDuration(message)! : 0,
@@ -152,6 +155,12 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(transitionRef, !shouldRender);
+
+  useEffect(() => {
+    if (timestamp) {
+      setCurrentTime(timestamp);
+    }
+  }, [timestamp, setCurrentTime]);
 
   const handleClick = useLastCallback(() => {
     const { chatId, id } = renderingMessage!;
@@ -407,7 +416,7 @@ export default withGlobal<OwnProps>(
     const sender = message && selectSender(global, message);
     const chat = message && selectChat(global, message.chatId);
     const {
-      volume, playbackRate, isMuted, isPlaybackRateActive,
+      volume, playbackRate, isMuted, isPlaybackRateActive, timestamp,
     } = selectTabState(global).audioPlayer;
 
     return {
@@ -418,6 +427,7 @@ export default withGlobal<OwnProps>(
       playbackRate,
       isPlaybackRateActive,
       isMuted,
+      timestamp,
     };
   },
 )(AudioPlayer);
