@@ -4,6 +4,8 @@ import React, { memo, useState } from '../../lib/teact/teact';
 
 import type { ApiUser } from '../../api/types';
 
+import buildClassName from '../../util/buildClassName';
+
 import useLastCallback from '../../hooks/useLastCallback';
 
 import Checkbox from './Checkbox';
@@ -26,6 +28,7 @@ type OwnProps = {
   loadingOptions?: string[];
   isRound?: boolean;
   onChange: (value: string[]) => void;
+  className?: string;
 };
 
 const CheckboxGroup: FC<OwnProps> = ({
@@ -37,6 +40,7 @@ const CheckboxGroup: FC<OwnProps> = ({
   loadingOptions,
   isRound,
   onChange,
+  className,
 }) => {
   const [values, setValues] = useState<string[]>(selected || []);
 
@@ -80,7 +84,7 @@ const CheckboxGroup: FC<OwnProps> = ({
   });
 
   return (
-    <div id={id} className="radio-group">
+    <div id={id} className={buildClassName('radio-group', className)}>
       {options.map((option) => {
         return (
           <Checkbox

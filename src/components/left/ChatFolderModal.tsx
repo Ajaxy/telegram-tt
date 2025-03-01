@@ -99,6 +99,7 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
     >
       <div className={buildClassName(styles.main, 'custom-scroll')}>
         <CheckboxGroup
+          className="dialog-checkbox-group"
           options={folders}
           selected={selectedFolderIds}
           onChange={setSelectedFolderIds}

@@ -75,6 +75,7 @@ const MuteChatModal: FC<OwnProps> = ({
       title={lang('Notifications')}
     >
       <RadioGroup
+        className="dialog-checkbox-group"
         name="muteFor"
         options={muteForOptions}
         selected={muteUntilOption}
