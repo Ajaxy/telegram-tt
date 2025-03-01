@@ -246,8 +246,13 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
 
 addActionHandler('addLocalPaidReaction', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageId, count, isPrivate, tabId = getCurrentTabId(),
+    chatId, messageId, count, shouldIgnoreDefaultPrivacy = false, tabId = getCurrentTabId(),
   } = payload;
+  const defaultPrivacy = global.settings.paidReactionPrivacy;
+  const isPrivate = !shouldIgnoreDefaultPrivacy ? defaultPrivacy?.type === 'anonymous' : payload.isPrivate;
+  const peerId = !shouldIgnoreDefaultPrivacy
+    ? (defaultPrivacy?.type === 'peer' ? defaultPrivacy.peerId : undefined) : payload.peerId;
+
   const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
 
@@ -256,7 +261,7 @@ addActionHandler('addLocalPaidReaction', (global, actions, payload): ActionRetur
   }
 
   const currentReactions = message.reactions?.results || [];
-  const newReactions = addPaidReaction(currentReactions, count, isPrivate);
+  const newReactions = addPaidReaction(currentReactions, count, isPrivate, peerId);
   global = updateChatMessage(global, message.chatId, message.id, {
     reactions: {
       ...currentReactions,
@@ -301,6 +306,7 @@ addActionHandler('sendPaidReaction', async (global, actions, payload): Promise<v
       messageId,
       count,
       isPrivate: paidReaction?.localIsPrivate,
+      peerId: paidReaction?.localPeerId,
     });
   } catch (error) {
     if ((error as ApiError).message === 'BALANCE_TOO_LOW') {

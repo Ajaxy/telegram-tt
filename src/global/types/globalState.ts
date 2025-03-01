@@ -15,6 +15,7 @@ import type {
   ApiGroupCall,
   ApiLanguage,
   ApiMessage,
+  ApiPaidReactionPrivacyType,
   ApiPeerColors,
   ApiPeerPhotos,
   ApiPeerStories,
@@ -408,7 +409,7 @@ export type GlobalState = {
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
     notifyExceptions?: Record<number, NotifyException>;
     lastPremiumBandwithNotificationDate?: number;
-    paidReactionPrivacy?: boolean;
+    paidReactionPrivacy?: ApiPaidReactionPrivacyType;
     languages?: ApiLanguage[];
     botVerificationShownPeerIds: string[];
     miniAppsCachedPosition?: Point;

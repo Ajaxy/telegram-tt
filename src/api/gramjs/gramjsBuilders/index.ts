@@ -93,6 +93,19 @@ export function buildInputPeer(chatOrUserId: string, accessHash?: string): GramJ
   }
 }
 
+export function buildInputPaidReactionPrivacy(isPrivate?: boolean, peerId?: string): GramJs.TypeInputPeer {
+  if (isPrivate) return new GramJs.PaidReactionPrivacyAnonymous();
+  if (peerId) {
+    const peer = buildInputPeerFromLocalDb(peerId);
+    if (peer) {
+      return new GramJs.PaidReactionPrivacyPeer({
+        peer,
+      });
+    }
+  }
+  return new GramJs.PaidReactionPrivacyDefault();
+}
+
 export function buildInputPeerFromLocalDb(chatOrUserId: string): GramJs.TypeInputPeer | undefined {
   const type = getEntityTypeById(chatOrUserId);
   let accessHash: BigInt.BigInteger | undefined;

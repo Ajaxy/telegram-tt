@@ -857,7 +857,8 @@ function updateReactions<T extends GlobalState>(
   const localPaidReaction = currentReactions?.results.find((r) => r.localAmount);
   // Save local count on update, but reset if we sent reaction
   if (localPaidReaction?.localAmount) {
-    reactions.results = addPaidReaction(reactions.results, localPaidReaction.localAmount);
+    const { localIsPrivate: isPrivate, localAmount, localPeerId } = localPaidReaction;
+    reactions.results = addPaidReaction(reactions.results, localAmount, isPrivate, localPeerId);
   }
 
   global = updateChatMessage(global, chatId, id, { reactions });

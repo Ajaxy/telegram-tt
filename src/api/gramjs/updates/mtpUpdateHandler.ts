@@ -55,6 +55,7 @@ import {
 import { buildApiStarsAmount } from '../apiBuilders/payments';
 import { buildApiEmojiStatus, buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
+  buildApiPaidReactionPrivacy,
   buildApiReaction,
   buildMessageReactions,
 } from '../apiBuilders/reactions';
@@ -1071,7 +1072,7 @@ export function updater(update: Update) {
   } else if (update instanceof GramJs.UpdatePaidReactionPrivacy) {
     sendApiUpdate({
       '@type': 'updatePaidReactionPrivacy',
-      isPrivate: update.private,
+      private: buildApiPaidReactionPrivacy(update.private),
     });
   } else if (update instanceof GramJs.UpdateLangPackTooLong) {
     sendApiUpdate({

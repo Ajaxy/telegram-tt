@@ -77,6 +77,8 @@ export interface ApiChat {
   isJoinToSend?: boolean;
   isJoinRequest?: boolean;
   sendAsPeerIds?: ApiSendAsPeerId[];
+  sendPaidReactionsAsPeerIds?: ApiSendAsPeerId[];
+  sendPaidReactionsPeer?: ApiSendAsPeerId;
 
   unreadReactions?: number[];
   unreadMentions?: number[];

@@ -122,7 +122,7 @@ export function updateReactionCount(reactionCount: ApiReactionCount[], newReacti
 }
 
 export function addPaidReaction(
-  reactionCount: ApiReactionCount[], count: number, isAnonymous?: boolean,
+  reactionCount: ApiReactionCount[], count: number, isAnonymous?: boolean, peerId?: string,
 ): ApiReactionCount[] {
   const results: ApiReactionCount[] = [];
   const hasPaid = reactionCount.some((current) => current.reaction.type === 'paid');
@@ -134,6 +134,7 @@ export function addPaidReaction(
           localAmount: (current.localAmount || 0) + count,
           chosenOrder: -1,
           localIsPrivate: isAnonymous !== undefined ? isAnonymous : current.localIsPrivate,
+          localPeerId: peerId || current.localPeerId,
           localPreviousChosenOrder: current.chosenOrder,
         });
         return;
@@ -152,6 +153,7 @@ export function addPaidReaction(
       chosenOrder: -1,
       localAmount: count,
       localIsPrivate: isAnonymous,
+      localPeerId: peerId,
     },
     ...reactionCount,
   ];

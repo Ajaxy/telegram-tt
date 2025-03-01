@@ -675,7 +675,7 @@ export interface ApiPeerReaction {
 
 export interface ApiMessageReactor {
   isTop?: true;
-  isMe?: true;
+  isMy?: true;
   count: number;
   isAnonymous?: true;
   peerId?: string;
@@ -687,6 +687,7 @@ export interface ApiReactionCount {
   reaction: ApiReactionWithPaid;
   localAmount?: number;
   localIsPrivate?: boolean;
+  localPeerId?: string;
   localPreviousChosenOrder?: number;
 }
 
@@ -748,6 +749,22 @@ export type ApiSavedReactionTag = {
   reaction: ApiReaction;
   title?: string;
   count: number;
+};
+
+export type ApiPaidReactionPrivacyType = ApiPaidReactionPrivacyDefault |
+ApiPaidReactionPrivacyAnonymous | PaidReactionPrivacyPeer;
+
+export type ApiPaidReactionPrivacyDefault = {
+  type: 'default';
+};
+
+export type ApiPaidReactionPrivacyAnonymous = {
+  type: 'anonymous';
+};
+
+export type PaidReactionPrivacyPeer = {
+  type: 'peer';
+  peerId: string;
 };
 
 interface ApiBaseThreadInfo {

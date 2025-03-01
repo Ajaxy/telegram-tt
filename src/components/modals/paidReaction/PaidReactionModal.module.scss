@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  max-height: min(92vh, 38rem) !important;
 }
 
 .title {
@@ -11,7 +12,7 @@
 }
 
 .slider {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   flex-shrink: 0;
 }
 
@@ -23,11 +24,73 @@
   text-align: center;
 }
 
-.modalBalance {
+.itemInfo {
+  flex-grow: 1;
+  overflow: hidden;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  margin-left: 0.5rem;
+}
+
+.itemTitle {
+  line-height: 1rem;
+  margin-bottom: 0.125rem;
+}
+
+.itemSubtitle {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1rem;
+}
+
+.itemIcon {
+  margin-left: 0.5rem;
+  margin-right: 0 !important;
+}
+
+.sendAsPeerMenuButton {
+  margin-right: 0.25rem;
+  border-radius: 1.5rem;
+  padding: 0.25rem !important;
+  width: auto;
+  height: auto !important;
+  background-color: var(--color-background-secondary) !important;
+
+  :active,
+  :hover {
+    background-color: var(--color-interactive-element-hover) !important;
+  }
+}
+
+.buttonDownIcon {
+  margin-left: 0.25rem;
+  margin-right: 0.125rem;
+}
+
+.sendAsPeerMenuBubble {
+  max-width: 16rem;
+}
+
+.sendAsPeerMenu {
+  margin-right: 0.25rem;
+}
+
+.headerControlPanel {
+  display: flex;
+  align-items: center;
   position: absolute;
   top: 0.75rem;
   right: 1.25rem;
   z-index: 3;
+}
+
+.separator {
+  margin-top: 1rem;
+}
+
+.checkBox {
+  margin-block: 0.25rem !important;
 }
 
 .topLabel {
@@ -61,5 +124,6 @@
   font-size: 0.875rem;
   align-self: center;
   color: var(--color-text-secondary);
-  margin-bottom: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 0.125rem;
 }

@@ -1633,3 +1633,5 @@
 "UniqueStatusProofOfOwnershipDescription" = "Tapping the icon of this item next to your name will show its info and owner.";
 "UniqueStatusWearButton" = "Start Wearing";
 "CollectibleStatusesCategory" = "Collectibles";
+"PeerPersonalAccount" = "personal account";
+"PeerChannel" = "channel";

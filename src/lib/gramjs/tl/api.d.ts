@@ -388,6 +388,7 @@ namespace Api {
   export type TypeStarGiftAttribute = StarGiftAttributeModel | StarGiftAttributePattern | StarGiftAttributeBackdrop | StarGiftAttributeOriginalDetails;
   export type TypeSavedStarGift = SavedStarGift;
   export type TypeInputSavedStarGift = InputSavedStarGiftUser | InputSavedStarGiftChat;
+  export type TypePaidReactionPrivacy = PaidReactionPrivacyDefault | PaidReactionPrivacyAnonymous | PaidReactionPrivacyPeer;
   export type TypeResPQ = ResPQ;
   export type TypeP_Q_inner_data = PQInnerData | PQInnerDataDc | PQInnerDataTemp | PQInnerDataTempDc;
   export type TypeServer_DH_Params = ServerDHParamsFail | ServerDHParamsOk;
@@ -4490,9 +4491,9 @@ namespace Api {
     static fromReader(reader: Reader): UpdateBotPurchasedPaidMedia;
   }
   export class UpdatePaidReactionPrivacy extends VirtualClass<{
-    private: Bool;
+    private: Api.TypePaidReactionPrivacy;
   }> {
-    private: Bool;
+    private: Api.TypePaidReactionPrivacy;
     static fromReader(reader: Reader): UpdatePaidReactionPrivacy;
   }
   export class UpdatesTooLong extends VirtualClass<void> {
@@ -5365,6 +5366,7 @@ namespace Api {
   export class WebPage extends VirtualClass<{
     // flags: Api.Type;
     hasLargeMedia?: true;
+    videoCoverPhoto?: true;
     id: long;
     url: string;
     displayUrl: string;
@@ -5386,6 +5388,7 @@ namespace Api {
   }> {
     // flags: Api.Type;
     hasLargeMedia?: true;
+    videoCoverPhoto?: true;
     id: long;
     url: string;
     displayUrl: string;
@@ -12070,6 +12073,7 @@ namespace Api {
     attributes: Api.TypeStarGiftAttribute[];
     availabilityIssued: int;
     availabilityTotal: int;
+    giftAddress?: string;
   }> {
     // flags: Api.Type;
     id: long;
@@ -12082,6 +12086,7 @@ namespace Api {
     attributes: Api.TypeStarGiftAttribute[];
     availabilityIssued: int;
     availabilityTotal: int;
+    giftAddress?: string;
     static fromReader(reader: Reader): StarGiftUnique;
   }
   export class MessageReportOption extends VirtualClass<{
@@ -12296,6 +12301,18 @@ namespace Api {
     peer: Api.TypeInputPeer;
     savedId: long;
     static fromReader(reader: Reader): InputSavedStarGiftChat;
+  }
+  export class PaidReactionPrivacyDefault extends VirtualClass<void> {
+    static fromReader(reader: Reader): PaidReactionPrivacyDefault;
+  }
+  export class PaidReactionPrivacyAnonymous extends VirtualClass<void> {
+    static fromReader(reader: Reader): PaidReactionPrivacyAnonymous;
+  }
+  export class PaidReactionPrivacyPeer extends VirtualClass<{
+    peer: Api.TypeInputPeer;
+  }> {
+    peer: Api.TypeInputPeer;
+    static fromReader(reader: Reader): PaidReactionPrivacyPeer;
   }
   export class ResPQ extends VirtualClass<{
     nonce: int128;
@@ -15711,6 +15728,13 @@ namespace Api {
     secret: string;
     query: X;
   }
+  export class InvokeWithReCaptcha extends Request<Partial<{
+    token: string;
+    query: X;
+  }>, X> {
+    token: string;
+    query: X;
+  }
   export class ReqPq extends Request<Partial<{
     nonce: int128;
   }>, Api.TypeResPQ> {
@@ -19013,23 +19037,23 @@ namespace Api {
       msgId: int;
       count: int;
       randomId: long;
-      private?: Bool;
+      private?: Api.TypePaidReactionPrivacy;
     }>, Api.TypeUpdates> {
       // flags: Api.Type;
       peer: Api.TypeInputPeer;
       msgId: int;
       count: int;
       randomId: long;
-      private?: Bool;
+      private?: Api.TypePaidReactionPrivacy;
     }
     export class TogglePaidReactionPrivacy extends Request<Partial<{
       peer: Api.TypeInputPeer;
       msgId: int;
-      private: Bool;
+      private: Api.TypePaidReactionPrivacy;
     }>, Bool> {
       peer: Api.TypeInputPeer;
       msgId: int;
-      private: Bool;
+      private: Api.TypePaidReactionPrivacy;
     }
     export class GetPaidReactionPrivacy extends Request<void, Api.TypeUpdates> {}
     export class ViewSponsoredMessage extends Request<Partial<{
@@ -19682,8 +19706,12 @@ namespace Api {
       channel: Api.TypeInputChannel;
     }
     export class GetSendAs extends Request<Partial<{
+      // flags: Api.Type;
+      forPaidReactions?: true;
       peer: Api.TypeInputPeer;
     }>, channels.TypeSendAsPeers> {
+      // flags: Api.Type;
+      forPaidReactions?: true;
       peer: Api.TypeInputPeer;
     }
     export class DeleteParticipantHistory extends Request<Partial<{
@@ -21465,7 +21493,7 @@ namespace Api {
     }
   }
 
-  export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | InvokeWithBusinessConnection | InvokeWithGooglePlayIntegrity | InvokeWithApnsSecret | ReqPq | ReqPqMulti | ReqPqMultiNew | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
+  export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | InvokeWithBusinessConnection | InvokeWithGooglePlayIntegrity | InvokeWithApnsSecret | InvokeWithReCaptcha | ReqPq | ReqPqMulti | ReqPqMultiNew | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
     | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization | auth.RequestFirebaseSms | auth.ResetLoginEmail | auth.ReportMissingCode
     | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses | account.ReorderUsernames | account.ToggleUsername | account.GetDefaultProfilePhotoEmojis | account.GetDefaultGroupPhotoEmojis | account.GetAutoSaveSettings | account.SaveAutoSaveSettings | account.DeleteAutoSaveExceptions | account.InvalidateSignInCodes | account.UpdateColor | account.GetDefaultBackgroundEmojis | account.GetChannelDefaultEmojiStatuses | account.GetChannelRestrictedStatusEmojis | account.UpdateBusinessWorkHours | account.UpdateBusinessLocation | account.UpdateBusinessGreetingMessage | account.UpdateBusinessAwayMessage | account.UpdateConnectedBot | account.GetConnectedBots | account.GetBotBusinessConnection | account.UpdateBusinessIntro | account.ToggleConnectedBotPaused | account.DisablePeerConnectedBot | account.UpdateBirthday | account.CreateBusinessChatLink | account.EditBusinessChatLink | account.DeleteBusinessChatLink | account.GetBusinessChatLinks | account.ResolveBusinessChatLink | account.UpdatePersonalChannel | account.ToggleSponsoredMessages | account.GetReactionsNotifySettings | account.SetReactionsNotifySettings | account.GetCollectibleEmojiStatuses
     | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors | users.GetIsPremiumRequiredToContact

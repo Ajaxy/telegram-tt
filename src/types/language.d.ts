@@ -1333,6 +1333,8 @@ export interface LangPair {
   'UniqueStatusProofOfOwnershipDescription': undefined;
   'UniqueStatusWearButton': undefined;
   'CollectibleStatusesCategory': undefined;
+  'PeerPersonalAccount': undefined;
+  'PeerChannel': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

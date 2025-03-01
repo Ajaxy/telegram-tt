@@ -24,6 +24,7 @@ import type {
   ApiFormattedText,
   ApiMediaExtendedPreview,
   ApiMessage,
+  ApiPaidReactionPrivacyType,
   ApiPhoto,
   ApiPoll,
   ApiQuickReply,
@@ -789,7 +790,7 @@ export type ApiUpdateEntities = {
 
 export type ApiUpdatePaidReactionPrivacy = {
   '@type': 'updatePaidReactionPrivacy';
-  isPrivate: boolean;
+  private: ApiPaidReactionPrivacyType;
 };
 
 export type ApiUpdateLangPackTooLong = {

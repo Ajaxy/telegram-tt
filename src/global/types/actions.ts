@@ -536,6 +536,9 @@ export interface ActionPayloads {
   loadSendAs: {
     chatId: string;
   };
+  loadSendPaidReactionsAs: {
+    chatId: string;
+  };
   saveDefaultSendAs: {
     chatId: string;
     sendAsId: string;
@@ -1384,7 +1387,9 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
     count: number;
+    peerId?: string;
     isPrivate?: boolean;
+    shouldIgnoreDefaultPrivacy?: boolean;
   } & WithTabId;
   resetLocalPaidReactions: {
     chatId: string;

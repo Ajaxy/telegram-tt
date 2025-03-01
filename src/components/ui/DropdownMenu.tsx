@@ -11,6 +11,7 @@ import './DropdownMenu.scss';
 
 type OwnProps = {
   className?: string;
+  bubbleClassName?: string;
   trigger?: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   transformOriginX?: number;
   transformOriginY?: number;
@@ -30,6 +31,7 @@ type OwnProps = {
 const DropdownMenu: FC<OwnProps> = ({
   trigger,
   className,
+  bubbleClassName,
   children,
   transformOriginX,
   transformOriginY,
@@ -107,6 +109,7 @@ const DropdownMenu: FC<OwnProps> = ({
         ref={menuRef}
         isOpen={isOpen || Boolean(forceOpen)}
         className={className || ''}
+        bubbleClassName={bubbleClassName || ''}
         transformOriginX={transformOriginX}
         transformOriginY={transformOriginY}
         positionX={positionX}

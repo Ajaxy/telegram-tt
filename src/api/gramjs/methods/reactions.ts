@@ -20,7 +20,9 @@ import {
   buildMessagePeerReaction,
 } from '../apiBuilders/reactions';
 import { buildStickerFromDocument } from '../apiBuilders/symbols';
-import { buildInputPeer, buildInputReaction, generateRandomTimestampedBigInt } from '../gramjsBuilders';
+import {
+  buildInputPaidReactionPrivacy, buildInputPeer, buildInputReaction, generateRandomTimestampedBigInt,
+} from '../gramjsBuilders';
 import localDb from '../localDb';
 import { invokeRequest } from './client';
 
@@ -155,18 +157,20 @@ export function sendPaidReaction({
   messageId,
   count,
   isPrivate,
+  peerId,
 }: {
   chat: ApiChat;
   messageId: number;
   count: number;
   isPrivate?: boolean;
+  peerId?: string;
 }) {
   return invokeRequest(new GramJs.messages.SendPaidReaction({
     peer: buildInputPeer(chat.id, chat.accessHash),
     msgId: messageId,
     randomId: generateRandomTimestampedBigInt(),
     count,
-    private: isPrivate || undefined,
+    private: buildInputPaidReactionPrivacy(isPrivate, peerId),
   }), {
     shouldReturnTrue: true,
     shouldThrow: true,

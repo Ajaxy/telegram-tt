@@ -199,7 +199,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...global,
         settings: {
           ...global.settings,
-          paidReactionPrivacy: update.isPrivate,
+          paidReactionPrivacy: update.private,
         },
       };
       setGlobal(global);

@@ -1646,7 +1646,30 @@ addActionHandler('loadSendAs', async (global, actions, payload): Promise<void> =
   }
 
   global = getGlobal();
-  global = updateChat(global, chatId, { sendAsPeerIds: result.sendAs });
+  global = updateChat(global, chatId, { sendAsPeerIds: result });
+  setGlobal(global);
+});
+
+addActionHandler('loadSendPaidReactionsAs', async (global, actions, payload): Promise<void> => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const result = await callApi('fetchSendAs', { chat, isForPaidReactions: true });
+  if (!result) {
+    global = getGlobal();
+    global = updateChat(global, chatId, {
+      sendPaidReactionsAsPeerIds: [],
+    });
+    setGlobal(global);
+
+    return;
+  }
+
+  global = getGlobal();
+  global = updateChat(global, chatId, { sendPaidReactionsAsPeerIds: result });
   setGlobal(global);
 });
 

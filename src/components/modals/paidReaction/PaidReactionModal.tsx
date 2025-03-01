@@ -1,30 +1,43 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiStarsAmount, ApiUser,
+  ApiChat, ApiMessage, ApiPaidReactionPrivacyType,
+  ApiPeer,
+  ApiSendAsPeerId,
+  ApiStarsAmount, ApiUser,
 } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { CustomPeer } from '../../../types';
 
 import { STARS_ICON_PLACEHOLDER } from '../../../config';
-import { getChatTitle, getUserFullName } from '../../../global/helpers';
-import { selectChat, selectChatMessage, selectUser } from '../../../global/selectors';
+import { getPeerTitle } from '../../../global/helpers';
+import { isApiPeerUser } from '../../../global/helpers/peers';
+import {
+  selectChat, selectChatMessage, selectPeer, selectUser,
+} from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
+import useAppLayout from '../../../hooks/useAppLayout';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Avatar from '../../common/Avatar';
+import FullNameTitle from '../../common/FullNameTitle';
 import Icon from '../../common/icons/Icon';
 import PeerBadge from '../../common/PeerBadge';
 import SafeLink from '../../common/SafeLink';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
+import DropdownMenu from '../../ui/DropdownMenu';
+import MenuItem from '../../ui/MenuItem';
 import Modal from '../../ui/Modal';
 import Separator from '../../ui/Separator';
 import BalanceBlock from '../stars/BalanceBlock';
@@ -41,15 +54,18 @@ type StateProps = {
   chat?: ApiChat;
   maxAmount: number;
   starBalance?: ApiStarsAmount;
-  defaultPrivacy?: boolean;
+  defaultPrivacy?: ApiPaidReactionPrivacyType;
+  sendPaidReactionsAsPeerIds?: ApiSendAsPeerId[];
+  currentUserId: string;
+  currentUser: ApiUser;
 };
 
 type ReactorData = {
   amount: number;
   localAmount: number;
-  isMe?: boolean;
+  isMy?: boolean;
   isAnonymous?: boolean;
-  user?: ApiUser;
+  user?: ApiPeer;
 };
 
 const MAX_TOP_REACTORS = 3;
@@ -69,18 +85,27 @@ const PaidReactionModal = ({
   maxAmount,
   starBalance,
   defaultPrivacy,
+  sendPaidReactionsAsPeerIds,
+  currentUserId,
+  currentUser,
 }: OwnProps & StateProps) => {
-  const { closePaidReactionModal, addLocalPaidReaction } = getActions();
+  const { closePaidReactionModal, addLocalPaidReaction, loadSendPaidReactionsAs } = getActions();
 
   const [starsAmount, setStarsAmount] = useState(DEFAULT_STARS_AMOUNT);
   const [isTouched, markTouched, unmarkTouched] = useFlag();
-  const [shouldShowUp, setShouldShowUp] = useState(true);
+  const [shouldSendAsAnonymous, setShouldSendAsAnonymous] = useState(true);
+  const [sendAsPeerId, setSendAsPeerId] = useState(currentUserId);
+
+  const chatId = chat?.id;
+
+  const senderPeer = sendAsPeerId ? (selectPeer(getGlobal(), sendAsPeerId)) : currentUser;
 
   const oldLang = useOldLang();
+  const { isMobile } = useAppLayout();
   const lang = useLang();
 
-  const handleAnonimityChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setShouldShowUp(e.target.checked);
+  const handleShowInTopSendersChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setShouldSendAsAnonymous(!e.target.checked);
   });
 
   const handleAmountChange = useLastCallback((value: number) => {
@@ -89,20 +114,44 @@ const PaidReactionModal = ({
   });
 
   useEffect(() => {
+    if (chatId && !sendPaidReactionsAsPeerIds) {
+      loadSendPaidReactionsAs({ chatId });
+    }
+  }, [chatId, sendPaidReactionsAsPeerIds]);
+
+  const filteredMyReactorIds = useMemo(() => {
+    const result = sendPaidReactionsAsPeerIds?.map((peer) => peer.id)
+      .filter((id) => id !== chatId);
+    result?.unshift(currentUserId);
+    return result;
+  }, [sendPaidReactionsAsPeerIds, chatId, currentUserId]);
+
+  const canChangeSendAsPeer = filteredMyReactorIds && filteredMyReactorIds.length > 1;
+
+  useEffect(() => {
     if (!modal) {
       unmarkTouched();
     }
   }, [modal]);
 
   useEffect(() => {
-    const currentReactor = message?.reactions?.topReactors?.find((reactor) => reactor.isMe);
+    const currentReactor = message?.reactions?.topReactors?.find((reactor) => reactor.isMy);
     if (currentReactor) {
-      setShouldShowUp(!currentReactor.isAnonymous);
+      setShouldSendAsAnonymous(Boolean(currentReactor.isAnonymous));
+      if (currentReactor.peerId) {
+        setSendAsPeerId(currentReactor.peerId);
+      }
       return;
     }
 
-    setShouldShowUp(defaultPrivacy || true);
-  }, [defaultPrivacy, message?.reactions?.topReactors]);
+    setShouldSendAsAnonymous(defaultPrivacy?.type === 'anonymous' || false);
+    if (defaultPrivacy?.type === 'peer' && filteredMyReactorIds?.includes(defaultPrivacy.peerId)) {
+      setSendAsPeerId(defaultPrivacy.peerId);
+      return;
+    }
+
+    setSendAsPeerId(currentUserId);
+  }, [defaultPrivacy, message?.reactions?.topReactors, filteredMyReactorIds, currentUserId]);
 
   const handleSend = useLastCallback(() => {
     if (!modal) return;
@@ -111,10 +160,84 @@ const PaidReactionModal = ({
       chatId: modal.chatId,
       messageId: modal.messageId,
       count: starsAmount,
-      isPrivate: !shouldShowUp,
+      isPrivate: shouldSendAsAnonymous,
+      peerId: shouldSendAsAnonymous || sendAsPeerId === currentUserId ? undefined : sendAsPeerId,
+      shouldIgnoreDefaultPrivacy: true,
     });
     closePaidReactionModal();
   });
+
+  const handleSendAsPeerChange = useLastCallback((peerId: string) => {
+    setShouldSendAsAnonymous(false);
+    setSendAsPeerId(peerId);
+  });
+
+  const renderMenuItem = useLastCallback((peerId: string) => {
+    const peer = selectPeer(getGlobal(), peerId);
+    const isSelected = sendAsPeerId === peerId && !shouldSendAsAnonymous;
+    if (!peer) return undefined;
+
+    return (
+      <MenuItem
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={() => handleSendAsPeerChange(peerId)}
+      >
+        <Avatar
+          size="small"
+          peer={peer}
+        />
+        <div className={buildClassName(styles.itemInfo)}>
+          <FullNameTitle className={styles.itemTitle} peer={peer} noFake noVerified />
+          <span className={styles.itemSubtitle}>
+            {isApiPeerUser(peer) ? lang('PeerPersonalAccount') : lang('PeerChannel')}
+          </span>
+        </div>
+        <Icon
+          className={styles.itemIcon}
+          name={isSelected ? 'check' : 'placeholder'}
+        />
+      </MenuItem>
+    );
+  });
+
+  const SendAsPeerMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isOpen }) => (
+      <Button
+        ripple={!isMobile}
+        size="smaller"
+        color="translucent"
+        className={buildClassName(styles.sendAsPeerMenuButton, isOpen ? 'active' : '')}
+        onClick={onTrigger}
+        ariaLabel={lang('AccDescrOpenMenu2')}
+      >
+        <Avatar
+          size="mini"
+          peer={shouldSendAsAnonymous ? ANONYMOUS_PEER : senderPeer}
+        />
+        <Icon
+          name="down"
+          className={styles.buttonDownIcon}
+        />
+      </Button>
+    );
+  }, [isMobile, lang, senderPeer, shouldSendAsAnonymous]);
+
+  const sendAsPeersMenu = useMemo(() => {
+    if (!canChangeSendAsPeer) return undefined;
+    return (
+      <DropdownMenu
+        className={styles.sendAsPeerMenu}
+        bubbleClassName={styles.sendAsPeerMenuBubble}
+        trigger={SendAsPeerMenuButton}
+        positionX="right"
+        autoClose
+      >
+        {filteredMyReactorIds.map((id) => (
+          renderMenuItem(id)
+        ))}
+      </DropdownMenu>
+    );
+  }, [SendAsPeerMenuButton, filteredMyReactorIds, canChangeSendAsPeer]);
 
   const topReactors = useMemo(() => {
     const global = getGlobal();
@@ -124,41 +247,49 @@ const PaidReactionModal = ({
     }
 
     const result: ReactorData[] = [];
-    let hasMe = false;
+    let hasCurrentSender = false;
+    let myReactorAmount = 0;
 
     all.forEach((reactor) => {
-      const user = reactor.peerId ? selectUser(global, reactor.peerId) : undefined;
-      if (!user && !reactor.isAnonymous && !reactor.isMe) return;
+      const peer = reactor.peerId ? selectPeer(global, reactor.peerId) : undefined;
+      if (!peer && !reactor.isAnonymous && !reactor.isMy) return;
+      if (reactor.isMy) {
+        myReactorAmount = reactor.count;
+      }
 
-      if (reactor.isMe) {
-        hasMe = true;
+      if (reactor.isMy && (reactor.peerId !== sendAsPeerId || (reactor.isAnonymous && !shouldSendAsAnonymous))) return;
+
+      const isCurrentReactor = sendAsPeerId === reactor.peerId || (shouldSendAsAnonymous && reactor.isAnonymous);
+
+      if (isCurrentReactor) {
+        hasCurrentSender = true;
       }
 
       result.push({
         amount: reactor.count,
-        localAmount: reactor.isMe && isTouched ? starsAmount : 0,
-        isMe: reactor.isMe,
+        localAmount: isCurrentReactor && isTouched ? starsAmount : 0,
+        isMy: reactor.isMy,
         isAnonymous: reactor.isAnonymous,
-        user,
+        user: peer,
       });
     });
 
-    if (!hasMe && isTouched) {
-      const me = selectUser(global, global.currentUserId!);
+    if (!hasCurrentSender) {
+      const sender = selectPeer(global, sendAsPeerId);
       result.push({
-        amount: 0,
-        localAmount: starsAmount,
-        isMe: true,
-        user: me,
+        amount: myReactorAmount,
+        localAmount: isTouched ? starsAmount : 0,
+        isMy: true,
+        user: sender,
       });
     }
 
     result.sort((a, b) => (b.amount + b.localAmount) - (a.amount + a.localAmount));
 
     return result.slice(0, MAX_TOP_REACTORS);
-  }, [isTouched, message?.reactions?.topReactors, starsAmount]);
+  }, [isTouched, message?.reactions?.topReactors, starsAmount, sendAsPeerId, shouldSendAsAnonymous]);
 
-  const chatTitle = chat && getChatTitle(oldLang, chat);
+  const chatTitle = chat && getPeerTitle(oldLang, chat);
 
   return (
     <Modal
@@ -168,7 +299,10 @@ const PaidReactionModal = ({
       hasAbsoluteCloseButton
       contentClassName={styles.content}
     >
-      <BalanceBlock balance={starBalance} className={styles.modalBalance} />
+      <div className={styles.headerControlPanel}>
+        {sendAsPeersMenu}
+        <BalanceBlock balance={starBalance} className={styles.modalBalance} />
+      </div>
       <StarSlider
         className={styles.slider}
         defaultValue={DEFAULT_STARS_AMOUNT}
@@ -186,9 +320,10 @@ const PaidReactionModal = ({
         <div className={styles.top}>
           {topReactors.map((reactor) => {
             const countText = formatInteger(reactor.amount + reactor.localAmount);
-            const peer = (reactor.isAnonymous || !reactor.user || (reactor.isMe && !shouldShowUp))
+            const peer = (reactor.isAnonymous || !reactor.user || (reactor.isMy && shouldSendAsAnonymous))
               ? ANONYMOUS_PEER : reactor.user;
-            const text = 'isCustomPeer' in peer ? oldLang(peer.titleKey) : getUserFullName(peer);
+            const text = 'isCustomPeer' in peer ? oldLang(peer.titleKey)
+              : peer && getPeerTitle(oldLang, peer);
             return (
               <PeerBadge
                 className={styles.topPeer}
@@ -203,10 +338,11 @@ const PaidReactionModal = ({
           })}
         </div>
       )}
+      {topReactors && (<Separator className={styles.separator} />) }
       <Checkbox
-        className="dialog-checkbox"
-        checked={shouldShowUp}
-        onChange={handleAnonimityChange}
+        className={buildClassName(styles.checkBox, 'dialog-checkbox')}
+        checked={!shouldSendAsAnonymous}
+        onChange={handleShowInTopSendersChange}
         label={oldLang('StarsReactionShowMeInTopSenders')}
       />
       <Button
@@ -238,6 +374,9 @@ export default memo(withGlobal<OwnProps>(
     const starBalance = global.stars?.balance;
     const maxAmount = global.appConfig?.paidReactionMaxAmount || MAX_REACTION_AMOUNT;
     const defaultPrivacy = global.settings.paidReactionPrivacy;
+    const sendPaidReactionsAsPeerIds = chat?.sendPaidReactionsAsPeerIds;
+    const currentUserId = global.currentUserId!;
+    const currentUser = selectUser(global, currentUserId)!;
 
     return {
       chat,
@@ -245,6 +384,9 @@ export default memo(withGlobal<OwnProps>(
       starBalance,
       maxAmount,
       defaultPrivacy,
+      sendPaidReactionsAsPeerIds,
+      currentUserId,
+      currentUser,
     };
   },
 )(PaidReactionModal));
