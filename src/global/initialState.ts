@@ -70,6 +70,7 @@ export const INITIAL_PERFORMANCE_STATE_MIN: PerformanceType = {
 };
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {
+  cacheVersion: 1,
   isInited: true,
   attachMenu: { bots: {} },
   passcode: {},

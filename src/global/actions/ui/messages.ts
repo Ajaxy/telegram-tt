@@ -31,7 +31,6 @@ import {
   getMessageStatefulContent,
   getPeerTitle,
   isChatChannel,
-  isJoinedChannelMessage,
 } from '../../helpers';
 import { getMessageSummaryText } from '../../helpers/messageSummary';
 import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
@@ -345,13 +344,6 @@ addActionHandler('focusLastMessage', (global, actions, payload): ActionReturnTyp
       lastMessageId = pinnedMessageIds[pinnedMessageIds.length - 1];
     } else {
       lastMessageId = selectChatLastMessageId(global, chatId);
-
-      const chatMessages = selectChatMessages(global, chatId);
-      // Workaround for scroll to local message 'you joined this channel'
-      const lastChatMessage = Object.values(chatMessages).reverse()[0];
-      if (lastMessageId && isJoinedChannelMessage(lastChatMessage) && lastChatMessage.id > lastMessageId) {
-        lastMessageId = lastChatMessage.id;
-      }
     }
   } else if (isSavedDialog) {
     lastMessageId = selectChatLastMessageId(global, String(threadId), 'saved');

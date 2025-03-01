@@ -20,13 +20,11 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
 import {
-  getMessageAction,
-  groupStatetefulContent,
+  groupStatefulContent,
   isUserId,
   isUserOnline,
   selectIsChatMuted,
 } from '../../../global/helpers';
-import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -101,9 +99,6 @@ type StateProps = {
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
-  actionTargetUserIds?: string[];
-  actionTargetMessage?: ApiMessage;
-  actionTargetChatId?: string;
   lastMessageSender?: ApiPeer;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   draft?: ApiDraft;
@@ -135,11 +130,8 @@ const Chat: FC<OwnProps & StateProps> = ({
   isMuted,
   user,
   userStatus,
-  actionTargetUserIds,
   lastMessageSender,
   lastMessageOutgoingStatus,
-  actionTargetMessage,
-  actionTargetChatId,
   offsetTop,
   draft,
   withInterfaceAnimations,
@@ -191,10 +183,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     lastMessage,
     typingStatus,
     draft,
-    statefulMediaContent: groupStatetefulContent({ story: lastMessageStory }),
-    actionTargetMessage,
-    actionTargetUserIds,
-    actionTargetChatId,
+    statefulMediaContent: groupStatefulContent({ story: lastMessageStory }),
     lastMessageTopic,
     lastMessageSender,
     observeIntersection,
@@ -458,12 +447,6 @@ export default memo(withGlobal<OwnProps>(
     const savedDialogSender = isSavedDialog && forwardInfo?.fromId ? selectPeer(global, forwardInfo.fromId) : undefined;
     const messageSender = lastMessage ? selectSender(global, lastMessage) : undefined;
     const lastMessageSender = savedDialogSender || messageSender;
-    const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
-    const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;
-    const actionTargetMessage = lastMessageAction && replyToMessageId
-      ? selectChatMessage(global, chat.id, replyToMessageId)
-      : undefined;
-    const { targetUserIds: actionTargetUserIds, targetChatId: actionTargetChatId } = lastMessageAction || {};
 
     const {
       chatId: currentChatId,
@@ -489,9 +472,6 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       lastMessageSender,
-      actionTargetUserIds,
-      actionTargetChatId,
-      actionTargetMessage,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
       isSelected,
       isSelectedForum,

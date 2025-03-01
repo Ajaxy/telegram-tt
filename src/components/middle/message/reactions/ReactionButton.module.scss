@@ -16,6 +16,12 @@
     --reaction-background-hover: #FFBC2E55 !important;
     --reaction-text-color: #E98111 !important;
     z-index: 2;
+
+    &.outside {
+      --reaction-text-color: #FFFFFF !important;
+      --reaction-background: #FFBC2E77 !important;
+      --reaction-background-hover: #FFBC2E99 !important;
+    }
   }
 
   &.paid.chosen {

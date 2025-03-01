@@ -50,7 +50,7 @@ export function getPropertyHexColor(style: CSSStyleDeclaration, property: string
   return prepareHexColor(value.trim());
 }
 
-function prepareHexColor(color: string) {
+export function prepareHexColor(color: string) {
   if (validateHexColor(color)) return color;
   return `#${color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+\.{0,1}\d*))?\)$/)!
     .slice(1)

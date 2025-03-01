@@ -215,6 +215,7 @@ const Reactions: FC<OwnProps> = ({
             containerId={messageKey}
             isOwnMessage={message.isOutgoing}
             recentReactors={recentReactors}
+            isOutside={isOutside}
             reaction={reaction}
             onClick={handleClick}
             onPaidClick={handlePaidClick}

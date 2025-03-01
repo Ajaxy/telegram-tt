@@ -15,7 +15,6 @@ import {
   getMessageMediaHash,
   getMessageRoundVideo,
   getPeerTitle,
-  isActionMessage,
   isChatChannel,
   isChatGroup,
   isMessageTranslatable,
@@ -35,7 +34,6 @@ import useOldLang from '../../../hooks/useOldLang';
 import useThumbnail from '../../../hooks/useThumbnail';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
-import ActionMessage from '../../middle/ActionMessage';
 import RippleEffect from '../../ui/RippleEffect';
 import Icon from '../icons/Icon';
 import MediaSpoiler from '../MediaSpoiler';
@@ -133,24 +131,13 @@ const EmbeddedMessage: FC<OwnProps> = ({
       return renderTextWithEntities({
         text: replyInfo.quoteText.text,
         entities: replyInfo.quoteText.entities,
-        noLineBreaks: isInComposer,
+        asPreview: true,
         emojiSize: EMOJI_SIZE,
       });
     }
 
     if (!message) {
       return customText || renderMediaContentType(containedMedia) || NBSP;
-    }
-
-    if (isActionMessage(message)) {
-      return (
-        <ActionMessage
-          message={message}
-          isEmbedded
-          observeIntersectionForLoading={observeIntersectionForLoading}
-          observeIntersectionForPlaying={observeIntersectionForPlaying}
-        />
-      );
     }
 
     return (

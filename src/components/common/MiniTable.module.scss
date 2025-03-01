@@ -1,0 +1,28 @@
+.root {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+
+  text-align: initial;
+
+  position: relative;
+
+  white-space: nowrap;
+}
+
+.key {
+  justify-self: flex-end;
+  font-weight: var(--font-weight-normal);
+}
+
+.value {
+  justify-self: flex-start;
+  width: 100%; // Grid ellipsis hack
+
+  font-weight: var(--font-weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

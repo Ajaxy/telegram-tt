@@ -4,11 +4,10 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiMessage, ApiPeer } from '../../../api/types';
 import type { ThemeKey } from '../../../types';
 import type { GiftOption } from './GiftModal';
+import { type ApiMessage, type ApiPeer, MAIN_THREAD_ID } from '../../../api/types';
 
-import { STARS_CURRENCY_CODE } from '../../../config';
 import { getPeerTitle } from '../../../global/helpers';
 import { isApiPeerUser } from '../../../global/helpers/peers';
 import { selectPeer, selectTabState, selectTheme } from '../../../global/selectors';
@@ -22,7 +21,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import PremiumProgress from '../../common/PremiumProgress';
-import ActionMessage from '../../middle/ActionMessage';
+import ActionMessage from '../../middle/message/ActionMessage';
 import Button from '../../ui/Button';
 import Link from '../../ui/Link';
 import ListItem from '../../ui/ListItem';
@@ -75,6 +74,7 @@ function GiftComposer({
 
   const isStarGift = 'id' in gift;
   const isPeerUser = peer && isApiPeerUser(peer);
+  const isSelf = peerId === currentUserId;
 
   const localMessage = useMemo(() => {
     if (!isStarGift) {
@@ -86,17 +86,12 @@ function GiftComposer({
         date: Math.floor(Date.now() / 1000),
         content: {
           action: {
-            targetChatId: peerId,
             mediaType: 'action',
-            text: 'ActionGiftInbound',
             type: 'giftPremium',
-            amount: gift.amount,
             currency: gift.currency,
+            amount: gift.amount,
             months: gift.months,
-            message: {
-              text: giftMessage,
-            },
-            translationValues: ['%action_origin%', '%gift_payment_amount%'],
+            message: giftMessage ? { text: giftMessage } : undefined,
           },
         },
       } satisfies ApiMessage;
@@ -110,27 +105,18 @@ function GiftComposer({
       date: Math.floor(Date.now() / 1000),
       content: {
         action: {
-          targetChatId: peerId,
           mediaType: 'action',
-          text: 'ActionGiftInbound',
           type: 'starGift',
-          currency: STARS_CURRENCY_CODE,
-          amount: gift.stars,
-          starGift: {
-            type: 'starGift',
-            message: giftMessage?.length ? {
-              text: giftMessage,
-            } : undefined,
-            isNameHidden: shouldHideName,
-            starsToConvert: gift.starsToConvert,
-            canUpgrade: shouldPayForUpgrade || undefined,
-            alreadyPaidUpgradeStars: shouldPayForUpgrade ? gift.upgradeStars : undefined,
-            isSaved: false,
-            gift,
-            peerId,
-            fromId: currentUserId,
-          },
-          translationValues: ['%action_origin%', '%gift_payment_amount%'],
+          message: giftMessage?.length ? {
+            text: giftMessage,
+          } : undefined,
+          isNameHidden: shouldHideName || undefined,
+          starsToConvert: gift.starsToConvert,
+          canUpgrade: shouldPayForUpgrade || undefined,
+          alreadyPaidUpgradeStars: shouldPayForUpgrade ? gift.upgradeStars : undefined,
+          gift,
+          peerId,
+          fromId: currentUserId,
         },
       },
     } satisfies ApiMessage;
@@ -207,7 +193,7 @@ function GiftComposer({
             />
           </ListItem>
         )}
-        {isStarGift && (
+        {isStarGift && gift.upgradeStars && (
           <div className={styles.description}>
             {isPeerUser
               ? lang('GiftMakeUniqueDescription', {
@@ -237,7 +223,9 @@ function GiftComposer({
         )}
         {isStarGift && (
           <div className={styles.description}>
-            {isPeerUser ? lang('GiftHideNameDescription', { receiver: title }) : lang('GiftHideNameDescriptionChannel')}
+            {isSelf ? lang('GiftHideNameDescriptionSelf')
+              : isPeerUser ? lang('GiftHideNameDescription', { receiver: title })
+                : lang('GiftHideNameDescriptionChannel')}
           </div>
         )}
       </div>
@@ -247,7 +235,7 @@ function GiftComposer({
   function renderFooter() {
     const amount = isStarGift
       ? formatStarsAsIcon(lang, gift.stars + (shouldPayForUpgrade ? gift.upgradeStars! : 0), { asFont: true })
-      : formatCurrency(gift.amount, gift.currency);
+      : formatCurrency(lang, gift.amount, gift.currency);
 
     return (
       <div className={styles.footer}>
@@ -264,6 +252,7 @@ function GiftComposer({
         )}
         <Button
           className={styles.mainButton}
+          size="smaller"
           onClick={handleMainButtonClick}
           isLoading={isPaymentFormLoading}
         >
@@ -300,7 +289,12 @@ function GiftComposer({
           className={bgClassName}
           style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
         />
-        <ActionMessage key={isStarGift ? gift.id : gift.months} message={localMessage} />
+        <ActionMessage
+          key={isStarGift ? gift.id : gift.months}
+          message={localMessage}
+          threadId={MAIN_THREAD_ID}
+          appearanceOrder={0}
+        />
       </div>
       {renderOptionsSection()}
       <div className={styles.spacer} />

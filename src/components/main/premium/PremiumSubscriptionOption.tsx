@@ -5,7 +5,7 @@ import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import type { ApiPremiumGiftCodeOption, ApiPremiumGiftOption } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { formatCurrency } from '../../../util/formatCurrency';
+import { formatCurrencyAsString } from '../../../util/formatCurrency';
 
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -24,7 +24,7 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
   option, checked, fullMonthlyAmount,
   onChange, className, isGiveaway,
 }) => {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
 
   const {
     months, amount, currency,
@@ -52,7 +52,7 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
         (checked && !isGiveaway) && styles.active,
         className,
       )}
-      dir={lang.isRtl ? 'rtl' : undefined}
+      dir={oldLang.isRtl ? 'rtl' : undefined}
     >
       <input
         className={styles.input}
@@ -67,18 +67,18 @@ const PremiumSubscriptionOption: FC<OwnProps> = ({
           {Boolean(discount) && (
             <span
               className={buildClassName(styles.giveawayDiscount, styles.discount)}
-              title={lang('GiftDiscount')}
+              title={oldLang('GiftDiscount')}
             > &minus;{discount}%
             </span>
           )}
-          {lang('Months', months)}
+          {oldLang('Months', months)}
         </div>
         <div className={styles.perMonth}>
-          {(isGiveaway || isUserCountPlural) ? `${formatCurrency(amount, currency, lang.code)} x ${users!}`
-            : lang('PricePerMonth', formatCurrency(perMonth, currency, lang.code))}
+          {(isGiveaway || isUserCountPlural) ? `${formatCurrencyAsString(amount, currency, oldLang.code)} x ${users!}`
+            : oldLang('PricePerMonth', formatCurrencyAsString(perMonth, currency, oldLang.code))}
         </div>
         <div className={styles.amount}>
-          {formatCurrency(amount, currency, lang.code)}
+          {formatCurrencyAsString(amount, currency, oldLang.code)}
         </div>
       </div>
     </label>

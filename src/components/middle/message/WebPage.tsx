@@ -10,7 +10,6 @@ import { getMessageWebPage } from '../../../global/helpers';
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import trimText from '../../../util/trimText';
-import { getGiftAttributes, getStickerFromGift } from '../../common/helpers/gifts';
 import renderText from '../../common/helpers/renderText';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import { getWebpageButtonLangKey } from './helpers/webpageType';
@@ -26,13 +25,13 @@ import Audio from '../../common/Audio';
 import Document from '../../common/Document';
 import EmojiIconBackground from '../../common/embedded/EmojiIconBackground';
 import PeerColorWrapper from '../../common/PeerColorWrapper';
-import RadialPatternBackground from '../../common/profile/RadialPatternBackground';
 import SafeLink from '../../common/SafeLink';
 import StickerView from '../../common/StickerView';
 import Button from '../../ui/Button';
 import BaseStory from './BaseStory';
 import Photo from './Photo';
 import Video from './Video';
+import WebPageUniqueGift from './WebPageUniqueGift';
 
 import './WebPage.scss';
 
@@ -68,7 +67,6 @@ type OwnProps = {
 type StateProps = {
   canPlayAnimatedEmojis: boolean;
 };
-const STAR_GIFT_STICKER_SIZE = 120;
 
 const WebPage: FC<OwnProps & StateProps> = ({
   message,
@@ -98,8 +96,6 @@ const WebPage: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
   // eslint-disable-next-line no-null/no-null
   const stickersRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const giftStickersRef = useRef<HTMLDivElement>(null);
 
   const oldLang = useOldLang();
   const lang = useLang();
@@ -125,7 +121,7 @@ const WebPage: FC<OwnProps & StateProps> = ({
   useEnsureStory(storyData?.peerId, storyData?.id, story);
 
   const hasCustomColor = stickers?.isWithTextColor || stickers?.documents?.[0]?.shouldUseTextColor;
-  const customColor = useDynamicColorListener(stickersRef, !hasCustomColor);
+  const customColor = useDynamicColorListener(stickersRef, undefined, !hasCustomColor);
 
   if (!webPage) {
     return undefined;
@@ -195,44 +191,6 @@ const WebPage: FC<OwnProps & StateProps> = ({
     );
   }
 
-  function renderStarGiftUnique() {
-    const gift = webPage?.gift;
-    if (!gift || gift.type !== 'starGiftUnique') return undefined;
-
-    const sticker = getStickerFromGift(gift)!;
-    const attributes = getGiftAttributes(gift);
-    const { backdrop, pattern, model } = attributes || {};
-
-    if (!backdrop || !pattern || !model) return undefined;
-
-    const backgroundColors = [backdrop.centerColor, backdrop.edgeColor];
-
-    return (
-      <div
-        className="web-page-gift web-page-centered web-page-unique"
-        onClick={() => handleOpenTelegramLink()}
-      >
-        <div className="web-page-unique-background-wrapper">
-          <RadialPatternBackground
-            className="web-page-unique-background"
-            backgroundColors={backgroundColors}
-            patternColor={backdrop.patternColor}
-            patternIcon={pattern.sticker}
-          />
-        </div>
-        <div ref={giftStickersRef} key={sticker.id} className="WebPage--unique-sticker">
-          <StickerView
-            containerRef={giftStickersRef}
-            sticker={sticker}
-            size={STAR_GIFT_STICKER_SIZE}
-            observeIntersectionForPlaying={observeIntersectionForPlaying}
-            observeIntersectionForLoading={observeIntersectionForLoading}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <PeerColorWrapper
       className={className}
@@ -256,7 +214,12 @@ const WebPage: FC<OwnProps & StateProps> = ({
           <BaseStory story={story} isProtected={isProtected} isConnected={isConnected} isPreview />
         )}
         {isGift && !inPreview && (
-          renderStarGiftUnique()
+          <WebPageUniqueGift
+            gift={webPage.gift!}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+            onClick={handleOpenTelegramLink}
+          />
         )}
         {isArticle && (
           <div

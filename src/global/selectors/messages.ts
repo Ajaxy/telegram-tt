@@ -646,7 +646,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const hasTtl = hasMessageTtl(message);
   const { content } = message;
   const isDocumentSticker = isMessageDocumentSticker(message);
-  const isBoostMessage = message.content.action?.type === 'chatBoost';
+  const isBoostMessage = message.content.action?.type === 'boostApply';
 
   const hasChatPinPermission = (chat.isCreator
     || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
@@ -935,9 +935,7 @@ export function selectFirstUnreadId<T extends GlobalState>(
       return (
         (!lastReadId || id > lastReadId)
         && byId[id]
-        // For some reason outgoing topic actions are not marked as read, thus we need to mark them as read
-        // when the edit message hits the viewport
-        && ((!byId[id].isOutgoing || byId[id].content.action?.isTopicAction) || byId[id].isFromScheduled)
+        && (!byId[id].isOutgoing || byId[id].isFromScheduled)
         && id > lastReadServiceNotificationId
       );
     });

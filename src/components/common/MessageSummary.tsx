@@ -5,12 +5,12 @@ import type {
   ApiFormattedText, ApiMessage, ApiPoll, ApiTypeStory,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import { ApiMessageEntityTypes } from '../../api/types';
 
 import {
   extractMessageText,
   getMessagePollId,
-  groupStatetefulContent,
+  groupStatefulContent,
+  isActionMessage,
 } from '../../global/helpers';
 import {
   getMessageSummaryDescription,
@@ -24,6 +24,7 @@ import renderText from './helpers/renderText';
 
 import useOldLang from '../../hooks/useOldLang';
 
+import ActionMessageText from '../middle/message/ActionMessageText';
 import MessageText from './MessageText';
 
 type OwnProps = {
@@ -59,14 +60,13 @@ function MessageSummary({
   observeIntersectionForPlaying,
 }: OwnProps & StateProps) {
   const lang = useOldLang();
-  const { text, entities } = extractMessageText(message, inChatList) || {};
-  const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
-  const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
+  const extractedText = extractMessageText(message, inChatList);
   const hasPoll = Boolean(getMessagePollId(message));
+  const isAction = isActionMessage(message);
 
-  const statefulContent = groupStatetefulContent({ poll, story });
+  const statefulContent = groupStatefulContent({ poll, story });
 
-  if ((!text || (!hasSpoilers && !hasCustomEmoji)) && !hasPoll) {
+  if (!extractedText && !hasPoll && !isAction) {
     const summaryText = translatedText?.text
       || getMessageSummaryText(lang, message, statefulContent, noEmoji, truncateLength);
     const trimmedText = trimText(summaryText, truncateLength);
@@ -83,12 +83,16 @@ function MessageSummary({
   }
 
   function renderMessageText() {
+    if (isAction) {
+      return <ActionMessageText message={message} asPreview />;
+    }
+
     return (
       <MessageText
         messageOrStory={message}
         translatedText={translatedText}
         highlight={highlight}
-        isSimple
+        asPreview
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         withTranslucentThumbs={withTranslucentThumbs}

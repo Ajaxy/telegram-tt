@@ -102,7 +102,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
   }, [renderingModal?.sampleAttributes]);
 
   const modalData = useMemo(() => {
-    if (!previewAttributes) {
+    if (!previewAttributes || !isOpen) {
       return undefined;
     }
 
@@ -159,7 +159,7 @@ const GiftUpgradeModal = ({ modal, recipient }: OwnProps & StateProps) => {
       header,
       footer,
     };
-  }, [previewAttributes, lang, renderingRecipient, renderingModal?.gift, shouldKeepOriginalDetails]);
+  }, [previewAttributes, isOpen, lang, renderingRecipient, renderingModal?.gift, shouldKeepOriginalDetails]);
 
   return (
     <TableAboutModal

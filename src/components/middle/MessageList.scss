@@ -1,4 +1,6 @@
 .MessageList {
+  --action-message-bg: var(--pattern-color);
+
   flex: 1;
   width: 100%;
   margin-bottom: 0.5rem;
@@ -200,7 +202,7 @@
     .Message,
     .ActionMessage {
       &::before {
-        background: var(--pattern-color);
+        background-color: var(--action-message-bg);
       }
 
       &.focused,
@@ -226,8 +228,6 @@
       text-align: left;
     }
   }
-
-  .join-text,
   .sticky-date,
   .local-action-message,
   .ActionMessage,
@@ -235,17 +235,17 @@
     text-align: center;
     user-select: none;
 
+    --custom-emoji-size: calc(var(--message-text-size, 1rem) + 0.125rem);
+    font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
+    line-height: 1.25;
+
     > span {
-      display: inline-block;
-      background: var(--pattern-color);
+      background-color: var(--action-message-bg);
       color: white;
-      font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
-      font-weight: var(--font-weight-medium);
-      line-height: 1rem;
-      padding: 0.1875rem 0.5rem;
-      border-radius: var(--border-radius-messages);
-      word-break: break-word;
+
       position: relative;
+      border-radius: var(--border-radius-messages);
+
       z-index: 0;
 
       body.is-ios &,
@@ -263,182 +263,14 @@
     }
   }
 
-  .action-message-content {
-    max-width: 100%;
-  }
-
-  .ActionMessage.centered-action {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .centered-action .action-message-content {
-    max-width: 17rem;
-  }
-
-  .web-page-gift,
-  .action-message-gift {
-    display: flex !important;
-    width: 13.75rem;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1rem !important;
-    padding-bottom: 0.75rem !important;
-    margin-top: 0.5rem;
-    cursor: var(--custom-cursor, pointer);
-    outline: none;
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .web-page-gift {
-    position: relative;
-    min-width: 12.5rem;
-    width: 100%;
-    margin-top: 0;
-    padding-block: 2rem !important;
-    border-radius: 0.25rem;
-  }
-
-  .web-page-centered,
-  .action-message-centered {
-    margin-inline: auto;
-  }
-
-  .web-page-unique,
-  .action-message-unique {
-    &::before {
-      content: "";
-      position: absolute;
-      inset: -0.25rem;
-      background: var(--pattern-color);
-      border-radius: calc(var(--border-radius-messages) + 0.25rem);
-      z-index: -1;
-    }
-  }
-
-  .web-page-unique-background-wrapper,
-  .action-message-unique-background-wrapper {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    border-radius: inherit;
-  }
-
-  .web-page-unique-background,
-  .action-message-unique-background {
-    position: absolute;
-    inset: 0;
-    top: -6rem;
-  }
-  .web-page-unique-background {
-    top: -1rem;
-  }
-
-  .action-message-user-caption,
-  .action-message-stars-balance {
-    position: relative;
-    margin-top: 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    line-height: 1.5;
+  .sticky-date,
+  .local-action-message,
+  .empty {
     font-weight: var(--font-weight-medium);
-  }
-
-  .action-message-user-caption {
-    align-items: center;
-    font-size: 0.9375rem;
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .action-message-unique-title {
-    position: relative;
-    font-size: 0.875rem;
-  }
-
-  .action-message-unique-properties {
-    display: grid;
-    grid-template-columns: min-content 1fr;
-    justify-content: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-
-    position: relative;
-
-    white-space: nowrap;
-  }
-
-  .action-message-unique-value {
-    color: white;
-    justify-self: flex-start;
-    width: 100%; // Grid ellipsis hack
-    text-align: initial;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .action-message-unique-property {
-    justify-self: flex-end;
-    font-weight: var(--font-weight-normal);
-  }
-
-  .action-message-user-avatar {
-    margin: 0 0.25rem;
-  }
-
-  .action-message-subtitle {
-    margin-top: 1rem;
-    font-weight: normal;
-    text-wrap: balance;
-  }
-
-  .action-message-gift-subtitle {
-    position: relative;
-    font-weight: normal;
-    text-wrap: balance;
-    font-size: 0.8125rem;
-  }
-
-  .action-message-suggested-avatar {
-    max-width: 16rem;
-    display: flex !important;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1rem !important;
-    padding-bottom: 0.75rem !important;
-    margin-top: 0.5rem;
-    cursor: var(--custom-cursor, pointer);
-    outline: none;
-
-    .Avatar {
-      width: 6.5rem;
-      height: 6.5rem;
-      margin: 1rem;
-    }
-  }
-
-  .action-message-updated-avatar {
-    background: transparent !important;
-    margin-top: 0.5rem;
-    cursor: var(--custom-cursor, pointer);
-    outline: none;
-  }
-
-  .action-message-button {
-    position: relative;
-    display: inline-block;
-    border-radius: var(--border-radius-modal);
-    padding: 0.5rem 1.5rem;
-    margin-top: 0.6875rem;
-    background-color: var(--pattern-color);
-    font-weight: var(--font-weight-semibold);
-    transition: opacity 0.15s;
-
-    &:hover,
-    &:focus {
-      opacity: 0.8;
+    & > span {
+      display: inline-block;
+      padding: 0.1875rem 0.5rem;
+      word-break: break-word;
     }
   }
 
@@ -489,24 +321,6 @@
   .ActionMessage {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
-  }
-
-  .ActionMessage {
-    .action-link {
-      cursor: var(--custom-cursor, pointer);
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-
-    .underlined-link {
-      text-decoration: underline;
-
-      &:hover {
-        text-decoration: none;
-      }
-    }
   }
 
   .sticky-date + .ActionMessage {

@@ -205,9 +205,10 @@ export async function initLocalization(langCode: string, canLoadFromServer?: boo
     fetchDifference();
   } else if (canLoadFromServer) {
     await loadAndChangeLanguage(langCode);
-  } else {
-    loadFallbackPack();
   }
+
+  // Always start loading fallback pack in the background. Some languages may not have every string translated.
+  loadFallbackPack();
 
   translationFn = createTranslationFn();
   scheduleCallbacks();
@@ -330,6 +331,7 @@ function createTranslationFn(): LangFn {
   fn.conjunction = (list: string[]) => formatters?.conjunction.format(list) || list.join(', ');
   fn.disjunction = (list: string[]) => formatters?.disjunction.format(list) || list.join(', ');
   fn.number = (value: number) => formatters?.number.format(value) || String(value);
+  fn.internalFormatters = formatters!;
   fn.languageInfo = language!;
   return fn;
 }

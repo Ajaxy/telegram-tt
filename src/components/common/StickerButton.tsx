@@ -103,7 +103,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const menuRef = useRef<HTMLDivElement>(null);
   const lang = useOldLang();
   const hasCustomColor = sticker.shouldUseTextColor;
-  const customColor = useDynamicColorListener(ref, !hasCustomColor);
+  const customColor = useDynamicColorListener(ref, undefined, !hasCustomColor);
 
   const {
     id, stickerSetInfo,

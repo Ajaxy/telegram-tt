@@ -253,15 +253,19 @@ export function updateChatMessage<T extends GlobalState>(
   if (message && messageUpdate.isMediaUnread === false && hasMessageTtl(message)) {
     if (message.content.voice) {
       messageUpdate.content = {
-        ...messageUpdate.content,
-        voice: undefined,
-        isExpiredVoice: true,
+        action: {
+          mediaType: 'action',
+          type: 'expired',
+          isVoice: true,
+        },
       };
     } else if (message.content.video?.isRound) {
       messageUpdate.content = {
-        ...messageUpdate.content,
-        video: undefined,
-        isExpiredRoundVideo: true,
+        action: {
+          mediaType: 'action',
+          type: 'expired',
+          isRoundVideo: true,
+        },
       };
     }
   }

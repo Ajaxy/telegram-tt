@@ -53,7 +53,7 @@ const StickerSetCover: FC<OwnProps> = ({
 
   const { customEmoji } = useCustomEmoji(thumbCustomEmojiId);
   const hasCustomColor = customEmoji?.shouldUseTextColor;
-  const customColor = useDynamicColorListener(containerRef, !hasCustomColor);
+  const customColor = useDynamicColorListener(containerRef, undefined, !hasCustomColor);
   const colorFilter = useColorFilter(customColor);
 
   const isIntersecting = useIsIntersecting(containerRef, observeIntersection);

@@ -1,25 +1,27 @@
-import React, { type TeactNode } from '../lib/teact/teact';
+import { type TeactNode } from '../lib/teact/teact';
+
+import type { LangFn } from './localization';
 
 import { STARS_CURRENCY_CODE } from '../config';
-
-import StarIcon from '../components/common/icons/StarIcon';
+import { formatStarsAsIcon } from './localization/format';
 
 export function formatCurrency(
+  lang: LangFn,
   totalPrice: number,
   currency: string,
-  locale: string = 'en',
   options?: {
     shouldOmitFractions?: boolean;
     iconClassName?: string;
+    asFontIcon?: boolean;
   },
 ): TeactNode {
   const price = totalPrice / 10 ** getCurrencyExp(currency);
 
   if (currency === STARS_CURRENCY_CODE) {
-    return [<StarIcon className={options?.iconClassName} type="gold" size="adaptive" />, price];
+    return formatStarsAsIcon(lang, price, { asFont: options?.asFontIcon, className: options?.iconClassName });
   }
 
-  return formatCurrencyAsString(totalPrice, currency, locale, options);
+  return formatCurrencyAsString(totalPrice, currency, lang.code, options);
 }
 
 export function formatCurrencyAsString(

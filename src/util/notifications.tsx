@@ -1,3 +1,4 @@
+import React from '../lib/teact/teact';
 import { getActions, getGlobal, setGlobal } from '../global';
 
 import type {
@@ -10,37 +11,32 @@ import { APP_NAME, DEBUG, IS_TEST } from '../config';
 import {
   getChatAvatarHash,
   getChatTitle,
-  getMessageAction,
   getMessageRecentReaction,
   getMessageSenderName,
-  getMessageStatefulContent,
   getPrivateChatUserId,
   getUserFullName,
-  isActionMessage,
   isChatChannel,
   selectIsChatMuted,
   selectShouldShowMessagePreview,
 } from '../global/helpers';
-import { getMessageSummaryText } from '../global/helpers/messageSummary';
-import { getMessageReplyInfo } from '../global/helpers/replies';
 import { addNotifyExceptions, replaceSettings } from '../global/reducers';
 import {
   selectChat,
-  selectChatMessage,
   selectCurrentMessageList,
   selectIsChatWithSelf,
   selectNotifyExceptions,
   selectNotifySettings,
-  selectTopicFromMessage,
   selectUser,
 } from '../global/selectors';
 import { callApi } from '../api/gramjs';
-import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
+import jsxToHtml from './element/jsxToHtml';
 import { buildCollectionByKey } from './iteratees';
 import * as mediaLoader from './mediaLoader';
 import { oldTranslate } from './oldLangProvider';
 import { debounce } from './schedulers';
 import { IS_ELECTRON, IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
+
+import MessageSummary from '../components/common/MessageSummary';
 
 function getDeviceToken(subscription: PushSubscription) {
   const data = subscription.toJSON();
@@ -300,7 +296,7 @@ function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
   if (!areSettingsLoaded) return false;
   const global = getGlobal();
   const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
-  const shouldNotifyAboutMessage = !message.content?.action?.phoneCall;
+  const shouldNotifyAboutMessage = message.content?.action?.type !== 'phoneCall';
   if (isMuted || !shouldNotifyAboutMessage
      || chat.isNotJoined || !chat.isListed || selectIsChatWithSelf(global, chat.id)) {
     return false;
@@ -328,25 +324,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   const { isScreenLocked } = global.passcode;
   const messageSenderChat = senderId ? selectChat(global, senderId) : undefined;
   const messageSenderUser = senderId ? selectUser(global, senderId) : undefined;
-  const messageAction = getMessageAction(message as ApiMessage);
-
-  const replyInfo = getMessageReplyInfo(message);
-  const actionTargetMessage = messageAction && replyInfo?.replyToMsgId
-    ? selectChatMessage(global, replyInfo?.replyFrom?.fromChatId || chat.id, replyInfo.replyToMsgId)
-    : undefined;
-  const {
-    targetUserIds: actionTargetUserIds,
-    targetChatId: actionTargetChatId,
-  } = messageAction || {};
-
-  const actionTargetUsers = actionTargetUserIds
-    ? actionTargetUserIds.map((userId) => selectUser(global, userId))
-      .filter(Boolean)
-    : undefined;
   const privateChatUserId = getPrivateChatUserId(chat);
   const isSelf = privateChatUserId === global.currentUserId;
-
-  const topic = selectTopicFromMessage(global, message);
 
   let body: string;
   if (
@@ -355,31 +334,16 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   ) {
     const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
 
-    if (isActionMessage(message)) {
-      body = renderActionMessageText(
-        oldTranslate,
-        message,
-        messageSenderUser,
-        chat,
-        actionTargetUsers,
-        actionTargetMessage,
-        actionTargetChatId,
-        topic,
-        { asPlainText: true },
-      ) as string;
-    } else {
-      // TODO[forums] Support ApiChat
-      const senderName = getMessageSenderName(oldTranslate, chat.id, isChat ? messageSenderChat : messageSenderUser);
-      const statefulContent = getMessageStatefulContent(global, message);
-      let summary = getMessageSummaryText(oldTranslate, message, statefulContent, hasReaction, 60);
+    // TODO[forums] Support ApiChat
+    const senderName = getMessageSenderName(oldTranslate, chat.id, isChat ? messageSenderChat : messageSenderUser);
+    let summary = jsxToHtml(<span><MessageSummary message={message} /></span>)[0].textContent || '';
 
-      if (hasReaction) {
-        const emoji = getReactionEmoji(reaction);
-        summary = oldTranslate('PushReactText', [emoji, summary]);
-      }
-
-      body = senderName ? `${senderName}: ${summary}` : summary;
+    if (hasReaction) {
+      const emoji = getReactionEmoji(reaction);
+      summary = oldTranslate('PushReactText', [emoji, summary]);
     }
+
+    body = senderName ? `${senderName}: ${summary}` : summary;
   } else {
     body = 'New message';
   }

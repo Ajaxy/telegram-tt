@@ -277,6 +277,13 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.peers) {
     cached.peers = initialState.peers;
   }
+
+  if (!cached.cacheVersion) {
+    cached.cacheVersion = initialState.cacheVersion;
+    // Reset because of the new action message structure
+    cached.messages = initialState.messages;
+    cached.chats.listIds = initialState.chats.listIds;
+  }
 }
 
 function updateCache(force?: boolean) {

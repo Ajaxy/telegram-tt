@@ -289,7 +289,8 @@ export async function fetchProfilePhotos({
 
   return {
     count: totalCount,
-    photos: messages.map((message) => message.content.action!.photo).filter(Boolean),
+    photos: messages.map((message) => message.content.action?.type === 'chatEditPhoto' && message.content.action.photo)
+      .filter(Boolean),
     nextOffsetId,
   };
 }

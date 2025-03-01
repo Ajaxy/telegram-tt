@@ -24,7 +24,7 @@ export function renderMessageText({
   message,
   highlight,
   emojiSize,
-  isSimple,
+  asPreview,
   truncateLength,
   isProtected,
   forcePlayback,
@@ -34,7 +34,7 @@ export function renderMessageText({
   message: ApiMessage | ApiSponsoredMessage;
   highlight?: string;
   emojiSize?: number;
-  isSimple?: boolean;
+  asPreview?: boolean;
   truncateLength?: number;
   isProtected?: boolean;
   forcePlayback?: boolean;
@@ -44,7 +44,7 @@ export function renderMessageText({
   const { text, entities } = message.content.text || {};
 
   if (!text) {
-    const contentNotSupportedText = getMessageText(message);
+    const contentNotSupportedText = getMessageText(message)?.text;
     return contentNotSupportedText ? [trimText(contentNotSupportedText, truncateLength)] : undefined;
   }
 
@@ -57,7 +57,7 @@ export function renderMessageText({
     emojiSize,
     shouldRenderAsHtml,
     containerId: `${isForMediaViewer ? 'mv-' : ''}${messageKey}`,
-    isSimple,
+    asPreview,
     isProtected,
     forcePlayback,
   });
@@ -92,7 +92,7 @@ export function renderMessageSummary(
   const emojiWithSpace = emoji ? `${emoji} ` : '';
 
   const text = renderMessageText({
-    message, highlight, isSimple: true, truncateLength,
+    message, highlight, asPreview: true, truncateLength,
   });
   const description = getMessageSummaryDescription(lang, message, statefulContent, text);
 

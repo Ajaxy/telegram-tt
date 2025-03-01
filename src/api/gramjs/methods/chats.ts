@@ -633,7 +633,7 @@ async function getFullChannelInfo(
   const memberInfo = memberInfoRequest?.member;
   const joinInfo = memberInfo?.joinedDate ? {
     joinedDate: memberInfo.joinedDate,
-    inviter: memberInfo.inviterId,
+    inviterId: memberInfo.inviterId,
     isViaRequest: memberInfo.isViaRequest,
   } : undefined;
 

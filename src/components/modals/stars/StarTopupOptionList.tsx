@@ -112,7 +112,7 @@ const StarTopupOptionList: FC<OwnProps> = ({
               </div>
             </div>
             <div className={styles.optionBottom}>
-              {formatCurrency(option.amount, option.currency, oldLang.code)}
+              {formatCurrency(lang, option.amount, option.currency)}
             </div>
             {(isActiveOption || (selectedStarOption && 'winners' in selectedStarOption)) && perUserStarCount && (
               <div className={styles.optionBottom}>

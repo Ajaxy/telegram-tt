@@ -11,6 +11,10 @@ export default function readStrings(data: string): Record<string, string> {
       console.warn('Bad formatting in line:', line);
       continue;
     }
+    if (result[key]) {
+      // eslint-disable-next-line no-console
+      console.warn('Duplicate key:', key);
+    }
     result[key] = value;
   }
   return result;

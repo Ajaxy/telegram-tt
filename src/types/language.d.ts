@@ -134,6 +134,7 @@ export interface LangPair {
   'SentAppCode': undefined;
   'LoginJustSentSms': undefined;
   'Code': undefined;
+  'Open': undefined;
   'LoginHeaderPassword': undefined;
   'LoginEnterPasswordDescription': undefined;
   'StartText': undefined;
@@ -533,6 +534,8 @@ export interface LangPair {
   'Block': undefined;
   'DeleteThisChat': undefined;
   'Caption': undefined;
+  'CropperTitle': undefined;
+  'CropperApply': undefined;
   'AttachmentMenuPhotoOrVideo': undefined;
   'AttachDocument': undefined;
   'Poll': undefined;
@@ -1040,14 +1043,6 @@ export interface LangPair {
   'EditProfileNoFirstName': undefined;
   'AriaEditProfilePhoto': undefined;
   'LaunchConfetti': undefined;
-  'SettingsAnimations': undefined;
-  'SettingsAnimationsDescription': undefined;
-  'SettingsAnimationsLow': undefined;
-  'SettingsAnimationsMedium': undefined;
-  'SettingsAnimationsHigh': undefined;
-  'Settings12HourFormat': undefined;
-  'Settings24HourFormat': undefined;
-  'SettingsSendCtrlEnterDescription': undefined;
   'AriaMoreButton': undefined;
   'RecoveryEmailCode': undefined;
   'NotificationsWeb': undefined;
@@ -1169,6 +1164,7 @@ export interface LangPair {
   'GiftSoldOut': undefined;
   'GiftMessagePlaceholder': undefined;
   'GiftHideMyName': undefined;
+  'GiftHideNameDescriptionSelf': undefined;
   'GiftHideNameDescriptionChannel': undefined;
   'GiftInfoSent': undefined;
   'GiftInfoReceived': undefined;
@@ -1225,14 +1221,6 @@ export interface LangPair {
   'PremiumGiftDescription': undefined;
   'StarsReactionLinkText': undefined;
   'StarsReactionLink': undefined;
-  'ActionStarGiftDisplaying': undefined;
-  'ActionStarGiftChannelDisplaying': undefined;
-  'ActionStarGiftDescriptionUpgrade': undefined;
-  'ActionStarGiftUpgraded': undefined;
-  'ActionStarGiftUnpack': undefined;
-  'GiftTo': undefined;
-  'GiftFrom': undefined;
-  'ReceivedGift': undefined;
   'SentGift': undefined;
   'StarsSubscribeInfoLinkText': undefined;
   'StarsSubscribeInfoLink': undefined;
@@ -1324,6 +1312,80 @@ export interface LangPair {
   'CheckPasswordTitle': undefined;
   'CheckPasswordPlaceholder': undefined;
   'CheckPasswordDescription': undefined;
+  'ActionFallbackUser': undefined;
+  'ActionFallbackChat': undefined;
+  'ActionFallbackChannel': undefined;
+  'ActionFallbackSomeone': undefined;
+  'ActionUnsupported': undefined;
+  'ActionPinnedNotFoundYou': undefined;
+  'ActionPinnedMediaPhoto': undefined;
+  'ActionPinnedMediaVideo': undefined;
+  'ActionPinnedMediaAudio': undefined;
+  'ActionPinnedMediaVoice': undefined;
+  'ActionPinnedMediaVideoMessage': undefined;
+  'ActionPinnedMediaFile': undefined;
+  'ActionPinnedMediaGif': undefined;
+  'ActionPinnedMediaContact': undefined;
+  'ActionPinnedMediaLocation': undefined;
+  'ActionPinnedMediaSticker': undefined;
+  'ActionPinnedMediaInvoice': undefined;
+  'ActionPinnedMediaStory': undefined;
+  'ActionPinnedMediaAlbum': undefined;
+  'ActionPinnedMediaPoll': undefined;
+  'ActionPinnedMediaGiveaway': undefined;
+  'ActionPinnedMediaGiveawayResults': undefined;
+  'ActionGroupCallStartedChannel': undefined;
+  'ActionExpiredVoice': undefined;
+  'ActionExpiredVideo': undefined;
+  'ActionChannelJoinedYou': undefined;
+  'ActionChannelJoinedByRequestChannelYou': undefined;
+  'ActionUserLeftYou': undefined;
+  'ActionUserJoinedYou': undefined;
+  'ActionJoinedByRequestYou': undefined;
+  'ActionRemovedPhotoYou': undefined;
+  'ActionRemovedPhotoChannel': undefined;
+  'ActionChangedPhotoYou': undefined;
+  'ActionChangedPhotoChannel': undefined;
+  'ActionCreatedChannel': undefined;
+  'ActionScreenshotTakenYou': undefined;
+  'ActionBotAppPlaceholder': undefined;
+  'ActionGiftTextUnknown': undefined;
+  'ActionGiftUniqueSent': undefined;
+  'ActionStarGiftUpgradedSelf': undefined;
+  'ActionStarGiftTransferredSelf': undefined;
+  'ActionStarGiftTransferredUnknown': undefined;
+  'ActionStarGiftNoConvertTextYou': undefined;
+  'ActionStarGiftDisplaying': undefined;
+  'ActionStarGiftChannelDisplaying': undefined;
+  'ActionStarGiftUpgradeTextYou': undefined;
+  'ActionStarGiftUpgraded': undefined;
+  'ActionStarGiftUnpack': undefined;
+  'ActionStarGiftUniqueRibbon': undefined;
+  'ActionStarGiftUniqueModel': undefined;
+  'ActionStarGiftUniqueBackdrop': undefined;
+  'ActionStarGiftUniqueSymbol': undefined;
+  'ActionStarGiftSelf': undefined;
+  'ActionSuggestedPhotoButton': undefined;
+  'ActionSuggestedVideoTitle': undefined;
+  'ActionSuggestedVideoText': undefined;
+  'ActionSuggestedPhotoUpdatedTitle': undefined;
+  'ActionSuggestedPhotoUpdatedDescription': undefined;
+  'ActionAttachMenuBotAllowed': undefined;
+  'ActionWebappBotAllowed': undefined;
+  'ActionTopicClosedInside': undefined;
+  'ActionTopicReopenedInside': undefined;
+  'ActionTopicHiddenInside': undefined;
+  'ActionTopicUnhiddenInside': undefined;
+  'ActionTopicPlaceholder': undefined;
+  'ActionGiveawayResultsSome': undefined;
+  'ActionGiveawayResultsStarsSome': undefined;
+  'ActionGiveawayResultsNone': undefined;
+  'ActionOpenGiftButton': undefined;
+  'ActionViewButton': undefined;
+  'ActionGiveawayResultTitle': undefined;
+  'ActionGiftPremiumText': undefined;
+  'ActionGiftStarsText': undefined;
+  'ActionHistoryCleared': undefined;
   'UniqueStatusBenefitsDescription': undefined;
   'UniqueStatusBadgeBenefitTitle': undefined;
   'UniqueStatusBadgeDescription': undefined;
@@ -1339,13 +1401,6 @@ export interface LangPair {
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
-  'ChatServiceGroupUpdatedPinnedMessage1': {
-    'user': V;
-    'message': V;
-  };
-  'MessagePinnedGenericMessage': {
-    'user': V;
-  };
   'UserTyping': {
     'user': V;
   };
@@ -1791,16 +1846,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'StarsReactionTerms': {
     'link': V;
   };
-  'ActionStarGiftPeerTitle': {
-    'peer': V;
-    'count': V;
-  };
-  'ActionStarGiftOutTitle': {
-    'count': V;
-  };
-  'ActionStarGiftPeerOutDescriptionUpgrade': {
-    'peer': V;
-  };
   'StarsSubscribeInfo': {
     'link': V;
   };
@@ -1849,6 +1894,318 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'MoreSimilarBotsText': {
     'count': V;
+  };
+  'ActionPinnedText': {
+    'from': V;
+    'text': V;
+  };
+  'ActionPinnedTextYou': {
+    'text': V;
+  };
+  'ActionPinnedNotFound': {
+    'from': V;
+  };
+  'ActionPinnedMedia': {
+    'from': V;
+    'media': V;
+  };
+  'ActionPinnedMediaYou': {
+    'media': V;
+  };
+  'ActionPinnedMediaGame': {
+    'game': V;
+  };
+  'ActionGroupCallStartedGroup': {
+    'from': V;
+  };
+  'ActionGroupCallScheduledGroup': {
+    'from': V;
+    'date': V;
+  };
+  'ActionGroupCallScheduledChannel': {
+    'date': V;
+  };
+  'ActionGroupCallFinishedChannel': {
+    'duration': V;
+  };
+  'ActionGroupCallFinishedGroup': {
+    'from': V;
+    'duration': V;
+  };
+  'ActionAddUser': {
+    'from': V;
+    'user': V;
+  };
+  'ActionAddUserYou': {
+    'user': V;
+  };
+  'ActionAddUsersMany': {
+    'from': V;
+    'users': V;
+  };
+  'ActionAddUsersManyYou': {
+    'users': V;
+  };
+  'ActionAddYou': {
+    'from': V;
+  };
+  'ActionAddYouGroup': {
+    'from': V;
+  };
+  'ActionKickUser': {
+    'from': V;
+    'user': V;
+  };
+  'ActionKickUserYou': {
+    'user': V;
+  };
+  'ActionUserLeft': {
+    'from': V;
+  };
+  'ActionUserJoined': {
+    'from': V;
+  };
+  'ActionUserJoinedByLink': {
+    'from': V;
+  };
+  'ActionJoinedByRequest': {
+    'from': V;
+  };
+  'ActionVideoInvited': {
+    'from': V;
+    'user': V;
+  };
+  'ActionVideoInvitedYou': {
+    'user': V;
+  };
+  'ActionVideoInvitedMany': {
+    'from': V;
+    'users': V;
+  };
+  'ActionVideoInvitedManyYou': {
+    'users': V;
+  };
+  'ActionUserRegistered': {
+    'from': V;
+  };
+  'ActionRemovedPhoto': {
+    'from': V;
+  };
+  'ActionChangedPhoto': {
+    'from': V;
+  };
+  'ActionChangedTitle': {
+    'from': V;
+    'title': V;
+  };
+  'ActionChangedTitleYou': {
+    'title': V;
+  };
+  'ActionChangedTitleChannel': {
+    'title': V;
+  };
+  'ActionCreatedChat': {
+    'from': V;
+    'title': V;
+  };
+  'ActionPaymentDone': {
+    'amount': V;
+    'user': V;
+  };
+  'ActionPaymentDoneFor': {
+    'amount': V;
+    'user': V;
+    'invoice': V;
+  };
+  'ActionPaymentInitRecurringFor': {
+    'amount': V;
+    'user': V;
+    'invoice': V;
+  };
+  'ActionPaymentInitRecurring': {
+    'amount': V;
+    'user': V;
+  };
+  'ActionPaymentUsedRecurring': {
+    'amount': V;
+  };
+  'ActionScreenshotTaken': {
+    'from': V;
+  };
+  'ActionBotAllowedFromDomain': {
+    'domain': V;
+  };
+  'ActionBotAllowedFromApp': {
+    'app': V;
+  };
+  'ActionGiftTextCost': {
+    'from': V;
+    'cost': V;
+  };
+  'ActionGiftTextCostYou': {
+    'cost': V;
+  };
+  'ActionGiftTextCostAnonymous': {
+    'cost': V;
+  };
+  'ActionCostCrypto': {
+    'price': V;
+    'cryptoPrice': V;
+  };
+  'ActionWebviewDataDone': {
+    'text': V;
+  };
+  'ActionGiftUniqueReceived': {
+    'user': V;
+  };
+  'ActionStarGiftReceived': {
+    'user': V;
+    'cost': V;
+  };
+  'ActionStarGiftSent': {
+    'cost': V;
+  };
+  'ActionStarGiftUpgradedUser': {
+    'user': V;
+  };
+  'ActionStarGiftUpgradedChannel': {
+    'user': V;
+    'channel': V;
+  };
+  'ActionStarGiftUpgradedChannelYou': {
+    'channel': V;
+  };
+  'ActionStarGiftUpgradedMine': {
+    'user': V;
+  };
+  'ActionStarGiftTransferred': {
+    'user': V;
+  };
+  'ActionStarGiftTransferredChannel': {
+    'user': V;
+    'channel': V;
+  };
+  'ActionStarGiftTransferredChannelYou': {
+    'channel': V;
+  };
+  'ActionStarGiftTransferredMine': {
+    'user': V;
+  };
+  'ActionStarGiftTransferredUnknownChannel': {
+    'channel': V;
+  };
+  'ActionStarGiftReceivedAnonymous': {
+    'cost': V;
+  };
+  'ActionStarGiftSentChannel': {
+    'user': V;
+    'channel': V;
+    'cost': V;
+  };
+  'ActionStarGiftSentChannelYou': {
+    'channel': V;
+    'cost': V;
+  };
+  'ActionStarGiftSelfBought': {
+    'cost': V;
+  };
+  'ActionStarGiftTo': {
+    'peer': V;
+  };
+  'ActionStarGiftFrom': {
+    'peer': V;
+  };
+  'ActionStarGiftConvertText': {
+    'peer': V;
+    'amount': V;
+  };
+  'ActionStarGiftConvertTextYou': {
+    'amount': V;
+  };
+  'ActionStarGiftNoConvertText': {
+    'peer': V;
+  };
+  'ActionStarGiftConvertedText': {
+    'peer': V;
+    'amount': V;
+  };
+  'ActionStarGiftConvertedTextYou': {
+    'amount': V;
+  };
+  'ActionStarGiftChannelText': {
+    'amount': V;
+  };
+  'ActionStarGiftUpgradeText': {
+    'peer': V;
+  };
+  'ActionStarGiftLimitedRibbon': {
+    'total': V;
+  };
+  'ActionSuggestedPhotoYou': {
+    'user': V;
+  };
+  'ActionSuggestedPhoto': {
+    'user': V;
+  };
+  'ActionTopicCreated': {
+    'topic': V;
+  };
+  'ActionTopicClosed': {
+    'from': V;
+    'topic': V;
+  };
+  'ActionTopicReopened': {
+    'from': V;
+    'topic': V;
+  };
+  'ActionTopicHidden': {
+    'topic': V;
+  };
+  'ActionTopicUnhidden': {
+    'topic': V;
+  };
+  'ActionTopicRenamed': {
+    'from': V;
+    'link': V;
+    'title': V;
+  };
+  'ActionTopicIconChanged': {
+    'from': V;
+    'link': V;
+    'emoji': V;
+  };
+  'ActionTopicIconRemoved': {
+    'from': V;
+    'link': V;
+  };
+  'ActionTopicIconAndRenamed': {
+    'from': V;
+    'link': V;
+    'topic': V;
+  };
+  'ActionGiveawayStartedGroup': {
+    'from': V;
+  };
+  'ActionGiveawayStarted': {
+    'from': V;
+  };
+  'ActionGiveawayStarsStartedGroup': {
+    'from': V;
+    'amount': V;
+  };
+  'ActionGiveawayStarsStarted': {
+    'from': V;
+    'amount': V;
+  };
+  'ActionPaymentRefunded': {
+    'peer': V;
+    'amount': V;
+  };
+  'ActionMigratedFrom': {
+    'chat': V;
+  };
+  'ActionMigratedTo': {
+    'chat': V;
   };
   'UniqueStatusWearTitle': {
     'gift': V;
@@ -2043,13 +2400,6 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   'PrizeCredits2': {
     'count': V;
   };
-  'ActionStarGiftPeerOutDescription': {
-    'peer': V;
-    'count': V;
-  };
-  'ActionStarGiftDescription2': {
-    'count': V;
-  };
   'StarsSubscribeText': {
     'chat': V;
     'amount': V;
@@ -2072,6 +2422,53 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
     'count': V;
   };
   'FolderLinkNotificationUpdatedSubtitle': {
+    'count': V;
+  };
+  'ActionGameScore': {
+    'from': V;
+    'count': V;
+    'game': V;
+  };
+  'ActionGameScoreYou': {
+    'count': V;
+    'game': V;
+  };
+  'ActionGameScoreNoGame': {
+    'from': V;
+    'count': V;
+  };
+  'ActionGameScoreNoGameYou': {
+    'count': V;
+  };
+  'ActionGiveawayResults': {
+    'count': V;
+  };
+  'ActionGiveawayResultsStars': {
+    'count': V;
+  };
+  'ActionGiveawayResultPremiumText': {
+    'channel': V;
+    'months': V;
+  };
+  'ActionGiftCodePremiumText': {
+    'channel': V;
+    'months': V;
+  };
+  'ActionGiveawayResultStarsText': {
+    'channel': V;
+    'amount': V;
+  };
+  'ActionGiftPremiumTitle': {
+    'months': V;
+  };
+  'ActionGiftStarsTitle': {
+    'amount': V;
+  };
+  'ActionBoostApplyYou': {
+    'count': V;
+  };
+  'ActionBoostApply': {
+    'from': V;
     'count': V;
   };
 }

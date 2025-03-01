@@ -88,7 +88,7 @@ const CustomEmoji: FC<OwnProps> = ({
   const [shouldPlay, setShouldPlay] = useState(true);
 
   const hasCustomColor = customEmoji?.shouldUseTextColor;
-  const customColor = useDynamicColorListener(containerRef, !hasCustomColor);
+  const customColor = useDynamicColorListener(containerRef, undefined, !hasCustomColor);
 
   const handleVideoEnded = useLastCallback((e) => {
     if (!loopLimit) return;

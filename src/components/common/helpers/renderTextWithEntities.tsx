@@ -36,9 +36,8 @@ export function renderTextWithEntities({
   emojiSize,
   shouldRenderAsHtml,
   containerId,
-  isSimple,
+  asPreview,
   isProtected,
-  noLineBreaks,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   withTranslucentThumbs,
@@ -56,9 +55,8 @@ export function renderTextWithEntities({
   emojiSize?: number;
   shouldRenderAsHtml?: boolean;
   containerId?: string;
-  isSimple?: boolean;
+  asPreview?: boolean;
   isProtected?: boolean;
-  noLineBreaks?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
@@ -77,8 +75,7 @@ export function renderTextWithEntities({
       focusedQuote,
       emojiSize,
       shouldRenderAsHtml,
-      isSimple,
-      noLineBreaks,
+      asPreview,
     });
   }
 
@@ -113,8 +110,7 @@ export function renderTextWithEntities({
           focusedQuote,
           emojiSize,
           shouldRenderAsHtml,
-          isSimple,
-          noLineBreaks,
+          asPreview,
         }) as TextPart[]);
       }
     }
@@ -164,8 +160,7 @@ export function renderTextWithEntities({
         highlight,
         focusedQuote,
         containerId,
-        isSimple,
-        noLineBreaks,
+        asPreview,
         isProtected,
         observeIntersectionForLoading,
         observeIntersectionForPlaying,
@@ -199,8 +194,7 @@ export function renderTextWithEntities({
           focusedQuote,
           emojiSize,
           shouldRenderAsHtml,
-          isSimple,
-          noLineBreaks,
+          asPreview,
         }) as TextPart[]);
       }
     }
@@ -254,16 +248,14 @@ function renderMessagePart({
   focusedQuote,
   emojiSize,
   shouldRenderAsHtml,
-  isSimple,
-  noLineBreaks,
+  asPreview,
 } : {
   content: TextPart | TextPart[];
   highlight?: string;
   focusedQuote?: string;
   emojiSize?: number;
   shouldRenderAsHtml?: boolean;
-  isSimple?: boolean;
-  noLineBreaks?: boolean;
+  asPreview?: boolean;
 }) {
   if (Array.isArray(content)) {
     const result: TextPart[] = [];
@@ -275,8 +267,7 @@ function renderMessagePart({
         focusedQuote,
         emojiSize,
         shouldRenderAsHtml,
-        isSimple,
-        noLineBreaks,
+        asPreview,
       }));
     });
 
@@ -291,7 +282,7 @@ function renderMessagePart({
 
   const filters: TextFilter[] = [emojiFilter];
   const params: RenderTextParams = {};
-  if (!isSimple && !noLineBreaks) {
+  if (!asPreview) {
     filters.push('br');
   }
 
@@ -380,8 +371,7 @@ function processEntity({
   highlight,
   focusedQuote,
   containerId,
-  isSimple,
-  noLineBreaks,
+  asPreview,
   isProtected,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -400,8 +390,7 @@ function processEntity({
   highlight?: string;
   focusedQuote?: string;
   containerId?: string;
-  isSimple?: boolean;
-  noLineBreaks?: boolean;
+  asPreview?: boolean;
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
@@ -423,8 +412,7 @@ function processEntity({
       highlight,
       focusedQuote,
       emojiSize,
-      isSimple,
-      noLineBreaks,
+      asPreview,
     });
   }
 
@@ -432,7 +420,7 @@ function processEntity({
     return renderNestedMessagePart();
   }
 
-  if (isSimple) {
+  if (asPreview) {
     const text = renderNestedMessagePart();
     if (entity.type === ApiMessageEntityTypes.Spoiler) {
       return <Spoiler>{text}</Spoiler>;

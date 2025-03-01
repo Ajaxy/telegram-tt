@@ -1,11 +1,9 @@
 import type { ThreadId, WebPageMediaSize } from '../../types';
 import type { ApiWebDocument } from './bots';
-import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiPeerColor } from './chats';
+import type { ApiMessageAction } from './messageActions';
 import type {
-  ApiInputSavedStarGift,
   ApiLabeledPrice,
-  ApiStarGiftRegular,
   ApiStarGiftUnique,
 } from './payments';
 import type {
@@ -328,85 +326,6 @@ export type ApiNewPoll = {
   };
 };
 
-export interface ApiMessageActionStarGift {
-  type: 'starGift';
-  isNameHidden: boolean;
-  isSaved: boolean;
-  isConverted?: true;
-  gift: ApiStarGiftRegular;
-  message?: ApiFormattedText;
-  starsToConvert?: number;
-  canUpgrade?: true;
-  isUpgraded?: true;
-  upgradeMsgId?: number;
-  alreadyPaidUpgradeStars?: number;
-  fromId?: string;
-  peerId?: string;
-  savedId?: string;
-  inputSavedGift?: ApiInputSavedStarGift;
-}
-
-export interface ApiMessageActionStarGiftUnique {
-  type: 'starGiftUnique';
-  isUpgrade?: true;
-  isTransferred?: true;
-  isSaved?: true;
-  isRefunded?: true;
-  gift: ApiStarGiftUnique;
-  canExportAt?: number;
-  transferStars?: number;
-  fromId?: string;
-  peerId?: string;
-  savedId?: string;
-  inputSavedGift?: ApiInputSavedStarGift;
-}
-
-export interface ApiAction {
-  mediaType: 'action';
-  text: string;
-  targetUserIds?: string[];
-  targetChatId?: string;
-  type:
-  | 'historyClear'
-  | 'contactSignUp'
-  | 'chatCreate'
-  | 'topicCreate'
-  | 'suggestProfilePhoto'
-  | 'updateProfilePhoto'
-  | 'joinedChannel'
-  | 'chatBoost'
-  | 'receipt'
-  | 'giftStars'
-  | 'giftPremium'
-  | 'giftCode'
-  | 'prizeStars'
-  | 'starGift'
-  | 'starGiftUnique'
-  | 'other';
-  photo?: ApiPhoto;
-  amount?: number;
-  stars?: number;
-  transactionId?: string;
-  currency?: string;
-  giftCryptoInfo?: {
-    currency: string;
-    amount: number;
-  };
-  starGift?: ApiMessageActionStarGift | ApiMessageActionStarGiftUnique;
-  translationValues: string[];
-  call?: Partial<ApiGroupCall>;
-  phoneCall?: PhoneCallAction;
-  score?: number;
-  months?: number;
-  topicEmojiIconId?: string;
-  isTopicAction?: boolean;
-  slug?: string;
-  isGiveaway?: boolean;
-  isUnclaimed?: boolean;
-  pluralValue?: number;
-  message?: ApiFormattedText;
-}
-
 export interface ApiWebPage {
   mediaType: 'webpage';
   id: number;
@@ -571,7 +490,7 @@ export type MediaContent = {
   sticker?: ApiSticker;
   contact?: ApiContact;
   pollId?: string;
-  action?: ApiAction;
+  action?: ApiMessageAction;
   webPage?: ApiWebPage;
   audio?: ApiAudio;
   voice?: ApiVoice;
@@ -582,8 +501,6 @@ export type MediaContent = {
   giveaway?: ApiGiveaway;
   giveawayResults?: ApiGiveawayResults;
   paidMedia?: ApiPaidMedia;
-  isExpiredVoice?: boolean;
-  isExpiredRoundVideo?: boolean;
   ttlSeconds?: number;
 };
 export type MediaContainer = {

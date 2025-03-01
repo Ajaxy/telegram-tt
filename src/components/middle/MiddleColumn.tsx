@@ -78,6 +78,7 @@ import { useResize } from '../../hooks/useResize';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useWindowSize from '../../hooks/window/useWindowSize';
 import usePinnedMessage from './hooks/usePinnedMessage';
+import useFluidBackgroundFilter from './message/hooks/useFluidBackgroundFilter';
 
 import Composer from '../common/Composer';
 import Icon from '../common/icons/Icon';
@@ -465,6 +466,9 @@ function MiddleColumn({
     isActive: isSelectModeActive,
     onBack: exitMessageSelectMode,
   });
+
+  // Prepare filter beforehand to avoid flickering
+  useFluidBackgroundFilter(patternColor);
 
   const isMessagingDisabled = Boolean(
     !isPinnedMessageList && !isSavedDialog && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot

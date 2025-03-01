@@ -12,6 +12,7 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 
+import useLang from '../../../hooks/useLang';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
@@ -41,7 +42,8 @@ const Invoice: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const invoice = getMessageInvoice(message);
 
   const {
@@ -120,8 +122,8 @@ const Invoice: FC<OwnProps> = ({
           </div>
         )}
         <p className="description-text">
-          {formatCurrency(amount, currency, lang.code, { iconClassName: 'invoice-currency-icon' })}
-          {isTest && <span className="test-invoice">{lang('PaymentTestInvoice')}</span>}
+          {formatCurrency(lang, amount, currency, { iconClassName: 'invoice-currency-icon' })}
+          {isTest && <span className="test-invoice">{oldLang('PaymentTestInvoice')}</span>}
         </p>
       </div>
     </div>

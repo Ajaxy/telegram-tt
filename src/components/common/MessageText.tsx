@@ -20,7 +20,7 @@ interface OwnProps {
   isForAnimation?: boolean;
   emojiSize?: number;
   highlight?: string;
-  isSimple?: boolean;
+  asPreview?: boolean;
   truncateLength?: number;
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
@@ -42,7 +42,7 @@ function MessageText({
   isForAnimation,
   emojiSize,
   highlight,
-  isSimple,
+  asPreview,
   truncateLength,
   isProtected,
   observeIntersectionForLoading,
@@ -98,7 +98,7 @@ function MessageText({
           emojiSize,
           shouldRenderAsHtml,
           containerId,
-          isSimple,
+          asPreview,
           isProtected,
           observeIntersectionForLoading,
           observeIntersectionForPlaying,

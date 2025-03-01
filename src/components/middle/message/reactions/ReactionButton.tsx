@@ -40,6 +40,7 @@ type OwnProps = {
   recentReactors?: ApiPeer[];
   className?: string;
   chosenClassName?: string;
+  isOutside?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (reaction: ApiReaction) => void;
   onPaidClick?: (count: number) => void;
@@ -58,6 +59,7 @@ const ReactionButton = ({
   chosenClassName,
   chatId,
   messageId,
+  isOutside,
   observeIntersection,
   onClick,
   onPaidClick,
@@ -171,6 +173,7 @@ const ReactionButton = ({
         styles.root,
         isOwnMessage && styles.own,
         isPaid && styles.paid,
+        isOutside && styles.outside,
         isReactionChosen(reaction) && styles.chosen,
         isReactionChosen(reaction) && chosenClassName,
         className,

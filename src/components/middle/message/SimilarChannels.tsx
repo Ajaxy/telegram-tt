@@ -31,6 +31,7 @@ import styles from './SimilarChannels.module.scss';
 
 const DEFAULT_BADGE_COLOR = '#3C3C4399';
 const SHOW_CHANNELS_NUMBER = 10;
+const ANIMATION_DURATION = 150;
 const MIN_SKELETON_DELAY = 300;
 const MAX_SKELETON_DELAY = 2000;
 const AUTO_EXPAND_TIME = 10; // Seconds from joining
@@ -55,12 +56,17 @@ const SimilarChannels = ({
   isCurrentUserPremium,
   channelJoinInfo,
 }: StateProps & OwnProps) => {
-  const lang = useOldLang();
   const { toggleChannelRecommendations, loadChannelRecommendations } = getActions();
+
+  const lang = useOldLang();
+
   const [isShowing, markShowing, markNotShowing] = useFlag(false);
   const [isHiding, markHiding, markNotHiding] = useFlag(false);
+
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
+
+  const ignoreAutoScrollRef = useRef(false);
   const similarChannels = useMemo(() => {
     if (!similarChannelIds) {
       return undefined;
@@ -103,35 +109,40 @@ const SimilarChannels = ({
     return undefined;
   }, [similarChannels, isExpanded, shouldRenderSkeleton]);
 
-  const handleToggle = useLastCallback(() => {
-    toggleChannelRecommendations({ chatId });
+  useEffect(() => {
     if (isExpanded) {
-      markNotShowing();
-      markHiding();
-    } else {
       markShowing();
       markNotHiding();
       setShouldRenderSkeleton(!similarChannelIds);
+      if (!ignoreAutoScrollRef.current) {
+        setTimeout(() => {
+          ref.current?.scrollIntoView({ behavior: 'smooth' });
+        }, ANIMATION_DURATION);
+      }
+    } else {
+      markNotShowing();
+      markHiding();
     }
+  }, [isExpanded, similarChannelIds]);
+
+  const handleToggle = useLastCallback(() => {
+    toggleChannelRecommendations({ chatId });
   });
 
   useEffect(() => {
     if (!channelJoinInfo?.joinedDate || isExpanded) return;
     if (getServerTime() - channelJoinInfo.joinedDate <= AUTO_EXPAND_TIME) {
       handleToggle();
+      ignoreAutoScrollRef.current = true;
     }
   }, [channelJoinInfo, isExpanded]);
 
+  if (!shouldRenderChannels && !shouldRenderSkeleton) {
+    return undefined;
+  }
+
   return (
     <div className={buildClassName(styles.root)}>
-      <div className="join-text">
-        <span
-          className={buildClassName(areSimilarChannelsPresent && styles.joinText)}
-          onClick={areSimilarChannelsPresent ? handleToggle : undefined}
-        >
-          {lang('ChannelJoined')}
-        </span>
-      </div>
       {shouldRenderSkeleton && <Skeleton className={styles.skeleton} />}
       {shouldRenderChannels && (
         <div

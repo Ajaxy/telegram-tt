@@ -21,7 +21,7 @@ import type { IAnchorPosition } from '../../../types';
 
 import {
   getUserFullName,
-  groupStatetefulContent,
+  groupStatefulContent,
   isUserId,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -297,7 +297,7 @@ const MessageContextMenu: FC<OwnProps> = ({
 
   const copyOptions = getMessageCopyOptions(
     message,
-    groupStatetefulContent({ poll, story }),
+    groupStatefulContent({ poll, story }),
     targetHref,
     canCopy,
     handleAfterCopy,

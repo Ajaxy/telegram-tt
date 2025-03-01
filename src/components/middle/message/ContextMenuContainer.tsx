@@ -72,6 +72,7 @@ import {
   selectUser,
   selectUserStatus,
 } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedText';
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
@@ -96,6 +97,7 @@ export type OwnProps = {
   noReplies?: boolean;
   detectedLanguage?: string;
   repliesThreadInfo?: ApiThreadInfo;
+  className?: string;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd: NoneToVoidFunction;
 };
@@ -217,10 +219,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   isInSavedMessages,
   canReplyInChat,
   isWithPaidReaction,
-  onClose,
-  onCloseAnimationEnd,
   userFullName,
   canGift,
+  className,
+  onClose,
+  onCloseAnimationEnd,
 }) => {
   const {
     openThread,
@@ -621,7 +624,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
   return (
-    <div ref={containerRef} className="ContextMenuContainer">
+    <div ref={containerRef} className={buildClassName('ContextMenuContainer', className)}>
       <MessageContextMenu
         isReactionPickerOpen={isReactionPickerOpen}
         availableReactions={availableReactions}

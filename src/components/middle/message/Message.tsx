@@ -43,7 +43,7 @@ import type { OnIntersectPinnedMessage } from '../hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { AudioOrigin } from '../../../types';
 
-import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
+import { EMOJI_STATUS_LOOP_LIMIT, MESSAGE_APPEARANCE_DELAY } from '../../../config';
 import {
   areReactionsEmpty,
   getIsDownloading,
@@ -311,7 +311,6 @@ type QuickReactionPosition =
   | 'in-meta';
 
 const NBSP = '\u00A0';
-const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
 const QUICK_REACTION_SIZE = 1.75 * REM;
 const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
@@ -471,7 +470,7 @@ const Message: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
+    setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
 
   useShowTransition({
@@ -742,7 +741,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const currentTranslatedText = translatedText || previousTranslatedText;
 
-  const { phoneCall } = action || {};
+  const phoneCall = action?.type === 'phoneCall' ? action : undefined;
 
   const isMediaWithCommentButton = (repliesThreadInfo || (hasLinkedChat && isChannel && isLocal))
     && !isInDocumentGroupNotLast
@@ -850,10 +849,19 @@ const Message: FC<OwnProps & StateProps> = ({
       animateUnreadReaction({ messageIds: [messageId] });
     }
 
+    let unreadMentionIds: number[] = [];
     if (message.hasUnreadMention) {
-      markMentionsRead({ messageIds: [messageId] });
+      unreadMentionIds = [messageId];
     }
-  }, [hasUnreadReaction, messageId, animateUnreadReaction, message.hasUnreadMention]);
+
+    if (album) {
+      unreadMentionIds = album.messages.filter((msg) => msg.hasUnreadMention).map((msg) => msg.id);
+    }
+
+    if (unreadMentionIds.length) {
+      markMentionsRead({ messageIds: unreadMentionIds });
+    }
+  }, [hasUnreadReaction, album, messageId, animateUnreadReaction, message.hasUnreadMention]);
 
   const albumLayout = useMemo(() => {
     return isAlbum

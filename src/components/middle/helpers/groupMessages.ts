@@ -92,8 +92,8 @@ export function groupMessages(
         || message.senderId !== nextMessage.senderId
         || message.isOutgoing !== nextMessage.isOutgoing
         || message.postAuthorTitle !== nextMessage.postAuthorTitle
-        || (isActionMessage(message) && !message.content.action?.phoneCall)
-        || (isActionMessage(nextMessage) && !nextMessage.content.action?.phoneCall)
+        || (isActionMessage(message) && message.content.action?.type !== 'phoneCall')
+        || (isActionMessage(nextMessage) && nextMessage.content.action?.type !== 'phoneCall')
         || message.inlineButtons
         || nextMessage.inlineButtons
         || (nextMessage.date - message.date) > GROUP_INTERVAL_SECONDS

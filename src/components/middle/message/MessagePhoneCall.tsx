@@ -2,11 +2,13 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiMessage, PhoneCallAction } from '../../../api/types';
+import type { ApiMessage } from '../../../api/types';
+import type { ApiMessageActionPhoneCall } from '../../../api/types/messageActions';
 
 import buildClassName from '../../../util/buildClassName';
 import { formatTime, formatTimeDuration } from '../../../util/dates/dateFormat';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
+import { getCallMessageKey } from './helpers/messageActions';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
@@ -17,7 +19,7 @@ import Button from '../../ui/Button';
 import styles from './MessagePhoneCall.module.scss';
 
 type OwnProps = {
-  phoneCall: PhoneCallAction;
+  phoneCall: ApiMessageActionPhoneCall;
   message: ApiMessage;
   chatId: string;
 };
@@ -31,28 +33,15 @@ const MessagePhoneCall: FC<OwnProps> = ({
 
   const lang = useOldLang();
   const {
-    isOutgoing, isVideo, reason, duration,
+    isVideo, reason, duration,
   } = phoneCall;
+  const isOutgoing = message.isOutgoing;
   const isMissed = reason === 'missed';
   const isCancelled = reason === 'busy' || duration === undefined;
 
   const handleCall = useLastCallback(() => {
     requestMasterAndRequestCall({ isVideo, userId: chatId });
   });
-
-  const reasonText = useMemo(() => {
-    if (isVideo) {
-      if (isMissed) return isOutgoing ? 'CallMessageVideoOutgoingMissed' : 'CallMessageVideoIncomingMissed';
-      if (isCancelled) return 'CallMessageVideoIncomingDeclined';
-
-      return isOutgoing ? 'CallMessageVideoOutgoing' : 'CallMessageVideoIncoming';
-    } else {
-      if (isMissed) return isOutgoing ? 'CallMessageOutgoingMissed' : 'CallMessageIncomingMissed';
-      if (isCancelled) return 'CallMessageIncomingDeclined';
-
-      return isOutgoing ? 'CallMessageOutgoing' : 'CallMessageIncoming';
-    }
-  }, [isCancelled, isMissed, isOutgoing, isVideo]);
 
   const formattedDuration = useMemo(() => {
     return phoneCall.duration ? formatTimeDuration(lang, phoneCall.duration) : undefined;
@@ -74,7 +63,7 @@ const MessagePhoneCall: FC<OwnProps> = ({
         <Icon name={isVideo ? 'video-outlined' : 'phone'} />
       </Button>
       <div className={styles.info}>
-        <div className={styles.reason}>{lang(reasonText)}</div>
+        <div className={styles.reason}>{lang(getCallMessageKey(phoneCall, message.isOutgoing))}</div>
         <div className={styles.meta}>
           <Icon
             name="arrow-right"

@@ -300,6 +300,7 @@ export enum MediaViewerOrigin {
   Album,
   ScheduledAlbum,
   SearchResult,
+  ChannelAvatar,
   SuggestedAvatar,
   StarsTransaction,
   PreviewMedia,

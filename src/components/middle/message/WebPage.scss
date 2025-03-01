@@ -34,14 +34,6 @@
     border-radius: 0.25rem;
   }
 
-  &--unique-sticker {
-    position: relative;
-    width: 7.5rem;
-    height: 7.5rem;
-    overflow: hidden;
-    margin-block: 0.5rem;
-  }
-
   &--stickers {
     color: var(--accent-color);
     border-radius: 0 !important;
@@ -67,16 +59,14 @@
         background-color: var(--background-active-color);
       }
     }
+
+    .site-title, .site-name {
+      font-weight: var(--font-weight-normal);
+    }
   }
 
   .WebPage--content {
     position: relative;
-
-    &.is-gift {
-      .site-title {
-        font-weight: var(--font-weight-normal);
-      }
-    }
 
     &.is-gift,
     &.is-story {

@@ -20,6 +20,7 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
@@ -125,7 +126,8 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   onBack,
   onClickSubscribe,
 }) => {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(PREMIUM_FEATURE_SECTIONS.indexOf(initialSection));
@@ -148,7 +150,9 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     const { amount, months, currency } = subscriptionOption;
     const perMonthPrice = Math.floor(amount / months);
 
-    return isPremium ? lang('OK') : lang('SubscribeToPremium', formatCurrency(perMonthPrice, currency, lang.code));
+    return isPremium
+      ? lang('OK')
+      : lang('SubscribeToPremium', { price: formatCurrency(lang, perMonthPrice, currency) }, { withNodes: true });
   }, [isPremium, lang, subscriptionOption]);
 
   const handleClick = useLastCallback(() => {
@@ -220,7 +224,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
         className={buildClassName(styles.backButton, currentSlideIndex !== 0 && styles.whiteBackButton)}
         color={currentSlideIndex === 0 ? 'translucent' : 'translucent-white'}
         onClick={onBack}
-        ariaLabel={lang('Back')}
+        ariaLabel={oldLang('Back')}
       >
         <Icon name="arrow-left" />
       </Button>
@@ -234,7 +238,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
             return (
               <div className={buildClassName(styles.slide, styles.limits)}>
                 <h2 className={buildClassName(styles.header, isScrolledToTop && styles.noHeaderBorder)}>
-                  {lang(PREMIUM_FEATURE_TITLES.double_limits)}
+                  {oldLang(PREMIUM_FEATURE_TITLES.double_limits)}
                 </h2>
                 <div className={buildClassName(styles.limitsContent, 'custom-scroll')} onScroll={handleLimitsScroll}>
                   {PREMIUM_LIMITS_ORDER.map((limit, i) => {
@@ -242,8 +246,8 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                     const premiumLimit = limits?.[limit][1].toString();
                     return (
                       <PremiumLimitPreview
-                        title={lang(LIMITS_TITLES[limit])}
-                        description={lang(LIMITS_DESCRIPTIONS[limit], premiumLimit)}
+                        title={oldLang(LIMITS_TITLES[limit])}
+                        description={oldLang(LIMITS_DESCRIPTIONS[limit], premiumLimit)}
                         leftValue={defaultLimit}
                         rightValue={premiumLimit}
                         colorStepProgress={i / (PREMIUM_LIMITS_ORDER.length - 1)}
@@ -262,10 +266,10 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                   <PremiumFeaturePreviewStickers isActive={currentSlideIndex === index} />
                 </div>
                 <h1 className={styles.title}>
-                  {lang(PREMIUM_FEATURE_TITLES.premium_stickers)}
+                  {oldLang(PREMIUM_FEATURE_TITLES.premium_stickers)}
                 </h1>
                 <div className={styles.description}>
-                  {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.premium_stickers), ['br'])}
+                  {renderText(oldLang(PREMIUM_FEATURE_DESCRIPTIONS.premium_stickers), ['br'])}
                 </div>
               </div>
             );
@@ -294,10 +298,10 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                 />
               </div>
               <h1 className={styles.title}>
-                {lang(PREMIUM_FEATURE_TITLES[promo.videoSections[i]!])}
+                {oldLang(PREMIUM_FEATURE_TITLES[promo.videoSections[i]!])}
               </h1>
               <div className={styles.description}>
-                {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS[promo.videoSections[i]!]), ['br'])}
+                {renderText(oldLang(PREMIUM_FEATURE_DESCRIPTIONS[promo.videoSections[i]!]), ['br'])}
               </div>
             </div>
           );

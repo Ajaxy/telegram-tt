@@ -7,7 +7,7 @@ import type {
   ApiTypeStory,
 } from '../../api/types';
 import type {
-  ApiPoll, MediaContainer, MediaContent, StatefulMediaContent,
+  ApiPoll, MediaContainer, StatefulMediaContent,
 } from '../../api/types/messages';
 import type { OldLangFn } from '../../hooks/useOldLang';
 import type { CustomPeer, ThreadId } from '../../types';
@@ -57,13 +57,13 @@ export function getMessageTranscription(message: ApiMessage) {
 
 export function hasMessageText(message: MediaContainer) {
   const {
-    text, sticker, photo, video, audio, voice, document, pollId, webPage, contact, invoice, location,
-    game, action, storyData, giveaway, giveawayResults, isExpiredVoice, paidMedia,
+    action, text, sticker, photo, video, audio, voice, document, pollId, webPage, contact, invoice, location,
+    game, storyData, giveaway, giveawayResults, paidMedia,
   } = message.content;
 
   return Boolean(text) || !(
     sticker || photo || video || audio || voice || document || contact || pollId || webPage || invoice || location
-    || game || action?.phoneCall || storyData || giveaway || giveawayResults || isExpiredVoice || paidMedia
+    || game || storyData || giveaway || giveawayResults || paidMedia || action?.type === 'phoneCall'
   );
 }
 
@@ -73,10 +73,10 @@ export function getMessageStatefulContent(global: GlobalState, message: ApiMessa
   const { peerId: storyPeerId, id: storyId } = message.content.storyData || {};
   const story = storyId && storyPeerId ? global.stories.byPeerId[storyPeerId]?.byId[storyId] : undefined;
 
-  return groupStatetefulContent({ poll, story });
+  return groupStatefulContent({ poll, story });
 }
 
-export function groupStatetefulContent({
+export function groupStatefulContent({
   poll,
   story,
 } : {
@@ -90,7 +90,7 @@ export function groupStatetefulContent({
 }
 
 export function getMessageText(message: MediaContainer) {
-  return hasMessageText(message) ? message.content.text?.text || CONTENT_NOT_SUPPORTED : undefined;
+  return hasMessageText(message) ? message.content.text || { text: CONTENT_NOT_SUPPORTED } : undefined;
 }
 
 export function getMessageCustomShape(message: ApiMessage): boolean {
@@ -198,7 +198,7 @@ export function isForwardedMessage(message: ApiMessage) {
 }
 
 export function isActionMessage(message: ApiMessage) {
-  return Boolean(message.content.action) || isExpiredMessage(message);
+  return Boolean(message.content.action);
 }
 
 export function isServiceNotificationMessage(message: ApiMessage) {
@@ -359,34 +359,12 @@ export function extractMessageText(message: ApiMessage | ApiStory, inChatList = 
   return { text, entities };
 }
 
-export function getExpiredMessageDescription(langFn: OldLangFn, message: ApiMessage): string | undefined {
-  return getExpiredMessageContentDescription(langFn, message.content);
-}
-export function getExpiredMessageContentDescription(langFn: OldLangFn, mediaContent: MediaContent): string | undefined {
-  const { isExpiredVoice, isExpiredRoundVideo } = mediaContent;
-  if (isExpiredVoice) {
-    return langFn('Message.VoiceMessageExpired');
-  } else if (isExpiredRoundVideo) {
-    return langFn('Message.VideoMessageExpired');
-  }
-  return undefined;
-}
-
 export function isExpiredMessage(message: ApiMessage) {
-  return isExpiredMessageContent(message.content);
-}
-
-export function isExpiredMessageContent(content: MediaContent) {
-  const { isExpiredVoice, isExpiredRoundVideo } = content ?? {};
-  return Boolean(isExpiredVoice || isExpiredRoundVideo);
+  return message.content.action?.type === 'expired';
 }
 
 export function hasMessageTtl(message: ApiMessage) {
   return message.content?.ttlSeconds !== undefined;
-}
-
-export function isJoinedChannelMessage(message: ApiMessage) {
-  return message.content.action && message.content.action.type === 'joinedChannel';
 }
 
 export function getAttachmentMediaType(attachment: ApiAttachment) {

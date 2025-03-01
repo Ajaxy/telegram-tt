@@ -31,13 +31,6 @@ export interface ApiGroupCall {
   isSpeakerDisabled?: boolean;
 }
 
-export interface PhoneCallAction {
-  isOutgoing: boolean;
-  isVideo?: boolean;
-  duration?: number;
-  reason?: 'missed' | 'disconnect' | 'hangup' | 'busy';
-}
-
 export interface ApiPhoneCall {
   state?: 'active' | 'waiting' | 'discarded' | 'requested' | 'accepted' | 'requesting';
   isConnected?: boolean;
@@ -73,3 +66,5 @@ export interface ApiPhoneCall {
   screencastState?: VideoState;
   isBatteryLow?: boolean;
 }
+
+export type ApiPhoneCallDiscardReason = 'missed' | 'disconnect' | 'hangup' | 'busy';

@@ -290,11 +290,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isOutgoing: false,
           content: {
             action: {
-              type: 'joinedChannel',
               mediaType: 'action',
-              text: '',
-              translationValues: [],
-              targetChatId: message.chatId,
+              type: 'channelJoined',
+              inviterId: channelJoinInfo?.inviterId,
+              isViaRequest: channelJoinInfo?.isViaRequest || undefined,
             },
           },
         } satisfies ApiMessage);

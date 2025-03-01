@@ -155,13 +155,15 @@ export type LangFn = {
   conjunction: (list: string[]) => string;
   disjunction: (list: string[]) => string;
   number: (value: number) => string;
+  internalFormatters: LangFormatters;
   isRtl?: boolean;
   code: string;
   pluralCode: string;
   languageInfo: ApiLanguage;
 };
 
-type ListFormat = Pick<Intl.ListFormat, 'format'>;
+// Allow basic polyfill
+type ListFormat = Pick<Intl.ListFormat, 'format' | 'formatToParts'>;
 
 export type LangFormatters = {
   pluralRules: Intl.PluralRules;

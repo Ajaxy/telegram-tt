@@ -84,6 +84,7 @@ export const IS_WAVE_TRANSFORM_SUPPORTED = !IS_MOBILE
 export const IS_SNAP_EFFECT_SUPPORTED = !IS_MOBILE
   && !IS_FIREFOX // https://bugzilla.mozilla.org/show_bug.cgi?id=1896504
   && !IS_SAFARI;
+export const IS_FLUID_BACKGROUND_SUPPORTED = !IS_FIREFOX;
 
 const TEST_VIDEO = document.createElement('video');
 

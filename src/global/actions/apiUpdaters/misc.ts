@@ -217,15 +217,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'newMessage': {
-      const actionStarGift = update.message.content?.action?.starGift;
+      const action = update.message.content?.action;
       if (!update.message.isOutgoing && update.message.chatId !== SERVICE_NOTIFICATIONS_USER_ID) return undefined;
-      if (actionStarGift?.type !== 'starGiftUnique') return undefined;
+      if (action?.type !== 'starGiftUnique') return undefined;
+      const actionStarGift = action.gift;
 
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const tabState = selectTabState(global, tabId);
         if (tabState.isWaitingForStarGiftUpgrade) {
           actions.openUniqueGiftBySlug({
-            slug: actionStarGift.gift.slug,
+            slug: actionStarGift.slug,
             tabId,
           });
 
@@ -259,8 +260,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
                   gift: {
                     key: 'GiftUnique',
                     variables: {
-                      title: actionStarGift.gift.title,
-                      number: actionStarGift.gift.number,
+                      title: actionStarGift.title,
+                      number: actionStarGift.number,
                     },
                   },
                   peer: getPeerTitle(getTranslationFn(), receiver),

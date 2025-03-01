@@ -1,4 +1,4 @@
-import type { ApiMessageActionStarGift, ApiSavedStarGift } from '../../../api/types';
+import type { ApiInputSavedStarGift, ApiSavedStarGift } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -208,32 +208,35 @@ addActionHandler('openGiftInfoModalFromMessage', (global, actions, payload): Act
   if (!message || !message.content.action) return;
 
   const action = message.content.action;
-  if (action.type === 'starGiftUnique') {
-    actions.openGiftInfoModal({ gift: action.starGift?.gift!, tabId });
-    return;
-  }
+  if (action.type !== 'starGift' && action.type !== 'starGiftUnique') return;
 
-  if (action.type !== 'starGift') return;
+  const starGift = action.type === 'starGift' ? action : undefined;
+  const uniqueGift = action.type === 'starGiftUnique' ? action : undefined;
 
-  const starGift = action.starGift! as ApiMessageActionStarGift;
+  const giftReceiverId = action.peerId || (message.isOutgoing ? message.chatId : global.currentUserId!);
 
-  const giftReceiverId = message.isOutgoing ? message.chatId : global.currentUserId!;
+  const inputGift: ApiInputSavedStarGift = action.savedId
+    ? { type: 'chat', chatId, savedId: action.savedId }
+    : { type: 'user', messageId };
 
-  const gift = {
+  const gift: ApiSavedStarGift = {
     date: message.date,
-    gift: starGift.gift,
-    message: starGift.message,
-    starsToConvert: starGift.starsToConvert,
-    isNameHidden: starGift.isNameHidden,
-    isUnsaved: !starGift.isSaved,
-    fromId: message.isOutgoing ? global.currentUserId : message.chatId,
-    messageId: (!message.isOutgoing || chatId === global.currentUserId) ? message.id : undefined,
-    isConverted: starGift.isConverted,
-    upgradeMsgId: starGift.upgradeMsgId,
-    canUpgrade: starGift.canUpgrade,
-    alreadyPaidUpgradeStars: starGift.alreadyPaidUpgradeStars,
-    inputGift: starGift.inputSavedGift,
-  } satisfies ApiSavedStarGift;
+    gift: action.gift,
+    message: starGift?.message,
+    starsToConvert: starGift?.starsToConvert,
+    isNameHidden: starGift?.isNameHidden,
+    isUnsaved: !action.isSaved,
+    fromId: action.fromId,
+    messageId: message.id,
+    isConverted: starGift?.isConverted,
+    upgradeMsgId: starGift?.upgradeMsgId,
+    canUpgrade: starGift?.canUpgrade,
+    alreadyPaidUpgradeStars: starGift?.alreadyPaidUpgradeStars,
+    inputGift,
+    canExportAt: uniqueGift?.canExportAt,
+    savedId: action.savedId,
+    transferStars: uniqueGift?.transferStars,
+  };
 
   actions.openGiftInfoModal({ peerId: giftReceiverId, gift, tabId });
 });

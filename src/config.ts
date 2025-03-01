@@ -173,6 +173,7 @@ export const TMP_CHAT_ID = '0';
 
 export const ANIMATION_END_DELAY = 100;
 export const ANIMATION_WAVE_MIN_INTERVAL = 200;
+export const MESSAGE_APPEARANCE_DELAY = 10;
 
 export const SCROLL_MIN_DURATION = 300;
 export const SCROLL_MAX_DURATION = 600;

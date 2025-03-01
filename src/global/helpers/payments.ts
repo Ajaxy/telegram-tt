@@ -317,9 +317,9 @@ export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransa
   const { transactionId, stars } = action;
 
   return {
-    id: transactionId!,
+    id: transactionId,
     stars: {
-      amount: stars!,
+      amount: stars,
       nanos: 0,
     },
     peer: {
@@ -337,17 +337,17 @@ export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiSt
 
   if (action?.type !== 'prizeStars') return undefined;
 
-  const { transactionId, stars, targetChatId } = action;
+  const { transactionId, stars, boostPeerId } = action;
 
   return {
-    id: transactionId!,
+    id: transactionId,
     stars: {
-      amount: stars!,
+      amount: stars,
       nanos: 0,
     },
     peer: {
       type: 'peer',
-      id: targetChatId!,
+      id: boostPeerId,
     },
     date: message.date,
     giveawayPostId: message.id,

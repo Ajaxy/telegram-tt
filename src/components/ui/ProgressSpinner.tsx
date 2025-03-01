@@ -50,7 +50,7 @@ const ProgressSpinner: FC<{
 
   const dpr = useDevicePixelRatio();
 
-  const color = useDynamicColorListener(canvasRef, !withColor);
+  const color = useDynamicColorListener(canvasRef, undefined, !withColor);
 
   useEffect(() => {
     let isFirst = true;

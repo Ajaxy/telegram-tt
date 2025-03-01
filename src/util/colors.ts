@@ -192,6 +192,12 @@ export function getColorLuma(rgbColor: [number, number, number]) {
   const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   return luma;
 }
+// https://stackoverflow.com/a/64090995
+export function hsl2rgb([h, s, l]: [number, number, number]): [number, number, number] {
+  let a = s * Math.min(l, 1 - l);
+  let f = (n: number, k = (n + h / 30) % 12) => l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+  return [f(0), f(8), f(4)];
+}
 
 // Function was adapted from https://github.com/telegramdesktop/tdesktop/blob/35ff621b5b52f7e3553fb0f990ea13ade7101b8e/Telegram/SourceFiles/data/data_wall_paper.cpp#L518
 export function getPatternColor(rgbColor: [number, number, number]) {
@@ -202,7 +208,9 @@ export function getPatternColor(rgbColor: [number, number, number]) {
     ? Math.max(0, value * 0.65)
     : Math.max(0, Math.min(1, 1 - value * 0.65));
 
-  return `hsla(${hue * 360}, ${saturation * 100}%, ${value * 100}%, .4)`;
+  const rgb = hsl2rgb([hue * 360, saturation, value]);
+  const hex = rgb2hex(rgb.map((c) => Math.floor(c * 255)) as [number, number, number]);
+  return `#${hex}66`;
 }
 
 /* eslint-disable no-bitwise */

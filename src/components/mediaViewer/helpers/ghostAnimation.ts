@@ -330,6 +330,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
       mediaSelector = '.avatar-media';
       break;
 
+    case MediaViewerOrigin.ChannelAvatar:
     case MediaViewerOrigin.SuggestedAvatar:
       containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = '.Avatar img';
@@ -370,6 +371,7 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.StarsTransaction:
     case MediaViewerOrigin.PreviewMedia:
+    case MediaViewerOrigin.ChannelAvatar:
       ghost.classList.add('rounded-corners');
       break;
 

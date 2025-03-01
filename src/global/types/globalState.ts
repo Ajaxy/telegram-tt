@@ -73,6 +73,7 @@ import type { RegularLangFnParameters } from '../../util/localization';
 import type { TabState } from './tabState';
 
 export type GlobalState = {
+  cacheVersion: number;
   isInited: boolean;
   config?: ApiConfig;
   appConfig?: ApiAppConfig;

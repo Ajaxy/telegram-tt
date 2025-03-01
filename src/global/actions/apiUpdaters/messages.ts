@@ -208,7 +208,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         if (!message) return;
 
         // Workaround for a weird behavior when interaction is received after watching reaction
-        if (getMessageText(message) !== update.emoji) return;
+        if (getMessageText(message)?.text !== update.emoji) return;
 
         const tabState = selectTabState(global, tabId);
         global = updateTabState(global, {
@@ -1163,7 +1163,7 @@ export function deleteMessages<T extends GlobalState>(
         return;
       }
 
-      if (message.content.action?.photo) {
+      if (message.content.action?.type === 'chatEditPhoto' && message.content.action.photo) {
         global = deletePeerPhoto(global, chatId, message.content.action.photo.id, true);
       }
 
@@ -1251,7 +1251,7 @@ export function deleteMessages<T extends GlobalState>(
         }
       }
 
-      if (message?.content.action?.photo) {
+      if (message?.content.action?.type === 'chatEditPhoto' && message.content.action.photo) {
         global = deletePeerPhoto(global, commonBoxChatId, message.content.action.photo.id, true);
       }
 

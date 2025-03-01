@@ -29,7 +29,7 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useMessageObservers from './hooks/useMessageObservers';
 import useScrollHooks from './hooks/useScrollHooks';
 
-import ActionMessage from './ActionMessage';
+import ActionMessage from './message/ActionMessage';
 import Message from './message/Message';
 import SenderGroupContainer from './message/SenderGroupContainer';
 import SponsoredMessage from './message/SponsoredMessage';
@@ -155,7 +155,7 @@ const MessageListContent: FC<OwnProps> = ({
         senderGroup.length === 1
         && !isAlbum(senderGroup[0])
         && isActionMessage(senderGroup[0])
-        && !senderGroup[0].content.action?.phoneCall
+        && senderGroup[0].content.action?.type !== 'phoneCall'
       ) {
         const message = senderGroup[0]!;
         const isLastInList = (
@@ -169,15 +169,14 @@ const MessageListContent: FC<OwnProps> = ({
             key={message.id}
             message={message}
             threadId={threadId}
-            messageListType={type}
-            isInsideTopic={Boolean(threadId && threadId !== MAIN_THREAD_ID && !isSavedDialog)}
-            observeIntersectionForReading={observeIntersectionForReading}
+            observeIntersectionForBottom={observeIntersectionForReading}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isJustAdded={isLastInList && isNewMessage}
             isLastInList={isLastInList}
+            getIsMessageListReady={getIsReady}
             onIntersectPinnedMessage={onIntersectPinnedMessage}
           />,
         ]);

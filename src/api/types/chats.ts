@@ -122,7 +122,7 @@ export interface ApiChatFullInfo {
   };
   joinInfo?: {
     joinedDate: number;
-    inviter?: string;
+    inviterId?: string;
     isViaRequest?: boolean;
   };
   linkedChatId?: string;

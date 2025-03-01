@@ -92,11 +92,23 @@ export function buildMessageMediaContent(
 
   const isExpiredVoice = isExpiredVoiceMessage(media);
   if (isExpiredVoice) {
-    return { isExpiredVoice };
+    return {
+      action: {
+        mediaType: 'action',
+        type: 'expired',
+        isVoice: true,
+      },
+    };
   }
   const isExpiredRoundVideo = isExpiredRoundVideoMessage(media);
   if (isExpiredRoundVideo) {
-    return { isExpiredRoundVideo };
+    return {
+      action: {
+        mediaType: 'action',
+        type: 'expired',
+        isRoundVideo: true,
+      },
+    };
   }
 
   const voice = buildVoice(media);
@@ -339,18 +351,18 @@ function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
   };
 }
 
-function isExpiredVoiceMessage(media: GramJs.TypeMessageMedia): MediaContent['isExpiredVoice'] {
+function isExpiredVoiceMessage(media: GramJs.TypeMessageMedia): boolean {
   if (!(media instanceof GramJs.MessageMediaDocument)) {
     return false;
   }
-  return !media.document && media.voice;
+  return Boolean(!media.document && media.voice);
 }
 
-function isExpiredRoundVideoMessage(media: GramJs.TypeMessageMedia): MediaContent['isExpiredRoundVideo'] {
+function isExpiredRoundVideoMessage(media: GramJs.TypeMessageMedia): boolean {
   if (!(media instanceof GramJs.MessageMediaDocument)) {
     return false;
   }
-  return !media.document && media.round;
+  return Boolean(!media.document && media.round);
 }
 
 function buildVoice(media: GramJs.TypeMessageMedia): ApiVoice | undefined {
