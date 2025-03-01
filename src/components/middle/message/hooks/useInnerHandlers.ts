@@ -95,6 +95,16 @@ export default function useInnerHandlers({
       return;
     }
 
+    if (isRepliesChat && replyToPeerId && replyToTopId) {
+      openThread({
+        isComments: true,
+        originChannelId: replyToPeerId,
+        originMessageId: replyToTopId,
+        focusMessageId: replyToMsgId,
+      });
+      return;
+    }
+
     focusMessage({
       chatId: replyToPeerId || chatId,
       threadId: isRepliesChat ? replyToTopId : threadId, // Open comments from Replies bot, otherwise, keep current thread
