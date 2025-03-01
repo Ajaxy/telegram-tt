@@ -8,6 +8,7 @@ import {
 } from '../helpers';
 import { selectChat } from './chats';
 import { selectTabState } from './tabs';
+import { selectUser } from './users';
 
 export function selectPaymentInputInvoice<T extends GlobalState>(
   global: T,
@@ -76,7 +77,8 @@ export function selectCanUseGiftProfileFilter<T extends GlobalState>(
   global: T, peerId: string,
 ) {
   const chat = selectChat(global, peerId);
-  return chat && isChatChannel(chat);
+  const user = selectUser(global, peerId);
+  return Boolean(user) || (chat && isChatChannel(chat));
 }
 
 export function selectGiftProfileFilter<T extends GlobalState>(
