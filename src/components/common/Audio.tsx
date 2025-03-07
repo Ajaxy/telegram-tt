@@ -412,7 +412,7 @@ const Audio: FC<OwnProps> = ({
   return (
     <div className={fullClassName} dir={lang.isRtl ? 'rtl' : 'ltr'}>
       {isSelectable && (
-        <div className="message-select-control">
+        <div className="message-select-control no-selection">
           {isSelected && <Icon name="select" />}
         </div>
       )}

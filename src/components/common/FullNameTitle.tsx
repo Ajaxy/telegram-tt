@@ -148,6 +148,7 @@ const FullNameTitle: FC<OwnProps> = ({
             >
               <CustomEmoji
                 forceAlways
+                className="no-selection"
                 withSparkles={emojiStatus.type === 'collectible'}
                 sparklesClassName="statusSparkles"
                 sparklesStyle={buildStyle(statusSparklesColor && `color: ${statusSparklesColor}`)}

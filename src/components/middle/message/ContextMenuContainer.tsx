@@ -365,9 +365,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
     const selectionText = getSelectionAsFormattedText(selectionRange);
 
+    const messageText = message.content.text!.text!.replace(/\u00A0/g, ' ');
+
     setCanQuoteSelection(
       selectionText.text.trim().length > 0
-      && message.content.text!.text!.includes(selectionText.text),
+      && messageText.includes(selectionText.text),
     );
   }, [
     selectionRange, selectionRange?.collapsed, selectionRange?.startOffset, selectionRange?.endOffset,

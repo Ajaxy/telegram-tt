@@ -231,6 +231,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         className,
         isQuote && 'is-quote',
         mediaThumbnail && 'with-thumb',
+        'no-selection',
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
       onClick={handleClick}

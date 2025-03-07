@@ -3,6 +3,7 @@
 // Common styles for all media-type components across the app.
 .media-inner {
   position: relative;
+  user-select: none;
 
   video.full-media,
   img.full-media,

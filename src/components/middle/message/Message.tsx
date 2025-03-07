@@ -1513,6 +1513,7 @@ const Message: FC<OwnProps & StateProps> = ({
               {!asForwarded && senderEmojiStatus && (
                 <CustomEmoji
                   documentId={senderEmojiStatus.documentId}
+                  className="no-selection"
                   loopLimit={EMOJI_STATUS_LOOP_LIMIT}
                   observeIntersectionForLoading={observeIntersectionForLoading}
                   observeIntersectionForPlaying={observeIntersectionForPlaying}
@@ -1587,13 +1588,15 @@ const Message: FC<OwnProps & StateProps> = ({
         data-should-update-views={message.viewsCount !== undefined}
       />
       {!isInDocumentGroup && (
-        <div className="message-select-control">
+        <div className="message-select-control no-selection">
           {isSelected && <Icon name="select" />}
         </div>
       )}
       {isLastInDocumentGroup && (
         <div
-          className={buildClassName('message-select-control group-select', isGroupSelected && 'is-selected')}
+          className={buildClassName(
+            'message-select-control group-select no-selection', isGroupSelected && 'is-selected',
+          )}
           onClick={handleDocumentGroupSelectAll}
         >
           {isGroupSelected && (
