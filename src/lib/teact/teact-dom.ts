@@ -253,7 +253,7 @@ function initComponent(
 
   $element.componentInstance.context = currentContext;
 
-  if (componentInstance.mountState === MountState.New) {
+  if (componentInstance.mountState === MountState.Unmounted) {
     $element = mountComponent(componentInstance);
     setupComponentUpdateListener(parentEl, $element, $parent, currentContext, index);
   }

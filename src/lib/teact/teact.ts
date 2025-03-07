@@ -66,7 +66,7 @@ export interface RefObject<T = any> {
 }
 
 export enum MountState {
-  New,
+  Mounting,
   Mounted,
   Unmounted,
 }
@@ -196,7 +196,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
     Component,
     name: Component.name,
     props,
-    mountState: MountState.New,
+    mountState: MountState.Unmounted,
   };
 
   componentInstance.$element = buildComponentElement(componentInstance);
@@ -463,14 +463,8 @@ export function renderComponent(componentInstance: ComponentInstance) {
   }
 
   componentInstance.renderedValue = newRenderedValue;
-
   const children = Array.isArray(newRenderedValue) ? newRenderedValue : [newRenderedValue];
-
-  if (componentInstance.mountState === MountState.New) {
-    componentInstance.$element.children = buildChildren(children, true);
-  } else {
-    componentInstance.$element = buildComponentElement(componentInstance, children);
-  }
+  componentInstance.$element = buildComponentElement(componentInstance, children);
 
   return componentInstance.$element;
 }
@@ -497,13 +491,14 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
 
 export function mountComponent(componentInstance: ComponentInstance) {
   componentInstance.id = ++lastComponentId;
+  componentInstance.mountState = MountState.Mounting;
   renderComponent(componentInstance);
   componentInstance.mountState = MountState.Mounted;
   return componentInstance.$element;
 }
 
 export function unmountComponent(componentInstance: ComponentInstance) {
-  if (componentInstance.mountState !== MountState.Mounted) {
+  if (componentInstance.mountState === MountState.Unmounted) {
     return;
   }
 
@@ -565,13 +560,11 @@ function helpGc(componentInstance: ComponentInstance) {
   componentInstance.hooks = undefined as any;
   componentInstance.$element = undefined as any;
   componentInstance.renderedValue = undefined;
-  componentInstance.Component = undefined as any;
-  componentInstance.props = undefined as any;
   componentInstance.onUpdate = undefined;
 }
 
 function prepareComponentForFrame(componentInstance: ComponentInstance) {
-  if (componentInstance.mountState !== MountState.Mounted) {
+  if (componentInstance.mountState === MountState.Unmounted) {
     return;
   }
 
@@ -583,7 +576,7 @@ function prepareComponentForFrame(componentInstance: ComponentInstance) {
 }
 
 function forceUpdateComponent(componentInstance: ComponentInstance) {
-  if (componentInstance.mountState !== MountState.Mounted || !componentInstance.onUpdate) {
+  if (componentInstance.mountState === MountState.Unmounted || !componentInstance.onUpdate) {
     return;
   }
 
