@@ -425,8 +425,8 @@
 "SettingsSendEnter" = "Send with Enter";
 "SettingsSendCmdenter" = "Send with Cmd+Enter";
 "SettingsSendCtrlenter" = "Send with Ctrl+Enter";
-"SettingsSendEnterDescription" = "New line by Shift + Enter";
-"SettingsSendPlusEnterDescription" = "New line by Enter";
+"SettingsSendEnterDescription" = "Press Shift + Enter for new line";
+"SettingsSendPlusEnterDescription" = "Press Enter for new line";
 "SettingsTimeFormat" = "Time format";
 "SettingsTimeFormat12" = "12-hour";
 "SettingsTimeFormat24" = "24-hour";
@@ -1408,7 +1408,7 @@
 "GiftInfoConvertDescriptionPeriod_other" = "Conversion is available for the next **{count} days**.";
 "GiftInfoSaved" = "This gift is visible on your profile. {link}";
 "GiftInfoHidden" = "This gift is hidden. Only you can see it. {link}";
-"GiftInfoChannelSaved" = "This gift is visible in your channel's Gifts. {link}";
+"GiftInfoChannelSaved" = "This gift is visible in your channel's profile. {link}";
 "GiftInfoChannelHidden" = "This gift is hidden from visitors of your channel. {link}";
 "GiftInfoSavedHide" = "Hide >";
 "GiftInfoSavedShow" = "Show >";
@@ -1459,7 +1459,7 @@
 "GiftPeerUpgradeText" = "Let {peer} turn your gift into a unique collectible.";
 "GiftUpgradeTextOwn" = "Turn your gift into a unique collectible that you can transfer or auction.";
 "GiftUpgradeKeepDetails" = "Keep sender's name and comment";
-"GiftUpgradeButton" = "Upgrade {amount}";
+"GiftUpgradeButton" = "Upgrade for {amount}";
 "GiftUpgradedTitle" = "This gift is now a collectible";
 "GiftUpgradedDescription" = "You have received a unique number, model, backdrop and symbol for your gift.";
 "GiftMakeUnique" = "Make unique for {stars}";
@@ -1731,7 +1731,7 @@
 "ActionStarGiftConvertedText" = "{peer} converted this gift to {amount}.";
 "ActionStarGiftConvertedTextYou" = "You converted this gift to {amount}.";
 "ActionStarGiftChannelText" = "Add this gift to your channel's profile or convert it to {amount}.";
-"ActionStarGiftDisplaying" = "You kept this gift on your profile.";
+"ActionStarGiftDisplaying" = "You added this gift to your profile.";
 "ActionStarGiftChannelDisplaying" = "This gift is displayed to visitors of your channel.";
 "ActionStarGiftUpgradeText" = "{peer} can turn this gift to a unique collectible.";
 "ActionStarGiftUpgradeTextYou" = "Tap “Unpack” to turn this gift to a unique collectible.";
