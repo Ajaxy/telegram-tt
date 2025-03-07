@@ -94,4 +94,10 @@
       opacity: 0.8;
     }
   }
+
+  .unread::after {
+    content: "•";
+    font-size: 2rem;
+    margin-inline-start: 0.125rem;
+  }
 }

@@ -242,10 +242,10 @@ const Audio: FC<OwnProps> = ({
   });
 
   useEffect(() => {
-    if (onReadMedia && isMediaUnread && (isPlaying || isDownloading)) {
+    if (onReadMedia && isMediaUnread && isPlaying) {
       onReadMedia();
     }
-  }, [isPlaying, isMediaUnread, onReadMedia, isDownloading]);
+  }, [isPlaying, isMediaUnread, onReadMedia]);
 
   const handleDownloadClick = useLastCallback(() => {
     if (isDownloading) {

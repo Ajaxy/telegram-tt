@@ -665,8 +665,8 @@ export function getIsDownloading(activeDownloads: ActiveDownloads, media: Downlo
 }
 
 export function getTimestampableMedia(message: MediaContainer) {
-  return getMessageVideo(message)
-    || getMessageWebPageVideo(message)
+  const video = getMessageVideo(message) || getMessageWebPageVideo(message);
+  return (video && !video.isRound && !video.isGif ? video : undefined)
     || getMessageAudio(message)
     || getMessageVoice(message);
 }

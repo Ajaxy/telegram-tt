@@ -181,13 +181,11 @@
     align-items: flex-end;
 
     &.unread::after {
-      content: "";
-      position: relative;
-      margin: 0 0 0.375rem 0.25rem;
-      width: 0.4375rem;
-      height: 0.4375rem;
-      border-radius: 50%;
-      background-color: var(--accent-color);
+      content: "•";
+      font-size: 2rem;
+      line-height: 1.3125rem;
+      color: var(--accent-color);
+      margin-inline-start: 0.125rem;
     }
   }
 
