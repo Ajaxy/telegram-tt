@@ -668,7 +668,9 @@ const ActionMessageText = ({
 
       case 'suggestProfilePhoto': {
         const actionPeer = (isOutgoing ? chat : sender)!;
-        const actionPeerLink = renderPeerLink(actionPeer.id, getPeerTitle(lang, actionPeer) || userFallbackText);
+        const actionPeerLink = renderPeerLink(
+          actionPeer.id, getPeerTitle(lang, actionPeer) || userFallbackText, asPreview,
+        );
 
         return translateWithYou(lang, 'ActionSuggestedPhoto', isOutgoing, { user: actionPeerLink });
       }

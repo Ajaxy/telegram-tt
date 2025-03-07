@@ -198,7 +198,10 @@ export function buildApiMessageWithChatId(
   const isEdited = Boolean(mtpMessage.editDate) && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
-  } = buildReplyButtons(mtpMessage.replyMarkup, mtpMessage.id) || {};
+  } = buildReplyButtons(
+    mtpMessage.replyMarkup,
+    mtpMessage.media instanceof GramJs.MessageMediaInvoice ? mtpMessage.media.receiptMsgId : undefined,
+  ) || {};
   const { mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
