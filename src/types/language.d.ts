@@ -516,6 +516,7 @@ export interface LangPair {
   'AboutPremiumDescription': undefined;
   'AboutPremiumDescription2': undefined;
   'OpenUrlTitle': undefined;
+  'OpenUrlConfirm': undefined;
   'BotWebViewOpenBot': undefined;
   'WebAppReloadPage': undefined;
   'WebAppRemoveBot': undefined;
@@ -1540,7 +1541,7 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'TelegramPremiumUserDialogTitle': {
     'user': V;
   };
-  'OpenUrlAlert2': {
+  'OpenUrlText': {
     'url': V;
   };
   'ConversationOpenBotLinkLogin': {
