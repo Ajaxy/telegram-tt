@@ -16,8 +16,8 @@ import {
   selectThreadIdFromMessage,
   selectTopic,
 } from '../../../global/selectors';
+import { ensureProtocol } from '../../../util/browser/url';
 import { formatDateTimeToString, formatShortDuration } from '../../../util/dates/dateFormat';
-import { ensureProtocol } from '../../../util/ensureProtocol';
 import { formatCurrency } from '../../../util/formatCurrency';
 import { formatStarsAsText } from '../../../util/localization/format';
 import { conjuctionWithNodes } from '../../../util/localization/utils';

@@ -2,8 +2,8 @@ import type { ThreadId } from '../types';
 
 import { RE_TG_LINK, RE_TME_LINK } from '../config';
 import { toChannelId } from '../global/helpers';
+import { ensureProtocol } from './browser/url';
 import { parseTimestampDuration } from './dates/timestamp';
-import { ensureProtocol } from './ensureProtocol';
 import { isUsernameValid } from './username';
 import { IS_BAD_URL_PARSER } from './windowEnvironment';
 

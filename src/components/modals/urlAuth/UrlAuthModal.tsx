@@ -9,7 +9,7 @@ import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
-import { ensureProtocol } from '../../../util/ensureProtocol';
+import { ensureProtocol } from '../../../util/browser/url';
 import renderText from '../../common/helpers/renderText';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -44,8 +44,8 @@ const UrlAuthModal: FC<OwnProps & StateProps> = ({
       acceptAction({
         isWriteAllowed: isWriteAccessChecked,
       });
-    } else {
-      window.open(ensureProtocol(currentAuth?.url), '_blank', 'noopener');
+    } else if (currentAuth?.url) {
+      window.open(ensureProtocol(currentAuth.url), '_blank', 'noopener');
     }
     closeUrlAuthModal();
   }, [

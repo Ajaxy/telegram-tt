@@ -37,9 +37,9 @@ import {
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
+import { ensureProtocol, isMixedScriptUrl } from '../../../util/browser/url';
 import { copyTextToClipboardFromPromise } from '../../../util/clipboard';
 import { isDeepLink } from '../../../util/deepLinkParser';
-import { ensureProtocol } from '../../../util/ensureProtocol';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   areSortedArraysIntersecting,
@@ -1866,6 +1866,8 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
     url, shouldSkipModal, ignoreDeepLinks, tabId = getCurrentTabId(),
   } = payload;
   const urlWithProtocol = ensureProtocol(url)!;
+  const parsedUrl = new URL(urlWithProtocol);
+  const isMixedScript = isMixedScriptUrl(urlWithProtocol);
 
   if (!ignoreDeepLinks && isDeepLink(urlWithProtocol)) {
     actions.closeStoryViewer({ tabId });
@@ -1877,8 +1879,6 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
 
   const { appConfig, config } = global;
   if (appConfig) {
-    const parsedUrl = new URL(urlWithProtocol);
-
     if (config?.autologinToken && appConfig.autologinDomains.includes(parsedUrl.hostname)) {
       parsedUrl.searchParams.set(AUTOLOGIN_TOKEN_KEY, config.autologinToken);
       window.open(parsedUrl.href, '_blank', 'noopener');
@@ -1896,9 +1896,9 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   const shouldDisplayModal = !urlWithProtocol.match(RE_TELEGRAM_LINK) && !shouldSkipModal;
 
   if (shouldDisplayModal) {
-    actions.toggleSafeLinkModal({ url: urlWithProtocol, tabId });
+    actions.toggleSafeLinkModal({ url: isMixedScript ? parsedUrl.toString() : urlWithProtocol, tabId });
   } else {
-    window.open(urlWithProtocol, '_blank', 'noopener');
+    window.open(parsedUrl, '_blank', 'noopener');
   }
 });
 
