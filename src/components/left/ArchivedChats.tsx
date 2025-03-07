@@ -71,7 +71,7 @@ const ArchivedChats: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderTitle,
     transitionClassNames: titleClassNames,
-  } = useShowTransitionDeprecated(!isForumPanelOpen);
+  } = useShowTransitionDeprecated(!isForumPanelOpen, undefined, undefined, false);
 
   const {
     shouldRenderForumPanel, handleForumPanelAnimationEnd,
