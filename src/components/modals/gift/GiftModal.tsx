@@ -89,8 +89,9 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   const chat = peer && isApiPeerChat(peer) ? peer : undefined;
 
   const [selectedGift, setSelectedGift] = useState<GiftOption | undefined>();
-  const [isHeaderHidden, setIsHeaderHidden] = useState(true);
-  const [isHeaderForStarGifts, setIsHeaderForStarGifts] = useState(false);
+  const [shouldShowMainScreenHeader, setShouldShowMainScreenHeader] = useState(false);
+  const [isMainScreenHeaderForStarGifts, setIsMainScreenHeaderForStarGifts] = useState(false);
+  const [isGiftScreenHeaderForStarGifts, setIsGiftScreenHeaderForStarGifts] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState<StarGiftCategory>('all');
 
@@ -110,27 +111,31 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: scrollerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
 
+  const isGiftScreen = Boolean(selectedGift);
+  const shouldShowHeader = isGiftScreen || shouldShowMainScreenHeader;
+  const isHeaderForStarGifts = isGiftScreen ? isGiftScreenHeaderForStarGifts : isMainScreenHeaderForStarGifts;
+
   useEffect(() => {
     if (!isOpen) {
-      setIsHeaderHidden(true);
+      setShouldShowMainScreenHeader(false);
       setSelectedGift(undefined);
       setSelectedCategory('all');
     }
   }, [isOpen]);
 
   const handleScroll = useLastCallback((e: React.UIEvent<HTMLDivElement>) => {
-    if (selectedGift) return;
+    if (isGiftScreen) return;
     const currentTarget = e.currentTarget;
 
     runThrottledForScroll(() => {
       const { scrollTop } = currentTarget;
 
-      setIsHeaderHidden(scrollTop <= 150);
+      setShouldShowMainScreenHeader(scrollTop > 150);
 
       if (transitionRef.current && giftHeaderRef.current) {
         const { top: headerTop } = giftHeaderRef.current.getBoundingClientRect();
         const { top: transitionTop } = transitionRef.current.getBoundingClientRect();
-        setIsHeaderForStarGifts(headerTop - transitionTop <= 0);
+        setIsMainScreenHeaderForStarGifts(headerTop - transitionTop <= 0);
       }
     });
   });
@@ -193,8 +198,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
 
   const handleGiftClick = useLastCallback((gift: GiftOption) => {
     setSelectedGift(gift);
-    setIsHeaderForStarGifts('id' in gift);
-    setIsHeaderHidden(false);
+    setIsGiftScreenHeaderForStarGifts('id' in gift);
   });
 
   function renderStarGifts() {
@@ -235,7 +239,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleCloseButtonClick = useLastCallback(() => {
-    if (selectedGift) {
+    if (isGiftScreen) {
       setSelectedGift(undefined);
       return;
     }
@@ -270,7 +274,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
     );
   }
 
-  const isBackButton = Boolean(selectedGift);
+  const isBackButton = isGiftScreen;
 
   const buttonClassName = buildClassName(
     'animated-close-icon',
@@ -298,7 +302,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
         <div className={buttonClassName} />
       </Button>
       <BalanceBlock className={styles.balance} balance={starBalance} withAddButton />
-      <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
+      <div className={buildClassName(styles.header, !shouldShowHeader && styles.hiddenHeader)}>
         <Transition
           name="slideVerticalFade"
           activeKey={Number(isHeaderForStarGifts)}
@@ -313,10 +317,10 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
         ref={transitionRef}
         className={styles.transition}
         name="pushSlide"
-        activeKey={selectedGift ? 1 : 0}
+        activeKey={isGiftScreen ? 1 : 0}
       >
-        {!selectedGift && renderMainScreen()}
-        {selectedGift && renderingModal?.forPeerId && (
+        {!isGiftScreen && renderMainScreen()}
+        {isGiftScreen && renderingModal?.forPeerId && (
           <GiftSendingOptions gift={selectedGift} peerId={renderingModal.forPeerId} />
         )}
       </Transition>
