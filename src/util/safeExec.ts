@@ -3,20 +3,26 @@ import { handleError } from './handleError';
 
 const SAFE_EXEC_ENABLED = !DEBUG_MORE;
 
-export default function safeExec<F extends AnyFunction>(
-  cb: F,
-  rescue?: (err: Error) => void,
-  always?: NoneToVoidFunction,
-): ReturnType<F> | undefined {
+type SafeExecOptions = {
+  rescue?: (err: Error) => void;
+  always?: NoneToVoidFunction;
+  shouldIgnoreError?: boolean;
+};
+
+export default function safeExec<T extends AnyFunction>(cb: T, options?: SafeExecOptions): ReturnType<T> | undefined {
   if (!SAFE_EXEC_ENABLED) {
     return cb();
   }
+
+  const { rescue, always, shouldIgnoreError } = options ?? {};
 
   try {
     return cb();
   } catch (err: any) {
     rescue?.(err);
-    handleError(err);
+    if (!shouldIgnoreError) {
+      handleError(err);
+    }
     return undefined;
   } finally {
     always?.();
