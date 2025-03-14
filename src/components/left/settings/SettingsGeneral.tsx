@@ -12,7 +12,8 @@ import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/oldLangProvider';
 import { getSystemTheme } from '../../../util/systemTheme';
 import {
-  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_MAC_OS, IS_WINDOWS,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_LINUX,
+  IS_MAC_OS, IS_WINDOWS,
 } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -153,7 +154,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
           {lang('ChatBackground')}
         </ListItem>
 
-        {IS_ELECTRON && IS_WINDOWS && (
+        {IS_ELECTRON && (IS_WINDOWS || IS_LINUX) && (
           <Checkbox
             label={lang('SettingsTray')}
             checked={Boolean(isTrayIconEnabled)}
