@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiMessageAction } from '../../../api/types/messageActions';
 import type {
   FocusDirection,
+  ScrollTargetPosition,
   ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
@@ -82,6 +83,8 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
   isInSelectMode?: boolean;
   hasUnreadReaction?: boolean;
+  isResizingContainer?: boolean;
+  scrollTargetPosition?: ScrollTargetPosition;
 };
 
 const SINGLE_LINE_ACTIONS: Set<ApiMessageAction['type']> = new Set([
@@ -111,6 +114,8 @@ const ActionMessage = ({
   isCurrentUserPremium,
   isInSelectMode,
   hasUnreadReaction,
+  isResizingContainer,
+  scrollTargetPosition,
   onIntersectPinnedMessage,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
@@ -162,11 +167,13 @@ const ActionMessage = ({
   );
   useFocusMessage({
     elementRef: ref,
-    chatId: message.chatId,
+    chatId,
     isFocused,
     focusDirection,
     noFocusHighlight,
+    isResizingContainer,
     isJustAdded,
+    scrollTargetPosition,
   });
 
   useUnmountCleanup(() => {
@@ -389,6 +396,7 @@ const ActionMessage = ({
       id={getMessageHtmlId(id)}
       className={buildClassName(
         'ActionMessage',
+        'message-list-item',
         styles.root,
         isSingleLine && styles.singleLine,
         isFluidMultiline && styles.fluidMultiline,
@@ -463,6 +471,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       direction: focusDirection,
       noHighlight: noFocusHighlight,
+      isResizingContainer, scrollTargetPosition,
     } = (isFocused && tabState.focusedMessage) || {};
 
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
@@ -481,6 +490,8 @@ export default memo(withGlobal<OwnProps>(
       isInSelectMode: selectIsInSelectMode(global),
       patternColor: themes[selectTheme(global)]?.patternColor,
       hasUnreadReaction,
+      isResizingContainer,
+      scrollTargetPosition,
     };
   },
 )(ActionMessage));
