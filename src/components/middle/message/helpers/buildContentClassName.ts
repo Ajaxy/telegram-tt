@@ -148,6 +148,10 @@ export function buildContentClassName(
     classNames.push('invoice');
   }
 
+  if (invoice && invoice.photo) {
+    classNames.push('has-photo');
+  }
+
   if (storyData) {
     classNames.push('story');
   }

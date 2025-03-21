@@ -5,9 +5,19 @@
     margin-bottom: 0;
   }
 
+  .info {
+    line-height: 1.25;
+  }
+
   .description {
     position: relative;
     margin-top: 0.5rem;
+
+    .description-text {
+      .star-amount-icon {
+        margin-inline-start: 0;
+      }
+    }
 
     &.has-image {
       .content-inner:not(.forwarded-message) & {

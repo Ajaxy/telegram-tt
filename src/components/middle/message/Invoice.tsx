@@ -96,7 +96,7 @@ const Invoice: FC<OwnProps> = ({
         <p className="title">{renderText(title)}</p>
       )}
       {description && (
-        <div>{renderText(description, ['emoji', 'br'])}</div>
+        <div className="info">{renderText(description, ['emoji', 'br'])}</div>
       )}
       <div className={`description ${photo ? 'has-image' : ''}`}>
         {Boolean(photo) && (

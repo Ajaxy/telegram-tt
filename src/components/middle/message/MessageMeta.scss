@@ -91,7 +91,7 @@
 
   .media.no-footer &,
   .Message .custom-shape &,
-  .Message .invoice:not(.has-reactions) & {
+  .Message .invoice:not(.has-reactions).has-photo & {
     --color-accent-own: white;
     --color-accent: white;
     color: white !important;
@@ -108,7 +108,7 @@
   }
 
   .media.no-footer &,
-  .Message .invoice:not(.has-reactions) & {
+  .Message .invoice:not(.has-reactions).has-photo & {
     background: rgba(0, 0, 0, 0.2);
   }
 
