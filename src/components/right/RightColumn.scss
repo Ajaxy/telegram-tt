@@ -34,7 +34,7 @@
 
   .panel-content {
     border-top: 1px solid transparent;
-    transition: border-top-color 250ms ease-in-out;
+    transition: border-top-color 0.2s ease-in-out;
 
     &.scrolled {
       border-top-color: var(--color-borders);
