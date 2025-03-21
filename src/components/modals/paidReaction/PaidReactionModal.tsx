@@ -211,6 +211,7 @@ const PaidReactionModal = ({
         ariaLabel={lang('AccDescrOpenMenu2')}
       >
         <Avatar
+          className={styles.sendAsPeerButtonAvatar}
           size="mini"
           peer={shouldSendAsAnonymous ? ANONYMOUS_PEER : senderPeer}
         />
@@ -226,7 +227,7 @@ const PaidReactionModal = ({
     if (!canChangeSendAsPeer) return undefined;
     return (
       <DropdownMenu
-        className={styles.sendAsPeerMenu}
+        className={buildClassName(styles.sendAsPeerMenu, 'with-menu-transitions')}
         bubbleClassName={styles.sendAsPeerMenuBubble}
         trigger={SendAsPeerMenuButton}
         positionX="right"

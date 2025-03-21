@@ -49,7 +49,12 @@
   margin-right: 0 !important;
 }
 
+.sendAsPeerButtonAvatar {
+  pointer-events: none;
+}
+
 .sendAsPeerMenuButton {
+  transition: background-color 0.15s;
   margin-right: 0.25rem;
   border-radius: 1.5rem;
   padding: 0.25rem !important;
@@ -57,9 +62,10 @@
   height: auto !important;
   background-color: var(--color-background-secondary) !important;
 
-  :active,
-  :hover {
-    background-color: var(--color-interactive-element-hover) !important;
+  &:global(.active),
+  &:active,
+  &:hover {
+    background-color: rgba(var(--color-text-secondary-rgb), 0.15) !important;
   }
 }
 
@@ -69,7 +75,17 @@
 }
 
 .sendAsPeerMenuBubble {
+  max-height: 15rem;
+  overflow-y: auto !important;
+  right: auto !important;
+  left: 50%;
+  transform: translateX(-50%) scale(0.85) !important;
+  transform-origin: center !important;
   max-width: 16rem;
+
+  &:global(.open) {
+    transform: translateX(-50%) scale(1) !important;
+  }
 }
 
 .sendAsPeerMenu {
