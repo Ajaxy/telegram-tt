@@ -3,8 +3,12 @@
   overflow: hidden;
   margin: auto;
 
-  .message-content:not(.is-forwarded):not(.has-subheader).media.text & {
+  .message-content:not(.is-forwarded).media.text & {
     margin: -0.3125rem -0.5rem 0.3125rem;
+  }
+
+  .message-content:not(.is-inverted-media).has-subheader.media.text & {
+    margin-top: 0.3125rem;
   }
 
   &,
