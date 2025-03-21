@@ -292,6 +292,24 @@
       color: #fff;
     }
   }
+
+  .composer-action-buttons-container {
+    width: auto;
+    position: relative;
+
+    + .AttachMenu {
+      margin-left: var(--action-button-compact-fix);
+    }
+  }
+
+  .composer-action-buttons {
+    display: flex;
+    top: 0;
+    right: 0;
+    left: auto;
+    width: auto;
+    height: auto;
+  }
 }
 
 .mobile-symbol-menu-button {
@@ -384,25 +402,32 @@
 }
 
 .message-input-wrapper {
+  --action-button-size: var(--base-height, 3.5rem);
+  --action-button-compact-fix: -1rem;
   display: flex;
 
+  @media (max-width: 600px) {
+    --action-button-size: 2.875rem;
+    --action-button-compact-fix: -0.6875rem;
+  }
+
   .input-scroller {
-    margin-right: 0.5rem;
-    padding-right: 0.25rem;
+    --_scroller-right-gap: calc((var(--action-button-size) + var(--action-button-compact-fix) - 0.125rem));
+    margin-right: calc(-1 * var(--_scroller-right-gap));
+    padding-right: var(--_scroller-right-gap);
   }
 
   > .Spinner {
     align-self: center;
     --spinner-size: 1.5rem;
-    margin-right: -0.5rem;
+    margin-right: 0.5rem;
   }
 
-  > .AttachMenu > .Button,
-  > .Button {
+  .composer-action-button {
     flex-shrink: 0;
     background: none !important;
-    width: var(--base-height, 3.5rem);
-    height: var(--base-height, 3.5rem);
+    width: var(--action-button-size);
+    height: var(--action-button-size);
     margin: 0;
     padding: 0;
     align-self: flex-end;
@@ -411,17 +436,8 @@
       color: var(--color-composer-button);
     }
 
-    + .Button, + .AttachMenu {
-      margin-left: -1rem;
-    }
-
-    @media (max-width: 600px) {
-      width: 2.875rem;
-      height: 2.875rem;
-
-      + .Button, + .AttachMenu {
-        margin-left: -0.6875rem;
-      }
+    + .composer-action-button {
+      margin-left: var(--action-button-compact-fix);
     }
 
     &.bot-menu {

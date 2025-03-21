@@ -46,7 +46,7 @@ const BotMenuButton: FC<OwnProps> = ({
 
   return (
     <Button
-      className={buildClassName('bot-menu', isOpen && 'open')}
+      className={buildClassName('composer-action-button bot-menu', isOpen && 'open')}
       round
       color="translucent"
       disabled={isDisabled}

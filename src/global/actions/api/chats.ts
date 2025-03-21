@@ -23,6 +23,7 @@ import {
   CHAT_LIST_LOAD_SLICE,
   DEBUG,
   GLOBAL_SUGGESTED_CHANNELS_ID,
+  MAX_INT_32,
   RE_TG_LINK,
   SAVED_FOLDER_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -625,13 +626,29 @@ addActionHandler('requestSavedDialogUpdate', async (global, actions, payload): P
 });
 
 addActionHandler('updateChatMutedState', (global, actions, payload): ActionReturnType => {
-  const { chatId, isMuted, mutedUntil } = payload;
+  const { chatId, isMuted } = payload;
+  let { mutedUntil } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+  if (isMuted && !mutedUntil) {
+    mutedUntil = MAX_INT_32;
+  }
+
+  void callApi('updateChatNotifySettings', { chat, settings: { mutedUntil } });
+});
+
+addActionHandler('updateChatSilentPosting', (global, actions, payload): ActionReturnType => {
+  const { chatId, isEnabled } = payload;
+
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  void callApi('updateChatMutedState', { chat, isMuted, mutedUntil });
+  void callApi('updateChatNotifySettings', { chat, settings: { isSilentPosting: isEnabled } });
 });
 
 addActionHandler('updateTopicMutedState', (global, actions, payload): ActionReturnType => {

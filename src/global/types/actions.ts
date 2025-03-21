@@ -1051,6 +1051,10 @@ export interface ActionPayloads {
     isMuted?: boolean;
     mutedUntil?: number;
   };
+  updateChatSilentPosting: {
+    chatId: string;
+    isEnabled: boolean;
+  };
 
   updateChat: {
     chatId: string;

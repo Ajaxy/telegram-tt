@@ -20,6 +20,7 @@ import {
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
 } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
 import { getDebugLogs } from '../../../util/debugConsole';
 import { validateFiles } from '../../../util/files';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
@@ -175,7 +176,7 @@ const AttachMenu: FC<OwnProps> = ({
         editingMessage && canEditMedia ? (
           <ResponsiveHoverButton
             id="replace-menu-button"
-            className={isAttachMenuOpen ? 'AttachMenu--button activated' : 'AttachMenu--button'}
+            className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
             round
             color="translucent"
             onActivate={handleToggleAttachMenu}
@@ -189,7 +190,7 @@ const AttachMenu: FC<OwnProps> = ({
           <ResponsiveHoverButton
             id="attach-menu-button"
             disabled={Boolean(editingMessage)}
-            className={isAttachMenuOpen ? 'AttachMenu--button activated' : 'AttachMenu--button'}
+            className={buildClassName('AttachMenu--button composer-action-button', isAttachMenuOpen && 'activated')}
             round
             color="translucent"
             onActivate={handleToggleAttachMenu}

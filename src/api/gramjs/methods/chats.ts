@@ -735,27 +735,26 @@ async function getFullChannelInfo(
   };
 }
 
-export function updateChatMutedState({
-  chat, isMuted, mutedUntil = 0,
+export function updateChatNotifySettings({
+  chat, settings,
 }: {
-  chat: ApiChat; isMuted?: boolean; mutedUntil?: number;
+  chat: ApiChat; settings: Partial<ApiPeerNotifySettings>;
 }) {
-  if (isMuted && !mutedUntil) {
-    mutedUntil = MAX_INT_32;
-  }
   invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyPeer({
       peer: buildInputPeer(chat.id, chat.accessHash),
     }),
-    settings: new GramJs.InputPeerNotifySettings({ muteUntil: mutedUntil }),
+    settings: new GramJs.InputPeerNotifySettings({
+      muteUntil: settings.mutedUntil,
+      showPreviews: settings.shouldShowPreviews,
+      silent: settings.isSilentPosting,
+    }),
   }));
 
   sendApiUpdate({
     '@type': 'updateChatNotifySettings',
     chatId: chat.id,
-    settings: {
-      mutedUntil,
-    },
+    settings,
   });
 
   void requestChatUpdate({

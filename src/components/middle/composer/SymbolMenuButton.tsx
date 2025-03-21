@@ -92,7 +92,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
   const [contextMenuAnchor, setContextMenuAnchor] = useState<IAnchorPosition | undefined>(undefined);
 
   const symbolMenuButtonClassName = buildClassName(
-    'mobile-symbol-menu-button',
+    'composer-action-button mobile-symbol-menu-button',
     !isReady && 'not-ready',
     isSymbolMenuLoaded
       ? (isSymbolMenuOpen && 'menu-opened')
@@ -157,7 +157,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
         </Button>
       ) : (
         <ResponsiveHoverButton
-          className={buildClassName('symbol-menu-button', isSymbolMenuOpen && 'activated')}
+          className={buildClassName('composer-action-button symbol-menu-button', isSymbolMenuOpen && 'activated')}
           round
           color="translucent"
           onActivate={handleActivateSymbolMenu}
