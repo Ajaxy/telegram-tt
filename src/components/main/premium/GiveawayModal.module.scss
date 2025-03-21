@@ -9,6 +9,7 @@
 
 .root :global(.modal-content) {
   padding: 0;
+  overflow: hidden;
 }
 
 .root :global(.modal-dialog) {

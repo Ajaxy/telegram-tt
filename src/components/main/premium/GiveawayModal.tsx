@@ -20,6 +20,7 @@ import {
   GIVEAWAY_MAX_ADDITIONAL_CHANNELS,
   GIVEAWAY_MAX_ADDITIONAL_COUNTRIES,
   GIVEAWAY_MAX_ADDITIONAL_USERS,
+  STARS_CURRENCY_CODE,
 } from '../../../config';
 import { getUserFullName, isChatChannel } from '../../../global/helpers';
 import {
@@ -217,7 +218,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   }, [dataStarsPrepaidGiveaway, starsGiftOptions, isStarsPrepaidGiveaway]);
 
   const filteredGifts = useMemo(() => {
-    return gifts?.filter((gift) => gift.users === selectedUserCount);
+    return gifts?.filter((gift) => gift.users === selectedUserCount && gift.currency !== STARS_CURRENCY_CODE);
   }, [gifts, selectedUserCount]);
 
   const fullMonthlyAmount = useMemo(() => {
@@ -229,7 +230,8 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
   }, [filteredGifts]);
 
   const userCountOptions = useMemo(() => {
-    return unique((gifts?.map((winner) => winner.users) || [])).sort((a, b) => a - b);
+    return unique((gifts?.filter((gift) => gift.currency !== STARS_CURRENCY_CODE)
+      ?.map((winner) => winner.users) || [])).sort((a, b) => a - b);
   }, [gifts]);
 
   const winnerCountOptions = useMemo(() => {
@@ -691,7 +693,7 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
       dialogRef={dialogRef}
       onEnter={(dataPrepaidGiveaway || dataStarsPrepaidGiveaway) ? openConfirmModal : handleClick}
     >
-      <div className={styles.main} onScroll={handleScroll}>
+      <div className={buildClassName(styles.main, 'custom-scroll')} onScroll={handleScroll}>
         <Button
           round
           size="smaller"

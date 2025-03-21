@@ -15,6 +15,13 @@
   -webkit-appearance: none;
   appearance: none;
 
+  @supports (-moz-appearance: none) {
+    transform: scale(1) translate(calc(-10% + var(--thumb-offset)), 0);
+    &:hover {
+      transform: scale(1.5) translate(calc(-10% + var(--thumb-offset)), 0) !important;
+    }
+  }
+
   &:hover {
     transform: scale(1.5) translate(-30%, -30%);
   }
@@ -27,6 +34,7 @@
 }
 
 .sliderContainer {
+  --thumb-offset: 0%;
   --fill-percentage: 0%;
   position: relative;
   width: 100%;
@@ -86,10 +94,9 @@
 
 .tickMarks {
   position: absolute;
-  top: 2rem;
+  bottom: 0.25rem;
   left: 0;
   right: 0;
-  height: 100%;
   display: flex;
   justify-content: space-between;
   pointer-events: none;
