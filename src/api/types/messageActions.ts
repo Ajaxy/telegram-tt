@@ -1,6 +1,6 @@
 import type { ApiGroupCall, ApiPhoneCallDiscardReason } from './calls';
 import type { ApiBotApp, ApiFormattedText, ApiPhoto } from './messages';
-import type { ApiStarGiftRegular, ApiStarGiftUnique } from './payments';
+import type { ApiStarGiftRegular, ApiStarGiftUnique } from './stars';
 
 interface ActionMediaType {
   mediaType: 'action';

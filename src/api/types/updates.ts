@@ -41,8 +41,8 @@ import type {
   ApiPeerNotifySettings,
   ApiSessionData,
 } from './misc';
-import type { ApiStarsAmount } from './payments';
 import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
+import type { ApiStarsAmount } from './stars';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
   ApiEmojiStatusType, ApiUser, ApiUserFullInfo, ApiUserStatus,

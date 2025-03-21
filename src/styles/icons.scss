@@ -113,8 +113,8 @@ $icons-map: (
   "enter": "\f14c",
   "expand-modal": "\f14d",
   "expand": "\f14e",
-  "eye-closed-outline": "\f14f",
-  "eye-closed": "\f150",
+  "eye-crossed-outline": "\f14f",
+  "eye-crossed": "\f150",
   "eye-outline": "\f151",
   "eye": "\f152",
   "favorite-filled": "\f153",
@@ -525,11 +525,11 @@ $icons-map: (
 .icon-expand::before {
   content: map.get($icons-map, "expand");
 }
-.icon-eye-closed-outline::before {
-  content: map.get($icons-map, "eye-closed-outline");
+.icon-eye-crossed-outline::before {
+  content: map.get($icons-map, "eye-crossed-outline");
 }
-.icon-eye-closed::before {
-  content: map.get($icons-map, "eye-closed");
+.icon-eye-crossed::before {
+  content: map.get($icons-map, "eye-crossed");
 }
 .icon-eye-outline::before {
   content: map.get($icons-map, "eye-outline");

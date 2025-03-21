@@ -11,3 +11,4 @@ export * from './calls';
 export * from './statistics';
 export * from './stories';
 export * from './business';
+export * from './stars';

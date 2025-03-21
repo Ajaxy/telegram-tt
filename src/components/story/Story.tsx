@@ -730,7 +730,7 @@ function Story({
               </MenuItem>
             )}
             {!isOut && isUserStory && (
-              <MenuItem icon="eye-closed-outline" onClick={handleOpenStealthModal}>
+              <MenuItem icon="eye-crossed-outline" onClick={handleOpenStealthModal}>
                 {lang('StealthMode')}
               </MenuItem>
             )}

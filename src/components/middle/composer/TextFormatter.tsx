@@ -422,7 +422,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('spoiler')}
           onClick={handleSpoilerText}
         >
-          <Icon name="eye-closed" />
+          <Icon name="eye-crossed" />
         </Button>
         <div className="TextFormatter-divider" />
         <Button

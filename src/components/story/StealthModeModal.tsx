@@ -84,7 +84,7 @@ const StealthModeModal = ({ isOpen, stealthMode, isCurrentUserPremium } : StateP
         <Icon name="close" />
       </Button>
       <div className={styles.stealthIcon}>
-        <Icon name="eye-closed-outline" />
+        <Icon name="eye-crossed-outline" />
       </div>
       <div className={styles.title}>{lang('StealthMode')}</div>
       <div className={styles.description}>

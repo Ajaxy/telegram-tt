@@ -1413,6 +1413,8 @@
 "GiftInfoChannelHidden" = "This gift is hidden from visitors of your channel. {link}";
 "GiftInfoSavedHide" = "Hide >";
 "GiftInfoSavedShow" = "Show >";
+"GiftActionShow" = "Show";
+"GiftActionHide" = "Hide";
 "GiftInfoTonText" = "This gift is on the TON Blockchain. {link}";
 "GiftInfoTonLinkText" = "View >";
 "GiftInfoAvailability" = "Availability";

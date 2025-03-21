@@ -42,3 +42,5 @@ export * from './stories';
 export * from './payments';
 
 export * from './fragment';
+
+export * from './stars';

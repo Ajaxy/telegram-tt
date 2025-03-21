@@ -4,7 +4,7 @@ import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from
 import type { ApiPeerColor } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
 import type { ApiBotVerification } from './misc';
-import type { ApiSavedStarGift } from './payments';
+import type { ApiSavedStarGift } from './stars';
 
 export interface ApiUser {
   id: string;

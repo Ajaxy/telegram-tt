@@ -114,6 +114,7 @@ export const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in window;
 export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA && IS_MOBILE);
 export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
 export const IS_INTL_LIST_FORMAT_SUPPORTED = 'ListFormat' in Intl;
+export const IS_VIEW_TRANSITION_SUPPORTED = 'ViewTransition' in window;
 
 export const IS_BAD_URL_PARSER = new URL('tg://host').host !== 'host';
 

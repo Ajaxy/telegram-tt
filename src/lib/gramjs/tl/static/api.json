@@ -314,6 +314,7 @@
     "payments.transferStarGift",
     "payments.getUniqueStarGift",
     "payments.getStarGiftWithdrawalUrl",
+    "payments.toggleStarGiftsPinnedToTop",
     "langpack.getLangPack",
     "langpack.getStrings",
     "langpack.getLanguages",

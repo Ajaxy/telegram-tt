@@ -2412,7 +2412,6 @@ export interface ActionPayloads {
   loadPeerSavedGifts: {
     peerId: string;
     shouldRefresh?: boolean;
-    withTransition?: boolean;
   } & WithTabId;
   changeGiftVisibility: {
     gift: ApiInputSavedStarGift;
@@ -2420,6 +2419,10 @@ export interface ActionPayloads {
   } & WithTabId;
   convertGiftToStars: {
     gift: ApiInputSavedStarGift;
+  } & WithTabId;
+  toggleSavedGiftPinned: {
+    peerId: string;
+    gift: ApiSavedStarGift;
   } & WithTabId;
 
   openStarsGiftModal: ({

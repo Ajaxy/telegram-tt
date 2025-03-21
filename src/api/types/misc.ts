@@ -4,7 +4,8 @@ import type { CallbackAction } from '../../global/types';
 import type { IconName } from '../../types/icons';
 import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
-import type { ApiPremiumSection, ApiStarsSubscriptionPricing } from './payments';
+import type { ApiPremiumSection } from './payments';
+import type { ApiStarsSubscriptionPricing } from './stars';
 import type { ApiUser } from './users';
 
 export interface ApiInitialArgs {
@@ -235,6 +236,7 @@ export interface ApiAppConfig {
   starGiftMaxConvertPeriod?: number;
   starRefStartPrefixes?: string[];
   tonExplorerUrl?: string;
+  savedGiftPinLimit?: number;
 }
 
 export interface ApiConfig {

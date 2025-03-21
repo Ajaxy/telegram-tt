@@ -66,6 +66,7 @@
     "@testing-library/jest-dom": "^6.4.5",
     "@twbs/fantasticon": "^3.0.0",
     "@types/croppie": "^2.6.4",
+    "@types/dom-view-transitions": "^1.0.6",
     "@types/hast": "^3.0.4",
     "@types/jest": "^29.5.12",
     "@types/react": "^18.3.1",

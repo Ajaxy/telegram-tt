@@ -44,7 +44,7 @@ const STORY_FEATURE_DESCRIPTIONS = {
 
 const STORY_FEATURE_ICONS: Record<string, IconName> = {
   stories_order: 'story-priority',
-  stories_stealth: 'eye-closed-outline',
+  stories_stealth: 'eye-crossed-outline',
   stories_views: 'eye-outline',
   stories_timer: 'timer',
   stories_save: 'arrow-down-circle',

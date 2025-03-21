@@ -150,7 +150,7 @@ const PasswordForm: FC<OwnProps> = ({
           title="Toggle password visibility"
           aria-label="Toggle password visibility"
         >
-          <Icon name={isPasswordVisible ? 'eye' : 'eye-closed'} />
+          <Icon name={isPasswordVisible ? 'eye' : 'eye-crossed'} />
         </div>
       </div>
       {description && <p className="description">{description}</p>}

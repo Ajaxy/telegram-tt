@@ -110,7 +110,7 @@ addActionHandler('updateGiftProfileFilter', (global, actions, payload): ActionRe
   setGlobal(global);
 
   actions.loadPeerSavedGifts({
-    peerId, shouldRefresh: true, withTransition: true, tabId: tabState.id,
+    peerId, shouldRefresh: true, tabId: tabState.id,
   });
 });
 
@@ -132,6 +132,6 @@ addActionHandler('resetGiftProfileFilter', (global, actions, payload): ActionRet
   setGlobal(global);
 
   actions.loadPeerSavedGifts({
-    peerId, shouldRefresh: true, withTransition: true, tabId: tabState.id,
+    peerId, shouldRefresh: true, tabId: tabState.id,
   });
 });

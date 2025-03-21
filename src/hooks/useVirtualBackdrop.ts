@@ -1,6 +1,8 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
 
+import { hasActiveViewTransition } from './animations/useViewTransition';
+
 const BACKDROP_CLASSNAME = 'backdrop';
 
 // This effect implements closing menus by clicking outside of them
@@ -20,7 +22,7 @@ export default function useVirtualBackdrop(
     const handleEvent = (e: MouseEvent) => {
       const container = containerRef.current;
       const target = e.target as HTMLElement | null;
-      if (!container || !target || (ignoreRightClick && e.button === 2)) {
+      if (!container || !target || (ignoreRightClick && e.button === 2) || hasActiveViewTransition()) {
         return;
       }
 

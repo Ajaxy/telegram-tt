@@ -141,10 +141,11 @@ const FullNameTitle: FC<OwnProps> = ({
           {canShowEmojiStatus && emojiStatus && (
             <Transition
               className={styles.transition}
+              slideClassName={styles.transitionSlide}
               activeKey={Number(emojiStatus.documentId)}
-              name="fade"
+              name="slideFade"
+              direction={-1}
               shouldCleanup
-              shouldRestoreHeight
             >
               <CustomEmoji
                 forceAlways

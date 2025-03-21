@@ -1183,6 +1183,8 @@ export interface LangPair {
   'GiftInfoConvertDescription2': undefined;
   'GiftInfoSavedHide': undefined;
   'GiftInfoSavedShow': undefined;
+  'GiftActionShow': undefined;
+  'GiftActionHide': undefined;
   'GiftInfoTonLinkText': undefined;
   'GiftInfoAvailability': undefined;
   'GiftInfoFirstSale': undefined;

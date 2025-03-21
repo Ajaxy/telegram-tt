@@ -87,6 +87,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   stargifts_convert_period_max?: number;
   starref_start_param_prefixes?: string[];
   ton_blockchain_explorer_url?: string;
+  stargifts_pinned_to_top_limit?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -174,5 +175,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     starGiftMaxConvertPeriod: appConfig.stargifts_convert_period_max,
     starRefStartPrefixes: appConfig.starref_start_param_prefixes,
     tonExplorerUrl: appConfig.ton_blockchain_explorer_url,
+    savedGiftPinLimit: appConfig.stargifts_pinned_to_top_limit,
   };
 }

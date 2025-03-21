@@ -67,6 +67,7 @@ import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
 import { getSenderName } from '../left/search/helpers/getSenderName';
 
+import { useViewTransition } from '../../hooks/animations/useViewTransition';
 import usePeerStoriesPolling from '../../hooks/polling/usePeerStoriesPolling';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
@@ -130,7 +131,6 @@ type StateProps = {
   hasPreviewMediaTab?: boolean;
   hasGiftsTab?: boolean;
   gifts?: ApiSavedStarGift[];
-  giftsTransitionKey: number;
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
@@ -198,7 +198,6 @@ const Profile: FC<OwnProps & StateProps> = ({
   hasPreviewMediaTab,
   hasGiftsTab,
   gifts,
-  giftsTransitionKey,
   botPreviewMedia,
   areMembersHidden,
   canAddMembers,
@@ -356,9 +355,13 @@ const Profile: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, isBot, similarBots, isSynced]);
 
-  const giftIds = useMemo(() => {
-    return gifts?.map(({ date, gift, fromId }) => `${date}-${fromId}-${gift.id}`);
-  }, [gifts]);
+  const [renderingGifts, setRenderingGifts] = useState(gifts);
+  const { startViewTransition, shouldApplyVtn } = useViewTransition();
+
+  const getGiftId = useLastCallback((gift: ApiSavedStarGift) => (
+    `${gift.date}-${gift.fromId}-${gift.gift.id}`
+  ));
+  const giftIds = useMemo(() => renderingGifts?.map(getGiftId), [renderingGifts]);
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
@@ -374,6 +377,25 @@ const Profile: FC<OwnProps & StateProps> = ({
   const handleLoadGifts = useCallback(() => {
     loadPeerSavedGifts({ peerId: chatId });
   }, [chatId]);
+
+  useEffectWithPrevDeps(([prevGifts]) => {
+    if (!gifts || !prevGifts) {
+      setRenderingGifts(gifts);
+      return;
+    }
+
+    const prevGiftIds = prevGifts.map(getGiftId);
+    const newGiftIds = gifts.map(getGiftId);
+    const hasOrderChanged = prevGiftIds.some((id, index) => id !== newGiftIds[index]);
+
+    if (hasOrderChanged) {
+      startViewTransition(() => {
+        setRenderingGifts(gifts);
+      });
+    } else {
+      setRenderingGifts(gifts);
+    }
+  }, [gifts, startViewTransition]);
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds({
     loadMoreMembers,
@@ -816,38 +838,24 @@ const Profile: FC<OwnProps & StateProps> = ({
             )}
           </div>
         ) : resultType === 'gifts' ? (
-          (gifts?.map((gift) => (
-            <SavedGift
-              peerId={chatId}
-              key={`${gift.date}-${gift.fromId}-${gift.gift.id}`}
-              gift={gift}
-              observeIntersection={observeIntersectionForMedia}
-            />
-          )))
+          (renderingGifts?.map((gift) => {
+            return (
+              <SavedGift
+                peerId={chatId}
+                key={getGiftId(gift)}
+                style={shouldApplyVtn ? `view-transition-name: vt${getGiftId(gift)}` : undefined}
+                gift={gift}
+                observeIntersection={observeIntersectionForMedia}
+              />
+            );
+          }))
         ) : undefined}
       </div>
     );
   }
 
-  const shouldUseTransitionForContent = resultType === 'gifts';
-  const contentTransitionKey = giftsTransitionKey;
-
-  function renderContentWithTransition() {
-    return (
-      <Transition
-        className={`${resultType}-list`}
-        activeKey={contentTransitionKey}
-        name="fade"
-      >
-        {renderContent()}
-      </Transition>
-    );
-  }
-
   const activeListSelector = `.shared-media-transition > .Transition_slide-active.${resultType}-list`;
-  const itemSelector = !shouldUseTransitionForContent
-    ? `${activeListSelector} > .scroll-item`
-    : `${activeListSelector} > .Transition_slide-active > .content > .scroll-item`;
+  const itemSelector = `${activeListSelector} > .scroll-item`;
 
   return (
     <InfiniteScroll
@@ -881,7 +889,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             onStart={applyTransitionFix}
             onStop={handleTransitionStop}
           >
-            {shouldUseTransitionForContent ? renderContentWithTransition() : renderContent()}
+            {renderContent()}
           </Transition>
           <TabList activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={handleSwitchTab} />
         </div>
@@ -974,7 +982,6 @@ export default memo(withGlobal<OwnProps>(
 
     const hasGiftsTab = Boolean(peerFullInfo?.starGiftCount) && !isSavedDialog;
     const peerGifts = selectTabState(global).savedGifts.giftsByPeerId[chatId];
-    const giftsTransitionKey = selectTabState(global).savedGifts.transitionKey || 0;
 
     return {
       theme: selectTheme(global),
@@ -1000,7 +1007,6 @@ export default memo(withGlobal<OwnProps>(
       storyIds,
       hasGiftsTab,
       gifts: peerGifts?.gifts,
-      giftsTransitionKey,
       pinnedStoryIds,
       archiveStoryIds,
       storyByIds,

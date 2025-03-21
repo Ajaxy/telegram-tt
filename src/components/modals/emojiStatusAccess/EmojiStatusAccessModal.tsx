@@ -33,7 +33,7 @@ export type StateProps = {
   isPremium?: boolean;
 };
 
-const INTERVAL = 3000;
+const INTERVAL = 3200;
 
 const EmojiStatusAccessModal: FC<OwnProps & StateProps> = ({
   modal,
