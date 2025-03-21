@@ -287,6 +287,7 @@ const RoundVideo: FC<OwnProps> = ({
             autoPlay={!shouldRenderSpoiler}
             disablePictureInPicture
             muted={!isActivated}
+            defaultMuted
             loop={!isActivated}
             playsInline
             isPriority

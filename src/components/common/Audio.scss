@@ -178,20 +178,16 @@
     color: var(--color-text-secondary);
     font-variant-numeric: tabular-nums;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
 
     &.unread::after {
-      content: "•";
-      font-size: 2rem;
-      line-height: 1.3125rem;
-      color: var(--accent-color);
+      content: "";
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      background-color: var(--accent-color);
+      border-radius: 50%;
       margin-inline-start: 0.125rem;
-    }
-  }
-
-  body.is-ios & {
-    .voice-duration.unread::after {
-      margin-bottom: 0.4375rem;
     }
   }
 

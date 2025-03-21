@@ -22,6 +22,7 @@ declare namespace React {
 
   interface VideoHTMLAttributes {
     srcObject?: MediaStream;
+    defaultMuted?: boolean;
   }
 
   interface MouseEvent {

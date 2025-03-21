@@ -252,6 +252,7 @@ const Video = <T,>({
           src={fullMediaData}
           className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
           canPlay={isPlayAllowed && isIntersectingForPlaying && !isUnsupported}
+          defaultMuted
           muted
           loop
           playsInline

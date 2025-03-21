@@ -96,8 +96,12 @@
   }
 
   .unread::after {
-    content: "•";
-    font-size: 2rem;
+    content: "";
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: currentColor;
+    border-radius: 50%;
     margin-inline-start: 0.125rem;
   }
 }
