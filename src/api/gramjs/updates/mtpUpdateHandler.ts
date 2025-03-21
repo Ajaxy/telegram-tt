@@ -47,8 +47,7 @@ import {
   buildMessageDraft,
 } from '../apiBuilders/messages';
 import {
-  buildApiNotifyException,
-  buildApiNotifyExceptionTopic,
+  buildApiPeerNotifySettings,
   buildLangStrings,
   buildPrivacyKey,
 } from '../apiBuilders/misc';
@@ -632,28 +631,6 @@ export function updater(update: Update) {
       isPinned: update.pinned,
     });
   } else if (
-    update instanceof GramJs.UpdateNotifySettings
-    && update.peer instanceof GramJs.NotifyPeer
-  ) {
-    const payload = buildApiNotifyException(update.notifySettings, update.peer.peer);
-    scheduleMutedChatUpdate(payload.chatId, payload.muteUntil, sendApiUpdate);
-    sendApiUpdate({
-      '@type': 'updateNotifyExceptions',
-      ...payload,
-    });
-  } else if (
-    update instanceof GramJs.UpdateNotifySettings
-    && update.peer instanceof GramJs.NotifyForumTopic
-  ) {
-    const payload = buildApiNotifyExceptionTopic(
-      update.notifySettings, update.peer.peer, update.peer.topMsgId,
-    );
-    scheduleMutedTopicUpdate(payload.chatId, payload.topicId, payload.muteUntil, sendApiUpdate);
-    sendApiUpdate({
-      '@type': 'updateTopicNotifyExceptions',
-      ...payload,
-    });
-  } else if (
     update instanceof GramJs.UpdateUserTyping
     || update instanceof GramJs.UpdateChatUserTyping
   ) {
@@ -837,18 +814,41 @@ export function updater(update: Update) {
     // Settings
   } else if (update instanceof GramJs.UpdateNotifySettings) {
     const {
-      notifySettings: {
-        showPreviews, silent, muteUntil,
-      },
-      peer: { className },
+      notifySettings,
+      peer: notifyPeer,
     } = update;
+    const className = notifyPeer.className;
+    const settings = buildApiPeerNotifySettings(notifySettings);
+
+    if (notifyPeer instanceof GramJs.NotifyPeer) {
+      const peerId = getApiChatIdFromMtpPeer(notifyPeer.peer);
+      scheduleMutedChatUpdate(peerId, settings.mutedUntil, sendApiUpdate);
+      sendApiUpdate({
+        '@type': 'updateChatNotifySettings',
+        chatId: peerId,
+        settings,
+      });
+      return;
+    }
+
+    if (notifyPeer instanceof GramJs.NotifyForumTopic) {
+      const peerId = getApiChatIdFromMtpPeer(notifyPeer.peer);
+      scheduleMutedTopicUpdate(peerId, notifyPeer.topMsgId, settings.mutedUntil, sendApiUpdate);
+      sendApiUpdate({
+        '@type': 'updateTopicNotifySettings',
+        chatId: peerId,
+        topicId: notifyPeer.topMsgId,
+        settings,
+      });
+      return;
+    }
 
     const peerType = className === 'NotifyUsers'
-      ? 'contact'
+      ? 'users'
       : (className === 'NotifyChats'
-        ? 'group'
+        ? 'groups'
         : (className === 'NotifyBroadcasts'
-          ? 'broadcast'
+          ? 'channels'
           : undefined
         )
       );
@@ -858,11 +858,9 @@ export function updater(update: Update) {
     }
 
     sendApiUpdate({
-      '@type': 'updateNotifySettings',
+      '@type': 'updateDefaultNotifySettings',
       peerType,
-      isSilent: Boolean(silent
-        || (typeof muteUntil === 'number' && Date.now() + getServerTimeOffset() * 1000 < muteUntil * 1000)),
-      shouldShowPreviews: Boolean(showPreviews),
+      settings,
     });
   } else if (update instanceof GramJs.UpdatePeerBlocked) {
     sendApiUpdate({

@@ -1818,12 +1818,11 @@ async function fetchUnreadMentions<T extends GlobalState>(global: T, chatId: str
 }
 
 addActionHandler('markMentionsRead', (global, actions, payload): ActionReturnType => {
-  const { messageIds, tabId = getCurrentTabId() } = payload;
-
-  const chat = selectCurrentChat(global, tabId);
+  const { chatId, messageIds, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  global = removeUnreadMentions(global, chat.id, chat, messageIds, true);
+  global = removeUnreadMentions(global, chatId, chat, messageIds, true);
   setGlobal(global);
 
   actions.markMessagesRead({ messageIds, tabId });
@@ -1848,17 +1847,22 @@ addActionHandler('focusNextMention', async (global, actions, payload): Promise<v
 });
 
 addActionHandler('readAllMentions', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { chatId, threadId = MAIN_THREAD_ID } = payload;
 
-  const chat = selectCurrentChat(global, tabId);
+  const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
-  callApi('readAllMentions', { chat });
+  callApi('readAllMentions', { chat, threadId: threadId === MAIN_THREAD_ID ? undefined : threadId });
 
-  return updateChat(global, chat.id, {
-    unreadMentionsCount: undefined,
-    unreadMentions: undefined,
-  });
+  if (threadId === MAIN_THREAD_ID) {
+    return updateChat(global, chat.id, {
+      unreadMentionsCount: undefined,
+      unreadMentions: undefined,
+    });
+  }
+
+  // TODO[Forums]: Support mentions in threads
+  return undefined;
 });
 
 addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {

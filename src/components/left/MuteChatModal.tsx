@@ -51,16 +51,16 @@ const MuteChatModal: FC<OwnProps> = ({
   ], [lang]);
 
   const handleSubmit = useCallback(() => {
-    let muteUntil: number;
+    let mutedUntil: number;
     if (muteUntilOption === MuteDuration.Forever) {
-      muteUntil = MAX_INT_32;
+      mutedUntil = MAX_INT_32;
     } else {
-      muteUntil = Math.floor(Date.now() / 1000) + Number(muteUntilOption);
+      mutedUntil = Math.floor(Date.now() / 1000) + Number(muteUntilOption);
     }
     if (topicId) {
-      updateTopicMutedState({ chatId, topicId, muteUntil });
+      updateTopicMutedState({ chatId, topicId, mutedUntil });
     } else {
-      updateChatMutedState({ chatId, muteUntil });
+      updateChatMutedState({ chatId, mutedUntil });
     }
     onClose();
   }, [chatId, muteUntilOption, onClose, topicId]);

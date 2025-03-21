@@ -15,8 +15,10 @@ import type {
   ApiGroupCall,
   ApiLanguage,
   ApiMessage,
+  ApiNotifyPeerType,
   ApiPaidReactionPrivacyType,
   ApiPeerColors,
+  ApiPeerNotifySettings,
   ApiPeerPhotos,
   ApiPeerStories,
   ApiPhoneCall,
@@ -54,7 +56,6 @@ import type {
   EmojiKeywords,
   ISettings,
   IThemeSettings,
-  NotifyException,
   PerformanceType,
   Point,
   ServiceNotification,
@@ -221,6 +222,7 @@ export type GlobalState = {
       similarChannelIds?: string[];
       count?: number;
     }>>;
+    notifyExceptionById: Record<string, ApiPeerNotifySettings>;
 
     similarBotsById: Record<string, SimilarBotsInfo>;
   };
@@ -411,7 +413,7 @@ export type GlobalState = {
     loadedWallpapers?: ApiWallpaper[];
     themes: Partial<Record<ThemeKey, IThemeSettings>>;
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
-    notifyExceptions?: Record<number, NotifyException>;
+    notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>;
     lastPremiumBandwithNotificationDate?: number;
     paidReactionPrivacy?: ApiPaidReactionPrivacyType;
     languages?: ApiLanguage[];

@@ -76,19 +76,6 @@ export interface IThemeSettings {
   isBlurred?: boolean;
 }
 
-export type NotifySettings = {
-  hasPrivateChatsNotifications?: boolean;
-  hasPrivateChatsMessagePreview?: boolean;
-  hasGroupNotifications?: boolean;
-  hasGroupMessagePreview?: boolean;
-  hasBroadcastNotifications?: boolean;
-  hasBroadcastMessagePreview?: boolean;
-  hasContactJoinedNotifications?: boolean;
-  hasWebNotifications: boolean;
-  hasPushNotifications: boolean;
-  notificationSoundVolume: number;
-};
-
 export type LangCode = (
   'en' | 'ar' | 'be' | 'ca' | 'nl' | 'fr' | 'de' | 'id' | 'it' | 'ko' | 'ms' | 'fa' | 'pl' | 'pt-br' | 'ru' | 'es'
   | 'tr' | 'uk' | 'uz'
@@ -96,7 +83,7 @@ export type LangCode = (
 
 export type TimeFormat = '24h' | '12h';
 
-export interface ISettings extends NotifySettings, Record<string, any> {
+export interface ISettings {
   theme: ThemeKey;
   shouldUseSystemTheme: boolean;
   messageTextSize: number;
@@ -139,6 +126,10 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   shouldDebugExportedSenders?: boolean;
   shouldWarnAboutSvg?: boolean;
   shouldSkipWebAppCloseConfirmation: boolean;
+  hasContactJoinedNotifications?: boolean;
+  hasWebNotifications: boolean;
+  hasPushNotifications: boolean;
+  notificationSoundVolume: number;
 }
 
 export type IAnchorPosition = {
@@ -460,12 +451,6 @@ export enum ManagementScreens {
 }
 
 export type ManagementType = 'user' | 'group' | 'channel' | 'bot';
-
-export type NotifyException = {
-  isMuted: boolean;
-  isSilent?: boolean;
-  shouldShowPreviews?: boolean;
-};
 
 export type EmojiKeywords = {
   isLoading?: boolean;

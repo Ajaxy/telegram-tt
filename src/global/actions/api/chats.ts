@@ -1,6 +1,7 @@
 import type {
   ApiChat, ApiChatFolder, ApiChatlistExportedInvite,
   ApiChatMember, ApiError, ApiMissingInvitedUser,
+  ApiTopic,
 } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
@@ -60,6 +61,7 @@ import {
   addChatMembers,
   addChats,
   addMessages,
+  addNotifyExceptions,
   addSimilarBots,
   addUsers,
   addUserStatuses,
@@ -221,7 +223,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   const chat = selectChat(global, id);
 
   if (chat?.hasUnreadMark) {
-    actions.toggleChatUnread({ id });
+    actions.markChatRead({ id });
   }
 
   const isChatOnlySummary = !selectChatLastMessageId(global, id);
@@ -623,32 +625,26 @@ addActionHandler('requestSavedDialogUpdate', async (global, actions, payload): P
 });
 
 addActionHandler('updateChatMutedState', (global, actions, payload): ActionReturnType => {
-  const { chatId, muteUntil = 0 } = payload;
+  const { chatId, isMuted, mutedUntil } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  const isMuted = payload.isMuted ?? muteUntil > 0;
-
-  global = updateChat(global, chatId, { isMuted });
-  setGlobal(global);
-  void callApi('updateChatMutedState', { chat, isMuted, muteUntil });
+  void callApi('updateChatMutedState', { chat, isMuted, mutedUntil });
 });
 
 addActionHandler('updateTopicMutedState', (global, actions, payload): ActionReturnType => {
-  const { chatId, topicId, muteUntil = 0 } = payload;
+  const {
+    chatId, topicId, isMuted, mutedUntil,
+  } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
-  const isMuted = payload.isMuted ?? muteUntil > 0;
-
-  global = updateTopic(global, chatId, topicId, { isMuted });
-  setGlobal(global);
   void callApi('updateTopicMutedState', {
-    chat, topicId, isMuted, muteUntil,
+    chat, topicId, isMuted, mutedUntil,
   });
 });
 
@@ -1155,17 +1151,47 @@ addActionHandler('deleteChatFolder', async (global, actions, payload): Promise<v
   }
 });
 
-addActionHandler('toggleChatUnread', (global, actions, payload): ActionReturnType => {
+addActionHandler('markChatUnread', (global, actions, payload): ActionReturnType => {
   const { id } = payload;
   const chat = selectChat(global, id);
-  if (chat) {
-    if (chat.unreadCount) {
-      void callApi('markMessageListRead', { chat, threadId: MAIN_THREAD_ID });
-    } else {
-      void callApi('toggleDialogUnread', {
-        chat,
-        hasUnreadMark: !chat.hasUnreadMark,
-      });
+  if (!chat) return;
+  void callApi('toggleDialogUnread', {
+    chat,
+    hasUnreadMark: !chat.hasUnreadMark,
+  });
+});
+
+addActionHandler('markChatRead', async (global, actions, payload): Promise<void> => {
+  const { id } = payload;
+  const chat = selectChat(global, id);
+  if (!chat) return;
+  if (!chat.isForum) {
+    await callApi('markMessageListRead', { chat, threadId: MAIN_THREAD_ID });
+    actions.readAllMentions({ chatId: id });
+    actions.readAllReactions({ chatId: id });
+    return;
+  }
+
+  let hasMoreTopics = true;
+  let lastTopic: ApiTopic | undefined;
+  let processedCount = 0;
+
+  while (hasMoreTopics) {
+    const result = await callApi('fetchTopics', {
+      chat, offsetDate: lastTopic?.date, offsetTopicId: lastTopic?.id, offsetId: lastTopic?.lastMessageId, limit: 100,
+    });
+
+    if (!result?.topics?.length) return;
+
+    result.topics.forEach((topic) => {
+      if (!topic.unreadCount && !topic.unreadMentionsCount && !topic.unreadReactionsCount) return;
+      actions.markTopicRead({ chatId: id, topicId: topic.id });
+    });
+
+    lastTopic = result.topics[result.topics.length - 1];
+    processedCount += result.topics.length;
+    if (result.count <= processedCount) {
+      hasMoreTopics = false;
     }
   }
 });
@@ -1185,6 +1211,8 @@ addActionHandler('markTopicRead', (global, actions, payload): ActionReturnType =
     threadId: topicId,
     maxId: lastTopicMessageId,
   });
+  actions.readAllMentions({ chatId, threadId: topicId });
+  actions.readAllReactions({ chatId, threadId: topicId });
 
   global = getGlobal();
   global = updateTopic(global, chatId, topicId, {
@@ -2910,6 +2938,7 @@ async function loadChats(
   global = updateChatListSecondaryInfo(global, listType, result);
   global = replaceMessages(global, result.messages);
   global = updateChatsLastMessageId(global, result.lastMessageByChatId, listType);
+  global = addNotifyExceptions(global, result.notifyExceptionById);
 
   if (!shouldIgnorePagination) {
     global = replaceChatListLoadingParameters(

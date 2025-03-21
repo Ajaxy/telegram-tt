@@ -227,9 +227,9 @@ const ActionMessage = ({
     }
 
     if (message.hasUnreadMention) {
-      markMentionsRead({ messageIds: [id] });
+      markMentionsRead({ chatId, messageIds: [id] });
     }
-  }, [hasUnreadReaction, id, animateUnreadReaction, message.hasUnreadMention]);
+  }, [hasUnreadReaction, chatId, id, animateUnreadReaction, message.hasUnreadMention]);
 
   useEffect(() => {
     if (action.type !== 'giftPremium') return;

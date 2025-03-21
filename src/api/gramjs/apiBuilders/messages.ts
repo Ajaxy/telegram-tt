@@ -163,6 +163,7 @@ export function buildApiMessageFromNotification(
     chatId: SERVICE_NOTIFICATIONS_USER_ID,
     date: notification.inboxDate || currentDate,
     content,
+    isInvertedMedia: notification.invertMedia,
     isOutgoing: false,
   };
 }

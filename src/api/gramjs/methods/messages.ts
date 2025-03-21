@@ -1834,11 +1834,14 @@ export async function reportSponsoredMessage({
 
 export async function readAllMentions({
   chat,
+  threadId,
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
 }) {
   const result = await invokeRequest(new GramJs.messages.ReadMentions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
   }));
 
   if (!result) return;
@@ -1846,17 +1849,20 @@ export async function readAllMentions({
   processAffectedHistory(chat, result);
 
   if (result.offset) {
-    await readAllMentions({ chat });
+    await readAllMentions({ chat, threadId });
   }
 }
 
 export async function readAllReactions({
   chat,
+  threadId,
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
 }) {
   const result = await invokeRequest(new GramJs.messages.ReadReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
   }));
 
   if (!result) return;
@@ -1864,14 +1870,15 @@ export async function readAllReactions({
   processAffectedHistory(chat, result);
 
   if (result.offset) {
-    await readAllReactions({ chat });
+    await readAllReactions({ chat, threadId });
   }
 }
 
 export async function fetchUnreadMentions({
-  chat, ...pagination
+  chat, threadId, ...pagination
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
   offsetId?: number;
   addOffset?: number;
   maxId?: number;
@@ -1879,6 +1886,7 @@ export async function fetchUnreadMentions({
 }) {
   const result = await invokeRequest(new GramJs.messages.GetUnreadMentions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
     limit: MENTION_UNREAD_SLICE,
     ...pagination,
   }));
@@ -1899,9 +1907,10 @@ export async function fetchUnreadMentions({
 }
 
 export async function fetchUnreadReactions({
-  chat, ...pagination
+  chat, threadId, ...pagination
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
   offsetId?: number;
   addOffset?: number;
   maxId?: number;
@@ -1909,6 +1918,7 @@ export async function fetchUnreadReactions({
 }) {
   const result = await invokeRequest(new GramJs.messages.GetUnreadReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
     limit: REACTION_UNREAD_SLICE,
     ...pagination,
   }));

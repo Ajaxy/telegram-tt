@@ -5,7 +5,7 @@ import {
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 
-import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT } from '../../../config';
+import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT, MAX_INT_32 } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
@@ -16,9 +16,9 @@ import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addBlockedUser, addNotifyExceptions, deletePeerPhoto,
+  addBlockedUser, addNotifyException, addNotifyExceptions, deletePeerPhoto,
   removeBlockedUser, replaceSettings, updateChat,
-  updateNotifySettings, updateUser, updateUserFullInfo,
+  updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -306,26 +306,40 @@ addActionHandler('loadNotificationExceptions', async (global): Promise<void> => 
 });
 
 addActionHandler('loadNotificationSettings', async (global): Promise<void> => {
-  const result = await callApi('fetchNotificationSettings');
-  if (!result) {
-    return;
-  }
+  const [signUpNotification, notifyDefaults] = await Promise.all([
+    callApi('fetchContactSignUpSetting'),
+    callApi('fetchNotifyDefaultSettings'),
+  ]);
+
+  if (!notifyDefaults) return;
 
   global = getGlobal();
-  global = replaceSettings(global, result);
+  global = replaceSettings(global, {
+    hasContactJoinedNotifications: signUpNotification,
+  });
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      notifyDefaults,
+    },
+  };
   setGlobal(global);
 });
 
 addActionHandler('updateNotificationSettings', async (global, actions, payload): Promise<void> => {
-  const { peerType, isSilent, shouldShowPreviews } = payload!;
+  const { peerType, isMuted, shouldShowPreviews } = payload!;
 
-  const result = await callApi('updateNotificationSettings', peerType, { isSilent, shouldShowPreviews });
+  const result = await callApi('updateNotificationSettings', peerType, { isMuted, shouldShowPreviews });
   if (!result) {
     return;
   }
 
   global = getGlobal();
-  global = updateNotifySettings(global, peerType, isSilent, shouldShowPreviews);
+  global = addNotifyException(global, peerType, {
+    mutedUntil: isMuted ? MAX_INT_32 : undefined,
+    shouldShowPreviews,
+  });
   setGlobal(global);
 });
 
@@ -582,12 +596,11 @@ addActionHandler('loadCountryList', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
-addActionHandler('ensureTimeFormat', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
+addActionHandler('ensureTimeFormat', async (global, actions): Promise<void> => {
   if (global.authNearestCountry) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT
       .has(global.authNearestCountry.toUpperCase()) ? '12h' : '24h';
-    actions.setSettingOption({ timeFormat, tabId });
+    actions.setSettingOption({ timeFormat });
     setTimeFormat(timeFormat);
   }
 
@@ -598,7 +611,7 @@ addActionHandler('ensureTimeFormat', async (global, actions, payload): Promise<v
   const nearestCountryCode = await callApi('fetchNearestCountry');
   if (nearestCountryCode) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(nearestCountryCode.toUpperCase()) ? '12h' : '24h';
-    actions.setSettingOption({ timeFormat, tabId });
+    actions.setSettingOption({ timeFormat });
     setTimeFormat(timeFormat);
   }
 });

@@ -25,6 +25,7 @@ import type {
   ApiMessageSearchContext,
   ApiNewPoll,
   ApiNotification,
+  ApiNotifyPeerType,
   ApiPaymentStatus,
   ApiPhoto,
   ApiPremiumSection,
@@ -220,8 +221,8 @@ export interface ActionPayloads {
     isSilent: boolean;
   };
   updateNotificationSettings: {
-    peerType: 'contact' | 'group' | 'broadcast';
-    isSilent?: boolean;
+    peerType: ApiNotifyPeerType;
+    isMuted?: boolean;
     shouldShowPreviews?: boolean;
   };
 
@@ -255,7 +256,7 @@ export interface ActionPayloads {
   loadCountryList: {
     langCode?: string;
   };
-  ensureTimeFormat: WithTabId | undefined;
+  ensureTimeFormat: undefined;
 
   // misc
   loadWebPagePreview: {
@@ -365,7 +366,8 @@ export interface ActionPayloads {
   toggleChatArchived: {
     id: string;
   };
-  toggleChatUnread: { id: string };
+  markChatUnread: { id: string };
+  markChatRead: { id: string };
   loadChatFolders: undefined;
   loadRecommendedChatFolders: undefined;
   editChatFolder: {
@@ -1047,7 +1049,7 @@ export interface ActionPayloads {
   updateChatMutedState: {
     chatId: string;
     isMuted?: boolean;
-    muteUntil?: number;
+    mutedUntil?: number;
   };
 
   updateChat: {
@@ -1313,9 +1315,16 @@ export interface ActionPayloads {
   } & WithTabId;
   focusNextReaction: WithTabId | undefined;
   focusNextMention: WithTabId | undefined;
-  readAllReactions: WithTabId | undefined;
-  readAllMentions: WithTabId | undefined;
+  readAllReactions: {
+    chatId: string;
+    threadId?: ThreadId;
+  };
+  readAllMentions: {
+    chatId: string;
+    threadId?: ThreadId;
+  };
   markMentionsRead: {
+    chatId: string;
     messageIds: number[];
   } & WithTabId;
   copyMessageLink: {
@@ -2505,7 +2514,7 @@ export interface ActionPayloads {
     chatId: string;
     topicId: number;
     isMuted?: boolean;
-    muteUntil?: number;
+    mutedUntil?: number;
   };
   setViewForumAsMessages: {
     chatId: string;

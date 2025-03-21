@@ -1,6 +1,6 @@
 import type { ApiError, ApiReaction, ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
-import { ApiMediaFormat } from '../../../api/types';
+import { ApiMediaFormat, MAIN_THREAD_ID } from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -557,16 +557,21 @@ addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('readAllReactions', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const chat = selectCurrentChat(global, tabId);
+  const { chatId, threadId = MAIN_THREAD_ID } = payload;
+  const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
-  callApi('readAllReactions', { chat });
+  callApi('readAllReactions', { chat, threadId: threadId === MAIN_THREAD_ID ? undefined : threadId });
 
-  return updateUnreadReactions(global, chat.id, {
-    unreadReactionsCount: undefined,
-    unreadReactions: undefined,
-  });
+  if (threadId === MAIN_THREAD_ID) {
+    return updateUnreadReactions(global, chat.id, {
+      unreadReactionsCount: undefined,
+      unreadReactions: undefined,
+    });
+  }
+
+  // TODO[Forums]: Support unread reactions in threads
+  return undefined;
 });
 
 addActionHandler('loadTopReactions', async (global): Promise<void> => {

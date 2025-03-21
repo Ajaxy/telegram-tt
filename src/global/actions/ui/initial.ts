@@ -24,7 +24,10 @@ import { replaceSettings } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectCanAnimateInterface,
-  selectNotifySettings, selectPerformanceSettings, selectTabState, selectTheme,
+  selectPerformanceSettings,
+  selectSettingsKeys,
+  selectTabState,
+  selectTheme,
 } from '../../selectors';
 
 const HISTORY_ANIMATION_DURATION = 450;
@@ -100,7 +103,7 @@ addActionHandler('initShared', (): ActionReturnType => {
 });
 
 addActionHandler('initMain', (global): ActionReturnType => {
-  const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
+  const { hasWebNotifications, hasPushNotifications } = selectSettingsKeys(global);
   if (hasWebNotifications && hasPushNotifications) {
     // Most of the browsers only show the notifications permission prompt after the first user gesture.
     const events = ['click', 'keypress'];

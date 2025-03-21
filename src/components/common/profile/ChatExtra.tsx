@@ -22,15 +22,15 @@ import {
   getHasAdminRight,
   isChatChannel,
   isUserRightBanned,
-  selectIsChatMuted,
 } from '../../../global/helpers';
+import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectBotAppPermissions,
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
-  selectNotifyExceptions,
-  selectNotifySettings,
+  selectNotifyDefaults,
+  selectNotifyException,
   selectTopicLink,
   selectUser,
   selectUserFullInfo,
@@ -419,7 +419,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <Switcher
             id="group-notifications"
             label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
-            checked={isMuted}
+            checked={!isMuted}
             inactive
           />
         </ListItem>
@@ -487,7 +487,7 @@ export default memo(withGlobal<OwnProps>(
     const user = chatOrUserId ? selectUser(global, chatOrUserId) : undefined;
     const botAppPermissions = chatOrUserId ? selectBotAppPermissions(global, chatOrUserId) : undefined;
     const isForum = chat?.isForum;
-    const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
+    const isMuted = chat && getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id));
     const { threadId } = selectCurrentMessageList(global) || {};
     const topicId = isForum && threadId ? Number(threadId) : undefined;
 

@@ -5,10 +5,10 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat, ApiUser } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
-import { isUserId, selectIsChatMuted } from '../../../global/helpers';
+import { isUserId } from '../../../global/helpers';
+import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
-  selectChat, selectIsChatPinned, selectNotifyExceptions,
-  selectNotifySettings, selectUser,
+  selectChat, selectIsChatPinned, selectNotifyDefaults, selectNotifyException, selectUser,
 } from '../../../global/selectors';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
@@ -156,9 +156,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const user = selectUser(global, chatId);
     const isPinned = selectIsChatPinned(global, chatId);
-    const isMuted = chat
-      ? selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global))
-      : undefined;
+    const isMuted = chat && getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id));
 
     return {
       chat,

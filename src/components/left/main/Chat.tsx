@@ -23,8 +23,8 @@ import {
   groupStatefulContent,
   isUserId,
   isUserOnline,
-  selectIsChatMuted,
 } from '../../../global/helpers';
+import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -35,8 +35,8 @@ import {
   selectDraft,
   selectIsForumPanelClosed,
   selectIsForumPanelOpen,
-  selectNotifyExceptions,
-  selectNotifySettings,
+  selectNotifyDefaults,
+  selectNotifyException,
   selectOutgoingStatus,
   selectPeer,
   selectPeerStory,
@@ -470,7 +470,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
+      isMuted: getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id)),
       lastMessageSender,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
       isSelected,

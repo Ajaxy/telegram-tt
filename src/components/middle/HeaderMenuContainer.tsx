@@ -20,8 +20,8 @@ import {
   isSystemBot,
   isUserId,
   isUserRightBanned,
-  selectIsChatMuted,
 } from '../../global/helpers';
+import { getIsChatMuted } from '../../global/helpers/notifications';
 import {
   selectBot,
   selectCanGift,
@@ -32,8 +32,8 @@ import {
   selectCurrentMessageList,
   selectIsChatWithSelf,
   selectIsRightColumnShown,
-  selectNotifyExceptions,
-  selectNotifySettings,
+  selectNotifyDefaults,
+  selectNotifyException,
   selectTabState,
   selectTopic,
   selectUser,
@@ -759,7 +759,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
+      isMuted: getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id)),
       isPrivate,
       isTopic: chat?.isForum && !isMainThread,
       isForum: chat?.isForum,

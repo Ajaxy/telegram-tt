@@ -300,6 +300,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
 
     cached.cacheVersion = 2;
   }
+
+  if (!cached.chats.notifyExceptionById) {
+    cached.chats.notifyExceptionById = initialState.chats.notifyExceptionById;
+  }
 }
 
 function updateCache(force?: boolean) {
@@ -494,6 +498,7 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     similarChannelsById: {},
     similarBotsById: {},
     isFullyLoaded: {},
+    notifyExceptionById: {},
     loadingParameters: INITIAL_GLOBAL_STATE.chats.loadingParameters,
     byId: pickTruthy(global.chats.byId, idsToSave),
     fullInfoById: pickTruthy(global.chats.fullInfoById, idsToSave),
@@ -662,7 +667,6 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     themes,
     performance,
     privacy: {},
-    notifyExceptions: {},
     botVerificationShownPeerIds,
     miniAppsCachedPosition,
     miniAppsCachedSize,

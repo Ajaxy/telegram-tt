@@ -122,6 +122,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     similarChannelsById: {},
     similarBotsById: {},
     topicsInfoById: {},
+    notifyExceptionById: {},
     loadingParameters: {
       active: {},
       archived: {},
@@ -297,7 +298,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     },
     performance: INITIAL_PERFORMANCE_STATE_MAX,
     privacy: {},
-    notifyExceptions: {},
     botVerificationShownPeerIds: [],
   },
 

@@ -9,11 +9,12 @@ import type { ApiPhoto, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { isUserBot, selectIsChatMuted } from '../../../global/helpers';
+import { isUserBot } from '../../../global/helpers';
+import { getIsChatMuted } from '../../../global/helpers/notifications';
 import {
   selectChat,
-  selectNotifyExceptions,
-  selectNotifySettings,
+  selectNotifyDefaults,
+  selectNotifyException,
   selectTabState,
   selectUser,
   selectUserFullInfo,
@@ -296,7 +297,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, userId);
     const userFullInfo = selectUserFullInfo(global, userId);
     const { progress } = selectTabState(global).management;
-    const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
+    const isMuted = chat && getIsChatMuted(chat, selectNotifyDefaults(global), selectNotifyException(global, chat.id));
     const personalPhoto = userFullInfo?.personalPhoto;
     const notPersonalPhoto = userFullInfo?.profilePhoto || userFullInfo?.fallbackPhoto;
 

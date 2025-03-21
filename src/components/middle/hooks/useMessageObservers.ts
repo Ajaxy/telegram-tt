@@ -86,7 +86,7 @@ export default function useMessageObservers(
     }
 
     if (mentionIds.length) {
-      markMentionsRead({ messageIds: mentionIds });
+      markMentionsRead({ chatId, messageIds: mentionIds });
     }
 
     if (reactionIds.length) {

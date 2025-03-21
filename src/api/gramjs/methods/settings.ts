@@ -8,7 +8,8 @@ import type {
   ApiConfig,
   ApiInputPrivacyRules,
   ApiLanguage,
-  ApiNotifyException,
+  ApiNotifyPeerType,
+  ApiPeerNotifySettings,
   ApiPhoto,
   ApiPrivacyKey,
   ApiUser,
@@ -21,15 +22,14 @@ import {
   MAX_INT_32,
 } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { getServerTime } from '../../../util/serverTime';
 import { buildAppConfig } from '../apiBuilders/appConfig';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
 import {
   buildApiConfig,
   buildApiCountryList,
   buildApiLanguage,
-  buildApiNotifyException,
   buildApiPeerColors,
+  buildApiPeerNotifySettings,
   buildApiSession,
   buildApiTimezone,
   buildApiWallpaper,
@@ -323,20 +323,26 @@ export async function fetchNotificationExceptions() {
       return acc;
     }
 
-    acc.push(buildApiNotifyException(update.notifySettings, update.peer.peer));
+    const peerId = getApiChatIdFromMtpPeer(update.peer.peer);
+
+    acc[peerId] = buildApiPeerNotifySettings(update.notifySettings);
 
     return acc;
-  }, [] as ApiNotifyException[]);
+  }, {} as Record<string, ApiPeerNotifySettings>);
 }
 
-export async function fetchNotificationSettings() {
+export async function fetchContactSignUpSetting() {
+  const hasContactJoinedNotifications = await invokeRequest(new GramJs.account.GetContactSignUpNotification());
+
+  return hasContactJoinedNotifications;
+}
+
+export async function fetchNotifyDefaultSettings() {
   const [
-    isMutedContactSignUpNotification,
-    privateContactNotificationsSettings,
-    groupNotificationsSettings,
-    broadcastNotificationsSettings,
+    usersSettings,
+    groupsSettings,
+    channelsSettings,
   ] = await Promise.all([
-    invokeRequest(new GramJs.account.GetContactSignUpNotification()),
     invokeRequest(new GramJs.account.GetNotifySettings({
       peer: new GramJs.InputNotifyUsers(),
     })),
@@ -348,37 +354,14 @@ export async function fetchNotificationSettings() {
     })),
   ]);
 
-  if (!privateContactNotificationsSettings || !groupNotificationsSettings || !broadcastNotificationsSettings) {
-    return false;
+  if (!usersSettings || !groupsSettings || !channelsSettings) {
+    return undefined;
   }
 
-  const {
-    silent: privateSilent, muteUntil: privateMuteUntil, showPreviews: privateShowPreviews,
-  } = privateContactNotificationsSettings;
-  const {
-    silent: groupSilent, muteUntil: groupMuteUntil, showPreviews: groupShowPreviews,
-  } = groupNotificationsSettings;
-  const {
-    silent: broadcastSilent, muteUntil: broadcastMuteUntil, showPreviews: broadcastShowPreviews,
-  } = broadcastNotificationsSettings;
-
   return {
-    hasContactJoinedNotifications: !isMutedContactSignUpNotification,
-    hasPrivateChatsNotifications: !(
-      privateSilent
-      || (typeof privateMuteUntil === 'number' && getServerTime() < privateMuteUntil)
-    ),
-    hasPrivateChatsMessagePreview: privateShowPreviews,
-    hasGroupNotifications: !(
-      groupSilent || (typeof groupMuteUntil === 'number'
-        && getServerTime() < groupMuteUntil)
-    ),
-    hasGroupMessagePreview: groupShowPreviews,
-    hasBroadcastNotifications: !(
-      broadcastSilent || (typeof broadcastMuteUntil === 'number'
-        && getServerTime() < broadcastMuteUntil)
-    ),
-    hasBroadcastMessagePreview: broadcastShowPreviews,
+    users: buildApiPeerNotifySettings(usersSettings),
+    groups: buildApiPeerNotifySettings(groupsSettings),
+    channels: buildApiPeerNotifySettings(channelsSettings),
   };
 }
 
@@ -386,17 +369,17 @@ export function updateContactSignUpNotification(isSilent: boolean) {
   return invokeRequest(new GramJs.account.SetContactSignUpNotification({ silent: isSilent }));
 }
 
-export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broadcast', {
-  isSilent,
+export function updateNotificationSettings(peerType: ApiNotifyPeerType, {
+  isMuted,
   shouldShowPreviews,
 }: {
-  isSilent?: boolean;
+  isMuted?: boolean;
   shouldShowPreviews?: boolean;
 }) {
   let peer: GramJs.TypeInputNotifyPeer;
-  if (peerType === 'contact') {
+  if (peerType === 'users') {
     peer = new GramJs.InputNotifyUsers();
-  } else if (peerType === 'group') {
+  } else if (peerType === 'groups') {
     peer = new GramJs.InputNotifyChats();
   } else {
     peer = new GramJs.InputNotifyBroadcasts();
@@ -404,8 +387,7 @@ export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broa
 
   const settings = {
     showPreviews: shouldShowPreviews,
-    silent: isSilent,
-    muteUntil: isSilent ? MAX_INT_32 : 0,
+    muteUntil: isMuted ? MAX_INT_32 : 0,
   };
 
   return invokeRequest(new GramJs.account.UpdateNotifySettings({

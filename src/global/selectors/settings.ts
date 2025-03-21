@@ -1,11 +1,11 @@
 import type { GlobalState } from '../types';
 
-export function selectNotifySettings<T extends GlobalState>(global: T) {
-  return global.settings.byKey;
+export function selectNotifyDefaults<T extends GlobalState>(global: T) {
+  return global.settings.notifyDefaults;
 }
 
-export function selectNotifyExceptions<T extends GlobalState>(global: T) {
-  return global.settings.notifyExceptions;
+export function selectNotifyException<T extends GlobalState>(global: T, chatId: string) {
+  return global.chats.notifyExceptionById?.[chatId];
 }
 
 export function selectLanguageCode<T extends GlobalState>(global: T) {
@@ -13,7 +13,7 @@ export function selectLanguageCode<T extends GlobalState>(global: T) {
 }
 
 export function selectCanSetPasscode<T extends GlobalState>(global: T) {
-  return global.authRememberMe && global.isCacheApiSupported;
+  return global.authRememberMe;
 }
 
 export function selectTranslationLanguage<T extends GlobalState>(global: T) {
@@ -26,4 +26,8 @@ export function selectNewNoncontactPeersRequirePremium<T extends GlobalState>(gl
 
 export function selectShouldHideReadMarks<T extends GlobalState>(global: T) {
   return global.settings.byKey.shouldHideReadMarks;
+}
+
+export function selectSettingsKeys<T extends GlobalState>(global: T) {
+  return global.settings.byKey;
 }

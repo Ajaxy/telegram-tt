@@ -79,7 +79,8 @@ const useChatContextActions = ({
       toggleSavedDialogPinned,
       updateChatMutedState,
       toggleChatArchived,
-      toggleChatUnread,
+      markChatRead,
+      markChatUnread,
       openChatInNewTab,
     } = getActions();
 
@@ -149,10 +150,10 @@ const useChatContextActions = ({
     }
 
     const actionMaskAsRead = (chat.unreadCount || chat.hasUnreadMark)
-      ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
+      ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => markChatRead({ id: chat.id }) }
       : undefined;
     const actionMarkAsUnread = !(chat.unreadCount || chat.hasUnreadMark) && !chat.isForum
-      ? { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) }
+      ? { title: lang('MarkAsUnread'), icon: 'unread', handler: () => markChatUnread({ id: chat.id }) }
       : undefined;
 
     const actionArchive = isChatArchived(chat)

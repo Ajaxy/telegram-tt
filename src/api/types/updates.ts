@@ -35,7 +35,11 @@ import type {
   BoughtPaidMedia,
 } from './messages';
 import type {
-  ApiEmojiInteraction, ApiError, ApiNotifyException, ApiSessionData,
+  ApiEmojiInteraction,
+  ApiError,
+  ApiNotifyPeerType,
+  ApiPeerNotifySettings,
+  ApiSessionData,
 } from './misc';
 import type { ApiStarsAmount } from './payments';
 import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
@@ -501,21 +505,24 @@ export type ApiUpdateTwoFaError = {
   messageKey: RegularLangFnParameters;
 };
 
-export type ApiUpdateNotifySettings = {
-  '@type': 'updateNotifySettings';
-  peerType: 'contact' | 'group' | 'broadcast';
-  isSilent: boolean;
-  shouldShowPreviews: boolean;
+export type ApiUpdateDefaultNotifySettings = {
+  '@type': 'updateDefaultNotifySettings';
+  peerType: ApiNotifyPeerType;
+  settings: Partial<ApiPeerNotifySettings>;
 };
 
-export type ApiUpdateNotifyExceptions = {
-  '@type': 'updateNotifyExceptions';
-} & ApiNotifyException;
+export type ApiUpdatePeerNotifySettings = {
+  '@type': 'updateChatNotifySettings';
+  chatId: string;
+  settings: Partial<ApiPeerNotifySettings>;
+};
 
-export type ApiUpdateTopicNotifyExceptions = {
-  '@type': 'updateTopicNotifyExceptions';
+export type ApiUpdateTopicNotifySettings = {
+  '@type': 'updateTopicNotifySettings';
+  chatId: string;
   topicId: number;
-} & ApiNotifyException;
+  settings: Partial<ApiPeerNotifySettings>;
+};
 
 export type ApiUpdateTwoFaStateWaitCode = {
   '@type': 'updateTwoFaStateWaitCode';
@@ -823,14 +830,14 @@ export type ApiUpdate = (
   ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage | ApiUpdateStarPaymentStateCompleted |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
-  ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
+  ApiUpdateDefaultNotifySettings | ApiUpdatePeerNotifySettings | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
-  ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
+  ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifySettings | ApiUpdatePinnedTopic |
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |

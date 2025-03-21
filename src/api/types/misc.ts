@@ -106,13 +106,6 @@ export interface ApiSessionData {
   isTest?: true;
 }
 
-export type ApiNotifyException = {
-  chatId: string;
-  isMuted: boolean;
-  isSilent?: boolean;
-  shouldShowPreviews?: boolean;
-};
-
 export type ApiNotification = {
   localId: string;
   containerSelector?: string;
@@ -352,3 +345,12 @@ export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
 export type ApiLimitTypeForPromo = Exclude<ApiLimitType,
 'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined' | 'savedDialogsPinned'
 >;
+
+export type ApiPeerNotifySettings = {
+  mutedUntil?: number;
+  hasSound?: boolean;
+  isSilentPosting?: boolean;
+  shouldShowPreviews?: boolean;
+};
+
+export type ApiNotifyPeerType = 'users' | 'groups' | 'channels';

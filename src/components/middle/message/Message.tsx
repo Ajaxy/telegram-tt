@@ -869,9 +869,9 @@ const Message: FC<OwnProps & StateProps> = ({
     }
 
     if (unreadMentionIds.length) {
-      markMentionsRead({ messageIds: unreadMentionIds });
+      markMentionsRead({ chatId, messageIds: unreadMentionIds });
     }
-  }, [hasUnreadReaction, album, messageId, animateUnreadReaction, message.hasUnreadMention]);
+  }, [hasUnreadReaction, album, chatId, messageId, animateUnreadReaction, message.hasUnreadMention]);
 
   const albumLayout = useMemo(() => {
     return isAlbum

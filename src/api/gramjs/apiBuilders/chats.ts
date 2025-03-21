@@ -24,13 +24,14 @@ import type {
 } from '../../types';
 
 import { pick, pickTruthy } from '../../../util/iteratees';
-import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
+import { getServerTimeOffset } from '../../../util/serverTime';
 import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import { serializeBytes } from '../helpers/misc';
 import {
   buildApiBotVerification, buildApiFormattedText, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
 } from './common';
 import { omitVirtualClassFields } from './helpers';
+import { buildApiPeerNotifySettings } from './misc';
 import {
   buildApiEmojiStatus,
   buildApiPeerColor,
@@ -119,10 +120,8 @@ export function buildApiChatFromDialog(
 ): ApiChat {
   const {
     peer, folderId, unreadMark, unreadCount, unreadMentionsCount, unreadReactionsCount,
-    notifySettings: { silent, muteUntil },
     readOutboxMaxId, readInboxMaxId, draft, viewForumAsMessages,
   } = dialog;
-  const isMuted = silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil);
 
   return {
     id: getApiChatIdFromMtpPeer(peer),
@@ -134,8 +133,6 @@ export function buildApiChatFromDialog(
     unreadCount,
     unreadMentionsCount,
     unreadReactionsCount,
-    isMuted,
-    muteUntil,
     ...(unreadMark && { hasUnreadMark: true }),
     ...(draft instanceof GramJs.DraftMessage && { draftDate: draft.date }),
     ...(viewForumAsMessages && { isForumAsMessages: true }),
@@ -579,9 +576,7 @@ export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | und
     unreadMentionsCount,
     unreadReactionsCount,
     fromId,
-    notifySettings: {
-      silent, muteUntil,
-    },
+    notifySettings,
   } = forumTopic;
 
   return {
@@ -600,8 +595,7 @@ export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | und
     unreadMentionsCount,
     unreadReactionsCount,
     fromId: getApiChatIdFromMtpPeer(fromId),
-    isMuted: silent || (typeof muteUntil === 'number' ? getServerTime() < muteUntil : undefined),
-    muteUntil,
+    notifySettings: buildApiPeerNotifySettings(notifySettings),
   };
 }
 

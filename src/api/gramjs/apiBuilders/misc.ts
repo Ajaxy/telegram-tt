@@ -8,6 +8,7 @@ import type {
   ApiLanguage,
   ApiOldLangString,
   ApiPeerColors,
+  ApiPeerNotifySettings,
   ApiPrivacyKey,
   ApiSession,
   ApiTimezone,
@@ -21,7 +22,6 @@ import { numberToHexColor } from '../../../util/colors';
 import {
   buildCollectionByCallback, omit, omitUndefined, pick,
 } from '../../../util/iteratees';
-import { getServerTime } from '../../../util/serverTime';
 import { addUserToLocalDb } from '../helpers/localDb';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiDocument, buildMessageTextContent } from './messageContent';
@@ -106,40 +106,20 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
   return undefined;
 }
 
-export function buildApiNotifyException(
-  notifySettings: GramJs.TypePeerNotifySettings, peer: GramJs.TypePeer,
-) {
+export function buildApiPeerNotifySettings(
+  notifySettings: GramJs.TypePeerNotifySettings,
+): ApiPeerNotifySettings {
   const {
     silent, muteUntil, showPreviews, otherSound,
   } = notifySettings;
 
-  const hasSound = Boolean(otherSound && !(otherSound instanceof GramJs.NotificationSoundNone));
+  const hasSound = !(otherSound instanceof GramJs.NotificationSoundNone);
 
   return {
-    chatId: getApiChatIdFromMtpPeer(peer),
-    isMuted: silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil),
-    ...(!hasSound && { isSilent: true }),
-    ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
-    muteUntil,
-  };
-}
-
-export function buildApiNotifyExceptionTopic(
-  notifySettings: GramJs.TypePeerNotifySettings, peer: GramJs.TypePeer, topicId: number,
-) {
-  const {
-    silent, muteUntil, showPreviews, otherSound,
-  } = notifySettings;
-
-  const hasSound = Boolean(otherSound && !(otherSound instanceof GramJs.NotificationSoundNone));
-
-  return {
-    chatId: getApiChatIdFromMtpPeer(peer),
-    topicId,
-    isMuted: silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil),
-    ...(!hasSound && { isSilent: true }),
-    ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
-    muteUntil,
+    hasSound,
+    isSilentPosting: silent,
+    mutedUntil: muteUntil,
+    shouldShowPreviews: showPreviews,
   };
 }
 

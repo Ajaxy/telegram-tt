@@ -13,7 +13,7 @@ import type {
 } from '../../api/types';
 import type { OldLangFn } from '../../hooks/useOldLang';
 import type {
-  CustomPeer, NotifyException, NotifySettings, ThreadId,
+  CustomPeer, ThreadId,
 } from '../../types';
 import type { LangFn } from '../../util/localization';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -304,40 +304,6 @@ export function getForumComposerPlaceholder(
 
 export function isChatArchived(chat: ApiChat) {
   return chat.folderId === ARCHIVED_FOLDER_ID;
-}
-
-export function selectIsChatMuted(
-  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<string, NotifyException> = {},
-) {
-  // If this chat is in exceptions they take precedence
-  if (notifyExceptions[chat.id] && notifyExceptions[chat.id].isMuted !== undefined) {
-    return notifyExceptions[chat.id].isMuted;
-  }
-
-  return (
-    chat.isMuted
-    || (isUserId(chat.id) && !notifySettings.hasPrivateChatsNotifications)
-    || (isChatChannel(chat) && !notifySettings.hasBroadcastNotifications)
-    || (isChatGroup(chat) && !notifySettings.hasGroupNotifications)
-  );
-}
-
-export function selectShouldShowMessagePreview(
-  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<string, NotifyException> = {},
-) {
-  const {
-    hasPrivateChatsMessagePreview = true,
-    hasBroadcastMessagePreview = true,
-    hasGroupMessagePreview = true,
-  } = notifySettings;
-  // If this chat is in exceptions they take precedence
-  if (notifyExceptions[chat.id] && notifyExceptions[chat.id].shouldShowPreviews !== undefined) {
-    return notifyExceptions[chat.id].shouldShowPreviews;
-  }
-
-  return (isUserId(chat.id) && hasPrivateChatsMessagePreview)
-    || (isChatChannel(chat) && hasBroadcastMessagePreview)
-    || (isChatGroup(chat) && hasGroupMessagePreview);
 }
 
 export function getCanDeleteChat(chat: ApiChat) {

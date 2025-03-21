@@ -2,7 +2,7 @@ import type { ApiBotCommand } from './bots';
 import type {
   ApiChatReactions, ApiFormattedText, ApiInputMessageReplyInfo, ApiPhoto, ApiStickerSet,
 } from './messages';
-import type { ApiBotVerification, ApiChatInviteImporter } from './misc';
+import type { ApiBotVerification, ApiChatInviteImporter, ApiPeerNotifySettings } from './misc';
 import type {
   ApiEmojiStatusType, ApiFakeType, ApiUser, ApiUsername,
 } from './users';
@@ -27,8 +27,6 @@ export interface ApiChat {
   unreadMentionsCount?: number;
   unreadReactionsCount?: number;
   isVerified?: true;
-  isMuted?: boolean;
-  muteUntil?: number;
   areSignaturesShown?: boolean;
   areProfilesShown?: boolean;
   hasPrivateLink?: boolean;
@@ -262,8 +260,7 @@ export interface ApiTopic {
   unreadMentionsCount: number;
   unreadReactionsCount: number;
   fromId: string;
-  isMuted?: boolean;
-  muteUntil?: number;
+  notifySettings: ApiPeerNotifySettings;
 }
 
 export interface ApiChatlistInviteNew {
