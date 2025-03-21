@@ -172,9 +172,10 @@ const GiftInfoModal = ({
   });
 
   const handleFocusUpgraded = useLastCallback(() => {
-    if (!savedGift?.upgradeMsgId || !renderingTargetPeer) return;
+    const giftChat = isSender ? renderingTargetPeer : renderingFromPeer;
+    if (!savedGift?.upgradeMsgId || !giftChat) return;
     const { upgradeMsgId } = savedGift;
-    focusMessage({ chatId: renderingTargetPeer.id, messageId: upgradeMsgId! });
+    focusMessage({ chatId: giftChat.id, messageId: upgradeMsgId! });
     handleClose();
   });
 

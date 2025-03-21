@@ -400,8 +400,9 @@ export function selectOutgoingStatus<T extends GlobalState>(
 export function selectSender<T extends GlobalState>(global: T, message: ApiMessage): ApiPeer | undefined {
   const { senderId } = message;
   const chat = selectChat(global, message.chatId);
+  const currentUser = selectUser(global, global.currentUserId!);
   if (!senderId) {
-    return chat;
+    return message.isOutgoing ? currentUser : chat;
   }
 
   if (chat && isChatChannel(chat) && !chat.areProfilesShown) return chat;
