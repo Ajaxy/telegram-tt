@@ -28,14 +28,14 @@
 
 .sortableContainer {
   position: relative;
-
-  :global(.draggable-knob) {
-    margin-top: -0.25rem;
-  }
 }
 
 .item {
   margin-bottom: 0;
   margin-left: -1rem;
   margin-right: -1rem;
+
+  :global(.multiline-item) {
+    padding-inline-end: 3rem;
+  }
 }

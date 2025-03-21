@@ -31,7 +31,7 @@ type OwnProps = {
   onEditUsername: (username: string) => void;
 };
 
-const USERNAME_HEIGHT_PX = 60;
+const USERNAME_HEIGHT_PX = 56;
 
 const ManageUsernames: FC<OwnProps> = ({
   chatId,
@@ -170,7 +170,7 @@ const ManageUsernames: FC<OwnProps> = ({
               >
                 <ListItem
                   key={usernameData.username}
-                  className={buildClassName('drag-item mb-2 no-icon', styles.item)}
+                  className={buildClassName('drag-item no-icon', styles.item)}
                   narrow
                   secondaryIcon="more"
                   icon={usernameData.isActive ? 'link' : 'link-broken'}

@@ -164,7 +164,7 @@ const Draggable: FC<OwnProps> = ({
           onTouchStart={handleMouseDown}
           style={knobStyle}
         >
-          <Icon name="sort" />
+          <Icon name="sort" className={styles.icon} />
         </div>
       )}
     </div>
