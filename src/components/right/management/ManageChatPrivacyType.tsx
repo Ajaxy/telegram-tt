@@ -22,6 +22,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
 import Icon from '../../common/icons/Icon';
+import LinkField from '../../common/LinkField';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
 import UsernameInput from '../../common/UsernameInput';
@@ -198,7 +199,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="Management">
-      <div className="custom-scroll">
+      <div className="panel-content custom-scroll">
         <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
           <h3 className="section-heading">{lang(`${langPrefix2}Type`)}</h3>
           <RadioGroup
@@ -212,7 +213,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
           <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
             {privateInviteLink ? (
               <>
-                <SafeLink url={privateInviteLink} className="group-link" text={privateInviteLink} />
+                <LinkField link={privateInviteLink} className="invite-link" />
                 <p className="section-info" dir={lang.isRtl ? 'rtl' : undefined}>
                   {lang(`${langPrefix1}PrivateLinkHelp`)}
                 </p>
@@ -235,14 +236,16 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
           </div>
         ) : (
           <div className="section no-border">
-            <UsernameInput
-              asLink
-              currentUsername={currentUsername}
-              isLoading={isLoading}
-              isUsernameAvailable={isUsernameAvailable}
-              checkedUsername={checkedUsername}
-              onChange={handleUsernameChange}
-            />
+            <div className="settings-input">
+              <UsernameInput
+                asLink
+                currentUsername={currentUsername}
+                isLoading={isLoading}
+                isUsernameAvailable={isUsernameAvailable}
+                checkedUsername={checkedUsername}
+                onChange={handleUsernameChange}
+              />
+            </div>
             {error === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
             <p className="section-info" dir="auto">
               {lang(`${langPrefix2}.Username.CreatePublicLinkHelp`)}

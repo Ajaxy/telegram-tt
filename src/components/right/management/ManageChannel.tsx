@@ -212,7 +212,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="Management">
-      <div className="custom-scroll">
+      <div className="panel-content custom-scroll">
         <div className="section">
           <AvatarEditable
             currentAvatarBlobUrl={currentAvatarBlobUrl}

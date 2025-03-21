@@ -3,6 +3,9 @@
   overflow-x: hidden;
   overflow-y: hidden;
 
+  border-top: 1px solid transparent;
+  transition: border-top-color 0.3s ease-in-out;
+
   :global(.lovely-chart--container) {
     font: inherit !important;
     font-size: 13px !important;

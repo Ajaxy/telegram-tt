@@ -279,7 +279,7 @@ const BoostStatistics = ({
   }
 
   return (
-    <div className={buildClassName(styles.root, 'custom-scroll')}>
+    <div className={buildClassName(styles.root, 'panel-content custom-scroll')}>
       {!isLoaded && <Loading />}
       {isLoaded && statsOverview && (
         <>

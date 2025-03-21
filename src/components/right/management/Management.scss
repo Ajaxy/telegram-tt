@@ -103,6 +103,10 @@
       padding: 0 1rem;
     }
 
+    .invite-link {
+      padding: 0 1rem;
+    }
+
     .section-info_push {
       margin-top: 0.25rem;
     }
@@ -124,6 +128,7 @@
   .RangeSlider {
     margin-top: 2rem;
     margin-inline-start: 1rem;
+    margin-inline-end: 1rem;
   }
 
   .button-position {
@@ -170,6 +175,10 @@
 .ManageInvites {
   .create-link {
     margin-bottom: 0.5rem;
+    .icon-add {
+      margin-inline-start: 0.1875rem;
+      margin-inline-end: 1.1875rem;
+    }
   }
 
   .ListItem-button {
@@ -209,6 +218,7 @@
 
 .ManageInvite {
   .link-name {
+    padding: 0 1rem;
     margin-bottom: 1rem;
   }
 

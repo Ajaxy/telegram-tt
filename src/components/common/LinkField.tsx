@@ -115,6 +115,7 @@ const InviteLink: FC<OwnProps> = ({
           size="smaller"
           disabled={isDisabled}
           onClick={handleShare}
+          className={styles.share}
         >
           {lang('FolderLinkScreen.LinkActionShare')}
         </Button>

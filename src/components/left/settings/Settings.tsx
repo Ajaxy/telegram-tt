@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useState } from '../../../lib/teact/teact';
+import React, { memo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
@@ -10,6 +10,7 @@ import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
 
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useMarkScrolled from '../../../hooks/useMarkScrolled/useMarkScrolled';
 
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';
@@ -161,8 +162,16 @@ const Settings: FC<OwnProps> = ({
 }) => {
   const { closeShareChatFolderModal } = getActions();
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
+
+  useMarkScrolled({
+    containerRef,
+    selector: '.settings-content',
+  }, [currentScreen]);
 
   const handleReset = useLastCallback((forceReturnToChatList?: true | Event) => {
     const isFromSettings = selectTabState(getGlobal()).shareFolderScreen?.isFromSettings;
@@ -506,6 +515,7 @@ const Settings: FC<OwnProps> = ({
 
   return (
     <Transition
+      ref={containerRef}
       id="Settings"
       name={shouldSkipTransition ? 'none' : LAYERS_ANIMATION_NAME}
       activeKey={currentScreen}

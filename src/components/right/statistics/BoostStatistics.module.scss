@@ -13,12 +13,13 @@
 }
 
 .section-header {
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
 }
 
 .section {
-  padding: 0.625rem;
+  padding: 1.5rem;
+  padding-inline-end: calc(1.5rem - var(--scrollbar-width));
 
   @include mixins.side-panel-section;
 }
@@ -110,10 +111,23 @@
 }
 
 .giveawayButton {
-  margin-bottom: 0.5rem;
+  margin: 0 -1rem 0.5rem;
 }
 
 .giveawayIcon {
   width: 2.75rem;
   height: 2.75rem;
+}
+
+.primaryLink {
+  position: relative;
+  margin: 0 1rem 0.5rem;
+}
+
+.copy {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 1;
 }

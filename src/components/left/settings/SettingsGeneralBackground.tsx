@@ -122,7 +122,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="SettingsGeneralBackground settings-content custom-scroll">
-      <div className="settings-item pt-3">
+      <div className="settings-item">
         <ListItem
           icon="camera-add"
           className="mb-0"

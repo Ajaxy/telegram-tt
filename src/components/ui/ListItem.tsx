@@ -60,6 +60,7 @@ interface OwnProps {
   inactive?: boolean;
   focus?: boolean;
   destructive?: boolean;
+  withPrimaryColor?: boolean;
   multiline?: boolean;
   isStatic?: boolean;
   allowSelection?: boolean;
@@ -98,6 +99,7 @@ const ListItem: FC<OwnProps> = ({
   inactive,
   focus,
   destructive,
+  withPrimaryColor,
   multiline,
   isStatic,
   allowSelection,
@@ -209,6 +211,7 @@ const ListItem: FC<OwnProps> = ({
     contextMenuAnchor && 'has-menu-open',
     focus && 'focus',
     destructive && 'destructive',
+    withPrimaryColor && 'primary',
     multiline && 'multiline',
     isStatic && 'is-static',
     withColorTransition && 'with-color-transition',

@@ -26,7 +26,6 @@ import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
 import Icon from '../../common/icons/Icon';
 import LinkField from '../../common/LinkField';
 import NothingFound from '../../common/NothingFound';
-import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 
@@ -274,7 +273,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="Management ManageInvites">
-      <div className="custom-scroll">
+      <div className="panel-content custom-scroll">
         <div className="section">
           <AnimatedIconWithPreview
             tgsUrl={LOCAL_TGS_URLS.Invite}
@@ -295,9 +294,9 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           </div>
         )}
         <div className="section" teactFastList>
-          <Button isText key="create" className="create-link" onClick={handleCreateNewClick}>
+          <ListItem icon="add" withPrimaryColor key="create" className="create-link" onClick={handleCreateNewClick}>
             {oldLang('CreateNewLink')}
-          </Button>
+          </ListItem>
           {(!temporalInvites || !temporalInvites.length) && <NothingFound text="No links found" key="nothing" />}
           {temporalInvites?.map((invite) => (
             <ListItem

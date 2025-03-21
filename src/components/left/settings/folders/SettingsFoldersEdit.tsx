@@ -306,7 +306,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         </div>
 
         {!isOnlyInvites && (
-          <div className="settings-item pt-3">
+          <div className="settings-item">
             {state.error && state.error === ERROR_NO_CHATS && (
               <p className="settings-item-description color-danger mb-2" dir={lang.isRtl ? 'rtl' : undefined}>
                 {lang(state.error)}

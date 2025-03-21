@@ -537,6 +537,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
         <p>{lang(isEndGroupCallModal ? 'VoipGroupEndAlertText' : 'VoipGroupLeaveAlertText')}</p>
         {!isEndGroupCallModal && (
           <Checkbox
+            className="dialog-checkbox"
             label={lang('VoipGroupEndChat')}
             checked={shouldEndGroupCall}
             onCheck={setShouldEndGroupCall}

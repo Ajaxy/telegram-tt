@@ -32,6 +32,15 @@
     overflow: hidden;
   }
 
+  .panel-content {
+    border-top: 1px solid transparent;
+    transition: border-top-color 250ms ease-in-out;
+
+    &.scrolled {
+      border-top-color: var(--color-borders);
+    }
+  }
+
   .Management .section > .ChatInfo {
     padding: 0 1.5rem;
     margin: 1rem 0;

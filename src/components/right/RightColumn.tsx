@@ -1,5 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  memo, useEffect, useRef, useState,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ProfileTabType, ThreadId } from '../../types';
@@ -22,6 +24,7 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
+import useMarkScrolled from '../../hooks/useMarkScrolled/useMarkScrolled';
 import useWindowSize from '../../hooks/window/useWindowSize';
 
 import Transition from '../ui/Transition';
@@ -106,6 +109,9 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     closeMonetizationStatistics,
   } = getActions();
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const { width: windowWidth } = useWindowSize();
   const [profileState, setProfileState] = useState<ProfileState>(
     isSavedMessages && !isSavedDialog ? ProfileState.SavedDialogs : ProfileState.Profile,
@@ -134,6 +140,11 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
+
+  useMarkScrolled({
+    containerRef,
+    selector: ':scope .custom-scroll, :scope .panel-content',
+  }, [contentKey, managementScreen, chatId, threadId]);
 
   const close = useLastCallback((shouldScrollUp = true) => {
     switch (contentKey) {
@@ -389,6 +400,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           onScreenSelect={setManagementScreen}
         />
         <Transition
+          ref={containerRef}
           name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'zoomFade'}
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}

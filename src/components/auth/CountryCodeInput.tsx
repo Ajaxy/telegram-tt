@@ -10,6 +10,7 @@ import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { isoToEmoji } from '../../util/emoji/emoji';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { IS_EMOJI_SUPPORTED } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
@@ -104,7 +105,9 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
       handleTrigger();
     };
 
-    const inputValue = filter ?? (value?.name || value?.defaultName || '');
+    const emoji = value && IS_EMOJI_SUPPORTED && renderText(isoToEmoji(value.iso2), ['hq_emoji']);
+    const name = value?.name || value?.defaultName || '';
+    const inputValue = filter ?? [emoji, name].filter(Boolean).join(' ');
 
     return (
       <div className={buildClassName('input-group', value && 'touched')}>

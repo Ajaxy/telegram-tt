@@ -8,6 +8,13 @@
   overflow-x: hidden;
   overflow-y: scroll;
 
+  border-top: 1px solid transparent;
+  transition: border-top-color 250ms ease-in-out;
+
+  &.scrolled {
+    border-top-color: var(--color-borders);
+  }
+
   > .profile-info > .ChatInfo {
     grid-area: chat_info;
 

@@ -185,6 +185,16 @@
     }
   }
 
+  &.primary {
+    .ListItem-button {
+      color: var(--color-primary);
+
+      .ListItem-main-icon {
+        color: inherit;
+      }
+    }
+  }
+
   &-context-menu {
     position: absolute;
 

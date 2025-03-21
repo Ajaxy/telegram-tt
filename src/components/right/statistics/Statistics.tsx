@@ -189,17 +189,15 @@ const Statistics: FC<OwnProps & StateProps> = ({
     graphs, graphTitles, isReady, statistics, lang, chatId, loadStatisticsAsyncGraph, dcId, forceUpdate,
   ]);
 
-  if (!isReady || !statistics) {
-    return <Loading />;
-  }
-
   return (
-    <div className={buildClassName(styles.root, 'custom-scroll', isReady && styles.ready)}>
-      <StatisticsOverview
-        statistics={statistics}
-        type={isGroup ? 'group' : 'channel'}
-        title={lang('StatisticOverview')}
-      />
+    <div className={buildClassName(styles.root, 'panel-content custom-scroll', isReady && styles.ready)}>
+      {statistics && (
+        <StatisticsOverview
+          statistics={statistics}
+          type={isGroup ? 'group' : 'channel'}
+          title={lang('StatisticOverview')}
+        />
+      )}
 
       {!loadedCharts.current.length && <Loading />}
 
@@ -209,7 +207,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
         ))}
       </div>
 
-      {Boolean((statistics as ApiChannelStatistics).recentPosts?.length) && (
+      {Boolean((statistics as ApiChannelStatistics)?.recentPosts?.length) && (
         <div className={styles.messages}>
           <h2 className={styles.messagesTitle}>{lang('ChannelStats.Recent.Header')}</h2>
 

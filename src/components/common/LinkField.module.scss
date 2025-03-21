@@ -18,7 +18,10 @@
 }
 
 .title {
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
-  padding-left: 1rem;
+}
+
+.share {
+  font-weight: var(--font-weight-semibold);
 }

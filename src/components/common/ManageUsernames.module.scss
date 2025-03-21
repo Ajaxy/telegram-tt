@@ -10,7 +10,6 @@
 .header {
   font-size: 1rem;
   color: var(--color-text-secondary);
-  margin-bottom: 2rem;
   position: relative;
 
   &[dir="rtl"] {
@@ -22,7 +21,6 @@
   font-size: 0.875rem;
   color: var(--color-text-secondary);
 
-  margin-top: 1rem;
   margin-bottom: 0;
   padding-top: 0.5rem;
   padding-bottom: 1.5rem;

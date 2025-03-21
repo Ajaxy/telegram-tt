@@ -43,7 +43,7 @@ const SettingsPasscodeCongratulations: FC<OwnProps> = ({
         </p>
       </div>
 
-      <div className="settings-item pt-2">
+      <div className="settings-item settings-group">
         <Button onClick={fullReset}>{lang('Back')}</Button>
       </div>
     </div>

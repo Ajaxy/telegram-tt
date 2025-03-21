@@ -208,7 +208,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       {noAdmins && renderSearchField()}
-      <div className="custom-scroll">
+      <div className="panel-content custom-scroll">
         {canHideParticipants && !isChannel && (
           <div className="section">
             <ListItem icon="group" ripple onClick={handleToggleParticipantsHidden}>
