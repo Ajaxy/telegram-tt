@@ -16,9 +16,9 @@
 .main {
   overflow-y: auto;
   scrollbar-gutter: stable;
-  padding: 1rem 0.5rem;
+  padding: 1rem 0.375rem;
 
-  @include mixins.adapt-padding-to-scrollbar(0.5rem);
+  @include mixins.adapt-padding-to-scrollbar(0.375rem);
 }
 
 .footer {
