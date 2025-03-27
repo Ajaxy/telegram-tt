@@ -14,6 +14,10 @@
   &.closing {
     transition: transform 0.2s ease-out, opacity 0.2s ease-out;
   }
+
+  body.is-macos & {
+    height: 1.375rem;
+  }
 }
 
 .ChatBadge-wrapper {

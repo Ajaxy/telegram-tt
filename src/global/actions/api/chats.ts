@@ -1178,7 +1178,7 @@ addActionHandler('markChatUnread', (global, actions, payload): ActionReturnType 
   });
 });
 
-addActionHandler('markChatRead', async (global, actions, payload): Promise<void> => {
+addActionHandler('markChatMessagesRead', async (global, actions, payload): Promise<void> => {
   const { id } = payload;
   const chat = selectChat(global, id);
   if (!chat) return;
@@ -1186,6 +1186,9 @@ addActionHandler('markChatRead', async (global, actions, payload): Promise<void>
     await callApi('markMessageListRead', { chat, threadId: MAIN_THREAD_ID });
     actions.readAllMentions({ chatId: id });
     actions.readAllReactions({ chatId: id });
+    if (chat.hasUnreadMark) {
+      actions.markChatRead({ id });
+    }
     return;
   }
 
@@ -1211,6 +1214,17 @@ addActionHandler('markChatRead', async (global, actions, payload): Promise<void>
       hasMoreTopics = false;
     }
   }
+});
+
+addActionHandler('markChatRead', (global, actions, payload): ActionReturnType => {
+  const { id } = payload;
+  const chat = selectChat(global, id);
+  if (!chat) return;
+
+  callApi('toggleDialogUnread', {
+    chat,
+    hasUnreadMark: !chat.hasUnreadMark,
+  });
 });
 
 addActionHandler('markTopicRead', (global, actions, payload): ActionReturnType => {

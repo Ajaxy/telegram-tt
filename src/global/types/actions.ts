@@ -368,6 +368,7 @@ export interface ActionPayloads {
   };
   markChatUnread: { id: string };
   markChatRead: { id: string };
+  markChatMessagesRead: { id: string };
   loadChatFolders: undefined;
   loadRecommendedChatFolders: undefined;
   editChatFolder: {
