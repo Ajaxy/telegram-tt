@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo,
+  useEffect,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -9,6 +10,7 @@ import type {
   ApiPeer,
 } from '../../../api/types';
 
+import { MESSAGE_APPEARANCE_DELAY } from '../../../config';
 import {
   isAnonymousForwardsChat,
   isAnonymousOwnMessage,
@@ -21,7 +23,9 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
+import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import Avatar from '../../common/Avatar';
 
@@ -33,6 +37,7 @@ type OwnProps =
     withAvatar?: boolean;
     children: React.ReactNode;
     id: string;
+    appearanceOrder: number;
   };
 
   type StateProps = {
@@ -49,6 +54,7 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
   withAvatar,
   children,
   id,
+  appearanceOrder,
   sender,
   canShowSender,
   originSender,
@@ -62,6 +68,16 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
 
   const messageSender = canShowSender ? sender : undefined;
 
+  const noAppearanceAnimation = appearanceOrder <= 0;
+  const [isShown, markShown] = useFlag(noAppearanceAnimation);
+  useEffect(() => {
+    if (noAppearanceAnimation) {
+      return;
+    }
+
+    setTimeout(markShown, appearanceOrder * MESSAGE_APPEARANCE_DELAY);
+  }, [appearanceOrder, markShown, noAppearanceAnimation]);
+
   const shouldPreferOriginSender = forwardInfo
   && (isChatWithSelf || isRepliesChat || isAnonymousForwards || !messageSender);
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
@@ -72,6 +88,14 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
     }
 
     openChat({ id: avatarPeer.id });
+  });
+
+  const {
+    ref: avatarRef,
+    shouldRender,
+  } = useShowTransition({
+    isOpen: withAvatar && isShown,
+    withShouldRender: true,
   });
 
   function renderAvatar() {
@@ -95,8 +119,8 @@ const SenderGroupContainer: FC<OwnProps & StateProps> = ({
 
   return (
     <div id={id} className={className}>
-      {withAvatar && (
-        <div className={styles.avatarContainer}>
+      {shouldRender && (
+        <div ref={avatarRef} className={styles.avatarContainer}>
           {renderAvatar()}
         </div>
       )}

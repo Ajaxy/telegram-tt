@@ -264,6 +264,7 @@ const MessageListContent: FC<OwnProps> = ({
       const lastMessageOrAlbum = senderGroup[senderGroup.length - 1];
       const lastMessage = isAlbum(lastMessageOrAlbum) ? lastMessageOrAlbum.mainMessage : lastMessageOrAlbum;
       const lastMessageId = getMessageOriginalId(lastMessage);
+      const lastAppearanceOrder = messageCountToAnimate - appearanceIndex;
 
       const isTopicTopMessage = lastMessage.id === threadId;
       const isOwn = isOwnMessage(lastMessage);
@@ -283,6 +284,7 @@ const MessageListContent: FC<OwnProps> = ({
           id={id}
           message={lastMessage}
           withAvatar={withAvatar}
+          appearanceOrder={lastAppearanceOrder}
         >
           {senderGroupElements}
         </SenderGroupContainer>
