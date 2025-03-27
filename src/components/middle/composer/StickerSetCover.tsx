@@ -59,15 +59,15 @@ const StickerSetCover: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(containerRef, observeIntersection);
   const shouldPlay = isIntersecting && !noPlay;
 
-  const hasOnlyStaticThumb = hasStaticThumb && !hasVideoThumb && !hasAnimatedThumb && !thumbCustomEmojiId;
+  const shouldFallbackToSticker = !hasThumbnail
+    || (hasVideoThumb && !IS_WEBM_SUPPORTED && !hasAnimatedThumb && !hasStaticThumb);
+  const firstStickerHash = shouldFallbackToSticker && stickerSet.stickers?.[0]
+    && getStickerMediaHash(stickerSet.stickers[0], 'preview');
+  const firstStickerMediaData = useMedia(firstStickerHash, !isIntersecting);
 
-  const shouldFallbackToStatic = hasOnlyStaticThumb || (hasVideoThumb && !IS_WEBM_SUPPORTED && !hasAnimatedThumb);
-  const staticHash = shouldFallbackToStatic && getStickerMediaHash(stickerSet.stickers![0], 'preview');
-  const staticMediaData = useMedia(staticHash, !isIntersecting);
-
-  const mediaHash = ((hasThumbnail && !shouldFallbackToStatic) || hasAnimatedThumb) && `stickerSet${stickerSet.id}`;
+  const mediaHash = ((hasThumbnail && !firstStickerHash) || hasAnimatedThumb) && `stickerSet${stickerSet.id}`;
   const mediaData = useMedia(mediaHash, !isIntersecting);
-  const isReady = thumbCustomEmojiId || mediaData || staticMediaData;
+  const isReady = thumbCustomEmojiId || mediaData || firstStickerMediaData;
   const transitionClassNames = useMediaTransitionDeprecated(isReady);
 
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
@@ -81,7 +81,11 @@ const StickerSetCover: FC<OwnProps> = ({
   }, [isIntersecting, loadStickers, stickerSet]);
 
   return (
-    <div ref={containerRef} className={buildClassName(styles.root, 'sticker-set-cover')}>
+    <div
+      ref={containerRef}
+      className={buildClassName(styles.root, 'sticker-set-cover')}
+      style={`--_size: ${size}px`}
+    >
       {isReady ? (
         thumbCustomEmojiId ? (
           <CustomEmoji
@@ -101,7 +105,7 @@ const StickerSetCover: FC<OwnProps> = ({
             sharedCanvasCoords={coords}
             forceAlways={forcePlayback}
           />
-        ) : (hasVideoThumb && !shouldFallbackToStatic) ? (
+        ) : (hasVideoThumb && !shouldFallbackToSticker) ? (
           <OptimizedVideo
             className={buildClassName(styles.video, transitionClassNames)}
             src={mediaData}
@@ -113,7 +117,7 @@ const StickerSetCover: FC<OwnProps> = ({
           />
         ) : (
           <img
-            src={mediaData || staticMediaData}
+            src={mediaData || firstStickerMediaData}
             style={colorFilter}
             className={buildClassName(styles.image, transitionClassNames)}
             alt=""

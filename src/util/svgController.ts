@@ -41,7 +41,9 @@ export function addSvgDefinition(element: React.JSX.Element, id?: string) {
 export function removeSvgDefinition(id: string) {
   const element = DEFINITION_MAP.get(id);
   if (element) {
-    element.remove();
+    requestMutation(() => {
+      element.remove();
+    });
     DEFINITION_MAP.delete(id);
   }
 }

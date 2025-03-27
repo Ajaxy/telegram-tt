@@ -1,8 +1,9 @@
 .root {
-  --custom-emoji-size: 2rem;
+  --_size: 2rem;
+  --custom-emoji-size: var(--_size);
 
-  width: 1.875rem;
-  height: 1.875rem;
+  width: var(--_size);
+  height: var(--_size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -18,4 +19,5 @@
 .image {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
