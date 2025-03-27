@@ -237,6 +237,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
                   // eslint-disable-next-line react/jsx-no-bind
                   onClick={() => handleMemberClick(id)}
                   contextActions={getMemberContextAction(id)}
+                  withPortalForMenu
                 >
                   <PrivateChatInfo userId={id} forceShowSelf withStory />
                 </ListItem>
