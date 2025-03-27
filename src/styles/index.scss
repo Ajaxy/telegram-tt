@@ -64,6 +64,7 @@ body.is-ios,
 body.is-macos {
   --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue",
   sans-serif;
+  --font-weight-semibold: 600;
 }
 
 html[lang="fa"],
@@ -81,10 +82,6 @@ html[lang="fa"] body {
 body.is-ios {
   --border-radius-messages: 1rem;
   --border-radius-messages-small: 0.5rem;
-}
-
-body.is-macos {
-  --font-weight-semibold: 600;
 }
 
 body.is-electron {
