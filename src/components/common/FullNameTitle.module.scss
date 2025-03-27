@@ -13,6 +13,11 @@
       color: white;
     }
   }
+
+  .transition {
+    height: 1.5em;
+    width: 1.5em;
+  }
 }
 
 .fullName {
@@ -26,11 +31,6 @@
   &.canCopy {
     pointer-events: all;
   }
-}
-
-.transition {
-  height: 1.5em;
-  width: 1.5em;
 }
 
 .transitionSlide {
