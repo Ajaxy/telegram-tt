@@ -33,7 +33,10 @@
 
     &.open {
       transform: scale(1);
-      view-transition-name: open-menu-bubble;
+
+      .active-view-transition & {
+        view-transition-name: open-menu-bubble;
+      }
     }
 
     &.closing {

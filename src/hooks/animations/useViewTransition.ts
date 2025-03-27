@@ -4,7 +4,8 @@ import {
   useState,
 } from '../../lib/teact/teact';
 
-import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
+import { VIEW_TRANSITION_CLASS_NAME } from '../../config';
+import { requestMutation, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import Deferred from '../../util/Deferred';
 import { IS_VIEW_TRANSITION_SUPPORTED } from '../../util/windowEnvironment';
 
@@ -41,6 +42,9 @@ export function useViewTransition(): ViewTransitionController {
 
     transition.finished.then(() => {
       setTransitionState('idle');
+      requestMutation(() => {
+        document.body.classList.remove(VIEW_TRANSITION_CLASS_NAME);
+      });
       hasActiveTransition = false;
     });
 
@@ -50,6 +54,9 @@ export function useViewTransition(): ViewTransitionController {
       // eslint-disable-next-line no-console
       console.error(e);
       setTransitionState('skipped');
+      requestMutation(() => {
+        document.body.classList.remove(VIEW_TRANSITION_CLASS_NAME);
+      });
       hasActiveTransition = false;
     });
   }, [transitionState]);
@@ -63,6 +70,9 @@ export function useViewTransition(): ViewTransitionController {
 
     domUpdaterFn.current = updateCallback;
     setTransitionState('capturing-old');
+    requestMutation(() => {
+      document.body.classList.add(VIEW_TRANSITION_CLASS_NAME);
+    });
     hasActiveTransition = true;
   }
 

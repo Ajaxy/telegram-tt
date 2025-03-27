@@ -154,6 +154,7 @@ export const EDITABLE_STORY_INPUT_CSS_SELECTOR = `#${EDITABLE_STORY_INPUT_ID}`;
 export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 export const MESSAGE_CONTENT_CLASS_NAME = 'message-content';
 export const MESSAGE_CONTENT_SELECTOR = '.message-content';
+export const VIEW_TRANSITION_CLASS_NAME = 'active-view-transition';
 
 export const RESIZE_HANDLE_CLASS_NAME = 'resizeHandle';
 export const RESIZE_HANDLE_SELECTOR = `.${RESIZE_HANDLE_CLASS_NAME}`;
