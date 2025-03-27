@@ -20,6 +20,5 @@ export type EntityLike =
 export interface SessionData {
     mainDcId: number;
     keys: Record<number, string | number[]>;
-    hashes: Record<number, string | number[]>;
     isTest?: true;
 }
