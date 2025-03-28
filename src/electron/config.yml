@@ -59,7 +59,7 @@ dmg:
       type: link
       path: "/Applications"
 linux:
-  category: Community
+  category: Network;InstantMessaging;Chat
   target:
     target: AppImage
     arch:
