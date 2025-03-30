@@ -1316,6 +1316,7 @@ export interface LangPair {
   'ViewButtonStory': undefined;
   'ViewButtonBoost': undefined;
   'ViewButtonStickerset': undefined;
+  'ViewButtonEmojiset': undefined;
   'ViewButtonGiftUnique': undefined;
   'AuthContinueOnThisLanguage': undefined;
   'Share': undefined;

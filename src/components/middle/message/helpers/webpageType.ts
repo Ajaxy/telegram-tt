@@ -33,6 +33,8 @@ export function getWebpageButtonLangKey(type?: string): RegularLangKey | undefin
       return 'ViewButtonBoost';
     case 'telegram_stickerset':
       return 'ViewButtonStickerset';
+    case 'telegram_emojiset':
+      return 'ViewButtonEmojiset';
     case 'telegram_nft':
       return 'ViewButtonGiftUnique';
     default:

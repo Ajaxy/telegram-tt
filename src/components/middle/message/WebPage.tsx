@@ -155,7 +155,8 @@ const WebPage: FC<OwnProps & StateProps> = ({
   const isGift = type === WEBPAGE_GIFT_TYPE;
   const isExpiredStory = story && 'isDeleted' in story;
 
-  const quickButtonLangKey = !inPreview && !isExpiredStory ? getWebpageButtonLangKey(type) : undefined;
+  const resultType = stickers?.isEmoji ? 'telegram_emojiset' : type;
+  const quickButtonLangKey = !inPreview && !isExpiredStory ? getWebpageButtonLangKey(resultType) : undefined;
   const quickButtonTitle = quickButtonLangKey && lang(quickButtonLangKey);
 
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
