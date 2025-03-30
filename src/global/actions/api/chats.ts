@@ -75,6 +75,7 @@ import {
   replaceChatListIds,
   replaceChatListLoadingParameters,
   replaceMessages,
+  replaceNotifyExceptions,
   replaceSimilarChannels,
   replaceThreadParam,
   replaceUserStatuses,
@@ -2928,6 +2929,7 @@ async function loadChats(
   const offsetId = params.nextOffsetId;
 
   const isFirstBatch = !shouldIgnorePagination && !offsetPeer && !offsetDate && !offsetId;
+  const shouldReplaceStaleState = listType === 'active' && isFirstBatch;
 
   const result = listType === 'saved' ? await callApi('fetchSavedChats', {
     limit: CHAT_LIST_LOAD_SLICE,
@@ -2960,16 +2962,21 @@ async function loadChats(
   global = updateChats(global, newChats);
   if (isFirstBatch) {
     global = replaceChatListIds(global, listType, chatIds);
-    global = replaceUserStatuses(global, result.userStatusesById);
   } else {
     global = addChatListIds(global, listType, chatIds);
+  }
+
+  if (shouldReplaceStaleState) {
+    global = replaceUserStatuses(global, result.userStatusesById);
+    global = replaceNotifyExceptions(global, result.notifyExceptionById);
+  } else {
     global = addUserStatuses(global, result.userStatusesById);
+    global = addNotifyExceptions(global, result.notifyExceptionById);
   }
 
   global = updateChatListSecondaryInfo(global, listType, result);
   global = replaceMessages(global, result.messages);
   global = updateChatsLastMessageId(global, result.lastMessageByChatId, listType);
-  global = addNotifyExceptions(global, result.notifyExceptionById);
 
   if (!shouldIgnorePagination) {
     global = replaceChatListLoadingParameters(

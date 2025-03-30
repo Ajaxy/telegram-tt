@@ -281,6 +281,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     isSavedDialog,
     currentUserId,
     isPreview,
+    topics,
   });
 
   const isIntersecting = useIsIntersecting(ref, chat ? observeIntersection : undefined);

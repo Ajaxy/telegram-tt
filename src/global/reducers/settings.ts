@@ -53,6 +53,18 @@ export function addNotifyExceptions<T extends GlobalState>(
   };
 }
 
+export function replaceNotifyExceptions<T extends GlobalState>(
+  global: T, notifyExceptionById: Record<string, ApiPeerNotifySettings>,
+): T {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      notifyExceptionById,
+    },
+  };
+}
+
 export function addNotifyException<T extends GlobalState>(
   global: T, id: string, notifyException: ApiPeerNotifySettings,
 ): T {

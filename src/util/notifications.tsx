@@ -278,9 +278,10 @@ function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
   const topic = selectTopicFromMessage(global, message as ApiMessage);
   const topicMutedUntil = topic?.notifySettings.mutedUntil;
   const isMuted = topicMutedUntil === undefined ? isChatMuted : topicMutedUntil > getServerTime();
+  const shouldIgnoreMute = message.isMentioned;
 
   const shouldNotifyAboutMessage = message.content?.action?.type !== 'phoneCall';
-  if (isMuted || !shouldNotifyAboutMessage
+  if ((isMuted && !shouldIgnoreMute) || !shouldNotifyAboutMessage
      || chat.isNotJoined || !chat.isListed || selectIsChatWithSelf(global, chat.id)) {
     return false;
   }

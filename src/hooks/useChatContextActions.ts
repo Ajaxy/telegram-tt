@@ -1,8 +1,8 @@
 import { useMemo } from '../lib/teact/teact';
 import { getActions } from '../global';
 
+import type { ApiChat, ApiTopic, ApiUser } from '../api/types';
 import type { MenuItemContextAction } from '../components/ui/ListItem';
-import { type ApiChat, type ApiUser } from '../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
@@ -23,6 +23,7 @@ const useChatContextActions = ({
   isSavedDialog,
   currentUserId,
   isPreview,
+  topics,
   handleDelete,
   handleMute,
   handleChatFolderChange,
@@ -37,6 +38,7 @@ const useChatContextActions = ({
   isSavedDialog?: boolean;
   currentUserId?: string;
   isPreview?: boolean;
+  topics?: Record<number, ApiTopic>;
   handleDelete?: NoneToVoidFunction;
   handleMute?: NoneToVoidFunction;
   handleChatFolderChange: NoneToVoidFunction;
@@ -149,8 +151,9 @@ const useChatContextActions = ({
       return compact([actionOpenInNewTab, actionPin, actionAddToFolder, actionMute]) as MenuItemContextAction[];
     }
 
-    const actionMaskAsRead = (chat.unreadCount || chat.hasUnreadMark)
-      ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => markChatMessagesRead({ id: chat.id }) }
+    const actionMaskAsRead = (
+      chat.unreadCount || chat.hasUnreadMark || Object.values(topics || {}).some(({ unreadCount }) => unreadCount)
+    ) ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => markChatMessagesRead({ id: chat.id }) }
       : undefined;
     const actionMarkAsUnread = !(chat.unreadCount || chat.hasUnreadMark) && !chat.isForum
       ? { title: lang('MarkAsUnread'), icon: 'unread', handler: () => markChatUnread({ id: chat.id }) }
@@ -181,7 +184,7 @@ const useChatContextActions = ({
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted, currentUserId,
     handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, isSavedDialog, deleteTitle,
-    isPreview,
+    isPreview, topics,
   ]);
 };
 

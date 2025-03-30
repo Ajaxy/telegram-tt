@@ -1923,18 +1923,20 @@ const Composer: FC<OwnProps & StateProps> = ({
                 {!hasText && (
                   <>
                     {isChannel && (
-                      <Button
-                        round
-                        faded
-                        className="composer-action-button"
-                        color="translucent"
-                        onClick={handleToggleSilentPosting}
-                        ariaLabel={lang(
-                          isSilentPosting ? 'AriaComposerSilentPostingDisable' : 'AriaComposerSilentPostingEnable',
-                        )}
-                      >
-                        <Icon name={isSilentPosting ? 'mute' : 'unmute'} />
-                      </Button>
+                      <Transition className="composer-action-button" name="reveal" activeKey={Number(isSilentPosting)}>
+                        <Button
+                          round
+                          faded
+                          className="composer-action-button"
+                          color="translucent"
+                          onClick={handleToggleSilentPosting}
+                          ariaLabel={lang(
+                            isSilentPosting ? 'AriaComposerSilentPostingDisable' : 'AriaComposerSilentPostingEnable',
+                          )}
+                        >
+                          <Icon name={isSilentPosting ? 'mute' : 'unmute'} />
+                        </Button>
+                      </Transition>
                     )}
                     {withScheduledButton && (
                       <Button
