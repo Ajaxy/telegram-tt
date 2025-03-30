@@ -180,7 +180,7 @@ const StarsBalanceModal = ({
 
   return (
     <Modal
-      className={buildClassName(styles.root, !shouldForceHeight && styles.minimal)}
+      className={buildClassName(styles.root, !shouldForceHeight && !areBuyOptionsShown && styles.minimal)}
       isOpen={isOpen}
       onClose={closeStarsBalanceModal}
     >
