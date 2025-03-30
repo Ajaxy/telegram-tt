@@ -270,7 +270,10 @@ const Poll: FC<OwnProps> = ({
         )}
       </div>
       {canVote && (
-        <div className="poll-answers" onClick={stopPropagation}>
+        <div
+          className="poll-answers"
+          onClick={stopPropagation}
+        >
           {isMultiple
             ? (
               <CheckboxGroup

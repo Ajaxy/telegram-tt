@@ -48,6 +48,10 @@
         visibility: hidden;
       }
     }
+
+    &:hover {
+      background-color: transparent;
+    }
   }
 
   > input {
@@ -92,7 +96,7 @@
       word-break: break-word;
       unicode-bidi: plaintext;
       text-align: left;
-      line-height: 1.25rem;
+      line-height: 1.5rem;
     }
 
     .subLabel {

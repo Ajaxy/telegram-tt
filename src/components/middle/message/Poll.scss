@@ -27,26 +27,15 @@
   }
 
   .poll-voters-count {
-    margin: 0.4375rem 0 1.125rem;
+    margin: 0 0 1.125rem;
     text-align: center;
-  }
-
-  .poll-answers {
-    padding-top: 0.25rem;
-    padding-bottom: 1rem;
   }
 
   .Checkbox,
   .Radio {
+    min-height: 2.5rem;
     padding-left: 2.25rem;
-
-    &:last-child {
-      margin-bottom: 0.75rem;
-    }
-
-    &:first-child {
-      margin-top: 0;
-    }
+    padding-bottom: 1.25rem;
 
     &.disabled {
       opacity: 1 !important;
@@ -59,13 +48,19 @@
 
     .Checkbox-main,
     .Radio-main {
+      .label {
+        line-height: 1.3125rem;
+      }
+
       &::before {
+        top: 0.6875rem;
         left: 0.125rem;
         background-color: var(--background-color);
         --color-borders-input: var(--secondary-color);
       }
 
       &::after {
+        top: 0.6875rem;
         left: 0.4375rem;
         background-color: var(--accent-color);
       }
@@ -79,11 +74,17 @@
     }
 
     .Spinner {
+      top: 0.6875rem;
       left: 0.125rem;
     }
   }
 
   .Checkbox {
+    &.loading {
+      .Spinner {
+        top: 0;
+      }
+    }
     .Checkbox-main {
       &::after {
         left: 0.125rem;
@@ -150,12 +151,6 @@
     }
   }
 
-  .poll-results,
-  .poll-answers {
-    padding-top: 0.25rem;
-    padding-bottom: 0.5rem;
-  }
-
   .Button {
     text-transform: none;
     font-size: 1rem;
@@ -167,6 +162,6 @@
   }
 
   > .Button {
-    margin-bottom: 0.625rem;
+    margin-bottom: 0.1875rem;
   }
 }

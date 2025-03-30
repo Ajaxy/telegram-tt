@@ -48,6 +48,7 @@ const Radio: FC<OwnProps> = ({
   onSubLabelClick,
 }) => {
   const lang = useOldLang();
+
   const fullClassName = buildClassName(
     'Radio',
     className,

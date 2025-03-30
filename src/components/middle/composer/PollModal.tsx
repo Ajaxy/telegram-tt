@@ -265,6 +265,7 @@ const PollModal: FC<OwnProps> = ({
     return options.map((option, index) => (
       <div className="option-wrapper">
         <InputText
+          maxLength={MAX_OPTION_LENGTH}
           label={index !== options.length - 1 || options.length === MAX_OPTIONS_COUNT
             ? lang('OptionHint')
             : lang('CreatePoll.AddOption')}
@@ -336,28 +337,27 @@ const PollModal: FC<OwnProps> = ({
       <div className="options-divider" />
 
       <div className="quiz-mode">
-        {!shouldBeAnonymous && (
+        <div className="dialog-checkbox-group">
+          {!shouldBeAnonymous && (
+            <Checkbox
+              label={lang('PollAnonymous')}
+              checked={isAnonymous}
+              onChange={handleIsAnonymousChange}
+            />
+          )}
           <Checkbox
-            className="dialog-checkbox"
-            label={lang('PollAnonymous')}
-            checked={isAnonymous}
-            onChange={handleIsAnonymousChange}
+            label={lang('PollMultiple')}
+            checked={isMultipleAnswers}
+            disabled={isQuizMode}
+            onChange={handleMultipleAnswersChange}
           />
-        )}
-        <Checkbox
-          className="dialog-checkbox"
-          label={lang('PollMultiple')}
-          checked={isMultipleAnswers}
-          disabled={isQuizMode}
-          onChange={handleMultipleAnswersChange}
-        />
-        <Checkbox
-          className="dialog-checkbox"
-          label={lang('PollQuiz')}
-          checked={isQuizMode}
-          disabled={isMultipleAnswers || isQuiz !== undefined}
-          onChange={handleQuizModeChange}
-        />
+          <Checkbox
+            label={lang('PollQuiz')}
+            checked={isQuizMode}
+            disabled={isMultipleAnswers || isQuiz !== undefined}
+            onChange={handleQuizModeChange}
+          />
+        </div>
         {isQuizMode && (
           <>
             <h3 className="options-header">{lang('lng_polls_solution_title')}</h3>

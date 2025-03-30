@@ -1,7 +1,7 @@
 .PollOption {
   display: flex;
   flex-flow: row nowrap;
-  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
 
   &:last-child {
     margin-bottom: 0;
@@ -59,7 +59,7 @@
 
   .poll-option-right {
     flex-grow: 1;
-    line-height: 1.5rem;
+    line-height: 1.3125rem;
   }
 
   .poll-option-answer {
