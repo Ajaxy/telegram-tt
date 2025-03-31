@@ -16,14 +16,19 @@ export default function deleteLastCharacterOutsideSelection(html: string) {
     }
   }
 
-  // Gets length of the element's content.
-  const textLength = element.textContent!.length;
   const range = document.createRange();
   const selection = window.getSelection()!;
 
-  // Sets selection position to the end of the element.
-  range.setStart(element, textLength);
-  range.setEnd(element, textLength);
+  if (element.textContent === "") {
+    range.selectNode(element);
+  } else {
+    // Gets length of the element's content.
+    const textLength = element.textContent!.length;
+    // Sets selection position to the end of the element.
+    range.setStart(element, textLength);
+    range.setEnd(element, textLength);
+  }
+
   selection.removeAllRanges();
   selection.addRange(range);
   document.execCommand('delete', false);
