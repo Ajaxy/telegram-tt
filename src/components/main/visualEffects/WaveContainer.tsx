@@ -16,7 +16,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import styles from './WaveContainer.module.scss';
 
-import waveRipple from '../../../assets/wave_ripple.svg';
+import waveRipple from '../../../assets/wave_ripple.png';
 
 type StateProps = {
   waveInfo?: TabState['wave'];
