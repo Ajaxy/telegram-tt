@@ -22,6 +22,7 @@
 
 .buttons {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
   column-gap: 1rem;
 }
