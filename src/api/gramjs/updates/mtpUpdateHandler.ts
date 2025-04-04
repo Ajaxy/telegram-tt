@@ -22,7 +22,6 @@ import {
 import {
   buildApiChatFolder,
   buildApiChatFromPreview,
-  buildApiChatSettings,
   buildChatMember,
   buildChatMembers,
   buildChatTypingStatus,
@@ -61,7 +60,7 @@ import {
 import { buildApiStealthMode, buildApiStory } from '../apiBuilders/stories';
 import { buildApiEmojiInteraction, buildStickerSet } from '../apiBuilders/symbols';
 import {
-  buildApiUser,
+  buildApiPeerSettings,
   buildApiUserStatus,
 } from '../apiBuilders/users';
 import {
@@ -776,42 +775,14 @@ export function updater(update: Update) {
       user: { phoneNumber: phone },
     });
   } else if (update instanceof GramJs.UpdatePeerSettings) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { _entities, settings } = update;
-    if (!_entities) {
-      return;
-    }
-
-    if (_entities?.length) {
-      _entities
-        .filter((e) => e instanceof GramJs.User && !e.contact)
-        .forEach((user) => {
-          sendApiUpdate({
-            '@type': 'deleteContact',
-            id: buildApiPeerId(user.id, 'user'),
-          });
-        });
-
-      _entities
-        .filter((e) => e instanceof GramJs.User && e.contact)
-        .map(buildApiUser)
-        .forEach((user) => {
-          if (!user) {
-            return;
-          }
-
-          sendApiUpdate({
-            '@type': 'updateUser',
-            id: user.id,
-            user: {
-              ...user,
-              ...(settings && { settings: buildApiChatSettings(settings) }),
-            },
-          });
-        });
-    }
-
-    // Settings
+    const { peer, settings } = update;
+    const peerId = getApiChatIdFromMtpPeer(peer);
+    const apiSettings = buildApiPeerSettings(settings);
+    sendApiUpdate({
+      '@type': 'updatePeerSettings',
+      id: peerId,
+      settings: apiSettings,
+    });
   } else if (update instanceof GramJs.UpdateNotifySettings) {
     const {
       notifySettings,

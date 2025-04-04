@@ -4,12 +4,13 @@ import React, {
 import { setExtraStyles } from '../../lib/teact/teact-dom';
 import { withGlobal } from '../../global';
 
+import type { ApiChat, ApiUserFullInfo } from '../../api/types';
 import type { MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
-import { type ApiChat, MAIN_THREAD_ID } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  selectChat, selectChatMessage, selectCurrentMiddleSearch, selectTabState,
+  selectChat, selectChatMessage, selectCurrentMiddleSearch, selectTabState, selectUserFullInfo,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
@@ -40,6 +41,7 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  userFullInfo?: ApiUserFullInfo;
   isAudioPlayerRendered?: boolean;
   isMiddleSearchOpen?: boolean;
 };
@@ -52,13 +54,14 @@ const MiddleHeaderPanes = ({
   threadId,
   messageListType,
   chat,
+  userFullInfo,
   getCurrentPinnedIndex,
   getLoadingPinnedId,
   isAudioPlayerRendered,
   isMiddleSearchOpen,
   onFocusPinnedMessage,
 }: OwnProps & StateProps) => {
-  const { settings } = chat || {};
+  const { settings } = userFullInfo || {};
 
   const { isDesktop } = useAppLayout();
   const [getAudioPlayerState, setAudioPlayerState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
@@ -163,6 +166,7 @@ export default memo(withGlobal<OwnProps>(
   }): StateProps => {
     const { audioPlayer } = selectTabState(global);
     const chat = selectChat(global, chatId);
+    const userFullInfo = selectUserFullInfo(global, chatId);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
     const audioMessage = audioChatId && audioMessageId
@@ -173,6 +177,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
+      userFullInfo,
       isAudioPlayerRendered: Boolean(audioMessage),
       isMiddleSearchOpen,
     };

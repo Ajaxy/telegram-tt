@@ -2130,21 +2130,6 @@ addActionHandler('fetchChat', (global, actions, payload): ActionReturnType => {
   }
 });
 
-addActionHandler('loadChatSettings', async (global, actions, payload): Promise<void> => {
-  const { chatId } = payload;
-  const chat = selectChat(global, chatId);
-  if (!chat) return;
-
-  const result = await callApi('fetchChatSettings', chat);
-  if (!result) return;
-
-  const { settings } = result;
-
-  global = getGlobal();
-  global = updateChat(global, chat.id, { settings });
-  setGlobal(global);
-});
-
 addActionHandler('toggleJoinToSend', async (global, actions, payload): Promise<void> => {
   const { chatId, isEnabled } = payload;
   const chat = selectChat(global, chatId);

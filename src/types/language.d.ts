@@ -224,6 +224,10 @@ export interface LangPair {
   'WalletAddressCopied': undefined;
   'Copy': undefined;
   'DeleteAndStop': undefined;
+  'ChatNonContactUserSubtitle': undefined;
+  'ChatNonContactUserGroups': undefined;
+  'ContactInfoRegistration': undefined;
+  'ContactInfoNotVerified': undefined;
   'DeleteForAll': undefined;
   'DeleteSingleMessagesTitle': undefined;
   'AreYouSureDeleteSingleMessage': undefined;
@@ -961,6 +965,7 @@ export interface LangPair {
   'WeekdaySaturday': undefined;
   'WeekdaySunday': undefined;
   'WeekdayToday': undefined;
+  'Today': undefined;
   'WeekdayYesterday': undefined;
   'User': undefined;
   'SecretChat': undefined;
@@ -1010,6 +1015,7 @@ export interface LangPair {
   'VoipIncoming': undefined;
   'LiveLocationUpdatedJustNow': undefined;
   'RightNow': undefined;
+  'JustNowAgo': undefined;
   'AudioPause': undefined;
   'AudioPlay': undefined;
   'ToggleUserNotifications': undefined;
@@ -1721,6 +1727,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'LiveLocationUpdatedTodayAt': {
     'time': V;
   };
+  'AtDateAgo': {
+    'date': V;
+  };
   'MediaViewDownloading': {
     'count': V;
   };
@@ -1791,6 +1800,14 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'GiftInfoPeerConvertDescription': {
     'peer': V;
     'amount': V;
+  };
+  'UserUpdatedName': {
+    'user': V;
+    'time': V;
+  };
+  'UserUpdatedPhoto': {
+    'user': V;
+    'time': V;
   };
   'GiftInfoSaved': {
     'link': V;
@@ -2394,6 +2411,15 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   'Minutes': {
     'count': V;
   };
+  'MinutesAgo': {
+    'count': V;
+  };
+  'HoursAgo': {
+    'count': V;
+  };
+  'DaysAgo': {
+    'count': V;
+  };
   'PreviewForwardedMessage': {
     'count': V;
   };
@@ -2435,6 +2461,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'GiftWithdrawWait': {
     'days': V;
+  };
+  'ChatGroups': {
+    'count': V;
   };
   'StarsAmountText': {
     'amount': V;

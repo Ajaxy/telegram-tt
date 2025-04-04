@@ -217,7 +217,7 @@ addActionHandler('updateContact', async (global, actions, payload): Promise<void
   }
 
   if (result) {
-    actions.loadChatSettings({ chatId: userId });
+    actions.loadPeerSettings({ peerId: userId });
     actions.loadPeerStories({ peerId: userId });
 
     global = getGlobal();
@@ -503,6 +503,30 @@ addActionHandler('openSuggestedStatusModal', async (global, actions, payload): P
       botId,
     },
   }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadPeerSettings', async (global, actions, payload): Promise<void> => {
+  const { peerId } = payload;
+
+  const userFullInfo = selectUserFullInfo(global, peerId);
+  if (!userFullInfo) {
+    actions.loadFullUser({ userId: peerId });
+    return;
+  }
+
+  const user = selectUser(global, peerId);
+  if (!user) {
+    return;
+  }
+
+  const result = await callApi('fetchPeerSettings', user);
+  if (!result) return;
+
+  const { settings } = result;
+
+  global = getGlobal();
+  global = updateUserFullInfo(global, peerId, { settings });
   setGlobal(global);
 });
 

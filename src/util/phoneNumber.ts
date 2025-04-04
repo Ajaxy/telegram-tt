@@ -3,8 +3,8 @@ import type { ApiCountryCode } from '../api/types';
 const PATTERN_PLACEHOLDER = 'X';
 const DEFAULT_PATTERN = 'XXX XXX XXX XXX';
 
-export function getCountryCodesByIso(phoneCodeList: ApiCountryCode[], iso: string) {
-  return phoneCodeList.filter((country) => country.iso2 === iso);
+export function getCountryCodeByIso(phoneCodeList: ApiCountryCode[], iso: string) {
+  return phoneCodeList.find((country) => country.iso2 === iso);
 }
 
 export function getCountryFromPhoneNumber(phoneCodeList: ApiCountryCode[], input = '') {

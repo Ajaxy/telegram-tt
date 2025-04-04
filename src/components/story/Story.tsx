@@ -24,10 +24,11 @@ import {
   selectPerformanceSettingsValue,
   selectTabState,
   selectUser,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatMediaDuration, formatRelativeTime } from '../../util/dates/dateFormat';
+import { formatMediaDuration, formatRelativePastTime } from '../../util/dates/dateFormat';
 import download from '../../util/download';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
@@ -94,7 +95,7 @@ interface StateProps {
   storyChangelogUserId?: string;
   viewersExpirePeriod: number;
   isChatExist?: boolean;
-  areChatSettingsLoaded?: boolean;
+  arePeerSettingsLoaded?: boolean;
   isCurrentUserPremium?: boolean;
   stealthMode: ApiStealthMode;
   withHeaderAnimation?: boolean;
@@ -122,7 +123,7 @@ function Story({
   storyChangelogUserId,
   viewersExpirePeriod,
   isChatExist,
-  areChatSettingsLoaded,
+  arePeerSettingsLoaded,
   getIsAnimating,
   isCurrentUserPremium,
   stealthMode,
@@ -143,7 +144,7 @@ function Story({
     openChat,
     showNotification,
     openStoryPrivacyEditor,
-    loadChatSettings,
+    loadPeerSettings,
     fetchChat,
     loadStoryViews,
     toggleStealthModal,
@@ -279,10 +280,10 @@ function Story({
     }
   }, [isChatExist, peerId]);
   useEffect(() => {
-    if (isChatExist && !areChatSettingsLoaded) {
-      loadChatSettings({ chatId: peerId });
+    if (isChatExist && !arePeerSettingsLoaded) {
+      loadPeerSettings({ peerId });
     }
-  }, [areChatSettingsLoaded, isChatExist, peerId]);
+  }, [arePeerSettingsLoaded, isChatExist, peerId]);
 
   const handlePauseStory = useLastCallback(() => {
     if (isVideo) {
@@ -672,7 +673,7 @@ function Story({
               </span>
             )}
             {story && 'date' in story && (
-              <span className={styles.storyMeta}>{formatRelativeTime(lang, serverTime, story.date)}</span>
+              <span className={styles.storyMeta}>{formatRelativePastTime(lang, serverTime, story.date)}</span>
             )}
             {isLoadedStory && story.isEdited && (
               <span className={styles.storyMeta}>{lang('Story.HeaderEdited')}</span>
@@ -906,6 +907,7 @@ export default memo(withGlobal<OwnProps>((global, {
   const { appConfig } = global;
   const user = selectUser(global, peerId);
   const chat = selectChat(global, peerId);
+  const userFullInfo = selectUserFullInfo(global, peerId);
   const tabState = selectTabState(global);
   const {
     storyViewer: {
@@ -951,7 +953,7 @@ export default memo(withGlobal<OwnProps>((global, {
     storyChangelogUserId: appConfig!.storyChangelogUserId,
     viewersExpirePeriod: appConfig!.storyExpirePeriod + appConfig!.storyViewersExpirePeriod,
     isChatExist: Boolean(chat),
-    areChatSettingsLoaded: Boolean(chat?.settings),
+    arePeerSettingsLoaded: Boolean(userFullInfo?.settings),
     stealthMode: global.stories.stealthMode,
     withHeaderAnimation,
   };

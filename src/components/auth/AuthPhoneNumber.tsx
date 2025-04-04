@@ -13,7 +13,7 @@ import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';
 import { oldSetLanguage } from '../../util/oldLangProvider';
-import { formatPhoneNumber, getCountryCodesByIso, getCountryFromPhoneNumber } from '../../util/phoneNumber';
+import { formatPhoneNumber, getCountryCodeByIso, getCountryFromPhoneNumber } from '../../util/phoneNumber';
 import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
@@ -101,7 +101,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
 
   useEffect(() => {
     if (authNearestCountry && phoneCodeList && !country && !isTouched) {
-      setCountry(getCountryCodesByIso(phoneCodeList, authNearestCountry)[0]);
+      setCountry(getCountryCodeByIso(phoneCodeList, authNearestCountry));
     }
   }, [country, authNearestCountry, isTouched, phoneCodeList]);
 

@@ -14,7 +14,6 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit, omitUndefined, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectTabState } from '../selectors';
-import { updateChat } from './chats';
 import { updateTabState } from './tabs';
 
 export function replaceUsers<T extends GlobalState>(global: T, newById: Record<string, ApiUser>): T {
@@ -179,7 +178,7 @@ export function deleteContact<T extends GlobalState>(global: T, userId: string):
     },
   };
 
-  return updateChat(global, userId, {
+  return updateUserFullInfo(global, userId, {
     settings: undefined,
   });
 }

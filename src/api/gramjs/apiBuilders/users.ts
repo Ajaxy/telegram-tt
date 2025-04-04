@@ -2,6 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiBirthday,
+  ApiPeerSettings,
   ApiUser,
   ApiUserFullInfo,
   ApiUserStatus,
@@ -24,7 +25,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
-      botCanManageEmojiStatus,
+      botCanManageEmojiStatus, settings,
     },
     users,
   } = mtpUserFull;
@@ -55,6 +56,29 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     starGiftCount: stargiftsCount,
     isBotCanManageEmojiStatus: botCanManageEmojiStatus,
     hasScheduledMessages: hasScheduled,
+    settings: buildApiPeerSettings(settings),
+  };
+}
+
+export function buildApiPeerSettings({
+  autoarchived,
+  reportSpam,
+  addContact,
+  blockContact,
+  registrationMonth,
+  phoneCountry,
+  nameChangeDate,
+  photoChangeDate,
+}: GramJs.PeerSettings): ApiPeerSettings {
+  return {
+    isAutoArchived: Boolean(autoarchived),
+    canReportSpam: Boolean(reportSpam),
+    canAddContact: Boolean(addContact),
+    canBlockContact: Boolean(blockContact),
+    registrationMonth,
+    phoneCountry,
+    nameChangeDate,
+    photoChangeDate,
   };
 }
 

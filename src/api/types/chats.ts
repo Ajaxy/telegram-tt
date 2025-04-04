@@ -68,9 +68,6 @@ export interface ApiChat {
     accessHash?: string;
   };
 
-  // Obtained from GetChatSettings
-  settings?: ApiChatSettings;
-
   joinRequests?: ApiChatInviteImporter[];
   isJoinToSend?: boolean;
   isJoinRequest?: boolean;
@@ -230,11 +227,15 @@ export interface ApiChatFolder {
   hasMyInvites?: true;
 }
 
-export interface ApiChatSettings {
+export interface ApiPeerSettings {
   isAutoArchived?: boolean;
   canReportSpam?: boolean;
   canAddContact?: boolean;
   canBlockContact?: boolean;
+  registrationMonth?: string;
+  phoneCountry?: string;
+  nameChangeDate?: number;
+  photoChangeDate?: number;
 }
 
 export interface ApiSendAsPeerId {

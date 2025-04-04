@@ -33,7 +33,7 @@ import ActionMessage from './message/ActionMessage';
 import Message from './message/Message';
 import SenderGroupContainer from './message/SenderGroupContainer';
 import SponsoredMessage from './message/SponsoredMessage';
-import MessageListBotInfo from './MessageListBotInfo';
+import MessageListAccountInfo from './MessageListAccountInfo';
 
 interface OwnProps {
   canShowAds?: boolean;
@@ -57,7 +57,9 @@ interface OwnProps {
   isReady: boolean;
   hasLinkedChat: boolean | undefined;
   isSchedule: boolean;
-  shouldRenderBotInfo?: boolean;
+  shouldRenderAccountInfo?: boolean;
+  nameChangeDate?: number;
+  photoChangeDate?: number;
   noAppearanceAnimation: boolean;
   isSavedDialog?: boolean;
   onScrollDownToggle: BooleanToVoidFunction;
@@ -89,7 +91,9 @@ const MessageListContent: FC<OwnProps> = ({
   isReady,
   hasLinkedChat,
   isSchedule,
-  shouldRenderBotInfo,
+  shouldRenderAccountInfo,
+  nameChangeDate,
+  photoChangeDate,
   noAppearanceAnimation,
   isSavedDialog,
   onScrollDownToggle,
@@ -126,11 +130,11 @@ const MessageListContent: FC<OwnProps> = ({
     isReady,
   );
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
 
   const unreadDivider = (
     <div className={buildClassName(UNREAD_DIVIDER_CLASS, 'local-action-message')} key="unread-messages">
-      <span>{lang('UnreadMessages')}</span>
+      <span>{oldLang('UnreadMessages')}</span>
     </div>
   );
   const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
@@ -251,7 +255,7 @@ const MessageListContent: FC<OwnProps> = ({
           />,
           message.id === threadId && (
             <div className="local-action-message" key="discussion-started">
-              <span>{lang(isEmptyThread
+              <span>{oldLang(isEmptyThread
                 ? (isComments ? 'NoComments' : 'NoReplies') : 'DiscussionStarted')}
               </span>
             </div>
@@ -301,7 +305,8 @@ const MessageListContent: FC<OwnProps> = ({
 
     return (
       <div
-        className={buildClassName('message-date-group', dateGroupIndex === 0 && 'first-message-date-group')}
+        className={buildClassName('message-date-group', !(nameChangeDate || photoChangeDate)
+            && dateGroupIndex === 0 && 'first-message-date-group')}
         key={dateGroup.datetime}
         onMouseDown={preventMessageInputBlur}
         teactFastList
@@ -314,12 +319,12 @@ const MessageListContent: FC<OwnProps> = ({
         >
           <span dir="auto">
             {isSchedule && dateGroup.originalDate === SCHEDULED_WHEN_ONLINE && (
-              lang('MessageScheduledUntilOnline')
+              oldLang('MessageScheduledUntilOnline')
             )}
             {isSchedule && dateGroup.originalDate !== SCHEDULED_WHEN_ONLINE && (
-              lang('MessageScheduledOn', formatHumanDate(lang, dateGroup.datetime, undefined, true))
+              oldLang('MessageScheduledOn', formatHumanDate(oldLang, dateGroup.datetime, undefined, true))
             )}
-            {!isSchedule && formatHumanDate(lang, dateGroup.datetime)}
+            {!isSchedule && formatHumanDate(oldLang, dateGroup.datetime)}
           </span>
         </div>
         {senderGroups.flat()}
@@ -330,7 +335,8 @@ const MessageListContent: FC<OwnProps> = ({
   return (
     <div className="messages-container" teactFastList>
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
-      {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
+      {shouldRenderAccountInfo
+        && <MessageListAccountInfo isInMessageList key={`account_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
       {withHistoryTriggers && (
         <div

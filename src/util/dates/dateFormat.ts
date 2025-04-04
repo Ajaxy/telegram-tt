@@ -2,8 +2,9 @@ import type { OldLangFn } from '../../hooks/useOldLang';
 import type { TimeFormat } from '../../types';
 import type { LangFn } from '../localization';
 
+import { getServerTime } from '../serverTime';
 import withCache from '../withCache';
-import { getDays } from './units';
+import { getDays, getHours, getMinutes } from './units';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTHS_FULL = [
@@ -78,11 +79,11 @@ export function formatPastTimeShort(lang: OldLangFn, datetime: number | Date, al
   return alwaysShowTime ? lang('FullDateTimeFormat', [formattedDate, time]) : formattedDate;
 }
 
-export function formatFullDate(lang: OldLangFn, datetime: number | Date) {
+export function formatFullDate(lang: OldLangFn | LangFn, datetime: number | Date) {
   return formatDateToString(datetime, lang.code, false, 'numeric');
 }
 
-export function formatMonthAndYear(lang: OldLangFn, date: Date, isShort = false) {
+export function formatMonthAndYear(lang: OldLangFn | LangFn, date: Date, isShort = false) {
   return formatDateToString(date, lang.code, false, isShort ? 'short' : 'long', true);
 }
 
@@ -122,7 +123,7 @@ export function formatCountdownShort(lang: OldLangFn, msLeft: number): string {
   }
 }
 
-export function formatLastUpdated(lang: OldLangFn, currentTime: number, lastUpdated = currentTime) {
+export function formatLocationLastUpdate(lang: OldLangFn, currentTime: number, lastUpdated = currentTime) {
   const seconds = currentTime - lastUpdated;
   if (seconds < 60) {
     return lang('LiveLocationUpdated.JustNow');
@@ -133,7 +134,7 @@ export function formatLastUpdated(lang: OldLangFn, currentTime: number, lastUpda
   }
 }
 
-export function formatRelativeTime(lang: OldLangFn, currentTime: number, lastUpdated = currentTime) {
+export function formatRelativePastTime(lang: OldLangFn, currentTime: number, lastUpdated = currentTime) {
   const seconds = currentTime - lastUpdated;
 
   if (seconds < 60) {
@@ -158,6 +159,31 @@ export function formatRelativeTime(lang: OldLangFn, currentTime: number, lastUpd
   }
 
   return lang('Time.AtDate', formatFullDate(lang, lastUpdatedDate));
+}
+
+export function formatPastDatetime(lang: LangFn, pastTime: number, currentTime = getServerTime()) {
+  const seconds = currentTime - pastTime;
+  const minutes = getMinutes(seconds);
+  const hours = getHours(seconds);
+  const days = getDays(seconds);
+
+  if (seconds < 60) {
+    return lang('JustNowAgo');
+  }
+
+  if (minutes < 60) {
+    return lang('MinutesAgo', { count: minutes }, { pluralValue: minutes });
+  }
+
+  if (hours < 24) {
+    return lang('HoursAgo', { count: hours }, { pluralValue: hours });
+  }
+
+  if (days < 28) {
+    return lang('DaysAgo', { count: days }, { pluralValue: days });
+  }
+
+  return lang('AtDateAgo', { date: formatFullDate(lang, pastTime) });
 }
 
 type DurationType = 'Seconds' | 'Minutes' | 'Hours' | 'Days' | 'Weeks';
@@ -448,4 +474,11 @@ function lowerFirst(str: string) {
 
 function upperFirst(str: string) {
   return `${str[0].toUpperCase()}${str.slice(1)}`;
+}
+
+export function formatRegistrationMonth(lang: string, dateString: string) {
+  const [month, year] = dateString.split('.');
+  const date = new Date(`${year}-${month}`);
+
+  return new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(date);
 }

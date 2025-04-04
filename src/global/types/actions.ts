@@ -918,8 +918,8 @@ export interface ActionPayloads {
     offsetUserId?: string;
     limit?: number;
   } & WithTabId;
-  hideChatReportPane: {
-    chatId: string;
+  hidePeerSettingsBar: {
+    peerId: string;
   };
   toggleManagement: ({
     force?: boolean;
@@ -1032,8 +1032,8 @@ export interface ActionPayloads {
   };
 
   // Chats
-  loadChatSettings: {
-    chatId: string;
+  loadPeerSettings: {
+    peerId: string;
   };
   fetchChat: {
     chatId: string;

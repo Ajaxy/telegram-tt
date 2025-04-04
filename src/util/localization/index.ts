@@ -429,7 +429,7 @@ function processTranslationAdvanced(
             if (value === undefined) return result;
 
             const preparedValue = Number.isFinite(value) ? formatters!.number.format(value as number) : value;
-            return replaceInStringsWithTeact(result, `{${key}}`, preparedValue);
+            return replaceInStringsWithTeact(result, `{${key}}`, renderText(preparedValue));
           }, [part] as TeactNode[]);
         },
       });
@@ -440,7 +440,7 @@ function processTranslationAdvanced(
     if (value === undefined) return result;
 
     const preparedValue = Number.isFinite(value) ? formatters!.number.format(value as number) : value;
-    return replaceInStringsWithTeact(result, `{${key}}`, preparedValue);
+    return replaceInStringsWithTeact(result, `{${key}}`, renderText(preparedValue));
   }, tempResult);
 }
 

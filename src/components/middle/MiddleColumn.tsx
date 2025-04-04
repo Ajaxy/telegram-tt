@@ -138,7 +138,7 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   isChannel?: boolean;
-  areChatSettingsLoaded?: boolean;
+  arePeerSettingsLoaded?: boolean;
   canSubscribe?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
@@ -198,7 +198,7 @@ function MiddleColumn({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   isChannel,
-  areChatSettingsLoaded,
+  arePeerSettingsLoaded,
   canSubscribe,
   canStartBot,
   canRestartBot,
@@ -219,7 +219,7 @@ function MiddleColumn({
     openPreviousChat,
     unpinAllMessages,
     loadUser,
-    loadChatSettings,
+    loadPeerSettings,
     exitMessageSelectMode,
     joinChannel,
     sendBotCommand,
@@ -339,10 +339,10 @@ function MiddleColumn({
   }, [chatId, isPrivate, loadUser]);
 
   useEffect(() => {
-    if (!areChatSettingsLoaded) {
-      loadChatSettings({ chatId: chatId! });
+    if (!arePeerSettingsLoaded) {
+      loadPeerSettings({ peerId: chatId! });
     }
-  }, [chatId, isPrivate, areChatSettingsLoaded]);
+  }, [chatId, isPrivate, arePeerSettingsLoaded]);
 
   useEffect(() => {
     if (chatId && shouldLoadFullChat && isReady) {
@@ -762,6 +762,7 @@ export default memo(withGlobal<OwnProps>(
     const bot = selectBot(global, chatId);
     const pinnedIds = selectPinnedIds(global, chatId, threadId);
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
+    const userFullInfo = chatId ? selectUserFullInfo(global, chatId) : undefined;
 
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
@@ -809,7 +810,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       draftReplyInfo,
       isPrivate,
-      areChatSettingsLoaded: Boolean(chat?.settings),
+      arePeerSettingsLoaded: Boolean(userFullInfo?.settings),
       isComments: isMessageThread,
       canPost:
         !isPinnedMessageList

@@ -13,7 +13,6 @@ import type {
   ApiChatlistInvite,
   ApiChatMember,
   ApiChatReactions,
-  ApiChatSettings,
   ApiExportedInvite,
   ApiMissingInvitedUser,
   ApiRestrictionReason,
@@ -514,20 +513,6 @@ export function buildChatInviteImporter(importer: GramJs.ChatInviteImporter): Ap
     about,
     isRequested: requested,
     isFromChatList: viaChatlist,
-  };
-}
-
-export function buildApiChatSettings({
-  autoarchived,
-  reportSpam,
-  addContact,
-  blockContact,
-}: GramJs.PeerSettings): ApiChatSettings {
-  return {
-    isAutoArchived: Boolean(autoarchived),
-    canReportSpam: Boolean(reportSpam),
-    canAddContact: Boolean(addContact),
-    canBlockContact: Boolean(blockContact),
   };
 }
 

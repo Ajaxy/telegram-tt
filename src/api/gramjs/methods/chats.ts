@@ -44,7 +44,6 @@ import {
   buildApiChatlistExportedInvite,
   buildApiChatlistInvite,
   buildApiChatReactions,
-  buildApiChatSettings,
   buildApiMissingInvitedUser,
   buildApiTopic,
   buildChatMember,
@@ -56,7 +55,7 @@ import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiPeerNotifySettings } from '../apiBuilders/misc';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildStickerSet } from '../apiBuilders/symbols';
-import { buildApiUser, buildApiUserStatuses } from '../apiBuilders/users';
+import { buildApiPeerSettings, buildApiUser, buildApiUserStatuses } from '../apiBuilders/users';
 import {
   buildChatAdminRights,
   buildChatBannedRights,
@@ -354,8 +353,8 @@ export function fetchFullChat(chat: ApiChat) {
     : getFullChatInfo(id);
 }
 
-export async function fetchChatSettings(chat: ApiChat) {
-  const { id, accessHash } = chat;
+export async function fetchPeerSettings(peer: ApiPeer) {
+  const { id, accessHash } = peer;
 
   const result = await invokeRequest(new GramJs.messages.GetPeerSettings({
     peer: buildInputPeer(id, accessHash),
@@ -368,7 +367,7 @@ export async function fetchChatSettings(chat: ApiChat) {
   }
 
   return {
-    settings: buildApiChatSettings(result.settings),
+    settings: buildApiPeerSettings(result.settings),
   };
 }
 

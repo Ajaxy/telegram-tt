@@ -59,7 +59,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
     deleteChatUser,
     deleteHistory,
     toggleChatArchived,
-    hideChatReportPane,
+    hidePeerSettingsBar,
   } = getActions();
 
   const lang = useOldLang();
@@ -96,7 +96,7 @@ const ChatReportPane: FC<OwnProps & StateProps> = ({
   });
 
   const handleCloseReportPane = useLastCallback(() => {
-    hideChatReportPane({ chatId });
+    hidePeerSettingsBar({ peerId: chatId });
   });
 
   const handleChatReportSpam = useLastCallback(() => {

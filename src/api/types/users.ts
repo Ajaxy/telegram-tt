@@ -1,7 +1,7 @@
 import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
 import type { ApiBusinessIntro, ApiBusinessLocation, ApiBusinessWorkHours } from './business';
-import type { ApiPeerColor } from './chats';
+import type { ApiPeerColor, ApiPeerSettings } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
 import type { ApiBotVerification } from './misc';
 import type { ApiSavedStarGift } from './stars';
@@ -65,6 +65,7 @@ export interface ApiUserFullInfo {
   isBotAccessEmojiGranted?: boolean;
   hasScheduledMessages?: boolean;
   botVerification?: ApiBotVerification;
+  settings?: ApiPeerSettings;
 }
 
 export type ApiFakeType = 'fake' | 'scam';

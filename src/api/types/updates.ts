@@ -18,6 +18,7 @@ import type {
   ApiChatFullInfo,
   ApiChatMember,
   ApiDraft,
+  ApiPeerSettings,
   ApiTypingStatus,
 } from './chats';
 import type {
@@ -401,6 +402,12 @@ export type ApiUpdateMessageExtendedMedia = {
 export type ApiDeleteContact = {
   '@type': 'deleteContact';
   id: string;
+};
+
+export type ApiUpdatePeerSettings = {
+  '@type': 'updatePeerSettings';
+  id: string;
+  settings: ApiPeerSettings;
 };
 
 export type ApiUpdateUser = {
@@ -822,7 +829,7 @@ export type ApiUpdate = (
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
   ApiUpdateServiceNotification | ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus |
-  ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending |
+  ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |

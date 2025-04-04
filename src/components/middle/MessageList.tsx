@@ -6,7 +6,10 @@ import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiChatFullInfo, ApiMessage, ApiRestrictionReason, ApiTopic,
+  ApiChatFullInfo,
+  ApiMessage,
+  ApiRestrictionReason,
+  ApiTopic,
 } from '../../api/types';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -74,7 +77,7 @@ import useStickyDates from './hooks/useStickyDates';
 
 import Loading from '../ui/Loading';
 import ContactGreeting from './ContactGreeting';
-import MessageListBotInfo from './MessageListBotInfo';
+import MessageListAccountInfo from './MessageListAccountInfo';
 import MessageListContent from './MessageListContent';
 import NoMessages from './NoMessages';
 import PremiumRequiredMessage from './PremiumRequiredMessage';
@@ -106,6 +109,9 @@ type StateProps = {
   isCreator?: boolean;
   isChannelWithAvatars?: boolean;
   isBot?: boolean;
+  isNonContact?: boolean;
+  nameChangeDate?: number;
+  photoChangeDate?: number;
   isSynced?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
@@ -159,6 +165,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isAnonymousForwards,
   isCreator,
   isBot,
+  isNonContact,
+  nameChangeDate,
+  photoChangeDate,
   messageIds,
   messagesById,
   firstUnreadId,
@@ -682,8 +691,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
         </div>
       ) : isContactRequirePremium && !hasMessages ? (
         <PremiumRequiredMessage userId={chatId} />
-      ) : isBot && !hasMessages ? (
-        <MessageListBotInfo chatId={chatId} />
+      ) : (isBot || isNonContact) && !hasMessages ? (
+        <MessageListAccountInfo chatId={chatId} />
       ) : shouldRenderGreeting ? (
         <ContactGreeting key={chatId} userId={chatId} />
       ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
@@ -718,7 +727,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isReady={isReady}
           hasLinkedChat={hasLinkedChat}
           isSchedule={messageGroups ? type === 'scheduled' : false}
-          shouldRenderBotInfo={isBot}
+          shouldRenderAccountInfo={isBot || isNonContact}
+          nameChangeDate={nameChangeDate}
+          photoChangeDate={photoChangeDate}
           noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
           onScrollDownToggle={onScrollDownToggle}
           onNotchToggle={onNotchToggle}
@@ -735,6 +746,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, type }): StateProps => {
     const currentUserId = global.currentUserId!;
     const chat = selectChat(global, chatId);
+    const userFullInfo = selectUserFullInfo(global, chatId);
     if (!chat) {
       return { currentUserId };
     }
@@ -763,6 +775,9 @@ export default memo(withGlobal<OwnProps>(
     );
 
     const chatBot = selectBot(global, chatId);
+    const isNonContact = Boolean(userFullInfo?.settings?.canAddContact);
+    const nameChangeDate = userFullInfo?.settings?.nameChangeDate;
+    const photoChangeDate = userFullInfo?.settings?.photoChangeDate;
 
     const topic = selectTopic(global, chatId, threadId);
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
@@ -784,6 +799,9 @@ export default memo(withGlobal<OwnProps>(
       isSystemBotChat: isSystemBot(chatId),
       isAnonymousForwards: isAnonymousForwardsChat(chatId),
       isBot: Boolean(chatBot),
+      isNonContact,
+      nameChangeDate,
+      photoChangeDate,
       isSynced: global.isSynced,
       messageIds,
       messagesById,

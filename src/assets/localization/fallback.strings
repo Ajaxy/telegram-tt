@@ -252,6 +252,10 @@
 "ChatListDeleteChatConfirmation" = "Are you sure you want to delete the chat\nwith {chat}?";
 "DeleteAndStop" = "Delete and Block";
 "ChatListDeleteForEveryone" = "Delete for me and {user}";
+"ChatNonContactUserSubtitle" = "Not a contact";
+"ChatNonContactUserGroups" = "Shared Groups";
+"ContactInfoRegistration" = "Registration";
+"ContactInfoNotVerified" = "Not an official account";
 "DeleteForAll" = "Delete for all members";
 "DeleteSingleMessagesTitle" = "Delete message";
 "AreYouSureDeleteSingleMessage" = "Are you sure you want to delete this message?";
@@ -1117,6 +1121,7 @@
 "WeekdaySaturday" = "Saturday";
 "WeekdaySunday" = "Sunday";
 "WeekdayToday" = "Today";
+"Today" = "today";
 "WeekdayYesterday" = "Yesterday";
 "User" = "User";
 "SecretChat" = "Secret Chat";
@@ -1193,6 +1198,14 @@
 "Seconds_other" = "{count} seconds";
 "Minutes_one" = "{count} minute";
 "Minutes_other" = "{count} minutes";
+"JustNowAgo" = "just now";
+"MinutesAgo_one" = "1 minute ago";
+"MinutesAgo_other" = "{count} minutes ago";
+"HoursAgo_one" = "1 hour ago";
+"HoursAgo_other" = "{count} hours ago";
+"DaysAgo_one" = "1 day ago";
+"DaysAgo_other" = "{count} days ago";
+"AtDateAgo" = "on {date}";
 "AudioPause" = "Pause audio";
 "AudioPlay" = "Play audio";
 "ToggleUserNotifications" = "Toggle user notifications";
@@ -1419,6 +1432,8 @@
 "GiftInfoConvertDescription2" = "This action cannot be undone. This will permanently destroy the gift.";
 "GiftInfoConvertDescriptionPeriod_one" = "Conversion is available for the next **{count} days**.";
 "GiftInfoConvertDescriptionPeriod_other" = "Conversion is available for the next **{count} days**.";
+"UserUpdatedName" = "{user} updated name {time}";
+"UserUpdatedPhoto" = "{user} updated photo {time}";
 "GiftInfoSaved" = "This gift is visible on your profile. {link}";
 "GiftInfoHidden" = "This gift is hidden. Only you can see it. {link}";
 "GiftInfoChannelSaved" = "This gift is visible in your channel's profile. {link}";
@@ -1487,6 +1502,8 @@
 "GiftWithdrawSubmit" = "Open Fragment";
 "GiftWithdrawWait_one" = "In {days} day, you'll be able to send this collectible to any TON blockchain address outside Telegram for sale or auction.";
 "GiftWithdrawWait_other" = "In {days} days, you'll be able to send this collectible to any TON blockchain address outside Telegram for sale or auction.";
+"ChatGroups_one" = "{count} group";
+"ChatGroups_other" = "{count} groups";
 "StarsAmount" = "⭐️{amount}";
 "StarsAmountText_one" = "{amount} Star";
 "StarsAmountText_other" = "{amount} Stars";
