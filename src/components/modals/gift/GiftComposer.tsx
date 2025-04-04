@@ -10,9 +10,14 @@ import {
   type ApiMessage, type ApiPeer, type ApiStarsAmount, MAIN_THREAD_ID,
 } from '../../../api/types';
 
-import { getPeerTitle } from '../../../global/helpers';
+import {
+  getPeerTitle,
+} from '../../../global/helpers';
 import { isApiPeerUser } from '../../../global/helpers/peers';
-import { selectPeer, selectTabState, selectTheme } from '../../../global/selectors';
+import {
+  selectPeer, selectPeerPaidMessagesStars,
+  selectTabState, selectTheme,
+} from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -49,6 +54,7 @@ export type StateProps = {
   currentUserId?: string;
   isPaymentFormLoading?: boolean;
   starBalance?: ApiStarsAmount;
+  paidMessagesStars?: number;
 };
 
 const LIMIT_DISPLAY_THRESHOLD = 50;
@@ -67,6 +73,7 @@ function GiftComposer({
   currentUserId,
   isPaymentFormLoading,
   starBalance,
+  paidMessagesStars,
 }: OwnProps & StateProps) {
   const {
     sendStarGift, sendPremiumGiftByStars, openInvoice, openGiftUpgradeModal, openStarsBalanceModal,
@@ -202,14 +209,19 @@ function GiftComposer({
     const title = getPeerTitle(lang, peer!)!;
     return (
       <div className={styles.optionsSection}>
-        <TextArea
-          className={styles.messageInput}
-          onChange={handleGiftMessageChange}
-          value={giftMessage}
-          label={lang('GiftMessagePlaceholder')}
-          maxLength={captionLimit}
-          maxLengthIndicator={symbolsLeft && symbolsLeft < LIMIT_DISPLAY_THRESHOLD ? symbolsLeft.toString() : undefined}
-        />
+
+        {!paidMessagesStars && (
+          <TextArea
+            className={styles.messageInput}
+            onChange={handleGiftMessageChange}
+            value={giftMessage}
+            label={lang('GiftMessagePlaceholder')}
+            maxLength={captionLimit}
+            maxLengthIndicator={
+              symbolsLeft && symbolsLeft < LIMIT_DISPLAY_THRESHOLD ? symbolsLeft.toString() : undefined
+            }
+          />
+        )}
 
         {canUseStarsPayment && (
           <ListItem className={styles.switcher} narrow ripple onClick={toggleShouldPayByStars}>
@@ -377,6 +389,7 @@ export default memo(withGlobal<OwnProps>(
       backgroundColor,
     } = global.settings.themes[theme] || {};
     const peer = selectPeer(global, peerId);
+    const paidMessagesStars = selectPeerPaidMessagesStars(global, peerId);
 
     const tabState = selectTabState(global);
 
@@ -391,6 +404,7 @@ export default memo(withGlobal<OwnProps>(
       captionLimit: global.appConfig?.starGiftMaxMessageLength,
       currentUserId: global.currentUserId,
       isPaymentFormLoading: tabState.isPaymentFormLoading,
+      paidMessagesStars,
     };
   },
 )(GiftComposer));

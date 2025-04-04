@@ -141,6 +141,10 @@ const PRIVACY_GROUP_CHATS_SCREENS = [
   SettingsScreens.PrivacyGroupChatsDeniedContacts,
 ];
 
+const PRIVACY_MESSAGES_SCREENS = [
+  SettingsScreens.PrivacyNoPaidMessages,
+];
+
 export type OwnProps = {
   isActive: boolean;
   currentScreen: SettingsScreens;
@@ -224,6 +228,7 @@ const Settings: FC<OwnProps> = ({
       [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyVoiceMessages]: PRIVACY_VOICE_MESSAGES_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyGroupChats]: PRIVACY_GROUP_CHATS_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyMessages]: PRIVACY_MESSAGES_SCREENS.includes(activeScreen),
     };
 
     const isTwoFaScreen = TWO_FA_SCREENS.includes(activeScreen);
@@ -370,13 +375,14 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyForwardingAllowedContacts:
       case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
+      case SettingsScreens.PrivacyNoPaidMessages:
         return (
           <SettingsPrivacyVisibilityExceptionList
             isAllowList
+            usersOnly={currentScreen === SettingsScreens.PrivacyNoPaidMessages}
             withPremiumCategory={currentScreen === SettingsScreens.PrivacyGroupChatsAllowedContacts}
             withMiniAppsCategory={currentScreen === SettingsScreens.PrivacyGiftsAllowedContacts}
             screen={currentScreen}
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive || privacyAllowScreens[currentScreen]}
             onReset={handleReset}
           />
@@ -396,7 +402,6 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsPrivacyVisibilityExceptionList
             screen={currentScreen}
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive}
             onReset={handleReset}
           />
@@ -407,6 +412,7 @@ const Settings: FC<OwnProps> = ({
           <PrivacyMessages
             isActive={isScreenActive}
             onReset={handleReset}
+            onScreenSelect={onScreenSelect}
           />
         );
 

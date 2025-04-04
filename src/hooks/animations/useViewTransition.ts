@@ -50,7 +50,7 @@ export function useViewTransition(): ViewTransitionController {
 
     transition.ready.then(() => {
       setTransitionState('animating');
-    }).catch((e) => {
+    }).catch((e:unknown) => {
       // eslint-disable-next-line no-console
       console.error(e);
       setTransitionState('skipped');

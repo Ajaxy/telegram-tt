@@ -30,6 +30,7 @@ export type OwnProps = {
   onSelectRecipient: (peerId: string, threadId?: ThreadId) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
+  isLowStackPriority?: boolean;
 };
 
 type StateProps = {
@@ -54,6 +55,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
   onSelectRecipient,
   onClose,
   onCloseAnimationEnd,
+  isLowStackPriority,
 }) => {
   const [search, setSearch] = useState('');
   const ids = useMemo(() => {
@@ -112,6 +114,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
       onSelectChatOrUser={onSelectRecipient}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
+      isLowStackPriority={isLowStackPriority}
     />
   );
 };

@@ -22,6 +22,7 @@ import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated
 
 import CustomEmoji from '../common/CustomEmoji';
 import Icon from '../common/icons/Icon';
+import StarIcon from '../common/icons/StarIcon';
 import Button from './Button';
 import Portal from './Portal';
 import RoundTimer from './RoundTimer';
@@ -54,6 +55,7 @@ const Notification: FC<OwnProps> = ({
     dismissAction,
     duration = DEFAULT_DURATION,
     icon,
+    shouldUseCustomIcon,
     customEmojiIconId,
     shouldShowTimer,
     title,
@@ -77,6 +79,23 @@ const Notification: FC<OwnProps> = ({
       // @ts-ignore
       actions[dismissAction.action](dismissAction.payload);
     }
+  });
+
+  const handleActionClick = useLastCallback(() => {
+    if (action) {
+      if (Array.isArray(action)) {
+        // @ts-ignore
+        action.forEach((cb) => actions[cb.action](cb.payload));
+      } else {
+        // @ts-ignore
+        actions[action.action](action.payload);
+      }
+    }
+    if (disableClickDismiss) {
+      setIsOpen(false);
+      setTimeout(handleDismiss, ANIMATION_DURATION + ANIMATION_END_DELAY);
+    }
+    closeAndDismiss();
   });
 
   const handleClick = useLastCallback(() => {
@@ -151,6 +170,28 @@ const Notification: FC<OwnProps> = ({
     return actionText;
   }, [lang, actionText]);
 
+  const renderedIcon = useMemo(() => {
+    if (customEmojiIconId) {
+      return (
+        <CustomEmoji
+          className="notification-emoji-icon"
+          forceAlways
+          size={CUSTOM_EMOJI_SIZE}
+          documentId={customEmojiIconId}
+        />
+      );
+    }
+
+    if (shouldUseCustomIcon) {
+      if (icon === 'star') {
+        return (
+          <StarIcon type="gold" className={buildClassName('notification-icon')} size="adaptive" />
+        );
+      }
+    }
+    return <Icon name={icon || 'info-filled'} className="notification-icon" />;
+  }, [customEmojiIconId, icon, shouldUseCustomIcon]);
+
   return (
     <Portal className="Notification-container" containerSelector={containerSelector}>
       <div
@@ -159,26 +200,17 @@ const Notification: FC<OwnProps> = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {customEmojiIconId ? (
-          <CustomEmoji
-            className="notification-emoji-icon"
-            forceAlways
-            size={CUSTOM_EMOJI_SIZE}
-            documentId={customEmojiIconId}
-          />
-        ) : (
-          <Icon name={icon || 'info-filled'} className="notification-icon" />
-        )}
+        {renderedIcon}
         <div className="content">
           {renderedTitle && (
             <div className="notification-title">{renderedTitle}</div>
           )}
           {renderedMessage}
         </div>
-        {action && renderedActionText && (
+        {renderedActionText && (
           <Button
             color="translucent-white"
-            onClick={handleClick}
+            onClick={handleActionClick}
             className="notification-button"
           >
             {renderedActionText}

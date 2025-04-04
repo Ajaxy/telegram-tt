@@ -2,7 +2,7 @@ import type { ApiChat } from './chats';
 import type { ApiUser } from './users';
 
 export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
-'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday' | 'gifts';
+'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio' | 'birthday' | 'gifts' | 'noPaidMessages';
 export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
 export type BotsPrivacyType = 'allow' | 'disallow' | 'none';
 

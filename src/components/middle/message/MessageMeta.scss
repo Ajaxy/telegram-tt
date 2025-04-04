@@ -14,6 +14,7 @@
   cursor: var(--custom-cursor, pointer);
   user-select: none;
 
+  .message-price,
   .message-time,
   .message-imported,
   .message-signature,
@@ -24,6 +25,22 @@
   .message-effect-icon {
     font-size: 0.75rem;
     white-space: nowrap;
+  }
+
+  .message-price-stars-container {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .message-price-star-icon {
+    margin-inline-start: 0 !important;
+    margin-inline-end: 0.0625rem !important;
+  }
+
+  .message-price {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-end: 0.25rem;
   }
 
   .message-replies-wrapper {

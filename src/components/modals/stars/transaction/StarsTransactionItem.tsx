@@ -64,7 +64,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
   const giftSticker = starGift && getStickerFromGift(starGift);
 
   const data = useMemo(() => {
-    let title = getTransactionTitle(oldLang, transaction);
+    let title = getTransactionTitle(oldLang, lang, transaction);
     let description;
     let status: string | undefined;
     let avatarPeer: ApiPeer | CustomPeer | undefined;
@@ -105,7 +105,7 @@ const StarsTransactionItem = ({ transaction, className }: OwnProps) => {
       avatarPeer,
       status,
     };
-  }, [oldLang, peer, transaction]);
+  }, [oldLang, lang, peer, transaction]);
 
   const previewContent = useMemo(() => {
     if (isUniqueGift) {

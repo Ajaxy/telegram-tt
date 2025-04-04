@@ -1,26 +1,36 @@
 import type { TeactNode } from '../lib/teact/teact';
 
 import type {
+  ApiAttachment,
   ApiBotInlineMediaResult,
   ApiBotInlineResult,
   ApiBotInlineSwitchPm,
   ApiBotInlineSwitchWebview,
+  ApiChat,
   ApiChatInviteImporter,
+  ApiContact,
   ApiDocument,
   ApiDraft,
   ApiExportedInvite,
   ApiFakeType,
   ApiFormattedText,
+  ApiInputReplyInfo,
   ApiLabeledPrice,
   ApiMediaFormat,
   ApiMessage,
+  ApiMessageEntity,
+  ApiNewPoll,
+  ApiPeer,
   ApiPhoto,
   ApiReaction,
   ApiReactionWithPaid,
   ApiStarGiftRegular,
   ApiStarsSubscription,
   ApiStarsTransaction,
+  ApiSticker,
   ApiStickerSet,
+  ApiStory,
+  ApiStorySkipped,
   ApiThreadInfo,
   ApiTopic,
   ApiTypingStatus,
@@ -114,6 +124,7 @@ export interface ISettings {
   isConnectionStatusMinimized: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
   shouldNewNonContactPeersRequirePremium?: boolean;
+  nonContactPeersPaidStars?: number;
   shouldHideReadMarks?: boolean;
   canTranslate: boolean;
   canTranslateChats: boolean;
@@ -126,6 +137,7 @@ export interface ISettings {
   shouldDebugExportedSenders?: boolean;
   shouldWarnAboutSvg?: boolean;
   shouldSkipWebAppCloseConfirmation: boolean;
+  shouldPaidMessageAutoApprove: boolean;
   hasContactJoinedNotifications?: boolean;
   hasWebNotifications: boolean;
   hasPushNotifications: boolean;
@@ -191,6 +203,7 @@ export enum SettingsScreens {
   PrivacyGroupChatsAllowedContacts,
   PrivacyGroupChatsDeniedContacts,
   PrivacyBlockedUsers,
+  PrivacyNoPaidMessages,
   Performance,
   Folders,
   FoldersCreateFolder,
@@ -652,4 +665,64 @@ export type GiftProfileFilterOptions = {
   shouldIncludeUnique: boolean;
   shouldIncludeDisplayed: boolean;
   shouldIncludeHidden: boolean;
+};
+
+export type SendMessageParams = {
+  chat?: ApiChat;
+  attachments?: ApiAttachment[];
+  lastMessageId?: number;
+  text?: string;
+  entities?: ApiMessageEntity[];
+  replyInfo?: ApiInputReplyInfo;
+  attachment?: ApiAttachment;
+  sticker?: ApiSticker;
+  story?: ApiStory | ApiStorySkipped;
+  gif?: ApiVideo;
+  poll?: ApiNewPoll;
+  contact?: ApiContact;
+  isSilent?: boolean;
+  scheduledAt?: number;
+  groupedId?: string;
+  noWebPage?: boolean;
+  sendAs?: ApiPeer;
+  shouldGroupMessages?: boolean;
+  shouldUpdateStickerSetOrder?: boolean;
+  wasDrafted?: boolean;
+  isInvertedMedia?: true;
+  effectId?: string;
+  webPageMediaSize?: WebPageMediaSize;
+  webPageUrl?: string;
+  starsAmount?: number;
+  isPending?: true;
+  messageList?: MessageList;
+  isReaction?: true; // Reaction to the story are sent in the form of a message
+  messagePriceInStars?: number;
+  localMessage?: ApiMessage;
+  forwardedLocalMessagesSlice?: ForwardedLocalMessagesSlice;
+  isForwarding?: boolean;
+  forwardParams?: ForwardMessagesParams;
+  isStoryReply?: boolean;
+};
+
+export type ForwardedLocalMessagesSlice = {
+  messageIds: number[];
+  localMessages: ApiMessage[];
+};
+
+export type ForwardMessagesParams = {
+  fromChat: ApiChat;
+  toChat: ApiChat;
+  toThreadId?: ThreadId;
+  messages: ApiMessage[];
+  isSilent?: boolean;
+  scheduledAt?: number;
+  sendAs?: ApiPeer;
+  withMyScore?: boolean;
+  noAuthors?: boolean;
+  noCaptions?: boolean;
+  isCurrentUserPremium?: boolean;
+  wasDrafted?: boolean;
+  lastMessageId?: number;
+  forwardedLocalMessagesSlice?: ForwardedLocalMessagesSlice;
+  messagePriceInStars?: number;
 };

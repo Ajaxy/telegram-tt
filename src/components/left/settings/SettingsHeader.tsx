@@ -163,6 +163,9 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
         return <h3>{oldLang('NeverAllow')}</h3>;
 
+      case SettingsScreens.PrivacyNoPaidMessages:
+        return <h3>{lang('RemoveFeeTitle')}</h3>;
+
       case SettingsScreens.Performance:
         return <h3>{lang('MenuAnimations')}</h3>;
 

@@ -301,6 +301,8 @@ type StateProps = {
   poll?: ApiPoll;
   maxTimestamp?: number;
   lastPlaybackTimestamp?: number;
+  paidMessageStars?: number;
+  isChatWithUser?: boolean;
 };
 
 type MetaPosition =
@@ -421,6 +423,8 @@ const Message: FC<OwnProps & StateProps> = ({
   maxTimestamp,
   lastPlaybackTimestamp,
   onIntersectPinnedMessage,
+  paidMessageStars,
+  isChatWithUser,
 }) => {
   const {
     toggleMessageSelection,
@@ -787,6 +791,10 @@ const Message: FC<OwnProps & StateProps> = ({
   const withAppendix = contentClassName.includes('has-appendix');
   const emojiSize = getCustomEmojiSize(message.emojiOnlyCount);
 
+  const paidMessageStarsInMeta = !isChatWithUser
+    ? (isAlbum && paidMessageStars ? album.messages.length * paidMessageStars : paidMessageStars)
+    : undefined;
+
   let metaPosition!: MetaPosition;
   if (phoneCall) {
     metaPosition = 'none';
@@ -1019,6 +1027,7 @@ const Message: FC<OwnProps & StateProps> = ({
         onEffectClick={handleEffectClick}
         onTranslationClick={handleTranslationClick}
         onOpenThread={handleOpenThread}
+        paidMessageStars={paidMessageStarsInMeta}
       />
     );
 
@@ -1119,7 +1128,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {hasAnimatedEmoji && animatedCustomEmoji && (
           <AnimatedCustomEmoji
             customEmojiId={animatedCustomEmoji}
-            withEffects={withAnimatedEffects && isUserId(chatId) && !effect}
+            withEffects={withAnimatedEffects && isChatWithUser && !effect}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
             forceLoadPreview={isLocal}
@@ -1131,7 +1140,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {hasAnimatedEmoji && animatedEmoji && (
           <AnimatedEmoji
             emoji={animatedEmoji}
-            withEffects={withAnimatedEffects && isUserId(chatId) && !effect}
+            withEffects={withAnimatedEffects && isChatWithUser && !effect}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
             forceLoadPreview={isLocal}
@@ -1719,7 +1728,10 @@ export default memo(withGlobal<OwnProps>(
     } = ownProps;
     const {
       id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, viaBusinessBotId, effectId,
+      paidMessageStars,
     } = message;
+
+    const isChatWithUser = isUserId(chatId);
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
@@ -1727,7 +1739,7 @@ export default memo(withGlobal<OwnProps>(
     const isAnonymousForwards = isAnonymousForwardsChat(chatId);
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
-    const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
+    const chatFullInfo = !isChatWithUser ? selectChatFullInfo(global, chatId) : undefined;
     const webPageStoryData = message.content.webPage?.story;
     const webPageStory = webPageStoryData
       ? selectPeerStory(global, webPageStoryData.peerId, webPageStoryData.id)
@@ -1931,6 +1943,8 @@ export default memo(withGlobal<OwnProps>(
       poll,
       maxTimestamp,
       lastPlaybackTimestamp,
+      paidMessageStars,
+      isChatWithUser,
     };
   },
 )(Message));

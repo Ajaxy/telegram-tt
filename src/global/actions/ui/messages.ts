@@ -62,6 +62,7 @@ import {
   selectIsRightColumnShown,
   selectIsViewportNewest,
   selectMessageIdsByGroupId,
+  selectPeer,
   selectPinnedIds,
   selectReplyStack,
   selectRequestedChatTranslationLanguage,
@@ -71,6 +72,7 @@ import {
   selectThreadInfo,
   selectViewportIds,
 } from '../../selectors';
+import { getPeerStarsForMessage } from '../api/messages';
 
 import { getIsMobile } from '../../../hooks/useAppLayout';
 
@@ -1092,4 +1094,40 @@ addActionHandler('closeSharePreparedMessageModal', (global, actions, payload): A
   return updateTabState(global, {
     sharePreparedMessageModal: undefined,
   }, tabId);
+});
+
+addActionHandler('updateSharePreparedMessageModalSendArgs', async (global, actions, payload): Promise<void> => {
+  const { args, tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+
+  if (!tabState.sharePreparedMessageModal) {
+    return;
+  }
+
+  if (!args) {
+    global = updateTabState(global, {
+      sharePreparedMessageModal: {
+        ...tabState.sharePreparedMessageModal,
+        pendingSendArgs: undefined,
+      },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  const peer = selectPeer(global, args.peerId);
+  const starsForSendMessage = peer ? await getPeerStarsForMessage(global, peer) : undefined;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    sharePreparedMessageModal: {
+      ...tabState.sharePreparedMessageModal,
+      pendingSendArgs: {
+        peerId: args.peerId,
+        threadId: args.threadId,
+        starsForSendMessage,
+      },
+    },
+  }, tabId);
+  setGlobal(global);
 });

@@ -61,6 +61,7 @@
     "account.resolveBusinessChatLink",
     "account.toggleSponsoredMessages",
     "account.getCollectibleEmojiStatuses",
+    "account.addNoPaidMessagesException",
     "users.getUsers",
     "users.getFullUser",
     "contacts.getContacts",

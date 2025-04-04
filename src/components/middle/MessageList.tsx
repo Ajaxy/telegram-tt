@@ -80,7 +80,7 @@ import ContactGreeting from './ContactGreeting';
 import MessageListAccountInfo from './MessageListAccountInfo';
 import MessageListContent from './MessageListContent';
 import NoMessages from './NoMessages';
-import PremiumRequiredMessage from './PremiumRequiredMessage';
+import RequirementToContactMessage from './RequirementToContactMessage';
 
 import './MessageList.scss';
 
@@ -97,6 +97,7 @@ type OwnProps = {
   withDefaultBg: boolean;
   onIntersectPinnedMessage: OnIntersectPinnedMessage;
   isContactRequirePremium?: boolean;
+  paidMessagesStars?: number;
 };
 
 type StateProps = {
@@ -187,6 +188,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isServiceNotificationsChat,
   currentUserId,
   isContactRequirePremium,
+  paidMessagesStars,
   areAdsEnabled,
   channelJoinInfo,
   isChatProtected,
@@ -689,8 +691,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
+      ) : paidMessagesStars && isPrivate && !hasMessages && !shouldRenderGreeting ? (
+        <RequirementToContactMessage paidMessagesStars={paidMessagesStars} userId={chatId} />
       ) : isContactRequirePremium && !hasMessages ? (
-        <PremiumRequiredMessage userId={chatId} />
+        <RequirementToContactMessage userId={chatId} />
       ) : (isBot || isNonContact) && !hasMessages ? (
         <MessageListAccountInfo chatId={chatId} />
       ) : shouldRenderGreeting ? (

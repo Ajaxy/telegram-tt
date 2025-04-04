@@ -8,6 +8,7 @@ import type {
 
 import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString, formatPastTimeShort, formatTime } from '../../../util/dates/dateFormat';
+import { formatStarsAsIcon } from '../../../util/localization/format';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 
@@ -38,6 +39,7 @@ type OwnProps = {
   onEffectClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   renderQuickReactionButton?: () => TeactNode | undefined;
   onOpenThread: NoneToVoidFunction;
+  paidMessageStars?: number;
 };
 
 const MessageMeta: FC<OwnProps> = ({
@@ -56,6 +58,7 @@ const MessageMeta: FC<OwnProps> = ({
   onTranslationClick,
   onEffectClick,
   onOpenThread,
+  paidMessageStars,
 }) => {
   const { showNotification } = getActions();
 
@@ -175,6 +178,16 @@ const MessageMeta: FC<OwnProps> = ({
       )}
       {signature && (
         <span className="message-signature">{renderText(signature)}</span>
+      )}
+      {paidMessageStars && (
+        <span className="message-price">{
+          formatStarsAsIcon(lang, paidMessageStars, {
+            asFont: true,
+            className: 'message-price-star-icon',
+            containerClassName: 'message-price-stars-container',
+          })
+        }
+        </span>
       )}
       <span className="message-time" title={dateTitle} onMouseEnter={markActivated}>
         {message.forwardInfo?.isImported && (

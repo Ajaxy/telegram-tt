@@ -88,6 +88,8 @@ export interface ApiChat {
 
   // Locally determined field
   detectedLanguage?: string;
+
+  paidMessagesStars?: number;
 }
 
 export interface ApiTypingStatus {
@@ -232,6 +234,7 @@ export interface ApiPeerSettings {
   canReportSpam?: boolean;
   canAddContact?: boolean;
   canBlockContact?: boolean;
+  chargedPaidMessageStars?: number;
   registrationMonth?: string;
   phoneCountry?: string;
   nameChangeDate?: number;

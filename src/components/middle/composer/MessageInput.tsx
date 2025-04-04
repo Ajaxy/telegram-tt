@@ -1,5 +1,5 @@
 import type { ChangeEvent, RefObject } from 'react';
-import type { FC } from '../../../lib/teact/teact';
+import type { FC, TeactNode } from '../../../lib/teact/teact';
 import React, {
   getIsHeavyAnimating,
   memo, useEffect, useLayoutEffect,
@@ -58,7 +58,7 @@ type OwnProps = {
   isReady: boolean;
   isActive: boolean;
   getHtml: Signal<string>;
-  placeholder: string;
+  placeholder: TeactNode | string;
   timedPlaceholderLangKey?: string;
   timedPlaceholderDate?: number;
   forcedPlaceholder?: string;
@@ -168,7 +168,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const absoluteContainerRef = useRef<HTMLDivElement>(null);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
   const isContextMenuOpenRef = useRef(false);
   const [isTextFormatterOpen, openTextFormatter, closeTextFormatter] = useFlag();
   const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
@@ -561,9 +561,10 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   );
 
   const inputScrollerContentClass = buildClassName('input-scroller-content', isNeedPremium && 'is-need-premium');
+  const placeholderAriaLabel = typeof placeholder === 'string' ? placeholder : undefined;
 
   return (
-    <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
+    <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={oldLang.isRtl ? 'rtl' : undefined}>
       <div
         className={buildClassName('custom-scroll', SCROLLER_CLASS, isNeedPremium && 'is-need-premium')}
         onScroll={onScroll}
@@ -584,7 +585,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             onMouseDown={handleMouseDown}
             onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}
             onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
-            aria-label={placeholder}
+            aria-label={placeholderAriaLabel}
             onFocus={!isNeedPremium ? onFocus : undefined}
             onBlur={!isNeedPremium ? onBlur : undefined}
           />
@@ -604,7 +605,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
               ) : placeholder}
               {isStoryInput && isNeedPremium && (
                 <Button className="unlock-button" size="tiny" color="adaptive" onClick={handleOpenPremiumModal}>
-                  {lang('StoryRepliesLockedButton')}
+                  {oldLang('StoryRepliesLockedButton')}
                 </Button>
               )}
             </span>

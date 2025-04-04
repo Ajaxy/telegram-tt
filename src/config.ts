@@ -19,6 +19,7 @@ export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
 export const IS_PACKAGED_ELECTRON = process.env.IS_PACKAGED_ELECTRON;
+export const PAID_MESSAGES_PURPOSE = 'paid_messages';
 
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
@@ -121,6 +122,10 @@ export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 20;
 
 export const SPONSORED_MESSAGE_CACHE_MS = 300000; // 5 min
 
+export const DEFAULT_CHARGE_FOR_MESSAGES = 250;
+export const MINIMUM_CHARGE_FOR_MESSAGES = 1;
+export const DEFAULT_MAXIMUM_CHARGE_FOR_MESSAGES = 10000;
+
 export const DEFAULT_VOLUME = 1;
 export const DEFAULT_PLAYBACK_RATE = 1;
 export const PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION = 20 * 60; // 20 min
@@ -177,6 +182,7 @@ export const TMP_CHAT_ID = '0';
 export const ANIMATION_END_DELAY = 100;
 export const ANIMATION_WAVE_MIN_INTERVAL = 200;
 export const MESSAGE_APPEARANCE_DELAY = 10;
+export const PAID_SEND_DELAY = 5000;
 
 export const SCROLL_MIN_DURATION = 300;
 export const SCROLL_MAX_DURATION = 600;

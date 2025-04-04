@@ -64,6 +64,16 @@
   text-align: center;
 }
 
+.totalStars {
+  display: inline-flex;
+  align-items: center;
+}
+
+.starIcon {
+  line-height: 1 !important;
+  margin-inline-start: 0 !important;
+}
+
 .footer {
   text-align: center;
   margin-block: 0.5rem;

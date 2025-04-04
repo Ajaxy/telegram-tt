@@ -1428,6 +1428,25 @@ export interface LangPair {
   'GetMoreStarsLinkText': undefined;
   'StarsGiftCompleted': undefined;
   'GiftSent': undefined;
+  'PrivacyDescriptionMessagesContactsAndPremium': undefined;
+  'PrivacyChargeForMessages': undefined;
+  'PrivacyDescriptionChargeForMessages': undefined;
+  'RemoveFeeTitle': undefined;
+  'ExceptionTitlePrivacyChargeForMessages': undefined;
+  'ExceptionDescriptionPrivacyChargeForMessages': undefined;
+  'SectionTitleStarsForForMessages': undefined;
+  'SubtitlePrivacyAddUsers': undefined;
+  'PrivacyPaidMessagesValue': undefined;
+  'ButtonBuyStars': undefined;
+  'TitleConfirmPayment': undefined;
+  'ToastTitleMessageSent': undefined;
+  'ButtonUndo': undefined;
+  'ConfirmRemoveMessageFee': undefined;
+  'StoryTooltipGifSent': undefined;
+  'StoryTooltipStickerSent': undefined;
+  'StoryTooltipReactionSent': undefined;
+  'StarsNeededTextSendPaidMessages': undefined;
+  'PaidMessageTransactionTotal': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -2273,6 +2292,66 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'stars': V;
     'link': V;
   };
+  'SectionDescriptionStarsForForMessages': {
+    'percent': V;
+    'amount': V;
+  };
+  'SubtitlePrivacyUsersCount': {
+    'count': V;
+  };
+  'FirstMessageInPaidMessagesChat': {
+    'user': V;
+    'amount': V;
+  };
+  'ComposerPlaceholderPaidMessage': {
+    'amount': V;
+  };
+  'ComposerPlaceholderPaidReply': {
+    'amount': V;
+  };
+  'ConfirmationModalPaymentForOneMessage': {
+    'user': V;
+    'amount': V;
+  };
+  'ConfirmationModalPaymentForMessages': {
+    'user': V;
+    'price': V;
+    'amount': V;
+    'count': V;
+  };
+  'ButtonPayForMessage': {
+    'count': V;
+  };
+  'ToastTitleMessagesSent': {
+    'count': V;
+  };
+  'ToastMessageSent': {
+    'amount': V;
+  };
+  'ActionPaidOneMessageOutgoing': {
+    'amount': V;
+  };
+  'ActionPaidOneMessageIncoming': {
+    'amount': V;
+    'user': V;
+  };
+  'PaneMessagePaidMessageCharge': {
+    'peer': V;
+    'amount': V;
+  };
+  'ConfirmDialogMessageRemoveFee': {
+    'peer': V;
+  };
+  'ConfirmDialogRemoveFeeRefundStars': {
+    'amount': V;
+  };
+  'DescriptionGiftPaidMessage': {
+    'user': V;
+    'amount': V;
+  };
+  'PaidMessageTransactionDescription': {
+    'percent': V;
+  };
 }
 
 export interface LangPairPlural {
@@ -2547,6 +2626,9 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'ActionBoostApply': {
     'from': V;
+    'count': V;
+  };
+  'PaidMessageTransaction': {
     'count': V;
   };
 }

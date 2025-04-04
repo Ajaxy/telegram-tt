@@ -12,11 +12,26 @@ export function formatStarsAsText(lang: LangFn, amount: number) {
   return lang('StarsAmountText', { amount }, { pluralValue: amount });
 }
 
-export function formatStarsAsIcon(lang: LangFn, amount: number, options?: { asFont?: boolean; className?: string }) {
-  const { asFont, className } = options || {};
+export function formatStarsAsIcon(lang: LangFn, amount: number, options?: {
+  asFont?: boolean; className?: string; containerClassName?: string; }) {
+  const { asFont, className, containerClassName } = options || {};
   const icon = asFont
     ? <Icon name="star" className={buildClassName('star-amount-icon', className)} />
     : <StarIcon type="gold" className={buildClassName('star-amount-icon', className)} size="adaptive" />;
+
+  if (containerClassName) {
+    return (
+      <span className={containerClassName}>
+        {lang('StarsAmount', { amount }, {
+          withNodes: true,
+          specialReplacement: {
+            [STARS_ICON_PLACEHOLDER]: icon,
+          },
+        })}
+      </span>
+    );
+  }
+
   return lang('StarsAmount', { amount }, {
     withNodes: true,
     specialReplacement: {

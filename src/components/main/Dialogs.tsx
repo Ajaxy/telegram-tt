@@ -9,7 +9,6 @@ import type { MessageList } from '../../types';
 
 import { selectCurrentMessageList, selectTabState } from '../../global/selectors';
 import getReadableErrorText from '../../util/getReadableErrorText';
-import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
 
 import useFlag from '../../hooks/useFlag';
@@ -49,7 +48,7 @@ const Dialogs: FC<StateProps> = ({ dialogs, currentMessageList }) => {
       }
 
       sendMessage({
-        contact: pick(contactRequest, ['firstName', 'lastName', 'phoneNumber']),
+        contact: contactRequest,
         messageList: currentMessageList,
       });
       closeModal();

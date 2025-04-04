@@ -585,6 +585,7 @@ export interface ApiMessage {
   isVideoProcessingPending?: true;
   areReactionsPossible?: true;
   reportDeliveryUntilDate?: number;
+  paidMessageStars?: number;
 }
 
 export interface ApiReactions {

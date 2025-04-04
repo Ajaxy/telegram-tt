@@ -16,6 +16,7 @@ import {
   selectCurrentMessageList,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectPeerPaidMessagesStars,
   selectShouldSchedule,
   selectStickerSet,
   selectThreadInfo,
@@ -276,12 +277,13 @@ export default memo(withGlobal<OwnProps>(
       : stickerSetShortName ? { shortName: stickerSetShortName } : undefined;
 
     const stickerSet = stickerSetInfo ? selectStickerSet(global, stickerSetInfo) : undefined;
+    const paidMessagesStars = chatId ? selectPeerPaidMessagesStars(global, chatId) : undefined;
 
     return {
       canScheduleUntilOnline: Boolean(chatId) && selectCanScheduleUntilOnline(global, chatId),
       canSendStickers,
       isSavedMessages,
-      shouldSchedule: selectShouldSchedule(global),
+      shouldSchedule: !paidMessagesStars && selectShouldSchedule(global),
       stickerSet,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       shouldUpdateStickerSetOrder: global.settings.byKey.shouldUpdateStickerSetOrder,

@@ -72,6 +72,7 @@
   }
 
   > .Button {
+    overflow: visible;
     flex-shrink: 0;
     margin-left: 0.5rem;
     width: var(--base-height);
@@ -94,6 +95,15 @@
     .icon-view-once,
     .icon-one-filled {
       position: absolute;
+    }
+
+    .paidStarsBadgeText {
+      display: inline-flex;
+      align-items: center;
+
+      .star-amount-icon {
+        margin-inline-start: 0;
+      }
     }
 
     @media (hover: hover) {
@@ -150,6 +160,33 @@
       .story-reaction-heart {
         color: var(--color-heart) !important;
       }
+    }
+
+    .paidStarsBadgeIcon {
+      margin-inline-start: 0;
+      margin-inline-end: 0.0625rem;
+    }
+
+    .paidStarsBadge {
+      animation: hide-icon 0.4s forwards ease-out;
+      &.visible {
+        animation: grow-icon 0.4s ease-out;
+      }
+
+      .icon {
+        font-size: 0.875rem;
+      }
+
+      position: absolute;
+
+      top: -1rem;
+      height: auto;
+      padding-inline: 0.375rem;
+      padding-block: 0.25rem;
+      font-size: 0.8125rem;
+      margin-top: 0.625rem;
+      line-height: 1;
+      font-weight: var(--font-weight-semibold) !important;
     }
 
     &.send, &.sendOneTime {
@@ -652,8 +689,13 @@
     }
   }
 
+  .placeholder-star-icon {
+    line-height: 1;
+  }
   .forced-placeholder,
   .placeholder-text {
+    display: inline-flex;
+    align-items: center;
     position: absolute;
     color: var(--color-placeholders);
     pointer-events: none;

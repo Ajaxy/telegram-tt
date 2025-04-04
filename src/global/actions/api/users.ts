@@ -184,6 +184,26 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
+addActionHandler('addNoPaidMessagesException', async (global, actions, payload): Promise<void> => {
+  const { userId, shouldRefundCharged } = payload;
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  const result = await callApi('addNoPaidMessagesException',
+    { user, shouldRefundCharged });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateUserFullInfo(global, userId, {
+    settings: undefined,
+  });
+  setGlobal(global);
+});
+
 addActionHandler('updateContact', async (global, actions, payload): Promise<void> => {
   const {
     userId, isMuted = false, firstName, lastName, shouldSharePhoneNumber,

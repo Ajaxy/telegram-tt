@@ -1,6 +1,6 @@
 .root {
   position: relative;
-  color: var(--color-primary);
+  color: var(--color-toast-action);
   font-weight: var(--font-weight-medium);
 }
 
@@ -12,7 +12,7 @@
 }
 
 .circle {
-  stroke: var(--color-primary);
+  stroke: var(--color-toast-action);
   fill: transparent;
   stroke-width: 2;
   stroke-linecap: round;

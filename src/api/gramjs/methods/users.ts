@@ -103,6 +103,22 @@ export async function fetchCommonChats(user: ApiUser, maxId?: string) {
   return { chatIds, count };
 }
 
+export async function fetchPaidMessagesStarsAmount(user: ApiUser) {
+  const result = await invokeRequest(new GramJs.users.GetRequirementsToContact({
+    id: [buildInputEntity(user.id, user.accessHash) as GramJs.InputUser],
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  if (result[0] instanceof GramJs.RequirementToContactPaidMessages) {
+    return result[0].starsAmount?.toJSNumber();
+  }
+
+  return undefined;
+}
+
 export async function fetchNearestCountry() {
   const dcInfo = await invokeRequest(new GramJs.help.GetNearestDc());
 
@@ -229,6 +245,17 @@ export async function deleteContact({
     '@type': 'deleteContact',
     id,
   });
+}
+
+export async function addNoPaidMessagesException({ user, shouldRefundCharged }: {
+  user: ApiUser;
+  shouldRefundCharged?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.account.AddNoPaidMessagesException({
+    refundCharged: shouldRefundCharged ? true : undefined,
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+  }));
+  return result;
 }
 
 export async function fetchProfilePhotos({

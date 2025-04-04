@@ -51,6 +51,7 @@ export type OwnProps = {
   onSelectChatOrUser: (chatOrUserId: string, threadId?: ThreadId) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
+  isLowStackPriority?: boolean;
 };
 
 const CHAT_LIST_SLIDE = 0;
@@ -71,6 +72,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   onSelectChatOrUser,
   onClose,
   onCloseAnimationEnd,
+  isLowStackPriority,
 }) => {
   const { loadTopics } = getActions();
 
@@ -323,6 +325,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       className={buildClassName('ChatOrUserPicker', className)}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
+      isLowStackPriority={isLowStackPriority}
     >
       <Transition activeKey={activeKey} name="slideFade" slideClassName="ChatOrUserPicker_slide">
         {() => {

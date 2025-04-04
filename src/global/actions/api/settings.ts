@@ -408,6 +408,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     callApi('fetchPrivacySettings', 'bio'),
     callApi('fetchPrivacySettings', 'birthday'),
     callApi('fetchPrivacySettings', 'gifts'),
+    callApi('fetchPrivacySettings', 'noPaidMessages'),
   ]);
 
   if (result.some((e) => e === undefined)) {
@@ -427,6 +428,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     bioSettings,
     birthdaySettings,
     giftsSettings,
+    noPaidMessagesSettings,
   ] = result as {
     rules: ApiPrivacySettings;
   }[];
@@ -450,6 +452,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
         bio: bioSettings.rules,
         birthday: birthdaySettings.rules,
         gifts: giftsSettings.rules,
+        noPaidMessages: noPaidMessagesSettings.rules,
       },
     },
   };
@@ -703,14 +706,24 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
   const shouldHideReadMarks = payload.shouldHideReadMarks ?? Boolean(global.settings.byKey.shouldHideReadMarks);
   const shouldNewNonContactPeersRequirePremium = payload.shouldNewNonContactPeersRequirePremium
     ?? Boolean(global.settings.byKey.shouldNewNonContactPeersRequirePremium);
+    // eslint-disable-next-line no-null/no-null
+  const nonContactPeersPaidStars = payload.nonContactPeersPaidStars === null ? undefined
+    : payload.nonContactPeersPaidStars || global.settings.byKey.nonContactPeersPaidStars;
 
-  global = replaceSettings(global, { shouldArchiveAndMuteNewNonContact, shouldHideReadMarks });
+  global = getGlobal();
+  global = replaceSettings(global, {
+    shouldArchiveAndMuteNewNonContact,
+    shouldHideReadMarks,
+    shouldNewNonContactPeersRequirePremium,
+    nonContactPeersPaidStars,
+  });
   setGlobal(global);
 
   const result = await callApi('updateGlobalPrivacySettings', {
     shouldArchiveAndMuteNewNonContact,
     shouldHideReadMarks,
     shouldNewNonContactPeersRequirePremium,
+    nonContactPeersPaidStars,
   });
 
   global = getGlobal();
@@ -722,6 +735,9 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
     shouldNewNonContactPeersRequirePremium: !result
       ? !shouldNewNonContactPeersRequirePremium
       : result.shouldNewNonContactPeersRequirePremium,
+    nonContactPeersPaidStars: !result
+      ? undefined
+      : result.nonContactPeersPaidStars,
   });
   setGlobal(global);
 });

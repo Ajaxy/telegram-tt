@@ -34,6 +34,7 @@ type StateProps = {
   canDisplayAutoarchiveSetting: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
   shouldNewNonContactPeersRequirePremium?: boolean;
+  shouldChargeForMessages: boolean;
   canDisplayChatInTitle?: boolean;
   privacy: GlobalState['settings']['privacy'];
 };
@@ -50,6 +51,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   canDisplayAutoarchiveSetting,
   shouldArchiveAndMuteNewNonContact,
   shouldNewNonContactPeersRequirePremium,
+  shouldChargeForMessages,
   canDisplayChatInTitle,
   canSetPasscode,
   privacy,
@@ -332,9 +334,10 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-item">
             <span className="title">{oldLang('PrivacyMessagesTitle')}</span>
             <span className="subtitle" dir="auto">
-              {shouldNewNonContactPeersRequirePremium
-                ? oldLang('PrivacyMessagesContactsAndPremium')
-                : oldLang('P2PEverybody')}
+              {shouldChargeForMessages ? lang('PrivacyPaidMessagesValue')
+                : shouldNewNonContactPeersRequirePremium
+                  ? oldLang('PrivacyMessagesContactsAndPremium')
+                  : oldLang('P2PEverybody')}
             </span>
           </div>
         </ListItem>
@@ -402,7 +405,7 @@ export default memo(withGlobal<OwnProps>(
       settings: {
         byKey: {
           hasPassword, isSensitiveEnabled, canChangeSensitive, shouldArchiveAndMuteNewNonContact,
-          canDisplayChatInTitle, shouldNewNonContactPeersRequirePremium,
+          canDisplayChatInTitle, shouldNewNonContactPeersRequirePremium, nonContactPeersPaidStars,
         },
         privacy,
       },
@@ -412,6 +415,8 @@ export default memo(withGlobal<OwnProps>(
       },
       appConfig,
     } = global;
+
+    const shouldChargeForMessages = Boolean(nonContactPeersPaidStars);
 
     return {
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
@@ -424,6 +429,7 @@ export default memo(withGlobal<OwnProps>(
       shouldArchiveAndMuteNewNonContact,
       canChangeSensitive,
       shouldNewNonContactPeersRequirePremium,
+      shouldChargeForMessages,
       privacy,
       canDisplayChatInTitle,
       canSetPasscode: selectCanSetPasscode(global),

@@ -38,6 +38,7 @@ export interface ApiUser {
   hasMainMiniApp?: boolean;
   botActiveUsers?: number;
   botVerificationIconId?: string;
+  paidMessagesStars?: number;
 }
 
 export interface ApiUserFullInfo {
@@ -65,6 +66,7 @@ export interface ApiUserFullInfo {
   isBotAccessEmojiGranted?: boolean;
   hasScheduledMessages?: boolean;
   botVerification?: ApiBotVerification;
+  paidMessagesStars?: number;
   settings?: ApiPeerSettings;
 }
 

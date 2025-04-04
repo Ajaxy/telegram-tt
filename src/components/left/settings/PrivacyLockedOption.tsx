@@ -17,7 +17,7 @@ function PrivacyLockedOption({ label }: OwnProps) {
 
   return (
     <div
-      className={styles.contactsAndPremiumOptionTitle}
+      className={styles.root}
       onClick={() => showNotification({ message: lang('OptionPremiumRequiredMessage') })}
     >
       <span>{label}</span>

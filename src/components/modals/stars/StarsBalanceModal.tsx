@@ -7,6 +7,7 @@ import type { ApiStarTopupOption } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 import type { RegularLangKey } from '../../../types/language';
 
+import { PAID_MESSAGES_PURPOSE } from '../../../config';
 import { getChatTitle, getPeerTitle, getUserFullName } from '../../../global/helpers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -106,6 +107,13 @@ const StarsBalanceModal = ({
 
     if (topup?.purpose === SUBSCRIPTION_PURPOSE) {
       return oldLang('StarsNeededTextLink');
+    }
+
+    if (topup?.purpose === PAID_MESSAGES_PURPOSE) {
+      return lang('StarsNeededTextSendPaidMessages', undefined, {
+        withMarkdown: true,
+        withNodes: true,
+      });
     }
 
     return undefined;

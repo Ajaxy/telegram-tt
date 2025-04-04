@@ -9,6 +9,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { addStoriesForPeer } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
+  selectChat,
   selectCurrentViewedStory,
   selectPeer,
   selectPeerFirstStoryId,
@@ -18,6 +19,7 @@ import {
   selectTabState,
 } from '../../selectors';
 import { fetchChatByUsername } from '../api/chats';
+import { getPeerStarsForMessage } from '../api/messages';
 
 addActionHandler('openStoryViewer', async (global, actions, payload): Promise<void> => {
   const {
@@ -289,12 +291,16 @@ addActionHandler('copyStoryLink', async (global, actions, payload): Promise<void
   });
 });
 
-addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => {
+addActionHandler('sendMessage', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload;
   const { storyId, peerId: storyPeerId } = selectCurrentViewedStory(global, tabId);
   const isStoryReply = Boolean(storyId && storyPeerId);
 
-  if (!isStoryReply) {
+  const chat = storyPeerId ? selectChat(global, storyPeerId) : undefined;
+  if (!chat) return;
+  const messagePriceInStars = await getPeerStarsForMessage(global, chat);
+
+  if (!isStoryReply || messagePriceInStars) {
     return;
   }
 

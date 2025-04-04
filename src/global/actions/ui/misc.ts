@@ -542,6 +542,21 @@ addActionHandler('hideEffectInComposer', (global, actions, payload): ActionRetur
   }, tabId);
 });
 
+addActionHandler('setPaidMessageAutoApprove', (global): ActionReturnType => {
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      byKey: {
+        ...global.settings.byKey,
+        shouldPaidMessageAutoApprove: true,
+      },
+    },
+  };
+
+  return global;
+});
+
 addActionHandler('setReactionEffect', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId, reaction, tabId = getCurrentTabId(),

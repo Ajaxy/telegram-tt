@@ -25,7 +25,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
-      botCanManageEmojiStatus, settings,
+      botCanManageEmojiStatus, settings, sendPaidMessagesStars,
     },
     users,
   } = mtpUserFull;
@@ -56,6 +56,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     starGiftCount: stargiftsCount,
     isBotCanManageEmojiStatus: botCanManageEmojiStatus,
     hasScheduledMessages: hasScheduled,
+    paidMessagesStars: sendPaidMessagesStars?.toJSNumber(),
     settings: buildApiPeerSettings(settings),
   };
 }
@@ -69,6 +70,7 @@ export function buildApiPeerSettings({
   phoneCountry,
   nameChangeDate,
   photoChangeDate,
+  chargePaidMessageStars,
 }: GramJs.PeerSettings): ApiPeerSettings {
   return {
     isAutoArchived: Boolean(autoarchived),
@@ -79,6 +81,7 @@ export function buildApiPeerSettings({
     phoneCountry,
     nameChangeDate,
     photoChangeDate,
+    chargedPaidMessageStars: chargePaidMessageStars?.toJSNumber(),
   };
 }
 
@@ -90,6 +93,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   const {
     id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
     bot, botActiveUsers, botVerificationIcon, botInlinePlaceholder, botAttachMenu, botCanEdit,
+    sendPaidMessagesStars,
   } = mtpUser;
   const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto ? Boolean(mtpUser.photo.hasVideo) : undefined;
   const avatarPhotoId = mtpUser.photo && buildAvatarPhotoId(mtpUser.photo);
@@ -128,6 +132,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     botActiveUsers,
     botVerificationIconId: botVerificationIcon?.toString(),
     color: mtpUser.color && buildApiPeerColor(mtpUser.color),
+    paidMessagesStars: sendPaidMessagesStars?.toJSNumber(),
   };
 }
 

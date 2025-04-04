@@ -180,6 +180,7 @@ export interface ApiStarsTransaction {
   subscriptionPeriod?: number;
   starRefCommision?: number;
   isGiftUpgrade?: true;
+  paidMessages?: number;
 }
 
 export interface ApiStarsSubscription {

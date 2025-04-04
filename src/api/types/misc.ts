@@ -109,6 +109,7 @@ export interface ApiSessionData {
 export type ApiNotification = {
   localId: string;
   containerSelector?: string;
+  type?: 'paidMessage' | undefined;
   title?: string | RegularLangFnParameters;
   message: TeactNode | RegularLangFnParameters;
   cacheBreaker?: string;
@@ -120,6 +121,7 @@ export type ApiNotification = {
   shouldShowTimer?: boolean;
   icon?: IconName;
   customEmojiIconId?: string;
+  shouldUseCustomIcon?: boolean;
   dismissAction?: CallbackAction;
 };
 
@@ -224,6 +226,10 @@ export interface ApiAppConfig {
   maxPinnedStoriesCount?: number;
   groupTranscribeLevelMin?: number;
   canLimitNewMessagesWithoutPremium?: boolean;
+  starsPaidMessagesAvailable?: boolean;
+  starsPaidMessageCommissionPermille?: number;
+  starsPaidMessageAmountMax?: number;
+  starsUsdWithdrawRateX1000?: number;
   bandwidthPremiumNotifyPeriod?: number;
   bandwidthPremiumUploadSpeedup?: number;
   bandwidthPremiumDownloadSpeedup?: number;

@@ -271,6 +271,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       shouldSuggestStickers: true,
       shouldSuggestCustomEmoji: true,
       shouldSkipWebAppCloseConfirmation: false,
+      shouldPaidMessageAutoApprove: false,
       shouldUpdateStickerSetOrder: true,
       language: 'en',
       timeFormat: '24h',
@@ -278,6 +279,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       isConnectionStatusMinimized: true,
       shouldArchiveAndMuteNewNonContact: false,
       shouldNewNonContactPeersRequirePremium: false,
+      nonContactPeersPaidStars: 0,
       shouldHideReadMarks: false,
       canTranslate: false,
       canTranslateChats: true,
@@ -423,4 +425,6 @@ export const INITIAL_TAB_STATE: TabState = {
   requestedTranslations: {
     byChatId: {},
   },
+
+  isPaymentMessageConfirmDialogOpen: false,
 };

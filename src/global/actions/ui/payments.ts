@@ -135,3 +135,19 @@ addActionHandler('resetGiftProfileFilter', (global, actions, payload): ActionRet
     peerId, shouldRefresh: true, tabId: tabState.id,
   });
 });
+
+addActionHandler('openPaymentMessageConfirmDialogOpen', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isPaymentMessageConfirmDialogOpen: true,
+  }, tabId);
+});
+
+addActionHandler('closePaymentMessageConfirmDialogOpen', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isPaymentMessageConfirmDialogOpen: false,
+  }, tabId);
+});

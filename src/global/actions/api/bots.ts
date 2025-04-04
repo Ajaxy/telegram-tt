@@ -14,7 +14,7 @@ import {
 } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
+import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL, PAID_SEND_DELAY } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { oldTranslate } from '../../../util/oldLangProvider';
@@ -62,6 +62,7 @@ import {
   selectUserFullInfo,
 } from '../../selectors';
 import { fetchChatByUsername } from './chats';
+import { getPeerStarsForMessage } from './messages';
 
 import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
 
@@ -379,7 +380,26 @@ addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType
   return undefined;
 });
 
-addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturnType => {
+addActionHandler('sendInlineBotApiResult', async (global, actions, payload): Promise<void> => {
+  const {
+    chat, id, queryId, replyInfo, sendAs, isSilent, scheduledAt, allowPaidStars,
+  } = payload;
+
+  await callApi('sendInlineBotResult', {
+    chat,
+    resultId: id,
+    queryId,
+    replyInfo,
+    sendAs,
+    isSilent,
+    scheduleDate: scheduledAt,
+    allowPaidStars,
+  });
+
+  if (allowPaidStars) actions.loadStarStatus();
+});
+
+addActionHandler('sendInlineBotResult', async (global, actions, payload): Promise<void> => {
   const {
     id, queryId, isSilent, scheduledAt, threadId, chatId,
     tabId = getCurrentTabId(),
@@ -396,14 +416,39 @@ addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturn
   actions.resetDraftReplyInfo({ tabId });
   actions.clearWebPagePreview({ tabId });
 
-  void callApi('sendInlineBotResult', {
+  const starsForOneMessage = await getPeerStarsForMessage(global, chat);
+  const params = {
     chat,
-    resultId: id,
+    id,
     queryId,
     replyInfo,
     sendAs: selectSendAs(global, chatId),
     isSilent,
-    scheduleDate: scheduledAt,
+    scheduledAt,
+    allowPaidStars: starsForOneMessage,
+  };
+  if (!starsForOneMessage) {
+    actions.sendInlineBotApiResult(params);
+    return;
+  }
+
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
+  actions.showNotification({
+    localId: queryId,
+    title: { key: 'ToastTitleMessageSent' },
+    message: { key: 'ToastMessageSent', variables: { amount: starsForOneMessage } },
+    actionText: { key: 'ButtonUndo' },
+    dismissAction: {
+      action: 'sendInlineBotApiResult',
+      payload: params,
+    },
+    duration: PAID_SEND_DELAY,
+    shouldShowTimer: true,
+    disableClickDismiss: true,
+    icon: 'star',
+    shouldUseCustomIcon: true,
+    type: 'paidMessage',
+    tabId,
   });
 });
 

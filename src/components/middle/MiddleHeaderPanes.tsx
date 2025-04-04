@@ -26,6 +26,7 @@ import BotAdPane from './panes/BotAdPane';
 import BotVerificationPane from './panes/BotVerificationPane';
 import ChatReportPane from './panes/ChatReportPane';
 import HeaderPinnedMessage from './panes/HeaderPinnedMessage';
+import PaidMessageChargePane from './panes/PaidMessageChargePane';
 
 import styles from './MiddleHeaderPanes.module.scss';
 
@@ -70,6 +71,7 @@ const MiddleHeaderPanes = ({
   const [getChatReportState, setChatReportState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getBotAdState, setBotAdState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
   const [getBotVerificationState, setBotVerificationState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
+  const [getPaidMessageChargeState, setPaidMessageChargeState] = useSignal<PaneState>(FALLBACK_PANE_STATE);
 
   const isPinnedMessagesFullWidth = isAudioPlayerRendered || !isDesktop;
 
@@ -94,10 +96,11 @@ const MiddleHeaderPanes = ({
     const groupCallState = getGroupCallState();
     const chatReportState = getChatReportState();
     const botAdState = getBotAdState();
+    const paidMessageState = getPaidMessageChargeState();
 
     // Keep in sync with the order of the panes in the DOM
     const stateArray = [audioPlayerState, groupCallState,
-      chatReportState, botVerificationState, pinnedState, botAdState];
+      chatReportState, botVerificationState, pinnedState, botAdState, paidMessageState];
 
     const isFirstRender = isFirstRenderRef.current;
     const totalHeight = stateArray.reduce((acc, state) => acc + state.height, 0);
@@ -111,7 +114,7 @@ const MiddleHeaderPanes = ({
       '--middle-header-panes-height': `${totalHeight}px`,
     });
   }, [getAudioPlayerState, getGroupCallState, getPinnedState,
-    getChatReportState, getBotAdState, getBotVerificationState]);
+    getChatReportState, getBotAdState, getBotVerificationState, getPaidMessageChargeState]);
 
   if (!shouldRender) return undefined;
 
@@ -139,6 +142,10 @@ const MiddleHeaderPanes = ({
       <BotVerificationPane
         peerId={chatId}
         onPaneStateChange={setBotVerificationState}
+      />
+      <PaidMessageChargePane
+        peerId={chatId}
+        onPaneStateChange={setPaidMessageChargeState}
       />
       <HeaderPinnedMessage
         chatId={chatId}

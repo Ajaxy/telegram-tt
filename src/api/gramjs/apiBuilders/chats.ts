@@ -75,6 +75,7 @@ function buildApiChatFieldsFromPeerEntity(
   const boostLevel = ('level' in peerEntity) ? peerEntity.level : undefined;
   const areProfilesShown = Boolean('signatureProfiles' in peerEntity && peerEntity.signatureProfiles);
   const subscriptionUntil = 'subscriptionUntilDate' in peerEntity ? peerEntity.subscriptionUntilDate : undefined;
+  const paidMessagesStars = 'sendPaidMessagesStars' in peerEntity ? peerEntity.sendPaidMessagesStars : undefined;
 
   return {
     isMin,
@@ -110,6 +111,7 @@ function buildApiChatFieldsFromPeerEntity(
     boostLevel,
     botVerificationIconId,
     subscriptionUntil,
+    paidMessagesStars: paidMessagesStars?.toJSNumber(),
   };
 }
 

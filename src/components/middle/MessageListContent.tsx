@@ -1,9 +1,10 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { getIsHeavyAnimating, memo } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, getGlobal } from '../../global';
 
-import type { MessageListType, ThreadId } from '../../types';
+import type { ApiMessage } from '../../api/types';
+import type { IAlbum, MessageListType, ThreadId } from '../../types';
 import type { Signal } from '../../util/signals';
 import type { MessageDateGroup } from './helpers/groupMessages';
 import type { OnIntersectPinnedMessage } from './hooks/usePinnedMessage';
@@ -13,10 +14,12 @@ import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import {
   getMessageHtmlId,
   getMessageOriginalId,
+  getPeerTitle,
   isActionMessage,
   isOwnMessage,
   isServiceNotificationMessage,
 } from '../../global/helpers';
+import { selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate } from '../../util/dates/dateFormat';
 import { compact } from '../../util/iteratees';
@@ -24,6 +27,7 @@ import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 
 import useDerivedSignal from '../../hooks/useDerivedSignal';
+import useLang from '../../hooks/useLang';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import useMessageObservers from './hooks/useMessageObservers';
@@ -131,12 +135,42 @@ const MessageListContent: FC<OwnProps> = ({
   );
 
   const oldLang = useOldLang();
+  const lang = useLang();
 
   const unreadDivider = (
     <div className={buildClassName(UNREAD_DIVIDER_CLASS, 'local-action-message')} key="unread-messages">
       <span>{oldLang('UnreadMessages')}</span>
     </div>
   );
+  const renderPaidMessageAction = (message: ApiMessage, album?: IAlbum) => {
+    if (message.paidMessageStars) {
+      const messagesLength = album?.messages?.length || 1;
+      const amount = message.paidMessageStars * messagesLength;
+      return (
+        <div
+          className={buildClassName('local-action-message')}
+          key={`paid-messages-action-${message.id}`}
+        >
+          <span>{
+            message.isOutgoing
+              ? lang('ActionPaidOneMessageOutgoing', {
+                amount,
+              })
+              : (() => {
+                const sender = selectSender(getGlobal(), message);
+                const userTitle = sender ? getPeerTitle(lang, sender) : '';
+                return lang('ActionPaidOneMessageIncoming', {
+                  user: userTitle,
+                  amount,
+                });
+              })()
+          }
+          </span>
+        </div>
+      );
+    }
+    return undefined;
+  };
   const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
     return acc + messageGroup.senderGroups.flat().length;
   }, 0);
@@ -228,6 +262,7 @@ const MessageListContent: FC<OwnProps> = ({
 
         return compact([
           message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
+          message.paidMessageStars && !withUsers && renderPaidMessageAction(message, album),
           <Message
             key={key}
             message={message}

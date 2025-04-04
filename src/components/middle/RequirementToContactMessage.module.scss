@@ -8,8 +8,8 @@
 
   .button {
     background: var(--pattern-color);
-    width: 10rem;
-    margin-top: 0.5rem;
+    width: auto;
+    margin-top: 1.0625rem;
     text-transform: none;
     color: var(--color-white);
     height: 2.25rem;
@@ -28,8 +28,8 @@
   flex-direction: column;
   align-items: center;
   background: var(--pattern-color);
-  max-width: 15rem;
-  padding: 0.75rem 0;
+  max-width: 13.5rem;
+  padding: 1.0625rem 0;
   border-radius: 1.5rem;
 
   &[dir="rtl"] {
@@ -60,7 +60,23 @@
 }
 
 .description {
+  white-space: pre;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
   padding: 0 1rem;
   margin-top: 0.5rem;
+}
+
+.starIconContainer {
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+}
+
+.starIcon {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0.0625rem !important;
 }

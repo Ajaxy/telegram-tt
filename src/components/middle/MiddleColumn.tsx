@@ -50,6 +50,7 @@ import {
   selectIsInSelectMode,
   selectIsRightColumnShown,
   selectIsUserBlocked,
+  selectPeerPaidMessagesStars,
   selectPinnedIds,
   selectTabState,
   selectTheme,
@@ -153,6 +154,7 @@ type StateProps = {
   canShowOpenChatButton?: boolean;
   isContactRequirePremium?: boolean;
   topics?: Record<number, ApiTopic>;
+  paidMessagesStars?: number;
 };
 
 function isImage(item: DataTransferItem) {
@@ -213,6 +215,7 @@ function MiddleColumn({
   canShowOpenChatButton,
   isContactRequirePremium,
   topics,
+  paidMessagesStars,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -551,6 +554,7 @@ function MiddleColumn({
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
                 isContactRequirePremium={isContactRequirePremium}
+                paidMessagesStars={paidMessagesStars}
                 withBottomShift={withMessageListBottomShift}
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
                 onIntersectPinnedMessage={renderingHandleIntersectPinnedMessage!}
@@ -800,7 +804,10 @@ export default memo(withGlobal<OwnProps>(
       )
     );
 
-    const isContactRequirePremium = selectUserFullInfo(global, chatId)?.isContactRequirePremium;
+    const userFull = selectUserFullInfo(global, chatId);
+
+    const isContactRequirePremium = userFull?.isContactRequirePremium;
+    const paidMessagesStars = selectPeerPaidMessagesStars(global, chatId);
 
     return {
       ...state,
@@ -838,6 +845,7 @@ export default memo(withGlobal<OwnProps>(
       canShowOpenChatButton,
       isContactRequirePremium,
       topics,
+      paidMessagesStars,
     };
   },
 )(MiddleColumn));

@@ -21,7 +21,7 @@ const Notifications: FC<StateProps> = ({ notifications }) => {
   return (
     <div id="Notifications">
       {notifications.map((notification) => (
-        <Notification notification={notification} />
+        <Notification key={notification.localId} notification={notification} />
       ))}
     </div>
   );

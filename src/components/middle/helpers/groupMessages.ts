@@ -90,6 +90,7 @@ export function groupMessages(
       } else if (
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
+        || message.paidMessageStars
         || message.isOutgoing !== nextMessage.isOutgoing
         || message.postAuthorTitle !== nextMessage.postAuthorTitle
         || (isActionMessage(message) && message.content.action?.type !== 'phoneCall')

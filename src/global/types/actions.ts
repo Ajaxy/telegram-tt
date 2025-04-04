@@ -8,7 +8,6 @@ import type {
   ApiChatlistInvite,
   ApiChatReactions,
   ApiChatType,
-  ApiContact,
   ApiDraft,
   ApiExportedInvite,
   ApiFormattedText,
@@ -23,10 +22,10 @@ import type {
   ApiMessage,
   ApiMessageEntity,
   ApiMessageSearchContext,
-  ApiNewPoll,
   ApiNotification,
   ApiNotifyPeerType,
   ApiPaymentStatus,
+  ApiPeer,
   ApiPhoto,
   ApiPremiumSection,
   ApiPreparedInlineMessage,
@@ -80,6 +79,7 @@ import type {
   Point,
   ProfileTabType,
   ScrollTargetPosition,
+  SendMessageParams,
   SettingsScreens,
   SharedMediaType,
   Size,
@@ -441,25 +441,10 @@ export interface ActionPayloads {
     onLoaded?: NoneToVoidFunction;
     onError?: NoneToVoidFunction;
   } & WithTabId;
-  sendMessage: {
-    text?: string;
-    entities?: ApiMessageEntity[];
-    attachments?: ApiAttachment[];
-    sticker?: ApiSticker;
-    isSilent?: boolean;
-    scheduledAt?: number;
-    gif?: ApiVideo;
-    poll?: ApiNewPoll;
-    contact?: Partial<ApiContact>;
-    shouldUpdateStickerSetOrder?: boolean;
-    shouldGroupMessages?: boolean;
-    messageList?: MessageList;
-    isReaction?: true; // Reaction to the story are sent in the form of a message
-    isInvertedMedia?: true;
-    effectId?: string;
-    webPageMediaSize?: WebPageMediaSize;
-    webPageUrl?: string;
-  } & WithTabId;
+  sendMessage: Partial<SendMessageParams> & WithTabId;
+  sendMessages: {
+    sendParams: SendMessageParams[];
+  };
   sendInviteMessages: {
     chatId: string;
     userIds: string[];
@@ -478,7 +463,9 @@ export interface ActionPayloads {
   deleteMessages: {
     messageIds: number[];
     shouldDeleteForAll?: boolean;
+    messageList?: MessageList;
   } & WithTabId;
+  resetLocalPaidMessages: WithTabId | undefined;
   deleteParticipantHistory: {
     peerId: string;
     chatId: string;
@@ -543,6 +530,12 @@ export interface ActionPayloads {
     message: ApiPreparedInlineMessage;
   } & WithTabId;
   closeSharePreparedMessageModal: WithTabId | undefined;
+  updateSharePreparedMessageModalSendArgs: {
+    args?: {
+      peerId: string;
+      threadId?: ThreadId;
+    };
+  } & WithTabId;
   openPreviousReportAdModal: WithTabId | undefined;
   openPreviousReportModal: WithTabId | undefined;
   closeReportAdModal: WithTabId | undefined;
@@ -1744,6 +1737,10 @@ export interface ActionPayloads {
     isMuted?: boolean;
     shouldSharePhoneNumber?: boolean;
   } & WithTabId;
+  addNoPaidMessagesException: {
+    userId: string;
+    shouldRefundCharged: boolean;
+  };
   loadMoreProfilePhotos: {
     peerId: string;
     isPreload?: boolean;
@@ -1902,7 +1899,18 @@ export interface ActionPayloads {
     threadId: ThreadId;
     isSilent?: boolean;
     scheduledAt?: number;
+    paidMessagesStars?: number;
   } & WithTabId;
+  sendInlineBotApiResult: {
+    chat: ApiChat;
+    id: string;
+    queryId: string;
+    replyInfo?: ApiInputMessageReplyInfo;
+    sendAs?: ApiPeer;
+    isSilent?: boolean;
+    scheduledAt?: number;
+    allowPaidStars?: number;
+  };
   resetInlineBot: {
     username: string;
     force?: boolean;
@@ -2154,6 +2162,7 @@ export interface ActionPayloads {
 
   requestEffectInComposer: WithTabId;
   hideEffectInComposer: WithTabId;
+  setPaidMessageAutoApprove: undefined;
 
   updateArchiveSettings: {
     isMinimized?: boolean;
@@ -2304,6 +2313,7 @@ export interface ActionPayloads {
     shouldArchiveAndMuteNewNonContact?: boolean;
     shouldHideReadMarks?: boolean;
     shouldNewNonContactPeersRequirePremium?: boolean;
+    nonContactPeersPaidStars?: number | null;
   };
 
   // Premium
@@ -2474,6 +2484,9 @@ export interface ActionPayloads {
     originData: TabState['starsBalanceModal'];
     status: ApiPaymentStatus;
   } & WithTabId;
+
+  openPaymentMessageConfirmDialogOpen: WithTabId | undefined;
+  closePaymentMessageConfirmDialogOpen: WithTabId | undefined;
 
   // Forums
   toggleForum: {
