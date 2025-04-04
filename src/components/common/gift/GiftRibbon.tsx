@@ -13,6 +13,7 @@ import styles from './GiftRibbon.module.scss';
 const COLORS = {
   red: [['#FF5B54', '#ED1C26'], ['#653633', '#532224']],
   blue: [['#6ED2FF', '#34A4FC'], ['#344F5A', '#152E42']],
+  purple: [['#E367D7', '#757BF6'], ['#E367D7', '#757BF6']],
 } as const;
 type ColorKey = keyof typeof COLORS;
 

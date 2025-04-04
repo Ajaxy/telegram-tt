@@ -13,6 +13,7 @@ import type {
 import type { TabState } from '../../../global/types';
 import type { StarGiftCategory } from '../../../types';
 
+import { STARS_CURRENCY_CODE } from '../../../config';
 import { getPeerTitle, getUserFullName } from '../../../global/helpers';
 import { isApiPeerChat, isApiPeerUser } from '../../../global/helpers/peers';
 import { selectPeer } from '../../../global/selectors';
@@ -97,11 +98,29 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
 
   const oldLang = useOldLang();
   const lang = useLang();
-
+  const allGifts = renderingModal?.gifts;
   const filteredGifts = useMemo(() => {
-    return renderingModal?.gifts?.sort((prevGift, gift) => prevGift.months - gift.months)
-      .filter((gift) => gift.users === 1);
-  }, [renderingModal]);
+    return allGifts?.sort((prevGift, gift) => prevGift.months - gift.months)
+      .filter((gift) => gift.users === 1 && gift.currency !== 'XTR');
+  }, [allGifts]);
+
+  const giftsByStars = useMemo(() => {
+    const mapGifts = new Map();
+
+    if (!filteredGifts) return mapGifts;
+
+    filteredGifts.forEach((gift) => {
+      const giftByStars = allGifts?.find(
+        (starsGift) => starsGift.currency === STARS_CURRENCY_CODE
+        && starsGift.months === gift.months,
+      );
+      if (giftByStars) {
+        mapGifts.set(gift, giftByStars);
+      }
+    });
+
+    return mapGifts;
+  }, [allGifts, filteredGifts]);
 
   const baseGift = useMemo(() => {
     return filteredGifts?.reduce((prev, gift) => (prev.amount < gift.amount ? prev : gift));
@@ -225,6 +244,7 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
           return (
             <GiftItemPremium
               option={gift}
+              optionByStars={giftsByStars.get(gift)}
               baseMonthAmount={baseGift ? Math.floor(baseGift.amount / baseGift.months) : undefined}
               onClick={handleGiftClick}
             />
@@ -321,7 +341,11 @@ const PremiumGiftModal: FC<OwnProps & StateProps> = ({
       >
         {!isGiftScreen && renderMainScreen()}
         {isGiftScreen && renderingModal?.forPeerId && (
-          <GiftSendingOptions gift={selectedGift} peerId={renderingModal.forPeerId} />
+          <GiftSendingOptions
+            gift={selectedGift}
+            giftByStars={giftsByStars.get(selectedGift)}
+            peerId={renderingModal.forPeerId}
+          />
         )}
       </Transition>
     </Modal>

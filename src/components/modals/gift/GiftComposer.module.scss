@@ -122,7 +122,6 @@
   display: flex;
   justify-content: space-between;
   padding: 1rem;
-  padding-top: 0.5rem;
   margin-inline: -0.75rem; // Account for padding
   flex-direction: column;
   background-color: var(--color-background-secondary);
@@ -136,7 +135,8 @@
 }
 
 .switcherStarIcon {
-  margin-inline: 0 !important;
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0.125rem !important;
 }
 
 .description {

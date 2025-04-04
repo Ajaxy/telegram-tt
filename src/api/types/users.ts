@@ -50,7 +50,6 @@ export interface ApiUserFullInfo {
   fallbackPhoto?: ApiPhoto;
   personalPhoto?: ApiPhoto;
   noVoiceMessages?: boolean;
-  premiumGifts?: ApiPremiumGiftOption[];
   isTranslationDisabled?: true;
   areAdsEnabled?: boolean;
   hasPinnedStories?: boolean;
@@ -125,13 +124,6 @@ export type ApiAttachBot = OptionalCombine<ApiAttachBotBase, ApiAttachBotForMenu
 export interface ApiAttachBotIcon {
   name: string;
   document: ApiDocument;
-}
-
-export interface ApiPremiumGiftOption {
-  months: number;
-  currency: string;
-  amount: number;
-  botUrl: string;
 }
 
 export type ApiEmojiStatusType = ApiEmojiStatus | ApiEmojiStatusCollectible;

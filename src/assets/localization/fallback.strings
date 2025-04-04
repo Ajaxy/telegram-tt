@@ -1829,4 +1829,10 @@
 "PeerPersonalAccount" = "personal account";
 "PeerChannel" = "channel";
 "WebAppCollapse" = "Collapse";
+"GiftPremiumStarsPrice" = "or **{stars}**";
+"GiftPremiumPayWithStars" = "Pay with {stars}";
+"GiftPremiumPayWithStarsAcc" = "Pay with stars";
+"GetMoreStarsLinkText" = "Get More Stars >";
+"GiftPremiumDescriptionYourBalance" = "Your balance is **{stars}**. {link}";
+"StarsGiftCompleted"= "Gift sent!";
 "GiftSent"= "Gift sent!";

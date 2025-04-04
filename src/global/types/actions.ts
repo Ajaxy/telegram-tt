@@ -2365,6 +2365,12 @@ export interface ActionPayloads {
   } & WithTabId;
   closeGiftModal: WithTabId | undefined;
   sendStarGift: StarGiftInfo & WithTabId;
+  sendPremiumGiftByStars: {
+    userId: string;
+    months: number;
+    amount: number;
+    message?: ApiFormattedText;
+  } & WithTabId;
 
   openGiftInfoModalFromMessage: {
     chatId: string;

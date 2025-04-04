@@ -1,5 +1,5 @@
 import type {
-  ApiInputInvoice, ApiInputInvoiceStarGift, ApiRequestInputInvoice,
+  ApiInputInvoice, ApiInputInvoicePremiumGiftStars, ApiInputInvoiceStarGift, ApiRequestInputInvoice,
 } from '../../../api/types';
 import type { ApiCredentials } from '../../../components/payment/PaymentModal';
 import type { RegularLangFnParameters } from '../../../util/localization';
@@ -138,6 +138,21 @@ addActionHandler('sendStarGift', (global, actions, payload): ActionReturnType =>
   };
 
   payInputStarInvoice(global, inputInvoice, gift.stars, tabId);
+});
+
+addActionHandler('sendPremiumGiftByStars', (global, actions, payload): ActionReturnType => {
+  const {
+    userId, months, amount, message, tabId = getCurrentTabId(),
+  } = payload;
+
+  const inputInvoice: ApiInputInvoicePremiumGiftStars = {
+    type: 'premiumGiftStars',
+    userId,
+    months,
+    message,
+  };
+
+  payInputStarInvoice(global, inputInvoice, amount, tabId);
 });
 
 addActionHandler('getReceipt', async (global, actions, payload): Promise<void> => {
@@ -1037,6 +1052,7 @@ async function payInputStarInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice, price: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   const actions = getActions();
   const balance = global.stars?.balance;
 

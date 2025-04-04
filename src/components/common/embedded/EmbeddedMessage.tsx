@@ -222,7 +222,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   return (
     <PeerColorWrapper
       peer={sender}
-      emojiIconClassName=' className="EmbeddedMessage--background-icons"'
+      emojiIconClassName="EmbeddedMessage--background-icons"
       ref={ref}
       shouldReset
       noUserColors={noUserColors}

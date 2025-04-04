@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
-import type { ApiPremiumGiftCodeOption, ApiPremiumGiftOption } from '../../../api/types';
+import type { ApiPremiumGiftCodeOption, ApiPremiumSubscriptionOption } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
@@ -12,7 +12,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import styles from './PremiumSubscriptionOption.module.scss';
 
 type OwnProps = {
-  option: ApiPremiumGiftOption | ApiPremiumGiftCodeOption;
+  option: ApiPremiumSubscriptionOption | ApiPremiumGiftCodeOption;
   isGiveaway?: boolean;
   checked?: boolean;
   fullMonthlyAmount?: number;

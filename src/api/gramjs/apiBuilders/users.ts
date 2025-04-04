@@ -2,7 +2,6 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiBirthday,
-  ApiPremiumGiftOption,
   ApiUser,
   ApiUserFullInfo,
   ApiUserStatus,
@@ -21,7 +20,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
   const {
     fullUser: {
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
-      profilePhoto, voiceMessagesForbidden, premiumGifts, hasScheduled,
+      profilePhoto, voiceMessagesForbidden, hasScheduled,
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
@@ -43,7 +42,6 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     profilePhoto: profilePhoto instanceof GramJs.Photo ? buildApiPhoto(profilePhoto) : undefined,
     fallbackPhoto: fallbackPhoto instanceof GramJs.Photo ? buildApiPhoto(fallbackPhoto) : undefined,
     personalPhoto: personalPhoto instanceof GramJs.Photo ? buildApiPhoto(personalPhoto) : undefined,
-    premiumGifts: premiumGifts?.map((gift) => buildApiPremiumGiftOption(gift)),
     botInfo: botInfo && buildApiBotInfo(botInfo, userId),
     isContactRequirePremium: contactRequirePremium,
     birthday: birthday && buildApiBirthday(birthday),
@@ -146,19 +144,6 @@ export function buildApiUserStatuses(mtpUsers: GramJs.TypeUser[]) {
   });
 
   return userStatusesById;
-}
-
-export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption): ApiPremiumGiftOption {
-  const {
-    months, currency, amount, botUrl,
-  } = option;
-
-  return {
-    months,
-    currency,
-    amount: amount.toJSNumber(),
-    botUrl,
-  };
 }
 
 export function buildApiBirthday(birthday: GramJs.TypeBirthday): ApiBirthday {

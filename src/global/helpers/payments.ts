@@ -96,6 +96,22 @@ export function getRequestInputInvoice<T extends GlobalState>(
     };
   }
 
+  if (inputInvoice.type === 'premiumGiftStars') {
+    const {
+      months, userId, message,
+    } = inputInvoice;
+    const user = selectUser(global, userId);
+
+    if (!user) return undefined;
+
+    return {
+      type: 'premiumGiftStars',
+      months,
+      message,
+      user,
+    };
+  }
+
   if (inputInvoice.type === 'giftcode') {
     const {
       userIds, boostChannelId, amount, currency, option, message,

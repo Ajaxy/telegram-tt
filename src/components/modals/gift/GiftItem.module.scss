@@ -67,3 +67,14 @@
 .amount {
   margin-top: 0.0625rem; // It just refuses to be centered
 }
+
+.starsPriceBlock {
+  color: var(--color-stars);
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.starsPriceIcon {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0.125rem !important;
+}

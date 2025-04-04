@@ -70,7 +70,8 @@ export function selectCanUseGiftProfileAdminFilter<T extends GlobalState>(
   global: T, peerId: string,
 ) {
   const chat = selectChat(global, peerId);
-  return chat && isChatChannel(chat) && isChatAdmin(chat) && getHasAdminRight(chat, 'postMessages');
+  const isCurrentUser = global.currentUserId === peerId;
+  return isCurrentUser || (chat && isChatChannel(chat) && isChatAdmin(chat) && getHasAdminRight(chat, 'postMessages'));
 }
 
 export function selectCanUseGiftProfileFilter<T extends GlobalState>(

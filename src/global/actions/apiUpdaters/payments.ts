@@ -91,7 +91,24 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
         if (giftModalState && inputInvoice.userIds[0] === giftModalState.forPeerId) {
           actions.showNotification({
-            message: langProvider.oldTranslate('StarsGiftCompleted'),
+            message: {
+              key: 'StarsGiftCompleted',
+            },
+            tabId,
+          });
+          actions.requestConfetti({ withStars: true, tabId });
+          actions.closeGiftModal({ tabId });
+        }
+      }
+
+      if (inputInvoice?.type === 'premiumGiftStars') {
+        const giftModalState = selectTabState(global, tabId).giftModal;
+
+        if (giftModalState && inputInvoice.userId === giftModalState.forPeerId) {
+          actions.showNotification({
+            message: {
+              key: 'StarsGiftCompleted',
+            },
             tabId,
           });
           actions.requestConfetti({ withStars: true, tabId });
@@ -124,7 +141,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
         if (starGiftModalState && inputInvoice.peerId === starGiftModalState.forPeerId) {
           actions.showNotification({
-            message: langProvider.oldTranslate('StarsGiftCompleted'),
+            message: {
+              key: 'StarsGiftCompleted',
+            },
             tabId,
           });
           actions.requestConfetti({ withStars: true, tabId });

@@ -136,6 +136,8 @@ export interface LangPair {
   'Code': undefined;
   'Open': undefined;
   'LoginHeaderPassword': undefined;
+  'BotShareMessageShare': undefined;
+  'BotShareMessage': undefined;
   'LoginEnterPasswordDescription': undefined;
   'StartText': undefined;
   'LoginPhonePlaceholder': undefined;
@@ -483,8 +485,6 @@ export interface LangPair {
   'SetAdditionalPasswordInfo': undefined;
   'EditAdminTransferSetPassword': undefined;
   'BotOpenPageTitle': undefined;
-  'BotShareMessageShare': undefined;
-  'BotShareMessage': undefined;
   'FilterDeleteAlert': undefined;
   'RequestToJoinChannelSentDescription': undefined;
   'RequestToJoinGroupSentDescription': undefined;
@@ -1418,6 +1418,9 @@ export interface LangPair {
   'PeerPersonalAccount': undefined;
   'PeerChannel': undefined;
   'WebAppCollapse': undefined;
+  'GiftPremiumPayWithStarsAcc': undefined;
+  'GetMoreStarsLinkText': undefined;
+  'StarsGiftCompleted': undefined;
   'GiftSent': undefined;
 }
 
@@ -1534,11 +1537,17 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'WebAppAddToAttachmentText': {
     'bot': V;
   };
+  'WebAppShareMessageInfo': {
+    'user': V;
+  };
   'BotPermissionGameAlert': {
     'bot': V;
   };
   'BotOpenPageMessage': {
     'bot': V;
+  };
+  'BotSharedToOne': {
+    'peer': V;
   };
   'NewContactPhoneHiddenText': {
     'user': V;
@@ -1564,9 +1573,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'ConversationOpenBotLinkAllowMessages': {
     'bot': V;
-  };
-  'WebAppShareMessageInfo': {
-    'user': V;
   };
   'BlockUserTitle': {
     'user': V;
@@ -2240,8 +2246,15 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'UniqueStatusWearTitle': {
     'gift': V;
   };
-  'BotSharedToOne': {
-    'peer': V;
+  'GiftPremiumStarsPrice': {
+    'stars': V;
+  };
+  'GiftPremiumPayWithStars': {
+    'stars': V;
+  };
+  'GiftPremiumDescriptionYourBalance': {
+    'stars': V;
+    'link': V;
   };
 }
 

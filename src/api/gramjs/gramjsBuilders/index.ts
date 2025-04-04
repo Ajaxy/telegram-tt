@@ -676,6 +676,17 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'premiumGiftStars': {
+      const {
+        user, message, months,
+      } = invoice;
+      return new GramJs.InputInvoicePremiumGiftStars({
+        months,
+        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+        message: message && buildInputTextWithEntities(message),
+      });
+    }
+
     case 'starsgiveaway': {
       const purpose = buildInputStorePaymentPurpose(invoice.purpose);
       return new GramJs.InputInvoiceStars({

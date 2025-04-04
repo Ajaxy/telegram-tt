@@ -319,6 +319,13 @@ export type ApiInputInvoiceGiveaway = {
   option: ApiPremiumGiftCodeOption;
 };
 
+export type ApiInputInvoicePremiumGiftStars = {
+  type: 'premiumGiftStars';
+  userId: string;
+  months: number;
+  message?: ApiFormattedText;
+};
+
 export type ApiInputInvoiceGiftCode = {
   type: 'giftcode';
   userIds: string[];
@@ -386,7 +393,7 @@ export type ApiInputInvoiceStarGiftTransfer = {
 };
 
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
-| ApiInputInvoiceGiftCode | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
+| ApiInputInvoiceGiftCode | ApiInputInvoicePremiumGiftStars | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
 | ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription
 | ApiInputInvoiceStarGiftUpgrade | ApiInputInvoiceStarGiftTransfer;
 
@@ -411,6 +418,13 @@ export type ApiRequestInputInvoiceGiveaway = {
 export type ApiRequestInputInvoiceStars = {
   type: 'stars';
   purpose: ApiInputStorePaymentPurpose;
+};
+
+export type ApiRequestInputInvoicePremiumGiftStars = {
+  type: 'premiumGiftStars';
+  user: ApiUser;
+  months: number;
+  message?: ApiFormattedText;
 };
 
 export type ApiRequestInputInvoiceStarsGiveaway = {
@@ -447,4 +461,4 @@ export type ApiRequestInputInvoiceStarGiftTransfer = {
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
 | ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway
 | ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift | ApiRequestInputInvoiceStarGiftUpgrade
-| ApiRequestInputInvoiceStarGiftTransfer;
+| ApiRequestInputInvoiceStarGiftTransfer | ApiRequestInputInvoicePremiumGiftStars;
