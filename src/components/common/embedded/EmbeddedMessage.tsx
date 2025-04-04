@@ -14,13 +14,13 @@ import {
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageRoundVideo,
-  getPeerTitle,
   isChatChannel,
   isChatGroup,
   isMessageTranslatable,
   isUserId,
 } from '../../../global/helpers';
 import { getMediaContentTypeDescription } from '../../../global/helpers/messageSummary';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';

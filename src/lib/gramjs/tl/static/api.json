@@ -62,6 +62,7 @@
     "account.toggleSponsoredMessages",
     "account.getCollectibleEmojiStatuses",
     "account.addNoPaidMessagesException",
+    "account.getPaidMessagesRevenue",
     "users.getUsers",
     "users.getFullUser",
     "contacts.getContacts",

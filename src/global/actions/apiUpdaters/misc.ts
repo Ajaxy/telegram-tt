@@ -3,7 +3,7 @@ import { PaymentStep } from '../../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { applyLangPackDifference, getTranslationFn, requestLangPackDifference } from '../../../util/localization';
-import { getPeerTitle } from '../../helpers';
+import { getPeerTitle } from '../../helpers/peers';
 import { addActionHandler, setGlobal } from '../../index';
 import {
   addBlockedUser,

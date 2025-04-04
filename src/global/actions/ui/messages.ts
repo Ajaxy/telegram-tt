@@ -29,10 +29,10 @@ import {
   getMediaHash,
   getMessageDownloadableMedia,
   getMessageStatefulContent,
-  getPeerTitle,
   isChatChannel,
 } from '../../helpers';
 import { getMessageSummaryText } from '../../helpers/messageSummary';
+import { getPeerTitle } from '../../helpers/peers';
 import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
@@ -62,7 +62,6 @@ import {
   selectIsRightColumnShown,
   selectIsViewportNewest,
   selectMessageIdsByGroupId,
-  selectPeer,
   selectPinnedIds,
   selectReplyStack,
   selectRequestedChatTranslationLanguage,
@@ -1115,8 +1114,7 @@ addActionHandler('updateSharePreparedMessageModalSendArgs', async (global, actio
     return;
   }
 
-  const peer = selectPeer(global, args.peerId);
-  const starsForSendMessage = peer ? await getPeerStarsForMessage(global, peer) : undefined;
+  const starsForSendMessage = await getPeerStarsForMessage(global, args.peerId);
 
   global = getGlobal();
   global = updateTabState(global, {

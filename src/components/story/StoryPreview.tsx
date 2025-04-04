@@ -6,7 +6,8 @@ import type {
 } from '../../api/types';
 import type { StoryViewerOrigin } from '../../types';
 
-import { getPeerTitle, getStoryMediaHash } from '../../global/helpers';
+import { getStoryMediaHash } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import { selectTabState } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 

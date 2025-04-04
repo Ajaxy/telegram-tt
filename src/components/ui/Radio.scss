@@ -54,6 +54,14 @@
     }
   }
 
+  &.canCheckedInDisabled {
+    .Radio-main {
+      &::before {
+        visibility: visible;
+      }
+    }
+  }
+
   > input {
     position: absolute;
     z-index: var(--z-below);

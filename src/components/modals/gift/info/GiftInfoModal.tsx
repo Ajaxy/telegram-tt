@@ -8,8 +8,8 @@ import type {
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
-import { getHasAdminRight, getPeerTitle } from '../../../../global/helpers';
-import { isApiPeerChat } from '../../../../global/helpers/peers';
+import { getHasAdminRight } from '../../../../global/helpers';
+import { getPeerTitle, isApiPeerChat } from '../../../../global/helpers/peers';
 import { selectPeer, selectUser } from '../../../../global/selectors';
 import buildClassName from '../../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../../util/clipboard';

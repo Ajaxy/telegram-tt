@@ -12,8 +12,8 @@ import {
   getMessageMediaHash,
   getMessageSingleInlineButton,
   getMessageVideo,
-  getPeerTitle,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectAllowedMessageActionsSlow,
   selectChat,

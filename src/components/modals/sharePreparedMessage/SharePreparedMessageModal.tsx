@@ -11,8 +11,8 @@ import type { ThreadId } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
-  getPeerTitle,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectPeer, selectTabState,
 } from '../../../global/selectors';
@@ -31,6 +31,8 @@ export type OwnProps = {
 
 type StateProps = {
   isPaymentMessageConfirmDialogOpen: boolean;
+  starsBalance: number;
+  isStarsBalanceModalOpen: boolean;
 };
 
 export type SendParams = {
@@ -39,7 +41,7 @@ export type SendParams = {
 };
 
 const SharePreparedMessageModal: FC<OwnProps & StateProps> = ({
-  modal, isPaymentMessageConfirmDialogOpen,
+  modal, isPaymentMessageConfirmDialogOpen, isStarsBalanceModalOpen, starsBalance,
 }) => {
   const {
     closeSharePreparedMessageModal,
@@ -73,7 +75,7 @@ const SharePreparedMessageModal: FC<OwnProps & StateProps> = ({
     shouldAutoApprove: shouldPaidMessageAutoApprove,
     setAutoApprove: setShouldPaidMessageAutoApprove,
     handleWithConfirmation: handleActionWithPaymentConfirmation,
-  } = usePaidMessageConfirmation(starsForSendMessage || 0);
+  } = usePaidMessageConfirmation(starsForSendMessage || 0, isStarsBalanceModalOpen, starsBalance);
 
   const handleClose = useLastCallback(() => {
     closeSharePreparedMessageModal();
@@ -118,7 +120,7 @@ const SharePreparedMessageModal: FC<OwnProps & StateProps> = ({
     updateSharePreparedMessageModalSendArgs({ args: { peerId: id, threadId } });
   });
 
-  const handleSendWithPaymentConformation = useLastCallback(() => {
+  const handleSendWithPaymentConfirmation = useLastCallback(() => {
     if (pendingSendArgs) {
       handleActionWithPaymentConfirmation(handleSend, pendingSendArgs.peerId, pendingSendArgs.threadId);
     }
@@ -131,7 +133,7 @@ const SharePreparedMessageModal: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (pendingSendArgs) {
-      handleSendWithPaymentConformation();
+      handleSendWithPaymentConfirmation();
     }
   }, [pendingSendArgs]);
 
@@ -172,8 +174,12 @@ export default memo(withGlobal(
   (global): StateProps => {
     const tabState = selectTabState(global);
     const { isPaymentMessageConfirmDialogOpen } = tabState;
+    const starsBalance = global.stars?.balance.amount || 0;
+    const isStarsBalanceModalOpen = Boolean(tabState.starsBalanceModal);
     return {
       isPaymentMessageConfirmDialogOpen,
+      starsBalance,
+      isStarsBalanceModalOpen,
     };
   },
 )(SharePreparedMessageModal));

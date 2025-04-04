@@ -15,10 +15,10 @@ import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
   getMessageRoundVideo,
-  getMessageSenderName,
   getMessageSticker,
   getMessageVideo,
 } from '../../../../global/helpers';
+import { getMessageSenderName } from '../../../../global/helpers/peers';
 import buildClassName from '../../../../util/buildClassName';
 import renderText from '../../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';

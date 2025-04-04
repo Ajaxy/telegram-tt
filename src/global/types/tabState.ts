@@ -638,6 +638,10 @@ export type TabState = {
     forPeerId: string;
     gifts?: ApiPremiumGiftCodeOption[];
   };
+  chatRefundModal?: {
+    userId: string;
+    starsToRefund: number;
+  };
 
   limitReachedModal?: {
     limit: ApiLimitTypeWithModal;

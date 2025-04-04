@@ -32,6 +32,7 @@ import {
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectIsTrustedBot,
+  selectPeerPaidMessagesStars,
   selectSender,
   selectTabState,
   selectTopic,
@@ -325,7 +326,19 @@ addActionHandler('showNotification', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('showAllowedMessageTypesNotification', (global, actions, payload): ActionReturnType => {
-  const { chatId, tabId = getCurrentTabId() } = payload;
+  const { chatId, messageListType, tabId = getCurrentTabId() } = payload;
+
+  const paidMessagesStars = selectPeerPaidMessagesStars(global, chatId);
+
+  if (paidMessagesStars && messageListType === 'scheduled') {
+    actions.showNotification({
+      message: {
+        key: 'DescriptionScheduledPaidMessagesNotAllowed',
+      },
+      tabId,
+    });
+    return;
+  }
 
   const chat = selectChat(global, chatId);
   if (!chat) return;

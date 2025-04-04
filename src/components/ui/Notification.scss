@@ -11,6 +11,8 @@
 }
 
 .Notification {
+  --color-toast-action: var(--color-primary);
+
   background-color: rgba(32, 32, 32, 0.8);
   background-size: 1.5rem;
   border-radius: var(--border-radius-default);

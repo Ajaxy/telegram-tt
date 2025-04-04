@@ -9,7 +9,6 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { addStoriesForPeer } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChat,
   selectCurrentViewedStory,
   selectPeer,
   selectPeerFirstStoryId,
@@ -296,13 +295,11 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
   const { storyId, peerId: storyPeerId } = selectCurrentViewedStory(global, tabId);
   const isStoryReply = Boolean(storyId && storyPeerId);
 
-  const chat = storyPeerId ? selectChat(global, storyPeerId) : undefined;
-  if (!chat) return;
-  const messagePriceInStars = await getPeerStarsForMessage(global, chat);
-
-  if (!isStoryReply || messagePriceInStars) {
+  if (!isStoryReply) {
     return;
   }
+  const messagePriceInStars = await getPeerStarsForMessage(global, storyPeerId!);
+  if (messagePriceInStars === undefined) return;
 
   const { gif, sticker, isReaction } = payload;
 

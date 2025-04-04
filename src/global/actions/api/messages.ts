@@ -8,7 +8,6 @@ import type {
   ApiInputStoryReplyInfo,
   ApiMessage,
   ApiOnProgress,
-  ApiPeer,
   ApiStory,
   ApiUser,
 } from '../../../api/types';
@@ -61,12 +60,11 @@ import {
   isChatSuperGroup,
   isDeletedUser,
   isMessageLocal,
-  isPeerUser,
   isServiceNotificationMessage,
   isUserBot,
   splitMessagesForForwarding,
 } from '../../helpers';
-import { isApiPeerUser } from '../../helpers/peers';
+import { isApiPeerChat, isApiPeerUser } from '../../helpers/peers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
@@ -345,7 +343,7 @@ addActionHandler('sendMessage', async (global, actions, payload): Promise<void> 
 
   const replyInfo = storyReplyInfo || messageReplyInfo;
   const lastMessageId = selectChatLastMessageId(global, chatId!);
-  const messagePriceInStars = await getPeerStarsForMessage(global, chat);
+  const messagePriceInStars = await getPeerStarsForMessage(global, chatId!);
 
   const params : SendMessageParams = {
     ...payload,
@@ -1607,9 +1605,12 @@ function getViewportSlice(
 
 export async function getPeerStarsForMessage<T extends GlobalState>(
   global: T,
-  peer: ApiPeer,
+  peerId: string,
 ): Promise<number | undefined> {
-  if (!isPeerUser(peer)) {
+  const peer = selectPeer(global, peerId);
+  if (!peer) return undefined;
+
+  if (isApiPeerChat(peer)) {
     return peer.paidMessagesStars;
   }
 
@@ -1617,7 +1618,7 @@ export async function getPeerStarsForMessage<T extends GlobalState>(
 
   const fullInfo = selectUserFullInfo(global, peer.id);
   if (fullInfo) {
-    return fullInfo?.paidMessagesStars;
+    return fullInfo.paidMessagesStars;
   }
 
   const result = await callApi('fetchPaidMessagesStarsAmount', peer);
@@ -1675,7 +1676,7 @@ async function sendMessagesWithNotification<T extends GlobalState>(
 ) {
   const chat = sendParams[0]?.chat;
   if (!chat || !sendParams.length) return;
-  const starsForOneMessage = await getPeerStarsForMessage(global, chat);
+  const starsForOneMessage = await getPeerStarsForMessage(global, chat.id);
   if (!starsForOneMessage) {
     // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
     getActions().sendMessages({ sendParams });

@@ -9,9 +9,7 @@ import type {
 import type {
   ApiPoll, MediaContainer, StatefulMediaContent,
 } from '../../api/types/messages';
-import type { OldLangFn } from '../../hooks/useOldLang';
-import type { CustomPeer, ThreadId } from '../../types';
-import type { LangFn } from '../../util/localization';
+import type { ThreadId } from '../../types';
 import type { GlobalState } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
@@ -32,9 +30,9 @@ import { isLocalMessageId } from '../../util/keys/messageKey';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '../index';
 import {
-  getChatTitle, getCleanPeerId, isPeerUser, isUserId,
+  getCleanPeerId, isUserId,
 } from './chats';
-import { getMainUsername, getUserFirstOrLastName, getUserFullName } from './users';
+import { getMainUsername } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
@@ -207,24 +205,6 @@ export function isServiceNotificationMessage(message: ApiMessage) {
 
 export function isAnonymousOwnMessage(message: ApiMessage) {
   return Boolean(message.senderId) && !isUserId(message.senderId) && isOwnMessage(message);
-}
-
-export function getPeerTitle(lang: OldLangFn | LangFn, peer: ApiPeer | CustomPeer) {
-  if (!peer) return undefined;
-  if ('isCustomPeer' in peer) {
-    // TODO: Remove any after full migration to new lang
-    return peer.titleKey ? lang(peer.titleKey as any) : peer.title;
-  }
-  return isPeerUser(peer) ? getUserFirstOrLastName(peer) : getChatTitle(lang, peer);
-}
-
-export function getPeerFullTitle(lang: OldLangFn | LangFn, peer: ApiPeer | CustomPeer) {
-  if (!peer) return undefined;
-  if ('isCustomPeer' in peer) {
-    // TODO: Remove any after full migration to new lang
-    return peer.titleKey ? lang(peer.titleKey as any) : peer.title;
-  }
-  return isPeerUser(peer) ? getUserFullName(peer) : getChatTitle(lang, peer);
 }
 
 export function getSendingState(message: ApiMessage) {

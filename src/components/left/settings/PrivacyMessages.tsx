@@ -72,6 +72,12 @@ function PrivacyMessages({
   const canChangeChargeForMessages = isCurrentUserPremium && canChargeForMessages;
   const [chargeForMessages, setChargeForMessages] = useState<number>(nonContactPeersPaidStars);
 
+  const selectedValue = useMemo(() => {
+    if (shouldChargeForMessages) return 'charge_for_messages';
+    if (shouldNewNonContactPeersRequirePremium) return 'contacts_and_premium';
+    return 'everybody';
+  }, [shouldChargeForMessages, shouldNewNonContactPeersRequirePremium]);
+
   const options = useMemo(() => {
     return [
       { value: 'everybody', label: oldLang('P2PEverybody') },
@@ -80,21 +86,29 @@ function PrivacyMessages({
         label: canChangeForContactsAndPremium ? (
           oldLang('PrivacyMessagesContactsAndPremium')
         ) : (
-          <PrivacyLockedOption label={oldLang('PrivacyMessagesContactsAndPremium')} />
+          <PrivacyLockedOption
+            label={oldLang('PrivacyMessagesContactsAndPremium')}
+            isChecked={selectedValue === 'contacts_and_premium'}
+          />
         ),
         hidden: !canChangeForContactsAndPremium,
+        isCanCheckedInDisabled: true,
       },
       {
         value: 'charge_for_messages',
         label: canChangeChargeForMessages ? (
           lang('PrivacyChargeForMessages')
         ) : (
-          <PrivacyLockedOption label={lang('PrivacyChargeForMessages')} />
+          <PrivacyLockedOption
+            label={lang('PrivacyChargeForMessages')}
+            isChecked={selectedValue === 'charge_for_messages'}
+          />
         ),
         hidden: !canChangeChargeForMessages,
+        isCanCheckedInDisabled: true,
       },
     ];
-  }, [oldLang, lang, canChangeForContactsAndPremium, canChangeChargeForMessages]);
+  }, [oldLang, lang, canChangeForContactsAndPremium, canChangeChargeForMessages, selectedValue]);
 
   const handleChange = useLastCallback((privacy: string) => {
     updateGlobalPrivacySettings({
@@ -183,12 +197,6 @@ function PrivacyMessages({
     isActive,
     onBack: onReset,
   });
-
-  const selectedValue = useMemo(() => {
-    if (shouldChargeForMessages) return 'charge_for_messages';
-    if (shouldNewNonContactPeersRequirePremium) return 'contacts_and_premium';
-    return 'everybody';
-  }, [shouldChargeForMessages, shouldNewNonContactPeersRequirePremium]);
 
   const privacyDescription = useMemo(() => {
     if (shouldChargeForMessages) return lang('PrivacyDescriptionChargeForMessages');

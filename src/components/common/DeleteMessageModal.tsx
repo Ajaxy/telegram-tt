@@ -12,7 +12,6 @@ import type { IRadioOption } from '../ui/CheckboxGroup';
 
 import {
   getHasAdminRight,
-  getPeerTitle,
   getPrivateChatUserId,
   getUserFirstOrLastName, isChatBasicGroup,
   isChatChannel,
@@ -20,6 +19,7 @@ import {
   isSystemBot,
   isUserId,
 } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import {
   getSendersFromSelectedMessages,
   selectBot,

@@ -9,7 +9,6 @@ import type {
   ApiPeer,
   ApiPreparedInlineMessage,
   ApiTopic,
-  ApiUser,
 } from '../../api/types';
 import type { OldLangFn } from '../../hooks/useOldLang';
 import type {
@@ -27,20 +26,12 @@ import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
 import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '..';
 import { isSystemBot } from './bots';
-import { getMainUsername, getUserFirstOrLastName } from './users';
+import { getMainUsername } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
 export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
-}
-
-export function isPeerChat(entity: ApiPeer): entity is ApiChat {
-  return 'title' in entity;
-}
-
-export function isPeerUser(entity: ApiPeer): entity is ApiUser {
-  return !isPeerChat(entity);
 }
 
 export function isChannelId(entityId: string) {
@@ -211,8 +202,10 @@ export function getAllowedAttachmentOptions(
   chatFullInfo?: ApiChatFullInfo,
   isChatWithBot = false,
   isStoryReply = false,
+  paidMessagesStars?: number,
+  isInScheduledList = false,
 ): IAllowedAttachmentOptions {
-  if (!chat) {
+  if (!chat || (paidMessagesStars && isInScheduledList)) {
     return {
       canAttachMedia: false,
       canAttachPolls: false,
@@ -343,24 +336,6 @@ export function getFolderDescriptionText(lang: OldLangFn, folder: ApiChatFolder,
   } else {
     return undefined;
   }
-}
-
-export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: ApiPeer) {
-  if (!sender || isUserId(chatId)) {
-    return undefined;
-  }
-
-  if (isPeerChat(sender)) {
-    if (chatId === sender.id) return undefined;
-
-    return sender.title;
-  }
-
-  if (sender.isSelf) {
-    return lang('FromYou');
-  }
-
-  return getUserFirstOrLastName(sender);
 }
 
 export function isChatPublic(chat: ApiChat) {

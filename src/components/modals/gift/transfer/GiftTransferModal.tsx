@@ -8,7 +8,7 @@ import type { TabState } from '../../../../global/types';
 import type { UniqueCustomPeer } from '../../../../types';
 
 import { ALL_FOLDER_ID } from '../../../../config';
-import { getPeerTitle } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectCanGift, selectPeer } from '../../../../global/selectors';
 import { unique } from '../../../../util/iteratees';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';

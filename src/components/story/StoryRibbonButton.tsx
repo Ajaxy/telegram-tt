@@ -4,7 +4,8 @@ import { getActions } from '../../global';
 import type { ApiPeer } from '../../api/types';
 import { StoryViewerOrigin } from '../../types';
 
-import { getPeerTitle, isUserId } from '../../global/helpers';
+import { isUserId } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 

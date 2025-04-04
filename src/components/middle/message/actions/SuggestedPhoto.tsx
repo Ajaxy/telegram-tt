@@ -5,7 +5,8 @@ import type { ApiMessageActionSuggestProfilePhoto } from '../../../../api/types/
 import { type ApiMessage, type ApiPeer, MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin, SettingsScreens } from '../../../../types';
 
-import { getPeerTitle, getPhotoMediaHash, getVideoProfilePhotoMediaHash } from '../../../../global/helpers';
+import { getPhotoMediaHash, getVideoProfilePhotoMediaHash } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { fetchBlob } from '../../../../util/files';
 import { renderPeerLink } from '../helpers/messageActions';

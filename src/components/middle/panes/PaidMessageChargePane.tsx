@@ -7,23 +7,20 @@ import type {
 } from '../../../api/types';
 
 import {
-  getPeerTitle,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectChat,
   selectUserFullInfo,
 } from '../../../global/selectors';
 import { formatStarsAsIcon } from '../../../util/localization/format';
 
-import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 // import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
 import Button from '../../ui/Button';
-import Checkbox from '../../ui/Checkbox';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 
 // import CustomEmoji from '../../common/CustomEmoji';
 import styles from './PaidMessageChargePane.module.scss';
@@ -41,16 +38,14 @@ type StateProps = {
 const PaidMessageChargePane: FC<OwnProps & StateProps> = ({
   chargedPaidMessageStars,
   chat,
-  onPaneStateChange,
   peerId,
+  onPaneStateChange,
 }) => {
   const isOpen = Boolean(chargedPaidMessageStars);
   const lang = useLang();
-  const [isRemoveFeeDialogOpen, openRemoveFeeDialog, closeRemoveFeeDialog] = useFlag();
-  const [shouldRefoundStars, setShouldRefoundStars] = useFlag(false);
 
   const {
-    addNoPaidMessagesException,
+    openChatRefundModal,
   } = getActions();
 
   const { ref, shouldRender } = useHeaderPane({
@@ -58,12 +53,8 @@ const PaidMessageChargePane: FC<OwnProps & StateProps> = ({
     onStateChange: onPaneStateChange,
   });
 
-  const handleRemoveFee = useLastCallback(() => {
-    openRemoveFeeDialog();
-  });
-
-  const handleConfirmRemoveFee = useLastCallback(() => {
-    addNoPaidMessagesException({ userId: peerId, shouldRefundCharged: shouldRefoundStars });
+  const handleRefund = useLastCallback(() => {
+    openChatRefundModal({ userId: peerId });
   });
 
   if (!shouldRender || !chargedPaidMessageStars) return undefined;
@@ -75,20 +66,6 @@ const PaidMessageChargePane: FC<OwnProps & StateProps> = ({
     amount: formatStarsAsIcon(lang,
       chargedPaidMessageStars,
       { asFont: true, className: styles.messageStarIcon, containerClassName: styles.messageStars }),
-  }, {
-    withMarkdown: true,
-    withNodes: true,
-  });
-
-  const dialogMessage = lang('ConfirmDialogMessageRemoveFee', {
-    peer: peerName,
-  }, {
-    withMarkdown: true,
-    withNodes: true,
-  });
-
-  const checkBoxTitle = lang('ConfirmDialogRemoveFeeRefundStars', {
-    amount: chargedPaidMessageStars,
   }, {
     withMarkdown: true,
     withNodes: true,
@@ -106,26 +83,10 @@ const PaidMessageChargePane: FC<OwnProps & StateProps> = ({
         fluid
         size="tiny"
         className={styles.button}
-        onClick={handleRemoveFee}
+        onClick={handleRefund}
       >
         {lang('RemoveFeeTitle')}
       </Button>
-
-      <ConfirmDialog
-        isOpen={isRemoveFeeDialogOpen}
-        onClose={closeRemoveFeeDialog}
-        title={lang('RemoveFeeTitle')}
-        confirmLabel={lang('ConfirmRemoveMessageFee')}
-        confirmHandler={handleConfirmRemoveFee}
-      >
-        {dialogMessage}
-        <Checkbox
-          className={styles.checkBox}
-          label={checkBoxTitle}
-          checked={shouldRefoundStars}
-          onCheck={setShouldRefoundStars}
-        />
-      </ConfirmDialog>
     </div>
   );
 };

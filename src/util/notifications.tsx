@@ -12,12 +12,12 @@ import {
   getChatAvatarHash,
   getChatTitle,
   getMessageRecentReaction,
-  getMessageSenderName,
   getPrivateChatUserId,
   getUserFullName,
   isChatChannel,
 } from '../global/helpers';
 import { getIsChatMuted, getIsChatSilent, getShouldShowMessagePreview } from '../global/helpers/notifications';
+import { getMessageSenderName } from '../global/helpers/peers';
 import {
   selectChat,
   selectCurrentMessageList,

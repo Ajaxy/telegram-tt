@@ -8,7 +8,8 @@ import type {
 } from '../../api/types';
 import type { IconName } from '../../types/icons';
 
-import { getPeerTitle, getUserFullName } from '../../global/helpers';
+import { getUserFullName } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import { selectPeerStory, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { getHours } from '../../util/dates/units';

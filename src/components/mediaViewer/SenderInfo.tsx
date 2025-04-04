@@ -6,8 +6,9 @@ import type { ApiChat, ApiPeer } from '../../api/types';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
 import {
-  getPeerTitle, isChatChannel, isChatGroup, isUserId,
+  isChatChannel, isChatGroup, isUserId,
 } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectSender,
 } from '../../global/selectors';

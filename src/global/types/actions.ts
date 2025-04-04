@@ -1741,6 +1741,10 @@ export interface ActionPayloads {
     userId: string;
     shouldRefundCharged: boolean;
   };
+  openChatRefundModal: {
+    userId: string;
+  } & WithTabId;
+  closeChatRefundModal: WithTabId | undefined;
   loadMoreProfilePhotos: {
     peerId: string;
     isPreload?: boolean;
@@ -2186,6 +2190,7 @@ export interface ActionPayloads {
   showNotification: Omit<ApiNotification, 'localId'> & { localId?: string } & WithTabId;
   showAllowedMessageTypesNotification: {
     chatId: string;
+    messageListType?: MessageListType;
   } & WithTabId;
   dismissNotification: { localId: string } & WithTabId;
 

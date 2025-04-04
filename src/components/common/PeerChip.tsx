@@ -6,8 +6,7 @@ import type { ApiPeer } from '../../api/types';
 import type { CustomPeer } from '../../types';
 import type { IconName } from '../../types/icons';
 
-import { getPeerTitle } from '../../global/helpers';
-import { isApiPeerChat } from '../../global/helpers/peers';
+import { getPeerTitle, isApiPeerChat } from '../../global/helpers/peers';
 import { selectPeer, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { getPeerColorClass } from './helpers/peerColor';

@@ -11,9 +11,8 @@ import {
 } from '../../../api/types';
 
 import {
-  getPeerTitle,
 } from '../../../global/helpers';
-import { isApiPeerUser } from '../../../global/helpers/peers';
+import { getPeerTitle, isApiPeerUser } from '../../../global/helpers/peers';
 import {
   selectPeer, selectPeerPaidMessagesStars,
   selectTabState, selectTheme,

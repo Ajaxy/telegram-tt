@@ -1,6 +1,7 @@
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { addTabStateResetterAction } from '../../helpers/meta';
 import { addActionHandler } from '../../index';
 import { closeNewContactDialog, updateUserSearch } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
@@ -50,3 +51,5 @@ addActionHandler('closeSuggestedStatusModal', (global, actions, payload): Action
     suggestedStatusModal: undefined,
   }, tabId);
 });
+
+addTabStateResetterAction('closeChatRefundModal', 'chatRefundModal');

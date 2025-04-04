@@ -14,6 +14,7 @@ export type IRadioOption<T = string> = {
   value: T;
   hidden?: boolean;
   className?: string;
+  isCanCheckedInDisabled?: boolean;
 };
 
 type OwnProps = {
@@ -67,6 +68,7 @@ const RadioGroup: FC<OwnProps> = ({
           value={option.value}
           checked={option.value === selected}
           hidden={option.hidden}
+          isCanCheckedInDisabled={option.isCanCheckedInDisabled}
           disabled={disabled}
           withIcon={withIcon}
           isLoading={loadingOption ? loadingOption === option.value : undefined}

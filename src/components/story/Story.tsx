@@ -15,7 +15,8 @@ import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
-import { getPeerTitle, isChatChannel, isUserId } from '../../global/helpers';
+import { isChatChannel, isUserId } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectChat,
   selectIsCurrentUserPremium,

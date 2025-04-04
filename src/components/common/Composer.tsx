@@ -57,7 +57,6 @@ import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterd
 import {
   canEditMedia,
   getAllowedAttachmentOptions,
-  getPeerTitle,
   getReactionKey,
   getStoryKey,
   isChatAdmin,
@@ -68,6 +67,7 @@ import {
   isUserId,
 } from '../../global/helpers';
 import { getChatNotifySettings } from '../../global/helpers/notifications';
+import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectBot,
   selectCanPlayAnimatedEmojis,
@@ -288,6 +288,8 @@ type StateProps =
     shouldPaidMessageAutoApprove?: boolean;
     isSilentPosting?: boolean;
     isPaymentMessageConfirmDialogOpen: boolean;
+    starsBalance: number;
+    isStarsBalanceModalOpen: boolean;
   };
 
 enum MainButtonState {
@@ -406,6 +408,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   onBlur,
   onForward,
   isPaymentMessageConfirmDialogOpen,
+  starsBalance,
+  isStarsBalanceModalOpen,
 }) => {
   const {
     sendMessage,
@@ -520,8 +524,13 @@ const Composer: FC<OwnProps & StateProps> = ({
     canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
     canSendVoices, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
   } = useMemo(
-    () => getAllowedAttachmentOptions(chat, chatFullInfo, isChatWithBot, isInStoryViewer),
-    [chat, chatFullInfo, isChatWithBot, isInStoryViewer],
+    () => getAllowedAttachmentOptions(chat,
+      chatFullInfo,
+      isChatWithBot,
+      isInStoryViewer,
+      paidMessagesStars,
+      isInScheduledList),
+    [chat, chatFullInfo, isChatWithBot, isInStoryViewer, paidMessagesStars, isInScheduledList],
   );
 
   const isNeedPremium = isContactRequirePremium && isInStoryViewer;
@@ -541,7 +550,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     shouldAutoApprove: shouldPaidMessageAutoApprove,
     setAutoApprove: setShouldPaidMessageAutoApprove,
     handleWithConfirmation: handleActionWithPaymentConfirmation,
-  } = usePaidMessageConfirmation(starsForAllMessages);
+  } = usePaidMessageConfirmation(starsForAllMessages, isStarsBalanceModalOpen, starsBalance);
 
   const hasWebPagePreview = !hasAttachments && canAttachEmbedLinks && !noWebPage && Boolean(webPagePreview);
   const isComposerBlocked = isSendTextBlocked && !editingMessage;
@@ -1391,17 +1400,21 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     if (isInScheduledList) {
       requestCalendar((scheduledAt) => {
-        handleMessageSchedule({ poll }, scheduledAt, currentMessageList);
+        handleActionWithPaymentConfirmation(
+          handleMessageSchedule,
+          { poll },
+          scheduledAt,
+          currentMessageList,
+        );
       });
       closePollModal();
     } else {
-      sendMessage({ messageList: currentMessageList, poll, isSilent: isSilentPosting });
+      handleActionWithPaymentConfirmation(
+        sendMessage,
+        { messageList: currentMessageList, poll, isSilent: isSilentPosting },
+      );
       closePollModal();
     }
-  });
-
-  const handlePollSendWithPaymentConfirmation = useLastCallback((poll: ApiNewPoll) => {
-    handleActionWithPaymentConfirmation(handlePollSend, poll);
   });
 
   const sendSilent = useLastCallback((additionalArgs?: ScheduledMessageArgs) => {
@@ -1587,7 +1600,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               message: oldLang('VoiceMessagesRestrictedByPrivacy', chat?.title),
             });
           } else if (!canSendVoices) {
-            showAllowedMessageTypesNotification({ chatId });
+            showAllowedMessageTypesNotification({ chatId, messageListType });
           }
         } else {
           setIsViewOnceEnabled(false);
@@ -1812,7 +1825,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         isQuiz={pollModal.isQuiz}
         shouldBeAnonymous={isChannel}
         onClear={closePollModal}
-        onSend={handlePollSendWithPaymentConfirmation}
+        onSend={handlePollSend}
       />
       <SendAsMenu
         isOpen={isSendAsMenuOpen}
@@ -1998,6 +2011,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             onFocus={markInputHasFocus}
             onBlur={unmarkInputHasFocus}
             isNeedPremium={isNeedPremium}
+            messageListType={messageListType}
           />
           {isInMessageList && (
             <>
@@ -2084,6 +2098,8 @@ const Composer: FC<OwnProps & StateProps> = ({
               theme={theme}
               onMenuOpen={onAttachMenuOpen}
               onMenuClose={onAttachMenuClose}
+              messageListType={messageListType}
+              paidMessagesStars={paidMessagesStars}
             />
           )}
           {isInMessageList && Boolean(botKeyboardMessageId) && (
@@ -2354,6 +2370,8 @@ export default memo(withGlobal<OwnProps>(
 
     const maxMessageLength = global.config?.maxMessageLength || DEFAULT_MAX_MESSAGE_LENGTH;
     const isForwarding = chatId === tabState.forwardMessages.toChatId;
+    const starsBalance = global.stars?.balance.amount || 0;
+    const isStarsBalanceModalOpen = Boolean(tabState.starsBalanceModal);
 
     return {
       availableReactions: global.reactions.availableReactions,
@@ -2436,6 +2454,8 @@ export default memo(withGlobal<OwnProps>(
       shouldPaidMessageAutoApprove,
       isSilentPosting,
       isPaymentMessageConfirmDialogOpen: tabState.isPaymentMessageConfirmDialogOpen,
+      starsBalance,
+      isStarsBalanceModalOpen,
     };
   },
 )(Composer));

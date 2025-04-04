@@ -1891,3 +1891,6 @@
 "PaidMessageTransaction_other" = "Fee for {count} Messages";
 "PaidMessageTransactionDescription" = "You receive **{percent}** of the price that you charge for each incoming message.";
 "PaidMessageTransactionTotal" = "Total";
+"DescriptionRestrictedMedia" = "Posting media content is not allowed in this group.";
+"DescriptionScheduledPaidMediaNotAllowed" = "Posting scheduled paid media content is not allowed";
+"DescriptionScheduledPaidMessagesNotAllowed" = "Scheduled paid messages is not allowed";

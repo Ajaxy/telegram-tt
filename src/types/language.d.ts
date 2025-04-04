@@ -1447,6 +1447,9 @@ export interface LangPair {
   'StoryTooltipReactionSent': undefined;
   'StarsNeededTextSendPaidMessages': undefined;
   'PaidMessageTransactionTotal': undefined;
+  'DescriptionRestrictedMedia': undefined;
+  'DescriptionScheduledPaidMediaNotAllowed': undefined;
+  'DescriptionScheduledPaidMessagesNotAllowed': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

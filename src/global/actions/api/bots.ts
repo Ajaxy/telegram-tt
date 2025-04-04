@@ -416,7 +416,7 @@ addActionHandler('sendInlineBotResult', async (global, actions, payload): Promis
   actions.resetDraftReplyInfo({ tabId });
   actions.clearWebPagePreview({ tabId });
 
-  const starsForOneMessage = await getPeerStarsForMessage(global, chat);
+  const starsForOneMessage = await getPeerStarsForMessage(global, chatId);
   const params = {
     chat,
     id,

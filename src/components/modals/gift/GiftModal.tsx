@@ -14,8 +14,8 @@ import type { TabState } from '../../../global/types';
 import type { StarGiftCategory } from '../../../types';
 
 import { STARS_CURRENCY_CODE } from '../../../config';
-import { getPeerTitle, getUserFullName } from '../../../global/helpers';
-import { isApiPeerChat, isApiPeerUser } from '../../../global/helpers/peers';
+import { getUserFullName } from '../../../global/helpers';
+import { getPeerTitle, isApiPeerChat, isApiPeerUser } from '../../../global/helpers/peers';
 import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';

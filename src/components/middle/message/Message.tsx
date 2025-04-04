@@ -53,7 +53,6 @@ import {
   getMessageHtmlId,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
-  getPeerFullTitle,
   hasMessageText,
   hasMessageTtl,
   isAnonymousForwardsChat,
@@ -69,6 +68,7 @@ import {
   isSystemBot,
   isUserId,
 } from '../../../global/helpers';
+import { getPeerFullTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo, getStoryReplyInfo } from '../../../global/helpers/replies';
 import {
   selectActiveDownloads,

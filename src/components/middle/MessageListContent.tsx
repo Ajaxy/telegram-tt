@@ -14,11 +14,11 @@ import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import {
   getMessageHtmlId,
   getMessageOriginalId,
-  getPeerTitle,
   isActionMessage,
   isOwnMessage,
   isServiceNotificationMessage,
 } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import { selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate } from '../../util/dates/dateFormat';

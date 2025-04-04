@@ -10,9 +10,9 @@ import type {
 import type { IconName } from '../../../types/icons';
 
 import {
-  getPeerTitle,
   isUserId,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectPeer, selectPeerStory } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getPeerColorClass } from '../helpers/peerColor';

@@ -40,7 +40,6 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
 
   actions.closeStoryViewer({ tabId });
   actions.closeStarsBalanceModal({ tabId });
-  actions.closeStarsBalanceModal({ tabId });
   actions.closeStarsTransactionModal({ tabId });
 
   if (!currentMessageList || (

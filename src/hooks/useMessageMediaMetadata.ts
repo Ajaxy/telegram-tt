@@ -6,8 +6,9 @@ import type {
 } from '../api/types';
 
 import {
-  getAudioHasCover, getChatAvatarHash, getChatTitle, getMediaHash, getMessageContent, getPeerTitle,
+  getAudioHasCover, getChatAvatarHash, getChatTitle, getMediaHash, getMessageContent,
 } from '../global/helpers';
+import { getPeerTitle } from '../global/helpers/peers';
 import { resizeImage, scaleImage } from '../util/imageResize';
 import { buildMediaMetadata } from '../util/mediaSession';
 import { AVATAR_FULL_DIMENSIONS } from '../components/common/helpers/mediaDimensions';

@@ -8,7 +8,9 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiInputMessageReplyInfo } from '../../../api/types';
-import type { IAnchorPosition, ISettings, ThreadId } from '../../../types';
+import type {
+  IAnchorPosition, ISettings, MessageListType, ThreadId,
+} from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
@@ -75,6 +77,7 @@ type OwnProps = {
   onFocus?: NoneToVoidFunction;
   onBlur?: NoneToVoidFunction;
   isNeedPremium?: boolean;
+  messageListType?: MessageListType;
 };
 
 type StateProps = {
@@ -141,6 +144,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   onFocus,
   onBlur,
   isNeedPremium,
+  messageListType,
 }) => {
   const {
     editLastMessage,
@@ -456,7 +460,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
   function handleClick() {
     if (isAttachmentModalInput || canSendPlainText || (isStoryInput && isNeedPremium)) return;
-    showAllowedMessageTypesNotification({ chatId });
+    showAllowedMessageTypesNotification({ chatId, messageListType });
   }
 
   const handleOpenPremiumModal = useLastCallback(() => openPremiumModal());

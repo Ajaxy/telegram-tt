@@ -258,6 +258,17 @@ export async function addNoPaidMessagesException({ user, shouldRefundCharged }: 
   return result;
 }
 
+export async function fetchPaidMessagesRevenue({ user }: {
+  user: ApiUser;
+  shouldRefundCharged?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.account.GetPaidMessagesRevenue({
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+  }));
+  if (!result) return undefined;
+  return result.starsAmount.toJSNumber();
+}
+
 export async function fetchProfilePhotos({
   peer,
   offset = 0,

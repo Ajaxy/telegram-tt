@@ -21,10 +21,9 @@ import {
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
-  isPeerChat,
-  isPeerUser,
   isUserId,
 } from '../../global/helpers';
+import { isApiPeerChat, isApiPeerUser } from '../../global/helpers/peers';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { getFirstLetters } from '../../util/textFormat';
@@ -117,8 +116,8 @@ const Avatar: FC<OwnProps> = ({
   const videoLoopCountRef = useRef(0);
   const isCustomPeer = peer && 'isCustomPeer' in peer;
   const realPeer = peer && !isCustomPeer ? peer : undefined;
-  const user = realPeer && isPeerUser(realPeer) ? realPeer : undefined;
-  const chat = realPeer && isPeerChat(realPeer) ? realPeer : undefined;
+  const user = realPeer && isApiPeerUser(realPeer) ? realPeer : undefined;
+  const chat = realPeer && isApiPeerChat(realPeer) ? realPeer : undefined;
   const isDeleted = user && isDeletedUser(user);
   const isReplies = realPeer && isChatWithRepliesBot(realPeer.id);
   const isAnonymousForwards = realPeer && isAnonymousForwardsChat(realPeer.id);

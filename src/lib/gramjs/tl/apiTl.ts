@@ -1473,6 +1473,7 @@ account.resolveBusinessChatLink#5492e5ee slug:string = account.ResolvedBusinessC
 account.toggleSponsoredMessages#b9d9a38d enabled:Bool = Bool;
 account.getCollectibleEmojiStatuses#2e7b4543 hash:long = account.EmojiStatuses;
 account.addNoPaidMessagesException#6f688aa7 flags:# refund_charged:flags.0?true user_id:InputUser = Bool;
+account.getPaidMessagesRevenue#f1266f38 user_id:InputUser = account.PaidMessagesRevenue;
 users.getUsers#d91a548 id:Vector<InputUser> = Vector<User>;
 users.getFullUser#b60f5918 id:InputUser = users.UserFull;
 users.getRequirementsToContact#d89a83a3 id:Vector<InputUser> = Vector<RequirementToContact>;

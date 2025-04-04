@@ -3,14 +3,14 @@ import React, {
   memo, useEffect, useMemo, useRef,
   useState,
 } from '../../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../../global';
+import { getActions, withGlobal } from '../../../../global';
 
 import type {
   ApiStarTopupOption, ApiUser,
 } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
 
-import { getPeerTitle } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers/peers';
 import {
   selectUser,
 } from '../../../../global/selectors';
@@ -213,7 +213,7 @@ const StarsGiftModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
-  const user = modal?.forUserId ? selectUser(getGlobal(), modal.forUserId) : undefined;
+  const user = modal?.forUserId ? selectUser(global, modal.forUserId) : undefined;
 
   return {
     user,

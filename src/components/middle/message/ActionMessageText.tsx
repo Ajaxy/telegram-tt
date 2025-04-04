@@ -5,8 +5,9 @@ import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';
 
 import { GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID, TME_LINK_PREFIX } from '../../../config';
 import {
-  getMessageInvoice, getMessageText, getPeerTitle, isChatChannel,
+  getMessageInvoice, getMessageText, isChatChannel,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectChat,

@@ -15,8 +15,8 @@ import {
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isChatWithVerificationCodesBot,
-  isPeerUser,
 } from '../../global/helpers';
+import { isApiPeerUser } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { copyTextToClipboard } from '../../util/clipboard';
@@ -71,7 +71,7 @@ const FullNameTitle: FC<OwnProps> = ({
   const { showNotification } = getActions();
   const realPeer = 'id' in peer ? peer : undefined;
   const customPeer = 'isCustomPeer' in peer ? peer : undefined;
-  const isUser = realPeer && isPeerUser(realPeer);
+  const isUser = realPeer && isApiPeerUser(realPeer);
   const title = realPeer && (isUser ? getUserFullName(realPeer) : getChatTitle(lang, realPeer));
   const isPremium = isUser && realPeer.isPremium;
   const canShowEmojiStatus = withEmojiStatus && !isSavedMessages && realPeer;

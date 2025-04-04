@@ -36,8 +36,8 @@ import {
   buildApiPeerColor,
   buildApiPeerId,
   getApiChatIdFromMtpPeer,
-  isPeerChat,
-  isPeerUser,
+  isMtpPeerChat,
+  isMtpPeerUser,
 } from './peers';
 import { buildApiReaction } from './reactions';
 
@@ -295,9 +295,9 @@ export function getApiChatTypeFromPeerEntity(peerEntity: GramJs.TypeChat | GramJ
 }
 
 export function getPeerKey(peer: GramJs.TypePeer) {
-  if (isPeerUser(peer)) {
+  if (isMtpPeerUser(peer)) {
     return `user${peer.userId}`;
-  } else if (isPeerChat(peer)) {
+  } else if (isMtpPeerChat(peer)) {
     return `chat${peer.chatId}`;
   } else {
     return `chat${peer.channelId}`;
@@ -305,7 +305,7 @@ export function getPeerKey(peer: GramJs.TypePeer) {
 }
 
 export function getApiChatTitleFromMtpPeer(peer: GramJs.TypePeer, peerEntity: GramJs.User | GramJs.Chat) {
-  if (isPeerUser(peer)) {
+  if (isMtpPeerUser(peer)) {
     return getUserName(peerEntity as GramJs.User);
   } else {
     return (peerEntity as GramJs.Chat).title;

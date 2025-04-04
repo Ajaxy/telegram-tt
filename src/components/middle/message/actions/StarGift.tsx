@@ -4,8 +4,8 @@ import { withGlobal } from '../../../../global';
 import type { ApiMessage, ApiPeer } from '../../../../api/types';
 import type { ApiMessageActionStarGift } from '../../../../api/types/messageActions';
 
-import { getPeerTitle, isChatChannel } from '../../../../global/helpers';
-import { isApiPeerChat } from '../../../../global/helpers/peers';
+import { isChatChannel } from '../../../../global/helpers';
+import { getPeerTitle, isApiPeerChat } from '../../../../global/helpers/peers';
 import {
   selectCanPlayAnimatedEmojis,
   selectPeer,

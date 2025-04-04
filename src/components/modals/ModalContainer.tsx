@@ -32,6 +32,7 @@ import PreparedMessageModal from './preparedMessage/PreparedMessageModal.async';
 import ReportAdModal from './reportAd/ReportAdModal.async';
 import ReportModal from './reportModal/ReportModal.async';
 import SharePreparedMessageModal from './sharePreparedMessage/SharePreparedMessageModal.async';
+import ChatRefundModal from './stars/chatRefund/ChatRefundModal.async';
 import StarsGiftModal from './stars/gift/StarsGiftModal.async';
 import StarsBalanceModal from './stars/StarsBalanceModal.async';
 import StarsPaymentModal from './stars/StarsPaymentModal.async';
@@ -77,7 +78,8 @@ type ModalKey = keyof Pick<TabState,
 'preparedMessageModal' |
 'sharePreparedMessageModal' |
 'giftStatusInfoModal' |
-'giftTransferModal'
+'giftTransferModal' |
+'chatRefundModal'
 >;
 
 type StateProps = {
@@ -127,6 +129,7 @@ const MODALS: ModalRegistry = {
   preparedMessageModal: PreparedMessageModal,
   sharePreparedMessageModal: SharePreparedMessageModal,
   giftTransferModal: GiftTransferModal,
+  chatRefundModal: ChatRefundModal,
 };
 const MODAL_KEYS = Object.keys(MODALS) as ModalKey[];
 const MODAL_ENTRIES = Object.entries(MODALS) as Entries<ModalRegistry>;

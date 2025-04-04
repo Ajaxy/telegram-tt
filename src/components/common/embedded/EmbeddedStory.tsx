@@ -6,9 +6,9 @@ import type { ApiPeer, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import {
-  getPeerTitle,
   getStoryMediaHash,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';
 import renderText from '../helpers/renderText';

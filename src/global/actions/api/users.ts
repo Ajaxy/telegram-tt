@@ -204,6 +204,27 @@ addActionHandler('addNoPaidMessagesException', async (global, actions, payload):
   setGlobal(global);
 });
 
+addActionHandler('openChatRefundModal', async (global, actions, payload): Promise<void> => {
+  const { userId, tabId = getCurrentTabId() } = payload;
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  const starsAmount = await callApi('fetchPaidMessagesRevenue', { user });
+  if (starsAmount === undefined) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    chatRefundModal: {
+      userId,
+      starsToRefund: starsAmount,
+    },
+  }, tabId);
+
+  setGlobal(global);
+});
+
 addActionHandler('updateContact', async (global, actions, payload): Promise<void> => {
   const {
     userId, isMuted = false, firstName, lastName, shouldSharePhoneNumber,

@@ -8,7 +8,8 @@ import type { GlobalState, TabState } from '../../../global/types';
 import type { RegularLangKey } from '../../../types/language';
 
 import { PAID_MESSAGES_PURPOSE } from '../../../config';
-import { getChatTitle, getPeerTitle, getUserFullName } from '../../../global/helpers';
+import { getChatTitle, getUserFullName } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import { selectChat, selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';

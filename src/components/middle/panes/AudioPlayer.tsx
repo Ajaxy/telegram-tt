@@ -10,8 +10,9 @@ import type { IconName } from '../../../types/icons';
 
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../../config';
 import {
-  getMediaDuration, getMessageContent, getMessageMediaHash, getPeerTitle, isMessageLocal,
+  getMediaDuration, getMessageContent, getMessageMediaHash, isMessageLocal,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectChat, selectChatMessage, selectSender, selectTabState,
 } from '../../../global/selectors';

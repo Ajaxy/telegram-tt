@@ -4,7 +4,7 @@ import { withGlobal } from '../../../../global';
 import type { ApiMessage, ApiPeer } from '../../../../api/types';
 import type { ApiMessageActionStarGiftUnique } from '../../../../api/types/messageActions';
 
-import { getPeerTitle } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers/peers';
 import {
   selectCanPlayAnimatedEmojis,
   selectPeer,

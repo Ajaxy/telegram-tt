@@ -18,6 +18,7 @@ type OwnProps = {
   value?: string;
   checked?: boolean;
   disabled?: boolean;
+  isCanCheckedInDisabled?: boolean;
   isLink?: boolean;
   hidden?: boolean;
   isLoading?: boolean;
@@ -46,6 +47,7 @@ const Radio: FC<OwnProps> = ({
   isLink,
   onChange,
   onSubLabelClick,
+  isCanCheckedInDisabled,
 }) => {
   const lang = useOldLang();
 
@@ -58,6 +60,7 @@ const Radio: FC<OwnProps> = ({
     isLoading && 'loading',
     onlyInput && 'onlyInput',
     Boolean(subLabel) && 'withSubLabel',
+    isCanCheckedInDisabled && 'canCheckedInDisabled',
   );
 
   return (
