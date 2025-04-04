@@ -157,8 +157,8 @@ export type LangFn = {
   number: (value: number) => string;
   internalFormatters: LangFormatters;
   isRtl?: boolean;
+  rawCode: string;
   code: string;
-  pluralCode: string;
   languageInfo: ApiLanguage;
 };
 

@@ -312,9 +312,9 @@ function createTranslationFn(): LangFn {
     }
     return processTranslation(key, variables as Record<string, string | number>, options);
   }) as LangFn;
-  fn.code = language?.langCode || FORMATTERS_FALLBACK_LANG;
+  fn.rawCode = language?.langCode || FORMATTERS_FALLBACK_LANG;
   fn.isRtl = language?.isRtl;
-  fn.pluralCode = language?.pluralCode || FORMATTERS_FALLBACK_LANG;
+  fn.code = language?.pluralCode || FORMATTERS_FALLBACK_LANG;
   fn.with = (({ key, variables, options }: LangFnParameters) => {
     if (options && areAdvancedLangFnOptions(options)) {
       return processTranslationAdvanced(key, variables as Record<string, TeactNode | undefined>, options);
