@@ -140,8 +140,8 @@ const FullNameTitle: FC<OwnProps> = ({
           {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
           {canShowEmojiStatus && emojiStatus && (
             <Transition
-              className={styles.transition}
-              slideClassName={styles.transitionSlide}
+              className={styles.statusTransition}
+              slideClassName={styles.statusTransitionSlide}
               activeKey={Number(emojiStatus.documentId)}
               name="slideFade"
               direction={-1}

@@ -14,9 +14,9 @@
     }
   }
 
-  .transition {
-    height: 1.5em;
-    width: 1.5em;
+  .statusTransition {
+    height: 1.5em !important;
+    width: 1.5em !important;
   }
 }
 
@@ -33,7 +33,7 @@
   }
 }
 
-.transitionSlide {
+.statusTransitionSlide {
   display: flex;
   align-items: center;
 }

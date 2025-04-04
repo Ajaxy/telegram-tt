@@ -112,6 +112,8 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
   const { id: userId } = user || {};
 
+  const hasAvatarMediaViewer = withMediaViewer && !isSavedMessages;
+
   useEffect(() => {
     if (userId) {
       if (withFullInfo && isSynced) loadFullUser({ userId });
@@ -246,7 +248,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         withStory={withStory}
         storyViewerOrigin={storyViewerOrigin}
         storyViewerMode="single-peer"
-        onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
+        onClick={hasAvatarMediaViewer ? handleAvatarViewerOpen : undefined}
       />
       <div className="info">
         {renderNameTitle()}
