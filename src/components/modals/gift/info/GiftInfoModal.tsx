@@ -185,6 +185,22 @@ const GiftInfoModal = ({
     );
   });
 
+  const saleDateInfo = useMemo(() => {
+    if (!gift) return undefined;
+    let text = '';
+    if (gift.type === 'starGift') {
+      if (gift.firstSaleDate) {
+        text += `${lang('GiftInfoFirstSale')} ${formatDateTimeToString(gift.firstSaleDate * 1000, lang.code, true)}`;
+      }
+      if (gift.lastSaleDate) {
+        text += '\n';
+        text += `${lang('GiftInfoLastSale')} ${formatDateTimeToString(gift.lastSaleDate * 1000, lang.code, true)}`;
+      }
+    }
+
+    return text;
+  }, [gift, lang]);
+
   const modalData = useMemo(() => {
     if (!typeGift || !gift) {
       return undefined;
@@ -359,18 +375,18 @@ const GiftInfoModal = ({
       if (savedGift?.date) {
         tableData.push([
           lang('GiftInfoDate'),
-          formatDateTimeToString(savedGift.date * 1000, lang.code, true),
+          <span title={saleDateInfo}>{formatDateTimeToString(savedGift.date * 1000, lang.code, true)}</span>,
         ]);
       }
 
-      if (gift.firstSaleDate) {
+      if (gift.firstSaleDate && !savedGift) {
         tableData.push([
           lang('GiftInfoFirstSale'),
           formatDateTimeToString(gift.firstSaleDate * 1000, lang.code, true),
         ]);
       }
 
-      if (gift.lastSaleDate) {
+      if (gift.lastSaleDate && !savedGift) {
         tableData.push([
           lang('GiftInfoLastSale'),
           formatDateTimeToString(gift.lastSaleDate * 1000, lang.code, true),
@@ -602,7 +618,7 @@ const GiftInfoModal = ({
     canManage, hasConvertOption, isSender, oldLang, tonExplorerUrl,
     gift, giftAttributes, renderFooterButton, isTargetChat,
     SettingsMenuButton, isOpen, isGiftUnique, renderingModal,
-    collectibleEmojiStatuses, currentUserEmojiStatus,
+    collectibleEmojiStatuses, currentUserEmojiStatus, saleDateInfo,
   ]);
 
   return (
