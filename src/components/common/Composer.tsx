@@ -1914,7 +1914,9 @@ const Composer: FC<OwnProps & StateProps> = ({
               )}
               {withBotCommands && (
                 <ResponsiveHoverButton
-                  className={buildClassName('bot-commands', isBotCommandMenuOpen && 'activated')}
+                  className={buildClassName(
+                    'bot-commands', 'composer-action-button',
+                  )}
                   round
                   disabled={botCommands === undefined}
                   color="translucent"
