@@ -61,6 +61,8 @@ import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 import useChatListEntry from './hooks/useChatListEntry';
+import { useMessageCounter } from '../../../hooks/useMessageCounter';
+import MessageCountBadge from './MessageCountBadge';
 
 import Avatar from '../../common/Avatar';
 import DeleteChatModal from '../../common/DeleteChatModal';
@@ -75,6 +77,8 @@ import ChatBadge from './ChatBadge';
 import ChatCallStatus from './ChatCallStatus';
 
 import './Chat.scss';
+import { formatInteger } from '../../../util/textFormat';
+import { isUserBot } from '../../../global/helpers/users';
 
 type OwnProps = {
   chatId: string;
@@ -174,6 +178,9 @@ const Chat: FC<OwnProps & StateProps> = ({
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
 
   const { isForum, isForumAsMessages } = chat || {};
+  const isChannel = chat?.type === 'chatTypeChannel';
+  const isBot = user && isUserBot(user);
+  const isTelegramChannel = chat?.id === '777000'; // ID канала Telegram
 
   useEnsureMessage(isSavedDialog ? currentUserId : chatId, lastMessageId, lastMessage);
 
@@ -285,13 +292,12 @@ const Chat: FC<OwnProps & StateProps> = ({
   });
 
   const isIntersecting = useIsIntersecting(ref, chat ? observeIntersection : undefined);
+  const { count, isLoading, error, status, isPaused } = useMessageCounter({ 
+    chatId: Number(chatId), 
+    isVisible: isIntersecting 
+  });
 
-  // Load the forum topics to display unread count badge
-  useEffect(() => {
-    if (isIntersecting && isForum && isSynced && listedTopicIds === undefined) {
-      loadTopics({ chatId });
-    }
-  }, [chatId, listedTopicIds, isSynced, isForum, isIntersecting]);
+  const shouldShowMessageCount = !isChannel && !isForum && !isForumAsMessages && !isBot && !isTelegramChannel;
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
   const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
@@ -321,6 +327,13 @@ const Chat: FC<OwnProps & StateProps> = ({
     isPreview && 'standalone',
     className,
   );
+
+  // Load the forum topics to display unread count badge
+  useEffect(() => {
+    if (isIntersecting && isForum && isSynced && listedTopicIds === undefined) {
+      loadTopics({ chatId });
+    }
+  }, [chatId, listedTopicIds, isSynced, isForum, isIntersecting]);
 
   return (
     <ListItem
@@ -386,17 +399,28 @@ const Chat: FC<OwnProps & StateProps> = ({
         </div>
         <div className="subtitle">
           {renderSubtitle()}
-          {!isPreview && (
-            <ChatBadge
-              chat={chat}
-              isPinned={isPinned}
-              isMuted={isMuted}
-              isSavedDialog={isSavedDialog}
-              hasMiniApp={user?.hasMainMiniApp}
-              topics={topics}
-              isSelected={isSelected}
-            />
-          )}
+          <div className="badge-container">
+            {shouldShowMessageCount && (
+              <MessageCountBadge
+                count={count}
+                isLoading={isLoading}
+                error={error}
+                status={status}
+                isPaused={isPaused}
+              />
+            )}
+            {!isPreview && (
+              <ChatBadge
+                chat={chat}
+                isPinned={isPinned}
+                isMuted={isMuted}
+                isSavedDialog={isSavedDialog}
+                hasMiniApp={user?.hasMainMiniApp}
+                topics={topics}
+                isSelected={isSelected}
+              />
+            )}
+          </div>
         </div>
       </div>
       {shouldRenderDeleteModal && (

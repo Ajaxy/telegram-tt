@@ -1,0 +1,92 @@
+.MessageCountBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.5rem;
+  min-width: 1.5rem;
+  padding: 0 0.4375rem;
+  margin-right: 5px;
+  border-radius: 0.75rem;
+  background-color: #9e8b50;
+  color: white;
+  font-size: 0.875rem;
+  line-height: 1.5625rem;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  transition: width 0.4s ease, padding 0.4s ease;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  width: auto;
+  max-width: none;
+
+  body.is-macos & {
+    line-height: 1.5rem;
+  }
+
+  body.is-ios & {
+    line-height: 1.375rem;
+    min-width: 1.375rem;
+    height: 1.375rem;
+    padding: 0 0.375rem;
+  }
+
+  &.has-content {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  &.loading {
+    background-color: #9e8b50;
+    color: #ffffff;
+    opacity: 0.8;
+  }
+
+  &.error {
+    background-color: var(--color-error);
+    color: #ffffff;
+    opacity: 0.9;
+  }
+
+  &.processing {
+    background-color: #9e8b50;
+    color: #ffffff;
+    opacity: 0.5;
+  }
+
+  .count {
+    display: inline-block;
+    min-width: 8px;
+    padding: 0 4px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} 
