@@ -774,19 +774,6 @@ addActionHandler('deleteMessages', (global, actions, payload): ActionReturnType 
     return message && !isMessageLocal(message);
   });
 
-  Object.values(global.byTabId)
-    .forEach(({ id }) => {
-      messageIds.forEach((messageId) => {
-        const message = selectChatMessage(global, chatId, messageId);
-        if (message) {
-          actions.dismissNotification({
-            localId: getMessageKey(message),
-            tabId: id,
-          });
-        }
-      });
-    });
-
   // Only local messages
   if (!messageIdsToDelete.length && messageIds.length) {
     deleteMessages(global, isChatChannel(chat) || isChatSuperGroup(chat) ? chatId : undefined, messageIds, actions);
