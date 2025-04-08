@@ -754,7 +754,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
                 course: geolocation?.heading,
                 speed: geolocation?.speed,
                 horizontal_accuracy: geolocation?.accuracy,
-                vertical_accuracy: geolocation?.accuracy,
+                vertical_accuracy: geolocation?.altitudeAccuracy,
               },
             });
           } else {
