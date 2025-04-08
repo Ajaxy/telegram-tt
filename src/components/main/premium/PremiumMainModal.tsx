@@ -375,7 +375,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             >
               <Icon name="close" />
             </Button>
-            {fromUserStatusEmoji ? (
+            {(fromUserStatusEmoji && !isGift) ? (
               <CustomEmoji
                 className={styles.statusEmoji}
                 onClick={handleOpenStatusSet}
