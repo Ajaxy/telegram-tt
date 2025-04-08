@@ -121,6 +121,12 @@
   }
 }
 
+.settings-range-value {
+  color: var(--color-primary);
+  display: inline-flex;
+  align-items: center;
+}
+
 .settings-item-simple,
 .settings-item {
   text-align: initial;

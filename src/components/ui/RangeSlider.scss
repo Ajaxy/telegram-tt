@@ -25,6 +25,10 @@
     --slider-color: var(--color-text-secondary);
   }
 
+  &.readOnly {
+    pointer-events: none;
+  }
+
   .slider-top-row {
     display: flex;
     justify-content: space-between;

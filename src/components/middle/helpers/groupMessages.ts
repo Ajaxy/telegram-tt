@@ -19,7 +19,7 @@ export function isAlbum(messageOrAlbum: ApiMessage | IAlbum): messageOrAlbum is 
 }
 
 export function groupMessages(
-  messages: ApiMessage[], firstUnreadId?: number, topMessageId?: number, isChatWithSelf?: boolean,
+  messages: ApiMessage[], firstUnreadId?: number, topMessageId?: number, isChatWithSelf?: boolean, withUsers?: boolean,
 ) {
   const initDateGroup: MessageDateGroup = {
     originalDate: messages[0].date,
@@ -90,7 +90,7 @@ export function groupMessages(
       } else if (
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
-        || message.paidMessageStars
+        || (!withUsers && message.paidMessageStars)
         || message.isOutgoing !== nextMessage.isOutgoing
         || message.postAuthorTitle !== nextMessage.postAuthorTitle
         || (isActionMessage(message) && message.content.action?.type !== 'phoneCall')

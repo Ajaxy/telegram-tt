@@ -24,6 +24,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import RangeSlider from '../../ui/RangeSlider';
@@ -130,8 +131,13 @@ function PrivacyMessages({
   }, [setChargeForMessages, updateGlobalPrivacySettingsWithDebounced]);
 
   const renderValueForStarsRange = useCallback((value: number) => {
-    return formatStarsAsText(lang, value);
-  }, [lang]);
+    return (
+      <span className="settings-range-value">
+        {!canChangeChargeForMessages && (<Icon name="lock-badge" />)}
+        {formatStarsAsText(lang, value)}
+      </span>
+    );
+  }, [lang, canChangeChargeForMessages]);
 
   function renderSectionStarsAmountForPaidMessages() {
     return (
@@ -146,6 +152,7 @@ function PrivacyMessages({
           value={chargeForMessages}
           onChange={handleChargeForMessagesChange}
           renderValue={renderValueForStarsRange}
+          readOnly={!canChangeChargeForMessages}
         />
         <p className="settings-item-description-larger" dir={oldLang.isRtl ? 'rtl' : undefined}>
           {lang('SectionDescriptionStarsForForMessages', {
@@ -219,8 +226,7 @@ function PrivacyMessages({
           {privacyDescription}
         </p>
       </div>
-      {canChangeChargeForMessages
-       && selectedValue === 'charge_for_messages' && renderSectionStarsAmountForPaidMessages()}
+      {selectedValue === 'charge_for_messages' && renderSectionStarsAmountForPaidMessages()}
       {canChangeChargeForMessages && selectedValue === 'charge_for_messages' && renderSectionNoPaidMessagesForUsers()}
       {!isCurrentUserPremium && <PremiumStatusItem premiumSection="message_privacy" />}
     </>

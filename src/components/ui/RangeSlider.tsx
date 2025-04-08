@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { FC } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -16,9 +16,10 @@ type OwnProps = {
   label?: string;
   value: number;
   disabled?: boolean;
+  readOnly?: boolean;
   bold?: boolean;
   className?: string;
-  renderValue?: (value: number) => string;
+  renderValue?: (value: number) => TeactNode;
   onChange: (value: number) => void;
   isCenteredLayout?: boolean;
 };
@@ -31,6 +32,7 @@ const RangeSlider: FC<OwnProps> = ({
   label,
   value,
   disabled,
+  readOnly,
   bold,
   className,
   renderValue,
@@ -46,6 +48,7 @@ const RangeSlider: FC<OwnProps> = ({
     className,
     'RangeSlider',
     disabled && 'disabled',
+    readOnly && 'readOnly',
     bold && 'bold',
   );
 

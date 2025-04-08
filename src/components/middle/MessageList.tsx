@@ -226,6 +226,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const areMessagesLoaded = Boolean(messageIds);
 
+  const isPrivate = isUserId(chatId);
+  const withUsers = Boolean((!isPrivate && !isChannelChat)
+    || isChatWithSelf || isSystemBotChat || isAnonymousForwards || isChannelWithAvatars);
+
   useSyncEffect(() => {
     // We only need it first time when message list appears
     if (areMessagesLoaded) {
@@ -329,9 +333,13 @@ const MessageList: FC<OwnProps & StateProps> = ({
         memoUnreadDividerBeforeIdRef.current,
         !isForum ? Number(threadId) : undefined,
         isChatWithSelf,
+        withUsers,
       )
       : undefined;
-  }, [messageIds, messagesById, type, isServiceNotificationsChat, isForum, threadId, isChatWithSelf, channelJoinInfo]);
+  }, [withUsers,
+    messageIds, messagesById, type,
+    isServiceNotificationsChat, isForum,
+    threadId, isChatWithSelf, channelJoinInfo]);
 
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled') return;
@@ -635,9 +643,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
   }, [isSelectModeActive]);
 
-  const isPrivate = isUserId(chatId);
-  const withUsers = Boolean((!isPrivate && !isChannelChat)
-    || isChatWithSelf || isSystemBotChat || isAnonymousForwards || isChannelWithAvatars);
   const noAvatars = Boolean(!withUsers || (isChannelChat && !isChannelWithAvatars));
   const shouldRenderGreeting = isUserId(chatId) && !isChatWithSelf && !isBot && !isAnonymousForwards
     && type === 'thread'
