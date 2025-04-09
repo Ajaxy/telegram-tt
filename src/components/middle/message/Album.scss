@@ -7,6 +7,10 @@
     margin: -0.3125rem -0.5rem 0.3125rem;
   }
 
+  .message-content:not(.is-inverted-media).has-subheader.media.text & {
+    margin-top: 0.3125rem;
+  }
+
   &,
   .message-content.media.text & {
     > .album-item-select-wrapper .media-inner {

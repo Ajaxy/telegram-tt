@@ -5,7 +5,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ActiveEmojiInteraction } from '../../global/types';
+import type { ActiveEmojiInteraction } from '../../types';
 
 import {
   selectAnimatedEmojiEffect,

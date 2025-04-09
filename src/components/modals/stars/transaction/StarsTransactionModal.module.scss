@@ -2,6 +2,10 @@
 
 .modal {
   z-index: calc(var(--z-modal-low-priority) + 1);
+
+  :global(.modal-dialog) {
+    overflow: hidden;
+  }
 }
 
 .positive {
@@ -16,20 +20,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  position: relative;
+  gap: 0.25rem;
+  margin-block: 1rem;
 }
 
-.starsHeader {
-  gap: normal;
+.uniqueGift {
+  margin-block: 0;
 }
 
 .amount {
   display: flex;
   gap: 0.25rem;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.325;
 }
 
@@ -40,7 +43,9 @@
 .title {
   text-align: center;
   text-wrap: balance;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-semibold);
+  margin-top: 1rem;
   line-height: 1.25;
 }
 
@@ -59,6 +64,16 @@
   text-align: center;
 }
 
+.totalStars {
+  display: inline-flex;
+  align-items: center;
+}
+
+.starIcon {
+  line-height: 1 !important;
+  margin-inline-start: 0 !important;
+}
+
 .footer {
   text-align: center;
   margin-block: 0.5rem;
@@ -68,8 +83,8 @@
 
 .starsBackground {
   position: absolute;
-  height: 8rem;
-  top: 0;
+  height: 7rem;
+  top: -0.75rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: -1;

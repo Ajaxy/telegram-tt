@@ -1,15 +1,20 @@
 import type { InlineBotSettings } from '../../../types';
+import type { WebApp } from '../../../types/webapp';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, GlobalState, TabArgs, WebApp,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 import {
-  type ApiChat, type ApiContact, type ApiInputMessageReplyInfo, type ApiPeer, type ApiUrlAuthResult,
+  type ApiChat,
+  type ApiContact,
+  type ApiInputMessageReplyInfo,
+  type ApiPeer,
+  type ApiUrlAuthResult,
   MAIN_THREAD_ID,
 } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
+import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL, PAID_SEND_DELAY } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { oldTranslate } from '../../../util/oldLangProvider';
@@ -26,7 +31,11 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
-  removeBlockedUser, updateManagementProgress, updateUser, updateUserFullInfo,
+  removeBlockedUser,
+  updateBotAppPermissions,
+  updateManagementProgress,
+  updateUser,
+  updateUserFullInfo,
 } from '../../reducers';
 import {
   activateWebAppIfOpen,
@@ -53,6 +62,7 @@ import {
   selectUserFullInfo,
 } from '../../selectors';
 import { fetchChatByUsername } from './chats';
+import { getPeerStarsForMessage } from './messages';
 
 import { getIsWebAppsFullscreenSupported } from '../../../hooks/useAppLayout';
 
@@ -370,16 +380,34 @@ addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType
   return undefined;
 });
 
-addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturnType => {
+addActionHandler('sendInlineBotApiResult', async (global, actions, payload): Promise<void> => {
   const {
-    id, queryId, isSilent, scheduledAt, messageList,
+    chat, id, queryId, replyInfo, sendAs, isSilent, scheduledAt, allowPaidStars,
+  } = payload;
+
+  await callApi('sendInlineBotResult', {
+    chat,
+    resultId: id,
+    queryId,
+    replyInfo,
+    sendAs,
+    isSilent,
+    scheduleDate: scheduledAt,
+    allowPaidStars,
+  });
+
+  if (allowPaidStars) actions.loadStarStatus();
+});
+
+addActionHandler('sendInlineBotResult', async (global, actions, payload): Promise<void> => {
+  const {
+    id, queryId, isSilent, scheduledAt, threadId, chatId,
     tabId = getCurrentTabId(),
   } = payload;
   if (!id) {
     return;
   }
 
-  const { chatId, threadId } = messageList;
   const chat = selectChat(global, chatId)!;
   const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
 
@@ -388,14 +416,39 @@ addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturn
   actions.resetDraftReplyInfo({ tabId });
   actions.clearWebPagePreview({ tabId });
 
-  void callApi('sendInlineBotResult', {
+  const starsForOneMessage = await getPeerStarsForMessage(global, chatId);
+  const params = {
     chat,
-    resultId: id,
+    id,
     queryId,
     replyInfo,
     sendAs: selectSendAs(global, chatId),
     isSilent,
-    scheduleDate: scheduledAt,
+    scheduledAt,
+    allowPaidStars: starsForOneMessage,
+  };
+  if (!starsForOneMessage) {
+    actions.sendInlineBotApiResult(params);
+    return;
+  }
+
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
+  actions.showNotification({
+    localId: queryId,
+    title: { key: 'ToastTitleMessageSent' },
+    message: { key: 'ToastMessageSent', variables: { amount: starsForOneMessage } },
+    actionText: { key: 'ButtonUndo' },
+    dismissAction: {
+      action: 'sendInlineBotApiResult',
+      payload: params,
+    },
+    duration: PAID_SEND_DELAY,
+    shouldShowTimer: true,
+    disableClickDismiss: true,
+    icon: 'star',
+    shouldUseCustomIcon: true,
+    type: 'paidMessage',
+    tabId,
   });
 });
 
@@ -1310,6 +1363,44 @@ addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> =
 
   global = getGlobal();
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('toggleUserEmojiStatusPermission', async (global, actions, payload): Promise<void> => {
+  const {
+    botId, isEnabled, isBotAccessEmojiGranted,
+  } = payload;
+
+  const bot = selectBot(global, botId);
+
+  if (!botId || !bot) {
+    return;
+  }
+
+  const result = await callApi('toggleUserEmojiStatusPermission', {
+    bot, isEnabled,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateUserFullInfo(global, botId, {
+    isBotCanManageEmojiStatus: isEnabled,
+    isBotAccessEmojiGranted,
+  });
+  setGlobal(global);
+});
+
+addActionHandler('toggleUserLocationPermission', (global, actions, payload): ActionReturnType => {
+  const {
+    botId, isAccessGranted,
+  } = payload;
+
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
+  global = getGlobal();
+  global = updateBotAppPermissions(global, bot.id, { geolocation: isAccessGranted });
   setGlobal(global);
 });
 

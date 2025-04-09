@@ -1,7 +1,8 @@
 import type { ApiGroupCall } from '../../../api/types';
+import type { CallSound } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActionReturnType, CallSound, GlobalState, TabArgs,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';

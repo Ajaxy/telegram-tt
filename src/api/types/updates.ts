@@ -1,4 +1,4 @@
-import type { ApiDraft, TabState } from '../../global/types';
+import type { TabState } from '../../global/types';
 import type {
   GroupCallConnectionData,
   GroupCallConnectionState,
@@ -6,7 +6,8 @@ import type {
   VideoRotation,
   VideoState,
 } from '../../lib/secret-sauce';
-import type { ApiPrivacyKey, PrivacyVisibility, ThreadId } from '../../types';
+import type { ThreadId } from '../../types';
+import type { RegularLangFnParameters } from '../../util/localization';
 import type { ApiBotMenuButton } from './bots';
 import type {
   ApiGroupCall, ApiPhoneCall,
@@ -16,12 +17,15 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatMember,
+  ApiDraft,
+  ApiPeerSettings,
   ApiTypingStatus,
 } from './chats';
 import type {
   ApiFormattedText,
   ApiMediaExtendedPreview,
   ApiMessage,
+  ApiPaidReactionPrivacyType,
   ApiPhoto,
   ApiPoll,
   ApiQuickReply,
@@ -32,13 +36,17 @@ import type {
   BoughtPaidMedia,
 } from './messages';
 import type {
-  ApiEmojiInteraction, ApiError, ApiNotifyException, ApiSessionData,
+  ApiEmojiInteraction,
+  ApiError,
+  ApiNotifyPeerType,
+  ApiPeerNotifySettings,
+  ApiSessionData,
 } from './misc';
-import type { ApiStarsAmount } from './payments';
-import type { LangPackStringValue } from './settings';
+import type { ApiPrivacyKey, LangPackStringValue, PrivacyVisibility } from './settings';
+import type { ApiStarsAmount } from './stars';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 import type {
-  ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,
+  ApiEmojiStatusType, ApiUser, ApiUserFullInfo, ApiUserStatus,
 } from './users';
 
 export type ApiUpdateReady = {
@@ -83,7 +91,7 @@ export type ApiUpdateSession = {
 
 export type ApiUpdateAuthorizationError = {
   '@type': 'updateAuthorizationError';
-  message: string;
+  errorKey: RegularLangFnParameters;
 };
 
 export type ApiUpdateConnectionState = {
@@ -349,6 +357,12 @@ export type ApiUpdateDeleteHistory = {
   chatId: string;
 };
 
+export type ApiDeleteParticipantHistory = {
+  '@type': 'deleteParticipantHistory';
+  chatId: string;
+  peerId: string;
+};
+
 export type ApiUpdateDeleteSavedHistory = {
   '@type': 'deleteSavedHistory';
   chatId: string;
@@ -390,6 +404,12 @@ export type ApiDeleteContact = {
   id: string;
 };
 
+export type ApiUpdatePeerSettings = {
+  '@type': 'updatePeerSettings';
+  id: string;
+  settings: ApiPeerSettings;
+};
+
 export type ApiUpdateUser = {
   '@type': 'updateUser';
   id: string;
@@ -411,7 +431,7 @@ export type ApiUpdateUserStatus = {
 export type ApiUpdateUserEmojiStatus = {
   '@type': 'updateUserEmojiStatus';
   userId: string;
-  emojiStatus?: ApiEmojiStatus;
+  emojiStatus?: ApiEmojiStatusType;
 };
 
 export type ApiUpdateRecentEmojiStatuses = {
@@ -489,29 +509,27 @@ export type ApiUpdateSavedGifs = {
 
 export type ApiUpdateTwoFaError = {
   '@type': 'updateTwoFaError';
-  message: string;
+  messageKey: RegularLangFnParameters;
 };
 
-export type ApiUpdatePasswordError = {
-  '@type': 'updatePasswordError';
-  error: string;
+export type ApiUpdateDefaultNotifySettings = {
+  '@type': 'updateDefaultNotifySettings';
+  peerType: ApiNotifyPeerType;
+  settings: Partial<ApiPeerNotifySettings>;
 };
 
-export type ApiUpdateNotifySettings = {
-  '@type': 'updateNotifySettings';
-  peerType: 'contact' | 'group' | 'broadcast';
-  isSilent: boolean;
-  shouldShowPreviews: boolean;
+export type ApiUpdatePeerNotifySettings = {
+  '@type': 'updateChatNotifySettings';
+  chatId: string;
+  settings: Partial<ApiPeerNotifySettings>;
 };
 
-export type ApiUpdateNotifyExceptions = {
-  '@type': 'updateNotifyExceptions';
-} & ApiNotifyException;
-
-export type ApiUpdateTopicNotifyExceptions = {
-  '@type': 'updateTopicNotifyExceptions';
+export type ApiUpdateTopicNotifySettings = {
+  '@type': 'updateTopicNotifySettings';
+  chatId: string;
   topicId: number;
-} & ApiNotifyException;
+  settings: Partial<ApiPeerNotifySettings>;
+};
 
 export type ApiUpdateTwoFaStateWaitCode = {
   '@type': 'updateTwoFaStateWaitCode';
@@ -786,7 +804,7 @@ export type ApiUpdateEntities = {
 
 export type ApiUpdatePaidReactionPrivacy = {
   '@type': 'updatePaidReactionPrivacy';
-  isPrivate: boolean;
+  private: ApiPaidReactionPrivacyType;
 };
 
 export type ApiUpdateLangPackTooLong = {
@@ -809,23 +827,24 @@ export type ApiUpdate = (
   ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder | ApiUpdateRecommendedChatFolders |
   ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
-  ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed | ApiUpdateServiceNotification |
-  ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending |
+  ApiDeleteParticipantHistory | ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed |
+  ApiUpdateServiceNotification | ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus |
+  ApiUpdateUserFullInfo | ApiUpdateVideoProcessingPending | ApiUpdatePeerSettings |
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |
   ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
   ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage | ApiUpdateStarPaymentStateCompleted |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages | ApiUpdateMessageTranslations |
-  ApiUpdateTwoFaError | ApiUpdatePasswordError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
-  ApiUpdateNotifySettings | ApiUpdateNotifyExceptions | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
+  ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |
+  ApiUpdateDefaultNotifySettings | ApiUpdatePeerNotifySettings | ApiUpdatePeerBlocked | ApiUpdatePrivacy |
   ApiUpdateServerTimeOffset | ApiUpdateMessageReactions | ApiUpdateSavedReactionTags |
   ApiUpdateGroupCallParticipants | ApiUpdateGroupCallConnection | ApiUpdateGroupCall | ApiUpdateGroupCallStreams |
   ApiUpdateGroupCallConnectionState | ApiUpdateGroupCallLeavePresentation | ApiUpdateGroupCallChatId |
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
-  ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
+  ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifySettings | ApiUpdatePinnedTopic |
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |

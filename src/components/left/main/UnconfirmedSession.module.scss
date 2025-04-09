@@ -22,11 +22,12 @@
 
 .buttons {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
   column-gap: 1rem;
 }
 
 .button {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }

@@ -1,19 +1,20 @@
 import type BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiEmojiStatus, ApiPeerColor } from '../../types';
+import type { ApiEmojiStatusType, ApiPeerColor } from '../../types';
 
 import { CHANNEL_ID_LENGTH } from '../../../config';
+import { numberToHexColor } from '../../../util/colors';
 
-export function isPeerUser(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerUser {
+export function isMtpPeerUser(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerUser {
   return peer.hasOwnProperty('userId');
 }
 
-export function isPeerChat(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerChat {
+export function isMtpPeerChat(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerChat {
   return peer.hasOwnProperty('chatId');
 }
 
-export function isPeerChannel(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerChannel {
+export function isMtpPeerChannel(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerChannel {
   return peer.hasOwnProperty('channelId');
 }
 
@@ -33,9 +34,9 @@ export function buildApiPeerId(id: BigInt.BigInteger, type: 'user' | 'chat' | 'c
 }
 
 export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer | GramJs.TypeInputPeer) {
-  if (isPeerUser(peer)) {
+  if (isMtpPeerUser(peer)) {
     return buildApiPeerId(peer.userId, 'user');
-  } else if (isPeerChat(peer)) {
+  } else if (isMtpPeerChat(peer)) {
     return buildApiPeerId(peer.chatId, 'chat');
   } else {
     return buildApiPeerId((peer as GramJs.InputPeerChannel).channelId, 'channel');
@@ -50,13 +51,30 @@ export function buildApiPeerColor(peerColor: GramJs.TypePeerColor): ApiPeerColor
   };
 }
 
-export function buildApiEmojiStatus(mtpEmojiStatus: GramJs.TypeEmojiStatus): ApiEmojiStatus | undefined {
+export function buildApiEmojiStatus(mtpEmojiStatus: GramJs.TypeEmojiStatus):
+ApiEmojiStatusType | undefined {
   if (mtpEmojiStatus instanceof GramJs.EmojiStatus) {
-    return { documentId: mtpEmojiStatus.documentId.toString() };
+    return {
+      type: 'regular',
+      documentId: mtpEmojiStatus.documentId.toString(),
+      until: mtpEmojiStatus.until,
+    };
   }
 
-  if (mtpEmojiStatus instanceof GramJs.EmojiStatusUntil) {
-    return { documentId: mtpEmojiStatus.documentId.toString(), until: mtpEmojiStatus.until };
+  if (mtpEmojiStatus instanceof GramJs.EmojiStatusCollectible) {
+    return {
+      type: 'collectible',
+      collectibleId: mtpEmojiStatus.collectibleId.toString(),
+      documentId: mtpEmojiStatus.documentId.toString(),
+      title: mtpEmojiStatus.title,
+      slug: mtpEmojiStatus.slug,
+      patternDocumentId: mtpEmojiStatus.patternDocumentId.toString(),
+      centerColor: numberToHexColor(mtpEmojiStatus.centerColor),
+      edgeColor: numberToHexColor(mtpEmojiStatus.edgeColor),
+      patternColor: numberToHexColor(mtpEmojiStatus.patternColor),
+      textColor: numberToHexColor(mtpEmojiStatus.textColor),
+      until: mtpEmojiStatus.until,
+    };
   }
 
   return undefined;

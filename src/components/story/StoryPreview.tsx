@@ -6,7 +6,8 @@ import type {
 } from '../../api/types';
 import type { StoryViewerOrigin } from '../../types';
 
-import { getSenderTitle, getStoryMediaHash } from '../../global/helpers';
+import { getStoryMediaHash } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import { selectTabState } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 
@@ -86,7 +87,7 @@ function StoryPreview({
             withStory
             storyViewerMode="disabled"
           />
-          <div className={styles.name}>{renderText(getSenderTitle(lang, peer) || '')}</div>
+          <div className={styles.name}>{renderText(getPeerTitle(lang, peer) || '')}</div>
         </div>
       </div>
     </div>

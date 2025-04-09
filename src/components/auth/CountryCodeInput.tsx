@@ -10,9 +10,10 @@ import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { isoToEmoji } from '../../util/emoji/emoji';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { IS_EMOJI_SUPPORTED } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
 import DropdownMenu from '../ui/DropdownMenu';
@@ -42,7 +43,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
   onChange,
   phoneCodeList,
 }) => {
-  const lang = useOldLang();
+  const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -104,7 +105,9 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
       handleTrigger();
     };
 
-    const inputValue = filter ?? (value?.name || value?.defaultName || '');
+    const emoji = value && IS_EMOJI_SUPPORTED && renderText(isoToEmoji(value.iso2), ['hq_emoji']);
+    const name = value?.name || value?.defaultName || '';
+    const inputValue = filter ?? [emoji, name].filter(Boolean).join(' ');
 
     return (
       <div className={buildClassName('input-group', value && 'touched')}>
@@ -120,7 +123,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
           onInput={handleCodeInput}
           onKeyDown={handleInputKeyDown}
         />
-        <label>{lang('Login.SelectCountry.Title')}</label>
+        <label>{lang('LoginSelectCountryTitle')}</label>
         {isLoading ? (
           <Spinner color="black" />
         ) : (
@@ -154,7 +157,7 @@ const CountryCodeInput: FC<OwnProps & StateProps> = ({
           className="no-results"
           disabled
         >
-          <span>{lang('lng_country_none')}</span>
+          <span>{lang('CountryNone')}</span>
         </MenuItem>
       )}
     </DropdownMenu>

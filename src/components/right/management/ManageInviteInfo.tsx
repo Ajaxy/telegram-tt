@@ -1,20 +1,19 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChatInviteImporter, ApiExportedInvite, ApiUser } from '../../../api/types';
 
 import { isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
-import { copyTextToClipboard } from '../../../util/clipboard';
 import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dates/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
+import LinkField from '../../common/LinkField';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
-import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
 import Spinner from '../../ui/Spinner';
 
@@ -44,7 +43,6 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   onClose,
 }) => {
   const {
-    showNotification,
     loadChatInviteImporters,
     loadChatInviteRequesters,
     openChat,
@@ -64,13 +62,6 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, link, loadChatInviteImporters, loadChatInviteRequesters]);
 
-  const handleCopyClicked = useCallback(() => {
-    copyTextToClipboard(invite!.link);
-    showNotification({
-      message: lang('LinkCopied'),
-    });
-  }, [invite, lang, showNotification]);
-
   useHistoryBack({
     isActive,
     onBack: onClose,
@@ -81,7 +72,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     if (!importers) return <Spinner />;
     return (
       <div className="section">
-        <p>{importers.length ? lang('PeopleJoined', usage) : lang('NoOneJoined')}</p>
+        <p className="section-heading">{importers.length ? lang('PeopleJoined', usage) : lang('NoOneJoined')}</p>
         <p className="section-help">
           {!importers.length && (
             usageLimit ? lang('PeopleCanJoinViaLinkCount', usageLimit - usage) : lang('NoOneJoinedYet')
@@ -114,7 +105,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
     if (!requesters?.length) return undefined;
     return (
       <div className="section">
-        <p>{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</p>
+        <p className="section-heading">{isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}</p>
         <p className="section-help">
           {requesters.map((requester) => (
             <ListItem
@@ -136,21 +127,14 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="Management ManageInviteInfo">
-      <div className="custom-scroll">
+      <div className="panel-content custom-scroll">
         {!invite && (
           <p className="section-help">{lang('Loading')}</p>
         )}
         {invite && (
           <>
             <div className="section">
-              <h3 className="link-title">{invite.title || invite.link}</h3>
-              <input
-                className="form-control"
-                value={invite.link}
-                readOnly
-                onClick={handleCopyClicked}
-              />
-              <Button className="copy-link" onClick={handleCopyClicked}>{lang('CopyLink')}</Button>
+              <LinkField title={invite.title} link={invite.link} className="invite-link" />
               {Boolean(expireDate) && (
                 <p className="section-help">
                   {isExpired
@@ -161,7 +145,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
             </div>
             {adminId && (
               <div className="section">
-                <p>{lang('LinkCreatedeBy')}</p>
+                <p className="section-heading">{lang('LinkCreatedeBy')}</p>
                 <ListItem
                   className="chat-item-clickable scroll-item small-icon"
                   // eslint-disable-next-line react/jsx-no-bind

@@ -6,8 +6,9 @@ import type {
 } from '../api/types';
 
 import {
-  getAudioHasCover, getChatAvatarHash, getChatTitle, getMediaHash, getMessageContent, getSenderTitle,
+  getAudioHasCover, getChatAvatarHash, getChatTitle, getMediaHash, getMessageContent,
 } from '../global/helpers';
+import { getPeerTitle } from '../global/helpers/peers';
 import { resizeImage, scaleImage } from '../util/imageResize';
 import { buildMediaMetadata } from '../util/mediaSession';
 import { AVATAR_FULL_DIMENSIONS } from '../components/common/helpers/mediaDimensions';
@@ -28,7 +29,7 @@ const useMessageMediaMetadata = (
 
   const { audio, voice } = message ? getMessageContent(message) : {} satisfies MediaContent;
   const title = audio ? (audio.title || audio.fileName) : voice ? 'Voice message' : '';
-  const artist = audio?.performer || (sender && getSenderTitle(lang, sender));
+  const artist = audio?.performer || (sender && getPeerTitle(lang, sender));
   const album = (chat && getChatTitle(lang, chat)) || 'Telegram';
 
   const audioCoverHash = (audio && getAudioHasCover(audio) && getMediaHash(audio, 'pictogram'));

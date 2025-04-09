@@ -1,5 +1,9 @@
-import type { ApiReactionEmoji } from './api/types';
-import type { ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection } from './global/types';
+import type {
+  ApiLimitType, ApiLimitTypeForPromo, ApiPremiumSection, ApiReactionEmoji,
+} from './api/types';
+import type {
+  GiftProfileFilterOptions,
+} from './types';
 
 export const APP_CODE_NAME = 'A';
 export const APP_NAME = process.env.APP_NAME || `Telegram Web ${APP_CODE_NAME}`;
@@ -15,11 +19,13 @@ export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
 export const IS_PACKAGED_ELECTRON = process.env.IS_PACKAGED_ELECTRON;
+export const PAID_MESSAGES_PURPOSE = 'paid_messages';
 
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
 export const DEBUG_LOG_FILENAME = 'tt-log.json';
 export const STRICTERDOM_ENABLED = DEBUG;
+export const BOT_VERIFICATION_PEERS_LIMIT = 20;
 
 export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebA-Beta-03-20';
 export const ELECTRON_HOST_URL = process.env.ELECTRON_HOST_URL!;
@@ -51,7 +57,7 @@ export const MEDIA_PROGRESSIVE_CACHE_DISABLED = false;
 export const MEDIA_PROGRESSIVE_CACHE_NAME = 'tt-media-progressive';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v46';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v49';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -95,6 +101,8 @@ export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
 export const STORY_VIEWS_MIN_CONTACTS_FILTER = 20;
 
+export const MEDIA_TIMESTAMP_SAVE_MINIMUM_DURATION = 30; // 30s
+
 export const GLOBAL_SUGGESTED_CHANNELS_ID = 'global';
 
 // As in Telegram for Android
@@ -113,6 +121,10 @@ export const TOPICS_SLICE_SECOND_LOAD = 500;
 export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 20;
 
 export const SPONSORED_MESSAGE_CACHE_MS = 300000; // 5 min
+
+export const DEFAULT_CHARGE_FOR_MESSAGES = 250;
+export const MINIMUM_CHARGE_FOR_MESSAGES = 1;
+export const DEFAULT_MAXIMUM_CHARGE_FOR_MESSAGES = 10000;
 
 export const DEFAULT_VOLUME = 1;
 export const DEFAULT_PLAYBACK_RATE = 1;
@@ -147,6 +159,7 @@ export const EDITABLE_STORY_INPUT_CSS_SELECTOR = `#${EDITABLE_STORY_INPUT_ID}`;
 export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 export const MESSAGE_CONTENT_CLASS_NAME = 'message-content';
 export const MESSAGE_CONTENT_SELECTOR = '.message-content';
+export const VIEW_TRANSITION_CLASS_NAME = 'active-view-transition';
 
 export const RESIZE_HANDLE_CLASS_NAME = 'resizeHandle';
 export const RESIZE_HANDLE_SELECTOR = `.${RESIZE_HANDLE_CLASS_NAME}`;
@@ -168,6 +181,8 @@ export const TMP_CHAT_ID = '0';
 
 export const ANIMATION_END_DELAY = 100;
 export const ANIMATION_WAVE_MIN_INTERVAL = 200;
+export const MESSAGE_APPEARANCE_DELAY = 10;
+export const PAID_SEND_DELAY = 5000;
 
 export const SCROLL_MIN_DURATION = 300;
 export const SCROLL_MAX_DURATION = 600;
@@ -177,7 +192,12 @@ export const SCROLL_SHORT_TRANSITION_MAX_DISTANCE = 300; // px
 // Average duration of message sending animation
 export const API_UPDATE_THROTTLE = Math.round((SCROLL_MIN_DURATION + SCROLL_MAX_DURATION) / 2);
 export const API_THROTTLE_RESET_UPDATES = new Set([
-  'newMessage', 'newScheduledMessage', 'deleteMessages', 'deleteScheduledMessages', 'deleteHistory',
+  'newMessage',
+  'newScheduledMessage',
+  'deleteMessages',
+  'deleteScheduledMessages',
+  'deleteHistory',
+  'deleteParticipantHistory',
 ]);
 
 export const LOCK_SCREEN_ANIMATION_DURATION_MS = 200;
@@ -189,7 +209,7 @@ export const STICKER_SIZE_AUTH_MOBILE = 120;
 export const STICKER_SIZE_PICKER = 72;
 export const EMOJI_SIZE_PICKER = 36;
 export const COMPOSER_EMOJI_SIZE_PICKER = 32;
-export const STICKER_SIZE_GENERAL_SETTINGS = 48;
+export const STICKER_SIZE_GENERAL_SETTINGS = 40;
 export const STICKER_SIZE_PICKER_HEADER = 32;
 export const STICKER_PICKER_MAX_SHARED_COVERS = 20;
 export const STICKER_SIZE_SEARCH = 72;
@@ -209,6 +229,7 @@ export const EMOJI_SIZES = 7;
 export const TOP_SYMBOL_SET_ID = 'top';
 export const POPULAR_SYMBOL_SET_ID = 'popular';
 export const RECENT_SYMBOL_SET_ID = 'recent';
+export const COLLECTIBLE_STATUS_SET_ID = 'collectibleStatus';
 export const FAVORITE_SYMBOL_SET_ID = 'favorite';
 export const EFFECT_STICKERS_SET_ID = 'effectStickers';
 export const EFFECT_EMOJIS_SET_ID = 'effectEmojis';
@@ -224,6 +245,8 @@ export const SLIDE_TRANSITION_DURATION = 450;
 
 export const BIRTHDAY_NUMBERS_SET = 'FestiveFontEmoji';
 export const RESTRICTED_EMOJI_SET = 'RestrictedEmoji';
+
+export const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 
 export const VIDEO_WEBM_TYPE = 'video/webm';
 export const GIF_MIME_TYPE = 'image/gif';
@@ -296,7 +319,7 @@ export const LANG_PACK = 'weba';
 // eslint-disable-next-line max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
 
-export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users'] as const;
+export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users', 'groups'] as const;
 
 export const HEART_REACTION: ApiReactionEmoji = {
   type: 'emoji',
@@ -318,8 +341,6 @@ export const DELETED_COMMENTS_CHANNEL_ID = '-1000000000777';
 export const MAX_MEDIA_FILES_FOR_ALBUM = 10;
 export const MAX_ACTIVE_PINNED_CHATS = 5;
 export const SCHEDULED_WHEN_ONLINE = 0x7FFFFFFE;
-export const DEFAULT_LANG_CODE = 'en';
-export const OLD_DEFAULT_LANG_PACK = 'android';
 export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'] as const;
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
 export const FAQ_URL = 'https://telegram.org/faq';
@@ -363,7 +384,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   dialogFiltersChats: [100, 200],
   dialogFilters: [10, 20],
   dialogFolderPinned: [5, 10],
-  captionLength: [1024, 2048],
+  captionLength: [1024, 4096],
   channels: [500, 1000],
   channelsPublic: [10, 20],
   aboutLength: [70, 140],
@@ -372,6 +393,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   recommendedChannels: [10, 100],
   savedDialogsPinned: [5, 100],
 };
+export const DEFAULT_MAX_MESSAGE_LENGTH = 4096;
 
 export const ONE_TIME_MEDIA_TTL_SECONDS = 2147483647;
 
@@ -424,3 +446,12 @@ export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [
   'dialogFiltersChats',
   'recommendedChannels',
 ];
+
+export const DEFAULT_GIFT_PROFILE_FILTER_OPTIONS : GiftProfileFilterOptions = {
+  sortType: 'byDate',
+  shouldIncludeUnlimited: true,
+  shouldIncludeLimited: true,
+  shouldIncludeUnique: true,
+  shouldIncludeDisplayed: true,
+  shouldIncludeHidden: true,
+} as const;

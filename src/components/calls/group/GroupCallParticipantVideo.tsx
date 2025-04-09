@@ -25,6 +25,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import GroupCallParticipantMenu from './GroupCallParticipantMenu';
@@ -292,7 +293,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
             ariaLabel={lang(isPinned ? 'lng_group_call_context_unpin_camera' : 'lng_group_call_context_pin_camera')}
             onClick={handleClickPin}
           >
-            <i className={buildClassName('icon', isPinned ? 'icon-unpin' : 'icon-pin')} />
+            <Icon name={isPinned ? 'unpin' : 'pin'} />
           </Button>
         )}
         <div className={styles.bottomPanel}>

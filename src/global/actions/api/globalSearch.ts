@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiPeer, ApiTopic,
+  ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiMessageSearchContext, ApiPeer, ApiTopic,
   ApiUserStatus,
 } from '../../../api/types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
@@ -86,13 +86,22 @@ addActionHandler('setGlobalSearchDate', (global, actions, payload): ActionReturn
 });
 
 addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionReturnType => {
-  const { type, tabId = getCurrentTabId() } = payload;
+  const {
+    type, context, shouldResetResultsByType, shouldCheckFetchingMessagesStatus, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (shouldCheckFetchingMessagesStatus) {
+    global = updateGlobalSearchFetchingStatus(global, { messages: true }, tabId);
+    setGlobal(global);
+    global = getGlobal();
+  }
+
   const {
     query, resultsByType, chatId,
   } = selectTabState(global, tabId).globalSearch;
   const {
     totalCount, foundIds, nextOffsetId, nextOffsetPeerId, nextOffsetRate,
-  } = resultsByType?.[type] || {};
+  } = (!shouldResetResultsByType && resultsByType?.[type]) || {};
 
   // Stop loading if we have all the messages or server returned 0
   if (totalCount !== undefined && (!totalCount || (foundIds && foundIds.length >= totalCount))) {
@@ -105,6 +114,8 @@ addActionHandler('searchMessagesGlobal', (global, actions, payload): ActionRetur
   searchMessagesGlobal(global, {
     query,
     type,
+    context,
+    shouldResetResultsByType,
     offsetRate: nextOffsetRate,
     offsetId: nextOffsetId,
     offsetPeer,
@@ -145,6 +156,7 @@ addActionHandler('searchPopularBotApps', async (global, actions, payload): Promi
 async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   query?: string;
   type: ApiGlobalMessageSearchType;
+  context?: ApiMessageSearchContext;
   offsetRate?: number;
   offsetId?: number;
   offsetPeer?: ApiPeer;
@@ -152,9 +164,11 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   maxDate?: number;
   minDate?: number;
   tabId: TabArgs<T>[0];
+  shouldResetResultsByType?: boolean;
 }) {
   const {
-    query = '', type, offsetRate, offsetId, offsetPeer, peer, maxDate, minDate, tabId = getCurrentTabId(),
+    query = '', type, context, offsetRate, offsetId, offsetPeer,
+    peer, maxDate, minDate, shouldResetResultsByType, tabId = getCurrentTabId(),
   } = params;
   let result: {
     messages: ApiMessage[];
@@ -211,6 +225,7 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
       offsetPeer,
       limit: GLOBAL_SEARCH_SLICE,
       type,
+      context,
       maxDate,
       minDate,
     });
@@ -225,6 +240,15 @@ async function searchMessagesGlobal<T extends GlobalState>(global: T, params: {
   }
 
   global = getGlobal();
+
+  if (shouldResetResultsByType) {
+    global = updateGlobalSearch(global, {
+      resultsByType: {
+        ...(selectTabState(global, tabId).globalSearch || {}).resultsByType,
+        [type]: undefined,
+      },
+    }, tabId);
+  }
   const currentSearchQuery = selectCurrentGlobalSearchQuery(global, tabId);
   if (!result || (query !== '' && query !== currentSearchQuery)) {
     global = updateGlobalSearchFetchingStatus(global, { messages: false }, tabId);

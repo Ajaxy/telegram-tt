@@ -8,7 +8,7 @@ import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
 import { pick } from '../../../util/iteratees';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';
@@ -53,7 +53,7 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
 }) => {
   const { setSettingOption } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -61,7 +61,9 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
   });
 
   const renderFileSizeCallback = useCallback((value: number) => {
-    return lang('AutodownloadSizeLimitUpTo', lang('FileSize.MB', String(AUTODOWNLOAD_FILESIZE_MB_LIMITS[value]), 'i'));
+    return lang('AutodownloadSizeLimitUpTo', {
+      limit: lang('FileSizeMB', { count: AUTODOWNLOAD_FILESIZE_MB_LIMITS[value] }),
+    });
   }, [lang]);
 
   const handleFileSizeChange = useCallback((value: number) => {
@@ -98,26 +100,26 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{title}</h4>
 
         <Checkbox
-          label={lang('AutoDownloadSettings.Contacts')}
+          label={lang('AutoDownloadSettingsContacts')}
           checked={canAutoLoadFromContacts}
           // TODO rewrite to support `useCallback`
           // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}FromContacts`]: isChecked })}
         />
         <Checkbox
-          label={lang('AutoDownloadSettings.PrivateChats')}
+          label={lang('AutoDownloadSettingsPrivateChats')}
           checked={canAutoLoadInPrivateChats}
           // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InPrivateChats`]: isChecked })}
         />
         <Checkbox
-          label={lang('AutoDownloadSettings.GroupChats')}
+          label={lang('AutoDownloadSettingsGroupChats')}
           checked={canAutoLoadInGroups}
           // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InGroups`]: isChecked })}
         />
         <Checkbox
-          label={lang('AutoDownloadSettings.Channels')}
+          label={lang('AutoDownloadSettingsChannels')}
           checked={canAutoLoadInChannels}
           // eslint-disable-next-line react/jsx-no-bind
           onCheck={(isChecked) => setSettingOption({ [`canAutoLoad${key}InChannels`]: isChecked })}
@@ -147,7 +149,7 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
         canAutoLoadVideoInChannels,
       )}
       {renderAutoDownloadBlock(
-        'Auto-download files', // Proper translation is not available yet
+        lang('AutoDownloadFilesTitle'),
         'File',
         canAutoLoadFileFromContacts,
         canAutoLoadFileInPrivateChats,

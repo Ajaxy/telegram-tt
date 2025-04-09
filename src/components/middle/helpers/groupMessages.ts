@@ -19,19 +19,20 @@ export function isAlbum(messageOrAlbum: ApiMessage | IAlbum): messageOrAlbum is 
 }
 
 export function groupMessages(
-  messages: ApiMessage[], firstUnreadId?: number, topMessageId?: number, isChatWithSelf?: boolean,
+  messages: ApiMessage[], firstUnreadId?: number, topMessageId?: number, isChatWithSelf?: boolean, withUsers?: boolean,
 ) {
-  let currentSenderGroup: SenderGroup = [];
-  let currentDateGroup = {
+  const initDateGroup: MessageDateGroup = {
     originalDate: messages[0].date,
     datetime: getDayStartAt(messages[0].date * 1000),
-    senderGroups: [currentSenderGroup],
+    senderGroups: [[]],
   };
   let currentAlbum: IAlbum | undefined;
 
-  const dateGroups: MessageDateGroup[] = [currentDateGroup];
+  const dateGroups: MessageDateGroup[] = [initDateGroup];
 
   messages.forEach((message, index) => {
+    const currentDateGroup = dateGroups[dateGroups.length - 1];
+    const currentSenderGroup = currentDateGroup.senderGroups[currentDateGroup.senderGroups.length - 1];
     if (message.isInAlbum) {
       if (!currentAlbum) {
         currentAlbum = {
@@ -76,38 +77,36 @@ export function groupMessages(
       currentAlbum = undefined;
     }
 
-    const lastSenderGroupItem = currentSenderGroup[currentSenderGroup.length - 1];
-    if (nextMessage) {
+    const lastMessageInSenderGroup = currentSenderGroup[currentSenderGroup.length - 1];
+    if (nextMessage && !currentAlbum) {
       const nextMessageDayStartsAt = getDayStartAt(nextMessage.date * 1000);
       if (currentDateGroup.datetime !== nextMessageDayStartsAt) {
-        currentDateGroup = {
+        const newDateGroup: MessageDateGroup = {
           originalDate: nextMessage.date,
           datetime: nextMessageDayStartsAt,
-          senderGroups: [],
+          senderGroups: [[]],
         };
-        dateGroups.push(currentDateGroup);
-
-        currentSenderGroup = [];
-        currentDateGroup.senderGroups.push(currentSenderGroup);
+        dateGroups.push(newDateGroup);
       } else if (
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
+        || (!withUsers && message.paidMessageStars)
         || message.isOutgoing !== nextMessage.isOutgoing
         || message.postAuthorTitle !== nextMessage.postAuthorTitle
-        || (isActionMessage(message) && !message.content.action?.phoneCall)
-        || (isActionMessage(nextMessage) && !nextMessage.content.action?.phoneCall)
+        || (isActionMessage(message) && message.content.action?.type !== 'phoneCall')
+        || (isActionMessage(nextMessage) && nextMessage.content.action?.type !== 'phoneCall')
         || message.inlineButtons
         || nextMessage.inlineButtons
         || (nextMessage.date - message.date) > GROUP_INTERVAL_SECONDS
         || (topMessageId
           && (message.id === topMessageId
-            || (lastSenderGroupItem
-              && 'mainMessage' in lastSenderGroupItem && lastSenderGroupItem.mainMessage?.id === topMessageId))
+            || (lastMessageInSenderGroup
+              && 'mainMessage' in lastMessageInSenderGroup
+              && lastMessageInSenderGroup.mainMessage?.id === topMessageId))
           && nextMessage.id !== topMessageId)
         || (isChatWithSelf && message.forwardInfo?.fromId !== nextMessage.forwardInfo?.fromId)
       ) {
-        currentSenderGroup = [];
-        currentDateGroup.senderGroups.push(currentSenderGroup);
+        currentDateGroup.senderGroups.push([]);
       }
     }
   });

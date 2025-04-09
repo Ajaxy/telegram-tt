@@ -5,13 +5,15 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiUser, ApiUserStatus } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
-import { filterUsersByName, sortUserIds } from '../../../global/helpers';
+import { sortUserIds } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -60,7 +62,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const filteredIds = filterUsersByName(contactIds, usersById, filter);
+    const filteredIds = filterPeersByQuery({ ids: contactIds, query: filter, type: 'user' });
 
     return sortUserIds(filteredIds, usersById, userStatusesById);
   }, [contactIds, filter, usersById, userStatusesById]);
@@ -100,7 +102,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
         onClick={openNewContactDialog}
         ariaLabel={lang('CreateNewContact')}
       >
-        <i className="icon icon-add-user-filled" />
+        <Icon name="add-user-filled" />
       </FloatingActionButton>
     </InfiniteScroll>
   );

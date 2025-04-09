@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat } from '../../../api/types';
-import type { TopicsInfo } from '../../../global/types';
+import type { TopicsInfo } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
@@ -39,6 +39,7 @@ import useOrderDiff from './hooks/useOrderDiff';
 
 import GroupCallTopPane from '../../calls/group/GroupCallTopPane';
 import GroupChatInfo from '../../common/GroupChatInfo';
+import Icon from '../../common/icons/Icon';
 import HeaderActions from '../../middle/HeaderActions';
 import Button from '../../ui/Button';
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -234,7 +235,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
           onClick={handleClose}
           ariaLabel={lang('Close')}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
 
         {chat && (

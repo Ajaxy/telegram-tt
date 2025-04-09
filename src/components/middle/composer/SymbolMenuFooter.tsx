@@ -6,6 +6,7 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 
 type OwnProps = {
@@ -80,7 +81,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           color="translucent"
           onClick={handleSearchOpen}
         >
-          <i className="icon icon-search" />
+          <Icon name="search" />
         </Button>
       )}
 
@@ -98,7 +99,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           faded
           color="translucent"
         >
-          <i className="icon icon-delete-left" />
+          <Icon name="delete-left" />
         </Button>
       )}
     </div>

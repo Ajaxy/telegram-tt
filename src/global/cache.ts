@@ -2,9 +2,12 @@
 import { getIsHeavyAnimating, onFullyIdle } from '../lib/teact/teact';
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
-import type { ApiAvailableReaction, ApiMessage } from '../api/types';
-import type { ThreadId } from '../types';
-import type { ActionReturnType, GlobalState, MessageList } from './types';
+import type {
+  ApiAvailableReaction,
+  ApiMessage,
+} from '../api/types';
+import type { MessageList, ThreadId } from '../types';
+import type { ActionReturnType, GlobalState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import {
@@ -214,6 +217,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.chats.similarChannelsById = initialState.chats.similarChannelsById;
   }
 
+  if (!cached.chats.similarBotsById) {
+    cached.chats.similarBotsById = initialState.chats.similarBotsById;
+  }
+
   if (!cached.chats.lastMessageIds) {
     cached.chats.lastMessageIds = initialState.chats.lastMessageIds;
   }
@@ -253,6 +260,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.users.commonChatsById) {
     cached.users.commonChatsById = initialState.users.commonChatsById;
   }
+  if (!cached.users.botAppPermissionsById) {
+    cached.users.botAppPermissionsById = initialState.users.botAppPermissionsById;
+  }
   if (!cached.chats.topicsInfoById) {
     cached.chats.topicsInfoById = initialState.chats.topicsInfoById;
   }
@@ -260,10 +270,39 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.messages.pollById) {
     cached.messages.pollById = initialState.messages.pollById;
   }
+  if (!cached.settings.botVerificationShownPeerIds) {
+    cached.settings.botVerificationShownPeerIds = initialState.settings.botVerificationShownPeerIds;
+  }
 
-  if (!cached.stickers.starGifts) {
-    cached.stickers.starGifts = initialState.stickers.starGifts;
-    cached.users.giftsById = initialState.users.giftsById;
+  if (!cached.peers) {
+    cached.peers = initialState.peers;
+  }
+
+  if (!cached.cacheVersion) {
+    cached.cacheVersion = initialState.cacheVersion;
+    // Reset because of the new action message structure
+    cached.messages = initialState.messages;
+    cached.chats.listIds = initialState.chats.listIds;
+  }
+
+  if (!cached.messages.playbackByChatId) {
+    cached.messages.playbackByChatId = initialState.messages.playbackByChatId;
+  }
+
+  if (cached.cacheVersion < 2) {
+    if (cached.settings.themes.dark) {
+      cached.settings.themes.dark.patternColor = initialState.settings.themes.dark!.patternColor;
+    }
+
+    if (cached.settings.themes.light) {
+      cached.settings.themes.light.patternColor = initialState.settings.themes.light!.patternColor;
+    }
+
+    cached.cacheVersion = 2;
+  }
+
+  if (!cached.chats.notifyExceptionById) {
+    cached.chats.notifyExceptionById = initialState.chats.notifyExceptionById;
   }
 }
 
@@ -378,7 +417,7 @@ function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['cust
 function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
   const {
     users: {
-      byId, statusesById, fullInfoById,
+      byId, statusesById, fullInfoById, botAppPermissionsById,
     }, currentUserId,
   } = global;
   const currentChatIds = compact(
@@ -415,6 +454,7 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
     byId: pickTruthy(byId, idsToSave),
     statusesById: pickTruthy(statusesById, idsToSave),
     fullInfoById: pickTruthy(fullInfoById, idsToSave),
+    botAppPermissionsById,
   };
 }
 
@@ -446,17 +486,19 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
     ...messagesChatIds,
+    ...global.recentlyFoundChatIds || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT) || [],
     ...getOrderedIds(ALL_FOLDER_ID) || [],
     ...getOrderedIds(SAVED_FOLDER_ID) || [],
-    ...global.recentlyFoundChatIds || [],
     ...Object.keys(byId),
   ]).slice(0, GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT);
 
   return {
     ...global.chats,
     similarChannelsById: {},
+    similarBotsById: {},
     isFullyLoaded: {},
+    notifyExceptionById: pickTruthy(global.chats.notifyExceptionById, idsToSave),
     loadingParameters: INITIAL_GLOBAL_STATE.chats.loadingParameters,
     byId: pickTruthy(global.chats.byId, idsToSave),
     fullInfoById: pickTruthy(global.chats.fullInfoById, idsToSave),
@@ -561,6 +603,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     byChatId,
     pollById: pickTruthy(global.messages.pollById, pollIdsToSave),
     sponsoredByChatId: {},
+    playbackByChatId: {},
   };
 }
 
@@ -615,14 +658,19 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
 }
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
-  const { byKey, themes, performance } = global.settings;
+  const {
+    byKey, themes, performance, botVerificationShownPeerIds, miniAppsCachedPosition, miniAppsCachedSize, notifyDefaults,
+  } = global.settings;
 
   return {
     byKey,
     themes,
     performance,
     privacy: {},
-    notifyExceptions: {},
+    botVerificationShownPeerIds,
+    miniAppsCachedPosition,
+    miniAppsCachedSize,
+    notifyDefaults,
   };
 }
 

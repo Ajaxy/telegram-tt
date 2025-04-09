@@ -85,7 +85,7 @@
     text-overflow: ellipsis;
     unicode-bidi: plaintext;
     font-size: 1rem !important;
-    font-weight: 500 !important;
+    font-weight: var(--font-weight-medium) !important;
     margin: 0 !important;
   }
 

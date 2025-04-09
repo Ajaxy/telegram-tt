@@ -3,7 +3,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { StarGiftCategory } from '../../../global/types';
+import type { StarGiftCategory } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
 
@@ -19,22 +19,22 @@ type OwnProps = {
 };
 
 type StateProps = {
-  starGiftCategoriesByName: Record<StarGiftCategory, string[]>;
+  idsByCategory?: Record<StarGiftCategory, string[]>;
 };
 
 const StarGiftCategoryList = ({
-  starGiftCategoriesByName,
+  idsByCategory,
   onCategoryChanged,
 }: StateProps & OwnProps) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
-  const starCategories: number[] = useMemo(() => Object.keys(starGiftCategoriesByName)
+  const starCategories: number[] | undefined = useMemo(() => idsByCategory && Object.keys(idsByCategory)
     .filter((category) => category !== 'all' && category !== 'limited')
     .map(Number)
     .sort((a, b) => a - b),
-  [starGiftCategoriesByName]);
+  [idsByCategory]);
 
   const [selectedCategory, setSelectedCategory] = useState<StarGiftCategory>('all');
 
@@ -46,12 +46,9 @@ const StarGiftCategoryList = ({
   }
 
   function renderCategoryName(category: StarGiftCategory) {
-    if (category === 'all') {
-      return lang('AllGiftsCategory');
-    }
-    if (category === 'limited') {
-      return lang('LimitedGiftsCategory');
-    }
+    if (category === 'all') return lang('AllGiftsCategory');
+    if (category === 'stock') return lang('StockGiftsCategory');
+    if (category === 'limited') return lang('LimitedGiftsCategory');
     return category;
   }
 
@@ -64,7 +61,7 @@ const StarGiftCategoryList = ({
         )}
         onClick={() => handleItemClick(category)}
       >
-        {category !== 'all' && category !== 'limited' && (
+        {Number.isInteger(category) && (
           <StarIcon
             className={styles.star}
             type="gold"
@@ -82,17 +79,18 @@ const StarGiftCategoryList = ({
     <div ref={ref} className={buildClassName(styles.list, 'no-scrollbar')}>
       {renderCategoryItem('all')}
       {renderCategoryItem('limited')}
-      {starCategories.map(renderCategoryItem)}
+      {renderCategoryItem('stock')}
+      {starCategories?.map(renderCategoryItem)}
     </div>
   );
 };
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { starGiftCategoriesByName } = global;
+    const { starGifts } = global;
 
     return {
-      starGiftCategoriesByName,
+      idsByCategory: starGifts?.idsByCategory,
     };
   },
 )(StarGiftCategoryList));

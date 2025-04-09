@@ -19,12 +19,13 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
 import useDerivedState from '../../../hooks/useDerivedState';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import StoryRibbon from '../../story/StoryRibbon';
@@ -94,7 +95,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useEffect(() => {
     loadChatFolders();
@@ -114,7 +115,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const allChatsFolder: ApiChatFolder = useMemo(() => {
     return {
       id: ALL_FOLDER_ID,
-      title: orderedFolderIds?.[0] === ALL_FOLDER_ID ? lang('FilterAllChatsShort') : lang('FilterAllChats'),
+      title: { text: orderedFolderIds?.[0] === ALL_FOLDER_ID ? lang('FilterAllChatsShort') : lang('FilterAllChats') },
       includedChatIds: MEMO_EMPTY_ARRAY,
       excludedChatIds: MEMO_EMPTY_ARRAY,
     } satisfies ApiChatFolder;
@@ -150,7 +151,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
       if (canShareFolder) {
         contextActions.push({
-          title: lang('ChatList.ContextMenuShare'),
+          title: lang('FilterShare'),
           icon: 'link',
           handler: () => {
             const chatListCount = Object.values(chatFoldersById).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);
@@ -186,7 +187,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         });
 
         contextActions.push({
-          title: lang('FilterDeleteItem'),
+          title: lang('FilterDelete'),
           icon: 'delete',
           destructive: true,
           handler: () => {
@@ -197,7 +198,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
       return {
         id,
-        title,
+        title: renderTextWithEntities({
+          text: title.text,
+          entities: title.entities,
+          noCustomEmojiPlayback: folder.noTitleAnimations,
+        }),
         badgeCount: folderCountersById[id]?.chatsCount,
         isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
         isBlocked,
@@ -335,7 +340,6 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
           tabs={folderTabs}
           activeTab={activeChatFolder}
           onSwitchTab={handleSwitchTab}
-          areFolders
         />
       ) : shouldRenderPlaceholder ? (
         <div ref={placeholderRef} className="tabs-placeholder" />

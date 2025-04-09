@@ -20,7 +20,7 @@ body {
   padding: 0;
   font-size: 16px;
   color: var(--color-text);
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
   line-height: 1.5;
   text-align: left;
   overflow: hidden;
@@ -35,6 +35,7 @@ body {
   "Consolas", monospace;
   --font-family-rounded: -ui-rounded, "Numbers Rounded", "Roboto", "Helvetica Neue", sans-serif;
   --font-family-condensed: "Roboto Condensed", "Roboto", "Helvetica Neue", sans-serif;
+  --font-weight-semibold: 500; // Note: Roboto is naturally quite bold, so 500 works well as default
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
@@ -63,6 +64,7 @@ body.is-ios,
 body.is-macos {
   --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue",
   sans-serif;
+  --font-weight-semibold: 600;
 }
 
 html[lang="fa"],
@@ -80,10 +82,6 @@ html[lang="fa"] body {
 body.is-ios {
   --border-radius-messages: 1rem;
   --border-radius-messages-small: 0.5rem;
-}
-
-body.is-windows {
-  --font-weight-semibold: 500;
 }
 
 body.is-electron {
@@ -402,6 +400,7 @@ body:not(.is-ios) {
   --color-message-reaction-hover-own: rgb(91, 82, 155);
   --color-message-reaction-chosen-hover: rgb(120, 100, 221);
   --color-message-reaction-chosen-hover-own: rgb(245, 245, 245);
+  --color-message-non-contact: rgb(204, 238, 191);
   --color-voice-transcribe-button: rgb(42, 42, 60);
   --color-voice-transcribe-button-own: rgb(131, 115, 211);
   --color-topic-blue: rgb(111, 249, 240);

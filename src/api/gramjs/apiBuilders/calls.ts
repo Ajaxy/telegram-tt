@@ -9,7 +9,7 @@ import type {
 } from '../../../lib/secret-sauce';
 import type { ApiGroupCall, ApiPhoneCall } from '../../types';
 
-import { getApiChatIdFromMtpPeer, isPeerUser } from './peers';
+import { getApiChatIdFromMtpPeer, isMtpPeerUser } from './peers';
 
 export function buildApiGroupCallParticipant(participant: GramJs.GroupCallParticipant): GroupCallParticipant {
   const {
@@ -33,7 +33,7 @@ export function buildApiGroupCallParticipant(participant: GramJs.GroupCallPartic
     raiseHandRating: raiseHandRating?.toString(),
     volume,
     date: new Date(date),
-    isUser: isPeerUser(peer),
+    isUser: isMtpPeerUser(peer),
     id: getApiChatIdFromMtpPeer(peer),
     video: video ? buildApiGroupCallParticipantVideo(video) : undefined,
     presentation: presentation ? buildApiGroupCallParticipantVideo(presentation) : undefined,

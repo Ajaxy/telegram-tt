@@ -23,6 +23,7 @@ import useFullscreen from '../../hooks/window/useFullscreen';
 import useControlsSignal from './hooks/useControlsSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
 import VideoPlayerControls from './VideoPlayerControls';
@@ -46,10 +47,11 @@ type OwnProps = {
   isProtected?: boolean;
   shouldCloseOnClick?: boolean;
   isForceMobileVersion?: boolean;
-  onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   isClickDisabled?: boolean;
   isSponsoredMessage?: boolean;
+  timestamp?: number;
   handleSponsoredClick?: (isFromMedia?: boolean) => void;
+  onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 };
 
 const MAX_LOOP_DURATION = 30; // Seconds
@@ -68,14 +70,15 @@ const VideoPlayer: FC<OwnProps> = ({
   volume,
   isMuted,
   playbackRate,
-  onClose,
   isForceMobileVersion,
   shouldCloseOnClick,
   isProtected,
   isClickDisabled,
   isPreviewDisabled,
   isSponsoredMessage,
+  timestamp,
   handleSponsoredClick,
+  onClose,
 }) => {
   const {
     setMediaViewerVolume,
@@ -140,6 +143,9 @@ const VideoPlayer: FC<OwnProps> = ({
     IS_IOS && !isPlaying && !shouldRenderSpinner && !isUnsupported, undefined, undefined, 'slow',
   );
 
+  const [, setCurrentTime] = useCurrentTimeSignal();
+  const [, setIsVideoWaiting] = useVideoWaitingSignal();
+
   useEffect(() => {
     lockControls(shouldRenderSpinner);
   }, [lockControls, shouldRenderSpinner]);
@@ -162,6 +168,12 @@ const VideoPlayer: FC<OwnProps> = ({
   useEffect(() => {
     videoRef.current!.playbackRate = playbackRate;
   }, [playbackRate]);
+
+  useEffect(() => {
+    if (!timestamp) return;
+    videoRef.current!.currentTime = timestamp;
+    setCurrentTime(timestamp);
+  }, [setCurrentTime, timestamp]);
 
   const togglePlayState = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent> | KeyboardEvent) => {
     e.stopPropagation();
@@ -190,9 +202,6 @@ const VideoPlayer: FC<OwnProps> = ({
   });
 
   useVideoCleanup(videoRef, bufferingHandlers);
-
-  const [, setCurrentTime] = useCurrentTimeSignal();
-  const [, setIsVideoWaiting] = useVideoWaitingSignal();
 
   const handleTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
@@ -327,7 +336,7 @@ const VideoPlayer: FC<OwnProps> = ({
       </div>
       {shouldRenderPlayButton && (
         <Button round className={`play-button ${playButtonClassNames}`} onClick={togglePlayState}>
-          <i className="icon icon-play" />
+          <Icon name="play" />
         </Button>
       )}
       {shouldRenderSpinner && (

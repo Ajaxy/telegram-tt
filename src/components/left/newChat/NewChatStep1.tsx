@@ -2,7 +2,8 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import { filterUsersByName, isUserBot } from '../../../global/helpers';
+import { isUserBot } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
@@ -10,6 +11,7 @@ import sortChatIds from '../../common/helpers/sortChatIds';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -62,7 +64,8 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    const foundContactIds = localContactIds ? filterUsersByName(localContactIds, usersById, searchQuery) : [];
+    const foundContactIds = localContactIds
+      ? filterPeersByQuery({ ids: localContactIds, query: searchQuery, type: 'user' }) : [];
 
     return sortChatIds(
       unique([
@@ -94,7 +97,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           onClick={onReset}
           ariaLabel="Return to Chat List"
         >
-          <i className="icon icon-arrow-left" />
+          <Icon name="arrow-left" />
         </Button>
         <h3>{lang('GroupAddMembers')}</h3>
       </div>
@@ -120,7 +123,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           onClick={handleNextStep}
           ariaLabel={isChannel ? 'Continue To Channel Info' : 'Continue To Group Info'}
         >
-          <i className="icon icon-arrow-right" />
+          <Icon name="arrow-right" />
         </FloatingActionButton>
       </div>
     </div>

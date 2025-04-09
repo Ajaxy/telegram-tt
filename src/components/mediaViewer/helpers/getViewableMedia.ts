@@ -99,9 +99,9 @@ export default function getViewableMedia(params?: MediaViewerItem): ViewableMedi
     action, document, photo, video, webPage, paidMedia,
   } = getMessageContent(params.message);
 
-  if (action?.photo) {
+  if (action?.type === 'chatEditPhoto' || action?.type === 'suggestProfilePhoto') {
     return {
-      media: action.photo,
+      media: action.photo!,
       isSingle: true,
     };
   }

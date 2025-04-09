@@ -4,6 +4,7 @@ import type {
   ApiAvailableEffect,
   ApiAvailableReaction,
   ApiMessageReactor,
+  ApiPaidReactionPrivacyType,
   ApiPeerReaction,
   ApiReaction,
   ApiReactionCount,
@@ -66,7 +67,7 @@ export function buildApiMessageReactor(reactor: GramJs.MessageReactor): ApiMessa
   return {
     peerId: peerId && getApiChatIdFromMtpPeer(peerId),
     count,
-    isMe: my,
+    isMy: my,
     isTop: top,
     isAnonymous: anonymous,
   };
@@ -163,4 +164,19 @@ export function buildApiAvailableEffect(availableEffect: GramJs.AvailableEffect)
     effectStickerId: effectStickerId.toString(),
     effectAnimationId: effectAnimationId?.toString(),
   };
+}
+
+export function buildApiPaidReactionPrivacy(privacy: GramJs.TypePaidReactionPrivacy) : ApiPaidReactionPrivacyType {
+  if (privacy instanceof GramJs.PaidReactionPrivacyAnonymous) {
+    return { type: 'anonymous' };
+  }
+
+  if (privacy instanceof GramJs.PaidReactionPrivacyPeer) {
+    return {
+      type: 'peer',
+      peerId: getApiChatIdFromMtpPeer(privacy.peer),
+    };
+  }
+
+  return { type: 'default' };
 }

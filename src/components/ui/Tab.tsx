@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
 
 import type { MenuItemContextAction } from './ListItem';
@@ -13,6 +13,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
 
+import Icon from '../common/icons/Icon';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
 import MenuSeparator from './MenuSeparator';
@@ -21,7 +22,7 @@ import './Tab.scss';
 
 type OwnProps = {
   className?: string;
-  title: string;
+  title: TeactNode;
   isActive?: boolean;
   isBlocked?: boolean;
   badgeCount?: number;
@@ -139,11 +140,11 @@ const Tab: FC<OwnProps> = ({
       ref={tabRef}
     >
       <span className="Tab_inner">
-        {renderText(title)}
+        {typeof title === 'string' ? renderText(title) : title}
         {Boolean(badgeCount) && (
           <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
         )}
-        {isBlocked && <i className="icon icon-lock-badge blocked" />}
+        {isBlocked && <Icon name="lock-badge" className="blocked" />}
         <i className="platform" />
       </span>
 

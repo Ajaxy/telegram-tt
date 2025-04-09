@@ -30,6 +30,7 @@ import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import Link from '../../ui/Link';
 import ListItem from '../../ui/ListItem';
 
@@ -129,7 +130,7 @@ function renderSummary(
         }
         draggable={false}
       />
-      {getMessageVideo(message) && <i className="icon icon-play" />}
+      {getMessageVideo(message) && <Icon name="play" />}
       {renderMessageSummary(lang, message, true, searchQuery)}
     </span>
   );

@@ -2,6 +2,7 @@ import type { ApiUser } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { ManagementProgress } from '../../../types';
 
+import { BOT_VERIFICATION_PEERS_LIMIT } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
@@ -9,11 +10,7 @@ import { throttle } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
 import { isUserBot, isUserId } from '../../helpers';
-import {
-  addActionHandler,
-  getGlobal,
-  setGlobal,
-} from '../../index';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addUserStatuses,
   closeNewContactDialog,
@@ -187,6 +184,47 @@ addActionHandler('loadCommonChats', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
+addActionHandler('addNoPaidMessagesException', async (global, actions, payload): Promise<void> => {
+  const { userId, shouldRefundCharged } = payload;
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  const result = await callApi('addNoPaidMessagesException',
+    { user, shouldRefundCharged });
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateUserFullInfo(global, userId, {
+    settings: undefined,
+  });
+  setGlobal(global);
+});
+
+addActionHandler('openChatRefundModal', async (global, actions, payload): Promise<void> => {
+  const { userId, tabId = getCurrentTabId() } = payload;
+  const user = selectUser(global, userId);
+  if (!user) {
+    return;
+  }
+
+  const starsAmount = await callApi('fetchPaidMessagesRevenue', { user });
+  if (starsAmount === undefined) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    chatRefundModal: {
+      userId,
+      starsToRefund: starsAmount,
+    },
+  }, tabId);
+
+  setGlobal(global);
+});
+
 addActionHandler('updateContact', async (global, actions, payload): Promise<void> => {
   const {
     userId, isMuted = false, firstName, lastName, shouldSharePhoneNumber,
@@ -220,7 +258,7 @@ addActionHandler('updateContact', async (global, actions, payload): Promise<void
   }
 
   if (result) {
-    actions.loadChatSettings({ chatId: userId });
+    actions.loadPeerSettings({ peerId: userId });
     actions.loadPeerStories({ peerId: userId });
 
     global = getGlobal();
@@ -392,7 +430,7 @@ addActionHandler('reportSpam', (global, actions, payload): ActionReturnType => {
 
 addActionHandler('setEmojiStatus', async (global, actions, payload): Promise<void> => {
   const {
-    emojiStatusId, referrerWebAppKey, expires, tabId = getCurrentTabId(),
+    emojiStatus, referrerWebAppKey, tabId = getCurrentTabId(),
   } = payload;
 
   const isCurrentUserPremium = selectIsCurrentUserPremium(global);
@@ -414,7 +452,7 @@ addActionHandler('setEmojiStatus', async (global, actions, payload): Promise<voi
     return;
   }
 
-  const result = await callApi('updateEmojiStatus', emojiStatusId, expires);
+  const result = await callApi('updateEmojiStatus', emojiStatus);
 
   if (referrerWebAppKey) {
     if (!result) {
@@ -442,7 +480,7 @@ addActionHandler('setEmojiStatus', async (global, actions, payload): Promise<voi
       message: {
         key: 'BotSuggestedStatusUpdated',
       },
-      customEmojiIconId: emojiStatusId,
+      customEmojiIconId: emojiStatus.documentId,
       tabId,
     });
   }
@@ -506,5 +544,46 @@ addActionHandler('openSuggestedStatusModal', async (global, actions, payload): P
       botId,
     },
   }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadPeerSettings', async (global, actions, payload): Promise<void> => {
+  const { peerId } = payload;
+
+  const userFullInfo = selectUserFullInfo(global, peerId);
+  if (!userFullInfo) {
+    actions.loadFullUser({ userId: peerId });
+    return;
+  }
+
+  const user = selectUser(global, peerId);
+  if (!user) {
+    return;
+  }
+
+  const result = await callApi('fetchPeerSettings', user);
+  if (!result) return;
+
+  const { settings } = result;
+
+  global = getGlobal();
+  global = updateUserFullInfo(global, peerId, { settings });
+  setGlobal(global);
+});
+
+addActionHandler('markBotVerificationInfoShown', (global, actions, payload): ActionReturnType => {
+  const { peerId } = payload;
+
+  const currentPeerIds = global.settings.botVerificationShownPeerIds;
+  const newPeerIds = unique([peerId, ...currentPeerIds]).slice(0, BOT_VERIFICATION_PEERS_LIMIT);
+
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      botVerificationShownPeerIds: newPeerIds,
+    },
+  };
+
   setGlobal(global);
 });

@@ -15,7 +15,7 @@
     // Prevent loading additional 10 kB of icomoon font on initial load.
     .css-icon-down {
       position: absolute;
-      top: 1.125rem;
+      top: 1rem;
       right: 1rem;
       width: 0.75rem;
       height: 0.75rem;
@@ -29,7 +29,7 @@
       &.open {
         border-color: var(--color-primary);
         transform: scaleY(-1) rotate(45deg);
-        top: 1.5rem;
+        top: 1.3125rem;
       }
     }
   }

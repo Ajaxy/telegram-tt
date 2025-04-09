@@ -1,7 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiError, ApiUser, ApiUsername,
+  ApiChat, ApiError, ApiPeer, ApiUser, ApiUsername,
 } from '../../types';
 
 import { ACCEPTABLE_USERNAME_ERRORS } from '../../../config';
@@ -280,8 +280,8 @@ export function hideAllChatJoinRequests({
   });
 }
 
-export function hideChatReportPane(chat: ApiChat) {
-  const { id, accessHash } = chat;
+export function hidePeerSettingsBar(peer: ApiPeer) {
+  const { id, accessHash } = peer;
 
   return invokeRequest(new GramJs.messages.HidePeerSettingsBar({
     peer: buildInputPeer(id, accessHash),

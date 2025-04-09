@@ -9,25 +9,30 @@ import type {
   ApiMediaAreaChannelPost,
   ApiPeer, ApiStealthMode, ApiStory, ApiTypeStory,
 } from '../../api/types';
-import type { IDimensions } from '../../global/types';
+import type { IDimensions } from '../../types';
+import type { IconName } from '../../types/icons';
 import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
-import { getSenderTitle, isChatChannel, isUserId } from '../../global/helpers';
+import { isChatChannel, isUserId } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectChat,
   selectIsCurrentUserPremium,
   selectPeer,
+  selectPeerPaidMessagesStars,
   selectPeerStory,
   selectPerformanceSettingsValue,
   selectTabState,
   selectUser,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import { formatMediaDuration, formatRelativeTime } from '../../util/dates/dateFormat';
+import { formatMediaDuration, formatRelativePastTime } from '../../util/dates/dateFormat';
 import download from '../../util/download';
+import { formatStarsAsIcon } from '../../util/localization/format';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
 import { IS_SAFARI } from '../../util/windowEnvironment';
@@ -41,6 +46,7 @@ import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
 import useMediaTransitionDeprecated from '../../hooks/useMediaTransitionDeprecated';
@@ -72,8 +78,6 @@ interface OwnProps {
   storyId: number;
   dimensions: IDimensions;
   // eslint-disable-next-line react/no-unused-prop-types
-  isReportModalOpen?: boolean;
-  // eslint-disable-next-line react/no-unused-prop-types
   isDeleteModalOpen?: boolean;
   isPrivateStories?: boolean;
   isArchivedStories?: boolean;
@@ -95,10 +99,11 @@ interface StateProps {
   storyChangelogUserId?: string;
   viewersExpirePeriod: number;
   isChatExist?: boolean;
-  areChatSettingsLoaded?: boolean;
+  arePeerSettingsLoaded?: boolean;
   isCurrentUserPremium?: boolean;
   stealthMode: ApiStealthMode;
   withHeaderAnimation?: boolean;
+  paidMessagesStars?: number;
 }
 
 const VIDEO_MIN_READY_STATE = IS_SAFARI ? 4 : 3;
@@ -123,7 +128,7 @@ function Story({
   storyChangelogUserId,
   viewersExpirePeriod,
   isChatExist,
-  areChatSettingsLoaded,
+  arePeerSettingsLoaded,
   getIsAnimating,
   isCurrentUserPremium,
   stealthMode,
@@ -131,6 +136,7 @@ function Story({
   onDelete,
   onClose,
   onReport,
+  paidMessagesStars,
 }: OwnProps & StateProps) {
   const {
     viewStory,
@@ -144,14 +150,15 @@ function Story({
     openChat,
     showNotification,
     openStoryPrivacyEditor,
-    loadChatSettings,
+    loadPeerSettings,
     fetchChat,
     loadStoryViews,
     toggleStealthModal,
   } = getActions();
   const serverTime = getServerTime();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const { isMobile } = useAppLayout();
   const [isComposerHasFocus, markComposerHasFocus, unmarkComposerHasFocus] = useFlag(false);
   const [isStoryPlaybackRequested, playStory, pauseStory] = useFlag(false);
@@ -199,7 +206,7 @@ function Story({
     isOut && (story!.date + viewersExpirePeriod) < getServerTime(),
   );
 
-  const forwardSenderTitle = forwardSender ? getSenderTitle(lang, forwardSender)
+  const forwardSenderTitle = forwardSender ? getPeerTitle(oldLang, forwardSender)
     : (isLoadedStory && story.forwardInfo?.fromName);
 
   const canCopyLink = Boolean(
@@ -280,10 +287,10 @@ function Story({
     }
   }, [isChatExist, peerId]);
   useEffect(() => {
-    if (isChatExist && !areChatSettingsLoaded) {
-      loadChatSettings({ chatId: peerId });
+    if (isChatExist && !arePeerSettingsLoaded) {
+      loadPeerSettings({ peerId });
     }
-  }, [areChatSettingsLoaded, isChatExist, peerId]);
+  }, [arePeerSettingsLoaded, isChatExist, peerId]);
 
   const handlePauseStory = useLastCallback(() => {
     if (isVideo) {
@@ -492,16 +499,16 @@ function Story({
       : story.isForContacts ? 'contacts' : (story.isForCloseFriends ? 'closeFriends' : 'nobody');
 
     let message;
-    const myName = getSenderTitle(lang, peer);
+    const myName = getPeerTitle(oldLang, peer);
     switch (visibility) {
       case 'nobody':
-        message = lang('StorySelectedContactsHint', myName);
+        message = oldLang('StorySelectedContactsHint', myName);
         break;
       case 'contacts':
-        message = lang('StoryContactsHint', myName);
+        message = oldLang('StoryContactsHint', myName);
         break;
       case 'closeFriends':
-        message = lang('StoryCloseFriendsHint', myName);
+        message = oldLang('StoryCloseFriendsHint', myName);
         break;
       default:
         return;
@@ -512,7 +519,7 @@ function Story({
   const handleVolumeMuted = useLastCallback(() => {
     if (noSound) {
       showNotification({
-        message: lang('Story.TooltipVideoHasNoSound'),
+        message: oldLang('Story.TooltipVideoHasNoSound'),
       });
       return;
     }
@@ -525,8 +532,8 @@ function Story({
     if (stealthMode.activeUntil && getServerTime() < stealthMode.activeUntil) {
       const diff = stealthMode.activeUntil - getServerTime();
       showNotification({
-        title: lang('StealthModeOn'),
-        message: lang('Story.ToastStealthModeActiveText', formatMediaDuration(diff)),
+        title: oldLang('StealthModeOn'),
+        message: oldLang('Story.ToastStealthModeActiveText', formatMediaDuration(diff)),
         duration: STEALTH_MODE_NOTIFICATION_DURATION,
       });
       return;
@@ -544,9 +551,9 @@ function Story({
     if (!isDeletedStory) return;
 
     showNotification({
-      message: lang('StoryNotFound'),
+      message: oldLang('StoryNotFound'),
     });
-  }, [lang, isDeletedStory]);
+  }, [oldLang, isDeletedStory]);
 
   const MenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => {
@@ -558,13 +565,13 @@ function Story({
           color="translucent-white"
           onClick={onTrigger}
           className={buildClassName(styles.button, isOpen && 'active')}
-          ariaLabel={lang('AccDescrOpenMenu2')}
+          ariaLabel={oldLang('AccDescrOpenMenu2')}
         >
-          <i className={buildClassName('icon icon-more')} aria-hidden />
+          <Icon name="more" />
         </Button>
       );
     };
-  }, [isMobile, lang]);
+  }, [isMobile, oldLang]);
 
   function renderStoriesTabs() {
     return (
@@ -587,7 +594,7 @@ function Story({
   function renderStoryPrivacyButton() {
     if (!isUserStory) return undefined;
 
-    let privacyIcon = 'channel-filled';
+    let privacyIcon: IconName = 'channel-filled';
     const gradient: Record<string, [string, string]> = {
       'channel-filled': ['#50ABFF', '#007AFF'],
       'user-filled': ['#C36EFF', '#8B60FA'],
@@ -627,8 +634,8 @@ function Story({
         onClick={isOut ? handleInfoPrivacyEdit : handleInfoPrivacyClick}
         style={`--color-from: ${gradient[privacyIcon][0]}; --color-to: ${gradient[privacyIcon][1]}`}
       >
-        <i className={`icon icon-${privacyIcon}`} aria-hidden />
-        {isOut && <i className="icon icon-next" aria-hidden />}
+        <Icon name={privacyIcon} />
+        {isOut && <Icon name="next" />}
       </div>
     );
   }
@@ -643,7 +650,7 @@ function Story({
         />
         <div className={styles.senderMeta}>
           <span onClick={handleOpenChat} className={styles.senderName}>
-            {renderText(getSenderTitle(lang, peer) || '')}
+            {renderText(getPeerTitle(oldLang, peer) || '')}
           </span>
           <div className={styles.storyMetaRow}>
             {forwardSenderTitle && (
@@ -668,15 +675,15 @@ function Story({
               >
                 <Avatar peer={fromPeer} size="micro" />
                 <span className={styles.headerTitle}>
-                  {renderText(getSenderTitle(lang, fromPeer) || '')}
+                  {renderText(getPeerTitle(oldLang, fromPeer) || '')}
                 </span>
               </span>
             )}
             {story && 'date' in story && (
-              <span className={styles.storyMeta}>{formatRelativeTime(lang, serverTime, story.date)}</span>
+              <span className={styles.storyMeta}>{formatRelativePastTime(oldLang, serverTime, story.date)}</span>
             )}
             {isLoadedStory && story.isEdited && (
-              <span className={styles.storyMeta}>{lang('Story.HeaderEdited')}</span>
+              <span className={styles.storyMeta}>{oldLang('Story.HeaderEdited')}</span>
             )}
           </div>
         </div>
@@ -702,15 +709,9 @@ function Story({
               color="translucent-white"
               disabled={!hasFullData}
               onClick={handleVolumeMuted}
-              ariaLabel={lang('Volume')}
+              ariaLabel={oldLang('Volume')}
             >
-              <i
-                className={buildClassName(
-                  'icon',
-                  isMuted || noSound ? 'icon-speaker-muted-story' : 'icon-speaker-story',
-                )}
-                aria-hidden
-              />
+              <Icon name={(isMuted || noSound) ? 'speaker-muted-story' : 'speaker-story'} />
             </Button>
           )}
           <DropdownMenu
@@ -720,44 +721,59 @@ function Story({
             onOpen={handleDropdownMenuOpen}
             onClose={handleDropdownMenuClose}
           >
-            {canCopyLink && <MenuItem icon="copy" onClick={handleCopyStoryLink}>{lang('CopyLink')}</MenuItem>}
+            {canCopyLink && <MenuItem icon="copy" onClick={handleCopyStoryLink}>{oldLang('CopyLink')}</MenuItem>}
             {canPinToProfile && (
               <MenuItem icon="save-story" onClick={handlePinClick}>
-                {lang(isUserStory ? 'StorySave' : 'SaveToPosts')}
+                {oldLang(isUserStory ? 'StorySave' : 'SaveToPosts')}
               </MenuItem>
             )}
             {canUnpinFromProfile && (
               <MenuItem icon="delete" onClick={handleUnpinClick}>
-                {lang(isUserStory ? 'ArchiveStory' : 'RemoveFromPosts')}
+                {oldLang(isUserStory ? 'ArchiveStory' : 'RemoveFromPosts')}
               </MenuItem>
             )}
             {canDownload && (
               <MenuItem icon="download" disabled={!downloadMediaData} onClick={handleDownload}>
-                {lang('lng_media_download')}
+                {oldLang('lng_media_download')}
               </MenuItem>
             )}
             {!isOut && isUserStory && (
-              <MenuItem icon="eye-closed-outline" onClick={handleOpenStealthModal}>
-                {lang('StealthMode')}
+              <MenuItem icon="eye-crossed-outline" onClick={handleOpenStealthModal}>
+                {oldLang('StealthMode')}
               </MenuItem>
             )}
-            {!isOut && <MenuItem icon="flag" onClick={handleReportStoryClick}>{lang('lng_report_story')}</MenuItem>}
-            {isOut && <MenuItem icon="delete" destructive onClick={handleDeleteStoryClick}>{lang('Delete')}</MenuItem>}
+            {!isOut && <MenuItem icon="flag" onClick={handleReportStoryClick}>{oldLang('lng_report_story')}</MenuItem>}
+            {isOut && (
+              <MenuItem
+                icon="delete"
+                destructive
+                onClick={handleDeleteStoryClick}
+              >{oldLang('Delete')}
+              </MenuItem>
+            )}
           </DropdownMenu>
           <Button
             className={buildClassName(styles.button, styles.closeButton)}
             round
             size="tiny"
             color="translucent-white"
-            ariaLabel={lang('Close')}
+            ariaLabel={oldLang('Close')}
             onClick={onClose}
           >
-            <i className={buildClassName('icon icon-close')} aria-hidden />
+            <Icon name="close" />
           </Button>
         </div>
       </div>
     );
   }
+
+  const inputPlaceholder = paidMessagesStars
+    ? lang('ComposerPlaceholderPaidReply', {
+      amount: formatStarsAsIcon(lang, paidMessagesStars, { asFont: true, className: 'placeholder-star-icon' }),
+    }, {
+      withNodes: true,
+    })
+    : oldLang(isChatStory ? 'ReplyToGroupStory' : 'ReplyPrivately');
 
   return (
     <div
@@ -827,13 +843,13 @@ function Story({
               type="button"
               className={buildClassName(styles.navigate, styles.prev)}
               onClick={handleOpenPrevStory}
-              aria-label={lang('Previous')}
+              aria-label={oldLang('Previous')}
             />
             <button
               type="button"
               className={buildClassName(styles.navigate, styles.next)}
               onClick={handleOpenNextStory}
-              aria-label={lang('Next')}
+              aria-label={oldLang('Next')}
             />
           </>
         )}
@@ -853,7 +869,7 @@ function Story({
                 withStory
                 storyViewerMode="disabled"
               />
-              <div className={styles.name}>{renderText(getSenderTitle(lang, peer) || '')}</div>
+              <div className={styles.name}>{renderText(getPeerTitle(oldLang, peer) || '')}</div>
             </div>
           </div>
         )}
@@ -868,7 +884,7 @@ function Story({
           role="button"
           className={buildClassName(styles.captionBackdrop, captionBackdropTransitionClassNames)}
           onClick={() => foldCaption()}
-          aria-label={lang('Close')}
+          aria-label={oldLang('Close')}
         />
       )}
       {hasText && <div className={buildClassName(styles.captionGradient, captionAppearanceAnimationClassNames)} />}
@@ -895,7 +911,7 @@ function Story({
           editableInputId={EDITABLE_STORY_INPUT_ID}
           inputId="story-input-text"
           className={buildClassName(styles.composer, composerAppearanceAnimationClassNames)}
-          inputPlaceholder={lang(isChatStory ? 'ReplyToGroupStory' : 'ReplyPrivately')}
+          inputPlaceholder={inputPlaceholder}
           onForward={canShare ? handleForwardClick : undefined}
           onFocus={markComposerHasFocus}
           onBlur={unmarkComposerHasFocus}
@@ -908,12 +924,12 @@ function Story({
 export default memo(withGlobal<OwnProps>((global, {
   peerId,
   storyId,
-  isReportModalOpen,
   isDeleteModalOpen,
 }): StateProps => {
   const { appConfig } = global;
   const user = selectUser(global, peerId);
   const chat = selectChat(global, peerId);
+  const userFullInfo = selectUserFullInfo(global, peerId);
   const tabState = selectTabState(global);
   const {
     storyViewer: {
@@ -927,13 +943,17 @@ export default memo(withGlobal<OwnProps>((global, {
     premiumModal,
     safeLinkModalUrl,
     mapModal,
+    reportModal,
+    giftInfoModal,
+    isPaymentMessageConfirmDialogOpen,
   } = tabState;
   const { isOpen: isPremiumModalOpen } = premiumModal || {};
   const story = selectPeerStory(global, peerId, storyId);
   const isLoadedStory = story && 'content' in story;
   const shouldForcePause = Boolean(
-    viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
-    || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal,
+    isPaymentMessageConfirmDialogOpen
+    || viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || reportModal || isPrivacyModalOpen
+    || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal || giftInfoModal,
   );
 
   const forwardInfo = isLoadedStory ? story.forwardInfo : undefined;
@@ -944,6 +964,7 @@ export default memo(withGlobal<OwnProps>((global, {
   const withHeaderAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
   const fromPeer = isLoadedStory && story.fromId ? selectPeer(global, story.fromId) : undefined;
+  const paidMessagesStars = selectPeerPaidMessagesStars(global, peerId);
 
   return {
     peer: (user || chat)!,
@@ -957,8 +978,9 @@ export default memo(withGlobal<OwnProps>((global, {
     storyChangelogUserId: appConfig!.storyChangelogUserId,
     viewersExpirePeriod: appConfig!.storyExpirePeriod + appConfig!.storyViewersExpirePeriod,
     isChatExist: Boolean(chat),
-    areChatSettingsLoaded: Boolean(chat?.settings),
+    arePeerSettingsLoaded: Boolean(userFullInfo?.settings),
     stealthMode: global.stories.stealthMode,
     withHeaderAnimation,
+    paidMessagesStars,
   };
 })(Story));

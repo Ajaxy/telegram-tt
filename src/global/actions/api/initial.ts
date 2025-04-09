@@ -69,7 +69,7 @@ addActionHandler('setAuthPhoneNumber', (global, actions, payload): ActionReturnT
   return {
     ...global,
     authIsLoading: true,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 
@@ -81,7 +81,7 @@ addActionHandler('setAuthCode', (global, actions, payload): ActionReturnType => 
   return {
     ...global,
     authIsLoading: true,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 
@@ -93,7 +93,7 @@ addActionHandler('setAuthPassword', (global, actions, payload): ActionReturnType
   return {
     ...global,
     authIsLoading: true,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 
@@ -124,7 +124,7 @@ addActionHandler('signUp', (global, actions, payload): ActionReturnType => {
   return {
     ...global,
     authIsLoading: true,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 
@@ -133,7 +133,7 @@ addActionHandler('returnToAuthPhoneNumber', (global): ActionReturnType => {
 
   return {
     ...global,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 
@@ -143,7 +143,7 @@ addActionHandler('goToAuthQrCode', (global): ActionReturnType => {
   return {
     ...global,
     authIsLoadingQrCode: true,
-    authError: undefined,
+    authErrorKey: undefined,
   };
 });
 

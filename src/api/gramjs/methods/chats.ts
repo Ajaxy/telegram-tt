@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
-import type { ApiDraft } from '../../../global/types';
 import type {
   ApiChat,
   ApiChatAdminRights,
@@ -9,10 +9,12 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatReactions,
+  ApiDraft,
   ApiGroupCall,
   ApiMessage,
   ApiMissingInvitedUser,
   ApiPeer,
+  ApiPeerNotifySettings,
   ApiPhoto,
   ApiTopic,
   ApiUser,
@@ -30,7 +32,7 @@ import {
   SERVICE_NOTIFICATIONS_USER_ID,
   TOPICS_SLICE,
 } from '../../../config';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByKey, omitUndefined } from '../../../util/iteratees';
 import {
   buildApiChatBotCommands,
   buildApiChatFolder,
@@ -42,18 +44,18 @@ import {
   buildApiChatlistExportedInvite,
   buildApiChatlistInvite,
   buildApiChatReactions,
-  buildApiChatSettings,
   buildApiMissingInvitedUser,
   buildApiTopic,
   buildChatMember,
   buildChatMembers,
   getPeerKey,
 } from '../apiBuilders/chats';
-import { buildApiPhoto } from '../apiBuilders/common';
+import { buildApiBotVerification, buildApiPhoto } from '../apiBuilders/common';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
+import { buildApiPeerNotifySettings } from '../apiBuilders/misc';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildStickerSet } from '../apiBuilders/symbols';
-import { buildApiUser, buildApiUserStatuses } from '../apiBuilders/users';
+import { buildApiPeerSettings, buildApiUser, buildApiUserStatuses } from '../apiBuilders/users';
 import {
   buildChatAdminRights,
   buildChatBannedRights,
@@ -68,8 +70,8 @@ import {
 } from '../gramjsBuilders';
 import {
   addPhotoToLocalDb,
-  isChatFolder,
-} from '../helpers';
+} from '../helpers/localDb';
+import { isChatFolder } from '../helpers/misc';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import {
@@ -95,6 +97,7 @@ type ChatListData = {
   orderedPinnedIds: string[] | undefined;
   totalChatCount: number;
   messages: ApiMessage[];
+  notifyExceptionById: Record<string, ApiPeerNotifySettings>;
   lastMessageByChatId: Record<string, number>;
   nextOffsetId?: number;
   nextOffsetPeerId?: string;
@@ -149,6 +152,7 @@ export async function fetchChats({
 
   const chats: ApiChat[] = [];
   const draftsById: Record<string, ApiDraft> = {};
+  const notifyExceptionById: Record<string, ApiPeerNotifySettings> = {};
 
   const dialogs = (resultPinned?.dialogs || []).concat(result.dialogs);
 
@@ -185,7 +189,12 @@ export async function fetchChats({
 
     chats.push(chat);
 
-    scheduleMutedChatUpdate(chat.id, chat.muteUntil, sendApiUpdate);
+    const notifySettings = buildApiPeerNotifySettings(dialog.notifySettings);
+    if (Object.values(omitUndefined(notifySettings)).length) {
+      notifyExceptionById[chat.id] = notifySettings;
+
+      scheduleMutedChatUpdate(chat.id, notifySettings.mutedUntil, sendApiUpdate);
+    }
 
     if (withPinned && dialog.pinned) {
       orderedPinnedIds.push(chat.id);
@@ -228,6 +237,7 @@ export async function fetchChats({
     totalChatCount,
     lastMessageByChatId,
     messages,
+    notifyExceptionById,
     nextOffsetId,
     nextOffsetPeerId,
     nextOffsetDate,
@@ -326,6 +336,7 @@ export async function fetchSavedChats({
     lastMessageByChatId,
     messages,
     draftsById: {},
+    notifyExceptionById: {},
     nextOffsetId,
     nextOffsetPeerId,
     nextOffsetDate,
@@ -342,8 +353,8 @@ export function fetchFullChat(chat: ApiChat) {
     : getFullChatInfo(id);
 }
 
-export async function fetchChatSettings(chat: ApiChat) {
-  const { id, accessHash } = chat;
+export async function fetchPeerSettings(peer: ApiPeer) {
+  const { id, accessHash } = peer;
 
   const result = await invokeRequest(new GramJs.messages.GetPeerSettings({
     peer: buildInputPeer(id, accessHash),
@@ -356,7 +367,7 @@ export async function fetchChatSettings(chat: ApiChat) {
   }
 
   return {
-    settings: buildApiChatSettings(result.settings),
+    settings: buildApiPeerSettings(result.settings),
   };
 }
 
@@ -473,7 +484,9 @@ export async function requestChatUpdate({
 
   applyState(result.state);
 
-  scheduleMutedChatUpdate(chatUpdate.id, chatUpdate.muteUntil, sendApiUpdate);
+  const notifySettings = buildApiPeerNotifySettings(dialog.notifySettings);
+
+  scheduleMutedChatUpdate(chatUpdate.id, notifySettings.mutedUntil, sendApiUpdate);
 }
 
 export function saveDraft({
@@ -603,9 +616,12 @@ async function getFullChannelInfo(
     emojiset,
     boostsApplied,
     boostsUnrestrict,
+    botVerification,
     canViewRevenue: canViewMonetization,
     paidReactionsAvailable,
     hasScheduled,
+    stargiftsCount,
+    stargiftsAvailable,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -616,12 +632,12 @@ async function getFullChannelInfo(
     ? exportedInvite.link
     : undefined;
 
-  const { members, userStatusesById } = (canViewParticipants && await fetchMembers(id, accessHash)) || {};
+  const { members, userStatusesById } = (canViewParticipants && await fetchMembers({ chat })) || {};
   const { members: kickedMembers, userStatusesById: bannedStatusesById } = (
-    canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'kicked')
+    canViewParticipants && adminRights && await fetchMembers({ chat, memberFilter: 'kicked' })
   ) || {};
   const { members: adminMembers, userStatusesById: adminStatusesById } = (
-    canViewParticipants && await fetchMembers(id, accessHash, 'admin')
+    canViewParticipants && await fetchMembers({ chat, memberFilter: 'admin' })
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
   const memberInfoRequest = !chat.isNotJoined && chat.type === 'chatTypeChannel'
@@ -629,7 +645,7 @@ async function getFullChannelInfo(
   const memberInfo = memberInfoRequest?.member;
   const joinInfo = memberInfo?.joinedDate ? {
     joinedDate: memberInfo.joinedDate,
-    inviter: memberInfo.inviterId,
+    inviterId: memberInfo.inviterId,
     isViaRequest: memberInfo.isViaRequest,
   } : undefined;
 
@@ -695,8 +711,11 @@ async function getFullChannelInfo(
       hasPinnedStories: Boolean(storiesPinnedAvailable),
       boostsApplied,
       boostsToUnrestrict: boostsUnrestrict,
+      botVerification: botVerification && buildApiBotVerification(botVerification),
       isPaidReactionAvailable: paidReactionsAvailable,
       hasScheduledMessages: hasScheduled,
+      starGiftCount: stargiftsCount,
+      areStarGiftsAvailable: Boolean(stargiftsAvailable),
     },
     chats,
     userStatusesById: statusesById,
@@ -715,25 +734,26 @@ async function getFullChannelInfo(
   };
 }
 
-export async function updateChatMutedState({
-  chat, isMuted, muteUntil = 0,
+export function updateChatNotifySettings({
+  chat, settings,
 }: {
-  chat: ApiChat; isMuted: boolean; muteUntil?: number;
+  chat: ApiChat; settings: Partial<ApiPeerNotifySettings>;
 }) {
-  if (isMuted && !muteUntil) {
-    muteUntil = MAX_INT_32;
-  }
-  await invokeRequest(new GramJs.account.UpdateNotifySettings({
+  invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyPeer({
       peer: buildInputPeer(chat.id, chat.accessHash),
     }),
-    settings: new GramJs.InputPeerNotifySettings({ muteUntil }),
+    settings: new GramJs.InputPeerNotifySettings({
+      muteUntil: settings.mutedUntil,
+      showPreviews: settings.shouldShowPreviews,
+      silent: settings.isSilentPosting,
+    }),
   }));
 
   sendApiUpdate({
-    '@type': 'updateNotifyExceptions',
+    '@type': 'updateChatNotifySettings',
     chatId: chat.id,
-    isMuted,
+    settings,
   });
 
   void requestChatUpdate({
@@ -742,27 +762,29 @@ export async function updateChatMutedState({
   });
 }
 
-export async function updateTopicMutedState({
-  chat, topicId, isMuted, muteUntil = 0,
+export function updateTopicMutedState({
+  chat, topicId, isMuted, mutedUntil = 0,
 }: {
-  chat: ApiChat; topicId: number; isMuted: boolean; muteUntil?: number;
+  chat: ApiChat; topicId: number; isMuted?: boolean; mutedUntil?: number;
 }) {
-  if (isMuted && !muteUntil) {
-    muteUntil = MAX_INT_32;
+  if (isMuted && !mutedUntil) {
+    mutedUntil = MAX_INT_32;
   }
-  await invokeRequest(new GramJs.account.UpdateNotifySettings({
+  invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyForumTopic({
       peer: buildInputPeer(chat.id, chat.accessHash),
       topMsgId: topicId,
     }),
-    settings: new GramJs.InputPeerNotifySettings({ muteUntil }),
+    settings: new GramJs.InputPeerNotifySettings({ muteUntil: mutedUntil }),
   }));
 
   sendApiUpdate({
-    '@type': 'updateTopicNotifyExceptions',
+    '@type': 'updateTopicNotifySettings',
     chatId: chat.id,
     topicId,
-    isMuted,
+    settings: {
+      mutedUntil,
+    },
   });
 
   // TODO[forums] Request forum topic thread update
@@ -833,14 +855,15 @@ export function joinChannel({
 }
 
 export function deleteChatUser({
-  chat, user,
+  chat, user, shouldRevokeHistory,
 }: {
-  chat: ApiChat; user: ApiUser;
+  chat: ApiChat; user: ApiUser; shouldRevokeHistory?: boolean;
 }) {
   if (chat.type !== 'chatTypeBasicGroup') return undefined;
   return invokeRequest(new GramJs.messages.DeleteChatUser({
     chatId: buildInputEntity(chat.id, chat.accessHash) as BigInt.BigInteger,
     userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    revokeHistory: shouldRevokeHistory || undefined,
   }), {
     shouldReturnTrue: true,
   });
@@ -1278,22 +1301,31 @@ export function toggleSignatures({
 type ChannelMembersFilter =
   'kicked'
   | 'admin'
-  | 'recent';
+  | 'recent'
+  | 'search';
 
-export async function fetchMembers(
-  chatId: string,
-  accessHash: string,
-  memberFilter: ChannelMembersFilter = 'recent',
-  offset?: number,
-) {
+export async function fetchMembers({
+  chat,
+  memberFilter = 'recent',
+  offset,
+  query = '',
+} : {
+  chat: ApiChat;
+  memberFilter?: ChannelMembersFilter;
+  offset?: number;
+  query?: string;
+}) {
   let filter: GramJs.TypeChannelParticipantsFilter;
 
   switch (memberFilter) {
     case 'kicked':
-      filter = new GramJs.ChannelParticipantsKicked({ q: '' });
+      filter = new GramJs.ChannelParticipantsKicked({ q: query });
       break;
     case 'admin':
       filter = new GramJs.ChannelParticipantsAdmins();
+      break;
+    case 'search':
+      filter = new GramJs.ChannelParticipantsSearch({ q: query });
       break;
     default:
       filter = new GramJs.ChannelParticipantsRecent();
@@ -1301,12 +1333,12 @@ export async function fetchMembers(
   }
 
   const result = await invokeRequest(new GramJs.channels.GetParticipants({
-    channel: buildInputEntity(chatId, accessHash) as GramJs.InputChannel,
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
     filter,
     offset,
     limit: MEMBERS_LOAD_SLICE,
   }), {
-    abortControllerChatId: chatId,
+    abortControllerChatId: chat.id,
   });
 
   if (!result || result instanceof GramJs.channels.ChannelParticipantsNotModified) {
@@ -1458,11 +1490,12 @@ export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
     if (addChatUsersResult) {
       return addChatUsersResult.flat().filter(Boolean);
     }
-  } catch (err) {
+  } catch (err: unknown) {
+    const message = err instanceof RPCError ? err.errorMessage : (err as Error).message;
     sendApiUpdate({
       '@type': 'error',
       error: {
-        message: (err as Error).message,
+        message,
       },
     });
   }

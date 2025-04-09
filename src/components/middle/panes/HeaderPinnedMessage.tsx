@@ -2,8 +2,7 @@ import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';
-import type { MessageListType } from '../../../global/types';
-import type { ThreadId } from '../../../types';
+import type { MessageListType, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
@@ -13,8 +12,8 @@ import {
   getMessageMediaHash,
   getMessageSingleInlineButton,
   getMessageVideo,
-  getSenderTitle,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import {
   selectAllowedMessageActionsSlow,
   selectChat,
@@ -56,6 +55,7 @@ import PinnedMessageNavigation from '../PinnedMessageNavigation';
 
 import styles from './HeaderPinnedMessage.module.scss';
 
+const MAX_LENGTH = 256;
 const SHOW_LOADER_DELAY = 450;
 const EMOJI_SIZE = 1.125 * REM;
 
@@ -111,7 +111,7 @@ const HeaderPinnedMessage = ({
     ? pinnedMessageIds.length : (pinnedMessageIds ? 1 : 0);
   const pinnedMessageNumber = Math.max(pinnedMessagesCount - currentPinnedIndex, 1);
 
-  const topMessageTitle = topMessageSender ? getSenderTitle(lang, topMessageSender) : undefined;
+  const topMessageTitle = topMessageSender ? getPeerTitle(lang, topMessageSender) : undefined;
 
   const video = pinnedMessage && getMessageVideo(pinnedMessage);
   const gif = video?.isGif ? video : undefined;
@@ -313,6 +313,7 @@ const HeaderPinnedMessage = ({
             <p dir="auto" className={styles.summary}>
               <MessageSummary
                 message={renderingPinnedMessage}
+                truncateLength={MAX_LENGTH}
                 noEmoji={Boolean(mediaThumbnail)}
                 emojiSize={EMOJI_SIZE}
               />

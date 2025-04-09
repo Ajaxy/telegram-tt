@@ -1,18 +1,22 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
+import type { ThreadId } from '../../types';
+
 import { GENERAL_TOPIC_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { getTopicDefaultIcon } from '../../util/forumColors';
 import { getFirstLetters } from '../../util/textFormat';
 import renderText from './helpers/renderText';
 
+import Icon from './icons/Icon';
+
 import styles from './TopicDefaultIcon.module.scss';
 
 type OwnProps = {
   className?: string;
   letterClassName?: string;
-  topicId: number;
+  topicId: ThreadId;
   iconColor?: number;
   title: string;
   onClick?: NoneToVoidFunction;
@@ -30,8 +34,9 @@ const TopicDefaultIcon: FC<OwnProps> = ({
 
   if (topicId === GENERAL_TOPIC_ID) {
     return (
-      <i
-        className={buildClassName(styles.root, className, 'icon', 'icon-hashtag', 'general-forum-icon')}
+      <Icon
+        name="hashtag"
+        className={buildClassName(styles.root, className, 'general-forum-icon')}
         onClick={onClick}
       />
     );

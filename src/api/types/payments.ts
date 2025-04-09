@@ -1,15 +1,16 @@
-import type { ApiPremiumSection } from '../../global/types';
+import type { PREMIUM_FEATURE_SECTIONS } from '../../config';
 import type { ApiWebDocument } from './bots';
-import type { ApiChat } from './chats';
+import type { ApiChat, ApiPeer } from './chats';
 import type {
   ApiDocument,
   ApiFormattedText,
   ApiInvoice,
   ApiMessageEntity,
   ApiPaymentCredentials,
-  BoughtPaidMedia,
 } from './messages';
-import type { ApiStarsSubscriptionPricing } from './misc';
+import type {
+  ApiInputSavedStarGift, ApiRequestInputSavedStarGift, ApiStarsGiveawayWinnerOption,
+} from './stars';
 import type { StatisticsOverviewPercentage } from './statistics';
 import type { ApiUser } from './users';
 
@@ -116,6 +117,8 @@ export interface ApiReceiptRegular {
 
 export type ApiReceipt = ApiReceiptRegular | ApiReceiptStars;
 
+export type ApiPremiumSection = typeof PREMIUM_FEATURE_SECTIONS[number];
+
 export interface ApiPremiumPromo {
   videoSections: ApiPremiumSection[];
   videos: ApiDocument[];
@@ -187,31 +190,6 @@ export type ApiInputStorePaymentStarsGiveaway = {
 
 export type ApiInputStorePaymentPurpose = ApiInputStorePaymentGiveaway | ApiInputStorePaymentGiftcode |
 ApiInputStorePaymentStarsTopup | ApiInputStorePaymentStarsGift | ApiInputStorePaymentStarsGiveaway;
-
-export type ApiStarGift = {
-  isLimited?: true;
-  id: string;
-  stickerId: string;
-  stars: number;
-  availabilityRemains?: number;
-  availabilityTotal?: number;
-  starsToConvert: number;
-  isSoldOut?: true;
-  firstSaleDate?: number;
-  lastSaleDate?: number;
-};
-
-export interface ApiUserStarGift {
-  isNameHidden?: boolean;
-  isUnsaved?: boolean;
-  fromId?: string;
-  date: number;
-  gift: ApiStarGift;
-  message?: ApiFormattedText;
-  messageId?: number;
-  starsToConvert?: number;
-  isConverted?: boolean; // Local field, used for Action Message
-}
 
 export interface ApiPremiumGiftCodeOption {
   users: number;
@@ -302,104 +280,6 @@ export type ApiCheckedGiftCode = {
   usedAt?: number;
 };
 
-export interface ApiStarsAmount {
-  amount: number;
-  nanos: number;
-}
-
-export interface ApiStarsTransactionPeerUnsupported {
-  type: 'unsupported';
-}
-
-export interface ApiStarsTransactionPeerAppStore {
-  type: 'appStore';
-}
-
-export interface ApiStarsTransactionPeerPlayMarket {
-  type: 'playMarket';
-}
-
-export interface ApiStarsTransactionPeerPremiumBot {
-  type: 'premiumBot';
-}
-
-export interface ApiStarsTransactionPeerFragment {
-  type: 'fragment';
-}
-
-export interface ApiStarsTransactionPeerAds {
-  type: 'ads';
-}
-
-export interface ApiStarsTransactionApi {
-  type: 'api';
-}
-
-export interface ApiStarsTransactionPeerPeer {
-  type: 'peer';
-  id: string;
-}
-
-export type ApiStarsTransactionPeer =
-| ApiStarsTransactionPeerUnsupported
-| ApiStarsTransactionPeerAppStore
-| ApiStarsTransactionPeerPlayMarket
-| ApiStarsTransactionPeerPremiumBot
-| ApiStarsTransactionPeerFragment
-| ApiStarsTransactionPeerAds
-| ApiStarsTransactionApi
-| ApiStarsTransactionPeerPeer;
-
-export interface ApiStarsTransaction {
-  id?: string;
-  peer: ApiStarsTransactionPeer;
-  messageId?: number;
-  stars: ApiStarsAmount;
-  isRefund?: true;
-  isGift?: true;
-  starGift?: ApiStarGift;
-  giveawayPostId?: number;
-  isMyGift?: true; // Used only for outgoing star gift messages
-  isReaction?: true;
-  hasFailed?: true;
-  isPending?: true;
-  date: number;
-  title?: string;
-  description?: string;
-  photo?: ApiWebDocument;
-  extendedMedia?: BoughtPaidMedia[];
-  subscriptionPeriod?: number;
-  starRefCommision?: number;
-}
-
-export interface ApiStarsSubscription {
-  id: string;
-  peerId: string;
-  until: number;
-  pricing: ApiStarsSubscriptionPricing;
-  isCancelled?: true;
-  canRefulfill?: true;
-  hasMissingBalance?: true;
-  chatInviteHash?: string;
-  hasBotCancelled?: true;
-  title?: string;
-  photo?: ApiWebDocument;
-  invoiceSlug?: string;
-}
-
-export interface ApiStarTopupOption {
-  isExtended?: true;
-  stars: number;
-  currency: string;
-  amount: number;
-}
-
-export interface ApiStarsGiveawayWinnerOption {
-  isDefault?: true;
-  users: number;
-  perUserStars: number;
-}
-
 export interface ApiStarGiveawayOption {
   isExtended?: true;
   isDefault?: true;
@@ -409,3 +289,176 @@ export interface ApiStarGiveawayOption {
   amount: number;
   winners: ApiStarsGiveawayWinnerOption[];
 }
+
+export type ApiPaymentStatus = 'paid' | 'failed' | 'pending' | 'cancelled';
+
+/* Used for Invoice UI */
+export type ApiInputInvoiceMessage = {
+  type: 'message';
+  chatId: string;
+  messageId: number;
+  isExtendedMedia?: boolean;
+};
+
+export type ApiInputInvoiceSlug = {
+  type: 'slug';
+  slug: string;
+};
+
+export type ApiInputInvoiceGiveaway = {
+  type: 'giveaway';
+  chatId: string;
+  additionalChannelIds?: string[];
+  isOnlyForNewSubscribers?: boolean;
+  areWinnersVisible?: boolean;
+  prizeDescription?: string;
+  countries?: string[];
+  untilDate: number;
+  currency: string;
+  amount: number;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiInputInvoicePremiumGiftStars = {
+  type: 'premiumGiftStars';
+  userId: string;
+  months: number;
+  message?: ApiFormattedText;
+};
+
+export type ApiInputInvoiceGiftCode = {
+  type: 'giftcode';
+  userIds: string[];
+  boostChannelId?: string;
+  currency: string;
+  amount: number;
+  option: ApiPremiumGiftCodeOption;
+  message?: ApiFormattedText;
+};
+
+export type ApiInputInvoiceStars = {
+  type: 'stars';
+  stars: number;
+  currency: string;
+  amount: number;
+};
+
+export type ApiInputInvoiceStarsGift = {
+  type: 'starsgift';
+  userId: string;
+  stars: number;
+  currency: string;
+  amount: number;
+};
+
+export type ApiInputInvoiceStarGift = {
+  type: 'stargift';
+  shouldHideName?: boolean;
+  peerId: string;
+  giftId: string;
+  message?: ApiFormattedText;
+  shouldUpgrade?: true;
+};
+
+export type ApiInputInvoiceStarsGiveaway = {
+  type: 'starsgiveaway';
+  chatId: string;
+  additionalChannelIds?: string[];
+  isOnlyForNewSubscribers?: boolean;
+  areWinnersVisible?: boolean;
+  prizeDescription?: string;
+  countries?: string[];
+  untilDate: number;
+  currency: string;
+  amount: number;
+  stars: number;
+  users: number;
+};
+
+export type ApiInputInvoiceChatInviteSubscription = {
+  type: 'chatInviteSubscription';
+  hash: string;
+};
+
+export type ApiInputInvoiceStarGiftUpgrade = {
+  type: 'stargiftUpgrade';
+  inputSavedGift: ApiInputSavedStarGift;
+  shouldKeepOriginalDetails?: true;
+};
+
+export type ApiInputInvoiceStarGiftTransfer = {
+  type: 'stargiftTransfer';
+  inputSavedGift: ApiInputSavedStarGift;
+  recipientId: string;
+};
+
+export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
+| ApiInputInvoiceGiftCode | ApiInputInvoicePremiumGiftStars | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
+| ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription
+| ApiInputInvoiceStarGiftUpgrade | ApiInputInvoiceStarGiftTransfer;
+
+/* Used for Invoice request */
+export type ApiRequestInputInvoiceMessage = {
+  type: 'message';
+  chat: ApiChat;
+  messageId: number;
+};
+
+export type ApiRequestInputInvoiceSlug = {
+  type: 'slug';
+  slug: string;
+};
+
+export type ApiRequestInputInvoiceGiveaway = {
+  type: 'giveaway';
+  purpose: ApiInputStorePaymentPurpose;
+  option: ApiPremiumGiftCodeOption;
+};
+
+export type ApiRequestInputInvoiceStars = {
+  type: 'stars';
+  purpose: ApiInputStorePaymentPurpose;
+};
+
+export type ApiRequestInputInvoicePremiumGiftStars = {
+  type: 'premiumGiftStars';
+  user: ApiUser;
+  months: number;
+  message?: ApiFormattedText;
+};
+
+export type ApiRequestInputInvoiceStarsGiveaway = {
+  type: 'starsgiveaway';
+  purpose: ApiInputStorePaymentPurpose;
+};
+
+export type ApiRequestInputInvoiceStarGift = {
+  type: 'stargift';
+  shouldHideName?: boolean;
+  peer: ApiPeer;
+  giftId: string;
+  message?: ApiFormattedText;
+  shouldUpgrade?: true;
+};
+
+export type ApiRequestInputInvoiceChatInviteSubscription = {
+  type: 'chatInviteSubscription';
+  hash: string;
+};
+
+export type ApiRequestInputInvoiceStarGiftUpgrade = {
+  type: 'stargiftUpgrade';
+  inputSavedGift: ApiRequestInputSavedStarGift;
+  shouldKeepOriginalDetails?: true;
+};
+
+export type ApiRequestInputInvoiceStarGiftTransfer = {
+  type: 'stargiftTransfer';
+  inputSavedGift: ApiRequestInputSavedStarGift;
+  recipient: ApiPeer;
+};
+
+export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
+| ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway
+| ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift | ApiRequestInputInvoiceStarGiftUpgrade
+| ApiRequestInputInvoiceStarGiftTransfer | ApiRequestInputInvoicePremiumGiftStars;

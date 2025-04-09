@@ -26,6 +26,7 @@ import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
+import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 import OptimizedVideo from '../../ui/OptimizedVideo';
 import ProgressSpinner from '../../ui/ProgressSpinner';
@@ -33,6 +34,7 @@ import ProgressSpinner from '../../ui/ProgressSpinner';
 export type OwnProps<T> = {
   id?: string;
   video: ApiVideo | ApiMediaExtendedPreview;
+  lastPlaybackTimestamp?: number;
   isOwn?: boolean;
   isInWebPage?: boolean;
   observeIntersectionForLoading?: ObserveFn;
@@ -70,6 +72,7 @@ const Video = <T,>({
   isDownloading,
   isProtected,
   className,
+  lastPlaybackTimestamp,
   clickArg,
   onClick,
   onCancelUpload,
@@ -249,6 +252,7 @@ const Video = <T,>({
           src={fullMediaData}
           className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
           canPlay={isPlayAllowed && isIntersectingForPlaying && !isUnsupported}
+          defaultMuted
           muted
           loop
           playsInline
@@ -271,7 +275,7 @@ const Video = <T,>({
         <canvas ref={thumbRef} className="thumbnail" />
       )}
       {isProtected && <span className="protector" />}
-      <i ref={playButtonRef} className="icon icon-large-play" />
+      <Icon ref={playButtonRef} name="large-play" />
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation
@@ -289,7 +293,7 @@ const Video = <T,>({
         </div>
       )}
       {!isLoadAllowed && !fullMediaData && (
-        <i className="icon icon-download" />
+        <Icon name="download" />
       )}
       {isTransferring && (!isUnsupported || isDownloading) ? (
         <span className="message-transfer-progress">
@@ -298,8 +302,14 @@ const Video = <T,>({
       ) : (
         <div className="message-media-duration">
           {!isPaidPreview && video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
-          {isUnsupported && <i className="icon icon-message-failed playback-failed" />}
+          {isUnsupported && <Icon name="message-failed" className="playback-failed" />}
         </div>
+      )}
+      {Boolean(lastPlaybackTimestamp) && (
+        <div
+          className="message-media-last-progress"
+          style={`--_progress: ${Math.floor((lastPlaybackTimestamp / duration) * 100)}%`}
+        />
       )}
     </div>
   );

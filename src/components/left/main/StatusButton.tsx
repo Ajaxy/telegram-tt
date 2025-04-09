@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiEmojiStatus, ApiSticker } from '../../../api/types';
+import type { ApiEmojiStatusCollectible, ApiEmojiStatusType, ApiSticker } from '../../../api/types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
 import { selectUser } from '../../../global/selectors';
@@ -20,13 +20,14 @@ import Button from '../../ui/Button';
 import StatusPickerMenu from './StatusPickerMenu.async';
 
 interface StateProps {
-  emojiStatus?: ApiEmojiStatus;
+  emojiStatus?: ApiEmojiStatusType;
+  collectibleStatuses?: ApiEmojiStatusType[];
 }
 
 const EFFECT_DURATION_MS = 1500;
 const EMOJI_STATUS_SIZE = 24;
 
-const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
+const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses }) => {
   const { setEmojiStatus, loadCurrentUser } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -47,9 +48,14 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
   }, [emojiStatus, shouldShowEffect, showEffect, unmarkShouldShowEffect]);
 
   const handleEmojiStatusSet = useCallback((sticker: ApiSticker) => {
+    const collectibleStatus = collectibleStatuses?.find(
+      ((status) => 'collectibleId' in status && status.documentId === sticker.id),
+    ) as ApiEmojiStatusCollectible | undefined;
     markShouldShowEffect();
-    setEmojiStatus({ emojiStatusId: sticker.id });
-  }, [markShouldShowEffect, setEmojiStatus]);
+    setEmojiStatus({
+      emojiStatus: collectibleStatus || { type: 'regular', documentId: sticker.id },
+    });
+  }, [markShouldShowEffect, setEmojiStatus, collectibleStatuses]);
 
   useTimeout(hideEffect, isEffectShown ? EFFECT_DURATION_MS : undefined);
 
@@ -81,6 +87,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
             documentId={emojiStatus.documentId}
             size={EMOJI_STATUS_SIZE}
             loopLimit={EMOJI_STATUS_LOOP_LIMIT}
+            withSparkles={emojiStatus?.type === 'collectible'}
           />
         ) : <StarIcon />}
       </Button>
@@ -97,8 +104,10 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
 export default memo(withGlobal((global): StateProps => {
   const { currentUserId } = global;
   const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
+  const collectibleStatuses = global.collectibleEmojiStatuses?.statuses;
 
   return {
     emojiStatus: currentUser?.emojiStatus,
+    collectibleStatuses,
   };
 })(StatusButton));

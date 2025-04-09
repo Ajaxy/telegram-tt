@@ -24,6 +24,7 @@ import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Spinner from '../ui/Spinner';
+import Icon from './icons/Icon';
 
 import './GifButton.scss';
 
@@ -141,7 +142,7 @@ const GifButton: FC<OwnProps> = ({
           noFastClick
           onClick={handleUnsaveClick}
         >
-          <i className="icon icon-close gif-unsave-button-icon" />
+          <Icon name="close" className="gif-unsave-button-icon" />
         </Button>
       )}
       {withThumb && (

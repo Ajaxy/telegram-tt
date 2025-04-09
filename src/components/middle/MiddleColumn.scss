@@ -65,7 +65,9 @@
     > .Button {
       opacity: 1;
       transform: scale(1);
+      /* stylelint-disable plugin/no-low-performance-animation-properties */
       transition:
+        border-radius 0.15s,
         opacity var(--select-transition),
         transform var(--select-transition),
         background-color 0.15s,
@@ -162,7 +164,6 @@
     z-index: var(--z-middle-footer);
 
     transform: translate3d(0, 0, 0);
-    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
     transition: top 200ms, transform var(--layer-transition);
 
     body.no-page-transitions & {
@@ -170,7 +171,6 @@
     }
 
     body.no-right-column-animations & {
-      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
       transition: top 200ms !important;
     }
 

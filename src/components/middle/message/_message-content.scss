@@ -21,6 +21,10 @@
 }
 
 .message-content {
+  &.gift {
+    --max-width: 18rem;
+  }
+
   position: relative;
   max-width: var(--max-width);
 
@@ -371,7 +375,7 @@
 
     .via {
       padding-right: 0.25rem;
-      font-weight: 400;
+      font-weight: var(--font-weight-normal);
     }
 
     span + .via {
@@ -397,7 +401,7 @@
     .admin-title {
       margin-left: 1rem;
       text-align: right;
-      font-weight: 400;
+      font-weight: var(--font-weight-normal);
       font-size: 0.75rem;
       color: rgba(var(--color-text-meta-rgb), 0.75);
       user-select: none;
@@ -695,8 +699,8 @@
   &.has-subheader .media-inner,
   &.has-subheader .Album,
   &.force-sender-name .Album,
-  &.is-forwarded .media-inner,
-  &.is-forwarded .Album,
+  &.is-forwarded:not(.is-inverted-media) .media-inner,
+  &.is-forwarded:not(.is-inverted-media) .Album,
   .message-title ~ .media-inner {
     margin-top: 0.25rem;
     margin-bottom: -0.375rem;
@@ -784,7 +788,7 @@
   .message-media-duration .icon-muted {
     vertical-align: -0.1875rem;
     margin-left: 0.375rem;
-    font-size: 1.0625rem;
+    font-size: 1rem;
   }
 
   .message-media-duration .playback-failed {
@@ -983,7 +987,7 @@
 .text-entity-link {
   color: var(--color-links) !important;
   text-decoration: none !important;
-  word-break: break-word;
+  overflow-wrap: break-word;
   cursor: var(--custom-cursor, pointer);
   unicode-bidi: initial;
 

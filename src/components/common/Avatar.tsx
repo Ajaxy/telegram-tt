@@ -21,13 +21,13 @@ import {
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isDeletedUser,
-  isPeerChat,
-  isPeerUser,
   isUserId,
 } from '../../global/helpers';
+import { isApiPeerChat, isApiPeerUser } from '../../global/helpers/peers';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { getFirstLetters } from '../../util/textFormat';
+import { REM } from './helpers/mediaDimensions';
 import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
@@ -45,8 +45,19 @@ import './Avatar.scss';
 
 const LOOP_COUNT = 3;
 
+export const AVATAR_SIZES = {
+  micro: REM,
+  mini: 1.5 * REM,
+  tiny: 2 * REM,
+  small: 2.125 * REM,
+  medium: 2.75 * REM,
+  large: 3.375 * REM,
+  giant: 5.625 * REM,
+  jumbo: 7.5 * REM,
+};
+
 export type AvatarSize =
-  'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'giant' | 'huge' | 'jumbo';
+  'micro' | 'mini' | 'tiny' | 'small' | 'medium' | 'large' | 'giant' | 'jumbo' | number;
 
 const cn = createClassNameBuilder('Avatar');
 cn.media = cn('media');
@@ -105,8 +116,8 @@ const Avatar: FC<OwnProps> = ({
   const videoLoopCountRef = useRef(0);
   const isCustomPeer = peer && 'isCustomPeer' in peer;
   const realPeer = peer && !isCustomPeer ? peer : undefined;
-  const user = realPeer && isPeerUser(realPeer) ? realPeer : undefined;
-  const chat = realPeer && isPeerChat(realPeer) ? realPeer : undefined;
+  const user = realPeer && isApiPeerUser(realPeer) ? realPeer : undefined;
+  const chat = realPeer && isApiPeerChat(realPeer) ? realPeer : undefined;
   const isDeleted = user && isDeletedUser(user);
   const isReplies = realPeer && isChatWithRepliesBot(realPeer.id);
   const isAnonymousForwards = realPeer && isAnonymousForwardsChat(realPeer.id);
@@ -114,12 +125,14 @@ const Avatar: FC<OwnProps> = ({
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
+  const pxSize = typeof size === 'number' ? size : AVATAR_SIZES[size];
+
   const shouldLoadVideo = withVideo && photo?.isVideo;
 
-  const shouldFetchBig = size === 'jumbo';
+  const isBig = pxSize >= AVATAR_SIZES.jumbo;
   if (!isSavedMessages && !isDeleted) {
     if ((user && !noPersonalPhoto) || chat) {
-      imageHash = getChatAvatarHash(peer as ApiPeer, shouldFetchBig ? 'big' : undefined);
+      imageHash = getChatAvatarHash(peer as ApiPeer, isBig ? 'big' : undefined);
     } else if (photo) {
       imageHash = `photo${photo.id}?size=m`;
       if (photo.isVideo && withVideo) {
@@ -233,7 +246,7 @@ const Avatar: FC<OwnProps> = ({
   const customColor = isCustomPeer && peer.customPeerAvatarColor;
 
   const fullClassName = buildClassName(
-    `Avatar size-${size}`,
+    'Avatar',
     className,
     getPeerColorClass(peer),
     !peer && text && 'hidden-user',
@@ -279,15 +292,15 @@ const Avatar: FC<OwnProps> = ({
       data-peer-id={realPeer?.id}
       data-test-sender-id={IS_TEST ? realPeer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
-      style={buildStyle(customColor && `--color-user: ${customColor}`)}
+      style={buildStyle(`--_size: ${pxSize}px;`, customColor && `--color-user: ${customColor}`)}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
       <div className="inner">
-        {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
+        {typeof content === 'string' ? renderText(content, [isBig ? 'hq_emoji' : 'emoji']) : content}
       </div>
       {withStory && realPeer?.hasStories && (
-        <AvatarStoryCircle peerId={realPeer.id} size={size} withExtraGap={withStoryGap} />
+        <AvatarStoryCircle peerId={realPeer.id} size={pxSize} withExtraGap={withStoryGap} />
       )}
     </div>
   );

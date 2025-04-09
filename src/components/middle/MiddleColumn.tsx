@@ -10,8 +10,9 @@ import type {
 import type {
   ActiveEmojiInteraction,
   MessageListType,
-} from '../../global/types';
-import type { ThemeKey, ThreadId } from '../../types';
+  ThemeKey,
+  ThreadId,
+} from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -49,6 +50,7 @@ import {
   selectIsInSelectMode,
   selectIsRightColumnShown,
   selectIsUserBlocked,
+  selectPeerPaidMessagesStars,
   selectPinnedIds,
   selectTabState,
   selectTheme,
@@ -61,7 +63,7 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
-  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_SAFARI, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
 } from '../../util/windowEnvironment';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
@@ -77,8 +79,10 @@ import { useResize } from '../../hooks/useResize';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useWindowSize from '../../hooks/window/useWindowSize';
 import usePinnedMessage from './hooks/usePinnedMessage';
+import useFluidBackgroundFilter from './message/hooks/useFluidBackgroundFilter';
 
 import Composer from '../common/Composer';
+import Icon from '../common/icons/Icon';
 import PrivacySettingsNoticeModal from '../common/PrivacySettingsNoticeModal.async';
 import SeenByModal from '../common/SeenByModal.async';
 import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
@@ -135,7 +139,7 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   isChannel?: boolean;
-  areChatSettingsLoaded?: boolean;
+  arePeerSettingsLoaded?: boolean;
   canSubscribe?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
@@ -150,6 +154,7 @@ type StateProps = {
   canShowOpenChatButton?: boolean;
   isContactRequirePremium?: boolean;
   topics?: Record<number, ApiTopic>;
+  paidMessagesStars?: number;
 };
 
 function isImage(item: DataTransferItem) {
@@ -195,7 +200,7 @@ function MiddleColumn({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   isChannel,
-  areChatSettingsLoaded,
+  arePeerSettingsLoaded,
   canSubscribe,
   canStartBot,
   canRestartBot,
@@ -210,13 +215,14 @@ function MiddleColumn({
   canShowOpenChatButton,
   isContactRequirePremium,
   topics,
+  paidMessagesStars,
 }: OwnProps & StateProps) {
   const {
     openChat,
     openPreviousChat,
     unpinAllMessages,
     loadUser,
-    loadChatSettings,
+    loadPeerSettings,
     exitMessageSelectMode,
     joinChannel,
     sendBotCommand,
@@ -336,10 +342,10 @@ function MiddleColumn({
   }, [chatId, isPrivate, loadUser]);
 
   useEffect(() => {
-    if (!areChatSettingsLoaded) {
-      loadChatSettings({ chatId: chatId! });
+    if (!arePeerSettingsLoaded) {
+      loadPeerSettings({ peerId: chatId! });
     }
-  }, [chatId, isPrivate, areChatSettingsLoaded]);
+  }, [chatId, isPrivate, arePeerSettingsLoaded]);
 
   useEffect(() => {
     if (chatId && shouldLoadFullChat && isReady) {
@@ -355,11 +361,13 @@ function MiddleColumn({
 
   const handleDragEnter = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
     const { items } = e.dataTransfer || {};
-    const shouldDrawQuick = items && items.length > 0 && Array.from(items)
+    // In Safari, the e.dataTransfer.items list may be empty during dragenter/dragover events,
+    // preventing the ability to determine file types in advance. More details: https://bugs.webkit.org/show_bug.cgi?id=223517
+    const shouldDrawQuick = IS_SAFARI || (items && items.length > 0 && Array.from(items)
       // Filter unnecessary element for drag and drop images in Firefox (https://github.com/Ajaxy/telegram-tt/issues/49)
       // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#image
       .filter((item) => item.type !== 'text/uri-list')
-      .every((item) => isImage(item) || isVideo(item));
+      .every((item) => isImage(item) || isVideo(item)));
 
     setDropAreaState(shouldDrawQuick ? DropAreaState.QuickFile : DropAreaState.Document);
   });
@@ -462,6 +470,9 @@ function MiddleColumn({
     onBack: exitMessageSelectMode,
   });
 
+  // Prepare filter beforehand to avoid flickering
+  useFluidBackgroundFilter(patternColor);
+
   const isMessagingDisabled = Boolean(
     !isPinnedMessageList && !isSavedDialog && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
     && !renderingCanSubscribe && composerRestrictionMessage,
@@ -543,6 +554,7 @@ function MiddleColumn({
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
                 isContactRequirePremium={isContactRequirePremium}
+                paidMessagesStars={paidMessagesStars}
                 withBottomShift={withMessageListBottomShift}
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
                 onIntersectPinnedMessage={renderingHandleIntersectPinnedMessage!}
@@ -572,7 +584,7 @@ function MiddleColumn({
                       className="composer-button unpin-all-button"
                       onClick={handleOpenUnpinModal}
                     >
-                      <i className="icon icon-unpin" />
+                      <Icon name="unpin" />
                       <span>{lang('Chat.Pinned.UnpinAll', pinnedMessagesCount, 'i')}</span>
                     </Button>
                   </div>
@@ -754,6 +766,7 @@ export default memo(withGlobal<OwnProps>(
     const bot = selectBot(global, chatId);
     const pinnedIds = selectPinnedIds(global, chatId, threadId);
     const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
+    const userFullInfo = chatId ? selectUserFullInfo(global, chatId) : undefined;
 
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
@@ -791,7 +804,10 @@ export default memo(withGlobal<OwnProps>(
       )
     );
 
-    const isContactRequirePremium = selectUserFullInfo(global, chatId)?.isContactRequirePremium;
+    const userFull = selectUserFullInfo(global, chatId);
+
+    const isContactRequirePremium = userFull?.isContactRequirePremium;
+    const paidMessagesStars = selectPeerPaidMessagesStars(global, chatId);
 
     return {
       ...state,
@@ -801,7 +817,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       draftReplyInfo,
       isPrivate,
-      areChatSettingsLoaded: Boolean(chat?.settings),
+      arePeerSettingsLoaded: Boolean(userFullInfo?.settings),
       isComments: isMessageThread,
       canPost:
         !isPinnedMessageList
@@ -829,6 +845,7 @@ export default memo(withGlobal<OwnProps>(
       canShowOpenChatButton,
       isContactRequirePremium,
       topics,
+      paidMessagesStars,
     };
   },
 )(MiddleColumn));

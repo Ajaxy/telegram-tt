@@ -48,7 +48,7 @@ export default function useInputCustomEmojis(
   isReady?: boolean,
   isActive?: boolean,
 ) {
-  const customColor = useDynamicColorListener(inputRef, !isReady);
+  const customColor = useDynamicColorListener(inputRef, undefined, !isReady);
   const colorFilter = useColorFilter(customColor, true);
   const dpr = useDevicePixelRatio();
   const playersById = useRef<Map<string, CustomEmojiPlayer>>(new Map());

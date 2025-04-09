@@ -5,9 +5,9 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiPremiumPromo, ApiPremiumSubscriptionOption, ApiSticker, ApiStickerSet, ApiUser,
+  ApiPremiumPromo, ApiPremiumSection, ApiPremiumSubscriptionOption, ApiSticker, ApiStickerSet, ApiUser,
 } from '../../../api/types';
-import type { ApiPremiumSection, GlobalState } from '../../../global/types';
+import type { GlobalState } from '../../../global/types';
 
 import { PREMIUM_FEATURE_SECTIONS, TME_LINK_PREFIX } from '../../../config';
 import { getUserFullName } from '../../../global/helpers';
@@ -22,11 +22,13 @@ import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import CustomEmoji from '../../common/CustomEmoji';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
@@ -136,7 +138,8 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     closePremiumModal, openInvoice, requestConfetti, openTelegramLink, loadStickers, openStickerSet,
   } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const [isHeaderHidden, setHeaderHidden] = useState(true);
   const [currentSection, setCurrentSection] = useState<ApiPremiumSection | undefined>(initialSection);
   const [selectedSubscriptionOption, setSubscriptionOption] = useState<ApiPremiumSubscriptionOption>();
@@ -246,23 +249,6 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     });
   });
 
-  const stickerSetTitle = useMemo(() => {
-    if (!fromUserStatusSet || !fromUser) return undefined;
-
-    const template = lang('lng_premium_emoji_status_title').replace('{user}', getUserFullName(fromUser)!);
-    const [first, second] = template.split('{link}');
-
-    const emoji = fromUserStatusSet.thumbCustomEmojiId ? (
-      <CustomEmoji className={styles.stickerSetLinkIcon} documentId={fromUserStatusSet.thumbCustomEmojiId} />
-    ) : undefined;
-    const link = (
-      <span className={styles.stickerSetLink} onClick={handleOpenStatusSet}>
-        {emoji}{renderText(fromUserStatusSet.title)}
-      </span>
-    );
-    return [renderText(first), link, renderText(second)];
-  }, [fromUser, fromUserStatusSet, lang]);
-
   const fullMonthlyAmount = useMemo(() => {
     const monthOption = promo?.options.find((option) => option.months === 1);
     if (!monthOption) {
@@ -278,40 +264,61 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     const { amount, months, currency } = selectedSubscriptionOption;
     const perMonthPrice = Math.floor(amount / months);
     return formatCurrency(
+      lang,
       perMonthPrice,
       currency,
-      lang.code,
     );
-  }, [selectedSubscriptionOption, lang.code]);
+  }, [selectedSubscriptionOption, lang]);
 
   if (!promo || (fromUserStatusEmoji && !fromUserStatusSet)) return undefined;
 
   function getHeaderText() {
     if (isGift) {
-      return fromUser?.id === currentUserId
-        ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle', [getUserFullName(toUser), monthsAmount])
-        : lang('TelegramPremiumUserGiftedPremiumDialogTitle', [getUserFullName(fromUser), monthsAmount]);
+      return renderText(
+        fromUser?.id === currentUserId
+          ? oldLang('TelegramPremiumUserGiftedPremiumOutboundDialogTitle', [getUserFullName(toUser), monthsAmount])
+          : oldLang('TelegramPremiumUserGiftedPremiumDialogTitle', [getUserFullName(fromUser), monthsAmount]),
+        ['simple_markdown', 'emoji'],
+      );
     }
 
-    return fromUser
-      ? lang('TelegramPremiumUserDialogTitle', getUserFullName(fromUser))
-      : lang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium');
+    if (fromUserStatusSet && fromUser) {
+      const template = oldLang('lng_premium_emoji_status_title').replace('{user}', getUserFullName(fromUser)!);
+      const [first, second] = template.split('{link}');
+
+      const emoji = fromUserStatusSet.thumbCustomEmojiId ? (
+        <CustomEmoji className={styles.stickerSetLinkIcon} documentId={fromUserStatusSet.thumbCustomEmojiId} />
+      ) : undefined;
+      const link = (
+        <span className={styles.stickerSetLink} onClick={handleOpenStatusSet}>
+          {emoji}{renderText(fromUserStatusSet.title)}
+        </span>
+      );
+      return [renderText(first), link, renderText(second)];
+    }
+
+    return renderText(
+      fromUser
+        ? oldLang('TelegramPremiumUserDialogTitle', getUserFullName(fromUser))
+        : oldLang(isPremium ? 'TelegramPremiumSubscribedTitle' : 'TelegramPremium'),
+      ['simple_markdown', 'emoji'],
+    );
   }
 
   function getHeaderDescription() {
     if (isGift) {
       return fromUser?.id === currentUserId
-        ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', getUserFullName(toUser))
-        : lang('TelegramPremiumUserGiftedPremiumDialogSubtitle');
+        ? oldLang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', getUserFullName(toUser))
+        : oldLang('TelegramPremiumUserGiftedPremiumDialogSubtitle');
     }
 
     if (fromUserStatusSet) {
-      return lang('TelegramPremiumUserStatusDialogSubtitle');
+      return oldLang('TelegramPremiumUserStatusDialogSubtitle');
     }
 
     return fromUser
-      ? lang('TelegramPremiumUserDialogSubtitle')
-      : lang(isPremium ? 'TelegramPremiumSubscribedSubtitle' : 'TelegramPremiumSubtitle');
+      ? oldLang('TelegramPremiumUserDialogSubtitle')
+      : oldLang(isPremium ? 'TelegramPremiumSubscribedSubtitle' : 'TelegramPremiumSubtitle');
   }
 
   function renderFooterText() {
@@ -320,7 +327,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     }
 
     return (
-      <div className={styles.footerText} dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className={styles.footerText} dir={oldLang.isRtl ? 'rtl' : undefined}>
         {renderTextWithEntities({
           text: promo.statusText,
           entities: promo.statusEntities,
@@ -364,11 +371,11 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               color="translucent"
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => closePremiumModal()}
-              ariaLabel={lang('Close')}
+              ariaLabel={oldLang('Close')}
             >
-              <i className="icon icon-close" />
+              <Icon name="close" />
             </Button>
-            {fromUserStatusEmoji ? (
+            {(fromUserStatusEmoji && !isGift) ? (
               <CustomEmoji
                 className={styles.statusEmoji}
                 onClick={handleOpenStatusSet}
@@ -380,7 +387,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
             )}
             <h2 className={buildClassName(styles.headerText, fromUserStatusSet && styles.stickerSetText)}>
-              {fromUserStatusSet ? stickerSetTitle : renderText(getHeaderText(), ['simple_markdown', 'emoji'])}
+              {getHeaderText()}
             </h2>
             <div className={styles.description}>
               {renderText(getHeaderDescription(), ['simple_markdown', 'emoji'])}
@@ -388,7 +395,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             {!isPremium && !isGift && renderSubscriptionOptions()}
             <div className={buildClassName(styles.header, isHeaderHidden && styles.hiddenHeader)}>
               <h2 className={styles.premiumHeaderText}>
-                {lang('TelegramPremium')}
+                {oldLang('TelegramPremium')}
               </h2>
             </div>
             <div className={buildClassName(styles.list, isPremium && styles.noButton)}>
@@ -396,11 +403,11 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                 return (
                   <PremiumFeatureItem
                     key={section}
-                    title={lang(PREMIUM_FEATURE_TITLES[section])}
+                    title={oldLang(PREMIUM_FEATURE_TITLES[section])}
                     text={section === 'double_limits'
-                      ? lang(PREMIUM_FEATURE_DESCRIPTIONS[section],
+                      ? oldLang(PREMIUM_FEATURE_DESCRIPTIONS[section],
                         [limitChannels, limitFolders, limitPins, limitLinks, LIMIT_ACCOUNTS])
-                      : lang(PREMIUM_FEATURE_DESCRIPTIONS[section])}
+                      : oldLang(PREMIUM_FEATURE_DESCRIPTIONS[section])}
                     icon={PREMIUM_FEATURE_COLOR_ICONS[section]}
                     index={index}
                     count={filteredSections.length}
@@ -411,13 +418,13 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               })}
               <div
                 className={buildClassName(styles.footerText, styles.primaryFooterText)}
-                dir={lang.isRtl ? 'rtl' : undefined}
+                dir={oldLang.isRtl ? 'rtl' : undefined}
               >
                 <p>
-                  {renderText(lang('AboutPremiumDescription'), ['simple_markdown'])}
+                  {renderText(oldLang('AboutPremiumDescription'), ['simple_markdown'])}
                 </p>
                 <p>
-                  {renderText(lang('AboutPremiumDescription2'), ['simple_markdown'])}
+                  {renderText(oldLang('AboutPremiumDescription2'), ['simple_markdown'])}
                 </p>
               </div>
               {renderFooterText()}
@@ -425,7 +432,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             {!isPremium && selectedSubscriptionOption && (
               <div className={styles.footer}>
                 <Button className={styles.button} isShiny withPremiumGradient onClick={handleClick}>
-                  {lang('SubscribeToPremium', subscribeButtonText)}
+                  {oldLang('SubscribeToPremium', subscribeButtonText)}
                 </Button>
               </div>
             )}

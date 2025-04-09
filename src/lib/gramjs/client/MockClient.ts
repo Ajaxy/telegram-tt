@@ -1,7 +1,8 @@
 import BigInt from 'big-integer';
 
-import type { DownloadFileParams } from './downloadFile';
+import type { DownloadFileWithDcParams } from './downloadFile';
 import type { MockTypes } from './mockUtils/MockTypes';
+import type { SizeType } from './TelegramClient';
 
 import { GENERAL_TOPIC_ID } from '../../../config';
 import { UpdateConnectionState } from '../network';
@@ -22,7 +23,7 @@ import { downloadFile } from './downloadFile';
 
 import MockSender from './MockSender';
 
-const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'];
+const sizeTypes: SizeType[] = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'];
 
 class TelegramClient {
     private invokeMiddleware?: <A, R>(mockClient: TelegramClient, request: Api.Request<A, R>)
@@ -282,7 +283,7 @@ class TelegramClient {
         return new MockSender(this);
     }
 
-    downloadFile(inputLocation: any, args: DownloadFileParams) {
+    downloadFile(inputLocation: any, args: DownloadFileWithDcParams) {
         return downloadFile(this as any, inputLocation, args);
     }
 

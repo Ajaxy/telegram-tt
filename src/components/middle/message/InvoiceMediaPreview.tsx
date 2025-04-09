@@ -13,6 +13,7 @@ import useInterval from '../../../hooks/schedulers/useInterval';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import MediaSpoiler from '../../common/MediaSpoiler';
 
 import styles from './InvoiceMediaPreview.module.scss';
@@ -73,7 +74,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
       />
       {Boolean(duration) && <div className={styles.duration}>{formatMediaDuration(duration)}</div>}
       <div className={styles.buy}>
-        <i className={buildClassName('icon', 'icon-lock', styles.lock)} />
+        <Icon name="lock" className={styles.lock} />
         {lang('Checkout.PayPrice', formatCurrencyAsString(amount, currency))}
       </div>
     </div>

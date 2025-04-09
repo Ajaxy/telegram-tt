@@ -3,8 +3,9 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  max-height: min(92vh, 40rem) !important;
+  gap: 1rem;
+  padding-inline: 1rem !important;
+  max-height: min(92vh, 45rem) !important;
   overflow-x: hidden;
 }
 
@@ -41,6 +42,7 @@
   padding: 0.25rem 0.5rem;
   position: relative;
   min-height: 2.5rem;
+  font-size: 0.9375rem;
 }
 
 .fullWidth {
@@ -52,7 +54,6 @@
 }
 
 .chatItem {
-  margin: 0;
   width: fit-content;
   background-color: var(--color-background);
   color: var(--color-primary);

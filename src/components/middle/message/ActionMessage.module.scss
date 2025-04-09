@@ -1,0 +1,184 @@
+.root {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+
+  padding-block: 0.125rem;
+
+  word-break: break-word;
+
+  :global(.star-amount-icon) {
+    vertical-align: text-bottom;
+    margin-inline: 0 !important;
+  }
+}
+
+.contentBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 15rem;
+
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius-messages);
+
+  background-color: var(--action-message-bg);
+  color: white;
+
+  position: relative;
+  z-index: 0;
+}
+
+.textContent {
+  display: inline-block;
+  padding: 0.1875rem 0.5rem;
+  background-color: var(--action-message-bg);
+  color: white;
+  border-radius: var(--border-radius-messages);
+  max-width: 100%;
+
+  position: relative;
+  z-index: 0;
+}
+
+.hasFullContent {
+  & > .textContent,
+  & > .inlineWrapper {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.singleLine .textContent {
+  display: inline-flex;
+  white-space: pre;
+}
+
+.strong {
+  font-weight: var(--font-weight-medium);
+}
+
+.messageLink {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.singleLine, .messageLink {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inlineWrapper {
+  grid-area: 1 / 1;
+  max-width: 100%;
+}
+
+.contextContainer {
+  grid-area: 1 / 1;
+}
+
+.fluidMultiline {
+  background-color: transparent;
+
+  // These two elements should align perfectly
+  .fluidBackground, .textContent {
+    display: inline;
+    text-wrap: pretty;
+    padding: 0.1875rem 0.5rem;
+    box-decoration-break: clone;
+    border-radius: var(--border-radius-messages);
+  }
+
+  .fluidBackground {
+    pointer-events: none;
+    // Solid color for filter
+    background-color: black;
+    color: black;
+  }
+
+  .textContent {
+    background-color: transparent !important;
+  }
+}
+
+.info {
+  font-size: 0.9375rem;
+  position: relative;
+}
+
+.stickerWrapper {
+  position: relative;
+}
+
+.channelPhoto {
+  --radius: var(--border-radius-messages);
+}
+
+.suggestedAvatar {
+  margin-top: 0.25rem 0.125rem;
+}
+
+.suggestedText {
+  text-wrap: balance;
+}
+
+.actionButton {
+  position: relative;
+  display: inline-block;
+  border-radius: 1.25rem;
+  padding: 0.5rem 1.25rem;
+  background-color: var(--action-message-bg);
+  font-weight: var(--font-weight-semibold);
+  transition: opacity 0.15s;
+
+  cursor: var(--custom-cursor, pointer);
+
+  &:hover,
+  &:focus {
+    opacity: 0.8;
+  }
+}
+
+.title {
+  margin-bottom: 0;
+  font-size: inherit;
+}
+
+.subtitle {
+  font-size: 0.8125rem;
+  text-wrap: balance;
+}
+
+.starGift {
+  width: 13.75rem;
+}
+
+.uniqueGift {
+  margin-block: 0.25rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -0.25rem;
+    background: var(--action-message-bg);
+    border-radius: calc(var(--border-radius-messages) + 0.25rem);
+    z-index: -1;
+  }
+}
+
+.uniqueBackgroundWrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.uniqueBackground {
+  position: absolute;
+  inset: 0;
+  top: -6rem;
+}
+
+.uniqueValue {
+  color: white;
+}

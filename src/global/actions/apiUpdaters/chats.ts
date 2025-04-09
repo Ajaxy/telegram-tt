@@ -67,8 +67,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       setGlobal(global);
 
       const updatedChat = selectChat(global, update.id);
-      if (!update.noTopChatsRequest && updatedChat && !selectIsChatListed(global, update.id)
-          && !updatedChat.isNotJoined) {
+      if (!update.noTopChatsRequest && !selectIsChatListed(global, update.id)
+          && !updatedChat?.isNotJoined) {
         // Reload top chats to update chat listing
         actions.loadTopChats();
       }

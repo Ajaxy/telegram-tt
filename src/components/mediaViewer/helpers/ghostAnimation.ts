@@ -5,8 +5,9 @@ import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getMessageHtmlId } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
-import { isElementInViewport } from '../../../util/isElementInViewport';
 import stopEvent from '../../../util/stopEvent';
+import getOffsetToContainer from '../../../util/visibility/getOffsetToContainer';
+import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import windowSize from '../../../util/windowSize';
 import {
@@ -128,11 +129,13 @@ export function animateClosing(
   let fromScaleY = fromHeight / toHeight;
 
   const shouldFadeOut = (
-    [MediaViewerOrigin.Inline, MediaViewerOrigin.ScheduledInline].includes(origin)
-    && !isMessageImageFullyVisible(container, toImage)
-  ) || (
-    [MediaViewerOrigin.Album, MediaViewerOrigin.ScheduledAlbum].includes(origin)
-    && !isMessageImageFullyVisible(container, toImage)
+    [
+      MediaViewerOrigin.Inline,
+      MediaViewerOrigin.ScheduledInline,
+      MediaViewerOrigin.Album,
+      MediaViewerOrigin.ScheduledAlbum,
+    ].includes(origin)
+    && !isMessageImageFullyVisible(toImage)
   );
 
   if ([
@@ -266,15 +269,13 @@ function uncover(realWidth: number, realHeight: number, top: number, left: numbe
   };
 }
 
-function isMessageImageFullyVisible(container: HTMLElement, imageEl: HTMLElement) {
+function isMessageImageFullyVisible(imageEl: HTMLElement) {
   const messageListElement = document.querySelector<HTMLDivElement>('.Transition_slide-active > .MessageList')!;
-  let imgOffsetTop = container.offsetTop + imageEl.closest<HTMLDivElement>('.content-inner, .WebPage')!.offsetTop;
-  if (container.id.includes('album-media-')) {
-    imgOffsetTop += container.parentElement!.offsetTop + container.closest<HTMLDivElement>('.Message')!.offsetTop;
-  }
 
-  return imgOffsetTop > messageListElement.scrollTop
-    && imgOffsetTop + imageEl.offsetHeight < messageListElement.scrollTop + messageListElement.offsetHeight;
+  const { top } = getOffsetToContainer(imageEl, messageListElement);
+
+  return top > messageListElement.scrollTop
+    && top + imageEl.offsetHeight < messageListElement.scrollTop + messageListElement.offsetHeight;
 }
 
 function getTopOffset(hasFooter: boolean) {
@@ -329,6 +330,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage, index?: numbe
       mediaSelector = '.avatar-media';
       break;
 
+    case MediaViewerOrigin.ChannelAvatar:
     case MediaViewerOrigin.SuggestedAvatar:
       containerSelector = `.Transition_slide-active > .MessageList #${getMessageHtmlId(message!.id, index)}`;
       mediaSelector = '.Avatar img';
@@ -369,6 +371,7 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.StarsTransaction:
     case MediaViewerOrigin.PreviewMedia:
+    case MediaViewerOrigin.ChannelAvatar:
       ghost.classList.add('rounded-corners');
       break;
 

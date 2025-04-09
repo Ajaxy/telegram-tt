@@ -38,6 +38,7 @@ import { useStickerPickerObservers } from '../../common/hooks/useStickerPickerOb
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Avatar from '../../common/Avatar';
+import Icon from '../../common/icons/Icon';
 import StickerButton from '../../common/StickerButton';
 import StickerSet from '../../common/StickerSet';
 import Button from '../../ui/Button';
@@ -292,9 +293,9 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           onClick={() => selectStickerSet(index)}
         >
           {stickerSet.id === RECENT_SYMBOL_SET_ID ? (
-            <i className="icon icon-recent" />
+            <Icon name="recent" />
           ) : stickerSet.id === FAVORITE_SYMBOL_SET_ID ? (
-            <i className="icon icon-favorite" />
+            <Icon name="favorite" />
           ) : stickerSet.id === CHAT_STICKER_SET_ID ? (
             <Avatar peer={chat} size="small" />
           ) : (

@@ -5,7 +5,6 @@ import { withGlobal } from '../../global';
 
 import type { ApiTypeStory } from '../../api/types';
 import type { ThemeKey } from '../../types';
-import type { AvatarSize } from './Avatar';
 
 import { selectPeerStories, selectTheme } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -17,7 +16,7 @@ interface OwnProps {
   // eslint-disable-next-line react/no-unused-prop-types
   peerId: string;
   className?: string;
-  size: AvatarSize;
+  size: number;
   withExtraGap?: boolean;
 }
 
@@ -28,19 +27,6 @@ interface StateProps {
   appTheme: ThemeKey;
 }
 
-const SIZES: Record<AvatarSize, number> = {
-  micro: 1.125 * REM,
-  tiny: 2.125 * REM,
-  mini: 1.625 * REM,
-  small: 2.25 * REM,
-  'small-mobile': 2.625 * REM,
-  medium: 2.875 * REM,
-  large: 3.5 * REM,
-  giant: 5.125 * REM,
-  huge: 6.125 * REM,
-  jumbo: 7.625 * REM,
-};
-
 const BLUE = ['#34C578', '#3CA3F3'];
 const GREEN = ['#C9EB38', '#09C167'];
 const PURPLE = ['#A667FF', '#55A5FF'];
@@ -50,6 +36,7 @@ const STROKE_WIDTH = 0.125 * REM;
 const STROKE_WIDTH_READ = 0.0625 * REM;
 const GAP_PERCENT = 2;
 const SEGMENTS_MAX = 45; // More than this breaks rendering in Safari and Chrome
+const LARGE_AVATAR_SIZE = 3.5 * REM;
 
 const GAP_PERCENT_EXTRA = 10;
 const EXTRA_GAP_ANGLE = Math.PI / 4;
@@ -58,7 +45,7 @@ const EXTRA_GAP_START = EXTRA_GAP_ANGLE - EXTRA_GAP_SIZE / 2;
 const EXTRA_GAP_END = EXTRA_GAP_ANGLE + EXTRA_GAP_SIZE / 2;
 
 function AvatarStoryCircle({
-  size = 'large',
+  size,
   className,
   peerStories,
   storyIds,
@@ -70,6 +57,8 @@ function AvatarStoryCircle({
   const ref = useRef<HTMLCanvasElement>(null);
 
   const dpr = useDevicePixelRatio();
+
+  const adaptedSize = size + STROKE_WIDTH;
 
   const values = useMemo(() => {
     return (storyIds || []).reduce((acc, id) => {
@@ -104,7 +93,7 @@ function AvatarStoryCircle({
 
     drawGradientCircle({
       canvas: ref.current,
-      size: SIZES[size] * dpr,
+      size: adaptedSize * dpr,
       segmentsCount: values.total,
       color: isCloseFriend ? 'green' : 'blue',
       readSegmentsCount: values.read,
@@ -112,19 +101,17 @@ function AvatarStoryCircle({
       readSegmentColor: appTheme === 'dark' ? DARK_GRAY : GRAY,
       dpr,
     });
-  }, [appTheme, isCloseFriend, size, values.read, values.total, withExtraGap, dpr]);
+  }, [appTheme, isCloseFriend, adaptedSize, values.read, values.total, withExtraGap, dpr]);
 
   if (!values.total) {
     return undefined;
   }
 
-  const maxSize = SIZES[size];
-
   return (
     <canvas
       ref={ref}
-      className={buildClassName('story-circle', size, className)}
-      style={`max-width: ${maxSize}px; max-height: ${maxSize}px;`}
+      className={buildClassName('story-circle', className)}
+      style={`max-width: ${adaptedSize}px; max-height: ${adaptedSize}px;`}
     />
   );
 }
@@ -166,7 +153,7 @@ export function drawGradientCircle({
     segmentsCount = SEGMENTS_MAX;
   }
 
-  const strokeModifier = Math.max(Math.max(size - SIZES.large * dpr, 0) / dpr / REM / 1.5, 1) * dpr;
+  const strokeModifier = Math.max(Math.max(size - LARGE_AVATAR_SIZE * dpr, 0) / dpr / REM / 1.5, 1) * dpr;
 
   const ctx = canvas.getContext('2d');
   if (!ctx) {

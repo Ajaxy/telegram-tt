@@ -1,9 +1,8 @@
 import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
-import type { ApiDraft, MessageListType } from '../../../../global/types';
-import type { ThreadId } from '../../../../types';
+import type { ApiDraft, ApiFormattedText, ApiMessage } from '../../../../api/types';
+import type { MessageListType, ThreadId } from '../../../../types';
 import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
@@ -153,7 +152,11 @@ const useEditing = (
     }
 
     if (!text && !hasMessageMedia(editedMessage)) {
-      openDeleteMessageModal({ isSchedule: type === 'scheduled', message: editedMessage });
+      openDeleteMessageModal({
+        chatId,
+        messageIds: [editedMessage.id],
+        isSchedule: type === 'scheduled',
+      });
       return;
     }
 

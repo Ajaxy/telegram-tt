@@ -4,12 +4,13 @@ import type TelegramClient from './TelegramClient';
 
 import Deferred from '../../../util/Deferred';
 import { Foreman } from '../../../util/foreman';
-import errors from '../errors';
+import { FloodPremiumWaitError, FloodWaitError, RPCError } from '../errors';
 import Api from '../tl/api';
 
 import LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
 import { sleep } from '../Helpers';
 import { getDownloadPartSize } from '../Utils';
+import type { SizeType } from './TelegramClient';
 
 interface OnProgress {
     isCanceled?: boolean;
@@ -20,14 +21,20 @@ interface OnProgress {
 }
 
 export interface DownloadFileParams {
-    dcId: number;
-    fileSize: number;
+    fileSize?: number;
     workers?: number;
     partSizeKb?: number;
     start?: number;
     end?: number;
     progressCallback?: OnProgress;
     isPriority?: boolean;
+}
+
+export type DownloadFileWithDcParams = DownloadFileParams & { dcId: number };
+
+export interface DownloadMediaParams {
+    sizeType?: SizeType;
+    progressCallback?: OnProgress;
 }
 
 // Chunk sizes for `upload.getFile` must be multiple of the smallest size
@@ -87,7 +94,7 @@ class FileView {
         }
     }
 
-    getData(): Promise<Buffer | File> {
+    async getData(): Promise<Buffer | File> {
         if (this.type === 'opfs') {
             return this.largeFile!.getFile();
         } else {
@@ -98,19 +105,19 @@ class FileView {
 
 export async function downloadFile(
     client: TelegramClient,
-    inputLocation: Api.InputFileLocation,
-    fileParams: DownloadFileParams,
+    inputLocation: Api.TypeInputFileLocation,
+    fileParams: DownloadFileWithDcParams,
     shouldDebugExportedSenders?: boolean,
 ) {
     const { dcId } = fileParams;
     for (let i = 0; i < SENDER_RETRIES; i++) {
         try {
             return await downloadFile2(client, inputLocation, fileParams, shouldDebugExportedSenders);
-        } catch (err: any) {
-            if (
-                (err.message.startsWith('SESSION_REVOKED') || err.message.startsWith('CONNECTION_NOT_INITED'))
-                && i < SENDER_RETRIES - 1
-            ) {
+        } catch (err: unknown) {
+            if (err instanceof RPCError && (
+                err.errorMessage.startsWith('SESSION_REVOKED')
+                || err.errorMessage.startsWith('CONNECTION_NOT_INITED')
+            ) && i < SENDER_RETRIES - 1) {
                 await client._cleanupExportedSenders(dcId);
             } else {
                 throw err;
@@ -131,12 +138,12 @@ const foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM).fill(undefined)
 
 async function downloadFile2(
     client: TelegramClient,
-    inputLocation: Api.InputFileLocation,
-    fileParams: DownloadFileParams,
+    inputLocation: Api.TypeInputFileLocation,
+    fileParams: DownloadFileWithDcParams,
     shouldDebugExportedSenders?: boolean,
 ) {
     let {
-        partSizeKb, end,
+        partSizeKb, end = 0,
     } = fileParams;
     const {
         fileSize, dcId, progressCallback, isPriority, start = 0,
@@ -152,14 +159,18 @@ async function downloadFile2(
     logWithId('Downloading file...');
     const isPremium = Boolean(client.isPremium);
 
-    end = end && end < fileSize ? end : fileSize - 1;
+    if (fileSize) {
+        end = end && end < fileSize ? end : fileSize - 1;
+    }
+
+    const rangeSize = end ? end - start + 1 : undefined;
 
     if (!partSizeKb) {
-        partSizeKb = fileSize ? getDownloadPartSize(start ? (end - start + 1) : fileSize) : DEFAULT_CHUNK_SIZE;
+        partSizeKb = fileSize ? getDownloadPartSize(rangeSize || fileSize) : DEFAULT_CHUNK_SIZE;
     }
 
     const partSize = partSizeKb * 1024;
-    const partsCount = end ? Math.ceil((end + 1 - start + 1) / partSize) : 1;
+    const partsCount = rangeSize ? Math.ceil(rangeSize / partSize) : 1;
     const noParallel = !end;
     const shouldUseMultipleConnections = Boolean(fileSize)
         && fileSize >= MULTIPLE_CONNECTIONS_MIN_FILE_SIZE
@@ -172,7 +183,7 @@ async function downloadFile2(
 
     client._log.info(`Downloading file in chunks of ${partSize} bytes`);
 
-    const fileView = new FileView(end - start + 1);
+    const fileView = new FileView(rangeSize);
     const promises: Promise<any>[] = [];
     let offset = start;
     // Used for files with unknown size and for manual cancellations
@@ -243,7 +254,7 @@ async function downloadFile2(
                         }, 6000);
                     }
                     // sometimes a session is revoked and will cause this to hang.
-                    const result = await Promise.race([
+                    const result = (await Promise.race([
                         sender.send(new Api.upload.GetFile({
                             location: inputLocation,
                             offset: BigInt(offsetMemo),
@@ -260,8 +271,12 @@ async function downloadFile2(
                                 return Promise.reject(new Error('SESSION_REVOKED'));
                             }
                         }),
-                    ]);
+                    ]))!;
                     client.releaseExportedSender(sender);
+
+                    if (result instanceof Api.upload.FileCdnRedirect) {
+                        throw new Error('CDN download not supported');
+                    }
 
                     isDone2 = true;
                     if (progressCallback) {
@@ -288,8 +303,8 @@ async function downloadFile2(
                     if (sender && !sender.isConnected()) {
                         await sleep(DISCONNECT_SLEEP);
                         continue;
-                    } else if (err instanceof errors.FloodWaitError) {
-                        if (err instanceof errors.FloodPremiumWaitError && !isPremiumFloodWaitSent) {
+                    } else if (err instanceof FloodWaitError) {
+                        if (err instanceof FloodPremiumWaitError && !isPremiumFloodWaitSent) {
                             sender?._updateCallback(new LocalUpdatePremiumFloodWait(false));
                             isPremiumFloodWaitSent = true;
                         }
@@ -302,7 +317,7 @@ async function downloadFile2(
                     if (deferred) deferred.resolve();
 
                     hasEnded = true;
-                    client.releaseExportedSender(sender);
+                    if (sender) client.releaseExportedSender(sender);
                     throw err;
                 }
             }

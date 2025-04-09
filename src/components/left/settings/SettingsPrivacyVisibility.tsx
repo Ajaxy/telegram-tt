@@ -2,8 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiPhoto } from '../../../api/types';
-import type { ApiPrivacySettings, BotsPrivacyType } from '../../../types';
+import type { ApiPhoto, ApiPrivacySettings, BotsPrivacyType } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 
 import { selectIsCurrentUserPremium, selectUserFullInfo } from '../../../global/selectors';

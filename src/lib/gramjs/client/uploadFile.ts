@@ -1,7 +1,7 @@
 import type TelegramClient from './TelegramClient';
 
 import { Foreman } from '../../../util/foreman';
-import errors from '../errors';
+import { FloodPremiumWaitError, FloodWaitError } from '../errors';
 import Api from '../tl/api';
 
 import LocalUpdatePremiumFloodWait from '../../../api/gramjs/updates/UpdatePremiumFloodWait';
@@ -133,8 +133,8 @@ export async function uploadFile(
                     if (sender && !sender.isConnected()) {
                         await sleep(DISCONNECT_SLEEP);
                         continue;
-                    } else if (err instanceof errors.FloodWaitError) {
-                        if (err instanceof errors.FloodPremiumWaitError && !isPremiumFloodWaitSent) {
+                    } else if (err instanceof FloodWaitError) {
+                        if (err instanceof FloodPremiumWaitError && !isPremiumFloodWaitSent) {
                             sender?._updateCallback(new LocalUpdatePremiumFloodWait(true));
                             isPremiumFloodWaitSent = true;
                         }
@@ -142,7 +142,7 @@ export async function uploadFile(
                         continue;
                     }
                     foremans[senderIndex].releaseWorker();
-                    client.releaseExportedSender(sender);
+                    if (sender) client.releaseExportedSender(sender);
 
                     throw err;
                 }

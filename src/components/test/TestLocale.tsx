@@ -44,9 +44,9 @@ const TestLocale = () => {
       </p>
       <p>{lang('Participants', { count: 42 }, { pluralValue: 42 })}</p>
       <p>
-        {lang('ChatServiceGroupUpdatedPinnedMessage1', {
-          message: 'Some message',
-          user: 'Some user',
+        {lang('ActionPinnedText', {
+          text: 'Some message',
+          from: 'Some user',
         })}
       </p>
       {/* <p>

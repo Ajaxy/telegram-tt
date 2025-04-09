@@ -19,7 +19,11 @@ import type {
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { getUserFullName, groupStatetefulContent, isUserId } from '../../../global/helpers';
+import {
+  getUserFullName,
+  groupStatefulContent,
+  isUserId,
+} from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { disableScrolling } from '../../../util/scrollLock';
 import { REM } from '../../common/helpers/mediaDimensions';
@@ -125,6 +129,8 @@ type OwnProps = {
   onSendPaidReaction?: NoneToVoidFunction;
   onShowPaidReactionModal?: NoneToVoidFunction;
   onReactionPickerOpen?: (position: IAnchorPosition) => void;
+  userFullName?: string;
+  canGift?: boolean;
 };
 
 const SCROLLBAR_WIDTH = 10;
@@ -214,9 +220,11 @@ const MessageContextMenu: FC<OwnProps> = ({
   onTranslate,
   onShowOriginal,
   onSelectLanguage,
+  userFullName,
+  canGift,
 }) => {
   const {
-    showNotification, openStickerSet, openCustomEmojiSets, loadStickers,
+    showNotification, openStickerSet, openCustomEmojiSets, loadStickers, openGiftModal,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
@@ -224,9 +232,16 @@ const MessageContextMenu: FC<OwnProps> = ({
   const scrollableRef = useRef<HTMLDivElement>(null);
   const lang = useOldLang();
   const noReactions = !isPrivate && !enabledReactions;
-  const withReactions = canShowReactionList && !noReactions;
+  const areReactionsPossible = message.areReactionsPossible;
+  const withReactions = (canShowReactionList && !noReactions) || areReactionsPossible;
   const isEdited = ('isEdited' in message) && message.isEdited;
   const seenByDates = message.seenByDates;
+  const isPremiumGift = message.content.action?.type === 'giftPremium';
+  const isGiftCode = message.content.action?.type === 'giftCode';
+  const isStarGift = message.content.action?.type === 'starGift';
+  const isStarGiftUnique = message.content.action?.type === 'starGiftUnique';
+  const shouldShowGiftButton = isUserId(message.chatId)
+    && canGift && (isPremiumGift || isGiftCode || isStarGift || isStarGiftUnique);
 
   const [areItemsHidden, hideItems] = useFlag();
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
@@ -237,6 +252,11 @@ const MessageContextMenu: FC<OwnProps> = ({
     showNotification({
       message: lang('Share.Link.Copied'),
     });
+    onClose();
+  });
+
+  const handleGiftClick = useLastCallback(() => {
+    openGiftModal({ forUserId: message.chatId });
     onClose();
   });
 
@@ -277,7 +297,7 @@ const MessageContextMenu: FC<OwnProps> = ({
 
   const copyOptions = getMessageCopyOptions(
     message,
-    groupStatetefulContent({ poll, story }),
+    groupStatefulContent({ poll, story }),
     targetHref,
     canCopy,
     handleAfterCopy,
@@ -379,6 +399,13 @@ const MessageContextMenu: FC<OwnProps> = ({
         )}
         dir={lang.isRtl ? 'rtl' : undefined}
       >
+        {shouldShowGiftButton
+          && (
+            <MenuItem icon="gift" onClick={handleGiftClick}>
+              {message?.isOutgoing ? lang('SendAnotherGift')
+                : lang('Conversation.ContextMenuSendGiftTo', userFullName)}
+            </MenuItem>
+          )}
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}
         {canReschedule && (
           <MenuItem icon="schedule" onClick={onReschedule}>{lang('MessageScheduleEditTime')}</MenuItem>

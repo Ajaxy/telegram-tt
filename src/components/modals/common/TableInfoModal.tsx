@@ -9,13 +9,13 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
 import styles from './TableInfoModal.module.scss';
 
-type ChatItem = { chatId: string };
+type ChatItem = { chatId: string; withEmojiStatus?: boolean };
 
 export type TableData = [TeactNode | undefined, TeactNode | ChatItem][];
 
@@ -25,9 +25,11 @@ type OwnProps = {
   tableData?: TableData;
   headerAvatarPeer?: ApiPeer | CustomPeer;
   header?: TeactNode;
+  modalHeader?: TeactNode;
   footer?: TeactNode;
   buttonText?: string;
   className?: string;
+  hasBackdrop?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
 };
@@ -38,9 +40,11 @@ const TableInfoModal = ({
   tableData,
   headerAvatarPeer,
   header,
+  modalHeader,
   footer,
   buttonText,
   className,
+  hasBackdrop,
   onClose,
   onButtonClick,
 }: OwnProps) => {
@@ -55,7 +59,9 @@ const TableInfoModal = ({
       isOpen={isOpen}
       hasCloseButton={Boolean(title)}
       hasAbsoluteCloseButton={!title}
+      absoluteCloseButtonColor={hasBackdrop ? 'translucent-white' : undefined}
       isSlim
+      header={modalHeader}
       title={title}
       className={className}
       contentClassName={styles.content}
@@ -71,11 +77,11 @@ const TableInfoModal = ({
             {label && <div className={buildClassName(styles.cell, styles.title)}>{label}</div>}
             <div className={buildClassName(styles.cell, styles.value, !label && styles.fullWidth)}>
               {typeof value === 'object' && 'chatId' in value ? (
-                <PickerSelectedItem
+                <PeerChip
                   peerId={value.chatId}
                   className={styles.chatItem}
                   forceShowSelf
-                  fluid
+                  withEmojiStatus={value.withEmojiStatus}
                   clickArg={value.chatId}
                   onClick={handleOpenChat}
                 />

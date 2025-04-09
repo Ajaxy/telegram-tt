@@ -1,6 +1,5 @@
 .Checkbox {
   position: relative;
-  width: 100%;
   min-height: 3rem;
 
   display: flex;
@@ -86,7 +85,11 @@
   }
 
   .Checkbox-main {
-    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    flex-grow: 1;
 
     &::before,
     &::after {
@@ -117,8 +120,6 @@
     }
 
     .label {
-      display: flex;
-      align-items: center;
       word-break: break-word;
       unicode-bidi: plaintext;
       text-align: left;
@@ -126,14 +127,18 @@
     }
 
     .right-icon {
+      grid-column: 2;
+      grid-row: span 2;
       margin-left: auto;
       margin-right: 0.5rem;
       color: var(--color-text-secondary);
       font-size: 1.25rem;
+      align-self: center;
     }
 
     .subLabel {
-      display: block;
+      grid-column: 1;
+      grid-row: 2;
       font-size: 0.875rem;
       line-height: 1rem;
       color: var(--color-text-secondary);
@@ -161,12 +166,14 @@
       content: "";
       display: block;
       position: absolute;
-      left: 3.5rem;
+      left: 1.125rem;
       width: 1.125rem;
       height: 1.125rem;
     }
 
     .label {
+      display: flex;
+      align-items: center;
       column-gap: 0.6875rem;
     }
   }
@@ -210,7 +217,7 @@
     align-items: center;
     gap: 0.3125rem;
     margin-block: 0;
-    padding: 0 0 0 3.5rem;
+    padding: 0 0 0 4.1875rem;
 
     &:hover,
     &:focus-visible {
@@ -246,7 +253,8 @@
   }
 
   &.avatar {
-    padding-inline-start: 5.5rem;
+    padding-inline-start: 3.5rem;
+    margin-inline-start: 3.125rem;
   }
 
   .button {

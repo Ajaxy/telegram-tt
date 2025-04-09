@@ -3,9 +3,9 @@ import type { OldLangFn } from '../../hooks/useOldLang';
 
 import { ANONYMOUS_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { formatFullDate, formatTime } from '../../util/dates/dateFormat';
+import { DAY } from '../../util/dates/units';
 import { orderBy } from '../../util/iteratees';
 import { formatPhoneNumber } from '../../util/phoneNumber';
-import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getServerTime, getServerTimeOffset } from '../../util/serverTime';
 
 export function getUserFirstOrLastName(user?: ApiUser) {
@@ -227,40 +227,15 @@ export function sortUserIds(
 
     switch (userStatus.type) {
       case 'userStatusRecently':
-        return now - 60 * 60 * 24;
+        return now - DAY;
       case 'userStatusLastWeek':
-        return now - 60 * 60 * 24 * 7;
+        return now - DAY * 7;
       case 'userStatusLastMonth':
-        return now - 60 * 60 * 24 * 7 * 30;
+        return now - DAY * 7 * 30;
       default:
         return 0;
     }
   }, 'desc');
-}
-
-export function filterUsersByName(
-  userIds: string[],
-  usersById: Record<string, ApiUser>,
-  query?: string,
-  currentUserId?: string,
-  savedMessagesLang?: string,
-) {
-  if (!query) {
-    return userIds;
-  }
-
-  const searchWords = prepareSearchWordsForNeedle(query);
-
-  return userIds.filter((id) => {
-    const user = usersById[id];
-    if (!user) {
-      return false;
-    }
-
-    const name = id === currentUserId ? savedMessagesLang : getUserFullName(user);
-
-    return (name && searchWords(name)) || Boolean(user.usernames?.find(({ username }) => searchWords(username)));
-  });
 }
 
 export function getMainUsername(userOrChat: ApiPeer) {

@@ -5,7 +5,7 @@ import { getActions } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
 
-import { filterUsersByName } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import { unique } from '../../../util/iteratees';
 
@@ -13,6 +13,7 @@ import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 
@@ -42,8 +43,8 @@ function CloseFriends({
 
   const displayedIds = useMemo(() => {
     const contactIds = (contactListIds || []).filter((id) => id !== currentUserId);
-    return unique(filterUsersByName([...closeFriendIds, ...contactIds], usersById, searchQuery));
-  }, [closeFriendIds, contactListIds, currentUserId, searchQuery, usersById]);
+    return unique(filterPeersByQuery({ ids: [...closeFriendIds, ...contactIds], query: searchQuery, type: 'user' }));
+  }, [closeFriendIds, contactListIds, currentUserId, searchQuery]);
 
   useEffectWithPrevDeps(([prevIsActive]) => {
     if (!prevIsActive && isActive) {
@@ -85,7 +86,7 @@ function CloseFriends({
           onClick={handleSubmit}
           ariaLabel={lang('Save')}
         >
-          <i className="icon icon-check" />
+          <Icon name="check" />
         </FloatingActionButton>
       </div>
     </>

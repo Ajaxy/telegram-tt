@@ -3,6 +3,9 @@
   overflow-x: hidden;
   overflow-y: hidden;
 
+  border-top: 1px solid transparent;
+  transition: border-top-color 0.2s ease-in-out;
+
   :global(.lovely-chart--container) {
     font: inherit !important;
     font-size: 13px !important;
@@ -16,7 +19,7 @@
   :global(.lovely-chart--tooltip-title),
   :global(.lovely-chart--tooltip-dataset-value),
   :global(.lovely-chart--percentage-title) {
-    font-weight: 500 !important;
+    font-weight: var(--font-weight-medium) !important;
   }
 
   :global(.lovely-chart--container-type-pie) {

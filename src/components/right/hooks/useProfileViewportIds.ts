@@ -34,6 +34,7 @@ export default function useProfileViewportIds({
   pinnedStoryIds,
   archiveStoryIds,
   similarChannels,
+  similarBots,
 } : {
   loadMoreMembers: AnyToVoidFunction;
   loadCommonChats: AnyToVoidFunction;
@@ -56,6 +57,7 @@ export default function useProfileViewportIds({
   pinnedStoryIds?: number[];
   archiveStoryIds?: number[];
   similarChannels?: string[];
+  similarBots?: string[];
 }) {
   const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
 
@@ -183,6 +185,9 @@ export default function useProfileViewportIds({
       break;
     case 'similarChannels':
       viewportIds = similarChannels;
+      break;
+    case 'similarBots':
+      viewportIds = similarBots;
       break;
     case 'gifts':
       viewportIds = giftIds;

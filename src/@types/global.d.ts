@@ -22,6 +22,7 @@ declare namespace React {
 
   interface VideoHTMLAttributes {
     srcObject?: MediaStream;
+    defaultMuted?: boolean;
   }
 
   interface MouseEvent {
@@ -61,6 +62,7 @@ type AllEmojis = Record<string, Emoji | EmojiWithSkins>;
 
 // Declare supported for import formats as modules
 declare module '*.png';
+declare module '*.jpg';
 declare module '*.svg';
 declare module '*.tgs';
 declare module '*.wasm';

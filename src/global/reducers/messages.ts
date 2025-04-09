@@ -1,9 +1,17 @@
 import type {
   ApiMessage, ApiPoll, ApiPollResult, ApiQuickReply, ApiSponsoredMessage, ApiThreadInfo,
 } from '../../api/types';
-import type { FocusDirection, ScrollTargetPosition, ThreadId } from '../../types';
 import type {
-  GlobalState, MessageList, MessageListType, TabArgs, TabState, TabThread, Thread,
+  FocusDirection,
+  MessageList,
+  MessageListType,
+  ScrollTargetPosition,
+  TabThread,
+  Thread,
+  ThreadId,
+} from '../../types';
+import type {
+  GlobalState, TabArgs, TabState,
 } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
@@ -11,14 +19,16 @@ import {
   IS_MOCKED_CLIENT, IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
 } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
+import { addTimestampEntities } from '../../util/dates/timestamp';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
-  areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
+  areSortedArraysEqual, excludeSortedArray, omit, omitUndefined, pick, pickTruthy, unique,
 } from '../../util/iteratees';
 import { isLocalMessageId, type MessageKey } from '../../util/keys/messageKey';
 import {
   hasMessageTtl, isMediaLoadableInViewer, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
+import { getEmojiOnlyCountForMessage } from '../helpers/getEmojiOnlyCountForMessage';
 import {
   selectChatMessage,
   selectChatMessages,
@@ -244,22 +254,38 @@ export function updateChatMessage<T extends GlobalState>(
   if (message && messageUpdate.isMediaUnread === false && hasMessageTtl(message)) {
     if (message.content.voice) {
       messageUpdate.content = {
-        ...messageUpdate.content,
-        voice: undefined,
-        isExpiredVoice: true,
+        action: {
+          mediaType: 'action',
+          type: 'expired',
+          isVoice: true,
+        },
       };
     } else if (message.content.video?.isRound) {
       messageUpdate.content = {
-        ...messageUpdate.content,
-        video: undefined,
-        isExpiredRoundVideo: true,
+        action: {
+          mediaType: 'action',
+          type: 'expired',
+          isRoundVideo: true,
+        },
       };
     }
   }
-  const updatedMessage = {
+
+  let emojiOnlyCount = message?.emojiOnlyCount;
+  let text = message?.content?.text;
+  if (messageUpdate.content) {
+    emojiOnlyCount = getEmojiOnlyCountForMessage(
+      messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
+    );
+    text = messageUpdate.content.text ? addTimestampEntities(messageUpdate.content.text) : text;
+  }
+
+  const updatedMessage = omitUndefined({
     ...message,
     ...messageUpdate,
-  };
+    emojiOnlyCount,
+    text,
+  });
 
   if (!updatedMessage.id) {
     return global;
@@ -275,9 +301,21 @@ export function updateScheduledMessage<T extends GlobalState>(
   global: T, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>,
 ): T {
   const message = selectScheduledMessage(global, chatId, messageId)!;
+
+  let emojiOnlyCount = message?.emojiOnlyCount;
+  let text = message?.content?.text;
+  if (messageUpdate.content) {
+    emojiOnlyCount = getEmojiOnlyCountForMessage(
+      messageUpdate.content, message?.groupedId || messageUpdate.groupedId,
+    );
+    text = messageUpdate.content.text ? addTimestampEntities(messageUpdate.content.text) : text;
+  }
+
   const updatedMessage = {
     ...message,
     ...messageUpdate,
+    emojiOnlyCount,
+    text,
   };
 
   if (!updatedMessage.id) {

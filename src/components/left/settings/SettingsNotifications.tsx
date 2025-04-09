@@ -3,6 +3,8 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiNotifyPeerType, ApiPeerNotifySettings } from '../../../api/types';
+
 import {
   checkIfNotificationsSupported,
   checkIfOfflinePushFailed,
@@ -10,7 +12,7 @@ import {
 } from '../../../util/notifications';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 import useRunDebounced from '../../../hooks/useRunDebounced';
 
 import Checkbox from '../../ui/Checkbox';
@@ -22,12 +24,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  hasPrivateChatsNotifications: boolean;
-  hasPrivateChatsMessagePreview: boolean;
-  hasGroupNotifications: boolean;
-  hasGroupMessagePreview: boolean;
-  hasBroadcastNotifications: boolean;
-  hasBroadcastMessagePreview: boolean;
+  notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>;
   hasContactJoinedNotifications: boolean;
   hasWebNotifications: boolean;
   hasPushNotifications: boolean;
@@ -37,12 +34,7 @@ type StateProps = {
 const SettingsNotifications: FC<OwnProps & StateProps> = ({
   isActive,
   onReset,
-  hasPrivateChatsNotifications,
-  hasPrivateChatsMessagePreview,
-  hasGroupNotifications,
-  hasGroupMessagePreview,
-  hasBroadcastNotifications,
-  hasBroadcastMessagePreview,
+  notifyDefaults,
   hasContactJoinedNotifications,
   hasPushNotifications,
   hasWebNotifications,
@@ -66,27 +58,18 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
   const handleSettingsChange = useCallback((
     e: ChangeEvent<HTMLInputElement>,
-    peerType: 'contact' | 'group' | 'broadcast',
-    setting: 'silent' | 'showPreviews',
+    peerType: ApiNotifyPeerType,
+    setting: 'mute' | 'showPreviews',
   ) => {
-    const currentIsSilent = peerType === 'contact'
-      ? !hasPrivateChatsNotifications
-      : !(peerType === 'group' ? hasGroupNotifications : hasBroadcastNotifications);
-    const currentShouldShowPreviews = peerType === 'contact'
-      ? hasPrivateChatsMessagePreview
-      : (peerType === 'group' ? hasGroupMessagePreview : hasBroadcastMessagePreview);
+    const currentIsMuted = Boolean(notifyDefaults?.[peerType]?.mutedUntil);
+    const currentShouldShowPreviews = Boolean(notifyDefaults?.[peerType]?.shouldShowPreviews);
 
     updateNotificationSettings({
       peerType,
-      ...(setting === 'silent' && { isSilent: !e.target.checked, shouldShowPreviews: currentShouldShowPreviews }),
-      ...(setting === 'showPreviews' && { shouldShowPreviews: e.target.checked, isSilent: currentIsSilent }),
+      isMuted: setting === 'mute' ? !e.target.checked : currentIsMuted,
+      shouldShowPreviews: setting === 'showPreviews' ? e.target.checked : currentShouldShowPreviews,
     });
-  }, [
-    hasBroadcastMessagePreview, hasBroadcastNotifications,
-    hasGroupMessagePreview, hasGroupNotifications,
-    hasPrivateChatsMessagePreview, hasPrivateChatsNotifications,
-    updateNotificationSettings,
-  ]);
+  }, [notifyDefaults]);
 
   const handleWebNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const isEnabled = e.target.checked;
@@ -103,27 +86,27 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
   }, [updateWebNotificationSettings]);
 
   const handlePrivateChatsNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    handleSettingsChange(e, 'contact', 'silent');
+    handleSettingsChange(e, 'users', 'mute');
   }, [handleSettingsChange]);
 
   const handlePrivateChatsPreviewChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    handleSettingsChange(e, 'contact', 'showPreviews');
+    handleSettingsChange(e, 'users', 'showPreviews');
   }, [handleSettingsChange]);
 
   const handleGroupsNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    handleSettingsChange(e, 'group', 'silent');
+    handleSettingsChange(e, 'groups', 'mute');
   }, [handleSettingsChange]);
 
   const handleGroupsPreviewChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    handleSettingsChange(e, 'group', 'showPreviews');
+    handleSettingsChange(e, 'groups', 'showPreviews');
   }, [handleSettingsChange]);
 
   const handleChannelsNotificationsChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    handleSettingsChange(e, 'broadcast', 'silent');
+    handleSettingsChange(e, 'channels', 'mute');
   }, [handleSettingsChange]);
 
   const handleChannelsPreviewChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    handleSettingsChange(e, 'broadcast', 'showPreviews');
+    handleSettingsChange(e, 'channels', 'showPreviews');
   }, [handleSettingsChange]);
 
   const handleContactNotificationChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -139,7 +122,7 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     runDebounced(() => playNotifySound(undefined, volume));
   }, [runDebounced, updateWebNotificationSettings]);
 
-  const lang = useOldLang();
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -150,27 +133,27 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
     <div className="settings-content custom-scroll">
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          Web notifications
+          {lang('NotificationsWeb')}
         </h4>
         <Checkbox
-          label="Web notifications"
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasWebNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
+          label={lang('NotificationsWeb')}
+          subLabel={lang(hasWebNotifications ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
           checked={hasWebNotifications}
           disabled={!areNotificationsSupported}
           onChange={handleWebNotificationsChange}
         />
         <Checkbox
-          label="Offline notifications"
+          label={lang('NotificationsOffline')}
           disabled={!hasWebNotifications || !areOfflineNotificationsSupported}
-          // eslint-disable-next-line max-len
-          subLabel={areOfflineNotificationsSupported ? lang(hasPushNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled') : 'Not supported'}
+          subLabel={areOfflineNotificationsSupported
+            ? lang(hasPushNotifications ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')
+            : lang('SettingsOfflineNotificationUnsupported')}
           checked={hasPushNotifications}
           onChange={handlePushNotificationsChange}
         />
         <div className="settings-item-slider">
           <RangeSlider
-            label="Sound"
+            label={lang('NotificationsSound')}
             min={0}
             max={10}
             disabled={!areNotificationsSupported}
@@ -186,17 +169,17 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForPrivateChats')}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasPrivateChatsNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
-          checked={hasPrivateChatsNotifications}
+          subLabel={lang(notifyDefaults?.users?.mutedUntil
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={Boolean(notifyDefaults?.users?.mutedUntil)}
           onChange={handlePrivateChatsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          disabled={!hasPrivateChatsNotifications}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasPrivateChatsMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
-          checked={hasPrivateChatsMessagePreview}
+          disabled={!notifyDefaults?.users?.mutedUntil}
+          subLabel={lang(notifyDefaults?.users?.shouldShowPreviews
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={Boolean(notifyDefaults?.users?.shouldShowPreviews)}
           onChange={handlePrivateChatsPreviewChange}
         />
       </div>
@@ -206,15 +189,17 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForGroups')}
-          subLabel={lang(hasGroupNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
-          checked={hasGroupNotifications}
+          subLabel={lang(notifyDefaults?.groups?.mutedUntil
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={Boolean(notifyDefaults?.groups?.mutedUntil)}
           onChange={handleGroupsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          disabled={!hasGroupNotifications}
-          subLabel={lang(hasGroupMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
-          checked={hasGroupMessagePreview}
+          disabled={!notifyDefaults?.groups?.mutedUntil}
+          subLabel={lang(notifyDefaults?.groups?.shouldShowPreviews
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={Boolean(notifyDefaults?.groups?.shouldShowPreviews)}
           onChange={handleGroupsPreviewChange}
         />
       </div>
@@ -224,17 +209,17 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 
         <Checkbox
           label={lang('NotificationsForChannels')}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasBroadcastNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
-          checked={hasBroadcastNotifications}
+          subLabel={lang(notifyDefaults?.channels?.mutedUntil
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={Boolean(notifyDefaults?.channels?.mutedUntil)}
           onChange={handleChannelsNotificationsChange}
         />
         <Checkbox
           label={lang('MessagePreview')}
-          disabled={!hasBroadcastNotifications}
-          // eslint-disable-next-line max-len
-          subLabel={lang(hasBroadcastMessagePreview ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
-          checked={hasBroadcastMessagePreview}
+          disabled={!notifyDefaults?.channels?.mutedUntil}
+          subLabel={lang(notifyDefaults?.channels?.shouldShowPreviews
+            ? 'UserInfoNotificationsEnabled' : 'UserInfoNotificationsDisabled')}
+          checked={Boolean(notifyDefaults?.channels?.shouldShowPreviews)}
           onChange={handleChannelsPreviewChange}
         />
       </div>
@@ -255,12 +240,6 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
-      hasPrivateChatsNotifications: Boolean(global.settings.byKey.hasPrivateChatsNotifications),
-      hasPrivateChatsMessagePreview: Boolean(global.settings.byKey.hasPrivateChatsMessagePreview),
-      hasGroupNotifications: Boolean(global.settings.byKey.hasGroupNotifications),
-      hasGroupMessagePreview: Boolean(global.settings.byKey.hasGroupMessagePreview),
-      hasBroadcastNotifications: Boolean(global.settings.byKey.hasBroadcastNotifications),
-      hasBroadcastMessagePreview: Boolean(global.settings.byKey.hasBroadcastMessagePreview),
       hasContactJoinedNotifications: Boolean(global.settings.byKey.hasContactJoinedNotifications),
       hasWebNotifications: global.settings.byKey.hasWebNotifications,
       hasPushNotifications: global.settings.byKey.hasPushNotifications,

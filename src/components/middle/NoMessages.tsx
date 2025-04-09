@@ -2,14 +2,15 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiTopic } from '../../api/types';
-import type { MessageListType } from '../../global/types';
 import type { OldLangFn } from '../../hooks/useOldLang';
+import type { MessageListType } from '../../types';
 
 import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
 
 import useOldLang from '../../hooks/useOldLang';
 
+import Icon from '../common/icons/Icon';
 import TopicIcon from '../common/TopicIcon';
 
 import './NoMessages.scss';
@@ -79,7 +80,7 @@ function renderSavedMessages(lang: OldLangFn) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
-        <i className="icon no-messages-icon icon-cloud-download" />
+        <Icon name="cloud-download" className="no-messages-icon" />
         <h3 className="title">{lang('Conversation.CloudStorageInfo.Title')}</h3>
         <ul className="description">
           <li>{lang('Conversation.ClousStorageInfo.Description1')}</li>

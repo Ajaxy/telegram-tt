@@ -33,6 +33,7 @@ import Modal from '../../ui/Modal';
 import Transition from '../../ui/Transition';
 import Avatar from '../Avatar';
 import FullNameTitle from '../FullNameTitle';
+import Icon from '../icons/Icon';
 import TopicIcon from '../TopicIcon';
 import PickerItem from './PickerItem';
 
@@ -50,6 +51,7 @@ export type OwnProps = {
   onSelectChatOrUser: (chatOrUserId: string, threadId?: ThreadId) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
+  isLowStackPriority?: boolean;
 };
 
 const CHAT_LIST_SLIDE = 0;
@@ -70,6 +72,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   onSelectChatOrUser,
   onClose,
   onCloseAnimationEnd,
+  isLowStackPriority,
 }) => {
   const { loadTopics } = getActions();
 
@@ -231,7 +234,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       <>
         <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
           <Button round color="translucent" size="smaller" ariaLabel={lang('Back')} onClick={handleHeaderBackClick}>
-            <i className="icon icon-arrow-left" />
+            <Icon name="arrow-left" />
           </Button>
           <InputText
             ref={topicSearchRef}
@@ -284,7 +287,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
             ariaLabel={lang('Close')}
             onClick={onClose}
           >
-            <i className="icon icon-close" />
+            <Icon name="close" />
           </Button>
           <InputText
             ref={searchRef}
@@ -322,6 +325,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       className={buildClassName('ChatOrUserPicker', className)}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
+      isLowStackPriority={isLowStackPriority}
     >
       <Transition activeKey={activeKey} name="slideFade" slideClassName="ChatOrUserPicker_slide">
         {() => {

@@ -3,10 +3,10 @@ import type { OldLangFn } from '../../../../hooks/useOldLang';
 
 import {
   getChatTitle,
-  getSenderTitle,
   isChatGroup,
   isUserId,
 } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers/peers';
 
 export function getSenderName(
   lang: OldLangFn, message: ApiMessage, chatsById: Record<string, ApiChat>, usersById: Record<string, ApiUser>,
@@ -18,7 +18,7 @@ export function getSenderName(
 
   const sender = isUserId(senderId) ? usersById[senderId] : chatsById[senderId];
 
-  let senderName = getSenderTitle(lang, sender);
+  let senderName = getPeerTitle(lang, sender);
 
   const chat = chatsById[message.chatId];
   if (chat) {

@@ -3,14 +3,16 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChat } from '../../../api/types';
+import type { ApiChat, ApiChatFullInfo } from '../../../api/types';
 
 import {
   selectChat,
+  selectChatFullInfo,
   selectIsCurrentUserPremium,
   selectSimilarChannelIds,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { getServerTime } from '../../../util/serverTime';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
 import useTimeout from '../../../hooks/schedulers/useTimeout';
@@ -29,8 +31,10 @@ import styles from './SimilarChannels.module.scss';
 
 const DEFAULT_BADGE_COLOR = '#3C3C4399';
 const SHOW_CHANNELS_NUMBER = 10;
+const ANIMATION_DURATION = 150;
 const MIN_SKELETON_DELAY = 300;
 const MAX_SKELETON_DELAY = 2000;
+const AUTO_EXPAND_TIME = 10; // Seconds from joining
 
 type OwnProps = {
   chatId: string;
@@ -38,24 +42,31 @@ type OwnProps = {
 
 type StateProps = {
   similarChannelIds?: string[];
-  shouldShowInChat?: boolean;
-  count: number;
+  isExpanded?: boolean;
+  count?: number;
   isCurrentUserPremium: boolean;
+  channelJoinInfo?: ApiChatFullInfo['joinInfo'];
 };
 
 const SimilarChannels = ({
   chatId,
   similarChannelIds,
-  shouldShowInChat,
+  isExpanded,
   count,
   isCurrentUserPremium,
+  channelJoinInfo,
 }: StateProps & OwnProps) => {
-  const lang = useOldLang();
   const { toggleChannelRecommendations, loadChannelRecommendations } = getActions();
+
+  const lang = useOldLang();
+
   const [isShowing, markShowing, markNotShowing] = useFlag(false);
   const [isHiding, markHiding, markNotHiding] = useFlag(false);
+
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
+
+  const ignoreAutoScrollRef = useRef(false);
   const similarChannels = useMemo(() => {
     if (!similarChannelIds) {
       return undefined;
@@ -65,17 +76,18 @@ const SimilarChannels = ({
     return similarChannelIds.map((id) => selectChat(global, id)).filter(Boolean);
   }, [similarChannelIds]);
   // Show skeleton while loading similar channels
-  const [shoulRenderSkeleton, setShoulRenderSkeleton] = useState(!similarChannelIds);
+  const [shouldRenderSkeleton, setShouldRenderSkeleton] = useState(false);
   const firstSimilarChannels = useMemo(() => similarChannels?.slice(0, SHOW_CHANNELS_NUMBER), [similarChannels]);
   const areSimilarChannelsPresent = Boolean(firstSimilarChannels?.length);
 
-  useHorizontalScroll(ref, !areSimilarChannelsPresent || !shouldShowInChat || shoulRenderSkeleton, true);
   const isAnimating = isHiding || isShowing;
   const shouldRenderChannels = Boolean(
-    !shoulRenderSkeleton
-      && (shouldShowInChat || isAnimating)
+    !shouldRenderSkeleton
+      && (isExpanded || isAnimating)
       && areSimilarChannelsPresent,
   );
+
+  useHorizontalScroll(ref, !shouldRenderChannels, true);
 
   useEffect(() => {
     if (!similarChannelIds) {
@@ -83,42 +95,55 @@ const SimilarChannels = ({
     }
   }, [chatId, similarChannelIds]);
 
-  useTimeout(() => setShoulRenderSkeleton(false), MAX_SKELETON_DELAY);
+  useTimeout(() => setShouldRenderSkeleton(false), MAX_SKELETON_DELAY);
 
   useEffect(() => {
-    if (shoulRenderSkeleton && similarChannels && shouldShowInChat) {
+    if (shouldRenderSkeleton && similarChannels && isExpanded) {
       const id = setTimeout(() => {
-        setShoulRenderSkeleton(false);
+        setShouldRenderSkeleton(false);
       }, MIN_SKELETON_DELAY);
 
       return () => clearTimeout(id);
     }
 
     return undefined;
-  }, [similarChannels, shouldShowInChat, shoulRenderSkeleton]);
+  }, [similarChannels, isExpanded, shouldRenderSkeleton]);
+
+  useEffect(() => {
+    if (isExpanded) {
+      markShowing();
+      markNotHiding();
+      setShouldRenderSkeleton(!similarChannelIds);
+      if (!ignoreAutoScrollRef.current) {
+        setTimeout(() => {
+          ref.current?.scrollIntoView({ behavior: 'smooth' });
+        }, ANIMATION_DURATION);
+      }
+    } else {
+      markNotShowing();
+      markHiding();
+    }
+  }, [isExpanded, similarChannelIds]);
 
   const handleToggle = useLastCallback(() => {
     toggleChannelRecommendations({ chatId });
-    if (shouldShowInChat) {
-      markNotShowing();
-      markHiding();
-    } else {
-      markShowing();
-      markNotHiding();
-    }
   });
+
+  useEffect(() => {
+    if (!channelJoinInfo?.joinedDate || isExpanded) return;
+    if (getServerTime() - channelJoinInfo.joinedDate <= AUTO_EXPAND_TIME) {
+      handleToggle();
+      ignoreAutoScrollRef.current = true;
+    }
+  }, [channelJoinInfo, isExpanded]);
+
+  if (!shouldRenderChannels && !shouldRenderSkeleton) {
+    return undefined;
+  }
 
   return (
     <div className={buildClassName(styles.root)}>
-      <div className="join-text">
-        <span
-          className={buildClassName(areSimilarChannelsPresent && styles.joinText)}
-          onClick={areSimilarChannelsPresent ? handleToggle : undefined}
-        >
-          {lang('ChannelJoined')}
-        </span>
-      </div>
-      {shoulRenderSkeleton && <Skeleton className={styles.skeleton} />}
+      {shouldRenderSkeleton && <Skeleton className={styles.skeleton} />}
       {shouldRenderChannels && (
         <div
           className={buildClassName(
@@ -160,7 +185,7 @@ const SimilarChannels = ({
                   <MoreChannels
                     channel={channel}
                     chatId={chatId}
-                    channelsCount={count - SHOW_CHANNELS_NUMBER + 1}
+                    channelsCount={count! - SHOW_CHANNELS_NUMBER + 1}
                     isCurrentUserPremium={isCurrentUserPremium}
                   />
                 ) : (
@@ -183,7 +208,7 @@ function SimilarChannel({ channel }: { channel: ApiChat }) {
     <div className={styles.item} onClick={() => openChat({ id: channel.id })}>
       <Avatar className={styles.avatar} key={channel.id} size="large" peer={channel} />
       <div style={`background: ${color}`} className={styles.badge}>
-        <i className={buildClassName(styles.icon, 'icon icon-user-filled')} />
+        <Icon name="user-filled" className={styles.icon} />
         <span className={styles.membersCount}>{formatIntegerCompact(channel?.membersCount || 0)}
         </span>
       </div>
@@ -239,14 +264,16 @@ function MoreChannels({
 
 export default memo(
   withGlobal<OwnProps>((global, { chatId }): StateProps => {
-    const { similarChannelIds, shouldShowInChat, count } = selectSimilarChannelIds(global, chatId) || {};
+    const { similarChannelIds, isExpanded, count } = selectSimilarChannelIds(global, chatId) || {};
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+    const chatFullInfo = selectChatFullInfo(global, chatId);
 
     return {
       similarChannelIds,
-      shouldShowInChat,
+      isExpanded,
       count,
       isCurrentUserPremium,
+      channelJoinInfo: chatFullInfo?.joinInfo,
     };
   })(SimilarChannels),
 );

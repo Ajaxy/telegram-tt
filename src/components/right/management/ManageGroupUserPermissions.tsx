@@ -16,6 +16,7 @@ import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
+import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -39,7 +40,7 @@ type StateProps = {
   isFormFullyDisabled?: boolean;
 };
 
-const ITEM_HEIGHT = 24 + 32;
+const ITEM_HEIGHT = 48;
 const SHIFT_HEIGHT_MINUS = 1;
 const BEFORE_ITEMS_COUNT = 2;
 const BEFORE_USER_INFO_HEIGHT = 96;
@@ -180,7 +181,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
 

@@ -11,6 +11,7 @@ import useMedia from '../../../hooks/useMedia';
 import useMediaTransitionDeprecated from '../../../hooks/useMediaTransitionDeprecated';
 
 import CustomEmoji from '../CustomEmoji';
+import Icon from '../icons/Icon';
 
 import './ReactionStaticEmoji.scss';
 
@@ -58,7 +59,7 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
 
   if (shouldReplaceWithHeartIcon) {
     return (
-      <i className="ReactionStaticEmoji icon icon-heart" style={`font-size: ${size}px; width: ${size}px`} />
+      <Icon name="heart" className="ReactionStaticEmoji" style={`font-size: ${size}px; width: ${size}px`} />
     );
   }
 

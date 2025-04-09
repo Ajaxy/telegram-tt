@@ -11,6 +11,8 @@
 }
 
 .Notification {
+  --color-toast-action: var(--color-primary);
+
   background-color: rgba(32, 32, 32, 0.8);
   background-size: 1.5rem;
   border-radius: var(--border-radius-default);
@@ -40,7 +42,7 @@
   }
 
   .notification-title {
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
   }
 
   .notification-icon {
@@ -60,8 +62,8 @@
   }
 
   .notification-button {
-    color: var(--color-primary);
-    font-weight: 500;
+    color: var(--color-toast-action);
+    font-weight: var(--font-weight-medium);
     text-transform: none;
     margin-inline-start: 0.125rem;
     height: 2rem;

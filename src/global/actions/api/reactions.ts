@@ -1,6 +1,6 @@
 import type { ApiError, ApiReaction, ApiReactionEmoji } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
-import { ApiMediaFormat } from '../../../api/types';
+import { ApiMediaFormat, MAIN_THREAD_ID } from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -246,8 +246,13 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
 
 addActionHandler('addLocalPaidReaction', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageId, count, isPrivate, tabId = getCurrentTabId(),
+    chatId, messageId, count, shouldIgnoreDefaultPrivacy = false, tabId = getCurrentTabId(),
   } = payload;
+  const defaultPrivacy = global.settings.paidReactionPrivacy;
+  const isPrivate = !shouldIgnoreDefaultPrivacy ? defaultPrivacy?.type === 'anonymous' : payload.isPrivate;
+  const peerId = !shouldIgnoreDefaultPrivacy
+    ? (defaultPrivacy?.type === 'peer' ? defaultPrivacy.peerId : undefined) : payload.peerId;
+
   const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
 
@@ -256,7 +261,7 @@ addActionHandler('addLocalPaidReaction', (global, actions, payload): ActionRetur
   }
 
   const currentReactions = message.reactions?.results || [];
-  const newReactions = addPaidReaction(currentReactions, count, isPrivate);
+  const newReactions = addPaidReaction(currentReactions, count, isPrivate, peerId);
   global = updateChatMessage(global, message.chatId, message.id, {
     reactions: {
       ...currentReactions,
@@ -301,6 +306,7 @@ addActionHandler('sendPaidReaction', async (global, actions, payload): Promise<v
       messageId,
       count,
       isPrivate: paidReaction?.localIsPrivate,
+      peerId: paidReaction?.localPeerId,
     });
   } catch (error) {
     if ((error as ApiError).message === 'BALANCE_TOO_LOW') {
@@ -551,16 +557,21 @@ addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('readAllReactions', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  const chat = selectCurrentChat(global, tabId);
+  const { chatId, threadId = MAIN_THREAD_ID } = payload;
+  const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
-  callApi('readAllReactions', { chat });
+  callApi('readAllReactions', { chat, threadId: threadId === MAIN_THREAD_ID ? undefined : threadId });
 
-  return updateUnreadReactions(global, chat.id, {
-    unreadReactionsCount: undefined,
-    unreadReactions: undefined,
-  });
+  if (threadId === MAIN_THREAD_ID) {
+    return updateUnreadReactions(global, chat.id, {
+      unreadReactionsCount: undefined,
+      unreadReactions: undefined,
+    });
+  }
+
+  // TODO[Forums]: Support unread reactions in threads
+  return undefined;
 });
 
 addActionHandler('loadTopReactions', async (global): Promise<void> => {

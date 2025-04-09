@@ -171,10 +171,6 @@ export function selectIsAlwaysHighPriorityEmoji<T extends GlobalState>(
     || stickerSet.id === RESTRICTED_EMOJI_SET_ID;
 }
 
-export function selectStarGiftSticker<T extends GlobalState>(global: T, id: string) {
-  return global.stickers.starGifts.stickers[id];
-}
-
 export function selectGiftStickerForDuration<T extends GlobalState>(global: T, duration = 1) {
   const stickers = global.premiumGifts?.stickers;
   if (!stickers) return undefined;

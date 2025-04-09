@@ -18,7 +18,6 @@ import useOldLang from '../../../hooks/useOldLang';
 import AboutMonetizationModal from '../../common/AboutMonetizationModal.async';
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
-import VerificationMonetizationModal from '../../common/VerificationMonetizationModal.async';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Link from '../../ui/Link';
@@ -53,9 +52,6 @@ type StateProps = {
   isCreator?: boolean;
   isChannelRevenueWithdrawalEnabled?: boolean;
   hasPassword?: boolean;
-  passwordHint?: string;
-  error?: string;
-  isLoading?: boolean;
 };
 
 const MonetizationStatistics = ({
@@ -65,11 +61,8 @@ const MonetizationStatistics = ({
   isCreator,
   isChannelRevenueWithdrawalEnabled,
   hasPassword,
-  passwordHint,
-  error,
-  isLoading,
 }: StateProps) => {
-  const { loadChannelMonetizationStatistics, loadPasswordInfo } = getActions();
+  const { loadChannelMonetizationStatistics, openMonetizationVerificationModal, loadPasswordInfo } = getActions();
   const oldLang = useOldLang();
   const lang = useLang();
 
@@ -79,9 +72,6 @@ const MonetizationStatistics = ({
   const loadedCharts = useRef<string[]>([]);
   const forceUpdate = useForceUpdate();
   const [isAboutMonetizationModalOpen, openAboutMonetizationModal, closeAboutMonetizationModal] = useFlag(false);
-  const [
-    isVerificationMonetizationModalOpen, openVerificationMonetizationModal, closeVerificationMonetizationModal,
-  ] = useFlag(false);
   const [isConfirmPasswordDialogOpen, openConfirmPasswordDialogOpen, closeConfirmPasswordDialogOpen] = useFlag();
   const availableBalance = statistics?.balances?.availableBalance;
   const isWithdrawalEnabled = statistics?.balances?.isWithdrawalEnabled;
@@ -206,7 +196,9 @@ const MonetizationStatistics = ({
 
   const verificationMonetizationHandler = useLastCallback(() => {
     if (hasPassword) {
-      openVerificationMonetizationModal();
+      openMonetizationVerificationModal({
+        chatId,
+      });
     } else {
       openConfirmPasswordDialogOpen();
     }
@@ -259,14 +251,6 @@ const MonetizationStatistics = ({
         isOpen={isAboutMonetizationModalOpen}
         onClose={closeAboutMonetizationModal}
       />
-      <VerificationMonetizationModal
-        chatId={chatId}
-        isOpen={isVerificationMonetizationModalOpen}
-        onClose={closeVerificationMonetizationModal}
-        passwordHint={passwordHint}
-        error={error}
-        isLoading={isLoading}
-      />
       <ConfirmDialog
         isOnlyConfirm
         isOpen={isConfirmPasswordDialogOpen}
@@ -289,12 +273,7 @@ export default memo(withGlobal(
           hasPassword,
         },
       },
-      twoFaSettings: {
-        hint: passwordHint,
-      },
     } = global;
-    const isLoading = global.monetizationInfo?.isLoading;
-    const error = global.monetizationInfo?.error;
     const monetizationStatistics = tabState.monetizationStatistics;
     const chatId = monetizationStatistics && monetizationStatistics.chatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
@@ -312,9 +291,6 @@ export default memo(withGlobal(
       isCreator,
       isChannelRevenueWithdrawalEnabled,
       hasPassword,
-      passwordHint,
-      error,
-      isLoading,
     };
   },
 )(MonetizationStatistics));

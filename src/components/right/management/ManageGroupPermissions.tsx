@@ -14,6 +14,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useOldLang from '../../../hooks/useOldLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
+import Icon from '../../common/icons/Icon';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import PermissionCheckboxList from '../../main/PermissionCheckboxList';
 import FloatingActionButton from '../../ui/FloatingActionButton';
@@ -35,7 +36,7 @@ type StateProps = {
   members?: ApiChatMember[];
 };
 
-const ITEM_HEIGHT = 24 + 20;
+const ITEM_HEIGHT = 48;
 const BEFORE_ITEMS_COUNT = 2;
 const ITEMS_COUNT = 9;
 
@@ -168,7 +169,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
       style={`--shift-height: ${ITEMS_COUNT * ITEM_HEIGHT}px;`
         + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT}px;`}
     >
-      <div className="custom-scroll">
+      <div className="panel-content custom-scroll">
         <div className="section without-bottom-shadow">
           <h3 className="section-heading" dir="auto">{lang('ChannelPermissionsHeader')}</h3>
           <PermissionCheckboxList
@@ -244,7 +245,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
     </div>

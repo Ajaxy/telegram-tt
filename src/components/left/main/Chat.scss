@@ -400,6 +400,12 @@
         }
       }
     }
+
+    .star-amount-icon {
+      vertical-align: text-top;
+      line-height: initial;
+      margin-inline: 0;
+    }
   }
 
   &[dir="rtl"] {

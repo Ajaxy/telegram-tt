@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { MessageListType } from '../../global/types';
+import type { MessageListType, ThreadId } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { selectChat, selectCurrentMessageList, selectCurrentMiddleSearch } from '../../global/selectors';
@@ -24,6 +24,7 @@ type OwnProps = {
 type StateProps = {
   chatId?: string;
   messageListType?: MessageListType;
+  threadId?: ThreadId;
   unreadCount?: number;
   unreadReactions?: number[];
   unreadMentions?: number[];
@@ -38,6 +39,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
   canPost,
   messageListType,
   chatId,
+  threadId,
   unreadCount,
   unreadReactions,
   unreadMentions,
@@ -55,6 +57,16 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
 
   const hasUnreadReactions = Boolean(reactionsCount);
   const hasUnreadMentions = Boolean(mentionsCount);
+
+  const handleReadAllReactions = useLastCallback(() => {
+    if (!chatId) return;
+    readAllReactions({ chatId, threadId });
+  });
+
+  const handleReadAllMentions = useLastCallback(() => {
+    if (!chatId) return;
+    readAllMentions({ chatId, threadId });
+  });
 
   useEffect(() => {
     if (hasUnreadReactions && chatId && !unreadReactions?.length) {
@@ -97,7 +109,12 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
         return;
       }
 
-      animateScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
+      animateScroll({
+        container: messagesContainer,
+        element: lastMessageElement,
+        position: 'end',
+        margin: FOCUS_MARGIN,
+      });
     }
   });
 
@@ -115,7 +132,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
         icon="heart-outline"
         ariaLabelLang="AccDescrReactionMentionDown"
         onClick={focusNextReaction}
-        onReadAll={readAllReactions}
+        onReadAll={handleReadAllReactions}
         unreadCount={reactionsCount}
         className={buildClassName(
           styles.reactions,
@@ -128,7 +145,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
         icon="mention"
         ariaLabelLang="AccDescrMentionDown"
         onClick={focusNextMention}
-        onReadAll={readAllMentions}
+        onReadAll={handleReadAllMentions}
         unreadCount={mentionsCount}
         className={!hasUnreadMentions && styles.hidden}
       />
@@ -161,6 +178,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       messageListType,
       chatId,
+      threadId,
       reactionsCount: shouldShowCount ? chat.unreadReactionsCount : undefined,
       unreadReactions: shouldShowCount ? chat.unreadReactions : undefined,
       unreadMentions: shouldShowCount ? chat.unreadMentions : undefined,

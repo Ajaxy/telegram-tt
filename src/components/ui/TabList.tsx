@@ -1,9 +1,8 @@
-import type { FC } from '../../lib/teact/teact';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import type { MenuItemContextAction } from './ListItem';
 
-import { ALL_FOLDER_ID } from '../../config';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import buildClassName from '../../util/buildClassName';
 import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
@@ -18,7 +17,7 @@ import './TabList.scss';
 
 export type TabWithProperties = {
   id?: number;
-  title: string;
+  title: TeactNode;
   badgeCount?: number;
   isBlocked?: boolean;
   isBadgeActive?: boolean;
@@ -27,7 +26,6 @@ export type TabWithProperties = {
 
 type OwnProps = {
   tabs: readonly TabWithProperties[];
-  areFolders?: boolean;
   activeTab: number;
   className?: string;
   tabClassName?: string;
@@ -40,7 +38,7 @@ const TAB_SCROLL_THRESHOLD_PX = 16;
 const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
 const TabList: FC<OwnProps> = ({
-  tabs, areFolders, activeTab, onSwitchTab,
+  tabs, activeTab, onSwitchTab,
   contextRootElementSelector, className, tabClassName,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -83,9 +81,8 @@ const TabList: FC<OwnProps> = ({
     >
       {tabs.map((tab, i) => (
         <Tab
-          key={tab.id ?? tab.title}
-          // TODO Remove dependency on usage context
-          title={(!areFolders || tab.id === ALL_FOLDER_ID) ? lang(tab.title) : tab.title}
+          key={tab.id}
+          title={tab.title}
           isActive={i === activeTab}
           isBlocked={tab.isBlocked}
           badgeCount={tab.badgeCount}

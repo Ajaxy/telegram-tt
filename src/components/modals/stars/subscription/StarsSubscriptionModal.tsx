@@ -125,9 +125,9 @@ const StarsSubscriptionModal: FC<OwnProps & StateProps> = ({
     const isBotSubscription = isApiPeerUser(peer);
 
     const header = (
-      <div className={buildClassName(styles.header, styles.starsHeader)}>
+      <div className={styles.header}>
         <div className={styles.avatarWrapper}>
-          <Avatar peer={!photo ? peer : undefined} webPhoto={photo} size="jumbo" />
+          <Avatar peer={!photo ? peer : undefined} webPhoto={photo} size="giant" />
           <StarIcon className={styles.subscriptionStar} type="gold" size="adaptive" />
         </div>
         <img

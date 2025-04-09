@@ -2,7 +2,7 @@ import type {
   ApiChannelMonetizationStatistics,
   ApiChannelStatistics, ApiGroupStatistics, ApiPostStatistics, StatisticsGraph,
 } from '../../api/types';
-import type { GlobalState, TabArgs } from '../types';
+import type { GlobalState, TabArgs, TabState } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectTabState } from '../selectors';
@@ -75,6 +75,23 @@ export function updateChannelMonetizationStatistics<T extends GlobalState>(
     statistics: {
       ...selectTabState(global, tabId).statistics,
       monetization: statistics,
+    },
+  }, tabId);
+}
+
+export function updateVerifyMonetizationModal<T extends GlobalState>(
+  global: T, update: Partial<TabState['monetizationVerificationModal']>,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.monetizationVerificationModal) {
+    return global;
+  }
+
+  return updateTabState(global, {
+    monetizationVerificationModal: {
+      ...tabState.monetizationVerificationModal,
+      ...update,
     },
   }, tabId);
 }

@@ -1,14 +1,11 @@
-import type { ApiUsername } from '../../../api/types';
-import type {
-  ApiPrivacySettings,
-} from '../../../types';
+import type { ApiPrivacySettings, ApiUsername } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import {
   ProfileEditProgress,
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 
-import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT } from '../../../config';
+import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT, MAX_INT_32 } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
@@ -19,9 +16,9 @@ import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  addBlockedUser, addNotifyExceptions, deletePeerPhoto,
+  addBlockedUser, addNotifyException, addNotifyExceptions, deletePeerPhoto,
   removeBlockedUser, replaceSettings, updateChat,
-  updateNotifySettings, updateUser, updateUserFullInfo,
+  updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -309,26 +306,40 @@ addActionHandler('loadNotificationExceptions', async (global): Promise<void> => 
 });
 
 addActionHandler('loadNotificationSettings', async (global): Promise<void> => {
-  const result = await callApi('fetchNotificationSettings');
-  if (!result) {
-    return;
-  }
+  const [signUpNotification, notifyDefaults] = await Promise.all([
+    callApi('fetchContactSignUpSetting'),
+    callApi('fetchNotifyDefaultSettings'),
+  ]);
+
+  if (!notifyDefaults) return;
 
   global = getGlobal();
-  global = replaceSettings(global, result);
+  global = replaceSettings(global, {
+    hasContactJoinedNotifications: signUpNotification,
+  });
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      notifyDefaults,
+    },
+  };
   setGlobal(global);
 });
 
 addActionHandler('updateNotificationSettings', async (global, actions, payload): Promise<void> => {
-  const { peerType, isSilent, shouldShowPreviews } = payload!;
+  const { peerType, isMuted, shouldShowPreviews } = payload!;
 
-  const result = await callApi('updateNotificationSettings', peerType, { isSilent, shouldShowPreviews });
+  const result = await callApi('updateNotificationSettings', peerType, { isMuted, shouldShowPreviews });
   if (!result) {
     return;
   }
 
   global = getGlobal();
-  global = updateNotifySettings(global, peerType, isSilent, shouldShowPreviews);
+  global = addNotifyException(global, peerType, {
+    mutedUntil: isMuted ? MAX_INT_32 : undefined,
+    shouldShowPreviews,
+  });
   setGlobal(global);
 });
 
@@ -397,6 +408,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     callApi('fetchPrivacySettings', 'bio'),
     callApi('fetchPrivacySettings', 'birthday'),
     callApi('fetchPrivacySettings', 'gifts'),
+    callApi('fetchPrivacySettings', 'noPaidMessages'),
   ]);
 
   if (result.some((e) => e === undefined)) {
@@ -416,6 +428,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     bioSettings,
     birthdaySettings,
     giftsSettings,
+    noPaidMessagesSettings,
   ] = result as {
     rules: ApiPrivacySettings;
   }[];
@@ -439,6 +452,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
         bio: bioSettings.rules,
         birthday: birthdaySettings.rules,
         gifts: giftsSettings.rules,
+        noPaidMessages: noPaidMessagesSettings.rules,
       },
     },
   };
@@ -585,12 +599,11 @@ addActionHandler('loadCountryList', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
-addActionHandler('ensureTimeFormat', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
+addActionHandler('ensureTimeFormat', async (global, actions): Promise<void> => {
   if (global.authNearestCountry) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT
       .has(global.authNearestCountry.toUpperCase()) ? '12h' : '24h';
-    actions.setSettingOption({ timeFormat, tabId });
+    actions.setSettingOption({ timeFormat });
     setTimeFormat(timeFormat);
   }
 
@@ -601,7 +614,7 @@ addActionHandler('ensureTimeFormat', async (global, actions, payload): Promise<v
   const nearestCountryCode = await callApi('fetchNearestCountry');
   if (nearestCountryCode) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(nearestCountryCode.toUpperCase()) ? '12h' : '24h';
-    actions.setSettingOption({ timeFormat, tabId });
+    actions.setSettingOption({ timeFormat });
     setTimeFormat(timeFormat);
   }
 });
@@ -693,14 +706,24 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
   const shouldHideReadMarks = payload.shouldHideReadMarks ?? Boolean(global.settings.byKey.shouldHideReadMarks);
   const shouldNewNonContactPeersRequirePremium = payload.shouldNewNonContactPeersRequirePremium
     ?? Boolean(global.settings.byKey.shouldNewNonContactPeersRequirePremium);
+    // eslint-disable-next-line no-null/no-null
+  const nonContactPeersPaidStars = payload.nonContactPeersPaidStars === null ? undefined
+    : payload.nonContactPeersPaidStars || global.settings.byKey.nonContactPeersPaidStars;
 
-  global = replaceSettings(global, { shouldArchiveAndMuteNewNonContact, shouldHideReadMarks });
+  global = getGlobal();
+  global = replaceSettings(global, {
+    shouldArchiveAndMuteNewNonContact,
+    shouldHideReadMarks,
+    shouldNewNonContactPeersRequirePremium,
+    nonContactPeersPaidStars,
+  });
   setGlobal(global);
 
   const result = await callApi('updateGlobalPrivacySettings', {
     shouldArchiveAndMuteNewNonContact,
     shouldHideReadMarks,
     shouldNewNonContactPeersRequirePremium,
+    nonContactPeersPaidStars,
   });
 
   global = getGlobal();
@@ -712,6 +735,9 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
     shouldNewNonContactPeersRequirePremium: !result
       ? !shouldNewNonContactPeersRequirePremium
       : result.shouldNewNonContactPeersRequirePremium,
+    nonContactPeersPaidStars: !result
+      ? undefined
+      : result.nonContactPeersPaidStars,
   });
   setGlobal(global);
 });

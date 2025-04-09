@@ -55,7 +55,7 @@ type OwnProps = {
   getNextItem: (from: MediaViewerItem, direction: number) => MediaViewerItem | undefined;
   selectItem: (item: MediaViewerItem) => void;
   loadMoreItemsIfNeeded: (item: MediaViewerItem) => void;
-  onFooterClick: () => void;
+  onFooterClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleSponsoredClick: (isFromMedia?: boolean) => void;
   onClose: () => void;
 };

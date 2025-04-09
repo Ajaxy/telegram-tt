@@ -1,7 +1,9 @@
 import type {
   ApiInputInvoice,
+  ApiInputSavedStarGift,
   ApiMessage,
   ApiRequestInputInvoice,
+  ApiRequestInputSavedStarGift,
   ApiStarsAmount,
   ApiStarsTransaction,
   ApiStarsTransactionPeer,
@@ -11,7 +13,8 @@ import type { CustomPeer } from '../../types';
 import type { LangFn } from '../../util/localization';
 import type { GlobalState } from '../types';
 
-import { selectChat, selectUser } from '../selectors';
+import arePropsShallowEqual from '../../util/arePropsShallowEqual';
+import { selectChat, selectPeer, selectUser } from '../selectors';
 
 export function getRequestInputInvoice<T extends GlobalState>(
   global: T, inputInvoice: ApiInputInvoice,
@@ -20,18 +23,19 @@ export function getRequestInputInvoice<T extends GlobalState>(
 
   if (inputInvoice.type === 'stargift') {
     const {
-      userId, shouldHideName, giftId, message,
+      peerId, shouldHideName, giftId, message, shouldUpgrade,
     } = inputInvoice;
-    const user = selectUser(global, userId);
+    const peer = selectPeer(global, peerId);
 
-    if (!user) return undefined;
+    if (!peer) return undefined;
 
     return {
       type: 'stargift',
-      user,
+      peer,
       shouldHideName,
       giftId,
       message,
+      shouldUpgrade,
     };
   }
 
@@ -89,6 +93,22 @@ export function getRequestInputInvoice<T extends GlobalState>(
       type: 'message',
       chat,
       messageId: inputInvoice.messageId,
+    };
+  }
+
+  if (inputInvoice.type === 'premiumGiftStars') {
+    const {
+      months, userId, message,
+    } = inputInvoice;
+    const user = selectUser(global, userId);
+
+    if (!user) return undefined;
+
+    return {
+      type: 'premiumGiftStars',
+      months,
+      message,
+      user,
     };
   }
 
@@ -169,6 +189,50 @@ export function getRequestInputInvoice<T extends GlobalState>(
         isOnlyForNewSubscribers,
         prizeDescription,
       },
+    };
+  }
+
+  if (inputInvoice.type === 'stargiftUpgrade') {
+    const { inputSavedGift, shouldKeepOriginalDetails } = inputInvoice;
+    const savedGift = getRequestInputSavedStarGift(global, inputSavedGift);
+    if (!savedGift) return undefined;
+
+    return {
+      type: 'stargiftUpgrade',
+      inputSavedGift: savedGift,
+      shouldKeepOriginalDetails,
+    };
+  }
+
+  if (inputInvoice.type === 'stargiftTransfer') {
+    const { inputSavedGift, recipientId } = inputInvoice;
+    const savedGift = getRequestInputSavedStarGift(global, inputSavedGift);
+    const peer = selectPeer(global, recipientId);
+    if (!savedGift || !peer) return undefined;
+
+    return {
+      type: 'stargiftTransfer',
+      inputSavedGift: savedGift,
+      recipient: peer,
+    };
+  }
+
+  return undefined;
+}
+
+export function getRequestInputSavedStarGift<T extends GlobalState>(
+  global: T, inputGift: ApiInputSavedStarGift,
+): ApiRequestInputSavedStarGift | undefined {
+  if (inputGift.type === 'user') return inputGift;
+
+  if (inputGift.type === 'chat') {
+    const chat = selectChat(global, inputGift.chatId);
+    if (!chat) return undefined;
+
+    return {
+      type: 'chat',
+      chat,
+      savedId: inputGift.savedId,
     };
   }
 
@@ -269,9 +333,9 @@ export function getStarsTransactionFromGift(message: ApiMessage): ApiStarsTransa
   const { transactionId, stars } = action;
 
   return {
-    id: transactionId!,
+    id: transactionId,
     stars: {
-      amount: stars!,
+      amount: stars,
       nanos: 0,
     },
     peer: {
@@ -289,19 +353,23 @@ export function getPrizeStarsTransactionFromGiveaway(message: ApiMessage): ApiSt
 
   if (action?.type !== 'prizeStars') return undefined;
 
-  const { transactionId, stars, targetChatId } = action;
+  const { transactionId, stars, boostPeerId } = action;
 
   return {
-    id: transactionId!,
+    id: transactionId,
     stars: {
-      amount: stars!,
+      amount: stars,
       nanos: 0,
     },
     peer: {
       type: 'peer',
-      id: targetChatId!,
+      id: boostPeerId,
     },
     date: message.date,
     giveawayPostId: message.id,
   };
+}
+
+export function areInputSavedGiftsEqual(one: ApiInputSavedStarGift, two: ApiInputSavedStarGift) {
+  return arePropsShallowEqual(one, two);
 }

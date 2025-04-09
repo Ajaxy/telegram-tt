@@ -106,6 +106,21 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         },
       });
     }
+
+    case 'updatePeerSettings': {
+      const { id, settings } = update;
+
+      const targetUserFullInfo = selectUserFullInfo(global, id);
+      if (!targetUserFullInfo?.botInfo) {
+        actions.loadFullUser({ userId: id });
+        return undefined;
+      }
+
+      global = updateUserFullInfo(global, id, {
+        settings,
+      });
+      return global;
+    }
   }
 
   return undefined;

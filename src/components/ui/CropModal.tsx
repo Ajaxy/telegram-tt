@@ -6,8 +6,9 @@ import React, {
 import { DEBUG } from '../../config';
 import { blobToDataUri, blobToFile } from '../../util/files';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Loading from './Loading';
 import Modal from './Modal';
@@ -79,6 +80,8 @@ type OwnProps = {
 const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
   const [isCroppieReady, setIsCroppieReady] = useState(false);
 
+  const lang = useLang();
+
   useEffect(() => {
     if (!file) {
       return;
@@ -92,8 +95,6 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
 
     initCropper(file);
   }, [file, isCroppieReady]);
-
-  const lang = useOldLang();
 
   const handleCropClick = useCallback(async () => {
     if (!cropper) {
@@ -110,7 +111,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
     <Modal
       isOpen={Boolean(file)}
       onClose={onClose}
-      title="Drag to reposition"
+      title={lang('CropperTitle')}
       className="CropModal"
       hasCloseButton
     >
@@ -124,9 +125,9 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
         round
         color="primary"
         onClick={handleCropClick}
-        ariaLabel={lang('CropImage')}
+        ariaLabel={lang('CropperApply')}
       >
-        <i className="icon icon-check" />
+        <Icon name="check" />
       </Button>
     </Modal>
   );

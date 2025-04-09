@@ -3,7 +3,7 @@ import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatFullInfo, ApiVideo } from '../../api/types';
-import type { MessageList } from '../../global/types';
+import type { MessageList } from '../../types';
 
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 import {

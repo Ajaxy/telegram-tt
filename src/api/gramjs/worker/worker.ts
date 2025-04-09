@@ -7,7 +7,7 @@ import type { OriginMessageEvent, WorkerPayload } from './types';
 import { DEBUG } from '../../../config';
 import { DEBUG_LEVELS } from '../../../util/debugConsole';
 import { throttleWithTickEnd } from '../../../util/schedulers';
-import { log } from '../helpers';
+import { log } from '../helpers/misc';
 import { callApi, cancelApiProgress, initApi } from '../methods/init';
 
 declare const self: WorkerGlobalScope;

@@ -1,0 +1,40 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  position: relative;
+  min-width: 12.5rem;
+  width: 100%;
+
+  margin-top: 0;
+  padding-block: 2rem !important;
+  padding-bottom: 0.75rem;
+
+  border-radius: 0.25rem;
+
+  font-weight: var(--font-weight-semibold);
+
+  cursor: var(--custom-cursor, pointer);
+}
+
+.backgroundWrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+  top: -1rem;
+}
+
+.stickerWrapper {
+  position: relative;
+  width: 7.5rem;
+  height: 7.5rem;
+  overflow: hidden;
+  margin-block: 0.5rem;
+}

@@ -6,12 +6,11 @@ import type { ApiPeer, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import {
-  getSenderTitle,
   getStoryMediaHash,
 } from '../../../global/helpers';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';
-import { getPeerColorClass } from '../helpers/peerColor';
 import renderText from '../helpers/renderText';
 
 import { useFastClick } from '../../../hooks/useFastClick';
@@ -21,6 +20,7 @@ import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../icons/Icon';
+import PeerColorWrapper from '../PeerColorWrapper';
 
 import './EmbeddedMessage.scss';
 
@@ -59,7 +59,7 @@ const EmbeddedStory: FC<OwnProps> = ({
   const mediaThumbnail = isVideoStory ? story.content.video!.thumbnail?.dataUri : undefined;
   const pictogramUrl = mediaBlobUrl || mediaThumbnail;
 
-  const senderTitle = sender ? getSenderTitle(lang, sender) : undefined;
+  const senderTitle = sender ? getPeerTitle(lang, sender) : undefined;
   const handleFastClick = useLastCallback(() => {
     if (story && !isExpiredStory) {
       onClick();
@@ -73,11 +73,13 @@ const EmbeddedStory: FC<OwnProps> = ({
   const { handleClick, handleMouseDown } = useFastClick(handleFastClick);
 
   return (
-    <div
+    <PeerColorWrapper
       ref={ref}
+      peerColor={sender?.color}
+      noUserColors={noUserColors}
+      shouldReset
       className={buildClassName(
         'EmbeddedMessage',
-        getPeerColorClass(sender, noUserColors, true),
         pictogramUrl && 'with-thumb',
       )}
       onClick={handleClick}
@@ -96,7 +98,7 @@ const EmbeddedStory: FC<OwnProps> = ({
         </p>
         <div className="message-title">{renderText(senderTitle || NBSP)}</div>
       </div>
-    </div>
+    </PeerColorWrapper>
   );
 };
 

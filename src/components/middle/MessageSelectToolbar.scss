@@ -85,7 +85,7 @@
     background: var(--color-background);
     border-radius: var(--border-radius-messages);
     box-shadow: 0 1px 2px var(--color-default-shadow);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
 
     transform: scaleX(1);
     transition: transform var(--select-transition), opacity var(--select-transition);

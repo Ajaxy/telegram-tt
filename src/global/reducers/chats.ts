@@ -1,7 +1,8 @@
 import type {
   ApiChat, ApiChatFullInfo, ApiChatMember,
 } from '../../api/types';
-import type { ChatListType, GlobalState } from '../types';
+import type { ChatListType } from '../../types';
+import type { GlobalState } from '../types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import { areDeepEqual } from '../../util/areDeepEqual';
@@ -373,10 +374,6 @@ export function updateChatListSecondaryInfo<T extends GlobalState>(
         ...global.chats.totalCount,
         [totalCountKey]: info.totalChatCount,
       },
-      isFullyLoaded: {
-        ...global.chats.isFullyLoaded,
-        [type]: false,
-      },
     },
   };
 }
@@ -423,12 +420,11 @@ export function addChatMembers<T extends GlobalState>(global: T, chat: ApiChat, 
   });
 }
 
-export function addSimilarChannels<T extends GlobalState>(
+export function replaceSimilarChannels<T extends GlobalState>(
   global: T,
   chatId: string,
   similarChannelIds: string[],
   count?: number,
-  shouldShowInChat = true,
 ) {
   return {
     ...global,
@@ -439,7 +435,6 @@ export function addSimilarChannels<T extends GlobalState>(
         [chatId]: {
           similarChannelIds,
           count: count || similarChannelIds.length,
-          shouldShowInChat,
         },
       },
     },
@@ -460,7 +455,28 @@ export function toggleSimilarChannels<T extends GlobalState>(
         ...global.chats.similarChannelsById,
         [chatId]: {
           ...similarChannels,
-          shouldShowInChat: !similarChannels.shouldShowInChat,
+          isExpanded: !similarChannels?.isExpanded,
+        },
+      },
+    },
+  };
+}
+
+export function addSimilarBots<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  similarBotsIds: string[],
+  count?: number,
+) {
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      similarBotsById: {
+        ...global.chats.similarBotsById,
+        [chatId]: {
+          similarBotsIds,
+          count,
         },
       },
     },

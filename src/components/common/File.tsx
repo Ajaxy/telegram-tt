@@ -20,6 +20,7 @@ import useShowTransitionDeprecated from '../../hooks/useShowTransitionDeprecated
 
 import Link from '../ui/Link';
 import ProgressSpinner from '../ui/ProgressSpinner';
+import Icon from './icons/Icon';
 
 import './File.scss';
 
@@ -102,8 +103,8 @@ const File: FC<OwnProps> = ({
   return (
     <div ref={elementRef} className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       {isSelectable && (
-        <div className="message-select-control">
-          {isSelected && <i className="icon icon-select" />}
+        <div className="message-select-control no-selection">
+          {isSelected && <Icon name="select" />}
         </div>
       )}
       <div className="file-icon-container" onClick={isUploading ? undefined : onClick}>
@@ -141,13 +142,9 @@ const File: FC<OwnProps> = ({
           </div>
         )}
         {onClick && (
-          <i
-            className={buildClassName(
-              'action-icon',
-              'icon',
-              actionIcon ? `icon-${actionIcon}` : 'icon-download',
-              shouldSpinnerRender && 'hidden',
-            )}
+          <Icon
+            name={actionIcon || 'download'}
+            className={buildClassName('action-icon', shouldSpinnerRender && 'hidden')}
           />
         )}
       </div>

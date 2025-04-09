@@ -1,25 +1,31 @@
 import React, { memo } from '../../../lib/teact/teact';
 
-import buildClassName from '../../../util/buildClassName';
+import type { IconName } from '../../../types/icons';
+
 import { hexToRgb, lerpRgb } from '../../../util/switchTheme';
 import renderText from '../../common/helpers/renderText';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import Icon from '../../common/icons/Icon';
 import ListItem from '../../ui/ListItem';
 
 import styles from './PremiumFeatureItem.module.scss';
 
 type OwnProps<T> = {
-  icon: string;
-  isFontIcon?: boolean;
   title: string;
   text: string;
   index: number;
   count: number;
   section: T;
   onClick?: (section: T) => void;
-};
+} & ({
+  icon: IconName;
+  isFontIcon: true;
+} | {
+  icon: string;
+  isFontIcon?: false;
+});
 
 const COLORS = [
   '#F2862D', '#EB7B4D', '#E46D72', '#DD6091', '#CC5FBA', '#B464E7',
@@ -49,11 +55,7 @@ const PremiumFeatureItem = <T,>({
   return (
     <ListItem buttonClassName={styles.root} onClick={handleClick} inactive={!onClick}>
       {isFontIcon ? (
-        <i
-          className={buildClassName(styles.fontIcon, `icon icon-${icon}`)}
-          aria-hidden
-          style={`--item-color: rgb(${r},${g},${b})`}
-        />
+        <Icon name={icon} className={styles.fontIcon} style={`--item-color: rgb(${r},${g},${b})`} />
       ) : (
         <img src={icon} className={styles.icon} alt="" style={`--item-color: rgb(${r},${g},${b})`} draggable={false} />
       )}

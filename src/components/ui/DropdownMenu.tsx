@@ -3,6 +3,7 @@ import React, {
   useCallback, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
+import Icon from '../common/icons/Icon';
 import Button from './Button';
 import Menu from './Menu';
 
@@ -10,6 +11,7 @@ import './DropdownMenu.scss';
 
 type OwnProps = {
   className?: string;
+  bubbleClassName?: string;
   trigger?: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   transformOriginX?: number;
   transformOriginY?: number;
@@ -23,11 +25,13 @@ type OwnProps = {
   onTransitionEnd?: NoneToVoidFunction;
   onMouseEnterBackdrop?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   children: React.ReactNode;
+  autoClose?: boolean;
 };
 
 const DropdownMenu: FC<OwnProps> = ({
   trigger,
   className,
+  bubbleClassName,
   children,
   transformOriginX,
   transformOriginY,
@@ -40,6 +44,7 @@ const DropdownMenu: FC<OwnProps> = ({
   onTransitionEnd,
   onMouseEnterBackdrop,
   onHide,
+  autoClose = true,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
@@ -87,7 +92,7 @@ const DropdownMenu: FC<OwnProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [trigger]);
@@ -104,12 +109,13 @@ const DropdownMenu: FC<OwnProps> = ({
         ref={menuRef}
         isOpen={isOpen || Boolean(forceOpen)}
         className={className || ''}
+        bubbleClassName={bubbleClassName || ''}
         transformOriginX={transformOriginX}
         transformOriginY={transformOriginY}
         positionX={positionX}
         positionY={positionY}
         footer={footer}
-        autoClose
+        autoClose={autoClose}
         onClose={handleClose}
         onCloseAnimationEnd={onHide}
         onMouseEnterBackdrop={onMouseEnterBackdrop}

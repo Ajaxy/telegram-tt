@@ -346,7 +346,7 @@
     padding: 0.4375rem;
     border-radius: var(--border-radius-default-small);
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
 
     &.round {
       width: 2.25rem;

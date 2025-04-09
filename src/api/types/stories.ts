@@ -1,4 +1,3 @@
-import type { ApiPrivacySettings } from '../../types';
 import type {
   ApiGeoPoint,
   ApiMessage,
@@ -8,6 +7,7 @@ import type {
   ApiStoryForwardInfo,
   MediaContent,
 } from './messages';
+import type { ApiPrivacySettings } from './settings';
 
 export interface ApiStory {
   '@type'?: 'story';
@@ -176,5 +176,11 @@ export type ApiMediaAreaWeather = {
   color: number;
 };
 
+export type ApiMediaAreaUniqueGift = {
+  type: 'uniqueGift';
+  coordinates: ApiMediaAreaCoordinates;
+  slug: string;
+};
+
 export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction
-| ApiMediaAreaChannelPost | ApiMediaAreaUrl | ApiMediaAreaWeather;
+| ApiMediaAreaChannelPost | ApiMediaAreaUrl | ApiMediaAreaWeather | ApiMediaAreaUniqueGift;

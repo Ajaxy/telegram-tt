@@ -15,6 +15,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
@@ -138,7 +139,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
         onClick={openBlockUserModal}
         ariaLabel={lang('BlockContact')}
       >
-        <i className="icon icon-add" />
+        <Icon name="add" />
       </FloatingActionButton>
       <BlockUserModal
         isOpen={isBlockUserModalOpen}

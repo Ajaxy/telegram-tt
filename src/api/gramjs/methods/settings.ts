@@ -1,41 +1,41 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
 import type { LANG_PACKS } from '../../../config';
-import type { ApiInputPrivacyRules, ApiPrivacyKey } from '../../../types';
 import type {
   ApiAppConfig,
   ApiConfig,
-  ApiError,
+  ApiInputPrivacyRules,
   ApiLanguage,
-  ApiNotifyException,
+  ApiNotifyPeerType,
+  ApiPeerNotifySettings,
   ApiPhoto,
+  ApiPrivacyKey,
   ApiUser,
 } from '../../types';
 
 import {
   ACCEPTABLE_USERNAME_ERRORS,
   BLOCKED_LIST_LIMIT,
+  LANG_PACK,
   MAX_INT_32,
-  OLD_DEFAULT_LANG_PACK,
 } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { getServerTime } from '../../../util/serverTime';
 import { buildAppConfig } from '../apiBuilders/appConfig';
 import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
 import {
   buildApiConfig,
   buildApiCountryList,
   buildApiLanguage,
-  buildApiNotifyException,
   buildApiPeerColors,
+  buildApiPeerNotifySettings,
   buildApiSession,
   buildApiTimezone,
   buildApiWallpaper,
   buildApiWebSession,
   buildLangStrings,
   oldBuildLangPack,
-  oldBuildLangPackString,
 } from '../apiBuilders/misc';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
@@ -43,7 +43,7 @@ import {
   buildInputPrivacyKey,
   buildInputPrivacyRules,
 } from '../gramjsBuilders';
-import { addPhotoToLocalDb } from '../helpers';
+import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
 import { getClient, invokeRequest, uploadFile } from './client';
 
@@ -76,17 +76,15 @@ export async function checkUsername(username: string) {
     });
 
     return { result, error: undefined };
-  } catch (error) {
-    const errorMessage = (error as ApiError).message;
-
-    if (ACCEPTABLE_USERNAME_ERRORS.has(errorMessage)) {
+  } catch (err: unknown) {
+    if (err instanceof RPCError && ACCEPTABLE_USERNAME_ERRORS.has(err.errorMessage)) {
       return {
         result: false,
-        error: errorMessage,
+        error: err.errorMessage,
       };
     }
 
-    throw error;
+    throw err;
   }
 }
 
@@ -325,20 +323,26 @@ export async function fetchNotificationExceptions() {
       return acc;
     }
 
-    acc.push(buildApiNotifyException(update.notifySettings, update.peer.peer));
+    const peerId = getApiChatIdFromMtpPeer(update.peer.peer);
+
+    acc[peerId] = buildApiPeerNotifySettings(update.notifySettings);
 
     return acc;
-  }, [] as ApiNotifyException[]);
+  }, {} as Record<string, ApiPeerNotifySettings>);
 }
 
-export async function fetchNotificationSettings() {
+export async function fetchContactSignUpSetting() {
+  const hasContactJoinedNotifications = await invokeRequest(new GramJs.account.GetContactSignUpNotification());
+
+  return hasContactJoinedNotifications;
+}
+
+export async function fetchNotifyDefaultSettings() {
   const [
-    isMutedContactSignUpNotification,
-    privateContactNotificationsSettings,
-    groupNotificationsSettings,
-    broadcastNotificationsSettings,
+    usersSettings,
+    groupsSettings,
+    channelsSettings,
   ] = await Promise.all([
-    invokeRequest(new GramJs.account.GetContactSignUpNotification()),
     invokeRequest(new GramJs.account.GetNotifySettings({
       peer: new GramJs.InputNotifyUsers(),
     })),
@@ -350,37 +354,14 @@ export async function fetchNotificationSettings() {
     })),
   ]);
 
-  if (!privateContactNotificationsSettings || !groupNotificationsSettings || !broadcastNotificationsSettings) {
-    return false;
+  if (!usersSettings || !groupsSettings || !channelsSettings) {
+    return undefined;
   }
 
-  const {
-    silent: privateSilent, muteUntil: privateMuteUntil, showPreviews: privateShowPreviews,
-  } = privateContactNotificationsSettings;
-  const {
-    silent: groupSilent, muteUntil: groupMuteUntil, showPreviews: groupShowPreviews,
-  } = groupNotificationsSettings;
-  const {
-    silent: broadcastSilent, muteUntil: broadcastMuteUntil, showPreviews: broadcastShowPreviews,
-  } = broadcastNotificationsSettings;
-
   return {
-    hasContactJoinedNotifications: !isMutedContactSignUpNotification,
-    hasPrivateChatsNotifications: !(
-      privateSilent
-      || (typeof privateMuteUntil === 'number' && getServerTime() < privateMuteUntil)
-    ),
-    hasPrivateChatsMessagePreview: privateShowPreviews,
-    hasGroupNotifications: !(
-      groupSilent || (typeof groupMuteUntil === 'number'
-        && getServerTime() < groupMuteUntil)
-    ),
-    hasGroupMessagePreview: groupShowPreviews,
-    hasBroadcastNotifications: !(
-      broadcastSilent || (typeof broadcastMuteUntil === 'number'
-        && getServerTime() < broadcastMuteUntil)
-    ),
-    hasBroadcastMessagePreview: broadcastShowPreviews,
+    users: buildApiPeerNotifySettings(usersSettings),
+    groups: buildApiPeerNotifySettings(groupsSettings),
+    channels: buildApiPeerNotifySettings(channelsSettings),
   };
 }
 
@@ -388,17 +369,17 @@ export function updateContactSignUpNotification(isSilent: boolean) {
   return invokeRequest(new GramJs.account.SetContactSignUpNotification({ silent: isSilent }));
 }
 
-export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broadcast', {
-  isSilent,
+export function updateNotificationSettings(peerType: ApiNotifyPeerType, {
+  isMuted,
   shouldShowPreviews,
 }: {
-  isSilent?: boolean;
+  isMuted?: boolean;
   shouldShowPreviews?: boolean;
 }) {
   let peer: GramJs.TypeInputNotifyPeer;
-  if (peerType === 'contact') {
+  if (peerType === 'users') {
     peer = new GramJs.InputNotifyUsers();
-  } else if (peerType === 'group') {
+  } else if (peerType === 'groups') {
     peer = new GramJs.InputNotifyChats();
   } else {
     peer = new GramJs.InputNotifyBroadcasts();
@@ -406,8 +387,7 @@ export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broa
 
   const settings = {
     showPreviews: shouldShowPreviews,
-    silent: isSilent,
-    muteUntil: isSilent ? MAX_INT_32 : 0,
+    muteUntil: isMuted ? MAX_INT_32 : 0,
   };
 
   return invokeRequest(new GramJs.account.UpdateNotifySettings({
@@ -469,7 +449,7 @@ export async function fetchLangDifference({
 
 export async function fetchLanguages(): Promise<ApiLanguage[] | undefined> {
   const result = await invokeRequest(new GramJs.langpack.GetLanguages({
-    langPack: OLD_DEFAULT_LANG_PACK,
+    langPack: LANG_PACK,
   }));
   if (!result) {
     return undefined;
@@ -496,6 +476,27 @@ export async function fetchLanguage({
   return buildApiLanguage(result);
 }
 
+export async function fetchLangStrings({
+  langPack,
+  langCode,
+  keys,
+}: {
+  langPack: string;
+  langCode: string;
+  keys: string[];
+}) {
+  const result = await invokeRequest(new GramJs.langpack.GetStrings({
+    langPack,
+    langCode,
+    keys,
+  }));
+  if (!result) {
+    return undefined;
+  }
+
+  return buildLangStrings(result);
+}
+
 export async function oldFetchLangPack({ sourceLangPacks, langCode }: {
   sourceLangPacks: typeof LANG_PACKS;
   langCode: string;
@@ -513,22 +514,6 @@ export async function oldFetchLangPack({ sourceLangPacks, langCode }: {
   }
 
   return { langPack: Object.assign({}, ...collections.reverse()) as typeof collections[0] };
-}
-
-export async function oldFetchLangStrings({ langPack, langCode, keys }: {
-  langPack: string; langCode: string; keys: string[];
-}) {
-  const result = await invokeRequest(new GramJs.langpack.GetStrings({
-    langPack,
-    langCode: BETA_LANG_CODES.includes(langCode) ? `${langCode}-raw` : langCode,
-    keys,
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  return result.map(oldBuildLangPackString);
 }
 
 export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {
@@ -671,6 +656,7 @@ export async function fetchGlobalPrivacySettings() {
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
     shouldHideReadMarks: Boolean(result.hideReadMarks),
     shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
+    nonContactPeersPaidStars: Number(result.noncontactPeersPaidStars),
   };
 }
 
@@ -678,16 +664,19 @@ export async function updateGlobalPrivacySettings({
   shouldArchiveAndMuteNewNonContact,
   shouldHideReadMarks,
   shouldNewNonContactPeersRequirePremium,
+  nonContactPeersPaidStars,
 }: {
   shouldArchiveAndMuteNewNonContact?: boolean;
   shouldHideReadMarks?: boolean;
   shouldNewNonContactPeersRequirePremium?: boolean;
+  nonContactPeersPaidStars?: number | null;
 }) {
   const result = await invokeRequest(new GramJs.account.SetGlobalPrivacySettings({
     settings: new GramJs.GlobalPrivacySettings({
       ...(shouldArchiveAndMuteNewNonContact && { archiveAndMuteNewNoncontactPeers: true }),
       ...(shouldHideReadMarks && { hideReadMarks: true }),
       ...(shouldNewNonContactPeersRequirePremium && { newNoncontactPeersRequirePremium: true }),
+      noncontactPeersPaidStars: BigInt(nonContactPeersPaidStars || 0),
     }),
   }));
 
@@ -699,6 +688,7 @@ export async function updateGlobalPrivacySettings({
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
     shouldHideReadMarks: Boolean(result.hideReadMarks),
     shouldNewNonContactPeersRequirePremium: Boolean(result.newNoncontactPeersRequirePremium),
+    nonContactPeersPaidStars: Number(result.noncontactPeersPaidStars),
   };
 }
 

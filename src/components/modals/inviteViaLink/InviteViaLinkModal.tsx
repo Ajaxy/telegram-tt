@@ -19,6 +19,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AvatarList from '../../common/AvatarList';
+import Icon from '../../common/icons/Icon';
 import PeerPicker from '../../common/pickers/PeerPicker';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -133,7 +134,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('Close')}
         onClick={handleClose}
       >
-        <i className="icon icon-close" />
+        <Icon name="close" />
       </Button>
       {premiumSectionText && (
         <>

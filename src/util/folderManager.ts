@@ -3,20 +3,18 @@ import { addCallback } from '../lib/teact/teactn';
 import { addActionHandler, getGlobal } from '../global';
 
 import type {
-  ApiChat, ApiChatFolder, ApiUser,
+  ApiChat, ApiChatFolder, ApiNotifyPeerType, ApiPeerNotifySettings, ApiUser,
 } from '../api/types';
 import type { GlobalState } from '../global/types';
-import type { NotifyException, NotifySettings } from '../types';
 import type { CallbackManager } from './callbacks';
 
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, DEBUG, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../config';
-import { selectIsChatMuted } from '../global/helpers';
+import { getIsChatMuted } from '../global/helpers/notifications';
 import {
   selectChatLastMessage,
-  selectNotifyExceptions,
-  selectNotifySettings,
+  selectNotifyDefaults,
   selectTabState,
   selectTopics,
 } from '../global/selectors';
@@ -79,8 +77,8 @@ let prevGlobal: {
   chatsById: Record<string, ApiChat>;
   foldersById: Record<string, ApiChatFolder>;
   usersById: Record<string, ApiUser>;
-  notifySettings: NotifySettings;
-  notifyExceptions?: Record<number, NotifyException>;
+  notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>;
+  notifyExceptions?: Record<number, ApiPeerNotifySettings>;
 } = initials.prevGlobal;
 
 let prepared: {
@@ -219,8 +217,8 @@ function updateFolderManager(global: GlobalState) {
   const areAllLastMessageIdsChanged = global.chats.lastMessageIds.all !== prevGlobal.lastAllMessageIds;
   const areTopicsChanged = global.chats.topicsInfoById !== prevGlobal.topicsInfoById;
   const areUsersChanged = global.users.byId !== prevGlobal.usersById;
-  const areNotifySettingsChanged = selectNotifySettings(global) !== prevGlobal.notifySettings;
-  const areNotifyExceptionsChanged = selectNotifyExceptions(global) !== prevGlobal.notifyExceptions;
+  const areNotifyDefaultsChanged = selectNotifyDefaults(global) !== prevGlobal.notifyDefaults;
+  const areNotifyExceptionsChanged = global.chats.notifyExceptionById !== prevGlobal.notifyExceptions;
 
   let affectedFolderIds: number[] = [];
 
@@ -232,7 +230,7 @@ function updateFolderManager(global: GlobalState) {
 
   if (!(
     isAllFolderChanged || isArchivedFolderChanged || isSavedFolderChanged || areFoldersChanged
-    || areChatsChanged || areUsersChanged || areTopicsChanged || areNotifySettingsChanged || areNotifyExceptionsChanged
+    || areChatsChanged || areUsersChanged || areTopicsChanged || areNotifyDefaultsChanged || areNotifyExceptionsChanged
     || areSavedLastMessageIdsChanged || areAllLastMessageIdsChanged
   )
   ) {
@@ -252,7 +250,7 @@ function updateFolderManager(global: GlobalState) {
   affectedFolderIds = affectedFolderIds.concat(updateChats(
     global,
     areFoldersChanged || isAllFolderChanged || isArchivedFolderChanged || isSavedFolderChanged,
-    areNotifySettingsChanged,
+    areNotifyDefaultsChanged,
     areNotifyExceptionsChanged,
     prevAllFolderListIds,
     prevArchivedFolderListIds,
@@ -411,7 +409,7 @@ function buildFolderSummary(folder: ApiChatFolder): FolderSummary {
 function updateChats(
   global: GlobalState,
   areFoldersChanged: boolean,
-  areNotifySettingsChanged: boolean,
+  areNotifyDefaultsChanged: boolean,
   areNotifyExceptionsChanged: boolean,
   prevAllFolderListIds?: string[],
   prevArchivedFolderListIds?: string[],
@@ -421,8 +419,8 @@ function updateChats(
   const newUsersById = global.users.byId;
   const newAllLastMessageIds = global.chats.lastMessageIds.all;
   const newSavedLastMessageIds = global.chats.lastMessageIds.saved;
-  const newNotifySettings = selectNotifySettings(global);
-  const newNotifyExceptions = selectNotifyExceptions(global);
+  const newNotifyDefaults = selectNotifyDefaults(global);
+  const newNotifyExceptions = global.chats.notifyExceptionById;
   const folderSummaries = Object.values(prepared.folderSummariesById);
   const affectedFolderIds = new Set<number>();
 
@@ -445,7 +443,7 @@ function updateChats(
 
     if (
       !areFoldersChanged
-      && !areNotifySettingsChanged
+      && !areNotifyDefaultsChanged
       && !areNotifyExceptionsChanged
       && chat === prevGlobal.chatsById[chatId]
       && newUsersById[chatId] === prevGlobal.usersById[chatId]
@@ -463,7 +461,7 @@ function updateChats(
       const newSummary = buildChatSummary(
         global,
         chat,
-        newNotifySettings,
+        newNotifyDefaults,
         newNotifyExceptions,
         newUsersById[chatId],
         isRemovedFromAll,
@@ -500,7 +498,7 @@ function updateChats(
   prevGlobal.usersById = newUsersById;
   prevGlobal.lastAllMessageIds = newAllLastMessageIds;
   prevGlobal.lastSavedMessageIds = newSavedLastMessageIds;
-  prevGlobal.notifySettings = newNotifySettings;
+  prevGlobal.notifyDefaults = newNotifyDefaults;
   prevGlobal.notifyExceptions = newNotifyExceptions;
 
   return Array.from(affectedFolderIds);
@@ -509,8 +507,8 @@ function updateChats(
 function buildChatSummary<T extends GlobalState>(
   global: T,
   chat: ApiChat,
-  notifySettings: NotifySettings,
-  notifyExceptions?: Record<number, NotifyException>,
+  notifyDefaults?: Record<ApiNotifyPeerType, ApiPeerNotifySettings>,
+  notifyExceptions?: Record<string, ApiPeerNotifySettings>,
   user?: ApiUser,
   isRemovedFromAll?: boolean,
   isRemovedFromSaved?: boolean,
@@ -548,7 +546,7 @@ function buildChatSummary<T extends GlobalState>(
     isListedInAll: Boolean(!isRestricted && !isNotJoined && !migratedTo && !shouldHideServiceChat && !isRemovedFromAll),
     isListedInSaved: !isRemovedFromSaved,
     isArchived: folderId === ARCHIVED_FOLDER_ID,
-    isMuted: selectIsChatMuted(chat, notifySettings, notifyExceptions),
+    isMuted: getIsChatMuted(chat, notifyDefaults, notifyExceptions?.[chat.id]),
     isUnread: Boolean(unreadCount || unreadMentionsCount || hasUnreadMark),
     unreadCount,
     unreadMentionsCount,
@@ -810,8 +808,6 @@ function buildInitials() {
       chatsById: {},
       usersById: {},
       topicsInfoById: {},
-      notifySettings: {} as NotifySettings,
-      notifyExceptions: {},
     },
 
     prepared: {

@@ -1,5 +1,3 @@
-import { errors } from '../../../lib/gramjs';
-
 import type {
   ApiUpdateAuthorizationState,
   ApiUpdateAuthorizationStateType,
@@ -7,16 +5,8 @@ import type {
   ApiUserFullInfo,
 } from '../../types';
 
-import { DEBUG } from '../../../config';
+import { wrapError } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
-
-const ApiErrors: { [k: string]: string } = {
-  PHONE_NUMBER_INVALID: 'Invalid phone number.',
-  PHONE_CODE_INVALID: 'Invalid code.',
-  PASSWORD_HASH_INVALID: 'Incorrect password.',
-  PHONE_PASSWORD_FLOOD: 'Limit exceeded. Please try again later.',
-  PHONE_NUMBER_BANNED: 'This phone number is banned.',
-};
 
 const authController: {
   resolve?: Function;
@@ -85,27 +75,11 @@ export function onRequestQrCode(qrCode: { token: Buffer; expires: number }) {
 }
 
 export function onAuthError(err: Error) {
-  let message: string;
-
-  if (err instanceof errors.FloodWaitError) {
-    const hours = Math.ceil(Number(err.seconds) / 60 / 60);
-    message = `Too many attempts. Try again in ${hours > 1 ? `${hours} hours` : 'an hour'}`;
-  } else {
-    message = ApiErrors[err.message];
-  }
-
-  if (!message) {
-    message = 'Unexpected Error';
-
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }
+  const { messageKey } = wrapError(err);
 
   sendApiUpdate({
     '@type': 'updateAuthorizationError',
-    message,
+    errorKey: messageKey,
   });
 }
 

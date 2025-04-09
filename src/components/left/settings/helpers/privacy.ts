@@ -1,4 +1,4 @@
-import type { ApiPrivacyKey } from '../../../../types';
+import type { ApiPrivacyKey } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 
 export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefined {
@@ -49,6 +49,8 @@ export function getPrivacyKey(screen: SettingsScreens): ApiPrivacyKey | undefine
       return 'phoneP2P';
     case SettingsScreens.PrivacyAddByPhone:
       return 'addByPhone';
+    case SettingsScreens.PrivacyNoPaidMessages:
+      return 'noPaidMessages';
   }
 
   return undefined;

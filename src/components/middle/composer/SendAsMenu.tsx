@@ -15,6 +15,7 @@ import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import Icon from '../../common/icons/Icon';
 import ListItem from '../../ui/ListItem';
 import Menu from '../../ui/Menu';
 
@@ -123,7 +124,7 @@ const SendAsMenu: FC<OwnProps> = ({
             onClick={handleClick}
             focus={selectedSendAsIndex === index}
             rightElement={!isCurrentUserPremium && isPremium
-              && <i className="icon icon-lock-badge send-as-icon-locked" />}
+              && <Icon name="lock-badge" className="send-as-icon-locked" />}
           >
             <Avatar
               size="small"

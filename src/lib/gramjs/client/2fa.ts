@@ -1,8 +1,8 @@
 import type TelegramClient from './TelegramClient';
+import type { WrappedError } from '../../../api/gramjs/helpers/misc';
 
-import errors from '../errors';
-// eslint-disable-next-line import/no-named-default
-import { default as Api } from '../tl/api';
+import { EmailUnconfirmedError } from '../errors';
+import Api from '../tl/api';
 
 import { generateRandomBytes } from '../Helpers';
 import { computeCheck, computeDigest } from '../Password';
@@ -17,13 +17,8 @@ export interface TwoFaParams {
     onEmailCodeError?: (err: Error) => void;
 }
 
-export interface TwoFaPasswordParams {
-    currentPassword?: string;
-    onPasswordCodeError?: (err: Error) => void;
-}
-
-export type TmpPasswordResult = Api.account.TmpPassword | { error: string } | undefined;
-export type PasswordResult = Api.account.Password | { error: string } | undefined;
+export type TmpPasswordResult = Api.account.TmpPassword | WrappedError | undefined;
+export type PasswordResult = Api.TypeInputCheckPasswordSRP | WrappedError | undefined;
 
 /**
  * Changes the 2FA settings of the logged in user.
@@ -83,9 +78,13 @@ export async function updateTwoFaSettings(
 
     const pwd = await client.invoke(new Api.account.GetPassword());
 
-    if (!(pwd.newAlgo instanceof Api.PasswordKdfAlgoUnknown)) {
-        pwd.newAlgo.salt1 = Buffer.concat([pwd.newAlgo.salt1, generateRandomBytes(32)]);
+    const newAlgo = pwd.newAlgo;
+
+    if (newAlgo instanceof Api.PasswordKdfAlgoUnknown) {
+        throw new Error('Password algorithm is unknown');
     }
+
+    newAlgo.salt1 = Buffer.concat([newAlgo.salt1, generateRandomBytes(32)]);
     if (!pwd.hasPassword && currentPassword) {
         currentPassword = undefined;
     }
@@ -101,8 +100,8 @@ export async function updateTwoFaSettings(
         await client.invoke(new Api.account.UpdatePasswordSettings({
             password,
             newSettings: new Api.account.PasswordInputSettings({
-                newAlgo: pwd.newAlgo,
-                newPasswordHash: newPassword ? await computeDigest(pwd.newAlgo, newPassword) : Buffer.alloc(0),
+                newAlgo,
+                newPasswordHash: newPassword ? await computeDigest(newAlgo, newPassword) : Buffer.alloc(0),
                 hint,
                 email,
                 // not explained what it does and it seems to always be set to empty in tdesktop
@@ -110,7 +109,7 @@ export async function updateTwoFaSettings(
             }),
         }));
     } catch (e) {
-        if (e instanceof errors.EmailUnconfirmedError) {
+        if (e instanceof EmailUnconfirmedError) {
             // eslint-disable-next-line no-constant-condition
             while (true) {
                 try {
@@ -140,44 +139,23 @@ export async function getTmpPassword(client: TelegramClient, currentPassword: st
     }
 
     const inputPassword = await computeCheck(pwd, currentPassword);
-    try {
-        const result = await client.invoke(new Api.account.GetTmpPassword({
-            password: inputPassword,
-            period: ttl,
-        }));
+    const result = await client.invoke(new Api.account.GetTmpPassword({
+        password: inputPassword,
+        period: ttl,
+    }));
 
-        return result;
-    } catch (err: any) {
-        if (err.message === 'PASSWORD_HASH_INVALID') {
-            return { error: err.message };
-        }
-
-        throw err;
-    }
+    return result;
 }
 
 export async function getCurrentPassword(
     client: TelegramClient,
-    {
-        currentPassword,
-        onPasswordCodeError,
-    }: TwoFaPasswordParams,
-) {
+    currentPassword?: string,
+): Promise<PasswordResult> {
     const pwd = await client.invoke(new Api.account.GetPassword());
 
     if (!pwd) {
         return undefined;
     }
 
-    try {
-        return currentPassword ? await computeCheck(pwd, currentPassword!) : new Api.InputCheckPasswordEmpty();
-    } catch (err: any) {
-        if (err instanceof errors.PasswordModifiedError) {
-            return onPasswordCodeError!(err);
-        } else if (err.message === 'PASSWORD_HASH_INVALID') {
-            return { error: err.message };
-        } else {
-            throw err;
-        }
-    }
+    return currentPassword ? await computeCheck(pwd, currentPassword!) : new Api.InputCheckPasswordEmpty();
 }

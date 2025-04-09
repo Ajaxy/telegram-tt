@@ -7,7 +7,8 @@ import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
-import { filterUsersByName, getMainUsername, getUserFirstOrLastName } from '../../../../global/helpers';
+import { getMainUsername, getUserFirstOrLastName } from '../../../../global/helpers';
+import { filterPeersByQuery } from '../../../../global/helpers/peers';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
 import { getCaretPosition, getHtmlBeforeSelection, setCaretPosition } from '../../../../util/selection';
@@ -82,10 +83,14 @@ export default function useMentionTooltip(
     }, []);
 
     const filter = usernameTag.substring(1);
-    const filteredIds = filterUsersByName(unique([
-      ...((getWithInlineBots() && topInlineBotIds) || []),
-      ...(memberIds || []),
-    ]), usersById, filter);
+    const filteredIds = filterPeersByQuery({
+      ids: unique([
+        ...((getWithInlineBots() && topInlineBotIds) || []),
+        ...(memberIds || []),
+      ]),
+      query: filter,
+      type: 'user',
+    });
 
     setFilteredUsers(Object.values(pickTruthy(usersById, filteredIds)));
   }, [currentUserId, groupChatMembers, topInlineBotIds, getUsernameTag, getWithInlineBots]);

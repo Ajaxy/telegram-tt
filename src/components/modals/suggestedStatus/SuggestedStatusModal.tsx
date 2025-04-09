@@ -15,7 +15,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import CustomEmoji from '../../common/CustomEmoji';
-import PickerSelectedItem from '../../common/pickers/PickerSelectedItem';
+import PeerChip from '../../common/PeerChip';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 
@@ -45,6 +45,7 @@ const SuggestedStatusModal = ({ modal, currentUser, bot }: OwnProps & StateProps
     return {
       ...currentUser,
       emojiStatus: {
+        type: 'regular',
         documentId: renderingModal.customEmojiId,
       },
     } satisfies ApiUser;
@@ -93,8 +94,7 @@ const SuggestedStatusModal = ({ modal, currentUser, bot }: OwnProps & StateProps
 
     setEmojiStatus({
       referrerWebAppKey: renderingModal.webAppKey,
-      emojiStatusId: renderingModal.customEmojiId,
-      expires,
+      emojiStatus: { type: 'regular', documentId: renderingModal.customEmojiId, until: expires },
     });
     closeSuggestedStatusModal();
   });
@@ -121,8 +121,9 @@ const SuggestedStatusModal = ({ modal, currentUser, bot }: OwnProps & StateProps
         <p className={styles.description}>{description}</p>
       </div>
       {mockPeerWithStatus && (
-        <PickerSelectedItem
+        <PeerChip
           mockPeer={mockPeerWithStatus}
+          withEmojiStatus
         />
       )}
       <Button size="smaller" onClick={handleSetStatus}>

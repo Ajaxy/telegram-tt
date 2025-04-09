@@ -117,6 +117,34 @@ addActionHandler('changeWebAppModalState', (global, actions, payload): ActionRet
   return replaceWebAppModalState(global, state, tabId);
 });
 
+addActionHandler('updateMiniAppCachedPosition', (global, actions, payload): ActionReturnType => {
+  const { position } = payload;
+
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      miniAppsCachedPosition: position,
+    },
+  };
+
+  return global;
+});
+
+addActionHandler('updateMiniAppCachedSize', (global, actions, payload): ActionReturnType => {
+  const { size } = payload;
+
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      miniAppsCachedSize: size,
+    },
+  };
+
+  return global;
+});
+
 addActionHandler('setWebAppPaymentSlug', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload;
   const activeWebApp = selectActiveWebApp(global, tabId);
@@ -222,5 +250,55 @@ addActionHandler('cancelAttachBotInChat', (global, actions, payload): ActionRetu
   const { tabId = getCurrentTabId() } = payload || {};
   return updateTabState(global, {
     requestedAttachBotInChat: undefined,
+  }, tabId);
+});
+
+addActionHandler('openEmojiStatusAccessModal', (global, actions, payload): ActionReturnType => {
+  const {
+    bot, webAppKey, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (!bot || !webAppKey) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    emojiStatusAccessModal: {
+      bot,
+      webAppKey,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeEmojiStatusAccessModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    emojiStatusAccessModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openLocationAccessModal', (global, actions, payload): ActionReturnType => {
+  const {
+    bot, webAppKey, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (!bot || !webAppKey) return;
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    locationAccessModal: {
+      bot,
+      webAppKey,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('closeLocationAccessModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    locationAccessModal: undefined,
   }, tabId);
 });

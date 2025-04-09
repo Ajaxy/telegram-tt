@@ -77,6 +77,7 @@ const ReportAvatarModal: FC<OwnProps> = ({
       title={title}
     >
       <RadioGroup
+        className="dialog-checkbox-group"
         name="report-message"
         options={REPORT_OPTIONS}
         onChange={handleSelectReason}

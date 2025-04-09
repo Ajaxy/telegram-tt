@@ -6,10 +6,11 @@ import type {
 } from '../../../../api/types';
 import type { GlobalState } from '../../../../global/types';
 
-import { getSenderTitle } from '../../../../global/helpers';
+import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectPeer } from '../../../../global/selectors';
 import { formatDateToString } from '../../../../util/dates/dateFormat';
 import { formatInteger } from '../../../../util/textFormat';
+import renderText from '../../../common/helpers/renderText';
 
 import useSelector from '../../../../hooks/data/useSelector';
 import useLastCallback from '../../../../hooks/useLastCallback';
@@ -46,6 +47,7 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
   if (!peer) {
     return undefined;
   }
+
   const hasExpired = until < Date.now() / 1000;
   const formattedDate = formatDateToString(until * 1000, lang.code, true, 'long');
 
@@ -56,11 +58,11 @@ const StarsSubscriptionItem = ({ subscription }: OwnProps) => {
         <StarIcon className={styles.subscriptionStar} type="gold" size="small" />
       </div>
       <div className={styles.info}>
-        <h3 className={styles.title}>{getSenderTitle(lang, peer)}</h3>
+        <h3 className={styles.title}>{renderText(getPeerTitle(lang, peer) || '')}</h3>
         {title && (
           <p className={styles.subtitle}>
             {photo && <Avatar webPhoto={photo} size="micro" />}
-            {title}
+            {renderText(title)}
           </p>
         )}
         <p className={styles.description}>

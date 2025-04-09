@@ -53,7 +53,7 @@ const WebLink: FC<OwnProps> = ({
       linkData = {
         siteName: domain.replace(/^www./, ''),
         url: url.includes('://') ? url : url.includes('@') ? `mailto:${url}` : `http://${url}`,
-        formattedDescription: getMessageText(message) !== url
+        formattedDescription: getMessageText(message)?.text !== url
           ? renderMessageSummary(lang, message, undefined, undefined, MAX_TEXT_LENGTH)
           : undefined,
       } as ApiWebPageWithFormatted;

@@ -32,6 +32,7 @@ import {
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectIsTrustedBot,
+  selectPeerPaidMessagesStars,
   selectSender,
   selectTabState,
   selectTopic,
@@ -325,7 +326,19 @@ addActionHandler('showNotification', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('showAllowedMessageTypesNotification', (global, actions, payload): ActionReturnType => {
-  const { chatId, tabId = getCurrentTabId() } = payload;
+  const { chatId, messageListType, tabId = getCurrentTabId() } = payload;
+
+  const paidMessagesStars = selectPeerPaidMessagesStars(global, chatId);
+
+  if (paidMessagesStars && messageListType === 'scheduled') {
+    actions.showNotification({
+      message: {
+        key: 'DescriptionScheduledPaidMessagesNotAllowed',
+      },
+      tabId,
+    });
+    return;
+  }
 
   const chat = selectChat(global, chatId);
   if (!chat) return;
@@ -540,6 +553,21 @@ addActionHandler('hideEffectInComposer', (global, actions, payload): ActionRetur
   return updateTabState(global, {
     shouldPlayEffectInComposer: undefined,
   }, tabId);
+});
+
+addActionHandler('setPaidMessageAutoApprove', (global): ActionReturnType => {
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      byKey: {
+        ...global.settings.byKey,
+        shouldPaidMessageAutoApprove: true,
+      },
+    },
+  };
+
+  return global;
 });
 
 addActionHandler('setReactionEffect', (global, actions, payload): ActionReturnType => {

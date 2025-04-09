@@ -10,7 +10,7 @@ import { CONTENT_NOT_SUPPORTED } from '../../config';
 import trimText from '../../util/trimText';
 import { renderTextWithEntities } from '../../components/common/helpers/renderTextWithEntities';
 import {
-  getExpiredMessageContentDescription, getMessageText, getMessageTranscription, isExpiredMessageContent,
+  getMessageText, getMessageTranscription,
 } from './messages';
 
 const SPOILER_CHARS = ['⠺', '⠵', '⠞', '⠟'];
@@ -35,7 +35,7 @@ export function getMessageSummaryText(
 export function getMessageTextWithSpoilers(message: ApiMessage, statefulContent: StatefulMediaContent | undefined) {
   const transcription = getMessageTranscription(message);
 
-  const textWithoutTranscription = getMessageText(statefulContent?.story || message);
+  const textWithoutTranscription = getMessageText(statefulContent?.story || message)?.text;
   if (!textWithoutTranscription) {
     return transcription;
   }
@@ -147,7 +147,7 @@ function getSummaryDescription(
   const { poll } = statefulContent || {};
 
   let hasUsedTruncatedText = false;
-  let summary: string | TeactNode | undefined;
+  let summary: TeactNode | undefined;
 
   const boughtExtendedMedia = paidMedia?.isBought && paidMedia.extendedMedia;
   const previewExtendedMedia = paidMedia && !paidMedia.isBought
@@ -199,7 +199,7 @@ function getSummaryDescription(
     summary = renderTextWithEntities({
       text: poll.summary.question.text,
       entities: poll.summary.question.entities,
-      noLineBreaks: true,
+      asPreview: true,
     });
   }
 
@@ -237,13 +237,6 @@ function getSummaryDescription(
 
   if (storyData) {
     summary = truncatedText || (message ? lang('ForwardedStory') : lang('Chat.ReplyStory'));
-  }
-
-  if (isExpiredMessageContent(mediaContent)) {
-    const expiredMessageText = getExpiredMessageContentDescription(lang, mediaContent);
-    if (expiredMessageText) {
-      summary = expiredMessageText;
-    }
   }
 
   return summary || CONTENT_NOT_SUPPORTED;

@@ -10,6 +10,8 @@
   background-color: var(--accent-background-color);
   color: var(--accent-color);
 
+  --peer-color-wrapper-bar-color: var(--bar-gradient, var(--accent-color));
+
   &::before {
     content: "";
     display: block;
@@ -18,6 +20,6 @@
     bottom: 0;
     inset-inline-start: 0;
     width: 0.1875rem;
-    background: var(--bar-gradient, var(--accent-color));
+    background: var(--peer-color-wrapper-bar-color);
   }
 }

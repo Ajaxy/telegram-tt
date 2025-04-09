@@ -3,7 +3,7 @@ import { DEBUG } from '../../config';
 type Handler = (e: Event) => void;
 type DelegationRegistry = Map<Element, Handler>;
 
-const NON_BUBBLEABLE_EVENTS = new Set(['scroll', 'mouseenter', 'mouseleave', 'load']);
+const NON_BUBBLEABLE_EVENTS = new Set(['scroll', 'mouseenter', 'mouseleave', 'load', 'error']);
 
 const documentEventCounters: Record<string, number> = {};
 const delegationRegistryByEventType: Record<string, DelegationRegistry> = {};

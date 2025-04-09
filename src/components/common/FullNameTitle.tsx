@@ -15,9 +15,10 @@ import {
   isAnonymousForwardsChat,
   isChatWithRepliesBot,
   isChatWithVerificationCodesBot,
-  isPeerUser,
 } from '../../global/helpers';
+import { isApiPeerUser } from '../../global/helpers/peers';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 import { copyTextToClipboard } from '../../util/clipboard';
 import stopEvent from '../../util/stopEvent';
 import renderText from './helpers/renderText';
@@ -25,6 +26,7 @@ import renderText from './helpers/renderText';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
+import Transition from '../ui/Transition';
 import CustomEmoji from './CustomEmoji';
 import FakeIcon from './FakeIcon';
 import StarIcon from './icons/StarIcon';
@@ -44,9 +46,9 @@ type OwnProps = {
   noLoopLimit?: boolean;
   canCopyTitle?: boolean;
   iconElement?: React.ReactNode;
-  allowMultiLine?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
+  statusSparklesColor?: string;
 };
 
 const FullNameTitle: FC<OwnProps> = ({
@@ -61,18 +63,19 @@ const FullNameTitle: FC<OwnProps> = ({
   noLoopLimit,
   canCopyTitle,
   iconElement,
-  allowMultiLine,
   onEmojiStatusClick,
   observeIntersection,
+  statusSparklesColor,
 }) => {
   const lang = useOldLang();
   const { showNotification } = getActions();
   const realPeer = 'id' in peer ? peer : undefined;
   const customPeer = 'isCustomPeer' in peer ? peer : undefined;
-  const isUser = realPeer && isPeerUser(realPeer);
+  const isUser = realPeer && isApiPeerUser(realPeer);
   const title = realPeer && (isUser ? getUserFullName(realPeer) : getChatTitle(lang, realPeer));
   const isPremium = isUser && realPeer.isPremium;
   const canShowEmojiStatus = withEmojiStatus && !isSavedMessages && realPeer;
+  const emojiStatus = realPeer?.emojiStatus;
 
   const handleTitleClick = useLastCallback((e) => {
     if (!title || !canCopyTitle) {
@@ -107,16 +110,24 @@ const FullNameTitle: FC<OwnProps> = ({
 
     return undefined;
   }, [customPeer, isSavedDialog, isSavedMessages, lang, realPeer]);
+  const botVerificationIconId = realPeer?.botVerificationIconId;
 
   return (
     <div className={buildClassName('title', styles.root, className)}>
+      {botVerificationIconId && (
+        <CustomEmoji
+          documentId={botVerificationIconId}
+          size={emojiStatusSize}
+          loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
+          observeIntersectionForLoading={observeIntersection}
+        />
+      )}
       <h3
         dir="auto"
         role="button"
         className={buildClassName(
           'fullName',
           styles.fullName,
-          !allowMultiLine && styles.ellipsis,
           canCopyTitle && styles.canCopy,
         )}
         onClick={handleTitleClick}
@@ -127,16 +138,30 @@ const FullNameTitle: FC<OwnProps> = ({
         <>
           {!noVerified && peer?.isVerified && <VerifiedIcon />}
           {!noFake && peer?.fakeType && <FakeIcon fakeType={peer.fakeType} />}
-          {canShowEmojiStatus && realPeer.emojiStatus && (
-            <CustomEmoji
-              documentId={realPeer.emojiStatus.documentId}
-              size={emojiStatusSize}
-              loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
-              observeIntersectionForLoading={observeIntersection}
-              onClick={onEmojiStatusClick}
-            />
+          {canShowEmojiStatus && emojiStatus && (
+            <Transition
+              className={styles.statusTransition}
+              slideClassName={styles.statusTransitionSlide}
+              activeKey={Number(emojiStatus.documentId)}
+              name="slideFade"
+              direction={-1}
+              shouldCleanup
+            >
+              <CustomEmoji
+                forceAlways
+                className="no-selection"
+                withSparkles={emojiStatus.type === 'collectible'}
+                sparklesClassName="statusSparkles"
+                sparklesStyle={buildStyle(statusSparklesColor && `color: ${statusSparklesColor}`)}
+                documentId={emojiStatus.documentId}
+                size={emojiStatusSize}
+                loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
+                observeIntersectionForLoading={observeIntersection}
+                onClick={onEmojiStatusClick}
+              />
+            </Transition>
           )}
-          {canShowEmojiStatus && !realPeer.emojiStatus && isPremium && <StarIcon />}
+          {canShowEmojiStatus && !emojiStatus && isPremium && <StarIcon />}
         </>
       )}
       {iconElement}

@@ -2,9 +2,11 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiInputStorePaymentPurpose, ApiPeer, ApiRequestInputInvoice,
-  ApiSticker, ApiThemeParameters,
-  ApiUser,
+  ApiChat,
+  ApiInputStorePaymentPurpose,
+  ApiPeer,
+  ApiRequestInputInvoice,
+  ApiThemeParameters,
 } from '../../types';
 
 import { DEBUG } from '../../../config';
@@ -18,25 +20,20 @@ import {
   buildApiPremiumGiftCodeOption,
   buildApiPremiumPromo,
   buildApiReceipt,
-  buildApiStarGift,
-  buildApiStarsAmount,
-  buildApiStarsGiftOptions,
-  buildApiStarsGiveawayOptions,
-  buildApiStarsSubscription,
-  buildApiStarsTransaction,
-  buildApiStarTopupOption,
-  buildApiUserStarGift,
   buildShippingOptions,
 } from '../apiBuilders/payments';
 import { buildApiPeerId } from '../apiBuilders/peers';
-import { buildStickerFromDocument } from '../apiBuilders/symbols';
 import {
-  buildInputInvoice, buildInputPeer, buildInputStorePaymentPurpose, buildInputThemeParams, buildShippingInfo,
+  buildInputInvoice,
+  buildInputPeer,
+  buildInputStorePaymentPurpose,
+  buildInputThemeParams,
+  buildShippingInfo,
 } from '../gramjsBuilders';
 import {
   deserializeBytes,
   serializeBytes,
-} from '../helpers';
+} from '../helpers/misc';
 import localDb from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { handleGramJsUpdate, invokeRequest } from './client';
@@ -397,112 +394,6 @@ export async function getPremiumGiftCodeOptions({
   return result.map(buildApiPremiumGiftCodeOption);
 }
 
-export async function getStarsGiftOptions({
-  chat,
-}: {
-  chat?: ApiChat;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetStarsGiftOptions({
-    userId: chat && buildInputPeer(chat.id, chat.accessHash),
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  return result.map(buildApiStarsGiftOptions);
-}
-
-export async function fetchStarsGiveawayOptions() {
-  const result = await invokeRequest(new GramJs.payments.GetStarsGiveawayOptions());
-
-  if (!result) {
-    return undefined;
-  }
-
-  return result.map(buildApiStarsGiveawayOptions);
-}
-
-export async function fetchStarGifts() {
-  const result = await invokeRequest(new GramJs.payments.GetStarGifts({}));
-
-  if (!result || result instanceof GramJs.payments.StarGiftsNotModified) {
-    return undefined;
-  }
-
-  const gifts = result.gifts.map(buildApiStarGift);
-  const stickers : Record<string, ApiSticker> = {};
-
-  result.gifts.forEach((gift) => {
-    if (gift.sticker instanceof GramJs.Document) {
-      localDb.documents[String(gift.sticker.id)] = gift.sticker;
-    }
-
-    const sticker = buildStickerFromDocument(gift.sticker);
-    if (sticker) {
-      stickers[sticker.id] = sticker;
-    }
-  });
-
-  return { gifts, stickers };
-}
-
-export async function fetchUserStarGifts({
-  user,
-  offset = '',
-  limit,
-}: {
-  user: ApiUser;
-  offset?: string;
-  limit?: number;
-}) {
-  const result = await invokeRequest(new GramJs.payments.GetUserStarGifts({
-    userId: buildInputPeer(user.id, user.accessHash),
-    offset,
-    limit,
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  const gifts = result.gifts.map(buildApiUserStarGift);
-
-  return {
-    gifts,
-    nextOffset: result.nextOffset,
-  };
-}
-
-export function saveStarGift({
-  user,
-  messageId,
-  shouldUnsave,
-}: {
-  user: ApiUser;
-  messageId: number;
-  shouldUnsave?: boolean;
-}) {
-  return invokeRequest(new GramJs.payments.SaveStarGift({
-    userId: buildInputPeer(user.id, user.accessHash),
-    msgId: messageId,
-    unsave: shouldUnsave || undefined,
-  }));
-}
-
-export function convertStarGift({
-  user,
-  messageId,
-}: {
-  user: ApiUser;
-  messageId: number;
-}) {
-  return invokeRequest(new GramJs.payments.ConvertStarGift({
-    userId: buildInputPeer(user.id, user.accessHash),
-    msgId: messageId,
-  }));
-}
-
 export function launchPrepaidGiveaway({
   chat,
   giveawayId,
@@ -519,138 +410,4 @@ export function launchPrepaidGiveaway({
   }), {
     shouldReturnTrue: true,
   });
-}
-
-export async function fetchStarsStatus() {
-  const result = await invokeRequest(new GramJs.payments.GetStarsStatus({
-    peer: new GramJs.InputPeerSelf(),
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  return {
-    nextHistoryOffset: result.nextOffset,
-    history: result.history?.map(buildApiStarsTransaction),
-    nextSubscriptionOffset: result.subscriptionsNextOffset,
-    subscriptions: result.subscriptions?.map(buildApiStarsSubscription),
-    balance: buildApiStarsAmount(result.balance),
-  };
-}
-
-export async function fetchStarsTransactions({
-  peer,
-  offset,
-  isInbound,
-  isOutbound,
-}: {
-  peer?: ApiPeer;
-  offset?: string;
-  isInbound?: true;
-  isOutbound?: true;
-}) {
-  const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
-  const result = await invokeRequest(new GramJs.payments.GetStarsTransactions({
-    peer: inputPeer,
-    offset,
-    inbound: isInbound,
-    outbound: isOutbound,
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  return {
-    nextOffset: result.nextOffset,
-    history: result.history?.map(buildApiStarsTransaction),
-    balance: buildApiStarsAmount(result.balance),
-  };
-}
-
-export async function fetchStarsTransactionById({
-  id, peer,
-}: {
-  id: string;
-  peer?: ApiPeer;
-}) {
-  const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
-  const result = await invokeRequest(new GramJs.payments.GetStarsTransactionsByID({
-    peer: inputPeer,
-    id: [new GramJs.InputStarsTransaction({
-      id,
-    })],
-  }));
-
-  if (!result?.history?.[0]) {
-    return undefined;
-  }
-
-  return {
-    transaction: buildApiStarsTransaction(result.history[0]),
-  };
-}
-
-export async function fetchStarsSubscriptions({
-  offset, peer,
-}: {
-  offset?: string;
-  peer?: ApiPeer;
-}) {
-  const inputPeer = peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf();
-  const result = await invokeRequest(new GramJs.payments.GetStarsSubscriptions({
-    peer: inputPeer,
-    offset,
-  }));
-
-  if (!result?.subscriptions) {
-    return undefined;
-  }
-
-  return {
-    nextOffset: result.subscriptionsNextOffset,
-    subscriptions: result.subscriptions.map(buildApiStarsSubscription),
-    balance: buildApiStarsAmount(result.balance),
-  };
-}
-
-export async function changeStarsSubscription({
-  peer, subscriptionId, isCancelled,
-}: {
-  peer?: ApiPeer;
-  subscriptionId: string;
-  isCancelled: boolean;
-}) {
-  const result = await invokeRequest(new GramJs.payments.ChangeStarsSubscription({
-    peer: peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf(),
-    subscriptionId,
-    canceled: isCancelled,
-  }));
-
-  return result;
-}
-
-export async function fulfillStarsSubscription({
-  peer, subscriptionId,
-}: {
-  peer?: ApiPeer;
-  subscriptionId: string;
-}) {
-  const result = await invokeRequest(new GramJs.payments.FulfillStarsSubscription({
-    peer: peer ? buildInputPeer(peer.id, peer.accessHash) : new GramJs.InputPeerSelf(),
-    subscriptionId,
-  }));
-
-  return result;
-}
-
-export async function fetchStarsTopupOptions() {
-  const result = await invokeRequest(new GramJs.payments.GetStarsTopupOptions());
-
-  if (!result) {
-    return undefined;
-  }
-
-  return result.map(buildApiStarTopupOption);
 }

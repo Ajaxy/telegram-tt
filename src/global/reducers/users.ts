@@ -1,6 +1,12 @@
 import type {
-  ApiMissingInvitedUser, ApiUser, ApiUserCommonChats, ApiUserFullInfo, ApiUserStatus,
+  ApiMissingInvitedUser,
+  ApiSavedStarGift,
+  ApiUser,
+  ApiUserCommonChats,
+  ApiUserFullInfo,
+  ApiUserStatus,
 } from '../../api/types';
+import type { BotAppPermissions } from '../../types';
 import type { GlobalState, TabArgs, TabState } from '../types';
 
 import { areDeepEqual } from '../../util/areDeepEqual';
@@ -8,7 +14,6 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit, omitUndefined, unique } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectTabState } from '../selectors';
-import { updateChat } from './chats';
 import { updateTabState } from './tabs';
 
 export function replaceUsers<T extends GlobalState>(global: T, newById: Record<string, ApiUser>): T {
@@ -173,7 +178,7 @@ export function deleteContact<T extends GlobalState>(global: T, userId: string):
     },
   };
 
-  return updateChat(global, userId, {
+  return updateUserFullInfo(global, userId, {
     settings: undefined,
   });
 }
@@ -292,6 +297,51 @@ export function updateMissingInvitedUsers<T extends GlobalState>(
     inviteViaLinkModal: {
       missingUsers,
       chatId,
+    },
+  }, tabId);
+}
+
+export function updateBotAppPermissions<T extends GlobalState>(
+  global: T,
+  botId: string,
+  permissions: BotAppPermissions,
+): T {
+  const { botAppPermissionsById } = global.users;
+
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      botAppPermissionsById: {
+        ...botAppPermissionsById,
+        [botId]: {
+          ...botAppPermissionsById[botId],
+          ...permissions,
+        },
+      },
+    },
+  };
+}
+
+export function replacePeerSavedGifts<T extends GlobalState>(
+  global: T,
+  peerId: string,
+  gifts: ApiSavedStarGift[],
+  nextOffset?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const tabState = selectTabState(global, tabId);
+
+  return updateTabState(global, {
+    savedGifts: {
+      ...tabState.savedGifts,
+      giftsByPeerId: {
+        ...tabState.savedGifts.giftsByPeerId,
+        [peerId]: {
+          gifts,
+          nextOffset,
+        },
+      },
     },
   }, tabId);
 }

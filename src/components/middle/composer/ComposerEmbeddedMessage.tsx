@@ -7,8 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiChat, ApiInputMessageReplyInfo, ApiMessage, ApiPeer,
 } from '../../../api/types';
-import type { MessageListType } from '../../../global/types';
-import type { ThreadId } from '../../../types/index';
+import type { MessageListType, ThreadId } from '../../../types/index';
 
 import { isChatChannel, stripCustomEmoji } from '../../../global/helpers';
 import {
@@ -281,7 +280,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           ariaLabel={oldLang('Cancel')}
           onClick={handleClearClick}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         {(isShowingReply || isForwarding) && !isContextMenuDisabled && (
           <Menu
@@ -298,7 +297,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
               <>
                 <MenuItem
                   icon={!noAuthors ? 'message-succeeded' : undefined}
-                  customIcon={noAuthors ? <i className="icon icon-placeholder" /> : undefined}
+                  customIcon={noAuthors ? <Icon name="placeholder" /> : undefined}
                   // eslint-disable-next-line react/jsx-no-bind
                   onClick={() => setForwardNoAuthors({
                     noAuthors: false,
@@ -308,7 +307,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                 </MenuItem>
                 <MenuItem
                   icon={noAuthors ? 'message-succeeded' : undefined}
-                  customIcon={!noAuthors ? <i className="icon icon-placeholder" /> : undefined}
+                  customIcon={!noAuthors ? <Icon name="placeholder" /> : undefined}
                   // eslint-disable-next-line react/jsx-no-bind
                   onClick={() => setForwardNoAuthors({
                     noAuthors: true,
@@ -321,7 +320,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     <MenuSeparator />
                     <MenuItem
                       icon={!noCaptions ? 'message-succeeded' : undefined}
-                      customIcon={noCaptions ? <i className="icon icon-placeholder" /> : undefined}
+                      customIcon={noCaptions ? <Icon name="placeholder" /> : undefined}
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => setForwardNoCaptions({
                         noCaptions: false,
@@ -331,7 +330,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                     </MenuItem>
                     <MenuItem
                       icon={noCaptions ? 'message-succeeded' : undefined}
-                      customIcon={!noCaptions ? <i className="icon icon-placeholder" /> : undefined}
+                      customIcon={!noCaptions ? <Icon name="placeholder" /> : undefined}
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => setForwardNoCaptions({
                         noCaptions: true,

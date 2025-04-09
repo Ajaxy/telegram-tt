@@ -3,7 +3,7 @@
 }
 
 .button {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 1rem;
   height: 3rem;
 }
@@ -70,7 +70,7 @@
 .header {
   padding-left: 4rem;
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   padding-top: 0.875rem;
   padding-bottom: 0.875rem;
   border-bottom: 0.0625rem solid var(--color-borders);
@@ -102,7 +102,7 @@
 
 .title {
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-align: center;
   color: var(--color-text);
   margin-top: 1rem;
@@ -110,7 +110,7 @@
 
 .description {
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
   line-height: 1.375rem;
   text-align: center;
   color: var(--color-text-secondary);

@@ -28,7 +28,7 @@
 
 .text, .floating-badge-value {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .left-text {

@@ -12,22 +12,31 @@ import {
 } from '../config';
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../global/selectors';
+import getOffsetToContainer from './visibility/getOffsetToContainer';
 import { animateSingle, cancelSingleAnimation } from './animation';
 import { IS_ANDROID } from './windowEnvironment';
 
-type Params = Parameters<typeof createMutateFunction>;
+export type AnimateScrollArgs = {
+  container: HTMLElement;
+  element: HTMLElement;
+  position: ScrollTargetPosition;
+  margin?: number;
+  maxDistance?: number;
+  forceDirection?: FocusDirection;
+  forceDuration?: number;
+  forceNormalContainerHeight?: boolean;
+  shouldReturnMutationFn?: boolean;
+};
 
 let isAnimating = false;
-let currentArgs: Parameters<typeof createMutateFunction> | undefined;
+let currentArgs: AnimateScrollArgs | undefined;
 let onHeavyAnimationEnd: NoneToVoidFunction | undefined;
 
-export default function animateScroll(...args: Params | [...Params, boolean]) {
-  currentArgs = args.slice(0, 8) as Params;
+export default function animateScroll(args: AnimateScrollArgs) {
+  currentArgs = args;
+  const mutate = createMutateFunction(args);
 
-  const mutate = createMutateFunction(...currentArgs);
-
-  const shouldReturnMutationFn = args[8];
-  if (shouldReturnMutationFn) {
+  if (args.shouldReturnMutationFn) {
     return mutate;
   }
 
@@ -43,20 +52,23 @@ export function restartCurrentScrollAnimation() {
   cancelSingleAnimation();
 
   requestMeasure(() => {
-    requestMutation(createMutateFunction(...currentArgs!));
+    requestMutation(createMutateFunction(currentArgs!));
   });
 }
 
-function createMutateFunction(
-  container: HTMLElement,
-  element: HTMLElement,
-  position: ScrollTargetPosition,
-  margin = 0,
-  maxDistance = SCROLL_MAX_DISTANCE,
-  forceDirection?: FocusDirection,
-  forceDuration?: number,
-  forceNormalContainerHeight?: boolean,
-) {
+function createMutateFunction(args: AnimateScrollArgs) {
+  const {
+    container,
+    element,
+    position,
+    margin = 0,
+    maxDistance = SCROLL_MAX_DISTANCE,
+    forceDirection,
+    forceNormalContainerHeight,
+  } = args;
+
+  let forceDuration = args.forceDuration;
+
   if (
     forceDirection === FocusDirection.Static
     || !selectCanAnimateInterface(getGlobal())
@@ -64,8 +76,10 @@ function createMutateFunction(
     forceDuration = 0;
   }
 
-  const { offsetTop: elementTop, offsetHeight: elementHeight } = element;
+  const { offsetHeight: elementHeight } = element;
   const { scrollTop: currentScrollTop, offsetHeight: containerHeight, scrollHeight } = container;
+  const elementTop = getOffsetToContainer(element, container).top;
+
   const targetContainerHeight = forceNormalContainerHeight && container.dataset.normalHeight
     ? Number(container.dataset.normalHeight)
     : containerHeight;

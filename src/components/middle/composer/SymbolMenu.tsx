@@ -21,6 +21,7 @@ import useOldLang from '../../../hooks/useOldLang';
 import useShowTransitionDeprecated from '../../../hooks/useShowTransitionDeprecated';
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import Portal from '../../ui/Portal';
@@ -270,7 +271,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           size="tiny"
           onClick={onClose}
         >
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
       )}
       <SymbolMenuFooter

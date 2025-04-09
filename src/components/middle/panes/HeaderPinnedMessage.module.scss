@@ -132,7 +132,7 @@
 }
 
 .title {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   font-size: 0.875rem;
   line-height: 1rem;
   height: 1rem;
@@ -170,7 +170,7 @@
   text-overflow: ellipsis;
   border-radius: 1.5rem;
   padding: 0 0.75rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   text-transform: none;
   height: 2rem;
   max-width: 10rem;

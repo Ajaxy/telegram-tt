@@ -1,33 +1,36 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import { RPCError } from '../../../lib/gramjs/errors';
 
-import type { WebPageMediaSize } from '../../../global/types';
-import type { ThreadId } from '../../../types';
+import type {
+  ForwardMessagesParams,
+  SendMessageParams,
+  ThreadId,
+} from '../../../types';
 import type {
   ApiAttachment,
   ApiChat,
-  ApiContact,
   ApiError,
   ApiFormattedText,
   ApiGlobalMessageSearchType,
   ApiInputReplyInfo,
   ApiMessage,
   ApiMessageEntity,
+  ApiMessageSearchContext,
   ApiMessageSearchType,
-  ApiNewPoll,
   ApiOnProgress,
   ApiPeer,
   ApiPoll,
   ApiReaction,
   ApiSendMessageAction,
-  ApiSticker,
-  ApiStory,
-  ApiStorySkipped,
+  ApiUser,
   ApiUserStatus,
-  ApiVideo,
   MediaContent,
 } from '../../types';
-import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../types';
+import {
+  MAIN_THREAD_ID,
+  MESSAGE_DELETED,
+} from '../../types';
 
 import {
   API_GENERAL_ID_LIMIT,
@@ -41,7 +44,6 @@ import {
   SUPPORTED_PHOTO_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { fetchFile } from '../../../util/files';
 import { compact, split } from '../../../util/iteratees';
 import { getMessageKey } from '../../../util/keys/messageKey';
@@ -65,6 +67,7 @@ import {
   buildApiThreadInfo,
   buildLocalForwardedMessage,
   buildLocalMessage,
+  buildPreparedInlineMessage,
   buildUploadingMedia,
 } from '../apiBuilders/messages';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -89,7 +92,7 @@ import {
 import {
   deserializeBytes,
   resolveMessageApiChatId,
-} from '../helpers';
+} from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { processMessageAndUpdateThreadInfo } from '../updates/entityProcessor';
 import { processAffectedHistory, updateChannelState } from '../updates/updateManager';
@@ -153,7 +156,7 @@ export async function fetchMessages({
       abortControllerThreadId: threadId,
     });
   } catch (err: any) {
-    if (err.message === 'CHANNEL_PRIVATE') {
+    if (err.errorMessage === 'CHANNEL_PRIVATE') {
       sendApiUpdate({
         '@type': 'updateChat',
         id: chat.id,
@@ -250,56 +253,16 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
 
 let mediaQueue = Promise.resolve();
 
-export function sendMessage(
-  {
-    chat,
-    lastMessageId,
-    text,
-    entities,
-    replyInfo,
-    attachment,
-    sticker,
-    story,
-    gif,
-    poll,
-    contact,
-    isSilent,
-    scheduledAt,
-    groupedId,
-    noWebPage,
-    sendAs,
-    shouldUpdateStickerSetOrder,
-    wasDrafted,
-    isInvertedMedia,
-    effectId,
-    webPageMediaSize,
-    webPageUrl,
-  }: {
-    chat: ApiChat;
-    lastMessageId?: number;
-    text?: string;
-    entities?: ApiMessageEntity[];
-    replyInfo?: ApiInputReplyInfo;
-    attachment?: ApiAttachment;
-    sticker?: ApiSticker;
-    story?: ApiStory | ApiStorySkipped;
-    gif?: ApiVideo;
-    poll?: ApiNewPoll;
-    contact?: ApiContact;
-    isSilent?: boolean;
-    scheduledAt?: number;
-    groupedId?: string;
-    noWebPage?: boolean;
-    sendAs?: ApiPeer;
-    shouldUpdateStickerSetOrder?: boolean;
-    wasDrafted?: boolean;
-    isInvertedMedia?: true;
-    effectId?: string;
-    webPageMediaSize?: WebPageMediaSize;
-    webPageUrl?: string;
-  },
-  onProgress?: ApiOnProgress,
+export function sendMessageLocal(
+  params: SendMessageParams,
 ) {
+  const {
+    chat, lastMessageId, text, entities, replyInfo, attachment, sticker, story, gif, poll, contact,
+    scheduledAt, groupedId, sendAs, wasDrafted, isInvertedMedia, effectId, isPending, messagePriceInStars,
+  } = params;
+
+  if (!chat) return undefined;
+
   const {
     message: localMessage,
     poll: localPoll,
@@ -320,6 +283,8 @@ export function sendMessage(
     story,
     isInvertedMedia,
     effectId,
+    isPending,
+    messagePriceInStars,
   );
 
   sendApiUpdate({
@@ -330,6 +295,22 @@ export function sendMessage(
     poll: localPoll,
     wasDrafted,
   });
+
+  return localMessage;
+}
+
+export function sendApiMessage(
+  params: SendMessageParams,
+  localMessage: ApiMessage,
+  onProgress?: ApiOnProgress,
+) {
+  const {
+    chat, text, entities, replyInfo, attachment, sticker, story, gif, poll, contact,
+    isSilent, scheduledAt, groupedId, noWebPage, sendAs, shouldUpdateStickerSetOrder,
+    isInvertedMedia, effectId, webPageMediaSize, webPageUrl, messagePriceInStars,
+  } = params;
+
+  if (!chat) return undefined;
 
   // This is expected to arrive after `updateMessageSendSucceeded` which replaces the local ID,
   // so in most cases this will be simply ignored
@@ -356,6 +337,7 @@ export function sendMessage(
       groupedId,
       isSilent,
       scheduledAt,
+      messagePriceInStars,
     }, randomId, localMessage, onProgress);
   }
 
@@ -415,13 +397,14 @@ export function sendMessage(
         ...(shouldUpdateStickerSetOrder && { updateStickersetsOrder: shouldUpdateStickerSetOrder }),
         ...(isInvertedMedia && { invertMedia: isInvertedMedia }),
         ...(effectId && { effect: BigInt(effectId) }),
+        ...(messagePriceInStars && { allowPaidStars: BigInt(messagePriceInStars) }),
       }), {
         shouldThrow: true,
         shouldIgnoreUpdates: true,
       });
       if (update) handleLocalMessageUpdate(localMessage, update);
     } catch (error: any) {
-      if (error.message === 'PRIVACY_PREMIUM_REQUIRED') {
+      if (error.errorMessage === 'PRIVACY_PREMIUM_REQUIRED') {
         sendApiUpdate({ '@type': 'updateRequestUserUpdate', id: chat.id });
       }
 
@@ -436,6 +419,14 @@ export function sendMessage(
   })();
 
   return messagePromise;
+}
+
+export function sendMessage(
+  params: SendMessageParams,
+  onProgress?: ApiOnProgress,
+) {
+  const localMessage = params.localMessage || sendMessageLocal(params);
+  return localMessage ? sendApiMessage(params, localMessage, onProgress) : undefined;
 }
 
 const groupedUploads: Record<string, {
@@ -455,6 +446,7 @@ function sendGroupedMedia(
     isSilent,
     scheduledAt,
     sendAs,
+    messagePriceInStars,
   }: {
     chat: ApiChat;
     text?: string;
@@ -465,6 +457,7 @@ function sendGroupedMedia(
     isSilent?: boolean;
     scheduledAt?: number;
     sendAs?: ApiPeer;
+    messagePriceInStars?: number;
   },
   randomId: GramJs.long,
   localMessage: ApiMessage,
@@ -531,6 +524,7 @@ function sendGroupedMedia(
 
     const { singleMediaByIndex, localMessages } = groupedUploads[groupedId];
     delete groupedUploads[groupedId];
+    const count = Object.values(singleMediaByIndex).length;
 
     const update = await invokeRequest(new GramJs.messages.SendMultiMedia({
       clearDraft: true,
@@ -540,6 +534,7 @@ function sendGroupedMedia(
       ...(isSilent && { silent: isSilent }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
+      ...(messagePriceInStars && { allowPaidStars: BigInt(messagePriceInStars * count) }),
     }), {
       shouldIgnoreUpdates: true,
     });
@@ -623,7 +618,6 @@ export async function editMessage({
   const messageUpdate: Partial<ApiMessage> = {
     ...message,
     content: newContent,
-    emojiOnlyCount: getEmojiOnlyCountForMessage(newContent, message.groupedId),
     isInvertedMedia,
   };
 
@@ -831,6 +825,37 @@ export async function deleteMessages({
     ids: messageIds,
     ...(isChannel && { chatId: chat.id }),
   });
+}
+
+export async function deleteParticipantHistory({
+  chat, peer, isRepeat = false,
+}: {
+  chat: ApiChat; peer: ApiPeer; isRepeat?: boolean;
+}) {
+  const result = await invokeRequest(
+    new GramJs.channels.DeleteParticipantHistory({
+      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+      participant: buildInputPeer(peer.id, peer.accessHash),
+    }),
+  );
+
+  if (!result) {
+    return;
+  }
+
+  processAffectedHistory(chat, result);
+
+  if (!isRepeat) {
+    sendApiUpdate({
+      '@type': 'deleteParticipantHistory',
+      chatId: chat.id,
+      peerId: peer.id,
+    });
+  }
+
+  if (result.offset) {
+    await deleteParticipantHistory({ chat, peer, isRepeat: true });
+  }
 }
 
 export function deleteScheduledMessages({
@@ -1121,6 +1146,18 @@ export function fetchPaidReactionPrivacy() {
   return invokeRequest(new GramJs.messages.GetPaidReactionPrivacy(), { shouldReturnTrue: true });
 }
 
+export function reportMessagesDelivery({
+  chat, messageIds,
+}: {
+  chat: ApiChat;
+  messageIds: number[];
+}) {
+  return invokeRequest(new GramJs.messages.ReportMessagesDelivery({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: messageIds,
+  }));
+}
+
 export async function fetchDiscussionMessage({
   chat, messageId,
 }: {
@@ -1257,7 +1294,7 @@ export async function searchMessagesInChat({
 }
 
 export async function searchMessagesGlobal({
-  query, offsetRate = 0, offsetPeer, offsetId, limit, type = 'text', minDate, maxDate,
+  query, offsetRate = 0, offsetPeer, offsetId, limit, type = 'text', minDate, maxDate, context = 'all',
 }: {
   query: string;
   offsetRate?: number;
@@ -1265,6 +1302,7 @@ export async function searchMessagesGlobal({
   offsetId?: number;
   limit: number;
   type?: ApiGlobalMessageSearchType;
+  context?: ApiMessageSearchContext;
   minDate?: number;
   maxDate?: number;
 }): Promise<SearchResults | undefined> {
@@ -1302,7 +1340,9 @@ export async function searchMessagesGlobal({
     offsetRate,
     offsetPeer: peer,
     offsetId,
-    broadcastsOnly: type === 'channels' || undefined,
+    broadcastsOnly: type === 'channels' || context === 'channels' || undefined,
+    groupsOnly: context === 'groups' || undefined,
+    usersOnly: context === 'users' || undefined,
     limit,
     filter,
     minDate,
@@ -1400,7 +1440,7 @@ export async function fetchWebPagePreview({
     entities: textWithEntities.entities,
   }));
 
-  return preview && buildWebPage(preview);
+  return preview && buildWebPage(preview.media);
 }
 
 export async function sendPollVote({
@@ -1484,40 +1524,17 @@ export async function fetchExtendedMedia({
   }));
 }
 
-export async function forwardMessages({
-  fromChat,
-  toChat,
-  toThreadId,
-  messages,
-  isSilent,
-  scheduledAt,
-  sendAs,
-  withMyScore,
-  noAuthors,
-  noCaptions,
-  isCurrentUserPremium,
-  wasDrafted,
-  lastMessageId,
-}: {
-  fromChat: ApiChat;
-  toChat: ApiChat;
-  toThreadId?: ThreadId;
-  messages: ApiMessage[];
-  isSilent?: boolean;
-  scheduledAt?: number;
-  sendAs?: ApiPeer;
-  withMyScore?: boolean;
-  noAuthors?: boolean;
-  noCaptions?: boolean;
-  isCurrentUserPremium?: boolean;
-  wasDrafted?: boolean;
-  lastMessageId?: number;
-}) {
-  const messageIds = messages.map(({ id }) => id);
-  const randomIds = messages.map(generateRandomBigInt);
-  const localMessages: Record<string, ApiMessage> = {};
+export function forwardMessagesLocal(params: ForwardMessagesParams) {
+  const {
+    toChat, toThreadId, messages,
+    scheduledAt, sendAs, noAuthors, noCaptions,
+    isCurrentUserPremium, wasDrafted, lastMessageId,
+  } = params;
 
-  messages.forEach((message, index) => {
+  const messageIds = messages.map(({ id }) => id);
+  const localMessages: ApiMessage[] = [];
+
+  messages.forEach((message) => {
     const localMessage = buildLocalForwardedMessage({
       toChat,
       toThreadId: Number(toThreadId),
@@ -1529,7 +1546,7 @@ export async function forwardMessages({
       lastMessageId,
       sendAs,
     });
-    localMessages[randomIds[index].toString()] = localMessage;
+    localMessages.push(localMessage);
 
     sendApiUpdate({
       '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',
@@ -1539,7 +1556,25 @@ export async function forwardMessages({
       wasDrafted,
     });
   });
+  return { messageIds, localMessages };
+}
 
+export async function forwardApiMessages(params: ForwardMessagesParams) {
+  const {
+    fromChat, toChat, toThreadId, isSilent,
+    scheduledAt, sendAs, withMyScore, noAuthors, noCaptions,
+    forwardedLocalMessagesSlice, messagePriceInStars,
+  } = params;
+
+  if (!forwardedLocalMessagesSlice) return;
+
+  const {
+    messageIds, localMessages,
+  } = forwardedLocalMessagesSlice;
+
+  const priceInStars = messagePriceInStars ? messagePriceInStars * messageIds.length : undefined;
+
+  const randomIds = messageIds.map(generateRandomBigInt);
   try {
     const update = await invokeRequest(new GramJs.messages.ForwardMessages({
       fromPeer: buildInputPeer(fromChat.id, fromChat.accessHash),
@@ -1553,11 +1588,16 @@ export async function forwardMessages({
       ...(toThreadId && { topMsgId: Number(toThreadId) }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
+      ...(priceInStars && { allowPaidStars: BigInt(priceInStars) }),
     }), {
       shouldThrow: true,
       shouldIgnoreUpdates: true,
     });
-    if (update) handleMultipleLocalMessagesUpdate(localMessages, update);
+    const messagesForUpdate: Record<string, ApiMessage> = {};
+    localMessages.forEach((message, index) => {
+      messagesForUpdate[randomIds[index].toString()] = message;
+    });
+    if (update) handleMultipleLocalMessagesUpdate(messagesForUpdate, update);
   } catch (error: any) {
     Object.values(localMessages).forEach((localMessage) => {
       sendApiUpdate({
@@ -1567,6 +1607,18 @@ export async function forwardMessages({
         error: error.message,
       });
     });
+  }
+}
+
+export async function forwardMessages(params: ForwardMessagesParams) {
+  if (params.forwardedLocalMessagesSlice) {
+    await forwardApiMessages(params);
+  } else {
+    const newParams = {
+      ...params,
+      forwardedLocalMessagesSlice: forwardMessagesLocal(params),
+    };
+    await forwardApiMessages(newParams);
   }
 }
 
@@ -1674,10 +1726,13 @@ export async function fetchSeenBy({ chat, messageId }: { chat: ApiChat; messageI
 
 export async function fetchSendAs({
   chat,
+  isForPaidReactions,
 }: {
+  isForPaidReactions?: true;
   chat: ApiChat;
 }) {
   const result = await invokeRequest(new GramJs.channels.GetSendAs({
+    forPaidReactions: isForPaidReactions,
     peer: buildInputPeer(chat.id, chat.accessHash),
   }), {
     shouldIgnoreErrors: true,
@@ -1688,9 +1743,7 @@ export async function fetchSendAs({
     return undefined;
   }
 
-  return {
-    sendAs: result.peers.map(buildApiSendAsPeerId),
-  };
+  return result.peers.map(buildApiSendAsPeerId);
 }
 
 export function saveDefaultSendAs({
@@ -1771,8 +1824,8 @@ export async function reportSponsoredMessage({
     }
 
     return buildApiSponsoredMessageReportResult(result);
-  } catch (err) {
-    if (err instanceof Error && err.message === 'PREMIUM_ACCOUNT_REQUIRED') {
+  } catch (err: unknown) {
+    if (err instanceof RPCError && err.errorMessage === 'PREMIUM_ACCOUNT_REQUIRED') {
       return {
         type: 'premiumRequired' as const,
       };
@@ -1783,11 +1836,14 @@ export async function reportSponsoredMessage({
 
 export async function readAllMentions({
   chat,
+  threadId,
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
 }) {
   const result = await invokeRequest(new GramJs.messages.ReadMentions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
   }));
 
   if (!result) return;
@@ -1795,17 +1851,20 @@ export async function readAllMentions({
   processAffectedHistory(chat, result);
 
   if (result.offset) {
-    await readAllMentions({ chat });
+    await readAllMentions({ chat, threadId });
   }
 }
 
 export async function readAllReactions({
   chat,
+  threadId,
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
 }) {
   const result = await invokeRequest(new GramJs.messages.ReadReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
   }));
 
   if (!result) return;
@@ -1813,14 +1872,15 @@ export async function readAllReactions({
   processAffectedHistory(chat, result);
 
   if (result.offset) {
-    await readAllReactions({ chat });
+    await readAllReactions({ chat, threadId });
   }
 }
 
 export async function fetchUnreadMentions({
-  chat, ...pagination
+  chat, threadId, ...pagination
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
   offsetId?: number;
   addOffset?: number;
   maxId?: number;
@@ -1828,6 +1888,7 @@ export async function fetchUnreadMentions({
 }) {
   const result = await invokeRequest(new GramJs.messages.GetUnreadMentions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
     limit: MENTION_UNREAD_SLICE,
     ...pagination,
   }));
@@ -1848,9 +1909,10 @@ export async function fetchUnreadMentions({
 }
 
 export async function fetchUnreadReactions({
-  chat, ...pagination
+  chat, threadId, ...pagination
 }: {
   chat: ApiChat;
+  threadId?: ThreadId;
   offsetId?: number;
   addOffset?: number;
   maxId?: number;
@@ -1858,6 +1920,7 @@ export async function fetchUnreadReactions({
 }) {
   const result = await invokeRequest(new GramJs.messages.GetUnreadReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: threadId ? Number(threadId) : undefined,
     limit: REACTION_UNREAD_SLICE,
     ...pagination,
   }));
@@ -1964,7 +2027,10 @@ function handleMultipleLocalMessagesUpdate(
     return true;
   });
 
-  handleGramJsUpdate(otherUpdates);
+  // Illegal monkey patching. Easier than creating mock update object
+  update.updates = otherUpdates;
+
+  handleGramJsUpdate(update);
 }
 
 function handleLocalMessageUpdate(
@@ -2128,4 +2194,19 @@ export async function exportMessageLink({
   }));
 
   return result?.link;
+}
+
+export async function fetchPreparedInlineMessage({
+  bot, id,
+}: {
+  bot: ApiUser;
+  id: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetPreparedInlineMessage({
+    bot: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+    id,
+  }));
+  if (!result) return undefined;
+
+  return buildPreparedInlineMessage(result);
 }

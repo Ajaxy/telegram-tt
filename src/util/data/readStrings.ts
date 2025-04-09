@@ -1,7 +1,7 @@
 import { DEBUG } from '../../config';
 
 export default function readStrings(data: string): Record<string, string> {
-  const lines = data.split(/;?\r?\n/);
+  const lines = data.split(/;\r?\n?/);
   const result: Record<string, string> = {};
   for (const line of lines) {
     if (!line.startsWith('"')) continue;
@@ -10,6 +10,10 @@ export default function readStrings(data: string): Record<string, string> {
       // eslint-disable-next-line no-console
       console.warn('Bad formatting in line:', line);
       continue;
+    }
+    if (result[key]) {
+      // eslint-disable-next-line no-console
+      console.warn('Duplicate key:', key);
     }
     result[key] = value;
   }

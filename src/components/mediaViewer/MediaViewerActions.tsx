@@ -2,8 +2,9 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ActiveDownloads, MessageListType } from '../../global/types';
-import type { MediaViewerOrigin } from '../../types';
+import type { ApiChat } from '../../api/types';
+import type { ActiveDownloads, MediaViewerOrigin, MessageListType } from '../../types';
+import type { IconName } from '../../types/icons';
 import type { MenuItemProps } from '../ui/MenuItem';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
@@ -16,7 +17,7 @@ import {
 } from '../../global/helpers';
 import {
   selectActiveDownloads,
-  selectAllowedMessageActionsSlow,
+  selectAllowedMessageActionsSlow, selectCurrentChat,
   selectCurrentMessageList,
   selectIsChatProtected,
   selectIsMessageProtected,
@@ -32,6 +33,7 @@ import useOldLang from '../../hooks/useOldLang';
 import useZoomChange from './hooks/useZoomChangeSignal';
 
 import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -44,6 +46,7 @@ type StateProps = {
   isProtected?: boolean;
   isChatProtected?: boolean;
   canDelete?: boolean;
+  chat?: ApiChat;
   canUpdate?: boolean;
   messageListType?: MessageListType;
   origin?: MediaViewerOrigin;
@@ -66,6 +69,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   item,
   mediaData,
   isVideo,
+  chat,
   isChatProtected,
   isProtected,
   canReportAvatar,
@@ -159,7 +163,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, []);
@@ -192,7 +196,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         {isDownloading ? (
           <ProgressSpinner progress={downloadProgress} size="s" onClick={handleDownloadClick} />
         ) : (
-          <i className="icon icon-download" />
+          <Icon name="download" />
         )}
       </Button>
     ) : (
@@ -204,16 +208,17 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         color="translucent-white"
         ariaLabel={lang('AccActionDownload')}
       >
-        <i className="icon icon-download" />
+        <Icon name="download" />
       </Button>
     ));
   }
 
   const openDeleteModalHandler = useLastCallback(() => {
-    if (item?.type === 'message') {
+    if (item?.type === 'message' && chat) {
       openDeleteMessageModal({
+        chatId: chat?.id,
+        messageIds: [item.message.id],
         isSchedule: messageListType === 'scheduled',
-        message: item.message,
         onConfirm: onBeforeDelete,
       });
     } else {
@@ -287,7 +292,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           }) => (
             <MenuItem
               key={icon}
-              icon={icon}
+              icon={icon as IconName}
               href={href}
               download={download}
               onClick={onClick}
@@ -313,7 +318,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('Forward')}
           onClick={onForward}
         >
-          <i className="icon icon-forward" />
+          <Icon name="forward" />
         </Button>
       )}
       {renderDownloadButton()}
@@ -324,7 +329,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('MediaZoomOut')}
         onClick={handleZoomOut}
       >
-        <i className="icon icon-zoom-out" />
+        <Icon name="zoom-out" />
       </Button>
       <Button
         round
@@ -333,7 +338,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('MediaZoomIn')}
         onClick={handleZoomIn}
       >
-        <i className="icon icon-zoom-in" />
+        <Icon name="zoom-in" />
       </Button>
       {canReportAvatar && (
         <Button
@@ -343,7 +348,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang(isVideo ? 'PeerInfo.ReportProfileVideo' : 'PeerInfo.ReportProfilePhoto')}
           onClick={onReport}
         >
-          <i className="icon icon-flag" />
+          <Icon name="flag" />
         </Button>
       )}
       {canUpdate && (
@@ -354,7 +359,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('ProfilePhoto.SetMainPhoto')}
           onClick={handleUpdate}
         >
-          <i className="icon icon-copy-media" />
+          <Icon name="copy-media" />
         </Button>
       )}
       {canDelete && (
@@ -365,7 +370,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('Delete')}
           onClick={openDeleteModalHandler}
         >
-          <i className="icon icon-delete" />
+          <Icon name="delete" />
         </Button>
       )}
       <Button
@@ -375,7 +380,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('Close')}
         onClick={onCloseMediaViewer}
       >
-        <i className="icon icon-close" />
+        <Icon name="close" />
       </Button>
       {canDelete && renderDeleteModal()}
     </div>
@@ -393,6 +398,7 @@ export default memo(withGlobal<OwnProps>(
     const avatarOwner = item?.type === 'avatar' ? item.avatarOwner : undefined;
     const avatarPhoto = item?.type === 'avatar' && item.profilePhotos.photos[item.mediaIndex];
 
+    const chat = selectCurrentChat(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { threadId } = selectCurrentMessageList(global) || {};
     const isProtected = selectIsMessageProtected(global, message);
@@ -409,6 +415,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       activeDownloads,
       isProtected,
+      chat,
       isChatProtected,
       canDelete,
       canUpdate,

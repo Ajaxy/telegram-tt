@@ -16,6 +16,7 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Avatar from '../../common/Avatar';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import LeftSearchResultChat from './LeftSearchResultChat';
 
@@ -113,7 +114,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
               onClick={handleClearRecentlyFoundChats}
               isRtl={lang.isRtl}
             >
-              <i className="icon icon-close" />
+              <Icon name="close" />
             </Button>
           </h3>
           {recentlyFoundChatIds.map((id) => (

@@ -8,6 +8,7 @@ import buildClassName from '../../../util/buildClassName';
 
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import InputText from '../../ui/InputText';
 import Modal from '../../ui/Modal';
@@ -54,10 +55,9 @@ const RatePhoneCallModal: FC<OwnProps> = ({
         {new Array(5).fill(undefined).map((_, i) => {
           const isFilled = rating !== undefined && rating >= i;
           return (
-            <i
+            <Icon
+              name={isFilled ? 'favorite-filled' : 'favorite'}
               className={buildClassName(
-                'icon',
-                isFilled ? 'icon-favorite-filled' : 'icon-favorite',
                 isFilled && styles.isFilled,
                 styles.star,
               )}

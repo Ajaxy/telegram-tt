@@ -1,4 +1,4 @@
-import type { IDimensions } from '../../../global/types';
+import type { IDimensions } from '../../../types';
 import { StoryViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY } from '../../../config';

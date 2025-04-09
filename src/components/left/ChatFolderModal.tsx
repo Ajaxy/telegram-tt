@@ -8,6 +8,7 @@ import type { ApiChatFolder } from '../../api/types';
 
 import { ALL_FOLDER_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
+import { renderTextWithEntities } from '../common/helpers/renderTextWithEntities';
 
 import useOldLang from '../../hooks/useOldLang';
 
@@ -59,10 +60,19 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
   const [selectedFolderIds, setSelectedFolderIds] = useState<string[]>(initialSelectedFolderIds);
 
   const folders = useMemo(() => {
-    return folderOrderedIds?.filter((folderId) => folderId !== ALL_FOLDER_ID).map((folderId) => ({
-      label: foldersById ? foldersById[folderId].title : '',
-      value: String(folderId),
-    })) || [];
+    return folderOrderedIds?.filter((folderId) => folderId !== ALL_FOLDER_ID)
+      .map((folderId) => {
+        const folder = foldersById ? foldersById[folderId] : undefined;
+        const label = folder ? renderTextWithEntities({
+          text: folder.title.text,
+          entities: folder.title.entities,
+          noCustomEmojiPlayback: folder.noTitleAnimations,
+        }) : '';
+        return {
+          label,
+          value: String(folderId),
+        };
+      }) || [];
   }, [folderOrderedIds, foldersById]);
 
   const handleSubmit = useCallback(() => {

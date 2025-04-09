@@ -13,6 +13,7 @@ import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import Checkbox from '../../ui/Checkbox';
 import InputText from '../../ui/InputText';
@@ -245,7 +246,7 @@ const PollModal: FC<OwnProps> = ({
     return (
       <div className="modal-header-condensed">
         <Button round color="translucent" size="smaller" ariaLabel="Cancel poll creation" onClick={onClear}>
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <div className="modal-title">{lang('NewPoll')}</div>
         <Button
@@ -264,6 +265,7 @@ const PollModal: FC<OwnProps> = ({
     return options.map((option, index) => (
       <div className="option-wrapper">
         <InputText
+          maxLength={MAX_OPTION_LENGTH}
           label={index !== options.length - 1 || options.length === MAX_OPTIONS_COUNT
             ? lang('OptionHint')
             : lang('CreatePoll.AddOption')}
@@ -283,7 +285,7 @@ const PollModal: FC<OwnProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => removeOption(index)}
           >
-            <i className="icon icon-close" />
+            <Icon name="close" />
           </Button>
         )}
       </div>
@@ -335,25 +337,27 @@ const PollModal: FC<OwnProps> = ({
       <div className="options-divider" />
 
       <div className="quiz-mode">
-        {!shouldBeAnonymous && (
+        <div className="dialog-checkbox-group">
+          {!shouldBeAnonymous && (
+            <Checkbox
+              label={lang('PollAnonymous')}
+              checked={isAnonymous}
+              onChange={handleIsAnonymousChange}
+            />
+          )}
           <Checkbox
-            label={lang('PollAnonymous')}
-            checked={isAnonymous}
-            onChange={handleIsAnonymousChange}
+            label={lang('PollMultiple')}
+            checked={isMultipleAnswers}
+            disabled={isQuizMode}
+            onChange={handleMultipleAnswersChange}
           />
-        )}
-        <Checkbox
-          label={lang('PollMultiple')}
-          checked={isMultipleAnswers}
-          disabled={isQuizMode}
-          onChange={handleMultipleAnswersChange}
-        />
-        <Checkbox
-          label={lang('PollQuiz')}
-          checked={isQuizMode}
-          disabled={isMultipleAnswers || isQuiz !== undefined}
-          onChange={handleQuizModeChange}
-        />
+          <Checkbox
+            label={lang('PollQuiz')}
+            checked={isQuizMode}
+            disabled={isMultipleAnswers || isQuiz !== undefined}
+            onChange={handleQuizModeChange}
+          />
+        </div>
         {isQuizMode && (
           <>
             <h3 className="options-header">{lang('lng_polls_solution_title')}</h3>

@@ -11,6 +11,7 @@ import useLang from '../../../hooks/useLang';
 import useMultiClick from '../../../hooks/useMultiClick';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import DropdownMenu from '../../ui/DropdownMenu';
@@ -71,7 +72,7 @@ const SettingsHeader: FC<OwnProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [isMobile]);
@@ -162,8 +163,11 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
         return <h3>{oldLang('NeverAllow')}</h3>;
 
+      case SettingsScreens.PrivacyNoPaidMessages:
+        return <h3>{lang('RemoveFeeTitle')}</h3>;
+
       case SettingsScreens.Performance:
-        return <h3>{oldLang('Animations and Performance')}</h3>;
+        return <h3>{lang('MenuAnimations')}</h3>;
 
       case SettingsScreens.ActiveSessions:
         return <h3>{oldLang('SessionsTitle')}</h3>;
@@ -269,7 +273,7 @@ const SettingsHeader: FC<OwnProps> = ({
               onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
               ariaLabel={oldLang('lng_settings_information')}
             >
-              <i className="icon icon-edit" />
+              <Icon name="edit" />
             </Button>
             <DropdownMenu
               className="settings-more-menu"
@@ -292,7 +296,7 @@ const SettingsHeader: FC<OwnProps> = ({
         onClick={onReset}
         ariaLabel={oldLang('AccDescrGoBack')}
       >
-        <i className="icon icon-arrow-left" />
+        <Icon name="arrow-left" />
       </Button>
       {renderHeaderContent()}
       <ConfirmDialog

@@ -22,7 +22,7 @@ const RESIZE_THROTTLE_MS = 500;
 type OwnProps = {
   text: TextPart | TextPart[];
   buttonText?: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleSponsoredClick: (isFromMedia?: boolean) => void;
   isForVideo: boolean;
   isForceMobileVersion?: boolean;

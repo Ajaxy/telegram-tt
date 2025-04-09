@@ -2,7 +2,7 @@ import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSponsoredMessage } from '../../../api/types';
-import type { MessageListType } from '../../../global/types';
+import type { MessageListType } from '../../../types';
 
 import { selectBot, selectSponsoredMessage } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';

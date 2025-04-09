@@ -26,6 +26,7 @@ import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from './helpers/renderText';
 
+import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
@@ -56,6 +57,7 @@ type StateProps =
     topic?: ApiTopic;
     messagesCount?: number;
     emojiStatusSticker?: ApiSticker;
+    emojiStatusSlug?: string;
     profilePhotos?: ApiPeerPhotos;
   };
 
@@ -63,6 +65,7 @@ const EMOJI_STATUS_SIZE = 24;
 const EMOJI_TOPIC_SIZE = 120;
 const LOAD_MORE_THRESHOLD = 3;
 const MAX_PHOTO_DASH_COUNT = 30;
+const STATUS_UPDATE_INTERVAL = 1000 * 60; // 1 min
 
 const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
@@ -75,6 +78,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   topic,
   messagesCount,
   emojiStatusSticker,
+  emojiStatusSlug,
   profilePhotos,
   peerId,
 }) => {
@@ -84,9 +88,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     openStickerSet,
     openPrivacySettingsNoticeModal,
     loadMoreProfilePhotos,
+    openUniqueGiftBySlug,
   } = getActions();
 
   const lang = useOldLang();
+
+  useIntervalForceUpdate(user ? STATUS_UPDATE_INTERVAL : undefined);
 
   const photos = profilePhotos?.photos || MEMO_EMPTY_ARRAY;
   const prevMediaIndex = usePreviousDeprecated(mediaIndex);
@@ -133,6 +140,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   });
 
   const handleStatusClick = useLastCallback(() => {
+    if (emojiStatusSlug) {
+      openUniqueGiftBySlug({ slug: emojiStatusSlug });
+      return;
+    }
     if (!peerId) {
       openStickerSet({
         stickerSetInfo: emojiStatusSticker!.stickerSetInfo,
@@ -379,6 +390,7 @@ export default memo(withGlobal<OwnProps>(
 
     const emojiStatus = (user || chat)?.emojiStatus;
     const emojiStatusSticker = emojiStatus ? global.customEmojis.byId[emojiStatus.documentId] : undefined;
+    const emojiStatusSlug = emojiStatus?.type === 'collectible' ? emojiStatus.slug : undefined;
 
     return {
       user,
@@ -387,6 +399,7 @@ export default memo(withGlobal<OwnProps>(
       mediaIndex,
       avatarOwnerId,
       emojiStatusSticker,
+      emojiStatusSlug,
       profilePhotos,
       ...(topic && {
         topic,

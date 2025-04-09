@@ -5,8 +5,8 @@ import type {
   ApiChat,
   ApiMessage, ApiPeer, ApiReplyInfo, MediaContainer,
 } from '../../../api/types';
-import type { ChatTranslatedMessages } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { ChatTranslatedMessages } from '../../../types';
 import type { IconName } from '../../../types/icons';
 
 import { CONTENT_NOT_SUPPORTED } from '../../../config';
@@ -14,18 +14,16 @@ import {
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageRoundVideo,
-  getSenderTitle,
-  isActionMessage,
   isChatChannel,
   isChatGroup,
   isMessageTranslatable,
   isUserId,
 } from '../../../global/helpers';
 import { getMediaContentTypeDescription } from '../../../global/helpers/messageSummary';
+import { getPeerTitle } from '../../../global/helpers/peers';
 import buildClassName from '../../../util/buildClassName';
 import freezeWhenClosed from '../../../util/hoc/freezeWhenClosed';
 import { getPictogramDimensions } from '../helpers/mediaDimensions';
-import { getPeerColorClass } from '../helpers/peerColor';
 import renderText from '../helpers/renderText';
 import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
@@ -36,12 +34,11 @@ import useOldLang from '../../../hooks/useOldLang';
 import useThumbnail from '../../../hooks/useThumbnail';
 import useMessageTranslation from '../../middle/message/hooks/useMessageTranslation';
 
-import ActionMessage from '../../middle/ActionMessage';
 import RippleEffect from '../../ui/RippleEffect';
 import Icon from '../icons/Icon';
 import MediaSpoiler from '../MediaSpoiler';
 import MessageSummary from '../MessageSummary';
-import EmojiIconBackground from './EmojiIconBackground';
+import PeerColorWrapper from '../PeerColorWrapper';
 
 import './EmbeddedMessage.scss';
 
@@ -120,10 +117,10 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   const lang = useOldLang();
 
-  const senderTitle = sender ? getSenderTitle(lang, sender)
+  const senderTitle = sender ? getPeerTitle(lang, sender)
     : (replyForwardInfo?.hiddenUserName || message?.forwardInfo?.hiddenUserName);
-  const senderChatTitle = senderChat ? getSenderTitle(lang, senderChat) : undefined;
-  const forwardSenderTitle = forwardSender ? getSenderTitle(lang, forwardSender)
+  const senderChatTitle = senderChat ? getPeerTitle(lang, senderChat) : undefined;
+  const forwardSenderTitle = forwardSender ? getPeerTitle(lang, forwardSender)
     : message?.forwardInfo?.hiddenUserName;
   const areSendersSame = sender && sender.id === forwardSender?.id;
 
@@ -134,24 +131,13 @@ const EmbeddedMessage: FC<OwnProps> = ({
       return renderTextWithEntities({
         text: replyInfo.quoteText.text,
         entities: replyInfo.quoteText.entities,
-        noLineBreaks: isInComposer,
+        asPreview: true,
         emojiSize: EMOJI_SIZE,
       });
     }
 
     if (!message) {
       return customText || renderMediaContentType(containedMedia) || NBSP;
-    }
-
-    if (isActionMessage(message)) {
-      return (
-        <ActionMessage
-          message={message}
-          isEmbedded
-          observeIntersectionForLoading={observeIntersectionForLoading}
-          observeIntersectionForPlaying={observeIntersectionForPlaying}
-        />
-      );
     }
 
     return (
@@ -206,7 +192,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
     const isReplyToQuote = isInComposer && Boolean(replyInfo && 'quoteText' in replyInfo && replyInfo?.quoteText);
 
     return (
-      <>
+      <span className="embedded-sender-wrapper">
         {checkShouldRenderSenderTitle() && (
           <span className="embedded-sender">
             {renderText(isReplyToQuote ? lang('ReplyToQuote', senderTitle) : senderTitle)}
@@ -218,19 +204,34 @@ const EmbeddedMessage: FC<OwnProps> = ({
             {renderText(senderChatTitle)}
           </span>
         )}
-      </>
+      </span>
+    );
+  }
+
+  function renderForwardSender() {
+    return forwardSenderTitle && !areSendersSame && (
+      <span className="embedded-forward-sender-wrapper">
+        <Icon name={forwardSender ? 'share-filled' : 'forward'} className="embedded-origin-icon" />
+        <span className="forward-sender-title">
+          {renderText(forwardSenderTitle)}
+        </span>
+      </span>
     );
   }
 
   return (
-    <div
+    <PeerColorWrapper
+      peer={sender}
+      emojiIconClassName="EmbeddedMessage--background-icons"
       ref={ref}
+      shouldReset
+      noUserColors={noUserColors}
       className={buildClassName(
         'EmbeddedMessage',
         className,
-        getPeerColorClass(sender, noUserColors, true),
         isQuote && 'is-quote',
         mediaThumbnail && 'with-thumb',
+        'no-selection',
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
       onClick={handleClick}
@@ -241,27 +242,16 @@ const EmbeddedMessage: FC<OwnProps> = ({
       {mediaThumbnail && renderPictogram(
         mediaThumbnail, mediaBlobUrl, isVideoThumbnail, isRoundVideo, isProtected, isSpoiler,
       )}
-      {sender?.color?.backgroundEmojiId && (
-        <EmojiIconBackground
-          emojiDocumentId={sender.color.backgroundEmojiId}
-          className="EmbeddedMessage--background-icons"
-        />
-      )}
       <div className="message-text">
         <p className={buildClassName('embedded-text-wrapper', isQuote && 'multiline')}>
           {renderTextContent()}
         </p>
         <div className="message-title">
           {renderSender()}
-          {forwardSenderTitle && !areSendersSame && (
-            <>
-              <Icon name={forwardSender ? 'share-filled' : 'forward'} className="embedded-origin-icon" />
-              {renderText(forwardSenderTitle)}
-            </>
-          )}
+          {renderForwardSender()}
         </div>
       </div>
-    </div>
+    </PeerColorWrapper>
   );
 };
 

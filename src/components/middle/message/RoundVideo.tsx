@@ -91,6 +91,7 @@ const RoundVideo: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const video = message.content.video!;
+  const isMediaUnread = message.isMediaUnread;
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersecting);
@@ -219,6 +220,12 @@ const RoundVideo: FC<OwnProps> = ({
     togglePlaying();
   });
 
+  useEffect(() => {
+    if (onReadMedia && isMediaUnread && isActivated) {
+      onReadMedia();
+    }
+  }, [isActivated, isMediaUnread, onReadMedia]);
+
   const handleTimeUpdate = useLastCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
     setProgress(playerEl.currentTime / playerEl.duration);
@@ -280,6 +287,7 @@ const RoundVideo: FC<OwnProps> = ({
             autoPlay={!shouldRenderSpoiler}
             disablePictureInPicture
             muted={!isActivated}
+            defaultMuted
             loop={!isActivated}
             playsInline
             isPriority
@@ -319,10 +327,14 @@ const RoundVideo: FC<OwnProps> = ({
       )}
       {shouldRenderSpoiler && !shouldRenderSpinner && renderPlayWrapper()}
       {!mediaData && !isLoadAllowed && (
-        <i className="icon icon-download" />
+        <Icon name="download" />
       )}
       {!isInOneTimeModal && (
-        <div className="message-media-duration">
+        <div
+          className={buildClassName(
+            'message-media-duration', isMediaUnread && 'unread',
+          )}
+        >
           {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
           {(!isActivated || playerRef.current!.paused) && <Icon name="muted" />}
         </div>

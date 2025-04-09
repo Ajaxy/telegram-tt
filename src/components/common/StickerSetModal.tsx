@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
-import type { MessageList } from '../../global/types';
+import type { MessageList } from '../../types';
 
 import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL, TME_LINK_PREFIX } from '../../config';
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
@@ -16,6 +16,7 @@ import {
   selectCurrentMessageList,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectPeerPaidMessagesStars,
   selectShouldSchedule,
   selectStickerSet,
   selectThreadInfo,
@@ -37,6 +38,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import Loading from '../ui/Loading';
 import MenuItem from '../ui/MenuItem';
 import Modal from '../ui/Modal';
+import Icon from './icons/Icon';
 import StickerButton from './StickerButton';
 
 import './StickerSetModal.scss';
@@ -183,7 +185,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [isMobile]);
@@ -194,7 +196,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     return (
       <div className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <div className="modal-title">
           {renderingStickerSet ? renderText(renderingStickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
@@ -275,12 +277,13 @@ export default memo(withGlobal<OwnProps>(
       : stickerSetShortName ? { shortName: stickerSetShortName } : undefined;
 
     const stickerSet = stickerSetInfo ? selectStickerSet(global, stickerSetInfo) : undefined;
+    const paidMessagesStars = chatId ? selectPeerPaidMessagesStars(global, chatId) : undefined;
 
     return {
       canScheduleUntilOnline: Boolean(chatId) && selectCanScheduleUntilOnline(global, chatId),
       canSendStickers,
       isSavedMessages,
-      shouldSchedule: selectShouldSchedule(global),
+      shouldSchedule: !paidMessagesStars && selectShouldSchedule(global),
       stickerSet,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       shouldUpdateStickerSetOrder: global.settings.byKey.shouldUpdateStickerSetOrder,

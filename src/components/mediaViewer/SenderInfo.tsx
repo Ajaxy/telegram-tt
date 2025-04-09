@@ -6,8 +6,9 @@ import type { ApiChat, ApiPeer } from '../../api/types';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
 import {
-  getSenderTitle, isChatChannel, isChatGroup, isUserId,
+  isChatChannel, isChatGroup, isUserId,
 } from '../../global/helpers';
+import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectSender,
 } from '../../global/selectors';
@@ -107,7 +108,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
-  const senderTitle = getSenderTitle(lang, owner);
+  const senderTitle = getPeerTitle(lang, owner);
 
   return (
     <div className="SenderInfo" onClick={handleFocusMessage}>

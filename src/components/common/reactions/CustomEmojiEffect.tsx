@@ -1,7 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { ApiEmojiStatus, ApiReactionCustomEmoji } from '../../../api/types';
+import type { ApiEmojiStatusType, ApiReactionCustomEmoji } from '../../../api/types';
 
 import { getStickerHashById } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
@@ -15,7 +15,7 @@ import CustomEmoji from '../CustomEmoji';
 import styles from './CustomEmojiEffect.module.scss';
 
 type OwnProps = {
-  reaction: ApiReactionCustomEmoji | ApiEmojiStatus;
+  reaction: ApiReactionCustomEmoji | ApiEmojiStatusType;
   className?: string;
   isLottie?: boolean;
   particleSize?: number;

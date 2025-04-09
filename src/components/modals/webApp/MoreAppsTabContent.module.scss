@@ -19,7 +19,7 @@
 
 .section-title {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   padding: 0.5rem;
   padding-block: 0.25rem;
   justify-content: space-between;
@@ -32,7 +32,7 @@
   justify-content: center;
   align-items: center;
   gap: 0.125rem;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(4rem, 1fr));
   padding: 0.125rem;
   padding-bottom: 1.25em;
 }

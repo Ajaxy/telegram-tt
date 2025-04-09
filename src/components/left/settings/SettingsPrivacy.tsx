@@ -2,8 +2,8 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiPrivacySettings } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';
@@ -34,6 +34,7 @@ type StateProps = {
   canDisplayAutoarchiveSetting: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
   shouldNewNonContactPeersRequirePremium?: boolean;
+  shouldChargeForMessages: boolean;
   canDisplayChatInTitle?: boolean;
   privacy: GlobalState['settings']['privacy'];
 };
@@ -50,6 +51,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   canDisplayAutoarchiveSetting,
   shouldArchiveAndMuteNewNonContact,
   shouldNewNonContactPeersRequirePremium,
+  shouldChargeForMessages,
   canDisplayChatInTitle,
   canSetPasscode,
   privacy,
@@ -145,7 +147,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-content custom-scroll">
-      <div className="settings-item pt-3">
+      <div className="settings-item">
         <ListItem
           icon="delete-user"
           narrow
@@ -332,9 +334,10 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <div className="multiline-item">
             <span className="title">{oldLang('PrivacyMessagesTitle')}</span>
             <span className="subtitle" dir="auto">
-              {shouldNewNonContactPeersRequirePremium
-                ? oldLang('PrivacyMessagesContactsAndPremium')
-                : oldLang('P2PEverybody')}
+              {shouldChargeForMessages ? lang('PrivacyPaidMessagesValue')
+                : shouldNewNonContactPeersRequirePremium
+                  ? oldLang('PrivacyMessagesContactsAndPremium')
+                  : oldLang('P2PEverybody')}
             </span>
           </div>
         </ListItem>
@@ -402,7 +405,7 @@ export default memo(withGlobal<OwnProps>(
       settings: {
         byKey: {
           hasPassword, isSensitiveEnabled, canChangeSensitive, shouldArchiveAndMuteNewNonContact,
-          canDisplayChatInTitle, shouldNewNonContactPeersRequirePremium,
+          canDisplayChatInTitle, shouldNewNonContactPeersRequirePremium, nonContactPeersPaidStars,
         },
         privacy,
       },
@@ -412,6 +415,8 @@ export default memo(withGlobal<OwnProps>(
       },
       appConfig,
     } = global;
+
+    const shouldChargeForMessages = Boolean(nonContactPeersPaidStars);
 
     return {
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
@@ -424,6 +429,7 @@ export default memo(withGlobal<OwnProps>(
       shouldArchiveAndMuteNewNonContact,
       canChangeSensitive,
       shouldNewNonContactPeersRequirePremium,
+      shouldChargeForMessages,
       privacy,
       canDisplayChatInTitle,
       canSetPasscode: selectCanSetPasscode(global),

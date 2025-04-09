@@ -18,6 +18,7 @@ import {
   selectTabState,
 } from '../../selectors';
 import { fetchChatByUsername } from '../api/chats';
+import { getPeerStarsForMessage } from '../api/messages';
 
 addActionHandler('openStoryViewer', async (global, actions, payload): Promise<void> => {
   const {
@@ -289,7 +290,7 @@ addActionHandler('copyStoryLink', async (global, actions, payload): Promise<void
   });
 });
 
-addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => {
+addActionHandler('sendMessage', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload;
   const { storyId, peerId: storyPeerId } = selectCurrentViewedStory(global, tabId);
   const isStoryReply = Boolean(storyId && storyPeerId);
@@ -297,6 +298,8 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   if (!isStoryReply) {
     return;
   }
+  const messagePriceInStars = await getPeerStarsForMessage(global, storyPeerId!);
+  if (messagePriceInStars === undefined) return;
 
   const { gif, sticker, isReaction } = payload;
 
@@ -426,13 +429,5 @@ addActionHandler('closeBoostStatistics', (global, actions, payload): ActionRetur
 
   return updateTabState(global, {
     boostStatistics: undefined,
-  }, tabId);
-});
-
-addActionHandler('closeMonetizationStatistics', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  return updateTabState(global, {
-    monetizationStatistics: undefined,
   }, tabId);
 });

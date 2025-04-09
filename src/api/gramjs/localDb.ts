@@ -1,7 +1,5 @@
 import BigInt from 'big-integer';
-import { constructors } from '../../lib/gramjs/tl';
-
-import type { Api as GramJs } from '../../lib/gramjs';
+import { Api as GramJs } from '../../lib/gramjs';
 
 import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../config';
 import { throttle } from '../../util/schedulers';
@@ -82,7 +80,7 @@ function convertToVirtualClass(value: any): any {
   const path = value.className.split('.');
   const VirtualClass = path.reduce((acc: any, field: string) => {
     return acc[field];
-  }, constructors);
+  }, GramJs);
 
   const valueOmited = omitVirtualClassFields(value);
   const valueConverted = Object.keys(valueOmited).reduce((acc, key) => {

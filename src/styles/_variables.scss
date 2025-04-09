@@ -58,6 +58,8 @@ $color-message-reaction-own-hover: #b5e0a4;
 $color-message-reaction-chosen-hover: #1a82ea;
 $color-message-reaction-chosen-hover-own: #3f9d4b;
 
+$color-message-non-contact: #cceebf;
+
 $color-message-story-mention-from: #4ef390;
 $color-message-story-mention-to: #74bcff;
 
@@ -151,6 +153,8 @@ $color-message-story-mention-to: #74bcff;
   --color-message-reaction-chosen-hover: $color-message-reaction-chosen-hover;
   --color-message-reaction-chosen-hover-own: $color-message-reaction-chosen-hover-own;
 
+  --color-message-non-contact: $color-message-non-contact;
+
   --color-message-story-mention-from: $color-message-story-mention-from;
   --color-message-story-mention-to: $color-message-story-mention-to;
 
@@ -198,6 +202,7 @@ $color-message-story-mention-to: #74bcff;
   --color-archive: #9eaab5;
   --stars-gradient: linear-gradient(90deg, #FFAA00 0%, #FFCD3A 100%);
 
+  --color-stars: #FFAA00;
   --color-heart: #ff3c32;
 
   --vh: 1vh;
@@ -211,7 +216,7 @@ $color-message-story-mention-to: #74bcff;
   --border-radius-forum-avatar: 33.3333%;
   --messages-container-width: 45.5rem;
   --right-column-width: 26.5rem;
-  --header-height: 3.5rem;
+  --header-height: 3.4375rem;
   --custom-emoji-size: 1.25rem;
   --emoji-size: 1.25rem;
   --custom-emoji-border-radius: 0;
@@ -310,7 +315,6 @@ $color-message-story-mention-to: #74bcff;
 
   --font-weight-normal: 400;
   --font-weight-medium: 500;
-  --font-weight-semibold: 600;
 
   --middle-header-panes-height: 0px;
 

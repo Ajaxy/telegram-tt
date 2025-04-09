@@ -181,7 +181,7 @@
     .AudioPlayer & .title {
       display: block;
       margin-top: 0.125rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       font-size: 0.875rem !important;
       line-height: 1rem;
       white-space: nowrap;
@@ -225,7 +225,6 @@
     .icon-check, .icon-placeholder {
       margin-left: 0.25rem;
       margin-right: 0.25rem;
-      width: 1.5rem;
     }
   }
 }

@@ -98,7 +98,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
       return sortReactions(reactionsToSort, topReactions);
     }
 
-    const reactionsToSort: ApiReactionWithPaid[] = enabledReactions.allowed;
+    const reactionsToSort: ApiReactionWithPaid[] = enabledReactions.allowed.slice();
     if (isWithPaidReaction) {
       reactionsToSort.unshift({ type: 'paid' });
     }

@@ -124,7 +124,7 @@ const StickerView: FC<OwnProps> = ({
   const [isPlayerReady, markPlayerReady] = useFlag();
   const isFullMediaReady = shouldRenderFullMedia && (isStatic || isPlayerReady);
 
-  const thumbDataUri = useThumbnail(sticker);
+  const thumbDataUri = useThumbnail(sticker.thumbnail);
   const thumbData = cachedPreview || previewMediaData || thumbDataUri;
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
 

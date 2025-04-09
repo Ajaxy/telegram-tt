@@ -14,7 +14,6 @@ import {
   selectPerformanceSettingsValue,
   selectTabState,
 } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
@@ -27,6 +26,7 @@ import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCh
 import useSlideSizes from './hooks/useSlideSizes';
 import useStoryProps from './hooks/useStoryProps';
 
+import Icon from '../common/icons/Icon';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
 import StealthModeModal from './StealthModeModal';
@@ -48,7 +48,6 @@ interface StateProps {
   shouldSkipHistoryAnimations?: boolean;
   withAnimation?: boolean;
   isPrivacyModalOpen?: boolean;
-  isReportModalOpen?: boolean;
 }
 
 function StoryViewer({
@@ -60,7 +59,6 @@ function StoryViewer({
   shouldSkipHistoryAnimations,
   withAnimation,
   isPrivacyModalOpen,
-  isReportModalOpen,
 }: StateProps) {
   const { closeStoryViewer, closeStoryPrivacyEditor, reportStory } = getActions();
 
@@ -160,12 +158,11 @@ function StoryViewer({
         ariaLabel={lang('Close')}
         onClick={handleClose}
       >
-        <i className={buildClassName('icon icon-close')} aria-hidden />
+        <Icon name="close" />
       </Button>
 
       <StorySlides
         isOpen={isOpen}
-        isReportModalOpen={isReportModalOpen}
         isDeleteModalOpen={isDeleteModalOpen}
         onReport={openMessageReport}
         onClose={handleClose}
@@ -188,17 +185,14 @@ export default memo(withGlobal((global): StateProps => {
   const {
     shouldSkipHistoryAnimations, storyViewer: {
       storyId, peerId, isPrivacyModalOpen, origin,
-    }, reportModal,
+    },
   } = selectTabState(global);
   const story = peerId && storyId ? selectPeerStory(global, peerId, storyId) : undefined;
   const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
-  const isReportModalOpen = Boolean(reportModal);
-
   return {
     isOpen: selectIsStoryViewerOpen(global),
     shouldSkipHistoryAnimations,
-    isReportModalOpen,
     peerId: peerId!,
     storyId,
     story,

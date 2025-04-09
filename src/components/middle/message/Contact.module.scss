@@ -19,7 +19,7 @@
 
 .name {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   max-width: 12.5rem;
 }
 
@@ -42,20 +42,22 @@
 
 .buttons {
   display: flex;
-  padding-block: 0.125rem;
 
   .button {
     width: auto;
     flex: 1;
-    height: 2.25rem;
-    margin-block: 0.25rem;
-    font-weight: 500;
+    height: 2rem;
+    font-weight: var(--font-weight-medium);
     background-color: transparent;
     color: var(--accent-color);
     --ripple-color: var(--accent-background-active-color);
+    opacity: 1;
+    transition: 0.25s ease-in-out opacity;
 
     &:not(.disabled):not(:disabled):hover {
-      background-color: var(--accent-background-active-color);
+      color: var(--accent-color);
+      background-color: transparent;
+      opacity: 0.75;
     }
   }
 }

@@ -7,8 +7,8 @@ import { getActions, withGlobal } from '../../../global';
 import type {
   ApiAttachment, ApiChatMember, ApiMessage, ApiSticker,
 } from '../../../api/types';
-import type { GlobalState, MessageListType } from '../../../global/types';
-import type { ThreadId } from '../../../types';
+import type { GlobalState } from '../../../global/types';
+import type { MessageListType, ThreadId } from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import {
@@ -25,6 +25,7 @@ import { selectCurrentLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { validateFiles } from '../../../util/files';
+import { formatStarsAsIcon } from '../../../util/localization/format';
 import { removeAllSelections } from '../../../util/selection';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
@@ -36,6 +37,7 @@ import useDerivedState from '../../../hooks/useDerivedState';
 import useEffectOnce from '../../../hooks/useEffectOnce';
 import useFlag from '../../../hooks/useFlag';
 import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
@@ -45,6 +47,7 @@ import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useMentionTooltip from './hooks/useMentionTooltip';
 
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -86,7 +89,9 @@ export type OwnProps = {
   onRemoveSymbol: VoidFunction;
   onEmojiSelect: (emoji: string) => void;
   canScheduleUntilOnline?: boolean;
+  canSchedule?: boolean;
   onSendWhenOnline?: NoneToVoidFunction;
+  paidMessagesStars?: number;
 };
 
 type StateProps = {
@@ -143,7 +148,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   onRemoveSymbol,
   onEmojiSelect,
   canScheduleUntilOnline,
+  canSchedule,
   onSendWhenOnline,
+  paidMessagesStars,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -151,7 +158,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   // eslint-disable-next-line no-null/no-null
   const mainButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -425,7 +433,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     requestMutation(() => {
       input.style.setProperty('--margin-for-scrollbar', `${width}px`);
     });
-  }, [lang, isOpen]);
+  }, [oldLang, isOpen]);
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
@@ -438,7 +446,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon icon-more" />
+        <Icon name="more" />
       </Button>
     );
   }, [isMobile]);
@@ -480,14 +488,15 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   })();
 
   let title = '';
+  const attachmentsLength = renderingAttachments.length;
   if (areAllPhotos) {
-    title = lang(isEditing ? 'EditMessageReplacePhoto' : 'PreviewSender.SendPhoto', renderingAttachments.length, 'i');
+    title = oldLang(isEditing ? 'EditMessageReplacePhoto' : 'PreviewSender.SendPhoto', attachmentsLength, 'i');
   } else if (areAllVideos) {
-    title = lang(isEditing ? 'EditMessageReplaceVideo' : 'PreviewSender.SendVideo', renderingAttachments.length, 'i');
+    title = oldLang(isEditing ? 'EditMessageReplaceVideo' : 'PreviewSender.SendVideo', attachmentsLength, 'i');
   } else if (areAllAudios) {
-    title = lang(isEditing ? 'EditMessageReplaceAudio' : 'PreviewSender.SendAudio', renderingAttachments.length, 'i');
+    title = oldLang(isEditing ? 'EditMessageReplaceAudio' : 'PreviewSender.SendAudio', attachmentsLength, 'i');
   } else {
-    title = lang(isEditing ? 'EditMessageReplaceFile' : 'PreviewSender.SendFile', renderingAttachments.length, 'i');
+    title = oldLang(isEditing ? 'EditMessageReplaceFile' : 'PreviewSender.SendFile', attachmentsLength, 'i');
   }
 
   function renderHeader() {
@@ -496,9 +505,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     }
 
     return (
-      <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className="modal-header-condensed" dir={oldLang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel="Cancel attachments" onClick={onClear}>
-          <i className="icon icon-close" />
+          <Icon name="close" />
         </Button>
         <div className="modal-title">{title}</div>
         {notEditingFile && !isInAlbum
@@ -509,7 +518,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               positionX="right"
             >
               {Boolean(!editingMessage) && (
-                <MenuItem icon="add" onClick={handleDocumentSelect}>{lang('Add')}</MenuItem>
+                <MenuItem icon="add" onClick={handleDocumentSelect}>{oldLang('Add')}</MenuItem>
               )}
               {hasMedia && (
                 <>
@@ -517,12 +526,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                     canInvertMedia && (!isInvertedMedia ? (
                       // eslint-disable-next-line react/jsx-no-bind
                       <MenuItem icon="move-caption-up" onClick={() => setIsInvertedMedia(true)}>
-                        {lang('PreviewSender.MoveTextUp')}
+                        {oldLang('PreviewSender.MoveTextUp')}
                       </MenuItem>
                     ) : (
                       // eslint-disable-next-line react/jsx-no-bind
                       <MenuItem icon="move-caption-down" onClick={() => setIsInvertedMedia(undefined)}>
-                        {lang(('PreviewSender.MoveTextDown'))}
+                        {oldLang(('PreviewSender.MoveTextDown'))}
                       </MenuItem>
                     ))
                   }
@@ -530,7 +539,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                     !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
                       // eslint-disable-next-line react/jsx-no-bind
                       <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
-                        {lang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
+                        {oldLang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
                       </MenuItem>
                     ) : (
                       // eslint-disable-next-line react/jsx-no-bind
@@ -542,11 +551,11 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                   {isSendingCompressed && hasAnySpoilerable && Boolean(!editingMessage) && (
                     hasSpoiler ? (
                       <MenuItem icon="spoiler-disable" onClick={handleDisableSpoilers}>
-                        {lang('Attachment.DisableSpoiler')}
+                        {oldLang('Attachment.DisableSpoiler')}
                       </MenuItem>
                     ) : (
                       <MenuItem icon="spoiler" onClick={handleEnableSpoilers}>
-                        {lang('Attachment.EnableSpoiler')}
+                        {oldLang('Attachment.EnableSpoiler')}
                       </MenuItem>
                     )
                   )}
@@ -575,6 +584,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   }
 
   const isBottomDividerShown = !areAttachmentsScrolledToBottom || !isCaptionNotScrolled;
+  const buttonSendCaption = paidMessagesStars ? formatStarsAsIcon(lang,
+    attachmentsLength * paidMessagesStars,
+    {
+      className: styles.sendButtonStar,
+      asFont: true,
+    }) : oldLang('Send');
 
   return (
     <Modal
@@ -590,6 +605,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         forceDarkTheme && 'component-theme-dark',
       )}
       noBackdropClose
+      isLowStackPriority
     >
       <div
         className={styles.dropTarget}
@@ -598,7 +614,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onClick={unmarkHovered}
-        data-attach-description={lang('Preview.Dragging.AddItems', 10)}
+        data-attach-description={oldLang('Preview.Dragging.AddItems', 10)}
         data-dropzone
       >
         <svg className={styles.dropOutlineContainer}>
@@ -683,7 +699,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               isActive={isOpen}
               getHtml={getHtml}
               editableInputId={EDITABLE_INPUT_MODAL_ID}
-              placeholder={lang('AddCaption')}
+              placeholder={oldLang('AddCaption')}
               onUpdate={onCaptionUpdate}
               onSend={handleSendClick}
               onScroll={handleCaptionScroll}
@@ -699,12 +715,13 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                 onClick={handleSendClick}
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
               >
-                {shouldSchedule && !editingMessage ? lang('Next') : editingMessage ? lang('Save') : lang('Send')}
+                {shouldSchedule && !editingMessage ? oldLang('Next')
+                  : editingMessage ? oldLang('Save') : buttonSendCaption}
               </Button>
               {canShowCustomSendMenu && (
                 <CustomSendMenu
                   isOpen={isCustomSendMenuOpen}
-                  canSchedule={isForMessage}
+                  canSchedule={canSchedule && isForMessage}
                   onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
                   onSendSchedule={handleScheduleClick}
                   onClose={handleContextMenuClose}

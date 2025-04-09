@@ -8,15 +8,21 @@ import type {
   ApiPeer, ApiSponsoredMessage,
   ApiStickerSetInfo,
 } from '../../api/types';
-import type { ThreadId } from '../../types';
+import type {
+  ChatTranslatedMessages,
+  MessageListType,
+  TabThread,
+  Thread,
+  ThreadId,
+} from '../../types';
 import type { IAllowedAttachmentOptions } from '../helpers';
 import type {
-  ChatTranslatedMessages, GlobalState, MessageListType, TabArgs, TabThread, Thread,
+  GlobalState, TabArgs,
 } from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  ANONYMOUS_USER_ID, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  ANONYMOUS_USER_ID, API_GENERAL_ID_LIMIT, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
@@ -40,6 +46,7 @@ import {
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
   getSendingState,
+  getTimestampableMedia,
   hasMessageTtl,
   isActionMessage,
   isChatBasicGroup,
@@ -66,7 +73,7 @@ import {
   selectIsChatWithSelf,
   selectRequestedChatTranslationLanguage,
 } from './chats';
-import { selectPeer } from './peers';
+import { selectPeer, selectPeerPaidMessagesStars } from './peers';
 import { selectPeerStory } from './stories';
 import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
@@ -74,8 +81,6 @@ import { selectTopic } from './topics';
 import {
   selectBot, selectIsCurrentUserPremium, selectUser, selectUserStatus,
 } from './users';
-
-const MESSAGE_EDIT_ALLOWED_TIME = 172800; // 48 hours
 
 export function selectCurrentMessageList<T extends GlobalState>(
   global: T,
@@ -395,8 +400,9 @@ export function selectOutgoingStatus<T extends GlobalState>(
 export function selectSender<T extends GlobalState>(global: T, message: ApiMessage): ApiPeer | undefined {
   const { senderId } = message;
   const chat = selectChat(global, message.chatId);
+  const currentUser = selectUser(global, global.currentUserId!);
   if (!senderId) {
-    return chat;
+    return message.isOutgoing ? currentUser : chat;
   }
 
   if (chat && isChatChannel(chat) && !chat.areProfilesShown) return chat;
@@ -406,18 +412,13 @@ export function selectSender<T extends GlobalState>(global: T, message: ApiMessa
 
 export function getSendersFromSelectedMessages<T extends GlobalState>(
   global: T,
-  chat: ApiChat | undefined,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
+  chatId: string,
+  messageIds: number[],
 ) {
-  const { messageIds: selectedMessageIds } = selectTabState(global, tabId).selectedMessages || {};
-  if (!chat?.id || !selectedMessageIds) {
-    return undefined;
-  }
-
-  return selectedMessageIds.map((id) => {
-    const message = selectChatMessage(global, chat.id, id);
+  return messageIds.map((id) => {
+    const message = selectChatMessage(global, chatId, id);
     return message && selectSender(global, message);
-  });
+  }).filter(Boolean);
 }
 
 export function selectSenderFromMessage<T extends GlobalState>(
@@ -601,6 +602,28 @@ export function selectCanReplyToMessage<T extends GlobalState>(global: T, messag
   return !messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics');
 }
 
+export function selectCanForwardMessage<T extends GlobalState>(global: T, message: ApiMessage) {
+  const isLocal = isMessageLocal(message);
+  const isServiceNotification = isServiceNotificationMessage(message);
+  const isAction = isActionMessage(message);
+  const hasTtl = hasMessageTtl(message);
+  const { content } = message;
+  const story = content.storyData
+    ? selectPeerStory(global, content.storyData.peerId, content.storyData.id)
+    : (content.webPage?.story
+      ? selectPeerStory(global, content.webPage.story.peerId, content.webPage.story.id)
+      : undefined
+    );
+  const isChatProtected = selectIsChatProtected(global, message.chatId);
+  const isStoryForwardForbidden = story && ('isDeleted' in story || ('noForwards' in story && story.noForwards));
+  const canForward = (
+    !isLocal && !isAction && !isChatProtected && !isStoryForwardForbidden
+    && (message.isForwardingAllowed || isServiceNotification) && !hasTtl
+  );
+
+  return canForward;
+}
+
 // This selector is slow and not to be used within lists (e.g. Message component)
 export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   global: T, message: ApiMessage, threadId: ThreadId,
@@ -625,7 +648,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const hasTtl = hasMessageTtl(message);
   const { content } = message;
   const isDocumentSticker = isMessageDocumentSticker(message);
-  const isBoostMessage = message.content.action?.type === 'chatBoost';
+  const isBoostMessage = message.content.action?.type === 'boostApply';
 
   const hasChatPinPermission = (chat.isCreator
     || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
@@ -645,7 +668,7 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   const isMessageEditable = (
     (
       canEditMessagesIndefinitely
-      || getServerTime() - message.date < MESSAGE_EDIT_ALLOWED_TIME
+      || getServerTime() - message.date < (global.config?.editTimeLimit || Infinity)
     ) && !(
       content.sticker || content.contact || content.pollId || content.action
       || (content.video?.isRound) || content.location || content.invoice || content.giveaway || content.giveawayResults
@@ -696,20 +719,6 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
 
   const canEdit = !isLocal && !isAction && isMessageEditable && hasMessageEditRight;
 
-  const story = content.storyData
-    ? selectPeerStory(global, content.storyData.peerId, content.storyData.id)
-    : (content.webPage?.story
-      ? selectPeerStory(global, content.webPage.story.peerId, content.webPage.story.id)
-      : undefined
-    );
-
-  const isChatProtected = selectIsChatProtected(global, message.chatId);
-  const isStoryForwardForbidden = story && ('isDeleted' in story || ('noForwards' in story && story.noForwards));
-  const canForward = (
-    !isLocal && !isAction && !isChatProtected && !isStoryForwardForbidden
-    && (message.isForwardingAllowed || isServiceNotification) && !hasTtl
-  );
-
   const hasSticker = Boolean(message.content.sticker);
   const hasFavoriteSticker = hasSticker && selectIsStickerFavorite(global, message.content.sticker!);
   const canFaveSticker = !isAction && hasSticker && !hasFavoriteSticker;
@@ -737,7 +746,6 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
     canReport,
     canDelete,
     canDeleteForAll,
-    canForward,
     canFaveSticker,
     canUnfaveSticker,
     canCopy,
@@ -759,7 +767,6 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
     canReport,
     canDelete,
     canDeleteForAll,
-    canForward,
     canFaveSticker,
     canUnfaveSticker,
     canCopy,
@@ -772,19 +779,19 @@ export function selectAllowedMessageActionsSlow<T extends GlobalState>(
   };
 }
 
-// This selector always returns a new object which can not be safely used in shallow-equal checks
-export function selectCanDeleteSelectedMessages<T extends GlobalState>(
+export function selectCanDeleteMessages<T extends GlobalState>(
   global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
+  chatId: string,
+  threadId: ThreadId,
+  messageIds: number[],
 ) {
-  const { messageIds: selectedMessageIds } = selectTabState(global, tabId).selectedMessages || {};
-  const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
-  const chatMessages = chatId && selectChatMessages(global, chatId);
-  if (!chatMessages || !selectedMessageIds || !threadId) {
+  const chatMessages = selectChatMessages(global, chatId);
+
+  if (messageIds.length > API_GENERAL_ID_LIMIT) {
     return {};
   }
 
-  const messageActions = selectedMessageIds
+  const messageActions = messageIds
     .map((id) => chatMessages[id] && selectAllowedMessageActionsSlow(global, chatMessages[id], threadId))
     .filter(Boolean);
 
@@ -792,6 +799,21 @@ export function selectCanDeleteSelectedMessages<T extends GlobalState>(
     canDelete: messageActions.every((actions) => actions.canDelete),
     canDeleteForAll: messageActions.every((actions) => actions.canDeleteForAll),
   };
+}
+
+export function selectCanDeleteSelectedMessages<T extends GlobalState>(
+  global: T,
+  messageIds?: number[],
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { messageIds: selectedMessageIds } = selectTabState(global, tabId).selectedMessages || {};
+  const { chatId, threadId } = selectCurrentMessageList(global, tabId) || {};
+  const messageIdList = messageIds?.length ? messageIds : selectedMessageIds;
+  if (!chatId || !threadId || !messageIdList) {
+    return {};
+  }
+
+  return selectCanDeleteMessages(global, chatId, threadId, messageIdList);
 }
 
 export function selectCanReportSelectedMessages<T extends GlobalState>(
@@ -915,9 +937,7 @@ export function selectFirstUnreadId<T extends GlobalState>(
       return (
         (!lastReadId || id > lastReadId)
         && byId[id]
-        // For some reason outgoing topic actions are not marked as read, thus we need to mark them as read
-        // when the edit message hits the viewport
-        && ((!byId[id].isOutgoing || byId[id].content.action?.isTopicAction) || byId[id].isFromScheduled)
+        && (!byId[id].isOutgoing || byId[id].isFromScheduled)
         && id > lastReadServiceNotificationId
       );
     });
@@ -1311,12 +1331,21 @@ export function selectShouldSchedule<T extends GlobalState>(
   return selectCurrentMessageList(global, tabId)?.type === 'scheduled';
 }
 
+export function selectCanSchedule<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const chatId = selectCurrentMessageList(global, tabId)?.chatId;
+  const paidMessagesStars = chatId ? selectPeerPaidMessagesStars(global, chatId) : undefined;
+  return !paidMessagesStars;
+}
+
 export function selectCanScheduleUntilOnline<T extends GlobalState>(global: T, id: string) {
   const isChatWithSelf = selectIsChatWithSelf(global, id);
   const chatBot = selectBot(global, id);
-  return Boolean(
-    !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline,
-  );
+  const paidMessagesStars = selectPeerPaidMessagesStars(global, id);
+  return Boolean(!paidMessagesStars
+    && !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline);
 }
 
 export function selectCustomEmojis(message: ApiMessage) {
@@ -1482,4 +1511,29 @@ export function selectMessageReplyInfo<T extends GlobalState>(
   };
 
   return replyInfo;
+}
+
+export function selectReplyMessage<T extends GlobalState>(global: T, message: ApiMessage) {
+  const { replyToMsgId, replyToPeerId } = getMessageReplyInfo(message) || {};
+  const replyMessage = replyToMsgId
+    ? selectChatMessage(global, replyToPeerId || message.chatId, replyToMsgId) : undefined;
+
+  return replyMessage;
+}
+
+export function selectMessageTimestampableDuration<T extends GlobalState>(
+  global: T, message: ApiMessage, noReplies?: boolean,
+) {
+  const replyMessage = !noReplies ? selectReplyMessage(global, message) : undefined;
+
+  const timestampableMedia = getTimestampableMedia(message);
+  const replyTimestampableMedia = replyMessage && getTimestampableMedia(replyMessage);
+
+  return timestampableMedia?.duration || replyTimestampableMedia?.duration;
+}
+
+export function selectMessageLastPlaybackTimestamp<T extends GlobalState>(
+  global: T, chatId: string, messageId: number,
+) {
+  return global.messages.playbackByChatId[chatId]?.byId[messageId];
 }

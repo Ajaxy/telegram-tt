@@ -1,0 +1,131 @@
+.root {
+  display: flex;
+  align-items: center;
+  background: var(--color-chat-hover);
+  height: 2rem;
+  margin-inline: 0.25rem;
+  padding-right: 0.75rem;
+  border-radius: 1rem;
+  cursor: var(--custom-cursor, pointer);
+  position: relative;
+  min-width: 0;
+  flex-shrink: 1;
+  transition: background-color 0.15s ease;
+
+  &.minimized {
+    padding-right: 0;
+  }
+
+  &:hover {
+    background-color: var(--color-item-active);
+  }
+
+  &.closeable:hover {
+    background-color: rgba(var(--color-error-rgb), 0.16);
+
+    .remove {
+      opacity: 1;
+    }
+  }
+
+  &.nonDestructive {
+    .remove {
+      background: var(--color-primary);
+    }
+
+    &:hover {
+      background: var(--color-chat-hover);
+    }
+  }
+
+  &.notClickable {
+    cursor: default;
+  }
+
+  .avatar,
+  .iconWrapper {
+    width: 2rem;
+    height: 2rem;
+    opacity: 1;
+    flex-shrink: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: white;
+
+    .icon {
+      font-size: 1.25rem;
+      position: relative;
+      top: -1px;
+    }
+  }
+
+  .name {
+    margin-left: 0.5rem;
+    white-space: nowrap;
+    min-width: 0;
+    text-overflow: ellipsis;
+
+    :global(.emoji.emoji-small) {
+      width: 1.125rem;
+      height: 1.125rem;
+      background-size: 1.125rem;
+      vertical-align: -4px;
+    }
+  }
+
+  .remove {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-error);
+    font-size: 1.5rem;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 1;
+  }
+
+  &.squareAvatar {
+    border-start-start-radius: 0.625rem;
+    border-end-start-radius: 0.625rem;
+    --border-radius-forum-avatar: 0.625rem;
+
+    &.minimized, .remove {
+      border-radius: 0.625rem;
+    }
+  }
+
+  &[dir="rtl"] {
+    padding-left: 1rem;
+    padding-right: 0;
+
+    &.minimized {
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .name {
+      margin-left: 0;
+      margin-right: 0.5rem;
+    }
+
+    .remove {
+      left: auto;
+      right: 0;
+    }
+  }
+}

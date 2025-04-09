@@ -65,7 +65,6 @@ const ReportAdModal = ({
     return [
       parts[0],
       <SafeLink
-        withNormalWordBreak
         text={lang('lng_report_sponsored_reported_link')}
         url={lang('ReportAd.Help_URL')}
       />,

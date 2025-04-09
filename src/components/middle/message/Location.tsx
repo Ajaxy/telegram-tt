@@ -14,7 +14,7 @@ import {
   isGeoLiveExpired,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { formatCountdownShort, formatLastUpdated } from '../../../util/dates/dateFormat';
+import { formatCountdownShort, formatLocationLastUpdate } from '../../../util/dates/dateFormat';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl,
 } from '../../../util/map';
@@ -161,7 +161,7 @@ const Location: FC<OwnProps> = ({
         <div className="location-info">
           <div className="location-info-title">{lang('AttachLiveLocation')}</div>
           <div className="location-info-subtitle">
-            {formatLastUpdated(lang, serverTime, message.editDate)}
+            {formatLocationLastUpdate(lang, serverTime, message.editDate)}
           </div>
           {!isExpired && (
             <div className="geo-countdown" ref={countdownRef}>

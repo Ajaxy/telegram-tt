@@ -29,7 +29,7 @@ const ChatlistDelete: FC<OwnProps> = ({
 
   const lang = useOldLang();
 
-  const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>(suggestedPeerIds);
+  const [selectedPeerIds, setSelectedPeerIds] = useState<string[]>([]);
 
   const badgeText = selectedPeerIds.length ? selectedPeerIds.length.toString() : undefined;
 

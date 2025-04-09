@@ -5,13 +5,14 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatInviteInfo,
+  ApiMessage,
   ApiPeer,
+  ApiPreparedInlineMessage,
   ApiTopic,
-  ApiUser,
 } from '../../api/types';
 import type { OldLangFn } from '../../hooks/useOldLang';
 import type {
-  CustomPeer, NotifyException, NotifySettings, ThreadId,
+  CustomPeer, ThreadId,
 } from '../../types';
 import type { LangFn } from '../../util/localization';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -22,23 +23,15 @@ import {
   VERIFICATION_CODES_USER_ID,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dates/dateFormat';
-import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { getServerTime } from '../../util/serverTime';
 import { getGlobal } from '..';
 import { isSystemBot } from './bots';
-import { getMainUsername, getUserFirstOrLastName } from './users';
+import { getMainUsername } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
 export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
-}
-
-export function isPeerChat(entity: ApiPeer): entity is ApiChat {
-  return 'title' in entity;
-}
-
-export function isPeerUser(entity: ApiPeer): entity is ApiUser {
-  return !isPeerChat(entity);
 }
 
 export function isChannelId(entityId: string) {
@@ -209,8 +202,10 @@ export function getAllowedAttachmentOptions(
   chatFullInfo?: ApiChatFullInfo,
   isChatWithBot = false,
   isStoryReply = false,
+  paidMessagesStars?: number,
+  isInScheduledList = false,
 ): IAllowedAttachmentOptions {
-  if (!chat) {
+  if (!chat || (paidMessagesStars && isInScheduledList)) {
     return {
       canAttachMedia: false,
       canAttachPolls: false,
@@ -304,40 +299,6 @@ export function isChatArchived(chat: ApiChat) {
   return chat.folderId === ARCHIVED_FOLDER_ID;
 }
 
-export function selectIsChatMuted(
-  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<string, NotifyException> = {},
-) {
-  // If this chat is in exceptions they take precedence
-  if (notifyExceptions[chat.id] && notifyExceptions[chat.id].isMuted !== undefined) {
-    return notifyExceptions[chat.id].isMuted;
-  }
-
-  return (
-    chat.isMuted
-    || (isUserId(chat.id) && !notifySettings.hasPrivateChatsNotifications)
-    || (isChatChannel(chat) && !notifySettings.hasBroadcastNotifications)
-    || (isChatGroup(chat) && !notifySettings.hasGroupNotifications)
-  );
-}
-
-export function selectShouldShowMessagePreview(
-  chat: ApiChat, notifySettings: NotifySettings, notifyExceptions: Record<string, NotifyException> = {},
-) {
-  const {
-    hasPrivateChatsMessagePreview = true,
-    hasBroadcastMessagePreview = true,
-    hasGroupMessagePreview = true,
-  } = notifySettings;
-  // If this chat is in exceptions they take precedence
-  if (notifyExceptions[chat.id] && notifyExceptions[chat.id].shouldShowPreviews !== undefined) {
-    return notifyExceptions[chat.id].shouldShowPreviews;
-  }
-
-  return (isUserId(chat.id) && hasPrivateChatsMessagePreview)
-    || (isChatChannel(chat) && hasBroadcastMessagePreview)
-    || (isChatGroup(chat) && hasGroupMessagePreview);
-}
-
 export function getCanDeleteChat(chat: ApiChat) {
   return isChatBasicGroup(chat) || ((isChatSuperGroup(chat) || isChatChannel(chat)) && chat.isCreator);
 }
@@ -375,54 +336,6 @@ export function getFolderDescriptionText(lang: OldLangFn, folder: ApiChatFolder,
   } else {
     return undefined;
   }
-}
-
-export function getMessageSenderName(lang: OldLangFn, chatId: string, sender?: ApiPeer) {
-  if (!sender || isUserId(chatId)) {
-    return undefined;
-  }
-
-  if (isPeerChat(sender)) {
-    if (chatId === sender.id) return undefined;
-
-    return sender.title;
-  }
-
-  if (sender.isSelf) {
-    return lang('FromYou');
-  }
-
-  return getUserFirstOrLastName(sender);
-}
-
-export function filterChatsByName(
-  lang: OldLangFn,
-  chatIds: string[],
-  chatsById: Record<string, ApiChat>,
-  query?: string,
-  currentUserId?: string,
-) {
-  if (!query) {
-    return chatIds;
-  }
-
-  const searchWords = prepareSearchWordsForNeedle(query);
-
-  return chatIds.filter((id) => {
-    const chat = chatsById[id];
-    if (!chat) {
-      return false;
-    }
-    const isSelf = id === currentUserId;
-
-    const translatedTitle = getChatTitle(lang, chat, isSelf);
-    if (isSelf) {
-      // Search both "Saved Messages" and user title
-      return searchWords(translatedTitle) || searchWords(chat.title);
-    }
-
-    return searchWords(translatedTitle) || Boolean(chat.usernames?.find(({ username }) => searchWords(username)));
-  });
 }
 
 export function isChatPublic(chat: ApiChat) {
@@ -504,4 +417,20 @@ export function getCustomPeerFromInvite(invite: ApiChatInviteInfo): CustomPeer {
     isVerified,
     fakeType: isFake ? 'fake' : isScam ? 'scam' : undefined,
   };
+}
+
+export function getMockPreparedMessageFromResult(botId: string, preparedMessage: ApiPreparedInlineMessage) {
+  const { result } = preparedMessage;
+
+  const inlineButtons = result?.sendMessage?.replyMarkup?.inlineButtons;
+
+  return {
+    chatId: botId,
+    content: result.sendMessage.content,
+    date: getServerTime(),
+    id: 0,
+    isOutgoing: true,
+    viaBotId: botId,
+    inlineButtons,
+  } satisfies ApiMessage;
 }

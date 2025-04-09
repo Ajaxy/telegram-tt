@@ -51,7 +51,7 @@
 
     .file-ext {
       font-size: 1rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       transition: opacity 0.15s;
     }
 
@@ -144,7 +144,7 @@
   .file-title {
     font-size: 1rem;
     line-height: 1.5rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     overflow: hidden;
     text-overflow: ellipsis;
 
@@ -193,7 +193,7 @@
     }
 
     .file-title {
-      font-weight: 400;
+      font-weight: var(--font-weight-normal);
     }
 
     .file-subtitle {

@@ -33,6 +33,10 @@
 
     &.open {
       transform: scale(1);
+
+      .active-view-transition & {
+        view-transition-name: open-menu-bubble;
+      }
     }
 
     &.closing {
@@ -114,4 +118,9 @@
     z-index: var(--z-portal-menu);
     position: absolute;
   }
+}
+
+// Hacky way to fix z-index issues with overlays in View Transitions
+html::view-transition-group(open-menu-bubble) {
+  z-index: var(--z-portal-menu);
 }

@@ -1,5 +1,5 @@
 import { useCallback, useRef } from '../lib/teact/teact';
-import { getActions } from '../lib/teact/teactn';
+import { getActions } from '../global';
 
 import { IS_TEST } from '../config';
 import { requestMeasure } from '../lib/fasterdom/fasterdom';

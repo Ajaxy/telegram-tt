@@ -1,5 +1,6 @@
 .root :global(.modal-dialog) {
   width: 26.25rem;
+  overflow: hidden;
 }
 
 .title, .description {
@@ -25,6 +26,10 @@
   width: 6rem;
   height: 6rem;
   margin-bottom: 1rem;
+}
+
+.listItemIcon {
+  color: var(--accent-color) !important;
 }
 
 .content {

@@ -1,4 +1,4 @@
-import { Api as GramJs } from '../../../lib/gramjs';
+import { Api as GramJs, type Update } from '../../../lib/gramjs';
 import { UpdateConnectionState, UpdateServerTimeOffset } from '../../../lib/gramjs/network';
 
 import type { ApiChat } from '../../types';
@@ -11,7 +11,7 @@ import { buildInputEntity, buildMtpPeerId } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { sendApiUpdate } from './apiUpdateEmitter';
 import { processAndUpdateEntities } from './entityProcessor';
-import { type Update, updater } from './mtpUpdateHandler';
+import { updater } from './mtpUpdateHandler';
 
 import { buildLocalUpdatePts, type UpdatePts } from './UpdatePts';
 

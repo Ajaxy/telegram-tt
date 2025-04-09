@@ -69,7 +69,7 @@ rpc_answer_dropped_running#cd78e586 = RpcDropAnswer;
 rpc_answer_dropped#a43ad8b7 msg_id:long seq_no:int bytes:int = RpcDropAnswer;
 
 future_salt#0949d9dc valid_since:int valid_until:int salt:long = FutureSalt;
-future_salts#ae500895 req_msg_id:long now:int salts:vector<future_salt> = FutureSalts;
+future_salts#ae500895 req_msg_id:long now:int salts:vector<FutureSalt> = FutureSalts;
 
 pong#347773c5 msg_id:long ping_id:long = Pong;
 

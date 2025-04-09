@@ -1,0 +1,56 @@
+.root {
+  --_height: 15rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: var(--_height);
+  margin-bottom: 0.5rem;
+  padding-bottom: 1rem;
+}
+
+.radialPattern {
+  position: absolute;
+  inset: -5%;
+  top: -5rem;
+  height: calc(var(--height) * 1.05);
+
+  z-index: -1;
+}
+
+.sticker {
+  margin-top: 2rem;
+}
+
+.transition {
+  position: absolute;
+  top: 0;
+  height: calc(var(--_height) + 1rem); // Account for top modal padding
+  overflow: hidden;
+}
+
+.transitionSlide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.25rem;
+  color: white;
+  margin-top: auto;
+}
+
+.subtitle {
+  max-width: 75%;
+  font-size: 0.875rem;
+  transition: color 150ms ease-in;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.title, .subtitle {
+  margin-bottom: 0;
+  z-index: 1;
+}

@@ -138,10 +138,18 @@ export function buildContentClassName(
     if (webPage.document) {
       classNames.push('document');
     }
+
+    if (webPage.gift) {
+      classNames.push('gift');
+    }
   }
 
   if (invoice && !invoice.extendedMedia) {
     classNames.push('invoice');
+  }
+
+  if (invoice && invoice.photo) {
+    classNames.push('has-photo');
   }
 
   if (storyData) {

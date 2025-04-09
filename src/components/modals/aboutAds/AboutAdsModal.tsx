@@ -133,6 +133,7 @@ const AboutAdsModal = ({ message, minLevelToRestrictAds }: OwnProps & StateProps
           isOpen={isOpen}
           listItemData={modalData?.listItemData}
           headerIconName="channel"
+          withSeparator
           header={modalData?.header}
           footer={modalData?.footer}
           buttonText={oldLang('RevenueSharingAdsUnderstood')}

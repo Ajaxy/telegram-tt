@@ -1,21 +1,24 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useRef } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { AudioOrigin, type ISettings } from '../../../types';
 
 import { getMessageWebPage } from '../../../global/helpers';
+import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { tryParseDeepLink } from '../../../util/deepLinkParser';
 import trimText from '../../../util/trimText';
 import renderText from '../../common/helpers/renderText';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
-import { getWebpageButtonText } from './helpers/webpageType';
+import { getWebpageButtonLangKey } from './helpers/webpageType';
 
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useEnsureStory from '../../../hooks/useEnsureStory';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -29,18 +32,18 @@ import Button from '../../ui/Button';
 import BaseStory from './BaseStory';
 import Photo from './Photo';
 import Video from './Video';
+import WebPageUniqueGift from './WebPageUniqueGift';
 
 import './WebPage.scss';
 
 const MAX_TEXT_LENGTH = 170; // symbols
 const WEBPAGE_STORY_TYPE = 'telegram_story';
+const WEBPAGE_GIFT_TYPE = 'telegram_nft';
 const STICKER_SIZE = 80;
 const EMOJI_SIZE = 38;
 
 type OwnProps = {
   message: ApiMessage;
-  observeIntersectionForLoading?: ObserveFn;
-  observeIntersectionForPlaying?: ObserveFn;
   noAvatars?: boolean;
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
@@ -54,17 +57,22 @@ type OwnProps = {
   story?: ApiTypeStory;
   shouldWarnAboutSvg?: boolean;
   autoLoadFileMaxSizeMb?: number;
+  lastPlaybackTimestamp?: number;
+  isEditing?: boolean;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   onAudioPlay?: NoneToVoidFunction;
   onMediaClick?: NoneToVoidFunction;
+  onDocumentClick?: NoneToVoidFunction;
   onCancelMediaTransfer?: NoneToVoidFunction;
   onContainerClick?: ((e: React.MouseEvent) => void);
-  isEditing?: boolean;
+};
+type StateProps = {
+  canPlayAnimatedEmojis: boolean;
 };
 
-const WebPage: FC<OwnProps> = ({
+const WebPage: FC<OwnProps & StateProps> = ({
   message,
-  observeIntersectionForLoading,
-  observeIntersectionForPlaying,
   noAvatars,
   canAutoLoad,
   canAutoPlay,
@@ -78,29 +86,36 @@ const WebPage: FC<OwnProps> = ({
   backgroundEmojiId,
   shouldWarnAboutSvg,
   autoLoadFileMaxSizeMb,
+  lastPlaybackTimestamp,
+  isEditing,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   onMediaClick,
+  onDocumentClick,
   onContainerClick,
   onAudioPlay,
   onCancelMediaTransfer,
-  isEditing,
 }) => {
-  const { openTelegramLink } = getActions();
+  const { openUrl, openTelegramLink } = getActions();
   const webPage = getMessageWebPage(message);
   const { isMobile } = useAppLayout();
   // eslint-disable-next-line no-null/no-null
   const stickersRef = useRef<HTMLDivElement>(null);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const handleMediaClick = useLastCallback(() => {
     onMediaClick!();
   });
+
   const handleContainerClick = useLastCallback((e: React.MouseEvent) => {
     onContainerClick?.(e);
   });
 
-  const handleQuickButtonClick = useLastCallback(() => {
+  const handleOpenTelegramLink = useLastCallback(() => {
     if (!webPage) return;
+
     openTelegramLink({
       url: webPage.url,
     });
@@ -111,7 +126,13 @@ const WebPage: FC<OwnProps> = ({
   useEnsureStory(storyData?.peerId, storyData?.id, story);
 
   const hasCustomColor = stickers?.isWithTextColor || stickers?.documents?.[0]?.shouldUseTextColor;
-  const customColor = useDynamicColorListener(stickersRef, !hasCustomColor);
+  const customColor = useDynamicColorListener(stickersRef, undefined, !hasCustomColor);
+
+  const linkTimestamp = useMemo(() => {
+    const parsedLink = webPage?.url && tryParseDeepLink(webPage?.url);
+    if (!parsedLink || !('timestamp' in parsedLink)) return undefined;
+    return parsedLink.timestamp;
+  }, [webPage?.url]);
 
   if (!webPage) {
     return undefined;
@@ -131,8 +152,13 @@ const WebPage: FC<OwnProps> = ({
     mediaSize,
   } = webPage;
   const isStory = type === WEBPAGE_STORY_TYPE;
+  const isGift = type === WEBPAGE_GIFT_TYPE;
   const isExpiredStory = story && 'isDeleted' in story;
-  const quickButtonLangKey = !inPreview && !isExpiredStory ? getWebpageButtonText(type) : undefined;
+
+  const resultType = stickers?.isEmoji ? 'telegram_emojiset' : type;
+  const quickButtonLangKey = !inPreview && !isExpiredStory ? getWebpageButtonLangKey(resultType) : undefined;
+  const quickButtonTitle = quickButtonLangKey && lang(quickButtonLangKey);
+
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
   const isArticle = Boolean(truncatedDescription || title || siteName);
   let isSquarePhoto = Boolean(stickers);
@@ -158,19 +184,21 @@ const WebPage: FC<OwnProps> = ({
     video && 'with-video',
     !isArticle && 'no-article',
     document && 'with-document',
-    quickButtonLangKey && 'with-quick-button',
+    quickButtonTitle && 'with-quick-button',
+    isGift && 'with-gift',
   );
 
-  function renderQuickButton(langKey: string) {
+  function renderQuickButton(caption: string) {
     return (
       <Button
         className="WebPage--quick-button"
         size="tiny"
         color="translucent"
         isRectangular
-        onClick={handleQuickButtonClick}
+        noForcedUpperCase
+        onClick={handleOpenTelegramLink}
       >
-        {lang(langKey)}
+        {caption}
       </Button>
     );
   }
@@ -179,10 +207,15 @@ const WebPage: FC<OwnProps> = ({
     <PeerColorWrapper
       className={className}
       data-initial={(siteName || displayUrl)[0]}
-      dir={lang.isRtl ? 'rtl' : 'auto'}
+      dir={oldLang.isRtl ? 'rtl' : 'auto'}
       onClick={handleContainerClick}
     >
-      <div className={buildClassName('WebPage--content', isStory && 'is-story')}>
+      <div className={buildClassName(
+        'WebPage--content',
+        isStory && 'is-story',
+        isGift && 'is-gift',
+      )}
+      >
         {backgroundEmojiId && (
           <EmojiIconBackground
             emojiDocumentId={backgroundEmojiId}
@@ -192,18 +225,29 @@ const WebPage: FC<OwnProps> = ({
         {isStory && (
           <BaseStory story={story} isProtected={isProtected} isConnected={isConnected} isPreview />
         )}
+        {isGift && !inPreview && (
+          <WebPageUniqueGift
+            gift={webPage.gift!}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
+            onClick={handleOpenTelegramLink}
+          />
+        )}
         {isArticle && (
-          <div className="WebPage-text">
+          <div
+            className={buildClassName('WebPage-text', !inPreview && 'WebPage-text_interactive')}
+            onClick={!inPreview ? () => openUrl({ url, shouldSkipModal: true }) : undefined}
+          >
             <SafeLink className="site-name" url={url} text={siteName || displayUrl} />
-            {!inPreview && title && (
+            {(!inPreview || isGift) && title && (
               <p className="site-title">{renderText(title)}</p>
             )}
-            {truncatedDescription && (
+            {truncatedDescription && !isGift && (
               <p className="site-description">{renderText(truncatedDescription, ['emoji', 'br'])}</p>
             )}
           </div>
         )}
-        {photo && !video && !document && (
+        {photo && !isGift && !video && !document && (
           <Photo
             photo={photo}
             isOwn={message.isOutgoing}
@@ -233,6 +277,7 @@ const WebPage: FC<OwnProps> = ({
             asForwarded={asForwarded}
             isDownloading={isDownloading}
             isProtected={isProtected}
+            lastPlaybackTimestamp={lastPlaybackTimestamp || linkTimestamp}
             onClick={isMediaInteractive ? handleMediaClick : undefined}
             onCancelUpload={onCancelMediaTransfer}
           />
@@ -254,7 +299,7 @@ const WebPage: FC<OwnProps> = ({
             message={message}
             observeIntersection={observeIntersectionForLoading}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
-            onMediaClick={handleMediaClick}
+            onMediaClick={onDocumentClick}
             onCancelUpload={onCancelMediaTransfer}
             isDownloading={isDownloading}
             shouldWarnAboutSvg={shouldWarnAboutSvg}
@@ -285,13 +330,19 @@ const WebPage: FC<OwnProps> = ({
         {inPreview && displayUrl && !isArticle && (
           <div className="WebPage-text">
             <p className="site-name">{displayUrl}</p>
-            <p className="site-description">{lang('Chat.Empty.LinkPreview')}</p>
+            <p className="site-description">{oldLang('Chat.Empty.LinkPreview')}</p>
           </div>
         )}
       </div>
-      {quickButtonLangKey && renderQuickButton(quickButtonLangKey)}
+      {quickButtonTitle && renderQuickButton(quickButtonTitle)}
     </PeerColorWrapper>
   );
 };
 
-export default memo(WebPage);
+export default memo(withGlobal<OwnProps>(
+  (global): StateProps => {
+    return {
+      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
+    };
+  },
+)(WebPage));

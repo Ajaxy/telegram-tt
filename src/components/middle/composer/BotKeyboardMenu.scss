@@ -34,7 +34,7 @@
       border: 2px solid var(--color-primary);
       background: var(--color-background);
       color: var(--color-primary);
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       text-transform: none;
 
       &:hover {

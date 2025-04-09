@@ -6,19 +6,19 @@ import type { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
 
-import useOldLang from '../../hooks/useOldLang';
+import useLang from '../../hooks/useLang';
 
 import PasswordForm from '../common/PasswordForm';
 import MonkeyPassword from '../common/PasswordMonkey';
 
-type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError' | 'authHint'>;
+type StateProps = Pick<GlobalState, 'authIsLoading' | 'authErrorKey' | 'authHint'>;
 
 const AuthPassword: FC<StateProps> = ({
-  authIsLoading, authError, authHint,
+  authIsLoading, authErrorKey, authHint,
 }) => {
-  const { setAuthPassword, clearAuthError } = getActions();
+  const { setAuthPassword, clearAuthErrorKey } = getActions();
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChangePasswordVisibility = useCallback((isVisible) => {
@@ -33,11 +33,11 @@ const AuthPassword: FC<StateProps> = ({
     <div id="auth-password-form" className="custom-scroll">
       <div className="auth-form">
         <MonkeyPassword isPasswordVisible={showPassword} />
-        <h1>{lang('Login.Header.Password')}</h1>
-        <p className="note">{lang('Login.EnterPasswordDescription')}</p>
+        <h1>{lang('LoginHeaderPassword')}</h1>
+        <p className="note">{lang('LoginEnterPasswordDescription')}</p>
         <PasswordForm
-          clearError={clearAuthError}
-          error={authError && lang(authError)}
+          clearError={clearAuthErrorKey}
+          error={authErrorKey && lang.withRegular(authErrorKey)}
           hint={authHint}
           isLoading={authIsLoading}
           isPasswordVisible={showPassword}
@@ -50,5 +50,5 @@ const AuthPassword: FC<StateProps> = ({
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['authIsLoading', 'authError', 'authHint']),
+  (global): StateProps => pick(global, ['authIsLoading', 'authErrorKey', 'authHint']),
 )(AuthPassword));

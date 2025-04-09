@@ -1,9 +1,14 @@
-.root :global(.modal-content) {
-  padding: 0;
+@use "../../../../styles/mixins";
+
+.modalDialog :global(.modal-dialog) {
+  overflow: hidden;
 }
 
-.root :global(.modal-dialog) {
-  overflow: hidden;
+.content {
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
 
 .main {
@@ -48,6 +53,8 @@
   flex-direction: column;
   height: 100%;
   padding: 0.5rem;
+
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
 }
 
 .header {
@@ -67,7 +74,7 @@
 
 .starHeaderText {
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   margin: 0 0 0 3.5rem;
   unicode-bidi: plaintext;
 }
@@ -85,6 +92,7 @@
 
 .avatar {
   margin: 2rem;
+  margin-bottom: 0.75rem;
 }
 
 .center {

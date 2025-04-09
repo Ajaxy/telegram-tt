@@ -53,6 +53,7 @@ import usePreviousDeprecated from '../../hooks/usePreviousDeprecated';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { useMediaProps } from './hooks/useMediaProps';
 
+import Icon from '../common/icons/Icon';
 import ReportAvatarModal from '../common/ReportAvatarModal';
 import Button from '../ui/Button';
 import ShowTransition from '../ui/ShowTransition';
@@ -244,7 +245,9 @@ const MediaViewer = ({
 
   const handleClose = useLastCallback(() => closeMediaViewer());
 
-  const handleFooterClick = useLastCallback(() => {
+  const handleFooterClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target instanceof HTMLElement && e.target.closest('a')) return; // Prevent closing on timestamp click
+
     handleClose();
 
     if (!chatId || !messageId) return;
@@ -426,7 +429,7 @@ const MediaViewer = ({
             ariaLabel={lang('Close')}
             onClick={handleClose}
           >
-            <i className="icon icon-close" />
+            <Icon name="close" />
           </Button>
         )}
         <Transition activeKey={animationKey.current!} name={headerAnimation}>

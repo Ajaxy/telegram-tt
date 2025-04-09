@@ -100,8 +100,9 @@ const StarSlider = ({
           </svg>
         </div>
       </div>
-      <div className={styles.progress} />
-      <Sparkles preset="progress" className={styles.sparkles} />
+      <div className={styles.progress}>
+        <Sparkles preset="progress" className={styles.sparkles} />
+      </div>
       <input
         className={styles.slider}
         type="range"

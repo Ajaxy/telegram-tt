@@ -131,7 +131,7 @@
   bottom: 8%;
   left: 50%;
   transform: translateX(-50%);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .weather {
@@ -155,6 +155,6 @@
 
 .temperature {
   font-family: var(--font-family-condensed);
-  font-weight: 700;
+  font-weight: var(--font-weight-semibold);
   margin: 0;
 }

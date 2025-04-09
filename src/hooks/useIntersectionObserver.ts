@@ -163,6 +163,7 @@ export function useIntersectionObserver({
     function destroy() {
       callbacks.clear();
       observer.disconnect();
+      entriesAccumulator.clear();
     }
 
     controllerRef.current = {

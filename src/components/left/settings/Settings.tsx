@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useState } from '../../../lib/teact/teact';
+import React, { memo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
@@ -10,6 +10,7 @@ import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
 
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useMarkScrolled from '../../../hooks/useMarkScrolled/useMarkScrolled';
 
 import Transition from '../../ui/Transition';
 import SettingsFolders from './folders/SettingsFolders';
@@ -140,6 +141,10 @@ const PRIVACY_GROUP_CHATS_SCREENS = [
   SettingsScreens.PrivacyGroupChatsDeniedContacts,
 ];
 
+const PRIVACY_MESSAGES_SCREENS = [
+  SettingsScreens.PrivacyNoPaidMessages,
+];
+
 export type OwnProps = {
   isActive: boolean;
   currentScreen: SettingsScreens;
@@ -161,8 +166,16 @@ const Settings: FC<OwnProps> = ({
 }) => {
   const { closeShareChatFolderModal } = getActions();
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
+
+  useMarkScrolled({
+    containerRef,
+    selector: '.settings-content',
+  }, [currentScreen]);
 
   const handleReset = useLastCallback((forceReturnToChatList?: true | Event) => {
     const isFromSettings = selectTabState(getGlobal()).shareFolderScreen?.isFromSettings;
@@ -215,6 +228,7 @@ const Settings: FC<OwnProps> = ({
       [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyVoiceMessages]: PRIVACY_VOICE_MESSAGES_SCREENS.includes(activeScreen),
       [SettingsScreens.PrivacyGroupChats]: PRIVACY_GROUP_CHATS_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyMessages]: PRIVACY_MESSAGES_SCREENS.includes(activeScreen),
     };
 
     const isTwoFaScreen = TWO_FA_SCREENS.includes(activeScreen);
@@ -361,13 +375,14 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyForwardingAllowedContacts:
       case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
+      case SettingsScreens.PrivacyNoPaidMessages:
         return (
           <SettingsPrivacyVisibilityExceptionList
             isAllowList
+            usersOnly={currentScreen === SettingsScreens.PrivacyNoPaidMessages}
             withPremiumCategory={currentScreen === SettingsScreens.PrivacyGroupChatsAllowedContacts}
             withMiniAppsCategory={currentScreen === SettingsScreens.PrivacyGiftsAllowedContacts}
             screen={currentScreen}
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive || privacyAllowScreens[currentScreen]}
             onReset={handleReset}
           />
@@ -387,7 +402,6 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsPrivacyVisibilityExceptionList
             screen={currentScreen}
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive}
             onReset={handleReset}
           />
@@ -398,6 +412,7 @@ const Settings: FC<OwnProps> = ({
           <PrivacyMessages
             isActive={isScreenActive}
             onReset={handleReset}
+            onScreenSelect={onScreenSelect}
           />
         );
 
@@ -506,6 +521,7 @@ const Settings: FC<OwnProps> = ({
 
   return (
     <Transition
+      ref={containerRef}
       id="Settings"
       name={shouldSkipTransition ? 'none' : LAYERS_ANIMATION_NAME}
       activeKey={currentScreen}

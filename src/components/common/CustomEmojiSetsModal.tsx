@@ -4,8 +4,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../lib/teact/teact';
-import { getGlobal } from '../../lib/teact/teactn';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiSticker } from '../../api/types';
 

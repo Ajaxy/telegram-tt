@@ -25,6 +25,10 @@
     --slider-color: var(--color-text-secondary);
   }
 
+  &.readOnly {
+    pointer-events: none;
+  }
+
   .slider-top-row {
     display: flex;
     justify-content: space-between;
@@ -133,7 +137,7 @@
     }
 
     &.active {
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
     }
 
     &:first-child {

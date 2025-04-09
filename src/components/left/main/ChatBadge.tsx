@@ -6,6 +6,7 @@ import type { ApiChat, ApiTopic } from '../../../api/types';
 import type { Signal } from '../../../util/signals';
 
 import buildClassName from '../../../util/buildClassName';
+import { getServerTime } from '../../../util/serverTime';
 import { isSignal } from '../../../util/signals';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -15,6 +16,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedCounter from '../../common/AnimatedCounter';
+import Icon from '../../common/icons/Icon';
 import Button from '../../ui/Button';
 import ShowTransition from '../../ui/ShowTransition';
 
@@ -61,20 +63,29 @@ const ChatBadge: FC<OwnProps> = ({
     isForum && topics ? Object.values(topics).filter(({ unreadCount }) => unreadCount) : undefined
   ), [topics, isForum]);
 
-  const unreadCount = useMemo(() => (
-    isForum
-      // If we have unmuted topics, display the count of those. Otherwise, display the count of all topics.
-      ? ((isMuted && topicsWithUnread?.filter((acc) => acc.isMuted === false).length)
-        || topicsWithUnread?.length)
-      : (topic || chat).unreadCount
-  ), [chat, topic, topicsWithUnread, isForum, isMuted]);
+  const unreadCount = useMemo(() => {
+    if (!isForum) {
+      return (topic || chat).unreadCount;
+    }
 
-  const shouldBeMuted = useMemo(() => {
-    const hasUnmutedUnreadTopics = topics
-      && Object.values(topics).some((acc) => !acc.isMuted && acc.unreadCount);
+    return topicsWithUnread?.length;
+  }, [chat, topic, topicsWithUnread, isForum]);
 
-    return isMuted || (topics && !hasUnmutedUnreadTopics);
-  }, [topics, isMuted]);
+  const shouldBeUnMuted = useMemo(() => {
+    if (!isForum) {
+      return !isMuted || topic?.notifySettings.mutedUntil === 0;
+    }
+
+    if (isMuted) {
+      return topicsWithUnread?.some((acc) => acc.notifySettings.mutedUntil === 0);
+    }
+
+    const isEveryUnreadMuted = topicsWithUnread?.every((acc) => (
+      acc.notifySettings.mutedUntil && acc.notifySettings.mutedUntil > getServerTime()
+    ));
+
+    return !isEveryUnreadMuted;
+  }, [isForum, isMuted, topicsWithUnread, topic?.notifySettings.mutedUntil]);
 
   const hasUnreadMark = topic ? false : chat.hasUnreadMark;
 
@@ -90,7 +101,7 @@ const ChatBadge: FC<OwnProps> = ({
   const isUnread = Boolean((unreadCount || hasUnreadMark) && !isSavedDialog);
   const className = buildClassName(
     'ChatBadge',
-    shouldBeMuted && 'muted',
+    !shouldBeUnMuted && 'muted',
     !isUnread && isPinned && 'pinned',
     isUnread && 'unread',
   );
@@ -103,25 +114,24 @@ const ChatBadge: FC<OwnProps> = ({
       botId: chat.id,
       peerId: chat.id,
       theme,
-      shouldMarkBotTrusted: true,
     });
   });
 
   function renderContent() {
     const unreadReactionsElement = unreadReactionsCount && (
-      <div className={buildClassName('ChatBadge reaction', shouldBeMuted && 'muted')}>
-        <i className="icon icon-heart" />
+      <div className={buildClassName('ChatBadge reaction', !shouldBeUnMuted && 'muted')}>
+        <Icon name="heart" />
       </div>
     );
 
     const unreadMentionsElement = unreadMentionsCount && (
       <div className="ChatBadge mention">
-        <i className="icon icon-mention" />
+        <Icon name="mention" />
       </div>
     );
 
     const unopenedTopicElement = isTopicUnopened && (
-      <div className={buildClassName('ChatBadge unopened', shouldBeMuted && 'muted')} />
+      <div className={buildClassName('ChatBadge unopened', !shouldBeUnMuted && 'muted')} />
     );
 
     const unreadCountElement = (hasUnreadMark || unreadCount) ? (
@@ -132,7 +142,7 @@ const ChatBadge: FC<OwnProps> = ({
 
     const pinnedElement = isPinned && (
       <div className={className}>
-        <i className="icon icon-pinned-chat" />
+        <Icon name="pinned-chat" />
       </div>
     );
 

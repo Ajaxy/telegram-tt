@@ -29,8 +29,13 @@ export { default as ChatInviteModal } from '../components/modals/chatInvite/Chat
 export { default as AboutAdsModal } from '../components/modals/aboutAds/AboutAdsModal';
 export { default as AboutMonetizationModal } from '../components/common/AboutMonetizationModal';
 export { default as VerificationMonetizationModal } from '../components/common/VerificationMonetizationModal';
+export { default as EmojiStatusAccessModal } from '../components/modals/emojiStatusAccess/EmojiStatusAccessModal';
+export { default as LocationAccessModal } from '../components/modals/locationAccess/LocationAccessModal';
 export { default as ReportAdModal } from '../components/modals/reportAd/ReportAdModal';
 export { default as ReportModal } from '../components/modals/reportModal/ReportModal';
+export { default as PreparedMessageModal } from '../components/modals/preparedMessage/PreparedMessageModal';
+export { default as SharePreparedMessageModal }
+  from '../components/modals/sharePreparedMessage/SharePreparedMessageModal';
 export { default as CalendarModal } from '../components/common/CalendarModal';
 export { default as DeleteMessageModal } from '../components/common/DeleteMessageModal';
 export { default as PinMessageModal } from '../components/common/PinMessageModal';

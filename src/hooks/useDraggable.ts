@@ -3,16 +3,13 @@ import {
   useEffect, useSignal, useState,
 } from '../lib/teact/teact';
 
+import type { Point, Size } from '../types';
+
 import { RESIZE_HANDLE_SELECTOR } from '../config';
 import buildStyle from '../util/buildStyle';
 import { captureEvents } from '../util/captureEvents';
 import useFlag from './useFlag';
 import useLastCallback from './useLastCallback';
-
-export interface Size {
-  width: number;
-  height: number;
-}
 
 export enum ResizeHandleType {
   Top,
@@ -41,11 +38,6 @@ const resizeHandleSelectorsMap: Record<ResizeHandleSelectorType, ResizeHandleTyp
 
 const resizeHandleSelectors = Object.keys(resizeHandleSelectorsMap) as ResizeHandleSelectorType[];
 
-export interface Point {
-  x: number;
-  y: number;
-}
-
 let resizeTimeout: number | undefined;
 const FULLSCREEN_POSITION = { x: 0, y: 0 };
 
@@ -56,8 +48,9 @@ export default function useDraggable(
   originalSize: Size,
   isFullscreen: boolean = false,
   minimumSize: Size = { width: 0, height: 0 },
+  cachedPosition?: Point,
 ) {
-  const [elementCurrentPosition, setElementCurrentPosition] = useState<Point | undefined>(undefined);
+  const [elementCurrentPosition, setElementCurrentPosition] = useState<Point | undefined>(cachedPosition);
   const [elementCurrentSize, setElementCurrentSize] = useState<Size | undefined>(undefined);
 
   const [getElementPositionOnStartTransform, setElementPositionOnStartTransform] = useSignal({ x: 0, y: 0 });
@@ -211,7 +204,7 @@ export default function useDraggable(
 
   const adjustPositionWithinBounds = useLastCallback(() => {
     if (isFullscreen) return;
-    const position = !wasElementShown ? getCenteredPosition() : elementCurrentPosition;
+    const position = !wasElementShown && !cachedPosition ? getCenteredPosition() : elementCurrentPosition;
     if (!elementCurrentSize || !position) return;
     const newPosition = ensurePositionInVisibleArea(position.x, position.y);
     updateCurrentPosition(newPosition);

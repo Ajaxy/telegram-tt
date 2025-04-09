@@ -1,7 +1,5 @@
 import type { ApiChatType, ApiPhoto } from '../../api/types';
-import type {
-  WebApp,
-} from '../types';
+import type { WebApp } from '../../types/webapp';
 
 import { REPLIES_USER_ID, VERIFICATION_CODES_USER_ID } from '../../config';
 

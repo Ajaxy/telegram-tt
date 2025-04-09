@@ -1,7 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../lib/teact/teact';
-import { getActions } from '../../lib/teact/teactn';
-import { withGlobal } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
 
@@ -41,6 +40,7 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
   }, isOpen && canPost ? PLAY_GAME_ACTION_INTERVAL : undefined);
 
   const handleMessage = useCallback((event: MessageEvent<string>) => {
+    if (!chatId || !messageId) return;
     try {
       const data = JSON.parse(event.data) as GameEvents;
       if (data.eventType === 'share_score') {

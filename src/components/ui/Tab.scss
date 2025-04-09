@@ -49,6 +49,7 @@
     display: flex;
     align-items: center;
     white-space: nowrap;
+    gap: 1px; // Prevent custom emoji sticking to the text
   }
 
   .badge {
@@ -61,7 +62,7 @@
     color: white;
     font-size: 0.875rem;
     line-height: 1.3125rem;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     text-align: center;
     flex-shrink: 0;
 

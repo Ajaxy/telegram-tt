@@ -15,7 +15,7 @@ import type {
   ApiWebDocument,
   MediaContainer,
 } from '../../api/types';
-import type { ActiveDownloads } from '../types';
+import type { ActiveDownloads } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
 import {
@@ -662,4 +662,11 @@ export function getIsDownloading(activeDownloads: ActiveDownloads, media: Downlo
   const hash = getMediaHash(media, 'download');
   if (!hash) return false;
   return Boolean(activeDownloads[hash]);
+}
+
+export function getTimestampableMedia(message: MediaContainer) {
+  const video = getMessageVideo(message) || getMessageWebPageVideo(message);
+  return (video && !video.isRound && !video.isGif ? video : undefined)
+    || getMessageAudio(message)
+    || getMessageVoice(message);
 }

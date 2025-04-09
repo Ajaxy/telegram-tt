@@ -16,8 +16,13 @@ import type {
   ApiThreadInfo,
   ApiTypeStory,
 } from '../../../api/types';
-import type { ActiveDownloads, MessageListType } from '../../../global/types';
-import type { IAlbum, IAnchorPosition, ThreadId } from '../../../types';
+import type {
+  ActiveDownloads,
+  IAlbum,
+  IAnchorPosition,
+  MessageListType,
+  ThreadId,
+} from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
@@ -27,6 +32,7 @@ import {
   getIsDownloading,
   getMessageDownloadableMedia,
   getMessageVideo,
+  getUserFullName,
   hasMessageTtl,
   isActionMessage,
   isChatChannel,
@@ -39,6 +45,9 @@ import {
 import {
   selectActiveDownloads,
   selectAllowedMessageActionsSlow,
+  selectBot,
+  selectCanForwardMessage,
+  selectCanGift,
   selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
   selectCanTranslateMessage,
@@ -60,8 +69,10 @@ import {
   selectStickerSet,
   selectThreadInfo,
   selectTopic,
+  selectUser,
   selectUserStatus,
 } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getSelectionAsFormattedText } from './helpers/getSelectionAsFormattedText';
 import { isSelectionRangeInsideMessage } from './helpers/isSelectionRangeInsideMessage';
@@ -86,6 +97,7 @@ export type OwnProps = {
   noReplies?: boolean;
   detectedLanguage?: string;
   repliesThreadInfo?: ApiThreadInfo;
+  className?: string;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd: NoneToVoidFunction;
 };
@@ -142,6 +154,8 @@ type StateProps = {
   isChannel?: boolean;
   canReplyInChat?: boolean;
   isWithPaidReaction?: boolean;
+  userFullName?: string;
+  canGift?: boolean;
 };
 
 const selection = window.getSelection();
@@ -205,6 +219,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   isInSavedMessages,
   canReplyInChat,
   isWithPaidReaction,
+  userFullName,
+  canGift,
+  className,
   onClose,
   onCloseAnimationEnd,
 }) => {
@@ -348,9 +365,11 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
     const selectionText = getSelectionAsFormattedText(selectionRange);
 
+    const messageText = message.content.text!.text!.replace(/\u00A0/g, ' ');
+
     setCanQuoteSelection(
       selectionText.text.trim().length > 0
-      && message.content.text!.text!.includes(selectionText.text),
+      && messageText.includes(selectionText.text),
     );
   }, [
     selectionRange, selectionRange?.collapsed, selectionRange?.startOffset, selectionRange?.endOffset,
@@ -365,7 +384,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const handleDelete = useLastCallback(() => {
     setIsMenuOpen(false);
     closeMenu();
-    openDeleteMessageModal({ isSchedule: messageListType === 'scheduled', album, message });
+    const messageIds = album?.messages
+      ? album.messages.map(({ id }) => id)
+      : [message.id];
+    openDeleteMessageModal({
+      chatId: message.chatId,
+      messageIds,
+      isSchedule: messageListType === 'scheduled',
+    });
   });
 
   const closePinModal = useLastCallback(() => {
@@ -600,7 +626,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
   return (
-    <div ref={containerRef} className="ContextMenuContainer">
+    <div ref={containerRef} className={buildClassName('ContextMenuContainer', className)}>
       <MessageContextMenu
         isReactionPickerOpen={isReactionPickerOpen}
         availableReactions={availableReactions}
@@ -683,6 +709,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onTranslate={handleTranslate}
         onShowOriginal={handleShowOriginal}
         onSelectLanguage={handleSelectLanguage}
+        userFullName={userFullName}
+        canGift={canGift}
       />
       <PinMessageModal
         isOpen={isPinModalOpen}
@@ -712,6 +740,8 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, message.chatId);
     const isPrivate = chat && isUserId(chat.id);
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, message.chatId) : undefined;
+    const user = selectUser(global, message.chatId);
+    const userFullName = user && getUserFullName(user);
 
     const {
       seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions, readDateExpiresAt,
@@ -727,7 +757,6 @@ export default memo(withGlobal<OwnProps>(
       canDelete,
       canReport,
       canEdit,
-      canForward,
       canFaveSticker,
       canUnfaveSticker,
       canCopy,
@@ -738,13 +767,17 @@ export default memo(withGlobal<OwnProps>(
       canRevote,
       canClosePoll,
     } = (threadId && selectAllowedMessageActionsSlow(global, message, threadId)) || {};
+    const canForward = selectCanForwardMessage(global, message);
 
     const userStatus = isPrivate ? selectUserStatus(global, chat.id) : undefined;
     const isOwn = isOwnMessage(message);
+    const chatBot = chat && selectBot(global, chat.id);
+    const isBot = Boolean(chatBot);
     const isMessageUnread = selectIsMessageUnread(global, message);
     const canLoadReadDate = Boolean(
       isPrivate
       && isOwn
+      && !isBot
       && !isMessageUnread
       && readDateExpiresAt
       && message.date > Date.now() / 1000 - readDateExpiresAt
@@ -805,6 +838,8 @@ export default memo(withGlobal<OwnProps>(
     const storyData = message.content.storyData;
     const story = storyData ? selectPeerStory(global, storyData.peerId, storyData.id) : undefined;
 
+    const canGift = selectCanGift(global, message.chatId);
+
     return {
       threadId,
       chat,
@@ -858,6 +893,8 @@ export default memo(withGlobal<OwnProps>(
       isWithPaidReaction: chatFullInfo?.isPaidReactionAvailable,
       poll,
       story,
+      userFullName,
+      canGift,
     };
   },
 )(ContextMenuContainer));

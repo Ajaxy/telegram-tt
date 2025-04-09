@@ -4,6 +4,7 @@
   .modal-dialog {
     height: 70%;
     max-width: 25rem;
+    overflow: hidden;
 
     @media (max-width: 600px) {
       height: 90%;
@@ -114,7 +115,7 @@
 
       font-size: 1rem;
       line-height: 1.6875rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
     }
 
     .fullName {

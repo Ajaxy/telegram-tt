@@ -4,6 +4,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { AnimationLevel, PerformanceType, PerformanceTypeKey } from '../../../types';
+import type { RegularLangKey } from '../../../types/language';
 
 import {
   ANIMATION_LEVEL_CUSTOM, ANIMATION_LEVEL_MAX, ANIMATION_LEVEL_MED, ANIMATION_LEVEL_MIN,
@@ -18,15 +19,15 @@ import { areDeepEqual } from '../../../util/areDeepEqual';
 import { IS_BACKDROP_BLUR_SUPPORTED, IS_SNAP_EFFECT_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import useOldLang from '../../../hooks/useOldLang';
+import useLang from '../../../hooks/useLang';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';
 
-type PerformanceSection = [string, PerformanceOption[]];
+type PerformanceSection = [RegularLangKey, PerformanceOption[]];
 type PerformanceOption = {
   key: PerformanceTypeKey;
-  label: string;
+  label: RegularLangKey;
   disabled?: boolean;
 };
 
@@ -39,38 +40,38 @@ type StateProps = {
   performanceSettings: PerformanceType;
 };
 
-const ANIMATION_LEVEL_OPTIONS = [
-  'Power Saving',
-  'Nice and Fast',
-  'Lots of Stuff',
+const ANIMATION_LEVEL_OPTIONS: RegularLangKey[] = [
+  'SettingsPerformanceSliderLow',
+  'SettingsPerformanceSliderMedium',
+  'SettingsPerformanceSliderHigh',
 ];
 
-const ANIMATION_LEVEL_CUSTOM_OPTIONS = [
-  'Power Saving',
-  'Custom',
-  'Lots of Stuff',
+const ANIMATION_LEVEL_CUSTOM_OPTIONS: RegularLangKey[] = [
+  'SettingsPerformanceSliderLow',
+  'SettingsPerformanceSliderCustom',
+  'SettingsPerformanceSliderHigh',
 ];
 
 const PERFORMANCE_OPTIONS: PerformanceSection[] = [
-  ['LiteMode.Key.animations.Title', [
-    { key: 'pageTransitions', label: 'Page Transitions' },
-    { key: 'messageSendingAnimations', label: 'Message Sending Animation' },
-    { key: 'mediaViewerAnimations', label: 'Media Viewer Animations' },
-    { key: 'messageComposerAnimations', label: 'Message Composer Animations' },
-    { key: 'contextMenuAnimations', label: 'Context Menu Animation' },
-    { key: 'contextMenuBlur', label: 'Context Menu Blur', disabled: !IS_BACKDROP_BLUR_SUPPORTED },
-    { key: 'rightColumnAnimations', label: 'Right Column Animation' },
-    { key: 'snapEffect', label: 'Dust-effect deletion' },
+  ['SettingsPerformanceInterfaceAnimations', [
+    { key: 'pageTransitions', label: 'SettingsPerformancePageTransitions' },
+    { key: 'messageSendingAnimations', label: 'SettingsPerformanceSending' },
+    { key: 'mediaViewerAnimations', label: 'SettingsPerformanceMediaViewer' },
+    { key: 'messageComposerAnimations', label: 'SettingsPerformanceComposer' },
+    { key: 'contextMenuAnimations', label: 'SettingsPerformanceContextAnimation' },
+    { key: 'contextMenuBlur', label: 'SettingsPerformanceContextBlur', disabled: !IS_BACKDROP_BLUR_SUPPORTED },
+    { key: 'rightColumnAnimations', label: 'SettingsPerformanceRightColumn' },
+    { key: 'snapEffect', label: 'SettingsPerformanceThanos' },
   ]],
-  ['Stickers and Emoji', [
-    { key: 'animatedEmoji', label: 'Allow Animated Emoji' },
-    { key: 'loopAnimatedStickers', label: 'Loop Animated Stickers' },
-    { key: 'reactionEffects', label: 'Reaction Effects' },
-    { key: 'stickerEffects', label: 'Full-Screen Sticker and Emoji Effects' },
+  ['SettingsPerformanceStickers', [
+    { key: 'animatedEmoji', label: 'SettingsPerformanceAnimatedEmoji' },
+    { key: 'loopAnimatedStickers', label: 'SettingsPerformanceLoopStickers' },
+    { key: 'reactionEffects', label: 'SettingsPerformanceReactionEffects' },
+    { key: 'stickerEffects', label: 'SettingsPerformanceStickerEffects' },
   ]],
-  ['AutoplayMedia', [
-    { key: 'autoplayGifs', label: 'AutoplayGIF' },
-    { key: 'autoplayVideos', label: 'AutoplayVideo' },
+  ['SettingsPerformanceMediaAutoplay', [
+    { key: 'autoplayGifs', label: 'SettingsPerformanceAutoplayGif' },
+    { key: 'autoplayVideos', label: 'SettingsPerformanceAutoplayVideo' },
   ]],
 ];
 
@@ -89,7 +90,7 @@ function SettingsPerformance({
     onBack: onReset,
   });
 
-  const lang = useOldLang();
+  const lang = useLang();
   const [sectionExpandedStates, setSectionExpandedStates] = useState<Record<number, boolean>>({});
 
   const sectionCheckedStates = useMemo(() => {
@@ -113,9 +114,14 @@ function SettingsPerformance({
 
     return ANIMATION_LEVEL_CUSTOM;
   }, [performanceSettings]);
-  const animationLevelOptions = animationLevelState === ANIMATION_LEVEL_CUSTOM
-    ? ANIMATION_LEVEL_CUSTOM_OPTIONS
-    : ANIMATION_LEVEL_OPTIONS;
+
+  const animationLevelOptions = useMemo(() => {
+    const options = animationLevelState === ANIMATION_LEVEL_CUSTOM
+      ? ANIMATION_LEVEL_CUSTOM_OPTIONS
+      : ANIMATION_LEVEL_OPTIONS;
+
+    return options.map((option) => lang(option));
+  }, [animationLevelState, lang]);
 
   const handleToggleSection = useCallback((e: React.MouseEvent, index?: string) => {
     e.preventDefault();
@@ -161,10 +167,10 @@ function SettingsPerformance({
     <div className="settings-content custom-scroll">
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          Animation Level
+          {lang('SettingsPerformanceSliderTitle')}
         </h4>
         <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
-          Choose the desired animations amount.
+          {lang('SettingsPerformanceSliderSubtitle')}
         </p>
 
         <RangeSlider

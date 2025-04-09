@@ -5,7 +5,7 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
-import type { WebApp } from '../../../global/types';
+import type { WebApp } from '../../../types/webapp';
 
 import { selectActiveWebApp, selectTabState, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';

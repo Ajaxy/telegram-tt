@@ -1,5 +1,6 @@
 import type { ApiTopic } from '../../api/types';
-import type { GlobalState, TopicsInfo } from '../types';
+import type { TopicsInfo } from '../../types';
+import type { GlobalState } from '../types';
 
 import { buildCollectionByKey, omit, unique } from '../../util/iteratees';
 import {

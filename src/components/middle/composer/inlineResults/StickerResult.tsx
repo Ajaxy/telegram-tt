@@ -1,7 +1,7 @@
 import type { FC } from '../../../../lib/teact/teact';
 import React, { memo } from '../../../../lib/teact/teact';
 
-import type { ApiBotInlineMediaResult, ApiBotInlineResult } from '../../../../api/types';
+import type { ApiBotInlineMediaResult } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_INLINE_BOT_RESULT } from '../../../../config';
@@ -12,7 +12,7 @@ type OwnProps = {
   inlineResult: ApiBotInlineMediaResult;
   isSavedMessages?: boolean;
   observeIntersection: ObserveFn;
-  onClick: (result: ApiBotInlineResult, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onClick: (result: ApiBotInlineMediaResult, isSilent?: boolean, shouldSchedule?: boolean) => void;
   isCurrentUserPremium?: boolean;
 };
 

@@ -13,6 +13,7 @@ import useOldLang from '../../../../hooks/useOldLang';
 export default function useTopicContextActions({
   topic,
   chat,
+  isChatMuted,
   wasOpened,
   canDelete,
   handleDelete,
@@ -20,6 +21,7 @@ export default function useTopicContextActions({
 }: {
   topic: ApiTopic;
   chat: ApiChat;
+  isChatMuted?: boolean;
   wasOpened?: boolean;
   canDelete?: boolean;
   handleDelete?: NoneToVoidFunction;
@@ -29,7 +31,7 @@ export default function useTopicContextActions({
 
   return useMemo(() => {
     const {
-      isPinned, isMuted, isClosed, id: topicId,
+      isPinned, notifySettings, isClosed, id: topicId,
     } = topic;
 
     const chatId = chat.id;
@@ -75,7 +77,7 @@ export default function useTopicContextActions({
         handler: () => toggleTopicPinned({ chatId, topicId, isPinned: true }),
       }) : undefined;
 
-    const actionMute = ((chat.isMuted && isMuted !== false) || isMuted === true)
+    const actionMute = ((isChatMuted && notifySettings.mutedUntil === undefined) || notifySettings.mutedUntil)
       ? {
         title: lang('ChatList.Unmute'),
         icon: 'unmute',
@@ -114,5 +116,5 @@ export default function useTopicContextActions({
       actionCloseTopic,
       actionDelete,
     ]) as MenuItemContextAction[];
-  }, [topic, chat, wasOpened, lang, canDelete, handleDelete, handleMute]);
+  }, [topic, chat, isChatMuted, wasOpened, lang, canDelete, handleDelete, handleMute]);
 }

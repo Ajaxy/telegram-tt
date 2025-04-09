@@ -4,12 +4,11 @@ import type { ApiOldLangPack, ApiOldLangString } from '../api/types';
 import type { LangCode, TimeFormat } from '../types';
 
 import {
-  DEFAULT_LANG_CODE, LANG_CACHE_NAME, LANG_PACKS, OLD_DEFAULT_LANG_PACK,
+  LANG_CACHE_NAME, LANG_PACKS,
 } from '../config';
 import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { createCallbackManager } from './callbacks';
-import { fallbackLangPackInitial } from './fallbackLangPackInitial';
 import { loadAndChangeLanguage } from './localization';
 import { formatInteger } from './textFormat';
 
@@ -129,7 +128,7 @@ function createLangFn() {
       void importFallbackLangPack();
     }
 
-    const langString = langPack?.[key] || fallbackLangPack?.[key] || fallbackLangPackInitial[key];
+    const langString = langPack?.[key] || fallbackLangPack?.[key];
     if (!langString) {
       return key;
     }
@@ -149,23 +148,6 @@ export function oldTranslate(...args: Parameters<LangFn>) {
 
 export function getTranslationFn(): LangFn {
   return translationFn;
-}
-
-export async function getTranslationForLangString(langCode: string, key: string) {
-  let translateString: ApiOldLangString | undefined;
-  const cachedValue = await cacheApi.fetch(
-    LANG_CACHE_NAME,
-    `${OLD_DEFAULT_LANG_PACK}_${langCode}_${key}`,
-    cacheApi.Type.Json,
-  );
-
-  if (cachedValue) {
-    translateString = cachedValue.value;
-  } else {
-    translateString = await fetchRemoteString(OLD_DEFAULT_LANG_PACK, langCode, key);
-  }
-
-  return processTranslation(translateString, key);
 }
 
 /**
@@ -246,30 +228,8 @@ async function fetchRemote(langCode: string): Promise<ApiOldLangPack | undefined
   return undefined;
 }
 
-async function fetchRemoteString(
-  remoteLangPack: typeof LANG_PACKS[number], langCode: string, key: string,
-): Promise<ApiOldLangString | undefined> {
-  const remote = await callApi('oldFetchLangStrings', {
-    langPack: remoteLangPack,
-    langCode,
-    keys: [key],
-  });
-
-  if (remote?.length) {
-    const wrappedString = JSON.stringify({
-      value: remote[0],
-    });
-
-    await cacheApi.save(LANG_CACHE_NAME, `${remoteLangPack}_${langCode}_${key}`, wrappedString);
-
-    return remote[0];
-  }
-
-  return undefined;
-}
-
 function getPluralOption(amount: number) {
-  const langCode = currentLangCode || DEFAULT_LANG_CODE;
+  const langCode = currentLangCode || 'en';
   const optionIndex = PLURAL_RULES[langCode as keyof typeof PLURAL_RULES]
     ? PLURAL_RULES[langCode as keyof typeof PLURAL_RULES](amount)
     : 0;

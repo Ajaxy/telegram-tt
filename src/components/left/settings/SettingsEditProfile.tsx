@@ -22,6 +22,7 @@ import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 import usePreviousDeprecated from '../../../hooks/usePreviousDeprecated';
 
+import Icon from '../../common/icons/Icon';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
 import UsernameInput from '../../common/UsernameInput';
@@ -210,34 +211,36 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-fab-wrapper">
       <div className="settings-content no-border custom-scroll">
-        <div className="settings-edit-profile settings-item">
-          <AvatarEditable
-            currentAvatarBlobUrl={currentAvatarBlobUrl}
-            onChange={handlePhotoChange}
-            title="Edit your profile photo"
-            disabled={isLoading}
-          />
-          <InputText
-            value={firstName}
-            onChange={handleFirstNameChange}
-            label={lang('FirstName')}
-            disabled={isLoading}
-            error={error === ERROR_FIRST_NAME_MISSING ? error : undefined}
-          />
-          <InputText
-            value={lastName}
-            onChange={handleLastNameChange}
-            label={lang('LastName')}
-            disabled={isLoading}
-          />
-          <TextArea
-            value={bio}
-            onChange={handleBioChange}
-            label={lang('UserBio')}
-            disabled={isLoading}
-            maxLength={maxBioLength}
-            maxLengthIndicator={maxBioLength ? (maxBioLength - bio.length).toString() : undefined}
-          />
+        <div className="settings-item">
+          <div className="settings-input">
+            <AvatarEditable
+              currentAvatarBlobUrl={currentAvatarBlobUrl}
+              onChange={handlePhotoChange}
+              title="Edit your profile photo"
+              disabled={isLoading}
+            />
+            <InputText
+              value={firstName}
+              onChange={handleFirstNameChange}
+              label={lang('FirstName')}
+              disabled={isLoading}
+              error={error === ERROR_FIRST_NAME_MISSING ? error : undefined}
+            />
+            <InputText
+              value={lastName}
+              onChange={handleLastNameChange}
+              label={lang('LastName')}
+              disabled={isLoading}
+            />
+            <TextArea
+              value={bio}
+              onChange={handleBioChange}
+              label={lang('UserBio')}
+              disabled={isLoading}
+              maxLength={maxBioLength}
+              maxLengthIndicator={maxBioLength ? (maxBioLength - bio.length).toString() : undefined}
+            />
+          </div>
 
           <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
             {renderText(lang('lng_settings_about_bio'), ['br', 'simple_markdown'])}
@@ -286,7 +289,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon icon-check" />
+          <Icon name="check" />
         )}
       </FloatingActionButton>
     </div>

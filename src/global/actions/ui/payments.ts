@@ -1,7 +1,8 @@
 import type { ActionReturnType } from '../../types';
 
+import { DEFAULT_GIFT_PROFILE_FILTER_OPTIONS } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { addActionHandler } from '../../index';
+import { addActionHandler, setGlobal } from '../../index';
 import {
   clearPayment,
   updatePayment,
@@ -63,5 +64,90 @@ addActionHandler('closeGiftCodeModal', (global, actions, payload): ActionReturnT
 
   return updateTabState(global, {
     giftCodeModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('updateGiftProfileFilter', (global, actions, payload): ActionReturnType => {
+  const { filter, peerId, tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+
+  const prevFilter = tabState.savedGifts.filter;
+  let updatedFilter = {
+    ...prevFilter,
+    ...filter,
+  };
+
+  if (!updatedFilter.shouldIncludeUnlimited
+    && !updatedFilter.shouldIncludeLimited
+    && !updatedFilter.shouldIncludeUnique) {
+    updatedFilter = {
+      ...prevFilter,
+      shouldIncludeUnlimited: true,
+      shouldIncludeLimited: true,
+      shouldIncludeUnique: true,
+      ...filter,
+    };
+  }
+
+  if (!updatedFilter.shouldIncludeDisplayed && !updatedFilter.shouldIncludeHidden) {
+    updatedFilter = {
+      ...prevFilter,
+      shouldIncludeDisplayed: true,
+      shouldIncludeHidden: true,
+      ...filter,
+    };
+  }
+
+  global = updateTabState(global, {
+    savedGifts: {
+      ...tabState.savedGifts,
+      giftsByPeerId: {
+        [peerId]: tabState.savedGifts.giftsByPeerId[peerId],
+      },
+      filter: updatedFilter,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  actions.loadPeerSavedGifts({
+    peerId, shouldRefresh: true, tabId: tabState.id,
+  });
+});
+
+addActionHandler('resetGiftProfileFilter', (global, actions, payload): ActionReturnType => {
+  const { peerId, tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+
+  global = updateTabState(global, {
+    savedGifts: {
+      ...tabState.savedGifts,
+      giftsByPeerId: {
+        [peerId]: tabState.savedGifts.giftsByPeerId[peerId],
+      },
+      filter: {
+        ...DEFAULT_GIFT_PROFILE_FILTER_OPTIONS,
+      },
+    },
+  }, tabId);
+  setGlobal(global);
+
+  actions.loadPeerSavedGifts({
+    peerId, shouldRefresh: true, tabId: tabState.id,
+  });
+});
+
+addActionHandler('openPaymentMessageConfirmDialogOpen', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isPaymentMessageConfirmDialogOpen: true,
+  }, tabId);
+});
+
+addActionHandler('closePaymentMessageConfirmDialogOpen', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    isPaymentMessageConfirmDialogOpen: false,
   }, tabId);
 });

@@ -48,6 +48,18 @@
         visibility: hidden;
       }
     }
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  &.canCheckedInDisabled {
+    .Radio-main {
+      &::before {
+        visibility: visible;
+      }
+    }
   }
 
   > input {
@@ -92,7 +104,7 @@
       word-break: break-word;
       unicode-bidi: plaintext;
       text-align: left;
-      line-height: 1.25rem;
+      line-height: 1.5rem;
     }
 
     .subLabel {

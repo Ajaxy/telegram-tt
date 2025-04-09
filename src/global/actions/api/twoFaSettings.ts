@@ -1,8 +1,10 @@
 import type { ActionReturnType } from '../../types';
 
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { replaceSettings, updateTwoFaSettings } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 
 addActionHandler('loadPasswordInfo', async (global): Promise<void> => {
   const result = await callApi('getPasswordInfo');
@@ -19,7 +21,7 @@ addActionHandler('loadPasswordInfo', async (global): Promise<void> => {
 addActionHandler('checkPassword', async (global, actions, payload): Promise<void> => {
   const { currentPassword, onSuccess } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
   setGlobal(global);
 
   const isSuccess = await callApi('checkPassword', currentPassword);
@@ -36,7 +38,7 @@ addActionHandler('checkPassword', async (global, actions, payload): Promise<void
 addActionHandler('clearPassword', async (global, actions, payload): Promise<void> => {
   const { currentPassword, onSuccess } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
   setGlobal(global);
 
   const isSuccess = await callApi('clearPassword', currentPassword);
@@ -55,7 +57,7 @@ addActionHandler('updatePassword', async (global, actions, payload): Promise<voi
     currentPassword, password, hint, email, onSuccess,
   } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
   setGlobal(global);
 
   const isSuccess = await callApi('updatePassword', currentPassword, password, hint, email);
@@ -72,15 +74,22 @@ addActionHandler('updatePassword', async (global, actions, payload): Promise<voi
 addActionHandler('updateRecoveryEmail', async (global, actions, payload): Promise<void> => {
   const {
     currentPassword, email, onSuccess,
+    tabId = getCurrentTabId(),
   } = payload;
 
-  global = updateTwoFaSettings(global, { isLoading: true, error: undefined });
+  global = updateTwoFaSettings(global, { isLoading: true, errorKey: undefined });
+  global = updateTabState(global, {
+    recoveryEmail: email,
+  }, tabId);
   setGlobal(global);
 
   const isSuccess = await callApi('updateRecoveryEmail', currentPassword, email);
 
   global = getGlobal();
   global = updateTwoFaSettings(global, { isLoading: false, waitingEmailCodeLength: undefined });
+  global = updateTabState(global, {
+    recoveryEmail: undefined,
+  }, tabId);
   setGlobal(global);
 
   if (isSuccess) {
@@ -95,5 +104,5 @@ addActionHandler('provideTwoFaEmailCode', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('clearTwoFaError', (global): ActionReturnType => {
-  return updateTwoFaSettings(global, { error: undefined });
+  return updateTwoFaSettings(global, { errorKey: undefined });
 });

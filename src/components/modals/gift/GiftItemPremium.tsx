@@ -11,6 +11,7 @@ import {
   selectGiftStickerForDuration,
 } from '../../../global/selectors';
 import { formatCurrencyAsString } from '../../../util/formatCurrency';
+import { formatStarsAsIcon } from '../../../util/localization/format';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -23,6 +24,7 @@ import styles from './GiftItem.module.scss';
 
 export type OwnProps = {
   option: ApiPremiumGiftCodeOption;
+  optionByStars?: ApiPremiumGiftCodeOption;
   baseMonthAmount?: number;
   onClick: (gift: ApiPremiumGiftCodeOption) => void;
 };
@@ -35,7 +37,7 @@ export type StateProps = {
 const GIFT_STICKER_SIZE = 86;
 
 function GiftItemPremium({
-  sticker, canPlayAnimatedEmojis, baseMonthAmount, option, onClick,
+  sticker, canPlayAnimatedEmojis, baseMonthAmount, option, optionByStars, onClick,
 }: OwnProps & StateProps) {
   const {
     months, amount, currency,
@@ -84,8 +86,15 @@ function GiftItemPremium({
       <Button className={styles.buy} nonInteractive size="tiny" pill fluid>
         {formatCurrencyAsString(amount, currency)}
       </Button>
+      {optionByStars && (
+        <div className={styles.starsPriceBlock}>
+          {lang('GiftPremiumStarsPrice', {
+            stars: (formatStarsAsIcon(lang, optionByStars.amount, { className: styles.starsPriceIcon })),
+          }, { withNodes: true, withMarkdown: true })}
+        </div>
+      )}
       {Boolean(discount) && (
-        <GiftRibbon color="red" text={lang('GiftDiscount', { percent: discount })} />
+        <GiftRibbon color="purple" text={lang('GiftDiscount', { percent: discount })} />
       )}
     </div>
   );

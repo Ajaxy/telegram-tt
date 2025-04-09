@@ -4,8 +4,9 @@ import React, {
 import { getActions, getGlobal } from '../../../global';
 
 import {
-  filterChatsByName, isChatChannel, isChatPublic, isChatSuperGroup,
+  isChatChannel, isChatPublic, isChatSuperGroup,
 } from '../../../global/helpers';
+import { filterPeersByQuery } from '../../../global/helpers/peers';
 import { unique } from '../../../util/iteratees';
 import sortChatIds from '../../common/helpers/sortChatIds';
 
@@ -61,13 +62,12 @@ const GiveawayChannelPickerModal = ({
   }, [giveawayChatId]);
 
   const displayedChannelIds = useMemo(() => {
-    const chatsById = getGlobal().chats.byId;
-    const foundChannelIds = channelIds ? filterChatsByName(lang, channelIds, chatsById, searchQuery) : [];
+    const foundChannelIds = channelIds ? filterPeersByQuery({ ids: channelIds, query: searchQuery, type: 'chat' }) : [];
 
     return sortChatIds(foundChannelIds,
       false,
       selectedIds);
-  }, [channelIds, lang, searchQuery, selectedIds]);
+  }, [channelIds, searchQuery, selectedIds]);
 
   const handleSelectedChannelIdsChange = useLastCallback((newSelectedIds: string[]) => {
     const chatsById = getGlobal().chats.byId;

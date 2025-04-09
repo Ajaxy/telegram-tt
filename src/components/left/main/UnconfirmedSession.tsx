@@ -1,4 +1,5 @@
-import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
+import type { RefObject } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiSession } from '../../../api/types';
@@ -14,15 +15,14 @@ import styles from './UnconfirmedSession.module.scss';
 type OwnProps = {
   sessions: Record<string, ApiSession>;
   onHeightChange: (height: number) => void;
+  sessionRef: RefObject<HTMLDivElement | null>;
 };
 
-const UnconfirmedSession = ({ sessions, onHeightChange } : OwnProps) => {
+const UnconfirmedSession = ({ sessionRef, sessions, onHeightChange } : OwnProps) => {
   const { changeSessionSettings, terminateAuthorization, showNotification } = getActions();
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
   const lang = useOldLang();
 
-  useResizeObserver(ref, (entry) => {
+  useResizeObserver(sessionRef, (entry) => {
     const height = entry.borderBoxSize?.[0]?.blockSize || entry.contentRect.height;
     onHeightChange(height);
   });
@@ -52,7 +52,7 @@ const UnconfirmedSession = ({ sessions, onHeightChange } : OwnProps) => {
   });
 
   return (
-    <div className={styles.root} ref={ref}>
+    <div className={styles.root} ref={sessionRef}>
       <h2 className={styles.title}>{lang('UnconfirmedAuthTitle')}</h2>
       <p className={styles.info}>
         {lang('UnconfirmedAuthSingle', locationString)}

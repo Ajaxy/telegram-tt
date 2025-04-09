@@ -10,25 +10,29 @@ import EmojiIconBackground from './embedded/EmojiIconBackground';
 import styles from './PeerColorWrapper.module.scss';
 
 interface OwnProps extends React.HTMLAttributes<HTMLDivElement> {
+  ref?: React.RefObject<HTMLDivElement>;
   peer?: ApiPeer;
   peerColor?: ApiPeerColor;
   noUserColors?: boolean;
-  shoudReset?: boolean;
+  shouldReset?: boolean;
   className?: string;
   emojiIconClassName?: string;
   children: React.ReactNode;
 }
 
 function PeerColorWrapper({
-  peer, peerColor, noUserColors, shoudReset, className, emojiIconClassName, children, ...otherProps
+  peer, ref, peerColor, noUserColors,
+  shouldReset, className, emojiIconClassName,
+  children, ...otherProps
 }: OwnProps) {
   const color = peerColor || peer?.color;
 
   return (
     <div
+      ref={ref}
       className={buildClassName(
         styles.root,
-        peer && getPeerColorClass(peer, noUserColors, shoudReset),
+        peer && getPeerColorClass(peer, noUserColors, shouldReset),
         peerColor && getApiPeerColorClass(peerColor),
         className,
       )}

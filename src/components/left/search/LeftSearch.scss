@@ -44,7 +44,7 @@
     padding-left: 0.5rem;
     margin-bottom: 1rem;
 
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     font-size: 1rem;
     color: var(--color-text-secondary);
 
@@ -167,7 +167,7 @@
       align-items: center;
       font-size: 1rem;
       line-height: 1.6875rem;
-      font-weight: 500;
+      font-weight: var(--font-weight-medium);
       overflow: hidden;
 
       .topic-icon {
@@ -196,7 +196,7 @@
       .Link {
         float: right;
         color: var(--color-links);
-        font-weight: 500;
+        font-weight: var(--font-weight-medium);
         margin-right: 0.5rem;
         transition: opacity 0.15s ease-in;
 
@@ -230,7 +230,8 @@
     justify-content: space-between;
     align-items: flex-end;
 
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-inline: 0.25rem;
 
     box-shadow: inset 0 -1px 0 0 var(--color-borders);
     background-color: var(--color-background);
@@ -238,7 +239,7 @@
     overflow-x: auto;
     overflow-y: hidden;
 
-    > .PickerSelectedItem {
+    .left-search-local-suggestion {
       flex-shrink: 0;
     }
 

@@ -14,6 +14,8 @@ import buildClassName from '../../../../util/buildClassName';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
+import Icon from '../../../common/icons/Icon';
+
 type OwnProps<T> =
   (PhotoProps<T> | VideoProps<T>) & {
     clickArg: number;
@@ -65,7 +67,7 @@ export default function withSelectControl(WrappedComponent: FC) {
         {isInSelectMode && (
           <div className="message-select-control">
             {isSelected && (
-              <i className="icon icon-select" />
+              <Icon name="select" />
             )}
           </div>
         )}

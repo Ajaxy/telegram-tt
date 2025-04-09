@@ -20,7 +20,7 @@ export type OwnProps = {
   focus?: boolean;
   isForGallery?: boolean;
   inlineResult: ApiBotInlineMediaResult | ApiBotInlineResult;
-  onClick: (result: ApiBotInlineResult) => void;
+  onClick: (result: ApiBotInlineMediaResult | ApiBotInlineResult) => void;
 };
 
 const MediaResult: FC<OwnProps> = ({

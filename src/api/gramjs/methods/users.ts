@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiPeer, ApiUser,
+  ApiChat, ApiEmojiStatusType, ApiPeer, ApiUser,
 } from '../../types';
 
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -17,7 +17,7 @@ import {
   buildMtpPeerId,
   getEntityTypeById,
 } from '../gramjsBuilders';
-import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
+import { addPhotoToLocalDb, addUserToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
@@ -101,6 +101,22 @@ export async function fetchCommonChats(user: ApiUser, maxId?: string) {
   const count = 'count' in result ? result.count : chatIds.length;
 
   return { chatIds, count };
+}
+
+export async function fetchPaidMessagesStarsAmount(user: ApiUser) {
+  const result = await invokeRequest(new GramJs.users.GetRequirementsToContact({
+    id: [buildInputEntity(user.id, user.accessHash) as GramJs.InputUser],
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  if (result[0] instanceof GramJs.RequirementToContactPaidMessages) {
+    return result[0].starsAmount?.toJSNumber();
+  }
+
+  return undefined;
 }
 
 export async function fetchNearestCountry() {
@@ -231,6 +247,28 @@ export async function deleteContact({
   });
 }
 
+export async function addNoPaidMessagesException({ user, shouldRefundCharged }: {
+  user: ApiUser;
+  shouldRefundCharged?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.account.AddNoPaidMessagesException({
+    refundCharged: shouldRefundCharged ? true : undefined,
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+  }));
+  return result;
+}
+
+export async function fetchPaidMessagesRevenue({ user }: {
+  user: ApiUser;
+  shouldRefundCharged?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.account.GetPaidMessagesRevenue({
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+  }));
+  if (!result) return undefined;
+  return result.starsAmount.toJSNumber();
+}
+
 export async function fetchProfilePhotos({
   peer,
   offset = 0,
@@ -289,7 +327,8 @@ export async function fetchProfilePhotos({
 
   return {
     count: totalCount,
-    photos: messages.map((message) => message.content.action!.photo).filter(Boolean),
+    photos: messages.map((message) => message.content.action?.type === 'chatEditPhoto' && message.content.action.photo)
+      .filter(Boolean),
     nextOffsetId,
   };
 }
@@ -304,9 +343,9 @@ export function reportSpam(userOrChat: ApiPeer) {
   });
 }
 
-export function updateEmojiStatus(emojiStatusId: string, expires?: number) {
+export function updateEmojiStatus(emojiStatus: ApiEmojiStatusType) {
   return invokeRequest(new GramJs.account.UpdateEmojiStatus({
-    emojiStatus: buildInputEmojiStatus(emojiStatusId, expires),
+    emojiStatus: buildInputEmojiStatus(emojiStatus),
   }), {
     shouldReturnTrue: true,
   });

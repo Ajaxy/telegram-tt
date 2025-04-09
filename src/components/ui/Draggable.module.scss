@@ -19,8 +19,12 @@
 .knob {
   position: absolute;
   top: 50%;
+  transform: translateY(-50%);
   width: 2rem;
   height: 2rem;
+
+  display: grid;
+  place-items: center;
 
   color: var(--color-text-secondary);
   font-size: 1.25rem;
@@ -30,7 +34,6 @@
   transition: opacity 150ms;
 
   cursor: grab !important;
-  transform: translateY(-50%);
 
   .container:hover & {
     opacity: 1;
@@ -45,4 +48,8 @@
     opacity: 1 !important;
     touch-action: none;
   }
+}
+
+.icon {
+  font-size: 1.5rem;
 }

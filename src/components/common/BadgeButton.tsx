@@ -16,7 +16,7 @@ const BadgeButton = ({
   onClick,
 }: OwnProps) => {
   return (
-    <div className={buildClassName(styles.root, className)} onClick={onClick}>
+    <div className={buildClassName(styles.root, onClick && styles.clickable, className)} onClick={onClick}>
       {children}
     </div>
   );

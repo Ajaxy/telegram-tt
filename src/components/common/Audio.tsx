@@ -242,10 +242,10 @@ const Audio: FC<OwnProps> = ({
   });
 
   useEffect(() => {
-    if (onReadMedia && isMediaUnread && (isPlaying || isDownloading)) {
+    if (onReadMedia && isMediaUnread && isPlaying) {
       onReadMedia();
     }
-  }, [isPlaying, isMediaUnread, onReadMedia, isDownloading]);
+  }, [isPlaying, isMediaUnread, onReadMedia]);
 
   const handleDownloadClick = useLastCallback(() => {
     if (isDownloading) {
@@ -412,8 +412,8 @@ const Audio: FC<OwnProps> = ({
   return (
     <div className={fullClassName} dir={lang.isRtl ? 'rtl' : 'ltr'}>
       {isSelectable && (
-        <div className="message-select-control">
-          {isSelected && <i className="icon icon-select" />}
+        <div className="message-select-control no-selection">
+          {isSelected && <Icon name="select" />}
         </div>
       )}
       {renderTooglePlayWrapper()}
@@ -448,7 +448,7 @@ const Audio: FC<OwnProps> = ({
           ariaLabel={isDownloading ? 'Cancel download' : 'Download'}
           onClick={handleDownloadClick}
         >
-          <i className={buildClassName('icon', isDownloading ? 'icon-close' : 'icon-arrow-down')} />
+          <Icon name={isDownloading ? 'close' : 'arrow-down'} />
         </Button>
       )}
       {origin === AudioOrigin.Search && renderWithTitle()}
@@ -589,12 +589,12 @@ function renderVoice(
             }
           }}
           >
-            <i className={buildClassName(
-              'transcribe-icon',
-              'icon',
-              (isTranscribed || isTranscriptionError) ? 'icon-down' : 'icon-transcribe',
-              (isTranscribed || isTranscriptionError) && !isTranscriptionHidden && 'transcribe-shown',
-            )}
+            <Icon
+              name={(isTranscribed || isTranscriptionError) ? 'down' : 'transcribe'}
+              className={buildClassName(
+                'transcribe-icon',
+                (isTranscribed || isTranscriptionError) && !isTranscriptionHidden && 'transcribe-shown',
+              )}
             />
             {isTranscribing && (
               <svg viewBox="0 0 32 24" className="loading-svg">

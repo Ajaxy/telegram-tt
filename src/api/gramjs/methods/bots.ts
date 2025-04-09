@@ -39,8 +39,8 @@ import {
   addPhotoToLocalDb,
   addUserToLocalDb,
   addWebDocumentToLocalDb,
-  deserializeBytes,
-} from '../helpers';
+} from '../helpers/localDb';
+import { deserializeBytes } from '../helpers/misc';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
 
@@ -143,7 +143,7 @@ export async function fetchInlineBotResults({
 }
 
 export async function sendInlineBotResult({
-  chat, replyInfo, resultId, queryId, sendAs, isSilent, scheduleDate,
+  chat, replyInfo, resultId, queryId, sendAs, isSilent, scheduleDate, allowPaidStars,
 }: {
   chat: ApiChat;
   replyInfo?: ApiInputMessageReplyInfo;
@@ -152,6 +152,7 @@ export async function sendInlineBotResult({
   sendAs?: ApiPeer;
   isSilent?: boolean;
   scheduleDate?: number;
+  allowPaidStars?: number;
 }) {
   const randomId = generateRandomBigInt();
 
@@ -165,6 +166,7 @@ export async function sendInlineBotResult({
     replyTo: replyInfo && buildInputReplyTo(replyInfo),
     ...(isSilent && { silent: true }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
+    ...(allowPaidStars && { allowPaidStars: BigInt(allowPaidStars) }),
   }));
 }
 
@@ -611,6 +613,15 @@ export function checkBotDownloadFileParams({
   });
 }
 
+export function toggleUserEmojiStatusPermission({ bot, isEnabled } : { bot: ApiUser; isEnabled: boolean }) {
+  return invokeRequest(new GramJs.bots.ToggleUserEmojiStatusPermission({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+    enabled: isEnabled,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {
   return results.map((result) => {
     if (result instanceof GramJs.BotInlineMediaResult) {
@@ -682,5 +693,23 @@ export async function fetchPopularAppBots({
   return {
     peerIds,
     nextOffset: result.nextOffset,
+  };
+}
+
+export async function fetchBotsRecommendations({ user }: { user: ApiChat }) {
+  if (!user) return undefined;
+  const inputUser = buildInputEntity(user.id, user.accessHash) as GramJs.InputUser;
+  const result = await invokeRequest(new GramJs.bots.GetBotRecommendations({
+    bot: inputUser,
+  }));
+  if (!result) {
+    return undefined;
+  }
+
+  const similarBots = result?.users.map(buildApiUser).filter(Boolean);
+
+  return {
+    similarBots,
+    count: result instanceof GramJs.users.UsersSlice ? result.count : similarBots.length,
   };
 }
