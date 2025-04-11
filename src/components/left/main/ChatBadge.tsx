@@ -34,6 +34,8 @@ type OwnProps = {
   forceHidden?: boolean | Signal<boolean>;
   topics?: Record<number, ApiTopic>;
   isSelected?: boolean;
+  ownCountIsloading?: boolean;
+  ownCount?: number;
 };
 
 const ChatBadge: FC<OwnProps> = ({
@@ -48,6 +50,8 @@ const ChatBadge: FC<OwnProps> = ({
   isSavedDialog,
   hasMiniApp,
   isSelected,
+  ownCountIsloading,
+  ownCount,
 }) => {
   const { requestMainWebView } = getActions();
 
@@ -93,10 +97,12 @@ const ChatBadge: FC<OwnProps> = ({
     () => (isSignal(forceHidden) ? forceHidden() : forceHidden),
     [forceHidden],
   );
-  const isShown = !resolvedForceHidden && Boolean(
+  const isShown = (!resolvedForceHidden && Boolean(
     unreadCount || unreadMentionsCount || hasUnreadMark || isPinned || unreadReactionsCount
-    || isTopicUnopened || hasMiniApp,
-  );
+    || isTopicUnopened || hasMiniApp || !chat.isForum || isSavedDialog,
+  ));
+
+  const shouldShowOwnCount = !chat.isForum && (ownCountIsloading || (ownCount && ownCount > 0));
 
   const isUnread = Boolean((unreadCount || hasUnreadMark) && !isSavedDialog);
   const className = buildClassName(
@@ -134,6 +140,20 @@ const ChatBadge: FC<OwnProps> = ({
       <div className={buildClassName('ChatBadge unopened', !shouldBeUnMuted && 'muted')} />
     );
 
+    const ownCountElement = shouldShowOwnCount ? (
+      <div className={buildClassName(
+        className,
+        'ChatBadge_ownCounter',
+      )}
+      >
+        {!ownCountIsloading && ownCount !== undefined ? (
+          <span>{formatIntegerCompact(ownCount)}</span>
+        ) : (
+          <span>Подсчет сообщений…</span>
+        )}
+      </div>
+    ) : undefined;
+
     const unreadCountElement = (hasUnreadMark || unreadCount) ? (
       <div className={className}>
         {!hasUnreadMark && <AnimatedCounter text={formatIntegerCompact(unreadCount!)} />}
@@ -162,7 +182,8 @@ const ChatBadge: FC<OwnProps> = ({
       && pinnedElement;
 
     const elements = [
-      unopenedTopicElement, unreadReactionsElement, unreadMentionsElement, unreadCountElement, visiblePinnedElement,
+      unopenedTopicElement, unreadReactionsElement, unreadMentionsElement, ownCountElement, unreadCountElement,
+      visiblePinnedElement,
     ].filter(Boolean);
 
     if (isSavedDialog) return pinnedElement;
@@ -176,7 +197,7 @@ const ChatBadge: FC<OwnProps> = ({
 
     if (shouldShowOnlyMostImportant) {
       const importanceOrderedElements = [
-        unreadMentionsElement, unreadCountElement, unreadReactionsElement, pinnedElement,
+        unreadMentionsElement, ownCountElement, unreadCountElement, unreadReactionsElement, pinnedElement,
       ].filter(Boolean);
       return importanceOrderedElements[0];
     }
