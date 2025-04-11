@@ -13,7 +13,7 @@ import { captureLocalStorage, restoreLocalStorage } from './localStorage';
 import tray from './tray';
 import {
   checkIsWebContentsUrlAllowed, forceQuit, getAppTitle, getCurrentWindow, getLastWindow,
-  hasExtraWindows, IS_FIRST_RUN, IS_MAC_OS, IS_PREVIEW, IS_PRODUCTION, IS_WINDOWS,
+  hasExtraWindows, IS_FIRST_RUN, IS_LINUX, IS_MAC_OS, IS_PREVIEW, IS_PRODUCTION, IS_WINDOWS,
   reloadWindows, store, TRAFFIC_LIGHT_POSITION, windows,
 } from './utils';
 import windowStateKeeper from './windowState';
@@ -100,7 +100,7 @@ export function createWindow(url?: string) {
   });
 
   window.on('close', (event) => {
-    if (IS_MAC_OS || (IS_WINDOWS && tray.isEnabled)) {
+    if (IS_MAC_OS || ((IS_WINDOWS || IS_LINUX) && tray.isEnabled)) {
       if (forceQuit.isEnabled) {
         app.exit(0);
         forceQuit.disable();
@@ -120,7 +120,7 @@ export function createWindow(url?: string) {
     window.removeMenu();
   }
 
-  if (IS_WINDOWS && tray.isEnabled) {
+  if ((IS_WINDOWS || IS_LINUX) && tray.isEnabled) {
     tray.setupListeners(window);
     tray.create();
   }
