@@ -112,4 +112,8 @@
     padding: 0.25rem 1rem 0.375rem 1rem !important;
     z-index: calc(var(--z-chat-ripple) + 1);
   }
+
+  &_ownCounter {
+    background-color: #9e8b50;
+  }
 }

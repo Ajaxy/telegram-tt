@@ -1622,6 +1622,63 @@ export async function forwardMessages(params: ForwardMessagesParams) {
   }
 }
 
+export async function findtMessagesByOffset({
+  chat,
+  addOffset,
+}: {
+  chat: ApiChat;
+  addOffset: number;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetHistory({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    addOffset,
+    limit: 100,
+  }));
+
+  if (
+    !result
+    || result instanceof GramJs.messages.MessagesNotModified
+    || !result.messages || !result.messages.length
+  ) {
+    return undefined;
+  }
+
+  return result.messages;
+}
+
+export async function countMyMessages(chat: ApiChat): Promise<number> {
+  let addOffset = 0;
+  let myMessageCount = 0;
+  let hasMore = true;
+
+  while (hasMore) {
+    const result = await invokeRequest(new GramJs.messages.GetHistory({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      addOffset,
+      limit: 100,
+    }));
+
+    if (
+      !result || result instanceof GramJs.messages.MessagesNotModified || !result.messages || !result.messages.length
+    ) {
+      break;
+    }
+
+    for (const msg of result.messages) {
+      if (msg?.out) {
+        myMessageCount += 1;
+      }
+    }
+
+    addOffset += result.messages.length;
+
+    // If less 100 — no more "pages"
+    hasMore = result.messages.length === 100;
+  }
+
+  return myMessageCount;
+}
+
 export async function findFirstMessageIdAfterDate({
   chat,
   timestamp,

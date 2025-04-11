@@ -1,5 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
+import React, {
+  memo, useCallback,
+  useEffect, useMemo, useState} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -51,6 +53,7 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
+import { callApi } from '../../../api/gramjs';
 
 import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -172,6 +175,8 @@ const Chat: FC<OwnProps & StateProps> = ({
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
   const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
+  const [ownCountIsloading, setLoadding, setUnloading] = useFlag();
+  const [ownCount, setCount] = useState(0);
 
   const { isForum, isForumAsMessages } = chat || {};
 
@@ -293,6 +298,47 @@ const Chat: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, listedTopicIds, isSynced, isForum, isIntersecting]);
 
+  useEffect(() => {
+    // Пропускаем каналы
+    if (!chat || chat.isForum) return;
+
+    setLoadding();
+    getMyMessageCount(chat).then((count) => {
+      setCount(count);
+      setUnloading();
+    });
+  }, [chat]);
+
+  async function getMyMessageCount(chat: ApiChat): Promise<number> {
+    // Todo: extract, for telegram-tt app storage use cases.
+    // By store of electron in gramjs.
+    // Add flag in-progress for prevent parallel invoke and reInvoke
+    // when it was stopped in in-progress status.
+    // Chat can be so big. Maybe after some time show pre result with
+    // count and  pre counting result with bg loading animation
+    const CACHE_KEY = (chatId: number) => `my-msg-count:${chatId}`;
+    const CACHE_TTL = 1 * 60 * 1000; // 1 min
+
+    const cacheKey = CACHE_KEY(Number(chat.id));
+    const cached = localStorage.getItem(cacheKey);
+
+    if (cached) {
+      const { timestamp, count } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_TTL) {
+        return count;
+      }
+    }
+
+    const count = await callApi('countMyMessages', chat);
+
+    localStorage.setItem(cacheKey, JSON.stringify({
+      timestamp: Date.now(),
+      count,
+    }));
+
+    return count;
+  }
+
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
   const { hasShownClass: isAvatarOnlineShown } = useShowTransitionDeprecated(isOnline);
 
@@ -395,6 +441,8 @@ const Chat: FC<OwnProps & StateProps> = ({
               hasMiniApp={user?.hasMainMiniApp}
               topics={topics}
               isSelected={isSelected}
+              ownCountIsloading={ownCountIsloading}
+              ownCount={ownCount}
             />
           )}
         </div>
