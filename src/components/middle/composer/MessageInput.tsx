@@ -25,7 +25,7 @@ import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import parseEmojiOnlyString from '../../../util/emoji/parseEmojiOnlyString';
 import focusEditableElement from '../../../util/focusEditableElement';
-import { debounce } from '../../../util/schedulers';
+import { debounce, fastRaf } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
 import { isSelectionInsideInput } from './helpers/selection';
 
@@ -208,35 +208,38 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT
     : isStoryInput ? MAX_STORY_MODAL_INPUT_HEIGHT : (isMobile ? 256 : 416);
   const updateInputHeight = useLastCallback((willSend = false) => {
-    requestForcedReflow(() => {
-      const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
-      const currentHeight = Number(scroller.style.height.replace('px', ''));
-      const clone = scrollerCloneRef.current!;
-      const { scrollHeight } = clone;
-      const newHeight = Math.min(scrollHeight, maxInputHeight);
+    // Defer to avoid animation/layout conflicts during DOM updates
+    fastRaf(() => {
+      requestForcedReflow(() => {
+        const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
+        const currentHeight = Number(scroller.style.height.replace('px', ''));
+        const clone = scrollerCloneRef.current!;
+        const { scrollHeight } = clone;
+        const newHeight = Math.min(scrollHeight, maxInputHeight);
 
-      if (newHeight === currentHeight) {
-        return undefined;
-      }
+        if (newHeight === currentHeight) {
+          return undefined;
+        }
 
-      const isOverflown = scrollHeight > maxInputHeight;
+        const isOverflown = scrollHeight > maxInputHeight;
 
-      function exec() {
-        const transitionDuration = Math.round(
-          TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
-        );
-        scroller.style.height = `${newHeight}px`;
-        scroller.style.transitionDuration = `${transitionDuration}ms`;
-        scroller.classList.toggle('overflown', isOverflown);
-      }
+        function exec() {
+          const transitionDuration = Math.round(
+            TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
+          );
+          scroller.style.height = `${newHeight}px`;
+          scroller.style.transitionDuration = `${transitionDuration}ms`;
+          scroller.classList.toggle('overflown', isOverflown);
+        }
 
-      if (willSend) {
-        // Delay to next frame to sync with sending animation
-        requestMutation(exec);
-        return undefined;
-      } else {
-        return exec;
-      }
+        if (willSend) {
+          // Delay to next frame to sync with sending animation
+          requestMutation(exec);
+          return undefined;
+        } else {
+          return exec;
+        }
+      });
     });
   });
 
