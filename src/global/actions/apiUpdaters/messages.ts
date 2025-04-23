@@ -256,10 +256,23 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateMessage': {
       const {
-        chatId, id, message, poll,
+        chatId, id, message, poll, shouldCreateMessageIfNeeded, shouldForceReply,
       } = update;
 
       const currentMessage = selectChatMessage(global, chatId, id);
+
+      if (shouldCreateMessageIfNeeded && !currentMessage) {
+        actions.apiUpdate({
+          '@type': 'newMessage',
+          id: update.id,
+          chatId: update.chatId,
+          message: update.message,
+          poll: update.poll,
+          shouldForceReply,
+        });
+        return;
+      }
+
       const chat = selectChat(global, chatId);
 
       global = updateWithLocalMedia(global, chatId, id, message);

@@ -175,6 +175,7 @@ export function updater(update: Update) {
         message,
         shouldForceReply,
         poll,
+        shouldCreateMessageIfNeeded: true,
       });
     }
 
