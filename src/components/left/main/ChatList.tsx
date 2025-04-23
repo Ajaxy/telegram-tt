@@ -32,7 +32,6 @@ import { useHotkeys } from '../../../hooks/useHotkeys';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
 import useOrderDiff from './hooks/useOrderDiff';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -115,14 +114,6 @@ const ChatList: FC<OwnProps> = ({
   useEffect(() => {
     if (!shouldShowUnconfirmedSessions) setUnconfirmedSessionHeight(0);
   }, [shouldShowUnconfirmedSessions]);
-
-  const {
-    ref: sessionRef,
-    shouldRender,
-  } = useShowTransition({
-    isOpen: shouldShowUnconfirmedSessions,
-    withShouldRender: true,
-  });
 
   // Support <Alt>+<Up/Down> to navigate between chats
   useHotkeys(useMemo(() => (isActive && orderedIds?.length ? {
@@ -257,10 +248,9 @@ const ChatList: FC<OwnProps> = ({
       onLoadMore={getMore}
       onDragLeave={handleDragLeave}
     >
-      {shouldRender && (
+      {shouldShowUnconfirmedSessions && (
         <UnconfirmedSession
           key="unconfirmed"
-          sessionRef={sessionRef}
           sessions={sessions!}
           onHeightChange={setUnconfirmedSessionHeight}
         />
