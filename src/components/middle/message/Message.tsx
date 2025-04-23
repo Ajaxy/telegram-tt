@@ -1052,7 +1052,7 @@ const Message: FC<OwnProps & StateProps> = ({
         noRecentReactors={isChannel}
         tags={tags}
         isCurrentUserPremium={isPremium}
-        isAccountFrozen
+        isAccountFrozen={isAccountFrozen}
       />
     );
   }
