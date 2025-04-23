@@ -14,7 +14,7 @@ export interface LangPair {
   'Month11': undefined;
   'Month12': undefined;
   'GroupLeaveGroup': undefined;
-  'DeleteChatUser': undefined;
+  'DeleteChat': undefined;
   'AccDescrGroup': undefined;
   'AccDescrChannel': undefined;
   'Nothing': undefined;
@@ -67,6 +67,9 @@ export interface LangPair {
   'ProfileCopyPhone': undefined;
   'ContextCopySelected': undefined;
   'ContextCopyText': undefined;
+  'ContextArchiveCollapse': undefined;
+  'ContextArchiveExpand': undefined;
+  'ContextArchiveToMenu': undefined;
   'CallMessageVideoIncomingDeclined': undefined;
   'CallMessageVideoOutgoingMissed': undefined;
   'CallMessageVideoIncomingMissed': undefined;
@@ -428,8 +431,9 @@ export interface LangPair {
   'PasscodeControllerDisableTitle': undefined;
   'PasscodeControllerChangeTitle': undefined;
   'FilterNew': undefined;
-  'FilterEdit': undefined;
-  'FilterDelete': undefined;
+  'EditFolder': undefined;
+  'FilterEditFolders': undefined;
+  'FilterMenuDelete': undefined;
   'FilterShare': undefined;
   'AutoDeleteConfirm': undefined;
   'LogOutTitle': undefined;
@@ -710,7 +714,7 @@ export interface LangPair {
   'EmptyGroupInfoLine3': undefined;
   'EmptyGroupInfoLine4': undefined;
   'Reactions': undefined;
-  'MarkAllAsRead': undefined;
+  'ChatListMarkAllAsRead': undefined;
   'PaymentCardNumber': undefined;
   'CheckoutTotalAmount': undefined;
   'PaymentCheckoutMethod': undefined;
@@ -761,7 +765,7 @@ export interface LangPair {
   'ChannelSubscribers': undefined;
   'ChannelBlockedUsers': undefined;
   'ChannelDelete': undefined;
-  'LeaveChannel': undefined;
+  'ChannelLeave': undefined;
   'ChannelDeleteAlert': undefined;
   'ChannelLeaveAlert': undefined;
   'ChannelCreator': undefined;
@@ -976,6 +980,7 @@ export interface LangPair {
   'ChatListFilterErrorEmpty': undefined;
   'ChatListFilterErrorTitleEmpty': undefined;
   'FilterMuted': undefined;
+  'ReadFolder': undefined;
   'FilterRead': undefined;
   'FilterArchived': undefined;
   'GroupsAndChannelsLimitTitle': undefined;
@@ -1008,10 +1013,13 @@ export interface LangPair {
   'ConversationViewChannel': undefined;
   'Telegram': undefined;
   'ChatListFilterAddToFolder': undefined;
-  'UnpinFromTop': undefined;
-  'PinToTop': undefined;
-  'MarkAsRead': undefined;
-  'MarkAsUnread': undefined;
+  'ChatListUnpinFromTop': undefined;
+  'ChatListPinToTop': undefined;
+  'ChatListOpenInNewWindow': undefined;
+  'ChatListOpenInNewTab': undefined;
+  'ChatListContextMaskAsRead': undefined;
+  'ChatListContextMaskAsUnread': undefined;
+  'ChatListContextAddToFolder': undefined;
   'Unarchive': undefined;
   'Archive': undefined;
   'WaitingForNetwork': undefined;

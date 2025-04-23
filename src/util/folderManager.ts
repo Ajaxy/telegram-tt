@@ -97,12 +97,14 @@ let results: {
     chatsCount: number;
     notificationsCount: number;
   } | undefined>;
+  unreadChatIdsByFolderId: Record<string, string[] | undefined>;
 } = initials.results;
 
 let callbacks: {
   orderedIdsByFolderId: Record<number, CallbackManager>;
   chatsCountByFolderId: CallbackManager;
   unreadCountersByFolderId: CallbackManager;
+  unreadChatIdsByFolderId: CallbackManager;
 } = initials.callbacks;
 
 if (DEBUG) {
@@ -159,6 +161,12 @@ export function getUnreadCounters() {
   return results.unreadCountersByFolderId;
 }
 
+export function getUnreadChatsByFolderId() {
+  if (!inited) init();
+
+  return results.unreadChatIdsByFolderId;
+}
+
 export function getAllNotificationsCount() {
   return getUnreadCounters()[ALL_FOLDER_ID]?.notificationsCount || 0;
 }
@@ -180,6 +188,12 @@ export function addOrderedIdsCallback(folderId: number, callback: (orderedIds: s
 
 export function addChatsCountCallback(callback: (chatsCount: typeof results.chatsCountByFolderId) => void) {
   return callbacks.chatsCountByFolderId.addCallback(callback);
+}
+
+export function addUnreadChatsByFolderIdCallback(
+  callback: (unreadChats: typeof results.unreadChatIdsByFolderId) => void,
+) {
+  return callbacks.unreadChatIdsByFolderId.addCallback(callback);
 }
 
 export function addUnreadCountersCallback(callback: (unreadCounters: typeof results.unreadCountersByFolderId) => void) {
@@ -677,6 +691,7 @@ function updateListsForChat(chatId: string, currentFolderIds: number[], newFolde
 function updateResults(affectedFolderIds: number[]) {
   let wasUnreadCountersChanged = false;
   let wasChatsCountChanged = false;
+  let wasUnreadChatsChanged = false;
 
   Array.from(affectedFolderIds).forEach((folderId) => {
     const { pinnedCount: newPinnedCount, orderedIds: newOrderedIds } = buildFolderOrderedIds(folderId);
@@ -715,6 +730,15 @@ function updateResults(affectedFolderIds: number[]) {
       );
     }
     results.unreadCountersByFolderId[folderId] = newUnreadCounters;
+
+    const currentUnreadChats = results.unreadChatIdsByFolderId[folderId];
+    const newUnreadChats = buildFolderByUnreadChats(folderId);
+    if (!wasUnreadChatsChanged) {
+      wasUnreadChatsChanged = (
+        !currentUnreadChats || !areSortedArraysEqual(newUnreadChats, currentUnreadChats)
+      );
+    }
+    results.unreadChatIdsByFolderId[folderId] = newUnreadChats;
   });
 
   if (wasChatsCountChanged) {
@@ -729,6 +753,10 @@ function updateResults(affectedFolderIds: number[]) {
     const newValue = { ...results.unreadCountersByFolderId };
     results.unreadCountersByFolderId = newValue;
     callbacks.unreadCountersByFolderId.runCallbacks(newValue);
+  }
+
+  if (wasUnreadChatsChanged) {
+    callbacks.unreadChatIdsByFolderId.runCallbacks(results.unreadChatIdsByFolderId);
   }
 }
 
@@ -801,6 +829,16 @@ function buildFolderUnreadCounters(folderId: number) {
   });
 }
 
+function buildFolderByUnreadChats(folderId: number) {
+  const { chatSummariesById } = prepared;
+  const { orderedIdsByFolderId: { [folderId]: orderedIds } } = results;
+
+  return orderedIds!.filter((chatId) => {
+    const chatSummary = chatSummariesById.get(chatId);
+    return chatSummary?.isUnread;
+  });
+}
+
 function buildInitials() {
   return {
     prevGlobal: {
@@ -823,12 +861,14 @@ function buildInitials() {
       pinnedCountByFolderId: {},
       chatsCountByFolderId: {},
       unreadCountersByFolderId: {},
+      unreadChatIdsByFolderId: {},
     },
 
     callbacks: {
       orderedIdsByFolderId: {},
       chatsCountByFolderId: createCallbackManager(),
       unreadCountersByFolderId: createCallbackManager(),
+      unreadChatIdsByFolderId: createCallbackManager(),
     },
   };
 }

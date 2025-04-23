@@ -109,7 +109,7 @@ const GiftMenuItems = ({
     <>
       {hasPinOptions && (
         <MenuItem icon={savedGift.isPinned ? 'unpin' : 'pin'} onClick={handleTogglePin}>
-          {lang(savedGift.isPinned ? 'UnpinFromTop' : 'PinToTop')}
+          {lang(savedGift.isPinned ? 'ChatListUnpinFromTop' : 'ChatListPinToTop')}
         </MenuItem>
       )}
       <MenuItem icon="link-badge" onClick={handleCopyLink}>

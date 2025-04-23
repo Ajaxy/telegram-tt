@@ -11,7 +11,7 @@
 "Month11" = "November";
 "Month12" = "December";
 "GroupLeaveGroup" = "Leave Group";
-"DeleteChatUser" = "Delete chat";
+"DeleteChat" = "Delete Chat";
 "AccDescrGroup" = "Group";
 "AccDescrChannel" = "Channel";
 "Nothing" = "Nothing";
@@ -85,6 +85,9 @@
 "ProfileCopyPhone" = "Copy Phone Number";
 "ContextCopySelected" = "Copy Selected Text";
 "ContextCopyText" = "Copy Text";
+"ContextArchiveCollapse" = "Collapse";
+"ContextArchiveExpand" = "Collapse";
+"ContextArchiveToMenu" = "Move to Main Menu";
 "CallMessageVideoIncomingDeclined" = "Declined Video Call";
 "CallMessageVideoOutgoingMissed" = "Canceled Video Call";
 "CallMessageVideoIncomingMissed" = "Missed Video Call";
@@ -478,8 +481,9 @@
 "PasscodeControllerDisableTitle" = "Disable Passcode";
 "PasscodeControllerChangeTitle" = "Change Passcode";
 "FilterNew" = "New Folder";
-"FilterEdit" = "Edit folder";
-"FilterDelete" = "Delete folder";
+"EditFolder" = "Edit Folder";
+"FilterEditFolders" = "Edit Folders";
+"FilterMenuDelete" = "Delete Folder";
 "FilterShare" = "Share";
 "AutoDeleteConfirm" = "Confirm";
 "LogOutTitle" = "Log Out";
@@ -827,7 +831,7 @@
 "EmptyGroupInfoLine3" = "• Public links such as t.me/title";
 "EmptyGroupInfoLine4" = "• Admins with different rights";
 "Reactions" = "Reactions";
-"MarkAllAsRead" = "Mark all as read";
+"ChatListMarkAllAsRead" = "Mark All as Read";
 "PaymentCardNumber" = "Card Number";
 "PaymentCheckoutAcceptRecurrent" = "I accept the *Terms of Service* of {bot}.";
 "CheckoutTotalAmount" = "Total";
@@ -881,7 +885,7 @@
 "ChannelSubscribers" = "Subscribers";
 "ChannelBlockedUsers" = "Removed users";
 "ChannelDelete" = "Delete Channel";
-"LeaveChannel" = "Leave channel";
+"ChannelLeave" = "Leave Channel";
 "ChannelDeleteAlert" = "Deleting this channel will remove all subscribers and all posts will be lost. Delete the channel anyway?";
 "ChannelLeaveAlert" = "Are you sure you want to leave this channel?";
 "ChannelCreator" = "Owner";
@@ -1178,10 +1182,13 @@
 "ConversationViewChannel" = "VIEW CHANNEL";
 "Telegram" = "Telegram";
 "ChatListFilterAddToFolder" = "Add to folder...";
-"UnpinFromTop" = "Unpin from top";
-"PinToTop" = "Pin to top";
-"MarkAsRead" = "Mark as read";
-"MarkAsUnread" = "Mark as unread";
+"ChatListUnpinFromTop" = "Unpin from Top";
+"ChatListPinToTop" = "Pin to Top";
+"ChatListOpenInNewWindow" = "Open in New Window";
+"ChatListOpenInNewTab" = "Open in New Tab";
+"ChatListContextMaskAsRead" = "Mark as Read";
+"ChatListContextMaskAsUnread" = "Mark as Unread";
+"ChatListContextAddToFolder" = "Add to Folder";
 "Unarchive" = "Unarchive";
 "Archive" = "Archive";
 "WaitingForNetwork" = "Waiting for network...";
