@@ -1475,6 +1475,8 @@ export interface LangPair {
   'DescriptionRestrictedMedia': undefined;
   'DescriptionScheduledPaidMediaNotAllowed': undefined;
   'DescriptionScheduledPaidMessagesNotAllowed': undefined;
+  'GroupMessagesChargePrice': undefined;
+  'RightsChargeStarsAbout': undefined;
   'UnlockButtonTitle': undefined;
   'PrivacySubscribeToTelegramPremium': undefined;
   'PrivacyDisableLimitedEditionStarGifts': undefined;
@@ -2386,6 +2388,10 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'PaidMessageTransactionDescription': {
     'percent': V;
+  };
+  'SetPriceGroupDescription': {
+    'percent': V;
+    'amount': V;
   };
   'FrozenAccountAppealSubtitle': {
     'botLink': V;

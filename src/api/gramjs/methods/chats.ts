@@ -623,6 +623,7 @@ async function getFullChannelInfo(
     hasScheduled,
     stargiftsCount,
     stargiftsAvailable,
+    paidMessagesAvailable,
   } = result.fullChat;
 
   if (chatPhoto) {
@@ -717,6 +718,7 @@ async function getFullChannelInfo(
       hasScheduledMessages: hasScheduled,
       starGiftCount: stargiftsCount,
       areStarGiftsAvailable: Boolean(stargiftsAvailable),
+      arePaidMessagesAvailable: paidMessagesAvailable,
     },
     chats,
     userStatusesById: statusesById,
@@ -2020,6 +2022,19 @@ export async function fetchChannelRecommendations({ chat }: { chat?: ApiChat }) 
     similarChannels,
     count: result instanceof GramJs.messages.ChatsSlice ? result.count : similarChannels.length,
   };
+}
+
+export async function updatePaidMessagesPrice({
+  chat, paidMessagesStars,
+}: {
+  chat?: ApiChat; paidMessagesStars: number;
+}) {
+  return invokeRequest(new GramJs.channels.UpdatePaidMessagesPrice({
+    channel: chat && buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    sendPaidMessagesStars: BigInt(paidMessagesStars),
+  }), {
+    shouldReturnTrue: true,
+  });
 }
 
 export async function fetchSponsoredPeer({ query }: { query: string }) {

@@ -2896,6 +2896,27 @@ addActionHandler('toggleChannelRecommendations', (global, actions, payload): Act
   setGlobal(global);
 });
 
+addActionHandler('updatePaidMessagesPrice', async (global, actions, payload): Promise<void> => {
+  const { chatId, paidMessagesStars, tabId = getCurrentTabId() } = payload;
+  const chat = chatId ? selectChat(global, chatId) : undefined;
+  if (!chat) return;
+
+  global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
+  setGlobal(global);
+
+  const result = await callApi('updatePaidMessagesPrice', {
+    chat,
+    paidMessagesStars,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
+  global = updateChat(global, chatId, { paidMessagesStars });
+  setGlobal(global);
+});
+
 addActionHandler('resolveBusinessChatLink', async (global, actions, payload): Promise<void> => {
   const { slug, tabId = getCurrentTabId() } = payload;
   const result = await callApi('resolveBusinessChatLink', { slug });

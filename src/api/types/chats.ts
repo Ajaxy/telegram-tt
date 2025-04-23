@@ -142,6 +142,7 @@ export interface ApiChatFullInfo {
   hasScheduledMessages?: boolean;
   starGiftCount?: number;
   areStarGiftsAvailable?: boolean;
+  arePaidMessagesAvailable?: true;
 
   boostsApplied?: number;
   boostsToUnrestrict?: number;

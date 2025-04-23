@@ -1058,6 +1058,10 @@ export interface ActionPayloads {
     chatId: string;
     isEnabled: boolean;
   };
+  updatePaidMessagesPrice: {
+    chatId: string;
+    paidMessagesStars: number;
+  } & WithTabId;
 
   updateChat: {
     chatId: string;

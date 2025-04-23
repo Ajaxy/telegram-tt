@@ -18,7 +18,9 @@
 .RangeSlider {
   --slider-color: var(--color-primary);
 
-  margin-bottom: 1rem;
+  margin: 0.5rem 0 0;
+  margin-inline-start: 1rem;
+  margin-inline-end: 1rem;
 
   &.disabled {
     pointer-events: none;

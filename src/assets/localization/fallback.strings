@@ -1894,7 +1894,7 @@
 "ExceptionTitlePrivacyChargeForMessages" = "Remove fee";
 "ExceptionDescriptionPrivacyChargeForMessages" = "Add users or entire groups who won't be charged for sending messages to you.";
 "SectionTitleStarsForForMessages" = "Set your price per message";
-"SectionDescriptionStarsForForMessages" = "You will receive {percent}% of the selected fee (~{amount}) for each incoming message.";
+"SectionDescriptionStarsForForMessages" = "You will receive {percent} of the selected fee (~{amount}) for each incoming message.";
 "SubtitlePrivacyAddUsers" = "Add Users";
 "PrivacyPaidMessagesValue" = "Paid";
 "FirstMessageInPaidMessagesChat" = "**{user}** charges {amount} for each message.";
@@ -1931,6 +1931,9 @@
 "DescriptionRestrictedMedia" = "Posting media content is not allowed in this group.";
 "DescriptionScheduledPaidMediaNotAllowed" = "Posting scheduled paid media content is not allowed";
 "DescriptionScheduledPaidMessagesNotAllowed" = "Scheduled paid messages is not allowed";
+"GroupMessagesChargePrice" = "Charge Stars for Messages";
+"RightsChargeStarsAbout" = "If you turn this on, regular members of the group will have to pay Stars to send messages.";
+"SetPriceGroupDescription" = "Your group will receive {percent} of the selected fee (~{amount}) for each incoming messages.";
 "UnlockButtonTitle" = "Unlock with Telegram Premium";
 "FrozenAccountModalTitle" = "Your Account is Frozen";
 "FrozenAccountViolationTitle" = "Violation of Terms";
