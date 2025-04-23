@@ -525,6 +525,21 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
     return;
   }
 
+  if (privacyKey === 'noPaidMessages') {
+    global = getGlobal();
+    const idsForUpdate = [
+      ...updatedIds.filter((id) => !settings.allowUserIds.includes(id)),
+      ...settings.allowUserIds.filter((id) => !updatedIds.includes(id)),
+    ];
+
+    idsForUpdate.forEach((userId) => {
+      global = updateUserFullInfo(global, userId, {
+        settings: undefined,
+      });
+    });
+    setGlobal(global);
+  }
+
   const rules = buildApiInputPrivacyRules(global, {
     visibility: settings.visibility,
     isUnspecified: settings.isUnspecified,
@@ -705,6 +720,10 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
   const nonContactPeersPaidStars = payload.nonContactPeersPaidStars === null ? undefined
     : payload.nonContactPeersPaidStars || global.settings.byKey.nonContactPeersPaidStars;
 
+  // eslint-disable-next-line no-null/no-null
+  const shouldUpdateUsersSettings = (payload.nonContactPeersPaidStars === null)
+  || payload.nonContactPeersPaidStars;
+
   global = getGlobal();
   global = replaceSettings(global, {
     shouldArchiveAndMuteNewNonContact,
@@ -734,6 +753,15 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
       ? undefined
       : result.nonContactPeersPaidStars,
   });
+
+  if (shouldUpdateUsersSettings) {
+    Object.keys(global.users.fullInfoById).forEach((userId) => {
+      global = updateUserFullInfo(global, userId, {
+        settings: undefined,
+      });
+    });
+  }
+
   setGlobal(global);
 });
 
