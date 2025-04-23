@@ -4,7 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import { AudioOrigin, type ISettings } from '../../../types';
+import { AudioOrigin, type ThemeKey } from '../../../types';
 
 import { getMessageWebPage } from '../../../global/helpers';
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
@@ -53,7 +53,7 @@ type OwnProps = {
   isProtected?: boolean;
   isConnected?: boolean;
   backgroundEmojiId?: string;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   story?: ApiTypeStory;
   shouldWarnAboutSvg?: boolean;
   autoLoadFileMaxSizeMb?: number;

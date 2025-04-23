@@ -1,7 +1,7 @@
 import type { FastTextApi } from '../lib/fasttextweb/fasttext.worker';
 import type { Connector } from './PostMessageConnector';
 
-import { IS_TRANSLATION_SUPPORTED } from './windowEnvironment';
+import { IS_TRANSLATION_SUPPORTED } from './browser/windowEnvironment';
 
 import Deferred from './Deferred';
 import { createConnector } from './PostMessageConnector';

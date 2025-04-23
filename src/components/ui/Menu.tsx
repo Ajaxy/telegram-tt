@@ -5,9 +5,9 @@ import React, {
 
 import type { MenuPositionOptions } from '../../hooks/useMenuPosition';
 
+import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useAppLayout from '../../hooks/useAppLayout';

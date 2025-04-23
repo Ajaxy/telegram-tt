@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ISettings } from '../../../types';
+import type { AccountSettings } from '../../../types';
 
 import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
 import { pick } from '../../../util/iteratees';
@@ -18,7 +18,7 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps = Pick<ISettings, (
+type StateProps = Pick<AccountSettings, (
   'canAutoLoadPhotoFromContacts' |
   'canAutoLoadPhotoInPrivateChats' |
   'canAutoLoadPhotoInGroups' |

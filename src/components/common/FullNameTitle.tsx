@@ -63,9 +63,9 @@ const FullNameTitle: FC<OwnProps> = ({
   noLoopLimit,
   canCopyTitle,
   iconElement,
+  statusSparklesColor,
   onEmojiStatusClick,
   observeIntersection,
-  statusSparklesColor,
 }) => {
   const lang = useOldLang();
   const { showNotification } = getActions();
@@ -73,9 +73,10 @@ const FullNameTitle: FC<OwnProps> = ({
   const customPeer = 'isCustomPeer' in peer ? peer : undefined;
   const isUser = realPeer && isApiPeerUser(realPeer);
   const title = realPeer && (isUser ? getUserFullName(realPeer) : getChatTitle(lang, realPeer));
-  const isPremium = isUser && realPeer.isPremium;
-  const canShowEmojiStatus = withEmojiStatus && !isSavedMessages && realPeer;
-  const emojiStatus = realPeer?.emojiStatus;
+  const isPremium = (isUser && realPeer.isPremium) || customPeer?.isPremium;
+  const canShowEmojiStatus = withEmojiStatus && !isSavedMessages;
+  const emojiStatus = realPeer?.emojiStatus
+    || (customPeer?.emojiStatusId ? { type: 'regular', documentId: customPeer.emojiStatusId } : undefined);
 
   const handleTitleClick = useLastCallback((e) => {
     if (!title || !canCopyTitle) {
@@ -89,7 +90,7 @@ const FullNameTitle: FC<OwnProps> = ({
 
   const specialTitle = useMemo(() => {
     if (customPeer) {
-      return customPeer.title || lang(customPeer.titleKey!);
+      return renderText(customPeer.title || lang(customPeer.titleKey!));
     }
 
     if (isSavedMessages) {

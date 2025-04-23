@@ -6,7 +6,7 @@ import type {
   ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ISettings, ThreadId, WebPageMediaSize } from '../../../types';
+import type { ThemeKey, ThreadId, WebPageMediaSize } from '../../../types';
 import type { Signal } from '../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
@@ -44,7 +44,7 @@ type OwnProps = {
 type StateProps = {
   webPagePreview?: ApiWebPage;
   noWebPage?: boolean;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   attachmentSettings: GlobalState['attachmentSettings'];
 };
 

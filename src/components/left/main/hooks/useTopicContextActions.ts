@@ -5,8 +5,8 @@ import type { ApiChat, ApiTopic } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 
 import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/browser/windowEnvironment';
 import { compact } from '../../../../util/iteratees';
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/windowEnvironment';
 
 import useOldLang from '../../../../hooks/useOldLang';
 

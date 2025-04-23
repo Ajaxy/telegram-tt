@@ -20,10 +20,10 @@ import {
   selectUser,
   selectUserStatus,
 } from '../../global/selectors';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from './helpers/renderText';
 
 import useIntervalForceUpdate from '../../hooks/schedulers/useIntervalForceUpdate';

@@ -5,8 +5,8 @@ import React, { useRef } from '../../lib/teact/teact';
 import type { IconName } from '../../types/icons';
 
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
+import { IS_TOUCH_ENV, MouseButton } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';

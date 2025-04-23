@@ -33,9 +33,9 @@ import type {
   ChatTranslatedMessages,
   FocusDirection,
   IAlbum,
-  ISettings,
   MessageListType,
   ScrollTargetPosition,
+  ThemeKey,
   ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
@@ -113,11 +113,12 @@ import {
   selectUploadProgress,
   selectUser,
 } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getMessageKey } from '../../../util/keys/messageKey';
 import stopEvent from '../../../util/stopEvent';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
-import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import { calculateDimensionsForMessageMedia, getStickerDimensions, REM } from '../../common/helpers/mediaDimensions';
 import { getPeerColorClass } from '../../common/helpers/peerColor';
 import renderText from '../../common/helpers/renderText';
@@ -221,7 +222,7 @@ type OwnProps =
   & MessagePositionProperties;
 
 type StateProps = {
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   forceSenderName?: boolean;
   sender?: ApiPeer;
   canShowSender: boolean;
@@ -1731,6 +1732,7 @@ export default memo(withGlobal<OwnProps>(
       paidMessageStars,
     } = message;
 
+    const { shouldWarnAboutSvg } = selectSharedSettings(global);
     const isChatWithUser = isUserId(chatId);
 
     const chat = selectChat(global, chatId);
@@ -1925,7 +1927,7 @@ export default memo(withGlobal<OwnProps>(
       isLoadingComments: repliesThreadInfo?.isCommentsInfo
         && loadingThread?.loadingChatId === repliesThreadInfo?.originChannelId
         && loadingThread?.loadingMessageId === repliesThreadInfo?.originMessageId,
-      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
+      shouldWarnAboutSvg,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       ...(isFocused && {

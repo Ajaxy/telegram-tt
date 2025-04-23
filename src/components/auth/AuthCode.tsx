@@ -7,8 +7,8 @@ import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import { pick } from '../../util/iteratees';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';

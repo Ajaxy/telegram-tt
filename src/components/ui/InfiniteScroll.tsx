@@ -7,10 +7,10 @@ import React, {
 import { LoadMoreDirection } from '../../types';
 
 import { requestForcedReflow } from '../../lib/fasterdom/fasterdom';
+import { IS_ANDROID } from '../../util/browser/windowEnvironment';
 import buildStyle from '../../util/buildStyle';
 import resetScroll from '../../util/resetScroll';
 import { debounce } from '../../util/schedulers';
-import { IS_ANDROID } from '../../util/windowEnvironment';
 
 import useLastCallback from '../../hooks/useLastCallback';
 

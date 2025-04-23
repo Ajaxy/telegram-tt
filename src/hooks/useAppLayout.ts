@@ -6,8 +6,8 @@ import {
   MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH,
   MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
+import { IS_IOS } from '../util/browser/windowEnvironment';
 import { createCallbackManager } from '../util/callbacks';
-import { IS_IOS } from '../util/windowEnvironment';
 import { updateSizes } from '../util/windowSize';
 import useForceUpdate from './useForceUpdate';
 

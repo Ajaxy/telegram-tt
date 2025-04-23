@@ -30,9 +30,9 @@ import {
   selectIsCurrentUserPremium,
 } from '../../global/selectors';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { pickTruthy, unique, uniqueByField } from '../../util/iteratees';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { REM } from './helpers/mediaDimensions';
 
 import useAppLayout from '../../hooks/useAppLayout';

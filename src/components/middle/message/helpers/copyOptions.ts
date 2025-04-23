@@ -13,6 +13,7 @@ import {
   hasMediaLocalBlobUrl,
 } from '../../../../global/helpers';
 import { getMessageTextWithSpoilers } from '../../../../global/helpers/messageSummary';
+import { IS_SAFARI } from '../../../../util/browser/windowEnvironment';
 import {
   CLIPBOARD_ITEM_SUPPORTED,
   copyHtmlToClipboard,
@@ -21,7 +22,6 @@ import {
 } from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
 import * as mediaLoader from '../../../../util/mediaLoader';
-import { IS_SAFARI } from '../../../../util/windowEnvironment';
 import { renderMessageText } from '../../../common/helpers/renderMessageText';
 
 type ICopyOptions = {

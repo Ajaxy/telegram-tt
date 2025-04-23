@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
 import type { ApiDocument } from '../../../api/types';
-import type { ISettings } from '../../../types';
+import type { ThemeKey } from '../../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getDocumentMediaHash } from '../../../global/helpers';
@@ -15,7 +15,7 @@ import styles from './AttachBotIcon.module.scss';
 
 type OwnProps = {
   icon: ApiDocument;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
 };
 
 const ADDITIONAL_STROKE_WIDTH = '0.5px';

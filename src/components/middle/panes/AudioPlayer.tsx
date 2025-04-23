@@ -17,10 +17,10 @@ import {
   selectChat, selectChatMessage, selectSender, selectTabState,
 } from '../../../global/selectors';
 import { makeTrackId } from '../../../util/audioPlayer';
+import { IS_IOS, IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { clearMediaSession } from '../../../util/mediaSession';
-import { IS_IOS, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import renderText from '../../common/helpers/renderText';
 
 import useAppLayout from '../../../hooks/useAppLayout';

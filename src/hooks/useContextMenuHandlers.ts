@@ -6,7 +6,7 @@ import type { IAnchorPosition } from '../types';
 import type { Signal } from '../util/signals';
 
 import { requestMutation } from '../lib/fasterdom/fasterdom';
-import { IS_IOS, IS_PWA, IS_TOUCH_ENV } from '../util/windowEnvironment';
+import { IS_IOS, IS_PWA, IS_TOUCH_ENV } from '../util/browser/windowEnvironment';
 import useLastCallback from './useLastCallback';
 
 const LONG_TAP_DURATION_MS = 200;

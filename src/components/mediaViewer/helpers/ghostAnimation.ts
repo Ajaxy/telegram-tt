@@ -5,10 +5,10 @@ import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getMessageHtmlId } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import stopEvent from '../../../util/stopEvent';
 import getOffsetToContainer from '../../../util/visibility/getOffsetToContainer';
 import { isElementInViewport } from '../../../util/visibility/isElementInViewport';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import windowSize from '../../../util/windowSize';
 import {
   calculateDimensions,

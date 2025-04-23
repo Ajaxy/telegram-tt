@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSticker, ApiStickerSet } from '../../../api/types';
-import type { ISettings } from '../../../types';
+import type { AccountSettings } from '../../../types';
 
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
 import { pick } from '../../../util/iteratees';
@@ -23,7 +23,7 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps = Pick<ISettings, (
+type StateProps = Pick<AccountSettings, (
   'shouldSuggestCustomEmoji'
 )> & {
   customEmojiSetIds?: string[];

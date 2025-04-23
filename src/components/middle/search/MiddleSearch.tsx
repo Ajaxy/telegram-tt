@@ -29,6 +29,7 @@ import {
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
+import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { getDayStartAt } from '../../../util/dates/dateFormat';
@@ -36,7 +37,6 @@ import focusEditableElement from '../../../util/focusEditableElement';
 import { getSearchResultKey, parseSearchResultKey, type SearchResultKey } from '../../../util/keys/searchResultKey';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { debounce, fastRaf } from '../../../util/schedulers';
-import { IS_IOS } from '../../../util/windowEnvironment';
 
 import { useClickOutside } from '../../../hooks/events/useOutsideClick';
 import useAppLayout from '../../../hooks/useAppLayout';

@@ -7,8 +7,8 @@ import type { Signal } from '../../../util/signals';
 import { LoadMoreDirection } from '../../../types';
 
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
+import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/browser/windowEnvironment';
 import { debounce } from '../../../util/schedulers';
-import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
 
 import { useDebouncedSignal } from '../../../hooks/useAsyncResolvers';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';

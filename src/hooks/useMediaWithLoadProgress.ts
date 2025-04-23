@@ -5,9 +5,9 @@ import {
 import { ApiMediaFormat } from '../api/types';
 
 import { selectIsSynced } from '../global/selectors';
+import { IS_PROGRESSIVE_SUPPORTED } from '../util/browser/windowEnvironment';
 import * as mediaLoader from '../util/mediaLoader';
 import { throttle } from '../util/schedulers';
-import { IS_PROGRESSIVE_SUPPORTED } from '../util/windowEnvironment';
 import useSelector from './data/useSelector';
 import useForceUpdate from './useForceUpdate';
 import useUniqueId from './useUniqueId';

@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useState } from '../../lib/teact/teact';
 
 import { ElectronEvent } from '../../types/electron';
 
-import { IS_IOS } from '../../util/windowEnvironment';
+import { IS_IOS } from '../../util/browser/windowEnvironment';
 
 type ElementType = HTMLElement;
 type RefType = {

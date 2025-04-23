@@ -14,8 +14,8 @@ import type {
 import type { LangFn } from '../../../../util/localization';
 
 import { getMessageContent } from '../../../../global/helpers';
+import { IS_SAFARI } from '../../../../util/browser/windowEnvironment';
 import buildClassName from '../../../../util/buildClassName';
-import { IS_SAFARI } from '../../../../util/windowEnvironment';
 import renderText from '../../../common/helpers/renderText';
 
 import Link from '../../../ui/Link';

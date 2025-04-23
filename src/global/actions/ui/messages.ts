@@ -13,6 +13,7 @@ import {
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
 import { cancelScrollBlockingAnimation, isAnimatingScroll } from '../../../util/animateScroll';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
@@ -20,7 +21,6 @@ import * as langProvider from '../../../util/oldLangProvider';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import versionNotification from '../../../versionNotification.txt';
 import {
   getIsSavedDialog,

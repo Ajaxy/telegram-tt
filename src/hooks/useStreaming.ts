@@ -5,8 +5,8 @@ import { DEBUG } from '../config';
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { applyStyles } from '../util/animation';
 import unloadVideo from '../util/browser/unloadVideo';
+import { IS_SAFARI } from '../util/browser/windowEnvironment';
 import { makeProgressiveLoader } from '../util/progressiveLoader';
-import { IS_SAFARI } from '../util/windowEnvironment';
 
 const VIDEO_REVEAL_DELAY = 100;
 

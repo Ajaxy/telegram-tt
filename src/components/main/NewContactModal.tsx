@@ -8,8 +8,8 @@ import type { ApiCountryCode, ApiUser, ApiUserStatus } from '../../api/types';
 
 import { getUserStatus } from '../../global/helpers';
 import { selectUser, selectUserStatus } from '../../global/selectors';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';

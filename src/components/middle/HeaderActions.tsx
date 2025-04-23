@@ -31,7 +31,7 @@ import {
   selectTranslationLanguage,
   selectUserFullInfo,
 } from '../../global/selectors';
-import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/windowEnvironment';
+import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/browser/windowEnvironment';
 
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';

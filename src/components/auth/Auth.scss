@@ -225,6 +225,12 @@
   right: 0.5rem;
 }
 
+.auth-close {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
 @keyframes qr-show {
   0% {
     opacity: 0;

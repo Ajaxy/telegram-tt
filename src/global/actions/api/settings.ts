@@ -18,12 +18,13 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addBlockedUser, addNotifyException, addNotifyExceptions, deletePeerPhoto,
   removeBlockedUser, replaceSettings, updateChat,
-  updateUser, updateUserFullInfo,
+  updateSharedSettings, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat, selectTabState, selectUser,
 } from '../../selectors';
+import { selectSharedSettings } from '../../selectors/sharedState';
 
 addActionHandler('updateProfile', async (global, actions, payload): Promise<void> => {
   const {
@@ -384,13 +385,7 @@ addActionHandler('loadLanguages', async (global): Promise<void> => {
   }
 
   global = getGlobal();
-  global = {
-    ...global,
-    settings: {
-      ...global.settings,
-      languages: result,
-    },
-  };
+  global = updateSharedSettings(global, { languages: result });
   setGlobal(global);
 });
 
@@ -586,7 +581,7 @@ addActionHandler('updateContentSettings', async (global, actions, payload): Prom
 
 addActionHandler('loadCountryList', async (global, actions, payload): Promise<void> => {
   let { langCode } = payload;
-  if (!langCode) langCode = global.settings.byKey.language;
+  if (!langCode) langCode = selectSharedSettings(global).language;
 
   const countryList = await callApi('fetchCountryList', { langCode });
   if (!countryList) return;
@@ -603,18 +598,18 @@ addActionHandler('ensureTimeFormat', async (global, actions): Promise<void> => {
   if (global.authNearestCountry) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT
       .has(global.authNearestCountry.toUpperCase()) ? '12h' : '24h';
-    actions.setSettingOption({ timeFormat });
+    actions.setSharedSettingOption({ timeFormat });
     setTimeFormat(timeFormat);
   }
 
-  if (global.settings.byKey.wasTimeFormatSetManually) {
+  if (selectSharedSettings(global).wasTimeFormatSetManually) {
     return;
   }
 
   const nearestCountryCode = await callApi('fetchNearestCountry');
   if (nearestCountryCode) {
     const timeFormat = COUNTRIES_WITH_12H_TIME_FORMAT.has(nearestCountryCode.toUpperCase()) ? '12h' : '24h';
-    actions.setSettingOption({ timeFormat });
+    actions.setSharedSettingOption({ timeFormat });
     setTimeFormat(timeFormat);
   }
 });

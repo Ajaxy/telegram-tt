@@ -1,7 +1,7 @@
 import { useEffect, useState } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import { IS_MOBILE } from '../../util/windowEnvironment';
+import { IS_MOBILE } from '../../util/browser/windowEnvironment';
 import useLastCallback from '../useLastCallback';
 import useOldLang from '../useOldLang';
 

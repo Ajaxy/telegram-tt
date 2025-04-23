@@ -1,7 +1,7 @@
 import React, { type TeactNode } from '../../../lib/teact/teact';
 
+import { IS_IOS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { IS_IOS } from '../../../util/windowEnvironment';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';

@@ -24,7 +24,7 @@ import {
   IS_PROGRESSIVE_SUPPORTED,
   IS_SAFARI,
   MAX_BUFFER_SIZE,
-} from '../../util/windowEnvironment';
+} from '../../util/browser/windowEnvironment';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
 import { getAttachmentMediaType, matchLinkInMessageText } from './messages';
 
@@ -439,7 +439,10 @@ export function getGamePreviewVideoHash(game: ApiGame) {
 
 export function appendProgressiveQueryParameters(media: ApiAudio | ApiVideo | ApiDocument, base: string) {
   if (IS_PROGRESSIVE_SUPPORTED && IS_SAFARI) {
-    return `${base}?fileSize=${media.size}&mimeType=${media.mimeType}`;
+    const url = new URL(base, window.location.href);
+    url.searchParams.append('fileSize', media.size.toString());
+    url.searchParams.append('mimeType', media.mimeType);
+    return url.toString();
   }
 
   return base;

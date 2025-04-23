@@ -9,8 +9,8 @@ import type { TabState } from '../../../global/types';
 
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
+import { getGeolocationStatus } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { getGeolocationStatus } from '../../../util/windowEnvironment';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';

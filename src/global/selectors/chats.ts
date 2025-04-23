@@ -7,8 +7,8 @@ import type { GlobalState, TabArgs } from '../types';
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SAVED_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
+import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 import {
   getHasAdminRight,
   getPrivateChatUserId,

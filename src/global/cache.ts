@@ -7,13 +7,11 @@ import type {
   ApiMessage,
 } from '../api/types';
 import type { MessageList, ThreadId } from '../types';
-import type { ActionReturnType, GlobalState } from './types';
+import type { ActionReturnType, GlobalState, SharedState } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import {
   ALL_FOLDER_ID,
-  ANIMATION_LEVEL_MED,
-  ANIMATION_LEVEL_MIN,
   ARCHIVED_FOLDER_ID,
   DEBUG,
   DEFAULT_LIMITS,
@@ -21,23 +19,24 @@ import {
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
   GLOBAL_STATE_CACHE_DISABLED,
-  GLOBAL_STATE_CACHE_KEY,
   GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
   IS_SCREEN_LOCKED_CACHE_KEY,
   SAVED_FOLDER_ID,
+  SHARED_STATE_CACHE_KEY,
 } from '../config';
 import { MAIN_IDB_STORE } from '../util/browser/idb';
 import { getOrderedIds } from '../util/folderManager';
 import {
   compact, pick, pickTruthy, unique,
 } from '../util/iteratees';
+import { GLOBAL_STATE_CACHE_KEY } from '../util/multiaccount';
 import { encryptSession } from '../util/passcode';
 import { onBeforeUnload, throttle } from '../util/schedulers';
 import { hasStoredSession } from '../util/sessions';
 import { isUserId } from './helpers';
 import { addActionHandler, getGlobal } from './index';
-import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MID, INITIAL_PERFORMANCE_STATE_MIN } from './initialState';
-import { clearGlobalForLockScreen } from './reducers';
+import { INITIAL_GLOBAL_STATE } from './initialState';
+import { clearGlobalForLockScreen, clearSharedStateForLockScreen } from './reducers';
 import {
   selectChatLastMessageId,
   selectChatMessages,
@@ -62,12 +61,24 @@ export function cacheGlobal(global: GlobalState) {
   return MAIN_IDB_STORE.set(GLOBAL_STATE_CACHE_KEY, global);
 }
 
+export function cacheSharedState(state: SharedState) {
+  return MAIN_IDB_STORE.set(SHARED_STATE_CACHE_KEY, state);
+}
+
 export function loadCachedGlobal() {
   return MAIN_IDB_STORE.get<GlobalState>(GLOBAL_STATE_CACHE_KEY);
 }
 
+export function loadCachedSharedState() {
+  return MAIN_IDB_STORE.get<SharedState>(SHARED_STATE_CACHE_KEY);
+}
+
 export function removeGlobalFromCache() {
   return MAIN_IDB_STORE.del(GLOBAL_STATE_CACHE_KEY);
+}
+
+export function removeSharedStateFromCache() {
+  return MAIN_IDB_STORE.del(SHARED_STATE_CACHE_KEY);
 }
 
 function cacheIsScreenLocked(global: GlobalState) {
@@ -148,7 +159,16 @@ async function readCache(initialState: GlobalState): Promise<GlobalState> {
   const cachedFromLocalStorage = json ? JSON.parse(json) as GlobalState : undefined;
   if (cachedFromLocalStorage) localStorage.removeItem(GLOBAL_STATE_CACHE_KEY);
 
-  const cached = cachedFromLocalStorage || await loadCachedGlobal();
+  let cached = cachedFromLocalStorage || await loadCachedGlobal();
+  const cachedSharedState = await loadCachedSharedState();
+  const sharedState = cachedSharedState || initialState.sharedState;
+
+  if (cached) {
+    cached = {
+      ...cached,
+      sharedState,
+    };
+  }
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
@@ -159,9 +179,13 @@ async function readCache(initialState: GlobalState): Promise<GlobalState> {
     migrateCache(cached, initialState);
   }
 
-  const newState = {
+  const newState: GlobalState = {
     ...initialState,
     ...cached,
+    sharedState: {
+      ...sharedState,
+      ...cached?.sharedState, // Allow migration to override shared state
+    },
   };
 
   return newState;
@@ -184,29 +208,9 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     ...cached.settings.byKey,
   };
 
-  cached.settings.themes = {
-    ...initialState.settings.themes,
-    ...cached.settings.themes,
-  };
-
   cached.chatFolders = {
     ...initialState.chatFolders,
     ...cached.chatFolders,
-  };
-
-  if (!cached.settings.performance) {
-    if (cached.settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
-      cached.settings.performance = INITIAL_PERFORMANCE_STATE_MIN;
-    } else if (cached.settings.byKey.animationLevel === ANIMATION_LEVEL_MED) {
-      cached.settings.performance = INITIAL_PERFORMANCE_STATE_MID;
-    } else {
-      cached.settings.performance = initialState.settings.performance;
-    }
-  }
-
-  cached.settings.performance = {
-    ...initialState.settings.performance,
-    ...cached.settings.performance,
   };
 
   if (cached.appConfig && !cached.appConfig.limits) {
@@ -290,19 +294,49 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   }
 
   if (cached.cacheVersion < 2) {
-    if (cached.settings.themes.dark) {
-      cached.settings.themes.dark.patternColor = initialState.settings.themes.dark!.patternColor;
+    if (untypedCached.settings.themes.dark) {
+      untypedCached.settings.themes.dark.patternColor = (initialState as any).settings.themes.dark!.patternColor;
     }
 
-    if (cached.settings.themes.light) {
-      cached.settings.themes.light.patternColor = initialState.settings.themes.light!.patternColor;
+    if (untypedCached.settings.themes.light) {
+      untypedCached.settings.themes.light.patternColor = (initialState as any).settings.themes.light!.patternColor;
     }
 
     cached.cacheVersion = 2;
   }
 
+  if (cached.appConfig?.limits && !cached.appConfig.limits.moreAccounts) {
+    cached.appConfig.limits.moreAccounts = DEFAULT_LIMITS.moreAccounts;
+  }
   if (!cached.chats.notifyExceptionById) {
     cached.chats.notifyExceptionById = initialState.chats.notifyExceptionById;
+  }
+
+  if (!cached.sharedState) {
+    cached.sharedState = initialState.sharedState;
+    cached.sharedState.settings = {
+      canDisplayChatInTitle: untypedCached.settings.byKey.canDisplayChatInTitle,
+      animationLevel: untypedCached.settings.byKey.animationLevel,
+      messageSendKeyCombo: untypedCached.settings.byKey.messageSendKeyCombo,
+      messageTextSize: untypedCached.settings.byKey.messageTextSize,
+      performance: untypedCached.settings.performance,
+      theme: untypedCached.settings.byKey.theme,
+      themes: untypedCached.settings.themes,
+      timeFormat: untypedCached.settings.byKey.timeFormat,
+      wasTimeFormatSetManually: untypedCached.settings.byKey.wasTimeFormatSetManually,
+      shouldUseSystemTheme: untypedCached.settings.byKey.shouldUseSystemTheme,
+      isConnectionStatusMinimized: untypedCached.settings.byKey.isConnectionStatusMinimized,
+      shouldForceHttpTransport: untypedCached.settings.byKey.shouldForceHttpTransport,
+      language: untypedCached.settings.byKey.language,
+      languages: untypedCached.settings.languages,
+      shouldSkipWebAppCloseConfirmation: untypedCached.settings.byKey.shouldSkipWebAppCloseConfirmation,
+      miniAppsCachedPosition: untypedCached.settings.miniAppsCachedPosition,
+      miniAppsCachedSize: untypedCached.settings.miniAppsCachedSize,
+      shouldAllowHttpTransport: untypedCached.settings.byKey.shouldAllowHttpTransport,
+      shouldCollectDebugLogs: untypedCached.settings.byKey.shouldCollectDebugLogs,
+      shouldDebugExportedSenders: untypedCached.settings.byKey.shouldDebugExportedSenders,
+      shouldWarnAboutSvg: untypedCached.settings.byKey.shouldWarnAboutSvg,
+    };
   }
 }
 
@@ -327,11 +361,13 @@ export function forceUpdateCache(noEncrypt = false) {
 
     cacheIsScreenLocked(global);
     cacheGlobal(clearGlobalForLockScreen(global, false));
+    cacheSharedState(clearSharedStateForLockScreen(global.sharedState));
     return;
   }
 
   cacheIsScreenLocked(global);
   cacheGlobal(reduceGlobal(global));
+  cacheSharedState(reduceSharedState(global.sharedState));
 }
 
 function reduceGlobal<T extends GlobalState>(global: T) {
@@ -394,6 +430,17 @@ function reduceGlobal<T extends GlobalState>(global: T) {
   };
 
   return reducedGlobal;
+}
+
+function reduceSharedState(sharedState: SharedState): SharedState {
+  return {
+    ...sharedState,
+    settings: {
+      ...sharedState.settings,
+      languages: undefined,
+    },
+    isInitial: undefined,
+  };
 }
 
 export function serializeGlobal<T extends GlobalState>(global: T) {
@@ -659,17 +706,14 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
   const {
-    byKey, themes, performance, botVerificationShownPeerIds, miniAppsCachedPosition, miniAppsCachedSize, notifyDefaults,
+    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate,
   } = global.settings;
 
   return {
     byKey,
-    themes,
-    performance,
     privacy: {},
     botVerificationShownPeerIds,
-    miniAppsCachedPosition,
-    miniAppsCachedSize,
+    lastPremiumBandwithNotificationDate,
     notifyDefaults,
   };
 }

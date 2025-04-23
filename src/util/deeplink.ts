@@ -4,8 +4,8 @@ import type { ApiChatType, ApiFormattedText } from '../api/types';
 import type { DeepLinkMethod } from './deepLinkParser';
 
 import { API_CHAT_TYPES, RE_TG_LINK } from '../config';
+import { IS_BAD_URL_PARSER } from './browser/globalEnvironment';
 import { tryParseDeepLink } from './deepLinkParser';
-import { IS_BAD_URL_PARSER } from './windowEnvironment';
 
 export const processDeepLink = (url: string): boolean => {
   const actions = getActions();

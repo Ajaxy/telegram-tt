@@ -4,8 +4,8 @@ import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import type { MenuItemContextAction } from './ListItem';
 
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
+import { IS_ANDROID, IS_IOS } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useOldLang from '../../hooks/useOldLang';

@@ -79,7 +79,7 @@ addActionHandler('unlockScreen', (global, actions, payload): ActionReturnType =>
   const beforeTabStates = Object.values(global.byTabId);
   const { sessionJson, globalJson } = payload;
   const session = JSON.parse(sessionJson);
-  storeSession(session, session.userId);
+  storeSession(session);
 
   const previousGlobal = global;
   global = JSON.parse(globalJson);

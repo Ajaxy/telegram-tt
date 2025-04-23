@@ -414,3 +414,15 @@ body:not(.is-ios) {
   --color-forum-hover-unread-topic-hover: rgb(63, 63, 63);
   --color-chat-username: rgb(233, 238, 244);
 }
+
+/* stylelint-disable-next-line scss/at-rule-no-unknown */
+@view-transition {
+  /* stylelint-disable-next-line property-no-unknown */
+  navigation: auto;
+}
+
+:root {
+  &::view-transition-group(root) {
+    animation-duration: 400ms;
+  }
+}

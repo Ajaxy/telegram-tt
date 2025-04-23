@@ -1,5 +1,5 @@
+import { IS_ELECTRON } from './browser/windowEnvironment';
 import { debounce } from './schedulers';
-import { IS_ELECTRON } from './windowEnvironment';
 
 const UPDATE_DEBOUNCE_MS = 200;
 

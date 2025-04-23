@@ -4,6 +4,7 @@ import type { ActionReturnType } from '../../types';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getWebAppKey } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { updateSharedSettings } from '../../reducers';
 import {
   addWebAppToOpenList,
   clearOpenedWebApps,
@@ -19,6 +20,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectActiveWebApp, selectCurrentMessageList, selectTabState, selectWebApp,
 } from '../../selectors';
+import { selectSharedSettings } from '../../selectors/sharedState';
 
 addActionHandler('openWebAppTab', (global, actions, payload): ActionReturnType => {
   const {
@@ -98,7 +100,7 @@ addActionHandler('closeWebAppModal', (global, actions, payload): ActionReturnTyp
   const { shouldSkipConfirmation, tabId = getCurrentTabId() } = payload || {};
 
   const shouldShowConfirmation = !shouldSkipConfirmation
-  && !global.settings.byKey.shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
+  && !selectSharedSettings(global).shouldSkipWebAppCloseConfirmation && hasOpenedMoreThanOneWebApps(global, tabId);
 
   if (shouldShowConfirmation) {
     actions.openWebAppsCloseConfirmationModal({ tabId });
@@ -120,27 +122,18 @@ addActionHandler('changeWebAppModalState', (global, actions, payload): ActionRet
 addActionHandler('updateMiniAppCachedPosition', (global, actions, payload): ActionReturnType => {
   const { position } = payload;
 
-  global = {
-    ...global,
-    settings: {
-      ...global.settings,
-      miniAppsCachedPosition: position,
-    },
-  };
-
+  global = updateSharedSettings(global, {
+    miniAppsCachedPosition: position,
+  });
   return global;
 });
 
 addActionHandler('updateMiniAppCachedSize', (global, actions, payload): ActionReturnType => {
   const { size } = payload;
 
-  global = {
-    ...global,
-    settings: {
-      ...global.settings,
-      miniAppsCachedSize: size,
-    },
-  };
+  global = updateSharedSettings(global, {
+    miniAppsCachedSize: size,
+  });
 
   return global;
 });

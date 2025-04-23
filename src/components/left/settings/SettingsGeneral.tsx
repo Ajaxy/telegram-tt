@@ -4,16 +4,16 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ISettings, TimeFormat } from '../../../types';
+import type { SharedSettings, ThemeKey, TimeFormat } from '../../../types';
 import type { IRadioOption } from '../../ui/RadioGroup';
 import { SettingsScreens } from '../../../types';
 
-import { pick } from '../../../util/iteratees';
-import { setTimeFormat } from '../../../util/oldLangProvider';
-import { getSystemTheme } from '../../../util/systemTheme';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import {
   IS_ANDROID, IS_ELECTRON, IS_IOS, IS_MAC_OS, IS_WINDOWS,
-} from '../../../util/windowEnvironment';
+} from '../../../util/browser/windowEnvironment';
+import { setTimeFormat } from '../../../util/oldLangProvider';
+import { getSystemTheme } from '../../../util/systemTheme';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -31,28 +31,26 @@ type OwnProps = {
 };
 
 type StateProps =
-  Pick<ISettings, (
+  Pick<SharedSettings, (
     'messageTextSize' |
-    'animationLevel' |
     'messageSendKeyCombo' |
-    'timeFormat'
-  )> & {
-    theme: ISettings['theme'];
-    shouldUseSystemTheme: boolean;
-  };
+    'timeFormat' |
+    'theme' |
+    'shouldUseSystemTheme'
+  )>;
 
 const SettingsGeneral: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
-  onReset,
   messageTextSize,
   messageSendKeyCombo,
   timeFormat,
   theme,
   shouldUseSystemTheme,
+  onScreenSelect,
+  onReset,
 }) => {
   const {
-    setSettingOption,
+    setSharedSettingOption,
   } = getActions();
 
   const lang = useLang();
@@ -96,26 +94,26 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     document.documentElement.style.setProperty('--message-text-size', `${newSize}px`);
     document.documentElement.setAttribute('data-message-text-size', newSize.toString());
 
-    setSettingOption({ messageTextSize: newSize });
-  }, [setSettingOption]);
+    setSharedSettingOption({ messageTextSize: newSize });
+  }, []);
 
   const handleAppearanceThemeChange = useCallback((value: string) => {
-    const newTheme = value === 'auto' ? getSystemTheme() : value as ISettings['theme'];
+    const newTheme = value === 'auto' ? getSystemTheme() : value as ThemeKey;
 
-    setSettingOption({ theme: newTheme });
-    setSettingOption({ shouldUseSystemTheme: value === 'auto' });
-  }, [setSettingOption]);
+    setSharedSettingOption({ theme: newTheme });
+    setSharedSettingOption({ shouldUseSystemTheme: value === 'auto' });
+  }, []);
 
   const handleTimeFormatChange = useCallback((newTimeFormat: string) => {
-    setSettingOption({ timeFormat: newTimeFormat as TimeFormat });
-    setSettingOption({ wasTimeFormatSetManually: true });
+    setSharedSettingOption({ timeFormat: newTimeFormat as TimeFormat });
+    setSharedSettingOption({ wasTimeFormatSetManually: true });
 
     setTimeFormat(newTimeFormat as TimeFormat);
-  }, [setSettingOption]);
+  }, []);
 
   const handleMessageSendComboChange = useCallback((newCombo: string) => {
-    setSettingOption({ messageSendKeyCombo: newCombo as ISettings['messageSendKeyCombo'] });
-  }, [setSettingOption]);
+    setSharedSettingOption({ messageSendKeyCombo: newCombo as SharedSettings['messageSendKeyCombo'] });
+  }, []);
 
   const [isTrayIconEnabled, setIsTrayIconEnabled] = useState(false);
   useEffect(() => {
@@ -204,17 +202,18 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { theme, shouldUseSystemTheme } = global.settings.byKey;
+    const {
+      theme,
+      shouldUseSystemTheme,
+      messageSendKeyCombo,
+      messageTextSize,
+      timeFormat,
+    } = selectSharedSettings(global);
 
     return {
-      ...pick(global.settings.byKey, [
-        'messageTextSize',
-        'animationLevel',
-        'messageSendKeyCombo',
-        'isSensitiveEnabled',
-        'canChangeSensitive',
-        'timeFormat',
-      ]),
+      messageSendKeyCombo,
+      messageTextSize,
+      timeFormat,
       theme,
       shouldUseSystemTheme,
     };

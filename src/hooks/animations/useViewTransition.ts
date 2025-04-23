@@ -6,8 +6,8 @@ import {
 
 import { VIEW_TRANSITION_CLASS_NAME } from '../../config';
 import { requestMutation, requestNextMutation } from '../../lib/fasterdom/fasterdom';
+import { IS_VIEW_TRANSITION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import Deferred from '../../util/Deferred';
-import { IS_VIEW_TRANSITION_SUPPORTED } from '../../util/windowEnvironment';
 
 type TransitionFunction = () => Promise<void> | void;
 

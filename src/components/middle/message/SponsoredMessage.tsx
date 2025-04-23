@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSponsoredMessage } from '../../../api/types';
-import type { ISettings } from '../../../types';
+import type { ThemeKey } from '../../../types';
 import { MediaViewerOrigin } from '../../../types';
 
 import {
@@ -19,8 +19,8 @@ import {
   selectSponsoredMessage,
   selectTheme,
 } from '../../../global/selectors';
+import { IS_ANDROID } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { IS_ANDROID } from '../../../util/windowEnvironment';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
 import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT } from './helpers/mediaDimensions';
@@ -52,7 +52,7 @@ type OwnProps = {
 
 type StateProps = {
   message?: ApiSponsoredMessage;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   isDownloading?: boolean;
   canAutoLoadMedia?: boolean;
   canAutoPlayMedia?: boolean;

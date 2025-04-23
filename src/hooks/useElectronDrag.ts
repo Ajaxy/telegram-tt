@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import { useEffect, useRef } from '../lib/teact/teact';
 
-import { IS_ELECTRON, IS_MAC_OS } from '../util/windowEnvironment';
+import { IS_ELECTRON, IS_MAC_OS } from '../util/browser/windowEnvironment';
 
 const DRAG_DISTANCE_THRESHOLD = 5;
 

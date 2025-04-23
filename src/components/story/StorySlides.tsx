@@ -14,6 +14,7 @@ import {
   selectPeer,
   selectTabState,
 } from '../../global/selectors';
+import { IS_IOS } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import {
@@ -25,7 +26,6 @@ import {
 import focusEditableElement from '../../util/focusEditableElement';
 import { clamp } from '../../util/math';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
-import { IS_IOS } from '../../util/windowEnvironment';
 import { calculateOffsetX } from './helpers/dimensions';
 
 import useAppLayout from '../../hooks/useAppLayout';

@@ -64,7 +64,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus, collectibleStatuses }) => {
   }, [openStatusPicker]);
 
   return (
-    <div className="extra-spacing">
+    <div className="StatusButton extra-spacing">
       {Boolean(isEffectShown && emojiStatus) && (
         <CustomEmojiEffect
           reaction={emojiStatus!}

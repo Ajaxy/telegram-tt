@@ -1,7 +1,7 @@
 import type React from '../../../lib/teact/teact';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-import { IS_IOS } from '../../../util/windowEnvironment';
+import { IS_IOS } from '../../../util/browser/windowEnvironment';
 
 export function preventMessageInputBlur(e: React.MouseEvent<HTMLElement>, withBubbling = false) {
   if (

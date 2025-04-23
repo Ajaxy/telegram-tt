@@ -5,7 +5,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiMessage } from '../../../api/types';
 import type { GlobalState, TabState } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { IAlbum, ISettings } from '../../../types';
+import type { IAlbum, ThemeKey } from '../../../types';
 import type { IAlbumLayout } from './helpers/calculateAlbumLayout';
 
 import {
@@ -42,7 +42,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   uploadsByKey: GlobalState['fileUploads']['byMessageKey'];
   activeDownloads: TabState['activeDownloads'];
 };

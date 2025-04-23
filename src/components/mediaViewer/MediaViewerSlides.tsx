@@ -8,6 +8,7 @@ import type { RealTouchEvent } from '../../util/captureEvents';
 import type { MediaViewerItem } from './helpers/getViewableMedia';
 
 import { animateNumber, timingFunctions } from '../../util/animation';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import {
   captureEvents,
@@ -17,7 +18,6 @@ import {
 } from '../../util/captureEvents';
 import { clamp, isBetween, round } from '../../util/math';
 import { debounce } from '../../util/schedulers';
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import useTimeout from '../../hooks/schedulers/useTimeout';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';

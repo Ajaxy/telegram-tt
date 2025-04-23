@@ -22,6 +22,8 @@ export type MenuItemProps = {
   clickArg?: number;
   onContextMenu?: (e: React.UIEvent) => void;
   href?: string;
+  rel?: string;
+  target?: string;
   download?: string;
   disabled?: boolean;
   destructive?: boolean;
@@ -45,11 +47,13 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     children,
     onClick,
     href,
+    target,
     download,
     disabled,
     destructive,
     ariaLabel,
     withWrap,
+    rel = 'noopener noreferrer',
     onContextMenu,
     clickArg,
     withPreventDefaultOnMouseDown,
@@ -102,7 +106,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     </>
   );
 
-  if (href) {
+  if (href && !disabled) {
     return (
       <a
         tabIndex={0}
@@ -111,8 +115,8 @@ const MenuItem: FC<MenuItemProps> = (props) => {
         download={download}
         aria-label={ariaLabel}
         title={ariaLabel}
-        target={href.startsWith(window.location.origin) || IS_TEST ? '_self' : '_blank'}
-        rel="noopener noreferrer"
+        target={target || (href.startsWith(window.location.origin) || IS_TEST ? '_self' : '_blank')}
+        rel={rel}
         dir={lang.isRtl ? 'rtl' : undefined}
         onClick={onClick}
         onMouseDown={handleMouseDown}

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from '../../../../lib/teact/teact';
 
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
+import { IS_SAFARI, IS_VOICE_RECORDING_SUPPORTED } from '../../../../util/browser/windowEnvironment';
 import captureEscKeyListener from '../../../../util/captureEscKeyListener';
 import * as voiceRecording from '../../../../util/voiceRecording';
-import { IS_SAFARI, IS_VOICE_RECORDING_SUPPORTED } from '../../../../util/windowEnvironment';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 

@@ -1,9 +1,9 @@
 import { useCallback, useLayoutEffect, useState } from '../lib/teact/teact';
 
 import { DEBUG } from '../config';
+import { IS_IOS, IS_PWA } from '../util/browser/windowEnvironment';
 import safePlay, { getIsVideoPlaying } from '../util/safePlay';
 import { createSignal } from '../util/signals';
-import { IS_IOS, IS_PWA } from '../util/windowEnvironment';
 
 type RefType = {
   current: HTMLVideoElement | null;

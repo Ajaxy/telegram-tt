@@ -1,6 +1,6 @@
+import { IS_IOS } from './browser/windowEnvironment';
 import { animate } from './animation';
 import { fastRaf } from './schedulers';
-import { IS_IOS } from './windowEnvironment';
 
 const TEST_INTERVAL = 5000; // 5 sec
 const FRAMES_TO_TEST = 10;

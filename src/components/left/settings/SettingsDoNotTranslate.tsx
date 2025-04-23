@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ISettings } from '../../../types';
+import type { AccountSettings } from '../../../types';
 
 import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
@@ -50,7 +50,7 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps = Pick<ISettings, 'doNotTranslate'>;
+type StateProps = Pick<AccountSettings, 'doNotTranslate'>;
 
 const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
   isActive,

@@ -5,9 +5,14 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import { DEBUG_LOG_FILENAME } from '../../../config';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import {
+  IS_ELECTRON,
+  IS_SNAP_EFFECT_SUPPORTED,
+  IS_WAVE_TRANSFORM_SUPPORTED,
+} from '../../../util/browser/windowEnvironment';
 import { getDebugLogs } from '../../../util/debugConsole';
 import download from '../../../util/download';
-import { IS_ELECTRON, IS_SNAP_EFFECT_SUPPORTED, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -39,7 +44,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
   shouldCollectDebugLogs,
   shouldDebugExportedSenders,
 }) => {
-  const { requestConfetti, setSettingOption, requestWave } = getActions();
+  const { requestConfetti, setSharedSettingOption, requestWave } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const snapButtonRef = useRef<HTMLDivElement>(null);
@@ -128,7 +133,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
           label="Allow HTTP Transport"
           checked={Boolean(shouldAllowHttpTransport)}
           // eslint-disable-next-line react/jsx-no-bind
-          onCheck={() => setSettingOption({ shouldAllowHttpTransport: !shouldAllowHttpTransport })}
+          onCheck={() => setSharedSettingOption({ shouldAllowHttpTransport: !shouldAllowHttpTransport })}
         />
 
         <Checkbox
@@ -136,21 +141,21 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
           disabled={!shouldAllowHttpTransport}
           checked={Boolean(shouldForceHttpTransport)}
           // eslint-disable-next-line react/jsx-no-bind
-          onCheck={() => setSettingOption({ shouldForceHttpTransport: !shouldForceHttpTransport })}
+          onCheck={() => setSharedSettingOption({ shouldForceHttpTransport: !shouldForceHttpTransport })}
         />
 
         <Checkbox
           label={lang('DebugMenuEnableLogs')}
           checked={Boolean(shouldCollectDebugLogs)}
           // eslint-disable-next-line react/jsx-no-bind
-          onCheck={() => setSettingOption({ shouldCollectDebugLogs: !shouldCollectDebugLogs })}
+          onCheck={() => setSharedSettingOption({ shouldCollectDebugLogs: !shouldCollectDebugLogs })}
         />
 
         <Checkbox
           label="Enable exported senders debug"
           checked={Boolean(shouldDebugExportedSenders)}
           // eslint-disable-next-line react/jsx-no-bind
-          onCheck={() => setSettingOption({ shouldDebugExportedSenders: !shouldDebugExportedSenders })}
+          onCheck={() => setSharedSettingOption({ shouldDebugExportedSenders: !shouldDebugExportedSenders })}
         />
 
         {IS_ELECTRON && (
@@ -174,11 +179,18 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
+    const {
+      shouldForceHttpTransport,
+      shouldAllowHttpTransport,
+      shouldCollectDebugLogs,
+      shouldDebugExportedSenders,
+    } = selectSharedSettings(global);
+
     return {
-      shouldForceHttpTransport: global.settings.byKey.shouldForceHttpTransport,
-      shouldAllowHttpTransport: global.settings.byKey.shouldAllowHttpTransport,
-      shouldCollectDebugLogs: global.settings.byKey.shouldCollectDebugLogs,
-      shouldDebugExportedSenders: global.settings.byKey.shouldDebugExportedSenders,
+      shouldForceHttpTransport,
+      shouldAllowHttpTransport,
+      shouldCollectDebugLogs,
+      shouldDebugExportedSenders,
     };
   },
 )(SettingsExperimental));

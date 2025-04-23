@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiMessage } from '../../../api/types';
-import type { ISettings } from '../../../types';
+import type { ThemeKey } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -27,7 +27,7 @@ type OwnProps = {
   shouldAffectAppendix?: boolean;
   isInSelectMode?: boolean;
   isSelected?: boolean;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   forcedWidth?: number;
 };
 

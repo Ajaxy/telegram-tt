@@ -6,10 +6,10 @@ import { AudioOrigin, GlobalSearchContent } from '../types';
 
 import { requestNextMutation } from '../lib/fasterdom/fasterdom';
 import { selectCurrentMessageList, selectTabState } from '../global/selectors';
+import { IS_SAFARI } from './browser/windowEnvironment';
 import { getMessageServerKey, parseMessageKey } from './keys/messageKey';
 import { isSafariPatchInProgress, patchSafariProgressiveAudio } from './patchSafariProgressiveAudio';
 import safePlay from './safePlay';
-import { IS_SAFARI } from './windowEnvironment';
 
 type Handler = (eventName: string, e: Event) => void;
 export type TrackId = `${MessageKey}-${number}`;

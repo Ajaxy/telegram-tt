@@ -6,8 +6,8 @@ import type { Signal } from '../../../../util/signals';
 
 import { EMOJI_IMG_REGEX } from '../../../../config';
 import twemojiRegex from '../../../../lib/twemojiRegex';
+import { IS_EMOJI_SUPPORTED } from '../../../../util/browser/windowEnvironment';
 import parseEmojiOnlyString from '../../../../util/emoji/parseEmojiOnlyString';
-import { IS_EMOJI_SUPPORTED } from '../../../../util/windowEnvironment';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';

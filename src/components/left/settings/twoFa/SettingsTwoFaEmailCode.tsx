@@ -7,7 +7,7 @@ import { withGlobal } from '../../../../global';
 import type { ApiSticker } from '../../../../api/types';
 
 import { selectAnimatedEmoji, selectTabState } from '../../../../global/selectors';
-import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
+import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 
 import useAppLayout from '../../../../hooks/useAppLayout';
 import useHistoryBack from '../../../../hooks/useHistoryBack';

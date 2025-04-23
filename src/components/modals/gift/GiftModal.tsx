@@ -62,7 +62,7 @@ const SCROLL_THROTTLE = 200;
 
 const runThrottledForScroll = throttle((cb) => cb(), SCROLL_THROTTLE, true);
 
-const PremiumGiftModal: FC<OwnProps & StateProps> = ({
+const GiftModal: FC<OwnProps & StateProps> = ({
   modal,
   starGiftsById,
   starGiftIdsByCategory,
@@ -370,7 +370,7 @@ export default memo(withGlobal<OwnProps>((global, { modal }): StateProps => {
     peer,
     isSelf,
   };
-})(PremiumGiftModal));
+})(GiftModal));
 
 function getCategoryKey(category: StarGiftCategory) {
   if (category === 'all') return -2;

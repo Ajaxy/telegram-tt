@@ -10,7 +10,7 @@ import type {
   ApiSticker,
   ApiStickerSet,
 } from '../../../api/types';
-import type { ISettings } from '../../../types';
+import type { AccountSettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
@@ -36,7 +36,7 @@ type OwnProps = {
 };
 
 type StateProps =
-  Pick<ISettings, (
+  Pick<AccountSettings, (
     'shouldSuggestStickers' | 'shouldUpdateStickerSetOrder'
   )> & {
     addedSetIds?: string[];

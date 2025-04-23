@@ -1,15 +1,14 @@
 /* eslint-disable eslint-multitab-tt/set-global-only-variable */
-import { onFullyIdle } from '../lib/teact/teact';
-import { addCallback } from '../lib/teact/teactn';
-import { getActions, getGlobal, setGlobal } from '../global';
+import { onFullyIdle } from '../../lib/teact/teact';
+import { addCallback } from '../../lib/teact/teactn';
+import { getActions, getGlobal, setGlobal } from '../../global';
 
-import type { LocalDb } from '../api/gramjs/localDb';
-import type { MethodArgs, Methods } from '../api/gramjs/methods/types';
-import type { ApiInitialArgs } from '../api/types';
-import type { GlobalState } from '../global/types';
+import type { LocalDb } from '../../api/gramjs/localDb';
+import type { MethodArgs, Methods } from '../../api/gramjs/methods/types';
+import type { ApiInitialArgs } from '../../api/types';
+import type { GlobalState } from '../../global/types';
 
-import { DATA_BROADCAST_CHANNEL_NAME, MULTITAB_LOCALSTORAGE_KEY } from '../config';
-import { selectTabState } from '../global/selectors';
+import { selectTabState } from '../../global/selectors';
 import {
   callApiLocal,
   cancelApiProgressMaster,
@@ -18,12 +17,12 @@ import {
   initApi,
   updateFullLocalDb,
   updateLocalDb,
-} from '../api/gramjs';
-import { deepDiff } from './deepDiff';
-import { deepMerge } from './deepMerge';
-import { getCurrentTabId, signalPasscodeHash, subscribeToTokenDied } from './establishMultitabRole';
-import { omit } from './iteratees';
-import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
+} from '../../api/gramjs';
+import { deepDiff } from '../deepDiff';
+import { deepMerge } from '../deepMerge';
+import { getCurrentTabId, signalPasscodeHash, subscribeToTokenDied } from '../establishMultitabRole';
+import { omit } from '../iteratees';
+import { DATA_BROADCAST_CHANNEL_NAME, MULTITAB_STORAGE_KEY } from '../multiaccount';
 
 type BroadcastChannelRefreshLangpack = {
   type: 'langpackRefresh';
@@ -115,9 +114,7 @@ let isFirstGlobalResolved = false;
 let currentGlobal: GlobalState | undefined;
 let isDisabled = false;
 
-const channel = IS_MULTITAB_SUPPORTED
-  ? new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel
-  : undefined;
+const channel = new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel;
 
 let isBroadcastDiffScheduled = false;
 let lastBroadcastDiffGlobal: GlobalState | undefined;
@@ -129,8 +126,6 @@ function broadcastDiffOnIdle() {
   lastBroadcastDiffGlobal = currentGlobal;
 
   onFullyIdle(() => {
-    if (!channel) return;
-
     const diff = deepDiff(lastBroadcastDiffGlobal, currentGlobal);
 
     if (typeof diff !== 'symbol') {
@@ -145,15 +140,11 @@ function broadcastDiffOnIdle() {
 }
 
 export function unsubcribeFromMultitabBroadcastChannel() {
-  if (channel) {
-    channel.removeEventListener('message', handleMessage);
-    isDisabled = true;
-  }
+  channel.removeEventListener('message', handleMessage);
+  isDisabled = true;
 }
 
 export function subscribeToMultitabBroadcastChannel() {
-  if (!channel) return;
-
   subscribeToTokenDied((token) => {
     if (token === getCurrentTabId()) {
       unsubcribeFromMultitabBroadcastChannel();
@@ -210,7 +201,7 @@ export function subscribeToMultitabBroadcastChannel() {
 }
 
 export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
-  if (!data || !channel) return;
+  if (!data) return;
 
   switch (data.type) {
     case 'initApi': {
@@ -374,12 +365,10 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
 }
 
 export function requestGlobal(appVersion: string): Promise<void> {
-  if (channel) {
-    channel.postMessage({
-      type: 'requestGlobal',
-      appVersion,
-    });
-  }
+  channel.postMessage({
+    type: 'requestGlobal',
+    appVersion,
+  });
 
   const resolveWithoutGlobal = () => {
     if (resolveGlobalPromise) {
@@ -389,7 +378,7 @@ export function requestGlobal(appVersion: string): Promise<void> {
     isFirstGlobalResolved = true;
   };
 
-  if (localStorage.getItem(MULTITAB_LOCALSTORAGE_KEY)) {
+  if (localStorage.getItem(MULTITAB_STORAGE_KEY)) {
     setTimeout(resolveWithoutGlobal, MULTITAB_ESTABLISH_TIMEOUT);
   } else {
     resolveWithoutGlobal();
@@ -402,8 +391,6 @@ export function requestGlobal(appVersion: string): Promise<void> {
 }
 
 export function notifyLangpackUpdate(langCode: string) {
-  if (!channel) return;
-
   channel.postMessage({
     type: 'langpackRefresh',
     langCode,

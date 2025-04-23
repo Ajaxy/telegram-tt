@@ -14,9 +14,9 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getUserStreams, THRESHOLD } from '../../../lib/secret-sauce';
 import { selectChat, selectUser } from '../../../global/selectors';
 import { animate } from '../../../util/animation';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { fastRaf } from '../../../util/schedulers';
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 import formatGroupCallVolume from './helpers/formatGroupCallVolume';
 
 import useInterval from '../../../hooks/schedulers/useInterval';

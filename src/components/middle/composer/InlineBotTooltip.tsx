@@ -7,11 +7,11 @@ import type {
 } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { throttle } from '../../../util/schedulers';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';

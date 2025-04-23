@@ -57,6 +57,7 @@ import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 import type { ReducerAction } from '../../hooks/useReducer';
 import type { P2pMessage } from '../../lib/secret-sauce';
 import type {
+  AccountSettings,
   AudioOrigin,
   CallSound,
   ChatListType,
@@ -64,7 +65,6 @@ import type {
   GiftProfileFilterOptions,
   GlobalSearchContent,
   IAnchorPosition,
-  ISettings,
   IThemeSettings,
   LoadMoreDirection,
   ManagementScreens,
@@ -92,6 +92,7 @@ import type {
 } from '../../types';
 import type { WebApp, WebAppModalStateType, WebAppOutboundEvent } from '../../types/webapp';
 import type { DownloadableMedia } from '../helpers';
+import type { SharedState } from './sharedState';
 import type { TabState } from './tabState';
 
 export type WithTabId = { tabId?: number };
@@ -172,7 +173,8 @@ export interface ActionPayloads {
   closeChatInviteModal: WithTabId | undefined;
 
   // settings
-  setSettingOption: Partial<ISettings> | undefined;
+  setSettingOption: Partial<AccountSettings> | undefined;
+  setSharedSettingOption: Partial<SharedState['settings']> | undefined;
   updatePerformanceSettings: Partial<PerformanceType>;
   loadPasswordInfo: undefined;
   clearTwoFaError: undefined;

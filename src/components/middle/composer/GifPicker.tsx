@@ -8,8 +8,8 @@ import type { ApiVideo } from '../../../api/types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { selectCurrentMessageList, selectIsChatWithSelf } from '../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';

@@ -1,11 +1,11 @@
 import { animate } from '../../util/animation';
+import {
+  IS_ANDROID, IS_IOS, IS_SAFARI,
+} from '../../util/browser/windowEnvironment';
 import cycleRestrict from '../../util/cycleRestrict';
 import Deferred from '../../util/Deferred';
 import generateUniqueId from '../../util/generateUniqueId';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
-import {
-  IS_ANDROID, IS_IOS, IS_SAFARI,
-} from '../../util/windowEnvironment';
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
 interface Params {

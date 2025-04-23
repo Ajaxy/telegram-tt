@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from '../../../lib/teact/teact';
 
 import type { ApiMediaExtendedPreview, ApiPhoto } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { ISettings } from '../../../types';
+import type { ThemeKey } from '../../../types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
@@ -49,7 +49,7 @@ export type OwnProps<T> = {
   nonInteractive?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   className?: string;
   clickArg?: T;
   onClick?: (arg: T, e: React.MouseEvent<HTMLElement>) => void;

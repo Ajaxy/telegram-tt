@@ -1,7 +1,7 @@
 import type { GlobalState } from '../global/types';
 
 import { IS_MOCKED_CLIENT } from '../config';
-import { loadCache } from '../global/cache';
+import { loadCache, loadCachedSharedState } from '../global/cache';
 import {
   getGlobal, setGlobal,
 } from '../global/index';
@@ -17,7 +17,8 @@ export async function initGlobal(force: boolean = false, prevGlobal?: GlobalStat
   }
 
   const initial = cloneDeep(INITIAL_GLOBAL_STATE);
-  let global = await loadCache(initial) || initial;
+  const cache = await loadCache(initial);
+  let global = cache || initial;
   if (IS_MOCKED_CLIENT) global.authState = 'authorizationStateReady';
 
   const { hasPasscode, isScreenLocked } = global.passcode;
@@ -31,9 +32,13 @@ export async function initGlobal(force: boolean = false, prevGlobal?: GlobalStat
 
   if (force) {
     global.byTabId = prevGlobal.byTabId;
+  }
 
-    // Keep the theme if it was set before
-    global.settings.byKey.theme = prevGlobal.settings.byKey.theme;
+  if (!cache) { // Try loading shared state separately
+    const storedSharedState = await loadCachedSharedState();
+    if (storedSharedState) {
+      global.sharedState = storedSharedState;
+    }
   }
 
   setGlobal(global);

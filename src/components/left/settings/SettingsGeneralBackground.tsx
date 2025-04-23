@@ -9,7 +9,7 @@ import type { ThemeKey } from '../../../types';
 import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
 import { DARK_THEME_PATTERN_COLOR, DEFAULT_PATTERN_COLOR } from '../../../config';
-import { selectTheme } from '../../../global/selectors';
+import { selectTheme, selectThemeValues } from '../../../global/selectors';
 import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
 import { validateFiles } from '../../../util/files';
 import { throttle } from '../../../util/schedulers';
@@ -173,7 +173,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const theme = selectTheme(global);
-    const { background, isBlurred } = global.settings.themes[theme] || {};
+    const { background, isBlurred } = selectThemeValues(global, theme) || {};
     const { loadedWallpapers } = global.settings;
 
     return {

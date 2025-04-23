@@ -74,7 +74,7 @@ const Document = ({
   onMediaClick,
   onDateClick,
 }: OwnProps) => {
-  const { cancelMediaDownload, downloadMedia, setSettingOption } = getActions();
+  const { cancelMediaDownload, downloadMedia, setSharedSettingOption } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -158,7 +158,7 @@ const Document = ({
   });
 
   const handleSvgConfirm = useLastCallback(() => {
-    setSettingOption({ shouldWarnAboutSvg: !shouldNotWarnAboutSvg });
+    setSharedSettingOption({ shouldWarnAboutSvg: !shouldNotWarnAboutSvg });
     closeSvgDialog();
     handleDownload();
   });

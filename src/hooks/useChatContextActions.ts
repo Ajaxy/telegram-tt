@@ -9,8 +9,8 @@ import {
   getCanDeleteChat, isChatArchived, isChatChannel, isChatGroup,
   isUserId,
 } from '../global/helpers';
+import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/browser/windowEnvironment';
 import { compact } from '../util/iteratees';
-import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
 import useOldLang from './useOldLang';
 
 const useChatContextActions = ({

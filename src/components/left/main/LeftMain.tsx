@@ -9,8 +9,8 @@ import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
 
 import { PRODUCTION_URL } from '../../../config';
+import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLastCallback from '../../../hooks/useLastCallback';

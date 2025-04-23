@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
 
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
-import { IS_TOUCH_ENV } from '../util/windowEnvironment';
+import { IS_TOUCH_ENV } from '../util/browser/windowEnvironment';
 
 const DEFAULT_DURATION = 300;
 

@@ -19,10 +19,10 @@ import {
   FRESH_AUTH_PERIOD,
   SAVED_FOLDER_ID,
 } from '../../../config';
+import { IS_APP, IS_MAC_OS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderKey, getPinnedChatsCount } from '../../../util/folderManager';
 import { getServerTime } from '../../../util/serverTime';
-import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import usePeerStoriesPolling from '../../../hooks/polling/usePeerStoriesPolling';
 import useTopOverscroll from '../../../hooks/scroll/useTopOverscroll';

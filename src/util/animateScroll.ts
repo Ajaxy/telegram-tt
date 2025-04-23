@@ -12,9 +12,9 @@ import {
 } from '../config';
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../global/selectors';
+import { IS_ANDROID } from './browser/windowEnvironment';
 import getOffsetToContainer from './visibility/getOffsetToContainer';
 import { animateSingle, cancelSingleAnimation } from './animation';
-import { IS_ANDROID } from './windowEnvironment';
 
 export type AnimateScrollArgs = {
   container: HTMLElement;

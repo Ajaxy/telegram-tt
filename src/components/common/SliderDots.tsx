@@ -1,8 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback } from '../../lib/teact/teact';
 
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import Button from '../ui/Button';
 import Icon from './icons/Icon';

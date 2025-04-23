@@ -5,7 +5,7 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { ApiAttachBot } from '../../../api/types';
-import type { IAnchorPosition, ISettings, ThreadId } from '../../../types';
+import type { IAnchorPosition, ThemeKey, ThreadId } from '../../../types';
 
 import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -17,7 +17,7 @@ import AttachBotIcon from './AttachBotIcon';
 
 type OwnProps = {
   bot: ApiAttachBot;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   isInSideMenu?: true;
   chatId?: string;
   threadId?: ThreadId;

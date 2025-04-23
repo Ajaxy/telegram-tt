@@ -1,4 +1,4 @@
-import type { ISettings } from '../../../../types';
+import type { ThemeKey } from '../../../../types';
 
 import { MAX_WORKERS, requestMediaWorker } from '../../../../util/launchMediaWorkers';
 
@@ -14,7 +14,7 @@ const SELECTED_APPENDIX_COLORS = {
 };
 
 export default function getCustomAppendixBg(
-  src: string, isOwn: boolean, id: number, isSelected?: boolean, theme?: ISettings['theme'],
+  src: string, isOwn: boolean, id: number, isSelected?: boolean, theme?: ThemeKey,
 ) {
   if (isSelected) {
     return Promise.resolve(SELECTED_APPENDIX_COLORS[theme || 'light'][isOwn ? 'outgoing' : 'incoming']);

@@ -22,6 +22,7 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getAttachmentMediaType, isUserId } from '../../../global/helpers';
 import { selectChatFullInfo, selectIsChatWithSelf } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { validateFiles } from '../../../util/files';
@@ -750,7 +751,8 @@ export default memo(withGlobal<OwnProps>(
 
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-    const { language, shouldSuggestCustomEmoji } = global.settings.byKey;
+    const { shouldSuggestCustomEmoji } = global.settings.byKey;
+    const { language } = selectSharedSettings(global);
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
 

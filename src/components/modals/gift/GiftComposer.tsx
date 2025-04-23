@@ -14,8 +14,7 @@ import {
 } from '../../../global/helpers';
 import { getPeerTitle, isApiPeerUser } from '../../../global/helpers/peers';
 import {
-  selectPeer, selectPeerPaidMessagesStars,
-  selectTabState, selectTheme,
+  selectPeer, selectPeerPaidMessagesStars, selectTabState, selectTheme, selectThemeValues,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
@@ -386,7 +385,7 @@ export default memo(withGlobal<OwnProps>(
       patternColor,
       background: customBackground,
       backgroundColor,
-    } = global.settings.themes[theme] || {};
+    } = selectThemeValues(global, theme) || {};
     const peer = selectPeer(global, peerId);
     const paidMessagesStars = selectPeerPaidMessagesStars(global, peerId);
 

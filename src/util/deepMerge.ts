@@ -1,8 +1,10 @@
+import type { DiffObject } from './deepDiff';
+
 import { isLiteralObject, unique } from './iteratees';
 
-export function deepMerge<T extends any>(value1: T, value2: T): T {
+export function deepMerge<T extends object>(value1: T, value2: DiffObject<T>): T {
   if (value1 === value2) {
-    return value2;
+    return value2 as unknown as T;
   }
 
   if (!isLiteralObject(value2)) {
@@ -14,19 +16,19 @@ export function deepMerge<T extends any>(value1: T, value2: T): T {
   }
 
   // eslint-disable-next-line no-underscore-dangle
-  if (value2.__deleteAllChildren) {
+  if ('__deleteAllChildren' in value2) {
     return {} as T;
   }
 
   const allKeys = unique(Object.keys(value1).concat(Object.keys(value2)));
 
   return allKeys.reduce((acc: AnyLiteral, key) => {
-    const oldValue = value1[key];
+    const oldValue = (value1 as AnyLiteral)[key];
 
     if (!value2.hasOwnProperty(key)) {
       acc[key] = oldValue;
     } else {
-      const newValue = value2[key];
+      const newValue = (value2 as AnyLiteral)[key];
       // eslint-disable-next-line no-underscore-dangle
       if (!newValue?.__delete) {
         acc[key] = deepMerge(oldValue, newValue);

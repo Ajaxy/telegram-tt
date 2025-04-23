@@ -15,6 +15,7 @@ import {
   selectSelectedMessagesCount,
   selectTabState,
 } from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
@@ -75,7 +76,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     showNotification,
     reportMessages,
     openDeleteMessageModal,
-    setSettingOption,
+    setSharedSettingOption,
   } = getActions();
   const lang = useOldLang();
 
@@ -133,7 +134,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   });
 
   const handleSvgConfirm = useLastCallback(() => {
-    setSettingOption({ shouldWarnAboutSvg: false });
+    setSharedSettingOption({ shouldWarnAboutSvg: false });
     closeSvgDialog();
     handleDownload();
   });
@@ -238,7 +239,9 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const tabState = selectTabState(global);
+    const { shouldWarnAboutSvg } = selectSharedSettings(global);
     const chat = selectCurrentChat(global);
+
     const { type: messageListType, chatId } = selectCurrentMessageList(global) || {};
     const isSchedule = messageListType === 'scheduled';
     const { canDelete } = selectCanDeleteSelectedMessages(global);
@@ -263,7 +266,7 @@ export default memo(withGlobal<OwnProps>(
       selectedMessageIds,
       hasProtectedMessage,
       isAnyModalOpen,
-      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
+      shouldWarnAboutSvg,
     };
   },
 )(MessageSelectToolbar));

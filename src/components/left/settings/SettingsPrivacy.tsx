@@ -7,6 +7,7 @@ import type { GlobalState } from '../../../global/types';
 import { SettingsScreens } from '../../../types';
 
 import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -66,7 +67,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadGlobalPrivacySettings,
     updateGlobalPrivacySettings,
     loadWebAuthorizations,
-    setSettingOption,
+    setSharedSettingOption,
   } = getActions();
 
   useEffect(() => {
@@ -97,7 +98,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   }, [updateGlobalPrivacySettings]);
 
   const handleChatInTitleChange = useCallback((isChecked: boolean) => {
-    setSettingOption({
+    setSharedSettingOption({
       canDisplayChatInTitle: isChecked,
     });
   }, []);
@@ -405,7 +406,7 @@ export default memo(withGlobal<OwnProps>(
       settings: {
         byKey: {
           hasPassword, isSensitiveEnabled, canChangeSensitive, shouldArchiveAndMuteNewNonContact,
-          canDisplayChatInTitle, shouldNewNonContactPeersRequirePremium, nonContactPeersPaidStars,
+          shouldNewNonContactPeersRequirePremium, nonContactPeersPaidStars,
         },
         privacy,
       },
@@ -416,6 +417,7 @@ export default memo(withGlobal<OwnProps>(
       appConfig,
     } = global;
 
+    const { canDisplayChatInTitle } = selectSharedSettings(global);
     const shouldChargeForMessages = Boolean(nonContactPeersPaidStars);
 
     return {

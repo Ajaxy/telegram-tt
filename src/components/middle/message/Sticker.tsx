@@ -7,8 +7,8 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getStickerMediaHash } from '../../../global/helpers';
+import { IS_WEBM_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { IS_WEBM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 
 import useAppLayout from '../../../hooks/useAppLayout';

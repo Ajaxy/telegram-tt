@@ -17,9 +17,9 @@ import {
   isDeletedUser,
   isUserId,
 } from '../../global/helpers';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 

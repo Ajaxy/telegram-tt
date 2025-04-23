@@ -1,17 +1,17 @@
 import type { Api } from '../../../lib/gramjs';
-import type { TypedBroadcastChannel } from '../../../util/multitab';
+import type { TypedBroadcastChannel } from '../../../util/browser/multitab';
 import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
 import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
 import type { OriginPayload, ThenArg, WorkerMessageEvent } from './types';
 
-import { DATA_BROADCAST_CHANNEL_NAME, DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
+import { DEBUG, IGNORE_UNHANDLED_ERRORS } from '../../../config';
 import { logDebugMessage } from '../../../util/debugConsole';
 import Deferred from '../../../util/Deferred';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
+import { ACCOUNT_SLOT, DATA_BROADCAST_CHANNEL_NAME } from '../../../util/multiaccount';
 import { pause, throttleWithTickEnd } from '../../../util/schedulers';
-import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
 
 type RequestState = {
   messageId: string;
@@ -48,9 +48,7 @@ subscribeToMasterChange((isMasterTabNew) => {
   isMasterTab = isMasterTabNew;
 });
 
-const channel = IS_MULTITAB_SUPPORTED
-  ? new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel
-  : undefined;
+const channel = new BroadcastChannel(DATA_BROADCAST_CHANNEL_NAME) as TypedBroadcastChannel;
 
 const postMessagesOnTickEnd = throttleWithTickEnd(() => {
   const payloads = pendingPayloads;
@@ -64,8 +62,6 @@ function postMessageOnTickEnd(payload: OriginPayload) {
 }
 
 export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
-  if (!channel) return;
-
   channel.postMessage({
     type: 'initApi',
     token: getCurrentTabId(),
@@ -93,7 +89,14 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
       console.log('>>> START LOAD WORKER');
     }
 
-    worker = new Worker(new URL('./worker.ts', import.meta.url));
+    const params = new URLSearchParams();
+    if (ACCOUNT_SLOT) {
+      params.set('account', String(ACCOUNT_SLOT));
+    }
+
+    worker = new Worker(new URL('./worker.ts', import.meta.url), {
+      name: params.toString(),
+    });
     subscribeToWorker(onUpdate);
 
     if (initialArgs.platform === 'iOS') {
@@ -132,8 +135,6 @@ export function updateFullLocalDb(initial: LocalDb) {
 }
 
 export function callApiOnMasterTab(payload: any) {
-  if (!channel) return;
-
   channel.postMessage({
     type: 'callApi',
     token: getCurrentTabId(),
@@ -254,8 +255,6 @@ export function cancelApiProgress(progressCallback: ApiOnProgress) {
   if (isMasterTab) {
     cancelApiProgressMaster(messageId);
   } else {
-    if (!channel) return;
-
     channel.postMessage({
       type: 'cancelApiProgress',
       token: getCurrentTabId(),

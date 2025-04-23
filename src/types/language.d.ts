@@ -53,6 +53,9 @@ export interface LangPair {
   'PremiumPreviewUploadsDescription': undefined;
   'PremiumPreviewAdvancedChatManagementDescription': undefined;
   'PremiumPreviewAnimatedProfilesDescription': undefined;
+  'PremiumLimitAccountsTitle': undefined;
+  'PremiumLimitAccountsNoPremium': undefined;
+  'PremiumLimitAccounts': undefined;
   'SendMessage': undefined;
   'ConversationDefaultRestrictedMedia': undefined;
   'AccDescrVoiceMessage': undefined;
@@ -154,6 +157,7 @@ export interface LangPair {
   'LoginRegisterLastNamePlaceholder': undefined;
   'Next': undefined;
   'LoginSelectCountryTitle': undefined;
+  'MenuAddAccount': undefined;
   'CountryNone': undefined;
   'VoipGroupVoiceChat': undefined;
   'AccDescrMoreOptions': undefined;

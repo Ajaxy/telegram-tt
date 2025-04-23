@@ -1,13 +1,15 @@
 import type { ApiNotifyPeerType, ApiPeerNotifySettings } from '../../api/types';
 import type {
-  ISettings, IThemeSettings,
+  AccountSettings, IThemeSettings,
   ThemeKey,
 } from '../../types';
-import type { GlobalState } from '../types';
+import type { GlobalState, SharedState } from '../types';
 
+import { selectSharedSettings, selectSharedState } from '../selectors/sharedState';
+import { updateSharedState } from './sharedState';
 import { updateUserBlockedState } from './users';
 
-export function replaceSettings<T extends GlobalState>(global: T, newSettings?: Partial<ISettings>): T {
+export function replaceSettings<T extends GlobalState>(global: T, newSettings?: Partial<AccountSettings>): T {
   return {
     ...global,
     settings: {
@@ -20,22 +22,33 @@ export function replaceSettings<T extends GlobalState>(global: T, newSettings?: 
   };
 }
 
-export function replaceThemeSettings<T extends GlobalState>(
+export function updateSharedSettings<T extends GlobalState>(
+  global: T, newSettings?: Partial<SharedState['settings']>,
+): T {
+  const settings = selectSharedSettings(global);
+  return updateSharedState(global, {
+    settings: {
+      ...settings,
+      ...newSettings,
+    },
+  });
+}
+
+export function updateThemeSettings<T extends GlobalState>(
   global: T, theme: ThemeKey, newSettings?: Partial<IThemeSettings>,
 ): T {
-  return {
-    ...global,
-    settings: {
-      ...global.settings,
-      themes: {
-        ...global.settings.themes,
-        [theme]: {
-          ...(global.settings.themes[theme] || {}),
-          ...newSettings,
-        },
+  const settings = selectSharedState(global).settings;
+  const current = settings.themes[theme];
+
+  return updateSharedSettings(global, {
+    themes: {
+      ...settings.themes,
+      [theme]: {
+        ...current,
+        ...newSettings,
       },
     },
-  };
+  });
 }
 
 export function addNotifyExceptions<T extends GlobalState>(

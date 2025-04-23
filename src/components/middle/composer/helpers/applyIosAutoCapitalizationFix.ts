@@ -1,4 +1,4 @@
-import { IS_IOS } from '../../../../util/windowEnvironment';
+import { IS_IOS } from '../../../../util/browser/windowEnvironment';
 
 let resetInput: HTMLInputElement;
 

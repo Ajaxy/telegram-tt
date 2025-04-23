@@ -2,7 +2,7 @@
 // https://medium.com/@alshakero/how-to-setup-your-web-app-manifest-dynamically-using-javascript-f7fbee899a61
 
 import { DEBUG } from '../config';
-import { IS_MAC_OS } from './windowEnvironment';
+import { IS_MAC_OS } from './browser/windowEnvironment';
 
 export default function updateWebmanifest() {
   if (!IS_MAC_OS) {

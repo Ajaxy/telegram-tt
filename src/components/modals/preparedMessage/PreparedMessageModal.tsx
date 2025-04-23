@@ -10,7 +10,7 @@ import type { ThemeKey } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { getMockPreparedMessageFromResult, getUserFullName } from '../../../global/helpers';
-import { selectTheme, selectUser } from '../../../global/selectors';
+import { selectTheme, selectThemeValues, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 
@@ -182,7 +182,7 @@ export default memo(withGlobal<OwnProps>(
       patternColor,
       background: customBackground,
       backgroundColor,
-    } = global.settings.themes[theme] || {};
+    } = selectThemeValues(global, theme) || {};
     const bot = modal ? selectUser(global, modal?.botId) : undefined;
 
     return {

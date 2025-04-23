@@ -23,6 +23,7 @@ export interface ApiInitialArgs {
   shouldDebugExportedSenders?: boolean;
   langCode: string;
   isTestServerRequested?: boolean;
+  accountIds?: string[];
 }
 
 export interface ApiOnProgress {
@@ -102,7 +103,7 @@ export interface ApiWebSession {
 
 export interface ApiSessionData {
   mainDcId: number;
-  keys: Record<number, string | number[]>;
+  keys: Record<number, string>;
   isTest?: true;
 }
 
@@ -343,10 +344,11 @@ export type ApiLimitType =
   | 'chatlistInvites'
   | 'chatlistJoined'
   | 'recommendedChannels'
-  | 'savedDialogsPinned';
+  | 'savedDialogsPinned'
+  | 'moreAccounts';
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
-  'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels'
+  'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs' | 'recommendedChannels' | 'moreAccounts'
 )>;
 
 export type ApiLimitTypeForPromo = Exclude<ApiLimitType,

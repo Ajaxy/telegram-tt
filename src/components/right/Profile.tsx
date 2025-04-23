@@ -17,7 +17,7 @@ import type {
 } from '../../api/types';
 import type { TabState } from '../../global/types';
 import type {
-  ISettings, ProfileState, ProfileTabType, SharedMediaType, ThreadId,
+  ProfileState, ProfileTabType, SharedMediaType, ThemeKey, ThreadId,
 } from '../../types';
 import type { RegularLangKey } from '../../types/language';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -60,9 +60,10 @@ import {
   selectUserFullInfo,
 } from '../../global/selectors';
 import { selectPremiumLimit } from '../../global/selectors/limits';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
 import { getSenderName } from '../left/search/helpers/getSenderName';
@@ -118,7 +119,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   isChannel?: boolean;
   isBot?: boolean;
   currentUserId?: string;
@@ -935,6 +936,8 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = selectUserFullInfo(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
 
+    const { shouldWarnAboutSvg } = selectSharedSettings(global);
+
     const { currentType: mediaSearchType, resultsByType } = selectCurrentSharedMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
 
@@ -1013,7 +1016,7 @@ export default memo(withGlobal<OwnProps>(
       isChatProtected: chat?.isProtected,
       nextProfileTab: selectTabState(global).nextProfileTab,
       forceScrollProfileTab: selectTabState(global).forceScrollProfileTab,
-      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
+      shouldWarnAboutSvg,
       similarChannels: similarChannelIds,
       similarBots: similarBotsIds,
       botPreviewMedia,

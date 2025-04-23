@@ -76,7 +76,7 @@ export async function init(initialArgs: ApiInitialArgs) {
   const {
     userAgent, platform, sessionData, isWebmSupported, maxBufferSize, webAuthToken, dcId,
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
-    shouldDebugExportedSenders, langCode, isTestServerRequested,
+    shouldDebugExportedSenders, langCode, isTestServerRequested, accountIds,
   } = initialArgs;
 
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
@@ -133,6 +133,7 @@ export async function init(initialArgs: ApiInitialArgs) {
         webAuthToken,
         webAuthTokenFailed: onWebAuthTokenFailed,
         mockScenario,
+        accountIds,
       });
     } catch (err: any) {
       // eslint-disable-next-line no-console

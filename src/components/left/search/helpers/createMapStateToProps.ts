@@ -2,13 +2,14 @@ import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiUser,
 } from '../../../../api/types';
 import type { GlobalState, TabState } from '../../../../global/types';
-import type { ISettings } from '../../../../types';
+import type { ThemeKey } from '../../../../types';
 import type { SearchResultKey } from '../../../../util/keys/searchResultKey';
 
 import { selectChat, selectTabState, selectTheme } from '../../../../global/selectors';
+import { selectSharedSettings } from '../../../../global/selectors/sharedState';
 
 export type StateProps = {
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   isLoading?: boolean;
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
@@ -28,6 +29,8 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
     const {
       fetchingStatus, resultsByType, chatId,
     } = tabState.globalSearch;
+
+    const { shouldWarnAboutSvg } = selectSharedSettings(global);
 
     // One component is used for two different types of results.
     // The differences between them are only in the isVoice property.
@@ -50,7 +53,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
       searchChatId: chatId,
       activeDownloads,
       isChatProtected: chatId ? selectChat(global, chatId)?.isProtected : undefined,
-      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
+      shouldWarnAboutSvg,
     };
   };
 }

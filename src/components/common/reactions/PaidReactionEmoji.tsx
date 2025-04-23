@@ -8,8 +8,8 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { isSameReaction } from '../../../global/helpers';
 import { selectPerformanceSettingsValue, selectTabState } from '../../../global/selectors';
+import { IS_ANDROID, IS_IOS } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { IS_ANDROID, IS_IOS } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../helpers/animatedAssets';
 import { REM } from '../helpers/mediaDimensions';
 

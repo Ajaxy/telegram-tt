@@ -111,20 +111,22 @@
     }
   }
 
-  .emoji-status-effect {
-    top: 50%;
-    left: 50%;
-  }
+  .StatusButton {
+    .emoji-status-effect {
+      top: 50%;
+      left: 50%;
+    }
 
-  .emoji-status {
-    overflow: visible;
-    --custom-emoji-size: 1.5rem;
-    color: var(--color-primary);
-  }
+    .emoji-status {
+      overflow: visible;
+      --custom-emoji-size: 1.5rem;
+      color: var(--color-primary);
+    }
 
-  .StarIcon {
-    width: 1.5rem;
-    height: 1.5rem;
+    .StarIcon {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
   }
 
   // @optimization
@@ -151,6 +153,21 @@
     &[dir="rtl"] {
       left: auto;
       right: -0.125rem;
+    }
+  }
+
+  .account-menu-item {
+    --custom-emoji-size: 1rem;
+
+    .account-avatar {
+      margin-inline: 0.375rem 1.125rem;
+    }
+
+    .fullName {
+      margin: 0;
+      font-size: 1em;
+      line-height: 1;
+      padding-top: 0.1875rem;
     }
   }
 }

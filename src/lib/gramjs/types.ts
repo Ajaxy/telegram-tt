@@ -19,6 +19,6 @@ export type EntityLike =
 
 export interface SessionData {
     mainDcId: number;
-    keys: Record<number, string | number[]>;
+    keys: Record<number, string>;
     isTest?: true;
 }

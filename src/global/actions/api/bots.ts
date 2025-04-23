@@ -34,6 +34,7 @@ import {
   removeBlockedUser,
   updateBotAppPermissions,
   updateManagementProgress,
+  updateSharedSettings,
   updateUser,
   updateUserFullInfo,
 } from '../../reducers';
@@ -61,6 +62,7 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../selectors';
+import { selectSharedSettings } from '../../selectors/sharedState';
 import { fetchChatByUsername } from './chats';
 import { getPeerStarsForMessage } from './messages';
 
@@ -772,16 +774,9 @@ addActionHandler('openWebAppsCloseConfirmationModal', (global, actions, payload)
 addActionHandler('closeWebAppsCloseConfirmationModal', (global, actions, payload): ActionReturnType => {
   const { shouldSkipInFuture, tabId = getCurrentTabId() } = payload || {};
 
-  global = {
-    ...global,
-    settings: {
-      ...global.settings,
-      byKey: {
-        ...global.settings.byKey,
-        shouldSkipWebAppCloseConfirmation: Boolean(shouldSkipInFuture),
-      },
-    },
-  };
+  global = updateSharedSettings(global, {
+    shouldSkipWebAppCloseConfirmation: Boolean(shouldSkipInFuture),
+  });
 
   return updateTabState(global, {
     isWebAppsCloseConfirmationModalOpen: undefined,
@@ -1331,7 +1326,7 @@ addActionHandler('setBotInfo', async (global, actions, payload): Promise<void> =
   } = payload;
 
   let { langCode } = payload;
-  if (!langCode) langCode = global.settings.byKey.language;
+  if (!langCode) langCode = selectSharedSettings(global).language;
 
   const { currentUserId } = global;
   if (!currentUserId || !bot) {

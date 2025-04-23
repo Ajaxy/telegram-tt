@@ -6,8 +6,8 @@ import fastBlur from '../../../lib/fastBlur';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getPeerStoryHtmlId } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import stopEvent from '../../../util/stopEvent';
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 import windowSize from '../../../util/windowSize';
 import { REM } from '../../common/helpers/mediaDimensions';
 

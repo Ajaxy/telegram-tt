@@ -10,8 +10,8 @@ import type {
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';

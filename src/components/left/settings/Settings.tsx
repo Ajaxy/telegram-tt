@@ -6,7 +6,7 @@ import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/u
 import { SettingsScreens } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
+import { LAYERS_ANIMATION_NAME } from '../../../util/browser/windowEnvironment';
 
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 import useLastCallback from '../../../hooks/useLastCallback';

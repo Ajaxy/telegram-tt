@@ -8,6 +8,7 @@ import { getDisplayName } from '../Utils';
 import { Update } from './TelegramClient';
 import { RPCError } from '../errors';
 import { getServerTime } from '../../../util/serverTime';
+import bigInt from 'big-integer';
 
 export interface UserAuthParams {
     phoneNumber: string | (() => Promise<string>);
@@ -21,6 +22,7 @@ export interface UserAuthParams {
     initialMethod?: 'phoneNumber' | 'qrCode';
     shouldThrowIfUnauthorized?: boolean;
     webAuthToken?: string;
+    accountIds?: string[];
     mockScenario?: string;
 }
 
@@ -239,7 +241,7 @@ async function signInUserWithQrCode(
             const result = await client.invoke(new Api.auth.ExportLoginToken({
                 apiId: Number(process.env.TELEGRAM_API_ID),
                 apiHash: process.env.TELEGRAM_API_HASH,
-                exceptIds: [],
+                exceptIds: authParams.accountIds?.map((id) => bigInt(id)) || [],
             }));
             if (!(result instanceof Api.auth.LoginToken)) {
                 throw new Error('Unexpected');
@@ -280,7 +282,7 @@ async function signInUserWithQrCode(
         const result2 = await client.invoke(new Api.auth.ExportLoginToken({
             apiId: Number(process.env.TELEGRAM_API_ID),
             apiHash: process.env.TELEGRAM_API_HASH,
-            exceptIds: [],
+            exceptIds: authParams.accountIds?.map((id) => bigInt(id)) || [],
         }));
 
         if (result2 instanceof Api.auth.LoginTokenSuccess && result2.authorization instanceof Api.auth.Authorization) {

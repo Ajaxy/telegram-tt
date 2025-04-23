@@ -7,10 +7,10 @@ import { withGlobal } from '../../global';
 import type { ApiCountryCode } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
+import { IS_EMOJI_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { isoToEmoji } from '../../util/emoji/emoji';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
-import { IS_EMOJI_SUPPORTED } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';

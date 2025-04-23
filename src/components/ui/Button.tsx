@@ -2,9 +2,9 @@ import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { useRef, useState } from '../../lib/teact/teact';
 
+import { IS_TOUCH_ENV, MouseButton } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
-import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';

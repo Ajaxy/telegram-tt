@@ -30,10 +30,10 @@ import {
   selectUserFullInfo,
   selectWebApp,
 } from '../../../global/selectors';
+import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import download from '../../../util/download';
 import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
-import { getGeolocationStatus, IS_GEOLOCATION_SUPPORTED } from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';
 import renderText from '../../common/helpers/renderText';
 

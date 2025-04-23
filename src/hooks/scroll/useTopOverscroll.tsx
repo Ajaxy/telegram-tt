@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from '../../lib/teact/teact';
 
 import { forceMutation, requestMutation } from '../../lib/fasterdom/fasterdom';
+import { IS_IOS, IS_SAFARI } from '../../util/browser/windowEnvironment';
 import { stopScrollInertia } from '../../util/resetScroll';
-import { IS_IOS, IS_SAFARI } from '../../util/windowEnvironment';
 import useDebouncedCallback from '../useDebouncedCallback';
 import useLastCallback from '../useLastCallback';
 

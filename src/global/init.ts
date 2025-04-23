@@ -2,6 +2,7 @@ import './intervals';
 
 import type { ActionReturnType, GlobalState } from './types';
 
+import { IS_MULTIACCOUNT_SUPPORTED } from '../util/browser/globalEnvironment';
 import { isCacheApiSupported } from '../util/cacheApi';
 import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMultitabRole';
 import { initGlobal } from '../util/init';
@@ -10,9 +11,9 @@ import { isLocalMessageId } from '../util/keys/messageKey';
 import { Bundles, loadBundle } from '../util/moduleLoader';
 import { parseLocationHash } from '../util/routing';
 import { updatePeerColors } from '../util/theme';
-import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
 import { initializeChatMediaSearchResults } from './reducers/middleSearch';
 import { updateTabState } from './reducers/tabs';
+import { initSharedState } from './shared/sharedStateConnector';
 import { initCache } from './cache';
 import {
   addActionHandler, getGlobal, setGlobal,
@@ -46,8 +47,12 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
     },
   };
 
-  if (isMasterTab || !IS_MULTITAB_SUPPORTED) {
+  if (isMasterTab) {
     initialTabState.isMasterTab = true;
+  }
+
+  if (IS_MULTIACCOUNT_SUPPORTED && initialTabState.isMasterTab) {
+    initSharedState(global.sharedState);
   }
 
   Object.keys(global.messages.byChatId).forEach((chatId) => {
@@ -109,10 +114,6 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
         isInactive: true,
       }, otherTabId);
     });
-  }
-
-  if (!IS_MULTITAB_SUPPORTED) {
-    actions.initApi();
   }
 
   isCacheApiSupported().then((isSupported) => {

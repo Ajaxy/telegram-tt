@@ -1,7 +1,10 @@
 import { ELECTRON_HOST_URL, IS_PACKAGED_ELECTRON } from '../config';
+import { ACCOUNT_SLOT } from './multiaccount';
 
 // eslint-disable-next-line no-restricted-globals
 const cacheApi = self.caches;
+
+const SUFFIX = ACCOUNT_SLOT ? `_${ACCOUNT_SLOT}` : '';
 
 let isSupported: boolean | undefined;
 
@@ -31,7 +34,7 @@ export async function fetch(
     const request = IS_PACKAGED_ELECTRON
       ? `${ELECTRON_HOST_URL}/${key.replace(/:/g, '_')}`
       : new Request(key.replace(/:/g, '_'));
-    const cache = await cacheApi.open(cacheName);
+    const cache = await cacheApi.open(`${cacheName}${SUFFIX}`);
     const response = await cache.match(request);
     if (!response) {
       return undefined;
@@ -92,7 +95,7 @@ export async function save(cacheName: string, key: string, data: AnyLiteral | Bl
       ? `${ELECTRON_HOST_URL}/${key.replace(/:/g, '_')}`
       : new Request(key.replace(/:/g, '_'));
     const response = new Response(cacheData);
-    const cache = await cacheApi.open(cacheName);
+    const cache = await cacheApi.open(`${cacheName}${SUFFIX}`);
     await cache.put(request, response);
     return true;
   } catch (err) {
@@ -108,7 +111,7 @@ export async function remove(cacheName: string, key: string) {
       return undefined;
     }
 
-    const cache = await cacheApi.open(cacheName);
+    const cache = await cacheApi.open(`${cacheName}${SUFFIX}`);
     return await cache.delete(key);
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -123,7 +126,7 @@ export async function clear(cacheName: string) {
       return undefined;
     }
 
-    return await cacheApi.delete(cacheName);
+    return await cacheApi.delete(`${cacheName}${SUFFIX}`);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn(err);

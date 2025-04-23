@@ -88,6 +88,7 @@ const LIMITS_TITLES: Record<ApiLimitTypeForPromo, string> = {
   dialogFilters: 'FoldersLimitTitle',
   dialogFiltersChats: 'ChatPerFolderLimitTitle',
   recommendedChannels: 'SimilarChannelsLimitTitle',
+  moreAccounts: 'ConnectedAccountsLimitTitle',
 };
 
 const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeForPromo, string> = {
@@ -101,6 +102,7 @@ const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeForPromo, string> = {
   dialogFilters: 'FoldersLimitSubtitle',
   dialogFiltersChats: 'ChatPerFolderLimitSubtitle',
   recommendedChannels: 'SimilarChannelsLimitSubtitle',
+  moreAccounts: 'ConnectedAccountsLimitSubtitle',
 };
 
 const BORDER_THRESHOLD = 20;
@@ -216,13 +218,16 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     stopScrolling();
   });
 
+  const currentSection = filteredSections[currentSlideIndex];
+  const hasHeaderBackdrop = currentSection !== 'double_limits' && currentSection !== 'stories';
+
   return (
     <div className={styles.root}>
       <Button
         round
         size="smaller"
-        className={buildClassName(styles.backButton, currentSlideIndex !== 0 && styles.whiteBackButton)}
-        color={currentSlideIndex === 0 ? 'translucent' : 'translucent-white'}
+        className={buildClassName(styles.backButton, hasHeaderBackdrop && styles.whiteBackButton)}
+        color={hasHeaderBackdrop ? 'translucent-white' : 'translucent'}
         onClick={onBack}
         ariaLabel={oldLang('Back')}
       >

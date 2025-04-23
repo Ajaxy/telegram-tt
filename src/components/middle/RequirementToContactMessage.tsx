@@ -2,7 +2,7 @@ import React, { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { getUserFirstOrLastName } from '../../global/helpers';
-import { selectTheme, selectUser } from '../../global/selectors';
+import { selectTheme, selectThemeValues, selectUser } from '../../global/selectors';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
@@ -95,7 +95,7 @@ function RequirementToContactMessage({ patternColor, userName, paidMessagesStars
 export default memo(
   withGlobal<OwnProps>((global, { userId }): StateProps => {
     const theme = selectTheme(global);
-    const { patternColor } = global.settings.themes[theme] || {};
+    const { patternColor } = selectThemeValues(global, theme) || {};
     const user = selectUser(global, userId);
 
     return {

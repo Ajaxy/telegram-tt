@@ -1,11 +1,11 @@
 import type { MoveOffsets } from './captureEvents';
 
 import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
+import { IS_IOS } from './browser/windowEnvironment';
 import { animateNumber, timingFunctions } from './animation';
 import { captureEvents, SwipeDirection } from './captureEvents';
 import { waitForAnimationEnd } from './cssAnimationEndListeners';
 import { clamp } from './math';
-import { IS_IOS } from './windowEnvironment';
 
 const INERTIA_DURATION = 300;
 const INERTIA_EASING = timingFunctions.easeOutCubic;

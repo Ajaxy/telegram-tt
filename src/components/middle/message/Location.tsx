@@ -5,7 +5,7 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { ApiMessage, ApiPeer } from '../../../api/types';
-import type { ISettings } from '../../../types';
+import type { ThemeKey } from '../../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import {
@@ -50,7 +50,7 @@ type OwnProps = {
   peer?: ApiPeer;
   isInSelectMode?: boolean;
   isSelected?: boolean;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
 };
 
 const Location: FC<OwnProps> = ({

@@ -9,22 +9,23 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiInputMessageReplyInfo } from '../../../api/types';
 import type {
-  IAnchorPosition, ISettings, MessageListType, ThreadId,
+  IAnchorPosition, MessageListType, SharedSettings, ThreadId,
 } from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 import { requestForcedReflow, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectCanPlayAnimatedEmojis, selectDraft, selectIsInSelectMode } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import {
+  IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
+} from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import parseEmojiOnlyString from '../../../util/emoji/parseEmojiOnlyString';
 import focusEditableElement from '../../../util/focusEditableElement';
 import { debounce } from '../../../util/schedulers';
-import {
-  IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
-} from '../../../util/windowEnvironment';
 import renderText from '../../common/helpers/renderText';
 import { isSelectionInsideInput } from './helpers/selection';
 
@@ -83,7 +84,7 @@ type OwnProps = {
 type StateProps = {
   replyInfo?: ApiInputMessageReplyInfo;
   isSelectModeActive?: boolean;
-  messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
+  messageSendKeyCombo?: SharedSettings['messageSendKeyCombo'];
   canPlayAnimatedEmojis: boolean;
 };
 
@@ -649,7 +650,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId }: OwnProps): StateProps => {
-    const { messageSendKeyCombo } = global.settings.byKey;
+    const { messageSendKeyCombo } = selectSharedSettings(global);
 
     return {
       messageSendKeyCombo,

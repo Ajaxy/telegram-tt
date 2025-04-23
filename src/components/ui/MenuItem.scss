@@ -135,6 +135,7 @@
     font-weight: var(--font-weight-medium);
     transform: scale(1);
     transition: 0.15s ease-in-out transform;
+    will-change: transform;
 
     .icon {
       max-width: 1.25rem;

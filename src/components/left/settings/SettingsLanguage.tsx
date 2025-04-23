@@ -4,13 +4,13 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiLanguage } from '../../../api/types';
-import type { ISettings, LangCode } from '../../../types';
+import type { AccountSettings, LangCode, SharedSettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
+import { IS_TRANSLATION_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { oldSetLanguage } from '../../../util/oldLangProvider';
-import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -30,8 +30,8 @@ type OwnProps = {
 
 type StateProps = {
   isCurrentUserPremium: boolean;
-  languages?: ApiLanguage[];
-} & Pick<ISettings, | 'language' | 'canTranslate' | 'canTranslateChats' | 'doNotTranslate'>;
+} & Pick<AccountSettings, 'canTranslate' | 'canTranslateChats' | 'doNotTranslate'>
+& Pick<SharedSettings, 'language' | 'languages'>;
 
 const SettingsLanguage: FC<OwnProps & StateProps> = ({
   isActive,
@@ -47,6 +47,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   const {
     loadLanguages,
     setSettingOption,
+    setSharedSettingOption,
     openPremiumModal,
   } = getActions();
 
@@ -70,7 +71,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
     void oldSetLanguage(langCode as LangCode, () => {
       unmarkIsLoading();
 
-      setSettingOption({ language: langCode as LangCode });
+      setSharedSettingOption({ language: langCode as LangCode });
     });
   });
 
@@ -182,9 +183,9 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const {
-      language, canTranslate, canTranslateChats, doNotTranslate,
+      canTranslate, canTranslateChats, doNotTranslate,
     } = global.settings.byKey;
-    const languages = global.settings.languages;
+    const { language, languages } = selectSharedSettings(global);
 
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 

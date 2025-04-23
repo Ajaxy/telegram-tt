@@ -5,6 +5,7 @@ import {
   MEDIA_PROGRESSIVE_CACHE_NAME,
 } from '../config';
 import generateUniqueId from '../util/generateUniqueId';
+import { getAccountSlot } from '../util/multiaccount';
 import { pause } from '../util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
@@ -40,11 +41,13 @@ export async function respondForProgressive(e: FetchEvent) {
     end = start + DEFAULT_PART_SIZE - 1;
   }
 
+  const parsedUrl = new URL(url);
+
   // Optimization for Safari
   if (start === 0 && end === 1) {
-    const match = e.request.url.match(/fileSize=(\d+)&mimeType=([\w/]+)/);
-    const fileSize = match && Number(match[1]);
-    const mimeType = match?.[2];
+    const fileSizeParam = parsedUrl.searchParams.get('fileSize');
+    const fileSize = fileSizeParam && Number(fileSizeParam);
+    const mimeType = parsedUrl.searchParams.get('mimeType');
 
     if (fileSize && mimeType) {
       return new Response(new Uint8Array(2).buffer, {
@@ -60,7 +63,9 @@ export async function respondForProgressive(e: FetchEvent) {
     }
   }
 
-  const cacheKey = `${url}?start=${start}&end=${end}`;
+  parsedUrl.searchParams.set('start', String(start));
+  parsedUrl.searchParams.set('end', String(end));
+  const cacheKey = parsedUrl.href;
   const [cachedArrayBuffer, cachedHeaders] = !MEDIA_PROGRESSIVE_CACHE_DISABLED ? await fetchFromCache(cacheKey) : [];
 
   if (DEBUG) {
@@ -142,9 +147,7 @@ export async function requestPart(
   params: { url: string; start: number; end: number },
 ): Promise<PartInfo | undefined> {
   const isDownload = params.url.includes('/download/');
-  const client = isDownload ? (await self.clients.matchAll())
-    .find((c) => c.type === 'window' && c.frameType === 'top-level')
-    : await (self.clients.get(e.clientId));
+  const client = await (isDownload ? getClientForRequest(params.url) : self.clients.get(e.clientId));
   if (!client) {
     return undefined;
   }
@@ -175,6 +178,14 @@ export async function requestPart(
   });
 
   return promise;
+}
+
+async function getClientForRequest(url: string) {
+  const urlAccountSlot = getAccountSlot(url);
+  const clients = await self.clients.matchAll();
+  return clients.find((c) => (
+    c.type === 'window' && c.frameType === 'top-level' && getAccountSlot(c.url) === urlAccountSlot
+  ));
 }
 
 self.addEventListener('message', (e) => {

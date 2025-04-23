@@ -4,9 +4,9 @@ import { getActions, getGlobal } from '../../../global';
 
 import type { ApiSendAsPeerId } from '../../../api/types';
 
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';

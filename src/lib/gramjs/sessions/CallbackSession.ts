@@ -40,9 +40,7 @@ export default class CallbackSession extends MemorySession {
         await Promise.all(Object.keys(keys)
             .map(async (dcIdStr) => {
                 const dcId = Number(dcIdStr);
-                const key = typeof keys[dcId] === 'string'
-                    ? Buffer.from(keys[dcId] as string, 'hex')
-                    : Buffer.from(keys[dcId]);
+                const key = Buffer.from(keys[dcId], 'hex');
 
                 this._authKeys[dcId] = new AuthKey();
                 await this._authKeys[dcId].setKey(key);

@@ -8,9 +8,9 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { STICKER_SIZE_PICKER_HEADER } from '../../../config';
 import { getStickerMediaHash } from '../../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../../global/selectors';
+import { IS_WEBM_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getFirstLetters } from '../../../util/textFormat';
-import { IS_WEBM_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useColorFilter from '../../../hooks/stickers/useColorFilter';
 import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';

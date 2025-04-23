@@ -18,6 +18,7 @@ import {
   selectCurrentChat, selectTheme, selectUser,
   selectWebApp,
 } from '../../../global/selectors';
+import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 import { getColorLuma } from '../../../util/colors';
@@ -728,16 +729,15 @@ export default memo(withGlobal<OwnProps>(
     const bot = activeBotId ? selectUser(global, activeBotId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
-    const cachedPosition = global.settings.miniAppsCachedPosition;
-    const cachedSize = global.settings.miniAppsCachedSize;
+    const { miniAppsCachedPosition, miniAppsCachedSize } = selectSharedSettings(global);
 
     return {
       attachBot,
       bot,
       chat,
       theme,
-      cachedPosition,
-      cachedSize,
+      cachedPosition: miniAppsCachedPosition,
+      cachedSize: miniAppsCachedSize,
     };
   },
 )(WebAppModal));

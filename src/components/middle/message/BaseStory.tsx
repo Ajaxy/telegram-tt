@@ -4,9 +4,9 @@ import { getActions } from '../../../global';
 import type { ApiMessageStoryData, ApiTypeStory } from '../../../api/types';
 
 import { getStoryMediaHash } from '../../../global/helpers';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dates/dateFormat';
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useCanvasBlur from '../../../hooks/useCanvasBlur';

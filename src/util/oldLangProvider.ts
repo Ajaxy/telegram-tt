@@ -6,6 +6,7 @@ import type { LangCode, TimeFormat } from '../types';
 import {
   LANG_CACHE_NAME, LANG_PACKS,
 } from '../config';
+import { selectSharedSettings } from '../global/selectors/sharedState';
 import { callApi } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { createCallbackManager } from './callbacks';
@@ -182,8 +183,7 @@ export async function oldSetLanguage(langCode: LangCode, callback?: NoneToVoidFu
   document.documentElement.lang = langCode;
 
   const global = getGlobal();
-  const { languages, byKey } = global.settings;
-  const timeFormat = byKey?.timeFormat;
+  const { languages, timeFormat } = selectSharedSettings(global);
   const langInfo = languages?.find((lang) => lang.langCode === langCode);
   translationFn = createLangFn();
   translationFn.isRtl = Boolean(langInfo?.isRtl);

@@ -7,6 +7,7 @@ import {
   BASE_URL, IS_PACKAGED_ELECTRON, RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE,
 } from '../../../config';
 import EMOJI_REGEX from '../../../lib/twemojiRegex';
+import { IS_EMOJI_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isDeepLink } from '../../../util/deepLinkParser';
 import {
@@ -16,7 +17,6 @@ import {
 } from '../../../util/emoji/emoji';
 import fixNonStandardEmoji from '../../../util/emoji/fixNonStandardEmoji';
 import { compact } from '../../../util/iteratees';
-import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
 
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';

@@ -1,7 +1,7 @@
 import { ApiMediaFormat } from '../../api/types';
 
+import { IS_ANDROID, IS_IOS } from '../../util/browser/windowEnvironment';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
-import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 import { callApi } from '../../api/gramjs';
 import { requestMutation } from '../fasterdom/fasterdom';
 

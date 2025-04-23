@@ -1,6 +1,6 @@
 import type { FC } from '../lib/teact/teact';
 import React, { useEffect, useLayoutEffect } from '../lib/teact/teact';
-import { getActions, withGlobal } from '../global';
+import { withGlobal } from '../global';
 
 import type { GlobalState } from '../global/types';
 import type { ThemeKey } from '../types';
@@ -10,12 +10,12 @@ import {
   DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE,
 } from '../config';
 import { selectTabState, selectTheme } from '../global/selectors';
-import { addActiveTabChangeListener } from '../util/activeTabMonitor';
+import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windowEnvironment';
 import buildClassName from '../util/buildClassName';
 import { setupBeforeInstallPrompt } from '../util/installPrompt';
-import { parseInitialLocationHash } from '../util/routing';
+import { ACCOUNT_SLOT, getAccountsInfo, getAccountSlotUrl } from '../util/multiaccount';
+import { getInitialLocationHash, parseInitialLocationHash } from '../util/routing';
 import { hasStoredSession } from '../util/sessions';
-import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from '../util/windowEnvironment';
 import { updateSizes } from '../util/windowSize';
 
 import useAppLayout from '../hooks/useAppLayout';
@@ -61,8 +61,6 @@ const App: FC<StateProps> = ({
   isTestServer,
   theme,
 }) => {
-  const { disconnect } = getActions();
-
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
   const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
@@ -70,6 +68,22 @@ const App: FC<StateProps> = ({
   useEffect(() => {
     if (IS_INSTALL_PROMPT_SUPPORTED) {
       setupBeforeInstallPrompt();
+    }
+  }, []);
+
+  useEffect(() => {
+    const hash = getInitialLocationHash();
+    // If there is no stored session on first slot, navigate to any other slot with stored session
+    if (!hasStoredSession() && !ACCOUNT_SLOT && !hash) {
+      const accounts = getAccountsInfo();
+      Object.keys(accounts).forEach((key) => {
+        const slot = Number(key);
+        const account = accounts[slot];
+        if (account) {
+          const url = getAccountSlotUrl(slot);
+          window.location.href = `${url}#${hash || 'login'}`;
+        }
+      });
     }
   }, []);
 
@@ -160,17 +174,6 @@ const App: FC<StateProps> = ({
   useEffect(() => {
     updateSizes();
   }, []);
-
-  useEffect(() => {
-    if (IS_MULTITAB_SUPPORTED) return;
-
-    addActiveTabChangeListener(() => {
-      disconnect();
-      document.title = INACTIVE_PAGE_TITLE;
-
-      markInactive();
-    });
-  }, [activeKey, disconnect, markInactive]);
 
   useEffect(() => {
     if (isInactiveAuth) {

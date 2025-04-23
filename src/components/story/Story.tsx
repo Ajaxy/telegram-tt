@@ -28,6 +28,7 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
+import { IS_SAFARI } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { formatMediaDuration, formatRelativePastTime } from '../../util/dates/dateFormat';
@@ -35,7 +36,6 @@ import download from '../../util/download';
 import { formatStarsAsIcon } from '../../util/localization/format';
 import { round } from '../../util/math';
 import { getServerTime } from '../../util/serverTime';
-import { IS_SAFARI } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 import { BASE_STORY_HEIGHT, BASE_STORY_WIDTH } from './helpers/dimensions';
 import { PRIMARY_VIDEO_MIME, SECONDARY_VIDEO_MIME } from './helpers/videoFormats';

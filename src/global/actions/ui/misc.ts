@@ -7,6 +7,7 @@ import {
   ANIMATION_WAVE_MIN_INTERVAL,
   DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../../config';
+import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
 import generateUniqueId from '../../../util/generateUniqueId';
@@ -17,7 +18,6 @@ import { refreshFromCache } from '../../../util/localization';
 import * as langProvider from '../../../util/oldLangProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
-import { IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
@@ -37,6 +37,7 @@ import {
   selectTabState,
   selectTopic,
 } from '../../selectors';
+import { selectSharedSettings } from '../../selectors/sharedState';
 
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 
@@ -797,7 +798,7 @@ addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnTyp
 
 addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
-  const { canDisplayChatInTitle } = global.settings.byKey;
+  const { canDisplayChatInTitle } = selectSharedSettings(global);
   const currentUserId = global.currentUserId;
   const isTestServer = global.config?.isTestServer;
   const prefix = isTestServer ? '[T] ' : '';

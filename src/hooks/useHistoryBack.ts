@@ -3,7 +3,7 @@ import { getActions } from '../global';
 
 import { IS_TEST } from '../config';
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
-import { IS_IOS } from '../util/windowEnvironment';
+import { IS_IOS } from '../util/browser/windowEnvironment';
 import useEffectOnce from './useEffectOnce';
 import useLastCallback from './useLastCallback';
 import useSyncEffect from './useSyncEffect';

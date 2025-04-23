@@ -6,12 +6,12 @@ import type {
 } from '../../types';
 
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
+import { ARE_CALLS_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
 import * as langProvider from '../../../util/oldLangProvider';
 import safePlay from '../../../util/safePlay';
-import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';
 import { getMainUsername } from '../../helpers';
 import {

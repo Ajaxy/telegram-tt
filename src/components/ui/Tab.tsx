@@ -4,9 +4,9 @@ import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact
 import type { MenuItemContextAction } from './ListItem';
 
 import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
+import { MouseButton } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import forceReflow from '../../util/forceReflow';
-import { MouseButton } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';

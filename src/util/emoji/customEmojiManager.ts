@@ -8,11 +8,11 @@ import { ApiMediaFormat } from '../../api/types';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getStickerHashById } from '../../global/helpers';
 import { selectCanPlayAnimatedEmojis } from '../../global/selectors';
+import { IS_WEBM_SUPPORTED } from '../browser/windowEnvironment';
 import { createCallbackManager } from '../callbacks';
 import generateUniqueId from '../generateUniqueId';
 import * as mediaLoader from '../mediaLoader';
 import { throttle } from '../schedulers';
-import { IS_WEBM_SUPPORTED } from '../windowEnvironment';
 
 import blankSrc from '../../assets/blank.png';
 import placeholderSrc from '../../assets/square.svg';

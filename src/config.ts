@@ -13,6 +13,7 @@ export const PRODUCTION_HOSTNAME = 'web.telegram.org';
 export const PRODUCTION_URL = 'https://web.telegram.org/a';
 export const WEB_VERSION_BASE = 'https://web.telegram.org/'; // Used to redirect to other versions
 export const BASE_URL = process.env.BASE_URL;
+export const ACCOUNT_QUERY = 'account';
 
 export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';
@@ -38,11 +39,14 @@ export const INACTIVE_MARKER = '[Inactive]';
 
 export const DEBUG_PAYMENT_SMART_GLOCAL = false;
 
-export const SESSION_USER_KEY = 'user_auth';
+export const SESSION_LEGACY_USER_KEY = 'user_auth';
+export const SESSION_ACCOUNT_PREFIX = 'account';
 export const LEGACY_PASSCODE_CACHE_NAME = 'tt-passcode';
 
+export const MULTIACCOUNT_MAX_SLOTS = 6;
 export const GLOBAL_STATE_CACHE_DISABLED = false;
-export const GLOBAL_STATE_CACHE_KEY = 'tt-global-state';
+export const GLOBAL_STATE_CACHE_PREFIX = 'tt-global-state';
+export const SHARED_STATE_CACHE_KEY = 'tt-shared-state';
 export const GLOBAL_STATE_CACHE_USER_LIST_LIMIT = 500;
 export const GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT = 200;
 export const GLOBAL_STATE_CACHE_ARCHIVED_CHAT_LIST_LIMIT = 10;
@@ -60,9 +64,10 @@ export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
 export const LANG_CACHE_NAME = 'tt-lang-packs-v49';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
-export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
-export const ESTABLISH_BROADCAST_CHANNEL_NAME = 'tt-establish';
-export const MULTITAB_LOCALSTORAGE_KEY = 'tt-multitab';
+export const DATA_BROADCAST_CHANNEL_PREFIX = 'tt-global';
+export const ESTABLISH_BROADCAST_CHANNEL_PREFIX = 'tt-establish';
+export const MULTITAB_LOCALSTORAGE_KEY_PREFIX = 'tt-multitab';
+export const DC_IDS = [1, 2, 3, 4, 5] as const;
 
 export const DOWNLOAD_WORKERS = 16;
 export const UPLOAD_WORKERS = 16;
@@ -392,6 +397,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   chatlistJoined: [2, 20],
   recommendedChannels: [10, 100],
   savedDialogsPinned: [5, 100],
+  moreAccounts: [3, MULTIACCOUNT_MAX_SLOTS],
 };
 export const DEFAULT_MAX_MESSAGE_LENGTH = 4096;
 
@@ -444,6 +450,7 @@ export const PREMIUM_LIMITS_ORDER: ApiLimitTypeForPromo[] = [
   'captionLength',
   'dialogFilters',
   'dialogFiltersChats',
+  'moreAccounts',
   'recommendedChannels',
 ];
 

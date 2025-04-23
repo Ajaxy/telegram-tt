@@ -30,13 +30,14 @@ import {
   selectTabState,
   selectUser,
 } from '../../global/selectors';
+import { selectSharedSettings } from '../../global/selectors/sharedState';
+import { IS_ANDROID, IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
-import { IS_ANDROID, IS_ELECTRON, IS_WAVE_TRANSFORM_SUPPORTED } from '../../util/windowEnvironment';
 
 import useInterval from '../../hooks/schedulers/useInterval';
 import useTimeout from '../../hooks/schedulers/useTimeout';
@@ -598,11 +599,6 @@ const Main = ({
 export default memo(withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
     const {
-      settings: {
-        byKey: {
-          wasTimeFormatSetManually,
-        },
-      },
       currentUserId,
     } = global;
 
@@ -630,6 +626,8 @@ export default memo(withGlobal<OwnProps>(
       limitReachedModal,
       deleteFolderDialogModal,
     } = selectTabState(global);
+
+    const { wasTimeFormatSetManually } = selectSharedSettings(global);
 
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;

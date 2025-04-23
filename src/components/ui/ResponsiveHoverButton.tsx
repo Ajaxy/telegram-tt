@@ -3,7 +3,7 @@ import React, { useRef } from '../../lib/teact/teact';
 
 import type { OwnProps as ButtonProps } from './Button';
 
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 
 import useLastCallback from '../../hooks/useLastCallback';
 

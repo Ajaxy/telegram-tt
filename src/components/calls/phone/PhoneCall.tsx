@@ -13,13 +13,13 @@ import {
 } from '../../../lib/secret-sauce';
 import { selectTabState } from '../../../global/selectors';
 import { selectPhoneCallUser } from '../../../global/selectors/calls';
-import buildClassName from '../../../util/buildClassName';
-import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import {
   IS_ANDROID,
   IS_IOS,
   IS_REQUEST_FULLSCREEN_SUPPORTED,
-} from '../../../util/windowEnvironment';
+} from '../../../util/browser/windowEnvironment';
+import buildClassName from '../../../util/buildClassName';
+import { formatMediaDuration } from '../../../util/dates/dateFormat';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import renderText from '../../common/helpers/renderText';
 

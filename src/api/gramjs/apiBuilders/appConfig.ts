@@ -159,6 +159,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       chatlistJoined: getLimit(appConfig, 'chatlist_joined_limit', 'chatlistJoined'),
       recommendedChannels: getLimit(appConfig, 'recommended_channels_limit', 'recommendedChannels'),
       savedDialogsPinned: getLimit(appConfig, 'saved_dialogs_pinned_limit', 'savedDialogsPinned'),
+      moreAccounts: DEFAULT_LIMITS.moreAccounts,
     },
     hash,
     areStoriesHidden: appConfig.stories_all_hidden,

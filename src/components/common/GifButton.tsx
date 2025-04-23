@@ -7,8 +7,8 @@ import type { ApiVideo } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { getVideoMediaHash, getVideoPreviewMediaHash } from '../../global/helpers';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
 import useBuffering from '../../hooks/useBuffering';

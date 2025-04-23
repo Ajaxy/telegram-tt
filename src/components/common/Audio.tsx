@@ -9,7 +9,7 @@ import type {
 } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
 import type { OldLangFn } from '../../hooks/useOldLang';
-import type { ISettings } from '../../types';
+import type { ThemeKey } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 import { AudioOrigin } from '../../types';
 
@@ -51,7 +51,7 @@ import Icon from './icons/Icon';
 import './Audio.scss';
 
 type OwnProps = {
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   message: ApiMessage;
   senderTitle?: string;
   uploadProgress?: number;
@@ -628,7 +628,7 @@ function renderVoice(
 }
 
 function useWaveformCanvas(
-  theme: ISettings['theme'],
+  theme: ThemeKey,
   media?: ApiVoice | ApiVideo,
   playProgress = 0,
   isOwn = false,

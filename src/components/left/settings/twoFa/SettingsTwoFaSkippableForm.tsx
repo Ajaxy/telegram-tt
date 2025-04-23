@@ -7,7 +7,7 @@ import { withGlobal } from '../../../../global';
 import type { ApiSticker } from '../../../../api/types';
 
 import { selectAnimatedEmoji } from '../../../../global/selectors';
-import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
+import { IS_TOUCH_ENV } from '../../../../util/browser/windowEnvironment';
 import renderText from '../../../common/helpers/renderText';
 
 import useAppLayout from '../../../../hooks/useAppLayout';

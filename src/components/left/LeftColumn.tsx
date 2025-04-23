@@ -10,11 +10,11 @@ import type { ReducerAction } from '../../hooks/useReducer';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { selectCurrentChat, selectIsForumPanelOpen, selectTabState } from '../../global/selectors';
-import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { captureControlledSwipe } from '../../util/swipeController';
 import {
   IS_APP, IS_FIREFOX, IS_MAC_OS, IS_TOUCH_ENV, LAYERS_ANIMATION_NAME,
-} from '../../util/windowEnvironment';
+} from '../../util/browser/windowEnvironment';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { captureControlledSwipe } from '../../util/swipeController';
 
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useHotkeys } from '../../hooks/useHotkeys';

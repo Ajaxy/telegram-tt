@@ -12,12 +12,13 @@ import {
   IS_PACKAGED_ELECTRON, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS,
 } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
-import * as cacheApi from './cacheApi';
-import { fetchBlob } from './files';
-import { oggToWav } from './oggToWav';
 import {
   IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED,
-} from './windowEnvironment';
+} from './browser/windowEnvironment';
+import * as cacheApi from './cacheApi';
+import { fetchBlob } from './files';
+import { ACCOUNT_SLOT } from './multiaccount';
+import { oggToWav } from './oggToWav';
 
 const asCacheApiType = {
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,
@@ -27,7 +28,7 @@ const asCacheApiType = {
 };
 
 const PROGRESSIVE_URL_PREFIX = `${IS_PACKAGED_ELECTRON ? ELECTRON_HOST_URL : '.'}/progressive/`;
-const URL_DOWNLOAD_PREFIX = './download/';
+const DOWNLOAD_URL_PREFIX = './download/';
 const MAX_MEDIA_RETRIES = 5;
 
 const memoryCache = new Map<string, ApiPreparedMedia>();
@@ -45,17 +46,17 @@ export function fetch<T extends ApiMediaFormat>(
   if (mediaFormat === ApiMediaFormat.Progressive) {
     return (
       IS_PROGRESSIVE_SUPPORTED
-        ? getProgressive(url)
+        ? Promise.resolve(getProgressiveUrl(url))
         : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
-    ) as Promise<ApiPreparedMedia>;
+    );
   }
 
   if (mediaFormat === ApiMediaFormat.DownloadUrl) {
     return (
       IS_PROGRESSIVE_SUPPORTED
-        ? getDownloadUrl(url)
+        ? Promise.resolve(getDownloadUrl(url))
         : fetch(url, ApiMediaFormat.BlobUrl, isHtmlAllowed, onProgress, callbackUniqueId)
-    ) as Promise<ApiPreparedMedia>;
+    );
   }
 
   if (!fetchPromises.has(url)) {
@@ -115,19 +116,16 @@ export function removeCallback(url: string, callbackUniqueId: string) {
 }
 
 export function getProgressiveUrl(url: string) {
-  return `${PROGRESSIVE_URL_PREFIX}${url}`;
-}
-
-function getProgressive(url: string) {
-  const progressiveUrl = `${PROGRESSIVE_URL_PREFIX}${url}`;
-
-  memoryCache.set(url, progressiveUrl);
-
-  return Promise.resolve(progressiveUrl);
+  const base = new URL(`${PROGRESSIVE_URL_PREFIX}${url}`, window.location.href);
+  if (ACCOUNT_SLOT) base.searchParams.set('account', ACCOUNT_SLOT.toString());
+  memoryCache.set(url, base.href); // Needed for hooks to detect document as already loaded and apply URL
+  return base.href;
 }
 
 function getDownloadUrl(url: string) {
-  return Promise.resolve(`${URL_DOWNLOAD_PREFIX}${url}`);
+  const base = new URL(`${DOWNLOAD_URL_PREFIX}${url}`, window.location.href);
+  if (ACCOUNT_SLOT) base.searchParams.set('account', ACCOUNT_SLOT.toString());
+  return base.href;
 }
 
 async function fetchFromCacheOrRemote(

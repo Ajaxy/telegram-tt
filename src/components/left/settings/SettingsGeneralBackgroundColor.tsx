@@ -8,7 +8,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ThemeKey } from '../../../types';
 import type { RealTouchEvent } from '../../../util/captureEvents';
 
-import { selectTheme } from '../../../global/selectors';
+import { selectTheme, selectThemeValues } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { captureEvents } from '../../../util/captureEvents';
 import {
@@ -351,7 +351,7 @@ function drawHue(canvas: HTMLCanvasElement) {
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const theme = selectTheme(global);
-    const { backgroundColor } = global.settings.themes[theme] || {};
+    const { backgroundColor } = selectThemeValues(global, theme) || {};
     return {
       backgroundColor,
       theme,

@@ -71,6 +71,9 @@
 "PremiumPreviewUploadsDescription" = "4 GB per each document, unlimited storage for your chats and media overall.";
 "PremiumPreviewAdvancedChatManagementDescription" = "Tools to set the default folder, auto-archive and hide new chats from non-contacts.";
 "PremiumPreviewAnimatedProfilesDescription" = "Video avatars animated in chat lists and chats to allow for additional self-expression.";
+"PremiumLimitAccountsTitle" = "Limit Reached";
+"PremiumLimitAccountsNoPremium" = "You have reached your current limit of connected accounts. You can free one more place by subscribing to Telegram Premium.";
+"PremiumLimitAccounts" = "You have reached your current limit of connected accounts. You can free one more place by subscribing to Telegram Premium with one of these connected accounts.";
 "SendMessage" = "Send Message";
 "ConversationDefaultRestrictedMedia" = "Sending media isn't allowed in this group.";
 "AccDescrVoiceMessage" = "Record voice message";
@@ -172,6 +175,7 @@
 "LoginRegisterLastNamePlaceholder" = "Last Name";
 "Next" = "Next";
 "LoginSelectCountryTitle" = "Country";
+"MenuAddAccount" = "Add Account";
 "CountryNone" = "Country not found";
 "VoipGroupVoiceChat" = "Video Chat";
 "AccDescrMoreOptions" = "More options";

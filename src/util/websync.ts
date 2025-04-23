@@ -4,8 +4,8 @@ import {
   APP_CODE_NAME,
   DEBUG, IS_MOCKED_CLIENT,
 } from '../config';
+import { IS_ELECTRON } from './browser/windowEnvironment';
 import { hasStoredSession } from './sessions';
-import { IS_ELECTRON } from './windowEnvironment';
 
 const WEBSYNC_URLS = [
   't.me',

@@ -9,11 +9,11 @@ import type { BufferedRange } from '../../hooks/useBuffering';
 
 import { createVideoPreviews, getPreviewDimensions, renderVideoPreview } from '../../lib/video-preview/VideoPreview';
 import { animateNumber } from '../../util/animation';
+import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
 import { formatMediaDuration } from '../../util/dates/dateFormat';
 import { clamp, round } from '../../util/math';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import { useThrottledSignal } from '../../hooks/useAsyncResolvers';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';

@@ -103,6 +103,6 @@ export function clearWebTokenAuth() {
   delete parsedInitialLocationHash.tgWebAuthToken;
 }
 
-function getInitialLocationHash() {
+export function getInitialLocationHash() {
   return initialLocationHash;
 }

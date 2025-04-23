@@ -1,4 +1,4 @@
-import { IS_ANDROID, IS_IOS } from './windowEnvironment';
+import { IS_ANDROID, IS_IOS } from './browser/windowEnvironment';
 
 const SHOULD_PRE_OPEN = IS_IOS || IS_ANDROID;
 

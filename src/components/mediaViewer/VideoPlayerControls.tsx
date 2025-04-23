@@ -9,10 +9,10 @@ import type { ApiDimensions } from '../../api/types';
 import type { BufferedRange } from '../../hooks/useBuffering';
 import type { IconName } from '../../types/icons';
 
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dates/dateFormat';
 import { formatFileSize } from '../../util/textFormat';
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';

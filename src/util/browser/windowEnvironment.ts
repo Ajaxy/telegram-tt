@@ -1,4 +1,4 @@
-import { IS_TEST, PRODUCTION_HOSTNAME } from '../config';
+import { IS_TEST, PRODUCTION_HOSTNAME } from '../../config';
 
 export function getPlatform() {
   const { userAgent, platform } = window.navigator;
@@ -90,8 +90,6 @@ const TEST_VIDEO = document.createElement('video');
 
 export const IS_WEBM_SUPPORTED = Boolean(TEST_VIDEO.canPlayType('video/webm; codecs="vp9"').replace('no', ''));
 
-export const ARE_WEBCODECS_SUPPORTED = 'VideoDecoder' in window;
-
 export const MASK_IMAGE_DISABLED = true;
 export const IS_OPFS_SUPPORTED = Boolean(navigator.storage?.getDirectory);
 if (IS_OPFS_SUPPORTED) {
@@ -110,13 +108,9 @@ export const IS_OFFSET_PATH_SUPPORTED = CSS.supports('offset-rotate: 0deg');
 export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()')
   || CSS.supports('-webkit-backdrop-filter: blur()');
 export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;
-export const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in window;
-export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA && IS_MOBILE);
+export const IS_OPEN_IN_NEW_TAB_SUPPORTED = !(IS_PWA && IS_MOBILE);
 export const IS_TRANSLATION_SUPPORTED = !IS_TEST;
-export const IS_INTL_LIST_FORMAT_SUPPORTED = 'ListFormat' in Intl;
 export const IS_VIEW_TRANSITION_SUPPORTED = 'ViewTransition' in window;
-
-export const IS_BAD_URL_PARSER = new URL('tg://host').host !== 'host';
 
 export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 

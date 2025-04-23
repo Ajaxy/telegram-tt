@@ -6,7 +6,7 @@ import React, {
 
 import type { ApiAttachMenuPeerType, ApiMessage } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
-import type { ISettings, MessageListType, ThreadId } from '../../../types';
+import type { MessageListType, ThemeKey, ThreadId } from '../../../types';
 
 import {
   CONTENT_TYPES_WITH_PREVIEW, DEBUG_LOG_FILENAME, SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -20,11 +20,11 @@ import {
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
 } from '../../../global/helpers';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { getDebugLogs } from '../../../util/debugConsole';
 import { validateFiles } from '../../../util/files';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -54,7 +54,7 @@ export type OwnProps = {
   attachBots?: GlobalState['attachMenu']['bots'];
   peerType?: ApiAttachMenuPeerType;
   shouldCollectDebugLogs?: boolean;
-  theme: ISettings['theme'];
+  theme: ThemeKey;
   onFileSelect: (files: File[], shouldSuggestCompression?: boolean) => void;
   onPollCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;

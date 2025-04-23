@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
-import { PLATFORM_ENV } from '../../util/windowEnvironment';
+import { PLATFORM_ENV } from '../../util/browser/windowEnvironment';
 
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useElectronDrag from '../../hooks/useElectronDrag';

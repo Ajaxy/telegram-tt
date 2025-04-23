@@ -5,12 +5,12 @@ import React, {
 import type { ApiBusinessWorkHours } from '../../../api/types';
 
 import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatTime, formatWeekday } from '../../../util/dates/dateFormat';
 import {
   getUtcOffset, getWeekStart, shiftTimeRanges, splitDays,
 } from '../../../util/dates/workHours';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useSelectorSignal from '../../../hooks/data/useSelectorSignal';
 import useInterval from '../../../hooks/schedulers/useInterval';

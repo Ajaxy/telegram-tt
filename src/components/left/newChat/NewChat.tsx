@@ -3,7 +3,7 @@ import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 
 import { LeftColumnContent } from '../../../types';
 
-import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
+import { LAYERS_ANIMATION_NAME } from '../../../util/browser/windowEnvironment';
 
 import Transition from '../../ui/Transition';
 import NewChatStep1 from './NewChatStep1';
