@@ -245,6 +245,7 @@ type StateProps = {
   isFocused?: boolean;
   focusDirection?: FocusDirection;
   focusedQuote?: string;
+  focusedQuoteOffset?: number;
   noFocusHighlight?: boolean;
   scrollTargetPosition?: ScrollTargetPosition;
   isResizingContainer?: boolean;
@@ -368,6 +369,7 @@ const Message: FC<OwnProps & StateProps> = ({
   isFocused,
   focusDirection,
   focusedQuote,
+  focusedQuoteOffset,
   noFocusHighlight,
   scrollTargetPosition,
   isResizingContainer,
@@ -971,6 +973,7 @@ const Message: FC<OwnProps & StateProps> = ({
         translatedText={requestedTranslationLanguage ? currentTranslatedText : undefined}
         isForAnimation={isForAnimation}
         focusedQuote={focusedQuote}
+        focusedQuoteOffset={focusedQuoteOffset}
         emojiSize={emojiSize}
         highlight={highlight}
         isProtected={isProtected}
@@ -1788,7 +1791,7 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
-      quote: focusedQuote, scrollTargetPosition,
+      quote: focusedQuote, quoteOffset: focusedQuoteOffset, scrollTargetPosition,
     } = (isFocused && focusedMessage) || {};
 
     const middleSearch = selectCurrentMiddleSearch(global);
@@ -1935,6 +1938,7 @@ export default memo(withGlobal<OwnProps>(
         noFocusHighlight,
         isResizingContainer,
         focusedQuote,
+        focusedQuoteOffset,
         scrollTargetPosition,
       }),
       senderBoosts,

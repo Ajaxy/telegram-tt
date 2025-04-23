@@ -365,6 +365,7 @@ export interface ApiMessageReplyInfo {
   isForumTopic?: true;
   isQuote?: true;
   quoteText?: ApiFormattedText;
+  quoteOffset?: number;
 }
 
 export interface ApiStoryReplyInfo {
@@ -379,6 +380,7 @@ export interface ApiInputMessageReplyInfo {
   replyToTopId?: number;
   replyToPeerId?: string;
   quoteText?: ApiFormattedText;
+  quoteOffset?: number;
 }
 
 export interface ApiInputStoryReplyInfo {
@@ -457,6 +459,7 @@ export type ApiMessageEntityCustomEmoji = {
   documentId: string;
 };
 
+// Local entities
 export type ApiMessageEntityTimestamp = {
   type: ApiMessageEntityTypes.Timestamp;
   offset: number;
@@ -464,8 +467,15 @@ export type ApiMessageEntityTimestamp = {
   timestamp: number;
 };
 
+export type ApiMessageEntityQuoteFocus = {
+  type: 'quoteFocus';
+  offset: number;
+  length: number;
+};
+
 export type ApiMessageEntity = ApiMessageEntityDefault | ApiMessageEntityPre | ApiMessageEntityTextUrl |
-ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp;
+ApiMessageEntityMentionName | ApiMessageEntityCustomEmoji | ApiMessageEntityBlockquote | ApiMessageEntityTimestamp |
+ApiMessageEntityQuoteFocus;
 
 export enum ApiMessageEntityTypes {
   Bold = 'MessageEntityBold',
@@ -487,6 +497,7 @@ export enum ApiMessageEntityTypes {
   Spoiler = 'MessageEntitySpoiler',
   CustomEmoji = 'MessageEntityCustomEmoji',
   Timestamp = 'MessageEntityTimestamp',
+  QuoteFocus = 'MessageEntityQuoteFocus',
   Unknown = 'MessageEntityUnknown',
 }
 

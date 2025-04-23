@@ -726,6 +726,7 @@ export function updateFocusedMessage<T extends GlobalState>(
     noHighlight = false,
     isResizingContainer = false,
     quote,
+    quoteOffset,
     scrollTargetPosition,
   }: {
     global: T;
@@ -735,6 +736,7 @@ export function updateFocusedMessage<T extends GlobalState>(
     noHighlight?: boolean;
     isResizingContainer?: boolean;
     quote?: string;
+    quoteOffset?: number;
     scrollTargetPosition?: ScrollTargetPosition;
   },
   ...[tabId = getCurrentTabId()]: TabArgs<T>
@@ -748,6 +750,7 @@ export function updateFocusedMessage<T extends GlobalState>(
       noHighlight,
       isResizingContainer,
       quote,
+      quoteOffset,
       scrollTargetPosition,
     },
   }, tabId);

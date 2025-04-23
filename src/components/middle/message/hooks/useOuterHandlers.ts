@@ -138,7 +138,9 @@ export default function useOuterHandlers(
   function handleContainerDoubleClick() {
     if (IS_TOUCH_ENV || !canReply) return;
 
-    updateDraftReplyInfo({ replyToMsgId: messageId, replyToPeerId: undefined, quoteText: undefined });
+    updateDraftReplyInfo({
+      replyToMsgId: messageId, replyToPeerId: undefined, quoteText: undefined, quoteOffset: undefined,
+    });
   }
 
   function stopPropagation(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {

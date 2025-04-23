@@ -405,8 +405,8 @@ addActionHandler('focusNextReply', (global, actions, payload): ActionReturnType 
 addActionHandler('focusMessage', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
-    replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel, quote, scrollTargetPosition,
-    timestamp, tabId = getCurrentTabId(),
+    replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel, quote, quoteOffset,
+    scrollTargetPosition, timestamp, tabId = getCurrentTabId(),
   } = payload;
 
   let { messageId } = payload;
@@ -455,6 +455,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     noHighlight,
     isResizingContainer,
     quote,
+    quoteOffset,
     scrollTargetPosition,
   }, tabId);
   global = updateFocusDirection(global, undefined, tabId);
@@ -525,13 +526,14 @@ addActionHandler('setShouldPreventComposerAnimation', (global, actions, payload)
 
 addActionHandler('openReplyMenu', (global, actions, payload): ActionReturnType => {
   const {
-    fromChatId, messageId, quoteText, tabId = getCurrentTabId(),
+    fromChatId, messageId, quoteText, quoteOffset, tabId = getCurrentTabId(),
   } = payload;
   return updateTabState(global, {
     replyingMessage: {
       fromChatId,
       messageId,
       quoteText,
+      quoteOffset,
     },
     isShareMessageModalShown: true,
   }, tabId);

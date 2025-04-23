@@ -65,7 +65,7 @@ export default function useInnerHandlers({
   } = message;
 
   const {
-    replyToMsgId, replyToPeerId, replyToTopId, isQuote, quoteText,
+    replyToMsgId, replyToPeerId, replyToTopId, isQuote, quoteText, quoteOffset,
   } = getMessageReplyInfo(message) || {};
 
   const handleSenderClick = useLastCallback(() => {
@@ -114,7 +114,7 @@ export default function useInnerHandlers({
       messageId: replyToMsgId,
       replyMessageId: replyToPeerId ? undefined : messageId,
       noForumTopicPanel: !replyToPeerId, // Open topic panel for cross-chat replies
-      ...(isQuote && { quote: quoteText?.text }),
+      ...(isQuote && { quote: quoteText?.text, quoteOffset }),
     });
   });
 

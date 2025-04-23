@@ -156,6 +156,7 @@ export type TabState = {
     noHighlight?: boolean;
     isResizingContainer?: boolean;
     quote?: string;
+    quoteOffset?: number;
     scrollTargetPosition?: ScrollTargetPosition;
   };
 
@@ -352,6 +353,7 @@ export type TabState = {
     fromChatId?: string;
     messageId?: number;
     quoteText?: ApiFormattedText;
+    quoteOffset?: number;
     toChatId?: string;
     toThreadId?: ThreadId;
   };

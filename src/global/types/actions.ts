@@ -956,6 +956,7 @@ export interface ActionPayloads {
     shouldReplaceHistory?: boolean;
     noForumTopicPanel?: boolean;
     quote?: string;
+    quoteOffset?: number;
     scrollTargetPosition?: ScrollTargetPosition;
     timestamp?: number;
   } & WithTabId;
@@ -1769,6 +1770,7 @@ export interface ActionPayloads {
     fromChatId: string;
     messageId?: number;
     quoteText?: ApiFormattedText;
+    quoteOffset?: number;
   } & WithTabId;
 
   // Forwards

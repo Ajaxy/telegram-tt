@@ -2145,6 +2145,7 @@ addActionHandler('openChatOrTopicWithReplyInDraft', (global, actions, payload): 
     replyToTopId: replyingInfo.toThreadId,
     replyToPeerId: currentChatId,
     quoteText: replyingInfo.quoteText,
+    quoteOffset: replyingInfo.quoteOffset,
   } as ApiInputMessageReplyInfo;
 
   const currentReplyInfo = replyingInfo.messageId

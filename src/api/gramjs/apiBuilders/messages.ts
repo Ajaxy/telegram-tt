@@ -286,6 +286,7 @@ export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | un
     replyToTopId: replyTo.topMsgId,
     replyToPeerId: replyTo.replyToPeerId && getApiChatIdFromMtpPeer(replyTo.replyToPeerId),
     quoteText: replyTo.quoteText ? buildMessageTextContent(replyTo.quoteText, replyTo.quoteEntities) : undefined,
+    quoteOffset: replyTo.quoteOffset,
   } satisfies ApiInputMessageReplyInfo : undefined;
 
   return {
@@ -340,6 +341,7 @@ function buildApiReplyInfo(
       quote,
       quoteText,
       quoteEntities,
+      quoteOffset,
     } = replyHeader;
 
     return {
@@ -352,6 +354,7 @@ function buildApiReplyInfo(
       replyMedia: replyMedia && buildMessageMediaContent(replyMedia, context),
       isQuote: quote,
       quoteText: quoteText ? buildMessageTextContent(quoteText, quoteEntities) : undefined,
+      quoteOffset,
     };
   }
 
@@ -554,6 +557,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
     replyToTopId: inputInfo.replyToTopId,
     replyToPeerId: inputInfo.replyToPeerId,
     quoteText: inputInfo.quoteText,
+    quoteOffset: inputInfo.quoteOffset,
     isForumTopic: isForum && inputInfo.replyToTopId ? true : undefined,
     ...(Boolean(inputInfo.quoteText) && { isQuote: true }),
   };

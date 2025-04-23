@@ -46,7 +46,6 @@ export function renderTextWithEntities({
   cacheBuster,
   forcePlayback,
   noCustomEmojiPlayback,
-  focusedQuote,
   isInSelectMode,
   chatId,
   messageId,
@@ -69,7 +68,6 @@ export function renderTextWithEntities({
   cacheBuster?: string;
   forcePlayback?: boolean;
   noCustomEmojiPlayback?: boolean;
-  focusedQuote?: string;
   isInSelectMode?: boolean;
   chatId?: string;
   messageId?: number;
@@ -80,7 +78,6 @@ export function renderTextWithEntities({
     return renderMessagePart({
       content: text,
       highlight,
-      focusedQuote,
       emojiSize,
       shouldRenderAsHtml,
       asPreview,
@@ -115,7 +112,6 @@ export function renderTextWithEntities({
         renderResult.push(...renderMessagePart({
           content: textBefore,
           highlight,
-          focusedQuote,
           emojiSize,
           shouldRenderAsHtml,
           asPreview,
@@ -166,7 +162,6 @@ export function renderTextWithEntities({
         entityContent,
         nestedEntityContent,
         highlight,
-        focusedQuote,
         containerId,
         asPreview,
         isProtected,
@@ -203,7 +198,6 @@ export function renderTextWithEntities({
         renderResult.push(...renderMessagePart({
           content: textAfter,
           highlight,
-          focusedQuote,
           emojiSize,
           shouldRenderAsHtml,
           asPreview,
@@ -302,12 +296,61 @@ function renderMessagePart({
     filters.push('highlight');
     params.highlight = highlight;
   }
-  if (focusedQuote) {
-    filters.push('quote');
-    params.quote = focusedQuote;
-  }
 
   return renderText(content, filters, params);
+}
+
+export function insertTextEntity(entities: ApiMessageEntity[], newEntity: ApiMessageEntity) {
+  const resultEntities: ApiMessageEntity[] = [];
+
+  const newEntityStart = newEntity.offset;
+  const newEntityEnd = newEntity.offset + newEntity.length;
+
+  for (const existingEntity of entities) {
+    const existingEntityStart = existingEntity.offset;
+    const existingEntityEnd = existingEntity.offset + existingEntity.length;
+    // Push as is if edges do not overlap
+    if (existingEntityEnd <= newEntityStart
+      || existingEntityStart > newEntityEnd
+      || (existingEntityStart > newEntityStart
+        && existingEntityEnd < newEntityEnd)) {
+      resultEntities.push(existingEntity);
+      continue;
+    }
+
+    // If start edge overlaps
+    if (existingEntityStart < newEntityStart && existingEntityEnd > newEntityStart) {
+      // Split entity in two
+      resultEntities.push({
+        ...existingEntity,
+        length: newEntityStart - existingEntityStart,
+      });
+      resultEntities.push({
+        ...existingEntity,
+        offset: newEntityStart,
+        length: existingEntityEnd - newEntityStart,
+      });
+    }
+
+    // If end edge overlaps
+    if (existingEntityStart < newEntityEnd
+      && existingEntityEnd > newEntityEnd) {
+      // Split entity in two
+      resultEntities.push({
+        ...existingEntity,
+        offset: newEntityEnd,
+        length: existingEntityEnd - newEntityStart - newEntity.length,
+      });
+      resultEntities.push({
+        ...existingEntity,
+        length: newEntityEnd - existingEntityStart,
+      });
+    }
+  }
+
+  resultEntities.push(newEntity);
+  // Sort entities by offset, longer entities first
+  return resultEntities.sort((a, b) => a.offset - b.offset || b.length - a.length);
 }
 
 // Organize entities in a tree-like structure to better represent how the text will be displayed
@@ -381,7 +424,6 @@ function processEntity({
   entityContent,
   nestedEntityContent,
   highlight,
-  focusedQuote,
   containerId,
   asPreview,
   isProtected,
@@ -430,7 +472,6 @@ function processEntity({
     return renderMessagePart({
       content: renderedContent,
       highlight,
-      focusedQuote,
       emojiSize,
       asPreview,
     });
@@ -612,6 +653,10 @@ function processEntity({
           forceAlways={forcePlayback}
           noPlay={noCustomEmojiPlayback}
         />
+      );
+    case ApiMessageEntityTypes.QuoteFocus:
+      return (
+        <span className="matching-text-highlight is-quote">{renderNestedMessagePart()}</span>
       );
     default:
       return renderNestedMessagePart();
