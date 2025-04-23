@@ -81,6 +81,8 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   PEERS_LIST_EMPTY: 'No chats are added to the list',
 
   PAID_MEDIA_FORBIDDEN: 'You can\'t send paid media in this chat',
+
+  USER_DISALLOWED_STARGIFTS: 'User is not accepting gifts',
 };
 
 if (DEBUG) {

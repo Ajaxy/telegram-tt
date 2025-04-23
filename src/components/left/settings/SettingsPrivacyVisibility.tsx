@@ -13,10 +13,13 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
+import Icon from '../../common/icons/Icon';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
+import Switcher from '../../ui/Switcher';
 import PremiumStatusItem from './PremiumStatusItem';
 import PrivacyLockedOption from './PrivacyLockedOption';
+import SettingsAcceptedGift from './SettingsAcceptedGift';
 import SettingsPrivacyLastSeen from './SettingsPrivacyLastSeen';
 import SettingsPrivacyPublicProfilePhoto from './SettingsPrivacyPublicProfilePhoto';
 
@@ -34,6 +37,8 @@ type StateProps = {
   primaryPrivacy?: ApiPrivacySettings;
   secondaryPrivacy?: ApiPrivacySettings;
   isPremiumRequired?: boolean;
+  shouldDisplayGiftsButton?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
@@ -47,10 +52,34 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   isPremiumRequired,
   onScreenSelect,
   onReset,
+  shouldDisplayGiftsButton,
+  isCurrentUserPremium,
 }) => {
+  const lang = useLang();
+
+  const { updateGlobalPrivacySettings, showNotification } = getActions();
+
   useHistoryBack({
     isActive,
     onBack: onReset,
+  });
+
+  const handleShowGiftIconInChats = useLastCallback(() => {
+    if (!isCurrentUserPremium) {
+      showNotification({
+        message: lang('PrivacySubscribeToTelegramPremium'),
+        action: {
+          action: 'openPremiumModal',
+          payload: {},
+        },
+        actionText: { key: 'Open' },
+        icon: 'star',
+      });
+      return;
+    }
+    updateGlobalPrivacySettings({
+      shouldDisplayGiftsButton: !shouldDisplayGiftsButton,
+    });
   });
 
   const secondaryScreen = useMemo(() => {
@@ -67,6 +96,27 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-content custom-scroll">
+      {screen === SettingsScreens.PrivacyGifts && (
+        <div className="settings-item">
+          <ListItem onClick={handleShowGiftIconInChats}>
+            <span>{lang('PrivacyDisplayGiftsButton')}</span>
+            <Switcher
+              id="gift"
+              disabled={!isCurrentUserPremium}
+              label={shouldDisplayGiftsButton ? lang('HideGiftsButton') : lang('DisplayGiftsButton')}
+              checked={shouldDisplayGiftsButton}
+            />
+          </ListItem>
+          <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('PrivacyDisplayGiftIconInChats', {
+              icon: <Icon name="gift" className="gift-icon" />,
+              gift: lang('PrivacyDisplayGift'),
+            }, {
+              withNodes: true,
+            })}
+          </p>
+        </div>
+      )}
       <PrivacySubsection
         screen={screen}
         privacy={primaryPrivacy}
@@ -82,6 +132,9 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
       )}
       {screen === SettingsScreens.PrivacyLastSeen && (
         <SettingsPrivacyLastSeen visibility={primaryPrivacy?.visibility} />
+      )}
+      {screen === SettingsScreens.PrivacyGifts && (
+        <SettingsAcceptedGift />
       )}
       {secondaryScreen && (
         <PrivacySubsection
@@ -361,7 +414,12 @@ export default memo(withGlobal<OwnProps>(
 
     const {
       currentUserId,
-      settings: { privacy },
+      settings: {
+        privacy,
+        byKey: {
+          shouldDisplayGiftsButton,
+        },
+      },
     } = global;
 
     const currentUserFullInfo = selectUserFullInfo(global, currentUserId!);
@@ -426,6 +484,8 @@ export default memo(withGlobal<OwnProps>(
       hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
       currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
       isPremiumRequired: screen === SettingsScreens.PrivacyVoiceMessages && !selectIsCurrentUserPremium(global),
+      shouldDisplayGiftsButton,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(SettingsPrivacyVisibility));

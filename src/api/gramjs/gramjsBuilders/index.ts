@@ -8,6 +8,7 @@ import type {
   ApiChatBannedRights,
   ApiChatFolder,
   ApiChatReactions,
+  ApiDisallowedGiftsSettings,
   ApiEmojiStatusType,
   ApiFormattedText,
   ApiGroupCall,
@@ -641,6 +642,15 @@ function buildPremiumGiftCodeOption(optionData: ApiPremiumGiftCodeOption) {
     months: optionData.months,
     currency: optionData.currency,
     amount: BigInt(optionData.amount),
+  });
+}
+
+export function buildDisallowedGiftsSettings(disallowedGifts: ApiDisallowedGiftsSettings) {
+  return new GramJs.DisallowedGiftsSettings({
+    disallowUnlimitedStargifts: disallowedGifts.shouldDisallowLimitedStarGifts,
+    disallowLimitedStargifts: disallowedGifts.shouldDisallowUnlimitedStarGifts,
+    disallowUniqueStargifts: disallowedGifts.shouldDisallowUniqueStarGifts,
+    disallowPremiumGifts: disallowedGifts.shouldDisallowPremiumGifts,
   });
 }
 

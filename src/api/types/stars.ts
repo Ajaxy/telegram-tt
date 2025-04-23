@@ -215,3 +215,10 @@ export interface ApiStarsGiveawayWinnerOption {
   users: number;
   perUserStars: number;
 }
+
+export interface ApiDisallowedGiftsSettings {
+  shouldDisallowUnlimitedStarGifts?: true;
+  shouldDisallowLimitedStarGifts?: true;
+  shouldDisallowUniqueStarGifts?: true;
+  shouldDisallowPremiumGifts?: true;
+}

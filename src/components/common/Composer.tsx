@@ -15,6 +15,7 @@ import type {
   ApiBotMenuButton,
   ApiChat,
   ApiChatFullInfo,
+  ApiDisallowedGifts,
   ApiDraft,
   ApiFormattedText,
   ApiMessage,
@@ -227,6 +228,7 @@ type StateProps =
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
     isReactionPickerOpen?: boolean;
+    shouldDisplayGiftsButton?: boolean;
     isForwarding?: boolean;
     forwardedMessagesCount?: number;
     pollModal: TabState['pollModal'];
@@ -292,6 +294,7 @@ type StateProps =
     isPaymentMessageConfirmDialogOpen: boolean;
     starsBalance: number;
     isStarsBalanceModalOpen: boolean;
+    disallowedGifts?: ApiDisallowedGifts;
     isAccountFrozen?: boolean;
     isAppConfigLoaded?: boolean;
   };
@@ -346,6 +349,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   isRightColumnShown,
   isSelectModeActive,
   isReactionPickerOpen,
+  shouldDisplayGiftsButton,
   isForwarding,
   forwardedMessagesCount,
   pollModal,
@@ -414,6 +418,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   isPaymentMessageConfirmDialogOpen,
   starsBalance,
   isStarsBalanceModalOpen,
+  disallowedGifts,
   isAccountFrozen,
   isAppConfigLoaded,
 }) => {
@@ -434,6 +439,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     showNotification,
     showAllowedMessageTypesNotification,
     openStoryReactionPicker,
+    openGiftModal,
     closeReactionPicker,
     sendStoryReaction,
     editMessage,
@@ -834,6 +840,15 @@ const Composer: FC<OwnProps & StateProps> = ({
       resetComposerRef.current();
     };
   }, [chatId, threadId, resetComposerRef, stopRecordingVoiceRef]);
+
+  const areAllGiftsDisallowed = useMemo(() => {
+    if (!disallowedGifts) {
+      return undefined;
+    }
+    return Object.values(disallowedGifts).every(Boolean);
+  }, [disallowedGifts]);
+
+  const shouldShowGiftButton = Boolean(!isChatWithSelf && shouldDisplayGiftsButton && !areAllGiftsDisallowed);
 
   const showCustomEmojiPremiumNotification = useLastCallback(() => {
     const notificationNumber = customEmojiNotificationNumber.current;
@@ -1488,6 +1503,10 @@ const Composer: FC<OwnProps & StateProps> = ({
     });
   });
 
+  const handleGiftClick = useLastCallback(() => {
+    openGiftModal({ forUserId: chatId });
+  });
+
   const handleToggleSilentPosting = useLastCallback(() => {
     const newValue = !isSilentPosting;
     updateChatSilentPosting({ chatId, isEnabled: newValue });
@@ -2061,6 +2080,17 @@ const Composer: FC<OwnProps & StateProps> = ({
                         <Icon name="schedule" />
                       </Button>
                     )}
+                    {shouldShowGiftButton && (
+                      <Button
+                        round
+                        faded
+                        className="composer-action-button"
+                        color="translucent"
+                        onClick={handleGiftClick}
+                      >
+                        <Icon name="gift" />
+                      </Button>
+                    )}
                     {Boolean(botKeyboardMessageId) && !activeVoiceRecording && !editingMessage && (
                       <ResponsiveHoverButton
                         className={buildClassName('composer-action-button', isBotKeyboardOpen && 'activated')}
@@ -2464,6 +2494,8 @@ export default memo(withGlobal<OwnProps>(
       isPaymentMessageConfirmDialogOpen: tabState.isPaymentMessageConfirmDialogOpen,
       starsBalance,
       isStarsBalanceModalOpen,
+      shouldDisplayGiftsButton: userFullInfo?.shouldDisplayGiftsButton,
+      disallowedGifts: userFullInfo?.disallowedGifts,
       isAccountFrozen,
       isAppConfigLoaded,
     };

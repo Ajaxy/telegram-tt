@@ -20,11 +20,13 @@ type OwnProps = {
 
 type StateProps = {
   idsByCategory?: Record<StarGiftCategory, string[]>;
+  areLimitedStarGiftsDisallowed?: boolean;
 };
 
 const StarGiftCategoryList = ({
   idsByCategory,
   onCategoryChanged,
+  areLimitedStarGiftsDisallowed,
 }: StateProps & OwnProps) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -78,7 +80,7 @@ const StarGiftCategoryList = ({
   return (
     <div ref={ref} className={buildClassName(styles.list, 'no-scrollbar')}>
       {renderCategoryItem('all')}
-      {renderCategoryItem('limited')}
+      {!areLimitedStarGiftsDisallowed && renderCategoryItem('limited')}
       {renderCategoryItem('stock')}
       {starCategories?.map(renderCategoryItem)}
     </div>

@@ -8,6 +8,7 @@ import type {
   ApiChatlistInvite,
   ApiChatReactions,
   ApiChatType,
+  ApiDisallowedGiftsSettings,
   ApiDraft,
   ApiExportedInvite,
   ApiFormattedText,
@@ -2329,6 +2330,8 @@ export interface ActionPayloads {
     shouldHideReadMarks?: boolean;
     shouldNewNonContactPeersRequirePremium?: boolean;
     nonContactPeersPaidStars?: number | null;
+    shouldDisplayGiftsButton?: boolean;
+    disallowedGifts?: ApiDisallowedGiftsSettings;
   };
 
   // Premium

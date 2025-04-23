@@ -299,6 +299,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       shouldUpdateStickerSetOrder: true,
       shouldArchiveAndMuteNewNonContact: false,
       shouldNewNonContactPeersRequirePremium: false,
+      disallowedGifts: undefined,
       nonContactPeersPaidStars: 0,
       shouldHideReadMarks: false,
       canTranslate: false,

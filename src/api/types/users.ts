@@ -55,6 +55,8 @@ export interface ApiUserFullInfo {
   areAdsEnabled?: boolean;
   hasPinnedStories?: boolean;
   isContactRequirePremium?: boolean;
+  shouldDisplayGiftsButton?: boolean;
+  disallowedGifts?: ApiDisallowedGifts;
   birthday?: ApiBirthday;
   personalChannelId?: string;
   personalChannelMessageId?: number;
@@ -155,4 +157,11 @@ export interface ApiBirthday {
   day: number;
   month: number;
   year?: number;
+}
+
+export interface ApiDisallowedGifts {
+  shouldDisallowUnlimitedStarGifts?: boolean;
+  shouldDisallowLimitedStarGifts?: boolean;
+  shouldDisallowUniqueStarGifts?: boolean;
+  shouldDisallowPremiumGifts?: boolean;
 }

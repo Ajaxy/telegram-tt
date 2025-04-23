@@ -1099,6 +1099,7 @@ async function payInputStarInvoice<T extends GlobalState>(
   setGlobal(global);
 
   if ('error' in form) {
+    actions.showDialog({ data: { message: form.error || 'Error', hasErrorKey: true }, tabId });
     return;
   }
 

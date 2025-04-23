@@ -9,6 +9,7 @@ import type {
   ApiChat,
   ApiChatInviteImporter,
   ApiContact,
+  ApiDisallowedGiftsSettings,
   ApiDocument,
   ApiDraft,
   ApiExportedInvite,
@@ -147,6 +148,8 @@ export interface AccountSettings {
   shouldArchiveAndMuteNewNonContact?: boolean;
   shouldNewNonContactPeersRequirePremium?: boolean;
   nonContactPeersPaidStars?: number;
+  shouldDisplayGiftsButton?: boolean;
+  disallowedGifts?: ApiDisallowedGiftsSettings;
   shouldHideReadMarks?: boolean;
   canTranslate: boolean;
   canTranslateChats: boolean;

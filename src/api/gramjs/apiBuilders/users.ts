@@ -14,6 +14,7 @@ import { buildApiBusinessIntro, buildApiBusinessLocation, buildApiBusinessWorkHo
 import {
   buildApiBotVerification, buildApiPhoto, buildApiUsernames, buildAvatarPhotoId,
 } from './common';
+import { buildApiDisallowedGiftsSettings } from './gifts';
 import { omitVirtualClassFields } from './helpers';
 import { buildApiEmojiStatus, buildApiPeerColor, buildApiPeerId } from './peers';
 
@@ -25,7 +26,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
       fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
       contactRequirePremium, businessWorkHours, businessLocation, businessIntro,
       birthday, personalChannelId, personalChannelMessage, sponsoredEnabled, stargiftsCount, botVerification,
-      botCanManageEmojiStatus, settings, sendPaidMessagesStars,
+      botCanManageEmojiStatus, settings, sendPaidMessagesStars, displayGiftsButton, disallowedGifts,
     },
     users,
   } = mtpUserFull;
@@ -45,6 +46,8 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     personalPhoto: personalPhoto instanceof GramJs.Photo ? buildApiPhoto(personalPhoto) : undefined,
     botInfo: botInfo && buildApiBotInfo(botInfo, userId),
     isContactRequirePremium: contactRequirePremium,
+    shouldDisplayGiftsButton: displayGiftsButton,
+    disallowedGifts: disallowedGifts && buildApiDisallowedGiftsSettings(disallowedGifts),
     birthday: birthday && buildApiBirthday(birthday),
     businessLocation: businessLocation && buildApiBusinessLocation(businessLocation),
     businessWorkHours: businessWorkHours && buildApiBusinessWorkHours(businessWorkHours),

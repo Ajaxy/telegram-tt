@@ -1,6 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiDisallowedGiftsSettings,
   ApiInputSavedStarGift,
   ApiSavedStarGift,
   ApiStarGift,
@@ -154,5 +155,23 @@ export function buildApiSavedStarGift(userStarGift: GramJs.SavedStarGift, peerId
     savedId: savedId?.toString(),
     canExportAt,
     isPinned: pinnedToTop,
+  };
+}
+
+export function buildApiDisallowedGiftsSettings(
+  result: GramJs.TypeDisallowedGiftsSettings,
+): ApiDisallowedGiftsSettings {
+  const {
+    disallowUnlimitedStargifts,
+    disallowLimitedStargifts,
+    disallowUniqueStargifts,
+    disallowPremiumGifts,
+  } = result;
+
+  return {
+    shouldDisallowUnlimitedStarGifts: disallowUnlimitedStargifts,
+    shouldDisallowLimitedStarGifts: disallowLimitedStargifts,
+    shouldDisallowUniqueStarGifts: disallowUniqueStargifts,
+    shouldDisallowPremiumGifts: disallowPremiumGifts,
   };
 }
