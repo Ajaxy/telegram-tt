@@ -12,7 +12,7 @@ import {
   omit, pick,
 } from '../../../util/iteratees';
 import { getServerTimeOffset, setServerTimeOffset } from '../../../util/serverTime';
-import { buildApiBotMenuButton } from '../apiBuilders/bots';
+import { buildApiBotCommand, buildApiBotMenuButton } from '../apiBuilders/bots';
 import {
   buildApiGroupCall,
   buildApiGroupCallParticipant,
@@ -952,6 +952,19 @@ export function updater(update: Update) {
       '@type': 'updateBotMenuButton',
       botId: id,
       button: buildApiBotMenuButton(button),
+    });
+  } else if (update instanceof GramJs.UpdateBotCommands) {
+    const {
+      botId,
+      commands,
+    } = update;
+
+    const id = buildApiPeerId(botId, 'user');
+    const commandsArray = commands.map((command) => buildApiBotCommand(id, command));
+    sendApiUpdate({
+      '@type': 'updateBotCommands',
+      botId: id,
+      commands: commandsArray.length ? commandsArray : undefined,
     });
   } else if (update instanceof GramJs.UpdateTranscribedAudio) {
     sendApiUpdate({

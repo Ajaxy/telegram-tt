@@ -398,7 +398,7 @@ export function buildBotAppSettings(settings: GramJs.BotAppSettings): ApiBotAppS
   };
 }
 
-function buildApiBotCommand(botId: string, command: GramJs.BotCommand): ApiBotCommand {
+export function buildApiBotCommand(botId: string, command: GramJs.BotCommand): ApiBotCommand {
   return {
     botId,
     ...omitVirtualClassFields(command),
