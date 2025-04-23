@@ -1060,7 +1060,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
         src={url}
         title={`${bot?.firstName} Web App`}
         sandbox={SANDBOX_ATTRIBUTES}
-        allow="camera; microphone; geolocation;"
+        allow="camera; microphone; geolocation; clipboard-write;"
         allowFullScreen
         ref={frameRef}
       />

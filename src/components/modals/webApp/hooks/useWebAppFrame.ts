@@ -265,6 +265,78 @@ const useWebAppFrame = (
         });
       }
 
+      if (eventType === 'web_app_device_storage_clear'
+        || eventType === 'web_app_device_storage_get_key'
+        || eventType === 'web_app_device_storage_save_key') {
+        const { req_id } = eventData;
+        sendEvent({
+          eventType: 'device_storage_failed',
+          eventData: {
+            req_id,
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+
+      if (eventType === 'web_app_secure_storage_clear'
+        || eventType === 'web_app_secure_storage_get_key'
+        || eventType === 'web_app_secure_storage_restore_key'
+        || eventType === 'web_app_secure_storage_save_key') {
+        const { req_id } = eventData;
+        sendEvent({
+          eventType: 'secure_storage_failed',
+          eventData: {
+            req_id,
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+
+      if (eventType === 'web_app_start_accelerometer') {
+        sendEvent({
+          eventType: 'accelerometer_failed',
+          eventData: {
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+
+      if (eventType === 'web_app_start_gyroscope') {
+        sendEvent({
+          eventType: 'gyroscope_failed',
+          eventData: {
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+
+      if (eventType === 'web_app_start_device_orientation') {
+        sendEvent({
+          eventType: 'device_orientation_failed',
+          eventData: {
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+
+      if (eventType === 'web_app_add_to_home_screen') {
+        sendEvent({
+          eventType: 'home_screen_failed',
+          eventData: {
+            error: 'UNSUPPORTED',
+          },
+        });
+      }
+
+      if (eventType === 'web_app_check_home_screen') {
+        sendEvent({
+          eventType: 'home_screen_checked',
+          eventData: {
+            status: 'unsupported',
+          },
+        });
+      }
+
       if (eventType === 'web_app_set_emoji_status') {
         const { custom_emoji_id, duration } = eventData;
 
