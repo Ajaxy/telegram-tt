@@ -1459,6 +1459,7 @@
 "GiftInfoOwner" = "Owner";
 "GiftInfoIssued" = "{issued}/{total} issued";
 "GiftInfoCollectible" = "Collectible #{number}";
+"GiftSavedNumber" = "#{number}";
 "GiftAttributeModel" = "Model";
 "GiftAttributeBackdrop" = "Backdrop";
 "GiftAttributeSymbol" = "Symbol";

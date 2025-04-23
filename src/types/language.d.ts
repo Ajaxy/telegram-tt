@@ -1856,6 +1856,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'GiftInfoCollectible': {
     'number': V;
   };
+  'GiftSavedNumber': {
+    'number': V;
+  };
   'GiftInfoPeerOriginalInfo': {
     'peer': V;
     'date': V;

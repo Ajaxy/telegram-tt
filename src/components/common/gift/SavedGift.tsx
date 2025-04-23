@@ -13,8 +13,8 @@ import { getGiftAttributes, getStickerFromGift, getTotalGiftAvailability } from 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useFlag from '../../../hooks/useFlag';
 import { type ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useOldLang from '../../../hooks/useOldLang';
 
 import Menu from '../../ui/Menu';
 import AnimatedIconFromSticker from '../AnimatedIconFromSticker';
@@ -61,9 +61,16 @@ const SavedGift = ({
 
   const [shouldPlay, play] = useFlag();
 
-  const oldLang = useOldLang();
+  const lang = useLang();
 
   const canManage = peerId === currentUserId || hasAdminRights;
+
+  const totalIssued = getTotalGiftAvailability(gift.gift);
+  const ribbonText = gift.isPinned && gift.gift.type === 'starGiftUnique'
+    ? lang('GiftSavedNumber', { number: gift.gift.number })
+    : totalIssued
+      ? lang('ActionStarGiftLimitedRibbon', { total: formatIntegerCompact(totalIssued) })
+      : undefined;
 
   const {
     isContextMenuOpen, contextMenuAnchor,
@@ -117,8 +124,6 @@ const SavedGift = ({
 
   if (!sticker) return undefined;
 
-  const totalIssued = getTotalGiftAvailability(gift.gift);
-
   return (
     <div
       ref={ref}
@@ -143,10 +148,10 @@ const SavedGift = ({
           <Icon name="eye-crossed-outline" />
         </div>
       )}
-      {totalIssued && (
+      {ribbonText && (
         <GiftRibbon
           color="blue"
-          text={oldLang('Gift2Limited1OfRibbon', formatIntegerCompact(totalIssued))}
+          text={ribbonText}
         />
       )}
       {contextMenuAnchor !== undefined && (
