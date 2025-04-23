@@ -1931,6 +1931,7 @@
 "DescriptionRestrictedMedia" = "Posting media content is not allowed in this group.";
 "DescriptionScheduledPaidMediaNotAllowed" = "Posting scheduled paid media content is not allowed";
 "DescriptionScheduledPaidMessagesNotAllowed" = "Scheduled paid messages is not allowed";
+"UnlockButtonTitle" = "Unlock with Telegram Premium";
 "FrozenAccountModalTitle" = "Your Account is Frozen";
 "FrozenAccountViolationTitle" = "Violation of Terms";
 "FrozenAccountViolationSubtitle" = "Your account was frozen for breaking Telegram's Terms and Conditions";

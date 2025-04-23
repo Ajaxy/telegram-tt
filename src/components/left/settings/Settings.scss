@@ -136,6 +136,25 @@
   @include mixins.side-panel-section;
 }
 
+.settings-unlock-button {
+  margin-inline: 1rem;
+  margin-top: 1rem;
+}
+
+.fluid-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-unlock-button-title {
+  align-items: center;
+  display: flex;
+}
+
+.settings-unlock-button-icon {
+  margin-inline-start: 0.25rem;
+}
+
 .settings-item {
   &.no-border {
     margin-bottom: 0;

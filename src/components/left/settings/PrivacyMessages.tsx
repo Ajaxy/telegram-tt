@@ -25,6 +25,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
+import Button from '../../ui/Button';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import RangeSlider from '../../ui/RangeSlider';
@@ -65,7 +66,7 @@ function PrivacyMessages({
   onReset,
   onScreenSelect,
 }: OwnProps & StateProps) {
-  const { updateGlobalPrivacySettings } = getActions();
+  const { updateGlobalPrivacySettings, openPremiumModal } = getActions();
   const oldLang = useOldLang();
   const lang = useLang();
 
@@ -139,9 +140,13 @@ function PrivacyMessages({
     );
   }, [lang, canChangeChargeForMessages]);
 
+  const handleUnlockWithPremium = useLastCallback(() => {
+    openPremiumModal({ initialSection: 'message_privacy' });
+  });
+
   function renderSectionStarsAmountForPaidMessages() {
     return (
-      <div className="settings-item">
+      <div className="settings-item fluid-container">
         <h4 className="settings-item-header" dir={oldLang.isRtl ? 'rtl' : undefined}>
           {lang('SectionTitleStarsForForMessages')}
         </h4>
@@ -154,19 +159,36 @@ function PrivacyMessages({
           renderValue={renderValueForStarsRange}
           readOnly={!canChangeChargeForMessages}
         />
-        <p className="settings-item-description-larger" dir={oldLang.isRtl ? 'rtl' : undefined}>
-          {lang('SectionDescriptionStarsForForMessages', {
-            percent: starsPaidMessageCommissionPermille * 100,
-            amount: formatCurrencyAsString(
-              chargeForMessages * starsUsdWithdrawRate * starsPaidMessageCommissionPermille,
-              'USD',
-              lang.code,
+        {!isCurrentUserPremium && (
+          <Button
+            color="primary"
+            fluid
+            size="smaller"
+            noForcedUpperCase
+            className="settings-unlock-button"
+            onClick={handleUnlockWithPremium}
+          >
 
-            ),
-          }, {
-            withNodes: true,
-          })}
-        </p>
+            <span className="settings-unlock-button-title">
+              {lang('UnlockButtonTitle')}
+              <Icon name="lock-badge" className="settings-unlock-button-icon" />
+            </span>
+          </Button>
+        )}
+        {isCurrentUserPremium && (
+          <p className="settings-item-description-larger" dir={oldLang.isRtl ? 'rtl' : undefined}>
+            {lang('SectionDescriptionStarsForForMessages', {
+              percent: starsPaidMessageCommissionPermille * 100,
+              amount: formatCurrencyAsString(
+                chargeForMessages * starsUsdWithdrawRate * starsPaidMessageCommissionPermille,
+                'USD',
+                lang.code,
+              ),
+            }, {
+              withNodes: true,
+            })}
+          </p>
+        )}
       </div>
     );
   }
@@ -228,7 +250,8 @@ function PrivacyMessages({
       </div>
       {selectedValue === 'charge_for_messages' && renderSectionStarsAmountForPaidMessages()}
       {canChangeChargeForMessages && selectedValue === 'charge_for_messages' && renderSectionNoPaidMessagesForUsers()}
-      {!isCurrentUserPremium && <PremiumStatusItem premiumSection="message_privacy" />}
+      {!isCurrentUserPremium && selectedValue !== 'charge_for_messages'
+      && <PremiumStatusItem premiumSection="message_privacy" />}
     </>
   );
 }

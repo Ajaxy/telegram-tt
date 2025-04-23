@@ -1475,6 +1475,7 @@ export interface LangPair {
   'DescriptionRestrictedMedia': undefined;
   'DescriptionScheduledPaidMediaNotAllowed': undefined;
   'DescriptionScheduledPaidMessagesNotAllowed': undefined;
+  'UnlockButtonTitle': undefined;
   'PrivacySubscribeToTelegramPremium': undefined;
   'PrivacyDisableLimitedEditionStarGifts': undefined;
   'PrivacyEnableLimitedEditionStarGifts': undefined;
