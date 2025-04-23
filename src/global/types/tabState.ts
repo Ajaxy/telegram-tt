@@ -618,6 +618,8 @@ export type TabState = {
 
   isGiftRecipientPickerOpen?: boolean;
 
+  isFrozenAccountModalOpen?: boolean;
+
   starsGiftingPickerModal?: {
     isOpen?: boolean;
   };

@@ -268,6 +268,17 @@ export interface ApiMessageActionExpiredContent extends ActionMediaType {
   isRoundVideo?: true;
 }
 
+export interface ApiMessageActionPaidMessagesRefunded extends ActionMediaType {
+  type: 'paidMessagesRefunded';
+  count:number;
+  stars:number;
+}
+
+export interface ApiMessageActionPaidMessagesPrice extends ActionMediaType {
+  type: 'paidMessagesPrice';
+  stars:number;
+}
+
 export interface ApiMessageActionUnsupported extends ActionMediaType {
   type: 'unsupported';
 }
@@ -284,4 +295,5 @@ export type ApiMessageAction = ApiMessageActionUnsupported | ApiMessageActionCha
 | ApiMessageActionTopicCreate | ApiMessageActionTopicEdit | ApiMessageActionSuggestProfilePhoto
 | ApiMessageActionChannelJoined | ApiMessageActionGiftCode | ApiMessageActionGiveawayLaunch
 | ApiMessageActionGiveawayResults | ApiMessageActionPaymentRefunded | ApiMessageActionGiftStars
-| ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique;
+| ApiMessageActionPrizeStars | ApiMessageActionStarGift | ApiMessageActionStarGiftUnique
+| ApiMessageActionPaidMessagesRefunded | ApiMessageActionPaidMessagesPrice;

@@ -27,6 +27,7 @@ import {
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
+  selectIsCurrentUserFrozen,
   selectPeer, selectPeerStories, selectPeerStory,
   selectPinnedStories, selectTabState,
 } from '../../selectors';
@@ -278,6 +279,8 @@ addActionHandler('toggleStoryPinnedToTop', async (global, actions, payload): Pro
 });
 
 addActionHandler('loadPeerStories', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { peerId } = payload;
   const peer = selectPeer(global, peerId);
   if (!peer) return;
@@ -296,6 +299,8 @@ addActionHandler('loadPeerStories', async (global, actions, payload): Promise<vo
 });
 
 addActionHandler('loadPeerProfileStories', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { peerId, offsetId } = payload;
   const peer = selectPeer(global, peerId);
   let peerStories = selectPeerStories(global, peerId);
@@ -320,6 +325,8 @@ addActionHandler('loadPeerProfileStories', async (global, actions, payload): Pro
 });
 
 addActionHandler('loadStoriesArchive', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { peerId, offsetId } = payload;
   const peer = selectPeer(global, peerId);
   let peerStories = selectPeerStories(global, peerId);

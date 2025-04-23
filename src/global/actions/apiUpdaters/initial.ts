@@ -95,6 +95,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       break;
     }
+
+    case 'notSupportedInFrozenAccount': {
+      actions.showNotification({
+        title: {
+          key: 'NotificationTitleNotSupportedInFrozenAccount',
+        },
+        message: {
+          key: 'NotificationMessageNotSupportedInFrozenAccount',
+        },
+        tabId: getCurrentTabId(),
+      });
+      break;
+    }
   }
 });
 

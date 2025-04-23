@@ -13,7 +13,7 @@ import type { TabWithProperties } from '../../ui/TabList';
 import { SettingsScreens } from '../../../types';
 
 import { ALL_FOLDER_ID } from '../../../config';
-import { selectCanShareFolder, selectTabState } from '../../../global/selectors';
+import { selectCanShareFolder, selectIsCurrentUserFrozen, selectTabState } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { IS_TOUCH_ENV } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
@@ -60,6 +60,7 @@ type StateProps = {
   archiveSettings: GlobalState['archiveSettings'];
   isStoryRibbonShown?: boolean;
   sessions?: Record<string, ApiSession>;
+  isAccountFrozen?: boolean;
 };
 
 const SAVED_MESSAGES_HOTKEY = '0';
@@ -85,6 +86,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   archiveSettings,
   isStoryRibbonShown,
   sessions,
+  isAccountFrozen,
 }) => {
   const {
     loadChatFolders,
@@ -368,6 +370,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         canDisplayArchive={(hasArchivedChats || hasArchivedStories) && !archiveSettings.isHidden}
         archiveSettings={archiveSettings}
         sessions={sessions}
+        isAccountFrozen={isAccountFrozen}
       />
     );
   }
@@ -432,6 +435,7 @@ export default memo(withGlobal<OwnProps>(
     } = global;
     const { shouldSkipHistoryAnimations, activeChatFolder } = selectTabState(global);
     const { storyViewer: { isRibbonShown: isStoryRibbonShown } } = selectTabState(global);
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
       chatFoldersById,
@@ -448,6 +452,7 @@ export default memo(withGlobal<OwnProps>(
       archiveSettings,
       isStoryRibbonShown,
       sessions,
+      isAccountFrozen,
     };
   },
 )(ChatFolders));

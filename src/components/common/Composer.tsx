@@ -82,6 +82,7 @@ import {
   selectEditingMessage,
   selectEditingScheduledDraft,
   selectIsChatWithSelf,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsInSelectMode,
   selectIsPremiumPurchaseBlocked,
@@ -291,6 +292,8 @@ type StateProps =
     isPaymentMessageConfirmDialogOpen: boolean;
     starsBalance: number;
     isStarsBalanceModalOpen: boolean;
+    isAccountFrozen?: boolean;
+    isAppConfigLoaded?: boolean;
   };
 
 enum MainButtonState {
@@ -411,6 +414,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   isPaymentMessageConfirmDialogOpen,
   starsBalance,
   isStarsBalanceModalOpen,
+  isAccountFrozen,
+  isAppConfigLoaded,
 }) => {
   const {
     sendMessage,
@@ -499,10 +504,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [chatId]);
 
   useEffect(() => {
-    if (chatId && isReady && !isInStoryViewer) {
+    if (isAppConfigLoaded && chatId && isReady && !isInStoryViewer) {
       loadScheduledHistory({ chatId });
     }
-  }, [isReady, chatId, threadId, isInStoryViewer]);
+  }, [isReady, chatId, threadId, isInStoryViewer, isAppConfigLoaded]);
 
   useEffect(() => {
     const isChannelWithProfiles = isChannel && chat?.areProfilesShown;
@@ -1960,7 +1965,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               )}
             </>
           )}
-          {((!isComposerBlocked || canSendGifs || canSendStickers) && !isNeedPremium) && (
+          {((!isComposerBlocked || canSendGifs || canSendStickers) && !isNeedPremium && !isAccountFrozen) && (
             <SymbolMenuButton
               chatId={chatId}
               threadId={threadId}
@@ -2373,6 +2378,8 @@ export default memo(withGlobal<OwnProps>(
     const isForwarding = chatId === tabState.forwardMessages.toChatId;
     const starsBalance = global.stars?.balance.amount || 0;
     const isStarsBalanceModalOpen = Boolean(tabState.starsBalanceModal);
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
+    const isAppConfigLoaded = global.isAppConfigLoaded;
 
     return {
       availableReactions: global.reactions.availableReactions,
@@ -2457,6 +2464,8 @@ export default memo(withGlobal<OwnProps>(
       isPaymentMessageConfirmDialogOpen: tabState.isPaymentMessageConfirmDialogOpen,
       starsBalance,
       isStarsBalanceModalOpen,
+      isAccountFrozen,
+      isAppConfigLoaded,
     };
   },
 )(Composer));

@@ -43,6 +43,7 @@ import {
   selectFocusedMessageId,
   selectIsChatProtected,
   selectIsChatWithSelf,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsInSelectMode,
   selectIsViewportNewest,
@@ -130,10 +131,12 @@ type StateProps = {
   isEmptyThread?: boolean;
   isForum?: boolean;
   currentUserId: string;
+  isAccountFrozen?: boolean;
   areAdsEnabled?: boolean;
   channelJoinInfo?: ApiChatFullInfo['joinInfo'];
   isChatProtected?: boolean;
   hasCustomGreeting?: boolean;
+  isAppConfigLoaded?: boolean;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
@@ -196,7 +199,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
   onIntersectPinnedMessage,
   onScrollDownToggle,
   onNotchToggle,
+  isAccountFrozen,
   hasCustomGreeting,
+  isAppConfigLoaded,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -248,10 +253,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     const canHaveAds = isChannelChat || isBot;
-    if (areAdsEnabled && canHaveAds && isSynced && isReady) {
+    if (areAdsEnabled && canHaveAds && isSynced && isReady && isAppConfigLoaded) {
       loadSponsoredMessages({ peerId: chatId });
     }
-  }, [chatId, isSynced, isReady, isChannelChat, isBot, areAdsEnabled]);
+  }, [chatId, isSynced, isReady, isChannelChat, isBot, areAdsEnabled, isAppConfigLoaded]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useSyncEffect(() => {
@@ -344,7 +349,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     threadId, isChatWithSelf, channelJoinInfo]);
 
   useInterval(() => {
-    if (!messageIds || !messagesById || type === 'scheduled') return;
+    if (!messageIds || !messagesById || type === 'scheduled' || isAccountFrozen) return;
     if (!isChannelChat && !isGroupChat) return;
 
     const ids = messageIds.filter((id) => {
@@ -796,8 +801,10 @@ export default memo(withGlobal<OwnProps>(
 
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
     const areAdsEnabled = !isCurrentUserPremium || selectUserFullInfo(global, currentUserId)?.areAdsEnabled;
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     const hasCustomGreeting = Boolean(userFullInfo?.businessIntro);
+    const isAppConfigLoaded = global.isAppConfigLoaded;
 
     return {
       areAdsEnabled,
@@ -832,7 +839,9 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
       isChatProtected: selectIsChatProtected(global, chatId),
       ...(withLastMessageWhenPreloading && { lastMessage }),
+      isAccountFrozen,
       hasCustomGreeting,
+      isAppConfigLoaded,
     };
   },
 )(MessageList));

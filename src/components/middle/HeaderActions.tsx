@@ -23,6 +23,7 @@ import {
   selectChatFullInfo,
   selectIsChatBotNotStarted,
   selectIsChatWithSelf,
+  selectIsCurrentUserFrozen,
   selectIsInSelectMode,
   selectIsRightColumnShown,
   selectIsUserBlocked,
@@ -82,6 +83,7 @@ interface StateProps {
   language: string;
   detectedChatLanguage?: string;
   doNotTranslate: string[];
+  isAccountFrozen?: boolean;
 }
 
 // Chrome breaks layout when focusing input during transition
@@ -121,6 +123,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   detectedChatLanguage,
   doNotTranslate,
   onTopicSearch,
+  isAccountFrozen,
 }) => {
   const {
     joinChannel,
@@ -137,6 +140,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     setSettingOption,
     unblockUser,
     setViewForumAsMessages,
+    openFrozenAccountModal,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -219,6 +223,10 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   });
 
   const handleRequestCall = useLastCallback(() => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      return;
+    }
     requestMasterAndRequestCall({ userId: chatId });
   });
 
@@ -513,6 +521,7 @@ export default memo(withGlobal<OwnProps>(
 
     const isTranslating = Boolean(selectRequestedChatTranslationLanguage(global, chatId));
     const canTranslate = selectCanTranslateChat(global, chatId) && !fullInfo?.isTranslationDisabled;
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
       noMenu: false,
@@ -542,6 +551,7 @@ export default memo(withGlobal<OwnProps>(
       doNotTranslate,
       detectedChatLanguage: chat.detectedLanguage,
       canUnblock,
+      isAccountFrozen,
     };
   },
 )(HeaderActions));

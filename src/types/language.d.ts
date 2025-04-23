@@ -1458,9 +1458,24 @@ export interface LangPair {
   'StoryTooltipReactionSent': undefined;
   'StarsNeededTextSendPaidMessages': undefined;
   'PaidMessageTransactionTotal': undefined;
+  'TitleFrozenAccount': undefined;
+  'SubtitleFrozenAccount': undefined;
+  'ComposerTitleFrozenAccount': undefined;
+  'ComposerSubtitleFrozenAccount': undefined;
   'DescriptionRestrictedMedia': undefined;
   'DescriptionScheduledPaidMediaNotAllowed': undefined;
   'DescriptionScheduledPaidMessagesNotAllowed': undefined;
+  'FrozenAccountModalTitle': undefined;
+  'FrozenAccountViolationTitle': undefined;
+  'FrozenAccountViolationSubtitle': undefined;
+  'FrozenAccountReadOnlyTitle': undefined;
+  'FrozenAccountReadOnlySubtitle': undefined;
+  'FrozenAccountAppealTitle': undefined;
+  'ButtonAppeal': undefined;
+  'ButtonUnderstood': undefined;
+  'ActionPaidMessageGroupPriceFree': undefined;
+  'NotificationTitleNotSupportedInFrozenAccount': undefined;
+  'NotificationMessageNotSupportedInFrozenAccount': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {
@@ -2345,6 +2360,21 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'PaidMessageTransactionDescription': {
     'percent': V;
+  };
+  'FrozenAccountAppealSubtitle': {
+    'botLink': V;
+    'date': V;
+  };
+  'ActionPaidMessageGroupPrice': {
+    'stars': V;
+  };
+  'ApiMessageActionPaidMessagesRefundedOutgoing': {
+    'stars': V;
+    'user': V;
+  };
+  'ApiMessageActionPaidMessagesRefundedIncoming': {
+    'user': V;
+    'stars': V;
   };
 }
 

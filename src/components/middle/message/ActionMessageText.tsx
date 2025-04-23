@@ -699,6 +699,31 @@ const ActionMessageText = ({
       case 'customAction':
         return action.message;
 
+      case 'paidMessagesPrice': {
+        const { stars } = action;
+        if (stars === 0) {
+          return lang('ActionPaidMessageGroupPriceFree');
+        }
+        return lang('ActionPaidMessageGroupPrice', {
+          stars: formatStarsAsText(lang, stars),
+        }, { withNodes: true, withMarkdown: true });
+      }
+
+      case 'paidMessagesRefunded': {
+        const { stars } = action;
+        const user = selectPeer(global, chatId);
+        const userTitle = (user && getPeerTitle(lang, user)) || userFallbackText;
+
+        const key = isOutgoing
+          ? 'ApiMessageActionPaidMessagesRefundedOutgoing'
+          : 'ApiMessageActionPaidMessagesRefundedIncoming';
+
+        return lang(key, {
+          stars: formatStarsAsText(lang, stars),
+          user: renderPeerLink(user?.id, userTitle),
+        }, { withNodes: true, withMarkdown: true });
+      }
+
       case 'phoneCall': // Rendered as a regular message, but considered an action for the summary
         return lang(getCallMessageKey(action, isOutgoing));
       default:

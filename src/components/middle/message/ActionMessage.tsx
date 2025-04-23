@@ -19,6 +19,7 @@ import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectChat,
   selectChatMessage,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsInSelectMode,
   selectIsMessageFocused,
@@ -86,6 +87,7 @@ type StateProps = {
   hasUnreadReaction?: boolean;
   isResizingContainer?: boolean;
   scrollTargetPosition?: ScrollTargetPosition;
+  isAccountFrozen?: boolean;
 };
 
 const SINGLE_LINE_ACTIONS: Set<ApiMessageAction['type']> = new Set([
@@ -121,6 +123,7 @@ const ActionMessage = ({
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
+  isAccountFrozen,
 }: OwnProps & StateProps) => {
   const {
     requestConfetti,
@@ -189,7 +192,7 @@ const ActionMessage = ({
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(
     ref,
-    isTouchScreen && isInSelectMode,
+    (isTouchScreen && isInSelectMode) || isAccountFrozen,
     !IS_ELECTRON,
     IS_ANDROID,
     getIsMessageListReady,
@@ -448,6 +451,7 @@ const ActionMessage = ({
           threadId={threadId}
           observeIntersection={observeIntersectionForPlaying}
           isCurrentUserPremium={isCurrentUserPremium}
+          isAccountFrozen
         />
       )}
     </div>
@@ -479,6 +483,7 @@ export default memo(withGlobal<OwnProps>(
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
     const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
       sender,
@@ -494,6 +499,7 @@ export default memo(withGlobal<OwnProps>(
       hasUnreadReaction,
       isResizingContainer,
       scrollTargetPosition,
+      isAccountFrozen,
     };
   },
 )(ActionMessage));

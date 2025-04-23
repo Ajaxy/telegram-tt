@@ -243,6 +243,9 @@ export interface ApiAppConfig {
   starRefStartPrefixes?: string[];
   tonExplorerUrl?: string;
   savedGiftPinLimit?: number;
+  freezeSinceDate?: number;
+  freezeUntilDate?: number;
+  freezeAppealUrl?: string;
 }
 
 export interface ApiConfig {

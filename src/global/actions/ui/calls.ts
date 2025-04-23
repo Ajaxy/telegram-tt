@@ -21,7 +21,8 @@ import {
 import { updateGroupCall } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChat, selectChatFullInfo, selectTabState, selectUser,
+  selectChat, selectChatFullInfo, selectIsCurrentUserFrozen,
+  selectTabState, selectUser,
 } from '../../selectors';
 import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../../selectors/calls';
 import { fetchChatByUsername, loadFullChat } from '../api/chats';
@@ -90,6 +91,7 @@ export function initializeSounds() {
 }
 
 async function fetchGroupCall<T extends GlobalState>(global: T, groupCall: Partial<ApiGroupCall>) {
+  if (selectIsCurrentUserFrozen(global)) return undefined;
   const result = await callApi('getGroupCall', {
     call: groupCall,
   });
@@ -130,6 +132,8 @@ addActionHandler('toggleGroupCallPanel', (global, actions, payload): ActionRetur
 });
 
 addActionHandler('subscribeToGroupCallUpdates', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { subscribed, id } = payload!;
   const groupCall = selectGroupCall(global, id);
 

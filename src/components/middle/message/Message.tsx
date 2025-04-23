@@ -85,6 +85,7 @@ import {
   selectForwardedSender,
   selectIsChatProtected,
   selectIsChatWithSelf,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsDocumentGroupSelected,
   selectIsInSelectMode,
@@ -305,6 +306,7 @@ type StateProps = {
   lastPlaybackTimestamp?: number;
   paidMessageStars?: number;
   isChatWithUser?: boolean;
+  isAccountFrozen?: boolean;
 };
 
 type MetaPosition =
@@ -428,6 +430,7 @@ const Message: FC<OwnProps & StateProps> = ({
   onIntersectPinnedMessage,
   paidMessageStars,
   isChatWithUser,
+  isAccountFrozen,
 }) => {
   const {
     toggleMessageSelection,
@@ -465,7 +468,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleContextMenuHide,
   } = useContextMenuHandlers(
     ref,
-    isTouchScreen && isInSelectMode,
+    (isTouchScreen && isInSelectMode) || isAccountFrozen,
     !IS_ELECTRON,
     IS_ANDROID,
     getIsMessageListReady,
@@ -570,6 +573,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const hasSubheader = hasTopicChip || hasMessageReply || hasStoryReply || hasForwardedCustomShape;
 
   const selectMessage = useLastCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
+    if (isAccountFrozen) return;
     toggleMessageSelection({
       messageId,
       groupedId,
@@ -768,7 +772,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && !isInDocumentGroupNotLast && messageListType === 'thread'
     && !noComments;
   const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
-    && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl;
+    && !isInDocumentGroupNotLast && !isStoryMention && !hasTtl && !isAccountFrozen;
 
   const hasOutsideReactions = !withVoiceTranscription && hasReactions
     && (isCustomShape || ((photo || video || storyData || (location?.mediaType === 'geo')) && !hasText));
@@ -1048,6 +1052,7 @@ const Message: FC<OwnProps & StateProps> = ({
         noRecentReactors={isChannel}
         tags={tags}
         isCurrentUserPremium={isPremium}
+        isAccountFrozen
       />
     );
   }
@@ -1699,6 +1704,7 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
             tags={tags}
+            isAccountFrozen
           />
         )}
       </div>
@@ -1858,6 +1864,7 @@ export default memo(withGlobal<OwnProps>(
     const maxTimestamp = selectMessageTimestampableDuration(global, message);
 
     const lastPlaybackTimestamp = selectMessageLastPlaybackTimestamp(global, chatId, message.id);
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
       theme: selectTheme(global),
@@ -1951,6 +1958,7 @@ export default memo(withGlobal<OwnProps>(
       lastPlaybackTimestamp,
       paidMessageStars,
       isChatWithUser,
+      isAccountFrozen,
     };
   },
 )(Message));

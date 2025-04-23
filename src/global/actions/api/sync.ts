@@ -66,7 +66,7 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
   }, RELEASE_STATUS_TIMEOUT);
 
   const {
-    loadAllChats, preloadTopChatMessages, loadAllStories, loadAllHiddenStories,
+    loadAllChats, preloadTopChatMessages,
   } = actions;
 
   initFolderManager();
@@ -91,10 +91,7 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
       }
 
       loadAllChats({ listType: 'archived' });
-      loadAllChats({ listType: 'saved' });
       preloadTopChatMessages();
-      loadAllStories();
-      loadAllHiddenStories();
     },
   });
 });

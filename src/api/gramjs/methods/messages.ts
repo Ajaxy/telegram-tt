@@ -1775,20 +1775,17 @@ export async function fetchSponsoredMessages({ peer }: { peer: ApiPeer }) {
   };
 }
 
-export async function viewSponsoredMessage({ peer, random }: { peer: ApiPeer; random: string }) {
+export async function viewSponsoredMessage({ random }: { random: string }) {
   await invokeRequest(new GramJs.messages.ViewSponsoredMessage({
-    peer: buildInputPeer(peer.id, peer.accessHash),
     randomId: deserializeBytes(random),
   }));
 }
 
 export function clickSponsoredMessage({
-  peer,
   random,
   isMedia,
   isFullscreen,
 }: {
-  peer: ApiPeer;
   random: string;
   isMedia?: boolean;
   isFullscreen?: boolean;
@@ -1796,23 +1793,19 @@ export function clickSponsoredMessage({
   return invokeRequest(new GramJs.messages.ClickSponsoredMessage({
     media: isMedia || undefined,
     fullscreen: isFullscreen || undefined,
-    peer: buildInputPeer(peer.id, peer.accessHash),
     randomId: deserializeBytes(random),
   }));
 }
 
 export async function reportSponsoredMessage({
-  peer,
   randomId,
   option,
 }: {
-  peer: ApiPeer;
   randomId: string;
   option: string;
 }) {
   try {
     const result = await invokeRequest(new GramJs.messages.ReportSponsoredMessage({
-      peer: buildInputPeer(peer.id, peer.accessHash),
       randomId: deserializeBytes(randomId),
       option: deserializeBytes(option),
     }), {

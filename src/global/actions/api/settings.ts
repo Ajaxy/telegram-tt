@@ -22,7 +22,8 @@ import {
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChat, selectTabState, selectUser,
+  selectChat, selectIsCurrentUserFrozen,
+  selectTabState, selectUser,
 } from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
 
@@ -390,6 +391,8 @@ addActionHandler('loadLanguages', async (global): Promise<void> => {
 });
 
 addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const result = await Promise.all([
     callApi('fetchPrivacySettings', 'phoneNumber'),
     callApi('fetchPrivacySettings', 'addByPhone'),
@@ -574,6 +577,8 @@ addActionHandler('updateIsOnline', (global, actions, payload): ActionReturnType 
 });
 
 addActionHandler('loadContentSettings', async (global): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const result = await callApi('fetchContentSettings');
   if (!result) return;
 
@@ -644,6 +649,7 @@ addActionHandler('loadAppConfig', async (global, actions, payload): Promise<void
   global = {
     ...global,
     appConfig,
+    isAppConfigLoaded: true,
   };
   setGlobal(global);
 });

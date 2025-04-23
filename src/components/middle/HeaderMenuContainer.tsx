@@ -31,6 +31,7 @@ import {
   selectChatFullInfo,
   selectCurrentMessageList,
   selectIsChatWithSelf,
+  selectIsCurrentUserFrozen,
   selectIsRightColumnShown,
   selectNotifyDefaults,
   selectNotifyException,
@@ -122,6 +123,7 @@ type StateProps = {
   isBot?: boolean;
   isChatWithSelf?: boolean;
   savedDialog?: ApiChat;
+  isAccountFrozen?: boolean;
 };
 
 const CLOSE_MENU_ANIMATION_DURATION = 200;
@@ -176,6 +178,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   onAsMessagesClick,
   onClose,
   onCloseAnimationEnd,
+  isAccountFrozen,
 }) => {
   const {
     updateChatMutedState,
@@ -186,6 +189,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     createGroupCall,
     openLinkedChat,
     openAddContactDialog,
+    openFrozenAccountModal,
     requestMasterAndRequestCall,
     toggleStatistics,
     openMonetizationStatistics,
@@ -224,14 +228,23 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleReport = useLastCallback(() => {
-    setIsMenuOpen(false);
-    reportMessages({ chatId, messageIds: [] });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      setIsMenuOpen(false);
+      reportMessages({ chatId, messageIds: [] });
+    }
     onClose();
   });
 
   const handleDelete = useLastCallback(() => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      onClose();
+    } else {
+      setIsDeleteModalOpen(true);
+    }
     setIsMenuOpen(false);
-    setIsDeleteModalOpen(true);
   });
 
   const closeMenu = useLastCallback(() => {
@@ -251,39 +264,68 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleStartBot = useLastCallback(() => {
-    sendBotCommand({ command: '/start' });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      sendBotCommand({ command: '/start' });
+    }
   });
 
   const handleRestartBot = useLastCallback(() => {
-    restartBot({ chatId });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      restartBot({ chatId });
+    }
   });
 
   const handleUnmuteClick = useLastCallback(() => {
-    updateChatMutedState({ chatId, isMuted: false });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      updateChatMutedState({ chatId, isMuted: false });
+    }
     closeMenu();
   });
 
   const handleMuteClick = useLastCallback(() => {
-    markRenderMuteModal();
-    setIsMuteModalOpen(true);
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      closeMenu();
+    } else {
+      markRenderMuteModal();
+      setIsMuteModalOpen(true);
+    }
     setIsMenuOpen(false);
   });
 
   const handleCreateTopicClick = useLastCallback(() => {
-    openCreateTopicPanel({ chatId });
-    setShouldCloseFast(!isRightColumnShown);
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      openCreateTopicPanel({ chatId });
+      setShouldCloseFast(!isRightColumnShown);
+    }
     closeMenu();
   });
 
   const handleEditClick = useLastCallback(() => {
-    toggleManagement({ force: true });
-    setShouldCloseFast(!isRightColumnShown);
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      toggleManagement({ force: true });
+      setShouldCloseFast(!isRightColumnShown);
+    }
     closeMenu();
   });
 
   const handleEditTopicClick = useLastCallback(() => {
-    openEditTopicPanel({ chatId, topicId: Number(threadId) });
-    setShouldCloseFast(!isRightColumnShown);
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      openEditTopicPanel({ chatId, topicId: Number(threadId) });
+      setShouldCloseFast(!isRightColumnShown);
+    }
     closeMenu();
   });
 
@@ -294,7 +336,9 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleEnterVoiceChatClick = useLastCallback(() => {
-    if (canCreateVoiceChat) {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else if (canCreateVoiceChat) {
       // TODO Show popup to schedule
       createGroupCall({
         chatId,
@@ -313,27 +357,47 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleGiftClick = useLastCallback(() => {
-    openGiftModal({ forUserId: chatId });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      openGiftModal({ forUserId: chatId });
+    }
     closeMenu();
   });
 
   const handleAddContactClick = useLastCallback(() => {
-    openAddContactDialog({ userId: chatId });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      openAddContactDialog({ userId: chatId });
+    }
     closeMenu();
   });
 
   const handleSubscribe = useLastCallback(() => {
-    onSubscribeChannel();
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      onSubscribeChannel();
+    }
     closeMenu();
   });
 
   const handleVideoCall = useLastCallback(() => {
-    requestMasterAndRequestCall({ userId: chatId, isVideo: true });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      requestMasterAndRequestCall({ userId: chatId, isVideo: true });
+    }
     closeMenu();
   });
 
   const handleCall = useLastCallback(() => {
-    requestMasterAndRequestCall({ userId: chatId });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      requestMasterAndRequestCall({ userId: chatId });
+    }
     closeMenu();
   });
 
@@ -355,7 +419,9 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleBoostClick = useLastCallback(() => {
-    if (canViewBoosts) {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else if (canViewBoosts) {
       openBoostStatistics({ chatId });
       setShouldCloseFast(!isRightColumnShown);
     } else {
@@ -370,7 +436,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSelectMessages = useLastCallback(() => {
-    enterMessageSelectMode();
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      enterMessageSelectMode();
+    }
     closeMenu();
   });
 
@@ -380,12 +450,20 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleBlock = useLastCallback(() => {
-    blockUser({ userId: chatId });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      blockUser({ userId: chatId });
+    }
     closeMenu();
   });
 
   const handleUnblock = useLastCallback(() => {
-    unblockUser({ userId: chatId });
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+    } else {
+      unblockUser({ userId: chatId });
+    }
     closeMenu();
   });
 
@@ -756,6 +834,7 @@ export default memo(withGlobal<OwnProps>(
 
     const isSavedDialog = getIsSavedDialog(chatId, threadId, global.currentUserId);
     const savedDialog = isSavedDialog ? selectChat(global, String(threadId)) : undefined;
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
       chat,
@@ -782,6 +861,7 @@ export default memo(withGlobal<OwnProps>(
       isBot: Boolean(chatBot),
       isChatWithSelf,
       savedDialog,
+      isAccountFrozen,
     };
   },
 )(HeaderMenuContainer));

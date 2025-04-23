@@ -91,6 +91,7 @@ export type FontIconName =
   | 'forums'
   | 'forward'
   | 'fragment'
+  | 'frozen-time'
   | 'fullscreen'
   | 'gifs'
   | 'gift'

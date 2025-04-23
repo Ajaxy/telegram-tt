@@ -1,0 +1,25 @@
+.root {
+  background-color: var(--color-background-secondary);
+  margin-inline: -0.5rem;
+  padding-block: 0.75rem;
+  padding-inline: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+.title {
+  color: var(--color-error);
+  font-weight: var(--font-weight-medium);
+  font-size: 1rem;
+  line-height: 1rem;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  line-height: 1rem;
+}

@@ -16,6 +16,7 @@ import { ManagementProgress } from '../../../types';
 
 import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL, PAID_SEND_DELAY } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { getUsernameFromDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getTranslationFn } from '../../../util/localization';
 import { formatStarsAsText } from '../../../util/localization/format';
@@ -55,6 +56,7 @@ import {
   selectCurrentChat,
   selectCurrentMessageList,
   selectDraft,
+  selectIsCurrentUserFrozen,
   selectIsTrustedBot,
   selectMessageReplyInfo,
   selectPeer,
@@ -680,6 +682,11 @@ addActionHandler('requestMainWebView', async (global, actions, payload): Promise
     botId, peerId, theme, startParam, mode, shouldMarkBotTrusted,
     tabId = getCurrentTabId(),
   } = payload;
+
+  if (selectIsCurrentUserFrozen(global)) {
+    actions.openFrozenAccountModal({ tabId });
+    return;
+  }
 
   if (checkIfOpenOrActivate(global, botId, tabId)) return;
 
@@ -1422,4 +1429,18 @@ addActionHandler('startBotFatherConversation', async (global, actions, payload):
   }
 
   actions.openChat({ id: botFatherId, tabId });
+});
+
+addActionHandler('loadBotFreezeAppeal', async (global): Promise<void> => {
+  const botUrl = global.appConfig?.freezeAppealUrl;
+  if (!botUrl) return;
+  const botAppealUsername = botUrl ? getUsernameFromDeepLink(botUrl) : undefined;
+  if (!botAppealUsername) return;
+  const chat = await fetchChatByUsername(global, botAppealUsername);
+  global = getGlobal();
+  global = {
+    ...global,
+    botFreezeAppealId: chat?.id,
+  };
+  setGlobal(global);
 });

@@ -33,6 +33,7 @@ import {
   selectChatMessage,
   selectCurrentMessageList,
   selectDraft,
+  selectIsCurrentUserFrozen,
   selectIsForumPanelClosed,
   selectIsForumPanelOpen,
   selectNotifyDefaults,
@@ -114,6 +115,7 @@ type StateProps = {
   lastMessage?: ApiMessage;
   currentUserId: string;
   isSynced?: boolean;
+  isAccountFrozen?: boolean;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -151,6 +153,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   className,
   isSynced,
   onDragEnter,
+  isAccountFrozen,
 }) => {
   const {
     openChat,
@@ -163,6 +166,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     closeForumPanel,
     setShouldCloseRightColumn,
     reportMessages,
+    openFrozenAccountModal,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -248,11 +252,21 @@ const Chat: FC<OwnProps & StateProps> = ({
   });
 
   const handleDelete = useLastCallback(() => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      return;
+    }
+
     markRenderDeleteModal();
     openDeleteModal();
   });
 
   const handleMute = useLastCallback(() => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      return;
+    }
+
     markRenderMuteModal();
     openMuteModal();
   });
@@ -263,6 +277,11 @@ const Chat: FC<OwnProps & StateProps> = ({
   });
 
   const handleReport = useLastCallback(() => {
+    if (isAccountFrozen) {
+      openFrozenAccountModal();
+      return;
+    }
+
     if (!chat) return;
     reportMessages({ chatId: chat.id, messageIds: [] });
   });
@@ -468,6 +487,7 @@ export default memo(withGlobal<OwnProps>(
 
     const storyData = lastMessage?.content.storyData;
     const lastMessageStory = storyData && selectPeerStory(global, storyData.peerId, storyData.id);
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
       chat,
@@ -494,6 +514,7 @@ export default memo(withGlobal<OwnProps>(
       topics: topicsInfo?.topicsById,
       isSynced: global.isSynced,
       lastMessageStory,
+      isAccountFrozen,
     };
   },
 )(Chat));

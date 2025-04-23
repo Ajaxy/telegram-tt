@@ -307,6 +307,12 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       console.error(err);
     }
 
+    const message = err instanceof RPCError ? err.errorMessage : err.message;
+
+    if (message.includes('FROZEN_METHOD_INVALID')) {
+      dispatchNotSupportedInFrozenAccountUpdate(err, request);
+    }
+
     if (shouldThrow) {
       throw err;
     }
@@ -437,6 +443,27 @@ export function dispatchErrorUpdate<T extends GramJs.AnyRequest>(err: Error, req
       message,
       isSlowMode,
       hasErrorKey: true,
+    },
+  });
+}
+
+function dispatchNotSupportedInFrozenAccountUpdate<T extends GramJs.AnyRequest>(err: Error, request: T) {
+  if (!(err instanceof RPCError)) return;
+  const message = err.errorMessage;
+
+  if (
+    request instanceof GramJs.messages.GetPinnedDialogs
+    || request instanceof GramJs.phone.GetGroupParticipants
+    || request instanceof GramJs.channels.GetParticipant
+    || request instanceof GramJs.channels.GetParticipants
+    || request instanceof GramJs.channels.GetForumTopics) {
+    return;
+  }
+
+  sendApiUpdate({
+    '@type': 'notSupportedInFrozenAccount',
+    error: {
+      message,
     },
   });
 }

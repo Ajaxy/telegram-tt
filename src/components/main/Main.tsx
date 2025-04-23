@@ -19,6 +19,7 @@ import {
   selectChatFolder,
   selectChatMessage,
   selectCurrentMessageList,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
@@ -141,6 +142,8 @@ type StateProps = {
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
   isSynced?: boolean;
+  isAccountFrozen?: boolean;
+  isAppConfigLoaded?: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -194,6 +197,8 @@ const Main = ({
   noRightColumnAnimation,
   isSynced,
   currentUserId,
+  isAccountFrozen,
+  isAppConfigLoaded,
 }: OwnProps & StateProps) => {
   const {
     initMain,
@@ -248,6 +253,10 @@ const Main = ({
     loadTopBotApps,
     loadPaidReactionPrivacy,
     loadPasswordInfo,
+    loadBotFreezeAppeal,
+    loadAllChats,
+    loadAllStories,
+    loadAllHiddenStories,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -309,45 +318,54 @@ const Main = ({
       loadAppConfig();
       loadPeerColors();
       initMain();
-      loadAvailableReactions();
-      loadAnimatedEmojis();
-      loadNotificationSettings();
-      loadNotificationExceptions();
-      loadAttachBots();
       loadContactList();
-      loadDefaultTopicIcons();
       checkAppVersion();
-      loadTopReactions();
+      loadAuthorizations();
+      loadPasswordInfo();
+    }
+  }, [isMasterTab, isSynced]);
+
+  // Initial API calls
+  useEffect(() => {
+    if (isMasterTab && isSynced && isAppConfigLoaded && !isAccountFrozen) {
+      loadAllChats({ listType: 'saved' });
+      loadAllStories();
+      loadAllHiddenStories();
       loadRecentReactions();
       loadDefaultTagReactions();
-      loadFeaturedEmojiStickers();
+      loadAttachBots();
+      loadNotificationSettings();
+      loadNotificationExceptions();
       loadTopInlineBots();
-      loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
-      loadTimezones();
-      loadQuickReplies();
+      loadTopReactions();
       loadStarStatus();
+      loadEmojiKeywords({ language: BASE_EMOJI_KEYWORD_LANG });
+      loadFeaturedEmojiStickers();
+      loadSavedReactionTags();
+      loadTopBotApps();
+      loadPaidReactionPrivacy();
+      loadDefaultTopicIcons();
+      loadAnimatedEmojis();
+      loadAvailableReactions();
+      loadUserCollectibleStatuses();
+      loadGenericEmojiEffects();
       loadPremiumGifts();
       loadStarGifts();
       loadAvailableEffects();
       loadBirthdayNumbersStickers();
       loadRestrictedEmojiStickers();
-      loadGenericEmojiEffects();
-      loadSavedReactionTags();
-      loadAuthorizations();
-      loadTopBotApps();
-      loadPaidReactionPrivacy();
-      loadPasswordInfo();
-      loadUserCollectibleStatuses();
+      loadQuickReplies();
+      loadTimezones();
     }
-  }, [isMasterTab, isSynced]);
+  }, [isMasterTab, isSynced, isAppConfigLoaded, isAccountFrozen]);
 
   // Initial Premium API calls
   useEffect(() => {
-    if (isMasterTab && isCurrentUserPremium) {
+    if (isMasterTab && isCurrentUserPremium && isAppConfigLoaded && !isAccountFrozen) {
       loadDefaultStatusIcons();
       loadRecentEmojiStatuses();
     }
-  }, [isCurrentUserPremium, isMasterTab]);
+  }, [isCurrentUserPremium, isMasterTab, isAppConfigLoaded, isAccountFrozen]);
 
   // Language-based API calls
   useEffect(() => {
@@ -357,8 +375,6 @@ const Main = ({
       }
 
       loadCountryList({ langCode: lang.code });
-
-      loadAttachBots();
     }
   }, [lang, isMasterTab]);
 
@@ -374,7 +390,7 @@ const Main = ({
 
   // Sticker sets
   useEffect(() => {
-    if (isMasterTab && isSynced) {
+    if (isMasterTab && isSynced && isAppConfigLoaded && !isAccountFrozen) {
       if (!addedSetIds || !addedCustomEmojiIds) {
         loadStickerSets();
         loadFavoriteStickers();
@@ -384,7 +400,11 @@ const Main = ({
         loadAddedStickers();
       }
     }
-  }, [addedSetIds, addedCustomEmojiIds, isMasterTab, isSynced]);
+  }, [addedSetIds, addedCustomEmojiIds, isMasterTab, isSynced, isAppConfigLoaded, isAccountFrozen]);
+
+  useEffect(() => {
+    loadBotFreezeAppeal();
+  }, [isAppConfigLoaded]);
 
   // Check version when service chat is ready
   useEffect(() => {
@@ -636,6 +656,7 @@ export default memo(withGlobal<OwnProps>(
         || !selectCanAnimateInterface(global);
 
     const deleteFolderDialog = deleteFolderDialogModal ? selectChatFolder(global, deleteFolderDialogModal) : undefined;
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
     return {
       currentUserId,
@@ -681,6 +702,8 @@ export default memo(withGlobal<OwnProps>(
       requestedDraft,
       noRightColumnAnimation,
       isSynced: global.isSynced,
+      isAccountFrozen,
+      isAppConfigLoaded: global.isAppConfigLoaded,
     };
   },
 )(Main));

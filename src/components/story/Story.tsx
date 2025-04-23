@@ -19,6 +19,7 @@ import { isChatChannel, isUserId } from '../../global/helpers';
 import { getPeerTitle } from '../../global/helpers/peers';
 import {
   selectChat,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectPeer,
   selectPeerPaidMessagesStars,
@@ -104,6 +105,7 @@ interface StateProps {
   stealthMode: ApiStealthMode;
   withHeaderAnimation?: boolean;
   paidMessagesStars?: number;
+  isAccountFrozen?: boolean;
 }
 
 const VIDEO_MIN_READY_STATE = IS_SAFARI ? 4 : 3;
@@ -137,6 +139,7 @@ function Story({
   onClose,
   onReport,
   paidMessagesStars,
+  isAccountFrozen,
 }: OwnProps & StateProps) {
   const {
     viewStory,
@@ -233,7 +236,7 @@ function Story({
     ? story.content.video.duration
     : undefined;
 
-  const shouldShowComposer = !(isOut && isUserStory) && !isChangelog && !isChannelStory;
+  const shouldShowComposer = !(isOut && isUserStory) && !isChangelog && !isChannelStory && !isAccountFrozen;
   const shouldShowFooter = isLoadedStory && !shouldShowComposer && (isOut || isChannelStory);
   const headerAnimation = isMobile && withHeaderAnimation ? 'slideFade' : 'none';
 
@@ -965,6 +968,7 @@ export default memo(withGlobal<OwnProps>((global, {
 
   const fromPeer = isLoadedStory && story.fromId ? selectPeer(global, story.fromId) : undefined;
   const paidMessagesStars = selectPeerPaidMessagesStars(global, peerId);
+  const isAccountFrozen = selectIsCurrentUserFrozen(global);
 
   return {
     peer: (user || chat)!,
@@ -982,5 +986,6 @@ export default memo(withGlobal<OwnProps>((global, {
     stealthMode: global.stories.stealthMode,
     withHeaderAnimation,
     paidMessagesStars,
+    isAccountFrozen,
   };
 })(Story));

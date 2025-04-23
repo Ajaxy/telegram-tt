@@ -97,3 +97,4 @@ export { default as ReceiptModal } from '../components/payment/ReceiptModal';
 export { default as InviteViaLinkModal } from '../components/modals/inviteViaLink/InviteViaLinkModal';
 export { default as OneTimeMediaModal } from '../components/modals/oneTimeMedia/OneTimeMediaModal';
 export { default as WebAppsCloseConfirmationModal } from '../components/main/WebAppsCloseConfirmationModal';
+export { default as FrozenAccountModal } from '../components/modals/frozenAccount/FrozenAccountModal';

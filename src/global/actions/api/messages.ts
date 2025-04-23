@@ -120,6 +120,7 @@ import {
   selectForwardsContainVoiceMessages,
   selectIsChatBotNotStarted,
   selectIsChatWithSelf,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectLanguageCode,
   selectListedIds,
@@ -994,6 +995,7 @@ addActionHandler('reportChannelSpam', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('markMessageListRead', (global, actions, payload): ActionReturnType => {
+  if (selectIsCurrentUserFrozen(global)) return undefined;
   const { maxId, tabId = getCurrentTabId() } = payload!;
 
   const currentMessageList = selectCurrentMessageList(global, tabId);
@@ -1177,6 +1179,8 @@ addActionHandler('loadExtendedMedia', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('loadScheduledHistory', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -1852,6 +1856,8 @@ addActionHandler('loadSendPaidReactionsAs', async (global, actions, payload): Pr
 });
 
 addActionHandler('loadSponsoredMessages', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { peerId } = payload;
   const peer = selectPeer(global, peerId);
   if (!peer) {
@@ -1880,7 +1886,7 @@ addActionHandler('viewSponsoredMessage', (global, actions, payload): ActionRetur
     return;
   }
 
-  void callApi('viewSponsoredMessage', { peer, random: message.randomId });
+  void callApi('viewSponsoredMessage', { random: message.randomId });
 });
 
 addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionReturnType => {
@@ -1892,7 +1898,7 @@ addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionRetu
   }
 
   void callApi('clickSponsoredMessage', {
-    peer, random: message.randomId, isMedia, isFullscreen,
+    random: message.randomId, isMedia, isFullscreen,
   });
 });
 
@@ -1905,7 +1911,7 @@ addActionHandler('reportSponsoredMessage', async (global, actions, payload): Pro
     return;
   }
 
-  const result = await callApi('reportSponsoredMessage', { peer, randomId, option });
+  const result = await callApi('reportSponsoredMessage', { randomId, option });
 
   if (!result) return;
 
@@ -2351,6 +2357,8 @@ addActionHandler('scheduleForViewsIncrement', (global, actions, payload): Action
 
 addActionHandler('loadMessageViews', async (global, actions, payload): Promise<void> => {
   const { chatId, ids, shouldIncrement } = payload;
+
+  if (selectIsCurrentUserFrozen(global)) return;
 
   const chat = selectChat(global, chatId);
   if (!chat) return;

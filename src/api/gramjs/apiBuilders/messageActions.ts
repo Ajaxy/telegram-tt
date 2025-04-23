@@ -413,6 +413,27 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       savedId: savedId && buildApiPeerId(savedId, 'user'),
     };
   }
+  if (action instanceof GramJs.MessageActionPaidMessagesPrice) {
+    const {
+      stars,
+    } = action;
+    return {
+      mediaType: 'action',
+      type: 'paidMessagesPrice',
+      stars: stars.toJSNumber(),
+    };
+  }
+  if (action instanceof GramJs.MessageActionPaidMessagesRefunded) {
+    const {
+      stars, count,
+    } = action;
+    return {
+      mediaType: 'action',
+      type: 'paidMessagesRefunded',
+      stars: stars.toJSNumber(),
+      count,
+    };
+  }
 
   return UNSUPPORTED_ACTION;
 }

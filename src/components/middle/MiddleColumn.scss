@@ -266,10 +266,15 @@
 }
 
 .MessageSelectToolbar-inner,
-.composer-button,
-.messaging-disabled {
+.composer-button {
   .mask-image-disabled & {
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+    border-radius: var(--border-radius-messages);
+  }
+}
+
+.messaging-disabled {
+  .mask-image-disabled & {
     border-radius: var(--border-radius-messages);
   }
 }

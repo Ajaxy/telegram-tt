@@ -84,6 +84,7 @@ export type GlobalState = {
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
   isSyncing?: boolean;
+  isAppConfigLoaded?: boolean;
   isAppUpdateAvailable?: boolean;
   isElectronUpdateAvailable?: boolean;
   isSynced?: boolean;
@@ -92,6 +93,7 @@ export type GlobalState = {
   lastIsChatInfoShown?: boolean;
   initialUnreadNotifications?: number;
   shouldShowContextMenuHint?: boolean;
+  botFreezeAppealId?: string;
 
   audioPlayer: {
     lastPlaybackRate: number;

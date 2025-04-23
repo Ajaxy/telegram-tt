@@ -30,6 +30,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatFullInfo,
+  selectIsCurrentUserFrozen,
   selectIsCurrentUserPremium,
   selectPeer,
   selectPeerPhotos,
@@ -159,6 +160,11 @@ addActionHandler('loadCurrentUser', (): ActionReturnType => {
 
 addActionHandler('loadCommonChats', async (global, actions, payload): Promise<void> => {
   const { userId } = payload;
+
+  if (selectIsCurrentUserFrozen(global)) {
+    return;
+  }
+
   const user = selectUser(global, userId);
   const commonChats = selectUserCommonChats(global, userId);
   if (!user || isUserBot(user) || commonChats?.isFullyLoaded) {
@@ -294,6 +300,8 @@ addActionHandler('deleteContact', async (global, actions, payload): Promise<void
 });
 
 addActionHandler('loadMoreProfilePhotos', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { peerId, shouldInvalidateCache, isPreload } = payload;
   const isPrivate = isUserId(peerId);
 
@@ -549,6 +557,8 @@ addActionHandler('openSuggestedStatusModal', async (global, actions, payload): P
 
 addActionHandler('loadPeerSettings', async (global, actions, payload): Promise<void> => {
   const { peerId } = payload;
+
+  if (selectIsCurrentUserFrozen(global)) return;
 
   const userFullInfo = selectUserFullInfo(global, peerId);
   if (!userFullInfo) {

@@ -1026,6 +1026,8 @@ export interface ActionPayloads {
   changeSessionTtl: {
     days: number;
   };
+  openFrozenAccountModal: WithTabId | undefined;
+  closeFrozenAccountModal: WithTabId | undefined;
 
   // Chats
   loadPeerSettings: {
@@ -1713,6 +1715,7 @@ export interface ActionPayloads {
   startBotFatherConversation: {
     param: string;
   } & WithTabId;
+  loadBotFreezeAppeal: undefined;
   checkUsername: {
     username: string;
   } & WithTabId;

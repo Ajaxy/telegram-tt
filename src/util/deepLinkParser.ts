@@ -147,6 +147,14 @@ export function tryParseDeepLink(link: string): DeepLink | undefined {
   }
 }
 
+export function getUsernameFromDeepLink(url: string) {
+  const deepLink = tryParseDeepLink(url);
+  if (deepLink?.type === 'publicUsernameOrBotLink') {
+    return deepLink.username;
+  }
+  return undefined;
+}
+
 function parseDeepLink(url: string) {
   const correctUrl = ensureProtocol(url);
   if (!correctUrl) {

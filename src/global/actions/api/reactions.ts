@@ -31,6 +31,7 @@ import {
   selectCurrentChat,
   selectDefaultReaction,
   selectIsChatWithSelf,
+  selectIsCurrentUserFrozen,
   selectMaxUserReactions,
   selectMessageIdsByGroupId,
   selectPerformanceSettingsValue,
@@ -391,6 +392,8 @@ addActionHandler('stopActiveEmojiInteraction', (global, actions, payload): Actio
 });
 
 addActionHandler('loadReactors', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { chatId, messageId, reaction } = payload;
   const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
@@ -418,6 +421,8 @@ addActionHandler('loadReactors', async (global, actions, payload): Promise<void>
 });
 
 addActionHandler('loadMessageReactions', (global, actions, payload): ActionReturnType => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const { ids, chatId } = payload;
 
   const chat = selectChat(global, chatId);

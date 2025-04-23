@@ -10,7 +10,8 @@ import {
   updateChat, updateChatFullInfo, updateManagement, updateManagementProgress, updateUserFullInfo,
 } from '../../reducers';
 import {
-  selectChat, selectCurrentMessageList, selectTabState, selectUser,
+  selectChat, selectCurrentMessageList, selectIsCurrentUserFrozen,
+  selectTabState, selectUser,
 } from '../../selectors';
 import { ensureIsSuperGroup } from './chats';
 
@@ -109,6 +110,8 @@ addActionHandler('setOpenedInviteInfo', (global, actions, payload): ActionReturn
 });
 
 addActionHandler('loadExportedChatInvites', async (global, actions, payload): Promise<void> => {
+  if (selectIsCurrentUserFrozen(global)) return;
+
   const {
     chatId, adminId, isRevoked, limit, tabId = getCurrentTabId(),
   } = payload!;

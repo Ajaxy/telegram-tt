@@ -47,6 +47,7 @@ import {
   selectCurrentMiddleSearch,
   selectDraft,
   selectIsChatBotNotStarted,
+  selectIsCurrentUserFrozen,
   selectIsInSelectMode,
   selectIsRightColumnShown,
   selectIsUserBlocked,
@@ -93,6 +94,7 @@ import ChatLanguageModal from './ChatLanguageModal.async';
 import { DropAreaState } from './composer/DropArea';
 import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
 import FloatingActionButtons from './FloatingActionButtons';
+import FrozenAccountPlaceholder from './FrozenAccountPlaceholder';
 import MessageList from './MessageList';
 import MessageSelectToolbar from './MessageSelectToolbar.async';
 import MiddleHeader from './MiddleHeader';
@@ -156,6 +158,8 @@ type StateProps = {
   isContactRequirePremium?: boolean;
   topics?: Record<number, ApiTopic>;
   paidMessagesStars?: number;
+  isAccountFrozen?: boolean;
+  freezeAppealChat?: ApiChat;
 };
 
 function isImage(item: DataTransferItem) {
@@ -217,6 +221,8 @@ function MiddleColumn({
   isContactRequirePremium,
   topics,
   paidMessagesStars,
+  isAccountFrozen,
+  freezeAppealChat,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -448,7 +454,8 @@ function MiddleColumn({
 
   const composerRestrictionMessage = messageSendingRestrictionReason
     ?? forumComposerPlaceholder
-    ?? (isContactRequirePremium ? <PremiumRequiredPlaceholder userId={chatId!} /> : undefined);
+    ?? (isContactRequirePremium ? <PremiumRequiredPlaceholder userId={chatId!} /> : undefined)
+    ?? (isAccountFrozen && freezeAppealChat?.id !== chatId ? <FrozenAccountPlaceholder /> : undefined);
 
   // CSS Variables calculation doesn't work properly with transforms, so we calculate transform values in JS
   const {
@@ -477,7 +484,7 @@ function MiddleColumn({
   const isMessagingDisabled = Boolean(
     !isPinnedMessageList && !isSavedDialog && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
     && !renderingCanSubscribe && composerRestrictionMessage,
-  );
+  ) || (isAccountFrozen && freezeAppealChat?.id !== chatId);
   const withMessageListBottomShift = Boolean(
     renderingCanRestartBot || renderingCanSubscribe || renderingShouldSendJoinRequest || renderingCanStartBot
     || (isPinnedMessageList && canUnpin) || canShowOpenChatButton || renderingCanUnblock,
@@ -809,6 +816,10 @@ export default memo(withGlobal<OwnProps>(
 
     const isContactRequirePremium = userFull?.isContactRequirePremium;
     const paidMessagesStars = selectPeerPaidMessagesStars(global, chatId);
+    const isAccountFrozen = selectIsCurrentUserFrozen(global);
+    const botFreezeAppealId = global.botFreezeAppealId;
+    const freezeAppealChat = botFreezeAppealId
+      ? selectChat(global, botFreezeAppealId) : undefined;
 
     return {
       ...state,
@@ -826,7 +837,8 @@ export default memo(withGlobal<OwnProps>(
         && !isBotNotStarted
         && !(shouldJoinToSend && chat?.isNotJoined)
         && !shouldBlockSendInForum
-        && !isSavedDialog,
+        && !isSavedDialog
+        && (!isAccountFrozen || freezeAppealChat?.id === chatId),
       isPinnedMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
@@ -847,6 +859,8 @@ export default memo(withGlobal<OwnProps>(
       isContactRequirePremium,
       topics,
       paidMessagesStars,
+      isAccountFrozen,
+      freezeAppealChat,
     };
   },
 )(MiddleColumn));

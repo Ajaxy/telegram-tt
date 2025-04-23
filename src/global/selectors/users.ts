@@ -35,6 +35,10 @@ export function selectIsCurrentUserPremium<T extends GlobalState>(global: T) {
   return Boolean(global.users.byId[global.currentUserId].isPremium);
 }
 
+export function selectIsCurrentUserFrozen<T extends GlobalState>(global: T) {
+  return Boolean(global.appConfig?.freezeUntilDate);
+}
+
 export function selectIsPremiumPurchaseBlocked<T extends GlobalState>(global: T) {
   return global.appConfig?.isPremiumPurchaseBlocked ?? true;
 }

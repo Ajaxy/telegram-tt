@@ -43,6 +43,7 @@ type OwnProps = {
   onContentChange: (content: LeftColumnContent) => void;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
   onTopicSearch: NoneToVoidFunction;
+  isAccountFrozen?: boolean;
   onReset: () => void;
 };
 
@@ -67,6 +68,7 @@ const LeftMain: FC<OwnProps> = ({
   onSettingsScreenSelect,
   onReset,
   onTopicSearch,
+  isAccountFrozen,
 }) => {
   const { closeForumPanel } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
@@ -243,6 +245,7 @@ const LeftMain: FC<OwnProps> = ({
         onNewPrivateChat={handleSelectContacts}
         onNewChannel={handleSelectNewChannel}
         onNewGroup={handleSelectNewGroup}
+        isAccountFrozen={isAccountFrozen}
       />
     </div>
   );

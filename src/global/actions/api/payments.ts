@@ -40,6 +40,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatFullInfo,
+  selectIsCurrentUserFrozen,
   selectPaymentInputInvoice,
   selectPaymentRequestId,
   selectProviderPublicToken,
@@ -530,6 +531,11 @@ addActionHandler('openGiftModal', async (global, actions, payload): Promise<void
     forUserId, tabId = getCurrentTabId(),
   } = payload;
 
+  if (selectIsCurrentUserFrozen(global)) {
+    actions.openFrozenAccountModal({ tabId });
+    return;
+  }
+
   const gifts = await callApi('getPremiumGiftCodeOptions', {});
   if (!gifts) return;
 
@@ -548,6 +554,11 @@ addActionHandler('openStarsGiftModal', async (global, actions, payload): Promise
     forUserId,
     tabId = getCurrentTabId(),
   } = payload || {};
+
+  if (selectIsCurrentUserFrozen(global)) {
+    actions.openFrozenAccountModal({ tabId });
+    return;
+  }
 
   const starsGiftOptions = await callApi('getStarsGiftOptions', {});
 

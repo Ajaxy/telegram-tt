@@ -10,7 +10,9 @@ import {
   clearStarPayment, openStarsTransactionModal,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectChatMessage, selectStarsPayment, selectTabState } from '../../selectors';
+import {
+  selectChatMessage, selectIsCurrentUserFrozen, selectStarsPayment, selectTabState,
+} from '../../selectors';
 
 addActionHandler('processOriginStarsPayment', (global, actions, payload): ActionReturnType => {
   const { originData, status, tabId = getCurrentTabId() } = payload;
@@ -58,6 +60,11 @@ addActionHandler('openGiftRecipientPicker', (global, actions, payload): ActionRe
   const {
     tabId = getCurrentTabId(),
   } = payload || {};
+
+  if (selectIsCurrentUserFrozen(global)) {
+    actions.openFrozenAccountModal({ tabId });
+    return global;
+  }
 
   return updateTabState(global, {
     isGiftRecipientPickerOpen: true,

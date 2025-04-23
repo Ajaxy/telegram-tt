@@ -4,7 +4,7 @@ import { getActions, getGlobal } from '../../../global';
 
 import type { ApiCommentsInfo } from '../../../api/types';
 
-import { selectPeer } from '../../../global/selectors';
+import { selectIsCurrentUserFrozen, selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
@@ -36,7 +36,7 @@ const CommentButton: FC<OwnProps> = ({
   isLoading,
   asActionButton,
 }) => {
-  const { openThread } = getActions();
+  const { openThread, openFrozenAccountModal } = getActions();
 
   const shouldRenderLoading = useAsyncRendering([isLoading], SHOW_LOADER_DELAY);
 
@@ -46,6 +46,11 @@ const CommentButton: FC<OwnProps> = ({
   } = threadInfo;
 
   const handleClick = useLastCallback(() => {
+    const global = getGlobal();
+    if (selectIsCurrentUserFrozen(global)) {
+      openFrozenAccountModal();
+      return;
+    }
     openThread({
       isComments: true, chatId, originMessageId, originChannelId,
     });
