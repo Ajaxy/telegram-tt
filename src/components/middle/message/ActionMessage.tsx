@@ -450,7 +450,7 @@ const ActionMessage = ({
           threadId={threadId}
           observeIntersection={observeIntersectionForPlaying}
           isCurrentUserPremium={isCurrentUserPremium}
-          isAccountFrozen
+          isAccountFrozen={isAccountFrozen}
         />
       )}
     </div>

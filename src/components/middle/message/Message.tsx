@@ -1704,7 +1704,7 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
             tags={tags}
-            isAccountFrozen
+            isAccountFrozen={isAccountFrozen}
           />
         )}
       </div>
