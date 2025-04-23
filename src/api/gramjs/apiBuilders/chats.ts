@@ -1,5 +1,6 @@
 import type BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+import type { Entity } from '../../../lib/gramjs/types';
 
 import type {
   ApiBotCommand,
@@ -49,7 +50,7 @@ type PeerEntityApiChatFields = Omit<ApiChat, (
 )>;
 
 function buildApiChatFieldsFromPeerEntity(
-  peerEntity: GramJs.TypeUser | GramJs.TypeChat,
+  peerEntity: Entity,
   isSupport = false,
 ): PeerEntityApiChatFields {
   const isMin = Boolean('min' in peerEntity && peerEntity.min);
@@ -225,7 +226,7 @@ function buildApiChatRestrictions(peerEntity: GramJs.TypeUser | GramJs.TypeChat)
   return restrictions;
 }
 
-function buildApiChatMigrationInfo(peerEntity: GramJs.TypeChat): {
+function buildApiChatMigrationInfo(peerEntity: Entity): {
   migratedTo?: {
     chatId: string;
     accessHash?: string;
@@ -305,7 +306,7 @@ export function getPeerKey(peer: GramJs.TypePeer) {
   }
 }
 
-export function getApiChatTitleFromMtpPeer(peer: GramJs.TypePeer, peerEntity: GramJs.User | GramJs.Chat) {
+export function getApiChatTitleFromMtpPeer(peer: GramJs.TypePeer, peerEntity: Entity) {
   if (isMtpPeerUser(peer)) {
     return getUserName(peerEntity as GramJs.User);
   } else {

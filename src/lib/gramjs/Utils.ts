@@ -28,11 +28,9 @@ function _raiseCastFail(entity: any, target: string) {
  * @param allowSelf
  * @param checkHash
  */
-export function getInputPeer(entity: Entity, allowSelf = true, checkHash = true): Api.TypeInputPeer {
-    if (entity.SUBCLASS_OF_ID === 0xc91c90b6) { // crc32(b'InputPeer')
-        return entity;
-    }
-
+export function getInputPeer(
+    entity: Entity, allowSelf = true, checkHash = true,
+): Api.TypeInputPeer {
     if (entity instanceof Api.User) {
         if (entity.self && allowSelf) {
             return new Api.InputPeerSelf();
@@ -68,18 +66,6 @@ export function getInputPeer(entity: Entity, allowSelf = true, checkHash = true)
         });
     }
 
-    if (entity instanceof Api.InputUser) {
-        return new Api.InputPeerUser({
-            userId: entity.userId,
-            accessHash: entity.accessHash,
-        });
-    }
-    if (entity instanceof Api.InputChannel) {
-        return new Api.InputPeerChannel({
-            channelId: entity.channelId,
-            accessHash: entity.accessHash,
-        });
-    }
     if (entity instanceof Api.UserEmpty) {
         return new Api.InputPeerEmpty();
     }

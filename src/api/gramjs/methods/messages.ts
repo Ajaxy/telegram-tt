@@ -73,7 +73,7 @@ import {
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiUser, buildApiUserStatuses } from '../apiBuilders/users';
 import {
-  buildInputEntity,
+  buildInputChannel,
   buildInputMediaDocument,
   buildInputPeer,
   buildInputPoll,
@@ -82,6 +82,7 @@ import {
   buildInputReplyTo,
   buildInputStory,
   buildInputTextWithEntities,
+  buildInputUser,
   buildMessageFromUpdate,
   buildMtpMessageEntity,
   buildPeer,
@@ -196,7 +197,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
     result = await invokeRequest(
       isChannel
         ? new GramJs.channels.GetMessages({
-          channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+          channel: buildInputChannel(chat.id, chat.accessHash),
           id: [new GramJs.InputMessageID({ id: messageId })],
         })
         : new GramJs.messages.GetMessages({
@@ -805,7 +806,7 @@ export async function deleteMessages({
   const result = await invokeRequest(
     isChannel
       ? new GramJs.channels.DeleteMessages({
-        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        channel: buildInputChannel(chat.id, chat.accessHash),
         id: messageIds,
       })
       : new GramJs.messages.DeleteMessages({
@@ -834,7 +835,7 @@ export async function deleteParticipantHistory({
 }) {
   const result = await invokeRequest(
     new GramJs.channels.DeleteParticipantHistory({
-      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+      channel: buildInputChannel(chat.id, chat.accessHash),
       participant: buildInputPeer(peer.id, peer.accessHash),
     }),
   );
@@ -878,7 +879,7 @@ export async function deleteHistory({
   const result = await invokeRequest(
     isChannel
       ? new GramJs.channels.DeleteHistory({
-        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        channel: buildInputChannel(chat.id, chat.accessHash),
       })
       : new GramJs.messages.DeleteHistory({
         peer: buildInputPeer(chat.id, chat.accessHash),
@@ -969,7 +970,7 @@ export function reportChannelSpam({
 }) {
   return invokeRequest(new GramJs.channels.ReportSpam({
     participant: buildInputPeer(peer.id, peer.accessHash),
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
     id: messageIds,
   }));
 }
@@ -1016,7 +1017,7 @@ export async function markMessageListRead({
   const fixedMaxId = Math.min(maxId, MAX_INT_32);
   if (isChannel && threadId === MAIN_THREAD_ID) {
     await invokeRequest(new GramJs.channels.ReadHistory({
-      channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+      channel: buildInputChannel(chat.id, chat.accessHash),
       maxId: fixedMaxId,
     }));
   } else if (isChannel) {
@@ -1057,7 +1058,7 @@ export async function markMessagesRead({
   const result = await invokeRequest(
     isChannel
       ? new GramJs.channels.ReadMessageContents({
-        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+        channel: buildInputChannel(chat.id, chat.accessHash),
         id: messageIds,
       })
       : new GramJs.messages.ReadMessageContents({
@@ -2027,7 +2028,9 @@ function handleMultipleLocalMessagesUpdate(
 }
 
 function handleLocalMessageUpdate(
-  localMessage: ApiMessage, update: GramJs.TypeUpdates, scheduledMessageUpdate?: GramJs.UpdateNewScheduledMessage,
+  localMessage: ApiMessage,
+  update: GramJs.TypeUpdates | GramJs.UpdateMessageID,
+  scheduledMessageUpdate?: GramJs.UpdateNewScheduledMessage,
 ) {
   let messageUpdate;
   if (update instanceof GramJs.UpdateShortSentMessage || update instanceof GramJs.UpdateMessageID) {
@@ -2180,7 +2183,7 @@ export async function exportMessageLink({
   shouldIncludeGrouped?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.channels.ExportMessageLink({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
     id,
     thread: shouldIncludeThread || undefined,
     grouped: shouldIncludeGrouped || undefined,
@@ -2196,7 +2199,7 @@ export async function fetchPreparedInlineMessage({
   id: string;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetPreparedInlineMessage({
-    bot: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+    bot: buildInputUser(bot.id, bot.accessHash),
     id,
   }));
   if (!result) return undefined;

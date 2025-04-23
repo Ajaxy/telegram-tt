@@ -42,9 +42,11 @@ import {
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
   buildDisallowedGiftsSettings,
-  buildInputEntity, buildInputPeer, buildInputPhoto,
+  buildInputChannel,
+  buildInputPeer, buildInputPhoto,
   buildInputPrivacyKey,
   buildInputPrivacyRules,
+  buildInputUser,
 } from '../gramjsBuilders';
 import { addPhotoToLocalDb } from '../helpers/localDb';
 import localDb from '../localDb';
@@ -119,7 +121,7 @@ export async function uploadProfilePhoto(
 ) {
   const inputFile = await uploadFile(file);
   const result = await invokeRequest(new GramJs.photos.UploadProfilePhoto({
-    ...(bot ? { bot: buildInputPeer(bot.id, bot.accessHash) } : undefined),
+    ...(bot ? { bot: buildInputUser(bot.id, bot.accessHash) } : undefined),
     ...(isVideo ? { video: inputFile, videoStartTs: videoTs } : { file: inputFile }),
     ...(isFallback ? { fallback: true } : undefined),
   }));
@@ -144,7 +146,7 @@ export async function uploadContactProfilePhoto({
 }) {
   const inputFile = file ? await uploadFile(file) : undefined;
   const result = await invokeRequest(new GramJs.photos.UploadContactProfilePhoto({
-    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    userId: buildInputUser(user.id, user.accessHash),
     file: inputFile,
     ...(isSuggest ? { suggest: true } : { save: true }),
   }));
@@ -715,7 +717,7 @@ export function toggleUsername({
 }) {
   if (chatId) {
     return invokeRequest(new GramJs.channels.ToggleUsername({
-      channel: buildInputEntity(chatId, accessHash) as GramJs.InputChannel,
+      channel: buildInputChannel(chatId, accessHash),
       username,
       active: isActive,
     }));
@@ -734,7 +736,7 @@ export function reorderUsernames({ chatId, accessHash, usernames }: {
 }) {
   if (chatId) {
     return invokeRequest(new GramJs.channels.ReorderUsernames({
-      channel: buildInputEntity(chatId, accessHash) as GramJs.InputChannel,
+      channel: buildInputChannel(chatId, accessHash),
       order: usernames,
     }));
   }

@@ -24,7 +24,6 @@ import {
   isUserRightBanned,
 } from '../../global/helpers';
 import { getIsChatMuted } from '../../global/helpers/notifications';
-import { getPeerFullTitle } from '../../global/helpers/peers';
 import {
   selectBot,
   selectCanGift,

@@ -112,7 +112,7 @@ export function buildGroupStatistics(stats: GramJs.stats.MegagroupStats): ApiGro
   };
 }
 
-export function buildPostsStatistics(stats: GramJs.stats.MessageStats): ApiPostStatistics {
+export function buildPostsStatistics(stats: GramJs.stats.MessageStats | GramJs.stats.StoryStats): ApiPostStatistics {
   return {
     viewsGraph: buildGraph(stats.viewsGraph),
     reactionsGraph: buildGraph(stats.reactionsByEmotionGraph),
@@ -120,13 +120,16 @@ export function buildPostsStatistics(stats: GramJs.stats.MessageStats): ApiPostS
 }
 
 export function buildMessagePublicForwards(
-  result: GramJs.messages.TypeMessages,
+  result: GramJs.stats.PublicForwards,
 ): ApiMessagePublicForward[] | undefined {
-  if (!result || !('messages' in result)) {
+  if (!result) {
     return undefined;
   }
 
-  return result.messages.map((message) => buildApiMessagePublicForward(message, result.chats));
+  return result.forwards.map((forward) => {
+    if (forward instanceof GramJs.PublicForwardStory) return undefined;
+    return buildApiMessagePublicForward(forward.message, result.chats);
+  }).filter(Boolean);
 }
 
 export function buildStoryPublicForwards(
@@ -243,7 +246,7 @@ function getOverviewPeriod(data: GramJs.StatsDateRangeDays): StatisticsOverviewP
 function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs.TypeChat[]): ApiMessagePublicForward {
   const peerId = getApiChatIdFromMtpPeer(message.peerId!);
   const channel = chats.find((c) => buildApiPeerId(c.id, 'channel') === peerId);
-  const channelProfilePhoto = channel && 'photo' in channel && channel.photo instanceof GramJs.Photo
+  const channelProfilePhoto = channel && 'photo' in channel && channel.photo instanceof GramJs.ChatPhoto
     ? channel.photo : undefined;
 
   return {
@@ -256,7 +259,7 @@ function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs
       title: (channel as GramJs.Channel).title,
       usernames: buildApiUsernames(channel as GramJs.Channel),
       avatarPhotoId: channelProfilePhoto && buildAvatarPhotoId(channelProfilePhoto),
-      hasVideoAvatar: Boolean(channelProfilePhoto?.videoSizes),
+      hasVideoAvatar: Boolean(channelProfilePhoto?.hasVideo),
     },
   };
 }

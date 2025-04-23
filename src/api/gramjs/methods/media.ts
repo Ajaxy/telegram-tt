@@ -142,7 +142,10 @@ async function download(
   }
 
   if (MEDIA_ENTITY_TYPES.has(entityType)) {
-    const data = await client.downloadMedia(entity, {
+    const entityWithType = entity as (
+      GramJs.Photo | GramJs.Document | GramJs.WebDocument
+    );
+    const data = await client.downloadMedia(entityWithType, {
       sizeType, start, end, progressCallback: onProgress, workers: DOWNLOAD_WORKERS,
     });
     let mimeType;

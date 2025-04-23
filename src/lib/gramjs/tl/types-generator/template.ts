@@ -41,11 +41,15 @@ const generate = ({
     }
 
     function renderConstructors(arr: GenerationEntryConfig[], indent: string) {
-        return arr.map(({ name, argsConfig }) => {
+        return arr.map(({ name, subclassOfId, constructorId, argsConfig }) => {
             const argKeys = Object.keys(argsConfig);
+            const defaultHead = `${indent}  CONSTRUCTOR_ID: ${constructorId};
+${indent}  SUBCLASS_OF_ID: ${subclassOfId};
+${indent}  className: '${name}';\n`;
 
             if (!argKeys.length) {
                 return `export class ${upperFirst(name)} extends VirtualClass<void> {
+${defaultHead}
 ${indent}  static fromReader(reader: Reader): ${upperFirst(name)};
 ${indent}}`;
             }
@@ -65,6 +69,7 @@ ${indent}  ${Object.keys(argsConfig)
         ${renderArg(argName, argsConfig[argName])};
       `.trim())
             .join(`\n${indent}  `)}
+${defaultHead}
 ${indent}  static fromReader(reader: Reader): ${upperFirst(name)};
 ${indent}}`.trim();
         })

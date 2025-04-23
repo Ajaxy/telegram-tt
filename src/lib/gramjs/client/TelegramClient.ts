@@ -776,7 +776,8 @@ class TelegramClient {
     }
 
     downloadMedia(
-        entityOrMedia: Api.Message | Api.TypeMessageMedia, args: DownloadMediaParams & Partial<DownloadFileParams>,
+        entityOrMedia: Api.TypeMessage | Api.TypeMessageMedia | Api.TypePhoto | Api.TypeDocument | Api.TypeWebDocument,
+        args: DownloadMediaParams & Partial<DownloadFileParams>,
     ) {
         let media;
         if (entityOrMedia instanceof Api.Message || entityOrMedia instanceof Api.StoryItem) {

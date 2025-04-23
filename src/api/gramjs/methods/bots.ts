@@ -28,10 +28,10 @@ import { buildApiUrlAuthResult } from '../apiBuilders/misc';
 import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputBotApp,
-  buildInputEntity,
   buildInputPeer,
   buildInputReplyTo,
   buildInputThemeParams,
+  buildInputUser,
   generateRandomBigInt,
 } from '../gramjsBuilders';
 import {
@@ -121,7 +121,7 @@ export async function fetchInlineBotResults({
   bot: ApiUser; chat: ApiChat; query: string; offset?: string;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetInlineBotResults({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     peer: buildInputPeer(chat.id, chat.accessHash),
     query,
     offset,
@@ -179,7 +179,7 @@ export async function startBot({
   const randomId = generateRandomBigInt();
 
   await invokeRequest(new GramJs.messages.StartBot({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     peer: buildInputPeer(bot.id, bot.accessHash),
     randomId,
     startParam,
@@ -212,7 +212,7 @@ export async function requestWebView({
   const result = await invokeRequest(new GramJs.messages.RequestWebView({
     silent: isSilent || undefined,
     peer: buildInputPeer(peer.id, peer.accessHash),
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     url,
     startParam,
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
@@ -249,7 +249,7 @@ export async function requestMainWebView({
 }) {
   const result = await invokeRequest(new GramJs.messages.RequestMainWebView({
     peer: buildInputPeer(peer.id, peer.accessHash),
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     startParam,
     fullscreen: mode === 'fullscreen' || undefined,
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
@@ -284,7 +284,7 @@ export async function requestSimpleWebView({
 }) {
   const result = await invokeRequest(new GramJs.messages.RequestSimpleWebView({
     url,
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     platform: WEB_APP_PLATFORM,
     startParam,
@@ -304,7 +304,7 @@ export async function fetchBotApp({
 }) {
   const result = await invokeRequest(new GramJs.messages.GetBotApp({
     app: new GramJs.InputBotAppShortName({
-      botId: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+      botId: buildInputUser(bot.id, bot.accessHash),
       shortName: appName,
     }),
   }));
@@ -362,7 +362,7 @@ export function prolongWebView({
   return invokeRequest(new GramJs.messages.ProlongWebView({
     silent: isSilent || undefined,
     peer: buildInputPeer(peer.id, peer.accessHash),
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     queryId: BigInt(queryId),
     replyTo: replyInfo && buildInputReplyTo(replyInfo),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
@@ -378,7 +378,7 @@ export async function sendWebViewData({
 }) {
   const randomId = generateRandomBigInt();
   await invokeRequest(new GramJs.messages.SendWebViewData({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     buttonText,
     data,
     randomId,
@@ -409,7 +409,7 @@ export async function loadAttachBot({
   bot: ApiUser;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetAttachMenuBot({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
   }));
 
   if (result instanceof GramJs.AttachMenuBotsBot) {
@@ -430,7 +430,7 @@ export function toggleAttachBot({
   isEnabled: boolean;
 }) {
   return invokeRequest(new GramJs.messages.ToggleBotInAttachMenu({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     writeAllowed: isWriteAllowed || undefined,
     enabled: isEnabled,
   }));
@@ -532,13 +532,13 @@ export async function acceptLinkUrlAuth({ url, isWriteAllowed }: { url: string; 
 
 export function fetchBotCanSendMessage({ bot } : { bot: ApiUser }) {
   return invokeRequest(new GramJs.bots.CanSendMessage({
-    bot: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+    bot: buildInputUser(bot.id, bot.accessHash),
   }));
 }
 
 export function allowBotSendMessages({ bot } : { bot: ApiUser }) {
   return invokeRequest(new GramJs.bots.AllowSendMessage({
-    bot: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+    bot: buildInputUser(bot.id, bot.accessHash),
   }), {
     shouldReturnTrue: true,
   });
@@ -559,7 +559,7 @@ export async function invokeWebViewCustomMethod({
   }> {
   try {
     const result = await invokeRequest(new GramJs.bots.InvokeWebViewCustomMethod({
-      bot: buildInputPeer(bot.id, bot.accessHash),
+      bot: buildInputUser(bot.id, bot.accessHash),
       params: new GramJs.DataJSON({
         data: parameters,
       }),
@@ -581,7 +581,7 @@ export async function invokeWebViewCustomMethod({
 
 export async function fetchPreviewMedias({ bot } : { bot: ApiUser }) {
   const result = await invokeRequest(new GramJs.bots.GetPreviewMedias({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
   }));
 
   if (!result) return undefined;
@@ -605,7 +605,7 @@ export function checkBotDownloadFileParams({
   url: string;
 }) {
   return invokeRequest(new GramJs.bots.CheckDownloadFileParams({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     fileName,
     url,
   }), {
@@ -615,7 +615,7 @@ export function checkBotDownloadFileParams({
 
 export function toggleUserEmojiStatusPermission({ bot, isEnabled } : { bot: ApiUser; isEnabled: boolean }) {
   return invokeRequest(new GramJs.bots.ToggleUserEmojiStatusPermission({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     enabled: isEnabled,
   }), {
     shouldReturnTrue: true,
@@ -662,7 +662,7 @@ export function setBotInfo({
   description?: string;
 }) {
   return invokeRequest(new GramJs.bots.SetBotInfo({
-    bot: buildInputPeer(bot.id, bot.accessHash),
+    bot: buildInputUser(bot.id, bot.accessHash),
     langCode,
     name: name || '',
     about: about || '',
@@ -698,7 +698,7 @@ export async function fetchPopularAppBots({
 
 export async function fetchBotsRecommendations({ user }: { user: ApiChat }) {
   if (!user) return undefined;
-  const inputUser = buildInputEntity(user.id, user.accessHash) as GramJs.InputUser;
+  const inputUser = buildInputUser(user.id, user.accessHash);
   const result = await invokeRequest(new GramJs.bots.GetBotRecommendations({
     bot: inputUser,
   }));

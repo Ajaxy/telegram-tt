@@ -287,7 +287,7 @@ class TelegramClient {
         return downloadFile(this as any, inputLocation, args);
     }
 
-    _downloadPhoto(photo: Api.MessageMediaPhoto | Api.Photo | undefined, args: any) {
+    _downloadPhoto(photo: Api.MessageMediaPhoto | Api.TypePhoto | undefined, args: any) {
         if (photo instanceof Api.MessageMediaPhoto) {
             photo = photo.photo;
         }

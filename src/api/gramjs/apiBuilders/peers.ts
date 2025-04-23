@@ -6,15 +6,17 @@ import type { ApiEmojiStatusType, ApiPeerColor } from '../../types';
 import { CHANNEL_ID_LENGTH } from '../../../config';
 import { numberToHexColor } from '../../../util/colors';
 
-export function isMtpPeerUser(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerUser {
+type TypePeerOrInput = GramJs.TypePeer | GramJs.TypeInputPeer | GramJs.TypeInputUser | GramJs.TypeInputChannel;
+
+export function isMtpPeerUser(peer: TypePeerOrInput): peer is GramJs.PeerUser {
   return peer.hasOwnProperty('userId');
 }
 
-export function isMtpPeerChat(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerChat {
+export function isMtpPeerChat(peer: TypePeerOrInput): peer is GramJs.PeerChat {
   return peer.hasOwnProperty('chatId');
 }
 
-export function isMtpPeerChannel(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerChannel {
+export function isMtpPeerChannel(peer: TypePeerOrInput): peer is GramJs.PeerChannel {
   return peer.hasOwnProperty('channelId');
 }
 
@@ -33,7 +35,7 @@ export function buildApiPeerId(id: BigInt.BigInteger, type: 'user' | 'chat' | 'c
   return `-${id}`;
 }
 
-export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer | GramJs.TypeInputPeer) {
+export function getApiChatIdFromMtpPeer(peer: TypePeerOrInput) {
   if (isMtpPeerUser(peer)) {
     return buildApiPeerId(peer.userId, 'user');
   } else if (isMtpPeerChat(peer)) {

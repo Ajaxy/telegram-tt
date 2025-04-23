@@ -15,7 +15,7 @@ import {
   buildPostsStatistics,
   buildStoryPublicForwards,
 } from '../apiBuilders/statistics';
-import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
+import { buildInputChannel, buildInputPeer } from '../gramjsBuilders';
 import { checkErrorType, wrapError } from '../helpers/misc';
 import { invokeRequest } from './client';
 import { getPassword } from './twoFaSettings';
@@ -24,7 +24,7 @@ export async function fetchChannelStatistics({
   chat, dcId,
 }: { chat: ApiChat; dcId?: number }) {
   const result = await invokeRequest(new GramJs.stats.GetBroadcastStats({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
   }), {
     dcId,
   });
@@ -62,7 +62,7 @@ export async function fetchGroupStatistics({
   chat, dcId,
 }: { chat: ApiChat; dcId?: number }) {
   const result = await invokeRequest(new GramJs.stats.GetMegagroupStats({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
   }), {
     dcId,
   });
@@ -86,7 +86,7 @@ export async function fetchMessageStatistics({
   dcId?: number;
 }): Promise<ApiPostStatistics | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetMessageStats({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
     msgId: messageId,
   }), {
     dcId,
@@ -115,7 +115,7 @@ export async function fetchMessagePublicForwards({
     nextOffset?: string;
   } | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetMessagePublicForwards({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
     msgId: messageId,
     offset,
     limit: STATISTICS_PUBLIC_FORWARDS_LIMIT,

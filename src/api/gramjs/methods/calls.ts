@@ -13,7 +13,7 @@ import {
   buildPhoneCall,
 } from '../apiBuilders/calls';
 import {
-  buildInputGroupCall, buildInputPeer, buildInputPhoneCall, generateRandomInt,
+  buildInputGroupCall, buildInputPeer, buildInputPhoneCall, buildInputUser, generateRandomInt,
 } from '../gramjsBuilders';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest, invokeRequestBeacon } from './client';
@@ -277,7 +277,7 @@ export async function requestCall({
 }) {
   const result = await invokeRequest(new GramJs.phone.RequestCall({
     randomId: generateRandomInt(),
-    userId: buildInputPeer(user.id, user.accessHash),
+    userId: buildInputUser(user.id, user.accessHash),
     gAHash: Buffer.from(gAHash),
     ...(isVideo && { video: true }),
     protocol: buildCallProtocol(),

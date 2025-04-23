@@ -157,7 +157,8 @@ export function addChatToLocalDb(chat: GramJs.Chat | GramJs.Channel) {
   localDb.chats[id] = chat;
 }
 
-export function addUserToLocalDb(user: GramJs.User) {
+export function addUserToLocalDb(user: GramJs.TypeUser) {
+  if (user instanceof GramJs.UserEmpty) return;
   const id = buildApiPeerId(user.id, 'user');
   const storedUser = localDb.users[id];
 

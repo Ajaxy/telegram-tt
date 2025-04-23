@@ -18,7 +18,7 @@ import {
   buildApiStarsTransaction,
   buildApiStarTopupOption,
 } from '../apiBuilders/payments';
-import { buildInputPeer, buildInputSavedStarGift } from '../gramjsBuilders';
+import { buildInputPeer, buildInputSavedStarGift, buildInputUser } from '../gramjsBuilders';
 import { checkErrorType, wrapError } from '../helpers/misc';
 import { invokeRequest } from './client';
 import { getPassword } from './twoFaSettings';
@@ -114,7 +114,7 @@ export async function getStarsGiftOptions({
   chat?: ApiChat;
 }) {
   const result = await invokeRequest(new GramJs.payments.GetStarsGiftOptions({
-    userId: chat && buildInputPeer(chat.id, chat.accessHash),
+    userId: chat && buildInputUser(chat.id, chat.accessHash),
   }));
 
   if (!result) {

@@ -1,4 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+import type { Entity } from '../../../lib/gramjs/types';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
 import type {
@@ -68,7 +69,7 @@ export function buildApiThumbnailFromCached(photoSize: GramJs.PhotoCachedSize): 
 
 export function buildApiThumbnailFromPath(
   photoSize: GramJs.PhotoPathSize,
-  sizeAttribute: GramJs.DocumentAttributeImageSize | GramJs.DocumentAttributeVideo,
+  sizeAttribute: GramJs.DocumentAttributeImageSize | GramJs.DocumentAttributeVideo | GramJs.PhotoSize,
 ): ApiThumbnail | undefined {
   const { w, h } = sizeAttribute;
   const dataUri = `data:image/svg+xml;utf8,${pathBytesToSvg(photoSize.bytes, w, h)}`;
@@ -130,8 +131,8 @@ export function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
   };
 }
 
-export function buildApiUsernames(mtpPeer: GramJs.User | GramJs.Channel | GramJs.UpdateUserName) {
-  if (!mtpPeer.usernames && !('username' in mtpPeer && mtpPeer.username)) {
+export function buildApiUsernames(mtpPeer: Entity | GramJs.UpdateUserName) {
+  if (!('usernames' in mtpPeer && mtpPeer.usernames) && !('username' in mtpPeer && mtpPeer.username)) {
     return undefined;
   }
 

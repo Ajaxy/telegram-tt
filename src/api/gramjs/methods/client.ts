@@ -28,7 +28,7 @@ import {
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiStory } from '../apiBuilders/stories';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
-import { buildInputPeerFromLocalDb, getEntityTypeById } from '../gramjsBuilders';
+import { buildInputChannelFromLocalDb, buildInputPeerFromLocalDb, getEntityTypeById } from '../gramjsBuilders';
 import {
   addStoryToLocalDb, addUserToLocalDb,
 } from '../helpers/localDb';
@@ -523,12 +523,12 @@ export async function repairFileReference({
 
 async function repairMessageMedia(peerId: string, messageId: number) {
   const type = getEntityTypeById(peerId);
-  const peer = buildInputPeerFromLocalDb(peerId);
-  if (!peer) return false;
+  const inputChannel = buildInputChannelFromLocalDb(peerId);
+  if (!inputChannel) return false;
   const result = await invokeRequest(
     type === 'channel'
       ? new GramJs.channels.GetMessages({
-        channel: peer,
+        channel: inputChannel,
         id: [new GramJs.InputMessageID({ id: messageId })],
       })
       : new GramJs.messages.GetMessages({
@@ -541,7 +541,7 @@ async function repairMessageMedia(peerId: string, messageId: number) {
 
   if (!result || result instanceof GramJs.messages.MessagesNotModified) return false;
 
-  if (peer && 'pts' in result) {
+  if (inputChannel && 'pts' in result) {
     updateChannelState(peerId, result.pts);
   }
 

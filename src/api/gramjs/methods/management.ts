@@ -6,7 +6,7 @@ import type {
 
 import { ACCEPTABLE_USERNAME_ERRORS } from '../../../config';
 import { buildApiExportedInvite, buildChatInviteImporter } from '../apiBuilders/chats';
-import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
+import { buildInputChannel, buildInputPeer, buildInputUser } from '../gramjsBuilders';
 import { sendApiUpdate } from '../updates/apiUpdateEmitter';
 import { invokeRequest } from './client';
 
@@ -38,7 +38,7 @@ export async function setChatUsername(
   { chat, username }: { chat: ApiChat; username: string },
 ) {
   const result = await invokeRequest(new GramJs.channels.UpdateUsername({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
     username,
   }));
 
@@ -61,7 +61,7 @@ export async function setChatUsername(
 
 export async function deactivateAllUsernames({ chat }: { chat: ApiChat }) {
   const result = await invokeRequest(new GramJs.channels.DeactivateAllUsernames({
-    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: buildInputChannel(chat.id, chat.accessHash),
   }));
 
   if (result) {
@@ -111,7 +111,7 @@ export async function fetchExportedChatInvites({
 }: { peer: ApiChat; admin: ApiUser; limit?: number; isRevoked?: boolean }) {
   const exportedInvites = await invokeRequest(new GramJs.messages.GetExportedChatInvites({
     peer: buildInputPeer(peer.id, peer.accessHash),
-    adminId: buildInputEntity(admin.id, admin.accessHash) as GramJs.InputUser,
+    adminId: buildInputUser(admin.id, admin.accessHash),
     limit,
     revoked: isRevoked || undefined,
   }), {
@@ -214,7 +214,7 @@ export async function deleteRevokedExportedChatInvites({
 }) {
   const result = await invokeRequest(new GramJs.messages.DeleteRevokedExportedChatInvites({
     peer: buildInputPeer(peer.id, peer.accessHash),
-    adminId: buildInputEntity(admin.id, admin.accessHash) as GramJs.InputUser,
+    adminId: buildInputUser(admin.id, admin.accessHash),
   }));
 
   return result;
@@ -229,8 +229,7 @@ export async function fetchChatInviteImporters({
     peer: buildInputPeer(peer.id, peer.accessHash),
     link,
     offsetDate,
-    offsetUser: offsetUser
-      ? buildInputEntity(offsetUser.id, offsetUser.accessHash) as GramJs.InputUser : new GramJs.InputUserEmpty(),
+    offsetUser: offsetUser ? buildInputUser(offsetUser.id, offsetUser.accessHash) : new GramJs.InputUserEmpty(),
     limit,
     requested: isRequested || undefined,
   }), {
@@ -255,7 +254,7 @@ export function hideChatJoinRequest({
 }) {
   return invokeRequest(new GramJs.messages.HideChatJoinRequest({
     peer: buildInputPeer(peer.id, peer.accessHash),
-    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    userId: buildInputUser(user.id, user.accessHash),
     approved: isApproved || undefined,
   }), {
     shouldReturnTrue: true,

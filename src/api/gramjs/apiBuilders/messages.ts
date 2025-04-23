@@ -60,6 +60,7 @@ import {
   buildApiFormattedText,
   buildApiPhoto,
 } from './common';
+import { type OmitVirtualFields } from './helpers';
 import { buildApiMessageAction } from './messageActions';
 import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
 import { buildApiPeerColor, buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
@@ -168,9 +169,10 @@ export function buildApiMessageFromNotification(
   };
 }
 
+type TypeMessageWithContent = OmitVirtualFields<GramJs.Message> & OmitVirtualFields<GramJs.MessageService>;
 export type UniversalMessage = (
-  Pick<GramJs.Message & GramJs.MessageService, ('id' | 'date' | 'peerId')>
-  & Partial<GramJs.Message & GramJs.MessageService>
+  Pick<TypeMessageWithContent, ('id' | 'date' | 'peerId')>
+  & Partial<TypeMessageWithContent>
 );
 
 export function buildApiMessageWithChatId(
