@@ -372,7 +372,7 @@ const MessageListContent: FC<OwnProps> = ({
     <div className="messages-container" teactFastList>
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {shouldRenderAccountInfo
-        && <MessageListAccountInfo isInMessageList key={`account_info_${chatId}`} chatId={chatId} />}
+        && <MessageListAccountInfo key={`account_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
       {withHistoryTriggers && (
         <div

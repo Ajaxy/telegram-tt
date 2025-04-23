@@ -13,6 +13,7 @@
   flex-direction: column;
 
   font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
+  font-weight: var(--font-weight-normal);
   border-radius: var(--border-radius-messages);
   overflow: hidden;
   text-align: center;
