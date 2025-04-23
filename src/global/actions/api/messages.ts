@@ -29,7 +29,7 @@ import {
   MAX_MEDIA_FILES_FOR_ALBUM,
   MESSAGE_ID_REQUIRED_ERROR,
   MESSAGE_LIST_SLICE,
-  PAID_SEND_DELAY, RE_TELEGRAM_LINK,
+  RE_TELEGRAM_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_PHOTO_CONTENT_TYPES,
@@ -1714,6 +1714,9 @@ async function sendMessagesWithNotification<T extends GlobalState>(
   };
 
   // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
+  getActions().sendMessages({ sendParams });
+
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   getActions().showNotification({
     localId: getMessageKey(firstMessage),
     title: titleKey,
@@ -1721,20 +1724,6 @@ async function sendMessagesWithNotification<T extends GlobalState>(
       key: 'MessageSentPaidToastText',
       variables: { amount: formatStarsAsText(getTranslationFn(), starsForOneMessage * messagesCount) },
     },
-    actionText: { key: 'ButtonUndo' },
-    action: {
-      action: 'deleteMessages',
-      payload: { messageList: firstSendParam.messageList, messageIds: messageIdsForUndo, shouldDeleteForAll: true },
-    },
-    dismissAction: {
-      action: 'sendMessages',
-      payload: {
-        sendParams,
-      },
-    },
-    duration: PAID_SEND_DELAY,
-    shouldShowTimer: true,
-    disableClickDismiss: true,
     icon: 'star',
     shouldUseCustomIcon: true,
     type: 'paidMessage',

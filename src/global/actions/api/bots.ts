@@ -14,7 +14,7 @@ import {
 } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
-import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL, PAID_SEND_DELAY } from '../../../config';
+import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getUsernameFromDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -439,20 +439,16 @@ addActionHandler('sendInlineBotResult', async (global, actions, payload): Promis
   }
 
   // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
+  actions.sendInlineBotApiResult({ ...params });
+
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   actions.showNotification({
     localId: queryId,
     title: { key: 'MessageSentPaidToastTitle', variables: { count: 1 }, options: { pluralValue: 1 } },
     message: {
       key: 'MessageSentPaidToastText', variables: { amount: formatStarsAsText(getTranslationFn(), starsForOneMessage) },
     },
-    actionText: { key: 'ButtonUndo' },
-    dismissAction: {
-      action: 'sendInlineBotApiResult',
-      payload: params,
-    },
-    duration: PAID_SEND_DELAY,
-    shouldShowTimer: true,
-    disableClickDismiss: true,
+
     icon: 'star',
     shouldUseCustomIcon: true,
     type: 'paidMessage',
