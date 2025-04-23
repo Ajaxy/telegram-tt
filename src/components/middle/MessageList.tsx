@@ -133,6 +133,7 @@ type StateProps = {
   areAdsEnabled?: boolean;
   channelJoinInfo?: ApiChatFullInfo['joinInfo'];
   isChatProtected?: boolean;
+  hasCustomGreeting?: boolean;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 20 * 1000;
@@ -195,6 +196,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   onIntersectPinnedMessage,
   onScrollDownToggle,
   onNotchToggle,
+  hasCustomGreeting,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -696,7 +698,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
-      ) : paidMessagesStars && isPrivate && !hasMessages ? (
+      ) : paidMessagesStars && isPrivate && !hasMessages && !hasCustomGreeting ? (
         <RequirementToContactMessage paidMessagesStars={paidMessagesStars} userId={chatId} />
       ) : isContactRequirePremium && !hasMessages ? (
         <RequirementToContactMessage userId={chatId} />
@@ -795,6 +797,8 @@ export default memo(withGlobal<OwnProps>(
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
     const areAdsEnabled = !isCurrentUserPremium || selectUserFullInfo(global, currentUserId)?.areAdsEnabled;
 
+    const hasCustomGreeting = Boolean(userFullInfo?.businessIntro);
+
     return {
       areAdsEnabled,
       isChatLoaded: true,
@@ -828,6 +832,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
       isChatProtected: selectIsChatProtected(global, chatId),
       ...(withLastMessageWhenPreloading && { lastMessage }),
+      hasCustomGreeting,
     };
   },
 )(MessageList));
