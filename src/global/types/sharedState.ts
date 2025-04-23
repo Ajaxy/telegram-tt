@@ -1,7 +1,6 @@
 import type { ApiLanguage } from '../../api/types';
 import type {
   AnimationLevel,
-  IThemeSettings,
   PerformanceType,
   Point,
   Size,
@@ -13,7 +12,6 @@ export type SharedState = {
   settings: {
     shouldUseSystemTheme: boolean;
     theme: ThemeKey;
-    themes: Partial<Record<ThemeKey, IThemeSettings>>;
     language: string;
     languages?: ApiLanguage[];
     performance: PerformanceType;

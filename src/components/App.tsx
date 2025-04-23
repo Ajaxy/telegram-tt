@@ -14,8 +14,9 @@ import { IS_INSTALL_PROMPT_SUPPORTED, PLATFORM_ENV } from '../util/browser/windo
 import buildClassName from '../util/buildClassName';
 import { setupBeforeInstallPrompt } from '../util/installPrompt';
 import { ACCOUNT_SLOT, getAccountsInfo, getAccountSlotUrl } from '../util/multiaccount';
+import { hasEncryptedSession } from '../util/passcode';
 import { getInitialLocationHash, parseInitialLocationHash } from '../util/routing';
-import { hasStoredSession } from '../util/sessions';
+import { checkSessionLocked, hasStoredSession } from '../util/sessions';
 import { updateSizes } from '../util/windowSize';
 
 import useAppLayout from '../hooks/useAppLayout';
@@ -76,15 +77,27 @@ const App: FC<StateProps> = ({
     // If there is no stored session on first slot, navigate to any other slot with stored session
     if (!hasStoredSession() && !ACCOUNT_SLOT && !hash) {
       const accounts = getAccountsInfo();
-      Object.keys(accounts).forEach((key) => {
-        const slot = Number(key);
-        const account = accounts[slot];
-        if (account) {
-          const url = getAccountSlotUrl(slot);
-          window.location.href = `${url}#${hash || 'login'}`;
-        }
-      });
+      Object.keys(accounts)
+        .map(Number)
+        .sort((a, b) => b - a)
+        .forEach((key) => {
+          const slot = Number(key);
+          const account = accounts[slot];
+          if (account) {
+            const url = getAccountSlotUrl(slot);
+            window.location.href = `${url}#${hash || 'login'}`;
+          }
+        });
     }
+
+    // TODO[Passcode]: Remove when multiacc passcode is implemented
+    const checkMultiaccPasscode = async () => {
+      if (checkSessionLocked() && ACCOUNT_SLOT && await hasEncryptedSession()) {
+        const url = getAccountSlotUrl(1);
+        window.location.href = url;
+      }
+    };
+    checkMultiaccPasscode();
   }, []);
 
   // Prevent drop on elements that do not accept it

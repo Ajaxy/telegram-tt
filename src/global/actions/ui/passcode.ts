@@ -1,6 +1,7 @@
 import type { ActionReturnType } from '../../types';
 import { SettingsScreens } from '../../../types';
 
+import { IS_SCREEN_LOCKED_CACHE_KEY } from '../../../config';
 import { getCurrentTabId, signalPasscodeHash } from '../../../util/establishMultitabRole';
 import { cloneDeep } from '../../../util/iteratees';
 import {
@@ -72,6 +73,7 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
 addActionHandler('clearPasscode', (global): ActionReturnType => {
   void clearEncryptedSession();
 
+  localStorage.removeItem(IS_SCREEN_LOCKED_CACHE_KEY);
   return clearPasscodeSettings(global);
 });
 

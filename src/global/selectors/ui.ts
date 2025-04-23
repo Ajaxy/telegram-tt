@@ -76,7 +76,7 @@ export function selectTheme<T extends GlobalState>(global: T) {
 }
 
 export function selectThemeValues<T extends GlobalState>(global: T, themeKey: ThemeKey) {
-  return selectSharedSettings(global).themes[themeKey];
+  return global.settings.themes[themeKey];
 }
 
 export function selectIsForumPanelOpen<T extends GlobalState>(

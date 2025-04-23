@@ -125,6 +125,10 @@ function store(key: string, value: ArrayBuffer) {
   PASSCODE_IDB_STORE.set(key, asArray);
 }
 
+export function hasEncryptedSession() {
+  return PASSCODE_IDB_STORE.get('sessionEncrypted');
+}
+
 async function load(key: string) {
   const cached = await PASSCODE_IDB_STORE.get<number[]>(key);
   if (cached) {

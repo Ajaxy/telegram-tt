@@ -78,16 +78,6 @@ export const INITIAL_SHARED_STATE: SharedState = {
       : (IS_MAC_OS ? MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX : DEFAULT_MESSAGE_TEXT_SIZE_PX),
     animationLevel: ANIMATION_LEVEL_DEFAULT,
     messageSendKeyCombo: 'enter',
-    themes: {
-      light: {
-        isBlurred: true,
-        patternColor: DEFAULT_PATTERN_COLOR,
-      },
-      dark: {
-        isBlurred: true,
-        patternColor: DARK_THEME_PATTERN_COLOR,
-      },
-    },
     performance: INITIAL_PERFORMANCE_STATE_MAX,
     shouldSkipWebAppCloseConfirmation: false,
     language: 'en',
@@ -308,6 +298,16 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     },
     privacy: {},
     botVerificationShownPeerIds: [],
+    themes: {
+      light: {
+        isBlurred: true,
+        patternColor: DEFAULT_PATTERN_COLOR,
+      },
+      dark: {
+        isBlurred: true,
+        patternColor: DARK_THEME_PATTERN_COLOR,
+      },
+    },
   },
 
   serviceNotifications: [],

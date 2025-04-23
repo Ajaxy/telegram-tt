@@ -31,6 +31,7 @@ const requestStates = new Map<string, RequestStates>();
 
 export async function respondForProgressive(e: FetchEvent) {
   const { url } = e.request;
+  const accountSlot = getAccountSlot(url);
   const range = e.request.headers.get('range');
   const bytes = /^bytes=(\d+)-(\d+)?$/g.exec(range || '')!;
   const start = Number(bytes[1]);
@@ -66,7 +67,8 @@ export async function respondForProgressive(e: FetchEvent) {
   parsedUrl.searchParams.set('start', String(start));
   parsedUrl.searchParams.set('end', String(end));
   const cacheKey = parsedUrl.href;
-  const [cachedArrayBuffer, cachedHeaders] = !MEDIA_PROGRESSIVE_CACHE_DISABLED ? await fetchFromCache(cacheKey) : [];
+  const [cachedArrayBuffer, cachedHeaders] = !MEDIA_PROGRESSIVE_CACHE_DISABLED
+    ? await fetchFromCache(accountSlot, cacheKey) : [];
 
   if (DEBUG) {
     // eslint-disable-next-line no-console
@@ -113,7 +115,7 @@ export async function respondForProgressive(e: FetchEvent) {
   ];
 
   if (!MEDIA_PROGRESSIVE_CACHE_DISABLED && partSize <= MEDIA_CACHE_MAX_BYTES && end < MAX_END_TO_CACHE) {
-    saveToCache(cacheKey, arrayBufferPart, headers);
+    saveToCache(accountSlot, cacheKey, arrayBufferPart, headers);
   }
 
   return new Response(arrayBufferPart, {
@@ -124,8 +126,9 @@ export async function respondForProgressive(e: FetchEvent) {
 }
 
 // We can not cache 206 responses: https://github.com/GoogleChrome/workbox/issues/1644#issuecomment-638741359
-async function fetchFromCache(cacheKey: string) {
-  const cache = await self.caches.open(MEDIA_PROGRESSIVE_CACHE_NAME);
+async function fetchFromCache(accountSlot: number | undefined, cacheKey: string) {
+  const cacheName = !accountSlot ? MEDIA_PROGRESSIVE_CACHE_NAME : `${MEDIA_PROGRESSIVE_CACHE_NAME}_${accountSlot}`;
+  const cache = await self.caches.open(cacheName);
 
   return Promise.all([
     cache.match(`${cacheKey}&type=arrayBuffer`).then((r) => (r ? r.arrayBuffer() : undefined)),
@@ -133,8 +136,11 @@ async function fetchFromCache(cacheKey: string) {
   ]);
 }
 
-async function saveToCache(cacheKey: string, arrayBuffer: ArrayBuffer, headers: HeadersInit) {
-  const cache = await self.caches.open(MEDIA_PROGRESSIVE_CACHE_NAME);
+async function saveToCache(
+  accountSlot: number | undefined, cacheKey: string, arrayBuffer: ArrayBuffer, headers: HeadersInit,
+) {
+  const cacheName = !accountSlot ? MEDIA_PROGRESSIVE_CACHE_NAME : `${MEDIA_PROGRESSIVE_CACHE_NAME}_${accountSlot}`;
+  const cache = await self.caches.open(cacheName);
 
   return Promise.all([
     cache.put(new Request(`${cacheKey}&type=arrayBuffer`), new Response(arrayBuffer)),

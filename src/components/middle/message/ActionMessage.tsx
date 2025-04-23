@@ -27,7 +27,6 @@ import {
   selectTabState,
   selectTheme,
 } from '../../../global/selectors';
-import { selectSharedSettings } from '../../../global/selectors/sharedState';
 import { IS_ANDROID, IS_ELECTRON, IS_FLUID_BACKGROUND_SUPPORTED } from '../../../util/browser/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
@@ -461,7 +460,7 @@ const ActionMessage = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message, threadId }): StateProps => {
     const tabState = selectTabState(global);
-    const { themes } = selectSharedSettings(global);
+    const { themes } = global.settings;
 
     const chat = selectChat(global, message.chatId);
 

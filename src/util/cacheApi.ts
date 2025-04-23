@@ -97,6 +97,7 @@ export async function save(cacheName: string, key: string, data: AnyLiteral | Bl
     const response = new Response(cacheData);
     const cache = await cacheApi.open(`${cacheName}${SUFFIX}`);
     await cache.put(request, response);
+
     return true;
   } catch (err) {
     // eslint-disable-next-line no-console

@@ -321,7 +321,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       messageTextSize: untypedCached.settings.byKey.messageTextSize,
       performance: untypedCached.settings.performance,
       theme: untypedCached.settings.byKey.theme,
-      themes: untypedCached.settings.themes,
       timeFormat: untypedCached.settings.byKey.timeFormat,
       wasTimeFormatSetManually: untypedCached.settings.byKey.wasTimeFormatSetManually,
       shouldUseSystemTheme: untypedCached.settings.byKey.shouldUseSystemTheme,
@@ -337,6 +336,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       shouldDebugExportedSenders: untypedCached.settings.byKey.shouldDebugExportedSenders,
       shouldWarnAboutSvg: untypedCached.settings.byKey.shouldWarnAboutSvg,
     };
+  }
+
+  if (!cached.settings.themes) {
+    cached.settings.themes = initialState.settings.themes;
   }
 }
 
@@ -706,7 +709,7 @@ function omitLocalMedia(message: ApiMessage): ApiMessage {
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
   const {
-    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate,
+    byKey, botVerificationShownPeerIds, notifyDefaults, lastPremiumBandwithNotificationDate, themes,
   } = global.settings;
 
   return {
@@ -715,6 +718,7 @@ function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings
     botVerificationShownPeerIds,
     lastPremiumBandwithNotificationDate,
     notifyDefaults,
+    themes,
   };
 }
 

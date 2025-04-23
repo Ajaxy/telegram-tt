@@ -15,8 +15,9 @@ const WORKER_NAME = typeof WorkerGlobalScope !== 'undefined' && globalThis.self 
   ? globalThis.self.name : undefined;
 const WORKER_ACCOUNT_SLOT = WORKER_NAME ? Number(new URLSearchParams(WORKER_NAME).get(ACCOUNT_QUERY)) : undefined;
 
-export const ACCOUNT_SLOT = IS_MULTIACCOUNT_SUPPORTED
-  ? (WORKER_ACCOUNT_SLOT || getAccountSlot(globalThis.location.href)) : undefined;
+export const ACCOUNT_SLOT = WORKER_ACCOUNT_SLOT || (
+  IS_MULTIACCOUNT_SUPPORTED ? getAccountSlot(globalThis.location.href) : undefined
+);
 
 export const DATA_BROADCAST_CHANNEL_NAME = `${DATA_BROADCAST_CHANNEL_PREFIX}_${ACCOUNT_SLOT || 1}`;
 export const ESTABLISH_BROADCAST_CHANNEL_NAME = `${ESTABLISH_BROADCAST_CHANNEL_PREFIX}_${ACCOUNT_SLOT || 1}`;

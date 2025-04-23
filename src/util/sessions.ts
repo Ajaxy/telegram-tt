@@ -183,6 +183,6 @@ export function importTestSession() {
   }
 }
 
-function checkSessionLocked() {
+export function checkSessionLocked() {
   return localStorage.getItem(IS_SCREEN_LOCKED_CACHE_KEY) === 'true';
 }

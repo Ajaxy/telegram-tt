@@ -5,7 +5,7 @@ import type {
 } from '../../types';
 import type { GlobalState, SharedState } from '../types';
 
-import { selectSharedSettings, selectSharedState } from '../selectors/sharedState';
+import { selectSharedSettings } from '../selectors/sharedState';
 import { updateSharedState } from './sharedState';
 import { updateUserBlockedState } from './users';
 
@@ -37,18 +37,22 @@ export function updateSharedSettings<T extends GlobalState>(
 export function updateThemeSettings<T extends GlobalState>(
   global: T, theme: ThemeKey, newSettings?: Partial<IThemeSettings>,
 ): T {
-  const settings = selectSharedState(global).settings;
+  const settings = global.settings;
   const current = settings.themes[theme];
 
-  return updateSharedSettings(global, {
-    themes: {
-      ...settings.themes,
-      [theme]: {
-        ...current,
-        ...newSettings,
+  return {
+    ...global,
+    settings: {
+      ...global.settings,
+      themes: {
+        ...settings.themes,
+        [theme]: {
+          ...current,
+          ...newSettings,
+        },
       },
     },
-  });
+  };
 }
 
 export function addNotifyExceptions<T extends GlobalState>(
