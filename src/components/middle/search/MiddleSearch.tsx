@@ -595,6 +595,7 @@ const MiddleSearch: FC<StateProps> = ({
             ref={containerRef}
             className={buildClassName(styles.results, 'custom-scroll')}
             items={viewportResults}
+            itemSelector={`.${RESULT_ITEM_CLASS_NAME}`}
             preloadBackwards={0}
             onLoadMore={getMore}
             onKeyDown={handleKeyDown}

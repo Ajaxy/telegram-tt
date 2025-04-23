@@ -66,10 +66,12 @@ addActionHandler('performMiddleSearch', async (global, actions, payload): Promis
   const {
     results, savedTag, type, isHashtag,
   } = currentSearch;
-  const offsetId = results?.nextOffsetId;
-  const offsetRate = results?.nextOffsetRate;
-  const offsetPeerId = results?.nextOffsetPeerId;
-  const offsetPeer = offsetPeerId ? selectChat(global, offsetPeerId) : undefined;
+  const shouldReuseParams = results?.query === query;
+
+  const offsetId = shouldReuseParams ? results?.nextOffsetId : undefined;
+  const offsetRate = shouldReuseParams ? results?.nextOffsetRate : undefined;
+  const offsetPeerId = shouldReuseParams ? results?.nextOffsetPeerId : undefined;
+  const offsetPeer = shouldReuseParams && offsetPeerId ? selectChat(global, offsetPeerId) : undefined;
 
   const shouldHaveQuery = isHashtag || !savedTag;
   if (shouldHaveQuery && !query) {
