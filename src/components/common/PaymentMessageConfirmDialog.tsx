@@ -1,6 +1,8 @@
 import type { FC, StateHookSetter } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
+import { formatStarsAsText } from '../../util/localization/format';
+
 import useLang from '../../hooks/useLang';
 
 import Checkbox from '../ui/Checkbox';
@@ -31,24 +33,20 @@ const PaymentMessageConfirmDialog: FC<OwnProps> = ({
 }) => {
   const lang = useLang();
 
-  const confirmPaymentMessage = messagesCount === 1 ? lang('ConfirmationModalPaymentForOneMessage', {
+  const confirmPaymentMessage = lang('ConfirmationModalPaymentForMessage', {
     user: userName,
-    amount: messagePriceInStars,
-  }, {
-    withMarkdown: true,
-    withNodes: true,
-  }) : lang('ConfirmationModalPaymentForMessages', {
-    user: userName,
-    price: messagePriceInStars,
-    amount: messagePriceInStars * messagesCount,
+    amount: formatStarsAsText(lang, messagePriceInStars),
+    totalAmount: formatStarsAsText(lang, messagePriceInStars * messagesCount),
     count: messagesCount,
   }, {
     withMarkdown: true,
     withNodes: true,
+    pluralValue: messagesCount,
   });
 
-  const confirmLabel = lang('ButtonPayForMessage', { count: messagesCount }, {
+  const confirmLabel = lang('PayForMessage', { count: messagesCount }, {
     withNodes: true,
+    pluralValue: messagesCount,
   });
 
   return (

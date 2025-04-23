@@ -1443,7 +1443,6 @@ export interface LangPair {
   'PrivacyPaidMessagesValue': undefined;
   'ButtonBuyStars': undefined;
   'TitleConfirmPayment': undefined;
-  'ToastTitleMessageSent': undefined;
   'ButtonUndo': undefined;
   'ConfirmRemoveMessageFee': undefined;
   'StoryTooltipGifSent': undefined;
@@ -2303,9 +2302,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'percent': V;
     'amount': V;
   };
-  'SubtitlePrivacyUsersCount': {
-    'count': V;
-  };
   'FirstMessageInPaidMessagesChat': {
     'user': V;
     'amount': V;
@@ -2316,23 +2312,7 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'ComposerPlaceholderPaidReply': {
     'amount': V;
   };
-  'ConfirmationModalPaymentForOneMessage': {
-    'user': V;
-    'amount': V;
-  };
-  'ConfirmationModalPaymentForMessages': {
-    'user': V;
-    'price': V;
-    'amount': V;
-    'count': V;
-  };
-  'ButtonPayForMessage': {
-    'count': V;
-  };
-  'ToastTitleMessagesSent': {
-    'count': V;
-  };
-  'ToastMessageSent': {
+  'MessageSentPaidToastText': {
     'amount': V;
   };
   'ActionPaidOneMessageOutgoing': {
@@ -2350,10 +2330,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'peer': V;
   };
   'ConfirmDialogRemoveFeeRefundStars': {
-    'amount': V;
-  };
-  'DescriptionGiftPaidMessage': {
-    'user': V;
     'amount': V;
   };
   'PaidMessageTransactionDescription': {
@@ -2633,6 +2609,18 @@ export interface LangPairPluralWithVariables<V extends unknown = LangVariable> {
   };
   'ActionBoostApply': {
     'from': V;
+    'count': V;
+  };
+  'ConfirmationModalPaymentForMessage': {
+    'user': V;
+    'amount': V;
+    'totalAmount': V;
+    'count': V;
+  };
+  'PayForMessage': {
+    'count': V;
+  };
+  'MessageSentPaidToastTitle': {
     'count': V;
   };
   'PaidMessageTransaction': {

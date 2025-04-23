@@ -17,6 +17,8 @@ import { ManagementProgress } from '../../../types';
 import { BOT_FATHER_USERNAME, GENERAL_REFETCH_INTERVAL, PAID_SEND_DELAY } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { getTranslationFn } from '../../../util/localization';
+import { formatStarsAsText } from '../../../util/localization/format';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import PopupManager from '../../../util/PopupManager';
 import requestActionTimeout from '../../../util/requestActionTimeout';
@@ -437,8 +439,10 @@ addActionHandler('sendInlineBotResult', async (global, actions, payload): Promis
   // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   actions.showNotification({
     localId: queryId,
-    title: { key: 'ToastTitleMessageSent' },
-    message: { key: 'ToastMessageSent', variables: { amount: starsForOneMessage } },
+    title: { key: 'MessageSentPaidToastTitle', variables: { count: 1 }, options: { pluralValue: 1 } },
+    message: {
+      key: 'MessageSentPaidToastText', variables: { amount: formatStarsAsText(getTranslationFn(), starsForOneMessage) },
+    },
     actionText: { key: 'ButtonUndo' },
     dismissAction: {
       action: 'sendInlineBotApiResult',

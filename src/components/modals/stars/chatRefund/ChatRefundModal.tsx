@@ -6,6 +6,7 @@ import type { TabState } from '../../../../global/types';
 
 import { getPeerTitle } from '../../../../global/helpers/peers';
 import { selectUser } from '../../../../global/selectors';
+import { formatStarsAsText } from '../../../../util/localization/format';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
 import useLang from '../../../../hooks/useLang';
@@ -61,7 +62,7 @@ const ChatRefundModal = ({ modal, user }: OwnProps & StateProps) => {
           <Checkbox
             className="dialog-checkbox"
             label={lang('ConfirmDialogRemoveFeeRefundStars', {
-              amount: starsToRefund,
+              amount: formatStarsAsText(lang, starsToRefund),
             }, {
               withMarkdown: true,
               withNodes: true,

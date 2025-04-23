@@ -17,7 +17,6 @@ import type {
   ThreadId,
 } from '../../../types';
 import type { MessageKey } from '../../../util/keys/messageKey';
-import type { RegularLangFnParameters } from '../../../util/localization';
 import type { RequiredGlobalActions } from '../../index';
 import type {
   ActionReturnType, GlobalState, TabArgs,
@@ -50,6 +49,8 @@ import {
   unique,
 } from '../../../util/iteratees';
 import { getMessageKey, isLocalMessageId } from '../../../util/keys/messageKey';
+import { getTranslationFn, type RegularLangFnParameters } from '../../../util/localization';
+import { formatStarsAsText } from '../../../util/localization/format';
 import { oldTranslate } from '../../../util/oldLangProvider';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
@@ -1694,7 +1695,7 @@ async function sendMessagesWithNotification<T extends GlobalState>(
     const { gif, sticker, isReaction } = firstSendParam;
 
     if (gif) {
-      storySendMessage = { key: 'ToastTitleMessageSent' };
+      storySendMessage = { key: 'MessageSentPaidToastTitle', variables: { count: 1 }, options: { pluralValue: 1 } };
     } else if (sticker) {
       storySendMessage = { key: 'StoryTooltipStickerSent' };
     } else if (isReaction) {
@@ -1702,14 +1703,20 @@ async function sendMessagesWithNotification<T extends GlobalState>(
     }
   }
 
-  const titleKey: RegularLangFnParameters = storySendMessage || (messagesCount === 1 ? { key: 'ToastTitleMessageSent' }
-    : { key: 'ToastTitleMessagesSent', variables: { count: messagesCount } });
+  const titleKey: RegularLangFnParameters = storySendMessage || {
+    key: 'MessageSentPaidToastTitle',
+    variables: { count: messagesCount },
+    options: { pluralValue: messagesCount },
+  };
 
   // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   getActions().showNotification({
     localId: getMessageKey(firstMessage),
     title: titleKey,
-    message: { key: 'ToastMessageSent', variables: { amount: starsForOneMessage * messagesCount } },
+    message: {
+      key: 'MessageSentPaidToastText',
+      variables: { amount: formatStarsAsText(getTranslationFn(), starsForOneMessage * messagesCount) },
+    },
     actionText: { key: 'ButtonUndo' },
     action: {
       action: 'deleteMessages',
