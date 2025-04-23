@@ -1064,11 +1064,16 @@ addActionHandler('closeDeleteMessageModal', (global, actions, payload): ActionRe
 });
 
 addActionHandler('openAboutAdsModal', (global, actions, payload): ActionReturnType => {
-  const { chatId, tabId = getCurrentTabId() } = payload || {};
+  const {
+    randomId, additionalInfo, canReport, sponsorInfo, tabId = getCurrentTabId(),
+  } = payload || {};
 
   return updateTabState(global, {
     aboutAdsModal: {
-      chatId,
+      randomId,
+      canReport,
+      additionalInfo,
+      sponsorInfo,
     },
   }, tabId);
 });

@@ -30,7 +30,7 @@ const ReportAdModal = ({
   modal,
 }: OwnProps) => {
   const {
-    reportSponsoredMessage, closeReportAdModal, openPreviousReportAdModal,
+    reportSponsored, closeReportAdModal, openPreviousReportAdModal,
   } = getActions();
   const lang = useOldLang();
   const isOpen = Boolean(modal);
@@ -40,7 +40,7 @@ const ReportAdModal = ({
 
   const handleOptionClick = useLastCallback((e, option: string) => {
     const { chatId, randomId } = modal!;
-    reportSponsoredMessage({ peerId: chatId, randomId, option });
+    reportSponsored({ peerId: chatId, randomId, option });
   });
 
   const [renderingSection, renderingDepth] = useMemo(() => {

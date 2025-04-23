@@ -17,7 +17,7 @@ import useHeaderPane, { type PaneState } from '../hooks/useHeaderPane';
 
 import Avatar from '../../common/Avatar';
 import BadgeButton from '../../common/BadgeButton';
-import SponsoredMessageContextMenuContainer from '../message/SponsoredMessageContextMenuContainer';
+import SponsoredMessageContextMenuContainer from '../message/SponsoredContextMenuContainer';
 
 import styles from './BotAdPane.module.scss';
 
@@ -40,9 +40,9 @@ const BotAdPane = ({
   onPaneStateChange,
 }: OwnProps & StateProps) => {
   const {
-    viewSponsoredMessage,
+    viewSponsored,
     openUrl,
-    clickSponsoredMessage,
+    clickSponsored,
     openAboutAdsModal,
   } = getActions();
 
@@ -67,24 +67,37 @@ const BotAdPane = ({
   const handleClick = useLastCallback(() => {
     if (!renderingSponsoredMessage) return;
 
-    clickSponsoredMessage({ peerId: chatId });
+    clickSponsored({ randomId: renderingSponsoredMessage.randomId });
     openUrl({ url: renderingSponsoredMessage.url, shouldSkipModal: true });
   });
 
   const handleAboutClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!renderingSponsoredMessage) return;
+    const {
+      randomId, additionalInfo, canReport, sponsorInfo,
+    } = renderingSponsoredMessage;
     e.stopPropagation();
-    openAboutAdsModal({ chatId });
+    openAboutAdsModal({
+      randomId,
+      additionalInfo,
+      canReport,
+      sponsorInfo,
+    });
   });
 
   useEffect(() => {
-    if (shouldRender && sponsoredMessage) {
-      viewSponsoredMessage({ peerId: chatId });
+    if (shouldRender && renderingSponsoredMessage) {
+      viewSponsored({ randomId: renderingSponsoredMessage.randomId });
     }
-  }, [shouldRender, sponsoredMessage, chatId]);
+  }, [shouldRender, renderingSponsoredMessage, chatId]);
 
   if (!shouldRender || !renderingSponsoredMessage) {
     return undefined;
   }
+
+  const {
+    randomId, canReport, additionalInfo, sponsorInfo,
+  } = renderingSponsoredMessage;
 
   const {
     peerColor,
@@ -132,7 +145,10 @@ const BotAdPane = ({
           isOpen={isContextMenuOpen}
           anchor={contextMenuAnchor}
           triggerRef={ref}
-          message={renderingSponsoredMessage}
+          randomId={randomId}
+          additionalInfo={additionalInfo}
+          canReport={canReport}
+          sponsorInfo={sponsorInfo}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         />

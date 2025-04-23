@@ -18,6 +18,7 @@ import type {
   ApiRestrictionReason,
   ApiSendAsPeerId,
   ApiSponsoredMessageReportResult,
+  ApiSponsoredPeer,
   ApiStarsSubscriptionPricing,
   ApiTopic,
 } from '../../types';
@@ -709,5 +710,18 @@ export function buildApiStarsSubscriptionPricing(
   return {
     period: pricing.period,
     amount: pricing.amount.toJSNumber(),
+  };
+}
+
+export function buildApiSponsoredPeer(sponsoredPeer: GramJs.SponsoredPeer): ApiSponsoredPeer {
+  const {
+    peer, randomId, additionalInfo, sponsorInfo,
+  } = sponsoredPeer;
+
+  return {
+    peerId: getApiChatIdFromMtpPeer(peer),
+    randomId: serializeBytes(randomId),
+    additionalInfo,
+    sponsorInfo,
   };
 }

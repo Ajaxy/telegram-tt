@@ -45,6 +45,7 @@ import {
   buildApiChatlistInvite,
   buildApiChatReactions,
   buildApiMissingInvitedUser,
+  buildApiSponsoredPeer,
   buildApiTopic,
   buildChatMember,
   buildChatMembers,
@@ -2019,4 +2020,10 @@ export async function fetchChannelRecommendations({ chat }: { chat?: ApiChat }) 
     similarChannels,
     count: result instanceof GramJs.messages.ChatsSlice ? result.count : similarChannels.length,
   };
+}
+
+export async function fetchSponsoredPeer({ query }: { query: string }) {
+  const result = await invokeRequest(new GramJs.contacts.GetSponsoredPeers({ q: query }));
+  if (!result || result instanceof GramJs.contacts.SponsoredPeersEmpty) return undefined;
+  return buildApiSponsoredPeer(result.peers[0]);
 }

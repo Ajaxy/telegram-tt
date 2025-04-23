@@ -504,21 +504,24 @@ export interface ActionPayloads {
   loadSponsoredMessages: {
     peerId: string;
   };
-  viewSponsoredMessage: {
-    peerId: string;
+  viewSponsored: {
+    randomId: string;
   };
-  clickSponsoredMessage: {
-    peerId: string;
+  clickSponsored: {
+    randomId: string;
     isMedia?: boolean;
     isFullscreen?: boolean;
   };
-  reportSponsoredMessage: {
-    peerId: string;
+  reportSponsored: {
+    peerId?: string;
     randomId: string;
     option?: string;
   } & WithTabId;
   openAboutAdsModal: {
-    chatId: string;
+    randomId: string;
+    canReport?: boolean;
+    sponsorInfo?: string;
+    additionalInfo?: string;
   } & WithTabId;
   closeAboutAdsModal: WithTabId | undefined;
   openPreparedInlineMessageModal: {
@@ -542,7 +545,7 @@ export interface ActionPayloads {
   openPreviousReportModal: WithTabId | undefined;
   closeReportAdModal: WithTabId | undefined;
   closeReportModal: WithTabId | undefined;
-  hideSponsoredMessages: WithTabId | undefined;
+  hideSponsored: WithTabId | undefined;
   loadSendAs: {
     chatId: string;
   };

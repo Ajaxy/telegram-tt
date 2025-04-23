@@ -3,9 +3,6 @@ import React, {
   memo, useRef,
 } from '../../../lib/teact/teact';
 
-import type {
-  ApiSponsoredMessage,
-} from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -20,7 +17,8 @@ import './MessageContextMenu.scss';
 type OwnProps = {
   isOpen: boolean;
   anchor: IAnchorPosition;
-  message: ApiSponsoredMessage;
+  sponsorInfo?: string;
+  canReport?: boolean;
   triggerRef: React.RefObject<HTMLElement>;
   shouldSkipAbout?: boolean;
   onClose: NoneToVoidFunction;
@@ -31,9 +29,10 @@ type OwnProps = {
   onSponsoredReport?: NoneToVoidFunction;
 };
 
-const SponsoredMessageContextMenu: FC<OwnProps> = ({
+const SponsoredContextMenu: FC<OwnProps> = ({
   isOpen,
-  message,
+  sponsorInfo,
+  canReport,
   anchor,
   triggerRef,
   shouldSkipAbout,
@@ -53,7 +52,7 @@ const SponsoredMessageContextMenu: FC<OwnProps> = ({
   const getMenuElement = useLastCallback(() => menuRef.current);
   const getRootElement = useLastCallback(() => document.body);
 
-  const isSeparatorNeeded = message.sponsorInfo || !shouldSkipAbout || message.canReport;
+  const isSeparatorNeeded = sponsorInfo || !shouldSkipAbout || canReport;
 
   return (
     <Menu
@@ -69,15 +68,15 @@ const SponsoredMessageContextMenu: FC<OwnProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      {message.sponsorInfo && onSponsorInfo && (
+      {sponsorInfo && onSponsorInfo && (
         <MenuItem icon="channel" onClick={onSponsorInfo}>{lang('SponsoredMessageSponsor')}</MenuItem>
       )}
       {!shouldSkipAbout && (
         <MenuItem icon="info" onClick={onAboutAdsClick}>
-          {lang(message.canReport ? 'AboutRevenueSharingAds' : 'SponsoredMessageInfo')}
+          {lang(canReport ? 'AboutRevenueSharingAds' : 'SponsoredMessageInfo')}
         </MenuItem>
       )}
-      {message.canReport && onSponsoredReport && (
+      {canReport && onSponsoredReport && (
         <MenuItem icon="hand-stop" onClick={onSponsoredReport}>
           {lang('ReportAd')}
         </MenuItem>
@@ -90,4 +89,4 @@ const SponsoredMessageContextMenu: FC<OwnProps> = ({
   );
 };
 
-export default memo(SponsoredMessageContextMenu);
+export default memo(SponsoredContextMenu);

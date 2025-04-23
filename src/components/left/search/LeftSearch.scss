@@ -183,6 +183,11 @@
         text-overflow: ellipsis;
       }
     }
+
+    .search-sponsored-badge {
+      display: flex;
+      align-self: flex-start;
+    }
   }
 
   .search-section {

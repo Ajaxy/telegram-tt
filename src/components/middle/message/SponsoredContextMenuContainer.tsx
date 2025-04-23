@@ -2,17 +2,19 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiSponsoredMessage } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 
-import SponsoredMessageContextMenu from './SponsoredMessageContextMenu';
+import SponsoredContextMenu from './SponsoredContextMenu';
 
 export type OwnProps = {
   isOpen: boolean;
-  message: ApiSponsoredMessage;
+  randomId: string;
+  sponsorInfo?: string;
+  additionalInfo?: string;
+  canReport?: boolean;
   anchor: IAnchorPosition;
   triggerRef: React.RefObject<HTMLElement>;
   shouldSkipAbout?: boolean;
@@ -23,7 +25,10 @@ export type OwnProps = {
 
 const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
   isOpen,
-  message,
+  randomId,
+  sponsorInfo,
+  additionalInfo,
+  canReport,
   anchor,
   triggerRef,
   shouldSkipAbout,
@@ -34,8 +39,8 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
   const {
     openAboutAdsModal,
     showDialog,
-    reportSponsoredMessage,
-    hideSponsoredMessages,
+    reportSponsored,
+    hideSponsored,
   } = getActions();
 
   const { ref } = useShowTransition({
@@ -49,26 +54,31 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
   });
 
   const handleAboutAdsOpen = useLastCallback(() => {
-    openAboutAdsModal({ chatId: message.chatId });
+    openAboutAdsModal({
+      randomId,
+      additionalInfo,
+      canReport,
+      sponsorInfo,
+    });
     handleItemClick();
   });
 
   const handleSponsoredHide = useLastCallback(() => {
-    hideSponsoredMessages();
+    hideSponsored();
     handleItemClick();
   });
 
   const handleSponsorInfo = useLastCallback(() => {
     showDialog({
       data: {
-        message: [message.sponsorInfo, message.additionalInfo].join('\n'),
+        message: [sponsorInfo, additionalInfo].filter(Boolean).join('\n'),
       },
     });
     handleItemClick();
   });
 
   const handleReportSponsoredMessage = useLastCallback(() => {
-    reportSponsoredMessage({ peerId: message.chatId, randomId: message.randomId });
+    reportSponsored({ randomId });
     handleItemClick();
   });
 
@@ -78,11 +88,12 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps> = ({
 
   return (
     <div ref={ref} className="ContextMenuContainer">
-      <SponsoredMessageContextMenu
+      <SponsoredContextMenu
         isOpen={isOpen}
         anchor={anchor}
         triggerRef={triggerRef}
-        message={message}
+        canReport={canReport}
+        sponsorInfo={sponsorInfo}
         shouldSkipAbout={shouldSkipAbout}
         onClose={onClose}
         onCloseAnimationEnd={onClose}

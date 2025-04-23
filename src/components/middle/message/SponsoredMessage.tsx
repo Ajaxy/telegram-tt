@@ -38,7 +38,7 @@ import PeerColorWrapper from '../../common/PeerColorWrapper';
 import Button from '../../ui/Button';
 import MessageAppendix from './MessageAppendix';
 import Photo from './Photo';
-import SponsoredMessageContextMenuContainer from './SponsoredMessageContextMenuContainer.async';
+import SponsoredContextMenuContainer from './SponsoredContextMenuContainer.async';
 import Video from './Video';
 
 import './SponsoredMessage.scss';
@@ -72,10 +72,10 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   canAutoPlayMedia,
 }) => {
   const {
-    viewSponsoredMessage,
+    viewSponsored,
     openUrl,
-    hideSponsoredMessages,
-    clickSponsoredMessage,
+    hideSponsored,
+    clickSponsored,
     openMediaViewer,
     openAboutAdsModal,
   } = getActions();
@@ -103,11 +103,11 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     return shouldObserve ? observeIntersection(contentRef.current!, (target) => {
-      if (target.isIntersecting) {
-        viewSponsoredMessage({ peerId: chatId });
+      if (target.isIntersecting && message?.randomId) {
+        viewSponsored({ randomId: message.randomId });
       }
     }) : undefined;
-  }, [chatId, shouldObserve, observeIntersection, viewSponsoredMessage]);
+  }, [message?.randomId, shouldObserve, observeIntersection, viewSponsored]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     preventMessageInputBlur(e);
@@ -115,7 +115,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   };
 
   const handleHideSponsoredMessage = useLastCallback(() => {
-    hideSponsoredMessages();
+    hideSponsored();
   });
 
   const {
@@ -128,12 +128,13 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   const handleClick = useLastCallback(() => {
     if (!message) return;
 
-    clickSponsoredMessage({ isMedia: photo || isGif ? true : undefined, peerId: chatId });
+    clickSponsored({ randomId: message.randomId, isMedia: photo || isGif ? true : undefined });
     openUrl({ url: message.url, shouldSkipModal: true });
   });
 
   const handleOpenMedia = useLastCallback(() => {
-    clickSponsoredMessage({ isMedia: true, peerId: chatId });
+    if (!message) return;
+    clickSponsored({ randomId: message.randomId, isMedia: true });
     openMediaViewer({
       origin: MediaViewerOrigin.SponsoredMessage,
       chatId,
@@ -142,7 +143,13 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   });
 
   const handleOpenAboutAdsModal = useLastCallback(() => {
-    openAboutAdsModal({ chatId });
+    if (!message) return;
+    openAboutAdsModal({
+      randomId: message.randomId,
+      canReport: message.canReport,
+      additionalInfo: message.additionalInfo,
+      sponsorInfo: message.sponsorInfo,
+    });
   });
 
   const extraPadding = 0;
@@ -315,11 +322,14 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
         </div>
       </div>
       {contextMenuAnchor && (
-        <SponsoredMessageContextMenuContainer
+        <SponsoredContextMenuContainer
           isOpen={isContextMenuOpen}
           anchor={contextMenuAnchor}
           triggerRef={ref}
-          message={message!}
+          randomId={message.randomId}
+          canReport={message.canReport}
+          sponsorInfo={message.sponsorInfo}
+          additionalInfo={message.additionalInfo}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         />

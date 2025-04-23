@@ -1,11 +1,9 @@
 import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiSponsoredMessage } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { TableAboutData } from '../common/TableAboutModal';
 
-import { selectSponsoredMessage } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
@@ -16,7 +14,7 @@ import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
 import SafeLink from '../../common/SafeLink';
-import SponsoredMessageContextMenuContainer from '../../middle/message/SponsoredMessageContextMenuContainer';
+import SponsoredMessageContextMenuContainer from '../../middle/message/SponsoredContextMenuContainer';
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
 import TableAboutModal from '../common/TableAboutModal';
@@ -29,18 +27,21 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  message?: ApiSponsoredMessage;
   minLevelToRestrictAds?: number;
 };
 
-const AboutAdsModal = ({ message, minLevelToRestrictAds }: OwnProps & StateProps) => {
+const AboutAdsModal = ({ modal, minLevelToRestrictAds }: OwnProps & StateProps) => {
   const { closeAboutAdsModal } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const moreMenuRef = useRef<HTMLButtonElement>(null);
 
-  const isOpen = Boolean(message);
-  const isMonetizationSharing = message?.canReport;
+  const isOpen = Boolean(modal);
+  const renderingModal = useCurrentOrPrev(modal);
+  const {
+    canReport, randomId, additionalInfo, sponsorInfo,
+  } = renderingModal || {};
+  const isMonetizationSharing = canReport;
 
   const renderingIsNewDesign = useCurrentOrPrev(isMonetizationSharing);
 
@@ -139,12 +140,15 @@ const AboutAdsModal = ({ message, minLevelToRestrictAds }: OwnProps & StateProps
           buttonText={oldLang('RevenueSharingAdsUnderstood')}
           onClose={handleClose}
         />
-        {contextMenuAnchor && message && (
+        {contextMenuAnchor && randomId && (
           <SponsoredMessageContextMenuContainer
             isOpen={isContextMenuOpen}
             anchor={contextMenuAnchor}
             triggerRef={moreMenuRef}
-            message={message}
+            randomId={randomId}
+            additionalInfo={additionalInfo}
+            canReport={canReport}
+            sponsorInfo={sponsorInfo}
             shouldSkipAbout
             onItemClick={handleClose}
             onClose={handleContextMenuClose}
@@ -174,12 +178,10 @@ const AboutAdsModal = ({ message, minLevelToRestrictAds }: OwnProps & StateProps
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { modal }): StateProps => {
-    const message = modal?.chatId ? selectSponsoredMessage(global, modal.chatId) : undefined;
+  (global): StateProps => {
     const minLevelToRestrictAds = global.appConfig?.channelRestrictAdsLevelMin;
 
     return {
-      message,
       minLevelToRestrictAds,
     };
   },

@@ -685,6 +685,7 @@ export interface LangPair {
   'MessageRecommendedLabel': undefined;
   'SponsoredMessageAd': undefined;
   'SponsoredMessageAdWhatIsThis': undefined;
+  'SponsoredPeerBadge': undefined;
   'PremiumStickerTooltip': undefined;
   'ViewAction': undefined;
   'Loading': undefined;

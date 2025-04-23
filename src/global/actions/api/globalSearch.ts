@@ -33,11 +33,14 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
 
   if (query && !chatId) {
     void searchThrottled(async () => {
-      const result = await callApi('searchChats', { query });
+      const [searchResult, sponsoredResult] = await Promise.all([
+        callApi('searchChats', { query }),
+        callApi('fetchSponsoredPeer', { query }),
+      ]);
 
       global = getGlobal();
       const currentSearchQuery = selectCurrentGlobalSearchQuery(global, tabId);
-      if (!result || !currentSearchQuery || (query !== currentSearchQuery)) {
+      if (!searchResult || !currentSearchQuery || (query !== currentSearchQuery)) {
         global = updateGlobalSearchFetchingStatus(global, { chats: false }, tabId);
         setGlobal(global);
         return;
@@ -45,7 +48,7 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
 
       const {
         accountResultIds, globalResultIds,
-      } = result;
+      } = searchResult;
 
       global = updateGlobalSearchFetchingStatus(global, { chats: false }, tabId);
       global = updateGlobalSearch(global, {
@@ -56,6 +59,7 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
           ...selectTabState(global, tabId).globalSearch.globalResults,
           peerIds: globalResultIds,
         },
+        sponsoredPeer: sponsoredResult,
       }, tabId);
 
       setGlobal(global);

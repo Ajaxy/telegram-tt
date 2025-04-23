@@ -77,6 +77,7 @@
     "contacts.addContact",
     "contacts.resolvePhone",
     "contacts.editCloseFriends",
+    "contacts.getSponsoredPeers",
     "messages.getMessages",
     "messages.getDialogs",
     "messages.getHistory",

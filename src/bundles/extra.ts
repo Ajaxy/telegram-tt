@@ -58,8 +58,7 @@ export { default as ChatFolderModal } from '../components/left/ChatFolderModal';
 export { default as MuteChatModal } from '../components/left/MuteChatModal';
 
 export { default as ContextMenuContainer } from '../components/middle/message/ContextMenuContainer';
-export { default as SponsoredMessageContextMenuContainer }
-  from '../components/middle/message/SponsoredMessageContextMenuContainer';
+export { default as SponsoredContextMenuContainer } from '../components/middle/message/SponsoredContextMenuContainer';
 export { default as StickerSetModal } from '../components/common/StickerSetModal';
 export { default as CustomEmojiSetsModal } from '../components/common/CustomEmojiSetsModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';

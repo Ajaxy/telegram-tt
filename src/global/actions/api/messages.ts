@@ -84,6 +84,7 @@ import {
   updateChat,
   updateChatFullInfo,
   updateChatMessage,
+  updateGlobalSearch,
   updateListedIds,
   updateMessageTranslation,
   updateOutlyingLists,
@@ -135,7 +136,6 @@ import {
   selectReplyCanBeSentToChat,
   selectScheduledMessage,
   selectSendAs,
-  selectSponsoredMessage,
   selectTabState,
   selectThreadIdFromMessage,
   selectTopic,
@@ -1867,38 +1867,24 @@ addActionHandler('loadSponsoredMessages', async (global, actions, payload): Prom
   setGlobal(global);
 });
 
-addActionHandler('viewSponsoredMessage', (global, actions, payload): ActionReturnType => {
-  const { peerId } = payload;
-  const peer = selectPeer(global, peerId);
-  const message = selectSponsoredMessage(global, peerId);
-  if (!peer || !message) {
-    return;
-  }
+addActionHandler('viewSponsored', (global, actions, payload): ActionReturnType => {
+  const { randomId } = payload;
 
-  void callApi('viewSponsoredMessage', { random: message.randomId });
+  void callApi('viewSponsoredMessage', { random: randomId });
 });
 
-addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionReturnType => {
-  const { peerId, isMedia, isFullscreen } = payload;
-  const peer = selectPeer(global, peerId);
-  const message = selectSponsoredMessage(global, peerId);
-  if (!peer || !message) {
-    return;
-  }
+addActionHandler('clickSponsored', (global, actions, payload): ActionReturnType => {
+  const { randomId, isMedia, isFullscreen } = payload;
 
   void callApi('clickSponsoredMessage', {
-    random: message.randomId, isMedia, isFullscreen,
+    random: randomId, isMedia, isFullscreen,
   });
 });
 
-addActionHandler('reportSponsoredMessage', async (global, actions, payload): Promise<void> => {
+addActionHandler('reportSponsored', async (global, actions, payload): Promise<void> => {
   const {
     peerId, randomId, option = '', tabId = getCurrentTabId(),
   } = payload;
-  const peer = selectPeer(global, peerId);
-  if (!peer) {
-    return;
-  }
 
   const result = await callApi('reportSponsoredMessage', { randomId, option });
 
@@ -1918,7 +1904,13 @@ addActionHandler('reportSponsoredMessage', async (global, actions, payload): Pro
     actions.closeReportAdModal({ tabId });
 
     global = getGlobal();
-    global = deleteSponsoredMessage(global, peerId);
+    if (peerId) {
+      global = deleteSponsoredMessage(global, peerId);
+    } else {
+      global = updateGlobalSearch(global, {
+        sponsoredPeer: undefined,
+      }, tabId);
+    }
     setGlobal(global);
     return;
   }
@@ -1943,7 +1935,7 @@ addActionHandler('reportSponsoredMessage', async (global, actions, payload): Pro
   }
 });
 
-addActionHandler('hideSponsoredMessages', async (global, actions, payload): Promise<void> => {
+addActionHandler('hideSponsored', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload || {};
   const isCurrentUserPremium = selectIsCurrentUserPremium(global);
   if (!isCurrentUserPremium) {
