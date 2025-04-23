@@ -112,10 +112,14 @@ const MessageMeta: FC<OwnProps> = ({
 
   const viewsTitle = useMemo(() => {
     if (!message.viewsCount) return undefined;
-    let text = lang('MessageTooltipViews', { count: message.viewsCount }, { pluralValue: message.viewsCount });
+    let text = lang('MessageTooltipViews', {
+      count: lang.number(message.viewsCount),
+    }, { pluralValue: message.viewsCount });
     if (message.forwardsCount) {
       text += '\n';
-      text += lang('MessageTooltipForwards', { count: message.forwardsCount }, { pluralValue: message.forwardsCount });
+      text += lang('MessageTooltipForwards', {
+        count: lang.number(message.forwardsCount),
+      }, { pluralValue: message.forwardsCount });
     }
 
     return text;
@@ -160,7 +164,7 @@ const MessageMeta: FC<OwnProps> = ({
       {Boolean(message.viewsCount) && (
         <>
           <span className="message-views" title={viewsTitle}>
-            {formatIntegerCompact(message.viewsCount!)}
+            {formatIntegerCompact(lang, message.viewsCount!)}
           </span>
           <Icon name="channelviews" />
         </>
@@ -168,7 +172,7 @@ const MessageMeta: FC<OwnProps> = ({
       {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
         <span onClick={handleOpenThread} className="message-replies-wrapper" title={repliesTitle}>
           <span className="message-replies">
-            <AnimatedCounter text={formatIntegerCompact(repliesThreadInfo!.messagesCount!)} />
+            <AnimatedCounter text={formatIntegerCompact(lang, repliesThreadInfo!.messagesCount!)} />
           </span>
           <Icon name="reply-filled" />
         </span>

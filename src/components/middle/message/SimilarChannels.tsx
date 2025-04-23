@@ -19,6 +19,7 @@ import useTimeout from '../../../hooks/schedulers/useTimeout';
 import useAverageColor from '../../../hooks/useAverageColor';
 import useFlag from '../../../hooks/useFlag';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -203,13 +204,14 @@ const SimilarChannels = ({
 function SimilarChannel({ channel }: { channel: ApiChat }) {
   const { openChat } = getActions();
   const color = useAverageColor(channel, DEFAULT_BADGE_COLOR);
+  const lang = useLang();
 
   return (
     <div className={styles.item} onClick={() => openChat({ id: channel.id })}>
       <Avatar className={styles.avatar} key={channel.id} size="large" peer={channel} />
       <div style={`background: ${color}`} className={styles.badge}>
         <Icon name="user-filled" className={styles.icon} />
-        <span className={styles.membersCount}>{formatIntegerCompact(channel?.membersCount || 0)}
+        <span className={styles.membersCount}>{formatIntegerCompact(lang, channel?.membersCount || 0)}
         </span>
       </div>
       <span className={styles.channelTitle}>{channel.title}</span>

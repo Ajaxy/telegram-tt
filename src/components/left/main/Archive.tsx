@@ -118,7 +118,7 @@ const Archive: FC<OwnProps> = ({
           </div>
           <Badge
             className={styles.unreadCount}
-            text={archiveUnreadCount ? formatIntegerCompact(archiveUnreadCount) : undefined}
+            text={archiveUnreadCount ? formatIntegerCompact(lang, archiveUnreadCount) : undefined}
           />
         </div>
       </div>
@@ -143,7 +143,7 @@ const Archive: FC<OwnProps> = ({
             </div>
             <Badge
               className={styles.unreadCount}
-              text={archiveUnreadCount ? formatIntegerCompact(archiveUnreadCount) : undefined}
+              text={archiveUnreadCount ? formatIntegerCompact(lang, archiveUnreadCount) : undefined}
             />
           </div>
         </div>

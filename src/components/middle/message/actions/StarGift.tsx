@@ -145,7 +145,9 @@ const StarGiftAction = ({
       {action.gift.availabilityTotal && (
         <GiftRibbon
           color={backgroundColor || 'blue'}
-          text={lang('ActionStarGiftLimitedRibbon', { total: formatIntegerCompact(action.gift.availabilityTotal) })}
+          text={lang('ActionStarGiftLimitedRibbon', {
+            total: formatIntegerCompact(lang, action.gift.availabilityTotal),
+          })}
         />
       )}
       <div className={styles.info}>

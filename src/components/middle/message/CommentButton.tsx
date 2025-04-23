@@ -8,6 +8,7 @@ import { selectIsCurrentUserFrozen, selectPeer } from '../../../global/selectors
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
@@ -40,7 +41,8 @@ const CommentButton: FC<OwnProps> = ({
 
   const shouldRenderLoading = useAsyncRendering([isLoading], SHOW_LOADER_DELAY);
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const {
     originMessageId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds, originChannelId,
   } = threadInfo;
@@ -76,7 +78,7 @@ const CommentButton: FC<OwnProps> = ({
   function renderRecentRepliers() {
     return (
       Boolean(recentRepliers?.length) && (
-        <div className="recent-repliers" dir={lang.isRtl ? 'rtl' : 'ltr'}>
+        <div className="recent-repliers" dir={oldLang.isRtl ? 'rtl' : 'ltr'}>
           {recentRepliers!.map((peer) => (
             <Avatar
               key={peer.id}
@@ -91,16 +93,16 @@ const CommentButton: FC<OwnProps> = ({
 
   const hasUnread = Boolean(lastReadInboxMessageId && lastMessageId && lastReadInboxMessageId < lastMessageId);
 
-  const commentsText = messagesCount ? (lang('CommentsCount', '%COMMENTS_COUNT%', undefined, messagesCount) as string)
+  const commentsText = messagesCount ? (oldLang('CommentsCount', '%COMMENTS_COUNT%', undefined, messagesCount))
     .split('%')
     .map((s) => {
-      return (s === 'COMMENTS_COUNT' ? <AnimatedCounter text={formatIntegerCompact(messagesCount)} /> : s);
+      return (s === 'COMMENTS_COUNT' ? <AnimatedCounter text={formatIntegerCompact(lang, messagesCount)} /> : s);
     })
     : undefined;
 
   return (
     <div
-      data-cnt={formatIntegerCompact(messagesCount)}
+      data-cnt={formatIntegerCompact(lang, messagesCount)}
       className={buildClassName(
         'CommentButton',
         hasUnread && 'has-unread',
@@ -109,7 +111,7 @@ const CommentButton: FC<OwnProps> = ({
         isLoading && 'loading',
         asActionButton && 'as-action-button',
       )}
-      dir={lang.isRtl ? 'rtl' : 'ltr'}
+      dir={oldLang.isRtl ? 'rtl' : 'ltr'}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -124,7 +126,7 @@ const CommentButton: FC<OwnProps> = ({
       {!recentRepliers?.length && <Icon name="comments" />}
       {renderRecentRepliers()}
       <div className="label" dir="auto">
-        {messagesCount ? commentsText : lang('LeaveAComment')}
+        {messagesCount ? commentsText : oldLang('LeaveAComment')}
       </div>
       <div className="CommentButton_right">
         {isLoading && (

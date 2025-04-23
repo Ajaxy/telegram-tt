@@ -11,6 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import { formatFullDate } from '../../../util/dates/dateFormat';
 import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 
+import useLang from '../../../hooks/useLang';
 import useOldLang from '../../../hooks/useOldLang';
 
 import Icon from '../../common/icons/Icon';
@@ -121,7 +122,8 @@ const StatisticsOverview: FC<OwnProps> = ({
   className,
   subtitle,
 }) => {
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
   const renderOverviewItemValue = ({ change, percentage }: StatisticsOverviewItem) => {
     if (!change) {
@@ -132,7 +134,9 @@ const StatisticsOverview: FC<OwnProps> = ({
 
     return (
       <span className={buildClassName(styles.value, isChangeNegative && styles.negative)}>
-        {isChangeNegative ? `-${formatIntegerCompact(Math.abs(change))}` : `+${formatIntegerCompact(change)}`}
+        {isChangeNegative
+          ? `-${formatIntegerCompact(lang, Math.abs(change))}`
+          : `+${formatIntegerCompact(lang, change)}`}
         {percentage && (
           <>
             {' '}
@@ -156,7 +160,7 @@ const StatisticsOverview: FC<OwnProps> = ({
         <span className={styles.tableHeading}>
           ≈ ${integerUsdPart}<span className={styles.decimalUsdPart}>.{decimalUsdPart}</span>
         </span>
-        <h3 className={styles.tableHeading}>{lang(text)}</h3>
+        <h3 className={styles.tableHeading}>{oldLang(text)}</h3>
       </div>
     );
   };
@@ -177,7 +181,7 @@ const StatisticsOverview: FC<OwnProps> = ({
 
         {period && (
           <div className={styles.caption}>
-            {formatFullDate(lang, period.minDate * 1000)} — {formatFullDate(lang, period.maxDate * 1000)}
+            {formatFullDate(oldLang, period.minDate * 1000)} — {formatFullDate(oldLang, period.maxDate * 1000)}
           </div>
         )}
       </div>
@@ -202,7 +206,7 @@ const StatisticsOverview: FC<OwnProps> = ({
                     <b className={styles.tableValue}>
                       {`${cell.isApproximate ? '≈' : ''}${formatInteger(field)}`}
                     </b>
-                    <h3 className={styles.tableHeading}>{lang(cell.title)}</h3>
+                    <h3 className={styles.tableHeading}>{oldLang(cell.title)}</h3>
                   </td>
                 );
               }
@@ -218,7 +222,7 @@ const StatisticsOverview: FC<OwnProps> = ({
                     <span className={cell.withAbsoluteValue ? styles.tableSecondaryValue : styles.tableValue}>
                       {field.percentage}%
                     </span>
-                    <h3 className={styles.tableHeading}>{lang(cell.title)}</h3>
+                    <h3 className={styles.tableHeading}>{oldLang(cell.title)}</h3>
                   </td>
                 );
               }
@@ -226,11 +230,11 @@ const StatisticsOverview: FC<OwnProps> = ({
               return (
                 <td className={styles.tableCell}>
                   <b className={styles.tableValue}>
-                    {formatIntegerCompact(field.current)}
+                    {formatIntegerCompact(lang, field.current)}
                   </b>
                   {' '}
                   {renderOverviewItemValue(field)}
-                  <h3 className={styles.tableHeading}>{lang(cell.title)}</h3>
+                  <h3 className={styles.tableHeading}>{oldLang(cell.title)}</h3>
                 </td>
               );
             })}

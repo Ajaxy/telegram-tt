@@ -6,6 +6,7 @@ import { getAllNotificationsCount } from '../../util/folderManager';
 import { formatIntegerCompact } from '../../util/textFormat';
 
 import { useFolderManagerForUnreadCounters } from '../../hooks/useFolderManager';
+import useLang from '../../hooks/useLang';
 
 interface OwnProps {
   isForAppBadge?: boolean;
@@ -14,6 +15,8 @@ interface OwnProps {
 const UnreadCounter: FC<OwnProps> = ({ isForAppBadge }) => {
   useFolderManagerForUnreadCounters();
   const unreadNotificationsCount = getAllNotificationsCount();
+
+  const lang = useLang();
 
   useEffect(() => {
     if (isForAppBadge) {
@@ -26,7 +29,7 @@ const UnreadCounter: FC<OwnProps> = ({ isForAppBadge }) => {
   }
 
   return (
-    <div className="unread-count active">{formatIntegerCompact(unreadNotificationsCount)}</div>
+    <div className="unread-count active">{formatIntegerCompact(lang, unreadNotificationsCount)}</div>
   );
 };
 

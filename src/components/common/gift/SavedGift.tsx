@@ -69,7 +69,7 @@ const SavedGift = ({
   const ribbonText = gift.isPinned && gift.gift.type === 'starGiftUnique'
     ? lang('GiftSavedNumber', { number: gift.gift.number })
     : totalIssued
-      ? lang('ActionStarGiftLimitedRibbon', { total: formatIntegerCompact(totalIssued) })
+      ? lang('ActionStarGiftLimitedRibbon', { total: formatIntegerCompact(lang, totalIssued) })
       : undefined;
 
   const {

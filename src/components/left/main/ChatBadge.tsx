@@ -12,6 +12,7 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
 import useDerivedState from '../../../hooks/useDerivedState';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useOldLang from '../../../hooks/useOldLang';
 
@@ -52,6 +53,7 @@ const ChatBadge: FC<OwnProps> = ({
   const { requestMainWebView } = getActions();
 
   const oldLang = useOldLang();
+  const lang = useLang();
 
   const {
     unreadMentionsCount = 0, unreadReactionsCount = 0,
@@ -136,7 +138,7 @@ const ChatBadge: FC<OwnProps> = ({
 
     const unreadCountElement = (hasUnreadMark || unreadCount) ? (
       <div className={className}>
-        {!hasUnreadMark && <AnimatedCounter text={formatIntegerCompact(unreadCount!)} />}
+        {!hasUnreadMark && <AnimatedCounter text={formatIntegerCompact(lang, unreadCount!)} />}
       </div>
     ) : undefined;
 

@@ -20,6 +20,7 @@ import { formatIntegerCompact } from '../../util/textFormat';
 
 import useFlag from '../../hooks/useFlag';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
@@ -67,7 +68,8 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   const chatsById = getGlobal().chats.byId;
   const usersById = getGlobal().users.byId;
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
   const [isClosing, startClosing, stopClosing] = useFlag(false);
   const [chosenTab, setChosenTab] = useState<ApiReaction | undefined>(undefined);
   const canShowFilters = reactors && reactions && reactors.count >= MIN_REACTIONS_COUNT_FOR_FILTERS
@@ -143,11 +145,11 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
       isOpen={isOpen && !isClosing}
       onClose={handleClose}
       className="ReactorListModal narrow"
-      title={lang('Reactions')}
+      title={oldLang('Reactions')}
       onCloseAnimationEnd={handleCloseAnimationEnd}
     >
       {canShowFilters && (
-        <div className="Reactions" dir={lang.isRtl ? 'rtl' : undefined}>
+        <div className="Reactions" dir={oldLang.isRtl ? 'rtl' : undefined}>
           <Button
             className={buildClassName(!chosenTab && 'chosen')}
             size="tiny"
@@ -156,7 +158,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             onClick={() => setChosenTab(undefined)}
           >
             <Icon name="heart" />
-            {Boolean(reactors?.count) && formatIntegerCompact(reactors.count)}
+            {Boolean(reactors?.count) && formatIntegerCompact(lang, reactors.count)}
           </Button>
           {allReactions.map((reaction) => {
             const count = reactions?.results
@@ -175,14 +177,14 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                   className="reaction-filter-emoji"
                   availableReactions={availableReactions}
                 />
-                {Boolean(count) && formatIntegerCompact(count)}
+                {Boolean(count) && formatIntegerCompact(lang, count)}
               </Button>
             );
           })}
         </div>
       )}
 
-      <div dir={lang.isRtl ? 'rtl' : undefined} className="reactor-list-wrapper">
+      <div dir={oldLang.isRtl ? 'rtl' : undefined} className="reactor-list-wrapper">
         {viewportIds?.length ? (
           <InfiniteScroll
             className="reactor-list custom-scroll"
@@ -212,7 +214,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                         <FullNameTitle peer={peer} withEmojiStatus />
                         <span className="status" dir="auto">
                           <Icon name="heart-outline" className="status-icon" />
-                          {formatDateAtTime(lang, r.addedDate * 1000)}
+                          {formatDateAtTime(oldLang, r.addedDate * 1000)}
                         </span>
                       </div>
                       {r.reaction && (
@@ -238,7 +240,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                         userId={peerId}
                         noStatusOrTyping
                         avatarSize="medium"
-                        status={seenByUser ? formatDateAtTime(lang, seenByUser * 1000) : undefined}
+                        status={seenByUser ? formatDateAtTime(oldLang, seenByUser * 1000) : undefined}
                         statusIcon="message-read"
                       />
                     </ListItem>,
@@ -255,7 +257,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
         isText
         onClick={handleClose}
       >
-        {lang('Close')}
+        {oldLang('Close')}
       </Button>
     </Modal>
   );
