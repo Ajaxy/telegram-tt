@@ -692,7 +692,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         isFullScreen && styles.fullScreen,
       )}
       dialogStyle={supportMultiTabMode ? draggableStyle : undefined}
-      dialogContent={isDraggingEnabled ? renderResizeHandles() : undefined}
+      dialogContent={isDraggingEnabled && !isMinimizedState ? renderResizeHandles() : undefined}
       isOpen={isOpen}
       isLowStackPriority
       onClose={handleModalClose}
