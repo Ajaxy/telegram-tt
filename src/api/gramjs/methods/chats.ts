@@ -2027,13 +2027,13 @@ export async function fetchChannelRecommendations({ chat }: { chat?: ApiChat }) 
   };
 }
 
-export async function updatePaidMessagesPrice({
+export function updatePaidMessagesPrice({
   chat, paidMessagesStars,
 }: {
   chat?: ApiChat; paidMessagesStars: number;
 }) {
   return invokeRequest(new GramJs.channels.UpdatePaidMessagesPrice({
-    channel: chat && buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+    channel: chat && buildInputChannel(chat.id, chat.accessHash),
     sendPaidMessagesStars: BigInt(paidMessagesStars),
   }), {
     shouldReturnTrue: true,

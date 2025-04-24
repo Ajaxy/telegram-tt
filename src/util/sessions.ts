@@ -14,6 +14,9 @@ export function hasStoredSession() {
     return true;
   }
 
+  const slotData = loadSlotSession(ACCOUNT_SLOT);
+  if (slotData) return Boolean(slotData.dcId);
+
   if (!ACCOUNT_SLOT) {
     const legacyAuthJson = localStorage.getItem(SESSION_LEGACY_USER_KEY);
     if (legacyAuthJson) {
@@ -27,8 +30,7 @@ export function hasStoredSession() {
     }
   }
 
-  const slotData = loadSlotSession(ACCOUNT_SLOT);
-  return Boolean(slotData && slotData.dcId);
+  return false;
 }
 
 export function storeSession(sessionData: ApiSessionData) {

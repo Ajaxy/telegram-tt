@@ -552,8 +552,9 @@
 
   &:not(.custom-shape) .emoji:not(.custom-emoji) {
     display: inline-block;
-    width: 1.25rem;
-    background-size: 1.25rem;
+    width: 1.25em;
+    height: 1.25em;
+    background-size: 1.25em;
     color: transparent;
     margin-inline-end: 1px;
     vertical-align: text-bottom;
