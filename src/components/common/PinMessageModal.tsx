@@ -55,8 +55,8 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
       chatId,
       messageId,
       isUnpin: false,
-      isOneSide: shouldPinForAll,
-      isSilent: shouldPinForAll,
+      isOneSide: !shouldPinForAll,
+      isSilent: !shouldPinForAll,
     });
     onClose();
   }, [chatId, messageId, onClose, shouldPinForAll]);
