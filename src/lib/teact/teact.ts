@@ -56,6 +56,7 @@ export interface VirtualElementComponent {
 export interface VirtualElementFragment {
   type: VirtualType.Fragment;
   children: VirtualElementChildren;
+  placeholderTarget?: Comment;
 }
 
 export type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;

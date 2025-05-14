@@ -69,7 +69,7 @@ const AccountMenuItems = ({
   }, [accounts, currentCount, totalLimit]);
 
   return (
-    <div>
+    <>
       {Object.entries(accounts || {})
         .sort(([, account]) => (account.userId === currentUser.id ? -1 : 1))
         .map(([slot, account], index, arr) => {
@@ -116,7 +116,7 @@ const AccountMenuItems = ({
           {lang('MenuAddAccount')}
         </MenuItem>
       )}
-    </div>
+    </>
   );
 };
 
