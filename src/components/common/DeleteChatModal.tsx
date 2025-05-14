@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
@@ -17,6 +17,7 @@ import {
 import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import renderText from './helpers/renderText';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useOldLang from '../../hooks/useOldLang';
 
 import Button from '../ui/Button';
@@ -68,58 +69,57 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     deleteChannel,
     deleteChatUser,
     blockUser,
+    deleteChat,
   } = getActions();
 
   const lang = useOldLang();
   const chatTitle = getChatTitle(lang, chat);
 
-  const handleDeleteForAll = useCallback(() => {
+  const handleDeleteForAll = useLastCallback(() => {
     deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
 
     onClose();
-  }, [chat.id, onClose]);
+  });
 
-  const handleDeleteAndStop = useCallback(() => {
+  const handleDeleteAndStop = useLastCallback(() => {
     deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
     blockUser({ userId: chat.id });
 
     onClose();
-  }, [chat.id, onClose]);
+  });
 
-  const handleDeleteChat = useCallback(() => {
+  const handleDeleteChat = useLastCallback(() => {
     if (isSavedDialog) {
       deleteSavedHistory({ chatId: chat.id });
     } else if (isPrivateChat) {
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if (isBasicGroup) {
-      deleteChatUser({ chatId: chat.id, userId: currentUserId! });
-      deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
+      if (chat.isCreator) {
+        deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
+        deleteChat({ chatId: chat.id });
+      } else {
+        deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
+        deleteChatUser({ chatId: chat.id, userId: currentUserId! });
+      }
     } else if ((isChannel || isSuperGroup) && !chat.isCreator) {
       leaveChannel({ chatId: chat.id });
     } else if ((isChannel || isSuperGroup) && chat.isCreator) {
       deleteChannel({ chatId: chat.id });
     }
     onClose();
-  }, [
-    isPrivateChat,
-    isBasicGroup,
-    isChannel,
-    isSuperGroup,
-    currentUserId,
-    chat.isCreator,
-    chat.id,
-    isSavedDialog,
-    onClose,
-  ]);
+  });
 
-  const handleLeaveChat = useCallback(() => {
+  const handleLeaveChat = useLastCallback(() => {
     if (isChannel || isSuperGroup) {
       leaveChannel({ chatId: chat.id });
       onClose();
+    } else if (isBasicGroup && chat.isCreator) {
+      deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
+      deleteChatUser({ chatId: chat.id, userId: currentUserId! });
     } else {
       handleDeleteChat();
     }
-  }, [chat.id, handleDeleteChat, isChannel, isSuperGroup, leaveChannel, onClose]);
+  });
 
   function renderHeader() {
     return (

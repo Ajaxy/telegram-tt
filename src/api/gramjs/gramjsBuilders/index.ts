@@ -117,7 +117,7 @@ export function buildInputChannel(channelId: string, accessHash?: string): GramJ
 }
 
 export function buildInputChat(chatId: string) {
-  return BigInt(chatId);
+  return BigInt(chatId.slice(1));
 }
 
 export function buildInputPaidReactionPrivacy(isPrivate?: boolean, peerId?: string): GramJs.TypePaidReactionPrivacy {
