@@ -234,7 +234,7 @@ export type ApiUpdateMessage = {
   message: Partial<ApiMessage>;
   poll?: ApiPoll;
   shouldForceReply?: boolean;
-  shouldCreateMessageIfNeeded?: true;
+  isFromNew?: true;
 };
 
 export type ApiUpdateScheduledMessage = {
@@ -243,6 +243,7 @@ export type ApiUpdateScheduledMessage = {
   id: number;
   message: Partial<ApiMessage>;
   poll?: ApiPoll;
+  isFromNew?: true;
 };
 
 export type ApiUpdateQuickReplyMessage = {

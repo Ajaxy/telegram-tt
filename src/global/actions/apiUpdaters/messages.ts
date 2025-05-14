@@ -254,22 +254,61 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
     }
 
+    case 'updateScheduledMessage': {
+      const {
+        chatId, id, message, poll, isFromNew,
+      } = update;
+
+      const currentMessage = selectScheduledMessage(global, chatId, id);
+      if (!currentMessage) {
+        if (isFromNew) {
+          actions.apiUpdate({
+            '@type': 'newScheduledMessage',
+            id: update.id,
+            chatId: update.chatId,
+            message: update.message as ApiMessage,
+            poll: update.poll,
+          });
+        }
+        return;
+      }
+
+      global = updateWithLocalMedia(global, chatId, id, message, true);
+      const ids = Object.keys(selectChatScheduledMessages(global, chatId) || {}).map(Number).sort((a, b) => b - a);
+      global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', ids);
+
+      const threadId = selectThreadIdFromMessage(global, currentMessage);
+      if (threadId !== MAIN_THREAD_ID) {
+        const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
+        global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', threadScheduledIds.sort((a, b) => b - a));
+      }
+      if (poll) {
+        global = updatePoll(global, poll.id, poll);
+      }
+
+      setGlobal(global);
+
+      break;
+    }
+
     case 'updateMessage': {
       const {
-        chatId, id, message, poll, shouldCreateMessageIfNeeded, shouldForceReply,
+        chatId, id, message, poll, isFromNew, shouldForceReply,
       } = update;
 
       const currentMessage = selectChatMessage(global, chatId, id);
 
-      if (shouldCreateMessageIfNeeded && !currentMessage) {
-        actions.apiUpdate({
-          '@type': 'newMessage',
-          id: update.id,
-          chatId: update.chatId,
-          message: update.message,
-          poll: update.poll,
-          shouldForceReply,
-        });
+      if (!currentMessage) {
+        if (isFromNew) {
+          actions.apiUpdate({
+            '@type': 'newMessage',
+            id: update.id,
+            chatId: update.chatId,
+            message: update.message,
+            poll: update.poll,
+            shouldForceReply,
+          });
+        }
         return;
       }
 
@@ -289,34 +328,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = clearMessageTranslation(global, chatId, id);
       }
 
-      if (poll) {
-        global = updatePoll(global, poll.id, poll);
-      }
-
-      setGlobal(global);
-
-      break;
-    }
-
-    case 'updateScheduledMessage': {
-      const {
-        chatId, id, message, poll,
-      } = update;
-
-      const currentMessage = selectScheduledMessage(global, chatId, id);
-      if (!currentMessage) {
-        return;
-      }
-
-      global = updateWithLocalMedia(global, chatId, id, message, true);
-      const ids = Object.keys(selectChatScheduledMessages(global, chatId) || {}).map(Number).sort((a, b) => b - a);
-      global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', ids);
-
-      const threadId = selectThreadIdFromMessage(global, currentMessage);
-      if (threadId !== MAIN_THREAD_ID) {
-        const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
-        global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', threadScheduledIds.sort((a, b) => b - a));
-      }
       if (poll) {
         global = updatePoll(global, poll.id, poll);
       }
