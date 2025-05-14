@@ -2,7 +2,7 @@ import type { ApiMessage, ApiUpdateChat } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
+import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { isLocalMessageId } from '../../../util/keys/messageKey';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
@@ -171,7 +171,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const hasMention = Boolean(update.message.id && update.message.hasUnreadMention);
 
-      if (!isLocal) {
+      if (!isLocal || chat.id === SERVICE_NOTIFICATIONS_USER_ID) {
         global = updateChat(global, update.chatId, {
           unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
         });
