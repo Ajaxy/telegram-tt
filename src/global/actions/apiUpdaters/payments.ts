@@ -151,6 +151,25 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       }
 
+      if (inputInvoice?.type === 'stargiftResale') {
+        const starGiftModalState = selectTabState(global, tabId).giftInfoModal;
+
+        if (starGiftModalState) {
+          actions.showNotification({
+            message: {
+              key: 'StarsGiftBought',
+            },
+            tabId,
+          });
+          if (starGiftModalState.peerId) {
+            actions.reloadPeerSavedGifts({ peerId: starGiftModalState.peerId });
+          }
+          actions.reloadPeerSavedGifts({ peerId: inputInvoice.peerId });
+          actions.requestConfetti({ withStars: true, tabId });
+          actions.closeGiftInfoModal({ tabId });
+        }
+      }
+
       break;
     }
 

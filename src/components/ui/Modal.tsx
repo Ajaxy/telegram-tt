@@ -17,6 +17,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 
 import Icon from '../common/icons/Icon';
 import Button, { type OwnProps as ButtonProps } from './Button';
+import ModalStarBalanceBar from './ModalStarBalanceBar';
 import Portal from './Portal';
 
 import './Modal.scss';
@@ -46,6 +47,7 @@ export type OwnProps = {
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
   onEnter?: () => void;
+  withBalanceBar?: Boolean;
 };
 
 const Modal: FC<OwnProps> = ({
@@ -70,6 +72,7 @@ const Modal: FC<OwnProps> = ({
   onClose,
   onCloseAnimationEnd,
   onEnter,
+  withBalanceBar,
 }) => {
   const {
     ref: modalRef,
@@ -167,6 +170,7 @@ const Modal: FC<OwnProps> = ({
     noBackdrop && 'transparent-backdrop',
     isSlim && 'slim',
     isLowStackPriority && 'low-priority',
+    withBalanceBar && 'with-balance-bar',
   );
 
   return (
@@ -177,6 +181,11 @@ const Modal: FC<OwnProps> = ({
         tabIndex={-1}
         role="dialog"
       >
+        {withBalanceBar && (
+          <ModalStarBalanceBar
+            isModalOpen={isOpen}
+          />
+        )}
         <div className="modal-container">
           <div className="modal-backdrop" onClick={!noBackdropClose ? onClose : undefined} />
           <div className="modal-dialog" ref={dialogRef} style={dialogStyle}>

@@ -241,13 +241,14 @@ export function updater(update: Update) {
           });
         }
       } else if (action instanceof GramJs.MessageActionGroupCall) {
-        if (!action.duration && action.call) {
+        const groupCall = action.call instanceof GramJs.InputGroupCall ? action.call : undefined;
+        if (!action.duration && groupCall) {
           sendApiUpdate({
             '@type': 'updateGroupCallChatId',
             chatId: message.chatId,
             call: {
-              id: action.call.id.toString(),
-              accessHash: action.call.accessHash.toString(),
+              id: groupCall.id.toString(),
+              accessHash: groupCall.accessHash.toString(),
             },
           });
         }
@@ -905,11 +906,14 @@ export function updater(update: Update) {
       presentation: Boolean(update.presentation),
     });
   } else if (update instanceof GramJs.UpdateGroupCallParticipants) {
-    sendApiUpdate({
-      '@type': 'updateGroupCallParticipants',
-      groupCallId: getGroupCallId(update.call),
-      participants: update.participants.map(buildApiGroupCallParticipant),
-    });
+    const groupCallId = getGroupCallId(update.call);
+    if (groupCallId) {
+      sendApiUpdate({
+        '@type': 'updateGroupCallParticipants',
+        groupCallId,
+        participants: update.participants.map(buildApiGroupCallParticipant),
+      });
+    }
   } else if (update instanceof GramJs.UpdatePendingJoinRequests) {
     sendApiUpdate({
       '@type': 'updatePendingJoinRequests',

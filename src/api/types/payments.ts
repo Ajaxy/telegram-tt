@@ -360,6 +360,12 @@ export type ApiInputInvoiceStarGift = {
   shouldUpgrade?: true;
 };
 
+export type ApiInputInvoiceStarGiftResale = {
+  type: 'stargiftResale';
+  slug: string;
+  peerId: string;
+};
+
 export type ApiInputInvoiceStarsGiveaway = {
   type: 'starsgiveaway';
   chatId: string;
@@ -395,7 +401,7 @@ export type ApiInputInvoiceStarGiftTransfer = {
 export type ApiInputInvoice = ApiInputInvoiceMessage | ApiInputInvoiceSlug | ApiInputInvoiceGiveaway
 | ApiInputInvoiceGiftCode | ApiInputInvoicePremiumGiftStars | ApiInputInvoiceStars | ApiInputInvoiceStarsGift
 | ApiInputInvoiceStarsGiveaway | ApiInputInvoiceStarGift | ApiInputInvoiceChatInviteSubscription
-| ApiInputInvoiceStarGiftUpgrade | ApiInputInvoiceStarGiftTransfer;
+| ApiInputInvoiceStarGiftUpgrade | ApiInputInvoiceStarGiftTransfer | ApiInputInvoiceStarGiftResale;
 
 /* Used for Invoice request */
 export type ApiRequestInputInvoiceMessage = {
@@ -441,6 +447,12 @@ export type ApiRequestInputInvoiceStarGift = {
   shouldUpgrade?: true;
 };
 
+export type ApiRequestInputInvoiceStarGiftResale = {
+  type: 'stargiftResale';
+  slug: string;
+  peer: ApiPeer;
+};
+
 export type ApiRequestInputInvoiceChatInviteSubscription = {
   type: 'chatInviteSubscription';
   hash: string;
@@ -461,4 +473,5 @@ export type ApiRequestInputInvoiceStarGiftTransfer = {
 export type ApiRequestInputInvoice = ApiRequestInputInvoiceMessage | ApiRequestInputInvoiceSlug
 | ApiRequestInputInvoiceGiveaway | ApiRequestInputInvoiceStars | ApiRequestInputInvoiceStarsGiveaway
 | ApiRequestInputInvoiceChatInviteSubscription | ApiRequestInputInvoiceStarGift | ApiRequestInputInvoiceStarGiftUpgrade
-| ApiRequestInputInvoiceStarGiftTransfer | ApiRequestInputInvoicePremiumGiftStars;
+| ApiRequestInputInvoiceStarGiftTransfer | ApiRequestInputInvoicePremiumGiftStars
+| ApiRequestInputInvoiceStarGiftResale;

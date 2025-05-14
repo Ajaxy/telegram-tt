@@ -66,11 +66,22 @@ const SavedGift = ({
   const canManage = peerId === currentUserId || hasAdminRights;
 
   const totalIssued = getTotalGiftAvailability(gift.gift);
-  const ribbonText = gift.isPinned && gift.gift.type === 'starGiftUnique'
-    ? lang('GiftSavedNumber', { number: gift.gift.number })
-    : totalIssued
-      ? lang('ActionStarGiftLimitedRibbon', { total: formatIntegerCompact(lang, totalIssued) })
-      : undefined;
+  const starGift = gift.gift;
+  const starGiftUnique = starGift.type === 'starGiftUnique' ? starGift : undefined;
+  const ribbonText = (() => {
+    if (starGiftUnique?.resellPriceInStars) {
+      return lang('GiftRibbonSale');
+    }
+    if (gift.isPinned && starGiftUnique) {
+      return lang('GiftSavedNumber', { number: starGiftUnique.number });
+    }
+    if (totalIssued) {
+      return lang('ActionStarGiftLimitedRibbon', { total: formatIntegerCompact(lang, totalIssued) });
+    }
+    return undefined;
+  })();
+
+  const ribbonColor = starGiftUnique?.resellPriceInStars ? 'green' : 'blue';
 
   const {
     isContextMenuOpen, contextMenuAnchor,
@@ -150,7 +161,7 @@ const SavedGift = ({
       )}
       {ribbonText && (
         <GiftRibbon
-          color="blue"
+          color={ribbonColor}
           text={ribbonText}
         />
       )}

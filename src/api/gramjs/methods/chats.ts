@@ -543,6 +543,8 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
   const userStatusesById = buildApiUserStatuses(result.users);
   const chats = result.chats.map((chat) => buildApiChatFromPreview(chat)).filter(Boolean);
 
+  const groupCall = call instanceof GramJs.InputGroupCall ? call : undefined;
+
   return {
     fullInfo: {
       ...(chatPhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(chatPhoto) }),
@@ -552,7 +554,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       canViewMembers: true,
       botCommands,
       inviteLink,
-      groupCallId: call?.id.toString(),
+      groupCallId: groupCall?.id.toString(),
       enabledReactions: buildApiChatReactions(availableReactions),
       reactionsLimit,
       requestsPending,
@@ -563,11 +565,11 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     },
     chats,
     userStatusesById,
-    groupCall: call ? {
+    groupCall: groupCall ? {
       chatId,
       isLoaded: false,
-      id: call.id.toString(),
-      accessHash: call.accessHash.toString(),
+      id: groupCall.id.toString(),
+      accessHash: groupCall.accessHash.toString(),
       connectionState: 'disconnected',
       participantsCount: 0,
       version: 0,
@@ -678,6 +680,8 @@ async function getFullChannelInfo(
     ...adminStatusesById,
   };
 
+  const groupCall = call instanceof GramJs.InputGroupCall ? call : undefined;
+
   return {
     fullInfo: {
       ...(chatPhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(chatPhoto) }),
@@ -700,7 +704,7 @@ async function getFullChannelInfo(
       members,
       kickedMembers,
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
-      groupCallId: call ? String(call.id) : undefined,
+      groupCallId: groupCall ? String(groupCall.id) : undefined,
       linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'channel') : undefined,
       botCommands,
       enabledReactions: buildApiChatReactions(availableReactions),
@@ -725,11 +729,11 @@ async function getFullChannelInfo(
     },
     chats,
     userStatusesById: statusesById,
-    groupCall: call ? {
+    groupCall: groupCall ? {
       chatId: id,
       isLoaded: false,
-      id: call.id.toString(),
-      accessHash: call?.accessHash.toString(),
+      id: groupCall.id.toString(),
+      accessHash: groupCall?.accessHash.toString(),
       participants: {},
       version: 0,
       participantsCount: 0,

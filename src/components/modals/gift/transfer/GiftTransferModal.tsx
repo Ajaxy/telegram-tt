@@ -14,7 +14,6 @@ import { unique } from '../../../../util/iteratees';
 import { formatStarsAsIcon, formatStarsAsText } from '../../../../util/localization/format';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { getGiftAttributes } from '../../../common/helpers/gifts';
-import { REM } from '../../../common/helpers/mediaDimensions';
 import sortChatIds from '../../../common/helpers/sortChatIds';
 
 import useCurrentOrPrev from '../../../../hooks/useCurrentOrPrev';
@@ -23,15 +22,10 @@ import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import usePeerSearch from '../../../../hooks/usePeerSearch';
 
-import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
-import Avatar from '../../../common/Avatar';
-import Icon from '../../../common/icons/Icon';
+import GiftTransferPreview from '../../../common/gift/GiftTransferPreview';
 import PeerPicker from '../../../common/pickers/PeerPicker';
 import PickerModal from '../../../common/pickers/PickerModal';
-import RadialPatternBackground from '../../../common/profile/RadialPatternBackground';
 import ConfirmDialog from '../../../ui/ConfirmDialog';
-
-import styles from './GiftTransferModal.module.scss';
 
 export type OwnProps = {
   modal: TabState['giftTransferModal'];
@@ -43,9 +37,6 @@ type StateProps = {
 };
 
 type Categories = 'withdraw';
-
-const AVATAR_SIZE = 4 * REM;
-const GIFT_STICKER_SIZE = 3 * REM;
 
 const GiftTransferModal = ({
   modal, contactIds, currentUserId,
@@ -175,27 +166,12 @@ const GiftTransferModal = ({
             ) : lang('GiftTransferConfirmButtonFree')}
           confirmHandler={handleTransfer}
         >
-          <div className={styles.header}>
-            <div className={styles.giftPreview}>
-              <RadialPatternBackground
-                className={styles.backdrop}
-                backgroundColors={[giftAttributes.backdrop!.centerColor, giftAttributes.backdrop!.edgeColor]}
-                patternColor={giftAttributes.backdrop?.patternColor}
-                patternIcon={giftAttributes.pattern?.sticker}
-              />
-              <AnimatedIconFromSticker
-                className={styles.sticker}
-                size={GIFT_STICKER_SIZE}
-                sticker={giftAttributes.model?.sticker}
-              />
-            </div>
-            <Icon name="next" className={styles.arrow} />
-            <Avatar
+          {renderingSelectedPeer && (
+            <GiftTransferPreview
               peer={renderingSelectedPeer}
-              size={AVATAR_SIZE}
-              className={styles.avatar}
+              gift={uniqueGift}
             />
-          </div>
+          )}
           <p>
             {renderingModal?.gift.transferStars
               ? lang('GiftTransferConfirmDescription', {

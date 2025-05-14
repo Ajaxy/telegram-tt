@@ -1,5 +1,6 @@
 import type { ApiSavedStarGift, ApiStarGiftUnique } from '../../../api/types';
 import type { StarGiftCategory } from '../../../types';
+import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -144,12 +145,13 @@ addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise
   const peer = selectPeer(global, peerId);
   if (!peer) return;
 
+  global = getGlobal();
+
   const currentGifts = selectPeerSavedGifts(global, peerId, tabId);
   const localNextOffset = currentGifts?.nextOffset;
 
   if (!shouldRefresh && currentGifts && !localNextOffset) return; // Already loaded all
 
-  global = getGlobal();
   const fetchingFilter = selectGiftProfileFilter(global, peerId, tabId);
 
   const result = await callApi('fetchSavedStarGifts', {
@@ -169,6 +171,18 @@ addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise
 
   global = replacePeerSavedGifts(global, peerId, newGifts, result.nextOffset, tabId);
   setGlobal(global);
+});
+
+addActionHandler('reloadPeerSavedGifts', (global, actions, payload): ActionReturnType => {
+  const {
+    peerId,
+  } = payload;
+
+  Object.values(global.byTabId).forEach((tabState) => {
+    if (selectPeerSavedGifts(global, peerId, tabState.id)) {
+      actions.loadPeerSavedGifts({ peerId, shouldRefresh: true, tabId: tabState.id });
+    }
+  });
 });
 
 addActionHandler('loadStarsSubscriptions', async (global): Promise<void> => {
@@ -346,4 +360,25 @@ addActionHandler('toggleSavedGiftPinned', async (global, actions, payload): Prom
       actions.loadPeerSavedGifts({ peerId, shouldRefresh: true, tabId: tabState.id });
     }
   });
+});
+
+addActionHandler('updateStarGiftPrice', async (global, actions, payload): Promise<void> => {
+  const {
+    gift, price,
+  } = payload;
+
+  const requestSavedGift = getRequestInputSavedStarGift(global, gift);
+
+  if (!requestSavedGift) {
+    return;
+  }
+
+  const result = await callApi('updateStarGiftPrice', {
+    inputSavedGift: requestSavedGift,
+    price,
+  });
+
+  if (!result) return;
+
+  actions.reloadPeerSavedGifts({ peerId: global.currentUserId! });
 });

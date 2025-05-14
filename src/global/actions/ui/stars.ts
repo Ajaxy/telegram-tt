@@ -265,7 +265,22 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
   }, tabId);
 });
 
+addActionHandler('openGiftResalePriceComposerModal', (global, actions, payload): ActionReturnType => {
+  const {
+    gift, peerId, tabId = getCurrentTabId(),
+  } = payload;
+
+  return updateTabState(global, {
+    giftResalePriceComposerModal: {
+      peerId,
+      gift,
+    },
+  }, tabId);
+});
+
 addTabStateResetterAction('closeGiftInfoModal', 'giftInfoModal');
+
+addTabStateResetterAction('closeGiftResalePriceComposerModal', 'giftResalePriceComposerModal');
 
 addTabStateResetterAction('closeGiftUpgradeModal', 'giftUpgradeModal');
 

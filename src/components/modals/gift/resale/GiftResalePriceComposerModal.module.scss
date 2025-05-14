@@ -1,0 +1,19 @@
+.descriptionContainer {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 2rem;
+  margin-inline: 1rem;
+  display: flex;
+}
+
+.descriptionPrice {
+  margin-left: auto;
+}
+
+.inputPrice {
+  margin-top: 0.5rem;
+
+  :global(.input-group) {
+    margin-bottom: 0.25rem;
+  }
+}

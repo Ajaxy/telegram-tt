@@ -2,14 +2,20 @@ import React, { memo, useMemo } from '../../../lib/teact/teact';
 
 import type {
   ApiStarGiftAttributeBackdrop, ApiStarGiftAttributeModel, ApiStarGiftAttributePattern,
+  ApiStarsAmount,
 } from '../../../api/types';
 
+import {
+  formatStarsTransactionAmount,
+} from '../../../global/helpers/payments';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
 
 import { useTransitionActiveKey } from '../../../hooks/animations/useTransitionActiveKey';
+import useLang from '../../../hooks/useLang';
 
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
+import StarIcon from '../../common/icons/StarIcon';
 import RadialPatternBackground from '../../common/profile/RadialPatternBackground';
 import Transition from '../../ui/Transition';
 
@@ -22,6 +28,7 @@ type OwnProps = {
   title?: string;
   subtitle?: string;
   className?: string;
+  resellPrice?: ApiStarsAmount;
 };
 
 const STICKER_SIZE = 120;
@@ -33,7 +40,9 @@ const UniqueGiftHeader = ({
   title,
   subtitle,
   className,
+  resellPrice,
 }: OwnProps) => {
+  const lang = useLang();
   const activeKey = useTransitionActiveKey([modelAttribute, backdropAttribute, patternAttribute]);
   const subtitleColor = backdropAttribute?.textColor;
 
@@ -71,6 +80,14 @@ const UniqueGiftHeader = ({
       {subtitle && (
         <p className={styles.subtitle} style={buildStyle(subtitleColor && `color: ${subtitleColor}`)}>
           {subtitle}
+        </p>
+      )}
+      {resellPrice && (
+        <p className={styles.amount}>
+          <span>
+            {formatStarsTransactionAmount(lang, resellPrice)}
+          </span>
+          <StarIcon type="gold" size="middle" />
         </p>
       )}
     </div>

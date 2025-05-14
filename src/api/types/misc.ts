@@ -246,6 +246,9 @@ export interface ApiAppConfig {
   freezeSinceDate?: number;
   freezeUntilDate?: number;
   freezeAppealUrl?: string;
+  starsStargiftResaleAmountMin?: number;
+  starsStargiftResaleAmountMax?: number;
+  starsStargiftResaleCommissionPermille?: number;
 }
 
 export interface ApiConfig {

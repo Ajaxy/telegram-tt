@@ -19,6 +19,7 @@ import FrozenAccountModal from './frozenAccount/FrozenAccountModal.async';
 import PremiumGiftModal from './gift/GiftModal.async';
 import GiftInfoModal from './gift/info/GiftInfoModal.async';
 import GiftRecipientPicker from './gift/recipient/GiftRecipientPicker.async';
+import GiftResalePriceComposerModal from './gift/resale/GiftResalePriceComposerModal.async';
 import GiftStatusInfoModal from './gift/status/GiftStatusInfoModal.async';
 import GiftTransferModal from './gift/transfer/GiftTransferModal.async';
 import GiftUpgradeModal from './gift/upgrade/GiftUpgradeModal.async';
@@ -69,6 +70,7 @@ type ModalKey = keyof Pick<TabState,
 'isGiftRecipientPickerOpen' |
 'isWebAppsCloseConfirmationModalOpen' |
 'giftInfoModal' |
+'giftResalePriceComposerModal' |
 'suggestedStatusModal' |
 'emojiStatusAccessModal' |
 'locationAccessModal' |
@@ -120,6 +122,7 @@ const MODALS: ModalRegistry = {
   isGiftRecipientPickerOpen: GiftRecipientPicker,
   isWebAppsCloseConfirmationModalOpen: WebAppsCloseConfirmationModal,
   giftInfoModal: GiftInfoModal,
+  giftResalePriceComposerModal: GiftResalePriceComposerModal,
   suggestedStatusModal: SuggestedStatusModal,
   emojiStatusAccessModal: EmojiStatusAccessModal,
   locationAccessModal: LocationAccessModal,

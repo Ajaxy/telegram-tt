@@ -1235,6 +1235,7 @@ export interface LangPair {
   'GiftInfoWear': undefined;
   'GiftInfoTakeOff': undefined;
   'GiftInfoTransfer': undefined;
+  'GiftInfoUnlist': undefined;
   'GiftTransferTitle': undefined;
   'GiftTransferTON': undefined;
   'GiftTransferConfirmButtonFree': undefined;
@@ -1502,6 +1503,13 @@ export interface LangPair {
   'ActionPaidMessageGroupPriceFree': undefined;
   'NotificationTitleNotSupportedInFrozenAccount': undefined;
   'NotificationMessageNotSupportedInFrozenAccount': undefined;
+  'GiftRibbonSale': undefined;
+  'StarsGiftBought': undefined;
+  'GiftSellTitle': undefined;
+  'Sell': undefined;
+  'InputPlaceholderGiftResalePrice': undefined;
+  'StarGiftSaleTransaction': undefined;
+  'StarGiftPurchaseTransaction': undefined;
   'ContextMenuItemMention': undefined;
 }
 
@@ -2409,6 +2417,48 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'ApiMessageActionPaidMessagesRefundedIncoming': {
     'user': V;
+    'stars': V;
+  };
+  'NotificationGiftIsSale': {
+    'gift': V;
+  };
+  'NotificationGiftIsUnlist': {
+    'gift': V;
+  };
+  'ButtonBuyGift': {
+    'stars': V;
+  };
+  'GiftInfoBuyGift': {
+    'user': V;
+  };
+  'ButtonSellGift': {
+    'stars': V;
+  };
+  'DescriptionComposerGiftResalePrice': {
+    'stars': V;
+  };
+  'DescriptionComposerGiftMinimumPrice': {
+    'stars': V;
+  };
+  'ApiMessageMessageActionResaleStarGiftUniqueOutgoing': {
+    'stars': V;
+    'gift': V;
+  };
+  'ApiMessageMessageActionResaleStarGiftUniqueIncoming': {
+    'stars': V;
+    'gift': V;
+  };
+  'ModalStarsBalanceBarDescription': {
+    'stars': V;
+  };
+  'NotificationGiftCanResellAt': {
+    'date': V;
+  };
+  'NotificationGiftCanTransferAt': {
+    'date': V;
+  };
+  'GiftBuyConfirmDescription': {
+    'gift': V;
     'stars': V;
   };
   'ComposerTitleForwardFrom': {

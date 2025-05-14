@@ -1,0 +1,46 @@
+.root {
+  position: absolute;
+  top: 0rem;
+  left: 50%;
+  background-color: var(--color-background);
+  color: var(--color-text);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 0.5rem 1.25rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  z-index: var(--z-modal);
+
+  :global(.confirm) & {
+    z-index: var(--z-modal-confirm);
+  }
+
+  :global(.low-priority) & {
+    z-index: var(--z-modal-low-priority);
+  }
+
+  transform: translate(-50%, -1rem);
+
+  transition: transform 0.2s ease, opacity 0.2s ease;
+
+  :global(body:not(.no-page-transitions)) .dots {
+    transition: none;
+    transform: none !important;
+  }
+
+  &:not(:global(.open)) {
+    transform: translate(-50%, 0);
+  }
+
+  &:not(:global(.closing)) {
+    transform: translate(-50%, 1rem);
+  }
+}
+
+.starIcon {
+  margin-inline-start: 0.125rem !important;
+}

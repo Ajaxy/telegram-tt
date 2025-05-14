@@ -187,6 +187,9 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   }
   if (action instanceof GramJs.MessageActionGroupCall) {
     const { call, duration } = action;
+    if (!(call instanceof GramJs.InputGroupCall)) {
+      return UNSUPPORTED_ACTION;
+    }
     return {
       mediaType: 'action',
       type: 'groupCall',
@@ -199,6 +202,9 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   }
   if (action instanceof GramJs.MessageActionInviteToGroupCall) {
     const { call, users } = action;
+    if (!(call instanceof GramJs.InputGroupCall)) {
+      return UNSUPPORTED_ACTION;
+    }
     return {
       mediaType: 'action',
       type: 'inviteToGroupCall',
@@ -211,6 +217,9 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   }
   if (action instanceof GramJs.MessageActionGroupCallScheduled) {
     const { call, scheduleDate } = action;
+    if (!(call instanceof GramJs.InputGroupCall)) {
+      return UNSUPPORTED_ACTION;
+    }
     return {
       mediaType: 'action',
       type: 'groupCallScheduled',
@@ -393,6 +402,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
   if (action instanceof GramJs.MessageActionStarGiftUnique) {
     const {
       upgrade, transferred, saved, refunded, gift, canExportAt, transferStars, fromId, peer, savedId,
+      resaleStars,
     } = action;
 
     const starGift = buildApiStarGift(gift);
@@ -411,6 +421,7 @@ export function buildApiMessageAction(action: GramJs.TypeMessageAction): ApiMess
       fromId: fromId && getApiChatIdFromMtpPeer(fromId),
       peerId: peer && getApiChatIdFromMtpPeer(peer),
       savedId: savedId && buildApiPeerId(savedId, 'user'),
+      resaleStars: resaleStars?.toJSNumber(),
     };
   }
   if (action instanceof GramJs.MessageActionPaidMessagesPrice) {

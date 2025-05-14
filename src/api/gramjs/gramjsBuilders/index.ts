@@ -687,6 +687,16 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
       });
     }
 
+    case 'stargiftResale': {
+      const {
+        peer, slug,
+      } = invoice;
+      return new GramJs.InputInvoiceStarGiftResale({
+        toId: buildInputPeer(peer.id, peer.accessHash),
+        slug,
+      });
+    }
+
     case 'stargift': {
       const {
         peer, shouldHideName, giftId, message, shouldUpgrade,

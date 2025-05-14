@@ -21,6 +21,22 @@ export function getRequestInputInvoice<T extends GlobalState>(
 ): ApiRequestInputInvoice | undefined {
   if (inputInvoice.type === 'slug') return inputInvoice;
 
+  if (inputInvoice.type === 'stargiftResale') {
+    const {
+      slug,
+      peerId,
+    } = inputInvoice;
+    const peer = selectPeer(global, peerId);
+
+    if (!peer) return undefined;
+
+    return {
+      type: 'stargiftResale',
+      slug,
+      peer,
+    };
+  }
+
   if (inputInvoice.type === 'stargift') {
     const {
       peerId, shouldHideName, giftId, message, shouldUpgrade,

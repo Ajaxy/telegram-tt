@@ -7,9 +7,12 @@ import type {
 
 import { DEFAULT_STATUS_ICON_ID, TME_LINK_PREFIX } from '../../../config';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { formatDateAtTime } from '../../../util/dates/dateFormat';
+import { getServerTime } from '../../../util/serverTime';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import useOldLang from '../../../hooks/useOldLang';
 
 import MenuItem from '../../ui/MenuItem';
 
@@ -32,13 +35,17 @@ const GiftMenuItems = ({
     showNotification,
     openChatWithDraft,
     openGiftTransferModal,
+    openGiftResalePriceComposerModal,
     openGiftStatusInfoModal,
     setEmojiStatus,
     toggleSavedGiftPinned,
     changeGiftVisibility,
+    updateStarGiftPrice,
+    closeGiftInfoModal,
   } = getActions();
 
   const lang = useLang();
+  const oldLang = useOldLang();
 
   const isSavedGift = typeGift && 'gift' in typeGift;
   const savedGift = isSavedGift ? typeGift : undefined;
@@ -62,6 +69,7 @@ const GiftMenuItems = ({
   const isGiftUnique = gift && gift.type === 'starGiftUnique';
   const canTakeOff = isGiftUnique && currenUniqueEmojiStatusSlug === gift.slug;
   const canWear = userCollectibleStatus && !canTakeOff;
+  const giftResalePrice = isGiftUnique ? gift.resellPriceInStars : undefined;
 
   const hasPinOptions = canManage && savedGift && !savedGift.isUnsaved && isGiftUnique;
 
@@ -84,8 +92,46 @@ const GiftMenuItems = ({
   });
 
   const handleTransfer = useLastCallback(() => {
-    if (savedGift?.gift.type !== 'starGiftUnique') return;
+    if (!savedGift || savedGift?.gift.type !== 'starGiftUnique') return;
+
+    if (savedGift.canTransferAt && savedGift.canTransferAt > getServerTime()) {
+      showNotification({
+        message: {
+          key: 'NotificationGiftCanTransferAt',
+          variables: { date: formatDateAtTime(oldLang, savedGift.canTransferAt * 1000) },
+        },
+      });
+      return;
+    }
+
     openGiftTransferModal({ gift: savedGift });
+  });
+
+  const handleSell = useLastCallback(() => {
+    if (!savedGift) return;
+    if (savedGift.canResellAt && savedGift.canResellAt > getServerTime()) {
+      showNotification({
+        message: {
+          key: 'NotificationGiftCanResellAt',
+          variables: { date: formatDateAtTime(oldLang, savedGift.canResellAt * 1000) },
+        },
+      });
+      return;
+    }
+    openGiftResalePriceComposerModal({ peerId, gift: savedGift });
+  });
+
+  const handleUnsell = useLastCallback(() => {
+    if (!savedGift || savedGift.gift.type !== 'starGiftUnique' || !savedGift.inputGift) return;
+    closeGiftInfoModal();
+    updateStarGiftPrice({ gift: savedGift.inputGift, price: 0 });
+    showNotification({
+      icon: 'unlist-outline',
+      message: {
+        key: 'NotificationGiftIsUnlist',
+        variables: { gift: lang('GiftUnique', { title: savedGift.gift.title, number: savedGift.gift.number }) },
+      },
+    });
   });
 
   const handleWear = useLastCallback(() => {
@@ -123,18 +169,28 @@ const GiftMenuItems = ({
           {lang('GiftInfoTransfer')}
         </MenuItem>
       )}
+      {canManage && isGiftUnique && !giftResalePrice && (
+        <MenuItem icon="sell-outline" onClick={handleSell}>
+          {lang('Sell')}
+        </MenuItem>
+      )}
+      {canManage && isGiftUnique && giftResalePrice && (
+        <MenuItem icon="unlist-outline" onClick={handleUnsell}>
+          {lang('GiftInfoUnlist')}
+        </MenuItem>
+      )}
       {canManage && savedGift && (
         <MenuItem icon={savedGift.isUnsaved ? 'eye-outline' : 'eye-crossed-outline'} onClick={handleTriggerVisibility}>
           {lang(savedGift.isUnsaved ? 'GiftActionShow' : 'GiftActionHide')}
         </MenuItem>
       )}
       {canWear && (
-        <MenuItem icon="crown-wear" onClick={handleWear}>
+        <MenuItem icon="crown-wear-outline" onClick={handleWear}>
           {lang('GiftInfoWear')}
         </MenuItem>
       )}
       {canTakeOff && (
-        <MenuItem icon="crown-take-off" onClick={handleTakeOff}>
+        <MenuItem icon="crown-take-off-outline" onClick={handleTakeOff}>
           {lang('GiftInfoTakeOff')}
         </MenuItem>
       )}

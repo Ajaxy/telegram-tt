@@ -536,6 +536,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
   const {
     date, id, peer, stars, description, photo, title, refund, extendedMedia, failed, msgId, pending, gift, reaction,
     subscriptionPeriod, stargift, giveawayPostId, starrefCommissionPermille, stargiftUpgrade, paidMessages,
+    stargiftResale,
   } = transaction;
 
   if (photo) {
@@ -567,6 +568,7 @@ export function buildApiStarsTransaction(transaction: GramJs.StarsTransaction): 
     giveawayPostId,
     starRefCommision,
     isGiftUpgrade: stargiftUpgrade,
+    isGiftResale: stargiftResale,
     paidMessages,
   };
 }

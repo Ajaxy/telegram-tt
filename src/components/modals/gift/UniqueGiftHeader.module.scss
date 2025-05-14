@@ -19,6 +19,17 @@
   z-index: -1;
 }
 
+.amount {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1.125rem;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.325;
+  margin-bottom: 0.125rem;
+  align-items: center;
+  color: white;
+}
+
 .sticker {
   margin-top: 2rem;
 }

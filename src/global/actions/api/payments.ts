@@ -1,5 +1,6 @@
 import type {
-  ApiInputInvoice, ApiInputInvoicePremiumGiftStars, ApiInputInvoiceStarGift, ApiRequestInputInvoice,
+  ApiInputInvoice, ApiInputInvoicePremiumGiftStars, ApiInputInvoiceStarGift, ApiInputInvoiceStarGiftResale,
+  ApiRequestInputInvoice,
 } from '../../../api/types';
 import type { ApiCredentials } from '../../../components/payment/PaymentModal';
 import type { RegularLangFnParameters } from '../../../util/localization';
@@ -141,6 +142,20 @@ addActionHandler('sendStarGift', (global, actions, payload): ActionReturnType =>
   };
 
   payInputStarInvoice(global, inputInvoice, gift.stars, tabId);
+});
+
+addActionHandler('buyStarGift', (global, actions, payload): ActionReturnType => {
+  const {
+    slug, stars, tabId = getCurrentTabId(),
+  } = payload;
+
+  const inputInvoice: ApiInputInvoiceStarGiftResale = {
+    type: 'stargiftResale',
+    slug,
+    peerId: global.currentUserId!,
+  };
+
+  payInputStarInvoice(global, inputInvoice, stars, tabId);
 });
 
 addActionHandler('sendPremiumGiftByStars', (global, actions, payload): ActionReturnType => {
@@ -1184,6 +1199,7 @@ addActionHandler('processStarGiftWithdrawal', async (global, actions, payload): 
 
 function handlePaymentFormError(error: string, tabId: number) {
   if (error === 'SLUG_INVALID') {
+    // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
     getActions().showNotification({
       message: {
         key: 'PaymentInvoiceNotFound',
@@ -1193,5 +1209,6 @@ function handlePaymentFormError(error: string, tabId: number) {
     return;
   }
 
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   getActions().showDialog({ data: { message: error, hasErrorKey: true }, tabId });
 }

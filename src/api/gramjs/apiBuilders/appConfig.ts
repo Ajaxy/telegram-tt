@@ -95,6 +95,9 @@ export interface GramJsAppConfig extends LimitsConfig {
   freeze_since_date?: number;
   freeze_until_date?: number;
   freeze_appeal_url?: string;
+  stars_stargift_resale_amount_max?: number;
+  stars_stargift_resale_amount_min?: number;
+  stars_stargift_resale_commission_permille?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -191,5 +194,8 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     freezeSinceDate: appConfig.freeze_since_date,
     freezeUntilDate: appConfig.freeze_until_date,
     freezeAppealUrl: appConfig.freeze_appeal_url,
+    starsStargiftResaleAmountMin: appConfig.stars_stargift_resale_amount_min,
+    starsStargiftResaleAmountMax: appConfig.stars_stargift_resale_amount_max,
+    starsStargiftResaleCommissionPermille: appConfig.stars_stargift_resale_commission_permille,
   };
 }

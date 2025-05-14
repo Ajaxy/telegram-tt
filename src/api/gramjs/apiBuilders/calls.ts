@@ -102,7 +102,8 @@ export function buildApiGroupCall(groupCall: GramJs.TypeGroupCall): ApiGroupCall
 }
 
 export function getGroupCallId(groupCall: GramJs.TypeInputGroupCall) {
-  return groupCall.id.toString();
+  if (groupCall instanceof GramJs.InputGroupCall) return groupCall.id.toString();
+  return undefined;
 }
 
 export function buildPhoneCall(call: GramJs.TypePhoneCall): ApiPhoneCall {

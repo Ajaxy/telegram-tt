@@ -764,6 +764,11 @@ export type TabState = {
     gift: ApiSavedStarGift | ApiStarGift;
   };
 
+  giftResalePriceComposerModal?: {
+    peerId?: string;
+    gift: ApiSavedStarGift | ApiStarGift;
+  };
+
   giftTransferModal?: {
     gift: ApiSavedStarGift;
   };

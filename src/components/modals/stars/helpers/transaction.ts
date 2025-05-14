@@ -18,6 +18,13 @@ export function getTransactionTitle(oldLang: OldLangFn, lang: LangFn, transactio
       },
     );
   }
+
+  if (transaction.isGiftResale) {
+    return isNegativeStarsAmount(transaction.stars)
+      ? lang('StarGiftSaleTransaction')
+      : lang('StarGiftPurchaseTransaction');
+  }
+
   if (transaction.starRefCommision) {
     return oldLang('StarTransactionCommission', formatPercent(transaction.starRefCommision));
   }

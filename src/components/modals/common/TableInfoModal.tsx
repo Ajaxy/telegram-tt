@@ -32,6 +32,8 @@ type OwnProps = {
   hasBackdrop?: boolean;
   onClose: NoneToVoidFunction;
   onButtonClick?: NoneToVoidFunction;
+  withBalanceBar?: boolean;
+  isLowStackPriority?: true;
 };
 
 const TableInfoModal = ({
@@ -47,6 +49,8 @@ const TableInfoModal = ({
   hasBackdrop,
   onClose,
   onButtonClick,
+  withBalanceBar,
+  isLowStackPriority,
 }: OwnProps) => {
   const { openChat } = getActions();
   const handleOpenChat = useLastCallback((peerId: string) => {
@@ -66,6 +70,8 @@ const TableInfoModal = ({
       className={className}
       contentClassName={styles.content}
       onClose={onClose}
+      withBalanceBar={withBalanceBar}
+      isLowStackPriority={isLowStackPriority}
     >
       {headerAvatarPeer && (
         <Avatar peer={headerAvatarPeer} size="jumbo" className={styles.avatar} />

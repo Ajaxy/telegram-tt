@@ -54,6 +54,16 @@
     align-items: center;
   }
 
+  &.with-balance-bar {
+    .modal-container {
+      top: 5.5rem;
+    }
+    .modal-dialog {
+      margin-top: 0;
+      max-height: calc(100vh - 7.5rem);
+    }
+  }
+
   .modal-backdrop {
     position: fixed;
     top: 0;

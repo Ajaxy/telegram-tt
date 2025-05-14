@@ -85,7 +85,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
     }
 
     const {
-      giveawayPostId, photo, stars, isGiftUpgrade, starGift,
+      giveawayPostId, photo, stars, isGiftUpgrade, starGift, isGiftResale,
     } = transaction;
 
     const gift = transaction?.starGift;
@@ -131,6 +131,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
           modelAttribute={giftAttributes!.model!}
           title={gift.title}
           subtitle={lang('GiftInfoCollectible', { number: gift.number })}
+          resellPrice={transaction.stars}
         />
       </div>
     );
@@ -194,7 +195,7 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
 
     const tableData: TableData = [];
 
-    if (transaction && !transaction.paidMessages) {
+    if (transaction && !transaction.paidMessages && !isGiftResale) {
       tableData.push([
         oldLang('StarsTransaction.StarRefReason.Title'),
         oldLang('StarsTransaction.StarRefReason.Program'),
@@ -208,12 +209,21 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
       ]);
     }
 
+    if (isGiftResale) {
+      tableData.push([
+        oldLang('StarGiftReason'),
+        isNegativeStarsAmount(transaction.stars)
+          ? lang('StarGiftSaleTransaction')
+          : lang('StarGiftPurchaseTransaction'),
+      ]);
+    }
+
     let peerLabel;
     if (isGiftUpgrade) {
       peerLabel = oldLang('Stars.Transaction.GiftFrom');
     } else if (isNegativeStarsAmount(stars) || transaction.isMyGift) {
       peerLabel = oldLang('Stars.Transaction.To');
-    } else if (transaction.starRefCommision && !transaction.paidMessages) {
+    } else if (transaction.starRefCommision && !transaction.paidMessages && !isGiftResale) {
       peerLabel = oldLang('StarsTransaction.StarRefReason.Miniapp');
     } else if (peerId) {
       peerLabel = oldLang('Star.Transaction.From');

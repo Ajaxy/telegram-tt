@@ -331,6 +331,21 @@ export function toggleSavedGiftPinned({
   });
 }
 
+export function updateStarGiftPrice({
+  inputSavedGift,
+  price,
+}: {
+  inputSavedGift: ApiRequestInputSavedStarGift;
+  price: number;
+}) {
+  return invokeRequest(new GramJs.payments.UpdateStarGiftPrice({
+    stargift: buildInputSavedStarGift(inputSavedGift),
+    resellStars: bigInt(price),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
 export async function fetchStarGiftWithdrawalUrl({
   inputGift,
   password,
