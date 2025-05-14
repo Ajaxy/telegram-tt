@@ -93,7 +93,7 @@
 
   &.mention, &.reaction {
     width: 1.5rem;
-    padding: 0.25rem;
+    padding: 0.25rem !important;
 
     .icon {
       font-size: 1rem;
