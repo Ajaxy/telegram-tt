@@ -33,9 +33,9 @@
   height: 1.5rem;
   background: var(--color-gray);
   border-radius: 0.75rem;
-  padding: 0 0.4375rem;
+  padding: 0 0.4375rem !important;
   color: white;
-  font-size: 0.875rem;
+  font-size: 0.875rem !important;
   line-height: 1.5625rem;
   font-weight: var(--font-weight-medium);
   text-align: center;
@@ -111,7 +111,6 @@
   }
 
   &.miniapp {
-    padding: 0.25rem 1rem 0.375rem 1rem !important;
     z-index: calc(var(--z-chat-ripple) + 1);
   }
 }
