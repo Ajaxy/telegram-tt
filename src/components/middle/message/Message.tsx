@@ -735,7 +735,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const text = textMessage && getMessageContent(textMessage).text;
   const isInvertedMedia = Boolean(message.isInvertedMedia);
 
-  const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
+  const { replyToMsgId, replyToPeerId } = messageReplyInfo || {};
   const { peerId: storyReplyPeerId, storyId: storyReplyId } = storyReplyInfo || {};
 
   useEffect(() => {
@@ -836,7 +836,7 @@ const Message: FC<OwnProps & StateProps> = ({
     replyToMsgId,
     replyMessage,
     message.id,
-    shouldHideReply || isQuote || isReplyPrivate,
+    shouldHideReply || isReplyPrivate,
   );
 
   useEnsureStory(
