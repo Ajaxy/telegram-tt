@@ -26,7 +26,6 @@ import RangeSlider from '../../ui/RangeSlider';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -46,11 +45,10 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
   timeFormat,
   theme,
   shouldUseSystemTheme,
-  onScreenSelect,
   onReset,
 }) => {
   const {
-    setSharedSettingOption,
+    setSharedSettingOption, openSettingsScreen,
   } = getActions();
 
   const lang = useLang();
@@ -146,7 +144,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
           icon="photo"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.GeneralChatBackground)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.GeneralChatBackground })}
         >
           {lang('ChatBackground')}
         </ListItem>

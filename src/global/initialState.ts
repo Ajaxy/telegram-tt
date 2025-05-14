@@ -1,6 +1,6 @@
 import type { PerformanceType } from '../types';
 import type { GlobalState, SharedState, TabState } from './types';
-import { NewChatMembersProgress } from '../types';
+import { LeftColumnContent, NewChatMembersProgress, SettingsScreens } from '../types';
 
 import {
   ANIMATION_LEVEL_DEFAULT,
@@ -360,6 +360,11 @@ export const INITIAL_TAB_STATE: TabState = {
   globalSearch: {},
 
   userSearch: {},
+
+  leftColumn: {
+    contentKey: LeftColumnContent.ChatList,
+    settingsScreen: SettingsScreens.Main,
+  },
 
   middleSearch: {
     byChatThreadKey: {},

@@ -1368,6 +1368,7 @@ export interface LangPair {
   'GiftFilterHidden': undefined;
   'GiftSearchEmpty': undefined;
   'GiftSearchReset': undefined;
+  'SetUp2FA': undefined;
   'CheckPasswordTitle': undefined;
   'CheckPasswordPlaceholder': undefined;
   'CheckPasswordDescription': undefined;

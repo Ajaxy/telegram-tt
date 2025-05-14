@@ -29,7 +29,6 @@ import PrivacyLockedOption from './PrivacyLockedOption';
 type OwnProps = {
   isActive?: boolean;
   onReset: VoidFunction;
-  onScreenSelect: (screen: SettingsScreens) => void;
 };
 
 type StateProps = {
@@ -52,9 +51,8 @@ function PrivacyMessages({
   isCurrentUserPremium,
   noPaidReactionsForUsersCount,
   onReset,
-  onScreenSelect,
 }: OwnProps & StateProps) {
-  const { updateGlobalPrivacySettings } = getActions();
+  const { updateGlobalPrivacySettings, openSettingsScreen } = getActions();
   const oldLang = useOldLang();
   const lang = useLang();
 
@@ -133,7 +131,7 @@ function PrivacyMessages({
           icon="delete-user"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => {
-            onScreenSelect(SettingsScreens.PrivacyNoPaidMessages);
+            openSettingsScreen({ screen: SettingsScreens.PrivacyNoPaidMessages });
           }}
         >
           <div className="multiline-item full-size">

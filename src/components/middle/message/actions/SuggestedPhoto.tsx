@@ -67,7 +67,7 @@ const SuggestedPhotoAction = ({
       title: lang('ActionSuggestedPhotoUpdatedTitle'),
       message: lang('ActionSuggestedPhotoUpdatedDescription'),
       action: {
-        action: 'requestNextSettingsScreen',
+        action: 'openSettingsScreen',
         payload: {
           screen: SettingsScreens.Main,
         },

@@ -1,7 +1,7 @@
 import { addCallback } from '../../../lib/teact/teactn';
 
 import type { ActionReturnType, GlobalState } from '../../types';
-import { type LangCode, SettingsScreens } from '../../../types';
+import { type LangCode, LeftColumnContent, SettingsScreens } from '../../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { IS_IOS } from '../../../util/browser/windowEnvironment';
@@ -17,7 +17,7 @@ import {
 } from '../../index';
 import { replaceSettings, updateSharedSettings, updateThemeSettings } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { selectCanAnimateInterface, selectChatFolder } from '../../selectors';
+import { selectCanAnimateInterface, selectChatFolder, selectTabState } from '../../selectors';
 import { selectSharedSettings } from '../../selectors/sharedState';
 
 let prevGlobal: GlobalState | undefined;
@@ -142,11 +142,34 @@ addActionHandler('setThemeSettings', (global, actions, payload): ActionReturnTyp
   return updateThemeSettings(global, theme, settings);
 });
 
-addActionHandler('requestNextSettingsScreen', (global, actions, payload): ActionReturnType => {
-  const { screen, foldersAction, tabId = getCurrentTabId() } = payload;
+addActionHandler('requestNextFoldersAction', (global, actions, payload): ActionReturnType => {
+  const { foldersAction, tabId = getCurrentTabId() } = payload;
   return updateTabState(global, {
-    nextSettingsScreen: screen,
     nextFoldersAction: foldersAction,
+  }, tabId);
+});
+
+addActionHandler('openLeftColumnContent', (global, actions, payload): ActionReturnType => {
+  const { contentKey = LeftColumnContent.ChatList, tabId = getCurrentTabId() } = payload;
+  const tabState = selectTabState(global, tabId);
+  return updateTabState(global, {
+    leftColumn: {
+      ...tabState.leftColumn,
+      contentKey,
+    },
+  }, tabId);
+});
+
+addActionHandler('openSettingsScreen', (global, actions, payload): ActionReturnType => {
+  const { screen = SettingsScreens.Main, tabId = getCurrentTabId() } = payload;
+  const tabState = selectTabState(global, tabId);
+  // Force settings only if new screen is passed, do not on resets
+  if (payload.screen) actions.openLeftColumnContent({ contentKey: LeftColumnContent.Settings, tabId });
+  return updateTabState(global, {
+    leftColumn: {
+      ...tabState.leftColumn,
+      settingsScreen: screen,
+    },
   }, tabId);
 });
 
@@ -156,8 +179,11 @@ addActionHandler('openEditChatFolder', (global, actions, payload): ActionReturnT
   const chatFolder = selectChatFolder(global, folderId);
   if (!chatFolder) return;
 
-  actions.requestNextSettingsScreen({
+  actions.openSettingsScreen({
     screen: isOnlyInvites ? SettingsScreens.FoldersEditFolderInvites : SettingsScreens.FoldersEditFolderFromChatList,
+    tabId,
+  });
+  actions.requestNextFoldersAction({
     foldersAction: {
       type: 'editFolder',
       payload: chatFolder,
@@ -178,7 +204,7 @@ addActionHandler('openShareChatFolderModal', (global, actions, payload): ActionR
     return undefined;
   }
 
-  if (!noRequestNextScreen) actions.requestNextSettingsScreen({ screen: SettingsScreens.FoldersShare, tabId });
+  if (!noRequestNextScreen) actions.openSettingsScreen({ screen: SettingsScreens.FoldersShare, tabId });
 
   return updateTabState(global, {
     shareFolderScreen: {
@@ -192,7 +218,7 @@ addActionHandler('openShareChatFolderModal', (global, actions, payload): ActionR
 addActionHandler('closeShareChatFolderModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
-  actions.requestNextSettingsScreen({ screen: undefined, tabId });
+  actions.openSettingsScreen({ screen: undefined, tabId });
 
   return updateTabState(global, {
     shareFolderScreen: undefined,

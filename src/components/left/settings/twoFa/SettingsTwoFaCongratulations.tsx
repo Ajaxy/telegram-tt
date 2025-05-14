@@ -1,5 +1,6 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
 import { SettingsScreens } from '../../../../types';
 
@@ -7,6 +8,7 @@ import { STICKER_SIZE_TWO_FA } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useOldLang from '../../../../hooks/useOldLang';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
@@ -14,18 +16,18 @@ import Button from '../../../ui/Button';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
 const SettingsTwoFaCongratulations: FC<OwnProps> = ({
-  isActive, onReset, onScreenSelect,
+  isActive, onReset,
 }) => {
+  const { openSettingsScreen } = getActions();
   const lang = useOldLang();
 
-  const handleClick = useCallback(() => {
-    onScreenSelect(SettingsScreens.Privacy);
-  }, [onScreenSelect]);
+  const handleClick = useLastCallback(() => {
+    openSettingsScreen({ screen: SettingsScreens.Privacy });
+  });
 
   useHistoryBack({
     isActive,

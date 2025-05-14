@@ -150,7 +150,6 @@ export type OwnProps = {
   currentScreen: SettingsScreens;
   foldersState: FoldersState;
   foldersDispatch: FolderEditDispatch;
-  onScreenSelect: (screen: SettingsScreens) => void;
   shouldSkipTransition?: boolean;
   onReset: (forceReturnToChatList?: true | Event) => void;
 };
@@ -160,11 +159,10 @@ const Settings: FC<OwnProps> = ({
   currentScreen,
   foldersState,
   foldersDispatch,
-  onScreenSelect,
   onReset,
   shouldSkipTransition,
 }) => {
-  const { closeShareChatFolderModal } = getActions();
+  const { closeShareChatFolderModal, openSettingsScreen } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -205,9 +203,9 @@ const Settings: FC<OwnProps> = ({
       || currentScreen === SettingsScreens.FoldersExcludedChats
     ) {
       if (foldersState.mode === 'create') {
-        onScreenSelect(SettingsScreens.FoldersCreateFolder);
+        openSettingsScreen({ screen: SettingsScreens.FoldersCreateFolder });
       } else {
-        onScreenSelect(SettingsScreens.FoldersEditFolder);
+        openSettingsScreen({ screen: SettingsScreens.FoldersEditFolder });
       }
       return;
     }
@@ -243,7 +241,7 @@ const Settings: FC<OwnProps> = ({
     switch (currentScreen) {
       case SettingsScreens.Main:
         return (
-          <SettingsMain onScreenSelect={onScreenSelect} isActive={isActive} onReset={handleReset} />
+          <SettingsMain isActive={isActive} onReset={handleReset} />
         );
       case SettingsScreens.EditProfile:
         return (
@@ -255,7 +253,6 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.General:
         return (
           <SettingsGeneral
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive
               || activeScreen === SettingsScreens.GeneralChatBackgroundColor
               || activeScreen === SettingsScreens.GeneralChatBackground
@@ -284,7 +281,6 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Privacy:
         return (
           <SettingsPrivacy
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive || isPrivacyScreen}
             onReset={handleReset}
           />
@@ -294,7 +290,6 @@ const Settings: FC<OwnProps> = ({
           <SettingsLanguage
             isActive={isScreenActive || activeScreen === SettingsScreens.DoNotTranslate}
             onReset={handleReset}
-            onScreenSelect={onScreenSelect}
           />
         );
       case SettingsScreens.DoNotTranslate:
@@ -303,7 +298,7 @@ const Settings: FC<OwnProps> = ({
         );
       case SettingsScreens.Stickers:
         return (
-          <SettingsStickers isActive={isScreenActive} onReset={handleReset} onScreenSelect={onScreenSelect} />
+          <SettingsStickers isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Experimental:
         return (
@@ -312,7 +307,6 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.GeneralChatBackground:
         return (
           <SettingsGeneralBackground
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive || activeScreen === SettingsScreens.GeneralChatBackgroundColor}
             onReset={handleReset}
           />
@@ -358,7 +352,6 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsPrivacyVisibility
             screen={currentScreen}
-            onScreenSelect={onScreenSelect}
             isActive={isScreenActive || privacyAllowScreens[currentScreen]}
             onReset={handleReset}
           />
@@ -412,7 +405,6 @@ const Settings: FC<OwnProps> = ({
           <PrivacyMessages
             isActive={isScreenActive}
             onReset={handleReset}
-            onScreenSelect={onScreenSelect}
           />
         );
 
@@ -433,7 +425,6 @@ const Settings: FC<OwnProps> = ({
             state={foldersState}
             dispatch={foldersDispatch}
             isActive={isScreenActive}
-            onScreenSelect={onScreenSelect}
             onReset={handleReset}
           />
         );
@@ -461,7 +452,6 @@ const Settings: FC<OwnProps> = ({
             dispatch={twoFaDispatch}
             shownScreen={activeScreen}
             isActive={isScreenActive}
-            onScreenSelect={onScreenSelect}
             onReset={handleReset}
           />
         );
@@ -482,7 +472,6 @@ const Settings: FC<OwnProps> = ({
             onSetPasscode={setPrivacyPasscode}
             shownScreen={activeScreen}
             isActive={isScreenActive}
-            onScreenSelect={onScreenSelect}
             onReset={handleReset}
           />
         );
@@ -511,7 +500,6 @@ const Settings: FC<OwnProps> = ({
         <SettingsHeader
           currentScreen={currentScreen}
           onReset={handleReset}
-          onScreenSelect={onScreenSelect}
           editedFolderId={foldersState.folderId}
         />
         {renderCurrentSectionContent(isScreenActive, activeKey)}

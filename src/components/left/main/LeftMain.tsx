@@ -5,7 +5,6 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
 
 import { PRODUCTION_URL } from '../../../config';
@@ -40,8 +39,6 @@ type OwnProps = {
   isForumPanelOpen?: boolean;
   isClosingSearch?: boolean;
   onSearchQuery: (query: string) => void;
-  onContentChange: (content: LeftColumnContent) => void;
-  onSettingsScreenSelect: (screen: SettingsScreens) => void;
   onTopicSearch: NoneToVoidFunction;
   isAccountFrozen?: boolean;
   onReset: () => void;
@@ -64,13 +61,11 @@ const LeftMain: FC<OwnProps> = ({
   isElectronUpdateAvailable,
   isForumPanelOpen,
   onSearchQuery,
-  onContentChange,
-  onSettingsScreenSelect,
   onReset,
   onTopicSearch,
   isAccountFrozen,
 }) => {
-  const { closeForumPanel } = getActions();
+  const { closeForumPanel, openLeftColumnContent } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
   const [isElectronAutoUpdateEnabled, setIsElectronAutoUpdateEnabled] = useState(false);
 
@@ -116,15 +111,15 @@ const LeftMain: FC<OwnProps> = ({
   });
 
   const handleSelectSettings = useLastCallback(() => {
-    onContentChange(LeftColumnContent.Settings);
+    openLeftColumnContent({ contentKey: LeftColumnContent.Settings });
   });
 
   const handleSelectContacts = useLastCallback(() => {
-    onContentChange(LeftColumnContent.Contacts);
+    openLeftColumnContent({ contentKey: LeftColumnContent.Contacts });
   });
 
   const handleSelectArchived = useLastCallback(() => {
-    onContentChange(LeftColumnContent.Archived);
+    openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
     closeForumPanel();
   });
 
@@ -139,11 +134,11 @@ const LeftMain: FC<OwnProps> = ({
   });
 
   const handleSelectNewChannel = useLastCallback(() => {
-    onContentChange(LeftColumnContent.NewChannelStep1);
+    openLeftColumnContent({ contentKey: LeftColumnContent.NewChannelStep1 });
   });
 
   const handleSelectNewGroup = useLastCallback(() => {
-    onContentChange(LeftColumnContent.NewGroupStep1);
+    openLeftColumnContent({ contentKey: LeftColumnContent.NewGroupStep1 });
   });
 
   useEffect(() => {
@@ -199,8 +194,6 @@ const LeftMain: FC<OwnProps> = ({
               return (
                 <ChatFolders
                   shouldHideFolderTabs={isForumPanelVisible}
-                  onSettingsScreenSelect={onSettingsScreenSelect}
-                  onLeftColumnContentChange={onContentChange}
                   foldersDispatch={foldersDispatch}
                   isForumPanelOpen={isForumPanelVisible}
                 />

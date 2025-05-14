@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
-import { withGlobal } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChatFolder, ApiSticker } from '../../../api/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
@@ -21,7 +21,6 @@ type OwnProps = {
   folderId?: number;
   folderType: 'all' | 'archived' | 'saved' | 'folder';
   foldersDispatch: FolderEditDispatch;
-  onSettingsScreenSelect: (screen: SettingsScreens) => void;
 };
 
 type StateProps = {
@@ -32,15 +31,16 @@ type StateProps = {
 const ICON_SIZE = 96;
 
 const EmptyFolder: FC<OwnProps & StateProps> = ({
-  chatFolder, animatedEmoji, foldersDispatch, onSettingsScreenSelect,
+  chatFolder, animatedEmoji, foldersDispatch,
 }) => {
+  const { openSettingsScreen } = getActions();
   const lang = useOldLang();
   const { isMobile } = useAppLayout();
 
   const handleEditFolder = useCallback(() => {
     foldersDispatch({ type: 'editFolder', payload: chatFolder });
-    onSettingsScreenSelect(SettingsScreens.FoldersEditFolderFromChatList);
-  }, [chatFolder, foldersDispatch, onSettingsScreenSelect]);
+    openSettingsScreen({ screen: SettingsScreens.FoldersEditFolderFromChatList });
+  }, [chatFolder, foldersDispatch]);
 
   return (
     <div className={styles.root}>

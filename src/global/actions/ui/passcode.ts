@@ -66,7 +66,7 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
       message: 'Failed to set passcode',
       tabId,
     });
-    actions.requestNextSettingsScreen({ screen: SettingsScreens.PasscodeDisabled, tabId });
+    actions.openSettingsScreen({ screen: SettingsScreens.PasscodeDisabled, tabId });
   }
 });
 

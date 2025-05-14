@@ -1,5 +1,6 @@
 import type { FC } from '../../../../lib/teact/teact';
 import React, { memo } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
 import { SettingsScreens } from '../../../../types';
 
@@ -15,13 +16,13 @@ import lockPreviewUrl from '../../../../assets/lock.png';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
 const SettingsPasscodeEnabled: FC<OwnProps> = ({
-  isActive, onReset, onScreenSelect,
+  isActive, onReset,
 }) => {
+  const { openSettingsScreen } = getActions();
   const lang = useOldLang();
 
   useHistoryBack({ isActive, onBack: onReset });
@@ -45,14 +46,14 @@ const SettingsPasscodeEnabled: FC<OwnProps> = ({
         <ListItem
           icon="edit"
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.PasscodeChangePasscodeCurrent)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.PasscodeChangePasscodeCurrent })}
         >
           {lang('Passcode.Change')}
         </ListItem>
         <ListItem
           icon="password-off"
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.PasscodeTurnOff)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.PasscodeTurnOff })}
         >
           {lang('Passcode.TurnOff')}
         </ListItem>

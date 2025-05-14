@@ -26,7 +26,6 @@ import SettingsPrivacyPublicProfilePhoto from './SettingsPrivacyPublicProfilePho
 type OwnProps = {
   screen: SettingsScreens;
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -50,14 +49,13 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   hasCurrentUserFullInfo,
   currentUserFallbackPhoto,
   isPremiumRequired,
-  onScreenSelect,
   onReset,
   shouldDisplayGiftsButton,
   isCurrentUserPremium,
 }) => {
-  const lang = useLang();
-
   const { updateGlobalPrivacySettings, showNotification } = getActions();
+
+  const lang = useLang();
 
   useHistoryBack({
     isActive,
@@ -120,7 +118,6 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
       <PrivacySubsection
         screen={screen}
         privacy={primaryPrivacy}
-        onScreenSelect={onScreenSelect}
         isPremiumRequired={isPremiumRequired}
       />
       {screen === SettingsScreens.PrivacyProfilePhoto && primaryPrivacy?.visibility !== 'everybody' && (
@@ -140,7 +137,6 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
         <PrivacySubsection
           screen={secondaryScreen}
           privacy={secondaryPrivacy}
-          onScreenSelect={onScreenSelect}
         />
       )}
     </div>
@@ -150,15 +146,13 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
 function PrivacySubsection({
   screen,
   privacy,
-  onScreenSelect,
   isPremiumRequired,
 }: {
   screen: SettingsScreens;
   privacy?: ApiPrivacySettings;
   isPremiumRequired?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
 }) {
-  const { setPrivacyVisibility } = getActions();
+  const { setPrivacyVisibility, openSettingsScreen } = getActions();
   const oldLang = useOldLang();
   const lang = useLang();
 
@@ -376,7 +370,7 @@ function PrivacySubsection({
               icon="add-user"
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => {
-                onScreenSelect(allowedContactsScreen);
+                openSettingsScreen({ screen: allowedContactsScreen });
               }}
             >
               <div className="multiline-item full-size">
@@ -391,7 +385,7 @@ function PrivacySubsection({
               icon="delete-user"
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => {
-                onScreenSelect(deniedContactsScreen);
+                openSettingsScreen({ screen: deniedContactsScreen });
               }}
             >
               <div className="multiline-item full-size">

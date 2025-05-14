@@ -7,7 +7,6 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChatFolder, ApiChatlistExportedInvite, ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { LeftColumnContent } from '../../../types';
 import type { MenuItemContextAction } from '../../ui/ListItem';
 import type { TabWithProperties } from '../../ui/TabList';
 import { SettingsScreens } from '../../../types';
@@ -38,9 +37,7 @@ import Transition from '../../ui/Transition';
 import ChatList from './ChatList';
 
 type OwnProps = {
-  onSettingsScreenSelect: (screen: SettingsScreens) => void;
   foldersDispatch: FolderEditDispatch;
-  onLeftColumnContentChange: (content: LeftColumnContent) => void;
   shouldHideFolderTabs?: boolean;
   isForumPanelOpen?: boolean;
 };
@@ -68,8 +65,6 @@ const FIRST_FOLDER_INDEX = 0;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
   foldersDispatch,
-  onSettingsScreenSelect,
-  onLeftColumnContentChange,
   chatFoldersById,
   orderedFolderIds,
   activeChatFolder,
@@ -97,6 +92,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     openEditChatFolder,
     openLimitReachedModal,
     markChatMessagesRead,
+    openSettingsScreen,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -207,7 +203,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
           title: lang('FilterEditFolders'),
           icon: 'edit',
           handler: () => {
-            onSettingsScreenSelect(SettingsScreens.Folders);
+            openSettingsScreen({ screen: SettingsScreens.Folders });
           },
         });
 
@@ -260,7 +256,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     });
   }, [
     displayedFolders, maxFolders, folderCountersById, lang, chatFoldersById, maxChatLists, folderInvitesById,
-    maxFolderInvites, folderUnreadChatsCountersById, onSettingsScreenSelect,
+    maxFolderInvites, folderUnreadChatsCountersById, openSettingsScreen,
   ]);
 
   const handleSwitchTab = useLastCallback((index: number) => {
@@ -365,8 +361,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         isActive={isActive}
         isForumPanelOpen={isForumPanelOpen}
         foldersDispatch={foldersDispatch}
-        onSettingsScreenSelect={onSettingsScreenSelect}
-        onLeftColumnContentChange={onLeftColumnContentChange}
+        isMainList
         canDisplayArchive={(hasArchivedChats || hasArchivedStories) && !archiveSettings.isHidden}
         archiveSettings={archiveSettings}
         sessions={sessions}

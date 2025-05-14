@@ -113,7 +113,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     setSharedSettingOption,
     setGlobalSearchChatId,
     lockScreen,
-    requestNextSettingsScreen,
+    openSettingsScreen,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -146,7 +146,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     if (hasPasscode) {
       lockScreen();
     } else {
-      requestNextSettingsScreen({ screen: SettingsScreens.PasscodeDisabled });
+      openSettingsScreen({ screen: SettingsScreens.PasscodeDisabled });
     }
   });
 

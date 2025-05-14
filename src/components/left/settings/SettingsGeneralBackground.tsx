@@ -27,7 +27,6 @@ import './SettingsGeneralBackground.scss';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -44,7 +43,6 @@ const runThrottled = throttle((cb) => cb(), 60000, true);
 
 const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   isActive,
-  onScreenSelect,
   onReset,
   background,
   isBlurred,
@@ -55,6 +53,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     loadWallpapers,
     uploadWallpaper,
     setThemeSettings,
+    openSettingsScreen,
   } = getActions();
 
   const themeRef = useRef<ThemeKey>();
@@ -81,8 +80,8 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   }, [handleFileSelect]);
 
   const handleSetColor = useCallback(() => {
-    onScreenSelect(SettingsScreens.GeneralChatBackgroundColor);
-  }, [onScreenSelect]);
+    openSettingsScreen({ screen: SettingsScreens.GeneralChatBackgroundColor });
+  }, []);
 
   const handleResetToDefault = useCallback(() => {
     setThemeSettings({

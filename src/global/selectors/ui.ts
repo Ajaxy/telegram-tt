@@ -168,3 +168,15 @@ export function selectActiveWebApp<T extends GlobalState>(
 
   return selectWebApp(global, activeWebAppKey, tabId);
 }
+
+export function selectLeftColumnContentKey<T extends GlobalState>(
+  global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).leftColumn.contentKey;
+}
+
+export function selectSettingsScreen<T extends GlobalState>(
+  global: T, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).leftColumn.settingsScreen;
+}

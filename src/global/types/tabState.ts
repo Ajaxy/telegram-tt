@@ -65,6 +65,7 @@ import type {
   GlobalSearchContent,
   IAnchorPosition,
   InlineBotSettings,
+  LeftColumnContent,
   ManagementProgress,
   ManagementState,
   MediaViewerMedia,
@@ -120,7 +121,6 @@ export type TabState = {
   shouldCloseRightColumn?: boolean;
   nextProfileTab?: ProfileTabType;
   forceScrollProfileTab?: boolean;
-  nextSettingsScreen?: SettingsScreens;
   nextFoldersAction?: ReducerAction<FoldersActions>;
   shareFolderScreen?: {
     folderId: number;
@@ -215,6 +215,11 @@ export type TabState = {
   savedGifts: {
     giftsByPeerId: Record<string, ApiSavedGifts>;
     filter: GiftProfileFilterOptions;
+  };
+
+  leftColumn: {
+    contentKey: LeftColumnContent;
+    settingsScreen: SettingsScreens;
   };
 
   globalSearch: {

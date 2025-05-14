@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiStarGiftUnique } from '../../../../api/types';
 import type { TabState } from '../../../../global/types';
-import type { CustomPeer } from '../../../../types';
+import { type CustomPeer, SettingsScreens } from '../../../../types';
 
 import { getDays } from '../../../../util/dates/units';
 import { getServerTime } from '../../../../util/serverTime';
@@ -22,6 +22,7 @@ import Avatar from '../../../common/Avatar';
 import Icon from '../../../common/icons/Icon';
 import PasswordForm from '../../../common/PasswordForm';
 import RadialPatternBackground from '../../../common/profile/RadialPatternBackground';
+import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
 
 import styles from './GiftWithdrawModal.module.scss';
@@ -44,7 +45,13 @@ const FRAGMENT_PEER: CustomPeer = {
 const GIFT_STICKER_SIZE = 4.5 * REM;
 
 const GiftWithdrawModal = ({ modal, hasPassword, passwordHint }: OwnProps & StateProps) => {
-  const { closeGiftWithdrawModal, clearGiftWithdrawError, processStarGiftWithdrawal } = getActions();
+  const {
+    closeGiftWithdrawModal,
+    clearGiftWithdrawError,
+    closeGiftInfoModal,
+    processStarGiftWithdrawal,
+    openSettingsScreen,
+  } = getActions();
   const isOpen = Boolean(modal);
 
   const [shouldShowPassword, setShouldShowPassword] = useState(false);
@@ -66,6 +73,14 @@ const GiftWithdrawModal = ({ modal, hasPassword, passwordHint }: OwnProps & Stat
       gift: renderingModal!.gift.inputGift!,
       password,
     });
+  });
+
+  const handleSetUpPassword = useLastCallback(() => {
+    openSettingsScreen({
+      screen: SettingsScreens.TwoFaDisabled,
+    });
+    closeGiftWithdrawModal();
+    closeGiftInfoModal();
   });
 
   return (
@@ -115,7 +130,12 @@ const GiftWithdrawModal = ({ modal, hasPassword, passwordHint }: OwnProps & Stat
           {lang('GiftWithdrawWait', { days: getDays(exportDelay) }, { pluralValue: getDays(exportDelay) })}
         </p>
       )}
-      {!hasPassword && <span className={styles.noPassword}>{lang('ErrorPasswordMissing')}</span>}
+      {!hasPassword && (
+        <>
+          <span className={styles.noPassword}>{lang('ErrorPasswordMissing')}</span>
+          <Button size="smaller" onClick={handleSetUpPassword}>{lang('SetUp2FA')}</Button>
+        </>
+      )}
       {hasPassword && !exportDelay && (
         <PasswordForm
           shouldShowSubmit

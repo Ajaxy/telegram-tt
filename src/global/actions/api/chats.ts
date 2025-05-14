@@ -1140,7 +1140,7 @@ addActionHandler('addChatFolder', async (global, actions, payload): Promise<void
     folder: folderUpdate,
   });
 
-  actions.requestNextSettingsScreen({
+  actions.requestNextFoldersAction({
     foldersAction: {
       type: 'setFolderId',
       payload: maxId + 1,
@@ -2629,7 +2629,7 @@ addActionHandler('createChatlistInvite', async (global, actions, payload): Promi
   } catch (error) {
     if (CHATLIST_LIMIT_ERROR_LIST.has((error as ApiError).message)) {
       actions.openLimitReachedModal({ limit: 'chatlistInvites', tabId });
-      actions.requestNextSettingsScreen({ screen: SettingsScreens.Folders, tabId });
+      actions.openSettingsScreen({ screen: SettingsScreens.Folders, tabId });
     } else {
       actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
     }

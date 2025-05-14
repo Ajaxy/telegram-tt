@@ -21,25 +21,24 @@ type OwnProps = {
   currentScreen: SettingsScreens;
   editedFolderId?: number;
   onReset: () => void;
-  onScreenSelect: (screen: SettingsScreens) => void;
 };
 
 const SettingsHeader: FC<OwnProps> = ({
   currentScreen,
   editedFolderId,
   onReset,
-  onScreenSelect,
 }) => {
   const {
     signOut,
     openDeleteChatFolderModal,
+    openSettingsScreen,
   } = getActions();
 
   const { isMobile } = useAppLayout();
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
 
   const handleMultiClick = useMultiClick(5, () => {
-    onScreenSelect(SettingsScreens.Experimental);
+    openSettingsScreen({ screen: SettingsScreens.Experimental });
   });
 
   const openSignOutConfirmation = useCallback(() => {
@@ -270,7 +269,7 @@ const SettingsHeader: FC<OwnProps> = ({
               size="smaller"
               color="translucent"
               // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
+              onClick={() => openSettingsScreen({ screen: SettingsScreens.EditProfile })}
               ariaLabel={oldLang('lng_settings_information')}
             >
               <Icon name="edit" />

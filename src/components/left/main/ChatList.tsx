@@ -7,7 +7,6 @@ import { getActions } from '../../../global';
 import type { ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
 
 import {
@@ -51,10 +50,9 @@ type OwnProps = {
   archiveSettings?: GlobalState['archiveSettings'];
   isForumPanelOpen?: boolean;
   sessions?: Record<string, ApiSession>;
-  foldersDispatch?: FolderEditDispatch;
-  onSettingsScreenSelect?: (screen: SettingsScreens) => void;
-  onLeftColumnContentChange?: (content: LeftColumnContent) => void;
   isAccountFrozen?: boolean;
+  isMainList?: boolean;
+  foldersDispatch?: FolderEditDispatch;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -70,10 +68,9 @@ const ChatList: FC<OwnProps> = ({
   canDisplayArchive,
   archiveSettings,
   sessions,
-  foldersDispatch,
-  onSettingsScreenSelect,
-  onLeftColumnContentChange,
   isAccountFrozen,
+  isMainList,
+  foldersDispatch,
 }) => {
   const {
     openChat,
@@ -81,6 +78,7 @@ const ChatList: FC<OwnProps> = ({
     closeForumPanel,
     toggleStoryRibbon,
     openFrozenAccountModal,
+    openLeftColumnContent,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -150,7 +148,7 @@ const ChatList: FC<OwnProps> = ({
         const position = Number(digit) + shift - 1;
 
         if (isArchiveInList && position === -1) {
-          onLeftColumnContentChange?.(LeftColumnContent.Archived);
+          if (isMainList) openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
           return;
         }
 
@@ -166,8 +164,7 @@ const ChatList: FC<OwnProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [
-    archiveSettings, isSaved, isActive, onLeftColumnContentChange, openChat, openNextChat, orderedIds,
-    shouldDisplayArchive,
+    archiveSettings, isSaved, isActive, openChat, openNextChat, orderedIds, shouldDisplayArchive, isMainList,
   ]);
 
   const { observe } = useIntersectionObserver({
@@ -176,7 +173,7 @@ const ChatList: FC<OwnProps> = ({
   });
 
   const handleArchivedClick = useLastCallback(() => {
-    onLeftColumnContentChange!(LeftColumnContent.Archived);
+    openLeftColumnContent({ contentKey: LeftColumnContent.Archived });
     closeForumPanel();
   });
 
@@ -288,7 +285,6 @@ const ChatList: FC<OwnProps> = ({
             folderId={folderId}
             folderType={folderType}
             foldersDispatch={foldersDispatch!}
-            onSettingsScreenSelect={onSettingsScreenSelect!}
           />
         )
       ) : (

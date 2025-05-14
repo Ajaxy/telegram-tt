@@ -1674,6 +1674,7 @@
 "GiftFilterHidden" = "Hidden";
 "GiftSearchEmpty" = "No matching gifts";
 "GiftSearchReset" = "View All Gifts";
+"SetUp2FA" = "Set up Two-Step Verification";
 "CheckPasswordTitle" = "Enter Password";
 "CheckPasswordPlaceholder" = "Password";
 "CheckPasswordDescription" = "Please enter your password to continue.";

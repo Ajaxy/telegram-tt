@@ -25,7 +25,6 @@ import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   isActive?: boolean;
-  onScreenSelect: (screen: SettingsScreens) => void;
   onReset: () => void;
 };
 
@@ -44,7 +43,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   canBuyPremium,
   isGiveawayAvailable,
   starsBalance,
-  onScreenSelect,
   onReset,
 }) => {
   const {
@@ -54,6 +52,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
     openUrl,
     openGiftRecipientPicker,
     openStarsBalanceModal,
+    openSettingsScreen,
   } = getActions();
 
   const [isSupportDialogOpen, openSupportDialog, closeSupportDialog] = useFlag(false);
@@ -98,7 +97,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="settings"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.General)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.General })}
         >
           {lang('TelegramGeneralSettingsViewController')}
         </ListItem>
@@ -106,7 +105,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="animations"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.Performance)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.Performance })}
         >
           {lang('MenuAnimations')}
         </ListItem>
@@ -114,7 +113,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="unmute"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.Notifications)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.Notifications })}
         >
           {lang('Notifications')}
         </ListItem>
@@ -122,7 +121,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="data"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.DataStorage)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.DataStorage })}
         >
           {lang('DataSettings')}
         </ListItem>
@@ -130,7 +129,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="lock"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.Privacy)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.Privacy })}
         >
           {lang('PrivacySettings')}
         </ListItem>
@@ -138,7 +137,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="folder"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.Folders)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.Folders })}
         >
           {lang('Filters')}
         </ListItem>
@@ -146,7 +145,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="active-sessions"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.ActiveSessions)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.ActiveSessions })}
         >
           {lang('SessionsTitle')}
           {sessionCount > 0 && (<span className="settings-item__current-value">{sessionCount}</span>)}
@@ -155,7 +154,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="language"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.Language)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.Language })}
         >
           {lang('Language')}
           <span className="settings-item__current-value">{lang.languageInfo.nativeName}</span>
@@ -164,7 +163,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           icon="stickers"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.Stickers)}
+          onClick={() => openSettingsScreen({ screen: SettingsScreens.Stickers })}
         >
           {lang('MenuStickers')}
         </ListItem>
