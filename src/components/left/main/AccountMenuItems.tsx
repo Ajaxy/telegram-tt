@@ -37,6 +37,10 @@ const AccountMenuItems = ({
   const currentCount = getCurrentProdAccountCount();
   const maxCount = getCurrentMaxAccountCount();
 
+  const currentAccountInfo = useMemo(() => {
+    return Object.values(accounts).find((account) => account.userId === currentUser.id);
+  }, [accounts, currentUser.id]);
+
   const shouldShowLimit = currentCount >= maxCount;
 
   const handleLimitClick = useLastCallback(() => {
@@ -65,15 +69,16 @@ const AccountMenuItems = ({
   }, [accounts, currentCount, totalLimit]);
 
   return (
-    <>
+    <div>
       {Object.entries(accounts || {})
         .sort(([, account]) => (account.userId === currentUser.id ? -1 : 1))
         .map(([slot, account], index, arr) => {
+          const isSameServer = account.isTest === currentAccountInfo?.isTest;
           const mockUser: CustomPeer = {
             title: [account.firstName, account.lastName].filter(Boolean).join(' '),
             isCustomPeer: true,
             peerColorId: account.color,
-            emojiStatusId: account.emojiStatusId,
+            emojiStatusId: isSameServer ? account.emojiStatusId : undefined,
             isPremium: account.isPremium,
           };
 
@@ -111,7 +116,7 @@ const AccountMenuItems = ({
           {lang('MenuAddAccount')}
         </MenuItem>
       )}
-    </>
+    </div>
   );
 };
 
