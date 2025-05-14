@@ -233,4 +233,10 @@
       color: var(--accent-color);
     }
   }
+
+  &.is-input-forward {
+    .message-title {
+      font-weight: var(--font-weight-normal);
+    }
+  }
 }

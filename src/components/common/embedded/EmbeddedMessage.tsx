@@ -29,6 +29,7 @@ import { renderTextWithEntities } from '../helpers/renderTextWithEntities';
 
 import { useFastClick } from '../../../hooks/useFastClick';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 import useOldLang from '../../../hooks/useOldLang';
 import useThumbnail from '../../../hooks/useThumbnail';
@@ -49,6 +50,7 @@ type OwnProps = {
   sender?: ApiPeer;
   senderChat?: ApiChat;
   forwardSender?: ApiPeer;
+  composerForwardSenders?: ApiPeer[];
   title?: string;
   customText?: string;
   noUserColors?: boolean;
@@ -72,6 +74,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   sender,
   senderChat,
   forwardSender,
+  composerForwardSenders,
   title,
   customText,
   isProtected,
@@ -115,12 +118,21 @@ const EmbeddedMessage: FC<OwnProps> = ({
     chatTranslations, message?.chatId, shouldTranslate ? message?.id : undefined, requestedChatTranslationLanguage,
   );
 
-  const lang = useOldLang();
+  const oldLang = useOldLang();
+  const lang = useLang();
 
-  const senderTitle = sender ? getPeerTitle(lang, sender)
+  const senderTitle = sender ? getPeerTitle(oldLang, sender)
     : (replyForwardInfo?.hiddenUserName || message?.forwardInfo?.hiddenUserName);
-  const senderChatTitle = senderChat ? getPeerTitle(lang, senderChat) : undefined;
-  const forwardSenderTitle = forwardSender ? getPeerTitle(lang, forwardSender)
+
+  const forwardSendersTitle = useMemo(() => {
+    if (!composerForwardSenders) return undefined;
+
+    const peerTitles = composerForwardSenders.map((peer) => getPeerTitle(lang, peer)).filter(Boolean);
+    return lang.conjunction(peerTitles);
+  }, [composerForwardSenders, lang]);
+
+  const senderChatTitle = senderChat ? getPeerTitle(oldLang, senderChat) : undefined;
+  const forwardSenderTitle = forwardSender ? getPeerTitle(oldLang, forwardSender)
     : message?.forwardInfo?.hiddenUserName;
   const areSendersSame = sender && sender.id === forwardSender?.id;
 
@@ -154,7 +166,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   function renderMediaContentType(media?: MediaContainer) {
     if (!media || media.content.text) return NBSP;
-    const description = getMediaContentTypeDescription(lang, media.content, {});
+    const description = getMediaContentTypeDescription(oldLang, media.content, {});
     if (!description || description === CONTENT_NOT_SUPPORTED) return NBSP;
     return (
       <span>
@@ -174,7 +186,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       return renderText(title);
     }
 
-    if (!senderTitle) {
+    if (!senderTitle && !forwardSendersTitle) {
       return NBSP;
     }
 
@@ -195,7 +207,14 @@ const EmbeddedMessage: FC<OwnProps> = ({
       <span className="embedded-sender-wrapper">
         {checkShouldRenderSenderTitle() && (
           <span className="embedded-sender">
-            {renderText(isReplyToQuote ? lang('ReplyToQuote', senderTitle) : senderTitle)}
+            {!composerForwardSenders && senderTitle
+            && renderText(isReplyToQuote ? oldLang('ReplyToQuote', senderTitle) : senderTitle)}
+            {forwardSendersTitle && renderText(lang('ComposerTitleForwardFrom', {
+              users: forwardSendersTitle,
+            }, {
+              withNodes: true,
+              withMarkdown: true,
+            }))}
           </span>
         )}
         {icon && <Icon name={icon} className="embedded-chat-icon" />}
@@ -232,6 +251,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         isQuote && 'is-quote',
         mediaThumbnail && 'with-thumb',
         'no-selection',
+        composerForwardSenders && 'is-input-forward',
       )}
       dir={lang.isRtl ? 'rtl' : undefined}
       onClick={handleClick}

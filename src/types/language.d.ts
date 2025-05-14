@@ -2411,6 +2411,9 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
     'user': V;
     'stars': V;
   };
+  'ComposerTitleForwardFrom': {
+    'users': V;
+  };
 }
 
 export interface LangPairPlural {

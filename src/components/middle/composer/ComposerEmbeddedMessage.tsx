@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
   ApiChat, ApiInputMessageReplyInfo, ApiMessage, ApiPeer,
@@ -21,12 +21,12 @@ import {
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
-  selectPeer,
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { unique } from '../../../util/iteratees';
 import { getPeerColorClass } from '../../common/helpers/peerColor';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
@@ -63,6 +63,8 @@ type StateProps = {
   senderChat?: ApiChat;
   isSenderChannel?: boolean;
   currentUserId?: string;
+  forwardMessageIds?: number[];
+  fromChatId?: string;
 };
 
 type OwnProps = {
@@ -96,6 +98,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   chatId,
   currentUserId,
   isSenderChannel,
+  forwardMessageIds,
+  fromChatId,
 }) => {
   const {
     resetDraftReplyInfo,
@@ -120,10 +124,27 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const isForwarding = Boolean(forwardedMessagesCount);
 
+  const selectSenderFromForwardedMessage = useLastCallback((forwardedMessage: ApiMessage) => {
+    const global = getGlobal();
+    sender = selectForwardedSender(global, forwardedMessage);
+    if (!sender) {
+      sender = selectSender(global, forwardedMessage);
+    }
+    return sender;
+  });
+
+  const forwardSenders = useMemo(() => {
+    if (!isForwarding) return undefined;
+    const forwardedMessages = forwardMessageIds?.map((id) => selectChatMessage(getGlobal(), fromChatId!, id))
+      .filter(Boolean);
+    const senders = forwardedMessages?.map((m) => selectSenderFromForwardedMessage(m)).filter(Boolean);
+    return senders ? unique(senders) : undefined;
+  }, [isForwarding, forwardMessageIds, fromChatId]);
+
   const isShown = (() => {
     if (isInChangingRecipientMode) return false;
     if (message && (replyInfo || editingId)) return true;
-    if (sender && isForwarding) return true;
+    if (forwardSenders && isForwarding) return true;
     return false;
   })();
 
@@ -266,6 +287,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           isInComposer
           message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
+          composerForwardSenders={forwardSenders}
           customText={customText}
           title={(editingId && !isShowingReply) ? oldLang('EditMessage')
             : noAuthors ? oldLang('HiddenSendersNameDescription') : undefined}
@@ -417,18 +439,20 @@ export default memo(withGlobal<OwnProps>(
 
     let sender: ApiPeer | undefined;
 
+    const selectSenderFromForwardedMessage = (forwardedMessage: ApiMessage) => {
+      sender = selectForwardedSender(global, forwardedMessage);
+      if (!sender) {
+        sender = selectSender(global, forwardedMessage);
+      }
+      return sender;
+    };
+
     if (editingId && message) {
       sender = selectSender(global, message);
     } else if (isForwarding) {
-      if (message) {
-        sender = selectForwardedSender(global, message);
-        if (!sender) {
-          sender = selectSender(global, message);
-        }
-      }
-      if (!sender) {
-        sender = selectPeer(global, fromChatId!);
-      }
+      let forwardSenders = forwardedMessages?.map((m) => selectSenderFromForwardedMessage(m)).filter(Boolean);
+      forwardSenders = forwardSenders ? unique(forwardSenders) : undefined;
+      sender = forwardSenders?.length === 1 ? forwardSenders?.[0] : undefined;
     } else if (replyInfo && message && !shouldForceShowEditing) {
       const { forwardInfo } = message;
       const isChatWithSelf = selectIsChatWithSelf(global, chatId);
@@ -471,6 +495,8 @@ export default memo(withGlobal<OwnProps>(
       senderChat,
       currentUserId: global.currentUserId,
       isSenderChannel,
+      forwardMessageIds,
+      fromChatId,
     };
   },
 )(ComposerEmbeddedMessage));
