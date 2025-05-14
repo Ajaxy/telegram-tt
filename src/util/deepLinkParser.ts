@@ -10,7 +10,7 @@ import { isUsernameValid } from './username';
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
 'invoice' | 'addlist' | 'boost' | 'giftcode' | 'message' | 'premium_offer' | 'premium_multigift' | 'stars_topup'
-| 'nft';
+| 'nft' | 'stars';
 
 interface PublicMessageLink {
   type: 'publicMessageLink';
@@ -103,6 +103,10 @@ interface GiftUniqueLink {
   slug: string;
 }
 
+interface StarsModalLink {
+  type: 'stars';
+}
+
 type DeepLink =
   TelegramPassportLink |
   LoginCodeLink |
@@ -116,7 +120,8 @@ type DeepLink =
   PremiumReferrerLink |
   PremiumMultigiftLink |
   ChatBoostLink |
-  GiftUniqueLink;
+  GiftUniqueLink |
+  StarsModalLink;
 
 type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string | undefined>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
@@ -247,6 +252,8 @@ function parseTgLink(url: URL) {
       return buildChatBoostLink({ username: queryParams.domain, id: queryParams.channel });
     case 'giftUniqueLink':
       return buildGiftUniqueLink({ slug: queryParams.slug });
+    case 'stars':
+      return { type: 'stars' } satisfies StarsModalLink;
     default:
       break;
   }
@@ -452,6 +459,8 @@ function getTgDeepLinkType(
       return 'chatBoostLink';
     case 'nft':
       return 'giftUniqueLink';
+    case 'stars':
+      return 'stars';
     default:
       break;
   }

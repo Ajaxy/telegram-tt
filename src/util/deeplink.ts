@@ -75,6 +75,9 @@ export const processDeepLink = (url: string): boolean => {
       case 'giftUniqueLink':
         actions.openUniqueGiftBySlug({ slug: parsedLink.slug });
         return true;
+      case 'stars':
+        actions.openStarsBalanceModal({});
+        break;
       default:
         break;
     }
