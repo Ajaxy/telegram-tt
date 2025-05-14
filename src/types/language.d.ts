@@ -654,6 +654,7 @@ export interface LangPair {
   'PollsStopWarning': undefined;
   'PollsStopSure': undefined;
   'PaymentTestInvoice': undefined;
+  'PaymentInvoiceNotFound': undefined;
   'AttachLiveLocation': undefined;
   'NoWordsRecognized': undefined;
   'ViaBot': undefined;
@@ -981,7 +982,6 @@ export interface LangPair {
   'ChatListFilterErrorEmpty': undefined;
   'ChatListFilterErrorTitleEmpty': undefined;
   'FilterMuted': undefined;
-  'ReadFolder': undefined;
   'FilterRead': undefined;
   'FilterArchived': undefined;
   'GroupsAndChannelsLimitTitle': undefined;
@@ -1284,14 +1284,25 @@ export interface LangPair {
   'PrivacyGiftsInfo': undefined;
   'PrivacyAcceptedGiftTitle': undefined;
   'PrivacyAcceptedGiftInfo': undefined;
-  'PrivacyDisplayGiftsButton': undefined;
-  'PrivacyDisplayGift': undefined;
-  'SendDisallowError': undefined;
   'PrivacyValueBots': undefined;
   'PrivacyGiftLimitedEdition': undefined;
   'PrivacyGiftUnlimited': undefined;
   'PrivacyGiftUnique': undefined;
   'PrivacyGiftPremiumSubscription': undefined;
+  'PrivacyDisplayGiftsButton': undefined;
+  'PrivacyDisplayGift': undefined;
+  'SendDisallowError': undefined;
+  'PrivacySubscribeToTelegramPremium': undefined;
+  'PrivacyDisableLimitedEditionStarGifts': undefined;
+  'PrivacyEnableLimitedEditionStarGifts': undefined;
+  'PrivacyDisableUnlimitedStarGifts': undefined;
+  'PrivacyEnableUnlimitedStarGifts': undefined;
+  'PrivacyDisableUniqueStarGifts': undefined;
+  'PrivacyEnableUniqueStarGifts': undefined;
+  'PrivacyDisablePremiumGifts': undefined;
+  'PrivacyEnablePremiumGifts': undefined;
+  'DisplayGiftsButton': undefined;
+  'HideGiftsButton': undefined;
   'CustomShareGiftsInfo': undefined;
   'AllChatsSearchContext': undefined;
   'PrivateChatsSearchContext': undefined;
@@ -1479,17 +1490,6 @@ export interface LangPair {
   'GroupMessagesChargePrice': undefined;
   'RightsChargeStarsAbout': undefined;
   'UnlockButtonTitle': undefined;
-  'PrivacySubscribeToTelegramPremium': undefined;
-  'PrivacyDisableLimitedEditionStarGifts': undefined;
-  'PrivacyEnableLimitedEditionStarGifts': undefined;
-  'PrivacyDisableUnlimitedStarGifts': undefined;
-  'PrivacyEnableUnlimitedStarGifts': undefined;
-  'PrivacyDisableUniqueStarGifts': undefined;
-  'PrivacyEnableUniqueStarGifts': undefined;
-  'PrivacyDisablePremiumGifts': undefined;
-  'PrivacyEnablePremiumGifts': undefined;
-  'DisplayGiftsButton': undefined;
-  'HideGiftsButton': undefined;
   'FrozenAccountModalTitle': undefined;
   'FrozenAccountViolationTitle': undefined;
   'FrozenAccountViolationSubtitle': undefined;
@@ -1578,10 +1578,6 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   };
   'SpeakingWithVolume': {
     'volume': V;
-  };
-  'PrivacyDisplayGiftIconInChats':{
-    'icon': V;
-    'gift': V;
   };
   'CallEmojiKeyTooltip': {
     'user': V;
@@ -2001,6 +1997,10 @@ export interface LangPairWithVariables<V extends unknown = LangVariable> {
   'BotDownloadFileDescription': {
     'bot': V;
     'filename': V;
+  };
+  'PrivacyDisplayGiftIconInChats': {
+    'icon': V;
+    'gift': V;
   };
   'StarsSubscribeBotButtonMonth': {
     'amount': V;

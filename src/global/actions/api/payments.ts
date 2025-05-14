@@ -97,6 +97,8 @@ addActionHandler('openInvoice', async (global, actions, payload): Promise<void> 
 
   if ('error' in form) {
     setGlobal(global);
+
+    handlePaymentFormError(form.error, tabId);
     return;
   }
 
@@ -1099,7 +1101,7 @@ async function payInputStarInvoice<T extends GlobalState>(
   setGlobal(global);
 
   if ('error' in form) {
-    actions.showDialog({ data: { message: form.error || 'Error', hasErrorKey: true }, tabId });
+    handlePaymentFormError(form.error, tabId);
     return;
   }
 
@@ -1179,3 +1181,17 @@ addActionHandler('processStarGiftWithdrawal', async (global, actions, payload): 
   actions.openUrl({ url: result.url, shouldSkipModal: true, tabId });
   actions.closeGiftWithdrawModal({ tabId });
 });
+
+function handlePaymentFormError(error: string, tabId: number) {
+  if (error === 'SLUG_INVALID') {
+    getActions().showNotification({
+      message: {
+        key: 'PaymentInvoiceNotFound',
+      },
+      tabId,
+    });
+    return;
+  }
+
+  getActions().showDialog({ data: { message: error, hasErrorKey: true }, tabId });
+}

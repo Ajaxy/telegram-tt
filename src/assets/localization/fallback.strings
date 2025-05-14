@@ -742,6 +742,7 @@
 "PollsStopWarning" = "If you stop this poll now, nobody will be able to vote in it anymore. This action cannot be undone.";
 "PollsStopSure" = "Stop";
 "PaymentTestInvoice" = "TEST INVOICE";
+"PaymentInvoiceNotFound" = "Invoice not found";
 "AttachLiveLocation" = "Live Location";
 "NoWordsRecognized" = "No words recognized.";
 "ViaBot" = "via";
