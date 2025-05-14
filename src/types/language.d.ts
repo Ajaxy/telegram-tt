@@ -1502,6 +1502,7 @@ export interface LangPair {
   'ActionPaidMessageGroupPriceFree': undefined;
   'NotificationTitleNotSupportedInFrozenAccount': undefined;
   'NotificationMessageNotSupportedInFrozenAccount': undefined;
+  'ContextMenuItemMention': undefined;
 }
 
 export interface LangPairWithVariables<V extends unknown = LangVariable> {

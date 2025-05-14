@@ -70,6 +70,7 @@ interface OwnProps {
   onScrollDownToggle: BooleanToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
   onIntersectPinnedMessage: OnIntersectPinnedMessage;
+  canPost?: boolean;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
@@ -104,6 +105,7 @@ const MessageListContent: FC<OwnProps> = ({
   onScrollDownToggle,
   onNotchToggle,
   onIntersectPinnedMessage,
+  canPost,
 }) => {
   const { openHistoryCalendar } = getActions();
 
@@ -325,6 +327,7 @@ const MessageListContent: FC<OwnProps> = ({
           message={lastMessage}
           withAvatar={withAvatar}
           appearanceOrder={lastAppearanceOrder}
+          canPost={canPost}
         >
           {senderGroupElements}
         </SenderGroupContainer>

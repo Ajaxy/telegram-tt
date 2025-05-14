@@ -2,13 +2,13 @@ import type { RefObject } from 'react';
 import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
-import type { ApiChatMember, ApiUser } from '../../../../api/types';
+import type { ApiChatMember, ApiPeer, ApiUser } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
-import { getMainUsername, getUserFirstOrLastName } from '../../../../global/helpers';
-import { filterPeersByQuery } from '../../../../global/helpers/peers';
+import { getMainUsername } from '../../../../global/helpers';
+import { filterPeersByQuery, getPeerTitle } from '../../../../global/helpers/peers';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
 import { getCaretPosition, getHtmlBeforeSelection, setCaretPosition } from '../../../../util/selection';
@@ -17,6 +17,7 @@ import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import useFlag from '../../../../hooks/useFlag';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 const THROTTLE = 300;
@@ -39,6 +40,7 @@ export default function useMentionTooltip(
   topInlineBotIds?: string[],
   currentUserId?: string,
 ) {
+  const lang = useLang();
   const [filteredUsers, setFilteredUsers] = useState<ApiUser[] | undefined>();
   const [isManuallyClosed, markManuallyClosed, unmarkManuallyClosed] = useFlag(false);
 
@@ -95,19 +97,23 @@ export default function useMentionTooltip(
     setFilteredUsers(Object.values(pickTruthy(usersById, filteredIds)));
   }, [currentUserId, groupChatMembers, topInlineBotIds, getUsernameTag, getWithInlineBots]);
 
-  const insertMention = useLastCallback((user: ApiUser, forceFocus = false) => {
-    if (!user.usernames && !getUserFirstOrLastName(user)) {
+  const insertMention = useLastCallback((
+    peer: ApiPeer,
+    forceFocus = false,
+    insertAtEnd = false,
+  ) => {
+    if (!peer.usernames && !getPeerTitle(lang, peer)) {
       return;
     }
 
-    const mainUsername = getMainUsername(user);
-    const userFirstOrLastName = getUserFirstOrLastName(user) || '';
+    const mainUsername = getMainUsername(peer);
+    const userFirstOrLastName = getPeerTitle(lang, peer) || '';
     const htmlToInsert = mainUsername
       ? `@${mainUsername}`
       : `<a
           class="text-entity-link"
           data-entity-type="${ApiMessageEntityTypes.MentionName}"
-          data-user-id="${user.id}"
+          data-user-id="${peer.id}"
           contenteditable="false"
           dir="auto"
         >${userFirstOrLastName}</a>`;
@@ -115,7 +121,8 @@ export default function useMentionTooltip(
     const inputEl = inputRef.current!;
     const htmlBeforeSelection = getHtmlBeforeSelection(inputEl);
     const fixedHtmlBeforeSelection = cleanWebkitNewLines(htmlBeforeSelection);
-    const atIndex = fixedHtmlBeforeSelection.lastIndexOf('@');
+    const atIndex = insertAtEnd ? fixedHtmlBeforeSelection.length
+      : fixedHtmlBeforeSelection.lastIndexOf('@');
     const shiftCaretPosition = (mainUsername ? mainUsername.length + 1 : userFirstOrLastName.length)
       - (fixedHtmlBeforeSelection.length - atIndex);
 

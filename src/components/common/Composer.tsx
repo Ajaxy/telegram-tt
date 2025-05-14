@@ -93,6 +93,7 @@ import {
   selectNotifyDefaults,
   selectNotifyException,
   selectNoWebPage,
+  selectPeer,
   selectPeerPaidMessagesStars,
   selectPeerStory,
   selectPerformanceSettingsValue,
@@ -297,6 +298,7 @@ type StateProps =
     disallowedGifts?: ApiDisallowedGifts;
     isAccountFrozen?: boolean;
     isAppConfigLoaded?: boolean;
+    insertingPeerIdMention?: string;
   };
 
 enum MainButtonState {
@@ -421,6 +423,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   disallowedGifts,
   isAccountFrozen,
   isAppConfigLoaded,
+  insertingPeerIdMention,
 }) => {
   const {
     sendMessage,
@@ -448,6 +451,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     setReactionEffect,
     hideEffectInComposer,
     updateChatSilentPosting,
+    updateInsertingPeerIdMention,
   } = getActions();
 
   const oldLang = useOldLang();
@@ -750,6 +754,15 @@ const Composer: FC<OwnProps & StateProps> = ({
     topInlineBotIds,
     currentUserId,
   );
+
+  useEffect(() => {
+    if (!insertingPeerIdMention) return;
+    const peer = selectPeer(getGlobal(), insertingPeerIdMention);
+    if (peer) {
+      insertMention(peer, true, true);
+    }
+    updateInsertingPeerIdMention({ peerId: undefined });
+  }, [insertingPeerIdMention, insertMention]);
 
   const {
     isOpen: isInlineBotTooltipOpen,
@@ -2410,6 +2423,7 @@ export default memo(withGlobal<OwnProps>(
     const isStarsBalanceModalOpen = Boolean(tabState.starsBalanceModal);
     const isAccountFrozen = selectIsCurrentUserFrozen(global);
     const isAppConfigLoaded = global.isAppConfigLoaded;
+    const insertingPeerIdMention = tabState.insertingPeerIdMention;
 
     return {
       availableReactions: global.reactions.availableReactions,
@@ -2498,6 +2512,7 @@ export default memo(withGlobal<OwnProps>(
       disallowedGifts: userFullInfo?.disallowedGifts,
       isAccountFrozen,
       isAppConfigLoaded,
+      insertingPeerIdMention,
     };
   },
 )(Composer));

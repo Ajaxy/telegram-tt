@@ -1953,3 +1953,4 @@
 "ApiMessageActionPaidMessagesRefundedIncoming" = "{user} refunded **{stars}** to you";
 "NotificationTitleNotSupportedInFrozenAccount" = "Your account is frozen";
 "NotificationMessageNotSupportedInFrozenAccount" = "This action is not available";
+"ContextMenuItemMention" = "Mention";

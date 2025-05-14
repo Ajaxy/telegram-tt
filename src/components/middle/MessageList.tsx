@@ -750,6 +750,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           onScrollDownToggle={onScrollDownToggle}
           onNotchToggle={onNotchToggle}
           onIntersectPinnedMessage={onIntersectPinnedMessage}
+          canPost={canPost}
         />
       ) : (
         <Loading color="white" backgroundColor="dark" />

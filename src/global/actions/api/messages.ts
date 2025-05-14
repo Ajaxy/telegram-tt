@@ -678,6 +678,13 @@ addActionHandler('saveEffectInDraft', (global, actions, payload): ActionReturnTy
   });
 });
 
+addActionHandler('updateInsertingPeerIdMention', (global, actions, payload): ActionReturnType => {
+  const { peerId, tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    insertingPeerIdMention: peerId,
+  }, tabId);
+});
+
 async function saveDraft<T extends GlobalState>({
   global, chatId, threadId, draft, isLocalOnly, noLocalTimeUpdate,
 } : {

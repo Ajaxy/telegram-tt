@@ -799,4 +799,5 @@ export type TabState = {
 
   isWaitingForStarGiftUpgrade?: true;
   isWaitingForStarGiftTransfer?: true;
+  insertingPeerIdMention?: string;
 };

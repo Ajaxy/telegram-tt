@@ -32,3 +32,11 @@
     }
   }
 }
+
+.contextMenu {
+  position: absolute;
+
+  :global(.bubble) {
+    width: auto;
+  }
+}

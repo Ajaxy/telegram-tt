@@ -86,6 +86,7 @@ type OwnProps = {
   noPersonalPhoto?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 };
 
 const Avatar: FC<OwnProps> = ({
@@ -110,6 +111,7 @@ const Avatar: FC<OwnProps> = ({
   loopIndefinitely,
   noPersonalPhoto,
   onClick,
+  onContextMenu,
 }) => {
   const { openStoryViewer } = getActions();
 
@@ -297,6 +299,7 @@ const Avatar: FC<OwnProps> = ({
       aria-label={typeof content === 'string' ? author : undefined}
       style={buildStyle(`--_size: ${pxSize}px;`, customColor && `--color-user: ${customColor}`)}
       onClick={handleClick}
+      onContextMenu={onContextMenu}
       onMouseDown={handleMouseDown}
     >
       <div className="inner">
