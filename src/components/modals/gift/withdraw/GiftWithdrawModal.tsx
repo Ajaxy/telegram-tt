@@ -133,7 +133,7 @@ const GiftWithdrawModal = ({ modal, hasPassword, passwordHint }: OwnProps & Stat
       {!hasPassword && (
         <>
           <span className={styles.noPassword}>{lang('ErrorPasswordMissing')}</span>
-          <Button size="smaller" onClick={handleSetUpPassword}>{lang('SetUp2FA')}</Button>
+          <Button className="mt-2" size="smaller" onClick={handleSetUpPassword}>{lang('SetUp2FA')}</Button>
         </>
       )}
       {hasPassword && !exportDelay && (

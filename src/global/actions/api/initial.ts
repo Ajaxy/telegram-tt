@@ -52,8 +52,12 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
 
   const hasTestParam = window.location.search.includes('test') || initialLocationHash?.tgWebAuthTest === '1';
 
+  const isTestServer = global.config?.isTestServer;
   const accountsInfo = getAccountsInfo();
-  const accountIds = Object.values(accountsInfo).map(({ userId }) => userId)?.filter(Boolean);
+  const accountIds = Object.values(accountsInfo)
+    .filter((info) => info.isTest === isTestServer)
+    .map(({ userId }) => userId)
+    .filter(Boolean);
 
   void initApi(actions.apiUpdate, {
     userAgent: navigator.userAgent,
