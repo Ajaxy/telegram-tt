@@ -129,6 +129,7 @@ const RoundVideo: FC<OwnProps> = ({
   });
 
   const [isActivated, setIsActivated] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const [getProgress, setProgress] = useSignal(0);
   const getThrottledProgress = useThrottledSignal(getProgress, PROGRESS_THROTTLE);
@@ -229,6 +230,7 @@ const RoundVideo: FC<OwnProps> = ({
   const handleTimeUpdate = useLastCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
     setProgress(playerEl.currentTime / playerEl.duration);
+    setCurrentTime(Math.floor(playerEl.currentTime));
   });
 
   const handleTranscribe = useLastCallback(() => {
@@ -335,7 +337,7 @@ const RoundVideo: FC<OwnProps> = ({
             'message-media-duration', isMediaUnread && 'unread',
           )}
         >
-          {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
+          {isActivated ? formatMediaDuration(currentTime) : formatMediaDuration(video.duration)}
           {(!isActivated || playerRef.current!.paused) && <Icon name="muted" />}
         </div>
       )}
