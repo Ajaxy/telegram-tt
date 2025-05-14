@@ -378,7 +378,7 @@ function processTranslation(
     }
 
     const valueAsString = Number.isFinite(value) ? formatters!.number.format(value as number) : String(value);
-    return result.replace(`{${key}}`, valueAsString);
+    return result.replaceAll(`{${key}}`, valueAsString);
   }, string);
 
   TRANSLATION_CACHE.set(cacheKey, finalString);
