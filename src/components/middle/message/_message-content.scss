@@ -711,6 +711,10 @@
     }
   }
 
+  &.has-subheader.text.is-inverted-media.has-reactions.has-replies .media-inner {
+    margin-bottom: 0rem;
+  }
+
   &:not(.text) .RoundVideo {
     margin-bottom: 0;
   }
