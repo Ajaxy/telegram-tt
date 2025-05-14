@@ -57,7 +57,11 @@ type StateProps = {
 };
 
 const StarsTransactionModal: FC<OwnProps & StateProps> = ({
-  modal, peer, canPlayAnimatedEmojis, topSticker, paidMessageCommission,
+  modal,
+  peer,
+  canPlayAnimatedEmojis,
+  topSticker,
+  paidMessageCommission,
 }) => {
   const { showNotification, openMediaViewer, closeStarsTransactionModal } = getActions();
 
@@ -168,6 +172,9 @@ const StarsTransactionModal: FC<OwnProps & StateProps> = ({
             {formatStarsTransactionAmount(lang, stars)}
           </span>
           <StarIcon type="gold" size="middle" />
+          {transaction.isRefund && (
+            <p className={styles.refunded}>{lang('Refunded')}</p>
+          )}
         </p>
         {transaction.paidMessages && transaction.starRefCommision && paidMessageCommission
         && (

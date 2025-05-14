@@ -1434,6 +1434,7 @@ export interface LangPair {
   'ActionGiftPremiumText': undefined;
   'ActionGiftStarsText': undefined;
   'ActionHistoryCleared': undefined;
+  'Refunded': undefined;
   'UniqueStatusBenefitsDescription': undefined;
   'UniqueStatusBadgeBenefitTitle': undefined;
   'UniqueStatusBadgeDescription': undefined;

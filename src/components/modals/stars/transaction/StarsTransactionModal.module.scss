@@ -64,6 +64,15 @@
   text-align: center;
 }
 
+.refunded {
+  font-size: 0.8125rem;
+  line-height: 1;
+  border-radius: var(--border-radius-messages-small);
+  padding: 0.25em 0.5em;
+  background-color: rgba(var(--color-text-green-rgb), 0.2);
+  color: var(--color-success);
+}
+
 .totalStars {
   display: inline-flex;
   align-items: center;

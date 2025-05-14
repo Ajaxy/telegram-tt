@@ -1867,6 +1867,7 @@
 "ActionMigratedFrom" = "Migrated from {chat}";
 "ActionMigratedTo" = "Migrated to {chat}";
 "ActionHistoryCleared" = "History was cleared";
+"Refunded" = "Refund";
 "UniqueStatusWearTitle" = "Wear {gift}";
 "UniqueStatusBenefitsDescription" = "and get these benefits:";
 "UniqueStatusBadgeBenefitTitle" = "Radiant Badge";
