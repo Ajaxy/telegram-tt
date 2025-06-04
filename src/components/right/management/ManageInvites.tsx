@@ -294,7 +294,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           </div>
         )}
         <div className="section" teactFastList>
-          <ListItem icon="add" withPrimaryColor key="create" className="create-link" onClick={handleCreateNewClick}>
+          <ListItem icon="add" withPrimaryColor key="create" className="create-item" onClick={handleCreateNewClick}>
             {oldLang('CreateNewLink')}
           </ListItem>
           {(!temporalInvites || !temporalInvites.length) && <NothingFound text="No links found" key="nothing" />}

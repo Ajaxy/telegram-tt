@@ -76,7 +76,6 @@ const ContactList: FC<OwnProps & StateProps> = ({
           <ListItem
             key={id}
             className="chat-item-clickable contact-list-item"
-
             onClick={() => handleClick(id)}
           >
             <PrivateChatInfo

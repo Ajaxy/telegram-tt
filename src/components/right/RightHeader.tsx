@@ -136,6 +136,7 @@ enum HeaderContent {
   CreateTopic,
   EditTopic,
   SavedDialogs,
+  NewDiscussionGroup,
 }
 
 const RightHeader: FC<OwnProps & StateProps> = ({
@@ -318,6 +319,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       HeaderContent.ManageInviteInfo
     ) : managementScreen === ManagementScreens.JoinRequests ? (
       HeaderContent.ManageJoinRequests
+    ) : managementScreen === ManagementScreens.NewDiscussionGroup ? (
+      HeaderContent.NewDiscussionGroup
     ) : undefined // Never reached
   ) : isStatistics ? (
     HeaderContent.Statistics
@@ -588,6 +591,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
             )}
           </>
         );
+      case HeaderContent.NewDiscussionGroup:
+        return <h3 className="title">{oldLang('NewGroup')}</h3>;
       default:
         return (
           <>

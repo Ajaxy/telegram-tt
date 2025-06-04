@@ -674,11 +674,12 @@ addActionHandler('updateTopicMutedState', (global, actions, payload): ActionRetu
 
 addActionHandler('createChannel', async (global, actions, payload): Promise<void> => {
   const {
-    title, about, photo, memberIds, tabId = getCurrentTabId(),
+    title, about, photo, memberIds, discussionChannelId, tabId = getCurrentTabId(),
   } = payload;
+  const isChannel = 'isChannel' in payload ? payload.isChannel : undefined;
+  const isSuperGroup = 'isSuperGroup' in payload ? payload.isSuperGroup : undefined;
 
-  const users = (memberIds)
-    .map((id) => selectUser(global, id))
+  const users = memberIds?.map((id) => selectUser(global, id))
     .filter(Boolean);
 
   global = updateTabState(global, {
@@ -691,7 +692,13 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   let createdChannel: ApiChat | undefined;
   let missingInvitedUsers: ApiMissingInvitedUser[] | undefined;
   try {
-    const result = await callApi('createChannel', { title, about, users });
+    const result = await callApi('createChannel', {
+      title,
+      about,
+      users,
+      isBroadcast: isChannel,
+      isMegagroup: isSuperGroup,
+    });
     createdChannel = result?.channel;
     missingInvitedUsers = result?.missingUsers;
   } catch (error) {
@@ -727,6 +734,13 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
     },
   }, tabId);
   setGlobal(global);
+  if (discussionChannelId && channelId) {
+    actions.linkDiscussionGroup({
+      channelId: discussionChannelId,
+      chatId: channelId,
+      tabId,
+    });
+  }
   actions.openChat({ id: channelId, shouldReplaceHistory: true, tabId });
 
   if (missingInvitedUsers) {

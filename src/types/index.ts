@@ -331,6 +331,7 @@ export enum RightColumnContent {
   CreateTopic,
   EditTopic,
   MonetizationStatistics,
+  NewGroup,
 }
 
 export type MediaViewerMedia = ApiPhoto | ApiVideo | ApiDocument;
@@ -502,6 +503,7 @@ export enum ManagementScreens {
   Reactions,
   InviteInfo,
   JoinRequests,
+  NewDiscussionGroup,
 }
 
 export type ManagementType = 'user' | 'group' | 'channel' | 'bot';

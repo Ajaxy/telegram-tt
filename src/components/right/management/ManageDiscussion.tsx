@@ -15,6 +15,7 @@ import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLastCallback from '../../../hooks/useLastCallback.ts';
 import useOldLang from '../../../hooks/useOldLang';
 
 import AnimatedIconWithPreview from '../../common/AnimatedIconWithPreview';
@@ -198,6 +199,10 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const handleNewGroupClick = useLastCallback(() => {
+    onScreenSelect(ManagementScreens.NewDiscussionGroup);
+  });
+
   function renderDiscussionGroups() {
     return (
       <div>
@@ -208,8 +213,10 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
             key="create-group"
             icon="group"
             ripple
+            className="create-item"
+            withPrimaryColor
             teactOrderKey={0}
-            disabled
+            onClick={handleNewGroupClick}
           >
             {lang('DiscussionCreateGroup')}
           </ListItem>
@@ -219,7 +226,6 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
                 key={id}
                 teactOrderKey={i + 1}
                 className="chat-item-clickable scroll-item"
-
                 onClick={() => {
                   onDiscussionClick(id);
                 }}

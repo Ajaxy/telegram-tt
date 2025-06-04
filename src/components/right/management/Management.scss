@@ -162,6 +162,13 @@
     }
   }
 
+  .create-item {
+    .icon-group {
+      margin-inline-start: 0.1875rem;
+      margin-inline-end: 1.1875rem;
+    }
+  }
+
   .Spinner {
     margin: 2rem auto;
   }
@@ -172,7 +179,7 @@
 }
 
 .ManageInvites {
-  .create-link {
+  .create-item {
     margin-bottom: 0.5rem;
     .icon-add {
       margin-inline-start: 0.1875rem;

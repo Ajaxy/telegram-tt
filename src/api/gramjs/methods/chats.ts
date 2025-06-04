@@ -347,14 +347,27 @@ export async function fetchSavedChats({
   };
 }
 
-export function fetchFullChat(chat: ApiChat) {
+const fullChatRequestDedupe = new Map<string, Promise<FullChatData | undefined>>();
+export async function fetchFullChat(chat: ApiChat) {
   const { id } = chat;
+
+  if (fullChatRequestDedupe.has(id)) {
+    return fullChatRequestDedupe.get(id);
+  }
 
   const type = getEntityTypeById(chat.id);
 
-  return type === 'channel'
+  const promise = type === 'channel'
     ? getFullChannelInfo(chat)
     : getFullChatInfo(id);
+
+  fullChatRequestDedupe.set(id, promise);
+
+  promise.finally(() => {
+    fullChatRequestDedupe.delete(id);
+  });
+
+  return promise;
 }
 
 export async function fetchPeerSettings(peer: ApiPeer) {
@@ -801,14 +814,15 @@ export function updateTopicMutedState({
 }
 
 export async function createChannel({
-  title, about = '', users,
+  title, about = '', users, isBroadcast, isMegagroup,
 }: {
-  title: string; about?: string; users?: ApiUser[];
+  title: string; about?: string; users?: ApiUser[]; isBroadcast?: true; isMegagroup?: true;
 }) {
   const result = await invokeRequest(new GramJs.channels.CreateChannel({
-    broadcast: true,
+    broadcast: isBroadcast,
     title,
     about,
+    megagroup: isMegagroup,
   }), {
     shouldThrow: true,
   });

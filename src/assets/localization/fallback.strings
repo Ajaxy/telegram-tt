@@ -1083,6 +1083,7 @@
 "ChannelPersmissionDeniedSendMessagesForever" = "The admins of this group have restricted your ability to send messages.";
 "ChannelPersmissionDeniedSendMessagesDefaultRestrictedText" = "Sending messages is not allowed in this group.";
 "Chats" = "Chats";
+"NewDiscussionChatTitle" = "{name} Chat";
 "FilterBots" = "Bots";
 "FilterContacts" = "Contacts";
 "FilterNonContacts" = "Non-Contacts";
@@ -1750,6 +1751,7 @@
 "ActionChangedTitleYou" = "You changed group name to «{title}»";
 "ActionChangedTitleChannel" = "Channel name was changed to «{title}»";
 "ActionCreatedChat" = "{from} created the group «{title}»";
+"ActionCreatedChatYou" = "You created the group «{title}»";
 "ActionCreatedChannel" = "Channel created";
 "ActionGameScore_one" = "{from} scored {count} in {game}";
 "ActionGameScore_other" = "{from} scored {count} in {game}";

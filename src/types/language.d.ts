@@ -2483,6 +2483,9 @@ export interface LangPairWithVariables<V = LangVariable> {
   'ComposerTitleForwardFrom': {
     'users': V;
   };
+  'NewDiscussionChatTitle': {
+    'name': V;
+  }
 }
 
 export interface LangPairPlural {

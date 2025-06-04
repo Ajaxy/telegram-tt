@@ -685,8 +685,11 @@ export interface ActionPayloads {
     title: string;
     about?: string;
     photo?: File;
-    memberIds: string[];
-  } & WithTabId;
+    memberIds?: string[];
+    discussionChannelId?: string;
+  } & (
+    { isChannel: true } | { isSuperGroup: true }
+  ) & WithTabId;
   createGroupChat: {
     title: string;
     memberIds: string[];

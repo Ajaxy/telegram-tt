@@ -132,6 +132,7 @@ const NewChatStep2: FC<OwnProps & StateProps> = ({
       about,
       photo,
       memberIds,
+      isChannel: true,
     });
   }, [title, createChannel, about, photo, memberIds, channelTitleEmptyError]);
 

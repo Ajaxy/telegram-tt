@@ -182,6 +182,9 @@ const RightColumn: FC<OwnProps & StateProps> = ({
             setSelectedChatMemberId(undefined);
             setIsPromotedByCurrentUser(undefined);
             break;
+          case ManagementScreens.NewDiscussionGroup:
+            setManagementScreen(ManagementScreens.Discussion);
+            break;
           case ManagementScreens.ChatAdminRights:
           case ManagementScreens.ChatNewAdminRights:
           case ManagementScreens.GroupAddAdmins:
