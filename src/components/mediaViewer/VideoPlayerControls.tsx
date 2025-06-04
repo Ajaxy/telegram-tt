@@ -58,6 +58,7 @@ type OwnProps = {
   onPlaybackRateChange: (playbackRate: number) => void;
   onPlayPause: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onSeek: (position: number) => void;
+  onSeekingChange: (isSeeking: boolean) => void;
 };
 
 const stopEvent = (e: React.MouseEvent<HTMLElement>) => {
@@ -98,6 +99,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
   onPictureInPictureChange,
   onPlayPause,
   onSeek,
+  onSeekingChange,
 }) => {
   const [isPlaybackMenuOpen, openPlaybackMenu, closePlaybackMenu] = useFlag();
   const [getCurrentTime] = useCurrentTimeSignal();
@@ -146,10 +148,12 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const handleSeek = useLastCallback((position: number) => {
     setIsSeeking(false);
     onSeek(position);
+    onSeekingChange(false);
   });
 
   const handleSeekStart = useLastCallback(() => {
     setIsSeeking(true);
+    onSeekingChange(true);
   });
 
   const volumeIcon: IconName = useMemo(() => {

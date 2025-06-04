@@ -1,13 +1,14 @@
 import type { FC } from '../../lib/teact/teact';
 import type React from '../../lib/teact/teact';
 import {
-  memo, useEffect, useRef, useState,
+  memo, useEffect, useRef, useSignal, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiDimensions } from '../../api/types';
 
 import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/browser/windowEnvironment';
+import getPointerPosition from '../../util/events/getPointerPosition';
 import { clamp } from '../../util/math';
 import safePlay from '../../util/safePlay';
 import stopEvent from '../../util/stopEvent';
@@ -112,17 +113,47 @@ const VideoPlayer: FC<OwnProps> = ({
   ] = usePictureInPicture(videoRef, handleEnterFullscreen, handleLeaveFullscreen);
 
   const [, toggleControls, lockControls] = useControlsSignal();
+  const [getIsSeeking, setIsSeeking] = useSignal(false);
+  const lastMousePosition = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const updateMousePosition = (e: MouseEvent | TouchEvent) => {
+      lastMousePosition.current = getPointerPosition(e);
+    };
+
+    window.addEventListener('mousemove', updateMousePosition);
+    window.addEventListener('touchmove', updateMousePosition);
+
+    return () => {
+      window.removeEventListener('mousemove', updateMousePosition);
+      window.removeEventListener('touchmove', updateMousePosition);
+    };
+  }, []);
+
+  const checkMousePositionAndToggleControls = useLastCallback((clientX: number, clientY: number) => {
+    const bounds = videoRef.current?.getBoundingClientRect();
+    if (!bounds) return;
+    if (clientX <= bounds.left || clientX >= bounds.right
+      || clientY <= bounds.top || clientY >= bounds.bottom) {
+      if (!getIsSeeking()) {
+        toggleControls(false);
+      }
+    }
+  });
 
   const handleVideoMove = useLastCallback(() => {
     toggleControls(true);
   });
 
   const handleVideoLeave = useLastCallback((e) => {
-    const bounds = videoRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    if (e.clientX <= bounds.left || e.clientX >= bounds.right
-      || e.clientY <= bounds.top || e.clientY >= bounds.bottom) {
-      toggleControls(false);
+    checkMousePositionAndToggleControls(e.clientX, e.clientY);
+  });
+
+  const handleSeekingChange = useLastCallback((isSeeking: boolean) => {
+    setIsSeeking(isSeeking);
+    if (!isSeeking) {
+      const { x, y } = lastMousePosition.current;
+      checkMousePositionAndToggleControls(x, y);
     }
   });
 
@@ -374,6 +405,7 @@ const VideoPlayer: FC<OwnProps> = ({
           onVolumeClick={handleVolumeMuted}
           onVolumeChange={handleVolumeChange}
           onPlaybackRateChange={handlePlaybackRateChange}
+          onSeekingChange={handleSeekingChange}
         />
       )}
     </div>

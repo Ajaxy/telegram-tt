@@ -9,6 +9,7 @@ import type { Point, Size } from '../types';
 import { RESIZE_HANDLE_SELECTOR } from '../config';
 import buildStyle from '../util/buildStyle';
 import { captureEvents } from '../util/captureEvents';
+import getPointerPosition from '../util/events/getPointerPosition';
 import useFlag from './useFlag';
 import useLastCallback from './useLastCallback';
 
@@ -124,11 +125,11 @@ export default function useDraggable(
     if (targetElement.closest('.no-drag') || !element) {
       return;
     }
-    const { pageX, pageY } = ('touches' in event) ? event.touches[0] : event;
+    const { x, y } = getPointerPosition(event);
 
     const { left, top } = element.getBoundingClientRect();
     setElementPositionOnStartTransform({ x: left, y: top });
-    setTransformStartPoint({ x: pageX, y: pageY });
+    setTransformStartPoint({ x, y });
 
     startDragging();
   });
@@ -159,14 +160,14 @@ export default function useDraggable(
     if (resizeHandle === undefined) return;
     setHitResizeHandle(resizeHandle);
 
-    const { pageX, pageY } = ('touches' in event) ? event.touches[0] : event;
+    const { x, y } = getPointerPosition(event);
 
     const {
       left, right, top, bottom,
     } = element.getBoundingClientRect();
     setElementPositionOnStartTransform({ x: left, y: top });
     setElementSizeOnStartTransform({ width: right - left, height: bottom - top });
-    setTransformStartPoint({ x: pageX, y: pageY });
+    setTransformStartPoint({ x, y });
 
     startResizing();
   });
@@ -269,10 +270,10 @@ export default function useDraggable(
 
   const handleDrag = useLastCallback((event: MouseEvent | TouchEvent) => {
     if (!isDragging || !element) return;
-    const { pageX, pageY } = ('touches' in event) ? event.touches[0] : event;
+    const { x, y } = getPointerPosition(event);
 
-    const offsetX = pageX - transformStartPoint.x;
-    const offsetY = pageY - transformStartPoint.y;
+    const offsetX = x - transformStartPoint.x;
+    const offsetY = y - transformStartPoint.y;
 
     const newX = elementPositionOnStartTransform.x + offsetX;
     const newY = elementPositionOnStartTransform.y + offsetY;
@@ -282,11 +283,11 @@ export default function useDraggable(
 
   const handleResize = useLastCallback((event: MouseEvent | TouchEvent) => {
     if (!isResizing || !element || hitResizeHandle === undefined) return;
-    const { pageX, pageY } = ('touches' in event) ? event.touches[0] : event;
+    const { x, y } = getPointerPosition(event);
     const sizeOnStartTransform = getElementSizeOnStartTransform();
 
-    const pageVisibleX = Math.min(Math.max(0, pageX), getVisibleArea().width);
-    const pageVisibleY = Math.min(Math.max(0, pageY), getVisibleArea().height);
+    const pageVisibleX = Math.min(Math.max(0, x), getVisibleArea().width);
+    const pageVisibleY = Math.min(Math.max(0, y), getVisibleArea().height);
 
     const offsetX = pageVisibleX - transformStartPoint.x;
     const offsetY = pageVisibleY - transformStartPoint.y;

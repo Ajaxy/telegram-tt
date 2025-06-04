@@ -1,11 +1,11 @@
 import type { FC } from '../../lib/teact/teact';
-import type React from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import getPointerPosition from '../../util/events/getPointerPosition';
 
 import useOldLang from '../../hooks/useOldLang';
 
@@ -59,7 +59,7 @@ const Draggable: FC<OwnProps> = ({
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    const { x, y } = getClientCoordinate(e);
+    const { x, y } = getPointerPosition(e);
 
     setState({
       ...state,
@@ -71,7 +71,7 @@ const Draggable: FC<OwnProps> = ({
   };
 
   const handleMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
-    const { x, y } = getClientCoordinate(e);
+    const { x, y } = getPointerPosition(e);
 
     const translation = {
       x: x - state.origin.x,
@@ -172,18 +172,3 @@ const Draggable: FC<OwnProps> = ({
 };
 
 export default memo(Draggable);
-
-function getClientCoordinate(e: MouseEvent | TouchEvent | React.MouseEvent | React.TouchEvent) {
-  let x;
-  let y;
-
-  if ('touches' in e) {
-    x = e.touches[0].clientX;
-    y = e.touches[0].clientY;
-  } else {
-    x = e.clientX;
-    y = e.clientY;
-  }
-
-  return { x, y };
-}

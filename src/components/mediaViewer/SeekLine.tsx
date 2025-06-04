@@ -13,6 +13,7 @@ import { IS_TOUCH_ENV } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents } from '../../util/captureEvents';
 import { formatMediaDuration } from '../../util/dates/dateFormat';
+import getPointerPosition from '../../util/events/getPointerPosition';
 import { clamp, round } from '../../util/math';
 
 import { useThrottledSignal } from '../../hooks/useAsyncResolvers';
@@ -151,7 +152,7 @@ const SeekLine: FC<OwnProps> = ({
     let offset = 0;
 
     const getPreviewProps = (e: MouseEvent | TouchEvent) => {
-      const pageX = e instanceof MouseEvent ? e.pageX : e.touches[0].pageX;
+      const pageX = getPointerPosition(e).x;
       const t = clamp(duration * ((pageX - seekerSize.left) / seekerSize.width), 0, duration);
       if (isPreviewDisabled) return [t, 0];
       if (!seekerSize.width) seekerSize = seeker.getBoundingClientRect();
