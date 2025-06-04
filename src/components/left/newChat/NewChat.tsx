@@ -6,6 +6,8 @@ import { LeftColumnContent } from '../../../types';
 
 import { LAYERS_ANIMATION_NAME } from '../../../util/browser/windowEnvironment';
 
+import useLastCallback from '../../../hooks/useLastCallback.ts';
+
 import Transition from '../../ui/Transition';
 import NewChatStep1 from './NewChatStep1';
 import NewChatStep2 from './NewChatStep2';
@@ -27,7 +29,7 @@ const NewChat: FC<OwnProps> = ({
   content,
   onReset,
 }) => {
-  const { openLeftColumnContent } = getActions();
+  const { openLeftColumnContent, setGlobalSearchQuery } = getActions();
   const [newChatMemberIds, setNewChatMemberIds] = useState<string[]>([]);
 
   const handleNextStep = useCallback(() => {
@@ -35,6 +37,15 @@ const NewChat: FC<OwnProps> = ({
       contentKey: isChannel ? LeftColumnContent.NewChannelStep2 : LeftColumnContent.NewGroupStep2,
     });
   }, [isChannel]);
+
+  const changeSelectedMemberIdsHandler = useLastCallback((ids: string[]) => {
+    const isSelection = ids.length > newChatMemberIds.length;
+
+    setNewChatMemberIds(ids);
+    if (isSelection) {
+      setGlobalSearchQuery({ query: '' });
+    }
+  });
 
   return (
     <Transition
@@ -52,7 +63,7 @@ const NewChat: FC<OwnProps> = ({
                 isChannel={isChannel}
                 isActive={isActive}
                 selectedMemberIds={newChatMemberIds}
-                onSelectedMemberIdsChange={setNewChatMemberIds}
+                onSelectedMemberIdsChange={changeSelectedMemberIdsHandler}
                 onNextStep={handleNextStep}
                 onReset={onReset}
               />
