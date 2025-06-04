@@ -314,7 +314,8 @@ export function insertTextEntity(entities: ApiMessageEntity[], newEntity: ApiMes
     if (existingEntityEnd <= newEntityStart
       || existingEntityStart > newEntityEnd
       || (existingEntityStart > newEntityStart
-        && existingEntityEnd < newEntityEnd)) {
+        && existingEntityEnd < newEntityEnd)
+      || (existingEntityStart === newEntityStart && existingEntityEnd === newEntityEnd)) {
       resultEntities.push(existingEntity);
       continue;
     }

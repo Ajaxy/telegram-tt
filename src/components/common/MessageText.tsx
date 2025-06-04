@@ -74,7 +74,8 @@ function MessageText({
   const entitiesWithFocusedQuote = useMemo(() => {
     if (!text || !focusedQuote) return entities;
 
-    const index = text.indexOf(focusedQuote, focusedQuoteOffset);
+    const offsetIndex = text.indexOf(focusedQuote, focusedQuoteOffset);
+    const index = offsetIndex >= 0 ? offsetIndex : text.indexOf(focusedQuote); // Fallback to first occurrence
     const lendth = focusedQuote.length;
     if (index >= 0) {
       return insertTextEntity(entities || [], {
