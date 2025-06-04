@@ -73,6 +73,17 @@ export function forceMutation(cb: () => any, nodes: Node | Node[]) {
   return cb();
 }
 
+export function suppressStrict(cb: () => any) {
+  if (!isStrict) {
+    return cb();
+  }
+
+  disableStrict();
+  const result = cb();
+  enableStrict();
+  return result;
+}
+
 export function setHandler(handler?: ErrorHandler) {
   onError = handler || DEFAULT_ERROR_HANDLER;
 }

@@ -14,7 +14,7 @@ const runUpdatePassOnRaf = throttleWithRafFallback(() => {
   });
 
   // We use promises to provide correct order for Mutation Observer callback microtasks
-  Promise.resolve()
+  void Promise.resolve()
     .then(() => {
       setPhase('mutate');
 
