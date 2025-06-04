@@ -257,6 +257,7 @@ export const BIRTHDAY_NUMBERS_SET = 'FestiveFontEmoji';
 export const RESTRICTED_EMOJI_SET = 'RestrictedEmoji';
 
 export const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+export const SVG_EXTENSIONS = new Set(['svg', 'svgz']);
 
 export const VIDEO_WEBM_TYPE = 'video/webm';
 export const GIF_MIME_TYPE = 'image/gif';

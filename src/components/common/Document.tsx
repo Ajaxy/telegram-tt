@@ -6,6 +6,7 @@ import { getActions } from '../../global';
 import type { ApiDocument, ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
+import { SVG_EXTENSIONS } from '../../config';
 import {
   getDocumentMediaHash,
   getMediaFormat,
@@ -52,7 +53,6 @@ type OwnProps = {
 });
 
 const BYTES_PER_MB = 1024 * 1024;
-const SVG_EXTENSIONS = new Set(['svg', 'svgz']);
 
 const Document = ({
   document,

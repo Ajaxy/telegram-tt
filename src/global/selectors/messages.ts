@@ -23,6 +23,7 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ANONYMOUS_USER_ID, API_GENERAL_ID_LIMIT, GENERAL_TOPIC_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  SVG_EXTENSIONS,
 } from '../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/browser/windowEnvironment';
 import { isUserId } from '../../util/entities/ids';
@@ -31,6 +32,7 @@ import { findLast } from '../../util/iteratees';
 import { getMessageKey, isLocalMessageId } from '../../util/keys/messageKey';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { getServerTime } from '../../util/serverTime';
+import { getDocumentExtension } from '../../components/common/helpers/documentInfo';
 import {
   canSendReaction,
   getAllowedAttachmentOptions,
@@ -1268,6 +1270,24 @@ export function selectCanForwardMessages<T extends GlobalState>(global: T, chatI
     .map((id) => messages[id])
     .every((message) => message && !hasMessageTtl(message)
       && (message.isForwardingAllowed || isServiceNotificationMessage(message)));
+}
+
+export function selectHasSvg<T extends GlobalState>(global: T, chatId: string, messageIds: number[]) {
+  const messages = selectChatMessages(global, chatId);
+
+  return messageIds
+    .map((id) => messages[id])
+    .some((message) => {
+      if (!message) return false;
+
+      const document = getMessageDocument(message);
+      if (!document) return false;
+
+      const extension = getDocumentExtension(document);
+      if (!extension) return false;
+
+      return SVG_EXTENSIONS.has(extension);
+    });
 }
 
 export function selectSponsoredMessage<T extends GlobalState>(global: T, chatId: string) {

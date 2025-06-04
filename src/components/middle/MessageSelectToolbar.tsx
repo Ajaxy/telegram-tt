@@ -12,6 +12,7 @@ import {
   selectCanForwardMessages,
   selectCanReportSelectedMessages, selectCurrentChat,
   selectCurrentMessageList, selectHasProtectedMessage,
+  selectHasSvg,
   selectSelectedMessagesCount,
   selectTabState,
 } from '../../global/selectors';
@@ -50,6 +51,7 @@ type StateProps = {
   isAnyModalOpen?: boolean;
   selectedMessageIds?: number[];
   shouldWarnAboutSvg?: boolean;
+  hasSvgs?: boolean;
 };
 
 const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
@@ -67,6 +69,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   isAnyModalOpen,
   selectedMessageIds,
   shouldWarnAboutSvg,
+  hasSvgs,
 }) => {
   const {
     exitMessageSelectMode,
@@ -125,7 +128,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   });
 
   const handleMessageDownload = useLastCallback(() => {
-    if (shouldWarnAboutSvg) {
+    if (shouldWarnAboutSvg && hasSvgs) {
       openSvgDialog();
       return;
     }
@@ -134,7 +137,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   });
 
   const handleSvgConfirm = useLastCallback(() => {
-    setSharedSettingOption({ shouldWarnAboutSvg: false });
+    setSharedSettingOption({ shouldWarnAboutSvg: !shouldNotWarnAboutSvg });
     closeSvgDialog();
     handleDownload();
   });
@@ -250,6 +253,7 @@ export default memo(withGlobal<OwnProps>(
     const { messageIds: selectedMessageIds } = tabState.selectedMessages || {};
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
     const canForward = !isSchedule && chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
+    const hasSvgs = selectedMessageIds && chatId ? selectHasSvg(global, chatId, selectedMessageIds) : false;
     const isShareMessageModalOpen = tabState.isShareMessageModalShown;
     const isAnyModalOpen = Boolean(isShareMessageModalOpen || tabState.requestedDraft
       || tabState.requestedAttachBotInChat || tabState.requestedAttachBotInstall || tabState.reportModal
@@ -267,6 +271,7 @@ export default memo(withGlobal<OwnProps>(
       hasProtectedMessage,
       isAnyModalOpen,
       shouldWarnAboutSvg,
+      hasSvgs,
     };
   },
 )(MessageSelectToolbar));
