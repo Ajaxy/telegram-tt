@@ -15,6 +15,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": true,
+    "noImplicitReturns": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,

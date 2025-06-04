@@ -50,7 +50,7 @@ type StateProps = {
   isChannel?: boolean;
 };
 
-const GIVEAWAY_IMG_LIST: { [key: number]: string } = {
+const GIVEAWAY_IMG_LIST: Partial<Record<number, string>> = {
   3: GiftGreenRound,
   6: GiftBlueRound,
   12: GiftRedRound,
@@ -319,7 +319,7 @@ const BoostStatistics = ({
                             />
                           ) : (
                             <img
-                              src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months]}
+                              src={GIVEAWAY_IMG_LIST[prepaidGiveaway.months] || GIVEAWAY_IMG_LIST[3]}
                               className={styles.giveawayIcon}
                               alt={lang('Giveaway')}
                             />

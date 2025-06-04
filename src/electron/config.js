@@ -1,3 +1,4 @@
+/* eslint-disable no-template-curly-in-string */
 const config = {
   productName: 'Telegram A',
   artifactName: '${productName}-${arch}.${ext}',

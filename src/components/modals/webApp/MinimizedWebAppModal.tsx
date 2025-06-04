@@ -68,14 +68,14 @@ const MinimizedWebAppModal = ({
   function renderTitle() {
     const activeTabName = peers.length > 0 && peers[0]?.firstName;
     const title = openedTabsCount && activeTabName && openedTabsCount > 1
-      ? `${lang('MiniAppsMoreTabs',
+      ? lang('MiniAppsMoreTabs',
         {
           botName: activeTabName,
           count: openedTabsCount - 1,
         },
         {
           pluralValue: openedTabsCount - 1,
-        })}`
+        })
       : activeTabName;
 
     return (

@@ -342,7 +342,7 @@ const PaidReactionModal = ({
           })}
         </div>
       )}
-      {topReactors && (<Separator className={styles.separator} />) }
+      {topReactors && (<Separator className={styles.separator} />)}
       <Checkbox
         className={buildClassName(styles.checkBox, 'dialog-checkbox')}
         checked={!shouldSendAsAnonymous}

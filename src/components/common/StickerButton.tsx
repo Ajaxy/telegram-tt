@@ -291,7 +291,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
-      {withSparkles && <Sparkles preset="button" /> }
+      {withSparkles && <Sparkles preset="button" />}
       {isIntesectingForShowing && (
         <StickerView
           containerRef={ref}

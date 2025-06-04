@@ -137,7 +137,7 @@ const CommentButton: FC<OwnProps> = ({
             )}
             color={isCustomShape ? 'white' : 'blue'}
           />
-        ) }
+        )}
         <Icon
           name="next"
           className={buildClassName(

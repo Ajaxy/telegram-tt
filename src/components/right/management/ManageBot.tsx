@@ -167,7 +167,7 @@ const ManageBot: FC<OwnProps & StateProps> = ({
   });
 
   const handleChangeSettings = useLastCallback(() => {
-    startBotFatherConversation({ param: `${username}` });
+    startBotFatherConversation({ param: username! });
   });
 
   const inputRef = useRef<HTMLInputElement>();

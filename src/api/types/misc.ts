@@ -266,13 +266,11 @@ export interface ApiConfig {
 export type ApiPeerColorSet = string[];
 
 export interface ApiPeerColors {
-  general: {
-    [key: number]: {
-      isHidden?: true;
-      colors?: ApiPeerColorSet;
-      darkColors?: ApiPeerColorSet;
-    };
-  };
+  general: Record<number, {
+    isHidden?: true;
+    colors?: ApiPeerColorSet;
+    darkColors?: ApiPeerColorSet;
+  }>;
   generalHash?: number;
 }
 

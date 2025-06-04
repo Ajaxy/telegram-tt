@@ -4,9 +4,7 @@ type OrderDirection =
   'asc'
   | 'desc';
 
-interface OrderCallback<T> {
-  (member: T): any;
-}
+type OrderCallback<T> = (member: T) => unknown;
 
 export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key: keyof T) {
   return collection.reduce((byKey: CollectionByKey<T>, member: T) => {
@@ -82,6 +80,7 @@ export function orderBy<T>(
     const aValue = (typeof currentOrderRule === 'function' ? currentOrderRule(a) : a[currentOrderRule]) || 0;
     const bValue = (typeof currentOrderRule === 'function' ? currentOrderRule(b) : b[currentOrderRule]) || 0;
 
+    // @ts-expect-error Rely on the JS to handle the comparison
     return isAsc ? aValue - bValue : bValue - aValue;
   }
 

@@ -2114,7 +2114,7 @@ export async function fetchOutboxReadDate({ chat, messageId }: { chat: ApiChat; 
   const peer = buildInputPeer(id, accessHash);
 
   const result = await invokeRequest(new GramJs.messages.GetOutboxReadDate({
-    peer: peer,
+    peer,
     msgId: messageId,
   }), { shouldThrow: true });
 

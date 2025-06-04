@@ -245,12 +245,14 @@ const PeerPicker = <CategoryType extends string = CustomPeerType>({
 
     const peerOrCategory = peer || category;
     if (!peerOrCategory) {
-      if (DEBUG) return (
-        <div key={id}>
-          No peer or category with ID
-          {id}
-        </div>
-      );
+      if (DEBUG) {
+        return (
+          <div key={id}>
+            No peer or category with ID
+            {id}
+          </div>
+        );
+      }
       return undefined;
     }
 

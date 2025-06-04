@@ -246,7 +246,7 @@ const GiftModal: FC<OwnProps & StateProps> = ({
         return !isLimited && !isSoldOut;
       }
       if (areUnlimitedStarGiftsDisallowed && areLimitedStarGiftsDisallowed) {
-        return Boolean(isLimited && !!upgradeStars);
+        return Boolean(isLimited && Boolean(upgradeStars));
       }
 
       return true;

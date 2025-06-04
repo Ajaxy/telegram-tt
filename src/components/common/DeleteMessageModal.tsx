@@ -136,7 +136,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   const buildNestedOptionListWithAvatars = useLastCallback(() => {
     return peerList.map((member) => {
       return {
-        value: `${member.id}`,
+        value: member.id,
         label: getPeerTitle(lang, member) || '',
         leftElement: <Avatar size="small" peer={member} />,
       };

@@ -15,7 +15,7 @@ const connections = launchMediaWorkers();
 let videoPreview: VideoPreview | undefined;
 
 export class VideoPreview {
-  frames: Map<number, ImageBitmap> = new Map();
+  frames = new Map<number, ImageBitmap>();
 
   currentTime = 0;
 

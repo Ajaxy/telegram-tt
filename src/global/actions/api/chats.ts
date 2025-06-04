@@ -427,7 +427,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
   if (focusMessageId) {
     actions.focusMessage({
       chatId,
-      threadId: threadId,
+      threadId,
       messageId: focusMessageId,
       tabId,
     });
@@ -464,7 +464,7 @@ addActionHandler('openThread', async (global, actions, payload): Promise<void> =
       actions.processOpenChatOrThread({
         chatId,
         type,
-        threadId: threadId,
+        threadId,
         tabId,
         isComments,
         noForumTopicPanel,

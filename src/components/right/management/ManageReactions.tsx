@@ -192,7 +192,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   return (
     <div className="Management">
       <div className="panel-content custom-scroll">
-        { Boolean(localReactionsLimit && shouldShowReactionsLimit) && (
+        {Boolean(localReactionsLimit && shouldShowReactionsLimit) && (
           <div className="section">
             <h3 className="section-heading">
               {lang('MaximumReactionsHeader')}

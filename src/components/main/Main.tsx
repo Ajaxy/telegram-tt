@@ -550,7 +550,7 @@ const Main = ({
   });
 
   // Online status and browser tab indicators
-  useBackgroundMode(handleBlur, handleFocus, !!IS_ELECTRON);
+  useBackgroundMode(handleBlur, handleFocus, Boolean(IS_ELECTRON));
   useBeforeUnload(handleBlur);
   usePreventPinchZoomGesture(isMediaViewerOpen || isStoryViewerOpen);
 

@@ -13,7 +13,7 @@ const RIBBON_Z_INDEX = 11;
 const STROKE_OFFSET = 0.1875 * REM;
 const CANVAS_OFFSET = 0.125 * REM;
 
-const callbacks: Set<NoneToVoidFunction> = new Set();
+const callbacks = new Set<NoneToVoidFunction>();
 
 export function animateOpening(isArchived?: boolean) {
   cancelDelayedCallbacks();
@@ -99,7 +99,7 @@ export function animateOpening(isArchived?: boolean) {
       applyStyles(ghost, {
         top: `${toTop}px`,
         left: `${toLeft}px`,
-        zIndex: `${zIndex}`,
+        zIndex: String(zIndex),
         opacity: ghost2 ? '0' : '',
         transform: `translate3d(${fromTranslateX}px, ${fromTranslateY}px, 0) scale(${fromScale})`,
       });
@@ -108,7 +108,7 @@ export function animateOpening(isArchived?: boolean) {
         applyStyles(ghost2, {
           top: `${fromTop}px`,
           left: `${fromLeft}px`,
-          zIndex: `${zIndex}`,
+          zIndex: String(zIndex),
         });
       }
 
@@ -238,14 +238,14 @@ export function animateClosing(isArchived?: boolean) {
         top: `${fromTop}px`,
         left: `${fromLeft}px`,
         width: `${fromWidth}px`,
-        zIndex: `${zIndex}`,
+        zIndex: String(zIndex),
       });
 
       if (ghost2) {
         applyStyles(ghost2, {
           top: `${toTop}px`,
           left: `${toLeft}px`,
-          zIndex: `${zIndex}`,
+          zIndex: String(zIndex),
           opacity: '0',
           transform: `translate3d(${fromTranslateX}px, ${fromTranslateY}px, 0) scale(${fromScale})`,
         });

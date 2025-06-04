@@ -782,7 +782,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             ))}
             {!isCurrentUserPremium && (
               <>
-                { }
+                {}
                 <Button className="show-more-channels" size="smaller" onClick={() => openPremiumModal()}>
                   {oldLang('UnlockSimilar')}
                   <Icon name="unlock-badge" />
@@ -821,7 +821,7 @@ const Profile: FC<OwnProps & StateProps> = ({
             ))}
             {!isCurrentUserPremium && (
               <>
-                { }
+                {}
                 <Button className="show-more-bots" size="smaller" onClick={() => openPremiumModal()}>
                   {lang('UnlockMoreSimilarBots')}
                   <Icon name="unlock-badge" />

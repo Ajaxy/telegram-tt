@@ -855,9 +855,7 @@ export type ApiReplyKeyboard = {
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
   isKeyboardSelective?: boolean;
-} & {
-  [K in 'inlineButtons' | 'keyboardButtons']?: ApiKeyboardButtons;
-};
+} & Partial<Record<'inlineButtons' | 'keyboardButtons', ApiKeyboardButtons>>;
 
 export type ApiTranscription = {
   text: string;

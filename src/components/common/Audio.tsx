@@ -364,7 +364,7 @@ const Audio: FC<OwnProps> = ({
         {withSeekline && (
           <div className="meta search-result" dir={isRtl ? 'rtl' : undefined}>
             <span className="duration with-seekline" dir="auto">
-              {playProgress < 1 && `${formatMediaDuration(duration * playProgress, duration)}`}
+              {playProgress < 1 && formatMediaDuration(duration * playProgress, duration)}
             </span>
             {renderSeekline(playProgress, bufferedRanges, seekerRef)}
           </div>

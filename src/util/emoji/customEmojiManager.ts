@@ -22,7 +22,7 @@ type CustomEmojiInputRenderCallback = (emojiId: string) => void;
 
 const DOM_PROCESS_THROTTLE = 500;
 
-const INPUT_WAITING_CUSTOM_EMOJI_IDS: Set<string> = new Set();
+const INPUT_WAITING_CUSTOM_EMOJI_IDS = new Set<string>();
 
 const handlers = new Map<CustomEmojiLoadCallback, string>();
 const renderCallbacks = createCallbackManager<CustomEmojiInputRenderCallback>();

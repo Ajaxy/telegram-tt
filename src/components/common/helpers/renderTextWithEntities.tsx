@@ -356,7 +356,7 @@ export function insertTextEntity(entities: ApiMessageEntity[], newEntity: ApiMes
 
 // Organize entities in a tree-like structure to better represent how the text will be displayed
 function organizeEntities(entities: ApiMessageEntity[]) {
-  const organizedEntityIndexes: Set<number> = new Set();
+  const organizedEntityIndexes = new Set<number>();
   const organizedEntities: IOrganizedEntity[] = [];
 
   entities.forEach((entity, index) => {

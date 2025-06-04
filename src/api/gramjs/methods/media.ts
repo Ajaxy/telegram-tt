@@ -18,7 +18,7 @@ import * as cacheApi from '../../../util/cacheApi';
 import { getEntityTypeById } from '../gramjsBuilders';
 import localDb from '../localDb';
 
-const MEDIA_ENTITY_TYPES: Set<EntityType> = new Set([
+const MEDIA_ENTITY_TYPES = new Set<EntityType>([
   'sticker', 'wallpaper', 'photo', 'webDocument', 'document',
 ]);
 

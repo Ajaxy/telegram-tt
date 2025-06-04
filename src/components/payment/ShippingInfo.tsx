@@ -167,10 +167,10 @@ const ShippingInfo: FC<OwnProps> = ({
             />
           </div>
         ) : undefined}
-        { needName || needEmail || needPhone ? (
+        {needName || needEmail || needPhone ? (
           <h5>{oldLang('PaymentShippingReceiver')}</h5>
-        ) : undefined }
-        { needName && (
+        ) : undefined}
+        {needName && (
           <InputText
             label={oldLang('PaymentShippingName')}
             onChange={handleFullNameChange}
@@ -179,8 +179,8 @@ const ShippingInfo: FC<OwnProps> = ({
             tabIndex={0}
             error={formErrors.fullName && lang.withRegular(formErrors.fullName)}
           />
-        ) }
-        { needEmail && (
+        )}
+        {needEmail && (
           <InputText
             label={oldLang('PaymentShippingEmailPlaceholder')}
             onChange={handleEmailChange}
@@ -189,8 +189,8 @@ const ShippingInfo: FC<OwnProps> = ({
             tabIndex={0}
             error={formErrors.email && lang.withRegular(formErrors.email)}
           />
-        ) }
-        { needPhone && (
+        )}
+        {needPhone && (
           <InputText
             label={oldLang('PaymentShippingPhoneNumber')}
             onChange={handlePhoneChange}
@@ -200,7 +200,7 @@ const ShippingInfo: FC<OwnProps> = ({
             error={formErrors.phone && lang.withRegular(formErrors.phone)}
             ref={phoneRef}
           />
-        ) }
+        )}
         <Checkbox
           label={oldLang('PaymentShippingSave')}
           subLabel={oldLang('PaymentShippingSaveInfo')}

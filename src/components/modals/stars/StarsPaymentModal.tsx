@@ -87,7 +87,7 @@ const StarPaymentModal = ({
     if (paidMediaMessage) {
       const extendedMedia = paidMediaMessage.content.paidMedia!.extendedMedia as ApiMediaExtendedPreview[];
       const areAllPhotos = extendedMedia.every((media) => !media.duration);
-      const areAllVideos = extendedMedia.every((media) => !!media.duration);
+      const areAllVideos = extendedMedia.every((media) => Boolean(media.duration));
 
       const mediaText = areAllPhotos ? oldLang('Stars.Transfer.Photos', extendedMedia.length)
         : areAllVideos ? oldLang('Stars.Transfer.Videos', extendedMedia.length)

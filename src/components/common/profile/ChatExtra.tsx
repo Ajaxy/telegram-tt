@@ -395,7 +395,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
       {birthday && (
         <UserBirthday key={peerId} birthday={birthday} user={user!} isInSettings={isInSettings} />
       )}
-      { hasMainMiniApp && (
+      {hasMainMiniApp && (
         <ListItem
           multiline
           isStatic

@@ -89,13 +89,13 @@ type StateProps = {
   isAccountFrozen?: boolean;
 };
 
-const SINGLE_LINE_ACTIONS: Set<ApiMessageAction['type']> = new Set([
+const SINGLE_LINE_ACTIONS = new Set<ApiMessageAction['type']>([
   'pinMessage',
   'chatEditPhoto',
   'chatDeletePhoto',
   'unsupported',
 ]);
-const HIDDEN_TEXT_ACTIONS: Set<ApiMessageAction['type']> = new Set(['giftCode', 'prizeStars', 'suggestProfilePhoto']);
+const HIDDEN_TEXT_ACTIONS = new Set<ApiMessageAction['type']>(['giftCode', 'prizeStars', 'suggestProfilePhoto']);
 
 const ActionMessage = ({
   message,

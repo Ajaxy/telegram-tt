@@ -184,7 +184,7 @@ export function callApiLocal<T extends keyof Methods>(
           | (Api.VirtualClass<any> | undefined)[];
         type ForbiddenResponses =
           ForbiddenTypes
-          | (AnyLiteral & { [k: string]: ForbiddenTypes });
+          | (AnyLiteral & Record<string, ForbiddenTypes>);
 
         // Unwrap all chained promises
         const response = await promise;
@@ -231,7 +231,7 @@ export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<
           | (Api.VirtualClass<any> | undefined)[];
         type ForbiddenResponses =
           ForbiddenTypes
-          | (AnyLiteral & { [k: string]: ForbiddenTypes });
+          | (AnyLiteral & Record<string, ForbiddenTypes>);
 
         // Unwrap all chained promises
         const response = await promise;
@@ -346,7 +346,7 @@ function makeRequestToMaster(message: {
   const requestState = { messageId } as RequestState;
 
   // Re-wrap type because of `postMessage`
-  const promise: Promise<MethodResponse<keyof Methods>> = new Promise((resolve, reject) => {
+  const promise = new Promise<MethodResponse<keyof Methods>>((resolve, reject) => {
     Object.assign(requestState, { resolve, reject });
   });
 
@@ -385,7 +385,7 @@ function makeRequest(message: OriginPayload) {
   const requestState = { messageId } as RequestState;
 
   // Re-wrap type because of `postMessage`
-  const promise: Promise<MethodResponse<keyof Methods>> = new Promise((resolve, reject) => {
+  const promise = new Promise<MethodResponse<keyof Methods>>((resolve, reject) => {
     Object.assign(requestState, { resolve, reject });
   });
 

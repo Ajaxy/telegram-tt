@@ -65,7 +65,6 @@ function AnimatedIconWithPreview(props: OwnProps) {
           onLoad={handlePreviewLoad}
         />
       )}
-      { }
       <AnimatedIcon {...otherProps} onLoad={handleAnimationReady} />
     </div>
   );

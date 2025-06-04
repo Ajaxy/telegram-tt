@@ -16,7 +16,7 @@ type OwnProps = {
   containerId?: string;
 };
 
-const revealByContainerId: Map<string, VoidFunction[]> = new Map();
+const revealByContainerId = new Map<string, VoidFunction[]>();
 
 const buildClassName = createClassNameBuilder('Spoiler');
 

@@ -83,7 +83,7 @@ export default function useAnimatedEmoji(
     const { x, y } = container.getBoundingClientRect();
 
     interactWithAnimatedEmoji({
-      emoji: emoji,
+      emoji,
       x,
       y,
       startSize: size,

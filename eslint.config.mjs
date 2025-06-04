@@ -16,6 +16,7 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
+  tseslint.configs.stylistic,
   reactPlugin.configs.flat.recommended,
   reactXPlugin.configs['recommended-type-checked'],
   jsxA11yPlugin.flatConfigs.recommended,
@@ -51,6 +52,20 @@ export default tseslint.config(
     rules: {
       'no-null/no-null': 'error',
       'no-console': 'error',
+      'no-template-curly-in-string': 'error',
+      'object-shorthand': 'error',
+      curly: ['error', 'multi-line'],
+      'no-implicit-coercion': [
+        'error',
+        {
+          boolean: true,
+          disallowTemplateShorthand: true,
+        },
+      ],
+      'no-prototype-builtins': 'off',
+      'no-undef': 'off',
+      'no-unused-vars': 'off',
+      '@stylistic/multiline-ternary': 'off',
       '@stylistic/max-len': ['error', {
         code: 120,
         ignoreComments: true,
@@ -60,10 +75,6 @@ export default tseslint.config(
         SwitchCase: 1,
         flatTernaryExpressions: false,
       }],
-      '@stylistic/multiline-ternary': 'off',
-      'no-prototype-builtins': 'off',
-      'no-undef': 'off',
-      'no-unused-vars': 'off',
       'simple-import-sort/imports': [
         'error',
         {
@@ -115,7 +126,6 @@ export default tseslint.config(
           ],
         },
       ],
-      // TypeScript type imports preference
       '@typescript-eslint/consistent-type-imports': [
         'error',
         {
@@ -130,6 +140,11 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/consistent-type-definitions': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/prefer-for-of': 'off',
+      '@typescript-eslint/array-type': 'off',
       '@typescript-eslint/no-misused-promises': [
         'error',
         {
@@ -169,6 +184,15 @@ export default tseslint.config(
       'react/no-unknown-property': 'off',
       'react/display-name': 'off',
       'react/jsx-key': 'off',
+      'react/jsx-curly-spacing': [
+        'error',
+        {
+          when: 'never',
+          attributes: true,
+          children: true,
+          allowMultiline: true,
+        },
+      ],
       'react-x/no-use-context': 'off',
       'react-x/no-context-provider': 'off',
       'react-x/no-array-index-key': 'off',

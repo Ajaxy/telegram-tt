@@ -6,7 +6,7 @@ import { animate } from './animation';
 
 const DEFAULT_DURATION = 300;
 
-const stopById: Map<string, VoidFunction> = new Map();
+const stopById = new Map<string, VoidFunction>();
 
 export default function animateHorizontalScroll(container: HTMLElement, left: number, duration = DEFAULT_DURATION) {
   if (!selectCanAnimateInterface(getGlobal())) {

@@ -713,7 +713,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           modalHeight={currentHeight}
         />
       ))}
-      { isMoreAppsTabActive && (<MoreAppsTabContent />)}
+      {isMoreAppsTabActive && (<MoreAppsTabContent />)}
     </Modal>
   );
 };

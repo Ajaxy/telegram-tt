@@ -1109,7 +1109,7 @@ const WebAppModalTabContent: FC<OwnProps & StateProps> = ({
             {mainButton?.isProgressVisible && <Spinner className={styles.mainButtonSpinner} color="white" />}
           </Button>
         </div>
-      ) }
+      )}
       {popupParameters && (
         <Modal
           isOpen={Boolean(popupParameters)}

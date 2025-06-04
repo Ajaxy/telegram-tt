@@ -200,7 +200,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     const enabledLength = chatFullInfo.enabledReactions.allowed.length;
     const totalLength = availableReactions?.filter((reaction) => !reaction.isInactive).length || 0;
 
-    return totalLength ? `${enabledLength} / ${totalLength}` : `${enabledLength}`;
+    return totalLength ? `${enabledLength} / ${totalLength}` : enabledLength.toString();
   }, [availableReactions, chatFullInfo?.enabledReactions, lang]);
   const isChannelPublic = useMemo(() => isChatPublic(chat), [chat]);
 

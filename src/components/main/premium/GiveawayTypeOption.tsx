@@ -37,7 +37,7 @@ const GiveawayTypeOption: FC<OwnProps> = ({
 
   let displayText: string | undefined = lang(text);
   if (isLink && selectedMemberIds?.length) {
-    displayText = selectedMemberIds.length > 2 ? `${selectedMemberIds.length}` : userNames;
+    displayText = selectedMemberIds.length > 2 ? selectedMemberIds.length.toString() : userNames;
   }
 
   const handleChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +70,7 @@ const GiveawayTypeOption: FC<OwnProps> = ({
         <img className={styles.optionImg} src={img} alt="" draggable={false} />
         <div className={styles.giveaway}>
           <h3 className={styles.title}>
-            {lang(`${name}`)}
+            {lang(name)}
           </h3>
           {isLink ? (
             <div className={styles.link} onClick={handleClick}>

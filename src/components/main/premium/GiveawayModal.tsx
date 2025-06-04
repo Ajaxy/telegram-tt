@@ -103,7 +103,7 @@ const DEFAULT_CUSTOM_EXPIRE_DATE = 86400 * 3 * 1000; // 3 days
 const MAX_ADDITIONAL_CHANNELS = 9;
 const DEFAULT_BOOST_COUNT = 5;
 
-const GIVEAWAY_IMG_LIST: { [key: number]: string } = {
+const GIVEAWAY_IMG_LIST: Partial<Record<number, string>> = {
   3: GiftGreenRound,
   6: GiftBlueRound,
   12: GiftRedRound,
@@ -721,7 +721,11 @@ const GiveawayModal: FC<OwnProps & StateProps> = ({
               {dataStarsPrepaidGiveaway ? (
                 <img className={styles.prepaidImg} src={GiftStar} alt="" />
               ) : (
-                <img className={styles.prepaidImg} src={GIVEAWAY_IMG_LIST[dataPrepaidGiveaway!.months]} alt="" />
+                <img
+                  className={styles.prepaidImg}
+                  src={GIVEAWAY_IMG_LIST[dataPrepaidGiveaway!.months] || GIVEAWAY_IMG_LIST[3]}
+                  alt=""
+                />
               )}
             </div>
             <div className={styles.info}>

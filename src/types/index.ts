@@ -61,9 +61,7 @@ export type SharedSessionData = {
   date?: number;
   dcId: number;
   isTest?: true;
-} & {
-  [K in `dc${DcId}_${'auth_key' | 'server_salt'}`]?: string;
-} & SessionUserInfo;
+} & Partial<Record<`dc${DcId}_${'auth_key' | 'server_salt'}`, string>> & SessionUserInfo;
 
 export type AccountInfo = {
   isTest?: true;
@@ -103,9 +101,7 @@ export type PerformanceTypeKey = (
   | 'animatedEmoji' | 'loopAnimatedStickers' | 'reactionEffects' | 'stickerEffects' | 'autoplayGifs' | 'autoplayVideos'
   | 'storyRibbonAnimations' | 'snapEffect'
 );
-export type PerformanceType = {
-  [key in PerformanceTypeKey]: boolean;
-};
+export type PerformanceType = Record<PerformanceTypeKey, boolean>;
 
 export interface IThemeSettings {
   background?: string;

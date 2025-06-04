@@ -270,7 +270,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 
     return totalLength
       ? `${enabledLength} / ${totalLength}`
-      : `${enabledLength}`;
+      : enabledLength.toString();
   }, [availableReactions, chatFullInfo?.enabledReactions, lang]);
 
   const enabledPermissionsCount = useMemo(() => {

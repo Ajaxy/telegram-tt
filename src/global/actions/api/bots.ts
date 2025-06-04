@@ -337,7 +337,7 @@ addActionHandler('queryInlineBot', async (global, actions, payload): Promise<voi
   void runDebouncedForSearch(() => {
     searchInlineBot(global, {
       username,
-      inlineBotData: inlineBotData,
+      inlineBotData,
       chatId,
       query,
       offset,

@@ -140,7 +140,7 @@ class ConnectorClass<T extends InputRequestTypes> {
     const requestState = { messageId } as RequestState;
 
     // Re-wrap type because of `postMessage`
-    const promise: Promise<any> = new Promise((resolve, reject) => {
+    const promise = new Promise<any>((resolve, reject) => {
       Object.assign(requestState, { resolve, reject });
     });
 

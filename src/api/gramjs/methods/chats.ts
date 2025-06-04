@@ -86,7 +86,7 @@ import { handleGramJsUpdate, invokeRequest, uploadFile } from './client';
 type FullChatData = {
   fullInfo: ApiChatFullInfo;
   chats: ApiChat[];
-  userStatusesById: { [userId: string]: ApiUserStatus };
+  userStatusesById: Record<string, ApiUserStatus>;
   groupCall?: Partial<ApiGroupCall>;
   membersCount?: number;
   isForumAsMessages?: true;

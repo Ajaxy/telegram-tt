@@ -70,7 +70,7 @@ export default function withSelectControl(WrappedComponent: FC) {
             )}
           </div>
         )}
-        { }
+        {}
         <WrappedComponent {...newProps} />
       </div>
     );

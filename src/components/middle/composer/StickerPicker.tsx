@@ -352,14 +352,14 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={fullClassName}>
-      { !isForEffects && (
+      {!isForEffects && (
         <div ref={headerRef} className={headerClassName}>
           <div className="shared-canvas-container">
             <canvas ref={sharedCanvasRef} className="shared-canvas" />
             {allSets.map(renderCover)}
           </div>
         </div>
-      ) }
+      )}
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}

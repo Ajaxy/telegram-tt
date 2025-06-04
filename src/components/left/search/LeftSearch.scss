@@ -190,9 +190,9 @@
     }
 
     .search-sponsored-badge {
+      cursor: pointer;
       display: flex;
       align-self: flex-start;
-      cursor: pointer;
       &:hover {
         filter: brightness(1.1);
       }

@@ -3,7 +3,7 @@ import { devices, type PlaywrightTestConfig } from '@playwright/test';
 const config: PlaywrightTestConfig = {
   testDir: 'tests/playwright',
   timeout: process.env.CI ? 60 * 5 * 1000 : 30 * 1000,
-  forbidOnly: !!process.env.CI,
+  forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   webServer: {
     command: 'npm run build:mocked && serve -l 1235 dist',

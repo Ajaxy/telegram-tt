@@ -45,7 +45,7 @@ const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
 const HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
 const CONTROLLABLE_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
-const MAPPED_ATTRIBUTES: { [k: string]: string } = {
+const MAPPED_ATTRIBUTES: Partial<Record<string, string>> = {
   autoCapitalize: 'autocapitalize',
   autoComplete: 'autocomplete',
   autoCorrect: 'autocorrect',
