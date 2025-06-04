@@ -266,9 +266,10 @@ export function withUntypedGlobal<OwnProps extends AnyLiteral>(
         containers.set(id, container);
       }
 
-      if (!container.mappedProps || (
-        !arePropsShallowEqual(container.ownProps, props) && activateContainer(container, currentGlobal, props)
-      )) {
+      if (
+        (!container.mappedProps || !arePropsShallowEqual(container.ownProps, props))
+        && activateContainer(container, currentGlobal, props)
+      ) {
         try {
           container.mappedProps = mapStateToProps(currentGlobal, props);
         } catch (err: any) {
