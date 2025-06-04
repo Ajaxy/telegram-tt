@@ -2,6 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { RPCError } from '../../../lib/gramjs/errors';
 
+import type { ChatListType } from '../../../types';
 import type {
   ApiChat,
   ApiChatAdminRights,
@@ -1078,6 +1079,29 @@ export async function fetchChatFolders() {
         .map(buildApiChatFolder), 'id',
     ) as Record<number, ApiChatFolder>,
     orderedIds,
+  };
+}
+
+export async function fetchPinnedDialogs({
+  listType,
+}: {
+  listType: ChatListType;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetPinnedDialogs({
+    folderId: listType === 'archived' ? ARCHIVED_FOLDER_ID : undefined,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  const { dialogs, messages, chats, users } = result;
+
+  return {
+    dialogIds: dialogs.map((dialog) => getApiChatIdFromMtpPeer(dialog.peer)),
+    messages: messages.map((message) => buildApiMessage(message)).filter(Boolean),
+    chats: chats.map((chat) => buildApiChatFromPreview(chat)).filter(Boolean),
+    users: users.map((user) => buildApiUser(user)).filter(Boolean),
   };
 }
 

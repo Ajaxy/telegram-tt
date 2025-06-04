@@ -242,6 +242,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updatePinnedChatIds': {
       const { ids, folderId } = update;
       const listType = folderId === ARCHIVED_FOLDER_ID ? 'archived' : 'active';
+      if (!ids) {
+        actions.loadPinnedDialogs({ listType });
+        return global;
+      }
 
       return {
         ...global,

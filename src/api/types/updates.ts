@@ -165,7 +165,7 @@ export type ApiUpdateChatMembers = {
 
 export type ApiUpdatePinnedChatIds = {
   '@type': 'updatePinnedChatIds';
-  ids: string[];
+  ids?: string[];
   folderId?: number;
 };
 

@@ -531,11 +531,9 @@ export function updater(update: Update) {
       isPinned: update.pinned || false,
     });
   } else if (update instanceof GramJs.UpdatePinnedDialogs) {
-    const ids = update.order
-      ? update.order
-        .filter((dp): dp is GramJs.DialogPeer => dp instanceof GramJs.DialogPeer)
-        .map((dp) => getApiChatIdFromMtpPeer(dp.peer))
-      : [];
+    const ids = update.order?.filter(
+      (dp): dp is GramJs.DialogPeer => dp instanceof GramJs.DialogPeer)
+      .map((dp) => getApiChatIdFromMtpPeer(dp.peer));
 
     sendApiUpdate({
       '@type': 'updatePinnedChatIds',

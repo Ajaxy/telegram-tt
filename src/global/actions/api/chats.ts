@@ -542,6 +542,35 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
   }
 });
 
+addActionHandler('loadPinnedDialogs', async (global, actions, payload): Promise<void> => {
+  const {
+    listType,
+  } = payload;
+
+  const result = await callApi('fetchPinnedDialogs', { listType });
+  if (!result) return;
+
+  const { dialogIds, messages, chats, users } = result;
+
+  global = getGlobal();
+  global = updateChats(global, buildCollectionByKey(chats, 'id'));
+  global = updateUsers(global, buildCollectionByKey(users, 'id'));
+  global = replaceMessages(global, messages);
+
+  global = {
+    ...global,
+    chats: {
+      ...global.chats,
+      orderedPinnedIds: {
+        ...global.chats.orderedPinnedIds,
+        [listType]: dialogIds.length ? dialogIds : undefined,
+      },
+    },
+  };
+
+  setGlobal(global);
+});
+
 addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType => {
   const {
     chatId, force, withPhotos,

@@ -345,6 +345,9 @@ export interface ActionPayloads {
     listType: ChatListType;
     whenFirstBatchDone?: () => Promise<void>;
   };
+  loadPinnedDialogs: {
+    listType: ChatListType;
+  };
   openChatWithInfo: ActionPayloads['openChat'] & {
     profileTab?: ProfileTabType;
     forceScrollProfileTab?: boolean;
