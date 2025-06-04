@@ -11,13 +11,12 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 import { getGiftAttributes, getStickerFromGift, getTotalGiftAvailability } from '../helpers/gifts';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useFlag from '../../../hooks/useFlag';
-import { type ObserveFn, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import { type ObserveFn } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
+import StickerView from '../../common/StickerView';
 import Menu from '../../ui/Menu';
-import AnimatedIconFromSticker from '../AnimatedIconFromSticker';
 import Avatar from '../Avatar';
 import Icon from '../icons/Icon';
 import RadialPatternBackground from '../profile/RadialPatternBackground';
@@ -58,7 +57,7 @@ const SavedGift = ({
 
   const ref = useRef<HTMLDivElement>();
 
-  const [shouldPlay, play] = useFlag();
+  const stickerRef = useRef<HTMLDivElement>();
 
   const lang = useLang();
 
@@ -102,10 +101,6 @@ const SavedGift = ({
     });
   });
 
-  const handleOnIntersect = useLastCallback((entry: IntersectionObserverEntry) => {
-    if (entry.isIntersecting) play();
-  });
-
   const avatarPeer = (gift.isNameHidden && !fromPeer) ? CUSTOM_PEER_HIDDEN : fromPeer;
 
   const sticker = getStickerFromGift(gift.gift);
@@ -130,8 +125,6 @@ const SavedGift = ({
     );
   }, [gift.gift]);
 
-  useOnIntersect(ref, observeIntersection, sticker ? handleOnIntersect : undefined);
-
   if (!sticker) return undefined;
 
   return (
@@ -146,13 +139,23 @@ const SavedGift = ({
       {radialPatternBackdrop}
       {!radialPatternBackdrop && <Avatar className={styles.topIcon} peer={avatarPeer} size="micro" />}
       {gift.isPinned && <Icon name="pinned-message" className={styles.topIcon} />}
-      <AnimatedIconFromSticker
-        sticker={sticker}
-        noLoop
-        play={shouldPlay}
-        nonInteractive
-        size={GIFT_STICKER_SIZE}
-      />
+      <div
+        ref={stickerRef}
+        className={styles.stickerWrapper}
+        style={`width: ${GIFT_STICKER_SIZE}px; height: ${GIFT_STICKER_SIZE}px`}
+      >
+        {sticker && (
+          <StickerView
+            observeIntersectionForPlaying={observeIntersection}
+            observeIntersectionForLoading={observeIntersection}
+            containerRef={stickerRef}
+            sticker={sticker}
+            size={GIFT_STICKER_SIZE}
+            shouldPreloadPreview
+          />
+        )}
+
+      </div>
       {gift.isUnsaved && (
         <div className={styles.hiddenGift}>
           <Icon name="eye-crossed-outline" />
