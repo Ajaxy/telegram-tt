@@ -256,11 +256,13 @@ addActionHandler('openGiftInfoModal', (global, actions, payload): ActionReturnTy
   } = payload;
 
   const peerId = 'peerId' in payload ? payload.peerId : undefined;
+  const recipientId = 'recipientId' in payload ? payload.recipientId : undefined;
 
   return updateTabState(global, {
     giftInfoModal: {
       peerId,
       gift,
+      recipientId,
     },
   }, tabId);
 });

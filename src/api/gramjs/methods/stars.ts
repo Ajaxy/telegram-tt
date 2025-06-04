@@ -1,15 +1,17 @@
 import bigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { GiftProfileFilterOptions } from '../../../types';
+import type { GiftProfileFilterOptions, ResaleGiftsFilterOptions } from '../../../types';
 import type {
   ApiChat,
   ApiPeer,
   ApiRequestInputSavedStarGift,
+  ApiStarGiftAttributeId,
   ApiStarGiftRegular,
 } from '../../types';
 
-import { buildApiSavedStarGift, buildApiStarGift, buildApiStarGiftAttribute } from '../apiBuilders/gifts';
+import { buildApiResaleGifts, buildApiSavedStarGift, buildApiStarGift,
+  buildApiStarGiftAttribute, buildInputResaleGiftsAttributes } from '../apiBuilders/gifts';
 import {
   buildApiStarsAmount,
   buildApiStarsGiftOptions,
@@ -42,6 +44,48 @@ export async function fetchStarGifts() {
 
   // Right now, only regular star gifts can be bought, but API are not specific
   return result.gifts.map(buildApiStarGift).filter((gift): gift is ApiStarGiftRegular => gift.type === 'starGift');
+}
+
+export async function fetchResaleGifts({
+  giftId,
+  offset = '',
+  limit,
+  attributesHash = '0',
+  filter,
+}: {
+  giftId: string;
+  offset?: string;
+  limit?: number;
+  attributesHash?: string;
+  filter?: ResaleGiftsFilterOptions;
+}) {
+   type GetResaleStarGifts = ConstructorParameters<typeof GramJs.payments.GetResaleStarGifts>[0];
+
+   const attributes: ApiStarGiftAttributeId[] = [
+     ...(filter?.backdropAttributes ?? []),
+     ...(filter?.modelAttributes ?? []),
+     ...(filter?.patternAttributes ?? []),
+   ];
+
+   const params: GetResaleStarGifts = {
+     giftId: bigInt(giftId),
+     offset,
+     limit,
+     attributesHash: attributesHash ? bigInt(attributesHash) : undefined,
+     attributes: buildInputResaleGiftsAttributes(attributes),
+     ...(filter && {
+       sortByPrice: filter.sortType === 'byPrice' || undefined,
+       sortByNum: filter.sortType === 'byNumber' || undefined,
+     } satisfies GetResaleStarGifts),
+   };
+
+   const result = await invokeRequest(new GramJs.payments.GetResaleStarGifts(params));
+
+   if (!result) {
+     return undefined;
+   }
+
+   return buildApiResaleGifts(result);
 }
 
 export async function fetchSavedStarGifts({

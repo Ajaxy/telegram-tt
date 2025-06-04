@@ -53,6 +53,7 @@
   font-size: 0.75rem;
 }
 
+.starAmountIcon,
 .giftResalePriceStar {
   margin-inline-start: 0 !important;
 }
@@ -119,10 +120,6 @@
 /* stylelint-disable-next-line plugin/stylelint-group-selectors */
 .uniqueGift {
   margin-bottom: 0;
-}
-
-.starAmountIcon {
-  margin-inline-start: 0 !important;
 }
 
 .modalHeader {

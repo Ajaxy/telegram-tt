@@ -38,6 +38,7 @@ import type {
   ApiSponsoredPeer,
   ApiStarGift,
   ApiStarGiftAttribute,
+  ApiStarGiftAttributeCounter,
   ApiStarGiveawayOption,
   ApiStarsSubscription,
   ApiStarsTransaction,
@@ -76,6 +77,7 @@ import type {
   PaymentStep,
   ProfileEditProgress,
   ProfileTabType,
+  ResaleGiftsFilterOptions,
   ScrollTargetPosition,
   SettingsScreens,
   SharedMediaType,
@@ -215,6 +217,20 @@ export type TabState = {
   savedGifts: {
     giftsByPeerId: Record<string, ApiSavedGifts>;
     filter: GiftProfileFilterOptions;
+  };
+
+  resaleGifts: {
+    giftId?: string;
+    gifts: ApiStarGift[];
+    count: number;
+    attributes?: ApiStarGiftAttribute[];
+    counters?: ApiStarGiftAttributeCounter[];
+    nextOffset?: string;
+    attributesHash?: string;
+    isLoading?: boolean;
+    isAllLoaded?: boolean;
+    filter: ResaleGiftsFilterOptions;
+    updateIteration: number;
   };
 
   leftColumn: {
@@ -761,6 +777,7 @@ export type TabState = {
 
   giftInfoModal?: {
     peerId?: string;
+    recipientId?: string;
     gift: ApiSavedStarGift | ApiStarGift;
   };
 

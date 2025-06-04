@@ -26,6 +26,8 @@ import type {
   ApiPhoto,
   ApiReaction,
   ApiReactionWithPaid,
+  ApiStarGiftAttributeIdBackdrop,
+  ApiStarGiftAttributeIdPattern,
   ApiStarGiftRegular,
   ApiStarsSubscription,
   ApiStarsTransaction,
@@ -37,6 +39,7 @@ import type {
   ApiTopic,
   ApiTypingStatus,
   ApiVideo,
+  StarGiftAttributeIdModel,
 } from '../api/types';
 import type { DC_IDS } from '../config';
 import type { SearchResultKey } from '../util/keys/searchResultKey';
@@ -687,7 +690,7 @@ export interface Point {
 
 export type WebPageMediaSize = 'large' | 'small';
 
-export type StarGiftCategory = number | 'all' | 'limited' | 'stock';
+export type StarGiftCategory = number | 'all' | 'limited' | 'stock' | 'resale';
 
 export type CallSound = (
   'join' | 'allowTalk' | 'leave' | 'connecting' | 'incoming' | 'end' | 'connect' | 'busy' | 'ringing'
@@ -704,6 +707,13 @@ export type GiftProfileFilterOptions = {
   shouldIncludeUnique: boolean;
   shouldIncludeDisplayed: boolean;
   shouldIncludeHidden: boolean;
+};
+export type ResaleGiftsSortType = 'byDate' | 'byPrice' | 'byNumber';
+export type ResaleGiftsFilterOptions = {
+  sortType: ResaleGiftsSortType;
+  modelAttributes?: StarGiftAttributeIdModel[];
+  patternAttributes?: ApiStarGiftAttributeIdPattern[];
+  backdropAttributes?: ApiStarGiftAttributeIdBackdrop[];
 };
 
 export type SendMessageParams = {

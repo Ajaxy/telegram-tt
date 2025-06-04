@@ -1,0 +1,160 @@
+@use '../../../styles/mixins';
+
+.root {
+  position: relative;
+  display: flex;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.buttonsContainer {
+  scrollbar-color: rgba(0, 0, 0, 0);
+  scrollbar-width: none;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: center;
+
+  height: 100%;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+
+  white-space: nowrap;
+
+  @include mixins.gradient-border-horizontal(0.5rem, 0.5rem);
+
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+.itemIcon {
+  margin-inline-start: 0.25rem;
+}
+
+.sticker {
+  margin-inline-start: 0.375rem;
+}
+
+.backdropAttributeMenuItemText,
+.menuItemStickerText,
+.menuItemText {
+  flex-grow: 1;
+}
+
+.menuItemStickerText {
+  margin-inline-start: 1.125rem;
+}
+
+.backdropAttributeMenuItemText {
+  margin-inline-start: 3rem;
+}
+
+.backdrop {
+  position: absolute;
+  left: 0.625rem;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+}
+
+.menuItemIcon {
+  margin-inline: 0 !important;
+  margin-inline-start: 0.5 !important;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: auto;
+  margin-inline: 0.25rem;
+  padding: 0.125rem 0.75rem;
+  border-radius: 1rem;
+
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+
+  background-color: var(--color-background-secondary);
+
+  transition: 0.15s background-color;
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--color-background-secondary-accent);
+  }
+}
+
+.menuContentContainer {
+  overflow-y: scroll;
+  max-height: 20rem;
+}
+
+:global(.MenuItem) {
+  :global(.icon) {
+    color: var(--color-text);
+  }
+}
+
+.menu {
+  :global(.bubble) {
+    top: 2.25rem !important;
+  }
+
+  &.left {
+    :global(.bubble) {
+      right: auto !important;
+      left: 0.125rem !important;
+    }
+  }
+  &.right {
+    :global(.bubble) {
+      right: 0.125rem !important;
+      left: auto !important;
+    }
+  }
+
+  :global(.SearchInput) {
+    --color-placeholders: var(--color-text-secondary);
+
+    width: 15rem;
+    border: none;
+    border-bottom: 0.0625rem solid var(--color-borders);
+    border-radius: 0;
+
+    background-color: transparent;
+
+    :global(.form-control) {
+      caret-color: var(--color-icon-secondary);
+    }
+
+    :global(.icon) {
+      color: var(--color-icon-secondary);
+    }
+
+    input {
+      padding-left: 1.25rem;
+      font-size: 0.875rem;
+      font-weight: var(--font-weight-medium);
+    }
+
+    :global(.icon-container-left) {
+      width: 1.25rem;
+      margin-inline-start: 1rem;
+    }
+  }
+
+  :global(.icon) {
+    font-size: 1.25rem !important;
+    color: var(--color-text);
+  }
+}

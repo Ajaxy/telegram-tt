@@ -31,7 +31,7 @@
   }
 
   :global(html.theme-dark) & {
-    background-color: var(--color-background);
+    background-color: rgb(33, 33, 33);
   }
 
   &:hover::before {
@@ -68,6 +68,7 @@
 }
 
 .star {
+  margin-inline-start: 0 !important;
   margin-inline-end: 0.125rem;
   font-size: 0.75rem !important;
 }
@@ -85,4 +86,13 @@
 .starsPriceIcon {
   margin-inline-start: 0 !important;
   margin-inline-end: 0.125rem !important;
+}
+
+.radialPattern {
+  position: absolute;
+  inset: 0;
+}
+
+.stickerWrapper {
+  position: relative;
 }

@@ -3,6 +3,7 @@ import type {
 } from './api/types';
 import type {
   GiftProfileFilterOptions,
+  ResaleGiftsFilterOptions,
 } from './types';
 
 export const APP_CODE_NAME = 'A';
@@ -104,6 +105,7 @@ export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
 export const STORY_LIST_LIMIT = 100;
 export const API_GENERAL_ID_LIMIT = 100;
 export const STATISTICS_PUBLIC_FORWARDS_LIMIT = 50;
+export const RESALE_GIFTS_LIMIT = 50;
 
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;
@@ -465,3 +467,7 @@ export const DEFAULT_GIFT_PROFILE_FILTER_OPTIONS: GiftProfileFilterOptions = {
   shouldIncludeDisplayed: true,
   shouldIncludeHidden: true,
 } as const;
+
+export const DEFAULT_RESALE_GIFTS_FILTER_OPTIONS: ResaleGiftsFilterOptions = {
+  sortType: 'byDate',
+};

@@ -1514,6 +1514,17 @@ export interface LangPair {
   'StarGiftSaleTransaction': undefined;
   'StarGiftPurchaseTransaction': undefined;
   'ContextMenuItemMention': undefined;
+  'GiftRibbonResale': undefined;
+  'GiftCategoryResale': undefined;
+  'GiftSortByPrice': undefined;
+  'GiftSortByNumber': undefined;
+  'ContextMenuItemSelectAll': undefined;
+  'ButtonSort': undefined;
+  'ValueGiftSortByDate': undefined;
+  'ValueGiftSortByPrice': undefined;
+  'ValueGiftSortByNumber': undefined;
+  'ResellGiftsNoFound': undefined;
+  'ResellGiftsClearFilters': undefined;
 }
 
 export interface LangPairWithVariables<V = LangVariable> {
@@ -2464,6 +2475,11 @@ export interface LangPairWithVariables<V = LangVariable> {
     'gift': V;
     'stars': V;
   };
+  'GiftBuyForPeerConfirmDescription': {
+    'gift': V;
+    'stars': V;
+    'peer': V;
+  };
   'ComposerTitleForwardFrom': {
     'users': V;
   };
@@ -2756,6 +2772,18 @@ export interface LangPairPluralWithVariables<V = LangVariable> {
     'count': V;
   };
   'PaidMessageTransaction': {
+    'count': V;
+  };
+  'HeaderDescriptionResaleGifts': {
+    'count': V;
+  };
+  'GiftAttributeModelPlural': {
+    'count': V;
+  };
+  'GiftAttributeBackdropPlural': {
+    'count': V;
+  };
+  'GiftAttributeSymbolPlural': {
     'count': V;
   };
 }

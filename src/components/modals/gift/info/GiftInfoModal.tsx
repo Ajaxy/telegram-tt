@@ -58,6 +58,7 @@ type StateProps = {
   collectibleEmojiStatuses?: ApiEmojiStatusType[];
   tonExplorerUrl?: string;
   currentUser?: ApiUser;
+  recipientPeer?: ApiPeer;
 };
 
 const STICKER_SIZE = 120;
@@ -73,6 +74,7 @@ const GiftInfoModal = ({
   collectibleEmojiStatuses,
   tonExplorerUrl,
   currentUser,
+  recipientPeer,
 }: OwnProps & StateProps) => {
   const {
     closeGiftInfoModal,
@@ -83,6 +85,7 @@ const GiftInfoModal = ({
     openGiftUpgradeModal,
     showNotification,
     buyStarGift,
+    closeGiftModal,
   } = getActions();
 
   const [isConvertConfirmOpen, openConvertConfirm, closeConvertConfirm] = useFlag();
@@ -161,7 +164,7 @@ const GiftInfoModal = ({
   });
 
   const handleBuyGift = useLastCallback(() => {
-    if (!savedGift || gift?.type !== 'starGiftUnique' || !gift.resellPriceInStars) return;
+    if (gift?.type !== 'starGiftUnique' || !gift.resellPriceInStars) return;
     setIsConfirmModalOpen(true);
   });
 
@@ -170,9 +173,11 @@ const GiftInfoModal = ({
   });
 
   const handleConfirmBuyGift = useLastCallback(() => {
-    if (!savedGift || gift?.type !== 'starGiftUnique' || !gift.resellPriceInStars) return;
+    const peer = recipientPeer || currentUser;
+    if (!peer || gift?.type !== 'starGiftUnique' || !gift.resellPriceInStars) return;
     closeConfirmModal();
-    buyStarGift({ slug: gift.slug, stars: gift.resellPriceInStars });
+    closeGiftModal();
+    buyStarGift({ peerId: peer.id, slug: gift.slug, stars: gift.resellPriceInStars });
   });
 
   const giftAttributes = useMemo(() => {
@@ -726,18 +731,34 @@ const GiftInfoModal = ({
         >
 
           <GiftTransferPreview
-            peer={currentUser}
+            peer={recipientPeer || currentUser}
             gift={uniqueGift}
           />
-          <p>
-            {lang('GiftBuyConfirmDescription', {
-              gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
-              stars: formatStarsAsText(lang, resellPriceInStars),
-            }, {
-              withNodes: true,
-              withMarkdown: true,
-            })}
-          </p>
+          {!recipientPeer
+            && (
+              <p>
+                {lang('GiftBuyConfirmDescription', {
+                  gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
+                  stars: formatStarsAsText(lang, resellPriceInStars),
+                }, {
+                  withNodes: true,
+                  withMarkdown: true,
+                })}
+              </p>
+            )}
+          {recipientPeer
+            && (
+              <p>
+                {lang('GiftBuyForPeerConfirmDescription', {
+                  gift: lang('GiftUnique', { title: uniqueGift.title, number: uniqueGift.number }),
+                  stars: formatStarsAsText(lang, resellPriceInStars),
+                  peer: getPeerTitle(lang, recipientPeer),
+                }, {
+                  withNodes: true,
+                  withMarkdown: true,
+                })}
+              </p>
+            )}
         </ConfirmDialog>
       )}
       {savedGift && (
@@ -786,6 +807,8 @@ export default memo(withGlobal<OwnProps>(
     const chat = targetPeer && isApiPeerChat(targetPeer) ? targetPeer : undefined;
     const hasAdminRights = chat && getHasAdminRight(chat, 'postMessages');
     const currentUser = selectUser(global, currentUserId!);
+    const recipientPeer = modal?.recipientId && currentUserId !== modal.recipientId
+      ? selectPeer(global, modal.recipientId) : undefined;
     const currentUserEmojiStatus = currentUser?.emojiStatus;
     const collectibleEmojiStatuses = global.collectibleEmojiStatuses?.statuses;
 
@@ -799,6 +822,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserEmojiStatus,
       collectibleEmojiStatuses,
       currentUser,
+      recipientPeer,
     };
   },
 )(GiftInfoModal));

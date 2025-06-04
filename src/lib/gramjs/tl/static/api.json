@@ -319,6 +319,7 @@
     "payments.getUniqueStarGift",
     "payments.getStarGiftWithdrawalUrl",
     "payments.toggleStarGiftsPinnedToTop",
+    "payments.getResaleStarGifts",
     "payments.updateStarGiftPrice",
     "langpack.getLangPack",
     "langpack.getStrings",

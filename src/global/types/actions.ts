@@ -80,6 +80,7 @@ import type {
   PerformanceType,
   Point,
   ProfileTabType,
+  ResaleGiftsFilterOptions,
   ScrollTargetPosition,
   SendMessageParams,
   SettingsScreens,
@@ -2394,6 +2395,14 @@ export interface ActionPayloads {
 
   loadPremiumGifts: undefined;
   loadStarGifts: undefined;
+  updateResaleGiftsFilter: {
+    filter: ResaleGiftsFilterOptions;
+  } & WithTabId;
+  loadResaleGifts: {
+    giftId: string;
+    shouldRefresh?: boolean;
+  } & WithTabId;
+  resetResaleGifts: WithTabId | undefined;
   loadDefaultTopicIcons: undefined;
   loadPremiumStickers: undefined;
 
@@ -2403,6 +2412,7 @@ export interface ActionPayloads {
   closeGiftModal: WithTabId | undefined;
   sendStarGift: StarGiftInfo & WithTabId;
   buyStarGift: {
+    peerId: string;
     slug: string;
     stars: number;
   } & WithTabId;
@@ -2419,6 +2429,7 @@ export interface ActionPayloads {
   } & WithTabId;
   openGiftInfoModal: ({
     peerId: string;
+    recipientId?: string;
     gift: ApiSavedStarGift;
   } | {
     gift: ApiStarGift;

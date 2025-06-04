@@ -2,6 +2,7 @@ import type { ApiSavedStarGift, ApiStarGiftUnique } from '../../../api/types';
 import type { StarGiftCategory } from '../../../types';
 import type { ActionReturnType } from '../../types';
 
+import { DEFAULT_RESALE_GIFTS_FILTER_OPTIONS, RESALE_GIFTS_LIMIT } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { callApi } from '../../../api/gramjs';
@@ -11,8 +12,10 @@ import {
   appendStarsSubscriptions,
   appendStarsTransactions,
   replacePeerSavedGifts,
+  updateChats,
   updateStarsBalance,
   updateStarsSubscriptionLoading,
+  updateUsers,
 } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -102,6 +105,7 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
     all: [],
     stock: [],
     limited: [],
+    resale: [],
   };
 
   const allStarGiftIds = Object.keys(byId);
@@ -114,9 +118,13 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
     gift.availabilityRemains || !gift.availabilityTotal ? gift.id : undefined
   )).filter(Boolean);
 
+  const resaleStarGiftIds = allStarGifts.map((gift) => (gift.availabilityResale ? gift.id : undefined))
+    .filter(Boolean);
+
   idsByCategoryName.all = allStarGiftIds;
   idsByCategoryName.limited = limitedStarGiftIds;
   idsByCategoryName.stock = stockedStarGiftIds;
+  idsByCategoryName.resale = resaleStarGiftIds;
 
   allStarGifts.forEach((gift) => {
     const starsCategory = gift.stars;
@@ -135,6 +143,115 @@ addActionHandler('loadStarGifts', async (global): Promise<void> => {
     },
   };
   setGlobal(global);
+});
+
+addActionHandler('updateResaleGiftsFilter', (global, actions, payload): ActionReturnType => {
+  const {
+    filter, tabId = getCurrentTabId(),
+  } = payload;
+
+  const tabState = selectTabState(global, tabId);
+  global = updateTabState(global, {
+    resaleGifts: {
+      ...tabState.resaleGifts,
+      filter,
+    },
+  }, tabId);
+  if (tabState.resaleGifts.giftId) {
+    actions.loadResaleGifts({ giftId: tabState.resaleGifts.giftId, shouldRefresh: true, tabId });
+  }
+
+  setGlobal(global);
+});
+
+addActionHandler('loadResaleGifts', async (global, actions, payload): Promise<void> => {
+  const {
+    giftId, shouldRefresh, tabId = getCurrentTabId(),
+  } = payload;
+
+  let tabState = selectTabState(global, tabId);
+  if (tabState.resaleGifts.isLoading || (tabState.resaleGifts.isAllLoaded && !shouldRefresh)) return;
+
+  global = updateTabState(global, {
+    resaleGifts: {
+      ...tabState.resaleGifts,
+      isLoading: true,
+      ...(shouldRefresh && {
+        count: 0,
+        nextOffset: undefined,
+        isAllLoaded: false,
+      }),
+    },
+  }, tabId);
+  setGlobal(global);
+
+  global = getGlobal();
+  tabState = selectTabState(global, tabId);
+  const nextOffset = tabState.resaleGifts.nextOffset;
+  const attributesHash = tabState.resaleGifts.attributesHash;
+  const filter = tabState.resaleGifts.filter;
+
+  const result = await callApi('fetchResaleGifts', {
+    giftId,
+    offset: nextOffset,
+    limit: RESALE_GIFTS_LIMIT,
+    attributesHash,
+    filter,
+  });
+
+  if (!result) {
+    return;
+  };
+
+  const {
+    chats,
+    users,
+  } = result;
+
+  global = getGlobal();
+  tabState = selectTabState(global, tabId);
+
+  const currentGifts = tabState.resaleGifts.gifts;
+  const newGifts = !shouldRefresh ? currentGifts.concat(result.gifts) : result.gifts;
+  const currentUpdateIteration = tabState.resaleGifts.updateIteration;
+  const shouldUpdateIteration = tabState.resaleGifts.giftId !== giftId || shouldRefresh;
+  const updateIteration = shouldUpdateIteration ? currentUpdateIteration + 1 : currentUpdateIteration;
+  global = updateTabState(global, {
+    resaleGifts: {
+      ...tabState.resaleGifts,
+      giftId,
+      count: result.count || tabState.resaleGifts.count,
+      gifts: newGifts,
+      attributes: result.attributes || tabState.resaleGifts.attributes,
+      counters: result.counters || tabState.resaleGifts.counters,
+      attributesHash: result.attributesHash,
+      nextOffset: result.nextOffset,
+      isLoading: false,
+      isAllLoaded: !result.nextOffset,
+      updateIteration,
+    },
+  }, tabId);
+
+  global = updateUsers(global, buildCollectionByKey(users, 'id'));
+  global = updateChats(global, buildCollectionByKey(chats, 'id'));
+
+  setGlobal(global);
+});
+
+addActionHandler('resetResaleGifts', (global, actions, payload): ActionReturnType => {
+  const {
+    tabId = getCurrentTabId(),
+  } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+  return updateTabState(global, {
+    resaleGifts: {
+      updateIteration: tabState.resaleGifts.updateIteration + 1,
+      filter: DEFAULT_RESALE_GIFTS_FILTER_OPTIONS,
+      count: 0,
+      gifts: [],
+    },
+  }, tabId);
 });
 
 addActionHandler('loadPeerSavedGifts', async (global, actions, payload): Promise<void> => {

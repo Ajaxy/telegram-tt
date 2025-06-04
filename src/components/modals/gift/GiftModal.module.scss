@@ -9,15 +9,35 @@
   background-color: var(--color-background);
 
   :global(html.theme-dark) & {
-    background-color: #181818;
+    --color-background: #181818;
   }
 }
 
 .root :global(.modal-dialog),
 .transition,
 .content {
-  height: min(92vh, 45rem);
+  height: min(92vh, 49rem);
   max-height: none !important;
+}
+
+@media (max-width: 600px) {
+  .root :global(.modal-dialog),
+  .transition,
+  .content {
+    height: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .root :global(.modal-dialog) {
+    width: 100%;
+    max-width: 100% !important;
+    height: 100%;
+    border: none !important;
+    border-radius: 0;
+
+    box-shadow: none !important;
+  }
 }
 
 .root :global(.modal-dialog),
@@ -31,13 +51,22 @@
   flex-direction: column;
 }
 
+.resaleScreenRoot,
 .main {
   overflow-y: scroll;
-  height: 100%;
-  padding-bottom: 1rem;
-  padding-inline: 1rem;
+  padding-bottom: 0.5rem;
+  padding-inline: 0.5rem;
 
-  @include mixins.adapt-padding-to-scrollbar(1rem);
+  @include mixins.adapt-padding-to-scrollbar(0.5rem);
+}
+
+.resaleScreenRoot {
+  height: calc(100% - 6.25rem);
+  margin-top: 6.25rem;
+}
+
+.main {
+  height: 100%;
 }
 
 .giftSection {
@@ -48,6 +77,7 @@
   padding: 0.5rem;
 }
 
+.resaleStarGiftsContainer,
 .starGiftsContainer,
 .premiumGiftsGallery {
   display: flex;
@@ -58,6 +88,7 @@
   margin-bottom: 0.75rem;
 }
 
+.resaleStarGiftsContainer,
 .starGiftsContainer {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -65,6 +96,10 @@
   margin: 0rem;
   padding: 0.125rem;
   padding-top: 0.75rem;
+}
+
+.resaleStarGiftsContainer {
+  padding-bottom: 0.625rem;
 }
 
 .header {
@@ -83,8 +118,19 @@
   border-bottom: 0.0625rem solid var(--color-borders);
 
   background: var(--color-background);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 0.25s ease-out, transform 0.25s ease-out;
+}
 
-  transition: 0.25s ease-out transform;
+.resaleHeader {
+  overflow: visible;
+  height: 6.25rem;
+}
+
+.resaleHeaderContentContainer {
+  align-items: center;
+  justify-items: center;
+  width: 100%;
 }
 
 .headerSlide {
@@ -102,11 +148,27 @@
   transform: translateY(-100%);
 }
 
+.resaleHeaderText,
 .commonHeaderText {
   unicode-bidi: plaintext;
+
   margin: 0 0 0 4.5rem;
+
   font-size: 1.25rem;
   font-weight: var(--font-weight-medium);
+  line-height: 1.25rem;
+}
+
+.resaleHeaderText {
+  margin: 0;
+  margin-bottom: 0.25rem !important;
+}
+
+.resaleHeaderDescription {
+  unicode-bidi: plaintext;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text-secondary);
 }
 
 .closeButton {
@@ -185,4 +247,37 @@
   overflow: hidden;
   height: auto;
   min-height: calc(100% - 3.5rem);
+}
+
+.notFoundGiftsRoot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding-top: 5rem;
+}
+
+.notFoundGiftsDescription {
+  unicode-bidi: plaintext;
+
+  margin-block: 1rem;
+
+  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.notFoundGiftsLink {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-links);
+  transition: opacity 0.15s ease-in;
+
+  &:active,
+  &:hover {
+    color: var(--color-links);
+    text-decoration: none;
+    opacity: 0.85;
+  }
 }

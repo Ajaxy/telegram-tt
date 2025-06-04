@@ -317,6 +317,12 @@
     }
   }
 
+  &.bluredStarsBadge {
+    color: var(--color-white);
+    background: rgba(0, 0, 0, 0.2) !important;
+    backdrop-filter: blur(50px);
+  }
+
   &.smaller {
     height: 2.75rem;
     padding: 0.3125rem;

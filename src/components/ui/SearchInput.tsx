@@ -1,3 +1,4 @@
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { ElementRef, FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef,
@@ -43,7 +44,7 @@ type OwnProps = {
   onReset?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   onBlur?: NoneToVoidFunction;
-  onClick?: NoneToVoidFunction;
+  onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
   onUpClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onDownClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onSpinnerClick?: NoneToVoidFunction;

@@ -94,13 +94,14 @@ function GiftComposer({
     }
   }, [shouldDisallowLimitedStarGifts, shouldPayForUpgrade]);
 
-  const isStarGift = 'id' in gift;
+  const isStarGift = 'id' in gift && gift.type === 'starGift';
+  const isPremiumGift = 'months' in gift;
   const hasPremiumByStars = giftByStars && 'amount' in giftByStars;
   const isPeerUser = peer && isApiPeerUser(peer);
   const isSelf = peerId === currentUserId;
 
   const localMessage = useMemo(() => {
-    if (!isStarGift) {
+    if (isPremiumGift) {
       const currentGift = shouldPayByStars && hasPremiumByStars ? giftByStars : gift;
       return {
         id: -1,
@@ -121,32 +122,35 @@ function GiftComposer({
       } satisfies ApiMessage;
     }
 
-    return {
-      id: -1,
-      chatId: '0',
-      isOutgoing: false,
-      senderId: currentUserId,
-      date: Math.floor(Date.now() / 1000),
-      content: {
-        action: {
-          mediaType: 'action',
-          type: 'starGift',
-          message: giftMessage?.length ? {
-            text: giftMessage,
-          } : undefined,
-          isNameHidden: shouldHideName || undefined,
-          starsToConvert: gift.starsToConvert,
-          canUpgrade: shouldPayForUpgrade || undefined,
-          alreadyPaidUpgradeStars: shouldPayForUpgrade ? gift.upgradeStars : undefined,
-          gift,
-          peerId,
-          fromId: currentUserId,
+    if (isStarGift) {
+      return {
+        id: -1,
+        chatId: '0',
+        isOutgoing: false,
+        senderId: currentUserId,
+        date: Math.floor(Date.now() / 1000),
+        content: {
+          action: {
+            mediaType: 'action',
+            type: 'starGift',
+            message: giftMessage?.length ? {
+              text: giftMessage,
+            } : undefined,
+            isNameHidden: shouldHideName || undefined,
+            starsToConvert: gift.starsToConvert,
+            canUpgrade: shouldPayForUpgrade || undefined,
+            alreadyPaidUpgradeStars: shouldPayForUpgrade ? gift.upgradeStars : undefined,
+            gift,
+            peerId,
+            fromId: currentUserId,
+          },
         },
-      },
-    } satisfies ApiMessage;
+      } satisfies ApiMessage;
+    }
+    return undefined;
   }, [currentUserId, gift, giftMessage, isStarGift,
     shouldHideName, shouldPayForUpgrade, peerId,
-    shouldPayByStars, hasPremiumByStars, giftByStars]);
+    shouldPayByStars, hasPremiumByStars, giftByStars, isPremiumGift]);
 
   const handleGiftMessageChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setGiftMessage(e.target.value);
@@ -198,14 +202,16 @@ function GiftComposer({
       return;
     }
 
-    openInvoice({
-      type: 'giftcode',
-      userIds: [peerId],
-      currency: gift.currency,
-      amount: gift.amount,
-      option: gift,
-      message: giftMessage ? { text: giftMessage } : undefined,
-    });
+    if (isPremiumGift) {
+      openInvoice({
+        type: 'giftcode',
+        userIds: [peerId],
+        currency: gift.currency,
+        amount: gift.amount,
+        option: gift,
+        message: giftMessage ? { text: giftMessage } : undefined,
+      });
+    }
   });
 
   const canUseStarsPayment = hasPremiumByStars && starBalance && (starBalance.amount > giftByStars.amount);
@@ -320,7 +326,7 @@ function GiftComposer({
       ? formatStarsAsIcon(lang, giftByStars.amount, { asFont: true })
       : isStarGift
         ? formatStarsAsIcon(lang, gift.stars + (shouldPayForUpgrade ? gift.upgradeStars! : 0), { asFont: true })
-        : formatCurrency(lang, gift.amount, gift.currency);
+        : isPremiumGift ? formatCurrency(lang, gift.amount, gift.currency) : undefined;
 
     return (
       <div className={styles.footer}>
@@ -359,6 +365,8 @@ function GiftComposer({
     customBackground && isBackgroundBlurred && styles.blurred,
   );
 
+  if ((!isStarGift && !isPremiumGift) || !localMessage) return;
+
   return (
     <div className={buildClassName(styles.root, 'custom-scroll')}>
       <div
@@ -375,7 +383,7 @@ function GiftComposer({
           style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
         />
         <ActionMessage
-          key={isStarGift ? gift.id : gift.months}
+          key={isStarGift ? gift.id : isPremiumGift ? gift.months : undefined}
           message={localMessage}
           threadId={MAIN_THREAD_ID}
           appearanceOrder={0}
