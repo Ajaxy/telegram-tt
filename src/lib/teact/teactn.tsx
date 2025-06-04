@@ -2,6 +2,7 @@ import type { FC, FC_withDebug, Props } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
 import arePropsShallowEqual, { logUnequalProps } from '../../util/arePropsShallowEqual';
+import Deferred from '../../util/Deferred';
 import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
 import { throttleWithTickEnd } from '../../util/schedulers';
@@ -132,15 +133,25 @@ export function forceOnHeavyAnimationOnce() {
 
 let actionQueue: NoneToVoidFunction[] = [];
 
-function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions) {
+function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions): Promise<void> {
+  const deferred = new Deferred<void>();
   actionQueue.push(() => {
     actionHandlers[name]?.forEach((handler) => {
       const response = handler(DEBUG ? getUntypedGlobal() : currentGlobal, actions, payload);
-      if (!response || typeof response.then === 'function') {
+      if (!response) {
+        deferred.resolve();
+        return;
+      }
+
+      if (typeof response.then === 'function') {
+        response.then(() => {
+          deferred.resolve();
+        });
         return;
       }
 
       setUntypedGlobal(response as GlobalState, options);
+      deferred.resolve();
     });
   });
 
@@ -154,6 +165,8 @@ function handleAction(name: string, payload?: ActionPayload, options?: ActionOpt
       actionQueue = [];
     }
   }
+
+  return deferred.promise;
 }
 
 function updateContainers() {
@@ -221,7 +234,7 @@ export function addUntypedActionHandler(name: ActionNames, handler: ActionHandle
     actionHandlers[name] = [];
 
     actions[name] = (payload?: ActionPayload, options?: ActionOptions) => {
-      handleAction(name, payload, options);
+      return handleAction(name, payload, options);
     };
   }
 
@@ -312,12 +325,12 @@ export function typify<
   type ProjectActionNames = keyof ActionPayloads;
 
   // When payload is allowed to be `undefined` we consider it optional
-  type ProjectActions = {
+  type ProjectActions<ReturnType = void> = {
     [ActionName in ProjectActionNames]:
     (undefined extends ActionPayloads[ActionName] ? (
-      (payload?: ActionPayloads[ActionName], options?: ActionOptions) => void
+      (payload?: ActionPayloads[ActionName], options?: ActionOptions) => ReturnType
     ) : (
-      (payload: ActionPayloads[ActionName], options?: ActionOptions) => void
+      (payload: ActionPayloads[ActionName], options?: ActionOptions) => ReturnType
     ))
   };
 
@@ -333,6 +346,7 @@ export function typify<
     getGlobal: getUntypedGlobal as <T extends ProjectGlobalState>() => T,
     setGlobal: setUntypedGlobal as (state: ProjectGlobalState, options?: ActionOptions) => void,
     getActions: getUntypedActions as () => ProjectActions,
+    getPromiseActions: getUntypedActions as () => ProjectActions<Promise<void>>,
     addActionHandler: addUntypedActionHandler as <ActionName extends ProjectActionNames>(
       name: ActionName,
       handler: ActionHandlers[ActionName],

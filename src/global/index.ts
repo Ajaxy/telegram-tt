@@ -47,6 +47,7 @@ type ActionHandlers = {
 export const getGlobal = typed.getGlobal;
 export const setGlobal = typed.setGlobal;
 export const getActions = typed.getActions;
+export const getPromiseActions = typed.getPromiseActions;
 export const addActionHandler = typed.addActionHandler as <ActionName extends ProjectActionNames>(
   name: ActionName,
   handler: ActionHandlers[ActionName],
