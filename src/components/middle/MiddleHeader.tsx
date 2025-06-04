@@ -26,6 +26,7 @@ import {
   selectIsChatWithSelf,
   selectIsInSelectMode,
   selectIsRightColumnShown,
+  selectPeer,
   selectPinnedIds,
   selectScheduledIds,
   selectTabState,
@@ -377,6 +378,7 @@ export default memo(withGlobal<OwnProps>(
       isLeftColumnShown, shouldSkipHistoryAnimations, audioPlayer, messageLists,
     } = selectTabState(global);
     const chat = selectChat(global, chatId);
+    const peer = selectPeer(global, chatId);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
     const audioMessage = audioChatId && audioMessageId
@@ -397,7 +399,7 @@ export default memo(withGlobal<OwnProps>(
 
     const typingStatus = selectThreadParam(global, chatId, threadId, 'typingStatus');
 
-    const emojiStatus = chat?.emojiStatus;
+    const emojiStatus = peer?.emojiStatus;
     const emojiStatusSticker = emojiStatus && global.customEmojis.byId[emojiStatus.documentId];
     const emojiStatusSlug = emojiStatus?.type === 'collectible' ? emojiStatus.slug : undefined;
 

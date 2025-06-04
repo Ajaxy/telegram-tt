@@ -7,6 +7,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   deleteContact,
   replaceUserStatuses,
+  updateChat,
   updatePeerStoriesHidden,
   updateUser,
   updateUserFullInfo,
@@ -74,7 +75,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateUserEmojiStatus': {
-      return updateUser(global, update.userId, { emojiStatus: update.emojiStatus });
+      global = updateUser(global, update.userId, { emojiStatus: update.emojiStatus });
+      global = updateChat(global, update.userId, { emojiStatus: update.emojiStatus });
+      return global;
     }
 
     case 'updateUserStatus': {
