@@ -1,5 +1,5 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useEffect, useRef } from '../../../../lib/teact/teact';
+import { memo, useEffect, useRef } from '../../../../lib/teact/teact';
 
 import type { ApiReaction, ApiReactionCustomEmoji, ApiReactionPaid } from '../../../../api/types';
 

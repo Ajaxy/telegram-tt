@@ -1,5 +1,6 @@
 import type { ElementRef } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import type React from '../../lib/teact/teact';
+import { memo } from '../../lib/teact/teact';
 
 import type { ApiPeer, ApiPeerColor } from '../../api/types';
 

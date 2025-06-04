@@ -1,6 +1,7 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { ElementRef, FC } from '../../lib/teact/teact';
-import React, { useRef, useState } from '../../lib/teact/teact';
+import type React from '../../lib/teact/teact';
+import { useRef, useState } from '../../lib/teact/teact';
 
 import { IS_TOUCH_ENV, MouseButton } from '../../util/browser/windowEnvironment';
 import buildClassName from '../../util/buildClassName';

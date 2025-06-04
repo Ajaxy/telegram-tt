@@ -1,4 +1,4 @@
-import React, {
+import {
   memo, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';

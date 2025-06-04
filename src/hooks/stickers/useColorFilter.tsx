@@ -1,4 +1,4 @@
-import React, { useEffect } from '../../lib/teact/teact';
+import { useEffect } from '../../lib/teact/teact';
 
 import { SVG_NAMESPACE } from '../../config';
 import { addSvgDefinition, removeSvgDefinition } from '../../util/svgController';

@@ -1,5 +1,6 @@
 import type { ElementRef, FC, TeactNode } from '../../lib/teact/teact';
-import React, { useRef } from '../../lib/teact/teact';
+import type React from '../../lib/teact/teact';
+import { useRef } from '../../lib/teact/teact';
 
 import type { IconName } from '../../types/icons';
 

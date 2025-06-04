@@ -1,4 +1,5 @@
-import React, { memo, useMemo } from '../../../lib/teact/teact';
+import type React from '../../../lib/teact/teact';
+import { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';

@@ -1,5 +1,4 @@
 import type { FC } from '../../lib/teact/teact';
-import React from '../../lib/teact/teact';
 import { getGlobal, setGlobal, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';

@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
+import {
   beginHeavyAnimation,
   memo, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';

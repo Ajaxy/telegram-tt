@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import { memo } from '../../lib/teact/teact';
 
 import type { ApiMessage, ApiWebPage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';

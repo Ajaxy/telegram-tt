@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback, useLayoutEffect, useRef,
 } from '../../../../lib/teact/teact';
 

@@ -1,4 +1,4 @@
-import React, {
+import {
   memo, useMemo,
   useRef,
 } from '../../../lib/teact/teact';

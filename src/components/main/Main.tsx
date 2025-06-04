@@ -1,6 +1,6 @@
 import '../../global/actions/all';
 
-import React, {
+import {
   beginHeavyAnimation,
   memo, useEffect, useLayoutEffect,
   useRef, useState,

@@ -21,7 +21,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react-jsx",
+    "jsxImportSource": "@teact",
+    "paths": {
+      "@teact": ["./src/lib/teact/teact.ts"],
+      "@teact/*": ["./src/lib/teact/*"]
+    }
   },
   "include": [
     "src",

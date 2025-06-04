@@ -1,5 +1,6 @@
 import type { TeactNode } from '../../../lib/teact/teact';
-import React, {
+import type React from '../../../lib/teact/teact';
+import {
   memo, useCallback, useEffect,
   useMemo,
   useRef,

@@ -163,6 +163,10 @@ export default function createConfig(
 
     resolve: {
       extensions: ['.js', '.cjs', '.mjs', '.ts', '.tsx'],
+      alias: {
+        '@teact$': path.resolve(__dirname, './src/lib/teact/teact.ts'),
+        '@teact': path.resolve(__dirname, './src/lib/teact'),
+      },
       fallback: {
         path: require.resolve('path-browserify'),
         os: require.resolve('os-browserify/browser'),

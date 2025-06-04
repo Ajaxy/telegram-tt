@@ -1,5 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useMemo, useRef } from '../../../lib/teact/teact';
+import type React from '../../../lib/teact/teact';
+import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import type {
   ApiChat,

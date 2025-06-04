@@ -1,4 +1,4 @@
-import React, {
+import {
   beginHeavyAnimation, memo, useEffect, useMemo,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';

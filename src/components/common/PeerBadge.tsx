@@ -1,4 +1,4 @@
-import React, { memo } from '../../lib/teact/teact';
+import { memo } from '../../lib/teact/teact';
 
 import type { ApiPeer, ApiWebDocument } from '../../api/types';
 import type { CustomPeer } from '../../types';

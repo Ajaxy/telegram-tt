@@ -1,5 +1,5 @@
 import type { ElementRef } from '../../lib/teact/teact';
-import React, { useEffect, useRef } from '../../lib/teact/teact';
+import { useEffect, useRef } from '../../lib/teact/teact';
 
 import { forceMutation, requestMutation } from '../../lib/fasterdom/fasterdom';
 import { IS_IOS, IS_SAFARI } from '../../util/browser/windowEnvironment';

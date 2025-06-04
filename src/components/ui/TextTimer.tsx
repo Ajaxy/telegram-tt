@@ -1,4 +1,4 @@
-import React, { type FC, memo, useEffect } from '../../lib/teact/teact';
+import { type FC, memo, useEffect } from '../../lib/teact/teact';
 
 import { formatMediaDuration } from '../../util/dates/dateFormat';
 import { getServerTime } from '../../util/serverTime';

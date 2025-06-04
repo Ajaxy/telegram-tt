@@ -1,6 +1,7 @@
 import type {
   ElementRef } from '../../lib/teact/teact';
-import React, {
+import type React from '../../lib/teact/teact';
+import {
   beginHeavyAnimation, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import {

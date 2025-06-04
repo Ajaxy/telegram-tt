@@ -1,5 +1,3 @@
-import React from '../../../lib/teact/teact';
-
 interface OwnProps {
   isOwn?: boolean;
 }

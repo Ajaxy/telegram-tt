@@ -1,5 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useMemo } from '../../../lib/teact/teact';
+import type React from '../../../lib/teact/teact';
+import { memo, useMemo } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
 import { formatStarsAsText } from '../../../util/localization/format';

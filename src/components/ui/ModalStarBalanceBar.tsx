@@ -1,4 +1,4 @@
-import React, {
+import {
   memo,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';

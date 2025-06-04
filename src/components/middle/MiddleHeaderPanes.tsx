@@ -1,4 +1,4 @@
-import React, {
+import {
   memo, useRef, useSignal,
 } from '../../lib/teact/teact';
 import { setExtraStyles } from '../../lib/teact/teact-dom';

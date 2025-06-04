@@ -1,4 +1,4 @@
-import React, { memo, type TeactNode } from '../../../lib/teact/teact';
+import { memo, type TeactNode } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiMessage, ApiPeer } from '../../../api/types';

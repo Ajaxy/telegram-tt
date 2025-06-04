@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useState } from '../../lib/teact/teact';
+import { useState } from '../../lib/teact/teact';
 
 // 1. Make sure "First line" is rendered even if followed by a component with single text.
 // 2. Make sure it then can be normally removed (target is preserved).

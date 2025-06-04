@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from '../../lib/teact/teact';
+import { useEffect, useRef, useState } from '../../lib/teact/teact';
 
 function TestUpdateRef() {
   const [isShown, setIsShown] = useState(true);

@@ -18,6 +18,7 @@ export default tseslint.config(
   tseslint.configs.recommendedTypeChecked,
   tseslint.configs.stylistic,
   reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['jsx-runtime'],
   reactXPlugin.configs['recommended-type-checked'],
   jsxA11yPlugin.flatConfigs.recommended,
   ttMultitabPlugin.configs.recommended,

@@ -1,4 +1,4 @@
-import React, { memo, useRef } from '../../../lib/teact/teact';
+import { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiStarGiftUnique } from '../../../api/types';
 

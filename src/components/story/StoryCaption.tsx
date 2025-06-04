@@ -1,4 +1,4 @@
-import React, {
+import {
   memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';

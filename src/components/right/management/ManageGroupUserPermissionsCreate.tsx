@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
+import { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
 import type { ApiChatMember, ApiUser, ApiUserStatus } from '../../../api/types';

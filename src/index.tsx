@@ -2,7 +2,6 @@ import './util/handleError';
 import './util/setupServiceWorker';
 import './global/init';
 
-import React from './lib/teact/teact';
 import TeactDOM from './lib/teact/teact-dom';
 import {
   getActions, getGlobal,

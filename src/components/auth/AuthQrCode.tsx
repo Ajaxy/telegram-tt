@@ -1,4 +1,4 @@
-import React, {
+import {
   memo, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';

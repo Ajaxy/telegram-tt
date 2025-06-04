@@ -1,5 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useState } from '../../lib/teact/teact';
+import type React from '../../lib/teact/teact';
+import { useState } from '../../lib/teact/teact';
 
 const Test: FC = () => {
   const [inputValue, setInputValue] = useState('Controlled');

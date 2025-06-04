@@ -1,6 +1,7 @@
 import type { ChangeEvent } from 'react';
 import type { ElementRef, FC, TeactNode } from '../../../lib/teact/teact';
-import React, {
+import type React from '../../../lib/teact/teact';
+import {
   getIsHeavyAnimating,
   memo, useEffect, useLayoutEffect,
   useRef, useState,

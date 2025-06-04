@@ -1,5 +1,5 @@
 import type { ElementRef, FC } from '../../lib/teact/teact';
-import React, { memo, useCallback, useState } from '../../lib/teact/teact';
+import { memo, useCallback, useState } from '../../lib/teact/teact';
 
 import { openSystemFilesDialog } from '../../util/systemFilesDialog';
 

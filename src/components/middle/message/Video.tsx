@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from '../../../lib/teact/teact';
+import type React from '../../../lib/teact/teact';
+import { useEffect, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMediaExtendedPreview, ApiVideo } from '../../../api/types';

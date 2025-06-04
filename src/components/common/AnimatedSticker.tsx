@@ -1,5 +1,5 @@
 import type { ElementRef, FC } from '../../lib/teact/teact';
-import React, {
+import {
   getIsHeavyAnimating,
   memo,
   useEffect,

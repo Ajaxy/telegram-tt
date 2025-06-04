@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
+import { memo, useCallback, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiChatFolder, ApiChatlistInviteAlready } from '../../../api/types';

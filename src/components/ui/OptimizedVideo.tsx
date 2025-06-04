@@ -1,5 +1,6 @@
 import type { ElementRef } from '../../lib/teact/teact';
-import React, { memo, useMemo, useRef } from '../../lib/teact/teact';
+import type React from '../../lib/teact/teact';
+import { memo, useMemo, useRef } from '../../lib/teact/teact';
 
 import useBuffering from '../../hooks/useBuffering';
 import useLastCallback from '../../hooks/useLastCallback';

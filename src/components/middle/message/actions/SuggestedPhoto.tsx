@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from '../../../../lib/teact/teact';
+import { memo, useMemo, useState } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type { ApiMessageActionSuggestProfilePhoto } from '../../../../api/types/messageActions';

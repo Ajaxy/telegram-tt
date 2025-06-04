@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import React, {
+import {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';

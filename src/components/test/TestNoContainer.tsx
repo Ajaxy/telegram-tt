@@ -1,4 +1,4 @@
-import React, { useState } from '../../lib/teact/teact';
+import { useState } from '../../lib/teact/teact';
 
 const INTERACTIVE = 'cursor: pointer; text-decoration: underline;';
 

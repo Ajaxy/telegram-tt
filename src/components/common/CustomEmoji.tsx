@@ -1,5 +1,5 @@
 import type { ElementRef, FC } from '../../lib/teact/teact';
-import React, { memo, useRef, useState } from '../../lib/teact/teact';
+import { memo, useRef, useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';

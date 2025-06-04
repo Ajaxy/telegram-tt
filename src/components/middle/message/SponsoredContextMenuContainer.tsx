@@ -1,5 +1,5 @@
 import type { ElementRef, FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { IAnchorPosition } from '../../../types';

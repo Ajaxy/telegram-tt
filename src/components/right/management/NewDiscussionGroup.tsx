@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact.ts';
+import type React from '../../../lib/teact/teact.ts';
 import { useState } from '../../../lib/teact/teact.ts';
-import React, { memo } from '../../../lib/teact/teact.ts';
+import { memo } from '../../../lib/teact/teact.ts';
 
 import type { ApiChat } from '../../../api/types/index.ts';
 import type { ManagementScreens } from '../../../types/index.ts';

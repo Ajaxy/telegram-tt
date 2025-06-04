@@ -147,7 +147,7 @@ export type Context<T> = {
   Provider: FC<{ value: T; children: TeactNode }>;
 };
 
-const Fragment = Symbol('Fragment');
+const Fragment = Symbol('Fragment') as unknown as FC<{ children: TeactNode }>;
 
 const DEBUG_RENDER_THRESHOLD = 7;
 const DEBUG_EFFECT_THRESHOLD = 7;
@@ -1026,3 +1026,5 @@ export default {
   createElement,
   Fragment,
 };
+
+export { createElement, Fragment };

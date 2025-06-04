@@ -1,4 +1,4 @@
-import React, {
+import {
   type TeactNode,
   useRef,
 } from '../../lib/teact/teact';

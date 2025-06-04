@@ -1,4 +1,4 @@
-import React, { type TeactNode } from '../../../../lib/teact/teact';
+import { type TeactNode } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { ApiMessage } from '../../../../api/types';

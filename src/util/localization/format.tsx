@@ -1,5 +1,3 @@
-import React from '../../lib/teact/teact';
-
 import type { LangFn } from './types';
 
 import { STARS_ICON_PLACEHOLDER } from '../../config';

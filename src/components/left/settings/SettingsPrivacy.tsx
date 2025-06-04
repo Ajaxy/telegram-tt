@@ -1,6 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import { useMemo } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
+import { memo, useCallback, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiPrivacySettings } from '../../../api/types';

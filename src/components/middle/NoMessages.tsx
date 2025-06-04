@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import { memo } from '../../lib/teact/teact';
 
 import type { ApiTopic } from '../../api/types';
 import type { OldLangFn } from '../../hooks/useOldLang';

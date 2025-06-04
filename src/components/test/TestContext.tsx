@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext, memo, useState,
 } from '../../lib/teact/teact';
 

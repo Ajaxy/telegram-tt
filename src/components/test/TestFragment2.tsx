@@ -1,4 +1,4 @@
-import React, { useState } from '../../lib/teact/teact';
+import { useState } from '../../lib/teact/teact';
 
 export function App() {
   const [trigger, setTrigger] = useState(true);

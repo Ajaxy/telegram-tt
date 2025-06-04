@@ -1,4 +1,4 @@
-import React, { memo } from '../../../lib/teact/teact';
+import { memo } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import { SNAP_EFFECT_CONTAINER_ID, SNAP_EFFECT_ID, SVG_NAMESPACE } from '../../../config';

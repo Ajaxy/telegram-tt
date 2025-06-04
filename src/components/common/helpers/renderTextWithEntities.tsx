@@ -1,5 +1,5 @@
 import type { ElementRef } from '../../../lib/teact/teact';
-import React from '../../../lib/teact/teact';
+import type React from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiFormattedText, ApiMessageEntity } from '../../../api/types';

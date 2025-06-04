@@ -1,4 +1,4 @@
-import React, { memo, type TeactNode } from '../../lib/teact/teact';
+import { memo, type TeactNode } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 

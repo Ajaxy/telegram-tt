@@ -1,4 +1,3 @@
-import React from '../lib/teact/teact';
 import { getActions, getGlobal, setGlobal } from '../global';
 
 import type {

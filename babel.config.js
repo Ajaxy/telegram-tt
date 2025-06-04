@@ -7,7 +7,13 @@ export default function (api) {
   const presets = [
     '@babel/typescript',
     '@babel/preset-env',
-    '@babel/preset-react',
+    [
+      '@babel/preset-react',
+      {
+        runtime: 'automatic',
+        importSource: '@teact',
+      },
+    ],
   ];
 
   const plugins = [

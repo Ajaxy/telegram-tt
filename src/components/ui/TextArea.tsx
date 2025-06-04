@@ -1,6 +1,7 @@
 import type { ChangeEvent, FormEvent } from 'react';
 import type { ElementRef, FC } from '../../lib/teact/teact';
-import React, {
+import type React from '../../lib/teact/teact';
+import {
   memo, useCallback, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 
