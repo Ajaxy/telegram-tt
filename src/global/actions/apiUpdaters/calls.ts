@@ -107,9 +107,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (!isOutgoing && call.state === 'requested') {
         onTickEnd(() => {
           global = getGlobal();
+          const user = selectPhoneCallUser(global);
+          if (!user) return;
           notifyAboutCall({
             call,
-            user: selectPhoneCallUser(global)!,
+            user,
           });
         });
 

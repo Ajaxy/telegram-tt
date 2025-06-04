@@ -131,26 +131,6 @@ addActionHandler('toggleGroupCallPanel', (global, actions, payload): ActionRetur
   }, tabId);
 });
 
-addActionHandler('subscribeToGroupCallUpdates', async (global, actions, payload): Promise<void> => {
-  if (selectIsCurrentUserFrozen(global)) return;
-
-  const { subscribed, id } = payload;
-  const groupCall = selectGroupCall(global, id);
-
-  if (!groupCall) return;
-
-  if (subscribed) {
-    await fetchGroupCall(global, groupCall);
-    global = getGlobal();
-    await requestGroupCallParticipants(groupCall);
-  }
-
-  await callApi('toggleGroupCallStartSubscription', {
-    subscribed,
-    call: groupCall,
-  });
-});
-
 addActionHandler('createGroupCall', async (global, actions, payload): Promise<void> => {
   const { chatId, tabId = getCurrentTabId() } = payload;
 
@@ -341,7 +321,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
 addActionHandler('playGroupCallSound', (global, actions, payload): ActionReturnType => {
   const { sound } = payload;
 
-  if (!sounds[sound]) {
+  if (!sounds?.[sound]) {
     return;
   }
 

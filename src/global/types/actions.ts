@@ -2265,10 +2265,6 @@ export interface ActionPayloads {
     username: string;
     inviteHash: string;
   } & WithTabId;
-  subscribeToGroupCallUpdates: {
-    subscribed: boolean;
-    id: string;
-  };
   createGroupCallInviteLink: WithTabId | undefined;
 
   loadMoreGroupCallParticipants: undefined;
